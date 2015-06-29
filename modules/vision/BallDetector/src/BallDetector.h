@@ -21,6 +21,7 @@
 #define MODULES_VISION_BALLDETECTOR_H
 
 #include <nuclear>
+#include <armadillo>
 
 namespace modules {
 namespace vision {
@@ -35,6 +36,13 @@ namespace vision {
         double measurement_distance_variance_factor;
         double measurement_bearing_variance;
         double measurement_elevation_variance;
+
+        struct Frame{
+            time_t time;
+            arma::vec3 widthBall;
+            arma::vec3 projBall;
+        };
+        Frame lastFrame;
 
     public:
 

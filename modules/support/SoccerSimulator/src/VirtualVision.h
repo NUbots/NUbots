@@ -138,6 +138,8 @@ namespace support {
 
 			// TODO: set timestamp, sensors, classifiedImage?
 			for (auto& m : visibleMeasurements.measurements){
+				m.velocity.rows(0,1) = robotPose.rotation().i() * velocity.rows(0,1);
+				m.velCov = 0.1 * arma::eye(3,3);
 				result.measurements.push_back(m);
 			}
 

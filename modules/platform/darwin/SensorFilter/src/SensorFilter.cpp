@@ -342,6 +342,8 @@ namespace modules {
                      *                   Odometry                   *
                      ************************************************/
 
+                    emit(graph("FSR Left Raw", input.fsr.left.fsr1, input.fsr.left.fsr2, input.fsr.left.fsr3, input.fsr.left.fsr4));
+                    emit(graph("FSR Right Raw", input.fsr.right.fsr1, input.fsr.right.fsr2, input.fsr.right.fsr3, input.fsr.right.fsr4));
                     //Check support foot:
                     sensors->leftFootDown = false;
                     sensors->rightFootDown = false;
