@@ -46,7 +46,7 @@ walk_cycle:
     # These limit the distance a footstep will take
     limits:
       - [-0.1, 0.1] # [min_x, max_x]
-      - [0.07, 0.06] # [min_y, max_y]
+      - [0.07, 0.2] # [min_y, max_y]
       - [0, 30 * pi / 180] # [min_angle, max_angle]
   velocity:
     # Velocity limits for the walk
