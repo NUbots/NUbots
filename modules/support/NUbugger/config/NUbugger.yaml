@@ -12,20 +12,24 @@ output:
 
 # Select which data to send
 reaction_handles:
+  # Overview information for the dashboard, designed for minimum bandwidth
+  overview: true
   # Statistics about reactions, modules and runtimes
   reaction_statistics: false
   # Data for Chart tool in NUsight
-  data_points: true
+  data_points: false
   # Info from the game controller
   game_controller: false
   # Info about subsumption and behaviour
   behaviour: false
   # Motor positions, orientation, etc.
-  sensors: true
+  sensors: false
   # Localisation state estimates and uncertainties
-  localisation: true
+  localisation: false
   # Vision data
   image: false # Raw image
   classified_image: false # Colour classified
   goals: false # Detected goals in vision space
   balls: false # Detected balls in vision space
+  # Field drawn objects such as an arrow, sphere, etc
+  draw_objects: false

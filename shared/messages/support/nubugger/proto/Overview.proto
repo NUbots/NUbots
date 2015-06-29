@@ -20,7 +20,9 @@
 package messages.support.nubugger.proto;
 
 import "messages/behaviour/proto/Behaviour.proto";
+import "messages/input/proto/GameState.proto";
 import "messages/Vector.proto";
+import "messages/Matrix.proto";
 
 message Overview {
 
@@ -33,6 +35,20 @@ message Overview {
 
     // Localisation
     optional vec2 robot_position = 4;
+    optional mat22 robot_position_covariance = 6;
     optional vec2 robot_heading = 5;
-    
+
+    // Game controller
+    optional messages.input.proto.GameState.Data.Mode game_mode = 7;
+    optional messages.input.proto.GameState.Data.Phase game_phase = 8;
+    optional messages.input.proto.GameState.Data.PenaltyReason penalty_reason = 9;
+
+    // Hardware
+    optional uint64 last_camera_image = 10;
+    // TODO: motor overloads?
+
+    // Vision
+    optional uint64 last_seen_ball = 11;
+    optional uint64 last_seen_goal = 12;
+
 }

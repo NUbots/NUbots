@@ -167,6 +167,7 @@ namespace gameevents {
         NUClear::clock::time_point secondaryTime;
         Team team;
         Team opponent;
+        Robot self;
     };
 
 }
