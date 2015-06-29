@@ -24,6 +24,7 @@
 #include <armadillo>
 
 #include "messages/behaviour/FieldTarget.h"
+#include "messages/behaviour/proto/Behaviour.pb.h"
 
 namespace modules {
 namespace behaviour {
@@ -38,25 +39,18 @@ namespace strategy {
         NUClear::clock::duration BALL_LAST_SEEN_MAX_TIME;
         NUClear::clock::duration GOAL_LAST_SEEN_MAX_TIME;
 
+        arma::vec2 START_POSITION_OFFENSIVE;
+        arma::vec2 START_POSITION_DEFENSIVE;
+        bool GOALIE;
+
         // TODO: remove horrible
         bool isGettingUp = false;
         bool isDiving = false;
         bool selfPenalised = false;
-
-        // TODO: initalize
-        struct Zone {
-            NUClear::clock::duration ballActiveTimeout;
-            NUClear::clock::duration zoneReturnTimeout;
-            arma::mat22 zone;
-            arma::vec2 startPositionOffensive;
-            arma::vec2 startPositionDefensive;
-            arma::vec2 defaultPosition;
-            bool goalie;
-        } zone;
+        messages::behaviour::proto::Behaviour::State currentState = messages::behaviour::proto::Behaviour::INIT;
 
         time_t ballLastMeasured;
         time_t selfLastMeasured;
-        std::string leaf = "";
         void initialLocalisationReset();
         void penaltyLocalisationReset();
         void unpenalisedLocalisationReset();
@@ -69,8 +63,6 @@ namespace strategy {
         void spinWalk();
         bool pickedUp();
         bool penalised();
-        bool isGoalie();
-        bool inZone(const messages::behaviour::FieldTarget& object);
         bool ballDistance();
     public:
         static constexpr const char* CONFIGURATION_PATH = "SoccerStrategy.yaml";
