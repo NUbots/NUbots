@@ -31,8 +31,9 @@ ADD_ROLE(
     behaviour::skills::KickScript
     behaviour::skills::HeadBehaviourSoccer
     behaviour::planning::KickPlanner
-    # behaviour::planning::WalkPathPlanner
+    #behaviour::planning::SimpleWalkPathPlanner
     behaviour::planning::OMPLPathPlanner
+    #behaviour::strategy::KickAtGoal
     behaviour::strategy::SoccerStrategy
 
     #Motion

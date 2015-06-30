@@ -1,9 +1,9 @@
-Getup
+Simple Walk Path Planner
 =============
 
 ## Description
 
-Plans a walk command for a walk strategy.
+Plans a simple path trajectory to the ball, in a straight line. It is simplified as it does not attempt to line up with the goals.
 
 ## Usage
 

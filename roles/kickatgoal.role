@@ -42,5 +42,5 @@ ADD_ROLE(
     motion::WalkEngine
 
     #Output
-    output::eSpeak
+    #output::eSpeak
 )

@@ -42,7 +42,7 @@ namespace support {
             message.set_filter_id(filterId);
             message.set_utc_timestamp(getUtcTimestamp());
 
-            *(message.mutable_data_point()) = dataPoint;
+            *message.mutable_data_point() = dataPoint;
 
             send(message);
         }));

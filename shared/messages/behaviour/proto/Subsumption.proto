@@ -17,20 +17,39 @@
  * Copyright 2013 NUBots <nubots@nubots.net>
  */
 
+package messages.behaviour.proto;
 
-#ifndef MESSAGES_BEHAVIOUR_SOCCEROBJECTPRIORITY_H 
-#define MESSAGES_BEHAVIOUR_SOCCEROBJECTPRIORITY_H 
+message Subsumption {
+    enum Type {
+        ACTION_REGISTER = 1;
+        ACTION_STATE = 2;
+    }
 
-namespace messages {
-namespace behaviour {
+    required Type type = 1;
 
-	struct SoccerObjectPriority {
-		int ball;
-		int goal;
-		int line;
-	};
-	
-}
+    optional ActionRegister action_register = 2;
+    optional ActionStateChange action_state_change = 3;
 }
 
-#endif
+message ActionRegister {
+    required uint32 id = 1;
+    required string name = 2;
+    repeated LimbSet limb_set = 3;
+}
+
+message ActionStateChange {
+
+    enum State {
+        START = 1;
+        KILL = 2;
+    }
+
+    required State state = 1; 
+    required string name = 2;
+    repeated uint32 limbs = 3;
+}
+
+message LimbSet {
+    required float priority = 1;
+    repeated uint32 limbs = 2;
+}

@@ -35,7 +35,7 @@ robot:
 
 ball:
   # If use_motion is true, then the ball will move based on the latest behaviour commands
-  motion_type: NONE #NONE, PATH or MOTION
+  motion_type: MOTION #NONE, PATH or MOTION
   path:
   # If motion_type is PATH, the following path with be used
     period: 20
@@ -45,9 +45,9 @@ ball:
 
 # Initial pose of the robot, mainly for MOTION type
 initial:
-  robot_pose: [-4.5, 0, 0]
+  robot_pose: [0, 0, 0]
   ball:
-    position: [2 , 1, 0]
+    position: [-1 , 1, 0]
     diameter: 0.1
 
 # Turns off vision but leaves localisation running with no observations.

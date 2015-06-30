@@ -16,7 +16,7 @@ ADD_ROLE(
     motion::ScriptEngine
 
     # Vision
-    input::LinuxCamera
+    #input::LinuxCamera
     vision::LUTClassifier
     vision::GoalDetector
     vision::BallDetector

@@ -261,11 +261,16 @@ namespace input {
             auto& newOpponentPlayer = newOpponentTeam.players[i];
 
             // Update our state
-            state->team.players.push_back({
+            auto ownPlayer = GameState::Robot({
                 playerId,
                 getPenaltyReason(newOwnPlayer.penaltyState),
                 NUClear::clock::now() + std::chrono::seconds(newOwnPlayer.penalisedTimeLeft)
             });
+            state->team.players.push_back(ownPlayer);
+            if (playerId == PLAYER_ID) {
+                state->self = ownPlayer;
+            }
+
             state->opponent.players.push_back({
                 playerId,
                 getPenaltyReason(newOpponentPlayer.penaltyState),

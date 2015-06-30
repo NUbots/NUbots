@@ -165,9 +165,10 @@ namespace support {
             send(message);
         });
 
+        provideOverview();
         provideDataPoints();
         provideDrawObjects();
-        provideBehaviour();
+        provideSubsumption();
         provideGameController();
         provideLocalisation();
         provideReactionStatistics();

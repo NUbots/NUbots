@@ -199,7 +199,7 @@ namespace support {
 
                 case MotionType::MOTION:
                 //Update based on walk engine
-                    if(walkCommand && !kicking){
+                    if(walkCommand && !kicking) {
                         world.robotVelocity.rows(0,1) = sensors.odometry;
                         //angle from command:
                         world.robotVelocity(2) = walkCommand->command(2);
@@ -211,7 +211,7 @@ namespace support {
                     break;
             }
             // Update ball position
-            switch (cfg_.ball.motion_type){
+            switch (cfg_.ball.motion_type) {
                 case MotionType::NONE:
                     world.ball.velocity = { 0, 0 , 0};
                     break;

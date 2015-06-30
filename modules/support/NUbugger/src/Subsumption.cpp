@@ -32,19 +32,19 @@ namespace support {
     using messages::behaviour::ActionStart;
     using messages::behaviour::ActionKill;
     using messages::behaviour::RegisterAction;
-    using messages::behaviour::proto::Behaviour;
+    using messages::behaviour::proto::Subsumption;
     using messages::behaviour::proto::ActionStateChange;
 
-    void NUbugger::provideBehaviour() {
-        handles["behaviour"].push_back(on<Trigger<ActionStart>>([this](const ActionStart& actionStart) {
+    void NUbugger::provideSubsumption() {
+        handles["subsumption"].push_back(on<Trigger<ActionStart>>([this](const ActionStart& actionStart) {
             Message message;
-            message.set_type(Message::BEHAVIOUR);
+            message.set_type(Message::SUBSUMPTION);
             message.set_filter_id(0);
             message.set_utc_timestamp(getUtcTimestamp());
 
-            auto* behaviour = message.mutable_behaviour();
-            behaviour->set_type(Behaviour::ACTION_STATE);
-            auto* actionStateChange = behaviour->mutable_action_state_change();
+            auto* subsumption = message.mutable_subsumption();
+            subsumption->set_type(Subsumption::ACTION_STATE);
+            auto* actionStateChange = subsumption->mutable_action_state_change();
             actionStateChange->set_state(ActionStateChange::START);
             actionStateChange->set_name(actionStart.name);
             for (auto& limbID : actionStart.limbs) {
@@ -54,15 +54,15 @@ namespace support {
             send(message);
         }));
 
-        handles["behaviour"].push_back(on<Trigger<ActionKill>>([this](const ActionKill& actionKill) {
+        handles["subsumption"].push_back(on<Trigger<ActionKill>>([this](const ActionKill& actionKill) {
             Message message;
-            message.set_type(Message::BEHAVIOUR);
+            message.set_type(Message::SUBSUMPTION);
             message.set_filter_id(0);
             message.set_utc_timestamp(getUtcTimestamp());
 
-            auto* behaviour = message.mutable_behaviour();
-            behaviour->set_type(Behaviour::ACTION_STATE);
-            auto* actionStateChange = behaviour->mutable_action_state_change();
+            auto* subsumption = message.mutable_subsumption();
+            subsumption->set_type(Subsumption::ACTION_STATE);
+            auto* actionStateChange = subsumption->mutable_action_state_change();
             actionStateChange->set_state(ActionStateChange::KILL);
             actionStateChange->set_name(actionKill.name);
             for (auto& limbID : actionKill.limbs) {
@@ -72,15 +72,15 @@ namespace support {
             send(message);
         }));
 
-        handles["behaviour"].push_back(on<Trigger<RegisterAction>>([this] (const RegisterAction& action) {
+        handles["subsumption"].push_back(on<Trigger<RegisterAction>>([this] (const RegisterAction& action) {
             Message message;
-            message.set_type(Message::BEHAVIOUR);
+            message.set_type(Message::SUBSUMPTION);
             message.set_filter_id(0);
             message.set_utc_timestamp(getUtcTimestamp());
 
-            auto* behaviour = message.mutable_behaviour();
-            behaviour->set_type(Behaviour::ACTION_REGISTER);
-            auto* actionRegister = behaviour->mutable_action_register();
+            auto* subsumption = message.mutable_subsumption();
+            subsumption->set_type(Subsumption::ACTION_REGISTER);
+            auto* actionRegister = subsumption->mutable_action_register();
             actionRegister->set_id(action.id);
             actionRegister->set_name(action.name);
             for(const auto& set : action.limbSet) {

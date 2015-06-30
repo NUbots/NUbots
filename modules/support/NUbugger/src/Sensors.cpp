@@ -46,11 +46,7 @@ namespace support {
 
             sensorData->set_timestamp(sensors.timestamp.time_since_epoch().count());
             sensorData->set_voltage(sensors.voltage);
-
-            float min = 10.7;
-            float max = 12.9;
-            float battery = std::max(0.0f, (sensors.voltage - min) / (max - min));
-            sensorData->set_battery(battery);
+            sensorData->set_battery(sensors.battery);
 
             // Add each of the servos into the protocol buffer
             for(const auto& s : sensors.servos) {
