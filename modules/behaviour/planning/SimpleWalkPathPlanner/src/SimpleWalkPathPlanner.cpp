@@ -17,7 +17,7 @@
  * Copyright 2013 NUBots <nubots@nubots.net>
  */
 
-#include "WalkPathPlanner.h"
+#include "SimpleWalkPathPlanner.h"
 
 #include <cmath>
 #include "messages/behaviour/KickPlan.h"
@@ -55,12 +55,12 @@ namespace modules {
             using VisionBall = messages::vision::Ball;
             using VisionObstacle = messages::vision::Obstacle;
 
-            WalkPathPlanner::WalkPathPlanner(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
+            SimpleWalkPathPlanner::SimpleWalkPathPlanner(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
                 //we will initially stand still
                 planType = messages::behaviour::WalkApproach::StandStill;
 
                 //do a little configurating
-                on<Trigger<Configuration<WalkPathPlanner>>>([this] (const Configuration<WalkPathPlanner>& file){
+                on<Trigger<Configuration<SimpleWalkPathPlanner>>>([this] (const Configuration<SimpleWalkPathPlanner>& file){
 
                     turnSpeed = file.config["turnSpeed"].as<float>();
                     forwardSpeed = file.config["forwardSpeed"].as<float>();
@@ -78,7 +78,7 @@ namespace modules {
                     With<messages::localisation::Ball>,
                     With<std::vector<messages::localisation::Self>>,
                     With<Optional<std::vector<messages::vision::Obstacle>>>,
-                    Options<Sync<WalkPathPlanner>>
+                    Options<Sync<SimpleWalkPathPlanner>>
                    >([this] (
                      const time_t&,
                      const LocalisationBall& ball,
@@ -125,7 +125,7 @@ namespace modules {
 
                     arma::vec2 ball_world_position = RobotToWorldTransform(selfs.front().position, selfs.front().heading, ball.position);
                     arma::vec2 kick_target = 2 * ball_world_position - selfs.front().position;
-                    emit(drawSphere("kick_target", arma::vec3({kick_target[0], kick_target[1], 0.0}), 0.1, arma::vec3({1, 0, 0})));
+                    emit(drawSphere("kick_target", arma::vec3({kick_target[0], kick_target[1], 0.0}), 0.1, arma::vec3({1, 0, 0}), 0));
 
                     emit(std::make_unique<KickPlan>(KickPlan{kick_target}));
                     emit(std::move(std::make_unique<WalkStartCommand>()));
@@ -133,7 +133,7 @@ namespace modules {
 
                 });
 
-                on<Trigger<messages::behaviour::WalkStrategy>, Options<Sync<WalkPathPlanner>>>([this] (const messages::behaviour::WalkStrategy& cmd) {
+                on<Trigger<messages::behaviour::WalkStrategy>, Options<Sync<SimpleWalkPathPlanner>>>([this] (const messages::behaviour::WalkStrategy& cmd) {
                     //save the plan
                     planType = cmd.walkMovementType;
                     targetHeading = cmd.targetHeadingType;

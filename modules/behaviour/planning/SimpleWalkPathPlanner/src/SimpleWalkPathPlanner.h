@@ -17,8 +17,8 @@
  * Copyright 2013 NUBots <nubots@nubots.net>
  */
 
-#ifndef MODULES_BEHAVIOUR_PLANNERS_WALKPATHPLANNER_H
-#define MODULES_BEHAVIOUR_PLANNERS_WALKPATHPLANNER_H
+#ifndef MODULES_BEHAVIOUR_PLANNERS_SIMPLEWALKPATHPLANNER_H
+#define MODULES_BEHAVIOUR_PLANNERS_SIMPLEWALKPATHPLANNER_H
 
 #include <nuclear>
 #include <armadillo>
@@ -40,7 +40,7 @@ namespace modules {
                  *
                  * @author Josiah Walker
                  */
-                class WalkPathPlanner : public NUClear::Reactor {
+                class SimpleWalkPathPlanner : public NUClear::Reactor {
                 private:
                     float turnSpeed;
                     float forwardSpeed;
@@ -56,7 +56,7 @@ namespace modules {
                     messages::behaviour::WalkTarget targetHeading,targetPosition;
 
                 public:
-                    explicit WalkPathPlanner(std::unique_ptr<NUClear::Environment> environment);
+                    explicit SimpleWalkPathPlanner(std::unique_ptr<NUClear::Environment> environment);
                     static constexpr const char* CONFIGURATION_PATH = "WalkPathPlanner.yaml";
             };
 
@@ -64,5 +64,5 @@ namespace modules {
     }  // behaviours
 }  // modules
 
-#endif  // MODULES_BEHAVIOURS_UTILITY_SCRIPTRUNNER_H
+#endif  // MODULES_BEHAVIOUR_PLANNERS_SIMPLEWALKPATHPLANNER_H
 
