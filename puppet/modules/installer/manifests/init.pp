@@ -1,29 +1,10 @@
 
 class installer::prerequisites {
-  file {'/usr/local/bin/install_from_source':
+  file { 'install_from_source':
+    path => '/usr/local/bin/install_from_source',
     ensure => file,
     mode => '755',
     source => 'puppet:///modules/installer/install_from_source',
-  }
-
-  exec {'fix_compiler_environment':
-    command => "update-alternatives --install /usr/bin/ld ld /usr/bin/ld.bfd 10 \
-             && update-alternatives --install /usr/bin/ld ld /usr/bin/ld.gold 20 \
-             && update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-5   100 \
-             && update-alternatives --install /usr/bin/gfortran gfortran /usr/bin/gfortran-5   100 \
-             && mv /usr/bin/ar /usr/bin/ar_bin \
-             && echo '#/bin/bash'                                                                     > /usr/bin/ar \
-             && echo '/usr/bin/ar_bin $@ --plugin /usr/lib/gcc/i686-linux-gnu/5/liblto_plugin.so'     >> /usr/bin/ar \
-             && chmod +x /usr/bin/ar \
-             && mv /usr/bin/ranlib /usr/bin/ranlib_bin \
-             && echo '#/bin/bash'                                                                     > /usr/bin/ranlib \
-             && echo '/usr/bin/ranlib_bin $@ --plugin /usr/lib/gcc/i686-linux-gnu/5/liblto_plugin.so' >> /usr/bin/ranlib \
-             && chmod +x /usr/bin/ranlib \
-             && mv /usr/bin/nm /usr/bin/nm_bin \
-             && echo '#/bin/bash'                                                                     > /usr/bin/nm \
-             && echo '/usr/bin/nm_bin $@ --plugin /usr/lib/gcc/i686-linux-gnu/5/liblto_plugin.so'     >> /usr/bin/nm \
-             && chmod +x /usr/bin/nm",
-    creates => "/usr/bin/ar_bin",
   }
 }
 
@@ -56,18 +37,19 @@ define installer (
     checksum => false,
     extension => $extension,
     strip_components => $strip_components,
-  }
-
+  } ~>
   exec { "install_${name}":
     command => "/usr/local/bin/install_from_source '${prefix}' '${method}' ${lto} ${args}",
     creates => "/nubots/toolchain/lib/lib${name}.a",
     cwd => "/nubots/toolchain/src/${name}",
     environment => $environment,
-    path =>  [ '/bin/', '/sbin/' , '/usr/bin/', '/usr/sbin/' ],
+    path =>  [  '/usr/local/bin', '/usr/local/sbin/', '/usr/bin/', '/usr/sbin/', '/bin/', '/sbin/' ],
     timeout => 0,
+    refreshonly => true,
     require => [
-      File['/usr/local/bin/install_from_source'],
-      Archive["${name}"]
+      File['install_from_source'],
+      Archive["${name}"],
+      Exec['fix_compiler_environment'],
     ],
   }
 

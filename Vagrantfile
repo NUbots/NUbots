@@ -36,7 +36,7 @@ Vagrant.configure("2") do |config|
   config.vm.provider "parallels" do |v|
     # See http://www.virtualbox.org/manual/ch08.html#vboxmanage-modifyvm
     v.memory = 8192
-    v.cpus = 8
+    v.cpus = 4
     v.optimize_power_consumption = false
   end
 
