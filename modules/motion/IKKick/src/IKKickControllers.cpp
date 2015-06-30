@@ -38,14 +38,15 @@ namespace motion{
 	}
 
 	void FootLifter::configure(const Configuration<IKKickConfig>& config){
-		motion_gain = config["lifter"]["motion_gain"].as<float>();
+		// motion_gain = config["lifter"]["motion_gain"].as<float>();
         lift_foot_height = config["lifter"]["lift_foot_height"].as<float>();
         lift_foot_back = config["lifter"]["lift_foot_back"].as<float>();
         velocity = config["lifter"]["velocity"].as<float>();
 	}
 
 	void Kicker::configure(const Configuration<IKKickConfig>& config){
-		motion_gain = config["kicker"]["motion_gain"].as<float>();
+		// motion_gain = config["kicker"]["motion_gain"].as<float>();
+        velocity = config["lifter"]["velocity"].as<float>();
 	}
 
     void KickBalancer::computeMotion(const Sensors& sensors){
@@ -60,7 +61,17 @@ namespace motion{
     }
 
     void Kicker::computeMotion(const Sensors& sensors){
-
+        startPose = arma::eye(4,4);
+        
+        Transform3D currentTorso = getTorsoPose(sensors);
+        Transform3D currentKickFoot = supportFoot == LimbID::LEFT_LEG ? sensors.forwardKinematics.find(ServoID::L_ANKLE_ROLL)->second 
+                                                                      : sensors.forwardKinematics.find(ServoID::R_ANKLE_ROLL)->second;
+        Transform3D supportToKickFoot = currentKickFoot.i() * currentTorso.i();
+        arma::vec3 ballFromKickFoot = supportToKickFoot.transformPoint(ballPosition);
+        finishPose = startPose.translate(ballFromKickFoot);
+        
+        distance = arma::norm(startPose.translation() - finishPose.translation());
+        motionStartTime = sensors.timestamp;
     }
 
 
@@ -94,9 +105,10 @@ namespace motion{
 	}
 
 	Transform3D Kicker::getFootPose(const Sensors& sensors, float deltaT){
-        Transform3D goal;
-        //goal = goal.translate(arma::vec3({0.05,0,0}));
-		return goal;
+        double elapsedTime = std::chrono::duration_cast<std::chrono::microseconds>(sensors.timestamp - motionStartTime).count() * 1e-6;
+        float alpha = std::fmax(0,std::fmin(velocity * elapsedTime / distance,1));
+        stable = alpha >= 1;
+        return utility::math::matrix::Transform3D::interpolate(startPose,finishPose,alpha);
 	}
 }
 }

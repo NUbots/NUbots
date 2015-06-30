@@ -161,6 +161,9 @@ namespace matrix {
              */
             Transform3D localToWorld(const Transform3D& reference) const;
 
+            arma::vec3 transformPoint(const arma::vec3& p);
+            arma::vec3 transformVector(const arma::vec3& p);
+
             /**
              * @brief Performs an orthonormal inverse and returns a new copy
              * Note: Assumes current transform is orthonormal and invertible (which it should be given normal use)

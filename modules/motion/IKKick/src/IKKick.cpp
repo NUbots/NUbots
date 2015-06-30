@@ -165,22 +165,22 @@ namespace motion {
 
             //State checker
             if(balancer.isStable()){
-                std::cout << "balancer.isStable" << std::endl;
+                // std::cout << "balancer.isStable" << std::endl;
                 lifter.start(sensors);
             }
 
             if(lifter.isStable()){
-                std::cout << "lifter.isStable" << std::endl;
+                // std::cout << "lifter.isStable" << std::endl;
                 kicker.start(sensors);
             }
 
             if(kicker.isFinished()){
-                std::cout << "kicker.isFinished" << std::endl;
+                // std::cout << "kicker.isFinished" << std::endl;
                 lifter.stop();
             }
 
             if(lifter.isFinished()){
-                std::cout << "lifter.isFinished" << std::endl;
+                // std::cout << "lifter.isFinished" << std::endl;
                 balancer.stop();
             }
 
@@ -196,18 +196,18 @@ namespace motion {
             Transform3D supportFootGoal;
             
             if(balancer.isRunning()){
-                std::cout << "balancer is running" << std::endl;
+                // std::cout << "balancer is running" << std::endl;
                 Transform3D supportFootPose = balancer.getFootPose(sensors, deltaT);
                 supportFootGoal = supportFootPose;
                 kickFootGoal =  supportFootPose.translate(arma::vec3({0, negativeIfKickRight * foot_separation, 0}));
             }
             if(lifter.isRunning()){
-                std::cout << "lifter is running" << std::endl;
+                // std::cout << "lifter is running" << std::endl;
                 //TODO: CHECK ORDER
                 kickFootGoal *= lifter.getFootPose(sensors, deltaT);
             }
             if(kicker.isRunning()){
-                std::cout << "kicker is running" << std::endl;
+                // std::cout << "kicker is running" << std::endl;
                 //TODO: CHECK ORDER
                 kickFootGoal *= kicker.getFootPose(sensors, deltaT);
             }
@@ -219,9 +219,9 @@ namespace motion {
             
             std::vector<std::pair<messages::input::ServoID, float>> joints;
 
-            std::cout << "kickFootGoal" << kickFootGoal << std::endl;
+            // std::cout << "kickFootGoal" << kickFootGoal << std::endl;
             auto kickJoints = calculateLegJoints<DarwinModel>(kickFootGoal, kickFoot);
-            std::cout << "supportFootGoal" << supportFootGoal << std::endl;
+            // std::cout << "supportFootGoal" << supportFootGoal << std::endl;
             auto supportJoints = calculateLegJoints<DarwinModel>(supportFootGoal, supportFoot);
             joints.insert(joints.end(),kickJoints.begin(),kickJoints.end());
             joints.insert(joints.end(),supportJoints.begin(),supportJoints.end());

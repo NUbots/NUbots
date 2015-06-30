@@ -105,6 +105,20 @@ namespace matrix {
         return reference * (*this);
     }
 
+
+    arma::vec3 Transform3D::transformPoint(const arma::vec3& p){
+        arma::vec4 p4 = arma::join_cols(p,arma::vec({1}));
+        arma::vec4 result4 = *this * p4;
+        return result4.rows(0,2);
+    }
+
+    arma::vec3 Transform3D::transformVector(const arma::vec3& p){
+        arma::vec4 p4 = arma::join_cols(p,arma::vec({0}));
+        arma::vec4 result4 = *this * p4;
+        return result4.rows(0,2);
+    }
+
+
     Transform3D Transform3D::i() const {
         // Create a new transform
         Transform3D inverseTransform3D;

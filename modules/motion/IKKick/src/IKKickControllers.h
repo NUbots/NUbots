@@ -120,7 +120,11 @@ namespace motion{
 		};
 
 		class Kicker : public SixDOFMotionController{
-		// private:
+		private:
+			float velocity = 0.1;
+			utility::math::matrix::Transform3D startPose;
+			utility::math::matrix::Transform3D finishPose;
+			float distance;
 		public:
 			virtual utility::math::matrix::Transform3D getFootPose(const messages::input::Sensors& sensors, float deltaT);	
 			virtual void configure(const messages::support::Configuration<IKKickConfig>& config);
