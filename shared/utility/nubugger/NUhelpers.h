@@ -272,14 +272,19 @@ namespace nubugger {
         return std::move(drawObjects);
     }
 
-    inline std::unique_ptr<messages::support::nubugger::proto::DrawObjects> drawTree(std::string name, std::vector<arma::vec> positions, std::vector<uint> parentIndices, float timeout = TIMEOUT) {
+    inline std::unique_ptr<messages::support::nubugger::proto::DrawObjects> drawTree(std::string name, std::vector<arma::vec> positions, std::vector<uint> parentIndices, float line_width, arma::vec3 color, float timeout = TIMEOUT) {
 
         auto drawObjects = std::make_unique<messages::support::nubugger::proto::DrawObjects>();
         auto* object = drawObjects->add_objects();
         object->set_name(name);
         object->set_shape(messages::support::nubugger::proto::DrawObject::POLYLINE);
         object->set_timeout(timeout);
-
+        object->set_width(line_width);
+        auto* objColor = object->mutable_color();
+        objColor->set_x(color[0]);
+        objColor->set_y(color[1]);
+        objColor->set_z(color[2]);
+        
         for (uint i = 0; i < positions.size(); i++) {
             auto* objNode = object->add_path();
 
@@ -293,14 +298,14 @@ namespace nubugger {
         return std::move(drawObjects);
     }
 
-    inline std::unique_ptr<messages::support::nubugger::proto::DrawObjects> drawPolyline(std::string name, std::vector<arma::vec> positions, float timeout = TIMEOUT) {
+    inline std::unique_ptr<messages::support::nubugger::proto::DrawObjects> drawPolyline(std::string name, std::vector<arma::vec> positions, float line_width, arma::vec3 color, float timeout = TIMEOUT) {
 
         std::vector<uint> parentIndices;
         parentIndices.reserve(positions.size());
         for (uint i = 0; i < positions.size(); i++) {
             parentIndices.push_back(std::max(0, int(i) - 1));
         }
-        return drawTree(name, positions, parentIndices, timeout);
+        return drawTree(name, positions, parentIndices, line_width, color, timeout);
 
     }
 
