@@ -29,6 +29,7 @@
 #include "utility/nubugger/NUhelpers.h"
 #include "utility/localisation/transform.h"
 #include "utility/math/matrix/Transform2D.h"
+#include "utility/math/geometry/RotatedRectangle.h"
 #include "utility/math/angle.h"
 
 namespace modules {
@@ -46,6 +47,7 @@ namespace planning {
     using utility::nubugger::graph;
     using utility::math::matrix::Transform2D;
     using utility::math::angle::vectorToBearing;
+    using utility::math::geometry::RotatedRectangle;
 
     using LocalisationBall = messages::localisation::Ball;
     using Self = messages::localisation::Self;
@@ -100,6 +102,10 @@ namespace planning {
             currentState->setX(currTrans.x());
             currentState->setY(currTrans.y());
             currentState->setYaw(currTrans.angle());
+
+            emit(utility::nubugger::drawRectangle("OMPLPP_RobotFootprint", RotatedRectangle({0,0,0}, {1,1})));
+            emit(utility::nubugger::drawRectangle("OMPLPP_RobotFootprint2", RotatedRectangle({2,2,3.141*0.25}, {2,0.5})));
+
 
             // Find the closest state on the path to the robot's current state:
             auto pathGeom = boost::static_pointer_cast<ompl::geometric::PathGeometric>(currentPath);

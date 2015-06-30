@@ -25,9 +25,12 @@
 #include "messages/support/nubugger/proto/DataPoint.pb.h"
 #include "messages/support/nubugger/proto/DrawObjects.pb.h"
 #include "utility/math/matrix/Rotation3D.h"
+#include "utility/math/geometry/RotatedRectangle.h"
 
 namespace utility {
 namespace nubugger {
+    using utility::math::geometry::RotatedRectangle;
+
     namespace {
 
         using messages::support::nubugger::proto::DataPoint;
@@ -240,6 +243,32 @@ namespace nubugger {
 
         object->set_height(height);
         object->set_length(length);
+
+        return std::move(drawObjects);
+    }
+
+    inline std::unique_ptr<messages::support::nubugger::proto::DrawObjects> drawRectangle(std::string name, RotatedRectangle rect, float timeout = TIMEOUT) {
+
+        auto drawObjects = std::make_unique<messages::support::nubugger::proto::DrawObjects>();
+        auto* object = drawObjects->add_objects();
+        object->set_name(name);
+        object->set_shape(messages::support::nubugger::proto::DrawObject::RECTANGLE);
+        object->set_timeout(timeout);
+
+        auto* objPosition = object->mutable_position();
+        objPosition->set_x(rect.getPosition()(0));
+        objPosition->set_y(rect.getPosition()(1));
+        objPosition->set_z(0.008);
+
+        auto* objRotation = object->mutable_rotation();
+        // objRotation->set_x(std::cos(rect.getRotation()));
+        // objRotation->set_y(std::sin(rect.getRotation()));
+        objRotation->set_x(0);
+        objRotation->set_y(0);
+        objRotation->set_z(rect.getRotation());
+
+        object->set_length(rect.getSize()(0));
+        object->set_width(rect.getSize()(1));
 
         return std::move(drawObjects);
     }

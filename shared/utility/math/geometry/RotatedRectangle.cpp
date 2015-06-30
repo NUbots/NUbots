@@ -17,35 +17,27 @@
  * Copyright 2013 NUBots <nubots@nubots.net>
  */
 
-#ifndef UTILITY_MATH_GEOMETRY_ROTATEDRECTANGLE_H
-#define UTILITY_MATH_GEOMETRY_ROTATEDRECTANGLE_H
-
-#include <armadillo>
-#include <ostream>
-#include <vector>
-
-#include "utility/math/matrix/Transform2D.h"
+#include "RotatedRectangle.h"
 
 namespace utility {
 namespace math {
 namespace geometry {
 
-    using utility::math::matrix::Transform2D;
+    RotatedRectangle::RotatedRectangle(const Transform2D& transform_, const arma::vec2& size_)
+        : transform(transform_), size(size_) { }
 
-    class RotatedRectangle {
-    private:
-        Transform2D transform;
-        arma::vec2 size;
+    arma::vec2 RotatedRectangle::getPosition() const {
+        return arma::vec(transform.xy());
+    }
 
-    public:
-        RotatedRectangle(const Transform2D& trans, const arma::vec2& size);
+    double RotatedRectangle::getRotation()     const {
+        return transform.angle();
+    }
 
-        arma::vec2 getPosition() const;
-        double getRotation()     const;
-        arma::vec2 getSize()     const;
-    };
+    arma::vec2 RotatedRectangle::getSize()     const {
+        return size;
+    }
+
 }
 }
 }
-
-#endif
