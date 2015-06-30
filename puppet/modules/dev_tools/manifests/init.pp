@@ -29,6 +29,11 @@ class dev_tools {
   package { 'yasm': ensure => latest, }
   package { 'libboost-dev': ensure => latest, }
 
+  file { '/etc/profile.d/toolchain_init.sh':
+    ensure => present,
+    mode => '755',
+    source => 'puppet:///modules/dev_tools/toolchain_init.sh', }
+
   file { '/usr/bin/ar_bin':
     ensure => present,
     mode => '755',
