@@ -80,16 +80,26 @@ namespace motion{
         // Obtain the position of the torso and the direction in which the torso needs to move
         // The position that the COM needs to move to in support foot coordinates
         int negativeIfRight = supportFoot == LimbID::LEFT_LEG ? 1 : -1;
-        Transform3D torsoTarget = arma::eye(4,4);
-        if(stage == MotionStage::RUNNING){
-            torsoTarget.submat(0,3,3,3) = arma::vec({0, negativeIfRight * DarwinModel::Leg::FOOT_CENTRE_TO_ANKLE_CENTRE, stand_height,1}); 
-        } else if(stage == MotionStage::STOPPING){
-            torsoTarget.submat(0,3,3,3) = arma::vec({0, - negativeIfRight * foot_separation / 2, stand_height,1});
-        }
+
         Transform3D torsoPose = getTorsoPose(sensors);
+        
+        arma::vec3 centreOfMass_foot = torsoPose.transformPoint(sensors.centreOfMass.rows(0,2));
+        arma::vec3 comGoal;
+        //Select the COM position depending on stage
+        if(stage == MotionStage::RUNNING){
+            comGoal = arma::vec3({0, negativeIfRight * DarwinModel::Leg::FOOT_CENTRE_TO_ANKLE_CENTRE, stand_height});
+        } else if(stage == MotionStage::STOPPING){
+            comGoal = arma::vec3({0, - negativeIfRight * foot_separation / 2, stand_height});
+        }
+        arma::vec3 comDiff = comGoal - centreOfMass_foot;
+
+        Transform3D torsoTarget = torsoPose;
+        torsoTarget.translation() += comDiff;
 
         //WARNING: DO NOT SWAP STABLE CHECK AND newTorsoPose OR YOU WILL BREAK ROBOTS
-        stable = (arma::norm(torsoPose.submat(0,3,2,3) - torsoTarget.submat(0,3,2,3)) < tolerance);
+        float error = arma::norm(torsoPose.submat(0,3,2,3) - torsoTarget.submat(0,3,2,3));
+        std::cout << "error" << error << std::endl;
+        stable = error < tolerance;
         if(stable && stage == MotionStage::STOPPING) stage = MotionStage::FINISHED;
         
         Transform3D newTorsoPose = utility::math::matrix::Transform3D::interpolate(torsoPose, torsoTarget, deltaT * motion_gain);
