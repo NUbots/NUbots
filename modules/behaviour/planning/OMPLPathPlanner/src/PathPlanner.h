@@ -33,7 +33,7 @@
 #include "utility/localisation/transform.h"
 #include "utility/math/matrix/Transform2D.h"
 
-    
+
 namespace modules {
 namespace behaviour {
 namespace planning {
@@ -50,6 +50,13 @@ namespace planning {
 
         ompl::base::PathPtr obstacleFreePathBetween(Transform2D start, Transform2D goal, Ball ball, double timeLimit);
 
+        // The state space used for the last planning run:
+        ompl::base::StateSpacePtr stateSpace;
+
+        // The graph generated to calculate the optimal path:
+        std::vector<arma::vec> debugPositions;
+        std::vector<uint> debugParentIndices;
+        
     	private:
 
     };

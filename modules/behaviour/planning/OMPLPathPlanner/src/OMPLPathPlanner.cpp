@@ -83,19 +83,19 @@ namespace planning {
 
             // TODO: Make the state space a member variable of PathPlanner.
 
-            // Construct the robot state space in which we're planning.
-            ob::StateSpacePtr space(new ob::SE2StateSpace());
+            // // Construct the robot state space in which we're planning.
+            // ob::StateSpacePtr space(new ob::SE2StateSpace());
 
-            // Set the bounds of space to the field area:
-            // TODO: Use a FieldDescription from the config system for the lengths.
-            ob::RealVectorBounds bounds(2);
-            bounds.setLow(-4.5);
-            bounds.setHigh(4.5);
-            space->as<ob::SE2StateSpace>()->setBounds(bounds);
+            // // Set the bounds of space to the field area:
+            // // TODO: Use a FieldDescription from the config system for the lengths.
+            // ob::RealVectorBounds bounds(2);
+            // bounds.setLow(-4.5);
+            // bounds.setHigh(4.5);
+            // space->as<ob::SE2StateSpace>()->setBounds(bounds);
 
             // Get the robot's current state as an OMPL SE2 state:
             Transform2D currTrans = {self.position(0), self.position(1), vectorToBearing(self.heading)};
-            ob::ScopedState<> currentScopedState(space);
+            ob::ScopedState<> currentScopedState(pathPlanner.stateSpace);
             auto* currentState = currentScopedState->as<ob::SE2StateSpace::StateType>();
             currentState->setX(currTrans.x());
             currentState->setY(currTrans.y());
@@ -161,7 +161,7 @@ namespace planning {
             NUClear::log("OMPLPP: kickPlan.target:", kickPlan.target.t());
 
             Transform2D goal = {goalPosition(0), goalPosition(1), vectorToBearing(goalHeading)};
-            double timeLimit = 1; // Time limit in seconds.
+            double timeLimit = 0.01; // Time limit in seconds.
             auto path = pathPlanner.obstacleFreePathBetween(start, goal, ball, timeLimit);
             // LocalisationBall testBall;
             // testBall.position = {0,1};
@@ -194,7 +194,8 @@ namespace planning {
                     positions.push_back(pos);
                 }
 
-                emit(utility::nubugger::drawPolyline("OMPLPP_Path", positions));
+                emit(utility::nubugger::drawPolyline("OMPLPP_Path", positions, 0.1, {1,0.5,1}));
+                emit(utility::nubugger::drawTree("OMPLPP_DebugTree", pathPlanner.debugPositions, pathPlanner.debugParentIndices, 0.02, {0.5, 0,0.5}));
             }
         });
 
