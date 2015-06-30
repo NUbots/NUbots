@@ -183,6 +183,12 @@ namespace motion {
                 std::cout << "lifter.isFinished" << std::endl;
                 balancer.stop();
             }
+
+            if(balancer.isFinished()){
+                updater.disable();
+                updatePriority(0);
+                //TODO reset everything                
+            }
             
             //Do things based on current state
 
@@ -190,15 +196,18 @@ namespace motion {
             Transform3D supportFootGoal;
             
             if(balancer.isRunning()){
+                std::cout << "balancer is running" << std::endl;
                 Transform3D supportFootPose = balancer.getFootPose(sensors, deltaT);
                 supportFootGoal = supportFootPose;
                 kickFootGoal =  supportFootPose.translate(arma::vec3({0, negativeIfKickRight * foot_separation, 0}));
             }
             if(lifter.isRunning()){
+                std::cout << "lifter is running" << std::endl;
                 //TODO: CHECK ORDER
                 kickFootGoal *= lifter.getFootPose(sensors, deltaT);
             }
             if(kicker.isRunning()){
+                std::cout << "kicker is running" << std::endl;
                 //TODO: CHECK ORDER
                 kickFootGoal *= kicker.getFootPose(sensors, deltaT);
             }
@@ -229,73 +238,9 @@ namespace motion {
             emit(std::move(waypoints));
 
 
-//END BALANCER
-/*
-//START FOOTLIFTER w.r.t Torso, Should be support foot coordinates????
-            // 4x4 homogeneous transform matrices for left foot and right foot relative to torso
-            Transform3D leftFoot = sensors.forwardKinematics.find(ServoID::L_ANKLE_ROLL)->second;
-            Transform3D rightFoot = sensors.forwardKinematics.find(ServoID::R_ANKLE_ROLL)->second;
-            
-            // Finds the current position of the kick foot in support foot coordinates
-            auto liftFootPosition  = leftFoot.i()*rightFoot.translation();
-
-            // Finds the target position of the kick foot to lift foot in support foot coordinates
-            auto liftFootTarget = leftFoot.i()*rightFoot.translation();
-            
-            // Raises the foot
-            auto liftFootTarget.col(2) = liftFootTarget.col(2) + liftFootHeight;
-            
-            // Moves the heel backwards
-            // Negative taken into account
-            auto liftFootTarget.col(0) = liftFootTarget.col(0) - liftFootBack;
-
-            // Direction in which the foot needs to be lifted
-            auto liftFootDirection = liftFootTarget - liftFootPosition;
-            // Normalise Direction
-            auto normalLiftFootDirection = arma::normalise(liftFoot);
-
-            // Net displacement to move kick foot
-            auto liftFootDisplacement = (torsoShiftVelocity/UPDATE_FREQUENCY)*normalLiftFootDirection;
-            
-            // Convert displacement from support foot coordinates to kick foot coordinates
-            auto liftFootDisplacmentKick = rightFoot.i()*leftFoot*arma::join_cols(liftFootDisplacement, arma::vec({0}));
-            // Find the new position vector from the right foot to the torso
-            auto newLiftFootPositionKick = rightFoot.i().translation() - liftFootDisplacementKick;
-            
-            // New transform matrix to give to inverse kinematics           
-            auto newLiftFootPose = rightFoot;
-            auto newLiftFootPose.col(3) = (arma::join_cols(newLiftFootPositionKick, arma::vec({1}))).t();
-
-//END FOOTLIFTER
-
-//START KICK Assume we want to kick the ball straight ahead, and that the foot will move in a straight line
-            
-            // Homogeneous transform matrices
-            Transform3D leftFoot = sensors.forwardKinematics.find(ServoID::L_ANKLE_ROLL)->second;
-            Transform3D rightFoot = sensors.forwardKinematics.find(ServoID::R_ANKLE_ROLL)->second;
-
-            // Find position of the right foot w.r.t the torso
-            auto kickFootPosition = rightFoot.translation();
-            // Convert this position to support foot coordinates
-            auto kickFootPosition = leftFoot.i()*kickFootPosition;
-            // The direction we want the foot to move
-            auto kickFootDirection = ballPosition - kickFootPosition;
-            auto normalKickFootDirection = arma::normalise(kickFootDirection);
-            // Net displacement we want the foot to move per cycle 
-            auto kickFootDisplacement = (kickVelocity/UPDATE_FREQUENCY)*normalKickFootDirection;
-            // Convert to kick foot coordinates
-            auto kickFootDisplacementKick = rightFoot.i()*leftFoot*arma::join_cols(kickFootDisplacement, arma::vec({0}))
-            // New position of the foot we want to move to in support foot coordinates
-            auto newKickFootPositionKick = rightFoot.i().translation() - kickFootDisplacementKick;
-
-            // New transform matrix to give to inverse kinematics
-            auto newKickFootPose = rightFoot;
-            auto newKickFootPose.col(3) = (arma::join_cols(newKickFootPositionKick, arma::vec({1}))).t()
-//END KICK
-*/
-            // TODO We're always finished kicking because we never start :(
-            // updatePriority(0);
         });
+
+        updater.disable();
 
         on<Trigger<FinishKick>>([this] (const FinishKick&) {
             emit(std::move(std::make_unique<KickFinished>()));

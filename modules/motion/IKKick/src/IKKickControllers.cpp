@@ -73,19 +73,25 @@ namespace motion{
         torsoTarget.submat(0,3,3,3) = arma::vec({0, negativeIfRight * DarwinModel::Leg::FOOT_CENTRE_TO_ANKLE_CENTRE, stand_height,1}); 
 
         Transform3D torsoPose = getTorsoPose(sensors);
+        torsoPose.submat(0,0,2,2) = arma::eye(3,3);
 
         //WARNING: DO NOT SWAP STABLE CHECK AND newTorsoPose OR YOU WILL BREAK ROBOTS
         stable = (arma::norm(torsoPose.submat(0,3,2,3) - torsoTarget.submat(0,3,2,3)) < tolerance);
+        // std::cout << "stable = " << stable << std::endl;
         
         Transform3D newTorsoPose = utility::math::matrix::Transform3D::interpolate(torsoPose, torsoTarget, deltaT * motion_gain);
+        // std::cout << "torsoPose = \n" << torsoPose << std::endl;
+        // std::cout << "torsoTarget = \n" << torsoTarget << std::endl;
+        // std::cout << "newTorsoPose = \n" << newTorsoPose << std::endl;
 
         return newTorsoPose.i();
-	}
+    }
 
-	Transform3D FootLifter::getFootPose(const Sensors& sensors, float deltaT){
+    Transform3D FootLifter::getFootPose(const Sensors& sensors, float deltaT){
         double elapsedTime = std::chrono::duration_cast<std::chrono::microseconds>(sensors.timestamp - motionStartTime).count() * 1e-6;
-        float alpha = velocity * elapsedTime / distance;
-		return utility::math::matrix::Transform3D::interpolate(startPose,finishPose,alpha);
+        float alpha = std::fmax(0,std::fmin(velocity * elapsedTime / distance,1));
+        // std::cout << "alpha = " << alpha << std::endl;
+		return utility::math::matrix::Transform3D::interpolate(startPose,finishPose,alpha).i();
 	}
 
 	Transform3D Kicker::getFootPose(const Sensors& sensors, float deltaT){
