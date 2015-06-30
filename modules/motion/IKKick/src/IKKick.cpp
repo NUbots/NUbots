@@ -118,12 +118,12 @@ namespace motion {
             Transform3D leftFoot = sensors.forwardKinematics.find(ServoID::L_ANKLE_ROLL)->second;
             Transform3D rightFoot = sensors.forwardKinematics.find(ServoID::R_ANKLE_ROLL)->second;
 
-            Transform3D supportFootInverse = messages::input::LimbID::LEFT_LEG ? leftFoot.i() : rightFoot.i();
+            Transform3D torsoPose = (supportFoot == messages::input::LimbID::LEFT_LEG) ? leftFoot.i() : rightFoot.i();
 
             // Convert the direction vector and position of the ball into support foot coordinates by multiplying the inverse of the
             // homogeneous transforms with the coordinates in torso space. 1 for a point and 0 for a vector.
-            arma::vec4 ballPosition4 = supportFootInverse * arma::join_cols(command.target, arma::vec({1}));
-            arma::vec4 goalPosition4 = supportFootInverse * arma::join_cols(command.direction, arma::vec({0}));
+            arma::vec4 ballPosition4 = torsoPose * arma::join_cols(command.target, arma::vec({1}));
+            arma::vec4 goalPosition4 = torsoPose * arma::join_cols(command.direction, arma::vec({0}));
 
             ballPosition = ballPosition4.rows(0,2);
             goalPosition = goalPosition4.rows(0,2);
