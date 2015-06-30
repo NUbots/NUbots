@@ -46,7 +46,8 @@ node nubotsvm {
   installer { 'yaml-cpp':       url => 'https://github.com/jbeder/yaml-cpp/archive/release-0.5.2.tar.gz',
                                 args => '-DYAML_CPP_BUILD_CONTRIB=OFF -DYAML_CPP_BUILD_TOOLS=OFF', }
   installer { 'ncurses':        url => 'http://ftp.gnu.org/pub/gnu/ncurses/ncurses-5.9.tar.gz',
-                                args => '--without-progs --without-test --with-shared', }
+                                args => '--without-progs --without-test --with-shared',
+                                environment => [ 'CPPFLAGS=-P' ] }
   installer { 'fftw3':          url => 'http://www.fftw.org/fftw-3.3.4.tar.gz',
                                 args => '--disable-fortran --enable-shared', }
   installer { 'libjpeg-turbo':  url => 'http://downloads.sourceforge.net/project/libjpeg-turbo/1.4.1/libjpeg-turbo-1.4.1.tar.gz',
