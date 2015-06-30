@@ -65,4 +65,28 @@ node nubotsvm {
   installer { 'rtaudio':        url => 'http://www.music.mcgill.ca/~gary/rtaudio/release/rtaudio-4.1.1.tar.gz', }
   installer { 'muparser':       url => 'https://github.com/TrentHouliston/muparser/archive/master.tar.gz',
                                 args => '--disable-shared --disable-debug --disable-samples', }
+
+  archive { "espeak":
+    url    => "http://sourceforge.net/projects/espeak/files/espeak/espeak-1.48/espeak-1.48.04-source.zip",
+    target => '/nubots/toolchain/src',
+    checksum => false,
+    extension => "zip", } ~>
+  file { '/nubots/toolchain/src/espeak/espeak-1.48.04-source/src/portaudio.h':
+    ensure => present,
+    mode => '666',
+    source => '/nubots/toolchain/src/espeak/espeak-1.48.04-source/src/portaudio19.h', } ~>
+  exec { "install_espeak":
+    command => "/usr/local/bin/install_from_source '/nubots/toolchain' 'auto' true",
+    creates => "/nubots/toolchain/lib/libespeak.a",
+    cwd => "/nubots/toolchain/src/espeak/espeak-1.48.04-source/src",
+    environment => ['AUDIO="PORTAUDIO"'],
+    path =>  [  '/usr/local/bin', '/usr/local/sbin/', '/usr/bin/', '/usr/sbin/', '/bin/', '/sbin/' ],
+    timeout => 0,
+    refreshonly => true,
+    require => [
+      File['install_from_source'],
+      Archive["espeak"],
+      Exec['fix_compiler_environment'],
+    ],
+  }
 }

@@ -29,11 +29,27 @@ class dev_tools {
   package { 'yasm': ensure => latest, }
   package { 'libboost-dev': ensure => latest, }
 
+  # SSH KEYS FOR THE VM
+  file { 'vm_private_key':
+      path => '/home/vagrant/.ssh/id_rsa',
+      ensure => present,
+      source => 'puppet:///modules/vm_ssh_keys/id_rsa',
+      owner => 'vagrant',
+      mode => '600', }
+
+  file { 'vm_public_key':
+      path => '/home/vagrant/.ssh/id_rsa.pub',
+      ensure => present,
+      source => 'puppet:///modules/vm_ssh_keys/id_rsa.pub',
+      owner => 'vagrant', }
+
+  # SETUP ENVIRONMENT VARIABLES FOR SHELLS
   file { '/etc/profile.d/toolchain_init.sh':
     ensure => present,
     mode => '755',
     source => 'puppet:///modules/dev_tools/toolchain_init.sh', }
 
+  # SETUP BINUTILS REDIRECTS TO USE PLUGINS
   exec { 'mv /usr/bin/ar /usr/bin/ar_bin':
     creates => '/usr/bin/ar_bin',
     subscribe => Package['binutils'],
@@ -61,6 +77,7 @@ class dev_tools {
     mode => '755',
     source => 'puppet:///modules/dev_tools/ranlib', }
 
+  # SETUP OUR ALTERNATIVES SO WE USE THE CORRECT COMPILER
   exec {'fix_compiler_environment':
     command => 'update-alternatives --install /usr/bin/ld ld /usr/bin/ld.bfd 10 \
              && update-alternatives --install /usr/bin/ld ld /usr/bin/ld.gold 20 \
