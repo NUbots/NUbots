@@ -49,7 +49,7 @@ namespace support {
      */
     void NUbugger::provideOverview() {
 
-        handles["overview"].push_back(on<Trigger<Every<5, std::chrono::seconds>>, Options<Single, Priority<NUClear::LOW>>>([this](const time_t&) {
+        handles["overview"].push_back(on<Trigger<Every<1, std::chrono::seconds>>, Options<Single, Priority<NUClear::LOW>>>([this](const time_t&) {
             Message message;
             message.set_type(Message::OVERVIEW);
             message.set_filter_id(0);
