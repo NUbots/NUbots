@@ -29,6 +29,19 @@ class robocup::build_dep (
 
   include armadillo
   include quex
+  include cppformat
+
+  # OMPL and dependencies:
+  include ompl
+  package { 'libeigen3-dev': ensure => latest }
+  package { 'libboost-system-dev': ensure => latest }
+  package { 'libboost-filesystem-dev': ensure => latest }
+  package { 'libboost-thread-dev': ensure => latest }
+  package { 'libboost-serialization-dev': ensure => latest }
+  package { 'libboost-program-options-dev': ensure => latest }
+  package { 'libboost-test-dev': ensure => latest }
+  package { 'libboost-chrono-dev': ensure => latest }
+  package { 'libboost-date-time-dev': ensure => latest }
 
   class { 'nuclear':
     username => $username,

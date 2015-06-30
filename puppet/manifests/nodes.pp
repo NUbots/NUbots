@@ -37,9 +37,11 @@ node nubotsvm {
   $username = 'vagrant'
 
   class { 'robocup::build_dep': username => $username, }
-  class { 'cppformat':  }
 
-  class { 'nusight': username => $username, }
+  # NUsight doesn't work at the moment, and everyone uses is outside the VM
+  # anyway, so it's commented for now (ideally, we make it work on the vm to
+  # reduce the setup required to begin NUbots development).
+  # class { 'nusight': username => $username, }
 
   # ps3 controller tools
   package { 'software-properties-common': ensure => latest, }

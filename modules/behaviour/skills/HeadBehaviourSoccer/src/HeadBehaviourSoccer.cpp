@@ -126,7 +126,6 @@ namespace modules {
 
                     int maxPriority = std::max(std::max(ballPriority,goalPriority),0);
 
-
                     std::vector<VisionObject> fixationObjects;
 
                     auto now = NUClear::clock::now();
@@ -164,7 +163,6 @@ namespace modules {
                     bool found = !lost && lostLastTime;
                     //Do we need to update our plan?
                     bool updatePlan = found || (lastBallPriority != ballPriority) || (lastGoalPriority != goalPriority) ; //bool(Priorities have changed)
-
 
                     //Get robot pose
                     Rotation3D orientation, headToBodyRotation;

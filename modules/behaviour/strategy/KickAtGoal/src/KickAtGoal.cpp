@@ -35,12 +35,12 @@ namespace strategy {
     using messages::behaviour::WalkStrategy;
     using messages::behaviour::KickPlan;
     using messages::support::Configuration;
+    using messages::behaviour::proto::Behaviour;
     using VisionBall = messages::vision::Ball;
     using VisionGoal = messages::vision::Goal;
     using utility::time::durationFromSeconds;
 
-    KickAtGoal::KickAtGoal(std::unique_ptr<NUClear::Environment> environment)
-        : Reactor(std::move(environment)) {
+    KickAtGoal::KickAtGoal(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
 
         // TODO: unhack?
         emit(std::make_unique<KickPlan>(KickPlan{{3, 0}}));
@@ -72,16 +72,19 @@ namespace strategy {
     }
 
     void KickAtGoal::doBehaviour() {
+        // Store the state before executing behaviour.
+        Behaviour::State previousState = currentState;
 
-        if (NUClear::clock::now() - ballLastSeen < ballActiveTimeout) { // ball has been seen recently
-
+        // Check if the ball  has been seen recently.
+        if (NUClear::clock::now() - ballLastSeen < ballActiveTimeout) {
             walkToBall();
-
-        }
+        } 
         else {
-
             spinToWin();
+        }
 
+        if (currentState != previousState) {
+            emit(std::make_unique<Behaviour::State>(currentState));
         }
 
     }
@@ -92,8 +95,8 @@ namespace strategy {
         approach->targetHeadingType = WalkTarget::WayPoint;
         approach->walkMovementType = WalkApproach::WalkToPoint;
         approach->heading = arma::vec2({3, 0}); // TODO: unhack
-
         emit(std::move(approach));
+        currentState = Behaviour::WALK_TO_BALL;
     }
 
     void KickAtGoal::spinToWin() {
@@ -103,6 +106,7 @@ namespace strategy {
         command->target = {0,0};
         command->heading = {1,0};
         emit(std::move(command));
+        currentState = Behaviour::SEARCH_FOR_BALL;
     }
 
 }

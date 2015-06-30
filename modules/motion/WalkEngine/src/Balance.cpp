@@ -97,8 +97,8 @@ namespace motion {
         double newdRoll = (roll - lastRoll) / timeSinceLastMeasurement;
 
         //Exponential filter
-        dPitch = newdPitch * 0.25 + dPitch * 0.75;
-        dRoll = newdRoll * 0.25 + dRoll * 0.75;
+        dPitch = newdPitch * 0.1 + dPitch * 0.9;
+        dRoll = newdRoll * 0.1 + dRoll * 0.9;
 
         double dTotal = std::fabs(dPitch) + std::fabs(dRoll);
 
@@ -107,17 +107,18 @@ namespace motion {
         lastBalanceTime = now;
 
         //Debug result
-        // emit(graph("pd translation", pitch, dPitch));
+        emit(graph("pitch error", pitch, dPitch));
+        emit(graph("pd translation", balanceTransPGainX * sensors.bodyCentreHeight * pitch, balanceTransDGainX * sensors.bodyCentreHeight * dPitch));
 
         //Compute torso position adjustment
-        arma::vec3 torsoAdjustment_world = arma::vec3({- balanceTransPGainX * sensors.bodyCentreHeight * std::sin(pitch) - balanceTransDGainX * sensors.bodyCentreHeight * dPitch,
-                                                         balanceTransPGainY * sensors.bodyCentreHeight * std::sin(roll) + balanceTransDGainY * sensors.bodyCentreHeight * dRoll,
-                                                       - balanceTransPGainZ * std::sin(total) + balanceTransDGainY * dTotal});
+        arma::vec3 torsoAdjustment_world = arma::vec3({- balanceTransPGainX * sensors.bodyCentreHeight * pitch - balanceTransDGainX * sensors.bodyCentreHeight * dPitch,
+                                                         balanceTransPGainY * sensors.bodyCentreHeight * roll + balanceTransDGainY * sensors.bodyCentreHeight * dRoll,
+                                                       - balanceTransPGainZ * total + balanceTransDGainY * dTotal});
 
         //Rotate from world space to torso space
         Rotation3D yawLessOrientation = Rotation3D::createRotationZ(-sensors.orientation.yaw()) * sensors.orientation;
 
-        arma::vec3 torsoAdjustment_torso = yawLessOrientation * torsoAdjustment_world;
+        arma::vec3 torsoAdjustment_torso = torsoAdjustment_world;
 
         //Apply opposite translation to the foot position
         target = target.translate(-torsoAdjustment_torso);

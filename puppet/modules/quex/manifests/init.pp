@@ -18,5 +18,6 @@ class quex {
         ensure => present,
         mode => '755',
         source => 'puppet:///modules/quex/quex',
+        mode => 'a+x'
     }
 }

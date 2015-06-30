@@ -14,42 +14,27 @@
  * You should have received a copy of the GNU General Public License
  * along with the NUbots Codebase.  If not, see <http://www.gnu.org/licenses/>.
  *
- * Copyright 2013 NUBots <nubots@nubots.net>
+ * Copyright 2015 NUBots <nubots@nubots.net>
  */
 
 package messages.behaviour.proto;
 
 message Behaviour {
-    enum Type {
-        ACTION_REGISTER = 1;
-        ACTION_STATE = 2;
-    }
-
-    required Type type = 1;
-
-    optional ActionRegister action_register = 2;
-    optional ActionStateChange action_state_change = 3;
-}
-
-message ActionRegister {
-    required uint32 id = 1;
-    required string name = 2;
-    repeated LimbSet limb_set = 3;
-}
-
-message ActionStateChange {
 
     enum State {
-        START = 1;
-        KILL = 2;
+        INIT = 1;
+        PICKED_UP = 5;
+        INITIAL = 6;
+        READY = 7;
+        SET = 8;
+        TIMEOUT = 9;
+        FINISHED = 10;
+        PENALISED = 11;
+        SEARCH_FOR_BALL = 2;
+        SEARCH_FOR_GOALS = 3;
+        WALK_TO_BALL = 4;
     }
 
-    required State state = 1; 
-    required string name = 2;
-    repeated uint32 limbs = 3;
-}
+    required State state = 1;
 
-message LimbSet {
-    required float priority = 1;
-    repeated uint32 limbs = 2;
 }

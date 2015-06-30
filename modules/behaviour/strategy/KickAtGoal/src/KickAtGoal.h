@@ -22,6 +22,8 @@
 
 #include <nuclear>
 
+#include "messages/behaviour/proto/Behaviour.pb.h"
+
 namespace modules {
 namespace behaviour {
 namespace strategy {
@@ -35,6 +37,8 @@ namespace strategy {
         void doBehaviour();
         void walkToBall();
         void spinToWin();
+
+        messages::behaviour::proto::Behaviour::State currentState = messages::behaviour::proto::Behaviour::INIT;
     public:
         static constexpr const char* CONFIGURATION_PATH = "KickAtGoal.yaml";
 

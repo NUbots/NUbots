@@ -199,7 +199,7 @@ namespace support {
 
                 case MotionType::MOTION:
                 //Update based on walk engine
-                    if(walkCommand && !kicking){
+                    if(walkCommand && !kicking) {
                         world.robotVelocity.rows(0,1) = sensors.odometry;
                         //angle from command:
                         world.robotVelocity(2) = walkCommand->command(2);
@@ -211,7 +211,7 @@ namespace support {
                     break;
             }
             // Update ball position
-            switch (cfg_.ball.motion_type){
+            switch (cfg_.ball.motion_type) {
                 case MotionType::NONE:
                     world.ball.velocity = { 0, 0 , 0};
                     break;
@@ -346,10 +346,9 @@ namespace support {
 
             arma::vec2 bearingVector = world.robotPose.rotation() * arma::vec2({1,0});
             arma::vec3 robotHeadingVector = {bearingVector[0], bearingVector[1], 0};
-            emit(drawArrow("robot", {world.robotPose.x(), world.robotPose.y(), 0}, robotHeadingVector, 1));
+            emit(drawArrow("robot", {world.robotPose.x(), world.robotPose.y(), 0}, 1, robotHeadingVector, 0));
 
-            emit(drawSphere("ball", {world.ball.position(0), world.ball.position(1), 0}, 0.1));
-
+            emit(drawSphere("ball", {world.ball.position(0), world.ball.position(1), 0}, 0.1, 0));
         });
 
         on<Trigger<Startup>>("SoccerSimulator Startup",[this](const Startup&){
