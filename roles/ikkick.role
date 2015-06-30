@@ -11,7 +11,10 @@ ADD_ROLE(
     #Behaviour
     behaviour::Controller
     behaviour::skills::Stand
+    
+    # Motion
     motion::IKKick
-
     motion::WalkEngine
+    motion::ScriptEngine
+
 )

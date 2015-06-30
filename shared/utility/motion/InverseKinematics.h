@@ -68,6 +68,9 @@ namespace kinematics {
         float anklePitch = 0;
         float ankleRoll = 0;
 
+        //Correct for input referencing the bottom of the foot
+        target = target.translate(arma::vec3({0,0,RobotKinematicModel::Leg::FOOT_HEIGHT}));
+
         //TODO remove this. It was due to wrong convention use
         utility::math::matrix::Transform3D inputCoordinatesToCalcCoordinates;
         inputCoordinatesToCalcCoordinates << 0<< 1<< 0<< 0<< arma::endr
@@ -95,12 +98,12 @@ namespace kinematics {
 
         arma::vec3 hipOffset = {LENGTH_BETWEEN_LEGS / 2.0, HIP_OFFSET_X, DISTANCE_FROM_BODY_TO_HIP_JOINT};
 
-        arma::vec3 ankleToGroundDisplacement_torso = target.submat(0,0,2,2) * arma::vec3({0,0,RobotKinematicModel::Leg::FOOT_HEIGHT});
-        arma::vec3 targetLeg = anklePos - hipOffset - ankleToGroundDisplacement_torso;
+        
+        arma::vec3 targetLeg = anklePos - hipOffset;
 
         float length = arma::norm(targetLeg, 2);
         if (length > UPPER_LEG_LENGTH+LOWER_LEG_LENGTH){
-            NUClear::log<NUClear::WARN>("InverseKinematics::calculateLegJoints : !!! WARNING !!! Requested position beyond leg reach. Scaling back requested vector.");
+            NUClear::log<NUClear::WARN>("InverseKinematics::calculateLegJoints : !!! WARNING !!! Requested position beyond leg reach.\n Scaling back requested vector from length ",length, " to ", UPPER_LEG_LENGTH+LOWER_LEG_LENGTH);
             targetLeg *= (UPPER_LEG_LENGTH+LOWER_LEG_LENGTH)/length;
             length = UPPER_LEG_LENGTH+LOWER_LEG_LENGTH;
         }
