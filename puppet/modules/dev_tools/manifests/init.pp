@@ -34,31 +34,28 @@ class dev_tools {
     mode => '755',
     source => 'puppet:///modules/dev_tools/toolchain_init.sh', }
 
-  file { '/usr/bin/ar_bin':
-    ensure => present,
-    mode => '755',
-    source => '/usr/bin/ar',
-    subscribe => Package['binutils'], } ~>
+  exec { 'mv /usr/bin/ar /usr/bin/ar_bin':
+    creates => '/usr/bin/ar_bin',
+    subscribe => Package['binutils'],
+    refreshonly => true } ~>
   file { '/usr/bin/ar':
     ensure => present,
     mode => '755',
     source => 'puppet:///modules/dev_tools/ar', }
 
-  file { '/usr/bin/nm_bin':
-    ensure => present,
-    mode => '755',
-    source => '/usr/bin/nm',
-    subscribe => Package['binutils'],  } ~>
+  exec { 'mv /usr/bin/nm /usr/bin/nm_bin':
+    creates => '/usr/bin/nm_bin',
+    subscribe => Package['binutils'],
+    refreshonly => true } ~>
   file { '/usr/bin/nm':
     ensure => present,
     mode => '755',
     source => 'puppet:///modules/dev_tools/nm', }
 
-  file { '/usr/bin/ranlib_bin':
-    ensure => present,
-    mode => '755',
-    source => '/usr/bin/ranlib',
-    subscribe => Package['binutils'],  } ~>
+  exec { 'mv /usr/bin/ranlib /usr/bin/ranlib_bin':
+    creates => '/usr/bin/ranlib_bin',
+    subscribe => Package['binutils'],
+    refreshonly => true } ~>
   file { '/usr/bin/ranlib':
     ensure => present,
     mode => '755',
