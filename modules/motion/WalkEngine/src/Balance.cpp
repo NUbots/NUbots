@@ -108,17 +108,17 @@ namespace motion {
 
         //Debug result
         emit(graph("pitch error", pitch, dPitch));
-        emit(graph("pd translation", balanceTransPGainX * sensors.bodyCentreHeight * std::sin(pitch), balanceTransDGainX * sensors.bodyCentreHeight * dPitch));
+        emit(graph("pd translation", balanceTransPGainX * sensors.bodyCentreHeight * pitch, balanceTransDGainX * sensors.bodyCentreHeight * dPitch));
 
         //Compute torso position adjustment
-        arma::vec3 torsoAdjustment_world = arma::vec3({- balanceTransPGainX * sensors.bodyCentreHeight * std::sin(pitch) - balanceTransDGainX * sensors.bodyCentreHeight * dPitch,
-                                                         balanceTransPGainY * sensors.bodyCentreHeight * std::sin(roll) + balanceTransDGainY * sensors.bodyCentreHeight * dRoll,
-                                                       - balanceTransPGainZ * std::sin(total) + balanceTransDGainY * dTotal});
+        arma::vec3 torsoAdjustment_world = arma::vec3({- balanceTransPGainX * sensors.bodyCentreHeight * pitch - balanceTransDGainX * sensors.bodyCentreHeight * dPitch,
+                                                         balanceTransPGainY * sensors.bodyCentreHeight * roll + balanceTransDGainY * sensors.bodyCentreHeight * dRoll,
+                                                       - balanceTransPGainZ * total + balanceTransDGainY * dTotal});
 
         //Rotate from world space to torso space
         Rotation3D yawLessOrientation = Rotation3D::createRotationZ(-sensors.orientation.yaw()) * sensors.orientation;
 
-        arma::vec3 torsoAdjustment_torso = yawLessOrientation * torsoAdjustment_world;
+        arma::vec3 torsoAdjustment_torso = torsoAdjustment_world;
 
         //Apply opposite translation to the foot position
         target = target.translate(-torsoAdjustment_torso);
