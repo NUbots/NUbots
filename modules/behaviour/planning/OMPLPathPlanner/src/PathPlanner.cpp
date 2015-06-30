@@ -74,7 +74,7 @@ namespace planning {
         // Returns the distance from the given state's position to the
         // boundary of the circular obstacle.
         double clearance(const ob::State* state) const {
-            
+
             auto pos = omplState2Transform2d(state);
 
             auto bx = ball_.position(0);
@@ -106,7 +106,7 @@ namespace planning {
             auto t2 = omplState2Transform2d(s2);
 
             // Straight line distance and direction from start to goal.
-            auto diff = t2.xy() - t1.xy();
+            auto diff = arma::vec2(t2.xy() - t1.xy());
             auto dist = arma::norm(diff);
             auto dir = vectorToBearing(diff);
 
@@ -117,7 +117,7 @@ namespace planning {
             auto tdiff1 = utility::math::angle::difference(t1.angle(), dir);
             auto tdiff2 = utility::math::angle::difference(t2.angle(), dir);
             auto totalTurning = tdiff1 + tdiff2;
-            
+
             // The cost of turning vs walking in a straight line in m/rad.
             double turningWeight = 0.5;
 
@@ -244,7 +244,7 @@ namespace planning {
             // for (int i = 0; i < pd.numVertices(); i++) {
             //     for (int j = 0; j < i; j++) {
             //         if (pd.edgeExists(i, j)) {
-                        
+
             //         }
             //     }
             // }
