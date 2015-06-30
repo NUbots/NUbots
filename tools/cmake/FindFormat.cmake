@@ -6,6 +6,7 @@ else (FORMAT_INCLUDE_DIRS)
   find_path(FORMAT_INCLUDE_DIR
     NAMES
       format.h
+      cppformat/format.h
     PATHS
       /usr/include
       /usr/local/include
@@ -16,6 +17,7 @@ else (FORMAT_INCLUDE_DIRS)
   find_library(FORMAT_LIBRARY
     NAMES
       format
+      libcppformat
     PATHS
       /usr/lib
       /usr/local/lib

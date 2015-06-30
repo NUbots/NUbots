@@ -8,6 +8,7 @@ class nuclear(
     $clone_directory = "${nubots_dir}/NUClear", #"
   ) {
   include catch
+  package { 'libzmq3-dev': ensure => latest }
 
   $nuclear_build_dir = "${clone_directory}/build"
 

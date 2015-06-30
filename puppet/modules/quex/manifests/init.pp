@@ -17,5 +17,6 @@ class quex {
         path => '/usr/local/bin/quex',
         ensure => present,
         source => 'puppet:///modules/quex/quex',
+        mode => 'a+x'
     }
 }
