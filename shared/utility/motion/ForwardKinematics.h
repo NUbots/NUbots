@@ -339,16 +339,10 @@ namespace kinematics {
         }
     }
 
-    inline utility::math::geometry::Line calculateHorizon(const math::matrix::Rotation3D groundToCamRotation, double cameraDistancePixels){
-        arma::vec3 zGround = {0,0,1};
-        arma::vec3 normal = groundToCamRotation * zGround;
+    inline utility::math::geometry::Line calculateHorizon(const math::matrix::Rotation3D groundToCamRotation, double cameraDistancePixels) {
 
-        arma::vec3 xHead = {1,0,0};
-        arma::vec3 yHead = {0,1,0};
-        double phiX = std::acos(arma::dot(normal, xHead)) - M_PI_2;
-        double phiY = std::acos(arma::dot(normal, yHead)) - M_PI_2;
-
-        // TODO ask jake to fix this :P
+        double phiX = std::acos(groundToCamRotation(0, 2)) - M_PI_2;
+        double phiY = std::acos(groundToCamRotation(1, 2)) - M_PI_2;
 
         // Since I don't know how to math this properly, make two random points and make a line from those
         double m = std::tan(phiY);

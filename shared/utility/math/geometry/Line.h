@@ -37,6 +37,8 @@ namespace geometry {
 
         Line();
 
+        Line(const arma::vec2& n, const double& d);
+
         Line(const arma::vec2& a, const arma::vec2& b);
 
         void setFromPoints(const arma::vec2& a, const arma::vec2& b);

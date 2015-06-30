@@ -84,10 +84,13 @@ namespace modules {
                     }
 
                     // Set all other camera settings
-                    for(auto& setting : camera.getSettings()) {
-                        int value = config[setting.first].as<int>();
-                        if(setting.second.set(value) == false) {
-                            NUClear::log<NUClear::DEBUG>("Failed to set " + setting.first + " on camera");
+                    for(auto& setting : config.config) {
+                        auto& settings = camera.getSettings();
+                        auto it = settings.find(setting.first.as<std::string>());
+                        if(it != settings.end()) {
+                            if(it->second.set(setting.second.as<int>()) == false) {
+                                NUClear::log<NUClear::DEBUG>("Failed to set " + it->first + " on camera");
+                            }
                         }
                     }
 
@@ -102,10 +105,13 @@ namespace modules {
             on<Trigger<Every<1, std::chrono::seconds>>, With<Configuration<LinuxCamera>>>("Camera Setting Applicator", [this] (const time_t&, const Configuration<LinuxCamera>& config) {
                 if(camera.isStreaming()) {
                     // Set all other camera settings
-                    for(auto& setting : camera.getSettings()) {
-                        int value = config[setting.first].as<int>();
-                        if(setting.second.set(value) == false) {
-                            NUClear::log<NUClear::DEBUG>("Failed to set " + setting.first + " on camera");
+                    for(auto& setting : config.config) {
+                        auto& settings = camera.getSettings();
+                        auto it = settings.find(setting.first.as<std::string>());
+                        if(it != settings.end()) {
+                            if(it->second.set(setting.second.as<int>()) == false) {
+                                NUClear::log<NUClear::DEBUG>("Failed to set " + it->first + " on camera");
+                            }
                         }
                     }
                 }

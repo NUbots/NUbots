@@ -27,6 +27,7 @@ namespace modules {
         using messages::vision::LookUpTable;
         using messages::vision::ObjectClass;
         using messages::vision::ClassifiedImage;
+        using utility::math::geometry::Line;
 
         void LUTClassifier::findVisualHorizon(const Image& image, const LookUpTable& lut, ClassifiedImage<ObjectClass>& classifiedImage) {
 
@@ -35,98 +36,159 @@ namespace modules {
             auto& visualHorizon = classifiedImage.visualHorizon;
             auto& maxVisualHorizon = classifiedImage.maxVisualHorizon;
             auto& minVisualHorizon = classifiedImage.minVisualHorizon;
+            double width = classifiedImage.dimensions[0];
+            double height = classifiedImage.dimensions[1];
+
+            // Move the horizon up by VISUAL_HORIZON_BUFFER
+            Line drawCeiling = horizon;
+            drawCeiling.distance += VISUAL_HORIZON_BUFFER;
+
+            // Get all the tangential distances along the line
+            arma::mat::fixed<4,2> corners({0,width,0,width,0,0,height,height});
+            auto tangentialPoints = corners * arma::vec2({ -drawCeiling.normal[1], drawCeiling.normal[0] });
+
+            // Get the points we will be starting from on the line
+            auto linePoints = arma::linspace(std::ceil(tangentialPoints.min()),
+                                             std::floor(tangentialPoints.max()),
+                                             std::floor(std::abs(tangentialPoints.max()
+                                                      - tangentialPoints.min()) / VISUAL_HORIZON_SPACING));
+
+
+            1,0,0
+            0,1,0
+            1,0,width
+            0,1,height
+            drawCeiling
+
+
+
+
+
+            // // N points along a line need to get the start and end
+            // // Get onto the line by moving along the normal
+            // // Move along by tangential distance
+
+            // arma::repmat(drawCeiling.normal * drawCeiling.distance, 1, linePoints.N_ELEM);
+            //  + arma::vec2({ -normal[1], normal[0] }) * linePoints;
+
+
+
+
+            // Convert these points into actual points
+
+            // Find out where these lines intersect the screen borders below
+
+            // These are our end points
+
+            // Loop through each of these points and classify them
+                // Find the green point in the image and tag it
+
+            // Do a convex hull on the green points
+
+
+
+
+
+
+            // Make a list of start and end points for these lines
+            //  Get 0,0, 0,ymax, ymax,0, xmax,ymax and project them to the horizon to get our start and end points (choose the ones that give the longest line)
+            //  Starting at the 0,0 point on the line, move along it at VISUAL_HORIZON_SPACING until you get to xmax,ymax on the line flagging points
+            //  Intersect these with the screen edges that are below the horizon and the furtherst of above_horizon and intersecting with the edges above the horizon
+
+            // Get segments for each of these using quex classification
+            // Find the greenpoint for our convex hull algorithm
 
             // Cast lines to find our visual horizon
-            for(uint x = 0; x < image.width; x += VISUAL_HORIZON_SPACING) {
+            // for(uint x = 0; x < image.width; x += VISUAL_HORIZON_SPACING) {
 
-                // Find our point to classify from (slightly above the horizon)
-                int top = std::max(int(lround(horizon.y(x)) - VISUAL_HORIZON_BUFFER), int(0));
-                top = std::min(top, int(image.height - 1));
+            //     // Find our point to classify from (slightly above the horizon)
+            //     int top = std::max(int(lround(horizon.y(x)) - VISUAL_HORIZON_BUFFER), int(0));
+            //     top = std::min(top, int(image.height - 1));
 
-                // Classify our segments
-                auto segments = quex->classify(image, lut, { int(x), top }, { int(x), int(image.height - 1) }, VISUAL_HORIZON_SUBSAMPLING);
+            //     // Classify our segments
+            //     auto segments = quex->classify(image, lut, { int(x), top }, { int(x), int(image.height - 1) }, VISUAL_HORIZON_SUBSAMPLING);
 
-                // Our default green point is the bottom of the screen
-                arma::ivec2 greenPoint = { int(x), int(image.height - 1) };
+            //     // Our default green point is the bottom of the screen
+            //     arma::ivec2 greenPoint = { int(x), int(image.height - 1) };
 
-                // Loop through our segments to find our first green segment
-                for (auto it = segments.begin(); it != segments.end(); ++it) {
+            //     // Loop through our segments to find our first green segment
+            //     for (auto it = segments.begin(); it != segments.end(); ++it) {
 
-                    // If this a valid green point update our information
-                    if(it->colour == ObjectClass::FIELD && it->length >= VISUAL_HORIZON_MINIMUM_SEGMENT_SIZE) {
+            //         // If this a valid green point update our information
+            //         if(it->colour == ObjectClass::FIELD && it->length >= VISUAL_HORIZON_MINIMUM_SEGMENT_SIZE) {
 
-                        greenPoint = it->start;
+            //             greenPoint = it->start;
 
-                        // We move our green point up by the scanning size if possible (assume more green horizon rather then less)
-                        greenPoint[1] = std::max(int(greenPoint[1] - (VISUAL_HORIZON_SUBSAMPLING / 2)), 0);
+            //             // We move our green point up by the scanning size if possible (assume more green horizon rather then less)
+            //             greenPoint[1] = std::max(int(greenPoint[1] - (VISUAL_HORIZON_SUBSAMPLING / 2)), 0);
 
-                        // We found our green
-                        break;
-                    }
-                }
+            //             // We found our green
+            //             break;
+            //         }
+            //     }
 
-                visualHorizon.push_back(std::move(greenPoint));
+            //     visualHorizon.push_back(std::move(greenPoint));
 
-                insertSegments(classifiedImage, segments, true);
-            }
+            //     insertSegments(classifiedImage, segments, true);
+            // }
 
-            // If we don't have a line on the right of the image, make one
-            if(image.width - 1 % VISUAL_HORIZON_SPACING != 0) {
+            // // If we don't have a line on the right of the image, make one
+            // if(image.width - 1 % VISUAL_HORIZON_SPACING != 0) {
 
-                // Our default green point is the bottom of the screen
-                arma::ivec2 greenPoint = { int(image.width - 1), int(image.height - 1) };
+            //     // Our default green point is the bottom of the screen
+            //     arma::ivec2 greenPoint = { int(image.width - 1), int(image.height - 1) };
 
-                // Find our point to classify from (slightly above the horizon)
-                int top = std::max(int(lround(horizon.y(image.width - 1)) - VISUAL_HORIZON_BUFFER), int(0));
-                top = std::min(top, int(image.height - 1));
+            //     // Find our point to classify from (slightly above the horizon)
+            //     int top = std::max(int(lround(horizon.y(image.width - 1)) - VISUAL_HORIZON_BUFFER), int(0));
+            //     top = std::min(top, int(image.height - 1));
 
-                arma::ivec2 start = { int(image.width - 1), top };
-                arma::ivec2 end = { int(image.width - 1), int(image.height - 1) };
+            //     arma::ivec2 start = { int(image.width - 1), top };
+            //     arma::ivec2 end = { int(image.width - 1), int(image.height - 1) };
 
-                auto segments = quex->classify(image, lut, start, end, VISUAL_HORIZON_SUBSAMPLING);
+            //     auto segments = quex->classify(image, lut, start, end, VISUAL_HORIZON_SUBSAMPLING);
 
-                // Loop through our segments to find our first green segment
-                for (auto it = segments.begin(); it != segments.end(); ++it) {
+            //     // Loop through our segments to find our first green segment
+            //     for (auto it = segments.begin(); it != segments.end(); ++it) {
 
-                    // If this a valid green point update our information
-                    if(it->colour == ObjectClass::FIELD && it->length >= VISUAL_HORIZON_MINIMUM_SEGMENT_SIZE) {
-                        greenPoint = it->start;
-                        // We found our green
-                        break;
-                    }
-                }
+            //         // If this a valid green point update our information
+            //         if(it->colour == ObjectClass::FIELD && it->length >= VISUAL_HORIZON_MINIMUM_SEGMENT_SIZE) {
+            //             greenPoint = it->start;
+            //             // We found our green
+            //             break;
+            //         }
+            //     }
 
-                visualHorizon.push_back(std::move(greenPoint));
-                insertSegments(classifiedImage, segments, true);
-            }
+            //     visualHorizon.push_back(std::move(greenPoint));
+            //     insertSegments(classifiedImage, segments, true);
+            // }
 
-            // Do a convex hull on the map points to build the horizon
-            for(auto a = visualHorizon.begin(); a < visualHorizon.end() - 2;) {
+            // // Do a convex hull on the map points to build the horizon
+            // for(auto a = visualHorizon.begin(); a < visualHorizon.end() - 2;) {
 
-                auto b = a + 1;
-                auto c = a + 2;
+            //     auto b = a + 1;
+            //     auto c = a + 2;
 
-                // Get the Z component of a cross product to check if it is concave
-                bool concave = 0 <   (double(a->at(0)) - double(b->at(0))) * (double(c->at(1)) - double(b->at(1)))
-                                   - (double(a->at(1)) - double(b->at(1))) * (double(c->at(0)) - double(b->at(0)));
+            //     // Get the Z component of a cross product to check if it is concave
+            //     bool concave = 0 <   (double(a->at(0)) - double(b->at(0))) * (double(c->at(1)) - double(b->at(1)))
+            //                        - (double(a->at(1)) - double(b->at(1))) * (double(c->at(0)) - double(b->at(0)));
 
-                if(concave) {
-                    visualHorizon.erase(b);
-                    a = a == visualHorizon.begin() ? a : --a;
-                }
-                else {
-                    ++a;
-                }
-            }
+            //     if(concave) {
+            //         visualHorizon.erase(b);
+            //         a = a == visualHorizon.begin() ? a : --a;
+            //     }
+            //     else {
+            //         ++a;
+            //     }
+            // }
 
-            // As this is a convex hull, the max visual horizon will always be at one of the edges
-            maxVisualHorizon = visualHorizon.front()[1] > visualHorizon.back()[1] ? visualHorizon.begin() : visualHorizon.end() - 1;
+            // // As this is a convex hull, the max visual horizon will always be at one of the edges
+            // maxVisualHorizon = visualHorizon.front()[1] > visualHorizon.back()[1] ? visualHorizon.begin() : visualHorizon.end() - 1;
 
-            // As this is a convex function, we just need to progress till the next point is lower
-            for(minVisualHorizon = visualHorizon.begin();
-                minVisualHorizon < visualHorizon.end() - 1
-                && minVisualHorizon->at(1) > (minVisualHorizon + 1)->at(1);
-                ++minVisualHorizon);
+            // // As this is a convex function, we just need to progress till the next point is lower
+            // for(minVisualHorizon = visualHorizon.begin();
+            //     minVisualHorizon < visualHorizon.end() - 1
+            //     && minVisualHorizon->at(1) > (minVisualHorizon + 1)->at(1);
+            //     ++minVisualHorizon);
         }
 
     }  // vision
