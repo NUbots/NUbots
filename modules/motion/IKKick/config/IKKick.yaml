@@ -8,14 +8,14 @@ direction: [2, 2, 2]
 
 balancer:
   motion_gain: 10 # gain per second
-  stand_height: 0.18 #m 
+  stand_height: 0.22 #m 
   tolerance: 0.01 #m
 
 lifter:
   motion_gain: 0.1
   lift_foot_height: 0.05 #m
   lift_foot_back: 0.01 #m
-  velocity: 0.1
+  velocity: 0.05
 
 kicker:
   motion_gain: 0.1

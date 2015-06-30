@@ -47,7 +47,7 @@ namespace motion{
 
 		class SixDOFMotionController{
 			protected:
-				MotionStage stage;
+				MotionStage stage = MotionStage::READY;
 				bool stable = false;
 
 				float motion_gain = 10;
@@ -59,7 +59,7 @@ namespace motion{
 			public:
 				virtual void computeMotion(const messages::input::Sensors& sensors) = 0;
 				void start(const messages::input::Sensors& sensors){
-					if(stage != MotionStage::FINISHED){
+					if(stage == MotionStage::READY){
 						stage = MotionStage::RUNNING;
 						computeMotion(sensors);
 					}

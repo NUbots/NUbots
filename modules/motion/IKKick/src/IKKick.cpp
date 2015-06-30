@@ -169,6 +169,12 @@ namespace motion {
                 std::cout << "lifter.isFinished" << std::endl;
                 balancer.stop();
             }
+
+            if(balancer.isFinished()){
+                updater.disable();
+                updatePriority(0);
+                //TODO reset everything                
+            }
             
             //Do things based on current state
 
@@ -176,15 +182,18 @@ namespace motion {
             Transform3D supportFootGoal;
             
             if(balancer.isRunning()){
+                std::cout << "balancer is running" << std::endl;
                 Transform3D supportFootPose = balancer.getFootPose(sensors, deltaT);
                 supportFootGoal = supportFootPose;
                 kickFootGoal =  supportFootPose.translate(arma::vec3({0, negativeIfKickRight * foot_separation, 0}));
             }
             if(lifter.isRunning()){
+                std::cout << "lifter is running" << std::endl;
                 //TODO: CHECK ORDER
                 kickFootGoal *= lifter.getFootPose(sensors, deltaT);
             }
             if(kicker.isRunning()){
+                std::cout << "kicker is running" << std::endl;
                 //TODO: CHECK ORDER
                 kickFootGoal *= kicker.getFootPose(sensors, deltaT);
             }
@@ -213,7 +222,10 @@ namespace motion {
             }
 
             emit(std::move(waypoints));
+
         });
+
+        updater.disable();
 
         on<Trigger<FinishKick>>([this] (const FinishKick&) {
             emit(std::move(std::make_unique<KickFinished>()));

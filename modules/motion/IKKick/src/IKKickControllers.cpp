@@ -53,7 +53,7 @@ namespace motion{
     }
 
     void FootLifter::computeMotion(const Sensors& sensors){
-        startPose = getTorsoPose(sensors);
+        startPose = arma::eye(4,4);
         finishPose = startPose.translate(arma::vec3({-lift_foot_back,0,lift_foot_height}));
         distance = arma::norm(startPose.translation() - finishPose.translation());
         motionStartTime = sensors.timestamp;
@@ -76,21 +76,26 @@ namespace motion{
 
         //WARNING: DO NOT SWAP STABLE CHECK AND newTorsoPose OR YOU WILL BREAK ROBOTS
         stable = (arma::norm(torsoPose.submat(0,3,2,3) - torsoTarget.submat(0,3,2,3)) < tolerance);
+        // std::cout << "stable = " << stable << std::endl;
         
         Transform3D newTorsoPose = utility::math::matrix::Transform3D::interpolate(torsoPose, torsoTarget, deltaT * motion_gain);
+        // std::cout << "torsoPose = \n" << torsoPose << std::endl;
+        // std::cout << "torsoTarget = \n" << torsoTarget << std::endl;
+        // std::cout << "newTorsoPose = \n" << newTorsoPose << std::endl;
 
         return newTorsoPose.i();
-	}
+    }
 
-	Transform3D FootLifter::getFootPose(const Sensors& sensors, float deltaT){
+    Transform3D FootLifter::getFootPose(const Sensors& sensors, float deltaT){
         double elapsedTime = std::chrono::duration_cast<std::chrono::microseconds>(sensors.timestamp - motionStartTime).count() * 1e-6;
-        float alpha = velocity * elapsedTime / distance;
+        float alpha = std::fmax(0,std::fmin(velocity * elapsedTime / distance,1));
+        stable = alpha >= 1;
 		return utility::math::matrix::Transform3D::interpolate(startPose,finishPose,alpha);
 	}
 
 	Transform3D Kicker::getFootPose(const Sensors& sensors, float deltaT){
         Transform3D goal;
-        goal = goal.translate(arma::vec3({0.05,0,0}));
+        //goal = goal.translate(arma::vec3({0.05,0,0}));
 		return goal;
 	}
 }
