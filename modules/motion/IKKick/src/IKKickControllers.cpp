@@ -101,7 +101,6 @@ namespace motion{
         if(stage == MotionStage::RUNNING){
             
             double elapsedTime = std::chrono::duration_cast<std::chrono::microseconds>(sensors.timestamp - motionStartTime).count() * 1e-6;
-            std::cout << "FootLifter RUNNING, elapsed time = " << elapsedTime << std::endl;
             float alpha = std::fmax(0,std::fmin(velocity * elapsedTime / distance,1));
             stable = (alpha >= 1);
             return utility::math::matrix::Transform3D::interpolate(startPose,finishPose,alpha);
@@ -109,7 +108,6 @@ namespace motion{
         } else if (stage == MotionStage::STOPPING) {
             
             double elapsedTime = std::chrono::duration_cast<std::chrono::microseconds>(sensors.timestamp - stoppingCommandTime).count() * 1e-6;
-            std::cout << "FootLifter STOPPING, elapsed time = " << elapsedTime << std::endl;
             float alpha = std::fmax(0,std::fmin(velocity * elapsedTime / distance,1));
             if(alpha >= 1) stage = MotionStage::FINISHED;
             return utility::math::matrix::Transform3D::interpolate(finishPose,startPose,alpha);
@@ -122,7 +120,6 @@ namespace motion{
         if(stage == MotionStage::RUNNING){
             
             double elapsedTime = std::chrono::duration_cast<std::chrono::microseconds>(sensors.timestamp - motionStartTime).count() * 1e-6;
-            std::cout << "Kicker RUNNING, elapsed time = " << elapsedTime << std::endl;
             float alpha = std::fmax(0,std::fmin(kick_velocity * elapsedTime / distance,1));
             if(alpha >= 1) stop();
             return utility::math::matrix::Transform3D::interpolate(startPose,finishPose,alpha);
@@ -130,7 +127,6 @@ namespace motion{
         } else if (stage == MotionStage::STOPPING) {
             
             double elapsedTime = std::chrono::duration_cast<std::chrono::microseconds>(sensors.timestamp - stoppingCommandTime).count() * 1e-6;
-            std::cout << "Kicker STOPPING, elapsed time = " << elapsedTime << std::endl;
             float alpha = std::fmax(0,std::fmin(return_velocity * elapsedTime / distance,1));
             if(alpha >= 1) stage = MotionStage::FINISHED;
             return utility::math::matrix::Transform3D::interpolate(finishPose,startPose,alpha);
