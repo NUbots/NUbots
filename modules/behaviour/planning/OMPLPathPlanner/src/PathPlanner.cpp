@@ -33,8 +33,9 @@
 
 #include "utility/math/matrix/Transform2D.h"
 #include "utility/math/angle.h"
-
-namespace ob = ompl::base;
+#include "utility/math/geometry/Intersection.h"
+#include "utility/math/geometry/Circle.h"
+#include "utility/math/geometry/RotatedRectangle.h"
 
 namespace modules {
 namespace behaviour {
@@ -44,6 +45,10 @@ namespace planning {
     using messages::localisation::Self;
     using utility::math::matrix::Transform2D;
     using utility::math::angle::vectorToBearing;
+    using utility::math::geometry::Circle;
+    using utility::math::geometry::RotatedRectangle;
+    namespace intersection = utility::math::geometry::intersection;
+    namespace ob = ompl::base;
 
     // Helper method to convert from an OMPL state to a transform2d.
     Transform2D omplState2Transform2d(const ob::State* state) {
@@ -62,34 +67,26 @@ namespace planning {
     // (i.e. that the robot is not intersecting the ball)
     class DarwinBallValidityChecker : public ob::StateValidityChecker {
     public:
-        DarwinBallValidityChecker(const ob::SpaceInformationPtr& si, Ball ball) :
-            ob::StateValidityChecker(si), ball_(ball) {}
+        DarwinBallValidityChecker(const ob::SpaceInformationPtr& si, arma::vec2 ballPos) :
+            ob::StateValidityChecker(si), ballPos_(ballPos) {}
 
-        // Returns whether the given state's position overlaps the
-        // circular obstacle
         bool isValid(const ob::State* state) const {
-            return this->clearance(state) > 0.0;
-        }
-
-        // Returns the distance from the given state's position to the
-        // boundary of the circular obstacle.
-        double clearance(const ob::State* state) const {
 
             auto pos = omplState2Transform2d(state);
 
-            auto bx = ball_.position(0);
-            auto by = ball_.position(1);
-
-            // TODO: Use collision between a RotatedRectangle and a circle
-            // instead of just a distance test.
-
-            // Distance formula between two points, offset by the circle's
-            // radius:
             // TODO: Use a FieldDescription from the config system for the ball radius.
-            return sqrt((pos.x()-bx)*(pos.x()-bx) + (pos.y()-by)*(pos.y()-by)) - 0.05;
+            Circle ballCircle(0.05, ballPos_);
+            RotatedRectangle robotRect(pos, {0.12, 0.17});
+
+            return !intersection::test(ballCircle, robotRect);
+
+            // Distance formula between two points, offset by the circle's radius:
+            // auto bx = ball_.position(0);
+            // auto by = ball_.position(1);
+            // return sqrt((pos.x()-bx)*(pos.x()-bx) + (pos.y()-by)*(pos.y()-by)) - 0.05;
         }
 
-        Ball ball_;
+        arma::vec2 ballPos_;
     };
 
     class DarwinPathOptimisationObjective : public ob::OptimizationObjective {
@@ -146,7 +143,7 @@ namespace planning {
         // return ob::OptimizationObjectivePtr(new ob::PathLengthOptimizationObjective(si));
     }
 
-    ompl::base::PathPtr PathPlanner::obstacleFreePathBetween(Transform2D start, Transform2D goal, Ball ball, double timeLimit) {
+    ompl::base::PathPtr PathPlanner::obstacleFreePathBetween(Transform2D start, Transform2D goal, arma::vec2 ballPos, double timeLimit) {
         // Construct the robot state space in which we're planning.
         stateSpace = ob::StateSpacePtr(new ob::SE2StateSpace());
 
@@ -164,7 +161,7 @@ namespace planning {
         // Construct a space information instance for this state space:
         ob::SpaceInformationPtr si(new ob::SpaceInformation(stateSpace));
         // Set the object used to check which states in the space are valid
-        si->setStateValidityChecker(ob::StateValidityCheckerPtr(new DarwinBallValidityChecker(si, ball)));
+        si->setStateValidityChecker(ob::StateValidityCheckerPtr(new DarwinBallValidityChecker(si, ballPos)));
         si->setup();
 
         // Set the starting state:
@@ -206,6 +203,7 @@ namespace planning {
         // });
 
         // Construct our optimal planner using the RRT* algorithm.
+        // TODO: Look into using CForest for faster planning.
         ob::PlannerPtr optimizingPlanner(new ompl::geometric::RRTstar(si));
 
         // Set the problem instance for our planner to solve

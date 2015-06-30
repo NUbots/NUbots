@@ -14,37 +14,23 @@
  * You should have received a copy of the GNU General Public License
  * along with the NUbots Codebase.  If not, see <http://www.gnu.org/licenses/>.
  *
- * Copyright 2013 NUBots <nubots@nubots.net>
+ * Copyright 2015 NUBots <nubots@nubots.net>
  */
 
-#ifndef UTILITY_MATH_GEOMETRY_ROTATEDRECTANGLE_H
-#define UTILITY_MATH_GEOMETRY_ROTATEDRECTANGLE_H
+#ifndef UTILITY_MATH_GEOMETRY_INTERSECTION_H
+#define UTILITY_MATH_GEOMETRY_INTERSECTION_H
 
-#include <armadillo>
-#include <ostream>
-#include <vector>
-
-#include "utility/math/matrix/Transform2D.h"
+#include "Circle.h"
+#include "RotatedRectangle.h"
 
 namespace utility {
 namespace math {
 namespace geometry {
+namespace intersection {
 
-    using utility::math::matrix::Transform2D;
+bool test(const Circle& circle, const RotatedRectangle& rect);
 
-    class RotatedRectangle {
-    private:
-        Transform2D transform;
-        arma::vec2 size;
-
-    public:
-        RotatedRectangle(const Transform2D& trans, const arma::vec2& size);
-
-        Transform2D getTransform() const;
-        arma::vec2 getSize()       const;
-        arma::vec2 getPosition()   const;
-        double getRotation()       const;
-    };
+}
 }
 }
 }

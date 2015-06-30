@@ -48,7 +48,7 @@ namespace planning {
         PathPlanner() {
         }
 
-        ompl::base::PathPtr obstacleFreePathBetween(Transform2D start, Transform2D goal, Ball ball, double timeLimit);
+        ompl::base::PathPtr obstacleFreePathBetween(Transform2D start, Transform2D goal, arma::vec2 ballPos, double timeLimit);
 
         // The state space used for the last planning run:
         ompl::base::StateSpacePtr stateSpace;

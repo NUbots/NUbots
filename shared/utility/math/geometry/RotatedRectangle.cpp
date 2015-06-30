@@ -26,15 +26,19 @@ namespace geometry {
     RotatedRectangle::RotatedRectangle(const Transform2D& transform_, const arma::vec2& size_)
         : transform(transform_), size(size_) { }
 
-    arma::vec2 RotatedRectangle::getPosition() const {
+    Transform2D RotatedRectangle::getTransform() const {
+        return transform;
+    }
+
+    arma::vec2 RotatedRectangle::getPosition()   const {
         return arma::vec(transform.xy());
     }
 
-    double RotatedRectangle::getRotation()     const {
+    double RotatedRectangle::getRotation()       const {
         return transform.angle();
     }
 
-    arma::vec2 RotatedRectangle::getSize()     const {
+    arma::vec2 RotatedRectangle::getSize()       const {
         return size;
     }
 

@@ -103,9 +103,7 @@ namespace planning {
             currentState->setY(currTrans.y());
             currentState->setYaw(currTrans.angle());
 
-            emit(utility::nubugger::drawRectangle("OMPLPP_RobotFootprint", RotatedRectangle({0,0,0}, {1,1})));
-            emit(utility::nubugger::drawRectangle("OMPLPP_RobotFootprint2", RotatedRectangle({2,2,3.141*0.25}, {2,0.5})));
-
+            emit(utility::nubugger::drawRectangle("OMPLPP_RobotFootprint", RotatedRectangle(currTrans, {0.12, 0.17})));
 
             // Find the closest state on the path to the robot's current state:
             auto pathGeom = boost::static_pointer_cast<ompl::geometric::PathGeometric>(currentPath);
@@ -134,6 +132,7 @@ namespace planning {
             emit(std::move(command));
         });
 
+        // TODO: Add planning frequency to config.
         on<Trigger<Every<2, std::chrono::seconds>>,
             With<LocalisationBall>,
             With<std::vector<Self>>,
@@ -162,13 +161,13 @@ namespace planning {
             arma::vec2 goalHeading = kickPlan.target - ballPos;
             arma::vec goalPosition = ballPos - 0.1 * arma::normalise(goalHeading);
 
-            NUClear::log("OMPLPP:ballPos:", ballPos.t());
+            NUClear::log("OMPLPP: ballPos:", ballPos.t());
             NUClear::log("OMPLPP: goalPosition:", goalPosition.t());
             NUClear::log("OMPLPP: kickPlan.target:", kickPlan.target.t());
 
             Transform2D goal = {goalPosition(0), goalPosition(1), vectorToBearing(goalHeading)};
-            double timeLimit = 0.01; // Time limit in seconds.
-            auto path = pathPlanner.obstacleFreePathBetween(start, goal, ball, timeLimit);
+            double timeLimit = 0.1; // Time limit in seconds. TODO: Add to config.
+            auto path = pathPlanner.obstacleFreePathBetween(start, goal, ballPos, timeLimit);
             // LocalisationBall testBall;
             // testBall.position = {0,1};
             // auto path = pathPlanner.obstacleFreePathBetween({-4,1,0}, {3,3,3.14}, testBall, timeLimit);
