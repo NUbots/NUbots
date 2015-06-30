@@ -11,14 +11,14 @@ shift 3
 
 if [[ $LTO == "true" ]]; then
     echo "Using LTO"
-    export CFLAGS="-I$PREFIX/include -march=atom -mtune=atom -fuse-linker-plugin -flto -fno-fat-lto-objects -O3"
-    export CXXFLAGS="-I$PREFIX/include -march=atom -mtune=atom -fuse-linker-plugin -flto -fno-fat-lto-objects -O3"
-    export LDFLAGS="-L$PREFIX/lib"
+    export CFLAGS="$CFLAGS -I$PREFIX/include -march=atom -mtune=atom -fuse-linker-plugin -flto -fno-fat-lto-objects -O3"
+    export CXXFLAGS="$CXXFLAGS -I$PREFIX/include -march=atom -mtune=atom -fuse-linker-plugin -flto -fno-fat-lto-objects -O3"
+    export LDFLAGS="$LDFLAGS -L$PREFIX/lib"
 else
     echo "Not using LTO"
-    export CFLAGS="-I$PREFIX/include -march=atom -mtune=atom -O3"
-    export CXXFLAGS="-I$PREFIX/include -march=atom -mtune=atom -O3"
-    export LDFLAGS="-L$PREFIX/lib"
+    export CFLAGS="$CFLAGS -I$PREFIX/include -march=atom -mtune=atom -O3"
+    export CXXFLAGS="$CXXFLAGS -I$PREFIX/include -march=atom -mtune=atom -O3"
+    export LDFLAGS="$LDFLAGS -L$PREFIX/lib"
 fi
 
 # Say what we're doing!

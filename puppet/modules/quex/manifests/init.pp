@@ -11,13 +11,11 @@ class quex {
     file { '/usr/local/include/quex':
         ensure => 'link',
         target => '/usr/local/etc/quex/quex',
-        mode => 'a+x'
     } ->
     file { 'install-quex-bin':
         path => '/usr/local/bin/quex',
         ensure => present,
         mode => '755',
         source => 'puppet:///modules/quex/quex',
-        mode => 'a+x'
     }
 }

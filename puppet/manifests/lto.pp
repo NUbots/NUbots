@@ -41,8 +41,8 @@ node nubotsvm {
   installer { 'armadillo':      url => 'http://sourceforge.net/projects/arma/files/armadillo-5.200.2.tar.gz',
                                 method => 'cmake',
                                 require => Installer['openblas'], }
-  # installer { 'tcmalloc':       url => 'https://googledrive.com/host/0B6NtGsLhIcf7MWxMMF9JdTN3UVk/gperftools-2.4.tar.gz',
-  #                               args => '--with-tcmalloc-pagesize=64 --enable-minimal', }
+  installer { 'tcmalloc':       url => 'https://googledrive.com/host/0B6NtGsLhIcf7MWxMMF9JdTN3UVk/gperftools-2.4.tar.gz',
+                                args => '--with-tcmalloc-pagesize=64 --enable-minimal', }
   installer { 'yaml-cpp':       url => 'https://github.com/jbeder/yaml-cpp/archive/release-0.5.2.tar.gz',
                                 args => '-DYAML_CPP_BUILD_CONTRIB=OFF -DYAML_CPP_BUILD_TOOLS=OFF', }
   installer { 'ncurses':        url => 'http://ftp.gnu.org/pub/gnu/ncurses/ncurses-5.9.tar.gz',
@@ -61,6 +61,7 @@ node nubotsvm {
   # installer { 'espeak':         url => 'http://sourceforge.net/projects/espeak/files/espeak/espeak-1.48/espeak-1.48.04-source.zip',
   #                               environment => ['AUDIO="PORTAUDIO"'],
   #                               require => Installer['portaudio'], }
+  installer { 'rtaudio':        url => 'http://www.music.mcgill.ca/~gary/rtaudio/release/rtaudio-4.1.1.tar.gz', }
   installer { 'muparser':       url => 'https://github.com/TrentHouliston/muparser/archive/master.tar.gz',
                                 args => '--disable-shared --disable-debug --disable-samples', }
 }
