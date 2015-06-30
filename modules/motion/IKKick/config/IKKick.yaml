@@ -3,8 +3,8 @@ execution_priority: 40
 
 foot_separation: 0.074 # 0.074 = hip separation
 
-target: [1, 1, 1]
-direction: [2, 2, 2]
+target: [0.1, 0, -0.20]
+direction: [1, 0, 0]
 
 balancer:
   motion_gain: 10 # gain per second

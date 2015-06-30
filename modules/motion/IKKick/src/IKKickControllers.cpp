@@ -46,7 +46,7 @@ namespace motion{
 
 	void Kicker::configure(const Configuration<IKKickConfig>& config){
 		// motion_gain = config["kicker"]["motion_gain"].as<float>();
-        velocity = config["lifter"]["velocity"].as<float>();
+        velocity = config["kicker"]["velocity"].as<float>();
 	}
 
     void KickBalancer::computeMotion(const Sensors& sensors){
@@ -64,8 +64,8 @@ namespace motion{
         startPose = arma::eye(4,4);
         
         Transform3D currentTorso = getTorsoPose(sensors);
-        Transform3D currentKickFoot = supportFoot == LimbID::LEFT_LEG ? sensors.forwardKinematics.find(ServoID::L_ANKLE_ROLL)->second 
-                                                                      : sensors.forwardKinematics.find(ServoID::R_ANKLE_ROLL)->second;
+        Transform3D currentKickFoot = supportFoot == LimbID::LEFT_LEG ? sensors.forwardKinematics.find(ServoID::R_ANKLE_ROLL)->second 
+                                                                      : sensors.forwardKinematics.find(ServoID::L_ANKLE_ROLL)->second;
         Transform3D supportToKickFoot = currentKickFoot.i() * currentTorso.i();
         arma::vec3 ballFromKickFoot = supportToKickFoot.transformPoint(ballPosition);
         finishPose = startPose.translate(ballFromKickFoot);

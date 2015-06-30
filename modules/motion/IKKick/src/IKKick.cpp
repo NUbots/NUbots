@@ -108,10 +108,11 @@ namespace motion {
 
             // Work out which of our feet are going to be the support foot
             // Store the support foot and kick foot
-            if(ballPosition[1] > 0){
-                supportFoot = LimbID::RIGHT_LEG;
-            }else{
+            //TODO: fixe theses after debugging
+            if(ballPosition[1] < - foot_separation / 2){
                 supportFoot = LimbID::LEFT_LEG;
+            }else{
+                supportFoot = LimbID::RIGHT_LEG;
             }
 
             // 4x4 homogeneous transform matrices for left foot and right foot relative to torso
@@ -122,9 +123,13 @@ namespace motion {
 
             // Convert the direction vector and position of the ball into support foot coordinates by multiplying the inverse of the
             // homogeneous transforms with the coordinates in torso space. 1 for a point and 0 for a vector.
-            arma::vec4 ballPosition4 = torsoPose * arma::join_cols(command.target, arma::vec({1}));
-            arma::vec4 goalPosition4 = torsoPose * arma::join_cols(command.direction, arma::vec({0}));
+            float hackVal = (supportFoot == messages::input::LimbID::LEFT_LEG) ? 0 : foot_separation;
+            arma::vec3 hackDebuggingOffset = arma::vec3({0,hackVal,0});
+            arma::vec4 ballPosition4 = /*torsoPose */ arma::join_cols(command.target + hackDebuggingOffset, arma::vec({1}));
+            arma::vec4 goalPosition4 = /*torsoPose */ arma::join_cols(command.direction, arma::vec({0}));
 
+            log("hackDebuggingOffset\n", hackDebuggingOffset);
+            log("foot_separation\n", foot_separation);
             ballPosition = ballPosition4.rows(0,2);
             goalPosition = goalPosition4.rows(0,2);
 
