@@ -44,6 +44,10 @@ namespace support {
     void NUbugger::provideVision() {
         handles["image"].push_back(on<Trigger<Image>, Options<Single, Priority<NUClear::LOW>>>([this](const Image& image) {
 
+            if (NUClear::clock::now() - last_image < max_image_duration) {
+                return;
+            }
+
             Message message;
             message.set_type(Message::IMAGE);
             message.set_filter_id(1);
@@ -63,9 +67,15 @@ namespace support {
             imageBytes->insert(imageBytes->begin(), std::begin(image.source()), std::end(image.source()));
 
             send(message);
+
+            last_image = NUClear::clock::now();
         }));
 
         handles["classified_image"].push_back(on<Trigger<ClassifiedImage<ObjectClass>>, Options<Single, Priority<NUClear::LOW>>>([this](const ClassifiedImage<ObjectClass>& image) {
+
+            if (NUClear::clock::now() - last_classified_image < max_classified_image_duration) {
+                return;
+            }
 
             Message message;
             message.set_type(Message::CLASSIFIED_IMAGE);
@@ -124,6 +134,8 @@ namespace support {
             }
 
             send(message);
+
+            last_classified_image = NUClear::clock::now();
         }));
 
         handles["balls"].push_back(on<Trigger<std::vector<Ball>>, Options<Single, Priority<NUClear::LOW>>>([this] (const std::vector<Ball>& balls) {

@@ -74,10 +74,14 @@ namespace vision {
             measurement_distance_variance_factor = config["measurement_distance_variance_factor"].as<double>();
             measurement_bearing_variance = config["measurement_bearing_variance"].as<double>();
             measurement_elevation_variance = config["measurement_elevation_variance"].as<double>();
+
+            lastFrame.time = NUClear::clock::now();
         });
 
         on<Trigger<Raw<ClassifiedImage<ObjectClass>>>, With<CameraParameters>, With<Optional<FieldDescription>>, Options<Single>>("Ball Detector", [this](
             const std::shared_ptr<const ClassifiedImage<ObjectClass>>& rawImage, const CameraParameters& cam, const std::shared_ptr<const FieldDescription>& field) {
+            
+
             if (field == nullptr) {
                 NUClear::log(__FILE__, ", ", __LINE__, ": FieldDescription Update: support::configuration::SoccerConfig module might not be installed.");
                 throw std::runtime_error("FieldDescription Update: support::configuration::SoccerConfig module might not be installed");
@@ -86,6 +90,8 @@ namespace vision {
             // This holds our points that may be a part of the ball
             std::vector<arma::vec2> ballPoints;
             const auto& sensors = *image.sensors;
+
+            double deltaT = 1e-6 * std::chrono::duration_cast<std::chrono::microseconds>(sensors.timestamp - lastFrame.time).count();
 
             // Get all the points that could make up the ball
             for(int i = 0; i < 1; ++i) {
@@ -167,7 +173,23 @@ namespace vision {
                     measurement_distance_variance_factor * ballCentreGroundWidthDistance,
                     measurement_bearing_variance,
                     measurement_elevation_variance }));
-                measurements.push_back({ cartesianToSpherical(ballCentreGroundWidth), ballCentreGroundWidthCov});
+
+                //compute velocity
+                arma::mat widthVelCov = measurement_distance_variance_factor * ballCentreGroundWidthDistance * arma::eye(3,3);
+                arma::vec3 widthVel;
+                if(deltaT == 0) {
+                    widthVel = arma::zeros(3);
+                    widthVelCov = 1e5 * arma::eye(3,3);
+                }else if(deltaT < 1){
+                    widthVel = (ballCentreGroundWidth - lastFrame.widthBall) / deltaT;
+                } else {
+                    //If we havent see the ball for a while we dont measure vel
+                    widthVel = arma::zeros(3);
+                    log<NUClear::WARN>("Ball velocity frame dropped because of too much time between frames");
+                }
+                lastFrame.widthBall = ballCentreGroundWidth;
+                //push back measurements                
+                measurements.push_back({ cartesianToSpherical(ballCentreGroundWidth), ballCentreGroundWidthCov, widthVel, widthVelCov});
                 // 0.003505351, 0.001961638, 1.68276E-05
                 emit(graph("ballCentreGroundWidth measurement", ballCentreGroundWidth(0), ballCentreGroundWidth(1), ballCentreGroundWidth(2)));
                 emit(graph("ballCentreGroundWidth measurement (spherical)", measurements.back().position(0), measurements.back().position(1), measurements.back().position(2)));
@@ -180,7 +202,22 @@ namespace vision {
                     measurement_distance_variance_factor * ballCentreGroundProjDistance,
                     measurement_bearing_variance,
                     measurement_elevation_variance }));
-                measurements.push_back({ cartesianToSpherical(ballCentreGroundProj), ballCentreGroundProjCov});
+                //compute velocity
+                arma::mat projVelCov = measurement_distance_variance_factor * ballCentreGroundWidthDistance * arma::eye(3,3);
+                arma::vec3 projVel;
+                if(deltaT == 0) {
+                    projVel = arma::zeros(3);
+                    projVelCov = 1e5 * arma::eye(3,3);
+                }else if(deltaT < 1){
+                    projVel = (ballCentreGroundProj - lastFrame.projBall) / deltaT;
+                } else {
+                    //If we havent see the ball for a while we dont measure vel
+                    projVel = arma::zeros(3);
+                    log<NUClear::WARN>("Ball velocity frame dropped because of too much time between frames");
+                }
+                lastFrame.projBall = ballCentreGroundProj;
+                //push back measurements
+                measurements.push_back({ cartesianToSpherical(ballCentreGroundProj), ballCentreGroundProjCov, projVel, projVelCov});
                 // 0.002357231 * 2, 2.20107E-05 * 2, 4.33072E-05 * 2,
                 emit(graph("ballCentreGroundProj measurement", ballCentreGroundProj(0), ballCentreGroundProj(1), ballCentreGroundProj(2)));
                 emit(graph("ballCentreGroundProj measurement (spherical)", measurements.back().position(0), measurements.back().position(1), measurements.back().position(2)));
@@ -233,6 +270,8 @@ namespace vision {
             }
 
             emit(std::move(balls));
+
+            lastFrame.time = sensors.timestamp;
 
         });
     }

@@ -142,6 +142,8 @@ namespace support {
         bool kicking;
         uint PLAYER_ID;
 
+        time_t lastNow;
+
         //Methods
         void updateConfiguration(const messages::support::Configuration<SoccerSimulatorConfig>& config, const messages::support::GlobalConfig& globalConfig);
 

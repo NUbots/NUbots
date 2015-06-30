@@ -77,12 +77,14 @@ arma::vec BallModel::predictedObservation(
     arma::vec3 ball_pos = arma::vec3({state(kX), state(kY), cfg_.ballHeight});
     auto obs = SphericalRobotObservation({0, 0}, 0, ball_pos);
     obs(1) -= ballAngle;
-    return obs;
+
+    arma::vec obsVel = arma::join_cols(obs,state.rows(kVx,kVy));
+    return obsVel;
 }
 
 arma::vec BallModel::observationDifference(const arma::vec& a,
                                            const arma::vec& b){
-    arma::vec3 result = a - b;
+    arma::vec result = a - b;
     // result(1) = utility::math::angle::normalizeAngle(result(1));
     // result(2) = utility::math::angle::normalizeAngle(result(2));
     return result;

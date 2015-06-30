@@ -7,6 +7,8 @@ output:
     pub_port: 12000
     sub_port: 12001
     high_water_mark: 50
+    max_image_fps: 10
+    max_classified_image_fps: 10
 
 # Select which data to send
 reaction_handles:

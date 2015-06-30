@@ -79,6 +79,7 @@ namespace modules {
                     target.id = static_cast<messages::input::ServoID>(id);
                     target.position = sensors.servo[id].presentPosition;
                     target.gain = defaultGain;
+                    target.torque = 100;
 
                     script.frames[frame].targets.push_back(target);
 
@@ -88,6 +89,7 @@ namespace modules {
                     waypoint->id = target.id;
                     waypoint->gain = target.gain;
                     waypoint->position = target.position;
+                    waypoint->torque = target.torque;
                     emit(std::move(waypoint));
                 });
 
@@ -377,7 +379,8 @@ namespace modules {
                     waypoint->time = NUClear::clock::now();
                     waypoint->id = static_cast<messages::input::ServoID>(selection < 2 ? 18 + selection : selection - 2);
                     waypoint->gain = 0;
-                    waypoint->position = 0;
+                    waypoint->position = std::numeric_limits<float>::quiet_NaN();
+                    waypoint->torque = 0;
                     emit(std::move(waypoint));
                 }
             }

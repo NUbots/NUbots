@@ -117,6 +117,8 @@ namespace support {
         cfg_.vision_error(2) = config["vision"]["variance"]["theta"].as<Expression>();
         cfg_.vision_error(3) = config["vision"]["variance"]["phi"].as<Expression>();
 
+        lastNow = NUClear::clock::now();
+
         kicking = false;
         PLAYER_ID = globalConfig.playerId;
 
@@ -175,7 +177,8 @@ namespace support {
         >("Robot motion", [this](const time_t&,
                                  const Sensors& sensors,
                                  const std::shared_ptr<const WalkCommand>& walkCommand) {
-
+            time_t now = NUClear::clock::now();
+            double deltaT = 1e-6 * std::chrono::duration_cast<std::chrono::microseconds>(now - lastNow).count();
             Transform2D diff;
 
             switch (cfg_.robot.motion_type){
@@ -191,7 +194,7 @@ namespace support {
                     //Face along direction of movement
                     world.robotPose.angle() = vectorToBearing(diff.xy());
 
-                    world.robotVelocity = Transform2D({arma::norm(diff) * SIMULATION_UPDATE_FREQUENCY, 0, 0}); //Robot coordinates
+                    world.robotVelocity = Transform2D({arma::norm(diff) / deltaT, 0, 0}); //Robot coordinates
                     break;
 
                 case MotionType::MOTION:
@@ -204,7 +207,7 @@ namespace support {
                         world.robotVelocity = utility::math::matrix::Transform2D({0,0,0});
                     }
                     world.robotVelocity.xy() = world.robotPose.rotation() * world.robotVelocity.xy();
-                    world.robotPose += world.robotVelocity / SIMULATION_UPDATE_FREQUENCY;
+                    world.robotPose += world.robotVelocity * deltaT;
                     break;
             }
             // Update ball position
@@ -217,9 +220,10 @@ namespace support {
 
                     world.ball.position.rows(0,1) = getPath(cfg_.ball.path);
 
-                    diff = world.ball.position - oldBallPose;
-
-                    world.ball.velocity = Transform2D({arma::norm(diff) * SIMULATION_UPDATE_FREQUENCY, 0, 0}); //Robot coordinates
+                    world.ball.velocity = (world.ball.position - oldBallPose) / deltaT; //world coordinates
+                    emit(graph("sim ball vel",world.ball.velocity));
+                    emit(graph("oldBallPose",oldBallPose));
+                    emit(graph("world.ball.position",world.ball.position));
                     break;
 
                 case MotionType::MOTION:
@@ -245,6 +249,7 @@ namespace support {
 
             oldRobotPose = world.robotPose;
             oldBallPose = world.ball.position;
+            lastNow = now;
         });
 
         // Simulate Vision
@@ -412,7 +417,6 @@ namespace support {
         if(totalGoals != 2 || leftGoals != 1 || rightGoals != 1){
             for (auto& g : goals){
                 g.side = Goal::Side::UNKNOWN;
-                log("goals unkown = ", goals.size());
             }
         }
     }
