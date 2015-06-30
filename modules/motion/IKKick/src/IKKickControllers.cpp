@@ -35,6 +35,7 @@ namespace motion{
 	    stand_height = config["balancer"]["stand_height"].as<float>();
 
         tolerance = config["balancer"]["tolerance"].as<float>();
+        foot_separation = config["balancer"]["foot_separation"].as<float>();
 	}
 
 	void FootLifter::configure(const Configuration<IKKickConfig>& config){
@@ -46,10 +47,11 @@ namespace motion{
 
 	void Kicker::configure(const Configuration<IKKickConfig>& config){
 		// motion_gain = config["kicker"]["motion_gain"].as<float>();
-        velocity = config["kicker"]["velocity"].as<float>();
+        kick_velocity = config["kicker"]["kick_velocity"].as<float>();
+        return_velocity = config["kicker"]["return_velocity"].as<float>();
 	}
 
-    void KickBalancer::computeMotion(const Sensors& sensors){
+    void KickBalancer::computeMotion(const Sensors&){
 
     }
 
@@ -57,7 +59,6 @@ namespace motion{
         startPose = arma::eye(4,4);
         finishPose = startPose.translate(arma::vec3({-lift_foot_back,0,lift_foot_height}));
         distance = arma::norm(startPose.translation() - finishPose.translation());
-        motionStartTime = sensors.timestamp;
     }
 
     void Kicker::computeMotion(const Sensors& sensors){
@@ -69,9 +70,8 @@ namespace motion{
         Transform3D supportToKickFoot = currentKickFoot.i() * currentTorso.i();
         arma::vec3 ballFromKickFoot = supportToKickFoot.transformPoint(ballPosition);
         finishPose = startPose.translate(ballFromKickFoot);
-        
+
         distance = arma::norm(startPose.translation() - finishPose.translation());
-        motionStartTime = sensors.timestamp;
     }
 
 
@@ -81,34 +81,62 @@ namespace motion{
         // The position that the COM needs to move to in support foot coordinates
         int negativeIfRight = supportFoot == LimbID::LEFT_LEG ? 1 : -1;
         Transform3D torsoTarget = arma::eye(4,4);
-        torsoTarget.submat(0,3,3,3) = arma::vec({0, negativeIfRight * DarwinModel::Leg::FOOT_CENTRE_TO_ANKLE_CENTRE, stand_height,1}); 
-
+        if(stage == MotionStage::RUNNING){
+            torsoTarget.submat(0,3,3,3) = arma::vec({0, negativeIfRight * DarwinModel::Leg::FOOT_CENTRE_TO_ANKLE_CENTRE, stand_height,1}); 
+        } else if(stage == MotionStage::STOPPING){
+            torsoTarget.submat(0,3,3,3) = arma::vec({0, - negativeIfRight * foot_separation / 2, stand_height,1});
+        }
         Transform3D torsoPose = getTorsoPose(sensors);
 
         //WARNING: DO NOT SWAP STABLE CHECK AND newTorsoPose OR YOU WILL BREAK ROBOTS
         stable = (arma::norm(torsoPose.submat(0,3,2,3) - torsoTarget.submat(0,3,2,3)) < tolerance);
-        // std::cout << "stable = " << stable << std::endl;
+        if(stable && stage == MotionStage::STOPPING) stage = MotionStage::FINISHED;
         
         Transform3D newTorsoPose = utility::math::matrix::Transform3D::interpolate(torsoPose, torsoTarget, deltaT * motion_gain);
-        // std::cout << "torsoPose = \n" << torsoPose << std::endl;
-        // std::cout << "torsoTarget = \n" << torsoTarget << std::endl;
-        // std::cout << "newTorsoPose = \n" << newTorsoPose << std::endl;
 
         return newTorsoPose.i();
     }
 
-    Transform3D FootLifter::getFootPose(const Sensors& sensors, float deltaT){
-        double elapsedTime = std::chrono::duration_cast<std::chrono::microseconds>(sensors.timestamp - motionStartTime).count() * 1e-6;
-        float alpha = std::fmax(0,std::fmin(velocity * elapsedTime / distance,1));
-        stable = alpha >= 1;
-		return utility::math::matrix::Transform3D::interpolate(startPose,finishPose,alpha);
+    Transform3D FootLifter::getFootPose(const Sensors& sensors, float){
+        if(stage == MotionStage::RUNNING){
+            
+            double elapsedTime = std::chrono::duration_cast<std::chrono::microseconds>(sensors.timestamp - motionStartTime).count() * 1e-6;
+            std::cout << "FootLifter RUNNING, elapsed time = " << elapsedTime << std::endl;
+            float alpha = std::fmax(0,std::fmin(velocity * elapsedTime / distance,1));
+            stable = (alpha >= 1);
+            return utility::math::matrix::Transform3D::interpolate(startPose,finishPose,alpha);
+
+        } else if (stage == MotionStage::STOPPING) {
+            
+            double elapsedTime = std::chrono::duration_cast<std::chrono::microseconds>(sensors.timestamp - stoppingCommandTime).count() * 1e-6;
+            std::cout << "FootLifter STOPPING, elapsed time = " << elapsedTime << std::endl;
+            float alpha = std::fmax(0,std::fmin(velocity * elapsedTime / distance,1));
+            if(alpha >= 1) stage = MotionStage::FINISHED;
+            return utility::math::matrix::Transform3D::interpolate(finishPose,startPose,alpha);
+        }
+        //Default
+        return Transform3D();
 	}
 
-	Transform3D Kicker::getFootPose(const Sensors& sensors, float deltaT){
-        double elapsedTime = std::chrono::duration_cast<std::chrono::microseconds>(sensors.timestamp - motionStartTime).count() * 1e-6;
-        float alpha = std::fmax(0,std::fmin(velocity * elapsedTime / distance,1));
-        stable = alpha >= 1;
-        return utility::math::matrix::Transform3D::interpolate(startPose,finishPose,alpha);
+	Transform3D Kicker::getFootPose(const Sensors& sensors, float){
+        if(stage == MotionStage::RUNNING){
+            
+            double elapsedTime = std::chrono::duration_cast<std::chrono::microseconds>(sensors.timestamp - motionStartTime).count() * 1e-6;
+            std::cout << "Kicker RUNNING, elapsed time = " << elapsedTime << std::endl;
+            float alpha = std::fmax(0,std::fmin(kick_velocity * elapsedTime / distance,1));
+            if(alpha >= 1) stop();
+            return utility::math::matrix::Transform3D::interpolate(startPose,finishPose,alpha);
+
+        } else if (stage == MotionStage::STOPPING) {
+            
+            double elapsedTime = std::chrono::duration_cast<std::chrono::microseconds>(sensors.timestamp - stoppingCommandTime).count() * 1e-6;
+            std::cout << "Kicker STOPPING, elapsed time = " << elapsedTime << std::endl;
+            float alpha = std::fmax(0,std::fmin(return_velocity * elapsedTime / distance,1));
+            if(alpha >= 1) stage = MotionStage::FINISHED;
+            return utility::math::matrix::Transform3D::interpolate(finishPose,startPose,alpha);
+        }
+        //Default
+        return Transform3D();
 	}
 }
 }

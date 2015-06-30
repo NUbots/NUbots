@@ -55,18 +55,27 @@ namespace motion{
 				arma::vec3 ballPosition;
 				arma::vec3 goalPosition;
 				NUClear::clock::time_point motionStartTime;
+				NUClear::clock::time_point stoppingCommandTime;
 
 			public:
 				virtual void computeMotion(const messages::input::Sensors& sensors) = 0;
 				void start(const messages::input::Sensors& sensors){
 					if(stage == MotionStage::READY){
 						stage = MotionStage::RUNNING;
+						stable = false;
 						computeMotion(sensors);
+        				motionStartTime = sensors.timestamp;
 					}
 				}
 
-				void stop()			{stage = MotionStage::STOPPING;}
-				bool isRunning()	{return stage == MotionStage::RUNNING;}
+				void stop(){
+					if(stage == MotionStage::RUNNING){
+						stage = MotionStage::STOPPING;
+						stable = false;
+						stoppingCommandTime = NUClear::clock::now();
+					}
+				}
+				bool isRunning()	{return stage == MotionStage::RUNNING || stage == MotionStage::STOPPING;}
 				bool isStable()		{return stable;}
 				bool isFinished()   {return stage == MotionStage::FINISHED;}
 				void reset()		{stage = MotionStage::READY;}
@@ -76,6 +85,7 @@ namespace motion{
 					supportFoot = supportFoot_;
 					ballPosition = ballPosition_;
 					goalPosition = goalPosition_;
+					reset();
 				}
 
 				utility::math::matrix::Transform3D getTorsoPose(const messages::input::Sensors& sensors){
@@ -96,6 +106,7 @@ namespace motion{
 		private:
 			float stand_height = 0.18;
 			float tolerance = 0.01;
+			float foot_separation = 0.074;
 		public:
 			virtual utility::math::matrix::Transform3D getFootPose(const messages::input::Sensors& sensors, float deltaT);
 			virtual void configure(const messages::support::Configuration<IKKickConfig>& config);
@@ -121,7 +132,8 @@ namespace motion{
 
 		class Kicker : public SixDOFMotionController{
 		private:
-			float velocity = 0.1;
+			float kick_velocity = 1;
+			float return_velocity = 0.1;
 			utility::math::matrix::Transform3D startPose;
 			utility::math::matrix::Transform3D finishPose;
 			float distance;

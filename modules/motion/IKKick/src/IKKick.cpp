@@ -72,7 +72,7 @@ namespace motion {
             KICK_PRIORITY = config["kick_priority"].as<float>();
             EXECUTION_PRIORITY = config["execution_priority"].as<float>();
 
-            foot_separation = config["foot_separation"].as<float>();
+            foot_separation = config["balancer"]["foot_separation"].as<float>();
 
             emit(std::make_unique<KickCommand>(
                 config["target"].as<arma::vec3>(),
@@ -128,8 +128,6 @@ namespace motion {
             arma::vec4 ballPosition4 = /*torsoPose */ arma::join_cols(command.target + hackDebuggingOffset, arma::vec({1}));
             arma::vec4 goalPosition4 = /*torsoPose */ arma::join_cols(command.direction, arma::vec({0}));
 
-            log("hackDebuggingOffset\n", hackDebuggingOffset);
-            log("foot_separation\n", foot_separation);
             ballPosition = ballPosition4.rows(0,2);
             goalPosition = goalPosition4.rows(0,2);
 
@@ -176,9 +174,8 @@ namespace motion {
             }
 
             if(balancer.isFinished()){
-                updater.disable();
-                updatePriority(0);
-                //TODO reset everything                
+                // std::cout << "balancer.isFinished" << std::endl;
+                emit(std::move(std::make_unique<FinishKick>()));
             }
             
             //Do things based on current state
@@ -210,9 +207,9 @@ namespace motion {
             
             std::vector<std::pair<messages::input::ServoID, float>> joints;
 
-            // std::cout << "kickFootGoal" << kickFootGoal << std::endl;
+            // std::cout << "kickFootGoal\n" << kickFootGoal << std::endl;
             auto kickJoints = calculateLegJoints<DarwinModel>(kickFootGoal, kickFoot);
-            // std::cout << "supportFootGoal" << supportFootGoal << std::endl;
+            // std::cout << "supportFootGoal\n" << supportFootGoal << std::endl;
             auto supportJoints = calculateLegJoints<DarwinModel>(supportFootGoal, supportFoot);
             joints.insert(joints.end(),kickJoints.begin(),kickJoints.end());
             joints.insert(joints.end(),supportJoints.begin(),supportJoints.end());
@@ -253,13 +250,6 @@ namespace motion {
             }
         }));
 
-            // Listen for kickcommands
-
-            // When we get one ask for prioirty to kick
-
-            // When we get the priority to kick
-
-            // Run a loop that updates our foot position and body position
     }
 
     void IKKick::updatePriority(const float& priority) {
