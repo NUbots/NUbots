@@ -96,35 +96,7 @@ namespace motion {
 
         on<Trigger<ExecuteKick>, With<KickCommand>, With<Sensors>>([this] (const ExecuteKick&, const KickCommand& command, const Sensors& sensors) {
 
-            // TODO Work out which of our feet are going to be the support foot
-            // TODO store the support foot
-            // Assume leftFoot is support
-            //leftFootIsSupport = true;
-
-            // 4x4 homogeneous transform matrices for left foot and right foot relative to torso
-            Transform3D leftFoot = sensors.forwardKinematics.find(ServoID::L_ANKLE_ROLL)->second;
-            Transform3D rightFoot = sensors.forwardKinematics.find(ServoID::R_ANKLE_ROLL)->second;
-
-            //Transform3D supportFoot
-
-            //if(leftFootIsSupport == true) {
-
-            //}
-
-
-            // Convert the direction vector and position of the ball into left foot coordinates by multiplying the inverse of the
-            // homogeneous transforms with the coordinates in torso space. 1 for a point and 0 for a vector.
-
-            //TODO: talk to jake about why this is wrong
-            arma::vec4 ballPosition4 = leftFoot.i() * arma::join_cols(command.target, arma::vec({1}));
-            arma::vec4 goalPosition4 = leftFoot.i() * arma::join_cols(command.direction, arma::vec({0}));
-            
-            ballPosition = ballPosition4.rows(0,2);
-            goalPosition = goalPosition4.rows(0,2);
-
-
             log("Got a new kick!");
-            // Should this be kickcommand.target
             log("Target:", "x:", command.target[0], "y:", command.target[1], "z:", command.target[2]);
             log("Direction:", "x:", command.direction[0], "y:", command.direction[1], "z:", command.direction[2]);
             log("Ball Position in support foot coordinates:", "x:", ballPosition[0], "y:", ballPosition[1], "z:", ballPosition[2]);
@@ -132,14 +104,29 @@ namespace motion {
 
             // Enable our kick pather
             updater.enable();
-
             updatePriority(EXECUTION_PRIORITY);
 
+            // Work out which of our feet are going to be the support foot
+            // Store the support foot and kick foot
             if(ballPosition[1] > 0){
                 supportFoot = LimbID::RIGHT_LEG;
             }else{
                 supportFoot = LimbID::LEFT_LEG;
             }
+
+            // 4x4 homogeneous transform matrices for left foot and right foot relative to torso
+            Transform3D leftFoot = sensors.forwardKinematics.find(ServoID::L_ANKLE_ROLL)->second;
+            Transform3D rightFoot = sensors.forwardKinematics.find(ServoID::R_ANKLE_ROLL)->second;
+
+            Transform3D torsoPose = (supportFoot == messages::input::LimbID::LEFT_LEG) ? leftFoot.i() : rightFoot.i();
+
+            // Convert the direction vector and position of the ball into support foot coordinates by multiplying the inverse of the
+            // homogeneous transforms with the coordinates in torso space. 1 for a point and 0 for a vector.
+            arma::vec4 ballPosition4 = torsoPose * arma::join_cols(command.target, arma::vec({1}));
+            arma::vec4 goalPosition4 = torsoPose * arma::join_cols(command.direction, arma::vec({0}));
+
+            ballPosition = ballPosition4.rows(0,2);
+            goalPosition = goalPosition4.rows(0,2);
 
             balancer.setKickParameters(supportFoot, ballPosition, goalPosition);
             lifter.setKickParameters(supportFoot, ballPosition, goalPosition);
@@ -159,7 +146,6 @@ namespace motion {
             } else {
                 kickFoot = LimbID::RIGHT_LEG;
             }
-
 
             int negativeIfKickRight = kickFoot == LimbID::RIGHT_LEG ? -1 : 1;
 
@@ -237,7 +223,6 @@ namespace motion {
 
             emit(std::move(waypoints));
 
-
         });
 
         updater.disable();
@@ -270,17 +255,11 @@ namespace motion {
             // When we get the priority to kick
 
             // Run a loop that updates our foot position and body position
-
-
     }
 
     void IKKick::updatePriority(const float& priority) {
         emit(std::make_unique<ActionPriorites>(ActionPriorites { id, { priority }}));
     }
-
-
-
-
 
 } // motion
 } // modules
