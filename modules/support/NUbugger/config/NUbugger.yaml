@@ -35,3 +35,4 @@ reaction_handles:
   balls: false # Detected balls in vision space
   # Field drawn objects such as an arrow, sphere, etc
   draw_objects: false
+  vision_lines: false

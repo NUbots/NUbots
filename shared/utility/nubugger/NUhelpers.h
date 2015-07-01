@@ -24,6 +24,7 @@
 #include <armadillo>
 #include "messages/support/nubugger/proto/DataPoint.pb.h"
 #include "messages/support/nubugger/proto/DrawObjects.pb.h"
+#include "messages/vision/proto/VisionObject.pb.h"
 #include "utility/math/matrix/Rotation3D.h"
 #include "utility/math/geometry/RotatedRectangle.h"
 
@@ -313,7 +314,7 @@ namespace nubugger {
         objColor->set_x(color[0]);
         objColor->set_y(color[1]);
         objColor->set_z(color[2]);
-        
+
         for (uint i = 0; i < positions.size(); i++) {
             auto* objNode = object->add_path();
 
@@ -336,6 +337,33 @@ namespace nubugger {
         }
         return drawTree(name, positions, parentIndices, line_width, color, timeout);
 
+    }
+
+    inline std::unique_ptr<messages::vision::proto::VisionObject> drawVisionLines(std::vector<std::tuple<arma::ivec2, arma::ivec2, arma::vec4>> lines) {
+
+        auto visionObject = std::make_unique<messages::vision::proto::VisionObject>();
+
+        visionObject->set_type(messages::vision::proto::VisionObject::LINE);
+        visionObject->set_camera_id(0); // TODO
+
+        for (const auto& line : lines) {
+            auto* objLine = visionObject->add_line();
+
+            auto* start = objLine->mutable_start();
+            start->set_x(std::get<0>(line)[0]);
+            start->set_y(std::get<0>(line)[1]);
+
+            auto* end = objLine->mutable_end();
+            end->set_x(std::get<1>(line)[0]);
+            end->set_y(std::get<1>(line)[1]);
+        }
+
+        return std::move(visionObject);
+
+    }
+
+    inline std::unique_ptr<messages::vision::proto::VisionObject> drawVisionLine(arma::ivec2 start, arma::ivec2 end, arma::vec4 color = arma::vec4({1, 0, 0, 1})) {
+        return drawVisionLines({std::make_tuple(start, end, color)});
     }
 
 }
