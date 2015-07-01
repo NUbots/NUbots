@@ -341,14 +341,13 @@ namespace kinematics {
 
     inline utility::math::geometry::Line calculateHorizon(const math::matrix::Rotation3D groundToCamRotation, double cameraDistancePixels) {
 
-        double phiX = std::acos(groundToCamRotation(0, 2)) - M_PI_2;
-        double phiY = std::acos(groundToCamRotation(1, 2)) - M_PI_2;
+        std::cout << groundToCamRotation << std::endl;
 
-        // Since I don't know how to math this properly, make two random points and make a line from those
-        double m = std::tan(phiY);
-        double b = cameraDistancePixels * -std::tan(phiX);
+        // Normal of the line is the y and z of the z axis, however in the image the y axis is negated
+        arma::vec2 normal = arma::normalise(groundToCamRotation.submat(1,2,2,2));
+        double distance = cameraDistancePixels * -std::tan(std::acos(groundToCamRotation(0,2)) - M_PI_2);
 
-        return utility::math::geometry::Line(arma::vec2({ 0, b }), arma::vec2({ 1, m + b }));
+        return utility::math::geometry::Line(normal, distance);
     }
 
     inline utility::math::matrix::Transform3D calculateBodyToGround(arma::vec3 groundNormal_body, double bodyHeight){
