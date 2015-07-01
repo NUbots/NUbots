@@ -65,6 +65,29 @@ node nubotsvm {
   installer { 'rtaudio':        url => 'http://www.music.mcgill.ca/~gary/rtaudio/release/rtaudio-4.1.1.tar.gz', }
   installer { 'muparser':       url => 'https://github.com/TrentHouliston/muparser/archive/master.tar.gz',
                                 args => '--disable-shared --disable-debug --disable-samples', }
+  installer { 'eigen3':         url => 'http://bitbucket.org/eigen/eigen/get/3.2.5.tar.gz', }
+
+  package { 'libeigen3-dev': }
+  package { 'libboost-system-dev': }
+  package { 'libboost-filesystem-dev': }
+  package { 'libboost-thread-dev': }
+  package { 'libboost-serialization-dev': }
+  package { 'libboost-program-options-dev': }
+  package { 'libboost-test-dev': }
+  package { 'libboost-chrono-dev': }
+  package { 'libboost-date-time-dev': }
+
+  installer { 'ompl':           url => 'https://bitbucket.org/ompl/ompl/downloads/ompl-1.0.0-Source.tar.gz',
+                                args => "-DOMPL_BUILD_DEMOS -DOMPL_BUILD_PYBINDINGS -DOMPL_BUILD_PYTESTS",
+                                require => [ Package['libeigen3-dev'],
+                                             Package['libboost-system-dev'],
+                                             Package['libboost-filesystem-dev'],
+                                             Package['libboost-thread-dev'],
+                                             Package['libboost-serialization-dev'],
+                                             Package['libboost-program-options-dev'],
+                                             Package['libboost-test-dev'],
+                                             Package['libboost-chrono-dev'],
+                                             Package['libboost-date-time-dev'] ], }
 
   archive { "espeak":
     url    => "http://sourceforge.net/projects/espeak/files/espeak/espeak-1.48/espeak-1.48.04-source.zip",
