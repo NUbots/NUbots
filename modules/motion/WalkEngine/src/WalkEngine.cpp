@@ -427,9 +427,6 @@ namespace motion {
         }
 
         emit(graph("Right foot pos", rightFootTorso.translation()));
-        emit(graph("foot", foot));
-        emit(graph("phase", phase));
-        emit(graph("phaseComp", phaseComp));
         emit(graph("Left foot pos", leftFootTorso.translation()));
 
         auto joints = calculateLegJointsTeamDarwin<DarwinModel>(leftFootTorso, rightFootTorso);
