@@ -37,6 +37,7 @@ message Overview {
     optional vec2 robot_position = 4;
     optional mat22 robot_position_covariance = 6;
     optional vec2 robot_heading = 5;
+    optional vec2 ball_position = 13;
 
     // Game controller
     optional messages.input.proto.GameState.Data.Mode game_mode = 7;

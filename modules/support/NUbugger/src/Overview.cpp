@@ -38,8 +38,9 @@ namespace support {
     using messages::input::proto::Sensors;
     using messages::localisation::Self;
     using messages::support::nubugger::proto::Message;
-    using messages::vision::Goal;
-    using messages::vision::Ball;
+    using LocalisationBall = messages::localisation::Ball;
+    using VisionGoal = messages::vision::Goal;
+    using VisionBall = messages::vision::Ball;
 
     using utility::time::getUtcTimestamp;
 
@@ -102,19 +103,32 @@ namespace support {
 
         }));
 
+        handles["overview"].push_back(on<Trigger<std::vector<LocalisationBall>>, Options<Single, Priority<NUClear::LOW>>>([this](const std::vector<LocalisationBall>& balls) {
+
+            // Retrieve the first ball in the vector.
+            LocalisationBall ball = balls.front();
+
+            // Set ball position.
+            auto* ballPosition = overview.mutable_ball_position();
+            arma::vec2 position = ball.position;
+            ballPosition->set_x(position[0]);
+            ballPosition->set_y(position[1]);          
+
+        }));
+
         handles["overview"].push_back(on<Trigger<Image>, Options<Single, Priority<NUClear::LOW>>>([this](const Image&/* image*/) {
 
             overview.set_last_camera_image(getUtcTimestamp());
 
         }));
 
-        handles["overview"].push_back(on<Trigger<std::vector<Ball>>, Options<Single, Priority<NUClear::LOW>>>([this] (const std::vector<Ball>&/* balls*/) {
+        handles["overview"].push_back(on<Trigger<std::vector<VisionBall>>, Options<Single, Priority<NUClear::LOW>>>([this] (const std::vector<VisionBall>&/* balls*/) {
 
             overview.set_last_seen_ball(getUtcTimestamp());
 
         }));
 
-        handles["overview"].push_back(on<Trigger<std::vector<Goal>>, Options<Single, Priority<NUClear::LOW>>>([this] (const std::vector<Goal>&/* goals*/) {
+        handles["overview"].push_back(on<Trigger<std::vector<VisionGoal>>, Options<Single, Priority<NUClear::LOW>>>([this] (const std::vector<VisionGoal>&/* goals*/) {
 
             overview.set_last_seen_goal(getUtcTimestamp());
 
