@@ -426,8 +426,8 @@ namespace motion {
                 , sensors);
         }
 
-        emit(graph("Right foot pos", rightFootTorso.translation()));
-        emit(graph("Left foot pos", leftFootTorso.translation()));
+        // emit(graph("Right foot pos", rightFootTorso.translation()));
+        // emit(graph("Left foot pos", leftFootTorso.translation()));
 
         auto joints = calculateLegJointsTeamDarwin<DarwinModel>(leftFootTorso, rightFootTorso);
         auto waypoints = motionLegs(joints);
