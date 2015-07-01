@@ -360,6 +360,7 @@ namespace motion {
             return;
         }
 
+        //Compute FootSource and FootDestination for this step
         if (newStep) {
             calculateNewStep();
         }
@@ -368,21 +369,27 @@ namespace motion {
     }
 
     void WalkEngine::updateStep(double phase, const Sensors& sensors) {
+        //Get unitless phases for x and z motion
         arma::vec3 foot = footPhase(phase, phase1Single, phase2Single);
+        
+        // don't lift foot at initial step, TODO: review
         if (initialStep > 0) {
-            foot[2] = 0; // don't lift foot at initial step, TODO: review
+            foot[2] = 0; 
         }
+
+        //Interpolate Transform2D from start to destination
         if (swingLeg == LimbID::RIGHT_LEG) {
             uRightFoot = uRightFootSource.interpolate(foot[0], uRightFootDestination);
         } else {
             uLeftFoot = uLeftFootSource.interpolate(foot[0], uLeftFootDestination);
         }
-
+        //I hear you like arguments...
         uTorso = zmpCom(phase, zmpCoefficients, zmpParams, stepTime, zmpTime, phase1Single, phase2Single, uSupport, uLeftFootDestination, uLeftFootSource, uRightFootDestination, uRightFootSource);
 
         Transform3D leftFoot = uLeftFoot;
         Transform3D rightFoot = uRightFoot;
 
+        //Lift swing leg
         if (swingLeg == LimbID::RIGHT_LEG) {
             rightFoot = rightFoot.translateZ(stepHeight * foot[2]);
         } else {
@@ -396,8 +403,9 @@ namespace motion {
         Transform3D leftFootTorso = leftFoot.worldToLocal(torso);
         Transform3D rightFootTorso = rightFoot.worldToLocal(torso);
 
-
+        //TODO: what is this magic?
         double phaseComp = std::min({1.0, foot[1] / 0.1, (1 - foot[1]) / 0.1});
+
         // Rotate foot around hip by the given hip roll compensation
         if (swingLeg == LimbID::LEFT_LEG) {
             rightFootTorso = rightFootTorso.rotateZLocal(-hipRollCompensation * phaseComp, sensors.forwardKinematics.find(ServoID::R_HIP_ROLL)->second);
@@ -406,17 +414,20 @@ namespace motion {
             leftFootTorso = leftFootTorso.rotateZLocal(hipRollCompensation * phaseComp, sensors.forwardKinematics.find(ServoID::L_HIP_ROLL)->second);
         }
 
+        //TODO:is this a Debug?
         if (emitLocalisation) {
             localise(uTorsoActual);
         }
 
         if (balanceEnabled) {
-
             // Apply balance to our support foot
             balance(swingLeg == LimbID::LEFT_LEG ? rightFootTorso : leftFootTorso
                 , swingLeg == LimbID::LEFT_LEG ? LimbID::RIGHT_LEG : LimbID::LEFT_LEG
                 , sensors);
         }
+
+        // emit(graph("Right foot pos", rightFootTorso));
+        // emit(graph("Left foot pos", leftFootTorso));
 
         auto joints = calculateLegJointsTeamDarwin<DarwinModel>(leftFootTorso, rightFootTorso);
         auto waypoints = motionLegs(joints);
@@ -571,7 +582,8 @@ namespace motion {
 
     arma::vec2 WalkEngine::zmpSolve(double zs, double z1, double z2, double x1, double x2, double phase1Single, double phase2Single, double stepTime, double zmpTime) {
         /*
-        Solves ZMP equation:
+        Solves ZMP equations. 
+        The resulting form of x is
         x(t) = z(t) + aP*exp(t/zmpTime) + aN*exp(-t/zmpTime) - zmpTime*mi*sinh((t-Ti)/zmpTime)
         where the ZMP point is piecewise linear:
         z(0) = z1, z(T1 < t < T2) = zs, z(stepTime) = z2
