@@ -1,6 +1,6 @@
 stance:
   # The body height of the robot, in meters; changing this will alter how high the robot's natural stance is.
-  body_height: 0.265
+  body_height: 0.255
   # The angle of the torso when walking
   body_tilt: 35 * pi / 180
   # Default arm positions while walking

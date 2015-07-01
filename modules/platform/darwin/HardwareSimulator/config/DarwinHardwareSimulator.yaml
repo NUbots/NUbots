@@ -11,3 +11,5 @@ noise:
     x: 0.01
     y: 0.01
     z: 0.01
+
+bodyTilt:  35 * pi / 180 # set this to be the same as the WalkEngine.yaml:stance:bodyTilt TODO: read this from WalkEngine

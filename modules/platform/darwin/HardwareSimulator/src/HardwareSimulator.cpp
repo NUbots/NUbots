@@ -40,6 +40,7 @@ namespace darwin {
     using messages::input::Sensors;
     using utility::nubugger::graph;
     using messages::support::Configuration;
+    using utility::support::Expression;
 
     HardwareSimulator::HardwareSimulator(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
 
@@ -70,11 +71,6 @@ namespace darwin {
 
         // Voltage (in volts)
         sensors.voltage = 0;
-
-        // Accelerometer (in m/s^2)
-        sensors.accelerometer.x = 0;
-        sensors.accelerometer.y = 0;
-        sensors.accelerometer.z = 9.8;
 
         // Gyroscope (in radians/second)
         sensors.gyroscope.x = 0;
@@ -160,6 +156,8 @@ namespace darwin {
             noise.gyroscope.y = config["noise"]["gyroscope"]["y"].as<float>();
             noise.gyroscope.z = config["noise"]["gyroscope"]["z"].as<float>();
 
+            bodyTilt = config["bodyTilt"].as<Expression>();
+
         });
 
         on<Trigger<DarwinSensors::Gyroscope>>("Receive Simulated Gyroscope", [this](const DarwinSensors::Gyroscope& gyro){
@@ -222,6 +220,10 @@ namespace darwin {
             sensors.gyroscope.x = sumGyro[0];
             sensors.gyroscope.y = sumGyro[1];
             sensors.gyroscope.z = sumGyro[2];
+
+            sensors.accelerometer.x = 0;
+            sensors.accelerometer.y = - 9.8 * std::sin(bodyTilt);
+            sensors.accelerometer.z = 9.8 * std::cos(bodyTilt);
 
             sensors.timestamp = NUClear::clock::now();
             

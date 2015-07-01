@@ -51,6 +51,7 @@ namespace darwin {
             Vec3Noise accelerometer;
             Vec3Noise gyroscope;
         } noise;
+        double bodyTilt;
         arma::vec3 integrated_gyroscope;
         void setRightFootDown();
         void setLeftFootDown();
