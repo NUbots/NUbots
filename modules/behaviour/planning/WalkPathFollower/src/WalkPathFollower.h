@@ -17,31 +17,27 @@
  * Copyright 2015 NUbots <nubots@nubots.net>
  */
 
-#ifndef MODULES_BEHAVIOUR_PLANNING_OMPLPATHPLANNER_H
-#define MODULES_BEHAVIOUR_PLANNING_OMPLPATHPLANNER_H
+#ifndef MODULES_BEHAVIOUR_PLANNING_WALKPATHFOLLOWER_H
+#define MODULES_BEHAVIOUR_PLANNING_WALKPATHFOLLOWER_H
 
 #include <nuclear>
-#include "PathPlanner.h"
 
 namespace modules {
 namespace behaviour {
 namespace planning {
 
-    class OMPLPathPlanner : public NUClear::Reactor {
+    class WalkPathFollower : public NUClear::Reactor {
 
     public:
-        /// @brief Called by the powerplant to build and setup the OMPLPathPlanner reactor.
-        explicit OMPLPathPlanner(std::unique_ptr<NUClear::Environment> environment);
+        /// @brief Called by the powerplant to build and setup the WalkPathFollower reactor.
+        explicit WalkPathFollower(std::unique_ptr<NUClear::Environment> environment);
 
-        /// @brief the path to the configuration file for OMPLPathPlanner
-        static constexpr const char* CONFIGURATION_PATH = "OMPLPathPlanner.yaml";
-
-    private:
-    	PathPlanner pathPlanner;
+        /// @brief the path to the configuration file for WalkPathFollower
+        static constexpr const char* CONFIGURATION_PATH = "WalkPathFollower.yaml";
     };
 
 }
 }
 }
 
-#endif
+#endif  // MODULES_BEHAVIOUR_PLANNING_WALKPATHFOLLOWER_H

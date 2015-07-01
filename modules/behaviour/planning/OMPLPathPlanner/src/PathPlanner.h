@@ -27,11 +27,12 @@
 #include <ompl/base/spaces/SE2StateSpace.h>
 #include <ompl/geometric/planners/rrt/RRTstar.h>
 
+#include "utility/localisation/transform.h"
+#include "utility/math/matrix/Transform2D.h"
 #include "messages/support/Configuration.h"
 #include "messages/input/Sensors.h"
 #include "messages/localisation/FieldObject.h"
-#include "utility/localisation/transform.h"
-#include "utility/math/matrix/Transform2D.h"
+#include "messages/behaviour/WalkPath.h"
 
 
 namespace modules {
@@ -41,6 +42,7 @@ namespace planning {
 	using messages::localisation::Ball;
     using messages::localisation::Self;
     using utility::math::matrix::Transform2D;
+    using messages::behaviour::WalkPath;
 
     class PathPlanner {
         public:
@@ -48,7 +50,11 @@ namespace planning {
         PathPlanner() {
         }
 
-        ompl::base::PathPtr obstacleFreePathBetween(Transform2D start, Transform2D goal, arma::vec2 ballPos, double timeLimit);
+        std::unique_ptr<WalkPath> obstacleFreePathBetween(Transform2D start, Transform2D goal, arma::vec2 ballPos, double timeLimit);
+
+        std::unique_ptr<WalkPath> omplPathToWalkPath(ompl::base::PathPtr omplPath);
+
+        ompl::base::PathPtr omplPlanPath(Transform2D start, Transform2D goal, arma::vec2 ballPos, double timeLimit);
 
         // The state space used for the last planning run:
         ompl::base::StateSpacePtr stateSpace;

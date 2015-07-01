@@ -32,7 +32,8 @@ ADD_ROLE(
     behaviour::skills::HeadBehaviourSoccer
     behaviour::planning::KickPlanner
     #behaviour::planning::SimpleWalkPathPlanner
-    behaviour::planning::OMPLPathPlanner
+    behaviour::planning::OMPLPathPlanner  # Creates WalkPaths.
+    behaviour::planning::WalkPathFollower # Follows WalkPaths.
     #behaviour::strategy::KickAtGoal
     behaviour::strategy::SoccerStrategy
 

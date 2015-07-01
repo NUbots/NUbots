@@ -36,6 +36,7 @@
 #include "utility/math/geometry/Intersection.h"
 #include "utility/math/geometry/Circle.h"
 #include "utility/math/geometry/RotatedRectangle.h"
+#include "messages/behaviour/WalkPath.h"
 
 namespace modules {
 namespace behaviour {
@@ -43,6 +44,7 @@ namespace planning {
 
     using messages::localisation::Ball;
     using messages::localisation::Self;
+    using messages::behaviour::WalkPath;
     using utility::math::matrix::Transform2D;
     using utility::math::angle::vectorToBearing;
     using utility::math::geometry::Circle;
@@ -143,7 +145,34 @@ namespace planning {
         // return ob::OptimizationObjectivePtr(new ob::PathLengthOptimizationObjective(si));
     }
 
-    ompl::base::PathPtr PathPlanner::obstacleFreePathBetween(Transform2D start, Transform2D goal, arma::vec2 ballPos, double timeLimit) {
+
+    std::unique_ptr<WalkPath> PathPlanner::obstacleFreePathBetween(Transform2D start, Transform2D goal, arma::vec2 ballPos, double timeLimit) {
+        auto omplPath = omplPlanPath(start, goal, ballPos, timeLimit);
+        auto walkPath = omplPathToWalkPath(omplPath);
+        return std::move(walkPath);
+    }
+
+    std::unique_ptr<WalkPath> PathPlanner::omplPathToWalkPath(ompl::base::PathPtr omplPath) {
+        auto walkPath = std::make_unique<WalkPath>();
+
+        // Emit the new path to NUSight.
+        if (omplPath != nullptr) {
+
+            // Get the path states:
+            auto pathGeom = boost::static_pointer_cast<ompl::geometric::PathGeometric>(omplPath);
+            std::vector<ob::State*>& states = pathGeom->getStates();
+
+            // Add each state as a Transform2D:
+            for (auto* state : states) {
+                auto stateTrans = omplState2Transform2d(state);
+                walkPath->states.push_back(stateTrans);
+            }
+        }
+
+        return std::move(walkPath);
+    }
+
+    ompl::base::PathPtr PathPlanner::omplPlanPath(Transform2D start, Transform2D goal, arma::vec2 ballPos, double timeLimit) {
         // Construct the robot state space in which we're planning.
         stateSpace = ob::StateSpacePtr(new ob::SE2StateSpace());
 
@@ -153,9 +182,7 @@ namespace planning {
         bounds.setHigh(0, std::max(start.x()+1.0, goal.x()+1.0));
         bounds.setLow (1, std::min(start.y()-1.0, goal.y()-1.0)); // y
         bounds.setHigh(1, std::max(start.y()+1.0, goal.y()+1.0));
-
         // TODO: Clip bounds to the field, if both the goal and start points are on the field.
-
         stateSpace->as<ob::SE2StateSpace>()->setBounds(bounds);
 
         // Construct a space information instance for this state space:
@@ -180,27 +207,6 @@ namespace planning {
         ob::ProblemDefinitionPtr pdef(new ob::ProblemDefinition(si));
         pdef->setStartAndGoalStates(startState, goalState);
         pdef->setOptimizationObjective(getOptimisationObjective(si));
-
-        // int planStep = 0;
-        // pdef->setIntermediateSolutionCallback([si, &planStep](
-        //      const ob::Planner* planner,
-        //      const std::vector<const ob::State*>& states,
-        //      const ob::Cost cost) {
-        //     std::cout << "Planning step: " << planStep << std::endl;
-
-        //     ob::PlannerData pd(si);
-        //     planner->getPlannerData(pd);
-
-        //     std::stringstream fname;
-        //     fname << "output/planning-step_" << planStep << ".gml";
-
-        //     std::ofstream myfile;
-        //     myfile.open(fname.str());
-        //     pd.printGraphML(myfile);
-        //     myfile.close();
-
-        //     planStep++;
-        // });
 
         // Construct our optimal planner using the RRT* algorithm.
         // TODO: Look into using CForest for faster planning.
@@ -238,37 +244,6 @@ namespace planning {
                     debugParentIndices.push_back(i);
                 }
             }
-
-            // for (int i = 0; i < pd.numVertices(); i++) {
-            //     for (int j = 0; j < i; j++) {
-            //         if (pd.edgeExists(i, j)) {
-
-            //         }
-            //     }
-            // }
-
-            // auto& graph = pd.toBoostGraph();
-            // std::cout << "iterate over vertices, then over its neighbors\n";
-            // auto vs = boost::vertices(graph);
-            // for (auto vit = vs.first; vit != vs.second; ++vit) {
-            //    // auto neighbors = boost::adjacent_vertices(*vit, graph);
-            //    // for (auto nit = neighbors.first; nit != neighbors.second; ++nit)
-            //    //     std::cout << *vit << ' ' << *nit << std::endl;
-            // }
-            // std::cout << "iterate directly over edges\n";
-            // auto es = boost::edges(graph);
-            // for (auto eit = es.first; eit != es.second; ++eit) {
-            //    std::cout << boost::source(*eit, graph) << ' '
-            //              << boost::target(*eit, graph) << std::endl;
-            // }
-
-
-            // std::stringstream fname;
-            // fname << "output/planning-step_" << planStep << ".gml";
-            // std::ofstream myfile;
-            // myfile.open(fname.str());
-            // pd.printGraphML();
-            // myfile.close();
         }
         else {
             std::cout << "OMPLPathPlanner: No solution found." << std::endl;

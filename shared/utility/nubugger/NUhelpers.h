@@ -274,6 +274,16 @@ namespace nubugger {
         return std::move(drawObjects);
     }
 
+    inline std::unique_ptr<messages::support::nubugger::proto::DrawObjects> drawRectangle(std::string name, RotatedRectangle rect, arma::vec3 color, float timeout = TIMEOUT) {
+        auto drawObjects = drawRectangle(name, rect, timeout);
+        auto* object = drawObjects->mutable_objects(0);
+        auto* objColor = object->mutable_color();
+        objColor->set_x(color[0]);
+        objColor->set_y(color[1]);
+        objColor->set_z(color[2]);
+        return std::move(drawObjects);
+    }
+
     inline std::unique_ptr<messages::support::nubugger::proto::DrawObjects> drawSphere(std::string name, arma::vec3 position, float radius, float timeout = TIMEOUT) {
 
         auto drawObjects = std::make_unique<messages::support::nubugger::proto::DrawObjects>();
