@@ -26,6 +26,9 @@ namespace geometry {
     Line::Line() {
     }
 
+    Line::Line(const arma::vec2& n, const double& d) : normal(n), distance(d) {
+    }
+
     Line::Line(const arma::vec2& a, const arma::vec2& b) {
         setFromPoints(std::forward<const arma::vec2&>(a), std::forward<const arma::vec2&>(b));
     }
@@ -55,6 +58,15 @@ namespace geometry {
 
     arma::vec2 Line::pointFromTangentialDistance(const double& x) const {
         return normal * distance + arma::vec2({ -normal[1], normal[0] }) * x;
+    }
+
+    arma::vec2 Line::intersect(const Line& other) {
+dot(o1-o2, rotate90(n1)) * rotate90(n1) + o1
+
+
+
+        ((normal * distance) - (other.normal * other.distance)) * arma::vec2({ -normal[1], normal[0] })
+        * (arma::vec2({ -normal[1], normal[0] }) + (normal * distance));
     }
 
     bool Line::isHorizontal() const {
