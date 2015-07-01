@@ -196,6 +196,20 @@ namespace support {
             send(message);
         }));
 
+        // TODO: needs refactoring so that this is really only a vision line handle
+        handles["vision_lines"].push_back(on<Trigger<VisionObject>, Options<Single, Priority<NUClear::LOW>>>([this] (const VisionObject& visionObject) {
+
+            Message message;
+            message.set_type(Message::VISION_OBJECT);
+            message.set_filter_id(1);
+            message.set_utc_timestamp(getUtcTimestamp());
+
+            *message.mutable_vision_object() = visionObject;
+
+            send(message);
+
+        }));
+
         handles["lookuptable"].push_back(on<Trigger<LookUpTableDiff>, Options<Single, Priority<NUClear::LOW>>>([this] (const LookUpTableDiff& tableDiff) {
             Message message;
             message.set_type(Message::LOOKUP_TABLE_DIFF);

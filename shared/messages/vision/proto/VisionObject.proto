@@ -20,6 +20,7 @@
 package messages.vision.proto;
 
 import "messages/Geometry.proto";
+import "messages/Vector.proto";
 
 message VisionObject {
 
@@ -45,10 +46,18 @@ message VisionObject {
         required Polygon shape = 1;
     }
 
+    message Line {
+
+        required ivec2 start = 1;
+        required ivec2 end = 2;
+        optional vec3 colour = 3;
+    }
+
     enum ObjectType {
         GOAL = 0;
         BALL = 1;
         OBSTACLE = 2;
+        LINE = 3;
     }
 
     required uint32 camera_id = 5;
@@ -57,4 +66,5 @@ message VisionObject {
     repeated Goal goal = 2;
     repeated Ball ball = 3;
     repeated Obstacle obstacle = 4;
+    repeated Line line = 6;
 }
