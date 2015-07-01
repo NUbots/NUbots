@@ -33,6 +33,7 @@
 #include "utility/motion/InverseKinematics.h"
 #include "utility/motion/RobotModels.h"
 #include "utility/support/yaml_armadillo.h"
+#include "utility/nubugger/NUhelpers.h"
 
 
 namespace modules {
@@ -54,6 +55,7 @@ namespace motion {
     using utility::motion::kinematics::calculateLegJoints;
     using utility::motion::kinematics::calculateLegJointsTeamDarwin;
     using utility::motion::kinematics::DarwinModel;
+    using utility::nubugger::graph;
 
     struct ExecuteKick{};
     struct FinishKick{};
@@ -189,16 +191,17 @@ namespace motion {
                 supportFootGoal = supportFootPose;
                 kickFootGoal =  supportFootPose.translate(arma::vec3({0, negativeIfKickRight * foot_separation, 0}));
             }
-            if(lifter.isRunning()){
-                // std::cout << "lifter is running" << std::endl;
-                //TODO: CHECK ORDER
-                kickFootGoal *= lifter.getFootPose(sensors, deltaT);
-            }
-            if(kicker.isRunning()){
-                // std::cout << "kicker is running" << std::endl;
-                //TODO: CHECK ORDER
-                kickFootGoal *= kicker.getFootPose(sensors, deltaT);
-            }
+            emit(graph("comDiff", balancer.comDiff));
+            // if(lifter.isRunning()){
+            //     // std::cout << "lifter is running" << std::endl;
+            //     //TODO: CHECK ORDER
+            //     kickFootGoal *= lifter.getFootPose(sensors, deltaT);
+            // }
+            // if(kicker.isRunning()){
+            //     // std::cout << "kicker is running" << std::endl;
+            //     //TODO: CHECK ORDER
+            //     kickFootGoal *= kicker.getFootPose(sensors, deltaT);
+            // }
 
             //Calculate IK and send waypoints
 

@@ -91,19 +91,26 @@ namespace motion{
         } else if(stage == MotionStage::STOPPING){
             comGoal = arma::vec3({0, - negativeIfRight * foot_separation / 2, stand_height});
         }
-        arma::vec3 comDiff = comGoal - centreOfMass_foot;
+        comDiff = comGoal - centreOfMass_foot;
 
         Transform3D torsoTarget = torsoPose;
         torsoTarget.translation() += comDiff;
 
-        //WARNING: DO NOT SWAP STABLE CHECK AND newTorsoPose OR YOU WILL BREAK ROBOTS
         float error = arma::norm(torsoPose.submat(0,3,2,3) - torsoTarget.submat(0,3,2,3));
         std::cout << "error" << error << std::endl;
+        std::cout << "COM rel foot = " << centreOfMass_foot << std::endl;
+        std::cout << "comDiff  = " << comDiff << std::endl;
+        std::cout << "comGoal  = " << comGoal << std::endl;
+        std::cout << "torsoPose  = " << torsoPose << std::endl;
+        std::cout << "torsoTarget  = " << torsoTarget << std::endl;
+
+        //WARNING: DO NOT SWAP stable CHECK AND newTorsoPose OR YOU WILL BREAK ROBOTS
         stable = error < tolerance;
         if(stable && stage == MotionStage::STOPPING) stage = MotionStage::FINISHED;
         
         Transform3D newTorsoPose = utility::math::matrix::Transform3D::interpolate(torsoPose, torsoTarget, deltaT * motion_gain);
 
+        //TODO: guard against invalid IK request
         return newTorsoPose.i();
     }
 
