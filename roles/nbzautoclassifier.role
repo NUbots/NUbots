@@ -12,8 +12,4 @@ ADD_ROLE(
 
     # Vision
     vision::LUTClassifier
-
-    # Research
-    research::AutoClassifierProvider
-    research::LayerAutoClassifier
 )
