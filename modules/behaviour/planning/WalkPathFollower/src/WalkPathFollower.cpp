@@ -64,17 +64,27 @@ namespace planning {
         });
 
         on<Trigger<WalkPath>,
+            With<std::vector<Self>>,
             Options<Sync<WalkPathFollower>, Single>
            >("Update current path plan", [this] (
-             const WalkPath& walkPath
+             const WalkPath& walkPath,
+             const std::vector<Self>& selfs
              ) {
-             // Reset all path following state:
+            // Reset all path following state:
 
-             currentPath = walkPath;
+            currentPath = walkPath;
 
-             // Set current state to 0:
+            if (selfs.empty() || currentPath.states.empty()) {
+                return;
+            }
+            auto self = selfs.front();
+            Transform2D currentState = {self.position(0), self.position(1), vectorToBearing(self.heading)};
+            auto estPath = estimatedPath(currentState, currentPath, 0.01, 2000, 40);
+            emit(utility::nubugger::drawPath("WPF_EstimatedPath", estPath.states, 0.05, {1,0.8,0}));
 
-             // Set start time to current time:
+            // Set current state to 0:
+
+            // Set start time to current time:
         });
 
         on<Trigger<Every<20, Per<std::chrono::seconds>>>,
@@ -96,41 +106,71 @@ namespace planning {
             // target from the ball.
 
             // Get the robot's current state as a Transform2D:
-            Transform2D currState = {self.position(0), self.position(1), vectorToBearing(self.heading)};
-            emit(utility::nubugger::drawRectangle("WPF_RobotFootprint", RotatedRectangle(currState, {0.12, 0.17})));
+            Transform2D currentState = {self.position(0), self.position(1), vectorToBearing(self.heading)};
+            emit(utility::nubugger::drawRectangle("WPF_RobotFootprint", RotatedRectangle(currentState, {0.12, 0.17})));
 
-            
-            // Find the index of the closest state:
-            int numStates = currentPath.states.size();
-            int closestIndex = 0;
-            double closestDist = std::numeric_limits<double>::infinity();
-            for (int i = 0; i < numStates; i++) {
-                double dist = arma::norm(currentPath.states[i].xy() - currState.xy());
-                if (dist < closestDist) {
-                    closestDist = dist;
-                    closestIndex = i;
-                }
-            }
-            emit(utility::nubugger::drawRectangle("WPF_Closest", RotatedRectangle(currentPath.states[closestIndex], {0.12, 0.17}), {0, 0, 0}));
-
-            // Remove all states before the closest state:
-            if (closestIndex != 0) {
-                currentPath.states.erase(currentPath.states.begin(),
-                                         currentPath.states.begin() + closestIndex);
-                emit(utility::nubugger::drawPath("OMPLPP_Path", currentPath.states, 0.1, {0,0.5,0.5}));
+            // Remove unnecessary (visited) states from the path:
+            int removed = trimPath(currentState, currentPath);
+            if (removed) {
+                auto estPath = estimatedPath(currentState, currentPath, 0.01, 2000, 40);
+                emit(utility::nubugger::drawPath("WPF_EstimatedPath", estPath.states, 0.05, {1,0.8,0}));
             }
 
             // Aim for the index after the closest state:
-            int targetIndex = std::min(1, numStates);
+            int targetIndex = std::min(1, int(currentPath.states.size()));
             Transform2D targetState = currentPath.states[targetIndex]; // {3, 3, 3.14};
             emit(utility::nubugger::drawRectangle("WPF_TargetState", RotatedRectangle(targetState, {0.12, 0.17}), {1, 0, 0}));
 
-
             // Emit a walk command to move towards the target state:
-            auto command = std::make_unique<WalkCommand>(walkBetween(currState, targetState));
+            auto command = std::make_unique<WalkCommand>(walkBetween(currentState, targetState));
             emit(std::move(std::make_unique<WalkStartCommand>()));
             emit(std::move(command));
         });
+    }
+
+    int WalkPathFollower::trimPath(const Transform2D& currentState, WalkPath& walkPath) {
+        auto size = walkPath.states.size();
+
+        // Find the index of the closest state:
+        auto closestIndex = closestPathIndex(currentState, walkPath);
+        // emit(utility::nubugger::drawRectangle("WPF_Closest", RotatedRectangle(walkPath.states[closestIndex], {0.12, 0.17}), {0, 0, 0}));
+
+        // Check if we're close enough to have 'visited' the closest state:
+        if (!isVisited(currentState, walkPath.states[closestIndex])) {
+            return 0;
+        }
+
+        // Remove all states before the closest state:
+        if (closestIndex != 0) {
+            walkPath.states.erase(walkPath.states.begin(),
+                                  walkPath.states.begin() + closestIndex);
+            // emit(utility::nubugger::drawPath("OMPLPP_Path", walkPath.states, 0.1, {0,0.5,0.5}));
+        }
+
+        // Return the number of states removed from the path.
+        return size - walkPath.states.size();
+    }
+
+    bool WalkPathFollower::isVisited(const Transform2D& currentState, const Transform2D& visitState) {
+        double dist = arma::norm(visitState.xy() - currentState.xy());
+        
+        // TODO: Add waypoint visit distance to config.
+        return dist < 0.1;
+    }
+
+    int WalkPathFollower::closestPathIndex(const Transform2D& currentState, const WalkPath& walkPath) {
+        int numStates = walkPath.states.size();
+        int closestIndex = 0;
+        double closestDist = std::numeric_limits<double>::infinity();
+        for (int i = 0; i < numStates; i++) {
+            double dist = arma::norm(walkPath.states[i].xy() - currentState.xy());
+            if (dist < closestDist) {
+                closestDist = dist;
+                closestIndex = i;
+            }
+        }
+
+        return closestIndex;
     }
 
     WalkCommand WalkPathFollower::walkBetween(const Transform2D& currentState, const Transform2D& targetState) {
@@ -141,6 +181,36 @@ namespace planning {
         WalkCommand command;
         command.command = {1, 0, wcAngle};
         return command;
+    }
+
+    WalkPath WalkPathFollower::estimatedPath(const Transform2D& currentState, const WalkPath& walkPath, float timeStep, int simSteps, int sample) {
+        if (sample <= 0) {
+            sample = 1;
+        }
+        int stepNum = 0;
+
+        auto state = currentState;
+        auto path = walkPath;
+        WalkPath robotPath;
+        robotPath.states.push_back(state);
+
+        for (int i = 0; i < simSteps; i++) {
+            trimPath(state, path);
+
+            int targetIndex = std::min(1, int(path.states.size()));
+            Transform2D targetState = path.states[targetIndex];
+
+            auto command = walkBetween(state, targetState);
+
+            command.command.xy() = state.rotation() * command.command.xy() * 0.2;
+            state += command.command * timeStep;
+            stepNum++;
+            if (stepNum % sample == 0) {
+                robotPath.states.push_back(state);
+            }
+        }
+
+        return robotPath;
     }
 
 }

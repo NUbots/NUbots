@@ -76,6 +76,8 @@ namespace planning {
 
             auto pos = omplState2Transform2d(state);
 
+            // TODO: Add goalposts as obstacles.
+
             // TODO: Use a FieldDescription from the config system for the ball radius.
             Circle ballCircle(0.05, ballPos_);
             RotatedRectangle robotRect(pos, {0.12, 0.17});

@@ -82,7 +82,7 @@ namespace planning {
             arma::vec goalPosition = ballPos - 0.1 * arma::normalise(goalHeading);
 
             Transform2D goal = {goalPosition(0), goalPosition(1), vectorToBearing(goalHeading)};
-            double timeLimit = 0.1; // Time limit in seconds. TODO: Add to config.
+            double timeLimit = 0.5; // Time limit in seconds. TODO: Add to config.
 
             // TODO: Use an artificially larger ball, offset away from the
             // goal position for obstacle avoidance.

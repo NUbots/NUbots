@@ -42,6 +42,19 @@ namespace planning {
         /// @brief The instantaneous walk command required to start moving from currentState to targetState.
         WalkCommand walkBetween(const Transform2D& currentState, const Transform2D& targetState);
 
+        /// @brief Remove already visited states from the given path.
+        /// Returns the number of states removed.
+        int trimPath(const Transform2D& currentState, WalkPath& walkPath);
+
+        /// @brief The index of the closest state in walkPath to currentState.
+        int closestPathIndex(const Transform2D& currentState, const WalkPath& walkPath);
+
+        /// @brief The path the robot is expected to follow while following the given path.
+        WalkPath estimatedPath(const Transform2D& currentState, const WalkPath& walkPath, float timeStep, int simSteps, int sample);
+
+        /// @brief Return whether currentState is close enough to visitState for us to say that the robot has 'visited' that state.
+        bool isVisited(const Transform2D& currentState, const Transform2D& visitState);
+
         /// @brief the path to the configuration file for WalkPathFollower
         static constexpr const char* CONFIGURATION_PATH = "WalkPathFollower.yaml";
 
