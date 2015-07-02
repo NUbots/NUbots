@@ -83,15 +83,9 @@ namespace motion {
 
         on<Trigger<KickCommand>>([this] (const KickCommand&) {
             // We want to kick!
-            log("KickCommand");
-            log("Priority: Kick Priority");
+            log("IKKICK: KickCommand received");
 
-            if(!doThings) {
-                doThings = true;
-            }
-            else {
-                updatePriority(KICK_PRIORITY);
-            }
+            updatePriority(KICK_PRIORITY);
 
         });
 
