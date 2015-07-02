@@ -35,7 +35,6 @@ namespace planning {
         static constexpr const char* CONFIGURATION_PATH = "KickPlanner.yaml";
 
     private:
-        size_t framesNotSeen = 1000;
        	messages::motion::KickPlannerConfig cfg;
     };
 

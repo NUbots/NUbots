@@ -29,6 +29,7 @@
 #include "messages/behaviour/ServoCommand.h"
 #include "messages/behaviour/KickPlan.h"
 #include "messages/vision/VisionObjects.h"
+#include "messages/support/FieldDescription.h"
 #include "utility/nubugger/NUhelpers.h"
 
 
@@ -50,97 +51,45 @@ namespace planning {
     using messages::motion::WalkStopCommand;
     using messages::input::LimbID;
     using messages::behaviour::KickPlan;
+    using messages::support::FieldDescription;
 
     KickPlanner::KickPlanner(std::unique_ptr<NUClear::Environment> environment)
         : Reactor(std::move(environment)) {
 
 
         on<Trigger<Configuration<KickPlanner> > >([this](const Configuration<KickPlanner>& config) {
-            cfg.MAX_BALL_DISTANCE = config["MAX_BALL_DISTANCE"].as<float>();
-            cfg.KICK_CORRIDOR_WIDTH = config["KICK_CORRIDOR_WIDTH"].as<float>();
-            cfg.KICK_FORWARD_ANGLE_LIMIT = config["KICK_FORWARD_ANGLE_LIMIT"].as<float>();
-            cfg.KICK_SIDE_ANGLE_LIMIT = config["KICK_SIDE_ANGLE_LIMIT"].as<float>();
-            cfg.FRAMES_NOT_SEEN_LIMIT = config["FRAMES_NOT_SEEN_LIMIT"].as<float>();
+            cfg.max_ball_distance = config["max_ball_distance"].as<float>();
+            cfg.kick_corridor_width = config["kick_corridor_width"].as<float>();
+            cfg.seconds_not_seen_limit = config["seconds_not_seen_limit"].as<float>();
             emit(std::make_unique<KickPlannerConfig>(cfg));
         });
 
-        on< Trigger<Ball>, With<std::vector<Self>>, 
-        // With<std::vector<messages::vision::Ball>>,
+        on< Trigger<Ball>, 
+            With<std::vector<Self>>,
+            With<FieldDescription>,
             With<KickPlan> >([this] (
             const Ball& ball,
             const std::vector<Self>& selfs,
-            // const std::vector<messages::vision::Ball>& vision_balls,
+            const FieldDescription& fd,
             const KickPlan& kickPlan) {
-            // std::cerr<<__FILE__<<", "<<__LINE__<<": "<<__func__<<std::endl;
 
-            arma::vec2 ballPosition;
-
-            framesNotSeen = 0;
-            // If we're not seeing any vision balls, count frames not seen
-            ballPosition = ball.position;
-            /*if (vision_balls.empty()) {
-
-
-                framesNotSeen++;
-            } else {
-
-                // emit(graph("Kickplanner vision ball measurement (spherical)",
-                    // vision_balls.at(0).measurements.at(0).position[0],
-                    // vision_balls.at(0).measurements.at(0).position[1],
-                    // vision_balls.at(0).measurements.at(0).position[2]));
-                ballPosition = sphericalToCartesian(vision_balls.at(0).measurements.at(0).position).rows(0,1);
-                // emit(graph("Kickplanner Ball pos (vision)", ballPosition[0], ballPosition[1]));
-
-                framesNotSeen = 0;
-            }*/
-
-
+            //Get time since last seen ball
+            auto now = NUClear::clock::now();
+            double secondsSinceLastSeen = std::chrono::duration_cast<std::chrono::microseconds>(now - ball.last_measurement_time).count() * 1e-6;
+            
+            //Compute target in robot coords
             auto self = selfs[0];
-
             arma::vec2 kickTarget = WorldToRobotTransform(self.position, self.heading, kickPlan.target);
-            if(framesNotSeen < cfg.FRAMES_NOT_SEEN_LIMIT &&
-               ballPosition[0] < cfg.MAX_BALL_DISTANCE &&
-               ballPosition[0] > 0 &&
-               std::fabs(ballPosition[1]) < cfg.KICK_CORRIDOR_WIDTH / 2){
-                float targetBearing = std::atan2(kickTarget[1], kickTarget[0]);
 
-                if( std::fabs(targetBearing) < cfg.KICK_FORWARD_ANGLE_LIMIT){
-                    if(ballPosition[1] < 0){
-                        // Right front kick
-                        //NUClear::log("Kicking forward with right foot");
-                        emit(std::make_unique<WalkStopCommand>()); // Stop the walk
-                        emit(std::make_unique<KickCommand>(KickCommand{{1,  0, 0}, LimbID::RIGHT_LEG }));
-                        // TODO when the kick finishes, we need to start the walk
-                        // Probably need to add something to the KickScript.cpp
-                    } else {
-                        // Left front kick
-                        //NUClear::log("Kicking forward with left foot");
-                        emit(std::make_unique<WalkStopCommand>()); // Stop the walk
-                        emit(std::make_unique<KickCommand>(KickCommand{{1,  0, 0}, LimbID::LEFT_LEG }));
-                        // TODO when the kick finishes, we need to start the walk
-                        // Probably need to add something to the KickScript.cpp
-                    }
-                } else if (std::fabs(targetBearing) < cfg.KICK_SIDE_ANGLE_LIMIT) {
-                    if(targetBearing < 0 && ballPosition[1] < 0){
-                        // Left side kick
-                        //NUClear::log("Kicking side with left foot");
-                        emit(std::make_unique<WalkStopCommand>()); // Stop the walk
-                        emit(std::make_unique<KickCommand>(KickCommand{{0, -1, 0}, LimbID::LEFT_LEG }));
-                        // TODO when the kick finishes, we need to start the walk
-                        // Probably need to add something to the KickScript.cpp
-                    } else if(targetBearing > 0 && ballPosition[1] > 0) {
-                        // Right side kick
-                        //NUClear::log("Kicking side with right foot");
-                        emit(std::make_unique<WalkStopCommand>()); // Stop the walk
-                        emit(std::make_unique<KickCommand>(KickCommand{{0,  1, 0}, LimbID::RIGHT_LEG }));
-                        // TODO when the kick finishes, we need to start the walk
-                        // Probably need to add something to the KickScript.cpp
-                    }
-                }
-
+            //Check whether to kick
+            if(secondsSinceLastSeen < cfg.seconds_not_seen_limit &&
+               ball.position[0] < cfg.max_ball_distance &&
+               ball.position[0] > 0 &&
+               std::fabs(ball.position[1]) < cfg.kick_corridor_width / 2){
+               
+                    emit(std::make_unique<WalkStopCommand>()); // Stop the walk
+                    emit(std::make_unique<KickCommand>(KickCommand{{ball.position[0],ball.position[1],fd.ball_radius}, {kickTarget[0],kickTarget[1],0} }));
             }
-
-            // Most of this code will be similar to that in PS3Walk.cpp
 
         });
     }

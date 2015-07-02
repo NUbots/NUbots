@@ -44,11 +44,9 @@ namespace messages {
 
 
         struct KickPlannerConfig{
-            float MAX_BALL_DISTANCE;
-            float KICK_CORRIDOR_WIDTH;
-            float KICK_FORWARD_ANGLE_LIMIT;
-            float KICK_SIDE_ANGLE_LIMIT;
-            float FRAMES_NOT_SEEN_LIMIT;
+            float max_ball_distance;
+            float kick_corridor_width;
+            float seconds_not_seen_limit;
         };
 
         struct KickFinished{
