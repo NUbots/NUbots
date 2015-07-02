@@ -197,16 +197,16 @@ namespace motion {
             }
             emit(graph("comDiff", balancer.comDiff));
             emit(graph("com", balancer.centreOfMass_foot));
-            // if(lifter.isRunning()){
-            //     // std::cout << "lifter is running" << std::endl;
-            //     //TODO: CHECK ORDER
-            //     kickFootGoal *= lifter.getFootPose(sensors, deltaT);
-            // }
-            // if(kicker.isRunning()){
-            //     // std::cout << "kicker is running" << std::endl;
-            //     //TODO: CHECK ORDER
-            //     kickFootGoal *= kicker.getFootPose(sensors, deltaT);
-            // }
+            if(lifter.isRunning()){
+                // std::cout << "lifter is running" << std::endl;
+                //TODO: CHECK ORDER
+                kickFootGoal *= lifter.getFootPose(sensors, deltaT);
+            }
+            if(kicker.isRunning()){
+                // std::cout << "kicker is running" << std::endl;
+                //TODO: CHECK ORDER
+                kickFootGoal *= kicker.getFootPose(sensors, deltaT);
+            }
 
             //Calculate IK and send waypoints
 
