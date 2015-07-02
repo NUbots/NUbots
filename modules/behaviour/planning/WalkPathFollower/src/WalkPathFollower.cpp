@@ -19,6 +19,8 @@
 
 #include "WalkPathFollower.h"
 
+#include <limits>
+
 #include "messages/support/Configuration.h"
 #include "messages/localisation/FieldObject.h"
 #include "messages/motion/WalkCommand.h"
@@ -61,52 +63,73 @@ namespace planning {
             emit(std::move(std::make_unique<WalkStartCommand>()));
         });
 
+        // on<Trigger<WalkPath>,
+        //     Options<Single>
+        //    >("Update current path plan", [this] (
+        //      const WalkPath& walkPath
+        //      ) {
+        //      // Reset all path following state:
+
+        //      // Set current state to 0:
+
+        //      // Set start time to current time:
+        // });
+
         on<Trigger<Every<20, Per<std::chrono::seconds>>>,
             With<std::vector<Self>>,
             With<WalkPath>,
             Options<Single>
            >("Follow current path plan", [this] (
-             const NUClear::clock::time_point&/* current_time*/,
+             const NUClear::clock::time_point& current_time,
              const std::vector<Self>& selfs,
              const WalkPath& walkPath
              ) {
-            if (selfs.empty()) {
+            if (selfs.empty() || walkPath.states.empty()) {
                 return;
             }
             auto self = selfs.front();
 
-            // Get the robot's current state as an OMPL SE2 state:
-            Transform2D currTrans = {self.position(0), self.position(1), vectorToBearing(self.heading)};
+            // TODO: Represent the path in a space that has the ball position
+            // as its origin, and the x-axis in the direction of the kick
+            // target from the ball.
 
-            emit(utility::nubugger::drawRectangle("WPF_RobotFootprint", RotatedRectangle(currTrans, {0.12, 0.17})));
+            // Get the robot's current state as a Transform2D:
+            Transform2D currState = {self.position(0), self.position(1), vectorToBearing(self.heading)};
+            emit(utility::nubugger::drawRectangle("WPF_RobotFootprint", RotatedRectangle(currState, {0.12, 0.17})));
 
-            // Find the closest state on the path to the robot's current state:
-            // int index = pathGeom->getClosestIndex(currentState);
-            // // std::vector<ob::State*>& states = pathGeom->getStates();
+            
+            // Find the index of the closest state:
+            int numStates = walkPath.states.size();
+            int closestIndex = 0;
+            double closestDist = std::numeric_limits<double>::infinity();
+            for (int i = 0; i < numStates; i++) {
+                double dist = arma::norm(walkPath.states[i] - currState);
+                if (dist < closestDist) {
+                    closestDist = dist;
+                    closestIndex = i;
+                }
+            }
+            // Aim for the index after the closest state:
+            int targetIndex = std::min(closestIndex + 1, numStates);
+            Transform2D targetState = walkPath.states[targetIndex]; // {3, 3, 3.14};
 
-            // if (index < 0 || numStates <= index + 1) {
-            //     return;
+            // // Remove all states before the closest state:
+            // if (closestIndex != 0) {
+            //     walkPath.states.erase(walkPath.states.begin(),
+            //                            walkPath.states.begin() + (closestIndex - 1));
             // }
 
-            // // Make the robot head towards the next state on the path:
-
-            // // ob::State* currState = pathGeom->getState(index);
-            // // ob::State* nextState = pathGeom->getState(index + 1);
-            // const ob::SE2StateSpace::StateType* nextState =
-            //     pathGeom->getState(index + 1)->as<ob::SE2StateSpace::StateType>();
-
-            // // Transform2D currTrans = { currState->getX(), currState->getY(), currState->getYaw() };
-            // Transform2D nextTrans = { nextState->getX(), nextState->getY(), nextState->getYaw() };
-
-            // emit(utility::nubugger::drawRectangle("WPF_TargetState", RotatedRectangle(nextTrans, {0.12, 0.17}), {1, 0, 0}));
+            emit(utility::nubugger::drawRectangle("WPF_TargetState", RotatedRectangle(targetState, {0.12, 0.17}), {1, 0, 0}));
 
 
-            // std::unique_ptr<WalkCommand> command = std::make_unique<WalkCommand>();
-            // command->command = nextTrans - currTrans;
-            // command->command[2] = utility::math::angle::difference(nextTrans.angle(), currTrans.angle());
-
-            // emit(std::move(std::make_unique<WalkStartCommand>()));
-            // emit(std::move(command));
+            // Emit a walk command to move towards the target state:
+            std::unique_ptr<WalkCommand> command = std::make_unique<WalkCommand>();
+            auto diff = arma::vec2(targetState.xy() - currState.xy());
+            auto dir = vectorToBearing(diff);
+            double wcAngle = utility::math::angle::signedDifference(dir, currState.angle());
+            command->command = {1, 0, wcAngle};
+            emit(std::move(std::make_unique<WalkStartCommand>()));
+            emit(std::move(command));
         });
     }
 }

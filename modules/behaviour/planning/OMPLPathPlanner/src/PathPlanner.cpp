@@ -153,20 +153,20 @@ namespace planning {
     }
 
     std::unique_ptr<WalkPath> PathPlanner::omplPathToWalkPath(ompl::base::PathPtr omplPath) {
+        if (omplPath == nullptr) {
+            return nullptr;
+        }
+
         auto walkPath = std::make_unique<WalkPath>();
 
-        // Emit the new path to NUSight.
-        if (omplPath != nullptr) {
+        // Get the path states:
+        auto pathGeom = boost::static_pointer_cast<ompl::geometric::PathGeometric>(omplPath);
+        std::vector<ob::State*>& states = pathGeom->getStates();
 
-            // Get the path states:
-            auto pathGeom = boost::static_pointer_cast<ompl::geometric::PathGeometric>(omplPath);
-            std::vector<ob::State*>& states = pathGeom->getStates();
-
-            // Add each state as a Transform2D:
-            for (auto* state : states) {
-                auto stateTrans = omplState2Transform2d(state);
-                walkPath->states.push_back(stateTrans);
-            }
+        // Add each state as a Transform2D:
+        for (auto* state : states) {
+            auto stateTrans = omplState2Transform2d(state);
+            walkPath->states.push_back(stateTrans);
         }
 
         return std::move(walkPath);

@@ -83,10 +83,10 @@ namespace planning {
 
             Transform2D goal = {goalPosition(0), goalPosition(1), vectorToBearing(goalHeading)};
             double timeLimit = 0.1; // Time limit in seconds. TODO: Add to config.
+
+            // TODO: Use an artificially larger ball, offset away from the
+            // goal position for obstacle avoidance.
             auto path = pathPlanner.obstacleFreePathBetween(start, goal, ballPos, timeLimit);
-            // LocalisationBall testBall;
-            // testBall.position = {0,1};
-            // auto path = pathPlanner.obstacleFreePathBetween({-4,1,0}, {3,3,3.14}, testBall, timeLimit);
 
             // Emit the new path to NUSight:
             if (path != nullptr) {

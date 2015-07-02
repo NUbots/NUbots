@@ -62,6 +62,22 @@ namespace math {
             return M_PI - std::fabs(std::fmod(std::fabs(a - b), 2 * M_PI) - M_PI);
         }
 
+        /**
+         * Calculates the signed angle with the smallest absolute value such
+         * that: normalizeAngle(b + signedDifference(a, b)) == normalizeAngle(a).
+         * Method: http://stackoverflow.com/a/7869457
+         */
+        inline double signedDifference(const double a, const double b) {
+
+            auto x = a - b;
+
+            auto m = x - std::floor(x/(2*M_PI)) * (2*M_PI);
+
+            auto d = std::fmod(m + M_PI, 2*M_PI) - M_PI;
+
+            return d;
+        }
+
         inline double vectorToBearing(arma::vec2 dirVec) {
             return std::atan2(dirVec(1), dirVec(0));
         }
