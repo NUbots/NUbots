@@ -50,20 +50,19 @@ namespace motion{
 				MotionStage stage = MotionStage::READY;
 				bool stable = false;
 
-				float motion_gain = 10;
-				messages::input::LimbID supportFoot;
-				arma::vec3 ballPosition;
-				arma::vec3 goalPosition;
-				NUClear::clock::time_point motionStartTime;
-				NUClear::clock::time_point stoppingCommandTime;
-				float kick_velocity = 1;
+				float forward_velocity = 0.1;
 				float return_velocity = 0.1;
 				
 				//State variables
+				messages::input::LimbID supportFoot;
 				utility::math::matrix::Transform3D startPose;
 				utility::math::matrix::Transform3D finishPose;
 				float distance;
+				arma::vec3 ballPosition;
+				arma::vec3 goalPosition;
 
+				NUClear::clock::time_point motionStartTime;
+				NUClear::clock::time_point stoppingCommandTime;
 			public:
 				
 				virtual void computeMotion(const messages::input::Sensors& sensors) = 0;
@@ -105,7 +104,7 @@ namespace motion{
 		        	return supportFoot == messages::input::LimbID::LEFT_LEG ? leftFoot.i() : rightFoot.i();
 		        }
 
-				virtual utility::math::matrix::Transform3D getFootPose(const messages::input::Sensors& sensors) {
+				utility::math::matrix::Transform3D getFootPose(const messages::input::Sensors& sensors) {
 					if(stage == MotionStage::RUNNING) {
             
 			            double elapsedTime = std::chrono::duration_cast<std::chrono::microseconds>(sensors.timestamp - motionStartTime).count() * 1e-6;
@@ -119,8 +118,9 @@ namespace motion{
 			            float alpha = std::fmax(0,std::fmin(return_velocity * elapsedTime / distance,1));
 			            if(alpha >= 1) stage = MotionStage::FINISHED;
 			            return utility::math::matrix::Transform3D::interpolate(finishPose,startPose,alpha);	
+
 		        	}
-		        	return Transform3D();
+		        	return utility::math::matrix::Transform3D();
 				}
 
 				virtual void configure(const messages::support::Configuration<IKKickConfig>& config) = 0;
@@ -130,20 +130,13 @@ namespace motion{
 		private:
 			//Config
 			float stand_height = 0.18;
-			float tolerance = 0.01;
 			float foot_separation = 0.074;
 			float forward_lean = 0.01;
-			float forward_velocity = 0.1;
-			float return_velocity = 0.1;
 			float adjustment = 0.011;
-
 		public:
-			virtual utility::math::matrix::Transform3D getFootPose(const messages::input::Sensors& sensors, float deltaT);
 			virtual void configure(const messages::support::Configuration<IKKickConfig>& config);
 			virtual void computeMotion(const messages::input::Sensors& sensors);
-			//TODO:Remove this variable
-			arma::vec3 comDiff;
-			arma::vec3 centreOfMass_foot;
+
 		};
 
 		class FootLifter : public SixDOFMotionController{
@@ -151,21 +144,14 @@ namespace motion{
 			//Config variables
 			float lift_foot_height = 0.05;
 			float lift_foot_back = 0.01;
-			float forward_velocity = 0.1;
-			float return_velocity = 0.1;
 
 		public: 
-			virtual utility::math::matrix::Transform3D getFootPose(const messages::input::Sensors& sensors, float deltaT);
 			virtual void configure(const messages::support::Configuration<IKKickConfig>& config);
 			virtual void computeMotion(const messages::input::Sensors& sensors);
 		};
 
 		class Kicker : public SixDOFMotionController{
-		private:
-			float forward_velocity = 0.1;
-			float return_velocity = 0.1;
 		public:
-			virtual utility::math::matrix::Transform3D getFootPose(const messages::input::Sensors& sensors, float deltaT);	
 			virtual void configure(const messages::support::Configuration<IKKickConfig>& config);
 			virtual void computeMotion(const messages::input::Sensors& sensors);
 		};

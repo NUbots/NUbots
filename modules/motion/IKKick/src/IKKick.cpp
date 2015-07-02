@@ -147,8 +147,6 @@ namespace motion {
         updater = on<Trigger<Every<UPDATE_FREQUENCY, Per<std::chrono::seconds>>>, With<Sensors>, Options<Single>>([this](const time_t&, const Sensors& sensors) {
 
             //Setup kick variables
-            float deltaT = 1 / float(UPDATE_FREQUENCY);
-
             LimbID kickFoot;
             if(supportFoot == LimbID::RIGHT_LEG){
                 kickFoot = LimbID::LEFT_LEG;  
@@ -167,6 +165,11 @@ namespace motion {
             if(lifter.isStable()){
                 // std::cout << "lifter.isStable" << std::endl;
                 kicker.start(sensors);
+            }
+
+            if(kicker.isStable()){
+                // std::cout << "kicker.isStable" << std::endl;
+                kicker.stop();
             }
 
             if(kicker.isFinished()){
@@ -193,10 +196,9 @@ namespace motion {
                 // std::cout << "balancer is running" << std::endl;
                 Transform3D supportFootPose = balancer.getFootPose(sensors);
                 supportFootGoal = supportFootPose;
-                kickFootGoal =  supportFootPose.translate(arma::vec3({0, negativeIfKickRight * foot_separation, 0}));
+                kickFootGoal = supportFootPose.translate(arma::vec3({0, negativeIfKickRight * foot_separation, 0}));
             }
-            emit(graph("comDiff", balancer.comDiff));
-            emit(graph("com", balancer.centreOfMass_foot));
+
             if(lifter.isRunning()){
                 // std::cout << "lifter is running" << std::endl;
                 //TODO: CHECK ORDER
