@@ -162,14 +162,14 @@ namespace vision {
                 arma::running_stat<double> dist;
 
                 // Look through our segments to find endpoints
-                for(auto it = result.first; it != result.last; ++it) {
+                for(auto& point : result) {
                     // Project left and right onto midpoint keep top and bottom
-                    stat(mid.tangentialDistanceToPoint(it->left));
-                    stat(mid.tangentialDistanceToPoint(it->right));
+                    stat(mid.tangentialDistanceToPoint(point.left));
+                    stat(mid.tangentialDistanceToPoint(point.right));
 
                     // Work out our distance to the point for throwouts
-                    dist(mid.distanceToPoint(it->left));
-                    dist(mid.distanceToPoint(it->right));
+                    dist(mid.distanceToPoint(point.left));
+                    dist(mid.distanceToPoint(point.right));
                 }
 
                 double dSd = dist.stddev();
@@ -177,7 +177,7 @@ namespace vision {
                 double max = stat.min();
 
                 // Look through leftover segments to find better endpoints
-                for(auto it = models.back().last; it < segments.end(); ++it) {
+                for(auto it = models.back().end(); it < segments.end(); ++it) {
                     // Project onto midpoint
                     double tL = mid.tangentialDistanceToPoint(it->left);
                     double dL = mid.distanceToPoint(it->left);

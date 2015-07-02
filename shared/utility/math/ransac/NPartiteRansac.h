@@ -24,20 +24,14 @@
 #include <utility>
 #include <vector>
 
+#include "RansacResult.h"
+
 namespace utility {
 namespace math {
 namespace ransac {
 
     template <typename Model>
     struct NPartiteRansac {
-
-        template <typename Iterator>
-        struct RansacResult {
-            bool valid;
-            Model model;
-            Iterator first;
-            Iterator last;
-        };
 
         using DataPoint = typename Model::DataPoint;
 
@@ -70,7 +64,7 @@ namespace ransac {
          * @return A pair containing an iterator to the start of the remaining set, and the best fitting model
          */
         template <typename Iterator>
-        static RansacResult<Iterator> fitModel(std::array<Iterator, Model::REQUIRED_POINTS + 1>& iterators
+        static std::pair<bool, RansacResult<Iterator, Model>> fitModel(std::array<Iterator, Model::REQUIRED_POINTS + 1>& iterators
                                              , uint minimumPointsForConsensus
                                              , uint maximumIterationsPerFitting
                                              , double consensusErrorThreshold) {
@@ -78,7 +72,7 @@ namespace ransac {
             // Check we have enough points in each part
             for(uint i = 0; i < Model::REQUIRED_POINTS; ++i) {
                 if(std::distance(iterators[i], iterators[i + 1]) < 1) {
-                    return RansacResult<Iterator>{ false, Model(), Iterator(), Iterator() };
+                    return std::make_pair(false, RansacResult<Iterator, Model>());
                 }
             }
 
@@ -145,29 +139,31 @@ namespace ransac {
                 }
 
                 // Return the result
-                return RansacResult<Iterator>{ true, bestModel, start, newFirst };
+                return std::make_pair(true, RansacResult<Iterator, Model>(std::move(bestModel), start, newFirst));
             }
             else {
                 // We couldn't find a good enough set, return a flag that we failed
-                return RansacResult<Iterator>{ false, Model(), Iterator(), Iterator() };
+                return std::make_pair(false, RansacResult<Iterator, Model>());
             }
         }
 
         template <typename Iterator>
-        static std::vector<RansacResult<Iterator>> fitModels(std::array<Iterator, Model::REQUIRED_POINTS + 1> iterators
+        static std::vector<RansacResult<Iterator, Model>> fitModels(std::array<Iterator, Model::REQUIRED_POINTS + 1> iterators
                                                            , uint minimumPointsForConsensus
                                                            , uint maximumIterationsPerFitting
                                                            , uint maximumFittedModels
                                                            , double consensusErrorThreshold) {
 
-            std::vector<RansacResult<Iterator>> results;
+            std::vector<RansacResult<Iterator, Model>> results;
             results.reserve(maximumFittedModels);
 
             while(results.size() < maximumFittedModels) {
-                RansacResult<Iterator> result = fitModel(iterators, minimumPointsForConsensus, maximumIterationsPerFitting, consensusErrorThreshold);
+                bool valid;
+                RansacResult<Iterator, Model> result;
+                std::tie(valid, result) = fitModel(iterators, minimumPointsForConsensus, maximumIterationsPerFitting, consensusErrorThreshold);
 
                 // If we have more datapoints left then add this one and continue
-                if(result.valid) {
+                if(valid) {
                     results.push_back(std::move(result));
                 }
                 else {
