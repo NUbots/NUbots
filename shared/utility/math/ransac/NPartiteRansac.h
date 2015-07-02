@@ -137,6 +137,12 @@ namespace ransac {
                 // We now start with this new first
                 iterators.first() = newFirst;
 
+                // Put in our new iterator points
+                for(uint i = 0; i < Model::REQUIRED_POINTS; ++i) {
+                    // Move each iterator along
+                    iterators[i + 1] = std::next(iterators[i], offsets[i]);
+                }
+
                 // Return the result
                 return std::make_pair(newFirst, RansacResult<Iterator>{ true, bestModel, first, newFirst });
             }
