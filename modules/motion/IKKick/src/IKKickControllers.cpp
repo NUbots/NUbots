@@ -31,35 +31,36 @@ namespace modules{
 namespace motion{
 
 	void KickBalancer::configure(const Configuration<IKKickConfig>& config){
-		motion_gain = config["balancer"]["motion_gain"].as<float>();
 	    stand_height = config["balancer"]["stand_height"].as<float>();
         forward_lean = config["balancer"]["forward_lean"].as<float>();
-        tolerance = config["balancer"]["tolerance"].as<float>();
         foot_separation = config["balancer"]["foot_separation"].as<float>();
-        forward_velocity = config["kicker"]["forward_velocity"].as<float>();
-        return_velocity = config["kicker"]["return_velocity"].as<float>();
+
+        forward_velocity = config["balancer"]["forward_velocity"].as<float>();
+        return_velocity = config["balancer"]["return_velocity"].as<float>();
 	}
 
 	void FootLifter::configure(const Configuration<IKKickConfig>& config){
-		// motion_gain = config["lifter"]["motion_gain"].as<float>();
         lift_foot_height = config["lifter"]["lift_foot_height"].as<float>();
         lift_foot_back = config["lifter"]["lift_foot_back"].as<float>();
-        forward_velocity = config["kicker"]["forward_velocity"].as<float>();
-        return_velocity = config["kicker"]["return_velocity"].as<float>();
+        
+        forward_velocity = config["lifter"]["forward_velocity"].as<float>();
+        return_velocity = config["lifter"]["return_velocity"].as<float>();
 	}
 
 	void Kicker::configure(const Configuration<IKKickConfig>& config){
-		// motion_gain = config["kicker"]["motion_gain"].as<float>();
         forward_velocity = config["kicker"]["forward_velocity"].as<float>();
         return_velocity = config["kicker"]["return_velocity"].as<float>();
 	}
 
     void KickBalancer::computeMotion(const Sensors& sensors){
-        startPose = getTorsoPose(sensors);
+        Transform3D torsoToFoot = getTorsoPose(sensors);
         
-        finishPose = startPose;
+        int negativeIfRight = (supportFoot == LimbID::RIGHT_LEG) ? -1 : 1;
+        finishPose = torsoToFoot;
         finishPose.translation() = arma::vec3({forward_lean, negativeIfRight * DarwinModel::Leg::FOOT_CENTRE_TO_ANKLE_CENTRE, stand_height});
-        
+
+        startPose = torsoToFoot.i();
+        finishPose = finishPose.i();
         distance = arma::norm(startPose.translation() - finishPose.translation());
     }
 
