@@ -90,15 +90,7 @@ namespace planning {
 
             // Emit the new path to NUSight:
             if (path != nullptr) {
-                // Build the path to emit:
-                std::vector<arma::vec> positions;
-
-                for (auto state : path->states) {
-                    // Add the position:
-                    positions.push_back(state.xy());
-                }
-
-                emit(utility::nubugger::drawPolyline("OMPLPP_Path", positions, 0.1, {1,0.5,1}));
+                emit(utility::nubugger::drawPath("OMPLPP_Path", path->states, 0.1, {1,0.5,1}));
                 emit(utility::nubugger::drawTree("OMPLPP_DebugTree", pathPlanner.debugPositions, pathPlanner.debugParentIndices, 0.02, {0.5, 0,0.5}));
             }
 

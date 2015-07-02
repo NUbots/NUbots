@@ -63,28 +63,30 @@ namespace planning {
             emit(std::move(std::make_unique<WalkStartCommand>()));
         });
 
-        // on<Trigger<WalkPath>,
-        //     Options<Single>
-        //    >("Update current path plan", [this] (
-        //      const WalkPath& walkPath
-        //      ) {
-        //      // Reset all path following state:
+        on<Trigger<WalkPath>,
+            Options<Sync<WalkPathFollower>, Single>
+           >("Update current path plan", [this] (
+             const WalkPath& walkPath
+             ) {
+             // Reset all path following state:
 
-        //      // Set current state to 0:
+             currentPath = walkPath;
 
-        //      // Set start time to current time:
-        // });
+             // Set current state to 0:
+
+             // Set start time to current time:
+        });
 
         on<Trigger<Every<20, Per<std::chrono::seconds>>>,
             With<std::vector<Self>>,
-            With<WalkPath>,
-            Options<Single>
+            // With<WalkPath>,
+            Options<Sync<WalkPathFollower>, Single>
            >("Follow current path plan", [this] (
              const NUClear::clock::time_point& current_time,
-             const std::vector<Self>& selfs,
-             const WalkPath& walkPath
+             const std::vector<Self>& selfs
+             // const WalkPath& walkPath
              ) {
-            if (selfs.empty() || walkPath.states.empty()) {
+            if (selfs.empty() || currentPath.states.empty()) {
                 return;
             }
             auto self = selfs.front();
@@ -99,39 +101,48 @@ namespace planning {
 
             
             // Find the index of the closest state:
-            int numStates = walkPath.states.size();
+            int numStates = currentPath.states.size();
             int closestIndex = 0;
             double closestDist = std::numeric_limits<double>::infinity();
             for (int i = 0; i < numStates; i++) {
-                double dist = arma::norm(walkPath.states[i] - currState);
+                double dist = arma::norm(currentPath.states[i].xy() - currState.xy());
                 if (dist < closestDist) {
                     closestDist = dist;
                     closestIndex = i;
                 }
             }
+            emit(utility::nubugger::drawRectangle("WPF_Closest", RotatedRectangle(currentPath.states[closestIndex], {0.12, 0.17}), {0, 0, 0}));
+
+            // Remove all states before the closest state:
+            if (closestIndex != 0) {
+                currentPath.states.erase(currentPath.states.begin(),
+                                         currentPath.states.begin() + closestIndex);
+                emit(utility::nubugger::drawPath("OMPLPP_Path", currentPath.states, 0.1, {0,0.5,0.5}));
+            }
+
             // Aim for the index after the closest state:
-            int targetIndex = std::min(closestIndex + 1, numStates);
-            Transform2D targetState = walkPath.states[targetIndex]; // {3, 3, 3.14};
-
-            // // Remove all states before the closest state:
-            // if (closestIndex != 0) {
-            //     walkPath.states.erase(walkPath.states.begin(),
-            //                            walkPath.states.begin() + (closestIndex - 1));
-            // }
-
+            int targetIndex = std::min(1, numStates);
+            Transform2D targetState = currentPath.states[targetIndex]; // {3, 3, 3.14};
             emit(utility::nubugger::drawRectangle("WPF_TargetState", RotatedRectangle(targetState, {0.12, 0.17}), {1, 0, 0}));
 
 
             // Emit a walk command to move towards the target state:
-            std::unique_ptr<WalkCommand> command = std::make_unique<WalkCommand>();
-            auto diff = arma::vec2(targetState.xy() - currState.xy());
-            auto dir = vectorToBearing(diff);
-            double wcAngle = utility::math::angle::signedDifference(dir, currState.angle());
-            command->command = {1, 0, wcAngle};
+            auto command = std::make_unique<WalkCommand>(walkBetween(currState, targetState));
             emit(std::move(std::make_unique<WalkStartCommand>()));
             emit(std::move(command));
         });
     }
+
+    WalkCommand WalkPathFollower::walkBetween(const Transform2D& currentState, const Transform2D& targetState) {
+        auto diff = arma::vec2(targetState.xy() - currentState.xy());
+        auto dir = vectorToBearing(diff);
+        double wcAngle = utility::math::angle::signedDifference(dir, currentState.angle());
+        
+        WalkCommand command;
+        command.command = {1, 0, wcAngle};
+        return command;
+    }
+
 }
 }
 }

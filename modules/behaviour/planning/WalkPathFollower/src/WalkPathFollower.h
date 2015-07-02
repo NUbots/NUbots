@@ -21,10 +21,17 @@
 #define MODULES_BEHAVIOUR_PLANNING_WALKPATHFOLLOWER_H
 
 #include <nuclear>
+#include "messages/behaviour/WalkPath.h"
+#include "messages/motion/WalkCommand.h"
+#include "utility/math/matrix/Transform2D.h"
 
 namespace modules {
 namespace behaviour {
 namespace planning {
+
+    using messages::behaviour::WalkPath;
+    using messages::motion::WalkCommand;
+    using utility::math::matrix::Transform2D;
 
     class WalkPathFollower : public NUClear::Reactor {
 
@@ -32,10 +39,14 @@ namespace planning {
         /// @brief Called by the powerplant to build and setup the WalkPathFollower reactor.
         explicit WalkPathFollower(std::unique_ptr<NUClear::Environment> environment);
 
+        /// @brief The instantaneous walk command required to start moving from currentState to targetState.
+        WalkCommand walkBetween(const Transform2D& currentState, const Transform2D& targetState);
+
         /// @brief the path to the configuration file for WalkPathFollower
         static constexpr const char* CONFIGURATION_PATH = "WalkPathFollower.yaml";
 
-        NUClear::clock::time_point last_measurement_time;
+        // NUClear::clock::time_point last_measurement_time;
+        WalkPath currentPath;
     };
 
 }

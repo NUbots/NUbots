@@ -27,10 +27,12 @@
 #include "messages/vision/proto/VisionObject.pb.h"
 #include "utility/math/matrix/Rotation3D.h"
 #include "utility/math/geometry/RotatedRectangle.h"
+#include "utility/math/matrix/Transform2D.h"
 
 namespace utility {
 namespace nubugger {
     using utility::math::geometry::RotatedRectangle;
+    using utility::math::matrix::Transform2D;
 
     namespace {
 
@@ -347,6 +349,16 @@ namespace nubugger {
         }
         return drawTree(name, positions, parentIndices, line_width, color, timeout);
 
+    }
+
+    inline std::unique_ptr<messages::support::nubugger::proto::DrawObjects> drawPath(std::string name, std::vector<Transform2D> states, float line_width, arma::vec3 color, float timeout = TIMEOUT) {
+        std::vector<arma::vec> positions;
+
+        for (auto state : states) {
+            positions.push_back(state.xy());
+        }
+
+        return utility::nubugger::drawPolyline(name, positions, line_width, color, timeout);
     }
 
     inline std::unique_ptr<messages::vision::proto::VisionObject> drawVisionLines(std::vector<std::tuple<arma::ivec2, arma::ivec2, arma::vec4>> lines) {
