@@ -143,6 +143,7 @@ namespace motion{
 		private:
 			//Config variables
 			float lift_foot_height = 0.05;
+			float put_foot_down_height = 0.05;
 			float lift_foot_back = 0.01;
 
 		public: 

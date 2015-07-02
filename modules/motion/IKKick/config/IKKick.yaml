@@ -22,6 +22,7 @@ balancer:
 
 lifter:
   lift_foot_height: 0.05 #m
+  put_foot_down_height: 0.045 #m #default value is lift_foot_height
   lift_foot_back: 0.01 #m
   forward_velocity: 0.1 #m/s
   return_velocity: 0.1 #m/s
