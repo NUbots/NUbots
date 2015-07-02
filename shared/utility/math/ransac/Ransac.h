@@ -24,20 +24,14 @@
 #include <utility>
 #include <vector>
 
+#include "RansacResult.h"
+
 namespace utility {
 namespace math {
 namespace ransac {
 
     template <typename Model>
     struct Ransac {
-
-        template <typename Iterator>
-        struct RansacResult {
-            bool valid;
-            Model model;
-            Iterator first;
-            Iterator last;
-        };
 
         using DataPoint = typename Model::DataPoint;
 
@@ -80,15 +74,15 @@ namespace ransac {
          * @return A pair containing an iterator to the start of the remaining set, and the best fitting model
          */
         template <typename Iterator>
-        static std::pair<Iterator, RansacResult<Iterator>> findModel(Iterator first
-                                                                   , Iterator last
-                                                                   , uint minimumPointsForConsensus
-                                                                   , uint maximumIterationsPerFitting
-                                                                   , double consensusErrorThreshold) {
+        static std::pair<bool, RansacResult<Iterator, Model>> findModel(Iterator& first
+                                                                      , Iterator& last
+                                                                      , uint minimumPointsForConsensus
+                                                                      , uint maximumIterationsPerFitting
+                                                                      , double consensusErrorThreshold) {
 
             // Check we have enough points
             if(std::distance(first, last) < int(minimumPointsForConsensus)) {
-                return std::make_pair(last, RansacResult<Iterator>{ false, Model(), Iterator(), Iterator() });
+                return std::make_pair(false, RansacResult<Iterator, Model>());
             }
 
             uint largestConsensus = 0;
@@ -126,30 +120,33 @@ namespace ransac {
                     return consensusErrorThreshold > bestModel.calculateError(std::forward<const DataPoint&>(point));
                 });
 
-                return std::make_pair(newFirst, RansacResult<Iterator>{ true, bestModel, first, newFirst });
+                first = newFirst;
+
+                return std::make_pair(true, RansacResult<Iterator, Model>(bestModel, first, newFirst));
             }
             else {
-                return std::make_pair(last, RansacResult<Iterator>{ false, Model(), Iterator(), Iterator() });
+                return std::make_pair(false, RansacResult<Iterator, Model>());
             }
         }
 
         template <typename Iterator>
-        static std::vector<RansacResult<Iterator>> fitModels(Iterator first
-                                                           , Iterator last
-                                                           , uint minimumPointsForConsensus
-                                                           , uint maximumIterationsPerFitting
-                                                           , uint maximumFittedModels
-                                                           , double consensusErrorThreshold) {
+        static std::vector<RansacResult<Iterator, Model>> fitModels(Iterator first
+                                                                  , Iterator last
+                                                                  , uint minimumPointsForConsensus
+                                                                  , uint maximumIterationsPerFitting
+                                                                  , uint maximumFittedModels
+                                                                  , double consensusErrorThreshold) {
 
-            std::vector<RansacResult<Iterator>> results;
+            std::vector<RansacResult<Iterator, Model>> results;
             results.reserve(maximumFittedModels);
 
             while(results.size() < maximumFittedModels) {
-                RansacResult<Iterator> result;
-                std::tie(first, result) = findModel(first, last, minimumPointsForConsensus, maximumIterationsPerFitting, consensusErrorThreshold);
+                bool valid;
+                RansacResult<Iterator, Model> result;
+                std::tie(valid, result) = findModel(first, last, minimumPointsForConsensus, maximumIterationsPerFitting, consensusErrorThreshold);
 
                 // If we have more datapoints left then add this one and continue
-                if(result.valid) {
+                if(valid) {
                     results.push_back(std::move(result));
                 }
                 else {
