@@ -41,18 +41,19 @@ namespace motion{
 
 	void FootLifter::configure(const Configuration<IKKickConfig>& config){
         lift_foot_height = config["lifter"]["lift_foot_height"].as<float>();
+        put_foot_down_height = config["lifter"]["put_foot_down_height"].as<float>();
         lift_foot_back = config["lifter"]["lift_foot_back"].as<float>();
         
         forward_velocity = config["lifter"]["forward_velocity"].as<float>();
         return_velocity = config["lifter"]["return_velocity"].as<float>();
 	}
 
-	void Kicker::configure(const Configuration<IKKickConfig>& config){
+	void Kicker::configure(const Configuration<IKKickConfig>& config) {
         forward_velocity = config["kicker"]["forward_velocity"].as<float>();
         return_velocity = config["kicker"]["return_velocity"].as<float>();
 	}
 
-    void KickBalancer::computeMotion(const Sensors& sensors){
+    void KickBalancer::computeMotion(const Sensors& sensors) {
         Transform3D torsoToFoot = getTorsoPose(sensors);
 
         int negativeIfRight = (supportFoot == LimbID::RIGHT_LEG) ? -1 : 1;
@@ -64,15 +65,20 @@ namespace motion{
         distance = arma::norm(startPose.translation() - finishPose.translation());
     }
 
-    void FootLifter::computeMotion(const Sensors&){
+    void FootLifter::computeMotion(const Sensors&) {
         startPose = arma::eye(4,4);
         
-        finishPose = startPose.translate(arma::vec3({-lift_foot_back,0,lift_foot_height}));
+        if(stage == MotionStage::STOPPING) {
+            finishPose = startPose.translate(arma::vec3({-lift_foot_back,0,put_foot__down_height}));
+        }
+        else {
+            finishPose = startPose.translate(arma::vec3({-lift_foot_back,0,lift_foot_height}));
+        }
         
         distance = arma::norm(startPose.translation() - finishPose.translation());
     }
 
-    void Kicker::computeMotion(const Sensors& sensors){
+    void Kicker::computeMotion(const Sensors& sensors) {
         startPose = arma::eye(4,4);
         
         Transform3D currentTorso = getTorsoPose(sensors);

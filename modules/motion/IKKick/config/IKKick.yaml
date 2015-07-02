@@ -11,7 +11,7 @@ servo:
 
 balancer:
   foot_separation: 0.074 # 0.074 = hip separation
-  adjustment: 0 #default value is 0. 
+  adjustment: 0 # m #default value is 0. 
   stand_height: 0.22 #m 
   forward_lean: 0.0 #m
   
@@ -21,6 +21,7 @@ balancer:
 
 lifter:
   lift_foot_height: 0.05 #m
+  put_foot_down_height: 0.045 #m #default value is lift_foot_height
   lift_foot_back: 0.01 #m
   forward_velocity: 0.1 #m/s
   return_velocity: 0.1 #m/s
