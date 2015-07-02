@@ -36,6 +36,7 @@ namespace motion{
         forward_lean = config["balancer"]["forward_lean"].as<float>();
         tolerance = config["balancer"]["tolerance"].as<float>();
         foot_separation = config["balancer"]["foot_separation"].as<float>();
+        adjustment = config["balancer"]["adjustment"].as<float>();
         forward_velocity = config["kicker"]["forward_velocity"].as<float>();
         return_velocity = config["kicker"]["return_velocity"].as<float>();
 	}
@@ -58,7 +59,7 @@ namespace motion{
         startPose = getTorsoPose(sensors);
         
         finishPose = startPose;
-        finishPose.translation() = arma::vec3({forward_lean, negativeIfRight * DarwinModel::Leg::FOOT_CENTRE_TO_ANKLE_CENTRE, stand_height});
+        finishPose.translation() = arma::vec3({forward_lean, negativeIfRight *(FOOT_CENTRE_TO_ANKLE_CENTRE + adjustment), stand_height});
         
         distance = arma::norm(startPose.translation() - finishPose.translation());
     }

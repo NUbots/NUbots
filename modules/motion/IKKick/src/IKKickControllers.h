@@ -135,6 +135,7 @@ namespace motion{
 			float forward_lean = 0.01;
 			float forward_velocity = 0.1;
 			float return_velocity = 0.1;
+			float adjustment = 0.011;
 
 		public:
 			virtual utility::math::matrix::Transform3D getFootPose(const messages::input::Sensors& sensors, float deltaT);

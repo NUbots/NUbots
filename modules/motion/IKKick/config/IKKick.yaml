@@ -11,6 +11,7 @@ servo:
 
 balancer:
   foot_separation: 0.074 # 0.074 = hip separation
+  adjustment: 0 #default value is 0. 
   motion_gain: 10 # gain per second
   stand_height: 0.22 #m 
   forward_lean: 0.01 #m
