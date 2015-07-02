@@ -19,6 +19,7 @@
 
 #include "LUTClassifier.h"
 #include "QuexClassifier.h"
+#include "utility/math/geometry/ParametricLine.h"
 
 namespace modules {
     namespace vision {
@@ -44,8 +45,8 @@ namespace modules {
             drawCeiling.distance += VISUAL_HORIZON_BUFFER;
 
             // Get all the tangential distances along the line
-            arma::mat::fixed<4,2> corners({0,width,0,width,0,0,height,height});
-            auto tangentialPoints = corners * arma::vec2({ -drawCeiling.normal[1], drawCeiling.normal[0] });
+            arma::mat::fixed<4,2> corners({0, width, 0, width, 0, 0, height, height});
+            auto tangentialPoints = corners * drawCeiling.tangent();
 
             // Get the points we will be starting from on the line
             auto linePoints = arma::linspace(std::ceil(tangentialPoints.min()),
@@ -53,12 +54,13 @@ namespace modules {
                                              std::floor(std::abs(tangentialPoints.max()
                                                       - tangentialPoints.min()) / VISUAL_HORIZON_SPACING));
 
+            // std::cout << linePoints << std::endl;
 
-            1,0,0
-            0,1,0
-            1,0,width
-            0,1,height
-            drawCeiling
+            // 1,0,0
+            // 0,1,0
+            // 1,0,width
+            // 0,1,height
+            // drawCeiling
 
 
 

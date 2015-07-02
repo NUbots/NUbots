@@ -53,20 +53,11 @@ namespace geometry {
     }
 
     double Line::tangentialDistanceToPoint(const arma::vec2& x) const {
-        return arma::dot(arma::vec2({ -normal[1], normal[0] }), x);
+        return arma::dot(tangent(), x);
     }
 
     arma::vec2 Line::pointFromTangentialDistance(const double& x) const {
-        return normal * distance + arma::vec2({ -normal[1], normal[0] }) * x;
-    }
-
-    arma::vec2 Line::intersect(const Line& other) {
-dot(o1-o2, rotate90(n1)) * rotate90(n1) + o1
-
-
-
-        ((normal * distance) - (other.normal * other.distance)) * arma::vec2({ -normal[1], normal[0] })
-        * (arma::vec2({ -normal[1], normal[0] }) + (normal * distance));
+        return normal * distance + tangent() * x;
     }
 
     bool Line::isHorizontal() const {
@@ -87,6 +78,34 @@ dot(o1-o2, rotate90(n1)) * rotate90(n1) + o1
         result.normal = normal;
         result.distance = arma::dot(x, normal);
         return result;
+    }
+
+    arma::vec2 Line::tangent() const {
+        return {-normal[1], normal[0]};
+    }
+
+    arma::vec2 Line::intersect(const Line& line) const {
+
+        arma::vec2 direction1 = tangent();
+        arma::vec2 direction2 = line.tangent();
+        arma::vec2 point1 = pointFromTangentialDistance(0);
+        arma::vec2 point2 = line.pointFromTangentialDistance(0);
+
+        //Setup linear equations:
+        arma::mat Ainverse;
+        //Check extended lines intersect at all
+        double determinant = - direction1[0] * direction2[1] + direction1[1] * direction2[0];
+        if (determinant == 0) {
+            throw std::domain_error("Line::intersect - Lines do not intersect (parallel)");
+        } else {
+            Ainverse << -direction2[1] << direction2[0] << arma::endr
+                     << -direction1[1] << direction1[0];
+            Ainverse *= 1 / determinant;
+        }
+
+        arma::vec/*2*/ tValues = Ainverse * (arma::vec(point2) - arma::vec(point1));  //arma::meat
+
+        return point1 + tValues[0] * direction1;
     }
 
 }
