@@ -192,6 +192,7 @@ namespace motion {
                 kickFootGoal =  supportFootPose.translate(arma::vec3({0, negativeIfKickRight * foot_separation, 0}));
             }
             emit(graph("comDiff", balancer.comDiff));
+            emit(graph("com", balancer.centreOfMass_foot));
             // if(lifter.isRunning()){
             //     // std::cout << "lifter is running" << std::endl;
             //     //TODO: CHECK ORDER

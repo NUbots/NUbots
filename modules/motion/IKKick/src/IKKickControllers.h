@@ -104,16 +104,20 @@ namespace motion{
 
 		class KickBalancer : public SixDOFMotionController{
 		private:
+			//Config
 			float stand_height = 0.18;
 			float tolerance = 0.01;
 			float foot_separation = 0.074;
 
+			//State
+			utility::math::matrix::Transform3D torsoOrientation;
 		public:
 			virtual utility::math::matrix::Transform3D getFootPose(const messages::input::Sensors& sensors, float deltaT);
 			virtual void configure(const messages::support::Configuration<IKKickConfig>& config);
 			virtual void computeMotion(const messages::input::Sensors& sensors);
 			//TODO:Remove this variable
 			arma::vec3 comDiff;
+			arma::vec3 centreOfMass_foot;
 		};
 
 		class FootLifter : public SixDOFMotionController{

@@ -51,11 +51,12 @@ namespace motion{
         return_velocity = config["kicker"]["return_velocity"].as<float>();
 	}
 
-    void KickBalancer::computeMotion(const Sensors&){
-
+    void KickBalancer::computeMotion(const Sensors& sensors){
+        torsoOrientation = getTorsoPose(sensors);
+        torsoOrientation.translation() = arma::zeros(3);
     }
 
-    void FootLifter::computeMotion(const Sensors& sensors){
+    void FootLifter::computeMotion(const Sensors&){
         startPose = arma::eye(4,4);
         finishPose = startPose.translate(arma::vec3({-lift_foot_back,0,lift_foot_height}));
         distance = arma::norm(startPose.translation() - finishPose.translation());
@@ -83,7 +84,7 @@ namespace motion{
 
         Transform3D torsoPose = getTorsoPose(sensors);
         
-        arma::vec3 centreOfMass_foot = torsoPose.transformPoint(sensors.centreOfMass.rows(0,2));
+        centreOfMass_foot = torsoPose.transformPoint(sensors.centreOfMass.rows(0,2));
         arma::vec3 comGoal;
         //Select the COM position depending on stage
         if(stage == MotionStage::RUNNING){
@@ -93,8 +94,8 @@ namespace motion{
         }
         comDiff = comGoal - centreOfMass_foot;
 
-        Transform3D torsoTarget = torsoPose;
-        torsoTarget.translation() += comDiff;
+        Transform3D torsoTarget = torsoOrientation;
+        torsoTarget.translation() = torsoPose.translation() + comDiff;
 
         float error = arma::norm(torsoPose.submat(0,3,2,3) - torsoTarget.submat(0,3,2,3));
         std::cout << "error" << error << std::endl;
@@ -107,8 +108,13 @@ namespace motion{
         //WARNING: DO NOT SWAP stable CHECK AND newTorsoPose OR YOU WILL BREAK ROBOTS
         stable = error < tolerance;
         if(stable && stage == MotionStage::STOPPING) stage = MotionStage::FINISHED;
+        //Interpolate both rotation and translation
+        // Transform3D newTorsoPose = utility::math::matrix::Transform3D::interpolate(torsoPose, torsoTarget, deltaT * motion_gain);
         
-        Transform3D newTorsoPose = utility::math::matrix::Transform3D::interpolate(torsoPose, torsoTarget, deltaT * motion_gain);
+        //Interpolate just translation
+        float alpha = deltaT * motion_gain;
+        Transform3D newTorsoPose = torsoTarget;
+        newTorsoPose.translation() = alpha * (torsoTarget.translation() - torsoPose.translation()) + torsoPose.translation();
 
         //TODO: guard against invalid IK request
         return newTorsoPose.i();
