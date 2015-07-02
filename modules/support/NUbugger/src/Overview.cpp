@@ -25,6 +25,7 @@
 #include "messages/vision/VisionObjects.h"
 
 #include "utility/time/time.h"
+#include "utility/localisation/transform.h"
 
 /**
  * @author Monica Olejniczak
@@ -43,6 +44,7 @@ namespace support {
     using VisionBall = messages::vision::Ball;
 
     using utility::time::getUtcTimestamp;
+    using utility::localisation::transform::RobotToWorldTransform;
 
     /**
      * @brief Provides triggers to send overview information over the network using the overview
@@ -103,16 +105,24 @@ namespace support {
 
         }));
 
-        handles["overview"].push_back(on<Trigger<std::vector<LocalisationBall>>, Options<Single, Priority<NUClear::LOW>>>([this](const std::vector<LocalisationBall>& balls) {
+        handles["overview"].push_back(on<Trigger<std::vector<LocalisationBall>>, With<std::vector<Self>>, Options<Single, 
+            Priority<NUClear::LOW>>>([this](const std::vector<LocalisationBall>& balls, const std::vector<Self>& selfs) {
 
-            // Retrieve the first ball in the vector.
+            // Retrieve the first ball and self in the vector.            
             LocalisationBall ball = balls.front();
+            Self self = selfs.front();
 
-            // Set ball position.
+            // Set local ball position.
             auto* ballPosition = overview.mutable_ball_position();
             arma::vec2 position = ball.position;
             ballPosition->set_x(position[0]);
             ballPosition->set_y(position[1]);          
+
+            // Set world ball position.
+            auto* ballWorldPosition = overview.mutable_ball_world_position();
+            arma::vec2 worldPosition = RobotToWorldTransform(self.position, self.heading, position);
+            ballWorldPosition->set_x(worldPosition[0]);
+            ballWorldPosition->set_y(worldPosition[1]);  
 
         }));
 
