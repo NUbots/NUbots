@@ -191,7 +191,7 @@ namespace motion {
             
             if(balancer.isRunning()){
                 // std::cout << "balancer is running" << std::endl;
-                Transform3D supportFootPose = balancer.getFootPose(sensors, deltaT);
+                Transform3D supportFootPose = balancer.getFootPose(sensors);
                 supportFootGoal = supportFootPose;
                 kickFootGoal =  supportFootPose.translate(arma::vec3({0, negativeIfKickRight * foot_separation, 0}));
             }
@@ -200,12 +200,12 @@ namespace motion {
             if(lifter.isRunning()){
                 // std::cout << "lifter is running" << std::endl;
                 //TODO: CHECK ORDER
-                kickFootGoal *= lifter.getFootPose(sensors, deltaT);
+                kickFootGoal *= lifter.getFootPose(sensors);
             }
             if(kicker.isRunning()){
                 // std::cout << "kicker is running" << std::endl;
                 //TODO: CHECK ORDER
-                kickFootGoal *= kicker.getFootPose(sensors, deltaT);
+                kickFootGoal *= kicker.getFootPose(sensors);
             }
 
             //Calculate IK and send waypoints
