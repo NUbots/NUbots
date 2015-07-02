@@ -75,12 +75,7 @@ namespace motion {
             EXECUTION_PRIORITY = config["execution_priority"].as<float>();
 
             foot_separation = config["balancer"]["foot_separation"].as<float>();
-
-            emit(std::make_unique<KickCommand>(
-                config["target"].as<arma::vec3>(),
-                config["direction"].as<arma::vec3>()
-            ));
-
+            
             gain_legs =config["servo"]["gain"].as<float>();
             torque = config["servo"]["torque"].as<float>();
 
