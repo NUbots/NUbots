@@ -226,8 +226,43 @@ namespace geometry {
 
     }
 
+    std::pair<arma::vec2, arma::vec2> Quad::getIntersectionPoints(Line line) const {
+
+        std::pair<arma::vec2, arma::vec2> points;
+
+        std::vector<ParametricLine<>> quadLines = {
+            ParametricLine<>(tl, tr, true),
+            ParametricLine<>(tr, br, true),
+            ParametricLine<>(bl, br, true),
+            ParametricLine<>(bl, tl, true)
+        };
+
+        int counter = 0;
+        ParametricLine<> pLine(line.pointFromTangentialDistance(0), line.pointFromTangentialDistance(1));
+        for (auto& quadLine : quadLines) {
+            try {
+                if (counter == 0) {
+                    points.first = pLine.intersect(quadLine);
+                    counter++;
+                } else {
+                    points.second = pLine.intersect(quadLine);
+                    counter++;
+                    break;
+                }
+            } catch (std::domain_error&) {
+                // did not intersect, ignore
+            }
+        }
+        if (counter < 2) {
+            throw std::domain_error("Quad::intersect - Line does not not intersect quad");
+        }
+
+        return points;
+
+    }
+
     Quad Quad::getBoundingBox(const std::vector<arma::vec2>& points){
-        //Check for 
+        //Check for
         if(points.size() <= 0){
             throw std::domain_error("Request made for bounding box for empty list of points!");
         }
@@ -247,7 +282,7 @@ namespace geometry {
                     {min_x,min_y},
                     {min_x,max_y},
                     {max_x,max_y},
-                    {max_x,min_y}                    
+                    {max_x,min_y}
                     );
     }
 

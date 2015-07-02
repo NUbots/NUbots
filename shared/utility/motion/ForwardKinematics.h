@@ -342,8 +342,8 @@ namespace kinematics {
     inline utility::math::geometry::Line calculateHorizon(const math::matrix::Rotation3D groundToCamRotation, double cameraDistancePixels) {
 
         // Normal of the line is the y and z of the z axis, however in the image the y axis is negated
-        arma::vec2 normal = arma::normalise(groundToCamRotation.submat(1,2,2,2));
-        double distance = cameraDistancePixels * -std::tan(std::acos(groundToCamRotation(0,2)) - M_PI_2);
+        arma::vec2 normal = -arma::normalise(groundToCamRotation.submat(1,2,2,2));
+        double distance = cameraDistancePixels * std::tan(std::acos(groundToCamRotation(0,2)) - M_PI_2);
 
         return utility::math::geometry::Line(normal, distance);
     }

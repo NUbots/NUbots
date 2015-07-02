@@ -20,6 +20,8 @@
 #include "LUTClassifier.h"
 #include "QuexClassifier.h"
 #include "utility/math/geometry/ParametricLine.h"
+#include "utility/math/geometry/Quad.h"
+#include "utility/nubugger/NUhelpers.h"
 
 namespace modules {
     namespace vision {
@@ -29,6 +31,8 @@ namespace modules {
         using messages::vision::ObjectClass;
         using messages::vision::ClassifiedImage;
         using utility::math::geometry::Line;
+        using utility::math::geometry::Quad;
+        using utility::nubugger::drawVisionLines;
 
         void LUTClassifier::findVisualHorizon(const Image& image, const LookUpTable& lut, ClassifiedImage<ObjectClass>& classifiedImage) {
 
@@ -42,17 +46,50 @@ namespace modules {
 
             // Move the horizon up by VISUAL_HORIZON_BUFFER
             Line drawCeiling = horizon;
-            drawCeiling.distance += VISUAL_HORIZON_BUFFER;
+            drawCeiling.distance -= VISUAL_HORIZON_BUFFER;
 
             // Get all the tangential distances along the line
             arma::mat::fixed<4,2> corners({0, width, 0, width, 0, 0, height, height});
             auto tangentialPoints = corners * drawCeiling.tangent();
 
             // Get the points we will be starting from on the line
-            auto linePoints = arma::linspace(std::ceil(tangentialPoints.min()),
-                                             std::floor(tangentialPoints.max()),
-                                             std::floor(std::abs(tangentialPoints.max()
-                                                      - tangentialPoints.min()) / VISUAL_HORIZON_SPACING));
+            auto lineTangentLengths = arma::linspace(0,
+                                                     std::floor(tangentialPoints.max()),
+                                                     std::floor(std::abs(tangentialPoints.max()
+                                                              - tangentialPoints.min()) / VISUAL_HORIZON_SPACING));
+
+
+            Quad quad(arma::vec2({0, height}), arma::vec2({0, 0}), arma::vec2({width, 0}), arma::vec2({width, height}));
+
+
+            std::vector<std::tuple<arma::ivec2, arma::ivec2, arma::vec4>> allThePoints;
+
+            for (double lineTangentLength : lineTangentLengths) {
+
+                arma::vec2 point1 = drawCeiling.pointFromTangentialDistance(lineTangentLength);
+                arma::vec2 point2 = point1 + drawCeiling.normal;
+
+                Line line(point1, point2);
+
+                try {
+                    auto points = quad.getIntersectionPoints(line);
+
+                    allThePoints.push_back(std::make_tuple(arma::ivec2({points.first[0], points.first[1]}), arma::ivec2({points.second[0], points.second[1]}), arma::vec4({0, 1, 0, 1})));
+
+                    // NUClear::log("good", points.first.t(), points.second.t());
+                } catch (std::domain_error&) {
+                    // nobody cares
+                }
+
+            }
+
+            emit(drawVisionLines(allThePoints));
+
+            // std::vector<std::pair<arma::vec2, arma::vec2>> linePoints;
+
+            // linePoints.push_back({
+
+            // })
 
             // std::cout << linePoints << std::endl;
 
