@@ -29,11 +29,12 @@
 
 #include "utility/localisation/transform.h"
 #include "utility/math/matrix/Transform2D.h"
+#include "utility/math/geometry/Circle.h"
 #include "messages/support/Configuration.h"
 #include "messages/input/Sensors.h"
 #include "messages/localisation/FieldObject.h"
 #include "messages/behaviour/WalkPath.h"
-
+#include "messages/support/FieldDescription.h"
 
 namespace modules {
 namespace behaviour {
@@ -41,20 +42,33 @@ namespace planning {
 
 	using messages::localisation::Ball;
     using messages::localisation::Self;
-    using utility::math::matrix::Transform2D;
     using messages::behaviour::WalkPath;
+    using messages::support::FieldDescription;
+    using utility::math::matrix::Transform2D;
+    using utility::math::geometry::Circle;
 
     class PathPlanner {
-        public:
+    public:
 
-        PathPlanner() {
-        }
+        struct Config {
+            float goalpost_safety_margin = 0;
+            float ball_obstacle_margin = 0;
+            bool calculate_debug_planning_tree = false;
+            // float ball_obstacle_radius = 0;
+            // arma::vec2 ball_obstacle_offset = {0, 0};
+        } cfg_;
 
-        std::unique_ptr<WalkPath> obstacleFreePathBetween(Transform2D start, Transform2D goal, arma::vec2 ballPos, double timeLimit);
+
+        PathPlanner() {}
+        PathPlanner(const FieldDescription& desc, const PathPlanner::Config& config);
+
+        std::unique_ptr<WalkPath> obstacleFreePathBetween(Transform2D start, Transform2D goal, Transform2D ballSpace, double timeLimit);
 
         std::unique_ptr<WalkPath> omplPathToWalkPath(ompl::base::PathPtr omplPath);
 
-        ompl::base::PathPtr omplPlanPath(Transform2D start, Transform2D goal, arma::vec2 ballPos, double timeLimit);
+        ompl::base::PathPtr omplPlanPath(Transform2D start, Transform2D goal, Transform2D ballSpace, double timeLimit);
+
+        Circle getBallObstacle(Transform2D ballSpace);
 
         // The state space used for the last planning run:
         ompl::base::StateSpacePtr stateSpace;
@@ -62,9 +76,10 @@ namespace planning {
         // The graph generated to calculate the optimal path:
         std::vector<arma::vec> debugPositions;
         std::vector<uint> debugParentIndices;
-        
-    	private:
 
+	// private:
+        std::vector<Circle> staticObstacles;
+        float ballRadius = 0.05;
     };
 }
 }

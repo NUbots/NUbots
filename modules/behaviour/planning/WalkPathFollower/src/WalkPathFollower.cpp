@@ -57,6 +57,10 @@ namespace planning {
 
         on<Trigger<Configuration<WalkPathFollower>>>([this] (const Configuration<WalkPathFollower>& config) {
             // Use configuration here from file WalkPathFollower.yaml
+
+            cfg_.waypoint_visit_distance = config["waypoint_visit_distance"].as<float>();
+            cfg_.draw_estimated_path = config["draw_estimated_path"].as<bool>();
+
         });
 
         on<Trigger<KickFinished>>([this] (const KickFinished&) {
@@ -70,21 +74,19 @@ namespace planning {
              const WalkPath& walkPath,
              const std::vector<Self>& selfs
              ) {
-            // Reset all path following state:
 
             currentPath = walkPath;
 
-            if (selfs.empty() || currentPath.states.empty()) {
-                return;
+            // Draw the robot's estimated path:
+            if (cfg_.draw_estimated_path) {
+                if (selfs.empty() || currentPath.states.empty()) {
+                    return;
+                }
+                auto self = selfs.front();
+                Transform2D currentState = {self.position(0), self.position(1), vectorToBearing(self.heading)};
+                auto estPath = estimatedPath(currentState, currentPath, 0.01, 2000, 40);
+                emit(utility::nubugger::drawPath("WPF_EstimatedPath", estPath.states, 0.05, {1,0.8,0}));
             }
-            auto self = selfs.front();
-            Transform2D currentState = {self.position(0), self.position(1), vectorToBearing(self.heading)};
-            auto estPath = estimatedPath(currentState, currentPath, 0.01, 2000, 40);
-            emit(utility::nubugger::drawPath("WPF_EstimatedPath", estPath.states, 0.05, {1,0.8,0}));
-
-            // Set current state to 0:
-
-            // Set start time to current time:
         });
 
         on<Trigger<Every<20, Per<std::chrono::seconds>>>,
@@ -111,7 +113,7 @@ namespace planning {
 
             // Remove unnecessary (visited) states from the path:
             int removed = trimPath(currentState, currentPath);
-            if (removed) {
+            if (removed && cfg_.draw_estimated_path) {
                 auto estPath = estimatedPath(currentState, currentPath, 0.01, 2000, 40);
                 emit(utility::nubugger::drawPath("WPF_EstimatedPath", estPath.states, 0.05, {1,0.8,0}));
             }
@@ -154,8 +156,7 @@ namespace planning {
     bool WalkPathFollower::isVisited(const Transform2D& currentState, const Transform2D& visitState) {
         double dist = arma::norm(visitState.xy() - currentState.xy());
         
-        // TODO: Add waypoint visit distance to config.
-        return dist < 0.1;
+        return dist < cfg_.waypoint_visit_distance;
     }
 
     int WalkPathFollower::closestPathIndex(const Transform2D& currentState, const WalkPath& walkPath) {
@@ -178,6 +179,8 @@ namespace planning {
         auto dir = vectorToBearing(diff);
         double wcAngle = utility::math::angle::signedDifference(dir, currentState.angle());
         
+        // TODO: Consider the heading of targetState in planning.
+
         WalkCommand command;
         command.command = {1, 0, wcAngle};
         return command;

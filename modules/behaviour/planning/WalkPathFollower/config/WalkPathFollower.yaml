@@ -1,0 +1,4 @@
+
+# Waypoints are considered 'visited' once the robot approaches within this
+# distance of them.
+waypoint_visit_distance: 0.1

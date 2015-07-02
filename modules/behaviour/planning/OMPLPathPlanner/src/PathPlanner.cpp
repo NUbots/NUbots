@@ -69,20 +69,26 @@ namespace planning {
     // (i.e. that the robot is not intersecting the ball)
     class DarwinBallValidityChecker : public ob::StateValidityChecker {
     public:
-        DarwinBallValidityChecker(const ob::SpaceInformationPtr& si, arma::vec2 ballPos) :
-            ob::StateValidityChecker(si), ballPos_(ballPos) {}
+        DarwinBallValidityChecker(const ob::SpaceInformationPtr& si, Circle ballObstable_, const std::vector<Circle> staticObstacles_) :
+            ob::StateValidityChecker(si),
+            ballObstable(ballObstable_),
+            staticObstacles(staticObstacles_) {}
 
         bool isValid(const ob::State* state) const {
 
             auto pos = omplState2Transform2d(state);
 
-            // TODO: Add goalposts as obstacles.
-
-            // TODO: Use a FieldDescription from the config system for the ball radius.
-            Circle ballCircle(0.05, ballPos_);
+            // TODO: Load the robot dimensions from a config file.
             RotatedRectangle robotRect(pos, {0.12, 0.17});
 
-            return !intersection::test(ballCircle, robotRect);
+            // Check goalposts:
+            for (auto& obs : staticObstacles) {
+                if (intersection::test(obs, robotRect)) {
+                    return false;
+                }
+            }
+
+            return !intersection::test(ballObstable, robotRect);
 
             // Distance formula between two points, offset by the circle's radius:
             // auto bx = ball_.position(0);
@@ -90,7 +96,8 @@ namespace planning {
             // return sqrt((pos.x()-bx)*(pos.x()-bx) + (pos.y()-by)*(pos.y()-by)) - 0.05;
         }
 
-        arma::vec2 ballPos_;
+        Circle ballObstable;
+        std::vector<Circle> staticObstacles;
     };
 
     class DarwinPathOptimisationObjective : public ob::OptimizationObjective {
@@ -148,9 +155,27 @@ namespace planning {
     }
 
 
-    std::unique_ptr<WalkPath> PathPlanner::obstacleFreePathBetween(Transform2D start, Transform2D goal, arma::vec2 ballPos, double timeLimit) {
-        auto omplPath = omplPlanPath(start, goal, ballPos, timeLimit);
+    PathPlanner::PathPlanner(const FieldDescription& desc, const PathPlanner::Config& cfg) : cfg_(cfg) {
+        staticObstacles.clear();
+        
+        auto goalObsRad = cfg_.goalpost_safety_margin + desc.dimensions.goalpost_diameter*0.5;
+        staticObstacles.push_back(Circle(goalObsRad, desc.goalpost_own_l));
+        staticObstacles.push_back(Circle(goalObsRad, desc.goalpost_own_r));
+        staticObstacles.push_back(Circle(goalObsRad, desc.goalpost_opp_l));
+        staticObstacles.push_back(Circle(goalObsRad, desc.goalpost_opp_r));
+        ballRadius = desc.ball_radius;
+    }
+
+    std::unique_ptr<WalkPath> PathPlanner::obstacleFreePathBetween(Transform2D start, Transform2D goal, Transform2D ballSpace, double timeLimit) {
+        auto omplPath = omplPlanPath(start, goal, ballSpace, timeLimit);
+        
         auto walkPath = omplPathToWalkPath(omplPath);
+        if (walkPath != nullptr) {
+            walkPath->ballSpace = ballSpace;
+            walkPath->start = start;
+            walkPath->goal = goal;
+        }
+
         return std::move(walkPath);
     }
 
@@ -174,7 +199,18 @@ namespace planning {
         return std::move(walkPath);
     }
 
-    ompl::base::PathPtr PathPlanner::omplPlanPath(Transform2D start, Transform2D goal, arma::vec2 ballPos, double timeLimit) {
+    Circle PathPlanner::getBallObstacle(Transform2D ballSpace) {
+        float obsRad = ballRadius + cfg_.ball_obstacle_margin;
+        
+        Transform2D obsTrans = ballSpace.localToWorld({cfg_.ball_obstacle_margin, 0, 0});
+        
+        Circle ballObstacle(obsRad, obsTrans.xy());
+
+        return ballObstacle;
+    }
+
+
+    ompl::base::PathPtr PathPlanner::omplPlanPath(Transform2D start, Transform2D goal, Transform2D ballSpace, double timeLimit) {
         // Construct the robot state space in which we're planning.
         stateSpace = ob::StateSpacePtr(new ob::SE2StateSpace());
 
@@ -190,7 +226,8 @@ namespace planning {
         // Construct a space information instance for this state space:
         ob::SpaceInformationPtr si(new ob::SpaceInformation(stateSpace));
         // Set the object used to check which states in the space are valid
-        si->setStateValidityChecker(ob::StateValidityCheckerPtr(new DarwinBallValidityChecker(si, ballPos)));
+        auto ballObstacle = getBallObstacle(ballSpace);
+        si->setStateValidityChecker(ob::StateValidityCheckerPtr(new DarwinBallValidityChecker(si, ballObstacle, staticObstacles)));
         si->setup();
 
         // Set the starting state:
@@ -229,21 +266,23 @@ namespace planning {
                       << solution->length() << std::endl;
 
             // Print the entire graph:
-            debugPositions.clear();
-            debugParentIndices.clear();
-            ob::PlannerData pd(si);
-            optimizingPlanner->getPlannerData(pd);
-            for (unsigned int i = 0; i < pd.numVertices(); i++) {
-                auto t = omplState2Transform2d(pd.getVertex(i).getState());
-                // std::cout << t.t() << std::endl;
-                debugPositions.push_back(arma::vec(t.xy()));
+            if (cfg_.calculate_debug_planning_tree) {
+                debugPositions.clear();
+                debugParentIndices.clear();
+                ob::PlannerData pd(si);
+                optimizingPlanner->getPlannerData(pd);
+                for (unsigned int i = 0; i < pd.numVertices(); i++) {
+                    auto t = omplState2Transform2d(pd.getVertex(i).getState());
+                    // std::cout << t.t() << std::endl;
+                    debugPositions.push_back(arma::vec(t.xy()));
 
-                std::vector<unsigned int> edges;
-                int num = pd.getIncomingEdges(i, edges);
-                if (num > 0) {
-                    debugParentIndices.push_back(edges.front());
-                } else {
-                    debugParentIndices.push_back(i);
+                    std::vector<unsigned int> edges;
+                    int num = pd.getIncomingEdges(i, edges);
+                    if (num > 0) {
+                        debugParentIndices.push_back(edges.front());
+                    } else {
+                        debugParentIndices.push_back(i);
+                    }
                 }
             }
         }

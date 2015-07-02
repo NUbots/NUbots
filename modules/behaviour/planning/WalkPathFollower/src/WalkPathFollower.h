@@ -58,8 +58,15 @@ namespace planning {
         /// @brief the path to the configuration file for WalkPathFollower
         static constexpr const char* CONFIGURATION_PATH = "WalkPathFollower.yaml";
 
-        // NUClear::clock::time_point last_measurement_time;
         WalkPath currentPath;
+
+    private:
+        struct Config {
+            
+            float waypoint_visit_distance = 0.1;
+            bool draw_estimated_path = false;
+
+        } cfg_;
     };
 
 }

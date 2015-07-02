@@ -38,6 +38,15 @@ namespace planning {
 
     private:
     	PathPlanner pathPlanner;
+        NUClear::clock::time_point lastPlanningTime;
+
+		struct Config {
+            
+            float planning_interval = 5;
+            float planning_time_limit = 0.5;
+            bool draw_planning_tree = false;
+
+        } cfg_;
     };
 
 }

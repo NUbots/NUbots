@@ -27,7 +27,15 @@ namespace messages {
 namespace behaviour {
 
 	struct WalkPath { 
+		// Sequence of robot states that form a path:
 		std::vector<utility::math::matrix::Transform2D> states;
+
+		// The ball position and target bearing at the time of planning:
+		utility::math::matrix::Transform2D ballSpace;
+
+		// The start and goal states used for planning:
+		utility::math::matrix::Transform2D start;
+		utility::math::matrix::Transform2D goal;
 	};
 
 }
