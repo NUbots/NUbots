@@ -20,6 +20,7 @@
 #ifndef UTILITY_MATH_RANSAC_RANSACCIRCLEMODEL_H
 #define UTILITY_MATH_RANSAC_RANSACCIRCLEMODEL_H
 
+#include <array>
 #include <armadillo>
 #include "utility/math/geometry/Circle.h"
 
@@ -33,7 +34,7 @@ namespace ransac {
         static constexpr size_t REQUIRED_POINTS = 3;
         using DataPoint = arma::vec2;
 
-        bool regenerate(const std::vector<DataPoint>& points);
+        bool regenerate(const std::array<DataPoint, REQUIRED_POINTS>& points);
 
         double calculateError(const DataPoint& p) const;
 

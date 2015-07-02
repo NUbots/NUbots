@@ -78,7 +78,7 @@ namespace ransac {
             // Check we have enough points in each part
             for(uint i = 0; i < Model::REQUIRED_POINTS; ++i) {
                 if(std::distance(iterators[i], iterators[i + 1]) < 1) {
-                    return std::make_pair(last, RansacResult<Iterator>{ false, Model(), Iterator(), Iterator() });
+                    return RansacResult<Iterator>{ false, Model(), Iterator(), Iterator() };
                 }
             }
 
@@ -116,7 +116,7 @@ namespace ransac {
             if(largestConsensus >= minimumPointsForConsensus) {
 
                 // If we can, refine the model using the points in the consensus
-                model.refineModel(iterators.first(), iterators.last(), consensusErrorThreshold);
+                model.refineModel(iterators.front(), iterators.back(), consensusErrorThreshold);
 
                 // Split off the valid points in each part to the start of it
                 std::array<uint, Model::REQUIRED_POINTS> offsets;
@@ -130,12 +130,13 @@ namespace ransac {
                 }
 
                 // Now we split off all our new points into a global partition
-                auto newFirst = std::stable_partition(first, last, [consensusErrorThreshold, bestModel] (const DataPoint& point) {
+                auto newFirst = std::stable_partition(iterators.front(), iterators.back(), [consensusErrorThreshold, bestModel] (const DataPoint& point) {
                     return consensusErrorThreshold > bestModel.calculateError(std::forward<const DataPoint&>(point));
                 });
 
                 // We now start with this new first
-                iterators.first() = newFirst;
+                auto start = iterators.front();
+                iterators.front() = newFirst;
 
                 // Put in our new iterator points
                 for(uint i = 0; i < Model::REQUIRED_POINTS; ++i) {
@@ -144,11 +145,11 @@ namespace ransac {
                 }
 
                 // Return the result
-                return std::make_pair(newFirst, RansacResult<Iterator>{ true, bestModel, first, newFirst });
+                return RansacResult<Iterator>{ true, bestModel, start, newFirst };
             }
             else {
                 // We couldn't find a good enough set, return a flag that we failed
-                return std::make_pair(last, RansacResult<Iterator>{ false, Model(), Iterator(), Iterator() });
+                return RansacResult<Iterator>{ false, Model(), Iterator(), Iterator() };
             }
         }
 
