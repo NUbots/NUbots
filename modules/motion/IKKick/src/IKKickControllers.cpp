@@ -58,7 +58,7 @@ namespace motion{
 
         int negativeIfRight = (supportFoot == LimbID::RIGHT_LEG) ? -1 : 1;
         finishPose = torsoToFoot;
-        finishPose.translation() = arma::vec3({forward_lean, negativeIfRight * DarwinModel::Leg::FOOT_CENTRE_TO_ANKLE_CENTRE, stand_height});
+        finishPose.translation() = arma::vec3({forward_lean, negativeIfRight * (adjustment + DarwinModel::Leg::FOOT_CENTRE_TO_ANKLE_CENTRE), stand_height});
 
         startPose = torsoToFoot.i();
         finishPose = finishPose.i();
