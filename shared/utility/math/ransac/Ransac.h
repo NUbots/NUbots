@@ -56,19 +56,17 @@ namespace ransac {
 
             // Get random points between first and last
             uint range = std::distance(first, last);
-            std::vector<DataPoint> points;
+            std::array<DataPoint, Model::REQUIRED_POINTS> points;
             do {
-                points.clear();
                 std::set<uint64_t> indices;
 
                 while(indices.size() < Model::REQUIRED_POINTS) {
                     indices.insert(xorShift() % range);
-
                 }
 
-                for(auto& i : indices) {
-                    points.push_back(*std::next(first, i));
-
+                uint i = 0;
+                for(auto& index : indices) {
+                    points[i++]= *std::next(first, index);
                 }
 
                 // If this returns false then it was an invalid model

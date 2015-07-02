@@ -20,6 +20,7 @@
 #ifndef UTILITY_MATH_RANSAC_RANSACLINEMODEL_H
 #define UTILITY_MATH_RANSAC_RANSACLINEMODEL_H
 
+#include <array>
 #include "utility/math/geometry/Line.h"
 
 namespace utility {
@@ -33,10 +34,10 @@ namespace ransac {
 
         RansacLineModel() {}
 
-        bool regenerate(const std::vector<DataPoint>& pts);
+        bool regenerate(const std::array<DataPoint, REQUIRED_POINTS>& pts);
 
         double calculateError(const DataPoint& p) const;
-        
+
         template <typename Iterator>
         void refineModel(Iterator& first, Iterator& last, const double& candidateThreshold) {
             //refine model using least squares
