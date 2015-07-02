@@ -235,8 +235,8 @@ namespace support {
                         //Check if kick worked:
                         Transform2D relativeBallPose = world.robotPose.worldToLocal(world.ball.position);
 
-                        if( relativeBallPose.x() < kick_cfg.MAX_BALL_DISTANCE &&
-                            std::fabs(relativeBallPose.y()) < kick_cfg.KICK_CORRIDOR_WIDTH / 2){
+                        if( relativeBallPose.x() < kick_cfg.max_ball_distance &&
+                            std::fabs(relativeBallPose.y()) < kick_cfg.kick_corridor_width / 2){
                                 world.ball.position.rows(0,1) += world.robotPose.rotation() * lastKickCommand.direction.rows(0, 1);
                         }
                     }
