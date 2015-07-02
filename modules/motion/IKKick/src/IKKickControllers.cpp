@@ -53,7 +53,7 @@ namespace motion{
         return_velocity = config["kicker"]["return_velocity"].as<float>();
 	}
 
-    void KickBalancer::computeMotion(const Sensors& sensors) {
+    void KickBalancer::computeStartMotion(const Sensors& sensors) {
         Transform3D torsoToFoot = getTorsoPose(sensors);
 
         int negativeIfRight = (supportFoot == LimbID::RIGHT_LEG) ? -1 : 1;
@@ -65,20 +65,16 @@ namespace motion{
         distance = arma::norm(startPose.translation() - finishPose.translation());
     }
 
-    void FootLifter::computeMotion(const Sensors&) {
+    void FootLifter::computeStartMotion(const Sensors&) {
         startPose = arma::eye(4,4);
         
-        if(stage == MotionStage::STOPPING) {
-            finishPose = startPose.translate(arma::vec3({-lift_foot_back,0,put_foot__down_height}));
-        }
-        else {
-            finishPose = startPose.translate(arma::vec3({-lift_foot_back,0,lift_foot_height}));
-        }
+        finishPose = startPose.translate(arma::vec3({-lift_foot_back,0,lift_foot_height}));
         
         distance = arma::norm(startPose.translation() - finishPose.translation());
     }
 
-    void Kicker::computeMotion(const Sensors& sensors) {
+
+    void Kicker::computeStartMotion(const Sensors& sensors) {
         startPose = arma::eye(4,4);
         
         Transform3D currentTorso = getTorsoPose(sensors);
@@ -90,5 +86,16 @@ namespace motion{
 
         distance = arma::norm(startPose.translation() - finishPose.translation());
     }
+
+
+    void KickBalancer::computeStopMotion(){}
+
+    void FootLifter::computeStopMotion(){
+        startPose = startPose.translate(arma::vec3({0,0,put_foot_down_height}));
+        
+        distance = arma::norm(startPose.translation() - finishPose.translation());
+    }
+    
+    void Kicker::computeStopMotion(){}
 }
 }

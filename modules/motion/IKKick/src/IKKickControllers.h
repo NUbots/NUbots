@@ -65,12 +65,13 @@ namespace motion{
 				NUClear::clock::time_point stoppingCommandTime;
 			public:
 				
-				virtual void computeMotion(const messages::input::Sensors& sensors) = 0;
+				virtual void computeStartMotion(const messages::input::Sensors& sensors) = 0;
+				virtual void computeStopMotion() = 0;
 				void start(const messages::input::Sensors& sensors){
 					if(stage == MotionStage::READY){
 						stage = MotionStage::RUNNING;
 						stable = false;
-						computeMotion(sensors);
+						computeStartMotion(sensors);
         				motionStartTime = sensors.timestamp;
 					}
 				}
@@ -80,6 +81,7 @@ namespace motion{
 						stage = MotionStage::STOPPING;
 						stable = false;
 						stoppingCommandTime = NUClear::clock::now();
+						computeStopMotion();
 					}
 				}
 				bool isRunning()	{return stage == MotionStage::RUNNING || stage == MotionStage::STOPPING;}
@@ -135,7 +137,8 @@ namespace motion{
 			float adjustment = 0.011;
 		public:
 			virtual void configure(const messages::support::Configuration<IKKickConfig>& config);
-			virtual void computeMotion(const messages::input::Sensors& sensors);
+			virtual void computeStartMotion(const messages::input::Sensors& sensors);
+			virtual void computeStopMotion();
 
 		};
 
@@ -148,13 +151,15 @@ namespace motion{
 
 		public: 
 			virtual void configure(const messages::support::Configuration<IKKickConfig>& config);
-			virtual void computeMotion(const messages::input::Sensors& sensors);
+			virtual void computeStartMotion(const messages::input::Sensors& sensors);
+			virtual void computeStopMotion();
 		};
 
 		class Kicker : public SixDOFMotionController{
 		public:
 			virtual void configure(const messages::support::Configuration<IKKickConfig>& config);
-			virtual void computeMotion(const messages::input::Sensors& sensors);
+			virtual void computeStartMotion(const messages::input::Sensors& sensors);
+			virtual void computeStopMotion();
 		};
 
 	}
