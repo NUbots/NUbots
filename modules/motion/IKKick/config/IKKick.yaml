@@ -5,6 +5,10 @@ execution_priority: 40
 target: [0.1, 0, 0.05] #in support foot coordinates for debugging
 direction: [1, 0, 0]
 
+servo:
+  gain: 50
+  torque: 100
+
 balancer:
   foot_separation: 0.074 # 0.074 = hip separation
   motion_gain: 10 # gain per second

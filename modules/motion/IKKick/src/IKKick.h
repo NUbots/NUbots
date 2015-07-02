@@ -49,6 +49,9 @@ namespace motion {
     	float KICK_PRIORITY;
     	float EXECUTION_PRIORITY;
 
+        float gain_legs = 50;
+        float torque = 100;
+
         KickBalancer balancer;
         FootLifter lifter;
         Kicker kicker;

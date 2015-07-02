@@ -80,6 +80,10 @@ namespace motion {
                 config["target"].as<arma::vec3>(),
                 config["direction"].as<arma::vec3>()
             ));
+
+            gain_legs =config["servo"]["gain"].as<float>();
+            torque = config["servo"]["torque"].as<float>();
+
         });
 
         on<Trigger<KickCommand>>([this] (const KickCommand&) {
@@ -206,9 +210,6 @@ namespace motion {
 
             //Calculate IK and send waypoints
 
-            float gainLegs = 30;
-            float torque = 100;
-            
             std::vector<std::pair<messages::input::ServoID, float>> joints;
 
             // std::cout << "kickFootGoal\n" << kickFootGoal << std::endl;
@@ -224,7 +225,7 @@ namespace motion {
             time_t time = NUClear::clock::now() + std::chrono::nanoseconds(std::nano::den / UPDATE_FREQUENCY);
 
             for (auto& joint : joints) {
-                waypoints->push_back({ id, time, joint.first, joint.second, gainLegs, torque});
+                waypoints->push_back({ id, time, joint.first, joint.second, gain_legs, torque});
             }
 
             emit(std::move(waypoints));
