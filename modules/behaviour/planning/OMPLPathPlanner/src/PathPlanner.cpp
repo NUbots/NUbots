@@ -69,17 +69,22 @@ namespace planning {
     // (i.e. that the robot is not intersecting the ball)
     class DarwinBallValidityChecker : public ob::StateValidityChecker {
     public:
-        DarwinBallValidityChecker(const ob::SpaceInformationPtr& si, Circle ballObstable_, const std::vector<Circle> staticObstacles_) :
+        DarwinBallValidityChecker(
+            const ob::SpaceInformationPtr& si,
+            Circle ballObstable_,
+            const std::vector<Circle> staticObstacles_,
+            arma::vec2 robotFootprintDimensions_) :
             ob::StateValidityChecker(si),
             ballObstable(ballObstable_),
-            staticObstacles(staticObstacles_) {}
+            staticObstacles(staticObstacles_),
+            robotFootprintDimensions(robotFootprintDimensions_) {}
 
         bool isValid(const ob::State* state) const {
 
             auto pos = omplState2Transform2d(state);
 
             // TODO: Load the robot dimensions from a config file.
-            RotatedRectangle robotRect(pos, {0.12, 0.17});
+            RotatedRectangle robotRect(pos, robotFootprintDimensions);
 
             // Check goalposts:
             for (auto& obs : staticObstacles) {
@@ -98,6 +103,7 @@ namespace planning {
 
         Circle ballObstable;
         std::vector<Circle> staticObstacles;
+        arma::vec2 robotFootprintDimensions;
     };
 
     class DarwinPathOptimisationObjective : public ob::OptimizationObjective {
@@ -227,7 +233,7 @@ namespace planning {
         ob::SpaceInformationPtr si(new ob::SpaceInformation(stateSpace));
         // Set the object used to check which states in the space are valid
         auto ballObstacle = getBallObstacle(ballSpace);
-        si->setStateValidityChecker(ob::StateValidityCheckerPtr(new DarwinBallValidityChecker(si, ballObstacle, staticObstacles)));
+        si->setStateValidityChecker(ob::StateValidityCheckerPtr(new DarwinBallValidityChecker(si, ballObstacle, staticObstacles, cfg_.robot_footprint_dimensions)));
         si->setup();
 
         // Set the starting state:

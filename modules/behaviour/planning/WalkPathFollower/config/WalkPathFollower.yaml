@@ -2,3 +2,8 @@
 # Waypoints are considered 'visited' once the robot approaches within this
 # distance of them.
 waypoint_visit_distance: 0.1
+
+
+# Simulates and draws the path the robot is expected to take while attempting
+# to follow the current path:
+draw_estimated_path: false

@@ -83,7 +83,7 @@ namespace planning {
                     return;
                 }
                 auto self = selfs.front();
-                Transform2D currentState = {self.position(0), self.position(1), vectorToBearing(self.heading)};
+                Transform2D currentState = {self.position, vectorToBearing(self.heading)};
                 auto estPath = estimatedPath(currentState, currentPath, 0.01, 2000, 40);
                 emit(utility::nubugger::drawPath("WPF_EstimatedPath", estPath.states, 0.05, {1,0.8,0}));
             }
@@ -103,13 +103,14 @@ namespace planning {
             }
             auto self = selfs.front();
 
-            // TODO: Represent the path in a space that has the ball position
+            // TODO: Try representing the path in a space that has the ball position
             // as its origin, and the x-axis in the direction of the kick
             // target from the ball.
 
             // Get the robot's current state as a Transform2D:
-            Transform2D currentState = {self.position(0), self.position(1), vectorToBearing(self.heading)};
+            Transform2D currentState = {self.position, vectorToBearing(self.heading)};
             emit(utility::nubugger::drawRectangle("WPF_RobotFootprint", RotatedRectangle(currentState, {0.12, 0.17})));
+            emit(utility::nubugger::drawRectangle("WPF_GoalState", RotatedRectangle(currentPath.goal, {0.12, 0.17}), {0.4, 0.4, 0.4}, 0.123));
 
             // Remove unnecessary (visited) states from the path:
             int removed = trimPath(currentState, currentPath);

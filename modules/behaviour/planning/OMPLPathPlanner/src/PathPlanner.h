@@ -54,6 +54,7 @@ namespace planning {
             float goalpost_safety_margin = 0;
             float ball_obstacle_margin = 0;
             bool calculate_debug_planning_tree = false;
+            arma::vec2 robot_footprint_dimensions = {0.12, 0.17};
             // float ball_obstacle_radius = 0;
             // arma::vec2 ball_obstacle_offset = {0, 0};
         } cfg_;

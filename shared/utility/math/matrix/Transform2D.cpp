@@ -33,6 +33,11 @@ namespace matrix {
         zeros();
     }
 
+    Transform2D::Transform(const arma::vec2 xy_, double angle_) {
+        xy() = xy_;
+        angle() = angle_;
+    }
+
     Transform2D Transform2D::localToWorld(const Transform2D& reference) const {
         double cosAngle = std::cos(angle());
         double sinAngle = std::sin(angle());

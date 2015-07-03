@@ -30,8 +30,6 @@
 #include "utility/math/matrix/Transform2D.h"
 #include "utility/math/angle.h"
 #include "utility/math/geometry/Circle.h"
-#include "utility/math/geometry/RotatedRectangle.h"
-#include "utility/math/geometry/Intersection.h"
 
 namespace modules {
 namespace behaviour {
@@ -43,8 +41,6 @@ namespace planning {
     using utility::math::matrix::Transform2D;
     using utility::math::angle::vectorToBearing;
     using utility::math::geometry::Circle;
-    using utility::math::geometry::RotatedRectangle;
-    namespace intersection = utility::math::geometry::intersection;
 
     using LocalisationBall = messages::localisation::Ball;
     using Self = messages::localisation::Self;
@@ -67,10 +63,12 @@ namespace planning {
             cfg_.planning_time_limit = config["planning_time_limit"].as<float>();
             
             cfg_.draw_planning_tree = config["draw_planning_tree"].as<bool>();
+            cfg_.target_offset = config["target_offset"].as<arma::vec2>();
 
             PathPlanner::Config ppConfig;
             ppConfig.goalpost_safety_margin = config["goalpost_safety_margin"].as<float>();
             ppConfig.ball_obstacle_margin = config["ball_obstacle_margin"].as<float>();
+            ppConfig.robot_footprint_dimensions = config["robot_footprint_dimensions"].as<arma::vec2>();
             ppConfig.calculate_debug_planning_tree = cfg_.draw_planning_tree;
             // ppConfig.ball_obstacle_radius = config["ball_obstacle_radius"].as<float>();
             // ppConfig.ball_obstacle_offset = config["ball_obstacle_offset"].as<arma::vec2>();
@@ -103,6 +101,8 @@ namespace planning {
             auto self = selfs.front();
 
             // Enforce the planning interval:
+            // TODO: Override the planning interval if the environment has changed significantly.
+            // (or when a certain message is received?)
             auto now = NUClear::clock::now();
             auto msSinceLastPlan = std::chrono::duration_cast<std::chrono::microseconds>(now - lastPlanningTime).count();
             double timeSinceLastPlan = 1e-6 * static_cast<double>(msSinceLastPlan);
@@ -112,18 +112,23 @@ namespace planning {
             lastPlanningTime = now;
 
             // Generate a new path:
-            Transform2D start = {self.position(0), self.position(1), vectorToBearing(self.heading)};
-            Transform2D localGoal = {ball.position(0), ball.position(1), 0};
-
-            // Determine the goal position and heading:
-            arma::vec2 ballPos = start.localToWorld(localGoal).xy();
-            arma::vec2 goalHeading = kickPlan.target - ballPos;
-            arma::vec2 goalPosition = ballPos - 0.1 * arma::normalise(goalHeading);
-            double goalBearing = vectorToBearing(goalHeading);
-            Transform2D goal = {goalPosition(0), goalPosition(1), goalBearing};
+            // TODO: Support the old WalkPlan interface, allowing paths to points other than the ball.
+            // (still handle the ball offset automatically as below)
+            Transform2D start = {self.position, vectorToBearing(self.heading)};
+            Transform2D localGoal = {ball.position, 0};
 
             // Create the ball space (origin at ball pos, and x-axis along target kick direction):
-            Transform2D ballSpace = {ballPos(0), ballPos(1), goalBearing};
+            arma::vec2 ballPos = start.localToWorld(localGoal).xy();
+            arma::vec2 goalHeading = kickPlan.target - ballPos;
+            double goalBearing = vectorToBearing(goalHeading);
+            Transform2D ballSpace = {ballPos, goalBearing};
+            
+            // Determine the goal position and heading:
+            // TODO: Clean this up.
+            arma::vec2 ballSpaceGoal = arma::vec2({-0.5 * pathPlanner.cfg_.robot_footprint_dimensions(0), 0})
+                                     + arma::vec2({-pathPlanner.ballRadius, 0})
+                                     + cfg_.target_offset;
+            Transform2D goal = ballSpace.localToWorld({ballSpaceGoal, 0});
 
             // Draw obstacles:
             emit(utility::nubugger::drawCircle("OMPLPP_BallShadow", Circle(pathPlanner.ballRadius, ballSpace.xy()), 0.123, {1, 0.8, 0}));
@@ -136,6 +141,7 @@ namespace planning {
             }
 
             // Plan the path:
+            // TODO (not too important): Detect when the initial state is invalid, and handle it more intelligently.
             auto path = pathPlanner.obstacleFreePathBetween(start, goal, ballSpace, cfg_.planning_time_limit);
 
             // Emit the new path to NUSight:

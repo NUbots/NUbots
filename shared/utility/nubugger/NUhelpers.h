@@ -269,7 +269,7 @@ namespace nubugger {
         return std::move(drawObjects);
     }
 
-    inline std::unique_ptr<DrawObjects> drawRectangle(std::string name, RotatedRectangle rect, float timeout = TIMEOUT) {
+    inline std::unique_ptr<DrawObjects> drawRectangle(std::string name, RotatedRectangle rect, float z = 0.08, float timeout = TIMEOUT) {
 
         auto drawObjects = std::make_unique<DrawObjects>();
         auto* object = drawObjects->add_objects();
@@ -280,7 +280,7 @@ namespace nubugger {
         auto* objPosition = object->mutable_position();
         objPosition->set_x(rect.getPosition()(0));
         objPosition->set_y(rect.getPosition()(1));
-        objPosition->set_z(0.008);
+        objPosition->set_z(z);
 
         auto* objRotation = object->mutable_rotation();
         // objRotation->set_x(std::cos(rect.getRotation()));
