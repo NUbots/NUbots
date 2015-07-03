@@ -41,7 +41,7 @@ namespace skills {
     using messages::behaviour::ActionPriorites;
     using messages::motion::WalkStartCommand;
     using messages::input::LimbID;
-    using messages::motion::KickCommand;
+    using messages::motion::KickScriptCommand;
     using messages::motion::KickFinished;
 
     KickScript::KickScript(std::unique_ptr<NUClear::Environment> environment)
@@ -54,7 +54,7 @@ namespace skills {
             EXECUTION_PRIORITY = config["EXECUTION_PRIORITY"].as<float>();
         });
 
-        on<Trigger<KickCommand>>([this] (const KickCommand& kickCommand) {
+        on<Trigger<KickScriptCommand>>([this] (const KickScriptCommand& kickCommand) {
             auto direction = kickCommand.direction;
             auto leg = kickCommand.leg;
 

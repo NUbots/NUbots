@@ -42,6 +42,17 @@ namespace messages {
             , direction(direction) {}
         };
 
+        /**
+         * TODO document
+         *
+         * @author Trent Houliston
+         * @author Brendan Annable
+         */
+        struct KickScriptCommand {
+            arma::vec3 direction; // Direction to kick with magnitude determining force
+            messages::input::LimbID leg; // Leg to kick with
+        };
+
 
         struct KickPlannerConfig{
             float max_ball_distance;

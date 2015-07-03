@@ -94,20 +94,12 @@ namespace motion {
         });
 
         on<Trigger<KickCommand>, With<Sensors>>([this] (const KickCommand&, const Sensors& sensors) {
-            // We want to kick!
-            log("IKKICK: KickCommand received");
-            
+            // We want to kick!            
             emit(std::make_unique<WalkStopCommand>()); // Stop the walk
             updatePriority(KICK_PRIORITY);
         });
 
         on<Trigger<ExecuteKick>, With<KickCommand>, With<Sensors>>([this] (const ExecuteKick&, const KickCommand& command, const Sensors& sensors) {
-
-            log("Got a new kick!");
-            log("Target:", "x:", command.target[0], "y:", command.target[1], "z:", command.target[2]);
-            log("Direction:", "x:", command.direction[0], "y:", command.direction[1], "z:", command.direction[2]);
-            log("Ball Position in support foot coordinates:", "x:", ballPosition[0], "y:", ballPosition[1], "z:", ballPosition[2]);
-            log("Goal Direction in support foot coordinates:", "x:", goalPosition[0], "y:", goalPosition[1], "z:", goalPosition[2]);
 
             // Enable our kick pather
             updater.enable();
@@ -161,32 +153,26 @@ namespace motion {
 
             //State checker
             if(balancer.isStable()){
-                // std::cout << "balancer.isStable" << std::endl;
                 lifter.start(sensors);
             }
 
             if(lifter.isStable()){
-                // std::cout << "lifter.isStable" << std::endl;
                 kicker.start(sensors);
             }
 
             if(kicker.isStable()){
-                // std::cout << "kicker.isStable" << std::endl;
                 kicker.stop();
             }
 
             if(kicker.isFinished()){
-                // std::cout << "kicker.isFinished" << std::endl;
                 lifter.stop();
             }
 
             if(lifter.isFinished()){
-                // std::cout << "lifter.isFinished" << std::endl;
                 balancer.stop();
             }
 
             if(balancer.isFinished()){
-                // std::cout << "balancer.isFinished" << std::endl;
                 emit(std::move(std::make_unique<FinishKick>()));
             }
             
@@ -196,18 +182,15 @@ namespace motion {
             Transform3D supportFootGoal;
             
             if(balancer.isRunning()){
-                // std::cout << "balancer is running" << std::endl;
                 Transform3D supportFootPose = balancer.getFootPose(sensors);
                 supportFootGoal = supportFootPose;
                 kickFootGoal = supportFootPose.translate(arma::vec3({0, negativeIfKickRight * foot_separation, 0}));
             }
 
             if(lifter.isRunning()){
-                // std::cout << "lifter is running" << std::endl;
                 kickFootGoal *= lifter.getFootPose(sensors);
             }
             if(kicker.isRunning()){
-                // std::cout << "kicker is running" << std::endl;
                 kickFootGoal *= kicker.getFootPose(sensors);
             }
 
@@ -215,9 +198,7 @@ namespace motion {
 
             std::vector<std::pair<messages::input::ServoID, float>> joints;
 
-            // std::cout << "kickFootGoal\n" << kickFootGoal << std::endl;
             auto kickJoints = calculateLegJoints<DarwinModel>(kickFootGoal, kickFoot);
-            // std::cout << "supportFootGoal\n" << supportFootGoal << std::endl;
             auto supportJoints = calculateLegJoints<DarwinModel>(supportFootGoal, supportFoot);
             joints.insert(joints.end(),kickJoints.begin(),kickJoints.end());
             joints.insert(joints.end(),supportJoints.begin(),supportJoints.end());
@@ -248,9 +229,7 @@ namespace motion {
             "IK Kick",
             { std::pair<float, std::set<LimbID>>(0, { LimbID::LEFT_LEG, LimbID::RIGHT_LEG, LimbID::LEFT_ARM, LimbID::RIGHT_ARM }) },
             [this] (const std::set<LimbID>&) {
-                emit(std::make_unique<ExecuteKick>());
-                log("ExecuteKick");
-            },
+                emit(std::make_unique<ExecuteKick>());            },
             [this] (const std::set<LimbID>&) {
                 emit(std::make_unique<FinishKick>());
             },

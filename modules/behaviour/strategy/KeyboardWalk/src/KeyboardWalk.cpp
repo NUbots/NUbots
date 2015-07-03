@@ -170,8 +170,8 @@ namespace strategy {
 
     void KeyboardWalk::kickRightForward() {
         emit(std::make_unique<KickCommand>(KickCommand{
-            {1, 0, 0}, // vector pointing forward relative to robot
-            LimbID::RIGHT_LEG
+            {-0.05, 0, 0}, //Ball is right of centre for right kick
+            {1, 0, 0}
         }));
         log("right forward kick");
     }

@@ -222,9 +222,6 @@ namespace support {
                     world.ball.position.rows(0,1) = getPath(cfg_.ball.path);
 
                     world.ball.velocity = (world.ball.position - oldBallPose) / deltaT; //world coordinates
-                    emit(graph("sim ball vel",world.ball.velocity));
-                    emit(graph("oldBallPose",oldBallPose));
-                    emit(graph("world.ball.position",world.ball.position));
                     break;
 
                 case MotionType::MOTION:
@@ -236,7 +233,7 @@ namespace support {
                         //Check if kick worked:
                         Transform2D relativeBallPose = world.robotPose.worldToLocal(world.ball.position);
 
-                        world.ball.position.rows(0,1) += world.robotPose.rotation() * lastKickCommand.direction.rows(0, 1);
+                        world.ball.position.rows(0,1) += world.robotPose.rotation() * arma::normalise(lastKickCommand.direction.rows(0, 1));
 
                     }
                     break;
