@@ -1,7 +1,6 @@
-{
-	"MAX_BALL_DISTANCE" : 0.25,
-	"KICK_CORRIDOR_WIDTH" : 0.2,
-	"KICK_FORWARD_ANGLE_LIMIT" : 0.782,
-	"KICK_SIDE_ANGLE_LIMIT" : 0,
-	"FRAMES_NOT_SEEN_LIMIT" : 5
-}
+
+max_ball_distance: 0.25
+kick_corridor_width: 0.2
+kick_forward_angle_limit: 0.782
+kick_side_angle_limit: 0
+seconds_not_seen_limit: 0.5

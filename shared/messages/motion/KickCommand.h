@@ -34,19 +34,26 @@ namespace messages {
          * @author Brendan Annable
          */
         struct KickCommand {
+            arma::vec3 target; // The point to kick
             arma::vec3 direction; // force is the magnitude
-            input::LimbID leg;
+
+            KickCommand(const arma::vec3& target, const arma::vec3& direction)
+            : target(target)
+            , direction(direction) {}
         };
 
+
         struct KickPlannerConfig{
-            float MAX_BALL_DISTANCE;
-            float KICK_CORRIDOR_WIDTH;
-            float KICK_FORWARD_ANGLE_LIMIT;
-            float KICK_SIDE_ANGLE_LIMIT;
-            float FRAMES_NOT_SEEN_LIMIT;
+            float max_ball_distance;
+            float kick_corridor_width;
+            float seconds_not_seen_limit;
         };
 
         struct KickFinished{
+        };
+
+        struct IKKickParams{
+            float stand_height;
         };
 
     }  // motion

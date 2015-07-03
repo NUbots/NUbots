@@ -22,6 +22,7 @@
 
 #include <armadillo>
 #include "messages/motion/KickCommand.h"
+#include "messages/input/Sensors.h"
 
 #include <nuclear>
 namespace modules {
@@ -33,9 +34,8 @@ namespace planning {
         /// @brief Called by the powerplant to build and setup the KickPlanner reactor.
         explicit KickPlanner(std::unique_ptr<NUClear::Environment> environment);
         static constexpr const char* CONFIGURATION_PATH = "KickPlanner.yaml";
-
     private:
-        size_t framesNotSeen = 1000;
+        bool kickValid(const arma::vec3& ballPos, float standHeight, const messages::input::Sensors& sensors);
        	messages::motion::KickPlannerConfig cfg;
     };
 

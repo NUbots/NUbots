@@ -1,5 +1,5 @@
 /*
- * This file is part of the NUbots Codebase.
+ * This file is part of NUbots Codebase.
  *
  * The NUbots Codebase is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,27 +17,7 @@
  * Copyright 2013 NUBots <nubots@nubots.net>
  */
 
-#ifndef MESSAGES_BEHAVIOUR_SERVOCOMMAND_H
-#define MESSAGES_BEHAVIOUR_SERVOCOMMAND_H
 
-#include <nuclear>
-#include "messages/input/ServoID.h"
 
-namespace messages {
-    namespace behaviour {
-
-        struct ServoCommand {
-            size_t source;
-
-            NUClear::clock::time_point time;
-            input::ServoID id;
-            float position;
-            float gain;
-            float torque;
-        };
-
-    }
-}
-
-#endif
-
+#define CATCH_CONFIG_MAIN  // This tells Catch to provide a main() - only do this in one cpp file
+#include <catch.hpp>

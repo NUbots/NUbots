@@ -51,6 +51,29 @@ namespace kinematics {
         @param isLeft Request for left leg motors or right leg motors?
         @param RobotKinematicModel The class containing the leg model of the robot.
     */
+
+
+    template <typename RobotKinematicModel>
+    bool legPoseValid(utility::math::matrix::Transform3D target, messages::input::LimbID limb) {
+        const float HIP_OFFSET_Y = RobotKinematicModel::Leg::HIP_OFFSET_Y;
+        const float HIP_OFFSET_Z = RobotKinematicModel::Leg::HIP_OFFSET_Z;
+        const float HIP_OFFSET_X = RobotKinematicModel::Leg::HIP_OFFSET_X;
+        const float UPPER_LEG_LENGTH = RobotKinematicModel::Leg::UPPER_LEG_LENGTH;
+        const float LOWER_LEG_LENGTH = RobotKinematicModel::Leg::LOWER_LEG_LENGTH;
+
+        //Translate up foot
+        auto targetLeg = target.translate(arma::vec3({0,0,RobotKinematicModel::Leg::FOOT_HEIGHT}));
+        
+        //Remove hip offset
+        int negativeIfRight = (limb == messages::input::LimbID::RIGHT_LEG) ? -1 : 1;
+        arma::vec3 hipOffset = { HIP_OFFSET_X, negativeIfRight * HIP_OFFSET_Y, -HIP_OFFSET_Z};
+        targetLeg.translation() -= hipOffset;
+
+        float length = arma::norm(targetLeg.translation());
+        float maxLegLength = UPPER_LEG_LENGTH + LOWER_LEG_LENGTH;
+        return (length < maxLegLength);
+    }
+
     template <typename RobotKinematicModel>
     std::vector<std::pair<messages::input::ServoID, float>> calculateLegJoints(utility::math::matrix::Transform3D target, messages::input::LimbID limb) {
         const float LENGTH_BETWEEN_LEGS = RobotKinematicModel::Leg::LENGTH_BETWEEN_LEGS;
@@ -67,6 +90,9 @@ namespace kinematics {
         float knee = 0;
         float anklePitch = 0;
         float ankleRoll = 0;
+
+        //Correct for input referencing the bottom of the foot
+        target = target.translate(arma::vec3({0,0,RobotKinematicModel::Leg::FOOT_HEIGHT}));
 
         //TODO remove this. It was due to wrong convention use
         utility::math::matrix::Transform3D inputCoordinatesToCalcCoordinates;
@@ -95,13 +121,15 @@ namespace kinematics {
 
         arma::vec3 hipOffset = {LENGTH_BETWEEN_LEGS / 2.0, HIP_OFFSET_X, DISTANCE_FROM_BODY_TO_HIP_JOINT};
 
+        
         arma::vec3 targetLeg = anklePos - hipOffset;
 
         float length = arma::norm(targetLeg, 2);
-        if (length > UPPER_LEG_LENGTH+LOWER_LEG_LENGTH){
-            NUClear::log<NUClear::WARN>("InverseKinematics::calculateLegJoints : !!! WARNING !!! Requested position beyond leg reach. Scaling back requested vector.");
-            targetLeg *= (UPPER_LEG_LENGTH+LOWER_LEG_LENGTH)/length;
-            length = UPPER_LEG_LENGTH+LOWER_LEG_LENGTH;
+        float maxLegLength = UPPER_LEG_LENGTH + LOWER_LEG_LENGTH;
+        if (length > maxLegLength){
+            NUClear::log<NUClear::WARN>("InverseKinematics::calculateLegJoints : !!! WARNING !!! Requested position beyond leg reach.\n Scaling back requested vector from length ",length, " to ", maxLegLength);
+            targetLeg *= (maxLegLength)/length;
+            length = maxLegLength;
         }
         ////NUClear::log<NUClear::DEBUG>("Length: ", length);
         float sqrLength = length * length;
@@ -188,6 +216,14 @@ namespace kinematics {
         }
 
         return positions;
+    }
+
+    template <typename RobotKinematicModel>
+    std::vector<std::pair<messages::input::ServoID, float>> calculateLegJoints(utility::math::matrix::Transform3D leftTarget, utility::math::matrix::Transform3D rightTarget) {
+        auto joints = calculateLegJoints<RobotKinematicModel>(leftTarget, messages::input::LimbID::LEFT_LEG);
+        auto joints2 = calculateLegJoints<RobotKinematicModel>(rightTarget, messages::input::LimbID::RIGHT_LEG);
+        joints.insert(joints.end(), joints2.begin(), joints2.end());
+        return joints;
     }
 
     template <typename RobotKinematicModel>

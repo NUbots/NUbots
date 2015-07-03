@@ -139,7 +139,9 @@ namespace support {
         Transform2D oldRobotPose;
         Transform2D oldBallPose;
 
-        bool kicking;
+
+        bool kicking = false;
+        bool lastKicking = false;
         uint PLAYER_ID;
 
         time_t lastNow;

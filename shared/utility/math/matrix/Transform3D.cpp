@@ -105,6 +105,20 @@ namespace matrix {
         return reference * (*this);
     }
 
+
+    arma::vec3 Transform3D::transformPoint(const arma::vec3& p){
+        arma::vec4 p4 = arma::join_cols(p,arma::vec({1}));
+        arma::vec4 result4 = *this * p4;
+        return result4.rows(0,2);
+    }
+
+    arma::vec3 Transform3D::transformVector(const arma::vec3& p){
+        arma::vec4 p4 = arma::join_cols(p,arma::vec({0}));
+        arma::vec4 result4 = *this * p4;
+        return result4.rows(0,2);
+    }
+
+
     Transform3D Transform3D::i() const {
         // Create a new transform
         Transform3D inverseTransform3D;
@@ -143,14 +157,25 @@ namespace matrix {
     }
 
     Transform3D Transform3D::interpolate(Transform3D T1, Transform3D T2, float alpha){
-        UnitQuaternion q1 = UnitQuaternion(T1.rotation());
-        UnitQuaternion q2 = UnitQuaternion(T2.rotation());
+        Rotation3D r1 = T1.rotation();
+        UnitQuaternion q1 = UnitQuaternion(r1);
+        Rotation3D r2 = T2.rotation();
+        UnitQuaternion q2 = UnitQuaternion(r2);
 
         arma::vec3 t1 = T1.translation();
         arma::vec3 t2 = T2.translation();
 
-        auto qResult = q1.slerp(q2,alpha);
-        auto tResult = alpha * (t2 - t1) + t1;
+        UnitQuaternion qResult = q1.slerp(q2,alpha);
+        // std::cout << "qResult = \n" << qResult.t() << std::endl;
+        // std::cout << "q1 = \n" << q1.t() << std::endl;
+        // std::cout << "t1 = \n" << t1.t() << std::endl;
+        // std::cout << "r1 = \n" << r1  << std::endl;
+        // std::cout << "q2 = \n" << q2.t() << std::endl;
+        // std::cout << "t2 = \n" << t2.t() << std::endl;
+        // std::cout << "r2 = \n" << r2   << std::endl;
+        // std::cout << "alpha = \n" << alpha   << std::endl;
+        arma::vec3 tResult = alpha * (t2 - t1) + t1;
+        // std::cout << "tResult = \n" << tResult   << std::endl;
 
         Transform3D TResult = Transform3D(Rotation3D(qResult));
         TResult.translation() = tResult;
