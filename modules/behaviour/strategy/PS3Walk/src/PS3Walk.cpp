@@ -28,7 +28,7 @@ namespace modules {
 namespace behaviour {
 namespace strategy {
 
-    using messages::motion::KickCommand;
+    using messages::motion::KickScriptCommand;
     using messages::motion::WalkCommand;
     using messages::motion::WalkStartCommand;
     using messages::motion::WalkStopCommand;
@@ -76,7 +76,7 @@ namespace strategy {
                         /*case BUTTON_L1:
                             if (event.value > 0) { // button down
                                 NUClear::log("Requesting Left Side Kick");
-                                emit(std::make_unique<KickCommand>(KickCommand{
+                                emit(std::make_unique<KickScriptCommand>(KickScriptCommand{
                                     {0, -1, 0}, // vector pointing right relative to robot
                                     LimbID::LEFT_LEG
                                 }));
@@ -85,7 +85,7 @@ namespace strategy {
                         case BUTTON_L2:
                             if (event.value > 0) { // button down
                                 NUClear::log("Requesting Left Front Kick");
-                                emit(std::make_unique<KickCommand>(KickCommand{
+                                emit(std::make_unique<KickScriptCommand>(KickScriptCommand{
                                     {1, 0, 0}, // vector pointing forward relative to robot
                                     LimbID::LEFT_LEG
                                 }));
@@ -94,7 +94,7 @@ namespace strategy {
                         case BUTTON_R1:
                             if (event.value > 0) { // button down
                                 NUClear::log("Requesting Right Side Kick");
-                                emit(std::make_unique<KickCommand>(KickCommand{
+                                emit(std::make_unique<KickScriptCommand>(KickScriptCommand{
                                     {0, 1, 0}, // vector pointing left relative to robot
                                     LimbID::RIGHT_LEG
                                 }));
@@ -103,7 +103,7 @@ namespace strategy {
                         case BUTTON_R2:
                             if (event.value > 0) { // button down
                                 NUClear::log("Requesting Right Front Kick");
-                                emit(std::make_unique<KickCommand>(KickCommand{
+                                emit(std::make_unique<KickScriptCommand>(KickScriptCommand{
                                     {1, 0, 0}, // vector pointing forward relative to robot
                                     LimbID::RIGHT_LEG
                                 }));

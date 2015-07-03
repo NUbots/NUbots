@@ -167,6 +167,7 @@ namespace support {
             kickQueue.push(k);
             kicking = true;
         });
+
         on<Trigger<KickFinished>>("Simulator Kick Finished",[this](const KickFinished&){
             kicking = false;
         });
@@ -221,13 +222,10 @@ namespace support {
                     world.ball.position.rows(0,1) = getPath(cfg_.ball.path);
 
                     world.ball.velocity = (world.ball.position - oldBallPose) / deltaT; //world coordinates
-                    emit(graph("sim ball vel",world.ball.velocity));
-                    emit(graph("oldBallPose",oldBallPose));
-                    emit(graph("world.ball.position",world.ball.position));
                     break;
 
                 case MotionType::MOTION:
-                    if(!kickQueue.empty()){
+                    if(!kickQueue.empty() && !kicking && lastKicking){
                         //Get last queue
                         KickCommand lastKickCommand = kickQueue.back();
                         //Empty queue
@@ -235,13 +233,12 @@ namespace support {
                         //Check if kick worked:
                         Transform2D relativeBallPose = world.robotPose.worldToLocal(world.ball.position);
 
-                        if( relativeBallPose.x() < kick_cfg.MAX_BALL_DISTANCE &&
-                            std::fabs(relativeBallPose.y()) < kick_cfg.KICK_CORRIDOR_WIDTH / 2){
-                                world.ball.position.rows(0,1) += world.robotPose.rotation() * lastKickCommand.direction.rows(0, 1);
-                        }
+                        world.ball.position.rows(0,1) += world.robotPose.rotation() * arma::normalise(lastKickCommand.direction.rows(0, 1));
+
                     }
                     break;
             }
+
 
             // Emit the change in orientation as a DarwinSensors::Gyroscope,
             // to be handled by HardwareSimulator.
@@ -250,6 +247,7 @@ namespace support {
             oldRobotPose = world.robotPose;
             oldBallPose = world.ball.position;
             lastNow = now;
+            lastKicking = kicking;
         });
 
         // Simulate Vision

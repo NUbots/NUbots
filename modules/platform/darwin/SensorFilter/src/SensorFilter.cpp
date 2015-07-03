@@ -27,7 +27,6 @@
 #include "utility/math/geometry/UnitQuaternion.h"
 #include "utility/nubugger/NUhelpers.h"
 #include "utility/motion/ForwardKinematics.h"
-#include "utility/nubugger/NUhelpers.h"
 
 namespace modules {
     namespace platform {

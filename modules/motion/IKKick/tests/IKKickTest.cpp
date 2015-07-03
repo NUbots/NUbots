@@ -1,5 +1,5 @@
 /*
- * This file is part of the NUbots Codebase.
+ * This file is part of NUbots Codebase.
  *
  * The NUbots Codebase is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,30 +17,7 @@
  * Copyright 2013 NUBots <nubots@nubots.net>
  */
 
-#ifndef MESSAGES_MOTION_DIVECOMMAND_H
-#define MESSAGES_MOTION_DIVECOMMAND_H
 
-#include <nuclear>
-#include <armadillo>
-#include "messages/behaviour/Action.h"
 
-namespace messages {
-    namespace motion {
-
-        /**
-         * TODO document
-         *
-         * @author Trent Houliston
-         * @author Jake Fountain
-         */
-        struct DiveCommand {
-            arma::vec2 direction;
-        };
-
-        struct DiveFinished{
-        };
-        
-    }  // motion
-}  // messages
-
-#endif  // MESSAGES_MOTION_DIVECOMMAND_H
+#define CATCH_CONFIG_MAIN  // This tells Catch to provide a main() - only do this in one cpp file
+#include <catch.hpp>

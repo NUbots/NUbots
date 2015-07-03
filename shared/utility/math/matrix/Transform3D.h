@@ -79,7 +79,7 @@ namespace matrix {
             Transform(const arma::vec3& in);
 
             /**
-             * @brief Translate the current basis by the given 3D vector
+             * @brief Translate the current basis by the given 3D vector in local space
              *
              * @param translation The 3D translation vector to translate by
              * @return The transformed basis matrix
@@ -161,6 +161,9 @@ namespace matrix {
              */
             Transform3D localToWorld(const Transform3D& reference) const;
 
+            arma::vec3 transformPoint(const arma::vec3& p);
+            arma::vec3 transformVector(const arma::vec3& p);
+
             /**
              * @brief Performs an orthonormal inverse and returns a new copy
              * Note: Assumes current transform is orthonormal and invertible (which it should be given normal use)
@@ -177,7 +180,7 @@ namespace matrix {
             inline arma::subview<double> rotation() { return submat(0,0,2,2); }
 
             inline const arma::vec3 translation() const { return submat(0,3,2,3); }
-            inline arma::vec3 translation() { return submat(0,3,2,3); }
+            inline arma::subview<double> translation() { return submat(0,3,2,3); }
 
             arma::vec3 eulerAngles() const {
                 return rotation().eulerAngles();
