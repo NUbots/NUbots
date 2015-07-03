@@ -36,7 +36,7 @@ ADD_ROLE(
 
     behaviour::skills::KickScript
     behaviour::planning::KickPlanner
-    behaviour::planning::WalkPathPlanner
+    behaviour::planning::SimpleWalkPathPlanner
 
     #Motion
     motion::ScriptEngine
