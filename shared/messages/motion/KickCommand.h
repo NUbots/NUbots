@@ -52,6 +52,10 @@ namespace messages {
         struct KickFinished{
         };
 
+        struct IKKickParams{
+            float stand_height;
+        };
+
     }  // motion
 }  // messages
 

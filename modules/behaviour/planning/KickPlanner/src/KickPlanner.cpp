@@ -43,6 +43,7 @@ using messages::input::Sensors;
 using messages::input::LimbID;
 using messages::localisation::Ball;
 using messages::localisation::Self;
+using messages::motion::IKKickParams;
 using messages::motion::KickCommand;
 using messages::motion::KickPlannerConfig;
 using messages::support::Configuration;
@@ -78,12 +79,14 @@ namespace planning {
             With<std::vector<Self>>,
             With<FieldDescription>,
             With<KickPlan>,
-            With<Sensors> >([this] (
+            With<Sensors>,
+            With<IKKickParams>>([this] (
             const Ball& ball,
             const std::vector<Self>& selfs,
             const FieldDescription& fd,
             const KickPlan& kickPlan,
-            const Sensors& sensors) {
+            const Sensors& sensors,
+            const IKKickParams& params) {
 
             //Get time since last seen ball
             auto now = NUClear::clock::now();
@@ -95,22 +98,22 @@ namespace planning {
             arma::vec3 ballPosition = {ball.position[0],ball.position[1],fd.ball_radius}; 
             
             //Check whether to kick
-            std::cout << "kick planning" << __LINE__ << std::endl; 
-            std::cout << "ballPosition" << ballPosition.t() << std::endl; 
+            
             if(secondsSinceLastSeen < cfg.seconds_not_seen_limit
-                && kickValid(ballPosition, sensors)){
-            std::cout << "kick planning" << __LINE__ << std::endl; 
+                && kickValid(ballPosition, params.stand_height, sensors)){
                     emit(std::make_unique<KickCommand>(KickCommand{ballPosition, {kickTarget[0],kickTarget[1],0} }));
-            std::cout << "kick planning" << __LINE__ << std::endl; 
             }
 
         });
     }
 
 
-    bool KickPlanner::kickValid(const arma::vec3& ballPos, const Sensors& sensors){
-        Transform3D ballPose; 
-        ballPose.translation() = sensors.orientationBodyToGround.i().transformPoint(ballPos);
+    bool KickPlanner::kickValid(const arma::vec3& ballPos, float standHeight, const Sensors& sensors){
+        Transform3D ballPose;
+        //TODO: make this take into account the correct kick stand height
+        Transform3D torsoToGround = sensors.orientationBodyToGround;
+        torsoToGround.translation()[2] = standHeight;
+        ballPose.translation() = torsoToGround.i().transformPoint(ballPos);
         return (legPoseValid<DarwinModel>(ballPose, LimbID::RIGHT_LEG) || legPoseValid<DarwinModel>(ballPose, LimbID::LEFT_LEG));
     }
 

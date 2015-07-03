@@ -35,7 +35,7 @@ namespace planning {
         explicit KickPlanner(std::unique_ptr<NUClear::Environment> environment);
         static constexpr const char* CONFIGURATION_PATH = "KickPlanner.yaml";
     private:
-        bool kickValid(const arma::vec3& ballPos, const messages::input::Sensors& sensors);
+        bool kickValid(const arma::vec3& ballPos, float standHeight, const messages::input::Sensors& sensors);
        	messages::motion::KickPlannerConfig cfg;
     };
 

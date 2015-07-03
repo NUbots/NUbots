@@ -44,6 +44,7 @@ namespace motion {
     using messages::support::Configuration;
     using messages::motion::WalkStopCommand;
     using messages::motion::KickCommand;
+    using messages::motion::IKKickParams;
     using messages::motion::KickFinished;
     using messages::input::Sensors;
     using messages::input::ServoID;
@@ -79,9 +80,11 @@ namespace motion {
             gain_legs =config["servo"]["gain"].as<float>();
             torque = config["servo"]["torque"].as<float>();
 
+            //Emit useful info to KickPlanner
+            emit(std::make_unique<IKKickParams>(IKKickParams{config["balancer"]["stand_height"].as<float>()}));
         });
 
-        on<Trigger<KickCommand>, With<Sensors>>([this] (const KickCommand& kick, const Sensors& sensors) {
+        on<Trigger<KickCommand>, With<Sensors>>([this] (const KickCommand&, const Sensors& sensors) {
             // We want to kick!
             log("IKKICK: KickCommand received");
             
