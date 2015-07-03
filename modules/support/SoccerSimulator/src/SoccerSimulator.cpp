@@ -30,7 +30,7 @@
 #include "messages/localisation/FieldObject.h"
 #include "messages/input/ServoID.h"
 #include "messages/motion/WalkCommand.h"
-#include "messages/input/GameEvents/gameevents.h"
+#include "messages/input/gameevents/GameEvents.h"
 
 
 namespace modules {
