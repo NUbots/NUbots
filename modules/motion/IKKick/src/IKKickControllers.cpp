@@ -83,6 +83,7 @@ namespace motion{
         Transform3D supportToKickFoot = currentKickFoot.i() * currentTorso.i();
         arma::vec3 ballFromKickFoot = supportToKickFoot.transformPoint(ballPosition);
         finishPose = startPose.translate(ballFromKickFoot);
+        finishPose = startPose.translate(arma::vec3({DarwinModel::Leg::FOOT_LENGTH / 2, 0, 0}));
 
         distance = arma::norm(startPose.translation() - finishPose.translation());
     }

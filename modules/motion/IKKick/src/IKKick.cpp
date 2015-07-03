@@ -27,6 +27,8 @@
 #include "messages/behaviour/ServoCommand.h"
 #include "messages/behaviour/Action.h"
 #include "messages/support/FieldDescription.h"
+#include "messages/motion/WalkCommand.h"
+#include "messages/behaviour/KickPlan.h"
 
 
 #include "utility/math/matrix/Transform3D.h"
@@ -34,7 +36,6 @@
 #include "utility/motion/RobotModels.h"
 #include "utility/support/yaml_armadillo.h"
 #include "utility/nubugger/NUhelpers.h"
-#include "messages/motion/WalkCommand.h"
 
 
 
@@ -52,6 +53,7 @@ namespace motion {
     using messages::behaviour::ServoCommand;
     using messages::behaviour::RegisterAction;
     using messages::behaviour::ActionPriorites;
+    using messages::behaviour::KickPlan;
     using messages::support::FieldDescription;
 
     using utility::motion::kinematics::calculateLegJoints;
@@ -82,6 +84,13 @@ namespace motion {
 
             //Emit useful info to KickPlanner
             emit(std::make_unique<IKKickParams>(IKKickParams{config["balancer"]["stand_height"].as<float>()}));
+            emit(std::make_unique<KickPlan>(KickPlan{{4.5,0}}));
+
+        });
+
+        on<Trigger<Startup>>("IKKick Startup",[this](const Startup&){
+            //Default kick plan at enemy goals
+            emit(std::make_unique<KickPlan>(KickPlan{{4.5,0}}));
         });
 
         on<Trigger<KickCommand>, With<Sensors>>([this] (const KickCommand&, const Sensors& sensors) {
@@ -110,7 +119,7 @@ namespace motion {
 
             // Work out which of our feet are going to be the support foot
             // Store the support foot and kick foot
-            if(ballPosition[1] < - foot_separation / 2){
+            if(command.target[1] < 0){
                 supportFoot = LimbID::LEFT_LEG;
             }else{
                 supportFoot = LimbID::RIGHT_LEG;

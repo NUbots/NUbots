@@ -75,6 +75,7 @@ namespace planning {
             emit(std::make_unique<KickPlannerConfig>(cfg));
         });
 
+
         on< Trigger<Ball>, 
             With<std::vector<Self>>,
             With<FieldDescription>,
@@ -98,7 +99,6 @@ namespace planning {
             arma::vec3 ballPosition = {ball.position[0],ball.position[1],fd.ball_radius}; 
             
             //Check whether to kick
-            
             if(secondsSinceLastSeen < cfg.seconds_not_seen_limit
                 && kickValid(ballPosition, params.stand_height, sensors)){
                     emit(std::make_unique<KickCommand>(KickCommand{ballPosition, {kickTarget[0],kickTarget[1],0} }));
@@ -114,6 +114,7 @@ namespace planning {
         Transform3D torsoToGround = sensors.orientationBodyToGround;
         torsoToGround.translation()[2] = standHeight;
         ballPose.translation() = torsoToGround.i().transformPoint(ballPos);
+        ballPose.translate(arma::vec3({-DarwinModel::Leg::FOOT_LENGTH / 2,0,0}));
         return (legPoseValid<DarwinModel>(ballPose, LimbID::RIGHT_LEG) || legPoseValid<DarwinModel>(ballPose, LimbID::LEFT_LEG));
     }
 

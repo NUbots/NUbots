@@ -15,6 +15,8 @@ ADD_ROLE(
     #Vision
     vision::LUTClassifier
     vision::BallDetector
+    vision::GoalDetector
+    vision::ObstacleDetector
 
     #Localisation
     localisation::MMKFRobotLocalisation
@@ -26,7 +28,6 @@ ADD_ROLE(
     behaviour::skills::FallingRelax
     behaviour::skills::Getup
     behaviour::skills::HeadBehaviourSoccer
-
     behaviour::planning::KickPlanner
 
     #Motion
