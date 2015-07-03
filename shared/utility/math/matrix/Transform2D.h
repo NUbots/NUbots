@@ -51,6 +51,11 @@ namespace matrix {
             Transform();
 
             /**
+             * @brief Construct transform from a position and an angle.
+             */
+            Transform(const arma::vec2 xy_, double angle_);
+
+            /**
              * @brief Transforms position from local coordinates relative to 'reference', to world coordinates
              *
              * @param reference A position to become relatively local to
