@@ -30,6 +30,8 @@
 #include "utility/math/matrix/Transform2D.h"
 #include "utility/math/angle.h"
 #include "utility/math/geometry/Circle.h"
+#include "utility/math/geometry/RotatedRectangle.h"
+#include "utility/math/geometry/Intersection.h"
 
 namespace modules {
 namespace behaviour {
@@ -41,6 +43,8 @@ namespace planning {
     using utility::math::matrix::Transform2D;
     using utility::math::angle::vectorToBearing;
     using utility::math::geometry::Circle;
+    using utility::math::geometry::RotatedRectangle;
+    namespace intersection = utility::math::geometry::intersection;
 
     using LocalisationBall = messages::localisation::Ball;
     using Self = messages::localisation::Self;
@@ -142,8 +146,6 @@ namespace planning {
                     emit(utility::nubugger::drawTree("OMPLPP_DebugTree", pathPlanner.debugPositions, pathPlanner.debugParentIndices, 0.02, {0.5, 0,0.5}));
                 }
             }
-
-            // TODO: Test object intersection.
 
             // Emit the new path:
             if (path != nullptr) {
