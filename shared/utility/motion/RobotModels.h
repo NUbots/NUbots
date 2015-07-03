@@ -64,7 +64,7 @@ namespace utility{
                     static constexpr float NECK_LENGTH = 0.042;
                     static constexpr float NECK_TO_CAMERA_X = 0.036;
                     static constexpr float NECK_TO_CAMERA_Y = 0;
-                    static constexpr float NECK_TO_CAMERA_Z = 0.028
+                    static constexpr float NECK_TO_CAMERA_Z = 0.028;
                     static constexpr float CAMERA_DECLINATION_ANGLE_OFFSET = 0;
                     //Head movement limits
                     static constexpr float MAX_YAW = M_PI * 2 / 3;
