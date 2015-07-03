@@ -22,6 +22,8 @@
 
 #include <nuclear>
 #include "IKKickControllers.h"
+#include "messages/motion/KickCommand.h"
+#include "messages/input/Sensors.h"
 
 namespace modules {
 namespace motion {

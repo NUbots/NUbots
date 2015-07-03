@@ -19,9 +19,6 @@
 
 #include "KickPlanner.h"
 
-#include "utility/support/yaml_armadillo.h"
-#include "utility/math/coordinates.h"
-#include "utility/localisation/transform.h"
 #include "messages/motion/WalkCommand.h"
 #include "messages/localisation/FieldObject.h"
 #include "messages/support/Configuration.h"
@@ -30,28 +27,41 @@
 #include "messages/behaviour/KickPlan.h"
 #include "messages/vision/VisionObjects.h"
 #include "messages/support/FieldDescription.h"
+#include "messages/input/LimbID.h"
+
+#include "utility/support/yaml_armadillo.h"
+#include "utility/math/coordinates.h"
+#include "utility/localisation/transform.h"
 #include "utility/nubugger/NUhelpers.h"
+#include "utility/math/matrix/Transform3D.h"
+#include "utility/motion/RobotModels.h"
+#include "utility/motion/InverseKinematics.h"
 
 
+
+using messages::input::Sensors;
+using messages::input::LimbID;
+using messages::localisation::Ball;
+using messages::localisation::Self;
+using messages::motion::KickCommand;
+using messages::motion::KickPlannerConfig;
+using messages::support::Configuration;
+using messages::motion::WalkStopCommand;
+using messages::input::LimbID;
+using messages::behaviour::KickPlan;
+using messages::support::FieldDescription;
+
+using utility::math::matrix::Transform3D;
+using utility::motion::kinematics::legPoseValid;
+using utility::math::coordinates::sphericalToCartesian;
+using utility::localisation::transform::WorldToRobotTransform;
+using utility::localisation::transform::RobotToWorldTransform;
+using utility::nubugger::graph;
+using utility::motion::kinematics::DarwinModel;
 
 namespace modules {
 namespace behaviour {
 namespace planning {
-
-    using utility::math::coordinates::sphericalToCartesian;
-    using utility::localisation::transform::WorldToRobotTransform;
-    using utility::localisation::transform::RobotToWorldTransform;
-    using utility::nubugger::graph;
-
-    using messages::localisation::Ball;
-    using messages::localisation::Self;
-    using messages::motion::KickCommand;
-    using messages::motion::KickPlannerConfig;
-    using messages::support::Configuration;
-    using messages::motion::WalkStopCommand;
-    using messages::input::LimbID;
-    using messages::behaviour::KickPlan;
-    using messages::support::FieldDescription;
 
     KickPlanner::KickPlanner(std::unique_ptr<NUClear::Environment> environment)
         : Reactor(std::move(environment)) {
@@ -67,11 +77,13 @@ namespace planning {
         on< Trigger<Ball>, 
             With<std::vector<Self>>,
             With<FieldDescription>,
-            With<KickPlan> >([this] (
+            With<KickPlan>,
+            With<Sensors> >([this] (
             const Ball& ball,
             const std::vector<Self>& selfs,
             const FieldDescription& fd,
-            const KickPlan& kickPlan) {
+            const KickPlan& kickPlan,
+            const Sensors& sensors) {
 
             //Get time since last seen ball
             auto now = NUClear::clock::now();
@@ -80,19 +92,28 @@ namespace planning {
             //Compute target in robot coords
             auto self = selfs[0];
             arma::vec2 kickTarget = WorldToRobotTransform(self.position, self.heading, kickPlan.target);
-
+            arma::vec3 ballPosition = {ball.position[0],ball.position[1],fd.ball_radius}; 
+            
             //Check whether to kick
-            if(secondsSinceLastSeen < cfg.seconds_not_seen_limit &&
-               ball.position[0] < cfg.max_ball_distance &&
-               ball.position[0] > 0 &&
-               std::fabs(ball.position[1]) < cfg.kick_corridor_width / 2){
-               
-                    emit(std::make_unique<WalkStopCommand>()); // Stop the walk
-                    emit(std::make_unique<KickCommand>(KickCommand{{ball.position[0],ball.position[1],fd.ball_radius}, {kickTarget[0],kickTarget[1],0} }));
+            std::cout << "kick planning" << __LINE__ << std::endl; 
+            std::cout << "ballPosition" << ballPosition.t() << std::endl; 
+            if(secondsSinceLastSeen < cfg.seconds_not_seen_limit
+                && kickValid(ballPosition, sensors)){
+            std::cout << "kick planning" << __LINE__ << std::endl; 
+                    emit(std::make_unique<KickCommand>(KickCommand{ballPosition, {kickTarget[0],kickTarget[1],0} }));
+            std::cout << "kick planning" << __LINE__ << std::endl; 
             }
 
         });
     }
+
+
+    bool KickPlanner::kickValid(const arma::vec3& ballPos, const Sensors& sensors){
+        Transform3D ballPose; 
+        ballPose.translation() = sensors.orientationBodyToGround.i().transformPoint(ballPos);
+        return (legPoseValid<DarwinModel>(ballPose, LimbID::RIGHT_LEG) || legPoseValid<DarwinModel>(ballPose, LimbID::LEFT_LEG));
+    }
+
 
 }
 }

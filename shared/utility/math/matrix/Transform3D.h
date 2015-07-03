@@ -79,7 +79,7 @@ namespace matrix {
             Transform(const arma::vec3& in);
 
             /**
-             * @brief Translate the current basis by the given 3D vector
+             * @brief Translate the current basis by the given 3D vector in local space
              *
              * @param translation The 3D translation vector to translate by
              * @return The transformed basis matrix

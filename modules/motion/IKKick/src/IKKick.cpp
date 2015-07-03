@@ -34,12 +34,15 @@
 #include "utility/motion/RobotModels.h"
 #include "utility/support/yaml_armadillo.h"
 #include "utility/nubugger/NUhelpers.h"
+#include "messages/motion/WalkCommand.h"
+
 
 
 namespace modules {
 namespace motion {
 
     using messages::support::Configuration;
+    using messages::motion::WalkStopCommand;
     using messages::motion::KickCommand;
     using messages::motion::KickFinished;
     using messages::input::Sensors;
@@ -53,14 +56,11 @@ namespace motion {
     using utility::motion::kinematics::calculateLegJoints;
     using utility::math::matrix::Transform3D;
     using utility::motion::kinematics::calculateLegJoints;
-    using utility::motion::kinematics::calculateLegJointsTeamDarwin;
     using utility::motion::kinematics::DarwinModel;
     using utility::nubugger::graph;
 
     struct ExecuteKick{};
     struct FinishKick{};
-
-    bool doThings = false;
 
     IKKick::IKKick(std::unique_ptr<NUClear::Environment> environment)
         : Reactor(std::move(environment))
@@ -81,12 +81,12 @@ namespace motion {
 
         });
 
-        on<Trigger<KickCommand>>([this] (const KickCommand&) {
+        on<Trigger<KickCommand>, With<Sensors>>([this] (const KickCommand& kick, const Sensors& sensors) {
             // We want to kick!
             log("IKKICK: KickCommand received");
-
+            
+            emit(std::make_unique<WalkStopCommand>()); // Stop the walk
             updatePriority(KICK_PRIORITY);
-
         });
 
         on<Trigger<ExecuteKick>, With<KickCommand>, With<Sensors>>([this] (const ExecuteKick&, const KickCommand& command, const Sensors& sensors) {
@@ -107,7 +107,6 @@ namespace motion {
 
             // Work out which of our feet are going to be the support foot
             // Store the support foot and kick foot
-            //TODO: fixe theses after debugging
             if(ballPosition[1] < - foot_separation / 2){
                 supportFoot = LimbID::LEFT_LEG;
             }else{
@@ -125,10 +124,7 @@ namespace motion {
             arma::vec3 directionTorso = sensors.orientationBodyToGround.i().transformVector(command.direction);
             // Put the goal into support foot coordinates
             arma::vec3 directionSupportFoot = torsoPose.transformVector(directionTorso);
-/*
-            float hackVal = (supportFoot == messages::input::LimbID::LEFT_LEG) ? 0 : foot_separation;
-            arma::vec3 hackDebuggingOffset = arma::vec3({0, hackVal, 0});
-*/
+
             arma::vec3 ballPosition = targetSupportFoot;
             arma::vec3 goalPosition = directionSupportFoot;
 
@@ -196,12 +192,10 @@ namespace motion {
 
             if(lifter.isRunning()){
                 // std::cout << "lifter is running" << std::endl;
-                //TODO: CHECK ORDER
                 kickFootGoal *= lifter.getFootPose(sensors);
             }
             if(kicker.isRunning()){
                 // std::cout << "kicker is running" << std::endl;
-                //TODO: CHECK ORDER
                 kickFootGoal *= kicker.getFootPose(sensors);
             }
 
@@ -257,6 +251,7 @@ namespace motion {
     void IKKick::updatePriority(const float& priority) {
         emit(std::make_unique<ActionPriorites>(ActionPriorites { id, { priority }}));
     }
+
 
 } // motion
 } // modules
