@@ -136,7 +136,6 @@ namespace motion {
         });
 
         on<Trigger<Startup>>([this](const Startup&) {
-            lastBalanceTime = NUClear::clock::now();
 
             //generateAndSaveStandScript();
             //reset();
@@ -195,20 +194,11 @@ namespace motion {
 
         auto& balance = walkCycle["balance"];
         balanceEnabled = balance["enabled"].as<bool>();
-        balanceAmplitude = balance["amplitude"].as<Expression>();
-        balanceWeight = balance["weight"].as<Expression>();
-        balanceOffset = balance["offset"].as<Expression>();
+        // balanceAmplitude = balance["amplitude"].as<Expression>();
+        // balanceWeight = balance["weight"].as<Expression>();
+        // balanceOffset = balance["offset"].as<Expression>();
 
-        balancePGain = balance["angle_gain"]["p"].as<Expression>();
-        balanceIGain = balance["angle_gain"]["i"].as<Expression>();
-        balanceDGain = balance["angle_gain"]["d"].as<Expression>();
-
-        balanceTransPGainX = balance["translation_gain"]["X"]["p"].as<Expression>();
-        balanceTransDGainX = balance["translation_gain"]["X"]["d"].as<Expression>();
-        balanceTransPGainY = balance["translation_gain"]["Y"]["p"].as<Expression>();
-        balanceTransDGainY = balance["translation_gain"]["Y"]["d"].as<Expression>();
-        balanceTransPGainZ = balance["translation_gain"]["Z"]["p"].as<Expression>();
-        balanceTransDGainZ = balance["translation_gain"]["Z"]["d"].as<Expression>();
+        balancer.configure(balance);
 
         for(auto& gain : balance["servo_gains"]){
             float p = gain["p"].as<Expression>();
@@ -424,11 +414,9 @@ namespace motion {
 
         if (balanceEnabled) {
             // Apply balance to our support foot
-            // Get current orientation, offset by body tilt. Maps robot to world. 
-            // balancer.balance(swingLeg == LimbID::LEFT_LEG ? rightFootTorso : leftFootTorso
-                // , swingLeg == LimbID::LEFT_LEG ? LimbID::RIGHT_LEG : LimbID::LEFT_LEG
-                // , tiltedOrientation
-                // , sensors);
+            balancer.balance(swingLeg == LimbID::LEFT_LEG ? rightFootTorso : leftFootTorso
+                , swingLeg == LimbID::LEFT_LEG ? LimbID::RIGHT_LEG : LimbID::LEFT_LEG
+                , sensors);
         }
 
         // emit(graph("Right foot pos", rightFootTorso.translation()));
@@ -459,8 +447,8 @@ namespace motion {
 
         if (balanceEnabled) {
             // Apply balance to both legs when standing still
-            // balancer.balance(leftFootTorso, LimbID::LEFT_LEG, sensors);
-            // balancer.balance(rightFootTorso, LimbID::RIGHT_LEG, sensors);
+            balancer.balance(leftFootTorso, LimbID::LEFT_LEG, sensors);
+            balancer.balance(rightFootTorso, LimbID::RIGHT_LEG, sensors);
         }
 
         auto joints = calculateLegJointsTeamDarwin<DarwinModel>(leftFootTorso, rightFootTorso);

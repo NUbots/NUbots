@@ -17,6 +17,10 @@
  * Copyright 2013 NUBots <nubots@nubots.net>
  */
 
+#ifndef UTILITY_MOTION_BALANCE_H
+#define UTILITY_MOTION_BALANCE_H
+
+
 #include "utility/math/matrix/Transform3D.h"
 #include "utility/math/matrix/Rotation3D.h"
 #include "utility/math/geometry/UnitQuaternion.h"
@@ -24,6 +28,8 @@
 
 #include "messages/input/Sensors.h"
 #include "messages/input/LimbID.h"
+#include "messages/support/Configuration.h"
+#include <yaml-cpp/yaml.h>
 
 #include <nuclear>
 
@@ -31,7 +37,6 @@
 namespace utility {
 namespace motion {
 
-    template <class RobotModel>
     class Balancer {
     private:
         //Config
@@ -56,6 +61,7 @@ namespace motion {
         utility::math::geometry::UnitQuaternion lastErrorQuaternion;
         NUClear::clock::time_point lastBalanceTime;
     public:
+        void configure(const YAML::Node& config);        
         void balance(utility::math::matrix::Transform3D& footToTorso, const messages::input::LimbID& leg, const messages::input::Sensors& sensors);
     };
 
@@ -63,7 +69,4 @@ namespace motion {
 }
 }
 
-
-
-
-
+#endif

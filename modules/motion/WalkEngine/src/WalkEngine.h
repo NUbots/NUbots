@@ -33,6 +33,8 @@
 
 #include "utility/math/matrix/Transform2D.h"
 #include "utility/math/matrix/Transform3D.h"
+#include "utility/motion/Balance.h"
+#include "utility/motion/RobotModels.h"
 
 
 namespace modules {
@@ -184,18 +186,7 @@ namespace motion {
         // constants which define the current values of jointGains based on the robot's balance state
         std::map<ServoID, float> servoControlPGains;
         
-        double balanceTransPGainX;
-        double balanceTransPGainY;
-        double balanceTransPGainZ;
-        double balanceTransDGainX;
-        double balanceTransDGainY;
-        double balanceTransDGainZ;
-
-        double dPitch = 0;
-        double dRoll = 0;
-        double lastPitch = 0;
-        double lastRoll = 0;
-        time_t lastBalanceTime;
+        utility::motion::Balancer balancer;
 
         /*arma::vec4 ankleImuParamX;
         arma::vec4 ankleImuParamY;

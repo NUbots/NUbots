@@ -28,8 +28,24 @@ namespace motion {
     using utility::math::geometry::UnitQuaternion;
     using utility::motion::kinematics::DarwinModel;
 
-    template <class RobotModel>
-    void Balancer<RobotModel>::balance(Transform3D& footToTorso, const LimbID& leg, const Sensors& sensors) {
+    void Balancer::configure(const YAML::Node& config) {
+        rotationPGain = config["angle_gain"]["p"].as<float>();
+        rotationIGain = config["angle_gain"]["i"].as<float>();
+        rotationDGain = config["angle_gain"]["d"].as<float>();
+
+        translationPGainX = config["translation_gain"]["X"]["p"].as<float>();
+        translationDGainX = config["translation_gain"]["X"]["d"].as<float>();
+
+        translationPGainY = config["translation_gain"]["Y"]["p"].as<float>();
+        translationDGainY = config["translation_gain"]["Y"]["d"].as<float>();
+
+        translationPGainZ = config["translation_gain"]["Z"]["p"].as<float>();
+        translationDGainZ = config["translation_gain"]["Z"]["d"].as<float>();
+
+        lastBalanceTime = NUClear::clock::now();
+    }
+
+    void Balancer::balance(Transform3D& footToTorso, const LimbID& leg, const Sensors& sensors) {
 
         //Goal is based on the support foot rotation.
         Rotation3D goalTorsoOrientation = footToTorso.rotation().i();
@@ -73,9 +89,9 @@ namespace motion {
         // Get the position of our hip to rotate around
         //TODO: template with model
         Transform3D hip = Transform3D(arma::vec3({
-            RobotModel::Leg::HIP_OFFSET_X,
-            RobotModel::Leg::HIP_OFFSET_Y * (leg == LimbID::RIGHT_LEG ? -1 : 1),
-            -RobotModel::Leg::HIP_OFFSET_Z
+            DarwinModel::Leg::HIP_OFFSET_X,
+            DarwinModel::Leg::HIP_OFFSET_Y * (leg == LimbID::RIGHT_LEG ? -1 : 1),
+            -DarwinModel::Leg::HIP_OFFSET_Z
         }));
 
         // Rotate around our hip to apply a balance
