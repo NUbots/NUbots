@@ -32,6 +32,7 @@
 #include "messages/behaviour/FixedWalkCommand.h"
 #include "messages/localisation/FieldObject.h"
 
+#include "utility/motion/Balance.h"
 #include "utility/nubugger/NUhelpers.h"
 #include "utility/support/yaml_armadillo.h"
 #include "utility/support/yaml_expression.h"
@@ -39,6 +40,7 @@
 #include "utility/motion/ForwardKinematics.h"
 #include "utility/motion/RobotModels.h"
 #include "utility/math/angle.h"
+#include "utility/math/matrix/Rotation3D.h"
 
 namespace modules {
 namespace motion {
@@ -65,6 +67,7 @@ namespace motion {
     using utility::motion::kinematics::DarwinModel;
     using utility::math::matrix::Transform2D;
     using utility::math::matrix::Transform3D;
+    using utility::math::matrix::Rotation3D;
     using utility::math::angle::normalizeAngle;
     using utility::nubugger::graph;
     using utility::support::Expression;
@@ -421,9 +424,11 @@ namespace motion {
 
         if (balanceEnabled) {
             // Apply balance to our support foot
-            balance(swingLeg == LimbID::LEFT_LEG ? rightFootTorso : leftFootTorso
-                , swingLeg == LimbID::LEFT_LEG ? LimbID::RIGHT_LEG : LimbID::LEFT_LEG
-                , sensors);
+            // Get current orientation, offset by body tilt. Maps robot to world. 
+            // balancer.balance(swingLeg == LimbID::LEFT_LEG ? rightFootTorso : leftFootTorso
+                // , swingLeg == LimbID::LEFT_LEG ? LimbID::RIGHT_LEG : LimbID::LEFT_LEG
+                // , tiltedOrientation
+                // , sensors);
         }
 
         // emit(graph("Right foot pos", rightFootTorso.translation()));
@@ -454,8 +459,8 @@ namespace motion {
 
         if (balanceEnabled) {
             // Apply balance to both legs when standing still
-            balance(leftFootTorso, LimbID::LEFT_LEG, sensors);
-            balance(rightFootTorso, LimbID::RIGHT_LEG, sensors);
+            // balancer.balance(leftFootTorso, LimbID::LEFT_LEG, sensors);
+            // balancer.balance(rightFootTorso, LimbID::RIGHT_LEG, sensors);
         }
 
         auto joints = calculateLegJointsTeamDarwin<DarwinModel>(leftFootTorso, rightFootTorso);
