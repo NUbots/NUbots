@@ -55,31 +55,29 @@ namespace motion{
 
     void KickBalancer::computeStartMotion(const Sensors& sensors) {
         Transform3D torsoToFoot = getTorsoPose(sensors);
+        startPose = torsoToFoot.i();
 
         int negativeIfRight = (supportFoot == LimbID::RIGHT_LEG) ? -1 : 1;
         finishPose = torsoToFoot;
         finishPose.translation() = arma::vec3({forward_lean, negativeIfRight * (adjustment + DarwinModel::Leg::FOOT_CENTRE_TO_ANKLE_CENTRE), stand_height});
 
-        startPose = torsoToFoot.i();
-        std::cout <<"startPoseStartBalancer"<< startPose <<std::endl;
         finishPose = finishPose.i();
-        std::cout <<"finishPoseStartBalancer"<< finishPose <<std::endl;        
         distance = arma::norm(startPose.translation() - finishPose.translation());
     }
 
     void FootLifter::computeStartMotion(const Sensors&) {
         startPose = arma::eye(4,4);
-        std::cout <<"startPoseStartLifter"<< startPose <<std::endl;        
         finishPose = startPose.translate(arma::vec3({-lift_foot_back,0,lift_foot_height}));
-        std::cout <<"finishPoseStartLifter"<< finishPose <<std::endl;
         distance = arma::norm(startPose.translation() - finishPose.translation());
     }
 
 
     void Kicker::computeStartMotion(const Sensors& sensors) {
         startPose = arma::eye(4,4);
+
         std::cout <<"startPoseStartKicker"<< startPose <<std::endl;        
         // Convert torso to support foot
+
         Transform3D currentTorso = getTorsoPose(sensors);
         // Convert kick foot to torso 
         Transform3D currentKickFoot = supportFoot == LimbID::LEFT_LEG ? sensors.forwardKinematics.find(ServoID::R_ANKLE_ROLL)->second 
@@ -90,8 +88,10 @@ namespace motion{
         arma::vec3 ballFromKickFoot = supportToKickFoot.transformPoint(ballPosition);
         // Make the end target matrix: no rotation (identity) and translate by ball position
         finishPose = startPose.translate(ballFromKickFoot);
+
         finishPose = startPose.translate(arma::vec3({DarwinModel::Leg::TOE_LENGTH, 0, 0}));
         std::cout <<"finishPoseStartKicker"<< finishPose <<std::endl;
+
         distance = arma::norm(startPose.translation() - finishPose.translation());
     }
 
@@ -100,8 +100,6 @@ namespace motion{
 
     void FootLifter::computeStopMotion(){
         startPose = startPose.translate(arma::vec3({0,0,put_foot_down_height}));
-        std::cout <<"startPoseStopLifter"<< startPose <<std::endl;
-        std::cout <<"finishPoseStopLifter"<< finishPose <<std::endl;
         distance = arma::norm(startPose.translation() - finishPose.translation());
     }
     

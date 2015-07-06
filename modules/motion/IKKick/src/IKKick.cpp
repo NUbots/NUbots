@@ -83,7 +83,7 @@ namespace motion {
             torque = config["servo"]["torque"].as<float>();
 
             auto& balanceConfig = config["active_balance"];
-            feedback_active = balanceConfig["active_balance"].as<bool>();
+            feedback_active = balanceConfig["enabled"].as<bool>();
             feedbackBalancer.configure(balanceConfig);
 
             //Emit useful info to KickPlanner
@@ -98,7 +98,8 @@ namespace motion {
         });
 
         on<Trigger<KickCommand>>([this] (const KickCommand&) {
-            // We want to kick!            
+            // We want to kick!  
+            log("Kick Command");          
             emit(std::make_unique<WalkStopCommand>()); // Stop the walk
             updatePriority(KICK_PRIORITY);
         });
@@ -108,6 +109,7 @@ namespace motion {
             // Enable our kick pather
             updater.enable();
             updatePriority(EXECUTION_PRIORITY);
+
 
             // 4x4 homogeneous transform matrices for left foot and right foot relative to torso
             Transform3D leftFoot = sensors.forwardKinematics.find(ServoID::L_ANKLE_ROLL)->second;
@@ -124,17 +126,24 @@ namespace motion {
             Transform3D torsoPose = (supportFoot == messages::input::LimbID::LEFT_LEG) ? leftFoot.i() : rightFoot.i();
 
             // Put the ball position from vision into torso coordinates
-            arma::vec3 targetTorso = sensors.orientationBodyToGround.i().transformPoint(command.target);
+            arma::vec3 targetTorso = sensors.kinematicsBodyToGround.i().transformPoint(command.target);
             // Put the ball position into support foot coordinates
             arma::vec3 targetSupportFoot = torsoPose.transformPoint(targetTorso);
+            // std::cout << "ExecuteKick: sensors.orientationBodyToGround = \n" << sensors.orientationBodyToGround <<std::endl;
+            // std::cout << "ExecuteKick: sensors.kinematicsBodyToGround = \n" << sensors.kinematicsBodyToGround <<std::endl;
+            // std::cout << "ExecuteKick: command.target = " << command.target.t() <<std::endl;
+            // std::cout << "ExecuteKick: targetTorso = " << targetTorso.t() <<std::endl;
+            // std::cout << "ExecuteKick: targetSupportFoot = " << targetSupportFoot.t() <<std::endl;
 
             // Put the goal from vision into torso coordinates
-            arma::vec3 directionTorso = sensors.orientationBodyToGround.i().transformVector(command.direction);
+            arma::vec3 directionTorso = sensors.kinematicsBodyToGround.i().transformVector(command.direction);
             // Put the goal into support foot coordinates
             arma::vec3 directionSupportFoot = torsoPose.transformVector(directionTorso);
 
             arma::vec3 ballPosition = targetSupportFoot;
+            ballPosition[2] = 0.05; //TODO: figure out why ball height is unreliable
             arma::vec3 goalPosition = directionSupportFoot;
+            goalPosition[2] = 0.0; //TODO: figure out why ball height is unreliable
 
             balancer.setKickParameters(supportFoot, ballPosition, goalPosition);
             lifter.setKickParameters(supportFoot, ballPosition, goalPosition);

@@ -30,7 +30,7 @@ namespace support {
     public:
         /// @brief Called by the powerplant to build and setup the KickCommander reactor.
         explicit KickCommander(std::unique_ptr<NUClear::Environment> environment);
-
+        bool doThings = false;
         /// @brief the path to the configuration file for KickCommander
         static constexpr const char* CONFIGURATION_PATH = "KickCommander.yaml";
     };

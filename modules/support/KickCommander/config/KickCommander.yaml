@@ -1,2 +1,2 @@
-target: [0.1, 0, 0.05] #in support foot coordinates for debugging
+target: [0.1, 0, 0.05] #in ground coordinates
 direction: [1, 0, 0]
