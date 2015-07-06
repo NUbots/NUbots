@@ -155,7 +155,7 @@ namespace strategy {
                             initialLocalisationReset(fieldDescription);
                             currentState = Behaviour::INITIAL;
                         }
-                        else if (false) { // phase == Phase::READY
+                        else if (phase == Phase::READY) {
                             if (gameState.ourKickOff) {
                                 walkTo(fieldDescription, START_POSITION_OFFENSIVE);
                             }
@@ -165,7 +165,7 @@ namespace strategy {
                             find({FieldTarget::SELF});
                             currentState = Behaviour::READY;
                         }
-                        else if (phase == Phase::SET || phase == Phase::READY) {
+                        else if (phase == Phase::SET) {
                             standStill();
                             find({FieldTarget::BALL});
                             if(mode == Mode::PENALTY_SHOOTOUT) {
