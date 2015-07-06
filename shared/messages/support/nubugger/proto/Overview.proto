@@ -26,6 +26,8 @@ import "messages/Matrix.proto";
 
 message Overview {
 
+    optional string role_name = 15;
+
 	// Sensors
 	optional float voltage = 1;
 	optional float battery = 2;

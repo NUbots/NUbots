@@ -63,6 +63,17 @@ namespace support {
             send(message);
         }));
 
+        handles["overview"].push_back(on<Trigger<CommandLineArguments>, Options<Single, Priority<NUClear::LOW>>>([this](const std::vector<std::string>& arguments) {
+
+            std::string role_name = arguments.at(0);
+            auto index = role_name.rfind('/');
+            if (index != std::string::npos) {
+                role_name = role_name.substr(index + 1);
+            }
+            overview.set_role_name(role_name);
+
+        }));
+
         handles["overview"].push_back(on<Trigger<Behaviour::State>, Options<Single, Priority<NUClear::LOW>>>([this](const Behaviour::State& state) {
 
             overview.set_behaviour_state(state);
@@ -105,10 +116,10 @@ namespace support {
 
         }));
 
-        handles["overview"].push_back(on<Trigger<std::vector<LocalisationBall>>, With<std::vector<Self>>, Options<Single, 
+        handles["overview"].push_back(on<Trigger<std::vector<LocalisationBall>>, With<std::vector<Self>>, Options<Single,
             Priority<NUClear::LOW>>>([this](const std::vector<LocalisationBall>& balls, const std::vector<Self>& selfs) {
 
-            // Retrieve the first ball and self in the vector.            
+            // Retrieve the first ball and self in the vector.
             LocalisationBall ball = balls.front();
             Self self = selfs.front();
 
@@ -116,13 +127,13 @@ namespace support {
             auto* ballPosition = overview.mutable_ball_position();
             arma::vec2 position = ball.position;
             ballPosition->set_x(position[0]);
-            ballPosition->set_y(position[1]);          
+            ballPosition->set_y(position[1]);
 
             // Set world ball position.
             auto* ballWorldPosition = overview.mutable_ball_world_position();
             arma::vec2 worldPosition = RobotToWorldTransform(self.position, self.heading, position);
             ballWorldPosition->set_x(worldPosition[0]);
-            ballWorldPosition->set_y(worldPosition[1]);  
+            ballWorldPosition->set_y(worldPosition[1]);
 
         }));
 
