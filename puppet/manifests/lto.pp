@@ -108,6 +108,7 @@ node nubotsvm {
     refreshonly => true,
     require => [
       File['install_from_source'],
+      Installer['portaudio'],
       Archive["espeak"],
       Exec['fix_compiler_environment'],
     ],
