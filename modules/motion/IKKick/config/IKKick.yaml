@@ -1,9 +1,6 @@
+
 kick_priority: 30
 execution_priority: 40
-
-
-target: [0.1, 0, 0.05] #in support foot coordinates for debugging
-direction: [1, 0, 0]
 
 servo:
   gain: 30
@@ -11,8 +8,8 @@ servo:
 
 balancer:
   foot_separation: 0.074 # 0.074 = hip separation
-  adjustment: 0.00 #default value is 0.
-  stand_height: 0.22 #m
+  adjustment: -0.0000 #default value is 0.
+  stand_height: 0.23 #m
   forward_lean: 0.0 #m
 
   forward_velocity: 0.05 #m/s
@@ -21,27 +18,30 @@ balancer:
 
 lifter:
   lift_foot_height: 0.05 #m
-  put_foot_down_height: 0.045 #m #default value is lift_foot_height
-  lift_foot_back: 0.01 #m
-  forward_velocity: 0.05 #m/s
-  return_velocity: 0.1 #m/s
+  put_foot_down_height: 0.0 #m #default value is lift_foot_height
+  lift_foot_back: 0.1 #m
+
+  forward_velocity: 0.5 #m/s
+  return_velocity: 1 #m/s
 
 kicker:
-  forward_velocity: 0.1 #m/s
-  return_velocity: 0.05 #m/s
+  forward_velocity: 1 #m/s
+  return_velocity: 1 #m/s
 
 active_balance:
+  enabled: true
   angle_gain:
-    p: 0.5
+    p: 0.0
     i: 0.0
     d: 0.0
   translation_gain:
     X:
-      p: 0.0
+      p: 0.25
       d: -0.0
     Y:
-      p: 0
+      p: 0.25
       d: 0
     Z:
-      p: 0.035
-      d: 0  
+      p: 0.0  
+      d: 0
+
