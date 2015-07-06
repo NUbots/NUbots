@@ -57,6 +57,9 @@ namespace geometry {
 
         Line getParallelLineThrough(const arma::vec2& x) const;
 
+        arma::vec2 tangent() const;
+        arma::vec2 intersect(const Line& line) const;
+
         //Perform a least squares fit on a line, optionally using a distance
         //squared threshold away from the current model to filter candidates
         template <typename Iterator>

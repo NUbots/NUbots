@@ -356,6 +356,12 @@ namespace nubugger {
             auto* end = objLine->mutable_end();
             end->set_x(std::get<1>(line)[0]);
             end->set_y(std::get<1>(line)[1]);
+
+            auto* colour = objLine->mutable_colour();
+            colour->set_x(std::get<2>(line)[0]);
+            colour->set_y(std::get<2>(line)[1]);
+            colour->set_z(std::get<2>(line)[2]);
+            colour->set_t(std::get<2>(line)[3]);
         }
 
         return std::move(visionObject);
