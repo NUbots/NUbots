@@ -37,6 +37,13 @@ namespace planning {
     private:
         bool kickValid(const arma::vec3& ballPos, float standHeight, const messages::input::Sensors& sensors);
        	messages::motion::KickPlannerConfig cfg;
+       	float xTakeOverBox;
+       	float yTakeOverBox;
+        float xRobot;
+        float yRobot;
+       	float KickAngle;
+        float kickAngleThreshold;
+        arma::vec2 newTarget;
     };
 
 }

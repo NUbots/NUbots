@@ -89,18 +89,43 @@ namespace planning {
             const Sensors& sensors,
             const IKKickParams& params) {
 
+            //length to the closest end of the field abs(robot.x)
+            
+
+            // Defines the box within in which the kick target is changed from the centre 
+            // of the oppposition goal to the perpendicular distance from the robot to the goal
+
+            float maxKickRange = 0.60; //TODO: make configurable, only want to change at the last kick to avoid smart goalies
+            float xTakeOverBox = maxKickRange;
+            float error = 0.05;
+            float buffer = error + 2*fd.ball_radius;            
+            float yTakeOverBox = (fd.dimensions.field_width - fd.dimensions.goal_width)/2 + buffer;
+            float xRobot = selfs.front().position[0];
+            float yRobot = selfs.front().position[1];
+
+            if(xRobot < xTakeOverBox && yRobot < yTakeOverBox) {
+                newTarget = kickPlan.target;
+                newTarget[1] = yRobot;
+            } else {
+                newTarget = kickPlan.target;
+            }
+
             //Get time since last seen ball
             auto now = NUClear::clock::now();
             double secondsSinceLastSeen = std::chrono::duration_cast<std::chrono::microseconds>(now - ball.last_measurement_time).count() * 1e-6;
             
             //Compute target in robot coords
             auto self = selfs[0];
-            arma::vec2 kickTarget = WorldToRobotTransform(self.position, self.heading, kickPlan.target);
+            arma::vec2 kickTarget = WorldToRobotTransform(self.position, self.heading, newTarget);
             arma::vec3 ballPosition = {ball.position[0],ball.position[1],fd.ball_radius}; 
             
+            float KickAngle = std::fabs(std::atan2(kickTarget[1], kickTarget[0]));
+            float kickAngleThreshold = M_PI_4;
+
             //Check whether to kick
             if(secondsSinceLastSeen < cfg.seconds_not_seen_limit
-                && kickValid(ballPosition, params.stand_height, sensors)){
+                && kickValid(ballPosition, params.stand_height, sensors)
+                    && KickAngle < kickAngleThreshold){
                     emit(std::make_unique<KickCommand>(KickCommand{ballPosition, {kickTarget[0],kickTarget[1],0} }));
             }
 
