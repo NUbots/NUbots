@@ -32,11 +32,16 @@ namespace strategy {
         static constexpr const double DIFF = 0.01;
         static constexpr const double ROT_DIFF = 0.01;
 
+        static constexpr const double HEAD_DIFF = 1 * M_PI / 180;
+
         bool running = true;
 
         bool moving = false;
         arma::vec2 velocity;
         float rotation = 0;
+
+        float headYaw = 0;
+        float headPitch = 0;
 
         void run();
         void kill();
@@ -50,6 +55,10 @@ namespace strategy {
         void getUp();
         void reset();
         void kickRightForward();
+        void lookLeft();
+        void lookRight();
+        void lookUp();
+        void lookDown();
         void walkToggle();
         void quit();
 
