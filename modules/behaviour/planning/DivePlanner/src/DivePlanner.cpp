@@ -43,12 +43,15 @@ namespace planning {
 
     DivePlanner::DivePlanner(std::unique_ptr<NUClear::Environment> environment)
         : Reactor(std::move(environment)) {
-
+        
+        
+        // Do some configuration
         on<Trigger<Configuration<DivePlanner> > >([this](const Configuration<DivePlanner>& config) {
         	SPEED_THRESHOLD = config["SPEED_THRESHOLD"].as<float>();
         	DISTANCE_THRESHOLD = config["DISTANCE_THRESHOLD"].as<float>();
         });
 
+        // DivePlan provides target (probablly ball?) position (vec2)
         on<Trigger<Ball>, With<std::vector<Self>>, With<std::vector<messages::vision::Ball>>, With<DivePlan>>([this] (
         	const Ball& ball,
         	const std::vector<Self>& selfs,
@@ -59,13 +62,36 @@ namespace planning {
         	(void)selfs;
         	(void)divePlan;
 
-            if(vision_balls.size()>0 &&
-               ball.position[0] > 0 &&
-               -ball.velocity[0] > SPEED_THRESHOLD &&
-               ball.position[0] < DISTANCE_THRESHOLD ){
+            
+
+
+            if(vision_balls.size()>0 && //It means a ball was detected.
+               ball.position[0] > 0 && //
+               -ball.velocity[0] > SPEED_THRESHOLD && //Negative velocity means the ball is coming towards the goalie.
+               ball.position[0] < DISTANCE_THRESHOLD // If the ball is close enough (0.5 metres?) to the goalie.
+               ){
 
                 //NUClear::log("Ball Vel:", -ball.velocity[0] , ball.position[0]);
 
+                // Position [0] : x
+                // Position [1] : y
+                /*
+                 * Dive direction is determined by the RT position of ball.
+                 * TODO 1: This is problematic as there will be latence which has to be considered 
+                 * if the velocity of ball is beyond a threshold. Might be good if there is any sort of prediction.
+                 *
+                 * TODO 2: Posture before dive. Banana dive?
+                 *
+                 * TODO 3: If banana dive, how can the robot tell if it is facing the wrong direction and 
+                 * turn back to the correct direction (facing opponent)? Is that based on localisation?
+                 *
+                 *               + x
+                 *                ^
+                 *                |
+                 *          + y   |   -y
+                 *  LEFT<---------.--------- RIGHT
+                 */
+                
                 if(ball.position[1]>0){
                     //Dive left
                     auto x = std::make_unique<DiveCommand>();
