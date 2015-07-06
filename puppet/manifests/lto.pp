@@ -67,7 +67,6 @@ node nubotsvm {
                                 args => '--disable-shared --disable-debug --disable-samples', }
   installer { 'eigen3':         url => 'http://bitbucket.org/eigen/eigen/get/3.2.5.tar.gz', }
 
-  package { 'libeigen3-dev': }
   package { 'libboost-system-dev': }
   package { 'libboost-filesystem-dev': }
   package { 'libboost-thread-dev': }
@@ -77,9 +76,10 @@ node nubotsvm {
   package { 'libboost-chrono-dev': }
   package { 'libboost-date-time-dev': }
 
-  installer { 'ompl':           url => 'https://bitbucket.org/ompl/ompl/downloads/ompl-1.0.0-Source.tar.gz',
+  installer { 'ompl':           url => 'https://github.com/ompl/ompl/archive/master.tar.gz',
                                 args => "-DOMPL_BUILD_DEMOS -DOMPL_BUILD_PYBINDINGS -DOMPL_BUILD_PYTESTS",
-                                require => [ Package['libeigen3-dev'],
+                                environment => [ 'CXXFLAGS=-std=c++11' ],
+                                require => [ Installer['eigen3'],
                                              Package['libboost-system-dev'],
                                              Package['libboost-filesystem-dev'],
                                              Package['libboost-thread-dev'],
