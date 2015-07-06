@@ -61,8 +61,8 @@ namespace motion {
         // Removes any yaw component
         Rotation3D yawlessGoalOrientation = Rotation3D::createRotationZ(-goalTorsoOrientation.yaw()) * goalTorsoOrientation;
 
-        //Error orientation maps: Current -> Goal
-        Rotation3D errorOrientation = yawlessGoalOrientation * yawlessOrientation.i();
+        //Error orientation maps: Goal -> Current
+        Rotation3D errorOrientation = yawlessOrientation * yawlessGoalOrientation.i();
 
         // Our goal position as a quaternions
         UnitQuaternion errorQuaternion(errorOrientation);
