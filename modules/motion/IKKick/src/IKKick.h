@@ -24,6 +24,7 @@
 #include "IKKickControllers.h"
 #include "messages/motion/KickCommand.h"
 #include "messages/input/Sensors.h"
+#include "utility/motion/Balance.h"
 
 namespace modules {
 namespace motion {
@@ -53,6 +54,9 @@ namespace motion {
 
         float gain_legs = 50;
         float torque = 100;
+
+        bool feedback_active;
+        utility::motion::Balancer feedbackBalancer;
 
         KickBalancer balancer;
         FootLifter lifter;

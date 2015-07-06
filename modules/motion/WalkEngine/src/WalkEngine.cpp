@@ -32,6 +32,7 @@
 #include "messages/behaviour/FixedWalkCommand.h"
 #include "messages/localisation/FieldObject.h"
 
+#include "utility/motion/Balance.h"
 #include "utility/nubugger/NUhelpers.h"
 #include "utility/support/yaml_armadillo.h"
 #include "utility/support/yaml_expression.h"
@@ -39,6 +40,7 @@
 #include "utility/motion/ForwardKinematics.h"
 #include "utility/motion/RobotModels.h"
 #include "utility/math/angle.h"
+#include "utility/math/matrix/Rotation3D.h"
 
 namespace modules {
 namespace motion {
@@ -65,6 +67,7 @@ namespace motion {
     using utility::motion::kinematics::DarwinModel;
     using utility::math::matrix::Transform2D;
     using utility::math::matrix::Transform3D;
+    using utility::math::matrix::Rotation3D;
     using utility::math::angle::normalizeAngle;
     using utility::nubugger::graph;
     using utility::support::Expression;
@@ -133,7 +136,6 @@ namespace motion {
         });
 
         on<Trigger<Startup>>([this](const Startup&) {
-            lastBalanceTime = NUClear::clock::now();
 
             //generateAndSaveStandScript();
             //reset();
@@ -192,20 +194,11 @@ namespace motion {
 
         auto& balance = walkCycle["balance"];
         balanceEnabled = balance["enabled"].as<bool>();
-        balanceAmplitude = balance["amplitude"].as<Expression>();
-        balanceWeight = balance["weight"].as<Expression>();
-        balanceOffset = balance["offset"].as<Expression>();
+        // balanceAmplitude = balance["amplitude"].as<Expression>();
+        // balanceWeight = balance["weight"].as<Expression>();
+        // balanceOffset = balance["offset"].as<Expression>();
 
-        balancePGain = balance["angle_gain"]["p"].as<Expression>();
-        balanceIGain = balance["angle_gain"]["i"].as<Expression>();
-        balanceDGain = balance["angle_gain"]["d"].as<Expression>();
-
-        balanceTransPGainX = balance["translation_gain"]["X"]["p"].as<Expression>();
-        balanceTransDGainX = balance["translation_gain"]["X"]["d"].as<Expression>();
-        balanceTransPGainY = balance["translation_gain"]["Y"]["p"].as<Expression>();
-        balanceTransDGainY = balance["translation_gain"]["Y"]["d"].as<Expression>();
-        balanceTransPGainZ = balance["translation_gain"]["Z"]["p"].as<Expression>();
-        balanceTransDGainZ = balance["translation_gain"]["Z"]["d"].as<Expression>();
+        balancer.configure(balance);
 
         for(auto& gain : balance["servo_gains"]){
             float p = gain["p"].as<Expression>();
@@ -421,7 +414,7 @@ namespace motion {
 
         if (balanceEnabled) {
             // Apply balance to our support foot
-            balance(swingLeg == LimbID::LEFT_LEG ? rightFootTorso : leftFootTorso
+            balancer.balance(swingLeg == LimbID::LEFT_LEG ? rightFootTorso : leftFootTorso
                 , swingLeg == LimbID::LEFT_LEG ? LimbID::RIGHT_LEG : LimbID::LEFT_LEG
                 , sensors);
         }
@@ -454,8 +447,8 @@ namespace motion {
 
         if (balanceEnabled) {
             // Apply balance to both legs when standing still
-            balance(leftFootTorso, LimbID::LEFT_LEG, sensors);
-            balance(rightFootTorso, LimbID::RIGHT_LEG, sensors);
+            balancer.balance(leftFootTorso, LimbID::LEFT_LEG, sensors);
+            balancer.balance(rightFootTorso, LimbID::RIGHT_LEG, sensors);
         }
 
         auto joints = calculateLegJointsTeamDarwin<DarwinModel>(leftFootTorso, rightFootTorso);

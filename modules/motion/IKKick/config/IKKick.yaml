@@ -30,3 +30,18 @@ kicker:
   forward_velocity: 0.1 #m/s
   return_velocity: 0.05 #m/s
 
+active_balance:
+  angle_gain:
+    p: 0.5
+    i: 0.0
+    d: 0.0
+  translation_gain:
+    X:
+      p: 0.0
+      d: -0.0
+    Y:
+      p: 0
+      d: 0
+    Z:
+      p: 0.035
+      d: 0  

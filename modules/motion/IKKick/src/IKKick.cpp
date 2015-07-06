@@ -82,6 +82,10 @@ namespace motion {
             gain_legs =config["servo"]["gain"].as<float>();
             torque = config["servo"]["torque"].as<float>();
 
+            auto& balanceConfig = config["active_balance"];
+            feedback_active = balanceConfig["active_balance"].as<bool>();
+            feedbackBalancer.configure(balanceConfig);
+
             //Emit useful info to KickPlanner
             emit(std::make_unique<IKKickParams>(IKKickParams{config["balancer"]["stand_height"].as<float>()}));
             emit(std::make_unique<KickPlan>(KickPlan{{4.5,0}}));
@@ -93,7 +97,7 @@ namespace motion {
             emit(std::make_unique<KickPlan>(KickPlan{{4.5,0}}));
         });
 
-        on<Trigger<KickCommand>, With<Sensors>>([this] (const KickCommand&, const Sensors& sensors) {
+        on<Trigger<KickCommand>>([this] (const KickCommand&) {
             // We want to kick!            
             emit(std::make_unique<WalkStopCommand>()); // Stop the walk
             updatePriority(KICK_PRIORITY);
@@ -180,38 +184,53 @@ namespace motion {
 
             Transform3D kickFootGoal;
             Transform3D supportFootGoal;
-            
+
+            //Move torso over support foot
             if(balancer.isRunning()){
                 Transform3D supportFootPose = balancer.getFootPose(sensors);
                 supportFootGoal = supportFootPose;
                 kickFootGoal = supportFootPose.translate(arma::vec3({0, negativeIfKickRight * foot_separation, 0}));
             }
 
+            //Lift the foot
             if(lifter.isRunning()){
                 kickFootGoal *= lifter.getFootPose(sensors);
             }
+
+            //Move foot to ball to kick
             if(kicker.isRunning()){
                 kickFootGoal *= kicker.getFootPose(sensors);
             }
 
-            //Calculate IK and send waypoints
+            //Balance based on the IMU
+            if(feedback_active){
+                feedbackBalancer.balance(supportFootGoal,supportFoot,sensors);
+            }
 
+            //Calculate IK and send waypoints
             std::vector<std::pair<messages::input::ServoID, float>> joints;
 
+            //IK
             auto kickJoints = calculateLegJoints<DarwinModel>(kickFootGoal, kickFoot);
             auto supportJoints = calculateLegJoints<DarwinModel>(supportFootGoal, supportFoot);
+
+            //Combine left and right legs
             joints.insert(joints.end(),kickJoints.begin(),kickJoints.end());
             joints.insert(joints.end(),supportJoints.begin(),supportJoints.end());
 
+            //Create message to send to servos
             auto waypoints = std::make_unique<std::vector<ServoCommand>>();
             waypoints->reserve(16);
 
+            //Goal time is by next frame
             time_t time = NUClear::clock::now() + std::chrono::nanoseconds(std::nano::den / UPDATE_FREQUENCY);
 
+            //Push back each servo command
             for (auto& joint : joints) {
                 waypoints->push_back({ id, time, joint.first, joint.second, gain_legs, torque});
             }
 
+            //Send message
             emit(std::move(waypoints));
 
         });
