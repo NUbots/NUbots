@@ -79,13 +79,18 @@ namespace motion{
     void Kicker::computeStartMotion(const Sensors& sensors) {
         startPose = arma::eye(4,4);
         std::cout <<"startPoseStartKicker"<< startPose <<std::endl;        
+        // Convert torso to support foot
         Transform3D currentTorso = getTorsoPose(sensors);
+        // Convert kick foot to torso 
         Transform3D currentKickFoot = supportFoot == LimbID::LEFT_LEG ? sensors.forwardKinematics.find(ServoID::R_ANKLE_ROLL)->second 
                                                                       : sensors.forwardKinematics.find(ServoID::L_ANKLE_ROLL)->second;
+        // Convert support foot to kick foot coordinates = convert torso to kick foot * convert support foot to torso
         Transform3D supportToKickFoot = currentKickFoot.i() * currentTorso.i();
+        // Convert ball position from support foot coordinates to kick foot coordinates
         arma::vec3 ballFromKickFoot = supportToKickFoot.transformPoint(ballPosition);
+        // Make the end target matrix: no rotation (identity) and translate by ball position
         finishPose = startPose.translate(ballFromKickFoot);
-        finishPose = startPose.translate(arma::vec3({DarwinModel::Leg::FOOT_LENGTH / 2, 0, 0}));
+        finishPose = startPose.translate(arma::vec3({DarwinModel::Leg::TOE_LENGTH, 0, 0}));
         std::cout <<"finishPoseStartKicker"<< finishPose <<std::endl;
         distance = arma::norm(startPose.translation() - finishPose.translation());
     }
