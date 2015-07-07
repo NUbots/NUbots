@@ -38,14 +38,7 @@ namespace motion{
         forward_duration = config["balancer"]["forward_duration"].as<float>();
         return_duration = config["balancer"]["return_duration"].as<float>();
 	}
-    
-    void Kicker::configure(const Configuration<IKKickConfig>& config) {
-        lift_foot_height = config["lifter"]["lift_foot_height"].as<float>();
-        put_foot_down_height = config["lifter"]["put_foot_down_height"].as<float>();
-        lift_foot_back = config["lifter"]["lift_foot_back"].as<float>();
-        forward_duration = config["kicker"]["forward_duration"].as<float>();
-        return_duration = config["kicker"]["return_duration"].as<float>();
-	}
+
 
     void KickBalancer::computeStartMotion(const Sensors& sensors) {
         Transform3D torsoToFoot = getTorsoPose(sensors);
@@ -62,11 +55,24 @@ namespace motion{
         anim = Animator(frames);
     }
 
+
+    void KickBalancer::computeStopMotion(const Sensors&){
+        //Play the reverse
+        anim.frames[0].duration = return_duration;
+        std::reverse(anim.frames.begin(),anim.frames.end());
+        anim.frames[0].duration = 0;
+    }
+
+    void Kicker::configure(const Configuration<IKKickConfig>& config) {
+        lift_foot = SixDOFFrame(config["kick_frames"]["lift_foot"]);
+        kick = SixDOFFrame(config["kick_frames"]["kick"]);
+        place_foot = SixDOFFrame(config["kick_frames"]["place_foot"]);
+	}
+
     void Kicker::computeStartMotion(const Sensors& sensors) {
         Transform3D startPose = arma::eye(4,4);
 
         // Convert torso to support foot
-
         Transform3D currentTorso = getTorsoPose(sensors);
         // Convert kick foot to torso 
         Transform3D currentKickFoot = supportFoot == LimbID::LEFT_LEG ? sensors.forwardKinematics.find(ServoID::R_ANKLE_ROLL)->second 
@@ -75,28 +81,22 @@ namespace motion{
         Transform3D supportToKickFoot = currentKickFoot.i() * currentTorso.i();
         // Convert ball position from support foot coordinates to kick foot coordinates
         arma::vec3 ballFromKickFoot = supportToKickFoot.transformPoint(ballPosition);
-        Transform3D finishPose = startPose.translate(ballFromKickFoot);
+        kick.pose.translation() = ballFromKickFoot;
         
         std::vector<SixDOFFrame> frames;
         frames.push_back(SixDOFFrame{startPose,0});
-        frames.push_back(SixDOFFrame{finishPose,forward_duration});
+        frames.push_back(lift_foot);
+        frames.push_back(kick);
+        frames.push_back(place_foot);
         anim = Animator(frames);
 
     }
-
-
-    void KickBalancer::computeStopMotion(const Sensors&){
-        //EWW HACKS
-        anim.frames[0].duration = return_duration;
-        std::reverse(anim.frames.begin(),anim.frames.end());
-        anim.frames[0].duration = 0;
-    }
-
     void Kicker::computeStopMotion(const Sensors&){
-        //EWW HACKS
-        anim.frames[0].duration = return_duration;
-        std::reverse(anim.frames.begin(),anim.frames.end());
-        anim.frames[0].duration = 0;
+        //Just play the place_foot frame
+        std::vector<SixDOFFrame> frames;
+        frames.push_back(place_foot);
+        anim = Animator(frames);
+
     }
 }
 }

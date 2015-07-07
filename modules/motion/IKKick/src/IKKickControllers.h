@@ -38,14 +38,33 @@ namespace motion{
 			FINISHED = 3
 		};
 
-		struct SixDOFFrame {
+        struct IKKickConfig{
+			static constexpr const char* CONFIGURATION_PATH = "IKKick.yaml";
+        };
+
+		class SixDOFFrame {
 			// enum InterpolationType {
 			// 	LINEAR = 0,
 			// 	SERVO = 1
+			//TODO:
 			// };
 			// InterpolationType interpolation = LINEAR;
+		public:
 			utility::math::matrix::Transform3D pose;
 			float duration;
+			SixDOFFrame():pose(){}
+			SixDOFFrame(utility::math::matrix::Transform3D pose_, float duration_) : pose(pose_), duration(duration_){}
+			SixDOFFrame(const YAML::Node& config){
+				duration = config["duration"].as<float>();
+				arma::vec3 pos = config["pos"].as<arma::vec>();
+				arma::vec3 orientation = (180.0 / M_PI ) * config["orientation"].as<arma::vec>();
+				pose = utility::math::matrix::Transform3D();
+				pose.rotateX(orientation[0]);
+				pose.rotateY(orientation[1]);
+				pose.rotateZ(orientation[2]);
+				pose.translation() = pos;
+			};
+			//TODO:
 			// std::map<messages::input::ServoID, float> jointGains;
 		};	
 
@@ -53,22 +72,20 @@ namespace motion{
 		public:
 			std::vector<SixDOFFrame> frames;
 			int i = 0;
-			Animator(){}
+			Animator(){frames.push_back(SixDOFFrame{utility::math::matrix::Transform3D(),0});}
 			Animator(std::vector<SixDOFFrame> frames_){
 				frames = frames_;
 			}
-			void next(){i = std::min(i+1,int(frames.size()-2));}
+			int clampPrev(int k) const {return std::max(std::min(k,int(frames.size()-2)),0);}
+			int clampCurrent(int k) const {return std::max(std::min(k,int(frames.size()-1)),0);}
+			void next(){i = clampPrev(i+1);}
 			void reset(){i = 0;}
-			const SixDOFFrame& currentFrame() const {return frames[i+1];}
+			const SixDOFFrame& currentFrame() const {return frames[clampCurrent(i+1)];}
 			const SixDOFFrame& previousFrame() const {return frames[i];}
 			const SixDOFFrame& startFrame() const {return frames[0];}
-			bool stable(){return i == int(frames.size()-2);}
+			bool stable(){return i >= int(frames.size()-2);}
 		};
 
-
-        struct IKKickConfig{
-			static constexpr const char* CONFIGURATION_PATH = "IKKick.yaml";
-        };
 
 
 		class SixDOFFootController{
@@ -178,9 +195,9 @@ namespace motion{
 
 		class Kicker : public SixDOFFootController{
 		private:
-			float lift_foot_height = 0.05;
-			float put_foot_down_height = 0.05;
-			float lift_foot_back = 0.01;
+			SixDOFFrame lift_foot;
+			SixDOFFrame kick;
+			SixDOFFrame place_foot;
 		public:
 			virtual void configure(const messages::support::Configuration<IKKickConfig>& config);
 			virtual void computeStartMotion(const messages::input::Sensors& sensors);

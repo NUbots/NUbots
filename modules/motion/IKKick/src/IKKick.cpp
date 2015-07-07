@@ -98,7 +98,6 @@ namespace motion {
 
         on<Trigger<KickCommand>>([this] (const KickCommand&) {
             // We want to kick!  
-            log("Kick Command");          
             emit(std::make_unique<WalkStopCommand>()); // Stop the walk
             updatePriority(KICK_PRIORITY);
         });
@@ -164,22 +163,22 @@ namespace motion {
 
             //State checker
             if(balancer.isStable()){
-                std::cout << "balancer stable" << std::endl;
+                // std::cout << "balancer stable" << std::endl;
                 kicker.start(sensors);
             }
 
             if(kicker.isStable()){
-                std::cout << "kicker stable" << std::endl;
+                // std::cout << "kicker stable" << std::endl;
                 kicker.stop(sensors);
             }
 
             if(kicker.isFinished()){
-                std::cout << "kicker finished" << std::endl;
+                // std::cout << "kicker finished" << std::endl;
                 balancer.stop(sensors);
             }
 
             if(balancer.isFinished()){
-                std::cout << "balancer finished" << std::endl;
+                // std::cout << "balancer finished" << std::endl;
                 emit(std::move(std::make_unique<FinishKick>()));
             }
             
@@ -190,16 +189,15 @@ namespace motion {
 
             //Move torso over support foot
             if(balancer.isRunning()){
-                std::cout << "balancer running" << std::endl;
+                // std::cout << "balancer running" << std::endl;
                 Transform3D supportFootPose = balancer.getFootPose(sensors);
                 supportFootGoal = supportFootPose;
                 kickFootGoal = supportFootPose.translate(arma::vec3({0, negativeIfKickRight * foot_separation, 0}));
             }
 
-
             //Move foot to ball to kick
             if(kicker.isRunning()){
-                std::cout << "kicker running" << std::endl;
+                // std::cout << "kicker running" << std::endl;
                 kickFootGoal *= kicker.getFootPose(sensors);
             }
 

@@ -15,19 +15,6 @@ balancer:
   forward_duration: 1 #m/s
   return_duration: 1 #m/s
 
-
-lifter:
-  lift_foot_height: 0.05 #m
-  put_foot_down_height: 0.0 #m #default value is lift_foot_height
-  lift_foot_back: 0.1 #m
-
-  forward_duration: 1 #s
-  return_duration: 1 #s
-
-kicker:
-  forward_duration: 1 #s
-  return_duration: 1 #s
-
 active_balance:
   enabled: true
   angle_gain:
@@ -45,3 +32,16 @@ active_balance:
       p: 0.0  
       d: 0
 
+kick_frames:
+  lift_foot:
+    pos: [-0.05,0,0.05]
+    orientation: [0,0,0]
+    duration: 1
+  kick:
+    pos: [0,0,0]
+    orientation: [0,0,0]
+    duration: 0.1
+  place_foot:
+    pos: [0,0,0.02]
+    orientation: [0,0,0]
+    duration: 0.5
