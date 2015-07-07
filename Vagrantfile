@@ -16,7 +16,7 @@ Vagrant.configure("2") do |config|
   config.vm.provision :puppet do |puppet|
     puppet.manifests_path = "puppet/manifests"
     puppet.module_path = "puppet/modules"
-    puppet.manifest_file  = "nodes.pp"
+    puppet.manifest_file  = "nubots.pp"
     puppet.options = [
       # See https://docs.puppetlabs.com/references/3.6.2/man/agent.html#OPTIONS
       "--verbose",
