@@ -161,7 +161,7 @@ namespace nubugger {
         return std::move(drawObjects);
     }
 
-    inline std::unique_ptr<DrawObjects> drawCircle(std::string name, Circle circle, float z = 0, arma::vec3 color = {1,1,0}, float timeout = TIMEOUT) {
+    inline std::unique_ptr<DrawObjects> drawCircle(std::string name, Circle circle, float z = 0, arma::vec3 colour = {1,1,0}, float timeout = TIMEOUT) {
         auto drawObjects = drawCircle(
             name,
             {circle.centre(0), circle.centre(1), z},
@@ -171,7 +171,7 @@ namespace nubugger {
             timeout);
 
         auto* object = drawObjects->mutable_objects(0);
-        *object->mutable_color() << color;
+        *object->mutable_colour() << colour;
 
         return std::move(drawObjects);
     }
@@ -253,10 +253,10 @@ namespace nubugger {
         return std::move(drawObjects);
     }
 
-    inline std::unique_ptr<DrawObjects> drawRectangle(std::string name, RotatedRectangle rect, arma::vec3 color, float timeout = TIMEOUT) {
+    inline std::unique_ptr<DrawObjects> drawRectangle(std::string name, RotatedRectangle rect, arma::vec3 colour, float timeout = TIMEOUT) {
         auto drawObjects = drawRectangle(name, rect, timeout);
         auto* object = drawObjects->mutable_objects(0);
-        *object->mutable_color() << color;
+        *object->mutable_colour() << colour;
         return std::move(drawObjects);
     }
 
@@ -268,24 +268,21 @@ namespace nubugger {
         object->set_shape(messages::support::nubugger::proto::DrawObject::SPHERE);
         object->set_timeout(timeout);
 
-        auto* objPosition = object->mutable_position();
-        objPosition->set_x(position[0]);
-        objPosition->set_y(position[1]);
-        objPosition->set_z(position[2]);
+        *object->mutable_position() << position;
 
         object->set_radius(radius);
 
         return std::move(drawObjects);
     }
 
-    inline std::unique_ptr<DrawObjects> drawSphere(std::string name, arma::vec3 position, float radius, arma::vec3 color, float timeout = TIMEOUT) {
+    inline std::unique_ptr<DrawObjects> drawSphere(std::string name, arma::vec3 position, float radius, arma::vec3 colour, float timeout = TIMEOUT) {
         auto drawObjects = drawSphere(name, position, radius, timeout);
         auto* object = drawObjects->mutable_objects(0);
-        *object->mutable_color() << color;
+        *object->mutable_colour() << colour;
         return std::move(drawObjects);
     }
 
-    inline std::unique_ptr<DrawObjects> drawTree(std::string name, std::vector<arma::vec> positions, std::vector<uint> parentIndices, float line_width, arma::vec3 color, float timeout = TIMEOUT) {
+    inline std::unique_ptr<DrawObjects> drawTree(std::string name, std::vector<arma::vec> positions, std::vector<uint> parentIndices, float line_width, arma::vec3 colour, float timeout = TIMEOUT) {
 
         auto drawObjects = std::make_unique<DrawObjects>();
         auto* object = drawObjects->add_objects();
@@ -294,7 +291,7 @@ namespace nubugger {
         object->set_timeout(timeout);
         object->set_width(line_width);
 
-        *object->mutable_color() << color;
+        *object->mutable_colour() << colour;
 
         for (uint i = 0; i < positions.size(); i++) {
             auto* objNode = object->add_path();
@@ -309,25 +306,25 @@ namespace nubugger {
         return std::move(drawObjects);
     }
 
-    inline std::unique_ptr<DrawObjects> drawPolyline(std::string name, std::vector<arma::vec> positions, float line_width, arma::vec3 color, float timeout = TIMEOUT) {
+    inline std::unique_ptr<DrawObjects> drawPolyline(std::string name, std::vector<arma::vec> positions, float line_width, arma::vec3 colour, float timeout = TIMEOUT) {
 
         std::vector<uint> parentIndices;
         parentIndices.reserve(positions.size());
         for (uint i = 0; i < positions.size(); i++) {
             parentIndices.push_back(std::max(0, int(i) - 1));
         }
-        return drawTree(name, positions, parentIndices, line_width, color, timeout);
+        return drawTree(name, positions, parentIndices, line_width, colour, timeout);
 
     }
 
-    inline std::unique_ptr<DrawObjects> drawPath(std::string name, std::vector<Transform2D> states, float line_width, arma::vec3 color, float timeout = TIMEOUT) {
+    inline std::unique_ptr<DrawObjects> drawPath(std::string name, std::vector<Transform2D> states, float line_width, arma::vec3 colour, float timeout = TIMEOUT) {
         std::vector<arma::vec> positions;
 
         for (auto state : states) {
             positions.push_back(state.xy());
         }
 
-        return utility::nubugger::drawPolyline(name, positions, line_width, color, timeout);
+        return utility::nubugger::drawPolyline(name, positions, line_width, colour, timeout);
     }
 
     inline std::unique_ptr<messages::vision::proto::VisionObject> drawVisionLines(std::vector<std::tuple<arma::ivec2, arma::ivec2, arma::vec4>> lines) {
@@ -340,30 +337,26 @@ namespace nubugger {
         for (const auto& line : lines) {
             auto* objLine = visionObject->add_line();
 
-            auto* start = objLine->mutable_start();
-            start->set_x(std::get<0>(line)[0]);
-            start->set_y(std::get<0>(line)[1]);
-
-            auto* end = objLine->mutable_end();
-            end->set_x(std::get<1>(line)[0]);
-            end->set_y(std::get<1>(line)[1]);
+            *objLine->mutable_start() << std::get<0>(line);
+            *objLine->mutable_end() << std::get<1>(line);
+            *objLine->mutable_colour() << std::get<2>(line);
         }
 
         return std::move(visionObject);
 
     }
 
-    inline std::unique_ptr<messages::vision::proto::VisionObject> drawVisionLines(std::vector<std::pair<arma::ivec2, arma::ivec2>> lines) {
+    inline std::unique_ptr<messages::vision::proto::VisionObject> drawVisionLines(std::vector<std::pair<arma::ivec2, arma::ivec2>> lines, arma::vec4 colour = arma::vec4({1, 1, 1, 1})) {
         std::vector<std::tuple<arma::ivec2, arma::ivec2, arma::vec4>> colouredLines;
         colouredLines.reserve(lines.size());
         for (auto const line : lines) {
-            colouredLines.push_back(std::make_tuple(line.first, line.second, arma::vec4({1, 1, 1, 1})));
+            colouredLines.push_back(std::make_tuple(line.first, line.second, colour));
         }
         return drawVisionLines(colouredLines);
     }
 
-    inline std::unique_ptr<messages::vision::proto::VisionObject> drawVisionLine(arma::ivec2 start, arma::ivec2 end, arma::vec4 color = arma::vec4({1, 1, 1, 1})) {
-        return drawVisionLines({std::make_tuple(start, end, color)});
+    inline std::unique_ptr<messages::vision::proto::VisionObject> drawVisionLine(arma::ivec2 start, arma::ivec2 end, arma::vec4 colour = arma::vec4({1, 1, 1, 1})) {
+        return drawVisionLines({std::make_tuple(start, end, colour)});
     }
 
 }

@@ -45,17 +45,15 @@ namespace ransac {
             return (s[1] = (s1 ^ s0 ^ (s1 >> 17) ^ (s0 >> 26))) + s0;
         }
 
-        template <typename Iterator>
-        static void regenerateRandomModel(Model& model, const std::array<Iterator, Model::REQUIRED_POINTS + 1>& iterators) {
+        template <typename Iterator, typename... Args>
+        static bool regenerateRandomModel(Model& model, const std::array<Iterator, Model::REQUIRED_POINTS + 1>& iterators, Args... args) {
 
             std::array<DataPoint, Model::REQUIRED_POINTS> points;
-            do {
-                for (uint i = 0; i < Model::REQUIRED_POINTS; ++i) {
-                    uint range = std::distance(iterators[i], iterators[i + 1]);
-                    points[i] = *std::next(iterators[i], xorShift() % range);
-                }
+            for (uint i = 0; i < Model::REQUIRED_POINTS; ++i) {
+                uint range = std::distance(iterators[i], iterators[i + 1]);
+                points[i] = *std::next(iterators[i], xorShift() % range);
             }
-            while(!model.regenerate(points));
+            return model.regenerate(points, std::forward<Args>(args)...);
         }
 
         /**
@@ -63,11 +61,12 @@ namespace ransac {
          *
          * @return A pair containing an iterator to the start of the remaining set, and the best fitting model
          */
-        template <typename Iterator>
+        template <typename Iterator, typename... Args>
         static std::pair<bool, RansacResult<Iterator, Model>> fitModel(std::array<Iterator, Model::REQUIRED_POINTS + 1>& iterators
                                              , uint minimumPointsForConsensus
                                              , uint maximumIterationsPerFitting
-                                             , double consensusErrorThreshold) {
+                                             , double consensusErrorThreshold
+                                             , Args... args) {
 
             // Check we have enough points in each part
             for(uint i = 0; i < Model::REQUIRED_POINTS; ++i) {
@@ -87,7 +86,9 @@ namespace ransac {
                 double error = 0.0;
 
                 // Make our model have new set of points
-                regenerateRandomModel(model, iterators);
+                if(!regenerateRandomModel(model, iterators, std::forward<Args>(args)...)) {
+                    continue;
+                }
 
                 // Look through all our points and see if they fall within our error bounds
                 for(auto it = iterators.front(); it != iterators.back(); ++it) {
@@ -147,12 +148,13 @@ namespace ransac {
             }
         }
 
-        template <typename Iterator>
+        template <typename Iterator, typename... Args>
         static std::vector<RansacResult<Iterator, Model>> fitModels(std::array<Iterator, Model::REQUIRED_POINTS + 1> iterators
                                                            , uint minimumPointsForConsensus
                                                            , uint maximumIterationsPerFitting
                                                            , uint maximumFittedModels
-                                                           , double consensusErrorThreshold) {
+                                                           , double consensusErrorThreshold
+                                                           , Args... args) {
 
             std::vector<RansacResult<Iterator, Model>> results;
             results.reserve(maximumFittedModels);
@@ -160,7 +162,7 @@ namespace ransac {
             while(results.size() < maximumFittedModels) {
                 bool valid;
                 RansacResult<Iterator, Model> result;
-                std::tie(valid, result) = fitModel(iterators, minimumPointsForConsensus, maximumIterationsPerFitting, consensusErrorThreshold);
+                std::tie(valid, result) = fitModel(iterators, minimumPointsForConsensus, maximumIterationsPerFitting, consensusErrorThreshold, std::forward<Args>(args)...);
 
                 // If we have more datapoints left then add this one and continue
                 if(valid) {

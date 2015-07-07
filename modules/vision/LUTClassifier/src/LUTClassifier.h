@@ -53,8 +53,17 @@ namespace modules {
 
             int GOAL_LINE_SPACING = 100;
             int GOAL_SUBSAMPLING = 1;
-            double GOAL_EXTENSION_SCALE = 2.0;
+            uint GOAL_RANSAC_MINIMUM_POINTS_FOR_CONSENSUS = 10;
+            uint GOAL_RANSAC_MAXIMUM_ITERATIONS_PER_FITTING = 30;
+            uint GOAL_RANSAC_MAXIMUM_FITTED_MODELS = 6;
+            uint GOAL_MINIMUM_RANSAC_SEGMENT_SIZE = 1;
+            double GOAL_RANSAC_CONSENSUS_ERROR_THRESHOLD = 10;
+            double GOAL_MAX_HORIZON_ANGLE = M_PI / 6;
+            double GOAL_VERTICAL_EXTENSION_SCALE = 2.0;
+            double GOAL_HORIZONTAL_EXTENSION_SCALE = 2.0;
             int GOAL_LINE_DENSITY = 2;
+            double GOAL_WIDTH_HEIGHT_RATIO = 3;
+            int GOAL_LINE_INTERSECTIONS = 30;
 
             double BALL_MINIMUM_INTERSECTIONS_COARSE = 1;
             double BALL_MINIMUM_INTERSECTIONS_FINE = 1;

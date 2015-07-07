@@ -25,6 +25,8 @@
 #include "messages/vision/LookUpTable.h"
 #include "messages/support/Configuration.h"
 
+#include "utility/support/yaml_expression.h"
+
 #include "QuexClassifier.h"
 
 #include "Lexer.hpp"
@@ -42,6 +44,7 @@ namespace modules {
         using messages::vision::ClassifiedImage;
         using messages::support::Configuration;
         using messages::support::SaveConfiguration;
+        using utility::support::Expression;
 
         void LUTClassifier::insertSegments(ClassifiedImage<ObjectClass>& image, std::vector<ClassifiedImage<ObjectClass>::Segment>& segments, bool vertical) {
             ClassifiedImage<ObjectClass>::Segment* previous = nullptr;
@@ -86,8 +89,18 @@ namespace modules {
                 // Goal detector
                 GOAL_LINE_SPACING = cam.focalLengthPixels * tan(config["goals"]["spacing"].as<double>());
                 GOAL_SUBSAMPLING = std::max(1, int(cam.focalLengthPixels * tan(config["goals"]["subsampling"].as<double>())));
-                GOAL_EXTENSION_SCALE = config["goals"]["extension_scale"].as<double>() / 2;
+                GOAL_RANSAC_MINIMUM_POINTS_FOR_CONSENSUS = config["goals"]["ransac"]["minimum_points_for_consensus"].as<uint>();
+                GOAL_RANSAC_MAXIMUM_ITERATIONS_PER_FITTING = config["goals"]["ransac"]["maximum_iterations_per_fitting"].as<uint>();
+                GOAL_RANSAC_MAXIMUM_FITTED_MODELS = config["goals"]["ransac"]["maximum_fitted_models"].as<uint>();
+                GOAL_RANSAC_CONSENSUS_ERROR_THRESHOLD = config["goals"]["ransac"]["consensus_error_threshold"].as<double>();
+                GOAL_MINIMUM_RANSAC_SEGMENT_SIZE = std::max(1, int(cam.focalLengthPixels * tan(config["goals"]["minimum_ransac_segment_size"].as<double>())));
+                GOAL_MAX_HORIZON_ANGLE = std::cos(config["goals"]["max_horizon_angle"].as<Expression>());
+                GOAL_RANSAC_CONSENSUS_ERROR_THRESHOLD = config["goals"]["ransac"]["consensus_error_threshold"].as<double>();
                 GOAL_LINE_DENSITY = config["goals"]["line_density"].as<int>();
+                GOAL_HORIZONTAL_EXTENSION_SCALE = config["goals"]["horizontal_extension_scale"].as<double>();
+                GOAL_VERTICAL_EXTENSION_SCALE = config["goals"]["vertical_extension_scale"].as<double>();
+                GOAL_WIDTH_HEIGHT_RATIO = config["goals"]["width_height_ratio"].as<double>();
+                GOAL_LINE_INTERSECTIONS = config["goals"]["line_intersections"].as<uint>();
 
                 // Ball Detector
                 BALL_MINIMUM_INTERSECTIONS_COARSE = config["ball"]["intersections_coarse"].as<double>();
@@ -132,11 +145,11 @@ namespace modules {
                 // Find our visual horizon
                 findVisualHorizon(image, lut, *classifiedImage);
 
-                // // Find our goals
-                // findGoals(image, lut, *classifiedImage);
+                // Find our goals
+                findGoals(image, lut, *classifiedImage);
 
-                // // Enhance our goals
-                // enhanceGoals(image, lut, *classifiedImage);
+                // Enhance our goals
+                enhanceGoals(image, lut, *classifiedImage);
 
                 // // Find our ball (also helps with the bottom of goals)
                 // findBall(image, lut, *classifiedImage);
