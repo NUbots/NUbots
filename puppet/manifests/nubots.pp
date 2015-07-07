@@ -9,8 +9,7 @@ node nubotsvm {
 
   # We need dev tools
   class {'dev_tools': }
-
-  $toolchain_url = "https://drive.google.com/open?id=0B-0Hu8H3MvexUG1JY1Z4cjhhWkE"
+  $toolchain_url = "https://www.dropbox.com/s/gj86fejcncri4ip/nubots-toolchain1.0.0.deb"
 
   # Get and install our toolchain
   wget::fetch { "nubots_toolchain":
