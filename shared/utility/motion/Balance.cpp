@@ -111,9 +111,8 @@ namespace motion {
         //Differentiate error signal
         auto now = NUClear::clock::now();
         double timeSinceLastMeasurement = std::chrono::duration_cast<std::chrono::nanoseconds>(now - lastBalanceTime).count() * 1e-9;
-
-        double newdPitch = (pitch - lastPitch) / timeSinceLastMeasurement; //note that this is not a great computation of the diff
-        double newdRoll = (roll - lastRoll) / timeSinceLastMeasurement;
+        double newdPitch = timeSinceLastMeasurement != 0 ? (pitch - lastPitch) / timeSinceLastMeasurement : 0; //note that this is not a great computation of the diff
+        double newdRoll = timeSinceLastMeasurement != 0 ? (roll - lastRoll) / timeSinceLastMeasurement : 0;
 
         //Exponential filter for velocity
         dPitch = newdPitch * 0.1 + dPitch * 0.9;

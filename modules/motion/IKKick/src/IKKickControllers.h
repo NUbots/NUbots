@@ -38,55 +38,101 @@ namespace motion{
 			FINISHED = 3
 		};
 
-
         struct IKKickConfig{
-            static constexpr const char* CONFIGURATION_PATH = "IKKick.yaml";
+			static constexpr const char* CONFIGURATION_PATH = "IKKick.yaml";
         };
 
+		class SixDOFFrame {
+			// enum InterpolationType {
+			// 	LINEAR = 0,
+			// 	SERVO = 1
+			//TODO:
+			// };
+			// InterpolationType interpolation = LINEAR;
+		public:
+			utility::math::matrix::Transform3D pose;
+			float duration;
+			SixDOFFrame():pose(){}
+			SixDOFFrame(utility::math::matrix::Transform3D pose_, float duration_) : pose(pose_), duration(duration_){}
+			SixDOFFrame(const YAML::Node& config){
+				duration = config["duration"].as<float>();
+				arma::vec3 pos = config["pos"].as<arma::vec>();
+				arma::vec3 orientation = (180.0 / M_PI ) * config["orientation"].as<arma::vec>();
+				pose = utility::math::matrix::Transform3D();
+				pose.rotateX(orientation[0]);
+				pose.rotateY(orientation[1]);
+				pose.rotateZ(orientation[2]);
+				pose.translation() = pos;
+			};
+			//TODO:
+			// std::map<messages::input::ServoID, float> jointGains;
+		};	
 
-		class SixDOFMotionController{
+		class Animator{
+		public:
+			std::vector<SixDOFFrame> frames;
+			int i = 0;
+			Animator(){frames.push_back(SixDOFFrame{utility::math::matrix::Transform3D(),0});}
+			Animator(std::vector<SixDOFFrame> frames_){
+				frames = frames_;
+			}
+			int clampPrev(int k) const {return std::max(std::min(k,int(frames.size()-2)),0);}
+			int clampCurrent(int k) const {return std::max(std::min(k,int(frames.size()-1)),0);}
+			void next(){i = clampPrev(i+1);}
+			void reset(){i = 0;}
+			const SixDOFFrame& currentFrame() const {return frames[clampCurrent(i+1)];}
+			const SixDOFFrame& previousFrame() const {return frames[i];}
+			const SixDOFFrame& startFrame() const {return frames[0];}
+			bool stable(){return i >= int(frames.size()-2);}
+		};
+
+
+
+		class SixDOFFootController{
 			protected:
 				MotionStage stage = MotionStage::READY;
 				bool stable = false;
 
-				float forward_velocity = 0.1;
-				float return_velocity = 0.1;
-				
 				//State variables
 				messages::input::LimbID supportFoot;
-				utility::math::matrix::Transform3D startPose;
-				utility::math::matrix::Transform3D finishPose;
-				float distance;
+
+				float forward_duration;
+				float return_duration;
+				Animator anim;
+
 				arma::vec3 ballPosition;
 				arma::vec3 goalPosition;
 
 				NUClear::clock::time_point motionStartTime;
-				NUClear::clock::time_point stoppingCommandTime;
 			public:
 				
 				virtual void computeStartMotion(const messages::input::Sensors& sensors) = 0;
-				virtual void computeStopMotion() = 0;
+				virtual void computeStopMotion(const messages::input::Sensors& sensors) = 0;
+
 				void start(const messages::input::Sensors& sensors){
 					if(stage == MotionStage::READY){
+        				anim.reset();
 						stage = MotionStage::RUNNING;
 						stable = false;
-						computeStartMotion(sensors);
         				motionStartTime = sensors.timestamp;
+						computeStartMotion(sensors);
 					}
 				}
 
-				void stop(){
+				void stop(const messages::input::Sensors& sensors){
 					if(stage == MotionStage::RUNNING){
+        				anim.reset();
 						stage = MotionStage::STOPPING;
 						stable = false;
-						stoppingCommandTime = NUClear::clock::now();
-						computeStopMotion();
+						motionStartTime = sensors.timestamp;
+						computeStopMotion(sensors);
 					}
 				}
+
 				bool isRunning()	{return stage == MotionStage::RUNNING || stage == MotionStage::STOPPING;}
 				bool isStable()		{return stable;}
 				bool isFinished()   {return stage == MotionStage::FINISHED;}
-				void reset()		{stage = MotionStage::READY;}
+				void reset()		{stage = MotionStage::READY; stable = false; anim.reset();}
 
 
 				void setKickParameters(messages::input::LimbID supportFoot_, arma::vec3 ballPosition_, arma::vec3 goalPosition_) {
@@ -106,59 +152,55 @@ namespace motion{
 		        }
 
 				utility::math::matrix::Transform3D getFootPose(const messages::input::Sensors& sensors) {
-					if(stage == MotionStage::RUNNING) {
-            
-			            double elapsedTime = std::chrono::duration_cast<std::chrono::microseconds>(sensors.timestamp - motionStartTime).count() * 1e-6;
-			            float alpha = std::fmax(0,std::fmin(forward_velocity * elapsedTime / distance,1));
-			            stable = (alpha >= 1);
-			            return utility::math::matrix::Transform3D::interpolate(startPose,finishPose,alpha);
-
-			        } else if (stage == MotionStage::STOPPING) {
-            
-			            double elapsedTime = std::chrono::duration_cast<std::chrono::microseconds>(sensors.timestamp - stoppingCommandTime).count() * 1e-6;
-			            float alpha = std::fmax(0,std::fmin(return_velocity * elapsedTime / distance,1));
-			            if(alpha >= 1) stage = MotionStage::FINISHED;
-			            return utility::math::matrix::Transform3D::interpolate(finishPose,startPose,alpha);	
-
+					auto result = utility::math::matrix::Transform3D();
+					if(stage == MotionStage::RUNNING || stage == MotionStage::STOPPING) {
+			
+						double elapsedTime = std::chrono::duration_cast<std::chrono::microseconds>(sensors.timestamp - motionStartTime).count() * 1e-6;
+						float alpha = (anim.currentFrame().duration != 0)
+										?	std::fmax(0,std::fmin(elapsedTime / anim.currentFrame().duration, 1))
+										:	1;
+						result = utility::math::matrix::Transform3D::interpolate(anim.previousFrame().pose,anim.currentFrame().pose,alpha);
+						if(alpha >= 1){
+							stable = anim.stable();
+							if(!stable){
+								anim.next();
+								motionStartTime = sensors.timestamp;
+							}
+						}
+						if(stable && stage == MotionStage::STOPPING){
+							stage = MotionStage::FINISHED;
+						}
 		        	}
-		        	return utility::math::matrix::Transform3D();
+		        	return result;
 				}
 
 				virtual void configure(const messages::support::Configuration<IKKickConfig>& config) = 0;
 		};
 
-		class KickBalancer : public SixDOFMotionController{
+		class KickBalancer : public SixDOFFootController{
 		private:
 			//Config
 			float stand_height = 0.18;
 			float foot_separation = 0.074;
 			float forward_lean = 0.01;
 			float adjustment = 0.011;
+			
 		public:
 			virtual void configure(const messages::support::Configuration<IKKickConfig>& config);
 			virtual void computeStartMotion(const messages::input::Sensors& sensors);
-			virtual void computeStopMotion();
+			virtual void computeStopMotion(const messages::input::Sensors& sensors);
 
 		};
 
-		class FootLifter : public SixDOFMotionController{
+		class Kicker : public SixDOFFootController{
 		private:
-			//Config variables
-			float lift_foot_height = 0.05;
-			float put_foot_down_height = 0.05;
-			float lift_foot_back = 0.01;
-
-		public: 
-			virtual void configure(const messages::support::Configuration<IKKickConfig>& config);
-			virtual void computeStartMotion(const messages::input::Sensors& sensors);
-			virtual void computeStopMotion();
-		};
-
-		class Kicker : public SixDOFMotionController{
+			SixDOFFrame lift_foot;
+			SixDOFFrame kick;
+			SixDOFFrame place_foot;
 		public:
 			virtual void configure(const messages::support::Configuration<IKKickConfig>& config);
 			virtual void computeStartMotion(const messages::input::Sensors& sensors);
-			virtual void computeStopMotion();
+			virtual void computeStopMotion(const messages::input::Sensors& sensors);
 		};
 
 	}
