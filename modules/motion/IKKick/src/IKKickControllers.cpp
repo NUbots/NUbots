@@ -38,17 +38,11 @@ namespace motion{
         forward_duration = config["balancer"]["forward_duration"].as<float>();
         return_duration = config["balancer"]["return_duration"].as<float>();
 	}
-
-	void FootLifter::configure(const Configuration<IKKickConfig>& config){
+    
+    void Kicker::configure(const Configuration<IKKickConfig>& config) {
         lift_foot_height = config["lifter"]["lift_foot_height"].as<float>();
         put_foot_down_height = config["lifter"]["put_foot_down_height"].as<float>();
         lift_foot_back = config["lifter"]["lift_foot_back"].as<float>();
-        
-        forward_duration = config["lifter"]["forward_duration"].as<float>();
-        return_duration = config["lifter"]["return_duration"].as<float>();
-	}
-
-	void Kicker::configure(const Configuration<IKKickConfig>& config) {
         forward_duration = config["kicker"]["forward_duration"].as<float>();
         return_duration = config["kicker"]["return_duration"].as<float>();
 	}
@@ -67,17 +61,6 @@ namespace motion{
         frames.push_back(SixDOFFrame{finishPose,forward_duration});
         anim = Animator(frames);
     }
-
-    void FootLifter::computeStartMotion(const Sensors&) {
-        Transform3D startPose = arma::eye(4,4);
-        Transform3D finishPose = startPose.translate(arma::vec3({-lift_foot_back,0,lift_foot_height}));
-        
-        std::vector<SixDOFFrame> frames;
-        frames.push_back(SixDOFFrame{startPose,0});
-        frames.push_back(SixDOFFrame{finishPose,forward_duration});
-        anim = Animator(frames);
-    }
-
 
     void Kicker::computeStartMotion(const Sensors& sensors) {
         Transform3D startPose = arma::eye(4,4);
@@ -109,14 +92,6 @@ namespace motion{
         anim.frames[0].duration = 0;
     }
 
-    void FootLifter::computeStopMotion(const Sensors&){
-        //EWW HACKS
-        anim.frames[0].pose.translate(arma::vec3({0,0,put_foot_down_height}));
-        anim.frames[0].duration = return_duration;
-        std::reverse(anim.frames.begin(),anim.frames.end());
-        anim.frames[0].duration = 0;
-    }
-    
     void Kicker::computeStopMotion(const Sensors&){
         //EWW HACKS
         anim.frames[0].duration = return_duration;

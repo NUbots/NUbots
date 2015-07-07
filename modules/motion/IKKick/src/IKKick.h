@@ -59,7 +59,6 @@ namespace motion {
         utility::motion::Balancer feedbackBalancer;
 
         KickBalancer balancer;
-        FootLifter lifter;
         Kicker kicker;
 
     	void updatePriority(const float& priority);

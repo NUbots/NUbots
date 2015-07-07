@@ -168,6 +168,7 @@ namespace motion{
 			float foot_separation = 0.074;
 			float forward_lean = 0.01;
 			float adjustment = 0.011;
+			
 		public:
 			virtual void configure(const messages::support::Configuration<IKKickConfig>& config);
 			virtual void computeStartMotion(const messages::input::Sensors& sensors);
@@ -175,20 +176,11 @@ namespace motion{
 
 		};
 
-		class FootLifter : public SixDOFFootController{
+		class Kicker : public SixDOFFootController{
 		private:
-			//Config variables
 			float lift_foot_height = 0.05;
 			float put_foot_down_height = 0.05;
 			float lift_foot_back = 0.01;
-
-		public: 
-			virtual void configure(const messages::support::Configuration<IKKickConfig>& config);
-			virtual void computeStartMotion(const messages::input::Sensors& sensors);
-			virtual void computeStopMotion(const messages::input::Sensors& sensors);
-		};
-
-		class Kicker : public SixDOFFootController{
 		public:
 			virtual void configure(const messages::support::Configuration<IKKickConfig>& config);
 			virtual void computeStartMotion(const messages::input::Sensors& sensors);

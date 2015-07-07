@@ -71,7 +71,6 @@ namespace motion {
 
         on<Trigger<Configuration<IKKickConfig>>>([this] (const Configuration<IKKickConfig>& config){
             balancer.configure(config);
-            lifter.configure(config);
             kicker.configure(config);
 
             KICK_PRIORITY = config["kick_priority"].as<float>();
@@ -146,7 +145,6 @@ namespace motion {
             goalPosition[2] = 0.0; //TODO: figure out why ball height is unreliable
 
             balancer.setKickParameters(supportFoot, ballPosition, goalPosition);
-            lifter.setKickParameters(supportFoot, ballPosition, goalPosition);
             kicker.setKickParameters(supportFoot, ballPosition, goalPosition);
             
             balancer.start(sensors);
@@ -167,11 +165,6 @@ namespace motion {
             //State checker
             if(balancer.isStable()){
                 std::cout << "balancer stable" << std::endl;
-                lifter.start(sensors);
-            }
-
-            if(lifter.isStable()){
-                std::cout << "lifter stable" << std::endl;
                 kicker.start(sensors);
             }
 
@@ -182,11 +175,6 @@ namespace motion {
 
             if(kicker.isFinished()){
                 std::cout << "kicker finished" << std::endl;
-                lifter.stop(sensors);
-            }
-
-            if(lifter.isFinished()){
-                std::cout << "lifter finished" << std::endl;
                 balancer.stop(sensors);
             }
 
@@ -208,11 +196,6 @@ namespace motion {
                 kickFootGoal = supportFootPose.translate(arma::vec3({0, negativeIfKickRight * foot_separation, 0}));
             }
 
-            //Lift the foot
-            if(lifter.isRunning()){
-                std::cout << "lifter running" << std::endl;
-                kickFootGoal *= lifter.getFootPose(sensors);
-            }
 
             //Move foot to ball to kick
             if(kicker.isRunning()){
