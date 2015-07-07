@@ -175,6 +175,8 @@ namespace support {
         provideSensors();
         provideVision();
 
+        sendReactionHandles();
+
         // When we shutdown, close our publisher and our file if we have one
         on<Trigger<Shutdown>>([this](const Shutdown&) {
             pub.close();
@@ -184,6 +186,25 @@ namespace support {
             outputFile.close();
             // TODO DO THIS
         });
+    }
+
+    void NUbugger::sendReactionHandles() {
+        Message message;
+
+        message.set_type(Message::REACTION_HANDLES);
+        message.set_filter_id(0);
+        message.set_utc_timestamp(getUtcTimestamp());
+
+        auto* reactionHandles = message.mutable_reaction_handles();
+
+        for (auto& handle : handles) {
+            auto* objHandles = reactionHandles->add_handles();
+            auto& value = handle.second;
+            objHandles->set_name(handle.first);
+            objHandles->set_enabled(value.empty() ? false : value.front().enabled());
+        }
+
+        send(message);
     }
 
     void NUbugger::run() {
@@ -252,6 +273,8 @@ namespace support {
             send(message);
         } else if (command == "get_configuration_state") {
             sendConfigurationState();
+        } else if (command == "get_reaction_handles") {
+            sendReactionHandles();
         }
     }
 

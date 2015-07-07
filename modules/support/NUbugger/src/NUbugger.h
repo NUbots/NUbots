@@ -78,6 +78,8 @@ namespace modules {
             void provideSensors();
             void provideVision();
 
+            void sendReactionHandles();
+
             void sendGameState(std::string event, const messages::input::gameevents::GameState& gameState);
             messages::input::proto::GameState::Data::Phase getPhase(const messages::input::gameevents::Phase& phase);
             messages::input::proto::GameState::Data::Mode getMode(const messages::input::gameevents::Mode& phase);
