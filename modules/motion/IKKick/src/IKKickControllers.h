@@ -49,6 +49,22 @@ namespace motion{
 			// std::map<messages::input::ServoID, float> jointGains;
 		};	
 
+		class Animator{
+		public:
+			std::vector<SixDOFFrame> frames;
+			int i = 0;
+			Animator(){}
+			Animator(std::vector<SixDOFFrame> frames_){
+				frames = frames_;
+			}
+			void next(){i = std::min(i+1,int(frames.size()-2));}
+			void reset(){i = 0;}
+			const SixDOFFrame& currentFrame() const {return frames[i+1];}
+			const SixDOFFrame& previousFrame() const {return frames[i];}
+			const SixDOFFrame& startFrame() const {return frames[0];}
+			bool stable(){return i == int(frames.size()-2);}
+		};
+
 
         struct IKKickConfig{
 			static constexpr const char* CONFIGURATION_PATH = "IKKick.yaml";
@@ -62,27 +78,15 @@ namespace motion{
 
 				//State variables
 				messages::input::LimbID supportFoot;
-				
-				class Animator{
-				public:
-					std::vector<SixDOFFrame> frames;
-					int i = 0;
-					Animator(std::vector<SixDOFFrame> frames_){
-						frames = frames_;
-					}
-					void next(){i = std::min(i+1,frames.size()-2);}
-					std::const_iterator& currentFrame() const {return frames[i+1];}
-					std::const_iterator& previousFrame() const {return frames[i];}
-					std::const_iterator& startFrame() const {return frames[0];}
-					bool stable(){return i == frames.size()-2;}
-				};
+
+				float forward_duration;
+				float return_duration;
 				Animator anim;
 
 				arma::vec3 ballPosition;
 				arma::vec3 goalPosition;
 
 				NUClear::clock::time_point motionStartTime;
-				NUClear::clock::time_point stoppingCommandTime;
 			public:
 				
 				virtual void computeStartMotion(const messages::input::Sensors& sensors) = 0;
@@ -90,26 +94,28 @@ namespace motion{
 
 				void start(const messages::input::Sensors& sensors){
 					if(stage == MotionStage::READY){
+        				anim.reset();
 						stage = MotionStage::RUNNING;
 						stable = false;
-						computeStartMotion(sensors);
         				motionStartTime = sensors.timestamp;
+						computeStartMotion(sensors);
 					}
 				}
 
-				void stop(){
+				void stop(const messages::input::Sensors& sensors){
 					if(stage == MotionStage::RUNNING){
+        				anim.reset();
 						stage = MotionStage::STOPPING;
 						stable = false;
-						stoppingCommandTime = NUClear::clock::now();
-						computeStopMotion();
+						motionStartTime = sensors.timestamp;
+						computeStopMotion(sensors);
 					}
 				}
 
 				bool isRunning()	{return stage == MotionStage::RUNNING || stage == MotionStage::STOPPING;}
 				bool isStable()		{return stable;}
 				bool isFinished()   {return stage == MotionStage::FINISHED;}
-				void reset()		{stage = MotionStage::READY;}
+				void reset()		{stage = MotionStage::READY; stable = false; anim.reset();}
 
 
 				void setKickParameters(messages::input::LimbID supportFoot_, arma::vec3 ballPosition_, arma::vec3 goalPosition_) {
@@ -143,6 +149,9 @@ namespace motion{
 								motionStartTime = sensors.timestamp;
 							}
 						}
+						if(stable && stage == MotionStage::STOPPING){
+							stage = MotionStage::FINISHED;
+						}
 						return utility::math::matrix::Transform3D::interpolate(anim.previousFrame().pose,anim.currentFrame().pose,alpha);
 
 		        	}
@@ -162,7 +171,7 @@ namespace motion{
 		public:
 			virtual void configure(const messages::support::Configuration<IKKickConfig>& config);
 			virtual void computeStartMotion(const messages::input::Sensors& sensors);
-			virtual void computeStopMotion();
+			virtual void computeStopMotion(const messages::input::Sensors& sensors);
 
 		};
 
@@ -176,14 +185,14 @@ namespace motion{
 		public: 
 			virtual void configure(const messages::support::Configuration<IKKickConfig>& config);
 			virtual void computeStartMotion(const messages::input::Sensors& sensors);
-			virtual void computeStopMotion();
+			virtual void computeStopMotion(const messages::input::Sensors& sensors);
 		};
 
 		class Kicker : public SixDOFFootController{
 		public:
 			virtual void configure(const messages::support::Configuration<IKKickConfig>& config);
 			virtual void computeStartMotion(const messages::input::Sensors& sensors);
-			virtual void computeStopMotion();
+			virtual void computeStopMotion(const messages::input::Sensors& sensors);
 		};
 
 	}

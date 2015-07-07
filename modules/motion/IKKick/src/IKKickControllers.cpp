@@ -35,8 +35,8 @@ namespace motion{
         forward_lean = config["balancer"]["forward_lean"].as<float>();
         foot_separation = config["balancer"]["foot_separation"].as<float>();
         adjustment = config["balancer"]["adjustment"].as<float>();
-        forward_velocity = config["balancer"]["forward_velocity"].as<float>();
-        return_velocity = config["balancer"]["return_velocity"].as<float>();
+        forward_duration = config["balancer"]["forward_duration"].as<float>();
+        return_duration = config["balancer"]["return_duration"].as<float>();
 	}
 
 	void FootLifter::configure(const Configuration<IKKickConfig>& config){
@@ -44,13 +44,13 @@ namespace motion{
         put_foot_down_height = config["lifter"]["put_foot_down_height"].as<float>();
         lift_foot_back = config["lifter"]["lift_foot_back"].as<float>();
         
-        forward_velocity = config["lifter"]["forward_velocity"].as<float>();
-        return_velocity = config["lifter"]["return_velocity"].as<float>();
+        forward_duration = config["lifter"]["forward_duration"].as<float>();
+        return_duration = config["lifter"]["return_duration"].as<float>();
 	}
 
 	void Kicker::configure(const Configuration<IKKickConfig>& config) {
-        forward_velocity = config["kicker"]["forward_velocity"].as<float>();
-        return_velocity = config["kicker"]["return_velocity"].as<float>();
+        forward_duration = config["kicker"]["forward_duration"].as<float>();
+        return_duration = config["kicker"]["return_duration"].as<float>();
 	}
 
     void KickBalancer::computeStartMotion(const Sensors& sensors) {
@@ -64,7 +64,7 @@ namespace motion{
 
         std::vector<SixDOFFrame> frames;
         frames.push_back(SixDOFFrame{startPose,0});
-        frames.push_back(SixDOFFrame{finishPose,forward_velocity});
+        frames.push_back(SixDOFFrame{finishPose,forward_duration});
         anim = Animator(frames);
     }
 
@@ -74,7 +74,7 @@ namespace motion{
         
         std::vector<SixDOFFrame> frames;
         frames.push_back(SixDOFFrame{startPose,0});
-        frames.push_back(SixDOFFrame{finishPose,forward_velocity});
+        frames.push_back(SixDOFFrame{finishPose,forward_duration});
         anim = Animator(frames);
     }
 
@@ -96,18 +96,32 @@ namespace motion{
         
         std::vector<SixDOFFrame> frames;
         frames.push_back(SixDOFFrame{startPose,0});
-        frames.push_back(SixDOFFrame{finishPose,forward_velocity});
+        frames.push_back(SixDOFFrame{finishPose,forward_duration});
         anim = Animator(frames);
 
     }
 
 
-    void KickBalancer::computeStopMotion(){}
+    void KickBalancer::computeStopMotion(const Sensors&){
+        //EWW HACKS
+        anim.frames[0].duration = return_duration;
+        std::reverse(anim.frames.begin(),anim.frames.end());
+        anim.frames[0].duration = 0;
+    }
 
-    void FootLifter::computeStopMotion(){
-        anim.startFrame.pose.translate(arma::vec3({0,0,put_foot_down_height}));
+    void FootLifter::computeStopMotion(const Sensors&){
+        //EWW HACKS
+        anim.frames[0].pose.translate(arma::vec3({0,0,put_foot_down_height}));
+        anim.frames[0].duration = return_duration;
+        std::reverse(anim.frames.begin(),anim.frames.end());
+        anim.frames[0].duration = 0;
     }
     
-    void Kicker::computeStopMotion(){}
+    void Kicker::computeStopMotion(const Sensors&){
+        //EWW HACKS
+        anim.frames[0].duration = return_duration;
+        std::reverse(anim.frames.begin(),anim.frames.end());
+        anim.frames[0].duration = 0;
+    }
 }
 }

@@ -166,26 +166,32 @@ namespace motion {
 
             //State checker
             if(balancer.isStable()){
+                std::cout << "balancer stable" << std::endl;
                 lifter.start(sensors);
             }
 
             if(lifter.isStable()){
+                std::cout << "lifter stable" << std::endl;
                 kicker.start(sensors);
             }
 
             if(kicker.isStable()){
-                kicker.stop();
+                std::cout << "kicker stable" << std::endl;
+                kicker.stop(sensors);
             }
 
             if(kicker.isFinished()){
-                lifter.stop();
+                std::cout << "kicker finished" << std::endl;
+                lifter.stop(sensors);
             }
 
             if(lifter.isFinished()){
-                balancer.stop();
+                std::cout << "lifter finished" << std::endl;
+                balancer.stop(sensors);
             }
 
             if(balancer.isFinished()){
+                std::cout << "balancer finished" << std::endl;
                 emit(std::move(std::make_unique<FinishKick>()));
             }
             
@@ -196,6 +202,7 @@ namespace motion {
 
             //Move torso over support foot
             if(balancer.isRunning()){
+                std::cout << "balancer running" << std::endl;
                 Transform3D supportFootPose = balancer.getFootPose(sensors);
                 supportFootGoal = supportFootPose;
                 kickFootGoal = supportFootPose.translate(arma::vec3({0, negativeIfKickRight * foot_separation, 0}));
@@ -203,11 +210,13 @@ namespace motion {
 
             //Lift the foot
             if(lifter.isRunning()){
+                std::cout << "lifter running" << std::endl;
                 kickFootGoal *= lifter.getFootPose(sensors);
             }
 
             //Move foot to ball to kick
             if(kicker.isRunning()){
+                std::cout << "kicker running" << std::endl;
                 kickFootGoal *= kicker.getFootPose(sensors);
             }
 
