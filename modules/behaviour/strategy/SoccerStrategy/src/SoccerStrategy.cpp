@@ -84,9 +84,6 @@ namespace strategy {
 
         });
 
-        // TODO: unhack
-        emit(std::make_unique<KickPlan>(KickPlan{{4.5, 0}}));
-
         // For checking last seen times
         on<Trigger<std::vector<LocalisationBall>>>([this] (const std::vector<LocalisationBall>& balls) {
             if(!balls.empty()) {
@@ -212,7 +209,9 @@ namespace strategy {
                         }
                     }
                 }
+                
 
+                
                 if (currentState != previousState) {
                     emit(std::make_unique<Behaviour::State>(currentState));
                 }
@@ -227,6 +226,12 @@ namespace strategy {
                 log("Runtime exception.");
             }
         });
+
+    on<Trigger<std::vector<Self>>, With<FieldDescription>> ([this] (const std::vector<Self>& selfs, const FieldDescription& fieldDescription) {
+        
+        emit(std::make_unique<KickPlan>(KickPlan{getKickPlan(selfs, fieldDescription)}));
+    
+    });
 
     }
 
@@ -390,6 +395,47 @@ namespace strategy {
         command->target = {0,0};
         command->heading = {1,0};
         emit(std::move(command));
+    }
+
+    arma::vec2 SoccerStrategy::getKickPlan(const std::vector<Self>& selfs, const messages::support::FieldDescription& fieldDescription) {
+        
+        // Defines the box within in which the kick target is changed from the centre 
+        // of the oppposition goal to the perpendicular distance from the robot to the goal
+
+        float maxKickRange = 0.6; //TODO: make configurable, only want to change at the last kick to avoid smart goalies
+        float xTakeOverBox = maxKickRange;
+        size_t error = 0.05;
+        size_t buffer = error + 2 * fieldDescription.ball_radius; //15cm           
+        float yTakeOverBox = fieldDescription.dimensions.goal_width/2 - buffer; // 90-15 = 75cm
+        float xRobot = selfs.front().position[0];
+        float yRobot = selfs.front().position[1];
+        arma::vec2 newTarget;
+        
+        if(!selfs.empty()) {        
+            
+            if( (fieldDescription.dimensions.field_length/2) - xTakeOverBox < xRobot 
+                    && -yTakeOverBox < yRobot 
+                        && yRobot < yTakeOverBox) {
+                
+                // Aims for the point that gives the shortest distance                   
+                newTarget[0] = fieldDescription.dimensions.field_length/2;
+                newTarget[1] = yRobot;
+
+            } else {
+                
+                // Aims for the centre of the goal
+                newTarget[0] = fieldDescription.dimensions.field_length/2;
+                newTarget[1] = 0;
+            }
+
+        } else {
+            
+            // Return default
+            newTarget[0] = fieldDescription.dimensions.field_length/2;
+            newTarget[1] = 0;
+
+        }
+        return newTarget;
     }
 
 } // strategy
