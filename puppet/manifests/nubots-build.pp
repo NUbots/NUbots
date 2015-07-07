@@ -17,6 +17,9 @@ node nubotsvm {
   # We need dev tools to use the installer
   class {'dev_tools': } -> Installer <| |>
 
+  # After we have installed, build our deb
+  Installer <| |> -> class { 'toolchain_deb': }
+
   class { 'quex': }
   installer { 'zlib':           url => 'http://zlib.net/zlib-1.2.8.tar.gz', }
   installer { 'protobuf':       url => 'https://github.com/google/protobuf/releases/download/v2.6.1/protobuf-2.6.1.tar.gz',
