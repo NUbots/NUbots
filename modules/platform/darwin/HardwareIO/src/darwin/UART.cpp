@@ -131,7 +131,7 @@ namespace Darwin {
         while ((bytesWritten != (int)count) && (reconnects < 3)) {
             bytesWritten = write(fd, buf, count);
 
-            if (bytesWritten < 0) {
+            if (bytesWritten < (int)count) {
                 reconnect();
                 reconnects++;
             }
