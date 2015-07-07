@@ -35,7 +35,7 @@
 
 namespace modules {
 namespace behaviour {
-namespace planning {
+namespace skills {
 
     using messages::support::Configuration;
     using Self = messages::localisation::Self;
@@ -155,6 +155,7 @@ namespace planning {
     }
 
     bool WalkPathFollower::isVisited(const Transform2D& currentState, const Transform2D& visitState) {
+        // TODO: Abstract away the distance metric used between states.
         double dist = arma::norm(visitState.xy() - currentState.xy());
         
         return dist < cfg_.waypoint_visit_distance;
@@ -165,6 +166,7 @@ namespace planning {
         int closestIndex = 0;
         double closestDist = std::numeric_limits<double>::infinity();
         for (int i = 0; i < numStates; i++) {
+            // TODO: Abstract away the distance metric used between states.
             double dist = arma::norm(walkPath.states[i].xy() - currentState.xy());
             if (dist < closestDist) {
                 closestDist = dist;

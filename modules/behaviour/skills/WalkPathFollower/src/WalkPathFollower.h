@@ -17,8 +17,8 @@
  * Copyright 2015 NUbots <nubots@nubots.net>
  */
 
-#ifndef MODULES_BEHAVIOUR_PLANNING_WALKPATHFOLLOWER_H
-#define MODULES_BEHAVIOUR_PLANNING_WALKPATHFOLLOWER_H
+#ifndef MODULES_BEHAVIOUR_SKILLS_WALKPATHFOLLOWER_H
+#define MODULES_BEHAVIOUR_SKILLS_WALKPATHFOLLOWER_H
 
 #include <nuclear>
 #include "messages/behaviour/WalkPath.h"
@@ -27,7 +27,7 @@
 
 namespace modules {
 namespace behaviour {
-namespace planning {
+namespace skills {
 
     using messages::behaviour::WalkPath;
     using messages::motion::WalkCommand;
@@ -73,4 +73,4 @@ namespace planning {
 }
 }
 
-#endif  // MODULES_BEHAVIOUR_PLANNING_WALKPATHFOLLOWER_H
+#endif  // MODULES_BEHAVIOUR_SKILLS_WALKPATHFOLLOWER_H
