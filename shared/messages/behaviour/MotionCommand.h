@@ -38,8 +38,11 @@ namespace behaviour {
             DirectCommand // Stop all current motion and directly send the given WalkCommand to the WalkEngine.
         };
 
+        // TODO: Create accessor methods that throw errors if the data
+        // accessed does not correspond to the command type?
+
         // The type of this motion command:
-        Type command = StandStill;
+        Type type = Type::StandStill;
 
         // Required data for WalkToState command:
         Transform2D goalState = {0, 0, 0};

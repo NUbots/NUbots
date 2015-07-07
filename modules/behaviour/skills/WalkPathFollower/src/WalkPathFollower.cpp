@@ -23,15 +23,17 @@
 
 #include "messages/support/Configuration.h"
 #include "messages/localisation/FieldObject.h"
+#include "messages/behaviour/WalkPath.h"
+#include "messages/behaviour/Action.h"
 #include "messages/motion/WalkCommand.h"
 #include "messages/motion/KickCommand.h"
 #include "messages/behaviour/KickPlan.h"
-#include "messages/behaviour/WalkPath.h"
+#include "messages/input/LimbID.h"
+#include "messages/input/ServoID.h"
 #include "utility/nubugger/NUhelpers.h"
 #include "utility/math/geometry/RotatedRectangle.h"
 #include "utility/math/matrix/Transform2D.h"
 #include "utility/math/angle.h"
-
 
 namespace modules {
 namespace behaviour {
@@ -41,19 +43,57 @@ namespace skills {
     using Self = messages::localisation::Self;
 
     using messages::behaviour::WalkPath;
+    using messages::behaviour::RegisterAction;
 
     using messages::motion::WalkCommand;
     using messages::motion::KickFinished;
     using messages::motion::WalkStartCommand;
     using messages::motion::WalkStopCommand;
     
+    using messages::input::LimbID;
+    using messages::input::ServoID;
+
     using utility::math::geometry::RotatedRectangle;
     using utility::math::matrix::Transform2D;
     using utility::math::angle::vectorToBearing;
 
 
     WalkPathFollower::WalkPathFollower(std::unique_ptr<NUClear::Environment> environment)
-    : Reactor(std::move(environment)) {
+    : Reactor(std::move(environment))
+    , subsumptionId(size_t(this) * size_t(this) - size_t(this)) {
+
+        // Register the path follower with the subsumption system:
+        emit<Scope::INITIALIZE>(std::make_unique<RegisterAction>(RegisterAction {
+            subsumptionId,
+            "WalkPathFollower",
+            {
+                // Limb sets required by the walk engine:
+                std::pair<double, std::set<LimbID>>(0, {LimbID::LEFT_LEG, LimbID::RIGHT_LEG}),
+                std::pair<double, std::set<LimbID>>(0, {LimbID::LEFT_ARM, LimbID::RIGHT_ARM}),
+            },
+            [this] (const std::set<LimbID>& givenLimbs) {
+                if (givenLimbs.find(LimbID::LEFT_LEG) != givenLimbs.end()) {
+                    // legs are available, start
+                    // stanceReset(); // reset stance as we don't know where our limbs are
+                    // interrupted = false;
+                    // updateHandle.enable();
+
+                    // TODO: Enable the walk engine.
+                }
+            },
+            [this] (const std::set<LimbID>& takenLimbs) {
+                if (takenLimbs.find(LimbID::LEFT_LEG) != takenLimbs.end()) {
+                    // // legs are no longer available, reset walking (too late to stop walking)
+                    // updateHandle.disable();
+                    // interrupted = true;
+
+                    // TODO: Disable the walk engine.
+                }
+            },
+            [this] (const std::set<ServoID>&) {
+                // nothing
+            }
+        }));
 
         on<Trigger<Configuration<WalkPathFollower>>>([this] (const Configuration<WalkPathFollower>& config) {
             // Use configuration here from file WalkPathFollower.yaml

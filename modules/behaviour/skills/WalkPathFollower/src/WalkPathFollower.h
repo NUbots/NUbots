@@ -61,6 +61,9 @@ namespace skills {
         WalkPath currentPath;
 
     private:
+        /// Subsumption ID key to access motors
+        const size_t subsumptionId;
+
         struct Config {
             
             float waypoint_visit_distance = 0.1;

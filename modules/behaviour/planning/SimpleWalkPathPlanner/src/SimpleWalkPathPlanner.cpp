@@ -133,7 +133,7 @@ namespace modules {
 
                 });
 
-                on<Trigger<messages::behaviour::WalkStrategy>, Options<Sync<SimpleWalkPathPlanner>>>([this] (const messages::behaviour::WalkStrategy& cmd) {
+                on<Trigger<messages::behaviour::MotionCommand>, Options<Sync<SimpleWalkPathPlanner>>>([this] (const messages::behaviour::MotionCommand& cmd) {
                     //save the plan
                     planType = cmd.walkMovementType;
                     targetHeading = cmd.targetHeadingType;
