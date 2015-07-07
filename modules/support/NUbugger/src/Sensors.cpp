@@ -76,10 +76,10 @@ namespace support {
             }
 
             // The gyroscope values (x,y,z)
-            *sensorData->mutable_gyroscope() << sensors.gyroscope;
+            *sensorData->mutable_gyroscope() << arma::conv_to<arma::fvec>::from(sensors.gyroscope);
 
             // The accelerometer values (x,y,z)
-            *sensorData->mutable_accelerometer() << sensors.accelerometer;
+            *sensorData->mutable_accelerometer() << arma::conv_to<arma::fvec>::from(sensors.accelerometer);
 
             // The orientation matrix
             *sensorData->mutable_orientation() << sensors.orientation;
