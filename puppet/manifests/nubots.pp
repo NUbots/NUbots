@@ -10,7 +10,7 @@ node nubotsvm {
   # We need dev tools
   class {'dev_tools': }
 
-  $toolchain_url = "https://drive.google.com/file/d/0B-0Hu8H3MvexUnFaX1FXc21wM3M/view?usp=sharing"
+  $toolchain_url = "https://drive.google.com/open?id=0B-0Hu8H3MvexUG1JY1Z4cjhhWkE"
 
   # Get and install our toolchain
   wget::fetch { "nubots_toolchain":
