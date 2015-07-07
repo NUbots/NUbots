@@ -42,7 +42,7 @@ namespace modules {
             auto& maxVisualHorizon = classifiedImage.maxVisualHorizon;
             auto& minVisualHorizon = classifiedImage.minVisualHorizon;
 
-            Cast lines to find our visual horizon
+            // Cast lines to find our visual horizon
             for(uint x = 0; x < image.width; x += VISUAL_HORIZON_SPACING) {
 
                 // Find our point to classify from (slightly above the horizon)
