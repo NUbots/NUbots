@@ -127,11 +127,6 @@ namespace motion {
             arma::vec3 targetTorso = sensors.kinematicsBodyToGround.i().transformPoint(command.target);
             // Put the ball position into support foot coordinates
             arma::vec3 targetSupportFoot = torsoPose.transformPoint(targetTorso);
-            // std::cout << "ExecuteKick: sensors.orientationBodyToGround = \n" << sensors.orientationBodyToGround <<std::endl;
-            // std::cout << "ExecuteKick: sensors.kinematicsBodyToGround = \n" << sensors.kinematicsBodyToGround <<std::endl;
-            // std::cout << "ExecuteKick: command.target = " << command.target.t() <<std::endl;
-            // std::cout << "ExecuteKick: targetTorso = " << targetTorso.t() <<std::endl;
-            // std::cout << "ExecuteKick: targetSupportFoot = " << targetSupportFoot.t() <<std::endl;
 
             // Put the goal from vision into torso coordinates
             arma::vec3 directionTorso = sensors.kinematicsBodyToGround.i().transformVector(command.direction);
@@ -163,22 +158,18 @@ namespace motion {
 
             //State checker
             if(balancer.isStable()){
-                // std::cout << "balancer stable" << std::endl;
                 kicker.start(sensors);
             }
 
             if(kicker.isStable()){
-                // std::cout << "kicker stable" << std::endl;
                 kicker.stop(sensors);
             }
 
             if(kicker.isFinished()){
-                // std::cout << "kicker finished" << std::endl;
                 balancer.stop(sensors);
             }
 
             if(balancer.isFinished()){
-                // std::cout << "balancer finished" << std::endl;
                 emit(std::move(std::make_unique<FinishKick>()));
             }
             
@@ -189,7 +180,6 @@ namespace motion {
 
             //Move torso over support foot
             if(balancer.isRunning()){
-                // std::cout << "balancer running" << std::endl;
                 Transform3D supportFootPose = balancer.getFootPose(sensors);
                 supportFootGoal = supportFootPose;
                 kickFootGoal = supportFootPose.translate(arma::vec3({0, negativeIfKickRight * foot_separation, 0}));
@@ -197,11 +187,11 @@ namespace motion {
 
             //Move foot to ball to kick
             if(kicker.isRunning()){
-                // std::cout << "kicker running" << std::endl;
                 kickFootGoal *= kicker.getFootPose(sensors);
             }
 
             //Balance based on the IMU
+            
             if(feedback_active){
                 feedbackBalancer.balance(supportFootGoal,supportFoot,sensors);
             }

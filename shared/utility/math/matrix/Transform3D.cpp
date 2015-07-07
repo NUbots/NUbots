@@ -166,16 +166,7 @@ namespace matrix {
         arma::vec3 t2 = T2.translation();
 
         UnitQuaternion qResult = q1.slerp(q2,alpha);
-        // std::cout << "qResult = \n" << qResult.t() << std::endl;
-        // std::cout << "q1 = \n" << q1.t() << std::endl;
-        // std::cout << "t1 = \n" << t1.t() << std::endl;
-        // std::cout << "r1 = \n" << r1  << std::endl;
-        // std::cout << "q2 = \n" << q2.t() << std::endl;
-        // std::cout << "t2 = \n" << t2.t() << std::endl;
-        // std::cout << "r2 = \n" << r2   << std::endl;
-        // std::cout << "alpha = \n" << alpha   << std::endl;
         arma::vec3 tResult = alpha * (t2 - t1) + t1;
-        // std::cout << "tResult = \n" << tResult   << std::endl;
 
         Transform3D TResult = Transform3D(Rotation3D(qResult));
         TResult.translation() = tResult;
