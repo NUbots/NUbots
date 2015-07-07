@@ -26,6 +26,7 @@
 
 #include "utility/time/time.h"
 #include "utility/localisation/transform.h"
+#include "utility/support/proto_armadillo.h"
 
 /**
  * @author Monica Olejniczak
@@ -93,27 +94,13 @@ namespace support {
             Self self = selfs.front();
 
             // Set robot position.
-            auto* robotPosition = overview.mutable_robot_position();
-            arma::vec2 position = self.position;
-            robotPosition->set_x(position[0]);
-            robotPosition->set_y(position[1]);
+            *overview.mutable_robot_position() << self.position;
 
             // Set robot position covariance.
-            auto* robotPositionCovariance = overview.mutable_robot_position_covariance();
-            arma::mat22 covariance = self.position_cov;
-            auto* xAxis = robotPositionCovariance->mutable_x();
-            xAxis->set_x(covariance[0]);
-            xAxis->set_y(covariance[1]);
-            auto* yAxis = robotPositionCovariance->mutable_y();
-            yAxis->set_x(covariance[2]);
-            yAxis->set_y(covariance[3]);
+            *overview.mutable_robot_position_covariance() << self.position_cov;
 
             // Set robot heading.
-            auto* robotHeading = overview.mutable_robot_heading();
-            arma::vec2 heading = self.heading;
-            robotHeading->set_x(heading[0]);
-            robotHeading->set_y(heading[1]);
-
+            *overview.mutable_robot_heading() << self.heading;
         }));
 
         handles[Message::OVERVIEW].push_back(on<Trigger<std::vector<LocalisationBall>>, With<std::vector<Self>>, Options<Single,
@@ -124,17 +111,10 @@ namespace support {
             Self self = selfs.front();
 
             // Set local ball position.
-            auto* ballPosition = overview.mutable_ball_position();
-            arma::vec2 position = ball.position;
-            ballPosition->set_x(position[0]);
-            ballPosition->set_y(position[1]);
+            *overview.mutable_ball_position() << ball.position;
 
             // Set world ball position.
-            auto* ballWorldPosition = overview.mutable_ball_world_position();
-            arma::vec2 worldPosition = RobotToWorldTransform(self.position, self.heading, position);
-            ballWorldPosition->set_x(worldPosition[0]);
-            ballWorldPosition->set_y(worldPosition[1]);
-
+            *overview.mutable_ball_world_position() << RobotToWorldTransform(self.position, self.heading, ball.position);
         }));
 
         handles[Message::OVERVIEW].push_back(on<Trigger<Image>, Options<Single, Priority<NUClear::LOW>>>([this](const Image&/* image*/) {
