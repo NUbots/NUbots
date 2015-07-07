@@ -71,6 +71,8 @@ namespace Darwin {
             // There was an exception connecting
             throw std::runtime_error("There was an error setting up the serial connection to the CM730");
         }
+
+        NUClear::log<NUClear::DEBUG>("Device '", devName, "' successfully opened.");
     }
 
     bool UART::configure(double baud) {
@@ -112,12 +114,14 @@ namespace Darwin {
 
         // Set our custom speed in the system
         if (ioctl(fd, TIOCSSERIAL, &serinfo) < 0) {
+            throw std::runtime_error("There was an error configuring up the serial connection to the CM730");
             return false;
         }
 
         // Flush our connection to remove all existing data
         tcflush(fd, TCIFLUSH);
 
+        NUClear::log<NUClear::DEBUG>("Device '", devName, "' successfully configured.");
         return true;
     }
 
@@ -137,12 +141,12 @@ namespace Darwin {
             }
         }
 
-        assert(reconnects < 3);
-        (void) reconnects; // Make the compiler happy when NDEBUG is set
-
         if (reconnects > 0) {
             std::cout << "Bytes Written: " << (int)bytesWritten << " Reconnects: " << (int)reconnects << "\r" << std::endl;
         }
+
+        assert(reconnects < 3);
+        (void) reconnects; // Make the compiler happy when NDEBUG is set
 
         return(bytesWritten);
     }
@@ -154,8 +158,7 @@ namespace Darwin {
         while ((bytesRead != (int)count) && (reconnects < 3)) {
             bytesRead = read(fd, buf, count);
 
-            if (errno == EAGAIN) {
-                bytesRead = 0;
+            if ((errno == EAGAIN) || ((bytesRead < (int)count) && (bytesRead > 0))) {
                 break;
             }
 
@@ -165,9 +168,6 @@ namespace Darwin {
             }
         }
 
-        assert(reconnects < 3);
-        (void) reconnects; // Make the compiler happy when NDEBUG is set
-
         if (reconnects > 0) {
             std::cout << "Bytes Read: " << (int)bytesRead << " Reconnects: " << (int)reconnects << " Data: ";
             for (int i = 0; i < bytesRead; i++) {
@@ -176,17 +176,21 @@ namespace Darwin {
             std::cout << "\r" << std::endl;
         }
 
+        assert(reconnects < 3);
+        (void) reconnects; // Make the compiler happy when NDEBUG is set
+
         return(bytesRead);
     }
 
     void UART::reconnect() {
+        std::cout << "Failed to read from '" << devName << "' Error: '" << strerror(errno) << "'\r" << std::endl;
         NUClear::log<NUClear::WARN>("Failed to read from '", devName, "' Error: '", strerror(errno), "'");
 
         // Close the connection.
         close(fd);
 
         // Sleep for a brief period to allow things to clean up and reconnect.
-        std::this_thread::sleep_for(std::chrono::microseconds(BUS_RESET_WAIT_TIME_uS));
+        std::this_thread::sleep_for(std::chrono::seconds(1));
 
         // Connect to the serial port again.
         connect();
@@ -234,7 +238,14 @@ namespace Darwin {
         }
 
         // Here we adjust our "length" to mean the length of the payload rather then the length of bytes after the length
-        int length = result.header.length - 2;
+        int length = 0;
+        if (result.header.length < 2) {
+            std::cout << "Length: " << (int)result.header.length << ", " << (int)(result.header.length - 2) << "\r" << std::endl;
+        }
+
+        else {
+            length = result.header.length - 2;
+        }
 
         // We now are now waiting for our data
         timeout.tv_usec = BYTE_WAIT * length;
