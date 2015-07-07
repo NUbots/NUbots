@@ -353,7 +353,16 @@ namespace nubugger {
 
     }
 
-    inline std::unique_ptr<messages::vision::proto::VisionObject> drawVisionLine(arma::ivec2 start, arma::ivec2 end, arma::vec4 color = arma::vec4({1, 0, 0, 1})) {
+    inline std::unique_ptr<messages::vision::proto::VisionObject> drawVisionLines(std::vector<std::pair<arma::ivec2, arma::ivec2>> lines) {
+        std::vector<std::tuple<arma::ivec2, arma::ivec2, arma::vec4>> colouredLines;
+        colouredLines.reserve(lines.size());
+        for (auto const line : lines) {
+            colouredLines.push_back(std::make_tuple(line.first, line.second, arma::vec4({1, 1, 1, 1})));
+        }
+        return drawVisionLines(colouredLines);
+    }
+
+    inline std::unique_ptr<messages::vision::proto::VisionObject> drawVisionLine(arma::ivec2 start, arma::ivec2 end, arma::vec4 color = arma::vec4({1, 1, 1, 1})) {
         return drawVisionLines({std::make_tuple(start, end, color)});
     }
 
