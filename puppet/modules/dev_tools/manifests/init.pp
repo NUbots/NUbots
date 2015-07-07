@@ -1,15 +1,18 @@
 class dev_tools {
 
-  # Update apt before getting any packages
+  # Update apt before getting any packages (if we need to)
   exec { "apt-update":
-    command => "/usr/bin/apt-get update"
+    command => "/usr/bin/apt-get update",
+    onlyif => "/bin/sh -c '[ ! -f /var/cache/apt/pkgcache.bin ] || /usr/bin/find /etc/apt/* -cnewer /var/cache/apt/pkgcache.bin | /bin/grep . > /dev/null'",
   } ->
   exec { "install-software-properties":
-    command => "/usr/bin/apt-get install -y software-properties-common"
+    command => "/usr/bin/apt-get install -y software-properties-common",
+    unless => '/usr/bin/dpkg -s software-properties-common',
   } ->
-  apt::ppa {'ppa:ubuntu-toolchain-r/test': } ->
+  apt::ppa {'ppa:ubuntu-toolchain-r/test': } ~>
   exec { "apt-update-ppa":
-    command => "/usr/bin/apt-get update"
+    command => "/usr/bin/apt-get update",
+    refreshonly => true
   } -> Package <| |>
 
   package { 'vim': ensure => latest, }
@@ -42,6 +45,14 @@ class dev_tools {
       ensure => present,
       source => 'puppet:///modules/dev_tools/id_rsa.pub',
       owner => 'vagrant', }
+
+  # SSH CONFIG FOR THE VM
+  file { 'ssh_config':
+      path => '/home/vagrant/.ssh/config',
+      ensure => present,
+      source => 'puppet:///modules/dev_tools/ssh_config',
+      owner => 'vagrant',
+      mode => '600', }
 
   # SETUP ENVIRONMENT VARIABLES FOR SHELLS
   file { '/etc/profile.d/toolchain_init.sh':

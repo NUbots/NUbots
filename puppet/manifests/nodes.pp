@@ -113,6 +113,4 @@ node nubotsvm {
       Exec['fix_compiler_environment'],
     ],
   }
-
-  class { 'toolchain_deb': }
 }
