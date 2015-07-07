@@ -152,13 +152,14 @@ namespace motion{
 		        }
 
 				utility::math::matrix::Transform3D getFootPose(const messages::input::Sensors& sensors) {
-					
+					auto result = utility::math::matrix::Transform3D();
 					if(stage == MotionStage::RUNNING || stage == MotionStage::STOPPING) {
 			
 						double elapsedTime = std::chrono::duration_cast<std::chrono::microseconds>(sensors.timestamp - motionStartTime).count() * 1e-6;
 						float alpha = (anim.currentFrame().duration != 0)
 										?	std::fmax(0,std::fmin(elapsedTime / anim.currentFrame().duration, 1))
 										:	1;
+						result = utility::math::matrix::Transform3D::interpolate(anim.previousFrame().pose,anim.currentFrame().pose,alpha);
 						if(alpha >= 1){
 							stable = anim.stable();
 							if(!stable){
@@ -169,10 +170,8 @@ namespace motion{
 						if(stable && stage == MotionStage::STOPPING){
 							stage = MotionStage::FINISHED;
 						}
-						return utility::math::matrix::Transform3D::interpolate(anim.previousFrame().pose,anim.currentFrame().pose,alpha);
-
 		        	}
-		        	return utility::math::matrix::Transform3D();
+		        	return result;
 				}
 
 				virtual void configure(const messages::support::Configuration<IKKickConfig>& config) = 0;
