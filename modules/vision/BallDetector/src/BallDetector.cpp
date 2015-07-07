@@ -80,7 +80,7 @@ namespace vision {
 
         on<Trigger<Raw<ClassifiedImage<ObjectClass>>>, With<CameraParameters>, With<Optional<FieldDescription>>, Options<Single>>("Ball Detector", [this](
             const std::shared_ptr<const ClassifiedImage<ObjectClass>>& rawImage, const CameraParameters& cam, const std::shared_ptr<const FieldDescription>& field) {
-            
+
 
             if (field == nullptr) {
                 NUClear::log(__FILE__, ", ", __LINE__, ": FieldDescription Update: support::configuration::SoccerConfig module might not be installed.");
@@ -94,7 +94,7 @@ namespace vision {
             double deltaT = 1e-6 * std::chrono::duration_cast<std::chrono::microseconds>(sensors.timestamp - lastFrame.time).count();
 
             // Get all the points that could make up the ball
-            for(int i = 0; i < 1; ++i) {
+            for(int i = 0; i < 2; ++i) {
 
                 auto segments = i ? image.horizontalSegments.equal_range(ObjectClass::BALL)
                                   : image.verticalSegments.equal_range(ObjectClass::BALL);
@@ -108,7 +108,7 @@ namespace vision {
                     bool belowHorizon = image.visualHorizonAtPoint(end[0]) < end[1] || image.visualHorizonAtPoint(start[0]) < start[1];
 
                     // We throw out points if they are:
-                    // Less the full quality (subsampled)
+                    // Less the full quality (sub-sampled)
                     // Do not have a transition on either side (are on an edge)
                     // Go from an orange to other to orange segment (are interior)
 
@@ -161,7 +161,7 @@ namespace vision {
                 arma::vec3 ballCentreRay = arma::normalise(arma::normalise(getCamFromScreen(top, cam.focalLengthPixels))
                                                            + arma::normalise(getCamFromScreen(base, cam.focalLengthPixels)));
 
-                // Get the centre of our ball ins creen space
+                // Get the centre of our ball in screen space
                 arma::vec2 ballCentreScreen = projectCamSpaceToScreen(ballCentreRay, cam.focalLengthPixels);
 
                 // Get our width based distance to the ball
@@ -183,12 +183,12 @@ namespace vision {
                 }else if(deltaT < 1){
                     widthVel = (ballCentreGroundWidth - lastFrame.widthBall) / deltaT;
                 } else {
-                    //If we havent see the ball for a while we dont measure vel
+                    //If we haven't see the ball for a while we don't measure velocity
                     widthVel = arma::zeros(3);
                     log<NUClear::WARN>("Ball velocity frame dropped because of too much time between frames");
                 }
                 lastFrame.widthBall = ballCentreGroundWidth;
-                //push back measurements                
+                //push back measurements
                 measurements.push_back({ cartesianToSpherical(ballCentreGroundWidth), ballCentreGroundWidthCov, widthVel, widthVelCov});
                 // 0.003505351, 0.001961638, 1.68276E-05
                 emit(graph("ballCentreGroundWidth measurement", ballCentreGroundWidth(0), ballCentreGroundWidth(1), ballCentreGroundWidth(2)));
@@ -211,7 +211,7 @@ namespace vision {
                 }else if(deltaT < 1){
                     projVel = (ballCentreGroundProj - lastFrame.projBall) / deltaT;
                 } else {
-                    //If we havent see the ball for a while we dont measure vel
+                    //If we haven't see the ball for a while we don't measure velocity
                     projVel = arma::zeros(3);
                     log<NUClear::WARN>("Ball velocity frame dropped because of too much time between frames");
                 }
@@ -252,7 +252,7 @@ namespace vision {
                     if(a->circle.distanceToPoint(b->circle.centre) < b->circle.radius) {
                         // Pick the better ball
                         if(a->circle.radius < b->circle.radius) {
-                            // Throwout b
+                            // Throw-out b
                             b = balls->erase(b);
                         }
                         else {

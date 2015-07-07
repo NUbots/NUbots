@@ -50,7 +50,7 @@ message VisionObject {
 
         required ivec2 start = 1;
         required ivec2 end = 2;
-        optional vec3 colour = 3;
+        optional vec4 colour = 3;
     }
 
     enum ObjectType {

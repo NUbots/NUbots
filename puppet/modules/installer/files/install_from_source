@@ -1,0 +1,76 @@
+#!/bin/bash
+
+# Exit immediatly on error
+set -e
+
+# Get our prefix
+PREFIX="$1"
+METHOD="$2"
+LTO="$3"
+shift 3
+
+if [[ $LTO == "true" ]]; then
+    echo "Using LTO"
+    export CFLAGS="$CFLAGS -I$PREFIX/include -march=atom -mtune=atom -fuse-linker-plugin -flto -ffat-lto-objects -O3"
+    export CXXFLAGS="$CXXFLAGS -I$PREFIX/include -march=atom -mtune=atom -fuse-linker-plugin -flto -ffat-lto-objects -O3"
+    export LDFLAGS="$LDFLAGS -L$PREFIX/lib"
+else
+    echo "Not using LTO"
+    export CFLAGS="$CFLAGS -I$PREFIX/include -march=atom -mtune=atom -O3"
+    export CXXFLAGS="$CXXFLAGS -I$PREFIX/include -march=atom -mtune=atom -O3"
+    export LDFLAGS="$LDFLAGS -L$PREFIX/lib"
+fi
+
+# Say what we're doing!
+echo "Installing $(basename $(pwd)) to $PREFIX"
+
+# Work out what build system we are using
+if [[ $METHOD == 'autotools' || ($METHOD == 'auto' && -e "configure") ]]; then
+    echo "Configuring using autotools"
+
+    # Set our package config search path
+    export PKG_CONFIG_PATH="$PREFIX/lib/pkgconfig"
+
+    # Run configure
+    ./configure $@ --prefix="$PREFIX"
+
+    # Run make
+    make -j$(nproc)
+
+    # Run make install
+    make install
+
+elif [[ $METHOD == 'cmake' || $METHOD == 'auto' && -e "CMakeLists.txt" ]]; then
+    echo "Configuring using cmake"
+
+    # Set our prefix so CMAKE finds things in the toolchain
+    export CMAKE_PREFIX_PATH=$PREFIX
+
+    mkdir build
+    cd build
+
+    # Configure using cmake
+    cmake .. \
+        -DCMAKE_C_FLAGS="$CFLAGS" \
+        -DCMAKE_CXX_FLAGS="$CXXFLAGS" \
+        -DCMAKE_INSTALL_PREFIX:PATH="$PREFIX"
+
+    # Run make
+    make -j$(nproc)
+
+    # Run make install
+    make install
+
+elif [[ -e "Makefile" ]]; then
+    echo "Building using make"
+
+    export COMMON_OPT="$CFLAGS -O3"
+    export FCOMMON_OPT="$CXXFLAGS -O3"
+
+    make -j$(nproc)
+
+    make PREFIX="$PREFIX" install
+
+else
+    exit 1
+fi

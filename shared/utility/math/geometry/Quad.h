@@ -24,6 +24,8 @@
 #include <ostream>
 #include <vector>
 
+#include "Line.h"
+
 namespace utility {
 namespace math {
 namespace geometry {
@@ -96,6 +98,8 @@ namespace geometry {
          * @return The minX and maxX rounded that intersect given y
          */
         arma::vec2 getEdgePoints(uint y) const;
+
+        std::pair<arma::vec2, arma::vec2> getIntersectionPoints(Line line) const;
 
         /**
          * Finds and returns the two intersections points on x given a y
