@@ -200,7 +200,7 @@ namespace support {
         for (auto& handle : handles) {
             auto* objHandles = reactionHandles->add_handles();
             auto& value = handle.second;
-            objHandles->set_name(handle.first);
+            objHandles->set_type(handle.first);
             objHandles->set_enabled(value.empty() ? false : value.front().enabled());
         }
 
@@ -306,11 +306,14 @@ namespace support {
 
         for (const auto& command : message.reaction_handles().handles()) {
 
-            std::string name = command.name();
+            Message::Type type = command.type();
             bool enabled = command.enabled();
+            std::string key = getStringFromMessageType(type);
+
+            std::transform(key.begin(), key.end(), key.begin(), ::tolower);
 
             config->path = CONFIGURATION_PATH;
-            config->config["reaction_handles"][name] = enabled;
+            config->config["reaction_handles"][key] = enabled;
         }
 
         emit(std::move(config));
@@ -380,6 +383,30 @@ namespace support {
                 : str == "CONFIGURATION_STATE"  ? Message::CONFIGURATION_STATE
                 : str == "BEHAVIOUR"            ? Message::BEHAVIOUR
                 : Message::OVERVIEW;
+    }
+
+    std::string NUbugger::getStringFromMessageType(Message::Type type) {
+        switch (type) {
+            case Message::PING:                 return "PING";
+            case Message::SENSOR_DATA:          return "SENSOR_DATA";
+            case Message::IMAGE:                return "IMAGE";
+            case Message::CLASSIFIED_IMAGE:     return "CLASSIFIED_IMAGE";
+            case Message::VISION_OBJECT:        return "VISION_OBJECT";
+            case Message::LOCALISATION:         return "LOCALISATION";
+            case Message::DATA_POINT:           return "DATA_POINT";
+            case Message::DRAW_OBJECTS:         return "DRAW_OBJECTS";
+            case Message::REACTION_STATISTICS:  return "REACTION_STATISTICS";
+            case Message::LOOKUP_TABLE:         return "LOOKUP_TABLE";
+            case Message::LOOKUP_TABLE_DIFF:    return "LOOKUP_TABLE_DIFF";
+            case Message::SUBSUMPTION:          return "SUBSUMPTION";
+            case Message::COMMAND:              return "COMMAND";
+            case Message::REACTION_HANDLES:     return "REACTION_HANDLES";
+            case Message::GAME_STATE:           return "GAME_STATE";
+            case Message::CONFIGURATION_STATE:  return "CONFIGURATION_STATE";
+            case Message::BEHAVIOUR:            return "BEHAVIOUR";
+
+            default:                            return "OVERVIEW";
+        }
     }
 
 } // support
