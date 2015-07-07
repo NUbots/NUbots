@@ -23,14 +23,14 @@
 namespace messages {
     namespace input {
 
-        Image::Image(size_t width, size_t height, NUClear::clock::time_point timestamp, std::vector<uint8_t>&& data)
+        Image::Image(uint width, uint height, NUClear::clock::time_point timestamp, std::vector<uint8_t>&& data)
             : width(width)
             , height(height)
             , timestamp(timestamp)
             , data(std::move(data)) {
         }
 
-        Image::Pixel Image::operator()(size_t x, size_t y) const {
+        Image::Pixel Image::operator()(uint x, uint y) const {
             int origin = (y * width + x) * 2;
             int shift = (x % 2) * 2;
 
