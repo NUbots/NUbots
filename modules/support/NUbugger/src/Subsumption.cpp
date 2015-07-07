@@ -33,6 +33,7 @@ namespace support {
     using messages::behaviour::ActionStart;
     using messages::behaviour::ActionKill;
     using messages::behaviour::RegisterAction;
+    using messages::behaviour::ActionPriorites;
     using messages::behaviour::proto::Subsumption;
 
     using messages::input::LimbID;
@@ -55,7 +56,7 @@ namespace support {
     }
 
     void NUbugger::provideSubsumption() {
-        handles["subsumption"].push_back(on<Trigger<ActionStart>>([this](const ActionStart& actionStart) {
+        handles[Message::SUBSUMPTION].push_back(on<Trigger<ActionStart>>([this](const ActionStart& actionStart) {
             Message message;
             message.set_type(Message::SUBSUMPTION);
             message.set_filter_id(0);
@@ -73,7 +74,7 @@ namespace support {
             send(message);
         }));
 
-        handles["subsumption"].push_back(on<Trigger<ActionKill>>([this](const ActionKill& actionKill) {
+        handles[Message::SUBSUMPTION].push_back(on<Trigger<ActionKill>>([this](const ActionKill& actionKill) {
             Message message;
             message.set_type(Message::SUBSUMPTION);
             message.set_filter_id(0);
@@ -91,7 +92,7 @@ namespace support {
             send(message);
         }));
 
-        handles["subsumption"].push_back(on<Trigger<RegisterAction>>([this] (const RegisterAction& action) {
+        handles[Message::SUBSUMPTION].push_back(on<Trigger<RegisterAction>>([this] (const RegisterAction& action) {
             Message message;
             message.set_type(Message::SUBSUMPTION);
             message.set_filter_id(0);
@@ -108,6 +109,24 @@ namespace support {
                 for (auto& limbID : set.second) {
                     limbSet->add_limbs(getLimb(limbID));
                 }
+            }
+
+            send(message);
+        }));
+
+        handles[Message::SUBSUMPTION].push_back(on<Trigger<ActionPriorites>>([this] (const ActionPriorites& action) {
+            Message message;
+            message.set_type(Message::SUBSUMPTION);
+            message.set_filter_id(0);
+            message.set_utc_timestamp(getUtcTimestamp());
+
+            auto* subsumption = message.mutable_subsumption();
+            subsumption->set_type(Subsumption::ACTION_PRIORITY_CHANGE);
+            auto* actionPriorityChange = subsumption->mutable_action_priority_change();
+
+            actionPriorityChange->set_id(action.id);
+            for(const auto& priority : action.priorities) {
+                actionPriorityChange->add_priorities(priority);
             }
 
             send(message);

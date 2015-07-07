@@ -52,7 +52,7 @@ namespace support {
      */
     void NUbugger::provideOverview() {
 
-        handles["overview"].push_back(on<Trigger<Every<1, std::chrono::seconds>>, Options<Single, Priority<NUClear::LOW>>>([this](const time_t&) {
+        handles[Message::OVERVIEW].push_back(on<Trigger<Every<1, std::chrono::seconds>>, Options<Single, Priority<NUClear::LOW>>>([this](const time_t&) {
             Message message;
             message.set_type(Message::OVERVIEW);
             message.set_filter_id(0);
@@ -63,7 +63,7 @@ namespace support {
             send(message);
         }));
 
-        handles["overview"].push_back(on<Trigger<CommandLineArguments>, Options<Single, Priority<NUClear::LOW>>>([this](const std::vector<std::string>& arguments) {
+        handles[Message::OVERVIEW].push_back(on<Trigger<CommandLineArguments>, Options<Single, Priority<NUClear::LOW>>>([this](const std::vector<std::string>& arguments) {
 
             std::string role_name = arguments.at(0);
             auto index = role_name.rfind('/');
@@ -74,20 +74,20 @@ namespace support {
 
         }));
 
-        handles["overview"].push_back(on<Trigger<Behaviour::State>, Options<Single, Priority<NUClear::LOW>>>([this](const Behaviour::State& state) {
+        handles[Message::OVERVIEW].push_back(on<Trigger<Behaviour::State>, Options<Single, Priority<NUClear::LOW>>>([this](const Behaviour::State& state) {
 
             overview.set_behaviour_state(state);
 
         }));
 
-        handles["overview"].push_back(on<Trigger<Sensors>, Options<Single, Priority<NUClear::LOW>>>([this](const Sensors& sensors) {
+        handles[Message::OVERVIEW].push_back(on<Trigger<Sensors>, Options<Single, Priority<NUClear::LOW>>>([this](const Sensors& sensors) {
 
             overview.set_voltage(sensors.voltage());
             overview.set_battery(sensors.battery());
 
         }));
 
-        handles["overview"].push_back(on<Trigger<std::vector<Self>>, Options<Single, Priority<NUClear::LOW>>>([this](const std::vector<Self>& selfs) {
+        handles[Message::OVERVIEW].push_back(on<Trigger<std::vector<Self>>, Options<Single, Priority<NUClear::LOW>>>([this](const std::vector<Self>& selfs) {
 
             // Retrieve the first self in the vector.
             Self self = selfs.front();
@@ -116,7 +116,7 @@ namespace support {
 
         }));
 
-        handles["overview"].push_back(on<Trigger<std::vector<LocalisationBall>>, With<std::vector<Self>>, Options<Single,
+        handles[Message::OVERVIEW].push_back(on<Trigger<std::vector<LocalisationBall>>, With<std::vector<Self>>, Options<Single,
             Priority<NUClear::LOW>>>([this](const std::vector<LocalisationBall>& balls, const std::vector<Self>& selfs) {
 
             // Retrieve the first ball and self in the vector.
@@ -137,25 +137,25 @@ namespace support {
 
         }));
 
-        handles["overview"].push_back(on<Trigger<Image>, Options<Single, Priority<NUClear::LOW>>>([this](const Image&/* image*/) {
+        handles[Message::OVERVIEW].push_back(on<Trigger<Image>, Options<Single, Priority<NUClear::LOW>>>([this](const Image&/* image*/) {
 
             overview.set_last_camera_image(getUtcTimestamp());
 
         }));
 
-        handles["overview"].push_back(on<Trigger<std::vector<VisionBall>>, Options<Single, Priority<NUClear::LOW>>>([this] (const std::vector<VisionBall>&/* balls*/) {
+        handles[Message::OVERVIEW].push_back(on<Trigger<std::vector<VisionBall>>, Options<Single, Priority<NUClear::LOW>>>([this] (const std::vector<VisionBall>&/* balls*/) {
 
             overview.set_last_seen_ball(getUtcTimestamp());
 
         }));
 
-        handles["overview"].push_back(on<Trigger<std::vector<VisionGoal>>, Options<Single, Priority<NUClear::LOW>>>([this] (const std::vector<VisionGoal>&/* goals*/) {
+        handles[Message::OVERVIEW].push_back(on<Trigger<std::vector<VisionGoal>>, Options<Single, Priority<NUClear::LOW>>>([this] (const std::vector<VisionGoal>&/* goals*/) {
 
             overview.set_last_seen_goal(getUtcTimestamp());
 
         }));
 
-        handles["overview"].push_back(on<Trigger<GameState>, Options<Single, Priority<NUClear::LOW>>>([this] (const GameState& gamestate) {
+        handles[Message::OVERVIEW].push_back(on<Trigger<GameState>, Options<Single, Priority<NUClear::LOW>>>([this] (const GameState& gamestate) {
 
             overview.set_game_mode(getMode(gamestate.mode));
             overview.set_game_phase(getPhase(gamestate.phase));

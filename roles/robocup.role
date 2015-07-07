@@ -37,6 +37,8 @@ ADD_ROLE(
     behaviour::planning::KickPlanner
     behaviour::planning::DivePlanner
     behaviour::planning::SimpleWalkPathPlanner
+    #behaviour::planning::OMPLPathPlanner  # Creates WalkPaths.
+    #behaviour::planning::WalkPathFollower # Follows WalkPaths.
     behaviour::strategy::SoccerStrategy
 
     #Motion

@@ -14,25 +14,37 @@ output:
 reaction_handles:
   # Overview information for the dashboard, designed for minimum bandwidth
   overview: true
-  # Statistics about reactions, modules and runtimes
-  reaction_statistics: false
-  # Data for Chart tool in NUsight
-  data_points: false
-  # Info from the game controller
-  game_controller: false
-  # Info about subsumption
-  subsumption: true
-  # Info about behaviour
-  behaviour: true
+  # Ping packets
+  ping: true
   # Motor positions, orientation, etc.
-  sensors: true
+  sensor_data: true
+  # Raw image
+  image: true
+  # Classified image
+  classified_image: true
+  # Vision objects including goals, balls and debugging lines
+  vision_object: true
   # Localisation state estimates and uncertainties
   localisation: true
-  # Vision data
-  image: false # Raw image
-  classified_image: false # Colour classified
-  goals: false # Detected goals in vision space
-  balls: false # Detected balls in vision space
+  # Data for chart tool in NUsight
+  data_point: true
   # Field drawn objects such as an arrow, sphere, etc
-  draw_objects: false
-  vision_lines: false
+  draw_objects: true
+  # Lookup table packets
+  lookup_table: true
+  # Lookup table delta packets (autoclassifier)
+  lookup_table_diff: true
+  # Subsumption data
+  subsumption: true
+  # NUsight commands (download_lut, etc)
+  command: true
+  # Updates to enabled reaction handles
+  reaction_handles: true
+  # GameController information
+  game_state: true
+  # Configuration window
+  configuration_state: true
+  # Behaviour information
+  behaviour: true
+  # Statistics about reactions, modules and runtimes
+  reaction_statistics: true

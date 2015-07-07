@@ -24,6 +24,7 @@ message Subsumption {
     enum Type {
         ACTION_REGISTER = 1;
         ACTION_STATE = 2;
+        ACTION_PRIORITY_CHANGE = 3;
     }
 
     enum Limb {
@@ -61,9 +62,17 @@ message Subsumption {
         repeated Limb limbs = 3;
     }
 
+    message ActionPriorites {
+
+        required uint32 id = 1;
+        repeated float priorities = 2;
+
+    }
+
     required Type type = 1;
 
     optional ActionRegister action_register = 2;
     optional ActionStateChange action_state_change = 3;
+    optional ActionPriorites action_priority_change = 4;
 
 }

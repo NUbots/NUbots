@@ -51,7 +51,7 @@ namespace modules {
             bool listening = true;
 
             // Reaction Handles
-            std::map<std::string, std::vector<ReactionHandle>> handles;
+            std::map<messages::support::nubugger::proto::Message::Type, std::vector<ReactionHandle>> handles;
 
             std::map<std::string, uint> dataPointFilterIds;
             uint dataPointFilterId = 1;
@@ -102,6 +102,8 @@ namespace modules {
 
             void run();
             void kill();
+
+            messages::support::nubugger::proto::Message::Type getMessageTypeFromString(std::string type_name);
         public:
             static constexpr const char* CONFIGURATION_PATH = "NUbugger.yaml";
             static constexpr const char* IGNORE_TAG = "IGNORE";

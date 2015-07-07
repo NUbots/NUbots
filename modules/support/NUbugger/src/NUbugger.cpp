@@ -135,7 +135,7 @@ namespace support {
                 bool enabled = setting.second.as<bool>();
 
                 bool found = false;
-                for (auto& handle : handles[name]) {
+                for (auto& handle : handles[getMessageTypeFromString(name)]) {
                     if (enabled && !handle.enabled()) {
                         handle.enable();
                         found = true;
@@ -356,6 +356,30 @@ namespace support {
             message.SerializeToOstream(&outputFile);
         }
 
+    }
+
+
+    Message::Type NUbugger::getMessageTypeFromString(std::string type_name) {
+        std::string str;
+        std::transform(type_name.begin(), type_name.end(), str.begin(), ::toupper);
+        return    str == "PING"                 ? Message::PING
+                : str == "SENSOR_DATA"          ? Message::SENSOR_DATA
+                : str == "IMAGE"                ? Message::IMAGE
+                : str == "CLASSIFIED_IMAGE"     ? Message::CLASSIFIED_IMAGE
+                : str == "VISION_OBJECT"        ? Message::VISION_OBJECT
+                : str == "LOCALISATION"         ? Message::LOCALISATION
+                : str == "DATA_POINT"           ? Message::DATA_POINT
+                : str == "DRAW_OBJECTS"         ? Message::DRAW_OBJECTS
+                : str == "REACTION_STATISTICS"  ? Message::REACTION_STATISTICS
+                : str == "LOOKUP_TABLE"         ? Message::LOOKUP_TABLE
+                : str == "LOOKUP_TABLE_DIFF"    ? Message::LOOKUP_TABLE_DIFF
+                : str == "SUBSUMPTION"          ? Message::SUBSUMPTION
+                : str == "COMMAND"              ? Message::COMMAND
+                : str == "REACTION_HANDLES"     ? Message::REACTION_HANDLES
+                : str == "GAME_STATE"           ? Message::GAME_STATE
+                : str == "CONFIGURATION_STATE"  ? Message::CONFIGURATION_STATE
+                : str == "BEHAVIOUR"            ? Message::BEHAVIOUR
+                : Message::OVERVIEW;
     }
 
 } // support

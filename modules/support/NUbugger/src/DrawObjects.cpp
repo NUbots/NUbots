@@ -33,7 +33,7 @@ namespace support {
 
     void NUbugger::provideDrawObjects() {
 
-        handles["draw_objects"].push_back(on<Trigger<DrawObjects>>([this](const DrawObjects& drawObjects) {
+        handles[Message::DRAW_OBJECTS].push_back(on<Trigger<DrawObjects>>([this](const DrawObjects& drawObjects) {
 
             Message message;
             message.set_type(Message::DRAW_OBJECTS);
@@ -45,7 +45,7 @@ namespace support {
             send(message);
         }));
 
-        handles["draw_objects"].push_back(on<Trigger<DrawObject>>([this](const DrawObject& drawObject) {
+        handles[Message::DRAW_OBJECTS].push_back(on<Trigger<DrawObject>>([this](const DrawObject& drawObject) {
 
             Message message;
             message.set_type(Message::DRAW_OBJECTS);

@@ -42,7 +42,7 @@ namespace support {
     using messages::input::Image;
 
     void NUbugger::provideVision() {
-        handles["image"].push_back(on<Trigger<Image>, Options<Single, Priority<NUClear::LOW>>>([this](const Image& image) {
+        handles[Message::IMAGE].push_back(on<Trigger<Image>, Options<Single, Priority<NUClear::LOW>>>([this](const Image& image) {
 
             if (NUClear::clock::now() - last_image < max_image_duration) {
                 return;
@@ -71,7 +71,7 @@ namespace support {
             last_image = NUClear::clock::now();
         }));
 
-        handles["classified_image"].push_back(on<Trigger<ClassifiedImage<ObjectClass>>, Options<Single, Priority<NUClear::LOW>>>([this](const ClassifiedImage<ObjectClass>& image) {
+        handles[Message::CLASSIFIED_IMAGE].push_back(on<Trigger<ClassifiedImage<ObjectClass>>, Options<Single, Priority<NUClear::LOW>>>([this](const ClassifiedImage<ObjectClass>& image) {
 
             if (NUClear::clock::now() - last_classified_image < max_classified_image_duration) {
                 return;
@@ -138,7 +138,7 @@ namespace support {
             last_classified_image = NUClear::clock::now();
         }));
 
-        handles["balls"].push_back(on<Trigger<std::vector<Ball>>, Options<Single, Priority<NUClear::LOW>>>([this] (const std::vector<Ball>& balls) {
+        handles[Message::VISION_OBJECT].push_back(on<Trigger<std::vector<Ball>>, Options<Single, Priority<NUClear::LOW>>>([this] (const std::vector<Ball>& balls) {
 
             Message message;
             message.set_type(Message::VISION_OBJECT);
@@ -163,7 +163,7 @@ namespace support {
 
         }));
 
-        handles["goals"].push_back(on<Trigger<std::vector<Goal>>, Options<Single, Priority<NUClear::LOW>>>([this] (const std::vector<Goal>& goals) {
+        handles[Message::VISION_OBJECT].push_back(on<Trigger<std::vector<Goal>>, Options<Single, Priority<NUClear::LOW>>>([this] (const std::vector<Goal>& goals) {
 
             Message message;
             message.set_type(Message::VISION_OBJECT);
@@ -197,7 +197,7 @@ namespace support {
         }));
 
         // TODO: needs refactoring so that this is really only a vision line handle
-        handles["vision_lines"].push_back(on<Trigger<VisionObject>, Options<Single, Priority<NUClear::LOW>>>([this] (const VisionObject& visionObject) {
+        handles[Message::VISION_OBJECT].push_back(on<Trigger<VisionObject>, Options<Single, Priority<NUClear::LOW>>>([this] (const VisionObject& visionObject) {
 
             Message message;
             message.set_type(Message::VISION_OBJECT);
@@ -210,7 +210,7 @@ namespace support {
 
         }));
 
-        handles["lookuptable"].push_back(on<Trigger<LookUpTableDiff>, Options<Single, Priority<NUClear::LOW>>>([this] (const LookUpTableDiff& tableDiff) {
+        handles[Message::LOOKUP_TABLE_DIFF].push_back(on<Trigger<LookUpTableDiff>, Options<Single, Priority<NUClear::LOW>>>([this] (const LookUpTableDiff& tableDiff) {
             Message message;
             message.set_type(Message::LOOKUP_TABLE_DIFF);
             message.set_filter_id(0);
