@@ -146,7 +146,7 @@ namespace darwin {
         return sensors;
     }
 
-    HardwareIO::HardwareIO(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)), darwin("/dev/ttyUSB0") {
+    HardwareIO::HardwareIO(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)), darwin("/dev/CM730") {
 
         on<Trigger<Configuration<Darwin::UART>>>([this](const Configuration<Darwin::UART>& config){
             darwin.setConfig(config);
