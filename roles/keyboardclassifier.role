@@ -12,9 +12,10 @@ ADD_ROLE(
     platform::darwin::SensorFilter
 
     # Motion
-    #motion::WalkEngine
+    motion::WalkEngine
     motion::ScriptEngine
     motion::HeadController
+    motion::IKKick
 
     #Vision
     vision::LUTClassifier
@@ -24,7 +25,7 @@ ADD_ROLE(
 
     # Behaviour
     behaviour::Controller
-    behaviour::skills::KickScript
+    behaviour::skills::Stand
     behaviour::skills::FallingRelax
     behaviour::skills::Getup
     behaviour::strategy::KeyboardWalk
