@@ -55,25 +55,32 @@ namespace motion{
 
     void KickBalancer::computeStartMotion(const Sensors& sensors) {
         Transform3D torsoToFoot = getTorsoPose(sensors);
-        startPose = torsoToFoot.i();
+        Transform3D startPose = torsoToFoot.i();
 
         int negativeIfRight = (supportFoot == LimbID::RIGHT_LEG) ? -1 : 1;
-        finishPose = torsoToFoot;
+        Transform3D finishPose = torsoToFoot;
         finishPose.translation() = arma::vec3({forward_lean, negativeIfRight * (adjustment + DarwinModel::Leg::FOOT_CENTRE_TO_ANKLE_CENTRE), stand_height});
-
         finishPose = finishPose.i();
-        distance = arma::norm(startPose.translation() - finishPose.translation());
+
+        std::vector<SixDOFFrame> frames;
+        frames.push_back(SixDOFFrame{startPose,0});
+        frames.push_back(SixDOFFrame{finishPose,forward_velocity});
+        anim = Animator(frames);
     }
 
     void FootLifter::computeStartMotion(const Sensors&) {
-        startPose = arma::eye(4,4);
-        finishPose = startPose.translate(arma::vec3({-lift_foot_back,0,lift_foot_height}));
-        distance = arma::norm(startPose.translation() - finishPose.translation());
+        Transform3D startPose = arma::eye(4,4);
+        Transform3D finishPose = startPose.translate(arma::vec3({-lift_foot_back,0,lift_foot_height}));
+        
+        std::vector<SixDOFFrame> frames;
+        frames.push_back(SixDOFFrame{startPose,0});
+        frames.push_back(SixDOFFrame{finishPose,forward_velocity});
+        anim = Animator(frames);
     }
 
 
     void Kicker::computeStartMotion(const Sensors& sensors) {
-        startPose = arma::eye(4,4);
+        Transform3D startPose = arma::eye(4,4);
 
         // Convert torso to support foot
 
@@ -85,17 +92,20 @@ namespace motion{
         Transform3D supportToKickFoot = currentKickFoot.i() * currentTorso.i();
         // Convert ball position from support foot coordinates to kick foot coordinates
         arma::vec3 ballFromKickFoot = supportToKickFoot.transformPoint(ballPosition);
-        finishPose = startPose.translate(ballFromKickFoot);
+        Transform3D finishPose = startPose.translate(ballFromKickFoot);
+        
+        std::vector<SixDOFFrame> frames;
+        frames.push_back(SixDOFFrame{startPose,0});
+        frames.push_back(SixDOFFrame{finishPose,forward_velocity});
+        anim = Animator(frames);
 
-        distance = arma::norm(startPose.translation() - finishPose.translation());
     }
 
 
     void KickBalancer::computeStopMotion(){}
 
     void FootLifter::computeStopMotion(){
-        startPose = startPose.translate(arma::vec3({0,0,put_foot_down_height}));
-        distance = arma::norm(startPose.translation() - finishPose.translation());
+        anim.startFrame.pose.translate(arma::vec3({0,0,put_foot_down_height}));
     }
     
     void Kicker::computeStopMotion(){}
