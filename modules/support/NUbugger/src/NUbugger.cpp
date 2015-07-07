@@ -314,6 +314,9 @@ namespace support {
 
             config->path = CONFIGURATION_PATH;
             config->config["reaction_handles"][key] = enabled;
+            for (auto& handle : handles[type]) {
+                handle.enable(enabled);
+            }
         }
 
         emit(std::move(config));
@@ -363,26 +366,25 @@ namespace support {
 
 
     Message::Type NUbugger::getMessageTypeFromString(std::string type_name) {
-        std::string str;
-        std::transform(type_name.begin(), type_name.end(), str.begin(), ::toupper);
-        return    str == "PING"                 ? Message::PING
-                : str == "SENSOR_DATA"          ? Message::SENSOR_DATA
-                : str == "IMAGE"                ? Message::IMAGE
-                : str == "CLASSIFIED_IMAGE"     ? Message::CLASSIFIED_IMAGE
-                : str == "VISION_OBJECT"        ? Message::VISION_OBJECT
-                : str == "LOCALISATION"         ? Message::LOCALISATION
-                : str == "DATA_POINT"           ? Message::DATA_POINT
-                : str == "DRAW_OBJECTS"         ? Message::DRAW_OBJECTS
-                : str == "REACTION_STATISTICS"  ? Message::REACTION_STATISTICS
-                : str == "LOOKUP_TABLE"         ? Message::LOOKUP_TABLE
-                : str == "LOOKUP_TABLE_DIFF"    ? Message::LOOKUP_TABLE_DIFF
-                : str == "SUBSUMPTION"          ? Message::SUBSUMPTION
-                : str == "COMMAND"              ? Message::COMMAND
-                : str == "REACTION_HANDLES"     ? Message::REACTION_HANDLES
-                : str == "GAME_STATE"           ? Message::GAME_STATE
-                : str == "CONFIGURATION_STATE"  ? Message::CONFIGURATION_STATE
-                : str == "BEHAVIOUR"            ? Message::BEHAVIOUR
-                : Message::OVERVIEW;
+        std::transform(type_name.begin(), type_name.end(), type_name.begin(), ::toupper);
+        return    type_name == "PING"                 ? Message::PING
+                : type_name == "SENSOR_DATA"          ? Message::SENSOR_DATA
+                : type_name == "IMAGE"                ? Message::IMAGE
+                : type_name == "CLASSIFIED_IMAGE"     ? Message::CLASSIFIED_IMAGE
+                : type_name == "VISION_OBJECT"        ? Message::VISION_OBJECT
+                : type_name == "LOCALISATION"         ? Message::LOCALISATION
+                : type_name == "DATA_POINT"           ? Message::DATA_POINT
+                : type_name == "DRAW_OBJECTS"         ? Message::DRAW_OBJECTS
+                : type_name == "REACTION_STATISTICS"  ? Message::REACTION_STATISTICS
+                : type_name == "LOOKUP_TABLE"         ? Message::LOOKUP_TABLE
+                : type_name == "LOOKUP_TABLE_DIFF"    ? Message::LOOKUP_TABLE_DIFF
+                : type_name == "SUBSUMPTION"          ? Message::SUBSUMPTION
+                : type_name == "COMMAND"              ? Message::COMMAND
+                : type_name == "REACTION_HANDLES"     ? Message::REACTION_HANDLES
+                : type_name == "GAME_STATE"           ? Message::GAME_STATE
+                : type_name == "CONFIGURATION_STATE"  ? Message::CONFIGURATION_STATE
+                : type_name == "BEHAVIOUR"            ? Message::BEHAVIOUR
+                :                                       Message::OVERVIEW;
     }
 
     std::string NUbugger::getStringFromMessageType(Message::Type type) {
@@ -404,7 +406,6 @@ namespace support {
             case Message::GAME_STATE:           return "GAME_STATE";
             case Message::CONFIGURATION_STATE:  return "CONFIGURATION_STATE";
             case Message::BEHAVIOUR:            return "BEHAVIOUR";
-
             default:                            return "OVERVIEW";
         }
     }
