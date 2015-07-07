@@ -163,9 +163,6 @@ namespace motion {
 
             if(kicker.isStable()){
                 kicker.stop(sensors);
-            }
-
-            if(kicker.isFinished()){
                 balancer.stop(sensors);
             }
 
