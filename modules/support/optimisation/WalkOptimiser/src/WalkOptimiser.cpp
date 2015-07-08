@@ -23,6 +23,7 @@
 #include "utility/support/yaml_armadillo.h"
 #include "utility/math/optimisation/PGAoptimiser.h"
 #include "messages/input/ServoID.h"
+#include "utility/math/angle.h"
 
 namespace modules {
     namespace support {
@@ -221,7 +222,7 @@ namespace modules {
                 if(recording){
                     arma::vec3 verticalKinematics = sensors.orientationCamToGround.submat(0,2,2,2);
                     arma::vec3 verticalOrientation = sensors.kinematicsCamToGround.submat(0,2,2,2);
-                    double tiltMag = std::acos(arma::dot(verticalOrientation, verticalKinematics));
+                    double tiltMag = utility::math::angle::acos_clamped(arma::dot(verticalOrientation, verticalKinematics));
                     if(std::fabs(tiltMag) < M_PI_4){
                         tilt(tiltMag);
                     }

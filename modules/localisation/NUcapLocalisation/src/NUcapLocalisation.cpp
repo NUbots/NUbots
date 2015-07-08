@@ -25,6 +25,7 @@
 #include "utility/math/geometry/UnitQuaternion.h"
 #include "messages/support/Configuration.h"
 #include "messages/localisation/FieldObject.h"
+#include "utility/math/angle.h"
 #include <armadillo>
 
 namespace modules {
@@ -63,7 +64,7 @@ namespace localisation {
 
                     Rotation3D groundToWorldRotation = q;// * sensors.orientationCamToGround.submat(0,0,2,2).t();
 
-                    double heading = std::acos(groundToWorldRotation(0,0));
+                    double heading = utility::math::angle::acos_clamped(groundToWorldRotation(0,0));
 
                     // TODO: transform from head to field
                     auto selfs = std::make_unique<std::vector<Self>>();
