@@ -72,7 +72,7 @@ Vagrant.configure("2") do |config|
   end
 
   # This VM will build all dependencies by source (use this to update old dependencies, or to generate a new deb file)
-  config.vm.define "nubotsvmbuild" do |nubots|
+  config.vm.define "nubotsvmbuild", autostart: false do |nubots|
     nubots.vm.hostname = "nubotsvmbuild.nubots.net"
 
     # Note: Use NFS for more predictable shared folder support.
