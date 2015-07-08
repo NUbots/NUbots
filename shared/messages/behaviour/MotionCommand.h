@@ -45,13 +45,13 @@ namespace behaviour {
         Type type = Type::StandStill;
 
         // Required data for WalkToState command:
-        Transform2D goalState = {0, 0, 0};
+        Transform2D goalState;
 
         // Required data for WalkToBall command:
         arma::vec2 kickTarget = {0, 0};
 
         // Required data for DirectCommand command:
-        Transform2D walkCommand = {0, 0, 0};
+        Transform2D walkCommand;
 
         // Note: We used to use more generic goal and kickTarget types, but
         // these have been removed for simplicity.

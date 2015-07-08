@@ -43,7 +43,7 @@ namespace motion {
         arma::vec3 goalPosition;
 
         /// Subsumption ID key to access motors
-        const size_t id;
+        const size_t subsumptionId;
         
         bool leftFootIsSupport;
 

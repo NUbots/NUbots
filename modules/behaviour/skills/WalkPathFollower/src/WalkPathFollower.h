@@ -61,8 +61,15 @@ namespace skills {
         WalkPath currentPath;
 
     private:
-        /// Subsumption ID key to access motors
+        /// @brief Subsumption ID key to access motors
         const size_t subsumptionId;
+
+        /// @brief Reaction handle for the path following reaction
+        ReactionHandle followPathReaction;
+        
+        /// @brief Reaction handle for the path update reaction
+        ReactionHandle updatePathReaction;
+
 
         struct Config {
             

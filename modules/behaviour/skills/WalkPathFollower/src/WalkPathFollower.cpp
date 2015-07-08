@@ -45,11 +45,13 @@ namespace skills {
     using messages::behaviour::WalkPath;
     using messages::behaviour::RegisterAction;
 
-    using messages::motion::WalkCommand;
     using messages::motion::KickFinished;
+    using messages::motion::WalkCommand;
     using messages::motion::WalkStartCommand;
     using messages::motion::WalkStopCommand;
-    
+    using messages::motion::EnableWalkEngineCommand;
+    using messages::motion::DisableWalkEngineCommand;
+
     using messages::input::LimbID;
     using messages::input::ServoID;
 
@@ -73,21 +75,14 @@ namespace skills {
             },
             [this] (const std::set<LimbID>& givenLimbs) {
                 if (givenLimbs.find(LimbID::LEFT_LEG) != givenLimbs.end()) {
-                    // legs are available, start
-                    // stanceReset(); // reset stance as we don't know where our limbs are
-                    // interrupted = false;
-                    // updateHandle.enable();
-
-                    // TODO: Enable the walk engine.
+                    // Enable the walk engine.
+                    emit<Scope::DIRECT>(std::move(std::make_unique<EnableWalkEngineCommand>(subsumptionId)));
                 }
             },
             [this] (const std::set<LimbID>& takenLimbs) {
                 if (takenLimbs.find(LimbID::LEFT_LEG) != takenLimbs.end()) {
-                    // // legs are no longer available, reset walking (too late to stop walking)
-                    // updateHandle.disable();
-                    // interrupted = true;
-
-                    // TODO: Disable the walk engine.
+                    // Shut down the walk engine, since we don't need it right now.
+                    emit<Scope::DIRECT>(std::move(std::make_unique<DisableWalkEngineCommand>(subsumptionId)));
                 }
             },
             [this] (const std::set<ServoID>&) {
@@ -103,11 +98,24 @@ namespace skills {
 
         });
 
-        on<Trigger<KickFinished>>([this] (const KickFinished&) {
-            emit(std::move(std::make_unique<WalkStartCommand>()));
+        // Enable/Disable path following based on the current motion command.
+        on<Trigger<MotionCommand>>([this] (const MotionCommand& command) {
+            if (command.type == MotionCommand::Type::WalkToState ||
+                command.type == MotionCommand::Type::BallApproach) {
+                followPathReaction.enable();
+                updatePathReaction.enable();
+            } else {
+                followPathReaction.disable();
+                updatePathReaction.disable();
+            }
         });
 
-        on<Trigger<WalkPath>,
+        // // TODO: Review the interaction of the kick with the WalkPathFollower.
+        // on<Trigger<KickFinished>>([this] (const KickFinished&) {
+        //     emit(std::move(std::make_unique<WalkStartCommand>(subsumptionId)));
+        // });
+
+        updatePathReaction = on<Trigger<WalkPath>,
             With<std::vector<Self>>,
             Options<Sync<WalkPathFollower>, Single>
            >("Update current path plan", [this] (
@@ -127,14 +135,14 @@ namespace skills {
                 auto estPath = estimatedPath(currentState, currentPath, 0.01, 2000, 40);
                 emit(utility::nubugger::drawPath("WPF_EstimatedPath", estPath.states, 0.05, {1,0.8,0}));
             }
-        });
+        }).disable();
 
-        on<Trigger<Every<20, Per<std::chrono::seconds>>>,
+        followPathReaction = on<Trigger<Every<20, Per<std::chrono::seconds>>>,
             With<std::vector<Self>>,
             // With<WalkPath>,
             Options<Sync<WalkPathFollower>, Single>
            >("Follow current path plan", [this] (
-             const NUClear::clock::time_point& current_time,
+             const NUClear::clock::time_point& /*current_time*/,
              const std::vector<Self>& selfs
              // const WalkPath& walkPath
              ) {
@@ -166,9 +174,9 @@ namespace skills {
 
             // Emit a walk command to move towards the target state:
             auto command = std::make_unique<WalkCommand>(walkBetween(currentState, targetState));
-            emit(std::move(std::make_unique<WalkStartCommand>()));
+            emit(std::move(std::make_unique<WalkStartCommand>(subsumptionId)));
             emit(std::move(command));
-        });
+        }).disable();
     }
 
     int WalkPathFollower::trimPath(const Transform2D& currentState, WalkPath& walkPath) {
@@ -226,6 +234,7 @@ namespace skills {
 
         WalkCommand command;
         command.command = {1, 0, wcAngle};
+        command.subsumptionId = subsumptionId;
         return command;
     }
 
