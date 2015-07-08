@@ -9,13 +9,13 @@ ADD_ROLE(
     support::configuration::SoccerConfig
     support::GrimReaper
 
+    #input
+    input::GameController
+
     #Simulation
     platform::darwin::HardwareSimulator
     support::SoccerSimulator
     support::VirtualCamera
-
-    #input
-    input::GameController
 
     #Sensors
     platform::darwin::SensorFilter
