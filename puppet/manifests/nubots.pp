@@ -14,11 +14,11 @@ node nubotsvm {
   package { 'libboost-program-options-dev': }
   package { 'libboost-test-dev': }
   package { 'libboost-chrono-dev': }
-  package { 'libboost-date-time-de': }
+  package { 'libboost-date-time-dev': }
 
   # We need dev tools
   class {'dev_tools': }
-  $toolchain_url = "https://www.dropbox.com/s/gj86fejcncri4ip/nubots-toolchain1.0.0.deb"
+  $toolchain_url = "http://nubots.net/debs/nubots-toolchain1.0.0.deb"
 
   # Get and install our toolchain
   wget::fetch { "nubots_toolchain":
@@ -36,6 +36,6 @@ node nubotsvm {
                 Package['libboost-program-options-dev'],
                 Package['libboost-test-dev'],
                 Package['libboost-chrono-dev'],
-                Package['libboost-date-time-de']]
+                Package['libboost-date-time-dev']]
   }
 }

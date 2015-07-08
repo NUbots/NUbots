@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Exit immediatly on error
+# Exit immediately on error
 set -e
 
 # Get our prefix
@@ -24,12 +24,12 @@ fi
 # Say what we're doing!
 echo "Installing $(basename $(pwd)) to $PREFIX"
 
+# Set our package config search path
+export PKG_CONFIG_PATH="$PREFIX/lib/pkgconfig"
+
 # Work out what build system we are using
 if [[ $METHOD == 'autotools' || ($METHOD == 'auto' && -e "configure") ]]; then
     echo "Configuring using autotools"
-
-    # Set our package config search path
-    export PKG_CONFIG_PATH="$PREFIX/lib/pkgconfig"
 
     # Run configure
     ./configure $@ --prefix="$PREFIX"
@@ -46,11 +46,11 @@ elif [[ $METHOD == 'cmake' || $METHOD == 'auto' && -e "CMakeLists.txt" ]]; then
     # Set our prefix so CMAKE finds things in the toolchain
     export CMAKE_PREFIX_PATH=$PREFIX
 
-    mkdir build
+    mkdir -p build
     cd build
 
     # Configure using cmake
-    cmake .. \
+    cmake .. $@ \
         -DCMAKE_C_FLAGS="$CFLAGS" \
         -DCMAKE_CXX_FLAGS="$CXXFLAGS" \
         -DCMAKE_INSTALL_PREFIX:PATH="$PREFIX"
@@ -67,7 +67,7 @@ elif [[ -e "Makefile" ]]; then
     export COMMON_OPT="$CFLAGS -O3"
     export FCOMMON_OPT="$CXXFLAGS -O3"
 
-    make -j$(nproc)
+    make $@ -j$(nproc)
 
     make PREFIX="$PREFIX" install
 

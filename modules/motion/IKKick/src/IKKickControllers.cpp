@@ -67,6 +67,10 @@ namespace motion{
         lift_foot = SixDOFFrame(config["kick_frames"]["lift_foot"]);
         kick = SixDOFFrame(config["kick_frames"]["kick"]);
         place_foot = SixDOFFrame(config["kick_frames"]["place_foot"]);
+
+        follow_through = config["kick"]["follow_through"].as<float>();
+        wind_up = config["kick"]["wind_up"].as<float>();
+        foot_separation_margin = config["kick"]["foot_separation_margin"].as<float>();
 	}
 
     void Kicker::computeStartMotion(const Sensors& sensors) {
@@ -81,7 +85,36 @@ namespace motion{
         Transform3D supportToKickFoot = currentKickFoot.i() * currentTorso.i();
         // Convert ball position from support foot coordinates to kick foot coordinates
         arma::vec3 ballFromKickFoot = supportToKickFoot.transformPoint(ballPosition);
-        kick.pose.translation() = ballFromKickFoot;
+        arma::vec3 goalFromKickFoot = supportToKickFoot.transformPoint(goalPosition);
+
+        //Compute follow through:
+        arma::vec3 ballToGoalUnit = arma::normalise(goalFromKickFoot - ballFromKickFoot);
+        arma::vec3 followThrough = follow_through * ballToGoalUnit;
+        arma::vec3 windUp = - wind_up * ballToGoalUnit;
+
+        //Get kick and lift goals
+        arma::vec3 kickGoal = ballFromKickFoot + followThrough;
+        arma::vec3 liftGoal = ballFromKickFoot + windUp;
+
+        //constrain to prevent leg collision
+        arma::vec3 supportFootPos = supportToKickFoot.translation();
+        int signSupportFootPosY = supportFootPos[1] < 0 ? -1 : 1;
+        float clippingPlaneY = supportFootPos[1] - signSupportFootPosY * (foot_separation_margin + (DarwinModel::Leg::FOOT_WIDTH / 2.0 - DarwinModel::Leg::FOOT_CENTRE_TO_ANKLE_CENTRE));
+        
+        float liftClipDistance = (liftGoal[1] - clippingPlaneY);
+        if(signSupportFootPosY * liftClipDistance > 0){
+            //Clip
+            liftGoal.rows(0,1) = liftGoal.rows(0,1) * clippingPlaneY / liftGoal[1];
+        }
+
+        float kickClipDistance = (kickGoal[1] - clippingPlaneY);
+        if(signSupportFootPosY * kickClipDistance > 0){
+            //Clip
+            kickGoal.rows(0,1) = kickGoal.rows(0,1) * clippingPlaneY / kickGoal[1];
+        }
+
+        kick.pose.translation() = kickGoal;
+        lift_foot.pose.translation() = liftGoal;
         
         std::vector<SixDOFFrame> frames;
         frames.push_back(SixDOFFrame{startPose,0});

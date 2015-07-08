@@ -30,6 +30,7 @@
 #include "utility/math/matrix/Transform3D.h"
 #include "utility/math/matrix/Rotation3D.h"
 #include "utility/motion/RobotModels.h"
+#include "utility/math/angle.h"
 
 #include "messages/input/Sensors.h"
 #include "messages/input/ServoID.h"
@@ -343,7 +344,7 @@ namespace kinematics {
 
         // Normal of the line is the y and z of the z axis, however in the image the y axis is negated
         arma::vec2 normal = -arma::normalise(groundToCamRotation.submat(1,2,2,2));
-        double distance = cameraDistancePixels * std::tan(std::acos(groundToCamRotation(0,2)) - M_PI_2);
+        double distance = cameraDistancePixels * std::tan(utility::math::angle::acos_clamped(groundToCamRotation(0,2)) - M_PI_2);
 
         return utility::math::geometry::Line(normal, distance);
     }
