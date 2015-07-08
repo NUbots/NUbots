@@ -56,7 +56,7 @@ namespace modules {
             auto& minHorizon = classifiedImage.minVisualHorizon;
             auto& sensors = *classifiedImage.sensors;
 
-            arma::vec2 topY = imageToScreen(arma::ivec2({ classifiedImage.minVisualHorizon->at(0), int(classifiedImage.minVisualHorizon->at(1)) })
+            arma::vec2 topY = imageToScreen(arma::ivec2({ classifiedImage.maxVisualHorizon->at(0), int(classifiedImage.maxVisualHorizon->at(1)) })
                                           , classifiedImage.dimensions);
             topY[0] = 0;    //Choose centre of screen
 

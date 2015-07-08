@@ -151,11 +151,11 @@ namespace modules {
                 // Enhance our goals
                 enhanceGoals(image, lut, *classifiedImage);
 
-                // // Find our ball (also helps with the bottom of goals)
-                // findBall(image, lut, *classifiedImage);
+                // Find our ball (also helps with the bottom of goals)
+                findBall(image, lut, *classifiedImage);
 
-                // // Enhance our ball
-                // enhanceBall(image, lut, *classifiedImage);
+                // Enhance our ball
+                enhanceBall(image, lut, *classifiedImage);
 
                 // Emit our classified image
                 emit(std::move(classifiedImage));
