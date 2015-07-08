@@ -310,7 +310,7 @@ namespace vision {
                         goalTopProjDist * measurement_distance_covariance_factor,
                         measurement_bearing_variance,
                         measurement_elevation_variance }));
-                // measurements.push_back({ cartesianToSpherical(goalTopProj), goalTopProjDistCov});
+                measurements.push_back({ cartesianToSpherical(goalTopProj), goalTopProjDistCov});
 
                 // Measure the distance to the base of the goals
                 Plane groundPlane({ 0, 0, 1 }, { 0, 0, 0 });
@@ -320,7 +320,7 @@ namespace vision {
                         goalBaseProjDist * measurement_distance_covariance_factor,
                         measurement_bearing_variance,
                         measurement_elevation_variance }));
-                //measurements.push_back({ cartesianToSpherical(goalBaseProj), goalBaseProjDistCov});
+                measurements.push_back({ cartesianToSpherical(goalBaseProj), goalBaseProjDistCov});
 
 
                 // Measure the width based distance to the bottom
@@ -351,7 +351,7 @@ namespace vision {
                         goalHeightDist * measurement_distance_covariance_factor,
                         measurement_bearing_variance,
                         measurement_elevation_variance }));
-                // measurements.push_back({ cartesianToSpherical(goalHeight), goalHeightDistCov});
+                measurements.push_back({ cartesianToSpherical(goalHeight), goalHeightDistCov});
 
 
                 // // Ignore invalid measurements:
