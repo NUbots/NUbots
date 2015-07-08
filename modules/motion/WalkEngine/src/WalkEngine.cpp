@@ -104,6 +104,7 @@ namespace motion {
         }));
 
         updateHandle = on<Trigger<Every<UPDATE_FREQUENCY, Per<std::chrono::seconds>>>, With<Sensors>, Options<Single, Priority<NUClear::HIGH>>>([this](const time_t&, const Sensors& sensors) {
+                    NUClear::log(__FILE__, __LINE__, "updateHandle");
             update(sensors);
         }).disable();
 
@@ -115,15 +116,21 @@ namespace motion {
             velocity.angle() *= velocity.angle() > 0 ? velocityLimits(2,1) : -velocityLimits(2,0);
 
             setVelocity(velocity);
+                    NUClear::log(__FILE__, __LINE__, "WalkCommand", walkCommand.command.t());
+                    NUClear::log(__FILE__, __LINE__, "WalkCommand velocity", velocity.t());
+                    NUClear::log(__FILE__, __LINE__, "WalkCommand state", state);
         });
 
         on<Trigger<WalkStartCommand>>([this](const WalkStartCommand&) {
             start();
             emit(std::make_unique<ActionPriorites>(ActionPriorites { id, { 25, 10 }})); // TODO: config
+                    NUClear::log(__FILE__, __LINE__, "WalkStartCommand");
+                    NUClear::log(__FILE__, __LINE__, "updateHandle.enabled()", updateHandle.enabled());
         });
 
         on<Trigger<WalkStopCommand>>([this](const WalkStopCommand&) {
             requestStop();
+                    NUClear::log(__FILE__, __LINE__, "WalkStopCommand");
         });
 
         on<Trigger<Configuration<WalkEngine>>>([this](const Configuration<WalkEngine>& config) {
@@ -424,6 +431,9 @@ namespace motion {
 
         auto joints = calculateLegJointsTeamDarwin<DarwinModel>(leftFootTorso, rightFootTorso);
         auto waypoints = motionLegs(joints);
+
+                    NUClear::log(__FILE__, __LINE__, "motionLegs");
+
 
         auto arms = motionArms(phase);
         waypoints->insert(waypoints->end(), arms->begin(), arms->end());

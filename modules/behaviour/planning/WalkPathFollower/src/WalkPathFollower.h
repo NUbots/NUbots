@@ -42,6 +42,9 @@ namespace planning {
         /// @brief The instantaneous walk command required to start moving from currentState to targetState.
         WalkCommand walkBetween(const Transform2D& currentState, const Transform2D& targetState);
 
+        WalkCommand walkAbout(const Transform2D& currentState, const Transform2D& targetState);
+
+
         /// @brief Remove already visited states from the given path.
         /// Returns the number of states removed.
         int trimPath(const Transform2D& currentState, WalkPath& walkPath);
@@ -50,7 +53,7 @@ namespace planning {
         int closestPathIndex(const Transform2D& currentState, const WalkPath& walkPath);
 
         /// @brief The path the robot is expected to follow while following the given path.
-        WalkPath estimatedPath(const Transform2D& currentState, const WalkPath& walkPath, float timeStep, int simSteps, int sample);
+        WalkPath estimatedPath(const Transform2D& currentState, const WalkPath& walkPath, double timeStep, int simSteps, int sample);
 
         /// @brief Return whether currentState is close enough to visitState for us to say that the robot has 'visited' that state.
         bool isVisited(const Transform2D& currentState, const Transform2D& visitState);
@@ -63,8 +66,11 @@ namespace planning {
     private:
         struct Config {
             
-            float waypoint_visit_distance = 0.1;
+            double waypoint_visit_distance = 0.1;
             bool draw_estimated_path = false;
+            double walk_about_x_strafe = 0;
+            double walk_about_y_strafe = 0;
+            double walk_about_rotational_speed = 0;
 
         } cfg_;
     };

@@ -84,6 +84,10 @@ namespace strategy {
 
         });
 
+        // TODO: unhack
+        emit(std::make_unique<KickPlan>(KickPlan{{4.5, 0}}));
+
+
         // For checking last seen times
         on<Trigger<std::vector<LocalisationBall>>>([this] (const std::vector<LocalisationBall>& balls) {
             if(!balls.empty()) {
@@ -226,13 +230,12 @@ namespace strategy {
                 log("Runtime exception.");
             }
         });
-
+/*
     on<Trigger<std::vector<Self>>, With<FieldDescription>> ([this] (const std::vector<Self>& selfs, const FieldDescription& fieldDescription) {
-        
-        emit(std::make_unique<KickPlan>(KickPlan{getKickPlan(selfs, fieldDescription)}));
+        //emit(std::make_unique<KickPlan>(KickPlan{getKickPlan(selfs, fieldDescription)}));
     
     });
-
+*/
     }
 
     void SoccerStrategy::initialLocalisationReset(const FieldDescription& fieldDescription) {
@@ -396,7 +399,7 @@ namespace strategy {
         command->heading = {1,0};
         emit(std::move(command));
     }
-
+/*
     arma::vec2 SoccerStrategy::getKickPlan(const std::vector<Self>& selfs, const messages::support::FieldDescription& fieldDescription) {
         
         // Defines the box within in which the kick target is changed from the centre 
@@ -437,7 +440,7 @@ namespace strategy {
         }
         return newTarget;
     }
-
+*/
 } // strategy
 } // behaviours
 } // modules

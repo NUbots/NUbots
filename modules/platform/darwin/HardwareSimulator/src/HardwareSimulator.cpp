@@ -242,6 +242,7 @@ namespace darwin {
 
         // This trigger writes the servo positions to the hardware
         on<Trigger<std::vector<ServoTarget>>>([this](const std::vector<ServoTarget>& commands) {
+                    NUClear::log(__FILE__, __LINE__, "ServoTarget");
             for (auto& command : commands) {
 
                 // Calculate our moving speed

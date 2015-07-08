@@ -58,8 +58,12 @@ namespace planning {
         on<Trigger<Configuration<WalkPathFollower>>>([this] (const Configuration<WalkPathFollower>& config) {
             // Use configuration here from file WalkPathFollower.yaml
 
-            cfg_.waypoint_visit_distance = config["waypoint_visit_distance"].as<float>();
+            cfg_.waypoint_visit_distance = config["waypoint_visit_distance"].as<double>();
             cfg_.draw_estimated_path = config["draw_estimated_path"].as<bool>();
+
+            cfg_.walk_about_x_strafe = config["walk_about_xstrafe"].as<double>();        
+            cfg_.walk_about_y_strafe = config["walk_about_ystrafe"].as<double>();
+            cfg_.walk_about_rotational_speed = config["walk_about_rotational_speed"].as<double>();
 
         });
 
@@ -80,6 +84,7 @@ namespace planning {
             // Draw the robot's estimated path:
             if (cfg_.draw_estimated_path) {
                 if (selfs.empty() || currentPath.states.empty()) {
+                    NUClear::log(__FILE__, __LINE__, "empty self and current states");
                     return;
                 }
                 auto self = selfs.front();
@@ -123,12 +128,42 @@ namespace planning {
             int targetIndex = std::min(1, int(currentPath.states.size()));
             Transform2D targetState = currentPath.states[targetIndex]; // {3, 3, 3.14};
             emit(utility::nubugger::drawRectangle("WPF_TargetState", RotatedRectangle(targetState, {0.12, 0.17}), {1, 0, 0}));
+            
+            WalkCommand command;
 
+            // If we have reached our target
+            if (targetIndex == 0 && isVisited(currentState, targetState)) {
+                
+                // Angle between current heading and target heading
+                double walkAboutAngle = utility::math::angle::signedDifference(targetState.angle(), currentState.angle());    
+                
+                if (std::abs(walkAboutAngle) < M_PI*0.125) {
+                    // If heading is accurate, just walk forward:
+
+                    // Make a walk command to move towards the target state
+                    command = WalkCommand(walkBetween(currentState, targetState)); 
+                    NUClear::log(__FILE__, __LINE__, "Small angle, walkBetween");
+                } else {
+                    // Make a walk command to rotate about the target to face the target heading
+                    command = WalkCommand(walkAbout(currentState, targetState));             
+                    NUClear::log(__FILE__, __LINE__, "Large angle, walkAbout");
+                }
+
+            } else {
+                // Make a walk command to move towards the target state
+                command = WalkCommand(walkBetween(currentState, targetState));               
+                NUClear::log(__FILE__, __LINE__, "Far from target");
+            }
+            
             // Emit a walk command to move towards the target state:
-            auto command = std::make_unique<WalkCommand>(walkBetween(currentState, targetState));
             emit(std::move(std::make_unique<WalkStartCommand>()));
-            emit(std::move(command));
+            emit(std::move(std::make_unique<WalkCommand>(command)));
+
+                NUClear::log(__FILE__, __LINE__, "command", command.command.t());
+
         });
+
+        
     }
 
     int WalkPathFollower::trimPath(const Transform2D& currentState, WalkPath& walkPath) {
@@ -179,7 +214,6 @@ namespace planning {
         auto diff = arma::vec2(targetState.xy() - currentState.xy());
         auto dir = vectorToBearing(diff);
         double wcAngle = utility::math::angle::signedDifference(dir, currentState.angle());
-        
         // TODO: Consider the heading of targetState in planning.
 
         WalkCommand command;
@@ -187,7 +221,23 @@ namespace planning {
         return command;
     }
 
-    WalkPath WalkPathFollower::estimatedPath(const Transform2D& currentState, const WalkPath& walkPath, float timeStep, int simSteps, int sample) {
+    WalkCommand WalkPathFollower::walkAbout(const Transform2D& currentState, const Transform2D& targetState) {
+        
+        // Angle between current heading and target heading
+        double walkAboutAngle = utility::math::angle::signedDifference(targetState.angle(), currentState.angle());  
+        int angleSign = (walkAboutAngle < 0) ? -1 : 1;
+
+        arma::vec strafe = { std::max(cfg_.walk_about_x_strafe, 0.0), -angleSign * cfg_.walk_about_y_strafe };
+
+        arma::vec strafeClipped = arma::normalise(strafe) * std::min(1.0, arma::norm(strafe));
+
+        WalkCommand command;
+        command.command = {strafeClipped[0], strafeClipped[1], angleSign * cfg_.walk_about_rotational_speed}; //TODO make 20 seconds the variable update_frequency
+        return command;
+        
+    }
+
+    WalkPath WalkPathFollower::estimatedPath(const Transform2D& currentState, const WalkPath& walkPath, double timeStep, int simSteps, int sample) {
         if (sample <= 0) {
             sample = 1;
         }
