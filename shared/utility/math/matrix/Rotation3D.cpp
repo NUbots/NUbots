@@ -20,6 +20,7 @@
 #include "Rotation3D.h"
 #include "matrix.h"
 #include "utility/math/comparison.h"
+#include "utility/math/angle.h"
 
 #include <nuclear>
 
@@ -130,7 +131,7 @@ namespace matrix {
         // Gregory G. Slabaugh
         double roll, pitch, yaw; // psi, theta, phi
         if (!almost_equal(std::abs(at(2,0)), 1.0, 4)) {
-            pitch = -std::asin(at(2,0));
+            pitch = -utility::math::angle::asin_clamped(at(2,0));
             double cosPitch = std::cos(pitch);
             roll = std::atan2(at(2,1) / cosPitch, at(2,2) / cosPitch);
             yaw = std::atan2(at(1,0) / cosPitch, at(0,0) / cosPitch);

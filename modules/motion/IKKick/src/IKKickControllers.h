@@ -197,6 +197,10 @@ namespace motion{
 			SixDOFFrame lift_foot;
 			SixDOFFrame kick;
 			SixDOFFrame place_foot;
+
+			float follow_through;
+			float wind_up;
+			float foot_separation_margin;
 		public:
 			virtual void configure(const messages::support::Configuration<IKKickConfig>& config);
 			virtual void computeStartMotion(const messages::input::Sensors& sensors);

@@ -14,8 +14,6 @@ output:
 reaction_handles:
   # Overview information for the dashboard, designed for minimum bandwidth
   overview: true
-  # Ping packets
-  ping: true
   # Motor positions, orientation, etc.
   sensor_data: true
   # Raw image
@@ -30,21 +28,26 @@ reaction_handles:
   data_point: true
   # Field drawn objects such as an arrow, sphere, etc
   draw_objects: true
-  # Lookup table packets
-  lookup_table: true
-  # Lookup table delta packets (autoclassifier)
-  lookup_table_diff: true
   # Subsumption data
   subsumption: true
+  # GameController information
+  game_state: true
+  # Behaviour information
+  behaviour: true
+  # Statistics about reactions, modules and runtimes
+  reaction_statistics: false
+
+  #### things you probably wouldn't want to disable below ####
+
   # NUsight commands (download_lut, etc)
   command: true
   # Updates to enabled reaction handles
   reaction_handles: true
-  # GameController information
-  game_state: true
+  # Ping packets
+  ping: true
   # Configuration window
   configuration_state: true
-  # Behaviour information
-  behaviour: true
-  # Statistics about reactions, modules and runtimes
-  reaction_statistics: true
+  # Lookup table packets
+  lookup_table: true
+  # Lookup table delta packets (autoclassifier)
+  lookup_table_diff: true

@@ -201,7 +201,7 @@ namespace support {
             auto* objHandles = reactionHandles->add_handles();
             auto& value = handle.second;
             objHandles->set_type(handle.first);
-            objHandles->set_enabled(value.empty() ? false : value.front().enabled());
+            objHandles->set_enabled(value.empty() ? true : value.front().enabled());
         }
 
         send(message);

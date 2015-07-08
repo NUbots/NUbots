@@ -57,17 +57,22 @@ namespace Darwin {
         BUS_RESET_WAIT_TIME_uS = config["BUS_RESET_WAIT_TIME_uS"].as<int>();
     }
 
-    UART::UART(const char* name) {
+    UART::UART(const char* name) : devName(name) {
+        connect();
+    }
 
+    void UART::connect() {
         double baud = 1000000;  // (1mb/s)
 
-        fd = open(name, O_RDWR|O_NOCTTY|O_NONBLOCK);
+        fd = open(devName, O_RDWR|O_NOCTTY|O_NONBLOCK);
 
         // If we have a valid file handle, and were able to configure it correctly (custom baud)
         if (fd < 0 || !configure(baud)) {
             // There was an exception connecting
             throw std::runtime_error("There was an error setting up the serial connection to the CM730");
         }
+
+        NUClear::log<NUClear::DEBUG>("Device '", devName, "' successfully opened.");
     }
 
     bool UART::configure(double baud) {
@@ -109,13 +114,86 @@ namespace Darwin {
 
         // Set our custom speed in the system
         if (ioctl(fd, TIOCSSERIAL, &serinfo) < 0) {
+            throw std::runtime_error("There was an error configuring up the serial connection to the CM730");
             return false;
         }
 
         // Flush our connection to remove all existing data
         tcflush(fd, TCIFLUSH);
 
+        NUClear::log<NUClear::DEBUG>("Device '", devName, "' successfully configured.");
         return true;
+    }
+
+    size_t UART::writeBytes(const void* buf, size_t count) {
+        uint8_t reconnects = 0;
+        int bytesWritten = 0;
+
+        // We flush our buffer, just in case there was anything random in it
+        tcflush(fd,TCIFLUSH);
+                
+        while ((bytesWritten != (int)count) && (reconnects < 3)) {
+            bytesWritten = write(fd, buf, count);
+
+            if (bytesWritten < (int)count) {
+                reconnect();
+                reconnects++;
+            }
+        }
+
+        if (reconnects > 0) {
+            std::cout << "Bytes Written: " << (int)bytesWritten << " Reconnects: " << (int)reconnects << "\r" << std::endl;
+        }
+
+        assert(reconnects < 3);
+        (void) reconnects; // Make the compiler happy when NDEBUG is set
+
+        return(bytesWritten);
+    }
+
+    size_t UART::readBytes(void* buf, size_t count) {
+        uint8_t reconnects = 0;
+        int bytesRead = 0;
+
+        while ((bytesRead != (int)count) && (reconnects < 3)) {
+            bytesRead = read(fd, buf, count);
+
+            if ((errno == EAGAIN) || ((bytesRead < (int)count) && (bytesRead > 0))) {
+                break;
+            }
+
+            if (bytesRead < 0) {
+                reconnect();
+                reconnects++;
+            }
+        }
+
+        if (reconnects > 0) {
+            std::cout << "Bytes Read: " << (int)bytesRead << " Reconnects: " << (int)reconnects << " Data: ";
+            for (int i = 0; i < bytesRead; i++) {
+                std::cout << (int)(*((uint8_t *)buf + i)) << " ";
+            }
+            std::cout << "\r" << std::endl;
+        }
+
+        assert(reconnects < 3);
+        (void) reconnects; // Make the compiler happy when NDEBUG is set
+
+        return(bytesRead);
+    }
+
+    void UART::reconnect() {
+        std::cout << "Failed to read from '" << devName << "' Error: '" << strerror(errno) << "'\r" << std::endl;
+        NUClear::log<NUClear::WARN>("Failed to read from '", devName, "' Error: '", strerror(errno), "'");
+
+        // Close the connection.
+        close(fd);
+
+        // Sleep for a brief period to allow things to clean up and reconnect.
+        std::this_thread::sleep_for(std::chrono::seconds(1));
+
+        // Connect to the serial port again.
+        connect();
     }
 
     CommandResult UART::readPacket() {
@@ -134,14 +212,11 @@ namespace Darwin {
         timeout.tv_usec = PACKET_WAIT;
         for (int sync = 0; sync < 2;) {
             if (select(fd + 1, &connectionset, nullptr, nullptr, &timeout) == 1) {
-
                 uint8_t byte;
-                int bytesRead = read(fd, &byte, 1);
-
-                assert(bytesRead == 1);
-                (void) bytesRead; // Make the compiler happy when NDEBUG is set
-
-                sync = byte == 0xFF ? sync + 1 : 0;
+                
+                if (readBytes(&byte, 1) > 0) {
+                    sync = (byte == 0xFF) ? (sync + 1) : 0;
+                }
             }
             else {
                 // The result is pre initialized as a timeout
@@ -154,8 +229,7 @@ namespace Darwin {
         uint8_t* headerBytes = reinterpret_cast<uint8_t*>(&result.header);
         for (size_t done = 0; done < sizeof(Header);) {
             if (select(fd + 1, &connectionset, nullptr, nullptr, &timeout) == 1) {
-
-                done += read(fd, &headerBytes[done], sizeof(Header) - done);
+                done += readBytes(&headerBytes[done], sizeof(Header) - done);
             }
             else {
                 // The result is pre initialized as a timeout
@@ -164,15 +238,21 @@ namespace Darwin {
         }
 
         // Here we adjust our "length" to mean the length of the payload rather then the length of bytes after the length
-        int length = result.header.length - 2;
+        int length = 0;
+        if (result.header.length < 2) {
+            std::cout << "Length: " << (int)result.header.length << ", " << (int)(result.header.length - 2) << "\r" << std::endl;
+        }
+
+        else {
+            length = result.header.length - 2;
+        }
 
         // We now are now waiting for our data
         timeout.tv_usec = BYTE_WAIT * length;
         result.data.resize(length);
         for (int done = 0; done < length;) {
             if (select(fd + 1, &connectionset, nullptr, nullptr, &timeout) == 1) {
-
-                done += read(fd, &result.data[done], length - done);
+                done += readBytes(&result.data[done], length - done);
             }
             else {
                 // Set our packet header to timeout and return it
@@ -184,10 +264,11 @@ namespace Darwin {
         // We just read the checksum now
         timeout.tv_usec = 2000;
         if (select(fd + 1, &connectionset, nullptr, nullptr, &timeout) == 1) {
-
-            size_t bytesRead = read(fd, &result.checksum, 1);
-            assert(bytesRead == 1);
-            (void)bytesRead; // Make the compiler happy when NDEBUG is set
+            // If we fail to read the checksum then just assume corrupt data.
+            if (readBytes(&result.checksum, 1) != 1) {
+                result.header.errorcode |= ErrorCode::CORRUPT_DATA;
+                return result;
+            }
         }
         else {
             // If all we are missing is the checksum, just assume the data is corrupt
@@ -216,13 +297,7 @@ namespace Darwin {
         // Lock our mutex
         std::lock_guard<std::mutex> lock(mutex);
 
-        // We flush our buffer, just in case there was anything random in it
-        tcflush(fd, TCIFLUSH);
-
-        // Write the command as usual
-        size_t written = write(fd, command.data(), command.size());
-        assert(written == command.size());
-        (void)written; // Keep the compiler happy when NDEBUG is set
+        writeBytes(command.data(), command.size());
 
         // Read our responses for each of the packets
         for (int i = 0; i < responses; ++i) {
@@ -252,13 +327,7 @@ namespace Darwin {
         // Lock our mutex
         std::lock_guard<std::mutex> lock(mutex);
 
-        // We flush our buffer, just in case there was anything random in it
-        tcflush(fd,TCIFLUSH);
-
-        // Write the command as usual
-        size_t written = write(fd, command.data(), command.size());
-        assert(written == command.size());
-        (void) written; // Make the compiler happy when NDEBUG is set
+        writeBytes(command.data(), command.size());
 
         // There are no responses for broadcast commands
     }

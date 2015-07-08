@@ -22,6 +22,7 @@
 
 #include <cassert>
 #include <unistd.h>
+#include <errno.h>
 #include <termios.h>
 #include <stdint.h>
 #include <linux/serial.h>
@@ -93,6 +94,7 @@ namespace Darwin {
      */
     class UART {
     private:
+        const char* devName;
 
         // We will wait this long for an initial packet header
         int PACKET_WAIT= 10000;
@@ -113,6 +115,38 @@ namespace Darwin {
          * @return if the configuration was successful
          */
         bool configure(double baud);
+
+        /**
+         * @brief Connects to the serial port
+         */
+        void connect();
+
+        /**
+         * @brief Reconnects to the serial port
+         */
+        void reconnect();
+
+        /**
+         * @brief Reads a specified number of bytes from the serial port.
+         *
+         * @param buf Pointer to a location to store the read data.
+         *
+         * @param count Number of bytes to read from the serial port.
+         *
+         * @return the number of bytes.
+         */
+        size_t readBytes(void* buf, size_t count);
+
+        /**
+         * @brief Writes a specified number of bytes to the serial port.
+         *
+         * @param buf Pointer to the data to write.
+         *
+         * @param count Number of bytes to write to the serial port.
+         *
+         * @return the number of bytes.
+         */
+        size_t writeBytes(const void* buf, size_t count);
 
     public:
         static constexpr const char* CONFIGURATION_PATH = "DarwinPlatform.yaml";
