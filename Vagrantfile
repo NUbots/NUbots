@@ -16,10 +16,13 @@ Vagrant.configure("2") do |config|
   config.vm.provision :puppet do |puppet|
     puppet.manifests_path = "puppet/manifests"
     puppet.module_path = "puppet/modules"
-    # This manifest will install all dependencies using the NUbots deb file
+
+    # This manifest will install all dependencies using the NUbots deb file (faster, generally recommended)
     puppet.manifest_file  = "nubots.pp"
-    # This manifest will build all dependencies by source
+
+    # This manifest will build all dependencies by source (use this to update old dependencies, or to generate a new deb file)
     # puppet.manifest_file  = "nubots-build.pp"
+
     puppet.options = [
       # See https://docs.puppetlabs.com/references/3.6.2/man/agent.html#OPTIONS
       "--verbose",
