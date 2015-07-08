@@ -32,7 +32,7 @@ namespace support {
     using std::chrono::microseconds;
 
     void NUbugger::provideReactionStatistics() {
-        handles["reaction_statistics"].push_back(on<Trigger<NUClear::ReactionStatistics>>([this](const NUClear::ReactionStatistics& stats) {
+        handles[Message::REACTION_STATISTICS].push_back(on<Trigger<NUClear::ReactionStatistics>>([this](const NUClear::ReactionStatistics& stats) {
             Message message;
             message.set_type(Message::REACTION_STATISTICS);
             message.set_filter_id(1);

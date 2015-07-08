@@ -37,7 +37,7 @@ namespace support {
     using messages::localisation::Self;
 
     void NUbugger::provideLocalisation() {
-        handles["localisation"].push_back(on<Trigger<Every<100, std::chrono::milliseconds>>,
+        handles[Message::LOCALISATION].push_back(on<Trigger<Every<100, std::chrono::milliseconds>>,
            With<Optional<std::vector<Ball>>>,
            With<Optional<std::vector<Self>>>,
            Options<Single>>("Localisation Reaction (NUbugger.cpp)",

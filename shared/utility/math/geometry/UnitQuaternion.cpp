@@ -74,7 +74,8 @@ namespace geometry {
     }
 
     double UnitQuaternion::getAngle() const {
-    	return 2 * std::acos(real());
+        //Max and min prevent nand error, presumably due to computational limitations
+    	return 2 * std::acos(std::fmin(1,std::fmax(real(),-1)));
     }
 
     void UnitQuaternion::setAngle(double angle) {

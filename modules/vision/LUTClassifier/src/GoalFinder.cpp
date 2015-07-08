@@ -41,6 +41,10 @@ namespace modules {
                classify the mostly empty green below.
              */
 
+            // TODO cast lines from the highest screen edge point above the horizon
+            // Cast them at GOAL_LINE_SPACING below this point to the lowest point of the visual horizon
+            // Intersect them with the visual horizon to not overlap with them (this may make two lines)
+
             // Cast lines upward to find the goals
             for(int y = 0; y < int(image.height - 1); y += GOAL_LINE_SPACING) {
 

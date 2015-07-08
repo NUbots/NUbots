@@ -37,6 +37,8 @@ namespace geometry {
 
         Line();
 
+        Line(const arma::vec2& n, const double& d);
+
         Line(const arma::vec2& a, const arma::vec2& b);
 
         void setFromPoints(const arma::vec2& a, const arma::vec2& b);
@@ -54,6 +56,9 @@ namespace geometry {
         arma::vec2 orthogonalProjection(const arma::vec2& x) const;
 
         Line getParallelLineThrough(const arma::vec2& x) const;
+
+        arma::vec2 tangent() const;
+        arma::vec2 intersect(const Line& line) const;
 
         //Perform a least squares fit on a line, optionally using a distance
         //squared threshold away from the current model to filter candidates

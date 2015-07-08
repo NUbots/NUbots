@@ -22,6 +22,7 @@
 #include "messages/support/nubugger/proto/Message.pb.h"
 #include "messages/input/Sensors.h"
 
+#include "utility/support/proto_armadillo.h"
 #include "utility/time/time.h"
 
 namespace modules {
@@ -34,7 +35,7 @@ namespace support {
     void NUbugger::provideSensors() {
 
         // This trigger gets the output from the sensors (unfiltered)
-        handles["sensors"].push_back(on<Trigger<Sensors>, Options<Single, Priority<NUClear::LOW>>>([this](const Sensors& sensors) {
+        handles[Message::SENSOR_DATA].push_back(on<Trigger<Sensors>, Options<Single, Priority<NUClear::LOW>>>([this](const Sensors& sensors) {
 
             Message message;
 
@@ -75,28 +76,13 @@ namespace support {
             }
 
             // The gyroscope values (x,y,z)
-            auto* gyro = sensorData->mutable_gyroscope();
-            gyro->set_x(sensors.gyroscope[0]);
-            gyro->set_y(sensors.gyroscope[1]);
-            gyro->set_z(sensors.gyroscope[2]);
+            *sensorData->mutable_gyroscope() << sensors.gyroscope;
 
             // The accelerometer values (x,y,z)
-            auto* accel = sensorData->mutable_accelerometer();
-            accel->set_x(sensors.accelerometer[0]);
-            accel->set_y(sensors.accelerometer[1]);
-            accel->set_z(sensors.accelerometer[2]);
+            *sensorData->mutable_accelerometer() << sensors.accelerometer;
 
             // The orientation matrix
-            auto* orient = sensorData->mutable_orientation();
-            orient->mutable_x()->set_x(sensors.orientation(0,0));
-            orient->mutable_y()->set_x(sensors.orientation(1,0));
-            orient->mutable_z()->set_x(sensors.orientation(2,0));
-            orient->mutable_x()->set_y(sensors.orientation(0,1));
-            orient->mutable_y()->set_y(sensors.orientation(1,1));
-            orient->mutable_z()->set_y(sensors.orientation(2,1));
-            orient->mutable_x()->set_z(sensors.orientation(0,2));
-            orient->mutable_y()->set_z(sensors.orientation(1,2));
-            orient->mutable_z()->set_z(sensors.orientation(2,2));
+            *sensorData->mutable_orientation() << sensors.orientation;
 
             // TODO: these do not exist in Sensors.h, this needs reimplementing
             // The left FSR values

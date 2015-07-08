@@ -26,6 +26,7 @@
 #include "messages/vision/VisionObjects.h"
 
 #include "utility/time/time.h"
+#include "utility/support/proto_armadillo.h"
 
 namespace modules {
 namespace support {
@@ -42,7 +43,7 @@ namespace support {
     using messages::input::Image;
 
     void NUbugger::provideVision() {
-        handles["image"].push_back(on<Trigger<Image>, Options<Single, Priority<NUClear::LOW>>>([this](const Image& image) {
+        handles[Message::IMAGE].push_back(on<Trigger<Image>, Options<Single, Priority<NUClear::LOW>>>([this](const Image& image) {
 
             if (NUClear::clock::now() - last_image < max_image_duration) {
                 return;
@@ -71,7 +72,7 @@ namespace support {
             last_image = NUClear::clock::now();
         }));
 
-        handles["classified_image"].push_back(on<Trigger<ClassifiedImage<ObjectClass>>, Options<Single, Priority<NUClear::LOW>>>([this](const ClassifiedImage<ObjectClass>& image) {
+        handles[Message::CLASSIFIED_IMAGE].push_back(on<Trigger<ClassifiedImage<ObjectClass>>, Options<Single, Priority<NUClear::LOW>>>([this](const ClassifiedImage<ObjectClass>& image) {
 
             if (NUClear::clock::now() - last_classified_image < max_classified_image_duration) {
                 return;
@@ -85,8 +86,7 @@ namespace support {
             auto* imageData = message.mutable_classified_image();
 
             imageData->set_camera_id(0);
-            imageData->mutable_dimensions()->set_x(image.dimensions[0]);
-            imageData->mutable_dimensions()->set_y(image.dimensions[1]);
+            *imageData->mutable_dimensions() << image.dimensions;
 
             // Add the vertical segments to the list
             for(const auto& segment : image.verticalSegments) {
@@ -95,13 +95,8 @@ namespace support {
                 s->set_colour(uint(segment.first));
                 s->set_subsample(segment.second.subsample);
 
-                auto* start = s->mutable_start();
-                start->set_x(segment.second.start[0]);
-                start->set_y(segment.second.start[1]);
-
-                auto* end = s->mutable_end();
-                end->set_x(segment.second.end[0]);
-                end->set_y(segment.second.end[1]);
+                *s->mutable_start() << segment.second.start;
+                *s->mutable_end() << segment.second.end;
             }
 
             // Add the horizontal segments to the list
@@ -111,26 +106,17 @@ namespace support {
                 s->set_colour(uint(segment.first));
                 s->set_subsample(segment.second.subsample);
 
-                auto* start = s->mutable_start();
-                start->set_x(segment.second.start[0]);
-                start->set_y(segment.second.start[1]);
-
-                auto* end = s->mutable_end();
-                end->set_x(segment.second.end[0]);
-                end->set_y(segment.second.end[1]);
+                *s->mutable_start() << segment.second.start;
+                *s->mutable_end() << segment.second.end;
             }
 
             // Add in the actual horizon (the points on the left and right side)
             auto* horizon = imageData->mutable_horizon();
-            horizon->mutable_normal()->set_x(image.horizon.normal[0]);
-            horizon->mutable_normal()->set_y(image.horizon.normal[1]);
+            *horizon->mutable_normal() << image.horizon.normal;
             horizon->set_distance(image.horizon.distance);
 
             for(const auto& visualHorizon : image.visualHorizon) {
-                auto* vh = imageData->add_visual_horizon();
-
-                vh->set_x(visualHorizon[0]);
-                vh->set_y(visualHorizon[1]);
+                *imageData->add_visual_horizon() << visualHorizon;
             }
 
             send(message);
@@ -138,7 +124,7 @@ namespace support {
             last_classified_image = NUClear::clock::now();
         }));
 
-        handles["balls"].push_back(on<Trigger<std::vector<Ball>>, Options<Single, Priority<NUClear::LOW>>>([this] (const std::vector<Ball>& balls) {
+        handles[Message::VISION_OBJECT].push_back(on<Trigger<std::vector<Ball>>, Options<Single, Priority<NUClear::LOW>>>([this] (const std::vector<Ball>& balls) {
 
             Message message;
             message.set_type(Message::VISION_OBJECT);
@@ -155,15 +141,14 @@ namespace support {
 
                 auto* circle = ball->mutable_circle();
                 circle->set_radius(b.circle.radius);
-                circle->mutable_centre()->set_x(b.circle.centre[0]);
-                circle->mutable_centre()->set_y(b.circle.centre[1]);
+                *circle->mutable_centre() << b.circle.centre;
             }
 
             send(message);
 
         }));
 
-        handles["goals"].push_back(on<Trigger<std::vector<Goal>>, Options<Single, Priority<NUClear::LOW>>>([this] (const std::vector<Goal>& goals) {
+        handles[Message::VISION_OBJECT].push_back(on<Trigger<std::vector<Goal>>, Options<Single, Priority<NUClear::LOW>>>([this] (const std::vector<Goal>& goals) {
 
             Message message;
             message.set_type(Message::VISION_OBJECT);
@@ -183,21 +168,17 @@ namespace support {
                              : VisionObject::Goal::UNKNOWN);
 
                 auto* quad = goal->mutable_quad();
-                quad->mutable_tl()->set_x(g.quad.getTopLeft()[0]);
-                quad->mutable_tl()->set_y(g.quad.getTopLeft()[1]);
-                quad->mutable_tr()->set_x(g.quad.getTopRight()[0]);
-                quad->mutable_tr()->set_y(g.quad.getTopRight()[1]);
-                quad->mutable_bl()->set_x(g.quad.getBottomLeft()[0]);
-                quad->mutable_bl()->set_y(g.quad.getBottomLeft()[1]);
-                quad->mutable_br()->set_x(g.quad.getBottomRight()[0]);
-                quad->mutable_br()->set_y(g.quad.getBottomRight()[1]);
+                *quad->mutable_tl() << g.quad.getTopLeft();
+                *quad->mutable_tr() << g.quad.getTopRight();
+                *quad->mutable_bl() << g.quad.getBottomLeft();
+                *quad->mutable_br() << g.quad.getBottomRight();
             }
 
             send(message);
         }));
 
         // TODO: needs refactoring so that this is really only a vision line handle
-        handles["vision_lines"].push_back(on<Trigger<VisionObject>, Options<Single, Priority<NUClear::LOW>>>([this] (const VisionObject& visionObject) {
+        handles[Message::VISION_OBJECT].push_back(on<Trigger<VisionObject>, Options<Single, Priority<NUClear::LOW>>>([this] (const VisionObject& visionObject) {
 
             Message message;
             message.set_type(Message::VISION_OBJECT);
@@ -210,7 +191,7 @@ namespace support {
 
         }));
 
-        handles["lookuptable"].push_back(on<Trigger<LookUpTableDiff>, Options<Single, Priority<NUClear::LOW>>>([this] (const LookUpTableDiff& tableDiff) {
+        handles[Message::LOOKUP_TABLE_DIFF].push_back(on<Trigger<LookUpTableDiff>, Options<Single, Priority<NUClear::LOW>>>([this] (const LookUpTableDiff& tableDiff) {
             Message message;
             message.set_type(Message::LOOKUP_TABLE_DIFF);
             message.set_filter_id(0);

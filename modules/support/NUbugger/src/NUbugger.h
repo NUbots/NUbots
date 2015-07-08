@@ -51,7 +51,7 @@ namespace modules {
             bool listening = true;
 
             // Reaction Handles
-            std::map<std::string, std::vector<ReactionHandle>> handles;
+            std::map<messages::support::nubugger::proto::Message::Type, std::vector<ReactionHandle>> handles;
 
             std::map<std::string, uint> dataPointFilterIds;
             uint dataPointFilterId = 1;
@@ -78,6 +78,8 @@ namespace modules {
             void provideSensors();
             void provideVision();
 
+            void sendReactionHandles();
+
             void sendGameState(std::string event, const messages::input::gameevents::GameState& gameState);
             messages::input::proto::GameState::Data::Phase getPhase(const messages::input::gameevents::Phase& phase);
             messages::input::proto::GameState::Data::Mode getMode(const messages::input::gameevents::Mode& phase);
@@ -100,6 +102,9 @@ namespace modules {
 
             void run();
             void kill();
+
+            messages::support::nubugger::proto::Message::Type getMessageTypeFromString(std::string type_name);
+            std::string getStringFromMessageType(messages::support::nubugger::proto::Message::Type type);
         public:
             static constexpr const char* CONFIGURATION_PATH = "NUbugger.yaml";
             static constexpr const char* IGNORE_TAG = "IGNORE";
