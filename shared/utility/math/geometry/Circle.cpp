@@ -68,7 +68,7 @@ namespace geometry {
         return arma::accu(arma::square(point - centre)) - radiusSq;
     }
 
-    arma::vec2 Circle::orthogonalProjection(const arma::vec2& point) {
+    arma::vec2 Circle::orthogonalProjection(const arma::vec2& point) const {
         return arma::normalise(point - centre) * radius + centre;
     }
 

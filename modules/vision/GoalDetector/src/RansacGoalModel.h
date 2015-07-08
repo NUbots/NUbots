@@ -22,6 +22,7 @@
 
 #include <nuclear>
 
+#include <array>
 #include "utility/math/geometry/Line.h"
 
 namespace modules {
@@ -43,7 +44,7 @@ namespace vision {
 
         RansacGoalModel() {}
 
-        bool regenerate(const std::vector<DataPoint>& pts);
+        bool regenerate(const std::array<DataPoint, REQUIRED_POINTS>& pts);
 
         double calculateError(const DataPoint& p) const;
 

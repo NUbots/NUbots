@@ -23,7 +23,7 @@ namespace utility {
 namespace math {
 namespace ransac {
 
-  bool RansacCircleModel::regenerate(const std::vector<DataPoint>& points) {
+  bool RansacCircleModel::regenerate(const std::array<DataPoint, REQUIRED_POINTS>& points) {
         if (points.size() == REQUIRED_POINTS
             && !arma::all(points[0] == points[1])
             && !arma::all(points[0] == points[2])

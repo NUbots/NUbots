@@ -30,7 +30,7 @@
 #include "utility/math/geometry/Line.h"
 #include "utility/math/geometry/Plane.h"
 
-#include "utility/math/ransac/Ransac.h"
+#include "utility/math/ransac/NPartiteRansac.h"
 #include "utility/math/vision.h"
 #include "utility/math/coordinates.h"
 #include "messages/input/CameraParameters.h"
@@ -47,7 +47,7 @@ namespace vision {
     using Plane = utility::math::geometry::Plane<3>;
     using utility::math::geometry::Quad;
 
-    using utility::math::ransac::Ransac;
+    using utility::math::ransac::NPartiteRansac;
 
     using utility::math::vision::widthBasedDistanceToCircle;
     using utility::math::vision::projectCamToPlane;
@@ -119,13 +119,25 @@ namespace vision {
                 }
             }
 
+            // Partition our segments so that they are split between above and below the horizon
+            auto split = std::partition(std::begin(segments), std::end(segments), [image] (const RansacGoalModel::GoalSegment& segment) {
+                // Is the midpoint above or below the horizon?
+                return image.horizon.distanceToPoint(segment.left + segment.right / 2) > 0;
+            });
+
+            // Make an array of our partitions
+            std::array<std::vector<RansacGoalModel::GoalSegment>::iterator, RansacGoalModel::REQUIRED_POINTS + 1> points = {
+                segments.begin(),
+                split,
+                segments.end()
+            };
+
             // Ransac for goals
-            auto models = Ransac<RansacGoalModel>::fitModels(segments.begin()
-                                                           , segments.end()
-                                                           , MINIMUM_POINTS_FOR_CONSENSUS
-                                                           , MAXIMUM_ITERATIONS_PER_FITTING
-                                                           , MAXIMUM_FITTED_MODELS
-                                                           , CONSENSUS_ERROR_THRESHOLD);
+            auto models = NPartiteRansac<RansacGoalModel>::fitModels(points
+                                                                   , MINIMUM_POINTS_FOR_CONSENSUS
+                                                                   , MAXIMUM_ITERATIONS_PER_FITTING
+                                                                   , MAXIMUM_FITTED_MODELS
+                                                                   , CONSENSUS_ERROR_THRESHOLD);
 
             // Look at our results
             for (auto& result : models) {
@@ -150,14 +162,14 @@ namespace vision {
                 arma::running_stat<double> dist;
 
                 // Look through our segments to find endpoints
-                for(auto it = result.first; it != result.last; ++it) {
+                for(auto& point : result) {
                     // Project left and right onto midpoint keep top and bottom
-                    stat(mid.tangentialDistanceToPoint(it->left));
-                    stat(mid.tangentialDistanceToPoint(it->right));
+                    stat(mid.tangentialDistanceToPoint(point.left));
+                    stat(mid.tangentialDistanceToPoint(point.right));
 
                     // Work out our distance to the point for throwouts
-                    dist(mid.distanceToPoint(it->left));
-                    dist(mid.distanceToPoint(it->right));
+                    dist(mid.distanceToPoint(point.left));
+                    dist(mid.distanceToPoint(point.right));
                 }
 
                 double dSd = dist.stddev();
@@ -165,7 +177,7 @@ namespace vision {
                 double max = stat.min();
 
                 // Look through leftover segments to find better endpoints
-                for(auto it = models.back().last; it < segments.end(); ++it) {
+                for(auto it = models.back().end(); it < segments.end(); ++it) {
                     // Project onto midpoint
                     double tL = mid.tangentialDistanceToPoint(it->left);
                     double dL = mid.distanceToPoint(it->left);

@@ -37,6 +37,9 @@ namespace modules {
                 We first generate segments above and below that are 2x the width of the segment
              */
 
+            // TODO think of a better way of doing this? This murders the robot when it's near the goals
+            // Probably use bipartite ransac
+
             std::vector<ClassifiedImage<ObjectClass>::Segment> newSegments;
             auto goalSegments = classifiedImage.horizontalSegments.equal_range(ObjectClass::GOAL);
 

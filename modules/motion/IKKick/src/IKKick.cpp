@@ -71,7 +71,6 @@ namespace motion {
 
         on<Trigger<Configuration<IKKickConfig>>>([this] (const Configuration<IKKickConfig>& config){
             balancer.configure(config);
-            lifter.configure(config);
             kicker.configure(config);
 
             KICK_PRIORITY = config["kick_priority"].as<float>();
@@ -99,7 +98,6 @@ namespace motion {
 
         on<Trigger<KickCommand>>([this] (const KickCommand&) {
             // We want to kick!  
-            log("Kick Command");          
             emit(std::make_unique<WalkStopCommand>()); // Stop the walk
             updatePriority(KICK_PRIORITY);
         });
@@ -129,11 +127,6 @@ namespace motion {
             arma::vec3 targetTorso = sensors.kinematicsBodyToGround.i().transformPoint(command.target);
             // Put the ball position into support foot coordinates
             arma::vec3 targetSupportFoot = torsoPose.transformPoint(targetTorso);
-            // std::cout << "ExecuteKick: sensors.orientationBodyToGround = \n" << sensors.orientationBodyToGround <<std::endl;
-            // std::cout << "ExecuteKick: sensors.kinematicsBodyToGround = \n" << sensors.kinematicsBodyToGround <<std::endl;
-            // std::cout << "ExecuteKick: command.target = " << command.target.t() <<std::endl;
-            // std::cout << "ExecuteKick: targetTorso = " << targetTorso.t() <<std::endl;
-            // std::cout << "ExecuteKick: targetSupportFoot = " << targetSupportFoot.t() <<std::endl;
 
             // Put the goal from vision into torso coordinates
             arma::vec3 directionTorso = sensors.kinematicsBodyToGround.i().transformVector(command.direction);
@@ -146,7 +139,6 @@ namespace motion {
             goalPosition[2] = 0.0; //TODO: figure out why ball height is unreliable
 
             balancer.setKickParameters(supportFoot, ballPosition, goalPosition);
-            lifter.setKickParameters(supportFoot, ballPosition, goalPosition);
             kicker.setKickParameters(supportFoot, ballPosition, goalPosition);
             
             balancer.start(sensors);
@@ -166,23 +158,12 @@ namespace motion {
 
             //State checker
             if(balancer.isStable()){
-                lifter.start(sensors);
-            }
-
-            if(lifter.isStable()){
                 kicker.start(sensors);
             }
 
             if(kicker.isStable()){
-                kicker.stop();
-            }
-
-            if(kicker.isFinished()){
-                lifter.stop();
-            }
-
-            if(lifter.isFinished()){
-                balancer.stop();
+                kicker.stop(sensors);
+                balancer.stop(sensors);
             }
 
             if(balancer.isFinished()){
@@ -201,17 +182,13 @@ namespace motion {
                 kickFootGoal = supportFootPose.translate(arma::vec3({0, negativeIfKickRight * foot_separation, 0}));
             }
 
-            //Lift the foot
-            if(lifter.isRunning()){
-                kickFootGoal *= lifter.getFootPose(sensors);
-            }
-
             //Move foot to ball to kick
             if(kicker.isRunning()){
                 kickFootGoal *= kicker.getFootPose(sensors);
             }
 
             //Balance based on the IMU
+            
             if(feedback_active){
                 feedbackBalancer.balance(supportFootGoal,supportFoot,sensors);
             }

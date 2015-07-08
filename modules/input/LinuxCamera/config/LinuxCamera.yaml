@@ -1,4 +1,4 @@
-deviceID: /dev/video0
+deviceID: /dev/CAM
 
 # Picture brightness, or more precisely, the black level.
 # min=0 max=255 step=1 default=128

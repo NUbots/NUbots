@@ -80,8 +80,8 @@ message Sensors {
     }
 
     required int64 timestamp = 1;
-    optional fvec3 accelerometer = 2;
-    optional fvec3 gyroscope = 3;
+    optional vec3 accelerometer = 2;
+    optional vec3 gyroscope = 3;
     optional mat33 orientation = 4;
     optional vec3 left_FSR = 5;
     optional vec3 right_FSR = 6;

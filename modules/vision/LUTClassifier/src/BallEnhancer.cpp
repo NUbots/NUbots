@@ -44,6 +44,9 @@ namespace modules {
                 size needed to ensure that the ball is totally covered.
              */
 
+            // Need a better way of finding balls, this is garbage it won't be able to histogram with so much white
+            //
+
             std::vector<arma::ivec2> points;
             auto& sensors = *classifiedImage.sensors;
 

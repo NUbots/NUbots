@@ -146,7 +146,7 @@ namespace darwin {
         return sensors;
     }
 
-    HardwareIO::HardwareIO(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)), darwin("/dev/ttyUSB0") {
+    HardwareIO::HardwareIO(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)), darwin("/dev/CM730") {
 
         on<Trigger<Configuration<Darwin::UART>>>([this](const Configuration<Darwin::UART>& config){
             darwin.setConfig(config);
@@ -183,8 +183,7 @@ namespace darwin {
                     }
                     else {
                         // If our torque was disabled but is now enabled
-                        if(!servoState[i].torqueEnabled &&
-                         !(isnan(servoState[i].goalPosition) || servoState[i].torque == 0)) {
+                        if(!servoState[i].torqueEnabled && !isnan(servoState[i].goalPosition) && servoState[i].torque != 0) {
                             servoState[i].torqueEnabled = true;
                             darwin[i + 1].write(Darwin::MX28::Address::TORQUE_ENABLE, true);
                         }

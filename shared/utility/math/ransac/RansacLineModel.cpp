@@ -23,7 +23,7 @@ namespace utility {
 namespace math {
 namespace ransac {
 
-    bool RansacLineModel::regenerate(const std::vector<DataPoint>& pts) {
+    bool RansacLineModel::regenerate(const std::array<DataPoint, REQUIRED_POINTS>& pts) {
         if(pts.size() == REQUIRED_POINTS && !arma::all(pts[0] == pts[1])) {
             setFromPoints(pts[0], pts[1]);
             return true;

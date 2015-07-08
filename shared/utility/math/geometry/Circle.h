@@ -44,7 +44,7 @@ namespace geometry {
 
         double squaresDifference(const arma::vec2& point) const;
 
-        arma::vec2 orthogonalProjection(const arma::vec2& x);
+        arma::vec2 orthogonalProjection(const arma::vec2& x) const;
 
         //Perform a least squares fit on a line, optionally using a distance
         //squared threshold away from the current model to filter candidates

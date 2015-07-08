@@ -84,7 +84,7 @@ message Message {
 
     message ReactionHandles {
         message Handle {
-            required string name = 1;
+            required Type type = 1;
             required bool enabled = 2;
         }
 

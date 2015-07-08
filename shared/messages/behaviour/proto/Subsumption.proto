@@ -20,36 +20,59 @@
 package messages.behaviour.proto;
 
 message Subsumption {
+
     enum Type {
         ACTION_REGISTER = 1;
         ACTION_STATE = 2;
+        ACTION_PRIORITY_CHANGE = 3;
+    }
+
+    enum Limb {
+        LEFT_LEG = 1;
+        RIGHT_LEG = 2;
+        LEFT_ARM = 3;
+        RIGHT_ARM = 4;
+        HEAD = 5;
+    }
+
+    message LimbSet {
+
+        required float priority = 1;
+        repeated Limb limbs = 2;
+
+    }
+
+    message ActionRegister {
+
+        required uint32 id = 1;
+        required string name = 2;
+        repeated LimbSet limb_set = 3;
+
+    }
+
+    message ActionStateChange {
+
+        enum State {
+            START = 1;
+            KILL = 2;
+        }
+
+        required State state = 1;
+        required string name = 2;
+        repeated Limb limbs = 3;
+    }
+
+    message ActionPriorites {
+
+        required uint32 id = 1;
+        repeated float priorities = 2;
+
     }
 
     required Type type = 1;
 
     optional ActionRegister action_register = 2;
     optional ActionStateChange action_state_change = 3;
-}
+    optional ActionPriorites action_priority_change = 4;
 
-message ActionRegister {
-    required uint32 id = 1;
-    required string name = 2;
-    repeated LimbSet limb_set = 3;
-}
-
-message ActionStateChange {
-
-    enum State {
-        START = 1;
-        KILL = 2;
-    }
-
-    required State state = 1; 
-    required string name = 2;
-    repeated uint32 limbs = 3;
-}
-
-message LimbSet {
-    required float priority = 1;
-    repeated uint32 limbs = 2;
 }

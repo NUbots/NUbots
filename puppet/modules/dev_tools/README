@@ -1,0 +1,3 @@
+installer
+
+This module installs things from source using either autotools cmake, or make.

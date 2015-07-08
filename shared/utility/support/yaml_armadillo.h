@@ -25,7 +25,6 @@
 #include <yaml-cpp/yaml.h>
 #include "utility/support/yaml_expression.h"
 
-
 namespace YAML {
 
     template<>
