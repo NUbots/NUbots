@@ -104,7 +104,6 @@ namespace motion{
         float liftClipDistance = (liftGoal[1] - clippingPlaneY);
         if(signSupportFootPosY * liftClipDistance > 0){
             //Clip
-            
             liftGoal.rows(0,1) = liftGoal.rows(0,1) * clippingPlaneY / liftGoal[1];
         }
 

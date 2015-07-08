@@ -1,3 +1,4 @@
+
 kick_priority: 30
 execution_priority: 40
 
@@ -40,7 +41,7 @@ kick_frames:
   lift_foot:
     pos: [-0.05,0,0.05]
     orientation: [0,0,0]
-    duration: 0.1
+    duration: 1  
   kick:
     pos: [0,0,0]
     orientation: [0,0,0]
@@ -49,6 +50,5 @@ kick_frames:
     pos: [0,0,0.01]
     orientation: [0,0,0]
     duration: 0.5
-
 
 
