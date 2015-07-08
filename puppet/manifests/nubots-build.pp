@@ -80,7 +80,7 @@ node nubotsvm {
   package { 'libboost-date-time-dev': }
 
   installer { 'ompl':           url => 'https://github.com/ompl/ompl/archive/master.tar.gz',
-                                args => "-DOMPL_BUILD_DEMOS -DOMPL_BUILD_PYBINDINGS -DOMPL_BUILD_PYTESTS",
+                                args => "-DOMPL_BUILD_DEMOS=OFF -DOMPL_BUILD_PYBINDINGS=OFF -DOMPL_BUILD_PYTESTS=OFF -DCMAKE_INSTALL_LIBDIR=lib",
                                 environment => [ 'CXXFLAGS=-std=c++11' ],
                                 require => [ Installer['eigen3'],
                                              Package['libboost-system-dev'],

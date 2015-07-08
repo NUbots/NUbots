@@ -14,7 +14,7 @@ node nubotsvm {
   package { 'libboost-program-options-dev': }
   package { 'libboost-test-dev': }
   package { 'libboost-chrono-dev': }
-  package { 'libboost-date-time-de': }
+  package { 'libboost-date-time-dev': }
 
   # We need dev tools
   class {'dev_tools': }
@@ -36,6 +36,6 @@ node nubotsvm {
                 Package['libboost-program-options-dev'],
                 Package['libboost-test-dev'],
                 Package['libboost-chrono-dev'],
-                Package['libboost-date-time-de']]
+                Package['libboost-date-time-dev']]
   }
 }
