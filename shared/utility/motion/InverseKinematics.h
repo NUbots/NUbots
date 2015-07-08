@@ -101,12 +101,13 @@ namespace kinematics {
                                           << 0<< 0<<-1<< 0<< arma::endr
                                           << 0<< 0<< 0<< 1;
         //Rotate input position from standard robot coords to foot coords
-        //NUClear::log<NUClear::DEBUG>("Target Original\n", target);
+        // NUClear::log<NUClear::DEBUG>("Target Original\n", target);
         arma::vec4 fourthColumn = inputCoordinatesToCalcCoordinates * target.col(3);
         target = inputCoordinatesToCalcCoordinates * target * inputCoordinatesToCalcCoordinates.t();
         target.col(3) = fourthColumn;
-        //NUClear::log<NUClear::DEBUG>("Target Final\n", target);
+        // NUClear::log<NUClear::DEBUG>("Target Final\n", target);
 
+        //swap legs if needed
         if (limb != messages::input::LimbID::LEFT_LEG) {
             target.submat(0,0,2,2) = arma::mat33{-1,0,0, 0,1,0, 0,0,1} * target.submat(0,0,2,2);
             target.submat(0,0,2,0) *= -1;
@@ -120,26 +121,26 @@ namespace kinematics {
         arma::vec3 anklePos = target.submat(0,3,2,3);
 
         arma::vec3 hipOffset = {LENGTH_BETWEEN_LEGS / 2.0, HIP_OFFSET_X, DISTANCE_FROM_BODY_TO_HIP_JOINT};
-
         
         arma::vec3 targetLeg = anklePos - hipOffset;
 
-        float length = arma::norm(targetLeg, 2);
+        float length = arma::norm(targetLeg);
         float maxLegLength = UPPER_LEG_LENGTH + LOWER_LEG_LENGTH;
         if (length > maxLegLength){
-            NUClear::log<NUClear::WARN>("InverseKinematics::calculateLegJoints : !!! WARNING !!! Requested position beyond leg reach.\n Scaling back requested vector from length ",length, " to ", maxLegLength);
-            targetLeg *= (maxLegLength)/length;
-            length = maxLegLength;
+            // NUClear::log<NUClear::WARN>("InverseKinematics::calculateLegJoints : !!! WARNING !!! Requested position beyond leg reach.\n Scaling back requested vector from length ",length, " to ", maxLegLength);
+            targetLeg = targetLeg * (maxLegLength)/length;
+            length = arma::norm(targetLeg);
         }
-        ////NUClear::log<NUClear::DEBUG>("Length: ", length);
+        // NUClear::log<NUClear::DEBUG>("Length: ", length);
         float sqrLength = length * length;
         float sqrUpperLeg = UPPER_LEG_LENGTH * UPPER_LEG_LENGTH;
         float sqrLowerLeg = LOWER_LEG_LENGTH * LOWER_LEG_LENGTH;
 
         float cosKnee = (sqrUpperLeg + sqrLowerLeg - sqrLength) / (2 * UPPER_LEG_LENGTH * LOWER_LEG_LENGTH);
-       // //NUClear::log<NUClear::DEBUG>("Cos Knee: ", cosKnee);
+       // NUClear::log<NUClear::DEBUG>("Cos Knee: ", cosKnee);
         // TODO: check if cosKnee is between 1 and -1
-        knee = acos(cosKnee);
+        knee = std::acos(std::fmax(std::fmin(cosKnee,1),-1));
+       // NUClear::log<NUClear::DEBUG>("Knee: ", knee);
 
         float cosLowerLeg = (sqrLowerLeg + sqrLength - sqrUpperLeg) / (2 * LOWER_LEG_LENGTH * length);
         // TODO: check if cosLowerLeg is between 1 and -1
