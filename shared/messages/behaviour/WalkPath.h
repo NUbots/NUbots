@@ -22,11 +22,12 @@
 
 #include <vector>
 #include "utility/math/matrix/Transform2D.h"
+#include "messages/behaviour/MotionCommand.h"
 
 namespace messages {
 namespace behaviour {
 
-	struct WalkPath { 
+	struct WalkPath {
 		// Sequence of robot states that form a path:
 		std::vector<utility::math::matrix::Transform2D> states;
 
@@ -36,6 +37,9 @@ namespace behaviour {
 		// The start and goal states used for planning:
 		utility::math::matrix::Transform2D start;
 		utility::math::matrix::Transform2D goal;
+
+		// The motion command for which this plan was generated:
+		messages::behaviour::MotionCommand command;
 	};
 
 }

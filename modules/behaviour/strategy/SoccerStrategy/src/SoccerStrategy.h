@@ -67,6 +67,8 @@ namespace strategy {
         bool pickedUp(const messages::input::Sensors& sensors);
         bool penalised();
         bool ballDistance(const messages::localisation::Ball& ball);
+        arma::vec2 getKickPlan(const std::vector<messages::localisation::Self>& selfs, const messages::support::FieldDescription& fieldDescription);
+    
     public:
         static constexpr const char* CONFIGURATION_PATH = "SoccerStrategy.yaml";
 

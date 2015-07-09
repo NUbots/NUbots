@@ -24,6 +24,7 @@
 #include "messages/support/FieldDescription.h"
 #include "messages/localisation/FieldObject.h"
 #include "messages/vision/VisionObjects.h"
+#include "messages/behaviour/MotionCommand.h"
 #include "messages/behaviour/WalkPath.h"
 #include "messages/behaviour/KickPlan.h"
 #include "utility/nubugger/NUhelpers.h"
@@ -44,9 +45,8 @@ namespace planning {
 
     using LocalisationBall = messages::localisation::Ball;
     using Self = messages::localisation::Self;
-    using VisionBall = messages::vision::Ball;
-    using VisionObstacle = messages::vision::Obstacle;
 
+    using messages::behaviour::MotionCommand;
     using messages::behaviour::KickPlan;
 
     namespace ob = ompl::base;
@@ -80,19 +80,29 @@ namespace planning {
         on<With<Configuration<OMPLPathPlanner>>, Trigger<FieldDescription>>("OMPLPathPlanner Configuration", updateConfigLambda);
         on<Trigger<Configuration<OMPLPathPlanner>>, With<FieldDescription>>("OMPLPathPlanner Configuration", updateConfigLambda);
 
+        // Enable/Disable path generation based on the current motion command.
+        on<Trigger<MotionCommand>>([this] (const MotionCommand& command) {
+            if (command.type == MotionCommand::Type::WalkToState ||
+                command.type == MotionCommand::Type::BallApproach) {
+                generatePathReaction.enable();
+            } else {
+                generatePathReaction.disable();
+            }
+        });
 
-        on<Trigger<Every<10, Per<std::chrono::seconds>>>,
+        generatePathReaction = on<Trigger<Every<10, Per<std::chrono::seconds>>>,
+            With<MotionCommand>,
             With<LocalisationBall>,
             With<std::vector<Self>>,
             With<KickPlan>,
-            With<Optional<std::vector<VisionObstacle>>>,
             Options<Sync<OMPLPathPlanner>, Single>
            >("Generate new path plan", [this] (
              const NUClear::clock::time_point& current_time,
+             const MotionCommand& command,
              const LocalisationBall& ball,
              const std::vector<Self>& selfs,
-             const KickPlan& kickPlan,
-             const std::shared_ptr<const std::vector<VisionObstacle>>&/* robots*/) {
+             const KickPlan& kickPlan
+             ) {
 
             // Ensure that we have robot positions:
             if (selfs.empty()) {
@@ -102,8 +112,8 @@ namespace planning {
 
             // Enforce the planning interval:
             // TODO: Override the planning interval if the environment has changed significantly.
-            // (or when a certain message is received?)
-            auto now = NUClear::clock::now();
+            // (or if command is marked as 'urgent'?)
+            auto now = NUClear::clock::now(); // TODO: use current_time instead.
             auto msSinceLastPlan = std::chrono::duration_cast<std::chrono::microseconds>(now - lastPlanningTime).count();
             double timeSinceLastPlan = 1e-6 * static_cast<double>(msSinceLastPlan);
             if (std::abs(timeSinceLastPlan) < cfg_.planning_interval) {
@@ -112,23 +122,46 @@ namespace planning {
             lastPlanningTime = now;
 
             // Generate a new path:
-            // TODO: Support the old WalkPlan interface, allowing paths to points other than the ball.
-            // (still handle the ball offset automatically as below)
+            
+            // Use the robot's current position estimate as the start state:
             Transform2D start = {self.position, vectorToBearing(self.heading)};
-            Transform2D localGoal = {ball.position, 0};
 
-            // Create the ball space (origin at ball pos, and x-axis along target kick direction):
-            arma::vec2 ballPos = start.localToWorld(localGoal).xy();
-            arma::vec2 goalHeading = kickPlan.target - ballPos;
-            double goalBearing = vectorToBearing(goalHeading);
-            Transform2D ballSpace = {ballPos, goalBearing};
+            // Create the 'ball space' (origin at ball pos, and x-axis along
+            // target kick direction) used to determine the ball obstacle and
+            // possibly the goal position:
+            Transform2D localBall = {ball.position, 0};
+            arma::vec2 globalBall = start.localToWorld(localBall).xy();
+            Transform2D ballSpace = Transform2D::lookAt(globalBall, kickPlan.target);
             
             // Determine the goal position and heading:
-            // TODO: Clean this up.
-            arma::vec2 ballSpaceGoal = arma::vec2({-0.5 * pathPlanner.cfg_.robot_footprint_dimensions(0), 0})
-                                     + arma::vec2({-pathPlanner.ballRadius, 0})
-                                     + cfg_.target_offset;
-            Transform2D goal = ballSpace.localToWorld({ballSpaceGoal, 0});
+            Transform2D goal;
+            switch (command.type) {
+                case MotionCommand::Type::WalkToState: {
+                    goal = command.goalState;
+                } break;
+
+                case MotionCommand::Type::BallApproach: {
+                    // Calculate the goal position which places the robot in a
+                    // position to kick the ball toward the kicktarget with a
+                    // forward kick.
+                    // TODO: Clean this up (shouldn't be accessing path planner state).
+                    arma::vec2 ballSpaceGoal = arma::vec2({-0.5 * pathPlanner.cfg_.robot_footprint_dimensions(0), 0})
+                                         + arma::vec2({-pathPlanner.ballRadius, 0})
+                                         + cfg_.target_offset;
+                    goal = ballSpace.localToWorld({ballSpaceGoal, 0});
+                } break;
+
+                default: {
+                    NUClear::log<NUClear::WARN>("OMPLPathPlanner: Unexpected MotionCommand::Type: ", int(command.type));
+                    return;
+                }
+            }
+
+            // Plan the path:
+            // TODO (not too important): Detect the case where the initial
+            // state is invalid, and handle it more intelligently.
+            auto path = pathPlanner.obstacleFreePathBetween(start, goal, ballSpace, cfg_.planning_time_limit);
+
 
             // Draw obstacles:
             emit(utility::nubugger::drawCircle("OMPLPP_BallShadow", Circle(pathPlanner.ballRadius, ballSpace.xy()), 0.123, {1, 0.8, 0}));
@@ -139,11 +172,6 @@ namespace planning {
                 str << "OMPLPP_GoalObstacle" << (obsNum++);
                 emit(utility::nubugger::drawCircle(str.str(), obs, 0.012, {0.6, 0.4, 0.2}));
             }
-
-            // Plan the path:
-            // TODO (not too important): Detect when the initial state is invalid, and handle it more intelligently.
-            auto path = pathPlanner.obstacleFreePathBetween(start, goal, ballSpace, cfg_.planning_time_limit);
-
             // Emit the new path to NUSight:
             if (path != nullptr) {
                 emit(utility::nubugger::drawPath("OMPLPP_Path", path->states, 0.1, {1,0.5,1}));
@@ -155,16 +183,12 @@ namespace planning {
 
             // Emit the new path:
             if (path != nullptr) {
+                path->command = command;
                 emit(std::move(path));
             } else {
                 NUClear::log("OMPLPP: Returned path was a nullptr.");
             }
-        });
-
-        // on<Trigger<messages::behaviour::WalkStrategy>,
-        //    Options<Sync<OMPLPathPlanner>>>([this] (const messages::behaviour::WalkStrategy& cmd) {
-        //     //reset hysteresis variables when a command changes
-        // });
+        }).disable();
     }
 }
 }

@@ -158,11 +158,8 @@ namespace modules {
             });
 
             on<Trigger<Every<90, Per<std::chrono::seconds>>>, Options<Single, Sync<Controller>, Priority<NUClear::HIGH>>>("Controller Update Waypoints",[this] (const time_t& now) {
-
                 std::list<ServoID> emptiedQueues;
                 std::unique_ptr<std::vector<ServoTarget>> waypoints;
-
-
 
                 for(auto& queue : commandQueues) {
 

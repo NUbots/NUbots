@@ -92,8 +92,9 @@ arma::vec BallModel::observationDifference(const arma::vec& a,
 
 arma::vec::fixed<BallModel::size> BallModel::limitState(
     const arma::vec::fixed<BallModel::size>& state) {
-
-    return state;
+    auto new_state = state;
+    new_state.rows(kVx,kVy) = arma::vec({0,0});
+    return new_state;
 }
 
 arma::mat::fixed<BallModel::size, BallModel::size> BallModel::processNoise() {

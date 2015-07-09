@@ -18,7 +18,7 @@ node nubotsvm {
 
   # We need dev tools
   class {'dev_tools': }
-  $toolchain_url = "http://nubots.net/debs/nubots-toolchain1.0.2.deb"
+  $toolchain_url = "http://nubots.net/debs/nubots-toolchain1.0.3.deb"
 
   # Get and install our toolchain
   wget::fetch { "nubots_toolchain":

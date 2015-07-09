@@ -199,6 +199,7 @@ namespace support {
                     break;
 
                 case MotionType::MOTION:
+                
                 //Update based on walk engine
                     if(walkCommand && !kicking) {
                         world.robotVelocity.rows(0,1) = sensors.odometry;

@@ -30,10 +30,11 @@ ADD_ROLE(
     behaviour::skills::FallingRelax
     behaviour::skills::Getup
     behaviour::skills::HeadBehaviourSoccer
+    behaviour::skills::WalkPathFollower # Follows WalkPaths.
+    behaviour::skills::DirectWalkController
     behaviour::planning::KickPlanner
     #behaviour::planning::SimpleWalkPathPlanner
     behaviour::planning::OMPLPathPlanner  # Creates WalkPaths.
-    behaviour::planning::WalkPathFollower # Follows WalkPaths.
     #behaviour::strategy::KickAtGoal
     behaviour::strategy::SoccerStrategy
 

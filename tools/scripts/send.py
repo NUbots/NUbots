@@ -25,6 +25,9 @@ target_dir = '{0}@{1}:/home/{0}/'.format(username, robot_ip)
 files = glob.glob('bin/*')
 call(['rsync', '-avzP', '--checksum', '-e ssh'] + files + [target_dir])
 
+# Get all of our required shared libraries in our toolchain and send them
+libs = glob.glob('/nubots/toolchain/lib/*.so*')
+call(['rsync', '-avzP', '--checksum', '-e ssh'] + libs + [target_dir + 'toolchain'])
 
 # Overwrite configuration files
 if config in ['overwrite', 'o']:
