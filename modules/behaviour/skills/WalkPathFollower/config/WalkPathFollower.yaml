@@ -7,3 +7,7 @@ waypoint_visit_distance: 0.1
 # Simulates and draws the path the robot is expected to take while attempting
 # to follow the current path:
 draw_estimated_path: false
+
+walk_about_xstrafe: 0 #m
+walk_about_ystrafe: 0.03 #m
+walk_about_rotational_speed: 1 #rad/sec

@@ -40,6 +40,8 @@ namespace planning {
     	PathPlanner pathPlanner;
         NUClear::clock::time_point lastPlanningTime;
 
+        ReactionHandle generatePathReaction;
+
 		struct Config {
             
             float planning_interval = 5;

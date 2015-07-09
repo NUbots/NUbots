@@ -27,7 +27,7 @@
 #include "messages/input/Sensors.h"
 #include "messages/localisation/FieldObject.h"
 #include "messages/vision/VisionObjects.h"
-#include "messages/behaviour/WalkStrategy.h"
+#include "messages/behaviour/MotionCommand.h"
 
 
 namespace modules {
