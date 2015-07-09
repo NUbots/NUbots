@@ -11,7 +11,7 @@ Include this module to allow the robot to plan a walk command for a walk strateg
 
 ## Consumes
 
-* `messages::behaviour::WalkStrategy` containing the walk type
+* `messages::behaviour::MotionCommand` containing the walk type
 * `messages::localisation::*` containing navigation data
 
 ## Emits

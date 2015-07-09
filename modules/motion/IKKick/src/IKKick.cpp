@@ -67,7 +67,7 @@ namespace motion {
 
     IKKick::IKKick(std::unique_ptr<NUClear::Environment> environment)
         : Reactor(std::move(environment))
-        , id(size_t(this) * size_t(this) - size_t(this)) {
+        , subsumptionId(size_t(this) * size_t(this) - size_t(this)) {
 
         on<Trigger<Configuration<IKKickConfig>>>([this] (const Configuration<IKKickConfig>& config){
             balancer.configure(config);
@@ -98,7 +98,10 @@ namespace motion {
 
         on<Trigger<KickCommand>>([this] (const KickCommand&) {
             // We want to kick!  
-            emit(std::make_unique<WalkStopCommand>()); // Stop the walk
+            
+            log("Kick Command");          
+            emit(std::make_unique<WalkStopCommand>(subsumptionId)); // Stop the walk
+
             updatePriority(KICK_PRIORITY);
         });
 
@@ -213,7 +216,7 @@ namespace motion {
 
             //Push back each servo command
             for (auto& joint : joints) {
-                waypoints->push_back({ id, time, joint.first, joint.second, gain_legs, torque});
+                waypoints->push_back({ subsumptionId, time, joint.first, joint.second, gain_legs, torque});
             }
 
             //Send message
@@ -230,7 +233,7 @@ namespace motion {
         });
 
         emit<Scope::INITIALIZE>(std::make_unique<RegisterAction>(RegisterAction {
-            id,
+            subsumptionId,
             "IK Kick",
             { std::pair<float, std::set<LimbID>>(0, { LimbID::LEFT_LEG, LimbID::RIGHT_LEG, LimbID::LEFT_ARM, LimbID::RIGHT_ARM }) },
             [this] (const std::set<LimbID>&) {
@@ -245,7 +248,7 @@ namespace motion {
     }
 
     void IKKick::updatePriority(const float& priority) {
-        emit(std::make_unique<ActionPriorites>(ActionPriorites { id, { priority }}));
+        emit(std::make_unique<ActionPriorites>(ActionPriorites { subsumptionId, { priority }}));
     }
 
 

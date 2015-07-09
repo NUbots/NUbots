@@ -87,8 +87,9 @@ namespace motion {
             WALKING
         };
 
-        /// Subsumption ID key to access motors
-        const size_t id;
+        /// Current subsumption ID key to access motors.
+        size_t subsumptionId = 1;
+
         // Reaction handle for the main update loop, disabling when not moving will save unnecessary CPU
         ReactionHandle updateHandle;
 
@@ -96,8 +97,8 @@ namespace motion {
 
         // The state of the current walk
         State state;
-        // Whether subsumption has currently interrupted the walk engine
-        bool interrupted;
+        // // Whether subsumption has currently interrupted the walk engine
+        // bool interrupted;
         // TODO: ???
         bool startFromStep;
         // The time when the current step begun

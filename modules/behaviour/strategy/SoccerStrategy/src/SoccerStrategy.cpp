@@ -22,7 +22,7 @@
 #include "messages/input/gameevents/GameEvents.h"
 #include "messages/behaviour/LookStrategy.h"
 #include "messages/behaviour/Look.h"
-#include "messages/behaviour/WalkStrategy.h"
+#include "messages/behaviour/MotionCommand.h"
 #include "messages/behaviour/KickPlan.h"
 #include "messages/behaviour/SoccerObjectPriority.h"
 #include "messages/support/FieldDescription.h"
@@ -35,6 +35,7 @@
 
 #include "utility/time/time.h"
 #include "utility/localisation/transform.h"
+#include "utility/math/matrix/Transform2D.h"
 
 namespace modules {
 namespace behaviour {
@@ -48,11 +49,9 @@ namespace strategy {
     using LocalisationBall = messages::localisation::Ball;
     using LocalisationSelf = messages::localisation::Self;
     using messages::localisation::Self;
-    using messages::behaviour::WalkStrategy;
+    using messages::behaviour::MotionCommand;
     using messages::behaviour::LookStrategy;
     using messages::behaviour::Look;
-    using messages::behaviour::WalkApproach;
-    using messages::behaviour::WalkTarget;
     using messages::behaviour::FieldTarget;
     using messages::behaviour::KickPlan;
     using messages::behaviour::SoccerObjectPriority;
@@ -65,6 +64,7 @@ namespace strategy {
     using SelfPenalisation = messages::input::gameevents::Penalisation<messages::input::gameevents::SELF>;
     using SelfUnpenalisation = messages::input::gameevents::Unpenalisation<messages::input::gameevents::SELF>;
     using messages::localisation::ResetRobotHypotheses;
+    using utility::math::matrix::Transform2D;
 
     using utility::localisation::transform::RobotToWorldTransform;
     using utility::time::durationFromSeconds;
@@ -86,6 +86,7 @@ namespace strategy {
 
         // TODO: unhack
         emit(std::make_unique<KickPlan>(KickPlan{{4.5, 0}}));
+
 
         // For checking last seen times
         on<Trigger<std::vector<LocalisationBall>>>([this] (const std::vector<LocalisationBall>& balls) {
@@ -212,7 +213,9 @@ namespace strategy {
                         }
                     }
                 }
+                
 
+                
                 if (currentState != previousState) {
                     emit(std::make_unique<Behaviour::State>(currentState));
                 }
@@ -227,7 +230,12 @@ namespace strategy {
                 log("Runtime exception.");
             }
         });
-
+/*
+    on<Trigger<std::vector<Self>>, With<FieldDescription>> ([this] (const std::vector<Self>& selfs, const FieldDescription& fieldDescription) {
+        //emit(std::make_unique<KickPlan>(KickPlan{getKickPlan(selfs, fieldDescription)}));
+    
+    });
+*/
     }
 
     void SoccerStrategy::initialLocalisationReset(const FieldDescription& fieldDescription) {
@@ -293,49 +301,32 @@ namespace strategy {
     }
 
     void SoccerStrategy::standStill() {
-        auto command = std::make_unique<WalkStrategy>();
-        command->walkMovementType = WalkApproach::StandStill;
+        auto command = std::make_unique<MotionCommand>();
+        command->type = MotionCommand::Type::StandStill;
         emit(std::move(command));
     }
 
-    void SoccerStrategy::walkTo(const FieldDescription& fieldDescription, const FieldTarget& object) {
-        // TODO: find object position and call other walkTo method
-        WalkTarget walkTarget;
-        arma::vec2 heading;
-
-        switch (object) {
-            case FieldTarget::BALL: {
-                walkTarget = WalkTarget::Ball;
-                arma::vec2 enemyGoal({fieldDescription.dimensions.field_length * 0.5, 0});
-                heading = enemyGoal;
-                break;
-            }
-            default:
-                throw std::runtime_error("unsupported walk target");
+    void SoccerStrategy::walkTo(const FieldDescription& fieldDescription, const FieldTarget& target) {
+        if (target != FieldTarget::BALL) {
+            throw std::runtime_error("SoccerStrategy::walkTo: Only FieldTarget::BALL is supported.");
         }
 
-        auto approach = std::make_unique<WalkStrategy>();
-        approach->targetPositionType = walkTarget;
-        approach->targetHeadingType = WalkTarget::WayPoint;
-        approach->walkMovementType = WalkApproach::WalkToPoint;
-        approach->heading = heading;
+        arma::vec2 enemyGoal = {fieldDescription.dimensions.field_length * 0.5, 0};
 
-        emit(std::move(approach));
-
+        auto command = std::make_unique<MotionCommand>();
+        command->type = MotionCommand::Type::BallApproach;
+        command->kickTarget = enemyGoal;
+        emit(std::move(command));
     }
 
     void SoccerStrategy::walkTo(const FieldDescription& fieldDescription, arma::vec position) {
 
-        arma::vec2 enemyGoal({fieldDescription.dimensions.field_length * 0.5, 0});
-        auto approach = std::make_unique<WalkStrategy>();
-        approach->targetPositionType = WalkTarget::WayPoint;
-        approach->targetHeadingType = WalkTarget::WayPoint;
-        approach->walkMovementType = WalkApproach::WalkToPoint;
-        approach->heading = enemyGoal;
-        approach->target = position;
-
-        emit(std::move(approach));
-
+        arma::vec2 enemyGoal = {fieldDescription.dimensions.field_length * 0.5, 0};
+        
+        auto command = std::make_unique<MotionCommand>();
+        command->type = MotionCommand::Type::WalkToState;
+        command->goalState = Transform2D::lookAt(position, enemyGoal);
+        emit(std::move(command));
     }
 
     bool SoccerStrategy::pickedUp(const Sensors& sensors) {
@@ -384,14 +375,53 @@ namespace strategy {
     }
 
     void SoccerStrategy::spinWalk() {
-        // TODO: does this work?
-        auto command = std::make_unique<WalkStrategy>();
-        command->walkMovementType = WalkApproach::DirectCommand;
-        command->target = {0,0};
-        command->heading = {1,0};
+        auto command = std::make_unique<MotionCommand>();
+        command->type = MotionCommand::Type::DirectCommand;
+        command->walkCommand = {0, 0, 1};
         emit(std::move(command));
     }
+/*
+    arma::vec2 SoccerStrategy::getKickPlan(const std::vector<Self>& selfs, const messages::support::FieldDescription& fieldDescription) {
+        
+        // Defines the box within in which the kick target is changed from the centre 
+        // of the oppposition goal to the perpendicular distance from the robot to the goal
 
+        float maxKickRange = 0.6; //TODO: make configurable, only want to change at the last kick to avoid smart goalies
+        float xTakeOverBox = maxKickRange;
+        size_t error = 0.05;
+        size_t buffer = error + 2 * fieldDescription.ball_radius; //15cm           
+        float yTakeOverBox = fieldDescription.dimensions.goal_width/2 - buffer; // 90-15 = 75cm
+        float xRobot = selfs.front().position[0];
+        float yRobot = selfs.front().position[1];
+        arma::vec2 newTarget;
+        
+        if(!selfs.empty()) {        
+            
+            if( (fieldDescription.dimensions.field_length/2) - xTakeOverBox < xRobot 
+                    && -yTakeOverBox < yRobot 
+                        && yRobot < yTakeOverBox) {
+                
+                // Aims for the point that gives the shortest distance                   
+                newTarget[0] = fieldDescription.dimensions.field_length/2;
+                newTarget[1] = yRobot;
+
+            } else {
+                
+                // Aims for the centre of the goal
+                newTarget[0] = fieldDescription.dimensions.field_length/2;
+                newTarget[1] = 0;
+            }
+
+        } else {
+            
+            // Return default
+            newTarget[0] = fieldDescription.dimensions.field_length/2;
+            newTarget[1] = 0;
+
+        }
+        return newTarget;
+    }
+*/
 } // strategy
 } // behaviours
 } // modules

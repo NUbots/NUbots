@@ -13,11 +13,10 @@ ADD_ROLE(
 
     #Sensors
     input::LinuxCamera
-    platform::darwin::HardwareIO
+    platform::darwin::HardwareSimulator
     platform::darwin::SensorFilter
 
     #Vision
-    vision::LUTClassifier
     vision::GoalDetector
     vision::BallDetector
     vision::ObstacleDetector
@@ -32,21 +31,15 @@ ADD_ROLE(
     behaviour::skills::FallingRelax
     behaviour::skills::Getup
     behaviour::skills::KickScript
-    behaviour::skills::GoalSaver
     behaviour::skills::HeadBehaviourSoccer
-    behaviour::skills::WalkPathFollower # Follows WalkPaths.
-    behaviour::skills::DirectWalkController
     behaviour::planning::KickPlanner
-    behaviour::planning::DivePlanner
-    # behaviour::planning::SimpleWalkPathPlanner
-    behaviour::planning::OMPLPathPlanner  # Creates WalkPaths.
-    behaviour::strategy::SoccerStrategy
+    behaviour::planning::SimpleWalkPathPlanner
+    behaviour::strategy::KickAtGoal
 
     #Motion
     motion::ScriptEngine
     motion::WalkEngine
-    motion::HeadController
 
     #Output
-    output::eSpeak
+    #output::eSpeak
 )

@@ -25,28 +25,44 @@
 #include "utility/math/matrix/Transform2D.h"
 
 namespace messages {
-    namespace motion {
+namespace motion {
 
-        /**
-         * TODO document
-         *
-         * @author Trent Houliston
-         * @author Brendan Annable
-         */
-        struct WalkCommand {
-            // x and y are velocity in m/s and angle is in rads/s
-            utility::math::matrix::Transform2D command;
-        };
+    using utility::math::matrix::Transform2D;
 
-        struct WalkStartCommand {
-        };
+    struct WalkCommand {
+        WalkCommand() = delete;
+        WalkCommand(size_t id, Transform2D command_) : subsumptionId(id), command(command_) { }
+        size_t subsumptionId = 1;
 
-        struct WalkStopCommand {
-        };
+        // x and y are velocity in m/s and angle is in rads/s
+        utility::math::matrix::Transform2D command;
+    };
 
-        struct WalkStopped {
-        };
-    }  // motion
-}  // messages
+    struct WalkStartCommand {
+        WalkStartCommand() = delete;
+        WalkStartCommand(size_t id) : subsumptionId(id) { }
+        size_t subsumptionId = 1;
+    };
+
+    struct WalkStopCommand {
+        WalkStopCommand() = delete;
+        WalkStopCommand(size_t id) : subsumptionId(id) { }
+        size_t subsumptionId = 1;
+    };
+    struct WalkStopped {
+    };
+    
+    struct EnableWalkEngineCommand {
+        EnableWalkEngineCommand() = delete;
+        EnableWalkEngineCommand(size_t id) : subsumptionId(id) { }
+        size_t subsumptionId = 1;
+    };
+    struct DisableWalkEngineCommand {
+        DisableWalkEngineCommand() = delete;
+        DisableWalkEngineCommand(size_t id) : subsumptionId(id) { }
+        size_t subsumptionId = 1;
+    };
+}
+}
 
 #endif  // MESSAGES_MOTION_WALKCOMMAND_H

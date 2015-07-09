@@ -96,12 +96,17 @@ namespace planning {
             //Compute target in robot coords
             auto self = selfs[0];
             arma::vec2 kickTarget = WorldToRobotTransform(self.position, self.heading, kickPlan.target);
-            arma::vec3 ballPosition = {ball.position[0],ball.position[1],fd.ball_radius}; 
+            arma::vec3 ballPosition = {ball.position[0], ball.position[1], fd.ball_radius}; 
             
+            float KickAngle = std::fabs(std::atan2(kickTarget[1], kickTarget[0]));
+            float kickAngleThreshold = M_PI_4;
+
             //Check whether to kick
             if(secondsSinceLastSeen < cfg.seconds_not_seen_limit
-                && kickValid(ballPosition, params.stand_height, sensors)){
-                    emit(std::make_unique<KickCommand>(KickCommand{ballPosition, {kickTarget[0],kickTarget[1],0} }));
+                && kickValid(ballPosition, params.stand_height, sensors)
+                    // && KickAngle < kickAngleThreshold)
+                ) {
+                    emit(std::make_unique<KickCommand>(KickCommand{ballPosition, {kickTarget[0], kickTarget[1], 0} }));
             }
 
         });
