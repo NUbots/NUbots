@@ -19,6 +19,7 @@
 
 #include "NUbugger.h"
 
+#include "messages/behaviour/WalkPath.h"
 #include "messages/input/gameevents/GameEvents.h"
 #include "messages/input/Image.h"
 #include "messages/support/nubugger/proto/Message.pb.h"
@@ -35,6 +36,7 @@ namespace modules {
 namespace support {
 
     using messages::behaviour::proto::Behaviour;
+    using messages::behaviour::WalkPath;
     using messages::input::gameevents::GameState;
     using messages::input::Image;
     using messages::input::proto::Sensors;
@@ -140,6 +142,16 @@ namespace support {
             overview.set_game_mode(getMode(gamestate.mode));
             overview.set_game_phase(getPhase(gamestate.phase));
             overview.set_penalty_reason(getPenaltyReason(gamestate.self.penaltyReason));
+
+        }));
+
+        handles[Message::OVERVIEW].push_back(on<Trigger<WalkPath>, Options<Single, Priority<NUClear::LOW>>>([this] (const WalkPath& walkPath) {
+
+            overview.clear_path_plan();
+
+            for (auto state : walkPath.states) {
+                *overview.add_path_plan() << arma::vec2(state.xy());
+            }
 
         }));
 
