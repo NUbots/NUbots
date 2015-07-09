@@ -21,6 +21,7 @@
 #define MODULES_VISION_LUTCLASSIFIER_H
 
 #include <nuclear>
+#include <armadillo>
 
 #include "messages/input/Image.h"
 #include "messages/input/Sensors.h"
@@ -45,6 +46,8 @@ namespace modules {
         private:
             // A pointer to our quex class (since it is generated it is not defined at this point)
             QuexClassifier* quex;
+
+            arma::fvec3 greenCentroid;
 
             int VISUAL_HORIZON_SPACING = 100;
             int VISUAL_HORIZON_BUFFER = 0;

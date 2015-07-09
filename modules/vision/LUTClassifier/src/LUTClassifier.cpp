@@ -42,6 +42,7 @@ namespace modules {
         using messages::vision::SaveLookUpTable;
         using messages::vision::ObjectClass;
         using messages::vision::ClassifiedImage;
+        using messages::vision::Colour;
         using messages::support::Configuration;
         using messages::support::SaveConfiguration;
         using utility::support::Expression;
@@ -71,7 +72,38 @@ namespace modules {
         LUTClassifier::LUTClassifier(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)), quex(new QuexClassifier) {
 
             on<Trigger<Configuration<LUTLocation>>>([this](const Configuration<LUTLocation>& config) {
-                emit(std::make_unique<LookUpTable>(config.config.as<LookUpTable>()));
+
+                // Load our LUT
+                auto lut = std::make_unique<LookUpTable>(config.config.as<LookUpTable>());
+
+                // Calculate our green centroid for ball detection
+                arma::fvec3 greenCentroid({0, 0, 0});
+                uint nPoints = 0;
+
+                // Loop through every voxel in the lut
+                for(uint x = 0; x < uint(1 << lut->BITS_Y); ++x) {
+                    for (uint y = 0; y < uint(1 << lut->BITS_CB); ++y) {
+                        for (uint z = 0; z < uint(1 << lut->BITS_CR); ++z) {
+
+                            // Get our voxel
+                            uint index = (((x << lut->BITS_CR) | y) << lut->BITS_CB) | z;
+                            char c = lut->getRawData()[index];
+
+                            // If this is a field voxel
+                            if(c == Colour::GREEN) {
+                                // Get our LUT pixel for this index
+                                Image::Pixel p = lut->getPixelFromIndex(index);
+
+                                ++nPoints;
+                                greenCentroid += arma::fvec3({ float(p.y), float(p.cb), float(p.cr) });
+                            }
+                        }
+                    }
+                }
+                greenCentroid /= float(nPoints);
+                this->greenCentroid = greenCentroid;
+
+                emit(std::move(lut));
             });
 
             on<Trigger<SaveLookUpTable>, With<LookUpTable>>([this](const SaveLookUpTable&, const LookUpTable& lut) {
