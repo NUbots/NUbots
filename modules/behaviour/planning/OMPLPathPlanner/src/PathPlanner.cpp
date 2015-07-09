@@ -210,6 +210,7 @@ namespace planning {
         
         Transform2D obsTrans = ballSpace.localToWorld({cfg_.ball_obstacle_margin, 0, 0});
         
+        // See the documentation for ball_obstacle_margin in OMPLPathPlanner.yaml
         Circle ballObstacle(obsRad, obsTrans.xy());
 
         return ballObstacle;

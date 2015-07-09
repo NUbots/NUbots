@@ -17,8 +17,8 @@
  * Copyright 2015 NUbots <nubots@nubots.net>
  */
 
-#ifndef MODULES_BEHAVIOUR_PLANNING_WALKPATHFOLLOWER_H
-#define MODULES_BEHAVIOUR_PLANNING_WALKPATHFOLLOWER_H
+#ifndef MODULES_BEHAVIOUR_SKILLS_WALKPATHFOLLOWER_H
+#define MODULES_BEHAVIOUR_SKILLS_WALKPATHFOLLOWER_H
 
 #include <nuclear>
 #include "messages/behaviour/WalkPath.h"
@@ -27,7 +27,7 @@
 
 namespace modules {
 namespace behaviour {
-namespace planning {
+namespace skills {
 
     using messages::behaviour::WalkPath;
     using messages::motion::WalkCommand;
@@ -64,6 +64,16 @@ namespace planning {
         WalkPath currentPath;
 
     private:
+        /// @brief Subsumption ID key to access motors
+        const size_t subsumptionId;
+
+        /// @brief Reaction handle for the path following reaction
+        ReactionHandle followPathReaction;
+        
+        /// @brief Reaction handle for the path update reaction
+        ReactionHandle updatePathReaction;
+
+
         struct Config {
             
             double waypoint_visit_distance = 0.1;
@@ -79,4 +89,4 @@ namespace planning {
 }
 }
 
-#endif  // MODULES_BEHAVIOUR_PLANNING_WALKPATHFOLLOWER_H
+#endif  // MODULES_BEHAVIOUR_SKILLS_WALKPATHFOLLOWER_H
