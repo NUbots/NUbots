@@ -36,6 +36,8 @@
 #include "utility/time/time.h"
 #include "utility/localisation/transform.h"
 #include "utility/math/matrix/Transform2D.h"
+#include "utility/nubugger/NUhelpers.h"
+#include "utility/math/geometry/Circle.h"
 
 namespace modules {
 namespace behaviour {
@@ -68,6 +70,7 @@ namespace strategy {
 
     using utility::localisation::transform::RobotToWorldTransform;
     using utility::time::durationFromSeconds;
+    using utility::math::geometry::Circle;
 
     SoccerStrategy::SoccerStrategy(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
 
@@ -230,12 +233,13 @@ namespace strategy {
                 log("Runtime exception.");
             }
         });
-/*
-    on<Trigger<std::vector<Self>>, With<FieldDescription>> ([this] (const std::vector<Self>& selfs, const FieldDescription& fieldDescription) {
-        //emit(std::make_unique<KickPlan>(KickPlan{getKickPlan(selfs, fieldDescription)}));
-    
-    });
-*/
+
+        on<Trigger<std::vector<Self>>, With<FieldDescription>> ([this] (const std::vector<Self>& selfs, const FieldDescription& fieldDescription) {
+            auto kickTarget = getKickPlan(selfs, fieldDescription);
+            emit(std::make_unique<KickPlan>(KickPlan{kickTarget}));
+            emit(utility::nubugger::drawCircle("SocStrat_kickTarget", Circle(0.05, kickTarget), 0.123, {0.8, 0.8, 0}));
+        });
+
     }
 
     void SoccerStrategy::initialLocalisationReset(const FieldDescription& fieldDescription) {
@@ -380,7 +384,7 @@ namespace strategy {
         command->walkCommand = {0, 0, 1};
         emit(std::move(command));
     }
-/*
+
     arma::vec2 SoccerStrategy::getKickPlan(const std::vector<Self>& selfs, const messages::support::FieldDescription& fieldDescription) {
         
         // Defines the box within in which the kick target is changed from the centre 
@@ -400,9 +404,8 @@ namespace strategy {
             if( (fieldDescription.dimensions.field_length/2) - xTakeOverBox < xRobot 
                     && -yTakeOverBox < yRobot 
                         && yRobot < yTakeOverBox) {
-                
-                // Aims for the point that gives the shortest distance                   
-                newTarget[0] = fieldDescription.dimensions.field_length/2;
+                // Aims for behind the point that gives the shortest distance             
+                newTarget[0] = fieldDescription.dimensions.field_length/2 + fieldDescription.dimensions.goal_depth/2;
                 newTarget[1] = yRobot;
 
             } else {
@@ -421,7 +424,7 @@ namespace strategy {
         }
         return newTarget;
     }
-*/
+
 } // strategy
 } // behaviours
 } // modules

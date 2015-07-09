@@ -98,8 +98,7 @@ namespace motion {
 
         on<Trigger<KickCommand>>([this] (const KickCommand&) {
             // We want to kick!  
-            
-            log("Kick Command");          
+       
             emit(std::make_unique<WalkStopCommand>(subsumptionId)); // Stop the walk
 
             updatePriority(KICK_PRIORITY);
