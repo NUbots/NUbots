@@ -179,11 +179,53 @@ namespace modules {
 
                     if(c == 'g') {
                         edges.push_back(arma::ivec2({ point[0], y - 1 }));
-                        debug.push_back(std::make_tuple(point, arma::ivec2({ point[0], y - 1 }), arma::vec4({0,1,1,1})));
+                        debug.push_back(std::make_tuple(point, edges.back(), arma::vec4({0,1,1,1})));
                         break;
                     }
                 }
             }
+
+            // For each of these points move leftward until we find a strong transition to green
+            for(auto& point : points) {
+
+                // The last pixel we looked at
+                // auto lastPixel = image(point[0], point[1]);
+
+                for(int x = point[0]; x > 0; --x) {
+
+                    char c = lut(image(x, point[1]));
+
+                    if(c == 'g') {
+                        edges.push_back(arma::ivec2({ x + 1, point[1] }));
+                        debug.push_back(std::make_tuple(point, edges.back(), arma::vec4({0,1,1,1})));
+                        break;
+                    }
+                }
+            }
+
+            // For each of these points move rightward until we find a strong transition to green
+            for(auto& point : points) {
+
+                // The last pixel we looked at
+                // auto lastPixel = image(point[0], point[1]);
+
+                for(int x = point[0]; x < image.width - 1; ++x) {
+
+                    char c = lut(image(x, point[1]));
+
+                    if(c == 'g') {
+                        edges.push_back(arma::ivec2({ x - 1, point[1] }));
+                        debug.push_back(std::make_tuple(point, edges.back(), arma::vec4({0,1,1,1})));
+                        break;
+                    }
+                }
+            }
+
+            // While we still have edges
+            auto setComparator = [] (const arma::ivec2& a, const arma::ivec2& b) {
+                return a[0] == b[0] ? a[1] < b[1] : a[0] < b[0];
+            };
+            std::set<arma::ivec2, decltype(setComparator)> pSet(setComparator);
 
             for(auto& edge : edges) {
 
@@ -198,22 +240,22 @@ namespace modules {
                     arma::ivec2 direction;
                     std::tie(strength, direction) = fieldEdgeDirection(point, image, greenCentroid);
 
+                    // If our strength get's too low then stop
                     if(strength < 2) {
                         break;
                     }
 
                     point += direction;
 
-                    // if(strength > 128) {
-                        classifiedImage.ballPoints.push_back(point);
 
-                        std::get<1>(d)  = point;
+                    pSet.insert(point);
 
-                        float r = (strength / 30);
-                        float b = 1 - (strength / 30);
-                        std::get<2>(d)  = arma::vec4({r,0,b,1});
-                        debug.push_back(d);
-                    // }
+                    std::get<1>(d)  = point;
+
+                    float r = (strength / 30);
+                    float b = 1 - (strength / 30);
+                    std::get<2>(d)  = arma::vec4({r,0,b,1});
+                    debug.push_back(d);
                 }
 
                 // Go Anticlockwise
@@ -227,26 +269,26 @@ namespace modules {
                     arma::ivec2 direction;
                     std::tie(strength, direction) = fieldEdgeDirection(point, image, greenCentroid);
 
+                    // If our strength get's too low then stop
                     if(strength < 2) {
                         break;
                     }
 
                     point -= direction;
 
-                    // if(strength > 128) {
-                        classifiedImage.ballPoints.push_back(point);
+                    pSet.insert(point);
 
-                        std::get<1>(d)  = point;
+                    std::get<1>(d)  = point;
 
-                        float r = (strength / 30);
-                        float b = 1 - (strength / 30);
-                        std::get<2>(d)  = arma::vec4({r,0,b,1});
-                        debug.push_back(d);
-                    // }
+                    float r = (strength / 30);
+                    float b = 1 - (strength / 30);
+                    std::get<2>(d)  = arma::vec4({r,0,b,1});
+                    debug.push_back(d);
                 }
             }
 
-            log(classifiedImage.ballPoints.size());
+            // Put our set into the object
+            classifiedImage.ballPoints.insert(classifiedImage.ballPoints.begin(), pSet.begin(), pSet.end());
 
             emit(drawVisionLines(debug));
 
