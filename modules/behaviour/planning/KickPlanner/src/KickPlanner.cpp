@@ -110,7 +110,6 @@ namespace planning {
 
     bool KickPlanner::kickValid(const arma::vec3& ballPos, float standHeight, const Sensors& sensors){
         Transform3D ballPose;
-        //TODO: make this take into account the correct kick stand height
         Transform3D torsoToGround = sensors.orientationBodyToGround;
         torsoToGround.translation()[2] = standHeight;
         ballPose.translation() = torsoToGround.i().transformPoint(ballPos);
