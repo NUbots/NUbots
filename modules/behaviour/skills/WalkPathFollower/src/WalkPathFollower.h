@@ -39,11 +39,12 @@ namespace skills {
         /// @brief Called by the powerplant to build and setup the WalkPathFollower reactor.
         explicit WalkPathFollower(std::unique_ptr<NUClear::Environment> environment);
 
-        /// @brief The instantaneous walk command required to start moving from currentState to targetState.
-        WalkCommand walkBetween(const Transform2D& currentState, const Transform2D& targetState);
+        /// @brief The instantaneous walk command required to start moving to the next unvisited node on the path.
+        std::unique_ptr<WalkCommand> walkToNextNode(const Transform2D& currentState, bool noLogging = false);
 
-        WalkCommand walkAbout(const Transform2D& currentState, const Transform2D& targetState);
+        WalkCommand walkBetweenFar(const Transform2D& currentState, const Transform2D& targetState);
 
+        WalkCommand walkBetweenNear(const Transform2D& currentState, const Transform2D& targetState);
 
         /// @brief Remove already visited states from the given path.
         /// Returns the number of states removed.

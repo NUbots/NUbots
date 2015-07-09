@@ -30,6 +30,9 @@ namespace behaviour {
 
     struct MotionCommand {
 
+        // TODO: Delete the default constructor, and make factory methods for
+        // different motion command types?
+
         // Defines the possible types of motion command:
         enum class Type {
             StandStill,   // Stop moving and just stand still.

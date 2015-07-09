@@ -202,10 +202,6 @@ namespace support {
                 
                 //Update based on walk engine
                     if(walkCommand && !kicking) {
-
-                        NUClear::log(__FILE__, __LINE__, "walkCommand", walkCommand->command.t());
-                        NUClear::log(__FILE__, __LINE__, "sensors.odometry", sensors.odometry.t());
-
                         world.robotVelocity.rows(0,1) = sensors.odometry;
                         //angle from command:
                         world.robotVelocity(2) = walkCommand->command(2);

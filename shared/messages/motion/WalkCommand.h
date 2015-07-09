@@ -30,7 +30,7 @@ namespace motion {
     using utility::math::matrix::Transform2D;
 
     struct WalkCommand {
-        WalkCommand() { }
+        WalkCommand() = delete;
         WalkCommand(size_t id, Transform2D command_) : subsumptionId(id), command(command_) { }
         size_t subsumptionId = 1;
 
@@ -39,13 +39,13 @@ namespace motion {
     };
 
     struct WalkStartCommand {
-        WalkStartCommand() { }
+        WalkStartCommand() = delete;
         WalkStartCommand(size_t id) : subsumptionId(id) { }
         size_t subsumptionId = 1;
     };
 
     struct WalkStopCommand {
-        WalkStopCommand() { }
+        WalkStopCommand() = delete;
         WalkStopCommand(size_t id) : subsumptionId(id) { }
         size_t subsumptionId = 1;
     };
@@ -53,12 +53,12 @@ namespace motion {
     };
     
     struct EnableWalkEngineCommand {
-        EnableWalkEngineCommand() { }
+        EnableWalkEngineCommand() = delete;
         EnableWalkEngineCommand(size_t id) : subsumptionId(id) { }
         size_t subsumptionId = 1;
     };
     struct DisableWalkEngineCommand {
-        DisableWalkEngineCommand() { }
+        DisableWalkEngineCommand() = delete;
         DisableWalkEngineCommand(size_t id) : subsumptionId(id) { }
         size_t subsumptionId = 1;
     };

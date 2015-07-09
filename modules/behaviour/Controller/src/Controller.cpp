@@ -135,9 +135,6 @@ namespace modules {
 
             on<Trigger<std::vector<ServoCommand>>, Options<Sync<Controller>>>("Command Filter", [this] (const std::vector<ServoCommand>& commands) {
 
-                        NUClear::log(__FILE__, __LINE__, "ServoCommand", commands.size());
-
-
                 for (auto& command : commands) {
 
                     // Check if we have access
@@ -145,12 +142,9 @@ namespace modules {
 
                         // Get our queue
                         auto& queue = commandQueues[uint(command.id)];
-                        NUClear::log(__FILE__, __LINE__, "queue", queue.size(), queue.back().time.time_since_epoch().count(), command.time.time_since_epoch().count());
 
                         // Clear commands until we get back one that we are after
                         while(!queue.empty() && queue.back().time > command.time) {
-                            NUClear::log(__FILE__, __LINE__, "queue pop", queue.size());
-                            
                             queue.pop_back();
                         }
 
@@ -164,14 +158,8 @@ namespace modules {
             });
 
             on<Trigger<Every<90, Per<std::chrono::seconds>>>, Options<Single, Sync<Controller>, Priority<NUClear::HIGH>>>("Controller Update Waypoints",[this] (const time_t& now) {
-
-                        NUClear::log(__FILE__, __LINE__, "Controller Update Waypoints");
-
-
                 std::list<ServoID> emptiedQueues;
                 std::unique_ptr<std::vector<ServoTarget>> waypoints;
-
-
 
                 for(auto& queue : commandQueues) {
 
@@ -207,13 +195,9 @@ namespace modules {
                         }
                     }
                 }
-                        NUClear::log(__FILE__, __LINE__, "has waypoints?");
 
                 // Emit our waypoints
                 if(waypoints) {
-
-                        NUClear::log(__FILE__, __LINE__, "waypoints");
-
                     emit(std::move(waypoints));
                 }
 
@@ -404,8 +388,6 @@ namespace modules {
                 }
             }
 
-                        NUClear::log(__FILE__, __LINE__, "Execute all our kill commands");
-
             // Execute all our kill commands
             for (const auto& k : killMap) {
                 auto& request = requests[k.first];
@@ -420,17 +402,12 @@ namespace modules {
                 }
             }
 
-                        NUClear::log(__FILE__, __LINE__, "Execute all our kill commands COMPLETE");
-
-                        NUClear::log(__FILE__, __LINE__, "Execute our start commands");
-
             // Execute our start commands
             for (const auto& s : startMap) {
                 auto& request = requests[s.first];
                 request->start(s.second);
                 emit(std::make_unique<ActionStart>(ActionStart{request->id, request->name, s.second}));
             }
-                        NUClear::log(__FILE__, __LINE__, "Execute our start commands COMPLETE");
 
             // Our actions are now these new actions
             currentActions = std::move(newActions);

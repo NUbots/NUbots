@@ -179,41 +179,9 @@ namespace skills {
                 emit(utility::nubugger::drawPath("WPF_EstimatedPath", estPath.states, 0.05, {1,0.8,0}));
             }
 
-            // Aim for the index after the closest state:
-            int targetIndex = std::min(1, int(currentPath.states.size()));
-            Transform2D targetState = currentPath.states[targetIndex]; // {3, 3, 3.14};
-            emit(utility::nubugger::drawRectangle("WPF_TargetState", RotatedRectangle(targetState, {0.12, 0.17}), {1, 0, 0}));
-            
-            WalkCommand command;
-
-            // If we have reached our target
-            if (targetIndex == 0 && isVisited(currentState, targetState)) {
-                
-                // Angle between current heading and target heading
-                double walkAboutAngle = utility::math::angle::signedDifference(targetState.angle(), currentState.angle());    
-                
-                if (std::abs(walkAboutAngle) < M_PI*0.125) {
-                    // If heading is accurate, just walk forward:
-
-                    // Make a walk command to move towards the target state
-                    command = WalkCommand(walkBetween(currentState, targetState)); 
-                    NUClear::log(__FILE__, __LINE__, "Small angle, walkBetween");
-                } else {
-                    // Make a walk command to rotate about the target to face the target heading
-                    command = WalkCommand(walkAbout(currentState, targetState));             
-                    NUClear::log(__FILE__, __LINE__, "Large angle, walkAbout");
-                }
-
-            } else {
-                // Make a walk command to move towards the target state
-                command = WalkCommand(walkBetween(currentState, targetState));               
-                NUClear::log(__FILE__, __LINE__, "Far from target");
-            }
-            
             // Emit a walk command to move towards the target state:
             emit(std::move(std::make_unique<WalkStartCommand>(subsumptionId)));
-            emit(std::move(std::make_unique<WalkCommand>(command)));
-            NUClear::log(__FILE__, __LINE__, "command", command.command.t());
+            emit(std::move(walkToNextNode(currentState)));
         }).disable();
     }
 
@@ -263,33 +231,55 @@ namespace skills {
         return closestIndex;
     }
 
-    WalkCommand WalkPathFollower::walkBetween(const Transform2D& currentState, const Transform2D& targetState) {
+    std::unique_ptr<WalkCommand> WalkPathFollower::walkToNextNode(const Transform2D& currentState, bool noLogging) {
+        // Aim for the index after the closest state:
+        int targetIndex = std::min(1, int(currentPath.states.size()) - 1);
+        Transform2D targetState = currentPath.states[targetIndex]; // {3, 3, 3.14};
+        emit(utility::nubugger::drawRectangle("WPF_TargetState", RotatedRectangle(targetState, {0.12, 0.17}), {1, 0, 0}));
+        
+        std::unique_ptr<WalkCommand> command;
+
+        // If we have reached our target
+        if (targetIndex == 0 && isVisited(currentState, targetState)) {
+            command = std::make_unique<WalkCommand>(walkBetweenNear(currentState, targetState));
+        } else {
+            // Make a walk command to move towards the target state
+            command = std::make_unique<WalkCommand>(walkBetweenFar(currentState, targetState));
+        }
+
+        return command;
+    }
+
+    WalkCommand WalkPathFollower::walkBetweenFar(const Transform2D& currentState, const Transform2D& targetState) {
         auto diff = arma::vec2(targetState.xy() - currentState.xy());
         auto dir = vectorToBearing(diff);
         double wcAngle = utility::math::angle::signedDifference(dir, currentState.angle());
         // TODO: Consider the heading of targetState in planning.
 
-        WalkCommand command;
-        command.command = {1, 0, wcAngle};
-        command.subsumptionId = subsumptionId;
+        WalkCommand command(subsumptionId, {1, 0, wcAngle});
         return command;
     }
 
-    WalkCommand WalkPathFollower::walkAbout(const Transform2D& currentState, const Transform2D& targetState) {
-        
+    WalkCommand WalkPathFollower::walkBetweenNear(const Transform2D& currentState, const Transform2D& targetState) {
         // Angle between current heading and target heading
         double walkAboutAngle = utility::math::angle::signedDifference(targetState.angle(), currentState.angle());  
         int angleSign = (walkAboutAngle < 0) ? -1 : 1;
+        // TODO: Consider using a smaller, non-constant speed.
+        double rotationSpeed = angleSign * cfg_.walk_about_rotational_speed;
 
-        arma::vec strafe = { std::max(cfg_.walk_about_x_strafe, 0.0), -angleSign * cfg_.walk_about_y_strafe };
+        // if (std::abs(walkAboutAngle) < M_PI*0.125) {
+            Transform2D velocity = {arma::normalise(targetState.xy() - currentState.xy()), rotationSpeed}; //TODO make 20 seconds the variable update_frequency
+            WalkCommand command(subsumptionId, velocity);
+            return command;
+        // } else {
+        //     arma::vec2 strafe = { std::max(cfg_.walk_about_x_strafe, 0.0), -angleSign * cfg_.walk_about_y_strafe };
 
-        arma::vec strafeClipped = arma::normalise(strafe) * std::min(1.0, arma::norm(strafe));
+        //     arma::vec2 strafeClipped = arma::normalise(strafe) * std::min(1.0, arma::norm(strafe));
 
-        WalkCommand command;
-        command.command = {strafeClipped[0], strafeClipped[1], angleSign * cfg_.walk_about_rotational_speed}; //TODO make 20 seconds the variable update_frequency
-        command.subsumptionId = subsumptionId;
-        return command;
-        
+        //     Transform2D velocity = {strafeClipped, rotationSpeed}; //TODO make 20 seconds the variable update_frequency
+        //     WalkCommand command(subsumptionId, velocity);
+        //     return command;
+        // }
     }
 
     WalkPath WalkPathFollower::estimatedPath(const Transform2D& currentState, const WalkPath& walkPath, double timeStep, int simSteps, int sample) {
@@ -306,13 +296,10 @@ namespace skills {
         for (int i = 0; i < simSteps; i++) {
             trimPath(state, path);
 
-            int targetIndex = std::min(1, int(path.states.size()));
-            Transform2D targetState = path.states[targetIndex];
+            auto command = walkToNextNode(state, true);
 
-            auto command = walkBetween(state, targetState);
-
-            command.command.xy() = state.rotation() * command.command.xy() * 0.2;
-            state += command.command * timeStep;
+            command->command.xy() = state.rotation() * command->command.xy() * 0.2;
+            state += command->command * timeStep;
             stepNum++;
             if (stepNum % sample == 0) {
                 robotPath.states.push_back(state);

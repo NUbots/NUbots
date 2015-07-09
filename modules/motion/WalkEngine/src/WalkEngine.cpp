@@ -119,7 +119,6 @@ namespace motion {
         });
 
         updateHandle = on<Trigger<Every<UPDATE_FREQUENCY, Per<std::chrono::seconds>>>, With<Sensors>, Options<Single, Priority<NUClear::HIGH>>>([this](const time_t&, const Sensors& sensors) {
-                    NUClear::log(__FILE__, __LINE__, "updateHandle");
             update(sensors);
         }).disable();
 
@@ -131,26 +130,17 @@ namespace motion {
             velocity.angle() *= velocity.angle() > 0 ? velocityLimits(2,1) : -velocityLimits(2,0);
 
             setVelocity(velocity);
-                    NUClear::log(__FILE__, __LINE__, "WalkCommand", walkCommand.command.t());
-                    NUClear::log(__FILE__, __LINE__, "WalkCommand velocity", velocity.t());
-                    NUClear::log(__FILE__, __LINE__, "WalkCommand state", state);
         });
 
         on<Trigger<WalkStartCommand>>([this](const WalkStartCommand&) {
             start();
-
-                    NUClear::log(__FILE__, __LINE__, "WalkStartCommand");
-                    NUClear::log(__FILE__, __LINE__, "updateHandle.enabled()", updateHandle.enabled());
-
             // emit(std::make_unique<ActionPriorites>(ActionPriorites { subsumptionId, { 25, 10 }})); // TODO: config
-
         });
 
         on<Trigger<WalkStopCommand>>([this](const WalkStopCommand&) {
             // TODO: This sets STOP_REQUEST, which appears not to be used anywhere.
             // If this is the case, we should delete or rethink the WalkStopCommand.
             requestStop();
-                    NUClear::log(__FILE__, __LINE__, "WalkStopCommand");
         });
         
         on<Trigger<Configuration<WalkEngine>>>([this](const Configuration<WalkEngine>& config) {
@@ -450,9 +440,6 @@ namespace motion {
 
         auto joints = calculateLegJointsTeamDarwin<DarwinModel>(leftFootTorso, rightFootTorso);
         auto waypoints = motionLegs(joints);
-
-                    NUClear::log(__FILE__, __LINE__, "motionLegs");
-
 
         auto arms = motionArms(phase);
         waypoints->insert(waypoints->end(), arms->begin(), arms->end());
