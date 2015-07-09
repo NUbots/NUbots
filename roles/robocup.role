@@ -35,6 +35,7 @@ ADD_ROLE(
     behaviour::skills::GoalSaver
     behaviour::skills::HeadBehaviourSoccer
     behaviour::skills::WalkPathFollower # Follows WalkPaths.
+    behaviour::skills::DirectWalkController
     behaviour::planning::KickPlanner
     behaviour::planning::DivePlanner
     #behaviour::planning::SimpleWalkPathPlanner
