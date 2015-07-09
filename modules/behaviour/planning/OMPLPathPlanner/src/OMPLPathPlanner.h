@@ -38,7 +38,18 @@ namespace planning {
 
     private:
     	PathPlanner pathPlanner;
-    	ompl::base::PathPtr currentPath;
+        NUClear::clock::time_point lastPlanningTime;
+
+        ReactionHandle generatePathReaction;
+
+		struct Config {
+            
+            float planning_interval = 5;
+            float planning_time_limit = 0.5;
+            bool draw_planning_tree = false;
+            arma::vec2 target_offset = {0, 0};
+
+        } cfg_;
     };
 
 }

@@ -43,4 +43,4 @@ namespace messages {
     }  // motion
 }  // messages
 
-#endif  // MESSAGES_MOTION_KICKCOMMAND_H
+#endif  // MESSAGES_MOTION_DIVECOMMAND_H

@@ -32,6 +32,7 @@
 #include "messages/behaviour/FixedWalkCommand.h"
 #include "messages/localisation/FieldObject.h"
 
+#include "utility/motion/Balance.h"
 #include "utility/nubugger/NUhelpers.h"
 #include "utility/support/yaml_armadillo.h"
 #include "utility/support/yaml_expression.h"
@@ -39,6 +40,7 @@
 #include "utility/motion/ForwardKinematics.h"
 #include "utility/motion/RobotModels.h"
 #include "utility/math/angle.h"
+#include "utility/math/matrix/Rotation3D.h"
 
 namespace modules {
 namespace motion {
@@ -49,13 +51,15 @@ namespace motion {
     using messages::behaviour::ServoCommand;
     using messages::behaviour::WalkOptimiserCommand;
     using messages::behaviour::WalkConfigSaved;
-    using messages::behaviour::RegisterAction;
-    using messages::behaviour::ActionPriorites;
+    // using messages::behaviour::RegisterAction;
+    // using messages::behaviour::ActionPriorites;
     using messages::input::LimbID;
     using messages::motion::WalkCommand;
     using messages::motion::WalkStartCommand;
     using messages::motion::WalkStopCommand;
     using messages::motion::WalkStopped;
+    using messages::motion::EnableWalkEngineCommand;
+    using messages::motion::DisableWalkEngineCommand;
     using messages::motion::ServoTarget;
     using messages::motion::Script;
     using messages::support::SaveConfiguration;
@@ -65,40 +69,54 @@ namespace motion {
     using utility::motion::kinematics::DarwinModel;
     using utility::math::matrix::Transform2D;
     using utility::math::matrix::Transform3D;
+    using utility::math::matrix::Rotation3D;
     using utility::math::angle::normalizeAngle;
     using utility::nubugger::graph;
     using utility::support::Expression;
 
     WalkEngine::WalkEngine(std::unique_ptr<NUClear::Environment> environment)
-        : Reactor(std::move(environment))
-        , id(size_t(this) * size_t(this) - size_t(this)) {
+        : Reactor(std::move(environment)) {
+        // , subsumptionId(size_t(this) * size_t(this) - size_t(this)) {
 
-        emit<Scope::INITIALIZE>(std::make_unique<RegisterAction>(RegisterAction {
-            id,
-            "Walk Engine",
-            {
-                std::pair<double, std::set<LimbID>>(0, {LimbID::LEFT_LEG, LimbID::RIGHT_LEG}),
-                std::pair<double, std::set<LimbID>>(0, {LimbID::LEFT_ARM, LimbID::RIGHT_ARM}),
-            },
-            [this] (const std::set<LimbID>& givenLimbs) {
-                if (givenLimbs.find(LimbID::LEFT_LEG) != givenLimbs.end()) {
-                    // legs are available, start
-                    stanceReset(); // reset stance as we don't know where our limbs are
-                    interrupted = false;
-                    updateHandle.enable();
-                }
-            },
-            [this] (const std::set<LimbID>& takenLimbs) {
-                if (takenLimbs.find(LimbID::LEFT_LEG) != takenLimbs.end()) {
-                    // legs are no longer available, reset walking (too late to stop walking)
-                    updateHandle.disable();
-                    interrupted = true;
-                }
-            },
-            [this] (const std::set<ServoID>&) {
-                // nothing
-            }
-        }));
+        // emit<Scope::INITIALIZE>(std::make_unique<RegisterAction>(RegisterAction {
+        //     subsumptionId,
+        //     "Walk Engine",
+        //     {
+        //         std::pair<double, std::set<LimbID>>(0, {LimbID::LEFT_LEG, LimbID::RIGHT_LEG}),
+        //         std::pair<double, std::set<LimbID>>(0, {LimbID::LEFT_ARM, LimbID::RIGHT_ARM}),
+        //     },
+        //     [this] (const std::set<LimbID>& givenLimbs) {
+        //         if (givenLimbs.find(LimbID::LEFT_LEG) != givenLimbs.end()) {
+        //             // legs are available, start
+        //             stanceReset(); // reset stance as we don't know where our limbs are
+        //             interrupted = false;
+        //             updateHandle.enable();
+        //         }
+        //     },
+        //     [this] (const std::set<LimbID>& takenLimbs) {
+        //         if (takenLimbs.find(LimbID::LEFT_LEG) != takenLimbs.end()) {
+        //             // legs are no longer available, reset walking (too late to stop walking)
+        //             updateHandle.disable();
+        //             interrupted = true;
+        //         }
+        //     },
+        //     [this] (const std::set<ServoID>&) {
+        //         // nothing
+        //     }
+        // }));
+
+        on<Trigger<EnableWalkEngineCommand>>([this](const EnableWalkEngineCommand& command) {
+            subsumptionId = command.subsumptionId;
+
+            stanceReset(); // Reset stance as we don't know where our limbs are.
+            updateHandle.enable();
+        });
+        on<Trigger<DisableWalkEngineCommand>>([this](const DisableWalkEngineCommand&) {
+            // Nobody needs the walk engine, so we stop updating it.
+            updateHandle.disable();
+
+            // TODO: Also disable the other walk command reactions?
+        });
 
         updateHandle = on<Trigger<Every<UPDATE_FREQUENCY, Per<std::chrono::seconds>>>, With<Sensors>, Options<Single, Priority<NUClear::HIGH>>>([this](const time_t&, const Sensors& sensors) {
             update(sensors);
@@ -116,13 +134,15 @@ namespace motion {
 
         on<Trigger<WalkStartCommand>>([this](const WalkStartCommand&) {
             start();
-            emit(std::make_unique<ActionPriorites>(ActionPriorites { id, { 25, 10 }})); // TODO: config
+            // emit(std::make_unique<ActionPriorites>(ActionPriorites { subsumptionId, { 25, 10 }})); // TODO: config
         });
 
         on<Trigger<WalkStopCommand>>([this](const WalkStopCommand&) {
+            // TODO: This sets STOP_REQUEST, which appears not to be used anywhere.
+            // If this is the case, we should delete or rethink the WalkStopCommand.
             requestStop();
         });
-
+        
         on<Trigger<Configuration<WalkEngine>>>([this](const Configuration<WalkEngine>& config) {
             configure(config.config);
         });
@@ -133,8 +153,6 @@ namespace motion {
         });
 
         on<Trigger<Startup>>([this](const Startup&) {
-            lastBalanceTime = NUClear::clock::now();
-
             //generateAndSaveStandScript();
             //reset();
             //state = State::LAST_STEP;
@@ -192,20 +210,11 @@ namespace motion {
 
         auto& balance = walkCycle["balance"];
         balanceEnabled = balance["enabled"].as<bool>();
-        balanceAmplitude = balance["amplitude"].as<Expression>();
-        balanceWeight = balance["weight"].as<Expression>();
-        balanceOffset = balance["offset"].as<Expression>();
+        // balanceAmplitude = balance["amplitude"].as<Expression>();
+        // balanceWeight = balance["weight"].as<Expression>();
+        // balanceOffset = balance["offset"].as<Expression>();
 
-        balancePGain = balance["angle_gain"]["p"].as<Expression>();
-        balanceIGain = balance["angle_gain"]["i"].as<Expression>();
-        balanceDGain = balance["angle_gain"]["d"].as<Expression>();
-
-        balanceTransPGainX = balance["translation_gain"]["X"]["p"].as<Expression>();
-        balanceTransDGainX = balance["translation_gain"]["X"]["d"].as<Expression>();
-        balanceTransPGainY = balance["translation_gain"]["Y"]["p"].as<Expression>();
-        balanceTransDGainY = balance["translation_gain"]["Y"]["d"].as<Expression>();
-        balanceTransPGainZ = balance["translation_gain"]["Z"]["p"].as<Expression>();
-        balanceTransDGainZ = balance["translation_gain"]["Z"]["d"].as<Expression>();
+        balancer.configure(balance);
 
         for(auto& gain : balance["servo_gains"]){
             float p = gain["p"].as<Expression>();
@@ -296,7 +305,7 @@ namespace motion {
 
         state = State::STOPPED;
 
-        interrupted = false;
+        // interrupted = false;
     }
 
     void WalkEngine::start() {
@@ -317,7 +326,7 @@ namespace motion {
 
     void WalkEngine::stop() {
         state = State::STOPPED;
-        emit(std::make_unique<ActionPriorites>(ActionPriorites { id, { 0, 0 }})); // TODO: config
+        // emit(std::make_unique<ActionPriorites>(ActionPriorites { subsumptionId, { 0, 0 }})); // TODO: config
         log<NUClear::TRACE>("Walk Engine:: Stop request complete");
         emit(std::make_unique<WalkStopped>());
         emit(std::make_unique<std::vector<ServoCommand>>());
@@ -421,7 +430,7 @@ namespace motion {
 
         if (balanceEnabled) {
             // Apply balance to our support foot
-            balance(swingLeg == LimbID::LEFT_LEG ? rightFootTorso : leftFootTorso
+            balancer.balance(swingLeg == LimbID::LEFT_LEG ? rightFootTorso : leftFootTorso
                 , swingLeg == LimbID::LEFT_LEG ? LimbID::RIGHT_LEG : LimbID::LEFT_LEG
                 , sensors);
         }
@@ -454,8 +463,8 @@ namespace motion {
 
         if (balanceEnabled) {
             // Apply balance to both legs when standing still
-            balance(leftFootTorso, LimbID::LEFT_LEG, sensors);
-            balance(rightFootTorso, LimbID::RIGHT_LEG, sensors);
+            balancer.balance(leftFootTorso, LimbID::LEFT_LEG, sensors);
+            balancer.balance(rightFootTorso, LimbID::RIGHT_LEG, sensors);
         }
 
         auto joints = calculateLegJointsTeamDarwin<DarwinModel>(leftFootTorso, rightFootTorso);
@@ -474,7 +483,7 @@ namespace motion {
         time_t time = NUClear::clock::now() + std::chrono::nanoseconds(std::nano::den / UPDATE_FREQUENCY);
 
         for (auto& joint : joints) {
-            waypoints->push_back({ id, time, joint.first, joint.second, jointGains[joint.first], 100 }); // TODO: support separate gains for each leg
+            waypoints->push_back({ subsumptionId, time, joint.first, joint.second, jointGains[joint.first], 100 }); // TODO: support separate gains for each leg
         }
 
         return std::move(waypoints);
@@ -508,12 +517,12 @@ namespace motion {
         waypoints->reserve(6);
 
         time_t time = NUClear::clock::now() + std::chrono::nanoseconds(std::nano::den/UPDATE_FREQUENCY);
-        waypoints->push_back({ id, time, ServoID::R_SHOULDER_PITCH, float(qRArmActual[0]), jointGains[ServoID::R_SHOULDER_PITCH], 100 });
-        waypoints->push_back({ id, time, ServoID::R_SHOULDER_ROLL,  float(qRArmActual[1]), jointGains[ServoID::R_SHOULDER_ROLL], 100 });
-        waypoints->push_back({ id, time, ServoID::R_ELBOW,          float(qRArmActual[2]), jointGains[ServoID::R_ELBOW], 100 });
-        waypoints->push_back({ id, time, ServoID::L_SHOULDER_PITCH, float(qLArmActual[0]), jointGains[ServoID::L_SHOULDER_PITCH], 100 });
-        waypoints->push_back({ id, time, ServoID::L_SHOULDER_ROLL,  float(qLArmActual[1]), jointGains[ServoID::L_SHOULDER_ROLL], 100 });
-        waypoints->push_back({ id, time, ServoID::L_ELBOW,          float(qLArmActual[2]), jointGains[ServoID::L_ELBOW], 100 });
+        waypoints->push_back({ subsumptionId, time, ServoID::R_SHOULDER_PITCH, float(qRArmActual[0]), jointGains[ServoID::R_SHOULDER_PITCH], 100 });
+        waypoints->push_back({ subsumptionId, time, ServoID::R_SHOULDER_ROLL,  float(qRArmActual[1]), jointGains[ServoID::R_SHOULDER_ROLL], 100 });
+        waypoints->push_back({ subsumptionId, time, ServoID::R_ELBOW,          float(qRArmActual[2]), jointGains[ServoID::R_ELBOW], 100 });
+        waypoints->push_back({ subsumptionId, time, ServoID::L_SHOULDER_PITCH, float(qLArmActual[0]), jointGains[ServoID::L_SHOULDER_PITCH], 100 });
+        waypoints->push_back({ subsumptionId, time, ServoID::L_SHOULDER_ROLL,  float(qLArmActual[1]), jointGains[ServoID::L_SHOULDER_ROLL], 100 });
+        waypoints->push_back({ subsumptionId, time, ServoID::L_ELBOW,          float(qLArmActual[2]), jointGains[ServoID::L_ELBOW], 100 });
 
         return std::move(waypoints);
     }

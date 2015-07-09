@@ -18,6 +18,7 @@
  */
 
 #include "UnitQuaternion.h"
+#include "utility/math/angle.h"
 
 namespace utility {
 namespace math {
@@ -74,7 +75,8 @@ namespace geometry {
     }
 
     double UnitQuaternion::getAngle() const {
-    	return 2 * std::acos(real());
+        //Max and min prevent nand error, presumably due to computational limitations
+    	return 2 * utility::math::angle::acos_clamped(std::fmin(1,std::fmax(real(),-1)));
     }
 
     void UnitQuaternion::setAngle(double angle) {
@@ -120,7 +122,7 @@ namespace geometry {
             return *this;
         }
 
-        double halfTheta = std::acos(cosHalfTheta);
+        double halfTheta = utility::math::angle::acos_clamped(cosHalfTheta);
         double sinHalfTheta = sqrt(1.0 - cosHalfTheta * cosHalfTheta);
 
         // If theta = 180 degrees then result is not fully defined

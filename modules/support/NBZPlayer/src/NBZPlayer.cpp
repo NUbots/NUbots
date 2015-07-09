@@ -150,8 +150,9 @@ namespace support {
                         auto sensors = std::make_unique<DarwinSensors>();
 
                         sensors->accelerometer = {
-                            -message.sensor_data().accelerometer().y(),
-                             message.sensor_data().accelerometer().x(),
+
+                             message.sensor_data().accelerometer().y(),
+                            -message.sensor_data().accelerometer().x(),
                             -message.sensor_data().accelerometer().z()
                         };
 

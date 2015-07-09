@@ -33,6 +33,8 @@
 
 #include "utility/math/matrix/Transform2D.h"
 #include "utility/math/matrix/Transform3D.h"
+#include "utility/motion/Balance.h"
+#include "utility/motion/RobotModels.h"
 
 
 namespace modules {
@@ -85,8 +87,9 @@ namespace motion {
             WALKING
         };
 
-        /// Subsumption ID key to access motors
-        const size_t id;
+        /// Current subsumption ID key to access motors.
+        size_t subsumptionId = 1;
+
         // Reaction handle for the main update loop, disabling when not moving will save unnecessary CPU
         ReactionHandle updateHandle;
 
@@ -94,8 +97,8 @@ namespace motion {
 
         // The state of the current walk
         State state;
-        // Whether subsumption has currently interrupted the walk engine
-        bool interrupted;
+        // // Whether subsumption has currently interrupted the walk engine
+        // bool interrupted;
         // TODO: ???
         bool startFromStep;
         // The time when the current step begun
@@ -184,18 +187,7 @@ namespace motion {
         // constants which define the current values of jointGains based on the robot's balance state
         std::map<ServoID, float> servoControlPGains;
         
-        double balanceTransPGainX;
-        double balanceTransPGainY;
-        double balanceTransPGainZ;
-        double balanceTransDGainX;
-        double balanceTransDGainY;
-        double balanceTransDGainZ;
-
-        double dPitch = 0;
-        double dRoll = 0;
-        double lastPitch = 0;
-        double lastRoll = 0;
-        time_t lastBalanceTime;
+        utility::motion::Balancer balancer;
 
         /*arma::vec4 ankleImuParamX;
         arma::vec4 ankleImuParamY;
@@ -232,7 +224,6 @@ namespace motion {
         void update(const Sensors& sensors);
         void updateStep(double phase, const Sensors& sensors);
         void updateStill(const Sensors& sensors = Sensors());
-        void balance(Transform3D& target, const LimbID& leg, const Sensors& sensors);
 
         void calculateNewStep();
         void setVelocity(Transform2D velocity);

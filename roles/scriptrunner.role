@@ -1,6 +1,7 @@
 ADD_ROLE(
     support::configuration::ConfigSystem
     support::configuration::GlobalConfig
+    support::logging::ConsoleLogHandler
     platform::darwin::HardwareIO
     behaviour::Controller
     platform::darwin::SensorFilter

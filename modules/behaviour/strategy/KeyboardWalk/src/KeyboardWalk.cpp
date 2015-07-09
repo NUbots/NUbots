@@ -24,6 +24,7 @@
 #include <format.h>
 
 #include "messages/motion/WalkCommand.h"
+#include "messages/motion/HeadCommand.h"
 #include "messages/motion/KickCommand.h"
 #include "messages/behaviour/Action.h"
 
@@ -31,6 +32,7 @@ namespace modules {
 namespace behaviour {
 namespace strategy {
 
+    using messages::motion::HeadCommand;
     using messages::motion::WalkCommand;
     using messages::motion::WalkStartCommand;
     using messages::motion::WalkStopCommand;
@@ -93,10 +95,10 @@ namespace strategy {
                 case 'd':
                     right();
                     break;
-                case KEY_LEFT:
+                case 'z':
                     turnLeft();
                     break;
-                case KEY_RIGHT:
+                case 'x':
                     turnRight();
                     break;
                 case 'r':
@@ -110,6 +112,18 @@ namespace strategy {
                     break;
                 case ' ':
                     kickRightForward();
+                    break;
+                case KEY_LEFT:
+                    lookLeft();
+                    break;
+                case KEY_RIGHT:
+                    lookRight();
+                    break;
+                case KEY_UP:
+                    lookUp();
+                    break;
+                case KEY_DOWN:
+                    lookDown();
                     break;
                 case 'q':
                     quit();
@@ -170,10 +184,38 @@ namespace strategy {
 
     void KeyboardWalk::kickRightForward() {
         emit(std::make_unique<KickCommand>(KickCommand{
-            {1, 0, 0}, // vector pointing forward relative to robot
-            LimbID::RIGHT_LEG
+            {-0.05, 0, 0}, //Ball is right of centre for right kick
+            {1, 0, 0}
         }));
         log("right forward kick");
+    }
+
+    void KeyboardWalk::lookLeft() {
+        headYaw += HEAD_DIFF;
+        updateCommand();
+        printStatus();
+        log("look left");
+    }
+
+    void KeyboardWalk::lookRight() {
+        headYaw -= HEAD_DIFF;
+        updateCommand();
+        printStatus();
+        log("look right");
+    }
+
+    void KeyboardWalk::lookUp() {
+        headPitch -= HEAD_DIFF;
+        updateCommand();
+        printStatus();
+        log("look up");
+    }
+
+    void KeyboardWalk::lookDown() {
+        headPitch += HEAD_DIFF;
+        updateCommand();
+        printStatus();
+        log("look down");
     }
 
     void KeyboardWalk::walkToggle() {
@@ -190,6 +232,8 @@ namespace strategy {
     void KeyboardWalk::reset() {
         velocity = {0, 0};
         rotation = 0;
+        headYaw = 0;
+        headPitch = 0;
         updateCommand();
         printStatus();
         log("reset");
@@ -200,6 +244,11 @@ namespace strategy {
         walkCommand->command.xy()    = velocity;
         walkCommand->command.angle() = rotation;
         emit(std::move(walkCommand));
+
+        auto headCommand = std::make_unique<HeadCommand>();
+        headCommand->yaw = headYaw;
+        headCommand->pitch = headPitch;
+        emit(std::move(headCommand));
     }
 
     void KeyboardWalk::printStatus() {
@@ -207,6 +256,7 @@ namespace strategy {
         log(fmt::format("Velocity: {:.4f}, {:.4f}", velocity[0], velocity[1]));
         log(fmt::format("Rotation: {:.4f}", rotation));
         log(fmt::format("Moving: {}", moving));
+        log(fmt::format("Head Yaw: {:.2f}, Head Pitch: {:.2f}", headYaw * 180 / M_PI, headPitch * 180 / M_PI));
     }
 
     void KeyboardWalk::quit() {

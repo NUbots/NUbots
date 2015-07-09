@@ -1,0 +1,30 @@
+
+# Minimum time between path planning attempts (if the environment hasn't
+# changed significantly).
+planning_interval: 5
+
+# Planning time limit in seconds (per planning interval).
+planning_time_limit: 0.5
+
+# Margin by which to avoid goalposts.
+goalpost_safety_margin: 0.03
+
+# The radius of the ball obstacle, which is a circle positioned so that it is
+# tangential to the ball at the closest point to the goal position.
+ball_obstacle_margin: 0.05
+
+# Dimensions of the robot's rectangular 'footprint', a rectangle centred on
+# the origin in robot space. Used for collision checking with obstacles during
+# planning.
+robot_footprint_dimensions: [0.12, 0.17]
+
+# The default target position has the facing its target direction, with the
+# front of the robot touching the center of the ball. This offset is applied
+# to that position (e.g. to make the robot line up with the ball in front of
+# one foot).
+target_offset: [-0.02, 0.06] # stand 2cm back, and line up ball with left foort
+
+# ball_obstacle_radius: 0.1
+# ball_obstacle_offset: [0.05, 0]
+
+draw_planning_tree: false

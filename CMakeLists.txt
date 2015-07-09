@@ -11,6 +11,14 @@ OPTION(BUILD_TESTS "Builds all of the tests for each module." OFF)
 # Set to on to build as shared libraries
 OPTION(SHARED_BUILD "Build the binaries by linking to shared libraries." ON)
 
+OPTION(STATIC_LIBRARIES "Prefer using static .a files rather than .so files. NOTE: This must be enabled from the start!" OFF)
+
+IF(STATIC_LIBRARIES)
+    SET(CMAKE_FIND_LIBRARY_SUFFIXES
+        ${CMAKE_STATIC_LIBRARY_SUFFIX}
+        ${CMAKE_SHARED_LIBRARY_SUFFIX})
+ENDIF()
+
 # We use additional modules that cmake needs to know about
 SET(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/tools/cmake/")
 

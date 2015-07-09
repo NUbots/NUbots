@@ -38,7 +38,7 @@ ADD_ROLE(
     behaviour::skills::GoalSaver
     behaviour::planning::KickPlanner
     behaviour::planning::DivePlanner
-    behaviour::planning::WalkPathPlanner
+    behaviour::planning::SimpleWalkPathPlanner
     behaviour::strategy::SoccerStrategy
 
     #Motion

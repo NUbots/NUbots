@@ -38,7 +38,7 @@ namespace skills {
         float KICK_PRIORITY;
         float EXECUTION_PRIORITY;
 
-        messages::motion::KickCommand kickCommand;
+        messages::motion::KickScriptCommand kickCommand;
 
         void updatePriority(const float& priority);
         int getDirectionalQuadrant(float x, float y);

@@ -1,0 +1,54 @@
+
+kick_priority: 30
+execution_priority: 40
+
+servo:
+  gain: 30
+  torque: 100
+
+balancer:
+  foot_separation: 0.074 # 0.074 = hip separation
+  adjustment: -0.0000 #default value is 0.
+  stand_height: 0.23 #m
+  forward_lean: 0.0 #m
+
+  forward_duration: 1 #m/s
+  return_duration: 1 #m/s
+
+active_balance:
+  enabled: true
+  angle_gain:
+    p: 0.0
+    i: 0.0
+    d: 0.0
+  translation_gain:
+    X:
+      p: 0.25
+      d: -0.0
+    Y:
+      p: 0.25
+      d: 0
+    Z:
+      p: 0.0
+      d: 0
+
+kick:
+  follow_through: 0.1 #m
+  wind_up: 0.1 #m
+  foot_separation_margin: 0.02 #m
+
+kick_frames:
+  lift_foot:
+    pos: [-0.05,0,0.05]
+    orientation: [0,0,0]
+    duration: 1  
+  kick:
+    pos: [0,0,0]
+    orientation: [0,0,0]
+    duration: 0.1
+  place_foot:
+    pos: [0,0,0.01]
+    orientation: [0,0,0]
+    duration: 0.5
+
+

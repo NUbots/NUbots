@@ -61,11 +61,11 @@ bool test(const Circle& circle, const RotatedRectangle& rect) {
 	}
 
 	if (x < hw && y > hh) { // B
-		return y > hh + r;
+		return y < hh + r;
 	}
 
 	if (x > hw && y < hh) { // F
-		return x > hw + r;
+		return x < hw + r;
 	}
 
 	// if (x > hw && y > hh) { // C

@@ -21,7 +21,7 @@
 #include <armadillo>
 
 #include "messages/behaviour/KickPlan.h"
-#include "messages/behaviour/WalkStrategy.h"
+#include "messages/behaviour/MotionCommand.h"
 #include "messages/support/Configuration.h"
 #include "messages/vision/VisionObjects.h"
 #include "utility/time/time.h"
@@ -32,7 +32,7 @@ namespace strategy {
 
     using messages::behaviour::WalkApproach;
     using messages::behaviour::WalkTarget;
-    using messages::behaviour::WalkStrategy;
+    using messages::behaviour::MotionCommand;
     using messages::behaviour::KickPlan;
     using messages::support::Configuration;
     using messages::behaviour::proto::Behaviour;
@@ -90,7 +90,7 @@ namespace strategy {
     }
 
     void KickAtGoal::walkToBall() {
-        auto approach = std::make_unique<WalkStrategy>();
+        auto approach = std::make_unique<MotionCommand>();
         approach->targetPositionType = WalkTarget::Ball;
         approach->targetHeadingType = WalkTarget::WayPoint;
         approach->walkMovementType = WalkApproach::WalkToPoint;
@@ -101,7 +101,7 @@ namespace strategy {
 
     void KickAtGoal::spinToWin() {
         // TODO: does this work?
-        auto command = std::make_unique<WalkStrategy>();
+        auto command = std::make_unique<MotionCommand>();
         command->walkMovementType = WalkApproach::DirectCommand;
         command->target = {0,0};
         command->heading = {1,0};

@@ -19,6 +19,9 @@
 
 #include "LUTClassifier.h"
 #include "QuexClassifier.h"
+#include "utility/math/geometry/ParametricLine.h"
+#include "utility/math/geometry/Quad.h"
+#include "utility/nubugger/NUhelpers.h"
 
 namespace modules {
     namespace vision {
@@ -27,6 +30,9 @@ namespace modules {
         using messages::vision::LookUpTable;
         using messages::vision::ObjectClass;
         using messages::vision::ClassifiedImage;
+        using utility::math::geometry::Line;
+        using utility::math::geometry::Quad;
+        using utility::nubugger::drawVisionLines;
 
         void LUTClassifier::findVisualHorizon(const Image& image, const LookUpTable& lut, ClassifiedImage<ObjectClass>& classifiedImage) {
 
@@ -35,7 +41,7 @@ namespace modules {
             auto& visualHorizon = classifiedImage.visualHorizon;
             auto& maxVisualHorizon = classifiedImage.maxVisualHorizon;
             auto& minVisualHorizon = classifiedImage.minVisualHorizon;
-
+            
             // Cast lines to find our visual horizon
             for(uint x = 0; x < image.width; x += VISUAL_HORIZON_SPACING) {
 

@@ -51,6 +51,18 @@ namespace matrix {
             Transform();
 
             /**
+             * @brief Construct transform from a position and an angle.
+             */
+            Transform(const arma::vec2 xy_, double angle_);
+
+            /**
+             * Construct a transform that represents the position and
+             * orientation of a camera positioned at 'from' and facing toward
+             * 'to'.
+             */
+            static Transform2D lookAt(const arma::vec2 from, arma::vec2 to);
+
+            /**
              * @brief Transforms position from local coordinates relative to 'reference', to world coordinates
              *
              * @param reference A position to become relatively local to

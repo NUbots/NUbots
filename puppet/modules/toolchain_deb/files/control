@@ -1,0 +1,16 @@
+Package: nubots-toolchain
+Version: 1.0.1
+Section: base
+Priority: optional
+Architecture: i386
+Depends: libboost-system-dev,
+         libboost-filesystem-dev,
+         libboost-thread-dev,
+         libboost-serialization-dev,
+         libboost-program-options-dev,
+         libboost-test-dev,
+         libboost-chrono-dev,
+         libboost-date-time-dev
+Maintainer: NUbots <nubots@nubots.net>
+Description: NUbots toolchain
+ All of the libraries built for the NUbots toolchain

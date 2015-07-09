@@ -28,10 +28,23 @@ namespace math {
 namespace matrix {
 
     using utility::math::angle::normalizeAngle;
+    using utility::math::angle::vectorToBearing;
 
     Transform2D::Transform() {
         zeros();
     }
+
+    Transform2D::Transform(const arma::vec2 xy_, double angle_) {
+        xy() = xy_;
+        angle() = angle_;
+    }
+
+    Transform2D Transform2D::lookAt(const arma::vec2 from, arma::vec2 to) {
+        arma::vec2 vecHeading = to - from;
+        double angle = vectorToBearing(vecHeading);
+        return {from, angle};
+    }
+
 
     Transform2D Transform2D::localToWorld(const Transform2D& reference) const {
         double cosAngle = std::cos(angle());

@@ -27,6 +27,7 @@
 #include "utility/math/matrix/Transform3D.h"
 #include "utility/math/geometry/Plane.h"
 #include "utility/math/geometry/ParametricLine.h"
+#include "utility/math/angle.h"
 
 namespace utility {
 namespace math {
@@ -86,7 +87,7 @@ namespace vision {
         arma::vec3 camSpaceP1 = {camFocalLengthPixels, screen1[0], screen1[1]};
         arma::vec3 camSpaceP2 = {camFocalLengthPixels, screen2[0], screen2[1]};
 
-        return std::acos(arma::dot(camSpaceP1,camSpaceP2) / (arma::norm(camSpaceP1) * arma::norm(camSpaceP2)));
+        return utility::math::angle::acos_clamped(arma::dot(camSpaceP1,camSpaceP2) / (arma::norm(camSpaceP1) * arma::norm(camSpaceP2)));
     }
 
     inline double widthBasedDistanceToCircle(const double& circleDiameter, const arma::vec2& s1, const arma::vec2& s2, const double& camFocalLengthPixels){

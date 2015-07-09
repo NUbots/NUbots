@@ -52,6 +52,14 @@ namespace math {
             return angle;
         }
 
+        inline double acos_clamped(const double& a){
+            return std::acos(std::fmax(std::fmin(a,1),-1));
+        }
+
+        inline double asin_clamped(const double& a){
+            return std::asin(std::fmax(std::fmin(a,1),-1));
+        }
+
         /**
          * Calculates the difference between two angles between -pi and pi
          * Method: http://math.stackexchange.com/questions/1158223/solve-for-x-where-a-sin-x-b-cos-x-c-where-a-b-and-c-are-kno
@@ -60,6 +68,22 @@ namespace math {
         inline double difference(const double a, const double b) {
 
             return M_PI - std::fabs(std::fmod(std::fabs(a - b), 2 * M_PI) - M_PI);
+        }
+
+        /**
+         * Calculates the signed angle with the smallest absolute value such
+         * that: normalizeAngle(b + signedDifference(a, b)) == normalizeAngle(a).
+         * Method: http://stackoverflow.com/a/7869457
+         */
+        inline double signedDifference(const double a, const double b) {
+
+            auto x = a - b;
+
+            auto m = x - std::floor(x/(2*M_PI)) * (2*M_PI);
+
+            auto d = std::fmod(m + M_PI, 2*M_PI) - M_PI;
+
+            return d;
         }
 
         inline double vectorToBearing(arma::vec2 dirVec) {
@@ -91,7 +115,7 @@ namespace math {
             float alpha = atan2(a_,b_);
 
             //Hence the equation becomes $\cos(\alpha)\cos(x)+\sin(\alpha)\sin(x) = cos(x-\alpha) = c\_$
-            return alpha + std::acos(c_);
+            return alpha + acos_clamped(c_);
         }
     }
 }

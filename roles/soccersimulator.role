@@ -7,14 +7,15 @@ ADD_ROLE(
     #support::configuration::NetworkingConfiguration
     support::NUbugger
     support::configuration::SoccerConfig
+    support::GrimReaper
+
+    #input
+    input::GameController
 
     #Simulation
     platform::darwin::HardwareSimulator
     support::SoccerSimulator
     support::VirtualCamera
-
-    #input
-    input::GameController
 
     #Sensors
     platform::darwin::SensorFilter
@@ -28,11 +29,12 @@ ADD_ROLE(
     behaviour::skills::Stand
     behaviour::skills::FallingRelax
     behaviour::skills::Getup
-    behaviour::skills::KickScript
     behaviour::skills::HeadBehaviourSoccer
-    behaviour::planning::KickPlanner
+    behaviour::skills::WalkPathFollower # Follows WalkPaths.
+    behaviour::skills::DirectWalkController
+    #behaviour::planning::KickPlanner
     #behaviour::planning::SimpleWalkPathPlanner
-    behaviour::planning::OMPLPathPlanner
+    behaviour::planning::OMPLPathPlanner  # Creates WalkPaths.
     #behaviour::strategy::KickAtGoal
     behaviour::strategy::SoccerStrategy
 
@@ -40,5 +42,6 @@ ADD_ROLE(
     motion::ScriptEngine
     motion::WalkEngine
     motion::HeadController
+    motion::IKKick
 )
 
