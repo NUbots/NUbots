@@ -7,13 +7,15 @@ ADD_ROLE(
     support::configuration::SoccerConfig
     support::NUbugger
 
+    #input
+    input::GameController
+
     # Sensors
     input::LinuxCamera
     platform::darwin::HardwareIO
     platform::darwin::SensorFilter
 
     # Vision
-    #vision::FeatureDetector
     vision::LUTClassifier
     vision::BallDetector
     vision::GoalDetector
@@ -26,9 +28,10 @@ ADD_ROLE(
     # Behaviour
     behaviour::Controller
     behaviour::skills::Stand
-    # behaviour::skills::FallingRelax
+    behaviour::skills::FallingRelax
     behaviour::strategy::KeyboardWalk
     behaviour::skills::Getup
+    behaviour::strategy::SoccerStrategy
 
     
     # Motion
