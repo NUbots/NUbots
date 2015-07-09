@@ -219,14 +219,14 @@ namespace strategy {
     }
 
     void KeyboardWalk::walkToggle() {
-        if (moving) {
+        /*if (moving) {
             emit(std::make_unique<WalkStopCommand>());
         }
         else {
             emit(std::make_unique<WalkStartCommand>());
             updateCommand();
         }
-        printStatus();
+        printStatus();*/
     }
 
     void KeyboardWalk::reset() {
@@ -240,10 +240,10 @@ namespace strategy {
     }
 
     void KeyboardWalk::updateCommand() {
-        auto walkCommand = std::make_unique<WalkCommand>();
+        /*auto walkCommand = std::make_unique<WalkCommand>();
         walkCommand->command.xy()    = velocity;
         walkCommand->command.angle() = rotation;
-        emit(std::move(walkCommand));
+        emit(std::move(walkCommand));*/
 
         auto headCommand = std::make_unique<HeadCommand>();
         headCommand->yaw = headYaw;
