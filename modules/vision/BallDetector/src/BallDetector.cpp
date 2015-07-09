@@ -81,7 +81,6 @@ namespace vision {
         on<Trigger<Raw<ClassifiedImage<ObjectClass>>>, With<CameraParameters>, With<Optional<FieldDescription>>, Options<Single>>("Ball Detector", [this](
             const std::shared_ptr<const ClassifiedImage<ObjectClass>>& rawImage, const CameraParameters& cam, const std::shared_ptr<const FieldDescription>& field) {
 
-
             if (field == nullptr) {
                 NUClear::log(__FILE__, ", ", __LINE__, ": FieldDescription Update: support::configuration::SoccerConfig module might not be installed.");
                 throw std::runtime_error("FieldDescription Update: support::configuration::SoccerConfig module might not be installed");
@@ -97,43 +96,6 @@ namespace vision {
             }
 
             double deltaT = 1e-6 * std::chrono::duration_cast<std::chrono::microseconds>(sensors.timestamp - lastFrame.time).count();
-
-            // Get all the points that could make up the ball
-            // for(int i = 0; i < 2; ++i) {
-
-            //     auto segments = i ? image.horizontalSegments.equal_range(ObjectClass::BALL)
-            //                       : image.verticalSegments.equal_range(ObjectClass::BALL);
-
-            //     for(auto it = segments.first; it != segments.second; ++it) {
-
-            //         auto& segment = it->second;
-            //         auto& start = segment.start;
-            //         auto& end = segment.end;
-
-            //         bool belowHorizon = image.visualHorizonAtPoint(end[0]) < end[1] || image.visualHorizonAtPoint(start[0]) < start[1];
-
-            //         // We throw out points if they are:
-            //         // Less the full quality (sub-sampled)
-            //         // Do not have a transition on either side (are on an edge)
-            //         // Go from an orange to other to orange segment (are interior)
-
-            //         if(belowHorizon
-            //             && segment.subsample == 1
-            //             && segment.next
-            //             && (!segment.next->next || segment.next->next->colour != ObjectClass::BALL)) {
-
-            //             ballPoints.push_back({ double(end[0]), double(end[1]) });
-            //         }
-
-            //         if(belowHorizon
-            //             && segment.subsample == 1
-            //             && segment.previous
-            //             && (!segment.previous->previous || segment.previous->previous->colour != ObjectClass::BALL)) {
-
-            //             ballPoints.push_back({ double(start[0]), double(start[1]) });
-            //         }
-            //     }
-            // }
 
             // Use ransac to find the ball
             auto ransacResults = Ransac<RansacCircleModel>::fitModels(ballPoints.begin()

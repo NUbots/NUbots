@@ -12,7 +12,7 @@ visual_horizon:
 # Settings related to the ball finder
 ball:
   # The number of lines that will pass through the ball when finding (at minimum)
-  intersections_coarse: 2
+  intersections_coarse: 4
   # The number of lines that will pass through the ball when enhancing
   intersections_fine: 10
   # The multiplier for the search for the ball
