@@ -23,6 +23,7 @@
 
 #include "messages/support/Configuration.h"
 #include "messages/localisation/FieldObject.h"
+#include "messages/behaviour/MotionCommand.h"
 #include "messages/behaviour/WalkPath.h"
 #include "messages/behaviour/Action.h"
 #include "messages/motion/WalkCommand.h"
@@ -42,8 +43,10 @@ namespace skills {
     using messages::support::Configuration;
     using Self = messages::localisation::Self;
 
+    using messages::behaviour::MotionCommand;
     using messages::behaviour::WalkPath;
     using messages::behaviour::RegisterAction;
+    using messages::behaviour::ActionPriorites;
 
     using messages::motion::KickFinished;
     using messages::motion::WalkCommand;
@@ -104,9 +107,13 @@ namespace skills {
                 command.type == MotionCommand::Type::BallApproach) {
                 followPathReaction.enable();
                 updatePathReaction.enable();
+                // Increase priority?
+                emit(std::make_unique<ActionPriorites>(ActionPriorites { subsumptionId, { 25, 10 }}));
             } else {
                 followPathReaction.disable();
                 updatePathReaction.disable();
+                // Decrease priority?
+                emit(std::make_unique<ActionPriorites>(ActionPriorites { subsumptionId, { 0, 0 }}));
             }
         });
 

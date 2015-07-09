@@ -41,8 +41,8 @@ namespace matrix {
 
     Transform2D Transform2D::lookAt(const arma::vec2 from, arma::vec2 to) {
         arma::vec2 vecHeading = to - from;
-        double goalBearing = vectorToBearing(vecHeading);
-        return {from, goalBearing};
+        double angle = vectorToBearing(vecHeading);
+        return {from, angle};
     }
 
 
