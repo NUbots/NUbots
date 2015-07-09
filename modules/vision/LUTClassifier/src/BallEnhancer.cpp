@@ -36,11 +36,116 @@ namespace modules {
         using utility::math::vision::imageToScreen;
         using utility::nubugger::drawVisionLines;
 
+        std::pair<float, arma::ivec2> fieldEdgeDirection(const arma::ivec2& base, const Image& image, const arma::fvec3 greenCentroid) {
+
+
+            // Get our centre and vector to the green centroid
+            // auto centrePixel = image(base[0], base[1]);
+            // arma::fvec3 c({ float(centrePixel.y), float(centrePixel.cb), float(centrePixel.cr) });
+            // arma::fvec3 g = c - greenCentroid;
+
+
+            // Get our relevant pixels
+            std::array<Image::Pixel, 24> pixels {
+                image(base[0] - 2, base[1] - 2),
+                image(base[0] - 2, base[1] - 1),
+                image(base[0] - 2, base[1] + 0),
+                image(base[0] - 2, base[1] + 1),
+                image(base[0] - 2, base[1] + 2),
+
+                image(base[0] - 1, base[1] - 2),
+                image(base[0] - 1, base[1] - 1),
+                image(base[0] - 1, base[1] + 0),
+                image(base[0] - 1, base[1] + 1),
+                image(base[0] - 1, base[1] + 2),
+
+                image(base[0] + 0, base[1] - 2),
+                image(base[0] + 0, base[1] - 1),
+                image(base[0] + 0, base[1] + 1),
+                image(base[0] + 0, base[1] + 2),
+
+                image(base[0] + 1, base[1] - 2),
+                image(base[0] + 1, base[1] - 1),
+                image(base[0] + 1, base[1] + 0),
+                image(base[0] + 1, base[1] + 1),
+                image(base[0] + 1, base[1] + 2),
+
+                image(base[0] + 2, base[1] - 2),
+                image(base[0] + 2, base[1] - 1),
+                image(base[0] + 2, base[1] + 0),
+                image(base[0] + 2, base[1] + 1),
+                image(base[0] + 2, base[1] + 2)
+            };
+
+            // Find out how green each pixel is!
+            std::array<float, 24> greenness;
+            for(int i = 0; i < int(greenness.size()); ++i) {
+                greenness[i] = arma::norm(greenCentroid - arma::fvec3({ float(pixels[i].y), float(pixels[i].cb), float(pixels[i].cr) }));
+            }
+
+            constexpr float M_1_SQRT5 = 0.4472135955;
+            constexpr float M_2_SQRT5 = 0.894427191;
+            constexpr float M_SQRT2_2 = M_SQRT2 * 0.5;
+
+            // 0 5 10 14 19
+            // 1 6 11 15 20
+            // 2 7    16 21
+            // 3 8 12 17 22
+            // 4 9 13 18 23
+
+            arma::fvec2 greenDirection = (arma::fvec2({-M_SQRT2_2, -M_SQRT2_2}) * greenness[0])
+                                       + (arma::fvec2({-M_2_SQRT5, -M_1_SQRT5}) * greenness[1])
+                                       + (arma::fvec2({-1        , +0})         * greenness[2])
+                                       + (arma::fvec2({-M_2_SQRT5, +M_1_SQRT5}) * greenness[3])
+                                       + (arma::fvec2({-M_SQRT2_2, +M_SQRT2_2}) * greenness[4])
+                                       + (arma::fvec2({-M_1_SQRT5, -M_2_SQRT5}) * greenness[5])
+                                       + (arma::fvec2({-M_SQRT2_2, -M_SQRT2_2}) * greenness[6])
+                                       + (arma::fvec2({-1        , +0})         * greenness[7])
+                                       + (arma::fvec2({-M_SQRT2_2, +M_SQRT2_2}) * greenness[8])
+                                       + (arma::fvec2({-M_1_SQRT5, +M_2_SQRT5}) * greenness[9])
+                                       + (arma::fvec2({+0        , -1})         * greenness[10])
+                                       + (arma::fvec2({+0        , -1})         * greenness[11])
+                                       + (arma::fvec2({+0        , +1})         * greenness[12])
+                                       + (arma::fvec2({+0        , +1})         * greenness[13])
+                                       + (arma::fvec2({+M_1_SQRT5, -M_2_SQRT5}) * greenness[14])
+                                       + (arma::fvec2({+M_SQRT2_2, -M_SQRT2_2}) * greenness[15])
+                                       + (arma::fvec2({+1        , +0})         * greenness[16])
+                                       + (arma::fvec2({+M_SQRT2_2, +M_SQRT2_2}) * greenness[17])
+                                       + (arma::fvec2({+M_1_SQRT5, +M_2_SQRT5}) * greenness[14])
+                                       + (arma::fvec2({+M_SQRT2_2, -M_SQRT2_2}) * greenness[19])
+                                       + (arma::fvec2({+M_2_SQRT5, -M_1_SQRT5}) * greenness[20])
+                                       + (arma::fvec2({+1        , +0})         * greenness[21])
+                                       + (arma::fvec2({+M_2_SQRT5, +M_1_SQRT5}) * greenness[22])
+                                       + (arma::fvec2({+M_SQRT2_2, +M_SQRT2_2}) * greenness[23]);
+
+            // 1/sqrt(5);
+            // 2/sqrt(5);
+
+
+
+            // Work out our greenest direction!
+            // arma::fvec2 greenDirection = (arma::fvec2({-M_SQRT2_2, -M_SQRT2_2}) * greenness[6])
+            //                            + (arma::fvec2({-1        , +0})         * greenness[7])
+            //                            + (arma::fvec2({-M_SQRT2_2, +M_SQRT2_2}) * greenness[8])
+            //                            + (arma::fvec2({+0        , -1})         * greenness[11])
+            //                            + (arma::fvec2({+0        , +1})         * greenness[12])
+            //                            + (arma::fvec2({+M_SQRT2_2, -M_SQRT2_2}) * greenness[15])
+            //                            + (arma::fvec2({+1        , +0})         * greenness[16])
+            //                            + (arma::fvec2({+M_SQRT2_2, +M_SQRT2_2}) * greenness[17]);
+
+            // How strong is our greenness movement?
+            double strength = arma::norm(greenDirection);
+
+            // Normalise our direction
+            greenDirection /= strength;
+
+            strength /= greenness.size();
+            arma::ivec2 greenNormal({ -int(std::round(greenDirection[1])), int(std::round(greenDirection[0])) });
+
+            return std::make_pair(strength, greenNormal);
+        }
+
         void LUTClassifier::enhanceBall(const Image& image, const LookUpTable& lut, ClassifiedImage<ObjectClass>& classifiedImage) {
-
-
-            // TODO find all of the segments that are white below the green horizon
-
 
             // Loop through all of our possible ball segments
             std::vector<arma::ivec2> points;
@@ -51,30 +156,104 @@ namespace modules {
 
                 // We throw out points if they:
                 // Have both edges above the green horizon
-                if(classifiedImage.visualHorizonAtPoint(pt.start[0]) <= pt.start[1] || classifiedImage.visualHorizonAtPoint(pt.end[0]) <= pt.end[1]) {
+                // Are too small
+                if((classifiedImage.visualHorizonAtPoint(pt.start[0]) <= pt.start[1]
+                || classifiedImage.visualHorizonAtPoint(pt.end[0]) <= pt.end[1])
+                && pt.length > 20) {
                     points.push_back(pt.midpoint);
                 }
             }
 
-            std::vector<std::pair<arma::ivec2, arma::ivec2>> debug;
-            std::vector<arma::ivec2> edge;
+            std::vector<std::tuple<arma::ivec2, arma::ivec2, arma::vec4>> debug;
+            std::vector<arma::ivec2> edges;
 
             // For each of these points move upward until we find a strong transition to green
             for(auto& point : points) {
 
+                // The last pixel we looked at
+                // auto lastPixel = image(point[0], point[1]);
+
                 for(int y = point[1]; y > classifiedImage.horizon.y(point[0]); --y) {
 
-                    // Take the difference and see if it's strong enough
                     char c = lut(image(point[0], y));
+
                     if(c == 'g') {
-                        edges.push_back(arma::ivec2({ point[0], y }));
-                        debug.push_back(std::make_pair(point, arma::ivec2({ point[0], y })));
+                        edges.push_back(arma::ivec2({ point[0], y - 1 }));
+                        debug.push_back(std::make_tuple(point, arma::ivec2({ point[0], y - 1 }), arma::vec4({0,1,1,1})));
                         break;
                     }
                 }
             }
 
+            for(auto& edge : edges) {
+
+                // Go clockwise
+                arma::ivec2 point = edge;
+                for(int i = 0; i < 100; ++i) {
+
+                    std::tuple<arma::ivec2, arma::ivec2, arma::vec4> d;
+                    std::get<0>(d) = point;
+
+                    float strength;
+                    arma::ivec2 direction;
+                    std::tie(strength, direction) = fieldEdgeDirection(point, image, greenCentroid);
+
+                    if(strength < 2) {
+                        break;
+                    }
+
+                    point += direction;
+
+                    // if(strength > 128) {
+                        classifiedImage.ballPoints.push_back(point);
+
+                        std::get<1>(d)  = point;
+
+                        float r = (strength / 30);
+                        float b = 1 - (strength / 30);
+                        std::get<2>(d)  = arma::vec4({r,0,b,1});
+                        debug.push_back(d);
+                    // }
+                }
+
+                // Go Anticlockwise
+                point = edge;
+                for(int i = 0; i < 100; ++i) {
+
+                    std::tuple<arma::ivec2, arma::ivec2, arma::vec4> d;
+                    std::get<0>(d) = point;
+
+                    float strength;
+                    arma::ivec2 direction;
+                    std::tie(strength, direction) = fieldEdgeDirection(point, image, greenCentroid);
+
+                    if(strength < 2) {
+                        break;
+                    }
+
+                    point -= direction;
+
+                    // if(strength > 128) {
+                        classifiedImage.ballPoints.push_back(point);
+
+                        std::get<1>(d)  = point;
+
+                        float r = (strength / 30);
+                        float b = 1 - (strength / 30);
+                        std::get<2>(d)  = arma::vec4({r,0,b,1});
+                        debug.push_back(d);
+                    // }
+                }
+            }
+
+            log(classifiedImage.ballPoints.size());
+
             emit(drawVisionLines(debug));
+
+            // for(auto& edge : edges) {
+
+            //     fieldEdgeDirection(edge);
+            // }
 
             // Now do we look for a cluster?
 

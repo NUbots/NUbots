@@ -74,6 +74,9 @@ namespace messages {
             // Our images dimensions
             arma::uvec2 dimensions;
 
+            // Points that could make up the ball
+            std::vector<arma::ivec2> ballPoints;
+
             // Our horizon
             utility::math::geometry::Line horizon;
 
