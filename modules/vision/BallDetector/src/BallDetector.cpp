@@ -128,7 +128,7 @@ namespace vision {
             green_radial_samples = config["green_radial_samples"].as<Expression>();
             green_angular_samples = config["green_angular_samples"].as<Expression>();
 
-            number_of_clusters = config["number_of_clusters"].as<int>();
+            kmeansClusterer.configure(config["clustering"]);
 
             lastFrame.time = NUClear::clock::now();
         });
@@ -157,6 +157,7 @@ namespace vision {
             for (int i = 0; i < ballPoints.size(); i++){
                 clusterData.col(i) = ballPoints[i];
             }
+            kmeansClusterer.learn(clusterData);
             
             // Use ransac to find the ball
             auto ransacResults = Ransac<RansacCircleModel>::fitModels(ballPoints.begin()

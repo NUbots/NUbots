@@ -47,7 +47,7 @@ namespace vision {
         double green_radial_samples;
         double green_angular_samples;
 
-        int number_of_clusters;
+        utility::math::learning::KMeans kmeansClusterer;
 
         struct Frame{
             time_t time;
