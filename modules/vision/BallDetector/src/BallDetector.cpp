@@ -72,7 +72,7 @@ namespace vision {
 
     float BallDetector::approximateCircleGreenRatio(const Circle& circle, const Image& image, const LookUpTable& lut) {
         // TODO:
-        std::vector<std::tuple<arma::ivec2, arma::ivec2, arma::vec4>> debug;
+        // std::vector<std::tuple<arma::ivec2, arma::ivec2, arma::vec4>> debug;
         float r = 0;
         int numGreen = 0;
         for(int i = 0; i < green_radial_samples; r = (++i) * circle.radius / float(green_radial_samples)) {
@@ -80,7 +80,7 @@ namespace vision {
             if(r == 0){
                 arma::ivec2 ipos = arma::ivec({int(std::round(circle.centre[0])), int(std::round(circle.centre[1]))});
                 if(ipos[0] >= 0 && ipos[0] < image.width && ipos[1] >= 0 && ipos[1] < image.height){
-                    debug.push_back(std::make_tuple(ipos, ipos + arma::ivec2{1,1}, arma::vec4{1,1,1,1}));
+                    // debug.push_back(std::make_tuple(ipos, ipos + arma::ivec2{1,1}, arma::vec4{1,1,1,1}));
                     if(lut(image(ipos)) == 'g'){
                         numGreen++;
                     }
@@ -93,7 +93,7 @@ namespace vision {
                 arma::vec2 pos = circle.centre + arma::vec2({x,y});
                 arma::ivec2 ipos = arma::ivec2({int(std::round(pos[0])),int(std::round(pos[1]))});
                 if(ipos[0] >= 0 && ipos[0] < image.width && ipos[1] >= 0 && ipos[1] < image.height){
-                    debug.push_back(std::make_tuple(ipos, ipos + arma::ivec2{1,1}, arma::vec4{1,1,1,1}));
+                    // debug.push_back(std::make_tuple(ipos, ipos + arma::ivec2{1,1}, arma::vec4{1,1,1,1}));
                     if(lut(image(ipos)) == 'g'){
                         numGreen++;
                     }
@@ -102,7 +102,7 @@ namespace vision {
             // sample point in lut and check if == 'g'
         }
 
-        emit(drawVisionLines(debug));
+        // emit(drawVisionLines(debug));
 
         float greenRatio = numGreen / float(1 + (green_radial_samples-1) * green_angular_samples);
         return greenRatio;

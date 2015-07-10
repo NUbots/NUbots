@@ -136,7 +136,7 @@ namespace modules {
                 }
             }
 
-            std::vector<std::tuple<arma::ivec2, arma::ivec2, arma::vec4>> debug;
+            // std::vector<std::tuple<arma::ivec2, arma::ivec2, arma::vec4>> debug;
             std::vector<arma::ivec2> edges;
 
             // For each of these points move upward until we find a strong transition to green
@@ -151,7 +151,7 @@ namespace modules {
 
                     if(c == 'g') {
                         edges.push_back(arma::ivec2({ point[0], y - 1 }));
-                        debug.push_back(std::make_tuple(point, edges.back(), arma::vec4({0,1,1,1})));
+                        // debug.push_back(std::make_tuple(point, edges.back(), arma::vec4({0,1,1,1})));
                         break;
                     }
                 }
@@ -169,7 +169,7 @@ namespace modules {
 
                     if(c == 'g') {
                         edges.push_back(arma::ivec2({ x + 1, point[1] }));
-                        debug.push_back(std::make_tuple(point, edges.back(), arma::vec4({0,1,1,1})));
+                        // debug.push_back(std::make_tuple(point, edges.back(), arma::vec4({0,1,1,1})));
                         break;
                     }
                 }
@@ -187,7 +187,7 @@ namespace modules {
 
                     if(c == 'g') {
                         edges.push_back(arma::ivec2({ x - 1, point[1] }));
-                        debug.push_back(std::make_tuple(point, edges.back(), arma::vec4({0,1,1,1})));
+                        // debug.push_back(std::make_tuple(point, edges.back(), arma::vec4({0,1,1,1})));
                         break;
                     }
                 }
@@ -205,8 +205,8 @@ namespace modules {
                 arma::ivec2 point = edge;
                 for(int i = 0; i < 100; ++i) {
 
-                    std::tuple<arma::ivec2, arma::ivec2, arma::vec4> d;
-                    std::get<0>(d) = point;
+                    // std::tuple<arma::ivec2, arma::ivec2, arma::vec4> d;
+                    // std::get<0>(d) = point;
 
                     float strength;
                     arma::ivec2 direction;
@@ -222,20 +222,20 @@ namespace modules {
 
                     pSet.insert(point);
 
-                    std::get<1>(d)  = point;
+                    // std::get<1>(d)  = point;
 
-                    float r = (strength / 30);
-                    float b = 1 - (strength / 30);
-                    std::get<2>(d)  = arma::vec4({r,0,b,1});
-                    debug.push_back(d);
+                    // float r = (strength / 30);
+                    // float b = 1 - (strength / 30);
+                    // std::get<2>(d)  = arma::vec4({r,0,b,1});
+                    // debug.push_back(d);
                 }
 
                 // Go Anticlockwise
                 point = edge;
                 for(int i = 0; i < 100; ++i) {
 
-                    std::tuple<arma::ivec2, arma::ivec2, arma::vec4> d;
-                    std::get<0>(d) = point;
+                    // std::tuple<arma::ivec2, arma::ivec2, arma::vec4> d;
+                    // std::get<0>(d) = point;
 
                     float strength;
                     arma::ivec2 direction;
@@ -250,12 +250,12 @@ namespace modules {
 
                     pSet.insert(point);
 
-                    std::get<1>(d)  = point;
+                    // std::get<1>(d)  = point;
 
-                    float r = (strength / 30);
-                    float b = 1 - (strength / 30);
-                    std::get<2>(d)  = arma::vec4({r,0,b,1});
-                    debug.push_back(d);
+                    // float r = (strength / 30);
+                    // float b = 1 - (strength / 30);
+                    // std::get<2>(d)  = arma::vec4({r,0,b,1});
+                    // debug.push_back(d);
                 }
             }
 
