@@ -7,3 +7,4 @@ maximum_disagreement_ratio: 0
 measurement_distance_variance_factor: 0.1
 measurement_bearing_variance: 0.05
 measurement_elevation_variance: 0.05
+green_ratio_threshold: 0.1

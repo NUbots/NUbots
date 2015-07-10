@@ -21,6 +21,7 @@
 
 #include "messages/vision/ClassifiedImage.h"
 #include "messages/vision/VisionObjects.h"
+#include "messages/vision/LookUpTable.h"
 #include "messages/input/CameraParameters.h"
 #include "messages/support/Configuration.h"
 #include "messages/support/FieldDescription.h"
@@ -43,6 +44,8 @@ namespace vision {
     using messages::vision::ClassifiedImage;
     using messages::vision::VisionObject;
     using messages::vision::Ball;
+    using messages::vision::LookUpTable;
+    using messages::input::Image;
 
     using Plane = utility::math::geometry::Plane<3>;
 
@@ -52,6 +55,7 @@ namespace vision {
     using utility::math::vision::getCamFromScreen;
     using utility::math::vision::getParallaxAngle;
     using utility::math::vision::projectCamSpaceToScreen;
+    using utility::math::geometry::Circle;
 
     using utility::math::coordinates::cartesianToSpherical;
     using utility::nubugger::graph;
@@ -61,6 +65,38 @@ namespace vision {
 
     using utility::math::ransac::Ransac;
     using utility::math::ransac::RansacCircleModel;
+
+    float approximateCircleGreenRatio(const Circle& circle, const Image& image, const LookUpTable& lut, int radial_samples = 3, int angular_samples = 8) {
+        // TODO:
+        float r = 0;
+        int numGreen = 0;
+        for(int i = 0; i < radial_samples; r = (++i) * circle.radius / float(radial_samples)) {
+            float theta = 0;
+            if(r == 0){
+                arma::ivec2 ipos = arma::ivec({int(std::round(circle.centre[0])), int(std::round(circle.centre[1]))});
+                if(lut(image(ipos)) == 'g'){
+                    numGreen++;
+                }
+                continue;
+            }
+            for(int j = 0; j < angular_samples; theta = (++j) * 2 * M_PI / float(angular_samples)) {
+                float x = r * std::cos(theta);
+                float y = r * std::sin(theta);
+                arma::vec2 pos = circle.centre + arma::vec2({x,y});
+                arma::ivec2 ipos = arma::ivec2({int(std::round(pos[0])),int(std::round(pos[1]))});
+                if(lut(image(ipos)) == 'g'){
+                    numGreen++;
+                }
+            }
+            // sample point in lut and check if == 'g'
+        }
+        std::cout << "numGreen = " << numGreen << std::endl;
+        std::cout << "number of samples = " << (1 + (radial_samples-1) * angular_samples) << std::endl;
+
+        float greenRatio = numGreen / float(1 + (radial_samples-1) * angular_samples);
+        std::cout << "greenRatio = " << greenRatio << std::endl;
+        return greenRatio;
+    }
 
     BallDetector::BallDetector(std::unique_ptr<NUClear::Environment> environment)
         : Reactor(std::move(environment)) {
@@ -74,12 +110,14 @@ namespace vision {
             measurement_distance_variance_factor = config["measurement_distance_variance_factor"].as<double>();
             measurement_bearing_variance = config["measurement_bearing_variance"].as<double>();
             measurement_elevation_variance = config["measurement_elevation_variance"].as<double>();
+            green_ratio_threshold = config["green_ratio_threshold"].as<double>();
 
             lastFrame.time = NUClear::clock::now();
         });
 
-        on<Trigger<Raw<ClassifiedImage<ObjectClass>>>, With<CameraParameters>, With<Optional<FieldDescription>>, Options<Single>>("Ball Detector", [this](
-            const std::shared_ptr<const ClassifiedImage<ObjectClass>>& rawImage, const CameraParameters& cam, const std::shared_ptr<const FieldDescription>& field) {
+        on<Trigger<Raw<ClassifiedImage<ObjectClass>>>, With<CameraParameters>, With<Optional<FieldDescription>>, With<LookUpTable>, Options<Single>>("Ball Detector", [this](
+            const std::shared_ptr<const ClassifiedImage<ObjectClass>>& rawImage, const CameraParameters& cam, const std::shared_ptr<const FieldDescription>& field, const LookUpTable& lut) {
+                std::cout << "Ball Detector" << std::endl;
 
             if (field == nullptr) {
                 NUClear::log(__FILE__, ", ", __LINE__, ": FieldDescription Update: support::configuration::SoccerConfig module might not be installed.");
@@ -109,6 +147,11 @@ namespace vision {
             balls->reserve(ransacResults.size());
 
             for(auto& result : ransacResults) {
+                std::cout << "ball detected" << std::endl;
+                float greenRatio = approximateCircleGreenRatio(result.model, *(image.image), lut);
+                if(greenRatio > green_ratio_threshold){
+                    continue;
+                }
 
                 std::vector<VisionObject::Measurement> measurements;
                 measurements.reserve(2);

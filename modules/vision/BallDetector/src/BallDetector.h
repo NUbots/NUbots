@@ -36,6 +36,7 @@ namespace vision {
         double measurement_distance_variance_factor;
         double measurement_bearing_variance;
         double measurement_elevation_variance;
+        double green_ratio_threshold;
 
         struct Frame{
             time_t time;

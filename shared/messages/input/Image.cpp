@@ -41,6 +41,11 @@ namespace messages {
             };
         }
 
+        Image::Pixel Image::operator()(const arma::ivec2& p) const {
+            return operator()(p[0],p[1]);
+        }
+
+
         const std::vector<uint8_t>& Image::source() const {
             return data;
         }

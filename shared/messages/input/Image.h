@@ -21,6 +21,7 @@
 #define MESSAGES_INPUT_IMAGE_H
 
 #include <nuclear>
+#include <armadillo>
 #include <cstdint>
 #include <cstddef>
 #include <vector>
@@ -44,6 +45,7 @@ namespace messages {
             Image(uint width, uint height, NUClear::clock::time_point, std::vector<uint8_t>&& data);
 
             Pixel operator()(uint x, uint y) const;
+            Pixel operator()(const arma::ivec2& p) const;
 
             uint width;
             uint height;
