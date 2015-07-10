@@ -112,17 +112,23 @@ namespace vision {
         : Reactor(std::move(environment)) {
 
         on<Trigger<Configuration<BallDetector>>>([this](const Configuration<BallDetector>& config) {
+            
             MINIMUM_POINTS_FOR_CONSENSUS = config["ransac"]["minimum_points_for_consensus"].as<uint>();
             CONSENSUS_ERROR_THRESHOLD = config["ransac"]["consensus_error_threshold"].as<Expression>();
+            
             MAXIMUM_ITERATIONS_PER_FITTING = config["ransac"]["maximum_iterations_per_fitting"].as<uint>();
             MAXIMUM_FITTED_MODELS = config["ransac"]["maximum_fitted_models"].as<uint>();
             MAXIMUM_DISAGREEMENT_RATIO = config["maximum_disagreement_ratio"].as<Expression>();
+            
             measurement_distance_variance_factor = config["measurement_distance_variance_factor"].as<Expression>();
             measurement_bearing_variance = config["measurement_bearing_variance"].as<Expression>();
             measurement_elevation_variance = config["measurement_elevation_variance"].as<Expression>();
+            
             green_ratio_threshold = config["green_ratio_threshold"].as<Expression>();
             green_radial_samples = config["green_radial_samples"].as<Expression>();
             green_angular_samples = config["green_angular_samples"].as<Expression>();
+
+            number_of_clusters = config["number_of_clusters"].as<int>();
 
             lastFrame.time = NUClear::clock::now();
         });
@@ -145,7 +151,13 @@ namespace vision {
             }
 
             double deltaT = 1e-6 * std::chrono::duration_cast<std::chrono::microseconds>(sensors.timestamp - lastFrame.time).count();
-
+            
+            //Cluster data points for running ransac
+            arma::mat clusterData = arma::zeros(2,ballPoints.size());
+            for (int i = 0; i < ballPoints.size(); i++){
+                clusterData.col(i) = ballPoints[i];
+            }
+            
             // Use ransac to find the ball
             auto ransacResults = Ransac<RansacCircleModel>::fitModels(ballPoints.begin()
                                                                     , ballPoints.end()

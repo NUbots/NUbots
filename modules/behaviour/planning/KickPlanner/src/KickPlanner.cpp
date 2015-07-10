@@ -104,7 +104,7 @@ namespace planning {
             //Check whether to kick
             if(secondsSinceLastSeen < cfg.seconds_not_seen_limit
                 && kickValid(ballPosition, params.stand_height, sensors)
-                     && KickAngle < kickAngleThreshold) {
+                     && KickAngle < cfg.kick_forward_angle_limit) {
                     emit(std::make_unique<KickCommand>(KickCommand{{0.1,0.04,0}, {1, 0, 0} }));
             }
 

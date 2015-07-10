@@ -34,14 +34,19 @@ namespace vision {
         uint MINIMUM_POINTS_FOR_CONSENSUS;
         uint MAXIMUM_ITERATIONS_PER_FITTING;
         uint MAXIMUM_FITTED_MODELS;
+        
         double CONSENSUS_ERROR_THRESHOLD;
         double MAXIMUM_DISAGREEMENT_RATIO;
+        
         double measurement_distance_variance_factor;
         double measurement_bearing_variance;
         double measurement_elevation_variance;
+
         double green_ratio_threshold;
         double green_radial_samples;
         double green_angular_samples;
+
+        int number_of_clusters;
 
         struct Frame{
             time_t time;
