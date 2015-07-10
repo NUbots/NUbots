@@ -262,7 +262,7 @@ namespace modules {
             // Put our set into the object
             classifiedImage.ballPoints.insert(classifiedImage.ballPoints.begin(), pSet.begin(), pSet.end());
 
-            emit(drawVisionLines(debug));
+            // emit(drawVisionLines(debug));
         }
 
     }  // vision
