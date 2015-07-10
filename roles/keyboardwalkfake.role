@@ -1,6 +1,6 @@
 ADD_ROLE(
     # Support and Configuration
-    support::SignalCatcher
+    #support::SignalCatcher
     support::configuration::ConfigSystem
     support::configuration::GlobalConfig
     support::configuration::SoccerConfig
@@ -13,9 +13,20 @@ ADD_ROLE(
     # Motion
     motion::WalkEngine
     motion::ScriptEngine
+    motion::HeadController
+    motion::IKKick
+
+    #Vision
+    vision::LUTClassifier
+    vision::GoalDetector
+    vision::BallDetector
+    vision::ObstacleDetector
 
     # Behaviour
     behaviour::Controller
-    behaviour::skills::KickScript
+    behaviour::skills::Stand
+    #behaviour::skills::FallingRelax
+    behaviour::skills::Getup
+    behaviour::skills::DirectWalkController
     behaviour::strategy::KeyboardWalk
 )
