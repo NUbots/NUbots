@@ -72,6 +72,7 @@ namespace planning {
             cfg.max_ball_distance = config["max_ball_distance"].as<float>();
             cfg.kick_corridor_width = config["kick_corridor_width"].as<float>();
             cfg.seconds_not_seen_limit = config["seconds_not_seen_limit"].as<float>();
+            cfg.kick_forward_angle_limit = config["kick_forward_angle_limit"].as<float>();
             emit(std::make_unique<KickPlannerConfig>(cfg));
         });
 
@@ -99,12 +100,11 @@ namespace planning {
             arma::vec3 ballPosition = {ball.position[0], ball.position[1], fd.ball_radius}; 
             
             float KickAngle = std::fabs(std::atan2(kickTarget[1], kickTarget[0]));
-            float kickAngleThreshold = M_PI_4;
 
             //Check whether to kick
             if(secondsSinceLastSeen < cfg.seconds_not_seen_limit
                 && kickValid(ballPosition, params.stand_height, sensors)
-                     && KickAngle < kickAngleThreshold) {
+                     && KickAngle < cfg.kick_forward_angle_limit) {
                     emit(std::make_unique<KickCommand>(KickCommand{ballPosition, {kickTarget[0], kickTarget[1], 0} }));
             }
 
@@ -113,12 +113,14 @@ namespace planning {
 
 
     bool KickPlanner::kickValid(const arma::vec3& ballPos, float standHeight, const Sensors& sensors){
-        Transform3D ballPose;
-        Transform3D torsoToGround = sensors.orientationBodyToGround;
-        torsoToGround.translation()[2] = standHeight;
-        ballPose.translation() = torsoToGround.i().transformPoint(ballPos);
-        ballPose.translate(arma::vec3({-DarwinModel::Leg::FOOT_LENGTH / 2,0,0}));
-        return (legPoseValid<DarwinModel>(ballPose, LimbID::RIGHT_LEG) || legPoseValid<DarwinModel>(ballPose, LimbID::LEFT_LEG));
+        // IK check seems broken
+        // Transform3D ballPose;
+        // Transform3D torsoToGround = sensors.orientationBodyToGround;
+        // torsoToGround.translation()[2] = standHeight;
+        // ballPose.translation() = torsoToGround.i().transformPoint(ballPos);
+        // ballPose.translate(arma::vec3({-DarwinModel::Leg::FOOT_LENGTH / 2,0,0}));
+        // return (legPoseValid<DarwinModel>(ballPose, LimbID::RIGHT_LEG) || legPoseValid<DarwinModel>(ballPose, LimbID::LEFT_LEG));
+        return (ballPos[0] > 0) && (ballPos[0] < cfg.max_ball_distance) && (std::fabs(ballPos[1]) < cfg.kick_corridor_width / 2.0);
     }
 
 

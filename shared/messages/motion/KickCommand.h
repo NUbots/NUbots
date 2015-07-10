@@ -58,6 +58,7 @@ namespace messages {
             float max_ball_distance;
             float kick_corridor_width;
             float seconds_not_seen_limit;
+            float kick_forward_angle_limit;
         };
 
         struct KickFinished{
