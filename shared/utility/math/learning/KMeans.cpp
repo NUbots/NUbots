@@ -25,21 +25,61 @@ namespace math {
 namespace learning {
 
 	void KMeans::configure(const YAML::Node& conf){
-		number_of_clusters = config["number_of_clusters"].as<int>();
-		k_means_iterations = config["k_means_iterations"].as<int>();
-		em_iterations = config["em_iterations"].as<int>();
+		config.number_of_clusters = conf["number_of_clusters"].as<int>();
+		config.k_means_iterations = conf["k_means_iterations"].as<int>();
+		config.em_iterations = conf["em_iterations"].as<int>();
+		config.variance_floor = conf["variance_floor"].as<Expression>();
+		config.print_status = conf["print_status"].as<bool>();
 
-		variance_floor = config["variance_floor"].as<Expression>();
-
-		eucl_dist = config["eucl_dist"].as<>();
-		random_spread = config["random_spread"].as<>();
-		print_mode = config["print_mode"].as<>();
+		config.dist_mode = conf["dist_mode"].as<std::string>();
+		config.seed_mode = conf["seed_mode"].as<std::string>();
 	}
 
-
-    arma::gmm_diag clusterModel;
-    clusterModel.learn(data, number_of_clusters, arma::eucl_dist, arma::random_spread, k_means_iterations, em_iterations, variance_floor, print_mode);
-    clusterModel.learn(data, number_of_clusters, arma::maha_dist, arma::random_spread, k_means_iterations, em_iterations, variance_floor, print_mode);
+	bool learn(arma::mat data){
+		if(config.dist_mode == "maha_dist") {
+			auto distance_mode = arma::maha_dist;
+			if(config.seed_mode == "keep_existing"){
+				auto seed_mode_arma = arma::keep_existing;
+   				clusterModel.learn(data, config.number_of_clusters, distance_mode, seed_mode_arma, config.k_means_iterations, config.em_iterations, config.variance_floor, config.print_status);
+			}else if(config.seed_mode == "static_subset"){
+				auto seed_mode_arma = arma::static_subset;
+   				clusterModel.learn(data, config.number_of_clusters, distance_mode, seed_mode_arma, config.k_means_iterations, config.em_iterations, config.variance_floor, config.print_status);
+			}else if(config.seed_mode == "random_subset"){
+				auto seed_mode_arma = arma::random_subset;
+   				clusterModel.learn(data, config.number_of_clusters, distance_mode, seed_mode_arma, config.k_means_iterations, config.em_iterations, config.variance_floor, config.print_status);
+			}else if(config.seed_mode == "static_spread"){
+				auto seed_mode_arma = arma::static_spread;
+   				clusterModel.learn(data, config.number_of_clusters, distance_mode, seed_mode_arma, config.k_means_iterations, config.em_iterations, config.variance_floor, config.print_status);
+			}else if(config.seed_mode == "random_spread"){
+				auto seed_mode_arma = arma::random_spread;
+   				clusterModel.learn(data, config.number_of_clusters, distance_mode, seed_mode_arma, config.k_means_iterations, config.em_iterations, config.variance_floor, config.print_status);
+			} else {
+				auto seed_mode_arma = arma::static_spread;
+   				clusterModel.learn(data, config.number_of_clusters, distance_mode, seed_mode_arma, config.k_means_iterations, config.em_iterations, config.variance_floor, config.print_status);
+			}
+		} else {
+			auto distance_mode = arma::eucl_dist;
+			if(config.seed_mode == "keep_existing"){
+				auto seed_mode_arma = arma::keep_existing;
+   				clusterModel.learn(data, config.number_of_clusters, distance_mode, seed_mode_arma, config.k_means_iterations, config.em_iterations, config.variance_floor, config.print_status);
+			}else if(config.seed_mode == "static_subset"){
+				auto seed_mode_arma = arma::static_subset;
+   				clusterModel.learn(data, config.number_of_clusters, distance_mode, seed_mode_arma, config.k_means_iterations, config.em_iterations, config.variance_floor, config.print_status);
+			}else if(config.seed_mode == "random_subset"){
+				auto seed_mode_arma = arma::random_subset;
+   				clusterModel.learn(data, config.number_of_clusters, distance_mode, seed_mode_arma, config.k_means_iterations, config.em_iterations, config.variance_floor, config.print_status);
+			}else if(config.seed_mode == "static_spread"){
+				auto seed_mode_arma = arma::static_spread;
+   				clusterModel.learn(data, config.number_of_clusters, distance_mode, seed_mode_arma, config.k_means_iterations, config.em_iterations, config.variance_floor, config.print_status);
+			}else if(config.seed_mode == "random_spread"){
+				auto seed_mode_arma = arma::random_spread;
+   				clusterModel.learn(data, config.number_of_clusters, distance_mode, seed_mode_arma, config.k_means_iterations, config.em_iterations, config.variance_floor, config.print_status);
+			} else {
+				auto seed_mode_arma = arma::static_spread;
+   				clusterModel.learn(data, config.number_of_clusters, distance_mode, seed_mode_arma, config.k_means_iterations, config.em_iterations, config.variance_floor, config.print_status);
+			}
+		}
+	}
 
 }
 }

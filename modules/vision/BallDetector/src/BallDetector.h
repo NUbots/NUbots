@@ -25,6 +25,7 @@
 #include "utility/math/geometry/Circle.h"
 #include "messages/vision/LookUpTable.h"
 #include "messages/input/Image.h"
+#include "utility/math/learning/KMeans.h"
 
 namespace modules {
 namespace vision {

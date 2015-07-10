@@ -1,4 +1,4 @@
-/* 
+/* KMeans clustering with expectation maximisation refinement
  * This file is part of Learning utilities.
  *
  * Learning utilities is free software: you can redistribute it and/or modify
@@ -23,24 +23,39 @@
 namespace utility {
 namespace math {
 namespace learning {
-	
+
 	class KMeans {
 	public:
+		KMeans(){}
 		struct KMeansConfig{
-			int number_of_clusters;
-			int k_means_iterations;
-			int em_iterations;
-			float variance_floor;
+			//NOTE: values here are safe defaults; the values you will want depend on the problem domain
+			int number_of_clusters = 1; // set the number of Gaussians
+			int k_means_iterations = 1; // the number of iterations of the k-means algorithm
+			int em_iterations = 0; // the number of iterations of the expectation maximisation algorithm
+			float variance_floor = 1; // the variance floor (smallest allowed value) for the diagonal covariances
+			bool print_status = false; // either true or false; enable or disable printing of progress during the k-means and EM algorithms
 			//TODO:find the types of these
-			arma::enum eucl_dist;
-			arma::enum random_spread;
-			arma::enum print_mode;
+			std::string dist_mode = "eucl_dist"; // specifies the distance used during the seeding of initial means and k-means clustering:
+			std::string seed_mode = "static_spread"; // specifies how the initial means are seeded prior to running k-means and/or EM algorithms
+
+			/* Parameters for dist_mode:
+			 * eucl_dist	   	Euclidean distance
+			 * maha_dist	   	Mahalanobis distance, which uses a global diagonal covariance matrix estimated from the training samples
+			 *
+			 * Parameters for seed_mode:
+			 * keep_existing	   	keep the existing model (do not modify the means, covariances and hefts)
+			 * static_subset	   	a subset of the training samples (repeatable)
+			 * random_subset	   	a subset of the training samples (random)
+			 * static_spread	   	a maximally spread subset of training samples (repeatable)
+			 * random_spread	   	a maximally spread subset of training samples (random start)
+			 */
 		};
-	private:
-		KMeansConfig config;
+
 		void configure(const YAML::Node& conf);
-
-
+		bool learn(arma::mat data);
+	private:
+    	arma::gmm_diag clusterModel;
+		KMeansConfig config;
 	};
 }
 }
