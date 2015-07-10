@@ -21,8 +21,14 @@ package messages.vision.proto;
 
 import "messages/Geometry.proto";
 import "messages/Vector.proto";
+import "messages/Matrix.proto";
 
 message VisionObject {
+
+    message Measurement {
+        optional vec3 position = 1;
+        optional mat33 covariance = 2;
+    }
 
     message Goal {
 
@@ -32,17 +38,20 @@ message VisionObject {
             UNKNOWN = 2;
         }
 
+        repeated Measurement measurement = 3;
         required Side side = 1;
         required Quad quad = 2;
     }
 
     message Ball {
 
+        repeated Measurement measurement = 2;
         required Circle circle = 1;
     }
 
     message Obstacle {
 
+        repeated Measurement measurement = 2;
         required Polygon shape = 1;
     }
 

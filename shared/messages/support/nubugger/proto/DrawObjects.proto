@@ -50,7 +50,7 @@ message DrawObject {
     optional float width = 6;
     optional float height = 7;
     optional vec3 rotation = 8;
-    optional vec3 color = 9; // rgb
+    optional vec3 colour = 9; // rgb
     optional float radius = 10;
     optional float top_radius = 11;
     optional float bottom_radius = 12;

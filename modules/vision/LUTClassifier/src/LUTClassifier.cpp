@@ -25,6 +25,8 @@
 #include "messages/vision/LookUpTable.h"
 #include "messages/support/Configuration.h"
 
+#include "utility/support/yaml_expression.h"
+
 #include "QuexClassifier.h"
 
 #include "Lexer.hpp"
@@ -40,8 +42,10 @@ namespace modules {
         using messages::vision::SaveLookUpTable;
         using messages::vision::ObjectClass;
         using messages::vision::ClassifiedImage;
+        using messages::vision::Colour;
         using messages::support::Configuration;
         using messages::support::SaveConfiguration;
+        using utility::support::Expression;
 
         void LUTClassifier::insertSegments(ClassifiedImage<ObjectClass>& image, std::vector<ClassifiedImage<ObjectClass>::Segment>& segments, bool vertical) {
             ClassifiedImage<ObjectClass>::Segment* previous = nullptr;
@@ -68,7 +72,38 @@ namespace modules {
         LUTClassifier::LUTClassifier(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)), quex(new QuexClassifier) {
 
             on<Trigger<Configuration<LUTLocation>>>([this](const Configuration<LUTLocation>& config) {
-                emit(std::make_unique<LookUpTable>(config.config.as<LookUpTable>()));
+
+                // Load our LUT
+                auto lut = std::make_unique<LookUpTable>(config.config.as<LookUpTable>());
+
+                // Calculate our green centroid for ball detection
+                arma::fvec3 greenCentroid({0, 0, 0});
+                uint nPoints = 0;
+
+                // Loop through every voxel in the lut
+                for(uint x = 0; x < uint(1 << lut->BITS_Y); ++x) {
+                    for (uint y = 0; y < uint(1 << lut->BITS_CB); ++y) {
+                        for (uint z = 0; z < uint(1 << lut->BITS_CR); ++z) {
+
+                            // Get our voxel
+                            uint index = (((x << lut->BITS_CR) | y) << lut->BITS_CB) | z;
+                            char c = lut->getRawData()[index];
+
+                            // If this is a field voxel
+                            if(c == Colour::GREEN) {
+                                // Get our LUT pixel for this index
+                                Image::Pixel p = lut->getPixelFromIndex(index);
+
+                                ++nPoints;
+                                greenCentroid += arma::fvec3({ float(p.y), float(p.cb), float(p.cr) });
+                            }
+                        }
+                    }
+                }
+                greenCentroid /= float(nPoints);
+                this->greenCentroid = greenCentroid;
+
+                emit(std::move(lut));
             });
 
             on<Trigger<SaveLookUpTable>, With<LookUpTable>>([this](const SaveLookUpTable&, const LookUpTable& lut) {
@@ -86,8 +121,18 @@ namespace modules {
                 // Goal detector
                 GOAL_LINE_SPACING = cam.focalLengthPixels * tan(config["goals"]["spacing"].as<double>());
                 GOAL_SUBSAMPLING = std::max(1, int(cam.focalLengthPixels * tan(config["goals"]["subsampling"].as<double>())));
-                GOAL_EXTENSION_SCALE = config["goals"]["extension_scale"].as<double>() / 2;
+                GOAL_RANSAC_MINIMUM_POINTS_FOR_CONSENSUS = config["goals"]["ransac"]["minimum_points_for_consensus"].as<uint>();
+                GOAL_RANSAC_MAXIMUM_ITERATIONS_PER_FITTING = config["goals"]["ransac"]["maximum_iterations_per_fitting"].as<uint>();
+                GOAL_RANSAC_MAXIMUM_FITTED_MODELS = config["goals"]["ransac"]["maximum_fitted_models"].as<uint>();
+                GOAL_RANSAC_CONSENSUS_ERROR_THRESHOLD = config["goals"]["ransac"]["consensus_error_threshold"].as<double>();
+                GOAL_MINIMUM_RANSAC_SEGMENT_SIZE = std::max(1, int(cam.focalLengthPixels * tan(config["goals"]["minimum_ransac_segment_size"].as<double>())));
+                GOAL_MAX_HORIZON_ANGLE = std::cos(config["goals"]["max_horizon_angle"].as<Expression>());
+                GOAL_RANSAC_CONSENSUS_ERROR_THRESHOLD = config["goals"]["ransac"]["consensus_error_threshold"].as<double>();
                 GOAL_LINE_DENSITY = config["goals"]["line_density"].as<int>();
+                GOAL_HORIZONTAL_EXTENSION_SCALE = config["goals"]["horizontal_extension_scale"].as<double>();
+                GOAL_VERTICAL_EXTENSION_SCALE = config["goals"]["vertical_extension_scale"].as<double>();
+                GOAL_WIDTH_HEIGHT_RATIO = config["goals"]["width_height_ratio"].as<double>();
+                GOAL_LINE_INTERSECTIONS = config["goals"]["line_intersections"].as<uint>();
 
                 // Ball Detector
                 BALL_MINIMUM_INTERSECTIONS_COARSE = config["ball"]["intersections_coarse"].as<double>();

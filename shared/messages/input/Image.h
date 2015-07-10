@@ -21,6 +21,7 @@
 #define MESSAGES_INPUT_IMAGE_H
 
 #include <nuclear>
+#include <armadillo>
 #include <cstdint>
 #include <cstddef>
 #include <vector>
@@ -41,12 +42,13 @@ namespace messages {
                 uint8_t cr;
             };
 
-            Image(size_t width, size_t height, NUClear::clock::time_point, std::vector<uint8_t>&& data);
+            Image(uint width, uint height, NUClear::clock::time_point, std::vector<uint8_t>&& data);
 
-            Pixel operator()(size_t x, size_t y) const;
+            Pixel operator()(uint x, uint y) const;
+            Pixel operator()(const arma::ivec2& p) const;
 
-            size_t width;
-            size_t height;
+            uint width;
+            uint height;
             NUClear::clock::time_point timestamp;
 
             // Returns the raw data that this is using

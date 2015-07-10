@@ -21,9 +21,12 @@
 
 #include "messages/vision/ClassifiedImage.h"
 #include "messages/vision/VisionObjects.h"
+#include "messages/vision/LookUpTable.h"
 #include "messages/input/CameraParameters.h"
 #include "messages/support/Configuration.h"
 #include "messages/support/FieldDescription.h"
+
+#include "utility/support/yaml_expression.h"
 
 #include "utility/math/geometry/Plane.h"
 
@@ -43,6 +46,8 @@ namespace vision {
     using messages::vision::ClassifiedImage;
     using messages::vision::VisionObject;
     using messages::vision::Ball;
+    using messages::vision::LookUpTable;
+    using messages::input::Image;
 
     using Plane = utility::math::geometry::Plane<3>;
 
@@ -52,6 +57,7 @@ namespace vision {
     using utility::math::vision::getCamFromScreen;
     using utility::math::vision::getParallaxAngle;
     using utility::math::vision::projectCamSpaceToScreen;
+    using utility::math::geometry::Circle;
 
     using utility::math::coordinates::cartesianToSpherical;
     using utility::nubugger::graph;
@@ -61,26 +67,68 @@ namespace vision {
 
     using utility::math::ransac::Ransac;
     using utility::math::ransac::RansacCircleModel;
+    using utility::nubugger::drawVisionLines;
+    using utility::support::Expression;
+
+    float BallDetector::approximateCircleGreenRatio(const Circle& circle, const Image& image, const LookUpTable& lut) {
+        // TODO:
+        // std::vector<std::tuple<arma::ivec2, arma::ivec2, arma::vec4>> debug;
+        float r = 0;
+        int numGreen = 0;
+        for(int i = 0; i < green_radial_samples; r = (++i) * circle.radius / float(green_radial_samples)) {
+            float theta = 0;
+            if(r == 0){
+                arma::ivec2 ipos = arma::ivec({int(std::round(circle.centre[0])), int(std::round(circle.centre[1]))});
+                if(ipos[0] >= 0 && ipos[0] < image.width && ipos[1] >= 0 && ipos[1] < image.height){
+                    // debug.push_back(std::make_tuple(ipos, ipos + arma::ivec2{1,1}, arma::vec4{1,1,1,1}));
+                    if(lut(image(ipos)) == 'g'){
+                        numGreen++;
+                    }
+                }
+                continue;
+            }
+            for(int j = 0; j < green_angular_samples; theta = (++j) * 2 * M_PI / float(green_angular_samples)) {
+                float x = r * std::cos(theta);
+                float y = r * std::sin(theta);
+                arma::vec2 pos = circle.centre + arma::vec2({x,y});
+                arma::ivec2 ipos = arma::ivec2({int(std::round(pos[0])),int(std::round(pos[1]))});
+                if(ipos[0] >= 0 && ipos[0] < image.width && ipos[1] >= 0 && ipos[1] < image.height){
+                    // debug.push_back(std::make_tuple(ipos, ipos + arma::ivec2{1,1}, arma::vec4{1,1,1,1}));
+                    if(lut(image(ipos)) == 'g'){
+                        numGreen++;
+                    }
+                }
+            }
+            // sample point in lut and check if == 'g'
+        }
+
+        // emit(drawVisionLines(debug));
+
+        float greenRatio = numGreen / float(1 + (green_radial_samples-1) * green_angular_samples);
+        return greenRatio;
+    }
 
     BallDetector::BallDetector(std::unique_ptr<NUClear::Environment> environment)
         : Reactor(std::move(environment)) {
 
         on<Trigger<Configuration<BallDetector>>>([this](const Configuration<BallDetector>& config) {
             MINIMUM_POINTS_FOR_CONSENSUS = config["ransac"]["minimum_points_for_consensus"].as<uint>();
-            CONSENSUS_ERROR_THRESHOLD = config["ransac"]["consensus_error_threshold"].as<double>();
+            CONSENSUS_ERROR_THRESHOLD = config["ransac"]["consensus_error_threshold"].as<Expression>();
             MAXIMUM_ITERATIONS_PER_FITTING = config["ransac"]["maximum_iterations_per_fitting"].as<uint>();
             MAXIMUM_FITTED_MODELS = config["ransac"]["maximum_fitted_models"].as<uint>();
-            MAXIMUM_DISAGREEMENT_RATIO = config["maximum_disagreement_ratio"].as<double>();
-            measurement_distance_variance_factor = config["measurement_distance_variance_factor"].as<double>();
-            measurement_bearing_variance = config["measurement_bearing_variance"].as<double>();
-            measurement_elevation_variance = config["measurement_elevation_variance"].as<double>();
+            MAXIMUM_DISAGREEMENT_RATIO = config["maximum_disagreement_ratio"].as<Expression>();
+            measurement_distance_variance_factor = config["measurement_distance_variance_factor"].as<Expression>();
+            measurement_bearing_variance = config["measurement_bearing_variance"].as<Expression>();
+            measurement_elevation_variance = config["measurement_elevation_variance"].as<Expression>();
+            green_ratio_threshold = config["green_ratio_threshold"].as<Expression>();
+            green_radial_samples = config["green_radial_samples"].as<Expression>();
+            green_angular_samples = config["green_angular_samples"].as<Expression>();
 
             lastFrame.time = NUClear::clock::now();
         });
 
-        on<Trigger<Raw<ClassifiedImage<ObjectClass>>>, With<CameraParameters>, With<Optional<FieldDescription>>, Options<Single>>("Ball Detector", [this](
-            const std::shared_ptr<const ClassifiedImage<ObjectClass>>& rawImage, const CameraParameters& cam, const std::shared_ptr<const FieldDescription>& field) {
-
+        on<Trigger<Raw<ClassifiedImage<ObjectClass>>>, With<CameraParameters>, With<Optional<FieldDescription>>, With<LookUpTable>, Options<Single>>("Ball Detector", [this](
+            const std::shared_ptr<const ClassifiedImage<ObjectClass>>& rawImage, const CameraParameters& cam, const std::shared_ptr<const FieldDescription>& field, const LookUpTable& lut) {
 
             if (field == nullptr) {
                 NUClear::log(__FILE__, ", ", __LINE__, ": FieldDescription Update: support::configuration::SoccerConfig module might not be installed.");
@@ -91,44 +139,12 @@ namespace vision {
             std::vector<arma::vec2> ballPoints;
             const auto& sensors = *image.sensors;
 
-            double deltaT = 1e-6 * std::chrono::duration_cast<std::chrono::microseconds>(sensors.timestamp - lastFrame.time).count();
-
-            // Get all the points that could make up the ball
-            for(int i = 0; i < 2; ++i) {
-
-                auto segments = i ? image.horizontalSegments.equal_range(ObjectClass::BALL)
-                                  : image.verticalSegments.equal_range(ObjectClass::BALL);
-
-                for(auto it = segments.first; it != segments.second; ++it) {
-
-                    auto& segment = it->second;
-                    auto& start = segment.start;
-                    auto& end = segment.end;
-
-                    bool belowHorizon = image.visualHorizonAtPoint(end[0]) < end[1] || image.visualHorizonAtPoint(start[0]) < start[1];
-
-                    // We throw out points if they are:
-                    // Less the full quality (sub-sampled)
-                    // Do not have a transition on either side (are on an edge)
-                    // Go from an orange to other to orange segment (are interior)
-
-                    if(belowHorizon
-                        && segment.subsample == 1
-                        && segment.next
-                        && (!segment.next->next || segment.next->next->colour != ObjectClass::BALL)) {
-
-                        ballPoints.push_back({ double(end[0]), double(end[1]) });
-                    }
-
-                    if(belowHorizon
-                        && segment.subsample == 1
-                        && segment.previous
-                        && (!segment.previous->previous || segment.previous->previous->colour != ObjectClass::BALL)) {
-
-                        ballPoints.push_back({ double(start[0]), double(start[1]) });
-                    }
-                }
+            ballPoints.reserve(image.ballPoints.size());
+            for(const auto& point : image.ballPoints) {
+                ballPoints.push_back(arma::vec2({double(point[0]), double(point[1])}));
             }
+
+            double deltaT = 1e-6 * std::chrono::duration_cast<std::chrono::microseconds>(sensors.timestamp - lastFrame.time).count();
 
             // Use ransac to find the ball
             auto ransacResults = Ransac<RansacCircleModel>::fitModels(ballPoints.begin()
@@ -142,6 +158,10 @@ namespace vision {
             balls->reserve(ransacResults.size());
 
             for(auto& result : ransacResults) {
+                float greenRatio = approximateCircleGreenRatio(result.model, *(image.image), lut);
+                if(greenRatio > green_ratio_threshold){
+                    continue;
+                }
 
                 std::vector<VisionObject::Measurement> measurements;
                 measurements.reserve(2);

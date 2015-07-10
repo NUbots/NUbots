@@ -22,6 +22,9 @@
 
 #include <nuclear>
 #include <armadillo>
+#include "utility/math/geometry/Circle.h"
+#include "messages/vision/LookUpTable.h"
+#include "messages/input/Image.h"
 
 namespace modules {
 namespace vision {
@@ -36,6 +39,9 @@ namespace vision {
         double measurement_distance_variance_factor;
         double measurement_bearing_variance;
         double measurement_elevation_variance;
+        double green_ratio_threshold;
+        double green_radial_samples;
+        double green_angular_samples;
 
         struct Frame{
             time_t time;
@@ -44,6 +50,7 @@ namespace vision {
         };
         Frame lastFrame;
 
+        float approximateCircleGreenRatio(const utility::math::geometry::Circle& circle, const messages::input::Image& image, const messages::vision::LookUpTable& lut);
     public:
 
         static constexpr const char* CONFIGURATION_PATH = "BallDetector.yaml";
