@@ -72,7 +72,7 @@ namespace skills {
             }
         }));
 
-        on<Trigger<Configuration<DirectWalkController>>>([this] (const Configuration<DirectWalkController>& config) {
+        on<Trigger<Configuration<DirectWalkController>>>([this] (const Configuration<DirectWalkController>& /*config*/) {
             // Use configuration here from file DirectWalkController.yaml
         });
 

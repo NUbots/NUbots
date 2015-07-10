@@ -97,7 +97,7 @@ namespace planning {
             With<KickPlan>,
             Options<Sync<OMPLPathPlanner>, Single>
            >("Generate new path plan", [this] (
-             const NUClear::clock::time_point& current_time,
+             const NUClear::clock::time_point& /*current_time*/,
              const MotionCommand& command,
              const LocalisationBall& ball,
              const std::vector<Self>& selfs,

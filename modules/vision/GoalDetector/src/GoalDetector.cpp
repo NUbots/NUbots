@@ -331,7 +331,8 @@ namespace vision {
                         baseGoalWidthDist * measurement_distance_covariance_factor,
                         measurement_bearing_variance,
                         measurement_elevation_variance }));
-                measurements.push_back({ cartesianToSpherical(baseGoalWidth), baseGoalWidthDistCov});
+                measurements.push_back({cartesianToSpherical(baseGoalWidth), baseGoalWidthDistCov, 
+                                        arma::zeros<arma::vec>(3), arma::zeros<arma::mat>(3, 3)});
 
                 // Measure the width based distance to the top
                 double topWidthDistance = widthBasedDistanceToCircle(GOAL_DIAMETER, tl, tr, cam.focalLengthPixels);
@@ -341,7 +342,8 @@ namespace vision {
                         topGoalWidthDist * measurement_distance_covariance_factor,
                         measurement_bearing_variance,
                         measurement_elevation_variance }));
-                measurements.push_back({ cartesianToSpherical(topGoalWidth), topGoalWidthDistCov});
+                measurements.push_back({cartesianToSpherical(topGoalWidth), topGoalWidthDistCov,
+                                        arma::zeros<arma::vec>(3), arma::zeros<arma::mat>(3, 3)});
 
                 // Measure the height based distance
                 double heightDistance = distanceToVerticalObject((tl + tr) * 0.5, (bl + br) * 0.5, GOAL_HEIGHT, sensors.orientationCamToGround(2,3), cam.focalLengthPixels);

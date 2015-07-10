@@ -694,6 +694,8 @@ namespace modules {
                             case ServoID::L_HIP_YAW:
                                 newFrame.targets.push_back({ ServoID::R_HIP_YAW, -target.position, target.gain, target.torque});
                                 break;
+                            case ServoID::NUMBER_OF_SERVOS:
+                                break;
                         }//end switch(target.id)
                     }
                     f = newFrame;
@@ -988,7 +990,7 @@ namespace modules {
                                     if(changedUpper && (upperGainS >= 0)) {
                                         target.gain = upperGainS;
                                     }
-                                break;
+                                    break;
                                 case ServoID::R_HIP_YAW:
                                 case ServoID::L_HIP_YAW:
                                 case ServoID::R_HIP_ROLL:
@@ -1004,7 +1006,9 @@ namespace modules {
                                     if(changedLower && (lowerGainS >= 0)) {
                                         target.gain = lowerGainS;
                                     }
-                                break;
+                                    break;
+                                case ServoID::NUMBER_OF_SERVOS:
+                                    break;
                             }
                         }
                     }
@@ -1025,7 +1029,7 @@ namespace modules {
                                 if(changedUpper && (upperGainF >= 0)) {
                                     target.gain = upperGainF;
                                 }
-                            break;
+                                break;
                             case ServoID::R_HIP_YAW:
                             case ServoID::L_HIP_YAW:
                             case ServoID::R_HIP_ROLL:
@@ -1041,7 +1045,9 @@ namespace modules {
                                 if(changedLower && (lowerGainF >= 0)) {
                                     target.gain = lowerGainF;
                                 }
-                            break;
+                                break;
+                            case ServoID::NUMBER_OF_SERVOS:
+                                break;
                         }
                     }
                 }
