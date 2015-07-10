@@ -13,7 +13,7 @@ balancer:
   forward_lean: 0.0 #m
 
   forward_duration: 1 #m/s
-  return_duration: 1 #m/s
+  return_duration: 0.5 #m/s
 
 active_balance:
   enabled: true
@@ -23,10 +23,10 @@ active_balance:
     d: 0.0
   translation_gain:
     X:
-      p: 0.25
+      p: 0.05
       d: -0.0
     Y:
-      p: 0.25
+      p: 0.185
       d: 0
     Z:
       p: 0.0
@@ -41,14 +41,14 @@ kick_frames:
   lift_foot:
     pos: [-0.05,0,0.05]
     orientation: [0,0,0]
-    duration: 1  
+    duration: 0.3
   kick:
     pos: [0,0,0]
     orientation: [0,0,0]
-    duration: 0.1
+    duration: 0.1 
   place_foot:
-    pos: [0,0,0.01]
+    pos: [0,0.02,0.01]
     orientation: [0,0,0]
-    duration: 0.5
+    duration: 0.3
 
 
