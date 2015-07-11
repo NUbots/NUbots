@@ -20,7 +20,6 @@ ELSE()
 	MESSAGE(WARNING "OpenBLAS was not found. Using BLAS instead.")
 ENDIF()
 
-
 # Set include directories and libraries:
 INCLUDE_DIRECTORIES(SYSTEM ${NUCLEAR_INCLUDE_DIRS})
 INCLUDE_DIRECTORIES(SYSTEM ${BLAS_INCLUDE_DIRS})
