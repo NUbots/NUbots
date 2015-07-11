@@ -5,6 +5,15 @@ IF(NOT CMAKE_BUILD_TYPE)
        FORCE)
 ENDIF()
 
+# RPath variables
+# use, i.e. don't skip the full RPATH for the build tree
+SET(CMAKE_SKIP_BUILD_RPATH FALSE)
+
+# Build the RPATH into the binary before install
+SET(CMAKE_BUILD_WITH_INSTALL_RPATH TRUE)
+
+# the RPATH to be used
+SET(CMAKE_INSTALL_RPATH "/nubots/toolchain/lib" "toolchain/" "lib/" "../lib/" "bin/lib" "/usr/local/lib/i386-linux-gnu")
 
 # Common C++ Flags
 # Enable c++11
