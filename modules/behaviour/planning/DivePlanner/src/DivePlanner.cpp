@@ -26,7 +26,6 @@
 #include "messages/support/Configuration.h"
 #include "messages/behaviour/Action.h"
 #include "messages/behaviour/ServoCommand.h"
-#include "messages/behaviour/DivePlan.h"
 #include "messages/vision/VisionObjects.h"
 
 namespace modules {
@@ -39,7 +38,6 @@ namespace planning {
     using messages::support::Configuration;
     using messages::motion::WalkStopCommand;
     using messages::input::LimbID;
-    using messages::behaviour::DivePlan;
 
     DivePlanner::DivePlanner(std::unique_ptr<NUClear::Environment> environment)
         : Reactor(std::move(environment)) {
@@ -49,15 +47,13 @@ namespace planning {
         	DISTANCE_THRESHOLD = config["DISTANCE_THRESHOLD"].as<float>();
         });
 
-        on<Trigger<Ball>, With<std::vector<Self>>, With<std::vector<messages::vision::Ball>>, With<DivePlan>>([this] (
+        on<Trigger<Ball>, With<std::vector<Self>>, With<std::vector<messages::vision::Ball>>>([this] (
         	const Ball& ball,
         	const std::vector<Self>& selfs,
-        	const std::vector<messages::vision::Ball>& vision_balls,
-        	const DivePlan& divePlan) {
+        	const std::vector<messages::vision::Ball>& vision_balls) {
 
         	// TODO: why are these used?
         	(void)selfs;
-        	(void)divePlan;
 
             if(vision_balls.size()>0 &&
                ball.position[0] > 0 &&
