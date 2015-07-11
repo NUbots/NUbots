@@ -23,7 +23,7 @@
 #include <csignal>
 #include <format.h>
 
-#include "messages/motion/WalkCommand.h"
+#include "messages/behaviour/MotionCommand.h"
 #include "messages/motion/HeadCommand.h"
 #include "messages/motion/KickCommand.h"
 #include "messages/behaviour/Action.h"
@@ -32,10 +32,8 @@ namespace modules {
 namespace behaviour {
 namespace strategy {
 
+    using messages::behaviour::MotionCommand;
     using messages::motion::HeadCommand;
-    using messages::motion::WalkCommand;
-    using messages::motion::WalkStartCommand;
-    using messages::motion::WalkStopCommand;
     using messages::motion::KickCommand;
     using messages::input::LimbID;
 
@@ -45,14 +43,6 @@ namespace strategy {
         velocity.zeros();
 
         powerplant.addServiceTask(NUClear::threading::ThreadWorker::ServiceTask(std::bind(std::mem_fn(&KeyboardWalk::run), this), std::bind(std::mem_fn(&KeyboardWalk::kill), this)));
-
-        on<Trigger<WalkStartCommand>>([this](const WalkStartCommand&) {
-            moving = true;
-        });
-
-        on<Trigger<WalkStopCommand>>([this](const WalkStopCommand&) {
-            moving = false;
-        });
 
         // emit<Scope::INITIALIZE>(std::make_unique<WalkStartCommand>());
         // moving = true;
@@ -220,10 +210,12 @@ namespace strategy {
 
     void KeyboardWalk::walkToggle() {
         if (moving) {
-            emit(std::make_unique<WalkStopCommand>());
-        }
-        else {
-            emit(std::make_unique<WalkStartCommand>());
+            auto motionCommand = std::make_unique<MotionCommand>();
+            motionCommand->type = MotionCommand::Type::StandStill;
+            emit(std::move(motionCommand));
+            moving = false;
+        } else {
+            moving = true;
             updateCommand();
         }
         printStatus();
@@ -240,10 +232,13 @@ namespace strategy {
     }
 
     void KeyboardWalk::updateCommand() {
-        auto walkCommand = std::make_unique<WalkCommand>();
-        walkCommand->command.xy()    = velocity;
-        walkCommand->command.angle() = rotation;
-        emit(std::move(walkCommand));
+        if (moving) {
+            auto motionCommand = std::make_unique<MotionCommand>();
+            motionCommand->type = MotionCommand::Type::DirectCommand;
+            motionCommand->walkCommand.xy() = velocity;
+            motionCommand->walkCommand.angle() = rotation;
+            emit(std::move(motionCommand));
+        }
 
         auto headCommand = std::make_unique<HeadCommand>();
         headCommand->yaw = headYaw;

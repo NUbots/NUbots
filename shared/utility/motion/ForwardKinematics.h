@@ -279,8 +279,9 @@ namespace kinematics {
             case messages::input::ServoID::L_ANKLE_PITCH:
             case messages::input::ServoID::L_ANKLE_ROLL:
                 return calculateLegJointPosition<RobotKinematicModel>(sensors, servoID, Side::LEFT);
+            default:
+                return std::map<messages::input::ServoID, utility::math::matrix::Transform3D>();
         }
-        return std::map<messages::input::ServoID, utility::math::matrix::Transform3D>();
     }
 
 

@@ -55,4 +55,6 @@ message Overview {
     optional uint64 last_seen_ball = 11;
     optional uint64 last_seen_goal = 12;
 
+    // Walk engine
+    repeated vec2 path_plan = 16;
 }

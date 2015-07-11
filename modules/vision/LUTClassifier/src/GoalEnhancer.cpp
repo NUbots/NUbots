@@ -19,6 +19,9 @@
 
 #include "LUTClassifier.h"
 #include "QuexClassifier.h"
+#include "utility/math/ransac/NPartiteRansac.h"
+#include "utility/math/geometry/Line.h"
+#include "utility/nubugger/NUhelpers.h"
 
 namespace modules {
     namespace vision {
@@ -27,6 +30,46 @@ namespace modules {
         using messages::vision::LookUpTable;
         using messages::vision::ObjectClass;
         using messages::vision::ClassifiedImage;
+        using utility::math::ransac::NPartiteRansac;
+        using utility::math::geometry::Line;
+
+        using utility::nubugger::drawVisionLines;
+
+        struct GoalPOI {
+            arma::vec2 midpoint;
+            uint length;
+        };
+
+        struct GoalPOIModel {
+
+            using DataPoint = GoalPOI;
+            static constexpr size_t REQUIRED_POINTS = 2;
+
+            Line line;
+            std::array<uint, 2> lengths;
+
+            GoalPOIModel() {}
+
+            bool regenerate(const std::array<DataPoint, REQUIRED_POINTS>& pts, const arma::vec2& horizonTangent, const double& maxAngle) {
+                line.setFromPoints(pts[0].midpoint, pts[1].midpoint);
+                lengths[0] = pts[0].length;
+                lengths[1] = pts[1].length;
+
+                return arma::dot(line.normal, horizonTangent) > maxAngle;
+            };
+
+            double calculateError(const DataPoint& p) const {
+                double dist = line.distanceToPoint(p.midpoint);
+                uint d1 = std::abs(lengths[0] - p.length);
+                uint d2 = std::abs(lengths[1] - p.length);
+
+                return dist * dist + d1 * d1 + d2 * d2;
+            };
+
+            template <typename Iterator>
+            void refineModel(Iterator& /*begin*/, Iterator& /*end*/, const double& /*threshold*/) {
+            }
+        };
 
         void LUTClassifier::enhanceGoals(const Image& image, const LookUpTable& lut, ClassifiedImage<ObjectClass>& classifiedImage) {
 
@@ -37,49 +80,91 @@ namespace modules {
                 We first generate segments above and below that are 2x the width of the segment
              */
 
-            // TODO think of a better way of doing this? This murders the robot when it's near the goals
-            // Probably use bipartite ransac
+            // Get our goal segments
+            std::vector<GoalPOI> points;
+            auto hSegments = classifiedImage.horizontalSegments.equal_range(ObjectClass::GOAL);
+            for(auto it = hSegments.first; it != hSegments.second; ++it) {
 
-            std::vector<ClassifiedImage<ObjectClass>::Segment> newSegments;
-            auto goalSegments = classifiedImage.horizontalSegments.equal_range(ObjectClass::GOAL);
-
-            // Draw 2n + 1 lines each n/(2n - 1) apart
-            for(auto it = goalSegments.first; it != goalSegments.second; ++it) {
-
-                auto& elem = it->second;
-
-                // We need 2n + 1 points, each with a start and end based on the midpoint
-                arma::mat points = arma::repmat(arma::vec({ double(elem.midpoint[0]), double(elem.midpoint[1]) }), 2, 2 * GOAL_LINE_DENSITY + 1);
-
-                // Move our X coordinates left and right
-                points.each_col() += arma::vec({ -double(elem.length) * GOAL_EXTENSION_SCALE, 0, double(elem.length) * GOAL_EXTENSION_SCALE, 0 });
-
-                // Generate all our Y values for our points
-                points.row(1) += GOAL_LINE_SPACING * ((arma::linspace(-GOAL_LINE_DENSITY, GOAL_LINE_DENSITY, 2 * GOAL_LINE_DENSITY + 1).t() * GOAL_LINE_DENSITY) / (2 * GOAL_LINE_DENSITY + 1));
-                // Copy over to the end
-                points.row(3) = points.row(1);
-
-                // Our lhs must be at least 0
-                points(arma::uvec({ 0 }), arma::find(points.row(0) < 0)).fill(0);
-
-                // Our rhs must be at most the image width
-                points(arma::uvec({ 2 }), arma::find(points.row(2) > double(image.width - 1))).fill(double(image.width - 1));
-
-                // Classify each of our points
-                for(uint i = 0; i < points.n_cols; ++i) {
-
-                    auto element = points.col(i);
-
-                    // Check our Y is within the bounds (no need to check the end since they are the same)
-                    if(element(1) >= 0 && element(1) < int(image.height)) {
-                        auto segments = quex->classify(image, lut, { int(element(0)), int(element(1)) }, { int(element(2)), int(element(3)) });
-                        newSegments.insert(newSegments.begin(), segments.begin(), segments.end());
-                    }
+                // Insert all our points
+                if(it->second.length > GOAL_MINIMUM_RANSAC_SEGMENT_SIZE) {
+                    points.push_back({{double(it->second.midpoint[0]), double(it->second.midpoint[1])}, it->second.length});
                 }
             }
 
-            insertSegments(classifiedImage, newSegments, false);
+            // Partition our segments so that they are split between above and below the horizon
+            auto split = std::partition(std::begin(points), std::end(points), [&] (const GoalPOI& point) {
+                // Is the midpoint above or below the horizon?
+                return classifiedImage.horizon.distanceToPoint(point.midpoint) > 0;
+            });
 
+            // Make an array of our partitions
+            std::array<std::vector<GoalPOI>::iterator, GoalPOIModel::REQUIRED_POINTS + 1> iterators = {
+                points.begin(),
+                split,
+                points.end()
+            };
+
+            // Ransac for goals
+            auto models = NPartiteRansac<GoalPOIModel>::fitModels(iterators
+                                                                , GOAL_RANSAC_MINIMUM_POINTS_FOR_CONSENSUS
+                                                                , GOAL_RANSAC_MAXIMUM_ITERATIONS_PER_FITTING
+                                                                , GOAL_RANSAC_MAXIMUM_FITTED_MODELS
+                                                                , GOAL_RANSAC_CONSENSUS_ERROR_THRESHOLD
+                                                                , classifiedImage.horizon.tangent()
+                                                                , GOAL_MAX_HORIZON_ANGLE);
+
+
+            std::vector<ClassifiedImage<ObjectClass>::Segment> newSegments;
+
+            std::vector<std::pair<arma::ivec2, arma::ivec2>> goalLines;
+            for(auto& model : models) {
+
+                double lineMid = 0;
+                double lineWidth = 0;
+
+                // Go through our points to find our extents
+                for(auto& m : model) {
+                    lineMid += model.model.line.tangentialDistanceToPoint(m.midpoint);
+                    lineWidth += m.length;
+                }
+
+                // Normalise our line length
+                lineWidth /= std::distance(model.begin(), model.end());
+                double lineHalfWidth = (lineWidth / 2) * GOAL_HORIZONTAL_EXTENSION_SCALE;
+                lineMid /= std::distance(model.begin(), model.end());
+
+                // Work out how long our line should be
+                // Get our actual line width
+                double lineLength = ((lineWidth * model.model.line.normal[0]) / GOAL_WIDTH_HEIGHT_RATIO) * GOAL_VERTICAL_EXTENSION_SCALE;
+
+                double minTangent = lineMid - lineLength / 2;
+                double maxTangent = lineMid + lineLength / 2;
+
+                // TODO clamp minTangent and maxTangent to the edges of the screen
+                // Get the min and max for intersecting with top and bottom of the screen
+
+                double jump = (maxTangent - minTangent) / double(GOAL_LINE_INTERSECTIONS);
+                for(auto d = minTangent; d <= maxTangent; d += jump) {
+
+                    // Get our centre point
+                    arma::vec2 p = model.model.line.pointFromTangentialDistance(d);
+
+                    if((p[1] > int(image.height) - 1) || (p[1] < 0)) {
+                        continue;
+                    }
+
+                    // Start and end
+                    arma::ivec2 s({ std::max(0, int(std::round(p[0] - lineHalfWidth))), int(std::round(p[1]))});
+                    arma::ivec2 e({ std::min(int(image.width) - 1, int(std::round(p[0] + lineHalfWidth))), int(std::round(p[1]))});
+
+                    if(e[0] > 0) {
+                        auto segments = quex->classify(image, lut, s, e);
+                        newSegments.insert(newSegments.begin(), segments.begin(), segments.end());
+                    }
+                }
+
+                insertSegments(classifiedImage, newSegments, false);
+            }
         }
 
     }  // vision

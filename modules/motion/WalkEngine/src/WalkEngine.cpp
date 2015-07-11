@@ -142,7 +142,7 @@ namespace motion {
             // If this is the case, we should delete or rethink the WalkStopCommand.
             requestStop();
         });
-        
+
         on<Trigger<Configuration<WalkEngine>>>([this](const Configuration<WalkEngine>& config) {
             configure(config.config);
         });
@@ -152,9 +152,9 @@ namespace motion {
             emit(std::make_unique<WalkConfigSaved>());
         });
 
-        on<Trigger<Startup>>([this](const Startup&) {
-            //generateAndSaveStandScript();
-            //reset();
+        generateStandScriptReaction = on<Trigger<Sensors>, Options<Single>>([this](const Sensors& sensors) {
+            generateStandScriptReaction.disable();
+            generateAndSaveStandScript(sensors);
             //state = State::LAST_STEP;
             //start();
         });
@@ -246,21 +246,20 @@ namespace motion {
         supportSideY = config["supportSideY"].as<Expression>();
         supportTurn = config["supportTurn"].as<Expression>();
 
-        // STAND_SCRIPT_DURATION = config["STAND_SCRIPT_DURATION"].as<Expression>();
         */
+        STAND_SCRIPT_DURATION = config["STAND_SCRIPT_DURATION"].as<Expression>();
     }
 
-    /* TODO
-    void WalkEngine::generateAndSaveStandScript(){
+    void WalkEngine::generateAndSaveStandScript(const Sensors& sensors) {
         reset();
         stanceReset();
-        auto waypoints = updateStill();
+        auto waypoints = updateStillWayPoints(sensors);
 
         Script standScript;
         Script::Frame frame;
         frame.duration = std::chrono::milliseconds(int(round(1000 * STAND_SCRIPT_DURATION)));
         for (auto& waypoint : *waypoints) {
-            frame.targets.push_back(Script::Frame::Target({waypoint.id, waypoint.position, waypoint.gain}));
+            frame.targets.push_back(Script::Frame::Target({waypoint.id, waypoint.position, waypoint.gain, 100}));
         }
         standScript.frames.push_back(frame);
         auto saveScript = std::make_unique<SaveConfiguration>();
@@ -270,7 +269,39 @@ namespace motion {
         //Try update(); ?
         reset();
         stanceReset();
-    }*/
+    }
+
+    void WalkEngine::stanceReset() {
+        // standup/sitdown/falldown handling
+        if (startFromStep) {
+            uLeftFoot = arma::zeros(3);
+            uRightFoot = arma::zeros(3);
+            uTorso = arma::zeros(3);
+
+            // start walking asap
+            initialStep = 1;
+        } else {
+            // stance resetted
+            uLeftFoot = uTorso.localToWorld({footOffset[0], DarwinModel::Leg::HIP_OFFSET_Y - footOffset[1], 0});
+            uRightFoot = uTorso.localToWorld({footOffset[0], -DarwinModel::Leg::HIP_OFFSET_Y + footOffset[1], 0});
+            initialStep = 2;
+        }
+
+        swingLeg = swingLegInitial;
+
+        uLeftFootSource = uLeftFoot;
+        uLeftFootDestination = uLeftFoot;
+
+        uRightFootSource = uRightFoot;
+        uRightFootDestination = uRightFoot;
+
+        uSupport = uTorso;
+        beginStepTime = getTime();
+        uLRFootOffset = {0, DarwinModel::Leg::HIP_OFFSET_Y - footOffset[1], 0};
+        startFromStep = false;
+
+        calculateNewStep();
+    }
 
     void WalkEngine::reset() {
         uTorso = {-footOffset[0], 0, 0};
@@ -380,10 +411,10 @@ namespace motion {
     void WalkEngine::updateStep(double phase, const Sensors& sensors) {
         //Get unitless phases for x and z motion
         arma::vec3 foot = footPhase(phase, phase1Single, phase2Single);
-        
+
         // don't lift foot at initial step, TODO: review
         if (initialStep > 0) {
-            foot[2] = 0; 
+            foot[2] = 0;
         }
 
         //Interpolate Transform2D from start to destination
@@ -447,7 +478,7 @@ namespace motion {
         emit(std::move(waypoints));
     }
 
-    void WalkEngine::updateStill(const Sensors& sensors) {
+    std::unique_ptr<std::vector<ServoCommand>> WalkEngine::updateStillWayPoints(const Sensors& sensors) {
         uTorso = stepTorso(uLeftFoot, uRightFoot, 0.5);
         Transform2D uTorsoActual = uTorso.localToWorld({-DarwinModel::Leg::HIP_OFFSET_X, 0, 0});
 
@@ -473,7 +504,11 @@ namespace motion {
         auto arms = motionArms(0.5);
         waypoints->insert(waypoints->end(), arms->begin(), arms->end());
 
-        emit(std::move(waypoints));
+        return waypoints;
+    }
+
+    void WalkEngine::updateStill(const Sensors& sensors) {
+        emit(std::move(updateStillWayPoints(sensors)));
     }
 
     std::unique_ptr<std::vector<ServoCommand>> WalkEngine::motionLegs(std::vector<std::pair<ServoID, float>> joints) {
@@ -558,40 +593,9 @@ namespace motion {
         return velocityCurrent;
     }
 
-    void WalkEngine::stanceReset() {
-        // standup/sitdown/falldown handling
-        if (startFromStep) {
-            uLeftFoot = arma::zeros(3);
-            uRightFoot = arma::zeros(3);
-            uTorso = arma::zeros(3);
-
-            // start walking asap
-            initialStep = 1;
-        } else {
-            // stance resetted
-            uLeftFoot = uTorso.localToWorld({footOffset[0], DarwinModel::Leg::HIP_OFFSET_Y, 0});
-            uRightFoot = uTorso.localToWorld({footOffset[0], -DarwinModel::Leg::HIP_OFFSET_Y, 0});
-        }
-
-        swingLeg = swingLegInitial;
-
-        uLeftFootSource = uLeftFoot;
-        uLeftFootDestination = uLeftFoot;
-
-        uRightFootSource = uRightFoot;
-        uRightFootDestination = uRightFoot;
-
-        uSupport = uTorso;
-        beginStepTime = getTime();
-        uLRFootOffset = {0, DarwinModel::Leg::HIP_OFFSET_Y - footOffset[1], 0};
-        startFromStep = false;
-
-        calculateNewStep();
-    }
-
     arma::vec2 WalkEngine::zmpSolve(double zs, double z1, double z2, double x1, double x2, double phase1Single, double phase2Single, double stepTime, double zmpTime) {
         /*
-        Solves ZMP equations. 
+        Solves ZMP equations.
         The resulting form of x is
         x(t) = z(t) + aP*exp(t/zmpTime) + aN*exp(-t/zmpTime) - zmpTime*mi*sinh((t-Ti)/zmpTime)
         where the ZMP point is piecewise linear:

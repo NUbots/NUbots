@@ -7,17 +7,27 @@ ADD_ROLE(
     support::NUbugger
 
     # Hardware Interface
+    input::LinuxCamera
     platform::darwin::HardwareIO
     platform::darwin::SensorFilter
 
     # Motion
     motion::WalkEngine
     motion::ScriptEngine
+    motion::HeadController
+    motion::IKKick
+
+    #Vision
+    vision::LUTClassifier
+    vision::GoalDetector
+    vision::BallDetector
+    vision::ObstacleDetector
 
     # Behaviour
     behaviour::Controller
-    behaviour::skills::KickScript
-    behaviour::skills::FallingRelax
+    behaviour::skills::Stand
+    #behaviour::skills::FallingRelax
     behaviour::skills::Getup
+    behaviour::skills::DirectWalkController
     behaviour::strategy::KeyboardWalk
 )

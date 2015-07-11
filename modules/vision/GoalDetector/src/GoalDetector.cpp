@@ -184,7 +184,7 @@ namespace vision {
                     double tR = mid.tangentialDistanceToPoint(it->right);
                     double dR = mid.distanceToPoint(it->right);
 
-                    // Don't want if if yellow shirt guy
+                    // Don't want if yellow shirt guy
                     if(std::abs(dL) < 2 * dSd && tL > max + 2 * dSd && tL > min - 2 * dSd) {
                         stat(tL);
                     }
@@ -310,7 +310,8 @@ namespace vision {
                         goalTopProjDist * measurement_distance_covariance_factor,
                         measurement_bearing_variance,
                         measurement_elevation_variance }));
-                // measurements.push_back({ cartesianToSpherical(goalTopProj), goalTopProjDistCov});
+                measurements.push_back({cartesianToSpherical(goalTopProj), goalTopProjDistCov,
+                                        arma::zeros<arma::vec>(3), arma::zeros<arma::mat>(3, 3)});
 
                 // Measure the distance to the base of the goals
                 Plane groundPlane({ 0, 0, 1 }, { 0, 0, 0 });
@@ -320,7 +321,8 @@ namespace vision {
                         goalBaseProjDist * measurement_distance_covariance_factor,
                         measurement_bearing_variance,
                         measurement_elevation_variance }));
-                //measurements.push_back({ cartesianToSpherical(goalBaseProj), goalBaseProjDistCov});
+                measurements.push_back({cartesianToSpherical(goalBaseProj), goalBaseProjDistCov,
+                                        arma::zeros<arma::vec>(3), arma::zeros<arma::mat>(3, 3)});
 
 
                 // Measure the width based distance to the bottom
@@ -331,7 +333,8 @@ namespace vision {
                         baseGoalWidthDist * measurement_distance_covariance_factor,
                         measurement_bearing_variance,
                         measurement_elevation_variance }));
-                measurements.push_back({ cartesianToSpherical(baseGoalWidth), baseGoalWidthDistCov});
+                measurements.push_back({cartesianToSpherical(baseGoalWidth), baseGoalWidthDistCov, 
+                                        arma::zeros<arma::vec>(3), arma::zeros<arma::mat>(3, 3)});
 
                 // Measure the width based distance to the top
                 double topWidthDistance = widthBasedDistanceToCircle(GOAL_DIAMETER, tl, tr, cam.focalLengthPixels);
@@ -341,7 +344,8 @@ namespace vision {
                         topGoalWidthDist * measurement_distance_covariance_factor,
                         measurement_bearing_variance,
                         measurement_elevation_variance }));
-                measurements.push_back({ cartesianToSpherical(topGoalWidth), topGoalWidthDistCov});
+                measurements.push_back({cartesianToSpherical(topGoalWidth), topGoalWidthDistCov,
+                                        arma::zeros<arma::vec>(3), arma::zeros<arma::mat>(3, 3)});
 
                 // Measure the height based distance
                 double heightDistance = distanceToVerticalObject((tl + tr) * 0.5, (bl + br) * 0.5, GOAL_HEIGHT, sensors.orientationCamToGround(2,3), cam.focalLengthPixels);
@@ -351,7 +355,8 @@ namespace vision {
                         goalHeightDist * measurement_distance_covariance_factor,
                         measurement_bearing_variance,
                         measurement_elevation_variance }));
-                // measurements.push_back({ cartesianToSpherical(goalHeight), goalHeightDistCov});
+                measurements.push_back({cartesianToSpherical(goalHeight), goalHeightDistCov,
+                                        arma::zeros<arma::vec>(3), arma::zeros<arma::mat>(3, 3)});
 
 
                 // // Ignore invalid measurements:

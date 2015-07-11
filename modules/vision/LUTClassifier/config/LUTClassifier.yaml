@@ -12,7 +12,7 @@ visual_horizon:
 # Settings related to the ball finder
 ball:
   # The number of lines that will pass through the ball when finding (at minimum)
-  intersections_coarse: 2
+  intersections_coarse: 4
   # The number of lines that will pass through the ball when enhancing
   intersections_fine: 10
   # The multiplier for the search for the ball
@@ -27,8 +27,23 @@ goals:
   # The spacing in radians between horizontal lines
   spacing: 0.02
   # The spacing in radians between sampled pixels (for finding)
-  subsampling: 0.01
-  # The density of extra lines to generate (as well as their range) calcluated as n lines per line separated by n/(2n + 1) jumps
+  subsampling: 0.005
+  # ransac settings for finding the goal area
+  ransac:
+    minimum_points_for_consensus: 6
+    maximum_iterations_per_fitting: 100
+    maximum_fitted_models: 6
+    consensus_error_threshold: 10
+  # How dense to make the lines for found objects
   line_density: 2
+  # How large the angle between the goal and horizon finder line can be
+  max_horizon_angle: pi / 6
+  # The smallest segment that will be considered by RANSAC for finding goal possiblities
+  minimum_ransac_segment_size: 0.01
   # The amount larger then the original data the goal lines will be
-  extension_scale: 2.5
+  horizontal_extension_scale: 3.0
+  vertical_extension_scale: 1.0
+  # The ratio of the width to height to use to normalize line lengths before extending
+  width_height_ratio: 0.05
+  # The number of segments to intersect with the goals
+  line_intersections: 50

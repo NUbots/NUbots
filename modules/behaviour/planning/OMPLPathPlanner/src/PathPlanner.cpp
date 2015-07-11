@@ -110,7 +110,7 @@ namespace planning {
     public:
         DarwinPathOptimisationObjective(const ob::SpaceInformationPtr &si) :
             ob::OptimizationObjective(si) {}
-        virtual ob::Cost stateCost(const ob::State* s) const {
+        virtual ob::Cost stateCost(const ob::State* /*s*/) const {
             return ob::Cost(0);
         }
         // virtual bool isCostBetterThan(ob::Cost c1, ob::Cost c2) const; // default: c1 + eps < c2

@@ -211,9 +211,10 @@ namespace motion {
 
         // end config
 
-        // TODO: double STAND_SCRIPT_DURATION;
+        double STAND_SCRIPT_DURATION;
+        ReactionHandle generateStandScriptReaction;
 
-        //void generateAndSaveStandScript();
+        void generateAndSaveStandScript(const Sensors& sensors);
         void configure(const YAML::Node& config);
 
         void reset();
@@ -224,6 +225,7 @@ namespace motion {
         void update(const Sensors& sensors);
         void updateStep(double phase, const Sensors& sensors);
         void updateStill(const Sensors& sensors = Sensors());
+        std::unique_ptr<std::vector<ServoCommand>> updateStillWayPoints(const Sensors& sensors);
 
         void calculateNewStep();
         void setVelocity(Transform2D velocity);

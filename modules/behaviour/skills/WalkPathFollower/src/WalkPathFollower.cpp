@@ -231,7 +231,7 @@ namespace skills {
         return closestIndex;
     }
 
-    std::unique_ptr<WalkCommand> WalkPathFollower::walkToNextNode(const Transform2D& currentState, bool noLogging) {
+    std::unique_ptr<WalkCommand> WalkPathFollower::walkToNextNode(const Transform2D& currentState, bool /*noLogging*/) {
         // Aim for the index after the closest state:
         int targetIndex = std::min(1, int(currentPath.states.size()) - 1);
         Transform2D targetState = currentPath.states[targetIndex]; // {3, 3, 3.14};

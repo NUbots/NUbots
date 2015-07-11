@@ -21,9 +21,12 @@
 
 #include "messages/vision/ClassifiedImage.h"
 #include "messages/vision/VisionObjects.h"
+#include "messages/vision/LookUpTable.h"
 #include "messages/input/CameraParameters.h"
 #include "messages/support/Configuration.h"
 #include "messages/support/FieldDescription.h"
+
+#include "utility/support/yaml_expression.h"
 
 #include "utility/math/geometry/Plane.h"
 
@@ -43,6 +46,8 @@ namespace vision {
     using messages::vision::ClassifiedImage;
     using messages::vision::VisionObject;
     using messages::vision::Ball;
+    using messages::vision::LookUpTable;
+    using messages::input::Image;
 
     using Plane = utility::math::geometry::Plane<3>;
 
@@ -52,6 +57,7 @@ namespace vision {
     using utility::math::vision::getCamFromScreen;
     using utility::math::vision::getParallaxAngle;
     using utility::math::vision::projectCamSpaceToScreen;
+    using utility::math::geometry::Circle;
 
     using utility::math::coordinates::cartesianToSpherical;
     using utility::nubugger::graph;
@@ -61,26 +67,74 @@ namespace vision {
 
     using utility::math::ransac::Ransac;
     using utility::math::ransac::RansacCircleModel;
+    using utility::nubugger::drawVisionLines;
+    using utility::support::Expression;
+
+    float BallDetector::approximateCircleGreenRatio(const Circle& circle, const Image& image, const LookUpTable& lut) {
+        // TODO:
+        // std::vector<std::tuple<arma::ivec2, arma::ivec2, arma::vec4>> debug;
+        float r = 0;
+        int numGreen = 0;
+        for(int i = 0; i < green_radial_samples; r = (++i) * circle.radius / float(green_radial_samples)) {
+            float theta = 0;
+            if(r == 0){
+                arma::ivec2 ipos = arma::ivec({int(std::round(circle.centre[0])), int(std::round(circle.centre[1]))});
+                if(ipos[0] >= 0 && ipos[0] < int(image.width) && ipos[1] >= 0 && ipos[1] < int(image.height)){
+                    // debug.push_back(std::make_tuple(ipos, ipos + arma::ivec2{1,1}, arma::vec4{1,1,1,1}));
+                    if(lut(image(ipos)) == 'g'){
+                        numGreen++;
+                    }
+                }
+                continue;
+            }
+            for(int j = 0; j < green_angular_samples; theta = (++j) * 2 * M_PI / float(green_angular_samples)) {
+                float x = r * std::cos(theta);
+                float y = r * std::sin(theta);
+                arma::vec2 pos = circle.centre + arma::vec2({x,y});
+                arma::ivec2 ipos = arma::ivec2({int(std::round(pos[0])),int(std::round(pos[1]))});
+                if(ipos[0] >= 0 && ipos[0] < int(image.width) && ipos[1] >= 0 && ipos[1] < int(image.height)){
+                    // debug.push_back(std::make_tuple(ipos, ipos + arma::ivec2{1,1}, arma::vec4{1,1,1,1}));
+                    if(lut(image(ipos)) == 'g'){
+                        numGreen++;
+                    }
+                }
+            }
+            // sample point in lut and check if == 'g'
+        }
+
+        // emit(drawVisionLines(debug));
+
+        float greenRatio = numGreen / float(1 + (green_radial_samples-1) * green_angular_samples);
+        return greenRatio;
+    }
 
     BallDetector::BallDetector(std::unique_ptr<NUClear::Environment> environment)
         : Reactor(std::move(environment)) {
 
         on<Trigger<Configuration<BallDetector>>>([this](const Configuration<BallDetector>& config) {
+            
             MINIMUM_POINTS_FOR_CONSENSUS = config["ransac"]["minimum_points_for_consensus"].as<uint>();
-            CONSENSUS_ERROR_THRESHOLD = config["ransac"]["consensus_error_threshold"].as<double>();
+            CONSENSUS_ERROR_THRESHOLD = config["ransac"]["consensus_error_threshold"].as<Expression>();
+            
             MAXIMUM_ITERATIONS_PER_FITTING = config["ransac"]["maximum_iterations_per_fitting"].as<uint>();
             MAXIMUM_FITTED_MODELS = config["ransac"]["maximum_fitted_models"].as<uint>();
-            MAXIMUM_DISAGREEMENT_RATIO = config["maximum_disagreement_ratio"].as<double>();
-            measurement_distance_variance_factor = config["measurement_distance_variance_factor"].as<double>();
-            measurement_bearing_variance = config["measurement_bearing_variance"].as<double>();
-            measurement_elevation_variance = config["measurement_elevation_variance"].as<double>();
+            MAXIMUM_DISAGREEMENT_RATIO = config["maximum_disagreement_ratio"].as<Expression>();
+            
+            measurement_distance_variance_factor = config["measurement_distance_variance_factor"].as<Expression>();
+            measurement_bearing_variance = config["measurement_bearing_variance"].as<Expression>();
+            measurement_elevation_variance = config["measurement_elevation_variance"].as<Expression>();
+            
+            green_ratio_threshold = config["green_ratio_threshold"].as<Expression>();
+            green_radial_samples = config["green_radial_samples"].as<Expression>();
+            green_angular_samples = config["green_angular_samples"].as<Expression>();
+
+            kmeansClusterer.configure(config["clustering"]);
 
             lastFrame.time = NUClear::clock::now();
         });
 
-        on<Trigger<Raw<ClassifiedImage<ObjectClass>>>, With<CameraParameters>, With<Optional<FieldDescription>>, Options<Single>>("Ball Detector", [this](
-            const std::shared_ptr<const ClassifiedImage<ObjectClass>>& rawImage, const CameraParameters& cam, const std::shared_ptr<const FieldDescription>& field) {
-
+        on<Trigger<Raw<ClassifiedImage<ObjectClass>>>, With<CameraParameters>, With<Optional<FieldDescription>>, With<LookUpTable>, Options<Single>>("Ball Detector", [this](
+            const std::shared_ptr<const ClassifiedImage<ObjectClass>>& rawImage, const CameraParameters& cam, const std::shared_ptr<const FieldDescription>& field, const LookUpTable& lut) {
 
             if (field == nullptr) {
                 NUClear::log(__FILE__, ", ", __LINE__, ": FieldDescription Update: support::configuration::SoccerConfig module might not be installed.");
@@ -91,57 +145,46 @@ namespace vision {
             std::vector<arma::vec2> ballPoints;
             const auto& sensors = *image.sensors;
 
-            double deltaT = 1e-6 * std::chrono::duration_cast<std::chrono::microseconds>(sensors.timestamp - lastFrame.time).count();
-
-            // Get all the points that could make up the ball
-            for(int i = 0; i < 2; ++i) {
-
-                auto segments = i ? image.horizontalSegments.equal_range(ObjectClass::BALL)
-                                  : image.verticalSegments.equal_range(ObjectClass::BALL);
-
-                for(auto it = segments.first; it != segments.second; ++it) {
-
-                    auto& segment = it->second;
-                    auto& start = segment.start;
-                    auto& end = segment.end;
-
-                    bool belowHorizon = image.visualHorizonAtPoint(end[0]) < end[1] || image.visualHorizonAtPoint(start[0]) < start[1];
-
-                    // We throw out points if they are:
-                    // Less the full quality (sub-sampled)
-                    // Do not have a transition on either side (are on an edge)
-                    // Go from an orange to other to orange segment (are interior)
-
-                    if(belowHorizon
-                        && segment.subsample == 1
-                        && segment.next
-                        && (!segment.next->next || segment.next->next->colour != ObjectClass::BALL)) {
-
-                        ballPoints.push_back({ double(end[0]), double(end[1]) });
-                    }
-
-                    if(belowHorizon
-                        && segment.subsample == 1
-                        && segment.previous
-                        && (!segment.previous->previous || segment.previous->previous->colour != ObjectClass::BALL)) {
-
-                        ballPoints.push_back({ double(start[0]), double(start[1]) });
-                    }
-                }
+            ballPoints.reserve(image.ballPoints.size());
+            for(const auto& point : image.ballPoints) {
+                ballPoints.push_back(arma::vec2({double(point[0]), double(point[1])}));
             }
 
-            // Use ransac to find the ball
+            double deltaT = 1e-6 * std::chrono::duration_cast<std::chrono::microseconds>(sensors.timestamp - lastFrame.time).count();
+            
+            // //Cluster data points for running ransac
+            // arma::mat clusterData = arma::zeros(2,ballPoints.size());
+            // for (int i = 0; i < ballPoints.size(); i++){
+            //     clusterData.col(i) = ballPoints[i];
+            // }
+            // bool clusterSuccess = kmeansClusterer.learn(clusterData);
+
+            // // std::vector<RansacResult<std::iterator, RansacCircleModel>> ransacResults;
+
+            // if(clusterSuccess){
+            //     std::cout << "Cluster success!" << std::endl;
+            //     // Do ransac per cluster 
+            //     auto debug = kmeansClusterer.getDebugRectangles();
+            //     emit(drawVisionLines(debug));
+            // } else {
+            // }
+            
             auto ransacResults = Ransac<RansacCircleModel>::fitModels(ballPoints.begin()
                                                                     , ballPoints.end()
                                                                     , MINIMUM_POINTS_FOR_CONSENSUS
                                                                     , MAXIMUM_ITERATIONS_PER_FITTING
                                                                     , MAXIMUM_FITTED_MODELS
                                                                     , CONSENSUS_ERROR_THRESHOLD);
+            // Use ransac to find the ball
 
             auto balls = std::make_unique<std::vector<Ball>>();
             balls->reserve(ransacResults.size());
 
             for(auto& result : ransacResults) {
+                float greenRatio = approximateCircleGreenRatio(result.model, *(image.image), lut);
+                if(greenRatio > green_ratio_threshold){
+                    continue;
+                }
 
                 std::vector<VisionObject::Measurement> measurements;
                 measurements.reserve(2);
@@ -189,7 +232,8 @@ namespace vision {
                 }
                 lastFrame.widthBall = ballCentreGroundWidth;
                 //push back measurements
-                measurements.push_back({ cartesianToSpherical(ballCentreGroundWidth), ballCentreGroundWidthCov, widthVel, widthVelCov});
+                arma::vec3 sphericalBallCentreGroundWidth = cartesianToSpherical(ballCentreGroundWidth);
+                measurements.push_back({ sphericalBallCentreGroundWidth, ballCentreGroundWidthCov, widthVel, widthVelCov});
                 // 0.003505351, 0.001961638, 1.68276E-05
                 emit(graph("ballCentreGroundWidth measurement", ballCentreGroundWidth(0), ballCentreGroundWidth(1), ballCentreGroundWidth(2)));
                 emit(graph("ballCentreGroundWidth measurement (spherical)", measurements.back().position(0), measurements.back().position(1), measurements.back().position(2)));
@@ -217,7 +261,8 @@ namespace vision {
                 }
                 lastFrame.projBall = ballCentreGroundProj;
                 //push back measurements
-                measurements.push_back({ cartesianToSpherical(ballCentreGroundProj), ballCentreGroundProjCov, projVel, projVelCov});
+                arma::vec3 sphericalBallCentreGroundProj = cartesianToSpherical(ballCentreGroundProj);
+                measurements.push_back({ sphericalBallCentreGroundProj, ballCentreGroundProjCov, projVel, projVelCov});
                 // 0.002357231 * 2, 2.20107E-05 * 2, 4.33072E-05 * 2,
                 emit(graph("ballCentreGroundProj measurement", ballCentreGroundProj(0), ballCentreGroundProj(1), ballCentreGroundProj(2)));
                 emit(graph("ballCentreGroundProj measurement (spherical)", measurements.back().position(0), measurements.back().position(1), measurements.back().position(2)));
@@ -225,7 +270,9 @@ namespace vision {
                 /*
                  *  IF VALID BUILD OUR BALL
                  */
-                if(widthDistance > cameraHeight / 2.0 && std::abs((ballCentreGroundWidth[0] - ballCentreGroundProj[0]) / ballCentreGroundProj[0]) > MAXIMUM_DISAGREEMENT_RATIO) {
+                if(widthDistance > cameraHeight / 2.0 
+                    //Only build ball if disagreement not too high
+                    && std::abs((sphericalBallCentreGroundWidth[0] - sphericalBallCentreGroundProj[0]) / sphericalBallCentreGroundProj[0]) < MAXIMUM_DISAGREEMENT_RATIO) {
                     Ball b;
 
                     // On screen visual shape

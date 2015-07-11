@@ -22,6 +22,10 @@
 
 #include <nuclear>
 #include <armadillo>
+#include "utility/math/geometry/Circle.h"
+#include "messages/vision/LookUpTable.h"
+#include "messages/input/Image.h"
+#include "utility/math/learning/KMeans.h"
 
 namespace modules {
 namespace vision {
@@ -31,11 +35,19 @@ namespace vision {
         uint MINIMUM_POINTS_FOR_CONSENSUS;
         uint MAXIMUM_ITERATIONS_PER_FITTING;
         uint MAXIMUM_FITTED_MODELS;
+        
         double CONSENSUS_ERROR_THRESHOLD;
         double MAXIMUM_DISAGREEMENT_RATIO;
+        
         double measurement_distance_variance_factor;
         double measurement_bearing_variance;
         double measurement_elevation_variance;
+
+        double green_ratio_threshold;
+        double green_radial_samples;
+        double green_angular_samples;
+
+        utility::math::learning::KMeans kmeansClusterer;
 
         struct Frame{
             time_t time;
@@ -44,6 +56,7 @@ namespace vision {
         };
         Frame lastFrame;
 
+        float approximateCircleGreenRatio(const utility::math::geometry::Circle& circle, const messages::input::Image& image, const messages::vision::LookUpTable& lut);
     public:
 
         static constexpr const char* CONFIGURATION_PATH = "BallDetector.yaml";

@@ -34,6 +34,7 @@ namespace skills {
     using messages::behaviour::MotionCommand;
     using messages::behaviour::RegisterAction;
     using messages::behaviour::ActionPriorites;
+    using messages::motion::WalkStopped;
     using messages::motion::WalkCommand;
     using messages::motion::WalkStartCommand;
     using messages::motion::WalkStopCommand;
@@ -72,7 +73,7 @@ namespace skills {
             }
         }));
 
-        on<Trigger<Configuration<DirectWalkController>>>([this] (const Configuration<DirectWalkController>& config) {
+        on<Trigger<Configuration<DirectWalkController>>>([this] (const Configuration<DirectWalkController>& /*config*/) {
             // Use configuration here from file DirectWalkController.yaml
         });
 
@@ -81,9 +82,16 @@ namespace skills {
                 emit(std::make_unique<ActionPriorites>(ActionPriorites { subsumptionId, { 26, 11 }}));
 	            emit(std::move(std::make_unique<WalkStartCommand>(subsumptionId)));
 	            emit(std::move(std::make_unique<WalkCommand>(subsumptionId, command.walkCommand)));
+            } else if (command.type == MotionCommand::Type::StandStill) {
+                emit(std::make_unique<ActionPriorites>(ActionPriorites { subsumptionId, { 26, 11 }}));
+                emit(std::move(std::make_unique<WalkStopCommand>(subsumptionId)));
             } else {
                 emit(std::make_unique<ActionPriorites>(ActionPriorites { subsumptionId, { 0, 0 }}));
             }
+        });
+
+        on<Trigger<WalkStopped>>([this] (const WalkStopped&) {
+            emit(std::make_unique<ActionPriorites>(ActionPriorites { subsumptionId, { 0, 0 }}));
         });
     }
 }

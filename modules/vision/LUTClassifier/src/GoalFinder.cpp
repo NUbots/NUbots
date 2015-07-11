@@ -41,12 +41,8 @@ namespace modules {
                classify the mostly empty green below.
              */
 
-            // TODO cast lines from the highest screen edge point above the horizon
-            // Cast them at GOAL_LINE_SPACING below this point to the lowest point of the visual horizon
-            // Intersect them with the visual horizon to not overlap with them (this may make two lines)
-
-            // Cast lines upward to find the goals
-            for(int y = 0; y < int(image.height - 1); y += GOAL_LINE_SPACING) {
+            // Cast lines upward to find the goals starting at the lowest point of the visual horizon
+            for(int y = 0; y < classifiedImage.maxVisualHorizon->at(1); y += GOAL_LINE_SPACING) {
 
                 arma::ivec2 start = { 0, y };
                 arma::ivec2 end = { int(image.width - 1), y };
