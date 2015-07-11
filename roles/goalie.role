@@ -30,6 +30,7 @@ ADD_ROLE(
     behaviour::skills::HeadBehaviourSoccer
 
     behaviour::planning::DivePlanner
+    behaviour::planning::GoalieWalkPlanner
     behaviour::skills::GoalSaver
 
     #Motion
