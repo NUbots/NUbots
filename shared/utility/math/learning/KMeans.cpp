@@ -40,10 +40,10 @@ namespace learning {
 		if(clusterModel.n_dims() != 2) return std::vector<std::tuple<arma::ivec2, arma::ivec2, arma::vec4>>();
 		
 		std::vector<std::tuple<arma::ivec2, arma::ivec2, arma::vec4>> debug;
-		for (int i = 0; i < clusterModel.n_gaus(); i++){
+		for (size_t i = 0; i < clusterModel.n_gaus(); i++){
             arma::vec2 mean = clusterModel.means.col(i);
             arma::vec2 dcov = clusterModel.dcovs.col(i);
-            float weight = clusterModel.hefts(i);
+            //float weight = clusterModel.hefts(i);
 
             arma::ivec2 imean = arma::ivec({int(std::round(mean[0])),int(std::round(mean[1]))});
             arma::ivec2 idcov = arma::ivec({int(std::round(dcov[0] * 0.1)),int(std::round(dcov[1] * 0.1))});
