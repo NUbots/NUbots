@@ -79,7 +79,7 @@ namespace vision {
             float theta = 0;
             if(r == 0){
                 arma::ivec2 ipos = arma::ivec({int(std::round(circle.centre[0])), int(std::round(circle.centre[1]))});
-                if(ipos[0] >= 0 && ipos[0] < image.width && ipos[1] >= 0 && ipos[1] < image.height){
+                if(ipos[0] >= 0 && ipos[0] < int(image.width) && ipos[1] >= 0 && ipos[1] < int(image.height)){
                     // debug.push_back(std::make_tuple(ipos, ipos + arma::ivec2{1,1}, arma::vec4{1,1,1,1}));
                     if(lut(image(ipos)) == 'g'){
                         numGreen++;
@@ -92,7 +92,7 @@ namespace vision {
                 float y = r * std::sin(theta);
                 arma::vec2 pos = circle.centre + arma::vec2({x,y});
                 arma::ivec2 ipos = arma::ivec2({int(std::round(pos[0])),int(std::round(pos[1]))});
-                if(ipos[0] >= 0 && ipos[0] < image.width && ipos[1] >= 0 && ipos[1] < image.height){
+                if(ipos[0] >= 0 && ipos[0] < int(image.width) && ipos[1] >= 0 && ipos[1] < int(image.height)){
                     // debug.push_back(std::make_tuple(ipos, ipos + arma::ivec2{1,1}, arma::vec4{1,1,1,1}));
                     if(lut(image(ipos)) == 'g'){
                         numGreen++;

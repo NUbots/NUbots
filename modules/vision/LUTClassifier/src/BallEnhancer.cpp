@@ -181,7 +181,7 @@ namespace modules {
                 // The last pixel we looked at
                 // auto lastPixel = image(point[0], point[1]);
 
-                for(int x = point[0]; x < image.width; ++x) {
+                for(int x = point[0]; x < int(image.width); ++x) {
 
                     char c = lut(image(x, point[1]));
 

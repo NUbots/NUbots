@@ -310,7 +310,8 @@ namespace vision {
                         goalTopProjDist * measurement_distance_covariance_factor,
                         measurement_bearing_variance,
                         measurement_elevation_variance }));
-                measurements.push_back({ cartesianToSpherical(goalTopProj), goalTopProjDistCov});
+                measurements.push_back({cartesianToSpherical(goalTopProj), goalTopProjDistCov,
+                                        arma::zeros<arma::vec>(3), arma::zeros<arma::mat>(3, 3)});
 
                 // Measure the distance to the base of the goals
                 Plane groundPlane({ 0, 0, 1 }, { 0, 0, 0 });
@@ -320,7 +321,8 @@ namespace vision {
                         goalBaseProjDist * measurement_distance_covariance_factor,
                         measurement_bearing_variance,
                         measurement_elevation_variance }));
-                measurements.push_back({ cartesianToSpherical(goalBaseProj), goalBaseProjDistCov});
+                measurements.push_back({cartesianToSpherical(goalBaseProj), goalBaseProjDistCov,
+                                        arma::zeros<arma::vec>(3), arma::zeros<arma::mat>(3, 3)});
 
 
                 // Measure the width based distance to the bottom
@@ -353,7 +355,8 @@ namespace vision {
                         goalHeightDist * measurement_distance_covariance_factor,
                         measurement_bearing_variance,
                         measurement_elevation_variance }));
-                measurements.push_back({ cartesianToSpherical(goalHeight), goalHeightDistCov});
+                measurements.push_back({cartesianToSpherical(goalHeight), goalHeightDistCov,
+                                        arma::zeros<arma::vec>(3), arma::zeros<arma::mat>(3, 3)});
 
 
                 // // Ignore invalid measurements:

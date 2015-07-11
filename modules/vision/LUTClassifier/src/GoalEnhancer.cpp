@@ -67,7 +67,7 @@ namespace modules {
             };
 
             template <typename Iterator>
-            void refineModel(Iterator& begin, Iterator& end, const double& threshold) {
+            void refineModel(Iterator& /*begin*/, Iterator& /*end*/, const double& /*threshold*/) {
             }
         };
 
