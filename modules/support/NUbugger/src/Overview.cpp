@@ -20,6 +20,7 @@
 #include "NUbugger.h"
 
 #include "messages/behaviour/WalkPath.h"
+#include "messages/behaviour/KickPlan.h"
 #include "messages/input/gameevents/GameEvents.h"
 #include "messages/input/Image.h"
 #include "messages/support/nubugger/proto/Message.pb.h"
@@ -37,6 +38,7 @@ namespace support {
 
     using messages::behaviour::proto::Behaviour;
     using messages::behaviour::WalkPath;
+    using messages::behaviour::KickPlan;
     using messages::input::gameevents::GameState;
     using messages::input::Image;
     using messages::input::proto::Sensors;
@@ -152,6 +154,12 @@ namespace support {
             for (auto state : walkPath.states) {
                 *overview.add_path_plan() << arma::vec2(state.xy());
             }
+
+        }));
+
+        handles[Message::OVERVIEW].push_back(on<Trigger<KickPlan>, Options<Single, Priority<NUClear::LOW>>>([this] (const KickPlan& KickPlan) {
+
+            *overview.mutable_kick_target() << KickPlan.target;
 
         }));
 

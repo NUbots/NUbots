@@ -34,6 +34,7 @@ message Overview {
 
 	// Behaviour
     optional messages.behaviour.proto.Behaviour.State behaviour_state = 3;
+    optional vec2 kick_target = 17;
 
     // Localisation
     optional vec2 robot_position = 4;
