@@ -152,20 +152,30 @@ namespace vision {
 
             double deltaT = 1e-6 * std::chrono::duration_cast<std::chrono::microseconds>(sensors.timestamp - lastFrame.time).count();
             
-            //Cluster data points for running ransac
-            arma::mat clusterData = arma::zeros(2,ballPoints.size());
-            for (int i = 0; i < ballPoints.size(); i++){
-                clusterData.col(i) = ballPoints[i];
-            }
-            kmeansClusterer.learn(clusterData);
+            // //Cluster data points for running ransac
+            // arma::mat clusterData = arma::zeros(2,ballPoints.size());
+            // for (int i = 0; i < ballPoints.size(); i++){
+            //     clusterData.col(i) = ballPoints[i];
+            // }
+            // bool clusterSuccess = kmeansClusterer.learn(clusterData);
+
+            // // std::vector<RansacResult<std::iterator, RansacCircleModel>> ransacResults;
+
+            // if(clusterSuccess){
+            //     std::cout << "Cluster success!" << std::endl;
+            //     // Do ransac per cluster 
+            //     auto debug = kmeansClusterer.getDebugRectangles();
+            //     emit(drawVisionLines(debug));
+            // } else {
+            // }
             
-            // Use ransac to find the ball
             auto ransacResults = Ransac<RansacCircleModel>::fitModels(ballPoints.begin()
                                                                     , ballPoints.end()
                                                                     , MINIMUM_POINTS_FOR_CONSENSUS
                                                                     , MAXIMUM_ITERATIONS_PER_FITTING
                                                                     , MAXIMUM_FITTED_MODELS
                                                                     , CONSENSUS_ERROR_THRESHOLD);
+            // Use ransac to find the ball
 
             auto balls = std::make_unique<std::vector<Ball>>();
             balls->reserve(ransacResults.size());
@@ -222,7 +232,8 @@ namespace vision {
                 }
                 lastFrame.widthBall = ballCentreGroundWidth;
                 //push back measurements
-                measurements.push_back({ cartesianToSpherical(ballCentreGroundWidth), ballCentreGroundWidthCov, widthVel, widthVelCov});
+                arma::vec3 sphericalBallCentreGroundWidth = cartesianToSpherical(ballCentreGroundWidth);
+                measurements.push_back({ sphericalBallCentreGroundWidth, ballCentreGroundWidthCov, widthVel, widthVelCov});
                 // 0.003505351, 0.001961638, 1.68276E-05
                 emit(graph("ballCentreGroundWidth measurement", ballCentreGroundWidth(0), ballCentreGroundWidth(1), ballCentreGroundWidth(2)));
                 emit(graph("ballCentreGroundWidth measurement (spherical)", measurements.back().position(0), measurements.back().position(1), measurements.back().position(2)));
@@ -250,7 +261,8 @@ namespace vision {
                 }
                 lastFrame.projBall = ballCentreGroundProj;
                 //push back measurements
-                measurements.push_back({ cartesianToSpherical(ballCentreGroundProj), ballCentreGroundProjCov, projVel, projVelCov});
+                arma::vec3 sphericalBallCentreGroundProj = cartesianToSpherical(ballCentreGroundProj);
+                measurements.push_back({ sphericalBallCentreGroundProj, ballCentreGroundProjCov, projVel, projVelCov});
                 // 0.002357231 * 2, 2.20107E-05 * 2, 4.33072E-05 * 2,
                 emit(graph("ballCentreGroundProj measurement", ballCentreGroundProj(0), ballCentreGroundProj(1), ballCentreGroundProj(2)));
                 emit(graph("ballCentreGroundProj measurement (spherical)", measurements.back().position(0), measurements.back().position(1), measurements.back().position(2)));
@@ -258,7 +270,9 @@ namespace vision {
                 /*
                  *  IF VALID BUILD OUR BALL
                  */
-                if(widthDistance > cameraHeight / 2.0 && std::abs((ballCentreGroundWidth[0] - ballCentreGroundProj[0]) / ballCentreGroundProj[0]) > MAXIMUM_DISAGREEMENT_RATIO) {
+                if(widthDistance > cameraHeight / 2.0 
+                    //Only build ball if disagreement not too high
+                    && std::abs((sphericalBallCentreGroundWidth[0] - sphericalBallCentreGroundProj[0]) / sphericalBallCentreGroundProj[0]) < MAXIMUM_DISAGREEMENT_RATIO) {
                     Ball b;
 
                     // On screen visual shape

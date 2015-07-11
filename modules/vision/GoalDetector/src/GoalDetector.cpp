@@ -184,7 +184,7 @@ namespace vision {
                     double tR = mid.tangentialDistanceToPoint(it->right);
                     double dR = mid.distanceToPoint(it->right);
 
-                    // Don't want if if yellow shirt guy
+                    // Don't want if yellow shirt guy
                     if(std::abs(dL) < 2 * dSd && tL > max + 2 * dSd && tL > min - 2 * dSd) {
                         stat(tL);
                     }
