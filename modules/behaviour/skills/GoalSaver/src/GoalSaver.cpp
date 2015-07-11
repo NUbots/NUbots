@@ -58,7 +58,7 @@ namespace skills {
         : Reactor(std::move(environment))
         , id(size_t(this) * size_t(this) - size_t(this)) {
 
-        // do a little configurating
+        // do a little configuration
         on<Trigger<Configuration<GoalSaver>>>([this] (const Configuration<GoalSaver>& config){
             DIVE_PRIORITY = config["DIVE_PRIORITY"].as<float>();
             EXECUTION_PRIORITY = config["EXECUTION_PRIORITY"].as<float>();

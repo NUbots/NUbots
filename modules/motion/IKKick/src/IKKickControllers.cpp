@@ -31,6 +31,7 @@ namespace modules{
 namespace motion{
 
 	void KickBalancer::configure(const Configuration<IKKickConfig>& config){
+        servo_angle_threshold = config["balancer"]["servo_angle_threshold"].as<float>();
 	    stand_height = config["balancer"]["stand_height"].as<float>();
         forward_lean = config["balancer"]["forward_lean"].as<float>();
         foot_separation = config["balancer"]["foot_separation"].as<float>();
@@ -64,11 +65,14 @@ namespace motion{
     }
 
     void Kicker::configure(const Configuration<IKKickConfig>& config) {
+        servo_angle_threshold = config["kick_frames"]["servo_angle_threshold"].as<float>();
         lift_foot = SixDOFFrame(config["kick_frames"]["lift_foot"]);
         kick = SixDOFFrame(config["kick_frames"]["kick"]);
         place_foot = SixDOFFrame(config["kick_frames"]["place_foot"]);
 
+        kick_velocity = config["kick"]["kick_velocity"].as<float>();
         follow_through = config["kick"]["follow_through"].as<float>();
+        kick_height = config["kick"]["kick_height"].as<float>();
         wind_up = config["kick"]["wind_up"].as<float>();
         foot_separation_margin = config["kick"]["foot_separation_margin"].as<float>();
 	}
@@ -93,8 +97,11 @@ namespace motion{
         arma::vec3 windUp = - wind_up * ballToGoalUnit;
 
         //Get kick and lift goals
-        arma::vec3 kickGoal = ballFromKickFoot + followThrough;
-        arma::vec3 liftGoal = ballFromKickFoot + windUp;
+        arma::vec3 kickGoal = followThrough;
+        arma::vec3 liftGoal = windUp;
+
+        kickGoal[2] = kick_height;
+        liftGoal[2] = kick_height;
 
         //constrain to prevent leg collision
         arma::vec3 supportFootPos = supportToKickFoot.translation();
@@ -115,6 +122,8 @@ namespace motion{
 
         kick.pose.translation() = kickGoal;
         lift_foot.pose.translation() = liftGoal;
+
+        kick.duration = arma::norm(kickGoal - liftGoal) / kick_velocity;
         
         std::vector<SixDOFFrame> frames;
         frames.push_back(SixDOFFrame{startPose,0});
