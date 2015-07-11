@@ -99,7 +99,7 @@ namespace planning {
                     x->direction[1] = 1;
 
                     std::cerr << "DIVE LEFT!" << std::endl;
-
+                    //GoalSaver will listen to the DiveCommand (x)
                     emit(std::move(x));
                 } else {
                     //Dive right
