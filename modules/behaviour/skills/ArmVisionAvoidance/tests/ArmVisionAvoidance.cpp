@@ -1,5 +1,5 @@
 /*
- * This file is part of the NUbots Codebase.
+ * This file is part of NUbots Codebase.
  *
  * The NUbots Codebase is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,19 +14,12 @@
  * You should have received a copy of the GNU General Public License
  * along with the NUbots Codebase.  If not, see <http://www.gnu.org/licenses/>.
  *
- * Copyright 2013 NUBots <nubots@nubots.net>
+ * Copyright 2015 NUbots <nubots@nubots.net>
  */
 
-#ifndef MESSAGES_BEHAVIOUR_DIVEPLAN_H
-#define MESSAGES_BEHAVIOUR_DIVEPLAN_H
+// Uncomment this line when other test files are added
+//#define CATCH_CONFIG_MAIN  // This tells Catch to provide a main() - only do this in one cpp file
+//#include <catch.hpp>
 
-namespace messages {
-namespace behaviour {
-
-	struct DivePlan { 
-		arma::vec2 target;
-	};
-
-}
-}
-#endif
+// Remove this line when test files are added
+int main() { return 0; }

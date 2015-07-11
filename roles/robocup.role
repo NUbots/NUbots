@@ -31,11 +31,12 @@ ADD_ROLE(
     behaviour::skills::Stand
     behaviour::skills::FallingRelax
     behaviour::skills::Getup
-    behaviour::skills::KickScript
+    #behaviour::skills::KickScript
     behaviour::skills::GoalSaver
     behaviour::skills::HeadBehaviourSoccer
     behaviour::skills::WalkPathFollower # Follows WalkPaths.
     behaviour::skills::DirectWalkController
+    behaviour::skills::ArmVisionAvoidance
     behaviour::planning::KickPlanner
     behaviour::planning::DivePlanner
     # behaviour::planning::SimpleWalkPathPlanner
@@ -45,6 +46,7 @@ ADD_ROLE(
     #Motion
     motion::ScriptEngine
     motion::WalkEngine
+    motion::IKKick
     motion::HeadController
 
     #Output

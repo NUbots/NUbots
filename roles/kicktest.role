@@ -28,6 +28,7 @@ ADD_ROLE(
     behaviour::skills::FallingRelax
     behaviour::skills::Getup
     behaviour::skills::HeadBehaviourSoccer
+    behaviour::skills::ArmVisionAvoidance
     behaviour::planning::KickPlanner
 
     #Motion
