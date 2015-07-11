@@ -211,7 +211,7 @@ namespace motion {
             waypoints->reserve(16);
 
             //Goal time is by next frame
-            time_t time = NUClear::clock::now() + std::chrono::nanoseconds(std::nano::den / UPDATE_FREQUENCY);
+            time_t time = NUClear::clock::now();
 
             //Push back each servo command
             for (auto& joint : joints) {

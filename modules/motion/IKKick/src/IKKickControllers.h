@@ -99,6 +99,7 @@ namespace motion{
 				float forward_duration;
 				float return_duration;
 				Animator anim;
+				float servo_angle_threshold = 0.1;
 
 				arma::vec3 ballPosition;
 				arma::vec3 goalPosition;
@@ -160,7 +161,16 @@ namespace motion{
 										?	std::fmax(0,std::fmin(elapsedTime / anim.currentFrame().duration, 1))
 										:	1;
 						result = utility::math::matrix::Transform3D::interpolate(anim.previousFrame().pose,anim.currentFrame().pose,alpha);
-						if(alpha >= 1){
+
+						bool servosAtGoal = true;
+						for (auto& servo : sensors.servos){
+							if(    int(servo.id) >= 6    //R_HIP_YAW
+								&& int(servo.id) <= 17){ //L_ANKLE_ROLL
+								servosAtGoal = servosAtGoal && std::fabs(servo.goalPosition - servo.presentPosition) < servo_angle_threshold;
+							}
+						}
+
+						if(alpha >= 1 && servosAtGoal){
 							stable = anim.stable();
 							if(!stable){
 								anim.next();
@@ -198,7 +208,9 @@ namespace motion{
 			SixDOFFrame kick;
 			SixDOFFrame place_foot;
 
+			float kick_velocity;
 			float follow_through;
+			float kick_height;
 			float wind_up;
 			float foot_separation_margin;
 		public:
