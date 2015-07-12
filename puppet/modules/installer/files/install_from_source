@@ -7,17 +7,18 @@ set -e
 PREFIX="$1"
 METHOD="$2"
 LTO="$3"
+DARWIN_OPTIMISATION_FLAGS="-march=bonnell -mtune=bonnell -mfxsr -mmmx -mmovbe -msahf -msse -msse2 -msse3 -mssse3"
 shift 3
 
 if [[ $LTO == "true" ]]; then
     echo "Using LTO"
-    export CFLAGS="$CFLAGS -I$PREFIX/include -march=atom -mtune=atom -fuse-linker-plugin -flto -ffat-lto-objects -O3"
-    export CXXFLAGS="$CXXFLAGS -I$PREFIX/include -march=atom -mtune=atom -fuse-linker-plugin -flto -ffat-lto-objects -O3"
+    export CFLAGS="$CFLAGS -I$PREFIX/include $DARWIN_OPTIMISATION_FLAGS -fuse-linker-plugin -flto -ffat-lto-objects -O3"
+    export CXXFLAGS="$CXXFLAGS -I$PREFIX/include $DARWIN_OPTIMISATION_FLAGS -fuse-linker-plugin -flto -ffat-lto-objects -O3"
     export LDFLAGS="$LDFLAGS -L$PREFIX/lib"
 else
     echo "Not using LTO"
-    export CFLAGS="$CFLAGS -I$PREFIX/include -march=atom -mtune=atom -O3"
-    export CXXFLAGS="$CXXFLAGS -I$PREFIX/include -march=atom -mtune=atom -O3"
+    export CFLAGS="$CFLAGS -I$PREFIX/include $DARWIN_OPTIMISATION_FLAGS -O3"
+    export CXXFLAGS="$CXXFLAGS -I$PREFIX/include $DARWIN_OPTIMISATION_FLAGS -O3"
     export LDFLAGS="$LDFLAGS -L$PREFIX/lib"
 fi
 

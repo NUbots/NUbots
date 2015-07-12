@@ -77,9 +77,7 @@ node nubotsvmbuild {
                                 environment => [ 'CPPFLAGS=-P', ], }
   installer { 'fftw3':          url => 'http://www.fftw.org/fftw-3.3.4.tar.gz',
                                 args => '--disable-fortran --enable-shared', }
-  installer { 'libjpeg-turbo':  url => 'http://downloads.sourceforge.net/project/libjpeg-turbo/1.4.1/libjpeg-turbo-1.4.1.tar.gz',
-                                args => '--build=i686-linux-gnu --host=i686-linux-gnu',
-                                lto => false, }
+  installer { 'jpeg':           url => 'http://downloads.sourceforge.net/project/libjpeg-turbo/1.4.1/libjpeg-turbo-1.4.1.tar.gz', }
   installer { 'cppformat':      url => 'https://github.com/cppformat/cppformat/archive/1.1.0.tar.gz', }
   installer { 'alsalib':        url => 'ftp://ftp.alsa-project.org/pub/lib/alsa-lib-1.0.29.tar.bz2',
                                 lto => false, }
