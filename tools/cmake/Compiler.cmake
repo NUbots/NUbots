@@ -34,7 +34,13 @@ SET(COMMON_C_FLAGS "${COMMON_C_FLAGS} -fPIC")
 
 # Make armadillo not use the wrapper:
 SET(COMMON_CXX_FLAGS "${COMMON_CXX_FLAGS} -DARMA_DONT_USE_WRAPPER -DARMA_32BIT_WORD")
+
+# Disable armadillo bounds checking in release and LTO builds
 SET(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -DARMA_NO_DEBUG")
+SET(CMAKE_CXX_FLAGS_LTO "${CMAKE_CXX_FLAGS_LTO} -DARMA_NO_DEBUG")
+
+# Set optimisation for LTO to be Ofast
+SET(CMAKE_CXX_FLAGS_LTO "${CMAKE_CXX_FLAGS_LTO} -Ofast")
 
 # Enable super strict warnings
 SET(COMMON_CXX_FLAGS "${COMMON_CXX_FLAGS} -Wall -Wpedantic -Wextra")
@@ -86,8 +92,8 @@ SET(CMAKE_CXX_FLAGS_DEBUG          "${CMAKE_CXX_FLAGS_DEBUG} ${COMMON_CXX_FLAGS}
 SET(CMAKE_C_FLAGS_DEBUG            "${CMAKE_C_FLAGS_DEBUG} ${COMMON_C_FLAGS}")
 SET(CMAKE_CXX_FLAGS_RELEASE        "${CMAKE_CXX_FLAGS_RELEASE} ${COMMON_CXX_FLAGS}")
 SET(CMAKE_C_FLAGS_RELEASE          "${CMAKE_C_FLAGS_RELEASE} ${COMMON_C_FLAGS}")
-SET(CMAKE_CXX_FLAGS_LTO            "-fuse-linker-plugin -ffast-math -flto=jobserver -fno-fat-lto-objects ${CMAKE_CXX_FLAGS_RELEASE}  ${COMMON_CXX_FLAGS}")
-SET(CMAKE_C_FLAGS_LTO              "-fuse-linker-plugin -ffast-math -flto=jobserver -fno-fat-lto-objects ${CMAKE_C_FLAGS_RELEASE} ${COMMON_C_FLAGS}")
+SET(CMAKE_CXX_FLAGS_LTO            "-fuse-linker-plugin -ffast-math -flto=jobserver -fno-fat-lto-objects ${CMAKE_CXX_FLAGS_LTO}  ${COMMON_CXX_FLAGS}")
+SET(CMAKE_C_FLAGS_LTO              "-fuse-linker-plugin -ffast-math -flto=jobserver -fno-fat-lto-objects ${CMAKE_C_FLAGS_LTO} ${COMMON_C_FLAGS}")
 SET(CMAKE_CXX_FLAGS_RELWITHDEBINFO "${CMAKE_CXX_FLAGS_RELWITHDEBINFO} ${COMMON_CXX_FLAGS}")
 SET(CMAKE_C_FLAGS_RELWITHDEBINFO   "${CMAKE_C_FLAGS_RELWITHDEBINFO} ${COMMON_C_FLAGS}")
 SET(CMAKE_CXX_FLAGS_MINSIZEREL     "${CMAKE_CXX_FLAGS_MINSIZEREL} ${COMMON_CXX_FLAGS}")

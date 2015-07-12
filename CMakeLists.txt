@@ -8,9 +8,13 @@ SET(VERSION_PATCH 0)
 # Set to off to ignore building tests
 OPTION(BUILD_TESTS "Builds all of the tests for each module." OFF)
 
+# Set to on to build the report
+OPTION(BUILD_REPORT "Builds the report from the latex source files." OFF)
+
 # Set to on to build as shared libraries
 OPTION(SHARED_BUILD "Build the binaries by linking to shared libraries." ON)
 
+# Set on to prefer .a files over .so files for linking
 OPTION(STATIC_LIBRARIES "Prefer using static .a files rather than .so files. NOTE: This must be enabled from the start!" OFF)
 
 IF(STATIC_LIBRARIES)
@@ -76,7 +80,9 @@ FOREACH(module ${NUCLEAR_MODULES})
     ADD_SUBDIRECTORY(modules/${modulepath})
 ENDFOREACH()
 
-ADD_SUBDIRECTORY(report)
+IF(BUILD_REPORT)
+    ADD_SUBDIRECTORY(report)
+ENDIF(BUILD_REPORT)
 
 # Include our scp darwin sender
 INCLUDE(DarwinSend)

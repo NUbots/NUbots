@@ -1,3 +1,4 @@
+INCLUDE(CMakeParseArguments)
 FUNCTION(NUCLEAR_MODULE)
 
     STRING(REGEX REPLACE "^.*modules/(.+)$" "\\1;" module_name "${CMAKE_CURRENT_SOURCE_DIR}")
