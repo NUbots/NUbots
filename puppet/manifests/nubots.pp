@@ -18,7 +18,7 @@ node nubotsvm {
 
   # We need dev tools
   class {'dev_tools': }
-  $toolchain_url = "http://nubots.net/debs/nubots-toolchain1.0.4.deb"
+  $toolchain_url = "http://nubots.net/debs/nubots-toolchain1.0.5.deb"
 
   # Get and install our toolchain
   wget::fetch { "nubots_toolchain":
@@ -63,7 +63,7 @@ node nubotsvmbuild {
                                 args => '-DNUCLEAR_BUILD_TESTS=OFF',
                                 require => [ Installer['zmq'], Installer['protobuf'], Wget::Fetch['zmq.hpp'] , Wget::Fetch['catch.hpp'] ], }
   installer { 'openblas':       url => 'https://github.com/xianyi/OpenBLAS/archive/v0.2.14.tar.gz',
-                                environment => ['TARGET=ATOM', 'USE_THREAD=1', 'BINARY=32'], }
+                                environment => ['TARGET=YONAH', 'USE_THREAD=1', 'BINARY=32', 'NUM_THREADS=2'], }
   installer { 'armadillo':      url => 'http://sourceforge.net/projects/arma/files/armadillo-5.200.2.tar.gz',
                                 method => 'cmake',
                                 require => Installer['openblas'], }
