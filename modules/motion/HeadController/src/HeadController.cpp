@@ -41,6 +41,7 @@ namespace modules {
         using messages::behaviour::ServoCommand;
         using messages::motion::HeadCommand;
         using utility::math::coordinates::sphericalToCartesian;
+        using utility::math::coordinates::cartesianToSpherical;
         using utility::motion::kinematics::calculateHeadJoints;
         using utility::motion::kinematics::DarwinModel;
         using utility::support::Expression;
@@ -54,7 +55,7 @@ namespace modules {
             //do a little configurating
             on<Trigger<Configuration<HeadController>>>("Head Controller - Config",[this] (const Configuration<HeadController>& config)
             {
-                //Gains                    
+                //Gains
                 head_motor_gain = config["head_motors"]["gain"].as<double>();
                 head_motor_torque = config["head_motors"]["torque"].as<double>();
 
@@ -65,14 +66,15 @@ namespace modules {
                 min_pitch = DarwinModel::Head::MIN_PITCH;
 
                 emit(std::make_unique<HeadCommand>( HeadCommand {config["initial"]["yaw"].as<float>(),
-                                                                 config["initial"]["pitch"].as<float>()}));
+                                                                 config["initial"]["pitch"].as<float>(), false}));
 
                 p_gain = config["p_gain"].as<float>();
 
             });
 
-            on< Trigger<HeadCommand>>("Head Controller - Register Head Command", [this](const HeadCommand& command){
-                goalAngles = {command.yaw,-command.pitch};
+            on< Trigger<HeadCommand>, With<Sensors>>("Head Controller - Register Head Command", [this](const HeadCommand& command, const Sensors& sensors){
+                goalAngles = {command.yaw, -command.pitch};
+                goalRobotSpace = command.robotSpace;
             });
 
             updateHandle = on< Trigger<Sensors>, Options<Single, Priority<NUClear::HIGH>> >("Head Controller - Update Head Position",[this] (const Sensors& sensors) {
@@ -82,9 +84,9 @@ namespace modules {
 
                 //Get goal vector from angles
                 //Pitch is positive when the robot is looking down by Right hand rule, so negate the pitch
-                arma::vec3 goalHeadUnitVector_world = sphericalToCartesian({1,currentAngles[0], currentAngles[1]});
+                arma::vec3 goalHeadUnitVector_world = sphericalToCartesian({1, currentAngles[0], currentAngles[1]});
                 //Convert to robot space
-                arma::vec3 headUnitVector =  sensors.orientation * goalHeadUnitVector_world;
+                arma::vec3 headUnitVector = goalRobotSpace ? goalHeadUnitVector_world : sensors.orientation * goalHeadUnitVector_world;
                 //Compute inverse kinematics for head
                 std::vector< std::pair<messages::input::ServoID, float> > goalAngles = calculateHeadJoints<DarwinModel>(headUnitVector);
                 // arma::vec2 goalAngles = cartesianToSpherical(headUnitVector).rows(1,2);
@@ -120,7 +122,7 @@ namespace modules {
                 },
                 [this] (const std::set<LimbID>&) { //Head controll lost
                     updateHandle.disable();
-                }, 
+                },
                 [this] (const std::set<ServoID>& ) { } //Servos reached target
             }));
 

@@ -34,8 +34,9 @@ namespace messages {
         struct HeadCommand {
             float yaw;
             float pitch;
+            bool robotSpace; // if true, the yaw and pitch are interpreted in robot space, instead of IMU space
         };
-        
+
     }  // motion
 }  // messages
 

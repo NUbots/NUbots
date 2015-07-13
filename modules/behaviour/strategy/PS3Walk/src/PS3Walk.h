@@ -67,6 +67,8 @@ namespace strategy {
         arma::vec strafe{0, 0};
         float rotationalSpeed = 0;
         bool moving = false;
+        float headPitch = 0;
+        float headYaw = 0;
     };
 
 }
