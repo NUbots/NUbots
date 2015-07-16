@@ -39,6 +39,7 @@ namespace modules {
         std::pair<float, arma::ivec2> fieldEdgeDirection(const arma::ivec2& base, const Image& image, const arma::fvec3 greenCentroid) {
 
             // Get our relevant pixels
+            //TODO:bounds check
             std::array<Image::Pixel, 24> pixels {
                 image(base[0] - 2, base[1] - 2),
                 image(base[0] - 2, base[1] - 1),

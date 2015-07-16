@@ -30,9 +30,6 @@ namespace behaviour {
 
     struct MotionCommand {
 
-        // TODO: Delete the default constructor, and make factory methods for
-        // different motion command types?
-
         // Defines the possible types of motion command:
         enum class Type {
             StandStill,   // Stop moving and just stand still.
@@ -40,6 +37,37 @@ namespace behaviour {
             BallApproach, // Approach the ball, ready to perform a forward kick toward the given kickTarget. Avoids obstacles.
             DirectCommand // Stop all current motion and directly send the given WalkCommand to the WalkEngine.
         };
+
+    private:
+        MotionCommand() { }
+
+    public:
+        static MotionCommand StandStill() {
+            MotionCommand cmd;
+            cmd.type = Type::StandStill;
+            return cmd;
+        }
+
+        static MotionCommand WalkToState(Transform2D goalState_) {
+            MotionCommand cmd;
+            cmd.type = Type::WalkToState;
+            cmd.goalState = goalState_;
+            return cmd;
+        }
+
+        static MotionCommand BallApproach(arma::vec2 kickTarget_) {
+            MotionCommand cmd;
+            cmd.type = Type::BallApproach;
+            cmd.kickTarget = kickTarget_;
+            return cmd;
+        }
+
+        static MotionCommand DirectCommand(Transform2D walkCommand_) {
+            MotionCommand cmd;
+            cmd.type = Type::DirectCommand;
+            cmd.walkCommand = walkCommand_;
+            return cmd;
+        }
 
         // TODO: Create accessor methods that throw errors if the data
         // accessed does not correspond to the command type?

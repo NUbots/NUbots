@@ -39,7 +39,6 @@ ADD_ROLE(
     behaviour::skills::ArmVisionAvoidance
     behaviour::planning::KickPlanner
     behaviour::planning::DivePlanner
-    # behaviour::planning::SimpleWalkPathPlanner
     behaviour::planning::OMPLPathPlanner  # Creates WalkPaths.
     behaviour::strategy::SoccerStrategy
 

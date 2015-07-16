@@ -37,6 +37,12 @@ namespace skills {
         const size_t id;
         float DIVE_PRIORITY;
         float EXECUTION_PRIORITY;
+
+        /**
+         * TODO DiveCommand seems incompleted?
+         * @Mingze
+         * DiveCommand returns vec2 direction to dive
+         */
         messages::motion::DiveCommand diveCommand;
 
         void updatePriority(const float& priority);
