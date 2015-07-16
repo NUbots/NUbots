@@ -1,0 +1,49 @@
+ADD_ROLE(
+    #Support
+    support::SignalCatcher
+    support::logging::ConsoleLogHandler
+    support::configuration::ConfigSystem
+    support::configuration::GlobalConfig
+    support::configuration::SoccerConfig
+    support::NUbugger
+
+    #simulation
+    platform::darwin::HardwareSimulator
+    support::SoccerSimulator
+    support::VirtualCamera
+
+    #input
+    input::GameController
+
+    #Sensors
+    #input::LinuxCamera
+    #platform::darwin::HardwareIO
+    platform::darwin::SensorFilter
+
+    #Vision
+    vision::LUTClassifier
+    vision::GoalDetector
+    vision::BallDetector
+    vision::ObstacleDetector
+    
+    #Localisation
+    localisation::MMKFRobotLocalisation
+    localisation::KFBallLocalisation
+
+    #Behaviour
+    behaviour::Controller
+    behaviour::skills::Stand
+    # behaviour::skills::FallingRelax
+    behaviour::skills::Getup
+    behaviour::skills::HeadBehaviourSoccer
+
+    behaviour::planning::DivePlanner
+    behaviour::planning::GoalieWalkPlanner
+    behaviour::skills::GoalSaver
+    behaviour::strategy::SoccerStrategy
+
+    #Motion
+    motion::ScriptEngine
+    motion::HeadController
+    motion::WalkEngine
+)

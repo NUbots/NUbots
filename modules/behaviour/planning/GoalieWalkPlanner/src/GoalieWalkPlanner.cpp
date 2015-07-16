@@ -74,6 +74,7 @@ namespace planning {
         	if(!(balls.empty() || selfs.empty())){
         		float timeSinceBallSeen = std::chrono::duration_cast<std::chrono::microseconds>(NUClear::clock::now() - balls[0].last_measurement_time).count() * 1e-6;
         		//TODO: config
+                emit(std::move(std::make_unique<WalkStartCommand>(subsumptionId)));
         		if(timeSinceBallSeen < command_timeout){
 	        		auto& ball = balls[0];
 	        		auto& self = selfs[0];
