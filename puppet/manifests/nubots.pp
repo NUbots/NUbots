@@ -18,17 +18,17 @@ node nubotsvm {
 
   # We need dev tools
   class {'dev_tools': }
-  $toolchain_url = "http://nubots.net/debs/nubots-toolchain1.0.5.deb"
 
   # Get and install our toolchain
+  $toolchain_version = '1.0.5'
   wget::fetch { "nubots_toolchain":
-    destination => "/tmp/nubots-toolchain.deb",
-    source      => "${toolchain_url}",
+    destination => "/tmp/nubots-toolchain${toolchain_version}.deb",
+    source      => "http://nubots.net/debs/nubots-toolchain${toolchain_version}.deb",
   }
   ~> package { 'nubots-toolchain':
     provider => 'dpkg',
     ensure => 'latest',
-    source => "/tmp/nubots-toolchain.deb",
+    source => "/tmp/nubots-toolchain${toolchain_version}.deb",
   }
 }
 
