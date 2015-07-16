@@ -445,7 +445,8 @@ namespace strategy {
                 auto& self = selfs[0];
 
                 float selfBearing = std::atan2(self.heading[1], self.heading[0]);
-                float rotationSpeed = - std::fmin(cfg_.goalie_rotation_speed_factor * selfBearing, cfg_.goalie_max_rotation_speed);
+                int signBearing = selfBearing > 0 ? 1 : -1;
+                float rotationSpeed = - signBearing * std::fmin(std::fabs(cfg_.goalie_rotation_speed_factor * selfBearing), cfg_.goalie_max_rotation_speed);
 
                 float translationSpeed = - std::fmin(cfg_.goalie_translation_speed_factor * ball.position[1], cfg_.goalie_max_translation_speed);
 
@@ -454,9 +455,10 @@ namespace strategy {
                 motionCommand = std::make_unique<MotionCommand>(MotionCommand::DirectCommand({0, 0, 0}));
             }
             emit(std::move(motionCommand));
+        } else {
+            emit(std::make_unique<MotionCommand>(MotionCommand::DirectCommand({0, 0, 1})));
         }
 
-        emit(std::make_unique<MotionCommand>(MotionCommand::DirectCommand({0, 0, 1})));
     }
 
 } // strategy
