@@ -69,6 +69,7 @@ namespace strategy {
             refresh();
         });
 
+        updateCommand();
         printStatus();
 
         do {
@@ -243,6 +244,7 @@ namespace strategy {
         auto headCommand = std::make_unique<HeadCommand>();
         headCommand->yaw = headYaw;
         headCommand->pitch = headPitch;
+        headCommand->robotSpace = true;
         emit(std::move(headCommand));
     }
 

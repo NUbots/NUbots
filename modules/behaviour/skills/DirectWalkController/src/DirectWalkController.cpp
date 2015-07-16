@@ -79,18 +79,22 @@ namespace skills {
 
         on<Trigger<MotionCommand>>([this] (const MotionCommand& command) {
             if (command.type == MotionCommand::Type::DirectCommand) {
+                log("Direct Command Walk");
                 emit(std::make_unique<ActionPriorites>(ActionPriorites { subsumptionId, { 26, 11 }}));
-	            emit(std::move(std::make_unique<WalkStartCommand>(subsumptionId)));
-	            emit(std::move(std::make_unique<WalkCommand>(subsumptionId, command.walkCommand)));
+                emit(std::move(std::make_unique<WalkStartCommand>(subsumptionId)));
+                emit(std::move(std::make_unique<WalkCommand>(subsumptionId, command.walkCommand)));
             } else if (command.type == MotionCommand::Type::StandStill) {
+                log("Direct Command Stand");
                 emit(std::make_unique<ActionPriorites>(ActionPriorites { subsumptionId, { 26, 11 }}));
                 emit(std::move(std::make_unique<WalkStopCommand>(subsumptionId)));
             } else {
+                log("Direct Command Nothing");
                 emit(std::make_unique<ActionPriorites>(ActionPriorites { subsumptionId, { 0, 0 }}));
             }
         });
 
         on<Trigger<WalkStopped>>([this] (const WalkStopped&) {
+            log("Direct Command Walk Stopped");
             emit(std::make_unique<ActionPriorites>(ActionPriorites { subsumptionId, { 0, 0 }}));
         });
     }

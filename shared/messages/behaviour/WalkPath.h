@@ -39,7 +39,7 @@ namespace behaviour {
 		utility::math::matrix::Transform2D goal;
 
 		// The motion command for which this plan was generated:
-		messages::behaviour::MotionCommand command;
+		messages::behaviour::MotionCommand command = MotionCommand::StandStill();
 	};
 
 }

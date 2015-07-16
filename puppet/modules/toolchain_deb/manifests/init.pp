@@ -1,6 +1,6 @@
 class toolchain_deb {
 
-  $build_dir = '/tmp/build_toolchain_deb'
+  $build_dir = '/home/vagrant/nubots-toolchain'
 
   file { "${build_dir}":
     ensure => directory

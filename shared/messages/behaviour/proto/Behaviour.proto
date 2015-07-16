@@ -33,6 +33,7 @@ message Behaviour {
         SEARCH_FOR_BALL = 2;
         SEARCH_FOR_GOALS = 3;
         WALK_TO_BALL = 4;
+        GOALIE_WALK = 12;
     }
 
     required State state = 1;

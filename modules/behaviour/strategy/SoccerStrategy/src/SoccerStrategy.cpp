@@ -48,8 +48,7 @@ namespace strategy {
     using messages::input::gameevents::GameState;
     using messages::input::gameevents::Mode;
     using messages::input::gameevents::Phase;
-    using LocalisationBall = messages::localisation::Ball;
-    using LocalisationSelf = messages::localisation::Self;
+    using messages::localisation::Ball;
     using messages::localisation::Self;
     using messages::behaviour::MotionCommand;
     using messages::behaviour::LookStrategy;
@@ -76,14 +75,20 @@ namespace strategy {
 
         on<Trigger<Configuration<SoccerStrategy>>>([this](const Configuration<SoccerStrategy>& config) {
 
-            BALL_CLOSE_DISTANCE = config["ball_close_distance"].as<double>();
-            BALL_LAST_SEEN_MAX_TIME = durationFromSeconds(config["ball_last_seen_max_time"].as<double>());
-            GOAL_LAST_SEEN_MAX_TIME = durationFromSeconds(config["goal_last_seen_max_time"].as<double>());
+            cfg_.ball_last_seen_max_time = durationFromSeconds(config["ball_last_seen_max_time"].as<double>());
+            cfg_.goal_last_seen_max_time = durationFromSeconds(config["goal_last_seen_max_time"].as<double>());
 
-            START_POSITION_OFFENSIVE = config["start_position_offensive"].as<arma::vec2>();
-            START_POSITION_DEFENSIVE = config["start_position_defensive"].as<arma::vec2>();
+            cfg_.start_position_offensive = config["start_position_offensive"].as<arma::vec2>();
+            cfg_.start_position_defensive = config["start_position_defensive"].as<arma::vec2>();
 
-            GOALIE = config["goalie"].as<bool>();
+            cfg_.is_goalie = config["goalie"].as<bool>();
+
+            // Use configuration here from file GoalieWalkPlanner.yaml
+            cfg_.goalie_command_timeout = config["goalie_command_timeout"].as<float>();
+            cfg_.goalie_rotation_speed_factor = config["goalie_rotation_speed_factor"].as<float>();
+            cfg_.goalie_max_rotation_speed = config["goalie_max_rotation_speed"].as<float>();
+            cfg_.goalie_translation_speed_factor = config["goalie_translation_speed_factor"].as<float>();
+            cfg_.goalie_max_translation_speed = config["goalie_max_translation_speed"].as<float>();
 
         });
 
@@ -92,13 +97,13 @@ namespace strategy {
 
 
         // For checking last seen times
-        on<Trigger<std::vector<LocalisationBall>>>([this] (const std::vector<LocalisationBall>& balls) {
+        on<Trigger<std::vector<Ball>>>([this] (const std::vector<Ball>& balls) {
             if(!balls.empty()) {
                 ballLastMeasured = balls[0].last_measurement_time;
             }
         });
 
-        on<Trigger<std::vector<LocalisationSelf>>>([this] (const std::vector<LocalisationSelf>& selfs) {
+        on<Trigger<std::vector<Self>>>([this] (const std::vector<Self>& selfs) {
             if(!selfs.empty()) {
                 selfLastMeasured = selfs[0].last_measurement_time;
             }
@@ -137,8 +142,23 @@ namespace strategy {
 
         // Main Loop
         // TODO: ensure a reasonable state is emitted even if gamecontroller is not running
-        on<Trigger<Every<30, Per<std::chrono::seconds>>>, With<Sensors>, With<GameState>, With<Phase>, With<FieldDescription>,
-            Options<Single>>([this](const time_t&, const Sensors& sensors, const GameState& gameState, const Phase& phase, const FieldDescription& fieldDescription) {
+        on<Trigger<
+            Every<30, Per<std::chrono::seconds>>>, 
+            With<Sensors>, 
+            With<GameState>, 
+            With<Phase>, 
+            With<FieldDescription>,
+            With<std::vector<Self>>,
+            With<std::vector<Ball>>,
+            Options<Single>
+        >([this](
+            const time_t&,
+            const Sensors& sensors,
+            const GameState& gameState,
+            const Phase& phase,
+            const FieldDescription& fieldDescription,
+            const std::vector<Self>& selfs,
+            const std::vector<Ball>& balls) {
 
             try {
 
@@ -161,10 +181,10 @@ namespace strategy {
                         }
                         else if (phase == Phase::READY) {
                             if (gameState.ourKickOff) {
-                                walkTo(fieldDescription, START_POSITION_OFFENSIVE);
+                                walkTo(fieldDescription, cfg_.start_position_offensive);
                             }
                             else {
-                                walkTo(fieldDescription, START_POSITION_DEFENSIVE);
+                                walkTo(fieldDescription, cfg_.start_position_defensive);
                             }
                             find({FieldTarget::SELF});
                             currentState = Behaviour::READY;
@@ -191,26 +211,26 @@ namespace strategy {
                             currentState = Behaviour::FINISHED;
                         }
                         else if (phase == Phase::PLAYING) {
+
                             if (penalised()) { // penalised
                                 standStill();
                                 find({FieldTarget::SELF});
                                 currentState = Behaviour::PENALISED;
                             }
                             else { // not penalised
-
-                                if (NUClear::clock::now() - ballLastMeasured < BALL_LAST_SEEN_MAX_TIME) { // ball has been seen recently
-                                    if (!GOALIE) { // goalie
+                                find({FieldTarget::BALL});
+                                if (cfg_.is_goalie) { // goalie
+                                    goalieWalk(selfs, balls);
+                                    currentState = Behaviour::GOALIE_WALK;
+                                } else {
+                                    if (NUClear::clock::now() - ballLastMeasured < cfg_.ball_last_seen_max_time) { // ball has been seen recently
                                         walkTo(fieldDescription, FieldTarget::BALL);
+                                        currentState = Behaviour::WALK_TO_BALL;
                                     }
-                                    find({FieldTarget::BALL});
-                                    currentState = Behaviour::WALK_TO_BALL;
-                                }
-                                else { // ball has not been seen recently
-                                    if (!GOALIE) { // goalie
+                                    else { // ball has not been seen recently
                                         spinWalk();
+                                        currentState = Behaviour::SEARCH_FOR_BALL;
                                     }
-                                    find({FieldTarget::BALL});
-                                    currentState = Behaviour::SEARCH_FOR_BALL;
                                 }
                             }
                         }
@@ -305,9 +325,7 @@ namespace strategy {
     }
 
     void SoccerStrategy::standStill() {
-        auto command = std::make_unique<MotionCommand>();
-        command->type = MotionCommand::Type::StandStill;
-        emit(std::move(command));
+        emit(std::make_unique<MotionCommand>(MotionCommand::StandStill()));
     }
 
     void SoccerStrategy::walkTo(const FieldDescription& fieldDescription, const FieldTarget& target) {
@@ -317,20 +335,15 @@ namespace strategy {
 
         arma::vec2 enemyGoal = {fieldDescription.dimensions.field_length * 0.5, 0};
 
-        auto command = std::make_unique<MotionCommand>();
-        command->type = MotionCommand::Type::BallApproach;
-        command->kickTarget = enemyGoal;
-        emit(std::move(command));
+        emit(std::make_unique<MotionCommand>(MotionCommand::BallApproach(enemyGoal)));
     }
 
     void SoccerStrategy::walkTo(const FieldDescription& fieldDescription, arma::vec position) {
 
         arma::vec2 enemyGoal = {fieldDescription.dimensions.field_length * 0.5, 0};
         
-        auto command = std::make_unique<MotionCommand>();
-        command->type = MotionCommand::Type::WalkToState;
-        command->goalState = Transform2D::lookAt(position, enemyGoal);
-        emit(std::move(command));
+        auto goalState = Transform2D::lookAt(position, enemyGoal);
+        emit(std::make_unique<MotionCommand>(MotionCommand::WalkToState(goalState)));
     }
 
     bool SoccerStrategy::pickedUp(const Sensors& sensors) {
@@ -349,7 +362,7 @@ namespace strategy {
         return selfPenalised;
     }
 
-    bool SoccerStrategy::ballDistance(const LocalisationBall& ball) {
+    bool SoccerStrategy::ballDistance(const Ball& ball) {
         return arma::norm(ball.position);
     }
 
@@ -379,10 +392,7 @@ namespace strategy {
     }
 
     void SoccerStrategy::spinWalk() {
-        auto command = std::make_unique<MotionCommand>();
-        command->type = MotionCommand::Type::DirectCommand;
-        command->walkCommand = {0, 0, 1};
-        emit(std::move(command));
+        emit(std::make_unique<MotionCommand>(MotionCommand::DirectCommand({0, 0, 1})));
     }
 
     arma::vec2 SoccerStrategy::getKickPlan(const std::vector<Self>& selfs, const messages::support::FieldDescription& fieldDescription) {
@@ -423,6 +433,30 @@ namespace strategy {
 
         }
         return newTarget;
+    }
+
+    void SoccerStrategy::goalieWalk(const std::vector<Self>& selfs, const std::vector<Ball>& balls) {
+        if (!(balls.empty() || selfs.empty())) {
+            std::unique_ptr<MotionCommand> motionCommand;
+
+            float timeSinceBallSeen = std::chrono::duration_cast<std::chrono::microseconds>(NUClear::clock::now() - balls[0].last_measurement_time).count() * 1e-6;
+            if(timeSinceBallSeen < cfg_.goalie_command_timeout){
+                auto& ball = balls[0];
+                auto& self = selfs[0];
+
+                float selfBearing = std::atan2(self.heading[1], self.heading[0]);
+                float rotationSpeed = - std::fmin(cfg_.goalie_rotation_speed_factor * selfBearing, cfg_.goalie_max_rotation_speed);
+
+                float translationSpeed = - std::fmin(cfg_.goalie_translation_speed_factor * ball.position[1], cfg_.goalie_max_translation_speed);
+
+                motionCommand = std::make_unique<MotionCommand>(MotionCommand::DirectCommand({0, translationSpeed, rotationSpeed}));
+            } else {
+                motionCommand = std::make_unique<MotionCommand>(MotionCommand::DirectCommand({0, 0, 0}));
+            }
+            emit(std::move(motionCommand));
+        }
+
+        emit(std::make_unique<MotionCommand>(MotionCommand::DirectCommand({0, 0, 1})));
     }
 
 } // strategy

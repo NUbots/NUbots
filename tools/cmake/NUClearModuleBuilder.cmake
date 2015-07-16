@@ -1,15 +1,4 @@
-
-IF(SHARED_BUILD)
-    # use, i.e. don't skip the full RPATH for the build tree
-    SET(CMAKE_SKIP_BUILD_RPATH FALSE)
-
-    # Build the RPATH into the binary before install
-    SET(CMAKE_BUILD_WITH_INSTALL_RPATH TRUE)
-
-    # the RPATH to be used
-    SET(CMAKE_INSTALL_RPATH "/nubots/toolchain/lib" "toolchain/" "lib/" "../lib/" "bin/lib" "/usr/local/lib/i386-linux-gnu")
-ENDIF()
-
+INCLUDE(CMakeParseArguments)
 FUNCTION(NUCLEAR_MODULE)
 
     STRING(REGEX REPLACE "^.*modules/(.+)$" "\\1;" module_name "${CMAKE_CURRENT_SOURCE_DIR}")

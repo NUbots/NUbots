@@ -1,5 +1,5 @@
-# Find the QUEX Library
-FIND_PACKAGE(QUEX REQUIRED)
+# Find the Quex library and binary
+FIND_PACKAGE(Quex REQUIRED)
 
 # Our lexer file
 SET(lexer "src/Lexer.qx")
@@ -26,7 +26,7 @@ ADD_CUSTOM_COMMAND(
            "${outputpath}/Lexer.hpp"
            "${outputpath}/Lexer-token.hpp"
            "${outputpath}/Lexer-configuration.hpp"
-    COMMAND ${QUEX_BINARY}
+    COMMAND ${Quex_BINARY}
     ARGS -i ${abs_file}
          --file-extension-scheme pp
          --output-directory ${outputpath}

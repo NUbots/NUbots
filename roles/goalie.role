@@ -7,6 +7,9 @@ ADD_ROLE(
     support::configuration::SoccerConfig
     support::NUbugger
 
+    #input
+    input::GameController
+
     #Sensors
     input::LinuxCamera
     platform::darwin::HardwareIO
@@ -27,13 +30,16 @@ ADD_ROLE(
     behaviour::skills::Stand
     # behaviour::skills::FallingRelax
     behaviour::skills::Getup
+    behaviour::skills::DirectWalkController
     behaviour::skills::HeadBehaviourSoccer
 
     behaviour::planning::DivePlanner
     behaviour::planning::GoalieWalkPlanner
     behaviour::skills::GoalSaver
+    behaviour::strategy::SoccerStrategy
 
     #Motion
     motion::ScriptEngine
     motion::HeadController
+    motion::WalkEngine
 )

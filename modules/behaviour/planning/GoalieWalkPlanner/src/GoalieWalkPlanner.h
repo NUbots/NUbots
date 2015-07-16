@@ -34,11 +34,8 @@ namespace planning {
 		float translation_speed_factor;
 		float max_translation_speed;
     public:
-    	void updatePriority(const float& priority);
         /// @brief Called by the powerplant to build and setup the GoalieWalkPlanner reactor.
         explicit GoalieWalkPlanner(std::unique_ptr<NUClear::Environment> environment);
-        int subsumptionId;
-        ReactionHandle updateHandle;
         /// @brief the path to the configuration file for GoalieWalkPlanner
         static constexpr const char* CONFIGURATION_PATH = "GoalieWalkPlanner.yaml";
     };

@@ -39,7 +39,7 @@ namespace modules {
         namespace skills {
 
         using utility::nubugger::graph;
-        
+
         using messages::vision::Goal;
         using messages::vision::Ball;
         using messages::vision::VisionObject;
@@ -62,7 +62,7 @@ namespace modules {
 
         using messages::behaviour::SoccerObjectPriority;
 
-            HeadBehaviourSoccer::HeadBehaviourSoccer(std::unique_ptr<NUClear::Environment> environment) : 
+            HeadBehaviourSoccer::HeadBehaviourSoccer(std::unique_ptr<NUClear::Environment> environment) :
             Reactor(std::move(environment)),
             lastCentroid({0,0}),
             lostAndSearching(false),
@@ -91,7 +91,7 @@ namespace modules {
                     //Note that these are actually modified later and are hence camelcase
                     ballPriority = config["initial"]["priority"]["ball"].as<int>();
                     goalPriority = config["initial"]["priority"]["goal"].as<int>();
-                    
+
                     //Load searches:
                     for(auto& search : config["searches"]){
                         SearchType s = searchTypeFromString(search["search_type"].as<std::string>());
@@ -140,7 +140,7 @@ namespace modules {
                         } else {
                             search = true;
                         }
-                    } 
+                    }
                     if(goalPriority == maxPriority){
                         if(vgoals != NULL && vgoals->size() > 0){
                             //Fixate on goals and lines and other landmarks
@@ -175,7 +175,7 @@ namespace modules {
                         headToBodyRotation = arma::eye(3,3);
                         orientation = sensors.orientation.i();
                     }
-                    Rotation3D headToIMUSpace = orientation * headToBodyRotation;                    
+                    Rotation3D headToIMUSpace = orientation * headToBodyRotation;
 
                     //Check current centroid
                     if(!lost){
@@ -185,7 +185,7 @@ namespace modules {
                         }
                         arma::vec2 currentCentroid_world = getIMUSpaceDirection(currentCentroid,headToIMUSpace);
                         //If our objects have moved, we need to replan
-                        if(arma::norm(currentCentroid_world - lastCentroid) >= fractional_angular_update_threshold * std::fmax(cam.FOV[0],cam.FOV[1]) / 2.0){                           
+                        if(arma::norm(currentCentroid_world - lastCentroid) >= fractional_angular_update_threshold * std::fmax(cam.FOV[0],cam.FOV[1]) / 2.0){
                             updatePlan = true;
                             lastCentroid = currentCentroid_world;
                             //std::cout << "Replanning due to object movement." << std::endl;
@@ -213,6 +213,7 @@ namespace modules {
                         std::unique_ptr<HeadCommand> command = std::make_unique<HeadCommand>();
                         command->yaw = direction[0];
                         command->pitch = direction[1];
+                        command->robotSpace = false;
                         emit(std::move(command));
                     }
 
@@ -222,7 +223,7 @@ namespace modules {
                     lostLastTime = lost;
                 });
 
-              
+
             }
 
             void HeadBehaviourSoccer::updateHeadPlan(const std::vector<VisionObject>& fixationObjects, const bool& search, const Sensors& sensors, const Rotation3D& headToIMUSpace){
@@ -249,12 +250,12 @@ namespace modules {
                 for(auto& p : fixationPoints){
                     p = getIMUSpaceDirection(p,headToIMUSpace);
                 }
-                
+
                 auto currentPos = arma::vec2({sensors.servos.at(int(ServoID::HEAD_YAW)).presentPosition,sensors.servos.at(int(ServoID::HEAD_PITCH)).presentPosition});
                 headSearcher.replaceSearchPoints(fixationPoints, currentPos);
             }
 
-            arma::vec2 HeadBehaviourSoccer::getIMUSpaceDirection(const arma::vec2& screenAngles, const Rotation3D& headToIMUSpace){               
+            arma::vec2 HeadBehaviourSoccer::getIMUSpaceDirection(const arma::vec2& screenAngles, const Rotation3D& headToIMUSpace){
 
                 // arma::vec3 lookVectorFromHead = objectDirectionFromScreenAngular(screenAngles);
                 arma::vec3 lookVectorFromHead = sphericalToCartesian({1,screenAngles[0],screenAngles[1]});//This is an approximation relying on the robots small FOV
@@ -275,7 +276,7 @@ namespace modules {
             }
 
             /*! Get search points which keep everything in view.
-            Returns vector of arma::vec2 
+            Returns vector of arma::vec2
             */
             std::vector<arma::vec2> HeadBehaviourSoccer::getSearchPoints(std::vector<VisionObject> fixationObjects, SearchType sType){
                     //If there is nothing of interest, we search fot points of interest
@@ -289,7 +290,7 @@ namespace modules {
                         }
                         return scaledResults;
                     }
-                   
+
                     Quad boundingBox = getScreenAngularBoundingBox(fixationObjects);
 
                     std::vector<arma::vec2> viewPoints;
@@ -321,9 +322,9 @@ namespace modules {
                                                  (1+x)*(1+y)*tr+
                                                  (1+x)*(1-y)*br )/4);
                     }
-                    
+
                     return searchPoints;
-                    
+
             }
 
             VisionObject HeadBehaviourSoccer::combineVisionObjects(const std::vector<VisionObject>& ob){
@@ -347,7 +348,7 @@ namespace modules {
                 return Quad::getBoundingBox(boundingPoints);
             }
 
-            
+
 
         }  // motion
     } //behaviour

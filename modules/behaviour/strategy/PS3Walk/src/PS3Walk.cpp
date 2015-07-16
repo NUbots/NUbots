@@ -19,7 +19,8 @@
 
 #include "PS3Walk.h"
 #include <nuclear>
-#include "messages/motion/WalkCommand.h"
+#include "messages/behaviour/MotionCommand.h"
+#include "messages/motion/HeadCommand.h"
 #include "messages/motion/KickCommand.h"
 #include "messages/behaviour/Action.h"
 #include "messages/behaviour/ServoCommand.h"
@@ -29,9 +30,8 @@ namespace behaviour {
 namespace strategy {
 
     using messages::motion::KickScriptCommand;
-    using messages::motion::WalkCommand;
-    using messages::motion::WalkStartCommand;
-    using messages::motion::WalkStopCommand;
+    using messages::motion::HeadCommand;
+    using messages::behaviour::MotionCommand;
     using messages::input::LimbID;
 
     PS3Walk::PS3Walk(std::unique_ptr<NUClear::Environment> environment)
@@ -48,14 +48,18 @@ namespace strategy {
                     switch (event.number) {
                         case AXIS_LEFT_JOYSTICK_HORIZONTAL:
                             // y is left relative to robot
-                            strafe[1] = -event.value;
+                            //strafe[1] = -event.value;
+                            rotationalSpeed = -event.value;
                             break;
                         case AXIS_LEFT_JOYSTICK_VERTICAL:
                             // x is forward relative to robot
                             strafe[0] = -event.value;
                             break;
+                        case AXIS_RIGHT_JOYSTICK_VERTICAL:
+                            headPitch = -event.value;
+                            break;
                         case AXIS_RIGHT_JOYSTICK_HORIZONTAL:
-                            rotationalSpeed = -event.value;
+                            headYaw = -event.value;
                             break;
                     }
                 } else if (event.isButton()) {
@@ -65,10 +69,11 @@ namespace strategy {
                             if (event.value > 0) { // button down
                                 if (moving) {
                                     NUClear::log("Stop walking");
-                                    emit(std::make_unique<WalkStopCommand>());
+                                    auto motionCommand = std::make_unique<MotionCommand>();
+                                    motionCommand->type = MotionCommand::Type::StandStill;
+                                    emit(std::move(motionCommand));
                                 } else {
                                     NUClear::log("Start walking");
-                                    emit(std::make_unique<WalkStartCommand>());
                                 }
                                 moving = !moving;
                             }
@@ -121,7 +126,16 @@ namespace strategy {
 
         // output walk command based on updated strafe and rotation speed from joystick
         // TODO: potential performance gain: ignore if value hasn't changed since last emit?
-        on<Trigger<Every<50, std::chrono::milliseconds>>>([this](const time_t&) {
+        on<Trigger<Every<20, Per<std::chrono::seconds>>>>([this](const time_t&) {
+            auto headCommand = std::make_unique<HeadCommand>();
+            headCommand->yaw = headYaw / std::numeric_limits<short>::max() * 1.5;
+            headCommand->pitch = headPitch / std::numeric_limits<short>::max();
+            headCommand->robotSpace = true;
+            emit(std::move(headCommand));
+
+            if (!moving) {
+                return;
+            }
 
             // TODO: hacked to not allow backwards movement for stability
             arma::vec s = { std::max(strafe[0], 0.0), strafe[1] };
@@ -129,10 +143,11 @@ namespace strategy {
 
             auto rotationalSpeedNorm = rotationalSpeed / std::numeric_limits<short>::max();
 
-            auto walkCommand = std::make_unique<WalkCommand>();
-            walkCommand->command.xy() = strafeNorm;
-            walkCommand->command.angle() = rotationalSpeedNorm;
-            emit(std::move(walkCommand));
+            auto motionCommand = std::make_unique<MotionCommand>();
+            motionCommand->type = MotionCommand::Type::DirectCommand;
+            motionCommand->walkCommand.xy() = strafeNorm;
+            motionCommand->walkCommand.angle() = rotationalSpeedNorm;
+            emit(std::move(motionCommand));
         });
     }
 

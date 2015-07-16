@@ -43,9 +43,10 @@ namespace modules {
                 static constexpr const char* CONFIGURATION_PATH = "HeadController.yaml";
                 arma::vec2 currentAngles;
                 arma::vec2 goalAngles;
+                bool goalRobotSpace = false;
             };
 
-    }  // motion 
+    }  // motion
 }  // modules
 
 #endif  // MODULES_BEHAVIOURS_REFLEX_HEADCONTROLLER_H
