@@ -181,6 +181,9 @@ namespace support {
             time_t now = NUClear::clock::now();
             double deltaT = 1e-6 * std::chrono::duration_cast<std::chrono::microseconds>(now - lastNow).count();
             Transform2D diff;
+            if(walkCommand){
+                emit(graph("walkCommand", walkCommand->command));
+            }
 
             switch (cfg_.robot.motion_type){
                 case MotionType::NONE:
@@ -202,13 +205,14 @@ namespace support {
                 
                 //Update based on walk engine
                     if(walkCommand && !kicking) {
-                        // world.robotVelocity.rows(0,1) = sensors.odometry;
-                        world.robotVelocity.xy() = sensors.odometry;
+                        world.robotVelocity.xy() = walkCommand->command.xy();
+                        // world.robotVelocity.xy() = sensors.odometry;
                         //angle from command:
-                        world.robotVelocity.angle() = walkCommand->command(2);
+                        world.robotVelocity.angle() = walkCommand->command.angle();
                     } else {
                         world.robotVelocity = utility::math::matrix::Transform2D({0,0,0});
                     }
+                    emit(graph("vel = ", world.robotVelocity));
                     world.robotVelocity.xy() = world.robotPose.rotation() * world.robotVelocity.xy();
                     world.robotPose += world.robotVelocity * deltaT;
                     break;
