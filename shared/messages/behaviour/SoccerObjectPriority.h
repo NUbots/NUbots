@@ -28,7 +28,9 @@ namespace behaviour {
         LOST,
         FIND_ADDITIONAL_OBJECTS,
         GOAL_LEFT,
-        GOAL_RIGHT,
+        GOAL_RIGHT, 
+        GROUND_LEFT,
+        GROUND_RIGHT,
         OTHER
     };
 
@@ -42,6 +44,10 @@ namespace behaviour {
             return SearchType::GOAL_RIGHT;
         } else if (s.compare("GOAL_LEFT") == 0) {
             return SearchType::GOAL_LEFT;
+        } else if (s.compare("GROUND_RIGHT") == 0) {
+            return SearchType::GROUND_RIGHT;
+        } else if (s.compare("GROUND_LEFT") == 0) {
+            return SearchType::GROUND_LEFT;
         } else if (s.compare("OTHER") == 0) {
             return SearchType::OTHER;
         } else {
