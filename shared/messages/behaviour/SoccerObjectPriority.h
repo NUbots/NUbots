@@ -55,7 +55,7 @@ namespace behaviour {
 		int goal;
 		int line;
 
-		SearchType searchType;
+		SearchType searchType = SearchType::LOST;
 	};	
 	
 }

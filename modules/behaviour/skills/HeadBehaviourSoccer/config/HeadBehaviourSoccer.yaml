@@ -49,3 +49,13 @@ searches:
       - [1,0]
       - [0,0]
       - [-1,0]
+  - search_type: "GOAL_LEFT"
+    #Points for this search are relative to the padded bounding box containing the already visible objects
+    points: 
+      - [0.5,0]
+
+  - search_type: "GOAL_RIGHT"
+    #Points for this search are relative to the padded bounding box containing the already visible objects
+    points: 
+      - [-0.5,0]
+
