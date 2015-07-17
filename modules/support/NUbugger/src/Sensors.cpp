@@ -37,12 +37,8 @@ namespace support {
         // This trigger gets the output from the sensors (unfiltered)
         handles[Message::SENSOR_DATA].push_back(on<Trigger<Sensors>, Options<Single, Priority<NUClear::LOW>>>([this](const Sensors& sensors) {
 
-            Message message;
-
-            message.set_type(Message::SENSOR_DATA);
-            message.set_filter_id(1);
-            message.set_utc_timestamp(std::chrono::duration_cast<std::chrono::milliseconds>(sensors.timestamp.time_since_epoch()).count());
-
+            Message message = createMessage(Message::SENSOR_DATA, 1);
+            
             auto* sensorData = message.mutable_sensor_data();
 
             sensorData->set_timestamp(sensors.timestamp.time_since_epoch().count());

@@ -35,26 +35,19 @@ namespace support {
 
         handles[Message::DRAW_OBJECTS].push_back(on<Trigger<DrawObjects>>([this](const DrawObjects& drawObjects) {
 
-            Message message;
-            message.set_type(Message::DRAW_OBJECTS);
-            message.set_filter_id(0); // TODO: potentially bad
-            message.set_utc_timestamp(getUtcTimestamp());
-
+            // TODO: potentially bad filter id
+            Message message = createMessage(Message::DRAW_OBJECTS);
             *(message.mutable_draw_objects()) = drawObjects;
-
             send(message);
+            
         }));
 
         handles[Message::DRAW_OBJECTS].push_back(on<Trigger<DrawObject>>([this](const DrawObject& drawObject) {
 
-            Message message;
-            message.set_type(Message::DRAW_OBJECTS);
-            message.set_filter_id(0); // TODO: potentially bad
-            message.set_utc_timestamp(getUtcTimestamp());
-
+            Message message = createMessage(Message::DRAW_OBJECTS);
             *(message.mutable_draw_objects()->add_objects()) = drawObject;
-
             send(message);
+
         }));
     }
 }

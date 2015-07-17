@@ -58,4 +58,6 @@ message Overview {
 
     // Walk engine
     repeated vec2 path_plan = 16;
+    optional vec3 walk_command = 18;
+
 }

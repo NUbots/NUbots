@@ -64,7 +64,7 @@ namespace support {
             // TODO if the file location is different, close the file and open a new one
 
             // If we are using the network
-            if(config["output"]["network"]["enabled"].as<bool>()) {
+            if (config["output"]["network"]["enabled"].as<bool>()) {
 
                 uint newPubPort = config["output"]["network"]["pub_port"].as<uint>();
                 uint newSubPort = config["output"]["network"]["sub_port"].as<uint>();
@@ -93,7 +93,7 @@ namespace support {
                 networkEnabled = true;
             }
             // If we were enabled and now we are not
-            else if(networkEnabled && !config["output"]["network"]["enabled"].as<bool>()) {
+            else if (networkEnabled && !config["output"]["network"]["enabled"].as<bool>()) {
                 // Unbind the network when we disable
                 pub.unbind(("tcp://*:" + std::to_string(pubPort)).c_str());
                 sub.unbind(("tcp://*:" + std::to_string(subPort)).c_str());
@@ -102,7 +102,7 @@ namespace support {
             }
 
             // If we are using files and haven't set one up yet
-            if(!fileEnabled && config["output"]["file"]["enabled"].as<bool>()) {
+            if (!fileEnabled && config["output"]["file"]["enabled"].as<bool>()) {
 
                 // Lock the file
                 std::lock_guard<std::mutex> lock(fileMutex);
@@ -120,7 +120,7 @@ namespace support {
 
                 fileEnabled = true;
             }
-            else if(fileEnabled && !config["output"]["file"]["enabled"].as<bool>()) {
+            else if (fileEnabled && !config["output"]["file"]["enabled"].as<bool>()) {
 
                 // Lock the file
                 std::lock_guard<std::mutex> lock(fileMutex);
@@ -158,11 +158,7 @@ namespace support {
         });
 
         on<Trigger<Every<1, std::chrono::seconds>>, Options<Single, Priority<NUClear::LOW>>>([this] (const time_t&) {
-            Message message;
-            message.set_type(Message::PING);
-            message.set_filter_id(0);
-            message.set_utc_timestamp(getUtcTimestamp());
-            send(message);
+            send(createMessage(Message::PING));
         });
 
         provideOverview();
@@ -189,11 +185,7 @@ namespace support {
     }
 
     void NUbugger::sendReactionHandles() {
-        Message message;
-
-        message.set_type(Message::REACTION_HANDLES);
-        message.set_filter_id(0);
-        message.set_utc_timestamp(getUtcTimestamp());
+        Message message = createMessage(Message::REACTION_HANDLES);
 
         auto* reactionHandles = message.mutable_reaction_handles();
 
@@ -222,6 +214,14 @@ namespace support {
                 recvMessage(proto);
             }
         }
+    }
+
+    Message NUbugger::createMessage(Message::Type type, uint filterId) {
+        Message message;
+        message.set_type(type);
+        message.set_filter_id(filterId);
+        message.set_utc_timestamp(getUtcTimestamp());
+        return message;
     }
 
     void NUbugger::recvMessage(const Message& message) {
@@ -257,11 +257,7 @@ namespace support {
                 return;
             }
 
-            Message message;
-
-            message.set_type(Message::LOOKUP_TABLE);
-            message.set_filter_id(0);
-            message.set_utc_timestamp(getUtcTimestamp());
+            Message message = createMessage(Message::LOOKUP_TABLE);
 
             auto* api_lookup_table = message.mutable_lookup_table();
 
@@ -275,6 +271,8 @@ namespace support {
             sendConfigurationState();
         } else if (command == "get_reaction_handles") {
             sendReactionHandles();
+        } else if (command == "get_subsumption") {
+            sendSubsumption();
         }
     }
 
@@ -338,7 +336,7 @@ namespace support {
 
     void NUbugger::send(Message message) {
 
-        if(networkEnabled) {
+        if (networkEnabled) {
             // Make a ZMQ packet and send it
             size_t messageSize = message.ByteSize();
             zmq::message_t packet(messageSize + 2);
@@ -348,7 +346,7 @@ namespace support {
             dataPtr[1] = uint8_t(message.filter_id());
             send(packet);
         }
-        if(fileEnabled && outputFile) {
+        if (fileEnabled && outputFile) {
             // Lock the file mutex
             std::lock_guard<std::mutex> lock(fileMutex);
 
@@ -367,24 +365,48 @@ namespace support {
 
     Message::Type NUbugger::getMessageTypeFromString(std::string type_name) {
         std::transform(type_name.begin(), type_name.end(), type_name.begin(), ::toupper);
-        return    type_name == "PING"                 ? Message::PING
-                : type_name == "SENSOR_DATA"          ? Message::SENSOR_DATA
-                : type_name == "IMAGE"                ? Message::IMAGE
-                : type_name == "CLASSIFIED_IMAGE"     ? Message::CLASSIFIED_IMAGE
-                : type_name == "VISION_OBJECT"        ? Message::VISION_OBJECT
-                : type_name == "LOCALISATION"         ? Message::LOCALISATION
-                : type_name == "DATA_POINT"           ? Message::DATA_POINT
-                : type_name == "DRAW_OBJECTS"         ? Message::DRAW_OBJECTS
-                : type_name == "REACTION_STATISTICS"  ? Message::REACTION_STATISTICS
-                : type_name == "LOOKUP_TABLE"         ? Message::LOOKUP_TABLE
-                : type_name == "LOOKUP_TABLE_DIFF"    ? Message::LOOKUP_TABLE_DIFF
-                : type_name == "SUBSUMPTION"          ? Message::SUBSUMPTION
-                : type_name == "COMMAND"              ? Message::COMMAND
-                : type_name == "REACTION_HANDLES"     ? Message::REACTION_HANDLES
-                : type_name == "GAME_STATE"           ? Message::GAME_STATE
-                : type_name == "CONFIGURATION_STATE"  ? Message::CONFIGURATION_STATE
-                : type_name == "BEHAVIOUR"            ? Message::BEHAVIOUR
-                :                                       Message::OVERVIEW;
+        Message::Type type;
+        if (type_name == "PING") {
+            type = Message::PING;
+        } else if (type_name == "SENSOR_DATA") {
+            type = Message::SENSOR_DATA;
+        } else if (type_name == "IMAGE") {
+            type = Message::IMAGE;
+        } else if (type_name == "CLASSIFIED_IMAGE") {
+            type = Message::CLASSIFIED_IMAGE;
+        } else if (type_name == "VISION_OBJECT") {
+            type = Message::VISION_OBJECT;
+        } else if (type_name == "LOCALISATION") {
+            type = Message::LOCALISATION;
+        } else if (type_name == "DATA_POINT") {
+            type = Message::DATA_POINT;
+        } else if (type_name == "DRAW_OBJECTS") {
+            type = Message::DRAW_OBJECTS;
+        } else if (type_name == "REACTION_STATISTICS") {
+            type = Message::REACTION_STATISTICS;
+        } else if (type_name == "LOOKUP_TABLE") {
+            type = Message::LOOKUP_TABLE;
+        } else if (type_name == "LOOKUP_TABLE_DIFF") {
+            type = Message::LOOKUP_TABLE_DIFF;
+        } else if (type_name == "SUBSUMPTION") {
+            type = Message::SUBSUMPTION;
+        } else if (type_name == "COMMAND") {
+            type = Message::COMMAND;
+        } else if (type_name == "REACTION_HANDLES") {
+            type = Message::REACTION_HANDLES;
+        } else if (type_name == "GAME_STATE") {
+            type = Message::GAME_STATE;
+        } else if (type_name == "CONFIGURATION_STATE") {
+            type = Message::CONFIGURATION_STATE;
+        } else if (type_name == "BEHAVIOUR") {
+            type = Message::BEHAVIOUR;
+        } else if (type_name == "OVERVIEW") {
+            type = Message::OVERVIEW;
+        } else {
+            throw new std::runtime_error("NUbugger::getMessageTypeFromString: Invalid message string");
+        }   
+        return type;                
+
     }
 
     std::string NUbugger::getStringFromMessageType(Message::Type type) {
@@ -406,7 +428,9 @@ namespace support {
             case Message::GAME_STATE:           return "GAME_STATE";
             case Message::CONFIGURATION_STATE:  return "CONFIGURATION_STATE";
             case Message::BEHAVIOUR:            return "BEHAVIOUR";
-            default:                            return "OVERVIEW";
+            case Message::OVERVIEW:             return "OVERVIEW";
+            
+            default: throw new std::runtime_error("NUbugger::getStringFromMessageType: Invalid message type");
         }
     }
 

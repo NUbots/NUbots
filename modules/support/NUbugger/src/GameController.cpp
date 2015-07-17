@@ -142,11 +142,8 @@ namespace support {
     void NUbugger::sendGameState(std::string event, const GameState& gameState) {
         log("GameEvent:", event);
 
-        Message message;
-        message.set_type(Message::GAME_STATE);
-        message.set_filter_id(0);
-        message.set_utc_timestamp(getUtcTimestamp());
-
+        Message message = createMessage(Message::GAME_STATE);
+        
         auto* gameController = message.mutable_game_state();
         gameController->set_event(event);
         auto* data = gameController->mutable_data();

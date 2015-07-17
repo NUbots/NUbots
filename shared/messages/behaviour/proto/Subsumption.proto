@@ -60,6 +60,7 @@ message Subsumption {
         required State state = 1;
         required string name = 2;
         repeated Limb limbs = 3;
+        
     }
 
     message ActionPriorites {

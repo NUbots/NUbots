@@ -56,54 +56,57 @@ namespace support {
     }
 
     void NUbugger::provideSubsumption() {
+
         handles[Message::SUBSUMPTION].push_back(on<Trigger<ActionStart>>([this](const ActionStart& actionStart) {
-            Message message;
-            message.set_type(Message::SUBSUMPTION);
-            message.set_filter_id(0);
-            message.set_utc_timestamp(getUtcTimestamp());
+
+            Message message = createMessage(Message::SUBSUMPTION);
 
             auto* subsumption = message.mutable_subsumption();
             subsumption->set_type(Subsumption::ACTION_STATE);
+            
             auto* actionStateChange = subsumption->mutable_action_state_change();
             actionStateChange->set_state(Subsumption::ActionStateChange::START);
             actionStateChange->set_name(actionStart.name);
+            
             for (auto& limbID : actionStart.limbs) {
                 actionStateChange->add_limbs(getLimb(limbID));
             }
 
             send(message);
+
         }));
 
         handles[Message::SUBSUMPTION].push_back(on<Trigger<ActionKill>>([this](const ActionKill& actionKill) {
-            Message message;
-            message.set_type(Message::SUBSUMPTION);
-            message.set_filter_id(0);
-            message.set_utc_timestamp(getUtcTimestamp());
+
+            Message message = createMessage(Message::SUBSUMPTION);
 
             auto* subsumption = message.mutable_subsumption();
             subsumption->set_type(Subsumption::ACTION_STATE);
+            
             auto* actionStateChange = subsumption->mutable_action_state_change();
             actionStateChange->set_state(Subsumption::ActionStateChange::KILL);
             actionStateChange->set_name(actionKill.name);
+            
             for (auto& limbID : actionKill.limbs) {
                 actionStateChange->add_limbs(getLimb(limbID));
             }
 
             send(message);
+
         }));
 
         handles[Message::SUBSUMPTION].push_back(on<Trigger<RegisterAction>>([this] (const RegisterAction& action) {
-            Message message;
-            message.set_type(Message::SUBSUMPTION);
-            message.set_filter_id(0);
-            message.set_utc_timestamp(getUtcTimestamp());
+
+            Message message = createMessage(Message::SUBSUMPTION);
 
             auto* subsumption = message.mutable_subsumption();
             subsumption->set_type(Subsumption::ACTION_REGISTER);
+            
             auto* actionRegister = subsumption->mutable_action_register();
             actionRegister->set_id(action.id);
             actionRegister->set_name(action.name);
-            for(const auto& set : action.limbSet) {
+            
+            for (const auto& set : action.limbSet) {
                 auto* limbSet = actionRegister->add_limb_set();
                 limbSet->set_priority(set.first);
                 for (auto& limbID : set.second) {
@@ -112,25 +115,39 @@ namespace support {
             }
 
             send(message);
+
         }));
 
         handles[Message::SUBSUMPTION].push_back(on<Trigger<ActionPriorites>>([this] (const ActionPriorites& action) {
-            Message message;
-            message.set_type(Message::SUBSUMPTION);
-            message.set_filter_id(0);
-            message.set_utc_timestamp(getUtcTimestamp());
+            
+            Message message = createMessage(Message::SUBSUMPTION);
 
             auto* subsumption = message.mutable_subsumption();
             subsumption->set_type(Subsumption::ACTION_PRIORITY_CHANGE);
+            
             auto* actionPriorityChange = subsumption->mutable_action_priority_change();
-
             actionPriorityChange->set_id(action.id);
-            for(const auto& priority : action.priorities) {
+
+            for (const auto& priority : action.priorities) {
                 actionPriorityChange->add_priorities(priority);
             }
 
             send(message);
+
         }));
+    }
+
+    void NUbugger::sendSubsumption() {
+
+        Message message = createMessage(Message::SUBSUMPTION);
+        // auto* subsumption = message.mutable_subsumption();
+
+        // for (auto& handle : handles) {
+            
+        // }
+
+        // send(message);
+
     }
 
 }

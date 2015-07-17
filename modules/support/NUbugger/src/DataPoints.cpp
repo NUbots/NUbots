@@ -37,13 +37,9 @@ namespace support {
             uint filterId = dataPointFilterIds.find(dataPoint.label()) == dataPointFilterIds.end()
                 ? dataPointFilterIds.insert(std::make_pair(dataPoint.label(), dataPointFilterId++)).first->second
                 : dataPointFilterIds[dataPoint.label()];
-            Message message;
-            message.set_type(Message::DATA_POINT);
-            message.set_filter_id(filterId);
-            message.set_utc_timestamp(getUtcTimestamp());
-
+            
+            Message message = createMessage(Message::DATA_POINT, filterId);
             *message.mutable_data_point() = dataPoint;
-
             send(message);
         }));
     }
