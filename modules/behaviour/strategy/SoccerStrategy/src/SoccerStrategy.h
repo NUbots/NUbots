@@ -35,16 +35,26 @@ namespace strategy {
 
     class SoccerStrategy : public NUClear::Reactor {
     private:
+        
+        struct Config {
+            NUClear::clock::duration ball_last_seen_max_time;
+            NUClear::clock::duration goal_last_seen_max_time;
+
+            arma::vec2 start_position_offensive;
+            arma::vec2 start_position_defensive;
+            bool is_goalie;
+
+            float goalie_command_timeout;
+            float goalie_rotation_speed_factor;
+            float goalie_max_rotation_speed;
+            float goalie_translation_speed_factor;
+            float goalie_max_translation_speed;
+            float goalie_side_walk_angle_threshold;
+        } cfg_;
+        
         messages::behaviour::FieldTarget walkTarget;
+
         std::vector<messages::behaviour::FieldTarget> lookTarget;
-
-        double BALL_CLOSE_DISTANCE;
-        NUClear::clock::duration BALL_LAST_SEEN_MAX_TIME;
-        NUClear::clock::duration GOAL_LAST_SEEN_MAX_TIME;
-
-        arma::vec2 START_POSITION_OFFENSIVE;
-        arma::vec2 START_POSITION_DEFENSIVE;
-        bool GOALIE;
 
         // TODO: remove horrible
         bool isGettingUp = false;
@@ -67,6 +77,7 @@ namespace strategy {
         bool pickedUp(const messages::input::Sensors& sensors);
         bool penalised();
         bool ballDistance(const messages::localisation::Ball& ball);
+        void goalieWalk(const std::vector<messages::localisation::Self>& selfs, const std::vector<messages::localisation::Ball>& balls);
         arma::vec2 getKickPlan(const std::vector<messages::localisation::Self>& selfs, const messages::support::FieldDescription& fieldDescription);
     
     public:

@@ -25,6 +25,7 @@
 #include "messages/input/Image.h"
 #include "messages/support/nubugger/proto/Message.pb.h"
 #include "messages/vision/VisionObjects.h"
+#include "messages/motion/WalkCommand.h"
 
 #include "utility/time/time.h"
 #include "utility/localisation/transform.h"
@@ -47,6 +48,7 @@ namespace support {
     using LocalisationBall = messages::localisation::Ball;
     using VisionGoal = messages::vision::Goal;
     using VisionBall = messages::vision::Ball;
+    using messages::motion::WalkCommand;
 
     using utility::time::getUtcTimestamp;
     using utility::localisation::transform::RobotToWorldTransform;
@@ -58,14 +60,11 @@ namespace support {
     void NUbugger::provideOverview() {
 
         handles[Message::OVERVIEW].push_back(on<Trigger<Every<1, std::chrono::seconds>>, Options<Single, Priority<NUClear::LOW>>>([this](const time_t&) {
-            Message message;
-            message.set_type(Message::OVERVIEW);
-            message.set_filter_id(0);
-            message.set_utc_timestamp(getUtcTimestamp());
-
+            
+            Message message = createMessage(Message::OVERVIEW);
             *message.mutable_overview() = overview;
-
             send(message);
+
         }));
 
         handles[Message::OVERVIEW].push_back(on<Trigger<CommandLineArguments>, Options<Single, Priority<NUClear::LOW>>>([this](const std::vector<std::string>& arguments) {
@@ -85,7 +84,7 @@ namespace support {
 
         }));
 
-        handles[Message::OVERVIEW].push_back(on<Trigger<Sensors>, Options<Single, Priority<NUClear::LOW>>>([this](const Sensors& sensors) {
+        handles[Message::OVERVIEW].push_back(on<Trigger<Sensors>>([this](const Sensors& sensors) {
 
             overview.set_voltage(sensors.voltage());
             overview.set_battery(sensors.battery());
@@ -157,9 +156,15 @@ namespace support {
 
         }));
 
-        handles[Message::OVERVIEW].push_back(on<Trigger<KickPlan>, Options<Single, Priority<NUClear::LOW>>>([this] (const KickPlan& KickPlan) {
+        handles[Message::OVERVIEW].push_back(on<Trigger<KickPlan>, Options<Single, Priority<NUClear::LOW>>>([this] (const KickPlan& kickPlan) {
 
-            *overview.mutable_kick_target() << KickPlan.target;
+            *overview.mutable_kick_target() << kickPlan.target;
+
+        }));
+
+        handles[Message::OVERVIEW].push_back(on<Trigger<WalkCommand>, Options<Single, Priority<NUClear::LOW>>>([this] (const WalkCommand& walkCommand) {
+
+            *overview.mutable_walk_command() << walkCommand.command;
 
         }));
 

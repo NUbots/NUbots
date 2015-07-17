@@ -1,5 +1,5 @@
 /*
- * This file is part of the NUbots Codebase.
+ * This file is part of NUbots Codebase.
  *
  * The NUbots Codebase is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,28 +14,12 @@
  * You should have received a copy of the GNU General Public License
  * along with the NUbots Codebase.  If not, see <http://www.gnu.org/licenses/>.
  *
- * Copyright 2015 NUBots <nubots@nubots.net>
+ * Copyright 2015 NUbots <nubots@nubots.net>
  */
 
-package messages.behaviour.proto;
+// Uncomment this line when other test files are added
+//#define CATCH_CONFIG_MAIN  // This tells Catch to provide a main() - only do this in one cpp file
+//#include <catch.hpp>
 
-message Behaviour {
-
-    enum State {
-        INIT = 1;
-        PICKED_UP = 5;
-        INITIAL = 6;
-        READY = 7;
-        SET = 8;
-        TIMEOUT = 9;
-        FINISHED = 10;
-        PENALISED = 11;
-        SEARCH_FOR_BALL = 2;
-        SEARCH_FOR_GOALS = 3;
-        WALK_TO_BALL = 4;
-        GOALIE_WALK = 12;
-    }
-
-    required State state = 1;
-
-}
+// Remove this line when test files are added
+int main() { return 0; }

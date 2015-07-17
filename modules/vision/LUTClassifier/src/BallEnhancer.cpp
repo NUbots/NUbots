@@ -39,6 +39,7 @@ namespace modules {
         std::pair<float, arma::ivec2> fieldEdgeDirection(const arma::ivec2& base, const Image& image, const arma::fvec3 greenCentroid) {
 
             // Get our relevant pixels
+            //TODO:bounds check
             std::array<Image::Pixel, 24> pixels {
                 image(base[0] - 2, base[1] - 2),
                 image(base[0] - 2, base[1] - 1),
@@ -145,7 +146,8 @@ namespace modules {
                 // The last pixel we looked at
                 // auto lastPixel = image(point[0], point[1]);
 
-                for(int y = point[1]; y > classifiedImage.horizon.y(point[0]); --y) {
+                int minY = std::max(0, classifiedImage.horizon.y(point[0]));
+                for(int y = point[1]; y > minY; --y) {
 
                     char c = lut(image(point[0], y));
 

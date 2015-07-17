@@ -33,10 +33,7 @@ namespace support {
 
     void NUbugger::provideReactionStatistics() {
         handles[Message::REACTION_STATISTICS].push_back(on<Trigger<NUClear::ReactionStatistics>>([this](const NUClear::ReactionStatistics& stats) {
-            Message message;
-            message.set_type(Message::REACTION_STATISTICS);
-            message.set_filter_id(1);
-            message.set_utc_timestamp(getUtcTimestamp());
+            Message message = createMessage(Message::REACTION_STATISTICS, 1);
             auto* reactionStatistics = message.mutable_reaction_statistics();
             //reactionStatistics->set_name(stats.name);
             reactionStatistics->set_reactionid(stats.reactionId);

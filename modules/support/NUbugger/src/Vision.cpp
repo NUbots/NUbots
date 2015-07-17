@@ -49,11 +49,8 @@ namespace support {
                 return;
             }
 
-            Message message;
-            message.set_type(Message::IMAGE);
-            message.set_filter_id(1);
-            message.set_utc_timestamp(getUtcTimestamp());
-
+            Message message = createMessage(Message::IMAGE, 1);
+            
             auto* imageData = message.mutable_image();
 
             imageData->set_camera_id(0);
@@ -78,11 +75,8 @@ namespace support {
                 return;
             }
 
-            Message message;
-            message.set_type(Message::CLASSIFIED_IMAGE);
-            message.set_filter_id(1);
-            message.set_utc_timestamp(getUtcTimestamp());
-
+            Message message = createMessage(Message::CLASSIFIED_IMAGE, 1);
+            
             auto* imageData = message.mutable_classified_image();
 
             imageData->set_camera_id(0);
@@ -126,11 +120,8 @@ namespace support {
 
         handles[Message::VISION_OBJECT].push_back(on<Trigger<std::vector<Ball>>, Options<Single, Priority<NUClear::LOW>>>([this] (const std::vector<Ball>& balls) {
 
-            Message message;
-            message.set_type(Message::VISION_OBJECT);
-            message.set_filter_id(1);
-            message.set_utc_timestamp(getUtcTimestamp());
-
+            Message message = createMessage(Message::VISION_OBJECT, 1);
+            
             auto* object = message.mutable_vision_object();
             object->set_type(VisionObject::BALL);
             object->set_camera_id(0);
@@ -156,11 +147,8 @@ namespace support {
 
         handles[Message::VISION_OBJECT].push_back(on<Trigger<std::vector<Goal>>, Options<Single, Priority<NUClear::LOW>>>([this] (const std::vector<Goal>& goals) {
 
-            Message message;
-            message.set_type(Message::VISION_OBJECT);
-            message.set_filter_id(2);
-            message.set_utc_timestamp(getUtcTimestamp());
-
+            Message message = createMessage(Message::VISION_OBJECT, 2);
+            
             auto* object = message.mutable_vision_object();
 
             object->set_type(VisionObject::GOAL);
@@ -192,25 +180,18 @@ namespace support {
         // TODO: needs refactoring so that this is really only a vision line handle
         handles[Message::VISION_OBJECT].push_back(on<Trigger<VisionObject>, Options<Single, Priority<NUClear::LOW>>>([this] (const VisionObject& visionObject) {
 
-            Message message;
-            message.set_type(Message::VISION_OBJECT);
-            message.set_filter_id(1);
-            message.set_utc_timestamp(getUtcTimestamp());
-
+            Message message = createMessage(Message::VISION_OBJECT, 1);
             *message.mutable_vision_object() = visionObject;
-
             send(message);
 
         }));
 
         handles[Message::LOOKUP_TABLE_DIFF].push_back(on<Trigger<LookUpTableDiff>, Options<Single, Priority<NUClear::LOW>>>([this] (const LookUpTableDiff& tableDiff) {
-            Message message;
-            message.set_type(Message::LOOKUP_TABLE_DIFF);
-            message.set_filter_id(0);
-            message.set_utc_timestamp(getUtcTimestamp());
+            
+            Message message = createMessage(Message::LOOKUP_TABLE_DIFF);
             *message.mutable_lookup_table_diff() = tableDiff;
-
             send(message);
+            
         }));
     }
 }

@@ -13,6 +13,8 @@ parser.add_argument('--username')
 args = parser.parse_args()
 
 robot_ip = args.robot_ip
+robot_id = robot_ip[-1] # TODO: unhack this
+
 config = args.config
 username = args.username if args.username else 'darwin'
 
@@ -33,6 +35,10 @@ call(['rsync', '-avzP', '--checksum', '-e ssh'] + libs + [target_dir + 'toolchai
 if config in ['overwrite', 'o']:
     print 'Updating configuration files'
     call(['rsync', '-avzP', '--checksum', '-e ssh', 'config', target_dir])
+    # Override robot specific versions
+    robot_config = glob.glob('config/robot_' + robot_id + '/*')
+    call(['rsync', '-avzP', '--checksum', '-e ssh'] + robot_config + [target_dir + 'config'])
+
 
 # Update configuration files
 elif config in ['update', 'u']:

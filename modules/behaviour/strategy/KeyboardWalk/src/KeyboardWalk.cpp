@@ -27,6 +27,7 @@
 #include "messages/motion/HeadCommand.h"
 #include "messages/motion/KickCommand.h"
 #include "messages/behaviour/Action.h"
+#include "utility/math/matrix/Transform2D.h"
 
 namespace modules {
 namespace behaviour {
@@ -36,6 +37,7 @@ namespace strategy {
     using messages::motion::HeadCommand;
     using messages::motion::KickCommand;
     using messages::input::LimbID;
+    using utility::math::matrix::Transform2D;
 
     KeyboardWalk::KeyboardWalk(std::unique_ptr<NUClear::Environment> environment)
         : Reactor(std::move(environment)) {
@@ -211,9 +213,7 @@ namespace strategy {
 
     void KeyboardWalk::walkToggle() {
         if (moving) {
-            auto motionCommand = std::make_unique<MotionCommand>();
-            motionCommand->type = MotionCommand::Type::StandStill;
-            emit(std::move(motionCommand));
+            emit(std::make_unique<MotionCommand>(MotionCommand::StandStill()));
             moving = false;
         } else {
             moving = true;
@@ -234,11 +234,7 @@ namespace strategy {
 
     void KeyboardWalk::updateCommand() {
         if (moving) {
-            auto motionCommand = std::make_unique<MotionCommand>();
-            motionCommand->type = MotionCommand::Type::DirectCommand;
-            motionCommand->walkCommand.xy() = velocity;
-            motionCommand->walkCommand.angle() = rotation;
-            emit(std::move(motionCommand));
+            emit(std::make_unique<MotionCommand>(MotionCommand::DirectCommand(Transform2D(velocity, rotation))));
         }
 
         auto headCommand = std::make_unique<HeadCommand>();

@@ -24,6 +24,7 @@
 #include "messages/motion/KickCommand.h"
 #include "messages/behaviour/Action.h"
 #include "messages/behaviour/ServoCommand.h"
+#include "utility/math/matrix/Transform2D.h"
 
 namespace modules {
 namespace behaviour {
@@ -33,6 +34,7 @@ namespace strategy {
     using messages::motion::HeadCommand;
     using messages::behaviour::MotionCommand;
     using messages::input::LimbID;
+    using utility::math::matrix::Transform2D;
 
     PS3Walk::PS3Walk(std::unique_ptr<NUClear::Environment> environment)
         : Reactor(std::move(environment)) {
@@ -69,9 +71,7 @@ namespace strategy {
                             if (event.value > 0) { // button down
                                 if (moving) {
                                     NUClear::log("Stop walking");
-                                    auto motionCommand = std::make_unique<MotionCommand>();
-                                    motionCommand->type = MotionCommand::Type::StandStill;
-                                    emit(std::move(motionCommand));
+                                    emit(std::make_unique<MotionCommand>(MotionCommand::StandStill()));
                                 } else {
                                     NUClear::log("Start walking");
                                 }
@@ -142,12 +142,8 @@ namespace strategy {
             arma::vec strafeNorm = s / std::numeric_limits<short>::max();
 
             auto rotationalSpeedNorm = rotationalSpeed / std::numeric_limits<short>::max();
-
-            auto motionCommand = std::make_unique<MotionCommand>();
-            motionCommand->type = MotionCommand::Type::DirectCommand;
-            motionCommand->walkCommand.xy() = strafeNorm;
-            motionCommand->walkCommand.angle() = rotationalSpeedNorm;
-            emit(std::move(motionCommand));
+            auto transform = Transform2D(strafeNorm, rotationalSpeedNorm);
+            emit(std::make_unique<MotionCommand>(MotionCommand::DirectCommand(transform)));
         });
     }
 

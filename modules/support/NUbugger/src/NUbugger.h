@@ -61,6 +61,7 @@ namespace modules {
             bool fileEnabled = false;
 
             messages::support::nubugger::proto::Overview overview;
+            messages::behaviour::proto::Subsumption subsumption;
 
             std::ofstream outputFile;
 
@@ -86,9 +87,12 @@ namespace modules {
             messages::input::proto::GameState::Data::PenaltyReason getPenaltyReason(const messages::input::gameevents::PenaltyReason& penaltyReason);
 
             void sendConfigurationState();
+            void sendSubsumption();
 
             void send(zmq::message_t& packet);
             void send(messages::support::nubugger::proto::Message message);
+
+            messages::support::nubugger::proto::Message createMessage(messages::support::nubugger::proto::Message::Type type, uint filterId=0);
 
             void recvMessage(const messages::support::nubugger::proto::Message& message);
             void recvCommand(const messages::support::nubugger::proto::Message& message);

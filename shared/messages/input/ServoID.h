@@ -31,6 +31,8 @@ namespace messages {
         };
 
         enum class ServoID {
+            //Always right first, this is particular required for idFromPartialString();
+            //@Mingze
             R_SHOULDER_PITCH    = 0,
             L_SHOULDER_PITCH    = 1,
             R_SHOULDER_ROLL     = 2,

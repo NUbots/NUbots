@@ -202,9 +202,10 @@ namespace support {
                 
                 //Update based on walk engine
                     if(walkCommand && !kicking) {
-                        world.robotVelocity.rows(0,1) = sensors.odometry;
+                        world.robotVelocity.xy() = walkCommand->command.xy();
+                        // world.robotVelocity.xy() = sensors.odometry;
                         //angle from command:
-                        world.robotVelocity(2) = walkCommand->command(2);
+                        world.robotVelocity.angle() = walkCommand->command.angle();
                     } else {
                         world.robotVelocity = utility::math::matrix::Transform2D({0,0,0});
                     }
