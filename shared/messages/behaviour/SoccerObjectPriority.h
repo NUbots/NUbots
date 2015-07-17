@@ -57,9 +57,9 @@ namespace behaviour {
     }
 
 	struct SoccerObjectPriority {
-		int ball;
-		int goal;
-		int line;
+		int ball = 0;
+		int goal = 0;
+		int line = 0;
 
 		SearchType searchType = SearchType::LOST;
 	};	

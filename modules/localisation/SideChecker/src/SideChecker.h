@@ -22,6 +22,9 @@
 
 #include <nuclear>
 
+#include "messages/vision/VisionObjects.h"
+
+
 namespace modules {
 namespace localisation {
 
@@ -29,19 +32,21 @@ namespace localisation {
     private:
     	struct Config {
     		float priority;
+    		int number_of_samples;
     	} cfg_;
 
-    	struct State {
+    	enum State {
     		SearchLeft,
     		SearchRight,
     		Calculate
     	};
 
     	//Collected data:
-    	std::vector<Goal> leftGoals;
-    	std::vector<Goal> rightGoals;
+    	std::vector<std::pair<messages::vision::Goal,messages::vision::Goal>> leftGoals; //list of (left,right) goals
+    	std::vector<std::pair<messages::vision::Goal,messages::vision::Goal>> rightGoals; //list of (left,right) goals
 
     	State currentState = State::SearchLeft;
+    	void addGoals(messages::vision::Goal left, messages::vision::Goal right);
 
     public:
         /// @brief Called by the powerplant to build and setup the SideChecker reactor.
