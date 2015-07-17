@@ -31,7 +31,6 @@
 #include "utility/support/yaml_armadillo.h"
 
 #include "utility/nubugger/NUhelpers.h"
-#include "messages/behaviour/SoccerObjectPriority.h"
 
 
 namespace modules {
@@ -61,6 +60,8 @@ namespace modules {
         using messages::input::ServoID;
 
         using messages::behaviour::SoccerObjectPriority;
+        using messages::behaviour::SearchType;
+        using messages::behaviour::searchTypeFromString;
 
             HeadBehaviourSoccer::HeadBehaviourSoccer(std::unique_ptr<NUClear::Environment> environment) :
             Reactor(std::move(environment)),
@@ -111,6 +112,7 @@ namespace modules {
                 on<Trigger<SoccerObjectPriority>, Options<Sync<HeadBehaviourSoccer>>>("Head Behaviour Soccer - Set priorities", [this] (const SoccerObjectPriority& p){
                     ballPriority = p.ball;
                     goalPriority = p.goal;
+                    searchType = p.searchType;
                 });
 
                 on< Trigger<Sensors>,
@@ -240,7 +242,7 @@ namespace modules {
                 }
 
                 if(search){
-                    fixationPoints = getSearchPoints(fixationObjects, SearchType::LOST);
+                    fixationPoints = getSearchPoints(fixationObjects, searchType);
                 }
 
                 if(fixationPoints.size() <= 0){

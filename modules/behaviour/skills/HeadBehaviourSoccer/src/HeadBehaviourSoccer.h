@@ -28,6 +28,7 @@
 #include "messages/input/Sensors.h"
 #include "messages/input/CameraParameters.h"
 #include "Searcher.h"
+#include "messages/behaviour/SoccerObjectPriority.h"
 
 namespace modules {
     namespace behaviour{
@@ -40,26 +41,7 @@ namespace modules {
              */
             class HeadBehaviourSoccer : public NUClear::Reactor {
             public:
-                enum SearchType {
-                    LOST = 0,
-                    FIND_ADDITIONAL_OBJECTS = 1,
-                    OTHER = 2
-                };
-                SearchType searchTypeFromString(std::string s){
-
-                    if(s.compare("LOST") == 0) {
-                        return SearchType::LOST;
-                    }
-                    else if(s.compare("FIND_ADDITIONAL_OBJECTS") == 0){
-                        return SearchType::FIND_ADDITIONAL_OBJECTS;
-                    }
-                    else if(s.compare("OTHER") == 0){
-                        return SearchType::OTHER;
-                    } else {
-                        throw std::domain_error("HeadBehaviourSoccer - searchTypeFromString: NO SEARCH TYPE FOUND!");
-                    }
-
-                }
+                
 
             private:
                 
@@ -73,7 +55,7 @@ namespace modules {
                 
                 /*! @brief Gets points which allow for simultaneous search and viewing of key objects
                 */
-                std::vector<arma::vec2> getSearchPoints(std::vector<messages::vision::VisionObject> fixationObjects, SearchType sType);
+                std::vector<arma::vec2> getSearchPoints(std::vector<messages::vision::VisionObject> fixationObjects, messages::behaviour::SearchType sType);
                 
                 /*! @brief Combines a collection of vision objects. The screen resulting screen angular region is the bounding box of the objects
                 */
@@ -97,13 +79,14 @@ namespace modules {
                 float search_timeout_ms;
                 float fractional_angular_update_threshold;
 
-                std::map<SearchType, std::vector<arma::vec2>> searches;
+                std::map<messages::behaviour::SearchType, std::vector<arma::vec2>> searches;
 
                 //State variables
                 Searcher<arma::vec2> headSearcher;
 
                 int ballPriority;
                 int goalPriority;
+                messages::behaviour::SearchType searchType;
 
                 NUClear::clock::time_point lastPlanUpdate;
                 NUClear::clock::time_point timeLastObjectSeen;
