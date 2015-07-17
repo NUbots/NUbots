@@ -37,7 +37,9 @@
 #include "utility/nubugger/NUhelpers.h"
 #include "utility/math/geometry/RotatedRectangle.h"
 #include "utility/math/matrix/Transform2D.h"
+#include "messages/localisation/ResetRobotHypotheses.h"
 #include "utility/math/angle.h"
+#include "utility/math/coordinates.h"
 
 namespace modules {
 namespace localisation {
@@ -48,6 +50,7 @@ namespace localisation {
     using Self = messages::localisation::Self;
 
     using messages::behaviour::MotionCommand;
+    using messages::support::FieldDescription;
     using messages::behaviour::WalkPath;
     using messages::behaviour::RegisterAction;
     using messages::behaviour::ActionPriorites;
@@ -62,6 +65,9 @@ namespace localisation {
     using messages::motion::DisableWalkEngineCommand;
 
 	using messages::vision::Goal;
+	using messages::vision::VisionObject;
+    
+    using messages::localisation::ResetRobotHypotheses;
 
     using messages::input::LimbID;
     using messages::input::ServoID;
@@ -119,10 +125,13 @@ namespace localisation {
 
         on<Trigger<SelfUnpenalisation>> ([this](const SelfUnpenalisation&) {
             
-            emit(std::make_unique<ActionPriorites>(ActionPriorites { subsumptionId, { cfg_.priority,cfg_.priority,cfg_.priority}}));
+            emit(std::make_unique<ActionPriorites>(ActionPriorites { subsumptionId, { cfg_.priority }}));
         });
 
-        on<Trigger<std::vector<Goal>>>("Side Checker State Check", [this](const std::vector<Goal>& goals){
+        on<Trigger<std::vector<Goal>>,
+           With<FieldDescription>>("Side Checker State Check", [this](
+           	const std::vector<Goal>& goals,
+           	const FieldDescription& fieldDescr){
         	//record goals:
         	if(goals.size() == 2){
         		bool leftPresent = false;
@@ -161,15 +170,26 @@ namespace localisation {
         	}
         	
         	if(currentState == State::Calculate){
-        		//calculateSide();
-        		//emit
-        	}
 
+                ResetType type = calculateSide(leftGoals, rightGoals);
+
+                // Emit the appropriate localisation reset:
+                unpenalisedLocalisationReset(fieldDescr, type);
+                // Relinquish control of the robot:
+                emit(std::make_unique<ActionPriorites>(ActionPriorites { subsumptionId, { 0 }}));
+            }
         });
-
-		
     }
 
+    arma::vec3 avgMeasurement(std::vector<VisionObject::Measurement> measurements) {
+        arma::vec3 avg = {0, 0, 0};
+        for (auto& m : measurements) {
+            avg += m.position;
+        }
+        avg /= measurements.size();
+        return avg;
+    }
+		
     void SideChecker::addGoals(Goal left, Goal right){
     	bool leftGoalToLeftOfRobot = left.measurements.front().position[1] > 0;
     	bool rightGoalToLeftOfRobot = right.measurements.front().position[1] > 0;
@@ -177,7 +197,100 @@ namespace localisation {
     		leftGoals.push_back(std::pair<Goal,Goal>(left,right));
     	} else if (!(leftGoalToLeftOfRobot && rightGoalToLeftOfRobot)){
     		rightGoals.push_back(std::pair<Goal,Goal>(left,right));
-    	}
+   		}
+   	}
+
+    std::pair<arma::vec3, arma::vec3> avgGoalPairs(std::vector<std::pair<Goal, Goal>> goalPairs) {
+        std::pair<arma::vec, arma::vec> avgGoals = {{0, 0, 0}, {0, 0, 0}};
+        for (auto& pair : goalPairs) {
+
+            arma::vec3 leftPos  = avgMeasurement(pair.first.measurements);
+            arma::vec3 rightPos = avgMeasurement(pair.second.measurements);;
+
+            avgGoals.first  += leftPos;
+            avgGoals.second += rightPos;
+        }
+
+        avgGoals.first  /= goalPairs.size();
+        avgGoals.second /= goalPairs.size();
+
+        return avgGoals;
+    }
+
+    SideChecker::ResetType SideChecker::calculateSide(std::vector<std::pair<Goal, Goal>> leftGoalPairs, std::vector<std::pair<Goal, Goal>> rightGoalPairs) {
+        // Get average spherical coordinates of goals:
+        auto avgLeftGoals = avgGoalPairs(leftGoalPairs);
+        auto avgRightGoals = avgGoalPairs(rightGoalPairs);
+
+        // Get cartesian goal coordinates:
+        arma::vec3 leftL  = utility::math::coordinates::sphericalToCartesian(avgLeftGoals.first);
+        arma::vec3 leftR  = utility::math::coordinates::sphericalToCartesian(avgLeftGoals.second);
+        arma::vec3 rightL = utility::math::coordinates::sphericalToCartesian(avgLeftGoals.first);
+        arma::vec3 rightR = utility::math::coordinates::sphericalToCartesian(avgLeftGoals.second);
+
+        if (leftL(1) < rightR(1) && leftR(1) < rightL(1)) {
+            // The left goal is closer (i.e. our own goal), so we are on the right side.
+            return ResetType::ON_RIGHT_SIDE;
+        } else if (leftL(1) > rightR(1) && leftR(1) > rightL(1)) {
+            // The right goal is closer (i.e. our own goal), so we are on the left side.
+            return ResetType::ON_LEFT_SIDE;
+        }
+
+        return ResetType::AMBIGUOUS;
+    }
+
+
+    void SideChecker::unpenalisedLocalisationReset(const FieldDescription& fieldDescription, ResetType resetType) {
+
+        auto reset = std::make_unique<ResetRobotHypotheses>();
+        if(resetType == ResetType::ON_LEFT_SIDE){ //On left side of field so home goal is to right
+	        ResetRobotHypotheses::Self selfSideLeft;
+	        selfSideLeft.position = arma::vec2({-fieldDescription.penalty_robot_start, fieldDescription.dimensions.field_width * 0.5});
+	        selfSideLeft.position_cov = arma::eye(2, 2) * 0.1;
+	        selfSideLeft.heading = -M_PI_2;
+	        selfSideLeft.heading_var = 0.05;
+	        reset->hypotheses.push_back(selfSideLeft);
+
+	    } else if(resetType == ResetType::ON_RIGHT_SIDE){ //On right side of field so home goal is to left
+	        ResetRobotHypotheses::Self selfSideRight;
+	        selfSideRight.position = arma::vec2({-fieldDescription.penalty_robot_start, -fieldDescription.dimensions.field_width * 0.5});
+	        selfSideRight.position_cov = arma::eye(2, 2) * 0.1;
+	        selfSideRight.heading = M_PI_2;
+	        selfSideRight.heading_var = 0.05;
+	        reset->hypotheses.push_back(selfSideRight);
+
+	    } else if(resetType == ResetType::AT_OWN_GOAL){ //On right side of field so home goal is to left
+	        ResetRobotHypotheses::Self selfSideBaseLine;
+	        selfSideBaseLine.position = arma::vec2({-fieldDescription.dimensions.field_length * 0.5 + fieldDescription.dimensions.goal_area_length, 0});
+	        selfSideBaseLine.position_cov = arma::eye(2, 2) * 0.1;
+	        selfSideBaseLine.heading = 0;
+	        selfSideBaseLine.heading_var = 0.05;
+	        reset->hypotheses.push_back(selfSideBaseLine);
+
+	    } else {
+	    	ResetRobotHypotheses::Self selfSideLeft;
+	        selfSideLeft.position = arma::vec2({-fieldDescription.penalty_robot_start, fieldDescription.dimensions.field_width * 0.5});
+	        selfSideLeft.position_cov = arma::eye(2, 2) * 0.1;
+	        selfSideLeft.heading = -M_PI_2;
+	        selfSideLeft.heading_var = 0.05;
+	        reset->hypotheses.push_back(selfSideLeft);
+
+	        ResetRobotHypotheses::Self selfSideRight;
+	        selfSideRight.position = arma::vec2({-fieldDescription.penalty_robot_start, -fieldDescription.dimensions.field_width * 0.5});
+	        selfSideRight.position_cov = arma::eye(2, 2) * 0.1;
+	        selfSideRight.heading = M_PI_2;
+	        selfSideRight.heading_var = 0.05;
+	        reset->hypotheses.push_back(selfSideRight);
+
+	        ResetRobotHypotheses::Self selfSideBaseLine;
+	        selfSideBaseLine.position = arma::vec2({-fieldDescription.dimensions.field_length * 0.5 + fieldDescription.dimensions.goal_area_length, 0});
+	        selfSideBaseLine.position_cov = arma::eye(2, 2) * 0.1;
+	        selfSideBaseLine.heading = 0;
+	        selfSideBaseLine.heading_var = 0.05;
+	        reset->hypotheses.push_back(selfSideBaseLine);
+	    }
+        emit(std::move(reset));
+
     }
 }
 }

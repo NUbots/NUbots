@@ -23,6 +23,8 @@
 #include <nuclear>
 
 #include "messages/vision/VisionObjects.h"
+#include "messages/support/FieldDescription.h"
+
 
 
 namespace modules {
@@ -35,18 +37,29 @@ namespace localisation {
     		int number_of_samples;
     	} cfg_;
 
-    	enum State {
+    	enum class State {
     		SearchLeft,
     		SearchRight,
     		Calculate
+    	};
+
+    	enum class ResetType {
+    		ON_LEFT_SIDE,
+    		ON_RIGHT_SIDE,
+    		AT_OWN_GOAL,
+    		AMBIGUOUS
     	};
 
     	//Collected data:
     	std::vector<std::pair<messages::vision::Goal,messages::vision::Goal>> leftGoals; //list of (left,right) goals
     	std::vector<std::pair<messages::vision::Goal,messages::vision::Goal>> rightGoals; //list of (left,right) goals
 
+
     	State currentState = State::SearchLeft;
     	void addGoals(messages::vision::Goal left, messages::vision::Goal right);
+
+        static ResetType calculateSide(std::vector<std::pair<messages::vision::Goal, messages::vision::Goal>> leftGoals, std::vector<std::pair<messages::vision::Goal, messages::vision::Goal>> rightGoals);
+    	void unpenalisedLocalisationReset(const messages::support::FieldDescription& fieldDescription, ResetType resetType);
 
     public:
         /// @brief Called by the powerplant to build and setup the SideChecker reactor.
