@@ -111,6 +111,7 @@ namespace modules {
                 on<Trigger<SoccerObjectPriority>, Options<Sync<HeadBehaviourSoccer>>>("Head Behaviour Soccer - Set priorities", [this] (const SoccerObjectPriority& p){
                     ballPriority = p.ball;
                     goalPriority = p.goal;
+                    searchType = p.searchType
                 });
 
                 on< Trigger<Sensors>,

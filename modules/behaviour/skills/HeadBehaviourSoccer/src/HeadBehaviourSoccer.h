@@ -40,26 +40,7 @@ namespace modules {
              */
             class HeadBehaviourSoccer : public NUClear::Reactor {
             public:
-                enum SearchType {
-                    LOST = 0,
-                    FIND_ADDITIONAL_OBJECTS = 1,
-                    OTHER = 2
-                };
-                SearchType searchTypeFromString(std::string s){
-
-                    if(s.compare("LOST") == 0) {
-                        return SearchType::LOST;
-                    }
-                    else if(s.compare("FIND_ADDITIONAL_OBJECTS") == 0){
-                        return SearchType::FIND_ADDITIONAL_OBJECTS;
-                    }
-                    else if(s.compare("OTHER") == 0){
-                        return SearchType::OTHER;
-                    } else {
-                        throw std::domain_error("HeadBehaviourSoccer - searchTypeFromString: NO SEARCH TYPE FOUND!");
-                    }
-
-                }
+                
 
             private:
                 

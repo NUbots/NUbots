@@ -24,11 +24,39 @@
 namespace messages {
 namespace behaviour {
 
+	enum class SearchType {
+        LOST,
+        FIND_ADDITIONAL_OBJECTS,
+        GOAL_LEFT,
+        GOAL_RIGHT,
+        OTHER
+    };
+
+    SearchType searchTypeFromString(std::string s){
+
+        if(s.compare("LOST") == 0) {
+            return SearchType::LOST;
+        } else if(s.compare("FIND_ADDITIONAL_OBJECTS") == 0){
+            return SearchType::FIND_ADDITIONAL_OBJECTS;
+        } else if(s.compare("GOAL_RIGHT") == 0){
+            return SearchType::GOAL_RIGHT;
+        } else if (s.compare("GOAL_LEFT") == 0) {
+            return SearchType::GOAL_LEFT;
+        } else if (s.compare("OTHER") == 0) {
+            return SearchType::OTHER;
+        } else {
+            throw std::domain_error("HeadBehaviourSoccer - searchTypeFromString: NO SEARCH TYPE FOUND!");
+        } 
+
+    }
+
 	struct SoccerObjectPriority {
 		int ball;
 		int goal;
 		int line;
-	};
+
+		SearchType searchType;
+	};	
 	
 }
 }
