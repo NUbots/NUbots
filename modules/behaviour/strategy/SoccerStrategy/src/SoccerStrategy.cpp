@@ -89,6 +89,7 @@ namespace strategy {
             cfg_.goalie_max_rotation_speed = config["goalie_max_rotation_speed"].as<float>();
             cfg_.goalie_translation_speed_factor = config["goalie_translation_speed_factor"].as<float>();
             cfg_.goalie_max_translation_speed = config["goalie_max_translation_speed"].as<float>();
+            cfg_.goalie_side_walk_angle_threshold = config["goalie_side_walk_angle_threshold"].as<float>();
 
         });
 
@@ -448,9 +449,13 @@ namespace strategy {
                 int signBearing = selfBearing > 0 ? 1 : -1;
                 float rotationSpeed = - signBearing * std::fmin(std::fabs(cfg_.goalie_rotation_speed_factor * selfBearing), cfg_.goalie_max_rotation_speed);
 
-                float translationSpeed = - std::fmin(cfg_.goalie_translation_speed_factor * ball.position[1], cfg_.goalie_max_translation_speed);
+                int signTranslation = ball.position[1] > 0 ? 1 : -1;
+                float translationSpeed = signTranslation * std::fmin(std::fabs(cfg_.goalie_translation_speed_factor * ball.position[1]), cfg_.goalie_max_translation_speed);
 
-                motionCommand = std::make_unique<MotionCommand>(MotionCommand::DirectCommand({0, translationSpeed, rotationSpeed}));
+                motionCommand = std::make_unique<MotionCommand>(MotionCommand::DirectCommand({0, 0, rotationSpeed}));
+                if(std::fabs(selfBearing) < cfg_.goalie_side_walk_angle_threshold){
+                    motionCommand->walkCommand.y() = translationSpeed;
+                }
             } else {
                 motionCommand = std::make_unique<MotionCommand>(MotionCommand::DirectCommand({0, 0, 0}));
             }

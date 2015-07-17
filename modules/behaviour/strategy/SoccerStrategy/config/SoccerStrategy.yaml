@@ -9,3 +9,4 @@ goalie_rotation_speed_factor: 0.1
 goalie_max_rotation_speed: 0.1
 goalie_translation_speed_factor: 0.1
 goalie_max_translation_speed: 0.1
+goalie_side_walk_angle_threshold: 0.1

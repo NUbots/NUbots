@@ -247,8 +247,6 @@ namespace skills {
             command = std::make_unique<WalkCommand>(walkBetweenFar(currentState, targetState));
         }
 
-        log("walk command follower", command->command);
-
         return command;
     }
 

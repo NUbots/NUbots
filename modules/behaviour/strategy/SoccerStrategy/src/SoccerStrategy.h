@@ -49,6 +49,7 @@ namespace strategy {
             float goalie_max_rotation_speed;
             float goalie_translation_speed_factor;
             float goalie_max_translation_speed;
+            float goalie_side_walk_angle_threshold;
         } cfg_;
         
         messages::behaviour::FieldTarget walkTarget;
