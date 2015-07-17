@@ -36,6 +36,7 @@
 #include "utility/math/geometry/RotatedRectangle.h"
 #include "utility/math/matrix/Transform2D.h"
 #include "utility/math/angle.h"
+#include "utility/math/coordinates.h"
 
 namespace modules {
 namespace localisation {
@@ -116,13 +117,68 @@ namespace localisation {
 
         	// Calculate average distances to each goal:
 
-        	// Determine side of field based on goal distances:
 
-        	// Perform the appropriate localisation reset:
+            if (currentState == State::Calculate) {
+                // Determine side of field based on goal distances:
+                bool side = calculateSide(leftGoals, rightGoals);
 
+                // Emit the appropriate localisation reset:
+
+                // Relinquish control of the robot:
+                emit(std::make_unique<ActionPriorites>(ActionPriorites { subsumptionId, { 0, 0, 0 }}));
+            }
         });
+    }
 
+    arma::vec3 avgMeasurement(std::vector<VisionObject::Meaurement> measurements) {
+        arma::vec3 avg = {0, 0, 0};
+        for (auto& m : measurements) {
+            avg += m.position;
+        }
+        avg /= measurements.size();
+        return avg;
+    }
 
+    std::pair<arma::vec3, arma::vec3> avgGoalPair(std::vector<std::pair<Goal, Goal>> goalPairs) {
+        std::pair<arma::vec, arma::vec> avgGoals = {{0, 0, 0}, {0, 0, 0}};
+        for (auto& pair : leftGoalPairs) {
+
+            arma::vec3 leftPos  = avgMeasurement(pair.first.measurements);
+            arma::vec3 rightPos = avgMeasurement(pair.second.measurements);;
+
+            avgGoals.left  += leftPos;
+            avgGoals.right += rightPos;
+        }
+
+        avgGoals.left  /= goalPairs.size();
+        avgGoals.right /= goalPairs.size();
+
+        return avgGoals;
+    }
+
+    bool SideChecker::calculateSide(std::vector<std::pair<Goal, Goal>> leftGoalPairs, std::vector<std::pair<Goal, Goal>> rightGoalPairs) {
+        // Get average spherical coordinates of goals:
+        auto avgLeftGoals = avgGoalPairs(leftGoalPairs);
+        auto avgRightGoals = avgGoalPairs(rightGoalPairs);
+
+        // Get cartesian goal coordinates:
+        arma::vec3 leftL  = math::coordinates::sphericalToCartesian(avgLeftGoals.first);
+        arma::vec3 leftR  = math::coordinates::sphericalToCartesian(avgLeftGoals.second);
+        arma::vec3 rightL = math::coordinates::sphericalToCartesian(avgLeftGoals.first);
+        arma::vec3 rightR = math::coordinates::sphericalToCartesian(avgLeftGoals.second);
+
+        if (leftL(1) < rightR(1) && leftR(1) < rightL(1)) {
+            // The left goal is closer (i.e. our own goal), so we are on the right side.
+            return true;
+        } else if (leftL(1) > rightR(1) && leftR(1) > rightL(1)) {
+            // The right goal is closer (i.e. our own goal), so we are on the left side.
+            return false;
+        }
+
+        // Testing the goalposts individually was inconclusive, so we'll test the goal centres.
+        arma::vec3 leftAvg = (leftL + leftR) * 0.5;
+        arma::vec3 rightAvg = (rightL + rightR) * 0.5;
+        return leftAvg(1) < rightAvg(1);
     }
 }
 }

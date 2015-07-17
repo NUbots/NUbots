@@ -38,10 +38,12 @@ namespace localisation {
     	};
 
     	//Collected data:
-    	std::vector<Goal> leftGoals;
-    	std::vector<Goal> rightGoals;
+    	std::vector<std::pair<Goal, Goal>> leftGoals;
+    	std::vector<std::pair<Goal, Goal>> rightGoals;
 
     	State currentState = State::SearchLeft;
+
+        static bool calculateSide(std::vector<std::pair<Goal, Goal>> leftGoals, std::vector<std::pair<Goal, Goal>> rightGoals);
 
     public:
         /// @brief Called by the powerplant to build and setup the SideChecker reactor.
