@@ -33,6 +33,10 @@ call(['rsync', '-avzP', '--checksum', '-e ssh'] + libs + [target_dir + 'toolchai
 if config in ['overwrite', 'o']:
     print 'Updating configuration files'
     call(['rsync', '-avzP', '--checksum', '-e ssh', 'config', target_dir])
+    # Override robot specific versions
+    robot_config = glob.glob('config/' + robot_ip + '/*')
+    call(['rsync', '-avzP', '--checksum', '-e ssh'] + robot_config + [target_dir + 'config'])
+
 
 # Update configuration files
 elif config in ['update', 'u']:
