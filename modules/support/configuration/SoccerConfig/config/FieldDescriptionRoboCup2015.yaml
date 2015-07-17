@@ -1,8 +1,7 @@
 Units: m
-BallRadius: 0.0478
+BallRadius: 0.065
 LineWidth: 0.05
 
-#MARKWIDTH?
 MarkWidth: 0.1
 
 FieldLength: 9
