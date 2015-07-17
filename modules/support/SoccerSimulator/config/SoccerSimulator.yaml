@@ -1,13 +1,13 @@
 
 #WARNING: TURNING OFF auto_start_behaviour RESULTS IN LOCALISATION BEING SPAMMED WITH RESET HYPOTHESIS COMMANDS
-auto_start_behaviour: true
+auto_start_behaviour: false
 #-----------------------------------------------------------------------------
 
 vision:
   # Disabling either of these emits corresponding ground truth simulation results
   # as localisation result
-  goal_observations: false
-  ball_observations: false
+  goal_observations: true
+  ball_observations: true
 
   distinguish_own_and_opponent_goals: false
   distinguish_left_and_right_goals: false

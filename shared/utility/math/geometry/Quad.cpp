@@ -32,7 +32,7 @@ namespace geometry {
         set(other.bl, other.tl, other.tr, other.br);
     }
 
-    Quad::Quad(const arma::vec2& bottomLeft, const arma::vec2& topLeft, const arma::vec2& topRight, const arma::vec2& bottomRight) {
+    Quad::Quad(arma::vec2 bottomLeft, arma::vec2 topLeft, arma::vec2 topRight, arma::vec2 bottomRight) {
         set(bottomLeft, topLeft, topRight, bottomRight);
     }
 
@@ -47,7 +47,7 @@ namespace geometry {
         tr[0] = right;          tr[1] = top;
     }
 
-    void Quad::set(const arma::vec2& bottomLeft, const arma::vec2& topLeft, const arma::vec2& topRight, const arma::vec2& bottomRight) {
+    void Quad::set(arma::vec2 bottomLeft, arma::vec2 topLeft, arma::vec2 topRight, arma::vec2 bottomRight) {
         bl = bottomLeft;
         tl = topLeft;
         tr = topRight;

@@ -31,6 +31,7 @@
 #include "messages/motion/DiveCommand.h"
 #include "messages/localisation/FieldObject.h"
 #include "messages/localisation/ResetRobotHypotheses.h"
+#include "messages/localisation/SideChecker.h"
 #include "messages/support/Configuration.h"
 
 #include "utility/time/time.h"
@@ -50,6 +51,7 @@ namespace strategy {
     using messages::input::gameevents::Phase;
     using messages::localisation::Ball;
     using messages::localisation::Self;
+    using messages::localisation::SideCheckingComplete;
     using messages::behaviour::MotionCommand;
     using messages::behaviour::LookStrategy;
     using messages::behaviour::Look;
@@ -137,8 +139,13 @@ namespace strategy {
 
         on<Trigger<SelfUnpenalisation>, With<FieldDescription>> ([this](const SelfUnpenalisation&, const FieldDescription& fieldDescription) {
             selfPenalised = false;
+            isSideChecking = true;
             // TODO: only do this once put down
             unpenalisedLocalisationReset(fieldDescription);
+        });
+
+        on<Trigger<SideCheckingComplete>>([this](const SideCheckingComplete&) {
+            isSideChecking = false;
         });
 
         // Main Loop
@@ -218,8 +225,9 @@ namespace strategy {
                                 find({FieldTarget::SELF});
                                 currentState = Behaviour::PENALISED;
                             }
-                            else { // not penalised
+                            else if (!isSideChecking) { // not penalised
                                 find({FieldTarget::BALL});
+
                                 if (cfg_.is_goalie) { // goalie
                                     goalieWalk(selfs, balls);
                                     currentState = Behaviour::GOALIE_WALK;
@@ -237,8 +245,6 @@ namespace strategy {
                         }
                     }
                 }
-                
-
                 
                 if (currentState != previousState) {
                     emit(std::make_unique<Behaviour::State>(currentState));

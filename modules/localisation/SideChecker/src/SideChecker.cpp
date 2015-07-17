@@ -38,6 +38,7 @@
 #include "utility/math/geometry/RotatedRectangle.h"
 #include "utility/math/matrix/Transform2D.h"
 #include "messages/localisation/ResetRobotHypotheses.h"
+#include "messages/localisation/SideChecker.h"
 #include "utility/math/angle.h"
 #include "utility/math/coordinates.h"
 
@@ -48,6 +49,7 @@ namespace localisation {
 
     using messages::support::Configuration;
     using Self = messages::localisation::Self;
+    using messages::localisation::SideCheckingComplete;
 
     using messages::behaviour::MotionCommand;
     using messages::support::FieldDescription;
@@ -98,21 +100,18 @@ namespace localisation {
                 std::pair<double, std::set<LimbID>>(0, {LimbID::LEFT_LEG, LimbID::RIGHT_LEG, LimbID::LEFT_ARM, LimbID::RIGHT_ARM}),
             },
             [this] (const std::set<LimbID>& givenLimbs) {
+				// We want to find out if we have been placed on the left or
+            	// right side of our end of the field.
 
         		auto headCommand = std::make_unique<SoccerObjectPriority>();
         		headCommand->goal = 1;
         		headCommand->searchType = SearchType::GOAL_LEFT;
-        		currentState = State::SearchLeft;
         		emit(std::move(headCommand));
-            	// We want to find out if we have been placed on the left or
-            	// right side of our end of the field.
 
-            	// Look for left goal (For N measurements):
-
-            	//  - Send a head command to search for the left goal
-            	//  - 
-
-            	
+        		// Reset state:
+        		leftGoals.clear();
+        		rightGoals.clear();
+        		currentState = State::SearchLeft;
             },
             [this] (const std::set<LimbID>& takenLimbs) {
 
@@ -122,9 +121,7 @@ namespace localisation {
             }
         }));
 
-
         on<Trigger<SelfUnpenalisation>> ([this](const SelfUnpenalisation&) {
-            
             emit(std::make_unique<ActionPriorites>(ActionPriorites { subsumptionId, { cfg_.priority }}));
         });
 
@@ -133,23 +130,22 @@ namespace localisation {
            	const std::vector<Goal>& goals,
            	const FieldDescription& fieldDescr){
         	//record goals:
-        	if(goals.size() == 2){
+        	if (goals.size() == 2) {
         		bool leftPresent = false;
         		Goal left;
         		bool rightPresent = false;
         		Goal right;
-        		for (auto& g : goals){
-        			if(g.side == Goal::Side::LEFT){
+        		for (auto& g : goals) {
+        			if (g.side == Goal::Side::LEFT) {
         				leftPresent = true;
         				left = g;
-        			}
-        			if(g.side == Goal::Side::RIGHT){
+        			} else if (g.side == Goal::Side::RIGHT) {
         				rightPresent = true;
         				right = g;
         			}
         		}
         		if (rightPresent && leftPresent){
-        			addGoals(left,right);
+        			addGoals(left, right);
         		}
         	}
 
@@ -157,19 +153,19 @@ namespace localisation {
         	bool leftMeasured = leftGoals.size() >= cfg_.number_of_samples;
         	bool rightMeasured = rightGoals.size() >= cfg_.number_of_samples;
 
-        	if(leftMeasured && currentState == State::SearchLeft){
+        	if (leftMeasured && currentState == State::SearchLeft) {
         		auto headCommand = std::make_unique<SoccerObjectPriority>();
         		headCommand->goal = 1;
         		headCommand->searchType = SearchType::GOAL_RIGHT;
-        		currentState = State::SearchRight;
         		emit(std::move(headCommand));
+        		currentState = State::SearchRight;
         	} 
         	
-        	if(rightMeasured && currentState == State::SearchRight){
+        	else if (rightMeasured && currentState == State::SearchRight) {
         		currentState = State::Calculate;
         	}
         	
-        	if(currentState == State::Calculate){
+        	else if (currentState == State::Calculate) {
 
                 ResetType type = calculateSide(leftGoals, rightGoals);
 
@@ -177,6 +173,9 @@ namespace localisation {
                 unpenalisedLocalisationReset(fieldDescr, type);
                 // Relinquish control of the robot:
                 emit(std::make_unique<ActionPriorites>(ActionPriorites { subsumptionId, { 0 }}));
+
+                // Let behaviour know that we're done:
+                emit(std::make_unique<SideCheckingComplete>());
             }
         });
     }
@@ -193,10 +192,13 @@ namespace localisation {
     void SideChecker::addGoals(Goal left, Goal right){
     	bool leftGoalToLeftOfRobot = left.measurements.front().position[1] > 0;
     	bool rightGoalToLeftOfRobot = right.measurements.front().position[1] > 0;
+    	
+    	std::pair<Goal,Goal> goalPair = std::make_pair(left, right);
+
     	if(leftGoalToLeftOfRobot && rightGoalToLeftOfRobot){
-    		leftGoals.push_back(std::pair<Goal,Goal>(left,right));
+    		leftGoals.push_back(goalPair);
     	} else if (!(leftGoalToLeftOfRobot && rightGoalToLeftOfRobot)){
-    		rightGoals.push_back(std::pair<Goal,Goal>(left,right));
+    		rightGoals.push_back(goalPair);
    		}
    	}
 
