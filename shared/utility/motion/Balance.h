@@ -52,6 +52,9 @@ namespace motion {
         float translationDGainY = 0;
         float translationDGainZ = 0;
 
+        float ankleRotationScale = 0;
+        float hipRotationScale = 0;
+
         //State
         float dPitch = 0;
         float dRoll = 0;
@@ -61,7 +64,7 @@ namespace motion {
         utility::math::geometry::UnitQuaternion lastErrorQuaternion;
         NUClear::clock::time_point lastBalanceTime;
     public:
-        void configure(const YAML::Node& config);        
+        void configure(const YAML::Node& config);
         void balance(utility::math::matrix::Transform3D& footToTorso, const messages::input::LimbID& leg, const messages::input::Sensors& sensors);
     };
 

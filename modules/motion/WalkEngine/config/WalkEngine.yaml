@@ -73,6 +73,10 @@ walk_cycle:
     amplitude: 1.0
     weight: 0.7
     offset: 0 * pi / 180
+
+    hip_rotation_scale: 2.0
+    ankle_rotation_scale: 0.5
+
     angle_gain:
       p: 0.5
       i: 0.0
@@ -106,7 +110,7 @@ walk_cycle:
       # -
       #   id: "ANKLE_ROLL"
       #   p: 100
-      
+
     # Support bias parameters to reduce backlash-based instability
     # velFastForward: 0.05
     # velFastTurn: 0.15
