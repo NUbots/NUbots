@@ -95,37 +95,41 @@ namespace modules {
                 });
 
                 on<Trigger<messages::support::ConfigurationConfiguration>>([this](const messages::support::ConfigurationConfiguration& command) {
+                    try {
+                        // Check if we have already loaded this type's handler
+                        if (loaded.find(command.requester) == std::end(loaded)) {
+                            // We have now loaded the type
+                            loaded.insert(command.requester);
 
-                    // Check if we have already loaded this type's handler
-                    if (loaded.find(command.requester) == std::end(loaded)) {
-                        // We have now loaded the type
-                        loaded.insert(command.requester);
+                            std::string fullPath = BASE_CONFIGURATION_PATH + command.configPath;
+                            auto& handlers = handler[fullPath];
 
-                        std::string fullPath = BASE_CONFIGURATION_PATH + command.configPath;
-                        auto& handlers = handler[fullPath];
+                            if (utility::file::isDir(fullPath)) {
+                                // Make sure fullPath has a trailing /
+                                if (!utility::strutil::endsWith(fullPath, "/")) {
+                                    fullPath += "/";
+                                }
 
-                        if (utility::file::isDir(fullPath)) {
-                            // Make sure fullPath has a trailing /
-                            if (!utility::strutil::endsWith(fullPath, "/")) {
-                                fullPath += "/";
+                                // If this is the first type watching this config dir, add a watch
+                                // on the directory
+                                if (handlers.empty()) {
+                                    watchDir(fullPath);
+                                }
+
+                                // Load all the config files in the given directory
+                                loadDir(fullPath, command.initialEmitter);
+                            }
+                            else {
+                                auto lastSlashIndex = command.configPath.rfind('/');
+                                auto fileName = command.configPath.substr(lastSlashIndex == std::string::npos ? 0 : lastSlashIndex);
+                                command.initialEmitter(this, fileName, YAML::Node(buildConfigurationNode(fullPath)));
                             }
 
-                            // If this is the first type watching this config dir, add a watch
-                            // on the directory
-                            if (handlers.empty()) {
-                                watchDir(fullPath);
-                            }
-
-                            // Load all the config files in the given directory
-                            loadDir(fullPath, command.initialEmitter);
+                            handlers.push_back(command.emitter);
                         }
-                        else {
-                            auto lastSlashIndex = command.configPath.rfind('/');
-                            auto fileName = command.configPath.substr(lastSlashIndex == std::string::npos ? 0 : lastSlashIndex);
-                            command.initialEmitter(this, fileName, YAML::Node(buildConfigurationNode(fullPath)));
-                        }
-
-                        handlers.push_back(command.emitter);
+                    }
+                    catch (...) {
+                        NUClear::log<NUClear::FATAL>("Error loading config file:", command.configPath);
                     }
                 });
 
