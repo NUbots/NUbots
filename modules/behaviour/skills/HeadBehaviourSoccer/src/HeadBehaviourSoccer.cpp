@@ -239,7 +239,6 @@ namespace modules {
                     if(headSearcher.newGoal()){
                         //Emit result
                         arma::vec2 direction = headSearcher.getState();
-                        log("search direction", direction);
                         std::unique_ptr<HeadCommand> command = std::make_unique<HeadCommand>();
                         command->yaw = direction[0];
                         command->pitch = direction[1];
