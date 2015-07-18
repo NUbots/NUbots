@@ -11,10 +11,10 @@ fractional_angular_update_threshold: 0.1
 fixation_time_ms: 500
 
 #Time before replanning of search when already searching
-replan_search_timeout_ms: 5000
+replan_search_timeout_ms: 20000
 
 initial:
-  priority: 
+  priority:
     ball: 1
     goal: 0
 
@@ -24,37 +24,37 @@ searches:
     #Points in normalised view space. [1,1] corresponds to looking up to the right as far as allowed, relative to the allowed head angles
     points:
       #upper then lower
-      - [-1,-0.5] 
+      - [-1,-0.5]
       - [-1,0]
       - [-0.5,0]
-      - [-0.5,-1] 
-      - [-0.25,-1] 
+      - [-0.5,-1]
+      - [-0.25,-1]
       - [-0.25,0]
       - [0,0]
-      - [0,-1] 
-      - [0.25,-1] 
+      - [0,-1]
+      - [0.25,-1]
       - [0.25,0]
       - [0.5,0]
-      - [0.5,-1] 
-      - [1,-0.5] 
+      - [0.5,-1]
+      - [1,-0.5]
       - [1,0]
 
-      # - [1,-0.5] 
-      # - [0.5,-1] 
+      # - [1,-0.5]
+      # - [0.5,-1]
       # - [0.5,0]
       # - [0.25,0]
-      # - [0.25,-1] 
-      # - [0,-1] 
+      # - [0.25,-1]
+      # - [0,-1]
       # - [-1,0]
       # - [0,0]
       # - [-0.25,0]
-      # - [-0.25,-1] 
-      # - [-0.5,-1] 
+      # - [-0.25,-1]
+      # - [-0.5,-1]
       # - [-0.5,0]
       # - [-1,0]
   - search_type: "FIND_ADDITIONAL_OBJECTS"
     #Points for this search are relative to the padded bounding box containing the already visible objects
-    points: 
+    points:
       - [-1,-1]
       - [0,-1]
       - [1,-1]
@@ -63,18 +63,18 @@ searches:
       - [-1,0]
   - search_type: "GOAL_LEFT"
     #Points for this search are relative to the padded bounding box containing the already visible objects
-    points: 
+    points:
       - [0.5,0]
   - search_type: "GOAL_RIGHT"
     #Points for this search are relative to the padded bounding box containing the already visible objects
-    points: 
+    points:
       - [-0.5,0]
   - search_type: "GROUND_LEFT"
     #Points for this search are relative to the padded bounding box containing the already visible objects
-    points: 
+    points:
       - [0.5,-1]
   - search_type: "GROUND_RIGHT"
     #Points for this search are relative to the padded bounding box containing the already visible objects
-    points: 
+    points:
       - [-0.5,-1]
 
