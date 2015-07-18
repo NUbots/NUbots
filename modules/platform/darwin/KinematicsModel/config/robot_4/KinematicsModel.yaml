@@ -12,7 +12,7 @@ leg:
         length: 0.094 # rough
         toe_length: 0.0472 # measured
 head:
-    camera_declination_angle_offset: 0.162
+    camera_declination_angle_offset: 0.0
     neck_to_camera: [0.036, 0, 0.028] # [x, y, z]
     neck:
         length: 0.042
