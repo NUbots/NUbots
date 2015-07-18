@@ -28,6 +28,8 @@
 #include "utility/math/matrix/Transform3D.h"
 #include "utility/math/geometry/Quad.h"
 #include "utility/math/vision.h"
+#include "messages/motion/GetupCommand.h"
+#include "utility/nubugger/NUhelpers.h"
 #include "utility/support/yaml_armadillo.h"
 
 #include "utility/nubugger/NUhelpers.h"
@@ -47,7 +49,10 @@ namespace modules {
         using messages::localisation::Self;
         using messages::input::Sensors;
         using messages::motion::HeadCommand;
+
         using messages::input::CameraParameters;
+        using messages::motion::ExecuteGetup;
+        using messages::motion::KillGetup;
 
         using utility::math::coordinates::sphericalToCartesian;
         using utility::motion::kinematics::calculateHeadJoints;
@@ -93,6 +98,8 @@ namespace modules {
                     ballPriority = config["initial"]["priority"]["ball"].as<int>();
                     goalPriority = config["initial"]["priority"]["goal"].as<int>();
 
+                    replan_search_timeout_ms = config["replan_search_timeout_ms"].as<float>();
+
                     //Load searches:
                     for(auto& search : config["searches"]){
                         SearchType s = searchTypeFromString(search["search_type"].as<std::string>());
@@ -104,6 +111,20 @@ namespace modules {
 
 
                 });
+
+
+                // TODO: remove this horrible code
+                // Check to see if we are currently in the process of getting up.
+                on<Trigger<ExecuteGetup>>([this](const ExecuteGetup&) {
+                    isGettingUp = true;
+                });
+
+                // Check to see if we have finished getting up.
+                on<Trigger<KillGetup>>([this](const KillGetup&) {
+                    isGettingUp = false;
+
+                });
+
 
                 on<Trigger<CameraParameters>>("Head Behaviour - Load CameraParameters",[this] (const CameraParameters& cam_){
                     cam = cam_;
@@ -201,8 +222,15 @@ namespace modules {
                         lastCentroid = {99999,99999};//reset centroid to impossible value to trigger reset TODO: find a better way
                     }
 
-                    if(updatePlan){
+                    else if(lostAndSearching && std::chrono::duration_cast<std::chrono::milliseconds>(now - timeLastLostPlan).count() > replan_search_timeout_ms){
+                        updatePlan = true;
+                        lastCentroid = {99999,99999};//reset centroid to impossible value to trigger reset TODO: find a better way
+                    }
 
+                    if(updatePlan && !isGettingUp){
+                        if(search){
+                            timeLastLostPlan = now;
+                        }
                         updateHeadPlan(fixationObjects, search, sensors, headToIMUSpace);
                     }
 
@@ -212,9 +240,13 @@ namespace modules {
                     if(headSearcher.newGoal()){
                         //Emit result
                         arma::vec2 direction = headSearcher.getState();
+                        log("search direction", direction);
                         std::unique_ptr<HeadCommand> command = std::make_unique<HeadCommand>();
                         command->yaw = direction[0];
                         command->pitch = direction[1];
+                        if(lost){
+
+                        }
                         command->robotSpace = false;
                         emit(std::move(command));
                     }

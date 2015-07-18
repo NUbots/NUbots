@@ -10,6 +10,9 @@ fractional_angular_update_threshold: 0.1
 #Time between saccades
 fixation_time_ms: 1000
 
+#Time before replanning of search when already searching
+replan_search_timeout_ms: 2000
+
 initial:
   priority: 
     ball: 1
@@ -20,25 +23,24 @@ searches:
     search_type: "LOST"
     #Points in normalised view space. [1,1] corresponds to looking up to the right as far as allowed, relative to the allowed head angles
     points:
-      #lower look
-      - [-1,-0.5]
-      - [-0.75,-0.25]
-      - [-0.5,-1]
-      - [-0.25,-1]
-      - [0,-1]
-      - [0.25,-1]
-      - [0.5,-1]
-      - [0.75,-0.25]
-      - [1,-0.5]
-      #upper
+      #upper then lower
+      - [-1,-0.5] 
       - [-1,0]
+      - [-0.75,-0.25] 
       - [-0.75,0]
+      - [-0.5,-1] 
       - [-0.5,0]
+      - [-0.25,-1] 
       - [-0.25,0]
+      - [0,-1] 
       - [0,0]
+      - [0.25,-1] 
       - [0.25,0]
+      - [0.5,-1] 
       - [0.5,0]
+      - [0.75,-0.25] 
       - [0.75,0]
+      - [1,-0.5] 
       - [1,0]
   - search_type: "FIND_ADDITIONAL_OBJECTS"
     #Points for this search are relative to the padded bounding box containing the already visible objects
