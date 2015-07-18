@@ -21,6 +21,7 @@
 #define UTILITY_MOTION_KINEMATICS_ROBOTMODELS_H
 
 #include <armadillo>
+#include <array>
 
 namespace utility{
     namespace motion{
@@ -36,98 +37,76 @@ namespace utility{
 
                 class Leg {
                 public:
-                    static constexpr float HIP_OFFSET_X = 0.00; //DARWIN SAYS THIS IS 0.008
-                    static constexpr float HIP_OFFSET_Y = 0.037; //DARWIN SAYS THIS IS 0.008
-                    static constexpr float HIP_OFFSET_Z = 0.034;
-                    static constexpr float UPPER_LEG_LENGTH = 0.093;
-                    static constexpr float LOWER_LEG_LENGTH = 0.093;
-                    static constexpr float FOOT_HEIGHT = 0.0335;
+                    static float HIP_OFFSET_X;
+                    static float HIP_OFFSET_Y;
+                    static float HIP_OFFSET_Z;
+                    static float UPPER_LEG_LENGTH;
+                    static float LOWER_LEG_LENGTH;
+                    static float FOOT_HEIGHT;
 
-                    static constexpr float FOOT_LENGTH = 0.094; // rough
-                    static constexpr float TOE_LENGTH = 0.0472; //measured
-                    static constexpr float HEEL_LENGTH = 0.0451; //measured
+                    static float FOOT_LENGTH;
+                    static float TOE_LENGTH;
+                    static float HEEL_LENGTH;
 
-                    static constexpr float FOOT_WIDTH = 0.066; // rough
-                    static constexpr float FOOT_CENTRE_TO_ANKLE_CENTRE = 0.011; // rough
+                    static float FOOT_WIDTH;
+                    static float FOOT_CENTRE_TO_ANKLE_CENTRE;
 
-                    static constexpr float LENGTH_BETWEEN_LEGS = HIP_OFFSET_Y * 2;
+                    static float LENGTH_BETWEEN_LEGS;
 
-                    static constexpr int LEFT_TO_RIGHT_HIP_YAW =       -1;
-                    static constexpr int LEFT_TO_RIGHT_HIP_ROLL =      -1;
-                    static constexpr int LEFT_TO_RIGHT_HIP_PITCH =      1;
-                    static constexpr int LEFT_TO_RIGHT_KNEE =           1;
-                    static constexpr int LEFT_TO_RIGHT_ANKLE_PITCH =    1;
-                    static constexpr int LEFT_TO_RIGHT_ANKLE_ROLL =    -1;
+                    static int LEFT_TO_RIGHT_HIP_YAW;
+                    static int LEFT_TO_RIGHT_HIP_ROLL;
+                    static int LEFT_TO_RIGHT_HIP_PITCH;
+                    static int LEFT_TO_RIGHT_KNEE;
+                    static int LEFT_TO_RIGHT_ANKLE_PITCH;
+                    static int LEFT_TO_RIGHT_ANKLE_ROLL;
                 };
 
                 class Head {
                 public:
-                    static constexpr float NECK_BASE_POS_FROM_ORIGIN_X = 0.013;
-                    static constexpr float NECK_BASE_POS_FROM_ORIGIN_Y = 0;
-                    static constexpr float NECK_BASE_POS_FROM_ORIGIN_Z = 0.11;
-                    static constexpr float NECK_LENGTH = 0.042;
-                    static constexpr float NECK_TO_CAMERA_X = 0.036;
-                    static constexpr float NECK_TO_CAMERA_Y = 0;
-                    static constexpr float NECK_TO_CAMERA_Z = 0.028;
-                    static constexpr float CAMERA_DECLINATION_ANGLE_OFFSET = 0.162;
+                    static float NECK_BASE_POS_FROM_ORIGIN_X;
+                    static float NECK_BASE_POS_FROM_ORIGIN_Y;
+                    static float NECK_BASE_POS_FROM_ORIGIN_Z;
+                    static float NECK_LENGTH;
+                    static float NECK_TO_CAMERA_X;
+                    static float NECK_TO_CAMERA_Y;
+                    static float NECK_TO_CAMERA_Z;
+                    static float CAMERA_DECLINATION_ANGLE_OFFSET;
                     //Head movement limits
-                    static constexpr float MAX_YAW = M_PI * 2 / 3;
-                    static constexpr float MIN_YAW = -M_PI * 2 / 3;
-                    static constexpr float MAX_PITCH = M_PI / 3;
-                    static constexpr float MIN_PITCH = -M_PI / 3;
+                    static float MAX_YAW;
+                    static float MIN_YAW;
+                    static float MAX_PITCH;
+                    static float MIN_PITCH;
                 };
 
-                class Arm {//ROUGH MEASUREMENTS
+                // ROUGH MEASUREMENTS
+                class Arm {
                 public:
-                    static constexpr float DISTANCE_BETWEEN_SHOULDERS = 0.114;
-                    static constexpr float SHOULDER_Z_OFFSET = 0.088;
-                    static constexpr float SHOULDER_X_OFFSET = 0.01;
+                    static float DISTANCE_BETWEEN_SHOULDERS;
+                    static float SHOULDER_Z_OFFSET;
+                    static float SHOULDER_X_OFFSET;
 
-                    static constexpr float SHOULDER_LENGTH = 0.017;
-                    static constexpr float SHOULDER_WIDTH = 0.0245;
-                    static constexpr float SHOULDER_HEIGHT = 0;
+                    static float SHOULDER_LENGTH;
+                    static float SHOULDER_WIDTH;
+                    static float SHOULDER_HEIGHT;
 
-                    static constexpr float UPPER_ARM_LENGTH = 0.0615;
-                    static constexpr float UPPER_ARM_Y_OFFSET = 0;
-                    static constexpr float UPPER_ARM_Z_OFFSET = 0.02;   //Very rough
+                    static float UPPER_ARM_LENGTH;
+                    static float UPPER_ARM_Y_OFFSET;
+                    static float UPPER_ARM_Z_OFFSET;
 
-                    static constexpr float LOWER_ARM_LENGTH = 0.13;
-                    static constexpr float LOWER_ARM_Y_OFFSET = 0;
-                    static constexpr float LOWER_ARM_Z_OFFSET = 0;  //Very rough
+                    static float LOWER_ARM_LENGTH;
+                    static float LOWER_ARM_Y_OFFSET;
+                    static float LOWER_ARM_Z_OFFSET;
 
 
                 };
 
                 class MassModel {
                 public:
-                    static constexpr size_t NUMBER_OF_MASSES = 21;
-                    static constexpr size_t MASS_REPRESENTATION_DIMENSION = 4;
-                    static constexpr double masses[NUMBER_OF_MASSES][MASS_REPRESENTATION_DIMENSION] = {
-                        {-0.011264,         0.0109774,      -0.00139357,    0.025913},  //  R_SHOULDER_PITCH
-                        {-0.011264,         -0.0109774,     -0.00139357,    0.025913},  //  L_SHOULDER_PITCH
-                        {-0.025261,         -0.000659787,   0.000734065,    0.168377},  //  R_SHOULDER_ROLL
-                        {-0.025261,         0.000659787,    0.000734065,    0.168377},  //  L_SHOULDER_ROLL
-                        {-0.0841618,        -0.00666564,    -0.0134901,     0.0592885}, //  R_ELBOW
-                        {-0.0841618,        0.00666564,     -0.0134901,     0.0592885}, //  L_ELBOW
-                        {-0.0155628,        0,              0.000480135,    0.0270692}, //  R_HIP_YAW
-                        {-0.0155628,        0,              0.000480135,    0.0270692}, //  L_HIP_YAW
-                        {0.0138731,         -7.99828e-005,  -0.0182424,     0.167108},  //  R_HIP_ROLL
-                        {0.0138731,         7.99828e-005,   -0.0182424,     0.167108},  //  L_HIP_ROLL
-                        {-0.0300345,        0.000322635,    0.000691906,    0.119043},  //  R_HIP_PITCH
-                        {-0.0300345,        -0.000322635,   0.000691906,    0.119043},  //  L_HIP_PITCH
-                        {-0.0539545,        0.000592469,    0.00654763,     0.0703098}, //  R_KNEE
-                        {-0.0539545,        -0.000592469,   0.00654763,     0.0703098}, //  L_KNEE
-                        {-0.0138731,        0.000213732,    -0.0185361,     0.167108},  //  R_ANKLE_PITCH
-                        {-0.0138731,        -0.000213732,   -0.0185361,     0.167108},  //  L_ANKLE_PITCH
-                        {0.0259953,         -0.00950588,    -0.000502877,   0.0794462}, //  R_ANKLE_ROLL
-                        {0.0259953,         0.00950588,     -0.000502877,   0.0794462}, //  L_ANKLE_ROLL
-                        {-0.0165676,        0.00142428,     0.000712811,    0.0243577}, //  HEAD_YAW
-                        {-0.035,                     0,           0.01,      0.11708},  //  HEAD_PITCH
-                        {-0.0066631,        -0.00311589,      0.0705563,      0.975599}   //  TORSO
-                    };
+                    static std::array<arma::vec4, 21> masses;
 
                 };
-                static constexpr float TEAMDARWINCHEST_TO_ORIGIN = 0.096 - Leg::HIP_OFFSET_Z; //Taken from team darwin OPkinematics.cpp : hipOffsetZ = .096;
+
+                static float TEAMDARWINCHEST_TO_ORIGIN;
             };
 
         }
