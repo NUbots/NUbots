@@ -105,7 +105,11 @@ namespace planning {
             if(secondsSinceLastSeen < cfg.seconds_not_seen_limit
                 && kickValid(ballPosition, params.stand_height, sensors)
                      && KickAngle < cfg.kick_forward_angle_limit) {
-                    emit(std::make_unique<KickCommand>(KickCommand{{0.1,0.04,0}, {1, 0, 0} }));
+                    if(ballPosition[1] > 0){
+                        emit(std::make_unique<KickCommand>(KickCommand{{0.1,0.04,0}, {1, 0, 0} }));
+                    } else {
+                        emit(std::make_unique<KickCommand>(KickCommand{{0.1,-0.04,0}, {1, 0, 0} }));
+                    }
             }
 
         });
