@@ -122,7 +122,6 @@ namespace modules {
                 // Check to see if we have finished getting up.
                 on<Trigger<KillGetup>>([this](const KillGetup&) {
                     isGettingUp = false;
-
                 });
 
 
@@ -293,8 +292,10 @@ namespace modules {
 
                 // arma::vec3 lookVectorFromHead = objectDirectionFromScreenAngular(screenAngles);
                 arma::vec3 lookVectorFromHead = sphericalToCartesian({1,screenAngles[0],screenAngles[1]});//This is an approximation relying on the robots small FOV
+                //Remove pitch from matrix  
+                Rotation3D yawlessheadToIMUSpace = Rotation3D::createRotationY(-headToIMUSpace.yaw()) * headToIMUSpace;
                 //Rotate target angles to World space
-                arma::vec3 lookVector = headToIMUSpace * lookVectorFromHead;
+                arma::vec3 lookVector = yawlessheadToIMUSpace * lookVectorFromHead;
                 //Compute inverse kinematics for head direction angles
                 std::vector< std::pair<ServoID, float> > goalAngles = calculateHeadJoints<DarwinModel>(lookVector);
 
