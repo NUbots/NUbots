@@ -25,7 +25,7 @@ ADD_ROLE(
 
     # Behaviour
     behaviour::Controller
-    behaviour::skills::Stand
+    behaviour::skills::WalkEngineStand
     behaviour::skills::FallingRelax
     behaviour::skills::Getup
     behaviour::skills::DirectWalkController

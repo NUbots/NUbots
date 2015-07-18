@@ -40,15 +40,16 @@ namespace skills {
     using messages::motion::DisableWalkEngineCommand;
     using messages::input::LimbID;
     using messages::input::ServoID;
-	
+
 	//internal only callback messages to start and stop our action
     // struct ExecuteStand {};
 
     WalkEngineStand::WalkEngineStand(std::unique_ptr<NUClear::Environment> environment)
-    : Reactor(std::move(environment)) {
+    : Reactor(std::move(environment))
+    , subsumptionId(size_t(this) * size_t(this) - size_t(this)) {
 
 		emit<Scope::INITIALIZE>(std::make_unique<RegisterAction>(RegisterAction {
-            id,
+            subsumptionId,
             "WalkEngineStand",
             { std::pair<float, std::set<LimbID>>(std::numeric_limits<float>::epsilon(), { LimbID::LEFT_LEG, LimbID::RIGHT_LEG, LimbID::LEFT_ARM, LimbID::RIGHT_ARM}) },
             [this] (const std::set<LimbID>&) {
@@ -60,13 +61,13 @@ namespace skills {
             },
             [this] (const std::set<ServoID>&) { }
         }));
- 
+
         on<Trigger<Configuration<WalkEngineStand>>>([this] (const Configuration<WalkEngineStand>& config) {
             // Use configuration here from file WalkEngineStand.yaml
         });
 
         // on<Trigger<ExecuteStand>>([this] (const ExecuteStand&) {
-            
+
         // });
     }
 }
