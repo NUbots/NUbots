@@ -76,8 +76,12 @@ namespace modules {
             });
 
             on< Trigger<HeadCommand>>("Head Controller - Register Head Command", [this](const HeadCommand& command){
-                goalAngles = {command.yaw, -command.pitch};
                 goalRobotSpace = command.robotSpace;
+                if(goalRobotSpace) {
+                    goalAngles = {command.yaw, command.pitch};
+                } else {
+                    goalAngles = {command.yaw, -command.pitch};
+                }
             });
 
             updateHandle = on< Trigger<Sensors>, Options<Single, Priority<NUClear::HIGH>> >("Head Controller - Update Head Position",[this] (const Sensors& sensors) {
