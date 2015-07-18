@@ -1,41 +1,40 @@
-darwin_model:
-    leg:
-        # darwin says this is [0.008, 0.008, 0.034]
-        hip_offset: [0.00, 0.037, 0.034] # [x, y, z]
-        upper_leg_length: 0.093
-        lower_leg_length: 0.093
-        heel_length: 0.0451 # measured
-        foot_centre_to_ankle_centre: 0.011 # rough
-        # length_between_legs: hip_offset[1] * 2
-        foot:
-            width: 0.066 # rough
-            height: 0.0335
-            length: 0.094 # rough
-            toe_length: 0.0472 # measured
-    head:
-        camera_declination_angle_offset: 0.162
-        neck_to_camera: [0.036, 0, 0.028] # [x, y, z]
-        neck:
-            length: 0.042
-            base_position_from_origin: [0.013, 0, 0.11] # [x, y, z]
-        # head movement limits
-        limits:
-            yaw: [-M_PI * 2 / 3, M_PI * 2 / 3] # [min_yaw, max_yaw]
-            pitch: [-M_PI / 3, M_PI / 3] # [min_pitch, max_pitch]
-    # rough measurements
-    arm:
-        distance_between_shoulders: 0.114 # distance between shoulders
-        shoulder: 
-            length: 0.017
-            width: 0.0245
-            height: 0
-            offset: [0.01, 0.088] # [x, z]
-        upper_arm:
-            length: 0.0615
-            offset: [0, 0.02] # [y, z] very rough
-        lower_arm:
-            length: 0.13
-            offset: [0, 0] # [y, z] very rough
+leg:
+    # darwin says this is [0.008, 0.008, 0.034]
+    hip_offset: [0.00, 0.037, 0.034] # [x, y, z]
+    upper_leg_length: 0.093
+    lower_leg_length: 0.093
+    heel_length: 0.0451 # measured
+    foot_centre_to_ankle_centre: 0.011 # rough
+    # length_between_legs: hip_offset[1] * 2
+    foot:
+        width: 0.066 # rough
+        height: 0.0335
+        length: 0.094 # rough
+        toe_length: 0.0472 # measured
+head:
+    camera_declination_angle_offset: 0.162
+    neck_to_camera: [0.036, 0, 0.028] # [x, y, z]
+    neck:
+        length: 0.042
+        base_position_from_origin: [0.013, 0, 0.11] # [x, y, z]
+    # head movement limits
+    limits:
+        yaw: [-M_PI * 2 / 3, M_PI * 2 / 3] # [min_yaw, max_yaw]
+        pitch: [-M_PI / 3, M_PI / 3] # [min_pitch, max_pitch]
+# rough measurements
+arm:
+    distance_between_shoulders: 0.114 # distance between shoulders
+    shoulder: 
+        length: 0.017
+        width: 0.0245
+        height: 0
+        offset: [0.01, 0.088] # [x, z]
+    upper_arm:
+        length: 0.0615
+        offset: [0, 0.02] # [y, z] very rough
+    lower_arm:
+        length: 0.13
+        offset: [0, 0] # [y, z] very rough
 mass_model:
     number_of_masses: 21
     mass_representation_dimension: 4

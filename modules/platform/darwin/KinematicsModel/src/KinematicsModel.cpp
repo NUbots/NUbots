@@ -19,95 +19,95 @@
 
 #include "KinematicsModel.h"
 
-#include "messages/support/Configuration.h"
 #include "utility/support/yaml_armadillo.h"
 #include "utility/support/yaml_expression.h"
+
+#include "utility/motion/RobotModels.h"
 
 namespace modules {
 namespace platform {
 namespace darwin {
 
     using messages::support::Configuration;
-    using utility::support::Expression;
-
     using messages::platform::darwin::DarwinKinematicsModel;
+
+    using utility::support::Expression;
+    using utility::motion::kinematics::DarwinModel;
 
     KinematicsModel::KinematicsModel(std::unique_ptr<NUClear::Environment> environment)
     : Reactor(std::move(environment)) {
 
         on<Trigger<Configuration<KinematicsModel>>>([this] (const Configuration<KinematicsModel>& config) {
-        	DarwinKinematicsModel model;
-
-        	model.dimensions = configureDimensions(config["dimensions"]);
-        	model.massModel = configureMassModel(config["mass_model"]);
-
-			emit(std::make_unique<DarwinKinematicsModel>(model));
+        	DarwinKinematicsModel darwinKinematicsModel;
+        	configure(darwinKinematicsModel, config);
+			emit(std::make_unique<DarwinKinematicsModel>(darwinKinematicsModel));
         });
     }
 
-    DarwinKinematicsModel::Dimensions KinematicsModel::configureDimensions (const YAML::Node& objDarwinModel) {
-    	DarwinKinematicsModel::Dimensions darwinModel;
+    void KinematicsModel::configure (DarwinKinematicsModel& darwinModel, const Configuration<KinematicsModel>& objDarwinModel) {
+        configureLeg(darwinModel.leg, objDarwinModel["leg"]);
+        configureHead(darwinModel.head, objDarwinModel["head"]);
+        configureArm(darwinModel.arm, objDarwinModel["arm"]);
 
-        auto& leg = darwinModel.leg;
-        auto& objLeg = objDarwinModel["leg"];
+		darwinModel.teamDarwinChestToOrigin = 0.096 - darwinModel.leg.hipOffset[2];
+
+        configureMassModel(darwinModel.massModel, objDarwinModel["mass_model"]);
+
+    }
+
+    void KinematicsModel::configureLeg (DarwinKinematicsModel::Leg& leg, const YAML::Node& objLeg) {
         leg.hipOffset = objLeg["hip_offset"].as<arma::vec3>();
-		leg.upperLegLength = objLeg["upper_leg_length"].as<Expression>();
-		leg.lowerLegLength = objLeg["lower_leg_length"].as<Expression>();
-		leg.heelLength = objLeg["heel_length"].as<Expression>();
-		leg.lengthBetweenLegs = leg.hipOffset[1] * 2;
-		leg.footCentreToAnkleCentre = objLeg["foot_centre_to_ankle_centre"].as<Expression>();
+        leg.upperLegLength = objLeg["upper_leg_length"].as<Expression>();
+        leg.lowerLegLength = objLeg["lower_leg_length"].as<Expression>();
+        leg.heelLength = objLeg["heel_length"].as<Expression>();
+        leg.lengthBetweenLegs = leg.hipOffset[1] * 2;
+        leg.footCentreToAnkleCentre = objLeg["foot_centre_to_ankle_centre"].as<Expression>();
 
-		auto& foot = leg.foot;
-		auto& objFoot = objLeg["foot"];
-		foot.width = objFoot["width"].as<Expression>();
-		foot.height = objFoot["height"].as<Expression>();
-		foot.length = objFoot["length"].as<Expression>();
-		foot.toeLength = objFoot["toe_length"].as<Expression>();
+        auto& foot = leg.foot;
+        auto& objFoot = objLeg["foot"];
+        foot.width = objFoot["width"].as<Expression>();
+        foot.height = objFoot["height"].as<Expression>();
+        foot.length = objFoot["length"].as<Expression>();
+        foot.toeLength = objFoot["toe_length"].as<Expression>();
+    }
 
-        auto& head = darwinModel.head;
-        auto& objHead = objDarwinModel["head"];
+    void KinematicsModel::configureHead (DarwinKinematicsModel::Head& head, const YAML::Node& objHead) {
         head.cameraDeclinationAngleOffset = objHead["camera_declination_angle_offset"].as<Expression>();
         head.neckToCamera = objHead["neck_to_camera"].as<arma::vec3>();
 
         auto& neck = head.neck;
         auto& objNeck = objHead["neck"];
         neck.length = objNeck["length"].as<Expression>();
-		neck.basePositionFromOrigin = objNeck["base_position_from_origin"].as<arma::vec3>();
+        neck.basePositionFromOrigin = objNeck["base_position_from_origin"].as<arma::vec3>();
 
-		auto& headMovementLimits = head.headMovementLimits;
+        auto& headMovementLimits = head.headMovementLimits;
         auto& objHeadMovementLimits = objHead["limits"];
-		headMovementLimits.yaw = objHeadMovementLimits["yaw"].as<arma::vec2>();
-		headMovementLimits.pitch = objHeadMovementLimits["pitch"].as<arma::vec2>();
-        
-        auto& arm = darwinModel.arm;
-        auto& objArm = objDarwinModel["arm"];
-        arm.distanceBetweenShoulders = objArm["distance_between_shoulders"].as<Expression>();
-
-		auto& shoulder = arm.shoulder;
-		auto& objShoulder = objArm["shoulder"];
-		shoulder.length = objShoulder["length"].as<Expression>();
-		shoulder.width = objShoulder["width"].as<Expression>();
-		shoulder.height = objShoulder["height"].as<Expression>();
-		shoulder.offset = objShoulder["offset"].as<arma::vec2>();
-
-		auto& upperArm = arm.upperArm;
-		auto& objUpperArm = objArm["upper_arm"];
-		upperArm.length = objUpperArm["length"].as<Expression>();
-		upperArm.offset = objUpperArm["offset"].as<arma::vec2>();
-
-		auto& lowerArm = arm.lowerArm;
-		auto& objLowerArm = objArm["lower_arm"];
-		lowerArm.length = objLowerArm["length"].as<Expression>();
-		lowerArm.offset = objLowerArm["offset"].as<arma::vec2>();
-
-		darwinModel.teamDarwinChestToOrigin = 0.096 - leg.hipOffset[2];
-
-		return darwinModel;
+        headMovementLimits.yaw = objHeadMovementLimits["yaw"].as<arma::vec2>();
+        headMovementLimits.pitch = objHeadMovementLimits["pitch"].as<arma::vec2>();
     }
 
-    DarwinKinematicsModel::MassModel KinematicsModel::configureMassModel (const YAML::Node& objMassModel) {
-    	DarwinKinematicsModel::MassModel massModel;
+    void KinematicsModel::configureArm (DarwinKinematicsModel::Arm& arm, const YAML::Node& objArm) {
+        arm.distanceBetweenShoulders = objArm["distance_between_shoulders"].as<Expression>();
 
+        auto& shoulder = arm.shoulder;
+        auto& objShoulder = objArm["shoulder"];
+        shoulder.length = objShoulder["length"].as<Expression>();
+        shoulder.width = objShoulder["width"].as<Expression>();
+        shoulder.height = objShoulder["height"].as<Expression>();
+        shoulder.offset = objShoulder["offset"].as<arma::vec2>();
+
+        auto& upperArm = arm.upperArm;
+        auto& objUpperArm = objArm["upper_arm"];
+        upperArm.length = objUpperArm["length"].as<Expression>();
+        upperArm.offset = objUpperArm["offset"].as<arma::vec2>();
+
+        auto& lowerArm = arm.lowerArm;
+        auto& objLowerArm = objArm["lower_arm"];
+        lowerArm.length = objLowerArm["length"].as<Expression>();
+        lowerArm.offset = objLowerArm["offset"].as<arma::vec2>();
+    }
+
+    void KinematicsModel::configureMassModel (DarwinKinematicsModel::MassModel& massModel, const YAML::Node& objMassModel) {
     	massModel.numberOfMasses = objMassModel["number_of_masses"].as<Expression>();
         massModel.massRepresentationDimension = objMassModel["mass_representation_dimension"].as<Expression>();
 
@@ -141,8 +141,6 @@ namespace darwin {
         masses.headYaw = objMasses[18].as<arma::vec4>();
 
 		masses.torso = objMasses[20].as<arma::vec4>();
-
-		return massModel;
     }
 
 }

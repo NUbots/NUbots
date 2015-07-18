@@ -28,66 +28,62 @@ namespace darwin {
 
     struct DarwinKinematicsModel {
 
-        struct Dimensions {
+        struct Leg {
+            arma::vec3 hipOffset;
+            float upperLegLength;
+            float lowerLegLength;
+            float heelLength;
+            float lengthBetweenLegs;
+            float footCentreToAnkleCentre;
 
-            struct Leg {
-                arma::vec3 hipOffset;
-                float upperLegLength;
-                float lowerLegLength;
-                float heelLength;
-                float lengthBetweenLegs;
-                float footCentreToAnkleCentre;
+            struct Foot {
+                float width;
+                float height;
+                float length;
+                float toeLength;
+            } foot;
 
-                struct Foot {
-                    float width;
-                    float height;
-                    float length;
-                    float toeLength;
-                } foot;
+        } leg;
 
-            } leg;
+        struct Head {
+            float cameraDeclinationAngleOffset;
+            arma::vec3 neckToCamera;
 
-            struct Head {
-                float cameraDeclinationAngleOffset;
-                arma::vec3 neckToCamera;
+            struct Neck {
+                float length;
+                arma::vec3 basePositionFromOrigin;
+            } neck;
 
-                struct Neck {
-                    float length;
-                    arma::vec3 basePositionFromOrigin;
-                } neck;
+            struct HeadMovementLimits {
+                arma::vec2 yaw;
+                arma::vec2 pitch;
+            } headMovementLimits;
 
-                struct HeadMovementLimits {
-                    arma::vec2 yaw;
-                    arma::vec2 pitch;
-                } headMovementLimits;
+        } head;
 
-            } head;
+        struct Arm {
+            float distanceBetweenShoulders;
 
-            struct Arm {
-                float distanceBetweenShoulders;
+            struct Shoulder {
+                float length;
+                float width;
+                float height;
+                arma::vec2 offset;
+            } shoulder;
 
-                struct Shoulder {
-                    float length;
-                    float width;
-                    float height;
-                    arma::vec2 offset;
-                } shoulder;
+            struct UpperArm {
+                float length;
+                arma::vec2 offset;
+            } upperArm;
 
-                struct UpperArm {
-                    float length;
-                    arma::vec2 offset;
-                } upperArm;
+            struct LowerArm {
+                float length;
+                arma::vec2 offset;
+            } lowerArm;
 
-                struct LowerArm {
-                    float length;
-                    arma::vec2 offset;
-                } lowerArm;
+        } arm;
 
-            } arm;
-
-            float teamDarwinChestToOrigin;
-
-        } dimensions;
+        float teamDarwinChestToOrigin;
 
         struct MassModel {
             uint numberOfMasses;

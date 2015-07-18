@@ -24,6 +24,7 @@
 #include <armadillo>
 #include <yaml-cpp/yaml.h>
 
+#include "messages/support/Configuration.h"
 #include "messages/platform/darwin/KinematicsModel.h"
 
 namespace modules {
@@ -42,8 +43,11 @@ namespace darwin {
 
     private:
 
-    	messages::platform::darwin::DarwinKinematicsModel::Dimensions configureDimensions (const YAML::Node& objDarwinModel);
-    	messages::platform::darwin::DarwinKinematicsModel::MassModel configureMassModel (const YAML::Node& objMassModel);
+    	void configure (messages::platform::darwin::DarwinKinematicsModel& darwinModel, const messages::support::Configuration<KinematicsModel>& objDarwinModel);
+        void configureLeg (messages::platform::darwin::DarwinKinematicsModel::Leg& leg, const YAML::Node& objLeg);
+        void configureHead (messages::platform::darwin::DarwinKinematicsModel::Head& head, const YAML::Node& objHead);
+        void configureArm (messages::platform::darwin::DarwinKinematicsModel::Arm& arm, const YAML::Node& objArm);
+    	void configureMassModel (messages::platform::darwin::DarwinKinematicsModel::MassModel& massModel, const YAML::Node& objMassModel);
 
     };
 
