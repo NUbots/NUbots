@@ -30,16 +30,24 @@ namespace darwin {
     using messages::support::Configuration;
     using utility::support::Expression;
 
+    using messages::platform::darwin::DarwinKinematicsModel;
+
     KinematicsModel::KinematicsModel(std::unique_ptr<NUClear::Environment> environment)
     : Reactor(std::move(environment)) {
 
         on<Trigger<Configuration<KinematicsModel>>>([this] (const Configuration<KinematicsModel>& config) {
-    		configureDarwinModel(config["darwin_model"]);
-    		configureMassModel(config["mass_model"]);
+        	DarwinKinematicsModel model;
+
+        	model.dimensions = configureDimensions(config["dimensions"]);
+        	model.massModel = configureMassModel(config["mass_model"]);
+
+			emit(std::make_unique<DarwinKinematicsModel>(model));
         });
     }
 
-    void KinematicsModel::configureDarwinModel (const YAML::Node& objDarwinModel) {
+    DarwinKinematicsModel::Dimensions KinematicsModel::configureDimensions (const YAML::Node& objDarwinModel) {
+    	DarwinKinematicsModel::Dimensions darwinModel;
+
         auto& leg = darwinModel.leg;
         auto& objLeg = objDarwinModel["leg"];
         leg.hipOffset = objLeg["hip_offset"].as<arma::vec3>();
@@ -93,9 +101,13 @@ namespace darwin {
 		lowerArm.offset = objLowerArm["offset"].as<arma::vec2>();
 
 		darwinModel.teamDarwinChestToOrigin = 0.096 - leg.hipOffset[2];
+
+		return darwinModel;
     }
 
-    void KinematicsModel::configureMassModel (const YAML::Node& objMassModel) {
+    DarwinKinematicsModel::MassModel KinematicsModel::configureMassModel (const YAML::Node& objMassModel) {
+    	DarwinKinematicsModel::MassModel massModel;
+
     	massModel.numberOfMasses = objMassModel["number_of_masses"].as<Expression>();
         massModel.massRepresentationDimension = objMassModel["mass_representation_dimension"].as<Expression>();
 
@@ -129,6 +141,8 @@ namespace darwin {
         masses.headYaw = objMasses[18].as<arma::vec4>();
 
 		masses.torso = objMasses[20].as<arma::vec4>();
+
+		return massModel;
     }
 
 }

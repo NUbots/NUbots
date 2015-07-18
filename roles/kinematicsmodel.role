@@ -5,5 +5,7 @@ ADD_ROLE(
     support::configuration::GlobalConfig
 
     platform::darwin::KinematicsModel
+
+	motion::WalkEngine
     
 )

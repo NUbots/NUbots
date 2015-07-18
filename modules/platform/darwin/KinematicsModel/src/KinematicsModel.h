@@ -24,6 +24,8 @@
 #include <armadillo>
 #include <yaml-cpp/yaml.h>
 
+#include "messages/platform/darwin/KinematicsModel.h"
+
 namespace modules {
 namespace platform {
 namespace darwin {
@@ -31,111 +33,6 @@ namespace darwin {
     class KinematicsModel : public NUClear::Reactor {
 
     public:
-
-    	struct Foot {
-    		float width;
-    		float height;
-    		float length;
-    		float toeLength;
-    	};
-
-    	struct Leg {
-    		arma::vec3 hipOffset;
-    		float upperLegLength;
-    		float lowerLegLength;
-    		float heelLength;
-    		float lengthBetweenLegs;
-    		float footCentreToAnkleCentre;
-    		Foot foot;
-    	};
-
-    	struct Neck {
-    		float length;
-    		arma::vec3 basePositionFromOrigin;
-    	};
-
-    	struct HeadMovementLimits {
-    		arma::vec2 yaw;
-    		arma::vec2 pitch;
-    	};
-
-    	struct Head {
-    		float cameraDeclinationAngleOffset;
-    		arma::vec3 neckToCamera;
-    		Neck neck;
-    		HeadMovementLimits headMovementLimits;
-    	};
-
-    	struct Shoulder {
-    		float length;
-    		float width;
-    		float height;
-    		arma::vec2 offset;
-    	};
-
-    	struct UpperArm {
-    		float length;
-    		arma::vec2 offset;
-    	};
-
-    	struct LowerArm {
-    		float length;
-    		arma::vec2 offset;
-    	};
-
-    	struct Arm {
-    		float distanceBetweenShoulders;
-    		Shoulder shoulder;
-    		UpperArm upperArm;
-    		LowerArm lowerArm;
-    	};
-
-    	struct DarwinModel {
-    		Leg leg;
-    		Head head;
-    		Arm arm;
-    		float teamDarwinChestToOrigin;
-    	};
-
-    	struct Masses {
-    		arma::vec4 leftShoulderRoll;
-    		arma::vec4 rightShoulderRoll;
-
-    		arma::vec4 leftShoulderPitch;
-    		arma::vec4 rightShoulderPitch;
-
-    		arma::vec4 leftElbow;
-    		arma::vec4 rightElbow;
-
-    		arma::vec4 leftHipRoll;
-    		arma::vec4 rightHipRoll;
-
-    		arma::vec4 leftHipPitch;
-    		arma::vec4 rightHipPitch;
-
-    		arma::vec4 leftHipYaw;
-    		arma::vec4 rightHipYaw;
-
-    		arma::vec4 leftKnee;
-    		arma::vec4 rightKnee;
-
-    		arma::vec4 leftAnkleRoll;
-    		arma::vec4 rightAnkleRoll;
-
-    		arma::vec4 leftAnklePitch;
-    		arma::vec4 rightAnklePitch;
-
-    		arma::vec4 headPitch;
-    		arma::vec4 headYaw;
-
-    		arma::vec4 torso;
-    	};
-
-    	struct MassModel {
-    		uint numberOfMasses;
-    		uint massRepresentationDimension;
-    		Masses masses;
-    	};
 
         /// @brief Called by the powerplant to build and setup the KinematicsModel reactor.
         explicit KinematicsModel(std::unique_ptr<NUClear::Environment> environment);
@@ -145,11 +42,8 @@ namespace darwin {
 
     private:
 
-    	void configureDarwinModel (const YAML::Node& objDarwinModel);
-    	void configureMassModel (const YAML::Node& objMassModel);
-
-    	DarwinModel darwinModel;
-    	MassModel massModel;
+    	messages::platform::darwin::DarwinKinematicsModel::Dimensions configureDimensions (const YAML::Node& objDarwinModel);
+    	messages::platform::darwin::DarwinKinematicsModel::MassModel configureMassModel (const YAML::Node& objMassModel);
 
     };
 
