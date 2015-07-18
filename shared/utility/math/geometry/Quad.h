@@ -34,7 +34,7 @@ namespace geometry {
     public:
         Quad();
         Quad(const Quad& other);
-        Quad(const arma::vec2& bottomLeft, const arma::vec2& topLeft, const arma::vec2& topRight, const arma::vec2& bottomRight);
+        Quad(arma::vec2 bottomLeft, arma::vec2 topLeft, arma::vec2 topRight, arma::vec2 bottomRight);
         Quad(int left, int top, int right, int bottom);
 
         /**
@@ -53,7 +53,7 @@ namespace geometry {
          * @param topRight    The top right corner.
          * @param bottomRight The bottom right corner.
          */
-        void set(const arma::vec2& bottomLeft, const arma::vec2& topLeft, const arma::vec2& topRight, const arma::vec2& bottomRight);
+        void set(arma::vec2 bottomLeft, arma::vec2 topLeft, arma::vec2 topRight, arma::vec2 bottomRight);
 
         arma::vec2 getTopCentre() const;                                //! Returns the bottom centre pixel location of the Quad.
         arma::vec2 getBottomCentre() const;                             //! Returns the bottom centre pixel location of the Quad.

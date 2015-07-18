@@ -60,6 +60,7 @@ namespace strategy {
         bool isGettingUp = false;
         bool isDiving = false;
         bool selfPenalised = false;
+        bool isSideChecking = false;
         messages::behaviour::proto::Behaviour::State currentState = messages::behaviour::proto::Behaviour::INIT;
 
         time_t ballLastMeasured;
