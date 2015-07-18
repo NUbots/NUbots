@@ -26,6 +26,7 @@
 #include "utility/motion/RobotModels.h"
 #include "utility/math/matrix/Rotation3D.h"
 #include "utility/math/matrix/Transform3D.h"
+#include "utility/math/geometry/UnitQuaternion.h"
 #include "utility/math/geometry/Quad.h"
 #include "utility/math/vision.h"
 #include "messages/motion/GetupCommand.h"
@@ -59,6 +60,7 @@ namespace modules {
         using utility::motion::kinematics::DarwinModel;
         using utility::math::matrix::Rotation3D;
         using utility::math::geometry::Quad;
+        using utility::math::geometry::UnitQuaternion;
         using utility::math::vision::objectDirectionFromScreenAngular;
         using utility::math::vision::screenAngularFromObjectDirection;
 
@@ -98,7 +100,7 @@ namespace modules {
                     ballPriority = config["initial"]["priority"]["ball"].as<int>();
                     goalPriority = config["initial"]["priority"]["goal"].as<int>();
 
-                    replan_search_timeout_ms = config["replan_search_timeout_ms"].as<float>();
+                    replan_angle_threshold = config["replan_angle_threshold"].as<float>();
 
                     //Load searches:
                     for(auto& search : config["searches"]){
@@ -147,6 +149,8 @@ namespace modules {
                     bool search = false;
 
                     int maxPriority = std::max(std::max(ballPriority,goalPriority),0);
+
+                    if(ballPriority == goalPriority) log<NUClear::WARN>("HeadBehaviourSoccer - Multiple object searching currently not supported properly.");
 
                     std::vector<VisionObject> fixationObjects;
 
@@ -227,6 +231,9 @@ namespace modules {
                     }
 
                     if(updatePlan && !isGettingUp){
+                        if(lost){
+                            lastPlanOrientation = sensors.orientation;
+                        }
                         updateHeadPlan(fixationObjects, search, sensors, headToIMUSpace);
                     }
 
@@ -376,6 +383,13 @@ namespace modules {
                 return Quad::getBoundingBox(boundingPoints);
             }
 
+
+            bool HeadBehaviourSoccer::orientationHasChanged(const messages::input::Sensors& sensors){
+                Rotation3D diff = sensors.orientation.i() * lastPlanOrientation;
+                UnitQuaternion quat = UnitQuaternion(diff);
+                float angle = quat.getAngle();
+                return std::fabs(angle) > replan_angle_threshold;
+            }
 
 
         }  // motion

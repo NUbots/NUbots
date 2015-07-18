@@ -319,14 +319,14 @@ namespace modules {
                     emit(graph("gyroscope", sensors->gyroscope[0], sensors->gyroscope[1], sensors->gyroscope[2]));
 
                     // If we assume the feet are flat on the ground, we can use forward kinematics to feed a measurement update to the orientation filter.
-                    if (std::abs(input.fsr.left.centreX) < FOOT_UP_SAFE_ZONE && std::abs(input.fsr.left.centreY) < FOOT_UP_SAFE_ZONE) {
-                        auto footUp = sensors->forwardKinematics.find(ServoID::L_ANKLE_ROLL)->second.rotation().col(2);
-                        orientationFilter.measurementUpdate(footUp, MEASUREMENT_NOISE_FOOT_UP, IMUModel::MeasurementType::UP());
-                    }
-                    if (std::abs(input.fsr.right.centreX) < FOOT_UP_SAFE_ZONE && std::abs(input.fsr.right.centreY) < FOOT_UP_SAFE_ZONE) {
-                        auto footUp = sensors->forwardKinematics.find(ServoID::R_ANKLE_ROLL)->second.rotation().col(2);
-                        orientationFilter.measurementUpdate(footUp, MEASUREMENT_NOISE_FOOT_UP, IMUModel::MeasurementType::UP());
-                    }
+                    // if (std::abs(input.fsr.left.centreX) < FOOT_UP_SAFE_ZONE && std::abs(input.fsr.left.centreY) < FOOT_UP_SAFE_ZONE) {
+                    //     auto footUp = sensors->forwardKinematics.find(ServoID::L_ANKLE_ROLL)->second.rotation().col(2);
+                    //     orientationFilter.measurementUpdate(footUp, MEASUREMENT_NOISE_FOOT_UP, IMUModel::MeasurementType::UP());
+                    // }
+                    // if (std::abs(input.fsr.right.centreX) < FOOT_UP_SAFE_ZONE && std::abs(input.fsr.right.centreY) < FOOT_UP_SAFE_ZONE) {
+                    //     auto footUp = sensors->forwardKinematics.find(ServoID::R_ANKLE_ROLL)->second.rotation().col(2);
+                    //     orientationFilter.measurementUpdate(footUp, MEASUREMENT_NOISE_FOOT_UP, IMUModel::MeasurementType::UP());
+                    // }
 
                     // Gives us the quaternion representation
                     arma::vec o = orientationFilter.get();
@@ -360,18 +360,35 @@ namespace modules {
                     //     sensors->rightFootDown = true;
                     // }
 
-                    if(!std::isnan(input.fsr.left.centreX) && !std::isnan(input.fsr.left.centreY)) {
-                        // Left foot is on the ground?
-                        sensors->leftFootDown = true;
-                        sensors->leftFSRCenter = {input.fsr.left.centreX, input.fsr.left.centreY};
-                        // log("bodyCentre", bodyCentre.t());
-                        // log("bodyCentre", sensors->leftFSRCenter);
-                    }
-                    if(!std::isnan(input.fsr.right.centreX) && !std::isnan(input.fsr.right.centreY)) {
-                        // Right foot is on the ground?
+                    // if(!std::isnan(input.fsr.left.centreX) && !std::isnan(input.fsr.left.centreY)) {
+                    //     // Left foot is on the ground?
+                    //     sensors->leftFootDown = true;
+                    //     sensors->leftFSRCenter = {input.fsr.left.centreX, input.fsr.left.centreY};
+                    //     // log("bodyCentre", bodyCentre.t());
+                    //     // log("bodyCentre", sensors->leftFSRCenter);
+                    // }
+                    // if(!std::isnan(input.fsr.right.centreX) && !std::isnan(input.fsr.right.centreY)) {
+                    //     // Right foot is on the ground?
+                    //     sensors->rightFootDown = true;
+                    //     sensors->rightFSRCenter = {input.fsr.right.centreX, input.fsr.right.centreY};
+                    // }
+
+
+                    auto rightFootPose = sensors->forwardKinematics.find(ServoID::R_ANKLE_ROLL)->second;
+                    auto leftFootPose = sensors->forwardKinematics.find(ServoID::L_ANKLE_ROLL)->second;
+                    arma::vec3 torsoFromRightFoot = -rightFootPose.rotation().i() * rightFootPose.translation();
+                    arma::vec3 torsoFromLeftFoot = -leftFootPose.rotation().i() * leftFootPose.translation();
+                    // emit(graph("torsoFromRightFoot", torsoFromRightFoot));
+                    // emit(graph("torsoFromLeftFoot", torsoFromLeftFoot));
+                    if(torsoFromRightFoot(2) > torsoFromLeftFoot(2)){
                         sensors->rightFootDown = true;
-                        sensors->rightFSRCenter = {input.fsr.right.centreX, input.fsr.right.centreY};
+                    } else if(torsoFromRightFoot(2) < torsoFromLeftFoot(2)){
+                        sensors->leftFootDown = true;
+                    } else {
+                        sensors->leftFootDown = false;
+                        sensors->rightFootDown = false;
                     }
+                    
                             
                     // log("left", sensors->leftFSRCenter.t(), "right", sensors->rightFSRCenter.t());
 

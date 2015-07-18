@@ -11,7 +11,7 @@ fractional_angular_update_threshold: 0.1
 fixation_time_ms: 500
 
 #Time before replanning of search when already searching
-replan_search_timeout_ms: 5000
+replan_angle_threshold: 0.5
 
 initial:
   priority: 

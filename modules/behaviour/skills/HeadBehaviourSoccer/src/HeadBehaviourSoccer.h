@@ -65,6 +65,7 @@ namespace modules {
                 */
                 utility::math::geometry::Quad getScreenAngularBoundingBox(const std::vector<messages::vision::VisionObject>& obs);
 
+                bool orientationHasChanged(const messages::input::Sensors& sensors);
 
                 //CONFIG - loaded elsewhere
                 float max_yaw;
@@ -72,12 +73,14 @@ namespace modules {
                 float max_pitch;
                 float min_pitch;
 
+                float replan_angle_threshold;
+                utility::math::matrix::Rotation3D lastPlanOrientation;
+
                 messages::input::CameraParameters cam;
 
                 //CONFIG from HeadBehaviourSoccer.yaml
                 double fractional_view_padding;
                 float search_timeout_ms;
-                float replan_search_timeout_ms;
                 float fractional_angular_update_threshold;
 
                 std::map<messages::behaviour::SearchType, std::vector<arma::vec2>> searches;
