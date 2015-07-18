@@ -205,7 +205,7 @@ namespace modules {
                         for(auto& ob : fixationObjects){
                             currentCentroid = ob.screenAngular / float(fixationObjects.size());
                         }
-                        arma::vec2 currentCentroid_world = getIMUSpaceDirection(currentCentroid,headToIMUSpace);
+                        arma::vec2 currentCentroid_world = getIMUSpaceDirection(currentCentroid,headToIMUSpace,false);
                         //If our objects have moved, we need to replan
                         if(arma::norm(currentCentroid_world - lastCentroid) >= fractional_angular_update_threshold * std::fmax(cam.FOV[0],cam.FOV[1]) / 2.0){
                             updatePlan = true;
@@ -221,15 +221,12 @@ namespace modules {
                         lastCentroid = {99999,99999};//reset centroid to impossible value to trigger reset TODO: find a better way
                     }
 
-                    else if(lostAndSearching && std::chrono::duration_cast<std::chrono::milliseconds>(now - timeLastLostPlan).count() > replan_search_timeout_ms){
+                    else if(lostAndSearching && orientationHasChanged(sensors)){
                         updatePlan = true;
                         lastCentroid = {99999,99999};//reset centroid to impossible value to trigger reset TODO: find a better way
                     }
 
                     if(updatePlan && !isGettingUp){
-                        if(search){
-                            timeLastLostPlan = now;
-                        }
                         updateHeadPlan(fixationObjects, search, sensors, headToIMUSpace);
                     }
 
@@ -242,9 +239,6 @@ namespace modules {
                         std::unique_ptr<HeadCommand> command = std::make_unique<HeadCommand>();
                         command->yaw = direction[0];
                         command->pitch = direction[1];
-                        if(lost){
-
-                        }
                         command->robotSpace = false;
                         emit(std::move(command));
                     }
@@ -280,21 +274,21 @@ namespace modules {
                 }
 
                 for(auto& p : fixationPoints){
-                    p = getIMUSpaceDirection(p,headToIMUSpace);
+                    p = getIMUSpaceDirection(p, headToIMUSpace, search && fixationObjects.size() == 0);
                 }
 
                 auto currentPos = arma::vec2({sensors.servos.at(int(ServoID::HEAD_YAW)).presentPosition,sensors.servos.at(int(ServoID::HEAD_PITCH)).presentPosition});
                 headSearcher.replaceSearchPoints(fixationPoints, currentPos);
             }
 
-            arma::vec2 HeadBehaviourSoccer::getIMUSpaceDirection(const arma::vec2& screenAngles, const Rotation3D& headToIMUSpace){
+            arma::vec2 HeadBehaviourSoccer::getIMUSpaceDirection(const arma::vec2& screenAngles, Rotation3D headToIMUSpace, bool lost){
 
                 // arma::vec3 lookVectorFromHead = objectDirectionFromScreenAngular(screenAngles);
                 arma::vec3 lookVectorFromHead = sphericalToCartesian({1,screenAngles[0],screenAngles[1]});//This is an approximation relying on the robots small FOV
-                //Remove pitch from matrix  
-                Rotation3D yawlessheadToIMUSpace = Rotation3D::createRotationY(-headToIMUSpace.yaw()) * headToIMUSpace;
+                //Remove pitch from matrix if we are adjusting search points
+                if(lost) headToIMUSpace = Rotation3D::createRotationY(-headToIMUSpace.yaw()) * headToIMUSpace;
                 //Rotate target angles to World space
-                arma::vec3 lookVector = yawlessheadToIMUSpace * lookVectorFromHead;
+                arma::vec3 lookVector = headToIMUSpace * lookVectorFromHead;
                 //Compute inverse kinematics for head direction angles
                 std::vector< std::pair<ServoID, float> > goalAngles = calculateHeadJoints<DarwinModel>(lookVector);
 

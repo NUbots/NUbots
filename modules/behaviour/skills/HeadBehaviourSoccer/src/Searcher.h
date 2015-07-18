@@ -49,6 +49,8 @@ namespace modules {
 				NUClear::clock::time_point lastSwitchTime;
 				float switch_period;
 
+				uint64_t forward;
+
             public:
 	           	Searcher():current(0), new_goal(false), switch_period(1000.0f){
 					lastSwitchTime = NUClear::clock::now();
@@ -96,7 +98,23 @@ namespace modules {
 					auto now = NUClear::clock::now();
 					if(!new_goal && std::chrono::duration_cast<std::chrono::milliseconds>(now - lastSwitchTime).count() > switch_period){
 						new_goal = true;
-						current = (current + 1) % points.size();
+						if(forward){
+							float new_index = current + 1; 
+							if (new_index >= points.size()){
+								forward = false;
+								current = std::max(current - 1, 0);
+							} else {
+								current = new_index;
+							}
+						} else {
+							float new_index = current - 1; 
+							if (new_index < 0){
+								forward = true;
+								current = std::min(int(points.size())-1, 1);
+							} else {
+								current = new_index;
+							}
+						}
 						lastSwitchTime = now;
 					}
 				}

@@ -29,8 +29,8 @@ ADD_ROLE(
     behaviour::Controller
     behaviour::skills::Stand
     behaviour::skills::FallingRelax
-    behaviour::skills::Getup
     behaviour::skills::HeadBehaviourSoccer
+    behaviour::skills::Getup
     behaviour::planning::KickPlanner
     behaviour::planning::OMPLPathPlanner  # Creates WalkPaths.
     behaviour::skills::WalkPathFollower # Follows WalkPaths.
