@@ -61,7 +61,7 @@ namespace modules {
             bool fileEnabled = false;
 
             messages::support::nubugger::proto::Overview overview;
-            messages::behaviour::proto::Subsumption subsumption;
+            std::map<uint, messages::behaviour::proto::Subsumption::ActionRegister> actionRegisters;
 
             std::ofstream outputFile;
 

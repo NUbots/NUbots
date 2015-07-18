@@ -146,7 +146,7 @@ namespace modules {
                 // The last pixel we looked at
                 // auto lastPixel = image(point[0], point[1]);
 
-                int minY = std::max(0, classifiedImage.horizon.y(point[0]));
+                int minY = std::max(0.0, classifiedImage.horizon.y(point[0]));
                 for(int y = point[1]; y > minY; --y) {
 
                     char c = lut(image(point[0], y));

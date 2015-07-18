@@ -62,9 +62,8 @@ namespace support {
             Message message = createMessage(Message::SUBSUMPTION);
 
             auto* subsumption = message.mutable_subsumption();
-            subsumption->set_type(Subsumption::ACTION_STATE);
             
-            auto* actionStateChange = subsumption->mutable_action_state_change();
+            auto* actionStateChange = subsumption->add_action_state_change();
             actionStateChange->set_state(Subsumption::ActionStateChange::START);
             actionStateChange->set_name(actionStart.name);
             
@@ -81,9 +80,8 @@ namespace support {
             Message message = createMessage(Message::SUBSUMPTION);
 
             auto* subsumption = message.mutable_subsumption();
-            subsumption->set_type(Subsumption::ACTION_STATE);
             
-            auto* actionStateChange = subsumption->mutable_action_state_change();
+            auto* actionStateChange = subsumption->add_action_state_change();
             actionStateChange->set_state(Subsumption::ActionStateChange::KILL);
             actionStateChange->set_name(actionKill.name);
             
@@ -100,10 +98,10 @@ namespace support {
             Message message = createMessage(Message::SUBSUMPTION);
 
             auto* subsumption = message.mutable_subsumption();
-            subsumption->set_type(Subsumption::ACTION_REGISTER);
             
-            auto* actionRegister = subsumption->mutable_action_register();
-            actionRegister->set_id(action.id);
+            auto* actionRegister = subsumption->add_action_register();
+            uint id = action.id;
+            actionRegister->set_id(id);
             actionRegister->set_name(action.name);
             
             for (const auto& set : action.limbSet) {
@@ -114,6 +112,7 @@ namespace support {
                 }
             }
 
+            actionRegisters.insert(std::make_pair(id, *actionRegister));
             send(message);
 
         }));
@@ -123,13 +122,19 @@ namespace support {
             Message message = createMessage(Message::SUBSUMPTION);
 
             auto* subsumption = message.mutable_subsumption();
-            subsumption->set_type(Subsumption::ACTION_PRIORITY_CHANGE);
             
-            auto* actionPriorityChange = subsumption->mutable_action_priority_change();
-            actionPriorityChange->set_id(action.id);
+            auto* actionPriorityChange = subsumption->add_action_priority_change();
+            uint id = action.id;
+            actionPriorityChange->set_id(id);
 
+            Subsumption::ActionRegister actionRegister = actionRegisters.find(id)->second;
+
+            size_t index = 0;
             for (const auto& priority : action.priorities) {
+                Subsumption::LimbSet limbSet = actionRegister.limb_set(index);
                 actionPriorityChange->add_priorities(priority);
+                limbSet.set_priority(priority);
+                index++;
             }
 
             send(message);
@@ -140,13 +145,13 @@ namespace support {
     void NUbugger::sendSubsumption() {
 
         Message message = createMessage(Message::SUBSUMPTION);
-        // auto* subsumption = message.mutable_subsumption();
 
-        // for (auto& handle : handles) {
-            
-        // }
+        for (const auto& actionRegister : actionRegisters) {
+            auto* objSubsumption = message.mutable_subsumption();
+            *objSubsumption->add_action_register() = actionRegister.second;
+        }
 
-        // send(message);
+        send(message);
 
     }
 
