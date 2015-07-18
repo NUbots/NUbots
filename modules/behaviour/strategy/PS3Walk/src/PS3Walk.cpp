@@ -78,6 +78,16 @@ namespace strategy {
                                 moving = !moving;
                             }
                             break;
+                        case BUTTON_SQUARE:
+                            if (event.value > 0) { // button down
+                                if (headLocked) {
+                                    NUClear::log("Head unlocked");
+                                } else {
+                                    NUClear::log("Head locked");
+                                }
+                                headLocked = !headLocked;
+                            }
+                            break;
                         /*case BUTTON_L1:
                             if (event.value > 0) { // button down
                                 NUClear::log("Requesting Left Side Kick");
@@ -127,23 +137,24 @@ namespace strategy {
         // output walk command based on updated strafe and rotation speed from joystick
         // TODO: potential performance gain: ignore if value hasn't changed since last emit?
         on<Trigger<Every<20, Per<std::chrono::seconds>>>>([this](const time_t&) {
-            auto headCommand = std::make_unique<HeadCommand>();
-            headCommand->yaw = headYaw / std::numeric_limits<short>::max() * 1.5;
-            headCommand->pitch = headPitch / std::numeric_limits<short>::max();
-            headCommand->robotSpace = true;
-            emit(std::move(headCommand));
-
-            if (!moving) {
-                return;
+            if (!headLocked) {
+                auto headCommand = std::make_unique<HeadCommand>();
+                headCommand->yaw = headYaw / std::numeric_limits<short>::max() * 1.5;
+                headCommand->pitch = headPitch / std::numeric_limits<short>::max();
+                headCommand->robotSpace = true;
+                emit(std::move(headCommand));
             }
 
-            // TODO: hacked to not allow backwards movement for stability
-            arma::vec s = { std::max(strafe[0], 0.0), strafe[1] };
-            arma::vec strafeNorm = s / std::numeric_limits<short>::max();
+            if (moving) {
+                // TODO: hacked to not allow backwards movement for stability
+                // arma::vec s = { std::max(strafe[0], 0.0), strafe[1] };
+                arma::vec s = strafe;
+                arma::vec strafeNorm = s / std::numeric_limits<short>::max();
 
-            auto rotationalSpeedNorm = rotationalSpeed / std::numeric_limits<short>::max();
-            auto transform = Transform2D(strafeNorm, rotationalSpeedNorm);
-            emit(std::make_unique<MotionCommand>(MotionCommand::DirectCommand(transform)));
+                auto rotationalSpeedNorm = rotationalSpeed / std::numeric_limits<short>::max();
+                auto transform = Transform2D(strafeNorm, rotationalSpeedNorm);
+                emit(std::make_unique<MotionCommand>(MotionCommand::DirectCommand(transform)));
+            }
         });
     }
 

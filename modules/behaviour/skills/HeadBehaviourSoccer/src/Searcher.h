@@ -60,24 +60,24 @@ namespace modules {
         		
         		void sort(){
         			//Just set to closest:
-        			// auto relativePoints = points;
-        			// for (auto& p : relativePoints){
-        			// 	p = p - refPoint;
-        			// }
-	        		// auto iter = std::min_element(relativePoints.begin(),relativePoints.end(),comparator);
-	        		// current = std::distance(relativePoints.begin(), iter);
+        			auto relativePoints = points;
+        			for (auto& p : relativePoints){
+        				p = p - refPoint;
+        			}
+	        		auto iter = std::min_element(relativePoints.begin(),relativePoints.end(),comparator);
+	        		current = std::distance(relativePoints.begin(), iter);
 
 	        		//Full sort
-	        		std::vector<std::pair<int, T>> relativePoints;
-        			for (uint i = 0; i < points.size(); i++){
-        				relativePoints.push_back(std::pair<int, T>(i,points[i] - refPoint));
-        			}
-        			std::sort(relativePoints.begin(),relativePoints.end(),pair_comparator);
-        			std::vector<T> newPoints(relativePoints.size());
-        			for(uint i = 0; i < relativePoints.size(); i++){
-        				newPoints[i] = points[relativePoints[i].first];
-        			}
-        			points = newPoints;
+	        		// std::vector<std::pair<int, T>> relativePoints;
+        			// for (uint i = 0; i < points.size(); i++){
+        			// 	relativePoints.push_back(std::pair<int, T>(i,points[i] - refPoint));
+        			// }
+        			// std::sort(relativePoints.begin(),relativePoints.end(),pair_comparator);
+        			// std::vector<T> newPoints(relativePoints.size());
+        			// for(uint i = 0; i < relativePoints.size(); i++){
+        			// 	newPoints[i] = points[relativePoints[i].first];
+        			// }
+        			// points = newPoints;
 	        	}
 
         		static bool pair_comparator(const std::pair<int, T>& a, const std::pair<int, T>& b){

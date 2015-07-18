@@ -18,8 +18,8 @@
  */
 
 
-#ifndef MESSAGES_BEHAVIOUR_SOCCEROBJECTPRIORITY_H 
-#define MESSAGES_BEHAVIOUR_SOCCEROBJECTPRIORITY_H 
+#ifndef MESSAGES_BEHAVIOUR_SOCCEROBJECTPRIORITY_H
+#define MESSAGES_BEHAVIOUR_SOCCEROBJECTPRIORITY_H
 
 namespace messages {
 namespace behaviour {
@@ -28,13 +28,13 @@ namespace behaviour {
         LOST,
         FIND_ADDITIONAL_OBJECTS,
         GOAL_LEFT,
-        GOAL_RIGHT, 
+        GOAL_RIGHT,
         GROUND_LEFT,
         GROUND_RIGHT,
         OTHER
     };
 
-    SearchType searchTypeFromString(std::string s){
+    inline SearchType searchTypeFromString(std::string s){
 
         if(s.compare("LOST") == 0) {
             return SearchType::LOST;
@@ -52,7 +52,7 @@ namespace behaviour {
             return SearchType::OTHER;
         } else {
             throw std::domain_error("HeadBehaviourSoccer - searchTypeFromString: NO SEARCH TYPE FOUND!");
-        } 
+        }
 
     }
 
@@ -62,8 +62,8 @@ namespace behaviour {
 		int line = 0;
 
 		SearchType searchType = SearchType::LOST;
-	};	
-	
+	};
+
 }
 }
 

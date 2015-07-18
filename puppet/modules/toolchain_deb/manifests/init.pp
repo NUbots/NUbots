@@ -24,5 +24,6 @@ class toolchain_deb {
   exec { "build_nubots_deb":
     command => "/usr/bin/dpkg-deb --build ${build_dir}",
     cwd => "/home/vagrant",
+    timeout => 0,
   }
 }

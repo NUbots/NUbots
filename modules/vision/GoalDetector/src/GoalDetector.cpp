@@ -23,6 +23,7 @@
 
 #include "messages/vision/ClassifiedImage.h"
 #include "messages/vision/VisionObjects.h"
+#include "messages/vision/LookUpTable.h"
 #include "messages/support/Configuration.h"
 #include "messages/support/FieldDescription.h"
 
@@ -58,6 +59,7 @@ namespace vision {
     using utility::math::vision::distanceToVerticalObject;
 
     using messages::vision::ObjectClass;
+    using messages::vision::LookUpTable;
     using messages::vision::ClassifiedImage;
     using messages::vision::VisionObject;
     using messages::vision::Goal;
@@ -93,8 +95,8 @@ namespace vision {
         on<Trigger<CameraParameters>, With<Configuration<GoalDetector>>>(setParams);
         on<With<CameraParameters>, Trigger<Configuration<GoalDetector>>>(setParams);
 
-        on<Trigger<Raw<ClassifiedImage<ObjectClass>>>, With<CameraParameters>, With<Optional<FieldDescription>>, Options<Single>>("Goal Detector", [this](
-            const std::shared_ptr<const ClassifiedImage<ObjectClass>>& rawImage, const CameraParameters& cam, const std::shared_ptr<const FieldDescription>& field) {
+        on<Trigger<Raw<ClassifiedImage<ObjectClass>>>, With<CameraParameters>, With<LookUpTable>, With<Optional<FieldDescription>>, Options<Single>>("Goal Detector", [this](
+            const std::shared_ptr<const ClassifiedImage<ObjectClass>>& rawImage, const CameraParameters& cam, const LookUpTable& lut, const std::shared_ptr<const FieldDescription>& field) {
             if (field == nullptr) {
                 NUClear::log(__FILE__, ", ", __LINE__, ": FieldDescription Update: support::configuration::SoccerConfig module might not be installed.");
                 throw std::runtime_error("FieldDescription Update: support::configuration::SoccerConfig module might not be installed");
@@ -158,44 +160,66 @@ namespace vision {
                     mid.distance = ((right.distance / arma::dot(right.normal, mid.normal)) - (left.distance / arma::dot(left.normal, mid.normal))) * 0.5;
                 }
 
+                // Find a point that should work to start searching down
+                arma::vec2 midpoint({0, 0});
+                int i = 0;
+                for(auto& m : result) {
+                    midpoint += m.left;
+                    midpoint += m.right;
+                    i += 2;
+                }
+                midpoint /= i;
+
+                // Work out which direction to go
+                arma::vec2 direction = mid.tangent();
+                direction *= direction[1] > 0 ? 1 : -1;
+                double theta = std::acos(direction[0]);
+                if (std::abs(theta) < M_PI_4) {
+                    direction[0] = 1;
+                    direction[1] = -std::tan(theta);
+                }
+                else {
+                    direction[0] = std::tan(M_PI_2 - std::abs(theta));
+                    direction[1] = 1;
+                }
+
+                // Classify until we reach green
+                arma::vec2 basePoint({0, 0});
+                int notWhiteLen = 0;
+                for(arma::vec2 point = mid.orthogonalProjection(midpoint);
+                    (point[0] < image.dimensions[0]) && (point[0] > 0) && (point[1] < image.dimensions[1]);
+                    point += direction) {
+
+                    char c = lut(image.image->operator()(int(point[0]), int(point[1])));
+
+                    if(c != 'y') {
+                        ++notWhiteLen;
+                        if(notWhiteLen > 4) {
+                            basePoint = point;
+                            break;
+                        }
+                    }
+                    else if(c == 'g') {
+                        basePoint = point;
+                        break;
+                    }
+                    else if(c == 'y') {
+                        notWhiteLen = 0;
+                    }
+                }
+
                 arma::running_stat<double> stat;
-                arma::running_stat<double> dist;
 
                 // Look through our segments to find endpoints
                 for(auto& point : result) {
                     // Project left and right onto midpoint keep top and bottom
                     stat(mid.tangentialDistanceToPoint(point.left));
                     stat(mid.tangentialDistanceToPoint(point.right));
-
-                    // Work out our distance to the point for throwouts
-                    dist(mid.distanceToPoint(point.left));
-                    dist(mid.distanceToPoint(point.right));
-                }
-
-                double dSd = dist.stddev();
-                double min = stat.max();
-                double max = stat.min();
-
-                // Look through leftover segments to find better endpoints
-                for(auto it = models.back().end(); it < segments.end(); ++it) {
-                    // Project onto midpoint
-                    double tL = mid.tangentialDistanceToPoint(it->left);
-                    double dL = mid.distanceToPoint(it->left);
-                    double tR = mid.tangentialDistanceToPoint(it->right);
-                    double dR = mid.distanceToPoint(it->right);
-
-                    // Don't want if yellow shirt guy
-                    if(std::abs(dL) < 2 * dSd && tL > max + 2 * dSd && tL > min - 2 * dSd) {
-                        stat(tL);
-                    }
-                    if(std::abs(dR) < 2 * dSd && tR < max + 2 * dSd && tR > min - 2 * dSd) {
-                        stat(tR);
-                    }
                 }
 
                 // Get our endpoints from the min and max points on the line
                 arma::vec2 midP1 = mid.pointFromTangentialDistance(stat.min());
-                arma::vec2 midP2 = mid.pointFromTangentialDistance(stat.max());
+                arma::vec2 midP2 = mid.orthogonalProjection(basePoint);
 
                 // Project those points outward onto the quad
                 arma::vec2 p1 = midP1 - left.distanceToPoint(midP1) * arma::dot(left.normal, mid.normal) * mid.normal;
@@ -333,7 +357,7 @@ namespace vision {
                         baseGoalWidthDist * measurement_distance_covariance_factor,
                         measurement_bearing_variance,
                         measurement_elevation_variance }));
-                measurements.push_back({cartesianToSpherical(baseGoalWidth), baseGoalWidthDistCov, 
+                measurements.push_back({cartesianToSpherical(baseGoalWidth), baseGoalWidthDistCov,
                                         arma::zeros<arma::vec>(3), arma::zeros<arma::mat>(3, 3)});
 
                 // Measure the width based distance to the top

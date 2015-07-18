@@ -23,6 +23,18 @@ IF(STATIC_LIBRARIES)
         ${CMAKE_SHARED_LIBRARY_SUFFIX})
 ENDIF()
 
+# Set some of our variables which we never use as advanced
+MARK_AS_ADVANCED(CMAKE_INSTALL_PREFIX
+                 CURSES_CURSES_H_PATH
+                 CURSES_FORM_LIBRARY
+                 CURSES_HAVE_CURSES_H
+                 OMPLAPP_LIBRARY
+                 OMPL_CONFIG
+                 OMPL_DIR
+                 OMPL_INCLUDE_DIRS
+                 OMPL_LIBRARIES
+                 OMPL_LIBRARY)
+
 # We use additional modules that cmake needs to know about
 SET(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/tools/cmake/")
 
