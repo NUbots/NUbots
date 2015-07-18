@@ -29,10 +29,13 @@
 #include "utility/motion/InverseKinematics.h"
 #include "utility/motion/RobotModels.h"
 #include "utility/support/yaml_expression.h"
+#include "utility/nubugger/NUhelpers.h"
+
 
 namespace modules {
     namespace motion {
 
+        using utility::nubugger::graph;
         using messages::input::ServoID;
         using messages::input::Sensors;
         using messages::behaviour::RegisterAction;
@@ -79,8 +82,7 @@ namespace modules {
 
             updateHandle = on< Trigger<Sensors>, Options<Single, Priority<NUClear::HIGH>> >("Head Controller - Update Head Position",[this] (const Sensors& sensors) {
                 //P controller
-                arma::vec2 diff = goalAngles - currentAngles;
-                currentAngles += p_gain * diff;
+                currentAngles = p_gain * goalAngles + (1 - p_gain) * currentAngles;
 
                 //Get goal vector from angles
                 //Pitch is positive when the robot is looking down by Right hand rule, so negate the pitch

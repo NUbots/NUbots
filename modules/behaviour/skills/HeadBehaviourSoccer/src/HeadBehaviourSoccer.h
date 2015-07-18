@@ -77,6 +77,7 @@ namespace modules {
                 //CONFIG from HeadBehaviourSoccer.yaml
                 double fractional_view_padding;
                 float search_timeout_ms;
+                float replan_search_timeout_ms;
                 float fractional_angular_update_threshold;
 
                 std::map<messages::behaviour::SearchType, std::vector<arma::vec2>> searches;
@@ -90,11 +91,14 @@ namespace modules {
 
                 NUClear::clock::time_point lastPlanUpdate;
                 NUClear::clock::time_point timeLastObjectSeen;
+                NUClear::clock::time_point timeLastLostPlan;
                 
                 arma::vec2 lastCentroid;
 
                 bool lostAndSearching;
                 bool lostLastTime;
+
+                bool isGettingUp;
 
                 int lastBallPriority;
                 int lastGoalPriority;

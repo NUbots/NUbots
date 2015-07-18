@@ -33,6 +33,9 @@ namespace motion {
         rotationIGain = config["angle_gain"]["i"].as<float>();
         rotationDGain = config["angle_gain"]["d"].as<float>();
 
+        hipRotationScale = config["hip_rotation_scale"].as<float>();
+        ankleRotationScale = config["ankle_rotation_scale"].as<float>();
+
         translationPGainX = config["translation_gain"]["X"]["p"].as<float>();
         translationDGainX = config["translation_gain"]["X"]["d"].as<float>();
 
@@ -76,15 +79,17 @@ namespace motion {
         // emit(graph("pid", Rotation3D(goalQuaternion).pitch(), Rotation3D(footGoalErrorSum).pitch(), Rotation3D(error).pitch()));
 
         // Apply the PID gains
-        UnitQuaternion rotation = UnitQuaternion().slerp(errorQuaternion, rotationPGain)
+        UnitQuaternion ankleRotation = UnitQuaternion().slerp(errorQuaternion, rotationPGain)
                                 // * UnitQuaternion().slerp(footGoalErrorSum, rotationIGain)
                                 * UnitQuaternion().slerp(differential, rotationDGain);
 
-        // Halve our correction (so the other half is applied at the hip)
-        rotation.scaleAngle(0.5);
+        // Apply our rotation
+        auto hipRotation = ankleRotation;
+        ankleRotation.scaleAngle(ankleRotationScale);
+        hipRotation.scaleAngle(hipRotationScale);
 
         // Apply this rotation goal to our position
-        footToTorso.rotation() = Rotation3D(rotation) * footToTorso.rotation();
+        footToTorso.rotation() = Rotation3D(ankleRotation) * footToTorso.rotation();
 
         // Get the position of our hip to rotate around
         //TODO: template with model
@@ -95,13 +100,13 @@ namespace motion {
         }));
 
         // Rotate around our hip to apply a balance
-        footToTorso = footToTorso.rotateLocal(Rotation3D(rotation).i(), hip);
+        footToTorso = footToTorso.rotateLocal(Rotation3D(hipRotation), hip); // Lean against the motion
 
         // Store our current footToTorso for D calculations
         lastErrorQuaternion = errorQuaternion;
 
         //------------------------------------
-        // Translation 
+        // Translation
         //------------------------------------
         //Get error signal
         double pitch = Rotation3D(errorQuaternion).pitch();

@@ -146,7 +146,7 @@ namespace modules {
                 // The last pixel we looked at
                 // auto lastPixel = image(point[0], point[1]);
 
-                int minY = std::max(0.0, classifiedImage.horizon.y(point[0]));
+                int minY = int(std::max(3.0, classifiedImage.horizon.y(point[0])));
                 for(int y = point[1]; y > minY; --y) {
 
                     char c = lut(image(point[0], y));
@@ -165,7 +165,7 @@ namespace modules {
                 // The last pixel we looked at
                 // auto lastPixel = image(point[0], point[1]);
 
-                for(int x = point[0]; x > 0; --x) {
+                for(int x = point[0]; x > 3; --x) {
 
                     char c = lut(image(x, point[1]));
 
@@ -183,7 +183,7 @@ namespace modules {
                 // The last pixel we looked at
                 // auto lastPixel = image(point[0], point[1]);
 
-                for(int x = point[0]; x < int(image.width); ++x) {
+                for(int x = point[0]; x < int(image.width) - 3; ++x) {
 
                     char c = lut(image(x, point[1]));
 
@@ -206,6 +206,11 @@ namespace modules {
                 // Go clockwise
                 arma::ivec2 point = edge;
                 for(int i = 0; i < 100; ++i) {
+
+                    // Break if we hit the edge of the screen
+                    if(point[0] < 4 || point[0] > (image.width - 4) || point[1] < 4 || point[1] > (image.height - 4)) {
+                        break;
+                    }
 
                     // std::tuple<arma::ivec2, arma::ivec2, arma::vec4> d;
                     // std::get<0>(d) = point;
@@ -235,6 +240,11 @@ namespace modules {
                 // Go Anticlockwise
                 point = edge;
                 for(int i = 0; i < 100; ++i) {
+
+                    // Break if we hit the edge of the screen
+                    if(point[0] < 4 || point[0] > (image.width - 4) || point[1] < 4 || point[1] > (image.height - 4)) {
+                        break;
+                    }
 
                     // std::tuple<arma::ivec2, arma::ivec2, arma::vec4> d;
                     // std::get<0>(d) = point;

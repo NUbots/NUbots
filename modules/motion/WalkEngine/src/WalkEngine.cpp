@@ -412,6 +412,13 @@ namespace motion {
         //Get unitless phases for x and z motion
         arma::vec3 foot = footPhase(phase, phase1Single, phase2Single);
 
+        float min = 0.5;
+        float max = 1.0;
+        auto& limit = (velocityCurrent.x() > velocityHigh ? accelerationLimitsHigh : accelerationLimits); // TODO: use a function instead
+        float speed = std::min(1.0, std::max(std::abs(velocityCurrent.x() / limit[0]), std::abs(velocityCurrent.y() / limit[1])));
+        float scale = (max - min) * speed + min;
+        foot[2] *= scale;
+
         // don't lift foot at initial step, TODO: review
         if (initialStep > 0) {
             foot[2] = 0;
@@ -642,4 +649,3 @@ namespace motion {
 
 }  // motion
 }  // modules
-
