@@ -17,7 +17,7 @@
  * Copyright 2013 NUBots <nubots@nubots.net>
  */
 
- #include "RobotModels.h"
+#include "RobotModels.h"
 
 namespace utility{
     namespace motion{
