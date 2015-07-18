@@ -96,6 +96,8 @@ namespace modules {
 
                     headSearcher.setSwitchTime(config["fixation_time_ms"].as<float>());
 
+                    oscillate_search = config["oscillate_search"].as<bool>();
+
                     //Note that these are actually modified later and are hence camelcase
                     ballPriority = config["initial"]["priority"]["ball"].as<int>();
                     goalPriority = config["initial"]["priority"]["goal"].as<int>();
@@ -239,7 +241,7 @@ namespace modules {
                     }
 
                     //Update state machine
-                    headSearcher.update();
+                    headSearcher.update(oscillate_search);
                     //Emit new result if possible
                     if(headSearcher.newGoal()){
                         //Emit result

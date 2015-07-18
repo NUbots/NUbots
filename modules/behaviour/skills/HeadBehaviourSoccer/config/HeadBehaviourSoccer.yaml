@@ -18,31 +18,30 @@ initial:
     ball: 1
     goal: 0
 
+oscillate_search: false
+
 searches:
   - #enum type for search
     search_type: "LOST"
     #Points in normalised view space. [1,1] corresponds to looking up to the right as far as allowed, relative to the allowed head angles
     points:
-      #upper then lower
-      - [-1,   -0.5]
-      - [-1,   0]
-      - [-0.5,  0]
-      - [-0.5,  -0.5]
-      - [-0.5,  -1]
-      - [-0.25, -1]
-      - [-0.25, -0.5]
-      - [-0.25, 0]
-      - [0, 0]
       - [0, -0.5]
       - [0, -1]
       - [0.25,  -1]
       - [0.25,  -0.5]
-      - [0.25,  0]
-      - [0.5, 0]
       - [0.5, -0.5]
       - [0.5, -1]
       - [1, -0.5]
       - [1, 0]
+      - [0.5, 0]
+      - [0, 0]
+      - [-0.5,  0]
+      - [-1,  0]
+      - [-1,  -0.5]
+      - [-0.5,  -0.5]
+      - [-0.5, -1]
+      - [-0.25, -1]
+      - [-0.25, -0.5]
 
   - search_type: "FIND_ADDITIONAL_OBJECTS"
     #Points for this search are relative to the padded bounding box containing the already visible objects

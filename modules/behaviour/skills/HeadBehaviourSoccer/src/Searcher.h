@@ -94,25 +94,38 @@ namespace modules {
 	        		switch_period = dt;
 	        	}
 
-				void update(){
+				void update(bool oscillate){
+					//TODO: recode this garbage
 					auto now = NUClear::clock::now();
 					if(!new_goal && std::chrono::duration_cast<std::chrono::milliseconds>(now - lastSwitchTime).count() > switch_period){
 						new_goal = true;
 						if(forward){
-							float new_index = current + 1; 
-							if (new_index >= points.size()){
-								forward = false;
-								current = std::max(current - 1, 0);
+							int new_index = current + 1;
+							if(oscillate){
+								//Moves search forward and backward along path
+								if (new_index >= points.size()){
+									forward = false;
+									current = std::max(current - 1, 0);
+								} else {
+									current = new_index;
+								}
 							} else {
-								current = new_index;
+								//Loops path
+								current = new_index % int(points.size());
 							}
 						} else {
-							float new_index = current - 1; 
-							if (new_index < 0){
-								forward = true;
-								current = std::min(int(points.size())-1, 1);
+							int new_index = current - 1;
+							if(oscillate){
+								//Moves search forward and backward along path
+								if (new_index < 0){
+									forward = true;
+									current = std::min(int(points.size())-1, 1);
+								} else {
+									current = new_index;
+								}
 							} else {
-								current = new_index;
+								//Loops path
+								current = new_index % int(points.size());
 							}
 						}
 						lastSwitchTime = now;

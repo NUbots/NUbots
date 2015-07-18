@@ -83,6 +83,8 @@ namespace modules {
                 float search_timeout_ms;
                 float fractional_angular_update_threshold;
 
+                bool oscillate_search;
+
                 std::map<messages::behaviour::SearchType, std::vector<arma::vec2>> searches;
 
                 //State variables
