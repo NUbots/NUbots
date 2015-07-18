@@ -20,7 +20,7 @@ node nubotsvm {
   class {'dev_tools': }
 
   # Get and install our toolchain
-  $toolchain_version = '1.0.5'
+  $toolchain_version = '1.0.6'
   exec { "nubots_toolchain":
     command => "wget http://nubots.net/debs/nubots-toolchain${toolchain_version}.deb",
     creates => "/tmp/nubots-toolchain${toolchain_version}.deb",
@@ -73,9 +73,9 @@ node nubotsvmbuild {
   installer { 'yaml-cpp':       url => 'https://github.com/jbeder/yaml-cpp/archive/release-0.5.2.tar.gz',
                                 args => '-DYAML_CPP_BUILD_CONTRIB=OFF -DYAML_CPP_BUILD_TOOLS=OFF',
                                 require => Installer['boost'], }
-  installer { 'ncurses':        url => 'http://ftp.gnu.org/pub/gnu/ncurses/ncurses-5.9.tar.gz',
-                                args => '--without-progs --without-test --with-shared',
-                                environment => [ 'CPPFLAGS=-P', ], }
+  # installer { 'ncurses':        url => 'http://ftp.gnu.org/pub/gnu/ncurses/ncurses-5.9.tar.gz',
+  #                               args => "--with-shared --mandir=/usr/share/man --without-profile --without-debug --disable-rpath --enable-echo --enable-const --enable-pc-files --without-ada --without-tests --without-progs --enable-symlinks --disable-lp64 --with-chtype='long' --with-mmask-t='long' --disable-termcap --with-default-terminfo-dir=/etc/terminfo --with-terminfo-dirs='/etc/terminfo:/lib/terminfo:/usr/share/terminfo' --with-ticlib=tic --with-termlib=tinfo --with-xterm-kbs=del",
+  #                               environment => [ 'CPPFLAGS=-P', ], }
   installer { 'fftw3':          url => 'http://www.fftw.org/fftw-3.3.4.tar.gz',
                                 args => '--disable-fortran --enable-shared', }
   installer { 'jpeg':           url => 'http://downloads.sourceforge.net/project/libjpeg-turbo/1.4.1/libjpeg-turbo-1.4.1.tar.gz', }
@@ -90,6 +90,7 @@ node nubotsvmbuild {
                                 args => '--disable-shared --disable-debug --disable-samples', }
   installer { 'eigen3':         url => 'http://bitbucket.org/eigen/eigen/get/3.2.5.tar.gz', }
   installer { 'boost':          url => 'http://downloads.sourceforge.net/project/boost/boost/1.57.0/boost_1_57_0.tar.gz',
+                                args => ['link=static'],
                                 require => [ Installer['zlib'], Installer['bzip2'], ], }
   installer { 'mlpack':         url => 'https://github.com/mlpack/mlpack/archive/mlpack-1.0.12.tar.gz',
                                 require => [ Installer['armadillo'], Installer['boost'], Installer['xml2'], ], }

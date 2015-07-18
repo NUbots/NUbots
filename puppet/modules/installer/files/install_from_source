@@ -12,8 +12,8 @@ shift 3
 
 if [[ $LTO == "true" ]]; then
     echo "Using LTO"
-    export CFLAGS="$CFLAGS -I$PREFIX/include $DARWIN_OPTIMISATION_FLAGS -fuse-linker-plugin -flto -ffat-lto-objects -O3"
-    export CXXFLAGS="$CXXFLAGS -I$PREFIX/include $DARWIN_OPTIMISATION_FLAGS -fuse-linker-plugin -flto -ffat-lto-objects -O3"
+    export CFLAGS="$CFLAGS -I$PREFIX/include $DARWIN_OPTIMISATION_FLAGS -fuse-linker-plugin -flto -ffat-lto-objects -Os"
+    export CXXFLAGS="$CXXFLAGS -I$PREFIX/include $DARWIN_OPTIMISATION_FLAGS -fuse-linker-plugin -flto -ffat-lto-objects -Os"
     export LDFLAGS="$LDFLAGS -L$PREFIX/lib"
 else
     echo "Not using LTO"
@@ -76,7 +76,7 @@ elif [[ $METHOD == 'boost' || $METHOD == 'auto' && -e "Jamroot" ]]; then
     ./bjam include="$PREFIX/include" library-path="$PREFIX/lib"
 
     # Build and install
-    ./b2
+    ./b2 $@
     ./b2 install
 
 # We are using standard makefiles

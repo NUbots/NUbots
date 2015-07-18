@@ -141,13 +141,13 @@ namespace NUClear {
             std::function<void (Reactor*, const std::string&, const YAML::Node&)> emitter =
             [](Reactor* configReactor, const std::string& name, const YAML::Node& node) {
                 // Cast our node to be the correct type (and wrap it in a unique pointer)
-               try {
-			configReactor->emit(std::make_unique<messages::support::Configuration<TConfiguration>>(name, node));
+                try {
+                    configReactor->emit(std::make_unique<messages::support::Configuration<TConfiguration>>(name, node));
                 }
 
                 catch (...) {
-                        NUClear::log<NUClear::FATAL>("Config error in file: ", name);
-                        throw;
+                    NUClear::log<NUClear::FATAL>("Config error in file: ", name);
+                    throw;
                 }
             };
 
@@ -156,13 +156,13 @@ namespace NUClear {
             std::function<void (Reactor*, const std::string&, const YAML::Node&)> initialEmitter =
             [](Reactor* configReactor, const std::string& name, const YAML::Node& node) {
                 // Cast our node to be the correct type (and wrap it in a unique pointer)
-               try {
-			configReactor->emit<Scope::DIRECT>(std::make_unique<messages::support::Configuration<TConfiguration>>(name, node));
+                try {
+                    configReactor->emit<Scope::DIRECT>(std::make_unique<messages::support::Configuration<TConfiguration>>(name, node));
                 }
 
                 catch (...) {
-                        NUClear::log<NUClear::FATAL>("Config error in file: ", name);
-                        throw;
+                    NUClear::log<NUClear::FATAL>("Config error in file: ", name);
+                    throw;
                 }
             };
 
