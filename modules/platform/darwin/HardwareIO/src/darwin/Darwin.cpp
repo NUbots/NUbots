@@ -131,7 +131,8 @@ namespace Darwin {
                 // If it's the FSRs
                 case ID::L_FSR:
                 case ID::R_FSR:
-                    request.push_back(std::make_tuple(FSR::Address::FSR1_L, sensor.first, sizeof(Types::FSRData)));
+                    // TODO this is where we no longer use the FSRs, if you need them again turn them on here
+                    // request.push_back(std::make_tuple(FSR::Address::FSR1_L, sensor.first, sizeof(Types::FSRData)));
                     break;
 
                 // Otherwise we assume that it's a servo
