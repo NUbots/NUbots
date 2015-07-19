@@ -4,7 +4,7 @@ ransac:
   maximum_iterations_per_fitting: 100
   maximum_fitted_models: 3
   consensus_error_threshold: 5
-maximum_disagreement_ratio: 0.15
+maximum_disagreement_ratio: 1.15
 measurement_distance_variance_factor: 0.1
 measurement_bearing_variance: 0.05
 measurement_elevation_variance: 0.05

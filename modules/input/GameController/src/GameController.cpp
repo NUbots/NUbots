@@ -186,8 +186,6 @@ namespace input {
         while (listening) {
             ::recv(socket, reinterpret_cast<char*>(&newPacket), sizeof(GameControllerPacket), 0);
 
-            NUClear::log(newPacket);
-
             if (newPacket.version == SUPPORTED_VERSION) {
                 try {
                     process(packet, newPacket);
