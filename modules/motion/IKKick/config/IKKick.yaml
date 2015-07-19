@@ -42,6 +42,9 @@ kick:
   wind_up: 0.1 #m
   foot_separation_margin: 0.02 #m
 
+  lift_before_windup_duration: 0.5
+  return_before_place_duration: 0.5
+
 kick_frames:
   servo_angle_threshold: 0.1
 # note that some of the following config is overwritten by planning processes
