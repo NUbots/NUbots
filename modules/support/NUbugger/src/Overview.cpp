@@ -25,6 +25,7 @@
 #include "messages/input/Image.h"
 #include "messages/support/nubugger/proto/Message.pb.h"
 #include "messages/vision/VisionObjects.h"
+#include "messages/motion/WalkCommand.h"
 
 #include "utility/time/time.h"
 #include "utility/localisation/transform.h"
@@ -47,6 +48,7 @@ namespace support {
     using LocalisationBall = messages::localisation::Ball;
     using VisionGoal = messages::vision::Goal;
     using VisionBall = messages::vision::Ball;
+    using messages::motion::WalkCommand;
 
     using utility::time::getUtcTimestamp;
     using utility::localisation::transform::RobotToWorldTransform;
@@ -77,6 +79,13 @@ namespace support {
         /*handles[Message::OVERVIEW].push_back(*/on<Trigger<Behaviour::State>, Options<Single, Priority<NUClear::LOW>>>([this](const Behaviour::State& state) {
 
             overview.set_behaviour_state(state);
+
+        })/*)*/;
+
+        /*handles[Message::OVERVIEW].push_back(*/on<Trigger<KickPlan>, Options<Single, Priority<NUClear::LOW>>>([this] (const KickPlan& kickPlan) {
+
+            // TODO fix runtime error:
+            // *overview.mutable_kick_target() << kickTarget;
 
         })/*)*/;
 
@@ -156,10 +165,9 @@ namespace support {
 
         })/*)*/;
 
-        /*handles[Message::OVERVIEW].push_back(*/on<Trigger<KickPlan>, Options<Single, Priority<NUClear::LOW>>>([this] (const KickPlan& kickPlan) {
+        /*handles[Message::OVERVIEW].push_back(*/on<Trigger<WalkCommand>, Options<Single, Priority<NUClear::LOW>>>([this] (const WalkCommand& walkCommand) {
 
-            // TODO fix runtime error:
-            // *overview.mutable_kick_target() << kickTarget;
+            *overview.mutable_walk_command() << walkCommand.command;
 
         })/*)*/;
 
