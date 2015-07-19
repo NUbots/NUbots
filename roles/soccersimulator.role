@@ -25,7 +25,7 @@ ADD_ROLE(
     #Localisation
     localisation::MMKFRobotLocalisation
     localisation::KFBallLocalisation
-    localisation::SideChecker
+    #localisation::SideChecker
 
     #Behaviour
     behaviour::Controller

@@ -92,14 +92,14 @@ namespace modules {
 
                 int ballPriority;
                 int goalPriority;
-                messages::behaviour::SearchType searchType;
+                messages::behaviour::SearchType searchType = messages::behaviour::SearchType::LOST;
 
                 NUClear::clock::time_point lastPlanUpdate;
                 NUClear::clock::time_point timeLastObjectSeen;
                 
                 arma::vec2 lastCentroid;
 
-                bool lostAndSearching;
+                bool lostAndSearching = false;
                 bool lostLastTime;
 
                 bool isGettingUp;
