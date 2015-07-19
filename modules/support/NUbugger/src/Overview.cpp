@@ -127,15 +127,19 @@ namespace support {
 
         })/*)*/;
 
-        /*handles[Message::OVERVIEW].push_back(*/on<Trigger<std::vector<VisionBall>>, Options<Single, Priority<NUClear::LOW>>>([this] (const std::vector<VisionBall>&/* balls*/) {
+        /*handles[Message::OVERVIEW].push_back(*/on<Trigger<std::vector<VisionBall>>, Options<Single, Priority<NUClear::LOW>>>([this] (const std::vector<VisionBall>& balls) {
 
-            overview.set_last_seen_ball(getUtcTimestamp());
+            if (!balls.empty()) {
+                overview.set_last_seen_ball(getUtcTimestamp());
+            }
 
         })/*)*/;
 
-        /*handles[Message::OVERVIEW].push_back(*/on<Trigger<std::vector<VisionGoal>>, Options<Single, Priority<NUClear::LOW>>>([this] (const std::vector<VisionGoal>&/* goals*/) {
+        /*handles[Message::OVERVIEW].push_back(*/on<Trigger<std::vector<VisionGoal>>, Options<Single, Priority<NUClear::LOW>>>([this] (const std::vector<VisionGoal>& goals) {
 
-            overview.set_last_seen_goal(getUtcTimestamp());
+            if (!goals.empty()) {
+                overview.set_last_seen_goal(getUtcTimestamp());
+            }
 
         })/*)*/;
 
