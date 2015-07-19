@@ -83,6 +83,10 @@ namespace strategy {
             cfg_.start_position_offensive = config["start_position_offensive"].as<arma::vec2>();
             cfg_.start_position_defensive = config["start_position_defensive"].as<arma::vec2>();
 
+            cfg_.ball_search_walk_start_speed = config["ball_search_walk_start_speed"].as<float>();
+            cfg_.ball_search_walk_stop_speed = config["ball_search_walk_stop_speed"].as<float>();
+            cfg_.ball_search_walk_slow_time = config["ball_search_walk_slow_time"].as<float>();
+
             cfg_.is_goalie = config["goalie"].as<bool>();
 
             // Use configuration here from file GoalieWalkPlanner.yaml
@@ -247,6 +251,9 @@ namespace strategy {
                 }
                 
                 if (currentState != previousState) {
+                    if(currentState == Behaviour::SEARCH_FOR_BALL){
+                        ballSearchStartTime = NUClear::clock::now();
+                    }
                     emit(std::make_unique<Behaviour::State>(currentState));
                 }
             }
@@ -399,7 +406,10 @@ namespace strategy {
     }
 
     void SoccerStrategy::spinWalk() {
-        emit(std::make_unique<MotionCommand>(MotionCommand::DirectCommand({0, 0, 1})));
+        float timeSinceSpinStarted = std::chrono::duration_cast<std::chrono::microseconds>(NUClear::clock::now() - ballSearchStartTime).count() * 1e-6;
+        float alpha = std::fmax(std::fmin(1 - timeSinceSpinStarted / cfg_.ball_search_walk_slow_time,1),0);
+        float velocity = cfg_.ball_search_walk_start_speed * alpha + (1-alpha) * cfg_.ball_search_walk_stop_speed;
+        emit(std::make_unique<MotionCommand>(MotionCommand::DirectCommand({0, 0, velocity})));
     }
 
     arma::vec2 SoccerStrategy::getKickPlan(const std::vector<Self>& selfs, const messages::support::FieldDescription& fieldDescription) {

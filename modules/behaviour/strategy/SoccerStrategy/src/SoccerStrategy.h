@@ -40,6 +40,10 @@ namespace strategy {
             NUClear::clock::duration ball_last_seen_max_time;
             NUClear::clock::duration goal_last_seen_max_time;
 
+            float ball_search_walk_start_speed;
+            float ball_search_walk_stop_speed;
+            float ball_search_walk_slow_time;
+
             arma::vec2 start_position_offensive;
             arma::vec2 start_position_defensive;
             bool is_goalie;
@@ -64,6 +68,7 @@ namespace strategy {
         messages::behaviour::proto::Behaviour::State currentState = messages::behaviour::proto::Behaviour::INIT;
 
         time_t ballLastMeasured;
+        time_t ballSearchStartTime;
         time_t selfLastMeasured;
         void initialLocalisationReset(const messages::support::FieldDescription& fieldDescription);
         void penaltyLocalisationReset();
