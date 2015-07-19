@@ -163,14 +163,28 @@ namespace skills {
             }
             auto self = selfs.front();
 
-            // TODO: Try representing the path in a space that has the ball position
-            // as its origin, and the x-axis in the direction of the kick
-            // target from the ball.
-
             // Get the robot's current state as a Transform2D:
             Transform2D currentState = {self.position, vectorToBearing(self.heading)};
             emit(utility::nubugger::drawRectangle("WPF_RobotFootprint", RotatedRectangle(currentState, {0.12, 0.17})));
             emit(utility::nubugger::drawRectangle("WPF_GoalState", RotatedRectangle(currentPath.goal, {0.12, 0.17}), {0.4, 0.4, 0.4}, 0.123));
+
+            if (cfg_.follow_path_in_ball_space &&
+                currentPath.command.type == MotionCommand::Type::BallApproach) {
+                // Ball space is a space that has the ball position
+                // as its origin, and the x-axis in the direction of the kick
+                // target from the ball.
+
+                // Find current ball space.
+                Transform2D currentBallSpace;
+
+                // Transform robot from world space into (current) ball space:
+                auto ballSpaceState = currentBallSpace.worldToLocal(currentState);
+
+                // Transform the robot from ball space into the world space at
+                // the time of path planning (note that walk commands will be
+                // valid as they in robot space):
+                currentState = currentPath.ballSpace.localToWorld(ballSpaceState);
+            }
 
             // Remove unnecessary (visited) states from the path:
             int removed = trimPath(currentState, currentPath);
