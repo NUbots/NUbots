@@ -130,6 +130,8 @@ namespace modules {
                     }
                     catch (...) {
                         NUClear::log<NUClear::FATAL>("Error loading config file:", command.configPath);
+                        std::cout << "Error loading config file:" << command.configPath << std::endl;
+                        throw;
                     }
                 });
 

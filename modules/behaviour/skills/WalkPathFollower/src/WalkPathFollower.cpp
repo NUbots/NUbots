@@ -42,6 +42,7 @@ namespace skills {
 
     using messages::support::Configuration;
     using Self = messages::localisation::Self;
+    using Ball = messages::localisation::Ball;
 
     using messages::behaviour::MotionCommand;
     using messages::behaviour::WalkPath;
@@ -154,11 +155,13 @@ namespace skills {
 
         followPathReaction = on<Trigger<Every<20, Per<std::chrono::seconds>>>,
             With<std::vector<Self>>,
+            With<Ball>,
             // With<WalkPath>,
             Options<Sync<WalkPathFollower>, Single>
            >("Follow current path plan", [this] (
              const NUClear::clock::time_point& /*current_time*/,
-             const std::vector<Self>& selfs
+             const std::vector<Self>& selfs,
+             const Ball& ball
              // const WalkPath& walkPath
              ) {
             if (selfs.empty() || currentPath.states.empty()) {
@@ -178,7 +181,8 @@ namespace skills {
                 // target from the ball.
 
                 // Find current ball space.
-                Transform2D currentBallSpace;
+                arma::vec2 worldBall = currentState.localToWorld({ball.position, 0}).xy();
+                Transform2D currentBallSpace = Transform2D::lookAt(worldBall, currentPath.command.kickTarget);
 
                 // Transform robot from world space into (current) ball space:
                 auto ballSpaceState = currentBallSpace.worldToLocal(currentState);
