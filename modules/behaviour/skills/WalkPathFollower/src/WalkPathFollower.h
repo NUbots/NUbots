@@ -82,6 +82,8 @@ namespace skills {
             double walk_about_x_strafe = 0;
             double walk_about_y_strafe = 0;
             double walk_about_rotational_speed = 0;
+            
+            bool follow_path_in_ball_space = true;
 
         } cfg_;
     };
