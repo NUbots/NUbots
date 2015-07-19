@@ -112,18 +112,20 @@ namespace vision {
         : Reactor(std::move(environment)) {
 
         on<Trigger<Configuration<BallDetector>>>([this](const Configuration<BallDetector>& config) {
-            
+
             MINIMUM_POINTS_FOR_CONSENSUS = config["ransac"]["minimum_points_for_consensus"].as<uint>();
             CONSENSUS_ERROR_THRESHOLD = config["ransac"]["consensus_error_threshold"].as<Expression>();
-            
+
             MAXIMUM_ITERATIONS_PER_FITTING = config["ransac"]["maximum_iterations_per_fitting"].as<uint>();
             MAXIMUM_FITTED_MODELS = config["ransac"]["maximum_fitted_models"].as<uint>();
             MAXIMUM_DISAGREEMENT_RATIO = config["maximum_disagreement_ratio"].as<Expression>();
-            
+
+            maximum_relative_seed_point_distance = config["maximum_relative_seed_point_distance"].as<double>();
+
             measurement_distance_variance_factor = config["measurement_distance_variance_factor"].as<Expression>();
             measurement_bearing_variance = config["measurement_bearing_variance"].as<Expression>();
             measurement_elevation_variance = config["measurement_elevation_variance"].as<Expression>();
-            
+
             green_ratio_threshold = config["green_ratio_threshold"].as<Expression>();
             green_radial_samples = config["green_radial_samples"].as<Expression>();
             green_angular_samples = config["green_angular_samples"].as<Expression>();
@@ -151,7 +153,7 @@ namespace vision {
             }
 
             double deltaT = 1e-6 * std::chrono::duration_cast<std::chrono::microseconds>(sensors.timestamp - lastFrame.time).count();
-            
+
             // //Cluster data points for running ransac
             // arma::mat clusterData = arma::zeros(2,ballPoints.size());
             // for (int i = 0; i < ballPoints.size(); i++){
@@ -163,12 +165,12 @@ namespace vision {
 
             // if(clusterSuccess){
             //     std::cout << "Cluster success!" << std::endl;
-            //     // Do ransac per cluster 
+            //     // Do ransac per cluster
             //     auto debug = kmeansClusterer.getDebugRectangles();
             //     emit(drawVisionLines(debug));
             // } else {
             // }
-            
+
             auto ransacResults = Ransac<RansacCircleModel>::fitModels(ballPoints.begin()
                                                                     , ballPoints.end()
                                                                     , MINIMUM_POINTS_FOR_CONSENSUS
@@ -181,10 +183,33 @@ namespace vision {
             balls->reserve(ransacResults.size());
 
             for(auto& result : ransacResults) {
+
+                // THROWOUTS
+                // DOES HAVE INTERNAL GREEN
                 float greenRatio = approximateCircleGreenRatio(result.model, *(image.image), lut);
                 if(greenRatio > green_ratio_threshold){
                     continue;
                 }
+
+                // DOES NOT TOUCH 3 SEED POINTS
+                arma::vec3 sDist({ std::numeric_limits<double>::max(), std::numeric_limits<double>::max(), std::numeric_limits<double>::max() });
+
+                // Loop through our seed points and find the minimum distance one
+                for(uint i = 0; i < 3; ++i) {
+                    for(auto& s : image.ballSeedPoints[i]) {
+                        double dist = std::fabs(result.model.radius - arma::norm(result.model.centre - arma::vec3({double(s[0]), double(s[1])})));
+                        if(sDist[i] > dist) {
+                            sDist[i] = dist;
+                        }
+                    }
+                }
+
+                // Check if our largest one is too far away
+                if(arma::max(sDist) / result.model.radius > maximum_relative_seed_point_distance) {
+                    continue;
+                }
+
+                // DO MEASUREMENTS
 
                 std::vector<VisionObject::Measurement> measurements;
                 measurements.reserve(2);
@@ -270,7 +295,7 @@ namespace vision {
                 /*
                  *  IF VALID BUILD OUR BALL
                  */
-                if(widthDistance > cameraHeight / 2.0 
+                if(widthDistance > cameraHeight / 2.0
                     //Only build ball if disagreement not too high
                     && std::abs((sphericalBallCentreGroundWidth[0] - sphericalBallCentreGroundProj[0]) / sphericalBallCentreGroundProj[0]) < MAXIMUM_DISAGREEMENT_RATIO) {
                     Ball b;

@@ -152,7 +152,9 @@ namespace modules {
                     char c = lut(image(point[0], y));
 
                     if(c == 'g') {
-                        edges.push_back(arma::ivec2({ point[0], y - 1 }));
+                        auto p = arma::ivec2({ point[0], y - 1 });
+                        edges.push_back(p);
+                        classifiedImage.ballSeedPoints[0].push_back(p);
                         // debug.push_back(std::make_tuple(point, edges.back(), arma::vec4({0,1,1,1})));
                         break;
                     }
@@ -170,7 +172,9 @@ namespace modules {
                     char c = lut(image(x, point[1]));
 
                     if(c == 'g') {
-                        edges.push_back(arma::ivec2({ x + 1, point[1] }));
+                        auto p = arma::ivec2({ x + 1, point[1] });
+                        edges.push_back(p);
+                        classifiedImage.ballSeedPoints[1].push_back(p);
                         // debug.push_back(std::make_tuple(point, edges.back(), arma::vec4({0,1,1,1})));
                         break;
                     }
@@ -188,7 +192,9 @@ namespace modules {
                     char c = lut(image(x, point[1]));
 
                     if(c == 'g') {
-                        edges.push_back(arma::ivec2({ x - 1, point[1] }));
+                        auto p = arma::ivec2({ x - 1, point[1] });
+                        edges.push_back(p);
+                        classifiedImage.ballSeedPoints[2].push_back(p);
                         // debug.push_back(std::make_tuple(point, edges.back(), arma::vec4({0,1,1,1})));
                         break;
                     }
@@ -208,7 +214,7 @@ namespace modules {
                 for(int i = 0; i < 100; ++i) {
 
                     // Break if we hit the edge of the screen
-                    if(point[0] < 4 || point[0] > (image.width - 4) || point[1] < 4 || point[1] > (image.height - 4)) {
+                    if(point[0] < 4 || point[0] > (int(image.width) - 4) || point[1] < 4 || point[1] > (int(image.height) - 4)) {
                         break;
                     }
 
@@ -242,7 +248,7 @@ namespace modules {
                 for(int i = 0; i < 100; ++i) {
 
                     // Break if we hit the edge of the screen
-                    if(point[0] < 4 || point[0] > (image.width - 4) || point[1] < 4 || point[1] > (image.height - 4)) {
+                    if(point[0] < 4 || point[0] > (int(image.width) - 4) || point[1] < 4 || point[1] > (int(image.height) - 4)) {
                         break;
                     }
 

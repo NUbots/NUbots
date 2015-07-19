@@ -74,6 +74,9 @@ namespace messages {
             // Our images dimensions
             arma::uvec2 dimensions;
 
+            // Points that are on the edge of the ball
+            std::array<std::vector<arma::ivec2>, 3> ballSeedPoints;
+
             // Points that could make up the ball
             std::vector<arma::ivec2> ballPoints;
 
