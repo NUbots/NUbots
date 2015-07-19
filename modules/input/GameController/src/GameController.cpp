@@ -137,25 +137,25 @@ namespace input {
             // TODO: aggressive mode, chase ball and kick towards goal (basically disable strategy)
         });
 
-        on<Trigger<ButtonMiddleDown>>([this](const ButtonMiddleDown&) {
-            // TODO: fix this
-            auto time = NUClear::clock::now();
-            if (!selfPenalised) {
-                // penalise
-                selfPenalised = true;
-                emit(std::move(std::make_unique<messages::output::Say>("Penalised")));
-                emit(std::make_unique<Penalisation<SELF>>(Penalisation<SELF>{PLAYER_ID, time, PenaltyReason::MANUAL}));
-            } else {
-                // unpenalised
-                selfPenalised = false;
-                emit(std::move(std::make_unique<messages::output::Say>("Playing")));
-                emit(std::make_unique<Unpenalisation<SELF>>(Unpenalisation<SELF>{PLAYER_ID}));
-                // TODO: fix timers
-                emit(std::make_unique<GamePhase<Phase::PLAYING>>(GamePhase<Phase::PLAYING>{time, time}));
-                emit(std::make_unique<Phase>(Phase::PLAYING));
-            }
-            penaltyOverride = true;
-        });
+        // on<Trigger<ButtonMiddleDown>>([this](const ButtonMiddleDown&) {
+        //     // TODO: fix this
+        //     auto time = NUClear::clock::now();
+        //     if (!selfPenalised) {
+        //         // penalise
+        //         selfPenalised = true;
+        //         emit(std::move(std::make_unique<messages::output::Say>("Penalised")));
+        //         emit(std::make_unique<Penalisation<SELF>>(Penalisation<SELF>{PLAYER_ID, time, PenaltyReason::MANUAL}));
+        //     } else {
+        //         // unpenalised
+        //         selfPenalised = false;
+        //         emit(std::move(std::make_unique<messages::output::Say>("Playing")));
+        //         emit(std::make_unique<Unpenalisation<SELF>>(Unpenalisation<SELF>{PLAYER_ID}));
+        //         // TODO: fix timers
+        //         emit(std::make_unique<GamePhase<Phase::PLAYING>>(GamePhase<Phase::PLAYING>{time, time}));
+        //         emit(std::make_unique<Phase>(Phase::PLAYING));
+        //     }
+        //     penaltyOverride = true;
+        // });
 
     }
 
@@ -185,6 +185,8 @@ namespace input {
 
         while (listening) {
             ::recv(socket, reinterpret_cast<char*>(&newPacket), sizeof(GameControllerPacket), 0);
+
+            NUClear::log(newPacket);
 
             if (newPacket.version == SUPPORTED_VERSION) {
                 try {

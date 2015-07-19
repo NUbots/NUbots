@@ -35,7 +35,7 @@ namespace strategy {
 
     class SoccerStrategy : public NUClear::Reactor {
     private:
-        
+
         struct Config {
             NUClear::clock::duration ball_last_seen_max_time;
             NUClear::clock::duration goal_last_seen_max_time;
@@ -55,7 +55,7 @@ namespace strategy {
             float goalie_max_translation_speed;
             float goalie_side_walk_angle_threshold;
         } cfg_;
-        
+
         messages::behaviour::FieldTarget walkTarget;
 
         std::vector<messages::behaviour::FieldTarget> lookTarget;
@@ -65,6 +65,7 @@ namespace strategy {
         bool isDiving = false;
         bool selfPenalised = false;
         bool isSideChecking = false;
+        bool forcePlaying = false;
         messages::behaviour::proto::Behaviour::State currentState = messages::behaviour::proto::Behaviour::INIT;
 
         time_t ballLastMeasured;
@@ -85,7 +86,8 @@ namespace strategy {
         bool ballDistance(const messages::localisation::Ball& ball);
         void goalieWalk(const std::vector<messages::localisation::Self>& selfs, const std::vector<messages::localisation::Ball>& balls);
         arma::vec2 getKickPlan(const std::vector<messages::localisation::Self>& selfs, const messages::support::FieldDescription& fieldDescription);
-    
+        void play(const std::vector<messages::localisation::Self>& selfs, const std::vector<messages::localisation::Ball>& balls, const messages::support::FieldDescription& fieldDescription);
+
     public:
         static constexpr const char* CONFIGURATION_PATH = "SoccerStrategy.yaml";
 

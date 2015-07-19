@@ -33,6 +33,7 @@
 #include "messages/localisation/ResetRobotHypotheses.h"
 #include "messages/localisation/SideChecker.h"
 #include "messages/support/Configuration.h"
+#include "messages/platform/darwin/DarwinSensors.h"
 
 #include "utility/time/time.h"
 #include "utility/localisation/transform.h"
@@ -68,6 +69,7 @@ namespace strategy {
     using SelfUnpenalisation = messages::input::gameevents::Unpenalisation<messages::input::gameevents::SELF>;
     using messages::localisation::ResetRobotHypotheses;
     using utility::math::matrix::Transform2D;
+    using messages::platform::darwin::ButtonMiddleDown;
 
     using utility::localisation::transform::RobotToWorldTransform;
     using utility::time::durationFromSeconds;
@@ -82,10 +84,6 @@ namespace strategy {
 
             cfg_.start_position_offensive = config["start_position_offensive"].as<arma::vec2>();
             cfg_.start_position_defensive = config["start_position_defensive"].as<arma::vec2>();
-
-            cfg_.ball_search_walk_start_speed = config["ball_search_walk_start_speed"].as<float>();
-            cfg_.ball_search_walk_stop_speed = config["ball_search_walk_stop_speed"].as<float>();
-            cfg_.ball_search_walk_slow_time = config["ball_search_walk_slow_time"].as<float>();
 
             cfg_.is_goalie = config["goalie"].as<bool>();
 
@@ -152,13 +150,22 @@ namespace strategy {
             isSideChecking = false;
         });
 
+        on<Trigger<ButtonMiddleDown>, Options<Single>>([this](const ButtonMiddleDown&) {
+
+            if (!forcePlaying) {
+                std::this_thread::sleep_for(std::chrono::seconds(10));
+                forcePlaying = true;
+            }
+
+        });
+
         // Main Loop
         // TODO: ensure a reasonable state is emitted even if gamecontroller is not running
         on<Trigger<
-            Every<30, Per<std::chrono::seconds>>>, 
-            With<Sensors>, 
-            With<GameState>, 
-            With<Phase>, 
+            Every<30, Per<std::chrono::seconds>>>,
+            With<Sensors>,
+            With<GameState>,
+            With<Phase>,
             With<FieldDescription>,
             With<std::vector<Self>>,
             With<std::vector<Ball>>,
@@ -177,8 +184,13 @@ namespace strategy {
                 Behaviour::State previousState = currentState;
 
                 auto& mode = gameState.mode;
+
                 //auto& phase = gameState.phase;
-                if (pickedUp(sensors)) {
+
+                if (forcePlaying) {
+                    play(selfs, balls, fieldDescription);
+                }
+                else if (pickedUp(sensors)) {
                     // TODO: stand, no moving
                     standStill();
                     currentState = Behaviour::PICKED_UP;
@@ -223,37 +235,12 @@ namespace strategy {
                             currentState = Behaviour::FINISHED;
                         }
                         else if (phase == Phase::PLAYING) {
-
-                            if (penalised()) { // penalised
-                                standStill();
-                                find({FieldTarget::SELF});
-                                currentState = Behaviour::PENALISED;
-                            }
-                            else if (!isSideChecking) { // not penalised
-                                find({FieldTarget::BALL});
-
-                                if (cfg_.is_goalie) { // goalie
-                                    goalieWalk(selfs, balls);
-                                    currentState = Behaviour::GOALIE_WALK;
-                                } else {
-                                    if (NUClear::clock::now() - ballLastMeasured < cfg_.ball_last_seen_max_time) { // ball has been seen recently
-                                        walkTo(fieldDescription, FieldTarget::BALL);
-                                        currentState = Behaviour::WALK_TO_BALL;
-                                    }
-                                    else { // ball has not been seen recently
-                                        spinWalk();
-                                        currentState = Behaviour::SEARCH_FOR_BALL;
-                                    }
-                                }
-                            }
+                            play(selfs, balls, fieldDescription);
                         }
                     }
                 }
-                
+
                 if (currentState != previousState) {
-                    if(currentState == Behaviour::SEARCH_FOR_BALL){
-                        ballSearchStartTime = NUClear::clock::now();
-                    }
                     emit(std::make_unique<Behaviour::State>(currentState));
                 }
             }
@@ -274,6 +261,31 @@ namespace strategy {
             emit(utility::nubugger::drawCircle("SocStrat_kickTarget", Circle(0.05, kickTarget), 0.123, {0.8, 0.8, 0}));
         });
 
+    }
+
+    void SoccerStrategy::play(const std::vector<Self>& selfs, const std::vector<Ball>& balls, const FieldDescription& fieldDescription) {
+        if (penalised()) { // penalised
+            standStill();
+            find({FieldTarget::SELF});
+            currentState = Behaviour::PENALISED;
+        }
+        else if (!isSideChecking) { // not penalised
+            find({FieldTarget::BALL});
+
+            if (cfg_.is_goalie) { // goalie
+                goalieWalk(selfs, balls);
+                currentState = Behaviour::GOALIE_WALK;
+            } else {
+                if (NUClear::clock::now() - ballLastMeasured < cfg_.ball_last_seen_max_time) { // ball has been seen recently
+                    walkTo(fieldDescription, FieldTarget::BALL);
+                    currentState = Behaviour::WALK_TO_BALL;
+                }
+                else { // ball has not been seen recently
+                    spinWalk();
+                    currentState = Behaviour::SEARCH_FOR_BALL;
+                }
+            }
+        }
     }
 
     void SoccerStrategy::initialLocalisationReset(const FieldDescription& fieldDescription) {
@@ -355,7 +367,7 @@ namespace strategy {
     void SoccerStrategy::walkTo(const FieldDescription& fieldDescription, arma::vec position) {
 
         arma::vec2 enemyGoal = {fieldDescription.dimensions.field_length * 0.5, 0};
-        
+
         auto goalState = Transform2D::lookAt(position, enemyGoal);
         emit(std::make_unique<MotionCommand>(MotionCommand::WalkToState(goalState)));
     }
@@ -406,44 +418,41 @@ namespace strategy {
     }
 
     void SoccerStrategy::spinWalk() {
-        float timeSinceSpinStarted = std::chrono::duration_cast<std::chrono::microseconds>(NUClear::clock::now() - ballSearchStartTime).count() * 1e-6;
-        float alpha = std::fmax(std::fmin(1 - timeSinceSpinStarted / cfg_.ball_search_walk_slow_time,1),0);
-        float velocity = cfg_.ball_search_walk_start_speed * alpha + (1-alpha) * cfg_.ball_search_walk_stop_speed;
-        emit(std::make_unique<MotionCommand>(MotionCommand::DirectCommand({0, 0, velocity})));
+        emit(std::make_unique<MotionCommand>(MotionCommand::DirectCommand({0, 0, 1})));
     }
 
     arma::vec2 SoccerStrategy::getKickPlan(const std::vector<Self>& selfs, const messages::support::FieldDescription& fieldDescription) {
-        
-        // Defines the box within in which the kick target is changed from the centre 
+
+        // Defines the box within in which the kick target is changed from the centre
         // of the oppposition goal to the perpendicular distance from the robot to the goal
 
         float maxKickRange = 0.6; //TODO: make configurable, only want to change at the last kick to avoid smart goalies
         float xTakeOverBox = maxKickRange;
         size_t error = 0.05;
-        size_t buffer = error + 2 * fieldDescription.ball_radius; //15cm           
+        size_t buffer = error + 2 * fieldDescription.ball_radius; //15cm
         float yTakeOverBox = fieldDescription.dimensions.goal_width/2 - buffer; // 90-15 = 75cm
         float xRobot = selfs.front().position[0];
         float yRobot = selfs.front().position[1];
         arma::vec2 newTarget;
-        
-        if(!selfs.empty()) {        
-            
-            if( (fieldDescription.dimensions.field_length/2) - xTakeOverBox < xRobot 
-                    && -yTakeOverBox < yRobot 
+
+        if(!selfs.empty()) {
+
+            if( (fieldDescription.dimensions.field_length/2) - xTakeOverBox < xRobot
+                    && -yTakeOverBox < yRobot
                         && yRobot < yTakeOverBox) {
-                // Aims for behind the point that gives the shortest distance             
+                // Aims for behind the point that gives the shortest distance
                 newTarget[0] = fieldDescription.dimensions.field_length/2 + fieldDescription.dimensions.goal_depth/2;
                 newTarget[1] = yRobot;
 
             } else {
-                
+
                 // Aims for the centre of the goal
                 newTarget[0] = fieldDescription.dimensions.field_length/2;
                 newTarget[1] = 0;
             }
 
         } else {
-            
+
             // Return default
             newTarget[0] = fieldDescription.dimensions.field_length/2;
             newTarget[1] = 0;
