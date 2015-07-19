@@ -152,11 +152,11 @@ namespace modules {
                         middleDown = newMiddleDown;
 
                         if(newMiddleDown) {
-                            std::cout << "Right Button Down" << std::endl;
+                            std::cout << "Middle Button Down" << std::endl;
                             emit(std::make_unique<ButtonMiddleDown>());
                         }
                         else {
-                            std::cout << "Right Button Up" << std::endl;
+                            std::cout << "Middle Button Up" << std::endl;
                             emit(std::make_unique<ButtonMiddleUp>());
                         }
                     }
@@ -388,8 +388,8 @@ namespace modules {
                         sensors->leftFootDown = false;
                         sensors->rightFootDown = false;
                     }
-                    
-                            
+
+
                     // log("left", sensors->leftFSRCenter.t(), "right", sensors->rightFSRCenter.t());
 
                     // if(previousSensors && (!sensors->leftFootDown && !sensors->rightFootDown )) {
