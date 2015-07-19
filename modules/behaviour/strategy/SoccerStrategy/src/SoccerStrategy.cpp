@@ -153,6 +153,7 @@ namespace strategy {
         on<Trigger<ButtonMiddleDown>, Options<Single>>([this](const ButtonMiddleDown&) {
 
             if (!forcePlaying) {
+                NUClear::log("forcePlaying started");
                 std::this_thread::sleep_for(std::chrono::seconds(10));
                 forcePlaying = true;
             }
@@ -264,25 +265,33 @@ namespace strategy {
     }
 
     void SoccerStrategy::play(const std::vector<Self>& selfs, const std::vector<Ball>& balls, const FieldDescription& fieldDescription) {
-        if (penalised()) { // penalised
+        if (penalised() && !forcePlaying) { // penalised
             standStill();
             find({FieldTarget::SELF});
             currentState = Behaviour::PENALISED;
         }
         else if (!isSideChecking) { // not penalised
-            find({FieldTarget::BALL});
 
             if (cfg_.is_goalie) { // goalie
+                find({FieldTarget::BALL});
                 goalieWalk(selfs, balls);
                 currentState = Behaviour::GOALIE_WALK;
             } else {
+                find({FieldTarget::BALL});
+
                 if (NUClear::clock::now() - ballLastMeasured < cfg_.ball_last_seen_max_time) { // ball has been seen recently
                     walkTo(fieldDescription, FieldTarget::BALL);
                     currentState = Behaviour::WALK_TO_BALL;
                 }
                 else { // ball has not been seen recently
-                    spinWalk();
-                    currentState = Behaviour::SEARCH_FOR_BALL;
+                    if (arma::norm(selfs[0].position) > 1) { // a long way away from centre
+                        // walk to centre of field
+                        walkTo(fieldDescription, arma::vec2({0, 0}));
+                        currentState = Behaviour::MOVE_TO_CENTRE;
+                    } else {
+                        spinWalk();
+                        currentState = Behaviour::SEARCH_FOR_BALL;
+                    }
                 }
             }
         }
