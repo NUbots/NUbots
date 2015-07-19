@@ -42,7 +42,7 @@ namespace localisation {
 
         KFBallLocalisationEngine() :
             ball_filter_(
-                {0.1, 0, 0, 0}, // mean
+                {3, 2, 0, 0}, // mean
                 // {0, 0, 3.141},
                 arma::eye(ball::BallModel::size, ball::BallModel::size) * 1, // cov
                 0.1) // alpha
