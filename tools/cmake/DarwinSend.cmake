@@ -34,6 +34,9 @@ FOREACH(robot 0 1 2 3 4 5 6 7)
     ENDFOREACH(config)
 ENDFOREACH(robot)
 
+ADD_CUSTOM_TARGET("dall"
+          DEPENDS d1eo d2eo d3eo d4eo d5eo d6eo)
+
 ADD_CUSTOM_TARGET("nc"
           COMMAND ${PYTHON_EXECUTABLE} "${CMAKE_SOURCE_DIR}/tools/scripts/send.py" "--robot_ip=10.0.1.120" "--username=nubots"
           DEPENDS ${NUCLEAR_ROLES} "${CMAKE_SOURCE_DIR}/tools/scripts/send.py")
