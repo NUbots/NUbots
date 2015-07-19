@@ -43,11 +43,14 @@ walk_cycle:
   step:
     # The height to which the robot raises its foot at each step. This parameter is very sensitive in terms of balance.
     height: 0.040
+    # height of foot as a fraction of height 
+    height_slow_fraction: 0.5
+    height_fast_fraction: 1.5
     # These limit the distance a footstep will take
-    limits:
+        limits:
       - [-0.1, 0.1] # [min_x, max_x]
-      - [0.07, 0.2] # [min_y, max_y]
-      - [0, 30 * pi / 180] # [min_angle, max_angle]
+      - [0.0, 0.2] # [min_y, max_y]
+      - [0, 15 * pi / 180] # [min_angle, max_angle]
   velocity:
     # Velocity limits for the walk
     limits:
@@ -58,9 +61,9 @@ walk_cycle:
     high_speed: 0.06
   acceleration:
     # Acceleration limits
-    limits: [0.02, 0.02, 0.15]
+    limits: [0.005, 0.005, 0.05]
     # When moving at 'fast' speed or faster, use these limits instead
-    limits_high: [0.01, 0.02, 0.15]
+    limits_high: [0.005, 0.005, 0.05]
     # Factor to slow down walk when turning
     turning_factor: 0.6
   # When to begin and end the single support phase. Range: [0,1]

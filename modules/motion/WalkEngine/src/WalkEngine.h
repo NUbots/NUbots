@@ -161,6 +161,8 @@ namespace motion {
         double stepTime;
         double zmpTime;
         double stepHeight;
+        float step_height_slow_fraction;
+        float step_height_fast_fraction;
         double phase1Single;
         double phase2Single;
         arma::vec2 footOffset;
@@ -180,6 +182,8 @@ namespace motion {
         double balancePGain;
         double balanceIGain;
         double balanceDGain;
+
+        NUClear::clock::time_point lastVeloctiyUpdateTime;
 
         // jointGains are the current gains sent to the servos
         std::map<ServoID, float> jointGains;

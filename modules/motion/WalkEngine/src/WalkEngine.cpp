@@ -133,6 +133,7 @@ namespace motion {
         });
 
         on<Trigger<WalkStartCommand>>([this](const WalkStartCommand&) {
+            lastVeloctiyUpdateTime = NUClear::clock::now();
             start();
             // emit(std::make_unique<ActionPriorites>(ActionPriorites { subsumptionId, { 25, 10 }})); // TODO: config
         });
@@ -195,6 +196,9 @@ namespace motion {
         hipRollCompensation = walkCycle["hip_roll_compensation"].as<Expression>();
         stepHeight = walkCycle["step"]["height"].as<Expression>();
         stepLimits = walkCycle["step"]["limits"].as<arma::mat::fixed<3,2>>();
+
+        step_height_slow_fraction = walkCycle["step"]["height_slow_fraction"].as<float>();
+        step_height_fast_fraction = walkCycle["step"]["height_fast_fraction"].as<float>();
 
         auto& velocity = walkCycle["velocity"];
         velocityLimits = velocity["limits"].as<arma::mat::fixed<3,2>>();
@@ -412,12 +416,12 @@ namespace motion {
         //Get unitless phases for x and z motion
         arma::vec3 foot = footPhase(phase, phase1Single, phase2Single);
 
-        float min = 0.5;
-        float max = 1.0;
+        //Lift foot by amount depending on walk speed
         auto& limit = (velocityCurrent.x() > velocityHigh ? accelerationLimitsHigh : accelerationLimits); // TODO: use a function instead
         float speed = std::min(1.0, std::max(std::abs(velocityCurrent.x() / limit[0]), std::abs(velocityCurrent.y() / limit[1])));
-        float scale = (max - min) * speed + min;
+        float scale = (step_height_fast_fraction - step_height_slow_fraction) * speed + step_height_slow_fraction;
         foot[2] *= scale;
+        
 
         // don't lift foot at initial step, TODO: review
         if (initialStep > 0) {
