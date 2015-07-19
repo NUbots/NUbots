@@ -35,6 +35,7 @@ message Behaviour {
         WALK_TO_BALL = 4;
         GOALIE_WALK = 12;
         MOVE_TO_CENTRE = 13;
+        LOCALISING = 14;
     }
 
     required State state = 1;

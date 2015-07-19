@@ -23,8 +23,14 @@
 namespace messages {
 namespace behaviour {
 
-	struct KickPlan { 
+    enum class KickType {
+        IK_KICK,
+        SCRIPTED
+    };
+
+	struct KickPlan {
 		arma::vec2 target;
+        KickType kickType;
 	};
 
 }

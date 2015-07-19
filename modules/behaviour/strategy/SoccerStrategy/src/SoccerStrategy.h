@@ -23,11 +23,13 @@
 #include <nuclear>
 #include <armadillo>
 
+#include "messages/behaviour/KickPlan.h"
 #include "messages/behaviour/FieldTarget.h"
 #include "messages/behaviour/proto/Behaviour.pb.h"
 #include "messages/localisation/FieldObject.h"
 #include "messages/input/Sensors.h"
 #include "messages/support/FieldDescription.h"
+#include "messages/input/gameevents/GameEvents.h"
 
 namespace modules {
 namespace behaviour {
@@ -54,6 +56,8 @@ namespace strategy {
             float goalie_translation_speed_factor;
             float goalie_max_translation_speed;
             float goalie_side_walk_angle_threshold;
+            NUClear::clock::duration localisation_interval;
+            NUClear::clock::duration localisation_duration;
         } cfg_;
 
         messages::behaviour::FieldTarget walkTarget;
@@ -66,7 +70,10 @@ namespace strategy {
         bool selfPenalised = false;
         bool isSideChecking = false;
         bool forcePlaying = false;
+        messages::behaviour::KickType kickType;
         messages::behaviour::proto::Behaviour::State currentState = messages::behaviour::proto::Behaviour::INIT;
+
+        NUClear::clock::time_point lastLocalised = NUClear::clock::now();
 
         time_t ballLastMeasured;
         time_t ballSearchStartTime;
@@ -86,7 +93,7 @@ namespace strategy {
         bool ballDistance(const messages::localisation::Ball& ball);
         void goalieWalk(const std::vector<messages::localisation::Self>& selfs, const std::vector<messages::localisation::Ball>& balls);
         arma::vec2 getKickPlan(const std::vector<messages::localisation::Self>& selfs, const messages::support::FieldDescription& fieldDescription);
-        void play(const std::vector<messages::localisation::Self>& selfs, const std::vector<messages::localisation::Ball>& balls, const messages::support::FieldDescription& fieldDescription);
+        void play(const std::vector<messages::localisation::Self>& selfs, const std::vector<messages::localisation::Ball>& balls, const messages::support::FieldDescription& fieldDescription, const messages::input::gameevents::Mode& mode);
 
     public:
         static constexpr const char* CONFIGURATION_PATH = "SoccerStrategy.yaml";

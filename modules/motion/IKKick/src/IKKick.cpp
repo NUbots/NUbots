@@ -54,6 +54,7 @@ namespace motion {
     using messages::behaviour::RegisterAction;
     using messages::behaviour::ActionPriorites;
     using messages::behaviour::KickPlan;
+    using messages::behaviour::KickType;
     using messages::support::FieldDescription;
 
     using utility::motion::kinematics::calculateLegJoints;
@@ -77,7 +78,7 @@ namespace motion {
             EXECUTION_PRIORITY = config["execution_priority"].as<float>();
 
             foot_separation = config["balancer"]["foot_separation"].as<float>();
-            
+
             gain_legs =config["servo"]["gain"].as<float>();
             torque = config["servo"]["torque"].as<float>();
 
@@ -87,18 +88,18 @@ namespace motion {
 
             //Emit useful info to KickPlanner
             emit(std::make_unique<IKKickParams>(IKKickParams{config["balancer"]["stand_height"].as<float>()}));
-            emit(std::make_unique<KickPlan>(KickPlan{{4.5,0}}));
+            emit(std::make_unique<KickPlan>(KickPlan{{4.5,0},KickType::IK_KICK}));
 
         });
 
         on<Trigger<Startup>>("IKKick Startup",[this](const Startup&){
             //Default kick plan at enemy goals
-            emit(std::make_unique<KickPlan>(KickPlan{{4.5,0}}));
+            emit(std::make_unique<KickPlan>(KickPlan{{4.5,0},KickType::IK_KICK}));
         });
 
         on<Trigger<KickCommand>>([this] (const KickCommand&) {
-            // We want to kick!  
-       
+            // We want to kick!
+
             emit(std::make_unique<WalkStopCommand>(subsumptionId)); // Stop the walk
 
             updatePriority(KICK_PRIORITY);
@@ -142,7 +143,7 @@ namespace motion {
 
             balancer.setKickParameters(supportFoot, ballPosition, goalPosition);
             kicker.setKickParameters(supportFoot, ballPosition, goalPosition);
-            
+
             balancer.start(sensors);
         });
 
@@ -151,7 +152,7 @@ namespace motion {
             //Setup kick variables
             LimbID kickFoot;
             if(supportFoot == LimbID::RIGHT_LEG){
-                kickFoot = LimbID::LEFT_LEG;  
+                kickFoot = LimbID::LEFT_LEG;
             } else {
                 kickFoot = LimbID::RIGHT_LEG;
             }
@@ -171,7 +172,7 @@ namespace motion {
             if(balancer.isFinished()){
                 emit(std::move(std::make_unique<FinishKick>()));
             }
-            
+
             //Do things based on current state
 
             Transform3D kickFootGoal;
@@ -190,7 +191,7 @@ namespace motion {
             }
 
             //Balance based on the IMU
-            
+
             if(feedback_active){
                 feedbackBalancer.balance(supportFootGoal,supportFoot,sensors);
             }
@@ -236,7 +237,7 @@ namespace motion {
             "IK Kick",
             { std::pair<float, std::set<LimbID>>(0, { LimbID::LEFT_LEG, LimbID::RIGHT_LEG, LimbID::LEFT_ARM, LimbID::RIGHT_ARM }) },
             [this] (const std::set<LimbID>&) {
-                emit(std::make_unique<ExecuteKick>());            
+                emit(std::make_unique<ExecuteKick>());
             },
             [this] (const std::set<LimbID>&) {
                 emit(std::make_unique<FinishKick>());

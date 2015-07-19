@@ -38,18 +38,20 @@
 #include "utility/motion/InverseKinematics.h"
 
 
-
 using messages::input::Sensors;
 using messages::input::LimbID;
 using messages::localisation::Ball;
 using messages::localisation::Self;
 using messages::motion::IKKickParams;
 using messages::motion::KickCommand;
+using messages::motion::KickCommandType;
+using messages::motion::KickScriptCommand;
 using messages::motion::KickPlannerConfig;
 using messages::support::Configuration;
 using messages::motion::WalkStopCommand;
 using messages::input::LimbID;
 using messages::behaviour::KickPlan;
+using messages::behaviour::KickType;
 using messages::support::FieldDescription;
 
 using utility::math::matrix::Transform3D;
@@ -77,7 +79,7 @@ namespace planning {
         });
 
 
-        on< Trigger<Ball>, 
+        on< Trigger<Ball>,
             With<std::vector<Self>>,
             With<FieldDescription>,
             With<KickPlan>,
@@ -93,23 +95,34 @@ namespace planning {
             //Get time since last seen ball
             auto now = NUClear::clock::now();
             double secondsSinceLastSeen = std::chrono::duration_cast<std::chrono::microseconds>(now - ball.last_measurement_time).count() * 1e-6;
-            
+
             //Compute target in robot coords
             auto self = selfs[0];
             arma::vec2 kickTarget = WorldToRobotTransform(self.position, self.heading, kickPlan.target);
-            arma::vec3 ballPosition = {ball.position[0], ball.position[1], fd.ball_radius}; 
-            
+            arma::vec3 ballPosition = {ball.position[0], ball.position[1], fd.ball_radius};
+
             float KickAngle = std::fabs(std::atan2(kickTarget[1], kickTarget[0]));
 
             //Check whether to kick
             if(secondsSinceLastSeen < cfg.seconds_not_seen_limit
                 && kickValid(ballPosition, params.stand_height, sensors)
-                     && KickAngle < cfg.kick_forward_angle_limit) {
-                    if(ballPosition[1] > 0){
-                        emit(std::make_unique<KickCommand>(KickCommand{{0.1,0.04,0}, {1, 0, 0} }));
-                    } else {
-                        emit(std::make_unique<KickCommand>(KickCommand{{0.1,-0.04,0}, {1, 0, 0} }));
-                    }
+                && KickAngle < cfg.kick_forward_angle_limit) {
+
+                switch (kickPlan.kickType) {
+                    case KickType::IK_KICK:
+                        NUClear::log("ik_kick");
+                        if(ballPosition[1] > 0){
+                            emit(std::make_unique<KickCommand>(KickCommand({0.1,0.04,0}, {1, 0, 0}, KickCommandType::NORMAL )));
+                        } else {
+                            emit(std::make_unique<KickCommand>(KickCommand({0.1,-0.04,0}, {1, 0, 0}, KickCommandType::NORMAL )));
+                        }
+                        break;
+                    case KickType::SCRIPTED:
+                        NUClear::log("scripted");
+                        emit(std::make_unique<KickScriptCommand>(KickScriptCommand({{1, 0, 0}, LimbID::LEFT_LEG})));
+                        break;
+                    default: throw new std::runtime_error("KickPlanner: Invalid KickType");
+                }
             }
 
         });

@@ -199,13 +199,13 @@ namespace support {
                     break;
 
                 case MotionType::MOTION:
-                
+
                 //Update based on walk engine
                     if(walkCommand && !kicking) {
-                        world.robotVelocity.xy() = walkCommand->command.xy();
+                        world.robotVelocity.xy() = walkCommand->command.xy() * 0.2;
                         // world.robotVelocity.xy() = sensors.odometry;
                         //angle from command:
-                        world.robotVelocity.angle() = walkCommand->command.angle();
+                        world.robotVelocity.angle() = walkCommand->command.angle() * 0.2;
                     } else {
                         world.robotVelocity = utility::math::matrix::Transform2D({0,0,0});
                     }
@@ -273,7 +273,7 @@ namespace support {
                     return;
                 }
 
-               
+
                 for (auto& g : goalPosts) {
 
                     // Detect the goal:

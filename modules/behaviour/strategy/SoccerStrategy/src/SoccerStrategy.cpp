@@ -19,11 +19,9 @@
 
 #include "SoccerStrategy.h"
 
-#include "messages/input/gameevents/GameEvents.h"
 #include "messages/behaviour/LookStrategy.h"
 #include "messages/behaviour/Look.h"
 #include "messages/behaviour/MotionCommand.h"
-#include "messages/behaviour/KickPlan.h"
 #include "messages/behaviour/SoccerObjectPriority.h"
 #include "messages/support/FieldDescription.h"
 #include "messages/input/Sensors.h"
@@ -58,6 +56,7 @@ namespace strategy {
     using messages::behaviour::Look;
     using messages::behaviour::FieldTarget;
     using messages::behaviour::KickPlan;
+    using messages::behaviour::KickType;
     using messages::behaviour::SoccerObjectPriority;
     using messages::behaviour::proto::Behaviour;
     using messages::support::FieldDescription;
@@ -82,6 +81,9 @@ namespace strategy {
             cfg_.ball_last_seen_max_time = durationFromSeconds(config["ball_last_seen_max_time"].as<double>());
             cfg_.goal_last_seen_max_time = durationFromSeconds(config["goal_last_seen_max_time"].as<double>());
 
+            cfg_.localisation_interval = durationFromSeconds(config["localisation_interval"].as<double>());
+            cfg_.localisation_duration = durationFromSeconds(config["localisation_duration"].as<double>());
+
             cfg_.start_position_offensive = config["start_position_offensive"].as<arma::vec2>();
             cfg_.start_position_defensive = config["start_position_defensive"].as<arma::vec2>();
 
@@ -98,7 +100,7 @@ namespace strategy {
         });
 
         // TODO: unhack
-        emit(std::make_unique<KickPlan>(KickPlan{{4.5, 0}}));
+        emit(std::make_unique<KickPlan>(KickPlan{{4.5, 0}, KickType::IK_KICK}));
 
 
         // For checking last seen times
@@ -188,8 +190,11 @@ namespace strategy {
 
                 //auto& phase = gameState.phase;
 
+                // TODO: unhack
+                kickType = mode == Mode::PENALTY_SHOOTOUT ? KickType::SCRIPTED : KickType::IK_KICK;
+
                 if (forcePlaying) {
-                    play(selfs, balls, fieldDescription);
+                    play(selfs, balls, fieldDescription, mode);
                 }
                 else if (pickedUp(sensors)) {
                     // TODO: stand, no moving
@@ -236,7 +241,7 @@ namespace strategy {
                             currentState = Behaviour::FINISHED;
                         }
                         else if (phase == Phase::PLAYING) {
-                            play(selfs, balls, fieldDescription);
+                            play(selfs, balls, fieldDescription, mode);
                         }
                     }
                 }
@@ -258,13 +263,13 @@ namespace strategy {
 
         on<Trigger<std::vector<Self>>, With<FieldDescription>> ([this] (const std::vector<Self>& selfs, const FieldDescription& fieldDescription) {
             auto kickTarget = getKickPlan(selfs, fieldDescription);
-            emit(std::make_unique<KickPlan>(KickPlan{kickTarget}));
+            emit(std::make_unique<KickPlan>(KickPlan{kickTarget, kickType}));
             emit(utility::nubugger::drawCircle("SocStrat_kickTarget", Circle(0.05, kickTarget), 0.123, {0.8, 0.8, 0}));
         });
 
     }
 
-    void SoccerStrategy::play(const std::vector<Self>& selfs, const std::vector<Ball>& balls, const FieldDescription& fieldDescription) {
+    void SoccerStrategy::play(const std::vector<Self>& selfs, const std::vector<Ball>& balls, const FieldDescription& fieldDescription, const Mode& mode) {
         if (penalised() && !forcePlaying) { // penalised
             standStill();
             find({FieldTarget::SELF});
@@ -277,18 +282,27 @@ namespace strategy {
                 goalieWalk(selfs, balls);
                 currentState = Behaviour::GOALIE_WALK;
             } else {
-                find({FieldTarget::BALL});
-
-                if (NUClear::clock::now() - ballLastMeasured < cfg_.ball_last_seen_max_time) { // ball has been seen recently
+                if (NUClear::clock::now() - lastLocalised > cfg_.localisation_interval) {
+                    standStill();
+                    find({FieldTarget::SELF});
+                    if (NUClear::clock::now() - lastLocalised > cfg_.localisation_interval + cfg_.localisation_duration) {
+                        lastLocalised = NUClear::clock::now();
+                    }
+                    currentState = Behaviour::LOCALISING;
+                }
+                else if (NUClear::clock::now() - ballLastMeasured < cfg_.ball_last_seen_max_time) { // ball has been seen recently
+                    find({FieldTarget::BALL});
                     walkTo(fieldDescription, FieldTarget::BALL);
                     currentState = Behaviour::WALK_TO_BALL;
                 }
                 else { // ball has not been seen recently
-                    if (arma::norm(selfs[0].position) > 1) { // a long way away from centre
+                    if (mode != Mode::PENALTY_SHOOTOUT && arma::norm(selfs[0].position) > 1) { // a long way away from centre
                         // walk to centre of field
+                        find({FieldTarget::BALL});
                         walkTo(fieldDescription, arma::vec2({0, 0}));
                         currentState = Behaviour::MOVE_TO_CENTRE;
                     } else {
+                        find({FieldTarget::BALL});
                         spinWalk();
                         currentState = Behaviour::SEARCH_FOR_BALL;
                     }

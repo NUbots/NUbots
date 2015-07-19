@@ -22,7 +22,7 @@ robot_footprint_dimensions: [0.12, 0.17]
 # front of the robot touching the center of the ball. This offset is applied
 # to that position (e.g. to make the robot line up with the ball in front of
 # one foot).
-target_offset: [-0.02, 0.06] # stand 2cm back, and line up ball with left foort
+target_offset: [-0.02, -0.06] # stand 2cm back, and line up ball with left foot
 
 # ball_obstacle_radius: 0.1
 # ball_obstacle_offset: [0.05, 0]

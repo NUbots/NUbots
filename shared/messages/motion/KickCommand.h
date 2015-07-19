@@ -33,13 +33,20 @@ namespace messages {
          * @author Trent Houliston
          * @author Brendan Annable
          */
+        enum class KickCommandType {
+            NORMAL,
+            POWER
+        };
+
         struct KickCommand {
             arma::vec3 target; // The point to kick
             arma::vec3 direction; // force is the magnitude
+            KickCommandType kickCommandType = KickCommandType::NORMAL;
 
-            KickCommand(const arma::vec3& target, const arma::vec3& direction)
+            KickCommand(const arma::vec3& target, const arma::vec3& direction, const KickCommandType& kickCommandType = KickCommandType::NORMAL)
             : target(target)
-            , direction(direction) {}
+            , direction(direction)
+            , kickCommandType(kickCommandType) {}
         };
 
         /**
