@@ -213,6 +213,9 @@ namespace motion{
 			float kick_height;
 			float wind_up;
 			float foot_separation_margin;
+
+			float return_before_place_duration;
+			float lift_before_windup_duration;
 		public:
 			virtual void configure(const messages::support::Configuration<IKKickConfig>& config);
 			virtual void computeStartMotion(const messages::input::Sensors& sensors);

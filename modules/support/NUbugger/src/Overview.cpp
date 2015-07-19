@@ -58,13 +58,8 @@ namespace support {
     void NUbugger::provideOverview() {
 
         /*handles[Message::OVERVIEW].push_back(*/on<Trigger<Every<1, std::chrono::seconds>>, Options<Single, Priority<NUClear::LOW>>>([this](const time_t&) {
-            Message message;
-            message.set_type(Message::OVERVIEW);
-            message.set_filter_id(0);
-            message.set_utc_timestamp(getUtcTimestamp());
-
+            Message message = createMessage(Message::OVERVIEW);
             *message.mutable_overview() = overview;
-
             send(message);
         })/*)*/;
 
@@ -127,23 +122,27 @@ namespace support {
 
         })/*)*/;
 
-        /*handles[Message::OVERVIEW].push_back(*/on<Trigger<std::vector<VisionBall>>, Options<Single, Priority<NUClear::LOW>>>([this] (const std::vector<VisionBall>&/* balls*/) {
+        /*handles[Message::OVERVIEW].push_back(*/on<Trigger<std::vector<VisionBall>>, Options<Single, Priority<NUClear::LOW>>>([this] (const std::vector<VisionBall>& balls) {
 
-            overview.set_last_seen_ball(getUtcTimestamp());
-
-        })/*)*/;
-
-        /*handles[Message::OVERVIEW].push_back(*/on<Trigger<std::vector<VisionGoal>>, Options<Single, Priority<NUClear::LOW>>>([this] (const std::vector<VisionGoal>&/* goals*/) {
-
-            overview.set_last_seen_goal(getUtcTimestamp());
+            if (!balls.empty()) {
+                overview.set_last_seen_ball(getUtcTimestamp());
+            }
 
         })/*)*/;
 
-        /*handles[Message::OVERVIEW].push_back(*/on<Trigger<GameState>, Options<Single, Priority<NUClear::LOW>>>([this] (const GameState& gamestate) {
+        /*handles[Message::OVERVIEW].push_back(*/on<Trigger<std::vector<VisionGoal>>, Options<Single, Priority<NUClear::LOW>>>([this] (const std::vector<VisionGoal>& goals) {
 
-            overview.set_game_mode(getMode(gamestate.mode));
-            overview.set_game_phase(getPhase(gamestate.phase));
-            overview.set_penalty_reason(getPenaltyReason(gamestate.self.penaltyReason));
+            if (!goals.empty()) {
+                overview.set_last_seen_goal(getUtcTimestamp());
+            }
+
+        })/*)*/;
+
+        /*handles[Message::OVERVIEW].push_back(*/on<Trigger<GameState>, Options<Single, Priority<NUClear::LOW>>>([this] (const GameState& gameState) {
+
+            overview.set_game_mode(getMode(gameState.mode));
+            overview.set_game_phase(getPhase(gameState.phase));
+            overview.set_penalty_reason(getPenaltyReason(gameState.self.penaltyReason));
 
         })/*)*/;
 
@@ -157,9 +156,10 @@ namespace support {
 
         })/*)*/;
 
-        /*handles[Message::OVERVIEW].push_back(*/on<Trigger<KickPlan>, Options<Single, Priority<NUClear::LOW>>>([this] (const KickPlan& KickPlan) {
+        /*handles[Message::OVERVIEW].push_back(*/on<Trigger<KickPlan>, Options<Single, Priority<NUClear::LOW>>>([this] (const KickPlan& kickPlan) {
 
-            *overview.mutable_kick_target() << KickPlan.target;
+            // TODO fix runtime error:
+            // *overview.mutable_kick_target() << kickTarget;
 
         })/*)*/;
 

@@ -96,6 +96,8 @@ namespace modules {
 
                     headSearcher.setSwitchTime(config["fixation_time_ms"].as<float>());
 
+                    oscillate_search = config["oscillate_search"].as<bool>();
+
                     //Note that these are actually modified later and are hence camelcase
                     ballPriority = config["initial"]["priority"]["ball"].as<int>();
                     goalPriority = config["initial"]["priority"]["goal"].as<int>();
@@ -224,8 +226,9 @@ namespace modules {
                         updatePlan = true;
                         lastCentroid = {99999,99999};//reset centroid to impossible value to trigger reset TODO: find a better way
                     }
-
-                    else if(lostAndSearching && orientationHasChanged(sensors)){
+                    //TODO!! - Put search pattern back in IMU space and make replanning work
+                    else if(false && lostAndSearching && orientationHasChanged(sensors)){
+                        // log("orientation has changed: replanning");
                         updatePlan = true;
                         lastCentroid = {99999,99999};//reset centroid to impossible value to trigger reset TODO: find a better way
                     }
@@ -238,7 +241,7 @@ namespace modules {
                     }
 
                     //Update state machine
-                    headSearcher.update();
+                    headSearcher.update(oscillate_search);
                     //Emit new result if possible
                     if(headSearcher.newGoal()){
                         //Emit result
@@ -246,7 +249,7 @@ namespace modules {
                         std::unique_ptr<HeadCommand> command = std::make_unique<HeadCommand>();
                         command->yaw = direction[0];
                         command->pitch = direction[1];
-                        command->robotSpace = false;
+                        command->robotSpace = search;
                         emit(std::move(command));
                     }
 
@@ -273,18 +276,21 @@ namespace modules {
                 }
 
                 if(search){
-                    fixationPoints = getSearchPoints(fixationObjects, searchType);
+                    fixationPoints = getSearchPoints(fixationObjects, searchType, sensors);
                 }
 
                 if(fixationPoints.size() <= 0){
                     log("FOUND NO POINTS TO LOOK AT! - ARE THE SEARCHES PROPERLY CONFIGURED IN HEADBEHAVIOURSOCCER.YAML?");
                 }
 
-                for(auto& p : fixationPoints){
-                    p = getIMUSpaceDirection(p, headToIMUSpace, search && fixationObjects.size() == 0);
+                auto currentPos = arma::vec2({sensors.servos.at(int(ServoID::HEAD_YAW)).presentPosition,sensors.servos.at(int(ServoID::HEAD_PITCH)).presentPosition});
+                if(!search){
+                    for(auto& p : fixationPoints){
+                        p = getIMUSpaceDirection(p, headToIMUSpace, search && fixationObjects.size() == 0);
+                    }
+                    currentPos = getIMUSpaceDirection(currentPos, headToIMUSpace, search && fixationObjects.size() == 0);
                 }
 
-                auto currentPos = arma::vec2({sensors.servos.at(int(ServoID::HEAD_YAW)).presentPosition,sensors.servos.at(int(ServoID::HEAD_PITCH)).presentPosition});
                 headSearcher.replaceSearchPoints(fixationPoints, currentPos);
             }
 
@@ -293,7 +299,10 @@ namespace modules {
                 // arma::vec3 lookVectorFromHead = objectDirectionFromScreenAngular(screenAngles);
                 arma::vec3 lookVectorFromHead = sphericalToCartesian({1,screenAngles[0],screenAngles[1]});//This is an approximation relying on the robots small FOV
                 //Remove pitch from matrix if we are adjusting search points
-                if(lost) headToIMUSpace = Rotation3D::createRotationY(-headToIMUSpace.yaw()) * headToIMUSpace;
+
+                //Check why if this works:
+                // if(lost) headToIMUSpace = Rotation3D::createRotationY(-headToIMUSpace.pitch()) * headToIMUSpace;
+                
                 //Rotate target angles to World space
                 arma::vec3 lookVector = headToIMUSpace * lookVectorFromHead;
                 //Compute inverse kinematics for head direction angles
@@ -313,15 +322,28 @@ namespace modules {
             /*! Get search points which keep everything in view.
             Returns vector of arma::vec2
             */
-            std::vector<arma::vec2> HeadBehaviourSoccer::getSearchPoints(std::vector<VisionObject> fixationObjects, SearchType sType){
+            std::vector<arma::vec2> HeadBehaviourSoccer::getSearchPoints(std::vector<VisionObject> fixationObjects, SearchType sType, const Sensors& sensors){
                     //If there is nothing of interest, we search fot points of interest
                     if(fixationObjects.size() == 0){
                         //Lost searches are normalised in terms of the FOV
                         std::vector<arma::vec2> scaledResults;
                         for(auto& p : searches[sType]){
                             //Interpolate between max and min allowed angles with -1 = min and 1 = max
-                            scaledResults.push_back(arma::vec2({((max_yaw - min_yaw) * p[0] + max_yaw + min_yaw) / 2,
-                                                                ((max_pitch - min_pitch) * p[1] + max_pitch + min_pitch) / 2}));
+                            auto angles = arma::vec2({((max_yaw - min_yaw) * p[0] + max_yaw + min_yaw) / 2,
+                                                                ((max_pitch - min_pitch) * p[1] + max_pitch + min_pitch) / 2});
+                            // arma::vec3 lookVectorFromHead = sphericalToCartesian({1,angles[0],angles[1]});//This is an approximation relying on the robots small FOV
+                            // arma::vec3 adjustedLookVector = Rotation3D::createRotationY(sensors.orientation.pitch()) * lookVectorFromHead;
+                            // std::vector< std::pair<ServoID, float> > goalAngles = calculateHeadJoints<DarwinModel>(adjustedLookVector);
+
+                            // for(auto& angle : goalAngles){
+                            //     if(angle.first == ServoID::HEAD_PITCH){
+                            //         angles[1] = angle.second;
+                            //     } else if(angle.first == ServoID::HEAD_YAW){
+                            //         angles[0] = angle.second;
+                            //     }
+                            // }
+                            
+                            scaledResults.push_back(angles);
                         }
                         return scaledResults;
                     }

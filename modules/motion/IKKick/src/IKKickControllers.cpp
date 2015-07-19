@@ -75,6 +75,10 @@ namespace motion{
         kick_height = config["kick"]["kick_height"].as<float>();
         wind_up = config["kick"]["wind_up"].as<float>();
         foot_separation_margin = config["kick"]["foot_separation_margin"].as<float>();
+
+        lift_before_windup_duration = config["kick"]["lift_before_windup_duration"].as<float>();
+        return_before_place_duration = config["kick"]["return_before_place_duration"].as<float>();
+        
 	}
 
     void Kicker::computeStartMotion(const Sensors& sensors) {
@@ -125,10 +129,20 @@ namespace motion{
 
         kick.duration = arma::norm(kickGoal - liftGoal) / kick_velocity;
         
+        //Robocup code / hacks
+        auto startFrame = SixDOFFrame{startPose,0};
+        auto liftBeforeWindUp = startFrame;
+        liftBeforeWindUp.pose.translation() = arma::vec3{0,0,lift_foot.pose.translation()[2]};
+        liftBeforeWindUp.duration = lift_before_windup_duration;
+        auto returnBeforePlace = liftBeforeWindUp;
+        returnBeforePlace.duration = return_before_place_duration;
+
         std::vector<SixDOFFrame> frames;
-        frames.push_back(SixDOFFrame{startPose,0});
+        frames.push_back(startFrame);
+        frames.push_back(liftBeforeWindUp);
         frames.push_back(lift_foot);
         frames.push_back(kick);
+        frames.push_back(returnBeforePlace);
         frames.push_back(place_foot);
         anim = Animator(frames);
 
