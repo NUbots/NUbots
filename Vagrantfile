@@ -47,7 +47,7 @@ Vagrant.configure("2") do |config|
   config.vm.define "nubotsvm", primary: true do |nubots|
     nubots.vm.hostname = "nubotsvm.nubots.net"
 
-    nubots.vm.network :private_network, ip: "192.168.33.77"
+    # nubots.vm.network :private_network, ip: "192.168.33.77"
 
     # Uncomment this to enable a bridged adapter. This allows for the game controller running on your host to work with the virtual machine. Note: replace 'Wi-Fi' with your network adapter name.
     # See http://docs.vagrantup.com/v2/networking/public_network.html

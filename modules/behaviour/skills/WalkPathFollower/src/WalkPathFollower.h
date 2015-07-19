@@ -58,6 +58,7 @@ namespace skills {
 
         /// @brief Return whether currentState is close enough to visitState for us to say that the robot has 'visited' that state.
         bool isVisited(const Transform2D& currentState, const Transform2D& visitState);
+        bool isGoalClose(const Transform2D& currentState, const Transform2D& visitState);
 
         /// @brief the path to the configuration file for WalkPathFollower
         static constexpr const char* CONFIGURATION_PATH = "WalkPathFollower.yaml";
@@ -70,19 +71,22 @@ namespace skills {
 
         /// @brief Reaction handle for the path following reaction
         ReactionHandle followPathReaction;
-        
+
         /// @brief Reaction handle for the path update reaction
         ReactionHandle updatePathReaction;
 
 
         struct Config {
-            
+
             double waypoint_visit_distance = 0.1;
+            double goal_close_distance = 0.5;
             bool draw_estimated_path = false;
             double walk_about_x_strafe = 0;
             double walk_about_y_strafe = 0;
             double walk_about_rotational_speed = 0;
-            
+            double walk_to_far_forward_speed = 1;
+            double walk_to_near_speed = 1;
+
             bool follow_path_in_ball_space = true;
 
         } cfg_;

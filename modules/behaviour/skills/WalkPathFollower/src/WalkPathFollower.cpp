@@ -99,9 +99,12 @@ namespace skills {
             cfg_.waypoint_visit_distance = config["waypoint_visit_distance"].as<double>();
             cfg_.draw_estimated_path = config["draw_estimated_path"].as<bool>();
 
-            cfg_.walk_about_x_strafe = config["walk_about_xstrafe"].as<double>();        
+            cfg_.walk_about_x_strafe = config["walk_about_xstrafe"].as<double>();
             cfg_.walk_about_y_strafe = config["walk_about_ystrafe"].as<double>();
             cfg_.walk_about_rotational_speed = config["walk_about_rotational_speed"].as<double>();
+            cfg_.walk_to_far_forward_speed = config["walk_to_far_forward_speed"].as<double>();
+            cfg_.walk_to_near_speed = config["walk_to_near_speed"].as<double>();
+            cfg_.goal_close_distance = config["goal_close_distance"].as<double>();
 
         });
 
@@ -225,8 +228,13 @@ namespace skills {
     bool WalkPathFollower::isVisited(const Transform2D& currentState, const Transform2D& visitState) {
         // TODO: Abstract away the distance metric used between states.
         double dist = arma::norm(visitState.xy() - currentState.xy());
-        
         return dist < cfg_.waypoint_visit_distance;
+    }
+
+    bool WalkPathFollower::isGoalClose(const Transform2D& currentState, const Transform2D& visitState) {
+        // TODO: Abstract away the distance metric used between states.
+        double dist = arma::norm(visitState.xy() - currentState.xy());
+        return dist < cfg_.goal_close_distance;
     }
 
     int WalkPathFollower::closestPathIndex(const Transform2D& currentState, const WalkPath& walkPath) {
@@ -250,11 +258,11 @@ namespace skills {
         int targetIndex = std::min(1, int(currentPath.states.size()) - 1);
         Transform2D targetState = currentPath.states[targetIndex]; // {3, 3, 3.14};
         emit(utility::nubugger::drawRectangle("WPF_TargetState", RotatedRectangle(targetState, {0.12, 0.17}), {1, 0, 0}));
-        
+
         std::unique_ptr<WalkCommand> command;
 
         // If we have reached our target
-        if (targetIndex == 0 && isVisited(currentState, targetState)) {
+        if (targetIndex == 0 && isGoalClose(currentState, targetState)) {
             command = std::make_unique<WalkCommand>(walkBetweenNear(currentState, targetState));
         } else {
             // Make a walk command to move towards the target state
@@ -270,19 +278,19 @@ namespace skills {
         double wcAngle = utility::math::angle::signedDifference(dir, currentState.angle());
         // TODO: Consider the heading of targetState in planning.
 
-        WalkCommand command(subsumptionId, {1, 0, wcAngle});
+        WalkCommand command(subsumptionId, {cfg_.walk_to_far_forward_speed, 0, wcAngle});
         return command;
     }
 
     WalkCommand WalkPathFollower::walkBetweenNear(const Transform2D& currentState, const Transform2D& targetState) {
         // Angle between current heading and target heading
-        double walkAboutAngle = utility::math::angle::signedDifference(targetState.angle(), currentState.angle());  
+        double walkAboutAngle = utility::math::angle::signedDifference(targetState.angle(), currentState.angle());
         int angleSign = (walkAboutAngle < 0) ? -1 : 1;
         // TODO: Consider using a smaller, non-constant speed.
         double rotationSpeed = angleSign * cfg_.walk_about_rotational_speed;
 
         // if (std::abs(walkAboutAngle) < M_PI*0.125) {
-            Transform2D velocity = {arma::normalise(targetState.xy() - currentState.xy()), rotationSpeed}; //TODO make 20 seconds the variable update_frequency
+            Transform2D velocity = {cfg_.walk_to_near_speed * arma::normalise(targetState.xy() - currentState.xy()), rotationSpeed}; //TODO make 20 seconds the variable update_frequency
             WalkCommand command(subsumptionId, velocity);
             return command;
         // } else {
