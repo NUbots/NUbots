@@ -177,7 +177,7 @@ namespace support {
             With<Sensors, Optional<WalkCommand>>
         >("Robot motion", [this](const time_t&,
                                  const Sensors& sensors,
-                                 const std::shared_ptr<const WalkCommand>& walkCommand) {
+                                 std::shared_ptr<const WalkCommand> walkCommand) {
             time_t now = NUClear::clock::now();
             double deltaT = 1e-6 * std::chrono::duration_cast<std::chrono::microseconds>(now - lastNow).count();
             Transform2D diff;
@@ -199,7 +199,7 @@ namespace support {
                     break;
 
                 case MotionType::MOTION:
-                
+
                 //Update based on walk engine
                     if(walkCommand && !kicking) {
                         world.robotVelocity.xy() = walkCommand->command.xy();
@@ -258,7 +258,7 @@ namespace support {
             With<CameraParameters>,
             Options<Sync<SoccerSimulator>>
             >("Vision Simulation", [this](const time_t&,
-                const std::shared_ptr<Sensors>& sensors,
+                std::shared_ptr<Sensors> sensors,
                 const CameraParameters& camParams) {
 
             if (field_description_ == nullptr) {
@@ -273,7 +273,7 @@ namespace support {
                     return;
                 }
 
-               
+
                 for (auto& g : goalPosts) {
 
                     // Detect the goal:
