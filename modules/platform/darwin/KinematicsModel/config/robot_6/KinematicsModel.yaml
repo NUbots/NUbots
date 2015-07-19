@@ -19,8 +19,8 @@ head:
         base_position_from_origin: [0.013, 0, 0.11] # [x, y, z]
     # head movement limits
     limits:
-        yaw: [-M_PI * 2 / 3, M_PI * 2 / 3] # [min_yaw, max_yaw]
-        pitch: [-M_PI / 3, M_PI / 3] # [min_pitch, max_pitch]
+        yaw: [-pi * 2 / 3, pi * 2 / 3] # [min_yaw, max_yaw]
+        pitch: [-pi / 3, pi / 3] # [min_pitch, max_pitch]
 # rough measurements
 arm:
     distance_between_shoulders: 0.114 # distance between shoulders
