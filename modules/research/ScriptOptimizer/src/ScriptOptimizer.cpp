@@ -87,7 +87,7 @@ namespace modules {
                 }
             });
 
-            on<Trigger<Raw<DarwinSensors>>>([this](const std::shared_ptr<const DarwinSensors>& frame) {
+            on<Trigger<Raw<DarwinSensors>>>([this](std::shared_ptr<const DarwinSensors> frame) {
 
                 // While we are recording, store all the frames in a vector
                 if(this->recording) {

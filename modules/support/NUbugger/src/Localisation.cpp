@@ -42,8 +42,8 @@ namespace support {
            With<Optional<std::vector<Self>>>,
            Options<Single>>("Localisation Reaction (NUbugger.cpp)",
             [this](const time_t&,
-                   const std::shared_ptr<const std::vector<Ball>>& opt_balls,
-                   const std::shared_ptr<const std::vector<Self>>& opt_robots) {
+                   std::shared_ptr<const std::vector<Ball>> opt_balls,
+                   std::shared_ptr<const std::vector<Self>> opt_robots) {
             auto robot_msg = std::make_unique<FieldObject>();
             auto ball_msg = std::make_unique<FieldObject>();
             bool robot_msg_set = false;
@@ -119,7 +119,7 @@ namespace support {
     }
 
     void NUbugger::EmitLocalisationModels(const std::unique_ptr<FieldObject>& robot_model, const std::unique_ptr<FieldObject>& ball_model) {
-        
+
         Message message = createMessage(Message::LOCALISATION, 1);
         auto* localisation = message.mutable_localisation();
 

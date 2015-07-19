@@ -167,7 +167,7 @@ namespace modules {
                   , Options<Single, Priority<NUClear::HIGH>>>(
                             "Main Sensors Loop",
                             [this](const DarwinSensors& input,
-                                   const std::shared_ptr<const Sensors>& previousSensors) {
+                                   std::shared_ptr<const Sensors> previousSensors) {
 
                     auto sensors = std::make_unique<Sensors>();
 

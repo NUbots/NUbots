@@ -144,8 +144,8 @@ namespace modules {
                     With<Optional<std::vector<Goal>>>,
                     Options<Single, Sync<HeadBehaviourSoccer>>
                   >("Head Behaviour Main Loop",[this] ( const Sensors& sensors,
-                                                        const std::shared_ptr<const std::vector<Ball>>& vballs,
-                                                        const std::shared_ptr<const std::vector<Goal>>& vgoals
+                                                        std::shared_ptr<const std::vector<Ball>> vballs,
+                                                        std::shared_ptr<const std::vector<Goal>> vgoals
                                                         ) {
 
                     bool search = false;
@@ -302,7 +302,7 @@ namespace modules {
 
                 //Check why if this works:
                 // if(lost) headToIMUSpace = Rotation3D::createRotationY(-headToIMUSpace.pitch()) * headToIMUSpace;
-                
+
                 //Rotate target angles to World space
                 arma::vec3 lookVector = headToIMUSpace * lookVectorFromHead;
                 //Compute inverse kinematics for head direction angles
@@ -342,7 +342,7 @@ namespace modules {
                             //         angles[0] = angle.second;
                             //     }
                             // }
-                            
+
                             scaledResults.push_back(angles);
                         }
                         return scaledResults;

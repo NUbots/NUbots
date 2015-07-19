@@ -93,7 +93,7 @@ namespace localisation {
 
         on<Trigger<Startup>,
            With<Optional<FieldDescription>>>("FieldDescription Update",
-           [this](const Startup&, const std::shared_ptr<const FieldDescription>& desc) {
+           [this](const Startup&, std::shared_ptr<const FieldDescription> desc) {
             if (desc == nullptr) {
                 throw std::runtime_error("FieldDescription Update: support::configuration::SoccerConfig module might not be installed");
             }
@@ -217,7 +217,7 @@ namespace localisation {
 
             auto curr_time = NUClear::clock::now();
             last_measurement_time = curr_time;
-            
+
             engine_->TimeUpdate(curr_time, sensors);
             engine_->ProcessObjects(goals);
 
