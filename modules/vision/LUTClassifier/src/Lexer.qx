@@ -15,24 +15,24 @@ token {
 mode ReplacementRules {
     // FIELD
     // Aggressive field noise removal:
-    g{10,}u{1,60}g{10,}         => QUEX_TKN_FIELD(number=(LexemeL));
+    // g{10,}u{1,60}g{10,}         => QUEX_TKN_FIELD(number=(LexemeL));
 
 
     // BALL:
     // Aggressive ball noise removal:
-    o{3,}u{1,20}o{3,}           => QUEX_TKN_BALL(number=(LexemeL));
+    // o{3,}u{1,20}o{3,}           => QUEX_TKN_BALL(number=(LexemeL));
 
     // Remove black outline from ball:
-    uo{5,}                      => QUEX_TKN_BALL(number=(LexemeL));
-    o{5,}u                      => QUEX_TKN_BALL(number=(LexemeL));
+    // uo{5,}                      => QUEX_TKN_BALL(number=(LexemeL));
+    // o{5,}u                      => QUEX_TKN_BALL(number=(LexemeL));
 
 
     // GOALPOSTS:
     // Aggressive goalpost noise removal:
-    y{3,}u{1,20}y{3,}           => QUEX_TKN_GOAL(number=(LexemeL));
+    (y{3,}u{1,10})+y{3,}           => QUEX_TKN_GOAL(number=(LexemeL));
 
     // Goal Orange Noise
-    y{3,}[o,w,u]{1,3}y{3,}      => QUEX_TKN_GOAL(number=(LexemeL));
+    // y{3,}[o,w,u]{1,3}y{3,}      => QUEX_TKN_GOAL(number=(LexemeL));
 
 
 

@@ -80,7 +80,7 @@
 
     \paragraph{Raw} Raw will return an unmodifyable (but storable) pointer to the data.\\
     \begin{cppcode}
-        on<Trigger<Raw<Data>>>([](const std::shared_ptr<const Data>& dataPtr) {
+        on<Trigger<Raw<Data>>>([](std::shared_ptr<const Data> dataPtr) {
             // The pointer to dataPtr can now be stored
         });
     \end{cppcode}

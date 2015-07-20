@@ -83,7 +83,7 @@ namespace modules {
                      const time_t&,
                      const LocalisationBall& ball,
                      const std::vector<Self>& selfs,
-                     const std::shared_ptr<const std::vector<VisionObstacle>>& robots) {
+                     std::shared_ptr<const std::vector<VisionObstacle>> robots) {
 
                     if (planType == messages::behaviour::WalkApproach::StandStill) {
 

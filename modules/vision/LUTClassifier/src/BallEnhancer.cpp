@@ -132,7 +132,7 @@ namespace modules {
                 // Are too small
                 if((classifiedImage.visualHorizonAtPoint(pt.start[0]) <= pt.start[1]
                 || classifiedImage.visualHorizonAtPoint(pt.end[0]) <= pt.end[1])
-                && pt.length > 20) {
+                && pt.length > 3) {
                     points.push_back(pt.midpoint);
                 }
             }

@@ -136,7 +136,7 @@ namespace vision {
         });
 
         on<Trigger<Raw<ClassifiedImage<ObjectClass>>>, With<CameraParameters>, With<Optional<FieldDescription>>, With<LookUpTable>, Options<Single>>("Ball Detector", [this](
-            const std::shared_ptr<const ClassifiedImage<ObjectClass>>& rawImage, const CameraParameters& cam, const std::shared_ptr<const FieldDescription>& field, const LookUpTable& lut) {
+            std::shared_ptr<const ClassifiedImage<ObjectClass>> rawImage, const CameraParameters& cam, std::shared_ptr<const FieldDescription> field, const LookUpTable& lut) {
 
             if (field == nullptr) {
                 NUClear::log(__FILE__, ", ", __LINE__, ": FieldDescription Update: support::configuration::SoccerConfig module might not be installed.");

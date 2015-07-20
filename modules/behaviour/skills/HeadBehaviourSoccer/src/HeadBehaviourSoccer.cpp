@@ -144,8 +144,8 @@ namespace modules {
                     With<Optional<std::vector<Goal>>>,
                     Options<Single, Sync<HeadBehaviourSoccer>>
                   >("Head Behaviour Main Loop",[this] ( const Sensors& sensors,
-                                                        const std::shared_ptr<const std::vector<Ball>>& vballs,
-                                                        const std::shared_ptr<const std::vector<Goal>>& vgoals
+                                                        std::shared_ptr<const std::vector<Ball>> vballs,
+                                                        std::shared_ptr<const std::vector<Goal>> vgoals
                                                         ) {
 
                     bool search = false;
@@ -189,8 +189,11 @@ namespace modules {
                     }
                     bool lost = fixationObjects.size() <= 0;
                     bool found = !lost && lostLastTime;
+                    //robocup hacks! replan whenever we can see an object
+                    bool updatePlan = !lost || (lastBallPriority != ballPriority) || (lastGoalPriority != goalPriority) ; //bool(Priorities have changed)
+                    
                     //Do we need to update our plan?
-                    bool updatePlan = found || (lastBallPriority != ballPriority) || (lastGoalPriority != goalPriority) ; //bool(Priorities have changed)
+                    // bool updatePlan = found || (lastBallPriority != ballPriority) || (lastGoalPriority != goalPriority) ; //bool(Priorities have changed)
 
                     //Get robot pose
                     Rotation3D orientation, headToBodyRotation;
@@ -206,20 +209,21 @@ namespace modules {
                     Rotation3D headToIMUSpace = orientation * headToBodyRotation;
 
                     //Check current centroid
-                    if(!lost){
-                        arma::vec2 currentCentroid = arma::vec2({0,0});
-                        for(auto& ob : fixationObjects){
-                            currentCentroid = ob.screenAngular / float(fixationObjects.size());
-                        }
-                        arma::vec2 currentCentroid_world = getIMUSpaceDirection(currentCentroid,headToIMUSpace,false);
-                        //If our objects have moved, we need to replan
-                        if(arma::norm(currentCentroid_world - lastCentroid) >= fractional_angular_update_threshold * std::fmax(cam.FOV[0],cam.FOV[1]) / 2.0){
-                            updatePlan = true;
-                            lastCentroid = currentCentroid_world;
-                            //std::cout << "Replanning due to object movement." << std::endl;
-                        }
-                    }
-
+                    // if(!lost){
+                    //     arma::vec2 currentCentroid = arma::vec2({0,0});
+                    //     for(auto& ob : fixationObjects){
+                    //         currentCentroid = ob.screenAngular / float(fixationObjects.size());
+                    //     }
+                    //     arma::vec2 currentCentroid_world = getIMUSpaceDirection(currentCentroid,headToIMUSpace,false);
+                    //     //If our objects have moved, we need to replan
+                    //     if(arma::norm(currentCentroid_world - lastCentroid) >= fractional_angular_update_threshold * std::fmax(cam.FOV[0],cam.FOV[1]) / 2.0){
+                    //         updatePlan = true;
+                    //         lastCentroid = currentCentroid_world;
+                    //         //std::cout << "Replanning due to object movement." << std::endl;
+                    //     }
+                    // }
+                            
+                
                     //If we lost what we are searching for.
                     if(!lostAndSearching && std::chrono::duration_cast<std::chrono::milliseconds>(now - timeLastObjectSeen).count() > search_timeout_ms ){
                         lostAndSearching = true;
@@ -227,11 +231,12 @@ namespace modules {
                         lastCentroid = {99999,99999};//reset centroid to impossible value to trigger reset TODO: find a better way
                     }
                     //TODO!! - Put search pattern back in IMU space and make replanning work
-                    else if(false && lostAndSearching && orientationHasChanged(sensors)){
-                        // log("orientation has changed: replanning");
-                        updatePlan = true;
-                        lastCentroid = {99999,99999};//reset centroid to impossible value to trigger reset TODO: find a better way
-                    }
+                    // else if(false && lostAndSearching && orientationHasChanged(sensors)){
+                    //     // log("orientation has changed: replanning");
+                    //     updatePlan = true;
+                    //     lastCentroid = {99999,99999};//reset centroid to impossible value to trigger reset TODO: find a better way
+                    // }
+
 
                     if(updatePlan && !isGettingUp){
                         if(lost){
@@ -249,7 +254,7 @@ namespace modules {
                         std::unique_ptr<HeadCommand> command = std::make_unique<HeadCommand>();
                         command->yaw = direction[0];
                         command->pitch = direction[1];
-                        command->robotSpace = search;
+                        command->robotSpace = true;
                         emit(std::move(command));
                     }
 
@@ -284,13 +289,13 @@ namespace modules {
                 }
 
                 auto currentPos = arma::vec2({sensors.servos.at(int(ServoID::HEAD_YAW)).presentPosition,sensors.servos.at(int(ServoID::HEAD_PITCH)).presentPosition});
-                if(!search){
+                if(false && !search){
                     for(auto& p : fixationPoints){
                         p = getIMUSpaceDirection(p, headToIMUSpace, search && fixationObjects.size() == 0);
                     }
                     currentPos = getIMUSpaceDirection(currentPos, headToIMUSpace, search && fixationObjects.size() == 0);
                 }
-
+              
                 headSearcher.replaceSearchPoints(fixationPoints, currentPos);
             }
 
@@ -302,7 +307,7 @@ namespace modules {
 
                 //Check why if this works:
                 // if(lost) headToIMUSpace = Rotation3D::createRotationY(-headToIMUSpace.pitch()) * headToIMUSpace;
-                
+
                 //Rotate target angles to World space
                 arma::vec3 lookVector = headToIMUSpace * lookVectorFromHead;
                 //Compute inverse kinematics for head direction angles
@@ -324,6 +329,7 @@ namespace modules {
             */
             std::vector<arma::vec2> HeadBehaviourSoccer::getSearchPoints(std::vector<VisionObject> fixationObjects, SearchType sType, const Sensors& sensors){
                     //If there is nothing of interest, we search fot points of interest
+
                     if(fixationObjects.size() == 0){
                         //Lost searches are normalised in terms of the FOV
                         std::vector<arma::vec2> scaledResults;
@@ -342,7 +348,7 @@ namespace modules {
                             //         angles[0] = angle.second;
                             //     }
                             // }
-                            
+
                             scaledResults.push_back(angles);
                         }
                         return scaledResults;

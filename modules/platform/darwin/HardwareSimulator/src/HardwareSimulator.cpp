@@ -165,7 +165,7 @@ namespace darwin {
         });
 
 
-        on<Trigger<Every<UPDATE_FREQUENCY, Per<std::chrono::seconds>>>, With<Optional<Sensors>>, Options<Single>>([this](const time_t&, const std::shared_ptr<const Sensors>& previousSensors) {
+        on<Trigger<Every<UPDATE_FREQUENCY, Per<std::chrono::seconds>>>, With<Optional<Sensors>>, Options<Single>>([this](const time_t&, std::shared_ptr<const Sensors> previousSensors) {
             if(previousSensors){
                 auto rightFootPose = previousSensors->forwardKinematics.find(ServoID::R_ANKLE_ROLL)->second;
                 auto leftFootPose = previousSensors->forwardKinematics.find(ServoID::L_ANKLE_ROLL)->second;
@@ -226,12 +226,12 @@ namespace darwin {
             sensors.accelerometer.z = 9.8 * std::cos(bodyTilt);
 
             sensors.timestamp = NUClear::clock::now();
-            
+
             // //Debug:
             // integrated_gyroscope += sumGyro + arma::vec3({0,0,imu_drift_rate});
             // std::cout << "HardwareSimulator gyroscope = " << sensors.gyroscope.x << ", " << sensors.gyroscope.y << ", " << sensors.gyroscope.z << std::endl;
             // std::cout << "HardwareSimulator integrated_gyroscope = " << integrated_gyroscope.t() << std::endl;
-            
+
             //Add some noise so that sensor fusion doesnt converge to a singularity
             auto sensors_message = std::make_unique<DarwinSensors>(sensors);
             addNoise(sensors_message);
