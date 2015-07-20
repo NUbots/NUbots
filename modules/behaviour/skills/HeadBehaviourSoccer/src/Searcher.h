@@ -68,7 +68,8 @@ namespace modules {
         			}
 	        		auto iter = std::min_element(relativePoints.begin(),relativePoints.end(),comparator);
 	        		// current = std::distance(relativePoints.begin(), iter);
-	        		current = 0;
+					current = current % int(points.size());
+
 	        		//Full sort
 	        		// std::vector<std::pair<int, T>> relativePoints;
         			// for (uint i = 0; i < points.size(); i++){

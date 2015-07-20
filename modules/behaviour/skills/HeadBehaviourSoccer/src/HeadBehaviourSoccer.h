@@ -23,6 +23,7 @@
 #include <nuclear>
 #include <armadillo>
 #include <set>
+#include "messages/localisation/FieldObject.h"
 #include "messages/vision/VisionObjects.h"
 #include "messages/motion/HeadCommand.h"
 #include "messages/input/Sensors.h"
@@ -66,9 +67,7 @@ namespace modules {
                 utility::math::geometry::Quad getScreenAngularBoundingBox(const std::vector<messages::vision::VisionObject>& obs);
 
                 bool orientationHasChanged(const messages::input::Sensors& sensors);
-
-
-                arma::vec
+                
 
                 //CONFIG - loaded elsewhere
                 float max_yaw;

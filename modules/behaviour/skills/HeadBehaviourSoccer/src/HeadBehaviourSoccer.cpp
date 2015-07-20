@@ -18,7 +18,6 @@
  */
 
 #include "HeadBehaviourSoccer.h"
-#include "messages/localisation/FieldObject.h"
 #include "messages/support/Configuration.h"
 #include "messages/motion/HeadCommand.h"
 #include "utility/math/coordinates.h"
@@ -151,7 +150,7 @@ namespace modules {
                                                         std::shared_ptr<const LocBall> locBall
                                                         ) {
 
-                    if(locball){
+                    if(locBall){
                         locBallReceived = true;
                         lastLocBall = *locBall;
                     }
@@ -335,7 +334,7 @@ namespace modules {
                     if(fixationObjects.size() == 0){
                         //Lost searches are normalised in terms of the FOV
                         std::vector<arma::vec2> scaledResults;
-                        scaledResults.push_back(utility::motion::kinematics::headAnglesToSeeGroundPoint(lastLocBall.position,sensors));
+                        scaledResults.push_back(utility::motion::kinematics::headAnglesToSeeGroundPoint<DarwinModel>(lastLocBall.position,sensors));
                         for(auto& p : searches[sType]){
                             //Interpolate between max and min allowed angles with -1 = min and 1 = max
                             auto angles = arma::vec2({((max_yaw - min_yaw) * p[0] + max_yaw + min_yaw) / 2,
