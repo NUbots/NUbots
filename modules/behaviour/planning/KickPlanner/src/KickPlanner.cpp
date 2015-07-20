@@ -119,7 +119,11 @@ namespace planning {
                         break;
                     case KickType::SCRIPTED:
                         NUClear::log("scripted");
-                        emit(std::make_unique<KickScriptCommand>(KickScriptCommand({{1, 0, 0}, LimbID::LEFT_LEG})));
+                        if(ballPosition[1] > 0){
+                            emit(std::make_unique<KickScriptCommand>(KickScriptCommand({{1, 0, 0}, LimbID::LEFT_LEG})));
+                        } else {
+                            emit(std::make_unique<KickScriptCommand>(KickScriptCommand({{1, 0, 0}, LimbID::RIGHT_LEG})));
+                        }
                         break;
                     default: throw new std::runtime_error("KickPlanner: Invalid KickType");
                 }

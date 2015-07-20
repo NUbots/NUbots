@@ -88,8 +88,13 @@ namespace skills {
             auto direction = kickCommand.direction;
             auto leg = kickCommand.leg;
 
-            // if (kickCommand.kickCommandType == KickType::SCRIPTED) {
+            if (leg == LimbID::RIGHT_LEG) {
+                emit(std::make_unique<ExecuteScriptByName>(id,  std::vector<std::string>({"RightFootPowerKick.yaml"})));
+            } else { //if (leg == LimbID::LEFT_LEG) {
                 emit(std::make_unique<ExecuteScriptByName>(id,  std::vector<std::string>({"LeftFootPowerKick.yaml"})));
+            }
+
+            // if (kickCommand.kickCommandType == KickType::SCRIPTED) {
             // } else {
                 // int quadrant = getDirectionalQuadrant(direction[0], direction[1]);
                 // // assume valid at this point as this is checked on the walkcommand trigger
