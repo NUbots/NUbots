@@ -9,7 +9,7 @@ ADD_ROLE(
     support::NUbugger
 
     # Hardware Interface
-    input::LinuxCamera
+    #input::LinuxCamera
     platform::darwin::HardwareIO
     platform::darwin::SensorFilter
 

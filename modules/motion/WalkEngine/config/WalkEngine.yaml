@@ -7,7 +7,7 @@ stance:
   arms:
       left:
         start:
-          -  90 * pi / 180 # Shoulder Pitch
+          -  135 * pi / 180 # Shoulder Pitch
           -   0 * pi / 180 # Shoulder Roll
           - -140 * pi / 180 # Elbow
         end:
@@ -16,7 +16,7 @@ stance:
           - -140 * pi / 180 # Elbow
       right:
         start:
-          -   90 * pi / 180 # Shoulder Pitch
+          -   135 * pi / 180 # Shoulder Pitch
           -   0 * pi / 180 # Shoulder Roll
           - -140 * pi / 180 # Elbow
         end:
@@ -54,8 +54,8 @@ walk_cycle:
   velocity:
     # Velocity limits for the walk
     limits:
-      - [-0.03, 0.035] # [min_x, max_x]
-      - [-0.03, 0.03] # [min_y, max_y]
+      - [-0.027, 0.0315] # [min_x, max_x]
+      - [-0.01, 0.01] # [min_y, max_y]
       - [-0.8, 0.8] # [min_angle, max_angle]
     # This defines a 'fast' speed in the forward direction
     high_speed: 0.06

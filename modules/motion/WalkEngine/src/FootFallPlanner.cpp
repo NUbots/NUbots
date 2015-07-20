@@ -20,6 +20,7 @@
 #include "WalkEngine.h"
 
 #include "utility/motion/RobotModels.h"
+#include "utility/nubugger/NUhelpers.h"
 
 namespace modules {
 namespace motion {
@@ -27,6 +28,7 @@ namespace motion {
     using messages::input::LimbID;
     using utility::motion::kinematics::DarwinModel;
     using utility::math::matrix::Transform2D;
+    using utility::nubugger::graph;
 
     void WalkEngine::calculateNewStep() {
         updateVelocity();
@@ -117,6 +119,8 @@ namespace motion {
         lastVeloctiyUpdateTime = now;
 
         auto& limit = (velocityCurrent.x() > velocityHigh ? accelerationLimitsHigh : accelerationLimits) * deltaT; // TODO: use a function instead
+
+
 
         velocityDifference.x()     = std::min(std::max(velocityCommand.x()     - velocityCurrent.x(),     -limit[0]), limit[0]);
         velocityDifference.y()     = std::min(std::max(velocityCommand.y()     - velocityCurrent.y(),     -limit[1]), limit[1]);
