@@ -155,7 +155,7 @@ namespace motion {
 
         generateStandScriptReaction = on<Trigger<Sensors>, Options<Single>>([this](const Sensors& sensors) {
             generateStandScriptReaction.disable();
-            generateAndSaveStandScript(sensors);
+            //generateAndSaveStandScript(sensors);
             //state = State::LAST_STEP;
             //start();
         });
@@ -263,7 +263,7 @@ namespace motion {
         Script::Frame frame;
         frame.duration = std::chrono::milliseconds(int(round(1000 * STAND_SCRIPT_DURATION)));
         for (auto& waypoint : *waypoints) {
-            frame.targets.push_back(Script::Frame::Target({waypoint.id, waypoint.position, waypoint.gain, 100}));
+            frame.targets.push_back(Script::Frame::Target({waypoint.id, waypoint.position, std::max(waypoint.gain, 60.0f), 100}));
         }
         standScript.frames.push_back(frame);
         auto saveScript = std::make_unique<SaveConfiguration>();
@@ -421,7 +421,7 @@ namespace motion {
         float speed = std::min(1.0, std::max(std::abs(velocityCurrent.x() / limit[0]), std::abs(velocityCurrent.y() / limit[1])));
         float scale = (step_height_fast_fraction - step_height_slow_fraction) * speed + step_height_slow_fraction;
         foot[2] *= scale;
-        
+
 
         // don't lift foot at initial step, TODO: review
         if (initialStep > 0) {

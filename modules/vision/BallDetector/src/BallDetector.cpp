@@ -295,6 +295,7 @@ namespace vision {
                 /*
                  *  IF VALID BUILD OUR BALL
                  */
+                // TODO: if center above horizon, forget about it
                 if(widthDistance > cameraHeight / 2.0
                     //Only build ball if disagreement not too high
                     && std::abs((sphericalBallCentreGroundWidth[0] - sphericalBallCentreGroundProj[0]) / sphericalBallCentreGroundProj[0]) < MAXIMUM_DISAGREEMENT_RATIO) {

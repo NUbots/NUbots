@@ -31,7 +31,7 @@ auto_white_balance: 0
 # This control specifies the white balance settings as a color temperature in Kelvin.
 # A driver should have a minimum of 2800 (incandescent) to 6500 (daylight).
 # (int): min=2000 max=6500 step=1 default=4000
-white_balance_temperature: 4200
+white_balance_temperature: 3500
 
 # Sets the current mode for automatic exposure. Can be set to one of the following options
 #   AUTO(0) - Automatically select the exposure mode
@@ -50,7 +50,7 @@ auto_exposure_priority: 0
 # Determines the exposure time of the camera sensor. The exposure time is limited by the frame interval.
 # Drivers should interpret the values as 100 µs units, where the value 1 stands for 1/10000th of a second, 10000 for 1 second and 100000 for 10 seconds.
 # (int): min=3 max=2047 step=1 default=250
-absolute_exposure: 250
+absolute_exposure: 350
 
 # Adjusts the backlight compensation in a camera. The minimum value disables backlight compensation.
 # (int): min=0 max=1 step=1 default=0
