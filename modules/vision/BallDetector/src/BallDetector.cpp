@@ -203,9 +203,13 @@ namespace vision {
                         }
                     }
                 }
-
                 // Check if our largest one is too far away
                 if(arma::max(sDist) / result.model.radius > maximum_relative_seed_point_distance) {
+                    continue;
+                }
+
+                // CENTRE OF BALL IS ABOVE THE HORIZON
+                if(image.horizon.y(result.model.centre[0]) > result.model.centre[1]) {
                     continue;
                 }
 
