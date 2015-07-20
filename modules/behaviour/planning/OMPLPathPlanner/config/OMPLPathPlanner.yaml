@@ -4,7 +4,7 @@
 planning_interval: 5
 
 # Planning time limit in seconds (per planning interval).
-planning_time_limit: 0.5
+planning_time_limit: 0.25
 
 # Margin by which to avoid goalposts.
 goalpost_safety_margin: 0.03

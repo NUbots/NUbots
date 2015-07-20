@@ -298,7 +298,7 @@ namespace strategy {
             } else {
                 if (NUClear::clock::now() - lastLocalised > cfg_.localisation_interval) {
                     standStill();
-                    find({FieldTarget::SELF});
+                    find({FieldTarget::BALL});
                     if (NUClear::clock::now() - lastLocalised > cfg_.localisation_interval + cfg_.localisation_duration) {
                         lastLocalised = NUClear::clock::now();
                     }
