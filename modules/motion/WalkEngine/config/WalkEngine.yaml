@@ -48,22 +48,22 @@ walk_cycle:
     height_fast_fraction: 1.5
     # These limit the distance a footstep will take
     limits:
-      - [-0.1, 0.1] # [min_x, max_x]
+      - [-0.1, 0.15] # [min_x, max_x]
       - [0.0, 0.2] # [min_y, max_y]
       - [0, 15 * pi / 180] # [min_angle, max_angle]
   velocity:
     # Velocity limits for the walk
     limits:
-      - [-0.027, 0.0315] # [min_x, max_x]
+      - [-0.027, 0.10] # [min_x, max_x]
       - [-0.01, 0.01] # [min_y, max_y]
       - [-0.8, 0.8] # [min_angle, max_angle]
     # This defines a 'fast' speed in the forward direction
     high_speed: 0.06
   acceleration:
     # Acceleration limits
-    limits: [0.05, 0.025, 0.8]
+    limits: [0.08, 0.025, 0.8]
     # When moving at 'fast' speed or faster, use these limits instead
-    limits_high: [0.03, 0.05, 0.8]
+    limits_high: [0.05, 0.05, 0.8]
     # Factor to slow down walk when turning
     turning_factor: 0.6
   # When to begin and end the single support phase. Range: [0,1]
