@@ -207,7 +207,7 @@ namespace modules {
                         headToBodyRotation = fixationObjects[0].sensors->forwardKinematics.at(ServoID::HEAD_PITCH).rotation();
                         orientation = fixationObjects[0].sensors->orientation.i();
                     } else {
-                        headToBodyRotation = arma::eye(3,3);
+                        headToBodyRotation = sensors.forwardKinematics.at(ServoID::HEAD_PITCH).rotation();
                         orientation = sensors.orientation.i();
                     }
                     Rotation3D headToIMUSpace = orientation * headToBodyRotation;
