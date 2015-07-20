@@ -69,6 +69,7 @@ namespace strategy {
     using messages::localisation::ResetRobotHypotheses;
     using utility::math::matrix::Transform2D;
     using messages::platform::darwin::ButtonMiddleDown;
+    using messages::platform::darwin::ButtonLeftDown;
 
     using utility::localisation::transform::RobotToWorldTransform;
     using utility::time::durationFromSeconds;
@@ -96,6 +97,10 @@ namespace strategy {
             cfg_.goalie_translation_speed_factor = config["goalie_translation_speed_factor"].as<float>();
             cfg_.goalie_max_translation_speed = config["goalie_max_translation_speed"].as<float>();
             cfg_.goalie_side_walk_angle_threshold = config["goalie_side_walk_angle_threshold"].as<float>();
+
+            cfg_.alwaysPowerKick = config["always_power_kick"].as<bool>();
+            cfg_.forcePlaying = config["force_playing"].as<bool>();
+            cfg_.forcePenaltyShootout = config["force_penalty_shootout"].as<bool>();
 
         });
 
@@ -154,10 +159,19 @@ namespace strategy {
 
         on<Trigger<ButtonMiddleDown>, Options<Single>>([this](const ButtonMiddleDown&) {
 
-            if (!forcePlaying) {
-                NUClear::log("forcePlaying started");
+            if (!cfg_.forcePlaying) {
+                NUClear::log("Force playing started.");
                 std::this_thread::sleep_for(std::chrono::seconds(10));
-                forcePlaying = true;
+                cfg_.forcePlaying = true;
+            }
+
+        });
+
+        on<Trigger<ButtonLeftDown>, Options<Single>>([this](const ButtonLeftDown&) {
+
+            if (!cfg_.forcePenaltyShootout) {
+                NUClear::log("Force penalty shootout started.");
+                cfg_.forcePenaltyShootout = true;
             }
 
         });
@@ -186,14 +200,14 @@ namespace strategy {
 
                 Behaviour::State previousState = currentState;
 
-                auto& mode = gameState.mode;
+                auto mode = cfg_.forcePenaltyShootout ? Mode::PENALTY_SHOOTOUT : gameState.mode;
 
                 //auto& phase = gameState.phase;
 
                 // TODO: unhack
-                kickType = mode == Mode::PENALTY_SHOOTOUT ? KickType::SCRIPTED : KickType::IK_KICK;
+                kickType = mode == Mode::PENALTY_SHOOTOUT || cfg_.alwaysPowerKick ? KickType::SCRIPTED : KickType::IK_KICK;
 
-                if (forcePlaying) {
+                if (cfg_.forcePlaying) {
                     play(selfs, balls, fieldDescription, mode);
                 }
                 else if (pickedUp(sensors)) {
@@ -270,7 +284,7 @@ namespace strategy {
     }
 
     void SoccerStrategy::play(const std::vector<Self>& selfs, const std::vector<Ball>& balls, const FieldDescription& fieldDescription, const Mode& mode) {
-        if (penalised() && !forcePlaying) { // penalised
+        if (penalised() && !cfg_.forcePlaying) { // penalised
             standStill();
             find({FieldTarget::SELF});
             currentState = Behaviour::PENALISED;
@@ -331,7 +345,7 @@ namespace strategy {
         auto reset = std::make_unique<ResetRobotHypotheses>();
 
         ResetRobotHypotheses::Self selfSideBaseLine;
-        selfSideBaseLine.position = arma::vec2({1, 0});
+        selfSideBaseLine.position = arma::vec2({2, 0});
         selfSideBaseLine.position_cov = arma::eye(2, 2) * 0.1;
         selfSideBaseLine.heading = 0;
         selfSideBaseLine.heading_var = 0.05;

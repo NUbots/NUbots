@@ -14,3 +14,11 @@ goalie_max_rotation_speed: 0.1
 goalie_translation_speed_factor: 0.1
 goalie_max_translation_speed: 0.1
 goalie_side_walk_angle_threshold: 0.1
+
+localisation_interval: 15
+localisation_duration: 5
+
+force_playing: false
+force_penalty_shootout: false
+
+always_power_kick: true

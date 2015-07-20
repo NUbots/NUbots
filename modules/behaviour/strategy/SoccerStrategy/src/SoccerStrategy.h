@@ -58,6 +58,9 @@ namespace strategy {
             float goalie_side_walk_angle_threshold;
             NUClear::clock::duration localisation_interval;
             NUClear::clock::duration localisation_duration;
+            bool alwaysPowerKick;
+            bool forcePlaying = false;
+            bool forcePenaltyShootout = false;
         } cfg_;
 
         messages::behaviour::FieldTarget walkTarget;
@@ -69,7 +72,6 @@ namespace strategy {
         bool isDiving = false;
         bool selfPenalised = false;
         bool isSideChecking = false;
-        bool forcePlaying = false;
         messages::behaviour::KickType kickType;
         messages::behaviour::proto::Behaviour::State currentState = messages::behaviour::proto::Behaviour::INIT;
 
