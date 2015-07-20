@@ -174,35 +174,72 @@ namespace skills {
             emit(utility::nubugger::drawRectangle("WPF_RobotFootprint", RotatedRectangle(currentState, {0.12, 0.17})));
             emit(utility::nubugger::drawRectangle("WPF_GoalState", RotatedRectangle(currentPath.goal, {0.12, 0.17}), {0.4, 0.4, 0.4}, 0.123));
 
-            if (cfg_.follow_path_in_ball_space &&
-                currentPath.command.type == MotionCommand::Type::BallApproach) {
-                // Ball space is a space that has the ball position
-                // as its origin, and the x-axis in the direction of the kick
-                // target from the ball.
+            // if (cfg_.follow_path_in_ball_space &&
+            //     currentPath.command.type == MotionCommand::Type::BallApproach) {
+            //     // Ball space is a space that has the ball position
+            //     // as its origin, and the x-axis in the direction of the kick
+            //     // target from the ball.
 
-                // Find current ball space.
+            //     // Find current ball space.
+            //     arma::vec2 worldBall = currentState.localToWorld({ball.position, 0}).xy();
+            //     Transform2D currentBallSpace = Transform2D::lookAt(worldBall, currentPath.command.kickTarget);
+
+            //     // Transform robot from world space into (current) ball space:
+            //     auto ballSpaceState = currentBallSpace.worldToLocal(currentState);
+
+            //     // Transform the robot from ball space into the world space at
+            //     // the time of path planning (note that walk commands will be
+            //     // valid as they in robot space):
+            //     currentState = currentPath.ballSpace.localToWorld(ballSpaceState);
+            // }
+
+
+            // TODO: Remove.
+            // RoboCup HACK - Just aim for the goal state:
+            Transform2D targetState;
+            if (currentPath.command.type == MotionCommand::Type::BallApproach) {
                 arma::vec2 worldBall = currentState.localToWorld({ball.position, 0}).xy();
                 Transform2D currentBallSpace = Transform2D::lookAt(worldBall, currentPath.command.kickTarget);
-
-                // Transform robot from world space into (current) ball space:
-                auto ballSpaceState = currentBallSpace.worldToLocal(currentState);
-
-                // Transform the robot from ball space into the world space at
-                // the time of path planning (note that walk commands will be
-                // valid as they in robot space):
-                currentState = currentPath.ballSpace.localToWorld(ballSpaceState);
+                targetState = currentBallSpace;
+            } else {
+                targetState = currentPath.goal;
             }
 
-            // Remove unnecessary (visited) states from the path:
-            int removed = trimPath(currentState, currentPath);
-            if (removed && cfg_.draw_estimated_path) {
-                auto estPath = estimatedPath(currentState, currentPath, 0.01, 2000, 40);
-                emit(utility::nubugger::drawPath("WPF_EstimatedPath", estPath.states, 0.05, {1,0.8,0}));
+
+            std::unique_ptr<WalkCommand> walkCommand;
+            if (isGoalClose(currentState, targetState)) { // TODO: Consider only doing walkBetweenFar/walkBetweenNear.
+                walkCommand = std::make_unique<WalkCommand>(walkBetweenNear(currentState, targetState));
+            } else {
+                // Make a walk command to move towards the target state
+                walkCommand = std::make_unique<WalkCommand>(walkBetweenFar(currentState, targetState));
             }
 
-            // Emit a walk command to move towards the target state:
+            // emit(utility::nubugger::drawArrow("WPF_Closest_Arrow", currentState.localToWorld(walkCommand->command), {1,1,1}, 1));
+            arma::vec2 arrowTip = currentState.localToWorld(walkCommand->command).xy();
+            arma::vec2 dirPoint = currentState.localToWorld({walkCommand->command.rotation()*walkCommand->command.xy(), 0}).xy();
+
+            emit(utility::nubugger::drawArrow("WPF_Closest_Arrow", currentState.xy(), arrowTip, 1));
+            emit(utility::nubugger::drawArrow("WPF_Closest_Arrow_Rotation", arrowTip, dirPoint, 1));
+
+            emit(std::move(walkCommand));
+
+
             emit(std::move(std::make_unique<WalkStartCommand>(subsumptionId)));
-            emit(std::move(walkToNextNode(currentState)));
+
+            emit(utility::nubugger::drawRectangle("WPF_Closest", RotatedRectangle(targetState, {0.12, 0.17}), {0, 0, 0}));
+
+            emit(utility::nubugger::drawArrow("WPF_Closest_Arrow", targetState, {1,0,1}, 1));
+
+            // // Remove unnecessary (visited) states from the path:
+            // int removed = trimPath(currentState, currentPath);
+            // if (removed && cfg_.draw_estimated_path) {
+            //     auto estPath = estimatedPath(currentState, currentPath, 0.01, 2000, 40);
+            //     emit(utility::nubugger::drawPath("WPF_EstimatedPath", estPath.states, 0.05, {1,0.8,0}));
+            // }
+
+            // // Emit a walk command to move towards the target state:
+            // emit(std::move(std::make_unique<WalkStartCommand>(subsumptionId)));
+            // emit(std::move(walkToNextNode(currentState)));
         }).disable();
     }
 

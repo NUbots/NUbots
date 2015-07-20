@@ -114,6 +114,29 @@ namespace nubugger {
     }
 
     inline std::unique_ptr<DrawObjects> drawArrow(std::string name, arma::vec3 position, arma::vec3 target, float timeout = TIMEOUT) {
+        auto drawObjects = std::make_unique<DrawObjects>();
+        auto* object = drawObjects->add_objects();
+        object->set_name(name);
+        object->set_shape(messages::support::nubugger::proto::DrawObject::ARROW);
+        object->set_timeout(timeout);
+        *object->mutable_position() << position;
+        *object->mutable_target() << target;
+        return std::move(drawObjects);
+    }
+
+
+    inline std::unique_ptr<DrawObjects> drawArrow(std::string name, arma::vec2 position, arma::vec2 target, float timeout = TIMEOUT) {
+        auto drawObjects = std::make_unique<DrawObjects>();
+        auto* object = drawObjects->add_objects();
+        object->set_name(name);
+        object->set_shape(messages::support::nubugger::proto::DrawObject::ARROW);
+        object->set_timeout(timeout);
+        *object->mutable_position() << arma::vec3({position(0), position(1), 0});
+        *object->mutable_target() <<  arma::vec3({target(0), target(1), 0});
+        return std::move(drawObjects);
+    }
+
+    inline std::unique_ptr<DrawObjects> drawArrow(std::string name, Transform2D position, arma::vec3 colour, float length, float timeout = TIMEOUT) {
 
         auto drawObjects = std::make_unique<DrawObjects>();
         auto* object = drawObjects->add_objects();
@@ -121,8 +144,11 @@ namespace nubugger {
         object->set_shape(messages::support::nubugger::proto::DrawObject::ARROW);
         object->set_timeout(timeout);
 
-        *object->mutable_position() << position;
-        *object->mutable_target() << target;
+        *object->mutable_position() << arma::vec3({position.x(), position.y(), 0});;
+        *object->mutable_direction() << arma::vec3({std::cos(position.angle()), std::sin(position.angle()), 0});
+        *object->mutable_colour() << colour;
+
+        object->set_length(length);
 
         return std::move(drawObjects);
     }
