@@ -67,6 +67,9 @@ namespace modules {
 
                 bool orientationHasChanged(const messages::input::Sensors& sensors);
 
+
+                arma::vec
+
                 //CONFIG - loaded elsewhere
                 float max_yaw;
                 float min_yaw;
@@ -84,6 +87,9 @@ namespace modules {
                 float fractional_angular_update_threshold;
 
                 bool oscillate_search;
+
+                bool locBallReceived = false;
+                messages::localisation::Ball lastLocBall;
 
                 std::map<messages::behaviour::SearchType, std::vector<arma::vec2>> searches;
 

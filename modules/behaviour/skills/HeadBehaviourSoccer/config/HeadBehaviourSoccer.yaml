@@ -38,6 +38,7 @@ searches:
       - [0.25,  0.2]
       - [0.75,  0.2]
       - [0.25,  0.2]
+
   - search_type: "FIND_ADDITIONAL_OBJECTS"
     #Points for this search are relative to the padded bounding box containing the already visible objects
     points:

@@ -48,6 +48,7 @@ namespace modules {
         using messages::support::Configuration;
         // using messages::localisation::Ball;
         using messages::localisation::Self;
+        using LocBall = messages::localisation::Ball;
         using messages::input::Sensors;
         using messages::motion::HeadCommand;
 
@@ -142,11 +143,18 @@ namespace modules {
                 on< Trigger<Sensors>,
                     With<Optional<std::vector<Ball>>>,
                     With<Optional<std::vector<Goal>>>,
+                    With<Optional<LocBall>>,
                     Options<Single, Sync<HeadBehaviourSoccer>>
                   >("Head Behaviour Main Loop",[this] ( const Sensors& sensors,
                                                         std::shared_ptr<const std::vector<Ball>> vballs,
-                                                        std::shared_ptr<const std::vector<Goal>> vgoals
+                                                        std::shared_ptr<const std::vector<Goal>> vgoals,
+                                                        std::shared_ptr<const LocBall> locBall
                                                         ) {
+
+                    if(locball){
+                        locBallReceived = true;
+                        lastLocBall = *locBall;
+                    }
 
                     bool search = false;
 
@@ -327,6 +335,7 @@ namespace modules {
                     if(fixationObjects.size() == 0){
                         //Lost searches are normalised in terms of the FOV
                         std::vector<arma::vec2> scaledResults;
+                        scaledResults.push_back(utility::motion::kinematics::headAnglesToSeeGroundPoint(lastLocBall.position,sensors));
                         for(auto& p : searches[sType]){
                             //Interpolate between max and min allowed angles with -1 = min and 1 = max
                             auto angles = arma::vec2({((max_yaw - min_yaw) * p[0] + max_yaw + min_yaw) / 2,

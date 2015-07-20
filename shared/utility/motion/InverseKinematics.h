@@ -261,6 +261,11 @@ namespace kinematics {
         return lookVectorSpherical.rows(1,2);
     }
 
+    template <typename RobotKinematicModel>
+    inline arma::vec2 headAnglesToSeeGroundPoint(const arma::vec2& gpos, const messages::input::Sensors& sensors){
+        arma::vec3 groundPos_ground = {gpos[0],gpos[1],0};
+    }
+
 } // kinematics
 }  // motion
 }  // utility
