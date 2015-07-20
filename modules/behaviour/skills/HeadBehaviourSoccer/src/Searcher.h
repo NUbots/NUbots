@@ -49,7 +49,7 @@ namespace modules {
 				NUClear::clock::time_point lastSwitchTime;
 				float switch_period;
 
-				uint64_t forward;
+				bool forward = true;
 
             public:
 	           	Searcher():current(0), new_goal(false), switch_period(1000.0f){
@@ -131,6 +131,7 @@ namespace modules {
 						}
 						lastSwitchTime = now;
 					}
+					std::cout << "current = " << current << std::endl;
 				}
 
 				bool newGoal(){
