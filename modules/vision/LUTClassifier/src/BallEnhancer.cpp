@@ -209,6 +209,9 @@ namespace modules {
 
             for(auto& edge : edges) {
 
+                // The seed points are also edges
+                pSet.insert(edge);
+
                 // Go clockwise
                 arma::ivec2 point = edge;
                 for(int i = 0; i < 100; ++i) {
