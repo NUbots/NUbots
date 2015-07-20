@@ -148,7 +148,7 @@ namespace strategy {
 
         on<Trigger<SelfUnpenalisation>, With<FieldDescription>> ([this](const SelfUnpenalisation&, const FieldDescription& fieldDescription) {
             selfPenalised = false;
-            isSideChecking = true;
+            // TODO: isSideChecking = true;
             // TODO: only do this once put down
             unpenalisedLocalisationReset(fieldDescription);
         });
@@ -290,7 +290,6 @@ namespace strategy {
             currentState = Behaviour::PENALISED;
         }
         else if (!isSideChecking) { // not penalised
-
             if (cfg_.is_goalie) { // goalie
                 find({FieldTarget::BALL});
                 goalieWalk(selfs, balls);
