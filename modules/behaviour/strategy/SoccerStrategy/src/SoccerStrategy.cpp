@@ -58,6 +58,7 @@ namespace strategy {
     using messages::behaviour::KickPlan;
     using messages::behaviour::KickType;
     using messages::behaviour::SoccerObjectPriority;
+    using messages::behaviour::SearchType;
     using messages::behaviour::proto::Behaviour;
     using messages::support::FieldDescription;
     using messages::motion::ExecuteGetup;
@@ -437,12 +438,15 @@ namespace strategy {
         soccerObjectPriority->line = 0;
         for (auto& fieldObject : fieldObjects) {
             switch (fieldObject) {
-                case FieldTarget::BALL: {
-                    soccerObjectPriority->ball = 1;
-                    break;
-                }
                 case FieldTarget::SELF: {
                     soccerObjectPriority->goal = 1;
+                    soccerObjectPriority->searchType = SearchType::GOAL_SEARCH;
+
+                    break;
+                }
+                case FieldTarget::BALL: {
+                    soccerObjectPriority->ball = 1;
+                    soccerObjectPriority->searchType = SearchType::LOST;
                     break;
                 }
                 default:

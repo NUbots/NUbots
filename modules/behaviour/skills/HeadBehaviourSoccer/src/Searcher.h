@@ -131,7 +131,6 @@ namespace modules {
 						}
 						lastSwitchTime = now;
 					}
-					std::cout << "current = " << current << std::endl;
 				}
 
 				bool newGoal(){

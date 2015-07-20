@@ -27,6 +27,7 @@ namespace behaviour {
 	enum class SearchType {
         LOST,
         FIND_ADDITIONAL_OBJECTS,
+        GOAL_SEARCH,
         GOAL_LEFT,
         GOAL_RIGHT,
         GROUND_LEFT,
@@ -40,6 +41,8 @@ namespace behaviour {
             return SearchType::LOST;
         } else if(s.compare("FIND_ADDITIONAL_OBJECTS") == 0){
             return SearchType::FIND_ADDITIONAL_OBJECTS;
+        } else if(s.compare("GOAL_SEARCH") == 0){
+            return SearchType::GOAL_SEARCH;
         } else if(s.compare("GOAL_RIGHT") == 0){
             return SearchType::GOAL_RIGHT;
         } else if (s.compare("GOAL_LEFT") == 0) {
