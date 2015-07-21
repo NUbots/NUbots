@@ -240,7 +240,7 @@ namespace modules {
                         lastCentroid = {99999,99999};//reset centroid to impossible value to trigger reset TODO: find a better way
                     }
 
-                    if(updatePlan && !isGettingUp){
+                    if(updatePlan){
                         if(lost){
                             lastPlanOrientation = sensors.orientation;
                         }

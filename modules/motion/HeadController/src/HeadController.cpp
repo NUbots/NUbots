@@ -75,7 +75,7 @@ namespace modules {
 
             });
 
-            on< Trigger<HeadCommand>>("Head Controller - Register Head Command", [this](const HeadCommand& command){
+            on< Trigger<HeadCommand>, Options<Sync<HeadController>> >("Head Controller - Register Head Command", [this](const HeadCommand& command){
                 goalRobotSpace = command.robotSpace;
                 if(goalRobotSpace) {
                     goalAngles = {command.yaw, command.pitch};
@@ -84,9 +84,13 @@ namespace modules {
                 }
             });
 
-            updateHandle = on< Trigger<Sensors>, Options<Single, Priority<NUClear::HIGH>> >("Head Controller - Update Head Position",[this] (const Sensors& sensors) {
+            updateHandle = on< Trigger<Sensors>, Options<Single, Sync<HeadController>, Priority<NUClear::HIGH>> >("Head Controller - Update Head Position",[this] (const Sensors& sensors) {
                 //P controller
-                currentAngles = p_gain * goalAngles + (1 - p_gain) * currentAngles;
+                if(goalRobotSpace == lastGoalRobotSpace){
+                    currentAngles = p_gain * goalAngles + (1 - p_gain) * currentAngles;
+                } else {
+                    currentAngles = goalAngles;
+                }
                 
                 //Get goal vector from angles
                 //Pitch is positive when the robot is looking down by Right hand rule, so negate the pitch
