@@ -44,7 +44,6 @@ namespace modules {
                 arma::vec2 currentAngles;
                 arma::vec2 goalAngles;
                 bool goalRobotSpace = false;
-                bool lastGoalRobotSpace = false;
             };
 
     }  // motion

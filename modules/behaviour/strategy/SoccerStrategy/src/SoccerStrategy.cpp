@@ -287,7 +287,7 @@ namespace strategy {
     void SoccerStrategy::play(const std::vector<Self>& selfs, const std::vector<Ball>& balls, const FieldDescription& fieldDescription, const Mode& mode) {
         if (penalised() && !cfg_.forcePlaying) { // penalised
             standStill();
-            find({FieldTarget::BALL});
+            find({FieldTarget::SELF});
             currentState = Behaviour::PENALISED;
         }
         else if (!isSideChecking) { // not penalised
