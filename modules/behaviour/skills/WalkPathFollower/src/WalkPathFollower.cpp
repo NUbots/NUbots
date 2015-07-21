@@ -303,12 +303,12 @@ namespace skills {
         std::unique_ptr<WalkCommand> command;
 
         // If we have reached our target
-        if (targetIndex == 0 && isGoalClose(currentState, targetState)) {
-            command = std::make_unique<WalkCommand>(walkBetweenNear(currentState, targetState));
-        } else {
+        // if (targetIndex == 0 && isGoalClose(currentState, targetState)) {
+        //     command = std::make_unique<WalkCommand>(walkBetweenNear(currentState, targetState));
+        // } else {
             // Make a walk command to move towards the target state
             command = std::make_unique<WalkCommand>(walkBetweenFar(currentState, targetState));
-        }
+        // }
 
         return command;
     }
