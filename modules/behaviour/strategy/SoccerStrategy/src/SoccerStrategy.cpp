@@ -162,7 +162,6 @@ namespace strategy {
 
             if (!cfg_.forcePlaying) {
                 NUClear::log("Force playing started.");
-                std::this_thread::sleep_for(std::chrono::seconds(10));
                 cfg_.forcePlaying = true;
             }
 

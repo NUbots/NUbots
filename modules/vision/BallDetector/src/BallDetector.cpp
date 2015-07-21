@@ -75,6 +75,7 @@ namespace vision {
         // std::vector<std::tuple<arma::ivec2, arma::ivec2, arma::vec4>> debug;
         float r = 0;
         int numGreen = 0;
+        int actualSamples = 0;
         for(int i = 0; i < green_radial_samples; r = (++i) * circle.radius / float(green_radial_samples)) {
             float theta = 0;
             if(r == 0){
@@ -84,6 +85,7 @@ namespace vision {
                     if(lut(image(ipos)) == 'g'){
                         numGreen++;
                     }
+                    actualSamples++;
                 }
                 continue;
             }
@@ -97,6 +99,7 @@ namespace vision {
                     if(lut(image(ipos)) == 'g'){
                         numGreen++;
                     }
+                    actualSamples++;
                 }
             }
             // sample point in lut and check if == 'g'
@@ -104,7 +107,7 @@ namespace vision {
 
         // emit(drawVisionLines(debug));
 
-        float greenRatio = numGreen / float(1 + (green_radial_samples-1) * green_angular_samples);
+        float greenRatio = actualSamples == 0 ? 1 : 1.0f - (numGreen / float(actualSamples));
         return greenRatio;
     }
 
