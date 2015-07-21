@@ -119,8 +119,6 @@ namespace modules {
                 }
                 //Send commands
                 emit(std::move(waypoints));
-
-                lastGoalRobotSpace = goalRobotSpace;
             });
 
             updateHandle.enable();

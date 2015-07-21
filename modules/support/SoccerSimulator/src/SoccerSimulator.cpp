@@ -316,7 +316,7 @@ namespace support {
 
                 auto ball = world.ball.detect(camParams, world.robotPose, sensors, cfg_.vision_error);
 
-                if (!ball.measurements.empty() && (rand() / float(RAND_MAX) > 0.1)) {
+                if (!ball.measurements.empty()) {
 
                     ball_vec->push_back(ball);
 
