@@ -151,29 +151,29 @@ namespace motion {
             configure(config.config);
         });
 
+        // TODO: finish push detection and compensation
+        // pushTime = NUClear::clock::now();
+        // on<Trigger<PushDetection>, With<Configuration<WalkEngine>>>([this](const PushDetection& pd, const Configuration<WalkEngine>& config) {
+        //     balanceEnabled = true;
+        //     // balanceAmplitude = balance["amplitude"].as<Expression>();
+        //     // balanceWeight = balance["weight"].as<Expression>();
+        //     // balanceOffset = balance["offset"].as<Expression>();
 
-        pushTime = NUClear::clock::now();
-        on<Trigger<PushDetection>, With<Configuration<WalkEngine>>>([this](const PushDetection& pd, const Configuration<WalkEngine>& config) {
-            balanceEnabled = true;
-            // balanceAmplitude = balance["amplitude"].as<Expression>();
-            // balanceWeight = balance["weight"].as<Expression>();
-            // balanceOffset = balance["offset"].as<Expression>();
+        //     balancer.configure(config["walk_cycle"]["balance"]["push_recovery"]);
+        //     pushTime = NUClear::clock::now();
 
-            balancer.configure(config["walk_cycle"]["balance"]["push_recovery"]);
-            pushTime = NUClear::clock::now();
+        //     // configure(config.config);
+        // });
 
-            // configure(config.config);
-        });
-
-        on<
-            Every<10, std::chrono::milliseconds>>(
-            With<Configuration<WalkEngine>>
-        >([this](const time_t& t, const Configuration<WalkEngine>& config) {
-            [this](const WalkOptimiserCommand& command) {
-            if ((NUClear::clock::now() - pushTime) > std::chrono::milliseconds(config["walk_cycle"]["balance"]["balance_time"].as<int>)) {
-                balancer.configure(config["walk_cycle"]["balance"]);
-            }
-        });
+        // on<
+        //     Every<10, std::chrono::milliseconds>>(
+        //     With<Configuration<WalkEngine>>
+        // >([this](const time_t& t, const Configuration<WalkEngine>& config) {
+        //     [this](const WalkOptimiserCommand& command) {
+        //     if ((NUClear::clock::now() - pushTime) > std::chrono::milliseconds(config["walk_cycle"]["balance"]["balance_time"].as<int>)) {
+        //         balancer.configure(config["walk_cycle"]["balance"]);
+        //     }
+        // });
 
 
         on<Trigger<WalkOptimiserCommand> >([this](const WalkOptimiserCommand& command) {
