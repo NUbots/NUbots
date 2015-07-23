@@ -41,10 +41,13 @@
 #include "utility/motion/RobotModels.h"
 #include "utility/math/angle.h"
 #include "utility/math/matrix/Rotation3D.h"
+#include "messages/input/PushDetection.h"
+
 
 namespace modules {
 namespace motion {
 
+    using messages::input::PushDetection;
     using messages::input::ServoID;
     using messages::input::Sensors;
     using messages::input::LimbID;
@@ -147,6 +150,31 @@ namespace motion {
         on<Trigger<Configuration<WalkEngine>>>([this](const Configuration<WalkEngine>& config) {
             configure(config.config);
         });
+
+
+        pushTime = NUClear::clock::now();
+        on<Trigger<PushDetection>, With<Configuration<WalkEngine>>>([this](const PushDetection& pd, const Configuration<WalkEngine>& config) {
+            balanceEnabled = true;
+            // balanceAmplitude = balance["amplitude"].as<Expression>();
+            // balanceWeight = balance["weight"].as<Expression>();
+            // balanceOffset = balance["offset"].as<Expression>();
+
+            balancer.configure(config["walk_cycle"]["balance"]["push_recovery"]);
+            pushTime = NUClear::clock::now();
+
+            // configure(config.config);
+        });
+
+        on<
+            Every<10, std::chrono::milliseconds>>(
+            With<Configuration<WalkEngine>>
+        >([this](const time_t& t, const Configuration<WalkEngine>& config) {
+            [this](const WalkOptimiserCommand& command) {
+            if ((NUClear::clock::now() - pushTime) > std::chrono::milliseconds(config["walk_cycle"]["balance"]["balance_time"].as<int>)) {
+                balancer.configure(config["walk_cycle"]["balance"]);
+            }
+        });
+
 
         on<Trigger<WalkOptimiserCommand> >([this](const WalkOptimiserCommand& command) {
             configure(command.walkConfig);

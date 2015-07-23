@@ -94,6 +94,30 @@ walk_cycle:
       Z:
         p: 0.035
         d: 0
+    push_recovery:
+      balance_time: 800
+      enabled: false
+      amplitude: 1.0
+      weight: 0.7
+      offset: 0 * pi / 180
+
+      hip_rotation_scale: 2.0
+      ankle_rotation_scale: 0.5
+
+      angle_gain:
+        p: 0.5
+        i: 0.0
+        d: 0.0
+      translation_gain:
+        X:
+          p: 0.0
+          d: -0.0
+        Y:
+          p: 0
+          d: 0
+        Z:
+          p: 0.035
+          d: 0
     servo_gains:
       # -
       #   id: "HIP_YAW"
