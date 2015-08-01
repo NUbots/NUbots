@@ -20,10 +20,13 @@
 #include "MocapRecorder.h"
 
 #include "messages/support/Configuration.h"
+#include "messages/input/proto/MotionCapture.pb.h"
+
 
 namespace modules {
 namespace support {
 
+	using messages::input::proto::MotionCapture;
     using messages::support::Configuration;
 
     MocapRecorder::MocapRecorder(std::unique_ptr<NUClear::Environment> environment)
@@ -31,6 +34,26 @@ namespace support {
 
         on<Trigger<Configuration<MocapRecorder>>>([this] (const Configuration<MocapRecorder>& config) {
             // Use configuration here from file MocapRecorder.yaml
+        });
+
+        on<Trigger<MotionCapture>, Options<Single>>([this](const MotionCapture& mocap){
+        	
+        	for (auto& rigidBody : mocap->rigid_bodies()) {
+
+                int id = rigidBody.identifier();
+                if (id == robot_id) {
+                    //TODO: switch to correct xyz coordinate system!!!!!!!!!!
+                    float x = rigidBody.position().x();
+                    float y = rigidBody.position().y();
+                    float z = rigidBody.position().z();
+                    UnitQuaternion q(arma::vec4{rigidBody.rotation().x(),
+                                                rigidBody.rotation().y(),
+                                                rigidBody.rotation().z(),
+                                                rigidBody.rotation().t()});
+
+                }
+            }
+        	//TODO open file and print mocap to file in some format
         });
     }
 }
