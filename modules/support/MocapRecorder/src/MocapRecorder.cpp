@@ -22,6 +22,7 @@
 #include "messages/support/Configuration.h"
 #include "messages/input/proto/MotionCapture.pb.h"
 #include "utility/math/geometry/UnitQuaternion.h"
+#include "utility/math/matrix/Rotation3D.h"
 
 
 #include <armadillo>
@@ -30,6 +31,7 @@ namespace modules {
 namespace support {
 
     using utility::math::geometry::UnitQuaternion;
+    using utility::math::matrix::Rotation3D;
 	using messages::input::proto::MotionCapture;
     using messages::support::Configuration;
 
@@ -42,7 +44,7 @@ namespace support {
 
         on<Trigger<MotionCapture>, Options<Single>>([this](const MotionCapture& mocap){
         	
-        	arma::mat rigidBodies(8,mocap.rigid_bodies().size());
+        	arma::mat rigidBodies(13,mocap.rigid_bodies().size());
         	int i = 0;
         	for (auto& rigidBody : mocap.rigid_bodies()) {
 
@@ -50,11 +52,15 @@ namespace support {
                 float x = rigidBody.position().x();
                 float y = rigidBody.position().y();
                 float z = rigidBody.position().z();
-                UnitQuaternion q(arma::vec4{rigidBody.rotation().x(),
+                UnitQuaternion q(arma::vec4{rigidBody.rotation().t(),
+                							rigidBody.rotation().x(),
                                             rigidBody.rotation().y(),
-                                            rigidBody.rotation().z(),
-                                            rigidBody.rotation().t()});
-                rigidBodies.col(i++) = arma::vec({id,x,y,z,q[0],q[1],q[2],q[3]});
+                                            rigidBody.rotation().z()
+                                            });
+                Rotation3D r(q);
+                rigidBodies.col(i++) = arma::vec({id,x,y,z, r.row(0)[0],r.row(0)[1],r.row(0)[2],
+	                										r.row(1)[0],r.row(1)[1],r.row(1)[2],
+	                										r.row(2)[0],r.row(2)[1],r.row(2)[2]});
 
             }
             auto now = NUClear::clock::now();
