@@ -57,8 +57,12 @@ namespace support {
                 rigidBodies.col(i++) = arma::vec({id,x,y,z,q[0],q[1],q[2],q[3]});
 
             }
-            rigidBodies.save("MocapData.hdf5", arma::hdf5_binary);
-        	//TODO open file and print mocap to file in some format
+            auto now = NUClear::clock::now();
+            std::stringstream filename; 
+            filename << "mocapdata/" << std::to_string(std::chrono::duration_cast<std::chrono::microseconds>(now.time_since_epoch()).count());
+            // log("Saving MotionCapture data to ",filename.str());
+            bool success = rigidBodies.save(filename.str());
+            // log(success ? "Saved Successfully" : "Save FAILED!!!");
         });
     }
 }
