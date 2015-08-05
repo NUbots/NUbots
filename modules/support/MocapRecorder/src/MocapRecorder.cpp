@@ -66,7 +66,7 @@ namespace support {
             auto now = NUClear::clock::now();
             std::stringstream filename; 
             filename << "mocapdata/" << std::to_string(std::chrono::duration_cast<std::chrono::microseconds>(now.time_since_epoch()).count());
-            // log("Saving MotionCapture data to ",filename.str());
+            log("Saving MotionCapture data to ",filename.str());
             bool success = rigidBodies.save(filename.str());
             // log(success ? "Saved Successfully" : "Save FAILED!!!");
         });

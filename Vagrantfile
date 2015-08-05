@@ -51,7 +51,7 @@ Vagrant.configure("2") do |config|
 
     # Uncomment this to enable a bridged adapter. This allows for the game controller running on your host to work with the virtual machine. Note: replace 'Wi-Fi' with your network adapter name.
     # See http://docs.vagrantup.com/v2/networking/public_network.html
-    #config.vm.network "public_network", :bridge => 'Wi-Fi'
+    config.vm.network "public_network"
 
     nubots.vm.network :forwarded_port, guest: 12000, host: 12000
     nubots.vm.network :forwarded_port, guest: 12001, host: 12001
