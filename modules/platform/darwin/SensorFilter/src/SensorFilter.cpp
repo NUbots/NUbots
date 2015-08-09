@@ -49,7 +49,6 @@ namespace modules {
             using utility::motion::kinematics::calculateCentreOfMass;
             using utility::motion::kinematics::Side;
             using utility::motion::kinematics::calculateRobotToIMU;
-            using utility::math::kalman::IMUModel;
             using utility::math::matrix::Transform3D;
             using utility::math::matrix::Rotation3D;
             using utility::math::geometry::UnitQuaternion;
@@ -89,8 +88,7 @@ namespace modules {
             SensorFilter::SensorFilter(std::unique_ptr<NUClear::Environment> environment)
             : Reactor(std::move(environment))
             // intialize orientation filter to measured values when standing
-            , orientationFilter(arma::vec({0, 0, 0, -9.6525e-01, -2.4957e-02, 1.8088e-01, 1.8696e-01}))
-            , velocityFilter(arma::vec3({0,0,0})) {
+            , orientationFilter(arma::vec({0, 0, 0, -9.6525e-01, -2.4957e-02, 1.8088e-01, 1.8696e-01})) {
 
                 on<Trigger<Configuration<SensorFilter>>>([this](const Configuration<SensorFilter>& config){
                     DEFAULT_NOISE_GAIN = config["default_noise_gain"].as<double>();

@@ -23,8 +23,8 @@
 #include <armadillo>
 #include <nuclear>
 #include "utility/localisation/LocalisationFieldObject.h"
-#include "utility/math/kalman/ParticleFilter.h"
-#include "utility/math/kalman/UKF.h"
+#include "utility/math/filter/ParticleFilter.h"
+#include "utility/math/filter/UKF.h"
 #include "messages/support/Configuration.h"
 #include "messages/vision/VisionObjects.h"
 #include "RobotModel.h"
@@ -40,8 +40,8 @@ namespace localisation {
     class RobotHypothesis {
     // private:
     public: // for unit testing.
-        utility::math::kalman::UKF<robot::RobotModel> filter_;
-        // utility::math::kalman::ParticleFilter<robot::RobotModel> filter_;
+        utility::math::filter::UKF<robot::RobotModel> filter_;
+        // utility::math::filter::ParticleFilter<robot::RobotModel> filter_;
 
         double weight_;
 

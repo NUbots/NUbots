@@ -23,9 +23,9 @@
 /* Inertial Motion Unit*/
 #include <armadillo>
 
-namespace utility {
-    namespace math {
-        namespace kalman {
+namespace modules {
+    namespace platform {
+        namespace darwin {
 
             class IMUModel {
             public:

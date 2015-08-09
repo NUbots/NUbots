@@ -20,9 +20,9 @@
 
 #include "IMUModel.h"
 
-namespace utility {
-    namespace math {
-        namespace kalman {
+namespace modules {
+    namespace platform {
+        namespace darwin {
 
             arma::vec::fixed<IMUModel::size> IMUModel::limitState(const arma::vec::fixed<size>& state) {
                 arma::vec::fixed<size> newState = state;
@@ -40,10 +40,10 @@ namespace utility {
                 arma::vec::fixed<IMUModel::size> newState;
 
                 newState = state;
-                
+
                 //make a rotation quaternion
                 const double omega = arma::norm(state.rows(VX, VZ)) + 0.00000000001;
-                //Negate to compensate for some later mistake. 
+                //Negate to compensate for some later mistake.
                 //deltaT has been negative for a while and has masked an incorrect hack below
                 const double theta = -omega*deltaT*0.5;
                 const double sinTheta = sin(theta);

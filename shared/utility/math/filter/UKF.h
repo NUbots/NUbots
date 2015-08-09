@@ -17,15 +17,15 @@
  * Copyright 2013 NUBots <nubots@nubots.net>
  */
 
-#ifndef UTILITY_MATH_KALMAN_UKF_H
-#define UTILITY_MATH_KALMAN_UKF_H
+#ifndef UTILITY_MATH_FILTER_UKF_H
+#define UTILITY_MATH_FILTER_UKF_H
 
 #include <nuclear>
 #include <armadillo>
 
 namespace utility {
     namespace math {
-        namespace kalman {
+        namespace filter {
 
             template <typename Model> //model is is a template parameter that Kalman also inherits
             class UKF {
@@ -185,10 +185,10 @@ namespace utility {
                     centredSigmaPoints = sigmaPoints - arma::repmat(sigmaMean, 1, NUM_SIGMA_POINTS);
                 }
 
-                template <typename TMeasurement, typename... TMeasurementType>
+                template <typename TMeasurement, typename... TMeasurementArgs>
                 double measurementUpdate(const TMeasurement& measurement,
-                                         const arma::mat& measurement_variance,
-                                         const TMeasurementType&... measurementArgs) {
+                                         const arma::mat& measurementVariance,
+                                         const TMeasurementArgs&... measurementArgs) {
 
                     // Allocate room for our predictions
                     arma::mat predictedObservations(measurement.n_elem, NUM_SIGMA_POINTS);
@@ -198,74 +198,39 @@ namespace utility {
                         predictedObservations.col(i) = model.predictedObservation(sigmaPoints.col(i), measurementArgs...);
                     }
 
-                    //DEBUG
-                    // if(model.size == 5){
-                    //     std::cout << "model size = \n" << model.size << std::endl;
-                    //     std::cout << "sigmaPoints = \n" << sigmaPoints << std::endl;
-                    //     std::cout << "predicted = \n" << predictedObservations << std::endl;
-                    //     std::cout << "measured = \n" << measurement << std::endl;
-                    // }
                     // Now calculate the mean of these measurement sigmas.
                     arma::vec predictedMean = meanFromSigmas(predictedObservations);
-                    
                     auto centredObservations = predictedObservations - arma::repmat(predictedMean, 1, NUM_SIGMA_POINTS);
 
-                    
                     // Update our state
                     covarianceUpdate -= covarianceUpdate.t() * centredObservations.t() *
-                                        (measurement_variance + centredObservations * covarianceUpdate * centredObservations.t()).i() *
+                                        (measurementVariance + centredObservations * covarianceUpdate * centredObservations.t()).i() *
                                         centredObservations * covarianceUpdate;
 
-                    
-
                     const arma::mat innovation = model.observationDifference(measurement, predictedMean);
-
-
-                    d += (centredObservations.t()) * measurement_variance.i() * innovation;
-
-                    //DEBUG
-                    // if(model.size == 5){
-                    //     std::cout << "innovation = \n" << innovation << std::endl;
-                    //     std::cout << "predictedMean = \n" << predictedMean << std::endl;
-                    //     std::cout << "centredSigmaPoints * covarianceUpdate * d = \n" << centredSigmaPoints * covarianceUpdate * d << std::endl;
-                    //     std::cout << "mean = \n" << mean << std::endl;
-                    // }
+                    d += (centredObservations.t()) * measurementVariance.i() * innovation;
 
                     // Update our mean and covariance
                     mean = sigmaMean + centredSigmaPoints * covarianceUpdate * d;
                     mean = model.limitState(mean);
                     covariance = centredSigmaPoints * covarianceUpdate * centredSigmaPoints.t();
 
-                    
                     // Calculate and return the likelihood of the prior mean
                     // and covariance given the new measurement (i.e. the
                     // prior probability density of the measurement):
-
-                    //DEBUG: why do we occasionally get negative eigenvalues
-                    // arma::vec eValues = arma::eig_sym(predictedCovariance);
-                    // std::cout << "UKF - eValues = " << eValues.t() << std::endl;
-                    // if(arma::any(eValues < 0*eValues)){
-                    //     std::cout << "UKF - sigma covariance has negative eigenvalues!!!!!!!!!!!!!!!!!!!!!!!" << std::endl;
-                    //     std::cout << "UKF - centredObservations = \n" << centredObservations << std::endl;
-                    //     std::cout << "UKF - predictedMean = " << predictedMean.t() << std::endl;
-                    // }
                     arma::mat predictedCovariance = covarianceFromSigmas(predictedObservations, predictedMean);
-                    arma::mat innovationVariance = predictedCovariance + measurement_variance;
+                    arma::mat innovationVariance = predictedCovariance + measurementVariance;
                     arma::mat scalarlikelihoodExponent = ((innovation.t() * innovationVariance.i()) * innovation);
 
                     double expTerm = -0.5 * scalarlikelihoodExponent(0, 0);
-                    double normalisationFactor = pow(2 * M_PI, measurement_variance.n_rows) * arma::det(innovationVariance);
-                    // DEBUG
-                    // if(normalisationFactor <= 0){
-                    //     std::cout << "arma::det(innovationVariance) == 0. innovationVariance = \n" << innovationVariance << std::endl;
-                    // }
+                    double normalisationFactor = pow(2 * M_PI, measurementVariance.n_rows) * arma::det(innovationVariance);
                     double fract = 1 / sqrt(normalisationFactor);
                     const float outlierProbability = 0.05;
 
                     return (1.0 - outlierProbability) * fract * exp(expTerm) + outlierProbability;
                 }
 
-                StateVec get() const {           
+                StateVec get() const {
                     return mean;
                 }
 
