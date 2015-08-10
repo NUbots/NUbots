@@ -37,9 +37,6 @@ namespace utility {
             
                 using StateVec = arma::vec::fixed<Model::size>;
                 using StateMat = arma::mat::fixed<Model::size, Model::size>;
-            
-                // The current prediction function in matrix form
-                StateMat jacobian;
                 
                 //the internal UKF variables
                 StateMat processNoise, processNoisePartial;
@@ -75,9 +72,10 @@ namespace utility {
                 template <typename... TAdditionalParameters>
                 void timeUpdate(double deltaT, const TAdditionalParameters&... additionalParameters) {
                     //timeUpdate sets the new jacobian as well as updating parameters
-                    jacobian = model.timeUpdateJacobian(deltaT, additionalParameters...);
                     
-                    state = state * jacobian;
+                    
+                    state = model.timeUpdate(state,deltaT, additionalParameters...);
+                    StateMat jacobian = model.timeUpdateJacobian(state, additionalParameters...);
                     
                     //this is the original
                     //processNoise = jacobian * processNoise * jacobian.t() + model.processNoise();
@@ -86,9 +84,6 @@ namespace utility {
                     processNoise = jacobian * (processNoisePartial * processNoise) * jacobian.t() + model.processNoise();
                     
                     processNoisePartial = arma::eye(Model::size, Model::size);
-                    
-                    //a second jacobian calculation is made so the observation phase is more accurate. This may be removed for speed.
-                    jacobian = model.timeUpdateJacobian(deltaT, additionalParameters...);
                 }
 
                 template <typename TMeasurement, typename... TMeasurementArgs>
