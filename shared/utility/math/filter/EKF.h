@@ -95,13 +95,13 @@ namespace utility {
                     arma::mat kalmanGain = processNoise * measurementTransform * 
                                             (arma::trimatu(measurementTransform * processNoisePartial * processNoise * measurementTransform.t() + measurementVariance)).i();
                     
-                    state += kalmanGain * (measurement - H * state);
+                    state += kalmanGain * (measurement - measurementTransform * state);
                     
                     //original
                     //processNoise = (arma::eye(Model::size, Model::size) - kalmanGain * H) * processNoise;
                     
                     //steve's backported out-of-order update
-                    processNoisePartial -= kalmanGain * H;
+                    processNoisePartial -= kalmanGain * measurementTransform;
                 }
 
                 StateVec get() const {
