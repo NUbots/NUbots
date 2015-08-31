@@ -20,7 +20,7 @@ node nubotsvm {
   class {'dev_tools': }
 
   # Get and install our toolchain
-  $toolchain_version = '1.0.6'
+  $toolchain_version = '1.0.7'
   exec { "nubots_toolchain":
     command => "wget http://nubots.net/debs/nubots-toolchain${toolchain_version}.deb",
     creates => "/tmp/nubots-toolchain${toolchain_version}.deb",
@@ -65,10 +65,10 @@ node nubotsvmbuild {
                                 require => [ Installer['zmq'], Installer['protobuf'], Wget::Fetch['zmq.hpp'] , Wget::Fetch['catch.hpp'] ], }
   installer { 'openblas':       url => 'https://github.com/xianyi/OpenBLAS/archive/v0.2.14.tar.gz',
                                 environment => ['TARGET=YONAH', 'USE_THREAD=1', 'BINARY=32', 'NUM_THREADS=2'], }
-  installer { 'armadillo':      url => 'http://sourceforge.net/projects/arma/files/armadillo-5.200.2.tar.gz',
+  installer { 'armadillo':      url => 'http://sourceforge.net/projects/arma/files/armadillo-5.400.2.tar.gz',
                                 method => 'cmake',
                                 require => Installer['openblas'], }
-  installer { 'tcmalloc':       url => 'https://googledrive.com/host/0B6NtGsLhIcf7MWxMMF9JdTN3UVk/gperftools-2.4.tar.gz',
+  installer { 'tcmalloc':       url => 'https://github.com/gperftools/gperftools/releases/download/gperftools-2.4/gperftools-2.4.tar.gz',
                                 args => '--with-tcmalloc-pagesize=64 --enable-minimal', }
   installer { 'yaml-cpp':       url => 'https://github.com/jbeder/yaml-cpp/archive/release-0.5.2.tar.gz',
                                 args => '-DYAML_CPP_BUILD_CONTRIB=OFF -DYAML_CPP_BUILD_TOOLS=OFF',
@@ -86,10 +86,10 @@ node nubotsvmbuild {
                                 require => Installer['alsalib'],
                                 lto => false, }
   installer { 'rtaudio':        url => 'http://www.music.mcgill.ca/~gary/rtaudio/release/rtaudio-4.1.1.tar.gz', }
-  installer { 'muparser':       url => 'https://github.com/TrentHouliston/muparser/archive/master.tar.gz',
+  installer { 'muparser':       url => 'https://github.com/beltoforion/muparser/archive/v2.2.5.tar.gz',
                                 args => '--disable-shared --disable-debug --disable-samples', }
   installer { 'eigen3':         url => 'http://bitbucket.org/eigen/eigen/get/3.2.5.tar.gz', }
-  installer { 'boost':          url => 'http://downloads.sourceforge.net/project/boost/boost/1.57.0/boost_1_57_0.tar.gz',
+  installer { 'boost':          url => 'http://downloads.sourceforge.net/project/boost/boost/1.59.0/boost_1_59_0.tar.gz',
                                 args => ['link=static'],
                                 require => [ Installer['zlib'], Installer['bzip2'], ], }
   installer { 'mlpack':         url => 'https://github.com/mlpack/mlpack/archive/mlpack-1.0.12.tar.gz',

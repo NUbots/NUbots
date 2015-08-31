@@ -31,7 +31,6 @@ class dev_tools {
   package { 'binutils': ensure => latest, require => Apt::Ppa['ppa:ubuntu-toolchain-r/test'] }
   package { 'ninja-build': ensure => latest, }
   package { 'yasm': ensure => latest, }
-  package { 'libboost-dev': ensure => latest, }
 
   # SSH KEYS FOR THE VM
   file { 'vm_private_key':
