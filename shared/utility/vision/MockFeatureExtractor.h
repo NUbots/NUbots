@@ -21,13 +21,14 @@
 #ifndef UTILITY_VISION_MOCK_FEATURE_EXTRACTOR_H
 #define UTILITY_VISION_MOCK_FEATURE_EXTRACTOR_H
 
+#include <armadillo>
+#include <yaml-cpp/yaml.h>
+
 #include "messages/input/Image.h"
 #include "messages/input/Sensors.h"
 #include "messages/input/Image.h"
 #include "messages/localisation/FieldObject.h"
-#include "messages/support/Configuration.h"
 
-#include <armadillo>
 
 namespace utility {
 	namespace vision {
@@ -48,7 +49,7 @@ namespace utility {
 			bool sampleRandomBool(double probability_true);
 		public:
             static constexpr const char* CONFIGURATION_PATH = "MockFeatureExtractor.json";
-			std::vector<MockFeature> setParameters(const messages::support::Configuration<MockFeatureExtractor>& config);
+			std::vector<MockFeature> setParameters(const YAML::Node& config);
 			class ExtractedFeature {
 			public:
 				arma::vec screenAngular;	//Compulsory
