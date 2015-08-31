@@ -140,7 +140,7 @@ namespace support {
                 }
             }
 
-            emit<Scope::NETWORK>(std::move(moCap));
+            emit<NETWORK>(std::move(moCap));
 
         });
 

@@ -130,7 +130,7 @@ namespace modules {
                 // Make a vector of the command
                 auto points = std::make_unique<std::vector<ServoCommand>>();
                 points->push_back(point);
-                emit<Scope::DIRECT>(std::move(points));
+                emit<DIRECT>(std::move(points));
             });
 
             on<Trigger<std::vector<ServoCommand>>, Options<Sync<Controller>>>("Command Filter", [this] (const std::vector<ServoCommand>& commands) {

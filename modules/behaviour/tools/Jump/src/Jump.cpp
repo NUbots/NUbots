@@ -46,7 +46,7 @@ namespace tools {
     Jump::Jump(std::unique_ptr<NUClear::Environment> environment)
     : Reactor(std::move(environment)) {
 
-        emit<Scope::INITIALIZE>(std::make_unique<RegisterAction>(RegisterAction {
+        emit<INITIALIZE>(std::make_unique<RegisterAction>(RegisterAction {
             2,
             "Jump",
             { std::pair<float, std::set<LimbID>>(100, { LimbID::LEFT_LEG, LimbID::RIGHT_LEG, LimbID::LEFT_ARM, LimbID::RIGHT_ARM }) },

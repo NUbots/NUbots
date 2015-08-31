@@ -44,7 +44,7 @@ namespace modules {
 
                 });
 
-                emit<Scope::INITIALIZE>(std::make_unique<RegisterAction>(RegisterAction {
+                emit<INITIALIZE>(std::make_unique<RegisterAction>(RegisterAction {
                     id,
                     "Stand",
                     { std::pair<float, std::set<LimbID>>(std::numeric_limits<float>::epsilon(), { LimbID::LEFT_LEG, LimbID::RIGHT_LEG, LimbID::LEFT_ARM, LimbID::RIGHT_ARM}) },

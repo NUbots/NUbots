@@ -55,7 +55,7 @@ namespace modules {
                         scriptList.push_back(script->second);
                     }
                 }
-                emit<Scope::DIRECT>(std::make_unique<ExecuteScript>(command.sourceId, scriptList, command.start));
+                emit<DIRECT>(std::make_unique<ExecuteScript>(command.sourceId, scriptList, command.start));
             });
 
             on<Trigger<ExecuteScript>>([this](const ExecuteScript& command) {

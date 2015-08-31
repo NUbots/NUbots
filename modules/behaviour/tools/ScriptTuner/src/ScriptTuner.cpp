@@ -93,7 +93,7 @@ namespace modules {
                     emit(std::move(waypoint));
                 });
 
-                emit<Scope::INITIALIZE>(std::make_unique<RegisterAction>(RegisterAction {
+                emit<INITIALIZE>(std::make_unique<RegisterAction>(RegisterAction {
                     id,
                     "Script Tuner",
                     { std::pair<float, std::set<LimbID>>(1, { LimbID::LEFT_LEG, LimbID::RIGHT_LEG, LimbID::LEFT_ARM, LimbID::RIGHT_ARM, LimbID::HEAD }) },
@@ -368,7 +368,7 @@ namespace modules {
                 // If we don't then save our current motor position as the position
                 if(it == std::end(script.frames[frame].targets)) {
 
-                    emit<Scope::DIRECT>(std::make_unique<LockServo>());
+                    emit<DIRECT>(std::make_unique<LockServo>());
                 }
                 else {
                     // Remove this frame

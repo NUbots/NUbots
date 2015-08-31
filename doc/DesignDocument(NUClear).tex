@@ -321,7 +321,7 @@
 					std::unique_ptr<MyData> myData = std::make_unique<MyData>();
 
 					// Send the data to the network!
-					emit<Scope::NETWORK>(std::move(myData));
+					emit<NETWORK>(std::move(myData));
 				\end{cppcode}
 
 				As you can see sending data to the network is almost as simple as sending data normally.
@@ -333,7 +333,7 @@
 					std::unique_ptr<MyData> myData = std::make_unique<MyData>();
 
 					// Send the data to the network!
-					emit<Scope::LOCAL, Scope::NETWORK>(std::move(myData));
+					emit<LOCAL, NETWORK>(std::move(myData));
 				\end{cppcode}
 
 				\begin{figure}[p]
@@ -536,10 +536,10 @@
 
 				\begin{cppcode}
 					// Send a message to the network
-					emit<Scope::NETWORK>(message);
+					emit<NETWORK>(message);
 
 					// Send a message locally and to the network
-					emit<Scope::LOCAL, Scope::NETWORK>(message);
+					emit<LOCAL, NETWORK>(message);
 				\end{cppcode}
 
 				Internally the Networking extension uses the ZeroMQ library to handle connection management.

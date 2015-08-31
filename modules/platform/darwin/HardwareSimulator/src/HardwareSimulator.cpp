@@ -269,7 +269,7 @@ namespace darwin {
             commandList->push_back(command);
 
             // Emit it so it's captured by the reaction above
-            emit<Scope::DIRECT>(std::move(commandList));
+            emit<DIRECT>(std::move(commandList));
         });
     }
 

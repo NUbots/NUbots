@@ -90,7 +90,7 @@ namespace modules {
                     fallenCheck.enable();
                 });
 
-                emit<Scope::INITIALIZE>(std::make_unique<RegisterAction>(RegisterAction {
+                emit<INITIALIZE>(std::make_unique<RegisterAction>(RegisterAction {
                     id,
                     "Get Up",
                     { std::pair<float, std::set<LimbID>>(0, { LimbID::LEFT_LEG, LimbID::RIGHT_LEG, LimbID::LEFT_ARM, LimbID::RIGHT_ARM, LimbID::HEAD }) },

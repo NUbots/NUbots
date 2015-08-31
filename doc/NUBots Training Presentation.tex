@@ -1284,7 +1284,7 @@
 		    std::make_unique<MyData>();
 
 		// Send the data out to the world! like all of it
-		emit<Scope::NETWORK>(std::move(myData));
+		emit<NETWORK>(std::move(myData));
 	\end{lstlisting}
 \end{frame}
 
@@ -1301,7 +1301,7 @@
 		    std::make_unique<MyData>();
 
 		// Send the data out to the world! like all of it
-		emit<Scope::NETWORK, Scope::LOCAL>(std::move(myData));
+		emit<NETWORK, LOCAL>(std::move(myData));
 	\end{lstlisting}
 \end{frame}
 
@@ -1320,7 +1320,7 @@
 		    std::make_unique<MyData>();
 
 		// Send the data out to the world! like all of it
-		emit<Scope::INITIALIZE>(std::move(myData));
+		emit<INITIALIZE>(std::move(myData));
 	\end{lstlisting}
 \end{frame}
 
@@ -1339,7 +1339,7 @@
 		    std::make_unique<MyData>();
 
 		// Send the data out to the world! like all of it
-		emit<Scope::DIRECT>(std::move(myData));
+		emit<DIRECT>(std::move(myData));
 	\end{lstlisting}
 \end{frame}
 

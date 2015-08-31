@@ -87,7 +87,7 @@ namespace modules {
             updateHandle = on< Trigger<Sensors>, Options<Single, Priority<NUClear::HIGH>> >("Head Controller - Update Head Position",[this] (const Sensors& sensors) {
                 //P controller
                 currentAngles = p_gain * goalAngles + (1 - p_gain) * currentAngles;
-                
+
                 //Get goal vector from angles
                 //Pitch is positive when the robot is looking down by Right hand rule, so negate the pitch
                 arma::vec3 goalHeadUnitVector_world = sphericalToCartesian({1, currentAngles[0], currentAngles[1]});
@@ -119,7 +119,7 @@ namespace modules {
 
             updateHandle.enable();
 
-            emit<Scope::INITIALIZE>(std::make_unique<RegisterAction>(RegisterAction {
+            emit<INITIALIZE>(std::make_unique<RegisterAction>(RegisterAction {
                 id,
                 "HeadController",
                 { std::pair<float, std::set<LimbID>>(30.0 , { LimbID::HEAD }) },

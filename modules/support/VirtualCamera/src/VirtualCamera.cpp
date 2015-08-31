@@ -47,8 +47,8 @@ namespace support {
             cameraParameters->focalLengthPixels = imageCentre[0] / tanHalfFOV[0];
 
 
-            emit<Scope::DIRECT>(std::move(cameraParameters));
-            
+            emit<DIRECT>(std::move(cameraParameters));
+
         });
     }
 }

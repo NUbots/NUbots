@@ -68,7 +68,7 @@ namespace localisation {
 
 	using messages::vision::Goal;
 	using messages::vision::VisionObject;
-    
+
     using messages::localisation::ResetRobotHypotheses;
 
     using messages::input::LimbID;
@@ -92,7 +92,7 @@ namespace localisation {
         });
 
            // Register the path follower with the subsumption system:
-        emit<Scope::INITIALIZE>(std::make_unique<RegisterAction>(RegisterAction {
+        emit<INITIALIZE>(std::make_unique<RegisterAction>(RegisterAction {
             subsumptionId,
             "SideChecker",
             {
@@ -159,12 +159,12 @@ namespace localisation {
         		headCommand->searchType = SearchType::GOAL_RIGHT;
         		emit(std::move(headCommand));
         		currentState = State::SearchRight;
-        	} 
-        	
+        	}
+
         	else if (rightMeasured && currentState == State::SearchRight) {
         		currentState = State::Calculate;
         	}
-        	
+
         	else if (currentState == State::Calculate) {
 
                 ResetType type = calculateSide(leftGoals, rightGoals);
@@ -188,11 +188,11 @@ namespace localisation {
         avg /= measurements.size();
         return avg;
     }
-		
+
     void SideChecker::addGoals(Goal left, Goal right){
     	bool leftGoalToLeftOfRobot = left.measurements.front().position[1] > 0;
     	bool rightGoalToLeftOfRobot = right.measurements.front().position[1] > 0;
-    	
+
     	std::pair<Goal,Goal> goalPair = std::make_pair(left, right);
 
     	if(leftGoalToLeftOfRobot && rightGoalToLeftOfRobot){

@@ -46,7 +46,7 @@ namespace strategy {
 
         powerplant.addServiceTask(NUClear::threading::ThreadWorker::ServiceTask(std::bind(std::mem_fn(&KeyboardWalk::run), this), std::bind(std::mem_fn(&KeyboardWalk::kill), this)));
 
-        // emit<Scope::INITIALIZE>(std::make_unique<WalkStartCommand>());
+        // emit<INITIALIZE>(std::make_unique<WalkStartCommand>());
         // moving = true;
     }
 

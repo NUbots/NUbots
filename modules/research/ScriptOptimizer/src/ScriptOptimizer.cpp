@@ -161,7 +161,7 @@ namespace modules {
                     }
 
                     // Return our result to the optimizer
-                    emit<Scope::NETWORK>(std::move(result));
+                    emit<NETWORK>(std::move(result));
                 }
             });
 

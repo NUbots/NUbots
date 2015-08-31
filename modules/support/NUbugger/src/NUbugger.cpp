@@ -287,11 +287,11 @@ namespace support {
             data.push_back(messages::vision::Colour(s));
         }
         auto lut = std::make_unique<LookUpTable>(lookuptable.bits_y(), lookuptable.bits_cb(), lookuptable.bits_cr(), std::move(data));
-        emit<Scope::DIRECT>(std::move(lut));
+        emit<DIRECT>(std::move(lut));
 
         if (lookuptable.save()) {
             log<NUClear::INFO>("Saving LUT to file");
-            emit<Scope::DIRECT>(std::make_unique<SaveLookUpTable>());
+            emit<DIRECT>(std::make_unique<SaveLookUpTable>());
         }
     }
 
@@ -404,8 +404,8 @@ namespace support {
             type = Message::OVERVIEW;
         } else {
             throw new std::runtime_error("NUbugger::getMessageTypeFromString: Invalid message string");
-        }   
-        return type;                
+        }
+        return type;
 
     }
 
@@ -429,7 +429,7 @@ namespace support {
             case Message::CONFIGURATION_STATE:  return "CONFIGURATION_STATE";
             case Message::BEHAVIOUR:            return "BEHAVIOUR";
             case Message::OVERVIEW:             return "OVERVIEW";
-            
+
             default: throw new std::runtime_error("NUbugger::getStringFromMessageType: Invalid message type");
         }
     }

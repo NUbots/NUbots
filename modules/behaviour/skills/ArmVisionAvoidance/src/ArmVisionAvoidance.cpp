@@ -59,7 +59,7 @@ namespace skills {
         updateHandle = on<Trigger<Sensors>, Options<Single, Priority<NUClear::HIGH>> >("Arm Vision Avoidance - Update Arm Position",
                 [this](const Sensors& sensors) {
             // Check to see if we are looking over one of our shoulders.
-            // If we are then we need to add an offset to the arms shoulder and elbow pitches 
+            // If we are then we need to add an offset to the arms shoulder and elbow pitches
             // so that the arm is not obscuring our vision.
             auto headTransform = sensors.forwardKinematics.find(ServoID::HEAD_PITCH)->second;
             auto headSpherical = utility::math::coordinates::cartesianToSpherical({headTransform(0, 0), headTransform(1, 0), headTransform(2, 0)});
@@ -131,7 +131,7 @@ namespace skills {
             emit(std::move(waypoints));
         });
 
-        emit<Scope::INITIALIZE>(std::make_unique<RegisterAction>(RegisterAction {
+        emit<INITIALIZE>(std::make_unique<RegisterAction>(RegisterAction {
             subsumptionId,
             "ArmVisionAvoidance",
             { std::pair<float, std::set<LimbID>>(20.0, { LimbID::LEFT_ARM, LimbID::RIGHT_ARM }) },
@@ -140,7 +140,7 @@ namespace skills {
             },
             [this] (const std::set<LimbID>&) { // Arm control lost
                 updateHandle.disable();
-            }, 
+            },
             [this] (const std::set<ServoID>& ) { } // Servos reached target
         }));
     }
