@@ -49,20 +49,12 @@ node nubotsvmbuild {
   installer { 'protobuf':       url => 'https://github.com/google/protobuf/releases/download/v2.6.1/protobuf-2.6.1.tar.gz',
                                 args => '--with-zlib',
                                 require => Installer['zlib'], }
-  installer { 'pgm':            url => 'https://openpgm.googlecode.com/files/libpgm-5.2.122.tar.gz',
-                                strip_components => 3, }
-  installer { 'zmq':            url => 'http://download.zeromq.org/zeromq-4.1.2.tar.gz',
-                                args => '-with-pgm --without-libsodium',
-                                require => Installer['pgm'], }
-  wget::fetch { 'zmq.hpp':      destination => '/nubots/toolchain/include/zmq.hpp',
-                                source => 'https://raw.githubusercontent.com/zeromq/cppzmq/master/zmq.hpp',
-                                require => [ Installer['zmq'], Class['installer::prerequisites'], ], }
+  installer { 'fswatch':        url => 'https://github.com/emcrisostomo/fswatch/releases/download/1.5.1/fswatch-1.5.1.tar.gz', }
   wget::fetch { 'catch.hpp':    destination => '/nubots/toolchain/include/catch.hpp',
                                 source => 'https://raw.githubusercontent.com/philsquared/Catch/master/single_include/catch.hpp',
                                 require => Class['installer::prerequisites'], }
-  installer { 'nuclear':        url => 'https://github.com/Fastcode/NUClear/archive/OldDSL.tar.gz',
-                                args => '-DNUCLEAR_BUILD_TESTS=OFF',
-                                require => [ Installer['zmq'], Installer['protobuf'], Wget::Fetch['zmq.hpp'] , Wget::Fetch['catch.hpp'] ], }
+  installer { 'nuclear':        url => 'https://github.com/Fastcode/NUClear/archive/develop.tar.gz',
+                                args => '-DBUILD_TESTS=OFF', }
   installer { 'openblas':       url => 'https://github.com/xianyi/OpenBLAS/archive/v0.2.14.tar.gz',
                                 environment => ['TARGET=YONAH', 'USE_THREAD=1', 'BINARY=32', 'NUM_THREADS=2'], }
   installer { 'armadillo':      url => 'http://sourceforge.net/projects/arma/files/armadillo-5.400.2.tar.gz',
