@@ -90,7 +90,7 @@ namespace modules {
             // intialize orientation filter to measured values when standing
             , orientationFilter(arma::vec({0, 0, 0, -9.6525e-01, -2.4957e-02, 1.8088e-01, 1.8696e-01})) {
 
-                on<Configuration>("DarwinSensorFilter.yaml").then([this](const Configuration<SensorFilter>& config){
+                on<Configuration>("DarwinSensorFilter.yaml").then([this](const Configuration& config){
                     DEFAULT_NOISE_GAIN = config["default_noise_gain"].as<double>();
                     HIGH_NOISE_THRESHOLD = config["high_noise_threshold"].as<double>();
                     HIGH_NOISE_GAIN = config["high_noise_gain"].as<double>();

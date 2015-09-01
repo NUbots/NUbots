@@ -35,7 +35,7 @@ namespace modules {
 
             on<Configuration>("scripts/").then([this](const Configuration& script) {
                 // Add this script to our list of scripts
-                scripts.insert(std::make_pair(script.name, script.config.as<Script>()));
+                scripts.insert(std::make_pair(script.path, script.config.as<Script>()));
             });
 
             on<Trigger<ExecuteScriptByName>>().then([this](const ExecuteScriptByName& command) {

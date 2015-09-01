@@ -156,7 +156,7 @@ namespace modules {
                 });
             }
 
-            arma::vec WalkOptimiser::getState(const Configuration<WalkOptimiserCommand>& walkConfig){
+            arma::vec WalkOptimiser::getState(const Configuration& walkConfig){
                 arma::vec state(parameter_names.size());
                 std::cerr << "walkConfig.size() = " << walkConfig.config.size() << "\nLoading state:"<< std::endl;
                 int i = 0;

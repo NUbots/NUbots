@@ -66,7 +66,7 @@ namespace support {
             send(message);
         })/*)*/;
 
-        /*handles[Message::OVERVIEW].push_back(*/on<Trigger<CommandLineArguments>, Single, Priority::LOW>().then([this](const std::vector<std::string>& arguments) {
+        /*handles[Message::OVERVIEW].push_back(*/on<Trigger<CommandLineArguments>, Single, Priority::LOW>().then([this] (const std::vector<std::string>& arguments) {
 
             std::string role_name = arguments.at(0);
             auto index = role_name.rfind('/');
@@ -77,20 +77,20 @@ namespace support {
 
         })/*)*/;
 
-        /*handles[Message::OVERVIEW].push_back(*/on<Trigger<Behaviour::State>, Single, Priority::LOW>().then([this](const Behaviour::State& state) {
+        /*handles[Message::OVERVIEW].push_back(*/on<Trigger<Behaviour::State>, Single, Priority::LOW>().then([this] (const Behaviour::State& state) {
 
             overview.set_behaviour_state(state);
 
         })/*)*/;
 
-        /*handles[Message::OVERVIEW].push_back(*/on<Trigger<KickPlan>, Single, Priority::LOW>([this] ().then(const KickPlan& kickPlan) {
+        /*handles[Message::OVERVIEW].push_back(*/on<Trigger<KickPlan>, Single, Priority::LOW>().then([this] (const KickPlan& kickPlan) {
 
             // TODO fix runtime error:
             // *overview.mutable_kick_target() << kickTarget;
 
         })/*)*/;
 
-        /*handles[Message::OVERVIEW].push_back(*/on<Trigger<Sensors>, Single, Priority::LOW>([this]().then(const Sensors& sensors) {
+        /*handles[Message::OVERVIEW].push_back(*/on<Trigger<Sensors>, Single, Priority::LOW>().then([this] (const Sensors& sensors) {
 
             overview.set_voltage(sensors.voltage);
             overview.set_battery(sensors.battery);
@@ -112,8 +112,8 @@ namespace support {
             *overview.mutable_robot_heading() << self.heading;
         })/*)*/;
 
-        /*handles[Message::OVERVIEW].push_back(*/on<Trigger<std::vector<LocalisationBall>>, With<std::vector<Self>>, Options<Single,
-            Priority<NUClear::LOW>>>().then([this](const std::vector<LocalisationBall>& balls, const std::vector<Self>& selfs) {
+        /*handles[Message::OVERVIEW].push_back(*/on<Trigger<std::vector<LocalisationBall>>, With<std::vector<Self>>, Single, Priority::LOW>()
+            .then([this](const std::vector<LocalisationBall>& balls, const std::vector<Self>& selfs) {
 
             // Retrieve the first ball and self in the vector.
             LocalisationBall ball = balls.front();
@@ -126,7 +126,7 @@ namespace support {
             *overview.mutable_ball_world_position() << RobotToWorldTransform(self.position, self.heading, ball.position);
         })/*)*/;
 
-        /*handles[Message::OVERVIEW].push_back(*/on<Trigger<Image>, Single, Priority::LOW>().then([this](const Image&/* image*/) {
+        /*handles[Message::OVERVIEW].push_back(*/on<Trigger<Image>, Single, Priority::LOW>().then([this] (const Image&/* image*/) {
 
             overview.set_last_camera_image(getUtcTimestamp());
 

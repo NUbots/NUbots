@@ -73,7 +73,7 @@ namespace modules{
             {
                 lastTime = NUClear::clock::now();
             }
-            void setParameters(const messages::support::Configuration<FeatureDetectorClass>& config){
+            void setParameters(const messages::support::Configuration& config){
                 MAX_MATCHES = config["MAX_MATCHES"].template as<size_t>();
                 MEASUREMENT_COV_FACTOR = config["MEASUREMENT_COV_FACTOR"].template as<float>();
                 RHO_INITIAL = config["RHO_INITIAL"].template as<float>();

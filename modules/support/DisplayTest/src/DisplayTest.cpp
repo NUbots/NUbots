@@ -40,10 +40,10 @@ namespace support {
 
         });*/
 
-        on<Network<MotionCapture>>().then([this](const Network<MotionCapture>& net) {
-//            auto mocap = net.data;
-            NUClear::log("I got things from", net.sender);
-        });
+//         on<Network<MotionCapture>>().then([this](const Network<MotionCapture>::Source, const Network<MotionCapture>& net) {
+// //            auto mocap = net.data;
+//             // NUClear::log("I got things from", net.sender);
+//         });
 
         on<Trigger<Sensors>, Single, Priority::HIGH>().then([this](const Sensors& sensors) {
             emit(graph("orientation", sensors.orientation));

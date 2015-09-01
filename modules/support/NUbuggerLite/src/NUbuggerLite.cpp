@@ -41,7 +41,7 @@ namespace support {
         : Reactor(std::move(environment)), socket(0) {
 
         on<Configuration, Trigger<GlobalConfig>>("NUbuggerLite.yaml")
-        .then("NUbuggerLite Configuration", [this] (const Configuration<NUbuggerLite>& config, const GlobalConfig& globalConfig) {
+        .then("NUbuggerLite Configuration", [this] (const Configuration& config, const GlobalConfig& globalConfig) {
 
             // TODO use an eventfd to allow changing the port dynamically
 

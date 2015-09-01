@@ -158,6 +158,8 @@ namespace modules {
             });
 
             on<Every<90, Per<std::chrono::seconds>>, Single, Sync<Controller>, Priority::HIGH>().then("Controller Update Waypoints", [this] {
+
+                auto now = NUClear::clock::now();
                 std::list<ServoID> emptiedQueues;
                 std::unique_ptr<std::vector<ServoTarget>> waypoints;
 

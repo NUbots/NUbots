@@ -28,7 +28,7 @@ namespace modules {
         using messages::support::Configuration;
 
         MathTester::MathTester(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
-            on<Configuration>("MathTester.yaml").then([this](const Configuration<MathTester>& tests) {
+            on<Configuration>("MathTester.yaml").then([this](const Configuration& tests) {
 
                 testPolygon(true, tests.config);
                 // if(tests["test_polygon"]){

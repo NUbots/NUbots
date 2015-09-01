@@ -48,7 +48,7 @@ namespace input {
         powerplant.addServiceTask(NUClear::threading::ThreadWorker::ServiceTask(std::bind(std::mem_fn(&GameController::run), this), std::bind(std::mem_fn(&GameController::kill), this)));
 
         // Configure
-        on<Configuration, Trigger<GlobalConfig>>("GameController.yaml").then("GameController Configuration", [this] (const Configuration<GameController>& config, const GlobalConfig& globalConfig) {
+        on<Configuration, Trigger<GlobalConfig>>("GameController.yaml").then("GameController Configuration", [this] (const Configuration& config, const GlobalConfig& globalConfig) {
 
             // TODO use an eventfd to allow changing the port dynamically
 
