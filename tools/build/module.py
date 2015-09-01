@@ -93,9 +93,6 @@ def generate_header(parts):
             public:
                 /// @brief Called by the powerplant to build and setup the {className} reactor.
                 explicit {className}(std::unique_ptr<NUClear::Environment> environment);
-
-                /// @brief the path to the configuration file for {className}
-                static constexpr const char* CONFIGURATION_PATH = "{className}.yaml";
             }};
 
         {closeNamespace}
@@ -141,7 +138,7 @@ def generate_cpp(parts):
             {className}::{className}(std::unique_ptr<NUClear::Environment> environment)
             : Reactor(std::move(environment)) {{
 
-                on<Trigger<Configuration<{className}>>>([this] (const Configuration<{className}>& config) {{
+                on<Configuration>("{className}.yaml").then([this] (const Configuration& config) {{
                     // Use configuration here from file {className}.yaml
                 }});
             }}

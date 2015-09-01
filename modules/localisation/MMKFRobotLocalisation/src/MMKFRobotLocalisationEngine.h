@@ -33,9 +33,6 @@
 
 namespace modules {
 namespace localisation {
-    struct MMKFRobotLocalisationEngineConfig {
-        static constexpr const char* CONFIGURATION_PATH = "MMKFRobotLocalisationEngine.yaml";
-    };
 
     class MMKFRobotLocalisationEngine {
         public:
@@ -65,11 +62,9 @@ namespace localisation {
 
         void set_field_description(std::shared_ptr<messages::support::FieldDescription> desc);
 
-        void UpdateConfiguration(
-            const messages::support::Configuration<MultiModalRobotModelConfig>& config);
+        void UpdateMultiModalRobotModelConfiguration(const messages::support::Configuration& config);
 
-        void UpdateConfiguration(
-            const messages::support::Configuration<MMKFRobotLocalisationEngineConfig>& config);
+        void UpdateRobotLocalisationEngineConfiguration(const messages::support::Configuration& config);
 
         bool CanEmitFieldObjects();
 

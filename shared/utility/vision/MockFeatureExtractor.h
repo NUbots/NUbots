@@ -29,7 +29,6 @@
 #include "messages/input/Image.h"
 #include "messages/localisation/FieldObject.h"
 
-
 namespace utility {
 	namespace vision {
 		class MockFeatureExtractor{
@@ -48,7 +47,6 @@ namespace utility {
 			double uniformSample(arma::vec/*2*/ range);
 			bool sampleRandomBool(double probability_true);
 		public:
-            static constexpr const char* CONFIGURATION_PATH = "MockFeatureExtractor.json";
 			std::vector<MockFeature> setParameters(const YAML::Node& config);
 			class ExtractedFeature {
 			public:

@@ -64,10 +64,6 @@ namespace input {
         /// @brief Called by the powerplant to build and setup the PushDetector reactor.
         explicit PushDetector(std::unique_ptr<NUClear::Environment> environment);
 
-        /// @brief the path to the configuration file for PushDetector
-        static constexpr const char* CONFIGURATION_PATH = "PushDetector.yaml";
-
-
         std::vector<UKF<ServoLoadModel>> loadFilters;
         NUClear::clock::time_point lastTimeUpdateTime;
     };

@@ -98,8 +98,6 @@ namespace strategy {
         void play(const std::vector<messages::localisation::Self>& selfs, const std::vector<messages::localisation::Ball>& balls, const messages::support::FieldDescription& fieldDescription, const messages::input::gameevents::Mode& mode);
 
     public:
-        static constexpr const char* CONFIGURATION_PATH = "SoccerStrategy.yaml";
-
         explicit SoccerStrategy(std::unique_ptr<NUClear::Environment> environment);
     };
 

@@ -41,7 +41,7 @@ namespace debug {
 
     NUbugger::NUbugger(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
 
-        on<Trigger<Every<50, milliseconds>>>([this](const time_t&) {
+        on<Every<50, milliseconds>>().then([this] {
 
             double period = 10;
             double freq = 1 / period;
@@ -55,7 +55,7 @@ namespace debug {
 
         });
 
-        on<Trigger<DarwinSensors>>([this](const DarwinSensors& sensors) {
+        on<Trigger<DarwinSensors>>().then([this](const DarwinSensors& sensors) {
             //Includes change to our standard coordinate system
             emit(graph(
                 "Accelerometer",
@@ -74,7 +74,7 @@ namespace debug {
 
         });
 
-        on<Trigger<Sensors>, Options<Single, Priority<NUClear::LOW>>>([this](const Sensors& sensors) {
+        on<Trigger<Sensors>, Single, Priority::LOW>().then([this](const Sensors& sensors) {
 
             for (const auto& s : sensors.servos) {
                 if (s.id == ServoID::L_HIP_ROLL){
@@ -84,7 +84,7 @@ namespace debug {
 
         });
 
-        on<Trigger<Every<1, std::chrono::seconds>>>([this] (const time_t&) {
+        on<Every<1, std::chrono::seconds>>().then([this] {
             std::random_device rd;
             std::mt19937 gen(rd());
             std::uniform_real_distribution<> dis(-2, 2);

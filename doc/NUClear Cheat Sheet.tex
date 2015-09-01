@@ -17,13 +17,13 @@
 
     \paragraph{on} An on statement is used to setup a callback to run with data, it takes arguments and a matching function
     \begin{cppcode}
-        on<...>(callbackFunction);
+        on<...>().then(callbackFunction);
     \end{cppcode}
 
     \paragraph{Trigger} Trigger statements setup the callbacks, they will execute when the type is emitted.
     There must always be a Trigger in an on statement.\\
     \begin{cppcode}
-        on<Trigger<Data>>([](const Data& data) {
+        on<Trigger<Data>>().then([](const Data& data) {
             // code
         });
     \end{cppcode}
@@ -35,17 +35,10 @@
         });
     \end{cppcode}
 
-    \paragraph{Options} Options statements configure how and when the callback will be executed.\\
-    \begin{cppcode}
-        on<Trigger<Data>, Options<...>>([](const Data& data) {
-            // Options configure when this code runs
-        });
-    \end{cppcode}
-
     \paragraph{Single} Single allows only a single execution of the callback at a time.
     If one is running a new trigger will be ignored.
     \begin{cppcode}
-        on<Trigger<Data>, Options<Single>>([](const Data& data) {
+        on<Trigger<Data>, Single>().then([](const Data& data) {
             // If this code is running, don't start a new one, instead drop it
         });
     \end{cppcode}
@@ -54,7 +47,7 @@
     If one is running a new trigger will be queued to execute after.
     Sync objects are grouped by their templated type.\\
     \begin{cppcode}
-        on<Trigger<Data>, Options<Sync<LockType>>>([](const Data& data) {
+        on<Trigger<Data>, Sync<LockType>>().then([](const Data& data) {
             // If this code is running, don't start a new one, instead queue it
         });
     \end{cppcode}
@@ -62,7 +55,7 @@
     \paragraph{Priority} Priority allows picking when the task will run in relation to other tasks.
     High priority tasks will jump the queue and run before low priority tasks.\\
     \begin{cppcode}
-        on<Trigger<Data>, Options<Priority<NUClear::HIGH>>>([](const Data& data) {
+        on<Trigger<Data>, Priority::HIGH>>().then([](const Data& data) {
             // This code will run before code with a lower priority
         });
     \end{cppcode}
@@ -70,36 +63,33 @@
     \paragraph{Every} Every is used to make a periodic function.
     It will execute at the period given, or at the frequency given (if using Per).\\
     \begin{cppcode}
-        on<Trigger<Every<5, std::chrono::seconds>>>(const time_t& time) {
+        on<Every<5, std::chrono::seconds>>().then([] {
             // Will run every 5 seconds
         });
-        on<Trigger<Every<10, Per<std::chrono::minute>>>>(const time_t& time) {
+        on<Every<10, Per<std::chrono::minute>>>().then([] {
             // Will run 10 times per minute
         });
     \end{cppcode}
 
-    \paragraph{Raw} Raw will return an unmodifyable (but storable) pointer to the data.\\
+    \paragraph{Raw} You can request an unmodifyable (but storable) pointer to the data.\\
     \begin{cppcode}
-        on<Trigger<Raw<Data>>>([](std::shared_ptr<const Data> dataPtr) {
+        on<Trigger<Data>>().then([](std::shared_ptr<const Data> dataPtr) {
             // The pointer to dataPtr can now be stored
         });
     \end{cppcode}
 
     \paragraph{Network} Network will allow Protocol Buffers to be received to other robots.\\
     \begin{cppcode}
-        on<Trigger<Network<ProtocolBuffer>>>([](const Network<ProtocolBuffer>& net) {
+        on<Network<ProtocolBuffer>>().then([](const Network<ProtocolBuffer>& net) {
             // net.data = the sent data
             // net.sender = where the data came from
-        }
+        });
     \end{cppcode}
 
     \paragraph{Configuration} This allows a system to access configuration files through the config system.\\
     \begin{cppcode}
-        struct Type {
-            static constexpr const char* CONFIGURATION_PATH = "Something.yaml"
-        }
 
-        on<Trigger<Configuration<Type>>>([](const Configuration<Type>& config) {
+        on<Trigger<Configuration>>("Something.yaml").then([](const Configuration& config) {
             // This has the configuration from Something.yaml
         });
     \end{cppcode}

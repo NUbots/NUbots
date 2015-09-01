@@ -37,14 +37,14 @@ namespace darwin {
     KinematicsModel::KinematicsModel(std::unique_ptr<NUClear::Environment> environment)
     : Reactor(std::move(environment)) {
 
-        on<Trigger<Configuration<KinematicsModel>>>([this] (const Configuration<KinematicsModel>& config) {
+        on<Configuration>("KinematicsModel.yaml").then([this] (const Configuration& config) {
         	DarwinKinematicsModel darwinKinematicsModel;
         	configure(darwinKinematicsModel, config);
 			emit(std::make_unique<DarwinKinematicsModel>(darwinKinematicsModel));
         });
     }
 
-    void KinematicsModel::configure (DarwinKinematicsModel& darwinModel, const Configuration<KinematicsModel>& objDarwinModel) {
+    void KinematicsModel::configure (DarwinKinematicsModel& darwinModel, const Configuration& objDarwinModel) {
         configureLeg(darwinModel.leg, objDarwinModel["leg"]);
         configureHead(darwinModel.head, objDarwinModel["head"]);
         configureArm(darwinModel.arm, objDarwinModel["arm"]);
@@ -52,7 +52,6 @@ namespace darwin {
 		darwinModel.teamDarwinChestToOrigin = 0.096 - darwinModel.leg.hipOffset[2];
 
         configureMassModel(darwinModel.massModel, objDarwinModel["mass_model"]);
-
     }
 
     void KinematicsModel::configureLeg (DarwinKinematicsModel::Leg& leg, const YAML::Node& objLeg) {
@@ -79,7 +78,7 @@ namespace darwin {
 
     void KinematicsModel::configureHead (DarwinKinematicsModel::Head& head, const YAML::Node& objHead) {
         DarwinModel::Head::CAMERA_DECLINATION_ANGLE_OFFSET = head.cameraDeclinationAngleOffset = objHead["camera_declination_angle_offset"].as<float>();
-        
+
         head.neckToCamera = objHead["neck_to_camera"].as<arma::vec3>();
         DarwinModel::Head::NECK_TO_CAMERA_X = head.neckToCamera[0];
         DarwinModel::Head::NECK_TO_CAMERA_Y = head.neckToCamera[1];
@@ -89,7 +88,7 @@ namespace darwin {
         auto& objNeck = objHead["neck"];
 
         DarwinModel::Head::NECK_LENGTH = neck.length = objNeck["length"].as<float>();
-        
+
         neck.basePositionFromOrigin = objNeck["base_position_from_origin"].as<arma::vec3>();
         DarwinModel::Head::NECK_BASE_POS_FROM_ORIGIN_X = neck.basePositionFromOrigin[0];
         DarwinModel::Head::NECK_BASE_POS_FROM_ORIGIN_Y = neck.basePositionFromOrigin[1];
@@ -162,10 +161,10 @@ namespace darwin {
   //       masses.rightHipPitch = objMasses[10].as<arma::vec4>();
   //       masses.leftHipYaw = objMasses[7].as<arma::vec4>();
   //       masses.rightHipYaw = objMasses[6].as<arma::vec4>();
-        
+
   //       masses.leftKnee = objMasses[13].as<arma::vec4>();
   //       masses.rightKnee = objMasses[12].as<arma::vec4>();
-        
+
   //       masses.leftAnkleRoll = objMasses[17].as<arma::vec4>();
   //       masses.rightAnkleRoll = objMasses[16].as<arma::vec4>();
   //       masses.leftAnklePitch = objMasses[15].as<arma::vec4>();

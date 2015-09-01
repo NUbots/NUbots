@@ -57,16 +57,16 @@ namespace support {
 
     void NUbugger::provideSubsumption() {
 
-        handles[Message::SUBSUMPTION].push_back(on<Trigger<ActionStart>>([this](const ActionStart& actionStart) {
+        handles[Message::SUBSUMPTION].push_back(on<Trigger<ActionStart>>().then([this](const ActionStart& actionStart) {
 
             Message message = createMessage(Message::SUBSUMPTION);
 
             auto* subsumption = message.mutable_subsumption();
-            
+
             auto* actionStateChange = subsumption->add_action_state_change();
             actionStateChange->set_state(Subsumption::ActionStateChange::START);
             actionStateChange->set_name(actionStart.name);
-            
+
             for (auto& limbID : actionStart.limbs) {
                 actionStateChange->add_limbs(getLimb(limbID));
             }
@@ -75,16 +75,16 @@ namespace support {
 
         }));
 
-        handles[Message::SUBSUMPTION].push_back(on<Trigger<ActionKill>>([this](const ActionKill& actionKill) {
+        handles[Message::SUBSUMPTION].push_back(on<Trigger<ActionKill>>().then([this](const ActionKill& actionKill) {
 
             Message message = createMessage(Message::SUBSUMPTION);
 
             auto* subsumption = message.mutable_subsumption();
-            
+
             auto* actionStateChange = subsumption->add_action_state_change();
             actionStateChange->set_state(Subsumption::ActionStateChange::KILL);
             actionStateChange->set_name(actionKill.name);
-            
+
             for (auto& limbID : actionKill.limbs) {
                 actionStateChange->add_limbs(getLimb(limbID));
             }
@@ -93,17 +93,17 @@ namespace support {
 
         }));
 
-        handles[Message::SUBSUMPTION].push_back(on<Trigger<RegisterAction>>([this] (const RegisterAction& action) {
+        handles[Message::SUBSUMPTION].push_back(on<Trigger<RegisterAction>>().then([this] (const RegisterAction& action) {
 
             Message message = createMessage(Message::SUBSUMPTION);
 
             auto* subsumption = message.mutable_subsumption();
-            
+
             auto* actionRegister = subsumption->add_action_register();
             uint id = action.id;
             actionRegister->set_id(id);
             actionRegister->set_name(action.name);
-            
+
             for (const auto& set : action.limbSet) {
                 auto* limbSet = actionRegister->add_limb_set();
                 limbSet->set_priority(set.first);
@@ -117,12 +117,12 @@ namespace support {
 
         }));
 
-        handles[Message::SUBSUMPTION].push_back(on<Trigger<ActionPriorites>>([this] (const ActionPriorites& action) {
-            
+        handles[Message::SUBSUMPTION].push_back(on<Trigger<ActionPriorites>>().then([this] (const ActionPriorites& action) {
+
             Message message = createMessage(Message::SUBSUMPTION);
 
             auto* subsumption = message.mutable_subsumption();
-            
+
             auto* actionPriorityChange = subsumption->add_action_priority_change();
             uint id = action.id;
             actionPriorityChange->set_id(id);

@@ -110,7 +110,6 @@ namespace modules {
             messages::support::nubugger::proto::Message::Type getMessageTypeFromString(std::string type_name);
             std::string getStringFromMessageType(messages::support::nubugger::proto::Message::Type type);
         public:
-            static constexpr const char* CONFIGURATION_PATH = "NUbugger.yaml";
             static constexpr const char* IGNORE_TAG = "IGNORE";
             explicit NUbugger(std::unique_ptr<NUClear::Environment> environment);
         };

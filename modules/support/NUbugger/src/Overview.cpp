@@ -37,6 +37,7 @@
 namespace modules {
 namespace support {
 
+    using NUClear::message::CommandLineArguments;
     using messages::behaviour::proto::Behaviour;
     using messages::behaviour::WalkPath;
     using messages::behaviour::KickPlan;
@@ -59,13 +60,13 @@ namespace support {
      */
     void NUbugger::provideOverview() {
 
-        /*handles[Message::OVERVIEW].push_back(*/on<Trigger<Every<1, std::chrono::seconds>>, Options<Single, Priority<NUClear::LOW>>>([this](const time_t&) {
+        /*handles[Message::OVERVIEW].push_back(*/on<Every<1, std::chrono::seconds>, Single, Priority::LOW>().then([this] {
             Message message = createMessage(Message::OVERVIEW);
             *message.mutable_overview() = overview;
             send(message);
         })/*)*/;
 
-        /*handles[Message::OVERVIEW].push_back(*/on<Trigger<CommandLineArguments>, Options<Single, Priority<NUClear::LOW>>>([this](const std::vector<std::string>& arguments) {
+        /*handles[Message::OVERVIEW].push_back(*/on<Trigger<CommandLineArguments>, Single, Priority::LOW>().then([this](const std::vector<std::string>& arguments) {
 
             std::string role_name = arguments.at(0);
             auto index = role_name.rfind('/');
@@ -76,27 +77,27 @@ namespace support {
 
         })/*)*/;
 
-        /*handles[Message::OVERVIEW].push_back(*/on<Trigger<Behaviour::State>, Options<Single, Priority<NUClear::LOW>>>([this](const Behaviour::State& state) {
+        /*handles[Message::OVERVIEW].push_back(*/on<Trigger<Behaviour::State>, Single, Priority::LOW>().then([this](const Behaviour::State& state) {
 
             overview.set_behaviour_state(state);
 
         })/*)*/;
 
-        /*handles[Message::OVERVIEW].push_back(*/on<Trigger<KickPlan>, Options<Single, Priority<NUClear::LOW>>>([this] (const KickPlan& kickPlan) {
+        /*handles[Message::OVERVIEW].push_back(*/on<Trigger<KickPlan>, Single, Priority::LOW>([this] ().then(const KickPlan& kickPlan) {
 
             // TODO fix runtime error:
             // *overview.mutable_kick_target() << kickTarget;
 
         })/*)*/;
 
-        /*handles[Message::OVERVIEW].push_back(*/on<Trigger<Sensors>, Options<Single, Priority<NUClear::LOW>>>([this](const Sensors& sensors) {
+        /*handles[Message::OVERVIEW].push_back(*/on<Trigger<Sensors>, Single, Priority::LOW>([this]().then(const Sensors& sensors) {
 
             overview.set_voltage(sensors.voltage);
             overview.set_battery(sensors.battery);
 
         })/*)*/;
 
-        /*handles[Message::OVERVIEW].push_back(*/on<Trigger<std::vector<Self>>, Options<Single, Priority<NUClear::LOW>>>([this](const std::vector<Self>& selfs) {
+        /*handles[Message::OVERVIEW].push_back(*/on<Trigger<std::vector<Self>>, Single, Priority::LOW>().then([this](const std::vector<Self>& selfs) {
 
             // Retrieve the first self in the vector.
             Self self = selfs.front();
@@ -112,7 +113,7 @@ namespace support {
         })/*)*/;
 
         /*handles[Message::OVERVIEW].push_back(*/on<Trigger<std::vector<LocalisationBall>>, With<std::vector<Self>>, Options<Single,
-            Priority<NUClear::LOW>>>([this](const std::vector<LocalisationBall>& balls, const std::vector<Self>& selfs) {
+            Priority<NUClear::LOW>>>().then([this](const std::vector<LocalisationBall>& balls, const std::vector<Self>& selfs) {
 
             // Retrieve the first ball and self in the vector.
             LocalisationBall ball = balls.front();
@@ -125,13 +126,13 @@ namespace support {
             *overview.mutable_ball_world_position() << RobotToWorldTransform(self.position, self.heading, ball.position);
         })/*)*/;
 
-        /*handles[Message::OVERVIEW].push_back(*/on<Trigger<Image>, Options<Single, Priority<NUClear::LOW>>>([this](const Image&/* image*/) {
+        /*handles[Message::OVERVIEW].push_back(*/on<Trigger<Image>, Single, Priority::LOW>().then([this](const Image&/* image*/) {
 
             overview.set_last_camera_image(getUtcTimestamp());
 
         })/*)*/;
 
-        /*handles[Message::OVERVIEW].push_back(*/on<Trigger<std::vector<VisionBall>>, Options<Single, Priority<NUClear::LOW>>>([this] (const std::vector<VisionBall>& balls) {
+        /*handles[Message::OVERVIEW].push_back(*/on<Trigger<std::vector<VisionBall>>, Single, Priority::LOW>().then([this] (const std::vector<VisionBall>& balls) {
 
             if (!balls.empty()) {
                 overview.set_last_seen_ball(getUtcTimestamp());
@@ -139,7 +140,7 @@ namespace support {
 
         })/*)*/;
 
-        /*handles[Message::OVERVIEW].push_back(*/on<Trigger<std::vector<VisionGoal>>, Options<Single, Priority<NUClear::LOW>>>([this] (const std::vector<VisionGoal>& goals) {
+        /*handles[Message::OVERVIEW].push_back(*/on<Trigger<std::vector<VisionGoal>>, Single, Priority::LOW>().then([this] (const std::vector<VisionGoal>& goals) {
 
             if (!goals.empty()) {
                 overview.set_last_seen_goal(getUtcTimestamp());
@@ -147,7 +148,7 @@ namespace support {
 
         })/*)*/;
 
-        /*handles[Message::OVERVIEW].push_back(*/on<Trigger<GameState>, Options<Single, Priority<NUClear::LOW>>>([this] (const GameState& gameState) {
+        /*handles[Message::OVERVIEW].push_back(*/on<Trigger<GameState>, Single, Priority::LOW>().then([this] (const GameState& gameState) {
 
             overview.set_game_mode(getMode(gameState.mode));
             overview.set_game_phase(getPhase(gameState.phase));
@@ -155,7 +156,7 @@ namespace support {
 
         })/*)*/;
 
-        /*handles[Message::OVERVIEW].push_back(*/on<Trigger<WalkPath>, Options<Single, Priority<NUClear::LOW>>>([this] (const WalkPath& walkPath) {
+        /*handles[Message::OVERVIEW].push_back(*/on<Trigger<WalkPath>, Single, Priority::LOW>().then([this] (const WalkPath& walkPath) {
 
             overview.clear_path_plan();
 
@@ -165,7 +166,7 @@ namespace support {
 
         })/*)*/;
 
-        /*handles[Message::OVERVIEW].push_back(*/on<Trigger<WalkCommand>, Options<Single, Priority<NUClear::LOW>>>([this] (const WalkCommand& walkCommand) {
+        /*handles[Message::OVERVIEW].push_back(*/on<Trigger<WalkCommand>, Single, Priority::LOW>().then([this] (const WalkCommand& walkCommand) {
 
             *overview.mutable_walk_command() << walkCommand.command;
 

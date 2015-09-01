@@ -56,8 +56,7 @@ namespace modules {
 
             currentAngles = {0,0};//TODO: set this to current motor positions
             //do a little configurating
-            on<Trigger<Configuration<HeadController>>>("Head Controller - Config",[this] (const Configuration<HeadController>& config)
-            {
+            on<Configuration>("HeadController.yaml").then("Head Controller - Config", [this] (const Configuration& config) {
                 //Gains
                 head_motor_gain = config["head_motors"]["gain"].as<double>();
                 head_motor_torque = config["head_motors"]["torque"].as<double>();
@@ -75,7 +74,7 @@ namespace modules {
 
             });
 
-            on< Trigger<HeadCommand>>("Head Controller - Register Head Command", [this](const HeadCommand& command){
+            on<Trigger<HeadCommand>>().then("Head Controller - Register Head Command", [this](const HeadCommand& command){
                 goalRobotSpace = command.robotSpace;
                 if(goalRobotSpace) {
                     goalAngles = {command.yaw, command.pitch};
@@ -84,7 +83,7 @@ namespace modules {
                 }
             });
 
-            updateHandle = on< Trigger<Sensors>, Options<Single, Priority<NUClear::HIGH>> >("Head Controller - Update Head Position",[this] (const Sensors& sensors) {
+            updateHandle = on<Trigger<Sensors>, Single, Priority::HIGH>().then("Head Controller - Update Head Position",[this] (const Sensors& sensors) {
                 //P controller
                 currentAngles = p_gain * goalAngles + (1 - p_gain) * currentAngles;
 

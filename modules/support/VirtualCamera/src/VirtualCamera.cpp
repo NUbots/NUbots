@@ -31,7 +31,7 @@ namespace support {
     VirtualCamera::VirtualCamera(std::unique_ptr<NUClear::Environment> environment)
     : Reactor(std::move(environment)) {
 
-        on<Trigger<Configuration<VirtualCamera>>>([this] (const Configuration<VirtualCamera>& config) {
+        on<Configuration>("VirtualCamera.yaml").then([this] (const Configuration& config) {
             // Use configuration here from file VirtualCamera.yaml
 
         	auto cameraParameters = std::make_unique<CameraParameters>();

@@ -78,7 +78,7 @@ namespace strategy {
 
     SoccerStrategy::SoccerStrategy(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
 
-        on<Trigger<Configuration<SoccerStrategy>>>([this](const Configuration<SoccerStrategy>& config) {
+        on<Configuration>("SoccerStrategy.yaml").then([this](const Configuration& config) {
 
             cfg_.ball_last_seen_max_time = durationFromSeconds(config["ball_last_seen_max_time"].as<double>());
             cfg_.goal_last_seen_max_time = durationFromSeconds(config["goal_last_seen_max_time"].as<double>());
@@ -110,13 +110,13 @@ namespace strategy {
 
 
         // For checking last seen times
-        on<Trigger<std::vector<Ball>>>([this] (const std::vector<Ball>& balls) {
+        on<Trigger<std::vector<Ball>>>().then([this] (const std::vector<Ball>& balls) {
             if(!balls.empty()) {
                 ballLastMeasured = balls[0].last_measurement_time;
             }
         });
 
-        on<Trigger<std::vector<Self>>>([this] (const std::vector<Self>& selfs) {
+        on<Trigger<std::vector<Self>>>().then([this] (const std::vector<Self>& selfs) {
             if(!selfs.empty()) {
                 selfLastMeasured = selfs[0].last_measurement_time;
             }
@@ -124,41 +124,41 @@ namespace strategy {
 
         // TODO: remove this horrible code
         // Check to see if we are currently in the process of getting up.
-        on<Trigger<ExecuteGetup>>([this](const ExecuteGetup&) {
+        on<Trigger<ExecuteGetup>>().then([this] {
             isGettingUp = true;
         });
 
         // Check to see if we have finished getting up.
-        on<Trigger<KillGetup>>([this](const KillGetup&) {
+        on<Trigger<KillGetup>>().then([this] {
             isGettingUp = false;
         });
 
         // Check to see if we are currently in the process of diving.
-        on<Trigger<DiveCommand>>([this](const DiveCommand&) {
+        on<Trigger<DiveCommand>>().then([this] {
             isDiving = true;
         });
 
         // Check to see if we have finished diving.
-        on<Trigger<DiveFinished>>([this](const DiveFinished&) {
+        on<Trigger<DiveFinished>>().then([this] {
             isDiving = false;
         });
 
-        on<Trigger<SelfPenalisation>>([this](const SelfPenalisation&) {
+        on<Trigger<SelfPenalisation>>().then([this] {
             selfPenalised = true;
         });
 
-        on<Trigger<SelfUnpenalisation>, With<FieldDescription>> ([this](const SelfUnpenalisation&, const FieldDescription& fieldDescription) {
+        on<Trigger<SelfUnpenalisation>, With<FieldDescription>>().then([this] (const FieldDescription& fieldDescription) {
             selfPenalised = false;
             // TODO: isSideChecking = true;
             // TODO: only do this once put down
             unpenalisedLocalisationReset(fieldDescription);
         });
 
-        on<Trigger<SideCheckingComplete>>([this](const SideCheckingComplete&) {
+        on<Trigger<SideCheckingComplete>>().then([this] {
             isSideChecking = false;
         });
 
-        on<Trigger<ButtonMiddleDown>, Options<Single>>([this](const ButtonMiddleDown&) {
+        on<Trigger<ButtonMiddleDown>, Single>().then([this] {
 
             if (!cfg_.forcePlaying) {
                 NUClear::log("Force playing started.");
@@ -167,7 +167,7 @@ namespace strategy {
 
         });
 
-        on<Trigger<ButtonLeftDown>, Options<Single>>([this](const ButtonLeftDown&) {
+        on<Trigger<ButtonLeftDown>, Single>().then([this] {
 
             if (!cfg_.forcePenaltyShootout) {
                 NUClear::log("Force penalty shootout started.");
@@ -178,17 +178,15 @@ namespace strategy {
 
         // Main Loop
         // TODO: ensure a reasonable state is emitted even if gamecontroller is not running
-        on<Trigger<
-            Every<30, Per<std::chrono::seconds>>>,
+        on<Every<30, Per<std::chrono::seconds>>,
             With<Sensors>,
             With<GameState>,
             With<Phase>,
             With<FieldDescription>,
             With<std::vector<Self>>,
             With<std::vector<Ball>>,
-            Options<Single>
-        >([this](
-            const time_t&,
+            Single
+        >().then([this](
             const Sensors& sensors,
             const GameState& gameState,
             const Phase& phase,
@@ -275,7 +273,7 @@ namespace strategy {
             }
         });
 
-        on<Trigger<std::vector<Self>>, With<FieldDescription>> ([this] (const std::vector<Self>& selfs, const FieldDescription& fieldDescription) {
+        on<Trigger<std::vector<Self>>, With<FieldDescription>>().then([this] (const std::vector<Self>& selfs, const FieldDescription& fieldDescription) {
             auto kickTarget = getKickPlan(selfs, fieldDescription);
             emit(std::make_unique<KickPlan>(KickPlan{kickTarget, kickType}));
             emit(utility::nubugger::drawCircle("SocStrat_kickTarget", Circle(0.05, kickTarget), 0.123, {0.8, 0.8, 0}));

@@ -85,7 +85,7 @@ namespace localisation {
     SideChecker::SideChecker(std::unique_ptr<NUClear::Environment> environment)
     : Reactor(std::move(environment)) , subsumptionId(size_t(this) * size_t(this) - size_t(this)){
 
-        on<Trigger<Configuration<SideChecker>>>([this] (const Configuration<SideChecker>& config) {
+        on<Configuration>("SideChecker.yaml").then([this] (const Configuration& config) {
             // Use configuration here from file SideChecker.yaml
             cfg_.priority = config["priority"].as<float>();
             cfg_.number_of_samples = config["number_of_samples"].as<int>();
@@ -121,12 +121,12 @@ namespace localisation {
             }
         }));
 
-        on<Trigger<SelfUnpenalisation>> ([this](const SelfUnpenalisation&) {
+        on<Trigger<SelfUnpenalisation>>().then([this] {
             emit(std::make_unique<ActionPriorites>(ActionPriorites { subsumptionId, { cfg_.priority }}));
         });
 
         on<Trigger<std::vector<Goal>>,
-           With<FieldDescription>>("Side Checker State Check", [this](
+           With<FieldDescription>>().then("Side Checker State Check", [this](
            	const std::vector<Goal>& goals,
            	const FieldDescription& fieldDescr){
         	//record goals:

@@ -39,7 +39,7 @@ namespace support {
     NUcap::NUcap(std::unique_ptr<NUClear::Environment> environment)
         : Reactor(std::move(environment)) {
 
-        on<Trigger<Configuration<NUcap> > >([this](const Configuration<NUcap>& config) {
+        on<Configuration>("NUcap.yaml").then([this] (const Configuration& config) {
 
             uint32_t serverIP = inet_addr(config["serverIP"].as<std::string>().c_str());
             uint32_t clientIP = inet_addr(config["clientIP"].as<std::string>().c_str());
@@ -77,7 +77,7 @@ namespace support {
 
         });
 
-        on<Trigger<Every<15, Per<std::chrono::seconds>>>>([this](const time_t&) {
+        on<Every<15, Per<std::chrono::seconds>>>().then([this] {
             bool valid;
             // Try to get a new frame from the listener.
             MocapFrame frame(frameListener->pop(&valid).first);
@@ -144,7 +144,7 @@ namespace support {
 
         });
 
-        on<Trigger<Shutdown>>([this](const Shutdown&) {
+        on<Shutdown>().then([this] {
             // Wait for threads to finish.
             frameListener->stop();
             commandListener->stop();

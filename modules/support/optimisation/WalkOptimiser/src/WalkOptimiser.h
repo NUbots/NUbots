@@ -28,7 +28,6 @@
 #include "messages/support/Configuration.h"
 #include "messages/behaviour/FixedWalkCommand.h"
 
-
 namespace modules {
     namespace support {
         namespace optimisation {
@@ -76,7 +75,6 @@ namespace modules {
 
                 FitnessData data;
             public:
-                static constexpr const char* CONFIGURATION_PATH = "WalkOptimiser.yaml";
                 explicit WalkOptimiser(std::unique_ptr<NUClear::Environment> environment);
             };
 

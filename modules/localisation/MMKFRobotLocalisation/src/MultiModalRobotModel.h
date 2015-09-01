@@ -33,9 +33,6 @@
 
 namespace modules {
 namespace localisation {
-    struct MultiModalRobotModelConfig {
-        static constexpr const char* CONFIGURATION_PATH = "MultiModalRobotModel.yaml";
-    };
 
     class RobotHypothesis {
     // private:

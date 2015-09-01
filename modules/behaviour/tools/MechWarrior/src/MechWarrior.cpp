@@ -26,7 +26,7 @@ namespace modules {
 
             MechWarrior::MechWarrior(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)), fired(0) {
 
-                on<Trigger<Every<250, std::chrono::milliseconds>>>([this](const time_t&) {
+                on<Every<250, std::chrono::milliseconds>>().then([this] {
                     if(++fired < 7) {
                         emit(std::make_unique<messages::platform::darwin::LMissile>());
                     }

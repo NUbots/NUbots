@@ -326,7 +326,7 @@ namespace research {
     PressureAutoClassifier::PressureAutoClassifier(std::unique_ptr<NUClear::Environment> environment)
         : Reactor(std::move(environment)) {
 
-        on<Trigger<Configuration<PressureAutoClassifier>>>([this](const Configuration<PressureAutoClassifier>& config) {
+        on<Configuration>("PressureAutoClassifier.yaml").then([this](const Configuration& config) {
 
             //Loop through each classification char
             for(auto& limit : config["limits"]) {
@@ -343,7 +343,7 @@ namespace research {
 
         // When we get a look up table then it was uploaded or emitted by someone else
         // We need to set it up for our datastructure
-        on<Trigger<LookUpTable>>([this] (const LookUpTable& lut) {
+        on<Trigger<LookUpTable>>().then([this] (const LookUpTable& lut) {
 
             std::map<Colour, std::set<uint>> newSA;
             std::map<Colour, uint> newVol;
@@ -382,7 +382,7 @@ namespace research {
         });
 
         // Show our Internal, Removeable, and Nonremoveable voxels
-        on<Trigger<Every<1, std::chrono::seconds>>, With<LookUpTable>>([this](const time_t&, const LookUpTable& lut) {
+        on<Every<1, std::chrono::seconds>, With<LookUpTable>>().then([this] (const LookUpTable& lut) {
             static int i = 0;
 
             // For visualization we are flagging surface voxels
@@ -461,7 +461,8 @@ namespace research {
             ++i;
         }).disable();
 
-        on<Trigger<AutoClassifierPixels>, With<LookUpTable>, Options<Single>>([this] (const AutoClassifierPixels& pixels, const LookUpTable& lut) {
+        on<Trigger<AutoClassifierPixels>, With<LookUpTable>, Single>()
+        .then([this] (const AutoClassifierPixels& pixels, const LookUpTable& lut) {
 
             // Some aliases
             const auto& c         = pixels.classification;

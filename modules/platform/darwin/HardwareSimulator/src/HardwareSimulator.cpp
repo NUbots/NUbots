@@ -145,7 +145,8 @@ namespace darwin {
             servo.temperature = 0;
         }
 
-        on<Trigger<Configuration<HardwareSimulator>>>("Hardware Simulator Config",[this](const Configuration<HardwareSimulator>& config){
+        on<Configuration>("DarwinHardwareSimulator.yaml")
+        .then("Hardware Simulator Config", [this] (const Configuration& config) {
             imu_drift_rate = config["imu_drift_rate"].as<float>();
 
             noise.accelerometer.x = config["noise"]["accelerometer"]["x"].as<float>();
@@ -157,16 +158,17 @@ namespace darwin {
             noise.gyroscope.z = config["noise"]["gyroscope"]["z"].as<float>();
 
             bodyTilt = config["bodyTilt"].as<Expression>();
-
         });
 
-        on<Trigger<DarwinSensors::Gyroscope>>("Receive Simulated Gyroscope", [this](const DarwinSensors::Gyroscope& gyro){
+        on<Trigger<DarwinSensors::Gyroscope>>()
+        .then("Receive Simulated Gyroscope", [this] (const DarwinSensors::Gyroscope& gyro) {
             gyroQueue.push(gyro);
         });
 
 
-        on<Trigger<Every<UPDATE_FREQUENCY, Per<std::chrono::seconds>>>, With<Optional<Sensors>>, Options<Single>>([this](const time_t&, std::shared_ptr<const Sensors> previousSensors) {
-            if(previousSensors){
+        on<Every<UPDATE_FREQUENCY, Per<std::chrono::seconds>>>, Optional<With<Sensors>>, Single>()
+        .then([this] (std::shared_ptr<const Sensors> previousSensors) {
+            if (previousSensors) {
                 auto rightFootPose = previousSensors->forwardKinematics.find(ServoID::R_ANKLE_ROLL)->second;
                 auto leftFootPose = previousSensors->forwardKinematics.find(ServoID::L_ANKLE_ROLL)->second;
                 arma::vec3 torsoFromRightFoot = -rightFootPose.rotation().i() * rightFootPose.translation();
@@ -237,11 +239,10 @@ namespace darwin {
             addNoise(sensors_message);
             // Send our nicely computed sensor data out to the world
             emit(std::move(sensors_message));
-
         });
 
         // This trigger writes the servo positions to the hardware
-        on<Trigger<std::vector<ServoTarget>>>([this](const std::vector<ServoTarget>& commands) {
+        on<Trigger<std::vector<ServoTarget>>>().then([this] (const std::vector<ServoTarget>& commands) {
             for (auto& command : commands) {
 
                 // Calculate our moving speed
@@ -261,10 +262,9 @@ namespace darwin {
                 servo.movingSpeed = speed;
                 servo.goalPosition = command.position;
             }
-
         });
 
-        on<Trigger<ServoTarget>>([this](const ServoTarget command) {
+        on<Trigger<ServoTarget>>().then([this] (const ServoTarget command) {
             auto commandList = std::make_unique<std::vector<ServoTarget>>();
             commandList->push_back(command);
 

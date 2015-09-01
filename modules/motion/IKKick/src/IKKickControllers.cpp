@@ -30,7 +30,7 @@ using utility::motion::kinematics::DarwinModel;
 namespace modules{
 namespace motion{
 
-	void KickBalancer::configure(const Configuration<IKKickConfig>& config){
+	void KickBalancer::configure(const Configuration& config){
         servo_angle_threshold = config["balancer"]["servo_angle_threshold"].as<float>();
 	    stand_height = config["balancer"]["stand_height"].as<float>();
         forward_lean = config["balancer"]["forward_lean"].as<float>();
@@ -64,7 +64,7 @@ namespace motion{
         anim.frames[0].duration = 0;
     }
 
-    void Kicker::configure(const Configuration<IKKickConfig>& config) {
+    void Kicker::configure(const Configuration& config) {
         servo_angle_threshold = config["kick_frames"]["servo_angle_threshold"].as<float>();
         lift_foot = SixDOFFrame(config["kick_frames"]["lift_foot"]);
         kick = SixDOFFrame(config["kick_frames"]["kick"]);
@@ -78,7 +78,7 @@ namespace motion{
 
         lift_before_windup_duration = config["kick"]["lift_before_windup_duration"].as<float>();
         return_before_place_duration = config["kick"]["return_before_place_duration"].as<float>();
-        
+
 	}
 
     void Kicker::computeStartMotion(const Sensors& sensors) {
@@ -86,8 +86,8 @@ namespace motion{
 
         // Convert torso to support foot
         Transform3D currentTorso = getTorsoPose(sensors);
-        // Convert kick foot to torso 
-        Transform3D currentKickFoot = supportFoot == LimbID::LEFT_LEG ? sensors.forwardKinematics.find(ServoID::R_ANKLE_ROLL)->second 
+        // Convert kick foot to torso
+        Transform3D currentKickFoot = supportFoot == LimbID::LEFT_LEG ? sensors.forwardKinematics.find(ServoID::R_ANKLE_ROLL)->second
                                                                       : sensors.forwardKinematics.find(ServoID::L_ANKLE_ROLL)->second;
         // Convert support foot to kick foot coordinates = convert torso to kick foot * convert support foot to torso
         Transform3D supportToKickFoot = currentKickFoot.i() * currentTorso.i();
@@ -111,7 +111,7 @@ namespace motion{
         arma::vec3 supportFootPos = supportToKickFoot.translation();
         int signSupportFootPosY = supportFootPos[1] < 0 ? -1 : 1;
         float clippingPlaneY = supportFootPos[1] - signSupportFootPosY * (foot_separation_margin + (DarwinModel::Leg::FOOT_WIDTH / 2.0 - DarwinModel::Leg::FOOT_CENTRE_TO_ANKLE_CENTRE));
-        
+
         float liftClipDistance = (liftGoal[1] - clippingPlaneY);
         if(signSupportFootPosY * liftClipDistance > 0){
             //Clip
@@ -128,7 +128,7 @@ namespace motion{
         lift_foot.pose.translation() = liftGoal;
 
         kick.duration = arma::norm(kickGoal - liftGoal) / kick_velocity;
-        
+
         //Robocup code / hacks
         auto startFrame = SixDOFFrame{startPose,0};
         auto liftBeforeWindUp = startFrame;

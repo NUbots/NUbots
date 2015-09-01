@@ -37,8 +37,7 @@ namespace support {
     NBZPlayer::NBZPlayer(std::unique_ptr<NUClear::Environment> environment)
         : Reactor(std::move(environment)) {
 
-
-            on<Trigger<Configuration<NBZPlayer>>>([this](const Configuration<NBZPlayer>& config) {
+            on<Configuration>("NBZPlayer.yaml").then([this](const Configuration& config) {
 
                 std::string path = config["file"].as<std::string>();
                 replay = config["replay"].as<bool>();
@@ -81,11 +80,8 @@ namespace support {
                 cameraParameters->pixelsToTanThetaFactor << (tanHalfFOV[0] / imageCentre[0]) << (tanHalfFOV[1] / imageCentre[1]);
                 cameraParameters->focalLengthPixels = imageCentre[0] / tanHalfFOV[0];
 
-
                 emit<DIRECT>(std::move(cameraParameters));
-
             });
-
 
             powerplant.addServiceTask(NUClear::threading::ThreadWorker::ServiceTask([this] {
                 while(true) {

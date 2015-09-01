@@ -31,19 +31,14 @@ namespace modules {
         using messages::motion::ExecuteScriptByName;
         using messages::motion::ExecuteScript;
 
-        struct Scripts {
-            // For scripts we want updates on the whole scripts directory
-            static constexpr const char* CONFIGURATION_PATH = "scripts/";
-        };
-
         ScriptEngine::ScriptEngine(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
 
-            on<Trigger<Configuration<Scripts>>>([this](const Configuration<Scripts>& script) {
+            on<Configuration>("scripts/").then([this](const Configuration& script) {
                 // Add this script to our list of scripts
                 scripts.insert(std::make_pair(script.name, script.config.as<Script>()));
             });
 
-            on<Trigger<ExecuteScriptByName>>([this](const ExecuteScriptByName& command) {
+            on<Trigger<ExecuteScriptByName>>().then([this](const ExecuteScriptByName& command) {
                 std::vector<Script> scriptList;
                 for(const auto& scriptName : command.scripts) {
                     auto script = scripts.find(scriptName);
@@ -58,7 +53,7 @@ namespace modules {
                 emit<DIRECT>(std::make_unique<ExecuteScript>(command.sourceId, scriptList, command.start));
             });
 
-            on<Trigger<ExecuteScript>>([this](const ExecuteScript& command) {
+            on<Trigger<ExecuteScript>>().then([this](const ExecuteScript& command) {
 
                 auto waypoints = std::make_unique<std::vector<ServoCommand>>();
 

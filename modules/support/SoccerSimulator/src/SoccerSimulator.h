@@ -37,10 +37,6 @@
 namespace modules {
 namespace support {
 
-    struct SoccerSimulatorConfig {
-        static constexpr const char* CONFIGURATION_PATH = "SoccerSimulator.yaml";
-    };
-
     class SoccerSimulator : public NUClear::Reactor {
     public:
         enum MotionType{
@@ -147,7 +143,7 @@ namespace support {
         time_t lastNow;
 
         //Methods
-        void updateConfiguration(const messages::support::Configuration<SoccerSimulatorConfig>& config, const messages::support::GlobalConfig& globalConfig);
+        void updateConfiguration(const messages::support::Configuration& config, const messages::support::GlobalConfig& globalConfig);
 
         std::unique_ptr<messages::platform::darwin::DarwinSensors::Gyroscope> computeGyro(float heading, float oldHeading);
 

@@ -40,7 +40,8 @@ namespace support {
     NUbuggerLite::NUbuggerLite(std::unique_ptr<NUClear::Environment> environment)
         : Reactor(std::move(environment)), socket(0) {
 
-        auto setup = [this] (const Configuration<NUbuggerLite>& config, const GlobalConfig& globalConfig) {
+        on<Configuration, Trigger<GlobalConfig>>("NUbuggerLite.yaml")
+        .then("NUbuggerLite Configuration", [this] (const Configuration<NUbuggerLite>& config, const GlobalConfig& globalConfig) {
 
             // TODO use an eventfd to allow changing the port dynamically
 
@@ -65,13 +66,9 @@ namespace support {
             if (oldSocket) {
                 ::close(oldSocket);
             }
+        });
 
-        };
-
-        on<With<Configuration<NUbuggerLite>>, Trigger<GlobalConfig>>("NUbuggerLite Configuration", setup);
-        on<Trigger<Configuration<NUbuggerLite>>, With<GlobalConfig>>("NUbuggerLite Configuration", setup);
-
-        on<Trigger<Every<1, std::chrono::seconds>>, Options<Single, Priority<NUClear::LOW>>>([this] (const time_t&) {
+        on<Every<1, std::chrono::seconds>, Single, Priority::LOW>([this] {
             if (socket) {
                 sockaddr_in socketAddress;
                 memset(&socketAddress, 0, sizeof(socketAddress));

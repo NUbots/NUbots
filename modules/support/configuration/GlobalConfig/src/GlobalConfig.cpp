@@ -30,9 +30,8 @@ namespace modules {
             GlobalConfig::GlobalConfig(std::unique_ptr<NUClear::Environment> environment)
                 : Reactor(std::move(environment)) {
 
-
-                on<Trigger<Configuration<GlobalConfig>>>([this] (const Configuration<GlobalConfig>& config) {
-                    emit(std::make_unique<messages::support::GlobalConfig>(messages::support::GlobalConfig{
+                on<Configuration>("GlobalConfig.yaml").then([this] (const Configuration& config) {
+                    emit(std::make_unique<messages::support::GlobalConfig>(messages::support::GlobalConfig {
                         config["playerId"].as<uint>(),
                         config["teamId"].as<uint>()
                     }));

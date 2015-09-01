@@ -47,7 +47,6 @@ namespace modules {
 
             public:
                 explicit FallingRelax(std::unique_ptr<NUClear::Environment> environment);
-                static constexpr const char* CONFIGURATION_PATH = "FallingRelax.yaml";
             };
         }  // skills
     }  // behaviours

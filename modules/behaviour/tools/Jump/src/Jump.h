@@ -31,9 +31,6 @@ namespace tools {
     public:
         /// @brief Called by the powerplant to build and setup the Jump reactor.
         explicit Jump(std::unique_ptr<NUClear::Environment> environment);
-
-        /// @brief the path to the configuration file for Jump
-        static constexpr const char* CONFIGURATION_PATH = "Jump.yaml";
     };
 
 }

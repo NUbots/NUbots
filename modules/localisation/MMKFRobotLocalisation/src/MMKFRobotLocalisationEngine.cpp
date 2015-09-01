@@ -56,14 +56,12 @@ namespace localisation {
         goalpost_lfos_.opp_r = {field_description_->goalpost_opp_r, LFOId::kGoalOppR, "goalpost_opp_right"};
     }
 
-    void MMKFRobotLocalisationEngine::UpdateConfiguration(
-        const messages::support::Configuration<MultiModalRobotModelConfig>& config) {
+    void MMKFRobotLocalisationEngine::UpdateMultiModalRobotModelConfiguration(const messages::support::Configuration& config) {
 
         robot_models_.UpdateConfiguration(config);
     }
 
-    void MMKFRobotLocalisationEngine::UpdateConfiguration(
-        const messages::support::Configuration<MMKFRobotLocalisationEngineConfig>& config) {
+    void MMKFRobotLocalisationEngine::UpdateRobotLocalisationEngineConfiguration(const messages::support::Configuration& config) {
 
         cfg_.angle_between_goals_observation_enabled = config["AngleBetweenGoalsObservationEnabled"].as<bool>();
         cfg_.goal_pair_observation_enabled = config["GoalPairObservationEnabled"].as<bool>();

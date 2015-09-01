@@ -30,9 +30,6 @@ namespace support {
     public:
         /// @brief Called by the powerplant to build and setup the VirtualCamera reactor.
         explicit VirtualCamera(std::unique_ptr<NUClear::Environment> environment);
-
-        /// @brief the path to the configuration file for VirtualCamera
-        static constexpr const char* CONFIGURATION_PATH = "VirtualCamera.yaml";
     };
 
 }

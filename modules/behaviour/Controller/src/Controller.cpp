@@ -38,7 +38,7 @@ namespace modules {
 
         Controller::Controller(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
 
-            on<Trigger<RegisterAction>, Options<Sync<Controller>>>("Action Registration", [this] (const RegisterAction& action) {
+            on<Trigger<RegisterAction>, Sync<Controller>>().then("Action Registration", [this] (const RegisterAction& action) {
 
                 if(action.id == 0) {
                     throw std::runtime_error("Action ID 0 is reserved for internal use");
@@ -76,13 +76,13 @@ namespace modules {
                 request->maxPriority = maxRequest->priority;
             });
 
-            on<Trigger<Startup>, Options<Sync<Controller>>>("Initial Action Selection", [this] (const Startup&) {
+            on<Startup, Sync<Controller>>().then("Initial Action Selection", [this] {
 
                 // Pick our first action to take
                 selectAction();
             });
 
-            on<Trigger<ActionPriorites>, Options<Sync<Controller>>>("Action Priority Update", [this] (const ActionPriorites& update) {
+            on<Trigger<ActionPriorites>, Sync<Controller>>().then("Action Priority Update", [this] (const ActionPriorites& update) {
 
                 auto& request = requests[update.id];
 
@@ -125,7 +125,7 @@ namespace modules {
             });
 
             // For single waypoints
-            on<Trigger<ServoCommand>>([this](const ServoCommand& point) {
+            on<Trigger<ServoCommand>>().then([this](const ServoCommand& point) {
 
                 // Make a vector of the command
                 auto points = std::make_unique<std::vector<ServoCommand>>();
@@ -133,7 +133,7 @@ namespace modules {
                 emit<DIRECT>(std::move(points));
             });
 
-            on<Trigger<std::vector<ServoCommand>>, Options<Sync<Controller>>>("Command Filter", [this] (const std::vector<ServoCommand>& commands) {
+            on<Trigger<std::vector<ServoCommand>>, Sync<Controller>>().then("Command Filter", [this] (const std::vector<ServoCommand>& commands) {
 
                 for (auto& command : commands) {
 
@@ -157,7 +157,7 @@ namespace modules {
                 }
             });
 
-            on<Trigger<Every<90, Per<std::chrono::seconds>>>, Options<Single, Sync<Controller>, Priority<NUClear::HIGH>>>("Controller Update Waypoints",[this] (const time_t& now) {
+            on<Every<90, Per<std::chrono::seconds>>, Single, Sync<Controller>, Priority::HIGH>().then("Controller Update Waypoints", [this] {
                 std::list<ServoID> emptiedQueues;
                 std::unique_ptr<std::vector<ServoTarget>> waypoints;
 

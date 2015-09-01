@@ -34,6 +34,9 @@ extern "C" {
 namespace modules {
     namespace audio {
 
+        using messages::input::SoundChunkSettings;
+        using messages::input::SoundChunk;
+
         const int WINDOW_SIZE = 1024;
         const int HOP_SIZE = 512; //number of frames to input to beat detection at one time
 
@@ -61,7 +64,7 @@ namespace modules {
 
         AubioBeatDetector::AubioBeatDetector(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
 
-            on<Trigger<messages::input::SoundChunkSettings>>([this](const messages::input::SoundChunkSettings& settings) {
+            on<Trigger<SoundChunkSettings>>().then([this](const SoundChunkSettings& settings) {
 
                 // Store the settings of the sound chunks
                 m->sampleRate = settings.sampleRate;
@@ -76,7 +79,7 @@ namespace modules {
 
             });
 
-            on<Trigger<messages::input::SoundChunk>>([this](const messages::input::SoundChunk& chunk) {
+            on<Trigger<SoundChunk>>().then([this](const SoundChunk& chunk) {
 
                 for (size_t i = 0; i < m->chunkSize; ++i) {
 
@@ -106,7 +109,7 @@ namespace modules {
                 m->offset = (m->chunkSize + m->offset) % HOP_SIZE;
             });
 
-           on<Trigger<Last<2, BeatTime>>>([this](const std::vector<std::shared_ptr<const BeatTime>>& lastTwoBeats) {
+           on<Last<2, Trigger<BeatTime>>>().then([this](const std::list<std::shared_ptr<const BeatTime>>& lastTwoBeats) {
 
                if(lastTwoBeats.size() == 2) {
                     auto beat = std::make_unique<messages::audio::Beat>();
@@ -117,7 +120,7 @@ namespace modules {
                }
            });
 
-           on<Trigger<Shutdown>>([this](const Shutdown&) {
+           on<Shutdown>().then([this] {
               del_aubio_tempo(m->tempoTracker);
               del_fvec(m->inputData);
               del_fvec(m->outputData);

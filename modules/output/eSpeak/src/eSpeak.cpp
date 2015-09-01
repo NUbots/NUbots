@@ -25,6 +25,8 @@
 namespace modules {
     namespace output {
 
+        using messages::output::Say;
+
         eSpeak::eSpeak(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
 
             // Initialize espeak, and set it to play out the speakers, and not exit if it can't find it's directory
@@ -33,7 +35,7 @@ namespace modules {
             espeak_SetParameter(espeakVOLUME, 100, 0);
             espeak_SetParameter(espeakCAPITALS, 6, 0);
 
-            on<Trigger<messages::output::Say>, Options<Sync<eSpeak>>>([](const messages::output::Say& message) {
+            on<Trigger<Say>, Sync<eSpeak>>().then([](const Say& message) {
                 // Wait to finish the current message (if any)
                 // By waiting here this reaction can finish and return to the pool
                 // if it does not have to wait for another say message
@@ -51,10 +53,7 @@ namespace modules {
                         );
             });
 
-            on<Trigger<Shutdown>>([](const Shutdown&) {
-                // Stop espeak
-                espeak_Terminate();
-            });
+            on<Shutdown>().then(espeak_Terminate);
         }
 
     }  // output

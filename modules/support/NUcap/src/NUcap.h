@@ -31,7 +31,6 @@ namespace support {
     class NUcap : public NUClear::Reactor {
     public:
         /// @brief Called by the powerplant to build and setup the NUcap reactor.
-        static constexpr const char* CONFIGURATION_PATH = "NUcap.yaml";
         explicit NUcap(std::unique_ptr<NUClear::Environment> environment);
     private:
         // Sockets

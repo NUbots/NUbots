@@ -33,7 +33,6 @@ namespace support {
         uint PLAYER_ID;
         std::string CLIENT_IP;
     public:
-        static constexpr const char* CONFIGURATION_PATH = "NUbuggerLite.yaml";
 
         /// @brief Called by the powerplant to build and setup the NUbuggerLite reactor.
         explicit NUbuggerLite(std::unique_ptr<NUClear::Environment> environment);

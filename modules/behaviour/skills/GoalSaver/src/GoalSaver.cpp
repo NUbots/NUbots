@@ -31,7 +31,6 @@
 #include "messages/vision/VisionObjects.h"
 #include "messages/motion/Script.h"
 
-
 namespace modules {
 namespace behaviour {
 namespace skills {
@@ -39,11 +38,8 @@ namespace skills {
     struct ExecuteDive {};
     struct FinishDive {};
 
-
     using messages::motion::ExecuteScriptByName;
-
     using messages::behaviour::RegisterAction;
-
     using messages::behaviour::ActionPriorites;
     using messages::localisation::Ball;
     using messages::input::ServoID;
@@ -59,19 +55,18 @@ namespace skills {
         , id(size_t(this) * size_t(this) - size_t(this)) {
 
         // do a little configuration
-        on<Trigger<Configuration<GoalSaver>>>([this] (const Configuration<GoalSaver>& config){
+        on<Configuration>("GoalSaver.yaml").then([this] (const Configuration& config) {
             DIVE_PRIORITY = config["DIVE_PRIORITY"].as<float>();
             EXECUTION_PRIORITY = config["EXECUTION_PRIORITY"].as<float>();
         });
 
-        on<Trigger<DiveCommand>>([this] (const DiveCommand& diveCommand) {
+        on<Trigger<DiveCommand>>().then([this] (const DiveCommand& diveCommand) {
 
             this->diveCommand = diveCommand;
             updatePriority(DIVE_PRIORITY);
-
         });
 
-        on<Trigger<ExecuteDive>>([this] (const ExecuteDive&) {
+        on<Trigger<ExecuteDive>>().then([this] {
             arma::vec direction = diveCommand.direction;
 
             int quadrant = getDirectionalQuadrant(direction[0], direction[1]);
@@ -84,12 +79,11 @@ namespace skills {
                 emit(std::make_unique<ExecuteScriptByName>(id, std::vector<std::string>({"DiveRight.yaml"})));
             }
 
-
             updatePriority(EXECUTION_PRIORITY);
 
         });
 
-        on<Trigger<FinishDive>>([this] (const FinishDive&) {
+        on<Trigger<FinishDive>>().then([this] {
             emit(std::move(std::make_unique<DiveFinished>()));
             updatePriority(0);
         });
@@ -123,7 +117,6 @@ namespace skills {
                  : x <= -std::abs(y) ? 2  // backward
                  :                     3; // right
     }
-
 
 }
 }

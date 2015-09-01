@@ -64,8 +64,6 @@ namespace modules {
 
                 void sendReplyPacket(const gamecontroller::ReplyMessage& replyMessage) const;
             public:
-                static constexpr const char* CONFIGURATION_PATH = "GameController.yaml";
-
                 explicit GameController(std::unique_ptr<NUClear::Environment> environment);
 
         };

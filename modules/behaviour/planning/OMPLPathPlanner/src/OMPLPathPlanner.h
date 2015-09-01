@@ -33,9 +33,6 @@ namespace planning {
         /// @brief Called by the powerplant to build and setup the OMPLPathPlanner reactor.
         explicit OMPLPathPlanner(std::unique_ptr<NUClear::Environment> environment);
 
-        /// @brief the path to the configuration file for OMPLPathPlanner
-        static constexpr const char* CONFIGURATION_PATH = "OMPLPathPlanner.yaml";
-
     private:
     	PathPlanner pathPlanner;
         NUClear::clock::time_point lastPlanningTime;
@@ -43,7 +40,7 @@ namespace planning {
         ReactionHandle generatePathReaction;
 
 		struct Config {
-            
+
             float planning_interval = 5;
             float planning_time_limit = 0.5;
             bool draw_planning_tree = false;

@@ -33,6 +33,7 @@ namespace modules {
 namespace behaviour {
 namespace strategy {
 
+    using NUClear::message::LogMessage;
     using messages::behaviour::MotionCommand;
     using messages::motion::HeadCommand;
     using messages::motion::KickCommand;
@@ -66,7 +67,7 @@ namespace strategy {
         // Hide the cursor
         //curs_set(false);
 
-        on<Trigger<NUClear::LogMessage>, Options<Sync<KeyboardWalk>>>([this](const NUClear::LogMessage& message) {
+        on<Trigger<LogMessage>, Sync<KeyboardWalk>>().then([this](const LogMessage& message) {
             printw((message.message + "\n").c_str());
             refresh();
         });

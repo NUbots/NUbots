@@ -31,71 +31,68 @@ namespace input {
     using messages::support::Configuration;
     using messages::input::Sensors;
     using messages::input::PushDetection;
-	using utility::math::kalman::UKF;
-	using utility::time::TimeDifferenceSeconds;
+    using utility::math::kalman::UKF;
+    using utility::time::TimeDifferenceSeconds;
     using utility::nubugger::graph;
 
     PushDetector::PushDetector(std::unique_ptr<NUClear::Environment> environment)
     : Reactor(std::move(environment)) {
 
-        on<Trigger<Configuration<PushDetector>>>([this] (const Configuration<PushDetector>& config) {
+        on<Configuration>("PushDetector.yaml").then([this] (const Configuration& config) {
             // Use configuration here from file PushDetector.yaml
 
-        	// Initialise the vector of load filters:
-        	for (int i = 0; i < 20; i++) {
-        		auto filter = UKF<ServoLoadModel>(
-	        		{0}, // mean
-	                arma::eye(ServoLoadModel::size, ServoLoadModel::size) * 1, // cov
-	                0.1); // alpha
-        		loadFilters.push_back(filter);
-        	}
+            // // Initialise the vector of load filters:
+            // for (int i = 0; i < 20; i++) {
+            //     auto filter = UKF<ServoLoadModel>(
+            //         {0}, // mean
+            //         arma::eye(ServoLoadModel::size, ServoLoadModel::size) * 1, // cov
+            //         0.1); // alpha
+            //     loadFilters.push_back(filter);
+            // }
 
-        	lastTimeUpdateTime = NUClear::clock::now();
+            // lastTimeUpdateTime = NUClear::clock::now();
         });
 
-        on<Trigger<Last<2, Sensors>>>([this] (const LastList<Sensors>& sensors) {
-        	NUClear::log("before");
-        	if (sensors.size() < 2) {
-        		return;
-        	}
-        	NUClear::log("after");
+        on<Last<2, Trigger<Sensors>>>().then([this] (const std::list<std::shared_ptr<const Sensors>>& sensors) {
+            NUClear::log("before");
+            if (sensors.size() < 2) {
+                return;
+            }
+            NUClear::log("after");
 
+            arma::vec3 diff = sensors[0]->accelerometer - sensors[1]->accelerometer;
+            arma::vec2 xzDiff = { diff(0), diff(2) };
 
-        	arma::vec3 diff = sensors[0]->accelerometer - sensors[1]->accelerometer;
-        	arma::vec2 xzDiff = { diff(0), diff(2) };
-        	
-        	if (arma::norm(xzDiff) > 5) {
-        		PushDetection det;
-        		det.forward = xzDiff(0) > 0;
-        		emit(std::make_unique<PushDetection>(det));
-    			emit(graph("PD: Detection", xzDiff(0) > 0 ? 1 : -1));
-        	} else {
-    			emit(graph("PD: Detection", 0));
-        	}
+            if (arma::norm(xzDiff) > 5) {
+                PushDetection det;
+                det.forward = xzDiff(0) > 0;
+                emit(std::make_unique<PushDetection>(det));
+                emit(graph("PD: Detection", xzDiff(0) > 0 ? 1 : -1));
+            } else {
+                emit(graph("PD: Detection", 0));
+            }
 
-        	// Load filtering:
-   //  		auto currentTime = NUClear::clock::now();
-   //  		double seconds = TimeDifferenceSeconds(currentTime, lastTimeUpdateTime);
-			// lastTimeUpdateTime = currentTime;
+            // Load filtering:
+            auto currentTime = NUClear::clock::now();
+            double seconds = TimeDifferenceSeconds(currentTime, lastTimeUpdateTime);
+            lastTimeUpdateTime = currentTime;
 
-   //      	for (int i = 0; i < loadFilters.size(); i++) {
-   //  			auto& filter = loadFilters[i];
+            for (int i = 0; i < loadFilters.size(); i++) {
+                auto& filter = loadFilters[i];
 
-   //  			filter.timeUpdate(seconds);
-   //  			arma::mat cov = { 0.1 };
-   //  			arma::vec meas = { sensors.servos[i].load };
-   //      		float likelihood = filter.measurementUpdate(meas, cov);
-   //      	}
-		
-			// // Output filtered values to NUsight:
-			// arma::vec::fixed<20> filteredLoads;
-   //  		for (int i = 0; i < loadFilters.size(); i++) {
-   //  			filteredLoads(i) = loadFilters[i].get()(0);
-   //  		}
-   //  		emit(graph("PD: Filtered Loads", filteredLoads));
-   //  		NUClear::log("Print the data!");
+                filter.timeUpdate(seconds);
+                arma::mat cov = { 0.1 };
+                arma::vec meas = { sensors.servos[i].load };
+                float likelihood = filter.measurementUpdate(meas, cov);
+            }
 
-
+            // Output filtered values to NUsight:
+            arma::vec::fixed<20> filteredLoads;
+            for (int i = 0; i < loadFilters.size(); i++) {
+                filteredLoads(i) = loadFilters[i].get()(0);
+            }
+            emit(graph("PD: Filtered Loads", filteredLoads));
+            NUClear::log("Print the data!");
         });
     }
 }

@@ -63,7 +63,6 @@ namespace modules {
 
                 arma::vec2 integratedOdometry;
 
-                static constexpr const char* CONFIGURATION_PATH = "DarwinSensorFilter.yaml";
             private:
                 utility::math::matrix::Transform3D calculateOdometryMatrix(
                     const messages::input::Sensors& sensors,

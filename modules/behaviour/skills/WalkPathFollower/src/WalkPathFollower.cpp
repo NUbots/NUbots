@@ -94,7 +94,10 @@ namespace skills {
             }
         }));
 
-        on<Trigger<Configuration<WalkPathFollower>>>([this] (const Configuration<WalkPathFollower>& config) {
+
+        /// @brief the path to the configuration file for WalkPathFollower
+        static constexpr const char* CONFIGURATION_PATH = ;
+        on<Configuration>("WalkPathFollower.yaml").then([this] (const Configuration& config) {
             // Use configuration here from file WalkPathFollower.yaml
 
             cfg_.waypoint_visit_distance = config["waypoint_visit_distance"].as<double>();
@@ -110,7 +113,7 @@ namespace skills {
         });
 
         // Enable/Disable path following based on the current motion command.
-        on<Trigger<MotionCommand>>([this] (const MotionCommand& command) {
+        on<Trigger<MotionCommand>>().then([this] (const MotionCommand& command) {
             if (command.type == MotionCommand::Type::WalkToState ||
                 command.type == MotionCommand::Type::BallApproach) {
                 followPathReaction.enable();
@@ -126,14 +129,15 @@ namespace skills {
         });
 
         // // TODO: Review the interaction of the kick with the WalkPathFollower.
-        // on<Trigger<KickFinished>>([this] (const KickFinished&) {
+        // on<Trigger<KickFinished>>().then([this] (const KickFinished&) {
         //     emit(std::move(std::make_unique<WalkStartCommand>(subsumptionId)));
         // });
 
         updatePathReaction = on<Trigger<WalkPath>,
             With<std::vector<Self>>,
-            Options<Sync<WalkPathFollower>, Single>
-           >("Update current path plan", [this] (
+            Sync<WalkPathFollower>,
+            Single
+           >().then("Update current path plan", [this] (
              const WalkPath& walkPath,
              const std::vector<Self>& selfs
              ) {
@@ -153,13 +157,13 @@ namespace skills {
             }
         }).disable();
 
-        followPathReaction = on<Trigger<Every<20, Per<std::chrono::seconds>>>,
+        followPathReaction = on<Every<20, Per<std::chrono::seconds>>,
             With<std::vector<Self>>,
             With<Ball>,
             // With<WalkPath>,
-            Options<Sync<WalkPathFollower>, Single>
+            Sync<WalkPathFollower>,
+            Single
            >("Follow current path plan", [this] (
-             const NUClear::clock::time_point& /*current_time*/,
              const std::vector<Self>& selfs,
              const Ball& ball
              // const WalkPath& walkPath

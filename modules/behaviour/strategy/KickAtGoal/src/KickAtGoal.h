@@ -40,8 +40,6 @@ namespace strategy {
 
         messages::behaviour::proto::Behaviour::State currentState = messages::behaviour::proto::Behaviour::INIT;
     public:
-        static constexpr const char* CONFIGURATION_PATH = "KickAtGoal.yaml";
-
         /// @brief Called by the powerplant to build and setup the KickAtGoal reactor.
         explicit KickAtGoal(std::unique_ptr<NUClear::Environment> environment);
     };

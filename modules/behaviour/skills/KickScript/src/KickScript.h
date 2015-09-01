@@ -31,7 +31,6 @@ namespace skills {
     public:
         /// @brief Called by the powerplant to build and setup the KickScript reactor.
         explicit KickScript(std::unique_ptr<NUClear::Environment> environment);
-        static constexpr const char* CONFIGURATION_PATH = "KickScript.yaml";
     private:
         const size_t id;
 

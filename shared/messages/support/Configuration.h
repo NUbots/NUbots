@@ -78,7 +78,7 @@ namespace NUClear {
                     auto reaction = util::generate_reaction<DSL, messages::support::Configuration>(reactor, label, std::forward<TFunc>(callback));
                     threading::ReactionHandle handle(reaction.get());
 
-                    reactor.log("Configuration for" + path + "not bound as it's not written yet");
+                    NUClear::log("Configuration for" + path + "not bound as it's not written yet");
 
                     // Return our handles
                     return handle;

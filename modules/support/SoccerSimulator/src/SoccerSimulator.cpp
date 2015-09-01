@@ -85,7 +85,7 @@ namespace support {
         return t;
     }
 
-    void SoccerSimulator::updateConfiguration(const Configuration<SoccerSimulatorConfig>& config, const GlobalConfig& globalConfig) {
+    void SoccerSimulator::updateConfiguration(const Configuration& config, const GlobalConfig& globalConfig) {
 
         moduleStartupTime = NUClear::clock::now();
 
@@ -128,7 +128,7 @@ namespace support {
     SoccerSimulator::SoccerSimulator(std::unique_ptr<NUClear::Environment> environment)
         : Reactor(std::move(environment)) {
 
-        on<Trigger<FieldDescription>>("FieldDescription Update", [this](const FieldDescription& desc) {
+        on<Trigger<FieldDescription>>().then("FieldDescription Update", [this] (const FieldDescription& desc) {
 
             field_description_ = std::make_shared<FieldDescription>(desc);
 
@@ -153,30 +153,28 @@ namespace support {
 
         });
 
-        auto updateConfigLambda = [this](const Configuration<SoccerSimulatorConfig>& config, const GlobalConfig& globalConfig) {
+        on<Configuration, Trigger<GlobalConfig>>("SoccerSimulator.yaml")
+        .then("Soccer Simulator Configuration", [this] (const Configuration& config, const GlobalConfig& globalConfig) {
             updateConfiguration(config, globalConfig);
-        };
-        on<With<Configuration<SoccerSimulatorConfig>>, Trigger<GlobalConfig>>("Soccer Simulator Configuration", updateConfigLambda);
-        on<Trigger<Configuration<SoccerSimulatorConfig>>, With<GlobalConfig>>("Soccer Simulator Configuration", updateConfigLambda);
+        });
 
-        on<Trigger<KickPlannerConfig>>("Get Kick Planner Config", [this](const KickPlannerConfig& cfg){
+        on<Trigger<KickPlannerConfig>>().then("Get Kick Planner Config", [this](const KickPlannerConfig& cfg){
             kick_cfg = cfg;
         });
 
-        on<Trigger<KickCommand>>("Simulator Queue KickCommand",[this](const KickCommand& k){
+        on<Trigger<KickCommand>>().then("Simulator Queue KickCommand",[this](const KickCommand& k){
             kickQueue.push(k);
             kicking = true;
         });
 
-        on<Trigger<KickFinished>>("Simulator Kick Finished",[this](const KickFinished&){
+        on<Trigger<KickFinished>>().then("Simulator Kick Finished",[this] {
             kicking = false;
         });
 
-        on<
-            Trigger<Every<SIMULATION_UPDATE_FREQUENCY, Per<std::chrono::seconds>>>,
-            With<Sensors, Optional<WalkCommand>>
-        >("Robot motion", [this](const time_t&,
-                                 const Sensors& sensors,
+        on<Every<SIMULATION_UPDATE_FREQUENCY, Per<std::chrono::seconds>>,
+            With<Sensors,
+            Optional<With<WalkCommand>>>
+        >().then("Robot motion", [this](const Sensors& sensors,
                                  std::shared_ptr<const WalkCommand> walkCommand) {
             time_t now = NUClear::clock::now();
             double deltaT = 1e-6 * std::chrono::duration_cast<std::chrono::microseconds>(now - lastNow).count();
@@ -253,12 +251,11 @@ namespace support {
         });
 
         // Simulate Vision
-        on<Trigger<Every<30, Per<std::chrono::seconds>>>,
-            With<Raw<Sensors>>,
+        on<Every<30, Per<std::chrono::seconds>>,
+            With<Sensors>,
             With<CameraParameters>,
-            Options<Sync<SoccerSimulator>>
-            >("Vision Simulation", [this](const time_t&,
-                std::shared_ptr<Sensors> sensors,
+            Sync<SoccerSimulator>
+            >("Vision Simulation", [this](std::shared_ptr<Sensors> sensors,
                 const CameraParameters& camParams) {
 
             if (field_description_ == nullptr) {
@@ -340,9 +337,7 @@ namespace support {
         });
 
         // Emit exact position to NUbugger
-        on<Trigger<Every<100, std::chrono::milliseconds>>>(
-        "Emit True Robot Position",
-            [this](const time_t&) {
+        on<Every<100, std::chrono::milliseconds>>().then("Emit True Robot Position", [this] {
 
             arma::vec2 bearingVector = world.robotPose.rotation() * arma::vec2({1,0});
             arma::vec3 robotHeadingVector = {bearingVector[0], bearingVector[1], 0};
@@ -351,7 +346,7 @@ namespace support {
             emit(drawSphere("ball", {world.ball.position(0), world.ball.position(1), 0}, 0.1, 0));
         });
 
-        on<Trigger<Startup>>("SoccerSimulator Startup",[this](const Startup&){
+        on<Startup>().then("SoccerSimulator Startup", [this] {
             if (cfg_.auto_start_behaviour) {
                 auto time = NUClear::clock::now();
                 emit(std::make_unique<Unpenalisation<SELF>>(Unpenalisation<SELF>{PLAYER_ID}));

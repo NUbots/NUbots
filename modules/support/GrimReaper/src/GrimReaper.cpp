@@ -22,11 +22,13 @@
 namespace modules {
 namespace support {
 
+    using NUClear::message::ReactionStatistics;
+
     GrimReaper::GrimReaper(std::unique_ptr<NUClear::Environment> environment)
         : Reactor(std::move(environment)) {
 
 
-        on<Trigger<NUClear::ReactionStatistics>>([this](const NUClear::ReactionStatistics& stats) {
+        on<Trigger<ReactionStatistics>>([this](const ReactionStatistics& stats) {
 
             // If there was an exception
             if(stats.exception) {

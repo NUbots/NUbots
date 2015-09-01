@@ -47,7 +47,8 @@ namespace input {
 
         powerplant.addServiceTask(NUClear::threading::ThreadWorker::ServiceTask(std::bind(std::mem_fn(&GameController::run), this), std::bind(std::mem_fn(&GameController::kill), this)));
 
-        auto setup = [this] (const Configuration<GameController>& config, const GlobalConfig& globalConfig) {
+        // Configure
+        on<Configuration, Trigger<GlobalConfig>>("GameController.yaml").then("GameController Configuration", [this] (const Configuration<GameController>& config, const GlobalConfig& globalConfig) {
 
             // TODO use an eventfd to allow changing the port dynamically
 
@@ -123,40 +124,11 @@ namespace input {
 
             emit(std::move(initialState));
             emit(std::make_unique<Phase>(Phase::INITIAL));
-        };
+        });
 
-        // Trigger the same function when either update
-        on<With<Configuration<GameController>>, Trigger<GlobalConfig>>("GameController Configuration", setup);
-        on<Trigger<Configuration<GameController>>, With<GlobalConfig>>("GameController Configuration", setup);
-
-        on<Trigger<Every<2, Per<std::chrono::seconds>>>>("GameController Reply", [this](const time_t&) {
+        on<Every<2, Per<std::chrono::seconds>>>().then("GameController Reply", [this] {
             sendReplyPacket(ReplyMessage::ALIVE);
         });
-
-        on<Trigger<ButtonLeftDown>>([this](const ButtonLeftDown&) {
-            // TODO: aggressive mode, chase ball and kick towards goal (basically disable strategy)
-        });
-
-        // on<Trigger<ButtonMiddleDown>>([this](const ButtonMiddleDown&) {
-        //     // TODO: fix this
-        //     auto time = NUClear::clock::now();
-        //     if (!selfPenalised) {
-        //         // penalise
-        //         selfPenalised = true;
-        //         emit(std::move(std::make_unique<messages::output::Say>("Penalised")));
-        //         emit(std::make_unique<Penalisation<SELF>>(Penalisation<SELF>{PLAYER_ID, time, PenaltyReason::MANUAL}));
-        //     } else {
-        //         // unpenalised
-        //         selfPenalised = false;
-        //         emit(std::move(std::make_unique<messages::output::Say>("Playing")));
-        //         emit(std::make_unique<Unpenalisation<SELF>>(Unpenalisation<SELF>{PLAYER_ID}));
-        //         // TODO: fix timers
-        //         emit(std::make_unique<GamePhase<Phase::PLAYING>>(GamePhase<Phase::PLAYING>{time, time}));
-        //         emit(std::make_unique<Phase>(Phase::PLAYING));
-        //     }
-        //     penaltyOverride = true;
-        // });
-
     }
 
     void GameController::sendReplyPacket(const ReplyMessage& replyMessage) const {

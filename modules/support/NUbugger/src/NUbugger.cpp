@@ -52,7 +52,7 @@ namespace support {
 
         powerplant.addServiceTask(NUClear::threading::ThreadWorker::ServiceTask(std::bind(std::mem_fn(&NUbugger::run), this), std::bind(std::mem_fn(&NUbugger::kill), this)));
 
-        on<Trigger<Configuration<NUbugger>>>([this] (const Configuration<NUbugger>& config) {
+        on<Configuration>("NUbugger.yaml").then([this] (const Configuration& config) {
 
             max_image_duration = durationFromSeconds(1.0 / config["output"]["network"]["max_image_fps"].as<double>());
             max_classified_image_duration = durationFromSeconds(1.0 / config["output"]["network"]["max_classified_image_fps"].as<double>());
@@ -157,7 +157,7 @@ namespace support {
             }
         });
 
-        on<Trigger<Every<1, std::chrono::seconds>>, Options<Single, Priority<NUClear::LOW>>>([this] (const time_t&) {
+        on<Every<1, std::chrono::seconds>>, Single, Priority::LOW>().then([this] {
             send(createMessage(Message::PING));
         });
 
@@ -174,7 +174,7 @@ namespace support {
         sendReactionHandles();
 
         // When we shutdown, close our publisher and our file if we have one
-        on<Trigger<Shutdown>>([this](const Shutdown&) {
+        on<Shutdown>().then([this] {
             pub.close();
 
             // Close the file if it exists

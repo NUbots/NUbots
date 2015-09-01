@@ -43,9 +43,6 @@ namespace vision {
         double measurement_elevation_variance;
 
     public:
-
-        static constexpr const char* CONFIGURATION_PATH = "GoalDetector.yaml";
-
         /// @brief Called by the powerplant to build and setup the GoalDetector reactor.
         explicit GoalDetector(std::unique_ptr<NUClear::Environment> environment);
     };

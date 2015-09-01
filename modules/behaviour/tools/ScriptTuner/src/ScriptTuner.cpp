@@ -38,6 +38,7 @@ namespace modules {
             using messages::motion::ServoTarget;
             using messages::behaviour::RegisterAction;
             using messages::input::LimbID;
+            using messages::platform::darwin::DarwinSensors;
 
             struct LockServo {};
 
@@ -53,7 +54,7 @@ namespace modules {
                 script.frames.emplace_back();
                 script.frames.back().duration = std::chrono::milliseconds(defaultDuration);
 
-                on<Trigger<CommandLineArguments>>([this](const std::vector<std::string>& args) {
+                on<CommandLineArguments>().then([this](const std::vector<std::string>& args) {
                     if(args.size() == 2) {
                         scriptPath = args[1];
 
@@ -70,7 +71,7 @@ namespace modules {
                     }
                 });
 
-                on<Trigger<LockServo>, With<messages::platform::darwin::DarwinSensors>>([this](const LockServo&, const messages::platform::darwin::DarwinSensors& sensors) {
+                on<Trigger<LockServo>, With<DarwinSensors>>().then([this](const DarwinSensors& sensors) {
 
                     auto id = selection < 2 ? 18 + selection : selection - 2;
 

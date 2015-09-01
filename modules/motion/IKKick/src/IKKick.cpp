@@ -70,7 +70,7 @@ namespace motion {
         : Reactor(std::move(environment))
         , subsumptionId(size_t(this) * size_t(this) - size_t(this)) {
 
-        on<Trigger<Configuration<IKKickConfig>>>([this] (const Configuration<IKKickConfig>& config){
+        on<Configuration>("IKKick.yaml").then([this] (const Configuration& config) {
             balancer.configure(config);
             kicker.configure(config);
 
@@ -92,12 +92,12 @@ namespace motion {
 
         });
 
-        on<Trigger<Startup>>("IKKick Startup",[this](const Startup&){
+        on<Startup>().then("IKKick Startup", [this] {
             //Default kick plan at enemy goals
             emit(std::make_unique<KickPlan>(KickPlan{{4.5,0},KickType::IK_KICK}));
         });
 
-        on<Trigger<KickCommand>>([this] (const KickCommand&) {
+        on<Trigger<KickCommand>>().then([this] {
             // We want to kick!
 
             emit(std::make_unique<WalkStopCommand>(subsumptionId)); // Stop the walk
@@ -105,7 +105,7 @@ namespace motion {
             updatePriority(KICK_PRIORITY);
         });
 
-        on<Trigger<ExecuteKick>, With<KickCommand>, With<Sensors>>([this] (const ExecuteKick&, const KickCommand& command, const Sensors& sensors) {
+        on<Trigger<ExecuteKick>, With<KickCommand>, With<Sensors>>().then([this] (const KickCommand& command, const Sensors& sensors) {
 
             // Enable our kick pather
             updater.enable();
@@ -147,7 +147,7 @@ namespace motion {
             balancer.start(sensors);
         });
 
-        updater = on<Trigger<Every<UPDATE_FREQUENCY, Per<std::chrono::seconds>>>, With<Sensors>, Options<Single>>([this](const time_t&, const Sensors& sensors) {
+        updater = on<Every<UPDATE_FREQUENCY, Per<std::chrono::seconds>>, With<Sensors>, Single>().then([this] (const Sensors& sensors) {
 
             //Setup kick variables
             LimbID kickFoot;
@@ -226,7 +226,7 @@ namespace motion {
 
         updater.disable();
 
-        on<Trigger<FinishKick>>([this] (const FinishKick&) {
+        on<Trigger<FinishKick>>().then([this] {
             emit(std::move(std::make_unique<KickFinished>()));
             updater.disable();
             updatePriority(0);

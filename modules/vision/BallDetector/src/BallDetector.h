@@ -61,8 +61,6 @@ namespace vision {
         float approximateCircleGreenRatio(const utility::math::geometry::Circle& circle, const messages::input::Image& image, const messages::vision::LookUpTable& lut);
     public:
 
-        static constexpr const char* CONFIGURATION_PATH = "BallDetector.yaml";
-
         /// @brief Called by the powerplant to build and setup the BallDetector reactor.
         explicit BallDetector(std::unique_ptr<NUClear::Environment> environment);
     };

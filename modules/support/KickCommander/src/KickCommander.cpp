@@ -33,8 +33,7 @@ namespace support {
     KickCommander::KickCommander(std::unique_ptr<NUClear::Environment> environment)
     : Reactor(std::move(environment)) {
 
-
-        on<Trigger<Configuration<KickCommander>>>([this] (const Configuration<KickCommander>& config) {
+        on<Configuration>("KickCommander.yaml").then([this] (const Configuration& config) {
         	log("I'm running");
             if(!doThings){
                 doThings = true;
@@ -43,8 +42,8 @@ namespace support {
     		        config["target"].as<arma::vec3>(),
     		        config["direction"].as<arma::vec3>()
     		    }));
-            } 
-        
+            }
+
         });
     }
 }

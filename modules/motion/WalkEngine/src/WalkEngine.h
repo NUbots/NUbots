@@ -50,7 +50,7 @@ namespace motion {
     public:
         /**
          * The number of servo updates performnced per second
-         * TODO: Probably be a global config somewhere, waiting on NUClear to support runtime on<Trigger<Every>> arguments
+         * TODO: Probably be a global config somewhere, waiting on NUClear to support runtime on<Every> arguments
          */
         static constexpr size_t UPDATE_FREQUENCY = 90;
 
@@ -190,7 +190,7 @@ namespace motion {
         // servoControlPGains are the constant proportionality
         // constants which define the current values of jointGains based on the robot's balance state
         std::map<ServoID, float> servoControlPGains;
-        
+
         utility::motion::Balancer balancer;
 
         NUClear::clock::time_point pushTime;

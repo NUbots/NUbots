@@ -27,12 +27,12 @@ namespace modules {
 namespace support {
     using messages::support::nubugger::proto::Message;
     using utility::time::getUtcTimestamp;
-
+    using NUClear::message::ReactionStatistics;
     using std::chrono::duration_cast;
     using std::chrono::microseconds;
 
     void NUbugger::provideReactionStatistics() {
-        handles[Message::REACTION_STATISTICS].push_back(on<Trigger<NUClear::ReactionStatistics>>([this](const NUClear::ReactionStatistics& stats) {
+        handles[Message::REACTION_STATISTICS].push_back(on<Trigger<ReactionStatistics>>().then([this](const ReactionStatistics& stats) {
             Message message = createMessage(Message::REACTION_STATISTICS, 1);
             auto* reactionStatistics = message.mutable_reaction_statistics();
             //reactionStatistics->set_name(stats.name);

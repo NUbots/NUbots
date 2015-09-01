@@ -32,12 +32,12 @@ namespace support {
 
     void NUbugger::provideDataPoints() {
 
-        handles[Message::DATA_POINT].push_back(on<Trigger<DataPoint>>([this](const DataPoint& dataPoint) {
+        handles[Message::DATA_POINT].push_back(on<Trigger<DataPoint>>().then([this](const DataPoint& dataPoint) {
 
             uint filterId = dataPointFilterIds.find(dataPoint.label()) == dataPointFilterIds.end()
                 ? dataPointFilterIds.insert(std::make_pair(dataPoint.label(), dataPointFilterId++)).first->second
                 : dataPointFilterIds[dataPoint.label()];
-            
+
             Message message = createMessage(Message::DATA_POINT, filterId);
             *message.mutable_data_point() = dataPoint;
             send(message);

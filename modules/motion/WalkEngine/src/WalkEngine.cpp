@@ -43,7 +43,6 @@
 #include "utility/math/matrix/Rotation3D.h"
 #include "messages/input/PushDetection.h"
 
-
 namespace modules {
 namespace motion {
 
@@ -108,24 +107,26 @@ namespace motion {
         //     }
         // }));
 
-        on<Trigger<EnableWalkEngineCommand>>([this](const EnableWalkEngineCommand& command) {
+        on<Trigger<EnableWalkEngineCommand>>().then([this] {
             subsumptionId = command.subsumptionId;
 
             stanceReset(); // Reset stance as we don't know where our limbs are.
             updateHandle.enable();
         });
-        on<Trigger<DisableWalkEngineCommand>>([this](const DisableWalkEngineCommand&) {
+
+        on<Trigger<DisableWalkEngineCommand>>().then([this] {
             // Nobody needs the walk engine, so we stop updating it.
             updateHandle.disable();
 
             // TODO: Also disable the other walk command reactions?
         });
 
-        updateHandle = on<Trigger<Every<UPDATE_FREQUENCY, Per<std::chrono::seconds>>>, With<Sensors>, Options<Single, Priority<NUClear::HIGH>>>([this](const time_t&, const Sensors& sensors) {
+        updateHandle = on<Every<UPDATE_FREQUENCY, Per<std::chrono::seconds>>, With<Sensors>, Single, Priority::HIGH>()
+        .then([this](const Sensors& sensors) {
             update(sensors);
         }).disable();
 
-        on<Trigger<WalkCommand>>([this](const WalkCommand& walkCommand) {
+        on<Trigger<WalkCommand>>().then([this] (const WalkCommand& walkCommand) {
             auto velocity = walkCommand.command;
 
             velocity.x()     *= velocity.x()     > 0 ? velocityLimits(0,1) : -velocityLimits(0,0);
@@ -135,19 +136,19 @@ namespace motion {
             setVelocity(velocity);
         });
 
-        on<Trigger<WalkStartCommand>>([this](const WalkStartCommand&) {
+        on<Trigger<WalkStartCommand>>().then([this] {
             lastVeloctiyUpdateTime = NUClear::clock::now();
             start();
             // emit(std::make_unique<ActionPriorites>(ActionPriorites { subsumptionId, { 25, 10 }})); // TODO: config
         });
 
-        on<Trigger<WalkStopCommand>>([this](const WalkStopCommand&) {
+        on<Trigger<WalkStopCommand>>().then([this] {
             // TODO: This sets STOP_REQUEST, which appears not to be used anywhere.
             // If this is the case, we should delete or rethink the WalkStopCommand.
             requestStop();
         });
 
-        on<Trigger<Configuration<WalkEngine>>>([this](const Configuration<WalkEngine>& config) {
+        on<Configuration>("WalkEngine.yaml").then([this] (const Configuration& config) {
             configure(config.config);
         });
 
@@ -176,12 +177,12 @@ namespace motion {
         // });
 
 
-        on<Trigger<WalkOptimiserCommand> >([this](const WalkOptimiserCommand& command) {
+        on<Trigger<WalkOptimiserCommand>>([this] (const WalkOptimiserCommand& command) {
             configure(command.walkConfig);
             emit(std::make_unique<WalkConfigSaved>());
         });
 
-        generateStandScriptReaction = on<Trigger<Sensors>, Options<Single>>([this](const Sensors& sensors) {
+        generateStandScriptReaction = on<Trigger<Sensors>, Single>([this] (const Sensors& sensors) {
             generateStandScriptReaction.disable();
             //generateAndSaveStandScript(sensors);
             //state = State::LAST_STEP;

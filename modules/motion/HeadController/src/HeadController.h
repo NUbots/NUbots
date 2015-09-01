@@ -40,7 +40,6 @@ namespace modules {
                 time_t lastTime;
             public:
                 explicit HeadController(std::unique_ptr<NUClear::Environment> environment);
-                static constexpr const char* CONFIGURATION_PATH = "HeadController.yaml";
                 arma::vec2 currentAngles;
                 arma::vec2 goalAngles;
                 bool goalRobotSpace = false;

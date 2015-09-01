@@ -33,7 +33,6 @@ namespace support {
         std::ifstream input;
         bool replay = false;
     public:
-        static constexpr const char* CONFIGURATION_PATH = "NBZPlayer.yaml";
         /// @brief Called by the powerplant to build and setup the NBZPlayer reactor.
         explicit NBZPlayer(std::unique_ptr<NUClear::Environment> environment);
     };

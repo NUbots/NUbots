@@ -60,9 +60,6 @@ namespace skills {
         bool isVisited(const Transform2D& currentState, const Transform2D& visitState);
         bool isGoalClose(const Transform2D& currentState, const Transform2D& visitState);
 
-        /// @brief the path to the configuration file for WalkPathFollower
-        static constexpr const char* CONFIGURATION_PATH = "WalkPathFollower.yaml";
-
         WalkPath currentPath;
 
     private:

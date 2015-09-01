@@ -51,7 +51,7 @@ namespace Darwin {
         return (~checksum);
     }
 
-    void UART::setConfig(const messages::support::Configuration<UART>& config){
+    void UART::setConfig(const messages::support::Configuration& config){
         PACKET_WAIT = config["PACKET_WAIT"].as<int>();
         BYTE_WAIT = config["BYTE_WAIT"].as<int>();
         BUS_RESET_WAIT_TIME_uS = config["BUS_RESET_WAIT_TIME_uS"].as<int>();
@@ -131,7 +131,7 @@ namespace Darwin {
 
         // We flush our buffer, just in case there was anything random in it
         tcflush(fd,TCIFLUSH);
-                
+
         while ((bytesWritten != (int)count) && (reconnects < 3)) {
             bytesWritten = write(fd, buf, count);
 
@@ -213,7 +213,7 @@ namespace Darwin {
         for (int sync = 0; sync < 2;) {
             if (select(fd + 1, &connectionset, nullptr, nullptr, &timeout) == 1) {
                 uint8_t byte;
-                
+
                 if (readBytes(&byte, 1) > 0) {
                     sync = (byte == 0xFF) ? (sync + 1) : 0;
                 }

@@ -33,16 +33,16 @@ namespace support {
 
     void NUbugger::provideDrawObjects() {
 
-        handles[Message::DRAW_OBJECTS].push_back(on<Trigger<DrawObjects>>([this](const DrawObjects& drawObjects) {
+        handles[Message::DRAW_OBJECTS].push_back(on<Trigger<DrawObjects>>().then([this](const DrawObjects& drawObjects) {
 
             // TODO: potentially bad filter id
             Message message = createMessage(Message::DRAW_OBJECTS);
             *(message.mutable_draw_objects()) = drawObjects;
             send(message);
-            
+
         }));
 
-        handles[Message::DRAW_OBJECTS].push_back(on<Trigger<DrawObject>>([this](const DrawObject& drawObject) {
+        handles[Message::DRAW_OBJECTS].push_back(on<Trigger<DrawObject>>().then([this](const DrawObject& drawObject) {
 
             Message message = createMessage(Message::DRAW_OBJECTS);
             *(message.mutable_draw_objects()->add_objects()) = drawObject;

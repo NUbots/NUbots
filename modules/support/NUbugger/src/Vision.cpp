@@ -43,14 +43,14 @@ namespace support {
     using messages::input::Image;
 
     void NUbugger::provideVision() {
-        handles[Message::IMAGE].push_back(on<Trigger<Image>, Options<Single, Priority<NUClear::LOW>>>([this](const Image& image) {
+        handles[Message::IMAGE].push_back(on<Trigger<Image>, Single, Priority::LOW>().then([this](const Image& image) {
 
             if (NUClear::clock::now() - last_image < max_image_duration) {
                 return;
             }
 
             Message message = createMessage(Message::IMAGE, 1);
-            
+
             auto* imageData = message.mutable_image();
 
             imageData->set_camera_id(0);
@@ -69,14 +69,14 @@ namespace support {
             last_image = NUClear::clock::now();
         }));
 
-        handles[Message::CLASSIFIED_IMAGE].push_back(on<Trigger<ClassifiedImage<ObjectClass>>, Options<Single, Priority<NUClear::LOW>>>([this](const ClassifiedImage<ObjectClass>& image) {
+        handles[Message::CLASSIFIED_IMAGE].push_back(on<Trigger<ClassifiedImage<ObjectClass>>, Single, Priority::LOW>().then([this](const ClassifiedImage<ObjectClass>& image) {
 
             if (NUClear::clock::now() - last_classified_image < max_classified_image_duration) {
                 return;
             }
 
             Message message = createMessage(Message::CLASSIFIED_IMAGE, 1);
-            
+
             auto* imageData = message.mutable_classified_image();
 
             imageData->set_camera_id(0);
@@ -118,10 +118,10 @@ namespace support {
             last_classified_image = NUClear::clock::now();
         }));
 
-        handles[Message::VISION_OBJECT].push_back(on<Trigger<std::vector<Ball>>, Options<Single, Priority<NUClear::LOW>>>([this] (const std::vector<Ball>& balls) {
+        handles[Message::VISION_OBJECT].push_back(on<Trigger<std::vector<Ball>>, Single, Priority::LOW>().then([this] (const std::vector<Ball>& balls) {
 
             Message message = createMessage(Message::VISION_OBJECT, 1);
-            
+
             auto* object = message.mutable_vision_object();
             object->set_type(VisionObject::BALL);
             object->set_camera_id(0);
@@ -145,10 +145,10 @@ namespace support {
 
         }));
 
-        handles[Message::VISION_OBJECT].push_back(on<Trigger<std::vector<Goal>>, Options<Single, Priority<NUClear::LOW>>>([this] (const std::vector<Goal>& goals) {
+        handles[Message::VISION_OBJECT].push_back(on<Trigger<std::vector<Goal>>, Single, Priority::LOW>().then([this] (const std::vector<Goal>& goals) {
 
             Message message = createMessage(Message::VISION_OBJECT, 2);
-            
+
             auto* object = message.mutable_vision_object();
 
             object->set_type(VisionObject::GOAL);
@@ -178,7 +178,7 @@ namespace support {
         }));
 
         // TODO: needs refactoring so that this is really only a vision line handle
-        handles[Message::VISION_OBJECT].push_back(on<Trigger<VisionObject>, Options<Single, Priority<NUClear::LOW>>>([this] (const VisionObject& visionObject) {
+        handles[Message::VISION_OBJECT].push_back(on<Trigger<VisionObject>, Single, Priority::LOW>().then([this] (const VisionObject& visionObject) {
 
             Message message = createMessage(Message::VISION_OBJECT, 1);
             *message.mutable_vision_object() = visionObject;
@@ -186,12 +186,12 @@ namespace support {
 
         }));
 
-        handles[Message::LOOKUP_TABLE_DIFF].push_back(on<Trigger<LookUpTableDiff>, Options<Single, Priority<NUClear::LOW>>>([this] (const LookUpTableDiff& tableDiff) {
-            
+        handles[Message::LOOKUP_TABLE_DIFF].push_back(on<Trigger<LookUpTableDiff>, Single, Priority::LOW>().then([this] (const LookUpTableDiff& tableDiff) {
+
             Message message = createMessage(Message::LOOKUP_TABLE_DIFF);
             *message.mutable_lookup_table_diff() = tableDiff;
             send(message);
-            
+
         }));
     }
 }
