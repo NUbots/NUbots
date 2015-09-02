@@ -102,7 +102,7 @@ namespace modules {
                 }
             });
 
-            on<Every<1, std::chrono::seconds>, Configuration>("LinuxCamera.yaml").then("Camera Setting Applicator", [this] (const Configuration& config) {
+            on<Configuration, Every<1, std::chrono::seconds>>("LinuxCamera.yaml").then("Camera Setting Applicator", [this] (const Configuration& config) {
                 if(camera.isStreaming()) {
                     // Set all other camera settings
                     for(auto& setting : config.config) {
