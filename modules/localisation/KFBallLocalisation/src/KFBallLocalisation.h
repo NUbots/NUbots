@@ -33,7 +33,7 @@ namespace localisation {
         localisation::KFBallLocalisationEngine engine_;
         ReactionHandle emit_data_handle;
 
-        time_t last_measurement_time;
+        NUClear::clock::time_point last_measurement_time;
 
     public:
         /// @brief Called by the powerplant to build and setup the KFBallLocalisation reactor.

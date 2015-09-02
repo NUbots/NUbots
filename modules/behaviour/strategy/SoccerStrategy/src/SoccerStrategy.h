@@ -77,9 +77,9 @@ namespace strategy {
 
         NUClear::clock::time_point lastLocalised = NUClear::clock::now();
 
-        time_t ballLastMeasured = NUClear::clock::now() - std::chrono::seconds(600); // TODO: unhack
-        time_t ballSearchStartTime;
-        time_t selfLastMeasured;
+        NUClear::clock::time_point ballLastMeasured = NUClear::clock::now() - std::chrono::seconds(600); // TODO: unhack
+        NUClear::clock::time_point ballSearchStartTime;
+        NUClear::clock::time_point selfLastMeasured;
         void initialLocalisationReset(const messages::support::FieldDescription& fieldDescription);
         void penaltyLocalisationReset();
         void unpenalisedLocalisationReset(const messages::support::FieldDescription& fieldDescription);

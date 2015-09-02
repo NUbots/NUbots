@@ -212,7 +212,7 @@ namespace motion {
             waypoints->reserve(16);
 
             //Goal time is by next frame
-            time_t time = NUClear::clock::now();
+            NUClear::clock::time_point time = NUClear::clock::now();
 
             //Push back each servo command
             for (auto& joint : joints) {

@@ -66,7 +66,7 @@ namespace support {
                 Message message;
                 message.ParsePartialFromArray(data.data(), data.size());
                 initialTime = NUClear::clock::now();
-                offset = initialTime - time_t(std::chrono::milliseconds(message.utc_timestamp()));
+                offset = initialTime - NUClear::clock::time_point(std::chrono::milliseconds(message.utc_timestamp()));
 
                 auto cameraParameters = std::make_unique<CameraParameters>();
 
@@ -119,7 +119,7 @@ namespace support {
                     if(message.type() == Message::IMAGE) {
 
                         // Work out our time to run
-                        time_t timeToRun = time_t(std::chrono::milliseconds(message.utc_timestamp())) + offset;
+                        NUClear::clock::time_point timeToRun = NUClear::clock::time_point(std::chrono::milliseconds(message.utc_timestamp())) + offset;
 
                         // Get the width and height
                         int width = message.image().dimensions().x();

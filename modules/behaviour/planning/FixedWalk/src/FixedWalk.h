@@ -47,7 +47,7 @@ namespace modules {
                                                                 NUClear::clock::duration t,
                                                                 const messages::input::Sensors& sensors);
                     std::list<messages::behaviour::FixedWalkCommand::WalkSegment> walkSegments;
-                    time_t segmentStart;
+                    NUClear::clock::time_point segmentStart;
                     NUClear::clock::duration segmentElapsedTimeBeforeFall;
 
                     arma::mat beginningOrientation;

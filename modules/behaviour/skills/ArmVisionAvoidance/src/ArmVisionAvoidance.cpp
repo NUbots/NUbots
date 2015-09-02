@@ -119,8 +119,8 @@ namespace skills {
             auto waypoints = std::make_unique<std::vector<ServoCommand>>();
             waypoints->reserve(6);
 
-            //time_t time = NUClear::clock::now() + std::chrono::seconds(1);
-            time_t time = NUClear::clock::now() + std::chrono::nanoseconds(std::nano::den / UPDATE_FREQUENCY);
+            //NUClear::clock::time_point time = NUClear::clock::now() + std::chrono::seconds(1);
+            NUClear::clock::time_point time = NUClear::clock::now() + std::chrono::nanoseconds(std::nano::den / UPDATE_FREQUENCY);
             waypoints->push_back({subsumptionId, time, ServoID::R_SHOULDER_ROLL,  float(rightShoulderRoll),  gain, torque});
             waypoints->push_back({subsumptionId, time, ServoID::R_SHOULDER_PITCH, float(rightShoulderPitch), gain, torque});
             waypoints->push_back({subsumptionId, time, ServoID::R_ELBOW,          float(rightElbowPitch),    gain, torque});

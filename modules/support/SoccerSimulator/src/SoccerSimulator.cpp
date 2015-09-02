@@ -176,7 +176,7 @@ namespace support {
             Optional<With<WalkCommand>>>
         >().then("Robot motion", [this](const Sensors& sensors,
                                  std::shared_ptr<const WalkCommand> walkCommand) {
-            time_t now = NUClear::clock::now();
+            NUClear::clock::time_point now = NUClear::clock::now();
             double deltaT = 1e-6 * std::chrono::duration_cast<std::chrono::microseconds>(now - lastNow).count();
             Transform2D diff;
 

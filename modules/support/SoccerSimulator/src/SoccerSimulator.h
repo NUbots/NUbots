@@ -75,7 +75,7 @@ namespace support {
         }
 
     private:
-        time_t moduleStartupTime;
+        NUClear::clock::time_point moduleStartupTime;
         double absolute_time();
 
         //Member variables
@@ -140,7 +140,7 @@ namespace support {
         bool lastKicking = false;
         uint PLAYER_ID;
 
-        time_t lastNow;
+        NUClear::clock::time_point lastNow;
 
         //Methods
         void updateConfiguration(const messages::support::Configuration& config, const messages::support::GlobalConfig& globalConfig);

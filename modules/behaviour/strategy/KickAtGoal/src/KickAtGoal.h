@@ -31,8 +31,8 @@ namespace strategy {
     class KickAtGoal : public NUClear::Reactor {
     private:
         NUClear::clock::duration ballActiveTimeout;
-        time_t ballLastSeen;
-        time_t goalLastSeen;
+        NUClear::clock::time_point ballLastSeen;
+        NUClear::clock::time_point goalLastSeen;
 
         void doBehaviour();
         void walkToBall();
