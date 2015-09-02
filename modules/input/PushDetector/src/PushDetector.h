@@ -24,39 +24,37 @@
 #include <armadillo>
 #include <chrono>
 #include "messages/input/Sensors.h"
-#include "utility/math/kalman/UKF.h"
+#include "utility/math/filter/UKF.h"
 
 namespace modules {
 namespace input {
 
-	using utility::math::kalman::UKF;
-
-	class ServoLoadModel {
+    class ServoLoadModel {
        public:
         static constexpr size_t size = 1;
 
         ServoLoadModel() {} // empty constructor
 
         arma::vec::fixed<size> timeUpdate(const arma::vec::fixed<size>& state, double deltaT) {
-        	return state;
+            return state;
         }
 
         arma::vec::fixed<size> predictedObservation(const arma::vec::fixed<size>& state) {
-        	return state;
+            return state;
         }
 
         arma::vec observationDifference(const arma::vec& a, const arma::vec& b) {
-        	return a - b;
+            return a - b;
         }
 
         arma::vec::fixed<size> limitState(const arma::vec::fixed<size>& state) {
-        	return state;
+            return state;
         }
 
         arma::mat::fixed<size, size> processNoise() {
-        	return arma::eye(ServoLoadModel::size, ServoLoadModel::size) * 0.001;
+            return arma::eye(ServoLoadModel::size, ServoLoadModel::size) * 0.001;
         }
-	};
+    };
 
     class PushDetector : public NUClear::Reactor {
 
@@ -64,7 +62,7 @@ namespace input {
         /// @brief Called by the powerplant to build and setup the PushDetector reactor.
         explicit PushDetector(std::unique_ptr<NUClear::Environment> environment);
 
-        std::vector<UKF<ServoLoadModel>> loadFilters;
+        std::vector<utility::math::filter::UKF<ServoLoadModel>> loadFilters;
         NUClear::clock::time_point lastTimeUpdateTime;
     };
 

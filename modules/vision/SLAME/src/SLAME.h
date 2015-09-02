@@ -27,7 +27,6 @@
 #include "messages/input/Sensors.h"
 #include "messages/vision/VisionObjects.h"
 #include "SLAMEModule.h"
-#include "utility/math/kalman/UKF.h"
 
 namespace modules {
     namespace vision {

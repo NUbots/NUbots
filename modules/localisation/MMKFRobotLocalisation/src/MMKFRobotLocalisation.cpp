@@ -40,7 +40,6 @@ using utility::math::matrix::Rotation3D;
 using utility::math::angle::bearingToUnitVector;
 using utility::nubugger::graph;
 using utility::localisation::LocalisationFieldObject;
-using modules::localisation::MultiModalRobotModelConfig;
 using messages::support::Configuration;
 using messages::support::FieldDescription;
 using messages::input::Sensors;
