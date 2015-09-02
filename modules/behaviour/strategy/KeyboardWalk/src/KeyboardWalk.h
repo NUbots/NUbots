@@ -34,17 +34,12 @@ namespace strategy {
 
         static constexpr const double HEAD_DIFF = 1 * M_PI / 180;
 
-        bool running = true;
-
         bool moving = false;
         arma::vec2 velocity;
         float rotation = 0;
 
         float headYaw = 0;
         float headPitch = 0;
-
-        void run();
-        void kill();
 
         void forward();
         void left();

@@ -26,11 +26,13 @@
 #include "messages/behaviour/Action.h"
 
 #include <ncurses.h>
+#include <stdio.h>
 #include <sstream>
 
 namespace modules {
     namespace behaviour {
         namespace tools {
+            using NUClear::message::CommandLineArguments;
             using messages::motion::Script;
             using messages::motion::ExecuteScript;
             using messages::motion::Script;
@@ -54,7 +56,7 @@ namespace modules {
                 script.frames.emplace_back();
                 script.frames.back().duration = std::chrono::milliseconds(defaultDuration);
 
-                on<CommandLineArguments>().then([this](const std::vector<std::string>& args) {
+                on<Trigger<CommandLineArguments>>().then([this](const std::vector<std::string>& args) {
                     if(args.size() == 2) {
                         scriptPath = args[1];
 
@@ -106,13 +108,6 @@ namespace modules {
                     }
                 }));
 
-                powerplant.addServiceTask(NUClear::threading::ThreadWorker::ServiceTask(std::bind(std::mem_fn(&ScriptTuner::run), this),
-                                                                                         std::bind(std::mem_fn(&ScriptTuner::kill), this)));
-
-            }
-
-            void ScriptTuner::run() {
-
                 // Start curses mode
                 initscr();
                 // Capture our characters immediately (but pass through signals)
@@ -127,8 +122,8 @@ namespace modules {
                 // Build our initial GUI
                 refreshView();
 
-                // Now we just loop forever
-                while (running) {
+                // Trigger when stdin has something to read
+                on<IO>(int(stdin), IO::READ).then([this] {
                     // Get the character the user has typed
                     switch(getch()) {
                         case KEY_UP: // Change selection up
@@ -195,7 +190,10 @@ namespace modules {
 
                     // Update whatever visual changes we made
                     refreshView();
-                }
+                });
+
+                // When we shutdown end ncurses
+                on<Shutdown>().then(endwin);
             }
 
             void ScriptTuner::activateFrame(int frame) {
@@ -524,10 +522,6 @@ namespace modules {
                 }
             }
 
-            void ScriptTuner::kill() {
-                running = false;
-                endwin();
-            }
 
             void ScriptTuner::help() {
 
