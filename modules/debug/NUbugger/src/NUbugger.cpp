@@ -98,8 +98,8 @@ namespace debug {
             float sine = sin(2 * M_PI * freq * t);
             float cosine = cos(2 * M_PI * freq * t);
 
-            emit(drawArrow("arrow", {x, y, std::abs(z)}, {sine, cosine, 0}, sine));
-            emit(drawSphere("sphere", {x, z, std::abs(z)}, std::abs(sine)));
+            emit(drawArrow("arrow", arma::vec3({x, y, std::abs(z)}), arma::vec3({sine, cosine, 0}), sine));
+            emit(drawSphere("sphere", arma::vec3({x, z, std::abs(z)}), std::abs(sine)));
 
         });
 
