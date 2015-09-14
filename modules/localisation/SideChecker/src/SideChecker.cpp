@@ -92,7 +92,7 @@ namespace localisation {
         });
 
            // Register the path follower with the subsumption system:
-        emit<INITIALIZE>(std::make_unique<RegisterAction>(RegisterAction {
+        emit<Scope::INITIALIZE>(std::make_unique<RegisterAction>(RegisterAction {
             subsumptionId,
             "SideChecker",
             {

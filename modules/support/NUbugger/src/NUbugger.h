@@ -21,7 +21,6 @@
 #define MODULES_SUPPORT_NUBUGGER_H
 
 #include <nuclear>
-#include <zmq.hpp>
 #include "messages/support/nubugger/proto/Message.pb.h"
 #include "messages/localisation/FieldObject.h"
 #include "messages/input/gameevents/GameEvents.h"
@@ -37,8 +36,8 @@ namespace modules {
          */
         class NUbugger : public NUClear::Reactor {
         private:
-            zmq::socket_t pub;
-            zmq::socket_t sub;
+            // zmq::socket_t pub;
+            // zmq::socket_t sub;
 
             uint pubPort = 0;
             uint subPort = 0;
@@ -89,7 +88,7 @@ namespace modules {
             void sendConfigurationState();
             void sendSubsumption();
 
-            void send(zmq::message_t& packet);
+            // void send(zmq::message_t& packet);
             void send(messages::support::nubugger::proto::Message message);
 
             messages::support::nubugger::proto::Message createMessage(messages::support::nubugger::proto::Message::Type type, uint filterId=0);

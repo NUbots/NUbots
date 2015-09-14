@@ -24,11 +24,6 @@
 #include "messages/platform/darwin/DarwinSensors.h"
 #include "messages/output/Say.h"
 
-extern "C" {
-    #include <sys/socket.h>
-    #include <arpa/inet.h>
-}
-
 namespace modules {
 namespace input {
 
@@ -43,138 +38,131 @@ namespace input {
     using messages::platform::darwin::ButtonLeftDown;
     using messages::platform::darwin::ButtonMiddleDown;
 
-    GameController::GameController(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)), socket(0) {
-
-        powerplant.addServiceTask(NUClear::threading::ThreadWorker::ServiceTask(std::bind(std::mem_fn(&GameController::run), this), std::bind(std::mem_fn(&GameController::kill), this)));
+    GameController::GameController(std::unique_ptr<NUClear::Environment> environment)
+    : Reactor(std::move(environment))
+    , port(0) {
 
         // Configure
         on<Configuration, Trigger<GlobalConfig>>("GameController.yaml").then("GameController Configuration", [this] (const Configuration& config, const GlobalConfig& globalConfig) {
 
-            // TODO use an eventfd to allow changing the port dynamically
-
             PLAYER_ID = globalConfig.playerId;
             TEAM_ID = globalConfig.teamId;
-            BROADCAST_IP = config["broadcastIP"].as<std::string>();
 
-            port = config["port"].as<uint>();
-            sockaddr_in socketAddress;
-            memset(&socketAddress, 0, sizeof(socketAddress));
-            int broadcast = 1;
-            socketAddress.sin_family = AF_INET;
-            socketAddress.sin_port = htons(port);
-            socketAddress.sin_addr.s_addr = (BROADCAST_IP.empty() ? INADDR_ANY : inet_addr(BROADCAST_IP.c_str()));
+            // If we are changing ports (the port starts at 0 so this should start it the first time)
+            if(config["port"].as<uint>() != port) {
 
-            int newSocket = ::socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
-            setsockopt(newSocket, SOL_SOCKET, SO_BROADCAST, &broadcast, sizeof(broadcast));
-            ::bind(newSocket, reinterpret_cast<sockaddr*>(&socketAddress), sizeof(sockaddr));
-
-            int oldSocket = socket.exchange(newSocket);
-
-            if (oldSocket) {
-                ::close(oldSocket);
-            }
-
-            mode = static_cast<gamecontroller::Mode>(-1);
-
-            std::copy(std::begin(gamecontroller::RECEIVE_HEADER), std::end(gamecontroller::RECEIVE_HEADER), std::begin(packet.header));
-            packet.version = SUPPORTED_VERSION;
-            packet.packetNumber = 0;
-            packet.playersPerTeam = PLAYERS_PER_TEAM;
-            packet.state = static_cast<gamecontroller::State>(-1);
-            packet.firstHalf = true;
-            packet.kickOffTeam = static_cast<gamecontroller::TeamColour>(-1);
-            packet.mode = static_cast<gamecontroller::Mode>(-1);
-            packet.dropInTeam = static_cast<gamecontroller::TeamColour>(-1);
-            packet.dropInTime = -1;
-            packet.secsRemaining = 0;
-            packet.secondaryTime = 0;
-            for (uint i = 0; i < NUM_TEAMS; i++) {
-                auto& ownTeam = packet.teams[i];
-                ownTeam.teamId = (i == 0 ? TEAM_ID : 0);
-                ownTeam.teamColour = static_cast<gamecontroller::TeamColour>(-1);
-                ownTeam.score = 0;
-                ownTeam.penaltyShot = 0;
-                ownTeam.singleShots = 0;
-                ownTeam.coachMessage.fill(0);
-                auto& coach = ownTeam.coach;
-                coach.penaltyState = gamecontroller::PenaltyState::UNPENALISED;
-                coach.penalisedTimeLeft = 0;
-                for (uint i = 0; i < gamecontroller::MAX_NUM_PLAYERS; i++) {
-                    auto& player = ownTeam.players[i];
-                    if (i <= ACTIVE_PLAYERS_PER_TEAM) {
-                        player.penaltyState = gamecontroller::PenaltyState::UNPENALISED;
-                        player.penalisedTimeLeft = 0;
-                    } else {
-                        player.penaltyState = gamecontroller::PenaltyState::SUBSTITUTE;
-                        player.penalisedTimeLeft = 0;
-                    }
+                // If we have an old binding, then unbind it
+                // The port starts at 0 so this should work
+                if(port != 0) {
+                    listenHandle.unbind();
                 }
+
+                // Update our port
+                port = config["port"].as<uint>();
+
+                // Bind our new handle
+                std::tie(listenHandle, std::ignore) = on<UDP::Broadcast, With<GameState>>(port).then([this] (const UDP::Packet& p, const GameState& gameState) {
+                    // Get our packet contents
+                    const GameControllerPacket& newPacket = *reinterpret_cast<const GameControllerPacket*>(p.data.data());
+
+                    // Get the IP we are getting this packet from
+                    // Store it and use it to send back to the game controller using emit UDP
+                    BROADCAST_IP = p.dest.address;
+
+                    if (newPacket.version == SUPPORTED_VERSION) {
+                        try {
+                            process(gameState, packet, newPacket);
+                        } catch (std::runtime_error err) {
+                            log(err.what());
+                        }
+
+                        packet = newPacket;
+                    }
+                });
             }
 
-            auto initialState = std::make_unique<GameState>();
-            // default to reasonable values for initial state
-            initialState->phase = Phase::INITIAL;
-            initialState->mode = Mode::NORMAL;
-            initialState->firstHalf = true;
-            initialState->kickedOutByUs = false;
-            initialState->ourKickOff = false;
-
-            initialState->team.teamId = TEAM_ID;
-            initialState->opponent.teamId = 0;
-
-            emit(std::move(initialState));
-            emit(std::make_unique<Phase>(Phase::INITIAL));
+            resetState();
         });
 
         on<Every<2, Per<std::chrono::seconds>>>().then("GameController Reply", [this] {
-            sendReplyPacket(ReplyMessage::ALIVE);
+
+            sendReplyMessage(ReplyMessage::ALIVE);
         });
     }
 
-    void GameController::sendReplyPacket(const ReplyMessage& replyMessage) const {
-        if (socket) {
+    void GameController::sendReplyMessage(const ReplyMessage& message) {
+        auto packet = std::make_unique<GameControllerReplyPacket>();
+        packet->header = {
+              gamecontroller::RETURN_HEADER[0]
+            , gamecontroller::RETURN_HEADER[1]
+            , gamecontroller::RETURN_HEADER[2]
+            , gamecontroller::RETURN_HEADER[3]
+        };
+        packet->version = gamecontroller::RETURN_VERSION;
+        packet->team = TEAM_ID;
+        packet->player = PLAYER_ID;
+        packet->message = message;
 
-            sockaddr_in socketAddress;
-            memset(&socketAddress, 0, sizeof(socketAddress));
-            socketAddress.sin_family = AF_INET;
-            socketAddress.sin_port = htons(port);
-            socketAddress.sin_addr.s_addr = (BROADCAST_IP.empty() ? INADDR_ANY : inet_addr(BROADCAST_IP.c_str()));
-
-            GameControllerReplyPacket replyPacket;
-            std::copy(std::begin(gamecontroller::RETURN_HEADER), std::end(gamecontroller::RETURN_HEADER), std::begin(replyPacket.header));
-            replyPacket.version = gamecontroller::RETURN_VERSION;
-            replyPacket.team = TEAM_ID;
-            replyPacket.player = PLAYER_ID;
-            replyPacket.message = replyMessage;
-            if(::sendto(socket, reinterpret_cast<char*>(&replyPacket), sizeof(replyPacket), 0, reinterpret_cast<sockaddr*>(&socketAddress), sizeof(socketAddress)) < 0) {
-                throw std::system_error(errno, std::system_category());
-            }
-        }
+        emit<Scope::UDP>(packet, BROADCAST_IP, port);
     }
 
-    void GameController::run() {
-        GameControllerPacket newPacket;
+    void GameController::resetState() {
 
-        while (listening) {
-            ::recv(socket, reinterpret_cast<char*>(&newPacket), sizeof(GameControllerPacket), 0);
+        mode = static_cast<gamecontroller::Mode>(-1);
 
-            if (newPacket.version == SUPPORTED_VERSION) {
-                try {
-                    process(packet, newPacket);
-                } catch (std::runtime_error err) {
-                    log(err.what());
-                    continue;
+        std::copy(std::begin(gamecontroller::RECEIVE_HEADER), std::end(gamecontroller::RECEIVE_HEADER), std::begin(packet.header));
+        packet.version = SUPPORTED_VERSION;
+        packet.packetNumber = 0;
+        packet.playersPerTeam = PLAYERS_PER_TEAM;
+        packet.state = static_cast<gamecontroller::State>(-1);
+        packet.firstHalf = true;
+        packet.kickOffTeam = static_cast<gamecontroller::TeamColour>(-1);
+        packet.mode = static_cast<gamecontroller::Mode>(-1);
+        packet.dropInTeam = static_cast<gamecontroller::TeamColour>(-1);
+        packet.dropInTime = -1;
+        packet.secsRemaining = 0;
+        packet.secondaryTime = 0;
+        for (uint i = 0; i < NUM_TEAMS; i++) {
+            auto& ownTeam = packet.teams[i];
+            ownTeam.teamId = (i == 0 ? TEAM_ID : 0);
+            ownTeam.teamColour = static_cast<gamecontroller::TeamColour>(-1);
+            ownTeam.score = 0;
+            ownTeam.penaltyShot = 0;
+            ownTeam.singleShots = 0;
+            ownTeam.coachMessage.fill(0);
+            auto& coach = ownTeam.coach;
+            coach.penaltyState = gamecontroller::PenaltyState::UNPENALISED;
+            coach.penalisedTimeLeft = 0;
+            for (uint i = 0; i < gamecontroller::MAX_NUM_PLAYERS; i++) {
+                auto& player = ownTeam.players[i];
+                if (i <= ACTIVE_PLAYERS_PER_TEAM) {
+                    player.penaltyState = gamecontroller::PenaltyState::UNPENALISED;
+                    player.penalisedTimeLeft = 0;
+                } else {
+                    player.penaltyState = gamecontroller::PenaltyState::SUBSTITUTE;
+                    player.penalisedTimeLeft = 0;
                 }
-
-                packet = newPacket;
-
             }
         }
+
+        auto initialState = std::make_unique<GameState>();
+        // default to reasonable values for initial state
+        initialState->phase = Phase::INITIAL;
+        initialState->mode = Mode::NORMAL;
+        initialState->firstHalf = true;
+        initialState->kickedOutByUs = false;
+        initialState->ourKickOff = false;
+
+        initialState->team.teamId = TEAM_ID;
+        initialState->opponent.teamId = 0;
+
+        emit(std::move(initialState));
+        emit(std::make_unique<Phase>(Phase::INITIAL));
     }
 
-    void GameController::process(const GameControllerPacket& oldPacket, const GameControllerPacket& newPacket) {
+    void GameController::process(const GameState& oldGameState, const GameControllerPacket& oldPacket, const GameControllerPacket& newPacket) {
 
-        auto state = std::make_unique<GameState>(*powerplant.get<GameState>());
+        auto state = std::make_unique<GameState>(oldGameState);
 
         std::vector<std::function<void ()>> stateChanges;
 
@@ -214,7 +202,6 @@ namespace input {
             }
 
         }
-
 
         /*******************************************************************************************
          * Process penalty updates
@@ -259,7 +246,7 @@ namespace input {
                     if (playerId == PLAYER_ID) {
                         // self penalised :@
                         emit(std::make_unique<Penalisation<SELF>>(Penalisation<SELF>{playerId, unpenalisedTime, reason}));
-                        sendReplyPacket(ReplyMessage::PENALISED);
+                        sendReplyMessage(ReplyMessage::PENALISED);
                         selfPenalised = true;
                         penaltyOverride = false;
                     }
@@ -275,7 +262,7 @@ namespace input {
                     if (playerId == PLAYER_ID) {
                         // self unpenalised :)
                         emit(std::make_unique<Unpenalisation<SELF>>(Unpenalisation<SELF>{playerId}));
-                        sendReplyPacket(ReplyMessage::UNPENALISED);
+                        sendReplyMessage(ReplyMessage::UNPENALISED);
                         selfPenalised = false;
                         penaltyOverride = false;
                     }
@@ -528,7 +515,6 @@ namespace input {
                 change();
             }
         }
-
     }
 
     PenaltyReason GameController::getPenaltyReason(const gamecontroller::PenaltyState& penaltyState) const {
@@ -579,11 +565,6 @@ namespace input {
         }
 
         throw std::runtime_error("No opponent teams not found"); // should never happen!
-    }
-
-    void GameController::kill() {
-        listening = false;
-        ::close(socket);
     }
 
 }  // input

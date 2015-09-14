@@ -22,7 +22,6 @@
 
 #include <vector>
 #include <armadillo>
-#include <nuclear_bits/LogLevel.h>
 #include <cmath>
 #include <nuclear>
 
@@ -63,7 +62,7 @@ namespace kinematics {
 
         //Translate up foot
         auto targetLeg = target.translate(arma::vec3({0,0,RobotKinematicModel::Leg::FOOT_HEIGHT}));
-        
+
         //Remove hip offset
         int negativeIfRight = (limb == messages::input::LimbID::RIGHT_LEG) ? -1 : 1;
         arma::vec3 hipOffset = { HIP_OFFSET_X, negativeIfRight * HIP_OFFSET_Y, -HIP_OFFSET_Z};
@@ -121,7 +120,7 @@ namespace kinematics {
         arma::vec3 anklePos = target.submat(0,3,2,3);
 
         arma::vec3 hipOffset = {LENGTH_BETWEEN_LEGS / 2.0, HIP_OFFSET_X, DISTANCE_FROM_BODY_TO_HIP_JOINT};
-        
+
         arma::vec3 targetLeg = anklePos - hipOffset;
 
         float length = arma::norm(targetLeg);

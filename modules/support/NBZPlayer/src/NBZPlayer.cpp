@@ -37,195 +37,189 @@ namespace support {
     NBZPlayer::NBZPlayer(std::unique_ptr<NUClear::Environment> environment)
         : Reactor(std::move(environment)) {
 
-            on<Configuration>("NBZPlayer.yaml").then([this](const Configuration& config) {
+        on<Configuration>("NBZPlayer.yaml").then([this](const Configuration& config) {
 
-                std::string path = config["file"].as<std::string>();
-                replay = config["replay"].as<bool>();
+            std::string path = config["file"].as<std::string>();
+            replay = config["replay"].as<bool>();
 
-                // Setup the file
-                // input.push(boost::iostreams::gzip_decompressor());
-                // Open a file using the file name and timestamp
-                input.close();
-                input.clear();
-                std::string filename = config["file"].as<std::string>();
-                input.open(filename, std::ios::binary);
-                if (input.fail()) {
-                    log<NUClear::FATAL>("NBZPlayer could not read from file:", filename);
+            // Setup the file
+            // input.push(boost::iostreams::gzip_decompressor());
+            // Open a file using the file name and timestamp
+            input.close();
+            input.clear();
+            std::string filename = config["file"].as<std::string>();
+            input.open(filename, std::ios::binary);
+            if (input.fail()) {
+                log<NUClear::FATAL>("NBZPlayer could not read from file:", filename);
+                return;
+            }
+
+            // Read the first 32 bit int to work out the size
+            uint32_t size;
+            input.read(reinterpret_cast<char*>(&size), sizeof(uint32_t));
+
+            // Read that much into a string
+            std::vector<char> data(size);
+            input.read(data.data(), size);
+
+            // Read the message
+            Message message;
+            message.ParsePartialFromArray(data.data(), data.size());
+            initialTime = NUClear::clock::now();
+            offset = initialTime - NUClear::clock::time_point(std::chrono::milliseconds(message.utc_timestamp()));
+
+            auto cameraParameters = std::make_unique<CameraParameters>();
+
+            cameraParameters->imageSizePixels = { 640, 480 };
+            cameraParameters->FOV = { 1.0472 , 0.785398 };
+            cameraParameters->distortionFactor = -0.000018;
+            arma::vec2 tanHalfFOV;
+            tanHalfFOV << std::tan(cameraParameters->FOV[0] * 0.5) << std::tan(cameraParameters->FOV[1] * 0.5);
+            arma::vec2 imageCentre;
+            imageCentre << cameraParameters->imageSizePixels[0] * 0.5 << cameraParameters->imageSizePixels[1] * 0.5;
+            cameraParameters->pixelsToTanThetaFactor << (tanHalfFOV[0] / imageCentre[0]) << (tanHalfFOV[1] / imageCentre[1]);
+            cameraParameters->focalLengthPixels = imageCentre[0] / tanHalfFOV[0];
+
+            emit<Scope::DIRECT>(std::move(cameraParameters));
+        });
+
+        on<Always>().then([this] {
+
+            // Read the first 32 bit int to work out the size
+            uint32_t size;
+            input.read(reinterpret_cast<char*>(&size), sizeof(uint32_t));
+
+            // Read that much into a string
+            std::vector<char> data(size);
+            input.read(data.data(), size);
+
+            // If we are going to replay then reset the stream
+            if(input.eof()) {
+                if (!replay) {
+                    log<NUClear::INFO>("Reached end of log file, quitting");
                     return;
                 }
 
-                // Read the first 32 bit int to work out the size
-                uint32_t size;
-                input.read(reinterpret_cast<char*>(&size), sizeof(uint32_t));
+                // replay, go back to beginning of file
+                input.clear();
+                input.seekg(0, std::ios::beg);
+                auto now = NUClear::clock::now();
+                offset += now - initialTime;
+                initialTime = now;
+                log<NUClear::INFO>("Reached end of log file, replaying");
+                return;
+            }
 
-                // Read that much into a string
-                std::vector<char> data(size);
-                input.read(data.data(), size);
+            // Read the message
+            Message message;
+            message.ParsePartialFromArray(data.data(), data.size());
 
-                // Read the message
-                Message message;
-                message.ParsePartialFromArray(data.data(), data.size());
-                initialTime = NUClear::clock::now();
-                offset = initialTime - NUClear::clock::time_point(std::chrono::milliseconds(message.utc_timestamp()));
+            // If it's an image
+            if(message.type() == Message::IMAGE) {
 
-                auto cameraParameters = std::make_unique<CameraParameters>();
+                // Work out our time to run
+                NUClear::clock::time_point timeToRun = NUClear::clock::time_point(std::chrono::milliseconds(message.utc_timestamp())) + offset;
 
-                cameraParameters->imageSizePixels = { 640, 480 };
-                cameraParameters->FOV = { 1.0472 , 0.785398 };
-                cameraParameters->distortionFactor = -0.000018;
-                arma::vec2 tanHalfFOV;
-                tanHalfFOV << std::tan(cameraParameters->FOV[0] * 0.5) << std::tan(cameraParameters->FOV[1] * 0.5);
-                arma::vec2 imageCentre;
-                imageCentre << cameraParameters->imageSizePixels[0] * 0.5 << cameraParameters->imageSizePixels[1] * 0.5;
-                cameraParameters->pixelsToTanThetaFactor << (tanHalfFOV[0] / imageCentre[0]) << (tanHalfFOV[1] / imageCentre[1]);
-                cameraParameters->focalLengthPixels = imageCentre[0] / tanHalfFOV[0];
+                // Get the width and height
+                int width = message.image().dimensions().x();
+                int height = message.image().dimensions().y();
+                const std::string& source = message.image().data();
 
-                emit<DIRECT>(std::move(cameraParameters));
-            });
+                // Get the image data
+                std::vector<uint8_t> pixels(source.size());
 
-            powerplant.addServiceTask(NUClear::threading::ThreadWorker::ServiceTask([this] {
-                while(true) {
+                std::memcpy(pixels.data(), source.data(), source.size());
 
-                    // Read the first 32 bit int to work out the size
-                    uint32_t size;
-                    input.read(reinterpret_cast<char*>(&size), sizeof(uint32_t));
+                // Build the image
+                auto image = std::make_unique<Image>(width, height, NUClear::clock::now(), std::move(pixels));
 
-                    // Read that much into a string
-                    std::vector<char> data(size);
-                    input.read(data.data(), size);
+                // Wait until it's time to display it
+                std::this_thread::sleep_until(timeToRun);
 
-                    // If we are going to replay then reset the stream
-                    if(input.eof()) {
-                        if (!replay) {
-                            log<NUClear::INFO>("Reached end of log file, quitting");
-                            break;
-                        }
+                // Send it!
+                emit(std::move(image));
+            }
+            else if(message.type() == Message::SENSOR_DATA) {
 
-                        // replay, go back to beginning of file
-                        input.clear();
-                        input.seekg(0, std::ios::beg);
-                        auto now = NUClear::clock::now();
-                        offset += now - initialTime;
-                        initialTime = now;
-                        log<NUClear::INFO>("Reached end of log file, replaying");
-                        continue;
+                // Make a darwin sensors
+                auto sensors = std::make_unique<DarwinSensors>();
+
+                sensors->accelerometer = {
+
+                     message.sensor_data().accelerometer().y(),
+                    -message.sensor_data().accelerometer().x(),
+                    -message.sensor_data().accelerometer().z()
+                };
+
+                sensors->gyroscope = {
+                    -message.sensor_data().gyroscope().x(),
+                    -message.sensor_data().gyroscope().y(),
+                     message.sensor_data().gyroscope().z()
+                };
+
+                for(const auto& s : message.sensor_data().servo()) {
+
+                    auto& servo = sensors->servo[s.id()];
+
+                    servo.errorFlags = s.error_flags();
+                    servo.torqueEnabled = s.enabled();
+
+                    servo.pGain = s.p_gain();
+                    servo.iGain = s.i_gain();
+                    servo.dGain = s.d_gain();
+
+                    servo.goalPosition = s.goal_position();
+                    servo.movingSpeed = s.goal_velocity();
+
+                    servo.presentPosition = s.present_position();
+                    servo.presentSpeed = s.present_velocity();
+
+                    servo.load = s.load();
+                    servo.voltage = s.voltage();
+                    servo.temperature = s.temperature();
+
+                }
+
+                for(const auto& l : message.sensor_data().led()) {
+                    switch(l.id()) {
+                        case 0: {
+                            sensors->ledPanel.led2 = l.colour() == 0xFF0000;
+                        } break;
+                        case 1:{
+                            sensors->ledPanel.led3 = l.colour() == 0xFF0000;
+                        } break;
+                        case 2:{
+                            sensors->ledPanel.led4 = l.colour() == 0xFF0000;
+                        } break;
+                        case 3:{
+                            sensors->eyeLED.r = (l.colour() & 0xFF0000) << 16;
+                            sensors->eyeLED.g = (l.colour() & 0x00FF00) << 8;
+                            sensors->eyeLED.b = (l.colour() & 0x0000FF) << 0;
+                        } break;
+                        case 4:{
+                            sensors->headLED.r = (l.colour() & 0xFF0000) << 16;
+                            sensors->headLED.g = (l.colour() & 0x00FF00) << 8;
+                            sensors->headLED.b = (l.colour() & 0x0000FF) << 0;
+                        } break;
                     }
 
-                    // Read the message
-                    Message message;
-                    message.ParsePartialFromArray(data.data(), data.size());
+                }
 
-                    // If it's an image
-                    if(message.type() == Message::IMAGE) {
+                for(const auto& l : message.sensor_data().button()) {
 
-                        // Work out our time to run
-                        NUClear::clock::time_point timeToRun = NUClear::clock::time_point(std::chrono::milliseconds(message.utc_timestamp())) + offset;
-
-                        // Get the width and height
-                        int width = message.image().dimensions().x();
-                        int height = message.image().dimensions().y();
-                        const std::string& source = message.image().data();
-
-                        // Get the image data
-                        std::vector<uint8_t> pixels(source.size());
-
-                        std::memcpy(pixels.data(), source.data(), source.size());
-
-                        // Build the image
-                        auto image = std::make_unique<Image>(width, height, NUClear::clock::now(), std::move(pixels));
-
-                        // Wait until it's time to display it
-                        std::this_thread::sleep_until(timeToRun);
-
-                        // Send it!
-                        emit(std::move(image));
-                    }
-                    else if(message.type() == Message::SENSOR_DATA) {
-
-                        // Make a darwin sensors
-                        auto sensors = std::make_unique<DarwinSensors>();
-
-                        sensors->accelerometer = {
-
-                             message.sensor_data().accelerometer().y(),
-                            -message.sensor_data().accelerometer().x(),
-                            -message.sensor_data().accelerometer().z()
-                        };
-
-                        sensors->gyroscope = {
-                            -message.sensor_data().gyroscope().x(),
-                            -message.sensor_data().gyroscope().y(),
-                             message.sensor_data().gyroscope().z()
-                        };
-
-                        for(const auto& s : message.sensor_data().servo()) {
-
-                            auto& servo = sensors->servo[s.id()];
-
-                            servo.errorFlags = s.error_flags();
-                            servo.torqueEnabled = s.enabled();
-
-                            servo.pGain = s.p_gain();
-                            servo.iGain = s.i_gain();
-                            servo.dGain = s.d_gain();
-
-                            servo.goalPosition = s.goal_position();
-                            servo.movingSpeed = s.goal_velocity();
-
-                            servo.presentPosition = s.present_position();
-                            servo.presentSpeed = s.present_velocity();
-
-                            servo.load = s.load();
-                            servo.voltage = s.voltage();
-                            servo.temperature = s.temperature();
-
-                        }
-
-                        for(const auto& l : message.sensor_data().led()) {
-                            switch(l.id()) {
-                                case 0: {
-                                    sensors->ledPanel.led2 = l.colour() == 0xFF0000;
-                                } break;
-                                case 1:{
-                                    sensors->ledPanel.led3 = l.colour() == 0xFF0000;
-                                } break;
-                                case 2:{
-                                    sensors->ledPanel.led4 = l.colour() == 0xFF0000;
-                                } break;
-                                case 3:{
-                                    sensors->eyeLED.r = (l.colour() & 0xFF0000) << 16;
-                                    sensors->eyeLED.g = (l.colour() & 0x00FF00) << 8;
-                                    sensors->eyeLED.b = (l.colour() & 0x0000FF) << 0;
-                                } break;
-                                case 4:{
-                                    sensors->headLED.r = (l.colour() & 0xFF0000) << 16;
-                                    sensors->headLED.g = (l.colour() & 0x00FF00) << 8;
-                                    sensors->headLED.b = (l.colour() & 0x0000FF) << 0;
-                                } break;
-                            }
-
-                        }
-
-                        for(const auto& l : message.sensor_data().button()) {
-
-                            switch(l.id()) {
-                                case 0: {
-                                    sensors->buttons.left = l.value();
-                                } break;
-                                case 1: {
-                                    sensors->buttons.middle = l.value();
-                                } break;
-                            }
-                        }
-
-                        emit(std::move(sensors));
+                    switch(l.id()) {
+                        case 0: {
+                            sensors->buttons.left = l.value();
+                        } break;
+                        case 1: {
+                            sensors->buttons.middle = l.value();
+                        } break;
                     }
                 }
-            },
-            [] {
-                // This is a buggy module! recode me!
-            }));
 
+                emit(std::move(sensors));
+            }
+        });
     }
 
 }

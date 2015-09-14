@@ -69,7 +69,7 @@ namespace skills {
     , subsumptionId(size_t(this) * size_t(this) - size_t(this)) {
 
         // Register the path follower with the subsumption system:
-        emit<INITIALIZE>(std::make_unique<RegisterAction>(RegisterAction {
+        emit<Scope::INITIALIZE>(std::make_unique<RegisterAction>(RegisterAction {
             subsumptionId,
             "WalkPathFollower",
             {
@@ -80,13 +80,13 @@ namespace skills {
             [this] (const std::set<LimbID>& givenLimbs) {
                 if (givenLimbs.find(LimbID::LEFT_LEG) != givenLimbs.end()) {
                     // Enable the walk engine.
-                    emit<DIRECT>(std::move(std::make_unique<EnableWalkEngineCommand>(subsumptionId)));
+                    emit<Scope::DIRECT>(std::move(std::make_unique<EnableWalkEngineCommand>(subsumptionId)));
                 }
             },
             [this] (const std::set<LimbID>& takenLimbs) {
                 if (takenLimbs.find(LimbID::LEFT_LEG) != takenLimbs.end()) {
                     // Shut down the walk engine, since we don't need it right now.
-                    emit<DIRECT>(std::move(std::make_unique<DisableWalkEngineCommand>(subsumptionId)));
+                    emit<Scope::DIRECT>(std::move(std::make_unique<DisableWalkEngineCommand>(subsumptionId)));
                 }
             },
             [this] (const std::set<ServoID>&) {
@@ -94,9 +94,6 @@ namespace skills {
             }
         }));
 
-
-        /// @brief the path to the configuration file for WalkPathFollower
-        static constexpr const char* CONFIGURATION_PATH = ;
         on<Configuration>("WalkPathFollower.yaml").then([this] (const Configuration& config) {
             // Use configuration here from file WalkPathFollower.yaml
 
@@ -163,7 +160,7 @@ namespace skills {
             // With<WalkPath>,
             Sync<WalkPathFollower>,
             Single
-           >("Follow current path plan", [this] (
+           >().then("Follow current path plan", [this] (
              const std::vector<Self>& selfs,
              const Ball& ball
              // const WalkPath& walkPath

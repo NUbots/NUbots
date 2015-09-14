@@ -44,7 +44,6 @@ namespace modules {
         using messages::vision::ClassifiedImage;
         using messages::vision::Colour;
         using messages::support::Configuration;
-        using messages::support::SaveConfiguration;
         using utility::support::Expression;
 
         void LUTClassifier::insertSegments(ClassifiedImage<ObjectClass>& image, std::vector<ClassifiedImage<ObjectClass>::Segment>& segments, bool vertical) {
@@ -106,9 +105,9 @@ namespace modules {
                 emit(std::move(lut));
             });
 
-            on<Trigger<SaveLookUpTable>, With<LookUpTable>>().then([this] (const LookUpTable& lut) {
-                emit(std::make_unique<SaveConfiguration>(SaveConfiguration{ LUTLocation::CONFIGURATION_PATH, YAML::Node(lut) }));
-            });
+            // on<Trigger<SaveLookUpTable>, With<LookUpTable>>().then([this] (const LookUpTable& lut) {
+            //     emit(std::make_unique<SaveConfiguration>(SaveConfiguration{ LUTLocation::CONFIGURATION_PATH, YAML::Node(lut) }));
+            // });
 
             // Trigger the same function when either update
             on<Configuration, Trigger<CameraParameters>>("LUTClassifier.yaml").then([this] (const Configuration& config, const CameraParameters& cam) {

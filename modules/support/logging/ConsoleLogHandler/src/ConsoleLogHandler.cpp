@@ -48,7 +48,7 @@ namespace modules {
                 });
 
 
-                on<Trigger<LogMessage>, Sync<ConsoleLogHandler>>([this](const LogMessage& message) {
+                on<Trigger<LogMessage>>().then([this] (const LogMessage& message) {
 
                     // Output the level
                     switch(message.level) {

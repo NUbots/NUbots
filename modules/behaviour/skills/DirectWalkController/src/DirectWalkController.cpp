@@ -48,7 +48,7 @@ namespace skills {
     , subsumptionId(size_t(this) * size_t(this) - size_t(this)) {
 
         // Register this module with the subsumption system:
-        emit<INITIALIZE>(std::make_unique<RegisterAction>(RegisterAction {
+        emit<Scope::INITIALIZE>(std::make_unique<RegisterAction>(RegisterAction {
             subsumptionId,
             "DirectWalkController",
             {
@@ -59,13 +59,13 @@ namespace skills {
             [this] (const std::set<LimbID>& givenLimbs) {
                 if (givenLimbs.find(LimbID::LEFT_LEG) != givenLimbs.end()) {
                     // Enable the walk engine.
-                    emit<DIRECT>(std::move(std::make_unique<EnableWalkEngineCommand>(subsumptionId)));
+                    emit<Scope::DIRECT>(std::move(std::make_unique<EnableWalkEngineCommand>(subsumptionId)));
                 }
             },
             [this] (const std::set<LimbID>& takenLimbs) {
                 if (takenLimbs.find(LimbID::LEFT_LEG) != takenLimbs.end()) {
                     // Shut down the walk engine, since we don't need it right now.
-                    emit<DIRECT>(std::move(std::make_unique<DisableWalkEngineCommand>(subsumptionId)));
+                    emit<Scope::DIRECT>(std::move(std::make_unique<DisableWalkEngineCommand>(subsumptionId)));
                 }
             },
             [this] (const std::set<ServoID>&) {

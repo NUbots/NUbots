@@ -80,7 +80,7 @@ namespace motion {
         : Reactor(std::move(environment)) {
         // , subsumptionId(size_t(this) * size_t(this) - size_t(this)) {
 
-        // emit<INITIALIZE>(std::make_unique<RegisterAction>(RegisterAction {
+        // emit<Scope::INITIALIZE>(std::make_unique<RegisterAction>(RegisterAction {
         //     subsumptionId,
         //     "Walk Engine",
         //     {
@@ -107,7 +107,7 @@ namespace motion {
         //     }
         // }));
 
-        on<Trigger<EnableWalkEngineCommand>>().then([this] {
+        on<Trigger<EnableWalkEngineCommand>>().then([this] (const EnableWalkEngineCommand& command) {
             subsumptionId = command.subsumptionId;
 
             stanceReset(); // Reset stance as we don't know where our limbs are.
@@ -154,7 +154,7 @@ namespace motion {
 
         // TODO: finish push detection and compensation
         // pushTime = NUClear::clock::now();
-        // on<Trigger<PushDetection>, With<Configuration>>([this](const PushDetection& pd, const Configuration& config) {
+        // on<Trigger<PushDetection>, With<Configuration>>().then([this](const PushDetection& pd, const Configuration& config) {
         //     balanceEnabled = true;
         //     // balanceAmplitude = balance["amplitude"].as<Expression>();
         //     // balanceWeight = balance["weight"].as<Expression>();
@@ -169,7 +169,7 @@ namespace motion {
         // on<
         //     Every<10, std::chrono::milliseconds>>(
         //     With<Configuration<WalkEngine>>
-        // >([this](const Configuration& config) {
+        // >().then([this](const Configuration& config) {
         //     [this](const WalkOptimiserCommand& command) {
         //     if ((NUClear::clock::now() - pushTime) > std::chrono::milliseconds(config["walk_cycle"]["balance"]["balance_time"].as<int>)) {
         //         balancer.configure(config["walk_cycle"]["balance"]);
@@ -177,12 +177,12 @@ namespace motion {
         // });
 
 
-        on<Trigger<WalkOptimiserCommand>>([this] (const WalkOptimiserCommand& command) {
+        on<Trigger<WalkOptimiserCommand>>().then([this] (const WalkOptimiserCommand& command) {
             configure(command.walkConfig);
             emit(std::make_unique<WalkConfigSaved>());
         });
 
-        generateStandScriptReaction = on<Trigger<Sensors>, Single>([this] (const Sensors& sensors) {
+        generateStandScriptReaction = on<Trigger<Sensors>, Single>().then([this] (const Sensors& sensors) {
             generateStandScriptReaction.disable();
             //generateAndSaveStandScript(sensors);
             //state = State::LAST_STEP;
@@ -190,7 +190,6 @@ namespace motion {
         });
 
         reset();
-
     }
 
     void WalkEngine::configure(const YAML::Node& config){

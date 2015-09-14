@@ -232,7 +232,7 @@ namespace motion {
             updatePriority(0);
         });
 
-        emit<INITIALIZE>(std::make_unique<RegisterAction>(RegisterAction {
+        emit<Scope::INITIALIZE>(std::make_unique<RegisterAction>(RegisterAction {
             subsumptionId,
             "IK Kick",
             { std::pair<float, std::set<LimbID>>(0, { LimbID::LEFT_LEG, LimbID::RIGHT_LEG, LimbID::LEFT_ARM, LimbID::RIGHT_ARM }) },

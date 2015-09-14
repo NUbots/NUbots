@@ -36,8 +36,9 @@
 #include "utility/time/time.h"
 #include "utility/localisation/transform.h"
 #include "utility/math/matrix/Transform2D.h"
-#include "utility/nubugger/NUhelpers.h"
 #include "utility/math/geometry/Circle.h"
+#include "utility/nubugger/NUhelpers.h"
+#include "utility/support/yaml_armadillo.h"
 
 namespace modules {
 namespace behaviour {
@@ -261,11 +262,6 @@ namespace strategy {
                 if (currentState != previousState) {
                     emit(std::make_unique<Behaviour::State>(currentState));
                 }
-            }
-            // catch (std::exception err) {
-            catch (NUClear::metaprogramming::NoDataException err) {
-                log(err.what());
-                log("No data exception.");
             }
             catch (std::runtime_error err) {
                 log(err.what());

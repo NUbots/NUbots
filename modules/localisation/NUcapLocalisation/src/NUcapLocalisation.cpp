@@ -46,10 +46,9 @@ namespace localisation {
             NUClear::log("NUcapLocalisation::robot_id = ", robot_id, ". If incorrect change config/NUcapLocalisation.yaml");
         });
 
-        on<Network<MotionCapture>>([this](const Network<MotionCapture>& net) {
+        on<Network<MotionCapture>>([this](const MotionCapture& mocap) {
 
-            auto& mocap = net.data;
-            for (auto& rigidBody : mocap->rigid_bodies()) {
+            for (auto& rigidBody : mocap.rigid_bodies()) {
 
                 int id = rigidBody.identifier();
                 if (id == robot_id) {

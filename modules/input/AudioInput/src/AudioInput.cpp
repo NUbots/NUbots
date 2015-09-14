@@ -127,7 +127,7 @@ namespace modules {
             settings->channels = info.inputChannels;
             settings->chunkSize = sampleRate / CHUNKS_PER_SECOND;
 
-            emit<INITIALIZE>(std::move(settings));
+            emit<Scope::INITIALIZE>(std::move(settings));
 
             try {
                 /**

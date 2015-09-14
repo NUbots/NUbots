@@ -31,7 +31,7 @@ namespace input {
     using messages::support::Configuration;
     using messages::input::Sensors;
     using messages::input::PushDetection;
-    using utility::math::kalman::UKF;
+    using utility::math::filter::UKF;
     using utility::time::TimeDifferenceSeconds;
     using utility::nubugger::graph;
 
@@ -53,7 +53,7 @@ namespace input {
             // lastTimeUpdateTime = NUClear::clock::now();
         });
 
-        on<Last<2, Trigger<Sensors>>>().then([this] (const std::list<std::shared_ptr<const Sensors>>& sensors) {
+        on<Last<2, Trigger<Sensors>>>().then([this] (const std::vector<std::shared_ptr<const Sensors>>& sensors) {
             NUClear::log("before");
             if (sensors.size() < 2) {
                 return;
@@ -82,7 +82,7 @@ namespace input {
 
                 filter.timeUpdate(seconds);
                 arma::mat cov = { 0.1 };
-                arma::vec meas = { sensors.servos[i].load };
+                arma::vec meas = { sensors[0]->servos[i].load };
                 float likelihood = filter.measurementUpdate(meas, cov);
             }
 

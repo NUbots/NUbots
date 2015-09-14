@@ -14,35 +14,31 @@
  * You should have received a copy of the GNU General Public License
  * along with the NUbots Codebase.  If not, see <http://www.gnu.org/licenses/>.
  *
- * Copyright 2013 NUBots <nubots@nubots.net>
+ * Copyright 2015 NUbots <nubots@nubots.net>
  */
 
-#ifndef MODULES_SUPPORT_NUCAP_H
-#define MODULES_SUPPORT_NUCAP_H
+#ifndef MODULES_SUPPORT_EXTENSION_FILEWATCHER_H
+#define MODULES_SUPPORT_EXTENSION_FILEWATCHER_H
 
 #include <nuclear>
 
-#include "NatNetLinux/CommandListener.h"
-#include "NatNetLinux/FrameListener.h"
-
 namespace modules {
 namespace support {
+namespace extension {
 
-    class NUcap : public NUClear::Reactor {
-    public:
-        /// @brief Called by the powerplant to build and setup the NUcap reactor.
-        explicit NUcap(std::unique_ptr<NUClear::Environment> environment);
+    class FileWatcher : public NUClear::Reactor {
     private:
-        // Sockets
-        int sdCommand;
-        int sdData;
+        int watcherFd;
+        std::map<std::string, std::map<std::string, std::vector<std::pair<std::shared_ptr<NUClear::threading::Reaction>, int>>>> handlers;
+        std::map<int, std::string> watchPaths;
 
-        // listeners
-        std::unique_ptr<CommandListener> commandListener;
-        std::unique_ptr<FrameListener> frameListener;
+    public:
+        /// @brief Called by the powerplant to build and setup the FileWatcher reactor.
+        explicit FileWatcher(std::unique_ptr<NUClear::Environment> environment);
     };
 
 }
 }
+}
 
-#endif
+#endif  // MODULES_SUPPORT_EXTENSION_FILEWATCHER_H

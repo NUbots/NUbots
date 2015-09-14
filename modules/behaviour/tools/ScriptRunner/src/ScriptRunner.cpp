@@ -27,6 +27,7 @@ namespace modules {
     namespace behaviour {
         namespace tools {
 
+            using NUClear::message::CommandLineArguments;
             using messages::motion::ExecuteScriptByName;
             using messages::behaviour::RegisterAction;
             using messages::input::LimbID;
@@ -66,7 +67,7 @@ namespace modules {
                     executeNextScript();
                 });
 
-                emit<INITIALIZE>(std::make_unique<RegisterAction>(RegisterAction {
+                emit<Scope::INITIALIZE>(std::make_unique<RegisterAction>(RegisterAction {
                     id,
                     "Script Runner",
                     { std::pair<float, std::set<LimbID>>(1, { LimbID::LEFT_LEG, LimbID::RIGHT_LEG, LimbID::LEFT_ARM, LimbID::RIGHT_ARM, LimbID::HEAD }) },

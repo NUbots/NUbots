@@ -131,7 +131,7 @@ namespace skills {
             emit(std::move(waypoints));
         });
 
-        emit<INITIALIZE>(std::make_unique<RegisterAction>(RegisterAction {
+        emit<Scope::INITIALIZE>(std::make_unique<RegisterAction>(RegisterAction {
             subsumptionId,
             "ArmVisionAvoidance",
             { std::pair<float, std::set<LimbID>>(20.0, { LimbID::LEFT_ARM, LimbID::RIGHT_ARM }) },

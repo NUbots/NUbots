@@ -19,8 +19,6 @@
 
 #include "NUbugger.h"
 
-#include <zmq.hpp>
-
 #include "messages/vision/LookUpTable.h"
 #include "messages/support/Configuration.h"
 
@@ -35,7 +33,6 @@ namespace support {
     using utility::nubugger::graph;
 
     using messages::support::Configuration;
-    using messages::support::SaveConfiguration;
     using messages::support::nubugger::proto::Message;
 
     using messages::vision::LookUpTable;
@@ -46,11 +43,11 @@ namespace support {
     using utility::time::durationFromSeconds;
 
     NUbugger::NUbugger(std::unique_ptr<NUClear::Environment> environment)
-        : Reactor(std::move(environment))
-        , pub(NUClear::extensions::Networking::ZMQ_CONTEXT, ZMQ_PUB)
-        , sub(NUClear::extensions::Networking::ZMQ_CONTEXT, ZMQ_SUB) {
+        : Reactor(std::move(environment)) {
+        // , pub(NUClear::extensions::Networking::ZMQ_CONTEXT, ZMQ_PUB)
+        // , sub(NUClear::extensions::Networking::ZMQ_CONTEXT, ZMQ_SUB) {
 
-        powerplant.addServiceTask(NUClear::threading::ThreadWorker::ServiceTask(std::bind(std::mem_fn(&NUbugger::run), this), std::bind(std::mem_fn(&NUbugger::kill), this)));
+        // powerplant.addServiceTask(NUClear::threading::ThreadWorker::ServiceTask(std::bind(std::mem_fn(&NUbugger::run), this), std::bind(std::mem_fn(&NUbugger::kill), this)));
 
         on<Configuration>("NUbugger.yaml").then([this] (const Configuration& config) {
 
@@ -71,32 +68,32 @@ namespace support {
 
                 if (newPubPort != pubPort) {
                     if (networkEnabled) {
-                        pub.unbind(("tcp://*:" + std::to_string(pubPort)).c_str());
+                        // pub.unbind(("tcp://*:" + std::to_string(pubPort)).c_str());
                     }
                     pubPort = newPubPort;
-                    pub.bind(("tcp://*:" + std::to_string(pubPort)).c_str());
+                    // pub.bind(("tcp://*:" + std::to_string(pubPort)).c_str());
                 }
 
                 if (newSubPort != subPort) {
                     if (networkEnabled) {
-                        sub.unbind(("tcp://*:" + std::to_string(subPort)).c_str());
+                        // sub.unbind(("tcp://*:" + std::to_string(subPort)).c_str());
                     }
                     subPort = newSubPort;
-                    sub.bind(("tcp://*:" + std::to_string(subPort)).c_str());
+                    // sub.bind(("tcp://*:" + std::to_string(subPort)).c_str());
                 }
 
                 // Set our high water mark
                 int hwm = config["output"]["network"]["high_water_mark"].as<int>();
-                pub.setsockopt(ZMQ_SNDHWM, &hwm, sizeof(hwm));
-                sub.setsockopt(ZMQ_SUBSCRIBE, 0, 0);
+                // pub.setsockopt(ZMQ_SNDHWM, &hwm, sizeof(hwm));
+                // sub.setsockopt(ZMQ_SUBSCRIBE, 0, 0);
 
                 networkEnabled = true;
             }
             // If we were enabled and now we are not
             else if (networkEnabled && !config["output"]["network"]["enabled"].as<bool>()) {
                 // Unbind the network when we disable
-                pub.unbind(("tcp://*:" + std::to_string(pubPort)).c_str());
-                sub.unbind(("tcp://*:" + std::to_string(subPort)).c_str());
+                // pub.unbind(("tcp://*:" + std::to_string(pubPort)).c_str());
+                // sub.unbind(("tcp://*:" + std::to_string(subPort)).c_str());
 
                 networkEnabled = false;
             }
@@ -157,7 +154,7 @@ namespace support {
             }
         });
 
-        on<Every<1, std::chrono::seconds>>, Single, Priority::LOW>().then([this] {
+        on<Every<1, std::chrono::seconds>, Single, Priority::LOW>().then([this] {
             send(createMessage(Message::PING));
         });
 
@@ -175,7 +172,7 @@ namespace support {
 
         // When we shutdown, close our publisher and our file if we have one
         on<Shutdown>().then([this] {
-            pub.close();
+            // pub.close();
 
             // Close the file if it exists
             fileEnabled = false;
@@ -201,19 +198,19 @@ namespace support {
 
     void NUbugger::run() {
         // TODO: fix this - still blocks on last recv even if listening = false
-        while (listening) {
-            zmq::message_t message;
-            sub.recv(&message);
+        // while (listening) {
+        //     // zmq::message_t message;
+        //     // sub.recv(&message);
 
-            // If our message size is 0, then it is probably our termination message
-            if (message.size() > 0) {
+        //     // If our message size is 0, then it is probably our termination message
+        //     if (message.size() > 0) {
 
-                // Parse our message
-                Message proto;
-                proto.ParseFromArray(message.data(), message.size());
-                recvMessage(proto);
-            }
-        }
+        //         // Parse our message
+        //         Message proto;
+        //         proto.ParseFromArray(message.data(), message.size());
+        //         recvMessage(proto);
+        //     }
+        // }
     }
 
     Message NUbugger::createMessage(Message::Type type, uint filterId) {
@@ -249,13 +246,13 @@ namespace support {
         log<NUClear::INFO>("Received command:", command);
         if (command == "download_lut") {
             std::shared_ptr<LookUpTable> lut;
-            try {
-                lut = powerplant.get<LookUpTable>();
-            }
-            catch (NUClear::metaprogramming::NoDataException err) {
-                log<NUClear::ERROR>("There is no LUT loaded");
-                return;
-            }
+            // try {
+            //     lut = powerplant.get<LookUpTable>();
+            // }
+            // catch (NUClear::metaprogramming::NoDataException err) {
+            //     log<NUClear::ERROR>("There is no LUT loaded");
+            //     return;
+            // }
 
             Message message = createMessage(Message::LOOKUP_TABLE);
 
@@ -287,37 +284,37 @@ namespace support {
             data.push_back(messages::vision::Colour(s));
         }
         auto lut = std::make_unique<LookUpTable>(lookuptable.bits_y(), lookuptable.bits_cb(), lookuptable.bits_cr(), std::move(data));
-        emit<DIRECT>(std::move(lut));
+        emit<Scope::DIRECT>(std::move(lut));
 
         if (lookuptable.save()) {
             log<NUClear::INFO>("Saving LUT to file");
-            emit<DIRECT>(std::make_unique<SaveLookUpTable>());
+            emit<Scope::DIRECT>(std::make_unique<SaveLookUpTable>());
         }
     }
 
     void NUbugger::recvReactionHandles(const Message& message) {
+        // TODO: Fix
+        // auto currentConfig = powerplant.get<Configuration<NUbugger>>();
 
-        auto currentConfig = powerplant.get<Configuration<NUbugger>>();
+        // auto config = std::make_unique<SaveConfiguration>();
+        // config->config = currentConfig->config;
 
-        auto config = std::make_unique<SaveConfiguration>();
-        config->config = currentConfig->config;
+        // for (const auto& command : message.reaction_handles().handles()) {
 
-        for (const auto& command : message.reaction_handles().handles()) {
+        //     Message::Type type = command.type();
+        //     bool enabled = command.enabled();
+        //     std::string key = getStringFromMessageType(type);
 
-            Message::Type type = command.type();
-            bool enabled = command.enabled();
-            std::string key = getStringFromMessageType(type);
+        //     std::transform(key.begin(), key.end(), key.begin(), ::tolower);
 
-            std::transform(key.begin(), key.end(), key.begin(), ::tolower);
+        //     config->path = CONFIGURATION_PATH;
+        //     config->config["reaction_handles"][key] = enabled;
+        //     for (auto& handle : handles[type]) {
+        //         handle.enable(enabled);
+        //     }
+        // }
 
-            config->path = CONFIGURATION_PATH;
-            config->config["reaction_handles"][key] = enabled;
-            for (auto& handle : handles[type]) {
-                handle.enable(enabled);
-            }
-        }
-
-        emit(std::move(config));
+        // emit(std::move(config));
     }
 
     void NUbugger::kill() {
@@ -329,22 +326,22 @@ namespace support {
      * pub.send need to be synchronized with a concurrency primitive
      * (such as a mutex)
      */
-    void NUbugger::send(zmq::message_t& packet) {
-        std::lock_guard<std::mutex> lock(networkMutex);
-        pub.send(packet);
-    }
+    // void NUbugger::send(zmq::message_t& packet) {
+    //     std::lock_guard<std::mutex> lock(networkMutex);
+    //     pub.send(packet);
+    // }
 
     void NUbugger::send(Message message) {
 
         if (networkEnabled) {
             // Make a ZMQ packet and send it
-            size_t messageSize = message.ByteSize();
-            zmq::message_t packet(messageSize + 2);
-            char* dataPtr = static_cast<char*>(packet.data());
-            message.SerializeToArray(dataPtr + 2, messageSize);
-            dataPtr[0] = uint8_t(message.type());
-            dataPtr[1] = uint8_t(message.filter_id());
-            send(packet);
+            // size_t messageSize = message.ByteSize();
+            // zmq::message_t packet(messageSize + 2);
+            // char* dataPtr = static_cast<char*>(packet.data());
+            // message.SerializeToArray(dataPtr + 2, messageSize);
+            // dataPtr[0] = uint8_t(message.type());
+            // dataPtr[1] = uint8_t(message.filter_id());
+            // send(packet);
         }
         if (fileEnabled && outputFile) {
             // Lock the file mutex

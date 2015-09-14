@@ -19,28 +19,29 @@
 
 #include "HardwareSimulator.h"
 
+#include <limits>
 #include <armadillo>
 
+#include "utility/math/angle.h"
+#include "utility/support/yaml_armadillo.h"
+#include "utility/nubugger/NUhelpers.h"
 #include "messages/motion/ServoTarget.h"
 #include "messages/platform/darwin/DarwinSensors.h"
 #include "messages/input/ServoID.h"
 #include "messages/input/Sensors.h"
-#include "utility/math/angle.h"
 #include "messages/support/Configuration.h"
-#include <limits>
-#include "utility/nubugger/NUhelpers.h"
 
 namespace modules {
 namespace platform {
 namespace darwin {
 
+    using utility::nubugger::graph;
+    using utility::support::Expression;
     using messages::platform::darwin::DarwinSensors;
     using messages::motion::ServoTarget;
     using messages::input::ServoID;
     using messages::input::Sensors;
-    using utility::nubugger::graph;
     using messages::support::Configuration;
-    using utility::support::Expression;
 
     HardwareSimulator::HardwareSimulator(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
 
@@ -166,7 +167,7 @@ namespace darwin {
         });
 
 
-        on<Every<UPDATE_FREQUENCY, Per<std::chrono::seconds>>>, Optional<With<Sensors>>, Single>()
+        on<Every<UPDATE_FREQUENCY, Per<std::chrono::seconds>>, Optional<With<Sensors>>, Single>()
         .then([this] (std::shared_ptr<const Sensors> previousSensors) {
             if (previousSensors) {
                 auto rightFootPose = previousSensors->forwardKinematics.find(ServoID::R_ANKLE_ROLL)->second;
@@ -269,7 +270,7 @@ namespace darwin {
             commandList->push_back(command);
 
             // Emit it so it's captured by the reaction above
-            emit<DIRECT>(std::move(commandList));
+            emit<Scope::DIRECT>(std::move(commandList));
         });
     }
 

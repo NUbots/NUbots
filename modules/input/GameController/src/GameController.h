@@ -42,27 +42,25 @@ namespace modules {
                 static constexpr const uint ACTIVE_PLAYERS_PER_TEAM = 4;
                 static constexpr const uint NUM_TEAMS = 2;
 
-                volatile bool listening = true;
-                std::atomic<int> socket;
                 uint port;
                 uint TEAM_ID;
                 uint PLAYER_ID;
-                std::string BROADCAST_IP;
+                uint BROADCAST_IP = 0xFFFFFFFF;
 
                 bool penaltyOverride = false;
                 bool selfPenalised = true;
+                ReactionHandle listenHandle;
 
                 gamecontroller::GameControllerPacket packet;
                 gamecontroller::Mode mode;
 
-                void kill();
-                void run();
-                void process(const gamecontroller::GameControllerPacket& oldPacket, const gamecontroller::GameControllerPacket& newPacket);
+                void resetState();
+                void process(const messages::input::gameevents::GameState& oldGameState, const gamecontroller::GameControllerPacket& oldPacket, const gamecontroller::GameControllerPacket& newPacket);
+                void sendReplyMessage(const gamecontroller::ReplyMessage& message);
                 const gamecontroller::Team& getOwnTeam(const gamecontroller::GameControllerPacket& packet) const;
                 const gamecontroller::Team& getOpponentTeam(const gamecontroller::GameControllerPacket& packet) const;
                 messages::input::gameevents::PenaltyReason getPenaltyReason(const gamecontroller::PenaltyState& penaltyState) const;
 
-                void sendReplyPacket(const gamecontroller::ReplyMessage& replyMessage) const;
             public:
                 explicit GameController(std::unique_ptr<NUClear::Environment> environment);
 

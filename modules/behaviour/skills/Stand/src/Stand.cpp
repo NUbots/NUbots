@@ -42,7 +42,7 @@ namespace modules {
                     emit(std::make_unique<ExecuteScriptByName>(id, "Stand.yaml"));
                 });
 
-                emit<INITIALIZE>(std::make_unique<RegisterAction>(RegisterAction {
+                emit<Scope::INITIALIZE>(std::make_unique<RegisterAction>(RegisterAction {
                     id,
                     "Stand",
                     { std::pair<float, std::set<LimbID>>(std::numeric_limits<float>::epsilon(), { LimbID::LEFT_LEG, LimbID::RIGHT_LEG, LimbID::LEFT_ARM, LimbID::RIGHT_ARM}) },

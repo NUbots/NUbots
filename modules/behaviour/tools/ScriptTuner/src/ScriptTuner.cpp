@@ -26,7 +26,7 @@
 #include "messages/behaviour/Action.h"
 
 #include <ncurses.h>
-#include <stdio.h>
+#include <cstdio>
 #include <sstream>
 
 namespace modules {
@@ -96,7 +96,7 @@ namespace modules {
                     emit(std::move(waypoint));
                 });
 
-                emit<INITIALIZE>(std::make_unique<RegisterAction>(RegisterAction {
+                emit<Scope::INITIALIZE>(std::make_unique<RegisterAction>(RegisterAction {
                     id,
                     "Script Tuner",
                     { std::pair<float, std::set<LimbID>>(1, { LimbID::LEFT_LEG, LimbID::RIGHT_LEG, LimbID::LEFT_ARM, LimbID::RIGHT_ARM, LimbID::HEAD }) },
@@ -123,7 +123,7 @@ namespace modules {
                 refreshView();
 
                 // Trigger when stdin has something to read
-                on<IO>(int(stdin), IO::READ).then([this] {
+                on<IO>(::fileno(stdin), IO::READ).then([this] {
                     // Get the character the user has typed
                     switch(getch()) {
                         case KEY_UP: // Change selection up
@@ -367,7 +367,7 @@ namespace modules {
                 // If we don't then save our current motor position as the position
                 if(it == std::end(script.frames[frame].targets)) {
 
-                    emit<DIRECT>(std::make_unique<LockServo>());
+                    emit<Scope::DIRECT>(std::make_unique<LockServo>());
                 }
                 else {
                     // Remove this frame

@@ -27,6 +27,7 @@
 #include "messages/behaviour/MotionCommand.h"
 #include "messages/behaviour/WalkPath.h"
 #include "messages/behaviour/KickPlan.h"
+#include "utility/support/yaml_armadillo.h"
 #include "utility/nubugger/NUhelpers.h"
 #include "utility/math/matrix/Transform2D.h"
 #include "utility/math/angle.h"
@@ -93,7 +94,7 @@ namespace planning {
                                 , With<KickPlan>
                                 , Sync<OMPLPathPlanner>
                                 , Single
-           >("Generate new path plan", [this] (
+           >().then("Generate new path plan", [this] (
              const MotionCommand& command,
              const LocalisationBall& ball,
              const std::vector<Self>& selfs,

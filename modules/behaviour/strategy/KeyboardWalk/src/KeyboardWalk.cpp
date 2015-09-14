@@ -21,6 +21,7 @@
 
 #include <ncurses.h>
 #include <csignal>
+#include <cstdio>
 #include <format.h>
 
 #include "messages/behaviour/MotionCommand.h"
@@ -58,7 +59,7 @@ namespace strategy {
         printStatus();
 
         // Trigger when stdin has something to read
-        on<IO>(int(stdin), IO::READ).then([this] {
+        on<IO>(::fileno(stdin), IO::READ).then([this] {
 
             switch (tolower(getch())) {
                 case 'w':

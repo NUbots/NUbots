@@ -3,7 +3,7 @@ ADD_ROLE(
     platform::darwin::KinematicsModel
     #Support
     support::logging::ConsoleLogHandler
-    support::configuration::ConfigSystem
+    support::extension::FileWatcher
     support::configuration::SoccerConfig
     support::NUbugger
     support::KickCommander
@@ -16,7 +16,7 @@ ADD_ROLE(
     behaviour::Controller
     behaviour::skills::Stand
     behaviour::skills::Getup
-    
+
     # Motion
     motion::IKKick
     motion::WalkEngine

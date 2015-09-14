@@ -20,8 +20,11 @@
 #ifndef MESSAGES_SUPPORT_CONFIGURATION_H_
 #define MESSAGES_SUPPORT_CONFIGURATION_H_
 
+#include <cstdlib>
 #include <nuclear>
 #include <yaml-cpp/yaml.h>
+
+#include "messages/support/FileWatch.h"
 
 namespace messages {
     namespace support {
@@ -62,6 +65,11 @@ namespace messages {
             }
         };
 
+        struct SaveConfiguration {
+            std::string path;
+            YAML::Node config;
+        };
+
     }  // support
 }  // messages
 
@@ -74,23 +82,24 @@ namespace NUClear {
 
                 template <typename DSL, typename TFunc>
                 static inline threading::ReactionHandle bind(Reactor& reactor, const std::string& label, TFunc&& callback, const std::string& path) {
-
-                    auto reaction = util::generate_reaction<DSL, messages::support::Configuration>(reactor, label, std::forward<TFunc>(callback));
-                    threading::ReactionHandle handle(reaction.get());
-
-                    NUClear::log("Configuration for" + path + "not bound as it's not written yet");
-
-                    // Return our handles
-                    return handle;
+                    return DSLProxy<messages::support::FileWatch>::bind<DSL>(reactor, label, callback, "config/" + path,
+                                                                             messages::support::FileWatch::ATTRIBUTES
+                                                                             | messages::support::FileWatch::CREATE
+                                                                             | messages::support::FileWatch::MODIFY
+                                                                             | messages::support::FileWatch::MOVED_TO);
                 }
 
                 template <typename DSL>
-                static inline std::shared_ptr<messages::support::Configuration> get(threading::ReactionTask&) {
+                static inline std::shared_ptr<messages::support::Configuration> get(threading::ReactionTask& t) {
 
-                    // Return our thread local variable
-                    return std::make_shared<messages::support::Configuration>("FileNameGoesHere!!!∑", YAML::Node());
+                    // Get the file watch event
+                    messages::support::FileWatch watch = DSLProxy<messages::support::FileWatch>::get<DSL>(t);
+
+                    // TODO test which events fired and if it's relevant to us
+
+                    // Return our yaml file
+                    return std::make_shared<messages::support::Configuration>(watch.path, YAML::LoadFile(watch.path));
                 }
-
             };
         }
     }

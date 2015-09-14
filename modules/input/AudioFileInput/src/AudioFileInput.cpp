@@ -52,7 +52,7 @@ namespace modules {
 
                     settings->chunkSize = m->file.samplerate() / CHUNKS_PER_SECOND;
 
-                    emit<INITIALIZE>(std::move(settings));
+                    emit<Scope::INITIALIZE>(std::move(settings));
             });
 
             on<Every<CHUNKS_PER_SECOND, Per<std::chrono::seconds>>>([this] {

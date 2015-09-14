@@ -1,0 +1,99 @@
+/*
+ * This file is part of the NUbots Codebase.
+ *
+ * The NUbots Codebase is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * The NUbots Codebase is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with the NUbots Codebase.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ * Copyright 2015 NUBots <nubots@nubots.net>
+ */
+
+#ifndef MESSAGES_SUPPORT_FILEWATCH_H_
+#define MESSAGES_SUPPORT_FILEWATCH_H_
+
+#include <nuclear>
+
+namespace messages {
+    namespace support {
+
+        struct FileWatch {
+            enum Event {
+                ACCESS        = 1,
+                ATTRIBUTES    = 2,
+                CLOSE_WRITE   = 4,
+                CLOSE_NOWRITE = 8,
+                CREATE        = 16,
+                DELETE        = 32,
+                DELETE_SELF   = 64,
+                MODIFY        = 128,
+                MOVE_SELF     = 256,
+                MOVED_FROM    = 512,
+                MOVED_TO      = 1024,
+                OPEN          = 2048,
+                IGNORED       = 4096,
+                ISDIR         = 8192,
+                UNMOUNT       = 16384
+            };
+
+            std::string path;
+            int events;
+        };
+
+        struct FileWatchRequest {
+            std::string path;
+            int events;
+            std::shared_ptr<NUClear::threading::Reaction> reaction;
+        };
+
+
+    }  // support
+}  // messages
+
+// NUClear configuration extension
+namespace NUClear {
+    namespace dsl {
+        namespace operation {
+            template <>
+            struct DSLProxy<messages::support::FileWatch> {
+
+                template <typename DSL, typename TFunc>
+                static inline threading::ReactionHandle bind(Reactor& reactor, const std::string& label, TFunc&& callback, const std::string& path, int events) {
+
+                    // Generate our reaction
+                    auto reaction = util::generate_reaction<DSL, messages::support::FileWatch>(reactor, label, std::forward<TFunc>(callback));
+                    threading::ReactionHandle handle(reaction.get());
+
+                    // Make a request to watch our file
+                    auto fw = std::make_unique<messages::support::FileWatchRequest>();
+                    fw->path = path;
+                    fw->events = events;
+                    fw->reaction = std::move(reaction);
+
+                    // Send our file watcher to the extension
+                    reactor.powerplant.emit<NUClear::dsl::word::emit::Direct>(fw);
+
+                    // Return our handles
+                    return handle;
+                }
+
+                template <typename DSL>
+                static inline messages::support::FileWatch get(threading::ReactionTask&) {
+                    using file_watch_store = NUClear::dsl::store::ThreadStore<messages::support::FileWatch*, 0>;
+                    messages::support::FileWatch w = *file_watch_store::value;
+                    return w;
+                }
+            };
+        }
+    }
+}
+
+#endif

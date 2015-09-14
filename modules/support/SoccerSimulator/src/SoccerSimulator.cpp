@@ -25,6 +25,7 @@
 #include "utility/nubugger/NUhelpers.h"
 #include "utility/localisation/transform.h"
 #include "utility/motion/ForwardKinematics.h"
+#include "utility/support/yaml_armadillo.h"
 #include "messages/vision/VisionObjects.h"
 #include "messages/support/Configuration.h"
 #include "messages/localisation/FieldObject.h"
@@ -172,8 +173,8 @@ namespace support {
         });
 
         on<Every<SIMULATION_UPDATE_FREQUENCY, Per<std::chrono::seconds>>,
-            With<Sensors,
-            Optional<With<WalkCommand>>>
+            With<Sensors>,
+            Optional<With<WalkCommand>>
         >().then("Robot motion", [this](const Sensors& sensors,
                                  std::shared_ptr<const WalkCommand> walkCommand) {
             NUClear::clock::time_point now = NUClear::clock::now();

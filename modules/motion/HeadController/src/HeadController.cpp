@@ -118,7 +118,7 @@ namespace modules {
 
             updateHandle.enable();
 
-            emit<INITIALIZE>(std::make_unique<RegisterAction>(RegisterAction {
+            emit<Scope::INITIALIZE>(std::make_unique<RegisterAction>(RegisterAction {
                 id,
                 "HeadController",
                 { std::pair<float, std::set<LimbID>>(30.0 , { LimbID::HEAD }) },

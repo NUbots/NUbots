@@ -40,7 +40,7 @@ node nubotsvmbuild {
   class {'dev_tools': } -> Installer <| |>
 
   # After we have installed, build our deb
-  Installer <| |> ~> class { 'toolchain_deb': }
+  # Installer <| |> ~> class { 'toolchain_deb': }
 
   class { 'quex': }
   installer { 'zlib':           url => 'http://zlib.net/zlib-1.2.8.tar.gz', }
@@ -94,8 +94,7 @@ node nubotsvmbuild {
   file { 'armadillo_config':    path => '/nubots/toolchain/include/armadillo_bits/config.hpp',
                                 source => 'puppet:///modules/files/nubots/toolchain/include/armadillo_bits/config.hpp',
                                 ensure => present,
-                                require => Installer['armadillo'],
-                                notify => Class['toolchain_deb'], }
+                                require => Installer['armadillo'], }
 
   # Install eSpeak
   archive { "espeak":
@@ -121,6 +120,6 @@ node nubotsvmbuild {
       Archive["espeak"],
       Exec['fix_compiler_environment'],
     ],
-    notify => Class['toolchain_deb'],
+    # notify => Class['toolchain_deb'],
   }
 }

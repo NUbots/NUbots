@@ -321,7 +321,7 @@
 					std::unique_ptr<MyData> myData = std::make_unique<MyData>();
 
 					// Send the data to the network!
-					emit<NETWORK>(std::move(myData));
+					emit<Scope::NETWORK>(std::move(myData));
 				\end{cppcode}
 
 				As you can see sending data to the network is almost as simple as sending data normally.
@@ -536,7 +536,7 @@
 
 				\begin{cppcode}
 					// Send a message to the network
-					emit<NETWORK>(message);
+					emit<Scope::NETWORK>(message);
 
 					// Send a message locally and to the network
 					emit<LOCAL, NETWORK>(message);
