@@ -21,6 +21,7 @@
 #define UTILITY_FILEUTIL_H
 
 #include <string>
+#include <array>
 #include <vector>
 #include <fstream>
 
@@ -48,6 +49,15 @@ namespace utility {
         bool isDir(const std::string& path);
 
         std::vector<std::string> listDir(const std::string& path);
+
+        /**
+         * @brief Splits a path into it's basename and dirname components.
+         *
+         * @param input the input string
+         *
+         * @return the dirname and basename in the posix style
+         */
+        std::pair<std::string, std::string> pathSplit(const std::string& input);
 
         /**
          * @author Monica Olejniczak

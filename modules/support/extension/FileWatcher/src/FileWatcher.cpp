@@ -21,7 +21,6 @@
 
 #include <unistd.h>
 #include <fcntl.h>
-#include <libgen.h>
 #include <sys/inotify.h>
 
 #include "messages/support/FileWatch.h"
@@ -42,13 +41,18 @@ namespace extension {
 
         on<Trigger<FileWatchRequest>>().then([this](const FileWatchRequest& req) {
 
-            char buff[1024];
+            // Get the real path with a unique ptr to ensure it is freed properly
+            std::unique_ptr<char, void(*)(void*)> realPath {
+                ::realpath(req.path.c_str(), nullptr),
+                std::free
+            };
+            std::string path = realPath.get();
+            std::string dir;
+            std::string filename;
 
-            // Get our absolute path, folder and filename
-            std::string path     = ::realpath(req.path.c_str(), buff);
-            std::string dir      = ::dirname(buff);
-            ::realpath(req.path.c_str(), buff);
-            std::string filename = ::basename(buff);
+            std::tie(dir, filename) = utility::file::pathSplit(path);
+
+            std::cout << path << " " << dir << " " << filename << std::endl;
 
             if(utility::file::isDir(path)) {
 
