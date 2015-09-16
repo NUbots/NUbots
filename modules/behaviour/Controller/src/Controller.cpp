@@ -38,7 +38,7 @@ namespace modules {
 
         Controller::Controller(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
 
-            on<Trigger<RegisterAction>, Sync<Controller>>().then("Action Registration", [this] (const RegisterAction& action) {
+            on<Trigger<RegisterAction>, Sync<Controller>, Priority::HIGH>().then("Action Registration", [this] (const RegisterAction& action) {
 
                 if(action.id == 0) {
                     throw std::runtime_error("Action ID 0 is reserved for internal use");
@@ -82,7 +82,7 @@ namespace modules {
                 selectAction();
             });
 
-            on<Trigger<ActionPriorites>, Sync<Controller>>().then("Action Priority Update", [this] (const ActionPriorites& update) {
+            on<Trigger<ActionPriorites>, Sync<Controller>, Priority::HIGH>().then("Action Priority Update", [this] (const ActionPriorites& update) {
 
                 auto& request = requests[update.id];
 
@@ -151,8 +151,16 @@ namespace modules {
                         // Push our command onto the queue
                         queue.push_back(command);
                     } else {
-                        auto& name = requests.find(command.source)->second->name;
-                        log<NUClear::WARN>("Motor command (from ", name, ") denied access: SERVO ", int(command.id));
+                        auto source = requests.find(command.source);
+
+                        // If we don't have a source
+                        if(source == requests.end()) {
+                            log<NUClear::WARN>("Motor command from unregistered source", command.source, "denied access: SERVO", int(command.id));
+                        }
+                        else {
+                            auto& name = requests.find(command.source)->second->name;
+                            log<NUClear::WARN>("Motor command (from ", name, ") denied access: SERVO ", int(command.id));
+                        }
                     }
                 }
             });

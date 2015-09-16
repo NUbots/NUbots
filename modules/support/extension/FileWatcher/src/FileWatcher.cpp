@@ -33,7 +33,6 @@ namespace extension {
 
     using messages::support::FileWatch;
     using messages::support::FileWatchRequest;
-    using file_watch_store = NUClear::dsl::store::ThreadStore<FileWatch*, 0>;
 
     FileWatcher::FileWatcher(std::unique_ptr<NUClear::Environment> environment)
     : Reactor(std::move(environment))
@@ -83,13 +82,13 @@ namespace extension {
                     watch.events = 0;
 
                     // Store our watch value in the local cache
-                    file_watch_store::value = &watch;
+                    FileWatch::FileWatchStore::value = &watch;
 
                     // Submit our reaction here
                     powerplant.submit(req.reaction->getTask());
 
                     // Clear our local cache
-                    file_watch_store::value = nullptr;
+                    FileWatch::FileWatchStore::value = nullptr;
                 }
             }
             else {
@@ -118,13 +117,13 @@ namespace extension {
                 watch.events = 0;
 
                 // Store our watch value in the local cache
-                file_watch_store::value = &watch;
+                FileWatch::FileWatchStore::value = &watch;
 
                 // Submit our reaction here
                 powerplant.submit(req.reaction->getTask());
 
                 // Clear our local cache
-                file_watch_store::value = nullptr;
+                FileWatch::FileWatchStore::value = nullptr;
             }
         });
 
@@ -197,13 +196,13 @@ namespace extension {
                                     watch.events = el.second;
 
                                     // Store our watch value in the local cache
-                                    file_watch_store::value = &watch;
+                                    FileWatch::FileWatchStore::value = &watch;
 
                                     // Submit the task (which should run the get)
                                     powerplant.submit(reaction.first->getTask());
 
                                     // Clear our local cache
-                                    file_watch_store::value = nullptr;
+                                    FileWatch::FileWatchStore::value = nullptr;
                                 }
                             }
                         }
@@ -224,13 +223,13 @@ namespace extension {
                                     watch.events = el.second;
 
                                     // Store our watch value in the local cache
-                                    file_watch_store::value = &watch;
+                                    FileWatch::FileWatchStore::value = &watch;
 
                                     // Submit the task (which should run the get)
                                     powerplant.submit(reaction.first->getTask());
 
                                     // Clear our local cache
-                                    file_watch_store::value = nullptr;
+                                    FileWatch::FileWatchStore::value = nullptr;
                                 }
                             }
                         }

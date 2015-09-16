@@ -95,12 +95,23 @@ namespace NUClear {
                     // Get the file watch event
                     messages::support::FileWatch watch = DSLProxy<messages::support::FileWatch>::get<DSL>(t);
 
-                    // TODO test which events fired and if it's relevant to us
-
-                    // Return our yaml file
-                    return std::make_shared<messages::support::Configuration>(watch.path, YAML::LoadFile(watch.path));
+                    // Check if the watch is valid
+                    if(watch) {
+                        // Return our yaml file
+                        return std::make_shared<messages::support::Configuration>(watch.path, YAML::LoadFile(watch.path));
+                    }
+                    else {
+                        // Return an empty configuration (which will show up invalid)
+                        return std::shared_ptr<messages::support::Configuration>(nullptr);
+                    }
                 }
             };
+        }
+
+        // Configuration is transient
+        namespace trait {
+            template <>
+            struct is_transient<std::shared_ptr<messages::support::Configuration>> : public std::true_type {};
         }
     }
 }

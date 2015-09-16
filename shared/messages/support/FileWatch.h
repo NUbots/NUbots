@@ -26,6 +26,8 @@ namespace messages {
     namespace support {
 
         struct FileWatch {
+            using FileWatchStore = NUClear::dsl::store::ThreadStore<FileWatch>;
+
             enum Event {
                 ACCESS        = 1,
                 ATTRIBUTES    = 2,
@@ -46,6 +48,11 @@ namespace messages {
 
             std::string path;
             int events;
+
+            inline operator bool() const {
+                // Empty path is invalid
+                return !path.empty();
+            }
         };
 
         struct FileWatchRequest {
@@ -53,8 +60,6 @@ namespace messages {
             int events;
             std::shared_ptr<NUClear::threading::Reaction> reaction;
         };
-
-
     }  // support
 }  // messages
 
@@ -87,11 +92,26 @@ namespace NUClear {
 
                 template <typename DSL>
                 static inline messages::support::FileWatch get(threading::ReactionTask&) {
-                    using file_watch_store = NUClear::dsl::store::ThreadStore<messages::support::FileWatch*, 0>;
-                    messages::support::FileWatch w = *file_watch_store::value;
-                    return w;
+
+                    // Get our File Watch store value
+                    auto ptr = messages::support::FileWatch::FileWatchStore::value;
+
+                    // If there was something in the store
+                    if(ptr) {
+                        return *ptr;
+                    }
+                    // Return an invalid file watch element
+                    else {
+                        return messages::support::FileWatch { "", 0 };
+                    }
                 }
             };
+        }
+
+        // FileWatch is transient
+        namespace trait {
+            template <>
+            struct is_transient<messages::support::FileWatch> : public std::true_type {};
         }
     }
 }
