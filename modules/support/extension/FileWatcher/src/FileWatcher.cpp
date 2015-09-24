@@ -52,8 +52,6 @@ namespace extension {
 
             std::tie(dir, filename) = utility::file::pathSplit(path);
 
-            std::cout << path << " " << dir << " " << filename << std::endl;
-
             if(utility::file::isDir(path)) {
 
                 // Check if we are already watching this path
@@ -88,8 +86,11 @@ namespace extension {
                     // Store our watch value in the local cache
                     FileWatch::FileWatchStore::value = &watch;
 
-                    // Submit our reaction here
-                    powerplant.submit(req.reaction->getTask());
+                    // Directly execute our reaction here
+                    auto task = req.reaction->getTask();
+                    if(task) {
+                        task->run(std::move(task));
+                    }
 
                     // Clear our local cache
                     FileWatch::FileWatchStore::value = nullptr;
@@ -123,8 +124,11 @@ namespace extension {
                 // Store our watch value in the local cache
                 FileWatch::FileWatchStore::value = &watch;
 
-                // Submit our reaction here
-                powerplant.submit(req.reaction->getTask());
+                // Directly execute our reaction here
+                auto task = req.reaction->getTask();
+                if(task) {
+                    task->run(std::move(task));
+                }
 
                 // Clear our local cache
                 FileWatch::FileWatchStore::value = nullptr;
@@ -146,28 +150,28 @@ namespace extension {
                 for(int i = 0; i < len;) {
 
                     // Get the current event
-                    inotify_event& event = *reinterpret_cast<inotify_event*>(&buffer[i]);
-                    std::string path(watchPaths[event.wd]);
-                    std::string file(event.name);
+                    inotify_event* event = reinterpret_cast<inotify_event*>(buffer + i);
+                    std::string path(watchPaths[event->wd]);
+                    std::string file(event->name);
 
-                    results[path][file] |= (event.mask & IN_ACCESS)        ? FileWatch::ACCESS        : 0;
-                    results[path][file] |= (event.mask & IN_ATTRIB)        ? FileWatch::ATTRIBUTES    : 0;
-                    results[path][file] |= (event.mask & IN_CLOSE_WRITE)   ? FileWatch::CLOSE_WRITE   : 0;
-                    results[path][file] |= (event.mask & IN_CLOSE_NOWRITE) ? FileWatch::CLOSE_NOWRITE : 0;
-                    results[path][file] |= (event.mask & IN_CREATE)        ? FileWatch::CREATE        : 0;
-                    results[path][file] |= (event.mask & IN_DELETE)        ? FileWatch::DELETE        : 0;
-                    results[path][file] |= (event.mask & IN_DELETE_SELF)   ? FileWatch::DELETE_SELF   : 0;
-                    results[path][file] |= (event.mask & IN_MODIFY)        ? FileWatch::MODIFY        : 0;
-                    results[path][file] |= (event.mask & IN_MOVE_SELF)     ? FileWatch::MOVE_SELF     : 0;
-                    results[path][file] |= (event.mask & IN_MOVED_FROM)    ? FileWatch::MOVED_FROM    : 0;
-                    results[path][file] |= (event.mask & IN_MOVED_TO)      ? FileWatch::MOVED_TO      : 0;
-                    results[path][file] |= (event.mask & IN_OPEN)          ? FileWatch::OPEN          : 0;
-                    results[path][file] |= (event.mask & IN_IGNORED)       ? FileWatch::IGNORED       : 0;
-                    results[path][file] |= (event.mask & IN_ISDIR)         ? FileWatch::ISDIR         : 0;
-                    results[path][file] |= (event.mask & IN_UNMOUNT)       ? FileWatch::UNMOUNT       : 0;
+                    results[path][file] |= (event->mask & IN_ACCESS)        ? FileWatch::ACCESS        : 0;
+                    results[path][file] |= (event->mask & IN_ATTRIB)        ? FileWatch::ATTRIBUTES    : 0;
+                    results[path][file] |= (event->mask & IN_CLOSE_WRITE)   ? FileWatch::CLOSE_WRITE   : 0;
+                    results[path][file] |= (event->mask & IN_CLOSE_NOWRITE) ? FileWatch::CLOSE_NOWRITE : 0;
+                    results[path][file] |= (event->mask & IN_CREATE)        ? FileWatch::CREATE        : 0;
+                    results[path][file] |= (event->mask & IN_DELETE)        ? FileWatch::DELETE        : 0;
+                    results[path][file] |= (event->mask & IN_DELETE_SELF)   ? FileWatch::DELETE_SELF   : 0;
+                    results[path][file] |= (event->mask & IN_MODIFY)        ? FileWatch::MODIFY        : 0;
+                    results[path][file] |= (event->mask & IN_MOVE_SELF)     ? FileWatch::MOVE_SELF     : 0;
+                    results[path][file] |= (event->mask & IN_MOVED_FROM)    ? FileWatch::MOVED_FROM    : 0;
+                    results[path][file] |= (event->mask & IN_MOVED_TO)      ? FileWatch::MOVED_TO      : 0;
+                    results[path][file] |= (event->mask & IN_OPEN)          ? FileWatch::OPEN          : 0;
+                    results[path][file] |= (event->mask & IN_IGNORED)       ? FileWatch::IGNORED       : 0;
+                    results[path][file] |= (event->mask & IN_ISDIR)         ? FileWatch::ISDIR         : 0;
+                    results[path][file] |= (event->mask & IN_UNMOUNT)       ? FileWatch::UNMOUNT       : 0;
 
                     // Move to the next event
-                    i += sizeof(inotify_event) + event.len;
+                    i += sizeof(inotify_event) + event->len;
                 }
 
                 // Sleeping for one millisecond here bunches up the events
@@ -203,7 +207,10 @@ namespace extension {
                                     FileWatch::FileWatchStore::value = &watch;
 
                                     // Submit the task (which should run the get)
-                                    powerplant.submit(reaction.first->getTask());
+                                    auto task = reaction.first->getTask();
+                                    if(task) {
+                                        powerplant.submit(std::move(task));
+                                    }
 
                                     // Clear our local cache
                                     FileWatch::FileWatchStore::value = nullptr;
@@ -230,7 +237,10 @@ namespace extension {
                                     FileWatch::FileWatchStore::value = &watch;
 
                                     // Submit the task (which should run the get)
-                                    powerplant.submit(reaction.first->getTask());
+                                    auto task = reaction.first->getTask();
+                                    if(task) {
+                                        powerplant.submit(std::move(task));
+                                    }
 
                                     // Clear our local cache
                                     FileWatch::FileWatchStore::value = nullptr;

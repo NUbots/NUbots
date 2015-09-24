@@ -91,7 +91,7 @@ namespace NUClear {
                 }
 
                 template <typename DSL>
-                static inline messages::support::FileWatch get(threading::ReactionTask&) {
+                static inline messages::support::FileWatch get(threading::Reaction&) {
 
                     // Get our File Watch store value
                     auto ptr = messages::support::FileWatch::FileWatchStore::value;

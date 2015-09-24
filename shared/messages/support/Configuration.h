@@ -90,7 +90,7 @@ namespace NUClear {
                 }
 
                 template <typename DSL>
-                static inline std::shared_ptr<messages::support::Configuration> get(threading::ReactionTask& t) {
+                static inline std::shared_ptr<messages::support::Configuration> get(threading::Reaction& t) {
 
                     // Get the file watch event
                     messages::support::FileWatch watch = DSLProxy<messages::support::FileWatch>::get<DSL>(t);

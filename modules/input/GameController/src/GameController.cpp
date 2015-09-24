@@ -67,7 +67,7 @@ namespace input {
 
                     // Get the IP we are getting this packet from
                     // Store it and use it to send back to the game controller using emit UDP
-                    BROADCAST_IP = p.dest.address;
+                    BROADCAST_IP = p.local.address;
 
                     if (newPacket.version == SUPPORTED_VERSION) {
                         try {
