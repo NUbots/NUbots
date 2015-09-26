@@ -116,7 +116,7 @@ namespace modules {
                 emit(std::move(waypoints));
             });
 
-            updateHandle.enable();
+            updateHandle.disable();
 
             emit<Scope::INITIALIZE>(std::make_unique<RegisterAction>(RegisterAction {
                 id,
