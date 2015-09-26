@@ -23,7 +23,6 @@
 #include "messages/behaviour/KickPlan.h"
 #include "messages/input/gameevents/GameEvents.h"
 #include "messages/input/Image.h"
-#include "messages/support/nubugger/proto/Message.pb.h"
 #include "messages/vision/VisionObjects.h"
 #include "messages/motion/WalkCommand.h"
 
@@ -45,7 +44,6 @@ namespace support {
     using messages::input::Image;
     using messages::input::Sensors;
     using messages::localisation::Self;
-    using messages::support::nubugger::proto::Message;
     using LocalisationBall = messages::localisation::Ball;
     using VisionGoal = messages::vision::Goal;
     using VisionBall = messages::vision::Ball;
@@ -61,9 +59,8 @@ namespace support {
     void NUbugger::provideOverview() {
 
         /*handles[Message::OVERVIEW].push_back(*/on<Every<1, std::chrono::seconds>, Single, Priority::LOW>().then([this] {
-            Message message = createMessage(Message::OVERVIEW);
-            *message.mutable_overview() = overview;
-            send(message);
+            // Send the overview packet
+            send(overview, 0, false, NUClear::clock::now());
         })/*)*/;
 
         /*handles[Message::OVERVIEW].push_back(*/on<Trigger<CommandLineArguments>, Single, Priority::LOW>().then([this] (const std::vector<std::string>& arguments) {

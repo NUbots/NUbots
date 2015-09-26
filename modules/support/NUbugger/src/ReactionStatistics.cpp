@@ -19,35 +19,33 @@
 
 #include "NUbugger.h"
 
-#include "messages/support/nubugger/proto/Message.pb.h"
-
 #include "utility/time/time.h"
+#include "messages/support/nuclear/proto/ReactionStatistics.pb.h"
 
 namespace modules {
 namespace support {
-    using messages::support::nubugger::proto::Message;
+    using ReactionStatisticsProto = messages::support::nuclear::proto::ReactionStatistics;
     using utility::time::getUtcTimestamp;
     using NUClear::message::ReactionStatistics;
     using std::chrono::duration_cast;
     using std::chrono::microseconds;
 
     void NUbugger::provideReactionStatistics() {
-        handles[Message::REACTION_STATISTICS].push_back(on<Trigger<ReactionStatistics>>().then([this](const ReactionStatistics& stats) {
-            Message message = createMessage(Message::REACTION_STATISTICS, 1);
-            auto* reactionStatistics = message.mutable_reaction_statistics();
-            //reactionStatistics->set_name(stats.name);
-            reactionStatistics->set_reactionid(stats.reactionId);
-            reactionStatistics->set_taskid(stats.taskId);
-            reactionStatistics->set_causereactionid(stats.causeReactionId);
-            reactionStatistics->set_causetaskid(stats.causeTaskId);
-            reactionStatistics->set_emitted(getUtcTimestamp<microseconds>(stats.emitted));
-            reactionStatistics->set_started(getUtcTimestamp<microseconds>(stats.started));
-            reactionStatistics->set_finished(getUtcTimestamp<microseconds>(stats.finished));
-            reactionStatistics->set_name(stats.identifier[0]);
-            reactionStatistics->set_triggername(stats.identifier[1]);
-            reactionStatistics->set_functionname(stats.identifier[2]);
+        handles["REACTION_STATISTICS"].push_back(on<Trigger<ReactionStatistics>>().then([this](const ReactionStatistics& stats) {
 
-            send(message);
+            ReactionStatisticsProto reactionStatistics;
+            reactionStatistics.set_reactionid(stats.reactionId);
+            reactionStatistics.set_taskid(stats.taskId);
+            reactionStatistics.set_causereactionid(stats.causeReactionId);
+            reactionStatistics.set_causetaskid(stats.causeTaskId);
+            reactionStatistics.set_emitted(getUtcTimestamp<microseconds>(stats.emitted));
+            reactionStatistics.set_started(getUtcTimestamp<microseconds>(stats.started));
+            reactionStatistics.set_finished(getUtcTimestamp<microseconds>(stats.finished));
+            reactionStatistics.set_name(stats.identifier[0]);
+            reactionStatistics.set_triggername(stats.identifier[1]);
+            reactionStatistics.set_functionname(stats.identifier[2]);
+
+            send(reactionStatistics);
         }));
     }
 }

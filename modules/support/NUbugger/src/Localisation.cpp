@@ -19,8 +19,8 @@
 
 #include "NUbugger.h"
 
-#include "messages/support/nubugger/proto/Message.pb.h"
 #include "messages/localisation/FieldObject.h"
+#include "messages/localisation/proto/Localisation.pb.h"
 
 #include "utility/time/time.h"
 #include "utility/localisation/transform.h"
@@ -31,13 +31,13 @@ namespace support {
 
     using utility::nubugger::graph;
     using utility::time::getUtcTimestamp;
-    using messages::support::nubugger::proto::Message;
     using messages::localisation::FieldObject;
     using messages::localisation::Ball;
     using messages::localisation::Self;
+    using messages::localisation::proto::Localisation;
 
     void NUbugger::provideLocalisation() {
-        handles[Message::LOCALISATION].push_back(on<Every<100, std::chrono::milliseconds>,
+        handles["LOCALISATION"].push_back(on<Every<100, std::chrono::milliseconds>,
            Optional<With<std::vector<Ball>>>,
            Optional<With<std::vector<Self>>>,
            Single,
@@ -120,10 +120,9 @@ namespace support {
 
     void NUbugger::EmitLocalisationModels(const std::unique_ptr<FieldObject>& robot_model, const std::unique_ptr<FieldObject>& ball_model) {
 
-        Message message = createMessage(Message::LOCALISATION, 1);
-        auto* localisation = message.mutable_localisation();
+        Localisation localisation;
 
-        auto* api_field_object = localisation->add_field_object();
+        auto* api_field_object = localisation.add_field_object();
         api_field_object->set_name(robot_model->name);
 
         for (FieldObject::Model model : robot_model->models) {
@@ -140,7 +139,7 @@ namespace support {
             api_model->set_lost(model.lost);
         }
 
-        api_field_object = localisation->add_field_object();
+        api_field_object = localisation.add_field_object();
         api_field_object->set_name(ball_model->name);
 
         for (FieldObject::Model model : ball_model->models) {
@@ -157,7 +156,7 @@ namespace support {
             api_model->set_lost(model.lost);
         }
 
-        send(message);
+        send(localisation, 1);
     }
 }
 }

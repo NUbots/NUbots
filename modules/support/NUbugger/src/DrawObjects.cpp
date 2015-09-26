@@ -19,13 +19,11 @@
 
 #include "NUbugger.h"
 
-#include "messages/support/nubugger/proto/Message.pb.h"
-
 #include "utility/time/time.h"
+#include "messages/support/nubugger/proto/DrawObjects.pb.h"
 
 namespace modules {
 namespace support {
-    using messages::support::nubugger::proto::Message;
     using utility::time::getUtcTimestamp;
 
     using messages::support::nubugger::proto::DrawObjects;
@@ -33,21 +31,14 @@ namespace support {
 
     void NUbugger::provideDrawObjects() {
 
-        handles[Message::DRAW_OBJECTS].push_back(on<Trigger<DrawObjects>>().then([this](const DrawObjects& drawObjects) {
+        handles["DRAW_OBJECTS"].push_back(on<Trigger<DrawObjects>>().then([this](const DrawObjects& drawObjects) {
 
-            // TODO: potentially bad filter id
-            Message message = createMessage(Message::DRAW_OBJECTS);
-            *(message.mutable_draw_objects()) = drawObjects;
-            send(message);
-
+            send(drawObjects);
         }));
 
-        handles[Message::DRAW_OBJECTS].push_back(on<Trigger<DrawObject>>().then([this](const DrawObject& drawObject) {
+        handles["DRAW_OBJECTS"].push_back(on<Trigger<DrawObject>>().then([this](const DrawObject& drawObject) {
 
-            Message message = createMessage(Message::DRAW_OBJECTS);
-            *(message.mutable_draw_objects()->add_objects()) = drawObject;
-            send(message);
-
+            send(drawObject);
         }));
     }
 }

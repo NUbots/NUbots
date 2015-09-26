@@ -20,10 +20,11 @@
 #include "NBZPlayer.h"
 
 #include "messages/support/Configuration.h"
-#include "messages/support/nubugger/proto/Message.pb.h"
 #include "messages/input/Image.h"
 #include "messages/input/CameraParameters.h"
 #include "messages/platform/darwin/DarwinSensors.h"
+#include "messages/input/proto/Image.pb.h"
+#include "messages/input/proto/Sensors.pb.h"
 
 namespace modules {
 namespace support {
@@ -31,8 +32,10 @@ namespace support {
     using messages::support::Configuration;
     using messages::input::Image;
     using messages::platform::darwin::DarwinSensors;
-    using messages::support::nubugger::proto::Message;
     using messages::input::CameraParameters;
+
+    template <typename T>
+    using Serialise = NUClear::util::serialise::Serialise<T>;
 
     NBZPlayer::NBZPlayer(std::unique_ptr<NUClear::Environment> environment)
         : Reactor(std::move(environment)) {
@@ -62,14 +65,11 @@ namespace support {
             std::vector<char> data(size);
             input.read(data.data(), size);
 
-            // Read the message
-            Message message;
-            message.ParsePartialFromArray(data.data(), data.size());
-            initialTime = NUClear::clock::now();
-            offset = initialTime - NUClear::clock::time_point(std::chrono::milliseconds(message.utc_timestamp()));
+            // Extract the timestamp and use it for an offset
+            uint64_t timestamp = *reinterpret_cast<uint64_t*>(data.data());
+            offset = initialTime - NUClear::clock::time_point(std::chrono::milliseconds(timestamp));
 
             auto cameraParameters = std::make_unique<CameraParameters>();
-
             cameraParameters->imageSizePixels = { 640, 480 };
             cameraParameters->FOV = { 1.0472 , 0.785398 };
             cameraParameters->distortionFactor = -0.000018;
@@ -110,24 +110,26 @@ namespace support {
                 return;
             }
 
-            // Read the message
-            Message message;
-            message.ParsePartialFromArray(data.data(), data.size());
+            // Extract the timestamp and use it for an offset
+            uint64_t timestamp = *reinterpret_cast<uint64_t*>(data.data());
+            NUClear::clock::time_point timeToRun = NUClear::clock::time_point(std::chrono::milliseconds(timestamp)) + offset;
 
-            // If it's an image
-            if(message.type() == Message::IMAGE) {
+            // Extract the hash
+            std::array<uint64_t, 2> hash = *reinterpret_cast<std::array<uint64_t, 2>*>(data.data() + sizeof(uint64_t));
 
-                // Work out our time to run
-                NUClear::clock::time_point timeToRun = NUClear::clock::time_point(std::chrono::milliseconds(message.utc_timestamp())) + offset;
+            if(hash == Serialise<messages::input::proto::Image>::hash()) {
+                // Parse our image
+                messages::input::proto::Image proto;
+                proto.ParsePartialFromArray(data.data() + (sizeof(uint64_t) * 3),
+                                        data.size() - (sizeof(uint64_t) * 3));
 
                 // Get the width and height
-                int width = message.image().dimensions().x();
-                int height = message.image().dimensions().y();
-                const std::string& source = message.image().data();
+                int width = proto.dimensions().x();
+                int height = proto.dimensions().y();
+                const std::string& source = proto.data();
 
                 // Get the image data
                 std::vector<uint8_t> pixels(source.size());
-
                 std::memcpy(pixels.data(), source.data(), source.size());
 
                 // Build the image
@@ -139,25 +141,27 @@ namespace support {
                 // Send it!
                 emit(std::move(image));
             }
-            else if(message.type() == Message::SENSOR_DATA) {
+            else if(hash == Serialise<messages::input::proto::Sensors>::hash()) {
+                messages::input::proto::Sensors proto;
+                proto.ParsePartialFromArray(data.data() + (sizeof(uint64_t) * 3),
+                                        data.size() - (sizeof(uint64_t) * 3));
 
                 // Make a darwin sensors
                 auto sensors = std::make_unique<DarwinSensors>();
 
                 sensors->accelerometer = {
-
-                     message.sensor_data().accelerometer().y(),
-                    -message.sensor_data().accelerometer().x(),
-                    -message.sensor_data().accelerometer().z()
+                     proto.accelerometer().y(),
+                    -proto.accelerometer().x(),
+                    -proto.accelerometer().z()
                 };
 
                 sensors->gyroscope = {
-                    -message.sensor_data().gyroscope().x(),
-                    -message.sensor_data().gyroscope().y(),
-                     message.sensor_data().gyroscope().z()
+                    -proto.gyroscope().x(),
+                    -proto.gyroscope().y(),
+                     proto.gyroscope().z()
                 };
 
-                for(const auto& s : message.sensor_data().servo()) {
+                for(const auto& s : proto.servo()) {
 
                     auto& servo = sensors->servo[s.id()];
 
@@ -180,7 +184,7 @@ namespace support {
 
                 }
 
-                for(const auto& l : message.sensor_data().led()) {
+                for(const auto& l : proto.led()) {
                     switch(l.id()) {
                         case 0: {
                             sensors->ledPanel.led2 = l.colour() == 0xFF0000;
@@ -205,7 +209,7 @@ namespace support {
 
                 }
 
-                for(const auto& l : message.sensor_data().button()) {
+                for(const auto& l : proto.button()) {
 
                     switch(l.id()) {
                         case 0: {
@@ -221,7 +225,6 @@ namespace support {
             }
         });
     }
-
 }
 }
 

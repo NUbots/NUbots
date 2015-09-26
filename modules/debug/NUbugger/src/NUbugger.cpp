@@ -24,7 +24,6 @@
 #include "messages/platform/darwin/DarwinSensors.h"
 #include "messages/input/Sensors.h"
 #include "utility/nubugger/NUhelpers.h"
-#include "messages/support/nubugger/proto/Message.pb.h"
 
 namespace modules {
 namespace debug {
@@ -102,7 +101,6 @@ namespace debug {
             emit(drawSphere("sphere", arma::vec3({x, z, std::abs(z)}), std::abs(sine)));
 
         });
-
     }
 
 } // debug

@@ -21,10 +21,10 @@
 
 #include <yaml-cpp/yaml.h>
 
-#include "messages/support/nubugger/proto/Message.pb.h"
 #include "utility/time/time.h"
 #include "utility/file/fileutil.h"
 #include "utility/strutil/strutil.h"
+#include "messages/support/nubugger/proto/ConfigurationState.pb.h"
 
 /**
  * @author Monica Olejniczak
@@ -34,7 +34,6 @@ namespace support {
     using utility::file::listFiles;
     using utility::time::getUtcTimestamp;
     using utility::strutil::split;
-    using messages::support::nubugger::proto::Message;
     using messages::support::nubugger::proto::ConfigurationState;
 
     void processNode(ConfigurationState::Node& node, YAML::Node& yaml);
@@ -53,7 +52,7 @@ namespace support {
     }
 
     /**
-     * @brief Processes a scalar YAML node by setting its respective type on the protocol node. A scalar node may 
+     * @brief Processes a scalar YAML node by setting its respective type on the protocol node. A scalar node may
      * comprise a boolean, number or string.
      *
      * @param node The protocol node.
@@ -97,7 +96,7 @@ namespace support {
     }
 
     /**
-     * @brief Processes a sequence YAML node by settings its respective type on the protocol node. It then iterates 
+     * @brief Processes a sequence YAML node by settings its respective type on the protocol node. It then iterates
      * through all the nodes in this sequence and processes each node.
      *
      * @param node The protocol node.
@@ -117,7 +116,7 @@ namespace support {
     }
 
     /**
-     * @brief Processes a map YAML node by setting its respective type on the protocol node. It then iterates through 
+     * @brief Processes a map YAML node by setting its respective type on the protocol node. It then iterates through
      * all the nodes in this map and processes each node.
      *
      * @param node The protocol node.
@@ -129,7 +128,7 @@ namespace support {
         // iterate through every yaml node in the map
         for (auto&& yamlNode : yaml) {
             // check if the node should be processed
-            if (yamlNode.second.Tag() != NUbugger::IGNORE_TAG) { 
+            if (yamlNode.second.Tag() != NUbugger::IGNORE_TAG) {
                 // create a new map value from the protocol node
                 auto* map = node.add_map_value();
                 // set the name of this new node to the key of the yaml node and convert it to a string
@@ -193,7 +192,7 @@ namespace support {
     }
 
     /**
-     * @brief A directory is processed by first retrieving the path to it and determining if it exists in the directories 
+     * @brief A directory is processed by first retrieving the path to it and determining if it exists in the directories
      * map. If the directory is not found within this map, then a new directory node is created and added to it. Otherwise,
      * the directory node is accessed. Finally, the next section of the path is processed.
      *
@@ -226,7 +225,7 @@ namespace support {
         processPath(path, index + 1, *map->mutable_value(), directories);
     }
     /**
-     * @brief Processes a configuration file path recursively. The name of the file or directory is retrieved by 
+     * @brief Processes a configuration file path recursively. The name of the file or directory is retrieved by
      * using the index of the first known '/'. This index determines whether a file or directory needs to be processed.
      *
      * @param path The path of the configuration file.
@@ -274,26 +273,21 @@ namespace support {
         // create the list of directories
         std::map<std::string, ConfigurationState::KeyPair*> directories;
 
-        Message message;                                        // create a new message
-        message.set_type(Message::CONFIGURATION_STATE);         // set the message type to the configuration state
-        message.set_filter_id(0);                               // ensure the message is not filtered
-        message.set_utc_timestamp(getUtcTimestamp());           // set the timestamp of the message
-
-        auto* state = message.mutable_configuration_state();    // create the configuration state from the message
-        auto* root = state->mutable_root();                     // retrieve the root node from the state
+        ConfigurationState state;                               // create the configuration state from the message
+        auto* root = state.mutable_root();                      // retrieve the root node from the state
         root->set_type(ConfigurationState::Node::DIRECTORY);    // set the type of the root node to a directory
 
         for (auto&& path : paths) {                             // iterate through every file path in the config directory
             processPath(path, *root, directories);              // process the path using the root node
         }
-        send(message);                                          // send the message over the network
+        send(state, 0, true, NUClear::clock::now());                                            // send the message over the network
     }
 
     /**
      * @brief Saves the configuration file using the root YAML node.
-     * @details Writes to the YAML file specified at the path by using a YAML emitter. This emitter takes the output stream of the 
-     * root YAML node and saves it to the file. 
-     * 
+     * @details Writes to the YAML file specified at the path by using a YAML emitter. This emitter takes the output stream of the
+     * root YAML node and saves it to the file.
+     *
      * @param path The path to the configuration file.
      * @param root The root YAML node.
      */
@@ -304,19 +298,19 @@ namespace support {
 
         //YAML::Emitter emitter;          // create a YAML emitter
         //emitter << root;                // send the root node to the emitter's output stream
-        //std::ofstream fout(path);       // create an output stream to the specified path 
+        //std::ofstream fout(path);       // create an output stream to the specified path
         //fout << emitter.c_str();        // write to the file
     }
 
     /**
      * @brief Processes a scalar configuration node.
-     * @details Processes a scalar configuration node by determining whether it is a double, long, boolean or string. The 
-     * current YAML node is then replaced with the value that was sent over the network within the ConfigurationState node. 
-     * 
+     * @details Processes a scalar configuration node by determining whether it is a double, long, boolean or string. The
+     * current YAML node is then replaced with the value that was sent over the network within the ConfigurationState node.
+     *
      * @param node The current ConfigurationState node.
      * @param yaml Thee current YAML node.
      */
-    void processScalarConfiguration(ConfigurationState::Node node, YAML::Node& yaml) { 
+    void processScalarConfiguration(ConfigurationState::Node node, YAML::Node& yaml) {
         if (node.has_double_value()) {              // check if the current node contains a double value
             double value = node.double_value();     // get the double value from the node
             yaml = value;                           // replace the current yaml node with the double value
@@ -335,7 +329,7 @@ namespace support {
      * @brief Processes a sequence configuration node.
      * @details Processes a sequence configuration node by iterating through every sequence protocol node and retrieving its index using its
      * tag. This index is then used to access the correct YAML node which is then passed into for processing.
-     * 
+     *
      * @param node The current ConfigurationState node.
      * @param yaml Thee current YAML node.
      */
@@ -357,7 +351,7 @@ namespace support {
      * @brief Processes a map configuration node.
      * @details Processes a map configuration node by iterating through each map value in the protocol node, and processes its configuration
      * by passing in the value of the map and respective YAML Node.
-     * 
+     *
      * @param node The current ConfigurationState node.
      * @param yaml Thee current YAML node.
      */
@@ -375,7 +369,7 @@ namespace support {
 
     /**
      * @brief This method evaluates the type of the current YAML node and then processes it.
-     * 
+     *
      * @param node The current ConfigurationState node.
      * @param yaml Thee current YAML node.
      */
@@ -399,18 +393,18 @@ namespace support {
             // hashes and dictionaries
             case YAML::NodeType::Map:
                 processMapConfiguration(node, yaml);
-                break;    
+                break;
         }
     }
 
     /**
      * @brief Receives the ConfigurationState message over the network, processes it, and updates the relevant configuration files.
-     * 
+     *
      * @param message The message sent over the network by NUbugger.
      */
-    void NUbugger::recvConfigurationState(const Message& message) {
+    void NUbugger::recvConfigurationState(const ConfigurationState& state) {
         // get the root node from the message
-        auto root = message.configuration_state().root();
+        auto root = state.root();
         // iterate through every file within the message
         for (int i = 0; i < root.map_value_size(); i++) {
             // get the map that contains the configuration file details

@@ -19,36 +19,34 @@
 
 #include "NUbugger.h"
 
-#include "messages/support/nubugger/proto/Message.pb.h"
 #include "messages/input/Sensors.h"
+#include "messages/input/proto/Sensors.pb.h"
 
 #include "utility/support/proto_armadillo.h"
 #include "utility/time/time.h"
 
 namespace modules {
 namespace support {
-    using messages::support::nubugger::proto::Message;
     using utility::time::getUtcTimestamp;
 
     using messages::input::Sensors;
+    using ProtoSensors = messages::input::proto::Sensors;
 
     void NUbugger::provideSensors() {
 
         // This trigger gets the output from the sensors (unfiltered)
-        handles[Message::SENSOR_DATA].push_back(on<Trigger<Sensors>, Single, Priority::LOW>().then([this](const Sensors& sensors) {
+        handles["SENSOR_DATA"].push_back(on<Trigger<Sensors>, Single, Priority::LOW>().then([this](const Sensors& sensors) {
 
-            Message message = createMessage(Message::SENSOR_DATA, 1);
+            ProtoSensors sensorData;
 
-            auto* sensorData = message.mutable_sensor_data();
-
-            sensorData->set_timestamp(sensors.timestamp.time_since_epoch().count());
-            sensorData->set_voltage(sensors.voltage);
-            sensorData->set_battery(sensors.battery);
+            sensorData.set_timestamp(sensors.timestamp.time_since_epoch().count());
+            sensorData.set_voltage(sensors.voltage);
+            sensorData.set_battery(sensors.battery);
 
             // Add each of the servos into the protocol buffer
             for(const auto& s : sensors.servos) {
 
-                auto* servo = sensorData->add_servo();
+                auto* servo = sensorData.add_servo();
 
                 servo->set_error_flags(s.errorFlags);
 
@@ -72,13 +70,13 @@ namespace support {
             }
 
             // The gyroscope values (x,y,z)
-            *sensorData->mutable_gyroscope() << arma::conv_to<arma::fvec>::from(sensors.gyroscope);
+            *sensorData.mutable_gyroscope() << arma::conv_to<arma::fvec>::from(sensors.gyroscope);
 
             // The accelerometer values (x,y,z)
-            *sensorData->mutable_accelerometer() << arma::conv_to<arma::fvec>::from(sensors.accelerometer);
+            *sensorData.mutable_accelerometer() << arma::conv_to<arma::fvec>::from(sensors.accelerometer);
 
             // The orientation matrix
-            *sensorData->mutable_orientation() << sensors.orientation;
+            *sensorData.mutable_orientation() << sensors.orientation;
 
             // TODO: these do not exist in Sensors.h, this needs reimplementing
             // The left FSR values
@@ -95,19 +93,19 @@ namespace support {
 
             // The LEDs
             for(auto& l : sensors.leds) {
-                auto* led = sensorData->add_led();
+                auto* led = sensorData.add_led();
                 led->set_id(l.id);
                 led->set_colour(l.colour);
             }
 
             // The Buttons
             for(auto& b : sensors.buttons) {
-                auto* button = sensorData->add_button();
+                auto* button = sensorData.add_button();
                 button->set_id(b.id);
                 button->set_value(b.value);
             }
 
-            send(message);
+            send(sensorData, 1, false, sensors.timestamp);
 
         }));
     }
