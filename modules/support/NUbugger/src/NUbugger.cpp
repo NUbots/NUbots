@@ -55,6 +55,17 @@ namespace support {
     NUbugger::NUbugger(std::unique_ptr<NUClear::Environment> environment)
         : Reactor(std::move(environment)) {
 
+        // These go first so the config can do things with them
+        provideOverview();
+        provideDataPoints();
+        provideDrawObjects();
+        provideSubsumption();
+        provideGameController();
+        provideLocalisation();
+        provideReactionStatistics();
+        provideSensors();
+        provideVision();
+
         on<Startup>().then([this] {
 
             auto netConfig = std::make_unique<NUClear::message::NetworkConfiguration>();
@@ -104,7 +115,10 @@ namespace support {
             }
 
             for (auto& setting : config["reaction_handles"]) {
+                // Lowercase the name
                 std::string name = setting.first.as<std::string>();
+                std::transform(name.begin(), name.end(), name.begin(), ::tolower);
+
                 bool enabled = setting.second.as<bool>();
 
                 bool found = false;
@@ -134,16 +148,6 @@ namespace support {
             // Send a ping message
             send(Ping(), 0, false, NUClear::clock::time_point());
         });
-
-        provideOverview();
-        provideDataPoints();
-        provideDrawObjects();
-        provideSubsumption();
-        provideGameController();
-        provideLocalisation();
-        provideReactionStatistics();
-        provideSensors();
-        provideVision();
 
         // Flag struct to upload a lut
         struct UploadLUT {};

@@ -31,7 +31,7 @@ namespace support {
     using std::chrono::microseconds;
 
     void NUbugger::provideReactionStatistics() {
-        handles["REACTION_STATISTICS"].push_back(on<Trigger<ReactionStatistics>>().then([this](const ReactionStatistics& stats) {
+        handles["reaction_statistics"].push_back(on<Trigger<ReactionStatistics>>().then([this](const ReactionStatistics& stats) {
 
             ReactionStatisticsProto reactionStatistics;
             reactionStatistics.set_reactionid(stats.reactionId);

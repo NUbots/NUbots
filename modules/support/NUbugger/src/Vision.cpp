@@ -46,7 +46,7 @@ namespace support {
     using messages::input::Image;
 
     void NUbugger::provideVision() {
-        handles["IMAGE"].push_back(on<Trigger<Image>, Single, Priority::LOW>().then([this](const Image& image) {
+        handles["image"].push_back(on<Trigger<Image>, Single, Priority::LOW>().then([this](const Image& image) {
 
             if (NUClear::clock::now() - last_image < max_image_duration) {
                 return;
@@ -70,7 +70,7 @@ namespace support {
             last_image = NUClear::clock::now();
         }));
 
-        handles["CLASSIFIED_IMAGE"].push_back(on<Trigger<ClassifiedImage<ObjectClass>>, Single, Priority::LOW>().then([this](const ClassifiedImage<ObjectClass>& image) {
+        handles["classified_image"].push_back(on<Trigger<ClassifiedImage<ObjectClass>>, Single, Priority::LOW>().then([this](const ClassifiedImage<ObjectClass>& image) {
 
             if (NUClear::clock::now() - last_classified_image < max_classified_image_duration) {
                 return;
@@ -117,7 +117,7 @@ namespace support {
             last_classified_image = NUClear::clock::now();
         }));
 
-        handles["VISION_OBJECT"].push_back(on<Trigger<std::vector<Ball>>, Single, Priority::LOW>().then([this] (const std::vector<Ball>& balls) {
+        handles["vision_object"].push_back(on<Trigger<std::vector<Ball>>, Single, Priority::LOW>().then([this] (const std::vector<Ball>& balls) {
 
             VisionObject object;
 
@@ -142,7 +142,7 @@ namespace support {
             send(object, object.camera_id() + 1, false, NUClear::clock::now());
         }));
 
-        handles["VISION_OBJECT"].push_back(on<Trigger<std::vector<Goal>>, Single, Priority::LOW>().then([this] (const std::vector<Goal>& goals) {
+        handles["vision_object"].push_back(on<Trigger<std::vector<Goal>>, Single, Priority::LOW>().then([this] (const std::vector<Goal>& goals) {
 
             VisionObject object;
 
@@ -173,12 +173,12 @@ namespace support {
         }));
 
         // TODO: needs refactoring so that this is really only a vision line handle
-        handles["VISION_OBJECT"].push_back(on<Trigger<VisionObject>, Single, Priority::LOW>().then([this] (const VisionObject& visionObject) {
+        handles["vision_object"].push_back(on<Trigger<VisionObject>, Single, Priority::LOW>().then([this] (const VisionObject& visionObject) {
 
             send(visionObject, 3, false, NUClear::clock::now());
         }));
 
-        handles["LOOKUP_TABLE_DIFF"].push_back(on<Trigger<LookUpTableDiff>, Single, Priority::LOW>().then([this] (const LookUpTableDiff& tableDiff) {
+        handles["lookup_table_diff"].push_back(on<Trigger<LookUpTableDiff>, Single, Priority::LOW>().then([this] (const LookUpTableDiff& tableDiff) {
 
             send(tableDiff, 0, true, NUClear::clock::now());
         }));

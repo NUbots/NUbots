@@ -35,7 +35,7 @@ namespace support {
     void NUbugger::provideSensors() {
 
         // This trigger gets the output from the sensors (unfiltered)
-        handles["SENSOR_DATA"].push_back(on<Trigger<Sensors>, Single, Priority::LOW>().then([this](const Sensors& sensors) {
+        handles["sensor_data"].push_back(on<Trigger<Sensors>, Single, Priority::LOW>().then([this](const Sensors& sensors) {
 
             ProtoSensors sensorData;
 

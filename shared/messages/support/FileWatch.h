@@ -75,13 +75,14 @@ namespace NUClear {
 
                     // Generate our reaction
                     auto reaction = util::generate_reaction<DSL, messages::support::FileWatch>(reactor, label, std::forward<TFunc>(callback));
-                    threading::ReactionHandle handle(reaction.get());
 
                     // Make a request to watch our file
                     auto fw = std::make_unique<messages::support::FileWatchRequest>();
                     fw->path = path;
                     fw->events = events;
                     fw->reaction = std::move(reaction);
+
+                    threading::ReactionHandle handle(fw->reaction);
 
                     // Send our file watcher to the extension
                     reactor.powerplant.emit<NUClear::dsl::word::emit::Direct>(fw);

@@ -31,12 +31,12 @@ namespace support {
 
     void NUbugger::provideDrawObjects() {
 
-        handles["DRAW_OBJECTS"].push_back(on<Trigger<DrawObjects>>().then([this](const DrawObjects& drawObjects) {
+        handles["draw_objects"].push_back(on<Trigger<DrawObjects>>().then([this](const DrawObjects& drawObjects) {
 
             send(drawObjects);
         }));
 
-        handles["DRAW_OBJECTS"].push_back(on<Trigger<DrawObject>>().then([this](const DrawObject& drawObject) {
+        handles["draw_objects"].push_back(on<Trigger<DrawObject>>().then([this](const DrawObject& drawObject) {
 
             send(drawObject);
         }));

@@ -174,7 +174,7 @@ namespace NUClear {
 
                     // Get the pointers for our metadata
                     uint8_t* filterid = reinterpret_cast<uint8_t*>(output.data());
-                    uint64_t* timestamp = reinterpret_cast<uint64_t*>(output.data() + 1);
+                    uint64_t* timestamp = reinterpret_cast<uint64_t*>(output.data() + sizeof(uint8_t));
 
                     // Write our metadata
                     *filterid = in.filterid;

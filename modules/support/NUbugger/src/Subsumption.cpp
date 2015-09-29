@@ -56,7 +56,7 @@ namespace support {
 
     void NUbugger::provideSubsumption() {
 
-        handles["SUBSUMPTION"].push_back(on<Trigger<ActionStart>>().then([this](const ActionStart& actionStart) {
+        handles["subsumption"].push_back(on<Trigger<ActionStart>>().then([this](const ActionStart& actionStart) {
 
             Subsumption subsumption;
 
@@ -72,7 +72,7 @@ namespace support {
 
         }));
 
-        handles["SUBSUMPTION"].push_back(on<Trigger<ActionKill>>().then([this](const ActionKill& actionKill) {
+        handles["subsumption"].push_back(on<Trigger<ActionKill>>().then([this](const ActionKill& actionKill) {
 
             Subsumption subsumption;
 
@@ -88,7 +88,7 @@ namespace support {
 
         }));
 
-        handles["SUBSUMPTION"].push_back(on<Trigger<RegisterAction>>().then([this] (const RegisterAction& action) {
+        handles["subsumption"].push_back(on<Trigger<RegisterAction>>().then([this] (const RegisterAction& action) {
 
             Subsumption subsumption;
 
@@ -110,7 +110,7 @@ namespace support {
 
         }));
 
-        handles["SUBSUMPTION"].push_back(on<Trigger<ActionPriorites>>().then([this] (const ActionPriorites& action) {
+        handles["subsumption"].push_back(on<Trigger<ActionPriorites>>().then([this] (const ActionPriorites& action) {
 
             Subsumption subsumption;
 
