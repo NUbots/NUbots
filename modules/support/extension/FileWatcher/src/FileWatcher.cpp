@@ -32,12 +32,53 @@ namespace extension {
 
     using messages::support::FileWatch;
     using messages::support::FileWatchRequest;
+    using Unbind = NUClear::dsl::operation::Unbind<FileWatch>;
 
     FileWatcher::FileWatcher(std::unique_ptr<NUClear::Environment> environment)
     : Reactor(std::move(environment))
     , watcherFd(inotify_init()) {
 
         fcntl (watcherFd, F_SETFL, fcntl (watcherFd, F_GETFL) | O_NONBLOCK);
+
+        on<Trigger<Unbind>>().then([this](const Unbind& fw) {
+            for(auto pIt = handlers.begin(); pIt != handlers.end(); ++pIt) {
+                for(auto fIt = pIt->second.begin(); fIt != pIt->second.end(); ++fIt) {
+                    for(auto rIt = fIt->second.begin(); rIt != fIt->second.end(); ++rIt) {
+                        if (rIt->first->reactionId == fw.reactionId) {
+
+                            // Erase this reaction
+                            fIt->second.erase(rIt);
+
+                            // If erasing this reaction got rid of this file, erase this file
+                            if(fIt->second.empty()) {
+                                pIt->second.erase(fIt);
+                            }
+
+                            // If erasing this file got rid of this path, unwatch this path
+                            if(pIt->second.empty()) {
+                                // Get our path to remove
+                                const std::string& removePath = pIt->first;
+
+                                // Find this path in our watch paths
+                                auto it = std::find_if(watchPaths.begin(), watchPaths.end(), [removePath] (const std::pair<int, std::string>& p) {
+                                    return removePath == p.second;
+                                });
+
+                                // Remove the watch from our inotify and watchPaths
+                                inotify_rm_watch(watcherFd, it->first);
+                                watchPaths.erase(it);
+
+                                // Remove pIt from handlers
+                                handlers.erase(pIt);
+                            }
+
+                            // We are done
+                            return;
+                        }
+                    }
+                }
+            }
+        });
 
         on<Trigger<FileWatchRequest>>().then([this](const FileWatchRequest& req) {
 
