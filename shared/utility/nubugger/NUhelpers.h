@@ -24,7 +24,7 @@
 #include <armadillo>
 #include "messages/support/nubugger/proto/DataPoint.pb.h"
 #include "messages/support/nubugger/proto/DrawObjects.pb.h"
-#include "messages/vision/proto/VisionObject.pb.h"
+#include "messages/vision/proto/VisionObjects.pb.h"
 #include "utility/math/matrix/Rotation3D.h"
 #include "utility/math/geometry/RotatedRectangle.h"
 #include "utility/math/geometry/Circle.h"

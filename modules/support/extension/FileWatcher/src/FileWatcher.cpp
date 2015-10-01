@@ -72,7 +72,7 @@ namespace extension {
                                 handlers.erase(pIt);
                             }
 
-                            // We are done
+                            // We are done no need to look further
                             return;
                         }
                     }

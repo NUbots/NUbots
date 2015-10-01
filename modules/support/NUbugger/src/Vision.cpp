@@ -24,8 +24,9 @@
 #include "messages/vision/VisionObjects.h"
 #include "messages/input/proto/Image.pb.h"
 #include "messages/vision/proto/LookUpTable.pb.h"
+#include "messages/vision/proto/LookUpTableDiff.pb.h"
 #include "messages/vision/proto/ClassifiedImage.pb.h"
-#include "messages/vision/proto/VisionObject.pb.h"
+#include "messages/vision/proto/VisionObjects.pb.h"
 
 #include "utility/time/time.h"
 #include "utility/support/proto_armadillo.h"
