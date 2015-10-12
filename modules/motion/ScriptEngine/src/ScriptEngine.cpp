@@ -19,6 +19,7 @@
 
 #include "ScriptEngine.h"
 
+#include "utility/file/fileutil.h"
 #include "messages/support/Configuration.h"
 #include "messages/behaviour/ServoCommand.h"
 
@@ -34,8 +35,9 @@ namespace modules {
         ScriptEngine::ScriptEngine(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
 
             on<Configuration>("scripts/").then([this](const Configuration& script) {
+
                 // Add this script to our list of scripts
-                scripts.insert(std::make_pair(script.path, script.config.as<Script>()));
+                scripts.insert(std::make_pair(utility::file::pathSplit(script.path).second, script.config.as<Script>()));
             });
 
             on<Trigger<ExecuteScriptByName>>().then([this](const ExecuteScriptByName& command) {

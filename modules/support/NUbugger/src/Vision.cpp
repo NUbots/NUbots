@@ -38,6 +38,7 @@ namespace support {
     using messages::input::Sensors;
     using ImageProto = messages::input::proto::Image;
     using ClassifiedImageProto = messages::vision::proto::ClassifiedImage;
+    using messages::vision::proto::VisionObjects;
     using messages::vision::proto::VisionObject;
     using messages::vision::proto::LookUpTableDiff;
     using messages::vision::ObjectClass;
@@ -120,7 +121,9 @@ namespace support {
 
         handles["vision_object"].push_back(on<Trigger<std::vector<Ball>>, Single, Priority::LOW>().then([this] (const std::vector<Ball>& balls) {
 
-            VisionObject object;
+            VisionObjects objects;
+
+            auto& object = *objects.add_object();
 
             object.set_type(VisionObject::BALL);
             object.set_camera_id(0);
@@ -145,7 +148,9 @@ namespace support {
 
         handles["vision_object"].push_back(on<Trigger<std::vector<Goal>>, Single, Priority::LOW>().then([this] (const std::vector<Goal>& goals) {
 
-            VisionObject object;
+            VisionObjects objects;
+
+            auto& object = *objects.add_object();
 
             object.set_type(VisionObject::GOAL);
             object.set_camera_id(0);
@@ -176,7 +181,11 @@ namespace support {
         // TODO: needs refactoring so that this is really only a vision line handle
         handles["vision_object"].push_back(on<Trigger<VisionObject>, Single, Priority::LOW>().then([this] (const VisionObject& visionObject) {
 
-            send(visionObject, 3, false, NUClear::clock::now());
+            VisionObjects objects;
+
+            *objects.add_object() = visionObject;
+
+            send(objects, 3, false, NUClear::clock::now());
         }));
 
         handles["lookup_table_diff"].push_back(on<Trigger<LookUpTableDiff>, Single, Priority::LOW>().then([this] (const LookUpTableDiff& tableDiff) {

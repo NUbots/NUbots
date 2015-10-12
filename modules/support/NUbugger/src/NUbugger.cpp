@@ -52,6 +52,9 @@ namespace support {
     using utility::time::getUtcTimestamp;
     using utility::time::durationFromSeconds;
 
+    // Flag struct to upload a lut
+    struct UploadLUT {};
+
     NUbugger::NUbugger(std::unique_ptr<NUClear::Environment> environment)
         : Reactor(std::move(environment)) {
 
@@ -66,16 +69,11 @@ namespace support {
         provideSensors();
         provideVision();
 
-        on<Startup>().then([this] {
-
-            auto netConfig = std::make_unique<NUClear::message::NetworkConfiguration>();
-
-            netConfig->name = "testing";
-            netConfig->multicastGroup = "238.158.129.230";
-            netConfig->multicastPort = 7447;
-
-            emit<Scope::DIRECT>(netConfig);
-        });
+        auto netConfig = std::make_unique<NUClear::message::NetworkConfiguration>();
+        netConfig->name = "";
+        netConfig->multicastGroup = "239.226.152.162";
+        netConfig->multicastPort = 7447;
+        emit<Scope::DIRECT>(netConfig);
 
         on<Configuration>("NUbugger.yaml").then([this] (const Configuration& config) {
 
@@ -144,13 +142,11 @@ namespace support {
             }
         });
 
-        on<Every<1, std::chrono::seconds>, Single, Priority::LOW>().then([this] {
+        on<Every<1, Per<std::chrono::seconds>>, Single, Priority::LOW>().then([this] {
             // Send a ping message
             send(Ping(), 0, false, NUClear::clock::time_point());
         });
 
-        // Flag struct to upload a lut
-        struct UploadLUT {};
         on<Trigger<UploadLUT>, With<LookUpTable>>().then([this](const LookUpTable& lut) {
 
             LookUpTableProto lutMessage;
@@ -163,7 +159,7 @@ namespace support {
             send(lutMessage);
         });
 
-        on<Network<Command>>().then([this](const Command& message) {
+        on<Network<Command>>().then("Network Command", [this](const Command& message) {
             std::string command = message.command();
             log<NUClear::INFO>("Received command:", command);
             if (command == "download_lut") {

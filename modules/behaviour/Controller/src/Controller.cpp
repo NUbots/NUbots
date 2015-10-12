@@ -39,7 +39,6 @@ namespace modules {
         Controller::Controller(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
 
             on<Trigger<RegisterAction>, Sync<Controller>, Priority::HIGH>().then("Action Registration", [this] (const RegisterAction& action) {
-
                 if(action.id == 0) {
                     throw std::runtime_error("Action ID 0 is reserved for internal use");
                 }
@@ -77,7 +76,6 @@ namespace modules {
             });
 
             on<Startup, Sync<Controller>>().then("Initial Action Selection", [this] {
-
                 // Pick our first action to take
                 selectAction();
             });

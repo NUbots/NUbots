@@ -55,7 +55,7 @@ namespace modules {
 
                 // Get the scripts to run from the command line
                 on<Trigger<CommandLineArguments>>().then([this](const std::vector<std::string>& args) {
-                    NUClear::log<NUClear::INFO>("Executing: ", args.size(), " scripts");
+                    NUClear::log<NUClear::INFO>("Executing: ", args.size() - 1, " scripts");
 
                     for(size_t i = 1; i < args.size(); ++i) {
                         NUClear::log<NUClear::INFO>("Queueing script ", args[i]);
