@@ -1,5 +1,7 @@
 #!/usr/bin/python
 
+exit(1)
+
 import sys
 import json
 import re

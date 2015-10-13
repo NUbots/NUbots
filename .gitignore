@@ -12,6 +12,9 @@
 *.la
 *.a
 
+# Compiled python
+*.pyc
+
 # Build & CMake files
 /build*/
 /vagrantbuild/
