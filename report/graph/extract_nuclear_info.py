@@ -5,7 +5,7 @@ from info.collapse_output_type import collapse_output_type
 from info.parse_output_type import parse_output_type
 from info.symbol_parser import SymbolParser
 
-import pdb
+import copy
 import pyparsing as pp
 import logging
 import json
@@ -233,10 +233,7 @@ for symbol_address in symbols:
     elif on_re[0].match(symbol['name']):
 
         # Run a parse with our locator tags on to get the function we are using
-        try:
-            location = parser.parse_symbol(symbol['name'], locateTags=True)
-        except:
-            pdb.set_trace()
+        location = parser.parse_symbol(symbol['name'], locateTags=True)
 
         # check and double check we are on the string version of on
         if len(location[1][-3]) == 2 and len(location[1][-2]) == 2:
@@ -262,6 +259,31 @@ for symbol_address in symbols:
             if not candidates:
                 candidates = [x for x in symbols if symbols[x]['name'].startswith(func)]
 
+            # Fallback to trying to fix the symbol
+            if not candidates:
+                # Sometimes something stupid happens with the function and we get 'then' and 'Parse' in our symbol...
+                # We need to fix this otherwise it can't find the real underlying symbol
+
+                # Try one that replaces with then
+                then_rep = re.sub(r'([A-Za-z0-9]+)::then\(', '\\1::\\1(', func, 1)
+                parse_rep = re.sub(r'([A-Za-z0-9]+)::Parse\(', '\\1::\\1(', func, 1)
+
+                if then_rep != func:
+                    # Find our candidates (start with ::operator() version)
+                    candidates = [x for x in symbols if symbols[x]['name'].startswith(then_rep + '::operator')]
+
+                    # Fallback to a direct match
+                    if not candidates:
+                        candidates = [x for x in symbols if symbols[x]['name'].startswith(then_rep)]
+
+                elif parse_rep != func:
+
+                    # Find our candidates (start with ::operator() version)
+                    candidates = [x for x in symbols if symbols[x]['name'].startswith(parse_rep + '::operator')]
+
+                    # Fallback to a direct match
+                    if not candidates:
+                        candidates = [x for x in symbols if symbols[x]['name'].startswith(parse_rep)]
 
             # If we still can't find it give up
             if not candidates:
@@ -277,6 +299,13 @@ for symbol_address in symbols:
                 # Reparse without our locator tags
                 parsed = parser.parse_symbol(symbol['name'])
 
+                # Check if this is probably a reaction owned by NUClear
+                # We don't want to include those because they will get
+                # included in every nuclear_info file and make the graphs
+                # huge and complex. Fortunatly all of them hide in the
+                # NUClear extension namespace
+                is_nuclear = func.startswith('NUClear::extension')
+
                 if candidate not in reactions:
                     reactions[candidate] = []
 
@@ -286,6 +315,7 @@ for symbol_address in symbols:
                     'binder_args': binder_args,
                     'binding_outputs': [],
                     'user_name': symbol['string_args'],
+                    'is_nuclear': is_nuclear
                 })
 
                 # Store that this binder binds this candidate
@@ -300,7 +330,6 @@ for output_address in outputs:
     searched = set()
     # todo search from symbols[output]['called_by']
     search = set(symbols[output_address]['called_by'])
-    isolated = True
 
     while search:
         # Get our next search element
@@ -312,16 +341,16 @@ for output_address in outputs:
         # outputs
         if top in reactions:
             for reaction in reactions[top]:
-                reaction['outputs'].append(output)
+                reaction['outputs'].append(copy.deepcopy(output))
 
         # If this has been called by another emit then add this to its list
         elif top in outputs:
-            outputs[top]['children'].append(output)
+            outputs[top]['children'].append(copy.deepcopy(output))
 
         # If this emit is done from a binding call (then call) we can trace it
         # to the reaction that called it. It is probably a setup reaction
         elif top in binders:
-            binders[top]['binding_outputs'].append(output)
+            binders[top]['binding_outputs'].append(copy.deepcopy(output))
 
         # Otherwise add this functions callers to the search list
         elif top in symbols:
@@ -343,44 +372,79 @@ jsonOutput = {
 for reaction_address in reactions:
     for reaction in reactions[reaction_address]:
 
-        r = {
-            # The name of the reaction, if the user provided use that
-            'name': reaction['user_name'][0][0] if reaction['user_name'] else None, # TODO find a better name here if you can
+        # We don't want to include reactions from NUClear
+        if not reaction['is_nuclear']:
 
-            # The conditions this reaction should execute on
-            # Consists of a list of event descriptions
-            'execution': [], #  { 'scope': 'S', 'value': 'T', 'modifiers': {'last':n, 'optional':True} }
+            r = {
+                # The name of the reaction, if the user provided use that
+                'name': reaction['user_name'][0][0] if reaction['user_name'] else None, # TODO find a better name here if you can
 
-            # The data that this reaction gets
-            # Consists of a list of event descriptions, and modifiers applied to the input
-            'input_data': [], # { 'scope': 'S', 'value': 'T', 'modifiers': {'last':n, 'optional':True} }
+                # The DSL that this is generated from
+                'dsl': reaction['dsl'],
 
-            # A list of the output data from this reaction
-            # Consists of a list of event descriptions, and scopes
-            'output_data': [], # { 'scope': 'S', 'value': 'T' }
+                # The memory address for the reaction function
+                'address': reaction_address,
 
-            # Modifiers that influence how the reaction as a whole runs
-            # Consists of a set of properties and values
-            'modifiers': {} # 'single': True, 'sync': 'T'
-        }
+                # The data that this reaction gets
+                # Consists of a list of event descriptions, and modifiers applied to the input
+                'input_data': [], # { 'scope': 'S', 'value': 'T', 'modifiers': {'last':n, 'optional':True} }
 
-        # Go through our DSL word elements
-        for word in reaction['dsl']:
+                # A list of the output data from this reaction
+                # Consists of a list of event descriptions, and scopes
+                'output_data': [], # { 'scope': 'S', 'value': 'T' }
 
-            # Get our reaction delta from this word
-            delta = parse_dsl_type(word, reaction['binder_args'])
+                # Modifiers that influence how the reaction as a whole runs
+                # Consists of a set of properties and values
+                'modifiers': {} # 'single': True, 'sync': 'T'
+            }
 
-            # Fuse in the data to the reaction
-            for key in delta:
-                if key == 'execution':
-                    r[key].extend(delta[key])
-                elif key == 'input_data':
-                    r[key].extend(delta[key])
-                elif key == 'modifiers':
-                    r[key].update(delta[key])
+            # Go through our DSL word elements
+            for word in reaction['dsl']:
 
-        # Go through all our outputs
-        for output in reaction['outputs']:
+                # Get our reaction delta from this word
+                delta = parse_dsl_type(word, reaction['binder_args'])
+
+                # Fuse in the data to the reaction
+                for key in delta:
+                    if key == 'execution':
+                        r[key].extend(delta[key])
+                    elif key == 'input_data':
+                        r[key].extend(delta[key])
+                    elif key == 'modifiers':
+                        r[key].update(delta[key])
+
+            # Go through all our outputs
+            for output in reaction['outputs']:
+
+                # Collapse our identical outputs
+                output = collapse_output_type(output)
+
+                # Parse our output
+                output = parse_output_type(output)
+
+                # Add our parsed list
+                r['output_data'].append(output)
+
+            # Go through all our binding outputs
+            for output in reaction['binding_outputs']:
+
+                # Collapse our identical outputs
+                output = collapse_output_type(output)
+
+                # Parse our output
+                output = parse_output_type(output)
+
+                for o in output:
+                    o['modifiers']['binding'] = True
+
+                # Add our parsed list
+                r['output_data'].append(output)
+
+            # Add this reaction to our list
+            jsonOutput['reactions'].append(r)
+
+        # Process all our isolated outputs
+        for output in isolated_outputs:
 
             # Collapse our identical outputs
             output = collapse_output_type(output)
@@ -389,37 +453,20 @@ for reaction_address in reactions:
             output = parse_output_type(output)
 
             # Add our parsed list
-            r['output_data'].append(output)
+            jsonOutput['output_data'].append(output)
 
-        # Go through all our binding outputs
-        for output in reaction['binding_outputs']:
+vals = []
+for o in jsonOutput['output_data']:
+    if o not in vals:
+        vals.append(o)
+jsonOutput['output_data'] = vals
 
-            # Collapse our identical outputs
-            output = collapse_output_type(output)
-
-            # Parse our output
-            output = parse_output_type(output)
-
-            for o in output:
-                o['modifiers']['binding'] = True
-
-            # Add our parsed list
-            r['output_data'].append(output)
-
-        # Add this reaction to our list
-        jsonOutput['reactions'].append(r)
-
-    # Process all our isolated outputs
-    for output in isolated_outputs:
-
-            # Collapse our identical outputs
-            output = collapse_output_type(output)
-
-            # Parse our output
-            output = parse_output_type(output)
-
-            # Add our parsed list
-            r['output_data'].append(output)
+for reaction in jsonOutput['reactions']:
+    vals = []
+    for o in reaction['output_data']:
+        if o not in vals:
+            vals.append(o)
+    reaction['output_data'] = vals
 
 # Open output file for writing
 with open(output_file, 'w') as file:
