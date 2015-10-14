@@ -39,6 +39,7 @@ Vagrant.configure("2") do |config|
     v.memory = 8192
     v.cpus = 4
     v.optimize_power_consumption = false
+    v.update_guest_tools = true
   end
 
   # Define the NUbots development VM, and make it the primary VM
@@ -47,19 +48,8 @@ Vagrant.configure("2") do |config|
   config.vm.define "nubotsvm", primary: true do |nubots|
     nubots.vm.hostname = "nubotsvm.nubots.net"
 
-    # nubots.vm.network :private_network, ip: "192.168.33.77"
-
-    # Uncomment this to enable a bridged adapter. This allows for the game controller running on your host to work with the virtual machine. Note: replace 'Wi-Fi' with your network adapter name.
-    # See http://docs.vagrantup.com/v2/networking/public_network.html
-    #config.vm.network "public_network", :bridge => 'Wi-Fi'
-
-    nubots.vm.network :forwarded_port, guest: 12000, host: 12000
-    nubots.vm.network :forwarded_port, guest: 12001, host: 12001
-
-    # Add hostname here if running NUsight on the VM
-    if [].include?(Socket.gethostname) # NUsight Port
-      nubots.vm.network :forwarded_port, guest: 9090, host: 9090
-    end
+    # Private network for NUsight's benifit
+    nubots.vm.network "private_network", type: "dhcp"
 
     # Note: Use NFS for more predictable shared folder support.
     #   The guest must have 'apt-get install nfs-common'
@@ -69,6 +59,9 @@ Vagrant.configure("2") do |config|
     # directory as the NUbots repository
     if File.directory?("../NUsight")
       nubots.vm.synced_folder "../NUsight", "/home/vagrant/nubots/NUsight"
+    end
+    if File.directory?("../NUClear")
+      nubots.vm.synced_folder "../NUClear", "/home/vagrant/nubots/NUClear"
     end
   end
 
@@ -80,10 +73,16 @@ Vagrant.configure("2") do |config|
     #   The guest must have 'apt-get install nfs-common'
     nubots.vm.synced_folder ".", "/home/vagrant/nubots/NUbots"
 
+    # Private network for NUsight's benifit
+    nubots.vm.network "private_network", type: "dhcp"
+
     # Share NUsight repository with the VM if it has been placed in the same
     # directory as the NUbots repository
     if File.directory?("../NUsight")
       nubots.vm.synced_folder "../NUsight", "/home/vagrant/nubots/NUsight"
+    end
+    if File.directory?("../NUClear")
+      nubots.vm.synced_folder "../NUClear", "/home/vagrant/nubots/NUClear"
     end
   end
 end
