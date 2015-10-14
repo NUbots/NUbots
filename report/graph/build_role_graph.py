@@ -2,7 +2,7 @@
 
 from info.type_to_string import type_to_string
 
-import pdb
+import random
 import sys
 import json
 import re
@@ -27,13 +27,105 @@ class NUClearGraphBuilder:
 
             self.modules.append(module)
 
+    def make_edge(self, output_id, output, input_id, input):
+        # If these two types are in the same scope
+        if input['scope'] == output['scope']:
+
+            # If the two types are type scopes of the same type
+            if input['scope'] == 'type' and input['type'] == output['type']:
+
+                # Get our type name
+                type_name = type_to_string(input['type'])
+
+                # give our global arguments
+                edge = {
+                    'src':   '"{}"'.format(output_id),
+                    'dst':   '"{}"'.format(input_id),
+                    'label': '"{}"'.format(type_name),
+                    # Red for triggering edges, blue for data only edges
+                    'color': '#FF0000' if input['modifiers'].get('execution', False) else '#0000FF'
+                }
+
+                if input['modifiers'].get('optional', False):
+                    edge['style'] = 'dashed'
+
+                if input['modifiers'].get('last', False):
+                    # Try to make the line a different style
+                    pass # TODO do something here
+
+                if output['modifiers'].get('binding', False):
+
+                    # TODO change the colour of the line?
+                    # TODO make the line style dotted
+                    pass # TODO do something here
+
+                if output['modifiers'].get('direct', False):
+                    edge['dir'] = 'both'
+                    edge['arrowtail'] = 'dot'
+
+                if output['modifiers'].get('initialize', False):
+                    edge['dir'] = 'both'
+                    edge['arrowtail'] = 'odot'
+
+                return Edge(**edge)
+
+            if input['scope'] == 'network' and input['type'] == output['type']:
+                pass
+                # This is a network type
+
+        # TODO we want to have only one edge for these
+        # But they will be called here for every alternative
+        if input['scope'] == 'system_event':
+            # TODO this could be Startup or Shutdown
+            # TODO work out what to do with these events
+            pass
+
+        if input['scope'] == 'every':
+            # TODO work out what to do with these events
+            pass
+
+        if input['scope'] == 'always':
+            # TODO work out what to do with these events
+            pass
+
+        if input['scope'] == 'io':
+            # TODO work out what to do with these events
+            pass
+
+        if input['scope'] == 'tcp':
+            # TODO work out what to do with these events
+            pass
+
+        if input['scope'] == 'udp':
+            # TODO work out what to do with these events
+            pass
+
+        if input['scope'] == 'udp_broadcast':
+            # TODO work out what to do with these events
+            pass
+
+        if input['scope'] == 'udp_multicast':
+            # TODO work out what to do with these events
+            pass
+
+        if input['scope'] == 'configuration':
+            # TODO work out what to do with these events
+            pass
+
+        if input['scope'] == 'file_watch':
+            # TODO work out what to do with these events
+            pass
+
+        # We are not going to make an edge for this
+        return None
+
     def build_reaction_graph(self, group_clusters=True):
 
         # A unique identifier for use in the clusters
         id = 0
 
         # Our graph
-        graph = Dot(graph_type='digraph', suppress_disconnected=False, splines=True, overlap=False, layout='neato')
+        graph = Dot(graph_type='digraph', suppress_disconnected=False, splines=True, overlap=False, layout='neato', epsilon=0.01, start=int(random.random() * 2**32))
 
         # Loop through each of our modules
         for m1 in self.modules:
@@ -66,38 +158,9 @@ class NUClearGraphBuilder:
 
                             for input in r2['input_data']:
 
-                                # TODO make a function here that links edges
-                                # edge = self.getEdge(input_name, input, output_name, output)
-                                # if edge: graph.add_edge(edge)
-
-                                if input['scope'] == output['scope'] and input['type'] == output['type']:
-                                    if input['scope'] == 'type':
-
-                                        # Get our type name
-                                        type_name = type_to_string(input['type'])
-
-                                        # give our global arguments
-                                        edge = {
-                                            'src':   '"{}"'.format(m1['name']),
-                                            'dst':   '"{}"'.format(dst_fqn),
-                                            'label': '"{}"'.format(type_name),
-                                            # Red for triggering edges, blue for data only edges
-                                            'color': '#FF0000' if input['modifiers'].get('execution', False) else '#0000FF'
-                                        }
-
-                                        # TODO make this function get modifiers for the edge
-                                        # self.edgeModifiers(input['modifiers'], output['modifiers'])
-
-                                        if input['modifiers'].get('optional', False):
-                                            edge['style'] = 'dashed'
-
-                                        if output['modifiers'].get('direct', False):
-                                            edge['arrowtail'] = 'dot'
-
-                                        if output['modifiers'].get('initialize', False):
-                                            edge['arrowtail'] = 'odot'
-
-                                        graph.add_edge(Edge(**edge))
+                                edge = self.make_edge(m1['name'], output, dst_fqn, input)
+                                if edge:
+                                    graph.add_edge(edge)
 
 
             # Loop through the reactions of each module
@@ -117,14 +180,25 @@ class NUClearGraphBuilder:
                     'shape': 'rect'
                 }
 
+                # If we are not grouping clusters, put the owner module here
+                if not group_clusters:
+                    node['label'] = '{0}\\n{1}'.format(m1['name'], label)
+
+                if r1['modifiers'].get('single', False):
+                    # TODO make the outline style be dashed?
+                    pass # TODO modify the reaction
+                if r1['modifiers'].get('sync', False):
+                    # TODO make the outline style be something??
+                    pass # TODO modify the reaction
+                if r1['modifiers'].get('priority', False):
+                    # TODO make the background colour depend on priority
+                    # Normal = none
+                    # High = #FF444444
+                    # Low = #44FF4444
+                    pass # TODO modify the reaction
+
                 # Add the node
                 cluster.add_node(Node(**node))
-
-                # TODO look at the modifiers for this reaction
-                # sync
-                # single
-                # priority
-                # And modifiy their colour to signifiy that
 
                 # Go through our outputs
                 for outputs in r1['output_data']:
@@ -140,101 +214,9 @@ class NUClearGraphBuilder:
                                 dst_fqn = m2['name'] + '::' + dst_reaction_identifier
 
                                 for input in r2['input_data']:
-
-
-                                    if input['scope'] == output['scope'] and input['type'] == output['type']:
-                                        if input['scope'] == 'type':
-
-                                            # Get our type name
-                                            type_name = type_to_string(input['type'])
-
-                                            # give our global arguments
-                                            edge = {
-                                                'src':   '"{}"'.format(src_fqn),
-                                                'dst':   '"{}"'.format(dst_fqn),
-                                                'label': '"{}"'.format(type_name),
-                                                # Red for triggering edges, blue for data only edges
-                                                'color': '#FF0000' if input['modifiers'].get('execution', False) else '#0000FF'
-                                            }
-
-                                            if input['modifiers'].get('optional', False):
-                                                edge['style'] = 'dashed'
-
-                                            if input['modifiers'].get('binding', False):
-                                                edge['style'] = 'dotted'
-
-                                            if output['modifiers'].get('direct', False):
-                                                edge['dir'] = 'both'
-                                                edge['arrowtail'] = 'dot'
-
-                                            if output['modifiers'].get('initialize', False):
-                                                edge['dir'] = 'both'
-                                                edge['arrowtail'] = 'odot'
-
-                                            graph.add_edge(Edge(**edge))
-
-                                            # Add our edge
-                                            # graph.add_edge(Edge(src='"{}"'.format(src_fqn), dst='"{}"'.format(dst_fqn), label='"{}"'.format(type_name)))
-
-                                            # TODO
-                                            # modifiers
-                                            #   'optional' -> style=dashed
-                                            #   'last'     -> lastthings
-                                            #   'binding'  -> things
-                                            #   'execution' -> RED
-                                            #   'data'      -> BLUE
-                                    # pass
-                                    # pdb.set_trace()
-                                    #     print 1
-
-                        # We have input modifiers and output modifiers
-
-                        # Check what scope it is
-
-                        # executing in one colour
-                        # data in another colour
-                        # the optional option makes it dashed
-                        # the last n option makes it doubleline?
-
-                        # TODO check if these two link together
-
-                        # TODO make an edge
-
-                        # todo make an Edge element here if it matches
-
-
-                # add to the subgraph?
-
-
-
-
-                # scopes
-                #   'type'
-                #   'every'
-                #   'always'
-                #   'system_event'
-                #   'io'
-                #   'network'
-                #   'tcp'
-                #   'udp'
-                #   'udp_broadcast'
-                #   'udp_multicast'
-                #   'configuration'
-
-                # modifiers
-                #   'optional'
-                #   'last'
-                #   'binding'
-
-                # Reaction modifiers
-                #   'sync'
-                #   'single'
-                #   'priority'
-
-
-        # Loop through each of our modules
-
-        # Loop through each modules reactions
+                                    edge = self.make_edge(src_fqn, output, dst_fqn, input)
+                                    if edge:
+                                        graph.add_edge(edge)
 
         return graph
 
@@ -273,7 +255,7 @@ class NUClearGraphBuilder:
 
 
         # Our graph
-        graph = Dot(graph_type='digraph', suppress_disconnected=False, splines=True, overlap=False, layout='neato')
+        graph = Dot(graph_type='digraph', suppress_disconnected=False, splines=True, overlap=False, layout='neato', epsilon=0.01, start=int(random.random() * 2**32))
 
         for m1 in compressed_modules:
 
@@ -292,84 +274,9 @@ class NUClearGraphBuilder:
                 for m2 in compressed_modules:
 
                     for input in m2['input_data']:
-
-                        # Make an edge if it matches
-                        if input['scope'] == output['scope'] and input['type'] == output['type']:
-                            if input['scope'] == 'type':
-
-                                # Get our type name
-                                type_name = type_to_string(input['type'])
-
-                                # give our global arguments
-                                edge = {
-                                    'src':   '"{}"'.format(m1['name']),
-                                    'dst':   '"{}"'.format(m2['name']),
-                                    'label': '"{}"'.format(type_name),
-                                    # Red for triggering edges, blue for data only edges
-                                    'color': '#FF0000' if input['modifiers'].get('execution', False) else '#0000FF'
-                                }
-
-                                if input['modifiers'].get('optional', False):
-                                    edge['style'] = 'dashed'
-
-                                if input['modifiers'].get('binding', False):
-                                    edge['style'] = 'dotted'
-
-                                if output['modifiers'].get('direct', False):
-                                    edge['dir'] = 'both'
-                                    edge['arrowtail'] = 'dot'
-
-                                if output['modifiers'].get('initialize', False):
-                                    edge['dir'] = 'both'
-                                    edge['arrowtail'] = 'odot'
-
-                                graph.add_edge(Edge(**edge))
-
-        return graph
-
-        # Build up a compressed modules list
-        graph_modules = {}
-
-        # Make a version of our data where all the modules are compressed into one
-        for m1 in self.modules:
-
-            # Skip several modules because they are so connected
-            if m1 == 'support::configuration::ConfigSystem' or m1 == 'support::logging::ConsoleLogHandler':
-                continue
-
-            module = self.modules[m1]
-
-            # Get our module
-            gm = graph_modules.setdefault(module['name'], {
-                'name': module['name'],
-                'inputs': set(),
-                'outputs': set()
-            })
-
-            # Add in our global outputs
-            gm['outputs'] |= module['outputs']
-
-            # Add in our reaction outputs
-            for reaction in module['reactions']:
-                gm['outputs'] |= reaction['outputs']
-                gm['inputs'] |= reaction['inputs']
-
-        # Loop through to make nodes
-        for m1 in graph_modules:
-            module = graph_modules[m1]
-
-            node = Node(name='"{}"'.format(module['name']), shape='rect')
-            graph.add_node(node)
-
-        # Loop through to link edges
-        for m1 in graph_modules:
-            us = graph_modules[m1]
-            for m2 in graph_modules:
-                them = graph_modules[m2]
-
-                # Go through every type that overlaps our outputs to their inputs
-                for type in (us['outputs'] & them['inputs']):
-                    graph.add_edge(Edge(src='"{}"'.format(us['name']), dst='"{}"'.format(them['name']), label='"{}"'.format(type), weight=0.2))
+                        edge = self.make_edge(m1['name'], output, m2['name'], input)
+                        if edge:
+                            graph.add_edge(edge)
 
         return graph
 
@@ -387,4 +294,4 @@ if __name__ == "__main__":
 
     # Build our graph and save
     converter.build_module_graph().write("{}_module.dot".format(out))
-    converter.build_reaction_graph(group_clusters=True).write("{}_reaction.dot".format(out))
+    converter.build_reaction_graph(group_clusters=False).write("{}_reaction.dot".format(out))
