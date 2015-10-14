@@ -24,7 +24,6 @@
 #include "utility/math/geometry/UnitQuaternion.h"
 #include "utility/math/matrix/Rotation3D.h"
 
-
 #include <armadillo>
 
 namespace modules {
@@ -64,7 +63,7 @@ namespace support {
 
             }
             auto now = NUClear::clock::now();
-            std::stringstream filename; 
+            std::stringstream filename;
             filename << "mocapdata/" << std::to_string(std::chrono::duration_cast<std::chrono::microseconds>(now.time_since_epoch()).count());
             log("Saving MotionCapture data to ",filename.str());
             bool success = rigidBodies.save(filename.str());
