@@ -206,6 +206,11 @@ for symbol_address in symbols:
         # TODO note there is a bug here that if an argument is the same as the type
         # getting emitted this will remove it and break it
         info = [x for x in parsed[1][3] if x not in parsed[1][-1][1:] and x != []]
+
+        # If this is a NUClear CommandLineArgs or ReactionStatisitcs ignore it
+        if len(info[-1]) == 3 and info[-1][:2] in [['NUClear', 'message', 'CommandLineArgs'], ['NUClear', 'message', 'ReactionStatistics']]:
+            continue
+
         outputs[symbol_address] = {
             'type': info[-1], # The type in the unique_ptr
             'scopes': [x[-1] for x in info[:-1]],
@@ -221,6 +226,10 @@ for symbol_address in symbols:
         # TODO note there is a bug here that if an argument is the same as the type
         # getting emitted this will remove it and break it
         info = [x for x in parsed[1][3] if x not in parsed[1][-1][1:] and x != []]
+
+        # If this is a NUClear CommandLineArgs or ReactionStatisitcs ignore it
+        if len(info[-1]) == 3 and info[-1][:2] in [['NUClear', 'message', 'CommandLineArgs'], ['NUClear', 'message', 'ReactionStatistics']]:
+            continue
 
         outputs[symbol_address] = {
             'type': info[-1], # The type in the unique_ptr
