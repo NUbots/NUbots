@@ -26,103 +26,108 @@
 namespace utility {
     namespace math {
         namespace optimisation {
+
+            /**
+             * XXX TODO Josiah, put the  description of this optimiser here
+             */
             class PGAEstimator {
-                private:
-                    arma::vec bestEstimate;
-                    arma::vec startPoint;
-                    double c = 7.0;
-                public:
-                    PGAEstimator(const arma::vec& params): startPoint(params), bestEstimate(params) {
-                        /**
-                         * Initialise the estimator with a new starting point in parameter space
-                         * 
-                         * @param params - the starting optimisation point for the algorithm
-                         *
-                         * @author Josiah Walker
-                         */
-                         
-                         //XXX: get c constant from inputs
-                    };
-                
-                    void reset() {
-                        bestEstimate = startPoint * 1.0;
-                    }
-                    
-                    arma::vec currentEstimate() {
-                        return bestEstimate;
-                    }
-                    
-                    arma::vec updateEstimate(const arma::mat& samples, const arma::vec& fitnesses, const arma::vec& unused) {
-                        /**
-                         * Generate a new best-estimate using the parameter samples and fitnesses provided.
-                         * Takes a row-wise list of sample parameters, a corresponding vector of fitnesses
-                         * 
-                         * @param samples - the tested samples in the matrix format returned by getSamples below (one sample per row)
-                         * @param fitnesses - a vector of fitnesses corresponding to each sample
-                         * 
-                         * @returns currentEstimate - an updated best parameter estimate vector to re-sample from
-                         *
-                         * @author Josiah Walker
-                         */
-                         
-                        //create a vector of normed fitnesses
-                        const double min = arma::min(fitnesses);
-                        const double max = arma::max(fitnesses);
-                        const arma::vec normedFitnesses = (max-fitnesses)/(max-min+std::numeric_limits<double>::epsilon());
-                        
-                        //create a set of weights per sample which specifies the likelihood that they are near the best estimate
-                        const arma::vec sampleWeights = arma::exp(-c*normedFitnesses);
-                        
-                        //calculate the probabilistically weighted result estimate
-                        bestEstimate = arma::sum(samples % arma::repmat(sampleWeights/arma::accu(sampleWeights),1,samples.n_cols),0).t();
-                    }
+            private:
+                arma::vec bestEstimate;
+                arma::vec startPoint;
+                const double c = 7.0;
+
+            public:
+                /**
+                 * Initialise the estimator with a new starting point in parameter space
+                 *
+                 * @param params - the starting optimisation point for the algorithm
+                 *
+                 * @author Josiah Walker
+                 */
+                PGAEstimator(const arma::vec& params)
+                : startPoint(params)
+                , bestEstimate(params) {}
+
+                void reset() {
+                    bestEstimate = startPoint * 1.0;
+                }
+
+                arma::vec currentEstimate() {
+                    return bestEstimate;
+                }
+
+                /**
+                 * Generate a new best-estimate using the parameter samples and fitnesses provided.
+                 * Takes a row-wise list of sample parameters, a corresponding vector of fitnesses
+                 *
+                 * @param samples - the tested samples in the matrix format returned by getSamples below (one sample per row)
+                 * @param fitnesses - a vector of fitnesses corresponding to each sample
+                 *
+                 * @returns currentEstimate - an updated best parameter estimate vector to re-sample from
+                 *
+                 * @author Josiah Walker
+                 */
+                arma::vec updateEstimate(const arma::mat& samples, const arma::vec& fitnesses, const arma::vec& unused) {
+
+                    //create a vector of normed fitnesses
+                    const double min = arma::min(fitnesses);
+                    const double max = arma::max(fitnesses);
+                    const arma::vec normedFitnesses = (max-fitnesses)/(max-min+std::numeric_limits<double>::epsilon());
+
+                    //create a set of weights per sample which specifies the likelihood that they are near the best estimate
+                    const arma::vec sampleWeights = arma::exp(-c*normedFitnesses);
+
+                    //calculate the probabilistically weighted result estimate
+                    bestEstimate = arma::sum(samples % arma::repmat(sampleWeights/arma::accu(sampleWeights),1,samples.n_cols),0).t();
+                }
             };
-            
-            
+
+            /**
+             * XXX TODO Josiah, put the  description of this optimiser here
+             */
             class PGASampler {
-                private:
-                    arma::vec sigmaWeights;
-                public: 
-                    PGASampler(const arma::vec& params): sigmaWeights(params) {
-                            /**
-                             * Initialise the estimator with a new starting point in parameter space
-                             * 
-                             * @param params - the starting sigmas for each dimension (ie the scaling factor to step in each dimension)
-                             *
-                             * @author Josiah Walker
-                             */
-                    };
-                    
-                    
-                    void reset() {
-                        ; //unused
-                    }
-                    
-                    arma::vec getVariances() {
-                        return arma::square(sigmaWeights);
-                    }
-                    
-                    updateEstimate(const arma::mat& samples, const arma::vec& fitnesses, const arma::vec& currentEstimate) {
-                        ; //unused
-                    }
-                    
-                    /**
-                     * Function to create a new set of parameter samples from a best estimate and
-                     * a vec of per-dimension scales for the gaussian noise additive (sigmaweights).
-                     * @param bestEstimate - the current estimated best parameter set
-                     * 
-                     * @param numSamples - the number of test parameter sets to generate (this varies, but 5-12 is usually good)
-                     * 
-                     * @returns newSamples - a numSamples rows by numParams cols matrix of sample parameter sets to try
-                     * 
-                     * @author Josiah walker
-                     */
-                    arma::mat getSamples(const arma::vec& bestEstimate, const size_t& numSamples) {
-                        return   arma::randn<arma::mat>(numSamples,bestEstimate.n_elem) 
-                               % arma::repmat(sigmaWeights, 1, numSamples).t() 
-                               + arma::repmat(bestEstimate, 1, numSamples).t();
-                    }
+            private:
+                arma::vec sigmaWeights;
+
+            public:
+                /**
+                 * Initialise the estimator with a new starting point in parameter space
+                 *
+                 * @param params - the starting sigmas for each dimension (ie the scaling factor to step in each dimension)
+                 *
+                 * @author Josiah Walker
+                 */
+                PGASampler(const arma::vec& params)
+                : sigmaWeights(params) {}
+
+                void reset() {
+                }
+
+                arma::vec getVariances() {
+                    return arma::square(sigmaWeights);
+                }
+
+                updateEstimate(const arma::mat& samples, const arma::vec& fitnesses, const arma::vec& currentEstimate) {
+                }
+
+                /**
+                 * Function to create a new set of parameter samples from a best estimate and
+                 * a vec of per-dimension scales for the gaussian noise additive (sigmaweights).
+                 * @param bestEstimate - the current estimated best parameter set
+                 *
+                 * @param numSamples - the number of test parameter sets to generate (this varies, but 5-12 is usually good)
+                 *
+                 * @returns newSamples - a numSamples rows by numParams cols matrix of sample parameter sets to try
+                 *
+                 * @author Josiah walker
+                 */
+                arma::mat getSamples(const arma::vec& bestEstimate, const size_t& numSamples) {
+                    return   arma::randn<arma::mat>(numSamples,bestEstimate.n_elem)
+                           % arma::repmat(sigmaWeights, 1, numSamples).t()
+                           + arma::repmat(bestEstimate, 1, numSamples).t();
+                }
             };
+
         }
     }
 }
