@@ -50,14 +50,12 @@ class NUClearGraphBuilder:
                     edge['style'] = 'dashed'
 
                 if input['modifiers'].get('last', False):
+                    # TODO do something here
                     # Try to make the line a different style
-                    pass # TODO do something here
+                    pass
 
                 if output['modifiers'].get('binding', False):
-
-                    # TODO change the colour of the line?
-                    # TODO make the line style dotted
-                    pass # TODO do something here
+                    edge['style'] = 'dotted'
 
                 if output['modifiers'].get('direct', False):
                     edge['dir'] = 'both'
@@ -125,7 +123,18 @@ class NUClearGraphBuilder:
         id = 0
 
         # Our graph
-        graph = Dot(graph_type='digraph', suppress_disconnected=False, splines=True, overlap=False, layout='neato', epsilon=0.01, start=int(random.random() * 2**32))
+        graph = {
+            'label': 'Reactions',
+            'graph_type': 'digraph',
+            'suppress_disconnected': False,
+            'splines': 'polyline',
+            'overlap': 'prism10000',
+            'layout': 'fdp',
+            'epsilon': 0.01,
+            'start': int(random.random() * 2**32)
+        }
+
+        graph = Dot(**graph)
 
         # Loop through each of our modules
         for m1 in self.modules:
@@ -138,29 +147,30 @@ class NUClearGraphBuilder:
                 cluster = graph
 
             # Add a node for our module itself
-            node = {
-                'name': '"{}"'.format(m1['name']),
-                'label': '"{}"'.format(m1['name']),
-                'shape': 'rect'
-            }
-            cluster.add_node(Node(**node))
+            if m1['output_data']:
+                node = {
+                    'name': '"{}"'.format(m1['name']),
+                    'label': '"{}"'.format(m1['name']),
+                    'shape': 'rect'
+                }
+                cluster.add_node(Node(**node))
 
-            for outputs in m1['output_data']:
-                for output in outputs:
-                    # Loop through our reactions in all the other modules
-                    for m2 in self.modules:
-                        for r2 in m2['reactions']:
+                for outputs in m1['output_data']:
+                    for output in outputs:
+                        # Loop through our reactions in all the other modules
+                        for m2 in self.modules:
+                            for r2 in m2['reactions']:
 
-                            # Get our destination fqn
-                            dst_text_dsl = type_to_string(['DSL', r2['dsl']])[4:-1]
-                            dst_reaction_identifier = '0x{0:x}<{1}>'.format(r2['address'], dst_text_dsl)
-                            dst_fqn = m2['name'] + '::' + dst_reaction_identifier
+                                # Get our destination fqn
+                                dst_text_dsl = type_to_string(['DSL', r2['dsl']])[4:-1]
+                                dst_reaction_identifier = '0x{0:x}<{1}>'.format(r2['address'], dst_text_dsl)
+                                dst_fqn = m2['name'] + '::' + dst_reaction_identifier
 
-                            for input in r2['input_data']:
+                                for input in r2['input_data']:
 
-                                edge = self.make_edge(m1['name'], output, dst_fqn, input)
-                                if edge:
-                                    graph.add_edge(edge)
+                                    edge = self.make_edge(m1['name'], output, dst_fqn, input)
+                                    if edge:
+                                        graph.add_edge(edge)
 
 
             # Loop through the reactions of each module
@@ -191,6 +201,16 @@ class NUClearGraphBuilder:
                     # TODO make the outline style be something??
                     pass # TODO modify the reaction
                 if r1['modifiers'].get('priority', False):
+                    if r1['modifiers']['priority'] == 'LOW':
+                        node['style'] = 'filled'
+                        node['fillcolor'] = '#44FF4444'
+
+                    elif r1['modifiers']['priority'] == 'HIGH':
+                        node['style'] = 'filled'
+                        node['fillcolor'] = '#FF444444'
+
+                    # elif r1['modifiers']['priority'] == 'NORMAL':
+
                     # TODO make the background colour depend on priority
                     # Normal = none
                     # High = #FF444444
@@ -255,7 +275,7 @@ class NUClearGraphBuilder:
 
 
         # Our graph
-        graph = Dot(graph_type='digraph', suppress_disconnected=False, splines=True, overlap=False, layout='neato', epsilon=0.01, start=int(random.random() * 2**32))
+        graph = Dot(graph_type='digraph', suppress_disconnected=True, splines=True, overlap='prism10000', layout='neato', epsilon=0.01, start=int(random.random() * 2**32))
 
         for m1 in compressed_modules:
 
@@ -294,4 +314,4 @@ if __name__ == "__main__":
 
     # Build our graph and save
     converter.build_module_graph().write("{}_module.dot".format(out))
-    converter.build_reaction_graph(group_clusters=False).write("{}_reaction.dot".format(out))
+    converter.build_reaction_graph(group_clusters=True).write("{}_reaction.dot".format(out))
