@@ -42,7 +42,6 @@ namespace research {
     public:
         /// @brief Called by the powerplant to build and setup the PressureAutoClassifier reactor.
         explicit PressureAutoClassifier(std::unique_ptr<NUClear::Environment> environment);
-        static constexpr const char* CONFIGURATION_PATH = "PressureAutoClassifier.yaml";
     };
 
 }

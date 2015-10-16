@@ -25,24 +25,21 @@
 #include "messages/localisation/FieldObject.h"
 #include "messages/input/Sensors.h"
 #include "messages/support/Configuration.h"
-#include "utility/math/kalman/UKF.h"
+#include "utility/math/filter/UKF.h"
 #include "utility/math/vision.h"
 #include "utility/math/angle.h"
 #include "utility/math/kalman/InverseDepthPointModel.h"
 #include <algorithm>
 
-
 namespace modules{
     namespace vision{
-
-
 
         template <class FeatureDetectorClass>
         class SLAMEModule{
         private:
             std::vector<float> featureStrengths;
             std::vector<typename FeatureDetectorClass::ExtractedFeature> features;
-            std::vector<utility::math::kalman::UKF<utility::math::kalman::InverseDepthPointModel>> featureFilters;
+            std::vector<utility::math::filter::UKF<utility::math::filter::InverseDepthPointModel>> featureFilters;
 
             static constexpr size_t MODEL_SIZE = utility::math::kalman::InverseDepthPointModel::size;
             using StateVector = arma::vec::fixed<MODEL_SIZE>;
@@ -73,7 +70,7 @@ namespace modules{
             {
                 lastTime = NUClear::clock::now();
             }
-            void setParameters(const messages::support::Configuration<FeatureDetectorClass>& config){
+            void setParameters(const messages::support::Configuration& config){
                 MAX_MATCHES = config["MAX_MATCHES"].template as<size_t>();
                 MEASUREMENT_COV_FACTOR = config["MEASUREMENT_COV_FACTOR"].template as<float>();
                 RHO_INITIAL = config["RHO_INITIAL"].template as<float>();

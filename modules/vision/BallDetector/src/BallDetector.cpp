@@ -114,7 +114,7 @@ namespace vision {
     BallDetector::BallDetector(std::unique_ptr<NUClear::Environment> environment)
         : Reactor(std::move(environment)) {
 
-        on<Trigger<Configuration<BallDetector>>>([this](const Configuration<BallDetector>& config) {
+        on<Configuration>("BallDetector.yaml").then([this] (const Configuration& config) {
 
             MINIMUM_POINTS_FOR_CONSENSUS = config["ransac"]["minimum_points_for_consensus"].as<uint>();
             CONSENSUS_ERROR_THRESHOLD = config["ransac"]["consensus_error_threshold"].as<Expression>();
@@ -138,8 +138,15 @@ namespace vision {
             lastFrame.time = NUClear::clock::now();
         });
 
-        on<Trigger<Raw<ClassifiedImage<ObjectClass>>>, With<CameraParameters>, With<Optional<FieldDescription>>, With<LookUpTable>, Options<Single>>("Ball Detector", [this](
-            std::shared_ptr<const ClassifiedImage<ObjectClass>> rawImage, const CameraParameters& cam, std::shared_ptr<const FieldDescription> field, const LookUpTable& lut) {
+        on<Trigger<ClassifiedImage<ObjectClass>>
+         , With<CameraParameters>
+         , Optional<With<FieldDescription>>
+         , With<LookUpTable>
+         , Single>().then("Ball Detector", [this](
+            std::shared_ptr<const ClassifiedImage<ObjectClass>> rawImage
+            , const CameraParameters& cam
+            , std::shared_ptr<const FieldDescription> field
+            , const LookUpTable& lut) {
 
             if (field == nullptr) {
                 NUClear::log(__FILE__, ", ", __LINE__, ": FieldDescription Update: support::configuration::SoccerConfig module might not be installed.");
@@ -255,7 +262,7 @@ namespace vision {
                 if(deltaT == 0) {
                     widthVel = arma::zeros(3);
                     widthVelCov = 1e5 * arma::eye(3,3);
-                }else if(deltaT < 1){
+                } else if(deltaT < 1){
                     widthVel = (ballCentreGroundWidth - lastFrame.widthBall) / deltaT;
                 } else {
                     //If we haven't see the ball for a while we don't measure velocity
@@ -352,7 +359,6 @@ namespace vision {
             emit(std::move(balls));
 
             lastFrame.time = sensors.timestamp;
-
         });
     }
 

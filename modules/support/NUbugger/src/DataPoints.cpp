@@ -19,28 +19,25 @@
 
 #include "NUbugger.h"
 
-#include "messages/support/nubugger/proto/Message.pb.h"
+#include "messages/support/nubugger/proto/DataPoint.pb.h"
 
 #include "utility/time/time.h"
 
 namespace modules {
 namespace support {
-    using messages::support::nubugger::proto::Message;
     using utility::time::getUtcTimestamp;
 
     using messages::support::nubugger::proto::DataPoint;
 
     void NUbugger::provideDataPoints() {
 
-        handles[Message::DATA_POINT].push_back(on<Trigger<DataPoint>>([this](const DataPoint& dataPoint) {
+        handles["data_point"].push_back(on<Trigger<DataPoint>>().then([this](const DataPoint& dataPoint) {
 
             uint filterId = dataPointFilterIds.find(dataPoint.label()) == dataPointFilterIds.end()
                 ? dataPointFilterIds.insert(std::make_pair(dataPoint.label(), dataPointFilterId++)).first->second
                 : dataPointFilterIds[dataPoint.label()];
-            
-            Message message = createMessage(Message::DATA_POINT, filterId);
-            *message.mutable_data_point() = dataPoint;
-            send(message);
+
+            send(dataPoint, filterId);
         }));
     }
 }

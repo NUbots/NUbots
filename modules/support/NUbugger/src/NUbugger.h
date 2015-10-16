@@ -21,10 +21,11 @@
 #define MODULES_SUPPORT_NUBUGGER_H
 
 #include <nuclear>
-#include <zmq.hpp>
-#include "messages/support/nubugger/proto/Message.pb.h"
 #include "messages/localisation/FieldObject.h"
 #include "messages/input/gameevents/GameEvents.h"
+#include "messages/support/nubugger/proto/Overview.pb.h"
+#include "messages/behaviour/proto/Subsumption.pb.h"
+#include "messages/support/nubugger/proto/ConfigurationState.pb.h"
 
 namespace modules {
     namespace support {
@@ -37,8 +38,23 @@ namespace modules {
          */
         class NUbugger : public NUClear::Reactor {
         private:
-            zmq::socket_t pub;
-            zmq::socket_t sub;
+
+            template <typename T>
+            struct NUsightMessage {
+
+                NUsightMessage() {};
+
+                NUsightMessage(const T& proto
+                               , uint8_t filterid
+                               , uint64_t timestamp)
+                : proto(proto)
+                , filterid(filterid)
+                , timestamp(timestamp) {}
+
+                T proto;
+                uint8_t filterid;
+                uint64_t timestamp;
+            };
 
             uint pubPort = 0;
             uint subPort = 0;
@@ -51,7 +67,7 @@ namespace modules {
             bool listening = true;
 
             // Reaction Handles
-            std::map<messages::support::nubugger::proto::Message::Type, std::vector<ReactionHandle>> handles;
+            std::map<std::string, std::vector<ReactionHandle>> handles;
 
             std::map<std::string, uint> dataPointFilterIds;
             uint dataPointFilterId = 1;
@@ -89,28 +105,50 @@ namespace modules {
             void sendConfigurationState();
             void sendSubsumption();
 
-            void send(zmq::message_t& packet);
-            void send(messages::support::nubugger::proto::Message message);
+            template <typename T>
+            void send(T&& proto, uint8_t filterId = 0, bool reliable = false, NUClear::clock::time_point time = NUClear::clock::now()) {
+                using ProtobufType = NUClear::util::Meta::RemoveRef<T>;
 
-            messages::support::nubugger::proto::Message createMessage(messages::support::nubugger::proto::Message::Type type, uint filterId=0);
+                // Wrap our protobuf in a message with filter information
+                auto msg = std::make_unique<NUsightMessage<ProtobufType>>(std::forward<T>(proto), filterId, std::chrono::duration_cast<std::chrono::milliseconds>(time.time_since_epoch()).count());
 
-            void recvMessage(const messages::support::nubugger::proto::Message& message);
-            void recvCommand(const messages::support::nubugger::proto::Message& message);
-            void recvLookupTable(const messages::support::nubugger::proto::Message& message);
-            void recvReactionHandles(const messages::support::nubugger::proto::Message& message);
-            void recvConfigurationState(const messages::support::nubugger::proto::Message& message);
+                // Send the message over the network
+                if(networkEnabled) {
+                    emit<Scope::NETWORK>(msg, "nusight", reliable);
+                }
+                // If we are writing to a file
+                if(fileEnabled && outputFile) {
+                    // Lock the file mutex
+                    std::lock_guard<std::mutex> lock(fileMutex);
+
+                    // Get the details
+                    uint32_t size = msg->proto.ByteSize() + (sizeof(uint64_t) * 3);
+                    std::array<uint64_t, 2> hash = NUClear::util::serialise::Serialise<ProtobufType>::hash();
+
+                    // Write the size
+                    outputFile.write(reinterpret_cast<char*>(&size), sizeof(uint32_t));
+                    // Write the timestamp
+                    outputFile.write(reinterpret_cast<char*>(&msg->timestamp), sizeof(uint64_t));
+                    // Write the hash
+                    outputFile.write(reinterpret_cast<char*>(hash.data()), sizeof(hash));
+                    // Write the protocol buffer
+                    msg->proto.SerializeToOstream(&outputFile);
+                }
+            }
+
+            // void recvMessage(const messages::support::nubugger::proto::Message& message);
+            // void recvCommand(const messages::support::nubugger::proto::Message& message);
+            // void recvLookupTable(const messages::support::nubugger::proto::Message& message);
+            // void recvReactionHandles(const messages::support::nubugger::proto::Message& message);
+            void recvConfigurationState(const messages::support::nubugger::proto::ConfigurationState& state);
 
             void EmitLocalisationModels(
                 const std::unique_ptr<messages::localisation::FieldObject>& robot_model,
                 const std::unique_ptr<messages::localisation::FieldObject>& ball_model);
 
-            void run();
-            void kill();
-
-            messages::support::nubugger::proto::Message::Type getMessageTypeFromString(std::string type_name);
-            std::string getStringFromMessageType(messages::support::nubugger::proto::Message::Type type);
+            // messages::support::nubugger::proto::Message::Type getMessageTypeFromString(std::string type_name);
+            // std::string getStringFromMessageType(messages::support::nubugger::proto::Message::Type type);
         public:
-            static constexpr const char* CONFIGURATION_PATH = "NUbugger.yaml";
             static constexpr const char* IGNORE_TAG = "IGNORE";
             explicit NUbugger(std::unique_ptr<NUClear::Environment> environment);
         };
@@ -118,5 +156,65 @@ namespace modules {
     }  // support
 }  // modules
 
-#endif  // MODULES_SUPPORT_NUBUGGER_H
+// Serialisation for NUsight messages
+namespace NUClear {
+    namespace util {
+        namespace serialise {
+            template <typename T>
+            struct Serialise<modules::support::NUbugger::NUsightMessage<T>, modules::support::NUbugger::NUsightMessage<T>> {
 
+                using Type = modules::support::NUbugger::NUsightMessage<T>;
+
+                static inline std::vector<char> serialise(const Type& in) {
+
+                    constexpr int metasize = sizeof(uint8_t) + sizeof(uint64_t);
+
+                    // Allocate our buffer
+                    std::vector<char> output(in.proto.ByteSize() + metasize);
+
+                    // Get the pointers for our metadata
+                    uint8_t* filterid = reinterpret_cast<uint8_t*>(output.data());
+                    uint64_t* timestamp = reinterpret_cast<uint64_t*>(output.data() + sizeof(uint8_t));
+
+                    // Write our metadata
+                    *filterid = in.filterid;
+                    *timestamp = in.timestamp;
+
+                    // Write our actual protocol buffer
+                    in.proto.SerializeToArray(output.data() + metasize, output.size() - metasize);
+
+                    return output;
+                }
+
+                static inline Type deserialise(const std::vector<char>& in) {
+                    // Make an output
+                    Type out;
+
+                    // Get the pointers for our metadata
+                    uint8_t* filterid = reinterpret_cast<uint8_t*>(in.data());
+                    uint64_t* timestamp = reinterpret_cast<uint64_t*>(in.data() + 1);
+
+                    // Deserialize it
+                    out.filterid = *filterid;
+                    out.timestamp = *timestamp;
+                    out.proto.ParseFromArray(in.data(), in.size());
+
+                    return out;
+                }
+
+                static inline std::array<uint64_t, 2> hash() {
+
+                    // We have to construct an instance to call the reflection functions
+                    T type;
+
+                    auto name = "NUsight<" + type.GetTypeName() + ">";
+
+                    // We base the hash on the name of the protocol buffer
+                    return murmurHash3(name.c_str(), name.size());
+                }
+            };
+        }
+    }
+}
+
+#endif  // MODULES_SUPPORT_NUBUGGER_H

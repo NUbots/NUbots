@@ -44,7 +44,6 @@ namespace modules {
         using messages::vision::ClassifiedImage;
         using messages::vision::Colour;
         using messages::support::Configuration;
-        using messages::support::SaveConfiguration;
         using utility::support::Expression;
 
         void LUTClassifier::insertSegments(ClassifiedImage<ObjectClass>& image, std::vector<ClassifiedImage<ObjectClass>::Segment>& segments, bool vertical) {
@@ -71,7 +70,7 @@ namespace modules {
 
         LUTClassifier::LUTClassifier(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)), quex(new QuexClassifier) {
 
-            on<Trigger<Configuration<LUTLocation>>>([this](const Configuration<LUTLocation>& config) {
+            on<Configuration>("LookUpTable.yaml").then([this] (const Configuration& config) {
 
                 // Load our LUT
                 auto lut = std::make_unique<LookUpTable>(config.config.as<LookUpTable>());
@@ -106,11 +105,12 @@ namespace modules {
                 emit(std::move(lut));
             });
 
-            on<Trigger<SaveLookUpTable>, With<LookUpTable>>([this](const SaveLookUpTable&, const LookUpTable& lut) {
-                emit(std::make_unique<SaveConfiguration>(SaveConfiguration{ LUTLocation::CONFIGURATION_PATH, YAML::Node(lut) }));
-            });
+            // on<Trigger<SaveLookUpTable>, With<LookUpTable>>().then([this] (const LookUpTable& lut) {
+            //     emit(std::make_unique<SaveConfiguration>(SaveConfiguration{ LUTLocation::CONFIGURATION_PATH, YAML::Node(lut) }));
+            // });
 
-            auto setParams = [this] (const CameraParameters& cam, const Configuration<LUTClassifier>& config) {
+            // Trigger the same function when either update
+            on<Configuration, Trigger<CameraParameters>>("LUTClassifier.yaml").then([this] (const Configuration& config, const CameraParameters& cam) {
 
                 // Visual horizon detector
                 VISUAL_HORIZON_SPACING = cam.focalLengthPixels * tan(config["visual_horizon"]["spacing"].as<double>());
@@ -144,14 +144,14 @@ namespace modules {
                 // Camera settings
                 ALPHA = cam.pixelsToTanThetaFactor[1];
                 FOCAL_LENGTH_PIXELS = cam.focalLengthPixels;
-            };
+            });
 
-            // Trigger the same function when either update
-            on<Trigger<CameraParameters>, With<Configuration<LUTClassifier>>>(setParams);
-            on<With<CameraParameters>, Trigger<Configuration<LUTClassifier>>>(setParams);
-
-            on<Trigger<Raw<Image>>, With<LookUpTable>, With<Raw<Sensors>>, Options<Single>>("Classify Image", [this](
-                std::shared_ptr<const Image> rawImage, const LookUpTable& lut, std::shared_ptr<const Sensors> sensors) {
+            on<Trigger<Image>
+            , With<LookUpTable>
+            , With<Sensors>
+            , Single>().then("Classify Image", [this] (std::shared_ptr<const Image> rawImage
+                      , const LookUpTable& lut
+                      , std::shared_ptr<const Sensors> sensors) {
 
                 //TODO
                 // if(std::fabs(sensors.servo[ServoID::HEAD_PITCH].currentVelocity) + std::fabs(sensors.servo[ServoID::HEAD_YAW].currentVelocity) > threshold)

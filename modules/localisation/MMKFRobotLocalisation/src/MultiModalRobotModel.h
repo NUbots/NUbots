@@ -33,9 +33,6 @@
 
 namespace modules {
 namespace localisation {
-    struct MultiModalRobotModelConfig {
-        static constexpr const char* CONFIGURATION_PATH = "MultiModalRobotModel.yaml";
-    };
 
     class RobotHypothesis {
     // private:
@@ -113,8 +110,7 @@ namespace localisation {
             robot_models_.push_back(std::make_unique<RobotHypothesis>());
         }
 
-        void UpdateConfiguration(
-            const messages::support::Configuration<modules::localisation::MultiModalRobotModelConfig>& config) {
+        void UpdateConfiguration( const messages::support::Configuration& config) {
             cfg_.merging_enabled = config["MergingEnabled"].as<bool>();
             cfg_.max_models_after_merge = config["MaxModelsAfterMerge"].as<int>();
             cfg_.merge_min_translation_dist = config["MergeMinTranslationDist"].as<float>();

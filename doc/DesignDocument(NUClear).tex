@@ -268,7 +268,7 @@
 					    // Do something with the image data here.
 					}
 
-					on<Trigger<Image>>(processImage);
+					on<Trigger<Image>>().then(processImage);
 				\end{cppcode}
 
 				\emph{With} tells NUClear that you are interested in something but you don't want to trigger on it.
@@ -280,7 +280,7 @@
 					    // Do something with image and motor data here
 					}
 
-					on<Trigger<Image>, With<MotorPositions>>(processImage);
+					on<Trigger<Image>, With<MotorPositions>>().then(processImage);
 				\end{cppcode}
 
 				\emph{With} also allows you to request multiple chunks of data so you're not limited to just a single extra piece of data.
@@ -292,7 +292,7 @@
 					    // Do something with vision, image and localization here
 					}
 
-					on<Trigger<Vision>, With<Image, Localization>>(processBehaviour);
+					on<Trigger<Vision>, With<Image, Localization>>().then(processBehaviour);
 				\end{cppcode}
 
 			\subsubsection{Emit}
@@ -333,7 +333,7 @@
 					std::unique_ptr<MyData> myData = std::make_unique<MyData>();
 
 					// Send the data to the network!
-					emit<Scope::LOCAL, Scope::NETWORK>(std::move(myData));
+					emit<LOCAL, NETWORK>(std::move(myData));
 				\end{cppcode}
 
 				\begin{figure}[p]
@@ -449,7 +449,7 @@
 					    log("Got data: ", image.data);
 					}
 
-					on<Trigger<Image>>(processImage);
+					on<Trigger<Image>>().then(processImage);
 				\end{cppcode}
 
 				In the previous example the "Got data" message is attached to the processImage reaction allowing us to determine the exact context the message occurred in.
@@ -504,7 +504,7 @@
 
 				\begin{cppcode}
 				// Example of Every
-				on<Trigger<Every<50, std::chrono::milliseconds>>>(function);
+				on<Every<50, std::chrono::milliseconds>>().then(function);
 				\end{cppcode}
 
 			\subsubsection{Last}
@@ -524,7 +524,7 @@
 
 				\begin{cppcode}
 				// Example of Last
-				on<Trigger<Last<10, Image>>>(function);
+				on<Last<10, Trigger<Image>>>().then(function);
 				\end{cppcode}
 
 			\subsubsection{Networked}
@@ -539,7 +539,7 @@
 					emit<Scope::NETWORK>(message);
 
 					// Send a message locally and to the network
-					emit<Scope::LOCAL, Scope::NETWORK>(message);
+					emit<LOCAL, NETWORK>(message);
 				\end{cppcode}
 
 				Internally the Networking extension uses the ZeroMQ library to handle connection management.
@@ -557,7 +557,7 @@
 					}
 
 					// Trigger on images from the network
-					on<Trigger<Network<Image>>>(processNetworkImage);
+					on<Network<Image>>().then(processNetworkImage);
 				\end{cppcode}
 
 				The \texttt{Network<Image>} object also contains information identifying the robot it was sent from allowing you to filter data by its source.
@@ -638,8 +638,8 @@
 
 				    // Every 1/10th of a second we want to lower the eye intensity
 				    // so that it's noticeable when it strobes back up.
-				    on<Trigger<Every<100, std::chrono::milliseconds>>,
-				       With<EyeLED>>([this](const time_t&, const EyeLED& eyeLED) {
+				    on<Every<100, std::chrono::milliseconds>,
+				       With<EyeLED>>().then([this](const EyeLED& eyeLED) {
 				        // Construct a new EyeLED message to change the eye colour.
 				        auto newEyes = std::make_unique<EyeLED>();
 

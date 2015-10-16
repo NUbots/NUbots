@@ -70,7 +70,7 @@ namespace planning {
         : Reactor(std::move(environment)) {
 
 
-        on<Trigger<Configuration<KickPlanner> > >([this](const Configuration<KickPlanner>& config) {
+        on<Configuration>("KickPlanner.yaml").then([this](const Configuration& config) {
             cfg.max_ball_distance = config["max_ball_distance"].as<float>();
             cfg.kick_corridor_width = config["kick_corridor_width"].as<float>();
             cfg.seconds_not_seen_limit = config["seconds_not_seen_limit"].as<float>();
@@ -79,12 +79,12 @@ namespace planning {
         });
 
 
-        on< Trigger<Ball>,
+        on<Trigger<Ball>,
             With<std::vector<Self>>,
             With<FieldDescription>,
             With<KickPlan>,
             With<Sensors>,
-            With<IKKickParams>>([this] (
+            With<IKKickParams>>().then([this] (
             const Ball& ball,
             const std::vector<Self>& selfs,
             const FieldDescription& fd,

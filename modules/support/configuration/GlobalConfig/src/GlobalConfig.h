@@ -28,7 +28,6 @@ namespace configuration {
 
     class GlobalConfig : public NUClear::Reactor {
     public:
-        static constexpr const char* CONFIGURATION_PATH = "GlobalConfig.yaml";
         /// @brief Called by the powerplant to build and setup the GlobalConfig reactor.
         explicit GlobalConfig(std::unique_ptr<NUClear::Environment> environment);
     };

@@ -26,12 +26,3 @@ message LookUpTable {
     required uint32 bits_cr = 4;
     optional bool save = 5;
 }
-
-message LookUpTableDiff {
-    message Diff {
-        required uint32 lut_index = 1;
-        required uint32 classification = 2;
-    }
-    // format is a repeated 4 bytes of [y, cb, cr, classification]
-    repeated Diff diff = 1;
-}

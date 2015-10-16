@@ -21,17 +21,15 @@
 #define MODULES_VISION_SLAME_H
 
 #include <nuclear>
-#include "utility/vision/ORBFeatureExtractor.h"    //Example subclass of SLAMEFeatureDetector
-#include "utility/vision/MockFeatureExtractor.h" 
-#include "messages/input/Image.h"   
-#include "messages/localisation/FieldObject.h"   
-#include "messages/input/Sensors.h"   
-#include "messages/vision/VisionObjects.h"   
+#include "utility/vision/MockFeatureExtractor.h"
+#include "messages/input/Image.h"
+#include "messages/localisation/FieldObject.h"
+#include "messages/input/Sensors.h"
+#include "messages/vision/VisionObjects.h"
 #include "SLAMEModule.h"
-#include "utility/math/kalman/UKF.h"
 
 namespace modules {
-    namespace vision {        
+    namespace vision {
         // template class SLAMEModule<utility::vision::ORBFeatureExtractor>;
         // template class SLAMEModule<utility::vision::MockFeatureExtractor>;
 
@@ -49,16 +47,15 @@ namespace modules {
         private:
             FeatureExtractorType FEATURE_EXTRACTOR_TYPE;
             int MAX_FEATURE_MATCHES;
-            
+
             //SLAMEModule<utility::vision::ORBFeatureExtractor> ORBModule;
             SLAMEModule<utility::vision::MockFeatureExtractor> MockSLAMEModule;
-            
+
             ReactionHandle fakeLocalisationHandle;
             double FAKE_LOCALISATION_PERIOD = 1;
             double FAKE_LOCALISATION_RADIUS = 1;
             NUClear::clock::time_point start_time;
         public:
-            static constexpr const char* CONFIGURATION_PATH = "SLAME.json";
             explicit SLAME(std::unique_ptr<NUClear::Environment> environment);
         };
     }

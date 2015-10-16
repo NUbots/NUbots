@@ -32,9 +32,6 @@ namespace skills {
     public:
         /// @brief Called by the powerplant to build and setup the WalkEngineStand reactor.
         explicit WalkEngineStand(std::unique_ptr<NUClear::Environment> environment);
-
-        /// @brief the path to the configuration file for WalkEngineStand
-        static constexpr const char* CONFIGURATION_PATH = "WalkEngineStand.yaml";
     };
 
 }

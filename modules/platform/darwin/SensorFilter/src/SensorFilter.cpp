@@ -90,13 +90,12 @@ namespace modules {
             // intialize orientation filter to measured values when standing
             , orientationFilter(arma::vec({0, 0, 0, -9.6525e-01, -2.4957e-02, 1.8088e-01, 1.8696e-01})) {
 
-                on<Trigger<Configuration<SensorFilter>>>([this](const Configuration<SensorFilter>& config){
+                on<Configuration>("DarwinSensorFilter.yaml").then([this](const Configuration& config){
                     DEFAULT_NOISE_GAIN = config["default_noise_gain"].as<double>();
                     HIGH_NOISE_THRESHOLD = config["high_noise_threshold"].as<double>();
                     HIGH_NOISE_GAIN = config["high_noise_gain"].as<double>();
                     LOW_NOISE_THRESHOLD = config["low_noise_threshold"].as<double>();
                     DEBOUNCE_THRESHOLD = config["debounce_threshold"].as<int>();
-
 
                     SUPPORT_FOOT_FSR_THRESHOLD = config["support_foot_fsr_threshold"].as<double>();
                     REQUIRED_NUMBER_OF_FSRS = config["required_number_of_fsrs"].as<int>();
@@ -114,7 +113,7 @@ namespace modules {
                     odometry_covariance_factor = config["odometry_covariance_factor"].as<double>();
                 });
 
-                on<Trigger<Last<20, DarwinSensors>>>([this](const LastList<DarwinSensors>& sensors) {
+                on<Last<20, Trigger<DarwinSensors>>>().then([this](const std::list<std::shared_ptr<const DarwinSensors>>& sensors) {
 
                     int leftCount = 0;
                     int middleCount = 0;
@@ -161,8 +160,9 @@ namespace modules {
                 });
 
                 on< Trigger<DarwinSensors>
-                  , With<Optional<Sensors>>
-                  , Options<Single, Priority<NUClear::HIGH>>>(
+                  , Optional<With<Sensors>>
+                  , Single
+                  , Priority::HIGH>().then(
                             "Main Sensors Loop",
                             [this](const DarwinSensors& input,
                                    std::shared_ptr<const Sensors> previousSensors) {

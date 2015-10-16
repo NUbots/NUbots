@@ -27,6 +27,7 @@
 #include "messages/behaviour/MotionCommand.h"
 #include "messages/behaviour/WalkPath.h"
 #include "messages/behaviour/KickPlan.h"
+#include "utility/support/yaml_armadillo.h"
 #include "utility/nubugger/NUhelpers.h"
 #include "utility/math/matrix/Transform2D.h"
 #include "utility/math/angle.h"
@@ -37,7 +38,7 @@ namespace behaviour {
 namespace planning {
     using messages::support::Configuration;
     using messages::support::FieldDescription;
-    
+
     using utility::nubugger::graph;
     using utility::math::matrix::Transform2D;
     using utility::math::angle::vectorToBearing;
@@ -54,14 +55,14 @@ namespace planning {
     OMPLPathPlanner::OMPLPathPlanner(std::unique_ptr<NUClear::Environment> environment)
     : Reactor(std::move(environment)) {
 
-        auto updateConfigLambda = [this](const Configuration<OMPLPathPlanner>& config, const FieldDescription& desc) {
+        on<Configuration, Trigger<FieldDescription>>("OMPLPathPlanner.yaml").then("OMPLPathPlanner Configuration", [this](const Configuration& config, const FieldDescription& desc) {
             // Use configuration here from file OMPLPathPlanner.yaml
 
             lastPlanningTime = NUClear::clock::time_point::min();
 
             cfg_.planning_interval = config["planning_interval"].as<float>();
             cfg_.planning_time_limit = config["planning_time_limit"].as<float>();
-            
+
             cfg_.draw_planning_tree = config["draw_planning_tree"].as<bool>();
             cfg_.target_offset = config["target_offset"].as<arma::vec2>();
 
@@ -74,14 +75,10 @@ namespace planning {
             // ppConfig.ball_obstacle_offset = config["ball_obstacle_offset"].as<arma::vec2>();
 
             pathPlanner = PathPlanner(desc, ppConfig);
-        };
-
-        // TODO: Find out why these don't compile with Options<Sync<OMPLPathPlanner>.
-        on<With<Configuration<OMPLPathPlanner>>, Trigger<FieldDescription>>("OMPLPathPlanner Configuration", updateConfigLambda);
-        on<Trigger<Configuration<OMPLPathPlanner>>, With<FieldDescription>>("OMPLPathPlanner Configuration", updateConfigLambda);
+        });
 
         // Enable/Disable path generation based on the current motion command.
-        on<Trigger<MotionCommand>>([this] (const MotionCommand& command) {
+        on<Trigger<MotionCommand>>().then([this] (const MotionCommand& command) {
             if (command.type == MotionCommand::Type::WalkToState ||
                 command.type == MotionCommand::Type::BallApproach) {
                 generatePathReaction.enable();
@@ -90,14 +87,14 @@ namespace planning {
             }
         });
 
-        generatePathReaction = on<Trigger<Every<10, Per<std::chrono::seconds>>>,
-            With<MotionCommand>,
-            With<LocalisationBall>,
-            With<std::vector<Self>>,
-            With<KickPlan>,
-            Options<Sync<OMPLPathPlanner>, Single>
-           >("Generate new path plan", [this] (
-             const NUClear::clock::time_point& /*current_time*/,
+        generatePathReaction = on<Every<10, Per<std::chrono::seconds>>
+                                , With<MotionCommand>
+                                , With<LocalisationBall>
+                                , With<std::vector<Self>>
+                                , With<KickPlan>
+                                , Sync<OMPLPathPlanner>
+                                , Single
+           >().then("Generate new path plan", [this] (
              const MotionCommand& command,
              const LocalisationBall& ball,
              const std::vector<Self>& selfs,
@@ -122,7 +119,7 @@ namespace planning {
             lastPlanningTime = now;
 
             // Generate a new path:
-            
+
             // Use the robot's current position estimate as the start state:
             Transform2D start = {self.position, vectorToBearing(self.heading)};
 
@@ -132,7 +129,7 @@ namespace planning {
             Transform2D localBall = {ball.position, 0};
             arma::vec2 globalBall = start.localToWorld(localBall).xy();
             Transform2D ballSpace = Transform2D::lookAt(globalBall, kickPlan.target);
-            
+
             // Determine the goal position and heading:
             Transform2D goal;
             switch (command.type) {
@@ -175,7 +172,7 @@ namespace planning {
             // Emit the new path to NUSight:
             if (path != nullptr) {
                 emit(utility::nubugger::drawPath("OMPLPP_Path", path->states, 0.1, {1,0.5,1}));
-                
+
                 if (cfg_.draw_planning_tree) {
                     emit(utility::nubugger::drawTree("OMPLPP_DebugTree", pathPlanner.debugPositions, pathPlanner.debugParentIndices, 0.02, {0.5, 0,0.5}));
                 }

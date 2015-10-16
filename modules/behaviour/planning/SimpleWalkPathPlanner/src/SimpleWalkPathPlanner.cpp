@@ -42,6 +42,7 @@ namespace modules {
             using messages::behaviour::WalkTarget;
             using messages::behaviour::WalkApproach;
             using messages::behaviour::KickPlan;
+            using messages::behaviour::MotionCommand;
             using messages::motion::WalkStartCommand;
             using messages::motion::WalkStopCommand;
             using messages::motion::KickFinished;
@@ -60,7 +61,7 @@ namespace modules {
                 planType = messages::behaviour::WalkApproach::StandStill;
 
                 //do a little configurating
-                on<Trigger<Configuration<SimpleWalkPathPlanner>>>([this] (const Configuration<SimpleWalkPathPlanner>& file){
+                on<Configuration>("SimpleWalkPathPlanner.yaml").then([this] (const Configuration& file){
 
                     turnSpeed = file.config["turnSpeed"].as<float>();
                     forwardSpeed = file.config["forwardSpeed"].as<float>();
@@ -70,17 +71,15 @@ namespace modules {
                 });
 
 
-                on<Trigger<KickFinished>>([this] (const KickFinished&) {
+                on<Trigger<KickFinished>>().then([this] (const KickFinished&) {
                     emit(std::move(std::make_unique<WalkStartCommand>()));
                 });
 
-                on<Trigger<Every<20, Per<std::chrono::seconds>>>,
-                    With<messages::localisation::Ball>,
-                    With<std::vector<messages::localisation::Self>>,
-                    With<Optional<std::vector<messages::vision::Obstacle>>>,
-                    Options<Sync<SimpleWalkPathPlanner>>
-                   >([this] (
-                     const time_t&,
+                on<Every<20, Per<std::chrono::seconds>>
+                 , With<messages::localisation::Ball>
+                 , With<std::vector<messages::localisation::Self>>
+                 , With<Optional<std::vector<messages::vision::Obstacle>>>
+                 , Sync<SimpleWalkPathPlanner>>().then([this] (
                      const LocalisationBall& ball,
                      const std::vector<Self>& selfs,
                      std::shared_ptr<const std::vector<VisionObstacle>> robots) {
@@ -133,7 +132,7 @@ namespace modules {
 
                 });
 
-                on<Trigger<messages::behaviour::MotionCommand>, Options<Sync<SimpleWalkPathPlanner>>>([this] (const messages::behaviour::MotionCommand& cmd) {
+                on<Trigger<MotionCommand>, Sync<SimpleWalkPathPlanner>>().then([this] (const MotionCommand& cmd) {
                     //save the plan
                     planType = cmd.walkMovementType;
                     targetHeading = cmd.targetHeadingType;

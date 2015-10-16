@@ -77,9 +77,9 @@ namespace strategy {
 
         NUClear::clock::time_point lastLocalised = NUClear::clock::now();
 
-        time_t ballLastMeasured = NUClear::clock::now() - std::chrono::seconds(600); // TODO: unhack
-        time_t ballSearchStartTime;
-        time_t selfLastMeasured;
+        NUClear::clock::time_point ballLastMeasured = NUClear::clock::now() - std::chrono::seconds(600); // TODO: unhack
+        NUClear::clock::time_point ballSearchStartTime;
+        NUClear::clock::time_point selfLastMeasured;
         void initialLocalisationReset(const messages::support::FieldDescription& fieldDescription);
         void penaltyLocalisationReset();
         void unpenalisedLocalisationReset(const messages::support::FieldDescription& fieldDescription);
@@ -98,8 +98,6 @@ namespace strategy {
         void play(const std::vector<messages::localisation::Self>& selfs, const std::vector<messages::localisation::Ball>& balls, const messages::support::FieldDescription& fieldDescription, const messages::input::gameevents::Mode& mode);
 
     public:
-        static constexpr const char* CONFIGURATION_PATH = "SoccerStrategy.yaml";
-
         explicit SoccerStrategy(std::unique_ptr<NUClear::Environment> environment);
     };
 

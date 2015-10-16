@@ -30,7 +30,6 @@ namespace research {
 
     class AutoClassifierProvider : public NUClear::Reactor {
     public:
-        static constexpr const char* CONFIGURATION_PATH = "AutoClassifierProvider.yaml";
         /// @brief Called by the powerplant to build and setup the AutoClassifier reactor.
         explicit AutoClassifierProvider(std::unique_ptr<NUClear::Environment> environment);
 

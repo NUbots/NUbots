@@ -37,7 +37,6 @@ namespace research {
     public:
         /// @brief Called by the powerplant to build and setup the LayerAutoClassifier reactor.
         explicit LayerAutoClassifier(std::unique_ptr<NUClear::Environment> environment);
-        static constexpr const char* CONFIGURATION_PATH = "LayerAutoClassifier.yaml";
     };
 
 }

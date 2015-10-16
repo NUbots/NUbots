@@ -30,7 +30,6 @@ namespace messages {
         struct FixedWalkFinished{};
         struct WalkOptimiserCommand{
             YAML::Node walkConfig;
-            static constexpr const char* CONFIGURATION_PATH = "WalkEngine.yaml";
         };
         struct WalkConfigSaved{};
         struct CancelFixedWalk{};
@@ -43,12 +42,12 @@ namespace messages {
                 arma::vec2 direction;
                 double curvePeriod;
 
-                double normalisedVelocity;                
-                double normalisedAngularVelocity;                
+                double normalisedVelocity;
+                double normalisedAngularVelocity;
                 NUClear::clock::duration duration;
             };
-            
-            std::vector<WalkSegment> segments;            
+
+            std::vector<WalkSegment> segments;
         };
     }
 }

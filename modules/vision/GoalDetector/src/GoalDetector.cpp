@@ -73,7 +73,9 @@ namespace vision {
     GoalDetector::GoalDetector(std::unique_ptr<NUClear::Environment> environment)
         : Reactor(std::move(environment)) {
 
-        auto setParams = [this] (const CameraParameters& cam, const Configuration<GoalDetector>& config) {
+        // Trigger the same function when either update
+        on<Configuration, Trigger<CameraParameters>>("GoalDetector.yaml")
+        .then([this] (const Configuration& config, const CameraParameters& cam) {
 
             MINIMUM_POINTS_FOR_CONSENSUS = config["ransac"]["minimum_points_for_consensus"].as<uint>();
             CONSENSUS_ERROR_THRESHOLD = config["ransac"]["consensus_error_threshold"].as<double>();
@@ -89,14 +91,17 @@ namespace vision {
             measurement_distance_covariance_factor = config["measurement_distance_covariance_factor"].as<double>();
             measurement_bearing_variance = config["measurement_bearing_variance"].as<double>();
             measurement_elevation_variance = config["measurement_elevation_variance"].as<double>();
-        };
+        });
 
-        // Trigger the same function when either update
-        on<Trigger<CameraParameters>, With<Configuration<GoalDetector>>>(setParams);
-        on<With<CameraParameters>, Trigger<Configuration<GoalDetector>>>(setParams);
+        on<Trigger<ClassifiedImage<ObjectClass>>
+         , With<CameraParameters>
+         , With<LookUpTable>
+         , Optional<With<FieldDescription>>
+         , Single>().then("Goal Detector", [this] (std::shared_ptr<const ClassifiedImage<ObjectClass>> rawImage
+                          , const CameraParameters& cam
+                          , const LookUpTable& lut
+                          , std::shared_ptr<const FieldDescription> field) {
 
-        on<Trigger<Raw<ClassifiedImage<ObjectClass>>>, With<CameraParameters>, With<LookUpTable>, With<Optional<FieldDescription>>, Options<Single>>("Goal Detector", [this](
-            std::shared_ptr<const ClassifiedImage<ObjectClass>> rawImage, const CameraParameters& cam, const LookUpTable& lut, std::shared_ptr<const FieldDescription> field) {
             if (field == nullptr) {
                 NUClear::log(__FILE__, ", ", __LINE__, ": FieldDescription Update: support::configuration::SoccerConfig module might not be installed.");
                 throw std::runtime_error("FieldDescription Update: support::configuration::SoccerConfig module might not be installed");

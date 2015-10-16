@@ -21,6 +21,7 @@
 
 #include <ncurses.h>
 #include <csignal>
+#include <cstdio>
 #include <format.h>
 
 #include "messages/behaviour/MotionCommand.h"
@@ -33,6 +34,7 @@ namespace modules {
 namespace behaviour {
 namespace strategy {
 
+    using NUClear::message::LogMessage;
     using messages::behaviour::MotionCommand;
     using messages::motion::HeadCommand;
     using messages::motion::KickCommand;
@@ -44,17 +46,6 @@ namespace strategy {
 
         velocity.zeros();
 
-        powerplant.addServiceTask(NUClear::threading::ThreadWorker::ServiceTask(std::bind(std::mem_fn(&KeyboardWalk::run), this), std::bind(std::mem_fn(&KeyboardWalk::kill), this)));
-
-        // emit<Scope::INITIALIZE>(std::make_unique<WalkStartCommand>());
-        // moving = true;
-    }
-
-    void KeyboardWalk::run() {
-        // TODO: on command change emit velocity changes
-        // TODO: on fall, use get up?
-        // TODO: kill motors command
-
         // Start curses mode
         initscr();
         // Capture our characters immediately (but pass through signals)
@@ -63,18 +54,13 @@ namespace strategy {
         keypad(stdscr, true);
         // Don't echo the users messages
         noecho();
-        // Hide the cursor
-        //curs_set(false);
-
-        on<Trigger<NUClear::LogMessage>, Options<Sync<KeyboardWalk>>>([this](const NUClear::LogMessage& message) {
-            printw((message.message + "\n").c_str());
-            refresh();
-        });
 
         updateCommand();
         printStatus();
 
-        do {
+        // Trigger when stdin has something to read
+        on<IO>(::fileno(stdin), IO::READ).then([this] {
+
             switch (tolower(getch())) {
                 case 'w':
                     forward();
@@ -124,7 +110,14 @@ namespace strategy {
                 default:
                     log("Unknown Command");
             }
-        } while (running);
+        });
+
+        on<Trigger<LogMessage>, Sync<KeyboardWalk>>().then([this](const LogMessage& message) {
+            printw((message.message + "\n").c_str());
+            refresh();
+        });
+
+        on<Shutdown>().then(endwin);
     }
 
     void KeyboardWalk::forward() {
@@ -255,10 +248,6 @@ namespace strategy {
     void KeyboardWalk::quit() {
         endwin();
         std::raise(SIGINT);
-    }
-
-    void KeyboardWalk::kill() {
-        running = false;
     }
 
 }

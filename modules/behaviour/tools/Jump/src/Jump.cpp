@@ -58,14 +58,10 @@ namespace tools {
             }
         }));
 
-        on<Trigger<ButtonMiddleDown>>([this] (const ButtonMiddleDown&) {
+        on<Trigger<ButtonMiddleDown>>().then([this] {
             std::this_thread::sleep_for(std::chrono::seconds(2));
 
             emit(std::make_unique<ExecuteScriptByName>(2,  std::vector<std::string>({"Jump.yaml"})));
-        });
-
-        on<Trigger<Configuration<Jump>>>([this] (const Configuration<Jump>& config) {
-            // Use configuration here from file Jump.yaml
         });
     }
 }

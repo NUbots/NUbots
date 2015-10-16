@@ -27,20 +27,18 @@ namespace modules {
     namespace behaviour {
         namespace tools {
 
-            struct DanceScripts {
-                // For scripts we want updates on the whole scripts directory
-                static constexpr const char* CONFIGURATION_PATH = "scripts/dance/";
-            };
+            using messages::support::Configuration;
 
             DanceDarwin::DanceDarwin(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
 
-                on<Trigger<messages::support::Configuration<DanceScripts>>>([this](const messages::support::Configuration<DanceScripts>& script) {
+                on<Configuration>("scripts/dance/").then([this](const Configuration& script) {
                     // Add this script to our list of scripts
                     scripts.insert(std::make_pair(script.name, script.config));
                 });
 
 
-                on<Trigger<messages::motion::AllServoWaypointsComplete>, With<messages::audio::Beat>>([this](const messages::motion::AllServoWaypointsComplete&, const messages::audio::Beat& beat) {
+                // This is very broken, needs to use subsumption
+                on<Trigger<messages::motion::AllServoWaypointsComplete>, With<messages::audio::Beat>>().then([this](const messages::motion::AllServoWaypointsComplete&, const messages::audio::Beat& beat) {
                     std::cout << "ServoWaypointsComplete" << std::endl;
                     // Here we pick a random element. Note that the random selection is bias here however until the number
                     // of scripts in the system is statistically significant compared to RAND_MAX, this should give decent results
@@ -85,7 +83,7 @@ namespace modules {
                 });
 
                 // Awful hack do not use.
-                on<Trigger<messages::audio::Beat>>([this](const messages::audio::Beat&) {
+                on<Trigger<messages::audio::Beat>>().then([this](const messages::audio::Beat&) {
                     if(!startedDancing) {
                         emit(std::make_unique<messages::motion::ExecuteScriptByName>("Stand.yaml"));
                         startedDancing = true;

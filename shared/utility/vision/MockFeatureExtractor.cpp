@@ -16,14 +16,16 @@
  *
  * Copyright 2013 NUBots <nubots@nubots.net>
  */
-#include "MockFeatureExtractor.h"
-#include "messages/input/ServoID.h"
-#include "utility/math/vision.h"
-#include "utility/support/yaml_armadillo.h"
+
 #include <cstdlib>
 #include <ctime>
 #include <iostream>
 #include <armadillo>
+
+#include "MockFeatureExtractor.h"
+#include "messages/input/ServoID.h"
+#include "utility/math/vision.h"
+#include "utility/support/yaml_armadillo.h"
 
 namespace utility {
 	namespace vision {
@@ -33,7 +35,7 @@ namespace utility {
 
 		MockFeatureExtractor::MockFeatureExtractor(){}
 
-		std::vector<MockFeatureExtractor::MockFeature> MockFeatureExtractor::setParameters(const messages::support::Configuration<MockFeatureExtractor>& config){
+		std::vector<MockFeatureExtractor::MockFeature> MockFeatureExtractor::setParameters(const YAML::Node& config){
 			int NUMBER_OF_MOCK_POINTS = config["NUMBER_OF_MOCK_POINTS"].as<int>();
 
 			arma::vec RADIUS = config["RADIUS"].as<arma::vec>();

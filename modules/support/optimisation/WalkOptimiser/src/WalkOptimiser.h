@@ -28,7 +28,6 @@
 #include "messages/support/Configuration.h"
 #include "messages/behaviour/FixedWalkCommand.h"
 
-
 namespace modules {
     namespace support {
         namespace optimisation {
@@ -64,19 +63,18 @@ namespace modules {
 
                 int configuration_wait_milliseconds = 2000;
 
-                messages::support::Configuration<messages::behaviour::WalkOptimiserCommand> initialConfig;
+                messages::support::Configuration initialConfig;
 
                 static constexpr const char* backupLocation = "WalkEngine_Optimised.yaml";
 
                 void printState(const arma::vec& state);
-                arma::vec getState(const messages::support::Configuration<messages::behaviour::WalkOptimiserCommand>& walkConfig);
+                arma::vec getState(const messages::support::Configuration& walkConfig);
                 YAML::Node getWalkConfig(const arma::vec& state);
                 void saveConfig(const YAML::Node& config);
                 void setWalkParameters(const YAML::Node& config);
 
                 FitnessData data;
             public:
-                static constexpr const char* CONFIGURATION_PATH = "WalkOptimiser.yaml";
                 explicit WalkOptimiser(std::unique_ptr<NUClear::Environment> environment);
             };
 

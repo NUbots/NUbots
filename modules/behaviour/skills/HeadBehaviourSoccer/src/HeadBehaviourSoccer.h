@@ -42,32 +42,32 @@ namespace modules {
              */
             class HeadBehaviourSoccer : public NUClear::Reactor {
             public:
-                
+
 
             private:
-                
+
                 /*! @brief Updates the search plan when something has changed
                 */
                 void updateHeadPlan(const std::vector<messages::vision::VisionObject>& fixationObjects, const bool& search, const messages::input::Sensors& sensors, const utility::math::matrix::Rotation3D& headToIMUSpace);
-                
+
                 /*! @brief Converts from camera space direction to IMU space direction
                 */
                 arma::vec2 getIMUSpaceDirection(const arma::vec2& screenAngles, utility::math::matrix::Rotation3D headToIMUSpace, bool lost);
-                
+
                 /*! @brief Gets points which allow for simultaneous search and viewing of key objects
                 */
                 std::vector<arma::vec2> getSearchPoints(std::vector<messages::vision::VisionObject> fixationObjects, messages::behaviour::SearchType sType, const messages::input::Sensors& sensors);
-                
+
                 /*! @brief Combines a collection of vision objects. The screen resulting screen angular region is the bounding box of the objects
                 */
                 messages::vision::VisionObject combineVisionObjects(const std::vector<messages::vision::VisionObject>& obs);
-                
+
                 /*! @brief Gets a bounding box in screen angular space of a set of vision objects
                 */
                 utility::math::geometry::Quad getScreenAngularBoundingBox(const std::vector<messages::vision::VisionObject>& obs);
 
                 bool orientationHasChanged(const messages::input::Sensors& sensors);
-                
+
 
                 //CONFIG - loaded elsewhere
                 float max_yaw;
@@ -101,7 +101,7 @@ namespace modules {
 
                 NUClear::clock::time_point lastPlanUpdate;
                 NUClear::clock::time_point timeLastObjectSeen;
-                
+
                 arma::vec2 lastCentroid;
 
                 bool lostAndSearching;
@@ -114,7 +114,6 @@ namespace modules {
 
             public:
                 explicit HeadBehaviourSoccer(std::unique_ptr<NUClear::Environment> environment);
-                static constexpr const char* CONFIGURATION_PATH = "HeadBehaviourSoccer.yaml";
             };
 
         }  // skills

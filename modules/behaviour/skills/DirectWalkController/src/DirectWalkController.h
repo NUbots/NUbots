@@ -32,9 +32,6 @@ namespace skills {
         /// @brief Called by the powerplant to build and setup the DirectWalkController reactor.
         explicit DirectWalkController(std::unique_ptr<NUClear::Environment> environment);
 
-        /// @brief the path to the configuration file for DirectWalkController
-        static constexpr const char* CONFIGURATION_PATH = "DirectWalkController.yaml";
-    
 	private:
        	/// @brief Subsumption ID key to access motors
         const size_t subsumptionId;

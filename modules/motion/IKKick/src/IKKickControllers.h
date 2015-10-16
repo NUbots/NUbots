@@ -21,6 +21,7 @@
 #define MODULES_MOTION_IKKICKCONTROLLERS_H
 
 #include "utility/math/matrix/Transform3D.h"
+#include "utility/support/yaml_armadillo.h"
 #include "messages/input/Sensors.h"
 #include "messages/input/LimbID.h"
 #include "messages/support/Configuration.h"
@@ -37,10 +38,6 @@ namespace motion{
 			STOPPING = 2,
 			FINISHED = 3
 		};
-
-        struct IKKickConfig{
-			static constexpr const char* CONFIGURATION_PATH = "IKKick.yaml";
-        };
 
 		class SixDOFFrame {
 			// enum InterpolationType {
@@ -66,7 +63,7 @@ namespace motion{
 			};
 			//TODO:
 			// std::map<messages::input::ServoID, float> jointGains;
-		};	
+		};
 
 		class Animator{
 		public:
@@ -106,7 +103,7 @@ namespace motion{
 
 				NUClear::clock::time_point motionStartTime;
 			public:
-				
+
 				virtual void computeStartMotion(const messages::input::Sensors& sensors) = 0;
 				virtual void computeStopMotion(const messages::input::Sensors& sensors) = 0;
 
@@ -155,7 +152,7 @@ namespace motion{
 				utility::math::matrix::Transform3D getFootPose(const messages::input::Sensors& sensors) {
 					auto result = utility::math::matrix::Transform3D();
 					if(stage == MotionStage::RUNNING || stage == MotionStage::STOPPING) {
-			
+
 						double elapsedTime = std::chrono::duration_cast<std::chrono::microseconds>(sensors.timestamp - motionStartTime).count() * 1e-6;
 						float alpha = (anim.currentFrame().duration != 0)
 										?	std::fmax(0,std::fmin(elapsedTime / anim.currentFrame().duration, 1))
@@ -184,7 +181,7 @@ namespace motion{
 		        	return result;
 				}
 
-				virtual void configure(const messages::support::Configuration<IKKickConfig>& config) = 0;
+				virtual void configure(const messages::support::Configuration& config) = 0;
 		};
 
 		class KickBalancer : public SixDOFFootController{
@@ -194,9 +191,9 @@ namespace motion{
 			float foot_separation = 0.074;
 			float forward_lean = 0.01;
 			float adjustment = 0.011;
-			
+
 		public:
-			virtual void configure(const messages::support::Configuration<IKKickConfig>& config);
+			virtual void configure(const messages::support::Configuration& config);
 			virtual void computeStartMotion(const messages::input::Sensors& sensors);
 			virtual void computeStopMotion(const messages::input::Sensors& sensors);
 
@@ -217,7 +214,7 @@ namespace motion{
 			float return_before_place_duration;
 			float lift_before_windup_duration;
 		public:
-			virtual void configure(const messages::support::Configuration<IKKickConfig>& config);
+			virtual void configure(const messages::support::Configuration& config);
 			virtual void computeStartMotion(const messages::input::Sensors& sensors);
 			virtual void computeStopMotion(const messages::input::Sensors& sensors);
 		};

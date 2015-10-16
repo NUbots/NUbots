@@ -1,473 +1,482 @@
 #!/usr/bin/python
 
+from info.parse_dsl_type import parse_dsl_type
+from info.collapse_output_type import collapse_output_type
+from info.parse_output_type import parse_output_type
+from info.symbol_parser import SymbolParser
+
+import copy
+import pyparsing as pp
+import logging
 import json
 import sys
 import re
 import ctypes
-import pyparsing as pp
+import struct
+import pybfd.bfd
+import pybfd.opcodes
+import bisect
 from subprocess import Popen, PIPE
 
 if sys.argv[1]:
     module_name = sys.argv[1]
 else:
-    print 'You must specify a module name\n'
+    logging.error('You must specify a module name')
     sys.exit(1)
 
 if sys.argv[2]:
     input_file = sys.argv[2]
 else:
-    print 'You must specify an input file\n'
+    logging.error('You must specify an input file')
     sys.exit(1)
 
 if sys.argv[3]:
     output_file = sys.argv[3]
 else:
-    print 'You must specify an output file\n'
+    logging.error('You must specify an output file')
     sys.exit(1)
 
 if sys.argv[4]:
     demangler = sys.argv[4]
 
-    # Start up our demangler
+    # Start up demangler
     demangler = ctypes.cdll.LoadLibrary(demangler)
     demangler.demangle.argtypes = [ctypes.c_char_p]
     demangler.demangle.restype = ctypes.c_char_p
 else:
-    print 'You must provide a demangler\n'
+    logging.error('You must provide a demangler')
     sys.exit(1)
 
-# Enable packrat for fastness!
-pp.ParserElement.enablePackrat()
-
-# Our namespaced type (potentially containing templates) e.g. `a::b::c<x::y>`
-nsType = pp.Forward()
-
-# Fundamental types (types built into c++)
-fundamentalType = (pp.Literal('bool')
-                 | pp.Literal('unsigned char')
-                 | pp.Literal('signed char')
-                 | pp.Literal('char')
-                 | pp.Literal('short int')
-                 | pp.Literal('short')
-                 | pp.Literal('int')
-                 | pp.Literal('signed short int')
-                 | pp.Literal('signed short')
-                 | pp.Literal('signed int')
-                 | pp.Literal('signed')
-                 | pp.Literal('unsigned short int')
-                 | pp.Literal('unsigned short')
-                 | pp.Literal('unsigned int')
-                 | pp.Literal('unsigned')
-                 | pp.Literal('long long int')
-                 | pp.Literal('long long')
-                 | pp.Literal('long int')
-                 | pp.Literal('long')
-                 | pp.Literal('signed long long int')
-                 | pp.Literal('signed long long')
-                 | pp.Literal('signed long int')
-                 | pp.Literal('signed long')
-                 | pp.Literal('unsigned long long int')
-                 | pp.Literal('unsigned long long')
-                 | pp.Literal('unsigned long int')
-                 | pp.Literal('unsigned long'))
-
-locate = False
-locator = pp.Empty().setParseAction(lambda s,l,t: l if locate else None)
-
-# An enum type e.g. `(a::b::c)1`
-enumType = pp.Suppress('(') + nsType + pp.Suppress(')') + pp.Word(pp.nums)
-
-# Match a template (list of types, enums and empties)
-templateType = pp.Group(pp.Suppress('<') + pp.Optional(pp.delimitedList(pp.Group(nsType | enumType | pp.Empty()))) + pp.Suppress('>'))
-
-# Match a cType (text then maybe a template)
-cType = pp.Word(pp.alphanums + '_') + pp.Optional(templateType)
-
-# A function type (type followed by function arguments)
-funcType = cType + pp.Suppress('(') + pp.Optional(pp.Group(pp.delimitedList(pp.Group(nsType)))) + pp.Suppress(')')
-
-# A lambda type (looks like) {lambda(a,b,c)#1}
-lambdaType = pp.Suppress('{') + funcType + pp.Suppress('#') + pp.Word(pp.nums) + pp.Suppress('}')
-
-# Fill our ns type (which is made up of several types separated by ::)
-nsType << locator + pp.delimitedList(fundamentalType | funcType | lambdaType | cType, '::') + locator + pp.ZeroOrMore(pp.Literal('const') | pp.Word('*&'))
-
-noRetFuncParser = nsType
-funcParser = pp.Group(nsType) + pp.Group(nsType)
-
-# Open our output file for writing
-with open(output_file, 'w') as file:
-
-    # Attempting a disassembing version
-    process = Popen(["objdump", "-d", input_file], stdout=PIPE);
-
-    (output, err) = process.communicate()
-    exit_code = process.wait()
-
-    # If our nm command failed then exit with the error
-    if(exit_code != 0):
-        print err
-        exit(exit_code)
-
-    # Get all the lines
-    lines = str(output).split('\n')
-
-    # Regular expressions to get both symbols and calls to symbols
-    symbol_regex       = re.compile(r'^([0-9A-Fa-f]+)\s+<([0-9-A-Z-a-z_]+)>:$')
-    call_regex         = re.compile(r'^\s+([0-9A-Fa-f]+):\s+(?:[0-9A-Fa-f]+\s+){5}call\s+([0-9A-Fa-f]+)\s+<(.*)>$')
-
-    raw_symbols = []
-    raw_calls = []
-
-    # Loop through our lines looking for useful symbols
-    for line in lines:
-
-        # See if it's a call line
-        if call_regex.match(line):
-            # We only need the indicies
-            call = call_regex.match(line)
-            raw_calls.append( (int(call.group(1), 16), int(call.group(2), 16), call.group(3)) )
-
-        # See if it's a symbol line
-        elif symbol_regex.match(line):
-            # Demangle the symbol
-            symbol = symbol_regex.match(line)
-            raw_symbols.append( (int(symbol.group(1), 16), symbol.group(2)) )
-
-    calls = []
-
-    # Relink our raw calls that are not properly linked
-    for call in raw_calls:
-        # If our call is a plt call (dynamic library)
-        if call[2].endswith('@plt'):
-
-            # Find the actual call and append it
-            for symb in raw_symbols:
-                if(symb[1] == call[2][:-4]):
-                    calls.append( (call[0], symb[0]) )
-                    break
-        else:
-            # Our call is ok as is
-            calls.append( (call[0], call[1]) )
-
-    # Our callmap, holds a map of functions to functions they call
-    callmap = {}
-    # Our inverse callmap holds a map of functions to functions they are called by
-    callmapi = {}
-
-    # Map our symbols to the functions they call
-    elem = 0
-    for i1, i2 in zip(raw_symbols, raw_symbols[1:]):
-        if not i1 in callmap:
-            callmap[i1[0]] = []
-
-        while calls[elem][0] < i2[0]:
-            callmap[i1[0]].append(calls[elem][1])
-            elem += 1
-
-    # Build our inverse lookup map
-    for caller in callmap:
-        for callee in callmap[caller]:
-            if callee not in callmapi:
-                callmapi[callee] = []
-
-            callmapi[callee].append(caller)
-
-    # Our map that maps function calls to their name
-    symbols = {}
-
-    # Process our symbols (demangle the token)
-    for symbol in raw_symbols:
-        dm = demangler.demangle(symbol[1])
-        if dm != None:
-            symbols[symbol[0]] = str(dm)
-
-    emit_re = [
-        # Emit types (should cover most cases)
-        re.compile(r'^NUClear::PowerPlant::Emit<(.+)>::emit\(.+\)$'),
-        # Direct emits
-        re.compile(r'^void NUClear::PowerPlant::ReactorMaster::directEmit<.+>\(.+\)$'),
-        # Initialize emits
-        re.compile(r'^void NUClear::PowerPlant::ReactorMaster::emitOnStart<.+>\(.+\)$'),
-        # Powerplant emits
-        re.compile(r'^void NUClear::PowerPlant::ReactorMaster::emit<.+>\(.+\)$'),
-        # Reactor Emits
-        re.compile(r'^void NUClear::Reactor::emit<.+>\(.+\)$')
-    ]
-
-    cache_re = [
-        # Happens when a cache function is called (is a set)
-        re.compile(r'^void NUClear::PowerPlant::CacheMaster::cache<.+>\(.+\)$'),
-        # Happens when something is retrived from the cache (a get)
-        re.compile(r'^NUClear::metaprogramming::TypeMap<NUClear::PowerPlant::CacheMaster,.+>::get\(\)$'),
-        # Happens when something is put into the cache (a set)
-        re.compile(r'^NUClear::metaprogramming::TypeMap<NUClear::PowerPlant::CacheMaster,.+>::set\(.+\)$'),
-        # Happens when the cache exists at all (only exists in symbol table)
-        re.compile(r'^NUClear::metaprogramming::TypeMap<(NUClear::PowerPlant::CacheMaster,.+)>::data$'),
-        # Happens when the cache exists at all (only exists in symbol table)
-        re.compile(r'^NUClear::metaprogramming::TypeMap<(NUClear::PowerPlant::CacheMaster,.+)>::mutex$')
-    ]
-
-    typelist_re = [
-        # Happens when a type list is gotten from the TypeList (a Trigger being set or triggered)
-        re.compile(r'^NUClear::metaprogramming::TypeList<NUClear::Reactor,.+>::get\(\)$'),
-        # Happens when a type list exists at all (holds triggers)
-        re.compile(r'^\d+ u NUClear::metaprogramming::TypeList<(NUClear::Reactor,[^{]+)>::data$')
-    ]
-
-    exists_re = [
-        # Is called when a type exists (in a trigger or with)
-        re.compile(r'^NUClear::Reactor::Exists<.+>::exists\(.+\)$')
-    ]
-
-    get_re = [
-        # Is called when a reaction wants to get a type
-        re.compile(r'^NUClear::PowerPlant::CacheMaster::Get<.+>::get\(.+\)$')
-    ]
-
-    on_re = [
-        # Is the result of the On<> metaprogram (contains lots of information)
-        re.compile(r'^NUClear::Reactor::On<.+>::on\(.+\)$'),
-        # Is the call of the On<> metaprogramm (contains the dsl used)
-        re.compile(r'^NUClear::threading::ReactionHandle NUClear::Reactor::on<.+>\(.+\)$')
-    ]
-
-    outputs = []
-    isolated_outputs = []
-    inputs = []
-
-    # Look through all our symbols and parse them
-    for id in symbols:
-        symbol = symbols[id]
-        parsed = None
-
-        # Emit types
-        if emit_re[0].match(symbol):
-            parsed = noRetFuncParser.parseString(symbol).asList()
-            outputs.append({
-                'address': id,
-                'type': parsed[3][-1],
-                'scopes': parsed[3][:-1],
-                'redundant': False
-            })
-
-        # Direct emits
-        elif emit_re[1].match(symbol):
-            parsed = funcParser.parseString(symbol).asList()
-            outputs.append({
-                'address': id,
-                'type': parsed[1][4][-1],
-                'scopes': [['NUClear', 'dsl', 'Scope', 'DIRECT']],
-                'redundant': False
-            })
-
-        # Initialize emits
-        elif emit_re[2].match(symbol):
-            parsed = funcParser.parseString(symbol).asList()
-            outputs.append({
-                'address': id,
-                'type': parsed[1][4][-1],
-                'scopes': [['NUClear', 'dsl', 'Scope', 'INITIALIZE']],
-                'redundant': False
-            })
-
-        # Local emits
-        elif emit_re[3].match(symbol):
-            parsed = funcParser.parseString(symbol).asList()
-            outputs.append({
-                'address': id,
-                'type': parsed[1][4][-1],
-                'scopes': [['NUClear', 'dsl', 'Scope', 'LOCAL']],
-                'redundant': False
-            })
-
-        # Reactor Emits
-        elif emit_re[4].match(symbol):
-            parsed = funcParser.parseString(symbol).asList()
-            outputs.append({
-                'address': id,
-                'type': parsed[1][3][-1],
-                'scopes': parsed[1][3][:-1] if len(parsed[1][3][0:-1][0]) > 0 else [['NUClear', 'dsl', 'Scope', 'LOCAL']],
-                'redundant': False
-            })
-
-        # Happens when a cache function is called (is a set) this is an output
-        elif cache_re[0].match(symbol):
-            parsed = funcParser.parseString(symbol).asList()
-            outputs.append({
-                'address': id,
-                'type': parsed[1][4][-1],
-                'scopes': [],
-                'redundant': True
-            })
-
-        # Happens when something is retrived from the cache (a get)
-        # elif cache_re[1].match(symbol):
-        #     parsed = noRetFuncParser.parseString(symbol).asList()
-
-        # Happens when something is put into the cache (a set)
-        # elif cache_re[2].match(symbol):
-        #     parsed = noRetFuncParser.parseString(symbol).asList()
-
-        # Happens when a type list is gotten from the TypeList (a Trigger being set or triggered)
-        # elif typelist_re[0].match(symbol):
-        #     parsed = noRetFuncParser.parseString(symbol).asList()
-
-        # Is called when a type exists (in a trigger or with)
-        # elif exists_re[0].match(symbol):
-        #     parsed = noRetFuncParser.parseString(symbol).asList()
-
-        # Is called when a reaction wants to get a type
-        # elif get_re[0].match(symbol):
-        #     parsed = noRetFuncParser.parseString(symbol).asList()
-
-        # Is the result of the On<> metaprogram (contains lots of information)
-        # elif on_re[0].match(symbol):
-        #     parsed = noRetFuncParser.parseString(symbol).asList()
-
-        # Is the call of the On<> metaprogramm (contains the dsl used)
-        elif on_re[1].match(symbol):
-
-            # Enable our locator tags so we can access the original function type
-            locate = True
-            parsed = funcParser.parseString(symbol).asList()
-            # Disable our locator tags
-            locate = False
-
-            # Extract our function name
-            start = parsed[1][-2][-1][0]
-            end = parsed[1][-2][-1][-1]
-            func = symbol[start:end]
-
-            # Work out which function is probably ours
-            candidates = [
-                [x for x in symbols if symbols[x].startswith(func + '::operator()')],
-                [x for x in symbols if symbols[x].startswith(func)]
-            ]
-
-            if len(candidates[0]) == 1:
-                candidates = candidates[0][0]
-            elif len(candidates[1]) == 1:
-                candidates = candidates[1][0]
-            else:
-                candidates = None
-
-            # Reparse without our locator tags
-            parsed = funcParser.parseString(symbol).asList()
-            inputs.append({
-                'address': candidates,
-                'types': parsed[1][3][:-1],
-                'outputs': []
-            })
-
-    # Flatten our outputs graph to remove duplicate information
-    for output in outputs:
-        searched = set()
-        search = []
-        search += callmapi[output['address']]
-        joined = False
-
-        while search:
-            top = search.pop(0)
-
-            # See if we found an ancestor
-            ancestor = [i for i in outputs if i['address'] == top]
-
-            # Fuse our information into this ancestor
-            if ancestor:
-                # We are now redundant
-                output['redundant'] = True
-
-                for a in ancestor:
-                    if a['type'] != output['type']:
-                        # OSNAP!
-                        # TODO I don't actually know if this is a problem
-                        # it can happen with custom emits where the type
-                        # changes as we go down
-                        pass
-
-                    for s in output['scopes']:
-                        if s not in a['scopes']:
-                            a['scopes'].append(s)
-
-            if top in callmapi:
-                for c in callmapi[top]:
-                    if c not in searched:
-                        search.append(c)
-                        searched.add(c)
-
-    # Remove our redundant outputs
-    outputs = [o for o in outputs if not o['redundant']]
-
-    # For each of our outputs, trace it back to an input
-    for output in outputs:
-        searched = set()
-        search = [output['address']]
-        joined = False
-        # While something is in our search list
-        while search:
-            # Get our search vector
-            top = search.pop(0)
-
-            # Find our input if we can
-            input = [i for i in inputs if i['address'] == top]
-            if input:
-                joined = True
-                for i in input:
-                    i['outputs'].append(output)
-            elif top in callmapi:
-                for c in callmapi[top]:
-                    if c not in searched:
-                        search.append(c)
-                        searched.add(c)
-
-        # If we couldn't find somwehere to put it then it's isolated
-        if not joined:
-            isolated_outputs.append(output)
-
-
-    # Now make our json output
-    jsonOutput = {
-        'module_name': module_name,
-        'reactions': [],
-        'outputs': []
+parser = SymbolParser()
+symbols = {}
+symbol_relocation = {}
+symbol_keys = []
+reactions = {}
+outputs = {}
+isolated_outputs = []
+binders = {}
+call_regex = re.compile(r'^call\s+0x([0-9A-Fa-f]+)$')
+push_regex = re.compile(r'^push\s+\$0x([0-9A-Fa-f]+)$')
+# This regular expression specifically finds values loaded into register eax ebx ecx or edx
+lea_regex = re.compile(r'lea\s+(-?0x[0-9a-fA-F]+)\(%ebx\),%e[abcd]x')
+
+# Open the file using BFD and open a disassembler instance
+bfd = pybfd.bfd.Bfd(input_file)
+opcodes = pybfd.opcodes.Opcodes(bfd)
+
+got_addr = bfd.sections['.got.plt'].vma
+
+print 'GOT offset addr', got_addr
+
+# Get list of symbols and their addresses
+for symbol_address in bfd.symbols:
+    symbol = bfd.symbols[symbol_address]
+
+    d = demangler.demangle(symbol.name)
+    d = symbol.name if d == None else str(d)
+    symbols[symbol_address] = {
+        'symbol': symbol.name,
+        'name': d,
+        'string_args': [],
+        'calls': [],
+        'called_by': []
     }
 
-    for input in inputs:
-        jsonOutput['reactions'].append({
-            'inputs': [],
-            'outputs': []
-        })
+# Extract the strings from the read only data section so we can find our reaction names
+s_data = bfd.sections['.rodata'].content
+s_data_addr_range = (bfd.sections['.rodata'].vma, bfd.sections['.rodata'].vma + bfd.sections['.rodata'].size)
 
-        elem = jsonOutput['reactions'][-1]
+# Space to tilde matches all printable chars, 4, matches all of length 4 or more
+# It also must be null terminated (the \x00)
+strings_re = re.compile(r'[ -~]{4,}(?=\x00)')
 
-        for type in input['types']:
-            if type[2] == 'Trigger':
-                elem['inputs'].append({
-                    'type': type[3][0],
-                    'scope': type[:3]
+# Get all of our strings in rodata mapped by their address
+ro_strings = dict([(m.start() + s_data_addr_range[0], m.group()) for m in strings_re.finditer(s_data)])
+
+# Resolve plt dynamic symbols so we can follow them
+s_dynsym = bfd.sections['.dynsym'].content
+s_dynstr = bfd.sections['.dynstr'].content
+s_rel_plt = bfd.sections['.rel.plt'].content
+s_plt = bfd.sections['.plt']
+for vma, size, disasm in opcodes.disassemble(s_plt.content, s_plt.vma):
+    c = push_regex.match(disasm)
+    if c:
+        # Work out pushed info
+        plt_index = int(c.group(1), 16)
+        inst_index = vma - size - 1
+
+        # Read relocation information
+        rel_plt = struct.unpack('II', s_rel_plt[plt_index:plt_index + 8])
+        rel_plt = (rel_plt[0], rel_plt[1] >> 8, rel_plt[1] & 0xff)
+
+        # Find corresponding dynamic symbol
+        sym = s_dynsym[rel_plt[1] * 16:rel_plt[1] * 16 + 16]
+        sym = struct.unpack('IIIBBH', sym)
+
+        # Store this relocation if it is meaningful
+        if sym[1] != 0:
+            symbol_relocation[inst_index] = sym[1]
+        # Otherwise add a new symbol for this address with dynstr string
+        else:
+            # Get the symbol name from dynstr
+            end = s_dynstr[sym[0]:].index('\x00')
+            symbol_name = s_dynstr[sym[0]:sym[0] + end]
+
+            d = demangler.demangle(symbol_name)
+            d = symbol_name if d == None else str(d)
+            symbols[inst_index] = {
+                'symbol': symbol_name,
+                'name': d,
+                'string_args': [],
+                'calls': [],
+                'called_by': []
+            }
+
+# Make a list of keys so we can bisect the list (lower bound)
+symbol_keys = sorted(list(symbols.keys()))
+
+# Process text (program) section to find call statements
+s_text = bfd.sections['.text']
+string_args = []
+for vma, size, disasm in opcodes.disassemble(s_text.content, s_text.vma):
+
+    # Find a string arguments for the next call if they exist
+    lea = lea_regex.match(disasm)
+    if lea:
+        arg_addr = int(lea.group(1), 16) + got_addr
+
+        # If this address is for a string store it for the next call
+        if arg_addr in ro_strings:
+            string_args.append(ro_strings[arg_addr])
+
+    call = call_regex.match(disasm)
+    if call: # This will ignore calls that are not to a specific function (e.g. call from register)
+        call_addr = int(call.group(1), 16)
+
+        # If call_addr is a relocated symbol, resolve to the real one
+        if call_addr in symbol_relocation:
+            call_addr = symbol_relocation[call_addr]
+
+        # Find the symbol that is probably doing the calling (the previously declared one)
+        # and put this call in it
+        symbol = symbols[symbol_keys[bisect.bisect(symbol_keys, vma) - 1]]
+        symbol['calls'].append(call_addr)
+
+        # If we have some string arguments for this call, add them to the callee
+        # Provided this isn't the string constructor... that eats lots of const char*s
+        if string_args:
+            symbols[call_addr]['string_args'].append(string_args)
+
+            # Clear our args, we used them
+            string_args = []
+
+# Reverse link symbols with the symbols that call them
+for caller_addr in symbols:
+
+    # Dedupe our string arguments to this function
+    symbols[caller_addr]['string_args'] = [list(x) for x in set(tuple(x) for x in symbols[caller_addr]['string_args'])]
+
+    # Reverse link our symbols
+    for callee_addr in symbols[caller_addr]['calls']:
+        if callee_addr in symbols:
+            symbols[callee_addr]['called_by'].append(caller_addr)
+
+# Define regular expressions for "interesting" emit symbols
+emit_re = [
+    # Powerplant emits
+    re.compile(r'^void NUClear::PowerPlant::emit<.+>\(.+\)$'),
+    # Reactor Emits
+    re.compile(r'^void NUClear::Reactor::emit<.+>\(.+\)$')
+]
+
+# Define regular expressions for "interesting" on symbols
+on_re = [
+    # Our then calls
+    re.compile(r'^decltype\s+\(.+?\.then.+?\).+?NUClear::Reactor::Binder<.+?>::then<.+?>.+?$')
+]
+
+# Find interesting symbols and add information to them
+for symbol_address in symbols:
+    symbol = symbols[symbol_address]
+
+    if emit_re[0].match(symbol['name']):
+        parsed = parser.parse_symbol(symbol['name'])
+
+        # Remove the template arguments that represent the actual arguments
+        # TODO note there is a bug here that if an argument is the same as the type
+        # getting emitted this will remove it and break it
+        info = [x for x in parsed[1][3] if x not in parsed[1][-1][1:] and x != []]
+
+        # If this is a NUClear CommandLineArgs or ReactionStatisitcs ignore it
+        if len(info[-1]) == 3 and info[-1][:2] in [['NUClear', 'message', 'CommandLineArgs'], ['NUClear', 'message', 'ReactionStatistics']]:
+            continue
+
+        outputs[symbol_address] = {
+            'type': info[-1], # The type in the unique_ptr
+            'scopes': [x[-1] for x in info[:-1]],
+            'children': []
+        }
+        # If empty then local scope
+        outputs[symbol_address]['scopes'] = outputs[symbol_address]['scopes'] if outputs[symbol_address]['scopes'] != [] else ['Local']
+
+    elif emit_re[1].match(symbol['name']):
+        parsed = parser.parse_symbol(symbol['name'])
+
+        # Remove the template arguments that represent the actual arguments
+        # TODO note there is a bug here that if an argument is the same as the type
+        # getting emitted this will remove it and break it
+        info = [x for x in parsed[1][3] if x not in parsed[1][-1][1:] and x != []]
+
+        # If this is a NUClear CommandLineArgs or ReactionStatisitcs ignore it
+        if len(info[-1]) == 3 and info[-1][:2] in [['NUClear', 'message', 'CommandLineArgs'], ['NUClear', 'message', 'ReactionStatistics']]:
+            continue
+
+        outputs[symbol_address] = {
+            'type': info[-1], # The type in the unique_ptr
+            'scopes': [x[-1] for x in info[:-1]],
+            'children': []
+        }
+        # If empty then local scope
+        outputs[symbol_address]['scopes'] = outputs[symbol_address]['scopes'] if outputs[symbol_address]['scopes'] != [] else ['Local']
+
+    elif on_re[0].match(symbol['name']):
+
+        # Run a parse with our locator tags on to get the function we are using
+        location = parser.parse_symbol(symbol['name'], locateTags=True)
+
+        # check and double check we are on the string version of on
+        if len(location[1][-3]) == 2 and len(location[1][-2]) == 2:
+
+            # Extract our function
+            func = symbol['name'][location[1][-3][1][0] : location[1][-3][1][-1]]
+
+            # Extract our binder instance
+            # This is the on call related to this reaction which has binder arguments
+            binder = symbol['name'][location[0][2][0][1][1][1][2][0][0] : location[0][2][0][1][1][1][2][0][-1]]
+            binder = [x for x in symbols if symbols[x]['name'].startswith(binder)]
+            binder_args = []
+
+            # If we have one or more, pick the shortest
+            if binder:
+                binder = min(binder, key=lambda addr: len(symbols[addr]['name']))
+                binder_args = symbols[binder]['string_args']
+
+            # Find our candidates (start with ::operator() version)
+            candidates = [x for x in symbols if symbols[x]['name'].startswith(func + '::operator')]
+
+            # Fallback to a direct match
+            if not candidates:
+                candidates = [x for x in symbols if symbols[x]['name'].startswith(func)]
+
+            # Fallback to trying to fix the symbol
+            if not candidates:
+                # Sometimes something stupid happens with the function and we get 'then' and 'Parse' in our symbol...
+                # We need to fix this otherwise it can't find the real underlying symbol
+
+                # Try one that replaces with then
+                then_rep = re.sub(r'([A-Za-z0-9]+)::then\(', '\\1::\\1(', func, 1)
+                parse_rep = re.sub(r'([A-Za-z0-9]+)::Parse\(', '\\1::\\1(', func, 1)
+
+                if then_rep != func:
+                    # Find our candidates (start with ::operator() version)
+                    candidates = [x for x in symbols if symbols[x]['name'].startswith(then_rep + '::operator')]
+
+                    # Fallback to a direct match
+                    if not candidates:
+                        candidates = [x for x in symbols if symbols[x]['name'].startswith(then_rep)]
+
+                elif parse_rep != func:
+
+                    # Find our candidates (start with ::operator() version)
+                    candidates = [x for x in symbols if symbols[x]['name'].startswith(parse_rep + '::operator')]
+
+                    # Fallback to a direct match
+                    if not candidates:
+                        candidates = [x for x in symbols if symbols[x]['name'].startswith(parse_rep)]
+
+            # If we still can't find it give up
+            if not candidates:
+                print 'Error could not find function for on statement'
+                print func, '\n\n',
+
+            else:
+                # There could be more than one candidiate here
+                # this can happen if there is a lambda in a lambda (we want the outer one)
+                # So pick the shortest string in the list
+                candidate = min(candidates, key=lambda addr: len(symbols[addr]['name']))
+
+                # Reparse without our locator tags
+                parsed = parser.parse_symbol(symbol['name'])
+
+                # Check if this is probably a reaction owned by NUClear
+                # We don't want to include those because they will get
+                # included in every nuclear_info file and make the graphs
+                # huge and complex. Fortunatly all of them hide in the
+                # NUClear extension namespace
+                is_nuclear = func.startswith('NUClear::extension')
+
+                if candidate not in reactions:
+                    reactions[candidate] = []
+
+                reactions[candidate].append({
+                    'dsl': parsed[1][3][0][3],
+                    'outputs': [],
+                    'binder_args': binder_args,
+                    'binding_outputs': [],
+                    'user_name': symbol['string_args'],
+                    'is_nuclear': is_nuclear
                 })
 
-            elif type[2] == 'With':
-                for t in type[3]:
-                    elem['inputs'].append({
-                        'type': t,
-                        'scope': type[:3]
-                    })
-            # Option
+                # Store that this binder binds this candidate
+                binders[symbol_address] = reactions[candidate][-1]
 
-        for output in input['outputs']:
-            elem['outputs'].append({
-                'type': output['type'],
-                'scopes': output['scopes']
-            })
+# Now collapse the call tree to work out which reactions send which outputs
+for output_address in outputs:
 
-    for output in isolated_outputs:
-        jsonOutput['outputs'].append({
-            'type': output['type'],
-            'scopes': output['scopes']
-        })
+    output = outputs[output_address]
 
+    # Do a bfs search
+    searched = set()
+    # todo search from symbols[output]['called_by']
+    search = set(symbols[output_address]['called_by'])
+
+    while search:
+        # Get our next search element
+        top = search.pop()
+        searched.add(top)
+
+        # If this is one of our reactions we don't need to search any
+        # further on this path, we found one add it to our reactions
+        # outputs
+        if top in reactions:
+            for reaction in reactions[top]:
+                reaction['outputs'].append(copy.deepcopy(output))
+
+        # If this has been called by another emit then add this to its list
+        elif top in outputs:
+            outputs[top]['children'].append(copy.deepcopy(output))
+
+        # If this emit is done from a binding call (then call) we can trace it
+        # to the reaction that called it. It is probably a setup reaction
+        elif top in binders:
+            binders[top]['binding_outputs'].append(copy.deepcopy(output))
+
+        # Otherwise add this functions callers to the search list
+        elif top in symbols:
+            search |= (set(symbols[top]['called_by']) - searched)
+
+            # If we reached an end this way, this reaction must be called from
+            # somewhere that does not match up to a reaction, another emit, or a binder
+            if len(search) == 0:
+                isolated_outputs.append(output)
+
+
+# Build our output information structure
+jsonOutput = {
+    'name': module_name,
+    'reactions': [],
+    'output_data': []
+}
+
+for reaction_address in reactions:
+    for reaction in reactions[reaction_address]:
+
+        # We don't want to include reactions from NUClear
+        if not reaction['is_nuclear']:
+
+            r = {
+                # The name of the reaction, if the user provided use that
+                'name': reaction['user_name'][0][0] if reaction['user_name'] else None, # TODO find a better name here if you can
+
+                # The DSL that this is generated from
+                'dsl': reaction['dsl'],
+
+                # The memory address for the reaction function
+                'address': reaction_address,
+
+                # The data that this reaction gets
+                # Consists of a list of event descriptions, and modifiers applied to the input
+                'input_data': [], # { 'scope': 'S', 'value': 'T', 'modifiers': {'last':n, 'optional':True} }
+
+                # A list of the output data from this reaction
+                # Consists of a list of event descriptions, and scopes
+                'output_data': [], # { 'scope': 'S', 'value': 'T' }
+
+                # Modifiers that influence how the reaction as a whole runs
+                # Consists of a set of properties and values
+                'modifiers': {} # 'single': True, 'sync': 'T'
+            }
+
+            # Go through our DSL word elements
+            for word in reaction['dsl']:
+
+                # Get our reaction delta from this word
+                delta = parse_dsl_type(word, reaction['binder_args'])
+
+                # Fuse in the data to the reaction
+                for key in delta:
+                    if key == 'execution':
+                        r[key].extend(delta[key])
+                    elif key == 'input_data':
+                        r[key].extend(delta[key])
+                    elif key == 'modifiers':
+                        r[key].update(delta[key])
+
+            # Go through all our outputs
+            for output in reaction['outputs']:
+
+                # Collapse our identical outputs
+                output = collapse_output_type(output)
+
+                # Parse our output
+                output = parse_output_type(output)
+
+                # Add our parsed list
+                r['output_data'].append(output)
+
+            # Go through all our binding outputs
+            for output in reaction['binding_outputs']:
+
+                # Collapse our identical outputs
+                output = collapse_output_type(output)
+
+                # Parse our output
+                output = parse_output_type(output)
+
+                for o in output:
+                    o['modifiers']['binding'] = True
+
+                # Add our parsed list
+                r['output_data'].append(output)
+
+            # Add this reaction to our list
+            jsonOutput['reactions'].append(r)
+
+        # Process all our isolated outputs
+        for output in isolated_outputs:
+
+            # Collapse our identical outputs
+            output = collapse_output_type(output)
+
+            # Parse our output
+            output = parse_output_type(output)
+
+            # Add our parsed list
+            jsonOutput['output_data'].append(output)
+
+vals = []
+for o in jsonOutput['output_data']:
+    if o not in vals:
+        vals.append(o)
+jsonOutput['output_data'] = vals
+
+for reaction in jsonOutput['reactions']:
+    vals = []
+    for o in reaction['output_data']:
+        if o not in vals:
+            vals.append(o)
+    reaction['output_data'] = vals
+
+# Open output file for writing
+with open(output_file, 'w') as file:
     json.dump(jsonOutput, file, sort_keys=True, indent=4, separators=(',', ': '))
-
-

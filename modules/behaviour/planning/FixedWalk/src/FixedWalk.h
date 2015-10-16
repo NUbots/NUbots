@@ -43,11 +43,11 @@ namespace modules {
                  */
                 class FixedWalk : public NUClear::Reactor {
                 private:
-                    std::unique_ptr<messages::motion::WalkCommand> getWalkCommand(const messages::behaviour::FixedWalkCommand::WalkSegment& segment, 
-                                                                NUClear::clock::duration t, 
+                    std::unique_ptr<messages::motion::WalkCommand> getWalkCommand(const messages::behaviour::FixedWalkCommand::WalkSegment& segment,
+                                                                NUClear::clock::duration t,
                                                                 const messages::input::Sensors& sensors);
-                    std::list<messages::behaviour::FixedWalkCommand::WalkSegment> walkSegments; 
-                    time_t segmentStart;
+                    std::list<messages::behaviour::FixedWalkCommand::WalkSegment> walkSegments;
+                    NUClear::clock::time_point segmentStart;
                     NUClear::clock::duration segmentElapsedTimeBeforeFall;
 
                     arma::mat beginningOrientation;
@@ -55,7 +55,6 @@ namespace modules {
                     bool fallen = false;
                 public:
                     explicit FixedWalk(std::unique_ptr<NUClear::Environment> environment);
-                    static constexpr const char* CONFIGURATION_PATH = "FixedWalk.yaml";
                 };
 
         }  // planning

@@ -56,17 +56,16 @@ namespace localisation {
             : Reactor(std::move(environment)) {
 
 
-        on<Trigger<Configuration<KFBallLocalisationEngineConfig>>>([this](const Configuration<KFBallLocalisationEngineConfig>& config) {
+        on<Configuration>("KFBallLocalisationEngine.yaml").then([this](const Configuration& config) {
             engine_.UpdateConfiguration(config);
         });
 
         // Emit to NUbugger
-       emit_data_handle = on<Trigger<Every<100, std::chrono::milliseconds>>,
+       emit_data_handle = on<Every<100, std::chrono::milliseconds>,
            With<Sensors>,
            With<std::vector<Self>>,
-           Options<Sync<KFBallLocalisation>>>("NUbugger Output",
-                [this](const time_t&, const Sensors& sensors, const std::vector<Self>& robots) {
-            
+           Sync<KFBallLocalisation>>().then("NUbugger Output", [this](const Sensors& sensors, const std::vector<Self>& robots) {
+
             arma::vec model_state = engine_.ball_filter_.get();
             arma::mat model_cov = engine_.ball_filter_.getCovariance();
 
@@ -103,24 +102,22 @@ namespace localisation {
         emit_data_handle.disable();
 
         // on<Trigger<FakeOdometry>,
-        //     Options<Sync<KFBallLocalisation>>
+        //     Sync<KFBallLocalisation>
         //     >("KFBallLocalisation Odometry", [this](const FakeOdometry& odom) {
         //      auto curr_time = NUClear::clock::now();
         //      engine_.TimeUpdate(curr_time, odom);
         //  });
 
-        on<Trigger<Every<100, Per<std::chrono::seconds>>>,
-             Options<Sync<KFBallLocalisation>>
-            >("KFBallLocalisation Time", [this](const time_t&) {
+        on<Every<100, Per<std::chrono::seconds>>, Sync<KFBallLocalisation>>().then("KFBallLocalisation Time", [this] {
             auto curr_time = NUClear::clock::now();
             engine_.TimeUpdate(curr_time);
         });
 
         on<Trigger<std::vector<messages::vision::Ball>>,
-             Options<Sync<KFBallLocalisation>>
-             >("KFBallLocalisation Step",
+             Sync<KFBallLocalisation>
+             >().then("KFBallLocalisation Step",
                 [this](const std::vector<messages::vision::Ball>& balls) {
-            
+
             //Is this check necessary?
             if(!emit_data_handle.enabled()){
                 emit_data_handle.enable();

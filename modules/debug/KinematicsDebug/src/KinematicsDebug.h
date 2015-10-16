@@ -25,17 +25,6 @@
 namespace modules {
     namespace debug {
 
-            struct InverseKinematicsRequest{
-                static constexpr const char* CONFIGURATION_PATH = "InverseKinematicsRequest.yaml";
-            };
-            struct LegKinematicsNULLTest{
-                static constexpr const char* CONFIGURATION_PATH = "LegKinematicsNULLTest.yaml";
-            };
-            struct HeadKinematicsNULLTest{
-                static constexpr const char* CONFIGURATION_PATH = "HeadKinematicsNULLTest.yaml";
-            };
-
-
             class KinematicsDebug : public NUClear::Reactor {
             public:
                 explicit KinematicsDebug(std::unique_ptr<NUClear::Environment> environment);

@@ -43,7 +43,6 @@
 #include "utility/math/matrix/Rotation3D.h"
 #include "messages/input/PushDetection.h"
 
-
 namespace modules {
 namespace motion {
 
@@ -108,24 +107,26 @@ namespace motion {
         //     }
         // }));
 
-        on<Trigger<EnableWalkEngineCommand>>([this](const EnableWalkEngineCommand& command) {
+        on<Trigger<EnableWalkEngineCommand>>().then([this] (const EnableWalkEngineCommand& command) {
             subsumptionId = command.subsumptionId;
 
             stanceReset(); // Reset stance as we don't know where our limbs are.
             updateHandle.enable();
         });
-        on<Trigger<DisableWalkEngineCommand>>([this](const DisableWalkEngineCommand&) {
+
+        on<Trigger<DisableWalkEngineCommand>>().then([this] {
             // Nobody needs the walk engine, so we stop updating it.
             updateHandle.disable();
 
             // TODO: Also disable the other walk command reactions?
         });
 
-        updateHandle = on<Trigger<Every<UPDATE_FREQUENCY, Per<std::chrono::seconds>>>, With<Sensors>, Options<Single, Priority<NUClear::HIGH>>>([this](const time_t&, const Sensors& sensors) {
+        updateHandle = on<Every<UPDATE_FREQUENCY, Per<std::chrono::seconds>>, With<Sensors>, Single, Priority::HIGH>()
+        .then([this](const Sensors& sensors) {
             update(sensors);
         }).disable();
 
-        on<Trigger<WalkCommand>>([this](const WalkCommand& walkCommand) {
+        on<Trigger<WalkCommand>>().then([this] (const WalkCommand& walkCommand) {
             auto velocity = walkCommand.command;
 
             velocity.x()     *= velocity.x()     > 0 ? velocityLimits(0,1) : -velocityLimits(0,0);
@@ -135,25 +136,25 @@ namespace motion {
             setVelocity(velocity);
         });
 
-        on<Trigger<WalkStartCommand>>([this](const WalkStartCommand&) {
+        on<Trigger<WalkStartCommand>>().then([this] {
             lastVeloctiyUpdateTime = NUClear::clock::now();
             start();
             // emit(std::make_unique<ActionPriorites>(ActionPriorites { subsumptionId, { 25, 10 }})); // TODO: config
         });
 
-        on<Trigger<WalkStopCommand>>([this](const WalkStopCommand&) {
+        on<Trigger<WalkStopCommand>>().then([this] {
             // TODO: This sets STOP_REQUEST, which appears not to be used anywhere.
             // If this is the case, we should delete or rethink the WalkStopCommand.
             requestStop();
         });
 
-        on<Trigger<Configuration<WalkEngine>>>([this](const Configuration<WalkEngine>& config) {
+        on<Configuration>("WalkEngine.yaml").then([this] (const Configuration& config) {
             configure(config.config);
         });
 
         // TODO: finish push detection and compensation
         // pushTime = NUClear::clock::now();
-        // on<Trigger<PushDetection>, With<Configuration<WalkEngine>>>([this](const PushDetection& pd, const Configuration<WalkEngine>& config) {
+        // on<Trigger<PushDetection>, With<Configuration>>().then([this](const PushDetection& pd, const Configuration& config) {
         //     balanceEnabled = true;
         //     // balanceAmplitude = balance["amplitude"].as<Expression>();
         //     // balanceWeight = balance["weight"].as<Expression>();
@@ -168,7 +169,7 @@ namespace motion {
         // on<
         //     Every<10, std::chrono::milliseconds>>(
         //     With<Configuration<WalkEngine>>
-        // >([this](const time_t& t, const Configuration<WalkEngine>& config) {
+        // >().then([this](const Configuration& config) {
         //     [this](const WalkOptimiserCommand& command) {
         //     if ((NUClear::clock::now() - pushTime) > std::chrono::milliseconds(config["walk_cycle"]["balance"]["balance_time"].as<int>)) {
         //         balancer.configure(config["walk_cycle"]["balance"]);
@@ -176,12 +177,12 @@ namespace motion {
         // });
 
 
-        on<Trigger<WalkOptimiserCommand> >([this](const WalkOptimiserCommand& command) {
+        on<Trigger<WalkOptimiserCommand>>().then([this] (const WalkOptimiserCommand& command) {
             configure(command.walkConfig);
             emit(std::make_unique<WalkConfigSaved>());
         });
 
-        generateStandScriptReaction = on<Trigger<Sensors>, Options<Single>>([this](const Sensors& sensors) {
+        generateStandScriptReaction = on<Trigger<Sensors>, Single>().then([this] (const Sensors& sensors) {
             generateStandScriptReaction.disable();
             //generateAndSaveStandScript(sensors);
             //state = State::LAST_STEP;
@@ -189,7 +190,6 @@ namespace motion {
         });
 
         reset();
-
     }
 
     void WalkEngine::configure(const YAML::Node& config){
@@ -554,7 +554,7 @@ namespace motion {
         auto waypoints = std::make_unique<std::vector<ServoCommand>>();
         waypoints->reserve(16);
 
-        time_t time = NUClear::clock::now() + std::chrono::nanoseconds(std::nano::den / UPDATE_FREQUENCY);
+        NUClear::clock::time_point time = NUClear::clock::now() + std::chrono::nanoseconds(std::nano::den / UPDATE_FREQUENCY);
 
         for (auto& joint : joints) {
             waypoints->push_back({ subsumptionId, time, joint.first, joint.second, jointGains[joint.first], 100 }); // TODO: support separate gains for each leg
@@ -590,7 +590,7 @@ namespace motion {
         auto waypoints = std::make_unique<std::vector<ServoCommand>>();
         waypoints->reserve(6);
 
-        time_t time = NUClear::clock::now() + std::chrono::nanoseconds(std::nano::den/UPDATE_FREQUENCY);
+        NUClear::clock::time_point time = NUClear::clock::now() + std::chrono::nanoseconds(std::nano::den/UPDATE_FREQUENCY);
         waypoints->push_back({ subsumptionId, time, ServoID::R_SHOULDER_PITCH, float(qRArmActual[0]), jointGains[ServoID::R_SHOULDER_PITCH], 100 });
         waypoints->push_back({ subsumptionId, time, ServoID::R_SHOULDER_ROLL,  float(qRArmActual[1]), jointGains[ServoID::R_SHOULDER_ROLL], 100 });
         waypoints->push_back({ subsumptionId, time, ServoID::R_ELBOW,          float(qRArmActual[2]), jointGains[ServoID::R_ELBOW], 100 });

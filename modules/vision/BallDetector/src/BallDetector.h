@@ -52,7 +52,7 @@ namespace vision {
         utility::math::learning::KMeans kmeansClusterer;
 
         struct Frame{
-            time_t time;
+            NUClear::clock::time_point time;
             arma::vec3 widthBall;
             arma::vec3 projBall;
         };
@@ -60,8 +60,6 @@ namespace vision {
 
         float approximateCircleGreenRatio(const utility::math::geometry::Circle& circle, const messages::input::Image& image, const messages::vision::LookUpTable& lut);
     public:
-
-        static constexpr const char* CONFIGURATION_PATH = "BallDetector.yaml";
 
         /// @brief Called by the powerplant to build and setup the BallDetector reactor.
         explicit BallDetector(std::unique_ptr<NUClear::Environment> environment);

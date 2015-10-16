@@ -27,6 +27,7 @@ namespace modules {
     namespace behaviour {
         namespace tools {
 
+            using NUClear::message::CommandLineArguments;
             using messages::motion::ExecuteScriptByName;
             using messages::behaviour::RegisterAction;
             using messages::input::LimbID;
@@ -53,7 +54,7 @@ namespace modules {
             ScriptRunner::ScriptRunner(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)), id(size_t(this) * size_t(this) - size_t(this)) {
 
                 // Get the scripts to run from the command line
-                on<Trigger<CommandLineArguments>>([this](const std::vector<std::string>& args) {
+                on<Trigger<CommandLineArguments>>().then([this](const std::vector<std::string>& args) {
                     NUClear::log<NUClear::INFO>("Executing: ", args.size() - 1, " scripts");
 
                     for(size_t i = 1; i < args.size(); ++i) {
@@ -62,7 +63,7 @@ namespace modules {
                     }
                 });
 
-                on<Trigger<ExecuteNextScript>>([this](const ExecuteNextScript&) {
+                on<Trigger<ExecuteNextScript>>().then([this] {
                     executeNextScript();
                 });
 

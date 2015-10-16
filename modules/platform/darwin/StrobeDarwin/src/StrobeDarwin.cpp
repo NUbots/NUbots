@@ -30,7 +30,7 @@ namespace modules {
 
             StrobeDarwin::StrobeDarwin(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
                 // Strobe up
-                on<Trigger<Beat>>([this](const Beat&) {
+                on<Trigger<Beat>>().then([this] {
                     auto eyes = std::make_unique<DarwinSensors::EyeLED>();
                     eyes->r = 0xff;
                     eyes->g = 0xff;
@@ -46,9 +46,8 @@ namespace modules {
                 });
 
                 // Strobe down
-                on<Trigger<Every<50, std::chrono::milliseconds>>,
-                   With<DarwinSensors>>([this](
-                    const time_t&, const DarwinSensors& data) {
+                on<Every<50, std::chrono::milliseconds>, With<DarwinSensors>>()
+                .then([this](const DarwinSensors& data) {
 
                     const int down = 25;
 

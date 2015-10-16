@@ -31,10 +31,6 @@
 namespace modules {
     namespace vision {
 
-        struct LUTLocation {
-            static constexpr const char* CONFIGURATION_PATH = "LookUpTable.yaml";
-        };
-
         class QuexClassifier;
 
         /**
@@ -95,8 +91,6 @@ namespace modules {
             void enhanceGoals(const messages::input::Image& image, const messages::vision::LookUpTable& lut, messages::vision::ClassifiedImage<messages::vision::ObjectClass>& classifiedImage);
 
         public:
-            static constexpr const char* CONFIGURATION_PATH = "LUTClassifier.yaml";
-
             explicit LUTClassifier(std::unique_ptr<NUClear::Environment> environment);
             ~LUTClassifier();
         };

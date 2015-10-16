@@ -1131,7 +1131,7 @@
 
 		// Tells PowerPlant to call processImage when new
 		// image data is available.
-		on<Trigger<Image>>(processImage);
+		on<Trigger<Image>>().then(processImage);
 	\end{lstlisting}
 \end{frame}
 
@@ -1155,7 +1155,7 @@
 		// Calls process data when a new image frame is
 		// captured. Also passes the most recent sensordata
 		// to processData.
-		on<Trigger<Image>, With<SensorData>>(processData);
+		on<Trigger<Image>, With<SensorData>>().then(processData);
 	\end{lstlisting}
 \end{frame}
 
@@ -1176,9 +1176,9 @@
 
 		// We can either use With multiple times or With<A,B>
 		on<Trigger<Image>,
-		   With<SensorData, AudioData>>(processData);
+		   With<SensorData, AudioData>>().then(processData);
 		on<Trigger<Image>,
-		   With<SensorData>, With<AudioData>>(processData);
+		   With<SensorData>, With<AudioData>>().then(processData);
 	\end{lstlisting}
 \end{frame}
 
@@ -1186,7 +1186,7 @@
 	\frametitle {Key Functions - Options Priority}
 	\begin{itemize}
 		\item Q: "My Reaction is much more important then everyone else's!"
-		\item A: Using an Options and Priority at the end of your reaction!
+		\item A: Using Priority at the end of your reaction!
 		\item Reactions with higher priority will get first access to free threads in the thread pool
 	\end{itemize}
 
@@ -1195,9 +1195,8 @@
 		    // Do stuff with the image
 		}
 
-		// We can also set priority to LOW DEFAULT or HIGH
-		on<Trigger<Image>,
-		   Options<Priority<NUClear::REALTIME>>>(processData);
+		// We can also set priority to LOW or DEFAULT
+		on<Trigger<Image>, Priority::HIGH>>().then(processData);
 	\end{lstlisting}
 \end{frame}
 
@@ -1205,7 +1204,7 @@
 	\frametitle {Key Functions - Options Single}
 	\begin{itemize}
 		\item Q: "If I'm already processing an Image, I don't want a new one till I'm done!"
-		\item A: Use the Single argument in Options
+		\item A: Use the Single argument
 		\item This will drop any new events of the same kind until yours is done
 	\end{itemize}
 
@@ -1216,8 +1215,7 @@
 
 		// Now only one Image will be processed at a time.
 		// If new ones come they'll be dropped
-		on<Trigger<Image>,
-		   Options<Single>>(processData);
+		on<Trigger<Image>, Single>().then(processData);
 	\end{lstlisting}
 \end{frame}
 
@@ -1225,7 +1223,7 @@
 	\frametitle {Key Functions - Options Sync}
 	\begin{itemize}
 		\item Q: "I have several state dependent reactions that can't be multithreaded! If they are then they won't run properly! But I know that if I use mutexes on them all I'll be really mean to everyone else by blocking up all the pool threads!"
-		\item A: Use the Sync argument in Options
+		\item A: Use the Sync argument
 		\item This will only allow a single event from a sync group to execute at a time (the rest queuing up and running after)
 	\end{itemize}
 \end{frame}
@@ -1243,10 +1241,8 @@
 
 		// The no two reactions with the same type in the Sync template
 		// will execute at the same time
-		on<Trigger<Image>,
-		   Options<Sync<MyReactor>>>(processData);
-		on<Trigger<Duck>,
-		   Options<Sync<MyReactor>>>(processMoarData);
+		on<Trigger<Image>, Sync<MyReactor>>(processData);
+		on<Trigger<Duck>, Sync<MyReactor>>(processMoarData);
 	\end{lstlisting}
 \end{frame}
 
@@ -1301,7 +1297,7 @@
 		    std::make_unique<MyData>();
 
 		// Send the data out to the world! like all of it
-		emit<Scope::NETWORK, Scope::LOCAL>(std::move(myData));
+		emit<NETWORK, LOCAL>(std::move(myData));
 	\end{lstlisting}
 \end{frame}
 
@@ -1310,7 +1306,7 @@
 	\frametitle{Key Functions - Emit}
 	\begin{itemize}
 		\item Q: "I want to emit some data that others can use to configure themselves"
-		\item A: If you want to emit some data in your constructor, before the system is started that others can use to configure themselves, then you need the INITIALIZE scope
+		\item A: If you want to emit some data in your constructor, before the system is started that others can use to configure themselves, then you need the Scope::INITIALIZE scope
 		\item This scope will run all the reactions before the system starts but after the modules are installed
 	\end{itemize}
 
@@ -1509,7 +1505,7 @@
 	// Vision.cpp
 	Vision::Vision(NUClear::PowerPlant* plant)
 	: Reactor(plant) {
-	    on<Trigger<Image>>
+	    on<Trigger<Image>>().then(
 	    ([this](const Image& image) {
 	        // Make a classified image and emit it
 	        auto classified = std::make_unique<ClassifiedImage>(makeClassified(image));
@@ -1533,8 +1529,7 @@
 
 	\begin{lstlisting}[language=nuclear]
 	using std::chrono::milliseconds;
-	on<Trigger<Every<100, milliseconds>>>
-	([](const time_t& t) {
+	on<Every<100, milliseconds>>>().then([] {
 	    // Do something every 100 milliseconds!
 	});
 	\end{lstlisting}
@@ -1551,8 +1546,7 @@
 	\end{itemize}
 
 	\begin{lstlisting}[language=nuclear]
-	on<Trigger<Last<5, Image>>>
-	([](const LastList<Image>& list) {
+	on<Last<5, Trigger<Image>>>().then([](const LastList<Image>& list) {
 	    // LastList is a vector of const pointers to the last 5 Images
 	});
 	\end{lstlisting}
@@ -1567,8 +1561,7 @@
 	\end{itemize}
 
 	\begin{lstlisting}[language=nuclear]
-	on<Trigger<Network<BallLocation>>>
-	([](const Network<BallLocation>& ball) {
+	on<Network<BallLocation>>().then([](const Network<BallLocation>& ball) {
 	    // We get all the ball locations emitted to the network
 	});
 	\end{lstlisting}
@@ -1583,12 +1576,8 @@
 	\end{itemize}
 
 	\begin{lstlisting}[language=nuclear]
-	struct MyConfigPath {
-	    static constexpr char* path = "Mine.yaml";
-	}
 
-	on<Trigger<Configuration<MyConfigPath>>>
-	([](const Configuration<MyConfigPath>& config) {
+	on<Configuration>("Mine.yaml").then([](const Configuration& config) {
 	    // config.name has the name of the file
 	    // config.config has our configuration
 	});
@@ -1605,12 +1594,8 @@
 	\end{itemize}
 
 	\begin{lstlisting}[language=nuclear]
-	struct Scripts {
-	    static constexpr char* path = "scripts/";
-	}
 
-	on<Trigger<Configuration<Scripts>>>
-	([](const Configuration<MyConfigPath>& config) {
+	on<Configuration>("scripts/").then([](const Configuration& config) {
 	    // config.name has the name of the script
 	    // config.config has the script configuration
 	});
@@ -1629,7 +1614,7 @@
 	\end{itemize}
 
 	\begin{lstlisting}[language=nuclear]
-	on<Trigger<MyData>>([](const MyData& data) {
+	on<Trigger<MyData>>().then([](const MyData& data) {
 	    // Bad! You've killed a thread pool thread!
 	    while(true) {
 	        doSomething(data);
@@ -1649,7 +1634,7 @@
 	\end{itemize}
 
 	\begin{lstlisting}[language=nuclear]
-	on<Trigger<Image>>([](const Image& image) {
+	on<Trigger<Image>>().then([](const Image& image) {
 
 	    // This could be emitted for others to use
 	    // Saving them the trouble of recoding or copying code

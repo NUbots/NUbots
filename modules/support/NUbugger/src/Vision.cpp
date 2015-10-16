@@ -19,21 +19,26 @@
 
 #include "NUbugger.h"
 
-#include "messages/support/nubugger/proto/Message.pb.h"
-#include "messages/vision/proto/LookUpTable.pb.h"
 #include "messages/input/Image.h"
 #include "messages/vision/ClassifiedImage.h"
 #include "messages/vision/VisionObjects.h"
+#include "messages/input/proto/Image.pb.h"
+#include "messages/vision/proto/LookUpTable.pb.h"
+#include "messages/vision/proto/LookUpTableDiff.pb.h"
+#include "messages/vision/proto/ClassifiedImage.pb.h"
+#include "messages/vision/proto/VisionObjects.pb.h"
 
 #include "utility/time/time.h"
 #include "utility/support/proto_armadillo.h"
 
 namespace modules {
 namespace support {
-    using messages::support::nubugger::proto::Message;
     using utility::time::getUtcTimestamp;
 
     using messages::input::Sensors;
+    using ImageProto = messages::input::proto::Image;
+    using ClassifiedImageProto = messages::vision::proto::ClassifiedImage;
+    using messages::vision::proto::VisionObjects;
     using messages::vision::proto::VisionObject;
     using messages::vision::proto::LookUpTableDiff;
     using messages::vision::ObjectClass;
@@ -43,48 +48,44 @@ namespace support {
     using messages::input::Image;
 
     void NUbugger::provideVision() {
-        handles[Message::IMAGE].push_back(on<Trigger<Image>, Options<Single, Priority<NUClear::LOW>>>([this](const Image& image) {
+        handles["image"].push_back(on<Trigger<Image>, Single, Priority::LOW>().then([this](const Image& image) {
 
             if (NUClear::clock::now() - last_image < max_image_duration) {
                 return;
             }
 
-            Message message = createMessage(Message::IMAGE, 1);
-            
-            auto* imageData = message.mutable_image();
+            ImageProto imageData;
 
-            imageData->set_camera_id(0);
-            imageData->mutable_dimensions()->set_x(image.width);
-            imageData->mutable_dimensions()->set_y(image.height);
+            imageData.set_camera_id(0);
+            imageData.mutable_dimensions()->set_x(image.width);
+            imageData.mutable_dimensions()->set_y(image.height);
 
-            std::string* imageBytes = imageData->mutable_data();
-            imageData->set_format(messages::input::proto::Image::YCbCr422);
+            std::string* imageBytes = imageData.mutable_data();
+            imageData.set_format(messages::input::proto::Image::YCbCr422);
 
             // Reserve enough space in the image data to store the output
             imageBytes->reserve(image.source().size());
             imageBytes->insert(imageBytes->begin(), std::begin(image.source()), std::end(image.source()));
 
-            send(message);
+            send(imageData, 1, false, NUClear::clock::now());
 
             last_image = NUClear::clock::now();
         }));
 
-        handles[Message::CLASSIFIED_IMAGE].push_back(on<Trigger<ClassifiedImage<ObjectClass>>, Options<Single, Priority<NUClear::LOW>>>([this](const ClassifiedImage<ObjectClass>& image) {
+        handles["classified_image"].push_back(on<Trigger<ClassifiedImage<ObjectClass>>, Single, Priority::LOW>().then([this](const ClassifiedImage<ObjectClass>& image) {
 
             if (NUClear::clock::now() - last_classified_image < max_classified_image_duration) {
                 return;
             }
 
-            Message message = createMessage(Message::CLASSIFIED_IMAGE, 1);
-            
-            auto* imageData = message.mutable_classified_image();
+            ClassifiedImageProto imageData;
 
-            imageData->set_camera_id(0);
-            *imageData->mutable_dimensions() << image.dimensions;
+            imageData.set_camera_id(0);
+            *imageData.mutable_dimensions() << image.dimensions;
 
             // Add the vertical segments to the list
             for(const auto& segment : image.verticalSegments) {
-                auto* s = imageData->add_segment();
+                auto* s = imageData.add_segment();
 
                 s->set_colour(uint(segment.first));
                 s->set_subsample(segment.second.subsample);
@@ -95,7 +96,7 @@ namespace support {
 
             // Add the horizontal segments to the list
             for(const auto& segment : image.horizontalSegments) {
-                auto* s = imageData->add_segment();
+                auto* s = imageData.add_segment();
 
                 s->set_colour(uint(segment.first));
                 s->set_subsample(segment.second.subsample);
@@ -105,30 +106,31 @@ namespace support {
             }
 
             // Add in the actual horizon (the points on the left and right side)
-            auto* horizon = imageData->mutable_horizon();
+            auto* horizon = imageData.mutable_horizon();
             *horizon->mutable_normal() << image.horizon.normal;
             horizon->set_distance(image.horizon.distance);
 
             for(const auto& visualHorizon : image.visualHorizon) {
-                *imageData->add_visual_horizon() << visualHorizon;
+                *imageData.add_visual_horizon() << visualHorizon;
             }
 
-            send(message);
+            send(imageData, imageData.camera_id() + 1, false, NUClear::clock::now());
 
             last_classified_image = NUClear::clock::now();
         }));
 
-        handles[Message::VISION_OBJECT].push_back(on<Trigger<std::vector<Ball>>, Options<Single, Priority<NUClear::LOW>>>([this] (const std::vector<Ball>& balls) {
+        handles["vision_object"].push_back(on<Trigger<std::vector<Ball>>, Single, Priority::LOW>().then([this] (const std::vector<Ball>& balls) {
 
-            Message message = createMessage(Message::VISION_OBJECT, 1);
-            
-            auto* object = message.mutable_vision_object();
-            object->set_type(VisionObject::BALL);
-            object->set_camera_id(0);
+            VisionObjects objects;
+
+            auto& object = *objects.add_object();
+
+            object.set_type(VisionObject::BALL);
+            object.set_camera_id(0);
 
             for(const auto& b : balls) {
 
-                auto* ball = object->add_ball();
+                auto* ball = object.add_ball();
 
                 auto* circle = ball->mutable_circle();
                 circle->set_radius(b.circle.radius);
@@ -141,21 +143,20 @@ namespace support {
                 }
             }
 
-            send(message);
-
+            send(object, object.camera_id() + 1, false, NUClear::clock::now());
         }));
 
-        handles[Message::VISION_OBJECT].push_back(on<Trigger<std::vector<Goal>>, Options<Single, Priority<NUClear::LOW>>>([this] (const std::vector<Goal>& goals) {
+        handles["vision_object"].push_back(on<Trigger<std::vector<Goal>>, Single, Priority::LOW>().then([this] (const std::vector<Goal>& goals) {
 
-            Message message = createMessage(Message::VISION_OBJECT, 2);
-            
-            auto* object = message.mutable_vision_object();
+            VisionObjects objects;
 
-            object->set_type(VisionObject::GOAL);
-            object->set_camera_id(0);
+            auto& object = *objects.add_object();
+
+            object.set_type(VisionObject::GOAL);
+            object.set_camera_id(0);
 
             for(const auto& g : goals) {
-                auto* goal = object->add_goal();
+                auto* goal = object.add_goal();
 
                 goal->set_side(g.side == Goal::Side::LEFT ? VisionObject::Goal::LEFT
                              : g.side == Goal::Side::RIGHT ? VisionObject::Goal::RIGHT
@@ -174,24 +175,22 @@ namespace support {
                 }
             }
 
-            send(message);
+            send(object, 2, false, NUClear::clock::now());
         }));
 
         // TODO: needs refactoring so that this is really only a vision line handle
-        handles[Message::VISION_OBJECT].push_back(on<Trigger<VisionObject>, Options<Single, Priority<NUClear::LOW>>>([this] (const VisionObject& visionObject) {
+        handles["vision_object"].push_back(on<Trigger<VisionObject>, Single, Priority::LOW>().then([this] (const VisionObject& visionObject) {
 
-            Message message = createMessage(Message::VISION_OBJECT, 1);
-            *message.mutable_vision_object() = visionObject;
-            send(message);
+            VisionObjects objects;
 
+            *objects.add_object() = visionObject;
+
+            send(objects, 3, false, NUClear::clock::now());
         }));
 
-        handles[Message::LOOKUP_TABLE_DIFF].push_back(on<Trigger<LookUpTableDiff>, Options<Single, Priority<NUClear::LOW>>>([this] (const LookUpTableDiff& tableDiff) {
-            
-            Message message = createMessage(Message::LOOKUP_TABLE_DIFF);
-            *message.mutable_lookup_table_diff() = tableDiff;
-            send(message);
-            
+        handles["lookup_table_diff"].push_back(on<Trigger<LookUpTableDiff>, Single, Priority::LOW>().then([this] (const LookUpTableDiff& tableDiff) {
+
+            send(tableDiff, 0, true, NUClear::clock::now());
         }));
     }
 }

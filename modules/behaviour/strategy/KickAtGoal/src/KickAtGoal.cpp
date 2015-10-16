@@ -45,28 +45,26 @@ namespace strategy {
         // TODO: unhack?
         emit(std::make_unique<KickPlan>(KickPlan{{3, 0}}));
 
-        on<Trigger<Every<30, Per<std::chrono::seconds>>>, Options<Single>>([this](const time_t&) {
+        on<Every<30, Per<std::chrono::seconds>>, Single>().then([this] {
 
             doBehaviour();
 
         });
 
-        on<Trigger<std::vector<VisionBall>>>([this] (const std::vector<VisionBall>& balls) {
+        on<Trigger<std::vector<VisionBall>>>().then([this] (const std::vector<VisionBall>& balls) {
             if (!balls.empty()) {
                 ballLastSeen = NUClear::clock::now();
             }
         });
 
-        on<Trigger<std::vector<VisionGoal>>>([this] (const std::vector<VisionGoal>& goals) {
+        on<Trigger<std::vector<VisionGoal>>>().then([this] (const std::vector<VisionGoal>& goals) {
             if (!goals.empty()) {
                 goalLastSeen = NUClear::clock::now();
             }
         });
 
-        on<Trigger<Configuration<KickAtGoal>>>([this](const Configuration<KickAtGoal>& config) {
-
+        on<Configuration>("KickAtGoal.yaml").then([this](const Configuration& config) {
             ballActiveTimeout = durationFromSeconds(config["ball_active_timeout"].as<double>());
-
         });
 
     }
@@ -78,7 +76,7 @@ namespace strategy {
         // Check if the ball  has been seen recently.
         if (NUClear::clock::now() - ballLastSeen < ballActiveTimeout) {
             walkToBall();
-        } 
+        }
         else {
             spinToWin();
         }

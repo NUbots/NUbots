@@ -1,0 +1,8 @@
+ADD_ROLE(
+    # This must come first as it populates global variables that other modules depend on.
+    #Support
+    support::SignalCatcher
+    support::logging::ConsoleLogHandler
+    support::extension::FileWatcher
+    support::NUbugger
+)

@@ -253,7 +253,7 @@ namespace modules {
 
         BeatDetector::BeatDetector(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
 
-            on<Trigger<messages::SoundChunkSettings>>([this](const messages::SoundChunkSettings& settings) {
+            on<Trigger<messages::SoundChunkSettings>>().then([this](const messages::SoundChunkSettings& settings) {
 
                 // Store the settings
                 m->sampleRate = settings.sampleRate;
@@ -277,7 +277,7 @@ namespace modules {
             });
 
             // This triggers on every sound chunk we get
-            on<Trigger<messages::SoundChunk>>([this](const messages::SoundChunk& chunk) {
+            on<Trigger<messages::SoundChunk>>().then([this](const messages::SoundChunk& chunk) {
                 // Split the sound into frequency buckets and emit
                 auto buckets = std::make_unique<Buckets>();
                 buckets->buckets = m->getBuckets(chunk);
@@ -285,7 +285,7 @@ namespace modules {
             });
 
             // This triggers on every 2 buckets we make, it does the derivative of the value
-            on<Trigger<Last<2, Buckets>>>([this](const std::vector<std::shared_ptr<const Buckets>>& buckets) {
+            on<Last<2, Trigger<Buckets>>>().then([this](const std::list<std::shared_ptr<const Buckets>>& buckets) {
 
                 // If we have at least two buckets (we can't do derivative on 1)
                 if(buckets.size() > 1) {
@@ -305,7 +305,7 @@ namespace modules {
 
             // This takes in the last 10 seconds (assuming 100 chunks per second) of differentiated buckets and finds the
             // most likely beat from it
-            on<Trigger<Last<NUM_BEAT_SAMPLES, DiffBuckets>>>([this](const std::vector<std::shared_ptr<const DiffBuckets>>& input) {
+            on<Last<NUM_BEAT_SAMPLES, Trigger<DiffBuckets>>>().then([this](const std::vector<std::shared_ptr<const DiffBuckets>>& input) {
 
                 // Allocate an array of buckets
                 std::vector<DiffBuckets> buckets;
@@ -332,7 +332,7 @@ namespace modules {
 
             // This takes the last 100 estimated beat locations and and gets the median. This will get rid of most of
             // the random outlier beats that are detected
-            on<Trigger<Last<100, Beat>>>([this](const std::vector<std::shared_ptr<const Beat>>& input) {
+            on<Last<100, Trigger<Beat>>>().then([this](const std::vector<std::shared_ptr<const Beat>>& input) {
 
                 // Make vectors for our beats and the indexes to the beats (so we can calculate our phase offset)
                 std::vector<Beat> beats;
@@ -365,7 +365,7 @@ namespace modules {
             });
 
             // This takes the last two filtered beats and emits a beat message every full phase revolution)
-            on<Trigger<Last<2, FilteredBeat>>>([this](const std::vector<std::shared_ptr<const FilteredBeat>>& input) {
+            on<Last<2, Trigger<FilteredBeat>>>().then([this](const std::vector<std::shared_ptr<const FilteredBeat>>& input) {
 
                 // Make sure we have 2 elements
                 if(input.size() == 2) {

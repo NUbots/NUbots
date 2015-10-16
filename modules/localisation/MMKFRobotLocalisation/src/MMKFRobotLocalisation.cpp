@@ -40,7 +40,6 @@ using utility::math::matrix::Rotation3D;
 using utility::math::angle::bearingToUnitVector;
 using utility::nubugger::graph;
 using utility::localisation::LocalisationFieldObject;
-using modules::localisation::MultiModalRobotModelConfig;
 using messages::support::Configuration;
 using messages::support::FieldDescription;
 using messages::input::Sensors;
@@ -77,23 +76,20 @@ namespace localisation {
           engine_(std::make_unique<MMKFRobotLocalisationEngine>()) {
 
 
-        on<Trigger<Configuration<MultiModalRobotModelConfig>>>(
-            "MultiModalRobotModelConfig Update",
-            [this](const Configuration<MultiModalRobotModelConfig>& config) {
+        on<Configuration>("MultiModalRobotModel.yaml")
+        .then("MultiModalRobotModelConfig Update", [this](const Configuration& config) {
 
-            engine_->UpdateConfiguration(config);
+            engine_->UpdateMultiModalRobotModelConfiguration(config);
             NUClear::log("Localisation config finished successfully!");
         });
 
-        on<Trigger<Configuration<MMKFRobotLocalisationEngineConfig>>>(
-            "MMKFRobotLocalisationEngineConfig Update",
-            [this](const Configuration<MMKFRobotLocalisationEngineConfig>& config) {
-            engine_->UpdateConfiguration(config);
+        on<Configuration>("MMKFRobotLocalisationEngine.yaml")
+        .then("MMKFRobotLocalisationEngineConfig Update", [this](const Configuration& config) {
+            engine_->UpdateRobotLocalisationEngineConfiguration(config);
         });
 
-        on<Trigger<Startup>,
-           With<Optional<FieldDescription>>>("FieldDescription Update",
-           [this](const Startup&, std::shared_ptr<const FieldDescription> desc) {
+        on<Startup, Optional<With<FieldDescription>>>()
+        .then("FieldDescription Update", [this](std::shared_ptr<const FieldDescription> desc) {
             if (desc == nullptr) {
                 throw std::runtime_error("FieldDescription Update: support::configuration::SoccerConfig module might not be installed");
             }
@@ -102,10 +98,11 @@ namespace localisation {
             engine_->set_field_description(fd);
         });
 
-        on<Trigger<ResetRobotHypotheses>,
-           Options<Sync<MMKFRobotLocalisation>,Single>,
-           With<Sensors>
-          >("Localisation ResetRobotHypotheses", [this](const ResetRobotHypotheses& reset, const Sensors& sensors) {
+        on<Trigger<ResetRobotHypotheses>
+         , With<Sensors>
+         , Sync<MMKFRobotLocalisation>
+         , Single>()
+         .then("Localisation ResetRobotHypotheses", [this](const ResetRobotHypotheses& reset, const Sensors& sensors) {
             engine_->Reset(reset, sensors);
 
             // auto& hypotheses = engine_->robot_models_.hypotheses();
@@ -115,10 +112,12 @@ namespace localisation {
         });
 
         // Emit self
-        emit_data_handle = on<Trigger<Every<100, std::chrono::milliseconds>>,
-           With<Sensors>,
-           Options<Sync<MMKFRobotLocalisation>, Single>
-           >("Localisation NUSight Output", [this](const time_t&, const Sensors& sensors) {
+        emit_data_handle = on<Every<100, std::chrono::milliseconds>
+         , With<Sensors>
+         , Sync<MMKFRobotLocalisation>
+         , Single>()
+           .then("Localisation NUSight Output", [this](const Sensors& sensors) {
+
             auto& hypotheses = engine_->robot_models_.hypotheses();
             if (hypotheses.size() == 0) {
                 NUClear::log<NUClear::ERROR>("MMKFRobotLocalisation has no robot hypotheses.");
@@ -153,10 +152,8 @@ namespace localisation {
         //Disable until first data
         emit_data_handle.disable();
 
-
-        on<Trigger<Sensors>,
-           Options<Sync<MMKFRobotLocalisation>,Single>
-          >("MMKFRobotLocalisation Odometry", [this](const Sensors& sensors) {
+        on<Trigger<Sensors>, Sync<MMKFRobotLocalisation>, Single>()
+        .then("MMKFRobotLocalisation Odometry", [this](const Sensors& sensors) {
             auto curr_time = NUClear::clock::now();
 
             emit(graph("Odometry Measurement Update", sensors.odometry[0], sensors.odometry[1]));
@@ -165,18 +162,19 @@ namespace localisation {
             engine_->OdometryMeasurementUpdate(sensors);
         });
 
-        // on<Trigger<Every<100, Per<std::chrono::seconds>>>,
+        // on<Every<100, Per<std::chrono::seconds>>,
         //    With<Sensors>,
-        //    Options<Sync<MMKFRobotLocalisation>>
-        //   >("MMKFRobotLocalisation Time", [this](const time_t&, const Sensors& sensors) {
+        //    Sync<MMKFRobotLocalisation>>
+        //    .then("MMKFRobotLocalisation Time", [this] (const Sensors& sensors) {
         //     auto curr_time = NUClear::clock::now();
         //     engine_->TimeUpdate(curr_time, sensors);
         // });
 
-        on<Trigger<std::vector<messages::vision::Goal>>,
-           With<Sensors>,
-           Options<Sync<MMKFRobotLocalisation>,Single>
-          >("MMKFRobotLocalisation Measurement Step",
+        on<Trigger<std::vector<messages::vision::Goal>>
+         , With<Sensors>
+         , Sync<MMKFRobotLocalisation>
+         , Single>()
+         .then("MMKFRobotLocalisation Measurement Step",
             [this](const std::vector<messages::vision::Goal>& goals, const Sensors& sensors) {
 
             //Is this check necessary?

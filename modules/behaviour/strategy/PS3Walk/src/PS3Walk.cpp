@@ -39,7 +39,7 @@ namespace strategy {
     PS3Walk::PS3Walk(std::unique_ptr<NUClear::Environment> environment)
         : Reactor(std::move(environment)) {
 
-        on<Trigger<Every<1, std::chrono::milliseconds>>, Options<Single>>([this](const time_t&) {
+        on<Every<1, std::chrono::milliseconds>, Single>([this] {
 
             JoystickEvent event;
             // read from joystick
@@ -129,14 +129,13 @@ namespace strategy {
             }
             // If it's closed then we should try to reconnect
             else if (!joystick.valid()) {
-
                 joystick.reconnect();
             }
         });
 
         // output walk command based on updated strafe and rotation speed from joystick
         // TODO: potential performance gain: ignore if value hasn't changed since last emit?
-        on<Trigger<Every<20, Per<std::chrono::seconds>>>>([this](const time_t&) {
+        on<Every<20, Per<std::chrono::seconds>>>([this] {
             if (!headLocked) {
                 auto headCommand = std::make_unique<HeadCommand>();
                 headCommand->yaw = headYaw / std::numeric_limits<short>::max() * 1.5;

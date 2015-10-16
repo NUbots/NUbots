@@ -26,7 +26,7 @@ namespace modules {
 
             PartyDarwin::PartyDarwin(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
 
-                on<Trigger<Every<125, std::chrono::milliseconds>>>([this](const time_t&) {
+                on<Every<125, std::chrono::milliseconds>>([this] {
 
                     auto eyes = std::make_unique<messages::DarwinSensors::EyeLED>();
                     eyes->r = rand();

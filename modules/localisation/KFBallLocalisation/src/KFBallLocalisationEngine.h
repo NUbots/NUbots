@@ -33,9 +33,6 @@
 
 namespace modules {
 namespace localisation {
-    struct KFBallLocalisationEngineConfig {
-        static constexpr const char* CONFIGURATION_PATH = "KFBallLocalisationEngine.yaml";
-    };
 
     class KFBallLocalisationEngine {
         public:
@@ -57,8 +54,7 @@ namespace localisation {
 
         double MeasurementUpdate(const messages::vision::VisionObject& observed_object);
 
-        void UpdateConfiguration(
-            const messages::support::Configuration<KFBallLocalisationEngineConfig>& config);
+        void UpdateConfiguration(const messages::support::Configuration& config);
 
         bool CanEmitFieldObjects();
 

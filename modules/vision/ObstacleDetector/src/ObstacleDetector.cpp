@@ -31,7 +31,7 @@ namespace vision {
     ObstacleDetector::ObstacleDetector(std::unique_ptr<NUClear::Environment> environment)
         : Reactor(std::move(environment)) {
 
-        on<Trigger<ClassifiedImage<ObjectClass>>, Options<Single>>("Obstacle Detector", [this](const ClassifiedImage<ObjectClass>& image) {
+        on<Trigger<ClassifiedImage<ObjectClass>>, Single>().then("Obstacle Detector", [this] (const ClassifiedImage<ObjectClass>& image) {
 
             std::vector<arma::ivec2> points;
 

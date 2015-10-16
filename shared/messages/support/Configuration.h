@@ -20,60 +20,25 @@
 #ifndef MESSAGES_SUPPORT_CONFIGURATION_H_
 #define MESSAGES_SUPPORT_CONFIGURATION_H_
 
+#include <cstdlib>
 #include <nuclear>
 #include <yaml-cpp/yaml.h>
-#include "utility/support/yaml_armadillo.h"
-#include "utility/support/yaml_expression.h"
+
+#include "messages/support/FileWatch.h"
 
 namespace messages {
     namespace support {
-
-        using namespace NUClear::metaprogramming;
-
-        // Anonymous namespace to hide details
-        namespace {
-            /*
-             * This uses SFINAE to work out if the CONFIGURATION_PATH operator exists. If it does then doTest(0) will match
-             * the int variant (as it is a closer match) but only so long as T::CONFIGURATION_PATH is defined (otherwise
-             * substitution will fail. It will then fallback to the char verison (who's returntype is not void)
-             */
-            template<class T>
-            static auto doTest(int) -> decltype(T::CONFIGURATION_PATH, void());
-            template<class>
-            static char doTest(char);
-
-            /**
-             * @brief Tests if the passed type's CONFIGURATION_PATH variable can be assigned to a string
-             *
-             * @details
-             *  TODO
-             */
-            template<typename T>
-            struct ConfigurationIsString :
-            public Meta::If<
-                std::is_assignable<std::string, decltype(T::CONFIGURATION_PATH)>,
-                std::true_type,
-                std::false_type
-            > {};
-
-            template<typename T>
-            struct HasConfiguration :
-            public Meta::If<std::is_void<decltype(doTest<T>(0))>, ConfigurationIsString<T>, std::false_type> {};
-        }
 
         /**
          * TODO document
          *
          * @author Trent Houliston
          */
-        template <typename TType>
         struct Configuration {
-            static_assert(HasConfiguration<TType>::value, "The passed type does not have a CONFIGURATION_PATH variable");
-
-            std::string name;
+            std::string path;
             YAML::Node config;
 
-            Configuration(const std::string& name, YAML::Node config) : name(name), config(config) {};
+            Configuration(const std::string& path, YAML::Node config) : path(path), config(config) {};
 
             YAML::Node operator [] (const std::string& key) {
                 return config[key];
@@ -100,82 +65,55 @@ namespace messages {
             }
         };
 
-        /**
-         * TODO document
-         *
-         * @author Trent Houliston
-         */
         struct SaveConfiguration {
             std::string path;
             YAML::Node config;
         };
 
-        /**
-         * TODO document
-         *
-         * @author Trent Houliston
-         */
-        struct ConfigurationConfiguration {
-            std::type_index requester;
-            std::string configPath;
-            std::function<void (NUClear::Reactor*, const std::string&, const YAML::Node&)> emitter;
-            std::function<void (NUClear::Reactor*, const std::string&, const YAML::Node&)> initialEmitter;
-        };
-
     }  // support
 }  // messages
 
-// Our extension
+// NUClear configuration extension
 namespace NUClear {
+    namespace dsl {
+        namespace operation {
+            template <>
+            struct DSLProxy<messages::support::Configuration> {
 
-    /**
-     * TODO document
-     *
-     * @author Trent Houliston
-     */
-    template <typename TConfiguration>
-    struct NUClear::Reactor::Exists<messages::support::Configuration<TConfiguration>> {
-        static void exists(NUClear::Reactor& context) {
-
-            // Build our lambda we will use to trigger this reaction
-            std::function<void (Reactor*, const std::string&, const YAML::Node&)> emitter =
-            [](Reactor* configReactor, const std::string& name, const YAML::Node& node) {
-                // Cast our node to be the correct type (and wrap it in a unique pointer)
-                try {
-                    configReactor->emit(std::make_unique<messages::support::Configuration<TConfiguration>>(name, node));
+                template <typename DSL, typename TFunc>
+                static inline threading::ReactionHandle bind(Reactor& reactor, const std::string& label, TFunc&& callback, const std::string& path) {
+                    return DSLProxy<messages::support::FileWatch>::bind<DSL>(reactor, label, callback, "config/" + path,
+                                                                             messages::support::FileWatch::ATTRIBUTES
+                                                                             | messages::support::FileWatch::CREATE
+                                                                             | messages::support::FileWatch::MODIFY
+                                                                             | messages::support::FileWatch::MOVED_TO);
                 }
 
-                catch (...) {
-                    NUClear::log<NUClear::FATAL>("Config error in file: ", name);
-                    throw;
-                }
-            };
+                template <typename DSL>
+                static inline std::shared_ptr<messages::support::Configuration> get(threading::Reaction& t) {
 
-            // We need to emit our initial configuration directly in order to avoid race conditions where
-            // a main reactor tries to load configuration information before the configurations are loaded.
-            std::function<void (Reactor*, const std::string&, const YAML::Node&)> initialEmitter =
-            [](Reactor* configReactor, const std::string& name, const YAML::Node& node) {
-                // Cast our node to be the correct type (and wrap it in a unique pointer)
-                try {
-                    configReactor->emit<Scope::DIRECT>(std::make_unique<messages::support::Configuration<TConfiguration>>(name, node));
-                }
+                    // Get the file watch event
+                    messages::support::FileWatch watch = DSLProxy<messages::support::FileWatch>::get<DSL>(t);
 
-                catch (...) {
-                    NUClear::log<NUClear::FATAL>("Config error in file: ", name);
-                    throw;
+                    // Check if the watch is valid
+                    if(watch) {
+                        // Return our yaml file
+                        return std::make_shared<messages::support::Configuration>(watch.path, YAML::LoadFile(watch.path));
+                    }
+                    else {
+                        // Return an empty configuration (which will show up invalid)
+                        return std::shared_ptr<messages::support::Configuration>(nullptr);
+                    }
                 }
             };
-
-            // Emit it from our reactor to the config system
-            context.emit<Scope::INITIALIZE>(std::unique_ptr<messages::support::ConfigurationConfiguration>(
-                new messages::support::ConfigurationConfiguration {
-                    typeid(TConfiguration),
-                    TConfiguration::CONFIGURATION_PATH,
-                    emitter,
-                    initialEmitter
-            }));
         }
-    };
-}  // NUClear
+
+        // Configuration is transient
+        namespace trait {
+            template <>
+            struct is_transient<std::shared_ptr<messages::support::Configuration>> : public std::true_type {};
+        }
+    }
+}
 
 #endif

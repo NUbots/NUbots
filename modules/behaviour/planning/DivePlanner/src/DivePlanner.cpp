@@ -32,8 +32,8 @@ namespace modules {
 namespace behaviour {
 namespace planning {
 
-    using messages::localisation::Ball;
-    using messages::localisation::Self;
+    using LocalisationBall = messages::localisation::Ball;
+    using VisionBall = messages::vision::Ball;
     using messages::motion::DiveCommand;
     using messages::support::Configuration;
     using messages::motion::WalkStopCommand;
@@ -41,24 +41,17 @@ namespace planning {
 
     DivePlanner::DivePlanner(std::unique_ptr<NUClear::Environment> environment)
         : Reactor(std::move(environment)) {
-        
-        
+
+
         // Do some configuration
-        on<Trigger<Configuration<DivePlanner> > >([this](const Configuration<DivePlanner>& config) {
+        on<Configuration>("DivePlanner.yaml").then("Configure Dive Planner", [this] (const Configuration& config) {
         	SPEED_THRESHOLD = config["SPEED_THRESHOLD"].as<float>();
         	DISTANCE_THRESHOLD = config["DISTANCE_THRESHOLD"].as<float>();
         });
 
-        on<Trigger<Ball>, With<std::vector<Self>>, With<std::vector<messages::vision::Ball>>>([this] (
-        	const Ball& ball,
-        	const std::vector<Self>& selfs,
-        	const std::vector<messages::vision::Ball>& vision_balls) {
-
-        	// TODO: why are these used?
-        	(void)selfs;
-
-            
-
+        on<Trigger<LocalisationBall>, With<std::vector<VisionBall>>>().then([this] (
+        	const LocalisationBall& ball,
+        	const std::vector<VisionBall>& vision_balls) {
 
             if(vision_balls.size()>0 && //It means a ball was detected.
                ball.position[0] > 0 && //
@@ -72,12 +65,12 @@ namespace planning {
                 // Position [1] : y
                 /*
                  * Dive direction is determined by the RT position of ball.
-                 * TODO 1: This is problematic as there will be latence which has to be considered 
+                 * TODO 1: This is problematic as there will be latence which has to be considered
                  * if the velocity of ball is beyond a threshold. Might be good if there is any sort of prediction.
                  *
                  * TODO 2: Posture before dive. Banana dive?
                  *
-                 * TODO 3: If banana dive, how can the robot tell if it is facing the wrong direction and 
+                 * TODO 3: If banana dive, how can the robot tell if it is facing the wrong direction and
                  * turn back to the correct direction (facing opponent)? Is that based on localisation?
                  *
                  *               + x
@@ -86,7 +79,7 @@ namespace planning {
                  *          + y   |   -y
                  *  LEFT<---------.--------- RIGHT
                  */
-                
+
                 if(ball.position[1]>0){
                     //Dive left
                     auto x = std::make_unique<DiveCommand>();

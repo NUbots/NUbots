@@ -4,7 +4,7 @@ ADD_ROLE(
     #Support
     support::SignalCatcher
     support::logging::ConsoleLogHandler
-    support::configuration::ConfigSystem
+    support::extension::FileWatcher
     support::configuration::GlobalConfig
     support::NUbugger
 

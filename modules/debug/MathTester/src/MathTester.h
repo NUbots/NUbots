@@ -29,7 +29,6 @@ namespace modules {
             class MathTester : public NUClear::Reactor {
             public:
                 bool testPolygon(bool verbose, const YAML::Node& config);
-                static constexpr const char* CONFIGURATION_PATH = "HeadKinematicsNULLTest.yaml";
                 explicit MathTester(std::unique_ptr<NUClear::Environment> environment);
             };
 

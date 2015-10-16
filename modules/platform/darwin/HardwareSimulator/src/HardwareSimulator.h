@@ -59,7 +59,6 @@ namespace darwin {
     public:
         /// @brief called by a Powerplant to construct this reactor
         explicit HardwareSimulator(std::unique_ptr<NUClear::Environment> environment);
-        static constexpr const char* CONFIGURATION_PATH = "DarwinHardwareSimulator.yaml";
     };
 }
 }

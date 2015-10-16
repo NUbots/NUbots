@@ -76,10 +76,9 @@ namespace modules {
             lostAndSearching(false),
             lostLastTime(false),
             lastBallPriority(0),
-            lastGoalPriority(0)
-            {
-                on<Trigger<Configuration<HeadBehaviourSoccer>>>("Head Behaviour Soccer Config",[this] (const Configuration<HeadBehaviourSoccer>& config)
-                {
+            lastGoalPriority(0) {
+
+                on<Configuration>("HeadBehaviourSoccer.yaml").then("Head Behaviour Soccer Config", [this] (const Configuration& config) {
                     lastPlanUpdate = NUClear::clock::now();
                     timeLastObjectSeen = NUClear::clock::now();
                     max_yaw = utility::motion::kinematics::DarwinModel::Head::MAX_YAW;
@@ -119,38 +118,39 @@ namespace modules {
 
                 // TODO: remove this horrible code
                 // Check to see if we are currently in the process of getting up.
-                on<Trigger<ExecuteGetup>>([this](const ExecuteGetup&) {
+                on<Trigger<ExecuteGetup>>().then([this] {
                     isGettingUp = true;
                 });
 
                 // Check to see if we have finished getting up.
-                on<Trigger<KillGetup>>([this](const KillGetup&) {
+                on<Trigger<KillGetup>>().then([this] {
                     isGettingUp = false;
                 });
 
 
-                on<Trigger<CameraParameters>>("Head Behaviour - Load CameraParameters",[this] (const CameraParameters& cam_){
+                on<Trigger<CameraParameters>>().then("Head Behaviour - Load CameraParameters",[this] (const CameraParameters& cam_) {
                     cam = cam_;
                 });
 
-                on<Trigger<SoccerObjectPriority>, Options<Sync<HeadBehaviourSoccer>>>("Head Behaviour Soccer - Set priorities", [this] (const SoccerObjectPriority& p){
+                on<Trigger<SoccerObjectPriority>, Sync<HeadBehaviourSoccer>>().then("Head Behaviour Soccer - Set priorities", [this] (const SoccerObjectPriority& p) {
                     ballPriority = p.ball;
                     goalPriority = p.goal;
                     searchType = p.searchType;
                 });
 
-                on< Trigger<Sensors>,
-                    With<Optional<std::vector<Ball>>>,
-                    With<Optional<std::vector<Goal>>>,
-                    With<Optional<LocBall>>,
-                    Options<Single, Sync<HeadBehaviourSoccer>>
-                  >("Head Behaviour Main Loop",[this] ( const Sensors& sensors,
+                on<Trigger<Sensors>,
+                    Optional<With<std::vector<Ball>>>,
+                    Optional<With<std::vector<Goal>>>,
+                    Optional<With<LocBall>>,
+                    Single,
+                    Sync<HeadBehaviourSoccer>
+                  >().then("Head Behaviour Main Loop", [this] ( const Sensors& sensors,
                                                         std::shared_ptr<const std::vector<Ball>> vballs,
                                                         std::shared_ptr<const std::vector<Goal>> vgoals,
                                                         std::shared_ptr<const LocBall> locBall
                                                         ) {
 
-                    if(locBall){
+                    if(locBall) {
                         locBallReceived = true;
                         lastLocBall = *locBall;
                     }

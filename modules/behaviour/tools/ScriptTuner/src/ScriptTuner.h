@@ -60,8 +60,6 @@ namespace modules {
                 void toggleLockMotor();
                 void newFrame();
                 void deleteFrame();
-                void run();
-                void kill();
                 void playScript();
                 void jumpToFrame();
                 void help();

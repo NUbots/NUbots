@@ -31,7 +31,6 @@ namespace skills {
     public:
         /// @brief Called by the powerplant to build and setup the GoalSaver reactor.
         explicit GoalSaver(std::unique_ptr<NUClear::Environment> environment);
-        static constexpr const char* CONFIGURATION_PATH = "GoalSaver.yaml";
 
     private:
         const size_t id;

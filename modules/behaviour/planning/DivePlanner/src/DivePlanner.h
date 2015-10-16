@@ -30,7 +30,6 @@ namespace planning {
     public:
         /// @brief Called by the powerplant to build and setup the DivePlanner reactor.
         explicit DivePlanner(std::unique_ptr<NUClear::Environment> environment);
-        static constexpr const char* CONFIGURATION_PATH = "DivePlanner.yaml";
 
     private:
     	float SPEED_THRESHOLD;

@@ -3,7 +3,8 @@ ADD_ROLE(
     platform::darwin::KinematicsModel
     support::SignalCatcher
     support::logging::ConsoleLogHandler
-    support::configuration::ConfigSystem
+    support::extension::FileWatcher
+    support::extension::FileWatcher
     support::configuration::GlobalConfig
     platform::darwin::HardwareIO
     platform::darwin::SensorFilter

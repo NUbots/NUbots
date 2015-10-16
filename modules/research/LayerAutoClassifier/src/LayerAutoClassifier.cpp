@@ -22,7 +22,7 @@
 #include "messages/research/AutoClassifierPixels.h"
 #include "messages/support/Configuration.h"
 #include "messages/vision/LookUpTable.h"
-#include "messages/vision/proto/LookUpTable.pb.h"
+#include "messages/vision/proto/LookUpTableDiff.pb.h"
 
 namespace modules {
 namespace research {
@@ -298,7 +298,7 @@ namespace research {
     LayerAutoClassifier::LayerAutoClassifier(std::unique_ptr<NUClear::Environment> environment)
         : Reactor(std::move(environment)) {
 
-        on<Trigger<Configuration<LayerAutoClassifier>>>([this](const Configuration<LayerAutoClassifier>& config) {
+        on<Configuration>("LayerAutoClassifier.yaml").then([this](const Configuration& config) {
 
             //Loop through each classification char
             for(auto& limit : config["limits"]) {
@@ -310,7 +310,7 @@ namespace research {
 
         // When we get a look up table then it was uploaded or emitted by someone else
         // We need to set it up for our datastructure
-        on<Trigger<LookUpTable>>([this] (const LookUpTable& lut) {
+        on<Trigger<LookUpTable>>().then([this] (const LookUpTable& lut) {
 
             std::map<Colour, std::set<uint>> newSA;
             std::map<Colour, uint> newVol;
@@ -344,7 +344,7 @@ namespace research {
         });
 
         // Show our Internal, Removeable, and Nonremoveable voxels
-        on<Trigger<Every<1, std::chrono::seconds>>, With<LookUpTable>>([this](const time_t&, const LookUpTable& lut) {
+        on<Every<1, std::chrono::seconds>, With<LookUpTable>>().then([this](const LookUpTable& lut) {
             static int i = 0;
 
 
@@ -424,7 +424,8 @@ namespace research {
             ++i;
         }).disable();
 
-        on<Trigger<AutoClassifierPixels>, With<LookUpTable>, Options<Single>>([this] (const AutoClassifierPixels& pixels, const LookUpTable& lut) {
+        on<Trigger<AutoClassifierPixels>, With<LookUpTable>, Single>()
+        .then([this] (const AutoClassifierPixels& pixels, const LookUpTable& lut) {
 
             // Some aliases
             const auto& c = pixels.classification;

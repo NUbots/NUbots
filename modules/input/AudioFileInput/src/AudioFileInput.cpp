@@ -31,18 +31,16 @@ namespace modules {
 
         const int CHUNKS_PER_SECOND = 100;
 
+        using messages::support::Configuration;
+
         class AudioFileInput::impl {
             public:
                 SndfileHandle file;
         };
 
-        struct AudioFileConfiguration {
-            static constexpr const char* CONFIGURATION_PATH = "AudioFileInput.yaml";
-        };
-
         AudioFileInput::AudioFileInput(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
             // Load our file name configuration.
-            on<Trigger<messages::support::Configuration<AudioFileConfiguration>>>([this](const messages::support::Configuration<AudioFileConfiguration>& configfile) {
+            on<Configuration>("AudioFileInput.yaml").then([this](const Configuration& configfile) {
                     std::string filePath = configfile.config["file"];
                     NUClear::log<NUClear::DEBUG>("Loading sound file: ", filePath);
                     m->file = SndfileHandle(filePath.c_str());
@@ -57,7 +55,7 @@ namespace modules {
                     emit<Scope::INITIALIZE>(std::move(settings));
             });
 
-            on<Trigger<Every<(NUClear::clock::period::den / CHUNKS_PER_SECOND), NUClear::clock::duration>>>([this](const time_t&) {
+            on<Every<CHUNKS_PER_SECOND, Per<std::chrono::seconds>>>([this] {
                 auto& file = m->file;
 
                 auto chunk = std::make_unique<messages::input::SoundChunk>();

@@ -45,7 +45,7 @@ namespace skills {
     : Reactor(std::move(environment))
     , subsumptionId(size_t(this) * size_t(this) - size_t(this)) {
 
-        on<Trigger<Configuration<ArmVisionAvoidance>>>([this] (const Configuration<ArmVisionAvoidance>& config) {
+        on<Configuration>("ArmVisionAvoidance.yaml").then([this] (const Configuration& config) {
             // The limits on how far the head can be turned before the corresponding arm starts to obscure vision.
             headYawLimit[0] = config["head_limits"]["yaw"]["min"].as<Expression>();
             headYawLimit[1] = config["head_limits"]["yaw"]["max"].as<Expression>();
@@ -56,10 +56,10 @@ namespace skills {
             torque = config["torque"].as<float>();
         });
 
-        updateHandle = on<Trigger<Sensors>, Options<Single, Priority<NUClear::HIGH>> >("Arm Vision Avoidance - Update Arm Position",
-                [this](const Sensors& sensors) {
+        updateHandle = on<Trigger<Sensors>, Single, Priority::HIGH>().then("Arm Vision Avoidance - Update Arm Position",
+                [this] (const Sensors& sensors) {
             // Check to see if we are looking over one of our shoulders.
-            // If we are then we need to add an offset to the arms shoulder and elbow pitches 
+            // If we are then we need to add an offset to the arms shoulder and elbow pitches
             // so that the arm is not obscuring our vision.
             auto headTransform = sensors.forwardKinematics.find(ServoID::HEAD_PITCH)->second;
             auto headSpherical = utility::math::coordinates::cartesianToSpherical({headTransform(0, 0), headTransform(1, 0), headTransform(2, 0)});
@@ -119,8 +119,8 @@ namespace skills {
             auto waypoints = std::make_unique<std::vector<ServoCommand>>();
             waypoints->reserve(6);
 
-            //time_t time = NUClear::clock::now() + std::chrono::seconds(1);
-            time_t time = NUClear::clock::now() + std::chrono::nanoseconds(std::nano::den / UPDATE_FREQUENCY);
+            //NUClear::clock::time_point time = NUClear::clock::now() + std::chrono::seconds(1);
+            NUClear::clock::time_point time = NUClear::clock::now() + std::chrono::nanoseconds(std::nano::den / UPDATE_FREQUENCY);
             waypoints->push_back({subsumptionId, time, ServoID::R_SHOULDER_ROLL,  float(rightShoulderRoll),  gain, torque});
             waypoints->push_back({subsumptionId, time, ServoID::R_SHOULDER_PITCH, float(rightShoulderPitch), gain, torque});
             waypoints->push_back({subsumptionId, time, ServoID::R_ELBOW,          float(rightElbowPitch),    gain, torque});
@@ -140,7 +140,7 @@ namespace skills {
             },
             [this] (const std::set<LimbID>&) { // Arm control lost
                 updateHandle.disable();
-            }, 
+            },
             [this] (const std::set<ServoID>& ) { } // Servos reached target
         }));
     }

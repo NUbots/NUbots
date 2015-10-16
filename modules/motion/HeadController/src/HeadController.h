@@ -37,10 +37,9 @@ namespace modules {
                 double min_yaw,max_yaw,min_pitch,max_pitch,head_motor_gain,head_motor_torque, p_gain;
                 ReactionHandle updateHandle;
                 //Debug var:
-                time_t lastTime;
+                NUClear::clock::time_point lastTime;
             public:
                 explicit HeadController(std::unique_ptr<NUClear::Environment> environment);
-                static constexpr const char* CONFIGURATION_PATH = "HeadController.yaml";
                 arma::vec2 currentAngles;
                 arma::vec2 goalAngles;
                 bool goalRobotSpace = false;

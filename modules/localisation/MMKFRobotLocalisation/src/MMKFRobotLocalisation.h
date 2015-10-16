@@ -36,8 +36,8 @@ namespace localisation {
         //Disable until first data
         ReactionHandle emit_data_handle;
 
-        time_t last_measurement_time;
-        
+        NUClear::clock::time_point last_measurement_time;
+
         void graphMMRMHypotheses(const std::string& descr, MultiModalRobotModel& mmrm);
 
     public:

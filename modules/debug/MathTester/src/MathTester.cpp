@@ -28,7 +28,7 @@ namespace modules {
         using messages::support::Configuration;
 
         MathTester::MathTester(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
-            on< Trigger<Configuration<MathTester>> >([this](const Configuration<MathTester>& tests) {
+            on<Configuration>("MathTester.yaml").then([this](const Configuration& tests) {
 
                 testPolygon(true, tests.config);
                 // if(tests["test_polygon"]){
@@ -45,7 +45,7 @@ namespace modules {
             });
         }
 
-        bool MathTester::testPolygon(bool verbose,const YAML::Node&){
+        bool MathTester::testPolygon(bool verbose, const YAML::Node&){
 
             if(verbose) {}
             std::cerr << "Beginning polygon test.===============" << std::endl;

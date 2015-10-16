@@ -73,11 +73,7 @@ namespace skills {
             }
         }));
 
-        on<Trigger<Configuration<DirectWalkController>>>([this] (const Configuration<DirectWalkController>& /*config*/) {
-            // Use configuration here from file DirectWalkController.yaml
-        });
-
-        on<Trigger<MotionCommand>>([this] (const MotionCommand& command) {
+        on<Trigger<MotionCommand>>().then([this] (const MotionCommand& command) {
             if (command.type == MotionCommand::Type::DirectCommand) {
                 emit(std::make_unique<ActionPriorites>(ActionPriorites { subsumptionId, { 26, 11 }}));
                 emit(std::move(std::make_unique<WalkStartCommand>(subsumptionId)));
@@ -90,7 +86,7 @@ namespace skills {
             }
         });
 
-        on<Trigger<WalkStopped>>([this] (const WalkStopped&) {
+        on<Trigger<WalkStopped>>().then([this] {
             emit(std::make_unique<ActionPriorites>(ActionPriorites { subsumptionId, { 0, 0 }}));
         });
     }

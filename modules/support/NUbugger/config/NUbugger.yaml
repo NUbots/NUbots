@@ -1,12 +1,9 @@
 output:
   file:
-    enabled: true
+    enabled: false
     path: DataStream/
   network:
     enabled: true
-    pub_port: 12000
-    sub_port: 12001
-    high_water_mark: 50
     max_image_fps: 10
     max_classified_image_fps: 10
 
@@ -25,7 +22,7 @@ reaction_handles:
   # Localisation state estimates and uncertainties
   localisation: false
   # Data for chart tool in NUsight
-  data_point: false
+  data_point: true
   # Field drawn objects such as an arrow, sphere, etc
   draw_objects: false
   # Subsumption data

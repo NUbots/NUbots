@@ -30,10 +30,9 @@ namespace localisation {
 		int robot_id;
     public:
         explicit NUcapLocalisation(std::unique_ptr<NUClear::Environment> environment);
-        static constexpr const char* CONFIGURATION_PATH = "NUcapLocalisation.yaml";
     };
 
 }
 }
-#endif
 
+#endif

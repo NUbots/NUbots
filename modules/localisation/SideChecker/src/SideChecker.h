@@ -65,8 +65,6 @@ namespace localisation {
         /// @brief Called by the powerplant to build and setup the SideChecker reactor.
         explicit SideChecker(std::unique_ptr<NUClear::Environment> environment);
         const size_t subsumptionId;
-        /// @brief the path to the configuration file for SideChecker
-        static constexpr const char* CONFIGURATION_PATH = "SideChecker.yaml";
     };
 
 }

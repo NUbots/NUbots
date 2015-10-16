@@ -77,3 +77,7 @@ message VisionObject {
     repeated Obstacle obstacle = 4;
     repeated Line line = 6;
 }
+
+message VisionObjects {
+    repeated VisionObject object = 1;
+}

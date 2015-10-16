@@ -28,10 +28,6 @@ namespace modules {
 namespace support {
 namespace configuration {
 
-    struct FieldDescriptionConfig {
-        static constexpr const char* CONFIGURATION_PATH = "FieldDescription.yaml";
-    };
-
     class SoccerConfig : public NUClear::Reactor {
     public:
         /// @brief Called by the powerplant to build and setup the SoccerConfig reactor.

@@ -36,9 +36,6 @@ namespace skills {
         /// @brief Called by the powerplant to build and setup the ArmController reactor.
         explicit ArmVisionAvoidance(std::unique_ptr<NUClear::Environment> environment);
 
-        /// @brief the path to the configuration file for ArmController
-        static constexpr const char* CONFIGURATION_PATH = "ArmVisionAvoidance.yaml";
-
     private:
         static constexpr size_t UPDATE_FREQUENCY = 90;
 

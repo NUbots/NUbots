@@ -27,6 +27,7 @@
 
 using utility::math::coordinates::cartesianToSpherical;
 using utility::math::coordinates::sphericalToCartesian;
+using messages::support::Configuration;
 
 using messages::vision::VisionObject;
 // using messages::localisation::FakeOdometry;
@@ -56,7 +57,7 @@ double KFBallLocalisationEngine::MeasurementUpdate(const VisionObject& observed_
     for (auto& measurement : observed_object.measurements) {
         // Spherical from ground:
         auto currentState = ball_filter_.get();
-        
+
         double ballAngle = 0;
         if (0 != currentState(1) || 0 != currentState(0)) {
             ballAngle = std::atan2(currentState(1), currentState(0));
@@ -86,8 +87,7 @@ double KFBallLocalisationEngine::MeasurementUpdate(const VisionObject& observed_
     return quality;
 }
 
-void KFBallLocalisationEngine::UpdateConfiguration(
-    const messages::support::Configuration<KFBallLocalisationEngineConfig>& config) {
+void KFBallLocalisationEngine::UpdateConfiguration(const Configuration& config) {
     cfg_.emitBallFieldobjects = config["EmitBallFieldobjects"].as<bool>();
 
     ball::BallModel::Config ball_cfg;

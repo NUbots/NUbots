@@ -32,8 +32,6 @@ namespace modules {
     namespace behaviour {
         namespace skills {
 
-
-
             using messages::support::Configuration;
             using messages::input::Sensors;
             using messages::input::ServoID;
@@ -50,7 +48,7 @@ namespace modules {
                 , gettingUp(false) {
 
                 //do a little configurating
-                on<Trigger<Configuration<Getup>>>([this] (const Configuration<Getup>& file){
+                on<Configuration>("Getup.yaml").then([this] (const Configuration& file){
 
                     //encode fallen angle as a cosine so we can compare it directly to the z axis value
                     double fallenAngleConfig = file["FALLEN_ANGLE"].as<double>();
@@ -61,7 +59,7 @@ namespace modules {
                     EXECUTION_PRIORITY = file["EXECUTION_PRIORITY"].as<float>();
                 });
 
-                fallenCheck = on<Trigger<Sensors>, Options<Single>>([this] (const Sensors& sensors) {
+                fallenCheck = on<Trigger<Sensors>, Single>().then("Getup Fallen Check", [this] (const Sensors& sensors) {
 
                     //check if the orientation is smaller than the cosine of our fallen angle
                     if (!gettingUp && fabs(sensors.orientation(2,2)) < FALLEN_ANGLE) {
@@ -70,7 +68,7 @@ namespace modules {
                     }
                 });
 
-                on<Trigger<ExecuteGetup>, With<Sensors>>([this] (const ExecuteGetup&, const Sensors& sensors) {
+                on<Trigger<ExecuteGetup>, With<Sensors>>().then("Execute Getup", [this] (const Sensors& sensors) {
 
                     gettingUp = true;
 
@@ -84,7 +82,7 @@ namespace modules {
                     updatePriority(EXECUTION_PRIORITY);
                 });
 
-                on<Trigger<KillGetup>, Options<Sync<Getup>>>([this] (const KillGetup&) {
+                on<Trigger<KillGetup>>([this] {
                     gettingUp = false;
                     updatePriority(0);
                     fallenCheck.enable();
@@ -114,8 +112,6 @@ namespace modules {
             void Getup::updatePriority(const float& priority) {
                 emit(std::make_unique<ActionPriorites>(ActionPriorites { id, { priority }}));
             }
-
-
 
         }  // skills
     }  // behaviours

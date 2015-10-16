@@ -95,6 +95,30 @@ namespace file {
         return result;
     }
 
+    std::pair<std::string, std::string> pathSplit(const std::string& input) {
+
+        uint lastSlash = input.rfind('/');
+
+        // There was no slash
+        if(lastSlash == std::string::npos) {
+            return { ".", input };
+        }
+        // The slash was the last character
+        if(lastSlash + 1 == input.size()) {
+            // If all we had was a slash
+            if(input.size() == 1) {
+                return { "/", "/" };
+            }
+            // Otherwise remove the slash and call recursivly
+            else {
+                return pathSplit(input.substr(0, input.size() - 1));
+            }
+        }
+        else {
+            return { input.substr(0, lastSlash), input.substr(lastSlash + 1, input.size()) };
+        }
+    }
+
     std::vector<std::string> listFiles(const std::string& directory, bool recursive) {
         // create a vector to store the files
         std::vector<std::string> files;

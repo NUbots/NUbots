@@ -61,14 +61,6 @@ namespace skills {
             },
             [this] (const std::set<ServoID>&) { }
         }));
-
-        on<Trigger<Configuration<WalkEngineStand>>>([this] (const Configuration<WalkEngineStand>& config) {
-            // Use configuration here from file WalkEngineStand.yaml
-        });
-
-        // on<Trigger<ExecuteStand>>([this] (const ExecuteStand&) {
-
-        // });
     }
 }
 }

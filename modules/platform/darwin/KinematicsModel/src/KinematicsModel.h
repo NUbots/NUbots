@@ -34,21 +34,15 @@ namespace darwin {
     class KinematicsModel : public NUClear::Reactor {
 
     public:
-
         /// @brief Called by the powerplant to build and setup the KinematicsModel reactor.
         explicit KinematicsModel(std::unique_ptr<NUClear::Environment> environment);
 
-        /// @brief the path to the configuration file for KinematicsModel
-        static constexpr const char* CONFIGURATION_PATH = "KinematicsModel.yaml";
-
     private:
-
-    	void configure (messages::platform::darwin::DarwinKinematicsModel& darwinModel, const messages::support::Configuration<KinematicsModel>& objDarwinModel);
+    	void configure (messages::platform::darwin::DarwinKinematicsModel& darwinModel, const messages::support::Configuration& objDarwinModel);
         void configureLeg (messages::platform::darwin::DarwinKinematicsModel::Leg& leg, const YAML::Node& objLeg);
         void configureHead (messages::platform::darwin::DarwinKinematicsModel::Head& head, const YAML::Node& objHead);
         void configureArm (messages::platform::darwin::DarwinKinematicsModel::Arm& arm, const YAML::Node& objArm);
     	void configureMassModel (messages::platform::darwin::DarwinKinematicsModel::MassModel& massModel, const YAML::Node& objMassModel);
-
     };
 
 }

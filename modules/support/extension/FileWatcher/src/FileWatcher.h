@@ -14,33 +14,31 @@
  * You should have received a copy of the GNU General Public License
  * along with the NUbots Codebase.  If not, see <http://www.gnu.org/licenses/>.
  *
- * Copyright 2013 NUBots <nubots@nubots.net>
+ * Copyright 2015 NUbots <nubots@nubots.net>
  */
 
-#ifndef MODULES_SUPPORT_NUBUGGERLITE_H
-#define MODULES_SUPPORT_NUBUGGERLITE_H
+#ifndef MODULES_SUPPORT_EXTENSION_FILEWATCHER_H
+#define MODULES_SUPPORT_EXTENSION_FILEWATCHER_H
 
 #include <nuclear>
 
 namespace modules {
 namespace support {
+namespace extension {
 
-    class NUbuggerLite : public NUClear::Reactor {
+    class FileWatcher : public NUClear::Reactor {
     private:
-        std::atomic<int> socket;
-        uint port;
-        uint TEAM_ID;
-        uint PLAYER_ID;
-        std::string CLIENT_IP;
-    public:
-        static constexpr const char* CONFIGURATION_PATH = "NUbuggerLite.yaml";
+        int watcherFd;
+        std::map<std::string, std::map<std::string, std::vector<std::pair<std::shared_ptr<NUClear::threading::Reaction>, int>>>> handlers;
+        std::map<int, std::string> watchPaths;
 
-        /// @brief Called by the powerplant to build and setup the NUbuggerLite reactor.
-        explicit NUbuggerLite(std::unique_ptr<NUClear::Environment> environment);
+    public:
+        /// @brief Called by the powerplant to build and setup the FileWatcher reactor.
+        explicit FileWatcher(std::unique_ptr<NUClear::Environment> environment);
     };
 
 }
 }
+}
 
-
-#endif
+#endif  // MODULES_SUPPORT_EXTENSION_FILEWATCHER_H

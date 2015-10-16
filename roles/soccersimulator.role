@@ -2,9 +2,9 @@ ADD_ROLE(
     # This must come first as it populates global variables that other modules depend on.
     platform::darwin::KinematicsModel
     #Support
-    #support::SignalCatcher
+    support::SignalCatcher
     support::logging::ConsoleLogHandler
-    support::configuration::ConfigSystem
+    support::extension::FileWatcher
     support::configuration::GlobalConfig
     #support::configuration::NetworkingConfiguration
     support::NUbugger

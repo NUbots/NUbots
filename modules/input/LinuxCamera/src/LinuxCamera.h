@@ -44,9 +44,6 @@ namespace modules {
             /// @brief Our internal camera class that interacts with the physical device
             V4L2Camera camera;
         public:
-            /// @brief Our configuration file for this class
-            static constexpr const char* CONFIGURATION_PATH = "LinuxCamera.yaml";
-
             /// @brief Called by the PowerPlant to build and setup our Reactor
             LinuxCamera(std::unique_ptr<NUClear::Environment> environment);
         };

@@ -39,7 +39,7 @@ namespace research {
     AutoClassifierProvider::AutoClassifierProvider(std::unique_ptr<NUClear::Environment> environment)
         : Reactor(std::move(environment)) {
 
-        on<Trigger<Configuration<AutoClassifierProvider>>>([this] (const Configuration<AutoClassifierProvider>& config) {
+        on<Configuration>("AutoClassifierProvider.yaml").then([this] (const Configuration& config) {
 
             ballProvider.enable(config["ball"]["enabled"].as<bool>());
             ballEdgeBuffer = config["ball"]["edge_buffer"].as<int>();
@@ -59,7 +59,8 @@ namespace research {
             // lineProvider.enable(config["line"].as<bool>());
         });
 
-        ballProvider = on<Trigger<std::vector<Ball>>, Options<Single, Priority<NUClear::LOW>>>("Auto Classifier Provider Balls", [this](const std::vector<Ball>& balls) {
+        ballProvider = on<Trigger<std::vector<Ball>>, Single, Priority::LOW>()
+        .then("Auto Classifier Provider Balls", [this] (const std::vector<Ball>& balls) {
 
             auto pixels = std::make_unique<AutoClassifierPixels>();
             pixels->classification = Colour::ORANGE;
@@ -96,7 +97,8 @@ namespace research {
             emit(std::move(pixels));
         });
 
-         goalProvider = on<Trigger<std::vector<Goal>>, Options<Single, Priority<NUClear::LOW>>>("Auto Classifier Goals", [this](const std::vector<Goal>& goals) {
+         goalProvider = on<Trigger<std::vector<Goal>>, Single, Priority::LOW>()
+         .then("Auto Classifier Goals", [this](const std::vector<Goal>& goals) {
 
             auto pixels = std::make_unique<AutoClassifierPixels>();
             pixels->classification = Colour::YELLOW;
@@ -132,7 +134,8 @@ namespace research {
             emit(std::move(pixels));
         });
 
-        fieldProvider = on<Trigger<ClassifiedImage<ObjectClass>>, Options<Single, Priority<NUClear::LOW>>>("Auto Classifier Field", [this](const ClassifiedImage<ObjectClass>& classifiedImage) {
+        fieldProvider = on<Trigger<ClassifiedImage<ObjectClass>>, Single, Priority::LOW>()
+        .then("Auto Classifier Field", [this](const ClassifiedImage<ObjectClass>& classifiedImage) {
 
             auto pixels = std::make_unique<AutoClassifierPixels>();
             pixels->classification = Colour::GREEN;

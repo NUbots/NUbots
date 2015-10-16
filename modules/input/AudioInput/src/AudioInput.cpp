@@ -100,7 +100,7 @@ namespace modules {
             }
 
             // We're going to look for our device by name. In the future this should
-            // pull from the config system and use on<Initialize>().
+            // pull from the config system and use on<Startup>().
             int deviceNumber = audioContext.getDefaultInputDevice();
             RtAudio::DeviceInfo info = audioContext.getDeviceInfo(deviceNumber);
             for(unsigned int i = 0; i < audioContext.getDeviceCount(); ++i) {
