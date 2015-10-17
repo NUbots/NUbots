@@ -33,7 +33,6 @@ namespace utility {
         namespace optimisation {
 
             /**
-             *
              *  This class is a generic container for direct policy
              *  optimisation methods. It supports splitting of
              *  optimisation and sampling steps to allow recombining

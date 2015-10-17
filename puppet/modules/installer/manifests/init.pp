@@ -7,7 +7,8 @@ class installer::prerequisites {
            '/nubots/toolchain/include',
            '/nubots/toolchain/lib',
            '/nubots/toolchain/man',
-           '/nubots/toolchain/share' ]:
+           '/nubots/toolchain/share',
+           '/nubots/toolchain/src' ]:
     ensure => directory,
   } ->
   file { 'install_from_source':
@@ -23,9 +24,13 @@ define installer (
   $args = '',
   $environment = [],
   $lto = true,
+  $src_dir = '',
   $method = 'auto',
   $prefix = '/nubots/toolchain',
-  $strip_components = 1
+  $prebuild = 'echo', # Colon is a noop
+  $postbuild = 'echo', # Colon is a noop
+  $strip_components = 1,
+  $creates = "/nubots/toolchain/lib/lib${name}.a"
 ) {
 
   $extension = $url ? {
@@ -37,29 +42,51 @@ define installer (
     /.*\.tbz/       => 'tbz',
     /.*\.tbz2/      => 'tbz2',
     /.*\.tar\.bz2/  => 'tar.bz2',
+    /.*\.h/         => 'h',
+    /.*\.hpp/       => 'hpp',
     default         => 'UNKNOWN',
   }
 
-  # Download the URL and extract
-  archive { "${name}":
-    url    => $url,
-    target => '/nubots/toolchain/src',
-    checksum => false,
-    extension => $extension,
-    strip_components => $strip_components,
-  } ~>
-  exec { "install_${name}":
-    command => "install_from_source '${prefix}' '${method}' ${lto} ${args}",
-    creates => "/nubots/toolchain/lib/lib${name}.a",
-    cwd => "/nubots/toolchain/src/${name}",
-    environment => $environment,
-    path =>  [  '/nubots/toolchain/bin', '/usr/local/bin', '/usr/local/sbin/', '/usr/bin/', '/usr/sbin/', '/bin/', '/sbin/' ],
-    timeout => 0,
-    refreshonly => true,
-    require => [
-      Class['installer::prerequisites'],
-      Archive["${name}"],
-      Class['dev_tools'],
-    ],
+  case $extension {
+    'h', 'hpp': {
+      # Download and put in include
+      $basename = basename($url)
+
+      wget::fetch { "${name}":
+        destination => "${prefix}/include/${basename}",
+        source => $url,
+      }
+    }
+    default: {
+      # Download and install
+      archive { "${name}":
+        url    => $url,
+        target => "/nubots/toolchain/src/${name}",
+        src_target => '/nubots/toolchain/src',
+        purge_target => true,
+        checksum => false,
+        follow_redirects => true,
+        timeout => 0,
+        extension => $extension,
+        strip_components => $strip_components,
+      } ~>
+      exec { "install_${name}":
+        command => "${prebuild} ;
+                    install_from_source '${prefix}' '${method}' ${lto} ${args} ;
+                    ${postbuild} ;",
+        creates => $creates,
+        cwd => "/nubots/toolchain/src/${name}/${src_dir}",
+        environment => $environment,
+        path =>  [  '/nubots/toolchain/bin', '/usr/local/bin', '/usr/local/sbin/', '/usr/bin/', '/usr/sbin/', '/bin/', '/sbin/' ],
+        timeout => 0,
+        refreshonly => true,
+        require => [
+          Class['installer::prerequisites'],
+          Archive["${name}"],
+          Class['dev_tools'],
+        ],
+      }
+    }
   }
+
 }

@@ -6,17 +6,32 @@ Vagrant.configure("2") do |config|
   # Use Ubuntu 14.04 32bit VM
   config.vm.box = "puphpet/ubuntu1404-x32"
 
-  # Create a public network, which generally matched to bridged network.
-  # Bridged networks make the machine appear as another physical device on
-  # your network.
-  # config.vm.network :public_network
+  # Fix the no tty error when installing
+  config.vm.provision "fix-no-tty", type: "shell" do |shell|
+    shell.privileged = false
+    shell.inline = "sudo sed -i '/tty/!s/mesg n/tty -s \\&\\& mesg n/' /root/.profile"
+  end
+
+  # Before the puppet provisioner runs
+  # install puppet modules that are used
+  config.vm.provision "install-puppet-modules", type: "shell" do |shell|
+    shell.inline = "mkdir -p /etc/puppet/modules;
+                    puppet module list | grep -q 'puppetlabs-apt' \
+                         || puppet module install puppetlabs-apt;
+                    puppet module list | grep -q 'stankevich-python' \
+                         || puppet module install stankevich-python;
+                    puppet module list | grep -q 'camptocamp-archive' \
+                         || puppet module install camptocamp-archive;
+                    puppet module list | grep -q 'maestrodev-wget' \
+                         || puppet module install maestrodev-wget;"
+  end
 
   # Enable provisioning with Puppet stand alone.  Puppet manifests
   # are contained in a directory path relative to this Vagrantfile.
   config.vm.provision :puppet do |puppet|
     puppet.manifests_path = "puppet/manifests"
     puppet.module_path = "puppet/modules"
-    puppet.manifest_file  = "nubots.pp"
+    puppet.manifest_file = "nubots.pp"
     puppet.options = [
       # See https://docs.puppetlabs.com/references/3.6.2/man/agent.html#OPTIONS
       "--verbose",
@@ -48,12 +63,12 @@ Vagrant.configure("2") do |config|
   config.vm.define "nubotsvm", primary: true do |nubots|
     nubots.vm.hostname = "nubotsvm.nubots.net"
 
-    # Private network for NUsight's benifit
-    nubots.vm.network "private_network", type: "dhcp"
-
     # Note: Use NFS for more predictable shared folder support.
     #   The guest must have 'apt-get install nfs-common'
     nubots.vm.synced_folder ".", "/home/vagrant/nubots/NUbots"
+
+    # Private network for NUsight's benifit
+    nubots.vm.network "private_network", type: "dhcp"
 
     # Share NUsight repository with the VM if it has been placed in the same
     # directory as the NUbots repository

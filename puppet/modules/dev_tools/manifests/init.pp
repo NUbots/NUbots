@@ -24,13 +24,25 @@ class dev_tools {
   package { 'dos2unix': ensure => latest, }
   package { 'rsync': ensure => latest, }
   package { 'build-essential': ensure => latest, }
-  package { 'python-dev': ensure => latest, }
   package { 'gcc-5': ensure => latest, require => Apt::Ppa['ppa:ubuntu-toolchain-r/test'] }
   package { 'g++-5': ensure => latest, require => Apt::Ppa['ppa:ubuntu-toolchain-r/test'] }
   package { 'gfortran-5': ensure => latest, require => Apt::Ppa['ppa:ubuntu-toolchain-r/test'] }
   package { 'binutils': ensure => latest, require => Apt::Ppa['ppa:ubuntu-toolchain-r/test'] }
+  package { 'binutils-dev': ensure => latest, require => Apt::Ppa['ppa:ubuntu-toolchain-r/test'] }
   package { 'ninja-build': ensure => latest, }
   package { 'yasm': ensure => latest, }
+
+  # INSTALL PYTHON PACKAGES
+  # package { 'setuptools': ensure => latest, provider => 'pip', require => Package['python-pip'] }
+  # package { 'pydotplus': ensure => latest, provider => 'pip', require => Package['python-pip'] }
+  # package { 'pyparsing': ensure => latest, provider => 'pip', require => Package['python-pip'] }
+  # package { 'pybfd': ensure => latest, provider => 'pip',
+  #   source => 'https://github.com/Groundworkstech/pybfd/archive/master.tar.gz' }
+  include python
+  python::pip { 'setuptools': ensure => latest }
+  python::pip { 'pyparsing': ensure => latest }
+  python::pip { 'pydotplus': ensure => latest }
+  # # python::pip { 'pygments': ensure => latest }
 
   # SSH KEYS FOR THE VM
   file { 'vm_private_key':
@@ -61,7 +73,8 @@ class dev_tools {
     source => 'puppet:///modules/dev_tools/toolchain_init.sh', }
 
   # SETUP BINUTILS REDIRECTS TO USE PLUGINS
-  exec { 'mv /usr/bin/ar /usr/bin/ar_bin':
+  exec { 'redirect_ar':
+    command => 'mv /usr/bin/ar /usr/bin/ar_bin',
     creates => '/usr/bin/ar_bin',
     subscribe => Package['binutils'],
     refreshonly => true } ~>
@@ -70,7 +83,8 @@ class dev_tools {
     mode => '755',
     source => 'puppet:///modules/dev_tools/ar', }
 
-  exec { 'mv /usr/bin/nm /usr/bin/nm_bin':
+  exec { 'redirect_nm':
+    command => 'mv /usr/bin/nm /usr/bin/nm_bin',
     creates => '/usr/bin/nm_bin',
     subscribe => Package['binutils'],
     refreshonly => true } ~>
@@ -79,7 +93,8 @@ class dev_tools {
     mode => '755',
     source => 'puppet:///modules/dev_tools/nm', }
 
-  exec { 'mv /usr/bin/ranlib /usr/bin/ranlib_bin':
+  exec { 'redirect_ranlib':
+    command => 'mv /usr/bin/ranlib /usr/bin/ranlib_bin',
     creates => '/usr/bin/ranlib_bin',
     subscribe => Package['binutils'],
     refreshonly => true } ~>

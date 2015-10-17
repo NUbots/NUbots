@@ -5,7 +5,8 @@ class quex {
     archive { 'quex':
         ensure => present,
         url    => "https://downloads.sourceforge.net/project/quex/DOWNLOAD/quex-${quex_version}.tar.gz",
-        target => '/nubots/toolchain/etc',
+        target => '/nubots/toolchain/etc/quex',
+        follow_redirects => true,
         strip_components => 2,
         checksum => false
     }
