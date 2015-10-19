@@ -77,7 +77,7 @@ namespace support {
 
         });
 
-        on<Trigger<Every<15, Per<std::chrono::seconds>>>>([this](const time_t&) {
+        on<Trigger<Every<60, Per<std::chrono::seconds>>>>([this](const time_t&) {
             bool valid;
             // Try to get a new frame from the listener.
             MocapFrame frame(frameListener->pop(&valid).first);
