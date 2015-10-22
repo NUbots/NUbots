@@ -31,6 +31,7 @@ namespace optimisation {
 
     using NUClear::message::NetworkJoin;
     using NUClear::message::NetworkLeave;
+    using utility::math::optimisation::WMDOptimiser;
     using messages::support::Configuration;
     using messages::support::optimisation::proto::Episode;
     using messages::support::optimisation::RequestParameters;
@@ -114,7 +115,13 @@ namespace optimisation {
                 // Add this new optimisation
                 log("Adding a new optimisation for", optimisation.group);
 
-                optimisations[optimisation.group] = optimisation;
+                optimisations[optimisation.group] = Optimisation {
+                    WMDOptimiser(),
+                    optimisation.values,
+                    optimisation.weights,
+                    std::vector<Episode>(),
+                    optimiser.network
+                };
             }
             else {
                 // Check if the size of the vectors are the same
