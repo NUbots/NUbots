@@ -5,11 +5,11 @@ ADD_ROLE(
     support::logging::ConsoleLogHandler
     support::extension::FileWatcher
     support::configuration::GlobalConfig
-    #support::configuration::NetworkingConfiguration
     support::DisplayTest
     #platform::darwin::HardwareIO
     #platform::darwin::SensorFilter
     #input::LinuxCamera
+    support::configuration::NetworkConfiguration
     support::NUbugger
     debug::NUbugger
 

@@ -69,12 +69,6 @@ namespace support {
         provideSensors();
         provideVision();
 
-        auto netConfig = std::make_unique<NUClear::message::NetworkConfiguration>();
-        netConfig->name = "";
-        netConfig->multicastGroup = "239.226.152.162";
-        netConfig->multicastPort = 7447;
-        emit<Scope::DIRECT>(netConfig);
-
         on<Configuration>("NUbugger.yaml").then([this] (const Configuration& config) {
 
             max_image_duration = durationFromSeconds(1.0 / config["output"]["network"]["max_image_fps"].as<double>());
