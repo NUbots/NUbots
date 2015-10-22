@@ -27,10 +27,15 @@
 #include "PGPEOptimiser.h"
 #include "WMDOptimiser.h"
 
-
 namespace utility {
     namespace math {
         namespace optimisation {
+
+            class Optimiser {
+                virtual arma::vec updateEstimate(arma::mat samples, arma::vec fitnesses) = 0;
+                virtual arma::mat getSamples(const uint& numSamples = 7) = 0;
+                virtual void reset() = 0;
+            };
 
             /**
              *  This class is a generic container for direct policy
@@ -41,7 +46,7 @@ namespace utility {
              * @author Josiah Walker
              */
             template<typename OptMethod, typename SampleMethod>
-            class Optimiser {
+            class OptimiserSet {
             private:
                 OptMethod estimator;
                 SampleMethod sampler;
@@ -62,7 +67,7 @@ namespace utility {
                  *
                  * @author Josiah Walker
                  */
-                arma::vec updateEstimate(arma::mat samples, arma::vec fitnesses) {
+                virtual arma::vec updateEstimate(arma::mat samples, arma::vec fitnesses) {
 
                     const auto variances = sampler.getVariances(); //variances are useful to determine noise in estimates
                     sampler.updateParams(samples, fitnesses, estimator.currentEstimate());
@@ -79,11 +84,11 @@ namespace utility {
                  *
                  * @author Josiah walker
                  */
-                arma::mat getSamples(const uint& numSamples = 7) {
+                virtual arma::mat getSamples(const uint& numSamples = 7) {
                     return sampler.sample(estimator.currentEstimate(), numSamples);
                 }
 
-                void reset() {
+                virtual void reset() {
                     sampler.reset();
                     estimator.reset();
                 }
@@ -100,9 +105,9 @@ namespace utility {
             };
 
             //easy typedefs for working with the included algorithms
-            using PGAOptimiser  =  Optimiser<PGAEstimator, PGASampler>;
-            using WMDOptimiser  =  Optimiser<WMDEstimator, WMDSampler>;
-            using PGPEOptimiser =  Optimiser<PGPEEstimator, PGPESampler>;
+            using PGAOptimiser  =  OptimiserSet<PGAEstimator, PGASampler>;
+            using WMDOptimiser  =  OptimiserSet<WMDEstimator, WMDSampler>;
+            using PGPEOptimiser =  OptimiserSet<PGPEEstimator, PGPESampler>;
         }
     }
 }

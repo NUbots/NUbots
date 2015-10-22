@@ -1,0 +1,21 @@
+ADD_ROLE(
+    # This must come first as it populates global variables that other modules depend on.
+    platform::darwin::KinematicsModel
+    support::logging::ConsoleLogHandler
+    support::extension::FileWatcher
+    support::configuration::GlobalConfig
+    support::DisplayTest
+    #platform::darwin::HardwareIO
+    #platform::darwin::SensorFilter
+    #input::LinuxCamera
+    support::configuration::NetworkConfiguration
+    support::NUbugger
+    debug::NUbugger
+    debug::optimisation::TestDOpE
+    support::optimisation::DOpE
+
+    vision::LUTClassifier
+    #vision::FeatureDetector
+
+    support::configuration::SoccerConfig
+)
