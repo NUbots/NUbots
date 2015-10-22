@@ -24,6 +24,8 @@ class dev_tools {
   package { 'dos2unix': ensure => latest, }
   package { 'rsync': ensure => latest, }
   package { 'build-essential': ensure => latest, }
+  package { 'python-dev': ensure => latest, }
+  package { 'python-pip': ensure => latest, }
   package { 'gcc-5': ensure => latest, require => Apt::Ppa['ppa:ubuntu-toolchain-r/test'] }
   package { 'g++-5': ensure => latest, require => Apt::Ppa['ppa:ubuntu-toolchain-r/test'] }
   package { 'gfortran-5': ensure => latest, require => Apt::Ppa['ppa:ubuntu-toolchain-r/test'] }
@@ -32,17 +34,12 @@ class dev_tools {
   package { 'ninja-build': ensure => latest, }
   package { 'yasm': ensure => latest, }
 
-  # INSTALL PYTHON PACKAGES
-  # package { 'setuptools': ensure => latest, provider => 'pip', require => Package['python-pip'] }
-  # package { 'pydotplus': ensure => latest, provider => 'pip', require => Package['python-pip'] }
-  # package { 'pyparsing': ensure => latest, provider => 'pip', require => Package['python-pip'] }
-  # package { 'pybfd': ensure => latest, provider => 'pip',
-  #   source => 'https://github.com/Groundworkstech/pybfd/archive/master.tar.gz' }
-  include python
-  python::pip { 'setuptools': ensure => latest }
-  python::pip { 'pyparsing': ensure => latest }
-  python::pip { 'pydotplus': ensure => latest }
-  # # python::pip { 'pygments': ensure => latest }
+  # INSTALL PYTHON PACKAGES (we need python-pip to use the pip provider)
+  Package['python-pip'] -> Package <| provider == 'pip' |>
+  package { 'pyparsing': ensure => latest, provider => 'pip' }
+  package { 'pydotplus': ensure => latest, provider => 'pip' }
+  package { 'pygments': ensure => latest, provider => 'pip' }
+  # python::pip { 'pybfd': ensure => latest }#, url => 'https://github.com/Groundworkstech/pybfd/archive/master.tar.gz' }
 
   # SSH KEYS FOR THE VM
   file { 'vm_private_key':

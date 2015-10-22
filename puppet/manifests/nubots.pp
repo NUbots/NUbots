@@ -16,6 +16,10 @@ node nubotsvm {
     creates => "/tmp/nubots-toolchain${toolchain_version}.deb",
     cwd => "/tmp/",
   }
+  wget::fetch { 'nubots_deb':
+    destination => "/tmp/nubots-toolchain${toolchain_version}.deb",
+    source => "http://nubots.net/debs/nubots-toolchain${toolchain_version}.deb",
+  }
   ~> package { 'nubots-toolchain':
     provider => 'dpkg',
     ensure => 'latest',
@@ -40,9 +44,6 @@ node nubotsvmbuild {
                                 args => '--with-zlib',
                                 require => Installer['zlib'], }
   installer { 'catch':          url => 'https://raw.githubusercontent.com/philsquared/Catch/master/single_include/catch.hpp', }
-  # wget::fetch { 'catch.hpp':    destination => '/nubots/toolchain/include/catch.hpp',
-  #                               source => 'https://raw.githubusercontent.com/philsquared/Catch/master/single_include/catch.hpp',
-  #                               require => Class['installer::prerequisites'], }
   installer { 'nuclear':        url => 'https://github.com/Fastcode/NUClear/archive/develop.tar.gz',
                                 args => '-DBUILD_TESTS=OFF', }
   installer { 'openblas':       url => 'https://github.com/xianyi/OpenBLAS/archive/v0.2.14.tar.gz',
@@ -65,7 +66,7 @@ node nubotsvmbuild {
   installer { 'cppformat':      url => 'https://github.com/cppformat/cppformat/archive/1.1.0.tar.gz',
                                 creates => '/nubots/toolchain/lib/libformat.a', }
   installer { 'alsalib':        url => 'ftp://ftp.alsa-project.org/pub/lib/alsa-lib-1.0.29.tar.bz2',
-                                args => '--enable-static',
+                                args => '--enable-static --disable-shared',
                                 creates => '/nubots/toolchain/lib/libasound.a',
                                 lto => false, }
   installer { 'portaudio':      url => 'http://www.portaudio.com/archives/pa_stable_v19_20140130.tgz',
@@ -78,7 +79,7 @@ node nubotsvmbuild {
                                 creates => '/nubots/toolchain/include/eigen3/Eigen/Eigen', }
   installer { 'boost':          url => 'http://downloads.sourceforge.net/project/boost/boost/1.59.0/boost_1_59_0.tar.gz',
                                 args => ['link=static'],
-                                require => [ Installer['zlib'], Installer['bzip2'], ], }
+                                require => [ Package['python-dev'], Installer['zlib'], Installer['bzip2'], ], }
   installer { 'mlpack':         url => 'https://github.com/mlpack/mlpack/archive/mlpack-1.0.12.tar.gz',
                                 require => [ Installer['armadillo'], Installer['boost'], Installer['xml2'], ],
                                 creates => '/nubots/toolchain/lib/libmlpack.so', }

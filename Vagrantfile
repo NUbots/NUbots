@@ -18,8 +18,6 @@ Vagrant.configure("2") do |config|
     shell.inline = "mkdir -p /etc/puppet/modules;
                     puppet module list | grep -q 'puppetlabs-apt' \
                          || puppet module install puppetlabs-apt;
-                    puppet module list | grep -q 'stankevich-python' \
-                         || puppet module install stankevich-python;
                     puppet module list | grep -q 'camptocamp-archive' \
                          || puppet module install camptocamp-archive;
                     puppet module list | grep -q 'maestrodev-wget' \
