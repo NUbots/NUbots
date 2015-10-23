@@ -19,6 +19,7 @@ node nubotsvm {
   wget::fetch { 'nubots_deb':
     destination => "/tmp/nubots-toolchain${toolchain_version}.deb",
     source => "http://nubots.net/debs/nubots-toolchain${toolchain_version}.deb",
+    timeout => 0,
   }
   ~> package { 'nubots-toolchain':
     provider => 'dpkg',
