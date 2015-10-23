@@ -3,6 +3,31 @@
 
 Vagrant.configure("2") do |config|
 
+  # Settings if using a virtualbox provider
+  config.vm.provider "virtualbox" do |v|
+    # Use the official ubuntu box
+    config.vm.box = "ubuntu/trusty32"
+
+    # See http://www.virtualbox.org/manual/ch08.html#vboxmanage-modifyvm
+    v.memory = 4096
+    v.cpus = 4
+    v.customize ["modifyvm", :id, "--vram", 128]
+    v.customize ["modifyvm", :id, "--ioapic", "on"]
+    v.customize ["modifyvm", :id, "--accelerate3d", "on"]
+  end
+
+  config.vm.provider "parallels" do |v|
+    # Use parallels virtualbox
+    config.vm.box = "parallels/ubuntu-14.04-i386"
+
+    # See http://www.virtualbox.org/manual/ch08.html#vboxmanage-modifyvm
+    # and http://parallels.github.io/vagrant-parallels/docs/configuration.html
+    v.memory = 8192
+    v.cpus = 4
+    v.optimize_power_consumption = false
+    v.update_guest_tools = true
+  end
+
   # Use Ubuntu 14.04 32bit VM
   config.vm.box = "puphpet/ubuntu1404-x32"
 
@@ -37,23 +62,6 @@ Vagrant.configure("2") do |config|
     ]
   end
 
-  config.vm.provider "virtualbox" do |v|
-    # See http://www.virtualbox.org/manual/ch08.html#vboxmanage-modifyvm
-    v.memory = 4096
-    v.cpus = 4
-    v.customize ["modifyvm", :id, "--vram", 128]
-    v.customize ["modifyvm", :id, "--ioapic", "on"]
-    v.customize ["modifyvm", :id, "--accelerate3d", "on"]
-  end
-
-  config.vm.provider "parallels" do |v|
-    # See http://www.virtualbox.org/manual/ch08.html#vboxmanage-modifyvm
-    # and http://parallels.github.io/vagrant-parallels/docs/configuration.html
-    v.memory = 8192
-    v.cpus = 4
-    v.optimize_power_consumption = false
-    v.update_guest_tools = true
-  end
 
   # Define the NUbots development VM, and make it the primary VM
   # (meaning that a plain `vagrant up` will only create this machine)
