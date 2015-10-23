@@ -4,9 +4,9 @@
 Vagrant.configure("2") do |config|
 
   # Settings if using a virtualbox provider
-  config.vm.provider "virtualbox" do |v|
+  config.vm.provider "virtualbox" do |v, override|
     # Use the official ubuntu box
-    config.vm.box = "ubuntu/trusty32"
+    override.vm.box = "ubuntu/trusty32"
 
     # See http://www.virtualbox.org/manual/ch08.html#vboxmanage-modifyvm
     v.memory = 4096
@@ -16,9 +16,9 @@ Vagrant.configure("2") do |config|
     v.customize ["modifyvm", :id, "--accelerate3d", "on"]
   end
 
-  config.vm.provider "parallels" do |v|
+  config.vm.provider "parallels" do |v, override|
     # Use parallels virtualbox
-    config.vm.box = "parallels/ubuntu-14.04-i386"
+    override.vm.box = "parallels/ubuntu-14.04-i386"
 
     # See http://www.virtualbox.org/manual/ch08.html#vboxmanage-modifyvm
     # and http://parallels.github.io/vagrant-parallels/docs/configuration.html
