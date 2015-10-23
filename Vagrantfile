@@ -24,7 +24,6 @@ Vagrant.configure("2") do |config|
     # and http://parallels.github.io/vagrant-parallels/docs/configuration.html
     v.memory = 8192
     v.cpus = 4
-    v.optimize_power_consumption = false
     v.update_guest_tools = true
   end
 
@@ -40,7 +39,8 @@ Vagrant.configure("2") do |config|
   # Before the puppet provisioner runs
   # install puppet modules that are used
   config.vm.provision "install-puppet-modules", type: "shell" do |shell|
-    shell.inline = "mkdir -p /etc/puppet/modules;
+    shell.inline = "apt-get install -y puppet;
+                    mkdir -p /etc/puppet/modules;
                     puppet module list | grep -q 'puppetlabs-apt' \
                          || puppet module install puppetlabs-apt;
                     puppet module list | grep -q 'camptocamp-archive' \
