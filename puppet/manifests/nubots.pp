@@ -11,11 +11,6 @@ node nubotsvm {
 
   # Get and install our toolchain
   $toolchain_version = '1.0.7'
-  exec { "nubots_toolchain":
-    command => "wget http://nubots.net/debs/nubots-toolchain${toolchain_version}.deb",
-    creates => "/tmp/nubots-toolchain${toolchain_version}.deb",
-    cwd => "/tmp/",
-  }
   wget::fetch { 'nubots_deb':
     destination => "/tmp/nubots-toolchain${toolchain_version}.deb",
     source => "http://nubots.net/debs/nubots-toolchain${toolchain_version}.deb",
