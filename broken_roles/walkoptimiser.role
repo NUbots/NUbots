@@ -3,7 +3,6 @@ ADD_ROLE(
     support::logging::ConsoleLogHandler
     support::configuration::ConfigSystem
     support::configuration::GlobalConfig
-    #support::configuration::NetworkingConfiguration
     support::configuration::SoccerConfig
 
 
@@ -11,6 +10,7 @@ ADD_ROLE(
     platform::darwin::SensorFilter
 
     support::NUbugger
+    support::configuration::NetworkingConfiguration
     debug::NUbugger
 
     behaviour::Controller
