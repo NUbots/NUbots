@@ -23,9 +23,16 @@
 #include <armadillo>
 #include <cmath>
 
-#include "PGAOptimiser.h"
-#include "PGPEOptimiser.h"
-#include "WMDOptimiser.h"
+
+#include "OptimiserTypes.h"
+
+#include "GaussianSampler.h"
+#include "MirroredSampler.h"
+#include "CholeskySampler.h"
+
+#include "PGAEstimator.h"
+#include "PGPEEstimator.h"
+//#include "WMDOptimiser.h"
 
 namespace utility {
     namespace math {
@@ -50,11 +57,15 @@ namespace utility {
             private:
                 OptMethod estimator;
                 SampleMethod sampler;
+                OptimiserEstimate startValues;
+                OptimiserEstimate currentValues;
 
             public:
-                Optimiser(const arma::vec& optParams, const arma::vec& sampleParams)
-                : estimator(optParams)
-                , sampler(sampleParams) {}
+                OptimiserSet(const OptimiserParams& params)
+                : estimator(params)
+                , sampler(params)
+                , startValues(params.startParams)
+                , currentValues(params.startParams)  {}
 
                 /**
                  * Generate a new best-estimate using the parameter samples and fitnesses provided.
@@ -67,12 +78,10 @@ namespace utility {
                  *
                  * @author Josiah Walker
                  */
-                virtual arma::vec updateEstimate(arma::mat samples, arma::vec fitnesses) {
+                virtual OptimiserEstimate updateEstimate(arma::mat samples, arma::vec fitnesses) {
 
-                    const auto variances = sampler.getVariances(); //variances are useful to determine noise in estimates
-                    sampler.updateParams(samples, fitnesses, estimator.currentEstimate());
-                    estimator.updateEstimate(samples, fitnesses, sampler.getVariances());
-                    return estimator.currentEstimate();
+                    currentValues = estimator.updateEstimate(samples,fitnesses,currentValues);
+                    return currentValues;
                 }
 
                 /**
@@ -85,12 +94,13 @@ namespace utility {
                  * @author Josiah walker
                  */
                 virtual arma::mat getSamples(const uint& numSamples = 7) {
-                    return sampler.sample(estimator.currentEstimate(), numSamples);
+                    return sampler.sample(currentValues, numSamples);
                 }
 
                 virtual void reset() {
-                    sampler.reset();
-                    estimator.reset();
+                    currentValues = startValues;
+                    sampler.clear();
+                    estimator.clear();
                 }
 
                 /*
@@ -105,9 +115,9 @@ namespace utility {
             };
 
             //easy typedefs for working with the included algorithms
-            using PGAOptimiser  =  OptimiserSet<PGAEstimator, PGASampler>;
-            using WMDOptimiser  =  OptimiserSet<WMDEstimator, WMDSampler>;
-            using PGPEOptimiser =  OptimiserSet<PGPEEstimator, PGPESampler>;
+            using PGAOptimiser  =  OptimiserSet<PGAEstimator, GaussianSampler>;
+            //using WMDOptimiser  =  OptimiserSet<WMDEstimator, GaussianSampler>;
+            using PGPEOptimiser =  OptimiserSet<PGPEEstimator, GaussianSampler>;
         }
     }
 }
