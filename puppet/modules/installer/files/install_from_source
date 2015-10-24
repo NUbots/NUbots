@@ -7,7 +7,7 @@ set -e
 PREFIX="$1"
 METHOD="$2"
 LTO="$3"
-DARWIN_OPTIMISATION_FLAGS="-march=bonnell -mtune=bonnell -mfxsr -mmmx -mmovbe -msahf -msse -msse2 -msse3 -mssse3"
+DARWIN_OPTIMISATION_FLAGS="-march=bonnell -mtune=bonnell -mfxsr -mmmx -mmovbe -msahf -msse -msse2 -msse3 -mssse3 --param l1-cache-size=24 --param l1-cache-line-size=64 --param l2-cache-size=512"
 shift 3
 
 if [[ $LTO == "true" ]]; then
