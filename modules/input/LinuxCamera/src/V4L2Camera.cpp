@@ -206,7 +206,7 @@ namespace modules {
             settings.insert(std::make_pair("absolute_exposure",          V4L2CameraSetting(fd, V4L2_CID_EXPOSURE_ABSOLUTE)));
             settings.insert(std::make_pair("backlight_compensation",     V4L2CameraSetting(fd, V4L2_CID_BACKLIGHT_COMPENSATION)));
             settings.insert(std::make_pair("auto_focus",                 V4L2CameraSetting(fd, V4L2_CID_FOCUS_AUTO)));
-            settings.insert(std::make_pair("absolute_focus",             V4L2CameraSetting(fd, V4L2_CID_FOCUS_ABSOLUTE)));
+            // settings.insert(std::make_pair("absolute_focus",             V4L2CameraSetting(fd, V4L2_CID_FOCUS_ABSOLUTE)));
             settings.insert(std::make_pair("absolute_zoom",              V4L2CameraSetting(fd, V4L2_CID_ZOOM_ABSOLUTE)));
             settings.insert(std::make_pair("absolute_pan",               V4L2CameraSetting(fd, V4L2_CID_PAN_ABSOLUTE)));
             settings.insert(std::make_pair("absolute_tilt",              V4L2CameraSetting(fd, V4L2_CID_TILT_ABSOLUTE)));

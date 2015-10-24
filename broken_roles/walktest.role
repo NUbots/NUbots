@@ -5,6 +5,7 @@ ADD_ROLE(
     support::configuration::ConfigSystem
     #support::configuration::GlobalConfig
     #support::configuration::SoccerConfig
+    support::configuration::NetworkConfiguration
     support::NUbugger
     #support::GrimReaper
 

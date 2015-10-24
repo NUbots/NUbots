@@ -8,6 +8,7 @@ ADD_ROLE(
     vision::GoalDetector
     vision::BallDetector
     vision::ObstacleDetector
+    support::configuration::NetworkConfiguration
     support::NUbugger
     support::logging::ConsoleLogHandler
     platform::darwin::HardwareIO
