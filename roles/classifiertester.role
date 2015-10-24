@@ -8,6 +8,7 @@ ADD_ROLE(
     platform::darwin::HardwareIO
     platform::darwin::SensorFilter
     vision::LUTClassifier
+    support::configuration::NetworkConfiguration
     support::NUbugger
     support::configuration::SoccerConfig
 )
