@@ -72,9 +72,7 @@ class dev_tools {
   # SETUP BINUTILS REDIRECTS TO USE PLUGINS
   exec { 'redirect_ar':
     command => 'mv /usr/bin/ar /usr/bin/ar_bin',
-    creates => '/usr/bin/ar_bin',
-    subscribe => Package['binutils'],
-    refreshonly => true } ~>
+    onlyif => 'file /usr/bin/ar | grep -q "ELF"' } ->
   file { '/usr/bin/ar':
     ensure => present,
     mode => '755',
@@ -82,9 +80,7 @@ class dev_tools {
 
   exec { 'redirect_nm':
     command => 'mv /usr/bin/nm /usr/bin/nm_bin',
-    creates => '/usr/bin/nm_bin',
-    subscribe => Package['binutils'],
-    refreshonly => true } ~>
+    onlyif => 'file /usr/bin/nm | grep -q "ELF"' } ->
   file { '/usr/bin/nm':
     ensure => present,
     mode => '755',
@@ -92,9 +88,7 @@ class dev_tools {
 
   exec { 'redirect_ranlib':
     command => 'mv /usr/bin/ranlib /usr/bin/ranlib_bin',
-    creates => '/usr/bin/ranlib_bin',
-    subscribe => Package['binutils'],
-    refreshonly => true } ~>
+    onlyif => 'file /usr/bin/ranlib | grep -q "ELF"' } ->
   file { '/usr/bin/ranlib':
     ensure => present,
     mode => '755',
