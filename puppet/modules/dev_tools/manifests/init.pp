@@ -22,6 +22,7 @@ class dev_tools {
   package { 'cmake-curses-gui': ensure => latest, }
   package { 'linux-headers-generic': ensure => latest, }
   package { 'dos2unix': ensure => latest, }
+  package { 'unzip': ensure => latest, }
   package { 'rsync': ensure => latest, }
   package { 'build-essential': ensure => latest, }
   package { 'python-dev': ensure => latest, }
@@ -102,6 +103,6 @@ class dev_tools {
              && update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-5 100 \
                                     --slave /usr/bin/g++ g++ /usr/bin/g++-5 \
                                     --slave /usr/bin/gfortran gfortran /usr/bin/gfortran-5',
-    require => [ Package['gcc-5'], Package['gfortran-5'], Package['build-essential'], Package['binutils'] ]
+    require => [ Package['gcc-5'], Package['g++-5'], Package['gfortran-5'], Package['build-essential'], Package['binutils'] ]
   }
 }
