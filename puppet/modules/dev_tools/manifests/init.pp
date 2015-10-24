@@ -26,6 +26,7 @@ class dev_tools {
   package { 'build-essential': ensure => latest, }
   package { 'python-dev': ensure => latest, }
   package { 'python-pip': ensure => latest, }
+  package { 'libncurses5-dev': ensure => latest, }
   package { 'gcc-5': ensure => latest, require => Apt::Ppa['ppa:ubuntu-toolchain-r/test'] }
   package { 'g++-5': ensure => latest, require => Apt::Ppa['ppa:ubuntu-toolchain-r/test'] }
   package { 'gfortran-5': ensure => latest, require => Apt::Ppa['ppa:ubuntu-toolchain-r/test'] }
