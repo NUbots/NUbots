@@ -10,7 +10,7 @@ node nubotsvm {
   class {'dev_tools': }
 
   # Get and install our toolchain
-  $toolchain_version = '1.0.7'
+  $toolchain_version = '1.0.8'
   wget::fetch { 'nubots_deb':
     destination => "/tmp/nubots-toolchain${toolchain_version}.deb",
     source => "http://nubots.net/debs/nubots-toolchain${toolchain_version}.deb",
