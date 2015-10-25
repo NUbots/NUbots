@@ -47,7 +47,8 @@ SET(COMMON_CXX_FLAGS "${COMMON_CXX_FLAGS} -Wall -Wpedantic -Wextra")
 SET(COMMON_C_FLAGS "${COMMON_C_FLAGS} -Wall -Wpedantic -Wextra")
 
 # Tune for the Darwin-OP (uses a http://ark.intel.com/products/35463)
-SET(DARWIN_OP_CPU_INSTRUCTION_SET_FLAGS "-march=bonnell -mtune=bonnell -m32 -mfxsr -mmmx -mmovbe -msahf -msse -msse2 -msse3 -mssse3 --param l1-cache-size=24 --param l1-cache-line-size=64 --param l2-cache-size=512")
+# -mmovbe isn't enabled as it was specific to atom CPUs until haswell
+SET(DARWIN_OP_CPU_INSTRUCTION_SET_FLAGS "-march=bonnell -mtune=bonnell -m32 -mfxsr -mmmx -msahf -msse -msse2 -msse3 -mssse3 --param l1-cache-size=24 --param l1-cache-line-size=64 --param l2-cache-size=512")
 SET(COMMON_CXX_FLAGS "${COMMON_CXX_FLAGS} ${DARWIN_OP_CPU_INSTRUCTION_SET_FLAGS}")
 SET(COMMON_C_FLAGS "${COMMON_C_FLAGS} ${DARWIN_OP_CPU_INSTRUCTION_SET_FLAGS}")
 
