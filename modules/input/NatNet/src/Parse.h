@@ -22,6 +22,8 @@
 
 #include <nuclear>
 #include <armadillo>
+
+#include "NatNet.h"
 #include "messages/input/MotionCapture.h"
 
 namespace modules {
@@ -213,6 +215,44 @@ namespace input {
         }
     };
 
+    // Read Marker Set Models
+    template <>
+    struct ReadData<NatNet::MarkerSetModel> {
+        static inline NatNet::MarkerSetModel read(const char*& ptr, const uint32_t version) {
+
+            NatNet::MarkerSetModel m;
+            m.name = ReadData<std::string>::read(ptr, version);
+            m.markerNames = ReadData<std::vector<std::string>>::read(ptr, version);
+            return m;
+        }
+    };
+
+    // Read Rigid Body Models
+    template <>
+    struct ReadData<NatNet::RigidBodyModel> {
+        static inline NatNet::RigidBodyModel read(const char*& ptr, const uint32_t version) {
+
+            NatNet::RigidBodyModel m;
+            m.name = version >= 0x02000000 ? ReadData<std::string>::read(ptr, version) : "";
+            m.id = ReadData<uint32_t>::read(ptr, version);
+            m.parentId = ReadData<uint32_t>::read(ptr, version);
+            m.offset = ReadData<arma::fvec3>::read(ptr, version);
+            return m;
+        }
+    };
+
+    // Read Skeleton Models
+    template <>
+    struct ReadData<NatNet::SkeletonModel> {
+        static inline NatNet::SkeletonModel read(const char*& ptr, const uint32_t version) {
+
+            NatNet::SkeletonModel m;
+            m.name = ReadData<std::string>::read(ptr, version);
+            m.id = ReadData<uint32_t>::read(ptr, version);
+            m.bones = ReadData<std::vector<NatNet::RigidBodyModel>>::read(ptr, version);
+            return m;
+        }
+    };
 }
 }
 

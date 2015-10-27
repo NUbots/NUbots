@@ -174,107 +174,41 @@ namespace input {
 
     void NatNet::processModel(const Packet& packet) {
 
-        // // number of datasets
-        // int nDatasets = 0; memcpy(&nDatasets, ptr, 4); ptr += 4;
-        // printf("Dataset Count : %d\n", nDatasets);
+        // Our pointer as we move through the data
+        const char* ptr = &packet.data;
 
-        // for(int i=0; i < nDatasets; i++)
-        // {
-        //     printf("Dataset %d\n", i);
+        uint32_t nModels = ReadData<uint32_t>::read(ptr, version);
 
-        //     int type = 0; memcpy(&type, ptr, 4); ptr += 4;
-        //     printf("Type : %d\n", i, type);
+        for (uint32_t i = 0; i < nModels; ++i) {
+            // Read the type
+            uint32_t type = ReadData<uint32_t>::read(ptr, version);
 
-        //     if(type == 0)   // markerset
-        //     {
-        //         // name
-        //         char szName[256];
-        //         strcpy_s(szName, ptr);
-        //         int nDataBytes = (int) strlen(szName) + 1;
-        //         ptr += nDataBytes;
-        //         printf("Markerset Name: %s\n", szName);
+            // Parse the correct type
+            switch (type) {
+                // Marker Set
+                case 0: {
+                    MarkerSetModel m = ReadData<MarkerSetModel>::read(ptr, version);
+                    markerSetModels[m.name] = m;
+                } break;
 
-        //         // marker data
-        //         int nMarkers = 0; memcpy(&nMarkers, ptr, 4); ptr += 4;
-        //         printf("Marker Count : %d\n", nMarkers);
+                // Rigid Body
+                case 1: {
+                    RigidBodyModel m = ReadData<RigidBodyModel>::read(ptr, version);
+                    rigidBodyModels[m.id] = m;
+                } break;
 
-        //         for(int j=0; j < nMarkers; j++)
-        //         {
-        //             char szName[256];
-        //             strcpy_s(szName, ptr);
-        //             int nDataBytes = (int) strlen(szName) + 1;
-        //             ptr += nDataBytes;
-        //             printf("Marker Name: %s\n", szName);
-        //         }
-        //     }
-        //     else if(type ==1)   // rigid body
-        //     {
-        //         if(major >= 2)
-        //         {
-        //             // name
-        //             char szName[MAX_NAMELENGTH];
-        //             strcpy(szName, ptr);
-        //             ptr += strlen(ptr) + 1;
-        //             printf("Name: %s\n", szName);
-        //         }
+                // Skeleton
+                case 2: {
+                    SkeletonModel m = ReadData<SkeletonModel>::read(ptr, version);
+                    skeletonModels[m.id] = m;
+                } break;
 
-        //         int ID = 0; memcpy(&ID, ptr, 4); ptr +=4;
-        //         printf("ID : %d\n", ID);
-
-        //         int parentID = 0; memcpy(&parentID, ptr, 4); ptr +=4;
-        //         printf("Parent ID : %d\n", parentID);
-
-        //         float xoffset = 0; memcpy(&xoffset, ptr, 4); ptr +=4;
-        //         printf("X Offset : %3.2f\n", xoffset);
-
-        //         float yoffset = 0; memcpy(&yoffset, ptr, 4); ptr +=4;
-        //         printf("Y Offset : %3.2f\n", yoffset);
-
-        //         float zoffset = 0; memcpy(&zoffset, ptr, 4); ptr +=4;
-        //         printf("Z Offset : %3.2f\n", zoffset);
-
-        //     }
-        //     else if(type ==2)   // skeleton
-        //     {
-        //         char szName[MAX_NAMELENGTH];
-        //         strcpy(szName, ptr);
-        //         ptr += strlen(ptr) + 1;
-        //         printf("Name: %s\n", szName);
-
-        //         int ID = 0; memcpy(&ID, ptr, 4); ptr +=4;
-        //         printf("ID : %d\n", ID);
-
-        //         int nRigidBodies = 0; memcpy(&nRigidBodies, ptr, 4); ptr +=4;
-        //         printf("RigidBody (Bone) Count : %d\n", nRigidBodies);
-
-        //         for(int i=0; i< nRigidBodies; i++)
-        //         {
-        //             if(major >= 2)
-        //             {
-        //                 // RB name
-        //                 char szName[MAX_NAMELENGTH];
-        //                 strcpy(szName, ptr);
-        //                 ptr += strlen(ptr) + 1;
-        //                 printf("Rigid Body Name: %s\n", szName);
-        //             }
-
-        //             int ID = 0; memcpy(&ID, ptr, 4); ptr +=4;
-        //             printf("RigidBody ID : %d\n", ID);
-
-        //             int parentID = 0; memcpy(&parentID, ptr, 4); ptr +=4;
-        //             printf("Parent ID : %d\n", parentID);
-
-        //             float xoffset = 0; memcpy(&xoffset, ptr, 4); ptr +=4;
-        //             printf("X Offset : %3.2f\n", xoffset);
-
-        //             float yoffset = 0; memcpy(&yoffset, ptr, 4); ptr +=4;
-        //             printf("Y Offset : %3.2f\n", yoffset);
-
-        //             float zoffset = 0; memcpy(&zoffset, ptr, 4); ptr +=4;
-        //             printf("Z Offset : %3.2f\n", zoffset);
-        //         }
-        //     }
-        // }
+                // Bad packet
+                default: {
+                    log<NUClear::WARN>("NatNet received an unexpected model type", type);
+                } break;
+            }
+        }
     }
 
     void NatNet::processPing(const Packet& packet) {

@@ -21,12 +21,13 @@
 #define MODULES_INPUT_NATNET_H
 
 #include <nuclear>
+#include <armadillo>
 
 namespace modules {
 namespace input {
 
     class NatNet : public NUClear::Reactor {
-    private:
+    public:
         struct Packet {
             enum class Type : uint16_t {
                 PING                  = 0,
@@ -45,6 +46,29 @@ namespace input {
             uint16_t length;
             char data;
         };
+
+        struct MarkerSetModel {
+            std::string name;
+            std::vector<std::string> markerNames;
+        };
+
+        struct RigidBodyModel {
+            std::string name;
+            uint32_t id;
+            uint32_t parentId;
+            arma::fvec3 offset;
+        };
+
+        struct SkeletonModel {
+            std::string name;
+            uint32_t id;
+            std::vector<RigidBodyModel> bones;
+        };
+
+        // Models we are using
+        std::map<std::string, MarkerSetModel> markerSetModels;
+        std::map<uint32_t, RigidBodyModel> rigidBodyModels;
+        std::map<uint32_t, SkeletonModel> skeletonModels;
 
         // The version of NatNet we are running with
         uint32_t remote = 0;
@@ -65,7 +89,6 @@ namespace input {
         void processString(const Packet& packet);
         void process(const std::vector<char>& input);
 
-    public:
         /// @brief Called by the powerplant to build and setup the NatNet reactor.
         explicit NatNet(std::unique_ptr<NUClear::Environment> environment);
     };
