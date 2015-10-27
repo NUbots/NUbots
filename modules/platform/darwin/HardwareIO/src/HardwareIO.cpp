@@ -153,7 +153,7 @@ namespace darwin {
         });
 
         // This trigger gets the sensor data from the CM730
-        on<Every<90, Per<std::chrono::seconds>>, Single, Priority::HIGH>().then([this] {
+        on<Every<90, Per<std::chrono::seconds>>, Single, Priority::HIGH>().then("Hardware Loop", [this] {
 
             // Our final sensor output
             auto sensors = std::make_unique<DarwinSensors>();

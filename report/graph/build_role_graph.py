@@ -2,10 +2,12 @@
 
 from info.type_to_string import type_to_string
 
+import math
 import random
 import sys
 import json
 import re
+from collections import Counter
 from pydotplus.graphviz import Dot, Node, Edge, Cluster
 
 class NUClearGraphBuilder:
@@ -19,100 +21,149 @@ class NUClearGraphBuilder:
 
             # Don't load some super connected modules
             if module['name'] in [
-                'support::logging::ConsoleLogHandler',
-                'support::NUbugger',
-                'support::extension::FileWatcher',
+                # 'support::logging::ConsoleLogHandler',
+                # 'support::NUbugger',
+                # 'support::extension::FileWatcher',
             ]:
                 return
 
             self.modules.append(module)
 
     def make_edge(self, output_id, output, input_id, input):
-        # If these two types are in the same scope
-        if input['scope'] == output['scope']:
+        # If we are after a two module edge
+        if output:
+            if input['scope'] == output['scope']:
 
-            # If the two types are type scopes of the same type
-            if input['scope'] == 'type' and input['type'] == output['type']:
+                # If the two types are type scopes of the same type
+                if input['scope'] == 'type' and input['type'] == output['type']:
 
-                # Get our type name
-                type_name = type_to_string(input['type'])
+                    # Get our type name
+                    type_name = type_to_string(input['type'])
 
-                # give our global arguments
-                edge = {
-                    'src':   '"{}"'.format(output_id),
-                    'dst':   '"{}"'.format(input_id),
-                    'label': '"{}"'.format(type_name),
-                    # Red for triggering edges, blue for data only edges
-                    'color': '#FF0000' if input['modifiers'].get('execution', False) else '#0000FF'
-                }
+                    # give our global arguments
+                    edge = {
+                        'src':   '"{}"'.format(output_id),
+                        'dst':   '"{}"'.format(input_id),
+                        'label': '"{}"'.format(type_name),
+                        # Red for triggering edges, blue for data only edges
+                        'color': '#FF0000' if input['modifiers'].get('execution', False) else '#0000FF'
+                    }
 
-                if input['modifiers'].get('optional', False):
-                    edge['style'] = 'dashed'
+                    if input['modifiers'].get('optional', False):
+                        edge['style'] = 'dashed'
 
-                if input['modifiers'].get('last', False):
-                    # TODO do something here
-                    # Try to make the line a different style
+                    if input['modifiers'].get('last', False):
+                        # TODO do something here
+                        # Try to make the line a different style
+                        pass
+
+                    if output['modifiers'].get('binding', False):
+                        edge['style'] = 'dotted'
+
+                    if output['modifiers'].get('direct', False):
+                        edge['dir'] = 'both'
+                        edge['arrowtail'] = 'dot'
+
+                    if output['modifiers'].get('initialize', False):
+                        edge['dir'] = 'both'
+                        edge['arrowtail'] = 'odot'
+
+                    return Edge(**edge)
+
+                if input['scope'] == 'network' and input['type'] == output['type']:
                     pass
-
-                if output['modifiers'].get('binding', False):
-                    edge['style'] = 'dotted'
-
-                if output['modifiers'].get('direct', False):
-                    edge['dir'] = 'both'
-                    edge['arrowtail'] = 'dot'
-
-                if output['modifiers'].get('initialize', False):
-                    edge['dir'] = 'both'
-                    edge['arrowtail'] = 'odot'
-
+                    # This is a network type
+        else:
+            if input['scope'] == 'system_event':
+                # give our arguments
+                edge = {
+                    'src':   '"{}"'.format('System'),
+                    'dst':   '"{}"'.format(input_id),
+                    'label': '"{}"'.format(input['type']),
+                    'color': '#00FF00'
+                }
                 return Edge(**edge)
 
-            if input['scope'] == 'network' and input['type'] == output['type']:
-                pass
-                # This is a network type
+            if input['scope'] == 'every':
+                edge = {
+                    'src':   '"{}"'.format('Every'),
+                    'dst':   '"{}"'.format(input_id),
+                    'label': '"Every<{}, seconds>"'.format(input['type']),
+                    'color': '#000000'
+                }
+                return Edge(**edge)
 
-        # TODO we want to have only one edge for these
-        # But they will be called here for every alternative
-        if input['scope'] == 'system_event':
-            # TODO this could be Startup or Shutdown
-            # TODO work out what to do with these events
-            pass
+            if input['scope'] == 'always':
+                edge = {
+                    'src':   '"{}"'.format('Every'),
+                    'dst':   '"{}"'.format(input_id),
+                    'label': '"{}"'.format('Always'),
+                    'color': '#000000'
+                }
+                return Edge(**edge)
 
-        if input['scope'] == 'every':
-            # TODO work out what to do with these events
-            pass
+            if input['scope'] == 'io':
+                edge = {
+                    'src':   '"{}"'.format('IO'),
+                    'dst':   '"{}"'.format(input_id),
+                    'label': '"{}"'.format('IO'),
+                    'color': '#000000'
+                }
+                return Edge(**edge)
 
-        if input['scope'] == 'always':
-            # TODO work out what to do with these events
-            pass
+            if input['scope'] == 'tcp':
+                edge = {
+                    'src':   '"{}"'.format('TCP'),
+                    'dst':   '"{}"'.format(input_id),
+                    'label': '"{}"'.format('TCP'),
+                    'color': '#000000'
+                }
+                return Edge(**edge)
 
-        if input['scope'] == 'io':
-            # TODO work out what to do with these events
-            pass
+            if input['scope'] == 'udp':
+                edge = {
+                    'src':   '"{}"'.format('UDP'),
+                    'dst':   '"{}"'.format(input_id),
+                    'label': '"{}"'.format('UDP'),
+                    'color': '#000000'
+                }
+                return Edge(**edge)
 
-        if input['scope'] == 'tcp':
-            # TODO work out what to do with these events
-            pass
+            if input['scope'] == 'udp_broadcast':
+                edge = {
+                    'src':   '"{}"'.format('UDP'),
+                    'dst':   '"{}"'.format(input_id),
+                    'label': '"{}"'.format('UDP Broadcast'),
+                    'color': '#000000'
+                }
+                return Edge(**edge)
 
-        if input['scope'] == 'udp':
-            # TODO work out what to do with these events
-            pass
+            if input['scope'] == 'udp_multicast':
+                edge = {
+                    'src':   '"{}"'.format('UDP'),
+                    'dst':   '"{}"'.format(input_id),
+                    'label': '"{}"'.format('UDP Multicast'),
+                    'color': '#000000'
+                }
+                return Edge(**edge)
 
-        if input['scope'] == 'udp_broadcast':
-            # TODO work out what to do with these events
-            pass
+            if input['scope'] == 'configuration':
+                edge = {
+                    'src':   '"{}"'.format('Configuration'),
+                    'dst':   '"{}"'.format(input_id),
+                    'label': '"{}"'.format(input['type']),
+                    'color': '#000000'
+                }
+                return Edge(**edge)
 
-        if input['scope'] == 'udp_multicast':
-            # TODO work out what to do with these events
-            pass
-
-        if input['scope'] == 'configuration':
-            # TODO work out what to do with these events
-            pass
-
-        if input['scope'] == 'file_watch':
-            # TODO work out what to do with these events
-            pass
+            if input['scope'] == 'file_watch':
+                edge = {
+                    'src':   '"{}"'.format('File Watch'),
+                    'dst':   '"{}"'.format(input_id),
+                    'label': '"{}"'.format(input['type']),
+                    'color': '#000000'
+                }
+                return Edge(**edge)
 
         # We are not going to make an edge for this
         return None
@@ -209,16 +260,14 @@ class NUClearGraphBuilder:
                         node['style'] = 'filled'
                         node['fillcolor'] = '#FF444444'
 
-                    # elif r1['modifiers']['priority'] == 'NORMAL':
-
-                    # TODO make the background colour depend on priority
-                    # Normal = none
-                    # High = #FF444444
-                    # Low = #44FF4444
-                    pass # TODO modify the reaction
-
                 # Add the node
                 cluster.add_node(Node(**node))
+
+                # Go through our own inputs looking for single edged inputs
+                for input in r1['input_data']:
+                    edge = self.make_edge(None, None, src_fqn, input)
+                    if edge:
+                        graph.add_edge(edge)
 
                 # Go through our outputs
                 for outputs in r1['output_data']:
@@ -253,6 +302,8 @@ class NUClearGraphBuilder:
                 'output_data': []
             }
 
+            # TODO we are getting doubleups
+
             # Add all of our reaction's inputs and outputs
             for reaction in module['reactions']:
                 for input in reaction['input_data']:
@@ -275,7 +326,7 @@ class NUClearGraphBuilder:
 
 
         # Our graph
-        graph = Dot(graph_type='digraph', suppress_disconnected=True, splines=True, overlap='prism10000', layout='neato', epsilon=0.01, start=int(random.random() * 2**32))
+        graph = Dot(graph_type='digraph', suppress_disconnected=True, splines=True, overlap='prism10000', layout='fdp', epsilon=0.01, start=int(random.random() * 2**32))
 
         for m1 in compressed_modules:
 
@@ -300,6 +351,129 @@ class NUClearGraphBuilder:
 
         return graph
 
+    def histogram_information(self, data):
+
+        # Unpack our data into this list
+        l = []
+        for k in data:
+            v = data[k]
+            l.extend([k] * v)
+        l = sorted(l)
+
+        # If it's an empty list
+        if(not len(l)):
+            return (float('nan'), float('nan'), float('nan'), float('nan'))
+
+        # Calculate the average
+        mean = float(sum(l))/float(len(l))
+
+        # Use a counter to get the mode
+        mode = Counter(data).most_common(1)[0][0]
+
+        # The median is the middle element of the list
+        median = l[len(l) / 2]
+
+        # Calculate the standard deviation
+        stddev = math.sqrt(sum([pow(i-mean, 2) for i in l]) / len(l))
+
+
+
+        # mean = ;
+        # mode = ;
+        # median = ;
+        # stddev = ;
+
+        return (mean, mode, median, stddev)
+
+    def extract_graph_information(self):
+        info = {
+            'lmb': {
+                'reactions': {
+                    'histogram': {},
+                    'mean': 0,
+                    'mode': 0,
+                    'median': 0,
+                    'stddev': 0,
+                },
+                'inputs': {
+                    'histogram': {},
+                    'mean': 0,
+                    'mode': 0,
+                    'median': 0,
+                    'stddev': 0,
+                },
+            },
+            'message': {
+                'reactions': {
+                    'histogram': {},
+                    'mean': 0,
+                    'mode': 0,
+                    'median': 0,
+                    'stddev': 0,
+                },
+                'induced_cache_variables': {
+                    'histogram': {},
+                    'mean': 0,
+                    'mode': 0,
+                    'median': 0,
+                    'stddev': 0,
+                },
+            },
+            'blackboard': {
+            }
+        }
+
+        # Process information for LMB
+        for module in self.modules:
+
+            # Add to our reaction histogram
+            h = info['lmb']['reactions']['histogram']
+            l = len(module['reactions'])
+            h[l] = h.get(l, 0) + 1
+
+            for reaction in module['reactions']:
+                # Build a histogram of the input complexity
+                h = info['lmb']['inputs']['histogram']
+                l = len(reaction['input_data'])
+                h[l] = h.get(l, 0) + 1
+
+        # Calculate our histogram information
+        h = info['lmb']['reactions']
+        h['mean'], h['mode'], h['median'], h['stddev'] = self.histogram_information(h['histogram'])
+
+        # Calculate our histogram information
+        h = info['lmb']['inputs']
+        h['mean'], h['mode'], h['median'], h['stddev'] = self.histogram_information(h['histogram'])
+
+        # Process the transformation for Message Passing
+        for module in self.modules:
+
+            data_types = []
+            exec_types = []
+
+            for reaction in module['reactions']:
+                for input in reaction['input_data']:
+                    if input['modifiers'].get('execution', False):
+                        exec_types.append(input)
+                    elif input not in data_types:
+                        data_types.append(input)
+
+            h = info['message']['reactions']['histogram']
+            l = len(data_types) + len(exec_types)
+            h[l] = h.get(l, 0) + 1
+
+            h = info['message']['induced_cache_variables']['histogram']
+            l = len(data_types)
+            h[l] = h.get(l, 0) + 1
+
+        # Calculate our histogram information
+        h = info['message']['reactions']
+        h['mean'], h['mode'], h['median'], h['stddev'] = self.histogram_information(h['histogram'])
+
+        h = info['message']['induced_cache_variables']
+        h['mean'], h['mode'], h['median'], h['stddev'] = self.histogram_information(h['histogram'])
+
+        return info
 
 if __name__ == "__main__":
 
@@ -308,10 +482,13 @@ if __name__ == "__main__":
     out = sys.argv[1]
     filenames = sys.argv[2:]
 
+    converter.build_module_graph().write("{}_module.dot".format(out))
+    converter.build_reaction_graph(group_clusters=False).write("{}_reaction.dot".format(out))
+
     # Add all of our modules
     for filename in filenames:
         converter.add_module(filename)
 
     # Build our graph and save
-    converter.build_module_graph().write("{}_module.dot".format(out))
-    converter.build_reaction_graph(group_clusters=True).write("{}_reaction.dot".format(out))
+    with open("{}_info.json".format(out), 'w') as file:
+        json.dump(converter.extract_graph_information(), file, sort_keys=True, indent=4, separators=(',', ': '))

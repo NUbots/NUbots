@@ -49,12 +49,14 @@ else:
 
 parser = SymbolParser()
 symbols = {}
+assembly_histogram = {}
 symbol_relocation = {}
 symbol_keys = []
 reactions = {}
 outputs = {}
 isolated_outputs = []
 binders = {}
+memonic_regex = re.compile(r'^(\w+)')
 call_regex = re.compile(r'^call\s+0x([0-9A-Fa-f]+)$')
 push_regex = re.compile(r'^push\s+\$0x([0-9A-Fa-f]+)$')
 # This regular expression specifically finds values loaded into register eax ebx ecx or edx
@@ -64,9 +66,8 @@ lea_regex = re.compile(r'lea\s+(-?0x[0-9a-fA-F]+)\(%ebx\),%e[abcd]x')
 bfd = pybfd.bfd.Bfd(input_file)
 opcodes = pybfd.opcodes.Opcodes(bfd)
 
+# Get our global offset table address for relative jumps
 got_addr = bfd.sections['.got.plt'].vma
-
-print 'GOT offset addr', got_addr
 
 # Get list of symbols and their addresses
 for symbol_address in bfd.symbols:
@@ -139,6 +140,13 @@ symbol_keys = sorted(list(symbols.keys()))
 s_text = bfd.sections['.text']
 string_args = []
 for vma, size, disasm in opcodes.disassemble(s_text.content, s_text.vma):
+
+    # Get the assembly memonic that is used and increment it
+    try:
+        memonic = memonic_regex.match(disasm).group(1)
+        assembly_histogram[memonic] = assembly_histogram.get(memonic, 0) + 1
+    except:
+        pass
 
     # Find a string arguments for the next call if they exist
     lea = lea_regex.match(disasm)
@@ -374,6 +382,7 @@ for output_address in outputs:
 # Build our output information structure
 jsonOutput = {
     'name': module_name,
+    'assembly': assembly_histogram,
     'reactions': [],
     'output_data': []
 }
