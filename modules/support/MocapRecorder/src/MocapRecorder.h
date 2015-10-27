@@ -31,8 +31,6 @@ namespace support {
         /// @brief Called by the powerplant to build and setup the MocapRecorder reactor.
         explicit MocapRecorder(std::unique_ptr<NUClear::Environment> environment);
 
-        /// @brief the path to the configuration file for MocapRecorder
-        static constexpr const char* CONFIGURATION_PATH = "MocapRecorder.yaml";
     };
 
 }

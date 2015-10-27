@@ -77,12 +77,13 @@ namespace support {
 
         });
 
-        on<Trigger<Every<60, Per<std::chrono::seconds>>>>([this](const time_t&) {
+        on<Every<60, Per<std::chrono::seconds>>>().then([this] {
             bool valid;
             // Try to get a new frame from the listener.
             MocapFrame frame(frameListener->pop(&valid).first);
             // Quit if the listener has no more frames.
             if (!valid) {
+                std::cout << " data not valid" << std::endl;
                 return;
             }
 //            std::cout << frame << std::endl;

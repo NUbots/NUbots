@@ -31,8 +31,6 @@ namespace support {
         /// @brief Called by the powerplant to build and setup the NUcapSimulator reactor.
         explicit NUcapSimulator(std::unique_ptr<NUClear::Environment> environment);
 
-        /// @brief the path to the configuration file for NUcapSimulator
-        static constexpr const char* CONFIGURATION_PATH = "NUcapSimulator.yaml";
     };
 
 }

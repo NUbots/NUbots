@@ -37,11 +37,11 @@ namespace support {
     MocapRecorder::MocapRecorder(std::unique_ptr<NUClear::Environment> environment)
     : Reactor(std::move(environment)) {
 
-        on<Trigger<Configuration<MocapRecorder>>>([this] (const Configuration<MocapRecorder>& config) {
+        on<Configuration>("MocapRecorder.yaml").then([this] (const Configuration& config) {
             // Use configuration here from file MocapRecorder.yaml
         });
 
-        on<Trigger<MotionCapture>, Options<Single>>([this](const MotionCapture& mocap){
+        on<Trigger<MotionCapture>, Single>().then([this](const MotionCapture& mocap){
         	
         	arma::mat rigidBodies(13,mocap.rigid_bodies().size());
         	int i = 0;

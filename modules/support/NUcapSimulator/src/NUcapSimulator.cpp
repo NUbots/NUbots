@@ -31,7 +31,7 @@ namespace support {
     NUcapSimulator::NUcapSimulator(std::unique_ptr<NUClear::Environment> environment)
     : Reactor(std::move(environment)) {
 
-        on<Trigger<Configuration<NUcapSimulator>>>([this] (const Configuration<NUcapSimulator>& config) {
+        on<Configuration>("NUcapSimulator.yaml").then([this] (const Configuration& config) {
             // Use configuration here from file NUcapSimulator.yaml
             auto moCap = std::make_unique<MotionCapture>();
 
