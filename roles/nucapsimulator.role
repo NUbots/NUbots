@@ -4,12 +4,11 @@ ADD_ROLE(
     # Support and Configuration
     support::SignalCatcher
     support::logging::ConsoleLogHandler
-    support::extension::FileWatcher
+    support::configuration::ConfigSystem
     support::configuration::GlobalConfig
-    support::configuration::NetworkConfiguration
     support::configuration::SoccerConfig
 
     # NUcap
-    support::NUcap
-    # support::MocapRecorder
+    support::MocapRecorder
+    support::NUcapSimulator
 )

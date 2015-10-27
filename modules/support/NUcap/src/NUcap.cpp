@@ -77,7 +77,7 @@ namespace support {
 
         });
 
-        on<Every<15, Per<std::chrono::seconds>>>().then([this] {
+        on<Trigger<Every<60, Per<std::chrono::seconds>>>>([this](const time_t&) {
             bool valid;
             // Try to get a new frame from the listener.
             MocapFrame frame(frameListener->pop(&valid).first);
@@ -140,7 +140,7 @@ namespace support {
                 }
             }
 
-            emit<Scope::NETWORK>(std::move(moCap));
+            emit<Scope::NETWORK,Scope::LOCAL>(std::move(moCap));
 
         });
 
