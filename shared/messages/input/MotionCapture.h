@@ -45,11 +45,19 @@ namespace messages {
                 float error;
                 bool trackingValid;
 
+                // Information added by the model
+                std::string name;
+                arma::fvec3 offset;
+                RigidBody* parent;
+                std::vector<RigidBody*> children;
             };
 
             struct Skeleton {
                 uint32_t id;
                 std::vector<RigidBody> bones;
+
+                // Information added by the model
+                std::string name;
             };
 
             struct LabeledMarker : public Marker {

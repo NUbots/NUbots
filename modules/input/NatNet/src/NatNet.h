@@ -30,16 +30,16 @@ namespace input {
     public:
         struct Packet {
             enum class Type : uint16_t {
-                PING                  = 0,
-                PING_RESPONSE         = 1,
-                REQUEST               = 2,
-                RESPONSE              = 3,
-                REQUEST_MODELDEF      = 4,
-                MODEL_DEF             = 5,
-                REQUEST_FRAMEOFDATA   = 6,
-                FRAME_OF_DATA         = 7,
-                MESSAGE_STRING        = 8,
-                UNRECOGNIZED_REQUEST  = 100
+                PING                      = 0,
+                PING_RESPONSE             = 1,
+                REQUEST                   = 2,
+                RESPONSE                  = 3,
+                REQUEST_MODEL_DEFINITIONS = 4,
+                MODEL_DEF                 = 5,
+                REQUEST_FRAMEOFDATA       = 6,
+                FRAME_OF_DATA             = 7,
+                MESSAGE_STRING            = 8,
+                UNRECOGNIZED_REQUEST      = 100
             };
 
             Type type;
@@ -62,7 +62,7 @@ namespace input {
         struct SkeletonModel {
             std::string name;
             uint32_t id;
-            std::vector<RigidBodyModel> bones;
+            std::map<uint32_t, RigidBodyModel> boneModels;
         };
 
         // Models we are using

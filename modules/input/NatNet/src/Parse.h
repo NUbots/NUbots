@@ -249,7 +249,13 @@ namespace input {
             NatNet::SkeletonModel m;
             m.name = ReadData<std::string>::read(ptr, version);
             m.id = ReadData<uint32_t>::read(ptr, version);
-            m.bones = ReadData<std::vector<NatNet::RigidBodyModel>>::read(ptr, version);
+
+            // Convert our bone models into a map
+            auto boneModels = ReadData<std::vector<NatNet::RigidBodyModel>>::read(ptr, version);
+            for(auto& model : boneModels) {
+                m.boneModels[model.id] = model;
+            }
+
             return m;
         }
     };

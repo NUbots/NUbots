@@ -166,7 +166,114 @@ namespace input {
 
         // TODO there is an eod thing here
 
-        // TODO it should be possible to apply a model here to link up the skeleton etc
+        // Apply the model information we have to the objects
+        for (auto& markerSet : mocap->markerSets) {
+
+            auto model = markerSetModels.find(markerSet.name);
+
+            // We have a model
+            if(model != markerSetModels.end()) {
+            }
+            // We need to update our models
+            else {
+                // Inform that we are updating our models
+                log<NUClear::INFO>("NatNet models are out of date, updating before resuming data");
+
+                // Request model definitions
+                sendCommand(Packet::Type::REQUEST_MODEL_DEFINITIONS);
+
+                // Stop processing
+                return;
+            }
+        }
+
+        for (auto& rigidBody : mocap->rigidBodies) {
+
+            auto model = rigidBodyModels.find(rigidBody.id);
+
+            // We have a model
+            if(model != rigidBodyModels.end()) {
+
+                auto parent = std::find_if(mocap->rigidBodies.begin(), mocap->rigidBodies.end(), [model] (const MotionCapture::RigidBody& rb) {
+                    return rb.id == model->second.id;
+                });
+
+                rigidBody.name = model->second.name;
+                rigidBody.parent = parent == mocap->rigidBodies.end() ? nullptr : &*parent;
+                rigidBody.offset = model->second.offset;
+            }
+            // We need to update our models
+            else {
+                // Inform that we are updating our models
+                log<NUClear::INFO>("NatNet models are out of date, updating before resuming data");
+
+                // Request model definitions
+                sendCommand(Packet::Type::REQUEST_MODEL_DEFINITIONS);
+
+                // Stop processing
+                return;
+            }
+        }
+
+        // Now we reverse link all our rigid bodies
+        for (auto& rigidBody : mocap->rigidBodies) {
+            if(rigidBody.parent) {
+                rigidBody.parent->children.push_back(&rigidBody);
+            }
+        }
+
+        for (auto& skeleton : mocap->skeletons) {
+
+            auto model = skeletonModels.find(skeleton.id);
+
+            // We have a model
+            if(model != skeletonModels.end()) {
+
+                for (auto& bone : skeleton.bones) {
+                    auto boneModel = model->second.boneModels.find(bone.id);
+                    // We have a model for this bone
+                    if (boneModel != model->second.boneModels.end()) {
+
+                        auto parent = std::find_if(skeleton.bones.begin(), skeleton.bones.end(), [boneModel] (const MotionCapture::RigidBody& rb) {
+                            return rb.id == boneModel->second.id;
+                        });
+
+                        bone.name = boneModel->second.name;
+                        bone.parent = parent == skeleton.bones.end() ? nullptr : &*parent;
+                        bone.offset = boneModel->second.offset;
+                    }
+                    // We need to update our models
+                    else {
+                        // Inform that we are updating our models
+                        log<NUClear::INFO>("NatNet models are out of date, updating before resuming data");
+
+                        // Request model definitions
+                        sendCommand(Packet::Type::REQUEST_MODEL_DEFINITIONS);
+
+                        // Stop processing
+                        return;
+                    }
+                }
+            }
+            // We need to update our models
+            else {
+                // Inform that we are updating our models
+                log<NUClear::INFO>("NatNet models are out of date, updating before resuming data");
+
+                // Request model definitions
+                sendCommand(Packet::Type::REQUEST_MODEL_DEFINITIONS);
+
+                // Stop processing
+                return;
+            }
+
+            // Now we reverse link all our bones
+            for (auto& rigidBody : skeleton.bones) {
+                if(rigidBody.parent) {
+                    rigidBody.parent->children.push_back(&rigidBody);
+                }
+            }
+        }
 
         // Emit our frame
         emit(std::move(mocap));
@@ -238,6 +345,9 @@ namespace input {
 
         log<NUClear::INFO>("Connected to", name, strAppVersion);
         log<NUClear::INFO>("NatNet version", strNatVersion);
+
+        // Request model definitions
+        sendCommand(Packet::Type::REQUEST_MODEL_DEFINITIONS);
     }
 
     void NatNet::processResponse(const Packet& packet) {
