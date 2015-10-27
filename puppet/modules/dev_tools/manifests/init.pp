@@ -24,6 +24,8 @@ class dev_tools {
   package { 'dos2unix': ensure => latest, }
   package { 'unzip': ensure => latest, }
   package { 'rsync': ensure => latest, }
+  package { 'git': ensure => latest, }
+  package { 'graphviz': ensure => latest, }
   package { 'build-essential': ensure => latest, }
   package { 'python-dev': ensure => latest, }
   package { 'python-pip': ensure => latest, }

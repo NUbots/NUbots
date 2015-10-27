@@ -355,7 +355,7 @@ namespace vision {
 
 
                 // Measure the width based distance to the bottom
-                double baseWidthDistance = widthBasedDistanceToCircle(GOAL_DIAMETER, bl, br, cam.focalLengthPixels);
+                double baseWidthDistance = widthBasedDistanceToCircle(GOAL_DIAMETER / 2, bl, br, cam.focalLengthPixels);
                 arma::vec3 baseGoalWidth = baseWidthDistance * sensors.orientationCamToGround.submat(0,0,2,2) * baseRay + sensors.orientationCamToGround.submat(0,3,2,3) + arma::vec({ 0, 0, GOAL_HEIGHT / 2 });
                 double baseGoalWidthDist = arma::norm(baseGoalWidth);
                 arma::mat baseGoalWidthDistCov = arma::diagmat(arma::vec({
@@ -366,7 +366,7 @@ namespace vision {
                                         arma::zeros<arma::vec>(3), arma::zeros<arma::mat>(3, 3)});
 
                 // Measure the width based distance to the top
-                double topWidthDistance = widthBasedDistanceToCircle(GOAL_DIAMETER, tl, tr, cam.focalLengthPixels);
+                double topWidthDistance = widthBasedDistanceToCircle(GOAL_DIAMETER / 2, tl, tr, cam.focalLengthPixels);
                 arma::vec3 topGoalWidth = topWidthDistance * sensors.orientationCamToGround.submat(0,0,2,2) * topRay + sensors.orientationCamToGround.submat(0,3,2,3) - arma::vec({ 0, 0, GOAL_HEIGHT / 2 });
                 double topGoalWidthDist = arma::norm(topGoalWidth);
                 arma::mat topGoalWidthDistCov = arma::diagmat(arma::vec({

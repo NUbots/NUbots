@@ -49,6 +49,7 @@ FOREACH(role ${NUCLEAR_ROLES})
     ADD_CUSTOM_COMMAND(
         OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/role_graph/${role}_reaction.dot
                ${CMAKE_CURRENT_BINARY_DIR}/role_graph/${role}_module.dot
+               ${CMAKE_CURRENT_BINARY_DIR}/role_graph/${role}_info.json
         COMMAND ${PYTHON_EXECUTABLE}
                 ${CMAKE_CURRENT_SOURCE_DIR}/build_role_graph.py
                 ${CMAKE_CURRENT_BINARY_DIR}/role_graph/${role}

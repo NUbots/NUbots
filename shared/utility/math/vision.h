@@ -90,11 +90,11 @@ namespace vision {
         return utility::math::angle::acos_clamped(arma::dot(camSpaceP1,camSpaceP2) / (arma::norm(camSpaceP1) * arma::norm(camSpaceP2)));
     }
 
-    inline double widthBasedDistanceToCircle(const double& circleDiameter, const arma::vec2& s1, const arma::vec2& s2, const double& camFocalLengthPixels){
+    inline double widthBasedDistanceToCircle(const double& radius, const arma::vec2& s1, const arma::vec2& s2, const double& camFocalLengthPixels){
         double parallaxAngle = getParallaxAngle(s1, s2, camFocalLengthPixels);
-        double correctionForClosenessEffect = 0.5 * circleDiameter * std::cos((M_PI - parallaxAngle) / 2.0);
+        double correctionForClosenessEffect = radius * std::sin(parallaxAngle / 2.0);
 
-        return (circleDiameter / 2) / std::tan(parallaxAngle / 2) + correctionForClosenessEffect;
+        return radius / std::tan(parallaxAngle / 2.0) + correctionForClosenessEffect;
     }
 
     /*! @param separation - Known distance between points in camera space
@@ -194,7 +194,7 @@ namespace vision {
         //Assume facing forward st x>0 (which is fine for screen angular)
         x = 1 / std::sqrt(denominator_sqr);
         y = x * tanTheta;
-        z = x * tanPhi;        
+        z = x * tanPhi;
 
         return {x,y,z};
     }

@@ -247,7 +247,7 @@ namespace vision {
                 arma::vec2 ballCentreScreen = projectCamSpaceToScreen(ballCentreRay, cam.focalLengthPixels);
 
                 // Get our width based distance to the ball
-                double widthDistance = widthBasedDistanceToCircle(field->ball_radius * 2, top, base, cam.focalLengthPixels);
+                double widthDistance = widthBasedDistanceToCircle(field->ball_radius, top, base, cam.focalLengthPixels);
                 arma::vec3 cameraPosition = sensors.orientationCamToGround.submat(0,3,2,3);
                 arma::vec3 ballCentreGroundWidth = widthDistance * sensors.orientationCamToGround.submat(0,0,2,2) * ballCentreRay + cameraPosition;
                 double ballCentreGroundWidthDistance = arma::norm(ballCentreGroundWidth);
