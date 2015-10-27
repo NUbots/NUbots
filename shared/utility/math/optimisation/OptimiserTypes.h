@@ -23,7 +23,6 @@
 #include <armadillo>
 #include <cmath>
 
-
 namespace utility {
     namespace math {
         namespace optimisation {
@@ -32,7 +31,7 @@ namespace utility {
                 arma::vec estimate;
                 arma::mat covmat;
             };
-        
+
             struct OptimiserParams {
                 OptimiserEstimate startParams;
                 arma::vec upperBound;
@@ -44,6 +43,4 @@ namespace utility {
     }
 }
 
-
 #endif // UTILITY_MATH_OPTIMISER_H
-

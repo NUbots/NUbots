@@ -28,68 +28,65 @@ namespace utility {
     namespace math {
         namespace optimisation {
             class GaussianSampler {
-                private:
-                    uint64_t batchSize;
-                    uint64_t sampleCount = 0;
-                    int64_t generationID = -1;
-                    arma::vec upperBound;
-                    arma::vec lowerBound;
-                    arma::mat samples;
-                public:
-                    GaussianSampler(const OptimiserParams& params): 
-                                    upperBound(params.upperBound), 
-                                    lowerBound(params.lowerBound),
-                                    batchSize(params.batchSize),
-                                    generationID(params.startParams.generationID) {
-                        ;
-                    }
-                    
-                    void clear() {
-                        generationID = -1;
-                    }
-                    
-                    arma::mat getSamples(OptimiserEstimate& bestParams, uint64_t numSamples) {
-                        //note: bestParams.covmat is possibly mutable in this step, do not const it!
-                        if (bestParams.generationID != generationID || sampleCount+numSamples > batchSize) {
-                            
-                            //generate initial data
-                            arma::vec weights = arma::diagvec(bestParams.covmat);
-                            samples = arma::randn(bestParams.estimate.n_elem,batchSize);
-                            samples.each_col() %= weights;
-                            samples.each_col() += bestParams.estimate;
-                            
-                            
-                            //out of bounds check
-                            if (lowerBound.n_elem > 0 and upperBound.n_elem > 0) {
-                                arma::uvec outOfBounds = arma::sum(samples > arma::repmat(upperBound,samples.n_cols,1),1);
-                                outOfBounds += arma::sum(samples < arma::repmat(lowerBound,samples.n_cols,1),1);
-                                samples = samples.rows(arma::find(outOfBounds == 0));
-                                
-                                while (samples.n_rows < batchSize) {
-                                    arma::mat samples2 = arma::randn(bestParams.estimate.n_elem,batchSize);
-                                    samples2.each_col() %= weights;
-                                    samples2.each_col() += bestParams.estimate;
-                                    
-                                    outOfBounds = arma::sum(samples2 > arma::repmat(upperBound,samples2.n_cols,1),1);
-                                    outOfBounds += arma::sum(samples2 < arma::repmat(lowerBound,samples2.n_cols,1),1);
-                                    samples2 = samples2.rows(arma::find(outOfBounds == 0));
-                                    
-                                    samples = join_rows(samples,samples2);
-                                }
-                                
-                                if (samples >= batchSize) {
-                                    samples = samples.rows(0,batchSize-1);
-                                }
+            private:
+                uint64_t batchSize;
+                uint64_t sampleCount = 0;
+                int64_t generationID = -1;
+                arma::vec upperBound;
+                arma::vec lowerBound;
+                arma::mat samples;
+            public:
+                GaussianSampler(const OptimiserParams& params):
+                                upperBound(params.upperBound),
+                                lowerBound(params.lowerBound),
+                                batchSize(params.batchSize),
+                                generationID(params.startParams.generationID) {}
+
+                void clear() {
+                    generationID = -1;
+                }
+
+                arma::mat getSamples(OptimiserEstimate& bestParams, uint64_t numSamples) {
+                    //note: bestParams.covmat is possibly mutable in this step, do not const it!
+                    if (bestParams.generationID != generationID || sampleCount+numSamples > batchSize) {
+
+                        //generate initial data
+                        arma::vec weights = arma::diagvec(bestParams.covmat);
+                        samples = arma::randn(bestParams.estimate.n_elem,batchSize);
+                        samples.each_col() %= weights;
+                        samples.each_col() += bestParams.estimate;
+
+
+                        //out of bounds check
+                        if (lowerBound.n_elem > 0 and upperBound.n_elem > 0) {
+                            arma::uvec outOfBounds = arma::sum(samples > arma::repmat(upperBound,samples.n_cols,1),1);
+                            outOfBounds += arma::sum(samples < arma::repmat(lowerBound,samples.n_cols,1),1);
+                            samples = samples.rows(arma::find(outOfBounds == 0));
+
+                            while (samples.n_rows < batchSize) {
+                                arma::mat samples2 = arma::randn(bestParams.estimate.n_elem,batchSize);
+                                samples2.each_col() %= weights;
+                                samples2.each_col() += bestParams.estimate;
+
+                                outOfBounds = arma::sum(samples2 > arma::repmat(upperBound,samples2.n_cols,1),1);
+                                outOfBounds += arma::sum(samples2 < arma::repmat(lowerBound,samples2.n_cols,1),1);
+                                samples2 = samples2.rows(arma::find(outOfBounds == 0));
+
+                                samples = join_rows(samples,samples2);
                             }
-                            
-                            //reset required variables
-                            sampleCount = 0;
-                            bestParams.covmat = arma::diagmat(weights);
+
+                            if (samples.n_elem >= batchSize) {
+                                samples = samples.rows(0,batchSize-1);
+                            }
                         }
-                        sampleCount += numSamples;
-                        return samples.cols(sampleCount-numSamples,sampleCount-1);
+
+                        //reset required variables
+                        sampleCount = 0;
+                        bestParams.covmat = arma::diagmat(weights);
                     }
-                
+                    sampleCount += numSamples;
+                    return samples.cols(sampleCount-numSamples,sampleCount-1);
+                }
             };
         }
     }

@@ -27,43 +27,42 @@
 namespace utility {
     namespace math {
         namespace optimisation {
-            
+
             template<typename OriginalSampler>
             class MirroredSampler {
-                private:
-                    uint64_t batchSize;
-                    uint64_t sampleCount = 0;
-                    int64_t generationID = -1;
-                    arma::mat samples;
-                    OriginalSampler sampler;
-                public:
-                    MirroredSampler(const OptimiserParams& params):
-                                    batchSize(params.batchSize),
-                                    generationID(params.startParams.generationID) { {
-                        auto params2 = params;
-                        params2.batchSize = (params.batchSize+1)/2;
-                        sampler(params2);
-                    }
-                    
-                    void clear() {
-                        generationID = -1;
-                    }
-                    
-                    arma::mat getSamples(OptimiserEstimate& bestParams, uint64_t numSamples) {
-                        //note: bestParams.covmat is possibly mutable in this step, do not const or copy it!
-                        if (bestParams.generationID != generationID || sampleCount+numSamples > batchSize) {
-                            samples = sampler.getSamples(bestParams,(batchSize+1)/2);
-                            samples = join_rows(samples,-samples);
-                            
-                            //XXX: rearrange samples to be better for robot rollouts!
+            private:
+                uint64_t batchSize;
+                uint64_t sampleCount = 0;
+                int64_t generationID = -1;
+                arma::mat samples;
+                OriginalSampler sampler;
+            public:
+                MirroredSampler(const OptimiserParams& params):
+                                batchSize(params.batchSize),
+                                generationID(params.startParams.generationID) {
+                    auto params2 = params;
+                    params2.batchSize = (params.batchSize+1)/2;
+                    sampler(params2);
+                }
 
-                            //reset required variables
-                            sampleCount = 0;
-                        }
-                        sampleCount += numSamples;
-                        return samples.cols(sampleCount-numSamples,sampleCount-1);
+                void clear() {
+                    generationID = -1;
+                }
+
+                arma::mat getSamples(OptimiserEstimate& bestParams, uint64_t numSamples) {
+                    //note: bestParams.covmat is possibly mutable in this step, do not const or copy it!
+                    if (bestParams.generationID != generationID || sampleCount+numSamples > batchSize) {
+                        samples = sampler.getSamples(bestParams,(batchSize+1)/2);
+                        samples = join_rows(samples,-samples);
+
+                        //XXX: rearrange samples to be better for robot rollouts!
+
+                        //reset required variables
+                        sampleCount = 0;
                     }
-                
+                    sampleCount += numSamples;
+                    return samples.cols(sampleCount-numSamples,sampleCount-1);
+                }
             };
         }
     }

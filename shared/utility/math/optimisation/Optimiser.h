@@ -23,7 +23,6 @@
 #include <armadillo>
 #include <cmath>
 
-
 #include "OptimiserTypes.h"
 
 #include "GaussianSampler.h"
