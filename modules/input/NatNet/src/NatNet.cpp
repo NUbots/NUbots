@@ -19,6 +19,7 @@
 
 #include "NatNet.h"
 #include "Parse.h"
+#include <format.h>
 
 #include "messages/support/Configuration.h"
 
@@ -350,17 +351,23 @@ namespace input {
 
         // Make our app version a string (removing trailing 0 version numbers)
         std::string strAppVersion = std::to_string(int(appVersion[0]))
-                            + (appVersion[1] == 0 ? "" : "." + std::to_string(int(appVersion[1])))
-                            + (appVersion[2] == 0 ? "" : "." + std::to_string(int(appVersion[2])))
-                            + (appVersion[3] == 0 ? "" : "." + std::to_string(int(appVersion[3])));
+                            + (appVersion[1] == 0 ? "" : "." + std::to_string(appVersion[1]))
+                            + (appVersion[2] == 0 ? "" : "." + std::to_string(appVersion[2]))
+                            + (appVersion[3] == 0 ? "" : "." + std::to_string(appVersion[3]));
 
         // Make our natNetVersion a string
-        std::string strNatVersion = std::to_string(int(natNetVersion[0]))
-                            + (natNetVersion[1] == 0 ? "" : "." + std::to_string(int(natNetVersion[1])))
-                            + (natNetVersion[2] == 0 ? "" : "." + std::to_string(int(natNetVersion[2])))
-                            + (natNetVersion[3] == 0 ? "" : "." + std::to_string(int(natNetVersion[3])));
+        std::string strNatVersion = std::to_string(natNetVersion[0])
+                            + (natNetVersion[1] == 0 ? "" : "." + std::to_string(natNetVersion[1]))
+                            + (natNetVersion[2] == 0 ? "" : "." + std::to_string(natNetVersion[2]))
+                            + (natNetVersion[3] == 0 ? "" : "." + std::to_string(natNetVersion[3]));
 
-        log<NUClear::INFO>("Connected to", name, strAppVersion, "over NatNet", strNatVersion);
+        // Make our remote into an IP
+        std::string strRemote = std::to_string((remote >> 24) & 0xFF) + "."
+                              + std::to_string((remote >> 16) & 0xFF) + "."
+                              + std::to_string((remote >>  8) & 0xFF) + "."
+                              + std::to_string((remote >>  0) & 0xFF);
+
+        log<NUClear::INFO>(fmt::format("Connected to {} ({} {}) over NatNet {}", strRemote, name, strAppVersion, strNatVersion));
 
         // Request model definitions on startup
         sendCommand(Packet::Type::REQUEST_MODEL_DEFINITIONS);
