@@ -127,7 +127,15 @@ namespace input {
         mocap->markerSets = ReadData<std::vector<MotionCapture::MarkerSet>>::read(ptr, version);
 
         // Read the free floating markers
-        mocap->markers = ReadData<std::vector<MotionCapture::Marker>>::read(ptr, version);
+        auto freeMarkers = ReadData<std::vector<arma::fvec3>>::read(ptr, version);
+        // Build markers
+        for (auto position : freeMarkers) {
+            MotionCapture::Marker marker;
+            marker.position = position;
+            marker.id = -1;
+            marker.size = -1;
+            mocap->markers.push_back(marker);
+        }
 
         // Read the Rigid Bodies
         mocap->rigidBodies = ReadData<std::vector<MotionCapture::RigidBody>>::read(ptr, version);
@@ -194,13 +202,17 @@ namespace input {
             // We have a model
             if(model != rigidBodyModels.end()) {
 
+                rigidBody.name = model->second.name;
+                rigidBody.offset = model->second.offset;
+
                 auto parent = std::find_if(mocap->rigidBodies.begin(), mocap->rigidBodies.end(), [model] (const MotionCapture::RigidBody& rb) {
                     return rb.id == model->second.id;
                 });
 
-                rigidBody.name = model->second.name;
-                rigidBody.parent = parent == mocap->rigidBodies.end() ? nullptr : &*parent;
-                rigidBody.offset = model->second.offset;
+                // Get a pointer to our parent if it exists and is not us
+                rigidBody.parent = parent->id == rigidBody.id         ? nullptr
+                                 : parent == mocap->rigidBodies.end() ? nullptr
+                                 : &*parent;
             }
             // We need to update our models
             else {
@@ -234,13 +246,16 @@ namespace input {
                     // We have a model for this bone
                     if (boneModel != model->second.boneModels.end()) {
 
+                        bone.name = boneModel->second.name;
+                        bone.offset = boneModel->second.offset;
+
                         auto parent = std::find_if(skeleton.bones.begin(), skeleton.bones.end(), [boneModel] (const MotionCapture::RigidBody& rb) {
                             return rb.id == boneModel->second.id;
                         });
 
-                        bone.name = boneModel->second.name;
-                        bone.parent = parent == skeleton.bones.end() ? nullptr : &*parent;
-                        bone.offset = boneModel->second.offset;
+                        bone.parent = parent->id == bone.id          ? nullptr
+                                    : parent == skeleton.bones.end() ? nullptr
+                                    : &*parent;
                     }
                     // We need to update our models
                     else {
@@ -327,24 +342,23 @@ namespace input {
 
         // Update our version number
         version = (natNetVersion[0] << 24)
-                | (natNetVersion[0] << 16)
-                | (natNetVersion[0] << 8)
-                | (natNetVersion[0] << 0);
+                | (natNetVersion[1] << 16)
+                | (natNetVersion[2] << 8)
+                | (natNetVersion[3] << 0);
 
-        // Make our app version a string
+        // Make our app version a string (removing trailing 0 version numbers)
         std::string strAppVersion = std::to_string(int(appVersion[0]))
-                            + "." + std::to_string(int(appVersion[1]))
-                            + "." + std::to_string(int(appVersion[2]))
-                            + "." + std::to_string(int(appVersion[3]));
+                            + (appVersion[1] == 0 ? "" : "." + std::to_string(int(appVersion[1])))
+                            + (appVersion[2] == 0 ? "" : "." + std::to_string(int(appVersion[2])))
+                            + (appVersion[3] == 0 ? "" : "." + std::to_string(int(appVersion[3])));
 
         // Make our natNetVersion a string
         std::string strNatVersion = std::to_string(int(natNetVersion[0]))
-                            + "." + std::to_string(int(natNetVersion[1]))
-                            + "." + std::to_string(int(natNetVersion[2]))
-                            + "." + std::to_string(int(natNetVersion[3]));
+                            + (natNetVersion[1] == 0 ? "" : "." + std::to_string(int(natNetVersion[1])))
+                            + (natNetVersion[2] == 0 ? "" : "." + std::to_string(int(natNetVersion[2])))
+                            + (natNetVersion[3] == 0 ? "" : "." + std::to_string(int(natNetVersion[3])));
 
-        log<NUClear::INFO>("Connected to", name, strAppVersion);
-        log<NUClear::INFO>("NatNet version", strNatVersion);
+        log<NUClear::INFO>("Connected to", name, strAppVersion, "over NatNet", strNatVersion);
 
         // Request model definitions
         sendCommand(Packet::Type::REQUEST_MODEL_DEFINITIONS);
