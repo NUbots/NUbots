@@ -10,16 +10,16 @@ node nubotsvm {
   class {'dev_tools': }
 
   # Get and install our toolchain
-  $toolchain_version = '1.0.9'
+  $toolchain_version = '1.1.0'
   wget::fetch { 'nubots_deb':
-    destination => "/tmp/nubots-toolchain${toolchain_version}.deb",
+    destination => "/root/nubots-toolchain${toolchain_version}.deb",
     source => "http://nubots.net/debs/nubots-toolchain${toolchain_version}.deb",
     timeout => 0,
   }
-  ~> package { 'nubots-toolchain':
+  -> package { 'nubots-toolchain':
     provider => 'dpkg',
     ensure => 'latest',
-    source => "/tmp/nubots-toolchain${toolchain_version}.deb",
+    source => "/root/nubots-toolchain${toolchain_version}.deb",
   }
 }
 
@@ -46,6 +46,7 @@ node nubotsvmbuild {
                                 environment => ['TARGET=YONAH', 'USE_THREAD=1', 'BINARY=32', 'NUM_THREADS=2'], }
   installer { 'armadillo':      url => 'https://downloads.sourceforge.net/project/arma/armadillo-6.100.0.tar.gz',
                                 method => 'cmake',
+                                creates => '/nubots/toolchain/lib/libarmadillo.so',
                                 require => Installer['openblas'], }
   installer { 'tcmalloc':       url => 'https://github.com/gperftools/gperftools/releases/download/gperftools-2.4/gperftools-2.4.tar.gz',
                                 args => '--with-tcmalloc-pagesize=64 --enable-minimal',
