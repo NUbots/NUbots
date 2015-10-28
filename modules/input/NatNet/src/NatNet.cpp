@@ -296,6 +296,8 @@ namespace input {
 
     void NatNet::processModel(const Packet& packet) {
 
+        log<NUClear::INFO>("Updating model definitions");
+
         // Our pointer as we move through the data
         const char* ptr = &packet.data;
 
@@ -360,7 +362,7 @@ namespace input {
 
         log<NUClear::INFO>("Connected to", name, strAppVersion, "over NatNet", strNatVersion);
 
-        // Request model definitions
+        // Request model definitions on startup
         sendCommand(Packet::Type::REQUEST_MODEL_DEFINITIONS);
     }
 
