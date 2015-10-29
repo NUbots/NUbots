@@ -22,6 +22,7 @@
 
 #include <nuclear>
 #include <armadillo>
+#include <mutex>
 
 #include "messages/platform/darwin/DarwinSensors.h"
 
@@ -38,12 +39,15 @@ namespace darwin {
     class HardwareSimulator : public NUClear::Reactor {
     private:
         messages::platform::darwin::DarwinSensors sensors;
+
         std::queue<messages::platform::darwin::DarwinSensors::Gyroscope> gyroQueue;
-        float imu_drift_rate;
+        std::mutex gyroQueueMutex;
+
+        float imu_drift_rate = 0;
         static constexpr size_t UPDATE_FREQUENCY = 90;
         void addNoise(std::unique_ptr<messages::platform::darwin::DarwinSensors>& sensors);
         struct NoiseConfig{
-            struct Vec3Noise{
+            struct Vec3Noise {
                 float x = 0.001;
                 float y = 0.001;
                 float z = 0.001;
@@ -51,8 +55,8 @@ namespace darwin {
             Vec3Noise accelerometer;
             Vec3Noise gyroscope;
         } noise;
-        double bodyTilt;
-        arma::vec3 integrated_gyroscope;
+        double bodyTilt = 0;
+        arma::vec3 integrated_gyroscope = {0, 0, 0};
         void setRightFootDown();
         void setLeftFootDown();
         void setBothFeetDown();
@@ -64,4 +68,3 @@ namespace darwin {
 }
 }
 #endif
-
