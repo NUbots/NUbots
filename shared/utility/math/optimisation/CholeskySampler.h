@@ -51,7 +51,7 @@ namespace utility {
 
                 arma::mat getSamples(const OptimiserEstimate& bestParams, uint64_t numSamples) {
                     if (bestParams.generationID != generationID || sampleCount+numSamples > batchSize) {
-                        projection = arma::chol(bestParams.covmat);
+                        arma::mat projection = arma::chol(bestParams.covmat);
                         samples = (arma::randn(bestParams.estimate.n_elem,batchSize) * projection).t();
                         samples.each_col() += bestParams.estimate;
 
@@ -63,7 +63,7 @@ namespace utility {
 
                             while (samples.n_rows < batchSize) {
                                 arma::mat samples2 = arma::randn(bestParams.estimate.n_elem,batchSize);
-                                samples2 = (sampler.getSamples(bestParams2,batchSize) * projection).t();
+                                samples2 = (arma::randn(bestParams.estimate.n_elem,batchSize) * projection).t();
                                 samples2.each_col() += bestParams.estimate;
 
                                 outOfBounds = arma::sum(samples2 > arma::repmat(upperBound,samples2.n_cols,1),1);
@@ -73,7 +73,7 @@ namespace utility {
                                 samples = join_rows(samples,samples2);
                             }
 
-                            if (samples >= batchSize) {
+                            if (samples.n_cols >= batchSize) {
                                 samples = samples.rows(0,batchSize-1);
                             }
                         }

@@ -70,7 +70,7 @@ namespace utility {
                     s2.each_col() -= bestEstimate;
                     arma::mat covmat = s2 * s2.t();
                     
-                    return {previousEstimate.generationID+1, bestEstimate, covmat};
+                    return {previousEstimate.generationID+1, bestEstimate, previousEstimate.covmat};
                 }
             };
 

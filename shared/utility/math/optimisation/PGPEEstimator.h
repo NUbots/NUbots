@@ -89,7 +89,7 @@ namespace utility {
                     bestEstimate += update;
                     covEstimate += updateCov;
                     
-                    return {previousEstimate.generationID+1, bestEstimate, diagmat(covEstimate)};
+                    return {previousEstimate.generationID+1, bestEstimate, arma::mat(diagmat(covEstimate))};
                 }
             };
 
