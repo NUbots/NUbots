@@ -100,14 +100,25 @@ namespace optimisation {
             if (el != optimisations.end()) {
                 auto& opt = el->second;
 
-                if(opt.optimiser->estimate().generation < estimate.generation()) {
-                    // TODO This is a new estimate, use this
-                    // TODO also save this best estimate in the config
-                    // TODO also check if we have any episodes that are valid and not in this episodes data
-                }
-                else if (opt.optimiser->estimate().generation == estimate.generation()) {
-                    // TODO This is the same as our existing generation
-                    // TODO Find some arbritrary way to work out which is better
+                // If we are doing a network optimisation
+                if (opt.network) {
+
+                    bool updated = false;
+                    if(opt.optimiser->estimate().generation < estimate.generation()) {
+                        bool updated = true;
+                        // TODO This is a new estimate, use this
+                        // TODO also check if we have any episodes that are valid and not in this episodes data
+                        // TODO also save this best estimate in the config
+                    }
+                    else if (opt.optimiser->estimate().generation == estimate.generation()) {
+                        // TODO This is the same as our existing generation
+                        // TODO Find some arbritrary way to work out which is better
+                    }
+
+                    // If we updated, save our estimate in the config
+                    if(updated) {
+                        // TODO save our current config
+                    }
                 }
             }
             else {
@@ -122,15 +133,39 @@ namespace optimisation {
             // If we have this optimisation
             auto el = optimisations.find(episode.group());
             if (el != optimisations.end()) {
-                // Check if this episode is relevant for us
+                auto& opt = el->second;
 
-                // Check if this episode is valid for our current best estimate (optimiser is network, epoch is correct, value is in range)
+                // If this optimiser works on the network
+                if (opt.network) {
 
-                // If so add it to our list of episodes
-                // Also save our optimisation state again
+                    // If we don't already have this episode and it is valid for our optimiser
+                    if(opt.episodes.find(episode) == opt.episodes.end()
+                       && opt.optimiser->validSample(episode)) {
 
-                // If we have reached our batch limit, update our estimate
-                // and emit our new best estimate result over the network
+                        opt.episodes.push_back(episode);
+                        if (opt.episodes.size() == opt.batchSize) {
+
+                            arma::vec fitnesses(opt.episodes.size())
+                            arma::mat samples(opt.episodes.size(), opt.optimiser.estimate().estimate.n_rows);
+
+                            for (uint i = 0; i < opt.episodes.size(); ++i) {
+                                fitnesses[i] = opt.episodes[i].fitness();
+
+                                // TODO Fill in the matrix row
+                            }
+
+                            // Update our optimiser
+                            auto result = opt.optimiser.updateEstimate(samples, fitnesses);
+
+                            // Clear our episodes list
+                            opt.episodes.clear()
+
+                            // Emit our new best estimate over the network
+                        }
+
+                        // TODO Save our optimisation state to the config file
+                    }
+                }
             }
         });
 
@@ -139,11 +174,30 @@ namespace optimisation {
             // If we have this optimisation
             auto el = optimisations.find(episode.group());
             if (el != optimisations.end()) {
-                //     // Check if this episode is valid for our current best estimate
+                auto& opt = el->second;
 
-                //     // If so add it to our list of episodes
-                //     //      If we have reached our batch limit, update our best estimate and emit the new best estimate over the network
-                //     //      Else emit this episode over the network
+                // If this episode is valid for our optimiser
+                if(opt.optimiser->validSample(episode)) {
+
+                    opt.episodes.push_back(episode);
+
+                    if (opt.episodes.size() == opt.batchSize) {
+                        // Update our optimiser
+
+                        // Clear our episodes list
+
+                        if (opt.network) {
+                            // Emit our new best estimate over the network
+                        }
+                    }
+                    // If we are networked send out this episode
+                    else if (opt.network) {
+                        auto e = std::make_unique<Episode>(episode);
+                        emit<Scope::NETWORK>(e, "", true);
+                    }
+
+                    // TODO Save our optimisation state to the config file
+                }
             }
             else {
                 // If we don't have an optimiser for this, this is an error
@@ -160,11 +214,14 @@ namespace optimisation {
 
                 optimisations[optimisation.group] = Optimisation {
                     optimisation.network,
+                    optimisation.batchSize,
                     std::make_unique<PGAOptimiser>(optimisation.params),
                     std::vector<Episode>()
                 };
             }
             else {
+                // TODO this may already have been loaded via either the config file, or the network
+
                 // Check if the size of the vectors are the same
                 // If they are not, log an error here saying that another
                 // Optimisation with the same name was already registered

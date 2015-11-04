@@ -36,7 +36,7 @@ namespace utility {
                 OptimiserEstimate initial;
                 arma::vec upperBound;
                 arma::vec lowerBound;
-                uint64_t batchSize;
+                uint batchSize;
                 //TODO: add extra params!
             };
         }
