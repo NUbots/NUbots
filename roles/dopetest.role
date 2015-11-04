@@ -5,17 +5,11 @@ ADD_ROLE(
     support::extension::FileWatcher
     support::configuration::GlobalConfig
     support::DisplayTest
-    #platform::darwin::HardwareIO
-    #platform::darwin::SensorFilter
-    #input::LinuxCamera
+
     support::configuration::NetworkConfiguration
     support::NUbugger
     debug::NUbugger
+
     debug::optimisation::TestDOpE
     support::optimisation::DOpE
-
-    vision::LUTClassifier
-    #vision::FeatureDetector
-
-    support::configuration::SoccerConfig
 )

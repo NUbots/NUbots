@@ -19,6 +19,22 @@
 
 package messages;
 
+message vec {
+    repeated double v = 1;
+}
+
+message fvec {
+    repeated float v = 1;
+}
+
+message ivec {
+    repeated int32 v = 1;
+}
+
+message uvec {
+    repeated uint32 v = 1;
+}
+
 message vec2 {
     required double x = 1;
     required double y = 2;

@@ -38,6 +38,8 @@ namespace utility {
         namespace optimisation {
 
             class Optimiser {
+            public:
+                virtual OptimiserEstimate estimate() = 0;
                 virtual OptimiserEstimate updateEstimate(arma::mat samples, arma::vec fitnesses) = 0;
                 virtual arma::mat getSamples(const uint& numSamples = 7) = 0;
                 virtual void reset() = 0;
@@ -80,6 +82,10 @@ namespace utility {
                 virtual OptimiserEstimate updateEstimate(arma::mat samples, arma::vec fitnesses) {
 
                     currentValues = estimator.updateEstimate(samples,fitnesses,currentValues);
+                    return currentValues;
+                }
+
+                virtual OptimiserEstimate estimate() {
                     return currentValues;
                 }
 

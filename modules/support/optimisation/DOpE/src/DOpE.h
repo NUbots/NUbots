@@ -24,7 +24,7 @@
 
 #include "messages/support/optimisation/DOpE.h"
 #include "utility/math/optimisation/Optimiser.h"
-#include "messages/support/optimisation/proto/Episode.pb.h"
+#include "messages/support/optimisation/Episode.pb.h"
 
 namespace modules {
 namespace support {
@@ -35,7 +35,7 @@ namespace optimisation {
         struct Optimisation {
             bool network;
             std::unique_ptr<utility::math::optimisation::Optimiser> optimiser;
-            std::vector<messages::support::optimisation::proto::Episode> episodes;
+            std::vector<messages::support::optimisation::Episode> episodes;
         };
 
         std::map<std::string, Optimisation> optimisations;

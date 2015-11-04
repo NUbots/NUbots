@@ -24,7 +24,8 @@
 
 #include "messages/support/Configuration.h"
 #include "messages/support/optimisation/DOpE.h"
-#include "messages/support/optimisation/proto/Episode.pb.h"
+#include "messages/support/optimisation/Episode.pb.h"
+#include "messages/support/optimisation/Estimate.pb.h"
 
 namespace modules {
 namespace support {
@@ -35,23 +36,10 @@ namespace optimisation {
     using utility::math::optimisation::Optimiser;
     using utility::math::optimisation::PGAOptimiser;
     using messages::support::Configuration;
-    using messages::support::optimisation::proto::Episode;
+    using messages::support::optimisation::Episode;
+    using messages::support::optimisation::Estimate;
     using messages::support::optimisation::RequestParameters;
     using messages::support::optimisation::RegisterOptimisation;
-
-    // struct Optimisation {
-    //     struct Trial {
-    //         arma::vec value;
-    //         double fitness
-    //     };
-
-    //     bool network;
-    //     std::string name;
-    //     Trial best;
-    //     std::vector<Trial> trials;
-    //     int batchSize;
-    // };
-
 
     DOpE::DOpE(std::unique_ptr<NUClear::Environment> environment)
     : Reactor(std::move(environment)) {
@@ -63,65 +51,109 @@ namespace optimisation {
             // TODO load any optimisations that are currently in the config file (saved/in progress)
         });
 
-        on<Trigger<NetworkJoin>>().then([this] (const NetworkJoin& joiner) {
+        on<Trigger<NetworkJoin>>().then("Distrubute Initial Optimisation", [this] (const NetworkJoin& joiner) {
 
-            log(fmt::format("{} ({})", joiner.name, joiner.udpPort));
+            log<NUClear::INFO>(fmt::format("{} ({}) joined the optimisation network", joiner.name, joiner.udpPort));
 
             for (auto& op : optimisations) {
                 // If this is a network optimisation
                 if(op.second.network) {
+                    // Get the current state for this
+                    auto current = op.second.optimiser->estimate();
+                    auto e = std::make_unique<Estimate>();
+
+                    // Set our group
+                    e->set_group(op.first);
+
+                    // Add our generation
+                    e->set_generation(current.generation);
+
+                    // Add our values
+                    for (uint i = 0; i < current.estimate.n_elem; ++i) {
+                        e->mutable_values()->add_v(current.estimate[i]);
+                    }
+
+                    // Add our covariance
+                    for (uint y = 0; y < current.covariance.n_cols; ++y) {
+                        auto row = e->mutable_covariance()->add_v();
+                        for (uint x = 0; x < current.covariance.n_rows; ++x) {
+                            row->add_v(current.covariance(x, y));
+                        }
+                    }
+
+                    // Add our episodes
+                    for (auto& episode : op.second.episodes) {
+                        *e->add_episode() = episode;
+                    }
+
                     // Send it to the remote
+                    emit<Scope::NETWORK>(e, joiner.name, true);
                 }
             }
-
-        //     auto currentState = std::make_unique<BestEpisode>();
-
-        //     // currentState->generation = ;
-        //     // currentState->best = ;
-
-        //     // make a message containing the current best episode
-        //     // and a list of current episodes
-        //     // current episode is not needed
-
-        //     // Emit the current state reliably to the newbie
-        //     emit<Scope::NETWORK>(currentState, joiner.name, true);
         });
 
-        // on<Network<BestEpisode>>().then([this] (const BestEpisode& episode) {
+        on<Network<Estimate>>().then("Network Estimate", [this] (const NetworkSource& src, const Estimate& estimate) {
 
-        //     // If this optimisation is operating on the network
-        //     // If the new best estimates generation is higher,
-        //     // or we use a cryptographic hash to pick one randomly (but consistently across the network)
-        //     if (episode.generation() > optimisers[episode.name()].bestEpisode.generation()
-        //         || cryptographicHash(episode) > cryptographicHash(optimisers[episode.name()].bestEpisode)) {
-        //         // TODO we use this new best estimate as our estimate
+            log<NUClear::INFO>(fmt::format("Estimate {} gen {} received from {}", estimate.group(), estimate.generation(), src.name));
 
-        //         // TODO go through our optimisers episodes
-        //         // If they are not valid for this new optimiser remove them from the list
-        //     }
-        // });
+            auto el = optimisations.find(estimate.group());
+            if (el != optimisations.end()) {
+                auto& opt = el->second;
 
-        on<Network<Episode>>().then([this] (const Episode& episode) {
-        //     // Check if this episode is valid for our current best estimate (optimiser is network, epoch is correct, value is in range)
-
-        //     // If so add it to our list of episodes
-
-        //     // If we have reached our batch limit, update our estimate
-        //     // and emit our new best estimate result over the network
+                if(opt.optimiser->estimate().generation < estimate.generation()) {
+                    // TODO This is a new estimate, use this
+                    // TODO also save this best estimate in the config
+                    // TODO also check if we have any episodes that are valid and not in this episodes data
+                }
+                else if (opt.optimiser->estimate().generation == estimate.generation()) {
+                    // TODO This is the same as our existing generation
+                    // TODO Find some arbritrary way to work out which is better
+                }
+            }
+            else {
+                // TODO should we add this? or ignore it?
+            }
         });
 
-        on<Trigger<Episode>>().then([this] (const Episode& episode) {
-        //     // Check if this episode is valid for our current best estimate
+        on<Network<Episode>>().then("Network Episode", [this] (const NetworkSource& src, const Episode& episode) {
 
-        //     // If so add it to our list of episodes
-        //     //      If we have reached our batch limit, update our best estimate and emit the new best estimate over the network
-        //     //      Else emit this episode over the network
+            log<NUClear::INFO>(fmt::format("Episode for {} gen {} received from {}", episode.group(), episode.generation(), src.name));
+
+            // If we have this optimisation
+            auto el = optimisations.find(episode.group());
+            if (el != optimisations.end()) {
+                // Check if this episode is relevant for us
+
+                // Check if this episode is valid for our current best estimate (optimiser is network, epoch is correct, value is in range)
+
+                // If so add it to our list of episodes
+                // Also save our optimisation state again
+
+                // If we have reached our batch limit, update our estimate
+                // and emit our new best estimate result over the network
+            }
         });
 
-        on<Trigger<RegisterOptimisation>>().then([this] (const RegisterOptimisation& optimisation) {
+        on<Trigger<Episode>>().then("Local Episode", [this] (const Episode& episode) {
+
+            // If we have this optimisation
+            auto el = optimisations.find(episode.group());
+            if (el != optimisations.end()) {
+                //     // Check if this episode is valid for our current best estimate
+
+                //     // If so add it to our list of episodes
+                //     //      If we have reached our batch limit, update our best estimate and emit the new best estimate over the network
+                //     //      Else emit this episode over the network
+            }
+            else {
+                // If we don't have an optimiser for this, this is an error
+                log<NUClear::ERROR>(fmt::format("Episode for {} gen {} generated for unregistered optimisation", episode.group(), episode.generation()));
+            }
+        });
+
+        on<Trigger<RegisterOptimisation>>().then("Register Optimisation", [this] (const RegisterOptimisation& optimisation) {
             // Add this optimisation to the list
             auto item = optimisations.find(optimisation.group);
-
             if (item == optimisations.end()) {
                 // Add this new optimisation
                 log("Adding a new optimisation for", optimisation.group);
@@ -138,17 +170,9 @@ namespace optimisation {
                 // Optimisation with the same name was already registered
                 log<NUClear::ERROR>("The optimisation,", optimisation.group, "was already registered as a different type");
             }
-
-        //     register {
-        //         std::string group;  // The group that this is a part of (a string identifier)
-        //         arma::vec values;   // The values that we are currently optimising with
-        //         arma::vec weights;  // The starting weights for this optimisation
-        //         bool network;       // If we should use the network for this optimisation
-        //         bool save;
-        //     }
         });
 
-        on<Trigger<RequestParameters>>().then([this] (const RequestParameters& request) {
+        on<Trigger<RequestParameters>>().then("Request Optimisation Parameters", [this] (const RequestParameters& request) {
 
         //     // Generate a list of paramters for this request type
         //     // Send them out

@@ -32,23 +32,23 @@ namespace utility {
             private:
                 uint64_t batchSize;
                 uint64_t sampleCount = 0;
-                int generationID = -1;
+                int generation = -1;
                 arma::vec upperBound;
                 arma::vec lowerBound;
                 arma::mat samples;
             public:
                 CholeskySampler(const OptimiserParameters& params)
                 : batchSize(params.batchSize)
-                , generationID(params.initial.generationID)
+                , generation(params.initial.generation)
                 , upperBound(params.upperBound)
                 , lowerBound(params.lowerBound) {}
 
                 void clear() {
-                    generationID = -1;
+                    generation = -1;
                 }
 
                 arma::mat getSamples(const OptimiserEstimate& bestParams, uint64_t numSamples) {
-                    if (bestParams.generationID != generationID || sampleCount+numSamples > batchSize) {
+                    if (bestParams.generation != generation || sampleCount+numSamples > batchSize) {
                         arma::mat projection = arma::chol(bestParams.covariance);
                         samples = (arma::randn(bestParams.estimate.n_elem,batchSize) * projection).t();
                         samples.each_col() += bestParams.estimate;

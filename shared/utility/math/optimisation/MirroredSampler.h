@@ -33,25 +33,25 @@ namespace utility {
             private:
                 uint64_t batchSize;
                 uint64_t sampleCount = 0;
-                int64_t generationID = -1;
+                int64_t generation = -1;
                 arma::mat samples;
                 OriginalSampler sampler;
             public:
                 MirroredSampler(const OptimiserParameters& params):
                                 batchSize(params.batchSize),
-                                generationID(params.initial.generationID) {
+                                generation(params.initial.generation) {
                     auto params2 = params;
                     params2.batchSize = (params.batchSize+1)/2;
                     sampler(params2);
                 }
 
                 void clear() {
-                    generationID = -1;
+                    generation = -1;
                 }
 
                 arma::mat getSamples(OptimiserEstimate& bestParams, uint64_t numSamples) {
                     //note: bestParams.covariance is possibly mutable in this step, do not const or copy it!
-                    if (bestParams.generationID != generationID || sampleCount+numSamples > batchSize) {
+                    if (bestParams.generation != generation || sampleCount+numSamples > batchSize) {
                         samples = sampler.getSamples(bestParams,(batchSize+1)/2);
                         samples = join_rows(samples,-samples);
 

@@ -17,19 +17,17 @@
  * Copyright 2013 NUBots <nubots@nubots.net>
  */
 
-package messages.support.optimisation.proto;
+package messages.support.optimisation;
+
+import "messages/Vector.proto";
 
 message Episode {
+    message Fitness {
+        required float fitness = 1;
+        required float weight = 2;
+    }
     required string group = 1;
-    required uint32 generation = 2;
-    repeated double values = 3;
-    repeated double fitness = 4;
-    repeated double fitness_weights = 5;
+    required int32 generation = 2;
+    required fvec values = 3;
+    repeated Fitness fitness = 4;
 }
-
-// message BestEpisode {
-//     vec values = 1;
-//     double fitness = 2;
-//     uint32 generation = 3;
-//     repeated Episode components;
-// }

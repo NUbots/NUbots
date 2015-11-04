@@ -27,7 +27,7 @@ namespace utility {
     namespace math {
         namespace optimisation {
             struct OptimiserEstimate {
-                int generationID;
+                int generation;
                 arma::vec estimate;
                 arma::mat covariance;
             };

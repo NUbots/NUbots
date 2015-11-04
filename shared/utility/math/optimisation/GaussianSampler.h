@@ -31,24 +31,24 @@ namespace utility {
             private:
                 uint64_t batchSize;
                 uint64_t sampleCount = 0;
-                int64_t generationID = -1;
+                int64_t generation = -1;
                 arma::vec upperBound;
                 arma::vec lowerBound;
                 arma::mat samples;
             public:
                 GaussianSampler(const OptimiserParameters& params)
                 : batchSize(params.batchSize)
-                , generationID(params.initial.generationID)
+                , generation(params.initial.generation)
                 , upperBound(params.upperBound)
                 , lowerBound(params.lowerBound) {}
 
                 void clear() {
-                    generationID = -1;
+                    generation = -1;
                 }
 
                 arma::mat getSamples(OptimiserEstimate& bestParams, uint64_t numSamples) {
                     //note: bestParams.covariance is possibly mutable in this step, do not const it!
-                    if (bestParams.generationID != generationID || sampleCount+numSamples > batchSize) {
+                    if (bestParams.generation != generation || sampleCount+numSamples > batchSize) {
 
                         //generate initial data
                         arma::vec weights = arma::diagvec(bestParams.covariance);

@@ -44,7 +44,7 @@ namespace optimisation {
         auto op = std::make_unique<RegisterOptimisation>();
         op->group = "test_dope";
         op->network = true;
-        op->params.initial.generationID = -1;
+        op->params.initial.generation = -1;
         op->params.initial.estimate = { 1, 2, 3 };
         op->params.initial.covariance = arma::diagmat(arma::vec({ 1, 2, 3 }));
         op->params.upperBound = { 10, 10, 10 };

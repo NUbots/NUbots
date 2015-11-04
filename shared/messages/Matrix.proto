@@ -21,6 +21,22 @@ package messages;
 
 import "messages/Vector.proto";
 
+message mat {
+    repeated vec v = 1;
+}
+
+message fmat {
+    repeated fvec v = 1;
+}
+
+message imat {
+    repeated ivec v = 1;
+}
+
+message umat {
+    repeated uvec v = 1;
+}
+
 message mat22 {
     required vec2 x = 1;
     required vec2 y = 2;
