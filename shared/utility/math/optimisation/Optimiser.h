@@ -38,7 +38,7 @@ namespace utility {
         namespace optimisation {
 
             class Optimiser {
-                virtual arma::vec updateEstimate(arma::mat samples, arma::vec fitnesses) = 0;
+                virtual OptimiserEstimate updateEstimate(arma::mat samples, arma::vec fitnesses) = 0;
                 virtual arma::mat getSamples(const uint& numSamples = 7) = 0;
                 virtual void reset() = 0;
             };
@@ -52,7 +52,7 @@ namespace utility {
              * @author Josiah Walker
              */
             template<typename OptMethod, typename SampleMethod>
-            class OptimiserSet {
+            class OptimiserSet : public Optimiser {
             private:
                 OptMethod estimator;
                 SampleMethod sampler;
@@ -60,11 +60,11 @@ namespace utility {
                 OptimiserEstimate currentValues;
 
             public:
-                OptimiserSet(const OptimiserParams& params)
+                OptimiserSet(const OptimiserParameters& params)
                 : estimator(params)
                 , sampler(params)
-                , startValues(params.startParams)
-                , currentValues(params.startParams)  {}
+                , startValues(params.initial)
+                , currentValues(params.initial)  {}
 
                 /**
                  * Generate a new best-estimate using the parameter samples and fitnesses provided.
@@ -93,7 +93,7 @@ namespace utility {
                  * @author Josiah walker
                  */
                 virtual arma::mat getSamples(const uint& numSamples = 7) {
-                    return sampler.sample(currentValues, numSamples);
+                    return sampler.getSamples(currentValues, numSamples);
                 }
 
                 virtual void reset() {

@@ -44,14 +44,14 @@ namespace utility {
                  *
                  * @author Josiah Walker
                  */
-                PGAEstimator(const OptimiserParams& params) {
+                PGAEstimator(const OptimiserParameters& params) {
                     //XXX: still no good place to set c!
                 }
-                
+
                 void clear() {}
 
-                OptimiserEstimate updateEstimate(const arma::mat& samples, 
-                                                 const arma::vec& fitnesses, 
+                OptimiserEstimate updateEstimate(const arma::mat& samples,
+                                                 const arma::vec& fitnesses,
                                                  const OptimiserEstimate& previousEstimate) {
 
                     //create a vector of normed fitnesses
@@ -64,13 +64,13 @@ namespace utility {
 
                     //calculate the probabilistically weighted result estimate
                     arma::vec bestEstimate = arma::sum(samples % arma::repmat(sampleWeights/arma::accu(sampleWeights),1,samples.n_cols),0).t();
-                    
+
                     //calculate the covariance matrix
                     arma::mat s2 = samples;
                     s2.each_col() -= bestEstimate;
                     arma::mat covmat = s2 * s2.t();
-                    
-                    return {previousEstimate.generationID+1, bestEstimate, previousEstimate.covmat};
+
+                    return {previousEstimate.generationID+1, bestEstimate, previousEstimate.covariance};
                 }
             };
 

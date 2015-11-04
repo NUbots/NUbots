@@ -31,7 +31,8 @@ namespace optimisation {
 
     using NUClear::message::NetworkJoin;
     using NUClear::message::NetworkLeave;
-    using utility::math::optimisation::WMDOptimiser;
+    using utility::math::optimisation::Optimiser;
+    using utility::math::optimisation::PGAOptimiser;
     using messages::support::Configuration;
     using messages::support::optimisation::proto::Episode;
     using messages::support::optimisation::RequestParameters;
@@ -56,6 +57,7 @@ namespace optimisation {
 
         on<Configuration>("DOpE.yaml").then([this] (const Configuration& config) {
             // Use configuration here from file DOpE.yaml
+            log("TODO load the configuration from any in progress optimisations here");
 
             // TODO load any optimisations that are currently in the config file (saved/in progress)
         });
@@ -116,11 +118,9 @@ namespace optimisation {
                 log("Adding a new optimisation for", optimisation.group);
 
                 optimisations[optimisation.group] = Optimisation {
-                    WMDOptimiser(),
-                    optimisation.values,
-                    optimisation.weights,
-                    std::vector<Episode>(),
-                    optimiser.network
+                    optimisation.network,
+                    std::make_unique<PGAOptimiser>(optimisation.params),
+                    std::vector<Episode>()
                 };
             }
             else {

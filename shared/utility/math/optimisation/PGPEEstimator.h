@@ -43,7 +43,7 @@ namespace utility {
                  *
                  * @author Josiah Walker
                  */
-                PGPEEstimator(const OptimiserParams& params) {
+                PGPEEstimator(const OptimiserParameters& params) {
                      //XXX: in the future, set learning rate through params
                 };
 
@@ -65,8 +65,8 @@ namespace utility {
                  */
                 OptimiserEstimate updateEstimate(const arma::mat& samples, const arma::vec& fitnesses, OptimiserEstimate& previousEstimate) {
                     arma::vec bestEstimate = previousEstimate.estimate;
-                    arma::vec covEstimate = arma::diagvec(previousEstimate.covmat);
-                    
+                    arma::vec covEstimate = arma::diagvec(previousEstimate.covariance);
+
                     if (firstRun) {
                         firstRun = false;
                         baseline = arma::mean(fitnesses);
@@ -78,17 +78,17 @@ namespace utility {
                     arma::vec updateCov(covEstimate.n_elem,arma::fill::zeros);
                     for(uint64_t i = 0; i < fitnesses.n_elem; ++i) {
                         update += alpha * (fitnesses[i]-baseline) % (samples.row(i).t() - bestEstimate);
-                        updateCov += alphaCov * 
-                                     (fitnesses[i]-baseline) % 
-                                     (arma::square(samples.row(i).t() - bestEstimate) - covEstimate) / 
+                        updateCov += alphaCov *
+                                     (fitnesses[i]-baseline) %
+                                     (arma::square(samples.row(i).t() - bestEstimate) - covEstimate) /
                                      arma::sqrt(covEstimate);
                     }
-                    
+
                     baseline = baseline * 0.9 + 0.1*arma::mean(fitnesses);
 
                     bestEstimate += update;
                     covEstimate += updateCov;
-                    
+
                     return {previousEstimate.generationID+1, bestEstimate, arma::mat(diagmat(covEstimate))};
                 }
             };

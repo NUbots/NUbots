@@ -23,15 +23,16 @@
 #include <string>
 #include <armadillo>
 
+#include "utility/math/optimisation/OptimiserTypes.h"
+
 namespace messages {
     namespace support {
         namespace optimisation {
 
             struct RegisterOptimisation {
                 std::string group;
-                arma::vec values;
-                arma::vec weights;
                 bool network;
+                utility::math::optimisation::OptimiserParameters params;
             };
 
             struct RequestParameters {

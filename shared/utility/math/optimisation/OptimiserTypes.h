@@ -27,13 +27,13 @@ namespace utility {
     namespace math {
         namespace optimisation {
             struct OptimiserEstimate {
-                uint64_t generationID;
+                int generationID;
                 arma::vec estimate;
-                arma::mat covmat;
+                arma::mat covariance;
             };
 
-            struct OptimiserParams {
-                OptimiserEstimate startParams;
+            struct OptimiserParameters {
+                OptimiserEstimate initial;
                 arma::vec upperBound;
                 arma::vec lowerBound;
                 uint64_t batchSize;

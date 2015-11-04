@@ -24,6 +24,7 @@
 
 #include "messages/support/optimisation/DOpE.h"
 #include "utility/math/optimisation/Optimiser.h"
+#include "messages/support/optimisation/proto/Episode.pb.h"
 
 namespace modules {
 namespace support {
@@ -32,11 +33,9 @@ namespace optimisation {
     class DOpE : public NUClear::Reactor {
     private:
         struct Optimisation {
-            utility::math::Optimiser optimiser;
-            arma::vec values;
-            arma::vec weights;
-            std::vector<Episode> episodes;
             bool network;
+            std::unique_ptr<utility::math::optimisation::Optimiser> optimiser;
+            std::vector<messages::support::optimisation::proto::Episode> episodes;
         };
 
         std::map<std::string, Optimisation> optimisations;

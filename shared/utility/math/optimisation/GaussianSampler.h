@@ -36,22 +36,22 @@ namespace utility {
                 arma::vec lowerBound;
                 arma::mat samples;
             public:
-                GaussianSampler(const OptimiserParams& params):
-                                upperBound(params.upperBound),
-                                lowerBound(params.lowerBound),
-                                batchSize(params.batchSize),
-                                generationID(params.startParams.generationID) {}
+                GaussianSampler(const OptimiserParameters& params)
+                : batchSize(params.batchSize)
+                , generationID(params.initial.generationID)
+                , upperBound(params.upperBound)
+                , lowerBound(params.lowerBound) {}
 
                 void clear() {
                     generationID = -1;
                 }
 
                 arma::mat getSamples(OptimiserEstimate& bestParams, uint64_t numSamples) {
-                    //note: bestParams.covmat is possibly mutable in this step, do not const it!
+                    //note: bestParams.covariance is possibly mutable in this step, do not const it!
                     if (bestParams.generationID != generationID || sampleCount+numSamples > batchSize) {
 
                         //generate initial data
-                        arma::vec weights = arma::diagvec(bestParams.covmat);
+                        arma::vec weights = arma::diagvec(bestParams.covariance);
                         samples = arma::randn(bestParams.estimate.n_elem,batchSize);
                         samples.each_col() %= weights;
                         samples.each_col() += bestParams.estimate;
@@ -82,7 +82,7 @@ namespace utility {
 
                         //reset required variables
                         sampleCount = 0;
-                        bestParams.covmat = arma::diagmat(weights);
+                        bestParams.covariance = arma::diagmat(weights);
                     }
                     sampleCount += numSamples;
                     return samples.cols(sampleCount-numSamples,sampleCount-1);

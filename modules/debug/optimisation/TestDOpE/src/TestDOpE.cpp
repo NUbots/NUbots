@@ -37,12 +37,21 @@ namespace optimisation {
             // Use configuration here from file TestDOpE.yaml
         });
 
-        emit<Scope::INITIALIZE>(std::make_unique<RegisterOptimisation>(RegisterOptimisation {
-            "test_dope",
-            arma::vec({1,2,3,4,5}),
-            arma::vec({1,2,3,4,5}),
-            true
-        }));
+        on<Every<1, std::chrono::seconds>>().then([this] {
+            // Emit and request a new sample?
+        });
+
+        auto op = std::make_unique<RegisterOptimisation>();
+        op->group = "test_dope";
+        op->network = true;
+        op->params.initial.generationID = -1;
+        op->params.initial.estimate = { 1, 2, 3 };
+        op->params.initial.covariance = arma::diagmat(arma::vec({ 1, 2, 3 }));
+        op->params.upperBound = { 10, 10, 10 };
+        op->params.lowerBound = { 0, 0, 0 };
+        op->params.batchSize = 10;
+
+        emit<Scope::INITIALIZE>(op);
     }
 }
 }
