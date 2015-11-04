@@ -20,9 +20,11 @@
 package messages.support.optimisation.proto;
 
 message Episode {
-    repeated double values = 1;
-    required double fitness = 2;
-    required uint32 generation = 3;
+    required string group = 1;
+    required uint32 generation = 2;
+    repeated double values = 3;
+    repeated double fitness = 4;
+    repeated double fitness_weights = 5;
 }
 
 // message BestEpisode {

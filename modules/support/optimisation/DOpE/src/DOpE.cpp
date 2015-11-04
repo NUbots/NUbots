@@ -20,6 +20,7 @@
 #include "DOpE.h"
 
 #include <armadillo>
+#include <format.h>
 
 #include "messages/support/Configuration.h"
 #include "messages/support/optimisation/DOpE.h"
@@ -63,7 +64,15 @@ namespace optimisation {
         });
 
         on<Trigger<NetworkJoin>>().then([this] (const NetworkJoin& joiner) {
-            log(joiner.name, "joined");
+
+            log(fmt::format("{} ({})", joiner.name, joiner.udpPort));
+
+            for (auto& op : optimisations) {
+                // If this is a network optimisation
+                if(op.second.network) {
+                    // Send it to the remote
+                }
+            }
 
         //     auto currentState = std::make_unique<BestEpisode>();
 
