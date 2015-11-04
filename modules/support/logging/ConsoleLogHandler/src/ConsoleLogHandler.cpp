@@ -50,25 +50,41 @@ namespace modules {
 
                 on<Trigger<LogMessage>>().then([this] (const LogMessage& message) {
 
+                    // Where this message came from
+                    std::string source = "";
+
+                    // If we know where this log message came from, we display that
+                    if (message.task) {
+                        // Get our reactor name
+                        std::string reactor = message.task->identifier[1];
+
+                        // Strip to the last semicolon if we have one
+                        size_t lastC = reactor.find_last_of(':');
+                        reactor = lastC == std::string::npos ? reactor : reactor.substr(lastC + 1);
+
+                        // This is our source
+                        source = reactor + " ";
+                    }
+
                     // Output the level
                     switch(message.level) {
                         case NUClear::TRACE:
-                            std::cout << "TRACE: ";
+                            std::cout << source << "TRACE: ";
                             break;
                         case NUClear::DEBUG:
-                            std::cout << Colour::green << "DEBUG: ";
+                            std::cout << source << Colour::green << "DEBUG: ";
                             break;
                         case NUClear::INFO:
-                            std::cout << Colour::brightblue << "INFO: ";
+                            std::cout << source << Colour::brightblue << "INFO: ";
                             break;
                         case NUClear::WARN:
-                            std::cout << Colour::yellow << "WARN: ";
+                            std::cout << source << Colour::yellow << "WARN: ";
                             break;
                         case NUClear::ERROR:
-                            std::cout << Colour::red << "ERROR: ";
+                            std::cout << source << Colour::red << "ERROR: ";
                             break;
                         case NUClear::FATAL:
-                            std::cout << Colour::red << "FATAL: ";
+                            std::cout << source << Colour::red << "FATAL: ";
                             break;
                     }
 

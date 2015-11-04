@@ -6,10 +6,9 @@ ADD_ROLE(
     support::logging::ConsoleLogHandler
     support::extension::FileWatcher
     support::configuration::GlobalConfig
-    support::configuration::NetworkConfiguration
     support::configuration::SoccerConfig
 
     # NUcap
-    support::NUcap
-    # support::MocapRecorder
+    support::MocapRecorder
+    support::NUcapSimulator
 )

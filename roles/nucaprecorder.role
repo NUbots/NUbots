@@ -11,5 +11,5 @@ ADD_ROLE(
 
     # NUcap
     support::NUcap
-    # support::MocapRecorder
+    support::MocapRecorder
 )

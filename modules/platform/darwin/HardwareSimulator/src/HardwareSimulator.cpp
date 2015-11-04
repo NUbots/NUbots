@@ -21,6 +21,7 @@
 
 #include <limits>
 #include <armadillo>
+#include <mutex>
 
 #include "utility/math/angle.h"
 #include "utility/support/yaml_armadillo.h"
@@ -163,7 +164,9 @@ namespace darwin {
 
         on<Trigger<DarwinSensors::Gyroscope>>()
         .then("Receive Simulated Gyroscope", [this] (const DarwinSensors::Gyroscope& gyro) {
-            gyroQueue.push(gyro);
+            std::lock_guard<std::mutex> lock(gyroQueueMutex);
+            DarwinSensors::Gyroscope tmpGyro = gyro;
+            gyroQueue.push(tmpGyro);
         });
 
 
@@ -214,10 +217,15 @@ namespace darwin {
             // 'Receive Simulated Gyroscope' reaction above, so we can't
             // reliably query the size of the gyroQueue.
             arma::vec3 sumGyro = {0,0,0};
-            while (!gyroQueue.empty()){
-                auto g = gyroQueue.front();
-                sumGyro += arma::vec3({g.x,g.y,g.z});
-                gyroQueue.pop();
+            {
+                // std::lock_guard<std::mutex> lock(gyroQueueMutex);
+                while (!gyroQueue.empty()){
+                    DarwinSensors::Gyroscope g = gyroQueue.front();
+                    sumGyro += arma::vec3({g.x,g.y,g.z});
+
+                    std::lock_guard<std::mutex> lock(gyroQueueMutex);
+                    gyroQueue.pop();
+                }
             }
             sumGyro = (sumGyro * UPDATE_FREQUENCY + arma::vec3({0,0,imu_drift_rate}));
             sensors.gyroscope.x = sumGyro[0];

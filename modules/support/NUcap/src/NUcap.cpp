@@ -77,12 +77,13 @@ namespace support {
 
         });
 
-        on<Every<15, Per<std::chrono::seconds>>>().then([this] {
+        on<Every<60, Per<std::chrono::seconds>>>().then([this] {
             bool valid;
             // Try to get a new frame from the listener.
             MocapFrame frame(frameListener->pop(&valid).first);
             // Quit if the listener has no more frames.
             if (!valid) {
+                std::cout << " data not valid" << std::endl;
                 return;
             }
 //            std::cout << frame << std::endl;
@@ -140,7 +141,7 @@ namespace support {
                 }
             }
 
-            emit<Scope::NETWORK>(std::move(moCap));
+            emit<Scope::NETWORK,Scope::LOCAL>(std::move(moCap));
 
         });
 
