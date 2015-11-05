@@ -39,9 +39,10 @@ namespace utility {
 
             class Optimiser {
             public:
-                virtual OptimiserEstimate estimate() = 0;
+                virtual const OptimiserEstimate& estimate() = 0;
                 virtual OptimiserEstimate updateEstimate(arma::mat samples, arma::vec fitnesses) = 0;
                 virtual arma::mat getSamples(const uint& numSamples = 7) = 0;
+                virtual bool validSample(...) = 0;
                 virtual void reset() = 0;
             };
 
@@ -85,8 +86,13 @@ namespace utility {
                     return currentValues;
                 }
 
-                virtual OptimiserEstimate estimate() {
+                virtual const OptimiserEstimate& estimate() {
                     return currentValues;
+                }
+
+
+                virtual bool validSample(...) {
+                    return true;
                 }
 
                 /**

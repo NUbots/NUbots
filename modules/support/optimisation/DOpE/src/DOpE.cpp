@@ -22,6 +22,7 @@
 #include <armadillo>
 #include <format.h>
 
+#include "utility/support/proto_armadillo.h"
 #include "messages/support/Configuration.h"
 #include "messages/support/optimisation/DOpE.h"
 #include "messages/support/optimisation/Episode.pb.h"
@@ -39,7 +40,41 @@ namespace optimisation {
     using messages::support::optimisation::Episode;
     using messages::support::optimisation::Estimate;
     using messages::support::optimisation::RequestParameters;
+    using messages::support::optimisation::Parameters;
     using messages::support::optimisation::RegisterOptimisation;
+
+    void DOpE::sendEstimateUpdate(const Optimisation& opt, const std::string& target) {
+
+        // Get the current state for this
+        auto current = opt.optimiser->estimate();
+        auto e = std::make_unique<Estimate>();
+
+        // Set our group
+        e->set_group(opt.group);
+
+        // Add our generation
+        e->set_generation(current.generation);
+
+        for (uint i = 0; i < current.estimate.n_elem; ++i) {
+            e->mutable_values()->add_v(current.estimate[i]);
+        }
+
+        // Add our values and covariance
+        *e->mutable_values() << current.estimate;
+        *e->mutable_covariance() << current.covariance;
+
+        // Add our episodes
+        for (auto& episode : opt.episodes) {
+            *e->add_episode() = episode;
+        }
+
+        // Send it to the remote
+        emit<Scope::NETWORK>(e, target, true);
+    }
+
+    void DOpE::saveOptimisationState(const Optimisation& opt) {
+        // TODO save the optimisation
+    }
 
     DOpE::DOpE(std::unique_ptr<NUClear::Environment> environment)
     : Reactor(std::move(environment)) {
@@ -58,36 +93,8 @@ namespace optimisation {
             for (auto& op : optimisations) {
                 // If this is a network optimisation
                 if(op.second.network) {
-                    // Get the current state for this
-                    auto current = op.second.optimiser->estimate();
-                    auto e = std::make_unique<Estimate>();
-
-                    // Set our group
-                    e->set_group(op.first);
-
-                    // Add our generation
-                    e->set_generation(current.generation);
-
-                    // Add our values
-                    for (uint i = 0; i < current.estimate.n_elem; ++i) {
-                        e->mutable_values()->add_v(current.estimate[i]);
-                    }
-
-                    // Add our covariance
-                    for (uint y = 0; y < current.covariance.n_cols; ++y) {
-                        auto row = e->mutable_covariance()->add_v();
-                        for (uint x = 0; x < current.covariance.n_rows; ++x) {
-                            row->add_v(current.covariance(x, y));
-                        }
-                    }
-
-                    // Add our episodes
-                    for (auto& episode : op.second.episodes) {
-                        *e->add_episode() = episode;
-                    }
-
-                    // Send it to the remote
-                    emit<Scope::NETWORK>(e, joiner.name, true);
+                    // Send it to our joiner
+                    sendEstimateUpdate(op.second, joiner.name);
                 }
             }
         });
@@ -113,11 +120,13 @@ namespace optimisation {
                     else if (opt.optimiser->estimate().generation == estimate.generation()) {
                         // TODO This is the same as our existing generation
                         // TODO Find some arbritrary way to work out which is better
+                        // TODO work out if any of our episodes
                     }
 
                     // If we updated, save our estimate in the config
                     if(updated) {
-                        // TODO save our current config
+                        // Save our optimisation state to the config file
+                        saveOptimisationState(opt);
                     }
                 }
             }
@@ -139,31 +148,40 @@ namespace optimisation {
                 if (opt.network) {
 
                     // If we don't already have this episode and it is valid for our optimiser
-                    if(opt.episodes.find(episode) == opt.episodes.end()
-                       && opt.optimiser->validSample(episode)) {
+                    if(//std::find(opt.episodes.begin(), opt.episodes.end(), episode) == opt.episodes.end()
+                       opt.optimiser->validSample(episode)) {
 
                         opt.episodes.push_back(episode);
                         if (opt.episodes.size() == opt.batchSize) {
 
-                            arma::vec fitnesses(opt.episodes.size())
-                            arma::mat samples(opt.episodes.size(), opt.optimiser.estimate().estimate.n_rows);
+                            arma::vec fitnesses(opt.episodes.size());
+                            arma::mat samples(opt.episodes.size(), opt.optimiser->estimate().estimate.n_rows);
 
                             for (uint i = 0; i < opt.episodes.size(); ++i) {
-                                fitnesses[i] = opt.episodes[i].fitness();
 
-                                // TODO Fill in the matrix row
+                                // Make our combined fitness
+                                fitnesses[i] = 0;
+                                for(auto& f : opt.episodes[i].fitness()) {
+                                    fitnesses[i] += f.fitness() * f.weight();
+                                }
+
+                                for (uint j = 0; j < samples.n_cols; ++j) {
+                                    samples(i, j) = opt.episodes[i].values().v(j);
+                                }
                             }
 
                             // Update our optimiser
-                            auto result = opt.optimiser.updateEstimate(samples, fitnesses);
+                            auto result = opt.optimiser->updateEstimate(samples, fitnesses);
 
                             // Clear our episodes list
-                            opt.episodes.clear()
+                            opt.episodes.clear();
 
                             // Emit our new best estimate over the network
+                            sendEstimateUpdate(opt);
                         }
 
-                        // TODO Save our optimisation state to the config file
+                        // Save our optimisation state to the config file
+                        saveOptimisationState(opt);
                     }
                 }
             }
@@ -188,6 +206,7 @@ namespace optimisation {
 
                         if (opt.network) {
                             // Emit our new best estimate over the network
+                            sendEstimateUpdate(opt);
                         }
                     }
                     // If we are networked send out this episode
@@ -196,7 +215,8 @@ namespace optimisation {
                         emit<Scope::NETWORK>(e, "", true);
                     }
 
-                    // TODO Save our optimisation state to the config file
+                    // Save our optimisation state to the config file
+                    saveOptimisationState(opt);
                 }
             }
             else {
@@ -213,9 +233,10 @@ namespace optimisation {
                 log("Adding a new optimisation for", optimisation.group);
 
                 optimisations[optimisation.group] = Optimisation {
+                    optimisation.group,
                     optimisation.network,
-                    optimisation.batchSize,
-                    std::make_unique<PGAOptimiser>(optimisation.params),
+                    optimisation.parameters.batchSize,
+                    std::make_unique<PGAOptimiser>(optimisation.parameters),
                     std::vector<Episode>()
                 };
             }
@@ -231,14 +252,24 @@ namespace optimisation {
 
         on<Trigger<RequestParameters>>().then("Request Optimisation Parameters", [this] (const RequestParameters& request) {
 
-        //     // Generate a list of paramters for this request type
-        //     // Send them out
+            auto el = optimisations.find(request.group);
+            if (el != optimisations.end()) {
+                auto& opt = el->second;
 
-        //     params {
-        //         std::string group;
-        //         int generation;
-        //         arma::vec values;
-        //     }
+                auto p = std::make_unique<Parameters>();
+
+                p->group = request.group;
+                p->generation = opt.optimiser->estimate().generation;
+                p->samples = opt.optimiser->getSamples(request.nSamples);
+                p->covariance = opt.optimiser->estimate().covariance;
+
+                std::cout << p->samples << std::endl;
+
+                emit(p);
+            }
+            else {
+                log<NUClear::ERROR>("The optimisation,", request.group, "was requested but does not exist");
+            }
         });
     }
 }

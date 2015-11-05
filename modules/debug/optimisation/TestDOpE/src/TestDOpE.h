@@ -21,12 +21,15 @@
 #define MODULES_DEBUG_OPTIMISATION_TESTDOPE_H
 
 #include <nuclear>
+#include "messages/support/optimisation/DOpE.h"
 
 namespace modules {
 namespace debug {
 namespace optimisation {
 
     class TestDOpE : public NUClear::Reactor {
+    private:
+        messages::support::optimisation::Parameters currentParameters;
 
     public:
         /// @brief Called by the powerplant to build and setup the TestDOpE reactor.

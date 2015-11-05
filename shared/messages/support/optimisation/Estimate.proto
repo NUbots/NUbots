@@ -26,8 +26,8 @@ import "messages/support/optimisation/Episode.proto";
 message Estimate {
     required string group = 1;
     required int32 generation = 2;
-    required fvec values = 3;
-    required fmat covariance = 4;
+    required vec values = 3;
+    required mat covariance = 4;
 
     repeated Episode episode = 5;
 }

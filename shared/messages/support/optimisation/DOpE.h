@@ -32,11 +32,19 @@ namespace messages {
             struct RegisterOptimisation {
                 std::string group;
                 bool network;
-                utility::math::optimisation::OptimiserParameters params;
+                utility::math::optimisation::OptimiserParameters parameters;
             };
 
             struct RequestParameters {
                 std::string group;
+                int nSamples;
+            };
+
+            struct Parameters {
+                std::string group;
+                int generation;
+                arma::mat samples;
+                arma::mat covariance;
             };
 
         }

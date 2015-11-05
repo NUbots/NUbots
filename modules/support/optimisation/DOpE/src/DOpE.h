@@ -33,11 +33,15 @@ namespace optimisation {
     class DOpE : public NUClear::Reactor {
     private:
         struct Optimisation {
+            std::string group;
             bool network;
             uint batchSize;
             std::unique_ptr<utility::math::optimisation::Optimiser> optimiser;
             std::vector<messages::support::optimisation::Episode> episodes;
         };
+
+        void sendEstimateUpdate(const Optimisation& opt, const std::string& target = "");
+        void saveOptimisationState(const Optimisation& opt);
 
         std::map<std::string, Optimisation> optimisations;
 

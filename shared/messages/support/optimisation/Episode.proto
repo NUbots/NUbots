@@ -20,14 +20,16 @@
 package messages.support.optimisation;
 
 import "messages/Vector.proto";
+import "messages/Matrix.proto";
 
 message Episode {
     message Fitness {
-        required float fitness = 1;
-        required float weight = 2;
+        required double fitness = 1;
+        required double weight = 2;
     }
     required string group = 1;
     required int32 generation = 2;
-    required fvec values = 3;
-    repeated Fitness fitness = 4;
+    required vec values = 3;
+    required mat covariance = 4;
+    repeated Fitness fitness = 5;
 }

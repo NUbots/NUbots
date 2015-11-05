@@ -24,9 +24,9 @@
 #include "messages/Vector.pb.h"
 #include "messages/Matrix.pb.h"
 
-messages::vec2&  operator<< ( messages::vec2& proto,  const arma::vec2& vec);
-messages::vec3&  operator<< ( messages::vec3& proto,  const arma::vec3& vec);
-messages::vec4&  operator<< ( messages::vec4& proto,  const arma::vec4& vec);
+ messages::vec2& operator<< ( messages::vec2& proto, const  arma::vec2& vec);
+ messages::vec3& operator<< ( messages::vec3& proto, const  arma::vec3& vec);
+ messages::vec4& operator<< ( messages::vec4& proto, const  arma::vec4& vec);
 messages::fvec2& operator<< (messages::fvec2& proto, const arma::fvec2& vec);
 messages::fvec3& operator<< (messages::fvec3& proto, const arma::fvec3& vec);
 messages::fvec4& operator<< (messages::fvec4& proto, const arma::fvec4& vec);
@@ -37,9 +37,9 @@ messages::uvec2& operator<< (messages::uvec2& proto, const arma::uvec2& vec);
 messages::uvec3& operator<< (messages::uvec3& proto, const arma::uvec3& vec);
 messages::uvec4& operator<< (messages::uvec4& proto, const arma::uvec4& vec);
 
-messages::vec2&  operator<< ( messages::vec2& proto,  const arma::vec& vec);
-messages::vec3&  operator<< ( messages::vec3& proto,  const arma::vec& vec);
-messages::vec4&  operator<< ( messages::vec4& proto,  const arma::vec& vec);
+ messages::vec2& operator<< ( messages::vec2& proto, const  arma::vec& vec);
+ messages::vec3& operator<< ( messages::vec3& proto, const  arma::vec& vec);
+ messages::vec4& operator<< ( messages::vec4& proto, const  arma::vec& vec);
 messages::fvec2& operator<< (messages::fvec2& proto, const arma::fvec& vec);
 messages::fvec3& operator<< (messages::fvec3& proto, const arma::fvec& vec);
 messages::fvec4& operator<< (messages::fvec4& proto, const arma::fvec& vec);
@@ -50,9 +50,14 @@ messages::uvec2& operator<< (messages::uvec2& proto, const arma::uvec& vec);
 messages::uvec3& operator<< (messages::uvec3& proto, const arma::uvec& vec);
 messages::uvec4& operator<< (messages::uvec4& proto, const arma::uvec& vec);
 
-messages::mat22&  operator<< ( messages::mat22& proto,  const arma::mat22& mat);
-messages::mat33&  operator<< ( messages::mat33& proto,  const arma::mat33& mat);
-messages::mat44&  operator<< ( messages::mat44& proto,  const arma::mat44& mat);
+  messages::vec& operator<< (messages::vec& proto,   const  arma::vec& vec);
+ messages::fvec& operator<< (messages::fvec& proto,  const arma::fvec& vec);
+ messages::ivec& operator<< (messages::ivec& proto,  const arma::ivec& vec);
+ messages::uvec& operator<< (messages::uvec& proto,  const arma::uvec& vec);
+
+ messages::mat22& operator<< ( messages::mat22& proto, const  arma::mat22& mat);
+ messages::mat33& operator<< ( messages::mat33& proto, const  arma::mat33& mat);
+ messages::mat44& operator<< ( messages::mat44& proto, const  arma::mat44& mat);
 messages::fmat22& operator<< (messages::fmat22& proto, const arma::fmat22& mat);
 messages::fmat33& operator<< (messages::fmat33& proto, const arma::fmat33& mat);
 messages::fmat44& operator<< (messages::fmat44& proto, const arma::fmat44& mat);
@@ -63,9 +68,9 @@ messages::umat22& operator<< (messages::umat22& proto, const arma::umat22& mat);
 messages::umat33& operator<< (messages::umat33& proto, const arma::umat33& mat);
 messages::umat44& operator<< (messages::umat44& proto, const arma::umat44& mat);
 
- messages::mat22& operator<< ( messages::mat22& proto,  const arma::mat& mat);
- messages::mat33& operator<< ( messages::mat33& proto,  const arma::mat& mat);
- messages::mat44& operator<< ( messages::mat44& proto,  const arma::mat& mat);
+ messages::mat22& operator<< ( messages::mat22& proto, const  arma::mat& mat);
+ messages::mat33& operator<< ( messages::mat33& proto, const  arma::mat& mat);
+ messages::mat44& operator<< ( messages::mat44& proto, const  arma::mat& mat);
 messages::fmat22& operator<< (messages::fmat22& proto, const arma::fmat& mat);
 messages::fmat33& operator<< (messages::fmat33& proto, const arma::fmat& mat);
 messages::fmat44& operator<< (messages::fmat44& proto, const arma::fmat& mat);
@@ -75,5 +80,10 @@ messages::imat44& operator<< (messages::imat44& proto, const arma::imat& mat);
 messages::umat22& operator<< (messages::umat22& proto, const arma::umat& mat);
 messages::umat33& operator<< (messages::umat33& proto, const arma::umat& mat);
 messages::umat44& operator<< (messages::umat44& proto, const arma::umat& mat);
+
+   messages::mat& operator<< ( messages::mat& proto,  const  arma::mat& mat);
+  messages::fmat& operator<< (messages::fmat& proto,  const arma::fmat& mat);
+  messages::imat& operator<< (messages::imat& proto,  const arma::imat& mat);
+  messages::umat& operator<< (messages::umat& proto,  const arma::umat& mat);
 
 #endif

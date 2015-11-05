@@ -246,3 +246,65 @@ messages::umat33& operator<< (messages::umat33& proto, const arma::umat& mat) {
 messages::umat44& operator<< (messages::umat44& proto, const arma::umat& mat) {
     return Setter<4>::set_matrix(proto, mat);
 }
+
+messages::vec& operator<< (messages::vec& proto, const arma::vec& vec) {
+    for(uint i = 0; i < vec.n_elem; ++i) {
+        proto.add_v(vec[i]);
+    }
+    return proto;
+}
+messages::fvec& operator<< (messages::fvec& proto, const arma::fvec& vec) {
+    for(uint i = 0; i < vec.n_elem; ++i) {
+        proto.add_v(vec[i]);
+    }
+    return proto;
+}
+messages::ivec& operator<< (messages::ivec& proto, const arma::ivec& vec) {
+    for(uint i = 0; i < vec.n_elem; ++i) {
+        proto.add_v(vec[i]);
+    }
+    return proto;
+}
+messages::uvec& operator<< (messages::uvec& proto, const arma::uvec& vec) {
+    for(uint i = 0; i < vec.n_elem; ++i) {
+        proto.add_v(vec[i]);
+    }
+    return proto;
+}
+
+messages::mat& operator<< ( messages::mat& proto, const arma::mat& mat) {
+    for(uint x = 0; x < mat.n_cols; ++x) {
+        auto& col = *proto.add_v();
+        for (uint y = 0; y < mat.n_rows; ++y) {
+            col.add_v(mat(x, y));
+        }
+    }
+    return proto;
+}
+messages::fmat& operator<< (messages::fmat& proto, const arma::fmat& mat) {
+    for(uint x = 0; x < mat.n_cols; ++x) {
+        auto& col = *proto.add_v();
+        for (uint y = 0; y < mat.n_rows; ++y) {
+            col.add_v(mat(x, y));
+        }
+    }
+    return proto;
+}
+messages::imat& operator<< (messages::imat& proto, const arma::imat& mat) {
+    for(uint x = 0; x < mat.n_cols; ++x) {
+        auto& col = *proto.add_v();
+        for (uint y = 0; y < mat.n_rows; ++y) {
+            col.add_v(mat(x, y));
+        }
+    }
+    return proto;
+}
+messages::umat& operator<< (messages::umat& proto, const arma::umat& mat) {
+    for(uint x = 0; x < mat.n_cols; ++x) {
+        auto& col = *proto.add_v();
+        for (uint y = 0; y < mat.n_rows; ++y) {
+            col.add_v(mat(x, y));
+        }
+    }
+    return proto;
+}
