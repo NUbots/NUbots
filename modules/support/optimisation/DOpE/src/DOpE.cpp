@@ -46,7 +46,7 @@ namespace optimisation {
     void DOpE::sendEstimateUpdate(const Optimisation& opt, const std::string& target) {
 
         // Get the current state for this
-        auto current = opt.optimiser->estimate();
+        const auto& current = opt.optimiser->estimate();
         auto e = std::make_unique<Estimate>();
 
         // Set our group
@@ -54,10 +54,6 @@ namespace optimisation {
 
         // Add our generation
         e->set_generation(current.generation);
-
-        for (uint i = 0; i < current.estimate.n_elem; ++i) {
-            e->mutable_values()->add_v(current.estimate[i]);
-        }
 
         // Add our values and covariance
         *e->mutable_values() << current.estimate;
@@ -74,6 +70,9 @@ namespace optimisation {
 
     void DOpE::saveOptimisationState(const Optimisation& opt) {
         // TODO save the optimisation
+        // TODO merge the current yaml file with our new yaml file
+        // TODO save the yaml file
+        // TODO this will trigger the configuration which we don't wanna do
     }
 
     DOpE::DOpE(std::unique_ptr<NUClear::Environment> environment)
@@ -171,7 +170,7 @@ namespace optimisation {
                             }
 
                             // Update our optimiser
-                            auto result = opt.optimiser->updateEstimate(samples, fitnesses);
+                            opt.optimiser->updateEstimate(samples, fitnesses);
 
                             // Clear our episodes list
                             opt.episodes.clear();
@@ -200,9 +199,27 @@ namespace optimisation {
                     opt.episodes.push_back(episode);
 
                     if (opt.episodes.size() == opt.batchSize) {
+                        arma::vec fitnesses(opt.episodes.size());
+                        arma::mat samples(opt.episodes.size(), opt.optimiser->estimate().estimate.n_rows);
+
+                        for (uint i = 0; i < opt.episodes.size(); ++i) {
+
+                            // Make our combined fitness
+                            fitnesses[i] = 0;
+                            for(auto& f : opt.episodes[i].fitness()) {
+                                fitnesses[i] += f.fitness() * f.weight();
+                            }
+
+                            for (uint j = 0; j < samples.n_cols; ++j) {
+                                samples(i, j) = opt.episodes[i].values().v(j);
+                            }
+                        }
+
                         // Update our optimiser
+                        opt.optimiser->updateEstimate(samples, fitnesses);
 
                         // Clear our episodes list
+                        opt.episodes.clear();
 
                         if (opt.network) {
                             // Emit our new best estimate over the network
@@ -262,8 +279,6 @@ namespace optimisation {
                 p->generation = opt.optimiser->estimate().generation;
                 p->samples = opt.optimiser->getSamples(request.nSamples);
                 p->covariance = opt.optimiser->estimate().covariance;
-
-                std::cout << p->samples << std::endl;
 
                 emit(p);
             }
