@@ -67,7 +67,7 @@ namespace utility {
 
                     //calculate the covariance matrix
                     arma::mat s2 = samples;
-                    s2.each_col() -= bestEstimate;
+                    s2.each_row() -= bestEstimate.t();
                     arma::mat covmat = s2 * s2.t();
 
                     return {previousEstimate.generation+1, bestEstimate, previousEstimate.covariance};
