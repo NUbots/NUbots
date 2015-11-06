@@ -64,6 +64,7 @@ namespace optimisation {
             // Request a new sample
             auto req = std::make_unique<RequestParameters>();
             req->group = "test_dope";
+            req->nSamples = 1;
             emit<Scope::INITIALIZE>(req);
         });
 
