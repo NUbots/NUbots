@@ -44,6 +44,7 @@ namespace utility {
                 virtual arma::mat getSamples(const uint& numSamples = 7) = 0;
                 virtual bool validSample(...) = 0;
                 virtual void reset() = 0;
+                virtual void reset(const OptimiserEstimate& est) = 0;
             };
 
             /**
@@ -110,6 +111,12 @@ namespace utility {
 
                 virtual void reset() {
                     currentValues = startValues;
+                    sampler.clear();
+                    estimator.clear();
+                }
+                
+                virtual void reset(const OptimiserEstimate& est) {
+                    currentValues = est;
                     sampler.clear();
                     estimator.clear();
                 }
