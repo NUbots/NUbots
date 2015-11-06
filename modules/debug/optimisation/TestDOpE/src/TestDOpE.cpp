@@ -73,8 +73,8 @@ namespace optimisation {
         op->parameters.initial.generation = -1;
         op->parameters.initial.estimate = { 1, 2, 3, 4, 5 };
         op->parameters.initial.covariance = arma::diagmat(arma::vec({ 1, 2, 3, 4, 5 }));
-        op->parameters.upperBound = { 10, 10, 10 };
-        op->parameters.lowerBound = { 0, 0, 0 };
+        op->parameters.upperBound = { 10, 10, 10, 10, 10 };
+        op->parameters.lowerBound = { 0, 0, 0, 0, 0 };
         op->parameters.batchSize = 10;
 
         emit<Scope::INITIALIZE>(op);
