@@ -169,7 +169,6 @@ namespace optimisation {
 
         on<Network<Episode>>().then("Network Episode", [this] (const NetworkSource& src, const Episode& episode) {
 
-            log<NUClear::INFO>(fmt::format("Episode for {} gen {} received from {}", episode.group(), episode.generation(), src.name));
 
             // If we have this optimisation
             auto el = optimisations.find(episode.group());
@@ -178,7 +177,7 @@ namespace optimisation {
 
                 // If this optimiser works on the network
                 if (opt.network) {
-                    log<NUClear::INFO>("Recieved network optimisation episode for", episode.group());
+                    log<NUClear::INFO>(fmt::format("Network episode for {}({}) received from {}", episode.group(), episode.generation(), src.name));
 
                     // If we don't already have this episode and it is valid for our optimiser
                     if(//std::find(opt.episodes.begin(), opt.episodes.end(), episode) == opt.episodes.end()
@@ -203,7 +202,7 @@ namespace optimisation {
             if (el != optimisations.end()) {
                 auto& opt = el->second;
 
-                log<NUClear::INFO>("Recieved local optimisation episode for", episode.group());
+                log<NUClear::INFO>(fmt::format("Local episode for {}({})", episode.group(), episode.generation()));
 
                 // If this episode is valid for our optimiser
                 if(opt.optimiser->validSample(episode)) {
@@ -261,14 +260,14 @@ namespace optimisation {
             if (el != optimisations.end()) {
                 auto& opt = el->second;
 
-                log<NUClear::INFO>("Sending new parameters for", request.group);
-
                 auto p = std::make_unique<Parameters>();
 
                 p->group = request.group;
                 p->generation = opt.optimiser->estimate().generation;
                 p->samples = opt.optimiser->getSamples(request.nSamples);
                 p->covariance = opt.optimiser->estimate().covariance;
+
+                log<NUClear::INFO>(fmt::format("Generating {} parameters for {}({})", request.nSamples, p->group, p->generation));
 
                 emit(p);
             }
