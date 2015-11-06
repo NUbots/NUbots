@@ -50,6 +50,8 @@ namespace modules {
 
                 on<Trigger<LogMessage>>().then([this] (const LogMessage& message) {
 
+                    std::lock_guard<std::mutex> lock(mutex);
+
                     // Where this message came from
                     std::string source = "";
 

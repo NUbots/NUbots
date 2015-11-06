@@ -68,6 +68,39 @@ namespace optimisation {
         emit<Scope::NETWORK>(e, target, true);
     }
 
+    void DOpE::processBatch(Optimisation& opt) {
+
+        // We are updating our batch
+        log<NUClear::INFO>(fmt::format("Processing {}/{} episode batch for {}", opt.episodes.size(), opt.batchSize, opt.group));
+
+        arma::vec fitnesses(opt.episodes.size());
+        arma::mat samples(opt.episodes.size(), opt.optimiser->estimate().estimate.n_rows);
+
+        for (uint i = 0; i < opt.episodes.size(); ++i) {
+
+            // Make our combined fitness
+            fitnesses[i] = 0;
+            for(auto& f : opt.episodes[i].fitness()) {
+                fitnesses[i] += f.fitness() * f.weight();
+            }
+
+            for (uint j = 0; j < samples.n_cols; ++j) {
+                samples(i, j) = opt.episodes[i].values().v(j);
+            }
+        }
+
+        // Update our optimiser
+        opt.optimiser->updateEstimate(samples, fitnesses);
+
+        // Clear our episodes list
+        opt.episodes.clear();
+
+        // Emit our new best estimate over the network
+        if (opt.network) {
+            sendEstimateUpdate(opt);
+        }
+    }
+
     void DOpE::saveOptimisationState(const Optimisation& opt) {
         // TODO save the optimisation
         // TODO merge the current yaml file with our new yaml file
@@ -145,38 +178,15 @@ namespace optimisation {
 
                 // If this optimiser works on the network
                 if (opt.network) {
+                    log<NUClear::INFO>("Recieved network optimisation episode for", episode.group());
 
                     // If we don't already have this episode and it is valid for our optimiser
                     if(//std::find(opt.episodes.begin(), opt.episodes.end(), episode) == opt.episodes.end()
                        opt.optimiser->validSample(episode)) {
 
                         opt.episodes.push_back(episode);
-                        if (opt.episodes.size() == opt.batchSize) {
-
-                            arma::vec fitnesses(opt.episodes.size());
-                            arma::mat samples(opt.episodes.size(), opt.optimiser->estimate().estimate.n_rows);
-
-                            for (uint i = 0; i < opt.episodes.size(); ++i) {
-
-                                // Make our combined fitness
-                                fitnesses[i] = 0;
-                                for(auto& f : opt.episodes[i].fitness()) {
-                                    fitnesses[i] += f.fitness() * f.weight();
-                                }
-
-                                for (uint j = 0; j < samples.n_cols; ++j) {
-                                    samples(i, j) = opt.episodes[i].values().v(j);
-                                }
-                            }
-
-                            // Update our optimiser
-                            opt.optimiser->updateEstimate(samples, fitnesses);
-
-                            // Clear our episodes list
-                            opt.episodes.clear();
-
-                            // Emit our new best estimate over the network
-                            sendEstimateUpdate(opt);
+                        if (opt.episodes.size() >= opt.batchSize) {
+                            processBatch(opt);
                         }
 
                         // Save our optimisation state to the config file
@@ -193,38 +203,16 @@ namespace optimisation {
             if (el != optimisations.end()) {
                 auto& opt = el->second;
 
+                log<NUClear::INFO>("Recieved local optimisation episode for", episode.group());
+
                 // If this episode is valid for our optimiser
                 if(opt.optimiser->validSample(episode)) {
 
                     opt.episodes.push_back(episode);
 
-                    if (opt.episodes.size() == opt.batchSize) {
-                        arma::vec fitnesses(opt.episodes.size());
-                        arma::mat samples(opt.episodes.size(), opt.optimiser->estimate().estimate.n_rows);
+                    if (opt.episodes.size() >= opt.batchSize) {
 
-                        for (uint i = 0; i < opt.episodes.size(); ++i) {
-
-                            // Make our combined fitness
-                            fitnesses[i] = 0;
-                            for(auto& f : opt.episodes[i].fitness()) {
-                                fitnesses[i] += f.fitness() * f.weight();
-                            }
-
-                            for (uint j = 0; j < samples.n_cols; ++j) {
-                                samples(i, j) = opt.episodes[i].values().v(j);
-                            }
-                        }
-
-                        // Update our optimiser
-                        opt.optimiser->updateEstimate(samples, fitnesses);
-
-                        // Clear our episodes list
-                        opt.episodes.clear();
-
-                        if (opt.network) {
-                            // Emit our new best estimate over the network
-                            sendEstimateUpdate(opt);
-                        }
+                        processBatch(opt);
                     }
                     // If we are networked send out this episode
                     else if (opt.network) {
@@ -247,7 +235,7 @@ namespace optimisation {
             auto item = optimisations.find(optimisation.group);
             if (item == optimisations.end()) {
                 // Add this new optimisation
-                log("Adding a new optimisation for", optimisation.group);
+                log<NUClear::INFO>("Adding a new optimisation for", optimisation.group);
 
                 optimisations[optimisation.group] = Optimisation {
                     optimisation.group,
@@ -271,8 +259,9 @@ namespace optimisation {
 
             auto el = optimisations.find(request.group);
             if (el != optimisations.end()) {
-                log("Sending new parameters for ", request.group);
                 auto& opt = el->second;
+
+                log<NUClear::INFO>("Sending new parameters for", request.group);
 
                 auto p = std::make_unique<Parameters>();
 

@@ -33,6 +33,8 @@ namespace modules {
              * @author Jake Woods
              */
             class ConsoleLogHandler : public NUClear::Reactor {
+            private:
+                std::mutex mutex;
             public:
                 explicit ConsoleLogHandler(std::unique_ptr<NUClear::Environment> environment);
             };

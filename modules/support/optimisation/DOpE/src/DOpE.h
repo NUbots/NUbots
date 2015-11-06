@@ -41,6 +41,7 @@ namespace optimisation {
         };
 
         void sendEstimateUpdate(const Optimisation& opt, const std::string& target = "");
+        void processBatch(Optimisation& opt);
         void saveOptimisationState(const Optimisation& opt);
 
         std::map<std::string, Optimisation> optimisations;

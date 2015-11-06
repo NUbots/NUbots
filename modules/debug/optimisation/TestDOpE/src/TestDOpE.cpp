@@ -42,6 +42,7 @@ namespace optimisation {
         });
 
         on<Trigger<Parameters>>().then([this] (const Parameters& params) {
+
             // If these parameters are for us
             if(params.group == "test_dope") {
                 currentParameters = params;
@@ -51,7 +52,8 @@ namespace optimisation {
         // TODO request optimisation parameters from the system
         // Emit an optimisation param request
 
-        on<Every<1, std::chrono::seconds>>().then([this] {
+        on<Every<2, Per<std::chrono::seconds>>>().then([this] {
+
             auto e = std::make_unique<Episode>();
 
             e->set_group("test_dope");
@@ -65,7 +67,7 @@ namespace optimisation {
             auto req = std::make_unique<RequestParameters>();
             req->group = "test_dope";
             req->nSamples = 1;
-            emit<Scope::INITIALIZE>(req);
+            emit<Scope::DIRECT>(req);
         });
 
         auto op = std::make_unique<RegisterOptimisation>();
