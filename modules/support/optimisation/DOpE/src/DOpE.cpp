@@ -271,6 +271,7 @@ namespace optimisation {
 
             auto el = optimisations.find(request.group);
             if (el != optimisations.end()) {
+                log("Sending new parameters for ", request.group);
                 auto& opt = el->second;
 
                 auto p = std::make_unique<Parameters>();
