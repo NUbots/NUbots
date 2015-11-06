@@ -48,35 +48,40 @@ namespace utility {
 
                 arma::mat getSamples(OptimiserEstimate& bestParams, uint64_t numSamples) {
                     //note: bestParams.covariance is possibly mutable in this step, do not const it!
-                    if (bestParams.generation != generation || sampleCount+numSamples > batchSize) {
+                    if (bestParams.generation != generation 
+                        || sampleCount+numSamples > batchSize 
+                        || samples.n_cols == 0) {
 
                         //generate initial data
                         arma::vec weights = arma::diagvec(bestParams.covariance);
                         samples = arma::randn(bestParams.estimate.n_elem,batchSize);
                         samples.each_col() %= weights;
                         samples.each_col() += bestParams.estimate;
-
+                        
+                        
 
                         //out of bounds check
                         if (lowerBound.n_elem > 0 and upperBound.n_elem > 0) {
-                            arma::uvec outOfBounds = arma::sum(samples > arma::repmat(upperBound,samples.n_cols,1),1);
-                            outOfBounds += arma::sum(samples < arma::repmat(lowerBound,samples.n_cols,1),1);
-                            samples = samples.rows(arma::find(outOfBounds == 0));
+                            arma::uvec outOfBounds = arma::sum(samples > arma::repmat(upperBound,1,samples.n_cols),1);
+                            outOfBounds += arma::sum(samples < arma::repmat(lowerBound,1,samples.n_cols),1);
+                            samples = samples.cols(arma::find(outOfBounds == 0));
 
-                            while (samples.n_rows < batchSize) {
+                            while (samples.n_cols < batchSize) {
                                 arma::mat samples2 = arma::randn(bestParams.estimate.n_elem,batchSize);
                                 samples2.each_col() %= weights;
                                 samples2.each_col() += bestParams.estimate;
-
-                                outOfBounds = arma::sum(samples2 > arma::repmat(upperBound,samples2.n_cols,1),1);
-                                outOfBounds += arma::sum(samples2 < arma::repmat(lowerBound,samples2.n_cols,1),1);
-                                samples2 = samples2.rows(arma::find(outOfBounds == 0));
-
-                                samples = join_rows(samples,samples2);
+                                
+                                outOfBounds = arma::sum(samples2 > arma::repmat(upperBound,1,samples2.n_cols),1);
+                                outOfBounds += arma::sum(samples2 < arma::repmat(lowerBound,1,samples2.n_cols),1);
+                                samples2 = samples2.cols(arma::find(outOfBounds == 0));
+                                
+                                if (samples2.n_rows > 0) {
+                                    samples = join_rows(samples,samples2);
+                                }
                             }
 
                             if (samples.n_elem >= batchSize) {
-                                samples = samples.rows(0,batchSize-1);
+                                samples = samples.cols(0,batchSize-1);
                             }
                         }
 
