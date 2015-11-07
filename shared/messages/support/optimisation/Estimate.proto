@@ -29,5 +29,6 @@ message Estimate {
     required vec values = 3;
     required mat covariance = 4;
 
-    repeated Episode episode = 5;
+    repeated Episode estimate_episode = 5;
+    repeated Episode episode = 6;
 }

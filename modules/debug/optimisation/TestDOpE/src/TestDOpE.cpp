@@ -52,7 +52,7 @@ namespace optimisation {
         // TODO request optimisation parameters from the system
         // Emit an optimisation param request
 
-        on<Every<2, Per<std::chrono::seconds>>>().then([this] {
+        on<Every<100, Per<std::chrono::seconds>>>().then([this] {
 
             auto e = std::make_unique<Episode>();
 
@@ -60,6 +60,17 @@ namespace optimisation {
             e->set_generation(currentParameters.generation);
             *e->mutable_values() << currentParameters.samples.col(0);
             *e->mutable_covariance() << currentParameters.covariance;
+
+            auto* fitness = e->add_fitness();
+            fitness->set_weight(1);
+
+            double f = 0;
+            for(uint i = 0; i < currentParameters.samples.col(0).n_elem; ++i) {
+                double v = currentParameters.samples(i, 0) + i;
+                v *= v;
+                f += -v;
+            }
+            fitness->set_fitness(f);
 
             emit(e);
 
@@ -73,11 +84,13 @@ namespace optimisation {
         auto op = std::make_unique<RegisterOptimisation>();
         op->group = "test_dope";
         op->network = true;
-        op->parameters.initial.generation = -1;
-        op->parameters.initial.estimate = { 1, 2, 3, 4, 5 };
-        op->parameters.initial.covariance = arma::diagmat(arma::vec({ 1, 2, 3, 4, 5 }));
-        op->parameters.upperBound = { 10, 10, 10, 10, 10 };
-        op->parameters.lowerBound = { 0, 0, 0, 0, 0 };
+        op->parameters.initial.generation = 0;
+        op->parameters.initial.estimate = arma::vec(5, arma::fill::randu);
+        op->parameters.initial.covariance = arma::diagmat(arma::vec({ 10, 10, 10, 10, 10 }));
+        op->parameters.upperBound = arma::vec(5);
+        op->parameters.upperBound.fill(std::numeric_limits<double>::max());
+        op->parameters.lowerBound = arma::vec(5);
+        op->parameters.lowerBound.fill(std::numeric_limits<double>::min());
         op->parameters.batchSize = 10;
 
         emit<Scope::INITIALIZE>(op);

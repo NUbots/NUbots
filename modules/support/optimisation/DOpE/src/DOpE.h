@@ -37,6 +37,7 @@ namespace optimisation {
             bool network;
             uint batchSize;
             std::unique_ptr<utility::math::optimisation::Optimiser> optimiser;
+            std::vector<messages::support::optimisation::Episode> estimateEpisodes;
             std::vector<messages::support::optimisation::Episode> episodes;
         };
 
