@@ -52,7 +52,7 @@ namespace optimisation {
         // TODO request optimisation parameters from the system
         // Emit an optimisation param request
 
-        on<Every<100, Per<std::chrono::seconds>>>().then([this] {
+        on<Every<1, Per<std::chrono::seconds>>>().then([this] {
 
             auto e = std::make_unique<Episode>();
 
@@ -86,7 +86,7 @@ namespace optimisation {
         op->network = true;
         op->parameters.initial.generation = 0;
         op->parameters.initial.estimate = arma::vec(5, arma::fill::randu);
-        op->parameters.initial.covariance = arma::diagmat(arma::vec({ 10, 10, 10, 10, 10 }));
+        op->parameters.initial.covariance = arma::diagmat(arma::vec({ 0.1, 0.1, 0.1, 0.1, 0.1 }));
         op->parameters.upperBound = arma::vec(5);
         op->parameters.upperBound.fill(std::numeric_limits<double>::max());
         op->parameters.lowerBound = arma::vec(5);
