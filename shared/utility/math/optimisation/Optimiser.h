@@ -23,14 +23,29 @@
 #include <armadillo>
 #include <cmath>
 
-#include "PGAOptimiser.h"
-#include "PGPEOptimiser.h"
-#include "WMDOptimiser.h"
+#include "OptimiserTypes.h"
 
+#include "GaussianSampler.h"
+#include "MirroredSampler.h"
+#include "CholeskySampler.h"
+
+#include "PGAEstimator.h"
+#include "PGPEEstimator.h"
+//#include "WMDOptimiser.h"
 
 namespace utility {
     namespace math {
         namespace optimisation {
+
+            class Optimiser {
+            public:
+                virtual const OptimiserEstimate& estimate() = 0;
+                virtual OptimiserEstimate updateEstimate(arma::mat samples, arma::vec fitnesses) = 0;
+                virtual arma::mat getSamples(const uint& numSamples = 7) = 0;
+                virtual bool validSample(...) = 0;
+                virtual void reset() = 0;
+                virtual void reset(const OptimiserEstimate& est) = 0;
+            };
 
             /**
              *  This class is a generic container for direct policy
@@ -41,15 +56,19 @@ namespace utility {
              * @author Josiah Walker
              */
             template<typename OptMethod, typename SampleMethod>
-            class Optimiser {
+            class OptimiserSet : public Optimiser {
             private:
                 OptMethod estimator;
                 SampleMethod sampler;
+                OptimiserEstimate startValues;
+                OptimiserEstimate currentValues;
 
             public:
-                Optimiser(const arma::vec& optParams, const arma::vec& sampleParams)
-                : estimator(optParams)
-                , sampler(sampleParams) {}
+                OptimiserSet(const OptimiserParameters& params)
+                : estimator(params)
+                , sampler(params)
+                , startValues(params.initial)
+                , currentValues(params.initial)  {}
 
                 /**
                  * Generate a new best-estimate using the parameter samples and fitnesses provided.
@@ -62,12 +81,19 @@ namespace utility {
                  *
                  * @author Josiah Walker
                  */
-                arma::vec updateEstimate(arma::mat samples, arma::vec fitnesses) {
+                virtual OptimiserEstimate updateEstimate(arma::mat samples, arma::vec fitnesses) {
 
-                    const auto variances = sampler.getVariances(); //variances are useful to determine noise in estimates
-                    sampler.updateParams(samples, fitnesses, estimator.currentEstimate());
-                    estimator.updateEstimate(samples, fitnesses, sampler.getVariances());
-                    return estimator.currentEstimate();
+                    currentValues = estimator.updateEstimate(samples,fitnesses,currentValues);
+                    return currentValues;
+                }
+
+                virtual const OptimiserEstimate& estimate() {
+                    return currentValues;
+                }
+
+
+                virtual bool validSample(...) {
+                    return true;
                 }
 
                 /**
@@ -79,13 +105,20 @@ namespace utility {
                  *
                  * @author Josiah walker
                  */
-                arma::mat getSamples(const uint& numSamples = 7) {
-                    return sampler.sample(estimator.currentEstimate(), numSamples);
+                virtual arma::mat getSamples(const uint& numSamples = 7) {
+                    return sampler.getSamples(currentValues, numSamples);
                 }
 
-                void reset() {
-                    sampler.reset();
-                    estimator.reset();
+                virtual void reset() {
+                    currentValues = startValues;
+                    sampler.clear();
+                    estimator.clear();
+                }
+                
+                virtual void reset(const OptimiserEstimate& est) {
+                    currentValues = est;
+                    sampler.clear();
+                    estimator.clear();
                 }
 
                 /*
@@ -100,9 +133,9 @@ namespace utility {
             };
 
             //easy typedefs for working with the included algorithms
-            using PGAOptimiser  =  Optimiser<PGAEstimator, PGASampler>;
-            using WMDOptimiser  =  Optimiser<WMDEstimator, WMDSampler>;
-            using PGPEOptimiser =  Optimiser<PGPEEstimator, PGPESampler>;
+            using PGAOptimiser  =  OptimiserSet<PGAEstimator, GaussianSampler>;
+            //using WMDOptimiser  =  OptimiserSet<WMDEstimator, GaussianSampler>;
+            using PGPEOptimiser =  OptimiserSet<PGPEEstimator, GaussianSampler>;
         }
     }
 }

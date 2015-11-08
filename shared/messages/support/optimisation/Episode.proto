@@ -17,30 +17,19 @@
  * Copyright 2013 NUBots <nubots@nubots.net>
  */
 
-#ifndef MODULES_SUPPORT_LOGGING_CONSOLELOGHANDLER_H
-#define MODULES_SUPPORT_LOGGING_CONSOLELOGHANDLER_H
+package messages.support.optimisation;
 
-#include <nuclear>
-#include <mutex>
+import "messages/Vector.proto";
+import "messages/Matrix.proto";
 
-namespace modules {
-    namespace support {
-        namespace logging {
-
-            /**
-             * Handles the logging of log messages to the console in a thread safe manner.
-             *
-             * @author Jake Woods
-             */
-            class ConsoleLogHandler : public NUClear::Reactor {
-            private:
-                std::mutex mutex;
-            public:
-                explicit ConsoleLogHandler(std::unique_ptr<NUClear::Environment> environment);
-            };
-
-        }  // logging
-    }  // support
-}  // modules
-
-#endif  // MODULES_SUPPORT_LOGGING_CONSOLELOGHANDLER_H
+message Episode {
+    message Fitness {
+        required double fitness = 1;
+        required double weight = 2;
+    }
+    required string group = 1;
+    required int32 generation = 2;
+    required vec values = 3;
+    required mat covariance = 4;
+    repeated Fitness fitness = 5;
+}
