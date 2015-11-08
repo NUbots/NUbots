@@ -21,6 +21,7 @@
 
 #include <armadillo>
 #include <format.h>
+#include <google/protobuf/util/message_differencer.h>
 
 #include "utility/support/proto_armadillo.h"
 #include "messages/support/Configuration.h"
@@ -31,6 +32,8 @@
 namespace modules {
 namespace support {
 namespace optimisation {
+
+    using google::protobuf::util::MessageDifferencer;
 
     using NUClear::message::NetworkJoin;
     using NUClear::message::NetworkLeave;
@@ -173,9 +176,8 @@ namespace optimisation {
                         for (auto it = opt.episodes.begin(); it != opt.episodes.end();) {
 
                             // Work out if this episode is in either list
-                            std::string serialised = it->SerializeAsString();
-                            auto f = [&serialised] (const Episode& e) {
-                                return e.SerializeAsString() == serialised;
+                            auto f = [&it] (const Episode& e) {
+                                return MessageDifferencer::Equals(e, *it);
                             };
                             auto newE = std::find_if(newEpisodes.begin(), newEpisodes.end(), f);
                             auto newPE = std::find_if(newEstimateEpisodes.begin(), newEstimateEpisodes.end(), f);
