@@ -10,7 +10,7 @@ node nubotsvm {
   class {'dev_tools': }
 
   # Get and install our toolchain
-  $toolchain_version = '1.1.0'
+  $toolchain_version = '1.1.1'
   wget::fetch { 'nubots_deb':
     destination => "/root/nubots-toolchain${toolchain_version}.deb",
     source => "http://nubots.net/debs/nubots-toolchain${toolchain_version}.deb",
@@ -36,15 +36,16 @@ node nubotsvmbuild {
                                 creates => '/nubots/toolchain/lib/libz.a' }
   installer { 'bzip2':          url => 'http://www.bzip.org/1.0.6/bzip2-1.0.6.tar.gz', }
   installer { 'xml2':           url => 'http://xmlsoft.org/sources/libxml2-2.9.2.tar.gz', }
-  installer { 'protobuf':       url => 'https://github.com/google/protobuf/releases/download/v2.6.1/protobuf-2.6.1.tar.gz',
+  installer { 'protobuf':       url => 'https://github.com/google/protobuf/releases/download/v3.0.0-beta-1/protobuf-cpp-3.0.0-beta-1.tar.gz',
                                 args => '--with-zlib',
                                 require => Installer['zlib'], }
   installer { 'catch':          url => 'https://raw.githubusercontent.com/philsquared/Catch/master/single_include/catch.hpp', }
   installer { 'nuclear':        url => 'https://github.com/Fastcode/NUClear/archive/develop.tar.gz',
                                 args => '-DBUILD_TESTS=OFF', }
-  installer { 'openblas':       url => 'https://github.com/xianyi/OpenBLAS/archive/v0.2.14.tar.gz',
-                                environment => ['TARGET=YONAH', 'USE_THREAD=1', 'BINARY=32', 'NUM_THREADS=2'], }
-  installer { 'armadillo':      url => 'https://downloads.sourceforge.net/project/arma/armadillo-6.100.0.tar.gz',
+  installer { 'openblas':       url => 'https://github.com/xianyi/OpenBLAS/archive/v0.2.15.tar.gz',
+                                environment => ['TARGET=YONAH', 'USE_THREAD=1', 'BINARY=32', 'NUM_THREADS=2'],
+                                method => 'make', }
+  installer { 'armadillo':      url => 'https://downloads.sourceforge.net/project/arma/armadillo-6.200.2.tar.gz',
                                 method => 'cmake',
                                 creates => '/nubots/toolchain/lib/libarmadillo.so',
                                 require => Installer['openblas'], }
@@ -70,9 +71,8 @@ node nubotsvmbuild {
                                 require => Installer['alsalib'],
                                 lto => false, }
   installer { 'rtaudio':        url => 'http://www.music.mcgill.ca/~gary/rtaudio/release/rtaudio-4.1.1.tar.gz', }
-  installer { 'muparser':       url => 'https://github.com/beltoforion/muparser/archive/v2.2.5.tar.gz',
-                                args => '--disable-shared --disable-debug --disable-samples', }
-  installer { 'eigen3':         url => 'http://bitbucket.org/eigen/eigen/get/3.2.6.tar.gz',
+  installer { 'muparserx':      url => 'https://github.com/beltoforion/muparserx/archive/v4.0.4.tar.gz', }
+  installer { 'eigen3':         url => 'http://bitbucket.org/eigen/eigen/get/3.2.7.tar.gz',
                                 creates => '/nubots/toolchain/include/eigen3/Eigen/Eigen', }
   installer { 'boost':          url => 'http://downloads.sourceforge.net/project/boost/boost/1.59.0/boost_1_59_0.tar.gz',
                                 args => ['link=static'],

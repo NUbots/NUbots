@@ -13,7 +13,7 @@
 #
 
 INCLUDE(ToolchainLibraryFinder)
-ToolchainLibraryFinder(NAME muParser
-                       HEADER muParser.h
-                       LIBRARY muparser
+ToolchainLibraryFinder(NAME muParserX
+                       HEADER mpParser.h
+                       LIBRARY muparserx
 )

@@ -22,7 +22,7 @@
 
 #include <iostream>
 #include <yaml-cpp/yaml.h>
-#include <muParser.h>
+#include <mpParser.h>
 
 namespace utility {
 namespace support {
@@ -56,14 +56,13 @@ namespace YAML {
 
             try {
                 // Parse the expression using muParser
-                mu::Parser parser;
-                parser.DefineConst("pi", double(M_PI));
+                mup::ParserX parser(mup::pckALL_NON_COMPLEX);
                 parser.SetExpr(node.as<std::string>());
-                rhs = parser.Eval();
+                rhs = parser.Eval().GetFloat();
 
                 return true;
             }
-            catch(mu::Parser::exception_type& e) {
+            catch(mup::ParserError& e) {
                 return false;
             }
         }
