@@ -15,6 +15,7 @@ class dev_tools {
     refreshonly => true
   } -> Package <| |>
 
+  # Tools
   package { 'vim': ensure => latest, }
   package { 'screen': ensure => latest, }
   package { 'htop': ensure => latest, }
@@ -37,6 +38,9 @@ class dev_tools {
   package { 'binutils-dev': ensure => latest, require => Apt::Ppa['ppa:ubuntu-toolchain-r/test'] }
   package { 'ninja-build': ensure => latest, }
   package { 'yasm': ensure => latest, }
+
+  # System libraries
+  package { 'libasound2-dev': ensure => latest, }
 
   # INSTALL PYTHON PACKAGES (we need python-pip to use the pip provider)
   Package['python-pip'] -> Package <| provider == 'pip' |>

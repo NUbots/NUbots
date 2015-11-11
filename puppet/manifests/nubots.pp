@@ -63,12 +63,7 @@ node nubotsvmbuild {
   installer { 'jpeg':           url => 'http://downloads.sourceforge.net/project/libjpeg-turbo/1.4.2/libjpeg-turbo-1.4.2.tar.gz', }
   installer { 'cppformat':      url => 'https://github.com/cppformat/cppformat/archive/1.1.0.tar.gz',
                                 creates => '/nubots/toolchain/lib/libformat.a', }
-  installer { 'alsalib':        url => 'ftp://ftp.alsa-project.org/pub/lib/alsa-lib-1.0.29.tar.bz2',
-                                args => '--enable-static --disable-shared',
-                                creates => '/nubots/toolchain/lib/libasound.a',
-                                lto => false, }
   installer { 'portaudio':      url => 'http://www.portaudio.com/archives/pa_stable_v19_20140130.tgz',
-                                require => Installer['alsalib'],
                                 lto => false, }
   installer { 'rtaudio':        url => 'http://www.music.mcgill.ca/~gary/rtaudio/release/rtaudio-4.1.1.tar.gz', }
   installer { 'muparserx':      url => 'https://github.com/beltoforion/muparserx/archive/v4.0.4.tar.gz', }
