@@ -17,26 +17,31 @@
  * Copyright 2013 NUBots <nubots@nubots.net>
  */
 
+syntax = "proto3";
+
 package messages.input.proto;
 
 message GameState {
     message Data {
         enum Mode {
+            UNKNOWN_MODE     = 0;
             NORMAL           = 1;
             PENALTY_SHOOTOUT = 2;
             OVERTIME         = 3;
         }
 
         enum Phase {
-            INITIAL  = 1;
-            READY    = 2;
-            SET      = 3;
-            PLAYING  = 4;
-            TIMEOUT  = 5;
-            FINISHED = 6;
+            UNKNOWN_PHASE = 0;
+            INITIAL       = 1;
+            READY         = 2;
+            SET           = 3;
+            PLAYING       = 4;
+            TIMEOUT       = 5;
+            FINISHED      = 6;
         }
 
         enum PenaltyReason {
+            UNKNOWN                       = 0;
             UNPENALISED                   = 1;
             BALL_MANIPULATION             = 2;
             PHYSICAL_CONTACT              = 3;
@@ -50,30 +55,30 @@ message GameState {
         }
 
         message Robot {
-            required uint32 id                    = 1;
-            required PenaltyReason penalty_reason = 2;
-            required uint64 unpenalised           = 3;
+            uint32 id                    = 1;
+            PenaltyReason penalty_reason = 2;
+            uint64 unpenalised           = 3;
         }
 
         message Team {
-            required uint32 team_id       = 1; // unique team number
-            required uint32 score        = 2; // team's score
-            required string coach_message = 3; // the coach's message to the team
-            repeated Robot players       = 4;
+            uint32 team_id         = 1; // unique team number
+            uint32 score           = 2; // team's score
+            string coach_message   = 3; // the coach's message to the team
+            repeated Robot players = 4;
         }
 
-        required Phase phase          = 1;
-        required Mode mode            = 2;
-        required bool first_half       = 3;
-        required bool kicked_out_by_us   = 4;
-        required uint64 kicked_out_time = 5;
-        required bool our_kick_off      = 6;
-        required uint64 primary_time   = 7;
-        required uint64 secondary_time = 8;
-        required Team team            = 9;
-        required Team opponent        = 10;
+        Phase phase            = 1;
+        Mode mode              = 2;
+        bool first_half        = 3;
+        bool kicked_out_by_us  = 4;
+        uint64 kicked_out_time = 5;
+        bool our_kick_off      = 6;
+        uint64 primary_time    = 7;
+        uint64 secondary_time  = 8;
+        Team team              = 9;
+        Team opponent          = 10;
     }
 
-    required Data data = 1;
-    required string event = 2;
+    Data data = 1;
+    string event = 2;
 }

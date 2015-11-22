@@ -17,6 +17,8 @@
  * Copyright 2013 NUBots <nubots@nubots.net>
  */
 
+syntax = "proto3";
+
 package messages.input.proto;
 
 import "messages/Vector.proto";
@@ -24,13 +26,14 @@ import "messages/Vector.proto";
 message Image {
 
     enum Format {
+        UNKNOWN  = 0;
         YCbCr422 = 1;
         YCbCr444 = 2;
-        JPEG = 3;
+        JPEG     = 3;
     };
 
-    required uint32 camera_id = 4;
-    required Format format = 1;
-    required uvec2 dimensions = 2;
-    required bytes data = 3;
+    uint32 camera_id = 4;
+    Format format = 1;
+    uvec2 dimensions = 2;
+    bytes data = 3;
 }

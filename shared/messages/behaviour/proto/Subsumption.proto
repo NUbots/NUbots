@@ -17,11 +17,14 @@
  * Copyright 2013 NUBots <nubots@nubots.net>
  */
 
+syntax = "proto3";
+
 package messages.behaviour.proto;
 
 message Subsumption {
 
     enum Limb {
+        UNKNOWN = 0;
         LEFT_LEG = 1;
         RIGHT_LEG = 2;
         LEFT_ARM = 3;
@@ -30,42 +33,34 @@ message Subsumption {
     }
 
     message LimbSet {
-
-        required float priority = 1;
+        float priority = 1;
         repeated Limb limbs = 2;
-
     }
 
     message ActionRegister {
-
-        required uint32 id = 1;
-        required string name = 2;
+        uint32 id = 1;
+        string name = 2;
         repeated LimbSet limb_set = 3;
-
     }
 
     message ActionStateChange {
-
         enum State {
+            UNKNOWN = 0;
             START = 1;
             KILL = 2;
         }
 
-        required State state = 1;
-        required string name = 2;
+        State state = 1;
+        string name = 2;
         repeated Limb limbs = 3;
-
     }
 
     message ActionPriorites {
-
-        required uint32 id = 1;
+        uint32 id = 1;
         repeated float priorities = 2;
-
     }
 
     repeated ActionRegister action_register = 1;
     repeated ActionStateChange action_state_change = 2;
     repeated ActionPriorites action_priority_change = 3;
-
 }

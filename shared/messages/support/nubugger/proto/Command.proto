@@ -17,8 +17,10 @@
  * Copyright 2013 NUBots <nubots@nubots.net>
  */
 
+syntax = "proto3";
+
 package messages.support.nubugger.proto;
 
 message Command {
-    optional string command = 1;
+    string command = 1;
 }

@@ -17,6 +17,8 @@
  * Copyright 2013 NUBots <nubots@nubots.net>
  */
 
+syntax = "proto3";
+
 package messages.support.optimisation;
 
 import "messages/Vector.proto";
@@ -24,12 +26,13 @@ import "messages/Matrix.proto";
 
 message Episode {
     message Fitness {
-        required double fitness = 1;
-        required double weight = 2;
+        double fitness = 1;
+        double weight = 2;
     }
-    required string group = 1;
-    required int32 generation = 2;
-    required vec values = 3;
-    required mat covariance = 4;
+
+    string group = 1;
+    int32 generation = 2;
+    vec values = 3;
+    mat covariance = 4;
     repeated Fitness fitness = 5;
 }

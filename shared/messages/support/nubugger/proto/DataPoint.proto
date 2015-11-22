@@ -17,6 +17,8 @@
  * Copyright 2013 NUBots <nubots@nubots.net>
  */
 
+syntax = "proto3";
+
 package messages.support.nubugger.proto;
 
 message DataPoint {
@@ -25,17 +27,18 @@ message DataPoint {
      * NOTE: This should not describe how to display the data, as that should be done client-side.
      */
     enum Type {
+        FLOAT_LIST = 0;
+
         // TODO: support all of these
-        FLOAT_LIST = 1; // A generic list of floats, can be of any dimension
-        // ROTATION_2D = 2;
-        ROTATION_3D = 3; // A column-major float list representing a 3x3 rotation marix
-        // TRANSFORM_2D = 4;
-        // TRANSFORM_3D = 5;
-        // SCATTER_2D = 6;
-        // SCATTER_3D = 7;
+        // ROTATION_2D = 1;
+        ROTATION_3D = 2; // A column-major float list representing a 3x3 rotation marix
+        // TRANSFORM_2D = 3;
+        // TRANSFORM_3D = 4;
+        // SCATTER_2D = 5;
+        // SCATTER_3D = 6;
     }
 
-    required string label = 1;
+    string label = 1;
     repeated float value = 2;
-    required Type type = 3;
+    Type type = 3;
 }

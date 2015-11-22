@@ -17,12 +17,14 @@
  * Copyright 2013 NUBots <nubots@nubots.net>
  */
 
+syntax = "proto3";
+
 package messages.support.nubugger.proto;
 
 message ReactionHandles {
     message Handle {
-        required string type = 1;
-        required bool enabled = 2;
+        string type = 1;
+        bool enabled = 2;
     }
 
     repeated Handle handles = 1;

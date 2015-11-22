@@ -17,6 +17,8 @@
  * Copyright 2013 NUBots <nubots@nubots.net>
  */
 
+syntax = "proto3";
+
 package messages.vision.proto;
 
 import "messages/Geometry.proto";
@@ -26,51 +28,52 @@ import "messages/Matrix.proto";
 message VisionObject {
 
     message Measurement {
-        optional vec3 position = 1;
-        optional mat33 covariance = 2;
+        vec3 position = 1;
+        mat33 covariance = 2;
     }
 
     message Goal {
 
         enum Side {
-            LEFT = 0;
-            RIGHT = 1;
-            UNKNOWN = 2;
+            UNKNOWN = 0;
+            LEFT = 1;
+            RIGHT = 2;
         }
 
         repeated Measurement measurement = 3;
-        required Side side = 1;
-        required Quad quad = 2;
+        Side side = 1;
+        Quad quad = 2;
     }
 
     message Ball {
 
         repeated Measurement measurement = 2;
-        required Circle circle = 1;
+        Circle circle = 1;
     }
 
     message Obstacle {
 
         repeated Measurement measurement = 2;
-        required Polygon shape = 1;
+        Polygon shape = 1;
     }
 
     message Line {
 
-        required ivec2 start = 1;
-        required ivec2 end = 2;
-        optional vec4 colour = 3;
+        ivec2 start = 1;
+        ivec2 end = 2;
+        vec4 colour = 3;
     }
 
     enum ObjectType {
-        GOAL = 0;
-        BALL = 1;
-        OBSTACLE = 2;
-        LINE = 3;
+        UNKNOWN = 0;
+        GOAL = 1;
+        BALL = 2;
+        OBSTACLE = 3;
+        LINE = 4;
     }
 
-    required uint32 camera_id = 5;
-    required ObjectType type = 1;
+    uint32 camera_id = 5;
+    ObjectType type = 1;
 
     repeated Goal goal = 2;
     repeated Ball ball = 3;

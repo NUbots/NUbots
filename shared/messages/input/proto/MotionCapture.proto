@@ -17,6 +17,8 @@
  * Copyright 2013 NUBots <nubots@nubots.net>
  */
 
+syntax = "proto3";
+
 package messages.input.proto;
 
 import "messages/Vector.proto";
@@ -24,35 +26,35 @@ import "messages/Vector.proto";
 message MotionCapture {
 
     message Point {
-        optional uint32 identifier = 1;
-        optional double size = 2;
-        required vec3 position = 3;
+        uint32 identifier = 1;
+        double size = 2;
+        vec3 position = 3;
     };
 
     message RigidBody {
-        optional uint32 identifier = 1;
-        optional double mean_error = 2;
+        uint32 identifier = 1;
+        double mean_error = 2;
 
-        required vec3 position = 3;
+        vec3 position = 3;
 
         // The rotation quaternion
-        required vec4 rotation = 4;
+        vec4 rotation = 4;
 
         repeated Point points = 5;
     };
 
     message Bone {
-        optional uint32 parent = 1;
-        required RigidBody object = 2;
+        uint32 parent = 1;
+        RigidBody object = 2;
     };
 
     message Skeleton {
-        required string identifier = 1;
+        string identifier = 1;
         repeated Bone bones = 3;
     };
 
     message MarkerSet {
-        optional string name = 1;
+        string name = 1;
         repeated Point points = 2;
     };
 

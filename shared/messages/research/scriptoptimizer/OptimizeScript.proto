@@ -17,6 +17,8 @@
  * Copyright 2013 NUBots <nubots@nubots.net>
  */
 
+syntax = "proto3";
+
 package messages.research.scriptoptimizer;
 
 import "messages/input/proto/Sensors.proto";
@@ -24,18 +26,18 @@ import "messages/input/proto/Sensors.proto";
 message OptimizeScript {
 
     message Target {
-        required input.proto.Sensors.ServoID id = 1;
-        required float position = 2;
-        required float gain = 3;
+        input.proto.Sensors.ServoID id = 1;
+        float position = 2;
+        float gain = 3;
     }
 
     message Frame {
-        required uint32 duration = 1;
+        uint32 duration = 1;
         repeated Target targets = 2;
     }
 
-    required string target = 1;
-    required uint32 iteration = 2;
-    required string metadata = 3;
+    string target = 1;
+    uint32 iteration = 2;
+    string metadata = 3;
     repeated Frame frames = 4;
 }

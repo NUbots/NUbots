@@ -17,33 +17,35 @@
  * Copyright 2013 NUBots <nubots@nubots.net>
  */
 
+syntax = "proto3";
+
 package messages;
 
 import "messages/Vector.proto";
 import "messages/Matrix.proto";
 
 message Line {
-    required vec2 normal = 1;
-    required double distance = 2;
+    vec2 normal = 1;
+    double distance = 2;
 }
 
 message Circle {
-	required double radius = 1;
-	required vec2 centre = 2;
+	double radius = 1;
+	vec2 centre = 2;
 }
 
 message Ellipse {
     // See http://en.wikipedia.org/wiki/Matrix_representation_of_conic_sections
-    required mat33 ellipse = 1;
+    mat33 ellipse = 1;
 }
 
 message Quad {
-    required vec2 tl = 1;
-    required vec2 tr = 2;
-    required vec2 bl = 3;
-    required vec2 br = 4;
+    vec2 tl = 1;
+    vec2 tr = 2;
+    vec2 bl = 3;
+    vec2 br = 4;
 }
 
 message Polygon {
-    repeated vec2 point = 1;
+    vec2 point = 1;
 }

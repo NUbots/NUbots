@@ -17,13 +17,16 @@
  * Copyright 2013 NUBots <nubots@nubots.net>
  */
 
+syntax = "proto3";
+
 package messages.vision.proto;
 
 message LookUpTableDiff {
     message Diff {
-        required uint32 lut_index = 1;
-        required uint32 classification = 2;
+        uint32 lut_index = 1;
+        uint32 classification = 2;
     }
+
     // format is a repeated 4 bytes of [y, cb, cr, classification]
     repeated Diff diff = 1;
 }

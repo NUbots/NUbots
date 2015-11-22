@@ -17,6 +17,8 @@
  * Copyright 2013 NUBots <nubots@nubots.net>
  */
 
+syntax = "proto3";
+
 package messages.vision.proto;
 
 import "messages/Vector.proto";
@@ -25,15 +27,15 @@ import "messages/Geometry.proto";
 message ClassifiedImage {
 
     message Segment {
-        required uint32 colour = 1;
-        required uint32 subsample = 2;
-        required ivec2 start = 3;
-        required ivec2 end = 4;
+        uint32 colour = 1;
+        uint32 subsample = 2;
+        ivec2 start = 3;
+        ivec2 end = 4;
     }
 
-    required uint32 camera_id = 6;
-    required uvec2 dimensions = 1;
-    required Line horizon = 2;
+    uint32 camera_id = 6;
+    uvec2 dimensions = 1;
+    Line horizon = 2;
     repeated ivec2 visual_horizon = 3;
     repeated Segment segment = 4;
 }
