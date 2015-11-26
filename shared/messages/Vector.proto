@@ -22,19 +22,19 @@ syntax = "proto3";
 package messages;
 
 message vec {
-    repeated double v = 1;
+    repeated double v = 1 [packed=true];
 }
 
 message fvec {
-    repeated float v = 1;
+    repeated float v = 1 [packed=true];
 }
 
 message ivec {
-    repeated int32 v = 1;
+    repeated int32 v = 1 [packed=true];
 }
 
 message uvec {
-    repeated uint32 v = 1;
+    repeated uint32 v = 1 [packed=true];
 }
 
 message vec2 {
