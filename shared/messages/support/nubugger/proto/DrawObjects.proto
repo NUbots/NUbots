@@ -17,6 +17,8 @@
  * Copyright 2013 NUBots <nubots@nubots.net>
  */
 
+syntax = "proto3";
+
 package messages.support.nubugger.proto;
 
 import "messages/Vector.proto";
@@ -24,6 +26,7 @@ import "messages/Vector.proto";
 message DrawObject {
 
     enum Shape {
+        UNKNOWN = 0;
         ARROW = 1;
         BOX = 2;
         CIRCLE = 3;
@@ -35,34 +38,32 @@ message DrawObject {
     }
 
     message Path {
-
-        required vec2 position = 1;
-        required uint32 parent_index = 2;
-
+        vec2 position = 1;
+        uint32 parent_index = 2;
     }
 
-    required Shape shape = 1;
-    optional string name = 2;
+    Shape shape = 1;
+    string name = 2;
 
-    optional vec3 position = 3;
-    optional vec3 direction = 4;
-    optional vec3 target = 5;
-    optional float width = 6;
-    optional float height = 7;
-    optional vec3 rotation = 8;
-    optional vec3 colour = 9; // rgb
-    optional float radius = 10;
-    optional float top_radius = 11;
-    optional float bottom_radius = 12;
+    vec3 position = 3;
+    vec3 direction = 4;
+    vec3 target = 5;
+    float width = 6;
+    float height = 7;
+    vec3 rotation = 8;
+    vec3 colour = 9; // rgb
+    float radius = 10;
+    float top_radius = 11;
+    float bottom_radius = 12;
     repeated vec3 vertices = 13;
     repeated Path path = 14;
-    optional uint32 faces = 15;
-    optional float line_width = 16;
-    optional float length = 17;
-    optional float depth = 18;
-    optional bool fill = 19;
+    uint32 faces = 15;
+    float line_width = 16;
+    float length = 17;
+    float depth = 18;
+    bool fill = 19;
 
-    optional float timeout = 20;
+    float timeout = 20;
 }
 
 message DrawObjects {

@@ -17,12 +17,14 @@
  * Copyright 2013 NUBots <nubots@nubots.net>
  */
 
+syntax = "proto3";
+
 package messages.vision.proto;
 
 message LookUpTable {
-    required bytes table = 1;
-    required uint32 bits_y = 2;
-    required uint32 bits_cb = 3;
-    required uint32 bits_cr = 4;
-    optional bool save = 5;
+    bytes table = 1;
+    uint32 bits_y = 2;
+    uint32 bits_cb = 3;
+    uint32 bits_cr = 4;
+    bool save = 5;
 }

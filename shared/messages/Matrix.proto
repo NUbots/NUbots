@@ -17,6 +17,8 @@
  * Copyright 2013 NUbots <nubots@nubots.net>
  */
 
+syntax = "proto3";
+
 package messages;
 
 import "messages/Vector.proto";
@@ -38,73 +40,73 @@ message umat {
 }
 
 message mat22 {
-    required vec2 x = 1;
-    required vec2 y = 2;
+    vec2 x = 1;
+    vec2 y = 2;
 }
 
 message fmat22 {
-    required fvec2 x = 1;
-    required fvec2 y = 2;
+    fvec2 x = 1;
+    fvec2 y = 2;
 }
 
 message imat22 {
-    required ivec2 x = 1;
-    required ivec2 y = 2;
+    ivec2 x = 1;
+    ivec2 y = 2;
 }
 
 message umat22 {
-    required uvec2 x = 1;
-    required uvec2 y = 2;
+    uvec2 x = 1;
+    uvec2 y = 2;
 }
 
 message mat33 {
-    required vec3 x = 1;
-    required vec3 y = 2;
-    required vec3 z = 3;
+    vec3 x = 1;
+    vec3 y = 2;
+    vec3 z = 3;
 }
 
 message fmat33 {
-    required fvec3 x = 1;
-    required fvec3 y = 2;
-    required fvec3 z = 3;
+    fvec3 x = 1;
+    fvec3 y = 2;
+    fvec3 z = 3;
 }
 
 message imat33 {
-    required ivec3 x = 1;
-    required ivec3 y = 2;
-    required ivec3 z = 3;
+    ivec3 x = 1;
+    ivec3 y = 2;
+    ivec3 z = 3;
 }
 
 message umat33 {
-    required uvec3 x = 1;
-    required uvec3 y = 2;
-    required uvec3 z = 3;
+    uvec3 x = 1;
+    uvec3 y = 2;
+    uvec3 z = 3;
 }
 
 message mat44 {
-    required vec4 x = 1;
-    required vec4 y = 2;
-    required vec4 z = 3;
-    required vec4 t = 4;
+    vec4 x = 1;
+    vec4 y = 2;
+    vec4 z = 3;
+    vec4 t = 4;
 }
 
 message fmat44 {
-    required vec4 x = 1;
-    required vec4 y = 2;
-    required vec4 z = 3;
-    required vec4 t = 4;
+    vec4 x = 1;
+    vec4 y = 2;
+    vec4 z = 3;
+    vec4 t = 4;
 }
 
 message imat44 {
-    required vec4 x = 1;
-    required vec4 y = 2;
-    required vec4 z = 3;
-    required vec4 t = 4;
+    vec4 x = 1;
+    vec4 y = 2;
+    vec4 z = 3;
+    vec4 t = 4;
 }
 
 message umat44 {
-    required vec4 x = 1;
-    required vec4 y = 2;
-    required vec4 z = 3;
-    required vec4 t = 4;
+    vec4 x = 1;
+    vec4 y = 2;
+    vec4 z = 3;
+    vec4 t = 4;
 }

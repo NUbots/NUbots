@@ -17,6 +17,8 @@
  * Copyright 2013 NUBots <nubots@nubots.net>
  */
 
+syntax = "proto3";
+
 package messages.support.optimisation;
 
 import "messages/Vector.proto";
@@ -24,10 +26,10 @@ import "messages/Matrix.proto";
 import "messages/support/optimisation/Episode.proto";
 
 message Estimate {
-    required string group = 1;
-    required int32 generation = 2;
-    required vec values = 3;
-    required mat covariance = 4;
+    string group = 1;
+    int32 generation = 2;
+    vec values = 3;
+    mat covariance = 4;
 
     repeated Episode estimate_episode = 5;
     repeated Episode episode = 6;

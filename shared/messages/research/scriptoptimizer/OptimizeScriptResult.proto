@@ -17,13 +17,15 @@
  * Copyright 2013 NUBots <nubots@nubots.net>
  */
 
- package messages.research.scriptoptimizer;
+syntax = "proto3";
+
+package messages.research.scriptoptimizer;
 
 import "messages/input/proto/Sensors.proto";
 
 message OptimizeScriptResult {
 
-    required uint32 iteration = 1;
-    required string metadata = 2;
+    uint32 iteration = 1;
+    string metadata = 2;
     repeated input.proto.Sensors sensors = 3;
 }

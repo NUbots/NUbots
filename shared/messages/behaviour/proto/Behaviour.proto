@@ -17,11 +17,14 @@
  * Copyright 2015 NUBots <nubots@nubots.net>
  */
 
+syntax = "proto3";
+
 package messages.behaviour.proto;
 
 message Behaviour {
 
     enum State {
+        UNKNOWN = 0;
         INIT = 1;
         PICKED_UP = 5;
         INITIAL = 6;
@@ -38,6 +41,5 @@ message Behaviour {
         LOCALISING = 14;
     }
 
-    required State state = 1;
-
+    State state = 1;
 }
