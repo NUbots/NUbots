@@ -17,7 +17,7 @@ SET(CMAKE_INSTALL_RPATH "/nubots/toolchain/lib" "toolchain/" "lib/" "../lib/" "b
 
 # Common C++ Flags
 # Enable c++11
-SET(COMMON_CXX_FLAGS "${COMMON_CXX_FLAGS} -std=c++11")
+SET(COMMON_CXX_FLAGS "${COMMON_CXX_FLAGS} -std=c++14")
 
 # We need noncall exceptions so we can throw exceptions from signal handlers
 SET(COMMON_CXX_FLAGS "${COMMON_CXX_FLAGS} -fnon-call-exceptions")
