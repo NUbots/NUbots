@@ -42,11 +42,16 @@ namespace kinematics {
 
     template <typename RobotKinematicModel>
     inline std::map<messages::input::ServoID, utility::math::matrix::Transform3D> calculateHeadJointPosition(const messages::input::Sensors& sensors, messages::input::ServoID servoID){
+        return calculateHeadJointPosition<RobotKinematicModel>(sensors.servos[static_cast<int>(messages::input::ServoID::HEAD_PITCH)].presentPosition,
+                                          sensors.servos[static_cast<int>(messages::input::ServoID::HEAD_YAW)  ].presentPosition,
+                                          servoID);
+    }
+
+    template <typename RobotKinematicModel>
+    inline std::map<messages::input::ServoID, utility::math::matrix::Transform3D> calculateHeadJointPosition(const float& HEAD_PITCH, const float& HEAD_YAW, messages::input::ServoID servoID){
         std::map<messages::input::ServoID, utility::math::matrix::Transform3D> positions;
 
         utility::math::matrix::Transform3D runningTransform;
-        float HEAD_PITCH = sensors.servos[static_cast<int>(messages::input::ServoID::HEAD_PITCH)].presentPosition;
-        float HEAD_YAW =  sensors.servos[static_cast<int>(messages::input::ServoID::HEAD_YAW)].presentPosition;
         arma::vec3 NECK_POS = {RobotKinematicModel::Head::NECK_BASE_POS_FROM_ORIGIN_X,
                                RobotKinematicModel::Head::NECK_BASE_POS_FROM_ORIGIN_Y,
                                RobotKinematicModel::Head::NECK_BASE_POS_FROM_ORIGIN_Z};

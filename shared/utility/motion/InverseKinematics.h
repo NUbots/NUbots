@@ -28,6 +28,7 @@
 #include "utility/math/matrix/Transform3D.h"
 #include "utility/math/coordinates.h"
 #include "utility/motion/RobotModels.h"
+#include "utility/motion/kinematics/ForwardKinematics.h"
 #include "messages/input/ServoID.h"
 #include "messages/input/Sensors.h"
 #include "messages/behaviour/Action.h"
@@ -265,6 +266,30 @@ namespace kinematics {
         arma::vec3 groundPos_ground = {gpos[0],gpos[1],0};
         return calculateHeadJointsToLookAt<RobotKinematicModel>(groundPos_ground, sensors.orientationCamToGround, sensors.orientationBodyToGround);
     }
+
+    template <typename RobotKinematicModel>
+    std::vector<std::pair<messages::input::ServoID, float>> setHeadPoseFromFeet(const utility::math::matrix::Transform3D& headToFeet, const float& footSeparation, const float& bodyAngle){
+        std::vector<std::pair<messages::input::ServoID, float> > servos;
+        
+        arma::vec3 euler = headToFeet.rotation().eulerAngles();
+        float headPitch = euler[1];
+        float headYaw = euler[2];
+        auto headPoses = calculateHeadJointPosition<RobotKinematicModel>(headPitch,
+                                                                         headYaw,
+                                                                         messages::input::ServoID::HEAD_PITCH);
+        auto cameraToBody = headPoses[messages::input::ServoID::HEAD_PITCH];
+
+        utility::math::matrix::Transform3D F_c
+        servos = calculateLegJoints<RobotKinematicModel>()
+        return servos;
+    } 
+
+    template <typename RobotKinematicModel>
+    std::vector<std::pair<messages::input::ServoID, float>> setArms(const arma::vec3& pos, bool left){
+        std::vector<std::pair<messages::input::ServoID, float> > servos;
+
+        return servos;
+    } 
 
 } // kinematics
 }  // motion
