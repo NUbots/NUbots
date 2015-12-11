@@ -74,7 +74,7 @@ Vagrant.configure("2") do |config|
     nubots.vm.synced_folder ".", "/home/vagrant/nubots/NUbots"
 
     # Private network for NUsight's benifit
-    nubots.vm.network "public_network", type: "dhcp"
+    # nubots.vm.network "public_network", type: "dhcp"
 
     # Share NUsight repository with the VM if it has been placed in the same
     # directory as the NUbots repository
