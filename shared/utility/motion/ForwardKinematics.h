@@ -25,8 +25,6 @@
 #include <cmath>
 #include <nuclear>
 
-#include "InverseKinematics.h"
-
 #include "utility/math/matrix/Transform3D.h"
 #include "utility/math/matrix/Rotation3D.h"
 #include "utility/motion/RobotModels.h"
@@ -40,12 +38,6 @@ namespace motion {
 namespace kinematics {
 
 
-    template <typename RobotKinematicModel>
-    inline std::map<messages::input::ServoID, utility::math::matrix::Transform3D> calculateHeadJointPosition(const messages::input::Sensors& sensors, messages::input::ServoID servoID){
-        return calculateHeadJointPosition<RobotKinematicModel>(sensors.servos[static_cast<int>(messages::input::ServoID::HEAD_PITCH)].presentPosition,
-                                          sensors.servos[static_cast<int>(messages::input::ServoID::HEAD_YAW)  ].presentPosition,
-                                          servoID);
-    }
 
     template <typename RobotKinematicModel>
     inline std::map<messages::input::ServoID, utility::math::matrix::Transform3D> calculateHeadJointPosition(const float& HEAD_PITCH, const float& HEAD_YAW, messages::input::ServoID servoID){
@@ -89,6 +81,12 @@ namespace kinematics {
         return positions;
     }
 
+    template <typename RobotKinematicModel>
+    inline std::map<messages::input::ServoID, utility::math::matrix::Transform3D> calculateHeadJointPosition(const messages::input::Sensors& sensors, messages::input::ServoID servoID){
+        return calculateHeadJointPosition<RobotKinematicModel>(sensors.servos[static_cast<int>(messages::input::ServoID::HEAD_PITCH)].presentPosition,
+                                          sensors.servos[static_cast<int>(messages::input::ServoID::HEAD_YAW)  ].presentPosition,
+                                          servoID);
+    }
     /*! @brief
         @NOTE read " runningTransform *= utility::math::matrix::_RotationMatrix(angle, 4); " as "Rotate the running transform about its local _ coordinate by angle."
         @return Returns basis matrix for position of end of limb controlled by the specified motor.

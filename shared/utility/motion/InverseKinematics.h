@@ -28,7 +28,7 @@
 #include "utility/math/matrix/Transform3D.h"
 #include "utility/math/coordinates.h"
 #include "utility/motion/RobotModels.h"
-#include "utility/motion/kinematics/ForwardKinematics.h"
+#include "utility/motion/ForwardKinematics.h"
 #include "messages/input/ServoID.h"
 #include "messages/input/Sensors.h"
 #include "messages/behaviour/Action.h"
@@ -269,19 +269,28 @@ namespace kinematics {
 
     template <typename RobotKinematicModel>
     std::vector<std::pair<messages::input::ServoID, float>> setHeadPoseFromFeet(const utility::math::matrix::Transform3D& headToFeet, const float& footSeparation, const float& bodyAngle){
-        std::vector<std::pair<messages::input::ServoID, float> > servos;
-        
+        //Get camera pose relative to body
         arma::vec3 euler = headToFeet.rotation().eulerAngles();
-        float headPitch = euler[1];
+        float headPitch = euler[1] - bodyAngle;
         float headYaw = euler[2];
-        auto headPoses = calculateHeadJointPosition<RobotKinematicModel>(headPitch,
-                                                                         headYaw,
-                                                                         messages::input::ServoID::HEAD_PITCH);
+        auto headPoses = utility::motion::kinematics::calculateHeadJointPosition<RobotKinematicModel>(headPitch,
+                                                                                                     headYaw,
+                                                                                                     messages::input::ServoID::HEAD_PITCH);
         auto cameraToBody = headPoses[messages::input::ServoID::HEAD_PITCH];
 
-        utility::math::matrix::Transform3D F_c
-        servos = calculateLegJoints<RobotKinematicModel>()
-        return servos;
+        //Compute foot poses
+        utility::math::matrix::Transform3D F_c = cameraToBody * headToFeet.i();
+        utility::math::matrix::Transform3D F_l = F_c.translateY(footSeparation / 2.0);
+        utility::math::matrix::Transform3D F_r = F_c.translateY(-footSeparation / 2.0);
+
+        //Get associated joint angles
+        auto joints = calculateLegJoints<RobotKinematicModel>(F_l, messages::input::LimbID::LEFT_LEG);
+        auto joints2 = calculateLegJoints<RobotKinematicModel>(F_r, messages::input::LimbID::RIGHT_LEG);
+        joints.insert(joints.end(), joints2.begin(), joints2.end());
+        joints.push_back(std::make_pair(messages::input::ServoID::HEAD_PITCH,headPitch));
+        joints.push_back(std::make_pair(messages::input::ServoID::HEAD_YAW,headYaw));
+        // servos = calculateLegJoints<RobotKinematicModel>()
+        return joints;
     } 
 
     template <typename RobotKinematicModel>
