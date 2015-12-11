@@ -63,7 +63,7 @@ namespace support {
             send(overview, 0, false, NUClear::clock::now());
         }));
 
-        handles["overview"].push_back(on<Trigger<CommandLineArguments>, Single, Priority::LOW>().then([this] (const std::vector<std::string>& arguments) {
+        handles["overview"].push_back(on<Trigger<CommandLineArguments>, Single, Priority::LOW>().then([this] (const CommandLineArguments& arguments) {
 
             std::string role_name = arguments.at(0);
             auto index = role_name.rfind('/');

@@ -107,7 +107,7 @@ namespace modules {
 
             template <typename T>
             void send(T&& proto, uint8_t filterId = 0, bool reliable = false, NUClear::clock::time_point time = NUClear::clock::now()) {
-                using ProtobufType = NUClear::util::Meta::RemoveRef<T>;
+                using ProtobufType = std::remove_reference_t<T>;
 
                 // Wrap our protobuf in a message with filter information
                 auto msg = std::make_unique<NUsightMessage<ProtobufType>>(std::forward<T>(proto), filterId, std::chrono::duration_cast<std::chrono::milliseconds>(time.time_since_epoch()).count());

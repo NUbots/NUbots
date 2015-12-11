@@ -56,7 +56,7 @@ namespace modules {
                 script.frames.emplace_back();
                 script.frames.back().duration = std::chrono::milliseconds(defaultDuration);
 
-                on<Trigger<CommandLineArguments>>().then([this](const std::vector<std::string>& args) {
+                on<Trigger<CommandLineArguments>>().then([this](const CommandLineArguments& args) {
                     if(args.size() == 2) {
                         scriptPath = args[1];
 
