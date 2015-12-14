@@ -13,8 +13,9 @@ Vagrant
 
 		$ sudo apt-get install git
 		$ sudo apt-get install virtualbox
-		$ sudo apt-get install vagrant
 
+		NOTE: Ubuntu users should get the debian for Vagrant from the vagrant website.
+	
 	Windows and OSX installation can be done with installers from the program sites above.
 
 
@@ -182,3 +183,4 @@ are having issues.
 [What is Docker]:  	  https://www.docker.com/whatisdocker/ 			  "Docker's Getting Started Guide"
 [Command-Line Interface]: https://docs.docker.com/reference/commandline/cli/	  "Docker Command-Line Interface Documentation"
 [Homebrew]: 	          http://brew.sh/					  "Homebrew"
+[Git]: 	                  https://git-scm.com/					  "Git version control"
