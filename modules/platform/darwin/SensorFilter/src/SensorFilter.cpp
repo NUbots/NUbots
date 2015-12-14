@@ -297,7 +297,9 @@ namespace modules {
                     /************************************************
                      *                  Kinematics                  *
                      ************************************************/
+                    // std::cout << __FILE__ << " " << __LINE__ << std::endl;
                     sensors->forwardKinematics = calculateAllPositions<DarwinModel>(*sensors);
+                    // std::cout << __FILE__ << " " << __LINE__ << std::endl;
 
                     /************************************************
                      *                 Orientation                  *
