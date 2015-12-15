@@ -27,6 +27,7 @@
 #include "messages/behaviour/ServoCommand.h"
 #include "messages/input/ServoID.h"
 #include "messages/behaviour/Action.h"
+#include "utility/support/yaml_expression.h"
 
 namespace modules {
 namespace motion {
@@ -40,6 +41,7 @@ namespace motion {
     using utility::math::matrix::Transform3D;
     using utility::motion::kinematics::DarwinModel;
 
+    using utility::support::Expression;
     using messages::behaviour::ServoCommand;
 
 
@@ -50,11 +52,11 @@ namespace motion {
 
         on<Configuration>("Head6DoFController.yaml").then([this] (const Configuration& config) {
             // Use configuration here from file Head6DoFController.yaml
-            foot_separation = config["foot_separation"].as<float>();
-			body_angle = config["body_angle"].as<float>();
+            foot_separation = config["foot_separation"].as<Expression>();
+			body_angle = config["body_angle"].as<Expression>();
 			
-			float test_yaw = config["test_yaw"].as<float>();
-			float test_pitch = config["test_pitch"].as<float>();
+			float test_yaw = config["test_yaw"].as<Expression>();
+			float test_pitch = config["test_pitch"].as<Expression>();
 			arma::vec3 test_pos = config["test_pos"].as<arma::vec>();
 
 			testHeadPose = Transform3D::createTranslation(test_pos) * Transform3D::createRotationZ(test_yaw) * Transform3D::createRotationY(test_pitch);

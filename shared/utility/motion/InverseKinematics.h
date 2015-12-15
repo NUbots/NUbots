@@ -268,27 +268,20 @@ namespace kinematics {
     }
 
     template <typename RobotKinematicModel>
-    std::vector<std::pair<messages::input::ServoID, float>> setHeadPoseFromFeet(const utility::math::matrix::Transform3D& headToFeet, const float& footSeparation, const float& bodyAngle){
+    std::vector<std::pair<messages::input::ServoID, float>> setHeadPoseFromFeet(const utility::math::matrix::Transform3D& cameraToFeet, const float& footSeparation, const float& bodyAngle){
         //Get camera pose relative to body
-        arma::vec3 euler = headToFeet.rotation().eulerAngles();
+        arma::vec3 euler = cameraToFeet.rotation().eulerAngles();
         float headPitch = euler[1] - bodyAngle;
         float headYaw = euler[2];
-        std::cout << "headYaw = " << headYaw << std::endl;
-        std::cout << "headPitch = " << headPitch << std::endl;
         auto headPoses = utility::motion::kinematics::calculateHeadJointPosition<RobotKinematicModel>(headPitch,
                                                                                                      headYaw,
                                                                                                      messages::input::ServoID::HEAD_PITCH);
         auto cameraToBody = headPoses[messages::input::ServoID::HEAD_PITCH];
 
         //Compute foot poses
-        utility::math::matrix::Transform3D F_c = cameraToBody * headToFeet.i();
+        utility::math::matrix::Transform3D F_c = cameraToBody * cameraToFeet.i();
         utility::math::matrix::Transform3D F_l = F_c.translateY(footSeparation / 2.0);
         utility::math::matrix::Transform3D F_r = F_c.translateY(-footSeparation / 2.0);
-        std::cout << "cameraToBody\n" << cameraToBody << std::endl;
-        std::cout << "headToFeet\n" << headToFeet << std::endl;
-        std::cout << "F_c\n" << F_c << std::endl;
-        std::cout << "F_l\n" << F_l << std::endl;
-        std::cout << "F_r\n" << F_r << std::endl;
 
         //Get associated joint angles
         auto joints = calculateLegJoints<RobotKinematicModel>(F_l, messages::input::LimbID::LEFT_LEG);
