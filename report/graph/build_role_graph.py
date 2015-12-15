@@ -376,13 +376,6 @@ class NUClearGraphBuilder:
         # Calculate the standard deviation
         stddev = math.sqrt(sum([pow(i-mean, 2) for i in l]) / len(l))
 
-
-
-        # mean = ;
-        # mode = ;
-        # median = ;
-        # stddev = ;
-
         return (mean, mode, median, stddev)
 
     def extract_graph_information(self):
@@ -396,6 +389,13 @@ class NUClearGraphBuilder:
                     'stddev': 0,
                 },
                 'inputs': {
+                    'histogram': {},
+                    'mean': 0,
+                    'mode': 0,
+                    'median': 0,
+                    'stddev': 0,
+                },
+                'unused_messages': {
                     'histogram': {},
                     'mean': 0,
                     'mode': 0,
@@ -437,12 +437,62 @@ class NUClearGraphBuilder:
                 l = len(reaction['input_data'])
                 h[l] = h.get(l, 0) + 1
 
+        # Look for unused data inputs
+        for m1 in self.modules:
+
+            # Count the number of unused outputs
+            unused = 0
+
+            for outputs in m1['output_data']:
+                for o in outputs:
+
+                    # Skip some types that go to NUClear or are networked
+                    if o['type'][0] == 'NUClear' or o['scope'] == 'network':
+                        continue
+
+                    used = False
+
+                    # Try to see if this output is used as an input anywhere
+                    for m2 in self.modules:
+                        for r2 in m2['reactions']:
+                            for i in r2['input_data']:
+                                used |= self.make_edge('', o, '', i) != None
+
+                    if not used:
+                        unused += 1
+
+            for r1 in m1['reactions']:
+                for outputs in r1['output_data']:
+                    for o in outputs:
+
+                        # Skip some types that go to NUClear or are networked
+                        if o['type'][0] == 'NUClear' or o['scope'] == 'network':
+                            continue
+
+                        used = False
+
+                        # Try to see if this output is used as an input anywhere
+                        for m2 in self.modules:
+                            for r2 in m2['reactions']:
+                                for i in r2['input_data']:
+                                    used |= self.make_edge('', o, '', i) != None
+
+                        if not used:
+                            unused += 1
+
+            h = info['lmb']['unused_messages']['histogram']
+            h[unused] = h.get(unused, 0) + 1
+
         # Calculate our histogram information
         h = info['lmb']['reactions']
         h['mean'], h['mode'], h['median'], h['stddev'] = self.histogram_information(h['histogram'])
 
         # Calculate our histogram information
         h = info['lmb']['inputs']
+        h['mean'], h['mode'], h['median'], h['stddev'] = self.histogram_information(h['histogram'])
+
+        # Calculate our histogram information
+        h = info['lmb']['unused_messages']
         h['mean'], h['mode'], h['median'], h['stddev'] = self.histogram_information(h['histogram'])
 
         # Process the transformation for Message Passing
