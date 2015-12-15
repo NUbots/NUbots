@@ -295,7 +295,7 @@ namespace kinematics {
 
     template <typename RobotKinematicModel>
     std::vector<std::pair<messages::input::ServoID, float>> setArms(const arma::vec3& pos, bool left){
-        Sensors fake_sensors;
+        // Sensors fake_sensors;
         
         
         std::vector<std::pair<messages::input::ServoID, float> > servos;
