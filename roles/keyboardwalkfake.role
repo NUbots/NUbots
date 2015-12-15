@@ -4,6 +4,7 @@ ADD_ROLE(
     # Support and Configuration
     #support::SignalCatcher
     support::extension::FileWatcher
+    support::configuration::NetworkConfiguration
     support::configuration::GlobalConfig
     support::configuration::SoccerConfig
     support::NUbugger
