@@ -91,7 +91,7 @@ namespace utility{
 
                     static float UPPER_ARM_LENGTH;
                     static float UPPER_ARM_Y_OFFSET;
-                    static float UPPER_ARM_Z_OFFSET;
+                    static float UPPER_ARM_X_OFFSET;
 
                     static float LOWER_ARM_LENGTH;
                     static float LOWER_ARM_Y_OFFSET;

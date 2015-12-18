@@ -149,6 +149,7 @@ namespace matrix {
              * @return The rotation matrix
              */
             static Rotation3D createRotationX(double radians);
+            static Rotation3D createRotationXJacobian(double radians);
 
             /**
              * @brief Creates a rotation matrix around the Y axis by the given radians
@@ -157,6 +158,7 @@ namespace matrix {
              * @return The rotation matrix
              */
             static Rotation3D createRotationY(double radians);
+            static Rotation3D createRotationYJacobian(double radians);
 
             /**
              * @brief Creates a rotation matrix around the Z axis by the given radians
@@ -165,6 +167,7 @@ namespace matrix {
              * @return The rotation matrix
              */
             static Rotation3D createRotationZ(double radians);
+            static Rotation3D createRotationZJacobian(double radians);
     };
 
 }  // matrix

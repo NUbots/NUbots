@@ -61,11 +61,20 @@ namespace motion {
 
 			testHeadPose = Transform3D::createTranslation(test_pos) * Transform3D::createRotationZ(test_yaw) * Transform3D::createRotationY(test_pitch);
 
+			l_arm = config["l_arm"].as<arma::vec>();
+			r_arm = config["r_arm"].as<arma::vec>();
+
 			updatePriority(100);
         });
 
-        on<Every<75,Per<std::chrono::seconds>>>().then([this]{
+        on<Every<75,Per<std::chrono::seconds>>, Single>().then([this]{
         	auto joints = utility::motion::kinematics::setHeadPoseFromFeet<DarwinModel>(testHeadPose, foot_separation, body_angle);
+        	
+        	auto arm_jointsL = utility::motion::kinematics::setArm<DarwinModel>(l_arm, true);
+        	auto arm_jointsR = utility::motion::kinematics::setArm<DarwinModel>(r_arm, false);
+        	joints.insert(joints.end(), arm_jointsL.begin(), arm_jointsL.end());
+        	joints.insert(joints.end(), arm_jointsR.begin(), arm_jointsR.end());
+
 
 	        auto waypoints = std::make_unique<std::vector<ServoCommand>>();
 	        waypoints->reserve(16);
@@ -81,7 +90,7 @@ namespace motion {
         emit<Scope::INITIALIZE>(std::make_unique<RegisterAction>(RegisterAction {
             id,
             "Head 6DoF Controller",
-            { std::pair<float, std::set<LimbID>>(0, { LimbID::LEFT_LEG, LimbID::RIGHT_LEG, LimbID::HEAD }) },
+            { std::pair<float, std::set<LimbID>>(0, { LimbID::LEFT_LEG, LimbID::RIGHT_LEG, LimbID::HEAD, LimbID::RIGHT_ARM, LimbID::LEFT_ARM }) },
             [this] (const std::set<LimbID>&) {
                 // emit(std::make_unique<ExecuteGetup>());
             },

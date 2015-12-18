@@ -17,33 +17,24 @@
  * Copyright 2015 NUbots <nubots@nubots.net>
  */
 
-#ifndef MODULES_MOTION_HEAD6DOFCONTROLLER_H
-#define MODULES_MOTION_HEAD6DOFCONTROLLER_H
+#ifndef MODULES_SUPPORT_IKGENERATOR_H
+#define MODULES_SUPPORT_IKGENERATOR_H
 
 #include <nuclear>
-#include "utility/math/matrix/Transform3D.h"
+
+// #include <openrave.h>
 
 namespace modules {
-namespace motion {
+namespace support {
 
-    class Head6DoFController : public NUClear::Reactor {
-    	float foot_separation = 0.10;
-    	float body_angle = 0.0;
-
-        arma::vec3 l_arm,r_arm;
-
-    	utility::math::matrix::Transform3D testHeadPose;
-
-    	size_t id;
-
-    	void updatePriority(const float& priority);
+    class IKGenerator : public NUClear::Reactor {
 
     public:
-        /// @brief Called by the powerplant to build and setup the Head6DoFController reactor.
-        explicit Head6DoFController(std::unique_ptr<NUClear::Environment> environment);
+        /// @brief Called by the powerplant to build and setup the IKGenerator reactor.
+        explicit IKGenerator(std::unique_ptr<NUClear::Environment> environment);
     };
 
 }
 }
 
-#endif  // MODULES_MOTION_HEAD6DOFCONTROLLER_H
+#endif  // MODULES_SUPPORT_IKGENERATOR_H

@@ -17,33 +17,21 @@
  * Copyright 2015 NUbots <nubots@nubots.net>
  */
 
-#ifndef MODULES_MOTION_HEAD6DOFCONTROLLER_H
-#define MODULES_MOTION_HEAD6DOFCONTROLLER_H
+#include "IKGenerator.h"
 
-#include <nuclear>
-#include "utility/math/matrix/Transform3D.h"
+#include "messages/support/Configuration.h"
 
 namespace modules {
-namespace motion {
+namespace support {
 
-    class Head6DoFController : public NUClear::Reactor {
-    	float foot_separation = 0.10;
-    	float body_angle = 0.0;
+    using messages::support::Configuration;
 
-        arma::vec3 l_arm,r_arm;
+    IKGenerator::IKGenerator(std::unique_ptr<NUClear::Environment> environment)
+    : Reactor(std::move(environment)) {
 
-    	utility::math::matrix::Transform3D testHeadPose;
-
-    	size_t id;
-
-    	void updatePriority(const float& priority);
-
-    public:
-        /// @brief Called by the powerplant to build and setup the Head6DoFController reactor.
-        explicit Head6DoFController(std::unique_ptr<NUClear::Environment> environment);
-    };
-
+        on<Configuration>("IKGenerator.yaml").then([this] (const Configuration& config) {
+            // Use configuration here from file IKGenerator.yaml
+        });
+    }
 }
 }
-
-#endif  // MODULES_MOTION_HEAD6DOFCONTROLLER_H

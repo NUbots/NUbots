@@ -291,15 +291,48 @@ namespace kinematics {
         joints.push_back(std::make_pair(messages::input::ServoID::HEAD_YAW,headYaw));
         // servos = calculateLegJoints<RobotKinematicModel>()
         return joints;
-    } 
+    }
 
     template <typename RobotKinematicModel>
-    std::vector<std::pair<messages::input::ServoID, float>> setArms(const arma::vec3& pos, bool left){
-        // Sensors fake_sensors;
+    std::vector<std::pair<messages::input::ServoID, float>> setArm(const arma::vec3& pos, bool left){
+        messages::input::ServoID SHOULDER_PITCH, SHOULDER_ROLL, ELBOW;
+        int negativeIfRight = 1;
+        int max_number_of_iterations = 1000;
+
+        if(static_cast<bool>(left)){
+            SHOULDER_PITCH = messages::input::ServoID::L_SHOULDER_PITCH;
+            SHOULDER_ROLL = messages::input::ServoID::L_SHOULDER_ROLL;
+            ELBOW = messages::input::ServoID::L_ELBOW;
+        } else {
+            SHOULDER_PITCH = messages::input::ServoID::R_SHOULDER_PITCH;
+            SHOULDER_ROLL = messages::input::ServoID::R_SHOULDER_ROLL;
+            ELBOW = messages::input::ServoID::R_ELBOW;
+            negativeIfRight = -1;
+        }
+
+        //Initial guess for angles
+        arma::vec3 angles;
+        arma::vec3 X;
+        for(int i = 0; i < max_number_of_iterations; i++){
+            arma::mat33 J = calculateArmJacobian<RobotKinematicModel>(angles, left);
+            X = calculateArmPosition<RobotKinematicModel>(angles, left);
+            arma::vec3 dX = pos - X;
+            // std::cout << "X = " << X.t() << std::endl;
+            // std::cout << "dX = " << dX.t() << std::endl;
+            // std::cout << "angles = " << angles.t() << std::endl;
+            if(arma::norm(dX) < 0.0001){
+                break;
+            }
+            arma::vec3 dAngles = J.i() * dX;
+            angles = dAngles + angles;
+        }
+        // std::cout << "Final angles = " << angles.t() << std::endl;
         
-        
-        std::vector<std::pair<messages::input::ServoID, float> > servos;
-        return servos;
+        std::vector<std::pair<messages::input::ServoID, float> > joints;
+        joints.push_back(std::make_pair(SHOULDER_PITCH,angles[0]));
+        joints.push_back(std::make_pair(SHOULDER_ROLL,angles[1]));
+        joints.push_back(std::make_pair(ELBOW,angles[2]));
+        return joints;
     } 
 
 } // kinematics

@@ -17,33 +17,9 @@
  * Copyright 2015 NUbots <nubots@nubots.net>
  */
 
-#ifndef MODULES_MOTION_HEAD6DOFCONTROLLER_H
-#define MODULES_MOTION_HEAD6DOFCONTROLLER_H
+// Uncomment this line when other test files are added
+//#define CATCH_CONFIG_MAIN  // This tells Catch to provide a main() - only do this in one cpp file
+//#include <catch.hpp>
 
-#include <nuclear>
-#include "utility/math/matrix/Transform3D.h"
-
-namespace modules {
-namespace motion {
-
-    class Head6DoFController : public NUClear::Reactor {
-    	float foot_separation = 0.10;
-    	float body_angle = 0.0;
-
-        arma::vec3 l_arm,r_arm;
-
-    	utility::math::matrix::Transform3D testHeadPose;
-
-    	size_t id;
-
-    	void updatePriority(const float& priority);
-
-    public:
-        /// @brief Called by the powerplant to build and setup the Head6DoFController reactor.
-        explicit Head6DoFController(std::unique_ptr<NUClear::Environment> environment);
-    };
-
-}
-}
-
-#endif  // MODULES_MOTION_HEAD6DOFCONTROLLER_H
+// Remove this line when test files are added
+int main() { return 0; }

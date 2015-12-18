@@ -22,7 +22,8 @@
 namespace utility{
     namespace motion{
         namespace kinematics {
-
+            //Convention: all values positive
+            
             float DarwinModel::Leg::HIP_OFFSET_X = 0.00;
             float DarwinModel::Leg::HIP_OFFSET_Y = 0.037; //DARWIN SAYS THIS IS 0.008
             float DarwinModel::Leg::HIP_OFFSET_Z = 0.034;
@@ -64,13 +65,13 @@ namespace utility{
             float DarwinModel::Arm::SHOULDER_Z_OFFSET = 0.088;
             float DarwinModel::Arm::SHOULDER_X_OFFSET = 0.01;
 
-            float DarwinModel::Arm::SHOULDER_LENGTH = 0.017;
+            float DarwinModel::Arm::SHOULDER_LENGTH = 0.00;
             float DarwinModel::Arm::SHOULDER_WIDTH = 0.0245;
-            float DarwinModel::Arm::SHOULDER_HEIGHT = 0;
+            float DarwinModel::Arm::SHOULDER_HEIGHT = 0.017;
 
             float DarwinModel::Arm::UPPER_ARM_LENGTH = 0.0615;
             float DarwinModel::Arm::UPPER_ARM_Y_OFFSET = 0;
-            float DarwinModel::Arm::UPPER_ARM_Z_OFFSET = 0.02;   //Very rough
+            float DarwinModel::Arm::UPPER_ARM_X_OFFSET = 0.02;   //Very rough
 
             float DarwinModel::Arm::LOWER_ARM_LENGTH = 0.13;
             float DarwinModel::Arm::LOWER_ARM_Y_OFFSET = 0;
