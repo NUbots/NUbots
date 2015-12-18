@@ -65,10 +65,10 @@ namespace motion {
 			r_arm = config["r_arm"].as<arma::vec>();
 
 			updatePriority(100);
-        });
 
-        on<Every<75,Per<std::chrono::seconds>>, Single>().then([this]{
-        	auto joints = utility::motion::kinematics::setHeadPoseFromFeet<DarwinModel>(testHeadPose, foot_separation, body_angle);
+			//Perform calcs
+
+			auto joints = utility::motion::kinematics::setHeadPoseFromFeet<DarwinModel>(testHeadPose, foot_separation, body_angle);
         	
         	auto arm_jointsL = utility::motion::kinematics::setArm<DarwinModel>(l_arm, true);
         	auto arm_jointsR = utility::motion::kinematics::setArm<DarwinModel>(r_arm, false);
@@ -86,6 +86,10 @@ namespace motion {
         	}	
         	emit(waypoints);
         });
+
+        // on<Every<75,Per<std::chrono::seconds>>, Single>().then([this]{
+        	
+        // });
 
         emit<Scope::INITIALIZE>(std::make_unique<RegisterAction>(RegisterAction {
             id,

@@ -297,7 +297,7 @@ namespace kinematics {
     std::vector<std::pair<messages::input::ServoID, float>> setArm(const arma::vec3& pos, bool left){
         messages::input::ServoID SHOULDER_PITCH, SHOULDER_ROLL, ELBOW;
         int negativeIfRight = 1;
-        int max_number_of_iterations = 1000;
+        int max_number_of_iterations = 1000000000;
 
         if(static_cast<bool>(left)){
             SHOULDER_PITCH = messages::input::ServoID::L_SHOULDER_PITCH;
@@ -311,22 +311,24 @@ namespace kinematics {
         }
 
         //Initial guess for angles
-        arma::vec3 angles;
-        arma::vec3 X;
+        arma::vec3 angles = {0,0,0};
+        arma::vec3 X = {0,0,0};
         for(int i = 0; i < max_number_of_iterations; i++){
             arma::mat33 J = calculateArmJacobian<RobotKinematicModel>(angles, left);
             X = calculateArmPosition<RobotKinematicModel>(angles, left);
             arma::vec3 dX = pos - X;
+            // std::cout << "pos = " << pos.t() << std::endl;
             // std::cout << "X = " << X.t() << std::endl;
             // std::cout << "dX = " << dX.t() << std::endl;
             // std::cout << "angles = " << angles.t() << std::endl;
-            if(arma::norm(dX) < 0.0001){
+            std::cout << "error = " << arma::norm(dX) << std::endl;
+            if(arma::norm(dX) < 0.001){
                 break;
             }
             arma::vec3 dAngles = J.i() * dX;
             angles = dAngles + angles;
         }
-        // std::cout << "Final angles = " << angles.t() << std::endl;
+        std::cout << "Final angles = " << angles.t() << std::endl;
         
         std::vector<std::pair<messages::input::ServoID, float> > joints;
         joints.push_back(std::make_pair(SHOULDER_PITCH,angles[0]));
