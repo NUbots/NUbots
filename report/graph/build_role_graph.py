@@ -380,6 +380,7 @@ class NUClearGraphBuilder:
 
     def extract_graph_information(self):
         info = {
+            'number_of_modules': 0,
             'lmb': {
                 'reactions': {
                     'histogram': {},
@@ -403,6 +404,7 @@ class NUClearGraphBuilder:
                     'stddev': 0,
                 },
             },
+            'message_lmb_complexity': [],
             'message': {
                 'reactions': {
                     'histogram': {},
@@ -420,8 +422,11 @@ class NUClearGraphBuilder:
                 },
             },
             'blackboard': {
+                'types': 0
             }
         }
+
+        info['number_of_modules'] = len(self.modules)
 
         # Process information for LMB
         for module in self.modules:
@@ -483,6 +488,25 @@ class NUClearGraphBuilder:
             h = info['lmb']['unused_messages']['histogram']
             h[unused] = h.get(unused, 0) + 1
 
+        # TODO traverse the graph and find data rate mismatches
+        # TODO do this by solving a data rate for every place you can (Every)
+
+        # TODO loop through every reaction and try to find it's rate
+        # TODO an every gives a direct rate
+        # Configuration is considered "very slow"
+
+        # Go flatten all the outputs and add them to a list?
+
+        output_rates = []
+
+        for module in self.modules:
+            for r in module['reactions']:
+                for i in r['input_data']:
+                    # TODO get a rate here if we can directly from an input
+                    pass
+        # TODO we now need to "push" our rates down from our types to reactions
+        # TODO compare the rates of "with" and "trigger" types
+
         # Calculate our histogram information
         h = info['lmb']['reactions']
         h['mean'], h['mode'], h['median'], h['stddev'] = self.histogram_information(h['histogram'])
@@ -503,10 +527,16 @@ class NUClearGraphBuilder:
 
             for reaction in module['reactions']:
                 for input in reaction['input_data']:
+
+                    ex = input['modifiers'].get('execution', False)
+                    t = { 'scope': input['scope'], 'type': input['type'] }
+
                     if input['modifiers'].get('execution', False):
                         exec_types.append(input)
-                    elif input not in data_types:
-                        data_types.append(input)
+                    elif t not in data_types:
+                        data_types.append(t)
+
+            info['message_lmb_complexity'].append((module['name'], len(module['reactions']), len(data_types) + len(exec_types), len(data_types)))
 
             h = info['message']['reactions']['histogram']
             l = len(data_types) + len(exec_types)
@@ -523,7 +553,65 @@ class NUClearGraphBuilder:
         h = info['message']['induced_cache_variables']
         h['mean'], h['mode'], h['median'], h['stddev'] = self.histogram_information(h['histogram'])
 
+
+        # Calculate blackboard information (get number of unique "types")
+        types = []
+
+        for module in self.modules:
+            for outputs in module['output_data']:
+                for o in outputs:
+                    if o['scope'] == 'type' and o['type'] not in types:
+                        types.append(o['type'])
+
+
+            for r in module['reactions']:
+                for i in r['input_data']:
+                    if i['scope'] == 'type' and i['type'] not in types:
+                        types.append(i['type'])
+
+                for outputs in r['output_data']:
+                    for o in outputs:
+                        if o['scope'] == 'type' and o['type'] not in types:
+                            types.append(o['type'])
+
+        info['blackboard']['types'] = len(types)
+
         return info
+
+    def get_unique_input_output(self):
+
+        # Process some information for blackboards
+        unique_inputs = []
+        unique_outputs = []
+
+        # Go and find all of our unique inputs/outputs
+        for module in self.modules:
+            for outputs in module['output_data']:
+                for o in outputs:
+                    unique_outputs.append(o)
+
+            for r in module['reactions']:
+                for i in r['input_data']:
+                    unique_inputs.append(i)
+                    pass
+
+                for outputs in r['output_data']:
+                    for o in outputs:
+                        unique_outputs.append(o)
+
+        l = []
+        for i in unique_inputs:
+            if i not in l:
+                l.append(i)
+        unique_inputs = l
+
+        l = []
+        for i in unique_outputs:
+            if i not in l:
+                l.append(i)
+        unique_outputs = l
+
+        return {'inputs': unique_inputs, 'outputs': unique_outputs }
 
 if __name__ == "__main__":
 
@@ -542,3 +630,7 @@ if __name__ == "__main__":
     # Build our graph and save
     with open("{}_info.json".format(out), 'w') as file:
         json.dump(converter.extract_graph_information(), file, sort_keys=True, indent=4, separators=(',', ': '))
+
+    with open("{}_types.json".format(out), 'w') as file:
+        json.dump(converter.get_unique_input_output(), file, sort_keys=True, indent=4, separators=(',', ': '))
+
