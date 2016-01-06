@@ -28,7 +28,7 @@ namespace support {
         : Reactor(std::move(environment)) {
 
 
-        on<Trigger<ReactionStatistics>>([this](const ReactionStatistics& stats) {
+        on<Trigger<ReactionStatistics>>().then([this](const ReactionStatistics& stats) {
 
             // If there was an exception
             if(stats.exception) {

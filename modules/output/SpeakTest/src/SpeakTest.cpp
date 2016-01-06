@@ -28,7 +28,7 @@ namespace output {
 
 		SpeakTest::SpeakTest(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
 
-			on<Every<30, std::chrono::seconds>>([this] {
+			on<Every<30, std::chrono::seconds>>().then([this] {
 				emit(std::make_unique<messages::output::Say>("Bite Me"));
 			});
 		}
