@@ -23,6 +23,7 @@
 #include <vector>
 #include <armadillo>
 #include <cmath>
+#include <chrono>
 #include <nuclear>
 
 #include "utility/math/matrix/Transform3D.h"
@@ -297,7 +298,7 @@ namespace kinematics {
     std::vector<std::pair<messages::input::ServoID, float>> setArm(const arma::vec3& pos, bool left){
         messages::input::ServoID SHOULDER_PITCH, SHOULDER_ROLL, ELBOW;
         int negativeIfRight = 1;
-        int max_number_of_iterations = 1000000000;
+        int max_number_of_iterations = 100;
 
         if(static_cast<bool>(left)){
             SHOULDER_PITCH = messages::input::ServoID::L_SHOULDER_PITCH;
@@ -310,10 +311,13 @@ namespace kinematics {
             negativeIfRight = -1;
         }
 
+        auto start_compute = NUClear::clock::now();
+
         //Initial guess for angles
         arma::vec3 angles = {0,0,0};
         arma::vec3 X = {0,0,0};
-        for(int i = 0; i < max_number_of_iterations; i++){
+        int i = 0;
+        for(; i < max_number_of_iterations; i++){
             arma::mat33 J = calculateArmJacobian<RobotKinematicModel>(angles, left);
             X = calculateArmPosition<RobotKinematicModel>(angles, left);
             arma::vec3 dX = pos - X;
@@ -321,14 +325,21 @@ namespace kinematics {
             // std::cout << "X = " << X.t() << std::endl;
             // std::cout << "dX = " << dX.t() << std::endl;
             // std::cout << "angles = " << angles.t() << std::endl;
-            std::cout << "error = " << arma::norm(dX) << std::endl;
+            // std::cout << "error = " << arma::norm(dX) << std::endl;
             if(arma::norm(dX) < 0.001){
                 break;
             }
-            arma::vec3 dAngles = J.i() * dX;
+            arma::vec3 dAngles = J.t() * dX * 100;//* std::max((100 - i),1);
             angles = dAngles + angles;
         }
+        auto end_compute = NUClear::clock::now();
+        std::cout << "Computation Time (ms) = " << std::chrono::duration_cast<std::chrono::microseconds>(end_compute - start_compute).count() * 1e-3 << std::endl;
         std::cout << "Final angles = " << angles.t() << std::endl;
+        std::cout << "Final position = " << X.t() << std::endl;
+        std::cout << "Goal position = " << pos.t() << std::endl;
+        std::cout << "Final error = " << arma::norm(pos-X) << std::endl;
+        std::cout << "Iterations = " << i << std::endl;
+
         
         std::vector<std::pair<messages::input::ServoID, float> > joints;
         joints.push_back(std::make_pair(SHOULDER_PITCH,angles[0]));
