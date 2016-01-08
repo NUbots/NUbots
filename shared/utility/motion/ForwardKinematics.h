@@ -460,22 +460,24 @@ namespace kinematics {
             -RobotKinematicModel::Arm::LOWER_ARM_Z_OFFSET
         };
         
-        arma::mat33 jRY1 = utility::math::matrix::Rotation3D::createRotationYJacobian(a[0]);
+        arma::mat33 jRY1 = utility::math::matrix::Rotation3D::createRotationYJacobian(a[0]-M_PI_2);
         arma::mat33 jRX2 = utility::math::matrix::Rotation3D::createRotationXJacobian(a[1]);
         arma::mat33 jRY3 = utility::math::matrix::Rotation3D::createRotationXJacobian(a[2]);
 
-        arma::mat33 RY1 = utility::math::matrix::Rotation3D::createRotationY(a[0]);
+        arma::mat33 RY1 = utility::math::matrix::Rotation3D::createRotationY(a[0]-M_PI_2);
         arma::mat33 RX2 = utility::math::matrix::Rotation3D::createRotationX(a[1]);
         arma::mat33 RY3 = utility::math::matrix::Rotation3D::createRotationY(a[2]);
 
-        arma::vec3 col1 = jRY1 * RX2 * RY3 * t3
+        arma::mat33 RY_PI_2 = utility::math::matrix::Rotation3D::createRotationY(M_PI_2);
+
+        arma::vec3 col1 = jRY1 * RX2 * RY_PI_2 * RY3 * t3
                         + jRY1 * RX2 * t2
                         + jRY1 * t1;
 
-        arma::vec3 col2 = RY1 * jRX2 * RY3 * t3
+        arma::vec3 col2 = RY1 * jRX2 * RY_PI_2 * RY3 * t3
                         + RY1 * jRX2 * t2;
 
-        arma::vec3 col3 = RY1 * RX2 * jRY3 * t3;
+        arma::vec3 col3 = RY1 * RX2 * RY_PI_2 * jRY3 * t3;
 
         return arma::join_rows(col1,arma::join_rows(col2,col3));
     }
@@ -510,12 +512,14 @@ namespace kinematics {
             negativeIfRight * RobotKinematicModel::Arm::LOWER_ARM_Y_OFFSET,
             -RobotKinematicModel::Arm::LOWER_ARM_Z_OFFSET
         };
+
+        arma::mat33 RY_PI_2 = utility::math::matrix::Rotation3D::createRotationY(M_PI_2);
         
-        arma::mat33 RY1 = utility::math::matrix::Rotation3D::createRotationY(a[0]);
+        arma::mat33 RY1 = utility::math::matrix::Rotation3D::createRotationY(a[0]-M_PI_2);
         arma::mat33 RX2 = utility::math::matrix::Rotation3D::createRotationX(a[1]);
         arma::mat33 RY3 = utility::math::matrix::Rotation3D::createRotationY(a[2]);
 
-        arma::vec3 pos =  RY1 * RX2 * RY3 * t3
+        arma::vec3 pos =  RY1 * RX2 * RY_PI_2 * RY3 * t3
                         + RY1 * RX2 * t2
                         + RY1 * t1
                         + t0;

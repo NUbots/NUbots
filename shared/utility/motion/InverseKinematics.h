@@ -32,6 +32,7 @@
 #include "utility/motion/ForwardKinematics.h"
 #include "messages/input/ServoID.h"
 #include "messages/input/Sensors.h"
+#include "utility/math/angle.h"
 #include "messages/behaviour/Action.h"
 
 namespace utility {
@@ -325,11 +326,11 @@ namespace kinematics {
             // std::cout << "X = " << X.t() << std::endl;
             // std::cout << "dX = " << dX.t() << std::endl;
             // std::cout << "angles = " << angles.t() << std::endl;
-            std::cout << "error = " << arma::norm(dX) << std::endl;
+            // std::cout << "error = " << arma::norm(dX) << std::endl;
             if(arma::norm(dX) < 0.001){
                 break;
             }
-            arma::vec3 dAngles = J.i() * dX;// * std::max((100 - i),1);
+            arma::vec3 dAngles = J.t() * dX * std::max((100 - i),1);
             angles = dAngles + angles;
         }
         auto end_compute = NUClear::clock::now();
@@ -342,9 +343,9 @@ namespace kinematics {
 
         
         std::vector<std::pair<messages::input::ServoID, float> > joints;
-        joints.push_back(std::make_pair(SHOULDER_PITCH,angles[0]));
-        joints.push_back(std::make_pair(SHOULDER_ROLL,angles[1]));
-        joints.push_back(std::make_pair(ELBOW,angles[2]));
+        joints.push_back(std::make_pair(SHOULDER_PITCH,utility::math::angle::normalizeAngle(angles[0])));
+        joints.push_back(std::make_pair(SHOULDER_ROLL,utility::math::angle::normalizeAngle(angles[1])));
+        joints.push_back(std::make_pair(ELBOW,utility::math::angle::normalizeAngle(angles[2])));
         return joints;
     } 
 

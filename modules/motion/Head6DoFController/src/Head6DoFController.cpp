@@ -66,7 +66,7 @@ namespace motion {
 
 			testHeadPose = Transform3D::createTranslation(test_pos) * Transform3D::createRotationZ(test_yaw) * Transform3D::createRotationY(test_pitch);
 
-			l_arm = config["l_arm"].as<arma::vec>();
+			l_arm = config["l_arm"].as<arma::vec>(); 
 			r_arm = config["r_arm"].as<arma::vec>();
 
 			updatePriority(100);
@@ -84,7 +84,7 @@ namespace motion {
 	        auto waypoints = std::make_unique<std::vector<ServoCommand>>();
 	        waypoints->reserve(16);
 
-	        NUClear::clock::time_point time = NUClear::clock::now();
+	        NUClear::clock::time_point time = NUClear::clock::now() + std::chrono::seconds(1);
 
 	        for (auto& joint : joints) {
 	            waypoints->push_back({ id, time, joint.first, joint.second, 30, 100 }); // TODO: support separate gains for each leg
@@ -103,13 +103,13 @@ namespace motion {
         	arma::vec3 zeros = arma::zeros(3);
         	arma::vec3 zero_pos = utility::motion::kinematics::calculateArmPosition<DarwinModel>(zeros, true);
 
-        	std::cout << "New zero pos = \n" << zero_pos << std::endl;
-        	std::cout << "Traditional FK R_shoulder_pitch = \n" << R_shoulder_pitch << std::endl;
-        	std::cout << "Traditional FK R_shoulder_roll = \n" << R_shoulder_roll << std::endl;
-        	std::cout << "Traditional FK R_arm = \n" << R_arm << std::endl;
-        	std::cout << "Traditional FK L_shoulder_pitch = \n" << L_shoulder_pitch << std::endl;
-        	std::cout << "Traditional FK L_shoulder_roll = \n" << L_shoulder_roll << std::endl;
-        	std::cout << "Traditional FK L_arm = \n" << L_arm << std::endl;
+        	// std::cout << "New zero pos = \n" << zero_pos << std::endl;
+        	// std::cout << "Traditional FK R_shoulder_pitch = \n" << R_shoulder_pitch << std::endl;
+        	// std::cout << "Traditional FK R_shoulder_roll = \n" << R_shoulder_roll << std::endl;
+        	// std::cout << "Traditional FK R_arm = \n" << R_arm << std::endl;
+        	// std::cout << "Traditional FK L_shoulder_pitch = \n" << L_shoulder_pitch << std::endl;
+        	// std::cout << "Traditional FK L_shoulder_roll = \n" << L_shoulder_roll << std::endl;
+        	// std::cout << "Traditional FK L_arm = \n" << L_arm << std::endl;
         });
 
         emit<Scope::INITIALIZE>(std::make_unique<RegisterAction>(RegisterAction {
