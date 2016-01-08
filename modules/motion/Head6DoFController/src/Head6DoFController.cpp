@@ -71,12 +71,29 @@ namespace motion {
 
 			updatePriority(100);
 
-			//Perform calcs
+        });
+
+        on<Every<60,Per<std::chrono::seconds>>, With<Sensors>, Single>().then([this](const Sensors& sensors){
+			
+        	//Record current arm position:
+        	arma::vec3 prevArmJointsL = {
+        								sensors.servos[int(ServoID::L_SHOULDER_PITCH)].presentPosition,
+        								sensors.servos[int(ServoID::L_SHOULDER_ROLL)].presentPosition,
+        								sensors.servos[int(ServoID::L_ELBOW)].presentPosition,
+        								};
+        	arma::vec3 prevArmJointsR = {
+        								sensors.servos[int(ServoID::R_SHOULDER_PITCH)].presentPosition,
+        								sensors.servos[int(ServoID::R_SHOULDER_ROLL)].presentPosition,
+        								sensors.servos[int(ServoID::R_ELBOW)].presentPosition,
+        								};
+
+			//Adjuast arm position
+        	int max_number_of_iterations = 20;
 
 			auto joints = utility::motion::kinematics::setHeadPoseFromFeet<DarwinModel>(testHeadPose, foot_separation, body_angle);
         	
-        	auto arm_jointsL = utility::motion::kinematics::setArm<DarwinModel>(l_arm, true);
-        	auto arm_jointsR = utility::motion::kinematics::setArm<DarwinModel>(r_arm, false);
+        	auto arm_jointsL = utility::motion::kinematics::setArm<DarwinModel>(l_arm, true, max_number_of_iterations, prevArmJointsL);
+        	auto arm_jointsR = utility::motion::kinematics::setArm<DarwinModel>(r_arm, false, max_number_of_iterations, prevArmJointsR);
         	joints.insert(joints.end(), arm_jointsL.begin(), arm_jointsL.end());
         	joints.insert(joints.end(), arm_jointsR.begin(), arm_jointsR.end());
 
@@ -84,24 +101,22 @@ namespace motion {
 	        auto waypoints = std::make_unique<std::vector<ServoCommand>>();
 	        waypoints->reserve(16);
 
-	        NUClear::clock::time_point time = NUClear::clock::now() + std::chrono::seconds(1);
+	        NUClear::clock::time_point time = NUClear::clock::now();
 
 	        for (auto& joint : joints) {
 	            waypoints->push_back({ id, time, joint.first, joint.second, 30, 100 }); // TODO: support separate gains for each leg
         	}	
         	emit(waypoints);
-        });
 
-        on<Every<10,std::chrono::seconds>, With<Sensors>, Single>().then([this](const Sensors& sensors){
-        	Transform3D R_shoulder_pitch = sensors.forwardKinematics.at(ServoID::R_SHOULDER_PITCH);
-        	Transform3D R_shoulder_roll = sensors.forwardKinematics.at(ServoID::R_SHOULDER_ROLL);
-        	Transform3D R_arm = sensors.forwardKinematics.at(ServoID::R_ELBOW);
-        	Transform3D L_shoulder_pitch = sensors.forwardKinematics.at(ServoID::L_SHOULDER_PITCH);
-        	Transform3D L_shoulder_roll = sensors.forwardKinematics.at(ServoID::L_SHOULDER_ROLL);
-        	Transform3D L_arm = sensors.forwardKinematics.at(ServoID::L_ELBOW);
+        	// Transform3D R_shoulder_pitch = sensors.forwardKinematics.at(ServoID::R_SHOULDER_PITCH);
+        	// Transform3D R_shoulder_roll = sensors.forwardKinematics.at(ServoID::R_SHOULDER_ROLL);
+        	// Transform3D R_arm = sensors.forwardKinematics.at(ServoID::R_ELBOW);
+        	// Transform3D L_shoulder_pitch = sensors.forwardKinematics.at(ServoID::L_SHOULDER_PITCH);
+        	// Transform3D L_shoulder_roll = sensors.forwardKinematics.at(ServoID::L_SHOULDER_ROLL);
+        	// Transform3D L_arm = sensors.forwardKinematics.at(ServoID::L_ELBOW);
 
-        	arma::vec3 zeros = arma::zeros(3);
-        	arma::vec3 zero_pos = utility::motion::kinematics::calculateArmPosition<DarwinModel>(zeros, true);
+        	// arma::vec3 zeros = arma::zeros(3);
+        	// arma::vec3 zero_pos = utility::motion::kinematics::calculateArmPosition<DarwinModel>(zeros, true);
 
         	// std::cout << "New zero pos = \n" << zero_pos << std::endl;
         	// std::cout << "Traditional FK R_shoulder_pitch = \n" << R_shoulder_pitch << std::endl;

@@ -296,10 +296,9 @@ namespace kinematics {
     }
 
     template <typename RobotKinematicModel>
-    std::vector<std::pair<messages::input::ServoID, float>> setArm(const arma::vec3& pos, bool left){
+    std::vector<std::pair<messages::input::ServoID, float>> setArm(const arma::vec3& pos, bool left, int number_of_iterations = 300, arma::vec3 angleHint = arma::zeros(3)){
         messages::input::ServoID SHOULDER_PITCH, SHOULDER_ROLL, ELBOW;
         int negativeIfRight = 1;
-        int max_number_of_iterations = 300;
 
         if(static_cast<bool>(left)){
             SHOULDER_PITCH = messages::input::ServoID::L_SHOULDER_PITCH;
@@ -315,13 +314,14 @@ namespace kinematics {
         auto start_compute = NUClear::clock::now();
 
         //Initial guess for angles
-        arma::vec3 angles = {0,0,0};
+        arma::vec3 angles = angleHint;
         arma::vec3 X = {0,0,0};
         int i = 0;
-        for(; i < max_number_of_iterations; i++){
-            arma::mat33 J = calculateArmJacobian<RobotKinematicModel>(angles, left);
+        for(; i < number_of_iterations; i++){
             X = calculateArmPosition<RobotKinematicModel>(angles, left);
             arma::vec3 dX = pos - X;
+            
+            arma::mat33 J = calculateArmJacobian<RobotKinematicModel>(angles, left);
             // std::cout << "pos = " << pos.t() << std::endl;
             // std::cout << "X = " << X.t() << std::endl;
             // std::cout << "dX = " << dX.t() << std::endl;
@@ -330,16 +330,16 @@ namespace kinematics {
             if(arma::norm(dX) < 0.001){
                 break;
             }
-            arma::vec3 dAngles = J.t() * dX * std::max((100 - i),1);
+            arma::vec3 dAngles = J.t() * dX;// * std::max((100 - i),1);
             angles = dAngles + angles;
         }
         auto end_compute = NUClear::clock::now();
         std::cout << "Computation Time (ms) = " << std::chrono::duration_cast<std::chrono::microseconds>(end_compute - start_compute).count() * 1e-3 << std::endl;
-        std::cout << "Final angles = " << angles.t() << std::endl;
-        std::cout << "Final position = " << X.t() << std::endl;
-        std::cout << "Goal position = " << pos.t() << std::endl;
+        // std::cout << "Final angles = " << angles.t() << std::endl;
+        // std::cout << "Final position = " << X.t() << std::endl;
+        // std::cout << "Goal position = " << pos.t() << std::endl;
         std::cout << "Final error = " << arma::norm(pos-X) << std::endl;
-        std::cout << "Iterations = " << i << std::endl;
+        // std::cout << "Iterations = " << i << std::endl;
 
         
         std::vector<std::pair<messages::input::ServoID, float> > joints;
