@@ -209,14 +209,18 @@ namespace kinematics {
         float shoulder_roll = sensors.servos[static_cast<int>(SHOULDER_ROLL)].presentPosition;
         float elbow = sensors.servos[static_cast<int>(ELBOW)].presentPosition;
 
+        // std::cout << "shoulder_pitch = " << shoulder_pitch << std::endl;
+        // std::cout << "shoulder_roll = " << shoulder_roll << std::endl;
+        // std::cout << "elbow = " << elbow << std::endl;
+
         //Translate to shoulder
         runningTransform = runningTransform.translate({
             RobotKinematicModel::Arm::SHOULDER_X_OFFSET,
-             negativeIfRight * RobotKinematicModel::Arm::DISTANCE_BETWEEN_SHOULDERS / 2.0,
-             RobotKinematicModel::Arm::SHOULDER_Z_OFFSET
+            negativeIfRight * RobotKinematicModel::Arm::DISTANCE_BETWEEN_SHOULDERS / 2.0,
+            RobotKinematicModel::Arm::SHOULDER_Z_OFFSET
          });
-        //Rotate about shoulder pitch
-        runningTransform = runningTransform.rotateY(shoulder_pitch);
+        //Rotate about shoulder pitch with zero position Zombie arms
+        runningTransform = runningTransform.rotateY(shoulder_pitch-M_PI_2);
         //Translate to end of shoulder part
         runningTransform = runningTransform.translate({
             RobotKinematicModel::Arm::SHOULDER_LENGTH,
@@ -237,6 +241,9 @@ namespace kinematics {
             negativeIfRight * RobotKinematicModel::Arm::UPPER_ARM_Y_OFFSET,
             -RobotKinematicModel::Arm::UPPER_ARM_LENGTH
         });
+        //Rotate to face down arm
+        runningTransform = runningTransform.rotateY(M_PI_2);
+
         positions[SHOULDER_ROLL] = runningTransform;
         if(servoID == SHOULDER_ROLL){
             return positions;

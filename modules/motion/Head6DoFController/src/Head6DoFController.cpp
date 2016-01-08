@@ -22,10 +22,12 @@
 #include "messages/support/Configuration.h"
 #include "utility/support/yaml_armadillo.h"
 #include "utility/motion/InverseKinematics.h"
+#include "utility/motion/ForwardKinematics.h"
 #include "utility/motion/RobotModels.h"
 #include "utility/motion/RobotModels.h"
 #include "messages/behaviour/ServoCommand.h"
 #include "messages/input/ServoID.h"
+#include "messages/input/Sensors.h"
 #include "messages/behaviour/Action.h"
 #include "utility/support/yaml_expression.h"
 
@@ -36,10 +38,13 @@ namespace motion {
     using messages::behaviour::RegisterAction;
     using messages::behaviour::ActionPriorites;
     using messages::input::ServoID;
+    using messages::input::ServoSide;
+    using messages::input::Sensors;
     using messages::input::LimbID;
 
     using utility::math::matrix::Transform3D;
     using utility::motion::kinematics::DarwinModel;
+    using utility::motion::kinematics::Side;
 
     using utility::support::Expression;
     using messages::behaviour::ServoCommand;
@@ -87,9 +92,25 @@ namespace motion {
         	emit(waypoints);
         });
 
-        // on<Every<75,Per<std::chrono::seconds>>, Single>().then([this]{
-        	
-        // });
+        on<Every<10,std::chrono::seconds>, With<Sensors>, Single>().then([this](const Sensors& sensors){
+        	Transform3D R_shoulder_pitch = sensors.forwardKinematics.at(ServoID::R_SHOULDER_PITCH);
+        	Transform3D R_shoulder_roll = sensors.forwardKinematics.at(ServoID::R_SHOULDER_ROLL);
+        	Transform3D R_arm = sensors.forwardKinematics.at(ServoID::R_ELBOW);
+        	Transform3D L_shoulder_pitch = sensors.forwardKinematics.at(ServoID::L_SHOULDER_PITCH);
+        	Transform3D L_shoulder_roll = sensors.forwardKinematics.at(ServoID::L_SHOULDER_ROLL);
+        	Transform3D L_arm = sensors.forwardKinematics.at(ServoID::L_ELBOW);
+
+        	arma::vec3 zeros = arma::zeros(3);
+        	arma::vec3 zero_pos = utility::motion::kinematics::calculateArmPosition<DarwinModel>(zeros, true);
+
+        	std::cout << "New zero pos = \n" << zero_pos << std::endl;
+        	std::cout << "Traditional FK R_shoulder_pitch = \n" << R_shoulder_pitch << std::endl;
+        	std::cout << "Traditional FK R_shoulder_roll = \n" << R_shoulder_roll << std::endl;
+        	std::cout << "Traditional FK R_arm = \n" << R_arm << std::endl;
+        	std::cout << "Traditional FK L_shoulder_pitch = \n" << L_shoulder_pitch << std::endl;
+        	std::cout << "Traditional FK L_shoulder_roll = \n" << L_shoulder_roll << std::endl;
+        	std::cout << "Traditional FK L_arm = \n" << L_arm << std::endl;
+        });
 
         emit<Scope::INITIALIZE>(std::make_unique<RegisterAction>(RegisterAction {
             id,
