@@ -1,4 +1,4 @@
-ADD_ROLE(
+NUCLEAR_ROLE(
     #Support
     #support::SignalCatcher
     support::logging::ConsoleLogHandler
