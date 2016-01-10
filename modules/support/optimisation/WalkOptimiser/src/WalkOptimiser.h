@@ -23,10 +23,10 @@
 #include <nuclear>
 #include <armadillo>
 
-#include "messages/input/Sensors.h"
-#include "messages/motion/GetupCommand.h"
-#include "messages/support/Configuration.h"
-#include "messages/behaviour/FixedWalkCommand.h"
+#include "message/input/Sensors.h"
+#include "message/motion/GetupCommand.h"
+#include "message/support/Configuration.h"
+#include "message/behaviour/FixedWalkCommand.h"
 
 namespace modules {
     namespace support {
@@ -43,14 +43,14 @@ namespace modules {
                 arma::running_stat<double> tilt;
                 bool recording;
                 double popFitness();
-                void update(const messages::input::Sensors& sensors);
+                void update(const message::input::Sensors& sensors);
                 void recordGetup();
                 void getupFinished();
             };
 
             class WalkOptimiser : public NUClear::Reactor {
             private:
-                messages::behaviour::FixedWalkCommand walk_command;
+                message::behaviour::FixedWalkCommand walk_command;
                 std::vector<std::string> parameter_names;
                 arma::vec parameter_sigmas;
                 arma::vec fitnesses;
@@ -63,12 +63,12 @@ namespace modules {
 
                 int configuration_wait_milliseconds = 2000;
 
-                messages::support::Configuration initialConfig;
+                message::support::Configuration initialConfig;
 
                 static constexpr const char* backupLocation = "WalkEngine_Optimised.yaml";
 
                 void printState(const arma::vec& state);
-                arma::vec getState(const messages::support::Configuration& walkConfig);
+                arma::vec getState(const message::support::Configuration& walkConfig);
                 YAML::Node getWalkConfig(const arma::vec& state);
                 void saveConfig(const YAML::Node& config);
                 void setWalkParameters(const YAML::Node& config);

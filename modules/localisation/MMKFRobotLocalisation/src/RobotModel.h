@@ -21,8 +21,8 @@
 #define MODULES_LOCALISATION_ROBOTMODEL_H
 
 #include <armadillo>
-#include "messages/localisation/FieldObject.h"
-#include "messages/input/Sensors.h"
+#include "message/localisation/FieldObject.h"
+#include "message/input/Sensors.h"
 #include "utility/math/matrix/Rotation3D.h"
 
 
@@ -62,7 +62,7 @@ namespace robot {
 
         arma::vec::fixed<RobotModel::size> timeUpdate(
             const arma::vec::fixed<RobotModel::size>& state, double deltaT,
-            const messages::input::Sensors& sensors);
+            const message::input::Sensors& sensors);
 
         // arma::vec predictedObservation(
         //     const arma::vec::fixed<RobotModel::size>& state,
@@ -71,11 +71,11 @@ namespace robot {
         arma::vec predictedObservation(
             const arma::vec::fixed<RobotModel::size>& state,
             const arma::vec3& actual_position,
-            const messages::input::Sensors& sensors);
+            const message::input::Sensors& sensors);
 
         arma::vec predictedObservation(
             const arma::vec::fixed<RobotModel::size>& state,
-            const messages::input::Sensors& sensors);
+            const message::input::Sensors& sensors);
 
         arma::vec predictedObservation(
             const arma::vec::fixed<RobotModel::size>& state,

@@ -21,7 +21,7 @@
 #define MESSAGES_BEHAVIOUR_SERVOCOMMAND_H
 
 #include <nuclear>
-#include "messages/input/ServoID.h"
+#include "message/input/ServoID.h"
 
 namespace messages {
     namespace behaviour {

@@ -19,7 +19,7 @@
 
 syntax = "proto3";
 
-package messages.localisation.proto;
+package message.localisation.proto;
 
 message Model {
     uint32 model_id = 1;

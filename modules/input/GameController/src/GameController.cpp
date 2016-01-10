@@ -19,24 +19,24 @@
 
 #include <atomic>
 #include "GameController.h"
-#include "messages/support/Configuration.h"
-#include "messages/support/GlobalConfig.h"
-#include "messages/platform/darwin/DarwinSensors.h"
-#include "messages/output/Say.h"
+#include "message/support/Configuration.h"
+#include "message/support/GlobalConfig.h"
+#include "message/platform/darwin/DarwinSensors.h"
+#include "message/output/Say.h"
 
 namespace modules {
 namespace input {
 
-    using messages::support::Configuration;
-    using messages::support::GlobalConfig;
+    using message::support::Configuration;
+    using message::support::GlobalConfig;
     using gamecontroller::GameControllerPacket;
     using gamecontroller::GameControllerReplyPacket;
     using gamecontroller::ReplyMessage;
     using gamecontroller::Team;
-    using namespace messages::input::gameevents;
-    using TeamColourEvent = messages::input::gameevents::TeamColour;
-    using messages::platform::darwin::ButtonLeftDown;
-    using messages::platform::darwin::ButtonMiddleDown;
+    using namespace message::input::gameevents;
+    using TeamColourEvent = message::input::gameevents::TeamColour;
+    using message::platform::darwin::ButtonLeftDown;
+    using message::platform::darwin::ButtonMiddleDown;
 
     GameController::GameController(std::unique_ptr<NUClear::Environment> environment)
     : Reactor(std::move(environment))

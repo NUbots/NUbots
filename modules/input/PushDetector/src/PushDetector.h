@@ -23,7 +23,7 @@
 #include <nuclear>
 #include <armadillo>
 #include <chrono>
-#include "messages/input/Sensors.h"
+#include "message/input/Sensors.h"
 #include "utility/math/filter/UKF.h"
 
 namespace modules {

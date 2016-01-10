@@ -23,10 +23,10 @@
 #include <nuclear>
 #include <armadillo>
 
-#include "messages/input/Image.h"
-#include "messages/input/Sensors.h"
-#include "messages/vision/ClassifiedImage.h"
-#include "messages/vision/LookUpTable.h"
+#include "message/input/Image.h"
+#include "message/input/Sensors.h"
+#include "message/vision/ClassifiedImage.h"
+#include "message/vision/LookUpTable.h"
 
 namespace modules {
     namespace vision {
@@ -74,21 +74,21 @@ namespace modules {
             double FOCAL_LENGTH_PIXELS = 2.0;
             double ALPHA = 2.0;
 
-            void insertSegments(messages::vision::ClassifiedImage<messages::vision::ObjectClass>& image
-                , std::vector<messages::vision::ClassifiedImage<messages::vision::ObjectClass>::Segment>& segments
+            void insertSegments(message::vision::ClassifiedImage<message::vision::ObjectClass>& image
+                , std::vector<message::vision::ClassifiedImage<message::vision::ObjectClass>::Segment>& segments
                 , bool vertical);
 
-            void findHorizon(const messages::input::Image& image, const messages::vision::LookUpTable& lut, messages::vision::ClassifiedImage<messages::vision::ObjectClass>& classifiedImage);
+            void findHorizon(const message::input::Image& image, const message::vision::LookUpTable& lut, message::vision::ClassifiedImage<message::vision::ObjectClass>& classifiedImage);
 
-            void findVisualHorizon(const messages::input::Image& image, const messages::vision::LookUpTable& lut, messages::vision::ClassifiedImage<messages::vision::ObjectClass>& classifiedImage);
+            void findVisualHorizon(const message::input::Image& image, const message::vision::LookUpTable& lut, message::vision::ClassifiedImage<message::vision::ObjectClass>& classifiedImage);
 
-            void findBall(const messages::input::Image& image, const messages::vision::LookUpTable& lut, messages::vision::ClassifiedImage<messages::vision::ObjectClass>& classifiedImage);
+            void findBall(const message::input::Image& image, const message::vision::LookUpTable& lut, message::vision::ClassifiedImage<message::vision::ObjectClass>& classifiedImage);
 
-            void findGoals(const messages::input::Image& image, const messages::vision::LookUpTable& lut, messages::vision::ClassifiedImage<messages::vision::ObjectClass>& classifiedImage);
+            void findGoals(const message::input::Image& image, const message::vision::LookUpTable& lut, message::vision::ClassifiedImage<message::vision::ObjectClass>& classifiedImage);
 
-            void enhanceBall(const messages::input::Image& image, const messages::vision::LookUpTable& lut, messages::vision::ClassifiedImage<messages::vision::ObjectClass>& classifiedImage);
+            void enhanceBall(const message::input::Image& image, const message::vision::LookUpTable& lut, message::vision::ClassifiedImage<message::vision::ObjectClass>& classifiedImage);
 
-            void enhanceGoals(const messages::input::Image& image, const messages::vision::LookUpTable& lut, messages::vision::ClassifiedImage<messages::vision::ObjectClass>& classifiedImage);
+            void enhanceGoals(const message::input::Image& image, const message::vision::LookUpTable& lut, message::vision::ClassifiedImage<message::vision::ObjectClass>& classifiedImage);
 
         public:
             explicit LUTClassifier(std::unique_ptr<NUClear::Environment> environment);

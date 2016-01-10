@@ -9,11 +9,11 @@ being recorded in real time.
 ## Usage
 
 AudioFileInput opens the audio file specified in its configuration file. It
-then emits a `messages::SoundChunkSettings` containing the sound file's sample
+then emits a `message::SoundChunkSettings` containing the sound file's sample
 rate, bit depth and the number of samples that will be in each sound chunk.
 
 Once running, the module regularly emits buffers of audio samples in
-`messages::SoundChunk` objects. The number of chunks to emit per second is set
+`message::SoundChunk` objects. The number of chunks to emit per second is set
 by the `CHUNKS_PER_SECOND` constant, which is currently set to 100 (producing
 100 10ms chunks per second).
 
@@ -26,13 +26,13 @@ input with pre-recorded sound.
 
 ## Consumes
 
-* `messages::Configuration<AudioFileConfiguration>` from the config system to
+* `message::Configuration<AudioFileConfiguration>` from the config system to
   set the name of the audio file to read
 
 ## Emits
 
-* `messages::SoundChunk` containing audio samples read from the file
-* `messages::SoundChunkSettings` to describe the sample format of upcoming
+* `message::SoundChunk` containing audio samples read from the file
+* `message::SoundChunkSettings` to describe the sample format of upcoming
   sound chunks
 
 ## Configuration

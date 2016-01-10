@@ -20,11 +20,11 @@
 #ifndef MESSAGES_INPUT_LIMBID_H
 #define MESSAGES_INPUT_LIMBID_H
 
-#include "messages/input/ServoID.h"
+#include "message/input/ServoID.h"
 
 namespace messages {
     namespace input {
-        //LimbID is a higher level of ServoID (see ServoID.h), 
+        //LimbID is a higher level of ServoID (see ServoID.h),
         //which contains all the constituent servos (e.g. An arm contains shoulder (pitch + roll)) and elbow.
 
         enum class LimbID {

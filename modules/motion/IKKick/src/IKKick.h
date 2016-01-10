@@ -22,8 +22,8 @@
 
 #include <nuclear>
 #include "IKKickControllers.h"
-#include "messages/motion/KickCommand.h"
-#include "messages/input/Sensors.h"
+#include "message/motion/KickCommand.h"
+#include "message/input/Sensors.h"
 #include "utility/motion/Balance.h"
 
 namespace modules {
@@ -34,7 +34,7 @@ namespace motion {
     private:
 
         // ID of support foot
-        messages::input::LimbID supportFoot;
+        message::input::LimbID supportFoot;
         // NEED the vector from the point on the surface of the ball where we want to kick to the front of the kick foot which is rightFootFront
         // KickPlanner has to add the radius of the all to get the location of the centre of the ball
         // point position of ball
@@ -44,7 +44,7 @@ namespace motion {
 
         /// Subsumption ID key to access motors
         const size_t subsumptionId;
-        
+
         bool leftFootIsSupport;
 
         float foot_separation;

@@ -23,7 +23,7 @@
 #include <armadillo>
 
 #include "MockFeatureExtractor.h"
-#include "messages/input/ServoID.h"
+#include "message/input/ServoID.h"
 #include "utility/math/vision.h"
 #include "utility/support/yaml_armadillo.h"
 
@@ -31,7 +31,7 @@ namespace utility {
 	namespace vision {
 		bool operator==(const MockFeatureExtractor::ExtractedFeature& lhs, const MockFeatureExtractor::ExtractedFeature& rhs){return (lhs.featureID == rhs.featureID);}
 
-		using messages::input::ServoID;
+		using message::input::ServoID;
 
 		MockFeatureExtractor::MockFeatureExtractor(){}
 
@@ -75,7 +75,7 @@ namespace utility {
 			return mockFeatures;
 		}
 
-		std::vector<MockFeatureExtractor::ExtractedFeature> MockFeatureExtractor::extractFeatures(const messages::localisation::Self& self, const messages::input::Sensors& sensors){
+		std::vector<MockFeatureExtractor::ExtractedFeature> MockFeatureExtractor::extractFeatures(const message::localisation::Self& self, const message::input::Sensors& sensors){
 			std::vector<MockFeatureExtractor::ExtractedFeature> features;
 			arma::mat worldToCamera_camera = utility::math::vision::calculateWorldToCameraTransform(sensors, self);
 

@@ -24,20 +24,20 @@
 #include "utility/math/angle.h"
 #include "utility/math/coordinates.h"
 #include "utility/nubugger/NUhelpers.h"
-#include "messages/input/Sensors.h"
-#include "messages/vision/VisionObjects.h"
-#include "messages/support/Configuration.h"
-#include "messages/localisation/FieldObject.h"
+#include "message/input/Sensors.h"
+#include "message/vision/VisionObjects.h"
+#include "message/support/Configuration.h"
+#include "message/localisation/FieldObject.h"
 #include "BallModel.h"
 #include "utility/localisation/transform.h"
 #include "utility/nubugger/NUhelpers.h"
 
-using messages::localisation::Self;
+using message::localisation::Self;
 using utility::nubugger::graph;
-using messages::input::Sensors;
-using messages::support::Configuration;
-// using messages::localisation::FakeOdometry;
-using messages::localisation::Ball;
+using message::input::Sensors;
+using message::support::Configuration;
+// using message::localisation::FakeOdometry;
+using message::localisation::Ball;
 using utility::nubugger::drawArrow;
 
 
@@ -73,7 +73,7 @@ namespace localisation {
             arma::vec2 robot_space_ball_pos = imu_to_robot * model_state.rows(0, 1);
             arma::vec2 robot_space_ball_vel = imu_to_robot * model_state.rows(2, 3);
 
-            messages::localisation::Ball ball;
+            message::localisation::Ball ball;
             ball.position = robot_space_ball_pos;
             ball.velocity = robot_space_ball_vel + robots[0].velocity;
             ball.position_cov = model_cov.submat(0,0,1,1);
@@ -113,10 +113,10 @@ namespace localisation {
             engine_.TimeUpdate(curr_time);
         });
 
-        on<Trigger<std::vector<messages::vision::Ball>>,
+        on<Trigger<std::vector<message::vision::Ball>>,
              Sync<KFBallLocalisation>
              >().then("KFBallLocalisation Step",
-                [this](const std::vector<messages::vision::Ball>& balls) {
+                [this](const std::vector<message::vision::Ball>& balls) {
 
             //Is this check necessary?
             if(!emit_data_handle.enabled()){

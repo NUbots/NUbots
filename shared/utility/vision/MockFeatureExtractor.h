@@ -24,10 +24,10 @@
 #include <armadillo>
 #include <yaml-cpp/yaml.h>
 
-#include "messages/input/Image.h"
-#include "messages/input/Sensors.h"
-#include "messages/input/Image.h"
-#include "messages/localisation/FieldObject.h"
+#include "message/input/Image.h"
+#include "message/input/Sensors.h"
+#include "message/input/Image.h"
+#include "message/localisation/FieldObject.h"
 
 namespace utility {
 	namespace vision {
@@ -57,7 +57,7 @@ namespace utility {
 				int numberOfTimesUpdated;
 			};
 			MockFeatureExtractor();
-			std::vector<ExtractedFeature> extractFeatures(const messages::localisation::Self& self, const messages::input::Sensors& sensors);
+			std::vector<ExtractedFeature> extractFeatures(const message::localisation::Self& self, const message::input::Sensors& sensors);
 
 			float FOV_X;
 			float FOV_Y;

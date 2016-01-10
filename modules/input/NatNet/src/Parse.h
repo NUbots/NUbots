@@ -24,12 +24,12 @@
 #include <armadillo>
 
 #include "NatNet.h"
-#include "messages/input/MotionCapture.h"
+#include "message/input/MotionCapture.h"
 
 namespace modules {
 namespace input {
 
-    using messages::input::MotionCapture;
+    using message::input::MotionCapture;
 
     // Read plain old datatypes
     template <typename T>

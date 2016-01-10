@@ -22,27 +22,27 @@
 
 #include "utility/support/yaml_armadillo.h"
 #include "utility/math/optimisation/PGAoptimiser.h"
-#include "messages/input/ServoID.h"
+#include "message/input/ServoID.h"
 #include "utility/math/angle.h"
 
 namespace modules {
     namespace support {
         namespace optimisation {
 
-            using messages::behaviour::FixedWalkCommand;
-            using messages::behaviour::FixedWalkFinished;
-            using messages::behaviour::CancelFixedWalk;
-            using messages::behaviour::WalkOptimiserCommand;
-            using messages::behaviour::WalkConfigSaved;
+            using message::behaviour::FixedWalkCommand;
+            using message::behaviour::FixedWalkFinished;
+            using message::behaviour::CancelFixedWalk;
+            using message::behaviour::WalkOptimiserCommand;
+            using message::behaviour::WalkConfigSaved;
 
-            using messages::input::Sensors;
-            using messages::input::ServoID;
+            using message::input::Sensors;
+            using message::input::ServoID;
 
-            using messages::motion::ExecuteGetup;
-            using messages::motion::KillGetup;
+            using message::motion::ExecuteGetup;
+            using message::motion::KillGetup;
 
-            using messages::support::SaveConfiguration;
-            using messages::support::Configuration;
+            using message::support::SaveConfiguration;
+            using message::support::Configuration;
 
             WalkOptimiser::WalkOptimiser(std::unique_ptr<NUClear::Environment> environment)
                 : Reactor(std::move(environment)),
@@ -210,7 +210,7 @@ namespace modules {
                 //Reset all data
                 return getupFitness + stabilityFitness;
             }
-            void FitnessData::update(const messages::input::Sensors& sensors){
+            void FitnessData::update(const message::input::Sensors& sensors){
                 if(recording){
                     arma::vec3 verticalKinematics = sensors.orientationCamToGround.submat(0,2,2,2);
                     arma::vec3 verticalOrientation = sensors.kinematicsCamToGround.submat(0,2,2,2);

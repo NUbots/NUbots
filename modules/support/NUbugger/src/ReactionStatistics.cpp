@@ -20,11 +20,11 @@
 #include "NUbugger.h"
 
 #include "utility/time/time.h"
-#include "messages/support/nuclear/proto/ReactionStatistics.pb.h"
+#include "message/support/nuclear/proto/ReactionStatistics.pb.h"
 
 namespace modules {
 namespace support {
-    using ReactionStatisticsProto = messages::support::nuclear::proto::ReactionStatistics;
+    using ReactionStatisticsProto = message::support::nuclear::proto::ReactionStatistics;
     using utility::time::getUtcTimestamp;
     using NUClear::message::ReactionStatistics;
     using std::chrono::duration_cast;

@@ -27,11 +27,11 @@ The keyboard controls are as follows:
 ## Consumes
 
 * `CommandLineArgumentis` containing the name of the script to edit
-* `messages::DarwinServos` containing the current positions of each servo
+* `message::DarwinServos` containing the current positions of each servo
 
 ## Emits
 
-* `messages::ServoWaypoint>` to control servos
+* `message::ServoWaypoint>` to control servos
 
 ## Dependencies
 

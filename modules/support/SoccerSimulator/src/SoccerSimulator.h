@@ -22,15 +22,15 @@
 
 #include <nuclear>
 #include <armadillo>
-#include "messages/support/Configuration.h"
-#include "messages/support/GlobalConfig.h"
-#include "messages/support/FieldDescription.h"
+#include "message/support/Configuration.h"
+#include "message/support/GlobalConfig.h"
+#include "message/support/FieldDescription.h"
 #include "utility/math/matrix/Transform2D.h"
 #include "utility/math/angle.h"
-#include "messages/platform/darwin/DarwinSensors.h"
-#include "messages/input/Sensors.h"
-#include "messages/input/CameraParameters.h"
-#include "messages/motion/KickCommand.h"
+#include "message/platform/darwin/DarwinSensors.h"
+#include "message/input/Sensors.h"
+#include "message/input/CameraParameters.h"
+#include "message/motion/KickCommand.h"
 
 #include "VirtualVision.h"
 
@@ -79,9 +79,9 @@ namespace support {
         double absolute_time();
 
         //Member variables
-        messages::motion::KickPlannerConfig kick_cfg;
+        message::motion::KickPlannerConfig kick_cfg;
 
-        std::shared_ptr<messages::support::FieldDescription> field_description_;
+        std::shared_ptr<message::support::FieldDescription> field_description_;
 
         static constexpr size_t SIMULATION_UPDATE_FREQUENCY = 180;
 
@@ -130,7 +130,7 @@ namespace support {
 
         WorldState world;
 
-        std::queue<messages::motion::KickCommand> kickQueue;
+        std::queue<message::motion::KickCommand> kickQueue;
 
         Transform2D oldRobotPose;
         Transform2D oldBallPose;
@@ -143,13 +143,13 @@ namespace support {
         NUClear::clock::time_point lastNow;
 
         //Methods
-        void updateConfiguration(const messages::support::Configuration& config, const messages::support::GlobalConfig& globalConfig);
+        void updateConfiguration(const message::support::Configuration& config, const message::support::GlobalConfig& globalConfig);
 
-        std::unique_ptr<messages::platform::darwin::DarwinSensors::Gyroscope> computeGyro(float heading, float oldHeading);
+        std::unique_ptr<message::platform::darwin::DarwinSensors::Gyroscope> computeGyro(float heading, float oldHeading);
 
         arma::vec2 getPath(Config::Motion::Path p);
 
-        void setGoalLeftRightKnowledge(std::vector<messages::vision::Goal>& goals);
+        void setGoalLeftRightKnowledge(std::vector<message::vision::Goal>& goals);
 
     public:
         /// @brief Called by the powerplant to build and setup the SoccerSimulator reactor.

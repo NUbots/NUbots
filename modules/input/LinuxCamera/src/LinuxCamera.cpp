@@ -24,16 +24,16 @@ extern "C" {
 }
 
 #include "V4L2Camera.h"
-#include "messages/input/Image.h"
-#include "messages/input/CameraParameters.h"
-#include "messages/support/Configuration.h"
+#include "message/input/Image.h"
+#include "message/input/CameraParameters.h"
+#include "message/support/Configuration.h"
 
 namespace modules {
     namespace input {
 
-        using messages::support::Configuration;
-        using messages::input::CameraParameters;
-        using messages::input::Image;
+        using message::support::Configuration;
+        using message::input::CameraParameters;
+        using message::input::Image;
 
         // We assume that the device will always be video0, if not then change this
         LinuxCamera::LinuxCamera(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {

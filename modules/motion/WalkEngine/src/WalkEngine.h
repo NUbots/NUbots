@@ -25,10 +25,10 @@
 
 #include <yaml-cpp/yaml.h>
 
-#include "messages/support/Configuration.h"
-#include "messages/behaviour/Action.h"
-#include "messages/behaviour/ServoCommand.h"
-#include "messages/input/Sensors.h"
+#include "message/support/Configuration.h"
+#include "message/behaviour/Action.h"
+#include "message/behaviour/ServoCommand.h"
+#include "message/input/Sensors.h"
 #include "utility/math/geometry/UnitQuaternion.h"
 
 #include "utility/math/matrix/Transform2D.h"
@@ -57,10 +57,10 @@ namespace motion {
         static constexpr const char* CONFIGURATION_PATH = "WalkEngine.yaml";
         explicit WalkEngine(std::unique_ptr<NUClear::Environment> environment);
     private:
-        using LimbID         = messages::input::LimbID;
-        using ServoCommand   = messages::behaviour::ServoCommand;
-        using Sensors        = messages::input::Sensors;
-        using ServoID        = messages::input::ServoID;
+        using LimbID         = message::input::LimbID;
+        using ServoCommand   = message::behaviour::ServoCommand;
+        using Sensors        = message::input::Sensors;
+        using ServoID        = message::input::ServoID;
         using Transform2D    = utility::math::matrix::Transform2D;
         using Transform3D    = utility::math::matrix::Transform3D;
         using UnitQuaternion = utility::math::geometry::UnitQuaternion;

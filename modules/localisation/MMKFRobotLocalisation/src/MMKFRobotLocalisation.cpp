@@ -27,12 +27,12 @@
 #include "utility/nubugger/NUhelpers.h"
 #include "utility/localisation/LocalisationFieldObject.h"
 #include "utility/localisation/transform.h"
-#include "messages/vision/VisionObjects.h"
-#include "messages/input/Sensors.h"
-#include "messages/support/Configuration.h"
-#include "messages/support/FieldDescription.h"
-#include "messages/localisation/FieldObject.h"
-#include "messages/localisation/ResetRobotHypotheses.h"
+#include "message/vision/VisionObjects.h"
+#include "message/input/Sensors.h"
+#include "message/support/Configuration.h"
+#include "message/support/FieldDescription.h"
+#include "message/localisation/FieldObject.h"
+#include "message/localisation/ResetRobotHypotheses.h"
 #include "MMKFRobotLocalisationEngine.h"
 #include "RobotModel.h"
 
@@ -40,12 +40,12 @@ using utility::math::matrix::Rotation3D;
 using utility::math::angle::bearingToUnitVector;
 using utility::nubugger::graph;
 using utility::localisation::LocalisationFieldObject;
-using messages::support::Configuration;
-using messages::support::FieldDescription;
-using messages::input::Sensors;
-using messages::vision::Goal;
-using messages::localisation::Self;
-using messages::localisation::ResetRobotHypotheses;
+using message::support::Configuration;
+using message::support::FieldDescription;
+using message::input::Sensors;
+using message::vision::Goal;
+using message::localisation::Self;
+using message::localisation::ResetRobotHypotheses;
 using utility::nubugger::graph;
 
 namespace modules {
@@ -170,12 +170,12 @@ namespace localisation {
         //     engine_->TimeUpdate(curr_time, sensors);
         // });
 
-        on<Trigger<std::vector<messages::vision::Goal>>
+        on<Trigger<std::vector<message::vision::Goal>>
          , With<Sensors>
          , Sync<MMKFRobotLocalisation>
          , Single>()
          .then("MMKFRobotLocalisation Measurement Step",
-            [this](const std::vector<messages::vision::Goal>& goals, const Sensors& sensors) {
+            [this](const std::vector<message::vision::Goal>& goals, const Sensors& sensors) {
 
             //Is this check necessary?
             if(!emit_data_handle.enabled()){

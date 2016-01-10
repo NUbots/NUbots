@@ -21,7 +21,7 @@
 #define MODULES_RESEARCH_SCRIPTOPTIMIZER_H
 
 #include <nuclear>
-#include "messages/platform/darwin/DarwinSensors.h"
+#include "message/platform/darwin/DarwinSensors.h"
 
 namespace modules {
     namespace research {
@@ -36,7 +36,7 @@ namespace modules {
             volatile bool recording;
             volatile int iteration;
             std::string metadata;
-            std::vector<std::shared_ptr<const messages::platform::darwin::DarwinSensors>> sensors;
+            std::vector<std::shared_ptr<const message::platform::darwin::DarwinSensors>> sensors;
         public:
             explicit ScriptOptimizer(std::unique_ptr<NUClear::Environment> environment);
         };

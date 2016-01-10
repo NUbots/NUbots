@@ -18,8 +18,8 @@
  */
 
 #include "HeadBehaviourSoccer.h"
-#include "messages/support/Configuration.h"
-#include "messages/motion/HeadCommand.h"
+#include "message/support/Configuration.h"
+#include "message/motion/HeadCommand.h"
 #include "utility/math/coordinates.h"
 #include "utility/motion/InverseKinematics.h"
 #include "utility/motion/RobotModels.h"
@@ -28,7 +28,7 @@
 #include "utility/math/geometry/UnitQuaternion.h"
 #include "utility/math/geometry/Quad.h"
 #include "utility/math/vision.h"
-#include "messages/motion/GetupCommand.h"
+#include "message/motion/GetupCommand.h"
 #include "utility/nubugger/NUhelpers.h"
 #include "utility/support/yaml_armadillo.h"
 
@@ -41,19 +41,19 @@ namespace modules {
 
         using utility::nubugger::graph;
 
-        using messages::vision::Goal;
-        using messages::vision::Ball;
-        using messages::vision::VisionObject;
-        using messages::support::Configuration;
-        // using messages::localisation::Ball;
-        using messages::localisation::Self;
-        using LocBall = messages::localisation::Ball;
-        using messages::input::Sensors;
-        using messages::motion::HeadCommand;
+        using message::vision::Goal;
+        using message::vision::Ball;
+        using message::vision::VisionObject;
+        using message::support::Configuration;
+        // using message::localisation::Ball;
+        using message::localisation::Self;
+        using LocBall = message::localisation::Ball;
+        using message::input::Sensors;
+        using message::motion::HeadCommand;
 
-        using messages::input::CameraParameters;
-        using messages::motion::ExecuteGetup;
-        using messages::motion::KillGetup;
+        using message::input::CameraParameters;
+        using message::motion::ExecuteGetup;
+        using message::motion::KillGetup;
 
         using utility::math::coordinates::sphericalToCartesian;
         using utility::motion::kinematics::calculateHeadJoints;
@@ -64,11 +64,11 @@ namespace modules {
         using utility::math::vision::objectDirectionFromScreenAngular;
         using utility::math::vision::screenAngularFromObjectDirection;
 
-        using messages::input::ServoID;
+        using message::input::ServoID;
 
-        using messages::behaviour::SoccerObjectPriority;
-        using messages::behaviour::SearchType;
-        using messages::behaviour::searchTypeFromString;
+        using message::behaviour::SoccerObjectPriority;
+        using message::behaviour::SearchType;
+        using message::behaviour::searchTypeFromString;
 
             HeadBehaviourSoccer::HeadBehaviourSoccer(std::unique_ptr<NUClear::Environment> environment) :
             Reactor(std::move(environment)),
@@ -414,7 +414,7 @@ namespace modules {
             }
 
 
-            bool HeadBehaviourSoccer::orientationHasChanged(const messages::input::Sensors& sensors){
+            bool HeadBehaviourSoccer::orientationHasChanged(const message::input::Sensors& sensors){
                 Rotation3D diff = sensors.orientation.i() * lastPlanOrientation;
                 UnitQuaternion quat = UnitQuaternion(diff);
                 float angle = quat.getAngle();

@@ -19,9 +19,9 @@
 
 #include "NUbugger.h"
 
-#include "messages/behaviour/proto/Subsumption.pb.h"
-#include "messages/behaviour/Action.h"
-#include "messages/input/LimbID.h"
+#include "message/behaviour/proto/Subsumption.pb.h"
+#include "message/behaviour/Action.h"
+#include "message/input/LimbID.h"
 
 #include "utility/time/time.h"
 
@@ -29,13 +29,13 @@ namespace modules {
 namespace support {
     using utility::time::getUtcTimestamp;
 
-    using messages::behaviour::ActionStart;
-    using messages::behaviour::ActionKill;
-    using messages::behaviour::RegisterAction;
-    using messages::behaviour::ActionPriorites;
-    using messages::behaviour::proto::Subsumption;
+    using message::behaviour::ActionStart;
+    using message::behaviour::ActionKill;
+    using message::behaviour::RegisterAction;
+    using message::behaviour::ActionPriorites;
+    using message::behaviour::proto::Subsumption;
 
-    using messages::input::LimbID;
+    using message::input::LimbID;
 
     inline Subsumption::Limb getLimb(const LimbID& limb) {
         switch (limb) {

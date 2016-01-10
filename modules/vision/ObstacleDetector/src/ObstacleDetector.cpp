@@ -20,13 +20,13 @@
 #include "ObstacleDetector.h"
 
 #include <armadillo>
-#include "messages/vision/ClassifiedImage.h"
+#include "message/vision/ClassifiedImage.h"
 
 namespace modules {
 namespace vision {
 
-    using messages::vision::ObjectClass;
-    using messages::vision::ClassifiedImage;
+    using message::vision::ObjectClass;
+    using message::vision::ClassifiedImage;
 
     ObstacleDetector::ObstacleDetector(std::unique_ptr<NUClear::Environment> environment)
         : Reactor(std::move(environment)) {

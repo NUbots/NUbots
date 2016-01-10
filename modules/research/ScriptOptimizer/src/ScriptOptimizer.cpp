@@ -18,21 +18,21 @@
  */
 
 #include "ScriptOptimizer.h"
-#include "messages/motion/Script.h"
-#include "messages/motion/ServoWaypoint.h"
-#include "messages/research/scriptoptimizer/OptimizeScript.pb.h"
-#include "messages/research/scriptoptimizer/OptimizeScriptResult.pb.h"
-#include "messages/platform/darwin/DarwinSensors.h"
+#include "message/motion/Script.h"
+#include "message/motion/ServoWaypoint.h"
+#include "message/research/scriptoptimizer/OptimizeScript.pb.h"
+#include "message/research/scriptoptimizer/OptimizeScriptResult.pb.h"
+#include "message/platform/darwin/DarwinSensors.h"
 
 namespace modules {
     namespace research {
 
-        using messages::platform::darwin::DarwinSensors;
-        using messages::research::scriptoptimizer::OptimizeScript;
-        using messages::research::scriptoptimizer::OptimizeScriptResult;
-        using messages::motion::ExecuteScript;
-        using messages::motion::AllServoWaypointsComplete;
-        using messages::motion::Script;
+        using message::platform::darwin::DarwinSensors;
+        using message::research::scriptoptimizer::OptimizeScript;
+        using message::research::scriptoptimizer::OptimizeScriptResult;
+        using message::motion::ExecuteScript;
+        using message::motion::AllServoWaypointsComplete;
+        using message::motion::Script;
 
         ScriptOptimizer::ScriptOptimizer(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)), recording(false) {
 
@@ -60,7 +60,7 @@ namespace modules {
                         for (const auto& target : frame.targets()) {
                             Script::Frame::Target t;
 
-                            t.id = static_cast<messages::input::ServoID>(target.id());
+                            t.id = static_cast<message::input::ServoID>(target.id());
                             t.position = target.position();
                             t.gain = target.gain();
 
@@ -144,7 +144,7 @@ namespace modules {
                             auto* servo = s->add_servo();
 
                             servo->set_error_flags(sensor->servo[i].errorFlags);
-                            servo->set_id(static_cast<messages::input::proto::Sensors_ServoID>(i));
+                            servo->set_id(static_cast<message::input::proto::Sensors_ServoID>(i));
                             servo->set_enabled(sensor->servo[i].torqueEnabled);
                             servo->set_p_gain(sensor->servo[i].pGain);
                             servo->set_i_gain(sensor->servo[i].iGain);

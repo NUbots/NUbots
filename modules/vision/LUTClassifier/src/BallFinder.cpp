@@ -27,12 +27,12 @@
 namespace modules {
     namespace vision {
 
-        using messages::input::Image;
-        using messages::input::ServoID;
-        using messages::input::Sensors;
-        using messages::vision::LookUpTable;
-        using messages::vision::ObjectClass;
-        using messages::vision::ClassifiedImage;
+        using message::input::Image;
+        using message::input::ServoID;
+        using message::input::Sensors;
+        using message::vision::LookUpTable;
+        using message::vision::ObjectClass;
+        using message::vision::ClassifiedImage;
 
         using utility::math::geometry::Line;
         using utility::math::vision::getGroundPointFromScreen;

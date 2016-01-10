@@ -19,29 +19,29 @@
 
 #include "Jump.h"
 
-#include "messages/support/Configuration.h"
+#include "message/support/Configuration.h"
 
 
-#include "messages/input/ServoID.h"
-#include "messages/motion/Script.h"
-#include "messages/behaviour/Action.h"
-#include "messages/behaviour/ServoCommand.h"
-#include "messages/input/Sensors.h"
-#include "messages/platform/darwin/DarwinSensors.h"
+#include "message/input/ServoID.h"
+#include "message/motion/Script.h"
+#include "message/behaviour/Action.h"
+#include "message/behaviour/ServoCommand.h"
+#include "message/input/Sensors.h"
+#include "message/platform/darwin/DarwinSensors.h"
 
 namespace modules {
 namespace behaviour {
 namespace tools {
 
-    using messages::support::Configuration;
-    using messages::support::Configuration;
-    using messages::input::ServoID;
-    using messages::motion::ExecuteScriptByName;
-    using messages::behaviour::RegisterAction;
-    using messages::behaviour::ActionPriorites;
-    using messages::input::LimbID;
-    using messages::platform::darwin::ButtonMiddleDown;
-    using messages::platform::darwin::ButtonLeftDown;
+    using message::support::Configuration;
+    using message::support::Configuration;
+    using message::input::ServoID;
+    using message::motion::ExecuteScriptByName;
+    using message::behaviour::RegisterAction;
+    using message::behaviour::ActionPriorites;
+    using message::input::LimbID;
+    using message::platform::darwin::ButtonMiddleDown;
+    using message::platform::darwin::ButtonLeftDown;
 
     Jump::Jump(std::unique_ptr<NUClear::Environment> environment)
     : Reactor(std::move(environment)) {

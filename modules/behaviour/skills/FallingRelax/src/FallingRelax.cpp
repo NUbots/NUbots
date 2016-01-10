@@ -20,12 +20,12 @@
 #include "FallingRelax.h"
 
 #include <cmath>
-#include "messages/input/ServoID.h"
-#include "messages/motion/Script.h"
-#include "messages/behaviour/Action.h"
-#include "messages/behaviour/ServoCommand.h"
-#include "messages/support/Configuration.h"
-#include "messages/input/Sensors.h"
+#include "message/input/ServoID.h"
+#include "message/motion/Script.h"
+#include "message/behaviour/Action.h"
+#include "message/behaviour/ServoCommand.h"
+#include "message/support/Configuration.h"
+#include "message/input/Sensors.h"
 
 namespace modules {
     namespace behaviour {
@@ -35,13 +35,13 @@ namespace modules {
             struct Falling {};
             struct KillFalling {};
 
-            using messages::support::Configuration;
-            using messages::input::Sensors;
-            using messages::input::ServoID;
-            using messages::motion::ExecuteScriptByName;
-            using messages::behaviour::RegisterAction;
-            using messages::behaviour::ActionPriorites;
-            using messages::input::LimbID;
+            using message::support::Configuration;
+            using message::input::Sensors;
+            using message::input::ServoID;
+            using message::motion::ExecuteScriptByName;
+            using message::behaviour::RegisterAction;
+            using message::behaviour::ActionPriorites;
+            using message::input::LimbID;
 
             FallingRelax::FallingRelax(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)), id(size_t(this) * size_t(this) - size_t(this)), falling(false) {
 

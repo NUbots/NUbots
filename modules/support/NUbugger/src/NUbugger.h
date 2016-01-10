@@ -21,11 +21,11 @@
 #define MODULES_SUPPORT_NUBUGGER_H
 
 #include <nuclear>
-#include "messages/localisation/FieldObject.h"
-#include "messages/input/gameevents/GameEvents.h"
-#include "messages/support/nubugger/proto/Overview.pb.h"
-#include "messages/behaviour/proto/Subsumption.pb.h"
-#include "messages/support/nubugger/proto/ConfigurationState.pb.h"
+#include "message/localisation/FieldObject.h"
+#include "message/input/gameevents/GameEvents.h"
+#include "message/support/nubugger/proto/Overview.pb.h"
+#include "message/behaviour/proto/Subsumption.pb.h"
+#include "message/support/nubugger/proto/ConfigurationState.pb.h"
 
 namespace modules {
     namespace support {
@@ -76,8 +76,8 @@ namespace modules {
             bool networkEnabled = false;
             bool fileEnabled = false;
 
-            messages::support::nubugger::proto::Overview overview;
-            std::map<uint, messages::behaviour::proto::Subsumption::ActionRegister> actionRegisters;
+            message::support::nubugger::proto::Overview overview;
+            std::map<uint, message::behaviour::proto::Subsumption::ActionRegister> actionRegisters;
 
             std::ofstream outputFile;
 
@@ -97,10 +97,10 @@ namespace modules {
 
             void sendReactionHandles();
 
-            void sendGameState(std::string event, const messages::input::gameevents::GameState& gameState);
-            messages::input::proto::GameState::Data::Phase getPhase(const messages::input::gameevents::Phase& phase);
-            messages::input::proto::GameState::Data::Mode getMode(const messages::input::gameevents::Mode& phase);
-            messages::input::proto::GameState::Data::PenaltyReason getPenaltyReason(const messages::input::gameevents::PenaltyReason& penaltyReason);
+            void sendGameState(std::string event, const message::input::gameevents::GameState& gameState);
+            message::input::proto::GameState::Data::Phase getPhase(const message::input::gameevents::Phase& phase);
+            message::input::proto::GameState::Data::Mode getMode(const message::input::gameevents::Mode& phase);
+            message::input::proto::GameState::Data::PenaltyReason getPenaltyReason(const message::input::gameevents::PenaltyReason& penaltyReason);
 
             void sendConfigurationState();
             void sendSubsumption();
@@ -136,18 +136,18 @@ namespace modules {
                 }
             }
 
-            // void recvMessage(const messages::support::nubugger::proto::Message& message);
-            // void recvCommand(const messages::support::nubugger::proto::Message& message);
-            // void recvLookupTable(const messages::support::nubugger::proto::Message& message);
-            // void recvReactionHandles(const messages::support::nubugger::proto::Message& message);
-            void recvConfigurationState(const messages::support::nubugger::proto::ConfigurationState& state);
+            // void recvMessage(const message::support::nubugger::proto::Message& message);
+            // void recvCommand(const message::support::nubugger::proto::Message& message);
+            // void recvLookupTable(const message::support::nubugger::proto::Message& message);
+            // void recvReactionHandles(const message::support::nubugger::proto::Message& message);
+            void recvConfigurationState(const message::support::nubugger::proto::ConfigurationState& state);
 
             void EmitLocalisationModels(
-                const std::unique_ptr<messages::localisation::FieldObject>& robot_model,
-                const std::unique_ptr<messages::localisation::FieldObject>& ball_model);
+                const std::unique_ptr<message::localisation::FieldObject>& robot_model,
+                const std::unique_ptr<message::localisation::FieldObject>& ball_model);
 
-            // messages::support::nubugger::proto::Message::Type getMessageTypeFromString(std::string type_name);
-            // std::string getStringFromMessageType(messages::support::nubugger::proto::Message::Type type);
+            // message::support::nubugger::proto::Message::Type getMessageTypeFromString(std::string type_name);
+            // std::string getStringFromMessageType(message::support::nubugger::proto::Message::Type type);
         public:
             static constexpr const char* IGNORE_TAG = "IGNORE";
             explicit NUbugger(std::unique_ptr<NUClear::Environment> environment);

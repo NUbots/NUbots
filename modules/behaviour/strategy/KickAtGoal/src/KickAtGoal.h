@@ -22,7 +22,7 @@
 
 #include <nuclear>
 
-#include "messages/behaviour/proto/Behaviour.pb.h"
+#include "message/behaviour/proto/Behaviour.pb.h"
 
 namespace modules {
 namespace behaviour {
@@ -38,7 +38,7 @@ namespace strategy {
         void walkToBall();
         void spinToWin();
 
-        messages::behaviour::proto::Behaviour::State currentState = messages::behaviour::proto::Behaviour::INIT;
+        message::behaviour::proto::Behaviour::State currentState = message::behaviour::proto::Behaviour::INIT;
     public:
         /// @brief Called by the powerplant to build and setup the KickAtGoal reactor.
         explicit KickAtGoal(std::unique_ptr<NUClear::Environment> environment);

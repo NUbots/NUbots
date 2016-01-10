@@ -21,7 +21,7 @@
 #define MODULES_BEHAVIOUR_PLANNING_GOALSAVER_H
 
 #include <nuclear>
-#include "messages/motion/DiveCommand.h"
+#include "message/motion/DiveCommand.h"
 
 namespace modules {
 namespace behaviour {
@@ -42,7 +42,7 @@ namespace skills {
          * @Mingze
          * DiveCommand returns vec2 direction to dive
          */
-        messages::motion::DiveCommand diveCommand;
+        message::motion::DiveCommand diveCommand;
 
         void updatePriority(const float& priority);
         int getDirectionalQuadrant(float x, float y);

@@ -18,7 +18,7 @@
  */
 
 #include "PartyDarwin.h"
-#include "messages/DarwinSensors.h"
+#include "message/DarwinSensors.h"
 
 namespace modules {
     namespace platform {
@@ -28,12 +28,12 @@ namespace modules {
 
                 on<Every<125, std::chrono::milliseconds>>([this] {
 
-                    auto eyes = std::make_unique<messages::DarwinSensors::EyeLED>();
+                    auto eyes = std::make_unique<message::DarwinSensors::EyeLED>();
                     eyes->r = rand();
                     eyes->g = rand();
                     eyes->b = rand();
 
-                    auto head = std::make_unique<messages::DarwinSensors::HeadLED>();
+                    auto head = std::make_unique<message::DarwinSensors::HeadLED>();
                     head->r = rand();
                     head->g = rand();
                     head->b = rand();

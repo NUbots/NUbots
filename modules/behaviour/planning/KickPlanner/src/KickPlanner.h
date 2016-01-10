@@ -21,8 +21,8 @@
 #define MODULES_BEHAVIOUR_PLANNING_KICKPLANNER_H
 
 #include <armadillo>
-#include "messages/motion/KickCommand.h"
-#include "messages/input/Sensors.h"
+#include "message/motion/KickCommand.h"
+#include "message/input/Sensors.h"
 
 #include <nuclear>
 namespace modules {
@@ -35,8 +35,8 @@ namespace planning {
         explicit KickPlanner(std::unique_ptr<NUClear::Environment> environment);
 
     private:
-        bool kickValid(const arma::vec3& ballPos, float standHeight, const messages::input::Sensors& sensors);
-       	messages::motion::KickPlannerConfig cfg;
+        bool kickValid(const arma::vec3& ballPos, float standHeight, const message::input::Sensors& sensors);
+       	message::motion::KickPlannerConfig cfg;
     };
 
 }

@@ -28,10 +28,10 @@ namespace modules {
 
         using utility::vision::ORBFeatureExtractor;
         using utility::vision::MockFeatureExtractor;
-        using messages::input::Image;
-        using messages::localisation::Self;
-        using messages::support::Configuration;
-        using messages::input::Sensors;
+        using message::input::Image;
+        using message::localisation::Self;
+        using message::support::Configuration;
+        using message::input::Sensors;
         using utility::nubugger::graph;
 
         SLAME::SLAME(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)), /*ORBModule(),*/ MockSLAMEModule() {

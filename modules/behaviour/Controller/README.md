@@ -11,12 +11,12 @@ This module is used to control which of a range of actions are allowed to execut
 
 ## Consumes
 
-* `messages::behaviour::RegisterAction` containing the details and motor requests of the action
-* `messages::behaviour::ActionPriority` updates the priority of an action
+* `message::behaviour::RegisterAction` containing the details and motor requests of the action
+* `message::behaviour::ActionPriority` updates the priority of an action
 * 
 ## Emits
 
-* `messages::motion::ServoWaypoint` which instructs the motion manager to run.
+* `message::motion::ServoWaypoint` which instructs the motion manager to run.
 * 
 ## Dependencies
 

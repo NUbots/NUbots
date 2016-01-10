@@ -20,8 +20,8 @@ copy of an image from the robot's camera.
 
 ## Consumes
 
-* `messages::DarwinSensors` containing sensor data
-* `messages::Image` containing a frame from the camera
+* `message::DarwinSensors` containing sensor data
+* `message::Image` containing a frame from the camera
 
 ## Dependencies
 

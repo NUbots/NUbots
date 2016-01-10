@@ -20,22 +20,22 @@
 #include "FixedWalk.h"
 
 #include "utility/math/matrix/Rotation2D.h"
-#include "messages/motion/GetupCommand.h"
+#include "message/motion/GetupCommand.h"
 
 namespace modules {
 namespace behaviour {
 namespace planning {
 
-    using messages::motion::WalkCommand;
-    using messages::motion::WalkStartCommand;
-    using messages::motion::WalkStopCommand;
-	using messages::motion::WalkStopped;
-	using messages::behaviour::FixedWalkCommand;
-    using messages::behaviour::FixedWalkFinished;
-	using messages::behaviour::CancelFixedWalk;
-    using messages::motion::ExecuteGetup;
-    using messages::motion::KillGetup;
-	using messages::input::Sensors;
+    using message::motion::WalkCommand;
+    using message::motion::WalkStartCommand;
+    using message::motion::WalkStopCommand;
+	using message::motion::WalkStopped;
+	using message::behaviour::FixedWalkCommand;
+    using message::behaviour::FixedWalkFinished;
+	using message::behaviour::CancelFixedWalk;
+    using message::motion::ExecuteGetup;
+    using message::motion::KillGetup;
+	using message::input::Sensors;
     using utility::math::matrix::Rotation2D;
 
 

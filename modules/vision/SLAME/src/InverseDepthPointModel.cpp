@@ -21,7 +21,7 @@
 #include <cassert>
 #include "InverseDepthPointModel.h" //includes armadillo
 #include "utility/motion/ForwardKinematics.h"
-#include "messages/input/ServoID.h"
+#include "message/input/ServoID.h"
 #include "utility/math/vision.h"
 #include "utility/math/matrix/Transform3D.h"
 
@@ -29,9 +29,9 @@ namespace utility {
     namespace math {
         namespace kalman {
 
-            using messages::localisation::Self;
-            using messages::input::Sensors;
-            using messages::input::ServoID;
+            using message::localisation::Self;
+            using message::input::Sensors;
+            using message::input::ServoID;
 
             arma::vec::fixed<InverseDepthPointModel::size> InverseDepthPointModel::limitState(const arma::vec::fixed<size>& state) {
 

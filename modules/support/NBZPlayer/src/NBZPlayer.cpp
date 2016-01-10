@@ -19,20 +19,20 @@
 
 #include "NBZPlayer.h"
 
-#include "messages/support/Configuration.h"
-#include "messages/input/Image.h"
-#include "messages/input/CameraParameters.h"
-#include "messages/platform/darwin/DarwinSensors.h"
-#include "messages/input/proto/Image.pb.h"
-#include "messages/input/proto/Sensors.pb.h"
+#include "message/support/Configuration.h"
+#include "message/input/Image.h"
+#include "message/input/CameraParameters.h"
+#include "message/platform/darwin/DarwinSensors.h"
+#include "message/input/proto/Image.pb.h"
+#include "message/input/proto/Sensors.pb.h"
 
 namespace modules {
 namespace support {
 
-    using messages::support::Configuration;
-    using messages::input::Image;
-    using messages::platform::darwin::DarwinSensors;
-    using messages::input::CameraParameters;
+    using message::support::Configuration;
+    using message::input::Image;
+    using message::platform::darwin::DarwinSensors;
+    using message::input::CameraParameters;
 
     template <typename T>
     using Serialise = NUClear::util::serialise::Serialise<T>;
@@ -117,9 +117,9 @@ namespace support {
             // Extract the hash
             std::array<uint64_t, 2> hash = *reinterpret_cast<std::array<uint64_t, 2>*>(data.data() + sizeof(uint64_t));
 
-            if(hash == Serialise<messages::input::proto::Image>::hash()) {
+            if(hash == Serialise<message::input::proto::Image>::hash()) {
                 // Parse our image
-                messages::input::proto::Image proto;
+                message::input::proto::Image proto;
                 proto.ParsePartialFromArray(data.data() + (sizeof(uint64_t) * 3),
                                         data.size() - (sizeof(uint64_t) * 3));
 
@@ -141,8 +141,8 @@ namespace support {
                 // Send it!
                 emit(std::move(image));
             }
-            else if(hash == Serialise<messages::input::proto::Sensors>::hash()) {
-                messages::input::proto::Sensors proto;
+            else if(hash == Serialise<message::input::proto::Sensors>::hash()) {
+                message::input::proto::Sensors proto;
                 proto.ParsePartialFromArray(data.data() + (sizeof(uint64_t) * 3),
                                         data.size() - (sizeof(uint64_t) * 3));
 

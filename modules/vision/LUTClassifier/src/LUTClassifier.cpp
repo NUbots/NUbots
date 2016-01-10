@@ -19,11 +19,11 @@
 
 #include "LUTClassifier.h"
 
-#include "messages/input/Image.h"
-#include "messages/input/CameraParameters.h"
-#include "messages/input/Sensors.h"
-#include "messages/vision/LookUpTable.h"
-#include "messages/support/Configuration.h"
+#include "message/input/Image.h"
+#include "message/input/CameraParameters.h"
+#include "message/input/Sensors.h"
+#include "message/vision/LookUpTable.h"
+#include "message/support/Configuration.h"
 
 #include "utility/support/yaml_expression.h"
 
@@ -34,16 +34,16 @@
 namespace modules {
     namespace vision {
 
-        using messages::input::Image;
-        using messages::input::ServoID;
-        using messages::input::Sensors;
-        using messages::input::CameraParameters;
-        using messages::vision::LookUpTable;
-        using messages::vision::SaveLookUpTable;
-        using messages::vision::ObjectClass;
-        using messages::vision::ClassifiedImage;
-        using messages::vision::Colour;
-        using messages::support::Configuration;
+        using message::input::Image;
+        using message::input::ServoID;
+        using message::input::Sensors;
+        using message::input::CameraParameters;
+        using message::vision::LookUpTable;
+        using message::vision::SaveLookUpTable;
+        using message::vision::ObjectClass;
+        using message::vision::ClassifiedImage;
+        using message::vision::Colour;
+        using message::support::Configuration;
         using utility::support::Expression;
 
         void LUTClassifier::insertSegments(ClassifiedImage<ObjectClass>& image, std::vector<ClassifiedImage<ObjectClass>::Segment>& segments, bool vertical) {

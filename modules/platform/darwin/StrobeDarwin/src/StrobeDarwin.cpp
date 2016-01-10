@@ -18,15 +18,15 @@
  */
 
 #include "StrobeDarwin.h"
-#include "messages/platform/darwin/DarwinSensors.h"
-#include "messages/audio/Beat.h"
+#include "message/platform/darwin/DarwinSensors.h"
+#include "message/audio/Beat.h"
 
 namespace modules {
     namespace platform {
         namespace darwin {
 
-            using messages::audio::Beat;
-            using messages::platform::darwin::DarwinSensors;
+            using message::audio::Beat;
+            using message::platform::darwin::DarwinSensors;
 
             StrobeDarwin::StrobeDarwin(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
                 // Strobe up

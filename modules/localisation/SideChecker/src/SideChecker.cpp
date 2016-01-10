@@ -19,63 +19,63 @@
 
 #include "SideChecker.h"
 
-#include "messages/support/Configuration.h"
+#include "message/support/Configuration.h"
 
-#include "messages/support/Configuration.h"
-#include "messages/localisation/FieldObject.h"
-#include "messages/behaviour/MotionCommand.h"
-#include "messages/behaviour/SoccerObjectPriority.h"
-#include "messages/behaviour/WalkPath.h"
-#include "messages/behaviour/Action.h"
-#include "messages/behaviour/SoccerObjectPriority.h"
-#include "messages/motion/WalkCommand.h"
-#include "messages/motion/KickCommand.h"
-#include "messages/behaviour/KickPlan.h"
-#include "messages/input/LimbID.h"
-#include "messages/input/gameevents/GameEvents.h"
-#include "messages/input/ServoID.h"
+#include "message/support/Configuration.h"
+#include "message/localisation/FieldObject.h"
+#include "message/behaviour/MotionCommand.h"
+#include "message/behaviour/SoccerObjectPriority.h"
+#include "message/behaviour/WalkPath.h"
+#include "message/behaviour/Action.h"
+#include "message/behaviour/SoccerObjectPriority.h"
+#include "message/motion/WalkCommand.h"
+#include "message/motion/KickCommand.h"
+#include "message/behaviour/KickPlan.h"
+#include "message/input/LimbID.h"
+#include "message/input/gameevents/GameEvents.h"
+#include "message/input/ServoID.h"
 #include "utility/nubugger/NUhelpers.h"
 #include "utility/math/geometry/RotatedRectangle.h"
 #include "utility/math/matrix/Transform2D.h"
-#include "messages/localisation/ResetRobotHypotheses.h"
-#include "messages/localisation/SideChecker.h"
+#include "message/localisation/ResetRobotHypotheses.h"
+#include "message/localisation/SideChecker.h"
 #include "utility/math/angle.h"
 #include "utility/math/coordinates.h"
 
 namespace modules {
 namespace localisation {
 
-    using messages::support::Configuration;
+    using message::support::Configuration;
 
-    using messages::support::Configuration;
-    using Self = messages::localisation::Self;
-    using messages::localisation::SideCheckingComplete;
+    using message::support::Configuration;
+    using Self = message::localisation::Self;
+    using message::localisation::SideCheckingComplete;
 
-    using messages::behaviour::MotionCommand;
-    using messages::support::FieldDescription;
-    using messages::behaviour::WalkPath;
-    using messages::behaviour::RegisterAction;
-    using messages::behaviour::ActionPriorites;
-    using messages::behaviour::SoccerObjectPriority;
-    using messages::behaviour::SearchType;
+    using message::behaviour::MotionCommand;
+    using message::support::FieldDescription;
+    using message::behaviour::WalkPath;
+    using message::behaviour::RegisterAction;
+    using message::behaviour::ActionPriorites;
+    using message::behaviour::SoccerObjectPriority;
+    using message::behaviour::SearchType;
 
-    using messages::motion::KickFinished;
-    using messages::motion::WalkCommand;
-    using messages::motion::WalkStartCommand;
-    using messages::motion::WalkStopCommand;
-    using messages::motion::EnableWalkEngineCommand;
-    using messages::motion::DisableWalkEngineCommand;
+    using message::motion::KickFinished;
+    using message::motion::WalkCommand;
+    using message::motion::WalkStartCommand;
+    using message::motion::WalkStopCommand;
+    using message::motion::EnableWalkEngineCommand;
+    using message::motion::DisableWalkEngineCommand;
 
-	using messages::vision::Goal;
-	using messages::vision::VisionObject;
+	using message::vision::Goal;
+	using message::vision::VisionObject;
 
-    using messages::localisation::ResetRobotHypotheses;
+    using message::localisation::ResetRobotHypotheses;
 
-    using messages::input::LimbID;
-    using messages::input::ServoID;
-    using SelfPenalisation = messages::input::gameevents::Penalisation<messages::input::gameevents::SELF>;
+    using message::input::LimbID;
+    using message::input::ServoID;
+    using SelfPenalisation = message::input::gameevents::Penalisation<message::input::gameevents::SELF>;
 
-    using SelfUnpenalisation = messages::input::gameevents::Unpenalisation<messages::input::gameevents::SELF>;
+    using SelfUnpenalisation = message::input::gameevents::Unpenalisation<message::input::gameevents::SELF>;
 
     using utility::math::geometry::RotatedRectangle;
     using utility::math::matrix::Transform2D;

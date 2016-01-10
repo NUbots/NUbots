@@ -19,11 +19,11 @@
 
 syntax = "proto3";
 
-package messages.vision.proto;
+package message.vision.proto;
 
-import "messages/Geometry.proto";
-import "messages/Vector.proto";
-import "messages/Matrix.proto";
+import "message/Geometry.proto";
+import "message/Vector.proto";
+import "message/Matrix.proto";
 
 message VisionObject {
 

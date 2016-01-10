@@ -11,8 +11,8 @@ StrobeDarwin strobes from when it is installed until the program exits. It requi
 
 ## Emits
 
-* `messages::DarwinSensor::HeadLED` to set head LED colour.
-* `messages::DarwinSensor::EyeLED` to set eye LED colour.
+* `message::DarwinSensor::HeadLED` to set head LED colour.
+* `message::DarwinSensor::EyeLED` to set eye LED colour.
 
 ## Dependencies
 

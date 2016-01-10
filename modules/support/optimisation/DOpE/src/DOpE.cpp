@@ -24,10 +24,10 @@
 #include <google/protobuf/util/message_differencer.h>
 
 #include "utility/support/proto_armadillo.h"
-#include "messages/support/Configuration.h"
-#include "messages/support/optimisation/DOpE.h"
-#include "messages/support/optimisation/Episode.pb.h"
-#include "messages/support/optimisation/Estimate.pb.h"
+#include "message/support/Configuration.h"
+#include "message/support/optimisation/DOpE.h"
+#include "message/support/optimisation/Episode.pb.h"
+#include "message/support/optimisation/Estimate.pb.h"
 
 namespace modules {
 namespace support {
@@ -40,12 +40,12 @@ namespace optimisation {
     using utility::math::optimisation::Optimiser;
     using utility::math::optimisation::OptimiserEstimate;
     using utility::math::optimisation::PGAOptimiser;
-    using messages::support::Configuration;
-    using messages::support::optimisation::Episode;
-    using messages::support::optimisation::Estimate;
-    using messages::support::optimisation::RequestParameters;
-    using messages::support::optimisation::Parameters;
-    using messages::support::optimisation::RegisterOptimisation;
+    using message::support::Configuration;
+    using message::support::optimisation::Episode;
+    using message::support::optimisation::Estimate;
+    using message::support::optimisation::RequestParameters;
+    using message::support::optimisation::Parameters;
+    using message::support::optimisation::RegisterOptimisation;
 
     void DOpE::sendEstimateUpdate(const Optimisation& opt, const std::string& target) {
 

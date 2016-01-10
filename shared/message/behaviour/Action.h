@@ -21,7 +21,7 @@
 #define MESSAGES_BEHAVIOUR_ACTIONS_H
 
 #include <nuclear>
-#include "messages/input/LimbID.h"
+#include "message/input/LimbID.h"
 
 namespace messages {
     namespace behaviour {

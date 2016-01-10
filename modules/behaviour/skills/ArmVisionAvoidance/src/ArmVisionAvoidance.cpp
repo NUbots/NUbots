@@ -19,12 +19,12 @@
 
 #include "ArmVisionAvoidance.h"
 
-#include "messages/input/ServoID.h"
-#include "messages/input/LimbID.h"
-#include "messages/behaviour/Action.h"
-#include "messages/behaviour/ServoCommand.h"
-#include "messages/input/Sensors.h"
-#include "messages/support/Configuration.h"
+#include "message/input/ServoID.h"
+#include "message/input/LimbID.h"
+#include "message/behaviour/Action.h"
+#include "message/behaviour/ServoCommand.h"
+#include "message/input/Sensors.h"
+#include "message/support/Configuration.h"
 
 #include "utility/math/coordinates.h"
 #include "utility/support/yaml_expression.h"
@@ -33,12 +33,12 @@ namespace modules {
 namespace behaviour {
 namespace skills {
 
-    using messages::input::LimbID;
-    using messages::input::ServoID;
-    using messages::input::Sensors;
-    using messages::behaviour::ServoCommand;
-    using messages::behaviour::RegisterAction;
-    using messages::support::Configuration;
+    using message::input::LimbID;
+    using message::input::ServoID;
+    using message::input::Sensors;
+    using message::behaviour::ServoCommand;
+    using message::behaviour::RegisterAction;
+    using message::support::Configuration;
     using utility::support::Expression;
 
     ArmVisionAvoidance::ArmVisionAvoidance(std::unique_ptr<NUClear::Environment> environment)

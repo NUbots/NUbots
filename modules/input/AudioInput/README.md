@@ -10,12 +10,12 @@ regularly emits it in chunks.
 
 AudioInput opens the default audio input device at its highest available sample
 rate, 16-bit depth and however many channels are available. During this
-initialisation it emits a `messages::SoundChunkSettings` to notify other
+initialisation it emits a `message::SoundChunkSettings` to notify other
 modules of the format of upcoming sound chunks: the sample rate, number of
 channels and number of samples that will be present in each chunk.
 
 Once running, the module regularly emits buffers of audio samples in
-`messages::SoundChunk` objects. The number of chunks to emit per second is set
+`message::SoundChunk` objects. The number of chunks to emit per second is set
 by the `CHUNKS_PER_SECOND` constant, which is
 currently set to 100 (producing 100 10ms chunks per second).
 
@@ -24,8 +24,8 @@ possible to emulate microphone input from a pre-recorded file if necessary.
 
 ## Emits
 
-* `messages::SoundChunk` containing recorded audio samples
-* `messages::SoundChunkSettings` to describe the sample format of upcoming
+* `message::SoundChunk` containing recorded audio samples
+* `message::SoundChunkSettings` to describe the sample format of upcoming
   sound chunks
 
 ## Dependencies

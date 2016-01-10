@@ -24,10 +24,10 @@
 #include <cstdio>
 #include <format.h>
 
-#include "messages/behaviour/MotionCommand.h"
-#include "messages/motion/HeadCommand.h"
-#include "messages/motion/KickCommand.h"
-#include "messages/behaviour/Action.h"
+#include "message/behaviour/MotionCommand.h"
+#include "message/motion/HeadCommand.h"
+#include "message/motion/KickCommand.h"
+#include "message/behaviour/Action.h"
 #include "utility/math/matrix/Transform2D.h"
 
 namespace modules {
@@ -35,10 +35,10 @@ namespace behaviour {
 namespace strategy {
 
     using NUClear::message::LogMessage;
-    using messages::behaviour::MotionCommand;
-    using messages::motion::HeadCommand;
-    using messages::motion::KickCommand;
-    using messages::input::LimbID;
+    using message::behaviour::MotionCommand;
+    using message::motion::HeadCommand;
+    using message::motion::KickCommand;
+    using message::input::LimbID;
     using utility::math::matrix::Transform2D;
 
     KeyboardWalk::KeyboardWalk(std::unique_ptr<NUClear::Environment> environment)

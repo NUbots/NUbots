@@ -90,7 +90,7 @@ namespace messages {
             bool leftFootDown;
             bool rightFootDown;
 
-            std::map<messages::input::ServoID, utility::math::matrix::Transform3D> forwardKinematics;
+            std::map<message::input::ServoID, utility::math::matrix::Transform3D> forwardKinematics;
 
             // utility::math::Transform3D odometry;
             arma::vec2 odometry;

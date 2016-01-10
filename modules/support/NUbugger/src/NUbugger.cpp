@@ -19,13 +19,13 @@
 
 #include "NUbugger.h"
 
-#include "messages/vision/LookUpTable.h"
-#include "messages/support/Configuration.h"
-#include "messages/support/nubugger/proto/Ping.pb.h"
-#include "messages/support/nubugger/proto/ReactionHandles.pb.h"
-#include "messages/support/nubugger/proto/Command.pb.h"
-#include "messages/support/nubugger/proto/ConfigurationState.pb.h"
-#include "messages/vision/proto/LookUpTable.pb.h"
+#include "message/vision/LookUpTable.h"
+#include "message/support/Configuration.h"
+#include "message/support/nubugger/proto/Ping.pb.h"
+#include "message/support/nubugger/proto/ReactionHandles.pb.h"
+#include "message/support/nubugger/proto/Command.pb.h"
+#include "message/support/nubugger/proto/ConfigurationState.pb.h"
+#include "message/vision/proto/LookUpTable.pb.h"
 
 #include "utility/nubugger/NUhelpers.h"
 #include "utility/time/time.h"
@@ -37,17 +37,17 @@ namespace support {
 
     using utility::nubugger::graph;
 
-    using messages::support::Configuration;
-    using messages::support::nubugger::proto::Ping;
-    using messages::support::nubugger::proto::ReactionHandles;
-    using messages::support::nubugger::proto::Command;
-    using messages::support::nubugger::proto::ConfigurationState;
+    using message::support::Configuration;
+    using message::support::nubugger::proto::Ping;
+    using message::support::nubugger::proto::ReactionHandles;
+    using message::support::nubugger::proto::Command;
+    using message::support::nubugger::proto::ConfigurationState;
 
-    using LookUpTableProto = messages::vision::proto::LookUpTable;
+    using LookUpTableProto = message::vision::proto::LookUpTable;
 
-    using messages::vision::LookUpTable;
-    using messages::vision::SaveLookUpTable;
-    using messages::vision::Colour;
+    using message::vision::LookUpTable;
+    using message::vision::SaveLookUpTable;
+    using message::vision::Colour;
 
     using utility::time::getUtcTimestamp;
     using utility::time::durationFromSeconds;
@@ -174,10 +174,10 @@ namespace support {
             const std::string& lutData = lookuptable.table();
 
             log<NUClear::INFO>("Loading LUT");
-            std::vector<messages::vision::Colour> data;
+            std::vector<message::vision::Colour> data;
             data.reserve(lutData.size());
             for (auto& s : lutData) {
-                data.push_back(messages::vision::Colour(s));
+                data.push_back(message::vision::Colour(s));
             }
             auto lut = std::make_unique<LookUpTable>(lookuptable.bits_y(), lookuptable.bits_cb(), lookuptable.bits_cr(), std::move(data));
             emit<Scope::DIRECT>(std::move(lut));

@@ -19,8 +19,8 @@
 
 #include "NUbugger.h"
 
-#include "messages/localisation/FieldObject.h"
-#include "messages/localisation/proto/Localisation.pb.h"
+#include "message/localisation/FieldObject.h"
+#include "message/localisation/proto/Localisation.pb.h"
 
 #include "utility/time/time.h"
 #include "utility/localisation/transform.h"
@@ -31,10 +31,10 @@ namespace support {
 
     using utility::nubugger::graph;
     using utility::time::getUtcTimestamp;
-    using messages::localisation::FieldObject;
-    using messages::localisation::Ball;
-    using messages::localisation::Self;
-    using messages::localisation::proto::Localisation;
+    using message::localisation::FieldObject;
+    using message::localisation::Ball;
+    using message::localisation::Self;
+    using message::localisation::proto::Localisation;
 
     void NUbugger::provideLocalisation() {
         handles["localisation"].push_back(on<Every<100, std::chrono::milliseconds>,

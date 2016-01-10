@@ -24,7 +24,7 @@
 #include "utility/time/time.h"
 #include "utility/file/fileutil.h"
 #include "utility/strutil/strutil.h"
-#include "messages/support/nubugger/proto/ConfigurationState.pb.h"
+#include "message/support/nubugger/proto/ConfigurationState.pb.h"
 
 /**
  * @author Monica Olejniczak
@@ -34,7 +34,7 @@ namespace support {
     using utility::file::listFiles;
     using utility::time::getUtcTimestamp;
     using utility::strutil::split;
-    using messages::support::nubugger::proto::ConfigurationState;
+    using message::support::nubugger::proto::ConfigurationState;
 
     void processNode(ConfigurationState::Node& node, YAML::Node& yaml);
     void processPath(std::string path, int currentIndex, ConfigurationState::Node& node, std::map<std::string,

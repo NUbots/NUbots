@@ -21,11 +21,11 @@
 
 #include "RansacGoalModel.h"
 
-#include "messages/vision/ClassifiedImage.h"
-#include "messages/vision/VisionObjects.h"
-#include "messages/vision/LookUpTable.h"
-#include "messages/support/Configuration.h"
-#include "messages/support/FieldDescription.h"
+#include "message/vision/ClassifiedImage.h"
+#include "message/vision/VisionObjects.h"
+#include "message/vision/LookUpTable.h"
+#include "message/support/Configuration.h"
+#include "message/support/FieldDescription.h"
 
 #include "utility/math/geometry/Quad.h"
 #include "utility/math/geometry/Line.h"
@@ -34,13 +34,13 @@
 #include "utility/math/ransac/NPartiteRansac.h"
 #include "utility/math/vision.h"
 #include "utility/math/coordinates.h"
-#include "messages/input/CameraParameters.h"
+#include "message/input/CameraParameters.h"
 
 namespace modules {
 namespace vision {
 
-    using messages::input::CameraParameters;
-    using messages::input::Sensors;
+    using message::input::CameraParameters;
+    using message::input::Sensors;
 
     using utility::math::coordinates::cartesianToSpherical;
 
@@ -58,14 +58,14 @@ namespace vision {
     using utility::math::vision::projectCamSpaceToScreen;
     using utility::math::vision::distanceToVerticalObject;
 
-    using messages::vision::ObjectClass;
-    using messages::vision::LookUpTable;
-    using messages::vision::ClassifiedImage;
-    using messages::vision::VisionObject;
-    using messages::vision::Goal;
+    using message::vision::ObjectClass;
+    using message::vision::LookUpTable;
+    using message::vision::ClassifiedImage;
+    using message::vision::VisionObject;
+    using message::vision::Goal;
 
-    using messages::support::Configuration;
-    using messages::support::FieldDescription;
+    using message::support::Configuration;
+    using message::support::FieldDescription;
 
     // TODO the system is too generous with adding segments above and below the goals and makes them too tall, stop it
     // TODO the system needs to throw out the kinematics and height based measurements when it cannot be sure it saw the tops and bottoms of the goals

@@ -21,13 +21,13 @@
 #include <nuclear>
 
 #include "utility/nubugger/NUhelpers.h"
-#include "messages/input/proto/MotionCapture.pb.h"
+#include "message/input/proto/MotionCapture.pb.h"
 
 namespace modules {
 namespace debug {
 
     using utility::nubugger::graph;
-    using messages::input::proto::MotionCapture;
+    using message::input::proto::MotionCapture;
 
     NUcap::NUcap(std::unique_ptr<NUClear::Environment> environment)
         : Reactor(std::move(environment)) {

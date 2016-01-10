@@ -34,7 +34,7 @@
 #include <cmath>
 #include <cstring>
 #include <yaml-cpp/yaml.h>
-#include "messages/input/Image.h"
+#include "message/input/Image.h"
 
 namespace messages {
     namespace vision {
@@ -72,21 +72,21 @@ namespace messages {
                 @param p the pixel
                 @return Returns the colour classification of this pixel
              */
-            const messages::vision::Colour& operator()(const messages::input::Image::Pixel& p) const;
-            messages::vision::Colour& operator()(const messages::input::Image::Pixel& p);
+            const message::vision::Colour& operator()(const message::input::Image::Pixel& p) const;
+            message::vision::Colour& operator()(const message::input::Image::Pixel& p);
 
             /*!
              *   @brief Gets the index of the pixel in the LUT
              *   @param p The pixel to be classified.
              *   @return Returns the colour index for the given pixel.
              */
-            uint getLUTIndex(const messages::input::Image::Pixel& colour) const;
+            uint getLUTIndex(const message::input::Image::Pixel& colour) const;
 
             /*!
              *   @brief The inverse of getLUTIndex
              *   NOTE: This inverse is NOT injective (e.g. not 1-to-1)
              */
-            messages::input::Image::Pixel getPixelFromIndex(const uint& index) const;
+            message::input::Image::Pixel getPixelFromIndex(const uint& index) const;
         private:
 
             uint8_t BITS_Y_REMOVED;
@@ -108,8 +108,8 @@ namespace messages {
 namespace YAML {
 
     template<>
-    struct convert<messages::vision::LookUpTable> {
-        static Node encode(const messages::vision::LookUpTable& rhs) {
+    struct convert<message::vision::LookUpTable> {
+        static Node encode(const message::vision::LookUpTable& rhs) {
             Node node;
 
             node["bits"]["y"] = uint(rhs.BITS_Y);
@@ -121,21 +121,21 @@ namespace YAML {
             return node;
         }
 
-        static bool decode(const Node& node, messages::vision::LookUpTable& rhs) {
+        static bool decode(const Node& node, message::vision::LookUpTable& rhs) {
 
             uint8_t bitsY = node["bits"]["y"].as<uint>();
             uint8_t bitsCb = node["bits"]["cb"].as<uint>();
             uint8_t bitsCr = node["bits"]["cr"].as<uint>();
 
             std::string dataString = node["lut"].as<std::string>();
-            std::vector<messages::vision::Colour> data;
+            std::vector<message::vision::Colour> data;
 
             data.reserve(dataString.size());
             for (auto& s : dataString) {
-                data.push_back(messages::vision::Colour(s));
+                data.push_back(message::vision::Colour(s));
             }
 
-            rhs = messages::vision::LookUpTable(bitsY, bitsCb, bitsCr, std::move(data));
+            rhs = message::vision::LookUpTable(bitsY, bitsCb, bitsCr, std::move(data));
 
             return true;
         }

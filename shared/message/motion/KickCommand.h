@@ -22,7 +22,7 @@
 
 #include <nuclear>
 #include <armadillo>
-#include "messages/input/LimbID.h"
+#include "message/input/LimbID.h"
 
 namespace messages {
     namespace motion {
@@ -57,7 +57,7 @@ namespace messages {
          */
         struct KickScriptCommand {
             arma::vec3 direction; // Direction to kick with magnitude determining force
-            messages::input::LimbID leg; // Leg to kick with
+            message::input::LimbID leg; // Leg to kick with
         };
 
 

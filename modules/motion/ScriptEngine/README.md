@@ -14,20 +14,20 @@ should be set to. Complex movements such as kicking or dancing are achieved
 using many frames. Files are loaded using the configuration system, see the
 Configuration section below for details of the format.
 
-To execute a script, emit a `messages::ExecuteScriptByName` containing the
+To execute a script, emit a `message::ExecuteScriptByName` containing the
 filename (without path) of the script to run and the time at which it should
-start. Alternatively you can also emit a `messages::ExecuteScript` to run a
-`messages::Script` directly.
+start. Alternatively you can also emit a `message::ExecuteScript` to run a
+`message::Script` directly.
 
 ## Consumes
 
-* `messages::Configuration<Scripts>` containing the loaded scripts
-* `messages::ExecuteScript` to run a script
-* `messages::ExecuteScriptByName` to run a script from a file
+* `message::Configuration<Scripts>` containing the loaded scripts
+* `message::ExecuteScript` to run a script
+* `message::ExecuteScriptByName` to run a script from a file
 
 ## Emits
 
-* `std::vector<messages::ServoTarget>` to set waypoints based on script
+* `std::vector<message::ServoTarget>` to set waypoints based on script
 
 ## Configuration
 
@@ -44,7 +44,7 @@ Frames are objects with the properties:
 Target objects have:
 
 * "id": the servo identifier as a string (see
-  `messages::DarwinSensors::Servo::ID` for servo ID names)
+  `message::DarwinSensors::Servo::ID` for servo ID names)
 * "position": the desired angle of the servo, in radians
 * "gain": the desired motor gain
 

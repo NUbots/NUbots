@@ -18,12 +18,12 @@
  */
 
 #include "ScriptTuner.h"
-#include "messages/support/Configuration.h"
-#include "messages/platform/darwin/DarwinSensors.h"
-#include "messages/motion/ServoTarget.h"
+#include "message/support/Configuration.h"
+#include "message/platform/darwin/DarwinSensors.h"
+#include "message/motion/ServoTarget.h"
 #include "utility/math/angle.h"
 #include "utility/file/fileutil.h"
-#include "messages/behaviour/Action.h"
+#include "message/behaviour/Action.h"
 
 #include <ncurses.h>
 #include <cstdio>
@@ -33,14 +33,14 @@ namespace modules {
     namespace behaviour {
         namespace tools {
             using NUClear::message::CommandLineArguments;
-            using messages::motion::Script;
-            using messages::motion::ExecuteScript;
-            using messages::motion::Script;
-            using messages::input::ServoID;
-            using messages::motion::ServoTarget;
-            using messages::behaviour::RegisterAction;
-            using messages::input::LimbID;
-            using messages::platform::darwin::DarwinSensors;
+            using message::motion::Script;
+            using message::motion::ExecuteScript;
+            using message::motion::Script;
+            using message::input::ServoID;
+            using message::motion::ServoTarget;
+            using message::behaviour::RegisterAction;
+            using message::input::LimbID;
+            using message::platform::darwin::DarwinSensors;
 
             struct LockServo {};
 
@@ -79,7 +79,7 @@ namespace modules {
 
                     Script::Frame::Target target;
 
-                    target.id = static_cast<messages::input::ServoID>(id);
+                    target.id = static_cast<message::input::ServoID>(id);
                     target.position = sensors.servo[id].presentPosition;
                     target.gain = defaultGain;
                     target.torque = 100;
@@ -376,7 +376,7 @@ namespace modules {
                     // Emit a waypoint so that the motor will turn off gain (go limp)
                     auto waypoint = std::make_unique<ServoTarget>();
                     waypoint->time = NUClear::clock::now();
-                    waypoint->id = static_cast<messages::input::ServoID>(selection < 2 ? 18 + selection : selection - 2);
+                    waypoint->id = static_cast<message::input::ServoID>(selection < 2 ? 18 + selection : selection - 2);
                     waypoint->gain = 0;
                     waypoint->position = std::numeric_limits<float>::quiet_NaN();
                     waypoint->torque = 0;
@@ -490,7 +490,7 @@ namespace modules {
                         if(it == std::end(script.frames[frame].targets)) {
                             it = script.frames[frame].targets.emplace(std::end(script.frames[frame].targets));
                             auto id = selection < 2 ? 18 + selection : selection - 2;
-                            it->id = static_cast<messages::input::ServoID>(id);
+                            it->id = static_cast<message::input::ServoID>(id);
                             it->position = 0;
                             it->gain = defaultGain;
                         }

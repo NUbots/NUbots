@@ -19,20 +19,20 @@
 
 #include "PressureAutoClassifier.h"
 
-#include "messages/research/AutoClassifierPixels.h"
-#include "messages/support/Configuration.h"
-#include "messages/vision/LookUpTable.h"
-#include "messages/vision/proto/LookUpTableDiff.pb.h"
+#include "message/research/AutoClassifierPixels.h"
+#include "message/support/Configuration.h"
+#include "message/vision/LookUpTable.h"
+#include "message/vision/proto/LookUpTableDiff.pb.h"
 
 namespace modules {
 namespace research {
 
-    using messages::input::Image;
-    using messages::research::AutoClassifierPixels;
-    using messages::support::Configuration;
-    using messages::vision::LookUpTable;
-    using messages::vision::proto::LookUpTableDiff;
-    using messages::vision::Colour;
+    using message::input::Image;
+    using message::research::AutoClassifierPixels;
+    using message::support::Configuration;
+    using message::vision::LookUpTable;
+    using message::vision::proto::LookUpTableDiff;
+    using message::vision::Colour;
 
 
     /**

@@ -19,19 +19,19 @@
 
 #include "Controller.h"
 
-#include "messages/motion/ServoTarget.h"
+#include "message/motion/ServoTarget.h"
 
 namespace modules {
     namespace behaviour {
 
-        using messages::input::ServoID;
-        using messages::motion::ServoTarget;
-        using messages::behaviour::RegisterAction;
-        using messages::behaviour::ActionPriorites;
-        using messages::behaviour::ServoCommand;
-        using messages::input::LimbID;
-        using messages::behaviour::ActionStart;
-        using messages::behaviour::ActionKill;
+        using message::input::ServoID;
+        using message::motion::ServoTarget;
+        using message::behaviour::RegisterAction;
+        using message::behaviour::ActionPriorites;
+        using message::behaviour::ServoCommand;
+        using message::input::LimbID;
+        using message::behaviour::ActionStart;
+        using message::behaviour::ActionKill;
 
         // So we don't need a huge long type declaration everywhere...
         using iterators = std::pair<std::vector<std::reference_wrapper<RequestItem>>::iterator, std::vector<std::reference_wrapper<RequestItem>>::iterator>;
@@ -136,7 +136,7 @@ namespace modules {
                 for (auto& command : commands) {
 
                     // Check if we have access
-                    if (this->limbAccess[uint(messages::input::limbForServo(command.id))] == command.source) {
+                    if (this->limbAccess[uint(message::input::limbForServo(command.id))] == command.source) {
 
                         // Get our queue
                         auto& queue = commandQueues[uint(command.id)];
@@ -216,7 +216,7 @@ namespace modules {
                     for (auto& servo : emptiedQueues) {
 
                         // Get the lease holder on the limb this servo belongs to
-                        auto id = limbAccess[uint(messages::input::limbForServo(servo))];
+                        auto id = limbAccess[uint(message::input::limbForServo(servo))];
                         completeMap[id].insert(servo);
                     }
 
@@ -404,7 +404,7 @@ namespace modules {
 
                 // Clear our queues for this limb
                 for(const auto& limb : k.second) {
-                    for (const auto& servo : messages::input::servosForLimb(limb)) {
+                    for (const auto& servo : message::input::servosForLimb(limb)) {
                         commandQueues[uint(servo)].clear();
                     }
                 }

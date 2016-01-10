@@ -22,7 +22,7 @@
 
 #include <nuclear>
 
-#include "messages/support/Configuration.h"
+#include "message/support/Configuration.h"
 
 namespace modules {
 namespace support {

@@ -26,9 +26,9 @@
 
 #include "utility/math/filter/UKF.h"
 #include "utility/math/filter/ParticleFilter.h"
-#include "messages/support/Configuration.h"
-#include "messages/vision/VisionObjects.h"
-#include "messages/localisation/FieldObject.h"
+#include "message/support/Configuration.h"
+#include "message/vision/VisionObjects.h"
+#include "message/localisation/FieldObject.h"
 #include "BallModel.h"
 
 namespace modules {
@@ -50,11 +50,11 @@ namespace localisation {
         void TimeUpdate(NUClear::clock::time_point current_time);
 
         // void TimeUpdate(std::chrono::system_clock::time_point current_time,
-        //                 const messages::localisation::FakeOdometry& odom);
+        //                 const message::localisation::FakeOdometry& odom);
 
-        double MeasurementUpdate(const messages::vision::VisionObject& observed_object);
+        double MeasurementUpdate(const message::vision::VisionObject& observed_object);
 
-        void UpdateConfiguration(const messages::support::Configuration& config);
+        void UpdateConfiguration(const message::support::Configuration& config);
 
         bool CanEmitFieldObjects();
 

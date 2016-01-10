@@ -25,17 +25,17 @@
 
 #include "utility/math/angle.h"
 #include "utility/math/coordinates.h"
-#include "messages/localisation/FieldObject.h"
+#include "message/localisation/FieldObject.h"
 #include "utility/localisation/transform.h"
-#include "messages/input/Sensors.h"
-#include "messages/input/ServoID.h"
+#include "message/input/Sensors.h"
+#include "message/input/ServoID.h"
 
 namespace modules {
 namespace localisation {
 namespace robot {
 
-    using messages::input::Sensors;
-    using messages::input::ServoID;
+    using message::input::Sensors;
+    using message::input::ServoID;
     using utility::localisation::transform::SphericalRobotObservation;
     using utility::localisation::transform::WorldToRobotTransform;
     using utility::localisation::transform::RobotToWorldTransform;

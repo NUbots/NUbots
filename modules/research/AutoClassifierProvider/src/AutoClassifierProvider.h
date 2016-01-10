@@ -21,9 +21,9 @@
 #define MODULES_RESEARCH_AUTOCLASSIFIERPROVIDER_H
 
 #include <nuclear>
-#include "messages/vision/LookUpTable.h"
-#include "messages/vision/proto/LookUpTable.pb.h"
-#include "messages/input/Image.h"
+#include "message/vision/LookUpTable.h"
+#include "message/vision/proto/LookUpTable.pb.h"
+#include "message/input/Image.h"
 
 namespace modules {
 namespace research {

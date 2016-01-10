@@ -21,7 +21,7 @@
 #define MODULES_BEHAVIOUR_REFLEXES_KICKSCRIPT_H
 
 #include <nuclear>
-#include "messages/motion/KickCommand.h"
+#include "message/motion/KickCommand.h"
 
 namespace modules {
 namespace behaviour {
@@ -37,7 +37,7 @@ namespace skills {
         float KICK_PRIORITY;
         float EXECUTION_PRIORITY;
 
-        messages::motion::KickScriptCommand kickCommand;
+        message::motion::KickScriptCommand kickCommand;
 
         void updatePriority(const float& priority);
         int getDirectionalQuadrant(float x, float y);

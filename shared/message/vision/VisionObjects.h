@@ -25,8 +25,8 @@
 #include "utility/math/geometry/Circle.h"
 #include "utility/math/geometry/Quad.h"
 #include "utility/math/geometry/Polygon.h"
-#include "messages/input/Sensors.h"
-#include "messages/vision/ClassifiedImage.h"
+#include "message/input/Sensors.h"
+#include "message/vision/ClassifiedImage.h"
 
 namespace messages {
     namespace vision {
@@ -58,11 +58,11 @@ namespace messages {
             arma::vec2 angularSize;
 
             // The sensor frame that was used to detect this object
-            std::shared_ptr<const messages::input::Sensors> sensors;
+            std::shared_ptr<const message::input::Sensors> sensors;
 
             // The classified image that was used to detect this object
             // TODO: Why is this here?
-            std::shared_ptr<const messages::vision::ClassifiedImage<messages::vision::ObjectClass>> classifiedImage;
+            std::shared_ptr<const message::vision::ClassifiedImage<message::vision::ObjectClass>> classifiedImage;
         };
 
         struct Ball : public VisionObject {

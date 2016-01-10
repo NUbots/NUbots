@@ -21,7 +21,7 @@ syntax = "proto3";
 
 package messages;
 
-import "messages/Vector.proto";
+import "message/Vector.proto";
 
 message mat {
     repeated vec v = 1;

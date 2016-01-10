@@ -19,7 +19,7 @@
 
 syntax = "proto3";
 
-package messages.behaviour.proto;
+package message.behaviour.proto;
 
 message Subsumption {
 

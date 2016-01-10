@@ -22,9 +22,9 @@
 
 #include <armadillo>
 
-#include "messages/vision/VisionObjects.h"
-#include "messages/input/CameraParameters.h"
-#include "messages/input/Sensors.h"
+#include "message/vision/VisionObjects.h"
+#include "message/input/CameraParameters.h"
+#include "message/input/Sensors.h"
 #include "utility/math/coordinates.h"
 #include "utility/math/geometry/Quad.h"
 #include "utility/localisation/transform.h"
@@ -32,24 +32,24 @@
 namespace modules {
 namespace support {
 
-    using messages::vision::Goal;
-    using messages::vision::Ball;
-    using messages::input::Sensors;
+    using message::vision::Goal;
+    using message::vision::Ball;
+    using message::input::Sensors;
     using utility::math::matrix::Transform2D;
     using utility::localisation::transform::SphericalRobotObservation;
-    using messages::input::CameraParameters;
+    using message::input::CameraParameters;
     using utility::math::coordinates::cartesianToSpherical;
     using utility::math::coordinates::sphericalToCartesian4;
     using utility::math::geometry::Quad;
 
     struct VisibleMeasurement {
-		std::vector<messages::vision::VisionObject::Measurement> measurements;
+		std::vector<message::vision::VisionObject::Measurement> measurements;
     	arma::vec2 screenAngular;
     };
 
 	inline static VisibleMeasurement computeVisible(arma::vec3 objPosition, const CameraParameters& camParams, Transform2D robotPose, std::shared_ptr<Sensors> sensors, arma::vec4 error){
 		//Assumes we need to see the bottom or...
-		messages::vision::VisionObject::Measurement measurement;
+		message::vision::VisionObject::Measurement measurement;
         measurement.position = SphericalRobotObservation(robotPose.xy(), robotPose.angle(), objPosition);
         measurement.error = arma::eye(3, 3);
 
@@ -60,7 +60,7 @@ namespace support {
         arma::vec4 cam_space = sensors->kinematicsCamToGround.i() * sphericalToCartesian4(measurement.position);
         arma::vec2 screenAngular = cartesianToSpherical(cam_space.rows(0,2)).rows(1,2);
 
-		std::vector<messages::vision::VisionObject::Measurement> measurements;
+		std::vector<message::vision::VisionObject::Measurement> measurements;
         if(std::fabs(screenAngular[0]) < camParams.FOV[0] / 2 && std::fabs(screenAngular[1]) < camParams.FOV[1] / 2){
         	measurements.push_back(measurement);
         	//measurements.push_back(measurement); // TODO: Fix the need for double measurements.
@@ -97,7 +97,7 @@ namespace support {
 			for (auto & m : visibleMeasurements.measurements){
 				result.measurements.push_back(m);
 			}
-			
+
 			result.screenAngular = visibleMeasurements.screenAngular;
 			result.sensors = sensors;
 			result.timestamp = sensors->timestamp; // TODO: Eventually allow this to be different to sensors.
@@ -112,7 +112,7 @@ namespace support {
 	};
 
 	class VirtualBall {
-	public: 
+	public:
 		VirtualBall() {
 			position = arma::vec3({0,0,0});
 			diameter = 0.1;
@@ -126,7 +126,7 @@ namespace support {
 
 		// utility::math::matrix::Transform2D ballPose;
 		arma::vec3 position;
-        arma::vec3 velocity;  
+        arma::vec3 velocity;
 
 		// arma::vec2 position;
 		float diameter;

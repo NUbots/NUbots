@@ -19,12 +19,12 @@
 
 #include "NUbugger.h"
 
-#include "messages/behaviour/WalkPath.h"
-#include "messages/behaviour/KickPlan.h"
-#include "messages/input/gameevents/GameEvents.h"
-#include "messages/input/Image.h"
-#include "messages/vision/VisionObjects.h"
-#include "messages/motion/WalkCommand.h"
+#include "message/behaviour/WalkPath.h"
+#include "message/behaviour/KickPlan.h"
+#include "message/input/gameevents/GameEvents.h"
+#include "message/input/Image.h"
+#include "message/vision/VisionObjects.h"
+#include "message/motion/WalkCommand.h"
 
 #include "utility/time/time.h"
 #include "utility/localisation/transform.h"
@@ -37,17 +37,17 @@ namespace modules {
 namespace support {
 
     using NUClear::message::CommandLineArguments;
-    using messages::behaviour::proto::Behaviour;
-    using messages::behaviour::WalkPath;
-    using messages::behaviour::KickPlan;
-    using messages::input::gameevents::GameState;
-    using messages::input::Image;
-    using messages::input::Sensors;
-    using messages::localisation::Self;
-    using LocalisationBall = messages::localisation::Ball;
-    using VisionGoal = messages::vision::Goal;
-    using VisionBall = messages::vision::Ball;
-    using messages::motion::WalkCommand;
+    using message::behaviour::proto::Behaviour;
+    using message::behaviour::WalkPath;
+    using message::behaviour::KickPlan;
+    using message::input::gameevents::GameState;
+    using message::input::Image;
+    using message::input::Sensors;
+    using message::localisation::Self;
+    using LocalisationBall = message::localisation::Ball;
+    using VisionGoal = message::vision::Goal;
+    using VisionBall = message::vision::Ball;
+    using message::motion::WalkCommand;
 
     using utility::time::getUtcTimestamp;
     using utility::localisation::transform::RobotToWorldTransform;

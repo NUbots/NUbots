@@ -23,7 +23,7 @@
 #include <nuclear>
 
 #include "darwin/Darwin.h"
-#include "messages/platform/darwin/DarwinSensors.h"
+#include "message/platform/darwin/DarwinSensors.h"
 
 namespace modules {
 namespace platform {
@@ -39,12 +39,12 @@ namespace darwin {
     private:
         /// @brief Our internal darwin class that is used for interacting with the hardware
         Darwin::Darwin darwin;
-        messages::platform::darwin::DarwinSensors parseSensors(const Darwin::BulkReadResults& data);
+        message::platform::darwin::DarwinSensors parseSensors(const Darwin::BulkReadResults& data);
 
         struct CM730State {
-            messages::platform::darwin::DarwinSensors::LEDPanel ledPanel = { false, false, false };
-            messages::platform::darwin::DarwinSensors::HeadLED headLED = { 0x00, 0xFF, 0x00 };
-            messages::platform::darwin::DarwinSensors::EyeLED eyeLED = { 0x00, 0x00, 0xFF };
+            message::platform::darwin::DarwinSensors::LEDPanel ledPanel = { false, false, false };
+            message::platform::darwin::DarwinSensors::HeadLED headLED = { 0x00, 0xFF, 0x00 };
+            message::platform::darwin::DarwinSensors::EyeLED eyeLED = { 0x00, 0x00, 0xFF };
         };
 
         struct ServoState {

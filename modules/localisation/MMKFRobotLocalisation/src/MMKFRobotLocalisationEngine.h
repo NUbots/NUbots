@@ -23,13 +23,13 @@
 #include <nuclear>
 #include <chrono>
 #include "utility/localisation/LocalisationFieldObject.h"
-#include "messages/support/Configuration.h"
-#include "messages/support/FieldDescription.h"
-#include "messages/vision/VisionObjects.h"
-#include "messages/input/Sensors.h"
-#include "messages/localisation/ResetRobotHypotheses.h"
+#include "message/support/Configuration.h"
+#include "message/support/FieldDescription.h"
+#include "message/vision/VisionObjects.h"
+#include "message/input/Sensors.h"
+#include "message/localisation/ResetRobotHypotheses.h"
 #include "MultiModalRobotModel.h"
-#include "messages/input/Sensors.h"
+#include "message/input/Sensors.h"
 
 namespace modules {
 namespace localisation {
@@ -42,39 +42,39 @@ namespace localisation {
         }
 
         void TimeUpdate(NUClear::clock::time_point current_time,
-                        const messages::input::Sensors& sensors);
+                        const message::input::Sensors& sensors);
 
         std::vector<utility::localisation::LocalisationFieldObject> GetPossibleObjects(
-            const messages::vision::Goal& ambiguous_object);
+            const message::vision::Goal& ambiguous_object);
 
         void ProcessAmbiguousObjects(
-            const std::vector<messages::vision::Goal>& ambiguous_objects);
+            const std::vector<message::vision::Goal>& ambiguous_objects);
 
         void IndividualStationaryObjectUpdate(
-            const std::vector<messages::vision::Goal>& goals,
+            const std::vector<message::vision::Goal>& goals,
             float time_increment);
 
-        void ProcessObjects(const std::vector<messages::vision::Goal>& goals);
+        void ProcessObjects(const std::vector<message::vision::Goal>& goals);
 
-        // void SensorsUpdate(const messages::input::Sensors& sensors);
+        // void SensorsUpdate(const message::input::Sensors& sensors);
 
-        std::shared_ptr<messages::support::FieldDescription> field_description();
+        std::shared_ptr<message::support::FieldDescription> field_description();
 
-        void set_field_description(std::shared_ptr<messages::support::FieldDescription> desc);
+        void set_field_description(std::shared_ptr<message::support::FieldDescription> desc);
 
-        void UpdateMultiModalRobotModelConfiguration(const messages::support::Configuration& config);
+        void UpdateMultiModalRobotModelConfiguration(const message::support::Configuration& config);
 
-        void UpdateRobotLocalisationEngineConfiguration(const messages::support::Configuration& config);
+        void UpdateRobotLocalisationEngineConfiguration(const message::support::Configuration& config);
 
         bool CanEmitFieldObjects();
 
-        void Reset(const messages::localisation::ResetRobotHypotheses& reset, const messages::input::Sensors& sensors);
+        void Reset(const message::localisation::ResetRobotHypotheses& reset, const message::input::Sensors& sensors);
 
-        void OdometryMeasurementUpdate(const messages::input::Sensors& sensors);
+        void OdometryMeasurementUpdate(const message::input::Sensors& sensors);
     // private:
         MultiModalRobotModel robot_models_;
 
-        std::shared_ptr<messages::support::FieldDescription> field_description_;
+        std::shared_ptr<message::support::FieldDescription> field_description_;
 
     private:
         struct {

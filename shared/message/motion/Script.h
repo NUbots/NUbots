@@ -23,7 +23,7 @@
 #include <chrono>
 #include <yaml-cpp/yaml.h>
 
-#include "messages/input/ServoID.h"
+#include "message/input/ServoID.h"
 
 namespace messages {
     namespace motion {
@@ -86,11 +86,11 @@ namespace messages {
 
 namespace YAML {
     template<>
-    struct convert<messages::motion::Script::Frame::Target> {
-        static inline Node encode(const messages::motion::Script::Frame::Target& rhs) {
+    struct convert<message::motion::Script::Frame::Target> {
+        static inline Node encode(const message::motion::Script::Frame::Target& rhs) {
             Node node;
 
-            node["id"] = messages::input::stringFromId(rhs.id);
+            node["id"] = message::input::stringFromId(rhs.id);
             node["position"] = rhs.position;
             node["gain"] = rhs.gain;
             node["torque"] = rhs.torque;
@@ -98,9 +98,9 @@ namespace YAML {
             return node;
         }
 
-        static inline bool decode(const Node& node, messages::motion::Script::Frame::Target& rhs) {
+        static inline bool decode(const Node& node, message::motion::Script::Frame::Target& rhs) {
 
-            rhs = { messages::input::idFromString(node["id"].as<std::string>())
+            rhs = { message::input::idFromString(node["id"].as<std::string>())
                   , node["position"].as<float>(), node["gain"].as<float>()
                   , node["torque"] ? node["torque"].as<float>() : 100
                    };
@@ -109,8 +109,8 @@ namespace YAML {
     };
 
     template<>
-    struct convert<messages::motion::Script::Frame> {
-        static inline Node encode(const messages::motion::Script::Frame& rhs) {
+    struct convert<message::motion::Script::Frame> {
+        static inline Node encode(const message::motion::Script::Frame& rhs) {
             Node node;
 
             node["duration"] = std::chrono::duration_cast<std::chrono::milliseconds>(rhs.duration).count();
@@ -119,12 +119,12 @@ namespace YAML {
             return node;
         }
 
-        static inline bool decode(const Node& node, messages::motion::Script::Frame& rhs) {
+        static inline bool decode(const Node& node, message::motion::Script::Frame& rhs) {
 
             int millis = node["duration"].as<int>();
             std::chrono::milliseconds duration(millis);
 
-            std::vector<messages::motion::Script::Frame::Target> targets = node["targets"].as<std::vector<messages::motion::Script::Frame::Target>>();
+            std::vector<message::motion::Script::Frame::Target> targets = node["targets"].as<std::vector<message::motion::Script::Frame::Target>>();
 
             rhs = { duration, std::move(targets) };
             return true;
@@ -132,8 +132,8 @@ namespace YAML {
     };
 
     template<>
-    struct convert<messages::motion::Script> {
-        static inline Node encode(const messages::motion::Script& rhs) {
+    struct convert<message::motion::Script> {
+        static inline Node encode(const message::motion::Script& rhs) {
             Node node;
 
             node = rhs.frames;
@@ -141,8 +141,8 @@ namespace YAML {
             return node;
         }
 
-        static inline bool decode(const Node& node, messages::motion::Script& rhs) {
-            std::vector<messages::motion::Script::Frame> frames = node.as<std::vector<messages::motion::Script::Frame>>();
+        static inline bool decode(const Node& node, message::motion::Script& rhs) {
+            std::vector<message::motion::Script::Frame> frames = node.as<std::vector<message::motion::Script::Frame>>();
             rhs = { std::move(frames) };
             return true;
         }

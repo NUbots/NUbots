@@ -26,9 +26,9 @@
 #include "utility/math/angle.h"
 #include "utility/math/coordinates.h"
 #include "utility/localisation/transform.h"
-#include "messages/input/Sensors.h"
+#include "message/input/Sensors.h"
 
-using messages::input::Sensors;
+using message::input::Sensors;
 using utility::localisation::LocalisationFieldObject;
 using utility::math::coordinates::spherical2Radial;
 using utility::localisation::transform::SphericalRobotObservation;
@@ -64,7 +64,7 @@ void RobotHypothesis::TimeUpdate(double seconds, const Sensors& sensors) {
 }
 
 void MultiModalRobotModel::MeasurementUpdate(
-    const messages::vision::Goal& observed_object,
+    const message::vision::Goal& observed_object,
     const LocalisationFieldObject& actual_object) {
 
     for (auto& model : robot_models_)
@@ -73,7 +73,7 @@ void MultiModalRobotModel::MeasurementUpdate(
 
 
 void MultiModalRobotModel::MeasurementUpdate(
-    const std::vector<messages::vision::Goal>& observed_objects,
+    const std::vector<message::vision::Goal>& observed_objects,
     const std::vector<LocalisationFieldObject>& actual_objects) {
 
     for (auto& model : robot_models_)
@@ -81,7 +81,7 @@ void MultiModalRobotModel::MeasurementUpdate(
 }
 
 double RobotHypothesis::MeasurementUpdate(
-    const messages::vision::Goal& observed_object,
+    const message::vision::Goal& observed_object,
     const LocalisationFieldObject& actual_object) {
 
     double quality = 1.0;
@@ -113,7 +113,7 @@ double RobotHypothesis::MeasurementUpdate(const Sensors& sensors){
 }
 
 double RobotHypothesis::MeasurementUpdate(
-    const std::vector<messages::vision::Goal>& /*observed_objects (commented for warnings)*/,
+    const std::vector<message::vision::Goal>& /*observed_objects (commented for warnings)*/,
     const std::vector<LocalisationFieldObject>& /*actual_objects*/) {
 
     std::cout << __PRETTY_FUNCTION__ << std::endl;
@@ -141,7 +141,7 @@ double RobotHypothesis::MeasurementUpdate(
     return 1;
 }
 
-// void MultiModalRobotModel::SensorsUpdate(const messages::input::Sensors& sensors) {
+// void MultiModalRobotModel::SensorsUpdate(const message::input::Sensors& sensors) {
 //     for (auto& model : robot_models_)
 //         model->SetSensorsData(sensors);
 // }
@@ -152,7 +152,7 @@ double RobotHypothesis::MeasurementUpdate(
  */
 // For a single observation that could be one of several objects.
 void MultiModalRobotModel::AmbiguousMeasurementUpdate(
-    const messages::vision::Goal& ambiguous_object,
+    const message::vision::Goal& ambiguous_object,
     const std::vector<LocalisationFieldObject>& possible_objects) {
 
     std::vector<std::unique_ptr<RobotHypothesis>> new_models;
@@ -194,7 +194,7 @@ void MultiModalRobotModel::AmbiguousMeasurementUpdate(
 // (i.e. When two goal posts are seen simultaneously, they are either both on
 // (one side of the field, or both on the other side)
 void MultiModalRobotModel::AmbiguousMeasurementUpdate(
-    const std::vector<messages::vision::Goal>& ambiguous_objects,
+    const std::vector<message::vision::Goal>& ambiguous_objects,
     const std::vector<std::vector<LocalisationFieldObject>>& possible_object_sets) {
 
     std::vector<std::unique_ptr<RobotHypothesis>> new_models;
@@ -218,7 +218,7 @@ void MultiModalRobotModel::AmbiguousMeasurementUpdate(
                 // Weight the new model based on the 'quality' of the observation
                 // just made.
                 auto weight = split_model->GetFilterWeight();
-                split_model->SetFilterWeight(weight * quality);                    
+                split_model->SetFilterWeight(weight * quality);
             }
             // std::cout << "split model " << *split_model <<  std::endl;
 
@@ -237,7 +237,7 @@ void MultiModalRobotModel::AmbiguousMeasurementUpdate(
 // (i.e. When two goal posts are seen simultaneously, they are either both on
 // (one side of the field, or both on the other side)
 void MultiModalRobotModel::AmbiguousMultipleMeasurementUpdate(
-    const std::vector<messages::vision::Goal>& ambiguous_objects,
+    const std::vector<message::vision::Goal>& ambiguous_objects,
     const std::vector<std::vector<LocalisationFieldObject>>& possible_object_sets) {
 
     std::vector<std::unique_ptr<RobotHypothesis>> new_models;

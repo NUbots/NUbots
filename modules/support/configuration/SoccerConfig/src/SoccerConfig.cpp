@@ -21,11 +21,11 @@
 
 #include <armadillo>
 
-#include "messages/support/Configuration.h"
-#include "messages/support/FieldDescription.h"
+#include "message/support/Configuration.h"
+#include "message/support/FieldDescription.h"
 
-using messages::support::Configuration;
-using messages::support::FieldDescription;
+using message::support::Configuration;
+using message::support::FieldDescription;
 
 namespace modules {
     namespace support {
@@ -85,7 +85,7 @@ namespace modules {
                 : Reactor(std::move(environment)) {
 
                 on<Configuration>("FieldDescription.yaml").then("FieldDescriptionConfig Update", [this](const Configuration& config) {
-                    auto fd = std::make_unique<messages::support::FieldDescription>(LoadFieldDescription(config));
+                    auto fd = std::make_unique<message::support::FieldDescription>(LoadFieldDescription(config));
                     emit(std::move(fd));
                 });
 

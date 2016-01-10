@@ -20,13 +20,13 @@
 #include "OMPLPathPlanner.h"
 
 #include <sstream>
-#include "messages/support/Configuration.h"
-#include "messages/support/FieldDescription.h"
-#include "messages/localisation/FieldObject.h"
-#include "messages/vision/VisionObjects.h"
-#include "messages/behaviour/MotionCommand.h"
-#include "messages/behaviour/WalkPath.h"
-#include "messages/behaviour/KickPlan.h"
+#include "message/support/Configuration.h"
+#include "message/support/FieldDescription.h"
+#include "message/localisation/FieldObject.h"
+#include "message/vision/VisionObjects.h"
+#include "message/behaviour/MotionCommand.h"
+#include "message/behaviour/WalkPath.h"
+#include "message/behaviour/KickPlan.h"
 #include "utility/support/yaml_armadillo.h"
 #include "utility/nubugger/NUhelpers.h"
 #include "utility/math/matrix/Transform2D.h"
@@ -36,19 +36,19 @@
 namespace modules {
 namespace behaviour {
 namespace planning {
-    using messages::support::Configuration;
-    using messages::support::FieldDescription;
+    using message::support::Configuration;
+    using message::support::FieldDescription;
 
     using utility::nubugger::graph;
     using utility::math::matrix::Transform2D;
     using utility::math::angle::vectorToBearing;
     using utility::math::geometry::Circle;
 
-    using LocalisationBall = messages::localisation::Ball;
-    using Self = messages::localisation::Self;
+    using LocalisationBall = message::localisation::Ball;
+    using Self = message::localisation::Self;
 
-    using messages::behaviour::MotionCommand;
-    using messages::behaviour::KickPlan;
+    using message::behaviour::MotionCommand;
+    using message::behaviour::KickPlan;
 
     namespace ob = ompl::base;
 

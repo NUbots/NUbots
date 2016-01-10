@@ -22,10 +22,10 @@
 
 #include "utility/math/matrix/Transform3D.h"
 #include "utility/support/yaml_armadillo.h"
-#include "messages/input/Sensors.h"
-#include "messages/input/LimbID.h"
-#include "messages/support/Configuration.h"
-#include "messages/input/ServoID.h"
+#include "message/input/Sensors.h"
+#include "message/input/LimbID.h"
+#include "message/support/Configuration.h"
+#include "message/input/ServoID.h"
 #include <armadillo>
 #include <nuclear>
 
@@ -62,7 +62,7 @@ namespace motion{
 				pose.translation() = pos;
 			};
 			//TODO:
-			// std::map<messages::input::ServoID, float> jointGains;
+			// std::map<message::input::ServoID, float> jointGains;
 		};
 
 		class Animator{
@@ -91,7 +91,7 @@ namespace motion{
 				bool stable = false;
 
 				//State variables
-				messages::input::LimbID supportFoot;
+				message::input::LimbID supportFoot;
 
 				float forward_duration;
 				float return_duration;
@@ -104,10 +104,10 @@ namespace motion{
 				NUClear::clock::time_point motionStartTime;
 			public:
 
-				virtual void computeStartMotion(const messages::input::Sensors& sensors) = 0;
-				virtual void computeStopMotion(const messages::input::Sensors& sensors) = 0;
+				virtual void computeStartMotion(const message::input::Sensors& sensors) = 0;
+				virtual void computeStopMotion(const message::input::Sensors& sensors) = 0;
 
-				void start(const messages::input::Sensors& sensors){
+				void start(const message::input::Sensors& sensors){
 					if(stage == MotionStage::READY){
         				anim.reset();
 						stage = MotionStage::RUNNING;
@@ -117,7 +117,7 @@ namespace motion{
 					}
 				}
 
-				void stop(const messages::input::Sensors& sensors){
+				void stop(const message::input::Sensors& sensors){
 					if(stage == MotionStage::RUNNING){
         				anim.reset();
 						stage = MotionStage::STOPPING;
@@ -133,23 +133,23 @@ namespace motion{
 				void reset()		{stage = MotionStage::READY; stable = false; anim.reset();}
 
 
-				void setKickParameters(messages::input::LimbID supportFoot_, arma::vec3 ballPosition_, arma::vec3 goalPosition_) {
+				void setKickParameters(message::input::LimbID supportFoot_, arma::vec3 ballPosition_, arma::vec3 goalPosition_) {
 					supportFoot = supportFoot_;
 					ballPosition = ballPosition_;
 					goalPosition = goalPosition_;
 					reset();
 				}
 
-				utility::math::matrix::Transform3D getTorsoPose(const messages::input::Sensors& sensors) {
+				utility::math::matrix::Transform3D getTorsoPose(const message::input::Sensors& sensors) {
 			        // Get our foot positions
-			        auto leftFoot = sensors.forwardKinematics.find(messages::input::ServoID::L_ANKLE_ROLL)->second;
-			        auto rightFoot = sensors.forwardKinematics.find(messages::input::ServoID::R_ANKLE_ROLL)->second;
+			        auto leftFoot = sensors.forwardKinematics.find(message::input::ServoID::L_ANKLE_ROLL)->second;
+			        auto rightFoot = sensors.forwardKinematics.find(message::input::ServoID::R_ANKLE_ROLL)->second;
 
 			        // Find position vector from support foot to torso in support foot coordinates.
-		        	return supportFoot == messages::input::LimbID::LEFT_LEG ? leftFoot.i() : rightFoot.i();
+		        	return supportFoot == message::input::LimbID::LEFT_LEG ? leftFoot.i() : rightFoot.i();
 		        }
 
-				utility::math::matrix::Transform3D getFootPose(const messages::input::Sensors& sensors) {
+				utility::math::matrix::Transform3D getFootPose(const message::input::Sensors& sensors) {
 					auto result = utility::math::matrix::Transform3D();
 					if(stage == MotionStage::RUNNING || stage == MotionStage::STOPPING) {
 
@@ -181,7 +181,7 @@ namespace motion{
 		        	return result;
 				}
 
-				virtual void configure(const messages::support::Configuration& config) = 0;
+				virtual void configure(const message::support::Configuration& config) = 0;
 		};
 
 		class KickBalancer : public SixDOFFootController{
@@ -193,9 +193,9 @@ namespace motion{
 			float adjustment = 0.011;
 
 		public:
-			virtual void configure(const messages::support::Configuration& config);
-			virtual void computeStartMotion(const messages::input::Sensors& sensors);
-			virtual void computeStopMotion(const messages::input::Sensors& sensors);
+			virtual void configure(const message::support::Configuration& config);
+			virtual void computeStartMotion(const message::input::Sensors& sensors);
+			virtual void computeStopMotion(const message::input::Sensors& sensors);
 
 		};
 
@@ -214,9 +214,9 @@ namespace motion{
 			float return_before_place_duration;
 			float lift_before_windup_duration;
 		public:
-			virtual void configure(const messages::support::Configuration& config);
-			virtual void computeStartMotion(const messages::input::Sensors& sensors);
-			virtual void computeStopMotion(const messages::input::Sensors& sensors);
+			virtual void configure(const message::support::Configuration& config);
+			virtual void computeStartMotion(const message::input::Sensors& sensors);
+			virtual void computeStopMotion(const message::input::Sensors& sensors);
 		};
 
 	}

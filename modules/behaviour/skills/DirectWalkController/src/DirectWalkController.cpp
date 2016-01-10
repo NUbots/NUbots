@@ -19,29 +19,29 @@
 
 #include "DirectWalkController.h"
 
-#include "messages/support/Configuration.h"
-#include "messages/behaviour/Action.h"
-#include "messages/behaviour/MotionCommand.h"
-#include "messages/motion/WalkCommand.h"
-#include "messages/input/LimbID.h"
-#include "messages/input/ServoID.h"
+#include "message/support/Configuration.h"
+#include "message/behaviour/Action.h"
+#include "message/behaviour/MotionCommand.h"
+#include "message/motion/WalkCommand.h"
+#include "message/input/LimbID.h"
+#include "message/input/ServoID.h"
 
 namespace modules {
 namespace behaviour {
 namespace skills {
 
-    using messages::support::Configuration;
-    using messages::behaviour::MotionCommand;
-    using messages::behaviour::RegisterAction;
-    using messages::behaviour::ActionPriorites;
-    using messages::motion::WalkStopped;
-    using messages::motion::WalkCommand;
-    using messages::motion::WalkStartCommand;
-    using messages::motion::WalkStopCommand;
-    using messages::motion::EnableWalkEngineCommand;
-    using messages::motion::DisableWalkEngineCommand;
-    using messages::input::LimbID;
-    using messages::input::ServoID;
+    using message::support::Configuration;
+    using message::behaviour::MotionCommand;
+    using message::behaviour::RegisterAction;
+    using message::behaviour::ActionPriorites;
+    using message::motion::WalkStopped;
+    using message::motion::WalkCommand;
+    using message::motion::WalkStartCommand;
+    using message::motion::WalkStopCommand;
+    using message::motion::EnableWalkEngineCommand;
+    using message::motion::DisableWalkEngineCommand;
+    using message::input::LimbID;
+    using message::input::ServoID;
 
     DirectWalkController::DirectWalkController(std::unique_ptr<NUClear::Environment> environment)
     : Reactor(std::move(environment))

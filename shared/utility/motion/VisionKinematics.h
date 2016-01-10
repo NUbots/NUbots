@@ -24,8 +24,8 @@
 
 #include "utility/motion/RobotModels.h"
 
-#include "messages/input/Sensors.h"
-#include "messages/input/ServoID.h"
+#include "message/input/Sensors.h"
+#include "message/input/ServoID.h"
 
 namespace utility {
 namespace motion {

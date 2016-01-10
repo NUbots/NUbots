@@ -21,16 +21,16 @@
 #define MODULES_BEHAVIOUR_SKILLS_WALKPATHFOLLOWER_H
 
 #include <nuclear>
-#include "messages/behaviour/WalkPath.h"
-#include "messages/motion/WalkCommand.h"
+#include "message/behaviour/WalkPath.h"
+#include "message/motion/WalkCommand.h"
 #include "utility/math/matrix/Transform2D.h"
 
 namespace modules {
 namespace behaviour {
 namespace skills {
 
-    using messages::behaviour::WalkPath;
-    using messages::motion::WalkCommand;
+    using message::behaviour::WalkPath;
+    using message::motion::WalkCommand;
     using utility::math::matrix::Transform2D;
 
     class WalkPathFollower : public NUClear::Reactor {

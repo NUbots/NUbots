@@ -19,16 +19,16 @@
 
 #include "KickCommander.h"
 
-#include "messages/support/Configuration.h"
-#include "messages/motion/KickCommand.h"
+#include "message/support/Configuration.h"
+#include "message/motion/KickCommand.h"
 
 #include "utility/support/yaml_armadillo.h"
 
 namespace modules {
 namespace support {
 
-    using messages::support::Configuration;
-    using messages::motion::KickCommand;
+    using message::support::Configuration;
+    using message::motion::KickCommand;
 
     KickCommander::KickCommander(std::unique_ptr<NUClear::Environment> environment)
     : Reactor(std::move(environment)) {

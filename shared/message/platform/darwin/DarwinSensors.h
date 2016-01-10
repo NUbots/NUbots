@@ -25,7 +25,7 @@
 #include <string>
 #include <stdexcept>
 
-#include "messages/input/ServoID.h"
+#include "message/input/ServoID.h"
 
 namespace messages {
 namespace platform {
@@ -156,8 +156,8 @@ namespace darwin {
             Servo headPan;
             Servo headTilt;
 
-            const Servo& operator[](messages::input::ServoID index) const;
-            Servo& operator[](messages::input::ServoID index);
+            const Servo& operator[](message::input::ServoID index) const;
+            Servo& operator[](message::input::ServoID index);
 
             const Servo& operator[](int index) const;
             Servo& operator[](int index);

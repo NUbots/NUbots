@@ -24,7 +24,7 @@
 #include <memory>
 #include <string>
 
-#include "messages/input/Image.h"
+#include "message/input/Image.h"
 #include "V4L2CameraSetting.h"
 
 namespace modules {
@@ -96,7 +96,7 @@ namespace modules {
              *
              * @return a pointer to the latest image from the camera
              */
-            messages::input::Image getImage();
+            message::input::Image getImage();
 
             /**
              * @brief Sets up the camera at a given resolution

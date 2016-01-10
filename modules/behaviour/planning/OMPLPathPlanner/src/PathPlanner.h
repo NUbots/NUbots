@@ -30,20 +30,20 @@
 #include "utility/localisation/transform.h"
 #include "utility/math/matrix/Transform2D.h"
 #include "utility/math/geometry/Circle.h"
-#include "messages/support/Configuration.h"
-#include "messages/input/Sensors.h"
-#include "messages/localisation/FieldObject.h"
-#include "messages/behaviour/WalkPath.h"
-#include "messages/support/FieldDescription.h"
+#include "message/support/Configuration.h"
+#include "message/input/Sensors.h"
+#include "message/localisation/FieldObject.h"
+#include "message/behaviour/WalkPath.h"
+#include "message/support/FieldDescription.h"
 
 namespace modules {
 namespace behaviour {
 namespace planning {
 
-	using messages::localisation::Ball;
-    using messages::localisation::Self;
-    using messages::behaviour::WalkPath;
-    using messages::support::FieldDescription;
+	using message::localisation::Ball;
+    using message::localisation::Self;
+    using message::behaviour::WalkPath;
+    using message::support::FieldDescription;
     using utility::math::matrix::Transform2D;
     using utility::math::geometry::Circle;
 

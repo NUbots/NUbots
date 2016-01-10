@@ -23,10 +23,10 @@
 
 namespace modules {
     namespace vision {
-        using messages::input::Image;
-        using messages::vision::LookUpTable;
-        using messages::vision::ObjectClass;
-        using messages::vision::ClassifiedImage;
+        using message::input::Image;
+        using message::vision::LookUpTable;
+        using message::vision::ObjectClass;
+        using message::vision::ClassifiedImage;
         using quex::Token;
 
         QuexClassifier::QuexClassifier() : lexer(buffer, BUFFER_SIZE, buffer + 1), tknNumber(lexer.token_p()->number) {

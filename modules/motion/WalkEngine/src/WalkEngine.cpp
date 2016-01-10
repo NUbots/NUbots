@@ -24,13 +24,13 @@
 #include <chrono>
 #include <cmath>
 
-#include "messages/behaviour/ServoCommand.h"
-#include "messages/support/Configuration.h"
-#include "messages/motion/WalkCommand.h"
-#include "messages/motion/ServoTarget.h"
-#include "messages/motion/Script.h"
-#include "messages/behaviour/FixedWalkCommand.h"
-#include "messages/localisation/FieldObject.h"
+#include "message/behaviour/ServoCommand.h"
+#include "message/support/Configuration.h"
+#include "message/motion/WalkCommand.h"
+#include "message/motion/ServoTarget.h"
+#include "message/motion/Script.h"
+#include "message/behaviour/FixedWalkCommand.h"
+#include "message/localisation/FieldObject.h"
 
 #include "utility/motion/Balance.h"
 #include "utility/nubugger/NUhelpers.h"
@@ -41,31 +41,31 @@
 #include "utility/motion/RobotModels.h"
 #include "utility/math/angle.h"
 #include "utility/math/matrix/Rotation3D.h"
-#include "messages/input/PushDetection.h"
+#include "message/input/PushDetection.h"
 
 namespace modules {
 namespace motion {
 
-    using messages::input::PushDetection;
-    using messages::input::ServoID;
-    using messages::input::Sensors;
-    using messages::input::LimbID;
-    using messages::behaviour::ServoCommand;
-    using messages::behaviour::WalkOptimiserCommand;
-    using messages::behaviour::WalkConfigSaved;
-    // using messages::behaviour::RegisterAction;
-    // using messages::behaviour::ActionPriorites;
-    using messages::input::LimbID;
-    using messages::motion::WalkCommand;
-    using messages::motion::WalkStartCommand;
-    using messages::motion::WalkStopCommand;
-    using messages::motion::WalkStopped;
-    using messages::motion::EnableWalkEngineCommand;
-    using messages::motion::DisableWalkEngineCommand;
-    using messages::motion::ServoTarget;
-    using messages::motion::Script;
-    using messages::support::SaveConfiguration;
-    using messages::support::Configuration;
+    using message::input::PushDetection;
+    using message::input::ServoID;
+    using message::input::Sensors;
+    using message::input::LimbID;
+    using message::behaviour::ServoCommand;
+    using message::behaviour::WalkOptimiserCommand;
+    using message::behaviour::WalkConfigSaved;
+    // using message::behaviour::RegisterAction;
+    // using message::behaviour::ActionPriorites;
+    using message::input::LimbID;
+    using message::motion::WalkCommand;
+    using message::motion::WalkStartCommand;
+    using message::motion::WalkStopCommand;
+    using message::motion::WalkStopped;
+    using message::motion::EnableWalkEngineCommand;
+    using message::motion::DisableWalkEngineCommand;
+    using message::motion::ServoTarget;
+    using message::motion::Script;
+    using message::support::SaveConfiguration;
+    using message::support::Configuration;
 
     using utility::motion::kinematics::calculateLegJointsTeamDarwin;
     using utility::motion::kinematics::DarwinModel;
@@ -250,8 +250,8 @@ namespace motion {
 
         for(auto& gain : balance["servo_gains"]){
             float p = gain["p"].as<Expression>();
-            ServoID sr = messages::input::idFromPartialString(gain["id"].as<std::string>(),messages::input::ServoSide::RIGHT);
-            ServoID sl = messages::input::idFromPartialString(gain["id"].as<std::string>(),messages::input::ServoSide::LEFT);
+            ServoID sr = message::input::idFromPartialString(gain["id"].as<std::string>(),message::input::ServoSide::RIGHT);
+            ServoID sl = message::input::idFromPartialString(gain["id"].as<std::string>(),message::input::ServoSide::LEFT);
             servoControlPGains[sr] = p;
             servoControlPGains[sl] = p;
         }
@@ -397,8 +397,8 @@ namespace motion {
 
     void WalkEngine::localise(Transform2D position) {
         // emit position as a fake localisation
-        auto localisation = std::make_unique<std::vector<messages::localisation::Self>>();
-        messages::localisation::Self self;
+        auto localisation = std::make_unique<std::vector<message::localisation::Self>>();
+        message::localisation::Self self;
         self.position = {position.x(), position.y()};
         self.position_cov = arma::eye(2,2) * 0.1; // made up
         self.heading = {std::cos(position.angle()), std::sin(position.angle())}; // convert to cartesian coordinates

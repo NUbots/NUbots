@@ -19,15 +19,15 @@
 
 #include "KickPlanner.h"
 
-#include "messages/motion/WalkCommand.h"
-#include "messages/localisation/FieldObject.h"
-#include "messages/support/Configuration.h"
-#include "messages/behaviour/Action.h"
-#include "messages/behaviour/ServoCommand.h"
-#include "messages/behaviour/KickPlan.h"
-#include "messages/vision/VisionObjects.h"
-#include "messages/support/FieldDescription.h"
-#include "messages/input/LimbID.h"
+#include "message/motion/WalkCommand.h"
+#include "message/localisation/FieldObject.h"
+#include "message/support/Configuration.h"
+#include "message/behaviour/Action.h"
+#include "message/behaviour/ServoCommand.h"
+#include "message/behaviour/KickPlan.h"
+#include "message/vision/VisionObjects.h"
+#include "message/support/FieldDescription.h"
+#include "message/input/LimbID.h"
 
 #include "utility/support/yaml_armadillo.h"
 #include "utility/math/coordinates.h"
@@ -38,21 +38,21 @@
 #include "utility/motion/InverseKinematics.h"
 
 
-using messages::input::Sensors;
-using messages::input::LimbID;
-using messages::localisation::Ball;
-using messages::localisation::Self;
-using messages::motion::IKKickParams;
-using messages::motion::KickCommand;
-using messages::motion::KickCommandType;
-using messages::motion::KickScriptCommand;
-using messages::motion::KickPlannerConfig;
-using messages::support::Configuration;
-using messages::motion::WalkStopCommand;
-using messages::input::LimbID;
-using messages::behaviour::KickPlan;
-using messages::behaviour::KickType;
-using messages::support::FieldDescription;
+using message::input::Sensors;
+using message::input::LimbID;
+using message::localisation::Ball;
+using message::localisation::Self;
+using message::motion::IKKickParams;
+using message::motion::KickCommand;
+using message::motion::KickCommandType;
+using message::motion::KickScriptCommand;
+using message::motion::KickPlannerConfig;
+using message::support::Configuration;
+using message::motion::WalkStopCommand;
+using message::input::LimbID;
+using message::behaviour::KickPlan;
+using message::behaviour::KickType;
+using message::support::FieldDescription;
 
 using utility::math::matrix::Transform3D;
 using utility::motion::kinematics::legPoseValid;

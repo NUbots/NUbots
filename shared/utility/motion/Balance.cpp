@@ -21,8 +21,8 @@
 namespace utility {
 namespace motion {
 
-    using messages::input::LimbID;
-    using messages::input::Sensors;
+    using message::input::LimbID;
+    using message::input::Sensors;
     using utility::math::matrix::Rotation3D;
     using utility::math::matrix::Transform3D;
     using utility::math::geometry::UnitQuaternion;

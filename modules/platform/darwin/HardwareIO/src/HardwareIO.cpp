@@ -21,18 +21,18 @@
 #include "Convert.h"
 
 #include "utility/math/angle.h"
-#include "messages/platform/darwin/DarwinSensors.h"
-#include "messages/motion/ServoTarget.h"
-#include "messages/support/Configuration.h"
+#include "message/platform/darwin/DarwinSensors.h"
+#include "message/motion/ServoTarget.h"
+#include "message/support/Configuration.h"
 
 
 namespace modules {
 namespace platform {
 namespace darwin {
 
-    using messages::platform::darwin::DarwinSensors;
-    using messages::motion::ServoTarget;
-    using messages::support::Configuration;
+    using message::platform::darwin::DarwinSensors;
+    using message::motion::ServoTarget;
+    using message::support::Configuration;
 
     DarwinSensors HardwareIO::parseSensors(const Darwin::BulkReadResults& data) {
         DarwinSensors sensors;

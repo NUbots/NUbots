@@ -19,7 +19,7 @@
 
 #include "NUbugger.h"
 
-#include "messages/input/gameevents/GameEvents.h"
+#include "message/input/gameevents/GameEvents.h"
 
 #include "utility/time/time.h"
 
@@ -27,9 +27,9 @@ namespace modules {
 namespace support {
     using utility::time::getUtcTimestamp;
 
-    using namespace messages::input::gameevents;
-    using GameStateProto = messages::input::proto::GameState;
-    using GameStateData = messages::input::proto::GameState::Data;
+    using namespace message::input::gameevents;
+    using GameStateProto = message::input::proto::GameState;
+    using GameStateData = message::input::proto::GameState::Data;
     using std::chrono::duration_cast;
     using std::chrono::milliseconds;
 

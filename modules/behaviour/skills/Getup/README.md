@@ -11,12 +11,12 @@ Include this module to allow the robot to get up after it has fallen over.
 
 ## Consumes
 
-* `messages::Sensors` containing the orientation matrix and accelerometer readings
-* `messages::AllServoWaypointsComplete` indicates that a script has finished
+* `message::Sensors` containing the orientation matrix and accelerometer readings
+* `message::AllServoWaypointsComplete` indicates that a script has finished
 
 ## Emits
 
-* `messages::ExecuteScript` instructs the script engine to run a script
+* `message::ExecuteScript` instructs the script engine to run a script
 
 ## Dependencies
 

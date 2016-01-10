@@ -19,7 +19,7 @@
 
 syntax = "proto3";
 
-package messages.input.proto;
+package message.input.proto;
 
 message GameState {
     message Data {

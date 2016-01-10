@@ -20,17 +20,17 @@
 #include "ScriptEngine.h"
 
 #include "utility/file/fileutil.h"
-#include "messages/support/Configuration.h"
-#include "messages/behaviour/ServoCommand.h"
+#include "message/support/Configuration.h"
+#include "message/behaviour/ServoCommand.h"
 
 namespace modules {
     namespace motion {
 
-        using messages::support::Configuration;
-        using messages::behaviour::ServoCommand;
-        using messages::motion::Script;
-        using messages::motion::ExecuteScriptByName;
-        using messages::motion::ExecuteScript;
+        using message::support::Configuration;
+        using message::behaviour::ServoCommand;
+        using message::motion::Script;
+        using message::motion::ExecuteScriptByName;
+        using message::motion::ExecuteScript;
 
         ScriptEngine::ScriptEngine(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
 

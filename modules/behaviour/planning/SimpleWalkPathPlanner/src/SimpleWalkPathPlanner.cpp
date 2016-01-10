@@ -20,13 +20,13 @@
 #include "SimpleWalkPathPlanner.h"
 
 #include <cmath>
-#include "messages/behaviour/KickPlan.h"
-#include "messages/support/Configuration.h"
-#include "messages/input/Sensors.h"
-#include "messages/localisation/FieldObject.h"
-#include "messages/vision/VisionObjects.h"
-#include "messages/motion/WalkCommand.h"
-#include "messages/motion/KickCommand.h"
+#include "message/behaviour/KickPlan.h"
+#include "message/support/Configuration.h"
+#include "message/input/Sensors.h"
+#include "message/localisation/FieldObject.h"
+#include "message/vision/VisionObjects.h"
+#include "message/motion/WalkCommand.h"
+#include "message/motion/KickCommand.h"
 #include "utility/nubugger/NUhelpers.h"
 #include "utility/localisation/transform.h"
 #include "utility/math/matrix/Transform2D.h"
@@ -36,29 +36,29 @@ namespace modules {
     namespace behaviour {
         namespace planning {
 
-            using messages::support::Configuration;
-            using messages::input::Sensors;
-            using messages::motion::WalkCommand;
-            using messages::behaviour::WalkTarget;
-            using messages::behaviour::WalkApproach;
-            using messages::behaviour::KickPlan;
-            using messages::behaviour::MotionCommand;
-            using messages::motion::WalkStartCommand;
-            using messages::motion::WalkStopCommand;
-            using messages::motion::KickFinished;
+            using message::support::Configuration;
+            using message::input::Sensors;
+            using message::motion::WalkCommand;
+            using message::behaviour::WalkTarget;
+            using message::behaviour::WalkApproach;
+            using message::behaviour::KickPlan;
+            using message::behaviour::MotionCommand;
+            using message::motion::WalkStartCommand;
+            using message::motion::WalkStopCommand;
+            using message::motion::KickFinished;
             using utility::localisation::transform::RobotToWorldTransform;
             using utility::math::matrix::Transform2D;
             using utility::nubugger::graph;
             using utility::nubugger::drawSphere;
 
-            using LocalisationBall = messages::localisation::Ball;
-            using Self = messages::localisation::Self;
-            using VisionBall = messages::vision::Ball;
-            using VisionObstacle = messages::vision::Obstacle;
+            using LocalisationBall = message::localisation::Ball;
+            using Self = message::localisation::Self;
+            using VisionBall = message::vision::Ball;
+            using VisionObstacle = message::vision::Obstacle;
 
             SimpleWalkPathPlanner::SimpleWalkPathPlanner(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
                 //we will initially stand still
-                planType = messages::behaviour::WalkApproach::StandStill;
+                planType = message::behaviour::WalkApproach::StandStill;
 
                 //do a little configurating
                 on<Configuration>("SimpleWalkPathPlanner.yaml").then([this] (const Configuration& file){
@@ -76,21 +76,21 @@ namespace modules {
                 });
 
                 on<Every<20, Per<std::chrono::seconds>>
-                 , With<messages::localisation::Ball>
-                 , With<std::vector<messages::localisation::Self>>
-                 , With<Optional<std::vector<messages::vision::Obstacle>>>
+                 , With<message::localisation::Ball>
+                 , With<std::vector<message::localisation::Self>>
+                 , With<Optional<std::vector<message::vision::Obstacle>>>
                  , Sync<SimpleWalkPathPlanner>>().then([this] (
                      const LocalisationBall& ball,
                      const std::vector<Self>& selfs,
                      std::shared_ptr<const std::vector<VisionObstacle>> robots) {
 
-                    if (planType == messages::behaviour::WalkApproach::StandStill) {
+                    if (planType == message::behaviour::WalkApproach::StandStill) {
 
                         emit(std::make_unique<WalkStopCommand>());
                         return;
 
                     }
-                    else if (planType == messages::behaviour::WalkApproach::DirectCommand) {
+                    else if (planType == message::behaviour::WalkApproach::DirectCommand) {
 
                         std::unique_ptr<WalkCommand> command = std::make_unique<WalkCommand>();
                         command->command.xy()    = currentTargetPosition;

@@ -25,11 +25,11 @@
 #include "utility/localisation/LocalisationFieldObject.h"
 #include "utility/math/filter/ParticleFilter.h"
 #include "utility/math/filter/UKF.h"
-#include "messages/support/Configuration.h"
-#include "messages/vision/VisionObjects.h"
+#include "message/support/Configuration.h"
+#include "message/vision/VisionObjects.h"
 #include "RobotModel.h"
-#include "messages/input/Sensors.h"
-#include "messages/localisation/ResetRobotHypotheses.h"
+#include "message/input/Sensors.h"
+#include "message/localisation/ResetRobotHypotheses.h"
 
 namespace modules {
 namespace localisation {
@@ -59,7 +59,7 @@ namespace localisation {
                 filter_.setState(arma::vec::fixed<robot::RobotModel::size>({-4.5, 0, 0}), cov);
             }
 
-        RobotHypothesis(const messages::localisation::ResetRobotHypotheses::Self& reset_self, const messages::input::Sensors& sensors)
+        RobotHypothesis(const message::localisation::ResetRobotHypotheses::Self& reset_self, const message::input::Sensors& sensors)
             : RobotHypothesis() {
             arma::vec2 imuDirection = arma::normalise(sensors.orientation.col(0).rows(0,1));
             double imuHeading = std::atan2(imuDirection(1), imuDirection(0));
@@ -89,17 +89,17 @@ namespace localisation {
         }
 
         double MeasurementUpdate(
-            const messages::vision::Goal& observed_object,
+            const message::vision::Goal& observed_object,
             const utility::localisation::LocalisationFieldObject& actual_object);
 
         //Odometry
-        double MeasurementUpdate(const messages::input::Sensors& sensors);
+        double MeasurementUpdate(const message::input::Sensors& sensors);
 
         double MeasurementUpdate(
-            const std::vector<messages::vision::Goal>& observed_objects,
+            const std::vector<message::vision::Goal>& observed_objects,
             const std::vector<utility::localisation::LocalisationFieldObject>& actual_objects);
 
-        void TimeUpdate(double seconds, const messages::input::Sensors& sensors);
+        void TimeUpdate(double seconds, const message::input::Sensors& sensors);
 
         friend std::ostream& operator<<(std::ostream &os, const RobotHypothesis& h);
     };
@@ -110,7 +110,7 @@ namespace localisation {
             robot_models_.push_back(std::make_unique<RobotHypothesis>());
         }
 
-        void UpdateConfiguration( const messages::support::Configuration& config) {
+        void UpdateConfiguration( const message::support::Configuration& config) {
             cfg_.merging_enabled = config["MergingEnabled"].as<bool>();
             cfg_.max_models_after_merge = config["MaxModelsAfterMerge"].as<int>();
             cfg_.merge_min_translation_dist = config["MergeMinTranslationDist"].as<float>();
@@ -129,7 +129,7 @@ namespace localisation {
             }
         };
 
-        // void SensorsUpdate(const messages::input::Sensors& sensors);
+        // void SensorsUpdate(const message::input::Sensors& sensors);
 
         void RemoveOldModels();
 
@@ -142,28 +142,28 @@ namespace localisation {
         bool ModelsAreSimilar(const std::unique_ptr<RobotHypothesis>& model_a,
                               const std::unique_ptr<RobotHypothesis>& model_b);
 
-        void TimeUpdate(double seconds, const messages::input::Sensors& sensors);
+        void TimeUpdate(double seconds, const message::input::Sensors& sensors);
 
         void MeasurementUpdate(
-            const messages::vision::Goal& observed_object,
+            const message::vision::Goal& observed_object,
             const utility::localisation::LocalisationFieldObject& actual_object);
 
-        void MeasurementUpdate(const messages::input::Sensors& sensors);
+        void MeasurementUpdate(const message::input::Sensors& sensors);
 
         void MeasurementUpdate(
-            const std::vector<messages::vision::Goal>& observed_objects,
+            const std::vector<message::vision::Goal>& observed_objects,
             const std::vector<utility::localisation::LocalisationFieldObject>& actual_objects);
 
         void AmbiguousMeasurementUpdate(
-            const messages::vision::Goal& ambiguous_object,
+            const message::vision::Goal& ambiguous_object,
             const std::vector<utility::localisation::LocalisationFieldObject>& possible_objects);
 
         void AmbiguousMeasurementUpdate(
-            const std::vector<messages::vision::Goal>& ambiguous_objects,
+            const std::vector<message::vision::Goal>& ambiguous_objects,
             const std::vector<std::vector<utility::localisation::LocalisationFieldObject>>& possible_object_sets);
 
         void AmbiguousMultipleMeasurementUpdate(
-            const std::vector<messages::vision::Goal>& ambiguous_objects,
+            const std::vector<message::vision::Goal>& ambiguous_objects,
             const std::vector<std::vector<utility::localisation::LocalisationFieldObject>>& possible_object_sets);
 
         arma::vec::fixed<robot::RobotModel::size> GetEstimate() {

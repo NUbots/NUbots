@@ -19,14 +19,14 @@
 
 #include "NUbugger.h"
 
-#include "messages/input/Image.h"
-#include "messages/vision/ClassifiedImage.h"
-#include "messages/vision/VisionObjects.h"
-#include "messages/input/proto/Image.pb.h"
-#include "messages/vision/proto/LookUpTable.pb.h"
-#include "messages/vision/proto/LookUpTableDiff.pb.h"
-#include "messages/vision/proto/ClassifiedImage.pb.h"
-#include "messages/vision/proto/VisionObjects.pb.h"
+#include "message/input/Image.h"
+#include "message/vision/ClassifiedImage.h"
+#include "message/vision/VisionObjects.h"
+#include "message/input/proto/Image.pb.h"
+#include "message/vision/proto/LookUpTable.pb.h"
+#include "message/vision/proto/LookUpTableDiff.pb.h"
+#include "message/vision/proto/ClassifiedImage.pb.h"
+#include "message/vision/proto/VisionObjects.pb.h"
 
 #include "utility/time/time.h"
 #include "utility/support/proto_armadillo.h"
@@ -35,17 +35,17 @@ namespace modules {
 namespace support {
     using utility::time::getUtcTimestamp;
 
-    using messages::input::Sensors;
-    using ImageProto = messages::input::proto::Image;
-    using ClassifiedImageProto = messages::vision::proto::ClassifiedImage;
-    using messages::vision::proto::VisionObjects;
-    using messages::vision::proto::VisionObject;
-    using messages::vision::proto::LookUpTableDiff;
-    using messages::vision::ObjectClass;
-    using messages::vision::ClassifiedImage;
-    using messages::vision::Goal;
-    using messages::vision::Ball;
-    using messages::input::Image;
+    using message::input::Sensors;
+    using ImageProto = message::input::proto::Image;
+    using ClassifiedImageProto = message::vision::proto::ClassifiedImage;
+    using message::vision::proto::VisionObjects;
+    using message::vision::proto::VisionObject;
+    using message::vision::proto::LookUpTableDiff;
+    using message::vision::ObjectClass;
+    using message::vision::ClassifiedImage;
+    using message::vision::Goal;
+    using message::vision::Ball;
+    using message::input::Image;
 
     void NUbugger::provideVision() {
         handles["image"].push_back(on<Trigger<Image>, Single, Priority::LOW>().then([this](const Image& image) {
@@ -61,7 +61,7 @@ namespace support {
             imageData.mutable_dimensions()->set_y(image.height);
 
             std::string* imageBytes = imageData.mutable_data();
-            imageData.set_format(messages::input::proto::Image::YCbCr422);
+            imageData.set_format(message::input::proto::Image::YCbCr422);
 
             // Reserve enough space in the image data to store the output
             imageBytes->reserve(image.source().size());

@@ -19,20 +19,20 @@
 
 #include "TestDOpE.h"
 
-#include "messages/support/Configuration.h"
-#include "messages/support/optimisation/DOpE.h"
-#include "messages/support/optimisation/Episode.pb.h"
+#include "message/support/Configuration.h"
+#include "message/support/optimisation/DOpE.h"
+#include "message/support/optimisation/Episode.pb.h"
 #include "utility/support/proto_armadillo.h"
 
 namespace modules {
 namespace debug {
 namespace optimisation {
 
-    using messages::support::Configuration;
-    using messages::support::optimisation::Episode;
-    using messages::support::optimisation::Parameters;
-    using messages::support::optimisation::RequestParameters;
-    using messages::support::optimisation::RegisterOptimisation;
+    using message::support::Configuration;
+    using message::support::optimisation::Episode;
+    using message::support::optimisation::Parameters;
+    using message::support::optimisation::RequestParameters;
+    using message::support::optimisation::RegisterOptimisation;
 
     TestDOpE::TestDOpE(std::unique_ptr<NUClear::Environment> environment)
     : Reactor(std::move(environment)) {

@@ -20,8 +20,8 @@
 #ifndef MESSAGES_RESEARCH_AUTOCLASSIFIERPIXELS_H
 #define MESSAGES_RESEARCH_AUTOCLASSIFIERPIXELS_H
 
-#include "messages/input/Image.h"
-#include "messages/vision/LookUpTable.h"
+#include "message/input/Image.h"
+#include "message/vision/LookUpTable.h"
 
 namespace messages {
 namespace research {

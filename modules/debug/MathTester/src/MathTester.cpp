@@ -18,14 +18,14 @@
  */
 
 #include "MathTester.h"
-#include "messages/support/Configuration.h"
+#include "message/support/Configuration.h"
 #include "utility/support/yaml_armadillo.h"
 #include "utility/math/geometry/Polygon.h"
 
 namespace modules {
     namespace debug {
         using utility::math::geometry::Polygon;
-        using messages::support::Configuration;
+        using message::support::Configuration;
 
         MathTester::MathTester(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
             on<Configuration>("MathTester.yaml").then([this](const Configuration& tests) {

@@ -22,21 +22,21 @@
 
 #include <nuclear>
 
-#include "messages/vision/LookUpTable.h"
+#include "message/vision/LookUpTable.h"
 
 namespace modules {
 namespace research {
 
     class PressureAutoClassifier : public NUClear::Reactor {
     private:
-        std::map<messages::vision::Colour, uint> maxSurfaceArea;
-        std::map<messages::vision::Colour, uint> maxVolume;
-        std::map<messages::vision::Colour, uint> volume;
-        std::map<messages::vision::Colour, std::set<uint>> surfaceArea;
-        std::map<messages::vision::Colour, uint> zeroPoints;
-        std::map<messages::vision::Colour, uint> zeroPointGrowths;
-        std::map<messages::vision::Colour, uint> voteGrowths;
-        std::map<messages::vision::Colour, uint> maxVotes;
+        std::map<message::vision::Colour, uint> maxSurfaceArea;
+        std::map<message::vision::Colour, uint> maxVolume;
+        std::map<message::vision::Colour, uint> volume;
+        std::map<message::vision::Colour, std::set<uint>> surfaceArea;
+        std::map<message::vision::Colour, uint> zeroPoints;
+        std::map<message::vision::Colour, uint> zeroPointGrowths;
+        std::map<message::vision::Colour, uint> voteGrowths;
+        std::map<message::vision::Colour, uint> maxVotes;
         std::map<uint, uint> votes;
 
     public:

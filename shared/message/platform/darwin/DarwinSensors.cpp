@@ -18,7 +18,7 @@
  */
 
 #include "DarwinSensors.h"
-#include "messages/input/ServoID.h"
+#include "message/input/ServoID.h"
 
 namespace messages {
     namespace platform {
@@ -50,7 +50,7 @@ namespace messages {
 
                     case input::ServoID::NUMBER_OF_SERVOS:   throw std::runtime_error("Out of bounds");
                 }
-                
+
                 throw std::runtime_error("Out of bounds");
             }
 
@@ -80,7 +80,7 @@ namespace messages {
 
                     case input::ServoID::NUMBER_OF_SERVOS:   throw std::runtime_error("Out of bounds");
                 }
-                
+
                 throw std::runtime_error("Out of bounds");
             }
 

@@ -23,11 +23,11 @@
 namespace modules {
     namespace vision {
 
-        using messages::input::Image;
-        using messages::input::Sensors;
-        using messages::vision::LookUpTable;
-        using messages::vision::ObjectClass;
-        using messages::vision::ClassifiedImage;
+        using message::input::Image;
+        using message::input::Sensors;
+        using message::vision::LookUpTable;
+        using message::vision::ObjectClass;
+        using message::vision::ClassifiedImage;
 
         void LUTClassifier::findHorizon(const Image& image, const LookUpTable&, ClassifiedImage<ObjectClass>& classifiedImage) {
 

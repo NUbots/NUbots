@@ -24,7 +24,7 @@
 #include <nuclear>
 #include <yaml-cpp/yaml.h>
 
-#include "messages/support/FileWatch.h"
+#include "message/support/FileWatch.h"
 
 namespace messages {
     namespace support {
@@ -78,31 +78,31 @@ namespace NUClear {
     namespace dsl {
         namespace operation {
             template <>
-            struct DSLProxy<messages::support::Configuration> {
+            struct DSLProxy<message::support::Configuration> {
 
                 template <typename DSL, typename TFunc>
                 static inline threading::ReactionHandle bind(Reactor& reactor, const std::string& label, TFunc&& callback, const std::string& path) {
-                    return DSLProxy<messages::support::FileWatch>::bind<DSL>(reactor, label, callback, "config/" + path,
-                                                                             messages::support::FileWatch::ATTRIBUTES
-                                                                             | messages::support::FileWatch::CREATE
-                                                                             | messages::support::FileWatch::MODIFY
-                                                                             | messages::support::FileWatch::MOVED_TO);
+                    return DSLProxy<message::support::FileWatch>::bind<DSL>(reactor, label, callback, "config/" + path,
+                                                                             message::support::FileWatch::ATTRIBUTES
+                                                                             | message::support::FileWatch::CREATE
+                                                                             | message::support::FileWatch::MODIFY
+                                                                             | message::support::FileWatch::MOVED_TO);
                 }
 
                 template <typename DSL>
-                static inline std::shared_ptr<messages::support::Configuration> get(threading::Reaction& t) {
+                static inline std::shared_ptr<message::support::Configuration> get(threading::Reaction& t) {
 
                     // Get the file watch event
-                    messages::support::FileWatch watch = DSLProxy<messages::support::FileWatch>::get<DSL>(t);
+                    message::support::FileWatch watch = DSLProxy<message::support::FileWatch>::get<DSL>(t);
 
                     // Check if the watch is valid
                     if(watch) {
                         // Return our yaml file
-                        return std::make_shared<messages::support::Configuration>(watch.path, YAML::LoadFile(watch.path));
+                        return std::make_shared<message::support::Configuration>(watch.path, YAML::LoadFile(watch.path));
                     }
                     else {
                         // Return an empty configuration (which will show up invalid)
-                        return std::shared_ptr<messages::support::Configuration>(nullptr);
+                        return std::shared_ptr<message::support::Configuration>(nullptr);
                     }
                 }
             };
@@ -111,7 +111,7 @@ namespace NUClear {
         // Configuration is transient
         namespace trait {
             template <>
-            struct is_transient<std::shared_ptr<messages::support::Configuration>> : public std::true_type {};
+            struct is_transient<std::shared_ptr<message::support::Configuration>> : public std::true_type {};
         }
     }
 }

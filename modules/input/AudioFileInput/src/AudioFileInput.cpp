@@ -20,8 +20,8 @@
 #include "AudioFileInput.h"
 #include "utility/idiom/pimpl_impl.h"
 
-#include "messages/input/SoundChunk.h"
-#include "messages/support/Configuration.h"
+#include "message/input/SoundChunk.h"
+#include "message/support/Configuration.h"
 #include <chrono>
 #include <string>
 #include <sndfile.hh>
@@ -31,7 +31,7 @@ namespace modules {
 
         const int CHUNKS_PER_SECOND = 100;
 
-        using messages::support::Configuration;
+        using message::support::Configuration;
 
         class AudioFileInput::impl {
             public:
@@ -45,7 +45,7 @@ namespace modules {
                     NUClear::log<NUClear::DEBUG>("Loading sound file: ", filePath);
                     m->file = SndfileHandle(filePath.c_str());
 
-                    auto settings = std::make_unique<messages::input::SoundChunkSettings>();
+                    auto settings = std::make_unique<message::input::SoundChunkSettings>();
 
                     settings->sampleRate = m->file.samplerate();
                     settings->channels = m->file.channels();
@@ -58,7 +58,7 @@ namespace modules {
             on<Every<CHUNKS_PER_SECOND, Per<std::chrono::seconds>>>([this] {
                 auto& file = m->file;
 
-                auto chunk = std::make_unique<messages::input::SoundChunk>();
+                auto chunk = std::make_unique<message::input::SoundChunk>();
 
                 // Find out how much of our file to read to get our sample
                 size_t chunkSize = (file.samplerate() / CHUNKS_PER_SECOND) * file.channels();

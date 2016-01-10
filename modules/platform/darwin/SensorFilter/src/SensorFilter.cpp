@@ -19,9 +19,9 @@
 
 #include "SensorFilter.h"
 
-#include "messages/platform/darwin/DarwinSensors.h"
-#include "messages/input/CameraParameters.h"
-#include "messages/support/Configuration.h"
+#include "message/platform/darwin/DarwinSensors.h"
+#include "message/input/CameraParameters.h"
+#include "message/support/Configuration.h"
 
 #include "utility/math/matrix/Rotation3D.h"
 #include "utility/math/geometry/UnitQuaternion.h"
@@ -32,17 +32,17 @@ namespace modules {
     namespace platform {
         namespace darwin {
 
-            using messages::support::Configuration;
+            using message::support::Configuration;
             using utility::nubugger::drawArrow;
             using utility::nubugger::drawSphere;
-            using messages::platform::darwin::DarwinSensors;
-            using messages::platform::darwin::ButtonLeftDown;
-            using messages::platform::darwin::ButtonLeftUp;
-            using messages::platform::darwin::ButtonMiddleDown;
-            using messages::platform::darwin::ButtonMiddleUp;
-            using messages::input::Sensors;
-            using messages::input::CameraParameters;
-            using messages::input::ServoID;
+            using message::platform::darwin::DarwinSensors;
+            using message::platform::darwin::ButtonLeftDown;
+            using message::platform::darwin::ButtonLeftUp;
+            using message::platform::darwin::ButtonMiddleDown;
+            using message::platform::darwin::ButtonMiddleUp;
+            using message::input::Sensors;
+            using message::input::CameraParameters;
+            using message::input::ServoID;
             using utility::nubugger::graph;
             using utility::motion::kinematics::calculateAllPositions;
             using utility::motion::kinematics::DarwinModel;
@@ -199,7 +199,7 @@ namespace modules {
                         // Check for an error on the servo and report it
                         while(error != DarwinSensors::Error::OK) {
                             std::stringstream s;
-                            s << "Error on Servo " << (i + 1) << " (" << messages::input::stringFromId(ServoID(i)) << "):";
+                            s << "Error on Servo " << (i + 1) << " (" << message::input::stringFromId(ServoID(i)) << "):";
 
                             if(error & DarwinSensors::Error::INPUT_VOLTAGE) {
                                 s << " Input Voltage - " << original.voltage;
@@ -525,8 +525,8 @@ namespace modules {
             }
 
             Transform3D SensorFilter::calculateOdometryMatrix(
-                const messages::input::Sensors& sensors,
-                const messages::input::Sensors& previousSensors,
+                const message::input::Sensors& sensors,
+                const message::input::Sensors& previousSensors,
                 utility::motion::kinematics::Side side) {
                     Transform3D bodyFromAnkleInitialInverse, bodyFromAnkleFinal;
                     if(side == Side::LEFT){

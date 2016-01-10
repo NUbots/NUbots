@@ -22,17 +22,17 @@
 
 #include <nuclear>
 
-#include "messages/vision/LookUpTable.h"
+#include "message/vision/LookUpTable.h"
 
 namespace modules {
 namespace research {
 
     class LayerAutoClassifier : public NUClear::Reactor {
     private:
-        std::map<messages::vision::Colour, uint> maxSurfaceArea;
-        std::map<messages::vision::Colour, uint> maxVolume;
-        std::map<messages::vision::Colour, uint> volume;
-        std::map<messages::vision::Colour, std::set<uint>> surfaceArea;
+        std::map<message::vision::Colour, uint> maxSurfaceArea;
+        std::map<message::vision::Colour, uint> maxVolume;
+        std::map<message::vision::Colour, uint> volume;
+        std::map<message::vision::Colour, std::set<uint>> surfaceArea;
 
     public:
         /// @brief Called by the powerplant to build and setup the LayerAutoClassifier reactor.

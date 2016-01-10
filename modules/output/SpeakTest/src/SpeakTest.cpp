@@ -19,7 +19,7 @@
 
 #include <nuclear>
 
-#include "messages/output/Say.h"
+#include "message/output/Say.h"
 
 #include "SpeakTest.h"
 
@@ -29,7 +29,7 @@ namespace output {
 		SpeakTest::SpeakTest(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
 
 			on<Every<30, std::chrono::seconds>>().then([this] {
-				emit(std::make_unique<messages::output::Say>("Bite Me"));
+				emit(std::make_unique<message::output::Say>("Bite Me"));
 			});
 		}
 	}

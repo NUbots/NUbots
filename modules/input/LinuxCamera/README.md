@@ -9,7 +9,7 @@ Streams video from a camera device, creating an image of each frame.
 
 The camera is initialised on startup using the settings from the configuration
 file (see below). Once this has occurred, the module will emit a
-`messages::Image` for each frame of video it receives. To access the value
+`message::Image` for each frame of video it receives. To access the value
 of a pixel in an `Image`, use its `(size_t x, size_t y)` operator.
 
 Frames are retrieved in YUYV format with 4:2:2 chroma subsampling. This means
@@ -29,12 +29,12 @@ to be known at compile time. The currently chosen value is 30fps.
 
 ## Consumes
 
-* `messages::Configuration<LinuxCameraStreamer>` from the config system to set
+* `message::Configuration<LinuxCameraStreamer>` from the config system to set
   camera parameters.
 
 ## Emits
 
-* `messages::Image` for each frame of video retrieved from the camera.
+* `message::Image` for each frame of video retrieved from the camera.
 
 ## Configuration
 

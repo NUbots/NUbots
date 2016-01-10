@@ -23,13 +23,13 @@
 #include <nuclear>
 #include <armadillo>
 #include <set>
-#include "messages/localisation/FieldObject.h"
-#include "messages/vision/VisionObjects.h"
-#include "messages/motion/HeadCommand.h"
-#include "messages/input/Sensors.h"
-#include "messages/input/CameraParameters.h"
+#include "message/localisation/FieldObject.h"
+#include "message/vision/VisionObjects.h"
+#include "message/motion/HeadCommand.h"
+#include "message/input/Sensors.h"
+#include "message/input/CameraParameters.h"
 #include "Searcher.h"
-#include "messages/behaviour/SoccerObjectPriority.h"
+#include "message/behaviour/SoccerObjectPriority.h"
 
 namespace modules {
     namespace behaviour{
@@ -48,7 +48,7 @@ namespace modules {
 
                 /*! @brief Updates the search plan when something has changed
                 */
-                void updateHeadPlan(const std::vector<messages::vision::VisionObject>& fixationObjects, const bool& search, const messages::input::Sensors& sensors, const utility::math::matrix::Rotation3D& headToIMUSpace);
+                void updateHeadPlan(const std::vector<message::vision::VisionObject>& fixationObjects, const bool& search, const message::input::Sensors& sensors, const utility::math::matrix::Rotation3D& headToIMUSpace);
 
                 /*! @brief Converts from camera space direction to IMU space direction
                 */
@@ -56,17 +56,17 @@ namespace modules {
 
                 /*! @brief Gets points which allow for simultaneous search and viewing of key objects
                 */
-                std::vector<arma::vec2> getSearchPoints(std::vector<messages::vision::VisionObject> fixationObjects, messages::behaviour::SearchType sType, const messages::input::Sensors& sensors);
+                std::vector<arma::vec2> getSearchPoints(std::vector<message::vision::VisionObject> fixationObjects, message::behaviour::SearchType sType, const message::input::Sensors& sensors);
 
                 /*! @brief Combines a collection of vision objects. The screen resulting screen angular region is the bounding box of the objects
                 */
-                messages::vision::VisionObject combineVisionObjects(const std::vector<messages::vision::VisionObject>& obs);
+                message::vision::VisionObject combineVisionObjects(const std::vector<message::vision::VisionObject>& obs);
 
                 /*! @brief Gets a bounding box in screen angular space of a set of vision objects
                 */
-                utility::math::geometry::Quad getScreenAngularBoundingBox(const std::vector<messages::vision::VisionObject>& obs);
+                utility::math::geometry::Quad getScreenAngularBoundingBox(const std::vector<message::vision::VisionObject>& obs);
 
-                bool orientationHasChanged(const messages::input::Sensors& sensors);
+                bool orientationHasChanged(const message::input::Sensors& sensors);
 
 
                 //CONFIG - loaded elsewhere
@@ -78,7 +78,7 @@ namespace modules {
                 float replan_angle_threshold;
                 utility::math::matrix::Rotation3D lastPlanOrientation;
 
-                messages::input::CameraParameters cam;
+                message::input::CameraParameters cam;
 
                 //CONFIG from HeadBehaviourSoccer.yaml
                 double fractional_view_padding;
@@ -88,16 +88,16 @@ namespace modules {
                 bool oscillate_search;
 
                 bool locBallReceived = false;
-                messages::localisation::Ball lastLocBall;
+                message::localisation::Ball lastLocBall;
 
-                std::map<messages::behaviour::SearchType, std::vector<arma::vec2>> searches;
+                std::map<message::behaviour::SearchType, std::vector<arma::vec2>> searches;
 
                 //State variables
                 Searcher<arma::vec2> headSearcher;
 
                 int ballPriority;
                 int goalPriority;
-                messages::behaviour::SearchType searchType;
+                message::behaviour::SearchType searchType;
 
                 NUClear::clock::time_point lastPlanUpdate;
                 NUClear::clock::time_point timeLastObjectSeen;

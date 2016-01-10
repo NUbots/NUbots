@@ -19,8 +19,8 @@
 
 #include "NUbugger.h"
 
-#include "messages/input/Sensors.h"
-#include "messages/input/proto/Sensors.pb.h"
+#include "message/input/Sensors.h"
+#include "message/input/proto/Sensors.pb.h"
 
 #include "utility/support/proto_armadillo.h"
 #include "utility/time/time.h"
@@ -29,8 +29,8 @@ namespace modules {
 namespace support {
     using utility::time::getUtcTimestamp;
 
-    using messages::input::Sensors;
-    using ProtoSensors = messages::input::proto::Sensors;
+    using message::input::Sensors;
+    using ProtoSensors = message::input::proto::Sensors;
 
     void NUbugger::provideSensors() {
 
@@ -50,7 +50,7 @@ namespace support {
 
                 servo->set_error_flags(s.errorFlags);
 
-                servo->set_id(static_cast<messages::input::proto::Sensors_ServoID>(s.id));
+                servo->set_id(static_cast<message::input::proto::Sensors_ServoID>(s.id));
 
                 servo->set_enabled(s.enabled);
 

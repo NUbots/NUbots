@@ -19,9 +19,9 @@
 
 syntax = "proto3";
 
-package messages.support.nubugger.proto;
+package message.support.nubugger.proto;
 
-import "messages/Vector.proto";
+import "message/Vector.proto";
 
 message DrawObject {
 

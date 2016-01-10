@@ -28,9 +28,9 @@
 #include <set>
 #include <list>
 
-#include "messages/behaviour/Action.h"
-#include "messages/behaviour/ServoCommand.h"
-#include "messages/input/ServoID.h"
+#include "message/behaviour/Action.h"
+#include "message/behaviour/ServoCommand.h"
+#include "message/input/ServoID.h"
 
 namespace modules {
     namespace behaviour {
@@ -38,9 +38,9 @@ namespace modules {
         struct RequestItem;
 
         struct Request {
-            using callback = std::function<void (std::set<messages::input::LimbID>)>;
+            using callback = std::function<void (std::set<message::input::LimbID>)>;
 
-            Request(size_t id, std::string name, callback start, callback kill, std::function<void (std::set<messages::input::ServoID>)> completed)
+            Request(size_t id, std::string name, callback start, callback kill, std::function<void (std::set<message::input::ServoID>)> completed)
             : id(id)
             , name(name)
             , active(false)
@@ -70,12 +70,12 @@ namespace modules {
             /// The callback to execute when a new limb is started
             callback start;
             callback kill;
-            std::function<void (std::set<messages::input::ServoID>)> completed;
+            std::function<void (std::set<message::input::ServoID>)> completed;
         };
 
         struct RequestItem {
 
-            RequestItem(Request& group, size_t index, float priority, const std::set<messages::input::LimbID>& limbSet)
+            RequestItem(Request& group, size_t index, float priority, const std::set<message::input::LimbID>& limbSet)
             : group(group)
             , index(index)
             , active(false)
@@ -89,7 +89,7 @@ namespace modules {
             bool active;
 
             float priority;
-            std::set<messages::input::LimbID> limbSet;
+            std::set<message::input::LimbID> limbSet;
         };
 
         /**
@@ -105,7 +105,7 @@ namespace modules {
             std::vector<std::reference_wrapper<RequestItem>> currentActions;
 
 
-            std::array<std::list<messages::behaviour::ServoCommand>, 20> commandQueues;
+            std::array<std::list<message::behaviour::ServoCommand>, 20> commandQueues;
 
             void selectAction();
         public:

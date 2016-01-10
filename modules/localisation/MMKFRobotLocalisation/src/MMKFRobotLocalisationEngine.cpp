@@ -22,19 +22,19 @@
 #include <algorithm>
 #include "utility/time/time.h"
 #include "utility/localisation/LocalisationFieldObject.h"
-#include "messages/vision/VisionObjects.h"
-#include "messages/input/Sensors.h"
-#include "messages/localisation/FieldObject.h"
-#include "messages/localisation/ResetRobotHypotheses.h"
-#include "messages/input/Sensors.h"
+#include "message/vision/VisionObjects.h"
+#include "message/input/Sensors.h"
+#include "message/localisation/FieldObject.h"
+#include "message/localisation/ResetRobotHypotheses.h"
+#include "message/input/Sensors.h"
 
 using utility::localisation::LFOId;
 using utility::localisation::LocalisationFieldObject;
 using utility::time::TimeDifferenceSeconds;
-using messages::input::Sensors;
-using messages::vision::VisionObject;
-using messages::localisation::ResetRobotHypotheses;
-using messages::vision::Goal;
+using message::input::Sensors;
+using message::vision::VisionObject;
+using message::localisation::ResetRobotHypotheses;
+using message::vision::Goal;
 
 namespace modules {
 namespace localisation {
@@ -43,11 +43,11 @@ namespace localisation {
         return cfg_.emit_robot_fieldobjects;
     }
 
-    std::shared_ptr<messages::support::FieldDescription> MMKFRobotLocalisationEngine::field_description() {
+    std::shared_ptr<message::support::FieldDescription> MMKFRobotLocalisationEngine::field_description() {
         return field_description_;
     }
 
-    void MMKFRobotLocalisationEngine::set_field_description(std::shared_ptr<messages::support::FieldDescription> desc) {
+    void MMKFRobotLocalisationEngine::set_field_description(std::shared_ptr<message::support::FieldDescription> desc) {
 
         field_description_ = desc;
         goalpost_lfos_.own_l = {field_description_->goalpost_own_l, LFOId::kGoalOwnL, "goalpost_own_left"};
@@ -56,12 +56,12 @@ namespace localisation {
         goalpost_lfos_.opp_r = {field_description_->goalpost_opp_r, LFOId::kGoalOppR, "goalpost_opp_right"};
     }
 
-    void MMKFRobotLocalisationEngine::UpdateMultiModalRobotModelConfiguration(const messages::support::Configuration& config) {
+    void MMKFRobotLocalisationEngine::UpdateMultiModalRobotModelConfiguration(const message::support::Configuration& config) {
 
         robot_models_.UpdateConfiguration(config);
     }
 
-    void MMKFRobotLocalisationEngine::UpdateRobotLocalisationEngineConfiguration(const messages::support::Configuration& config) {
+    void MMKFRobotLocalisationEngine::UpdateRobotLocalisationEngineConfiguration(const message::support::Configuration& config) {
 
         cfg_.angle_between_goals_observation_enabled = config["AngleBetweenGoalsObservationEnabled"].as<bool>();
         cfg_.goal_pair_observation_enabled = config["GoalPairObservationEnabled"].as<bool>();
@@ -77,7 +77,7 @@ namespace localisation {
     }
 
     std::vector<LocalisationFieldObject> MMKFRobotLocalisationEngine::GetPossibleObjects(
-            const messages::vision::Goal& obj) {
+            const message::vision::Goal& obj) {
         std::vector<LocalisationFieldObject> possible;
 
         //BOTH UNKNOWN
@@ -122,12 +122,12 @@ namespace localisation {
         if (obj.side == Goal::Side::RIGHT && obj.team == Goal::Team::OPPONENT) { possible.push_back(goalpost_lfos_.opp_r); return std::move(possible); }
 
 
-        NUClear::log<NUClear::ERROR>(__FILE__, ",", __LINE__, ": The ambiguous_object (messages::vision::Goal) has an invalid messages::vision::Goal::Side");
+        NUClear::log<NUClear::ERROR>(__FILE__, ",", __LINE__, ": The ambiguous_object (message::vision::Goal) has an invalid message::vision::Goal::Side");
         return std::move(possible);
     }
 
     bool GoalPairObserved(
-        const std::vector<messages::vision::Goal>& ambiguous_objects) {
+        const std::vector<message::vision::Goal>& ambiguous_objects) {
 
         if (ambiguous_objects.size() != 2)
             return false;
@@ -141,21 +141,21 @@ namespace localisation {
             return false;
 
         return
-            (oa.side == messages::vision::Goal::Side::RIGHT &&
-             ob.side == messages::vision::Goal::Side::LEFT) ||
-            (oa.side == messages::vision::Goal::Side::LEFT &&
-             ob.side == messages::vision::Goal::Side::RIGHT);
+            (oa.side == message::vision::Goal::Side::RIGHT &&
+             ob.side == message::vision::Goal::Side::LEFT) ||
+            (oa.side == message::vision::Goal::Side::LEFT &&
+             ob.side == message::vision::Goal::Side::RIGHT);
     }
 
     void MMKFRobotLocalisationEngine::ProcessAmbiguousObjects(
-        const std::vector<messages::vision::Goal>& ambiguous_objects) {
+        const std::vector<message::vision::Goal>& ambiguous_objects) {
         bool pair_observations_enabled =
             cfg_.goal_pair_observation_enabled ||
             cfg_.angle_between_goals_observation_enabled;
 
         if (pair_observations_enabled && GoalPairObserved(ambiguous_objects)) {
 
-            std::vector<messages::vision::Goal> vis_objs;
+            std::vector<message::vision::Goal> vis_objs;
             // Ensure left goal is always first.
             if (ambiguous_objects[0].side == Goal::Side::LEFT){
                 vis_objs = { ambiguous_objects[0], ambiguous_objects[1] };
@@ -194,17 +194,17 @@ namespace localisation {
     }
 
     void MMKFRobotLocalisationEngine::IndividualStationaryObjectUpdate(
-        const std::vector<messages::vision::Goal>& goals,
+        const std::vector<message::vision::Goal>& goals,
         float) {
 
         for (auto& observed_object : goals) {
 
             LocalisationFieldObject actual_object;
 
-            if (observed_object.side == messages::vision::Goal::Side::LEFT)
+            if (observed_object.side == message::vision::Goal::Side::LEFT)
                 actual_object = goalpost_lfos_.own_l;
 
-            if (observed_object.side == messages::vision::Goal::Side::RIGHT)
+            if (observed_object.side == message::vision::Goal::Side::RIGHT)
                 actual_object = goalpost_lfos_.own_r;
 
             robot_models_.MeasurementUpdate(observed_object, actual_object);
@@ -219,7 +219,7 @@ namespace localisation {
         @param fobs The object information output by the vision module. This contains objects identified and their relative positions.
         @param time_increment The time that has elapsed since the previous localisation frame.
      */
-    void MMKFRobotLocalisationEngine::ProcessObjects(const std::vector<messages::vision::Goal>& goals) {
+    void MMKFRobotLocalisationEngine::ProcessObjects(const std::vector<message::vision::Goal>& goals) {
         // robot_models_.robot_models_ = std::vector<std::unique_ptr<RobotHypothesis>>();
         // robot_models_.robot_models_.push_back(std::make_unique<RobotHypothesis>());
 

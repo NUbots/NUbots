@@ -12,8 +12,8 @@ In order for this to happen, the Darwin must have the Missile Launchers installe
 
 ## Emits
 
-* `messages::LMissile`
-* `messages::RMissile`
+* `message::LMissile`
+* `message::RMissile`
 
 ## Dependencies
 

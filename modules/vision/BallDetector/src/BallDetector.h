@@ -23,8 +23,8 @@
 #include <nuclear>
 #include <armadillo>
 #include "utility/math/geometry/Circle.h"
-#include "messages/vision/LookUpTable.h"
-#include "messages/input/Image.h"
+#include "message/vision/LookUpTable.h"
+#include "message/input/Image.h"
 #include "utility/math/learning/KMeans.h"
 
 namespace modules {
@@ -58,7 +58,7 @@ namespace vision {
         };
         Frame lastFrame;
 
-        float approximateCircleGreenRatio(const utility::math::geometry::Circle& circle, const messages::input::Image& image, const messages::vision::LookUpTable& lut);
+        float approximateCircleGreenRatio(const utility::math::geometry::Circle& circle, const message::input::Image& image, const message::vision::LookUpTable& lut);
     public:
 
         /// @brief Called by the powerplant to build and setup the BallDetector reactor.

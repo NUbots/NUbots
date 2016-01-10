@@ -19,12 +19,12 @@
 
 #include "BallDetector.h"
 
-#include "messages/vision/ClassifiedImage.h"
-#include "messages/vision/VisionObjects.h"
-#include "messages/vision/LookUpTable.h"
-#include "messages/input/CameraParameters.h"
-#include "messages/support/Configuration.h"
-#include "messages/support/FieldDescription.h"
+#include "message/vision/ClassifiedImage.h"
+#include "message/vision/VisionObjects.h"
+#include "message/vision/LookUpTable.h"
+#include "message/input/CameraParameters.h"
+#include "message/support/Configuration.h"
+#include "message/support/FieldDescription.h"
 
 #include "utility/support/yaml_expression.h"
 
@@ -39,15 +39,15 @@
 namespace modules {
 namespace vision {
 
-    using messages::input::CameraParameters;
-    using messages::input::Sensors;
+    using message::input::CameraParameters;
+    using message::input::Sensors;
 
-    using messages::vision::ObjectClass;
-    using messages::vision::ClassifiedImage;
-    using messages::vision::VisionObject;
-    using messages::vision::Ball;
-    using messages::vision::LookUpTable;
-    using messages::input::Image;
+    using message::vision::ObjectClass;
+    using message::vision::ClassifiedImage;
+    using message::vision::VisionObject;
+    using message::vision::Ball;
+    using message::vision::LookUpTable;
+    using message::input::Image;
 
     using Plane = utility::math::geometry::Plane<3>;
 
@@ -62,8 +62,8 @@ namespace vision {
     using utility::math::coordinates::cartesianToSpherical;
     using utility::nubugger::graph;
 
-    using messages::support::Configuration;
-    using messages::support::FieldDescription;
+    using message::support::Configuration;
+    using message::support::FieldDescription;
 
     using utility::math::ransac::Ransac;
     using utility::math::ransac::RansacCircleModel;

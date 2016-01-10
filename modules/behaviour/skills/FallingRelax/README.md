@@ -11,11 +11,11 @@ Include this module to allow the robot to relax its motors to prevent damage whe
 
 ## Consumes
 
-* `messages::Sensors` containing the orientation matrix and accelerometer readings
+* `message::Sensors` containing the orientation matrix and accelerometer readings
 
 ## Emits
 
-* `messages::ExecuteScript` instructs the script engine to run a script
+* `message::ExecuteScript` instructs the script engine to run a script
 
 ## Dependencies
 

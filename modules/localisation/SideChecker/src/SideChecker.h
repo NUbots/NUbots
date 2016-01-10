@@ -22,8 +22,8 @@
 
 #include <nuclear>
 
-#include "messages/vision/VisionObjects.h"
-#include "messages/support/FieldDescription.h"
+#include "message/vision/VisionObjects.h"
+#include "message/support/FieldDescription.h"
 
 
 
@@ -51,15 +51,15 @@ namespace localisation {
     	};
 
     	//Collected data:
-    	std::vector<std::pair<messages::vision::Goal,messages::vision::Goal>> leftGoals; //list of (left,right) goals
-    	std::vector<std::pair<messages::vision::Goal,messages::vision::Goal>> rightGoals; //list of (left,right) goals
+    	std::vector<std::pair<message::vision::Goal,message::vision::Goal>> leftGoals; //list of (left,right) goals
+    	std::vector<std::pair<message::vision::Goal,message::vision::Goal>> rightGoals; //list of (left,right) goals
 
 
     	State currentState = State::SearchLeft;
-    	void addGoals(messages::vision::Goal left, messages::vision::Goal right);
+    	void addGoals(message::vision::Goal left, message::vision::Goal right);
 
-        static ResetType calculateSide(std::vector<std::pair<messages::vision::Goal, messages::vision::Goal>> leftGoals, std::vector<std::pair<messages::vision::Goal, messages::vision::Goal>> rightGoals);
-    	void unpenalisedLocalisationReset(const messages::support::FieldDescription& fieldDescription, ResetType resetType);
+        static ResetType calculateSide(std::vector<std::pair<message::vision::Goal, message::vision::Goal>> leftGoals, std::vector<std::pair<message::vision::Goal, message::vision::Goal>> rightGoals);
+    	void unpenalisedLocalisationReset(const message::support::FieldDescription& fieldDescription, ResetType resetType);
 
     public:
         /// @brief Called by the powerplant to build and setup the SideChecker reactor.

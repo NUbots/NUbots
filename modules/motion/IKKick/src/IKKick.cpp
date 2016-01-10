@@ -19,16 +19,16 @@
 
 #include "IKKick.h"
 
-#include "messages/support/Configuration.h"
-#include "messages/motion/KickCommand.h"
-#include "messages/input/Sensors.h"
-#include "messages/input/ServoID.h"
-#include "messages/input/LimbID.h"
-#include "messages/behaviour/ServoCommand.h"
-#include "messages/behaviour/Action.h"
-#include "messages/support/FieldDescription.h"
-#include "messages/motion/WalkCommand.h"
-#include "messages/behaviour/KickPlan.h"
+#include "message/support/Configuration.h"
+#include "message/motion/KickCommand.h"
+#include "message/input/Sensors.h"
+#include "message/input/ServoID.h"
+#include "message/input/LimbID.h"
+#include "message/behaviour/ServoCommand.h"
+#include "message/behaviour/Action.h"
+#include "message/support/FieldDescription.h"
+#include "message/motion/WalkCommand.h"
+#include "message/behaviour/KickPlan.h"
 
 
 #include "utility/math/matrix/Transform3D.h"
@@ -42,20 +42,20 @@
 namespace modules {
 namespace motion {
 
-    using messages::support::Configuration;
-    using messages::motion::WalkStopCommand;
-    using messages::motion::KickCommand;
-    using messages::motion::IKKickParams;
-    using messages::motion::KickFinished;
-    using messages::input::Sensors;
-    using messages::input::ServoID;
-    using messages::input::LimbID;
-    using messages::behaviour::ServoCommand;
-    using messages::behaviour::RegisterAction;
-    using messages::behaviour::ActionPriorites;
-    using messages::behaviour::KickPlan;
-    using messages::behaviour::KickType;
-    using messages::support::FieldDescription;
+    using message::support::Configuration;
+    using message::motion::WalkStopCommand;
+    using message::motion::KickCommand;
+    using message::motion::IKKickParams;
+    using message::motion::KickFinished;
+    using message::input::Sensors;
+    using message::input::ServoID;
+    using message::input::LimbID;
+    using message::behaviour::ServoCommand;
+    using message::behaviour::RegisterAction;
+    using message::behaviour::ActionPriorites;
+    using message::behaviour::KickPlan;
+    using message::behaviour::KickType;
+    using message::support::FieldDescription;
 
     using utility::motion::kinematics::calculateLegJoints;
     using utility::math::matrix::Transform3D;
@@ -124,7 +124,7 @@ namespace motion {
                 supportFoot = LimbID::RIGHT_LEG;
             }
 
-            Transform3D torsoPose = (supportFoot == messages::input::LimbID::LEFT_LEG) ? leftFoot.i() : rightFoot.i();
+            Transform3D torsoPose = (supportFoot == message::input::LimbID::LEFT_LEG) ? leftFoot.i() : rightFoot.i();
 
             // Put the ball position from vision into torso coordinates
             arma::vec3 targetTorso = sensors.kinematicsBodyToGround.i().transformPoint(command.target);
@@ -197,7 +197,7 @@ namespace motion {
             }
 
             //Calculate IK and send waypoints
-            std::vector<std::pair<messages::input::ServoID, float>> joints;
+            std::vector<std::pair<message::input::ServoID, float>> joints;
 
             //IK
             auto kickJoints = calculateLegJoints<DarwinModel>(kickFootGoal, kickFoot);

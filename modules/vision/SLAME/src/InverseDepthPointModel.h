@@ -21,8 +21,8 @@
 #define UTILITY_MATH_KALMAN_INVERSE_DEPTH_MODEL_H
 
 #include <armadillo>
-#include "messages/localisation/FieldObject.h"
-#include "messages/input/Sensors.h"
+#include "message/localisation/FieldObject.h"
+#include "message/input/Sensors.h"
 
 namespace utility {
     namespace math {

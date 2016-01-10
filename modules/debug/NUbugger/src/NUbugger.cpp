@@ -21,8 +21,8 @@
 
 #include <random>
 
-#include "messages/platform/darwin/DarwinSensors.h"
-#include "messages/input/Sensors.h"
+#include "message/platform/darwin/DarwinSensors.h"
+#include "message/input/Sensors.h"
 #include "utility/nubugger/NUhelpers.h"
 
 namespace modules {
@@ -32,11 +32,11 @@ namespace debug {
     using utility::nubugger::graph;
     using utility::nubugger::drawArrow;
     using utility::nubugger::drawSphere;
-    using messages::platform::darwin::DarwinSensors;
+    using message::platform::darwin::DarwinSensors;
     using std::chrono::milliseconds;
-    using messages::input::Sensors;
-    using messages::input::ServoID;
-    using messages::support::nubugger::proto::DrawObjects;
+    using message::input::Sensors;
+    using message::input::ServoID;
+    using message::support::nubugger::proto::DrawObjects;
 
     NUbugger::NUbugger(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
 
@@ -77,7 +77,7 @@ namespace debug {
 
             for (const auto& s : sensors.servos) {
                 if (s.id == ServoID::L_HIP_ROLL){
-                    emit(graph("Servo " + messages::input::stringFromId(s.id), s.presentPosition));
+                    emit(graph("Servo " + message::input::stringFromId(s.id), s.presentPosition));
                 }
             }
 

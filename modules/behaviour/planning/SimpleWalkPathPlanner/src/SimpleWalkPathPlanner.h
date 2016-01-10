@@ -23,11 +23,11 @@
 #include <nuclear>
 #include <armadillo>
 #include <cmath>
-#include "messages/support/Configuration.h"
-#include "messages/input/Sensors.h"
-#include "messages/localisation/FieldObject.h"
-#include "messages/vision/VisionObjects.h"
-#include "messages/behaviour/MotionCommand.h"
+#include "message/support/Configuration.h"
+#include "message/input/Sensors.h"
+#include "message/localisation/FieldObject.h"
+#include "message/vision/VisionObjects.h"
+#include "message/behaviour/MotionCommand.h"
 
 
 namespace modules {
@@ -52,8 +52,8 @@ namespace modules {
                     //info for the current walk
                     arma::vec2 currentTargetPosition;
                     arma::vec2 currentTargetHeading;
-                    messages::behaviour::WalkApproach planType;
-                    messages::behaviour::WalkTarget targetHeading,targetPosition;
+                    message::behaviour::WalkApproach planType;
+                    message::behaviour::WalkTarget targetHeading,targetPosition;
 
                 public:
                     explicit SimpleWalkPathPlanner(std::unique_ptr<NUClear::Environment> environment);

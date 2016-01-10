@@ -19,7 +19,7 @@
 
 syntax = "proto3";
 
-package messages.support.nuclear.proto;
+package message.support.nuclear.proto;
 
 message ReactionStatistics {
     string name = 1;

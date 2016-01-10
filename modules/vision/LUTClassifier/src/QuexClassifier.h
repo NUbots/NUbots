@@ -27,9 +27,9 @@
 #define QUEX_OPTION_COMPUTED_GOTOS
 #define QUEX_OPTION_TERMINATION_ZERO_DISABLED
 #include "Lexer.hpp"
-#include "messages/input/Image.h"
-#include "messages/vision/LookUpTable.h"
-#include "messages/vision/ClassifiedImage.h"
+#include "message/input/Image.h"
+#include "message/vision/LookUpTable.h"
+#include "message/vision/ClassifiedImage.h"
 
 namespace modules {
     namespace vision {
@@ -43,7 +43,7 @@ namespace modules {
         public:
             QuexClassifier();
 
-            std::vector<messages::vision::ClassifiedImage<messages::vision::ObjectClass>::Segment> classify(const messages::input::Image& image, const messages::vision::LookUpTable& lut, const arma::ivec2& start, const arma::ivec2& end, const uint& stratification = 1);
+            std::vector<message::vision::ClassifiedImage<message::vision::ObjectClass>::Segment> classify(const message::input::Image& image, const message::vision::LookUpTable& lut, const arma::ivec2& start, const arma::ivec2& end, const uint& stratification = 1);
         };
     }
 }

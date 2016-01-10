@@ -19,15 +19,15 @@
 
 #include "DanceDarwin.h"
 
-#include "messages/motion/ServoWaypoint.h"
-#include "messages/support/Configuration.h"
-#include "messages/audio/Beat.h"
+#include "message/motion/ServoWaypoint.h"
+#include "message/support/Configuration.h"
+#include "message/audio/Beat.h"
 
 namespace modules {
     namespace behaviour {
         namespace tools {
 
-            using messages::support::Configuration;
+            using message::support::Configuration;
 
             DanceDarwin::DanceDarwin(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
 
@@ -38,7 +38,7 @@ namespace modules {
 
 
                 // This is very broken, needs to use subsumption
-                on<Trigger<messages::motion::AllServoWaypointsComplete>, With<messages::audio::Beat>>().then([this](const messages::motion::AllServoWaypointsComplete&, const messages::audio::Beat& beat) {
+                on<Trigger<message::motion::AllServoWaypointsComplete>, With<message::audio::Beat>>().then([this](const message::motion::AllServoWaypointsComplete&, const message::audio::Beat& beat) {
                     std::cout << "ServoWaypointsComplete" << std::endl;
                     // Here we pick a random element. Note that the random selection is bias here however until the number
                     // of scripts in the system is statistically significant compared to RAND_MAX, this should give decent results
@@ -72,20 +72,20 @@ namespace modules {
                     std::cout << "Scaling script by: " << scale << std::endl;
 
                     // Scale our script
-                    messages::motion::Script script;
+                    message::motion::Script script;
                     for(const auto& frame : item->second.frames) {
                         script.frames.push_back(frame);
                         script.frames.back().duration *= scale;
                     }
 
                     // Emit our scaled script to start at our start time (normally in the past)
-                    emit(std::make_unique<messages::motion::ExecuteScript>(script, start));
+                    emit(std::make_unique<message::motion::ExecuteScript>(script, start));
                 });
 
                 // Awful hack do not use.
-                on<Trigger<messages::audio::Beat>>().then([this](const messages::audio::Beat&) {
+                on<Trigger<message::audio::Beat>>().then([this](const message::audio::Beat&) {
                     if(!startedDancing) {
-                        emit(std::make_unique<messages::motion::ExecuteScriptByName>("Stand.yaml"));
+                        emit(std::make_unique<message::motion::ExecuteScriptByName>("Stand.yaml"));
                         startedDancing = true;
                     }
                 });

@@ -19,21 +19,21 @@
 
 #include "PS3Walk.h"
 #include <nuclear>
-#include "messages/behaviour/MotionCommand.h"
-#include "messages/motion/HeadCommand.h"
-#include "messages/motion/KickCommand.h"
-#include "messages/behaviour/Action.h"
-#include "messages/behaviour/ServoCommand.h"
+#include "message/behaviour/MotionCommand.h"
+#include "message/motion/HeadCommand.h"
+#include "message/motion/KickCommand.h"
+#include "message/behaviour/Action.h"
+#include "message/behaviour/ServoCommand.h"
 #include "utility/math/matrix/Transform2D.h"
 
 namespace modules {
 namespace behaviour {
 namespace strategy {
 
-    using messages::motion::KickScriptCommand;
-    using messages::motion::HeadCommand;
-    using messages::behaviour::MotionCommand;
-    using messages::input::LimbID;
+    using message::motion::KickScriptCommand;
+    using message::motion::HeadCommand;
+    using message::behaviour::MotionCommand;
+    using message::input::LimbID;
     using utility::math::matrix::Transform2D;
 
     PS3Walk::PS3Walk(std::unique_ptr<NUClear::Environment> environment)

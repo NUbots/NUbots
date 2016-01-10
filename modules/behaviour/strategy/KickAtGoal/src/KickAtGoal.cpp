@@ -20,24 +20,24 @@
 #include "KickAtGoal.h"
 #include <armadillo>
 
-#include "messages/behaviour/KickPlan.h"
-#include "messages/behaviour/MotionCommand.h"
-#include "messages/support/Configuration.h"
-#include "messages/vision/VisionObjects.h"
+#include "message/behaviour/KickPlan.h"
+#include "message/behaviour/MotionCommand.h"
+#include "message/support/Configuration.h"
+#include "message/vision/VisionObjects.h"
 #include "utility/time/time.h"
 
 namespace modules {
 namespace behaviour {
 namespace strategy {
 
-    using messages::behaviour::WalkApproach;
-    using messages::behaviour::WalkTarget;
-    using messages::behaviour::MotionCommand;
-    using messages::behaviour::KickPlan;
-    using messages::support::Configuration;
-    using messages::behaviour::proto::Behaviour;
-    using VisionBall = messages::vision::Ball;
-    using VisionGoal = messages::vision::Goal;
+    using message::behaviour::WalkApproach;
+    using message::behaviour::WalkTarget;
+    using message::behaviour::MotionCommand;
+    using message::behaviour::KickPlan;
+    using message::support::Configuration;
+    using message::behaviour::proto::Behaviour;
+    using VisionBall = message::vision::Ball;
+    using VisionGoal = message::vision::Goal;
     using utility::time::durationFromSeconds;
 
     KickAtGoal::KickAtGoal(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {

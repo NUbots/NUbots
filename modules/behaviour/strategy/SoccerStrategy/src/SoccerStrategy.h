@@ -23,13 +23,13 @@
 #include <nuclear>
 #include <armadillo>
 
-#include "messages/behaviour/KickPlan.h"
-#include "messages/behaviour/FieldTarget.h"
-#include "messages/behaviour/proto/Behaviour.pb.h"
-#include "messages/localisation/FieldObject.h"
-#include "messages/input/Sensors.h"
-#include "messages/support/FieldDescription.h"
-#include "messages/input/gameevents/GameEvents.h"
+#include "message/behaviour/KickPlan.h"
+#include "message/behaviour/FieldTarget.h"
+#include "message/behaviour/proto/Behaviour.pb.h"
+#include "message/localisation/FieldObject.h"
+#include "message/input/Sensors.h"
+#include "message/support/FieldDescription.h"
+#include "message/input/gameevents/GameEvents.h"
 
 namespace modules {
 namespace behaviour {
@@ -63,39 +63,39 @@ namespace strategy {
             bool forcePenaltyShootout = false;
         } cfg_;
 
-        messages::behaviour::FieldTarget walkTarget;
+        message::behaviour::FieldTarget walkTarget;
 
-        std::vector<messages::behaviour::FieldTarget> lookTarget;
+        std::vector<message::behaviour::FieldTarget> lookTarget;
 
         // TODO: remove horrible
         bool isGettingUp = false;
         bool isDiving = false;
         bool selfPenalised = false;
         bool isSideChecking = false;
-        messages::behaviour::KickType kickType;
-        messages::behaviour::proto::Behaviour::State currentState = messages::behaviour::proto::Behaviour::INIT;
+        message::behaviour::KickType kickType;
+        message::behaviour::proto::Behaviour::State currentState = message::behaviour::proto::Behaviour::INIT;
 
         NUClear::clock::time_point lastLocalised = NUClear::clock::now();
 
         NUClear::clock::time_point ballLastMeasured = NUClear::clock::now() - std::chrono::seconds(600); // TODO: unhack
         NUClear::clock::time_point ballSearchStartTime;
         NUClear::clock::time_point selfLastMeasured;
-        void initialLocalisationReset(const messages::support::FieldDescription& fieldDescription);
+        void initialLocalisationReset(const message::support::FieldDescription& fieldDescription);
         void penaltyLocalisationReset();
-        void unpenalisedLocalisationReset(const messages::support::FieldDescription& fieldDescription);
+        void unpenalisedLocalisationReset(const message::support::FieldDescription& fieldDescription);
 
         void standStill();
         void searchWalk();
-        void walkTo(const messages::support::FieldDescription& fieldDescription, const messages::behaviour::FieldTarget& object);
-        void walkTo(const messages::support::FieldDescription& fieldDescription, arma::vec position);
-        void find(const std::vector<messages::behaviour::FieldTarget>& objects);
+        void walkTo(const message::support::FieldDescription& fieldDescription, const message::behaviour::FieldTarget& object);
+        void walkTo(const message::support::FieldDescription& fieldDescription, arma::vec position);
+        void find(const std::vector<message::behaviour::FieldTarget>& objects);
         void spinWalk();
-        bool pickedUp(const messages::input::Sensors& sensors);
+        bool pickedUp(const message::input::Sensors& sensors);
         bool penalised();
-        bool ballDistance(const messages::localisation::Ball& ball);
-        void goalieWalk(const std::vector<messages::localisation::Self>& selfs, const std::vector<messages::localisation::Ball>& balls);
-        arma::vec2 getKickPlan(const std::vector<messages::localisation::Self>& selfs, const messages::support::FieldDescription& fieldDescription);
-        void play(const std::vector<messages::localisation::Self>& selfs, const std::vector<messages::localisation::Ball>& balls, const messages::support::FieldDescription& fieldDescription, const messages::input::gameevents::Mode& mode);
+        bool ballDistance(const message::localisation::Ball& ball);
+        void goalieWalk(const std::vector<message::localisation::Self>& selfs, const std::vector<message::localisation::Ball>& balls);
+        arma::vec2 getKickPlan(const std::vector<message::localisation::Self>& selfs, const message::support::FieldDescription& fieldDescription);
+        void play(const std::vector<message::localisation::Self>& selfs, const std::vector<message::localisation::Ball>& balls, const message::support::FieldDescription& fieldDescription, const message::input::gameevents::Mode& mode);
 
     public:
         explicit SoccerStrategy(std::unique_ptr<NUClear::Environment> environment);

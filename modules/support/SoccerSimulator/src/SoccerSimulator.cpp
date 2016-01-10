@@ -26,20 +26,20 @@
 #include "utility/localisation/transform.h"
 #include "utility/motion/ForwardKinematics.h"
 #include "utility/support/yaml_armadillo.h"
-#include "messages/vision/VisionObjects.h"
-#include "messages/support/Configuration.h"
-#include "messages/localisation/FieldObject.h"
-#include "messages/input/ServoID.h"
-#include "messages/motion/WalkCommand.h"
-#include "messages/input/gameevents/GameEvents.h"
+#include "message/vision/VisionObjects.h"
+#include "message/support/Configuration.h"
+#include "message/localisation/FieldObject.h"
+#include "message/input/ServoID.h"
+#include "message/motion/WalkCommand.h"
+#include "message/input/gameevents/GameEvents.h"
 
 
 namespace modules {
 namespace support {
 
-    using messages::platform::darwin::ButtonMiddleDown;
-    using messages::input::Sensors;
-    using messages::input::ServoID;
+    using message::platform::darwin::ButtonMiddleDown;
+    using message::input::Sensors;
+    using message::input::ServoID;
     using utility::nubugger::drawArrow;
     using utility::nubugger::drawSphere;
     using utility::math::angle::normalizeAngle;
@@ -51,17 +51,17 @@ namespace support {
     using utility::localisation::transform::WorldToRobotTransform;
     using utility::localisation::transform::RobotToWorldTransform;
     using utility::nubugger::graph;
-    using messages::support::Configuration;
-    using messages::support::FieldDescription;
-    using messages::motion::WalkCommand;
-    using messages::motion::KickCommand;
-    using messages::motion::KickFinished;
-    using messages::motion::KickPlannerConfig;
-    using messages::platform::darwin::DarwinSensors;
+    using message::support::Configuration;
+    using message::support::FieldDescription;
+    using message::motion::WalkCommand;
+    using message::motion::KickCommand;
+    using message::motion::KickFinished;
+    using message::motion::KickPlannerConfig;
+    using message::platform::darwin::DarwinSensors;
     using utility::math::matrix::Transform2D;
-    using messages::support::Configuration;
-    using messages::support::GlobalConfig;
-    using namespace messages::input::gameevents;
+    using message::support::Configuration;
+    using message::support::GlobalConfig;
+    using namespace message::input::gameevents;
     using utility::support::Expression;
 
     double triangle_wave(double t, double period) {
@@ -265,7 +265,7 @@ namespace support {
             }
 
             if (cfg_.simulate_goal_observations) {
-                auto goals = std::make_unique<std::vector<messages::vision::Goal>>();
+                auto goals = std::make_unique<std::vector<message::vision::Goal>>();
                 if (cfg_.blind_robot) {
                     emit(std::move(goals));
                     return;
@@ -279,7 +279,7 @@ namespace support {
 
                     if (!m.measurements.empty()) {
                         if (!cfg_.distinguish_own_and_opponent_goals) {
-                            m.team = messages::vision::Goal::Team::UNKNOWN;
+                            m.team = message::vision::Goal::Team::UNKNOWN;
                         }
                         goals->push_back(m);
                     }
@@ -294,8 +294,8 @@ namespace support {
 
             } else {
                 // Emit current self exactly
-                auto r = std::make_unique<std::vector<messages::localisation::Self>>();
-                r->push_back(messages::localisation::Self());
+                auto r = std::make_unique<std::vector<message::localisation::Self>>();
+                r->push_back(message::localisation::Self());
                 r->back().position = world.robotPose.xy();
                 r->back().heading = bearingToUnitVector(world.robotPose.angle());
                 r->back().velocity = world.robotVelocity.rows(0,1);
@@ -306,7 +306,7 @@ namespace support {
 
 
             if (cfg_.simulate_ball_observations) {
-                auto ball_vec = std::make_unique<std::vector<messages::vision::Ball>>();
+                auto ball_vec = std::make_unique<std::vector<message::vision::Ball>>();
                 if (cfg_.blind_robot) {
                     emit(std::move(ball_vec));
                     return;
@@ -324,13 +324,13 @@ namespace support {
 
             } else {
                 // Emit current ball exactly
-                auto b = std::make_unique<messages::localisation::Ball>();
+                auto b = std::make_unique<message::localisation::Ball>();
                 b->position = world.robotPose.worldToLocal(world.ball.position).xy();
                 b->velocity = world.robotPose.rotation().t() * world.ball.velocity.rows(0,1);
                 b->position_cov = 0.00001 * arma::eye(2,2);
                 b->last_measurement_time = NUClear::clock::now();
-                emit(std::make_unique<std::vector<messages::localisation::Ball>>(
-                        std::vector<messages::localisation::Ball>(1,*b)
+                emit(std::make_unique<std::vector<message::localisation::Ball>>(
+                        std::vector<message::localisation::Ball>(1,*b)
                     ));
                 emit(std::move(b));
             }
@@ -389,7 +389,7 @@ namespace support {
         return arma::vec2({wave1,wave2});
     }
 
-    void SoccerSimulator::setGoalLeftRightKnowledge(std::vector<messages::vision::Goal>& goals){
+    void SoccerSimulator::setGoalLeftRightKnowledge(std::vector<message::vision::Goal>& goals){
         // for (auto& g : goalPosts) {
         int leftGoals = 0;
         int rightGoals = 0;

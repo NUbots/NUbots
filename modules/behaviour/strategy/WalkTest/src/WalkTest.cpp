@@ -18,14 +18,14 @@
  */
 
 #include "WalkTest.h"
-#include "messages/motion/WalkCommand.h"
+#include "message/motion/WalkCommand.h"
 
 namespace modules {
     namespace behaviour {
         namespace strategy {
 
-            using messages::motion::WalkCommand;
-            using messages::motion::WalkStartCommand;
+            using message::motion::WalkCommand;
+            using message::motion::WalkStartCommand;
 
             WalkTest::WalkTest(std::unique_ptr<NUClear::Environment> environment)
                 : Reactor(std::move(environment)) {

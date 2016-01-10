@@ -7,22 +7,22 @@ This module finds the beat in music as it plays.
 
 ## Usage
 
-This module waits for audio input in the form of `messages::SoundChunk` objects
+This module waits for audio input in the form of `message::SoundChunk` objects
 and calculates the most likely timing of beats based on a sliding ten-second
-window of sound data. Whenever a beat is detected it emits a `messages::Beat`
+window of sound data. Whenever a beat is detected it emits a `message::Beat`
 containing the current time and the beat's frequency.
 
 If the input audio has multiple channels, only the first channel is analysed.
 
 ## Consumes
 
-* `messages::SoundChunkSettings` to set up the sample format of upcoming sound
+* `message::SoundChunkSettings` to set up the sample format of upcoming sound
   chunks
-* `messages::SoundChunk` containing the sound data to find beats in
+* `message::SoundChunk` containing the sound data to find beats in
 
 ## Emits
 
-* `messages::Beat` every time a beat is detected
+* `message::Beat` every time a beat is detected
 
 ## Dependencies
 

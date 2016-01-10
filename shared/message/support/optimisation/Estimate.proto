@@ -19,11 +19,11 @@
 
 syntax = "proto3";
 
-package messages.support.optimisation;
+package message.support.optimisation;
 
-import "messages/Vector.proto";
-import "messages/Matrix.proto";
-import "messages/support/optimisation/Episode.proto";
+import "message/Vector.proto";
+import "message/Matrix.proto";
+import "message/support/optimisation/Episode.proto";
 
 message Estimate {
     string group = 1;

@@ -21,16 +21,16 @@
 
 #include <limits>
 
-#include "messages/support/Configuration.h"
-#include "messages/localisation/FieldObject.h"
-#include "messages/behaviour/MotionCommand.h"
-#include "messages/behaviour/WalkPath.h"
-#include "messages/behaviour/Action.h"
-#include "messages/motion/WalkCommand.h"
-#include "messages/motion/KickCommand.h"
-#include "messages/behaviour/KickPlan.h"
-#include "messages/input/LimbID.h"
-#include "messages/input/ServoID.h"
+#include "message/support/Configuration.h"
+#include "message/localisation/FieldObject.h"
+#include "message/behaviour/MotionCommand.h"
+#include "message/behaviour/WalkPath.h"
+#include "message/behaviour/Action.h"
+#include "message/motion/WalkCommand.h"
+#include "message/motion/KickCommand.h"
+#include "message/behaviour/KickPlan.h"
+#include "message/input/LimbID.h"
+#include "message/input/ServoID.h"
 #include "utility/nubugger/NUhelpers.h"
 #include "utility/math/geometry/RotatedRectangle.h"
 #include "utility/math/matrix/Transform2D.h"
@@ -40,24 +40,24 @@ namespace modules {
 namespace behaviour {
 namespace skills {
 
-    using messages::support::Configuration;
-    using Self = messages::localisation::Self;
-    using Ball = messages::localisation::Ball;
+    using message::support::Configuration;
+    using Self = message::localisation::Self;
+    using Ball = message::localisation::Ball;
 
-    using messages::behaviour::MotionCommand;
-    using messages::behaviour::WalkPath;
-    using messages::behaviour::RegisterAction;
-    using messages::behaviour::ActionPriorites;
+    using message::behaviour::MotionCommand;
+    using message::behaviour::WalkPath;
+    using message::behaviour::RegisterAction;
+    using message::behaviour::ActionPriorites;
 
-    using messages::motion::KickFinished;
-    using messages::motion::WalkCommand;
-    using messages::motion::WalkStartCommand;
-    using messages::motion::WalkStopCommand;
-    using messages::motion::EnableWalkEngineCommand;
-    using messages::motion::DisableWalkEngineCommand;
+    using message::motion::KickFinished;
+    using message::motion::WalkCommand;
+    using message::motion::WalkStartCommand;
+    using message::motion::WalkStopCommand;
+    using message::motion::EnableWalkEngineCommand;
+    using message::motion::DisableWalkEngineCommand;
 
-    using messages::input::LimbID;
-    using messages::input::ServoID;
+    using message::input::LimbID;
+    using message::input::ServoID;
 
     using utility::math::geometry::RotatedRectangle;
     using utility::math::matrix::Transform2D;

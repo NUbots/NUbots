@@ -14,12 +14,12 @@ It will then execute this script and respond with the sensor values over the scr
 
 ## Consumes
 
-* `messages::OptimizeScript
+* `message::OptimizeScript
 
 ## Emits
 
-* `messages::Script` to execute scripts
-* `messages::SensorValues` to the network after scripts have run
+* `message::Script` to execute scripts
+* `message::SensorValues` to the network after scripts have run
 
 ## Dependencies
 

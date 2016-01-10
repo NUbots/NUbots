@@ -27,7 +27,7 @@
 #include "CM730.h"
 #include "MX28.h"
 #include "FSR.h"
-#include "messages/support/Configuration.h"
+#include "message/support/Configuration.h"
 
 #include "DarwinRawSensors.h"
 
@@ -88,7 +88,7 @@ namespace Darwin {
         void buildBulkReadPacket();
 
     public:
-        inline void setConfig(const messages::support::Configuration& config){
+        inline void setConfig(const message::support::Configuration& config){
             uart.setConfig(config);
         }
         /// The CM730

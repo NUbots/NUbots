@@ -20,14 +20,14 @@
 #include "NUbugger.h"
 
 #include "utility/time/time.h"
-#include "messages/support/nubugger/proto/DrawObjects.pb.h"
+#include "message/support/nubugger/proto/DrawObjects.pb.h"
 
 namespace modules {
 namespace support {
     using utility::time::getUtcTimestamp;
 
-    using messages::support::nubugger::proto::DrawObjects;
-    using messages::support::nubugger::proto::DrawObject;
+    using message::support::nubugger::proto::DrawObjects;
+    using message::support::nubugger::proto::DrawObject;
 
     void NUbugger::provideDrawObjects() {
 

@@ -20,12 +20,12 @@
 #include "KickScript.h"
 #include <nuclear>
 
-#include "messages/input/ServoID.h"
-#include "messages/motion/Script.h"
-#include "messages/behaviour/Action.h"
-#include "messages/behaviour/ServoCommand.h"
-#include "messages/support/Configuration.h"
-#include "messages/motion/WalkCommand.h"
+#include "message/input/ServoID.h"
+#include "message/motion/Script.h"
+#include "message/behaviour/Action.h"
+#include "message/behaviour/ServoCommand.h"
+#include "message/support/Configuration.h"
+#include "message/motion/WalkCommand.h"
 
 namespace modules {
 namespace behaviour {
@@ -34,15 +34,15 @@ namespace skills {
     struct ExecuteKick{};
     struct FinishKick{};
 
-    using messages::support::Configuration;
-    using messages::input::ServoID;
-    using messages::motion::ExecuteScriptByName;
-    using messages::behaviour::RegisterAction;
-    using messages::behaviour::ActionPriorites;
-    using messages::motion::WalkStartCommand;
-    using messages::input::LimbID;
-    using messages::motion::KickScriptCommand;
-    using messages::motion::KickFinished;
+    using message::support::Configuration;
+    using message::input::ServoID;
+    using message::motion::ExecuteScriptByName;
+    using message::behaviour::RegisterAction;
+    using message::behaviour::ActionPriorites;
+    using message::motion::WalkStartCommand;
+    using message::input::LimbID;
+    using message::motion::KickScriptCommand;
+    using message::motion::KickFinished;
 
     KickScript::KickScript(std::unique_ptr<NUClear::Environment> environment)
         : Reactor(std::move(environment))

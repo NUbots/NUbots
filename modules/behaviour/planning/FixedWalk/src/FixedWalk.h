@@ -25,9 +25,9 @@
 #include <armadillo>
 #include <list>
 
-#include "messages/input/Sensors.h"
-#include "messages/motion/WalkCommand.h"
-#include "messages/behaviour/FixedWalkCommand.h"
+#include "message/input/Sensors.h"
+#include "message/motion/WalkCommand.h"
+#include "message/behaviour/FixedWalkCommand.h"
 
 
 
@@ -43,10 +43,10 @@ namespace modules {
                  */
                 class FixedWalk : public NUClear::Reactor {
                 private:
-                    std::unique_ptr<messages::motion::WalkCommand> getWalkCommand(const messages::behaviour::FixedWalkCommand::WalkSegment& segment,
+                    std::unique_ptr<message::motion::WalkCommand> getWalkCommand(const message::behaviour::FixedWalkCommand::WalkSegment& segment,
                                                                 NUClear::clock::duration t,
-                                                                const messages::input::Sensors& sensors);
-                    std::list<messages::behaviour::FixedWalkCommand::WalkSegment> walkSegments;
+                                                                const message::input::Sensors& sensors);
+                    std::list<message::behaviour::FixedWalkCommand::WalkSegment> walkSegments;
                     NUClear::clock::time_point segmentStart;
                     NUClear::clock::duration segmentElapsedTimeBeforeFall;
 

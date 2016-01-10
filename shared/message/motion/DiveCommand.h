@@ -22,7 +22,7 @@
 
 #include <nuclear>
 #include <armadillo>
-#include "messages/behaviour/Action.h"
+#include "message/behaviour/Action.h"
 
 namespace messages {
     namespace motion {
@@ -39,7 +39,7 @@ namespace messages {
 
         struct DiveFinished{
         };
-        
+
     }  // motion
 }  // messages
 

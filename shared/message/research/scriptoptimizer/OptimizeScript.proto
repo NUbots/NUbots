@@ -19,9 +19,9 @@
 
 syntax = "proto3";
 
-package messages.research.scriptoptimizer;
+package message.research.scriptoptimizer;
 
-import "messages/input/proto/Sensors.proto";
+import "message/input/proto/Sensors.proto";
 
 message OptimizeScript {
 

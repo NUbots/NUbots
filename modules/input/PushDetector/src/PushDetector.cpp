@@ -19,18 +19,18 @@
 
 #include "PushDetector.h"
 
-#include "messages/support/Configuration.h"
+#include "message/support/Configuration.h"
 #include "utility/time/time.h"
 #include "utility/nubugger/NUhelpers.h"
-#include "messages/input/Sensors.h"
-#include "messages/input/PushDetection.h"
+#include "message/input/Sensors.h"
+#include "message/input/PushDetection.h"
 
 namespace modules {
 namespace input {
 
-    using messages::support::Configuration;
-    using messages::input::Sensors;
-    using messages::input::PushDetection;
+    using message::support::Configuration;
+    using message::input::Sensors;
+    using message::input::PushDetection;
     using utility::math::filter::UKF;
     using utility::time::TimeDifferenceSeconds;
     using utility::nubugger::graph;

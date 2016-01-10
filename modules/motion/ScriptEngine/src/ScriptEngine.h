@@ -21,7 +21,7 @@
 #define MODULES_MOTION_SCRIPTENGINE_H
 
 #include <nuclear>
-#include "messages/motion/Script.h"
+#include "message/motion/Script.h"
 
 namespace modules {
     namespace motion {
@@ -34,7 +34,7 @@ namespace modules {
          */
         class ScriptEngine : public NUClear::Reactor {
         private:
-            std::map<std::string, messages::motion::Script> scripts;
+            std::map<std::string, message::motion::Script> scripts;
         public:
             explicit ScriptEngine(std::unique_ptr<NUClear::Environment> environment);
             static constexpr const char* CONFIGURATION_PATH = "";

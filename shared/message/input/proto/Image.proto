@@ -19,9 +19,9 @@
 
 syntax = "proto3";
 
-package messages.input.proto;
+package message.input.proto;
 
-import "messages/Vector.proto";
+import "message/Vector.proto";
 
 message Image {
 

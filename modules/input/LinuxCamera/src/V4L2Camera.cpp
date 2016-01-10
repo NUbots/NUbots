@@ -36,7 +36,7 @@ namespace modules {
 
         constexpr size_t numbuffers = 2;
 
-        using messages::input::Image;
+        using message::input::Image;
 
         V4L2Camera::V4L2Camera() : fd(-1), width(0), height(0), deviceID(""), streaming(false) {
         }

@@ -19,12 +19,12 @@
 
 #include "HeadController.h"
 
-#include "messages/input/ServoID.h"
-#include "messages/behaviour/Action.h"
-#include "messages/behaviour/ServoCommand.h"
-#include "messages/input/Sensors.h"
-#include "messages/support/Configuration.h"
-#include "messages/motion/HeadCommand.h"
+#include "message/input/ServoID.h"
+#include "message/behaviour/Action.h"
+#include "message/behaviour/ServoCommand.h"
+#include "message/input/Sensors.h"
+#include "message/support/Configuration.h"
+#include "message/motion/HeadCommand.h"
 #include "utility/math/coordinates.h"
 #include "utility/motion/InverseKinematics.h"
 #include "utility/motion/RobotModels.h"
@@ -36,13 +36,13 @@ namespace modules {
     namespace motion {
 
         using utility::nubugger::graph;
-        using messages::input::ServoID;
-        using messages::input::Sensors;
-        using messages::behaviour::RegisterAction;
-        using messages::input::LimbID;
-        using messages::support::Configuration;
-        using messages::behaviour::ServoCommand;
-        using messages::motion::HeadCommand;
+        using message::input::ServoID;
+        using message::input::Sensors;
+        using message::behaviour::RegisterAction;
+        using message::input::LimbID;
+        using message::support::Configuration;
+        using message::behaviour::ServoCommand;
+        using message::motion::HeadCommand;
         using utility::math::coordinates::sphericalToCartesian;
         using utility::math::coordinates::cartesianToSpherical;
         using utility::motion::kinematics::calculateHeadJoints;
@@ -93,7 +93,7 @@ namespace modules {
                 //Convert to robot space
                 arma::vec3 headUnitVector = goalRobotSpace ? goalHeadUnitVector_world : sensors.orientation * goalHeadUnitVector_world;
                 //Compute inverse kinematics for head
-                std::vector< std::pair<messages::input::ServoID, float> > goalAnglesList = calculateHeadJoints<DarwinModel>(headUnitVector);
+                std::vector< std::pair<message::input::ServoID, float> > goalAnglesList = calculateHeadJoints<DarwinModel>(headUnitVector);
                 // arma::vec2 goalAngles = cartesianToSpherical(headUnitVector).rows(1,2);
 
                 //Clamp head angles

@@ -19,19 +19,19 @@
 
 #include "SoccerStrategy.h"
 
-#include "messages/behaviour/LookStrategy.h"
-#include "messages/behaviour/Look.h"
-#include "messages/behaviour/MotionCommand.h"
-#include "messages/behaviour/SoccerObjectPriority.h"
-#include "messages/support/FieldDescription.h"
-#include "messages/input/Sensors.h"
-#include "messages/motion/GetupCommand.h"
-#include "messages/motion/DiveCommand.h"
-#include "messages/localisation/FieldObject.h"
-#include "messages/localisation/ResetRobotHypotheses.h"
-#include "messages/localisation/SideChecker.h"
-#include "messages/support/Configuration.h"
-#include "messages/platform/darwin/DarwinSensors.h"
+#include "message/behaviour/LookStrategy.h"
+#include "message/behaviour/Look.h"
+#include "message/behaviour/MotionCommand.h"
+#include "message/behaviour/SoccerObjectPriority.h"
+#include "message/support/FieldDescription.h"
+#include "message/input/Sensors.h"
+#include "message/motion/GetupCommand.h"
+#include "message/motion/DiveCommand.h"
+#include "message/localisation/FieldObject.h"
+#include "message/localisation/ResetRobotHypotheses.h"
+#include "message/localisation/SideChecker.h"
+#include "message/support/Configuration.h"
+#include "message/platform/darwin/DarwinSensors.h"
 
 #include "utility/time/time.h"
 #include "utility/localisation/transform.h"
@@ -44,34 +44,34 @@ namespace modules {
 namespace behaviour {
 namespace strategy {
 
-    using messages::support::Configuration;
-    using messages::input::Sensors;
-    using messages::input::gameevents::GameState;
-    using messages::input::gameevents::Mode;
-    using messages::input::gameevents::Phase;
-    using messages::localisation::Ball;
-    using messages::localisation::Self;
-    using messages::localisation::SideCheckingComplete;
-    using messages::behaviour::MotionCommand;
-    using messages::behaviour::LookStrategy;
-    using messages::behaviour::Look;
-    using messages::behaviour::FieldTarget;
-    using messages::behaviour::KickPlan;
-    using messages::behaviour::KickType;
-    using messages::behaviour::SoccerObjectPriority;
-    using messages::behaviour::SearchType;
-    using messages::behaviour::proto::Behaviour;
-    using messages::support::FieldDescription;
-    using messages::motion::ExecuteGetup;
-    using messages::motion::KillGetup;
-    using messages::motion::DiveCommand;
-    using messages::motion::DiveFinished;
-    using SelfPenalisation = messages::input::gameevents::Penalisation<messages::input::gameevents::SELF>;
-    using SelfUnpenalisation = messages::input::gameevents::Unpenalisation<messages::input::gameevents::SELF>;
-    using messages::localisation::ResetRobotHypotheses;
+    using message::support::Configuration;
+    using message::input::Sensors;
+    using message::input::gameevents::GameState;
+    using message::input::gameevents::Mode;
+    using message::input::gameevents::Phase;
+    using message::localisation::Ball;
+    using message::localisation::Self;
+    using message::localisation::SideCheckingComplete;
+    using message::behaviour::MotionCommand;
+    using message::behaviour::LookStrategy;
+    using message::behaviour::Look;
+    using message::behaviour::FieldTarget;
+    using message::behaviour::KickPlan;
+    using message::behaviour::KickType;
+    using message::behaviour::SoccerObjectPriority;
+    using message::behaviour::SearchType;
+    using message::behaviour::proto::Behaviour;
+    using message::support::FieldDescription;
+    using message::motion::ExecuteGetup;
+    using message::motion::KillGetup;
+    using message::motion::DiveCommand;
+    using message::motion::DiveFinished;
+    using SelfPenalisation = message::input::gameevents::Penalisation<message::input::gameevents::SELF>;
+    using SelfUnpenalisation = message::input::gameevents::Unpenalisation<message::input::gameevents::SELF>;
+    using message::localisation::ResetRobotHypotheses;
     using utility::math::matrix::Transform2D;
-    using messages::platform::darwin::ButtonMiddleDown;
-    using messages::platform::darwin::ButtonLeftDown;
+    using message::platform::darwin::ButtonMiddleDown;
+    using message::platform::darwin::ButtonLeftDown;
 
     using utility::localisation::transform::RobotToWorldTransform;
     using utility::time::durationFromSeconds;
@@ -454,7 +454,7 @@ namespace strategy {
         emit(std::make_unique<MotionCommand>(MotionCommand::DirectCommand({0, 0, 1})));
     }
 
-    arma::vec2 SoccerStrategy::getKickPlan(const std::vector<Self>& selfs, const messages::support::FieldDescription& fieldDescription) {
+    arma::vec2 SoccerStrategy::getKickPlan(const std::vector<Self>& selfs, const message::support::FieldDescription& fieldDescription) {
 
         // Defines the box within in which the kick target is changed from the centre
         // of the oppposition goal to the perpendicular distance from the robot to the goal

@@ -19,7 +19,7 @@
 
 syntax = "proto3";
 
-package messages.support.nubugger.proto;
+package message.support.nubugger.proto;
 
 message ReactionHandles {
     message Handle {

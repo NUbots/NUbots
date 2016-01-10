@@ -25,9 +25,9 @@ extern "C" {
     #include <fftw3.h>
 }
 
-#include "messages/SoundChunk.h"
-#include "messages/DarwinSensors.h"
-#include "messages/Beat.h"
+#include "message/SoundChunk.h"
+#include "message/DarwinSensors.h"
+#include "message/Beat.h"
 #include "utility/math/angle.h"
 
 namespace modules {
@@ -103,7 +103,7 @@ namespace modules {
              *
              * @return the summation of the absolute value of frequency buckets in the fft between the requested frequencies
              */
-            std::vector<double> getBuckets(const messages::SoundChunk& chunk);
+            std::vector<double> getBuckets(const message::SoundChunk& chunk);
 
             /**
              * Finds the most likely beat frequency given an array of differentiated input
@@ -129,7 +129,7 @@ namespace modules {
             return double(index) * double(sampleRate) / double(fftSize);
         }
 
-        std::vector<double> BeatDetector::impl::getBuckets(const messages::SoundChunk& chunk) {
+        std::vector<double> BeatDetector::impl::getBuckets(const message::SoundChunk& chunk) {
 
             // Copy our sound data from the first channel into the input buffer (we only care about the first channel)
             for (size_t i = 0; i < chunkSize; ++i) {
@@ -253,7 +253,7 @@ namespace modules {
 
         BeatDetector::BeatDetector(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
 
-            on<Trigger<messages::SoundChunkSettings>>().then([this](const messages::SoundChunkSettings& settings) {
+            on<Trigger<message::SoundChunkSettings>>().then([this](const message::SoundChunkSettings& settings) {
 
                 // Store the settings
                 m->sampleRate = settings.sampleRate;
@@ -277,7 +277,7 @@ namespace modules {
             });
 
             // This triggers on every sound chunk we get
-            on<Trigger<messages::SoundChunk>>().then([this](const messages::SoundChunk& chunk) {
+            on<Trigger<message::SoundChunk>>().then([this](const message::SoundChunk& chunk) {
                 // Split the sound into frequency buckets and emit
                 auto buckets = std::make_unique<Buckets>();
                 buckets->buckets = m->getBuckets(chunk);
@@ -378,7 +378,7 @@ namespace modules {
                        && input[0]->phase > -M_PI_2) {
 
                         // Make our beat object and emit it
-                        auto beat = std::make_unique<messages::Beat>();
+                        auto beat = std::make_unique<message::Beat>();
                         beat->time = NUClear::clock::now();
                         beat->period = NUClear::clock::duration(static_cast<long>((1 / input[0]->frequency) * NUClear::clock::period::den));
                         emit(std::move(beat));

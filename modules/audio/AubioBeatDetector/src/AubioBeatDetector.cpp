@@ -28,14 +28,14 @@ extern "C" {
 #include <ctime>
 #include <vector>
 
-#include "messages/input/SoundChunk.h"
-#include "messages/audio/Beat.h"
+#include "message/input/SoundChunk.h"
+#include "message/audio/Beat.h"
 
 namespace modules {
     namespace audio {
 
-        using messages::input::SoundChunkSettings;
-        using messages::input::SoundChunk;
+        using message::input::SoundChunkSettings;
+        using message::input::SoundChunk;
 
         const int WINDOW_SIZE = 1024;
         const int HOP_SIZE = 512; //number of frames to input to beat detection at one time
@@ -112,7 +112,7 @@ namespace modules {
            on<Last<2, Trigger<BeatTime>>>().then([this](const std::list<std::shared_ptr<const BeatTime>>& lastTwoBeats) {
 
                if(lastTwoBeats.size() == 2) {
-                    auto beat = std::make_unique<messages::audio::Beat>();
+                    auto beat = std::make_unique<message::audio::Beat>();
                     beat->time = lastTwoBeats[0]->time; //apparently the latest one is 0
                     beat->period = lastTwoBeats[0]->time - lastTwoBeats[1]->time;
 

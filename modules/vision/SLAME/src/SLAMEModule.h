@@ -20,11 +20,11 @@
 #define MODULES_VISION_SLAME_MODULE_H
 
 #include <nuclear>
-#include "messages/vision/VisionObjects.h"
-#include "messages/input/Image.h"
-#include "messages/localisation/FieldObject.h"
-#include "messages/input/Sensors.h"
-#include "messages/support/Configuration.h"
+#include "message/vision/VisionObjects.h"
+#include "message/input/Image.h"
+#include "message/localisation/FieldObject.h"
+#include "message/input/Sensors.h"
+#include "message/support/Configuration.h"
 #include "utility/math/filter/UKF.h"
 #include "utility/math/vision.h"
 #include "utility/math/angle.h"
@@ -70,7 +70,7 @@ namespace modules{
             {
                 lastTime = NUClear::clock::now();
             }
-            void setParameters(const messages::support::Configuration& config){
+            void setParameters(const message::support::Configuration& config){
                 MAX_MATCHES = config["MAX_MATCHES"].template as<size_t>();
                 MEASUREMENT_COV_FACTOR = config["MEASUREMENT_COV_FACTOR"].template as<float>();
                 RHO_INITIAL = config["RHO_INITIAL"].template as<float>();
@@ -93,7 +93,7 @@ namespace modules{
             /*!
                 @param Rwc is the worldToCamera transform
             */
-            StateVector getInitialMean(arma::vec screenAngular, arma::mat Rwc, const messages::localisation::Self& self, const messages::input::Sensors& sensors){
+            StateVector getInitialMean(arma::vec screenAngular, arma::mat Rwc, const message::localisation::Self& self, const message::input::Sensors& sensors){
                 StateVector v;
                 arma::mat Rcw = utility::math::matrix::orthonormal44Inverse(Rwc);
                 v.rows(stateOf::kX,stateOf::kZ) = Rcw.submat(0,3,2,3);
@@ -104,7 +104,7 @@ namespace modules{
                 return v;
             }
 
-            CovarianceMatrix getInitialCovariance(arma::vec screenAngular, arma::mat Rwc, const messages::localisation::Self& self, const messages::input::Sensors& sensors){
+            CovarianceMatrix getInitialCovariance(arma::vec screenAngular, arma::mat Rwc, const message::localisation::Self& self, const message::input::Sensors& sensors){
                 CovarianceMatrix M = arma::eye(MODEL_SIZE, MODEL_SIZE);
                 M(stateOf::kX, stateOf::kX) = self.sr_xx;
                 M(stateOf::kY, stateOf::kX) = self.sr_xy;
@@ -190,14 +190,14 @@ namespace modules{
                 // END EWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW
             }
 
-            std::unique_ptr<std::vector<messages::vision::SLAMEObject>> getSLAMEObjects(const messages::input::Image& image,
-                                                                                        const messages::localisation::Self& self,
-                                                                                        const messages::input::Sensors& sensors)
+            std::unique_ptr<std::vector<message::vision::SLAMEObject>> getSLAMEObjects(const message::input::Image& image,
+                                                                                        const message::localisation::Self& self,
+                                                                                        const message::input::Sensors& sensors)
             {
 
                 arma::mat worldToCameraTransform = utility::math::vision::calculateWorldToCameraTransform(sensors, self);
 
-                auto objectMessage = std::make_unique<std::vector<messages::vision::SLAMEObject>>();
+                auto objectMessage = std::make_unique<std::vector<message::vision::SLAMEObject>>();
 
                 std::vector<typename FeatureDetectorClass::ExtractedFeature> extractedFeatures = featureExtractor.extractFeatures(image, self, sensors);
 
@@ -221,7 +221,7 @@ namespace modules{
                     if(fI < featureFilters.size()){
                         //That is, we have seen this object before
                         //Create message about where we have seen the feature
-                        objectMessage->push_back(messages::vision::SLAMEObject());
+                        objectMessage->push_back(message::vision::SLAMEObject());
 
                         objectMessage->back().expectedState = featureFilters[fI].get();
                         objectMessage->back().screenAngular = extractedFeatures[eFI].screenAngular;

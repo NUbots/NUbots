@@ -24,8 +24,8 @@
 #include <armadillo>
 #include <yaml-cpp/yaml.h>
 
-#include "messages/support/Configuration.h"
-#include "messages/platform/darwin/KinematicsModel.h"
+#include "message/support/Configuration.h"
+#include "message/platform/darwin/KinematicsModel.h"
 
 namespace modules {
 namespace platform {
@@ -38,11 +38,11 @@ namespace darwin {
         explicit KinematicsModel(std::unique_ptr<NUClear::Environment> environment);
 
     private:
-    	void configure (messages::platform::darwin::DarwinKinematicsModel& darwinModel, const messages::support::Configuration& objDarwinModel);
-        void configureLeg (messages::platform::darwin::DarwinKinematicsModel::Leg& leg, const YAML::Node& objLeg);
-        void configureHead (messages::platform::darwin::DarwinKinematicsModel::Head& head, const YAML::Node& objHead);
-        void configureArm (messages::platform::darwin::DarwinKinematicsModel::Arm& arm, const YAML::Node& objArm);
-    	void configureMassModel (messages::platform::darwin::DarwinKinematicsModel::MassModel& massModel, const YAML::Node& objMassModel);
+    	void configure (message::platform::darwin::DarwinKinematicsModel& darwinModel, const message::support::Configuration& objDarwinModel);
+        void configureLeg (message::platform::darwin::DarwinKinematicsModel::Leg& leg, const YAML::Node& objLeg);
+        void configureHead (message::platform::darwin::DarwinKinematicsModel::Head& head, const YAML::Node& objHead);
+        void configureArm (message::platform::darwin::DarwinKinematicsModel::Arm& arm, const YAML::Node& objArm);
+    	void configureMassModel (message::platform::darwin::DarwinKinematicsModel::MassModel& massModel, const YAML::Node& objMassModel);
     };
 
 }

@@ -19,7 +19,7 @@
 
 syntax = "proto3";
 
-package messages.vision.proto;
+package message.vision.proto;
 
 message LookUpTableDiff {
     message Diff {

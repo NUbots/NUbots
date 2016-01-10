@@ -22,7 +22,7 @@
 #include "AudioInput.h"
 #include "utility/idiom/pimpl_impl.h"
 
-#include "messages/SoundChunk.h"
+#include "message/SoundChunk.h"
 
 #include "RtAudio.h"
 
@@ -65,7 +65,7 @@ namespace modules {
                 // into this function.
                 UserData* udata = static_cast<UserData*>(userData);
 
-                auto chunk = std::make_unique<messages::SoundChunk>();
+                auto chunk = std::make_unique<message::SoundChunk>();
 
                 // Sound is split up into left and right channels which are 16 bytes
                 // (for the darwin) each. This means a single frame actually compromises
@@ -122,7 +122,7 @@ namespace modules {
 
             m->userData = std::make_unique<UserData>(powerPlant, inputStreamParameters, sampleRate);
 
-            auto settings = std::make_unique<messages::SoundChunkSettings>();
+            auto settings = std::make_unique<message::SoundChunkSettings>();
             settings->sampleRate = sampleRate;
             settings->channels = info.inputChannels;
             settings->chunkSize = sampleRate / CHUNKS_PER_SECOND;

@@ -19,16 +19,16 @@
 
 #include "DisplayTest.h"
 #include "utility/nubugger/NUhelpers.h"
-#include "messages/input/proto/MotionCapture.pb.h"
-#include "messages/input/Sensors.h"
+#include "message/input/proto/MotionCapture.pb.h"
+#include "message/input/Sensors.h"
 
 using utility::nubugger::graph;
 
 namespace modules {
 namespace support {
 
-    using messages::input::proto::MotionCapture;
-    using messages::input::Sensors;
+    using message::input::proto::MotionCapture;
+    using message::input::Sensors;
 
     DisplayTest::DisplayTest(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
 

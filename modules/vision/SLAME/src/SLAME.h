@@ -22,10 +22,10 @@
 
 #include <nuclear>
 #include "utility/vision/MockFeatureExtractor.h"
-#include "messages/input/Image.h"
-#include "messages/localisation/FieldObject.h"
-#include "messages/input/Sensors.h"
-#include "messages/vision/VisionObjects.h"
+#include "message/input/Image.h"
+#include "message/localisation/FieldObject.h"
+#include "message/input/Sensors.h"
+#include "message/vision/VisionObjects.h"
 #include "SLAMEModule.h"
 
 namespace modules {

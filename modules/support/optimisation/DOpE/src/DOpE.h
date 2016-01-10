@@ -22,9 +22,9 @@
 
 #include <nuclear>
 
-#include "messages/support/optimisation/DOpE.h"
+#include "message/support/optimisation/DOpE.h"
 #include "utility/math/optimisation/Optimiser.h"
-#include "messages/support/optimisation/Episode.pb.h"
+#include "message/support/optimisation/Episode.pb.h"
 
 namespace modules {
 namespace support {
@@ -37,8 +37,8 @@ namespace optimisation {
             bool network;
             uint batchSize;
             std::unique_ptr<utility::math::optimisation::Optimiser> optimiser;
-            std::vector<messages::support::optimisation::Episode> estimateEpisodes;
-            std::vector<messages::support::optimisation::Episode> episodes;
+            std::vector<message::support::optimisation::Episode> estimateEpisodes;
+            std::vector<message::support::optimisation::Episode> episodes;
         };
 
         void sendEstimateUpdate(const Optimisation& opt, const std::string& target = "");

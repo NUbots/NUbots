@@ -20,27 +20,27 @@
 #include "Getup.h"
 
 #include <cmath>
-#include "messages/input/ServoID.h"
-#include "messages/motion/Script.h"
-#include "messages/behaviour/Action.h"
-#include "messages/behaviour/ServoCommand.h"
-#include "messages/support/Configuration.h"
-#include "messages/input/Sensors.h"
-#include "messages/motion/GetupCommand.h"
+#include "message/input/ServoID.h"
+#include "message/motion/Script.h"
+#include "message/behaviour/Action.h"
+#include "message/behaviour/ServoCommand.h"
+#include "message/support/Configuration.h"
+#include "message/input/Sensors.h"
+#include "message/motion/GetupCommand.h"
 
 namespace modules {
     namespace behaviour {
         namespace skills {
 
-            using messages::support::Configuration;
-            using messages::input::Sensors;
-            using messages::input::ServoID;
-            using messages::motion::ExecuteScriptByName;
-            using messages::behaviour::RegisterAction;
-            using messages::behaviour::ActionPriorites;
-            using messages::input::LimbID;
-            using messages::motion::ExecuteGetup;
-            using messages::motion::KillGetup;
+            using message::support::Configuration;
+            using message::input::Sensors;
+            using message::input::ServoID;
+            using message::motion::ExecuteScriptByName;
+            using message::behaviour::RegisterAction;
+            using message::behaviour::ActionPriorites;
+            using message::input::LimbID;
+            using message::motion::ExecuteGetup;
+            using message::motion::KillGetup;
 
             Getup::Getup(std::unique_ptr<NUClear::Environment> environment)
                 : Reactor(std::move(environment))

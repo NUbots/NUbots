@@ -22,7 +22,7 @@
 
 #include <nuclear>
 
-#include "messages/input/Sensors.h"
+#include "message/input/Sensors.h"
 
 #include "utility/math/matrix/Transform3D.h"
 #include "utility/math/filter/UKF.h"
@@ -65,8 +65,8 @@ namespace modules {
 
             private:
                 utility::math::matrix::Transform3D calculateOdometryMatrix(
-                    const messages::input::Sensors& sensors,
-                    const messages::input::Sensors& previousSensors,
+                    const message::input::Sensors& sensors,
+                    const message::input::Sensors& previousSensors,
                     utility::motion::kinematics::Side side);
 
                 // used to debounce button presses

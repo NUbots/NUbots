@@ -19,22 +19,22 @@
 
 #include "AutoClassifierProvider.h"
 
-#include "messages/vision/VisionObjects.h"
-#include "messages/vision/ClassifiedImage.h"
-#include "messages/support/Configuration.h"
-#include "messages/research/AutoClassifierPixels.h"
+#include "message/vision/VisionObjects.h"
+#include "message/vision/ClassifiedImage.h"
+#include "message/support/Configuration.h"
+#include "message/research/AutoClassifierPixels.h"
 
 namespace modules {
 namespace research {
 
-    using messages::input::Image;
-    using messages::vision::Ball;
-    using messages::vision::Goal;
-    using messages::vision::ObjectClass;
-    using messages::vision::ClassifiedImage;
-    using messages::vision::Colour;
-    using messages::support::Configuration;
-    using messages::research::AutoClassifierPixels;
+    using message::input::Image;
+    using message::vision::Ball;
+    using message::vision::Goal;
+    using message::vision::ObjectClass;
+    using message::vision::ClassifiedImage;
+    using message::vision::Colour;
+    using message::support::Configuration;
+    using message::research::AutoClassifierPixels;
 
     AutoClassifierProvider::AutoClassifierProvider(std::unique_ptr<NUClear::Environment> environment)
         : Reactor(std::move(environment)) {

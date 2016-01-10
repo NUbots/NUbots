@@ -11,5 +11,5 @@ Once installed, this module will echo all NUClear log messages to standard outpu
 
 ## Consumes
 
-* `NUClear::Messages::LogMessage` containing a message to be logged
+* `NUClear::message::LogMessage` containing a message to be logged
 

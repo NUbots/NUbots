@@ -22,15 +22,15 @@
 #include "utility/time/time.h"
 #include "utility/math/coordinates.h"
 #include "utility/motion/ForwardKinematics.h"
-#include "messages/vision/VisionObjects.h"
-#include "messages/localisation/FieldObject.h"
+#include "message/vision/VisionObjects.h"
+#include "message/localisation/FieldObject.h"
 
 using utility::math::coordinates::cartesianToSpherical;
 using utility::math::coordinates::sphericalToCartesian;
-using messages::support::Configuration;
+using message::support::Configuration;
 
-using messages::vision::VisionObject;
-// using messages::localisation::FakeOdometry;
+using message::vision::VisionObject;
+// using message::localisation::FakeOdometry;
 using utility::time::TimeDifferenceSeconds;
 
 namespace modules {

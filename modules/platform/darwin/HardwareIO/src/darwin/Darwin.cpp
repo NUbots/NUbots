@@ -23,11 +23,11 @@
 #include <thread>
 #include <algorithm>
 
-#include "messages/input/ServoID.h"
+#include "message/input/ServoID.h"
 
 namespace Darwin {
-    using messages::input::ServoID;
-    using messages::input::stringFromId;
+    using message::input::ServoID;
+    using message::input::stringFromId;
 
     // Initialize all of the sensor handler objects using the passed uart
     Darwin::Darwin(const char* name) : uart(name)

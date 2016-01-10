@@ -21,11 +21,11 @@
 
 #include <cstdlib>
 
-#include "messages/behaviour/Action.h"
-#include "messages/support/Configuration.h"
-#include "messages/input/ServoID.h"
-#include "messages/input/Sensors.h"
-#include "messages/motion/ServoTarget.h"
+#include "message/behaviour/Action.h"
+#include "message/support/Configuration.h"
+#include "message/input/ServoID.h"
+#include "message/input/Sensors.h"
+#include "message/motion/ServoTarget.h"
 
 #include "utility/motion/InverseKinematics.h"
 #include "utility/motion/ForwardKinematics.h"
@@ -34,11 +34,11 @@
 
 namespace modules {
     namespace debug {
-            using messages::input::LimbID;
-            using messages::support::Configuration;
-            using messages::motion::ServoTarget;
-            using messages::input::ServoID;
-            using messages::input::Sensors;
+            using message::input::LimbID;
+            using message::support::Configuration;
+            using message::motion::ServoTarget;
+            using message::input::ServoID;
+            using message::input::Sensors;
             using utility::math::matrix::Transform3D;
             using utility::motion::kinematics::calculateLegJoints;
             using utility::motion::kinematics::calculatePosition;
@@ -223,7 +223,7 @@ namespace modules {
                             cameraVec *= 1/arma::norm(cameraVec,2);
                         }
 
-                        std::vector< std::pair<messages::input::ServoID, float> > angles = calculateHeadJoints<DarwinModel>(cameraVec);
+                        std::vector< std::pair<message::input::ServoID, float> > angles = calculateHeadJoints<DarwinModel>(cameraVec);
                         Sensors sensors;
                         sensors.servos = std::vector<Sensors::Servo>(20);
 

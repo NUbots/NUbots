@@ -22,7 +22,7 @@
 
 #include <vector>
 #include "utility/math/matrix/Transform2D.h"
-#include "messages/behaviour/MotionCommand.h"
+#include "message/behaviour/MotionCommand.h"
 
 namespace messages {
 namespace behaviour {
@@ -39,7 +39,7 @@ namespace behaviour {
 		utility::math::matrix::Transform2D goal;
 
 		// The motion command for which this plan was generated:
-		messages::behaviour::MotionCommand command = MotionCommand::StandStill();
+		message::behaviour::MotionCommand command = MotionCommand::StandStill();
 	};
 
 }
