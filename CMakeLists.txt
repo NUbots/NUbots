@@ -16,5 +16,28 @@ SET(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/")
 # Include all of the globally shared link_libraries
 INCLUDE(SharedLibraries)
 
+# Include specific compiler options
+INCLUDE(Compiler)
+
+# Include our platform details
+INCLUDE(Platform)
+
+# Hide some cmake variables that will never be used
+mark_as_advanced(
+    CMAKE_INSTALL_PREFIX
+    CURSES_CURSES_H_PATH
+    CURSES_FORM_LIBRARY
+    CURSES_HAVE_CURSES_H
+    OMPLAPP_LIBRARY
+    OMPL_CONFIG
+    OMPL_DIR
+    OMPL_INCLUDE_DIRS
+    OMPL_LIBRARIES
+    OMPL_LIBRARY
+)
+
 # Include the NUClear roles system
 ADD_SUBDIRECTORY(nuclear)
+
+# Enable sending binaries to robots
+INCLUDE(RobotSend)
