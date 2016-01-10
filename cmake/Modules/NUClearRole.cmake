@@ -32,7 +32,7 @@ FUNCTION(NUCLEAR_ROLE)
     ADD_EXECUTABLE("${role}" "${role}.cpp")
 
     # Link to the roles module libraries and the shared utility and extension libraries
-    TARGET_LINK_LIBRARIES(${role} ${role_module_targets} ${NUClear_LIBRARIES} nuclear_message nuclear_extension nuclear_utility)
+    TARGET_LINK_LIBRARIES(${role} ${role_module_targets} ${NUClear_LIBRARIES} ${NUCLEAR_ADDITIONAL_SHARED_LIBRARIES})
 
     # Set our output directory to be bin
     SET_PROPERTY(TARGET ${role} PROPERTY RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin/")
