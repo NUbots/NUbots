@@ -24,7 +24,7 @@ FUNCTION(NUCLEAR_MODULE)
     FILE(GLOB_RECURSE data_files "${CMAKE_CURRENT_SOURCE_DIR}/data/**")
 
     # Process the data files
-    FOREACH(data ${data_files})
+    FOREACH(data_file ${data_files})
 
         # Calculate the Output Directory
         FILE(RELATIVE_PATH output_file "${CMAKE_CURRENT_SOURCE_DIR}/data" ${data_file})
@@ -41,7 +41,7 @@ FUNCTION(NUCLEAR_MODULE)
             COMMENT "Copying updated data file ${data_file}"
         )
 
-    ENDFOREACH(data)
+    ENDFOREACH(data_file)
 
     # Include our own source and binary directories
     INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR}/src)
