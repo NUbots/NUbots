@@ -13,7 +13,7 @@ ENDIF()
 # We use additional modules that cmake needs to know about
 SET(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/")
 
-# Include all of the globally shared link_libraries
+# Include all of the globally shared link libraries
 INCLUDE(SharedLibraries)
 
 # Include specific compiler options

@@ -5,7 +5,7 @@ FIND_PACKAGE(NUClear REQUIRED)
 OPTION(BUILD_TESTS "Builds all of the tests for each module." OFF)
 
 # Set to on to build as shared libraries
-OPTION(SHARED_BUILD "Build each module as a separate shared library." ON)
+OPTION(NUCLEAR_SHARED_BUILD "Build each module as a separate shared library." ON)
 
 # Our variables that are used to locate the shared, module, and message folders
 SET(NUCLEAR_MODULE_DIR "${CMAKE_SOURCE_DIR}/module"              CACHE PATH "The path to the module directory for NUClear")
