@@ -20,7 +20,7 @@
 #include "Image.h"
 #include <cstring>
 
-namespace messages {
+namespace message {
     namespace input {
 
         Image::Image(uint width, uint height, NUClear::clock::time_point timestamp, std::vector<uint8_t>&& data)
@@ -51,4 +51,4 @@ namespace messages {
         }
 
     }  // input
-}  // messages
+}  // message

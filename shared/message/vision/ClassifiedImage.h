@@ -17,8 +17,8 @@
  * Copyright 2013 NUBots <nubots@nubots.net>
  */
 
-#ifndef MESSAGES_VISION_CLASSIFIEDIMAGE_H
-#define MESSAGES_VISION_CLASSIFIEDIMAGE_H
+#ifndef MESSAGE_VISION_CLASSIFIEDIMAGE_H
+#define MESSAGE_VISION_CLASSIFIEDIMAGE_H
 
 #include <map>
 #include <armadillo>
@@ -27,7 +27,7 @@
 #include "message/input/Image.h"
 #include "utility/math/geometry/Line.h"
 
-namespace messages {
+namespace message {
     namespace vision {
 
         enum class ObjectClass {
@@ -118,6 +118,6 @@ namespace messages {
         };
 
     }  // vision
-}  // messages
+}  // message
 
-#endif  // MESSAGES_VISION_CLASSIFIEDIMAGE_H
+#endif  // MESSAGE_VISION_CLASSIFIEDIMAGE_H

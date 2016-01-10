@@ -17,13 +17,13 @@
  * Copyright 2013 NUBots <nubots@nubots.net>
  */
 
-#ifndef MESSAGES_RESEARCH_AUTOCLASSIFIERPIXELS_H
-#define MESSAGES_RESEARCH_AUTOCLASSIFIERPIXELS_H
+#ifndef MESSAGE_RESEARCH_AUTOCLASSIFIERPIXELS_H
+#define MESSAGE_RESEARCH_AUTOCLASSIFIERPIXELS_H
 
 #include "message/input/Image.h"
 #include "message/vision/LookUpTable.h"
 
-namespace messages {
+namespace message {
 namespace research {
 
 struct AutoClassifierPixels {

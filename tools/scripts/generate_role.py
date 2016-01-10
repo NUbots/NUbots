@@ -111,7 +111,7 @@ int main(int argc, char** argv) {
 
     for module in sys.argv[2:]:
         file.write('    std::cout << "Installing " << "{0}" << std::endl;\n'.format(module))
-        file.write('    plant.install<modules::{0}>();\n'.format(module))
+        file.write('    plant.install<module::{0}>();\n'.format(module))
 
     end = """
     plant.start();

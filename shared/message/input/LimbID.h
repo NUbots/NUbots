@@ -17,12 +17,12 @@
  * Copyright 2013 NUBots <nubots@nubots.net>
  */
 
-#ifndef MESSAGES_INPUT_LIMBID_H
-#define MESSAGES_INPUT_LIMBID_H
+#ifndef MESSAGE_INPUT_LIMBID_H
+#define MESSAGE_INPUT_LIMBID_H
 
 #include "message/input/ServoID.h"
 
-namespace messages {
+namespace message {
     namespace input {
         //LimbID is a higher level of ServoID (see ServoID.h),
         //which contains all the constituent servos (e.g. An arm contains shoulder (pitch + roll)) and elbow.

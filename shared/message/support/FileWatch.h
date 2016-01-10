@@ -17,12 +17,12 @@
  * Copyright 2015 NUBots <nubots@nubots.net>
  */
 
-#ifndef MESSAGES_SUPPORT_FILEWATCH_H_
-#define MESSAGES_SUPPORT_FILEWATCH_H_
+#ifndef MESSAGE_SUPPORT_FILEWATCH_H_
+#define MESSAGE_SUPPORT_FILEWATCH_H_
 
 #include <nuclear>
 
-namespace messages {
+namespace message {
     namespace support {
 
         struct FileWatch {
@@ -61,23 +61,23 @@ namespace messages {
             std::shared_ptr<NUClear::threading::Reaction> reaction;
         };
     }  // support
-}  // messages
+}  // message
 
 // NUClear configuration extension
 namespace NUClear {
     namespace dsl {
         namespace operation {
             template <>
-            struct DSLProxy<message::support::FileWatch> {
+            struct DSLProxy<::message::support::FileWatch> {
 
                 template <typename DSL, typename TFunc>
                 static inline threading::ReactionHandle bind(Reactor& reactor, const std::string& label, TFunc&& callback, const std::string& path, int events) {
 
                     // Generate our reaction
-                    auto reaction = util::generate_reaction<DSL, message::support::FileWatch>(reactor, label, std::forward<TFunc>(callback));
+                    auto reaction = util::generate_reaction<DSL, ::message::support::FileWatch>(reactor, label, std::forward<TFunc>(callback));
 
                     // Make a request to watch our file
-                    auto fw = std::make_unique<message::support::FileWatchRequest>();
+                    auto fw = std::make_unique<::message::support::FileWatchRequest>();
                     fw->path = path;
                     fw->events = events;
                     fw->reaction = std::move(reaction);
@@ -92,10 +92,10 @@ namespace NUClear {
                 }
 
                 template <typename DSL>
-                static inline message::support::FileWatch get(threading::Reaction&) {
+                static inline ::message::support::FileWatch get(threading::Reaction&) {
 
                     // Get our File Watch store value
-                    auto ptr = message::support::FileWatch::FileWatchStore::value;
+                    auto ptr = ::message::support::FileWatch::FileWatchStore::value;
 
                     // If there was something in the store
                     if(ptr) {
@@ -103,7 +103,7 @@ namespace NUClear {
                     }
                     // Return an invalid file watch element
                     else {
-                        return message::support::FileWatch { "", 0 };
+                        return ::message::support::FileWatch { "", 0 };
                     }
                 }
             };
@@ -112,7 +112,7 @@ namespace NUClear {
         // FileWatch is transient
         namespace trait {
             template <>
-            struct is_transient<message::support::FileWatch> : public std::true_type {};
+            struct is_transient<::message::support::FileWatch> : public std::true_type {};
         }
     }
 }

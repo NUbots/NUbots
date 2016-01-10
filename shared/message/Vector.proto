@@ -19,7 +19,7 @@
 
 syntax = "proto3";
 
-package messages;
+package message;
 
 message vec {
     repeated double v = 1 [packed=true];

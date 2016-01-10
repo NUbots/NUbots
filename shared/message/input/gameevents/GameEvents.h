@@ -17,12 +17,12 @@
  * Copyright 2013 NUBots <nubots@nubots.net>
  */
 
- #ifndef MESSAGES_INPUT_GAMEEVENTS_H
- #define MESSAGES_INPUT_GAMEEVENTS_H
+ #ifndef MESSAGE_INPUT_GAMEEVENTS_H
+ #define MESSAGE_INPUT_GAMEEVENTS_H
 
  #include <nuclear>
 
-namespace messages {
+namespace message {
 namespace input {
 namespace gameevents {
 
@@ -174,4 +174,4 @@ namespace gameevents {
 }
 }
 
-#endif  // MESSAGES_INPUT_GAMEEVENTS_H
+#endif  // MESSAGE_INPUT_GAMEEVENTS_H

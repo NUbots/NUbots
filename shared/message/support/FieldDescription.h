@@ -17,12 +17,12 @@
  * Copyright 2013 NUBots <nubots@nubots.net>
  */
 
-#ifndef MESSAGES_SUPPORT_FIELDDESCRIPTION_H
-#define MESSAGES_SUPPORT_FIELDDESCRIPTION_H
+#ifndef MESSAGE_SUPPORT_FIELDDESCRIPTION_H
+#define MESSAGE_SUPPORT_FIELDDESCRIPTION_H
 
 #include <armadillo>
 
-namespace messages {namespace support {
+namespace message {namespace support {
 
 class FieldDescription {
 public:

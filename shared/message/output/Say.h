@@ -17,12 +17,12 @@
  * Copyright 2013 NUBots <nubots@nubots.net>
  */
 
-#ifndef MESSAGES_OUTPUT_SAY_H
-#define MESSAGES_OUTPUT_SAY_H
+#ifndef MESSAGE_OUTPUT_SAY_H
+#define MESSAGE_OUTPUT_SAY_H
 
 #include <string>
 
-namespace messages {
+namespace message {
     namespace output {
 
         /**
@@ -35,6 +35,6 @@ namespace messages {
         };
 
     }  // output
-}  // messages
+}  // message
 
-#endif  // MESSAGES_OUTPUT_SAY_H
+#endif  // MESSAGE_OUTPUT_SAY_H

@@ -17,13 +17,13 @@
  * Copyright 2013 NUBots <nubots@nubots.net>
  */
 
-#ifndef MESSAGES_BEHAVIOUR_ACTIONS_H
-#define MESSAGES_BEHAVIOUR_ACTIONS_H
+#ifndef MESSAGE_BEHAVIOUR_ACTIONS_H
+#define MESSAGE_BEHAVIOUR_ACTIONS_H
 
 #include <nuclear>
 #include "message/input/LimbID.h"
 
-namespace messages {
+namespace message {
     namespace behaviour {
 
         struct RegisterAction {

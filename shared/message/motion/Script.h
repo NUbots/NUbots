@@ -17,15 +17,15 @@
  * Copyright 2013 NUBots <nubots@nubots.net>
  */
 
-#ifndef MESSAGES_SCRIPT_H
-#define MESSAGES_SCRIPT_H
+#ifndef MESSAGE_SCRIPT_H
+#define MESSAGE_SCRIPT_H
 
 #include <chrono>
 #include <yaml-cpp/yaml.h>
 
 #include "message/input/ServoID.h"
 
-namespace messages {
+namespace message {
     namespace motion {
 
         /**
@@ -82,7 +82,7 @@ namespace messages {
         };
 
     }  // motion
-}  // messages
+}  // message
 
 namespace YAML {
     template<>

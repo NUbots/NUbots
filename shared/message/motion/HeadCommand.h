@@ -17,12 +17,12 @@
  * Copyright 2013 NUBots <nubots@nubots.net>
  */
 
-#ifndef MESSAGES_MOTION_HEADCOMMAND_H
-#define MESSAGES_MOTION_HEADCOMMAND_H
+#ifndef MESSAGE_MOTION_HEADCOMMAND_H
+#define MESSAGE_MOTION_HEADCOMMAND_H
 
 #include <armadillo>
 
-namespace messages {
+namespace message {
     namespace motion {
 
         /**
@@ -38,6 +38,6 @@ namespace messages {
         };
 
     }  // motion
-}  // messages
+}  // message
 
-#endif  // MESSAGES_MOTION_HEADCOMMAND_H
+#endif  // MESSAGE_MOTION_HEADCOMMAND_H

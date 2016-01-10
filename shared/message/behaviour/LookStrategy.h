@@ -17,10 +17,10 @@
  * Copyright 2013 NUBots <nubots@nubots.net>
  */
 
-#ifndef MESSAGES_BEHAVIOUR_LOOKSTRATEGY_H
-#define MESSAGES_BEHAVIOUR_LOOKSTRATEGY_H
+#ifndef MESSAGE_BEHAVIOUR_LOOKSTRATEGY_H
+#define MESSAGE_BEHAVIOUR_LOOKSTRATEGY_H
 
-namespace messages {
+namespace message {
 namespace behaviour {
 
     struct HeadBehaviourConfig{

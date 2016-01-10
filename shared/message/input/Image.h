@@ -17,8 +17,8 @@
  * Copyright 2013 NUBots <nubots@nubots.net>
  */
 
-#ifndef MESSAGES_INPUT_IMAGE_H
-#define MESSAGES_INPUT_IMAGE_H
+#ifndef MESSAGE_INPUT_IMAGE_H
+#define MESSAGE_INPUT_IMAGE_H
 
 #include <nuclear>
 #include <armadillo>
@@ -26,7 +26,7 @@
 #include <cstddef>
 #include <vector>
 
-namespace messages {
+namespace message {
     namespace input {
 
         /**
@@ -59,6 +59,6 @@ namespace messages {
         };
 
     }  // input
-}  // messages
+}  // message
 
-#endif  // MESSAGES_INPUT_IMAGE_H
+#endif  // MESSAGE_INPUT_IMAGE_H

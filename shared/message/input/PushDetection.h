@@ -17,12 +17,12 @@
  * Copyright 2015 NUBots <nubots@nubots.net>
  */
 
-#ifndef MESSAGES_INPUT_PUSHDETECTION_H
-#define MESSAGES_INPUT_PUSHDETECTION_H
+#ifndef MESSAGE_INPUT_PUSHDETECTION_H
+#define MESSAGE_INPUT_PUSHDETECTION_H
 
 #include <string>
 
-namespace messages {
+namespace message {
     namespace input {
         struct PushDetection {
             bool forward = true;

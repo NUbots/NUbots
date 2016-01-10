@@ -17,14 +17,14 @@
  * Copyright 2013 NUBots <nubots@nubots.net>
  */
 
-#ifndef MESSAGES_INPUT_SOUNDCHUNK_H
-#define MESSAGES_INPUT_SOUNDCHUNK_H
+#ifndef MESSAGE_INPUT_SOUNDCHUNK_H
+#define MESSAGE_INPUT_SOUNDCHUNK_H
 
 #include <nuclear>
 #include <vector>
 #include <cstdint>
 
-namespace messages {
+namespace message {
     namespace input {
 
         /**
@@ -60,7 +60,7 @@ namespace messages {
         };
 
     }  // input
-}  // messages
+}  // message
 
-#endif  // MESSAGES_INPUT_SOUNDCHUNK_H
+#endif  // MESSAGE_INPUT_SOUNDCHUNK_H
 

@@ -18,10 +18,10 @@
  * Copyright 2013 NUBots <nubots@nubots.net>
  */
 
-#ifndef MESSAGES_BEHAVIOUR_FIELDTARGET_H
-#define MESSAGES_BEHAVIOUR_FIELDTARGET_H
+#ifndef MESSAGE_BEHAVIOUR_FIELDTARGET_H
+#define MESSAGE_BEHAVIOUR_FIELDTARGET_H
 
-namespace messages {
+namespace message {
 namespace behaviour {
 
     enum class FieldTarget {
@@ -31,6 +31,6 @@ namespace behaviour {
     };
 
 }  // behaviours
-}  // messages
+}  // message
 
-#endif  // MESSAGES_BEHAVIOUR_FIELDTARGET_H
+#endif  // MESSAGE_BEHAVIOUR_FIELDTARGET_H

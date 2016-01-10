@@ -20,7 +20,7 @@
 #include "DarwinSensors.h"
 #include "message/input/ServoID.h"
 
-namespace messages {
+namespace message {
     namespace platform {
         namespace darwin {
 
@@ -94,4 +94,4 @@ namespace messages {
 
         }  // darwin
     }  // platform
-}  // messages
+}  // message

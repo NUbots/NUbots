@@ -17,13 +17,13 @@
  * Copyright 2013 NUBots <nubots@nubots.net>
  */
 
-#ifndef MESSAGES_LOCALISATIONFIELDOBJECT
-#define MESSAGES_LOCALISATIONFIELDOBJECT
+#ifndef MESSAGE_LOCALISATIONFIELDOBJECT
+#define MESSAGE_LOCALISATIONFIELDOBJECT
 
 #include <armadillo>
 #include <nuclear>
 
-namespace messages {
+namespace message {
     namespace localisation {
 
         // Sent to NUbugger
@@ -37,7 +37,7 @@ namespace messages {
                 double sd_heading;  //stdev
                 double sd_x;
                 double sd_y;
-                double sr_xx;   //covariance 
+                double sr_xx;   //covariance
                 double sr_xy;
                 double sr_yy;
                 bool lost;
@@ -53,7 +53,7 @@ namespace messages {
 
             arma::vec2 position;
             arma::mat22 position_cov;
-            
+
             NUClear::clock::time_point last_measurement_time;
         };
 
@@ -61,7 +61,7 @@ namespace messages {
         public:
             Ball() : LocalisationObject() {}
             arma::vec2 velocity;
-            bool world_space; // Ball will always be in robot space except 
+            bool world_space; // Ball will always be in robot space except
                               // when sent from MockRobot.
         };
 
@@ -69,7 +69,7 @@ namespace messages {
         public:
             Self() : LocalisationObject() {}
 
-            arma::vec2 heading;     //robot face direction (vector 2)                 
+            arma::vec2 heading;     //robot face direction (vector 2)
             arma::vec2 velocity;    //robot velocity (vector 2)
             arma::mat22 robot_to_world_rotation;    //??might not be useful
         };

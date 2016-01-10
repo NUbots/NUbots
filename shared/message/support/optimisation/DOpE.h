@@ -17,15 +17,15 @@
  * Copyright 2015 NUBots <nubots@nubots.net>
  */
 
-#ifndef MESSAGES_SUPPORT_OPTIMISATION_DOPE_H
-#define MESSAGES_SUPPORT_OPTIMISATION_DOPE_H
+#ifndef MESSAGE_SUPPORT_OPTIMISATION_DOPE_H
+#define MESSAGE_SUPPORT_OPTIMISATION_DOPE_H
 
 #include <string>
 #include <armadillo>
 
 #include "utility/math/optimisation/OptimiserTypes.h"
 
-namespace messages {
+namespace message {
     namespace support {
         namespace optimisation {
 
@@ -51,4 +51,4 @@ namespace messages {
     }
 }
 
-#endif  // MESSAGES_SUPPORT_OPTIMISATION_DOPE_H
+#endif  // MESSAGE_SUPPORT_OPTIMISATION_DOPE_H

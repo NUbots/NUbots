@@ -17,10 +17,10 @@
  * Copyright 2013 NUBots <nubots@nubots.net>
  */
 
-#ifndef MESSAGES_SUPPORT_GLOBALCONFIG_H
-#define MESSAGES_SUPPORT_GLOBALCONFIG_H
+#ifndef MESSAGE_SUPPORT_GLOBALCONFIG_H
+#define MESSAGE_SUPPORT_GLOBALCONFIG_H
 
-namespace messages {
+namespace message {
 namespace support {
 
     // Field dimensions as defined in the Robocup rules:

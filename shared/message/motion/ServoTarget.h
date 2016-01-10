@@ -17,13 +17,13 @@
  * Copyright 2013 NUBots <nubots@nubots.net>
  */
 
-#ifndef MESSAGES_MOTION_SERVOTARGET_H
-#define MESSAGES_MOTION_SERVOTARGET_H
+#ifndef MESSAGE_MOTION_SERVOTARGET_H
+#define MESSAGE_MOTION_SERVOTARGET_H
 
 #include <nuclear>
 #include "message/input/ServoID.h"
 
-namespace messages {
+namespace message {
     namespace motion {
 
         /**
@@ -40,6 +40,6 @@ namespace messages {
         };
 
     }  // motion
-}  // messages
+}  // message
 
-#endif  // MESSAGES_MOTION_SERVOTARGET_H
+#endif  // MESSAGE_MOTION_SERVOTARGET_H

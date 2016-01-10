@@ -26,8 +26,8 @@
  *       @note ported by Jake Fountain Dec 2013 to NUClear system
  */
 
-#ifndef MESSAGES_VISION_LOOKUPTABLE_H
-#define MESSAGES_VISION_LOOKUPTABLE_H
+#ifndef MESSAGE_VISION_LOOKUPTABLE_H
+#define MESSAGE_VISION_LOOKUPTABLE_H
 
 #include <memory>
 #include <string>
@@ -36,7 +36,7 @@
 #include <yaml-cpp/yaml.h>
 #include "message/input/Image.h"
 
-namespace messages {
+namespace message {
     namespace vision {
 
         enum Colour : unsigned char {
@@ -102,7 +102,7 @@ namespace messages {
         };
 
     } //vision
-} // messages
+} // message
 
 // YAML conversions
 namespace YAML {
@@ -142,4 +142,4 @@ namespace YAML {
     };
 }
 
-#endif // MESSAGES_VISION_LOOKUPTABLE_H
+#endif // MESSAGE_VISION_LOOKUPTABLE_H

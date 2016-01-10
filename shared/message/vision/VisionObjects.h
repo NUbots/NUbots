@@ -17,8 +17,8 @@
  * Copyright 2013 NUBots <nubots@nubots.net>
  */
 
-#ifndef MESSAGES_VISION_VISIONOBJECTS_H
-#define MESSAGES_VISION_VISIONOBJECTS_H
+#ifndef MESSAGE_VISION_VISIONOBJECTS_H
+#define MESSAGE_VISION_VISIONOBJECTS_H
 
 #include <armadillo>
 
@@ -28,7 +28,7 @@
 #include "message/input/Sensors.h"
 #include "message/vision/ClassifiedImage.h"
 
-namespace messages {
+namespace message {
     namespace vision {
 
         struct VisionObject {
@@ -99,4 +99,4 @@ namespace messages {
     }
 }
 
-#endif // MESSAGES_VISION_VISIONOBJECTS_H
+#endif // MESSAGE_VISION_VISIONOBJECTS_H

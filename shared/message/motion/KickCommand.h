@@ -17,14 +17,14 @@
  * Copyright 2013 NUBots <nubots@nubots.net>
  */
 
-#ifndef MESSAGES_MOTION_KICKCOMMAND_H
-#define MESSAGES_MOTION_KICKCOMMAND_H
+#ifndef MESSAGE_MOTION_KICKCOMMAND_H
+#define MESSAGE_MOTION_KICKCOMMAND_H
 
 #include <nuclear>
 #include <armadillo>
 #include "message/input/LimbID.h"
 
-namespace messages {
+namespace message {
     namespace motion {
 
         /**
@@ -76,6 +76,6 @@ namespace messages {
         };
 
     }  // motion
-}  // messages
+}  // message
 
-#endif  // MESSAGES_MOTION_KICKCOMMAND_H
+#endif  // MESSAGE_MOTION_KICKCOMMAND_H

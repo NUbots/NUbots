@@ -17,14 +17,14 @@
  * Copyright 2015 NUBots <nubots@nubots.net>
  */
 
-#ifndef MESSAGES_BEHAVIOUR_WALKPATH_H
-#define MESSAGES_BEHAVIOUR_WALKPATH_H
+#ifndef MESSAGE_BEHAVIOUR_WALKPATH_H
+#define MESSAGE_BEHAVIOUR_WALKPATH_H
 
 #include <vector>
 #include "utility/math/matrix/Transform2D.h"
 #include "message/behaviour/MotionCommand.h"
 
-namespace messages {
+namespace message {
 namespace behaviour {
 
 	struct WalkPath {

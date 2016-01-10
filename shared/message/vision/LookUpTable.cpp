@@ -22,7 +22,7 @@
 #include <cstring>
 #include <iostream>
 
-namespace messages {
+namespace message {
     namespace vision {
 
         LookUpTable::LookUpTable(uint8_t bitsY, uint8_t bitsCb, uint8_t bitsCr, std::vector<Colour>&& data)
@@ -81,4 +81,4 @@ namespace messages {
         }
 
     } //vision
-} // messages
+} // message

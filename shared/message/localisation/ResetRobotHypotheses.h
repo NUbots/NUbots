@@ -17,12 +17,12 @@
  * Copyright 2013 NUBots <nubots@nubots.net>
  */
 
-#ifndef MESSAGES_RESETROBOTHYPOTHESES
-#define MESSAGES_RESETROBOTHYPOTHESES
+#ifndef MESSAGE_RESETROBOTHYPOTHESES
+#define MESSAGE_RESETROBOTHYPOTHESES
 
 #include <armadillo>
 
-namespace messages {
+namespace message {
     namespace localisation {
         struct ResetRobotHypotheses {
             struct Self {

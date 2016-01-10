@@ -18,10 +18,10 @@
  */
 
 
-#ifndef MESSAGES_BEHAVIOUR_SOCCEROBJECTPRIORITY_H
-#define MESSAGES_BEHAVIOUR_SOCCEROBJECTPRIORITY_H
+#ifndef MESSAGE_BEHAVIOUR_SOCCEROBJECTPRIORITY_H
+#define MESSAGE_BEHAVIOUR_SOCCEROBJECTPRIORITY_H
 
-namespace messages {
+namespace message {
 namespace behaviour {
 
 	enum class SearchType {

@@ -17,14 +17,14 @@
  * Copyright 2013 NUBots <nubots@nubots.net>
  */
 
-#ifndef MESSAGES_BEHAVIOUR_FIXED_WALK_COMMAND_H
-#define MESSAGES_BEHAVIOUR_FIXED_WALK_COMMAND_H
+#ifndef MESSAGE_BEHAVIOUR_FIXED_WALK_COMMAND_H
+#define MESSAGE_BEHAVIOUR_FIXED_WALK_COMMAND_H
 
 #include <nuclear>
 #include <armadillo>
 #include <yaml-cpp/yaml.h>
 
-namespace messages {
+namespace message {
     namespace behaviour {
 
         struct FixedWalkFinished{};

@@ -17,12 +17,12 @@
  * Copyright 2013 NUBots <nubots@nubots.net>
  */
 
-#ifndef MESSAGES_SUPPORT_SEGMENTATIONFAULT_H
-#define MESSAGES_SUPPORT_SEGMENTATIONFAULT_H
+#ifndef MESSAGE_SUPPORT_SEGMENTATIONFAULT_H
+#define MESSAGE_SUPPORT_SEGMENTATIONFAULT_H
 
 #include <exception>
 
-namespace messages {
+namespace message {
     namespace support {
 
         /**
@@ -33,6 +33,6 @@ namespace messages {
         class SegmentationFault : public std::exception {};
 
     }  // support
-}  // messages
+}  // message
 
-#endif  // MESSAGES_SUPPORT_SEGMENTATIONFAULT_H
+#endif  // MESSAGE_SUPPORT_SEGMENTATIONFAULT_H

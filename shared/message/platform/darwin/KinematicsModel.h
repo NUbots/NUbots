@@ -17,12 +17,12 @@
  * Copyright 2013 NUBots <nubots@nubots.net>
  */
 
-#ifndef MESSAGES_PLATFORM_DARWIN_KINEMATICS_MODEL_H
-#define MESSAGES_PLATFORM_DARWIN_KINEMATICS_MODEL_H
+#ifndef MESSAGE_PLATFORM_DARWIN_KINEMATICS_MODEL_H
+#define MESSAGE_PLATFORM_DARWIN_KINEMATICS_MODEL_H
 
 #include <armadillo>
 
-namespace messages {
+namespace message {
 namespace platform {
 namespace darwin {
 
@@ -88,7 +88,7 @@ namespace darwin {
         struct MassModel {
             uint numberOfMasses;
             uint massRepresentationDimension;
-            
+
             struct Masses {
                 arma::vec4 leftShoulderRoll;
                 arma::vec4 rightShoulderRoll;
@@ -127,6 +127,6 @@ namespace darwin {
 
 }  // darwin
 }  // platform
-}  // messages
+}  // message
 
-#endif  // MESSAGES_PLATFORM_DARWIN_DARWINSENSORS_H
+#endif  // MESSAGE_PLATFORM_DARWIN_DARWINSENSORS_H

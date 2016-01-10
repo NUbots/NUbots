@@ -17,14 +17,14 @@
  * Copyright 2013 NUBots <nubots@nubots.net>
  */
 
-#ifndef MESSAGES_MOTION_GETUPCOMMAND_H
-#define MESSAGES_MOTION_GETUPCOMMAND_H
+#ifndef MESSAGE_MOTION_GETUPCOMMAND_H
+#define MESSAGE_MOTION_GETUPCOMMAND_H
 
-namespace messages {
-    namespace motion { 
+namespace message {
+    namespace motion {
     	//internal only callback messages to start and stop our action
 		struct ExecuteGetup{};
 		struct KillGetup{};
 	}
 }
-#endif  // MESSAGES_MOTION_KICKCOMMAND_H
+#endif  // MESSAGE_MOTION_KICKCOMMAND_H

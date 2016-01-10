@@ -17,13 +17,13 @@
  * Copyright 2013 NUBots <nubots@nubots.net>
  */
 
-#ifndef MESSAGES_BEHAVIOUR_SERVOCOMMAND_H
-#define MESSAGES_BEHAVIOUR_SERVOCOMMAND_H
+#ifndef MESSAGE_BEHAVIOUR_SERVOCOMMAND_H
+#define MESSAGE_BEHAVIOUR_SERVOCOMMAND_H
 
 #include <nuclear>
 #include "message/input/ServoID.h"
 
-namespace messages {
+namespace message {
     namespace behaviour {
 
         struct ServoCommand {

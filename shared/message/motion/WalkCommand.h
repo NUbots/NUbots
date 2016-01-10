@@ -17,14 +17,14 @@
  * Copyright 2013 NUBots <nubots@nubots.net>
  */
 
-#ifndef MESSAGES_MOTION_WALKCOMMAND_H
-#define MESSAGES_MOTION_WALKCOMMAND_H
+#ifndef MESSAGE_MOTION_WALKCOMMAND_H
+#define MESSAGE_MOTION_WALKCOMMAND_H
 
 #include <armadillo>
 
 #include "utility/math/matrix/Transform2D.h"
 
-namespace messages {
+namespace message {
 namespace motion {
 
     using utility::math::matrix::Transform2D;
@@ -51,7 +51,7 @@ namespace motion {
     };
     struct WalkStopped {
     };
-    
+
     struct EnableWalkEngineCommand {
         EnableWalkEngineCommand() = delete;
         EnableWalkEngineCommand(size_t id) : subsumptionId(id) { }
@@ -65,4 +65,4 @@ namespace motion {
 }
 }
 
-#endif  // MESSAGES_MOTION_WALKCOMMAND_H
+#endif  // MESSAGE_MOTION_WALKCOMMAND_H

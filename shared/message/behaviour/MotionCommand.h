@@ -17,13 +17,13 @@
  * Copyright 2013 NUBots <nubots@nubots.net>
  */
 
-#ifndef MESSAGES_BEHAVIOUR_MOTIONCOMMAND_H
-#define MESSAGES_BEHAVIOUR_MOTIONCOMMAND_H
+#ifndef MESSAGE_BEHAVIOUR_MOTIONCOMMAND_H
+#define MESSAGE_BEHAVIOUR_MOTIONCOMMAND_H
 
 #include <armadillo>
 #include "utility/math/matrix/Transform2D.h"
 
-namespace messages {
+namespace message {
 namespace behaviour {
 
     using utility::math::matrix::Transform2D;

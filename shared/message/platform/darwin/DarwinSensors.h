@@ -17,8 +17,8 @@
  * Copyright 2013 NUBots <nubots@nubots.net>
  */
 
-#ifndef MESSAGES_PLATFORM_DARWIN_DARWINSENSORS_H
-#define MESSAGES_PLATFORM_DARWIN_DARWINSENSORS_H
+#ifndef MESSAGE_PLATFORM_DARWIN_DARWINSENSORS_H
+#define MESSAGE_PLATFORM_DARWIN_DARWINSENSORS_H
 
 #include <nuclear>
 #include <cstdint>
@@ -27,7 +27,7 @@
 
 #include "message/input/ServoID.h"
 
-namespace messages {
+namespace message {
 namespace platform {
 namespace darwin {
 
@@ -173,6 +173,6 @@ namespace darwin {
 
 }  // darwin
 }  // platform
-}  // messages
+}  // message
 
-#endif  // MESSAGES_PLATFORM_DARWIN_DARWINSENSORS_H
+#endif  // MESSAGE_PLATFORM_DARWIN_DARWINSENSORS_H

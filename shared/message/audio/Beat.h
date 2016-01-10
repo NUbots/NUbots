@@ -17,12 +17,12 @@
  * Copyright 2013 NUBots <nubots@nubots.net>
  */
 
-#ifndef MESSAGES_AUDIO_BEAT_H
-#define MESSAGES_AUDIO_BEAT_H
+#ifndef MESSAGE_AUDIO_BEAT_H
+#define MESSAGE_AUDIO_BEAT_H
 
 #include <nuclear>
 
-namespace messages {
+namespace message {
     namespace audio {
 
         struct Beat {
@@ -31,7 +31,7 @@ namespace messages {
         };
 
     }  // audio
-}  // messages
+}  // message
 
-#endif  // MESSAGES_BEAT_H
+#endif  // MESSAGE_BEAT_H
 

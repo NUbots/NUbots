@@ -17,12 +17,12 @@
  * Copyright 2013 NUBots <nubots@nubots.net>
  */
 
-#ifndef MESSAGES_INPUT_SERVOID_H
-#define MESSAGES_INPUT_SERVOID_H
+#ifndef MESSAGE_INPUT_SERVOID_H
+#define MESSAGE_INPUT_SERVOID_H
 
 #include <string>
 
-namespace messages {
+namespace message {
     namespace input {
         struct MotionCapture {
 

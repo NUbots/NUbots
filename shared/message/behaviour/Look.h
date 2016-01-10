@@ -17,12 +17,12 @@
  * Copyright 2013 NUBots <nubots@nubots.net>
  */
 
-#ifndef MESSAGES_BEHAVIOUR_LOOK_H
-#define MESSAGES_BEHAVIOUR_LOOK_H
+#ifndef MESSAGE_BEHAVIOUR_LOOK_H
+#define MESSAGE_BEHAVIOUR_LOOK_H
 
 #include <armadillo>
 
-namespace messages {
+namespace message {
 namespace behaviour {
     struct Look {
 

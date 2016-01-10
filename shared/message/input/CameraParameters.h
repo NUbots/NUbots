@@ -17,12 +17,12 @@
  * Copyright 2013 NUBots <nubots@nubots.net>
  */
 
-#ifndef MESSAGES_INPUT_CAMERA_PARAMETERS_H
-#define MESSAGES_INPUT_CAMERA_PARAMETERS_H
+#ifndef MESSAGE_INPUT_CAMERA_PARAMETERS_H
+#define MESSAGE_INPUT_CAMERA_PARAMETERS_H
 
 #include <armadillo>
 
-namespace messages {
+namespace message {
     namespace input {
 
         struct CameraParameters{
@@ -37,4 +37,4 @@ namespace messages {
     }
 }
 
-#endif // MESSAGES_INPUT_GLOBAL_CONFIG_CAMERA_PARAMETERS_H
+#endif // MESSAGE_INPUT_GLOBAL_CONFIG_CAMERA_PARAMETERS_H

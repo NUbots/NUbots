@@ -17,14 +17,14 @@
  * Copyright 2013 NUBots <nubots@nubots.net>
  */
 
-#ifndef MESSAGES_MOTION_DIVECOMMAND_H
-#define MESSAGES_MOTION_DIVECOMMAND_H
+#ifndef MESSAGE_MOTION_DIVECOMMAND_H
+#define MESSAGE_MOTION_DIVECOMMAND_H
 
 #include <nuclear>
 #include <armadillo>
 #include "message/behaviour/Action.h"
 
-namespace messages {
+namespace message {
     namespace motion {
 
         /**
@@ -41,6 +41,6 @@ namespace messages {
         };
 
     }  // motion
-}  // messages
+}  // message
 
-#endif  // MESSAGES_MOTION_DIVECOMMAND_H
+#endif  // MESSAGE_MOTION_DIVECOMMAND_H

@@ -19,7 +19,7 @@
 
 #include "ServoID.h"
 
-namespace messages {
+namespace message {
     namespace input {
 
         ServoID idFromString(const std::string str) {

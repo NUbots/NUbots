@@ -19,7 +19,7 @@
 
 syntax = "proto3";
 
-package messages;
+package message;
 
 import "message/Vector.proto";
 

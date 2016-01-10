@@ -17,12 +17,12 @@
  * Copyright 2015 NUBots <nubots@nubots.net>
  */
 
-#ifndef MESSAGES_LOCALISATION_SIDECHECKER
-#define MESSAGES_LOCALISATION_SIDECHECKER
+#ifndef MESSAGE_LOCALISATION_SIDECHECKER
+#define MESSAGE_LOCALISATION_SIDECHECKER
 
 #include <armadillo>
 
-namespace messages {
+namespace message {
     namespace localisation {
         struct SideCheckingComplete { };
     }

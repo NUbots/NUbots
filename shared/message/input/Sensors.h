@@ -17,8 +17,8 @@
  * Copyright 2013 NUBots <nubots@nubots.net>
  */
 
-#ifndef MESSAGES_INPUT_SENSORS_H
-#define MESSAGES_INPUT_SENSORS_H
+#ifndef MESSAGE_INPUT_SENSORS_H
+#define MESSAGE_INPUT_SENSORS_H
 
 #include <nuclear>
 #include <armadillo>
@@ -30,7 +30,7 @@
 #include "utility/math/matrix/Rotation3D.h"
 #include "utility/math/geometry/Line.h"
 
-namespace messages {
+namespace message {
     namespace input {
 
 
