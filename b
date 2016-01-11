@@ -8,7 +8,7 @@ import pkgutil
 sys.dont_write_bytecode = True
 
 # Add tools/build to our python path
-sys.path.append('tools/build')
+sys.path.append('tools')
 
 if __name__ == '__main__':
 
@@ -17,7 +17,7 @@ if __name__ == '__main__':
     subcommands = command.add_subparsers(dest='command')
 
     # Get all of the packages that are in the build tools
-    modules = pkgutil.iter_modules(path=['tools/build'])
+    modules = pkgutil.iter_modules(path=['tools'])
 
     # Our tools dictionary
     tools = {}

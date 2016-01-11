@@ -63,7 +63,7 @@ FUNCTION(NUCLEAR_MODULE)
         ADD_LIBRARY(${module_name} STATIC ${src} ${MODULE_SOURCES} ${data})
     ENDIF()
 
-    TARGET_LINK_LIBRARIES(${module_name} nuclear_utility nuclear_message nuclear_extension ${MODULE_LIBRARIES})
+    TARGET_LINK_LIBRARIES(${module_name} nuclear_utility nuclear_message nuclear_extension ${MODULE_LIBRARIES} ${NUCLEAR_LIBRARY})
 
     # Put it in an IDE group for shared
     SET_PROPERTY(TARGET ${module_name} PROPERTY FOLDER ${module_path})

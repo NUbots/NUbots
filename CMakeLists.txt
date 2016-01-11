@@ -4,6 +4,10 @@ SET(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_SOURCE_DIR}/cmake/Mo
 # We need NUClear
 FIND_PACKAGE(NUClear REQUIRED)
 
+
+# message(NUCLEAR_INCLUDE_DIR ${NUCLEAR_INCLUDE_DIR})
+include_directories(${NUCLEAR_INCLUDE_DIR} SYSTEM)
+
 # Set to off to ignore building tests
 OPTION(BUILD_TESTS "Builds all of the tests for each module." OFF)
 
