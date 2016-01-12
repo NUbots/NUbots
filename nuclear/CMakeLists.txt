@@ -1,5 +1,12 @@
+# We use additional modules for the NUClear roles system
+SET(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_SOURCE_DIR}/cmake/Modules/")
+
 # We need NUClear
 FIND_PACKAGE(NUClear REQUIRED)
+
+
+# message(NUCLEAR_INCLUDE_DIR ${NUCLEAR_INCLUDE_DIR})
+include_directories(${NUCLEAR_INCLUDE_DIR} SYSTEM)
 
 # Set to off to ignore building tests
 OPTION(BUILD_TESTS "Builds all of the tests for each module." OFF)
@@ -15,9 +22,6 @@ SET(NUCLEAR_EXTENSION_DIR "${CMAKE_SOURCE_DIR}/shared/extension" CACHE PATH "The
 
 # You generally shouldn't have to change these
 MARK_AS_ADVANCED(NUCLEAR_MODULE_DIR NUCLEAR_MESSAGE_DIR NUCLEAR_UTILITY_DIR NUCLEAR_EXTENSION_DIR)
-
-# We use additional modules for the NUClear roles system
-SET(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_SOURCE_DIR}/cmake/Modules/")
 
 # Settings for the compiler to make NUClear work
 INCLUDE(NUClearCompilerSettings)
