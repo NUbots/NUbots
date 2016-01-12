@@ -1,0 +1,110 @@
+/*
+ * This file is part of the NUbots Codebase.
+ *
+ * The NUbots Codebase is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * The NUbots Codebase is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with the NUbots Codebase.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ * Copyright 2013 NUBots <nubots@nubots.net>
+ */
+
+syntax = "proto3";
+
+package message;
+
+message vec {
+    repeated double v = 1 [packed=true];
+}
+
+message fvec {
+    repeated float v = 1 [packed=true];
+}
+
+message ivec {
+    repeated int32 v = 1 [packed=true];
+}
+
+message uvec {
+    repeated uint32 v = 1 [packed=true];
+}
+
+message vec2 {
+    double x = 1;
+    double y = 2;
+}
+
+message fvec2 {
+    float x = 1;
+    float y = 2;
+}
+
+message ivec2 {
+    int32 x = 1;
+    int32 y = 2;
+}
+
+message uvec2 {
+    uint32 x = 1;
+    uint32 y = 2;
+}
+
+message vec3 {
+    double x = 1;
+    double y = 2;
+    double z = 3;
+}
+
+message fvec3 {
+    float x = 1;
+    float y = 2;
+    float z = 3;
+}
+
+message ivec3 {
+    int32 x = 1;
+    int32 y = 2;
+    int32 z = 3;
+}
+
+message uvec3 {
+    uint32 x = 1;
+    uint32 y = 2;
+    uint32 z = 3;
+}
+
+message vec4 {
+    double x = 1;
+    double y = 2;
+    double z = 3;
+    double t = 4;
+}
+
+message fvec4 {
+    float x = 1;
+    float y = 2;
+    float z = 3;
+    float t = 4;
+}
+
+message ivec4 {
+    int32 x = 1;
+    int32 y = 2;
+    int32 z = 3;
+    int32 t = 4;
+}
+
+message uvec4 {
+    uint32 x = 1;
+    uint32 y = 2;
+    uint32 z = 3;
+    uint32 t = 4;
+}

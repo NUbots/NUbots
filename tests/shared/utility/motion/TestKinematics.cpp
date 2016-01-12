@@ -19,13 +19,13 @@
 
 #include <catch.hpp>
 
-#include "messages/input/ServoID.h"
-#include "messages/input/Sensors.h"
+#include "message/input/ServoID.h"
+#include "message/input/Sensors.h"
 #include "utility/motion/ForwardKinematics.h"
 #include "utility/motion/InverseKinematics.h"
 
-using messages::input::ServoID;
-using messages::input::Sensors;
+using message::input::ServoID;
+using message::input::Sensors;
 using utility::motion::kinematics::DarwinModel;
 using utility::motion::kinematics::calculateHeadJoints;
 
@@ -43,7 +43,7 @@ TEST_CASE("Test the Head kinematics", "[utility][motion][kinematics][head]") {
 
         INFO("Testing with the random vector, " << camVec.t());
 
-        std::vector<std::pair<messages::input::ServoID, float>> angles = utility::motion::kinematics::calculateHeadJoints<DarwinModel>(camVec);
+        std::vector<std::pair<message::input::ServoID, float>> angles = utility::motion::kinematics::calculateHeadJoints<DarwinModel>(camVec);
 
         // Make our sensors object
         Sensors sensors;

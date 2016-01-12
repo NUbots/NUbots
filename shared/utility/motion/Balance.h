@@ -26,9 +26,9 @@
 #include "utility/math/geometry/UnitQuaternion.h"
 #include "utility/motion/RobotModels.h"
 
-#include "messages/input/Sensors.h"
-#include "messages/input/LimbID.h"
-#include "messages/support/Configuration.h"
+#include "message/input/Sensors.h"
+#include "message/input/LimbID.h"
+#include "message/support/Configuration.h"
 #include <yaml-cpp/yaml.h>
 
 #include <nuclear>
@@ -65,7 +65,7 @@ namespace motion {
         NUClear::clock::time_point lastBalanceTime;
     public:
         void configure(const YAML::Node& config);
-        void balance(utility::math::matrix::Transform3D& footToTorso, const messages::input::LimbID& leg, const messages::input::Sensors& sensors);
+        void balance(utility::math::matrix::Transform3D& footToTorso, const message::input::LimbID& leg, const message::input::Sensors& sensors);
     };
 
 
