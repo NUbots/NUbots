@@ -34,7 +34,9 @@ FUNCTION(NUCLEAR_ROLE)
     # Link to the roles module libraries and the shared utility and extension libraries
     TARGET_LINK_LIBRARIES(${role} ${role_module_targets} ${NUClear_LIBRARIES} ${NUCLEAR_ADDITIONAL_SHARED_LIBRARIES})
 
-    INCLUDE_DIRECTORIES($<TARGET_PROPERTY:${role_module_targets},INCLUDE_DIRECTORIES>)
+    FOREACH(module_target ${role_module_targets})
+        INCLUDE_DIRECTORIES($<TARGET_PROPERTY:${module_target},INCLUDE_DIRECTORIES>)
+    ENDFOREACH(module_target)
     
     # Set our output directory to be bin
     SET_PROPERTY(TARGET ${role} PROPERTY RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin/")
