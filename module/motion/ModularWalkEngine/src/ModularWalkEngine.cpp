@@ -490,6 +490,30 @@ namespace motion {
         return std::move(waypoints);
     }
 
+        void ModularWalkEngine::updateVelocity() {
+        // slow accelerations at high speed
+        auto now = NUClear::clock::now();
+        double deltaT = std::chrono::duration_cast<std::chrono::microseconds>(now - lastVeloctiyUpdateTime).count() * 1e-6;
+        lastVeloctiyUpdateTime = now;
+
+        auto& limit = (velocityCurrent.x() > velocityHigh ? accelerationLimitsHigh : accelerationLimits) * deltaT; // TODO: use a function instead
+
+
+
+        velocityDifference.x()     = std::min(std::max(velocityCommand.x()     - velocityCurrent.x(),     -limit[0]), limit[0]);
+        velocityDifference.y()     = std::min(std::max(velocityCommand.y()     - velocityCurrent.y(),     -limit[1]), limit[1]);
+        velocityDifference.angle() = std::min(std::max(velocityCommand.angle() - velocityCurrent.angle(), -limit[2]), limit[2]);
+
+        velocityCurrent.x()     += velocityDifference.x();
+        velocityCurrent.y()     += velocityDifference.y();
+        velocityCurrent.angle() += velocityDifference.angle();
+
+        if (initialStep > 0) {
+            velocityCurrent = arma::zeros(3);
+            initialStep--;
+        }
+    }
+
     std::unique_ptr<std::vector<ServoCommand>> ModularWalkEngine::motionArms(double phase) {
 
         // Converts the phase into a sine wave that oscillates between 0 and 1 with a period of 2 phases
