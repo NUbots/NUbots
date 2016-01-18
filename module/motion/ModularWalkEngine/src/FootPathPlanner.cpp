@@ -22,15 +22,18 @@
 #include "utility/motion/RobotModels.h"
 #include "utility/nubugger/NUhelpers.h"
 
-namespace module {
-namespace motion {
+namespace module 
+{
+namespace motion 
+{
 
     using message::input::LimbID;
     using utility::motion::kinematics::DarwinModel;
     using utility::math::matrix::Transform2D;
     using utility::nubugger::graph;
 
-    void WalkEngine::calculateNewStep() {
+    void WalkEngine::calculateNewStep() 
+    {
         updateVelocity();
 
         // swap swing and support legs
@@ -42,43 +45,64 @@ namespace motion {
 
         arma::vec2 supportMod = arma::zeros(2); // support point modulation for wallkick
 
-        if (state == State::STOP_REQUEST) {
+        if (state == State::STOP_REQUEST) 
+        {
             log<NUClear::TRACE>("Walk Engine:: Stop requested");
             state = State::LAST_STEP;
             velocityCurrent = arma::zeros(3);
             velocityCommand = arma::zeros(3);
 
             // Stop with feet together by targetting swing leg next to support leg
-            if (swingLeg == LimbID::RIGHT_LEG) {
+            if (swingLeg == LimbID::RIGHT_LEG) 
+            {
                 uRightFootDestination = uLeftFootSource.localToWorld(-2 * uLRFootOffset);
-            } else {
+            }
+            else 
+            {
                 uLeftFootDestination = uRightFootSource.localToWorld(2 * uLRFootOffset);
             }
-        } else {
+        }
+        else 
+        {
             // normal walk, advance steps
-            if (swingLeg == LimbID::RIGHT_LEG) {
+            if (swingLeg == LimbID::RIGHT_LEG) 
+            {
                 uRightFootDestination = getNewFootTarget(velocityCurrent, uLeftFootSource, uRightFootSource, swingLeg);
-            } else {
+            }
+            else 
+            {
                 uLeftFootDestination = getNewFootTarget(velocityCurrent, uLeftFootSource, uRightFootSource, swingLeg);
             }
 
             // velocity-based support point modulation
             /*toeTipCompensation = 0;
-            if (velocityDifference[0] > 0) {
+            if (velocityDifference[0] > 0) 
+            {
                 // accelerating to front
                 supportMod[0] = supportFront2;
-            } else if (velocityCurrent[0] > velFastForward) {
+            }
+            else if (velocityCurrent[0] > velFastForward) 
+            {
                 supportMod[0] = supportFront;
                 toeTipCompensation = ankleMod[0];
-            } else if (velocityCurrent[0] < 0) {
+            }
+            else if (velocityCurrent[0] < 0) 
+            {
                 supportMod[0] = supportBack;
-            } else if (std::abs(velocityCurrent[2]) > velFastTurn) {
+            }
+            else if (std::abs(velocityCurrent[2]) > velFastTurn) 
+            {
                 supportMod[0] = supportTurn;
-            } else {
-                if (velocityCurrent[1] > 0.015) {
+            }
+            else 
+            {
+                if (velocityCurrent[1] > 0.015) 
+                {
                     supportMod[0] = supportSideX;
                     supportMod[1] = supportSideY;
-                } else if (velocityCurrent[1] < -0.015) {
+                }
+                else if (velocityCurrent[1] < -0.015) 
+                {
                     supportMod[0] = supportSideX;
                     supportMod[1] = -supportSideY;
                 }
@@ -88,12 +112,15 @@ namespace motion {
         uTorsoDestination = stepTorso(uLeftFootDestination, uRightFootDestination, 0.5);
 
         // apply velocity-based support point modulation for uSupport
-        if (swingLeg == LimbID::RIGHT_LEG) {
+        if (swingLeg == LimbID::RIGHT_LEG) 
+        {
             Transform2D uLeftFootTorso = uTorsoSource.worldToLocal(uLeftFootSource);
             Transform2D uTorsoModded = uTorso.localToWorld({supportMod[0], supportMod[1], 0});
             Transform2D uLeftFootModded = uTorsoModded.localToWorld(uLeftFootTorso);
             uSupport = uLeftFootModded.localToWorld({-footOffset[0], -footOffset[1], 0});
-        } else {
+        }
+        else 
+        {
             Transform2D uRightFootTorso = uTorsoSource.worldToLocal(uRightFootSource);
             Transform2D uTorsoModded = uTorso.localToWorld({supportMod[0], supportMod[1], 0});
             Transform2D uRightFootModded = uTorsoModded.localToWorld(uRightFootTorso);
@@ -101,7 +128,8 @@ namespace motion {
         }
 
         // compute ZMP coefficients
-        zmpParams = {
+        zmpParams = 
+        {
             (uSupport.x() - uTorso.x()) / (stepTime * phase1Single),
             (uTorsoDestination.x() - uSupport.x()) / (stepTime * (1 - phase2Single)),
             (uSupport.y() - uTorso.y()) / (stepTime * phase1Single),
@@ -112,15 +140,14 @@ namespace motion {
         zmpCoefficients.rows(2,3) = zmpSolve(uSupport.y(), uTorsoSource.y(), uTorsoDestination.y(), uTorsoSource.y(), uTorsoDestination.y(), phase1Single, phase2Single, stepTime, zmpTime);
     }
 
-    void WalkEngine::updateVelocity() {
+    void WalkEngine::updateVelocity() 
+    {
         // slow accelerations at high speed
         auto now = NUClear::clock::now();
         double deltaT = std::chrono::duration_cast<std::chrono::microseconds>(now - lastVeloctiyUpdateTime).count() * 1e-6;
         lastVeloctiyUpdateTime = now;
 
         auto& limit = (velocityCurrent.x() > velocityHigh ? accelerationLimitsHigh : accelerationLimits) * deltaT; // TODO: use a function instead
-
-
 
         velocityDifference.x()     = std::min(std::max(velocityCommand.x()     - velocityCurrent.x(),     -limit[0]), limit[0]);
         velocityDifference.y()     = std::min(std::max(velocityCommand.y()     - velocityCurrent.y(),     -limit[1]), limit[1]);
@@ -130,13 +157,15 @@ namespace motion {
         velocityCurrent.y()     += velocityDifference.y();
         velocityCurrent.angle() += velocityDifference.angle();
 
-        if (initialStep > 0) {
+        if (initialStep > 0) 
+        {
             velocityCurrent = arma::zeros(3);
             initialStep--;
         }
     }
 
-    Transform2D WalkEngine::getNewFootTarget(const Transform2D& velocity, const Transform2D& leftFoot, const Transform2D& rightFoot, const LimbID& swingLeg) {
+    Transform2D WalkEngine::getNewFootTarget(const Transform2D& velocity, const Transform2D& leftFoot, const Transform2D& rightFoot, const LimbID& swingLeg) 
+    {
         // Negative if right leg to account for the mirroring of the foot target
         int8_t sign = swingLeg == LimbID::LEFT_LEG ? 1 : -1;
         // Get midpoint between the two feet
@@ -169,7 +198,8 @@ namespace motion {
         return footTarget;
     }
 
-    arma::vec3 WalkEngine::footPhase(double phase, double phase1Single, double phase2Single) {
+    arma::vec3 WalkEngine::footPhase(double phase, double phase1Single, double phase2Single) 
+    {
         // Computes relative x,z motion of foot during single support phase
         // phSingle = 0: x=0, z=0, phSingle = 1: x=1,z=0
         double phaseSingle = std::min(std::max(phase - phase1Single, 0.0) / (phase2Single - phase1Single), 1.0);
@@ -179,6 +209,5 @@ namespace motion {
 
         return {xf, phaseSingle, zf};
     }
-
 }
 }
