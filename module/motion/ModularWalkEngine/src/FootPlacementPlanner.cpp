@@ -136,7 +136,19 @@ namespace motion {
         }
     }
 
-    Transform2D ModularWalkEngine::getNewFootTarget(const Transform2D& velocity, const Transform2D& leftFoot, const Transform2D& rightFoot, const LimbID& swingLeg) {
+    //=========================================================================================================
+    //      NAME: getNewFootTarget
+    //=========================================================================================================
+    //      Input  : <TODO: INSERT DESCRIPTION>
+    /*-------------------------------------------------------------------------------------------------------*/
+    //      Output : <TODO: INSERT DESCRIPTION>
+    /*-------------------------------------------------------------------------------------------------------*/
+    //      Pre-condition  : <TODO: INSERT DESCRIPTION>
+    /*-------------------------------------------------------------------------------------------------------*/
+    //      Post-condition : <TODO: INSERT DESCRIPTION>
+    //=========================================================================================================
+    Transform2D ModularWalkEngine::getNewFootTarget(const Transform2D& velocity, const Transform2D& leftFoot, const Transform2D& rightFoot, const LimbID& swingLeg) 
+    {   
         // Negative if right leg to account for the mirroring of the foot target
         int8_t sign = swingLeg == LimbID::LEFT_LEG ? 1 : -1;
         // Get midpoint between the two feet
@@ -180,5 +192,5 @@ namespace motion {
         return {xf, phaseSingle, zf};
     }
 
-}
-}
+}  // motion
+}  // modules
