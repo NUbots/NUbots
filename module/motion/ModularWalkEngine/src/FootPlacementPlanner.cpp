@@ -1,23 +1,23 @@
 /*
- * This file is part of WalkEngine.
+ * This file is part of ModularWalkEngine.
  *
- * WalkEngine is free software: you can redistribute it and/or modify
+ * ModularWalkEngine is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * WalkEngine is distributed in the hope that it will be useful,
+ * ModularWalkEngine is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with WalkEngine.  If not, see <http://www.gnu.org/licenses/>.
+ * along with ModularWalkEngine.  If not, see <http://www.gnu.org/licenses/>.
  *
  * Copyright 2013 NUBots <nubots@nubots.net>
  */
 
-#include "WalkEngine.h"
+#include "ModularWalkEngine.h"
 
 #include "utility/motion/RobotModels.h"
 #include "utility/nubugger/NUhelpers.h"
@@ -30,7 +30,7 @@ namespace motion {
     using utility::math::matrix::Transform2D;
     using utility::nubugger::graph;
 
-    void WalkEngine::calculateNewStep() {
+    void ModularWalkEngine::calculateNewStep() {
         updateVelocity();
 
         // swap swing and support legs
@@ -112,7 +112,7 @@ namespace motion {
         zmpCoefficients.rows(2,3) = zmpSolve(uSupport.y(), uTorsoSource.y(), uTorsoDestination.y(), uTorsoSource.y(), uTorsoDestination.y(), phase1Single, phase2Single, stepTime, zmpTime);
     }
 
-    void WalkEngine::updateVelocity() {
+    void ModularWalkEngine::updateVelocity() {
         // slow accelerations at high speed
         auto now = NUClear::clock::now();
         double deltaT = std::chrono::duration_cast<std::chrono::microseconds>(now - lastVeloctiyUpdateTime).count() * 1e-6;
@@ -136,7 +136,7 @@ namespace motion {
         }
     }
 
-    Transform2D WalkEngine::getNewFootTarget(const Transform2D& velocity, const Transform2D& leftFoot, const Transform2D& rightFoot, const LimbID& swingLeg) {
+    Transform2D ModularWalkEngine::getNewFootTarget(const Transform2D& velocity, const Transform2D& leftFoot, const Transform2D& rightFoot, const LimbID& swingLeg) {
         // Negative if right leg to account for the mirroring of the foot target
         int8_t sign = swingLeg == LimbID::LEFT_LEG ? 1 : -1;
         // Get midpoint between the two feet
@@ -169,7 +169,7 @@ namespace motion {
         return footTarget;
     }
 
-    arma::vec3 WalkEngine::footPhase(double phase, double phase1Single, double phase2Single) {
+    arma::vec3 ModularWalkEngine::footPhase(double phase, double phase1Single, double phase2Single) {
         // Computes relative x,z motion of foot during single support phase
         // phSingle = 0: x=0, z=0, phSingle = 1: x=1,z=0
         double phaseSingle = std::min(std::max(phase - phase1Single, 0.0) / (phase2Single - phase1Single), 1.0);
