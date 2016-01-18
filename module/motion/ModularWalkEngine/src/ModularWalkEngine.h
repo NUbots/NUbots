@@ -17,8 +17,8 @@
  * Copyright 2013 NUBots <nubots@nubots.net>
  */
 
-#ifndef MODULES_MOTION_WALKENGINE_H
-#define MODULES_MOTION_WALKENGINE_H
+#ifndef MODULES_MOTION_ModularWalkEngine_H
+#define MODULES_MOTION_ModularWalkEngine_H
 
 #include <nuclear>
 #include <armadillo>
@@ -46,7 +46,7 @@ namespace motion {
      * @author Brendan Annable
      * @author Trent Houliston
      */
-    class WalkEngine : public NUClear::Reactor {
+    class ModularWalkEngine : public NUClear::Reactor {
     public:
         /**
          * The number of servo updates performnced per second
@@ -54,8 +54,8 @@ namespace motion {
          */
         static constexpr size_t UPDATE_FREQUENCY = 90;
 
-        static constexpr const char* CONFIGURATION_PATH = "WalkEngine.yaml";
-        explicit WalkEngine(std::unique_ptr<NUClear::Environment> environment);
+        static constexpr const char* CONFIGURATION_PATH = "ModularWalkEngine.yaml";
+        explicit ModularWalkEngine(std::unique_ptr<NUClear::Environment> environment);
     private:
         using LimbID         = message::input::LimbID;
         using ServoCommand   = message::behaviour::ServoCommand;
@@ -295,5 +295,5 @@ namespace motion {
 }  // motion
 }  // modules
 
-#endif  // MODULES_MOTION_WALKENGINE_H
+#endif  // MODULES_MOTION_ModularWalkEngine_H
 
