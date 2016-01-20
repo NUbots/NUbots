@@ -1,0 +1,10 @@
+foot_separation: 0.10
+body_angle: 0.0
+
+test_yaw: 0
+test_pitch: 0
+test_pos: [0,0,0.3]
+
+
+l_arm: [0.1,0.15,0.05]
+r_arm: [0.0,-0.15,0.15]
