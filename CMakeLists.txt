@@ -23,7 +23,7 @@ INCLUDE(Compiler)
 INCLUDE(Platform)
 
 # Hide some cmake variables that will never be used
-mark_as_advanced(
+MARK_AS_ADVANCED(
     CMAKE_INSTALL_PREFIX
     CURSES_CURSES_H_PATH
     CURSES_FORM_LIBRARY
