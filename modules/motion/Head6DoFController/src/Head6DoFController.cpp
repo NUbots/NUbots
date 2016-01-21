@@ -87,15 +87,16 @@ namespace motion {
         								sensors.servos[int(ServoID::R_ELBOW)].presentPosition,
         								};
 
-			//Adjuast arm position
+			//Adjust arm position
         	int max_number_of_iterations = 20;
 
 			auto joints = utility::motion::kinematics::setHeadPoseFromFeet<DarwinModel>(testHeadPose, foot_separation, body_angle);
         	
-        	auto arm_jointsL = utility::motion::kinematics::setArm<DarwinModel>(l_arm, true, max_number_of_iterations, prevArmJointsL);
-        	auto arm_jointsR = utility::motion::kinematics::setArm<DarwinModel>(r_arm, false, max_number_of_iterations, prevArmJointsR);
-        	joints.insert(joints.end(), arm_jointsL.begin(), arm_jointsL.end());
-        	joints.insert(joints.end(), arm_jointsR.begin(), arm_jointsR.end());
+            //TODO: fix arms
+        	// auto arm_jointsL = utility::motion::kinematics::setArm<DarwinModel>(l_arm, true, max_number_of_iterations, prevArmJointsL);
+        	// auto arm_jointsR = utility::motion::kinematics::setArm<DarwinModel>(r_arm, false, max_number_of_iterations, prevArmJointsR);
+        	// joints.insert(joints.end(), arm_jointsL.begin(), arm_jointsL.end());
+        	// joints.insert(joints.end(), arm_jointsR.begin(), arm_jointsR.end());
 
 
 	        auto waypoints = std::make_unique<std::vector<ServoCommand>>();
