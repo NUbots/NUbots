@@ -9,6 +9,7 @@ sys.dont_write_bytecode = True
 
 # Add tools/build to our python path
 sys.path.append('tools')
+sys.path.append('nuclear/tools')
 
 if __name__ == '__main__':
 
@@ -17,7 +18,7 @@ if __name__ == '__main__':
     subcommands = command.add_subparsers(dest='command')
 
     # Get all of the packages that are in the build tools
-    modules = pkgutil.iter_modules(path=['tools'])
+    modules = pkgutil.iter_modules(path=['nuclear/tools'])
 
     # Our tools dictionary
     tools = {}
