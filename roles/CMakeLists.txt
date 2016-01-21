@@ -51,6 +51,9 @@ ENDFOREACH()
 # We need the NUClear role function here so it can be used in the role files
 INCLUDE(NUClearRole)
 
+# Clear our NUClear modules variable so we can repopulate it
+UNSET(NUCLEAR_MODULES CACHE)
+
 # Note that the loop value of this for loop sets the local role variable that is used in the included role file
 FOREACH(role ${NUCLEAR_ROLES})
     INCLUDE("${role_source_dir}/${role}.role")
