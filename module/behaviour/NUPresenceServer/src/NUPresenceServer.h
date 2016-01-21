@@ -14,24 +14,25 @@
  * You should have received a copy of the GNU General Public License
  * along with the NUbots Codebase.  If not, see <http://www.gnu.org/licenses/>.
  *
- * Copyright 2015 NUbots <nubots@nubots.net>
+ * Copyright 2016 NUbots <nubots@nubots.net>
  */
 
-#include "IKGenerator.h"
+#ifndef MODULE_BEHAVIOUR_NUPRESENCESERVER_H
+#define MODULE_BEHAVIOUR_NUPRESENCESERVER_H
 
-#include "messages/support/Configuration.h"
+#include <nuclear>
 
-namespace modules {
-namespace support {
+namespace module {
+namespace behaviour {
 
-    using messages::support::Configuration;
+    class NUPresenceServer : public NUClear::Reactor {
 
-    IKGenerator::IKGenerator(std::unique_ptr<NUClear::Environment> environment)
-    : Reactor(std::move(environment)) {
+    public:
+        /// @brief Called by the powerplant to build and setup the NUPresenceServer reactor.
+        explicit NUPresenceServer(std::unique_ptr<NUClear::Environment> environment);
+    };
 
-        on<Configuration>("IKGenerator.yaml").then([this] (const Configuration& config) {
-            // Use configuration here from file IKGenerator.yaml
-        });
-    }
 }
 }
+
+#endif  // MODULE_BEHAVIOUR_NUPRESENCESERVER_H
