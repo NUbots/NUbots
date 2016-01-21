@@ -1,0 +1,86 @@
+/*
+ * This file is part of the NUbots Codebase.
+ *
+ * The NUbots Codebase is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * The NUbots Codebase is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with the NUbots Codebase.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ * Copyright 2013 NUBots <nubots@nubots.net>
+ */
+
+syntax = "proto3";
+
+package message.vision.proto;
+
+import "message/Geometry.proto";
+import "message/Vector.proto";
+import "message/Matrix.proto";
+
+message VisionObject {
+
+    message Measurement {
+        vec3 position = 1;
+        mat33 covariance = 2;
+    }
+
+    message Goal {
+
+        enum Side {
+            UNKNOWN = 0;
+            LEFT = 1;
+            RIGHT = 2;
+        }
+
+        repeated Measurement measurement = 3;
+        Side side = 1;
+        Quad quad = 2;
+    }
+
+    message Ball {
+
+        repeated Measurement measurement = 2;
+        Circle circle = 1;
+    }
+
+    message Obstacle {
+
+        repeated Measurement measurement = 2;
+        Polygon shape = 1;
+    }
+
+    message Line {
+
+        ivec2 start = 1;
+        ivec2 end = 2;
+        vec4 colour = 3;
+    }
+
+    enum ObjectType {
+        UNKNOWN = 0;
+        GOAL = 1;
+        BALL = 2;
+        OBSTACLE = 3;
+        LINE = 4;
+    }
+
+    uint32 camera_id = 5;
+    ObjectType type = 1;
+
+    repeated Goal goal = 2;
+    repeated Ball ball = 3;
+    repeated Obstacle obstacle = 4;
+    repeated Line line = 6;
+}
+
+message VisionObjects {
+    repeated VisionObject object = 1;
+}

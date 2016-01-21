@@ -13,8 +13,9 @@ Vagrant
 
 		$ sudo apt-get install git
 		$ sudo apt-get install virtualbox
-		$ sudo apt-get install vagrant
 
+		NOTE: Ubuntu users should get the debian for Vagrant from the vagrant website.
+	
 	Windows and OSX installation can be done with installers from the program sites above.
 
 
@@ -30,6 +31,7 @@ Vagrant
 
 3. Create vagrant machine
 	
+	$ cd NUbots
 	$ vagrant up
 	
 4. To set up vagrant and simulator
@@ -45,13 +47,13 @@ Vagrant
 	$ quex
 	$ ninja
 
-5. Open a second terminal, go to NUsight (after cloning) and run
+5. Open a second terminal, go to [NUsight][] (after cloning) and run
 
 	$ node app
 
 then in internet browser go to 
 
-localhost:9090 
+	localhost:9090 
 
 and then localization window
 go back to the first terminal and run
@@ -175,10 +177,14 @@ are having issues.
 [NUbots]:                 http://nubots.net/                                      "NUbots"
 [robocup]:                https://github.com/nubots/robocup                       "Robocup"
 [NUClear]:                https://github.com/Fastcode/NUClear                     "NUClear"
+[NUsight]:                https://github.com/NUbots/NUsight                       "NUsight web robot debugger"
 [Docker]:                 https://www.docker.com/                                 "Docker"
 [Boot2Docker]:            http://boot2docker.io/                                  "Boot2Docker"
 [Sublime Text 3]:         http://www.sublimetext.com/                             "Sublime Text 3"
 [docker_download]:	  https://docs.docker.com/installation/                   "Docker Installation Page"
 [What is Docker]:  	  https://www.docker.com/whatisdocker/ 			  "Docker's Getting Started Guide"
 [Command-Line Interface]: https://docs.docker.com/reference/commandline/cli/	  "Docker Command-Line Interface Documentation"
-[Homebrew]: 	          http://brew.sh/					  "Homebrew"
+[Homebrew]: 	          http://brew.sh/					  					  "Homebrew"
+[Git]: 	                  https://git-scm.com/					  				  "Git version control"
+[Vagrant]: 	              https://www.vagrantup.com/					          "Virtual machine wrapper"
+[VirtualBox]: 	          https://www.virtualbox.org/					          "Virtual machine"
