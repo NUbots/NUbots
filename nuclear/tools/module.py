@@ -14,16 +14,16 @@ def register(command):
 
     # Generate module subcommand
     generate_command = subcommands.add_parser('generate', help='Generate a new NUClear module based on a template')
-    generate_command.add_argument('path', metavar='path', help='a path to the new module (from the modules directory)')
+    generate_command.add_argument('path', metavar='path', help='a path to the new module (from the module directory)')
 
 def run(path='', **kwargs):
-    if os.path.exists('modules/{}'.format(path)):
+    if os.path.exists('module/{}'.format(path)):
         print("The path provided already exists.")
         print("Module generation aborted.")
     else:
 
         # Calculate all of our file paths
-        path = 'modules/{}'.format(path)
+        path = 'module/{}'.format(path)
         src_path = '{}/src'.format(path)
         tests_path = '{}/tests'.format(path)
         config_path = '{}/config'.format(path)
