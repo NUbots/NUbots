@@ -19,35 +19,35 @@
 
 #include "Head6DoFController.h"
 
-#include "messages/support/Configuration.h"
+#include "message/support/Configuration.h"
 #include "utility/support/yaml_armadillo.h"
 #include "utility/motion/InverseKinematics.h"
 #include "utility/motion/ForwardKinematics.h"
 #include "utility/motion/RobotModels.h"
 #include "utility/motion/RobotModels.h"
-#include "messages/behaviour/ServoCommand.h"
-#include "messages/input/ServoID.h"
-#include "messages/input/Sensors.h"
-#include "messages/behaviour/Action.h"
+#include "message/behaviour/ServoCommand.h"
+#include "message/input/ServoID.h"
+#include "message/input/Sensors.h"
+#include "message/behaviour/Action.h"
 #include "utility/support/yaml_expression.h"
 
-namespace modules {
+namespace module {
 namespace motion {
 
-    using messages::support::Configuration;
-    using messages::behaviour::RegisterAction;
-    using messages::behaviour::ActionPriorites;
-    using messages::input::ServoID;
-    using messages::input::ServoSide;
-    using messages::input::Sensors;
-    using messages::input::LimbID;
+    using message::support::Configuration;
+    using message::behaviour::RegisterAction;
+    using message::behaviour::ActionPriorites;
+    using message::input::ServoID;
+    using message::input::ServoSide;
+    using message::input::Sensors;
+    using message::input::LimbID;
 
     using utility::math::matrix::Transform3D;
     using utility::motion::kinematics::DarwinModel;
     using utility::motion::kinematics::Side;
 
     using utility::support::Expression;
-    using messages::behaviour::ServoCommand;
+    using message::behaviour::ServoCommand;
 
 
     Head6DoFController::Head6DoFController(std::unique_ptr<NUClear::Environment> environment)

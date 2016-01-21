@@ -23,7 +23,7 @@
 #include <nuclear>
 #include "utility/math/matrix/Transform3D.h"
 
-namespace modules {
+namespace module {
 namespace motion {
 
     class Head6DoFController : public NUClear::Reactor {
