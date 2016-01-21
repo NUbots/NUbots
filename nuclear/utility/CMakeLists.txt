@@ -1,10 +1,15 @@
 # Get the relative path to our utility directory
-FILE(RELATIVE_PATH utility_include_path ${CMAKE_SOURCE_DIR} "${NUCLEAR_UTILITY_DIR}/../")
+GET_FILENAME_COMPONENT(utility_include_path "${NUCLEAR_UTILITY_DIR}/.." ABSOLUTE)
+FILE(RELATIVE_PATH utility_include_path ${CMAKE_SOURCE_DIR} ${utility_include_path})
 
-# Make our message include directories variable
+# Get our two include directories for utilty
+SET(utility_source_include_dir "${CMAKE_SOURCE_DIR}/${utility_include_path}")
+SET(utility_binary_include_dir "${CMAKE_BINARY_DIR}/${utility_include_path}")
+
+# Make our utility include directories variable
 SET(NUCLEAR_UTILITY_INCLUDE_DIRS
-    "${CMAKE_SOURCE_DIR}/${utility_include_path}"
-    "${CMAKE_BINARY_DIR}/${utility_include_path}"
+    ${utility_source_include_dir}
+    ${utility_binary_include_dir}
     CACHE INTERNAL "Include directories for the utility folder and generated sources")
 INCLUDE_DIRECTORIES(${NUCLEAR_UTILITY_INCLUDE_DIRS})
 
