@@ -26,6 +26,7 @@ else (NUCLEAR_LIBRARIES AND NUCLEAR_INCLUDE_DIRS)
       /opt/local/include
       /sw/include
       $ENV{NUCLEAR_LOCATION}/include
+      $ENV{SHARED_LIBRARIES}/${TARGET_ARCHITECTURE}/include
   )
 
   find_library(NUCLEAR_LIBRARY
@@ -36,6 +37,7 @@ else (NUCLEAR_LIBRARIES AND NUCLEAR_INCLUDE_DIRS)
       /usr/local/lib
       /opt/local/lib
       /sw/lib
+      $ENV{SHARED_LIBRARIES}/${TARGET_ARCHITECTURE}/lib
   )
 
   set(NUCLEAR_INCLUDE_DIRS
