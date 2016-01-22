@@ -34,6 +34,7 @@
 namespace utility {
 namespace nubugger {
     using utility::math::geometry::RotatedRectangle;
+    
     using utility::math::geometry::Circle;
     using utility::math::matrix::Transform2D;
     using message::support::nubugger::proto::DrawObjects;
