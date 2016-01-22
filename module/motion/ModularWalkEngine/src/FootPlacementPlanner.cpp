@@ -1,3 +1,5 @@
+/*----------------------------------------------DOCUMENT HEADER----------------------------------------------*/
+/*===========================================================================================================*/
 /*
  * This file is part of ModularWalkEngine.
  *
@@ -16,31 +18,38 @@
  *
  * Copyright 2013 NUBots <nubots@nubots.net>
  */
-
+/*===========================================================================================================*/
+/*----------------------------------------CONSTANTS AND DEFINITIONS------------------------------------------*/
+/*===========================================================================================================*/
+//      INCLUDE(S)
+/*===========================================================================================================*/
 #include "ModularWalkEngine.h"
 
 #include "utility/motion/RobotModels.h"
 #include "utility/nubugger/NUhelpers.h"
-
-namespace module {
-namespace motion {
-
+/*===========================================================================================================*/
+//      NAMESPACE(S)
+/*===========================================================================================================*/
+namespace module 
+{
+namespace motion 
+{
+    /*=======================================================================================================*/
+    //      UTILIZATION REFERENCE(S)
+    /*=======================================================================================================*/
     using message::input::LimbID;
     using utility::motion::kinematics::DarwinModel;
     using utility::math::matrix::Transform2D;
     using utility::nubugger::graph;
-
-    //=========================================================================================================
+    /*=======================================================================================================*/
     //      NAME: calculateNewStep
-    //=========================================================================================================
-    //      Input  : null
-    /*-------------------------------------------------------------------------------------------------------*/
-    //      Output : void
-    /*-------------------------------------------------------------------------------------------------------*/
-    //      Pre-condition  : <TODO: INSERT DESCRIPTION>
-    /*-------------------------------------------------------------------------------------------------------*/
-    //      Post-condition : <TODO: INSERT DESCRIPTION>
-    //=========================================================================================================
+    /*=======================================================================================================*/
+    /*
+     *      @input  : <TODO: INSERT DESCRIPTION>
+     *      @output : <TODO: INSERT DESCRIPTION>
+     *      @pre-condition  : <TODO: INSERT DESCRIPTION>
+     *      @post-condition : <TODO: INSERT DESCRIPTION>
+    */
     void ModularWalkEngine::calculateNewStep() 
     {
         updateVelocity();
@@ -148,17 +157,15 @@ namespace motion {
         zmpCoefficients.rows(0,1) = zmpSolve(uSupport.x(), uTorsoSource.x(), uTorsoDestination.x(), uTorsoSource.x(), uTorsoDestination.x(), phase1Single, phase2Single, stepTime, zmpTime);
         zmpCoefficients.rows(2,3) = zmpSolve(uSupport.y(), uTorsoSource.y(), uTorsoDestination.y(), uTorsoSource.y(), uTorsoDestination.y(), phase1Single, phase2Single, stepTime, zmpTime);
     }
-    //=========================================================================================================
+    /*=======================================================================================================*/
     //      NAME: getNewFootTarget
-    //=========================================================================================================
-    //      Input  : <TODO: INSERT DESCRIPTION>
-    /*-------------------------------------------------------------------------------------------------------*/
-    //      Output : <TODO: INSERT DESCRIPTION>
-    /*-------------------------------------------------------------------------------------------------------*/
-    //      Pre-condition  : <TODO: INSERT DESCRIPTION>
-    /*-------------------------------------------------------------------------------------------------------*/
-    //      Post-condition : <TODO: INSERT DESCRIPTION>
-    //=========================================================================================================
+    /*=======================================================================================================*/
+    /*
+     *      @input  : <TODO: INSERT DESCRIPTION>
+     *      @output : <TODO: INSERT DESCRIPTION>
+     *      @pre-condition  : <TODO: INSERT DESCRIPTION>
+     *      @post-condition : <TODO: INSERT DESCRIPTION>
+    */
     Transform2D ModularWalkEngine::getNewFootTarget(const Transform2D& velocity, const Transform2D& leftFoot, const Transform2D& rightFoot, const LimbID& swingLeg) 
     {   
         // Negative if right leg to account for the mirroring of the foot target
