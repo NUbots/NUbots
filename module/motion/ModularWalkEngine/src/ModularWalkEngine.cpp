@@ -1,3 +1,5 @@
+/*----------------------------------------------DOCUMENT HEADER----------------------------------------------*/
+/*===========================================================================================================*/
 /*
  * This file is part of ModularWalkEngine.
  *
@@ -16,7 +18,11 @@
  *
  * Copyright 2013 NUBots <nubots@nubots.net>
  */
-
+/*===========================================================================================================*/
+/*----------------------------------------CONSTANTS AND DEFINITIONS------------------------------------------*/
+/*===========================================================================================================*/
+//      INCLUDE(S)
+/*===========================================================================================================*/
 #include "ModularWalkEngine.h"
 
 #include <algorithm>
@@ -42,10 +48,16 @@
 #include "utility/math/angle.h"
 #include "utility/math/matrix/Rotation3D.h"
 #include "message/input/PushDetection.h"
-
-namespace module {
-namespace motion {
-
+/*===========================================================================================================*/
+//      NAMESPACE(S)
+/*===========================================================================================================*/
+namespace module 
+{
+namespace motion 
+{
+    /*=======================================================================================================*/
+    //      UTILIZATION REFERENCE(S)
+    /*=======================================================================================================*/
     using message::input::PushDetection;
     using message::input::ServoID;
     using message::input::Sensors;
@@ -75,7 +87,15 @@ namespace motion {
     using utility::math::angle::normalizeAngle;
     using utility::nubugger::graph;
     using utility::support::Expression;
-
+    /*=======================================================================================================*/
+    //      NAME: ModularWalkEngine
+    /*=======================================================================================================*/
+    /*
+     *      @input  : <TODO: INSERT DESCRIPTION>
+     *      @output : <TODO: INSERT DESCRIPTION>
+     *      @pre-condition  : <TODO: INSERT DESCRIPTION>
+     *      @post-condition : <TODO: INSERT DESCRIPTION>
+    */
     ModularWalkEngine::ModularWalkEngine(std::unique_ptr<NUClear::Environment> environment)
         : Reactor(std::move(environment)) {
         // , subsumptionId(size_t(this) * size_t(this) - size_t(this)) {
@@ -191,7 +211,15 @@ namespace motion {
 
         reset();
     }
-
+    /*=======================================================================================================*/
+    //      NAME: configure
+    /*=======================================================================================================*/
+    /*
+     *      @input  : <TODO: INSERT DESCRIPTION>
+     *      @output : <TODO: INSERT DESCRIPTION>
+     *      @pre-condition  : <TODO: INSERT DESCRIPTION>
+     *      @post-condition : <TODO: INSERT DESCRIPTION>
+    */
     void ModularWalkEngine::configure(const YAML::Node& config){
         emitLocalisation = config["emit_localisation"].as<bool>();
 
@@ -281,7 +309,15 @@ namespace motion {
         */
         STAND_SCRIPT_DURATION = config["STAND_SCRIPT_DURATION"].as<Expression>();
     }
-
+    /*=======================================================================================================*/
+    //      NAME: generateAndSaveStandScript
+    /*=======================================================================================================*/
+    /*
+     *      @input  : <TODO: INSERT DESCRIPTION>
+     *      @output : <TODO: INSERT DESCRIPTION>
+     *      @pre-condition  : <TODO: INSERT DESCRIPTION>
+     *      @post-condition : <TODO: INSERT DESCRIPTION>
+    */
     void ModularWalkEngine::generateAndSaveStandScript(const Sensors& sensors) {
         reset();
         stanceReset();
@@ -302,7 +338,15 @@ namespace motion {
         reset();
         stanceReset();
     }
-
+    /*=======================================================================================================*/
+    //      NAME: stanceReset
+    /*=======================================================================================================*/
+    /*
+     *      @input  : <TODO: INSERT DESCRIPTION>
+     *      @output : <TODO: INSERT DESCRIPTION>
+     *      @pre-condition  : <TODO: INSERT DESCRIPTION>
+     *      @post-condition : <TODO: INSERT DESCRIPTION>
+    */
     void ModularWalkEngine::stanceReset() {
         // standup/sitdown/falldown handling
         if (startFromStep) {
@@ -334,7 +378,15 @@ namespace motion {
 
         calculateNewStep();
     }
-
+    /*=======================================================================================================*/
+    //      NAME: reset
+    /*=======================================================================================================*/
+    /*
+     *      @input  : <TODO: INSERT DESCRIPTION>
+     *      @output : <TODO: INSERT DESCRIPTION>
+     *      @pre-condition  : <TODO: INSERT DESCRIPTION>
+     *      @post-condition : <TODO: INSERT DESCRIPTION>
+    */
     void ModularWalkEngine::reset() {
         uTorso = {-footOffset[0], 0, 0};
         uLeftFoot = {0, DarwinModel::Leg::HIP_OFFSET_Y, 0};
@@ -370,7 +422,15 @@ namespace motion {
 
         // interrupted = false;
     }
-
+    /*=======================================================================================================*/
+    //      NAME: start
+    /*=======================================================================================================*/
+    /*
+     *      @input  : <TODO: INSERT DESCRIPTION>
+     *      @output : <TODO: INSERT DESCRIPTION>
+     *      @pre-condition  : <TODO: INSERT DESCRIPTION>
+     *      @post-condition : <TODO: INSERT DESCRIPTION>
+    */
     void ModularWalkEngine::start() {
         if (state != State::WALKING) {
             swingLeg = swingLegInitial;
@@ -379,14 +439,30 @@ namespace motion {
             state = State::WALKING;
         }
     }
-
+    /*=======================================================================================================*/
+    //      NAME: requestStop
+    /*=======================================================================================================*/
+    /*
+     *      @input  : <TODO: INSERT DESCRIPTION>
+     *      @output : <TODO: INSERT DESCRIPTION>
+     *      @pre-condition  : <TODO: INSERT DESCRIPTION>
+     *      @post-condition : <TODO: INSERT DESCRIPTION>
+    */
     void ModularWalkEngine::requestStop() {
         // always stops with feet together (which helps transition)
         if (state == State::WALKING) {
             state = State::STOP_REQUEST;
         }
     }
-
+    /*=======================================================================================================*/
+    //      NAME: stop
+    /*=======================================================================================================*/
+    /*
+     *      @input  : <TODO: INSERT DESCRIPTION>
+     *      @output : <TODO: INSERT DESCRIPTION>
+     *      @pre-condition  : <TODO: INSERT DESCRIPTION>
+     *      @post-condition : <TODO: INSERT DESCRIPTION>
+    */
     void ModularWalkEngine::stop() {
         state = State::STOPPED;
         // emit(std::make_unique<ActionPriorites>(ActionPriorites { subsumptionId, { 0, 0 }})); // TODO: config
@@ -394,7 +470,15 @@ namespace motion {
         emit(std::make_unique<WalkStopped>());
         emit(std::make_unique<std::vector<ServoCommand>>());
     }
-
+    /*=======================================================================================================*/
+    //      NAME: localise
+    /*=======================================================================================================*/
+    /*
+     *      @input  : <TODO: INSERT DESCRIPTION>
+     *      @output : <TODO: INSERT DESCRIPTION>
+     *      @pre-condition  : <TODO: INSERT DESCRIPTION>
+     *      @post-condition : <TODO: INSERT DESCRIPTION>
+    */
     void ModularWalkEngine::localise(Transform2D position) {
         // emit position as a fake localisation
         auto localisation = std::make_unique<std::vector<message::localisation::Self>>();
@@ -407,7 +491,15 @@ namespace motion {
         localisation->push_back(self);
         emit(std::move(localisation));
     }
-
+    /*=======================================================================================================*/
+    //      NAME: update
+    /*=======================================================================================================*/
+    /*
+     *      @input  : <TODO: INSERT DESCRIPTION>
+     *      @output : <TODO: INSERT DESCRIPTION>
+     *      @pre-condition  : <TODO: INSERT DESCRIPTION>
+     *      @post-condition : <TODO: INSERT DESCRIPTION>
+    */
     void ModularWalkEngine::update(const Sensors& sensors) {
         double now = getTime();
 
@@ -441,9 +533,15 @@ namespace motion {
 
         updateStep(phase, sensors);
     }
-
-
-
+    /*=======================================================================================================*/
+    //      NAME: updateStillWayPoints
+    /*=======================================================================================================*/
+    /*
+     *      @input  : <TODO: INSERT DESCRIPTION>
+     *      @output : <TODO: INSERT DESCRIPTION>
+     *      @pre-condition  : <TODO: INSERT DESCRIPTION>
+     *      @post-condition : <TODO: INSERT DESCRIPTION>
+    */
     std::unique_ptr<std::vector<ServoCommand>> ModularWalkEngine::updateStillWayPoints(const Sensors& sensors) {
         uTorso = stepTorso(uLeftFoot, uRightFoot, 0.5);
         Transform2D uTorsoActual = uTorso.localToWorld({-DarwinModel::Leg::HIP_OFFSET_X, 0, 0});
@@ -472,11 +570,27 @@ namespace motion {
 
         return waypoints;
     }
-
+    /*=======================================================================================================*/
+    //      NAME: updateStill
+    /*=======================================================================================================*/
+    /*
+     *      @input  : <TODO: INSERT DESCRIPTION>
+     *      @output : <TODO: INSERT DESCRIPTION>
+     *      @pre-condition  : <TODO: INSERT DESCRIPTION>
+     *      @post-condition : <TODO: INSERT DESCRIPTION>
+    */
     void ModularWalkEngine::updateStill(const Sensors& sensors) {
         emit(std::move(updateStillWayPoints(sensors)));
     }
-
+    /*=======================================================================================================*/
+    //      NAME: motionLegs
+    /*=======================================================================================================*/
+    /*
+     *      @input  : <TODO: INSERT DESCRIPTION>
+     *      @output : <TODO: INSERT DESCRIPTION>
+     *      @pre-condition  : <TODO: INSERT DESCRIPTION>
+     *      @post-condition : <TODO: INSERT DESCRIPTION>
+    */
     std::unique_ptr<std::vector<ServoCommand>> ModularWalkEngine::motionLegs(std::vector<std::pair<ServoID, float>> joints) {
         auto waypoints = std::make_unique<std::vector<ServoCommand>>();
         waypoints->reserve(16);
@@ -489,8 +603,17 @@ namespace motion {
 
         return std::move(waypoints);
     }
-
-        void ModularWalkEngine::updateVelocity() {
+    /*=======================================================================================================*/
+    //      NAME: updateVelocity
+    /*=======================================================================================================*/
+    /*
+     *      @input  : <TODO: INSERT DESCRIPTION>
+     *      @output : <TODO: INSERT DESCRIPTION>
+     *      @pre-condition  : <TODO: INSERT DESCRIPTION>
+     *      @post-condition : <TODO: INSERT DESCRIPTION>
+    */
+    void ModularWalkEngine::updateVelocity() 
+    {
         // slow accelerations at high speed
         auto now = NUClear::clock::now();
         double deltaT = std::chrono::duration_cast<std::chrono::microseconds>(now - lastVeloctiyUpdateTime).count() * 1e-6;
@@ -513,7 +636,15 @@ namespace motion {
             initialStep--;
         }
     }
-
+    /*=======================================================================================================*/
+    //      NAME: motionArms
+    /*=======================================================================================================*/
+    /*
+     *      @input  : <TODO: INSERT DESCRIPTION>
+     *      @output : <TODO: INSERT DESCRIPTION>
+     *      @pre-condition  : <TODO: INSERT DESCRIPTION>
+     *      @post-condition : <TODO: INSERT DESCRIPTION>
+    */
     std::unique_ptr<std::vector<ServoCommand>> ModularWalkEngine::motionArms(double phase) {
 
         // Converts the phase into a sine wave that oscillates between 0 and 1 with a period of 2 phases
@@ -551,13 +682,29 @@ namespace motion {
 
         return std::move(waypoints);
     }
-
+    /*=======================================================================================================*/
+    //      NAME: stepTorso
+    /*=======================================================================================================*/
+    /*
+     *      @input  : <TODO: INSERT DESCRIPTION>
+     *      @output : <TODO: INSERT DESCRIPTION>
+     *      @pre-condition  : <TODO: INSERT DESCRIPTION>
+     *      @post-condition : <TODO: INSERT DESCRIPTION>
+    */
     Transform2D ModularWalkEngine::stepTorso(Transform2D uLeftFoot, Transform2D uRightFoot, double shiftFactor) {
         Transform2D uLeftFootSupport = uLeftFoot.localToWorld({-footOffset[0], -footOffset[1], 0});
         Transform2D uRightFootSupport = uRightFoot.localToWorld({-footOffset[0], footOffset[1], 0});
         return uLeftFootSupport.interpolate(shiftFactor, uRightFootSupport);
     }
-
+    /*=======================================================================================================*/
+    //      NAME: setVelocity
+    /*=======================================================================================================*/
+    /*
+     *      @input  : <TODO: INSERT DESCRIPTION>
+     *      @output : <TODO: INSERT DESCRIPTION>
+     *      @pre-condition  : <TODO: INSERT DESCRIPTION>
+     *      @post-condition : <TODO: INSERT DESCRIPTION>
+    */
     void ModularWalkEngine::setVelocity(Transform2D velocity) {
         // filter the commanded speed
         velocity.x()     = std::min(std::max(velocity.x(),     velocityLimits(0,0)), velocityLimits(0,1));
@@ -578,11 +725,27 @@ namespace motion {
         velocityCommand.y()     = std::min(std::max(velocityCommand.y(),     velocityLimits(1,0)), velocityLimits(1,1));
         velocityCommand.angle() = std::min(std::max(velocityCommand.angle(), velocityLimits(2,0)), velocityLimits(2,1));
     }
-
+    /*=======================================================================================================*/
+    //      NAME: getVelocity
+    /*=======================================================================================================*/
+    /*
+     *      @input  : <TODO: INSERT DESCRIPTION>
+     *      @output : <TODO: INSERT DESCRIPTION>
+     *      @pre-condition  : <TODO: INSERT DESCRIPTION>
+     *      @post-condition : <TODO: INSERT DESCRIPTION>
+    */
     Transform2D ModularWalkEngine::getVelocity() {
         return velocityCurrent;
     }
-
+    /*=======================================================================================================*/
+    //      NAME: zmpSolve
+    /*=======================================================================================================*/
+    /*
+     *      @input  : <TODO: INSERT DESCRIPTION>
+     *      @output : <TODO: INSERT DESCRIPTION>
+     *      @pre-condition  : <TODO: INSERT DESCRIPTION>
+     *      @post-condition : <TODO: INSERT DESCRIPTION>
+    */
     arma::vec2 ModularWalkEngine::zmpSolve(double zs, double z1, double z2, double x1, double x2, double phase1Single, double phase2Single, double stepTime, double zmpTime) {
         /*
         Solves ZMP equations.
@@ -603,7 +766,15 @@ namespace motion {
         double aN = (c1 * expTStep - c2) / (expTStep - 1 / expTStep);
         return {aP, aN};
     }
-
+    /*=======================================================================================================*/
+    //      NAME: zmpCom
+    /*=======================================================================================================*/
+    /*
+     *      @input  : <TODO: INSERT DESCRIPTION>
+     *      @output : <TODO: INSERT DESCRIPTION>
+     *      @pre-condition  : <TODO: INSERT DESCRIPTION>
+     *      @post-condition : <TODO: INSERT DESCRIPTION>
+    */
     Transform2D ModularWalkEngine::zmpCom(double phase, arma::vec4 zmpCoefficients, arma::vec4 zmpParams, double stepTime, double zmpTime, double phase1Single, double phase2Single, Transform2D uSupport, Transform2D uLeftFootDestination, Transform2D uLeftFootSource, Transform2D uRightFootDestination, Transform2D uRightFootSource) {
         Transform2D com = {0, 0, 0};
         double expT = std::exp(stepTime * phase / zmpTime);
@@ -621,11 +792,27 @@ namespace motion {
         com.angle() = phase * (uLeftFootDestination.angle() + uRightFootDestination.angle()) / 2 + (1 - phase) * (uLeftFootSource.angle() + uRightFootSource.angle()) / 2;
         return com;
     }
-
+    /*=======================================================================================================*/
+    //      NAME: getTime
+    /*=======================================================================================================*/
+    /*
+     *      @input  : <TODO: INSERT DESCRIPTION>
+     *      @output : <TODO: INSERT DESCRIPTION>
+     *      @pre-condition  : <TODO: INSERT DESCRIPTION>
+     *      @post-condition : <TODO: INSERT DESCRIPTION>
+    */
     double ModularWalkEngine::getTime() {
         return std::chrono::duration_cast<std::chrono::microseconds>(NUClear::clock::now().time_since_epoch()).count() * 1E-6;
     }
-
+    /*=======================================================================================================*/
+    //      NAME: procFunc
+    /*=======================================================================================================*/
+    /*
+     *      @input  : <TODO: INSERT DESCRIPTION>
+     *      @output : <TODO: INSERT DESCRIPTION>
+     *      @pre-condition  : <TODO: INSERT DESCRIPTION>
+     *      @post-condition : <TODO: INSERT DESCRIPTION>
+    */
     double ModularWalkEngine::procFunc(double value, double deadband, double maxvalue) {
         return std::abs(std::min(std::max(0.0, std::abs(value) - deadband), maxvalue));
     }
