@@ -145,8 +145,6 @@ namespace motion {
 
         // start config, see config file for documentation
 
-        bool emitLocalisation;
-
         double stanceLimitY2;
         arma::mat::fixed<3,2> stepLimits;
         arma::mat::fixed<3,2> velocityLimits;
@@ -175,7 +173,10 @@ namespace motion {
         arma::vec3 qRArmEnd;
         LimbID swingLegInitial = LimbID::LEFT_LEG;
 
-        double balanceEnabled;
+        bool balanceEnabled;
+        bool emitLocalisation;
+        bool emitFootPosition;
+
         double balanceAmplitude;
         double balanceWeight;
         double balanceOffset;
@@ -190,6 +191,7 @@ namespace motion {
         // servoControlPGains are the constant proportionality
         // constants which define the current values of jointGains based on the robot's balance state
         std::map<ServoID, float> servoControlPGains;
+
 
         utility::motion::Balancer balancer;
 
@@ -230,7 +232,9 @@ namespace motion {
         void stop();
 
         void update(const Sensors& sensors);
-        void updateStep(double phase, const Sensors& sensors);
+        void updateLowerBody(double phase, const Sensors& sensors);
+        void updateUpperBody(double phase, const Sensors& sensors);
+        void hipCompensation(arma::vec3 footPhases, LimbID swingLeg, Transform3D rightFootT, Transform3D leftFootT);
         void updateStill(const Sensors& sensors = Sensors());
         std::unique_ptr<std::vector<ServoCommand>> updateStillWayPoints(const Sensors& sensors);
 
@@ -266,7 +270,7 @@ namespace motion {
          *
          * @return The torso position in Transform2D
          */
-        Transform2D zmpCom(double phase, arma::vec4 zmpCoefficients, arma::vec4 zmpParams, double stepTime, double zmpTime, double phase1Zmp, double phase2Zmp, Transform2D uSupport, Transform2D uLeftFootDestination, Transform2D uLeftFootSource, Transform2D uRightFootDestination, Transform2D uRightFootSource);
+        Transform2D zmpTorsoCompensation(double phase, arma::vec4 zmpCoefficients, arma::vec4 zmpParams, double stepTime, double zmpTime, double phase1Zmp, double phase2Zmp, Transform2D uSupport, Transform2D uLeftFootDestination, Transform2D uLeftFootSource, Transform2D uRightFootDestination, Transform2D uRightFootSource);
 
         /**
          * This is an easing function that returns 3 values {x,y,z} with the range [0,1]
@@ -289,7 +293,7 @@ namespace motion {
         /**
          * @return A clamped between 0 and maxvalue, offset by deadband
          */
-        double procFunc(double a, double deadband, double maxvalue);
+        double linearInterpolationDeadband(double a, double deadband, double maxvalue);
     };
 
 }  // motion

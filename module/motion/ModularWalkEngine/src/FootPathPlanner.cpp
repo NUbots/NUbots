@@ -32,7 +32,7 @@
 /*===========================================================================================================*/
 namespace module 
 {
-namespace motion 
+namespace motion
 {
     /*=======================================================================================================*/
     //      UTILIZATION REFERENCE(S)
@@ -62,7 +62,7 @@ namespace motion
         return {xf, phaseSingle, zf};
     }
     /*=======================================================================================================*/
-    //      NAME: updateStep
+    //      NAME: updateFootPosition
     /*=======================================================================================================*/
     /*
      *      @input  : <TODO: INSERT DESCRIPTION>
@@ -70,81 +70,96 @@ namespace motion
      *      @pre-condition  : <TODO: INSERT DESCRIPTION>
      *      @post-condition : <TODO: INSERT DESCRIPTION>
     */
-    void ModularWalkEngine::updateStep(double phase, const Sensors& sensors) {
-        //Get unitless phases for x and z motion
-        arma::vec3 foot = footPhase(phase, phase1Single, phase2Single);
+    arma::vec2 ModularWalkEngine::updateFootPosition(double phase, const Sensors& sensors) 
+    {
+        //Instantiate unitless phases for x(=0), y(=1) and z(=2) foot motion...
+        arma::vec3 footPhases = footPhase(phase, phase1Single, phase2Single);
 
         //Lift foot by amount depending on walk speed
         auto& limit = (velocityCurrent.x() > velocityHigh ? accelerationLimitsHigh : accelerationLimits); // TODO: use a function instead
         float speed = std::min(1.0, std::max(std::abs(velocityCurrent.x() / limit[0]), std::abs(velocityCurrent.y() / limit[1])));
         float scale = (step_height_fast_fraction - step_height_slow_fraction) * speed + step_height_slow_fraction;
-        foot[2] *= scale;
+        footPhases[2] *= scale;
 
 
         // don't lift foot at initial step, TODO: review
-        if (initialStep > 0) {
-            foot[2] = 0;
+        if (initialStep > 0) 
+        {
+            footPhases[2] = 0;
         }
 
-        //Interpolate Transform2D from start to destination
-        if (swingLeg == LimbID::RIGHT_LEG) {
-            uRightFoot = uRightFootSource.interpolate(foot[0], uRightFootDestination);
-        } else {
-            uLeftFoot = uLeftFootSource.interpolate(foot[0], uLeftFootDestination);
+        //Interpolate Transform2D from start to destination - deals with flat resolved movement in (x,y) coordinates
+        if (swingLeg == LimbID::RIGHT_LEG) 
+        {
+            //Vector field function??
+            uRightFoot = uRightFootSource.interpolate(footPhases[0], uRightFootDestination);
         }
-        //I hear you like arguments...
-        uTorso = zmpCom(phase, zmpCoefficients, zmpParams, stepTime, zmpTime, phase1Single, phase2Single, uSupport, uLeftFootDestination, uLeftFootSource, uRightFootDestination, uRightFootSource);
+        else
+        {
+            //Vector field function??
+            uLeftFoot  = uLeftFootSource.interpolate(footPhases[0], uLeftFootDestination);
+        }
+        
+        //Translates foot motion into z dimension for stepping in three-dimensional space...
+        Transform3D leftFootLocal = uLeftFoot;
+        Transform3D rightFootLocal = uRightFoot;
 
-        Transform3D leftFoot = uLeftFoot;
-        Transform3D rightFoot = uRightFoot;
+        //Lift swing leg - manipulate(update) z component of foot position to action movement with a varying altitude locus...
+        if (swingLeg == LimbID::RIGHT_LEG) 
+        {
+            rightFootLocal = rightFootLocal.translateZ(stepHeight * footPhases[2]);
+        }
+        else
+        {
+            leftFootLocal  = leftFootLocal.translateZ(stepHeight * footPhases[2]);
+        }      
 
-        //Lift swing leg
-        if (swingLeg == LimbID::RIGHT_LEG) {
-            rightFoot = rightFoot.translateZ(stepHeight * foot[2]);
-        } else {
-            leftFoot = leftFoot.translateZ(stepHeight * foot[2]);
+        return {leftFootLocal, rightFootLocal};
+    }
+    /*=======================================================================================================*/
+    //      NAME: updateLowerBody
+    /*=======================================================================================================*/
+    /*
+     *      @input  : <TODO: INSERT DESCRIPTION>
+     *      @output : <TODO: INSERT DESCRIPTION>
+     *      @pre-condition  : <TODO: INSERT DESCRIPTION>
+     *      @post-condition : <TODO: INSERT DESCRIPTION>
+    */
+    std::unique_ptr<std::vector<ServoCommand>> ModularWalkEngine::updateLowerBody(double phase, const Sensors& sensors) 
+    {
+        //Interpret robot's zero point reference from torso for positional transformation into relative space...
+        uTorsoLocal = zmpTorsoCompensation(phase, zmpCoefficients, zmpParams, stepTime, zmpTime, phase1Single, phase2Single, uSupport, uLeftFootDestination, uLeftFootSource, uRightFootDestination, uRightFootSource);
+
+        //Interpret robot's world position from torso as local positional reference...
+        Transform2D uTorsoWorld = uTorsoLocal.localToWorld({-DarwinModel::Leg::HIP_OFFSET_X, 0, 0});
+
+        //Collect attributed metrics that describe the robot's spatial orientation in environmental space...
+        Transform3D torsoWorldMetrics = arma::vec6({uTorsoWorld.x(), uTorsoWorld.y(), bodyHeight, 0, bodyTilt, uTorsoWorld.angle()});
+
+        //DEBUGGING: Emit relative torsoWorldMetrics position with respect to world model... 
+        if (emitLocalisation) 
+        {
+            localise(uTorsoWorld);
         }
 
-        Transform2D uTorsoActual = uTorso.localToWorld({-DarwinModel::Leg::HIP_OFFSET_X, 0, 0});
-        Transform3D torso = arma::vec6({uTorsoActual.x(), uTorsoActual.y(), bodyHeight, 0, bodyTilt, uTorsoActual.angle()});
+        // Transform feet targets to be relative to the robot torso...
+        Transform3D leftFootTorso = leftFoot.worldToLocal(torsoWorldMetrics);
+        Transform3D rightFootTorso = rightFoot.worldToLocal(torsoWorldMetrics);
 
-        // Transform feet targets to be relative to the torso
-        Transform3D leftFootTorso = leftFoot.worldToLocal(torso);
-        Transform3D rightFootTorso = rightFoot.worldToLocal(torso);
+        //Compute compensation moment to apply hip roll and support foot balance...
+        hipCompensation(footPhases, swingLeg, rightFootTorso, leftFootTorso);
 
-        //TODO: what is this magic?
-        double phaseComp = std::min({1.0, foot[1] / 0.1, (1 - foot[1]) / 0.1});
-
-        // Rotate foot around hip by the given hip roll compensation
-        if (swingLeg == LimbID::LEFT_LEG) {
-            rightFootTorso = rightFootTorso.rotateZLocal(-hipRollCompensation * phaseComp, sensors.forwardKinematics.find(ServoID::R_HIP_ROLL)->second);
+        //DEBUGGING: Emit relative feet position with respect to robot torso model... 
+        if (emitFootPosition)
+        {
+            emit(graph("Foot phase motion", phase));
+            emit(graph("Right foot position", rightFootTorso.translation()));
+            emit(graph("Left  foot position",  leftFootTorso.translation()));
         }
-        else {
-            leftFootTorso = leftFootTorso.rotateZLocal(hipRollCompensation * phaseComp, sensors.forwardKinematics.find(ServoID::L_HIP_ROLL)->second);
-        }
-
-        //TODO:is this a Debug?
-        if (emitLocalisation) {
-            localise(uTorsoActual);
-        }
-
-        if (balanceEnabled) {
-            // Apply balance to our support foot
-            balancer.balance(swingLeg == LimbID::LEFT_LEG ? rightFootTorso : leftFootTorso
-                , swingLeg == LimbID::LEFT_LEG ? LimbID::RIGHT_LEG : LimbID::LEFT_LEG
-                , sensors);
-        }
-
-        // emit(graph("Right foot pos", rightFootTorso.translation()));
-        // emit(graph("Left foot pos", leftFootTorso.translation()));
 
         auto joints = calculateLegJointsTeamDarwin<DarwinModel>(leftFootTorso, rightFootTorso);
-        auto waypoints = motionLegs(joints);
 
-        auto arms = motionArms(phase);
-        waypoints->insert(waypoints->end(), arms->begin(), arms->end());
-
-        emit(std::move(waypoints));
+        return (motionLegs(joints)); 
     }
 }  // motion
 }  // modules
