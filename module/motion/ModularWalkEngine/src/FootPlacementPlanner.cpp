@@ -41,6 +41,20 @@ namespace motion
     using utility::motion::kinematics::DarwinModel;
     using utility::math::matrix::Transform2D;
     using utility::nubugger::graph;
+
+    FootPlacementPlanner::FootPlacementPlanner()
+    {
+        on<Trigger<WalkCommand>>().then([this] (const WalkCommand& walkCommand) {
+            auto velocity = walkCommand.command;
+
+            velocity.x()     *= velocity.x()     > 0 ? velocityLimits(0,1) : -velocityLimits(0,0);
+            velocity.y()     *= velocity.y()     > 0 ? velocityLimits(1,1) : -velocityLimits(1,0);
+            velocity.angle() *= velocity.angle() > 0 ? velocityLimits(2,1) : -velocityLimits(2,0);
+
+            setVelocity(velocity);
+        });
+    }
+
     /*=======================================================================================================*/
     //      NAME: calculateNewStep
     /*=======================================================================================================*/
@@ -49,7 +63,7 @@ namespace motion
      *      @output : <TODO: INSERT DESCRIPTION>
      *      @pre-condition  : <TODO: INSERT DESCRIPTION>
      *      @post-condition : <TODO: INSERT DESCRIPTION>
-    */
+     */
     void ModularWalkEngine::calculateNewStep() 
     {
         updateVelocity();
@@ -198,6 +212,57 @@ namespace motion
         footTarget = supportFoot.localToWorld(feetDifference);
 
         return footTarget;
+    }
+
+    void ModularWalkEngine::updateVelocity() {
+        // slow accelerations at high speed
+        auto now = NUClear::clock::now();
+        double deltaT = std::chrono::duration_cast<std::chrono::microseconds>(now - lastVeloctiyUpdateTime).count() * 1e-6;
+        lastVeloctiyUpdateTime = now;
+
+        auto& limit = (velocityCurrent.x() > velocityHigh ? accelerationLimitsHigh : accelerationLimits) * deltaT; // TODO: use a function instead
+
+
+
+        velocityDifference.x()     = std::min(std::max(velocityCommand.x()     - velocityCurrent.x(),     -limit[0]), limit[0]);
+        velocityDifference.y()     = std::min(std::max(velocityCommand.y()     - velocityCurrent.y(),     -limit[1]), limit[1]);
+        velocityDifference.angle() = std::min(std::max(velocityCommand.angle() - velocityCurrent.angle(), -limit[2]), limit[2]);
+
+        velocityCurrent.x()     += velocityDifference.x();
+        velocityCurrent.y()     += velocityDifference.y();
+        velocityCurrent.angle() += velocityDifference.angle();
+
+        if (initialStep > 0) {
+            velocityCurrent = arma::zeros(3);
+            initialStep--;
+        }
+    }
+
+    Transform2D ModularWalkEngine::stepTorso(Transform2D uLeftFoot, Transform2D uRightFoot, double shiftFactor) {
+        Transform2D uLeftFootSupport = uLeftFoot.localToWorld({-footOffset[0], -footOffset[1], 0});
+        Transform2D uRightFootSupport = uRightFoot.localToWorld({-footOffset[0], footOffset[1], 0});
+        return uLeftFootSupport.interpolate(shiftFactor, uRightFootSupport);
+    }
+
+    arma::vec2 ModularWalkEngine::zmpSolve(double zs, double z1, double z2, double x1, double x2, double phase1Single, double phase2Single, double stepTime, double zmpTime) {
+        /*
+        Solves ZMP equations.
+        The resulting form of x is
+        x(t) = z(t) + aP*exp(t/zmpTime) + aN*exp(-t/zmpTime) - zmpTime*mi*sinh((t-Ti)/zmpTime)
+        where the ZMP point is piecewise linear:
+        z(0) = z1, z(T1 < t < T2) = zs, z(stepTime) = z2
+        */
+        double T1 = stepTime * phase1Single;
+        double T2 = stepTime * phase2Single;
+        double m1 = (zs - z1) / T1;
+        double m2 = -(zs - z2) / (stepTime - T2);
+
+        double c1 = x1 - z1 + zmpTime * m1 * std::sinh(-T1 / zmpTime);
+        double c2 = x2 - z2 + zmpTime * m2 * std::sinh((stepTime - T2) / zmpTime);
+        double expTStep = std::exp(stepTime / zmpTime);
+        double aP = (c2 - c1 / expTStep) / (expTStep - 1 / expTStep);
+        double aN = (c1 * expTStep - c2) / (expTStep - 1 / expTStep);
+        return {aP, aN};
     }
 
 }  // motion
