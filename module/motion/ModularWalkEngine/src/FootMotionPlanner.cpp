@@ -116,50 +116,5 @@ namespace motion
 
         return {leftFootLocal, rightFootLocal};
     }
-    /*=======================================================================================================*/
-    //      NAME: updateLowerBody
-    /*=======================================================================================================*/
-    /*
-     *      @input  : <TODO: INSERT DESCRIPTION>
-     *      @output : <TODO: INSERT DESCRIPTION>
-     *      @pre-condition  : <TODO: INSERT DESCRIPTION>
-     *      @post-condition : <TODO: INSERT DESCRIPTION>
-    */
-    std::unique_ptr<std::vector<ServoCommand>> ModularWalkEngine::updateLowerBody(double phase, const Sensors& sensors) 
-    {
-        //Interpret robot's zero point reference from torso for positional transformation into relative space...
-        uTorsoLocal = zmpTorsoCompensation(phase, zmpCoefficients, zmpParams, stepTime, zmpTime, phase1Single, phase2Single, uSupport, uLeftFootDestination, uLeftFootSource, uRightFootDestination, uRightFootSource);
-
-        //Interpret robot's world position from torso as local positional reference...
-        Transform2D uTorsoWorld = uTorsoLocal.localToWorld({-DarwinModel::Leg::HIP_OFFSET_X, 0, 0});
-
-        //Collect attributed metrics that describe the robot's spatial orientation in environmental space...
-        Transform3D torsoWorldMetrics = arma::vec6({uTorsoWorld.x(), uTorsoWorld.y(), bodyHeight, 0, bodyTilt, uTorsoWorld.angle()});
-
-        //DEBUGGING: Emit relative torsoWorldMetrics position with respect to world model... 
-        if (emitLocalisation) 
-        {
-            localise(uTorsoWorld);
-        }
-
-        // Transform feet targets to be relative to the robot torso...
-        Transform3D leftFootTorso = leftFoot.worldToLocal(torsoWorldMetrics);
-        Transform3D rightFootTorso = rightFoot.worldToLocal(torsoWorldMetrics);
-
-        //Compute compensation moment to apply hip roll and support foot balance...
-        hipCompensation(footPhases, swingLeg, rightFootTorso, leftFootTorso);
-
-        //DEBUGGING: Emit relative feet position with respect to robot torso model... 
-        if (emitFootPosition)
-        {
-            emit(graph("Foot phase motion", phase));
-            emit(graph("Right foot position", rightFootTorso.translation()));
-            emit(graph("Left  foot position",  leftFootTorso.translation()));
-        }
-
-        auto joints = calculateLegJointsTeamDarwin<DarwinModel>(leftFootTorso, rightFootTorso);
-
-        return (motionLegs(joints)); 
-    }
 }  // motion
 }  // modules
