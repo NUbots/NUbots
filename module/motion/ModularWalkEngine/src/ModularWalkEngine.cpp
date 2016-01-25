@@ -710,37 +710,6 @@ namespace motion
     {
         emit(std::move(updateStillWayPoints(sensors)));
     }
-
-    /*=======================================================================================================*/
-    //      NAME: zmpSolve
-    /*=======================================================================================================*/
-    /*
-     *      @input  : <TODO: INSERT DESCRIPTION>
-     *      @output : <TODO: INSERT DESCRIPTION>
-     *      @pre-condition  : <TODO: INSERT DESCRIPTION>
-     *      @post-condition : <TODO: INSERT DESCRIPTION>
-    */
-    arma::vec2 ModularWalkEngine::zmpSolve(double zs, double z1, double z2, double x1, double x2, double phase1Single, double phase2Single, double stepTime, double zmpTime) 
-    {
-        /*
-        Solves ZMP equations.
-        The resulting form of x is
-        x(t) = z(t) + aP*exp(t/zmpTime) + aN*exp(-t/zmpTime) - zmpTime*mi*sinh((t-Ti)/zmpTime)
-        where the ZMP point is piecewise linear:
-        z(0) = z1, z(T1 < t < T2) = zs, z(stepTime) = z2
-        */
-        double T1 = stepTime * phase1Single;
-        double T2 = stepTime * phase2Single;
-        double m1 = (zs - z1) / T1;
-        double m2 = -(zs - z2) / (stepTime - T2);
-
-        double c1 = x1 - z1 + zmpTime * m1 * std::sinh(-T1 / zmpTime);
-        double c2 = x2 - z2 + zmpTime * m2 * std::sinh((stepTime - T2) / zmpTime);
-        double expTStep = std::exp(stepTime / zmpTime);
-        double aP = (c2 - c1 / expTStep) / (expTStep - 1 / expTStep);
-        double aN = (c1 * expTStep - c2) / (expTStep - 1 / expTStep);
-        return {aP, aN};
-    }
     /*=======================================================================================================*/
     //      NAME: getTime
     /*=======================================================================================================*/
