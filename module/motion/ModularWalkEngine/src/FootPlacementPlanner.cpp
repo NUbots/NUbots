@@ -223,9 +223,5 @@ namespace motion
     Transform2D WalkEngine::getVelocity() {
         return velocityCurrent;
     }
-
-
-    
-
 }  // motion
 }  // modules

@@ -85,36 +85,6 @@ namespace motion
         return uLeftFootSupport.interpolate(shiftFactor, uRightFootSupport);
     }
     /*=======================================================================================================*/
-    //      NAME: zmpTorsoCompensation
-    /*=======================================================================================================*/
-    /*
-     *      @input  : <TODO: INSERT DESCRIPTION>
-     *      @output : <TODO: INSERT DESCRIPTION>
-     *      @pre-condition  : <TODO: INSERT DESCRIPTION>
-     *      @post-condition : <TODO: INSERT DESCRIPTION>
-    */
-    Transform2D ModularWalkEngine::zmpTorsoCompensation(double phase, arma::vec4 zmpCoefficients, arma::vec4 zmpParams, double stepTime, double zmpTime, double phase1Single, double phase2Single, Transform2D uSupport, Transform2D uLeftFootDestination, Transform2D uLeftFootSource, Transform2D uRightFootDestination, Transform2D uRightFootSource) 
-    {
-        Transform2D com = {0, 0, 0};
-        double expT = std::exp(stepTime * phase / zmpTime);
-        com.x() = uSupport.x() + zmpCoefficients[0] * expT + zmpCoefficients[1] / expT;
-        com.y() = uSupport.y() + zmpCoefficients[2] * expT + zmpCoefficients[3] / expT;
-        if (phase < phase1Single) 
-        {
-            com.x() += zmpParams[0] * stepTime * (phase - phase1Single) -zmpTime * zmpParams[0] * std::sinh(stepTime * (phase - phase1Single) / zmpTime);
-            com.y() += zmpParams[1] * stepTime * (phase - phase1Single) -zmpTime * zmpParams[1] * std::sinh(stepTime * (phase - phase1Single) / zmpTime);
-        } 
-        else if (phase > phase2Single) 
-        {
-            com.x() += zmpParams[2] * stepTime * (phase - phase2Single) -zmpTime * zmpParams[2] * std::sinh(stepTime * (phase - phase2Single) / zmpTime);
-            com.y() += zmpParams[3] * stepTime * (phase - phase2Single) -zmpTime * zmpParams[3] * std::sinh(stepTime * (phase - phase2Single) / zmpTime);
-        }
-        // com[2] = .5 * (uLeftFoot[2] + uRightFoot[2]);
-        // Linear speed turning
-        com.angle() = phase * (uLeftFootDestination.angle() + uRightFootDestination.angle()) / 2 + (1 - phase) * (uLeftFootSource.angle() + uRightFootSource.angle()) / 2;
-        return com;
-    }
-    /*=======================================================================================================*/
     //      NAME: motionArms
     /*=======================================================================================================*/
     /*
