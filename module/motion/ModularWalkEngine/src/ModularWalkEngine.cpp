@@ -639,6 +639,7 @@ namespace motion
             calculateNewStep();
         }
 
+        auto joints = calculateLegJointsTeamDarwin<DarwinModel>(leftFootTorso, rightFootTorso);
         auto robotWaypoints = updateLowerBody(phase, sensors);
         auto upperWaypoints = updateUpperBody(phase, sensors);
 

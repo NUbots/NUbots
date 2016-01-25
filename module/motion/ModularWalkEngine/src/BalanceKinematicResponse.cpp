@@ -42,7 +42,7 @@ namespace motion
     using utility::math::matrix::Transform2D;
     using utility::nubugger::graph;
     /*=======================================================================================================*/
-    //      NAME: updateLowerBody
+    //      NAME: hipRollCompensation
     /*=======================================================================================================*/
     /*
      *      @input  : <TODO: INSERT DESCRIPTION>
@@ -50,23 +50,27 @@ namespace motion
      *      @pre-condition  : <TODO: INSERT DESCRIPTION>
      *      @post-condition : <TODO: INSERT DESCRIPTION>
     */
-    std::pair<Transform3D, Transform3D> ModularWalkEngine::updateLowerBody(double phase, auto torsoWorld, auto feetLocal) 
+	void ModularWalkEngine::hipRollCompensation(arma::vec3 footPhases, LimbID swingLeg, Transform3D rightFootT, Transform3D leftFootT) 
     {
-        // Transform feet targets to be relative to the robot torso...
-        Transform3D leftFootTorso  =  leftFootLocal.worldToLocal(torsoWorld);
-        Transform3D rightFootTorso = rightFootLocal.worldToLocal(torsoWorld);
-
-        //DEBUGGING: Emit relative feet position with respect to robot torso model... 
-        if (emitFootPosition)
+        //If feature enabled, apply balance compensation through support actuator...
+        if (balanceEnabled) 
         {
-            emit(graph("Right foot position", rightFootTorso.translation()));
-            emit(graph("Left  foot position",  leftFootTorso.translation()));
-        }
+            //Evaluate scaled minimum distance of y(=1) phase position to the range [0,1] for hip roll parameter compensation... 
+            double yBoundedMinimumPhase = std::min({1.0, footPhases[1] / 0.1, (1 - footPhases[1]) / 0.1});
 
-        return {leftFootTorso, rightFootTorso};
+            //Rotate foot around hip by the given hip roll compensation...
+            if (swingLeg == LimbID::LEFT_LEG) 
+            {
+                rightFootT = rightFootT.rotateZLocal(-hipRollCompensation * yBoundedMinimumPhase, sensors.forwardKinematics.find(ServoID::R_HIP_ROLL)->second);
+            }
+            else 
+            {
+                leftFootT  = leftFootT.rotateZLocal( hipRollCompensation  * yBoundedMinimumPhase, sensors.forwardKinematics.find(ServoID::L_HIP_ROLL)->second);
+            }
+        }
     }
     /*=======================================================================================================*/
-    //      NAME: motionLegs
+    //      NAME: supportFootCompensation
     /*=======================================================================================================*/
     /*
      *      @input  : <TODO: INSERT DESCRIPTION>
@@ -74,19 +78,16 @@ namespace motion
      *      @pre-condition  : <TODO: INSERT DESCRIPTION>
      *      @post-condition : <TODO: INSERT DESCRIPTION>
     */
-    std::unique_ptr<std::vector<ServoCommand>> ModularWalkEngine::motionLegs(std::vector<std::pair<ServoID, float>> joints) 
+     void ModularWalkEngine::supportFootCompensation(LimbID swingLeg, Transform3D rightFootT, Transform3D leftFootT) 
     {
-        auto waypoints = std::make_unique<std::vector<ServoCommand>>();
-        waypoints->reserve(16);
-
-        NUClear::clock::time_point time = NUClear::clock::now() + std::chrono::nanoseconds(std::nano::den / UPDATE_FREQUENCY);
-
-        for (auto& joint : joints) 
+        //If feature enabled, apply balance compensation through support actuator...
+        if (balanceEnabled) 
         {
-            waypoints->push_back({ subsumptionId, time, joint.first, joint.second, jointGains[joint.first], 100 }); // TODO: support separate gains for each leg
+        	//Apply balance transformation to stipulated support actuator...
+            balancer.balance(swingLeg == LimbID::LEFT_LEG ? rightFootT : leftFootT
+                           , swingLeg == LimbID::LEFT_LEG ? LimbID::RIGHT_LEG : LimbID::LEFT_LEG
+                           , sensors);
         }
-
-        return std::move(waypoints);
-    }
+    }        
 }  // motion
-}  // modules
+}  // modules    
