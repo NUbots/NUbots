@@ -46,13 +46,25 @@ namespace motion
     {
         on<Trigger<WalkCommand>>().then([this] (const WalkCommand& walkCommand) {
             auto velocity = walkCommand.command;
-
             velocity.x()     *= velocity.x()     > 0 ? velocityLimits(0,1) : -velocityLimits(0,0);
             velocity.y()     *= velocity.y()     > 0 ? velocityLimits(1,1) : -velocityLimits(1,0);
             velocity.angle() *= velocity.angle() > 0 ? velocityLimits(2,1) : -velocityLimits(2,0);
 
             setVelocity(velocity);
         });
+
+        on<Trigger<WalkStartCommand>>().then([this] {
+            lastVeloctiyUpdateTime = NUClear::clock::now();
+            start();
+            // emit(std::make_unique<ActionPriorites>(ActionPriorites { subsumptionId, { 25, 10 }})); // TODO: config
+        });
+
+        on<Trigger<WalkStopCommand>>().then([this] {
+            // TODO: This sets STOP_REQUEST, which appears not to be used anywhere.
+            // If this is the case, we should delete or rethink the WalkStopCommand.
+            requestStop();
+        });
+
     }
 
     /*=======================================================================================================*/
@@ -64,6 +76,17 @@ namespace motion
      *      @pre-condition  : <TODO: INSERT DESCRIPTION>
      *      @post-condition : <TODO: INSERT DESCRIPTION>
      */
+
+     void ModularWalkEngine::start() {
+        if (state != State::WALKING) {
+            swingLeg = swingLegInitial;
+            beginStepTime = getTime();
+            initialStep = 2;
+            state = State::WALKING;
+            calculateNewStep();
+        }
+    }
+
     void ModularWalkEngine::calculateNewStep() 
     {
         updateVelocity();
@@ -105,71 +128,9 @@ namespace motion
             {
                 uLeftFootDestination = getNewFootTarget(velocityCurrent, uLeftFootSource, uRightFootSource, swingLeg);
             }
-
-            // velocity-based support point modulation
-            /*toeTipCompensation = 0;
-            if (velocityDifference[0] > 0) 
-            {
-                // accelerating to front
-                supportMod[0] = supportFront2;
-            }
-            else if (velocityCurrent[0] > velFastForward) 
-            {
-                supportMod[0] = supportFront;
-                toeTipCompensation = ankleMod[0];
-            }
-            else if (velocityCurrent[0] < 0) 
-            {
-                supportMod[0] = supportBack;
-            }
-            else if (std::abs(velocityCurrent[2]) > velFastTurn) 
-            {
-                supportMod[0] = supportTurn;
-            }
-            else 
-            {
-                if (velocityCurrent[1] > 0.015) 
-                {
-                    supportMod[0] = supportSideX;
-                    supportMod[1] = supportSideY;
-                }
-                else if (velocityCurrent[1] < -0.015) 
-                {
-                    supportMod[0] = supportSideX;
-                    supportMod[1] = -supportSideY;
-                }
-            }*/
         }
 
-        uTorsoDestination = stepTorso(uLeftFootDestination, uRightFootDestination, 0.5);
-
-        // apply velocity-based support point modulation for uSupport
-        if (swingLeg == LimbID::RIGHT_LEG) 
-        {
-            Transform2D uLeftFootTorso = uTorsoSource.worldToLocal(uLeftFootSource);
-            Transform2D uTorsoModded = uTorso.localToWorld({supportMod[0], supportMod[1], 0});
-            Transform2D uLeftFootModded = uTorsoModded.localToWorld(uLeftFootTorso);
-            uSupport = uLeftFootModded.localToWorld({-footOffset[0], -footOffset[1], 0});
-        }
-        else 
-        {
-            Transform2D uRightFootTorso = uTorsoSource.worldToLocal(uRightFootSource);
-            Transform2D uTorsoModded = uTorso.localToWorld({supportMod[0], supportMod[1], 0});
-            Transform2D uRightFootModded = uTorsoModded.localToWorld(uRightFootTorso);
-            uSupport = uRightFootModded.localToWorld({-footOffset[0], footOffset[1], 0});
-        }
-
-        // compute ZMP coefficients
-        zmpParams = 
-        {
-            (uSupport.x() - uTorso.x()) / (stepTime * phase1Single),
-            (uTorsoDestination.x() - uSupport.x()) / (stepTime * (1 - phase2Single)),
-            (uSupport.y() - uTorso.y()) / (stepTime * phase1Single),
-            (uTorsoDestination.y() - uSupport.y()) / (stepTime * (1 - phase2Single)),
-        };
-
-        zmpCoefficients.rows(0,1) = zmpSolve(uSupport.x(), uTorsoSource.x(), uTorsoDestination.x(), uTorsoSource.x(), uTorsoDestination.x(), phase1Single, phase2Single, stepTime, zmpTime);
-        zmpCoefficients.rows(2,3) = zmpSolve(uSupport.y(), uTorsoSource.y(), uTorsoDestination.y(), uTorsoSource.y(), uTorsoDestination.y(), phase1Single, phase2Single, stepTime, zmpTime);
+        //emit destinations for fmp and/or zmp
     }
     /*=======================================================================================================*/
     //      NAME: getNewFootTarget
@@ -214,7 +175,7 @@ namespace motion
         return footTarget;
     }
 
-    void ModularWalkEngine::updateVelocity() {
+    void ModularWalkEngine::updateVelocity() { 
         // slow accelerations at high speed
         auto now = NUClear::clock::now();
         double deltaT = std::chrono::duration_cast<std::chrono::microseconds>(now - lastVeloctiyUpdateTime).count() * 1e-6;
@@ -238,32 +199,33 @@ namespace motion
         }
     }
 
-    Transform2D ModularWalkEngine::stepTorso(Transform2D uLeftFoot, Transform2D uRightFoot, double shiftFactor) {
-        Transform2D uLeftFootSupport = uLeftFoot.localToWorld({-footOffset[0], -footOffset[1], 0});
-        Transform2D uRightFootSupport = uRightFoot.localToWorld({-footOffset[0], footOffset[1], 0});
-        return uLeftFootSupport.interpolate(shiftFactor, uRightFootSupport);
+    void WalkEngine::setVelocity(Transform2D velocity) {
+        // filter the commanded speed
+        velocity.x()     = std::min(std::max(velocity.x(),     velocityLimits(0,0)), velocityLimits(0,1));
+        velocity.y()     = std::min(std::max(velocity.y(),     velocityLimits(1,0)), velocityLimits(1,1));
+        velocity.angle() = std::min(std::max(velocity.angle(), velocityLimits(2,0)), velocityLimits(2,1));
+
+        // slow down when turning
+        double vFactor = 1 - std::abs(velocity.angle()) / accelerationTurningFactor;
+
+        double stepMag = std::sqrt(velocity.x() * velocity.x() + velocity.y() * velocity.y());
+        double magFactor = std::min(velocityLimits(0,1) * vFactor, stepMag) / (stepMag + 0.000001);
+
+        velocityCommand.x()     = velocity.x() * magFactor;
+        velocityCommand.y()     = velocity.y() * magFactor;
+        velocityCommand.angle() = velocity.angle();
+
+        velocityCommand.x()     = std::min(std::max(velocityCommand.x(),     velocityLimits(0,0)), velocityLimits(0,1));
+        velocityCommand.y()     = std::min(std::max(velocityCommand.y(),     velocityLimits(1,0)), velocityLimits(1,1));
+        velocityCommand.angle() = std::min(std::max(velocityCommand.angle(), velocityLimits(2,0)), velocityLimits(2,1));
     }
 
-    arma::vec2 ModularWalkEngine::zmpSolve(double zs, double z1, double z2, double x1, double x2, double phase1Single, double phase2Single, double stepTime, double zmpTime) {
-        /*
-        Solves ZMP equations.
-        The resulting form of x is
-        x(t) = z(t) + aP*exp(t/zmpTime) + aN*exp(-t/zmpTime) - zmpTime*mi*sinh((t-Ti)/zmpTime)
-        where the ZMP point is piecewise linear:
-        z(0) = z1, z(T1 < t < T2) = zs, z(stepTime) = z2
-        */
-        double T1 = stepTime * phase1Single;
-        double T2 = stepTime * phase2Single;
-        double m1 = (zs - z1) / T1;
-        double m2 = -(zs - z2) / (stepTime - T2);
-
-        double c1 = x1 - z1 + zmpTime * m1 * std::sinh(-T1 / zmpTime);
-        double c2 = x2 - z2 + zmpTime * m2 * std::sinh((stepTime - T2) / zmpTime);
-        double expTStep = std::exp(stepTime / zmpTime);
-        double aP = (c2 - c1 / expTStep) / (expTStep - 1 / expTStep);
-        double aN = (c1 * expTStep - c2) / (expTStep - 1 / expTStep);
-        return {aP, aN};
+    Transform2D WalkEngine::getVelocity() {
+        return velocityCurrent;
     }
+
+
+    
 
 }  // motion
 }  // modules
