@@ -70,7 +70,7 @@ namespace motion
      *      @pre-condition  : <TODO: INSERT DESCRIPTION>
      *      @post-condition : <TODO: INSERT DESCRIPTION>
     */
-    arma::vec2 ModularWalkEngine::updateFootPosition(double phase, const Sensors& sensors) 
+    std::pair<Transform3D, Transform3D> ModularWalkEngine::updateFootPosition(double phase, auto leftFootDestination, auto rightFootDestination) 
     {
         //Instantiate unitless phases for x(=0), y(=1) and z(=2) foot motion...
         arma::vec3 footPhases = footPhase(phase, phase1Single, phase2Single);
@@ -101,7 +101,7 @@ namespace motion
         }
         
         //Translates foot motion into z dimension for stepping in three-dimensional space...
-        Transform3D leftFootLocal = uLeftFoot;
+        Transform3D leftFootLocal  = uLeftFoot;
         Transform3D rightFootLocal = uRightFoot;
 
         //Lift swing leg - manipulate(update) z component of foot position to action movement with a varying altitude locus...
@@ -113,6 +113,12 @@ namespace motion
         {
             leftFootLocal  = leftFootLocal.translateZ(stepHeight * footPhases[2]);
         }      
+
+        //DEBUGGING: Emit relative feet position phase with respect to robot state... 
+        if (emitFootPosition)
+        {
+            emit(graph("Foot phase motion", phase));
+        }
 
         return {leftFootLocal, rightFootLocal};
     }

@@ -232,8 +232,8 @@ namespace motion {
         void stop();
 
         void update(const Sensors& sensors);
-        arma::vec2 updateFootPosition(double phase, const Sensors& sensors) 
-        void updateLowerBody(double phase, const Sensors& sensors);
+        std::pair<Transform3D, Transform3D> updateFootPosition(double phase);
+        void updateLowerBody(double phase, double leftFoot, double rightFoot);
         void updateUpperBody(double phase, const Sensors& sensors);
         void hipCompensation(arma::vec3 footPhases, LimbID swingLeg, Transform3D rightFootT, Transform3D leftFootT);
         void updateStill(const Sensors& sensors = Sensors());
