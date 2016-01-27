@@ -1,10 +1,15 @@
 # Get the relative path to our extension directory
-FILE(RELATIVE_PATH extension_include_path ${CMAKE_SOURCE_DIR} "${NUCLEAR_EXTENSION_DIR}/../")
+GET_FILENAME_COMPONENT(extension_include_path "${NUCLEAR_EXTENSION_DIR}/.." ABSOLUTE)
+FILE(RELATIVE_PATH extension_include_path ${CMAKE_SOURCE_DIR} ${extension_include_path})
 
-# Make our message include directories variable
+# Get our two include directories for extension
+SET(extension_source_include_dir "${CMAKE_SOURCE_DIR}/${extension_include_path}")
+SET(extension_binary_include_dir "${CMAKE_BINARY_DIR}/${extension_include_path}")
+
+# Make our extension include directories variable
 SET(NUCLEAR_EXTENSION_INCLUDE_DIRS
-    "${CMAKE_SOURCE_DIR}/${extension_include_path}"
-    "${CMAKE_BINARY_DIR}/${extension_include_path}"
+    ${extension_source_include_dir}
+    ${extension_binary_include_dir}
     CACHE INTERNAL "Include directories for the extension folder and generated sources")
 INCLUDE_DIRECTORIES(${NUCLEAR_EXTENSION_INCLUDE_DIRS})
 
