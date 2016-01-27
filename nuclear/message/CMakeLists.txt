@@ -83,6 +83,9 @@ SOURCE_GROUP("Protocol Buffer Generated Files" FILES ${proto_src} ${proto_h})
 # Build a library from these files
 ADD_LIBRARY(nuclear_message message.cpp ${protobufs} ${src})
 
+# Link our additional shared libraries
+TARGET_LINK_LIBRARIES(nuclear_message ${NUCLEAR_ADDITIONAL_SHARED_LIBRARIES})
+
 # Link to protobuf if we used it
 IF(protobufs)
     TARGET_LINK_LIBRARIES(nuclear_message ${PROTOBUF_LIBRARIES})
