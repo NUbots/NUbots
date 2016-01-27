@@ -26,5 +26,8 @@ FILE(GLOB_RECURSE src
 # Build a library from these files
 ADD_LIBRARY(nuclear_utility utility.cpp ${src})
 
+# Link our additional shared libraries
+TARGET_LINK_LIBRARIES(nuclear_utility ${NUCLEAR_ADDITIONAL_SHARED_LIBRARIES})
+
 # Put it in an IDE group for shared
 SET_PROPERTY(TARGET nuclear_utility PROPERTY FOLDER "shared/")
