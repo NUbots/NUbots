@@ -36,7 +36,7 @@ namespace behaviour {
     : Reactor(std::move(environment)) {
 
         on<Configuration>("NUPresenceServer.yaml").then([this] (const Configuration& config) {
-            // Use configuration here from file NUPresenceServer.yaml
+            reliable = config["reliable"];
         });
 
         on<Trigger<Image>>().then([this](const Image& image){
@@ -57,7 +57,7 @@ namespace behaviour {
             imageFragment->set_start(0);
             imageFragment->set_end(image.source().size());
 
-            emit<Scope::NETWORK>(imageFragment, "nupresenceclient", false);
+            emit<Scope::NETWORK>(imageFragment, "nupresenceclient", reliable);
 
         });
 

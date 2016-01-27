@@ -26,6 +26,8 @@ namespace module {
 namespace behaviour {
 
     class NUPresenceServer : public NUClear::Reactor {
+    private:
+        bool reliable;
 
     public:
         /// @brief Called by the powerplant to build and setup the NUPresenceServer reactor.
