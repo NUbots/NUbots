@@ -55,6 +55,11 @@ FUNCTION(NUCLEAR_MODULE)
     # Include any directories passed into the function
     INCLUDE_DIRECTORIES(SYSTEM ${MODULE_INCLUDES})
 
+    # Include any directories used in utility or messages
+    INCLUDE_DIRECTORIES($<TARGET_PROPERTY:nuclear_message,INCLUDE_DIRECTORIES>)
+    INCLUDE_DIRECTORIES($<TARGET_PROPERTY:nuclear_utility,INCLUDE_DIRECTORIES>)
+    INCLUDE_DIRECTORIES($<TARGET_PROPERTY:nuclear_extension,INCLUDE_DIRECTORIES>)
+
     # Add all our code to a library and if we are doing a shared build make it a shared library
     IF(NUCLEAR_SHARED_BUILD)
         ADD_LIBRARY(${module_name} SHARED ${src} ${MODULE_SOURCES} ${data})

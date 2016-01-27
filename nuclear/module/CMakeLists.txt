@@ -3,6 +3,7 @@ INCLUDE(NUClearModule)
 
 # Remove any duplicate modules (used in more then one role)
 SET(modules ${NUCLEAR_MODULES})
+message(${NUCLEAR_MODULES})
 LIST(REMOVE_DUPLICATES modules)
 SET(NUCLEAR_MODULES ${modules} CACHE INTERNAL "A list of the modules in use by the system" FORCE)
 
