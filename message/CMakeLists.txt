@@ -78,5 +78,10 @@ SOURCE_GROUP("Protocol Buffer Generated Files" FILES ${proto_src} ${proto_h})
 # Build a library from these files
 ADD_LIBRARY(nuclear_message message.cpp ${protobufs} ${src})
 
+# Link to protobuf if we used it
+IF(protobufs)
+    TARGET_LINK_LIBRARIES(nuclear_message ${PROTOBUF_LIBRARIES})
+ENDIF(protobufs)
+
 # Put it in an IDE group for shared
 SET_PROPERTY(TARGET nuclear_message PROPERTY FOLDER "shared/")
