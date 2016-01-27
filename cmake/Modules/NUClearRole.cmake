@@ -29,7 +29,7 @@ FUNCTION(NUCLEAR_ROLE)
     STRING(REPLACE "::" "" role_module_targets "${role_modules}")
 
     # Build our executable from the generated role
-    ADD_EXECUTABLE("${role}" "${role}.cpp")
+    ADD_EXECUTABLE(${role} "${role}.cpp")
 
     # Link to the roles module libraries and the shared utility and extension libraries
     TARGET_LINK_LIBRARIES(${role} ${role_module_targets} ${NUClear_LIBRARIES} ${NUCLEAR_ADDITIONAL_SHARED_LIBRARIES})
