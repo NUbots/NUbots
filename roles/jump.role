@@ -9,5 +9,6 @@ NUCLEAR_ROLE(
     platform::darwin::SensorFilter
     motion::ScriptEngine
     behaviour::tools::Jump
+    support::configuration::NetworkConfiguration
     support::NUbugger
 )

@@ -16,7 +16,7 @@ FOREACH(robot 0 1 2 3 4 5 6 7)
             # Make our installer
             ADD_CUSTOM_TARGET("d${robot}${ethernet}${config}"
                 COMMAND ${PYTHON_EXECUTABLE}
-                ARGS "${CMAKE_SOURCE_DIR}/cmake/scripts/send.py" "--robot_ip=${address}" "--config=${config}" "--username=darwin"
+                "${CMAKE_SOURCE_DIR}/cmake/scripts/send.py" "--robot_ip=${address}" "--config=${config}" "--username=darwin"
                 DEPENDS ${NUCLEAR_ROLES} "${CMAKE_SOURCE_DIR}/cmake/scripts/send.py")
 
             # Move our installer to an IDE group

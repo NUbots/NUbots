@@ -6,6 +6,7 @@ NUCLEAR_ROLE(
     support::logging::ConsoleLogHandler
     support::extension::FileWatcher
     support::configuration::GlobalConfig
+    support::configuration::NetworkConfiguration
     support::NUbugger
 
     #Sensors
