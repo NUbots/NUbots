@@ -1,10 +1,11 @@
-ADD_ROLE(
+NUCLEAR_ROLE(
     #Support
     #support::SignalCatcher
     support::logging::ConsoleLogHandler
     support::extension::FileWatcher
     support::configuration::GlobalConfig
     support::configuration::SoccerConfig
+    support::configuration::NetworkConfiguration
     support::NUbugger
 
 
@@ -15,11 +16,6 @@ ADD_ROLE(
 
     #Sensors
     platform::darwin::SensorFilter
-
-    #Vision
-    vision::LUTClassifier
-    vision::GoalDetector
-    vision::BallDetector
 
     #Behaviour
     behaviour::Controller

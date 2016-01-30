@@ -1,4 +1,4 @@
-ADD_ROLE(
+NUCLEAR_ROLE(
 	# This must come first as it populates global variables that other modules depend on.
     platform::darwin::KinematicsModel
     support::extension::FileWatcher
@@ -7,6 +7,7 @@ ADD_ROLE(
     platform::darwin::SensorFilter
     behaviour::tools::ScriptTuner
     behaviour::Controller
+    support::configuration::NetworkConfiguration
     support::NUbugger
     motion::ScriptEngine
 )

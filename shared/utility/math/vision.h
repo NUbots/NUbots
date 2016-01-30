@@ -22,8 +22,8 @@
 #include <cmath>
 #include <armadillo>
 #include <nuclear>
-#include "messages/localisation/FieldObject.h"
-#include "messages/input/Sensors.h"
+#include "message/localisation/FieldObject.h"
+#include "message/input/Sensors.h"
 #include "utility/math/matrix/Transform3D.h"
 #include "utility/math/geometry/Plane.h"
 #include "utility/math/geometry/ParametricLine.h"
@@ -38,7 +38,7 @@ namespace vision {
      **************************************************************/
     /*! @brief Calculates the transformation for taking homogeneous points from world coordinates to camera coordinates
     */
-    inline arma::mat calculateWorldToCameraTransform(const messages::input::Sensors& sensors, const messages::localisation::Self& self){
+    inline arma::mat calculateWorldToCameraTransform(const message::input::Sensors& sensors, const message::localisation::Self& self){
         arma::vec selfHeading = arma::normalise(self.heading);
         arma::mat robotToWorld_world;
         robotToWorld_world <<  selfHeading[0]  <<  -selfHeading[1]  <<  0 <<      self.position[0] << arma::endr
@@ -46,7 +46,7 @@ namespace vision {
                            <<               0  <<                0  <<  1 <<  sensors.bodyCentreHeight << arma::endr
                            <<               0  <<                0  <<  0 <<                                 1;
 
-        arma::mat cameraToBody_body = sensors.forwardKinematics.at(messages::input::ServoID::HEAD_PITCH);
+        arma::mat cameraToBody_body = sensors.forwardKinematics.at(message::input::ServoID::HEAD_PITCH);
         arma::mat robotToBody_body = arma::eye(4,4);
         robotToBody_body.submat(0,0,2,2) = sensors.orientation;
 

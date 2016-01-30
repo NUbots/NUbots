@@ -1,17 +1,4 @@
 {
-	"build_systems":
-	[
-		{
-			"cmd":
-			[
-				"python",
-				"${project_path:${folder}}/b",
-				"compile"
-			],
-			"name": "Docker",
-			"working_dir": "${project_path:${folder}}"
-		}
-	],
 	"folders":
 	[
 		{
@@ -20,9 +7,6 @@
 				"/build/"
 			],
 			"path": "."
-		},
-		{
-			"path": "tools/build"
 		}
 	]
 }

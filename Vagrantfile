@@ -94,9 +94,6 @@ Vagrant.configure("2") do |config|
     #   The guest must have 'apt-get install nfs-common'
     nubots.vm.synced_folder ".", "/home/vagrant/nubots/NUbots"
 
-    # Private network for NUsight's benifit
-    nubots.vm.network "public_network", type: "dhcp"
-
     # Share NUsight repository with the VM if it has been placed in the same
     # directory as the NUbots repository
     if File.directory?("../NUsight")

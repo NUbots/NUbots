@@ -1,0 +1,65 @@
+/*
+ * This file is part of the NUbots Codebase.
+ *
+ * The NUbots Codebase is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * The NUbots Codebase is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with the NUbots Codebase.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ * Copyright 2015 NUBots <nubots@nubots.net>
+ */
+
+syntax = "proto3";
+
+package message.support.nubugger.proto;
+
+import "message/behaviour/proto/Behaviour.proto";
+import "message/input/proto/GameState.proto";
+import "message/Vector.proto";
+import "message/Matrix.proto";
+
+message Overview {
+
+    string role_name = 15;
+
+	// Sensors
+	float voltage = 1;
+	float battery = 2;
+
+	// Behaviour
+    behaviour.proto.Behaviour.State behaviour_state = 3;
+    vec2 kick_target = 17;
+
+    // Localisation
+    vec2 robot_position = 4;
+    mat22 robot_position_covariance = 6;
+    vec2 robot_heading = 5;
+    vec2 ball_position = 13;
+    vec2 ball_world_position = 14;
+
+    // Game controller
+    input.proto.GameState.Data.Mode game_mode = 7;
+    input.proto.GameState.Data.Phase game_phase = 8;
+    input.proto.GameState.Data.PenaltyReason penalty_reason = 9;
+
+    // Hardware
+    uint64 last_camera_image = 10;
+    // TODO: motor overloads?
+
+    // Vision
+    uint64 last_seen_ball = 11;
+    uint64 last_seen_goal = 12;
+
+    // Walk engine
+    repeated vec2 path_plan = 16;
+    vec3 walk_command = 18;
+
+}

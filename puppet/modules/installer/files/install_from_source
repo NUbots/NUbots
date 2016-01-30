@@ -81,7 +81,7 @@ elif [[ $METHOD == 'boost' || $METHOD == 'auto' && -e "Jamroot" ]]; then
     ./b2 install
 
 # We are using standard makefiles
-elif [[ -e "Makefile" ]]; then
+elif [[ $METHOD == 'make' || $METHOD == 'auto' && -e "Makefile" ]]; then
     echo "Building using make"
 
     export COMMON_OPT="$CFLAGS -O3"
