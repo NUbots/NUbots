@@ -7,7 +7,6 @@ NUCLEAR_ROLE(
     support::extension::FileWatcher
     support::configuration::GlobalConfig
     support::configuration::NetworkConfiguration
-    support::configuration::NetworkConfiguration
     support::NUbugger
     support::configuration::SoccerConfig
 

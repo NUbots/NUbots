@@ -31,7 +31,7 @@ namespace support {
     VirtualCamera::VirtualCamera(std::unique_ptr<NUClear::Environment> environment)
     : Reactor(std::move(environment)) {
 
-        on<Configuration>("VirtualCamera.yaml").then([this] (const Configuration& config) {
+        on<Configuration>("VirtualCamera.yaml").then("VirtualCamera: Emit VirCam params",[this] (const Configuration& config) {
             // Use configuration here from file VirtualCamera.yaml
 
         	auto cameraParameters = std::make_unique<CameraParameters>();
@@ -46,6 +46,7 @@ namespace support {
             cameraParameters->pixelsToTanThetaFactor << (tanHalfFOV[0] / imageCentre[0]) << (tanHalfFOV[1] / imageCentre[1]);
             cameraParameters->focalLengthPixels = imageCentre[0] / tanHalfFOV[0];
 
+            std::cout << "Emitting camera parameters from VirtualCamera" << std::endl;
 
             emit<Scope::DIRECT>(std::move(cameraParameters));
 

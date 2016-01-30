@@ -17,11 +17,6 @@ NUCLEAR_ROLE(
     #Sensors
     platform::darwin::SensorFilter
 
-    #Vision
-    vision::LUTClassifier
-    vision::GoalDetector
-    vision::BallDetector
-
     #Behaviour
     behaviour::Controller
     behaviour::skills::Stand

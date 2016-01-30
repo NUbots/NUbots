@@ -47,7 +47,7 @@ namespace support {
     	arma::vec2 screenAngular;
     };
 
-	inline static VisibleMeasurement computeVisible(arma::vec3 objPosition, const CameraParameters& camParams, Transform2D robotPose, std::shared_ptr<Sensors> sensors, arma::vec4 error){
+	inline static VisibleMeasurement computeVisible(arma::vec3 objPosition, const CameraParameters& camParams, Transform2D robotPose, std::shared_ptr<const Sensors> sensors, arma::vec4 error){
 		//Assumes we need to see the bottom or...
 		message::vision::VisionObject::Measurement measurement;
         measurement.position = SphericalRobotObservation(robotPose.xy(), robotPose.angle(), objPosition);
@@ -89,7 +89,7 @@ namespace support {
 		Goal::Side side = Goal::Side::UNKNOWN; // LEFT, RIGHT, or UNKNOWN
 		Goal::Team team = Goal::Team::UNKNOWN; // OWN, OPPONENT, or UNKNOWN
 
-		Goal detect(const CameraParameters& camParams, Transform2D robotPose, std::shared_ptr<Sensors> sensors, arma::vec4 error){
+		Goal detect(const CameraParameters& camParams, Transform2D robotPose, std::shared_ptr<const Sensors> sensors, arma::vec4 error){
 			Goal result;
 
 			auto visibleMeasurements = computeVisible(position,camParams,robotPose,sensors,error);
@@ -131,7 +131,7 @@ namespace support {
 		// arma::vec2 position;
 		float diameter;
 
-		Ball detect(const CameraParameters& camParams, Transform2D robotPose, std::shared_ptr<Sensors> sensors, arma::vec4 error){
+		Ball detect(const CameraParameters& camParams, Transform2D robotPose, std::shared_ptr<const Sensors> sensors, arma::vec4 error){
 			Ball result;
 
 			auto visibleMeasurements = computeVisible(position,camParams,robotPose,sensors,error);
