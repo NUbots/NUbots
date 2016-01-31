@@ -343,21 +343,27 @@ namespace module {
                         std::vector<arma::vec2> scaledResults;
                         //scaledResults.push_back(utility::motion::kinematics::headAnglesToSeeGroundPoint<DarwinModel>(lastLocBall.position,sensors));
                         for(auto& p : searches[sType]){
+                            //old angles thing
                             //Interpolate between max and min allowed angles with -1 = min and 1 = max
-                            auto angles = arma::vec2({((max_yaw - min_yaw) * p[0] + max_yaw + min_yaw) / 2,
-                                                                ((max_pitch - min_pitch) * p[1] + max_pitch + min_pitch) / 2});
+                            //auto angles = arma::vec2({((max_yaw - min_yaw) * p[0] + max_yaw + min_yaw) / 2,
+                            //                                    ((max_pitch - min_pitch) * p[1] + max_pitch + min_pitch) / 2});
 
-                            // arma::vec3 lookVectorFromHead = sphericalToCartesian({1,angles[0],angles[1]});//This is an approximation relying on the robots small FOV
-                            // arma::vec3 adjustedLookVector = Rotation3D::createRotationY(sensors.orientation.pitch()) * lookVectorFromHead;
-                            // std::vector< std::pair<ServoID, float> > goalAngles = calculateHeadJoints<DarwinModel>(adjustedLookVector);
+                            //New absolute referencing 
+                            arma::vec2 angles = p * 180 / M_PI;
+                            emit(graph("Raw Head Lost Angles", angles));
+                            arma::vec3 lookVectorFromHead = sphericalToCartesian({1,angles[0],angles[1]});//This is an approximation relying on the robots small FOV
+                            arma::vec3 adjustedLookVector = Rotation3D::createRotationY(sensors.orientation.pitch()) * lookVectorFromHead;
+                            std::cout << "HeadBehaviourSoccer::getSearchPoints: sensors.orientation.pitch = " <<  sensors.orientation.pitch() << std::endl;
+                            std::vector< std::pair<ServoID, float> > goalAngles = calculateHeadJoints<DarwinModel>(adjustedLookVector);
 
-                            // for(auto& angle : goalAngles){
-                            //     if(angle.first == ServoID::HEAD_PITCH){
-                            //         angles[1] = angle.second;
-                            //     } else if(angle.first == ServoID::HEAD_YAW){
-                            //         angles[0] = angle.second;
-                            //     }
-                            // }
+                            for(auto& angle : goalAngles){
+                                if(angle.first == ServoID::HEAD_PITCH){
+                                    angles[1] = angle.second;
+                                } else if(angle.first == ServoID::HEAD_YAW){
+                                    angles[0] = angle.second;
+                                }
+                            }
+                            emit(graph("IMUSpace Head Lost Angles", angles));
 
                             scaledResults.push_back(angles);
                         }
