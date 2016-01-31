@@ -341,11 +341,12 @@ namespace module {
                     if(fixationObjects.size() == 0){
                         //Lost searches are normalised in terms of the FOV
                         std::vector<arma::vec2> scaledResults;
-                        scaledResults.push_back(utility::motion::kinematics::headAnglesToSeeGroundPoint<DarwinModel>(lastLocBall.position,sensors));
+                        //scaledResults.push_back(utility::motion::kinematics::headAnglesToSeeGroundPoint<DarwinModel>(lastLocBall.position,sensors));
                         for(auto& p : searches[sType]){
                             //Interpolate between max and min allowed angles with -1 = min and 1 = max
                             auto angles = arma::vec2({((max_yaw - min_yaw) * p[0] + max_yaw + min_yaw) / 2,
                                                                 ((max_pitch - min_pitch) * p[1] + max_pitch + min_pitch) / 2});
+
                             // arma::vec3 lookVectorFromHead = sphericalToCartesian({1,angles[0],angles[1]});//This is an approximation relying on the robots small FOV
                             // arma::vec3 adjustedLookVector = Rotation3D::createRotationY(sensors.orientation.pitch()) * lookVectorFromHead;
                             // std::vector< std::pair<ServoID, float> > goalAngles = calculateHeadJoints<DarwinModel>(adjustedLookVector);

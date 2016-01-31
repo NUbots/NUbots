@@ -84,6 +84,8 @@ namespace module {
             });
 
             updateHandle = on<Trigger<Sensors>, Single, Priority::HIGH>().then("Head Controller - Update Head Position",[this] (const Sensors& sensors) {
+                emit(graph("HeadController Goal Angles", goalAngles[0], goalAngles[1]));
+                
                 //P controller
                 currentAngles = p_gain * goalAngles + (1 - p_gain) * currentAngles;
 
@@ -97,13 +99,20 @@ namespace module {
                 // arma::vec2 goalAngles = cartesianToSpherical(headUnitVector).rows(1,2);
 
                 //Clamp head angles
+                float pitch = 0;
+                float yaw = 0;
                 for(auto& angle : goalAnglesList){
                     if(angle.first == ServoID::HEAD_PITCH){
                         angle.second = std::fmin(std::fmax(angle.second, min_pitch), max_pitch);
+                        pitch = angle.second;
                     } else if(angle.first == ServoID::HEAD_YAW){
                         angle.second = std::fmin(std::fmax(angle.second, min_yaw), max_yaw);
+                        yaw = angle.second;
                     }
                 }
+
+                emit(graph("HeadController Final Angles", yaw, pitch));
+
 
                 //Create message
                 auto waypoints = std::make_unique<std::vector<ServoCommand>>();
