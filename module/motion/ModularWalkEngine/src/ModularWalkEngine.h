@@ -129,8 +129,6 @@ namespace motion {
         Transform2D velocityCurrent;
         // Current velocity command
         Transform2D velocityCommand;
-        // Difference between current velocity and commanded velocity
-        Transform2D velocityDifference;
         // zmp expoential coefficients aXP aXN aYP aYN
         arma::vec4 zmpCoefficients;
         // zmp params m1X, m2X, m1Y, m2Y

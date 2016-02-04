@@ -23,7 +23,7 @@
 /*===========================================================================================================*/
 //      INCLUDE(S)
 /*===========================================================================================================*/
-#include "ModularWalkEngine.h"
+#include "FootPlacementPlanner.h"
 
 #include "utility/motion/RobotModels.h"
 #include "utility/nubugger/NUhelpers.h"
@@ -77,22 +77,21 @@ namespace motion
      *      @post-condition : <TODO: INSERT DESCRIPTION>
      */
 
-     void ModularWalkEngine::start() {
+     void FootPlacementPlanner::start() {
         if (state != State::WALKING) {
             swingLeg = swingLegInitial;
             beginStepTime = getTime();
-            initialStep = 2;
             state = State::WALKING;
             calculateNewStep();
         }
     }
 
-    void ModularWalkEngine::calculateNewStep() 
+    void FootPlacementPlanner::calculateNewStep() 
     {
         updateVelocity();
 
         // swap swing and support legs
-        swingLeg = swingLeg == LimbID::LEFT_LEG ? LimbID::RIGHT_LEG : LimbID::LEFT_LEG;
+        swingLeg = (swingLeg == LimbID::LEFT_LEG) ? LimbID::RIGHT_LEG : LimbID::LEFT_LEG;
 
         uLeftFootSource = uLeftFootDestination;
         uRightFootSource = uRightFootDestination;
@@ -141,7 +140,7 @@ namespace motion
      *      @pre-condition  : <TODO: INSERT DESCRIPTION>
      *      @post-condition : <TODO: INSERT DESCRIPTION>
     */
-    Transform2D ModularWalkEngine::getNewFootTarget(const Transform2D& velocity, const Transform2D& leftFoot, const Transform2D& rightFoot, const LimbID& swingLeg) 
+    Transform2D FootPlacementPlanner::getNewFootTarget(const Transform2D& velocity, const Transform2D& leftFoot, const Transform2D& rightFoot, const LimbID& swingLeg) 
     {   
         // Negative if right leg to account for the mirroring of the foot target
         int8_t sign = swingLeg == LimbID::LEFT_LEG ? 1 : -1;
@@ -175,7 +174,7 @@ namespace motion
         return footTarget;
     }
 
-    void ModularWalkEngine::updateVelocity() { 
+    void FootPlacementPlanner::updateVelocity() { 
         // slow accelerations at high speed
         auto now = NUClear::clock::now();
         double deltaT = std::chrono::duration_cast<std::chrono::microseconds>(now - lastVeloctiyUpdateTime).count() * 1e-6;
@@ -183,23 +182,18 @@ namespace motion
 
         auto& limit = (velocityCurrent.x() > velocityHigh ? accelerationLimitsHigh : accelerationLimits) * deltaT; // TODO: use a function instead
 
+        Transform2D velocityDifference;
 
-
-        velocityDifference.x()     = std::min(std::max(velocityCommand.x()     - velocityCurrent.x(),     -limit[0]), limit[0]);
+        velocityCurrent.x()     = std::min(std::max(velocityCommand.x()     - velocityCurrent.x(),     -limit[0]), limit[0]);
         velocityDifference.y()     = std::min(std::max(velocityCommand.y()     - velocityCurrent.y(),     -limit[1]), limit[1]);
         velocityDifference.angle() = std::min(std::max(velocityCommand.angle() - velocityCurrent.angle(), -limit[2]), limit[2]);
 
         velocityCurrent.x()     += velocityDifference.x();
         velocityCurrent.y()     += velocityDifference.y();
         velocityCurrent.angle() += velocityDifference.angle();
-
-        if (initialStep > 0) {
-            velocityCurrent = arma::zeros(3);
-            initialStep--;
-        }
     }
 
-    void WalkEngine::setVelocity(Transform2D velocity) {
+    void FootPlacementPlanner::setVelocity(Transform2D velocity) {
         // filter the commanded speed
         velocity.x()     = std::min(std::max(velocity.x(),     velocityLimits(0,0)), velocityLimits(0,1));
         velocity.y()     = std::min(std::max(velocity.y(),     velocityLimits(1,0)), velocityLimits(1,1));
@@ -220,7 +214,7 @@ namespace motion
         velocityCommand.angle() = std::min(std::max(velocityCommand.angle(), velocityLimits(2,0)), velocityLimits(2,1));
     }
 
-    Transform2D WalkEngine::getVelocity() {
+    Transform2D FootPlacementPlanner::getVelocity() {
         return velocityCurrent;
     }
 }  // motion
