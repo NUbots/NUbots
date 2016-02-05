@@ -111,7 +111,7 @@ namespace module {
                     }
                 }
 
-                emit(graph("HeadController Final Angles", yaw, pitch));
+                emit(graph("HeadController Final Angles", yaw, -pitch));
 
 
                 //Create message

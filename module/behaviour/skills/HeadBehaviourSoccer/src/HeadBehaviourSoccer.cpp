@@ -223,9 +223,9 @@ namespace module {
                     if(!lost){
                         arma::vec2 currentCentroid = arma::vec2({0,0});
                         for(auto& ob : fixationObjects){
-                            currentCentroid = ob.screenAngular / float(fixationObjects.size());
+                            currentCentroid += ob.screenAngular / float(fixationObjects.size());
                         }
-                        arma::vec2 currentCentroid_world = getIMUSpaceDirection(currentCentroid,headToIMUSpace,false);
+                        arma::vec2 currentCentroid_world = getIMUSpaceDirection(currentCentroid,headToIMUSpace);
                         //If our objects have moved, we need to replan
                         if(arma::norm(currentCentroid_world - lastCentroid) >= fractional_angular_update_threshold * std::fmax(cam.FOV[0],cam.FOV[1]) / 2.0){
                             updatePlan = true;
@@ -300,22 +300,19 @@ namespace module {
                 auto currentPos = arma::vec2({sensors.servos.at(int(ServoID::HEAD_YAW)).presentPosition,sensors.servos.at(int(ServoID::HEAD_PITCH)).presentPosition});
                 if(!search){
                     for(auto& p : fixationPoints){
-                        p = getIMUSpaceDirection(p, headToIMUSpace, search && fixationObjects.size() == 0);
+                        p = getIMUSpaceDirection(p, headToIMUSpace);
                     }
-                    currentPos = getIMUSpaceDirection(currentPos, headToIMUSpace, search && fixationObjects.size() == 0);
+                    currentPos = getIMUSpaceDirection(currentPos, headToIMUSpace);
                 }
 
                 headSearcher.replaceSearchPoints(fixationPoints, currentPos);
             }
 
-            arma::vec2 HeadBehaviourSoccer::getIMUSpaceDirection(const arma::vec2& screenAngles, Rotation3D headToIMUSpace, bool lost){
+            arma::vec2 HeadBehaviourSoccer::getIMUSpaceDirection(const arma::vec2& screenAngles, Rotation3D headToIMUSpace){
 
                 // arma::vec3 lookVectorFromHead = objectDirectionFromScreenAngular(screenAngles);
                 arma::vec3 lookVectorFromHead = sphericalToCartesian({1,screenAngles[0],screenAngles[1]});//This is an approximation relying on the robots small FOV
                 //Remove pitch from matrix if we are adjusting search points
-
-                //Check if this works:
-                // if(lost) headToIMUSpace = Rotation3D::createRotationY(-headToIMUSpace.pitch()) * headToIMUSpace;
 
                 //Rotate target angles to World space
                 arma::vec3 lookVector = headToIMUSpace * lookVectorFromHead;
@@ -349,12 +346,15 @@ namespace module {
                             //                                    ((max_pitch - min_pitch) * p[1] + max_pitch + min_pitch) / 2});
 
                             //New absolute referencing 
-                            arma::vec2 angles = p * 180 / M_PI;
+                            arma::vec2 angles = p * M_PI / 180;
                             emit(graph("Raw Head Lost Angles", angles));
                             arma::vec3 lookVectorFromHead = sphericalToCartesian({1,angles[0],angles[1]});//This is an approximation relying on the robots small FOV
                             arma::vec3 adjustedLookVector = Rotation3D::createRotationY(sensors.orientation.pitch()) * lookVectorFromHead;
                             std::cout << "HeadBehaviourSoccer::getSearchPoints: sensors.orientation.pitch = " <<  sensors.orientation.pitch() << std::endl;
+                            std::cout << "HeadBehaviourSoccer::getSearchPoints: lookVectorFromHead = " <<  lookVectorFromHead << std::endl;
+                            std::cout << "HeadBehaviourSoccer::getSearchPoints: adjustedLookVector = " <<  adjustedLookVector << std::endl;
                             std::vector< std::pair<ServoID, float> > goalAngles = calculateHeadJoints<DarwinModel>(adjustedLookVector);
+                            std::cout << "HeadBehaviourSoccer::getSearchPoints: goalAngles = " <<  goalAngles[0].second << " " << goalAngles[1].second << std::endl;
 
                             for(auto& angle : goalAngles){
                                 if(angle.first == ServoID::HEAD_PITCH){
