@@ -69,21 +69,7 @@ namespace motion
         //TODO: improve accuracy of compensation movement in upper body...
         return (motionArms(phase));
     }
-    /*=======================================================================================================*/
-    //      NAME: stepTorso
-    /*=======================================================================================================*/
-    /*
-     *      @input  : <TODO: INSERT DESCRIPTION>
-     *      @output : <TODO: INSERT DESCRIPTION>
-     *      @pre-condition  : <TODO: INSERT DESCRIPTION>
-     *      @post-condition : <TODO: INSERT DESCRIPTION>
-    */
-    Transform2D ModularWalkEngine::stepTorso(Transform2D uLeftFoot, Transform2D uRightFoot, double shiftFactor) 
-    {
-        Transform2D uLeftFootSupport  = uLeftFoot.localToWorld({-footOffset[0], -footOffset[1], 0});
-        Transform2D uRightFootSupport = uRightFoot.localToWorld({-footOffset[0], footOffset[1], 0});
-        return uLeftFootSupport.interpolate(shiftFactor, uRightFootSupport);
-    }
+    
     /*=======================================================================================================*/
     //      NAME: motionArms
     /*=======================================================================================================*/
