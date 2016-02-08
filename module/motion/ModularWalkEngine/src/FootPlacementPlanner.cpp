@@ -81,6 +81,11 @@ namespace motion
             // If this is the case, we should delete or rethink the WalkStopCommand.
             requestStop();
         });
+
+        on updateHandle = on<Trigger<RequestNewStep>>().then([this] {
+            calculateNewStep();
+        }
+
     }
 
     /*=======================================================================================================*/
@@ -293,8 +298,28 @@ namespace motion
                 uLeftFootDestination = getNewFootTarget(velocityCurrent, uLeftFootSource, uRightFootSource, swingLeg);
             }
         }
+        // apply velocity-based support point modulation for uSupport
+        if (swingLeg == LimbID::RIGHT_LEG) 
+        {
+            Transform2D uLeftFootTorso = uTorsoSource.worldToLocal(uLeftFootSource);
+            Transform2D uTorsoModded = uTorso.localToWorld({supportMod[0], supportMod[1], 0});
+            Transform2D uLeftFootModded = uTorsoModded.localToWorld(uLeftFootTorso);
+            uSupport = uLeftFootModded.localToWorld({-footOffset[0], -footOffset[1], 0});
+            emit(uRightFootDestination,swingLeg);
 
-        //emit destinations for fmp and/or zmp
+        }
+        else 
+        {
+            Transform2D uRightFootTorso = uTorsoSource.worldToLocal(uRightFootSource);
+            Transform2D uTorsoModded = uTorso.localToWorld({supportMod[0], supportMod[1], 0});
+            Transform2D uRightFootModded = uTorsoModded.localToWorld(uRightFootTorso);
+            uSupport = uRightFootModded.localToWorld({-footOffset[0], footOffset[1], 0});
+            emit(uLeftFootDestination,swingLeg);
+        }
+
+
+
+                //emit destinations for fmp and/or zmp
     }
     /*=======================================================================================================*/
     //      NAME: getNewFootTarget

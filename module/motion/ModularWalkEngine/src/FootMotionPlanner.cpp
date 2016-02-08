@@ -23,7 +23,7 @@
 /*===========================================================================================================*/
 //      INCLUDE(S)
 /*===========================================================================================================*/
-#include "ModularWalkEngine.h"
+#include "FootMotionPlanner.h"
 
 #include "utility/motion/RobotModels.h"
 #include "utility/nubugger/NUhelpers.h"
@@ -41,6 +41,23 @@ namespace motion
     using utility::motion::kinematics::DarwinModel;
     using utility::math::matrix::Transform2D;
     using utility::nubugger::graph;
+
+    FootMotionPlanner::FootMotionPlanner(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) 
+    {
+        
+        updateHandle = on<Every<UPDATE_FREQUENCY, Per<std::chrono::seconds>>, With<Sensors>, Single, Priority::HIGH>()
+        .then([this](const Sensors& sensors) 
+        {
+            update(sensors);
+        }).disable();
+
+        on<Configuration>("ModularWalkEngine.yaml").then([this] (const Configuration& config) 
+        {
+            configure(config.config);
+        });
+
+          reset();
+    }
     /*=======================================================================================================*/
     //      NAME: footPhase
     /*=======================================================================================================*/
@@ -60,6 +77,21 @@ namespace motion
         double zf = 0.5 * (1 - std::cos(2 * M_PI * phaseSingleSkew));
 
         return {xf, phaseSingle, zf};
+    }
+    /*=======================================================================================================*/
+    //      NAME: stepTorso
+    /*=======================================================================================================*/
+    /*
+     *      @input  : <TODO: INSERT DESCRIPTION>
+     *      @output : <TODO: INSERT DESCRIPTION>
+     *      @pre-condition  : <TODO: INSERT DESCRIPTION>
+     *      @post-condition : <TODO: INSERT DESCRIPTION>
+    */
+    Transform2D ModularWalkEngine::stepTorso(Transform2D uLeftFoot, Transform2D uRightFoot, double shiftFactor) 
+    {
+        Transform2D uLeftFootSupport  = uLeftFoot.localToWorld({-footOffset[0], -footOffset[1], 0});
+        Transform2D uRightFootSupport = uRightFoot.localToWorld({-footOffset[0], footOffset[1], 0});
+        return uLeftFootSupport.interpolate(shiftFactor, uRightFootSupport);
     }
     /*=======================================================================================================*/
     //      NAME: updateFootPosition
