@@ -50,7 +50,7 @@ namespace motion
      *      @pre-condition  : <TODO: INSERT DESCRIPTION>
      *      @post-condition : <TODO: INSERT DESCRIPTION>
     */
-    std::pair<Transform3D, Transform3D> ModularWalkEngine::updateLowerBody(double phase, auto torsoWorld, auto feetLocal) 
+    std::pair<Transform3D, Transform3D> LowerKinematicResponse::updateLowerBody(double phase, auto torsoWorld, auto feetLocal) 
     {
         // Transform feet targets to be relative to the robot torso...
         Transform3D leftFootTorso  =  leftFootLocal.worldToLocal(torsoWorld);
@@ -74,7 +74,7 @@ namespace motion
      *      @pre-condition  : <TODO: INSERT DESCRIPTION>
      *      @post-condition : <TODO: INSERT DESCRIPTION>
     */
-    std::unique_ptr<std::vector<ServoCommand>> ModularWalkEngine::motionLegs(std::vector<std::pair<ServoID, float>> joints) 
+    std::unique_ptr<std::vector<ServoCommand>> LowerKinematicResponse::motionLegs(std::vector<std::pair<ServoID, float>> joints) 
     {
         auto waypoints = std::make_unique<std::vector<ServoCommand>>();
         waypoints->reserve(16);
