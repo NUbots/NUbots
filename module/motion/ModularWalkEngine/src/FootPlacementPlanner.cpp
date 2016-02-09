@@ -23,7 +23,7 @@
 /*===========================================================================================================*/
 //      INCLUDE(S)
 /*===========================================================================================================*/
-#include "ModularWalkEngine.h"
+#include "FootPlacementPlanner.h"
 
 #include "utility/motion/RobotModels.h"
 #include "utility/nubugger/NUhelpers.h"
@@ -44,6 +44,23 @@ namespace motion
 
     FootPlacementPlanner::FootPlacementPlanner()
     {
+        //Do we need enable/disable?
+        on<Trigger<EnableWalkEngineCommand>>().then([this] (const EnableModularWalkEngineCommand& command) 
+        {
+            subsumptionId = command.subsumptionId;
+
+            stanceReset(); // Reset stance as we don't know where our limbs are.
+            updateHandle.enable();
+        });
+
+        on<Trigger<DisableWalkEngineCommand>>().then([this] 
+        {
+            // Nobody needs the walk engine, so we stop updating it.
+            updateHandle.disable(); 
+
+            // TODO: Also disable the other walk command reactions?
+        });
+
         on<Trigger<WalkCommand>>().then([this] (const WalkCommand& walkCommand) {
             auto velocity = walkCommand.command;
             velocity.x()     *= velocity.x()     > 0 ? velocityLimits(0,1) : -velocityLimits(0,0);
@@ -65,6 +82,169 @@ namespace motion
             requestStop();
         });
 
+        on updateHandle = on<Trigger<RequestNewStep>>().then([this] {
+            calculateNewStep();
+        }
+
+    }
+
+    /*=======================================================================================================*/
+    //      NAME: configure
+    /*=======================================================================================================*/
+    /*
+     *      @input  : <TODO: INSERT DESCRIPTION>
+     *      @output : <TODO: INSERT DESCRIPTION>
+     *      @pre-condition  : <TODO: INSERT DESCRIPTION>
+     *      @post-condition : <TODO: INSERT DESCRIPTION>
+    */
+    void ModularWalkEngine::configure(const YAML::Node& config)
+    {
+        emitLocalisation = config["emit_localisation"].as<bool>();
+
+        auto& stance = config["stance"];
+        bodyHeight = stance["body_height"].as<Expression>();
+        bodyTilt = stance["body_tilt"].as<Expression>();
+        qLArmStart = stance["arms"]["left"]["start"].as<arma::vec>();
+        qLArmEnd = stance["arms"]["left"]["end"].as<arma::vec>();
+        qRArmStart = stance["arms"]["right"]["start"].as<arma::vec>();
+        qRArmEnd = stance["arms"]["right"]["end"].as<arma::vec>();
+        footOffset = stance["foot_offset"].as<arma::vec>();
+        // gToe/heel overlap checking values
+        stanceLimitY2 = DarwinModel::Leg::LENGTH_BETWEEN_LEGS - stance["limit_margin_y"].as<Expression>();
+
+        auto& gains = stance["gains"];
+        gainArms = gains["arms"].as<Expression>();
+        gainLegs = gains["legs"].as<Expression>();
+
+        for(ServoID i = ServoID(0); i < ServoID::NUMBER_OF_SERVOS; i = ServoID(int(i)+1))
+        {
+            if(int(i) < 6)
+            {
+                jointGains[i] = gainArms;
+            } 
+            else 
+            {
+                jointGains[i] = gainLegs;
+            }
+        }
+
+        auto& walkCycle = config["walk_cycle"];
+        stepTime = walkCycle["step_time"].as<Expression>();
+        zmpTime = walkCycle["zmp_time"].as<Expression>();
+        hipRollCompensation = walkCycle["hip_roll_compensation"].as<Expression>();
+        stepHeight = walkCycle["step"]["height"].as<Expression>();
+        stepLimits = walkCycle["step"]["limits"].as<arma::mat::fixed<3,2>>();
+
+        step_height_slow_fraction = walkCycle["step"]["height_slow_fraction"].as<float>();
+        step_height_fast_fraction = walkCycle["step"]["height_fast_fraction"].as<float>();
+
+        auto& velocity = walkCycle["velocity"];
+        velocityLimits = velocity["limits"].as<arma::mat::fixed<3,2>>();
+        velocityHigh = velocity["high_speed"].as<Expression>();
+
+        auto& acceleration = walkCycle["acceleration"];
+        accelerationLimits = acceleration["limits"].as<arma::vec>();
+        accelerationLimitsHigh = acceleration["limits_high"].as<arma::vec>();
+        accelerationTurningFactor = acceleration["turning_factor"].as<Expression>();
+
+        phase1Single = walkCycle["single_support_phase"]["start"].as<Expression>();
+        phase2Single = walkCycle["single_support_phase"]["end"].as<Expression>();
+
+        auto& balance = walkCycle["balance"];
+        balanceEnabled = balance["enabled"].as<bool>();
+        // balanceAmplitude = balance["amplitude"].as<Expression>();
+        // balanceWeight = balance["weight"].as<Expression>();
+        // balanceOffset = balance["offset"].as<Expression>();
+
+        balancer.configure(balance);
+
+        for(auto& gain : balance["servo_gains"])
+        {
+            float p = gain["p"].as<Expression>();
+            ServoID sr = message::input::idFromPartialString(gain["id"].as<std::string>(),message::input::ServoSide::RIGHT);
+            ServoID sl = message::input::idFromPartialString(gain["id"].as<std::string>(),message::input::ServoSide::LEFT);
+            servoControlPGains[sr] = p;
+            servoControlPGains[sl] = p;
+        }
+        /* TODO
+        // gCompensation parameters
+        toeTipCompensation = config["toeTipCompensation"].as<Expression>();
+        ankleMod = {-toeTipCompensation, 0};
+
+        // gGyro stabilization parameters
+        ankleImuParamX = config["ankleImuParamX"].as<arma::vec>();
+        ankleImuParamY = config["ankleImuParamY"].as<arma::vec>();
+        kneeImuParamX = config["kneeImuParamX"].as<arma::vec>();
+        hipImuParamY = config["hipImuParamY"].as<arma::vec>();
+        armImuParamX = config["armImuParamX"].as<arma::vec>();
+        armImuParamY = config["armImuParamY"].as<arma::vec>();
+
+        // gSupport bias parameters to reduce backlash-based instability
+        velFastForward = config["velFastForward"].as<Expression>();
+        velFastTurn = config["velFastTurn"].as<Expression>();
+        supportFront = config["supportFront"].as<Expression>();
+        supportFront2 = config["supportFront2"].as<Expression>();
+        supportBack = config["supportBack"].as<Expression>();
+        supportSideX = config["supportSideX"].as<Expression>();
+        supportSideY = config["supportSideY"].as<Expression>();
+        supportTurn = config["supportTurn"].as<Expression>();
+        */
+        STAND_SCRIPT_DURATION = config["STAND_SCRIPT_DURATION"].as<Expression>();
+    }
+
+
+    /*=======================================================================================================*/
+    //      NAME: start
+    /*=======================================================================================================*/
+    /*
+     *      @input  : <TODO: INSERT DESCRIPTION>
+     *      @output : <TODO: INSERT DESCRIPTION>
+     *      @pre-condition  : <TODO: INSERT DESCRIPTION>
+     *      @post-condition : <TODO: INSERT DESCRIPTION>
+    */
+    void ModularWalkEngine::start() 
+    {
+        if (state != State::WALKING) 
+        {
+            swingLeg = swingLegInitial;
+            beginStepTime = getTime();
+            initialStep = 2;
+            state = State::WALKING;
+        }
+    }
+    /*=======================================================================================================*/
+    //      NAME: requestStop
+    /*=======================================================================================================*/
+    /*
+     *      @input  : <TODO: INSERT DESCRIPTION>
+     *      @output : <TODO: INSERT DESCRIPTION>
+     *      @pre-condition  : <TODO: INSERT DESCRIPTION>
+     *      @post-condition : <TODO: INSERT DESCRIPTION>
+    */
+    void ModularWalkEngine::requestStop() 
+    {
+        // always stops with feet together (which helps transition)
+        if (state == State::WALKING) 
+        {
+            state = State::STOP_REQUEST;
+        }
+    }
+    /*=======================================================================================================*/
+    //      NAME: stop
+    /*=======================================================================================================*/
+    /*
+     *      @input  : <TODO: INSERT DESCRIPTION>
+     *      @output : <TODO: INSERT DESCRIPTION>
+     *      @pre-condition  : <TODO: INSERT DESCRIPTION>
+     *      @post-condition : <TODO: INSERT DESCRIPTION>
+    */
+    void ModularWalkEngine::stop() 
+    {
+        state = State::STOPPED;
+        // emit(std::make_unique<ActionPriorites>(ActionPriorites { subsumptionId, { 0, 0 }})); // TODO: config
+        log<NUClear::TRACE>("Walk Engine:: Stop request complete");
+        emit(std::make_unique<WalkStopped>());
+        emit(std::make_unique<std::vector<ServoCommand>>());
     }
 
     /*=======================================================================================================*/
@@ -76,23 +256,12 @@ namespace motion
      *      @pre-condition  : <TODO: INSERT DESCRIPTION>
      *      @post-condition : <TODO: INSERT DESCRIPTION>
      */
-
-     void ModularWalkEngine::start() {
-        if (state != State::WALKING) {
-            swingLeg = swingLegInitial;
-            beginStepTime = getTime();
-            initialStep = 2;
-            state = State::WALKING;
-            calculateNewStep();
-        }
-    }
-
-    void ModularWalkEngine::calculateNewStep() 
+    void FootPlacementPlanner::calculateNewStep() 
     {
         updateVelocity();
 
         // swap swing and support legs
-        swingLeg = swingLeg == LimbID::LEFT_LEG ? LimbID::RIGHT_LEG : LimbID::LEFT_LEG;
+        swingLeg = (swingLeg == LimbID::LEFT_LEG) ? LimbID::RIGHT_LEG : LimbID::LEFT_LEG;
 
         uLeftFootSource = uLeftFootDestination;
         uRightFootSource = uRightFootDestination;
@@ -129,8 +298,28 @@ namespace motion
                 uLeftFootDestination = getNewFootTarget(velocityCurrent, uLeftFootSource, uRightFootSource, swingLeg);
             }
         }
+        // apply velocity-based support point modulation for uSupport
+        if (swingLeg == LimbID::RIGHT_LEG) 
+        {
+            Transform2D uLeftFootTorso = uTorsoSource.worldToLocal(uLeftFootSource);
+            Transform2D uTorsoModded = uTorso.localToWorld({supportMod[0], supportMod[1], 0});
+            Transform2D uLeftFootModded = uTorsoModded.localToWorld(uLeftFootTorso);
+            uSupport = uLeftFootModded.localToWorld({-footOffset[0], -footOffset[1], 0});
+            emit(uRightFootDestination,swingLeg);
 
-        //emit destinations for fmp and/or zmp
+        }
+        else 
+        {
+            Transform2D uRightFootTorso = uTorsoSource.worldToLocal(uRightFootSource);
+            Transform2D uTorsoModded = uTorso.localToWorld({supportMod[0], supportMod[1], 0});
+            Transform2D uRightFootModded = uTorsoModded.localToWorld(uRightFootTorso);
+            uSupport = uRightFootModded.localToWorld({-footOffset[0], footOffset[1], 0});
+            emit(uLeftFootDestination,swingLeg);
+        }
+
+
+
+                //emit destinations for fmp and/or zmp
     }
     /*=======================================================================================================*/
     //      NAME: getNewFootTarget
@@ -141,7 +330,7 @@ namespace motion
      *      @pre-condition  : <TODO: INSERT DESCRIPTION>
      *      @post-condition : <TODO: INSERT DESCRIPTION>
     */
-    Transform2D ModularWalkEngine::getNewFootTarget(const Transform2D& velocity, const Transform2D& leftFoot, const Transform2D& rightFoot, const LimbID& swingLeg) 
+    Transform2D FootPlacementPlanner::getNewFootTarget(const Transform2D& velocity, const Transform2D& leftFoot, const Transform2D& rightFoot, const LimbID& swingLeg) 
     {   
         // Negative if right leg to account for the mirroring of the foot target
         int8_t sign = swingLeg == LimbID::LEFT_LEG ? 1 : -1;
@@ -175,17 +364,18 @@ namespace motion
         return footTarget;
     }
 
-    void ModularWalkEngine::updateVelocity() { 
+    void FootPlacementPlanner::updateVelocity() { 
         // slow accelerations at high speed
+        //TODO: Add acceleration to velocity (Replace initialStep)
         auto now = NUClear::clock::now();
         double deltaT = std::chrono::duration_cast<std::chrono::microseconds>(now - lastVeloctiyUpdateTime).count() * 1e-6;
         lastVeloctiyUpdateTime = now;
 
         auto& limit = (velocityCurrent.x() > velocityHigh ? accelerationLimitsHigh : accelerationLimits) * deltaT; // TODO: use a function instead
 
+        Transform2D velocityDifference;
 
-
-        velocityDifference.x()     = std::min(std::max(velocityCommand.x()     - velocityCurrent.x(),     -limit[0]), limit[0]);
+        velocityCurrent.x()     = std::min(std::max(velocityCommand.x()     - velocityCurrent.x(),     -limit[0]), limit[0]);
         velocityDifference.y()     = std::min(std::max(velocityCommand.y()     - velocityCurrent.y(),     -limit[1]), limit[1]);
         velocityDifference.angle() = std::min(std::max(velocityCommand.angle() - velocityCurrent.angle(), -limit[2]), limit[2]);
 
@@ -193,13 +383,9 @@ namespace motion
         velocityCurrent.y()     += velocityDifference.y();
         velocityCurrent.angle() += velocityDifference.angle();
 
-        if (initialStep > 0) {
-            velocityCurrent = arma::zeros(3);
-            initialStep--;
-        }
     }
 
-    void WalkEngine::setVelocity(Transform2D velocity) {
+    void FootPlacementPlanner::setVelocity(Transform2D velocity) {
         // filter the commanded speed
         velocity.x()     = std::min(std::max(velocity.x(),     velocityLimits(0,0)), velocityLimits(0,1));
         velocity.y()     = std::min(std::max(velocity.y(),     velocityLimits(1,0)), velocityLimits(1,1));
@@ -220,8 +406,88 @@ namespace motion
         velocityCommand.angle() = std::min(std::max(velocityCommand.angle(), velocityLimits(2,0)), velocityLimits(2,1));
     }
 
-    Transform2D WalkEngine::getVelocity() {
+    Transform2D FootPlacementPlanner::getVelocity() {
         return velocityCurrent;
     }
-}  // motion
-}  // modules
+
+}  // modulesvoid ModularWalkEngine::stanceReset() 
+    {
+        // standup/sitdown/falldown handling
+        if (startFromStep) 
+        {
+            uLeftFoot = arma::zeros(3);
+            uRightFoot = arma::zeros(3);
+            uTorso = arma::zeros(3);
+
+            // start walking asap
+            initialStep = 1;
+        } 
+        else 
+        {
+            // stance resetted
+            uLeftFoot = uTorso.localToWorld({footOffset[0], DarwinModel::Leg::HIP_OFFSET_Y - footOffset[1], 0});
+            uRightFoot = uTorso.localToWorld({footOffset[0], -DarwinModel::Leg::HIP_OFFSET_Y + footOffset[1], 0});
+            initialStep = 2;
+        }
+
+        swingLeg = swingLegInitial;
+
+        uLeftFootSource = uLeftFoot;
+        uLeftFootDestination = uLeftFoot;
+
+        uRightFootSource = uRightFoot;
+        uRightFootDestination = uRightFoot;
+
+        uSupport = uTorso;
+        beginStepTime = getTime();
+        uLRFootOffset = {0, DarwinModel::Leg::HIP_OFFSET_Y - footOffset[1], 0};
+        startFromStep = false;
+
+        calculateNewStep();
+    }
+    /*=======================================================================================================*/
+    //      NAME: reset
+    /*=======================================================================================================*/
+    /*
+     *      @input  : <TODO: INSERT DESCRIPTION>
+     *      @output : <TODO: INSERT DESCRIPTION>
+     *      @pre-condition  : <TODO: INSERT DESCRIPTION>
+     *      @post-condition : <TODO: INSERT DESCRIPTION>
+    */
+    void ModularWalkEngine::reset() 
+    {
+        uTorso = {-footOffset[0], 0, 0};
+        uLeftFoot = {0, DarwinModel::Leg::HIP_OFFSET_Y, 0};
+        uRightFoot = {0, -DarwinModel::Leg::HIP_OFFSET_Y, 0};
+
+        uTorsoSource = arma::zeros(3);
+        uTorsoDestination = arma::zeros(3);
+        uLeftFootSource = arma::zeros(3);
+        uLeftFootDestination = arma::zeros(3);
+        uRightFootSource = arma::zeros(3);
+        uRightFootDestination = arma::zeros(3);
+
+        velocityCurrent = arma::zeros(3);
+        velocityCommand = arma::zeros(3);
+        velocityDifference = arma::zeros(3);
+
+        // gZMP exponential coefficients:
+        zmpCoefficients = arma::zeros(4);
+        zmpParams = arma::zeros(4);
+
+        // gGyro stabilization variables
+        swingLeg = swingLegInitial;
+        beginStepTime = getTime();
+        initialStep = 2;
+
+        // gStandard offset
+        uLRFootOffset = {0, DarwinModel::Leg::HIP_OFFSET_Y - footOffset[1], 0};
+
+        // gWalking/Stepping transition variables
+        startFromStep = false;
+
+        state = State::STOPPED;
+
+        // interrupted = false;
+    }
+}  // motion    

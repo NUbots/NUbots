@@ -17,7 +17,7 @@
  * Copyright 2013 NUBots <nubots@nubots.net>
  */
 
-#ifndef MODULES_MOTION_ModularWalkEngine_H
+#ifndef MODULES_MOTION_TorsoMotionPlanner_H
 #define MODULES_MOTION_ModularWalkEngine_H
 
 #include <nuclear>
@@ -221,46 +221,10 @@ namespace motion {
         double STAND_SCRIPT_DURATION;
         ReactionHandle generateStandScriptReaction;
 
-        void generateAndSaveStandScript(const Sensors& sensors);
-        void configure(const YAML::Node& config);
-
-        void reset();
-        void start();
-        void requestStop();
-        void stop();
-
-        void update(const Sensors& sensors);
-        std::pair<Transform3D, Transform3D> updateFootPosition(double phase);
-        void updateLowerBody(double phase, double leftFoot, double rightFoot);
-        void updateUpperBody(double phase, const Sensors& sensors);
-        void hipCompensation(arma::vec3 footPhases, LimbID swingLeg, Transform3D rightFootT, Transform3D leftFootT);
-        void updateStill(const Sensors& sensors = Sensors());
-        std::unique_ptr<std::vector<ServoCommand>> updateStillWayPoints(const Sensors& sensors);
-
-        void calculateNewStep();
-        void setVelocity(Transform2D velocity);
-        void updateVelocity();
-        void stanceReset();
-
-        void localise(Transform2D position);
-
-        std::unique_ptr<std::vector<ServoCommand>> motionLegs(std::vector<std::pair<ServoID, float>> joints);
-        std::unique_ptr<std::vector<ServoCommand>> motionArms(double phase);
-
-        Transform2D getNewFootTarget(const Transform2D& velocity, const Transform2D& leftFoot, const Transform2D& rightFoot, const LimbID& swingLeg);
-
-        /**
-         * Get the next torso position
-         */
         Transform2D stepTorso(Transform2D uLeftFoot, Transform2D uRightFoot, double shiftFactor);
 
         /**
          * @return The current velocity
-         */
-        Transform2D getVelocity();
-
-        /**
-         * Solve the ZMP equation
          */
         arma::vec2 zmpSolve(double zs, double z1, double z2, double x1, double x2, double phase1Single, double phase2Single, double stepTime, double zmpTime);
 
@@ -269,7 +233,7 @@ namespace motion {
          *
          * @return The torso position in Transform2D
          */
-        Transform2D zmpTorsoCompensation(double phase, arma::vec4 zmpCoefficients, arma::vec4 zmpParams, double stepTime, double zmpTime, double phase1Zmp, double phase2Zmp, Transform2D uSupport, Transform2D uLeftFootDestination, Transform2D uLeftFootSource, Transform2D uRightFootDestination, Transform2D uRightFootSource);
+        Transform2D zmpCom(double phase, arma::vec4 zmpCoefficients, arma::vec4 zmpParams, double stepTime, double zmpTime, double phase1Zmp, double phase2Zmp, Transform2D uSupport, Transform2D uLeftFootDestination, Transform2D uLeftFootSource, Transform2D uRightFootDestination, Transform2D uRightFootSource);
 
         /**
          * This is an easing function that returns 3 values {x,y,z} with the range [0,1]
@@ -282,17 +246,12 @@ namespace motion {
          * @param phase1Single The phase time between [0,1] to start the step. A value of 0.1 means the step will not start until phase is >= 0.1
          * @param phase2Single The phase time between [0,1] to end the step. A value of 0.9 means the step will end when phase >= 0.9
          */
-        arma::vec3 footPhase(double phase, double phase1Single, double phase2Single);
-
-        /**
-         * @return get a unix timestamp (in decimal seconds that are accurate to the microsecond)
-         */
+        
         double getTime();
 
         /**
          * @return A clamped between 0 and maxvalue, offset by deadband
          */
-        double linearInterpolationDeadband(double a, double deadband, double maxvalue);
     };
 
 }  // motion

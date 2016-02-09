@@ -17,8 +17,8 @@
  * Copyright 2013 NUBots <nubots@nubots.net>
  */
 
-#ifndef MODULES_MOTION_ModularWalkEngine_H
-#define MODULES_MOTION_ModularWalkEngine_H
+#ifndef MODULES_MOTION_FootMotionPlanner_H
+#define MODULES_MOTION_FootMotionPlanner_H
 
 #include <nuclear>
 #include <armadillo>
@@ -298,5 +298,5 @@ namespace motion {
 }  // motion
 }  // modules
 
-#endif  // MODULES_MOTION_ModularWalkEngine_H
+#endif  // MODULES_MOTION_FootMotionPlanner_H
 
