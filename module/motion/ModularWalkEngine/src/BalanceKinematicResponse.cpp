@@ -50,7 +50,7 @@ namespace motion
      *      @pre-condition  : <TODO: INSERT DESCRIPTION>
      *      @post-condition : <TODO: INSERT DESCRIPTION>
     */
-    void ModularWalkEngine::torsoZMP() //originally part of CalculateNewStep
+    void BalanceKinematicResponse::torsoZMP() //originally part of CalculateNewStep
     {
         uTorsoDestination = stepTorso(uLeftFootDestination, uRightFootDestination, 0.5);
 
@@ -82,7 +82,7 @@ namespace motion
         zmpCoefficients.rows(0,1) = zmpSolve(uSupport.x(), uTorsoSource.x(), uTorsoDestination.x(), uTorsoSource.x(), uTorsoDestination.x(), phase1Single, phase2Single, stepTime, zmpTime);
         zmpCoefficients.rows(2,3) = zmpSolve(uSupport.y(), uTorsoSource.y(), uTorsoDestination.y(), uTorsoSource.y(), uTorsoDestination.y(), phase1Single, phase2Single, stepTime, zmpTime);
     }
-        /*=======================================================================================================*/
+    /*=======================================================================================================*/
     //      NAME: zmpSolve
     /*=======================================================================================================*/
     /*
@@ -91,7 +91,7 @@ namespace motion
      *      @pre-condition  : <TODO: INSERT DESCRIPTION>
      *      @post-condition : <TODO: INSERT DESCRIPTION>
     */
-    arma::vec2 ModularWalkEngine::zmpSolve(double zs, double z1, double z2, double x1, double x2, double phase1Single, double phase2Single, double stepTime, double zmpTime) 
+    arma::vec2 BalanceKinematicResponse::zmpSolve(double zs, double z1, double z2, double x1, double x2, double phase1Single, double phase2Single, double stepTime, double zmpTime) 
     {
         /*
         Solves ZMP equations.
@@ -121,7 +121,7 @@ namespace motion
      *      @pre-condition  : <TODO: INSERT DESCRIPTION>
      *      @post-condition : <TODO: INSERT DESCRIPTION>
     */
-    Transform2D ModularWalkEngine::zmpTorsoCompensation(double phase, arma::vec4 zmpCoefficients, arma::vec4 zmpParams, double stepTime, double zmpTime, double phase1Single, double phase2Single, Transform2D uSupport, Transform2D uLeftFootDestination, Transform2D uLeftFootSource, Transform2D uRightFootDestination, Transform2D uRightFootSource) 
+    Transform2D BalanceKinematicResponse::zmpTorsoCompensation(double phase, arma::vec4 zmpCoefficients, arma::vec4 zmpParams, double stepTime, double zmpTime, double phase1Single, double phase2Single, Transform2D uSupport, Transform2D uLeftFootDestination, Transform2D uLeftFootSource, Transform2D uRightFootDestination, Transform2D uRightFootSource) 
     {
         Transform2D com = {0, 0, 0};
         double expT = std::exp(stepTime * phase / zmpTime);
@@ -151,7 +151,7 @@ namespace motion
      *      @pre-condition  : <TODO: INSERT DESCRIPTION>
      *      @post-condition : <TODO: INSERT DESCRIPTION>
     */
-	void ModularWalkEngine::hipRollCompensation(arma::vec3 footPhases, LimbID swingLeg, Transform3D rightFootT, Transform3D leftFootT) 
+	void BalanceKinematicResponse::hipRollCompensation(arma::vec3 footPhases, LimbID swingLeg, Transform3D rightFootT, Transform3D leftFootT) 
     {
         //If feature enabled, apply balance compensation through support actuator...
         if (balanceEnabled) 
@@ -179,7 +179,7 @@ namespace motion
      *      @pre-condition  : <TODO: INSERT DESCRIPTION>
      *      @post-condition : <TODO: INSERT DESCRIPTION>
     */
-     void ModularWalkEngine::supportFootCompensation(LimbID swingLeg, Transform3D rightFootT, Transform3D leftFootT) 
+     void BalanceKinematicResponse::supportFootCompensation(LimbID swingLeg, Transform3D rightFootT, Transform3D leftFootT) 
     {
         //If feature enabled, apply balance compensation through support actuator...
         if (balanceEnabled) 

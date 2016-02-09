@@ -50,7 +50,7 @@ namespace motion
      *      @pre-condition  : <TODO: INSERT DESCRIPTION>
      *      @post-condition : <TODO: INSERT DESCRIPTION>
     */
-	std::unique_ptr<std::vector<ServoCommand>> ModularWalkEngine::updateUpperBody(double phase, const Sensors& sensors) 
+	std::unique_ptr<std::vector<ServoCommand>> UpperKinematicResponse::updateUpperBody(double phase, const Sensors& sensors) 
 	{
 		//Interpret robot's zero point reference from torso for positional transformation into relative space...
         uTorsoLocal = zmpTorsoCompensation(phase, zmpCoefficients, zmpParams, stepTime, zmpTime, phase1Single, phase2Single, uSupport, uLeftFootDestination, uLeftFootSource, uRightFootDestination, uRightFootSource);
@@ -78,7 +78,7 @@ namespace motion
      *      @pre-condition  : <TODO: INSERT DESCRIPTION>
      *      @post-condition : <TODO: INSERT DESCRIPTION>
     */
-    Transform2D ModularWalkEngine::stepTorso(Transform2D uLeftFoot, Transform2D uRightFoot, double shiftFactor) 
+    Transform2D UpperKinematicResponse::stepTorso(Transform2D uLeftFoot, Transform2D uRightFoot, double shiftFactor) 
     {
         Transform2D uLeftFootSupport  = uLeftFoot.localToWorld({-footOffset[0], -footOffset[1], 0});
         Transform2D uRightFootSupport = uRightFoot.localToWorld({-footOffset[0], footOffset[1], 0});
@@ -93,7 +93,7 @@ namespace motion
      *      @pre-condition  : <TODO: INSERT DESCRIPTION>
      *      @post-condition : <TODO: INSERT DESCRIPTION>
     */
-    std::unique_ptr<std::vector<ServoCommand>> ModularWalkEngine::motionArms(double phase) 
+    std::unique_ptr<std::vector<ServoCommand>> UpperKinematicResponse::motionArms(double phase) 
     {
         // Converts the phase into a sine wave that oscillates between 0 and 1 with a period of 2 phases
         double easing = std::sin(M_PI * phase - M_PI / 2.0) / 2.0 + 0.5;

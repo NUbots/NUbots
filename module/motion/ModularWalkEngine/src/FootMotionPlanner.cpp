@@ -50,7 +50,7 @@ namespace motion
      *      @pre-condition  : <TODO: INSERT DESCRIPTION>
      *      @post-condition : <TODO: INSERT DESCRIPTION>
     */
-    arma::vec3 ModularWalkEngine::footPhase(double phase, double phase1Single, double phase2Single) 
+    arma::vec3 FootMotionPlanner::footPhase(double phase, double phase1Single, double phase2Single) 
     {
         // Computes relative x,z motion of foot during single support phase
         // phSingle = 0: x=0, z=0, phSingle = 1: x=1,z=0
@@ -70,7 +70,7 @@ namespace motion
      *      @pre-condition  : <TODO: INSERT DESCRIPTION>
      *      @post-condition : <TODO: INSERT DESCRIPTION>
     */
-    std::pair<Transform3D, Transform3D> ModularWalkEngine::updateFootPosition(double phase, auto leftFootDestination, auto rightFootDestination) 
+    std::pair<Transform3D, Transform3D> FootMotionPlanner::updateFootPosition(double phase, auto leftFootDestination, auto rightFootDestination) 
     {
         //Instantiate unitless phases for x(=0), y(=1) and z(=2) foot motion...
         arma::vec3 footPhases = footPhase(phase, phase1Single, phase2Single);
