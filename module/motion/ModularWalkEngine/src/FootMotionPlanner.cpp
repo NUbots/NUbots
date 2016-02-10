@@ -55,6 +55,14 @@ namespace motion
         });
 
         reset();
+
+        on<Trigger<DisableWalkEngineCommand>>().then([this] 
+        {
+            // Nobody needs the walk engine, so we stop updating it.
+            updateHandle.disable(); 
+
+            // TODO: Also disable the other walk command reactions?
+        });
     }
     /*=======================================================================================================*/
     //      NAME: footPhase
@@ -76,21 +84,7 @@ namespace motion
 
         return {xf, phaseSingle, zf};
     }
-    /*=======================================================================================================*/
-    //      NAME: stepTorso
-    /*=======================================================================================================*/
-    /*
-     *      @input  : <TODO: INSERT DESCRIPTION>
-     *      @output : <TODO: INSERT DESCRIPTION>
-     *      @pre-condition  : <TODO: INSERT DESCRIPTION>
-     *      @post-condition : <TODO: INSERT DESCRIPTION>
-    */
-    Transform2D FootMotionPlanner::stepTorso(Transform2D uLeftFoot, Transform2D uRightFoot, double shiftFactor) 
-    {
-        Transform2D uLeftFootSupport  = uLeftFoot.localToWorld({-footOffset[0], -footOffset[1], 0});
-        Transform2D uRightFootSupport = uRightFoot.localToWorld({-footOffset[0], footOffset[1], 0});
-        return uLeftFootSupport.interpolate(shiftFactor, uRightFootSupport);
-    }
+
     /*=======================================================================================================*/
     //      NAME: updateFootPosition
     /*=======================================================================================================*/
