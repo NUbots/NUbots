@@ -44,10 +44,8 @@ namespace motion
 
     FootMotionPlanner::FootMotionPlanner(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) 
     {
-        
         updateHandle = on<Every<UPDATE_FREQUENCY, Per<std::chrono::seconds>>, With<Sensors>, Single, Priority::HIGH>()
-        .then([this](const Sensors& sensors) 
-        {
+        .then([this](const Sensors& sensors) {
             update(sensors);
         }).disable();
 
@@ -56,7 +54,7 @@ namespace motion
             configure(config.config);
         });
 
-          reset();
+        reset();
     }
     /*=======================================================================================================*/
     //      NAME: footPhase
@@ -67,7 +65,7 @@ namespace motion
      *      @pre-condition  : <TODO: INSERT DESCRIPTION>
      *      @post-condition : <TODO: INSERT DESCRIPTION>
     */
-    arma::vec3 ModularWalkEngine::footPhase(double phase, double phase1Single, double phase2Single) 
+    arma::vec3 FootMotionPlanner::footPhase(double phase, double phase1Single, double phase2Single) 
     {
         // Computes relative x,z motion of foot during single support phase
         // phSingle = 0: x=0, z=0, phSingle = 1: x=1,z=0
@@ -87,7 +85,7 @@ namespace motion
      *      @pre-condition  : <TODO: INSERT DESCRIPTION>
      *      @post-condition : <TODO: INSERT DESCRIPTION>
     */
-    Transform2D ModularWalkEngine::stepTorso(Transform2D uLeftFoot, Transform2D uRightFoot, double shiftFactor) 
+    Transform2D FootMotionPlanner::stepTorso(Transform2D uLeftFoot, Transform2D uRightFoot, double shiftFactor) 
     {
         Transform2D uLeftFootSupport  = uLeftFoot.localToWorld({-footOffset[0], -footOffset[1], 0});
         Transform2D uRightFootSupport = uRightFoot.localToWorld({-footOffset[0], footOffset[1], 0});
@@ -102,7 +100,7 @@ namespace motion
      *      @pre-condition  : <TODO: INSERT DESCRIPTION>
      *      @post-condition : <TODO: INSERT DESCRIPTION>
     */
-    std::pair<Transform3D, Transform3D> ModularWalkEngine::updateFootPosition(double phase, auto leftFootDestination, auto rightFootDestination) 
+    void FootMotionPlanner::updateFootPosition(double phase, auto leftFootDestination, auto rightFootDestination) 
     {
         //Instantiate unitless phases for x(=0), y(=1) and z(=2) foot motion...
         arma::vec3 footPhases = footPhase(phase, phase1Single, phase2Single);
@@ -152,7 +150,7 @@ namespace motion
             emit(graph("Foot phase motion", phase));
         }
 
-        return {leftFootLocal, rightFootLocal};
+        emit({phase, leftFootLocal, rightFootLocal});
     }
 }  // motion
 }  // modules
