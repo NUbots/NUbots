@@ -1,20 +1,20 @@
 /*----------------------------------------------DOCUMENT HEADER----------------------------------------------*/
 /*===========================================================================================================*/
 /*
- * This file is part of ModularWalkEngine.
+ * This file is part of FootPlacementPlanner.
  *
- * ModularWalkEngine is free software: you can redistribute it and/or modify
+ * FootPlacementPlanner is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * ModularWalkEngine is distributed in the hope that it will be useful,
+ * FootPlacementPlanner is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with ModularWalkEngine.  If not, see <http://www.gnu.org/licenses/>.
+ * along with FootPlacementPlanner.  If not, see <http://www.gnu.org/licenses/>.
  *
  * Copyright 2013 NUBots <nubots@nubots.net>
  */
@@ -97,7 +97,7 @@ namespace motion
      *      @pre-condition  : <TODO: INSERT DESCRIPTION>
      *      @post-condition : <TODO: INSERT DESCRIPTION>
     */
-    void ModularWalkEngine::configure(const YAML::Node& config)
+    void FootPlacementPlanner::configure(const YAML::Node& config)
     {
         emitLocalisation = config["emit_localisation"].as<bool>();
 
@@ -202,7 +202,7 @@ namespace motion
      *      @pre-condition  : <TODO: INSERT DESCRIPTION>
      *      @post-condition : <TODO: INSERT DESCRIPTION>
     */
-    void ModularWalkEngine::start() 
+    void FootPlacementPlanner::start() 
     {
         if (state != State::WALKING) 
         {
@@ -221,7 +221,7 @@ namespace motion
      *      @pre-condition  : <TODO: INSERT DESCRIPTION>
      *      @post-condition : <TODO: INSERT DESCRIPTION>
     */
-    void ModularWalkEngine::requestStop() 
+    void FootPlacementPlanner::requestStop() 
     {
         // always stops with feet together (which helps transition)
         if (state == State::WALKING) 
@@ -238,7 +238,7 @@ namespace motion
      *      @pre-condition  : <TODO: INSERT DESCRIPTION>
      *      @post-condition : <TODO: INSERT DESCRIPTION>
     */
-    void ModularWalkEngine::stop() 
+    void FootPlacementPlanner::stop() 
     {
         state = State::STOPPED;
         // emit(std::make_unique<ActionPriorites>(ActionPriorites { subsumptionId, { 0, 0 }})); // TODO: config
@@ -410,7 +410,7 @@ namespace motion
         return velocityCurrent;
     }
 
-}  // modulesvoid ModularWalkEngine::stanceReset() 
+}  // modulesvoid FootPlacementPlanner::stanceReset() 
     {
         // standup/sitdown/falldown handling
         if (startFromStep) 
@@ -454,7 +454,7 @@ namespace motion
      *      @pre-condition  : <TODO: INSERT DESCRIPTION>
      *      @post-condition : <TODO: INSERT DESCRIPTION>
     */
-    void ModularWalkEngine::reset() 
+    void FootPlacementPlanner::reset() 
     {
         uTorso = {-footOffset[0], 0, 0};
         uLeftFoot = {0, DarwinModel::Leg::HIP_OFFSET_Y, 0};

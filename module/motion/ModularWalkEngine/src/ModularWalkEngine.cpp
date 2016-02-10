@@ -401,7 +401,7 @@ namespace motion
     */
     void ModularWalkEngine::update(const Sensors& sensors) 
     {
-        double now = getTime();
+        //double now = getTime();
 
         if (state == State::STOPPED) 
         {
@@ -409,18 +409,18 @@ namespace motion
             return;
         }
 
-        // The phase of the current step, range: [0,1]...
-        double phase = (now - beginStepTime) / stepTime;
+        /* The phase of the current step, range: [0,1]...
+        double phase = (now - beginStepTime) / stepTime;*/
 
-        bool newStep = false;
+        //bool newStep = false;
 
-        //Bind phase value to range [0,1], assume initiation new step...
+        /*Bind phase value to range [0,1], assume initiation new step...
         if (phase > 1) 
         {
             phase = std::fmod(phase, 1);
             beginStepTime += stepTime;
             newStep = true;
-        }
+        }*/
 
         if (newStep && state == State::LAST_STEP) 
         {
@@ -428,11 +428,11 @@ namespace motion
             return;
         }
 
-        //Compute FootSource and FootDestination for this step
+        /*Compute FootSource and FootDestination for this step
         if (newStep) 
         {
             calculateNewStep();
-        }
+        }*/
 
         auto joints = calculateLegJointsTeamDarwin<DarwinModel>(leftFootTorso, rightFootTorso);
         auto robotWaypoints = updateLowerBody(phase, sensors);

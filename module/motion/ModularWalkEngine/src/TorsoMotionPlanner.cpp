@@ -1,19 +1,19 @@
 /*===========================================================================================================*/
 /*
- * This file is part of ModularWalkEngine.
+ * This file is part of TorsoMotionPlanner.
  *
- * ModularWalkEngine is free software: you can redistribute it and/or modify
+ * TorsoMotionPlanner is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * ModularWalkEngine is distributed in the hope that it will be useful,
+ * TorsoMotionPlanner is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with ModularWalkEngine.  If not, see <http://www.gnu.org/licenses/>.
+ * along with TorsoMotionPlanner.  If not, see <http://www.gnu.org/licenses/>.
  *
  * Copyright 2013 NUBots <nubots@nubots.net>
  */
@@ -87,7 +87,7 @@ namespace motion
     using utility::nubugger::graph;
     using utility::support::Expression;
     /*=======================================================================================================*/
-    //      NAME: ModularWalkEngine
+    //      NAME: TorsoMotionPlanner
     /*=======================================================================================================*/
     /*
      *      @input  : <TODO: INSERT DESCRIPTION>
@@ -106,7 +106,7 @@ namespace motion
         on<Trigger<NewStep>>().then([this] 
         {
             torsoZMP();
-        }
+        });
     }
 
     void TorsoMotionPlanner::updateTorsoPosition()
@@ -123,7 +123,7 @@ namespace motion
      *      @pre-condition  : <TODO: INSERT DESCRIPTION>
      *      @post-condition : <TODO: INSERT DESCRIPTION>
     */
-    void ModularWalkEngine::torsoZMP() //originally part of CalculateNewStep
+    void TorsoMotionPlanner::torsoZMP() //originally part of CalculateNewStep
     {
         uTorsoDestination = stepTorso(uLeftFootDestination, uRightFootDestination, 0.5);
 
@@ -148,7 +148,7 @@ namespace motion
      *      @pre-condition  : <TODO: INSERT DESCRIPTION>
      *      @post-condition : <TODO: INSERT DESCRIPTION>
     */
-    arma::vec2 ModularWalkEngine::zmpSolve(double zs, double z1, double z2, double x1, double x2, double phase1Single, double phase2Single, double stepTime, double zmpTime) 
+    arma::vec2 TorsoMotionPlanner::zmpSolve(double zs, double z1, double z2, double x1, double x2, double phase1Single, double phase2Single, double stepTime, double zmpTime) 
     {
         /*
         Solves ZMP equations.
@@ -178,7 +178,7 @@ namespace motion
      *      @pre-condition  : <TODO: INSERT DESCRIPTION>
      *      @post-condition : <TODO: INSERT DESCRIPTION>
     */
-    Transform2D ModularWalkEngine::zmpTorsoCompensation(double phase, arma::vec4 zmpCoefficients, arma::vec4 zmpParams, double stepTime, double zmpTime, double phase1Single, double phase2Single, Transform2D uSupport, Transform2D uLeftFootDestination, Transform2D uLeftFootSource, Transform2D uRightFootDestination, Transform2D uRightFootSource) 
+    Transform2D TorsoMotionPlanner::zmpTorsoCompensation(double phase, arma::vec4 zmpCoefficients, arma::vec4 zmpParams, double stepTime, double zmpTime, double phase1Single, double phase2Single, Transform2D uSupport, Transform2D uLeftFootDestination, Transform2D uLeftFootSource, Transform2D uRightFootDestination, Transform2D uRightFootSource) 
     {
         Transform2D com = {0, 0, 0};
         double expT = std::exp(stepTime * phase / zmpTime);
