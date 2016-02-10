@@ -69,6 +69,7 @@ namespace motion
         //TODO: improve accuracy of compensation movement in upper body...
         emit(motionArms(phase));
     }
+<<<<<<< HEAD
     /*=======================================================================================================*/
     //      NAME: stepTorso
     /*=======================================================================================================*/
@@ -84,6 +85,9 @@ namespace motion
         Transform2D uRightFootSupport = uRightFoot.localToWorld({-footOffset[0], footOffset[1], 0});
         return uLeftFootSupport.interpolate(shiftFactor, uRightFootSupport);
     }
+=======
+
+>>>>>>> a0da7c550114069741abb76b19f955c5fba0d2d3
     /*=======================================================================================================*/
     //      NAME: motionArms
     /*=======================================================================================================*/

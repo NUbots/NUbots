@@ -105,13 +105,34 @@ namespace motion
 
         on<Trigger<NewStep>>().then([this] 
         {
+<<<<<<< HEAD
             torsoZMP();
         });
+=======
+            zmpCoefficients();
+        }
+>>>>>>> a0da7c550114069741abb76b19f955c5fba0d2d3
     }
 
     void TorsoMotionPlanner::updateTorsoPosition()
     {
-        uTorso = zmpCom(phase, zmpCoefficients, zmpParams, stepTime, zmpTime, phase1Single, phase2Single, uSupport, uLeftFootDestination, uLeftFootSource, uRightFootDestination, uRightFootSource);
+        uTorso = zmpTorsoCompensation(phase, zmpCoefficients, zmpParams, stepTime, zmpTime, phase1Single, phase2Single, uSupport, uLeftFootDestination, uLeftFootSource, uRightFootDestination, uRightFootSource);
+    }
+
+    /*=======================================================================================================*/
+    //      NAME: stepTorso
+    /*=======================================================================================================*/
+    /*
+     *      @input  : <TODO: INSERT DESCRIPTION>
+     *      @output : <TODO: INSERT DESCRIPTION>
+     *      @pre-condition  : <TODO: INSERT DESCRIPTION>
+     *      @post-condition : <TODO: INSERT DESCRIPTION>
+    */
+    Transform2D FootMotionPlanner::stepTorso(Transform2D uLeftFoot, Transform2D uRightFoot, double shiftFactor) 
+    {
+        Transform2D uLeftFootSupport  = uLeftFoot.localToWorld({-footOffset[0], -footOffset[1], 0});
+        Transform2D uRightFootSupport = uRightFoot.localToWorld({-footOffset[0], footOffset[1], 0});
+        return uLeftFootSupport.interpolate(shiftFactor, uRightFootSupport);
     }
 
     /*=======================================================================================================*/
@@ -123,7 +144,11 @@ namespace motion
      *      @pre-condition  : <TODO: INSERT DESCRIPTION>
      *      @post-condition : <TODO: INSERT DESCRIPTION>
     */
+<<<<<<< HEAD
     void TorsoMotionPlanner::torsoZMP() //originally part of CalculateNewStep
+=======
+    void ModularWalkEngine::zmpCoefficients() //originally part of CalculateNewStep
+>>>>>>> a0da7c550114069741abb76b19f955c5fba0d2d3
     {
         uTorsoDestination = stepTorso(uLeftFootDestination, uRightFootDestination, 0.5);
 
@@ -139,7 +164,7 @@ namespace motion
         zmpCoefficients.rows(0,1) = zmpSolve(uSupport.x(), uTorsoSource.x(), uTorsoDestination.x(), uTorsoSource.x(), uTorsoDestination.x(), phase1Single, phase2Single, stepTime, zmpTime);
         zmpCoefficients.rows(2,3) = zmpSolve(uSupport.y(), uTorsoSource.y(), uTorsoDestination.y(), uTorsoSource.y(), uTorsoDestination.y(), phase1Single, phase2Single, stepTime, zmpTime);
     }
-        /*=======================================================================================================*/
+    /*=======================================================================================================*/
     //      NAME: zmpSolve
     /*=======================================================================================================*/
     /*
@@ -148,7 +173,11 @@ namespace motion
      *      @pre-condition  : <TODO: INSERT DESCRIPTION>
      *      @post-condition : <TODO: INSERT DESCRIPTION>
     */
+<<<<<<< HEAD
     arma::vec2 TorsoMotionPlanner::zmpSolve(double zs, double z1, double z2, double x1, double x2, double phase1Single, double phase2Single, double stepTime, double zmpTime) 
+=======
+    arma::vec2 ModularWalkEngine::zmpTorsoCompensation(double zs, double z1, double z2, double x1, double x2, double phase1Single, double phase2Single, double stepTime, double zmpTime) 
+>>>>>>> a0da7c550114069741abb76b19f955c5fba0d2d3
     {
         /*
         Solves ZMP equations.
