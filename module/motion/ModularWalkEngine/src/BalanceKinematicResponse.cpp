@@ -41,9 +41,13 @@ namespace motion
     using utility::motion::kinematics::DarwinModel;
     using utility::math::matrix::Transform2D;
     using utility::nubugger::graph;
+<<<<<<< d07c1d138e6fd9fbe83afad4f4e877e4b814ea95
 <<<<<<< 3b87f3cda74870e5b6ca278b79d41f45e3932336
     
 =======
+=======
+<<<<<<< HEAD
+>>>>>>> Merging Changes
     /*=======================================================================================================*/
     //      NAME: torsoZMP
     /*=======================================================================================================*/
@@ -145,7 +149,13 @@ namespace motion
         com.angle() = phase * (uLeftFootDestination.angle() + uRightFootDestination.angle()) / 2 + (1 - phase) * (uLeftFootSource.angle() + uRightFootSource.angle()) / 2;
         return com;
     }
+<<<<<<< d07c1d138e6fd9fbe83afad4f4e877e4b814ea95
 >>>>>>> Remodelling...
+=======
+=======
+    
+>>>>>>> 38f588c4f50f3dc4b0637d4cf061a37535e6567d
+>>>>>>> Merging Changes
     /*=======================================================================================================*/
     //      NAME: hipRollCompensation
     /*=======================================================================================================*/

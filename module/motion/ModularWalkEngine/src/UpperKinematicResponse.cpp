@@ -69,9 +69,13 @@ namespace motion
         //TODO: improve accuracy of compensation movement in upper body...
         return (motionArms(phase));
     }
+<<<<<<< d07c1d138e6fd9fbe83afad4f4e877e4b814ea95
 <<<<<<< 3b87f3cda74870e5b6ca278b79d41f45e3932336
     
 =======
+=======
+<<<<<<< HEAD
+>>>>>>> Merging Changes
     /*=======================================================================================================*/
     //      NAME: stepTorso
     /*=======================================================================================================*/
@@ -87,7 +91,13 @@ namespace motion
         Transform2D uRightFootSupport = uRightFoot.localToWorld({-footOffset[0], footOffset[1], 0});
         return uLeftFootSupport.interpolate(shiftFactor, uRightFootSupport);
     }
+<<<<<<< d07c1d138e6fd9fbe83afad4f4e877e4b814ea95
 >>>>>>> Remodelling...
+=======
+=======
+    
+>>>>>>> 38f588c4f50f3dc4b0637d4cf061a37535e6567d
+>>>>>>> Merging Changes
     /*=======================================================================================================*/
     //      NAME: motionArms
     /*=======================================================================================================*/
