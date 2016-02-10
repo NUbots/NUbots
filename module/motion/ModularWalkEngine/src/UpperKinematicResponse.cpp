@@ -69,6 +69,7 @@ namespace motion
         //TODO: improve accuracy of compensation movement in upper body...
         emit(motionArms(phase));
     }
+<<<<<<< cdf96fbdd5a07a2529fcd01d4c07dd1dfe64510f
 <<<<<<< db55d1c8d9b8fa6645e5f0f1e7cf0d56eb5d6f4c
 <<<<<<< d07c1d138e6fd9fbe83afad4f4e877e4b814ea95
 <<<<<<< 3b87f3cda74870e5b6ca278b79d41f45e3932336
@@ -104,6 +105,9 @@ namespace motion
 >>>>>>> Merging Changes
 =======
 >>>>>>> Motion Planner expansion, emission, and further modification
+=======
+
+>>>>>>> Added messages between modules
     /*=======================================================================================================*/
     //      NAME: motionArms
     /*=======================================================================================================*/

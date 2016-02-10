@@ -62,6 +62,24 @@ namespace motion {
         DisableWalkEngineCommand(size_t id) : subsumptionId(id) { }
         size_t subsumptionId = 1;
     };
+    struct FootMotionUpdate
+    {
+        FootMotionUpdate() = delete;
+        FootMotionUpdate(
+            double phase, Transform2D leftFoot, Transform2D rightFoot))
+    }
+    struct FootMotionUpdate 
+    {
+        FootMotionUpdate() = delete;
+            double phase;
+            Transform2D leftFoot;
+            Transform2D rightFoot;
+        FootMotionUpdate(double phase, Transform2D leftFoot, Transform2D rightFoot)
+            : phase(phase)
+            , leftFoot(leftFoot)
+            , rightFoot(rightFoot) {}
+    };
+
 }
 }
 

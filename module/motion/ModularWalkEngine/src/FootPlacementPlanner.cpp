@@ -70,7 +70,7 @@ namespace motion
             setVelocity(velocity);
         });
 
-        on<Trigger<WalkStartCommand>>().then([this] {
+        updateHandle = on<Trigger<WalkStartCommand>>().then([this] {
             lastVeloctiyUpdateTime = NUClear::clock::now();
             start();
             // emit(std::make_unique<ActionPriorites>(ActionPriorites { subsumptionId, { 25, 10 }})); // TODO: config
@@ -82,7 +82,7 @@ namespace motion
             requestStop();
         });
 
-        on updateHandle = on<Trigger<RequestNewStep>>().then([this] {
+        on updateHandle = on<Trigger<StepCompleted>>().then([this] {
             calculateNewStep();
         }
 
@@ -211,6 +211,7 @@ namespace motion
             initialStep = 2;
             state = State::WALKING;
         }
+        calculateNewStep();
     }
     /*=======================================================================================================*/
     //      NAME: requestStop
@@ -305,7 +306,7 @@ namespace motion
             Transform2D uTorsoModded = uTorso.localToWorld({supportMod[0], supportMod[1], 0});
             Transform2D uLeftFootModded = uTorsoModded.localToWorld(uLeftFootTorso);
             uSupport = uLeftFootModded.localToWorld({-footOffset[0], -footOffset[1], 0});
-            emit(uRightFootDestination,swingLeg);
+            emit(uRightFootDestination,swingLeg); //Trigger NewStep
 
         }
         else 
@@ -314,8 +315,10 @@ namespace motion
             Transform2D uTorsoModded = uTorso.localToWorld({supportMod[0], supportMod[1], 0});
             Transform2D uRightFootModded = uTorsoModded.localToWorld(uRightFootTorso);
             uSupport = uRightFootModded.localToWorld({-footOffset[0], footOffset[1], 0});
-            emit(uLeftFootDestination,swingLeg);
+            emit(uLeftFootDestination,swingLeg); //NewStep
         }
+
+        emit(uLeftFootSource,uRightFootSource,uLeftFootDestination,uRightFootDestination,uSupport); //Torso Information
 
 
 

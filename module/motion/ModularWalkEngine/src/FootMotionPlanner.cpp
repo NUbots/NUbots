@@ -69,6 +69,14 @@ namespace motion
         });
 
         reset();
+
+        on<Trigger<DisableWalkEngineCommand>>().then([this] 
+        {
+            // Nobody needs the walk engine, so we stop updating it.
+            updateHandle.disable(); 
+
+            // TODO: Also disable the other walk command reactions?
+        });
     }
     /*=======================================================================================================*/
     //      NAME: getTime
@@ -137,6 +145,7 @@ namespace motion
         setNewStepReceived(true);
         leftFootDestination.push(inLeftFootDestination);
     }
+<<<<<<< cdf96fbdd5a07a2529fcd01d4c07dd1dfe64510f
     /*=======================================================================================================*/
     //      NAME: getRightFootDestination
     /*=======================================================================================================*/
@@ -250,6 +259,9 @@ namespace motion
 
         return {xf, phaseSingle, zf};
     }
+=======
+
+>>>>>>> Added messages between modules
     /*=======================================================================================================*/
     //      NAME: updateFootPosition
     /*=======================================================================================================*/
