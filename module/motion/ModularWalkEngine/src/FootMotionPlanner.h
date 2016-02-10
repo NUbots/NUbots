@@ -101,8 +101,13 @@ namespace motion {
         // bool interrupted;
         // TODO: ???
         bool startFromStep;
-        // The time when the current step begun
-        double beginStepTime;
+        // Update to step is received
+        bool updateStepInstruction;
+        // The time when the current is to be completed
+        double destinationTime;
+        // Destination placement Transform2D values
+        std::queue<Transform2D> leftFootDestination
+        std::queue<Transform2D> rightFootDestination
         // How to many 'steps' to take before lifting a foot when starting to walk
         int initialStep;
         // Current torso position

@@ -50,7 +50,7 @@ namespace motion
      *      @pre-condition  : <TODO: INSERT DESCRIPTION>
      *      @post-condition : <TODO: INSERT DESCRIPTION>
     */
-	std::unique_ptr<std::vector<ServoCommand>> UpperKinematicResponse::updateUpperBody(double phase, const Sensors& sensors) 
+	void UpperKinematicResponse::updateUpperBody(double phase, const Sensors& sensors) 
 	{
 		//Interpret robot's zero point reference from torso for positional transformation into relative space...
         uTorsoLocal = zmpTorsoCompensation(phase, zmpCoefficients, zmpParams, stepTime, zmpTime, phase1Single, phase2Single, uSupport, uLeftFootDestination, uLeftFootSource, uRightFootDestination, uRightFootSource);
@@ -67,8 +67,9 @@ namespace motion
             localise(uTorsoWorld);
         }
         //TODO: improve accuracy of compensation movement in upper body...
-        return (motionArms(phase));
+        emit(motionArms(phase));
     }
+<<<<<<< db55d1c8d9b8fa6645e5f0f1e7cf0d56eb5d6f4c
 <<<<<<< d07c1d138e6fd9fbe83afad4f4e877e4b814ea95
 <<<<<<< 3b87f3cda74870e5b6ca278b79d41f45e3932336
     
@@ -76,6 +77,8 @@ namespace motion
 =======
 <<<<<<< HEAD
 >>>>>>> Merging Changes
+=======
+>>>>>>> Motion Planner expansion, emission, and further modification
     /*=======================================================================================================*/
     //      NAME: stepTorso
     /*=======================================================================================================*/
@@ -91,6 +94,7 @@ namespace motion
         Transform2D uRightFootSupport = uRightFoot.localToWorld({-footOffset[0], footOffset[1], 0});
         return uLeftFootSupport.interpolate(shiftFactor, uRightFootSupport);
     }
+<<<<<<< db55d1c8d9b8fa6645e5f0f1e7cf0d56eb5d6f4c
 <<<<<<< d07c1d138e6fd9fbe83afad4f4e877e4b814ea95
 >>>>>>> Remodelling...
 =======
@@ -98,6 +102,8 @@ namespace motion
     
 >>>>>>> 38f588c4f50f3dc4b0637d4cf061a37535e6567d
 >>>>>>> Merging Changes
+=======
+>>>>>>> Motion Planner expansion, emission, and further modification
     /*=======================================================================================================*/
     //      NAME: motionArms
     /*=======================================================================================================*/
