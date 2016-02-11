@@ -60,11 +60,12 @@ namespace motion {
             foot_separation = config["foot_separation"].as<Expression>();
 			body_angle = config["body_angle"].as<Expression>();
 			
-			float test_yaw = config["test_yaw"].as<Expression>();
-			float test_pitch = config["test_pitch"].as<Expression>();
-			arma::vec3 test_pos = config["test_pos"].as<arma::vec>();
-
-			testHeadPose = Transform3D::createTranslation(test_pos) * Transform3D::createRotationZ(test_yaw) * Transform3D::createRotationY(test_pitch);
+			float yaw = config["robot_to_head"]["yaw"].as<Expression>();
+			float pitch = config["robot_to_head"]["pitch"].as<Expression>();
+			arma::vec3 pos = config["robot_to_head"]["pos"].as<arma::vec>();
+            
+            robot_to_head_scale = config["robot_to_head"]["scale"].as<Expression>();
+			robot_to_head = Transform3D::createTranslation(test_pos) * Transform3D::createRotationZ(test_yaw) * Transform3D::createRotationY(test_pitch);
 
 			l_arm = config["l_arm"].as<arma::vec>(); 
 			r_arm = config["r_arm"].as<arma::vec>();
@@ -73,7 +74,9 @@ namespace motion {
 
         });
 
-        on<Every<60,Per<std::chrono::seconds>>, With<Sensors>, Single>().then([this](const Sensors& sensors){
+        on<Every<60,Per<std::chrono::seconds>>, With<Sensors>, With<PresenceUserState>, Single
+        >().then([this](const Sensors& sensors
+                        const PresenceUserState& user){
 			
         	//Record current arm position:
         	arma::vec3 prevArmJointsL = {
@@ -90,7 +93,9 @@ namespace motion {
 			//Adjust arm position
         	int max_number_of_iterations = 20;
 
-			auto joints = utility::motion::kinematics::setHeadPoseFromFeet<DarwinModel>(testHeadPose, foot_separation, body_angle);
+            Transform3D robotCamPose = user.camPose;
+            robotCamPose.translation() = robot_to_head_scale * robotCamPose.translation()
+			auto joints = utility::motion::kinematics::setHeadPoseFromFeet<DarwinModel>(robotCamPose * robot_to_head, foot_separation, body_angle);
         	
             //TODO: fix arms
         	// auto arm_jointsL = utility::motion::kinematics::setArm<DarwinModel>(l_arm, true, max_number_of_iterations, prevArmJointsL);

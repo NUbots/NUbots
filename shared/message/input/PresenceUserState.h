@@ -20,14 +20,14 @@
 #ifndef MESSAGE_INPUT_PRESENCE_USER_STATE_H
 #define MESSAGE_INPUT_PRESENCE_USER_STATE_H
 
-#include <string>
+#include <armadillo> 
 
 namespace message {
     namespace input {
         struct PresenceUserState {
-            arma::mat44 camPose;
-            arma::vec3 lArmFromCam;
-            arma::vec3 rArmFromCam;
+            arma::mat44 headPose;
+            // arma::vec3 lArmFromHead;
+            // arma::vec3 rArmFromHead;
         };
     }
 }

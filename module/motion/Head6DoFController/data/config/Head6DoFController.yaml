@@ -1,9 +1,11 @@
 foot_separation: 0.10
 body_angle: 0.0
 
-test_yaw: 0
-test_pitch: 0
-test_pos: [0,0,0.4]
+robot_to_head:
+  yaw: 0
+  pitch: 0
+  pos: [0.4,0,0.4]
+  scale: 0.1
 
 
 l_arm: [0.1,0.15,0.05]
