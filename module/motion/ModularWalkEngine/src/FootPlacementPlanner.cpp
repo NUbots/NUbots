@@ -323,8 +323,9 @@ namespace motion
             emit(std::make_unique<FootStepTarget(swingLeg, getTime() + stepTime, uLeftFootDestination)>); //Trigger NewStep
         }
 
-        emit(uLeftFootSource,uRightFootSource,uLeftFootDestination,uRightFootDestination,uSupport); //Torso Information
+        emit(std:make_unique<NewStepTorso>(uLeftFootSource,uRightFootSource,uLeftFootDestination,uRightFootDestination,uSupport); //Torso Information
         //emit destinations for fmp and/or zmp
+        //may combine NewStep and NewStepTorso
     }
     /*=======================================================================================================*/
     //      NAME: getNewFootTarget

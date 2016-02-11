@@ -41,6 +41,18 @@ namespace motion
     using utility::motion::kinematics::DarwinModel;
     using utility::math::matrix::Transform2D;
     using utility::nubugger::graph;
+
+    UpperKinematicResponse::UpperKinematicResponse()
+    {
+        on<Trigger<TorsoUpdate>>().then([this] 
+        {
+            updateUpperBody();
+        });
+        on<Trigger<PhaseUpdate>>().then([this]
+        {
+            updatePhase();
+        });
+    }
     /*=======================================================================================================*/
     //      NAME: updateUpperBody
     /*=======================================================================================================*/
@@ -52,16 +64,7 @@ namespace motion
     */
 	void UpperKinematicResponse::updateUpperBody(double phase, const Sensors& sensors) 
 	{
-		//Interpret robot's zero point reference from torso for positional transformation into relative space...
-        uTorsoLocal = zmpTorsoCompensation(phase, zmpCoefficients, zmpParams, stepTime, zmpTime, phase1Single, phase2Single, uSupport, uLeftFootDestination, uLeftFootSource, uRightFootDestination, uRightFootSource);
-
-        //Interpret robot's world position from torso as local positional reference...
-        Transform2D uTorsoWorld = uTorsoLocal.localToWorld({-DarwinModel::Leg::HIP_OFFSET_X, 0, 0});
-
-        //Collect attributed metrics that describe the robot's spatial orientation in environmental space...
-        Transform3D torsoWorldMetrics = arma::vec6({uTorsoWorld.x(), uTorsoWorld.y(), bodyHeight, 0, bodyTilt, uTorsoWorld.angle()});
-
-        //DEBUGGING: Emit relative torsoWorldMetrics position with respect to world model... 
+		//DEBUGGING: Emit relative torsoWorldMetrics position with respect to world model... 
         if (emitLocalisation) 
         {
             localise(uTorsoWorld);
@@ -69,6 +72,7 @@ namespace motion
         //TODO: improve accuracy of compensation movement in upper body...
         emit(motionArms(phase));
     }
+<<<<<<< 96dd3deaa26010585080bb841a4e4f1773925448
 <<<<<<< cdf96fbdd5a07a2529fcd01d4c07dd1dfe64510f
 <<<<<<< db55d1c8d9b8fa6645e5f0f1e7cf0d56eb5d6f4c
 <<<<<<< d07c1d138e6fd9fbe83afad4f4e877e4b814ea95
@@ -108,6 +112,9 @@ namespace motion
 =======
 
 >>>>>>> Added messages between modules
+=======
+
+>>>>>>> Adding emits and triggers for flow of data
     /*=======================================================================================================*/
     //      NAME: motionArms
     /*=======================================================================================================*/
