@@ -98,38 +98,7 @@ namespace motion
     */
     ModularWalkEngine::ModularWalkEngine(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) 
     {
-        // , subsumptionId(size_t(this) * size_t(this) - size_t(this)) 
-        // {   
-        // emit<Scope::INITIALIZE>(std::make_unique<RegisterAction>(RegisterAction {subsumptionId, "Walk Engine", 
-        //     {
-        //         std::pair<double, std::set<LimbID>>(0, {LimbID::LEFT_LEG, LimbID::RIGHT_LEG}),
-        //         std::pair<double, std::set<LimbID>>(0, {LimbID::LEFT_ARM, LimbID::RIGHT_ARM}),
-        //     },
-        //     [this] (const std::set<LimbID>& givenLimbs) 
-        //      {
-        //        if (givenLimbs.find(LimbID::LEFT_LEG) != givenLimbs.end()) 
-        //        {
-        //             // legs are available, start
-        //             stanceReset(); // reset stance as we don't know where our limbs are
-        //             interrupted = false;
-        //             updateHandle.enable();
-        //         }
-        //     },
-        //     [this] (const std::set<LimbID>& takenLimbs) 
-        //     {
-        //         if (takenLimbs.find(LimbID::LEFT_LEG) != takenLimbs.end()) 
-        //         {
-        //             // legs are no longer available, reset walking (too late to stop walking)
-        //             updateHandle.disable();
-        //             interrupted = true;
-        //         }
-        //     },
-        //     [this] (const std::set<ServoID>&) 
-        //     {
-        //         // nothing
-        //     }
-        // }));
-
+        
         on<Trigger<EnableModularWalkEngineCommand>>().then([this] (const EnableModularWalkEngineCommand& command) 
         {
             subsumptionId = command.subsumptionId;
@@ -177,7 +146,7 @@ namespace motion
             requestStop();
         });
 
-        on<Configuration>("ModularWalkEngine.yaml").then([this] (const Configuration& config) 
+        on<Configuration>(CONFIGURATION_PATH).then([this] (const Configuration& config) 
         {
             configure(config.config);
         });
