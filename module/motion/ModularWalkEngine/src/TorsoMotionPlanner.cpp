@@ -97,6 +97,11 @@ namespace motion
     */
     TorsoMotionPlanner::TorsoMotionPlanner(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) 
     {
+        on<Configuration>(CONFIGURATION_PATH).then([this] (const Configuration& config) 
+        {
+            configure(config.config);
+        });
+        
         updateHandle = on<Every<UPDATE_FREQUENCY, Per<std::chrono::seconds>>, With<Sensors>, Single, Priority::HIGH>()
         .then([this](const Sensors& sensors) 
         {
@@ -105,18 +110,25 @@ namespace motion
 
         on<Trigger<NewStep>>().then([this] 
         {
+<<<<<<< f10da9c4b0232f8ba743f03d26325ddc863f1f48
 <<<<<<< cdf96fbdd5a07a2529fcd01d4c07dd1dfe64510f
             torsoZMP();
-        });
 =======
-            zmpCoefficients();
+            zmpTorsoCoefficients();
+>>>>>>> Message Headers, emit structs, and further encapsulation of
+        });
+        
+            zmpTorsoCoefficients();
         }
+<<<<<<< f10da9c4b0232f8ba743f03d26325ddc863f1f48
 >>>>>>> Added messages between modules
+=======
+>>>>>>> Message Headers, emit structs, and further encapsulation of
     }
 
     void TorsoMotionPlanner::updateTorsoPosition()
     {
-        uTorso = zmpTorsoCompensation(phase, zmpCoefficients, zmpParams, stepTime, zmpTime, phase1Single, phase2Single, uSupport, uLeftFootDestination, uLeftFootSource, uRightFootDestination, uRightFootSource);
+        uTorso = zmpTorsoCompensation(phase, zmpTorsoCoefficients, zmpParams, stepTime, zmpTime, phase1Single, phase2Single, uSupport, uLeftFootDestination, uLeftFootSource, uRightFootDestination, uRightFootSource);
     }
 
     /*=======================================================================================================*/
@@ -136,7 +148,7 @@ namespace motion
     }
 
     /*=======================================================================================================*/
-    //      NAME: torsoZMP
+    //      NAME: zmpTorsoCoefficients
     /*=======================================================================================================*/
     /*
      *      @input  : <TODO: INSERT DESCRIPTION>
@@ -144,11 +156,15 @@ namespace motion
      *      @pre-condition  : <TODO: INSERT DESCRIPTION>
      *      @post-condition : <TODO: INSERT DESCRIPTION>
     */
+<<<<<<< f10da9c4b0232f8ba743f03d26325ddc863f1f48
 <<<<<<< cdf96fbdd5a07a2529fcd01d4c07dd1dfe64510f
     void TorsoMotionPlanner::torsoZMP() //originally part of CalculateNewStep
 =======
     void ModularWalkEngine::zmpCoefficients() //originally part of CalculateNewStep
 >>>>>>> Added messages between modules
+=======
+    void TorsoMotionPlanner::zmpTorsoCoefficients() //originally part of CalculateNewStep
+>>>>>>> Message Headers, emit structs, and further encapsulation of
     {
         uTorsoDestination = stepTorso(uLeftFootDestination, uRightFootDestination, 0.5);
 
@@ -161,8 +177,8 @@ namespace motion
             (uTorsoDestination.y() - uSupport.y()) / (stepTime * (1 - phase2Single)),
         };
 
-        zmpCoefficients.rows(0,1) = zmpSolve(uSupport.x(), uTorsoSource.x(), uTorsoDestination.x(), uTorsoSource.x(), uTorsoDestination.x(), phase1Single, phase2Single, stepTime, zmpTime);
-        zmpCoefficients.rows(2,3) = zmpSolve(uSupport.y(), uTorsoSource.y(), uTorsoDestination.y(), uTorsoSource.y(), uTorsoDestination.y(), phase1Single, phase2Single, stepTime, zmpTime);
+        zmpTorsoCoefficients.rows(0,1) = zmpSolve(uSupport.x(), uTorsoSource.x(), uTorsoDestination.x(), uTorsoSource.x(), uTorsoDestination.x(), phase1Single, phase2Single, stepTime, zmpTime);
+        zmpTorsoCoefficients.rows(2,3) = zmpSolve(uSupport.y(), uTorsoSource.y(), uTorsoDestination.y(), uTorsoSource.y(), uTorsoDestination.y(), phase1Single, phase2Single, stepTime, zmpTime);
     }
     /*=======================================================================================================*/
     //      NAME: zmpSolve
@@ -173,11 +189,15 @@ namespace motion
      *      @pre-condition  : <TODO: INSERT DESCRIPTION>
      *      @post-condition : <TODO: INSERT DESCRIPTION>
     */
+<<<<<<< f10da9c4b0232f8ba743f03d26325ddc863f1f48
 <<<<<<< cdf96fbdd5a07a2529fcd01d4c07dd1dfe64510f
     arma::vec2 TorsoMotionPlanner::zmpSolve(double zs, double z1, double z2, double x1, double x2, double phase1Single, double phase2Single, double stepTime, double zmpTime) 
 =======
     arma::vec2 ModularWalkEngine::zmpTorsoCompensation(double zs, double z1, double z2, double x1, double x2, double phase1Single, double phase2Single, double stepTime, double zmpTime) 
 >>>>>>> Added messages between modules
+=======
+    arma::vec2 TorsoMotionPlanner::zmpSolve(double zs, double z1, double z2, double x1, double x2, double phase1Single, double phase2Single, double stepTime, double zmpTime) 
+>>>>>>> Message Headers, emit structs, and further encapsulation of
     {
         /*
         Solves ZMP equations.
@@ -207,12 +227,12 @@ namespace motion
      *      @pre-condition  : <TODO: INSERT DESCRIPTION>
      *      @post-condition : <TODO: INSERT DESCRIPTION>
     */
-    Transform2D TorsoMotionPlanner::zmpTorsoCompensation(double phase, arma::vec4 zmpCoefficients, arma::vec4 zmpParams, double stepTime, double zmpTime, double phase1Single, double phase2Single, Transform2D uSupport, Transform2D uLeftFootDestination, Transform2D uLeftFootSource, Transform2D uRightFootDestination, Transform2D uRightFootSource) 
+    Transform2D TorsoMotionPlanner::zmpTorsoCompensation(double phase, arma::vec4 zmpTorsoCoefficients, arma::vec4 zmpParams, double stepTime, double zmpTime, double phase1Single, double phase2Single, Transform2D uSupport, Transform2D uLeftFootDestination, Transform2D uLeftFootSource, Transform2D uRightFootDestination, Transform2D uRightFootSource) 
     {
         Transform2D com = {0, 0, 0};
         double expT = std::exp(stepTime * phase / zmpTime);
-        com.x() = uSupport.x() + zmpCoefficients[0] * expT + zmpCoefficients[1] / expT;
-        com.y() = uSupport.y() + zmpCoefficients[2] * expT + zmpCoefficients[3] / expT;
+        com.x() = uSupport.x() + zmpTorsoCoefficients[0] * expT + zmpTorsoCoefficients[1] / expT;
+        com.y() = uSupport.y() + zmpTorsoCoefficients[2] * expT + zmpTorsoCoefficients[3] / expT;
         if (phase < phase1Single) 
         {
             com.x() += zmpParams[0] * stepTime * (phase - phase1Single) -zmpTime * zmpParams[0] * std::sinh(stepTime * (phase - phase1Single) / zmpTime);

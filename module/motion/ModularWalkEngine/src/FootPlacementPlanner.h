@@ -17,8 +17,8 @@
  * Copyright 2013 NUBots <nubots@nubots.net>
  */
 
-#ifndef MODULES_MOTION_FootPlacementPlanner_H
-#define MODULES_MOTION_FootPlacementPlanner_H
+#ifndef MODULES_MOTION_FOOTPLACEMENTPLANNER_H
+#define MODULES_MOTION_FOOTPLACEMENTPLANNER_H
 
 #include <nuclear>
 #include <armadillo>
@@ -54,7 +54,7 @@ namespace motion {
          */
         static constexpr size_t UPDATE_FREQUENCY = 90;
 
-        static constexpr const char* CONFIGURATION_PATH = "ModularWalkEngine.yaml";
+        static constexpr const char* CONFIGURATION_PATH = "FootPlacementPlanner.yaml";
         explicit FootPlacementPlanner(std::unique_ptr<NUClear::Environment> environment);
     private:
         using LimbID         = message::input::LimbID;
@@ -298,5 +298,5 @@ namespace motion {
 }  // motion
 }  // modules
 
-#endif  // MODULES_MOTION_FootPlacementPlanner_H
+#endif  // MODULES_MOTION_FOOTPLACEMENTPLANNER_H
 

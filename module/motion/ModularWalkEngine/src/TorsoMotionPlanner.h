@@ -54,7 +54,7 @@ namespace motion {
          */
         static constexpr size_t UPDATE_FREQUENCY = 90;
 
-        static constexpr const char* CONFIGURATION_PATH = "ModularWalkEngine.yaml";
+        static constexpr const char* CONFIGURATION_PATH = "TorsoMotionPlanner.yaml";
         explicit ModularWalkEngine(std::unique_ptr<NUClear::Environment> environment);
     private:
         using LimbID         = message::input::LimbID;

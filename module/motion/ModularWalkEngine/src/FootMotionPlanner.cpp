@@ -41,10 +41,18 @@ namespace motion
     using utility::motion::kinematics::DarwinModel;
     using utility::math::matrix::Transform2D;
     using utility::nubugger::graph;
-
+    /*=======================================================================================================*/
+    //      NAME: FootMotionPlanner
+    /*=======================================================================================================*/
+    /*
+     *      @input  : <TODO: INSERT DESCRIPTION>
+     *      @output : <TODO: INSERT DESCRIPTION>
+     *      @pre-condition  : <TODO: INSERT DESCRIPTION>
+     *      @post-condition : <TODO: INSERT DESCRIPTION>
+    */
     FootMotionPlanner::FootMotionPlanner(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) 
     {
-        on<Configuration>("ModularWalkEngine.yaml").then([this] (const Configuration& config) 
+        on<Configuration>(CONFIGURATION_PATH).then([this] (const Configuration& config) 
         {
             configure(config.config);
         });
@@ -59,11 +67,11 @@ namespace motion
             /*
             if(inSupportFoot)
             {
-                setLeftFootDestination(inLeftFootDestination);
+                setLeftFootDestination(inFootDestination);
             }
             else
             {
-                setRightFootDestination(inRightFootDestination);
+                setRightFootDestination(inFootDestination);
             }    
             */       
         });
@@ -72,7 +80,7 @@ namespace motion
 
         on<Trigger<DisableWalkEngineCommand>>().then([this] 
         {
-            // Nobody needs the walk engine, so we stop updating it.
+            // Nobody needs the walk engine, so we stop updating it...
             updateHandle.disable(); 
 
             // TODO: Also disable the other walk command reactions?
@@ -145,7 +153,10 @@ namespace motion
         setNewStepReceived(true);
         leftFootDestination.push(inLeftFootDestination);
     }
+<<<<<<< f10da9c4b0232f8ba743f03d26325ddc863f1f48
 <<<<<<< cdf96fbdd5a07a2529fcd01d4c07dd1dfe64510f
+=======
+>>>>>>> Message Headers, emit structs, and further encapsulation of
     /*=======================================================================================================*/
     //      NAME: getRightFootDestination
     /*=======================================================================================================*/
@@ -236,7 +247,7 @@ namespace motion
         motionPhase = std::fmod(motionPhase, 1);
         if(getNewStepReceived())
         {
-            emit(std::make_unique<StepCompleted>());
+            emit(std::make_unique<StepCompleted>();
         }
     }
     /*=======================================================================================================*/
@@ -259,9 +270,12 @@ namespace motion
 
         return {xf, phaseSingle, zf};
     }
+<<<<<<< f10da9c4b0232f8ba743f03d26325ddc863f1f48
 =======
 
 >>>>>>> Added messages between modules
+=======
+>>>>>>> Message Headers, emit structs, and further encapsulation of
     /*=======================================================================================================*/
     //      NAME: updateFootPosition
     /*=======================================================================================================*/
@@ -314,7 +328,8 @@ namespace motion
             emit(graph("Foot phase motion", phase));
         }
 
-        emit(std:make_unique<FootMotionUpdate(phase, leftFootLocal, rightFootLocal)>);
+        //Broadcast struct of updated foot motion data at corresponding phase identity...
+        emit(std:make_unique<FootMotionUpdate>(phase, leftFootLocal, rightFootLocal));
     }
 }  // motion
 }  // modules
