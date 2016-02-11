@@ -105,44 +105,28 @@ namespace motion {
         double beginStepTime;
         // How to many 'steps' to take before lifting a foot when starting to walk
         int initialStep;
-        // Current torso position
-        //Transform2D uTorso;
         // Pre-step torso position
         Transform2D uTorsoSource;
         // Torso step target position
         Transform2D uTorsoDestination;
-        // Current left foot position
-        //Transform2D uLeftFoot;
         // Pre-step left foot position
         Transform2D uLeftFootSource;
         // Left foot step target position
         Transform2D uLeftFootDestination;
-        // Current right foot position
-        //Transform2D uRightFoot;
         // Pre-step right foot position
         Transform2D uRightFootSource;
         // Right foot step target position
         Transform2D uRightFootDestination;
-        // TODO: ??? Appears to be support foot pre-step position
-        //Transform2D uSupport;
         // Current robot velocity
         Transform2D velocityCurrent;
         // Current velocity command
         Transform2D velocityCommand;
-        // zmp expoential coefficients aXP aXN aYP aYN
-        //arma::vec4 zmpCoefficients;
-        // zmp params m1X, m2X, m1Y, m2Y
-        //arma::vec4 zmpParams;
         // The leg that is 'swinging' in the step, opposite of the support foot
         LimbID swingLeg;
-        // The last foot goal rotation
-        //UnitQuaternion lastFootGoalRotation;
-        //UnitQuaternion footGoalErrorSum;
-
+        
         // end state
 
         // start config, see config file for documentation
-
         double stanceLimitY2;
         arma::mat::fixed<3,2> stepLimits;
         arma::mat::fixed<3,2> velocityLimits;
@@ -150,139 +134,29 @@ namespace motion {
         arma::vec3 accelerationLimitsHigh;
         double velocityHigh;
         double accelerationTurningFactor;
-        //double bodyHeight;
-        //double bodyTilt;
-        //float gainArms;
-        //float gainLegs;
         double stepTime;
-        //double zmpTime;
-        //double stepHeight;
-        //float step_height_slow_fraction;
-        //float step_height_fast_fraction;
-        //double phase1Single;
-        //double phase2Single;
-        //arma::vec2 footOffset;
-        // standard offset
         Transform2D uLRFootOffset;
-        // arm poses
-        //arma::vec3 qLArmStart;
-        //arma::vec3 qLArmEnd;
-        //arma::vec3 qRArmStart;
-        //arma::vec3 qRArmEnd;
         LimbID swingLegInitial = LimbID::LEFT_LEG;
-
-        //bool balanceEnabled;
-        //bool emitLocalisation;
-        //bool emitFootPosition;
-
-        //double balanceAmplitude;
-        //double balanceWeight;
-        //double balanceOffset;
-        //double balancePGain;
-        //double balanceIGain;
-        //double balanceDGain;
+        //end confit
 
         NUClear::clock::time_point lastVeloctiyUpdateTime;
 
-        // jointGains are the current gains sent to the servos
-        //std::map<ServoID, float> jointGains;
-        // servoControlPGains are the constant proportionality
-        // constants which define the current values of jointGains based on the robot's balance state
-        //std::map<ServoID, float> servoControlPGains;
 
-
-        //utility::motion::Balancer balancer;
-
-        //NUClear::clock::time_point pushTime;
-
-
-        /*arma::vec4 ankleImuParamX;
-        arma::vec4 ankleImuParamY;
-        arma::vec4 kneeImuParamX;
-        arma::vec4 hipImuParamY;
-        arma::vec4 armImuParamX;
-        arma::vec4 armImuParamY;
-
-        double velFastForward;
-        double velFastTurn;
-        double supportFront;
-        double supportFront2;
-        double supportBack;
-        double supportSideX;
-        double supportSideY;
-        double supportTurn;*/
-
-        // Initial body swing
-        // double toeTipCompensation;
-        //double hipRollCompensation;
-
-        // end config
-
-        //double STAND_SCRIPT_DURATION;
-        //ReactionHandle generateStandScriptReaction;
-
-        //void generateAndSaveStandScript(const Sensors& sensors);
         void configure(const YAML::Node& config);
-
         void reset();
         void start();
         void requestStop();
         void stop();
-
-        //void update(const Sensors& sensors);
         std::pair<Transform3D, Transform3D> updateFootPosition(double phase);
-        //void updateLowerBody(double phase, double leftFoot, double rightFoot);
-        //void updateUpperBody(double phase, const Sensors& sensors);
-        //void hipCompensation(arma::vec3 footPhases, LimbID swingLeg, Transform3D rightFootT, Transform3D leftFootT);
-        //void updateStill(const Sensors& sensors = Sensors());
-        //std::unique_ptr<std::vector<ServoCommand>> updateStillWayPoints(const Sensors& sensors);
-
         void calculateNewStep();
         void setVelocity(Transform2D velocity);
         void updateVelocity();
         void stanceReset();
-
-        //void localise(Transform2D position);
-
-        //std::unique_ptr<std::vector<ServoCommand>> motionLegs(std::vector<std::pair<ServoID, float>> joints);
-        //std::unique_ptr<std::vector<ServoCommand>> motionArms(double phase);
-
         Transform2D getNewFootTarget(const Transform2D& velocity, const Transform2D& leftFoot, const Transform2D& rightFoot, const LimbID& swingLeg);
-
-        /**
-         * Get the next torso position
-         */
-        //Transform2D stepTorso(Transform2D uLeftFoot, Transform2D uRightFoot, double shiftFactor);
-
         /**
          * @return The current velocity
          */
         Transform2D getVelocity();
-
-        /**
-         * Solve the ZMP equation
-         */
-        //arma::vec2 zmpSolve(double zs, double z1, double z2, double x1, double x2, double phase1Single, double phase2Single, double stepTime, double zmpTime);
-
-        /**
-         * Uses ZMP to determine the torso position
-         *
-         * @return The torso position in Transform2D
-         */
-        //Transform2D zmpTorsoCompensation(double phase, arma::vec4 zmpCoefficients, arma::vec4 zmpParams, double stepTime, double zmpTime, double phase1Zmp, double phase2Zmp, Transform2D uSupport, Transform2D uLeftFootDestination, Transform2D uLeftFootSource, Transform2D uRightFootDestination, Transform2D uRightFootSource);
-
-        /**
-         * This is an easing function that returns 3 values {x,y,z} with the range [0,1]
-         * This is used to 'ease' the foot path through its trajectory.
-         * The params phase1Single and phase2Single are used to tune the amount of time the robot spends on two feet
-         * Note: Only x/z are used currently and y is always 0
-         * See: http://easings.net/ to reference common easing functions
-         *
-         * @param phase The input to the easing function, with a range of [0,1].
-         * @param phase1Single The phase time between [0,1] to start the step. A value of 0.1 means the step will not start until phase is >= 0.1
-         * @param phase2Single The phase time between [0,1] to end the step. A value of 0.9 means the step will end when phase >= 0.9
-         */
-        //arma::vec3 footPhase(double phase, double phase1Single, double phase2Single);
 
         /**
          * @return get a unix timestamp (in decimal seconds that are accurate to the microsecond)

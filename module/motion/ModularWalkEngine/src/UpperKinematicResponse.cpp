@@ -41,6 +41,18 @@ namespace motion
     using utility::motion::kinematics::DarwinModel;
     using utility::math::matrix::Transform2D;
     using utility::nubugger::graph;
+
+    UpperKinematicResponse::UpperKinematicResponse()
+    {
+        on<Trigger<TorsoUpdate>>().then([this] 
+        {
+            updateUpperBody();
+        });
+        on<Trigger<PhaseUpdate>>().then([this]
+        {
+            updatePhase();
+        });
+    }
     /*=======================================================================================================*/
     //      NAME: updateUpperBody
     /*=======================================================================================================*/
@@ -52,16 +64,7 @@ namespace motion
     */
 	void UpperKinematicResponse::updateUpperBody(double phase, const Sensors& sensors) 
 	{
-		//Interpret robot's zero point reference from torso for positional transformation into relative space...
-        uTorsoLocal = zmpTorsoCompensation(phase, zmpCoefficients, zmpParams, stepTime, zmpTime, phase1Single, phase2Single, uSupport, uLeftFootDestination, uLeftFootSource, uRightFootDestination, uRightFootSource);
-
-        //Interpret robot's world position from torso as local positional reference...
-        Transform2D uTorsoWorld = uTorsoLocal.localToWorld({-DarwinModel::Leg::HIP_OFFSET_X, 0, 0});
-
-        //Collect attributed metrics that describe the robot's spatial orientation in environmental space...
-        Transform3D torsoWorldMetrics = arma::vec6({uTorsoWorld.x(), uTorsoWorld.y(), bodyHeight, 0, bodyTilt, uTorsoWorld.angle()});
-
-        //DEBUGGING: Emit relative torsoWorldMetrics position with respect to world model... 
+		//DEBUGGING: Emit relative torsoWorldMetrics position with respect to world model... 
         if (emitLocalisation) 
         {
             localise(uTorsoWorld);
@@ -69,25 +72,7 @@ namespace motion
         //TODO: improve accuracy of compensation movement in upper body...
         emit(motionArms(phase));
     }
-<<<<<<< HEAD
-    /*=======================================================================================================*/
-    //      NAME: stepTorso
-    /*=======================================================================================================*/
-    /*
-     *      @input  : <TODO: INSERT DESCRIPTION>
-     *      @output : <TODO: INSERT DESCRIPTION>
-     *      @pre-condition  : <TODO: INSERT DESCRIPTION>
-     *      @post-condition : <TODO: INSERT DESCRIPTION>
-    */
-    Transform2D UpperKinematicResponse::stepTorso(Transform2D uLeftFoot, Transform2D uRightFoot, double shiftFactor) 
-    {
-        Transform2D uLeftFootSupport  = uLeftFoot.localToWorld({-footOffset[0], -footOffset[1], 0});
-        Transform2D uRightFootSupport = uRightFoot.localToWorld({-footOffset[0], footOffset[1], 0});
-        return uLeftFootSupport.interpolate(shiftFactor, uRightFootSupport);
-    }
-=======
 
->>>>>>> a0da7c550114069741abb76b19f955c5fba0d2d3
     /*=======================================================================================================*/
     //      NAME: motionArms
     /*=======================================================================================================*/

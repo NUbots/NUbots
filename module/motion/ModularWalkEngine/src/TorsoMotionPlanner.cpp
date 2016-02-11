@@ -112,16 +112,16 @@ namespace motion
         {
             zmpTorsoCoefficients();
         });
-        
-            zmpTorsoCoefficients();
-        }
     }
 
     void TorsoMotionPlanner::updateTorsoPosition()
     {
-        uTorso = zmpTorsoCompensation(phase, zmpTorsoCoefficients, zmpParams, stepTime, zmpTime, phase1Single, phase2Single, uSupport, uLeftFootDestination, uLeftFootSource, uRightFootDestination, uRightFootSource);
+        torso.uTorso = zmpTorsoCompensation(phase, zmpTorsoCoefficients, zmpParams, stepTime, zmpTime, phase1Single, phase2Single, uSupport, uLeftFootDestination, uLeftFootSource, uRightFootDestination, uRightFootSource);
+        Transform2D uTorsoActual = uTorso.localToWorld({-DarwinModel::Leg::HIP_OFFSET_X, 0, 0});
+        Transform3D torso.torso = arma::vec6({uTorsoActual.x(), uTorsoActual.y(), bodyHeight, 0, bodyTilt, uTorsoActual.angle()});
+        emit(std:make_unique<TorsoUpdate>(uTorso, torso); //uTorso is needed by motionArms and torso is needed for feet position
+                             //could also move calculation of torso to response
     }
-
     /*=======================================================================================================*/
     //      NAME: stepTorso
     /*=======================================================================================================*/
@@ -204,6 +204,7 @@ namespace motion
     */
     Transform2D TorsoMotionPlanner::zmpTorsoCompensation(double phase, arma::vec4 zmpTorsoCoefficients, arma::vec4 zmpParams, double stepTime, double zmpTime, double phase1Single, double phase2Single, Transform2D uSupport, Transform2D uLeftFootDestination, Transform2D uLeftFootSource, Transform2D uRightFootDestination, Transform2D uRightFootSource) 
     {
+        //Note that phase is the only variable updated during a step
         Transform2D com = {0, 0, 0};
         double expT = std::exp(stepTime * phase / zmpTime);
         com.x() = uSupport.x() + zmpTorsoCoefficients[0] * expT + zmpTorsoCoefficients[1] / expT;
