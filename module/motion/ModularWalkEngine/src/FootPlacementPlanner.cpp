@@ -44,6 +44,7 @@ namespace motion
 
     FootPlacementPlanner::FootPlacementPlanner()
     {
+        //Configure foot motion planner...
         on<Configuration>(CONFIGURATION_PATH).then([this] (const Configuration& config) 
         {
             configure(config.config);
