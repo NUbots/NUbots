@@ -52,38 +52,36 @@ namespace motion
     */
     FootMotionPlanner::FootMotionPlanner(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) 
     {
+        //Configure foot motion planner...
         on<Configuration>(CONFIGURATION_PATH).then([this] (const Configuration& config) 
         {
             configure(config.config);
         });
 
+        //Transform analytical foot positions in accordance with the stipulated targets...
         updateHandle = on<Every<UPDATE_FREQUENCY, Per<std::chrono::seconds>>, With<Sensors>, Single, Priority::HIGH>()
         .then([this](const Sensors& sensors) {
             updateFootPosition(getMotionPhase(), getLeftFootDestination(), getRightFootDestination());
         }).disable();
 
-        on<Trigger<NewStep>>().then([this] 
+        //In the event of a new foot step target specified by the foot placement planning module...
+        on<Trigger<FootStepTarget>>().then([this] 
         {
-            /*
-            if(inSupportFoot)
+            if(supportFoot)
             {
-                setLeftFootDestination(inFootDestination);
+                setLeftFootDestination(targetDestination);
             }
             else
             {
-                setRightFootDestination(inFootDestination);
-            }    
-            */       
+                setRightFootDestination(targetDestination);
+            }
+            setDestinationTime(targetTime);    
         });
 
-        reset();
-
+        //If foot motion no longer requested, cease updating...
         on<Trigger<DisableWalkEngineCommand>>().then([this] 
         {
-            // Nobody needs the walk engine, so we stop updating it...
             updateHandle.disable(); 
-
-            // TODO: Also disable the other walk command reactions?
         });
     }
     /*=======================================================================================================*/

@@ -23,7 +23,7 @@
 /*===========================================================================================================*/
 //      INCLUDE(S)
 /*===========================================================================================================*/
-#include "ModularWalkEngine.h"
+#include "BalanceKinematicResponse.h"
 
 #include "utility/motion/RobotModels.h"
 #include "utility/nubugger/NUhelpers.h"
