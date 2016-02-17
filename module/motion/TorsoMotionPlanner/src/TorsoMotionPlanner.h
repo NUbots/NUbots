@@ -1,5 +1,5 @@
 /*
- * This file is part of the NUbots Codebase.
+ * This file is part of NUbots Codebase.
  *
  * The NUbots Codebase is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,11 +14,11 @@
  * You should have received a copy of the GNU General Public License
  * along with the NUbots Codebase.  If not, see <http://www.gnu.org/licenses/>.
  *
- * Copyright 2013 NUBots <nubots@nubots.net>
+ * Copyright 2016 NUbots <nubots@nubots.net>
  */
 
-#ifndef MODULES_MOTION_TorsoMotionPlanner_H
-#define MODULES_MOTION_ModularWalkEngine_H
+#ifndef MODULE_MOTION_TORSOMOTIONPLANNER_H
+#define MODULE_MOTION_TORSOMOTIONPLANNER_H
 
 #include <nuclear>
 #include <armadillo>
@@ -28,6 +28,7 @@
 #include "message/support/Configuration.h"
 #include "message/behaviour/Action.h"
 #include "message/behaviour/ServoCommand.h"
+#include "message/motion/TorsoMotion.h" 
 #include "message/input/Sensors.h"
 #include "utility/math/geometry/UnitQuaternion.h"
 
@@ -36,17 +37,13 @@
 #include "utility/motion/Balance.h"
 #include "utility/motion/RobotModels.h"
 
+namespace module 
+{
+namespace motion 
+{
 
-namespace module {
-namespace motion {
+    class TorsoMotionPlanner : public NUClear::Reactor {
 
-    /**
-     * TODO
-     *
-     * @author Brendan Annable
-     * @author Trent Houliston
-     */
-    class ModularWalkEngine : public NUClear::Reactor {
     public:
         /**
          * The number of servo updates performnced per second
@@ -55,7 +52,7 @@ namespace motion {
         static constexpr size_t UPDATE_FREQUENCY = 90;
 
         static constexpr const char* CONFIGURATION_PATH = "TorsoMotionPlanner.yaml";
-        explicit ModularWalkEngine(std::unique_ptr<NUClear::Environment> environment);
+        explicit TorsoMotionPlanner(std::unique_ptr<NUClear::Environment> environment);
     private:
         using LimbID         = message::input::LimbID;
         using ServoCommand   = message::behaviour::ServoCommand;
@@ -85,7 +82,6 @@ namespace motion {
         // // Whether subsumption has currently interrupted the walk engine
         // bool interrupted;
         // TODO: ???
-<<<<<<< HEAD
         bool startFromStep;
         // The time when the current step begun
         double beginStepTime;
@@ -98,9 +94,6 @@ namespace motion {
         std::queue<Transform2D> rightFootDestination
         // How to many 'steps' to take before lifting a foot when starting to walk
         int initialStep;
-=======
-
->>>>>>> 64439fc7fe5cab96f356fa924fb6e99677a3ee9a
         // Current torso position
         //Transform2D uTorso;
         // Pre-step torso position
@@ -237,5 +230,4 @@ namespace motion {
 }  // motion
 }  // modules
 
-#endif  // MODULES_MOTION_ModularWalkEngine_H
-
+#endif  // MODULE_MOTION_TORSOMOTIONPLANNER_H

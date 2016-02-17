@@ -1,5 +1,5 @@
 /*
- * This file is part of the NUbots Codebase.
+ * This file is part of NUbots Codebase.
  *
  * The NUbots Codebase is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,11 +14,11 @@
  * You should have received a copy of the GNU General Public License
  * along with the NUbots Codebase.  If not, see <http://www.gnu.org/licenses/>.
  *
- * Copyright 2013 NUBots <nubots@nubots.net>
+ * Copyright 2016 NUbots <nubots@nubots.net>
  */
 
-#ifndef MODULES_MOTION_FOOTMOTIONPLANNER_H
-#define MODULES_MOTION_FOOTMOTIONPLANNER_H
+#ifndef MODULE_MOTION_BALANCEKINEMATICRESPONSE_H
+#define MODULE_MOTION_BALANCEKINEMATICRESPONSE_H
 
 #include <nuclear>
 #include <armadillo>
@@ -28,6 +28,7 @@
 #include "message/support/Configuration.h"
 #include "message/behaviour/Action.h"
 #include "message/behaviour/ServoCommand.h"
+#include "message/motion/BalanceCommand.h" 
 #include "message/input/Sensors.h"
 #include "utility/math/geometry/UnitQuaternion.h"
 
@@ -36,27 +37,20 @@
 #include "utility/motion/Balance.h"
 #include "utility/motion/RobotModels.h"
 
-
-namespace module {
-namespace motion {
-
-    /**
-     * TODO
-     *
-     * @author Brendan Annable
-     * @author Trent Houliston
-     */
-    class ModularWalkEngine : public NUClear::Reactor {
+namespace module 
+{
+namespace motion 
+{
+    class BalanceKinematicResponse : public NUClear::Reactor {
     public:
-        /**
+    	/**
          * The number of servo updates performnced per second
          * TODO: Probably be a global config somewhere, waiting on NUClear to support runtime on<Every> arguments
          */
         static constexpr size_t UPDATE_FREQUENCY = 90;
 
-        static constexpr const char* CONFIGURATION_PATH = "FootMotionPlanner.yaml";
-        explicit ModularWalkEngine(std::unique_ptr<NUClear::Environment> environment);
-    private:
+        static constexpr const char* CONFIGURATION_PATH = "BalanceKinematicResponse.yaml";
+        explicit BalanceKinematicResponse(std::unique_ptr<NUClear::Environment> environment);
         using LimbID         = message::input::LimbID;
         using ServoCommand   = message::behaviour::ServoCommand;
         using Sensors        = message::input::Sensors;
@@ -101,13 +95,8 @@ namespace motion {
         // bool interrupted;
         // TODO: ???
         bool startFromStep;
-        // Update to step is received
-        bool updateStepInstruction;
-        // The time when the current is to be completed
-        double destinationTime;
-        // Destination placement Transform2D values
-        std::queue<Transform2D> leftFootDestination
-        std::queue<Transform2D> rightFootDestination
+        // The time when the current step begun
+        double beginStepTime;
         // How to many 'steps' to take before lifting a foot when starting to walk
         int initialStep;
         // Current torso position
@@ -299,9 +288,7 @@ namespace motion {
          */
         double linearInterpolationDeadband(double a, double deadband, double maxvalue);
     };
-
 }  // motion
-}  // modules
+}  // modules   
 
-#endif  // MODULES_MOTION_FOOTMOTIONPLANNER_H
-
+#endif  // MODULE_MOTION_BALANCEKINEMATICRESPONSE_H
