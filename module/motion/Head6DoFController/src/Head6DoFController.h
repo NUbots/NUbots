@@ -32,7 +32,9 @@ namespace motion {
 
         arma::vec3 l_arm,r_arm;
 
-    	utility::math::matrix::Transform3D testHeadPose;
+    	utility::math::matrix::Transform3D robot_to_head;
+        float robot_to_head_scale;
+
 
     	size_t id;
 

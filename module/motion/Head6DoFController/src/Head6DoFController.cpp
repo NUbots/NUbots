@@ -28,6 +28,7 @@
 #include "message/behaviour/ServoCommand.h"
 #include "message/input/ServoID.h"
 #include "message/input/Sensors.h"
+#include "message/input/proto/PresenceUserState.pb.h"
 #include "message/behaviour/Action.h"
 #include "utility/support/yaml_expression.h"
 
@@ -41,6 +42,7 @@ namespace motion {
     using message::input::ServoSide;
     using message::input::Sensors;
     using message::input::LimbID;
+    using message::input::proto::PresenceUserState;
 
     using utility::math::matrix::Transform3D;
     using utility::motion::kinematics::DarwinModel;
@@ -65,7 +67,7 @@ namespace motion {
 			arma::vec3 pos = config["robot_to_head"]["pos"].as<arma::vec>();
             
             robot_to_head_scale = config["robot_to_head"]["scale"].as<Expression>();
-			robot_to_head = Transform3D::createTranslation(test_pos) * Transform3D::createRotationZ(test_yaw) * Transform3D::createRotationY(test_pitch);
+			robot_to_head = Transform3D::createTranslation(pos) * Transform3D::createRotationZ(yaw) * Transform3D::createRotationY(pitch);
 
 			l_arm = config["l_arm"].as<arma::vec>(); 
 			r_arm = config["r_arm"].as<arma::vec>();
@@ -74,9 +76,9 @@ namespace motion {
 
         });
 
-        on<Every<60,Per<std::chrono::seconds>>, With<Sensors>, With<PresenceUserState>, Single
-        >().then([this](const Sensors& sensors
-                        const PresenceUserState& user){
+        on<Every<60,Per<std::chrono::seconds>>, With<Sensors>, With<Optional<Network<PresenceUserState>>>, Single
+        >().then([this](const Sensors& sensors,
+                        const std::shared_ptr<const PresenceUserState>& user){
 			
         	//Record current arm position:
         	arma::vec3 prevArmJointsL = {
@@ -93,8 +95,16 @@ namespace motion {
 			//Adjust arm position
         	int max_number_of_iterations = 20;
 
-            Transform3D robotCamPose = user.camPose;
-            robotCamPose.translation() = robot_to_head_scale * robotCamPose.translation()
+            
+            Transform3D robotCamPose;
+            if(user){
+                robotCamPose.x() = user->head_pose().rotation(0);
+                robotCamPose.y() = user->head_pose().rotation(1);
+                robotCamPose.z() = user->head_pose().rotation(2);
+                robotCamPose.translation() = user->head_pose().position();
+                robotCamPose.translation() *= robot_to_head_scale;                
+            }
+
 			auto joints = utility::motion::kinematics::setHeadPoseFromFeet<DarwinModel>(robotCamPose * robot_to_head, foot_separation, body_angle);
         	
             //TODO: fix arms
