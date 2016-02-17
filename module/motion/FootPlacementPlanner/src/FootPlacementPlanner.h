@@ -1,5 +1,5 @@
 /*
- * This file is part of the NUbots Codebase.
+ * This file is part of NUbots Codebase.
  *
  * The NUbots Codebase is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,11 +14,11 @@
  * You should have received a copy of the GNU General Public License
  * along with the NUbots Codebase.  If not, see <http://www.gnu.org/licenses/>.
  *
- * Copyright 2013 NUBots <nubots@nubots.net>
+ * Copyright 2016 NUbots <nubots@nubots.net>
  */
 
-#ifndef MODULES_MOTION_FOOTPLACEMENTPLANNER_H
-#define MODULES_MOTION_FOOTPLACEMENTPLANNER_H
+#ifndef MODULE_MOTION_FOOTPLACEMENTPLANNER_H
+#define MODULE_MOTION_FOOTPLACEMENTPLANNER_H
 
 #include <nuclear>
 #include <armadillo>
@@ -27,6 +27,7 @@
 
 #include "message/support/Configuration.h"
 #include "message/behaviour/Action.h"
+#include "message/motion/FootPlacement.h"
 #include "message/behaviour/ServoCommand.h"
 #include "message/input/Sensors.h"
 #include "utility/math/geometry/UnitQuaternion.h"
@@ -36,16 +37,11 @@
 #include "utility/motion/Balance.h"
 #include "utility/motion/RobotModels.h"
 
+namespace module 
+{
+namespace motion 
+{
 
-namespace module {
-namespace motion {
-
-    /**
-     * TODO
-     *
-     * @author Brendan Annable
-     * @author Trent Houliston
-     */
     class FootPlacementPlanner : public NUClear::Reactor {
     public:
         /**
@@ -57,7 +53,7 @@ namespace motion {
         static constexpr const char* CONFIGURATION_PATH = "FootPlacementPlanner.yaml";
         explicit FootPlacementPlanner(std::unique_ptr<NUClear::Environment> environment);
     private:
-        using LimbID         = message::input::LimbID;
+    	using LimbID         = message::input::LimbID;
         using ServoCommand   = message::behaviour::ServoCommand;
         using Sensors        = message::input::Sensors;
         using ServoID        = message::input::ServoID;
@@ -172,5 +168,4 @@ namespace motion {
 }  // motion
 }  // modules
 
-#endif  // MODULES_MOTION_FOOTPLACEMENTPLANNER_H
-
+#endif  // MODULE_MOTION_FOOTPLACEMENTPLANNER_H

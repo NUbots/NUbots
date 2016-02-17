@@ -1,22 +1,20 @@
-/*----------------------------------------------DOCUMENT HEADER----------------------------------------------*/
-/*===========================================================================================================*/
 /*
- * This file is part of ModularWalkEngine.
+ * This file is part of NUbots Codebase.
  *
- * ModularWalkEngine is free software: you can redistribute it and/or modify
+ * The NUbots Codebase is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * ModularWalkEngine is distributed in the hope that it will be useful,
+ * The NUbots Codebase is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with ModularWalkEngine.  If not, see <http://www.gnu.org/licenses/>.
+ * along with the NUbots Codebase.  If not, see <http://www.gnu.org/licenses/>.
  *
- * Copyright 2013 NUBots <nubots@nubots.net>
+ * Copyright 2016 NUbots <nubots@nubots.net>
  */
 /*===========================================================================================================*/
 /*----------------------------------------CONSTANTS AND DEFINITIONS------------------------------------------*/
@@ -34,13 +32,14 @@ namespace module
 {
 namespace motion 
 {
-    /*=======================================================================================================*/
+	/*=======================================================================================================*/
     //      UTILIZATION REFERENCE(S)
     /*=======================================================================================================*/
     using message::input::LimbID;
     using utility::motion::kinematics::DarwinModel;
     using utility::math::matrix::Transform2D;
     using utility::nubugger::graph;
+<<<<<<< 183df72fb88459adef7436f0515b768fde100df7:module/motion/ModularWalkEngine/src/BalanceKinematicResponse.cpp
 <<<<<<< 96dd3deaa26010585080bb841a4e4f1773925448
 <<<<<<< d07c1d138e6fd9fbe83afad4f4e877e4b814ea95
 <<<<<<< 3b87f3cda74870e5b6ca278b79d41f45e3932336
@@ -63,12 +62,20 @@ namespace motion
         uTorsoDestination = stepTorso(uLeftFootDestination, uRightFootDestination, 0.5);
 =======
 >>>>>>> Adding emits and triggers for flow of data
+=======
+    using extension::Configuration;
+>>>>>>> Further Modularization in development hierarchy, reorganised directory structure:module/motion/BalanceKinematicResponse/src/BalanceKinematicResponse.cpp
 
+    BalanceKinematicResponse::BalanceKinematicResponse(std::unique_ptr<NUClear::Environment> environment)
+    : Reactor(std::move(environment)) {
 
-    BalanceKinematicResponse::BalanceKinematicResponse()
-    {
-        on<Trigger<FootMotionUpdate>>().then([this] 
+        //Configure foot motion planner...
+        on<Configuration>(CONFIGURATION_PATH).then([this] (const Configuration& config) 
         {
+            configure(config.config);
+        });
+
+        on<Trigger<FootMotionUpdate>>().then([this] {
             hipRollCompensation();
             supportFootCompensation();
         });
@@ -132,4 +139,4 @@ namespace motion
         }
     }        
 }  // motion
-}  // modules    
+}  // modules   

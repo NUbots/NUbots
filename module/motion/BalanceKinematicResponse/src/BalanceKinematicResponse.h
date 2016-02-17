@@ -1,5 +1,5 @@
 /*
- * This file is part of the NUbots Codebase.
+ * This file is part of NUbots Codebase.
  *
  * The NUbots Codebase is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,11 +14,11 @@
  * You should have received a copy of the GNU General Public License
  * along with the NUbots Codebase.  If not, see <http://www.gnu.org/licenses/>.
  *
- * Copyright 2013 NUBots <nubots@nubots.net>
+ * Copyright 2016 NUbots <nubots@nubots.net>
  */
 
-#ifndef MODULES_MOTION_TorsoMotionPlanner_H
-#define MODULES_MOTION_ModularWalkEngine_H
+#ifndef MODULE_MOTION_BALANCEKINEMATICRESPONSE_H
+#define MODULE_MOTION_BALANCEKINEMATICRESPONSE_H
 
 #include <nuclear>
 #include <armadillo>
@@ -28,6 +28,7 @@
 #include "message/support/Configuration.h"
 #include "message/behaviour/Action.h"
 #include "message/behaviour/ServoCommand.h"
+#include "message/motion/BalanceCommand.h" 
 #include "message/input/Sensors.h"
 #include "utility/math/geometry/UnitQuaternion.h"
 
@@ -36,27 +37,20 @@
 #include "utility/motion/Balance.h"
 #include "utility/motion/RobotModels.h"
 
-
-namespace module {
-namespace motion {
-
-    /**
-     * TODO
-     *
-     * @author Brendan Annable
-     * @author Trent Houliston
-     */
-    class ModularWalkEngine : public NUClear::Reactor {
+namespace module 
+{
+namespace motion 
+{
+    class BalanceKinematicResponse : public NUClear::Reactor {
     public:
-        /**
+    	/**
          * The number of servo updates performnced per second
          * TODO: Probably be a global config somewhere, waiting on NUClear to support runtime on<Every> arguments
          */
         static constexpr size_t UPDATE_FREQUENCY = 90;
 
-        static constexpr const char* CONFIGURATION_PATH = "TorsoMotionPlanner.yaml";
-        explicit ModularWalkEngine(std::unique_ptr<NUClear::Environment> environment);
-    private:
+        static constexpr const char* CONFIGURATION_PATH = "BalanceKinematicResponse.yaml";
+        explicit BalanceKinematicResponse(std::unique_ptr<NUClear::Environment> environment);
         using LimbID         = message::input::LimbID;
         using ServoCommand   = message::behaviour::ServoCommand;
         using Sensors        = message::input::Sensors;
@@ -64,6 +58,28 @@ namespace motion {
         using Transform2D    = utility::math::matrix::Transform2D;
         using Transform3D    = utility::math::matrix::Transform3D;
         using UnitQuaternion = utility::math::geometry::UnitQuaternion;
+
+        enum State {
+            /**
+             * Walk engine has completely stopped and standing still
+             */
+            STOPPED,
+
+            /**
+             * A stop request has been made but not received
+             */
+            STOP_REQUEST,
+
+            /**
+             * Stop request has been made and now taking the last step before stopping
+             */
+            LAST_STEP,
+
+            /**
+             * Walk engine is walking as normal
+             */
+            WALKING
+        };
 
         /// Current subsumption ID key to access motors.
         size_t subsumptionId = 1;
@@ -75,42 +91,28 @@ namespace motion {
 
         // The state of the current walk
         State state;
-
-
-        struct torso {
-            Transform2D uTorso;
-            Transform3D torso;
-        } torsos;
-
         // // Whether subsumption has currently interrupted the walk engine
         // bool interrupted;
         // TODO: ???
-<<<<<<< 64307f428050a70febbcdd787f038b25be0bf9ed
-
-=======
         bool startFromStep;
         // The time when the current step begun
         double beginStepTime;
-        // Update to step is received
-        bool updateStepInstruction;
-        // The time when the current is to be completed
-        double destinationTime;
-        // Destination placement Transform2D values
-        std::queue<Transform2D> leftFootDestination
-        std::queue<Transform2D> rightFootDestination
         // How to many 'steps' to take before lifting a foot when starting to walk
         int initialStep;
->>>>>>> Modifications to TorsoMotionPlanner
         // Current torso position
-        //Transform2D uTorso;
+        Transform2D uTorso;
         // Pre-step torso position
         Transform2D uTorsoSource;
         // Torso step target position
         Transform2D uTorsoDestination;
-       // Pre-step left foot position
+        // Current left foot position
+        Transform2D uLeftFoot;
+        // Pre-step left foot position
         Transform2D uLeftFootSource;
         // Left foot step target position
         Transform2D uLeftFootDestination;
+        // Current right foot position
+        Transform2D uRightFoot;
         // Pre-step right foot position
         Transform2D uRightFootSource;
         // Right foot step target position
@@ -118,12 +120,24 @@ namespace motion {
         // TODO: ??? Appears to be support foot pre-step position
         Transform2D uSupport;
         // Current robot velocity
+        Transform2D velocityCurrent;
+        // Current velocity command
+        Transform2D velocityCommand;
+        // zmp expoential coefficients aXP aXN aYP aYN
         arma::vec4 zmpCoefficients;
         // zmp params m1X, m2X, m1Y, m2Y
         arma::vec4 zmpParams;
-         // end state
+        // The leg that is 'swinging' in the step, opposite of the support foot
+        LimbID swingLeg;
+        // The last foot goal rotation
+        UnitQuaternion lastFootGoalRotation;
+        UnitQuaternion footGoalErrorSum;
+
+        // end state
 
         // start config, see config file for documentation
+
+        double stanceLimitY2;
         arma::mat::fixed<3,2> stepLimits;
         arma::mat::fixed<3,2> velocityLimits;
         arma::vec3 accelerationLimits;
@@ -201,10 +215,46 @@ namespace motion {
         double STAND_SCRIPT_DURATION;
         ReactionHandle generateStandScriptReaction;
 
+        void generateAndSaveStandScript(const Sensors& sensors);
+        void configure(const YAML::Node& config);
+
+        void reset();
+        void start();
+        void requestStop();
+        void stop();
+
+        void update(const Sensors& sensors);
+        std::pair<Transform3D, Transform3D> updateFootPosition(double phase);
+        void updateLowerBody(double phase, double leftFoot, double rightFoot);
+        void updateUpperBody(double phase, const Sensors& sensors);
+        void hipCompensation(arma::vec3 footPhases, LimbID swingLeg, Transform3D rightFootT, Transform3D leftFootT);
+        void updateStill(const Sensors& sensors = Sensors());
+        std::unique_ptr<std::vector<ServoCommand>> updateStillWayPoints(const Sensors& sensors);
+
+        void calculateNewStep();
+        void setVelocity(Transform2D velocity);
+        void updateVelocity();
+        void stanceReset();
+
+        void localise(Transform2D position);
+
+        std::unique_ptr<std::vector<ServoCommand>> motionLegs(std::vector<std::pair<ServoID, float>> joints);
+        std::unique_ptr<std::vector<ServoCommand>> motionArms(double phase);
+
+        Transform2D getNewFootTarget(const Transform2D& velocity, const Transform2D& leftFoot, const Transform2D& rightFoot, const LimbID& swingLeg);
+
+        /**
+         * Get the next torso position
+         */
         Transform2D stepTorso(Transform2D uLeftFoot, Transform2D uRightFoot, double shiftFactor);
 
         /**
          * @return The current velocity
+         */
+        Transform2D getVelocity();
+
+        /**
+         * Solve the ZMP equation
          */
         arma::vec2 zmpSolve(double zs, double z1, double z2, double x1, double x2, double phase1Single, double phase2Single, double stepTime, double zmpTime);
 
@@ -226,16 +276,19 @@ namespace motion {
          * @param phase1Single The phase time between [0,1] to start the step. A value of 0.1 means the step will not start until phase is >= 0.1
          * @param phase2Single The phase time between [0,1] to end the step. A value of 0.9 means the step will end when phase >= 0.9
          */
-        
+        arma::vec3 footPhase(double phase, double phase1Single, double phase2Single);
+
+        /**
+         * @return get a unix timestamp (in decimal seconds that are accurate to the microsecond)
+         */
         double getTime();
 
         /**
          * @return A clamped between 0 and maxvalue, offset by deadband
          */
+        double linearInterpolationDeadband(double a, double deadband, double maxvalue);
     };
-
 }  // motion
-}  // modules
+}  // modules   
 
-#endif  // MODULES_MOTION_ModularWalkEngine_H
-
+#endif  // MODULE_MOTION_BALANCEKINEMATICRESPONSE_H

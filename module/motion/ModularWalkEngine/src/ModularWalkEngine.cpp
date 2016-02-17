@@ -104,8 +104,7 @@ namespace motion
             subsumptionId = command.subsumptionId;
 
             stanceReset(); // Reset stance as we don't know where our limbs are.
-            updateHandle.enable();
-        });
+            updateHandle.enable();        });
 
         on<Trigger<DisableModularWalkEngineCommand>>().then([this] 
         {
