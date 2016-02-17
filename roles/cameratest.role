@@ -4,8 +4,9 @@ NUCLEAR_ROLE(
     support::SignalCatcher
     support::logging::ConsoleLogHandler
     support::extension::FileWatcher
-    support::extension::FileWatcher
+    support::configuration::NetworkConfiguration
     support::configuration::GlobalConfig
+    support::configuration::NetworkConfiguration
     platform::darwin::HardwareIO
     platform::darwin::SensorFilter
     input::LinuxCamera

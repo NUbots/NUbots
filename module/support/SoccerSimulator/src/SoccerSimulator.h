@@ -81,8 +81,6 @@ namespace support {
         //Member variables
         message::motion::KickPlannerConfig kick_cfg;
 
-        std::shared_ptr<message::support::FieldDescription> field_description_;
-
         static constexpr size_t SIMULATION_UPDATE_FREQUENCY = 180;
 
         struct Config{
@@ -150,6 +148,9 @@ namespace support {
         arma::vec2 getPath(Config::Motion::Path p);
 
         void setGoalLeftRightKnowledge(std::vector<message::vision::Goal>& goals);
+
+        void loadFieldDescription( const std::shared_ptr<const message::support::FieldDescription> fd);
+
 
     public:
         /// @brief Called by the powerplant to build and setup the SoccerSimulator reactor.

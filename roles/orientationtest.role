@@ -5,6 +5,7 @@ NUCLEAR_ROLE(
     support::configuration::GlobalConfig
     platform::darwin::HardwareIO
     support::configuration::SoccerConfig
+    support::configuration::NetworkConfiguration
     platform::darwin::SensorFilter
     support::NUbugger
     debug::NUbugger

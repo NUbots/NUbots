@@ -30,6 +30,7 @@
 #include "message/support/Configuration.h"
 #include "message/localisation/FieldObject.h"
 #include "message/input/ServoID.h"
+#include "message/input/CameraParameters.h"
 #include "message/motion/WalkCommand.h"
 #include "message/input/gameevents/GameEvents.h"
 
@@ -40,6 +41,16 @@ namespace support {
     using message::platform::darwin::ButtonMiddleDown;
     using message::input::Sensors;
     using message::input::ServoID;
+    using message::input::CameraParameters;
+    using message::support::Configuration;
+    using message::support::FieldDescription;
+    using message::motion::WalkCommand;
+    using message::motion::KickCommand;
+    using message::motion::KickFinished;
+    using message::motion::KickPlannerConfig;
+    using message::platform::darwin::DarwinSensors;
+    using message::support::Configuration;
+    using message::support::GlobalConfig;
     using utility::nubugger::drawArrow;
     using utility::nubugger::drawSphere;
     using utility::math::angle::normalizeAngle;
@@ -51,16 +62,7 @@ namespace support {
     using utility::localisation::transform::WorldToRobotTransform;
     using utility::localisation::transform::RobotToWorldTransform;
     using utility::nubugger::graph;
-    using message::support::Configuration;
-    using message::support::FieldDescription;
-    using message::motion::WalkCommand;
-    using message::motion::KickCommand;
-    using message::motion::KickFinished;
-    using message::motion::KickPlannerConfig;
-    using message::platform::darwin::DarwinSensors;
     using utility::math::matrix::Transform2D;
-    using message::support::Configuration;
-    using message::support::GlobalConfig;
     using namespace message::input::gameevents;
     using utility::support::Expression;
 
@@ -130,28 +132,8 @@ namespace support {
         : Reactor(std::move(environment)) {
 
         on<Trigger<FieldDescription>>().then("FieldDescription Update", [this] (const FieldDescription& desc) {
-
-            field_description_ = std::make_shared<FieldDescription>(desc);
-
-            goalPosts.clear();
-
-            arma::vec3 goal_opp_r = {field_description_->goalpost_opp_r[0],field_description_->goalpost_opp_r[1],0};
-            goalPosts.push_back(VirtualGoalPost(goal_opp_r, 1.1, Goal::Side::RIGHT, Goal::Team::OPPONENT));
-
-            arma::vec3 goal_opp_l = {field_description_->goalpost_opp_l[0],field_description_->goalpost_opp_l[1],0};
-            goalPosts.push_back(VirtualGoalPost(goal_opp_l, 1.1, Goal::Side::LEFT, Goal::Team::OPPONENT));
-
-            arma::vec3 goal_own_r = {field_description_->goalpost_own_r[0],field_description_->goalpost_own_r[1],0};
-            goalPosts.push_back(VirtualGoalPost(goal_own_r, 1.1, Goal::Side::RIGHT, Goal::Team::OWN));
-
-            arma::vec3 goal_own_l = {field_description_->goalpost_own_l[0],field_description_->goalpost_own_l[1],0};
-            goalPosts.push_back(VirtualGoalPost(goal_own_l, 1.1, Goal::Side::LEFT, Goal::Team::OWN));
-
-            //DEBUG
-            // for(auto& g : goalPosts){
-            //     log("goalPost", g.position.t());
-            // }
-
+            auto fdptr = std::make_shared<const FieldDescription>(desc);
+            loadFieldDescription(fdptr);
         });
 
         on<Configuration, Trigger<GlobalConfig>>("SoccerSimulator.yaml")
@@ -175,7 +157,7 @@ namespace support {
         on<Every<SIMULATION_UPDATE_FREQUENCY, Per<std::chrono::seconds>>,
             With<Sensors>,
             Optional<With<WalkCommand>>
-        >().then("Robot motion", [this](const Sensors& sensors,
+        >().then("Robot motion simulation", [this](const Sensors& sensors,
                                  std::shared_ptr<const WalkCommand> walkCommand) {
             NUClear::clock::time_point now = NUClear::clock::now();
             double deltaT = 1e-6 * std::chrono::duration_cast<std::chrono::microseconds>(now - lastNow).count();
@@ -249,19 +231,22 @@ namespace support {
             oldBallPose = world.ball.position;
             lastNow = now;
             lastKicking = kicking;
+
         });
 
         // Simulate Vision
-        on<Every<30, Per<std::chrono::seconds>>,
-            With<Sensors>,
-            With<CameraParameters>,
-            Sync<SoccerSimulator>
-            >("Vision Simulation", [this](std::shared_ptr<Sensors> sensors,
-                const CameraParameters& camParams) {
+        on<Every<30, Per<std::chrono::seconds>>, With<Sensors>, With<CameraParameters>, Optional<With<FieldDescription>>, Single>()
+        .then("Vision Simulation", 
+        [this](std::shared_ptr<const Sensors> sensors, const CameraParameters& camParams, const std::shared_ptr<const FieldDescription> fd) {
 
-            if (field_description_ == nullptr) {
-                NUClear::log(__FILE__, __LINE__, ": field_description_ == nullptr");
+            if(!fd){
+                NUClear::log<NUClear::ERROR>(__FILE__, __LINE__, "Field Description must be available for vision simulation!");
+                powerplant.shutdown();
                 return;
+            }
+
+            if (goalPosts.size() == 0) {
+                loadFieldDescription(fd);
             }
 
             if (cfg_.simulate_goal_observations) {
@@ -288,7 +273,6 @@ namespace support {
                 if(!cfg_.distinguish_left_and_right_goals){
                     setGoalLeftRightKnowledge(*goals);
                 }
-
 
                 emit(std::move(goals));
 
@@ -337,9 +321,9 @@ namespace support {
 
         });
 
+
         // Emit exact position to NUbugger
         on<Every<100, std::chrono::milliseconds>>().then("Emit True Robot Position", [this] {
-
             arma::vec2 bearingVector = world.robotPose.rotation() * arma::vec2({1,0});
             arma::vec3 robotHeadingVector = {bearingVector[0], bearingVector[1], 0};
             emit(drawArrow("robot", {world.robotPose.x(), world.robotPose.y(), 0}, 1, robotHeadingVector, 0));
@@ -414,6 +398,29 @@ namespace support {
                 g.side = Goal::Side::UNKNOWN;
             }
         }
+    }
+
+    void SoccerSimulator::loadFieldDescription( const std::shared_ptr<const FieldDescription> fd){
+            //Load goal posts
+            goalPosts.clear();
+
+            arma::vec3 goal_opp_r = {fd->goalpost_opp_r[0],fd->goalpost_opp_r[1],0};
+            goalPosts.push_back(VirtualGoalPost(goal_opp_r, 1.1, Goal::Side::RIGHT, Goal::Team::OPPONENT));
+
+            arma::vec3 goal_opp_l = {fd->goalpost_opp_l[0],fd->goalpost_opp_l[1],0};
+            goalPosts.push_back(VirtualGoalPost(goal_opp_l, 1.1, Goal::Side::LEFT, Goal::Team::OPPONENT));
+
+            arma::vec3 goal_own_r = {fd->goalpost_own_r[0],fd->goalpost_own_r[1],0};
+            goalPosts.push_back(VirtualGoalPost(goal_own_r, 1.1, Goal::Side::RIGHT, Goal::Team::OWN));
+
+            arma::vec3 goal_own_l = {fd->goalpost_own_l[0],fd->goalpost_own_l[1],0};
+            goalPosts.push_back(VirtualGoalPost(goal_own_l, 1.1, Goal::Side::LEFT, Goal::Team::OWN));
+
+            //DEBUG
+            // for(auto& g : goalPosts){
+            //     log("goalPost", g.position.t());
+            // }
+
     }
 
 }

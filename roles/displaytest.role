@@ -6,15 +6,10 @@ NUCLEAR_ROLE(
     support::extension::FileWatcher
     support::configuration::GlobalConfig
     support::DisplayTest
-    #platform::darwin::HardwareIO
-    #platform::darwin::SensorFilter
-    #input::LinuxCamera
     support::configuration::NetworkConfiguration
     support::NUbugger
+    
     debug::NUbugger
-
-    vision::LUTClassifier
-    #vision::FeatureDetector
 
     support::configuration::SoccerConfig
 )

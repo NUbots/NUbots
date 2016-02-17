@@ -11,6 +11,7 @@ NUCLEAR_ROLE(
     support::extension::FileWatcher
     support::configuration::GlobalConfig
     support::configuration::SoccerConfig
+    support::configuration::NetworkConfiguration
     support::NUbugger
 
     input::GameController

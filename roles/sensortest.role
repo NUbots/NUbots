@@ -5,8 +5,11 @@ NUCLEAR_ROLE(
     support::logging::ConsoleLogHandler
     support::extension::FileWatcher
     support::configuration::GlobalConfig
+    support::configuration::NetworkConfiguration
+    
     platform::darwin::HardwareIO
     platform::darwin::SensorFilter
+    
     support::NUbugger
     debug::NUbugger
 )

@@ -16,17 +16,16 @@ SET(CMAKE_BUILD_WITH_INSTALL_RPATH TRUE)
 # These will allow the binary to run from the build folder
 SET(CMAKE_INSTALL_RPATH ${CMAKE_INSTALL_RPATH} lib/ ../lib/ bin/lib)
 
-# Compilation must be done with c++14 for NUClear to work
-SET(NUCLEAR_ROLES_CXX_FLAGS "${NUCLEAR_ROLES_CXX_FLAGS} -std=c++14")
-SET(NUCLEAR_ROLES_C_FLAGS   "${NUCLEAR_ROLES_C_FLAGS} -std=c++14")
 
-# Build using -fPIC so the code can be shared libraries properly
-SET(NUCLEAR_ROLES_CXX_FLAGS "${NUCLEAR_ROLES_CXX_FLAGS} -fPIC")
-SET(NUCLEAR_ROLES_C_FLAGS   "${NUCLEAR_ROLES_C_FLAGS} -fPIC")
+IF(NOT MSVC)
+	# Compilation must be done with c++14 for NUClear to work
+	SET(NUCLEAR_ROLES_CXX_FLAGS "${NUCLEAR_ROLES_CXX_FLAGS} -std=c++14")
+	SET(NUCLEAR_ROLES_C_FLAGS   "${NUCLEAR_ROLES_C_FLAGS} -std=c++14")
 
-# Enable super strict warnings so developers behave themselves
-SET(NUCLEAR_ROLES_CXX_FLAGS "${NUCLEAR_ROLES_CXX_FLAGS} -Wall")
-SET(NUCLEAR_ROLES_C_FLAGS   "${NUCLEAR_ROLES_C_FLAGS} -Wall")
+	# Build using -fPIC so the code can be shared libraries properly
+	SET(NUCLEAR_ROLES_CXX_FLAGS "${NUCLEAR_ROLES_CXX_FLAGS} -fPIC")
+	SET(NUCLEAR_ROLES_C_FLAGS   "${NUCLEAR_ROLES_C_FLAGS} -fPIC")
+ENDIF()
 
 # Add these flags to the build types
 SET(CMAKE_CXX_FLAGS                 "${CMAKE_CXX_FLAGS} ${NUCLEAR_ROLES_CXX_FLAGS}")

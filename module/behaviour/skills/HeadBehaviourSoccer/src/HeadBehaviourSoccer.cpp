@@ -34,6 +34,8 @@
 
 #include "utility/nubugger/NUhelpers.h"
 
+#include <string>
+
 
 namespace module {
     namespace behaviour{
@@ -150,6 +152,11 @@ namespace module {
                                                         std::shared_ptr<const LocBall> locBall
                                                         ) {
 
+                    // std::cout << "Seen: Balls: " <<
+                    // ((vballs != nullptr) ? std::to_string(int(vballs->size())) : std::string("null")) << 
+                    // "Goals: " <<
+                    // ((vgoals != nullptr) ? std::to_string(int(vgoals->size())) : std::string("null")) << std::endl;
+                   
                     if(locBall) {
                         locBallReceived = true;
                         lastLocBall = *locBall;
@@ -307,7 +314,7 @@ namespace module {
                 arma::vec3 lookVectorFromHead = sphericalToCartesian({1,screenAngles[0],screenAngles[1]});//This is an approximation relying on the robots small FOV
                 //Remove pitch from matrix if we are adjusting search points
 
-                //Check why if this works:
+                //Check if this works:
                 // if(lost) headToIMUSpace = Rotation3D::createRotationY(-headToIMUSpace.pitch()) * headToIMUSpace;
 
                 //Rotate target angles to World space

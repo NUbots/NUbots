@@ -31,25 +31,25 @@ Vagrant
 
 3. Create vagrant machine
 	
-	$ cd NUbots
-	$ vagrant up
+		$ cd NUbots
+		$ vagrant up
 	
 4. To set up vagrant and simulator
 
-	$ vagrant ssh
-	$ cd nubots/NUbots/build
-	$ cmake .. -G Ninja
-	$ ninja
+		$ vagrant ssh
+		$ cd nubots/NUbots/build
+		$ cmake .. -G Ninja
+		$ ninja
 
 4. If quex permission error occurs run
 
-	$ chmod +x /usr/local/bin/quex
-	$ quex
-	$ ninja
+		$ chmod +x /usr/local/bin/quex
+		$ quex
+		$ ninja
 
 5. Open a second terminal, go to [NUsight][] (after cloning) and run
 
-	$ node app
+		$ node app
 
 then in internet browser go to 
 
