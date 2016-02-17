@@ -32,9 +32,10 @@
 #include "utility/nubugger/NUhelpers.h"
 
 
-namespace module {
-    namespace motion {
-
+namespace module 
+{    
+namespace motion 
+{
         using utility::nubugger::graph;
         using message::input::ServoID;
         using message::input::Sensors;
@@ -56,7 +57,7 @@ namespace module {
 
             currentAngles = {0,0};//TODO: set this to current motor positions
             //do a little configurating
-            on<Configuration>("HeadController.yaml").then("Head Controller - Config", [this] (const Configuration& config) {
+            on<Configuration>(CONFIGURATION_PATH).then("Head Controller - Config", [this] (const Configuration& config) {
                 //Gains
                 head_motor_gain = config["head_motors"]["gain"].as<double>();
                 head_motor_torque = config["head_motors"]["torque"].as<double>();
