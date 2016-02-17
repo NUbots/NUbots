@@ -23,7 +23,7 @@ package message.input.proto;
 
 import "message/Vector.proto";
 
-message MotionCapture {
+message PresenceUserState {
 
     message RigidBody {
         vec3 position = 1;

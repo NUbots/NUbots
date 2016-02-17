@@ -76,9 +76,20 @@ namespace motion {
 
         });
 
-        on<Every<60,Per<std::chrono::seconds>>, With<Sensors>, With<Optional<Network<PresenceUserState>>>, Single
-        >().then([this](const Sensors& sensors,
-                        const std::shared_ptr<const PresenceUserState>& user){
+        on<Network<PresenceUserState>, Sync<Head6DoFController>>().then("Head6DoFController Network Input",[this](const PresenceUserState& user){
+            for(int i = 0; i < 3; i++){
+                robotCamPose.col(i).row(0) = user.head_pose().rotation(i).x();
+                robotCamPose.col(i).row(1) = user.head_pose().rotation(i).y();
+                robotCamPose.col(i).row(2) = user.head_pose().rotation(i).z();
+            }
+            robotCamPose.translation()[0] = user.head_pose().position().x();
+            robotCamPose.translation()[1] = user.head_pose().position().y();
+            robotCamPose.translation()[2] = user.head_pose().position().z();
+            robotCamPose.translation() *= robot_to_head_scale;
+        });
+
+        on<Every<60,Per<std::chrono::seconds>>, With<Sensors>, Sync<Head6DoFController>
+        >().then([this](const Sensors& sensors){
 			
         	//Record current arm position:
         	arma::vec3 prevArmJointsL = {
@@ -95,15 +106,6 @@ namespace motion {
 			//Adjust arm position
         	int max_number_of_iterations = 20;
 
-            
-            Transform3D robotCamPose;
-            if(user){
-                robotCamPose.x() = user->head_pose().rotation(0);
-                robotCamPose.y() = user->head_pose().rotation(1);
-                robotCamPose.z() = user->head_pose().rotation(2);
-                robotCamPose.translation() = user->head_pose().position();
-                robotCamPose.translation() *= robot_to_head_scale;                
-            }
 
 			auto joints = utility::motion::kinematics::setHeadPoseFromFeet<DarwinModel>(robotCamPose * robot_to_head, foot_separation, body_angle);
         	

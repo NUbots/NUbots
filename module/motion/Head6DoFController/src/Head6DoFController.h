@@ -34,8 +34,11 @@ namespace motion {
 
     	utility::math::matrix::Transform3D robot_to_head;
         float robot_to_head_scale;
+        
+        //State:
+        utility::math::matrix::Transform3D robotCamPose;
 
-
+        //Subsumption:
     	size_t id;
 
     	void updatePriority(const float& priority);
