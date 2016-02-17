@@ -226,11 +226,15 @@ namespace motion
     */
     void TorsoMotionPlanner::updateTorsoPosition()
     {
+<<<<<<< 64307f428050a70febbcdd787f038b25be0bf9ed
         torso.uTorso = zmpTorsoCompensation(phase, zmpTorsoCoefficients, zmpParams, stepTime, zmpTime, phase1Single, phase2Single, uSupport, uLeftFootDestination, uLeftFootSource, uRightFootDestination, uRightFootSource);
         Transform2D uTorsoActual = uTorso.localToWorld({-DarwinModel::Leg::HIP_OFFSET_X, 0, 0});
         Transform3D torso.torso = arma::vec6({uTorsoActual.x(), uTorsoActual.y(), bodyHeight, 0, bodyTilt, uTorsoActual.angle()});
         emit(std:make_unique<TorsoUpdate>(uTorso, torso); //uTorso is needed by motionArms and torso is needed for feet position
                              //could also move calculation of torso to response
+=======
+        uTorso = zmpTorsoCompensation(phase, zmpTorsoCoefficients, zmpParams, stepTime, zmpTime, phase1Single, phase2Single, uSupport, uLeftFootSource, uRightFootSource);
+>>>>>>> Modifications to TorsoMotionPlanner
     }
     /*=======================================================================================================*/
     //      NAME: stepTorso
@@ -267,7 +271,7 @@ namespace motion
     void TorsoMotionPlanner::zmpTorsoCoefficients() //originally part of CalculateNewStep
 >>>>>>> Message Headers, emit structs, and further encapsulation of
     {
-        uTorsoDestination = stepTorso(uLeftFootDestination, uRightFootDestination, 0.5);
+        uTorsoDestination = stepTorso(getLeftFootDestination(), getRightFootDestination(), 0.5);
 
         // compute ZMP coefficients
         zmpParams = 
@@ -328,7 +332,7 @@ namespace motion
      *      @pre-condition  : <TODO: INSERT DESCRIPTION>
      *      @post-condition : <TODO: INSERT DESCRIPTION>
     */
-    Transform2D TorsoMotionPlanner::zmpTorsoCompensation(double phase, arma::vec4 zmpTorsoCoefficients, arma::vec4 zmpParams, double stepTime, double zmpTime, double phase1Single, double phase2Single, Transform2D uSupport, Transform2D uLeftFootDestination, Transform2D uLeftFootSource, Transform2D uRightFootDestination, Transform2D uRightFootSource) 
+    Transform2D TorsoMotionPlanner::zmpTorsoCompensation(double phase, arma::vec4 zmpTorsoCoefficients, arma::vec4 zmpParams, double stepTime, double zmpTime, double phase1Single, double phase2Single, Transform2D uSupport, Transform2D uLeftFootSource, Transform2D uRightFootSource) 
     {
         //Note that phase is the only variable updated during a step
         Transform2D com = {0, 0, 0};
@@ -347,7 +351,7 @@ namespace motion
         }
         // com[2] = .5 * (uLeftFoot[2] + uRightFoot[2]);
         // Linear speed turning
-        com.angle() = phase * (uLeftFootDestination.angle() + uRightFootDestination.angle()) / 2 + (1 - phase) * (uLeftFootSource.angle() + uRightFootSource.angle()) / 2;
+        com.angle() = phase * (getLeftFootDestination().angle() + getRightFootDestination().angle()) / 2 + (1 - phase) * (uLeftFootSource.angle() + uRightFootSource.angle()) / 2;
         return com;
     }
 

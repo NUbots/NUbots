@@ -85,7 +85,22 @@ namespace motion {
         // // Whether subsumption has currently interrupted the walk engine
         // bool interrupted;
         // TODO: ???
+<<<<<<< 64307f428050a70febbcdd787f038b25be0bf9ed
 
+=======
+        bool startFromStep;
+        // The time when the current step begun
+        double beginStepTime;
+        // Update to step is received
+        bool updateStepInstruction;
+        // The time when the current is to be completed
+        double destinationTime;
+        // Destination placement Transform2D values
+        std::queue<Transform2D> leftFootDestination
+        std::queue<Transform2D> rightFootDestination
+        // How to many 'steps' to take before lifting a foot when starting to walk
+        int initialStep;
+>>>>>>> Modifications to TorsoMotionPlanner
         // Current torso position
         //Transform2D uTorso;
         // Pre-step torso position
