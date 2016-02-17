@@ -65,28 +65,6 @@ namespace motion {
         using Transform3D    = utility::math::matrix::Transform3D;
         using UnitQuaternion = utility::math::geometry::UnitQuaternion;
 
-        enum State {
-            /**
-             * Walk engine has completely stopped and standing still
-             */
-            STOPPED,
-
-            /**
-             * A stop request has been made but not received
-             */
-            STOP_REQUEST,
-
-            /**
-             * Stop request has been made and now taking the last step before stopping
-             */
-            LAST_STEP,
-
-            /**
-             * Walk engine is walking as normal
-             */
-            WALKING
-        };
-
         /// Current subsumption ID key to access motors.
         size_t subsumptionId = 1;
 
@@ -97,9 +75,17 @@ namespace motion {
 
         // The state of the current walk
         State state;
+
+
+        struct torso {
+            Transform2D uTorso;
+            Transform3D torso;
+        } torsos;
+
         // // Whether subsumption has currently interrupted the walk engine
         // bool interrupted;
         // TODO: ???
+<<<<<<< HEAD
         bool startFromStep;
         // The time when the current step begun
         double beginStepTime;
@@ -112,20 +98,19 @@ namespace motion {
         std::queue<Transform2D> rightFootDestination
         // How to many 'steps' to take before lifting a foot when starting to walk
         int initialStep;
+=======
+
+>>>>>>> 64439fc7fe5cab96f356fa924fb6e99677a3ee9a
         // Current torso position
-        Transform2D uTorso;
+        //Transform2D uTorso;
         // Pre-step torso position
         Transform2D uTorsoSource;
         // Torso step target position
         Transform2D uTorsoDestination;
-        // Current left foot position
-        Transform2D uLeftFoot;
-        // Pre-step left foot position
+       // Pre-step left foot position
         Transform2D uLeftFootSource;
         // Left foot step target position
         Transform2D uLeftFootDestination;
-        // Current right foot position
-        Transform2D uRightFoot;
         // Pre-step right foot position
         Transform2D uRightFootSource;
         // Right foot step target position
@@ -133,24 +118,12 @@ namespace motion {
         // TODO: ??? Appears to be support foot pre-step position
         Transform2D uSupport;
         // Current robot velocity
-        Transform2D velocityCurrent;
-        // Current velocity command
-        Transform2D velocityCommand;
-        // zmp expoential coefficients aXP aXN aYP aYN
         arma::vec4 zmpCoefficients;
         // zmp params m1X, m2X, m1Y, m2Y
         arma::vec4 zmpParams;
-        // The leg that is 'swinging' in the step, opposite of the support foot
-        LimbID swingLeg;
-        // The last foot goal rotation
-        UnitQuaternion lastFootGoalRotation;
-        UnitQuaternion footGoalErrorSum;
-
-        // end state
+         // end state
 
         // start config, see config file for documentation
-
-        double stanceLimitY2;
         arma::mat::fixed<3,2> stepLimits;
         arma::mat::fixed<3,2> velocityLimits;
         arma::vec3 accelerationLimits;

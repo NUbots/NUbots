@@ -42,7 +42,7 @@ namespace motion
     using utility::math::matrix::Transform2D;
     using utility::nubugger::graph;
 
-    FootPlacementPlanner::FootPlacementPlanner()
+    FootPlacementPlanner::FootPlacementPlanner()(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment))
     {
         //Configure foot motion planner...
         on<Configuration>(CONFIGURATION_PATH).then([this] (const Configuration& config) 
@@ -324,8 +324,9 @@ namespace motion
             emit(std::make_unique<FootStepTarget(swingLeg, getTime() + stepTime, uLeftFootDestination)>); //Trigger NewStep
         }
 
-        emit(uLeftFootSource,uRightFootSource,uLeftFootDestination,uRightFootDestination,uSupport); //Torso Information
+        emit(std:make_unique<NewStepTorso>(uLeftFootSource,uRightFootSource,uLeftFootDestination,uRightFootDestination,uSupport); //Torso Information
         //emit destinations for fmp and/or zmp
+        //may combine NewStep and NewStepTorso
     }
     /*=======================================================================================================*/
     //      NAME: getNewFootTarget
