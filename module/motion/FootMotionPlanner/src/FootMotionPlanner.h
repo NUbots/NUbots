@@ -29,9 +29,10 @@
 #include "message/behaviour/Action.h"
 #include "message/behaviour/ServoCommand.h"
 #include "message/motion/FootMotion.h" 
+#include "message/motion/FootPlacement.h" 
 #include "message/input/Sensors.h"
-#include "utility/math/geometry/UnitQuaternion.h"
 
+#include "utility/math/geometry/UnitQuaternion.h"
 #include "utility/math/matrix/Transform2D.h"
 #include "utility/math/matrix/Transform3D.h"
 #include "utility/motion/Balance.h"
@@ -42,7 +43,8 @@ namespace module
 {
 namespace motion 
 {
-    class FootMotionPlanner : public NUClear::Reactor {
+    class FootMotionPlanner : public NUClear::Reactor 
+    {
     public:
         /**
          * The number of servo updates performnced per second
@@ -61,49 +63,20 @@ namespace motion
         using Transform3D    = utility::math::matrix::Transform3D;
         using UnitQuaternion = utility::math::geometry::UnitQuaternion;
 
-        enum State {
-            /**
-             * Walk engine has completely stopped and standing still
-             */
-            STOPPED,
-
-            /**
-             * A stop request has been made but not received
-             */
-            STOP_REQUEST,
-
-            /**
-             * Stop request has been made and now taking the last step before stopping
-             */
-            LAST_STEP,
-
-            /**
-             * Walk engine is walking as normal
-             */
-            WALKING
-        };
-
         /// Current subsumption ID key to access motors.
         size_t subsumptionId = 1;
 
         // Reaction handle for the main update loop, disabling when not moving will save unnecessary CPU
         ReactionHandle updateHandle;
 
-        // start state
-
-        // The state of the current walk
-        State state;
-        // // Whether subsumption has currently interrupted the walk engine
-        // bool interrupted;
-        // TODO: ???
         bool startFromStep;
         // Update to step is received
         bool updateStepInstruction;
         // The time when the current is to be completed
         double destinationTime;
         // Destination placement Transform2D values
-        std::queue<Transform2D> leftFootDestination
-        std::queue<Transform2D> rightFootDestination
+        std::queue<Transform2D> leftFootDestination;
+        std::queue<Transform2D> rightFootDestination;
         // How to many 'steps' to take before lifting a foot when starting to walk
         int initialStep;
         // Current torso position
@@ -222,56 +195,20 @@ namespace motion
         double STAND_SCRIPT_DURATION;
         ReactionHandle generateStandScriptReaction;
 
-        void generateAndSaveStandScript(const Sensors& sensors);
-        void configure(const YAML::Node& config);
-
-        void reset();
-        void start();
-        void requestStop();
-        void stop();
-
-        void update(const Sensors& sensors);
-        std::pair<Transform3D, Transform3D> updateFootPosition(double phase);
-        void updateLowerBody(double phase, double leftFoot, double rightFoot);
-        void updateUpperBody(double phase, const Sensors& sensors);
-        void hipCompensation(arma::vec3 footPhases, LimbID swingLeg, Transform3D rightFootT, Transform3D leftFootT);
-        void updateStill(const Sensors& sensors = Sensors());
-        std::unique_ptr<std::vector<ServoCommand>> updateStillWayPoints(const Sensors& sensors);
-
-        void calculateNewStep();
-        void setVelocity(Transform2D velocity);
-        void updateVelocity();
-        void stanceReset();
-
-        void localise(Transform2D position);
-
-        std::unique_ptr<std::vector<ServoCommand>> motionLegs(std::vector<std::pair<ServoID, float>> joints);
-        std::unique_ptr<std::vector<ServoCommand>> motionArms(double phase);
-
-        Transform2D getNewFootTarget(const Transform2D& velocity, const Transform2D& leftFoot, const Transform2D& rightFoot, const LimbID& swingLeg);
-
         /**
-         * Get the next torso position
+         * @return get a unix timestamp (in decimal seconds that are accurate to the microsecond)
          */
-        Transform2D stepTorso(Transform2D uLeftFoot, Transform2D uRightFoot, double shiftFactor);
-
-        /**
-         * @return The current velocity
-         */
-        Transform2D getVelocity();
-
-        /**
-         * Solve the ZMP equation
-         */
-        arma::vec2 zmpSolve(double zs, double z1, double z2, double x1, double x2, double phase1Single, double phase2Single, double stepTime, double zmpTime);
-
-        /**
-         * Uses ZMP to determine the torso position
-         *
-         * @return The torso position in Transform2D
-         */
-        Transform2D zmpTorsoCompensation(double phase, arma::vec4 zmpCoefficients, arma::vec4 zmpParams, double stepTime, double zmpTime, double phase1Zmp, double phase2Zmp, Transform2D uSupport, Transform2D uLeftFootDestination, Transform2D uLeftFootSource, Transform2D uRightFootDestination, Transform2D uRightFootSource);
-
+        double getTime();
+        double getDestinationTime();
+        void setDestinationTime(double inDestinationTime);
+        std::unique_ptr<Transform2D> getLeftFootDestination();
+        void setLeftFootDestination(std::unique_ptr<Transform2D> inLeftFootDestination);
+        std::unique_ptr<Transform2D> getRightFootDestination();
+        void setRightFootDestination(std::unique_ptr<Transform2D> inRightFootDestination);
+        bool getNewStepReceived();
+        void setNewStepReceived(bool inUpdateStepInstruction);
+        double getMotionPhase();
+        void resetMotionPhase();
         /**
          * This is an easing function that returns 3 values {x,y,z} with the range [0,1]
          * This is used to 'ease' the foot path through its trajectory.
@@ -285,15 +222,9 @@ namespace motion
          */
         arma::vec3 footPhase(double phase, double phase1Single, double phase2Single);
 
-        /**
-         * @return get a unix timestamp (in decimal seconds that are accurate to the microsecond)
-         */
-        double getTime();
+        void updateFootPosition(double phase, std::unique_ptr<Transform2D> leftFootDestination, std::unique_ptr<Transform2D> rightFootDestination);
 
-        /**
-         * @return A clamped between 0 and maxvalue, offset by deadband
-         */
-        double linearInterpolationDeadband(double a, double deadband, double maxvalue);
+        void configure(const YAML::Node& config);
     };
 
 }  // motion

@@ -16,7 +16,15 @@ NUCLEAR_ROLE(
     platform::darwin::SensorFilter
 
     # Motion
+<<<<<<< 98fb8c92f4155568ba3378095590c40273990270:roles/keyboardwalkfake.role
     motion::WalkEngine
+=======
+    motion::FootMotionPlanner
+    #motion::FootPlacementPlanner
+    #motion::TorsoMotionPlanner
+    #motion::BalanceKinematicResponse
+    #motion::ModularWalkEngine
+>>>>>>> Debugging for compilation of FootMotionPlanner:roles/modularwalk.role
     motion::ScriptEngine
     motion::HeadController
     motion::IKKick

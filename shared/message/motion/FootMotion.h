@@ -33,12 +33,34 @@ namespace motion
     {
         FootMotionUpdate() = delete;
             double phase;
-            Transform2D leftFoot;
-            Transform2D rightFoot;
-        FootMotionUpdate(double phase, Transform2D leftFoot, Transform2D rightFoot)
+            std::unique_ptr<Transform2D> leftFoot;
+            std::unique_ptr<Transform2D> rightFoot;
+        FootMotionUpdate(double phase, std::unique_ptr<Transform2D> leftFoot, std::unique_ptr<Transform2D> rightFoot)
             : phase(phase)
             , leftFoot(leftFoot)
             , rightFoot(rightFoot) {}
+    };
+
+    struct StepCompleted
+    {
+        StepCompleted() = delete;
+            bool status;
+        StepCompleted(bool status)
+            : status(status) {}
+    };
+
+    struct EnableFootMotion 
+    {
+        EnableFootMotion() = delete;
+        EnableFootMotion(size_t id) : subsumptionId(id) { }
+        size_t subsumptionId = 1;
+    };
+
+    struct DisableFootMotion
+    {
+        DisableFootMotion() = delete;
+        DisableFootMotion(size_t id) : subsumptionId(id) { }
+        size_t subsumptionId = 1;
     };
 }  // motion
 }  // message
