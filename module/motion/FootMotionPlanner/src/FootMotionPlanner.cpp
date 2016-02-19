@@ -146,7 +146,7 @@ namespace motion
         }
 
         //Broadcast struct of updated foot motion data at corresponding phase identity...
-        emit(std:make_unique<FootMotionUpdate>(phase, leftFootLocal, rightFootLocal));
+        emit(std::make_unique<FootMotionUpdate>(phase, leftFootLocal, rightFootLocal));
     }
     /*=======================================================================================================*/
     //      NAME: footPhase
@@ -203,7 +203,7 @@ namespace motion
      *      @pre-condition  : <TODO: INSERT DESCRIPTION>
      *      @post-condition : <TODO: INSERT DESCRIPTION>
     */
-    void FootMotionPlanner::setDestinationTime(auto inDestinationTime)
+    void FootMotionPlanner::setDestinationTime(double inDestinationTime)
     {
         destinationTime = inDestinationTime;
     }
@@ -227,7 +227,7 @@ namespace motion
      * 
      * @param inLeftFootDestination [description]
      */
-    void FootMotionPlanner::setLeftFootDestination(auto inLeftFootDestination)
+    void FootMotionPlanner::setLeftFootDestination(std::unique_ptr<Transform2D> inLeftFootDestination)
     {
         setNewStepReceived(true);
         leftFootDestination.push(inLeftFootDestination);
@@ -255,7 +255,7 @@ namespace motion
      *      @pre-condition  : <TODO: INSERT DESCRIPTION>
      *      @post-condition : <TODO: INSERT DESCRIPTION>
     */
-    void FootMotionPlanner::setRightFootDestination(auto inRightFootDestination)
+    void FootMotionPlanner::setRightFootDestination(std::unique_ptr<Transform2D> inRightFootDestination)
     {
         setNewStepReceived(true);
         rightFootDestination.push(inRightFootDestination);
