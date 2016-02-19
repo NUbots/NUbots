@@ -46,8 +46,6 @@
 #include "utility/motion/RobotModels.h"
 #include "utility/math/angle.h"
 #include "utility/math/matrix/Rotation3D.h"
-
-#include "extension/Configuration.h"
 /*===========================================================================================================*/
 //      NAMESPACE(S)
 /*===========================================================================================================*/

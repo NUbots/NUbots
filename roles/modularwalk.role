@@ -14,7 +14,7 @@ NUCLEAR_ROLE(
 
     # Motion
     motion::FootMotionPlanner
-    motion::FootPlacementPlanner
+    #motion::FootPlacementPlanner
     #motion::TorsoMotionPlanner
     #motion::BalanceKinematicResponse
     #motion::ModularWalkEngine
