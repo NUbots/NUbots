@@ -33,7 +33,6 @@ namespace module {
              */
             class HeadController : public NUClear::Reactor {
             public:
-                explicit HeadController(std::unique_ptr<NUClear::Environment> environment);
                 arma::vec2 currentAngles;
                 arma::vec2 goalAngles;
 <<<<<<< 285656e6e5f2d52a63ec3cbf0b0be03928f0eba9
@@ -41,6 +40,10 @@ namespace module {
 =======
                 bool goalRobotSpace = false;
                 static constexpr const char* CONFIGURATION_PATH = "HeadController.yaml";
+                static constexpr const char* CONFIGURATION_MSSG = "Head Controller - Configure";
+                static constexpr const char* ONTRIGGER_HEAD_CMD = "Head Controller - Register Head Command";
+                static constexpr const char* ONTRIGGER_HEAD_POS = "Head Controller - Update Head Position";
+                explicit HeadController(std::unique_ptr<NUClear::Environment> environment);
             private:
                 const size_t id;
                 double min_yaw,max_yaw,min_pitch,max_pitch,head_motor_gain,head_motor_torque, p_gain;
