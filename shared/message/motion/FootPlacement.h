@@ -35,7 +35,7 @@ namespace motion
             bool supportFoot;
             double targetTime;
             Transform2D targetDestination;
-        FootStepTarget(bool supportFoot, double targetTime, std::unique_ptr<Transform2D> targetDestination)
+        FootStepTarget(bool supportFoot, double targetTime, const Transform2D& targetDestination)
             : supportFoot(supportFoot)
             , targetTime(targetTime)
             , targetDestination(targetDestination) {}

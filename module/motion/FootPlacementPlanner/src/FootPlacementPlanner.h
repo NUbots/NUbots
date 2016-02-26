@@ -36,6 +36,7 @@
 #include "utility/math/matrix/Transform3D.h"
 #include "utility/motion/Balance.h"
 #include "utility/motion/RobotModels.h"
+#include "utility/nubugger/NUhelpers.h"
 
 namespace module 
 {

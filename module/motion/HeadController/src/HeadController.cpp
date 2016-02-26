@@ -57,14 +57,14 @@ namespace motion
 
             currentAngles = {0,0};//TODO: set this to current motor positions
             //do a little configurating
-            on<Configuration>(CONFIGURATION_PATH).then("Head Controller - Config", [this] (const Configuration& config) {
+            on<Configuration>("HeadController.yaml").then("Head Controller - Configure", [this] (const Configuration& config) {
                 //Gains
                 head_motor_gain = config["head_motors"]["gain"].as<double>();
                 head_motor_torque = config["head_motors"]["torque"].as<double>();
 
                 //head limits
-                max_yaw = DarwinModel::Head::MAX_YAW;
-                min_yaw = DarwinModel::Head::MIN_YAW;
+                max_yaw   = DarwinModel::Head::MAX_YAW;
+                min_yaw   = DarwinModel::Head::MIN_YAW;
                 max_pitch = DarwinModel::Head::MAX_PITCH;
                 min_pitch = DarwinModel::Head::MIN_PITCH;
 
@@ -84,7 +84,7 @@ namespace motion
                 }
             });
 
-            updateHandle = on<Trigger<Sensors>, Single, Priority::HIGH>().then("Head Controller - Update Head Position",[this] (const Sensors& sensors) {
+            updateHandle = on<Trigger<Sensors>, Single, Priority::HIGH>().then("Head Controller - Update Head Position", [this] (const Sensors& sensors) {
                 //P controller
                 currentAngles = p_gain * goalAngles + (1 - p_gain) * currentAngles;
 

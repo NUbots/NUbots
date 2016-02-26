@@ -22,9 +22,6 @@
 //      INCLUDE(S)
 /*===========================================================================================================*/
 #include "FootMotionPlanner.h"
-
-#include "utility/motion/RobotModels.h"
-#include "utility/nubugger/NUhelpers.h"
 /*===========================================================================================================*/
 //      NAMESPACE(S)
 /*===========================================================================================================*/
@@ -38,10 +35,15 @@ namespace motion
     using message::input::LimbID;
     using message::support::Configuration;
     using message::motion::FootStepTarget;
+    using message::motion::FootMotionUpdate;
     using message::motion::EnableFootMotion;
     using message::motion::DisableFootMotion;
+    using message::motion::FootStepCompleted;
+
+    using utility::support::Expression;
     using utility::motion::kinematics::DarwinModel;
     using utility::math::matrix::Transform2D;
+    using utility::math::matrix::Transform3D;
     using utility::nubugger::graph;
     /*=======================================================================================================*/
     //      NAME: FootMotionPlanner
@@ -56,19 +58,19 @@ namespace motion
     : Reactor(std::move(environment)) 
     {
     	//Configure foot motion planner...
-        on<Configuration>(CONFIGURATION_PATH).then([this] (const Configuration& config) 
+        on<Configuration>("FootMotionPlanner.yaml").then("Foot Motion Planner - Configure", [this] (const Configuration& config) 
         {
             configure(config.config);
         });
 
         //Transform analytical foot positions in accordance with the stipulated targets...
         updateHandle = on<Every<UPDATE_FREQUENCY, Per<std::chrono::seconds>>, With<Sensors>, Single, Priority::HIGH>()
-        .then([this](const Sensors& sensors) {
+        .then("Foot Motion Planner - Update Foot Position", [this](const Sensors& sensors) {
             updateFootPosition(getMotionPhase(), getLeftFootDestination(), getRightFootDestination());
         }).disable();
 
         //In the event of a new foot step target specified by the foot placement planning module...
-        on<Trigger<FootStepTarget>>().then([this] (const FootStepTarget& target) 
+        on<Trigger<FootStepTarget>>().then("Foot Motion Planner - Received Target Foot Position", [this] (const FootStepTarget& target) 
         {
             if(target.supportFoot)
             {
@@ -78,7 +80,7 @@ namespace motion
             {
                 setRightFootDestination(target.targetDestination);
             }
-            setDestinationTime(target.targetTime);    
+            setDestinationTime(target.targetTime); 
         });
 
         on<Trigger<EnableFootMotion>>().then([this] (const EnableFootMotion& command) 
@@ -102,7 +104,7 @@ namespace motion
      *      @pre-condition  : <TODO: INSERT DESCRIPTION>
      *      @post-condition : <TODO: INSERT DESCRIPTION>
     */
-    void FootMotionPlanner::updateFootPosition(double phase, std::unique_ptr<Transform2D> leftFootDestination, std::unique_ptr<Transform2D> rightFootDestination) 
+    void FootMotionPlanner::updateFootPosition(double phase, const Transform2D& leftFootDestination, const Transform2D& rightFootDestination) 
     {
         //Instantiate unitless phases for x(=0), y(=1) and z(=2) foot motion...
         arma::vec3 footPhases = footPhase(phase, phase1Single, phase2Single);
@@ -122,7 +124,7 @@ namespace motion
         else
         {
             //Vector field function??
-            uLeftFoot  = uLeftFootSource.interpolate(footPhases[0], leftFootDestination);
+            uLeftFoot  = uLeftFootSource.interpolate(footPhases[0],   leftFootDestination);
         }
         
         //Translates foot motion into z dimension for stepping in three-dimensional space...
@@ -142,7 +144,7 @@ namespace motion
         //DEBUGGING: Emit relative feet position phase with respect to robot state... 
         if (emitFootPosition)
         {
-            emit(graph("Foot phase motion", phase));
+            emit(graph("Foot Phase Motion", phase));
         }
 
         //Broadcast struct of updated foot motion data at corresponding phase identity...
@@ -216,7 +218,7 @@ namespace motion
      *      @pre-condition  : <TODO: INSERT DESCRIPTION>
      *      @post-condition : <TODO: INSERT DESCRIPTION>
     */
-    std::unique_ptr<Transform2D> FootMotionPlanner::getLeftFootDestination()
+    Transform2D FootMotionPlanner::getLeftFootDestination()
     {
         setNewStepReceived(false);
         return (leftFootDestination.front());
@@ -227,7 +229,7 @@ namespace motion
      * 
      * @param inLeftFootDestination [description]
      */
-    void FootMotionPlanner::setLeftFootDestination(std::unique_ptr<Transform2D> inLeftFootDestination)
+    void FootMotionPlanner::setLeftFootDestination(const Transform2D& inLeftFootDestination)
     {
         setNewStepReceived(true);
         leftFootDestination.push(inLeftFootDestination);
@@ -241,7 +243,7 @@ namespace motion
      *      @pre-condition  : <TODO: INSERT DESCRIPTION>
      *      @post-condition : <TODO: INSERT DESCRIPTION>
     */
-    std::unique_ptr<Transform2D> FootMotionPlanner::getRightFootDestination()
+    Transform2D FootMotionPlanner::getRightFootDestination()
     {
         setNewStepReceived(false);
         return (rightFootDestination.front());
@@ -255,7 +257,7 @@ namespace motion
      *      @pre-condition  : <TODO: INSERT DESCRIPTION>
      *      @post-condition : <TODO: INSERT DESCRIPTION>
     */
-    void FootMotionPlanner::setRightFootDestination(std::unique_ptr<Transform2D> inRightFootDestination)
+    void FootMotionPlanner::setRightFootDestination(const Transform2D& inRightFootDestination)
     {
         setNewStepReceived(true);
         rightFootDestination.push(inRightFootDestination);
@@ -304,26 +306,13 @@ namespace motion
         // Bind phase value to range [0,1], emit status if step completed...
         if (motionPhase > 1)
         {
-            resetMotionPhase();
+            motionPhase = std::fmod(motionPhase, 1);
+            if(getNewStepReceived())
+            {
+                emit(std::make_unique<FootStepCompleted>(true));
+            }
         }
         return (motionPhase);
-    }
-    /*=======================================================================================================*/
-    //      NAME: resetMotionPhase
-    /*=======================================================================================================*/
-    /*
-     *      @input  : <TODO: INSERT DESCRIPTION>
-     *      @output : <TODO: INSERT DESCRIPTION>
-     *      @pre-condition  : <TODO: INSERT DESCRIPTION>
-     *      @post-condition : <TODO: INSERT DESCRIPTION>
-    */
-    void FootMotionPlanner::resetMotionPhase()
-    {
-        motionPhase = std::fmod(motionPhase, 1);
-        if(getNewStepReceived())
-        {
-            emit(std::make_unique<StepCompleted>(true));
-        }
     }
     /*=======================================================================================================*/
     //      NAME: configure
@@ -334,7 +323,7 @@ namespace motion
      *      @pre-condition  : <TODO: INSERT DESCRIPTION>
      *      @post-condition : <TODO: INSERT DESCRIPTION>
     */
-    void ModularWalkEngine::configure(const YAML::Node& config)
+    void FootMotionPlanner::configure(const YAML::Node& config)
     {
         emitLocalisation = config["emit_localisation"].as<bool>();
 

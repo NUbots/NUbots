@@ -32,12 +32,15 @@
 #include "message/motion/FootPlacement.h" 
 #include "message/input/Sensors.h"
 
+#include "utility/support/yaml_armadillo.h"
+#include "utility/support/yaml_expression.h"
+
 #include "utility/math/geometry/UnitQuaternion.h"
 #include "utility/math/matrix/Transform2D.h"
 #include "utility/math/matrix/Transform3D.h"
 #include "utility/motion/Balance.h"
 #include "utility/motion/RobotModels.h"
-
+#include "utility/nubugger/NUhelpers.h"
 
 namespace module 
 {
@@ -51,8 +54,10 @@ namespace motion
          * TODO: Probably be a global config somewhere, waiting on NUClear to support runtime on<Every> arguments
          */
         static constexpr size_t UPDATE_FREQUENCY = 90;
-
         static constexpr const char* CONFIGURATION_PATH = "FootMotionPlanner.yaml";
+        static constexpr const char* CONFIGURATION_MSSG = "Foot Motion Planner - Configure";
+        static constexpr const char* ONTRIGGER_FOOT_CMD = "Foot Motion Planner - Update Foot Position";
+        static constexpr const char* ONTRIGGER_FOOT_TGT = "Foot Motion Planner - Received Target Foot Position";
         explicit FootMotionPlanner(std::unique_ptr<NUClear::Environment> environment);
     private:
         using LimbID         = message::input::LimbID;
@@ -201,14 +206,13 @@ namespace motion
         double getTime();
         double getDestinationTime();
         void setDestinationTime(double inDestinationTime);
-        std::unique_ptr<Transform2D> getLeftFootDestination();
-        void setLeftFootDestination(std::unique_ptr<Transform2D> inLeftFootDestination);
-        std::unique_ptr<Transform2D> getRightFootDestination();
-        void setRightFootDestination(std::unique_ptr<Transform2D> inRightFootDestination);
+        Transform2D getLeftFootDestination();
+        void setLeftFootDestination(const Transform2D& inLeftFootDestination);
+        Transform2D getRightFootDestination();
+        void setRightFootDestination(const Transform2D& inRightFootDestination);
         bool getNewStepReceived();
         void setNewStepReceived(bool inUpdateStepInstruction);
         double getMotionPhase();
-        void resetMotionPhase();
         /**
          * This is an easing function that returns 3 values {x,y,z} with the range [0,1]
          * This is used to 'ease' the foot path through its trajectory.
@@ -222,7 +226,7 @@ namespace motion
          */
         arma::vec3 footPhase(double phase, double phase1Single, double phase2Single);
 
-        void updateFootPosition(double phase, std::unique_ptr<Transform2D> leftFootDestination, std::unique_ptr<Transform2D> rightFootDestination);
+        void updateFootPosition(double phase, const Transform2D& leftFootDestination, const Transform2D& rightFootDestination);
 
         void configure(const YAML::Node& config);
     };
