@@ -279,8 +279,8 @@ namespace motion
         // standup/sitdown/falldown handling
         if (startFromStep) 
         {
-            uLeftFoot = arma::zeros(3);
-            uRightFoot = arma::zeros(3);
+            setLeftFootPosition(arma::zeros(3));
+            setRightFootPosition(arma::zeros(3));
             setTorsoPosition(arma::zeros(3));
 
             // start walking asap
@@ -289,18 +289,18 @@ namespace motion
         else 
         {
             // stance resetted
-            uLeftFoot = getTorsoPosition().localToWorld({getFootOffsetCoefficient(0), DarwinModel::Leg::HIP_OFFSET_Y - getFootOffsetCoefficient(1), 0});
-            uRightFoot = getTorsoPosition().localToWorld({getFootOffsetCoefficient(0), -DarwinModel::Leg::HIP_OFFSET_Y + getFootOffsetCoefficient(1), 0});
+            setLeftFootPosition(getTorsoPosition().localToWorld({getFootOffsetCoefficient(0), DarwinModel::Leg::HIP_OFFSET_Y - getFootOffsetCoefficient(1), 0}));
+            setRightFootPosition(getTorsoPosition().localToWorld({getFootOffsetCoefficient(0), -DarwinModel::Leg::HIP_OFFSET_Y + getFootOffsetCoefficient(1), 0}));
             initialStep = 2;
         }
 
         swingLeg = swingLegInitial;
 
-        setLeftFootSource(uLeftFoot);
-        setLeftFootDestination(uLeftFoot);
+        setLeftFootSource(getLeftFootPosition());
+        setLeftFootDestination(getLeftFootPosition());
 
-        setRightFootSource(uRightFoot);
-        setRightFootDestination(uRightFoot);
+        setRightFootSource(getRightFootPosition());
+        setRightFootDestination(getRightFootPosition());
 
         setSupportMass(getTorsoPosition());
         beginStepTime = getTime();
@@ -315,8 +315,8 @@ namespace motion
     void FootPlacementPlanner::reset() 
     {
         getTorsoPosition({-getFootOffsetCoefficient(0), 0, 0});
-        uLeftFoot = {0, DarwinModel::Leg::HIP_OFFSET_Y, 0};
-        uRightFoot = {0, -DarwinModel::Leg::HIP_OFFSET_Y, 0};
+        setLeftFootPosition({0, DarwinModel::Leg::HIP_OFFSET_Y, 0});
+        setRightFootPosition({0, -DarwinModel::Leg::HIP_OFFSET_Y, 0});
 
         setTorsoSource(arma::zeros(3));
         setTorsoDestination(arma::zeros(3));
@@ -424,6 +424,34 @@ namespace motion
     void FootPlacementPlanner::setFootOffsetCoefficient(int index, double inValue)
     {
         footOffsetCoefficient[index] = inValue;
+    }
+/*=======================================================================================================*/
+/*      ENCAPSULATION METHOD: 
+/*=======================================================================================================*/
+    Transform2D FootPlacementPlanner::getLeftFootPosition()
+    {
+        return (leftFootPositionTransform);
+    }
+/*=======================================================================================================*/
+/*      ENCAPSULATION METHOD: 
+/*=======================================================================================================*/
+    void FootPlacementPlanner::setLeftFootPosition(const Transform2D& inLeftFootPosition)
+    {
+        leftFootPositionTransform = inLeftFootPosition;
+    }
+/*=======================================================================================================*/
+/*      ENCAPSULATION METHOD: 
+/*=======================================================================================================*/
+    Transform2D FootPlacementPlanner::getRightFootPosition()
+    {
+        return (rightFootPositionTransform);
+    }
+/*=======================================================================================================*/
+/*      ENCAPSULATION METHOD: 
+/*=======================================================================================================*/
+    void FootPlacementPlanner::setRightFootPosition(const Transform2D& inRightFootPosition)
+    {
+        rightFootPositionTransform = inRightFootPosition;
     }
 /*=======================================================================================================*/
 /*      ENCAPSULATION METHOD: 
