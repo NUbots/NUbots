@@ -27,9 +27,10 @@
 
 #include "message/support/Configuration.h"
 #include "message/behaviour/Action.h"
+#include "message/motion/WalkCommand.h"
+#include "message/motion/FootMotionCommand.h" 
+#include "message/motion/FootPlacementCommand.h" 
 #include "message/behaviour/ServoCommand.h"
-#include "message/motion/FootMotion.h" 
-#include "message/motion/FootPlacement.h" 
 #include "message/input/Sensors.h"
 
 #include "utility/support/yaml_armadillo.h"
@@ -79,8 +80,9 @@ namespace motion
         bool updateStepInstruction;
         // The time when the current is to be completed
         double destinationTime;
-        // Destination placement Transform2D values
+        // Destination placement Transform2D left foot positions
         std::queue<Transform2D> leftFootDestination;
+        // Destination placement Transform2D right foot positions
         std::queue<Transform2D> rightFootDestination;
         // How to many 'steps' to take before lifting a foot when starting to walk
         int initialStep;

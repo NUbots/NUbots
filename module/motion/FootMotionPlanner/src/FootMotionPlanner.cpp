@@ -33,12 +33,12 @@ namespace motion
     //      UTILIZATION REFERENCE(S)
     /*=======================================================================================================*/
     using message::input::LimbID;
-    using message::support::Configuration;
     using message::motion::FootStepTarget;
     using message::motion::FootMotionUpdate;
     using message::motion::EnableFootMotion;
     using message::motion::DisableFootMotion;
     using message::motion::FootStepCompleted;
+    using message::support::Configuration;
 
     using utility::support::Expression;
     using utility::motion::kinematics::DarwinModel;

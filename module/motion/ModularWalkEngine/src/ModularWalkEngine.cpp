@@ -72,8 +72,8 @@ namespace motion
     using message::motion::WalkStartCommand;
     using message::motion::WalkStopCommand;
     using message::motion::WalkStopped;
-    using message::motion::EnableModularWalkEngineCommand;
-    using message::motion::DisableModularWalkEngineCommand;
+    using message::motion::EnableWalkEngineCommand;
+    using message::motion::DisableWalkEngineCommand;
     using message::motion::ServoTarget;
     using message::motion::Script;
     using message::support::SaveConfiguration;
@@ -98,18 +98,25 @@ namespace motion
     */
     ModularWalkEngine::ModularWalkEngine(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) 
     {
-        
-        on<Trigger<EnableModularWalkEngineCommand>>().then([this] (const EnableModularWalkEngineCommand& command) 
+        //Configure foot motion planner...
+        on<Configuration>("ModularWalkEngine.yaml").then("Walk Engine - Configure", [this] (const Configuration& config) 
+        {
+            configure(config.config);
+        });
+
+        //Do we need enable/disable?
+        on<Trigger<EnableWalkEngineCommand>>().then([this] (const EnableWalkEngineCommand& command) 
         {
             subsumptionId = command.subsumptionId;
 
             stanceReset(); // Reset stance as we don't know where our limbs are.
-            updateHandle.enable();        });
+            updateHandle.enable();
+        });
 
-        on<Trigger<DisableModularWalkEngineCommand>>().then([this] 
+        on<Trigger<DisableWalkEngineCommand>>().then([this] 
         {
             // Nobody needs the walk engine, so we stop updating it.
-            updateHandle.disable();
+            updateHandle.disable(); 
 
             // TODO: Also disable the other walk command reactions?
         });
