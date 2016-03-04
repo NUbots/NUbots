@@ -29,9 +29,9 @@ namespace module
 {
 namespace motion 
 {
-	/*=======================================================================================================*/
-    //      UTILIZATION REFERENCE(S)
-    /*=======================================================================================================*/
+/*=======================================================================================================*/
+//      UTILIZATION REFERENCE(S)
+/*=======================================================================================================*/
     using message::input::LimbID;
     using message::motion::FootStepTarget;
     using message::motion::FootMotionUpdate;
@@ -45,15 +45,9 @@ namespace motion
     using utility::math::matrix::Transform2D;
     using utility::math::matrix::Transform3D;
     using utility::nubugger::graph;
-    /*=======================================================================================================*/
-    //      NAME: FootMotionPlanner
-    /*=======================================================================================================*/
-    /*
-     *      @input  : <TODO: INSERT DESCRIPTION>
-     *      @output : <TODO: INSERT DESCRIPTION>
-     *      @pre-condition  : <TODO: INSERT DESCRIPTION>
-     *      @post-condition : <TODO: INSERT DESCRIPTION>
-    */
+/*=======================================================================================================*/
+//      NUCLEAR METHOD: FootMotionPlanner
+/*=======================================================================================================*/
     FootMotionPlanner::FootMotionPlanner(std::unique_ptr<NUClear::Environment> environment)
     : Reactor(std::move(environment)) 
     {
@@ -95,15 +89,9 @@ namespace motion
             updateHandle.disable(); 
         });
     }
-    /*=======================================================================================================*/
-    //      NAME: updateFootPosition
-    /*=======================================================================================================*/
-    /*
-     *      @input  : <TODO: INSERT DESCRIPTION>
-     *      @output : <TODO: INSERT DESCRIPTION>
-     *      @pre-condition  : <TODO: INSERT DESCRIPTION>
-     *      @post-condition : <TODO: INSERT DESCRIPTION>
-    */
+/*=======================================================================================================*/
+//      METHOD: updateFootPosition
+/*=======================================================================================================*/
     void FootMotionPlanner::updateFootPosition(double phase, const Transform2D& leftFootDestination, const Transform2D& rightFootDestination) 
     {
         //Instantiate unitless phases for x(=0), y(=1) and z(=2) foot motion...
@@ -150,15 +138,9 @@ namespace motion
         //Broadcast struct of updated foot motion data at corresponding phase identity...
         emit(std::make_unique<FootMotionUpdate>(phase, leftFootLocal, rightFootLocal));
     }
-    /*=======================================================================================================*/
-    //      NAME: footPhase
-    /*=======================================================================================================*/
-    /*
-     *      @input  : <TODO: INSERT DESCRIPTION>
-     *      @output : <TODO: INSERT DESCRIPTION>
-     *      @pre-condition  : <TODO: INSERT DESCRIPTION>
-     *      @post-condition : <TODO: INSERT DESCRIPTION>
-    */
+/*=======================================================================================================*/
+//      METHOD: footPhase
+/*=======================================================================================================*/
     arma::vec3 FootMotionPlanner::footPhase(double phase, double phase1Single, double phase2Single) 
     {
         // Computes relative x,z motion of foot during single support phase
@@ -170,70 +152,44 @@ namespace motion
 
         return {xf, phaseSingle, zf};
     }
-    /*=======================================================================================================*/
-    //      NAME: getTime
-    /*=======================================================================================================*/
-    /*
-     *      @input  : <TODO: INSERT DESCRIPTION>
-     *      @output : <TODO: INSERT DESCRIPTION>
-     *      @pre-condition  : <TODO: INSERT DESCRIPTION>
-     *      @post-condition : <TODO: INSERT DESCRIPTION>
-    */
+/*=======================================================================================================*/
+//      METHOD: getTime
+/*=======================================================================================================*/
     double FootMotionPlanner::getTime() 
     {
         return std::chrono::duration_cast<std::chrono::microseconds>(NUClear::clock::now().time_since_epoch()).count() * 1E-6;
     }
-    /*=======================================================================================================*/
-    //      NAME: getDestinationTime
-    /*=======================================================================================================*/
-    /*
-     *      @input  : <TODO: INSERT DESCRIPTION>
-     *      @output : <TODO: INSERT DESCRIPTION>
-     *      @pre-condition  : <TODO: INSERT DESCRIPTION>
-     *      @post-condition : <TODO: INSERT DESCRIPTION>
-    */
+/*=======================================================================================================*/
+//      METHOD: getDestinationTime
+/*=======================================================================================================*/
     double FootMotionPlanner::getDestinationTime()
     {
         return (destinationTime);
     }
-    /*=======================================================================================================*/
-    //      NAME: setDestinationTime
-    /*=======================================================================================================*/
-    /*
-     *      @input  : <TODO: INSERT DESCRIPTION>
-     *      @output : <TODO: INSERT DESCRIPTION>
-     *      @pre-condition  : <TODO: INSERT DESCRIPTION>
-     *      @post-condition : <TODO: INSERT DESCRIPTION>
-    */
+/*=======================================================================================================*/
+//      METHOD: setDestinationTime
+/*=======================================================================================================*/
     void FootMotionPlanner::setDestinationTime(double inDestinationTime)
     {
         destinationTime = inDestinationTime;
     }
-    /*=======================================================================================================*/
-    //      NAME: getLeftFootDestination
-    /*=======================================================================================================*/
-    /*
-     *      @input  : <TODO: INSERT DESCRIPTION>
-     *      @output : <TODO: INSERT DESCRIPTION>
-     *      @pre-condition  : <TODO: INSERT DESCRIPTION>
-     *      @post-condition : <TODO: INSERT DESCRIPTION>
-    */
+/*=======================================================================================================*/
+//      METHOD: getLeftFootDestination
+/*=======================================================================================================*/
     Transform2D FootMotionPlanner::getLeftFootDestination()
     {
         setNewStepReceived(false);
         return (leftFootDestination.front());
     }
-    /**
-     * @brief [brief description]
-     * @details [long description]
-     * 
-     * @param inLeftFootDestination [description]
-     */
+/*=======================================================================================================*/
+//      METHOD: setLeftFootDestination
+/*=======================================================================================================*/
     void FootMotionPlanner::setLeftFootDestination(const Transform2D& inLeftFootDestination)
     {
         setNewStepReceived(true);
         leftFootDestination.push(inLeftFootDestination);
     }
+<<<<<<< 10dc0520add22a7f4f7ad7e432ea63bdcaef581f
 <<<<<<< f10da9c4b0232f8ba743f03d26325ddc863f1f48
 <<<<<<< cdf96fbdd5a07a2529fcd01d4c07dd1dfe64510f
 =======
@@ -247,60 +203,41 @@ namespace motion
      *      @pre-condition  : <TODO: INSERT DESCRIPTION>
      *      @post-condition : <TODO: INSERT DESCRIPTION>
     */
+=======
+/*=======================================================================================================*/
+//      METHOD: getRightFootDestination
+/*=======================================================================================================*/
+>>>>>>> Documentation Changes to Foot Motion Planner
     Transform2D FootMotionPlanner::getRightFootDestination()
     {
         setNewStepReceived(false);
         return (rightFootDestination.front());
     }
-    /*=======================================================================================================*/
-    //      NAME: setRightFootDestination
-    /*=======================================================================================================*/
-    /*
-     *      @input  : <TODO: INSERT DESCRIPTION>
-     *      @output : <TODO: INSERT DESCRIPTION>
-     *      @pre-condition  : <TODO: INSERT DESCRIPTION>
-     *      @post-condition : <TODO: INSERT DESCRIPTION>
-    */
+/*=======================================================================================================*/
+//      METHOD: setRightFootDestination
+/*=======================================================================================================*/
     void FootMotionPlanner::setRightFootDestination(const Transform2D& inRightFootDestination)
     {
         setNewStepReceived(true);
         rightFootDestination.push(inRightFootDestination);
     }
-    /*=======================================================================================================*/
-    //      NAME: isNewStepReceived
-    /*=======================================================================================================*/
-    /*
-     *      @input  : <TODO: INSERT DESCRIPTION>
-     *      @output : <TODO: INSERT DESCRIPTION>
-     *      @pre-condition  : <TODO: INSERT DESCRIPTION>
-     *      @post-condition : <TODO: INSERT DESCRIPTION>
-    */
+/*=======================================================================================================*/
+//      METHOD: isNewStepReceived
+/*=======================================================================================================*/
     bool FootMotionPlanner::getNewStepReceived()
     {
         return (updateStepInstruction);
     }
-    /*=======================================================================================================*/
-    //      NAME: setNewStepReceived
-    /*=======================================================================================================*/
-    /*
-     *      @input  : <TODO: INSERT DESCRIPTION>
-     *      @output : <TODO: INSERT DESCRIPTION>
-     *      @pre-condition  : <TODO: INSERT DESCRIPTION>
-     *      @post-condition : <TODO: INSERT DESCRIPTION>
-    */
+/*=======================================================================================================*/
+//      METHOD: setNewStepReceived
+/*=======================================================================================================*/
     void FootMotionPlanner::setNewStepReceived(bool inUpdateStepInstruction)
     {
         updateStepInstruction = inUpdateStepInstruction;
     }
-    /*=======================================================================================================*/
-    //      NAME: getMotionPhase
-    /*=======================================================================================================*/
-    /*
-     *      @input  : <TODO: INSERT DESCRIPTION>
-     *      @output : <TODO: INSERT DESCRIPTION>
-     *      @pre-condition  : <TODO: INSERT DESCRIPTION>
-     *      @post-condition : <TODO: INSERT DESCRIPTION>
-    */
+/*=======================================================================================================*/
+//      METHOD: getMotionPhase
+/*=======================================================================================================*/
     double FootMotionPlanner::getMotionPhase()
     {
         // Obtain current system time...
@@ -318,15 +255,9 @@ namespace motion
         }
         return (motionPhase);
     }
-    /*=======================================================================================================*/
-    //      NAME: configure
-    /*=======================================================================================================*/
-    /*
-     *      @input  : <TODO: INSERT DESCRIPTION>
-     *      @output : <TODO: INSERT DESCRIPTION>
-     *      @pre-condition  : <TODO: INSERT DESCRIPTION>
-     *      @post-condition : <TODO: INSERT DESCRIPTION>
-    */
+/*=======================================================================================================*/
+//      METHOD: configure
+/*=======================================================================================================*/
     void FootMotionPlanner::configure(const YAML::Node& config)
     {
         emitLocalisation = config["emit_localisation"].as<bool>();

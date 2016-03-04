@@ -228,7 +228,8 @@ namespace motion
 /*=======================================================================================================*/
 /*      METHOD: updateVelocity
 /*=======================================================================================================*/
-    void FootPlacementPlanner::updateVelocity() { 
+    void FootPlacementPlanner::updateVelocity() 
+    { 
         // slow accelerations at high speed
         //TODO: Add acceleration to velocity (Replace initialStep)
         auto now = NUClear::clock::now();
@@ -275,7 +276,8 @@ namespace motion
 /*=======================================================================================================*/
 /*      METHOD: updateVelocity
 /*=======================================================================================================*/
-    Transform2D FootPlacementPlanner::getVelocity() {
+    Transform2D FootPlacementPlanner::getVelocity() 
+    {
         return velocityCurrent;
     }
 /*=======================================================================================================*/
