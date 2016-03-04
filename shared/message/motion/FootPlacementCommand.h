@@ -33,10 +33,9 @@ namespace motion
     
     struct FootStepTarget
     {
-        FootStepTarget() = delete;
-            bool supportFoot;
-            double targetTime;
-            Transform2D targetDestination;
+        bool supportFoot;
+        double targetTime;
+        Transform2D targetDestination;
         FootStepTarget(bool supportFoot, double targetTime, const Transform2D& targetDestination)
             : supportFoot(supportFoot)
             , targetTime(targetTime)
