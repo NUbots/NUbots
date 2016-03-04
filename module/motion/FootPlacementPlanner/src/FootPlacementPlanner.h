@@ -226,7 +226,7 @@ namespace motion
         Transform2D getLeftFootPosition();
         void setLeftFootPosition(const Transform2D& inLeftFootPosition);
         Transform2D getRightFootPosition();
-        void setRightFootPosition(const Transform2D& inPosition);
+        void setRightFootPosition(const Transform2D& inRightFootPosition);
 
         Transform2D getLeftFootSource();
         void setLeftFootSource(const Transform2D& inLeftFootSource);
