@@ -66,7 +66,7 @@ namespace motion
         //In the event of a new foot step target specified by the foot placement planning module...
         on<Trigger<FootStepTarget>>().then("Foot Motion Planner - Received Target Foot Position", [this] (const FootStepTarget& target) 
         {
-            if(target.supportFoot)
+            if(target.supportMass == LimbID::LEFT_LEG)
             {
                 setLeftFootDestination(target.targetDestination);
             }
