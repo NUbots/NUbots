@@ -27,19 +27,50 @@ namespace message
 {
 namespace motion 
 {
+    using message::input::LimbID;
     using utility::math::matrix::Transform2D;
 
     struct FootPlacementStopped {};
     
     struct FootStepTarget
     {
-        bool supportFoot;
+        LimbID supportMass;
         double targetTime;
         Transform2D targetDestination;
-        FootStepTarget(bool supportFoot, double targetTime, const Transform2D& targetDestination)
-            : supportFoot(supportFoot)
+        FootStepTarget(const LimbID& supportMass, 
+                       double targetTime, 
+                       const Transform2D& targetDestination)
+            : supportMass(supportMass)
             , targetTime(targetTime)
             , targetDestination(targetDestination) {}
+    };
+    struct NewTargetInformation
+    {
+        Transform2D leftFootSource;
+        Transform2D rightFootSource;
+        Transform2D leftFootDestination;
+        Transform2D rightFootDestination;
+        Transform2D supportMass;
+        NewTargetInformation(const Transform2D& leftFootSource, 
+                             const Transform2D& rightFootSource,
+                             const Transform2D& leftFootDestination,
+                             const Transform2D& rightFootDestination,
+                             const Transform2D& supportMass)
+            : leftFootSource(leftFootSource)
+            , rightFootSource(rightFootSource)
+            , leftFootDestination(leftFootDestination)
+            , rightFootDestination(rightFootDestination)
+            , supportMass(supportMass) {}
+    };
+    struct EnableFootPlacement
+    {
+        EnableFootPlacement(size_t id) : subsumptionId(id) { }
+        size_t subsumptionId = 1;
+    };
+    struct DisableFootPlacement
+    {
+        DisableFootPlacement(size_t id) : subsumptionId(id) { }
+        size_t subsumptionId = 1;
     };
 }  // motion
 }  // message

@@ -92,7 +92,7 @@ namespace motion
         };
 
         /// Current subsumption ID key to access motors.
-        size_t subsumptionIdupdateHandle = 1;
+        size_t subsumptionId = 1;
 
         // Reaction handle for the main update loop, disabling when not moving will save unnecessary CPU
         ReactionHandle updateHandle;
@@ -131,15 +131,20 @@ namespace motion
         Transform2D velocityCurrent;
         // Current velocity command
         Transform2D velocityCommand;
+        // ??
+        Transform2D velocityDifference;
         // The leg that is 'swinging' in the step, opposite of the support foot
         LimbID swingLeg;
-        
-
+        // zmp expoential coefficients aXP aXN aYP aYN
+        arma::vec4 zmpCoefficients;
+        // zmp params m1X, m2X, m1Y, m2Y
+        arma::vec4 zmpParams;
+        // ??
         Transform2D uSupportMass;
         // end state
 
-        
-        // start config, see config file for documentation
+        double STAND_SCRIPT_DURATION;
+
         // start config, see config file for documentation
 
         double stanceLimitY2;
@@ -197,64 +202,231 @@ namespace motion
         
         // end config
 
-        double STAND_SCRIPT_DURATION;
-
-        void configure(const YAML::Node& config);
-        void reset();
-        void start();
-        void requestStop();
-        void stop();
-        void calculateNewStep();
-        void setVelocity(Transform2D velocity);
-        void updateVelocity();
-        void stanceReset();
-
-        Transform2D getTorsoPosition();
-        void setTorsoPosition(const Transform2D& inTorsoPosition);
-        Transform2D getTorsoSource();
-        void setTorsoSource(const Transform2D& inTorsoPosition);
-        Transform2D getTorsoDestination();
-        void setTorsoDestination(const Transform2D& inTorsoPosition);
-
-        Transform2D getSupportMass();
-        void setSupportMass(const Transform2D& inSupportMass);
-
-        arma::vec2 getFootOffsetCoefficient(int index);
-        void setFootOffsetCoefficient(const arma::vec2& inFootOffsetCoefficient);
-        void setFootOffsetCoefficient(int index, double inValue);
-
-        Transform2D getLeftFootPosition();
-        void setLeftFootPosition(const Transform2D& inLeftFootPosition);
-        Transform2D getRightFootPosition();
-        void setRightFootPosition(const Transform2D& inRightFootPosition);
-
-        Transform2D getLeftFootSource();
-        void setLeftFootSource(const Transform2D& inLeftFootSource);
-        Transform2D getRightFootSource();
-        void setRightFootSource(const Transform2D& inRightFootSource);
-        
-        Transform2D getLeftFootDestination();
-        void setLeftFootDestination(const Transform2D& inLeftFootDestination);
-        Transform2D getRightFootDestination();
-        void setRightFootDestination(const Transform2D& inRightFootDestination);
-
-        Transform2D getNewFootTarget(const Transform2D& velocity, const Transform2D& leftFoot, const Transform2D& rightFoot, const LimbID& swingLeg);
         /**
-         * @return The current velocity
+         * @brief [brief description]
+         * @details [long description]
+         * 
+         * @param config [description]
+         */
+        void configure(const YAML::Node& config);
+        /**
+         * @brief [brief description]
+         * @details [long description]
+         */
+        void reset();
+        /**
+         * @brief [brief description]
+         * @details [long description]
+         */
+        void start();
+        /**
+         * @brief [brief description]
+         * @details [long description]
+         */
+        void requestStop();
+        /**
+         * @brief [brief description]
+         * @details [long description]
+         */
+        void stop();
+        /**
+         * @brief [brief description]
+         * @details [long description]
+         */
+        void calculateNewStep();
+        /**
+         * @brief [brief description]
+         * @details [long description]
+         * 
+         * @param velocity [description]
+         */
+        void setVelocity(Transform2D velocity);
+        /**
+         * @brief [brief description]
+         * @details [long description]
+         */
+        void updateVelocity();
+        /**
+         * @brief [brief description]
+         * @details [long description]
+         */
+        void stanceReset();
+        /**
+         * @brief [brief description]
+         * @details [long description]
+         * @return [description]
+         */
+        Transform2D getTorsoPosition();
+        /**
+         * @brief [brief description]
+         * @details [long description]
+         * 
+         * @param inTorsoPosition [description]
+         */
+        void setTorsoPosition(const Transform2D& inTorsoPosition);
+        /**
+         * @brief [brief description]
+         * @details [long description]
+         * @return [description]
+         */
+        Transform2D getTorsoSource();
+        /**
+         * @brief [brief description]
+         * @details [long description]
+         * 
+         * @param inTorsoPosition [description]
+         */
+        void setTorsoSource(const Transform2D& inTorsoPosition);
+        /**
+         * @brief [brief description]
+         * @details [long description]
+         * @return [description]
+         */
+        Transform2D getTorsoDestination();
+        /**
+         * @brief [brief description]
+         * @details [long description]
+         * 
+         * @param inTorsoPosition [description]
+         */
+        void setTorsoDestination(const Transform2D& inTorsoPosition);
+        /**
+         * @brief [brief description]
+         * @details [long description]
+         * @return [description]
+         */
+        Transform2D getSupportMass();
+        /**
+         * @brief [brief description]
+         * @details [long description]
+         * 
+         * @param inSupportMass [description]
+         */
+        void setSupportMass(const Transform2D& inSupportMass);
+        /**
+         * @brief [brief description]
+         * @details [long description]
+         * 
+         * @param index [description]
+         * @return [description]
+         */
+        double getFootOffsetCoefficient(int index);
+        /**
+         * @brief [brief description]
+         * @details [long description]
+         * 
+         * @param inFootOffsetCoefficient [description]
+         */
+        void setFootOffsetCoefficient(const arma::vec2& inFootOffsetCoefficient);
+        /**
+         * @brief [brief description]
+         * @details [long description]
+         * 
+         * @param index [description]
+         * @param inValue [description]
+         */
+        void setFootOffsetCoefficient(int index, double inValue);
+        /**
+         * @brief [brief description]
+         * @details [long description]
+         * @return [description]
+         */
+        Transform2D getLeftFootPosition();
+        /**
+         * @brief [brief description]
+         * @details [long description]
+         * 
+         * @param inLeftFootPosition [description]
+         */
+        void setLeftFootPosition(const Transform2D& inLeftFootPosition);
+        /**
+         * @brief [brief description]
+         * @details [long description]
+         * @return [description]
+         */
+        Transform2D getRightFootPosition();
+        /**
+         * @brief [brief description]
+         * @details [long description]
+         * 
+         * @param inRightFootPosition [description]
+         */
+        void setRightFootPosition(const Transform2D& inRightFootPosition);
+        /**
+         * @brief [brief description]
+         * @details [long description]
+         * @return [description]
+         */
+        Transform2D getLeftFootSource();
+        /**
+         * @brief [brief description]
+         * @details [long description]
+         * 
+         * @param inLeftFootSource [description]
+         */
+        void setLeftFootSource(const Transform2D& inLeftFootSource);
+        /**
+         * @brief [brief description]
+         * @details [long description]
+         * @return [description]
+         */
+        Transform2D getRightFootSource();
+        /**
+         * @brief [brief description]
+         * @details [long description]
+         * 
+         * @param inRightFootSource [description]
+         */
+        void setRightFootSource(const Transform2D& inRightFootSource);
+        /**
+         * @brief [brief description]
+         * @details [long description]
+         * @return [description]
+         */
+        Transform2D getLeftFootDestination();
+        /**
+         * @brief [brief description]
+         * @details [long description]
+         * 
+         * @param inLeftFootDestination [description]
+         */
+        void setLeftFootDestination(const Transform2D& inLeftFootDestination);
+        /**
+         * @brief [brief description]
+         * @details [long description]
+         * @return [description]
+         */
+        Transform2D getRightFootDestination();
+        /**
+         * @brief [brief description]
+         * @details [long description]
+         * 
+         * @param inRightFootDestination [description]
+         */
+        void setRightFootDestination(const Transform2D& inRightFootDestination);
+        /**
+         * @brief [brief description]
+         * @details [long description]
+         * 
+         * @param velocity [description]
+         * @param swingLeg [description]
+         * 
+         * @return [description]
+         */
+        Transform2D getNewFootTarget(const Transform2D& velocity, const LimbID& swingLeg);
+        /**
+         * @brief [brief description]
+         * @details [long description]
+         * @return [description]
          */
         Transform2D getVelocity();
-
         /**
-         * @return get a unix timestamp (in decimal seconds that are accurate to the microsecond)
+         * @brief [brief description]
+         * @details [long description]
+         * @return [description]
          */
         double getTime();
-
-        /**
-         * @return A clamped between 0 and maxvalue, offset by deadband
-         */
-        //double linearInterpolationDeadband(double a, double deadband, double maxvalue);
     };
-
 }  // motion
 }  // modules
 

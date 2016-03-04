@@ -34,8 +34,9 @@ namespace motion
 /*=======================================================================================================*/
     using message::input::LimbID;
     using message::motion::FootStepTarget;
-    using message::motion::EnableFootMotion;
-    using message::motion::DisableFootMotion;
+    using message::motion::NewTargetInformation;
+    using message::motion::EnableFootPlacement;
+    using message::motion::DisableFootPlacement;
     using message::motion::FootStepCompleted;
     using message::motion::WalkStartCommand;
     using message::motion::WalkStopCommand;
@@ -83,6 +84,18 @@ namespace motion
         updateHandle = on<Trigger<FootStepCompleted>>().then("Foot Placement Planner - Calculate Target Foot Position", [this]
         {
             calculateNewStep();
+        });
+
+        on<Trigger<EnableFootPlacement>>().then([this] (const EnableFootPlacement& command) 
+        {
+            subsumptionId = command.subsumptionId;
+            updateHandle.enable();
+        });
+
+        //If foot motion no longer requested, cease updating...
+        on<Trigger<DisableFootPlacement>>().then([this] 
+        {
+            updateHandle.disable(); 
         });
     }
 /*=======================================================================================================*/
@@ -159,11 +172,11 @@ namespace motion
             // normal walk, advance steps
             if (swingLeg == LimbID::RIGHT_LEG) 
             {
-                setRightFootDestination(getNewFootTarget(velocityCurrent, getLeftFootSource(), getRightFootSource(), swingLeg));
+                setRightFootDestination(getNewFootTarget(velocityCurrent, swingLeg));
             }
             else 
             {
-                setLeftFootDestination(getNewFootTarget(velocityCurrent, getLeftFootSource(), getRightFootSource(), swingLeg));
+                setLeftFootDestination(getNewFootTarget(velocityCurrent, swingLeg));
             }
         }
         // apply velocity-based support point modulation for SupportMass
@@ -173,7 +186,7 @@ namespace motion
             Transform2D uTorsoModded = getTorsoPosition().localToWorld({supportMod[0], supportMod[1], 0});
             Transform2D uLeftFootModded = uTorsoModded.localToWorld(uLeftFootTorso);
             setSupportMass(uLeftFootModded.localToWorld({-getFootOffsetCoefficient(0), -getFootOffsetCoefficient(1), 0}));
-            emit(std::make_unique<FootStepTarget(swingLeg, getTime() + stepTime, getRightFootDestination())>); //Trigger NewStep
+            emit(std::make_unique<FootStepTarget>(swingLeg, getTime() + stepTime, getRightFootDestination())); //Trigger NewStep
 
         }
         else 
@@ -182,17 +195,17 @@ namespace motion
             Transform2D uTorsoModded = getTorsoPosition().localToWorld({supportMod[0], supportMod[1], 0});
             Transform2D uRightFootModded = uTorsoModded.localToWorld(uRightFootTorso);
             setSupportMass(uRightFootModded.localToWorld({-getFootOffsetCoefficient(0), getFootOffsetCoefficient(1), 0}));
-            emit(std::make_unique<FootStepTarget(swingLeg, getTime() + stepTime, getLeftFootDestination())>); //Trigger NewStep
+            emit(std::make_unique<FootStepTarget>(swingLeg, getTime() + stepTime, getLeftFootDestination())); //Trigger NewStep
         }
 
-        emit(std:make_unique<NewStepTorso>(getLeftFootSource(),getRightFootSource(),getLeftFootDestination(),getRightFootDestination(),getSupportMass())); //Torso Information
+        emit(std::make_unique<NewTargetInformation>(getLeftFootSource(), getRightFootSource(), getLeftFootDestination(), getRightFootDestination(), getSupportMass())); //Torso Information
         //emit destinations for fmp and/or zmp
         //may combine NewStep and NewStepTorso
     }
 /*=======================================================================================================*/
 /*      METHOD: getNewFootTarget
 /*=======================================================================================================*/
-    Transform2D FootPlacementPlanner::getNewFootTarget(const Transform2D& velocity, LimbID& swingLeg) 
+    Transform2D FootPlacementPlanner::getNewFootTarget(const Transform2D& velocity, const LimbID& swingLeg) 
     {   
         // Negative if right leg to account for the mirroring of the foot target
         int8_t sign = swingLeg == LimbID::LEFT_LEG ? 1 : -1;
@@ -238,8 +251,6 @@ namespace motion
 
         auto& limit = (velocityCurrent.x() > velocityHigh ? accelerationLimitsHigh : accelerationLimits) * deltaT; // TODO: use a function instead
 
-        Transform2D velocityDifference;
-
         velocityCurrent.x()     = std::min(std::max(velocityCommand.x()     - velocityCurrent.x(),     -limit[0]), limit[0]);
         velocityDifference.y()     = std::min(std::max(velocityCommand.y()     - velocityCurrent.y(),     -limit[1]), limit[1]);
         velocityDifference.angle() = std::min(std::max(velocityCommand.angle() - velocityCurrent.angle(), -limit[2]), limit[2]);
@@ -247,7 +258,6 @@ namespace motion
         velocityCurrent.x()     += velocityDifference.x();
         velocityCurrent.y()     += velocityDifference.y();
         velocityCurrent.angle() += velocityDifference.angle();
-
     }
 /*=======================================================================================================*/
 /*      METHOD: updateVelocity
@@ -323,7 +333,7 @@ namespace motion
 /*=======================================================================================================*/
     void FootPlacementPlanner::reset() 
     {
-        getTorsoPosition({-getFootOffsetCoefficient(0), 0, 0});
+        setTorsoPosition({-getFootOffsetCoefficient(0), 0, 0});
         setLeftFootPosition({0, DarwinModel::Leg::HIP_OFFSET_Y, 0});
         setRightFootPosition({0, -DarwinModel::Leg::HIP_OFFSET_Y, 0});
 
@@ -357,6 +367,13 @@ namespace motion
 
         // interrupted = false;
     }
+/*=======================================================================================================*/
+//      METHOD: getTime
+/*=======================================================================================================*/
+    double FootPlacementPlanner::getTime() 
+    {
+        return std::chrono::duration_cast<std::chrono::microseconds>(NUClear::clock::now().time_since_epoch()).count() * 1E-6;
+    }    
 /*=======================================================================================================*/
 /*      ENCAPSULATION METHOD: getTorsoPosition
 /*=======================================================================================================*/
@@ -416,7 +433,7 @@ namespace motion
 /*=======================================================================================================*/
 /*      ENCAPSULATION METHOD: 
 /*=======================================================================================================*/
-    arma::vec2 FootPlacementPlanner::getFootOffsetCoefficient(int index)
+    double FootPlacementPlanner::getFootOffsetCoefficient(int index)
     {
         return (footOffsetCoefficient[index]);
     }

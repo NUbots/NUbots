@@ -29,7 +29,15 @@ namespace motion
 {
     using utility::math::matrix::Transform2D;
 
-
+    /*
+    struct [name]
+    {
+        [variables]
+        [structure](...)
+            : ...
+            , ... {}
+    };
+    */
 }  // motion
 }  // message
 

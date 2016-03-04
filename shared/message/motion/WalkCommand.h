@@ -27,8 +27,9 @@ namespace message
 {
 namespace motion 
 {
-
     using utility::math::matrix::Transform2D;
+
+    struct WalkStopped {};
 
     struct WalkCommand {
         WalkCommand() = delete;
@@ -49,9 +50,6 @@ namespace motion
         WalkStopCommand() = delete;
         WalkStopCommand(size_t id) : subsumptionId(id) { }
         size_t subsumptionId = 1;
-    };
-    
-    struct WalkStopped {
     };
 
     struct EnableWalkEngineCommand {
