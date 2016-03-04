@@ -17,8 +17,8 @@
  * Copyright 2013 NUBots <nubots@nubots.net>
  */
 
-#ifndef MESSAGE_MOTION_FOOTPLACEMENT_H
-#define MESSAGE_MOTION_FOOTPLACEMENT_H
+#ifndef MESSAGE_MOTION_FOOTPLACEMENTCOMMAND_H
+#define MESSAGE_MOTION_FOOTPLACEMENTCOMMAND_H
 
 #include <armadillo>
 #include "utility/math/matrix/Transform2D.h"
@@ -29,6 +29,8 @@ namespace motion
 {
     using utility::math::matrix::Transform2D;
 
+    struct FootPlacementStopped {};
+    
     struct FootStepTarget
     {
         FootStepTarget() = delete;
@@ -43,4 +45,4 @@ namespace motion
 }  // motion
 }  // message
 
-#endif  // MESSAGE_MOTION_FOOTPLACEMENT_H
+#endif  // MESSAGE_MOTION_FOOTPLACEMENTCOMMAND_H

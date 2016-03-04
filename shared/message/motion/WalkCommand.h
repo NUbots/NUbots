@@ -50,6 +50,7 @@ namespace motion
         WalkStopCommand(size_t id) : subsumptionId(id) { }
         size_t subsumptionId = 1;
     };
+    
     struct WalkStopped {
     };
 
