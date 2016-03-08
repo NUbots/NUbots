@@ -47,7 +47,7 @@ node nubotsvmbuild {
                                 method => 'make', }
   installer { 'libsvm':         url => 'https://github.com/cjlin1/libsvm/archive/v321.tar.gz',
                                 method => 'make', }
-  installer { 'armadillo':      url => 'https://downloads.sourceforge.net/project/arma/armadillo-6.400.3.tar.gz',
+  installer { 'armadillo':      url => 'https://downloads.sourceforge.net/project/arma/armadillo-6.500.5.tar.gz',
                                 method => 'cmake',
                                 creates => '/nubots/toolchain/lib/libarmadillo.so',
                                 require => Installer['openblas'], }

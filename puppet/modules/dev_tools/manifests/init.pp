@@ -18,6 +18,7 @@ class dev_tools {
   # Tools
   package { 'vim': ensure => latest, }
   package { 'screen': ensure => latest, }
+  package { 'zsh': ensure => latest, }
   package { 'htop': ensure => latest, }
   package { 'gdb': ensure => latest, }
   package { 'cmake-curses-gui': ensure => latest, }
@@ -38,6 +39,43 @@ class dev_tools {
   package { 'binutils-dev': ensure => latest, require => Apt::Ppa['ppa:ubuntu-toolchain-r/test'] }
   package { 'ninja-build': ensure => latest, }
   package { 'yasm': ensure => latest, }
+
+  # Set the vagrant shell to zsh
+  user { 'vagrant': shell => '/bin/zsh', require => Package['zsh'], }
+
+  # Setup prezto for a richer zsh experience
+  vcsrepo { 'zprezto':
+    ensure   => present,
+    path     => '/home/vagrant/.zprezto',
+    provider => git,
+    owner    => 'vagrant',
+    group    => 'vagrant',
+    source   => 'https://github.com/sorin-ionescu/prezto.git',
+    require  => Package['git'],
+  }
+
+  # Create the required links for zprezto
+  file { '/home/vagrant/.zlogin':    ensure => link, target => '/home/vagrant/.zprezto/runcoms/zlogin',    require => Vcsrepo['zprezto'], }
+  file { '/home/vagrant/.zlogout':   ensure => link, target => '/home/vagrant/.zprezto/runcoms/zlogout',   require => Vcsrepo['zprezto'], }
+  file { '/home/vagrant/.zpreztorc': ensure => link, target => '/home/vagrant/.zprezto/runcoms/zpreztorc', require => Vcsrepo['zprezto'], }
+  file { '/home/vagrant/.zprofile':  ensure => link, target => '/home/vagrant/.zprezto/runcoms/zprofile',  require => Vcsrepo['zprezto'], }
+  file { '/home/vagrant/.zshenv':    ensure => link, target => '/home/vagrant/.zprezto/runcoms/zshenv',    require => Vcsrepo['zprezto'], }
+  file { '/home/vagrant/.zshrc':     ensure => link, target => '/home/vagrant/.zprezto/runcoms/zshrc',     require => Vcsrepo['zprezto'], }
+
+  # Enable the git module for zprezto
+  file_line { 'zprezto_modules':
+    ensure => present,
+    path   => '/home/vagrant/.zpreztorc',
+    match  => '  \'prompt\'',
+    line   => "  \'git\' \'command-not-found\' \'prompt\'",
+  }
+
+  # Load environment variables for the toolchain in zsh
+  file_line { 'zsh_toolchain_environment':
+    ensure => present,
+    path   => '/home/vagrant/.zshrc',
+    line   => 'source /etc/profile.d/toolchain_init.sh',
+  }
 
   # System libraries
   package { 'libasound2-dev': ensure => latest, }
