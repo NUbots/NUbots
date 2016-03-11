@@ -35,14 +35,19 @@ namespace module {
                         try {
                             std::rethrow_exception(stats.exception);
                         }
-                        catch (std::exception ex) {
+                        catch (const std::exception& ex) {
+
+
                             for (auto stat : stats.identifier) {
-                                NUClear::log<NUClear::ERROR>("Identifier: ", stat);
+                                NUClear::log<NUClear::ERROR>("Identifier:", stat);
                             }
-                            NUClear::log<NUClear::ERROR>("Unhandled Exception: ", ex.what());
+                            NUClear::log<NUClear::ERROR>("Unhandled Exception:"
+                                , NUClear::util::demangle(typeid(ex).name()),
+                                ex.what());
                         }
                         // We don't actually want to crash
                         catch (...) {
+                            NUClear::log<NUClear::ERROR>("Unhandled Exception of unknown type");
                         }
                     }
                 });

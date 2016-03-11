@@ -30,7 +30,13 @@ namespace message {
          *
          * @author Trent Houliston
          */
-        class SegmentationFault : public std::exception {};
+        class SegmentationFault : public std::exception {
+
+        public:
+            virtual const char* what() const noexcept {
+                return "Segmentation Fault";
+            }
+        };
 
     }  // support
 }  // message
