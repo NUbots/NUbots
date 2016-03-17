@@ -38,6 +38,17 @@ namespace motion
             , ... {}
     };
     */
+    struct EnableTorsoMotion 
+    {
+        EnableTorsoMotion(size_t id) : subsumptionId(id) { }
+        size_t subsumptionId = 1;
+    };
+
+    struct DisableTorsoMotion
+    {
+        DisableTorsoMotion(size_t id) : subsumptionId(id) { }
+        size_t subsumptionId = 1;
+    };
 }  // motion
 }  // message
 

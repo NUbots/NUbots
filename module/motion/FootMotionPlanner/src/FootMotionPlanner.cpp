@@ -153,28 +153,28 @@ namespace motion
         return {xf, phaseSingle, zf};
     }
 /*=======================================================================================================*/
-//      METHOD: getTime
+//      ENCAPSULATION METHOD: getTime
 /*=======================================================================================================*/
     double FootMotionPlanner::getTime() 
     {
         return std::chrono::duration_cast<std::chrono::microseconds>(NUClear::clock::now().time_since_epoch()).count() * 1E-6;
     }
 /*=======================================================================================================*/
-//      METHOD: getDestinationTime
+//      ENCAPSULATION METHOD: getDestinationTime
 /*=======================================================================================================*/
     double FootMotionPlanner::getDestinationTime()
     {
         return (destinationTime);
     }
 /*=======================================================================================================*/
-//      METHOD: setDestinationTime
+//      ENCAPSULATION METHOD: setDestinationTime
 /*=======================================================================================================*/
     void FootMotionPlanner::setDestinationTime(double inDestinationTime)
     {
         destinationTime = inDestinationTime;
     }
 /*=======================================================================================================*/
-//      METHOD: getLeftFootDestination
+//      ENCAPSULATION METHOD: getLeftFootDestination
 /*=======================================================================================================*/
     Transform2D FootMotionPlanner::getLeftFootDestination()
     {
@@ -182,7 +182,7 @@ namespace motion
         return (leftFootDestination.front());
     }
 /*=======================================================================================================*/
-//      METHOD: setLeftFootDestination
+//      ENCAPSULATION METHOD: setLeftFootDestination
 /*=======================================================================================================*/
     void FootMotionPlanner::setLeftFootDestination(const Transform2D& inLeftFootDestination)
     {
@@ -205,7 +205,7 @@ namespace motion
     */
 =======
 /*=======================================================================================================*/
-//      METHOD: getRightFootDestination
+//      ENCAPSULATION METHOD: getRightFootDestination
 /*=======================================================================================================*/
 >>>>>>> Documentation Changes to Foot Motion Planner
     Transform2D FootMotionPlanner::getRightFootDestination()
@@ -214,7 +214,7 @@ namespace motion
         return (rightFootDestination.front());
     }
 /*=======================================================================================================*/
-//      METHOD: setRightFootDestination
+//      ENCAPSULATION METHOD: setRightFootDestination
 /*=======================================================================================================*/
     void FootMotionPlanner::setRightFootDestination(const Transform2D& inRightFootDestination)
     {
@@ -222,21 +222,21 @@ namespace motion
         rightFootDestination.push(inRightFootDestination);
     }
 /*=======================================================================================================*/
-//      METHOD: isNewStepReceived
+//      ENCAPSULATION METHOD: isNewStepReceived
 /*=======================================================================================================*/
     bool FootMotionPlanner::getNewStepReceived()
     {
         return (updateStepInstruction);
     }
 /*=======================================================================================================*/
-//      METHOD: setNewStepReceived
+//      ENCAPSULATION METHOD: setNewStepReceived
 /*=======================================================================================================*/
     void FootMotionPlanner::setNewStepReceived(bool inUpdateStepInstruction)
     {
         updateStepInstruction = inUpdateStepInstruction;
     }
 /*=======================================================================================================*/
-//      METHOD: getMotionPhase
+//      ENCAPSULATION METHOD: getMotionPhase
 /*=======================================================================================================*/
     double FootMotionPlanner::getMotionPhase()
     {

@@ -22,20 +22,37 @@
 
 #include <nuclear>
 #include <armadillo>
+#include <algorithm>
+#include <chrono>
+#include <cmath>
 
 #include <yaml-cpp/yaml.h>
 
 #include "message/support/Configuration.h"
 #include "message/behaviour/Action.h"
 #include "message/behaviour/ServoCommand.h"
-#include "message/motion/TorsoMotion.h" 
+#include "message/motion/WalkCommand.h"
+#include "message/motion/FootPlacementCommand.h" 
+#include "message/motion/TorsoMotionCommand.h" 
 #include "message/input/Sensors.h"
-#include "utility/math/geometry/UnitQuaternion.h"
+#include "message/motion/ServoTarget.h"
+#include "message/motion/Script.h"
+#include "message/behaviour/FixedWalkCommand.h"
+#include "message/localisation/FieldObject.h"
+#include "message/input/PushDetection.h"
 
+#include "utility/math/geometry/UnitQuaternion.h"
 #include "utility/math/matrix/Transform2D.h"
 #include "utility/math/matrix/Transform3D.h"
 #include "utility/motion/Balance.h"
 #include "utility/motion/RobotModels.h"
+#include "utility/nubugger/NUhelpers.h"
+#include "utility/support/yaml_armadillo.h"
+#include "utility/support/yaml_expression.h"
+#include "utility/motion/InverseKinematics.h"
+#include "utility/motion/ForwardKinematics.h"
+#include "utility/math/angle.h"
+#include "utility/math/matrix/Rotation3D.h"
 
 namespace module 
 {
@@ -50,8 +67,10 @@ namespace motion
          * TODO: Probably be a global config somewhere, waiting on NUClear to support runtime on<Every> arguments
          */
         static constexpr size_t UPDATE_FREQUENCY = 90;
-
         static constexpr const char* CONFIGURATION_PATH = "TorsoMotionPlanner.yaml";
+        static constexpr const char* CONFIGURATION_MSSG = "Torso Motion Planner - Configure";
+        static constexpr const char* ONTRIGGER_TORSO_CMD = "Torso Motion Planner - Update Torso Position";
+        static constexpr const char* ONTRIGGER_TORSO_TGT = "Torso Motion Planner - Received Target Torso Position";
         explicit TorsoMotionPlanner(std::unique_ptr<NUClear::Environment> environment);
     private:
         using LimbID         = message::input::LimbID;

@@ -22,30 +22,6 @@
 //      INCLUDE(S)
 /*===========================================================================================================*/
 #include "TorsoMotionPlanner.h"
-
-#include <algorithm>
-#include <armadillo>
-#include <chrono>
-#include <cmath>
-
-#include "message/behaviour/ServoCommand.h"
-#include "message/support/Configuration.h"
-#include "message/motion/WalkCommand.h"
-#include "message/motion/ServoTarget.h"
-#include "message/motion/Script.h"
-#include "message/behaviour/FixedWalkCommand.h"
-#include "message/localisation/FieldObject.h"
-#include "message/input/PushDetection.h"
-
-#include "utility/motion/Balance.h"
-#include "utility/nubugger/NUhelpers.h"
-#include "utility/support/yaml_armadillo.h"
-#include "utility/support/yaml_expression.h"
-#include "utility/motion/InverseKinematics.h"
-#include "utility/motion/ForwardKinematics.h"
-#include "utility/motion/RobotModels.h"
-#include "utility/math/angle.h"
-#include "utility/math/matrix/Rotation3D.h"
 /*===========================================================================================================*/
 //      NAMESPACE(S)
 /*===========================================================================================================*/
@@ -53,9 +29,9 @@ namespace module
 {
 namespace motion 
 {
-	/*=======================================================================================================*/
-    //      UTILIZATION REFERENCE(S)
-    /*=======================================================================================================*/
+/*=======================================================================================================*/
+//      UTILIZATION REFERENCE(S)
+/*=======================================================================================================*/
     using message::input::PushDetection;
     using message::input::ServoID;
     using message::input::Sensors;
@@ -70,14 +46,13 @@ namespace motion
     using message::motion::WalkStartCommand;
     using message::motion::WalkStopCommand;
     using message::motion::WalkStopped;
-    using message::motion::EnableModularWalkEngineCommand;
-    using message::motion::DisableModularWalkEngineCommand;
+    using message::motion::FootStepTarget;
+    using message::motion::EnableTorsoMotion
+    using message::motion::DisableTorsoMotion;
     using message::motion::ServoTarget;
     using message::motion::Script;
     using message::support::SaveConfiguration;
     using message::support::Configuration;
-
-    using extension::Configuration;
 
     using utility::motion::kinematics::calculateLegJointsTeamDarwin;
     using utility::motion::kinematics::DarwinModel;
@@ -87,20 +62,14 @@ namespace motion
     using utility::math::angle::normalizeAngle;
     using utility::nubugger::graph;
     using utility::support::Expression;
-    /*=======================================================================================================*/
-    //      NAME: TorsoMotionPlanner
-    /*=======================================================================================================*/
-    /*
-     *      @input  : <TODO: INSERT DESCRIPTION>
-     *      @output : <TODO: INSERT DESCRIPTION>
-     *      @pre-condition  : <TODO: INSERT DESCRIPTION>
-     *      @post-condition : <TODO: INSERT DESCRIPTION>
-    */
+/*=======================================================================================================*/
+//      NUCLEAR METHOD: TorsoMotionPlanner
+/*=======================================================================================================*/
     TorsoMotionPlanner::TorsoMotionPlanner(std::unique_ptr<NUClear::Environment> environment)
     : Reactor(std::move(environment)) 
     {
         //Configure foot motion planner...
-        on<Configuration>(CONFIGURATION_PATH).then([this] (const Configuration& config) 
+        on<Configuration>("TorsoMotionPlanner.yaml").then([this] (const Configuration& config) 
         {
             configure(config.config);
         });
@@ -113,8 +82,9 @@ namespace motion
         }).disable();
 
         //In the event of a new foot step target specified by the foot placement planning module...
-        on<Trigger<FootStepTarget>>().then([this] 
+        on<Trigger<FootStepTarget>>().then("Torso Motion Planner - Received Target Torso Position", [this] (const FootStepTarget& target) 
         {
+<<<<<<< f23d4331e4606fba733a1bb2327d6000df6cb997
 <<<<<<< e7199040444bd454e68ee7a37c6bfb4e3c9debc2
 <<<<<<< f10da9c4b0232f8ba743f03d26325ddc863f1f48
 <<<<<<< cdf96fbdd5a07a2529fcd01d4c07dd1dfe64510f
@@ -128,15 +98,30 @@ namespace motion
             zmpTorsoCoefficients();
 =======
             if(supportFoot)
+=======
+            if(target.supportMass == LimbID::LEFT_LEG)
+>>>>>>> Torso Motion Planner Fixing...
             {
-                setLeftFootDestination(targetDestination);
+                setLeftFootDestination(target.targetDestination);
             }
             else
             {
-                setRightFootDestination(targetDestination);
+                setRightFootDestination(target.targetDestination);
             }
-            setDestinationTime(targetTime);  
-            zmpTorsoCoefficients();  
+            setDestinationTime(target.targetTime); 
+            zmpTorsoCoefficients();
+        });
+
+        on<Trigger<EnableTorsoMotion>>().then([this] (const EnableTorsoMotion& command) 
+        {
+            subsumptionId = command.subsumptionId;
+            updateHandle.enable();
+        });
+
+        //If foot motion no longer requested, cease updating...
+        on<Trigger<DisableTorsoMotion>>().then([this] 
+        {
+            updateHandle.disable(); 
         });
 <<<<<<< 183df72fb88459adef7436f0515b768fde100df7:module/motion/ModularWalkEngine/src/TorsoMotionPlanner.cpp
 
@@ -151,105 +136,33 @@ namespace motion
 =======
 >>>>>>> Further Modularization in development hierarchy, reorganised directory structure:module/motion/TorsoMotionPlanner/src/TorsoMotionPlanner.cpp
     }
-    /*=======================================================================================================*/
-    //      NAME: getTime
-    /*=======================================================================================================*/
-    /*
-     *      @input  : <TODO: INSERT DESCRIPTION>
-     *      @output : <TODO: INSERT DESCRIPTION>
-     *      @pre-condition  : <TODO: INSERT DESCRIPTION>
-     *      @post-condition : <TODO: INSERT DESCRIPTION>
-    */
-    double TorsoMotionPlanner::getTime() 
-    {
-        return std::chrono::duration_cast<std::chrono::microseconds>(NUClear::clock::now().time_since_epoch()).count() * 1E-6;
-    }
-     /*=======================================================================================================*/
-    //      NAME: getLeftFootDestination
-    /*=======================================================================================================*/
-    /*
-     *      @input  : <TODO: INSERT DESCRIPTION>
-     *      @output : <TODO: INSERT DESCRIPTION>
-     *      @pre-condition  : <TODO: INSERT DESCRIPTION>
-     *      @post-condition : <TODO: INSERT DESCRIPTION>
-    */
-    double TorsoMotionPlanner::getLeftFootDestination()
-    {
-        setNewStepReceived(false);
-        return (leftFootDestination.front());
-    }
-    /*=======================================================================================================*/
-    //      NAME: setLeftFootDestination
-    /*=======================================================================================================*/
-    /*
-     *      @input  : <TODO: INSERT DESCRIPTION>
-     *      @output : <TODO: INSERT DESCRIPTION>
-     *      @pre-condition  : <TODO: INSERT DESCRIPTION>
-     *      @post-condition : <TODO: INSERT DESCRIPTION>
-    */
-    void TorsoMotionPlanner::setLeftFootDestination(double inLeftFootDestination)
-    {
-        setNewStepReceived(true);
-        leftFootDestination.push(inLeftFootDestination);
-    }
-    /*=======================================================================================================*/
-    //      NAME: getRightFootDestination
-    /*=======================================================================================================*/
-    /*
-     *      @input  : <TODO: INSERT DESCRIPTION>
-     *      @output : <TODO: INSERT DESCRIPTION>
-     *      @pre-condition  : <TODO: INSERT DESCRIPTION>
-     *      @post-condition : <TODO: INSERT DESCRIPTION>
-    */
-    double TorsoMotionPlanner::getRightFootDestination()
-    {
-        setNewStepReceived(false);
-        return (rightFootDestination.front());
-    }
-    /*=======================================================================================================*/
-    //      NAME: setRightFootDestination
-    /*=======================================================================================================*/
-    /*
-     *      @input  : <TODO: INSERT DESCRIPTION>
-     *      @output : <TODO: INSERT DESCRIPTION>
-     *      @pre-condition  : <TODO: INSERT DESCRIPTION>
-     *      @post-condition : <TODO: INSERT DESCRIPTION>
-    */
-    void TorsoMotionPlanner::setRightFootDestination(double inRightFootDestination)
-    {
-        setNewStepReceived(true);
-        rightFootDestination.push(inRightFootDestination);
-    }
-    /*=======================================================================================================*/
-    //      NAME: updateTorsoPosition
-    /*=======================================================================================================*/
-    /*
-     *      @input  : <TODO: INSERT DESCRIPTION>
-     *      @output : <TODO: INSERT DESCRIPTION>
-     *      @pre-condition  : <TODO: INSERT DESCRIPTION>
-     *      @post-condition : <TODO: INSERT DESCRIPTION>
-    */
+/*=======================================================================================================*/
+//      METHOD: updateTorsoPosition
+/*=======================================================================================================*/
+
     void TorsoMotionPlanner::updateTorsoPosition()
     {
+<<<<<<< f23d4331e4606fba733a1bb2327d6000df6cb997
 <<<<<<< 64307f428050a70febbcdd787f038b25be0bf9ed
+=======
+        uTorso = zmpTorsoCompensation(phase, zmpTorsoCoefficients, zmpParams, stepTime, zmpTime, phase1Single, phase2Single, uSupport, uLeftFootSource, uRightFootSource);
+>>>>>>> Torso Motion Planner Fixing...
         torso.uTorso = zmpTorsoCompensation(phase, zmpTorsoCoefficients, zmpParams, stepTime, zmpTime, phase1Single, phase2Single, uSupport, uLeftFootDestination, uLeftFootSource, uRightFootDestination, uRightFootSource);
         Transform2D uTorsoActual = uTorso.localToWorld({-DarwinModel::Leg::HIP_OFFSET_X, 0, 0});
         Transform3D torso.torso = arma::vec6({uTorsoActual.x(), uTorsoActual.y(), bodyHeight, 0, bodyTilt, uTorsoActual.angle()});
-        emit(std:make_unique<TorsoUpdate>(uTorso, torso); //uTorso is needed by motionArms and torso is needed for feet position
+        emit(std:make_unique<TorsoUpdate>(uTorso, torso)); //uTorso is needed by motionArms and torso is needed for feet position
                              //could also move calculation of torso to response
+<<<<<<< f23d4331e4606fba733a1bb2327d6000df6cb997
 =======
         uTorso = zmpTorsoCompensation(phase, zmpTorsoCoefficients, zmpParams, stepTime, zmpTime, phase1Single, phase2Single, uSupport, uLeftFootSource, uRightFootSource);
 >>>>>>> Modifications to TorsoMotionPlanner
+=======
+>>>>>>> Torso Motion Planner Fixing...
     }
-    /*=======================================================================================================*/
-    //      NAME: stepTorso
-    /*=======================================================================================================*/
-    /*
-     *      @input  : <TODO: INSERT DESCRIPTION>
-     *      @output : <TODO: INSERT DESCRIPTION>
-     *      @pre-condition  : <TODO: INSERT DESCRIPTION>
-     *      @post-condition : <TODO: INSERT DESCRIPTION>
-    */
+/*=======================================================================================================*/
+//      METHOD: stepTorso
+/*=======================================================================================================*/
+
     Transform2D TorsoMotionPlanner::stepTorso(Transform2D uLeftFoot, Transform2D uRightFoot, double shiftFactor) 
     {
         Transform2D uLeftFootSupport  = uLeftFoot.localToWorld({-footOffset[0], -footOffset[1], 0});
@@ -257,6 +170,7 @@ namespace motion
         return uLeftFootSupport.interpolate(shiftFactor, uRightFootSupport);
     }
 
+<<<<<<< f23d4331e4606fba733a1bb2327d6000df6cb997
     /*=======================================================================================================*/
     //      NAME: zmpTorsoCoefficients
     /*=======================================================================================================*/
@@ -273,6 +187,12 @@ namespace motion
     void ModularWalkEngine::zmpCoefficients() //originally part of CalculateNewStep
 >>>>>>> Added messages between modules
 =======
+=======
+/*=======================================================================================================*/
+//      METHOD: zmpTorsoCoefficients
+/*=======================================================================================================*/
+
+>>>>>>> Torso Motion Planner Fixing...
     void TorsoMotionPlanner::zmpTorsoCoefficients() //originally part of CalculateNewStep
 >>>>>>> Message Headers, emit structs, and further encapsulation of
     {
@@ -290,6 +210,7 @@ namespace motion
         zmpTorsoCoefficients.rows(0,1) = zmpSolve(uSupport.x(), uTorsoSource.x(), uTorsoDestination.x(), uTorsoSource.x(), uTorsoDestination.x(), phase1Single, phase2Single, stepTime, zmpTime);
         zmpTorsoCoefficients.rows(2,3) = zmpSolve(uSupport.y(), uTorsoSource.y(), uTorsoDestination.y(), uTorsoSource.y(), uTorsoDestination.y(), phase1Single, phase2Single, stepTime, zmpTime);
     }
+<<<<<<< f23d4331e4606fba733a1bb2327d6000df6cb997
     /*=======================================================================================================*/
     //      NAME: zmpSolve
     /*=======================================================================================================*/
@@ -306,6 +227,12 @@ namespace motion
     arma::vec2 ModularWalkEngine::zmpTorsoCompensation(double zs, double z1, double z2, double x1, double x2, double phase1Single, double phase2Single, double stepTime, double zmpTime) 
 >>>>>>> Added messages between modules
 =======
+=======
+/*=======================================================================================================*/
+//      METHOD: zmpSolve
+/*=======================================================================================================*/
+
+>>>>>>> Torso Motion Planner Fixing...
     arma::vec2 TorsoMotionPlanner::zmpSolve(double zs, double z1, double z2, double x1, double x2, double phase1Single, double phase2Single, double stepTime, double zmpTime) 
 >>>>>>> Message Headers, emit structs, and further encapsulation of
     {
@@ -328,15 +255,10 @@ namespace motion
         double aN = (c1 * expTStep - c2) / (expTStep - 1 / expTStep);
         return {aP, aN};
     }
-    /*=======================================================================================================*/
-    //      NAME: zmpTorsoCompensation
-    /*=======================================================================================================*/
-    /*
-     *      @input  : <TODO: INSERT DESCRIPTION>
-     *      @output : <TODO: INSERT DESCRIPTION>
-     *      @pre-condition  : <TODO: INSERT DESCRIPTION>
-     *      @post-condition : <TODO: INSERT DESCRIPTION>
-    */
+/*=======================================================================================================*/
+//      METHOD: zmpTorsoCompensation
+/*=======================================================================================================*/
+
     Transform2D TorsoMotionPlanner::zmpTorsoCompensation(double phase, arma::vec4 zmpTorsoCoefficients, arma::vec4 zmpParams, double stepTime, double zmpTime, double phase1Single, double phase2Single, Transform2D uSupport, Transform2D uLeftFootSource, Transform2D uRightFootSource) 
     {
         //Note that phase is the only variable updated during a step
@@ -359,7 +281,48 @@ namespace motion
         com.angle() = phase * (getLeftFootDestination().angle() + getRightFootDestination().angle()) / 2 + (1 - phase) * (uLeftFootSource.angle() + uRightFootSource.angle()) / 2;
         return com;
     }
+    /*=======================================================================================================*/
+//      METHOD: getTime
+/*=======================================================================================================*/
 
+    double TorsoMotionPlanner::getTime() 
+    {
+        return std::chrono::duration_cast<std::chrono::microseconds>(NUClear::clock::now().time_since_epoch()).count() * 1E-6;
+    }
+ /*=======================================================================================================*/
+//      METHOD: getLeftFootDestination
+/*=======================================================================================================*/
+
+    double TorsoMotionPlanner::getLeftFootDestination()
+    {
+        setNewStepReceived(false);
+        return (leftFootDestination.front());
+    }
+/*=======================================================================================================*/
+//      METHOD: setLeftFootDestination
+/*=======================================================================================================*/
+
+    void TorsoMotionPlanner::setLeftFootDestination(double inLeftFootDestination)
+    {
+        setNewStepReceived(true);
+        leftFootDestination.push(inLeftFootDestination);
+    }
+/*=======================================================================================================*/
+//      ENCAPSULATION METHOD: getRightFootDestination
+/*=======================================================================================================*/
+    double TorsoMotionPlanner::getRightFootDestination()
+    {
+        setNewStepReceived(false);
+        return (rightFootDestination.front());
+    }
+/*=======================================================================================================*/
+//      ENCAPSULATION METHOD: setRightFootDestination
+/*=======================================================================================================*/
+    void TorsoMotionPlanner::setRightFootDestination(double inRightFootDestination)
+    {
+        setNewStepReceived(true);
+        rightFootDestination.push(inRightFootDestination);
+    }
 }  // motion
 }  // modules
 
