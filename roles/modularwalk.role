@@ -13,9 +13,9 @@ NUCLEAR_ROLE(
     platform::darwin::SensorFilter
 
     # Motion
-    motion::FootMotionPlanner
-    motion::FootPlacementPlanner
-    #motion::TorsoMotionPlanner
+    #motion::FootMotionPlanner
+    #motion::FootPlacementPlanner
+    motion::TorsoMotionPlanner
     #motion::BalanceKinematicResponse
     #motion::ModularWalkEngine
     motion::ScriptEngine
