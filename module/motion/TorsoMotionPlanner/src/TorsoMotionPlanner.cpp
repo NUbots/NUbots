@@ -139,7 +139,6 @@ namespace motion
 /*=======================================================================================================*/
 //      METHOD: updateTorsoPosition
 /*=======================================================================================================*/
-
     void TorsoMotionPlanner::updateTorsoPosition()
     {
 <<<<<<< f23d4331e4606fba733a1bb2327d6000df6cb997
@@ -162,13 +161,13 @@ namespace motion
 /*=======================================================================================================*/
 //      METHOD: stepTorso
 /*=======================================================================================================*/
-
     Transform2D TorsoMotionPlanner::stepTorso(Transform2D uLeftFoot, Transform2D uRightFoot, double shiftFactor) 
     {
         Transform2D uLeftFootSupport  = uLeftFoot.localToWorld({-footOffset[0], -footOffset[1], 0});
         Transform2D uRightFootSupport = uRightFoot.localToWorld({-footOffset[0], footOffset[1], 0});
         return uLeftFootSupport.interpolate(shiftFactor, uRightFootSupport);
     }
+<<<<<<< dcc82b066432acf9647cd69193125f69aafab895
 
 <<<<<<< f23d4331e4606fba733a1bb2327d6000df6cb997
     /*=======================================================================================================*/
@@ -193,6 +192,11 @@ namespace motion
 /*=======================================================================================================*/
 
 >>>>>>> Torso Motion Planner Fixing...
+=======
+/*=======================================================================================================*/
+//      METHOD: zmpTorsoCoefficients
+/*=======================================================================================================*/
+>>>>>>> Torso Motion Planner Changes...
     void TorsoMotionPlanner::zmpTorsoCoefficients() //originally part of CalculateNewStep
 >>>>>>> Message Headers, emit structs, and further encapsulation of
     {
@@ -231,8 +235,11 @@ namespace motion
 /*=======================================================================================================*/
 //      METHOD: zmpSolve
 /*=======================================================================================================*/
+<<<<<<< dcc82b066432acf9647cd69193125f69aafab895
 
 >>>>>>> Torso Motion Planner Fixing...
+=======
+>>>>>>> Torso Motion Planner Changes...
     arma::vec2 TorsoMotionPlanner::zmpSolve(double zs, double z1, double z2, double x1, double x2, double phase1Single, double phase2Single, double stepTime, double zmpTime) 
 >>>>>>> Message Headers, emit structs, and further encapsulation of
     {
@@ -258,7 +265,6 @@ namespace motion
 /*=======================================================================================================*/
 //      METHOD: zmpTorsoCompensation
 /*=======================================================================================================*/
-
     Transform2D TorsoMotionPlanner::zmpTorsoCompensation(double phase, arma::vec4 zmpTorsoCoefficients, arma::vec4 zmpParams, double stepTime, double zmpTime, double phase1Single, double phase2Single, Transform2D uSupport, Transform2D uLeftFootSource, Transform2D uRightFootSource) 
     {
         //Note that phase is the only variable updated during a step
@@ -281,18 +287,16 @@ namespace motion
         com.angle() = phase * (getLeftFootDestination().angle() + getRightFootDestination().angle()) / 2 + (1 - phase) * (uLeftFootSource.angle() + uRightFootSource.angle()) / 2;
         return com;
     }
-    /*=======================================================================================================*/
+/*=======================================================================================================*/
 //      METHOD: getTime
 /*=======================================================================================================*/
-
     double TorsoMotionPlanner::getTime() 
     {
         return std::chrono::duration_cast<std::chrono::microseconds>(NUClear::clock::now().time_since_epoch()).count() * 1E-6;
     }
- /*=======================================================================================================*/
+/*=======================================================================================================*/
 //      METHOD: getLeftFootDestination
 /*=======================================================================================================*/
-
     double TorsoMotionPlanner::getLeftFootDestination()
     {
         setNewStepReceived(false);
@@ -301,7 +305,6 @@ namespace motion
 /*=======================================================================================================*/
 //      METHOD: setLeftFootDestination
 /*=======================================================================================================*/
-
     void TorsoMotionPlanner::setLeftFootDestination(double inLeftFootDestination)
     {
         setNewStepReceived(true);
