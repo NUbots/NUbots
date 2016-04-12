@@ -21,22 +21,10 @@ syntax = "proto3";
 
 package message.input.proto;
 
-import "message/Vector.proto";
+import "message/Matrix.proto";
 
 message PresenceUserState {
 
-    message RigidBody {
-        vec3 position = 1;
-        
-        //Store 3 columns of rotation matrix
-        repeated vec3 rotation = 2;
-
-        //TODO: use more efficient quaternion
-        //The rotation quaternion
-        //vec4 rotation = 4;
-    };
-
-
-    RigidBody head_pose = 4;
+    fmat44 head_pose = 1;
 
 }

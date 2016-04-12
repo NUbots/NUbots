@@ -31,6 +31,7 @@
 #include "message/input/proto/PresenceUserState.pb.h"
 #include "message/behaviour/Action.h"
 #include "utility/support/yaml_expression.h"
+#include "utility/support/proto_armadillo.h"
 
 namespace module {
 namespace motion {
@@ -77,15 +78,30 @@ namespace motion {
         });
 
         on<Network<PresenceUserState>, Sync<Head6DoFController>>().then("Head6DoFController Network Input",[this](const PresenceUserState& user){
-            for(int i = 0; i < 3; i++){
-                robotCamPose.col(i).row(0) = user.head_pose().rotation(i).x();
-                robotCamPose.col(i).row(1) = user.head_pose().rotation(i).y();
-                robotCamPose.col(i).row(2) = user.head_pose().rotation(i).z();
-            }
-            robotCamPose.translation()[0] = user.head_pose().position().x();
-            robotCamPose.translation()[1] = user.head_pose().position().y();
-            robotCamPose.translation()[2] = user.head_pose().position().z();
-            robotCamPose.translation() *= robot_to_head_scale;
+            robotCamPose(0,0) = user.head_pose().x().x();
+            robotCamPose(0,1) = user.head_pose().x().y();
+            robotCamPose(0,2) = user.head_pose().x().z();
+            robotCamPose(0,3) = user.head_pose().x().t(); 
+
+            robotCamPose(1,0) = user.head_pose().y().x();
+            robotCamPose(1,1) = user.head_pose().y().y();
+            robotCamPose(1,2) = user.head_pose().y().z();
+            robotCamPose(1,3) = user.head_pose().y().t();
+
+            robotCamPose(2,0) = user.head_pose().z().x();
+            robotCamPose(2,1) = user.head_pose().z().y();
+            robotCamPose(2,2) = user.head_pose().z().z();
+            robotCamPose(2,3) = user.head_pose().z().t();
+
+            robotCamPose(3,0) = user.head_pose().t().x();
+            robotCamPose(3,1) = user.head_pose().t().y();
+            robotCamPose(3,2) = user.head_pose().t().z();
+            robotCamPose(3,3) = user.head_pose().t().t();
+            // pose << user.head_pose();
+            // robotCamPose = Transform3D(arma::conv_to<arma::mat>::from(pose));
+            // std::cout << "robotCamPose = \n" << robotCamPose << std::endl;
+            // std::cout << "robotCamPos = " << user.head_pose().t().x() << " "<<  user.head_pose().t().y() << " "<<  user.head_pose().t().z() << std::endl;
+
         });
 
         on<Every<60,Per<std::chrono::seconds>>, With<Sensors>, Sync<Head6DoFController>
