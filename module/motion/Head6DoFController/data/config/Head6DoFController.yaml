@@ -5,7 +5,7 @@ robot_to_head:
   yaw: 0
   pitch: 0
   pos: [0,0,0.4]
-  scale: 0.1
+  scale: 0.2
 
 
 l_arm: [0.1,0.15,0.05]

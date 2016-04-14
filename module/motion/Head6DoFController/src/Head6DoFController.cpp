@@ -104,10 +104,12 @@ namespace motion {
             robotCamPose(3,1) = user.head_pose().t().y();
             robotCamPose(3,2) = user.head_pose().t().z();
             robotCamPose(3,3) = user.head_pose().t().t();
-            robotCamPose = camera_to_robot * robotCamPose.t().i() * camera_to_robot.t() ;
+            robotCamPose = camera_to_robot * robotCamPose.t().i() * camera_to_robot.t();
+            robotCamPose.translation() *= robot_to_head_scale;
+
             // pose << user.head_pose();
             // robotCamPose = Transform3D(arma::conv_to<arma::mat>::from(pose));
-            // std::cout << "robotCamPose = \n" << robotCamPose << std::endl;
+            std::cout << "robotCamPose = \n" << robotCamPose << std::endl;
             // std::cout << "robotCamPos = " << user.head_pose().t().x() << " "<<  user.head_pose().t().y() << " "<<  user.head_pose().t().z() << std::endl;
 
         });
