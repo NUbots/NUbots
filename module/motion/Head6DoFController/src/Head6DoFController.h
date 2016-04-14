@@ -32,6 +32,8 @@ namespace motion {
 
         arma::vec3 l_arm,r_arm;
 
+        utility::math::matrix::Transform3D camera_to_robot;
+
     	utility::math::matrix::Transform3D robot_to_head;
         float robot_to_head_scale;
         

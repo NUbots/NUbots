@@ -58,7 +58,7 @@ namespace motion {
     id(size_t(this) * size_t(this) - size_t(this)) 
     {
 
-        on<Configuration>("Head6DoFController.yaml").then([this] (const Configuration& config) {
+        on<Configuration>("Head6DoFController.yaml").then("Head6DoF config", [this] (const Configuration& config) {
             // Use configuration here from file Head6DoFController.yaml
             foot_separation = config["foot_separation"].as<Expression>();
 			body_angle = config["body_angle"].as<Expression>();
@@ -72,6 +72,13 @@ namespace motion {
 
 			l_arm = config["l_arm"].as<arma::vec>(); 
 			r_arm = config["r_arm"].as<arma::vec>();
+
+            arma::vec oculus_x_axis = config["oculus"]["x_axis"].as<arma::vec>();
+            arma::vec oculus_y_axis = config["oculus"]["y_axis"].as<arma::vec>();
+            arma::vec oculus_z_axis = config["oculus"]["z_axis"].as<arma::vec>();
+
+            arma::mat33 camera_to_robot_rot = arma::join_rows(oculus_x_axis,arma::join_rows(oculus_y_axis,oculus_z_axis));
+            camera_to_robot.rotation() = camera_to_robot_rot;
 
 			updatePriority(100);
 
@@ -97,6 +104,7 @@ namespace motion {
             robotCamPose(3,1) = user.head_pose().t().y();
             robotCamPose(3,2) = user.head_pose().t().z();
             robotCamPose(3,3) = user.head_pose().t().t();
+            robotCamPose = camera_to_robot * robotCamPose.t().i() * camera_to_robot.t() ;
             // pose << user.head_pose();
             // robotCamPose = Transform3D(arma::conv_to<arma::mat>::from(pose));
             // std::cout << "robotCamPose = \n" << robotCamPose << std::endl;
