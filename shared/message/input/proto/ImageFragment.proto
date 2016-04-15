@@ -22,6 +22,7 @@ syntax = "proto3";
 package message.input.proto;
 
 import "message/Vector.proto";
+import "message/Matrix.proto";
 
 message ImageFragment {
 
@@ -39,4 +40,6 @@ message ImageFragment {
 
     uint32 start = 5;
     uint32 end = 6;
+
+    fmat44 cam_to_feet = 7;
 }

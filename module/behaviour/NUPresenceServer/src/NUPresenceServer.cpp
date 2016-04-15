@@ -22,7 +22,10 @@
 #include "message/support/Configuration.h"
 
 #include "message/input/Image.h"
+#include "message/input/Sensors.h"
+#include "message/input/ServoID.h"
 #include "message/input/proto/ImageFragment.pb.h"
+#include "utility/math/matrix/Transform3D.h"
 
 namespace module {
 namespace behaviour {
@@ -30,7 +33,11 @@ namespace behaviour {
     using message::support::Configuration;
 
     using message::input::Image;
+    using message::input::Sensors;
+    using message::input::ServoID;
     using message::input::proto::ImageFragment;
+    using utility::math::matrix::Transform3D;
+
 
     NUPresenceServer::NUPresenceServer(std::unique_ptr<NUClear::Environment> environment)
     : Reactor(std::move(environment)) {
@@ -39,7 +46,7 @@ namespace behaviour {
             reliable = config["reliable"];
         });
 
-        on<Trigger<Image>>().then([this](const Image& image){
+        on<Trigger<Image>, With<Sensors>>().then([this](const Image& image, const Sensors& sensors){
 
         	auto imageFragment = std::make_unique<ImageFragment>();
 
@@ -56,6 +63,30 @@ namespace behaviour {
 
             imageFragment->set_start(0);
             imageFragment->set_end(image.source().size());
+
+            Transform3D cam_to_right_foot = sensors.forwardKinematics.at(ServoID::R_ANKLE_ROLL).i() * sensors.forwardKinematics.at(ServoID::HEAD_PITCH);
+            Transform3D cam_to_left_foot = sensors.forwardKinematics.at(ServoID::L_ANKLE_ROLL).i() * sensors.forwardKinematics.at(ServoID::HEAD_PITCH);
+            Transform3D cam_to_feet = cam_to_left_foot;
+            cam_to_feet.translation() = 0.5 * (cam_to_left_foot.translation() + cam_to_right_foot.translation());
+            imageFragment->mutable_cam_to_feet()->mutable_x()->set_x(cam_to_feet(0,0));
+            imageFragment->mutable_cam_to_feet()->mutable_x()->set_y(cam_to_feet(1,0));
+            imageFragment->mutable_cam_to_feet()->mutable_x()->set_z(cam_to_feet(2,0));
+            imageFragment->mutable_cam_to_feet()->mutable_x()->set_t(cam_to_feet(3,0));
+
+            imageFragment->mutable_cam_to_feet()->mutable_y()->set_x(cam_to_feet(0,1));
+            imageFragment->mutable_cam_to_feet()->mutable_y()->set_y(cam_to_feet(1,1));
+            imageFragment->mutable_cam_to_feet()->mutable_y()->set_z(cam_to_feet(2,1));
+            imageFragment->mutable_cam_to_feet()->mutable_y()->set_t(cam_to_feet(3,1));
+
+            imageFragment->mutable_cam_to_feet()->mutable_z()->set_x(cam_to_feet(0,2));
+            imageFragment->mutable_cam_to_feet()->mutable_z()->set_y(cam_to_feet(1,2));
+            imageFragment->mutable_cam_to_feet()->mutable_z()->set_z(cam_to_feet(2,2));
+            imageFragment->mutable_cam_to_feet()->mutable_z()->set_t(cam_to_feet(3,2));
+
+            imageFragment->mutable_cam_to_feet()->mutable_t()->set_x(cam_to_feet(0,3));
+            imageFragment->mutable_cam_to_feet()->mutable_t()->set_y(cam_to_feet(1,3));
+            imageFragment->mutable_cam_to_feet()->mutable_t()->set_z(cam_to_feet(2,3));
+            imageFragment->mutable_cam_to_feet()->mutable_t()->set_t(cam_to_feet(3,3));
 
             emit<Scope::NETWORK>(imageFragment, "nupresenceclient", reliable);
 
