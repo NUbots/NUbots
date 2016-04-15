@@ -80,6 +80,9 @@ namespace motion {
             arma::mat33 camera_to_robot_rot = arma::join_rows(oculus_x_axis,arma::join_rows(oculus_y_axis,oculus_z_axis));
             camera_to_robot.rotation() = camera_to_robot_rot;
 
+            //Kinematic limits:
+            distance_limit = config["limits"]["distance"].as<Expression>();
+
 			updatePriority(100);
 
         });
@@ -108,6 +111,8 @@ namespace motion {
             robotCamPose = camera_to_robot * robotCamPose.i() * camera_to_robot.t();
             robotCamPose.translation() *= robot_to_head_scale;
 
+            limitPose(robotCamPose);
+
             // pose << user.head_pose();
             // robotCamPose = Transform3D(arma::conv_to<arma::mat>::from(pose));
             std::cout << "robotCamPose = \n" << robotCamPose << std::endl;
@@ -132,6 +137,7 @@ namespace motion {
 
 			//Adjust arm position
         	int max_number_of_iterations = 20;
+
 
 
 			auto joints = utility::motion::kinematics::setHeadPoseFromFeet<DarwinModel>(robotCamPose * robot_to_head, foot_separation, body_angle);
@@ -197,5 +203,15 @@ namespace motion {
     void Head6DoFController::updatePriority(const float& priority) {
         emit(std::make_unique<ActionPriorites>(ActionPriorites { id, { priority }}));
     }
+
+    void Head6DoFController::limitPose(Transform3D& pose){
+        float norm = arma::norm(pose.translation());
+        if( norm > distance_limit){
+            pose.translation() = distance_limit * pose.translation() / norm;
+        }
+
+
+    }
+
 }
 }

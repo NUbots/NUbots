@@ -19,4 +19,5 @@ NUCLEAR_ROLE(
 
     # Behaviour
     behaviour::Controller
+    behaviour::NUPresenceServer
 )

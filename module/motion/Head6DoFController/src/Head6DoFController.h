@@ -37,6 +37,8 @@ namespace motion {
     	utility::math::matrix::Transform3D robot_to_head;
         float robot_to_head_scale;
         
+        float distance_limit = 0.1;
+        
         //State:
         utility::math::matrix::Transform3D robotCamPose;
 
@@ -44,6 +46,8 @@ namespace motion {
     	size_t id;
 
     	void updatePriority(const float& priority);
+
+        void limitPose(utility::math::matrix::Transform3D& pose);
 
     public:
         /// @brief Called by the powerplant to build and setup the Head6DoFController reactor.
