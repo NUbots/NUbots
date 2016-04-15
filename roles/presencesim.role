@@ -8,6 +8,9 @@ NUCLEAR_ROLE(
     support::configuration::NetworkConfiguration
     support::NUbugger
 
+    #Input
+    support::VirtualCamera
+
     # Hardware Interface
     platform::darwin::HardwareSimulator
     
