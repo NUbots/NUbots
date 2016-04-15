@@ -9,7 +9,7 @@ NUCLEAR_ROLE(
     support::NUbugger
 
     #Input
-    support::VirtualCamera
+    #support::VirtualCamera
 
     # Hardware Interface
     platform::darwin::HardwareSimulator
