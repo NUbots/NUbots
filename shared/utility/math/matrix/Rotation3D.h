@@ -69,6 +69,9 @@ namespace matrix {
              */
             Rotation(const arma::vec3& axis, double angle);
 
+
+
+
             /**
              * @brief Rotates matrix around the local X axis
              *
@@ -168,6 +171,16 @@ namespace matrix {
              */
             static Rotation3D createRotationZ(double radians);
             static Rotation3D createRotationZJacobian(double radians);
+
+            /**
+             * @brief Create a rotation matrix from euler angles
+                See: http://staff.city.ac.uk/~sbbh653/publications/euler.pdf
+                Computing Euler angles from a rotation matrix
+                Gregory G. Slabaugh
+                double roll, pitch, yaw; // psi, theta, phi
+             */
+            static Rotation3D createFromEulerAngles(const arma::vec3& a);
+
     };
 
 }  // matrix

@@ -46,6 +46,7 @@ namespace motion {
     using message::input::proto::PresenceUserState;
 
     using utility::math::matrix::Transform3D;
+    using utility::math::matrix::Rotation3D;
     using utility::motion::kinematics::DarwinModel;
     using utility::motion::kinematics::Side;
 
@@ -209,6 +210,11 @@ namespace motion {
         if( norm > distance_limit){
             pose.translation() = distance_limit * pose.translation() / norm;
         }
+
+        arma::vec3 eulerAngles = pose.eulerAngles();
+        std::cout << "eulerAngles = " << eulerAngles.t();
+        Rotation3D R = Rotation3D::createFromEulerAngles(eulerAngles);
+        std::cout << "check = " << pose.rotation() - R << std::endl;
 
 
     }

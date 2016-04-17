@@ -216,6 +216,14 @@ namespace matrix {
         return rotation;
     }
 
+
+    Rotation3D Rotation3D::createFromEulerAngles(const arma::vec3& a){
+        // double roll = a[0];
+        // double pitch = a[1];
+        // double yaw = a[2];
+        return Rotation3D::createRotationZ(a[2]) * Rotation3D::createRotationY(a[1]) * Rotation3D::createRotationX(a[0]); 
+    }
+
 }
 }
 }
