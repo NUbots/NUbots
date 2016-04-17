@@ -15,3 +15,9 @@ oculus:
   x_axis: [0,-1,0] #-y
   y_axis: [0,0,1] #z
   z_axis: [-1,0,0] #-x
+
+limits:
+  distance: 0.1
+  roll: [-pi / 6, pi / 6]
+  pitch: [-pi / 2, pi / 2]
+  yaw: [-pi / 2, pi / 2]

@@ -82,8 +82,13 @@ namespace motion {
             camera_to_robot.rotation() = camera_to_robot_rot;
 
             //Kinematic limits:
-            distance_limit = config["limits"]["distance"].as<Expression>();
-
+            distance_limit = config["limits"]["distance"].as<Expression>();     
+            eulerLimits.roll.min = config["limits"]["roll"][0].as<Expression>();
+            eulerLimits.roll.max = config["limits"]["roll"][1].as<Expression>();
+            eulerLimits.pitch.min = config["limits"]["pitch"][0].as<Expression>();
+            eulerLimits.pitch.max = config["limits"]["pitch"][1].as<Expression>();
+            eulerLimits.yaw.min = config["limits"]["yaw"][0].as<Expression>();
+            eulerLimits.yaw.max = config["limits"]["yaw"][1].as<Expression>();
 			updatePriority(100);
 
         });
@@ -212,9 +217,13 @@ namespace motion {
         }
 
         arma::vec3 eulerAngles = pose.eulerAngles();
-        std::cout << "eulerAngles = " << eulerAngles.t();
+        // std::cout << "eulerAngles = " << eulerAngles.t();
+        eulerAngles[0] = std::fmax(std::fmin(eulerAngles[0],eulerLimits.roll.max),eulerLimits.roll.min);
+        eulerAngles[1] = std::fmax(std::fmin(eulerAngles[1],eulerLimits.pitch.max),eulerLimits.pitch.min);
+        eulerAngles[2] = std::fmax(std::fmin(eulerAngles[2],eulerLimits.yaw.max),eulerLimits.yaw.min);
         Rotation3D R = Rotation3D::createFromEulerAngles(eulerAngles);
-        std::cout << "check = " << pose.rotation() - R << std::endl;
+        // std::cout << "check = " << pose.rotation() - R << std::endl;
+
 
 
     }

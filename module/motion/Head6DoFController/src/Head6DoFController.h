@@ -36,6 +36,16 @@ namespace motion {
 
     	utility::math::matrix::Transform3D robot_to_head;
         float robot_to_head_scale;
+
+        struct {
+            struct Range {
+                float max = 0;
+                float min = 0;
+            };
+            Range roll;
+            Range pitch;
+            Range yaw;
+        } eulerLimits;
         
         float distance_limit = 0.1;
         
