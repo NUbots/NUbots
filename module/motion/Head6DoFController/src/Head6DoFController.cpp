@@ -217,11 +217,13 @@ namespace motion {
         }
 
         arma::vec3 eulerAngles = pose.eulerAngles();
-        // std::cout << "eulerAngles = " << eulerAngles.t();
+        std::cout << "eulerAngles = " << eulerAngles.t();
+        std::cout << "eulerLimits = " << ", " << eulerLimits.roll.max << ", " << eulerLimits.roll.min << "; " << eulerLimits.pitch.max << ", " << eulerLimits.pitch.min << "; " << eulerLimits.yaw.max << ", " << eulerLimits.yaw.min << std::endl;
         eulerAngles[0] = std::fmax(std::fmin(eulerAngles[0],eulerLimits.roll.max),eulerLimits.roll.min);
         eulerAngles[1] = std::fmax(std::fmin(eulerAngles[1],eulerLimits.pitch.max),eulerLimits.pitch.min);
         eulerAngles[2] = std::fmax(std::fmin(eulerAngles[2],eulerLimits.yaw.max),eulerLimits.yaw.min);
-        Rotation3D R = Rotation3D::createFromEulerAngles(eulerAngles);
+        std::cout << "eulerAngles = " << eulerAngles.t();
+        pose.rotation() = Rotation3D::createFromEulerAngles(eulerAngles);
         // std::cout << "check = " << pose.rotation() - R << std::endl;
 
 
