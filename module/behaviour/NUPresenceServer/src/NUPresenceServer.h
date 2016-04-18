@@ -21,6 +21,7 @@
 #define MODULE_BEHAVIOUR_NUPRESENCESERVER_H
 
 #include <nuclear>
+#include "utility/math/matrix/Transform3D.h"
 
 namespace module {
 namespace behaviour {
@@ -28,6 +29,7 @@ namespace behaviour {
     class NUPresenceServer : public NUClear::Reactor {
     private:
         bool reliable;
+        utility::math::matrix::Transform3D camera_to_robot;
 
     public:
         /// @brief Called by the powerplant to build and setup the NUPresenceServer reactor.

@@ -25,6 +25,7 @@
 #include <cmath>
 #include <chrono>
 #include <nuclear>
+#include <limits>
 
 #include "utility/math/matrix/Transform3D.h"
 #include "utility/math/coordinates.h"
@@ -272,9 +273,31 @@ namespace kinematics {
     template <typename RobotKinematicModel>
     std::vector<std::pair<message::input::ServoID, float>> setHeadPoseFromFeet(const utility::math::matrix::Transform3D& cameraToFeet, const float& footSeparation, const float& bodyAngle){
         //Get camera pose relative to body
-        arma::vec3 euler = cameraToFeet.rotation().eulerAngles();
-        float headPitch = euler[1] - bodyAngle;
-        float headYaw = euler[2];
+        // arma::vec3 euler = cameraToFeet.rotation().eulerAngles();
+        // float headPitch = euler[1] - bodyAngle;
+        // float headYaw = euler[2];
+        arma::vec3 gaze = cameraToFeet.rotation().col(0);
+        auto headJoints = utility::motion::kinematics::calculateHeadJoints<RobotKinematicModel>(gaze);
+        float headPitch = std::numeric_limits<float>::quiet_NaN();
+        float headYaw = std::numeric_limits<float>::quiet_NaN();
+        for(auto joint : headJoints){
+            switch(joint.first){
+                case message::input::ServoID::HEAD_PITCH:
+                    headPitch = joint.second;
+                    break;
+                case message::input::ServoID::HEAD_YAW:
+                    headYaw = joint.second;
+                    break;
+                default:
+                    NUClear::log<NUClear::ERROR>(__FILE__,__LINE__,"Joints for head returned unexpected values");
+                    throw std::exception();
+            }
+        }
+        if( std::isnan(headPitch * headPitch) ){
+            NUClear::log<NUClear::ERROR>(__FILE__,__LINE__,"Joints for head missing values!!!");
+            throw std::exception();
+        }
+
         auto headPoses = utility::motion::kinematics::calculateHeadJointPosition<RobotKinematicModel>(headPitch,
                                                                                                      headYaw,
                                                                                                      message::input::ServoID::HEAD_PITCH);
@@ -289,8 +312,7 @@ namespace kinematics {
         auto joints = calculateLegJoints<RobotKinematicModel>(F_l, message::input::LimbID::LEFT_LEG);
         auto joints2 = calculateLegJoints<RobotKinematicModel>(F_r, message::input::LimbID::RIGHT_LEG);
         joints.insert(joints.end(), joints2.begin(), joints2.end());
-        joints.push_back(std::make_pair(message::input::ServoID::HEAD_PITCH,headPitch));
-        joints.push_back(std::make_pair(message::input::ServoID::HEAD_YAW,headYaw));
+        joints.insert(joints.end(),headJoints.begin(),headJoints.end());
         // servos = calculateLegJoints<RobotKinematicModel>()
         return joints;
     }

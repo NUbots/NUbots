@@ -26,6 +26,7 @@
 #include "message/input/ServoID.h"
 #include "message/input/proto/ImageFragment.pb.h"
 #include "utility/math/matrix/Transform3D.h"
+#include "utility/support/yaml_armadillo.h"
 
 namespace module {
 namespace behaviour {
@@ -44,6 +45,15 @@ namespace behaviour {
 
         on<Configuration>("NUPresenceServer.yaml").then([this] (const Configuration& config) {
             reliable = config["reliable"];
+        });
+
+        on<Configuration>("Head6DoFController.yaml").then([this](const Configuration& config){
+
+            arma::vec oculus_x_axis = config["oculus"]["x_axis"].as<arma::vec>();
+            arma::vec oculus_y_axis = config["oculus"]["y_axis"].as<arma::vec>();
+            arma::vec oculus_z_axis = config["oculus"]["z_axis"].as<arma::vec>();
+
+            camera_to_robot.rotation() = arma::join_rows(oculus_x_axis,arma::join_rows(oculus_y_axis,oculus_z_axis));
         });
 
         on<Trigger<Image>, With<Sensors>>().then([this](const Image& image, const Sensors& sensors){
@@ -68,6 +78,8 @@ namespace behaviour {
             Transform3D cam_to_left_foot = sensors.forwardKinematics.at(ServoID::L_ANKLE_ROLL).i() * sensors.forwardKinematics.at(ServoID::HEAD_PITCH);
             Transform3D cam_to_feet = cam_to_left_foot;
             cam_to_feet.translation() = 0.5 * (cam_to_left_foot.translation() + cam_to_right_foot.translation());
+
+            cam_to_feet = camera_to_robot.t() * cam_to_feet * camera_to_robot;
             imageFragment->mutable_cam_to_feet()->mutable_x()->set_x(cam_to_feet(0,0));
             imageFragment->mutable_cam_to_feet()->mutable_x()->set_y(cam_to_feet(1,0));
             imageFragment->mutable_cam_to_feet()->mutable_x()->set_z(cam_to_feet(2,0));
