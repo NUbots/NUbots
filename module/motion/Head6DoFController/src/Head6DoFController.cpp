@@ -149,7 +149,6 @@ namespace motion {
 
             currentCamPose = Transform3D::interpolate(currentCamPose, robot_to_head * goalCamPose, smoothing_alpha);
             // currentCamPose.rotation() = Rotation3D();
-            std::cout << "currentCamPose = \n" << currentCamPose << std::endl;
             auto joints = utility::motion::kinematics::setHeadPoseFromFeet<DarwinModel>(currentCamPose, foot_separation, body_angle);
             
             //TODO: fix arms
