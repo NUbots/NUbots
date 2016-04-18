@@ -71,6 +71,10 @@ namespace motion {
             robot_to_head_scale = config["robot_to_head"]["scale"].as<Expression>();
 			robot_to_head = Transform3D::createTranslation(pos) * Transform3D::createRotationZ(yaw) * Transform3D::createRotationY(pitch);
 
+            currentCamPose = robot_to_head;
+
+            smoothing_alpha = config["smoothing_alpha"].as<Expression>();
+
 			l_arm = config["l_arm"].as<arma::vec>(); 
 			r_arm = config["r_arm"].as<arma::vec>();
 
@@ -94,34 +98,34 @@ namespace motion {
         });
 
         on<Network<PresenceUserState>, Sync<Head6DoFController>>().then("Head6DoFController Network Input",[this](const PresenceUserState& user){
-            robotCamPose(0,0) = user.head_pose().x().x();
-            robotCamPose(1,0) = user.head_pose().x().y();
-            robotCamPose(2,0) = user.head_pose().x().z();
-            robotCamPose(3,0) = user.head_pose().x().t(); 
+            goalCamPose(0,0) = user.head_pose().x().x();
+            goalCamPose(1,0) = user.head_pose().x().y();
+            goalCamPose(2,0) = user.head_pose().x().z();
+            goalCamPose(3,0) = user.head_pose().x().t(); 
 
-            robotCamPose(0,1) = user.head_pose().y().x();
-            robotCamPose(1,1) = user.head_pose().y().y();
-            robotCamPose(2,1) = user.head_pose().y().z();
-            robotCamPose(3,1) = user.head_pose().y().t();
+            goalCamPose(0,1) = user.head_pose().y().x();
+            goalCamPose(1,1) = user.head_pose().y().y();
+            goalCamPose(2,1) = user.head_pose().y().z();
+            goalCamPose(3,1) = user.head_pose().y().t();
 
-            robotCamPose(0,2) = user.head_pose().z().x();
-            robotCamPose(1,2) = user.head_pose().z().y();
-            robotCamPose(2,2) = user.head_pose().z().z();
-            robotCamPose(3,2) = user.head_pose().z().t();
+            goalCamPose(0,2) = user.head_pose().z().x();
+            goalCamPose(1,2) = user.head_pose().z().y();
+            goalCamPose(2,2) = user.head_pose().z().z();
+            goalCamPose(3,2) = user.head_pose().z().t();
 
-            robotCamPose(0,3) = user.head_pose().t().x();
-            robotCamPose(1,3) = user.head_pose().t().y();
-            robotCamPose(2,3) = user.head_pose().t().z();
-            robotCamPose(3,3) = user.head_pose().t().t();
+            goalCamPose(0,3) = user.head_pose().t().x();
+            goalCamPose(1,3) = user.head_pose().t().y();
+            goalCamPose(2,3) = user.head_pose().t().z();
+            goalCamPose(3,3) = user.head_pose().t().t();
             //Rotate to robot coordinate system
-            robotCamPose = camera_to_robot * robotCamPose.i() * camera_to_robot.t();
-            robotCamPose.translation() *= robot_to_head_scale;
+            goalCamPose = camera_to_robot * goalCamPose.i() * camera_to_robot.t();
+            goalCamPose.translation() *= robot_to_head_scale;
 
-            limitPose(robotCamPose);
+            limitPose(goalCamPose);
 
             // pose << user.head_pose();
-            // robotCamPose = Transform3D(arma::conv_to<arma::mat>::from(pose));
-            std::cout << "robotCamPose = \n" << robotCamPose << std::endl;
+            // goalCamPose = Transform3D(arma::conv_to<arma::mat>::from(pose));
+            std::cout << "goalCamPose = \n" << goalCamPose << std::endl;
             // std::cout << "robotCamPos = " << user.head_pose().t().x() << " "<<  user.head_pose().t().y() << " "<<  user.head_pose().t().z() << std::endl;
 
         });
@@ -141,14 +145,14 @@ namespace motion {
         								sensors.servos[int(ServoID::R_ELBOW)].presentPosition,
         								};
 
-			//Adjust arm position
-        	int max_number_of_iterations = 20;
 
+            currentCamPose = Transform3D::interpolate(currentCamPose, goalCamPose * robot_to_head, smoothing_alpha);
 
-
-			auto joints = utility::motion::kinematics::setHeadPoseFromFeet<DarwinModel>(robotCamPose * robot_to_head, foot_separation, body_angle);
-        	
+            auto joints = utility::motion::kinematics::setHeadPoseFromFeet<DarwinModel>(currentCamPose, foot_separation, body_angle);
+            
             //TODO: fix arms
+			//Adjust arm position
+        	// int max_number_of_iterations = 20;
         	// auto arm_jointsL = utility::motion::kinematics::setArm<DarwinModel>(l_arm, true, max_number_of_iterations, prevArmJointsL);
         	// auto arm_jointsR = utility::motion::kinematics::setArm<DarwinModel>(r_arm, false, max_number_of_iterations, prevArmJointsR);
         	// joints.insert(joints.end(), arm_jointsL.begin(), arm_jointsL.end());
@@ -225,8 +229,6 @@ namespace motion {
         std::cout << "eulerAngles = " << eulerAngles.t();
         pose.rotation() = Rotation3D::createFromEulerAngles(eulerAngles);
         // std::cout << "check = " << pose.rotation() - R << std::endl;
-
-
 
     }
 

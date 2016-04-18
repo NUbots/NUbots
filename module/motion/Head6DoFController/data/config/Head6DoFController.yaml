@@ -1,5 +1,6 @@
 foot_separation: 0.10
 body_angle: 0.0
+smoothing_alpha: 0.1
 
 robot_to_head:
   yaw: 0

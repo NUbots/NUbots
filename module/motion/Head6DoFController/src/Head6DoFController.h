@@ -29,6 +29,7 @@ namespace motion {
     class Head6DoFController : public NUClear::Reactor {
     	float foot_separation = 0.10;
     	float body_angle = 0.0;
+        float smoothing_alpha = 0.1;
 
         arma::vec3 l_arm,r_arm;
 
@@ -50,7 +51,8 @@ namespace motion {
         float distance_limit = 0.1;
         
         //State:
-        utility::math::matrix::Transform3D robotCamPose;
+        utility::math::matrix::Transform3D goalCamPose;
+        utility::math::matrix::Transform3D currentCamPose;
 
         //Subsumption:
     	size_t id;
