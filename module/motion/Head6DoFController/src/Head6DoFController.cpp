@@ -71,8 +71,8 @@ namespace motion {
             robot_to_head_scale = config["robot_to_head"]["scale"].as<Expression>();
 			robot_to_head = Transform3D::createTranslation(pos) * Transform3D::createRotationZ(yaw) * Transform3D::createRotationY(pitch);
 
-            goalCamPose = robot_to_head;
-            currentCamPose = robot_to_head;
+            // goalCamPose = robot_to_head;
+            // currentCamPose = robot_to_head;
 
             smoothing_alpha = config["smoothing_alpha"].as<Expression>();
 
@@ -149,6 +149,7 @@ namespace motion {
 
             currentCamPose = Transform3D::interpolate(currentCamPose, robot_to_head * goalCamPose, smoothing_alpha);
             // currentCamPose.rotation() = Rotation3D();
+            std::cout << "currentCamPose = \n" << currentCamPose << std::endl;
             auto joints = utility::motion::kinematics::setHeadPoseFromFeet<DarwinModel>(currentCamPose, foot_separation, body_angle);
             
             //TODO: fix arms

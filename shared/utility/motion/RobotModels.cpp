@@ -54,7 +54,7 @@ namespace utility{
             float DarwinModel::Head::NECK_TO_CAMERA_X = 0.036;
             float DarwinModel::Head::NECK_TO_CAMERA_Y = 0;
             float DarwinModel::Head::NECK_TO_CAMERA_Z = 0.028;
-            float DarwinModel::Head::CAMERA_DECLINATION_ANGLE_OFFSET = 0.162;
+            float DarwinModel::Head::CAMERA_DECLINATION_ANGLE_OFFSET = 0;// 0.162; default zero
             //Head movement limits
             float DarwinModel::Head::MAX_YAW = M_PI * 2 / 3;
             float DarwinModel::Head::MIN_YAW = -M_PI * 2 / 3;
