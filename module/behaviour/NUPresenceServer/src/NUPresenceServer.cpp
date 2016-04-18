@@ -56,7 +56,7 @@ namespace behaviour {
             camera_to_robot.rotation() = arma::join_rows(oculus_x_axis,arma::join_rows(oculus_y_axis,oculus_z_axis));
         });
 
-        on<Trigger<Image>, With<Sensors>>().then([this](const Image& image, const Sensors& sensors){
+        on<Trigger<Image>, With<Sensors>, Single>().then([this](const Image& image, const Sensors& sensors){
 
         	auto imageFragment = std::make_unique<ImageFragment>();
 
