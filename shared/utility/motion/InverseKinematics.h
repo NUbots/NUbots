@@ -302,6 +302,7 @@ namespace kinematics {
                                                                                                      headYaw,
                                                                                                      message::input::ServoID::HEAD_PITCH);
         auto cameraToBody = headPoses[message::input::ServoID::HEAD_PITCH];
+        // std::cout << "cameraToBody = \n" << cameraToBody << std::endl;
 
         //Compute foot poses
         utility::math::matrix::Transform3D F_c = cameraToBody * cameraToFeet.i();

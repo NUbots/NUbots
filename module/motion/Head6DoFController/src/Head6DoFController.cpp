@@ -71,6 +71,7 @@ namespace motion {
             robot_to_head_scale = config["robot_to_head"]["scale"].as<Expression>();
 			robot_to_head = Transform3D::createTranslation(pos) * Transform3D::createRotationZ(yaw) * Transform3D::createRotationY(pitch);
 
+            goalCamPose = robot_to_head;
             currentCamPose = robot_to_head;
 
             smoothing_alpha = config["smoothing_alpha"].as<Expression>();
@@ -125,7 +126,7 @@ namespace motion {
 
             // pose << user.head_pose();
             // goalCamPose = Transform3D(arma::conv_to<arma::mat>::from(pose));
-            std::cout << "goalCamPose = \n" << goalCamPose << std::endl;
+            // std::cout << "goalCamPose = \n" << goalCamPose << std::endl;
             // std::cout << "robotCamPos = " << user.head_pose().t().x() << " "<<  user.head_pose().t().y() << " "<<  user.head_pose().t().z() << std::endl;
 
         });
@@ -146,8 +147,8 @@ namespace motion {
         								};
 
 
-            currentCamPose = Transform3D::interpolate(currentCamPose, goalCamPose * robot_to_head, smoothing_alpha);
-
+            currentCamPose = Transform3D::interpolate(currentCamPose, robot_to_head * goalCamPose, smoothing_alpha);
+            // currentCamPose.rotation() = Rotation3D();
             auto joints = utility::motion::kinematics::setHeadPoseFromFeet<DarwinModel>(currentCamPose, foot_separation, body_angle);
             
             //TODO: fix arms
@@ -221,8 +222,8 @@ namespace motion {
         }
 
         arma::vec3 eulerAngles = pose.eulerAngles();
-        std::cout << "eulerAngles = " << eulerAngles.t();
-        std::cout << "eulerLimits = " << ", " << eulerLimits.roll.max << ", " << eulerLimits.roll.min << "; " << eulerLimits.pitch.max << ", " << eulerLimits.pitch.min << "; " << eulerLimits.yaw.max << ", " << eulerLimits.yaw.min << std::endl;
+        // std::cout << "eulerAngles = " << eulerAngles.t();
+        // std::cout << "eulerLimits = " << ", " << eulerLimits.roll.max << ", " << eulerLimits.roll.min << "; " << eulerLimits.pitch.max << ", " << eulerLimits.pitch.min << "; " << eulerLimits.yaw.max << ", " << eulerLimits.yaw.min << std::endl;
         eulerAngles[0] = std::fmax(std::fmin(eulerAngles[0],eulerLimits.roll.max),eulerLimits.roll.min);
         eulerAngles[1] = std::fmax(std::fmin(eulerAngles[1],eulerLimits.pitch.max),eulerLimits.pitch.min);
         eulerAngles[2] = std::fmax(std::fmin(eulerAngles[2],eulerLimits.yaw.max),eulerLimits.yaw.min);
