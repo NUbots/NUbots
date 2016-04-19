@@ -313,8 +313,9 @@ namespace kinematics {
         auto joints2 = calculateLegJoints<RobotKinematicModel>(F_r, message::input::LimbID::RIGHT_LEG);
         joints.insert(joints.end(), joints2.begin(), joints2.end());
         joints.insert(joints.end(),headJoints.begin(),headJoints.end());
-        // servos = calculateLegJoints<RobotKinematicModel>()
-        return joints;
+
+        // return joints;
+        return headJoints;
     }
 
     template <typename RobotKinematicModel>

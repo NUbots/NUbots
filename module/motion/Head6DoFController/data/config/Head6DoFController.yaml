@@ -20,5 +20,5 @@ oculus:
 limits:
   distance: 0.1
   roll: [-pi / 6, pi / 6]
-  pitch: [-pi / 12, pi / 6]
-  yaw: [-pi / 2, pi / 2]
+  pitch: [-pi / 2, pi / 2]
+  yaw: [-2 * pi / 3, 2 * pi / 3]
