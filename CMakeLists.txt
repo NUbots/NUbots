@@ -13,6 +13,9 @@ OPTION(BUILD_TESTS "Builds all of the tests for each module." OFF)
 # Set to on to build as shared libraries
 OPTION(NUCLEAR_SHARED_BUILD "Build each module as a separate shared library." ON)
 
+# Our banner file for placing at the top of the roles
+SET(NUCLEAR_ROLE_BANNER_FILE "${CMAKE_CURRENT_SOURCE_DIR}/roles/banner.txt" CACHE PATH "The path the banner to print at the start of each role execution")
+
 # Our variables that are used to locate the shared, module, and message folders
 SET(NUCLEAR_MODULE_DIR "${CMAKE_SOURCE_DIR}/module"              CACHE PATH "The path to the module directory for NUClear")
 SET(NUCLEAR_MESSAGE_DIR "${CMAKE_SOURCE_DIR}/shared/message"     CACHE PATH "The path to the message directory for NUClear")

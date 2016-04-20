@@ -19,7 +19,6 @@ SET(CMAKE_MACOSX_RPATH ON)
 # These will allow the binary to run from the build folder
 SET(CMAKE_INSTALL_RPATH ${CMAKE_INSTALL_RPATH} lib/ ../lib/ bin/lib)
 
-
 IF(NOT MSVC)
 	# Compilation must be done with c++14 for NUClear to work
 	SET(NUCLEAR_ROLES_CXX_FLAGS "${NUCLEAR_ROLES_CXX_FLAGS} -std=c++14")
