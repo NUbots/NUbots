@@ -71,7 +71,7 @@ namespace motion {
 			float pitch = config["robot_to_head"]["pitch"].as<Expression>();
 			arma::vec3 pos = config["robot_to_head"]["pos"].as<arma::vec>();
             
-            robot_to_head_scale = config["robot_to_head"]["scale"].as<Expression>();
+            oculus_to_robot_scale = config["robot_to_head"]["scale"].as<Expression>();
 			robot_to_head = Transform3D::createTranslation(pos) * Transform3D::createRotationZ(yaw) * Transform3D::createRotationY(pitch);
 
             // goalCamPose = robot_to_head;
@@ -104,6 +104,11 @@ namespace motion {
             l_arm_id = config["mocap_rigidbody_ids"]["l_arm"].as<int>();
             r_arm_id = config["mocap_rigidbody_ids"]["r_arm"].as<int>();
 
+            arma::vec mocap_x_axis = config["mocap"]["x_axis"].as<arma::vec>();
+            arma::vec mocap_y_axis = config["mocap"]["y_axis"].as<arma::vec>();
+            arma::vec mocap_z_axis = config["mocap"]["z_axis"].as<arma::vec>();
+            mocap_to_robot = arma::join_rows(mocap_x_axis,arma::join_rows(mocap_y_axis,mocap_z_axis));
+
         });
 
         on<Network<PresenceUserState>, Sync<NUPresenceInput>>().then("NUPresenceInput Network Input",[this](const PresenceUserState& user){
@@ -128,7 +133,7 @@ namespace motion {
             goalCamPose(3,3) = user.head_pose().t().t();
             //Rotate to robot coordinate system
             goalCamPose = camera_to_robot * goalCamPose.i() * camera_to_robot.t();
-            goalCamPose.translation() *= robot_to_head_scale;
+            goalCamPose.translation() *= oculus_to_robot_scale;
 
             limitPose(goalCamPose);
 
@@ -147,11 +152,11 @@ namespace motion {
                 float y = rigidBody.position().y();
                 float z = rigidBody.position().z();
                 if(id == head_id){
-                        mocap_head_pos = arma::vec3({x,y,z});
+                        mocap_head_pos = oculus_to_robot_scale * mocap_to_robot * arma::vec3({x,y,z});
                 } else if(id == l_arm_id){
-                        l_arm = arma::vec3({x,y,z});
+                        l_arm = oculus_to_robot_scale * mocap_to_robot * arma::vec3({x,y,z});
                 } else if(id == r_arm_id){
-                        l_arm = arma::vec3({x,y,z});
+                        l_arm = oculus_to_robot_scale * mocap_to_robot * arma::vec3({x,y,z});
                 }
 
             }
@@ -180,10 +185,10 @@ namespace motion {
             //TODO: fix arms
 			//Adjust arm position
         	// int max_number_of_iterations = 20;
-        	// auto arm_jointsL = utility::motion::kinematics::setArm<DarwinModel>(l_arm, true, max_number_of_iterations, prevArmJointsL);
-        	// auto arm_jointsR = utility::motion::kinematics::setArm<DarwinModel>(r_arm, false, max_number_of_iterations, prevArmJointsR);
-        	// joints.insert(joints.end(), arm_jointsL.begin(), arm_jointsL.end());
-        	// joints.insert(joints.end(), arm_jointsR.begin(), arm_jointsR.end());
+        	auto arm_jointsL = utility::motion::kinematics::setArmApprox<DarwinModel>(l_arm, true);
+        	auto arm_jointsR = utility::motion::kinematics::setArmApprox<DarwinModel>(r_arm, false);
+        	joints.insert(joints.end(), arm_jointsL.begin(), arm_jointsL.end());
+        	joints.insert(joints.end(), arm_jointsR.begin(), arm_jointsR.end());
 
 
 	        auto waypoints = std::make_unique<std::vector<ServoCommand>>();

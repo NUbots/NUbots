@@ -95,8 +95,8 @@ namespace behaviour {
             //hack out translation
             //TODO: fix translation
             cam_to_feet.translation() *= 0;
-            std::cout << "robot_to_head.i() \n" << robot_to_head.i();
-            std::cout << "cam_to_feet \n" << cam_to_feet;
+            // std::cout << "robot_to_head.i() \n" << robot_to_head.i();
+            // std::cout << "cam_to_feet \n" << cam_to_feet;
             imageFragment->mutable_cam_to_feet()->mutable_x()->set_x(cam_to_feet(0,0));
             imageFragment->mutable_cam_to_feet()->mutable_x()->set_y(cam_to_feet(1,0));
             imageFragment->mutable_cam_to_feet()->mutable_x()->set_z(cam_to_feet(2,0));

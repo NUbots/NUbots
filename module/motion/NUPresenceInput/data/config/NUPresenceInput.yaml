@@ -1,6 +1,6 @@
 foot_separation: 0.10
 body_angle: 0.0
-smoothing_alpha: 0.1
+smoothing_alpha: 0.5
 
 robot_to_head:
   yaw: 0
@@ -20,10 +20,15 @@ oculus:
 limits:
   distance: 0.1
   roll: [-pi / 6, pi / 6]
-  pitch: [-pi / 2, pi / 2]
+  pitch: [-pi / 6, pi / 3 + 0.2]
   yaw: [-2 * pi / 3, 2 * pi / 3]
 
 mocap_rigidbody_ids:
   head: 0
   l_arm: 1
   r_arm: 2
+
+mocap:
+  x_axis: [0,-1,0] #-y
+  y_axis: [0,0,1] #z
+  z_axis: [1,0,0] #x

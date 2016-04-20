@@ -22,6 +22,7 @@
 
 #include <nuclear>
 #include "utility/math/matrix/Transform3D.h"
+#include "utility/math/matrix/Rotation3D.h"
 
 namespace module {
 namespace motion {
@@ -37,7 +38,8 @@ namespace motion {
         utility::math::matrix::Transform3D camera_to_robot;
 
     	utility::math::matrix::Transform3D robot_to_head;
-        float robot_to_head_scale;
+        utility::math::matrix::Rotation3D mocap_to_robot;
+        float oculus_to_robot_scale;
 
         struct {
             struct Range {
