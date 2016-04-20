@@ -18,7 +18,7 @@ NUCLEAR_ROLE(
     platform::darwin::SensorFilter
 
     # Motion
-    motion::Head6DoFController
+    motion::NUPresenceInput
 
     # Behaviour
     behaviour::Controller

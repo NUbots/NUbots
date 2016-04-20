@@ -49,7 +49,7 @@ namespace behaviour {
             reliable = config["reliable"];
         });
 
-        on<Configuration>("Head6DoFController.yaml").then([this](const Configuration& config){
+        on<Configuration>("NUPresenceInput.yaml").then([this](const Configuration& config){
             //Todo: make this a global config struct message
             float yaw = config["robot_to_head"]["yaw"].as<Expression>();
             float pitch = config["robot_to_head"]["pitch"].as<Expression>();
