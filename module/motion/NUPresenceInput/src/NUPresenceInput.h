@@ -23,6 +23,8 @@
 #include <nuclear>
 #include "utility/math/matrix/Transform3D.h"
 #include "utility/math/matrix/Rotation3D.h"
+#include "utility/support/Limiter.h"
+#include "message/input/ServoID.h"
 
 namespace module {
 namespace motion {
@@ -56,6 +58,9 @@ namespace motion {
         //State:
         utility::math::matrix::Transform3D goalCamPose;
         utility::math::matrix::Transform3D currentCamPose;
+
+        //Servo limiter
+        utility::support::Limiter<message::input::ServoID, float> jointLimiter;
 
         //Subsumption:
     	size_t id;

@@ -79,7 +79,7 @@ namespace motion {
 
             smoothing_alpha = config["smoothing_alpha"].as<Expression>();
 
-			l_arm = config["l_arm"].as<arma::vec>(); 
+			l_arm = config["l_arm"].as<arma::vec>();
 			r_arm = config["r_arm"].as<arma::vec>();
 
             arma::vec oculus_x_axis = config["oculus"]["x_axis"].as<arma::vec>();
@@ -97,6 +97,15 @@ namespace motion {
             eulerLimits.pitch.max = config["limits"]["pitch"][1].as<Expression>();
             eulerLimits.yaw.min = config["limits"]["yaw"][0].as<Expression>();
             eulerLimits.yaw.max = config["limits"]["yaw"][1].as<Expression>();
+
+            //Servo Limits:
+            for(auto& servo : config["limits"]["servos"]){
+                ServoID id = message::input::idFromString(servo[0].as<std::string>());
+                float min = servo[1].as<Expression>();
+                float max = servo[2].as<Expression>();
+                jointLimiter.addLimit(id, min, max);
+            }
+
 			updatePriority(100);
 
             //Mocap
@@ -197,9 +206,8 @@ namespace motion {
             Transform3D camToBody = sensors.forwardKinematics.at(ServoID::HEAD_PITCH);
         	auto arm_jointsL = utility::motion::kinematics::setArmApprox<DarwinModel>(camToBody.translation() + l_arm, true);
         	auto arm_jointsR = utility::motion::kinematics::setArmApprox<DarwinModel>(camToBody.translation() + r_arm, false);
-        	joints.insert(joints.end(), arm_jointsL.begin(), arm_jointsL.end());
-        	joints.insert(joints.end(), arm_jointsR.begin(), arm_jointsR.end());
-
+            joints.insert(joints.end(), arm_jointsL.begin(), arm_jointsL.end());
+            joints.insert(joints.end(), arm_jointsR.begin(), arm_jointsR.end());
 
 	        auto waypoints = std::make_unique<std::vector<ServoCommand>>();
 	        waypoints->reserve(16);
@@ -207,7 +215,7 @@ namespace motion {
 	        NUClear::clock::time_point time = NUClear::clock::now();
 
 	        for (auto& joint : joints) {
-	            waypoints->push_back({ id, time, joint.first, joint.second, 30, 100 }); // TODO: support separate gains for each leg
+	            waypoints->push_back({ id, time, joint.first, jointLimiter.clamp(joint.first,joint.second), 30, 100 }); // TODO: support separate gains for each leg
         	}	
         	emit(waypoints);
 

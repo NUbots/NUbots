@@ -22,6 +22,11 @@ limits:
   roll: [-pi / 6, pi / 6]
   pitch: [-pi / 6, pi / 3 + 0.2]
   yaw: [-2 * pi / 3, 2 * pi / 3]
+  servos:
+    - ["R_SHOULDER_ROLL", -pi, 0]
+    - ["L_SHOULDER_ROLL", 0, pi]
+    - ["R_ELBOW", -pi + pi / 8, 0]
+    - ["L_ELBOW", -pi + pi / 8, 0]
 
 mocap_rigidbody_ids:
   head: 0
@@ -32,3 +37,4 @@ mocap:
   x_axis: [0,-1,0] #-y
   y_axis: [0,0,1] #z
   z_axis: [1,0,0] #x
+
