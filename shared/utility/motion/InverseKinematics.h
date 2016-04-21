@@ -397,24 +397,32 @@ namespace kinematics {
         };
 
         arma::vec3 handFromShoulder = pos - shoulderPos;
+        std::cout << (left ? "left" : "right" ) << " shoulderPos = " << shoulderPos.t();
+        std::cout << (left ? "right" : "left" ) << " pos = " << pos.t();
+        std::cout << (left ? "left" : "right" ) << " handFromShoulder = " << handFromShoulder.t();
 
         //ELBOW
-        float extensionLength = arma::norm(shoulderPos);
+        float extensionLength = arma::norm(handFromShoulder);
         float upperArmLength = RobotKinematicModel::Arm::UPPER_ARM_LENGTH;
         float lowerArmLength = RobotKinematicModel::Arm::LOWER_ARM_LENGTH;
-        float cosElbow = (upperArmLength * upperArmLength + lowerArmLength * lowerArmLength - extensionLength * extensionLength) / (2 * upperArmLength * lowerArmLength);
-        elbow = std::acos(std::fmax(std::fmin(cosElbow,1),-1));
+        float sqrUpperArmLength = upperArmLength * upperArmLength;
+        float sqrLowerArmLength = lowerArmLength * lowerArmLength;
+        float sqrExtensionLength = extensionLength * extensionLength;
+        float cosElbow = (sqrUpperArmLength + sqrLowerArmLength - sqrExtensionLength) / (2 * upperArmLength * lowerArmLength);
+        elbow = -M_PI + std::acos(std::fmax(std::fmin(cosElbow,1),-1));
 
         //SHOULDER PITCH
-        roll = std::atan2(negativeIfRight * handFromShoulder[1],-handFromShoulder[2]);
+        float cosPitAngle = (sqrUpperArmLength + sqrExtensionLength - sqrLowerArmLength) / (2 * upperArmLength * extensionLength);
+        pitch = std::acos(std::fmax(std::fmin(cosPitAngle,1),-1)) + std::atan2(-handFromShoulder[2],handFromShoulder[0]);
         //SHOULDER ROLL
-        pitch = std::atan2(negativeIfRight * handFromShoulder[0],-handFromShoulder[2]);
+        roll = std::atan2(handFromShoulder[1],-handFromShoulder[2]);
 
         //Write to servo list
         std::vector<std::pair<message::input::ServoID, float> > joints;
         joints.push_back(std::make_pair(SHOULDER_PITCH,utility::math::angle::normalizeAngle(pitch)));
         joints.push_back(std::make_pair(SHOULDER_ROLL,utility::math::angle::normalizeAngle(roll)));
         joints.push_back(std::make_pair(ELBOW,utility::math::angle::normalizeAngle(elbow)));
+        std::cout << (left ? "left" : "right" ) << " roll,pitch,elbow (deg) = " << 180 * roll / M_PI << ", " << 180 * pitch / M_PI << ", " << 180 * elbow / M_PI << std::endl;
         return joints;
     }
 
