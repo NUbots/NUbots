@@ -145,6 +145,8 @@ namespace motion {
         });
 
         on<Trigger<MotionCapture>>().then([this](const MotionCapture& mocap){
+            arma::vec3 l_arm_raw, r_arm_raw;
+            int marker_count;
             for (auto& rigidBody : mocap.rigid_bodies()) {
 
                 int id = rigidBody.identifier();
@@ -153,12 +155,19 @@ namespace motion {
                 float z = rigidBody.position().z();
                 if(id == head_id){
                         mocap_head_pos = oculus_to_robot_scale * mocap_to_robot * arma::vec3({x,y,z});
+                        marker_count++;
                 } else if(id == l_arm_id){
-                        l_arm = oculus_to_robot_scale * mocap_to_robot * arma::vec3({x,y,z});
+                        l_arm_raw = oculus_to_robot_scale * mocap_to_robot * arma::vec3({x,y,z});
+                        marker_count++;
                 } else if(id == r_arm_id){
-                        l_arm = oculus_to_robot_scale * mocap_to_robot * arma::vec3({x,y,z});
+                        r_arm_raw = oculus_to_robot_scale * mocap_to_robot * arma::vec3({x,y,z});
+                        marker_count++;
                 }
 
+            }
+            if(marker_count == 3){
+                l_arm = l_arm_raw - mocap_head_pos;
+                r_arm = r_arm_raw - mocap_head_pos;
             }
         });
 
@@ -166,16 +175,16 @@ namespace motion {
         >().then([this](const Sensors& sensors){
 			
         	//Record current arm position:
-        	arma::vec3 prevArmJointsL = {
-        								sensors.servos[int(ServoID::L_SHOULDER_PITCH)].presentPosition,
-        								sensors.servos[int(ServoID::L_SHOULDER_ROLL)].presentPosition,
-        								sensors.servos[int(ServoID::L_ELBOW)].presentPosition,
-        								};
-        	arma::vec3 prevArmJointsR = {
-        								sensors.servos[int(ServoID::R_SHOULDER_PITCH)].presentPosition,
-        								sensors.servos[int(ServoID::R_SHOULDER_ROLL)].presentPosition,
-        								sensors.servos[int(ServoID::R_ELBOW)].presentPosition,
-        								};
+        	// arma::vec3 prevArmJointsL = {
+        	// 							sensors.servos[int(ServoID::L_SHOULDER_PITCH)].presentPosition,
+        	// 							sensors.servos[int(ServoID::L_SHOULDER_ROLL)].presentPosition,
+        	// 							sensors.servos[int(ServoID::L_ELBOW)].presentPosition,
+        	// 							};
+        	// arma::vec3 prevArmJointsR = {
+        	// 							sensors.servos[int(ServoID::R_SHOULDER_PITCH)].presentPosition,
+        	// 							sensors.servos[int(ServoID::R_SHOULDER_ROLL)].presentPosition,
+        	// 							sensors.servos[int(ServoID::R_ELBOW)].presentPosition,
+        	// 							};
 
 
             currentCamPose = Transform3D::interpolate(currentCamPose, robot_to_head * goalCamPose, smoothing_alpha);
@@ -185,8 +194,9 @@ namespace motion {
             //TODO: fix arms
 			//Adjust arm position
         	// int max_number_of_iterations = 20;
-        	auto arm_jointsL = utility::motion::kinematics::setArmApprox<DarwinModel>(l_arm, true);
-        	auto arm_jointsR = utility::motion::kinematics::setArmApprox<DarwinModel>(r_arm, false);
+            Transform3D camToBody = sensors.forwardKinematics.at(ServoID::HEAD_PITCH);
+        	auto arm_jointsL = utility::motion::kinematics::setArmApprox<DarwinModel>(camToBody.translation() + l_arm, true);
+        	auto arm_jointsR = utility::motion::kinematics::setArmApprox<DarwinModel>(camToBody.translation() + r_arm, false);
         	joints.insert(joints.end(), arm_jointsL.begin(), arm_jointsL.end());
         	joints.insert(joints.end(), arm_jointsR.begin(), arm_jointsR.end());
 

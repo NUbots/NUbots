@@ -397,9 +397,9 @@ namespace kinematics {
         };
 
         arma::vec3 handFromShoulder = pos - shoulderPos;
-        std::cout << (left ? "left" : "right" ) << " shoulderPos = " << shoulderPos.t();
-        std::cout << (left ? "right" : "left" ) << " pos = " << pos.t();
-        std::cout << (left ? "left" : "right" ) << " handFromShoulder = " << handFromShoulder.t();
+        // std::cout << (left ? "left" : "right" ) << " shoulderPos = " << shoulderPos.t();
+        // std::cout << (left ? "right" : "left" ) << " pos = " << pos.t();
+        // std::cout << (left ? "left" : "right" ) << " handFromShoulder = " << handFromShoulder.t();
 
         //ELBOW
         float extensionLength = arma::norm(handFromShoulder);
@@ -423,7 +423,7 @@ namespace kinematics {
         joints.push_back(std::make_pair(SHOULDER_PITCH,utility::math::angle::normalizeAngle(pitch)));
         joints.push_back(std::make_pair(SHOULDER_ROLL,utility::math::angle::normalizeAngle(roll)));
         joints.push_back(std::make_pair(ELBOW,utility::math::angle::normalizeAngle(elbow)));
-        std::cout << (left ? "left" : "right" ) << " roll,pitch,elbow (deg) = " << 180 * roll / M_PI << ", " << 180 * pitch / M_PI << ", " << 180 * elbow / M_PI << std::endl;
+        // std::cout << (left ? "left" : "right" ) << " roll,pitch,elbow (deg) = " << 180 * roll / M_PI << ", " << 180 * pitch / M_PI << ", " << 180 * elbow / M_PI << std::endl;
         return joints;
     }
 
