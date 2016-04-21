@@ -62,25 +62,6 @@ def generate_cmake(parts):
 
 def generate_header(parts):
     template = textwrap.dedent("""\
-        /*
-         * This file is part of NUbots Codebase.
-         *
-         * The NUbots Codebase is free software: you can redistribute it and/or modify
-         * it under the terms of the GNU General Public License as published by
-         * the Free Software Foundation, either version 3 of the License, or
-         * (at your option) any later version.
-         *
-         * The NUbots Codebase is distributed in the hope that it will be useful,
-         * but WITHOUT ANY WARRANTY; without even the implied warranty of
-         * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-         * GNU General Public License for more details.
-         *
-         * You should have received a copy of the GNU General Public License
-         * along with the NUbots Codebase.  If not, see <http://www.gnu.org/licenses/>.
-         *
-         * Copyright {year} NUbots <nubots@nubots.net>
-         */
-
         #ifndef {define}
         #define {define}
 
@@ -100,33 +81,13 @@ def generate_header(parts):
         #endif  // {define}
         """)
 
-    return template.format(year=datetime.datetime.now().year
-                         , define='{}_H'.format('_'.join([p.upper() for p in parts]))
+    return template.format(define='{}_H'.format('_'.join([p.upper() for p in parts]))
                          , className=parts[-1]
                          , openNamespace = '\n'.join(['namespace {} {{'.format(x) for x in parts[:-1]])
                          , closeNamespace = '\n'.join('}' * (len(parts) - 1)))
 
 def generate_cpp(parts):
     template = textwrap.dedent("""\
-        /*
-         * This file is part of NUbots Codebase.
-         *
-         * The NUbots Codebase is free software: you can redistribute it and/or modify
-         * it under the terms of the GNU General Public License as published by
-         * the Free Software Foundation, either version 3 of the License, or
-         * (at your option) any later version.
-         *
-         * The NUbots Codebase is distributed in the hope that it will be useful,
-         * but WITHOUT ANY WARRANTY; without even the implied warranty of
-         * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-         * GNU General Public License for more details.
-         *
-         * You should have received a copy of the GNU General Public License
-         * along with the NUbots Codebase.  If not, see <http://www.gnu.org/licenses/>.
-         *
-         * Copyright {year} NUbots <nubots@nubots.net>
-         */
-
         #include "{className}.h"
 
         #include "extension/Configuration.h"
@@ -145,8 +106,7 @@ def generate_cpp(parts):
         {closeNamespace}
         """)
 
-    return template.format(year=datetime.datetime.now().year
-                         , className=parts[-1]
+    return template.format(className=parts[-1]
                          , openNamespace = '\n'.join(['namespace {} {{'.format(x) for x in parts[:-1]])
                          , closeNamespace = '\n'.join(['}' for x in parts[:-1]]))
 
@@ -175,25 +135,6 @@ def generate_readme(parts):
 
 def generate_test(parts):
     template = textwrap.dedent("""\
-        /*
-         * This file is part of NUbots Codebase.
-         *
-         * The NUbots Codebase is free software: you can redistribute it and/or modify
-         * it under the terms of the GNU General Public License as published by
-         * the Free Software Foundation, either version 3 of the License, or
-         * (at your option) any later version.
-         *
-         * The NUbots Codebase is distributed in the hope that it will be useful,
-         * but WITHOUT ANY WARRANTY; without even the implied warranty of
-         * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-         * GNU General Public License for more details.
-         *
-         * You should have received a copy of the GNU General Public License
-         * along with the NUbots Codebase.  If not, see <http://www.gnu.org/licenses/>.
-         *
-         * Copyright {year} NUbots <nubots@nubots.net>
-         */
-
         // Uncomment this line when other test files are added
         //#define CATCH_CONFIG_MAIN  // This tells Catch to provide a main() - only do this in one cpp file
         //#include <catch.hpp>
@@ -202,6 +143,6 @@ def generate_test(parts):
         int main() {{ return 0; }}
         """)
 
-    return template.format(year=datetime.datetime.now().year)
+    return template.format()
 
 
