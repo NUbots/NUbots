@@ -30,7 +30,7 @@
 #include "message/input/Sensors.h"
 #include "message/input/proto/PresenceUserState.pb.h"
 #include "message/behaviour/Action.h"
-#include "message/input/proto/MotionCapture.pb.h"
+#include "message/input/MotionCapture.h"
 #include "utility/support/yaml_expression.h"
 #include "utility/support/proto_armadillo.h"
 
@@ -46,7 +46,7 @@ namespace motion {
     using message::input::LimbID;
     using message::input::proto::PresenceUserState;
 
-    using message::input::proto::MotionCapture;
+    using message::input::MotionCapture;
 
     using utility::math::matrix::Transform3D;
     using utility::math::matrix::Rotation3D;
@@ -153,16 +153,16 @@ namespace motion {
 
         });
 
-        on<Trigger<MotionCapture>>().then([this](const MotionCapture& mocap){
+        on<Trigger<MotionCapture>, Sync<NUPresenceInput>>().then([this](const MotionCapture& mocap){
             arma::vec3 l_arm_raw, r_arm_raw;
-            int marker_count;
-            std::cout << "received mocap!!" << std::endl;
-            for (auto& rigidBody : mocap.rigid_bodies()) {
+            int marker_count = 0;
+            for (auto& rigidBody : mocap.rigidBodies) {
 
-                int id = rigidBody.identifier();
-                float x = rigidBody.position().x();
-                float y = rigidBody.position().y();
-                float z = rigidBody.position().z();
+                int id = rigidBody.id;
+                float x = rigidBody.position[0];
+                float y = rigidBody.position[1];
+                float z = rigidBody.position[2];
+                std::cout << "Rigid body " << id << " " << arma::vec({x,y,z}).t();
                 if(id == head_id){
                         mocap_head_pos = oculus_to_robot_scale * mocap_to_robot * arma::vec3({x,y,z});
                         marker_count++;
@@ -176,8 +176,9 @@ namespace motion {
 
             }
             if(marker_count == 3){
-                l_arm = l_arm_raw - mocap_head_pos;
-                r_arm = r_arm_raw - mocap_head_pos;
+                std::cout << "calculating arms" << std::endl;
+                l_arm = (l_arm_raw - mocap_head_pos);
+                r_arm = (r_arm_raw - mocap_head_pos);
             }
         });
 
