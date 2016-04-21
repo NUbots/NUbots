@@ -156,6 +156,7 @@ namespace motion {
         on<Trigger<MotionCapture>>().then([this](const MotionCapture& mocap){
             arma::vec3 l_arm_raw, r_arm_raw;
             int marker_count;
+            std::cout << "received mocap!!" << std::endl;
             for (auto& rigidBody : mocap.rigid_bodies()) {
 
                 int id = rigidBody.identifier();

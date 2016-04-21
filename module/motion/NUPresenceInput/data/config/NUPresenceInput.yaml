@@ -22,6 +22,7 @@ limits:
   roll: [-pi / 6, pi / 6]
   pitch: [-pi / 6, pi / 3 + 0.2]
   yaw: [-2 * pi / 3, 2 * pi / 3]
+  #Raw servo limits
   servos:
     - ["R_SHOULDER_ROLL", -pi, 0]
     - ["L_SHOULDER_ROLL", 0, pi]
