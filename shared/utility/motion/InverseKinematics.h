@@ -415,7 +415,8 @@ namespace kinematics {
         float cosPitAngle = (sqrUpperArmLength + sqrExtensionLength - sqrLowerArmLength) / (2 * upperArmLength * extensionLength);
         pitch = std::acos(std::fmax(std::fmin(cosPitAngle,1),-1)) + std::atan2(-handFromShoulder[2],handFromShoulder[0]);
         //SHOULDER ROLL
-        roll = std::atan2(handFromShoulder[1],-handFromShoulder[2]);
+        arma::vec3 pitchlessHandFromShoulder = utility::math::matrix::Rotation3D::createRotationY(-pitch) * handFromShoulder;
+        roll = std::atan2(pitchlessHandFromShoulder[1],pitchlessHandFromShoulder[0]);
 
         //Write to servo list
         std::vector<std::pair<message::input::ServoID, float> > joints;
