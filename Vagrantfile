@@ -3,6 +3,18 @@
 
 Vagrant.configure("2") do |config|
 
+  # Settings for a parallels provider
+  config.vm.provider "parallels" do |v, override|
+    # Use parallels virtualbox
+    override.vm.box = "parallels/ubuntu-14.04-i386"
+
+    # See http://www.virtualbox.org/manual/ch08.html#vboxmanage-modifyvm
+    # and http://parallels.github.io/vagrant-parallels/docs/configuration.html
+    v.memory = 8192
+    v.cpus = 4
+    v.update_guest_tools = true
+  end
+
   # Settings if using a virtualbox provider
   config.vm.provider "virtualbox" do |v, override|
     # Use the official ubuntu box
@@ -14,17 +26,6 @@ Vagrant.configure("2") do |config|
     v.customize ["modifyvm", :id, "--vram", 128]
     v.customize ["modifyvm", :id, "--ioapic", "on"]
     v.customize ["modifyvm", :id, "--accelerate3d", "on"]
-  end
-
-  config.vm.provider "parallels" do |v, override|
-    # Use parallels virtualbox
-    override.vm.box = "parallels/ubuntu-14.04-i386"
-
-    # See http://www.virtualbox.org/manual/ch08.html#vboxmanage-modifyvm
-    # and http://parallels.github.io/vagrant-parallels/docs/configuration.html
-    v.memory = 8192
-    v.cpus = 4
-    v.update_guest_tools = true
   end
 
   # Use Ubuntu 14.04 32bit VM
@@ -43,6 +44,8 @@ Vagrant.configure("2") do |config|
                     mkdir -p /etc/puppet/modules;
                     puppet module list | grep -q 'puppetlabs-apt' \
                          || puppet module install puppetlabs-apt;
+                    puppet module list | grep -q 'puppetlabs-vcsrepo' \
+                         || puppet module install puppetlabs-vcsrepo;
                     puppet module list | grep -q 'camptocamp-archive' \
                          || puppet module install camptocamp-archive;
                     puppet module list | grep -q 'maestrodev-wget' \
@@ -71,7 +74,7 @@ Vagrant.configure("2") do |config|
 
     # Note: Use NFS for more predictable shared folder support.
     #   The guest must have 'apt-get install nfs-common'
-    nubots.vm.synced_folder ".", "/home/vagrant/nubots/NUbots"
+    nubots.vm.synced_folder ".", "/home/vagrant/NUbots"
 
     # Private network for NUsight's benifit
     nubots.vm.network "public_network", type: "dhcp"
@@ -79,10 +82,10 @@ Vagrant.configure("2") do |config|
     # Share NUsight repository with the VM if it has been placed in the same
     # directory as the NUbots repository
     if File.directory?("../NUsight")
-      nubots.vm.synced_folder "../NUsight", "/home/vagrant/nubots/NUsight"
+      nubots.vm.synced_folder "../NUsight", "/home/vagrant/NUsight"
     end
     if File.directory?("../NUClear")
-      nubots.vm.synced_folder "../NUClear", "/home/vagrant/nubots/NUClear"
+      nubots.vm.synced_folder "../NUClear", "/home/vagrant/NUClear"
     end
   end
 
@@ -92,15 +95,15 @@ Vagrant.configure("2") do |config|
 
     # Note: Use NFS for more predictable shared folder support.
     #   The guest must have 'apt-get install nfs-common'
-    nubots.vm.synced_folder ".", "/home/vagrant/nubots/NUbots"
+    nubots.vm.synced_folder ".", "/home/vagrant/NUbots"
 
     # Share NUsight repository with the VM if it has been placed in the same
     # directory as the NUbots repository
     if File.directory?("../NUsight")
-      nubots.vm.synced_folder "../NUsight", "/home/vagrant/nubots/NUsight"
+      nubots.vm.synced_folder "../NUsight", "/home/vagrant/NUsight"
     end
     if File.directory?("../NUClear")
-      nubots.vm.synced_folder "../NUClear", "/home/vagrant/nubots/NUClear"
+      nubots.vm.synced_folder "../NUClear", "/home/vagrant/NUClear"
     end
   end
 end

@@ -5,6 +5,7 @@ NUCLEAR_ROLE(
     support::extension::FileWatcher
     support::configuration::GlobalConfig
     support::configuration::SoccerConfig
+    support::configuration::NetworkConfiguration
     support::NUbugger
 
 
@@ -15,11 +16,6 @@ NUCLEAR_ROLE(
 
     #Sensors
     platform::darwin::SensorFilter
-
-    #Vision
-    vision::LUTClassifier
-    vision::GoalDetector
-    vision::BallDetector
 
     #Behaviour
     behaviour::Controller

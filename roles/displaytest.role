@@ -8,6 +8,7 @@ NUCLEAR_ROLE(
     support::DisplayTest
     support::configuration::NetworkConfiguration
     support::NUbugger
+    
     debug::NUbugger
 
     support::configuration::SoccerConfig

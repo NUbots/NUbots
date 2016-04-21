@@ -44,7 +44,7 @@ namespace support {
         });
 
 
-        on<Configuration>("VirtualCamera.yaml").then([this] (const Configuration& config) {
+        on<Configuration>("VirtualCamera.yaml").then("VirtualCamera: Emit VirCam params",[this] (const Configuration& config) {
             // Use configuration here from file VirtualCamera.yaml
 
         	auto cameraParameters = std::make_unique<CameraParameters>();
@@ -65,6 +65,7 @@ namespace support {
             } else {
                 emitImageHandle.disable();
             }
+            std::cout << "Emitting camera parameters from VirtualCamera" << std::endl;
 
             emit<Scope::DIRECT>(std::move(cameraParameters));
 

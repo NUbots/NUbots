@@ -20,7 +20,7 @@
 #include "DOpE.h"
 
 #include <armadillo>
-#include <format.h>
+#include <cppformat/format.h>
 #include <google/protobuf/util/message_differencer.h>
 
 #include "utility/support/proto_armadillo.h"

@@ -1,4 +1,4 @@
-#!/bin/bash
+# Define environment variables
 PREFIX=/nubots/toolchain
 
 export LD_LIBRARY_PATH="$PREFIX/lib"

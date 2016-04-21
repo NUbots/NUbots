@@ -2,6 +2,7 @@ NUCLEAR_ROLE(
 	# This must come first as it populates global variables that other modules depend on.
     platform::darwin::KinematicsModel
     support::logging::ConsoleLogHandler
+    support::configuration::NetworkConfiguration
     support::extension::FileWatcher
 
     support::NBZPlayer

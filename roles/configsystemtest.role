@@ -4,5 +4,6 @@ NUCLEAR_ROLE(
     support::SignalCatcher
     support::logging::ConsoleLogHandler
     support::extension::FileWatcher
+    support::configuration::NetworkConfiguration
     support::NUbugger
 )
