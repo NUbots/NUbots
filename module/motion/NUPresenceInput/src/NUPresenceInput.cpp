@@ -105,6 +105,11 @@ namespace motion {
                 float max = servo[2].as<Expression>();
                 jointLimiter.addLimit(id, min, max);
             }
+            for(auto& servo : config["limits"]["smoothing"]){
+                ServoID id = message::input::idFromString(servo[0].as<std::string>());
+                float alpha = servo[1].as<Expression>();
+                jointLimiter.addSmoothing(id, alpha);
+            }
 
 			updatePriority(100);
 
@@ -217,7 +222,7 @@ namespace motion {
 	        NUClear::clock::time_point time = NUClear::clock::now();
 
 	        for (auto& joint : joints) {
-	            waypoints->push_back({ id, time, joint.first, jointLimiter.clamp(joint.first,joint.second), 30, 100 }); // TODO: support separate gains for each leg
+	            waypoints->push_back({ id, time, joint.first, jointLimiter.clampAndSmooth(joint.first,joint.second), 30, 100 }); // TODO: support separate gains for each leg
         	}	
         	emit(waypoints);
 

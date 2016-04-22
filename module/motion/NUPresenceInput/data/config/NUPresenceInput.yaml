@@ -28,6 +28,13 @@ limits:
     - ["L_SHOULDER_ROLL", 0, pi]
     - ["R_ELBOW", -pi + pi / 8, 0]
     - ["L_ELBOW", -pi + pi / 8, 0]
+  smoothing:
+    - ["R_SHOULDER_PITCH", 0.5]
+    - ["L_SHOULDER_PITCH", 0.5]
+    - ["R_SHOULDER_ROLL", 0.5]
+    - ["L_SHOULDER_ROLL", 0.5]
+    - ["R_ELBOW", 0.5]
+    - ["L_ELBOW", 0.5]
 
 mocap_rigidbody_ids:
   head: 1
