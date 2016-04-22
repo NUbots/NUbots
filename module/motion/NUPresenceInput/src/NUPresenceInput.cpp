@@ -211,7 +211,7 @@ namespace motion {
             //3DoF
             arma::vec3 gaze = currentCamPose.rotation().col(0);
             if(gyro_compensation){
-                sensors.orientation * gaze;
+                gaze = sensors.orientation * gaze;
             }
             auto joints = utility::motion::kinematics::calculateHeadJoints<DarwinModel>(gaze);
 
@@ -221,8 +221,11 @@ namespace motion {
 			//Adjust arm position
         	// int max_number_of_iterations = 20;
             Transform3D camToBody = sensors.forwardKinematics.at(ServoID::HEAD_PITCH);
-        	auto arm_jointsL = utility::motion::kinematics::setArmApprox<DarwinModel>(camToBody.translation() + l_arm, true);
-        	auto arm_jointsR = utility::motion::kinematics::setArmApprox<DarwinModel>(camToBody.translation() + r_arm, false);
+            arma::vec3 kneckPos = { DarwinModel::Head::NECK_BASE_POS_FROM_ORIGIN_X,
+                                    DarwinModel::Head::NECK_BASE_POS_FROM_ORIGIN_Y,
+                                    DarwinModel::Head::NECK_BASE_POS_FROM_ORIGIN_Z};
+        	auto arm_jointsL = utility::motion::kinematics::setArmApprox<DarwinModel>(kneckPos + l_arm, true);
+        	auto arm_jointsR = utility::motion::kinematics::setArmApprox<DarwinModel>(kneckPos + r_arm, false);
             joints.insert(joints.end(), arm_jointsL.begin(), arm_jointsL.end());
             joints.insert(joints.end(), arm_jointsR.begin(), arm_jointsR.end());
 
@@ -293,7 +296,7 @@ namespace motion {
         eulerAngles[0] = std::fmax(std::fmin(eulerAngles[0],eulerLimits.roll.max),eulerLimits.roll.min);
         eulerAngles[1] = std::fmax(std::fmin(eulerAngles[1],eulerLimits.pitch.max),eulerLimits.pitch.min);
         eulerAngles[2] = std::fmax(std::fmin(eulerAngles[2],eulerLimits.yaw.max),eulerLimits.yaw.min);
-        std::cout << "eulerAngles = " << eulerAngles.t();
+        // std::cout << "eulerAngles = " << eulerAngles.t();
         pose.rotation() = Rotation3D::createFromEulerAngles(eulerAngles);
         // std::cout << "check = " << pose.rotation() - R << std::endl;
 
