@@ -123,6 +123,8 @@ namespace motion {
             arma::vec mocap_z_axis = config["mocap"]["z_axis"].as<arma::vec>();
             mocap_to_robot = arma::join_rows(mocap_x_axis,arma::join_rows(mocap_y_axis,mocap_z_axis));
 
+            gyro_compensation = config["gyro_compensation"].as<bool>();
+
         });
 
         on<Network<PresenceUserState>, Sync<NUPresenceInput>>().then("NUPresenceInput Network Input",[this](const PresenceUserState& user){
@@ -205,9 +207,17 @@ namespace motion {
 
             currentCamPose = Transform3D::interpolate(currentCamPose, robot_to_head * goalCamPose, smoothing_alpha);
             // currentCamPose.rotation() = Rotation3D();
-            auto joints = utility::motion::kinematics::setHeadPoseFromFeet<DarwinModel>(currentCamPose, foot_separation, body_angle);
+
+            //3DoF
+            arma::vec3 gaze = currentCamPose.rotation().col(0);
+            if(gyro_compensation){
+                sensors.orientation * gaze;
+            }
+            auto joints = utility::motion::kinematics::calculateHeadJoints<DarwinModel>(gaze);
+
+            //TODO: 6DOF needs fixing
+            // auto joints = utility::motion::kinematics::setHeadPoseFromFeet<DarwinModel>(currentCamPose, foot_separation, body_angle);
             
-            //TODO: fix arms
 			//Adjust arm position
         	// int max_number_of_iterations = 20;
             Transform3D camToBody = sensors.forwardKinematics.at(ServoID::HEAD_PITCH);

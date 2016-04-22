@@ -46,3 +46,5 @@ mocap:
   y_axis: [0,0,1] #z
   z_axis: [1,0,0] #x
 
+gyro_compensation: true
+

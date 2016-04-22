@@ -43,6 +43,8 @@ namespace motion {
         utility::math::matrix::Rotation3D mocap_to_robot;
         float oculus_to_robot_scale;
 
+        bool gyro_compensation = true;
+
         struct {
             struct Range {
                 float max = 0;
