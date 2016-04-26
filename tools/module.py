@@ -16,42 +16,42 @@ def register(command):
     generate_command = subcommands.add_parser('generate', help='Generate a new NUClear module based on a template')
     generate_command.add_argument('path', metavar='path', help='a path to the new module (from the module directory)')
 
-def run(path='', **kwargs):
+def run(path, **kwargs):
     if os.path.exists('module/{}'.format(path)):
-        print("The path provided already exists.")
-        print("Module generation aborted.")
-    else:
+        sys.stderr.write('The path provided already exists.\n')
+        sys.stderr.write('Module generation aborted.')
+        sys.exit(1)
 
-        # Calculate all of our file paths
-        path = 'module/{}'.format(path)
-        src_path = '{}/src'.format(path)
-        tests_path = '{}/tests'.format(path)
-        config_path = '{}/config'.format(path)
-        module_name = path.split('/')[-1]
+    # Calculate all of our file paths
+    path = 'module/{}'.format(path)
+    src_path = '{}/src'.format(path)
+    tests_path = '{}/tests'.format(path)
+    config_path = '{}/data/config'.format(path)
+    module_name = path.split('/')[-1]
 
-        # Create the required directories
-        os.makedirs(path)
-        os.makedirs(src_path)
-        os.makedirs(tests_path)
-        os.makedirs(config_path)
+    # Create the required directories
+    os.makedirs(path)
+    os.makedirs(src_path)
+    os.makedirs(tests_path)
+    os.makedirs(config_path)
 
-        # Split our provided path
-        parts = path.split('/')
+    # Split our provided path
+    parts = path.split('/')
 
-        # Write all of our files
-        with open('{}/CMakeLists.txt'.format(path), "w") as output:
-            output.write(generate_cmake(parts))
-        with open('{}/README.md'.format(path), "w") as output:
-            output.write(generate_readme(parts))
-        with open('{0}/{1}.h'.format(src_path, module_name), "w") as output:
-            output.write(generate_header(parts))
-        with open('{0}/{1}.cpp'.format(src_path, module_name), "w") as output:
-            output.write(generate_cpp(parts))
-        with open('{0}/{1}Test.cpp'.format(tests_path, module_name), "w") as output:
-            output.write(generate_test(parts))
+    # Write all of our files
+    with open('{}/CMakeLists.txt'.format(path), "w") as output:
+        output.write(generate_cmake(parts))
+    with open('{}/README.md'.format(path), "w") as output:
+        output.write(generate_readme(parts))
+    with open('{0}/{1}.h'.format(src_path, module_name), "w") as output:
+        output.write(generate_header(parts))
+    with open('{0}/{1}.cpp'.format(src_path, module_name), "w") as output:
+        output.write(generate_cpp(parts))
+    with open('{0}/{1}Test.cpp'.format(tests_path, module_name), "w") as output:
+        output.write(generate_test(parts))
 
-        with open('{0}/{1}.yaml'.format(config_path, module_name), 'a'):
-            pass
+    with open('{0}/{1}.yaml'.format(config_path, module_name), 'a'):
+        pass
 
 
 def generate_cmake(parts):
