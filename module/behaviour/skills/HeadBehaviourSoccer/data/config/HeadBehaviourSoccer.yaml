@@ -23,21 +23,21 @@ oscillate_search: false
 searches:
   - #enum type for search
     search_type: "LOST"
-    #Points in normalised view space. [1,1] corresponds to looking up to the right as far as allowed, relative to the allowed head angles
+    #Points in absolute angle (degrees) relative to the horizon and x-xis of robot
     points:
+      - [0, -45]
       - [0, 0]
-      - [0, 0.8]
-      - [-0.25, 0.8]
-      - [-0.75, 0.8]
-      - [-0.25, 0.8]
-      - [-0.25, 0]
+      - [-45, 0]
+      - [-90, 0]
+      - [-45, 0]
+      - [-45, 0]
       - [0, 0]
-      - [0, -1]
+      - [0, -70]
       - [0, 0]
-      - [0.25,  0]
-      - [0.25,  0.8]
-      - [0.75,  0.8]
-      - [0.25,  0.8]
+      - [45,  0]
+      - [45,  0]
+      - [90,  0]
+      - [45,  0]
 
   - search_type: "FIND_ADDITIONAL_OBJECTS"
     #Points for this search are relative to the padded bounding box containing the already visible objects

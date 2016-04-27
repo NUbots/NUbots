@@ -52,7 +52,7 @@ namespace module {
 
                 /*! @brief Converts from camera space direction to IMU space direction
                 */
-                arma::vec2 getIMUSpaceDirection(const arma::vec2& screenAngles, utility::math::matrix::Rotation3D headToIMUSpace, bool lost);
+                arma::vec2 getIMUSpaceDirection(const arma::vec2& screenAngles, utility::math::matrix::Rotation3D headToIMUSpace);
 
                 /*! @brief Gets points which allow for simultaneous search and viewing of key objects
                 */
