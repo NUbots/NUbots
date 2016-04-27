@@ -61,7 +61,7 @@ namespace input {
                 port = config["port"].as<uint>();
 
                 // Bind our new handle
-                std::tie(listenHandle, std::ignore) = on<UDP::Broadcast, With<GameState>>(port).then([this] (const UDP::Packet& p, const GameState& gameState) {
+                std::tie(listenHandle, std::ignore, std::ignore) = on<UDP::Broadcast, With<GameState>>(port).then([this] (const UDP::Packet& p, const GameState& gameState) {
                     // Get our packet contents
                     const GameControllerPacket& newPacket = *reinterpret_cast<const GameControllerPacket*>(p.data.data());
 
