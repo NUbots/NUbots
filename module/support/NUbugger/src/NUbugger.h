@@ -26,6 +26,7 @@
 #include "message/support/nubugger/proto/Overview.pb.h"
 #include "message/behaviour/proto/Subsumption.pb.h"
 #include "message/support/nubugger/proto/ConfigurationState.pb.h"
+#include "message/support/Configuration.h"
 
 namespace module {
     namespace support {
@@ -103,6 +104,7 @@ namespace module {
             message::input::proto::GameState::Data::PenaltyReason getPenaltyReason(const message::input::gameevents::PenaltyReason& penaltyReason);
 
             void sendConfigurationState();
+            void saveConfigurationFile(std::string path, const YAML::Node& root);
             void sendSubsumption();
 
             template <typename T>

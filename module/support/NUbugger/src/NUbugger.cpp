@@ -48,6 +48,8 @@ namespace support {
     using message::vision::LookUpTable;
     using message::vision::SaveLookUpTable;
     using message::vision::Colour;
+    
+    using message::support::SaveConfiguration;
 
     using utility::time::getUtcTimestamp;
     using utility::time::durationFromSeconds;
@@ -222,6 +224,10 @@ namespace support {
             // Close the file if it exists
             fileEnabled = false;
             outputFile.close();
+        });
+
+        on<Trigger<SaveConfiguration>>().then("Save Config",[this](const SaveConfiguration& config){
+            saveConfigurationFile(config.path,config.config);
         });
     }
 

@@ -74,6 +74,8 @@ namespace module {
             double FOCAL_LENGTH_PIXELS = 2.0;
             double ALPHA = 2.0;
 
+            std::string LUT_PATH;
+
             void insertSegments(message::vision::ClassifiedImage<message::vision::ObjectClass>& image
                 , std::vector<message::vision::ClassifiedImage<message::vision::ObjectClass>::Segment>& segments
                 , bool vertical);
