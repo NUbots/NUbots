@@ -123,6 +123,7 @@ namespace module {
             // Loop through all of our possible ball segments
             std::vector<arma::ivec2> points;
             auto hSegments = classifiedImage.horizontalSegments.equal_range(ObjectClass::GOAL);
+            // NUClear::log("hSegments size = ", std::distance(hSegments.first,hSegments.second));
             for(auto it = hSegments.first; it != hSegments.second; ++it) {
 
                 auto& pt = it->second;
@@ -137,7 +138,7 @@ namespace module {
                 }
             }
 
-            // std::vector<std::tuple<arma::ivec2, arma::ivec2, arma::vec4>> debug;
+            std::vector<std::tuple<arma::ivec2, arma::ivec2, arma::vec4>> debug;
             std::vector<arma::ivec2> edges;
 
             // For each of these points move upward until we find a strong transition to green
@@ -155,7 +156,7 @@ namespace module {
                         auto p = arma::ivec2({ point[0], y - 1 });
                         edges.push_back(p);
                         classifiedImage.ballSeedPoints[0].push_back(p);
-                        // debug.push_back(std::make_tuple(point, edges.back(), arma::vec4({0,1,1,1})));
+                        debug.push_back(std::make_tuple(point, edges.back(), arma::vec4({0,1,1,1})));
                         break;
                     }
                 }
@@ -175,7 +176,7 @@ namespace module {
                         auto p = arma::ivec2({ x + 1, point[1] });
                         edges.push_back(p);
                         classifiedImage.ballSeedPoints[1].push_back(p);
-                        // debug.push_back(std::make_tuple(point, edges.back(), arma::vec4({0,1,1,1})));
+                        debug.push_back(std::make_tuple(point, edges.back(), arma::vec4({0,1,1,1})));
                         break;
                     }
                 }
@@ -195,7 +196,7 @@ namespace module {
                         auto p = arma::ivec2({ x - 1, point[1] });
                         edges.push_back(p);
                         classifiedImage.ballSeedPoints[2].push_back(p);
-                        // debug.push_back(std::make_tuple(point, edges.back(), arma::vec4({0,1,1,1})));
+                        debug.push_back(std::make_tuple(point, edges.back(), arma::vec4({0,1,1,1})));
                         break;
                     }
                 }
@@ -221,8 +222,8 @@ namespace module {
                         break;
                     }
 
-                    // std::tuple<arma::ivec2, arma::ivec2, arma::vec4> d;
-                    // std::get<0>(d) = point;
+                    std::tuple<arma::ivec2, arma::ivec2, arma::vec4> d;
+                    std::get<0>(d) = point;
 
                     float strength;
                     arma::ivec2 direction;
@@ -238,12 +239,12 @@ namespace module {
 
                     pSet.insert(point);
 
-                    // std::get<1>(d)  = point;
+                    std::get<1>(d)  = point;
 
-                    // float r = (strength / 30);
-                    // float b = 1 - (strength / 30);
-                    // std::get<2>(d)  = arma::vec4({r,0,b,1});
-                    // debug.push_back(d);
+                    float r = (strength / 30);
+                    float b = 1 - (strength / 30);
+                    std::get<2>(d)  = arma::vec4({r,0,b,1});
+                    debug.push_back(d);
                 }
 
                 // Go Anticlockwise
@@ -255,8 +256,8 @@ namespace module {
                         break;
                     }
 
-                    // std::tuple<arma::ivec2, arma::ivec2, arma::vec4> d;
-                    // std::get<0>(d) = point;
+                    std::tuple<arma::ivec2, arma::ivec2, arma::vec4> d;
+                    std::get<0>(d) = point;
 
                     float strength;
                     arma::ivec2 direction;
@@ -271,19 +272,19 @@ namespace module {
 
                     pSet.insert(point);
 
-                    // std::get<1>(d)  = point;
+                    std::get<1>(d)  = point;
 
-                    // float r = (strength / 30);
-                    // float b = 1 - (strength / 30);
-                    // std::get<2>(d)  = arma::vec4({r,0,b,1});
-                    // debug.push_back(d);
+                    float r = (strength / 30);
+                    float b = 1 - (strength / 30);
+                    std::get<2>(d)  = arma::vec4({r,0,b,1});
+                    debug.push_back(d);
                 }
             }
 
             // Put our set into the object
             classifiedImage.ballPoints.insert(classifiedImage.ballPoints.begin(), pSet.begin(), pSet.end());
-
-            // emit(drawVisionLines(debug));
+            // NUClear::log("Finished enhancing ball regions: number of points = ", pSet.size());
+            emit(drawVisionLines(debug));
         }
 
     }  // vision

@@ -186,6 +186,7 @@ namespace support {
             *objects.add_object() = visionObject;
 
             send(objects, 3, false, NUClear::clock::now());
+            // NUClear::log("Vision lines emitted");
         }));
 
         handles["lookup_table_diff"].push_back(on<Trigger<LookUpTableDiff>, Single, Priority::LOW>().then([this] (const LookUpTableDiff& tableDiff) {

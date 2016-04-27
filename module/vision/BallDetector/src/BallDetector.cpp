@@ -181,6 +181,8 @@ namespace vision {
             // } else {
             // }
 
+            // NUClear::log("Ballpoints.size() = ", ballPoints.size());
+
             auto ransacResults = Ransac<RansacCircleModel>::fitModels(ballPoints.begin()
                                                                     , ballPoints.end()
                                                                     , MINIMUM_POINTS_FOR_CONSENSUS
@@ -191,8 +193,11 @@ namespace vision {
 
             auto balls = std::make_unique<std::vector<Ball>>();
             balls->reserve(ransacResults.size());
+            log("ransacResults.size() = ", ransacResults.size());
 
             for(auto& result : ransacResults) {
+                log(__LINE__);
+
 
                 // THROWOUTS
                 // DOES HAVE INTERNAL GREEN
@@ -201,34 +206,41 @@ namespace vision {
                     continue;
                 }
 
+                log(__LINE__);
                 // DOES NOT TOUCH 3 SEED POINTS
                 arma::vec3 sDist({ std::numeric_limits<double>::max(), std::numeric_limits<double>::max(), std::numeric_limits<double>::max() });
 
                 // Loop through our seed points and find the minimum distance one
+                log(__LINE__);
                 for(uint i = 0; i < 3; ++i) {
                     for(auto& s : image.ballSeedPoints[i]) {
-                        double dist = std::fabs(result.model.radius - arma::norm(result.model.centre - arma::vec3({double(s[0]), double(s[1])})));
+                        double dist = std::fabs(result.model.radius - arma::norm(result.model.centre - arma::vec2({double(s[0]), double(s[1])})));
                         if(sDist[i] > dist) {
                             sDist[i] = dist;
                         }
                     }
                 }
                 // Check if our largest one is too far away
+                log(__LINE__);
                 if(arma::max(sDist) / result.model.radius > maximum_relative_seed_point_distance) {
                     continue;
                 }
 
                 // CENTRE OF BALL IS ABOVE THE HORIZON
+                log(__LINE__);
                 if(image.horizon.y(result.model.centre[0]) > result.model.centre[1]) {
                     continue;
                 }
 
                 // DO MEASUREMENTS
 
+                log(__LINE__);
                 std::vector<VisionObject::Measurement> measurements;
+                log(__LINE__);
                 measurements.reserve(2);
 
                 // Transform our centre into kinematics coordinates
+                log(__LINE__);
                 auto centre = imageToScreen(result.model.centre, image.dimensions);
 
                 // Get the 4 points around our circle
@@ -237,28 +249,39 @@ namespace vision {
                 auto left  = centre + arma::vec2({  result.model.radius, 0 });
                 auto right = centre + arma::vec2({ -result.model.radius, 0 });
 
+                log(__LINE__);
                 double cameraHeight = sensors.orientationCamToGround(2, 3);
 
                 // Get a unit vector pointing to the centre of the ball
+                log(__LINE__);
                 arma::vec3 ballCentreRay = arma::normalise(arma::normalise(getCamFromScreen(top, cam.focalLengthPixels))
                                                            + arma::normalise(getCamFromScreen(base, cam.focalLengthPixels)));
 
                 // Get the centre of our ball in screen space
+                log(__LINE__);
                 arma::vec2 ballCentreScreen = projectCamSpaceToScreen(ballCentreRay, cam.focalLengthPixels);
 
                 // Get our width based distance to the ball
+                log(__LINE__);
                 double widthDistance = widthBasedDistanceToCircle(field->ball_radius, top, base, cam.focalLengthPixels);
+                log(__LINE__);
                 arma::vec3 cameraPosition = sensors.orientationCamToGround.submat(0,3,2,3);
+                log(__LINE__);
                 arma::vec3 ballCentreGroundWidth = widthDistance * sensors.orientationCamToGround.submat(0,0,2,2) * ballCentreRay + cameraPosition;
+                log(__LINE__);
                 double ballCentreGroundWidthDistance = arma::norm(ballCentreGroundWidth);
+                log(__LINE__);
                 arma::mat ballCentreGroundWidthCov = arma::diagmat(arma::vec({
                     measurement_distance_variance_factor * ballCentreGroundWidthDistance,
                     measurement_bearing_variance,
                     measurement_elevation_variance }));
 
                 //compute velocity
+                log(__LINE__);
                 arma::mat widthVelCov = measurement_distance_variance_factor * ballCentreGroundWidthDistance * arma::eye(3,3);
+                log(__LINE__);
                 arma::vec3 widthVel;
+                log(__LINE__);
                 if(deltaT == 0) {
                     widthVel = arma::zeros(3);
                     widthVelCov = 1e5 * arma::eye(3,3);
@@ -269,25 +292,37 @@ namespace vision {
                     widthVel = arma::zeros(3);
                     log<NUClear::WARN>("Ball velocity frame dropped because of too much time between frames");
                 }
+                log(__LINE__);
                 lastFrame.widthBall = ballCentreGroundWidth;
                 //push back measurements
+                log(__LINE__);
                 arma::vec3 sphericalBallCentreGroundWidth = cartesianToSpherical(ballCentreGroundWidth);
+                log(__LINE__);
                 measurements.push_back({ sphericalBallCentreGroundWidth, ballCentreGroundWidthCov, widthVel, widthVelCov});
                 // 0.003505351, 0.001961638, 1.68276E-05
+                log(__LINE__);
                 emit(graph("ballCentreGroundWidth measurement", ballCentreGroundWidth(0), ballCentreGroundWidth(1), ballCentreGroundWidth(2)));
+                log(__LINE__);
                 emit(graph("ballCentreGroundWidth measurement (spherical)", measurements.back().position(0), measurements.back().position(1), measurements.back().position(2)));
 
                 // Project this vector to a plane midway through the ball
+                log(__LINE__);
                 Plane ballBisectorPlane({ 0, 0, 1 }, { 0, 0, field->ball_radius });
+                log(__LINE__);
                 arma::vec3 ballCentreGroundProj = projectCamToPlane(ballCentreRay, sensors.orientationCamToGround, ballBisectorPlane);
+                log(__LINE__);
                 double ballCentreGroundProjDistance = arma::norm(ballCentreGroundProj);
+                log(__LINE__);
                 arma::mat ballCentreGroundProjCov = arma::diagmat(arma::vec({
                     measurement_distance_variance_factor * ballCentreGroundProjDistance,
                     measurement_bearing_variance,
                     measurement_elevation_variance }));
                 //compute velocity
+                log(__LINE__);
                 arma::mat projVelCov = measurement_distance_variance_factor * ballCentreGroundWidthDistance * arma::eye(3,3);
+                log(__LINE__);
                 arma::vec3 projVel;
+                log(__LINE__);
                 if(deltaT == 0) {
                     projVel = arma::zeros(3);
                     projVelCov = 1e5 * arma::eye(3,3);
@@ -298,38 +333,52 @@ namespace vision {
                     projVel = arma::zeros(3);
                     log<NUClear::WARN>("Ball velocity frame dropped because of too much time between frames");
                 }
+                log(__LINE__);
                 lastFrame.projBall = ballCentreGroundProj;
                 //push back measurements
+                log(__LINE__);
                 arma::vec3 sphericalBallCentreGroundProj = cartesianToSpherical(ballCentreGroundProj);
+                log(__LINE__);
                 measurements.push_back({ sphericalBallCentreGroundProj, ballCentreGroundProjCov, projVel, projVelCov});
                 // 0.002357231 * 2, 2.20107E-05 * 2, 4.33072E-05 * 2,
+                log(__LINE__);
                 emit(graph("ballCentreGroundProj measurement", ballCentreGroundProj(0), ballCentreGroundProj(1), ballCentreGroundProj(2)));
+                log(__LINE__);
                 emit(graph("ballCentreGroundProj measurement (spherical)", measurements.back().position(0), measurements.back().position(1), measurements.back().position(2)));
 
                 /*
                  *  IF VALID BUILD OUR BALL
                  */
                 // TODO: if center above horizon, forget about it
+                log(__LINE__);
                 if(widthDistance > cameraHeight / 2.0
                     //Only build ball if disagreement not too high
                     && std::abs((sphericalBallCentreGroundWidth[0] - sphericalBallCentreGroundProj[0]) / sphericalBallCentreGroundProj[0]) < MAXIMUM_DISAGREEMENT_RATIO) {
                     Ball b;
 
                     // On screen visual shape
+                log(__LINE__);
                     b.circle.radius = result.model.radius;
+                log(__LINE__);
                     b.circle.centre = result.model.centre;
 
                     // Angular positions from the camera
+                log(__LINE__);
                     b.screenAngular = arma::atan(cam.pixelsToTanThetaFactor % ballCentreScreen);
+                log(__LINE__);
                     b.angularSize = { getParallaxAngle(left, right, cam.focalLengthPixels), getParallaxAngle(top, base, cam.focalLengthPixels) };
 
                     // Move our measurements
+                log(__LINE__);
                     b.measurements = std::move(measurements);
 
+                log(__LINE__);
                     b.sensors = image.sensors;
                     b.classifiedImage = rawImage;
                     balls->push_back(std::move(b));
+                log(__LINE__);
                 }
+                log(__LINE__);
             }
 
             for(auto a = balls->begin(); a != balls->end(); ++a) {
