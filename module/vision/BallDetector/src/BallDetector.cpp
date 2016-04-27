@@ -202,6 +202,7 @@ namespace vision {
                 // DOES HAVE INTERNAL GREEN
                 float greenRatio = approximateCircleGreenRatio(result.model, *(image.image), lut);
                 if(greenRatio > green_ratio_threshold){
+                    // log(__LINE__,"Throwout: greenRatio > green_ratio_threshold");
                     continue;
                 }
 
@@ -219,11 +220,13 @@ namespace vision {
                 }
                 // Check if our largest one is too far away
                 if(arma::max(sDist) / result.model.radius > maximum_relative_seed_point_distance) {
+                    // log(__LINE__,"Throwout: arma::max(sDist) / result.model.radius > maximum_relative_seed_point_distance)");
                     continue;
                 }
 
                 // CENTRE OF BALL IS ABOVE THE HORIZON
                 if(image.horizon.y(result.model.centre[0]) > result.model.centre[1]) {
+                    // log(__LINE__,"Throwout: image.horizon.y(result.model.centre[0]) > result.model.centre[1])");
                     continue;
                 }
 
