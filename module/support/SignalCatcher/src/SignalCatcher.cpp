@@ -27,7 +27,7 @@ namespace module {
         volatile bool userRequestedShutdown = false;
 
         // Initialize our powerplant variable
-        NUClear::PowerPlant* SignalCatcher::POWER_PLANT = nullptr;
+        NUClear::PowerPlant* POWER_PLANT = nullptr;
 
         void sigint(int sig) {
 
