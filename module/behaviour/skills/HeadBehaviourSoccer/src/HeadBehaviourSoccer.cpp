@@ -268,7 +268,6 @@ namespace module {
                         std::unique_ptr<HeadCommand> command = std::make_unique<HeadCommand>();
                         command->yaw = direction[0];
                         command->pitch = direction[1];
-                        log("New goal = ",direction[0], direction[1]);
                         command->robotSpace = search;
                         emit(std::move(command));
                     }
