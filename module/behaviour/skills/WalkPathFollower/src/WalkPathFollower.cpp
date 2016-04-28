@@ -325,16 +325,35 @@ namespace skills {
     }
 
     WalkCommand WalkPathFollower::walkBetweenNear(const Transform2D& currentState, const Transform2D& targetState) {
-        // Angle between current heading and target heading
-        double walkAboutAngle = utility::math::angle::signedDifference(targetState.angle(), currentState.angle());
-        int angleSign = (walkAboutAngle < 0) ? -1 : 1;
-        // TODO: Consider using a smaller, non-constant speed.
+        Transform2D localTarget = currentState.worldToLocal(targetState); // creating local target first
+        int angleSign = (localTarget.angle() < 0) ? -1 : 1; // angle must be normalised.
+
         double rotationSpeed = angleSign * cfg_.walk_about_rotational_speed;
+        arma::vec2 translationVec = arma::normalise(localTarget.xy());
+
+        double translationAngle = utility::math::angle::vectorToBearing(translationVec);
+
+        double translationSpeed = (1 - std::abs(translationAngle)*(0.25/M_PI)); 
+        
+        arma::vec2 translationVelocity = translationVec * translationSpeed;
+
+        Transform2D velocity = {translationVelocity, rotationSpeed};
+
+        WalkCommand command(subsumptionId, velocity);
+
+        return command;
+
+
+        // Angle between current heading and target heading
+        /// double walkAboutAngle = utility::math::angle::signedDifference(targetState.angle(), currentState.angle());
+        /// int angleSign = (walkAboutAngle < 0) ? -1 : 1;
+        // TODO: Consider using a smaller, non-constant speed.
+        /// double rotationSpeed = angleSign * cfg_.walk_about_rotational_speed;
 
         // if (std::abs(walkAboutAngle) < M_PI*0.125) {
-            Transform2D velocity = {cfg_.walk_to_near_speed * arma::normalise(targetState.xy() - currentState.xy()), rotationSpeed}; //TODO make 20 seconds the variable update_frequency
-            WalkCommand command(subsumptionId, velocity);
-            return command;
+        ///     Transform2D velocity = {cfg_.walk_to_near_speed * arma::normalise(targetState.xy() - currentState.xy()), rotationSpeed}; //TODO make 20 seconds the variable update_frequency
+        ///     WalkCommand command(subsumptionId, velocity);
+        ///     return command;
         // } else {
         //     arma::vec2 strafe = { std::max(cfg_.walk_about_x_strafe, 0.0), -angleSign * cfg_.walk_about_y_strafe };
 
