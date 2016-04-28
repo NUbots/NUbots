@@ -14,44 +14,44 @@ def register(command):
 
     # Generate module subcommand
     generate_command = subcommands.add_parser('generate', help='Generate a new NUClear module based on a template')
-    generate_command.add_argument('path', metavar='path', help='a path to the new module (from the modules directory)')
+    generate_command.add_argument('path', metavar='path', help='a path to the new module (from the module directory)')
 
-def run(path='', **kwargs):
-    if os.path.exists('modules/{}'.format(path)):
-        print("The path provided already exists.")
-        print("Module generation aborted.")
-    else:
+def run(path, **kwargs):
+    if os.path.exists('module/{}'.format(path)):
+        sys.stderr.write('The path provided already exists.\n')
+        sys.stderr.write('Module generation aborted.')
+        sys.exit(1)
 
-        # Calculate all of our file paths
-        path = 'modules/{}'.format(path)
-        src_path = '{}/src'.format(path)
-        tests_path = '{}/tests'.format(path)
-        config_path = '{}/config'.format(path)
-        module_name = path.split('/')[-1]
+    # Calculate all of our file paths
+    path = 'module/{}'.format(path)
+    src_path = '{}/src'.format(path)
+    tests_path = '{}/tests'.format(path)
+    config_path = '{}/data/config'.format(path)
+    module_name = path.split('/')[-1]
 
-        # Create the required directories
-        os.makedirs(path)
-        os.makedirs(src_path)
-        os.makedirs(tests_path)
-        os.makedirs(config_path)
+    # Create the required directories
+    os.makedirs(path)
+    os.makedirs(src_path)
+    os.makedirs(tests_path)
+    os.makedirs(config_path)
 
-        # Split our provided path
-        parts = path.split('/')
+    # Split our provided path
+    parts = path.split('/')
 
-        # Write all of our files
-        with open('{}/CMakeLists.txt'.format(path), "w") as output:
-            output.write(generate_cmake(parts))
-        with open('{}/README.md'.format(path), "w") as output:
-            output.write(generate_readme(parts))
-        with open('{0}/{1}.h'.format(src_path, module_name), "w") as output:
-            output.write(generate_header(parts))
-        with open('{0}/{1}.cpp'.format(src_path, module_name), "w") as output:
-            output.write(generate_cpp(parts))
-        with open('{0}/{1}Test.cpp'.format(tests_path, module_name), "w") as output:
-            output.write(generate_test(parts))
+    # Write all of our files
+    with open('{}/CMakeLists.txt'.format(path), "w") as output:
+        output.write(generate_cmake(parts))
+    with open('{}/README.md'.format(path), "w") as output:
+        output.write(generate_readme(parts))
+    with open('{0}/{1}.h'.format(src_path, module_name), "w") as output:
+        output.write(generate_header(parts))
+    with open('{0}/{1}.cpp'.format(src_path, module_name), "w") as output:
+        output.write(generate_cpp(parts))
+    with open('{0}/{1}Test.cpp'.format(tests_path, module_name), "w") as output:
+        output.write(generate_test(parts))
 
-        with open('{0}/{1}.yaml'.format(config_path, module_name), 'a'):
-            pass
+    with open('{0}/{1}.yaml'.format(config_path, module_name), 'a'):
+        pass
 
 
 def generate_cmake(parts):
@@ -62,25 +62,6 @@ def generate_cmake(parts):
 
 def generate_header(parts):
     template = textwrap.dedent("""\
-        /*
-         * This file is part of NUbots Codebase.
-         *
-         * The NUbots Codebase is free software: you can redistribute it and/or modify
-         * it under the terms of the GNU General Public License as published by
-         * the Free Software Foundation, either version 3 of the License, or
-         * (at your option) any later version.
-         *
-         * The NUbots Codebase is distributed in the hope that it will be useful,
-         * but WITHOUT ANY WARRANTY; without even the implied warranty of
-         * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-         * GNU General Public License for more details.
-         *
-         * You should have received a copy of the GNU General Public License
-         * along with the NUbots Codebase.  If not, see <http://www.gnu.org/licenses/>.
-         *
-         * Copyright {year} NUbots <nubots@nubots.net>
-         */
-
         #ifndef {define}
         #define {define}
 
@@ -100,33 +81,13 @@ def generate_header(parts):
         #endif  // {define}
         """)
 
-    return template.format(year=datetime.datetime.now().year
-                         , define='{}_H'.format('_'.join([p.upper() for p in parts]))
+    return template.format(define='{}_H'.format('_'.join([p.upper() for p in parts]))
                          , className=parts[-1]
                          , openNamespace = '\n'.join(['namespace {} {{'.format(x) for x in parts[:-1]])
                          , closeNamespace = '\n'.join('}' * (len(parts) - 1)))
 
 def generate_cpp(parts):
     template = textwrap.dedent("""\
-        /*
-         * This file is part of NUbots Codebase.
-         *
-         * The NUbots Codebase is free software: you can redistribute it and/or modify
-         * it under the terms of the GNU General Public License as published by
-         * the Free Software Foundation, either version 3 of the License, or
-         * (at your option) any later version.
-         *
-         * The NUbots Codebase is distributed in the hope that it will be useful,
-         * but WITHOUT ANY WARRANTY; without even the implied warranty of
-         * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-         * GNU General Public License for more details.
-         *
-         * You should have received a copy of the GNU General Public License
-         * along with the NUbots Codebase.  If not, see <http://www.gnu.org/licenses/>.
-         *
-         * Copyright {year} NUbots <nubots@nubots.net>
-         */
-
         #include "{className}.h"
 
         #include "extension/Configuration.h"
@@ -145,8 +106,7 @@ def generate_cpp(parts):
         {closeNamespace}
         """)
 
-    return template.format(year=datetime.datetime.now().year
-                         , className=parts[-1]
+    return template.format(className=parts[-1]
                          , openNamespace = '\n'.join(['namespace {} {{'.format(x) for x in parts[:-1]])
                          , closeNamespace = '\n'.join(['}' for x in parts[:-1]]))
 
@@ -175,25 +135,6 @@ def generate_readme(parts):
 
 def generate_test(parts):
     template = textwrap.dedent("""\
-        /*
-         * This file is part of NUbots Codebase.
-         *
-         * The NUbots Codebase is free software: you can redistribute it and/or modify
-         * it under the terms of the GNU General Public License as published by
-         * the Free Software Foundation, either version 3 of the License, or
-         * (at your option) any later version.
-         *
-         * The NUbots Codebase is distributed in the hope that it will be useful,
-         * but WITHOUT ANY WARRANTY; without even the implied warranty of
-         * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-         * GNU General Public License for more details.
-         *
-         * You should have received a copy of the GNU General Public License
-         * along with the NUbots Codebase.  If not, see <http://www.gnu.org/licenses/>.
-         *
-         * Copyright {year} NUbots <nubots@nubots.net>
-         */
-
         // Uncomment this line when other test files are added
         //#define CATCH_CONFIG_MAIN  // This tells Catch to provide a main() - only do this in one cpp file
         //#include <catch.hpp>
@@ -202,6 +143,6 @@ def generate_test(parts):
         int main() {{ return 0; }}
         """)
 
-    return template.format(year=datetime.datetime.now().year)
+    return template.format()
 
 

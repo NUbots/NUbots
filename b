@@ -1,23 +1,31 @@
 #!/usr/bin/python
 
 import sys
+import os
 import argparse
 import pkgutil
 
 # Don't make .pyc files
 sys.dont_write_bytecode = True
 
-# Add tools/build to our python path
-sys.path.append('tools/build')
+tools_path = os.path.dirname(os.path.realpath(__file__)) + os.sep + 'tools'
+
+# Add our builtin tools to the path
+sys.path.append(tools_path)
+
+# Add add tools to the path in case the user has some in their pwd
+sys.path.append('tools')
 
 if __name__ == '__main__':
 
     # Root parser information
     command = argparse.ArgumentParser(description='This script is an optional helper script for performing common tasks for working with the NUClear roles system.')
     subcommands = command.add_subparsers(dest='command')
+    subcommands.help = "The command to run from the script. See each help for more information."
 
     # Get all of the packages that are in the build tools
-    modules = pkgutil.iter_modules(path=['tools/build'])
+    print tools_path
+    modules = pkgutil.iter_modules(path=[tools_path])
 
     # Our tools dictionary
     tools = {}
@@ -33,12 +41,8 @@ if __name__ == '__main__':
         # Let the tool register it's arguments
         register(subcommands.add_parser(module_name))
 
-        # associate our module_name with this tool
+        # Associate our module_name with this tool
         tools[module_name] = tool
-
-        # Call our register function with the subcommands thing
-
-        # What the register function returns will be the "subcommands" to forward to it
 
     # Parse our arguments
     args = command.parse_args()
