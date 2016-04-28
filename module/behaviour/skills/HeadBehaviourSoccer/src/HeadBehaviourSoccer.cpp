@@ -353,7 +353,7 @@ namespace module {
 
                             //New absolute referencing 
                             arma::vec2 angles = p * M_PI / 180;
-                            if(sensors.orientation.pitch() < pitch_plan_threshold){
+                            if(std::fabs(sensors.orientation.pitch()) < pitch_plan_threshold){
                                 arma::vec3 lookVectorFromHead = sphericalToCartesian({1,angles[0],angles[1]});//This is an approximation relying on the robots small FOV
 
 
