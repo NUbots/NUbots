@@ -25,14 +25,14 @@ searches:
     search_type: "LOST"
     #Points in absolute angle (degrees) relative to the horizon and x-xis of robot
     points:
-      - [0, -45]
+      - [0, 45]
       - [0, 0]
       - [-45, 0]
       - [-90, 0]
       - [-45, 0]
       - [-45, 0]
       - [0, 0]
-      - [0, -70]
+      - [0, 60]
       - [0, 0]
       - [45,  0]
       - [45,  0]

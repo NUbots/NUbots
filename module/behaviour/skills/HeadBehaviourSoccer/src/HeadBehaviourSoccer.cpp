@@ -140,6 +140,11 @@ namespace module {
                     searchType = p.searchType;
                 });
 
+                auto initialPriority = std::make_unique<SoccerObjectPriority>();
+                initialPriority->ball = 1;
+                emit(initialPriority);
+
+
                 on<Trigger<Sensors>,
                     Optional<With<std::vector<Ball>>>,
                     Optional<With<std::vector<Goal>>>,
@@ -263,6 +268,7 @@ namespace module {
                         std::unique_ptr<HeadCommand> command = std::make_unique<HeadCommand>();
                         command->yaw = direction[0];
                         command->pitch = direction[1];
+                        log("New goal = ",direction[0], direction[1]);
                         command->robotSpace = search;
                         emit(std::move(command));
                     }
@@ -296,7 +302,6 @@ namespace module {
                 if(fixationPoints.size() <= 0){
                     log("FOUND NO POINTS TO LOOK AT! - ARE THE SEARCHES PROPERLY CONFIGURED IN HEADBEHAVIOURSOCCER.YAML?");
                 }
-
                 auto currentPos = arma::vec2({sensors.servos.at(int(ServoID::HEAD_YAW)).presentPosition,sensors.servos.at(int(ServoID::HEAD_PITCH)).presentPosition});
                 if(!search){
                     for(auto& p : fixationPoints){
@@ -347,14 +352,14 @@ namespace module {
 
                             //New absolute referencing 
                             arma::vec2 angles = p * M_PI / 180;
-                            emit(graph("Raw Head Lost Angles", angles));
                             arma::vec3 lookVectorFromHead = sphericalToCartesian({1,angles[0],angles[1]});//This is an approximation relying on the robots small FOV
+
+
+                            //TODO: Fix trying to look underneath and behind self!!
+
+
                             arma::vec3 adjustedLookVector = Rotation3D::createRotationY(sensors.orientation.pitch()) * lookVectorFromHead;
-                            std::cout << "HeadBehaviourSoccer::getSearchPoints: sensors.orientation.pitch = " <<  sensors.orientation.pitch() << std::endl;
-                            std::cout << "HeadBehaviourSoccer::getSearchPoints: lookVectorFromHead = " <<  lookVectorFromHead << std::endl;
-                            std::cout << "HeadBehaviourSoccer::getSearchPoints: adjustedLookVector = " <<  adjustedLookVector << std::endl;
                             std::vector< std::pair<ServoID, float> > goalAngles = calculateHeadJoints<DarwinModel>(adjustedLookVector);
-                            std::cout << "HeadBehaviourSoccer::getSearchPoints: goalAngles = " <<  goalAngles[0].second << " " << goalAngles[1].second << std::endl;
 
                             for(auto& angle : goalAngles){
                                 if(angle.first == ServoID::HEAD_PITCH){
@@ -363,7 +368,7 @@ namespace module {
                                     angles[0] = angle.second;
                                 }
                             }
-                            emit(graph("IMUSpace Head Lost Angles", angles));
+                            // emit(graph("IMUSpace Head Lost Angles", angles));
 
                             scaledResults.push_back(angles);
                         }
