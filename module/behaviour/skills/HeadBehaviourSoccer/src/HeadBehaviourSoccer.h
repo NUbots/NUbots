@@ -97,22 +97,22 @@ namespace module {
                 //State variables
                 Searcher<arma::vec2> headSearcher;
 
-                int ballPriority;
-                int goalPriority;
-                message::behaviour::SearchType searchType;
+                int ballPriority = 0;
+                int goalPriority = 0;
+                message::behaviour::SearchType searchType = message::behaviour::SearchType::LOST;
 
                 NUClear::clock::time_point lastPlanUpdate;
                 NUClear::clock::time_point timeLastObjectSeen;
 
                 arma::vec2 lastCentroid;
 
-                bool lostAndSearching;
-                bool lostLastTime;
+                bool lostAndSearching = false;
+                bool lostLastTime = false;
 
-                bool isGettingUp;
+                bool isGettingUp = false;
 
-                int lastBallPriority;
-                int lastGoalPriority;
+                int lastBallPriority = 0;
+                int lastGoalPriority = 0;
 
             public:
                 explicit HeadBehaviourSoccer(std::unique_ptr<NUClear::Environment> environment);

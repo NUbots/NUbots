@@ -55,6 +55,7 @@ namespace module {
         HeadController::HeadController(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)), id(size_t(this) * size_t(this) - size_t(this)) {
 
             currentAngles = {0,0};//TODO: set this to current motor positions
+            goalAngles = {0,0};//TODO: set this to current motor positions
             //do a little configurating
             on<Configuration>("HeadController.yaml").then("Head Controller - Config", [this] (const Configuration& config) {
                 //Gains

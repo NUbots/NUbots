@@ -83,6 +83,10 @@ namespace module {
         			// points = newPoints;
 	        	}
 
+	        	int size(){
+	        		return points.size();
+	        	}
+
         		static bool pair_comparator(const std::pair<int, T>& a, const std::pair<int, T>& b){
 	        		return arma::norm(a.second) <  arma::norm(b.second);
 	        	}

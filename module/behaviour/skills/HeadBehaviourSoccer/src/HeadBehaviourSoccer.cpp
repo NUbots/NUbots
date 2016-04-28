@@ -211,8 +211,14 @@ namespace module {
                     bool lost = fixationObjects.size() <= 0;
                     bool found = !lost && lostLastTime;
                     //Do we need to update our plan?
-                    bool updatePlan = found || (lastBallPriority != ballPriority) || (lastGoalPriority != goalPriority) ; //bool(Priorities have changed)
+                    bool updatePlan = headSearcher.size() <= 1 || found || (lastBallPriority != ballPriority) || (lastGoalPriority != goalPriority) ; //bool(Priorities have changed)
 
+                    // log("updatePlan", updatePlan);
+                    // log("lost", lost);
+                    // log("isGettingUp", isGettingUp);
+                    // log("searchType", int(searchType));
+                    // log("headSearcher.size()", headSearcher.size());
+                    
                     //Get robot pose
                     Rotation3D orientation, headToBodyRotation;
                     if(!lost){
@@ -341,11 +347,14 @@ namespace module {
             */
             std::vector<arma::vec2> HeadBehaviourSoccer::getSearchPoints(std::vector<VisionObject> fixationObjects, SearchType sType, const Sensors& sensors){
                     //If there is nothing of interest, we search fot points of interest
+                    // log("getting search points");
                     if(fixationObjects.size() == 0){
+                        // log("getting search points 2");
                         //Lost searches are normalised in terms of the FOV
                         std::vector<arma::vec2> scaledResults;
                         //scaledResults.push_back(utility::motion::kinematics::headAnglesToSeeGroundPoint<DarwinModel>(lastLocBall.position,sensors));
                         for(auto& p : searches[sType]){
+                            // log("adding search point", p.t());
                             //old angles thing
                             //Interpolate between max and min allowed angles with -1 = min and 1 = max
                             //auto angles = arma::vec2({((max_yaw - min_yaw) * p[0] + max_yaw + min_yaw) / 2,
