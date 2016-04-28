@@ -10,10 +10,12 @@ import sys
 import re
 import os
 import textwrap
+import itertools
 
 role_name = sys.argv[1]
-module_path = sys.argv[2]
-role_modules = sys.argv[3:]
+banner_file = sys.argv[2]
+module_path = sys.argv[3]
+role_modules = sys.argv[4:]
 
 # Open our output role file
 with open(role_name, 'w') as file:
@@ -35,65 +37,87 @@ with open(role_name, 'w') as file:
         header = re.sub(r'([^\/]+)$', r'\1/src/\1.h', header)
         file.write('#include "{}/{}"\n'.format(module_path, header))
 
-    # Add our main function.
+    # Add our main function and include headers
     main = textwrap.dedent("""
         #include "utility/strutil/ansi.h"
         #include "utility/strutil/banner.h"
 
+        using utility::strutil::Colour;
+
         int main(int argc, char** argv) {
-
-            auto white  = utility::strutil::ANSISGR<
-                          utility::strutil::ANSICode::BRIGHT,
-                          utility::strutil::ANSICode::GRAY,
-                          utility::strutil::ANSICode::BLACK_BACKGROUND>();
-            auto yellow = utility::strutil::ANSISGR<
-                          utility::strutil::ANSICode::BRIGHT,
-                          utility::strutil::ANSICode::YELLOW,
-                          utility::strutil::ANSICode::BLACK_BACKGROUND>();
-
-
-            std::cout << std::endl << std::endl;
-            std::cout << white << "######                    ######  ######           ######  " << yellow << "####################" << std::endl;
-            std::cout << white << "#######                   ######  ######           ######  " << yellow << "####################" << std::endl;
-            std::cout << white << "########                  ######  ######           ######  " << yellow << "###     ####     ###" << std::endl;
-            std::cout << white << "###;)####                 ######  ######           ######  " << yellow << "###     ####     ###" << std::endl;
-            std::cout << white << "##########                ######  ######           ######  " << yellow << " ########  ######## " << std::endl;
-            std::cout << white << "###########               ######  ######           ######  " << yellow << "  ######    ######  " << std::endl;
-            std::cout << white << "############              ######  ######           ######  " << yellow << "                    " << std::endl;
-            std::cout << white << "###### ######             ######  ######           ######  " << yellow << "  ################  " << std::endl;
-            std::cout << white << "######  ######            ######  ######           ######  " << yellow << " ################## " << std::endl;
-            std::cout << white << "######   ######           ######  ######           ######  " << yellow << "###              ###" << std::endl;
-            std::cout << white << "######    ######          ######  ######           ######  " << yellow << "###              ###" << std::endl;
-            std::cout << white << "######     ######         ######  ######           ######  " << yellow << " ################## " << std::endl;
-            std::cout << white << "######      ######        ######  ######           ######  " << yellow << "  ################  " << std::endl;
-            std::cout << white << "######       ######       ######  ######           ######  " << yellow << "                    " << std::endl;
-            std::cout << white << "######        ######      ######  ######           ######  " << yellow << "                 ###" << std::endl;
-            std::cout << white << "######         ######     ######  ######           ######  " << yellow << "                 ###" << std::endl;
-            std::cout << white << "######          ######    ######  ######           ######  " << yellow << "####################" << std::endl;
-            std::cout << white << "######           ######   ######  ######           ######  " << yellow << "####################" << std::endl;
-            std::cout << white << "######            ######  ######  ######           ######  " << yellow << "                 ###" << std::endl;
-            std::cout << white << "######             ###### ######  ######           ######  " << yellow << "                 ###" << std::endl;
-            std::cout << white << "######              ############  ######           ######  " << yellow << "                    " << std::endl;
-            std::cout << white << "######               ###########  ######           ######  " << yellow << "  ###      #######  " << std::endl;
-            std::cout << white << "######                ##########  ######           ######  " << yellow << " ###      ######### " << std::endl;
-            std::cout << white << "######                 #########  ######           ######  " << yellow << "###      ###     ###" << std::endl;
-            std::cout << white << "######                  ########   #####################   " << yellow << "###     ###      ###" << std::endl;
-            std::cout << white << "######                   #######     #################     " << yellow << " #########      ### " << std::endl;
-            std::cout << white << "######                    ######       #############       " << yellow << "  #######      ###  " << std::endl;
-            std::cout << std::endl;
-
         """)
-    file.write("int main(int argc, char** argv) {")
+    file.write(main)
 
+    # Read our banner file
+    with open(banner_file, 'r') as banner_file:
+        banner = banner_file.read().split('\n')
 
+    # Add our banner
+    for banner_line in banner:
 
+        # Add the initial cout
+        file.write('    std::cout')
+
+        # Split our line into sections for colours
+        sections = [[k,len(list(g))] for k, g in itertools.groupby(banner_line)]
+
+        for section in sections:
+
+            # If it does not have colour print
+            if section[0] in '# ':
+                file.write(' << "' + (section[0] * section[1]) + '"')
+            # Otherwise print the colour and then the hashes
+            else:
+                if section[0] in 'k':     # black
+                    file.write(' << Colour::black')
+                elif section[0] in 'K':   # darkgrey
+                    file.write(' << Colour::brightblack')
+                elif section[0] in 'r':   # darkred
+                    file.write(' << Colour::red')
+                elif section[0] in 'R':   # red
+                    file.write(' << Colour::brightred')
+                elif section[0] in 'g':   # darkgreen
+                    file.write(' << Colour::green')
+                elif section[0] in 'G':   # green
+                    file.write(' << Colour::brightgreen')
+                elif section[0] in 'y':   # darkyellow
+                    file.write(' << Colour::yellow')
+                elif section[0] in 'Y':   # yellow
+                    file.write(' << Colour::brightyellow')
+                elif section[0] in 'b':   # darkblue
+                    file.write(' << Colour::blue')
+                elif section[0] in 'B':   # blue
+                    file.write(' << Colour::brightblue')
+                elif section[0] in 'm':   # darkmagenta
+                    file.write(' << Colour::magenta')
+                elif section[0] in 'M':   # magenta
+                    file.write(' << Colour::brightmagenta')
+                elif section[0] in 'c':   # darkcyan
+                    file.write(' << Colour::cyan')
+                elif section[0] in 'C':   # cyan
+                    file.write(' << Colour::brightcyan')
+                elif section[0] in 'w':   # lightgrey
+                    file.write(' << Colour::gray')
+                elif section[0] in 'W':   # white
+                    file.write(' << Colour::brightgray')
+                else:
+                    print "The banner file contains an invalid character", section
+                    exit(1)
+
+                # Write the actual banner text
+                file.write(' << "' + ('#' * section[1]) + '"')
+
+        file.write(' << std::endl;\n');
+
+    # Insert banner for the name of the executing role
     rolebanner = '    std::cout << utility::strutil::banner("{0}");\n    std::cout << std::endl;\n'.format(os.path.splitext(os.path.basename(role_name))[0])
-    # file.write(rolebanner)
+    file.write(rolebanner)
 
     start = """
 
     NUClear::PowerPlant::Configuration config;
-    config.threadCount = 4;
+    unsigned int nThreads = std::thread::hardware_concurrency();
+    config.threadCount = nThreads >= 4 ? nThreads : 4;
 
     NUClear::PowerPlant plant(config, argc, const_cast<const char**>(argv));
 """

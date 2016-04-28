@@ -17,10 +17,11 @@ FUNCTION(NUCLEAR_ROLE)
         COMMAND ${PYTHON_EXECUTABLE}
         ARGS    "${CMAKE_CURRENT_SOURCE_DIR}/generate_role.py"
                 "${role}.cpp"
+                ${NUCLEAR_ROLE_BANNER_FILE}
                 ${NUCLEAR_MODULE_DIR}
                 ${role_modules}
         COMMENT "Generating the ${role} role"
-        DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/generate_role.py")
+        DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/generate_role.py" ${NUCLEAR_ROLE_BANNER_FILE})
 
     # The role cpp files are generated
     SET_SOURCE_FILES_PROPERTIES(${role}.cpp PROPERTIES GENERATED TRUE)
