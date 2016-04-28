@@ -44,9 +44,6 @@ namespace module {
 
             /// Our static PowerPlant variable that we use to shutdown the system
             static NUClear::PowerPlant* POWER_PLANT;
-
-            /// This boolean is set to true if the user sends sigint, the second time this is sent exit(1) is called
-            static volatile bool userRequestedShutdown;
         };
 
     }  // support

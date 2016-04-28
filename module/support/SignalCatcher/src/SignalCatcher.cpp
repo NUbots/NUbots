@@ -24,7 +24,7 @@ namespace module {
     namespace support {
 
         // Set our initial shutdown request state
-        volatile bool SignalCatcher::userRequestedShutdown = false;
+        volatile bool userRequestedShutdown = false;
 
         // Initialize our powerplant variable
         NUClear::PowerPlant* SignalCatcher::POWER_PLANT = nullptr;
@@ -77,7 +77,10 @@ namespace module {
             sigaction(SIGABRT, &action, nullptr);
 
             // On sigint run the sigint handler
-            std::signal(SIGINT, &SignalCatcher::sigintHandler);
+            std::memset(&action, 0, sizeof(action));
+            action.sa_handler = sigint;
+            action.sa_flags = SA_NODEFER;
+            sigaction(SIGINT, &action, nullptr);
         }
 
     }  // support
