@@ -82,7 +82,7 @@ namespace module {
                     updatePriority(EXECUTION_PRIORITY);
                 });
 
-                on<Trigger<KillGetup>>([this] {
+                on<Trigger<KillGetup>>().then([this] {
                     gettingUp = false;
                     updatePriority(0);
                     fallenCheck.enable();
@@ -101,6 +101,7 @@ namespace module {
                     [this] (const std::set<ServoID>& servoSet) {
                         //HACK 2014 Jake Fountain, Trent Houliston
                         //TODO track set limbs and wait for all to finish
+                        log("Checking ankles: ", servoSet.find(ServoID::L_ANKLE_PITCH) != servoSet.end(), servoSet.find(ServoID::R_ANKLE_PITCH) != servoSet.end());
                         if(servoSet.find(ServoID::L_ANKLE_PITCH) != servoSet.end() ||
                            servoSet.find(ServoID::R_ANKLE_PITCH) != servoSet.end()) {
                             emit(std::make_unique<KillGetup>());
