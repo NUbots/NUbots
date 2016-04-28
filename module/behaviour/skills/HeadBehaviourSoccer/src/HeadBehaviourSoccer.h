@@ -75,12 +75,14 @@ namespace module {
                 float max_pitch;
                 float min_pitch;
 
+
                 float replan_angle_threshold;
                 utility::math::matrix::Rotation3D lastPlanOrientation;
 
                 message::input::CameraParameters cam;
 
                 //CONFIG from HeadBehaviourSoccer.yaml
+                float pitch_plan_threshold;
                 double fractional_view_padding;
                 float search_timeout_ms;
                 float fractional_angular_update_threshold;

@@ -105,6 +105,8 @@ namespace module {
 
                     replan_angle_threshold = config["replan_angle_threshold"].as<float>();
 
+                    pitch_plan_threshold = config["pitch_plan_threshold"].as<float>() * M_PI / 180.0f;
+
                     //Load searches:
                     for(auto& search : config["searches"]){
                         SearchType s = searchTypeFromString(search["search_type"].as<std::string>());
@@ -351,20 +353,22 @@ namespace module {
 
                             //New absolute referencing 
                             arma::vec2 angles = p * M_PI / 180;
-                            arma::vec3 lookVectorFromHead = sphericalToCartesian({1,angles[0],angles[1]});//This is an approximation relying on the robots small FOV
+                            if(sensors.orientation.pitch() < pitch_plan_threshold){
+                                arma::vec3 lookVectorFromHead = sphericalToCartesian({1,angles[0],angles[1]});//This is an approximation relying on the robots small FOV
 
 
-                            //TODO: Fix trying to look underneath and behind self!!
+                                //TODO: Fix trying to look underneath and behind self!!
 
 
-                            arma::vec3 adjustedLookVector = Rotation3D::createRotationY(sensors.orientation.pitch()) * lookVectorFromHead;
-                            std::vector< std::pair<ServoID, float> > goalAngles = calculateHeadJoints<DarwinModel>(adjustedLookVector);
+                                arma::vec3 adjustedLookVector = Rotation3D::createRotationY(sensors.orientation.pitch()) * lookVectorFromHead;
+                                std::vector< std::pair<ServoID, float> > goalAngles = calculateHeadJoints<DarwinModel>(adjustedLookVector);
 
-                            for(auto& angle : goalAngles){
-                                if(angle.first == ServoID::HEAD_PITCH){
-                                    angles[1] = angle.second;
-                                } else if(angle.first == ServoID::HEAD_YAW){
-                                    angles[0] = angle.second;
+                                for(auto& angle : goalAngles){
+                                    if(angle.first == ServoID::HEAD_PITCH){
+                                        angles[1] = angle.second;
+                                    } else if(angle.first == ServoID::HEAD_YAW){
+                                        angles[0] = angle.second;
+                                    }
                                 }
                             }
                             // emit(graph("IMUSpace Head Lost Angles", angles));

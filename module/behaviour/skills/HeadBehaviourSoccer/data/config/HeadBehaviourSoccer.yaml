@@ -13,6 +13,9 @@ fixation_time_ms: 750
 #Time before replanning of search when already searching
 replan_angle_threshold: 0.5
 
+#Threshold for compensating for body pitch
+pitch_plan_threshold: 20
+
 initial:
   priority:
     ball: 1
