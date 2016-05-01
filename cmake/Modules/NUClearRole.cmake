@@ -38,7 +38,7 @@ FUNCTION(NUCLEAR_ROLE)
     FOREACH(module_target ${role_module_targets})
         INCLUDE_DIRECTORIES($<TARGET_PROPERTY:${module_target},INCLUDE_DIRECTORIES>)
     ENDFOREACH(module_target)
-    
+
     # Set our output directory to be bin
     SET_PROPERTY(TARGET ${role} PROPERTY RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin/")
 
