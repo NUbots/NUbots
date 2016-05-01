@@ -14,25 +14,31 @@
  * You should have received a copy of the GNU General Public License
  * along with the NUbots Codebase.  If not, see <http://www.gnu.org/licenses/>.
  *
- * Copyright 2015 NUbots <nubots@nubots.net>
+ * Copyright 2016 NUbots <nubots@nubots.net>
  */
 
-#ifndef MODULES_SUPPORT_VIRTUALCAMERA_H
-#define MODULES_SUPPORT_VIRTUALCAMERA_H
+#ifndef MODULE_BEHAVIOUR_NUPRESENCESERVER_H
+#define MODULE_BEHAVIOUR_NUPRESENCESERVER_H
 
 #include <nuclear>
+#include "utility/math/matrix/Transform3D.h"
 
 namespace module {
-namespace support {
+namespace behaviour {
 
-    class VirtualCamera : public NUClear::Reactor {
-    	ReactionHandle emitImageHandle;
+    class NUPresenceServer : public NUClear::Reactor {
+    private:
+    	utility::math::matrix::Transform3D robot_to_head;
+        float robot_to_head_scale;
+        
+        bool reliable;
+        utility::math::matrix::Transform3D camera_to_robot;
     public:
-        /// @brief Called by the powerplant to build and setup the VirtualCamera reactor.
-        explicit VirtualCamera(std::unique_ptr<NUClear::Environment> environment);
+        /// @brief Called by the powerplant to build and setup the NUPresenceServer reactor.
+        explicit NUPresenceServer(std::unique_ptr<NUClear::Environment> environment);
     };
 
 }
 }
 
-#endif
+#endif  // MODULE_BEHAVIOUR_NUPRESENCESERVER_H

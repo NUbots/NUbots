@@ -88,7 +88,7 @@ namespace module {
             SensorFilter::SensorFilter(std::unique_ptr<NUClear::Environment> environment)
             : Reactor(std::move(environment))
             // intialize orientation filter to measured values when standing
-            , orientationFilter(arma::vec({0, 0, 0, -9.6525e-01, -2.4957e-02, 1.8088e-01, 1.8696e-01})) {
+            , orientationFilter(arma::vec({0, 0, 0, 1, 0,  0, 0})) {
 
                 on<Configuration>("DarwinSensorFilter.yaml").then([this](const Configuration& config){
                     DEFAULT_NOISE_GAIN = config["default_noise_gain"].as<double>();
@@ -297,7 +297,9 @@ namespace module {
                     /************************************************
                      *                  Kinematics                  *
                      ************************************************/
+                    // std::cout << __FILE__ << " " << __LINE__ << std::endl;
                     sensors->forwardKinematics = calculateAllPositions<DarwinModel>(*sensors);
+                    // std::cout << __FILE__ << " " << __LINE__ << std::endl;
 
                     /************************************************
                      *                 Orientation                  *

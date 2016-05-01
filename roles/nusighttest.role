@@ -1,0 +1,13 @@
+NUCLEAR_ROLE(
+    support::logging::ConsoleLogHandler
+    
+    #Config
+    support::extension::FileWatcher
+    support::configuration::NetworkConfiguration
+    
+    #Debugging
+    support::NUbugger
+
+    #emit sine waves
+    debug::NUbugger
+)

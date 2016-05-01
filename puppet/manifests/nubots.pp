@@ -21,6 +21,8 @@ node nubotsvm {
     ensure => 'latest',
     source => "/root/nubots-toolchain${toolchain_version}.deb",
   }
+  installer { 'openrave':       url => 'https://github.com/rdiankov/openrave/archive/v0.8.2.tar.gz',}
+  
 }
 
 node nubotsvmbuild {
@@ -84,6 +86,7 @@ node nubotsvmbuild {
                                 prebuild => 'cp portaudio19.h portaudio.h',
                                 environment => ['AUDIO=PORTAUDIO'],
                                 require => [ Installer['portaudio'] ], }
+  installer { 'openrave':       url => 'https://github.com/rdiankov/openrave/archive/v0.8.2.tar.gz',}
   # Patch armadillo
   file { 'armadillo_config':    path => '/nubots/toolchain/include/armadillo_bits/config.hpp',
                                 source => 'puppet:///modules/files/nubots/toolchain/include/armadillo_bits/config.hpp',

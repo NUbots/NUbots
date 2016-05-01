@@ -191,14 +191,17 @@ namespace darwin {
             for (int i = 0; i < 20; ++i) {
 
                 auto& servo = sensors.servo[i];
-                float movingSpeed = servo.movingSpeed == 0 ? 0.1 : servo.movingSpeed / 60;
+                float movingSpeed = servo.movingSpeed == 0 ? 0.1 : servo.movingSpeed / UPDATE_FREQUENCY;
                 movingSpeed = movingSpeed > 0.1 ? 0.1 : movingSpeed;
 
 
                 if (std::abs(servo.presentPosition - servo.goalPosition) < movingSpeed) {
                     servo.presentPosition = servo.goalPosition;
+                    // std::cout << "First: movingSpeed = " << movingSpeed << " servo.goalPosition = "<< servo.goalPosition << " servo.presentPosition = "<< servo.presentPosition << std::endl;
                 }
                 else {
+                    // std::cout << "Second: movingSpeed = " << movingSpeed << " servo.goalPosition = "<< servo.goalPosition << " servo.presentPosition = "<< servo.presentPosition << std::endl;
+
                     arma::vec3 present = { cos(servo.presentPosition), sin(servo.presentPosition), 0 };
                     arma::vec3 goal = { cos(servo.goalPosition), sin(servo.goalPosition), 0 };
 
@@ -269,7 +272,8 @@ namespace darwin {
                 // Set our variables
                 auto& servo = sensors.servo[command.id];
                 servo.movingSpeed = speed;
-                servo.goalPosition = command.position;
+                servo.goalPosition = utility::math::angle::normalizeAngle(command.position);
+                // std::cout << __LINE__ << std::endl;
             }
         });
 

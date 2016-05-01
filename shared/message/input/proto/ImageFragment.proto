@@ -1,5 +1,5 @@
 /*
- * This file is part of NUbots Codebase.
+ * This file is part of the NUbots Codebase.
  *
  * The NUbots Codebase is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,25 +14,32 @@
  * You should have received a copy of the GNU General Public License
  * along with the NUbots Codebase.  If not, see <http://www.gnu.org/licenses/>.
  *
- * Copyright 2015 NUbots <nubots@nubots.net>
+ * Copyright 2013 NUBots <nubots@nubots.net>
  */
 
-#ifndef MODULES_SUPPORT_VIRTUALCAMERA_H
-#define MODULES_SUPPORT_VIRTUALCAMERA_H
+syntax = "proto3";
 
-#include <nuclear>
+package message.input.proto;
 
-namespace module {
-namespace support {
+import "message/Vector.proto";
+import "message/Matrix.proto";
 
-    class VirtualCamera : public NUClear::Reactor {
-    	ReactionHandle emitImageHandle;
-    public:
-        /// @brief Called by the powerplant to build and setup the VirtualCamera reactor.
-        explicit VirtualCamera(std::unique_ptr<NUClear::Environment> environment);
+message ImageFragment {
+
+    enum Format {
+        UNKNOWN  = 0;
+        YCbCr422 = 1;
+        YCbCr444 = 2;
+        JPEG     = 3;
     };
 
-}
-}
+    uint32 camera_id = 4;
+    Format format = 1;
+    uvec2 dimensions = 2;
+    bytes data = 3;
 
-#endif
+    uint32 start = 5;
+    uint32 end = 6;
+
+    fmat44 cam_to_feet = 7;
+}

@@ -14,25 +14,12 @@
  * You should have received a copy of the GNU General Public License
  * along with the NUbots Codebase.  If not, see <http://www.gnu.org/licenses/>.
  *
- * Copyright 2015 NUbots <nubots@nubots.net>
+ * Copyright 2016 NUbots <nubots@nubots.net>
  */
 
-#ifndef MODULES_SUPPORT_VIRTUALCAMERA_H
-#define MODULES_SUPPORT_VIRTUALCAMERA_H
+// Uncomment this line when other test files are added
+//#define CATCH_CONFIG_MAIN  // This tells Catch to provide a main() - only do this in one cpp file
+//#include <catch.hpp>
 
-#include <nuclear>
-
-namespace module {
-namespace support {
-
-    class VirtualCamera : public NUClear::Reactor {
-    	ReactionHandle emitImageHandle;
-    public:
-        /// @brief Called by the powerplant to build and setup the VirtualCamera reactor.
-        explicit VirtualCamera(std::unique_ptr<NUClear::Environment> environment);
-    };
-
-}
-}
-
-#endif
+// Remove this line when test files are added
+int main() { return 0; }

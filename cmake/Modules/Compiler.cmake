@@ -1,6 +1,7 @@
 # We need noncall exceptions so we can throw exceptions from signal handlers
 # This allows us to catch null pointer exceptions
 SET(COMMON_CXX_FLAGS "${COMMON_CXX_FLAGS} -fnon-call-exceptions")
+SET(CMAKE_INSTALL_RPATH ${CMAKE_INSTALL_RPATH} toolchain/)
 
 # GNU Compiler
 IF(CMAKE_CXX_COMPILER_ID MATCHES GNU)
