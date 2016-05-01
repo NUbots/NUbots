@@ -226,8 +226,8 @@ namespace motion {
                                     DarwinModel::Head::NECK_BASE_POS_FROM_ORIGIN_Z};
         	auto arm_jointsL = utility::motion::kinematics::setArmApprox<DarwinModel>(kneckPos + l_arm, true);
         	auto arm_jointsR = utility::motion::kinematics::setArmApprox<DarwinModel>(kneckPos + r_arm, false);
-            joints.insert(joints.end(), arm_jointsL.begin(), arm_jointsL.end());
-            joints.insert(joints.end(), arm_jointsR.begin(), arm_jointsR.end());
+            // joints.insert(joints.end(), arm_jointsL.begin(), arm_jointsL.end());
+            // joints.insert(joints.end(), arm_jointsR.begin(), arm_jointsR.end());
 
 	        auto waypoints = std::make_unique<std::vector<ServoCommand>>();
 	        waypoints->reserve(16);
