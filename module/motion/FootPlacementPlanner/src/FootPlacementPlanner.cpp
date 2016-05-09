@@ -382,133 +382,133 @@ namespace motion
         return (torsoPositionTransform);
     }
 /*=======================================================================================================*/
-/*      ENCAPSULATION METHOD: 
+/*      ENCAPSULATION METHOD: setTorsoPosition
 /*=======================================================================================================*/
     void FootPlacementPlanner::setTorsoPosition(const Transform2D& inTorsoPosition)
     {
         torsoPositionTransform = inTorsoPosition;
     }
 /*=======================================================================================================*/
-/*      ENCAPSULATION METHOD: 
+/*      ENCAPSULATION METHOD: getTorsoSource
 /*=======================================================================================================*/
     Transform2D FootPlacementPlanner::getTorsoSource()
     {
         return (torsoPositionSource);
     }
 /*=======================================================================================================*/
-/*      ENCAPSULATION METHOD: 
+/*      ENCAPSULATION METHOD: setTorsoSource
 /*=======================================================================================================*/
     void FootPlacementPlanner::setTorsoSource(const Transform2D& inTorsoSource)
     {
         torsoPositionSource = inTorsoSource;
     }
 /*=======================================================================================================*/
-/*      ENCAPSULATION METHOD: 
+/*      ENCAPSULATION METHOD: getTorsoDestination
 /*=======================================================================================================*/
     Transform2D FootPlacementPlanner::getTorsoDestination()
     {
         return (torsoPositionDestination);
     }
 /*=======================================================================================================*/
-/*      ENCAPSULATION METHOD: 
+/*      ENCAPSULATION METHOD: setTorsoDestination
 /*=======================================================================================================*/
     void FootPlacementPlanner::setTorsoDestination(const Transform2D& inTorsoDestination)
     {
         torsoPositionDestination = inTorsoDestination;
     }
 /*=======================================================================================================*/
-/*      ENCAPSULATION METHOD: 
+/*      ENCAPSULATION METHOD: getSupportMass
 /*=======================================================================================================*/
     Transform2D FootPlacementPlanner::getSupportMass()
     {
         return (uSupportMass);
     }
 /*=======================================================================================================*/
-/*      ENCAPSULATION METHOD: 
+/*      ENCAPSULATION METHOD: setSupportMass
 /*=======================================================================================================*/
     void FootPlacementPlanner::setSupportMass(const Transform2D& inSupportMass)
     {
         uSupportMass = inSupportMass;
     }
 /*=======================================================================================================*/
-/*      ENCAPSULATION METHOD: 
+/*      ENCAPSULATION METHOD: getFootOffsetCoefficient
 /*=======================================================================================================*/
     double FootPlacementPlanner::getFootOffsetCoefficient(int index)
     {
         return (footOffsetCoefficient[index]);
     }
 /*=======================================================================================================*/
-/*      ENCAPSULATION METHOD: 
+/*      ENCAPSULATION METHOD: setFootOffsetCoefficient
 /*=======================================================================================================*/
     void FootPlacementPlanner::setFootOffsetCoefficient(const arma::vec2& inFootOffsetCoefficient)
     {
         footOffsetCoefficient = inFootOffsetCoefficient;
     }
 /*=======================================================================================================*/
-/*      ENCAPSULATION METHOD: 
+/*      ENCAPSULATION METHOD: setFootOffsetCoefficient
 /*=======================================================================================================*/
     void FootPlacementPlanner::setFootOffsetCoefficient(int index, double inValue)
     {
         footOffsetCoefficient[index] = inValue;
     }
 /*=======================================================================================================*/
-/*      ENCAPSULATION METHOD: 
+/*      ENCAPSULATION METHOD: getLeftFootPosition
 /*=======================================================================================================*/
     Transform2D FootPlacementPlanner::getLeftFootPosition()
     {
         return (leftFootPositionTransform);
     }
 /*=======================================================================================================*/
-/*      ENCAPSULATION METHOD: 
+/*      ENCAPSULATION METHOD: setLeftFootPosition
 /*=======================================================================================================*/
     void FootPlacementPlanner::setLeftFootPosition(const Transform2D& inLeftFootPosition)
     {
         leftFootPositionTransform = inLeftFootPosition;
     }
 /*=======================================================================================================*/
-/*      ENCAPSULATION METHOD: 
+/*      ENCAPSULATION METHOD: getRightFootPosition
 /*=======================================================================================================*/
     Transform2D FootPlacementPlanner::getRightFootPosition()
     {
         return (rightFootPositionTransform);
     }
 /*=======================================================================================================*/
-/*      ENCAPSULATION METHOD: 
+/*      ENCAPSULATION METHOD: setRightFootPosition
 /*=======================================================================================================*/
     void FootPlacementPlanner::setRightFootPosition(const Transform2D& inRightFootPosition)
     {
         rightFootPositionTransform = inRightFootPosition;
     }
 /*=======================================================================================================*/
-/*      ENCAPSULATION METHOD: 
+/*      ENCAPSULATION METHOD: getLeftFootSource
 /*=======================================================================================================*/
     Transform2D FootPlacementPlanner::getLeftFootSource()
     {
         return (leftFootSource);
     }
 /*=======================================================================================================*/
-/*      ENCAPSULATION METHOD: 
+/*      ENCAPSULATION METHOD: setLeftFootSource
 /*=======================================================================================================*/
     void FootPlacementPlanner::setLeftFootSource(const Transform2D& inLeftFootSource)
     {
         leftFootSource = inLeftFootSource;
     }
 /*=======================================================================================================*/
-/*      ENCAPSULATION METHOD: 
+/*      ENCAPSULATION METHOD: getRightFootSource
 /*=======================================================================================================*/
     Transform2D FootPlacementPlanner::getRightFootSource()
     {
         return (rightFootSource);
     }
 /*=======================================================================================================*/
-/*      ENCAPSULATION METHOD: 
+/*      ENCAPSULATION METHOD: setRightFootSource
 /*=======================================================================================================*/
     void FootPlacementPlanner::setRightFootSource(const Transform2D& inRightFootSource)
     {
         rightFootSource = inRightFootSource;
     }
 /*=======================================================================================================*/
-/*      ENCAPSULATION METHOD: 
+/*      ENCAPSULATION METHOD: getLeftFootDestination
 /*=======================================================================================================*/
     Transform2D FootPlacementPlanner::getLeftFootDestination()
     {
@@ -529,14 +529,14 @@ namespace motion
         return (rightFootDestination.front());
     }
 /*=======================================================================================================*/
-/*      ENCAPSULATION METHOD: 
+/*      ENCAPSULATION METHOD: setRightFootDestination
 /*=======================================================================================================*/
     void FootPlacementPlanner::setRightFootDestination(const Transform2D& inRightFootDestination)
     {
         rightFootDestination.push(inRightFootDestination);
     }
 /*=======================================================================================================*/
-/*      ENCAPSULATION METHOD: 
+/*      METHOD: configure
 /*=======================================================================================================*/
     void FootPlacementPlanner::configure(const YAML::Node& config)
     {
