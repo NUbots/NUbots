@@ -47,7 +47,7 @@ namespace motion
     using message::motion::WalkStopCommand;
     using message::motion::WalkStopped;
     using message::motion::FootStepTarget;
-    using message::motion::EnableTorsoMotion
+    using message::motion::EnableTorsoMotion;
     using message::motion::DisableTorsoMotion;
     using message::motion::ServoTarget;
     using message::motion::Script;
@@ -69,16 +69,16 @@ namespace motion
     : Reactor(std::move(environment)) 
     {
         //Configure foot motion planner...
-        on<Configuration>("TorsoMotionPlanner.yaml").then([this] (const Configuration& config) 
+        on<Configuration>("TorsoMotionPlanner.yaml").then("Torso Motion Planner - Configure", [this] (const Configuration& config) 
         {
             configure(config.config);
         });
 
         //Transform analytical torso positions in accordance with the stipulated targets...
         updateHandle = on<Every<UPDATE_FREQUENCY, Per<std::chrono::seconds>>, With<Sensors>, Single, Priority::HIGH>()
-        .then([this](const Sensors& sensors) 
+        .then("Torso Motion Planner - Update Torso Position", [this](const Sensors& sensors) 
         {
-            updateTorsoPosition(sensors);
+            updateTorsoPosition();
         }).disable();
 
         //In the event of a new foot step target specified by the foot placement planning module...
@@ -102,7 +102,7 @@ namespace motion
             updateHandle.enable();
         });
 
-        //If foot motion no longer requested, cease updating...
+        //If torso motion no longer requested, cease updating...
         on<Trigger<DisableTorsoMotion>>().then([this] 
         {
             updateHandle.disable(); 
@@ -117,8 +117,9 @@ namespace motion
         torso.uTorso = zmpTorsoCompensation(phase, zmpTorsoCoefficients, zmpParams, stepTime, zmpTime, phase1Single, phase2Single, uSupport, uLeftFootDestination, uLeftFootSource, uRightFootDestination, uRightFootSource);
         Transform2D uTorsoActual = uTorso.localToWorld({-DarwinModel::Leg::HIP_OFFSET_X, 0, 0});
         Transform3D torso.torso = arma::vec6({uTorsoActual.x(), uTorsoActual.y(), bodyHeight, 0, bodyTilt, uTorsoActual.angle()});
-        emit(std:make_unique<TorsoUpdate>(uTorso, torso)); //uTorso is needed by motionArms and torso is needed for feet position
-                             //could also move calculation of torso to response
+        emit(std::make_unique<TorsoUpdate>(uTorso, torso)); 
+                            //uTorso is needed by motionArms and torso is needed for feet position
+                            //could also move calculation of torso to response
     }
 /*=======================================================================================================*/
 //      METHOD: stepTorso
@@ -198,16 +199,142 @@ namespace motion
         return com;
     }
 /*=======================================================================================================*/
-//      METHOD: getTime
+//      ENCAPSULATION METHOD: getTime
 /*=======================================================================================================*/
     double TorsoMotionPlanner::getTime() 
     {
         return std::chrono::duration_cast<std::chrono::microseconds>(NUClear::clock::now().time_since_epoch()).count() * 1E-6;
     }
 /*=======================================================================================================*/
+//      ENCAPSULATION METHOD: getDestinationTime
+/*=======================================================================================================*/
+    double TorsoMotionPlanner::getDestinationTime()
+    {
+        return (destinationTime);
+    }
+/*=======================================================================================================*/
+//      ENCAPSULATION METHOD: setDestinationTime
+/*=======================================================================================================*/
+    void TorsoMotionPlanner::setDestinationTime(double inDestinationTime)
+    {
+        destinationTime = inDestinationTime;
+    }
+/*=======================================================================================================*/
+/*      ENCAPSULATION METHOD: getTorsoPosition
+/*=======================================================================================================*/
+    Transform2D TorsoMotionPlanner::getTorsoPosition()
+    {
+        return (torsoPositionTransform);
+    }
+/*=======================================================================================================*/
+/*      ENCAPSULATION METHOD: setTorsoPosition
+/*=======================================================================================================*/
+    void TorsoMotionPlanner::setTorsoPosition(const Transform2D& inTorsoPosition)
+    {
+        torsoPositionTransform = inTorsoPosition;
+    }
+/*=======================================================================================================*/
+/*      ENCAPSULATION METHOD: getTorsoSource
+/*=======================================================================================================*/
+    Transform2D TorsoMotionPlanner::getTorsoSource()
+    {
+        return (torsoPositionSource);
+    }
+/*=======================================================================================================*/
+/*      ENCAPSULATION METHOD: setTorsoSource
+/*=======================================================================================================*/
+    void TorsoMotionPlanner::setTorsoSource(const Transform2D& inTorsoSource)
+    {
+        torsoPositionSource = inTorsoSource;
+    }
+/*=======================================================================================================*/
+/*      ENCAPSULATION METHOD: getTorsoDestination
+/*=======================================================================================================*/
+    Transform2D TorsoMotionPlanner::getTorsoDestination()
+    {
+        return (torsoPositionDestination);
+    }
+/*=======================================================================================================*/
+/*      ENCAPSULATION METHOD: setTorsoDestination
+/*=======================================================================================================*/
+    void TorsoMotionPlanner::setTorsoDestination(const Transform2D& inTorsoDestination)
+    {
+        torsoPositionDestination = inTorsoDestination;
+    }
+/*=======================================================================================================*/
+/*      ENCAPSULATION METHOD: getSupportMass
+/*=======================================================================================================*/
+    Transform2D TorsoMotionPlanner::getSupportMass()
+    {
+        return (uSupportMass);
+    }
+/*=======================================================================================================*/
+/*      ENCAPSULATION METHOD: setSupportMass
+/*=======================================================================================================*/
+    void TorsoMotionPlanner::setSupportMass(const Transform2D& inSupportMass)
+    {
+        uSupportMass = inSupportMass;
+    }    
+/*=======================================================================================================*/
+/*      ENCAPSULATION METHOD: getLeftFootPosition
+/*=======================================================================================================*/
+    Transform2D TorsoMotionPlanner::getLeftFootPosition()
+    {
+        return (leftFootPositionTransform);
+    }
+/*=======================================================================================================*/
+/*      ENCAPSULATION METHOD: setLeftFootPosition
+/*=======================================================================================================*/
+    void TorsoMotionPlanner::setLeftFootPosition(const Transform2D& inLeftFootPosition)
+    {
+        leftFootPositionTransform = inLeftFootPosition;
+    }
+/*=======================================================================================================*/
+/*      ENCAPSULATION METHOD: getRightFootPosition
+/*=======================================================================================================*/
+    Transform2D TorsoMotionPlanner::getRightFootPosition()
+    {
+        return (rightFootPositionTransform);
+    }
+/*=======================================================================================================*/
+/*      ENCAPSULATION METHOD: setRightFootPosition
+/*=======================================================================================================*/
+    void TorsoMotionPlanner::setRightFootPosition(const Transform2D& inRightFootPosition)
+    {
+        rightFootPositionTransform = inRightFootPosition;
+    }
+/*=======================================================================================================*/
+/*      ENCAPSULATION METHOD: getLeftFootSource
+/*=======================================================================================================*/
+    Transform2D TorsoMotionPlanner::getLeftFootSource()
+    {
+        return (leftFootSource);
+    }
+/*=======================================================================================================*/
+/*      ENCAPSULATION METHOD: setLeftFootSource
+/*=======================================================================================================*/
+    void TorsoMotionPlanner::setLeftFootSource(const Transform2D& inLeftFootSource)
+    {
+        leftFootSource = inLeftFootSource;
+    }
+/*=======================================================================================================*/
+/*      ENCAPSULATION METHOD: getRightFootSource
+/*=======================================================================================================*/
+    Transform2D TorsoMotionPlanner::getRightFootSource()
+    {
+        return (rightFootSource);
+    }
+/*=======================================================================================================*/
+/*      ENCAPSULATION METHOD: setRightFootSource
+/*=======================================================================================================*/
+    void TorsoMotionPlanner::setRightFootSource(const Transform2D& inRightFootSource)
+    {
+        rightFootSource = inRightFootSource;
+    }        
+/*=======================================================================================================*/
 //      METHOD: getLeftFootDestination
 /*=======================================================================================================*/
-    double TorsoMotionPlanner::getLeftFootDestination()
+    Transform2D TorsoMotionPlanner::getLeftFootDestination()
     {
         setNewStepReceived(false);
         return (leftFootDestination.front());
@@ -215,7 +342,7 @@ namespace motion
 /*=======================================================================================================*/
 //      METHOD: setLeftFootDestination
 /*=======================================================================================================*/
-    void TorsoMotionPlanner::setLeftFootDestination(double inLeftFootDestination)
+    void TorsoMotionPlanner::setLeftFootDestination(const Transform2D& inLeftFootDestination)
     {
         setNewStepReceived(true);
         leftFootDestination.push(inLeftFootDestination);
@@ -223,7 +350,7 @@ namespace motion
 /*=======================================================================================================*/
 //      ENCAPSULATION METHOD: getRightFootDestination
 /*=======================================================================================================*/
-    double TorsoMotionPlanner::getRightFootDestination()
+    Transform2D TorsoMotionPlanner::getRightFootDestination()
     {
         setNewStepReceived(false);
         return (rightFootDestination.front());
@@ -231,11 +358,122 @@ namespace motion
 /*=======================================================================================================*/
 //      ENCAPSULATION METHOD: setRightFootDestination
 /*=======================================================================================================*/
-    void TorsoMotionPlanner::setRightFootDestination(double inRightFootDestination)
+    void TorsoMotionPlanner::setRightFootDestination(const Transform2D& inRightFootDestination)
     {
         setNewStepReceived(true);
         rightFootDestination.push(inRightFootDestination);
     }
+/*=======================================================================================================*/
+//      ENCAPSULATION METHOD: isNewStepReceived
+/*=======================================================================================================*/
+    bool TorsoMotionPlanner::getNewStepReceived()
+    {
+        return (updateStepInstruction);
+    }
+/*=======================================================================================================*/
+//      ENCAPSULATION METHOD: setNewStepReceived
+/*=======================================================================================================*/
+    void TorsoMotionPlanner::setNewStepReceived(bool inUpdateStepInstruction)
+    {
+        updateStepInstruction = inUpdateStepInstruction;
+    }    
+/*=======================================================================================================*/
+/*      METHOD: configure
+/*=======================================================================================================*/
+    void TorsoMotionPlanner::configure(const YAML::Node& config)
+    {
+        emitLocalisation = config["emit_localisation"].as<bool>();
+
+        auto& stance = config["stance"];
+        bodyHeight = stance["body_height"].as<Expression>();
+        bodyTilt = stance["body_tilt"].as<Expression>();
+        qLArmStart = stance["arms"]["left"]["start"].as<arma::vec>();
+        qLArmEnd = stance["arms"]["left"]["end"].as<arma::vec>();
+        qRArmStart = stance["arms"]["right"]["start"].as<arma::vec>();
+        qRArmEnd = stance["arms"]["right"]["end"].as<arma::vec>();
+        setFootOffsetCoefficient(stance["foot_offset"].as<arma::vec>());
+        // gToe/heel overlap checking values
+        stanceLimitY2 = DarwinModel::Leg::LENGTH_BETWEEN_LEGS - stance["limit_margin_y"].as<Expression>();
+
+        auto& gains = stance["gains"];
+        gainArms = gains["arms"].as<Expression>();
+        gainLegs = gains["legs"].as<Expression>();
+
+        for(ServoID i = ServoID(0); i < ServoID::NUMBER_OF_SERVOS; i = ServoID(int(i)+1))
+        {
+            if(int(i) < 6)
+            {
+                jointGains[i] = gainArms;
+            } 
+            else 
+            {
+                jointGains[i] = gainLegs;
+            }
+        }
+
+        auto& walkCycle = config["walk_cycle"];
+        stepTime = walkCycle["step_time"].as<Expression>();
+        zmpTime = walkCycle["zmp_time"].as<Expression>();
+        hipRollCompensation = walkCycle["hip_roll_compensation"].as<Expression>();
+        stepHeight = walkCycle["step"]["height"].as<Expression>();
+        stepLimits = walkCycle["step"]["limits"].as<arma::mat::fixed<3,2>>();
+
+        step_height_slow_fraction = walkCycle["step"]["height_slow_fraction"].as<float>();
+        step_height_fast_fraction = walkCycle["step"]["height_fast_fraction"].as<float>();
+
+        auto& velocity = walkCycle["velocity"];
+        velocityLimits = velocity["limits"].as<arma::mat::fixed<3,2>>();
+        velocityHigh = velocity["high_speed"].as<Expression>();
+
+        auto& acceleration = walkCycle["acceleration"];
+        accelerationLimits = acceleration["limits"].as<arma::vec>();
+        accelerationLimitsHigh = acceleration["limits_high"].as<arma::vec>();
+        accelerationTurningFactor = acceleration["turning_factor"].as<Expression>();
+
+        phase1Single = walkCycle["single_support_phase"]["start"].as<Expression>();
+        phase2Single = walkCycle["single_support_phase"]["end"].as<Expression>();
+
+        auto& balance = walkCycle["balance"];
+        balanceEnabled = balance["enabled"].as<bool>();
+        // balanceAmplitude = balance["amplitude"].as<Expression>();
+        // balanceWeight = balance["weight"].as<Expression>();
+        // balanceOffset = balance["offset"].as<Expression>();
+
+        balancer.configure(balance);
+
+        for(auto& gain : balance["servo_gains"])
+        {
+            float p = gain["p"].as<Expression>();
+            ServoID sr = message::input::idFromPartialString(gain["id"].as<std::string>(),message::input::ServoSide::RIGHT);
+            ServoID sl = message::input::idFromPartialString(gain["id"].as<std::string>(),message::input::ServoSide::LEFT);
+            servoControlPGains[sr] = p;
+            servoControlPGains[sl] = p;
+        }
+        /* TODO
+        // gCompensation parameters
+        toeTipCompensation = config["toeTipCompensation"].as<Expression>();
+        ankleMod = {-toeTipCompensation, 0};
+
+        // gGyro stabilization parameters
+        ankleImuParamX = config["ankleImuParamX"].as<arma::vec>();
+        ankleImuParamY = config["ankleImuParamY"].as<arma::vec>();
+        kneeImuParamX = config["kneeImuParamX"].as<arma::vec>();
+        hipImuParamY = config["hipImuParamY"].as<arma::vec>();
+        armImuParamX = config["armImuParamX"].as<arma::vec>();
+        armImuParamY = config["armImuParamY"].as<arma::vec>();
+
+        // gSupport bias parameters to reduce backlash-based instability
+        velFastForward = config["velFastForward"].as<Expression>();
+        velFastTurn = config["velFastTurn"].as<Expression>();
+        supportFront = config["supportFront"].as<Expression>();
+        supportFront2 = config["supportFront2"].as<Expression>();
+        supportBack = config["supportBack"].as<Expression>();
+        supportSideX = config["supportSideX"].as<Expression>();
+        supportSideY = config["supportSideY"].as<Expression>();
+        supportTurn = config["supportTurn"].as<Expression>();
+        */
+        STAND_SCRIPT_DURATION = config["STAND_SCRIPT_DURATION"].as<Expression>();
+    }    
 }  // motion
 }  // modules
 

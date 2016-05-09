@@ -59,7 +59,8 @@ namespace motion
 
         //Transform analytical foot positions in accordance with the stipulated targets...
         updateHandle = on<Every<UPDATE_FREQUENCY, Per<std::chrono::seconds>>, With<Sensors>, Single, Priority::HIGH>()
-        .then("Foot Motion Planner - Update Foot Position", [this](const Sensors& sensors) {
+        .then("Foot Motion Planner - Update Foot Position", [this](const Sensors& sensors) 
+        {
             updateFootPosition(getMotionPhase(), getLeftFootDestination(), getRightFootDestination());
         }).disable();
 

@@ -87,12 +87,6 @@ namespace motion
         // Reaction handle for the main update loop, disabling when not moving will save unnecessary CPU
         ReactionHandle updateHandle;
 
-        // start state
-
-        // The state of the current walk
-        State state;
-
-
         struct torso {
             Transform2D uTorso;
             Transform3D torso;
@@ -108,21 +102,26 @@ namespace motion
         bool updateStepInstruction;
         // The time when the current is to be completed
         double destinationTime;
-        // Destination placement Transform2D values
-        std::queue<Transform2D> leftFootDestination
-        std::queue<Transform2D> rightFootDestination
+        // Destination placement Transform2D left foot positions
+        std::queue<Transform2D> leftFootDestination;
+        // Destination placement Transform2D right foot positions
+        std::queue<Transform2D> rightFootDestination;
         // How to many 'steps' to take before lifting a foot when starting to walk
         int initialStep;
         // Current torso position
-        //Transform2D uTorso;
+        Transform2D uTorso;
         // Pre-step torso position
         Transform2D uTorsoSource;
         // Torso step target position
         Transform2D uTorsoDestination;
-       // Pre-step left foot position
+        // Current left foot position
+        Transform2D uLeftFoot;
+        // Pre-step left foot position
         Transform2D uLeftFootSource;
         // Left foot step target position
         Transform2D uLeftFootDestination;
+        // Current right foot position
+        Transform2D uRightFoot;
         // Pre-step right foot position
         Transform2D uRightFootSource;
         // Right foot step target position
@@ -210,14 +209,164 @@ namespace motion
 
         // end config
 
+        /**
+         * @brief [brief description]
+         * @details [long description]
+         * 
+         * @param config [description]
+         */
+        void configure(const YAML::Node& config);
+
         double STAND_SCRIPT_DURATION;
         ReactionHandle generateStandScriptReaction;
+
+        void updateTorsoPosition();
+
+        void zmpTorsoCoefficients();
+
+        /**
+         * @brief [brief description]
+         * @details [long description]
+         * @return [description]
+         */
+        Transform2D getTorsoPosition();
+        /**
+         * @brief [brief description]
+         * @details [long description]
+         * 
+         * @param inTorsoPosition [description]
+         */
+        void setTorsoPosition(const Transform2D& inTorsoPosition);
+          /**
+         * @brief [brief description]
+         * @details [long description]
+         * @return [description]
+         */
+        Transform2D getTorsoSource();
+        /**
+         * @brief [brief description]
+         * @details [long description]
+         * 
+         * @param inTorsoPosition [description]
+         */
+        void setTorsoSource(const Transform2D& inTorsoPosition);
+        /**
+         * @brief [brief description]
+         * @details [long description]
+         * @return [description]
+         */
+        Transform2D getTorsoDestination();
+        /**
+         * @brief [brief description]
+         * @details [long description]
+         * 
+         * @param inTorsoPosition [description]
+         */
+        void setTorsoDestination(const Transform2D& inTorsoPosition);
+        /**
+         * @brief [brief description]
+         * @details [long description]
+         * @return [description]
+         */
+        Transform2D getSupportMass();
+        /**
+         * @brief [brief description]
+         * @details [long description]
+         * 
+         * @param inSupportMass [description]
+         */
+        void setSupportMass(const Transform2D& inSupportMass);
+        /**
+         * @brief [brief description]
+         * @details [long description]
+         * @return [description]
+         */
+        Transform2D getLeftFootPosition();
+        /**
+         * @brief [brief description]
+         * @details [long description]
+         * 
+         * @param inLeftFootPosition [description]
+         */
+        void setLeftFootPosition(const Transform2D& inLeftFootPosition);
+        /**
+         * @brief [brief description]
+         * @details [long description]
+         * @return [description]
+         */
+        Transform2D getRightFootPosition();
+        /**
+         * @brief [brief description]
+         * @details [long description]
+         * 
+         * @param inRightFootPosition [description]
+         */
+        void setRightFootPosition(const Transform2D& inRightFootPosition);
+        /**
+         * @brief [brief description]
+         * @details [long description]
+         * @return [description]
+         */
+        Transform2D getLeftFootSource();
+        /**
+         * @brief [brief description]
+         * @details [long description]
+         * 
+         * @param inLeftFootSource [description]
+         */
+        void setLeftFootSource(const Transform2D& inLeftFootSource);
+        /**
+         * @brief [brief description]
+         * @details [long description]
+         * @return [description]
+         */
+        Transform2D getRightFootSource();
+        /**
+         * @brief [brief description]
+         * @details [long description]
+         * 
+         * @param inRightFootSource [description]
+         */
+        void setRightFootSource(const Transform2D& inRightFootSource);
+        /**
+         * @brief [brief description]
+         * @details [long description]
+         * @return [description]
+         */
+        Transform2D getLeftFootDestination();
+        /**
+         * @brief [brief description]
+         * @details [long description]
+         * 
+         * @param inLeftFootDestination [description]
+         */
+        void setLeftFootDestination(const Transform2D& inLeftFootDestination);
+        /**
+         * @brief [brief description]
+         * @details [long description]
+         * @return [description]
+         */
+        Transform2D getRightFootDestination();
+        /**
+         * @brief [brief description]
+         * @details [long description]
+         * 
+         * @param inRightFootDestination [description]
+         */
+        void setRightFootDestination(const Transform2D& inRightFootDestination);
 
         Transform2D stepTorso(Transform2D uLeftFoot, Transform2D uRightFoot, double shiftFactor);
 
         /**
-         * @return The current velocity
+         * @brief [return current velocity]
+         * @details [long description]
+         * @return [description]
          */
+        Transform2D getVelocity();
+
+        bool getNewStepReceived();
+        void setNewStepReceived(bool inUpdateStepInstruction);
+
         arma::vec2 zmpSolve(double zs, double z1, double z2, double x1, double x2, double phase1Single, double phase2Single, double stepTime, double zmpTime);
 
         /**
@@ -240,6 +389,8 @@ namespace motion
          */
         
         double getTime();
+        double getDestinationTime();
+        void setDestinationTime(double inDestinationTime);
 
         /**
          * @return A clamped between 0 and maxvalue, offset by deadband
