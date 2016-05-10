@@ -32,6 +32,7 @@
 #include "message/behaviour/Action.h"
 #include "message/behaviour/ServoCommand.h"
 #include "message/motion/WalkCommand.h"
+#include "message/motion/FootMotionCommand.h" 
 #include "message/motion/FootPlacementCommand.h" 
 #include "message/motion/TorsoMotionCommand.h" 
 #include "message/input/Sensors.h"
@@ -71,6 +72,7 @@ namespace motion
         static constexpr const char* CONFIGURATION_MSSG = "Torso Motion Planner - Configure";
         static constexpr const char* ONTRIGGER_TORSO_CMD = "Torso Motion Planner - Update Torso Position";
         static constexpr const char* ONTRIGGER_TORSO_TGT = "Torso Motion Planner - Received Target Torso Position";
+        static constexpr const char* ONTRIGGER_FOOT_INFO = "Torso Motion Planner - Received Foot Motion Update";
         explicit TorsoMotionPlanner(std::unique_ptr<NUClear::Environment> environment);
     private:
         using LimbID         = message::input::LimbID;
@@ -86,11 +88,6 @@ namespace motion
 
         // Reaction handle for the main update loop, disabling when not moving will save unnecessary CPU
         ReactionHandle updateHandle;
-
-        struct torso {
-            Transform2D uTorso;
-            Transform3D torso;
-        } torsos;
 
         // // Whether subsumption has currently interrupted the walk engine
         // bool interrupted;
@@ -108,41 +105,49 @@ namespace motion
         bool updateStepInstruction;
         // The time when the current is to be completed
         double destinationTime;
-        // Destination placement Transform2D left foot positions
-        std::queue<Transform2D> leftFootDestination;
-        // Destination placement Transform2D right foot positions
-        std::queue<Transform2D> rightFootDestination;
         // How to many 'steps' to take before lifting a foot when starting to walk
         int initialStep;
+<<<<<<< 879e6a350d98efce1da5d047cdca18f50dae0616
 <<<<<<< 183df72fb88459adef7436f0515b768fde100df7:module/motion/ModularWalkEngine/src/TorsoMotionPlanner.h
 >>>>>>> Modifications to TorsoMotionPlanner
 =======
 >>>>>>> Further Modularization in development hierarchy, reorganised directory structure:module/motion/TorsoMotionPlanner/src/TorsoMotionPlanner.h
         // Current torso position
         Transform2D uTorso;
+=======
+        // Active torso relative positions struct
+        struct TorsoPositions 
+        {
+            Transform2D FrameArms;
+            Transform2D FrameLegs;
+            Transform3D Frame3D;
+        };
+        // Active torso position
+        TorsoPositions torsoPositionsTransform;
+>>>>>>> Further remodelling...
         // Pre-step torso position
-        Transform2D uTorsoSource;
+        Transform2D torsoPositionSource;
         // Torso step target position
-        Transform2D uTorsoDestination;
-        // Current left foot position
-        Transform2D uLeftFoot;
+        Transform2D torsoPositionDestination;
+        // Active left foot position
+        Transform2D leftFootPositionTransform;
         // Pre-step left foot position
-        Transform2D uLeftFootSource;
-        // Left foot step target position
-        Transform2D uLeftFootDestination;
-        // Current right foot position
-        Transform2D uRightFoot;
+        Transform2D leftFootSource;
+        // Active right foot position
+        Transform2D rightFootPositionTransform;
         // Pre-step right foot position
-        Transform2D uRightFootSource;
-        // Right foot step target position
-        Transform2D uRightFootDestination;
+        Transform2D rightFootSource;
+        // Destination placement Transform2D left foot positions
+        std::queue<Transform2D> leftFootDestination;
+        // Destination placement Transform2D right foot positions
+        std::queue<Transform2D> rightFootDestination;
         // TODO: ??? Appears to be support foot pre-step position
-        Transform2D uSupport;
-        // Current robot velocity
-        arma::vec4 zmpCoefficients;
+        Transform2D uSupportMass;
         // zmp params m1X, m2X, m1Y, m2Y
         arma::vec4 zmpParams;
          // end state
+
+        double footMotionPhase;
 
         // start config, see config file for documentation
         arma::mat::fixed<3,2> stepLimits;
@@ -233,20 +238,48 @@ namespace motion
         void updateTorsoPosition();
 
         void zmpTorsoCoefficients();
-
-        /**
-         * @brief [brief description]
-         * @details [long description]
-         * @return [description]
-         */
-        Transform2D getTorsoPosition();
         /**
          * @brief [brief description]
          * @details [long description]
          * 
          * @param inTorsoPosition [description]
          */
-        void setTorsoPosition(const Transform2D& inTorsoPosition);
+        Transform2D getTorsoPositionArms();
+        /**
+         * @brief [brief description]
+         * @details [long description]
+         * 
+         * @param inTorsoPosition [description]
+         */
+        Transform2D getTorsoPositionLegs();
+        /**
+         * @brief [brief description]
+         * @details [long description]
+         * 
+         * @param inTorsoPosition [description]
+         */
+        Transform3D getTorsoPosition3D();
+        /**
+         * @brief [brief description]
+         * @details [long description]
+         * 
+         * @param inTorsoPosition [description]
+         */
+        void setTorsoPositionArms(const Transform2D& inTorsoPosition);
+        /**
+         * @brief [brief description]
+         * @details [long description]
+         * 
+         * @param inTorsoPosition [description]
+         */
+        void setTorsoPositionLegs(const Transform2D& inTorsoPosition);
+        /**
+         * @brief [brief description]
+         * @details [long description]
+         * 
+         * @param inTorsoPosition [description]
+         */
+        void setTorsoPosition3D(const Transform3D& inTorsoPosition);
           /**
          * @brief [brief description]
          * @details [long description]
@@ -384,7 +417,7 @@ namespace motion
          *
          * @return The torso position in Transform2D
          */
-        Transform2D zmpTorsoCompensation(double phase, arma::vec4 zmpCoefficients, arma::vec4 zmpParams, double stepTime, double zmpTime, double phase1Zmp, double phase2Zmp, Transform2D uSupport, Transform2D uLeftFootDestination, Transform2D uLeftFootSource, Transform2D uRightFootDestination, Transform2D uRightFootSource);
+        Transform2D zmpTorsoCompensation(double phase, arma::vec4 zmpCoefficients, arma::vec4 zmpParams, double stepTime, double zmpTime, double phase1Zmp, double phase2Zmp, Transform2D uLeftFootSource, Transform2D uRightFootSource);
 
         /**
          * This is an easing function that returns 3 values {x,y,z} with the range [0,1]
@@ -398,6 +431,9 @@ namespace motion
          * @param phase2Single The phase time between [0,1] to end the step. A value of 0.9 means the step will end when phase >= 0.9
          */
         
+        double getMotionPhase();
+        void setMotionPhase(double inMotionPhase);
+
         double getTime();
         double getDestinationTime();
         void setDestinationTime(double inDestinationTime);
