@@ -22,12 +22,14 @@
 
 #include <armadillo>
 #include "utility/math/matrix/Transform2D.h"
+#include "utility/math/matrix/Transform3D.h" 
 
 namespace message 
 {
 namespace motion 
 {
     using utility::math::matrix::Transform2D;
+    using utility::math::matrix::Transform3D;
 
     /*
     struct [name]
@@ -38,6 +40,19 @@ namespace motion
             , ... {}
     };
     */
+    struct NewTorsoInformation
+    {
+        Transform2D frameArms;
+        Transform2D frameLegs;
+        Transform3D frame3D;
+        NewTorsoInformation(const Transform2D& inFrameArms,
+                            const Transform2D& inFrameLegs,
+                            const Transform3D& inFrame3D)
+            : frameArms(inFrameArms) 
+            , frameLegs(inFrameLegs)
+            , frame3D(inFrame3D) {}
+    };
+
     struct EnableTorsoMotion 
     {
         EnableTorsoMotion(size_t id) : subsumptionId(id) { }

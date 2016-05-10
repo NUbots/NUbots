@@ -47,6 +47,8 @@ namespace motion
     using message::motion::WalkStopCommand;
     using message::motion::WalkStopped;
     using message::motion::FootStepTarget;
+    using message::motion::FootMotionUpdate;
+    using message::motion::NewTorsoInformation;
     using message::motion::EnableTorsoMotion;
     using message::motion::DisableTorsoMotion;
     using message::motion::ServoTarget;
@@ -96,6 +98,12 @@ namespace motion
             zmpTorsoCoefficients();
         });
 
+        //In the process of actuating a foot step and emitting updated positional data...
+        on<Trigger<FootMotionUpdate>>().then("Torso Motion Planner - Received Foot Motion Update", [this] (const FootMotionUpdate& info) 
+        {
+            setMotionPhase(info.phase);
+        });
+
         on<Trigger<EnableTorsoMotion>>().then([this] (const EnableTorsoMotion& command) 
         {
             subsumptionId = command.subsumptionId;
@@ -113,13 +121,11 @@ namespace motion
 /*=======================================================================================================*/
     void TorsoMotionPlanner::updateTorsoPosition()
     {
-        uTorso = zmpTorsoCompensation(phase, zmpTorsoCoefficients, zmpParams, stepTime, zmpTime, phase1Single, phase2Single, uSupport, uLeftFootSource, uRightFootSource);
-        torso.uTorso = zmpTorsoCompensation(phase, zmpTorsoCoefficients, zmpParams, stepTime, zmpTime, phase1Single, phase2Single, uSupport, uLeftFootDestination, uLeftFootSource, uRightFootDestination, uRightFootSource);
-        Transform2D uTorsoActual = uTorso.localToWorld({-DarwinModel::Leg::HIP_OFFSET_X, 0, 0});
-        Transform3D torso.torso = arma::vec6({uTorsoActual.x(), uTorsoActual.y(), bodyHeight, 0, bodyTilt, uTorsoActual.angle()});
-        emit(std::make_unique<TorsoUpdate>(uTorso, torso)); 
-                            //uTorso is needed by motionArms and torso is needed for feet position
-                            //could also move calculation of torso to response
+        setTorsoPositionArms(zmpTorsoCompensation(getMotionPhase(), zmpTorsoCoefficients(), zmpParams, stepTime, zmpTime, phase1Single, phase2Single, getLeftFootSource(), getRightFootSource()));
+        setTorsoPositionLegs(zmpTorsoCompensation(getMotionPhase(), zmpTorsoCoefficients(), zmpParams, stepTime, zmpTime, phase1Single, phase2Single, getLeftFootSource(), getRightFootSource()));
+        Transform2D uTorsoWorld = getTorsoPositionArms().localToWorld({-DarwinModel::Leg::HIP_OFFSET_X, 0, 0});
+        setTorsoPosition3D(arma::vec6({uTorsoWorld.x(), uTorsoWorld.y(), bodyHeight, 0, bodyTilt, uTorsoWorld.angle()}));
+        emit(std::make_unique<NewTorsoInformation>(getTorsoPositionArms(), getTorsoPositionLegs(), getTorsoPosition3D())); 
     }
 /*=======================================================================================================*/
 //      METHOD: stepTorso
@@ -135,19 +141,19 @@ namespace motion
 /*=======================================================================================================*/
     void TorsoMotionPlanner::zmpTorsoCoefficients() //originally part of CalculateNewStep
     {
-        uTorsoDestination = stepTorso(getLeftFootDestination(), getRightFootDestination(), 0.5);
+        setTorsoDestination(stepTorso(getLeftFootDestination(), getRightFootDestination(), 0.5));
 
         // compute ZMP coefficients
         zmpParams = 
         {
-            (uSupport.x() - uTorso.x()) / (stepTime * phase1Single),
-            (uTorsoDestination.x() - uSupport.x()) / (stepTime * (1 - phase2Single)),
-            (uSupport.y() - uTorso.y()) / (stepTime * phase1Single),
-            (uTorsoDestination.y() - uSupport.y()) / (stepTime * (1 - phase2Single)),
+            (getSupportMass().x() - getTorsoPositionArms().x()) / (stepTime * phase1Single),
+            (getTorsoDestination().x() - getSupportMass().x()) / (stepTime * (1 - phase2Single)),
+            (getSupportMass().y() - getTorsoPositionArms().y()) / (stepTime * phase1Single),
+            (getTorsoDestination().y() - getSupportMass().y()) / (stepTime * (1 - phase2Single)),
         };
 
-        zmpTorsoCoefficients.rows(0,1) = zmpSolve(uSupport.x(), uTorsoSource.x(), uTorsoDestination.x(), uTorsoSource.x(), uTorsoDestination.x(), phase1Single, phase2Single, stepTime, zmpTime);
-        zmpTorsoCoefficients.rows(2,3) = zmpSolve(uSupport.y(), uTorsoSource.y(), uTorsoDestination.y(), uTorsoSource.y(), uTorsoDestination.y(), phase1Single, phase2Single, stepTime, zmpTime);
+        zmpTorsoCoefficients().rows(0,1) = zmpSolve(getSupportMass().x(), getTorsoSource().x(), getTorsoDestination().x(), getTorsoSource().x(), getTorsoDestination().x(), phase1Single, phase2Single, stepTime, zmpTime);
+        zmpTorsoCoefficients().rows(2,3) = zmpSolve(getSupportMass().y(), getTorsoSource().y(), getTorsoDestination().y(), getTorsoSource().y(), getTorsoDestination().y(), phase1Single, phase2Single, stepTime, zmpTime);
     }
 /*=======================================================================================================*/
 //      METHOD: zmpSolve
@@ -176,13 +182,13 @@ namespace motion
 /*=======================================================================================================*/
 //      METHOD: zmpTorsoCompensation
 /*=======================================================================================================*/
-    Transform2D TorsoMotionPlanner::zmpTorsoCompensation(double phase, arma::vec4 zmpTorsoCoefficients, arma::vec4 zmpParams, double stepTime, double zmpTime, double phase1Single, double phase2Single, Transform2D uSupport, Transform2D uLeftFootSource, Transform2D uRightFootSource) 
+    Transform2D TorsoMotionPlanner::zmpTorsoCompensation(double phase, arma::vec4 zmpTorsoCoefficients, arma::vec4 zmpParams, double stepTime, double zmpTime, double phase1Single, double phase2Single, Transform2D uLeftFootSource, Transform2D uRightFootSource) 
     {
         //Note that phase is the only variable updated during a step
         Transform2D com = {0, 0, 0};
         double expT = std::exp(stepTime * phase / zmpTime);
-        com.x() = uSupport.x() + zmpTorsoCoefficients[0] * expT + zmpTorsoCoefficients[1] / expT;
-        com.y() = uSupport.y() + zmpTorsoCoefficients[2] * expT + zmpTorsoCoefficients[3] / expT;
+        com.x() = getSupportMass().x() + zmpTorsoCoefficients[0] * expT + zmpTorsoCoefficients[1] / expT;
+        com.y() = getSupportMass().y() + zmpTorsoCoefficients[2] * expT + zmpTorsoCoefficients[3] / expT;
         if (phase < phase1Single) 
         {
             com.x() += zmpParams[0] * stepTime * (phase - phase1Single) -zmpTime * zmpParams[0] * std::sinh(stepTime * (phase - phase1Single) / zmpTime);
@@ -220,19 +226,61 @@ namespace motion
         destinationTime = inDestinationTime;
     }
 /*=======================================================================================================*/
+//      ENCAPSULATION METHOD: getMotionPhase
+/*=======================================================================================================*/    
+    double TorsoMotionPlanner::getMotionPhase()
+    {
+        return (footMotionPhase);
+    }
+/*=======================================================================================================*/
+//      ENCAPSULATION METHOD: setMotionPhase
+/*=======================================================================================================*/
+    void TorsoMotionPlanner::setMotionPhase(double inMotionPhase)  
+    {
+        footMotionPhase = inMotionPhase;
+    } 
+/*=======================================================================================================*/
 /*      ENCAPSULATION METHOD: getTorsoPosition
 /*=======================================================================================================*/
-    Transform2D TorsoMotionPlanner::getTorsoPosition()
+    Transform2D TorsoMotionPlanner::getTorsoPositionArms()
     {
-        return (torsoPositionTransform);
+        return (torsoPositionsTransform.FrameArms);
     }
 /*=======================================================================================================*/
-/*      ENCAPSULATION METHOD: setTorsoPosition
+/*      ENCAPSULATION METHOD: getTorsoPosition
 /*=======================================================================================================*/
-    void TorsoMotionPlanner::setTorsoPosition(const Transform2D& inTorsoPosition)
+    Transform2D TorsoMotionPlanner::getTorsoPositionLegs()
     {
-        torsoPositionTransform = inTorsoPosition;
+        return (torsoPositionsTransform.FrameLegs);
+    }        
+/*=======================================================================================================*/
+/*      ENCAPSULATION METHOD: getTorsoPosition
+/*=======================================================================================================*/
+    Transform3D TorsoMotionPlanner::getTorsoPosition3D()
+    {
+        return (torsoPositionsTransform.Frame3D);
+    }            
+/*=======================================================================================================*/
+/*      ENCAPSULATION METHOD: setTorsoPositionLegs
+/*=======================================================================================================*/
+    void TorsoMotionPlanner::setTorsoPositionLegs(const Transform2D& inTorsoPosition)
+    {
+        torsoPositionsTransform.FrameLegs = inTorsoPosition;
     }
+/*=======================================================================================================*/
+/*      ENCAPSULATION METHOD: setTorsoPositionArms
+/*=======================================================================================================*/
+    void TorsoMotionPlanner::setTorsoPositionArms(const Transform2D& inTorsoPosition)
+    {
+        torsoPositionsTransform.FrameArms = inTorsoPosition;
+    }    
+/*=======================================================================================================*/
+/*      ENCAPSULATION METHOD: setTorsoPosition3D
+/*=======================================================================================================*/
+    void TorsoMotionPlanner::setTorsoPosition3D(const Transform3D& inTorsoPosition)
+    {
+        torsoPositionsTransform.Frame3D = inTorsoPosition;
+    }    
 /*=======================================================================================================*/
 /*      ENCAPSULATION METHOD: getTorsoSource
 /*=======================================================================================================*/
@@ -391,9 +439,9 @@ namespace motion
         qLArmEnd = stance["arms"]["left"]["end"].as<arma::vec>();
         qRArmStart = stance["arms"]["right"]["start"].as<arma::vec>();
         qRArmEnd = stance["arms"]["right"]["end"].as<arma::vec>();
-        setFootOffsetCoefficient(stance["foot_offset"].as<arma::vec>());
+        //setFootOffsetCoefficient(stance["foot_offset"].as<arma::vec>());
         // gToe/heel overlap checking values
-        stanceLimitY2 = DarwinModel::Leg::LENGTH_BETWEEN_LEGS - stance["limit_margin_y"].as<Expression>();
+        //stanceLimitY2 = DarwinModel::Leg::LENGTH_BETWEEN_LEGS - stance["limit_margin_y"].as<Expression>();
 
         auto& gains = stance["gains"];
         gainArms = gains["arms"].as<Expression>();
