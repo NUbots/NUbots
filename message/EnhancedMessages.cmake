@@ -37,6 +37,9 @@ FOREACH(proto ${protobufs} ${builtin})
     GET_FILENAME_COMPONENT(outputpath ${outputpath} PATH)
     SET(outputpath "${message_binary_dir}/${outputpath}")
 
+    # Create the output directory
+    FILE(MAKE_DIRECTORY ${outputpath})
+
     # Get the dependencies on this protobuf so we can recompile on changes
     # If they change you will need to re cmake
     EXECUTE_PROCESS(COMMAND ${PROTOBUF_PROTOC_EXECUTABLE}
