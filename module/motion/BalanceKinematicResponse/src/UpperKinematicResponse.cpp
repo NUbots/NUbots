@@ -23,21 +23,21 @@
 /*===========================================================================================================*/
 //      INCLUDE(S)
 /*===========================================================================================================*/
-#include "ModularWalkEngine.h"
+/*#include "ModularWalkEngine.h"
 
 #include "utility/motion/RobotModels.h"
 #include "utility/nubugger/NUhelpers.h"
 /*===========================================================================================================*/
 //      NAMESPACE(S)
 /*===========================================================================================================*/
-namespace module 
+/*namespace module 
 {
 namespace motion 
 {
     /*=======================================================================================================*/
     //      UTILIZATION REFERENCE(S)
     /*=======================================================================================================*/
-    using message::input::LimbID;
+    /*using message::input::LimbID;
     using utility::motion::kinematics::DarwinModel;
     using utility::math::matrix::Transform2D;
     using utility::nubugger::graph;
@@ -62,7 +62,7 @@ namespace motion
      *      @pre-condition  : <TODO: INSERT DESCRIPTION>
      *      @post-condition : <TODO: INSERT DESCRIPTION>
     */
-	void UpperKinematicResponse::updateUpperBody(double phase, const Sensors& sensors) 
+	/*void UpperKinematicResponse::updateUpperBody(double phase, const Sensors& sensors) 
 	{
 		//DEBUGGING: Emit relative torsoWorldMetrics position with respect to world model... 
         if (emitLocalisation) 
@@ -124,7 +124,7 @@ namespace motion
      *      @pre-condition  : <TODO: INSERT DESCRIPTION>
      *      @post-condition : <TODO: INSERT DESCRIPTION>
     */
-    std::unique_ptr<std::vector<ServoCommand>> UpperKinematicResponse::motionArms(double phase) 
+    /*std::unique_ptr<std::vector<ServoCommand>> UpperKinematicResponse::motionArms(double phase) 
     {
         // Converts the phase into a sine wave that oscillates between 0 and 1 with a period of 2 phases
         double easing = std::sin(M_PI * phase - M_PI / 2.0) / 2.0 + 0.5;

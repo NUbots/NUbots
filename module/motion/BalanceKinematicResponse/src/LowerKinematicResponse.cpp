@@ -22,23 +22,22 @@
 /*----------------------------------------CONSTANTS AND DEFINITIONS------------------------------------------*/
 /*===========================================================================================================*/
 //      INCLUDE(S)
-/*================================================================    Transform2D FootMotionPlanner::stepTorso(Transform2D uLeftFoot, Transform2D uRightFoot, double shiftFactor) 
-===========================================*/
-#include "ModularWalkEngine.h"
+/*===========================================================================================================*/
+/*#include "ModularWalkEngine.h"
 
 #include "utility/motion/RobotModels.h"
 #include "utility/nubugger/NUhelpers.h"
 /*===========================================================================================================*/
 //      NAMESPACE(S)
 /*===========================================================================================================*/
-namespace module 
+/*namespace module 
 {
 namespace motion 
 {
     /*=======================================================================================================*/
     //      UTILIZATION REFERENCE(S)
     /*=======================================================================================================*/
-    using message::input::LimbID;
+    /*using message::input::LimbID;
     using utility::motion::kinematics::DarwinModel;
     using utility::math::matrix::Transform2D;
     using utility::nubugger::graph;
@@ -51,7 +50,7 @@ namespace motion
      *      @pre-condition  : <TODO: INSERT DESCRIPTION>
      *      @post-condition : <TODO: INSERT DESCRIPTION>
     */
-    std::pair<Transform3D, Transform3D> LowerKinematicResponse::updateLowerBody(double phase, auto torsoWorld, auto feetLocal) 
+    /*std::pair<Transform3D, Transform3D> LowerKinematicResponse::updateLowerBody(double phase, auto torsoWorld, auto feetLocal) 
     {
         // Transform feet targets to be relative to the robot torso...
         Transform3D leftFootTorso  =  leftFootLocal.worldToLocal(torsoWorld);
@@ -75,7 +74,7 @@ namespace motion
      *      @pre-condition  : <TODO: INSERT DESCRIPTION>
      *      @post-condition : <TODO: INSERT DESCRIPTION>
     */
-    std::unique_ptr<std::vector<ServoCommand>> LowerKinematicResponse::motionLegs(std::vector<std::pair<ServoID, float>> joints) 
+    /*std::unique_ptr<std::vector<ServoCommand>> LowerKinematicResponse::motionLegs(std::vector<std::pair<ServoID, float>> joints) 
     {
         auto waypoints = std::make_unique<std::vector<ServoCommand>>();
         waypoints->reserve(16);
