@@ -22,9 +22,6 @@
 //      INCLUDE(S)
 /*===========================================================================================================*/
 #include "BalanceKinematicResponse.h"
-
-#include "utility/motion/RobotModels.h"
-#include "utility/nubugger/NUhelpers.h"
 /*===========================================================================================================*/
 //      NAMESPACE(S)
 /*===========================================================================================================*/
@@ -32,9 +29,9 @@ namespace module
 {
 namespace motion 
 {
-	/*=======================================================================================================*/
-    //      UTILIZATION REFERENCE(S)
-    /*=======================================================================================================*/
+/*=======================================================================================================*/
+//      UTILIZATION REFERENCE(S)
+/*=======================================================================================================*/
     using message::input::LimbID;
     using utility::motion::kinematics::DarwinModel;
     using utility::math::matrix::Transform2D;
@@ -64,8 +61,14 @@ namespace motion
 >>>>>>> Adding emits and triggers for flow of data
 =======
     using extension::Configuration;
+<<<<<<< 0b2306cf95d79477cc349f41ab6ab0c2d542fd0d
 >>>>>>> Further Modularization in development hierarchy, reorganised directory structure:module/motion/BalanceKinematicResponse/src/BalanceKinematicResponse.cpp
 
+=======
+/*=======================================================================================================*/
+/*      NUCLEAR METHOD: FootPlacementPlanner
+/*=======================================================================================================*/
+>>>>>>> Balance Remodelling
     BalanceKinematicResponse::BalanceKinematicResponse(std::unique_ptr<NUClear::Environment> environment)
     : Reactor(std::move(environment)) {
 
@@ -80,6 +83,7 @@ namespace motion
             supportFootCompensation();
         });
     }
+<<<<<<< 0b2306cf95d79477cc349f41ab6ab0c2d542fd0d
 <<<<<<< 96dd3deaa26010585080bb841a4e4f1773925448
 <<<<<<< d07c1d138e6fd9fbe83afad4f4e877e4b814ea95
 >>>>>>> Remodelling...
@@ -99,6 +103,11 @@ namespace motion
      *      @pre-condition  : <TODO: INSERT DESCRIPTION>
      *      @post-condition : <TODO: INSERT DESCRIPTION>
     */
+=======
+/*=======================================================================================================*/
+/*      METHOD: supportFootCompensation
+/*=======================================================================================================*/
+>>>>>>> Balance Remodelling
 	void BalanceKinematicResponse::hipRollCompensation(arma::vec3 footPhases, LimbID swingLeg, Transform3D rightFootT, Transform3D leftFootT) 
     {
         //If feature enabled, apply balance compensation through support actuator...
@@ -118,15 +127,9 @@ namespace motion
             }
         }
     }
-    /*=======================================================================================================*/
-    //      NAME: supportFootCompensation
-    /*=======================================================================================================*/
-    /*
-     *      @input  : <TODO: INSERT DESCRIPTION>
-     *      @output : <TODO: INSERT DESCRIPTION>
-     *      @pre-condition  : <TODO: INSERT DESCRIPTION>
-     *      @post-condition : <TODO: INSERT DESCRIPTION>
-    */
+/*=======================================================================================================*/
+/*      METHOD: supportFootCompensation
+/*=======================================================================================================*/
      void BalanceKinematicResponse::supportFootCompensation(LimbID swingLeg, Transform3D rightFootT, Transform3D leftFootT) 
     {
         //If feature enabled, apply balance compensation through support actuator...

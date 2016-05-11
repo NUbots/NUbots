@@ -28,9 +28,6 @@ namespace message
 {
 namespace motion 
 {
-    using utility::math::matrix::Transform2D;
-    using utility::math::matrix::Transform3D;
-
     /*
     struct [name]
     {
@@ -40,6 +37,10 @@ namespace motion
             , ... {}
     };
     */
+    
+    using utility::math::matrix::Transform2D;
+    using utility::math::matrix::Transform3D;
+
     struct NewTorsoInformation
     {
         Transform2D frameArms;

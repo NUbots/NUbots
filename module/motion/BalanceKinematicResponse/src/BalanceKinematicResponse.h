@@ -30,12 +30,13 @@
 #include "message/behaviour/ServoCommand.h"
 #include "message/motion/BalanceCommand.h" 
 #include "message/input/Sensors.h"
-#include "utility/math/geometry/UnitQuaternion.h"
 
+#include "utility/math/geometry/UnitQuaternion.h"
 #include "utility/math/matrix/Transform2D.h"
 #include "utility/math/matrix/Transform3D.h"
-#include "utility/motion/Balance.h"
+#include "utility/nubugger/NUhelpers.h" 
 #include "utility/motion/RobotModels.h"
+#include "utility/motion/Balance.h"
 
 namespace module 
 {
@@ -50,6 +51,9 @@ namespace motion
         static constexpr size_t UPDATE_FREQUENCY = 90;
 
         static constexpr const char* CONFIGURATION_PATH = "BalanceKinematicResponse.yaml";
+        static constexpr const char* CONFIGURATION_MSSG = "Balance Response Planner - Configure";
+        static constexpr const char* ONTRIGGER_BLNC_CMD = "Balance Response Planner - Update Waypoints";
+        static constexpr const char* ONTRIGGER_BLNC_TGT = "Balance Response Planner - Calculate Target Waypoints";
         explicit BalanceKinematicResponse(std::unique_ptr<NUClear::Environment> environment);
         using LimbID         = message::input::LimbID;
         using ServoCommand   = message::behaviour::ServoCommand;
@@ -59,38 +63,12 @@ namespace motion
         using Transform3D    = utility::math::matrix::Transform3D;
         using UnitQuaternion = utility::math::geometry::UnitQuaternion;
 
-        enum State {
-            /**
-             * Walk engine has completely stopped and standing still
-             */
-            STOPPED,
-
-            /**
-             * A stop request has been made but not received
-             */
-            STOP_REQUEST,
-
-            /**
-             * Stop request has been made and now taking the last step before stopping
-             */
-            LAST_STEP,
-
-            /**
-             * Walk engine is walking as normal
-             */
-            WALKING
-        };
-
         /// Current subsumption ID key to access motors.
         size_t subsumptionId = 1;
 
         // Reaction handle for the main update loop, disabling when not moving will save unnecessary CPU
         ReactionHandle updateHandle;
 
-        // start state
-
-        // The state of the current walk
-        State state;
         // // Whether subsumption has currently interrupted the walk engine
         // bool interrupted;
         // TODO: ???
@@ -99,26 +77,26 @@ namespace motion
         double beginStepTime;
         // How to many 'steps' to take before lifting a foot when starting to walk
         int initialStep;
-        // Current torso position
-        Transform2D uTorso;
+        // Active torso position
+        Transform2D torsoPositionTransform;
         // Pre-step torso position
-        Transform2D uTorsoSource;
+        Transform2D torsoPositionSource;
         // Torso step target position
-        Transform2D uTorsoDestination;
-        // Current left foot position
-        Transform2D uLeftFoot;
+        Transform2D torsoPositionDestination;
+        // Active left foot position
+        Transform2D leftFootPositionTransform;
         // Pre-step left foot position
-        Transform2D uLeftFootSource;
-        // Left foot step target position
-        Transform2D uLeftFootDestination;
-        // Current right foot position
-        Transform2D uRightFoot;
+        Transform2D leftFootSource;
+        // Active right foot position
+        Transform2D rightFootPositionTransform;
         // Pre-step right foot position
-        Transform2D uRightFootSource;
-        // Right foot step target position
-        Transform2D uRightFootDestination;
+        Transform2D rightFootSource;
+        // Destination placement Transform2D left foot positions
+        std::queue<Transform2D> leftFootDestination;
+        // Destination placement Transform2D right foot positions
+        std::queue<Transform2D> rightFootDestination;
         // TODO: ??? Appears to be support foot pre-step position
-        Transform2D uSupport;
+        Transform2D uSupportMass;
         // Current robot velocity
         Transform2D velocityCurrent;
         // Current velocity command
@@ -216,6 +194,12 @@ namespace motion
         ReactionHandle generateStandScriptReaction;
 
         void generateAndSaveStandScript(const Sensors& sensors);
+        /**
+         * @brief [brief description]
+         * @details [long description]
+         * 
+         * @param config [description]
+         */
         void configure(const YAML::Node& config);
 
         void reset();
