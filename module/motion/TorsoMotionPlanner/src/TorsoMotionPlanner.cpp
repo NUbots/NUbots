@@ -121,8 +121,8 @@ namespace motion
 /*=======================================================================================================*/
     void TorsoMotionPlanner::updateTorsoPosition()
     {
-        setTorsoPositionArms(zmpTorsoCompensation(getMotionPhase(), zmpTorsoCoefficients(), zmpParams, stepTime, zmpTime, phase1Single, phase2Single, getLeftFootSource(), getRightFootSource()));
-        setTorsoPositionLegs(zmpTorsoCompensation(getMotionPhase(), zmpTorsoCoefficients(), zmpParams, stepTime, zmpTime, phase1Single, phase2Single, getLeftFootSource(), getRightFootSource()));
+        setTorsoPositionArms(zmpTorsoCompensation(getMotionPhase(), zmpTorsoCoefficients(), getZmpParams(), stepTime, zmpTime, phase1Single, phase2Single, getLeftFootSource(), getRightFootSource()));
+        setTorsoPositionLegs(zmpTorsoCompensation(getMotionPhase(), zmpTorsoCoefficients(), getZmpParams(), stepTime, zmpTime, phase1Single, phase2Single, getLeftFootSource(), getRightFootSource()));
         Transform2D uTorsoWorld = getTorsoPositionArms().localToWorld({-DarwinModel::Leg::HIP_OFFSET_X, 0, 0});
         setTorsoPosition3D(arma::vec6({uTorsoWorld.x(), uTorsoWorld.y(), bodyHeight, 0, bodyTilt, uTorsoWorld.angle()}));
         emit(std::make_unique<NewTorsoInformation>(getTorsoPositionArms(), getTorsoPositionLegs(), getTorsoPosition3D())); 
@@ -139,21 +139,16 @@ namespace motion
 /*=======================================================================================================*/
 //      METHOD: zmpTorsoCoefficients
 /*=======================================================================================================*/
-    void TorsoMotionPlanner::zmpTorsoCoefficients() //originally part of CalculateNewStep
+    arma::vec4 TorsoMotionPlanner::zmpTorsoCoefficients()
     {
+        arma::vec4 zmpCoefficients;
         setTorsoDestination(stepTorso(getLeftFootDestination(), getRightFootDestination(), 0.5));
-
-        // compute ZMP coefficients
-        zmpParams = 
-        {
-            (getSupportMass().x() - getTorsoPositionArms().x()) / (stepTime * phase1Single),
-            (getTorsoDestination().x() - getSupportMass().x()) / (stepTime * (1 - phase2Single)),
-            (getSupportMass().y() - getTorsoPositionArms().y()) / (stepTime * phase1Single),
-            (getTorsoDestination().y() - getSupportMass().y()) / (stepTime * (1 - phase2Single)),
-        };
-
-        zmpTorsoCoefficients().rows(0,1) = zmpSolve(getSupportMass().x(), getTorsoSource().x(), getTorsoDestination().x(), getTorsoSource().x(), getTorsoDestination().x(), phase1Single, phase2Single, stepTime, zmpTime);
-        zmpTorsoCoefficients().rows(2,3) = zmpSolve(getSupportMass().y(), getTorsoSource().y(), getTorsoDestination().y(), getTorsoSource().y(), getTorsoDestination().y(), phase1Single, phase2Single, stepTime, zmpTime);
+        
+        // Compute ZMP coefficients...
+        zmpCoefficients.rows(0,1) = zmpSolve(getSupportMass().x(), getTorsoSource().x(), getTorsoDestination().x(), getTorsoSource().x(), getTorsoDestination().x(), phase1Single, phase2Single, stepTime, zmpTime);
+        zmpCoefficients.rows(2,3) = zmpSolve(getSupportMass().y(), getTorsoSource().y(), getTorsoDestination().y(), getTorsoSource().y(), getTorsoDestination().y(), phase1Single, phase2Single, stepTime, zmpTime);
+        
+        return (zmpCoefficients);
     }
 /*=======================================================================================================*/
 //      METHOD: zmpSolve
@@ -239,6 +234,27 @@ namespace motion
     {
         footMotionPhase = inMotionPhase;
     } 
+/*=======================================================================================================*/
+//      ENCAPSULATION METHOD: getZmpParams
+/*=======================================================================================================*/    
+    arma::vec4 TorsoMotionPlanner::getZmpParams()
+    {
+        setZmpParams
+        ({
+            (getSupportMass().x() - getTorsoPositionArms().x()) / (stepTime * phase1Single),
+            (getTorsoDestination().x() - getSupportMass().x()) / (stepTime * (1 - phase2Single)),
+            (getSupportMass().y() - getTorsoPositionArms().y()) / (stepTime * phase1Single),
+            (getTorsoDestination().y() - getSupportMass().y()) / (stepTime * (1 - phase2Single)),
+        });
+        return (zmpParameters);
+    }
+/*=======================================================================================================*/
+//      ENCAPSULATION METHOD: setZmpParams
+/*=======================================================================================================*/
+    void TorsoMotionPlanner::setZmpParams(arma::vec4 inZmpParams)
+    {
+        zmpParameters = inZmpParams;
+    }       
 /*=======================================================================================================*/
 /*      ENCAPSULATION METHOD: getTorsoPosition
 /*=======================================================================================================*/
