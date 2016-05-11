@@ -144,7 +144,7 @@ namespace motion
         // TODO: ??? Appears to be support foot pre-step position
         Transform2D uSupportMass;
         // zmp params m1X, m2X, m1Y, m2Y
-        arma::vec4 zmpParams;
+        arma::vec4 zmpParameters;
          // end state
 
         double footMotionPhase;
@@ -237,7 +237,7 @@ namespace motion
 
         void updateTorsoPosition();
 
-        void zmpTorsoCoefficients();
+        arma::vec4 zmpTorsoCoefficients();
         /**
          * @brief [brief description]
          * @details [long description]
@@ -411,6 +411,9 @@ namespace motion
         void setNewStepReceived(bool inUpdateStepInstruction);
 
         arma::vec2 zmpSolve(double zs, double z1, double z2, double x1, double x2, double phase1Single, double phase2Single, double stepTime, double zmpTime);
+
+        arma::vec4 getZmpParams();
+        void setZmpParams(arma::vec4 inZmpParams);    
 
         /**
          * Uses ZMP to determine the torso position
