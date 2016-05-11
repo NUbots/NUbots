@@ -28,6 +28,7 @@
 #include "message/support/Configuration.h"
 #include "message/behaviour/Action.h"
 #include "message/behaviour/ServoCommand.h"
+#include "message/motion/FootMotionCommand.h"  
 #include "message/motion/BalanceCommand.h" 
 #include "message/input/Sensors.h"
 
