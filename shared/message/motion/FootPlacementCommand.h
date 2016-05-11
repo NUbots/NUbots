@@ -27,6 +27,16 @@ namespace message
 {
 namespace motion 
 {
+    /*
+    struct [name]
+    {
+        [variables]
+        [structure](...)
+            : ...
+            , ... {}
+    };
+    */
+    
     using message::input::LimbID;
     using utility::math::matrix::Transform2D;
 
