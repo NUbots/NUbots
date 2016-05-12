@@ -60,7 +60,7 @@ namespace motion
         static constexpr const char* ONTRIGGER_FTMN_INF = "Balance Response Planner - Received Update (Active Foot Position) Info";
         static constexpr const char* ONTRIGGER_TRSM_INF = "Balance Response Planner - Received Update (Active Torso Position) Info";
         static constexpr const char* ONTRIGGER_HEAD_INF = "Balance Response Planner - Received Update (Active Head Position) Info";
-        static constexpr const char* ONTRIGGER_BLNC_CMD = "Balance Response Planner - Update Waypoints";
+        static constexpr const char* ONTRIGGER_BLNC_CMD = "Balance Response Planner - Update Robot Posture";
         explicit BalanceKinematicResponse(std::unique_ptr<NUClear::Environment> environment);
         using LimbID         = message::input::LimbID;
         using ServoCommand   = message::behaviour::ServoCommand;
@@ -217,6 +217,7 @@ namespace motion
         void update(const Sensors& sensors);
         std::pair<Transform3D, Transform3D> updateFootPosition(double phase);
         void updateLowerBody(double phase, double leftFoot, double rightFoot);
+        std::pair<Transform3D, Transform3D> updateLowerBody(double phase, auto torsoWorld, auto feetLocal);
         void updateUpperBody(double phase, const Sensors& sensors);
         void hipCompensation(const Sensors& sensors, arma::vec3 footPhases, LimbID swingLeg, Transform3D rightFootT, Transform3D leftFootT);
         void supportMassCompensation(const Sensors& sensors, LimbID swingLeg, Transform3D rightFootT, Transform3D leftFootT);

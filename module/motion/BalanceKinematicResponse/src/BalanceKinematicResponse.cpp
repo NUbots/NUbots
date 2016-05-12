@@ -90,7 +90,7 @@ namespace motion
         });
 
         updateHandle = on<Every<UPDATE_FREQUENCY, Per<std::chrono::seconds>>, With<Sensors>, Single, Priority::HIGH>()
-        .then("Balance Response Planner - Update Waypoints", [this](const Sensors& sensors) 
+        .then("Balance Response Planner - Update Robot Posture", [this](const Sensors& sensors) 
         {
             //hipCompensation();
             //supportMassCompensation();
@@ -188,6 +188,66 @@ namespace motion
                            , sensors);
         }
     }  
+/*=======================================================================================================*/
+//      METHOD: updateLowerBody
+/*=======================================================================================================*/
+    std::pair<Transform3D, Transform3D> BalanceKinematicResponse::updateLowerBody(double phase, auto torsoWorld, auto feetLocal) 
+    {
+        // Transform feet targets to be relative to the robot torso...
+        Transform3D leftFootTorso  =  leftFootLocal.worldToLocal(torsoWorld);
+        Transform3D rightFootTorso = rightFootLocal.worldToLocal(torsoWorld);
+
+        //DEBUGGING: Emit relative feet position with respect to robot torso model... 
+        if (emitFootPosition)
+        {
+            emit(graph("Right foot position", rightFootTorso.translation()));
+            emit(graph("Left  foot position",  leftFootTorso.translation()));
+        }
+
+        return {leftFootTorso, rightFootTorso};
+    }
+/*=======================================================================================================*/
+//      NAME: updateUpperBody
+/*=======================================================================================================*/
+    void BalanceKinematicResponse::updateUpperBody(double phase, const Sensors& sensors) 
+    {
+        /*
+        //BEGIN: Update Position of Arms
+            // Converts the phase into a sine wave that oscillates between 0 and 1 with a period of 2 phases
+            double easing = std::sin(M_PI * phase - M_PI / 2.0) / 2.0 + 0.5;
+            if (swingLeg == LimbID::LEFT_LEG) 
+            {
+                easing = -easing + 1.0; // Gets the 2nd half of the sine wave
+            }
+
+            // Linearly interpolate between the start and end positions using the easing parameter
+            arma::vec3 qLArmActual = easing * qLArmStart + (1.0 - easing) * qLArmEnd;
+            arma::vec3 qRArmActual = (1.0 - easing) * qRArmStart + easing * qRArmEnd;
+
+            // Start arm/leg collision/prevention
+            double rotLeftA = normalizeAngle(uLeftFoot.angle() - uTorso.angle());
+            double rotRightA = normalizeAngle(uTorso.angle() - uRightFoot.angle());
+            Transform2D leftLegTorso = uTorso.worldToLocal(uLeftFoot);
+            Transform2D rightLegTorso = uTorso.worldToLocal(uRightFoot);
+            double leftMinValue = 5 * M_PI / 180 + std::max(0.0, rotLeftA) / 2 + std::max(0.0, leftLegTorso.y() - 0.04) / 0.02 * (6 * M_PI / 180);
+            double rightMinValue = -5 * M_PI / 180 - std::max(0.0, rotRightA) / 2 - std::max(0.0, -rightLegTorso.y() - 0.04) / 0.02 * (6 * M_PI / 180);
+            // update shoulder pitch to move arm away from body
+            qLArmActual[1] = std::max(leftMinValue, qLArmActual[1]);
+            qRArmActual[1] = std::min(rightMinValue, qRArmActual[1]);
+            // End arm/leg collision/prevention
+        //END: Update Position of Arms  
+        */
+
+        /*
+        //DEBUGGING: Emit relative torsoWorldMetrics position with respect to world model... 
+        if (emitLocalisation) 
+        {
+            localise(uTorsoWorld);
+        }
+        */
+
+        //emit(motionArms(phase));
+    }
 /*=======================================================================================================*/
 /*      METHOD: configure
 /*=======================================================================================================*/
