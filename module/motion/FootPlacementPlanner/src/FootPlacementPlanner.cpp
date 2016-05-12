@@ -34,7 +34,7 @@ namespace motion
 /*=======================================================================================================*/
     using message::input::LimbID;
     using message::motion::FootStepTarget;
-    using message::motion::NewTargetInformation;
+    using message::motion::NewStepTargetInfo;
     using message::motion::EnableFootPlacement;
     using message::motion::DisableFootPlacement;
     using message::motion::FootStepCompleted;
@@ -69,13 +69,15 @@ namespace motion
             configure(config.config);
         });
 
-        on<Trigger<WalkStartCommand>>().then([this] {
+        on<Trigger<WalkStartCommand>>().then([this] 
+        {
             lastVeloctiyUpdateTime = NUClear::clock::now();
             start();
             // emit(std::make_unique<ActionPriorites>(ActionPriorites { subsumptionId, { 25, 10 }})); // TODO: config
         });
 
-        on<Trigger<WalkStopCommand>>().then([this] {
+        on<Trigger<WalkStopCommand>>().then([this] 
+        {
             // TODO: This sets STOP_REQUEST, which appears not to be used anywhere.
             // If this is the case, we should delete or rethink the WalkStopCommand.
             requestStop();
@@ -198,7 +200,7 @@ namespace motion
             emit(std::make_unique<FootStepTarget>(swingLeg, getTime() + stepTime, getLeftFootDestination())); //Trigger NewStep
         }
 
-        emit(std::make_unique<NewTargetInformation>(getLeftFootSource(), getRightFootSource(), getLeftFootDestination(), getRightFootDestination(), getSupportMass())); //Torso Information
+        emit(std::make_unique<NewStepTargetInfo>(getLeftFootSource(), getRightFootSource(), getLeftFootDestination(), getRightFootDestination(), getSupportMass())); //Torso Information
         //emit destinations for fmp and/or zmp
         //may combine NewStep and NewStepTorso
     }

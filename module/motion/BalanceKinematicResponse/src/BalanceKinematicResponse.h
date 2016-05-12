@@ -29,6 +29,7 @@
 #include "message/behaviour/Action.h"
 #include "message/behaviour/ServoCommand.h"
 #include "message/motion/FootMotionCommand.h"  
+#include "message/motion/TorsoMotionCommand.h"  
 #include "message/motion/BalanceCommand.h" 
 #include "message/input/Sensors.h"
 
@@ -56,8 +57,10 @@ namespace motion
 
         static constexpr const char* CONFIGURATION_PATH = "BalanceKinematicResponse.yaml";
         static constexpr const char* CONFIGURATION_MSSG = "Balance Response Planner - Configure";
+        static constexpr const char* ONTRIGGER_FTMN_INF = "Balance Response Planner - Received Update (Active Foot Position) Info";
+        static constexpr const char* ONTRIGGER_TRSM_INF = "Balance Response Planner - Received Update (Active Torso Position) Info";
+        static constexpr const char* ONTRIGGER_HEAD_INF = "Balance Response Planner - Received Update (Active Head Position) Info";
         static constexpr const char* ONTRIGGER_BLNC_CMD = "Balance Response Planner - Update Waypoints";
-        static constexpr const char* ONTRIGGER_BLNC_TGT = "Balance Response Planner - Calculate Target Waypoints";
         explicit BalanceKinematicResponse(std::unique_ptr<NUClear::Environment> environment);
         using LimbID         = message::input::LimbID;
         using ServoCommand   = message::behaviour::ServoCommand;

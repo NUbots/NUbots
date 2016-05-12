@@ -41,14 +41,14 @@ namespace motion
     using utility::math::matrix::Transform2D;
     using utility::math::matrix::Transform3D;
 
-    struct NewTorsoInformation
+    struct TorsoMotionUpdate
     {
         Transform2D frameArms;
         Transform2D frameLegs;
         Transform3D frame3D;
-        NewTorsoInformation(const Transform2D& inFrameArms,
-                            const Transform2D& inFrameLegs,
-                            const Transform3D& inFrame3D)
+        TorsoMotionUpdate(const Transform2D& inFrameArms,
+                          const Transform2D& inFrameLegs,
+                          const Transform3D& inFrame3D)
             : frameArms(inFrameArms) 
             , frameLegs(inFrameLegs)
             , frame3D(inFrame3D) {}

@@ -48,7 +48,7 @@ namespace motion
     using message::motion::WalkStopped;
     using message::motion::FootStepTarget;
     using message::motion::FootMotionUpdate;
-    using message::motion::NewTorsoInformation;
+    using message::motion::TorsoMotionUpdate;
     using message::motion::EnableTorsoMotion;
     using message::motion::DisableTorsoMotion;
     using message::motion::ServoTarget;
@@ -182,8 +182,12 @@ namespace motion
 >>>>>>> TorsoMotionPlanner compiles again - further remodelling required
         Transform2D uTorsoWorld = getTorsoPositionArms().localToWorld({-DarwinModel::Leg::HIP_OFFSET_X, 0, 0});
         setTorsoPosition3D(arma::vec6({uTorsoWorld.x(), uTorsoWorld.y(), bodyHeight, 0, bodyTilt, uTorsoWorld.angle()}));
+<<<<<<< 2b4d7ec9700518d8944243ec26dc14adda977657
         emit(std::make_unique<NewTorsoInformation>(getTorsoPositionArms(), getTorsoPositionLegs(), getTorsoPosition3D())); 
 >>>>>>> Further remodelling...
+=======
+        emit(std::make_unique<TorsoMotionUpdate>(getTorsoPositionArms(), getTorsoPositionLegs(), getTorsoPosition3D())); 
+>>>>>>> WalkEngine Remodelling - balance compiles successfully
     }
 /*=======================================================================================================*/
 //      METHOD: stepTorso
