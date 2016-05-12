@@ -34,6 +34,9 @@ namespace motion
 /*=======================================================================================================*/
     using message::input::LimbID;
     using message::motion::FootMotionUpdate;
+    using message::motion::TorsoMotionUpdate;
+    using message::motion::EnableBalanceResponse;
+    using message::motion::DisableBalanceResponse;
     using message::support::Configuration;
 
     using utility::support::Expression;
@@ -53,9 +56,41 @@ namespace motion
             configure(config.config);
         });
 
-        on<Trigger<FootMotionUpdate>>().then([this] {
+        updateHandle = on<Every<UPDATE_FREQUENCY, Per<std::chrono::seconds>>, With<Sensors>, Single, Priority::HIGH>()
+        .then("Balance Response Planner - Update Waypoints", [this](const Sensors& sensors) 
+        {
             //hipCompensation();
             //supportMassCompensation();
+        }).disable();
+
+        //Aim to avoid dependancy on target position to enhance statelessness and adaptive balance compensation...
+        on<Trigger<FootMotionUpdate>>().then("Balance Response Planner - Received Update (Active Foot Position) Info", [this] 
+        {
+            
+        });
+
+        //Aim to avoid dependancy on target position to enhance statelessness and adaptive balance compensation...
+        on<Trigger<TorsoMotionUpdate>>().then("Balance Response Planner - Received Update (Active Torso Position) Info", [this] 
+        {
+            
+        });
+
+        /*Aim to avoid dependancy on target position to enhance statelessness and adaptive balance compensation...
+        on<Trigger<HeadMotionUpdate>>().then("Balance Response Planner - Received Update (Active Head Position) Info", [this] 
+        {
+            
+        });*/
+
+        on<Trigger<EnableBalanceResponse>>().then([this] (const EnableBalanceResponse& command) 
+        {
+            subsumptionId = command.subsumptionId;
+            updateHandle.enable();
+        });
+
+        //If balance response no longer requested, cease updating...
+        on<Trigger<DisableBalanceResponse>>().then([this] 
+        {
+            updateHandle.disable(); 
         });
     }
 /*=======================================================================================================*/

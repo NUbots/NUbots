@@ -48,7 +48,7 @@ namespace motion
     using message::motion::WalkStopped;
     using message::motion::FootStepTarget;
     using message::motion::FootMotionUpdate;
-    using message::motion::NewTorsoInformation;
+    using message::motion::TorsoMotionUpdate;
     using message::motion::EnableTorsoMotion;
     using message::motion::DisableTorsoMotion;
     using message::motion::ServoTarget;
@@ -125,7 +125,7 @@ namespace motion
         setTorsoPositionLegs(zmpTorsoCompensation(getMotionPhase(), zmpTorsoCoefficients(), getZmpParams(), stepTime, zmpTime, phase1Single, phase2Single, getLeftFootSource(), getRightFootSource()));
         Transform2D uTorsoWorld = getTorsoPositionArms().localToWorld({-DarwinModel::Leg::HIP_OFFSET_X, 0, 0});
         setTorsoPosition3D(arma::vec6({uTorsoWorld.x(), uTorsoWorld.y(), bodyHeight, 0, bodyTilt, uTorsoWorld.angle()}));
-        emit(std::make_unique<NewTorsoInformation>(getTorsoPositionArms(), getTorsoPositionLegs(), getTorsoPosition3D())); 
+        emit(std::make_unique<TorsoMotionUpdate>(getTorsoPositionArms(), getTorsoPositionLegs(), getTorsoPosition3D())); 
     }
 /*=======================================================================================================*/
 //      METHOD: stepTorso

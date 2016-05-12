@@ -54,14 +54,14 @@ namespace motion
             , targetTime(targetTime)
             , targetDestination(targetDestination) {}
     };
-    struct NewTargetInformation
+    struct NewStepTargetInfo
     {
         Transform2D leftFootSource;
         Transform2D rightFootSource;
         Transform2D leftFootDestination;
         Transform2D rightFootDestination;
         Transform2D supportMass;
-        NewTargetInformation(const Transform2D& leftFootSource, 
+        NewStepTargetInfo(const Transform2D& leftFootSource, 
                              const Transform2D& rightFootSource,
                              const Transform2D& leftFootDestination,
                              const Transform2D& rightFootDestination,

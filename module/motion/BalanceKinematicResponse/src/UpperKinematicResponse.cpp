@@ -121,4 +121,4 @@ namespace motion
         return std::move(waypoints);
     }
 }  // motion
-}  // modules
+}  // modules*/
