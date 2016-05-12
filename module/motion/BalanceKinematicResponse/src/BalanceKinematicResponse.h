@@ -32,6 +32,9 @@
 #include "message/motion/BalanceCommand.h" 
 #include "message/input/Sensors.h"
 
+#include "utility/support/yaml_armadillo.h"
+#include "utility/support/yaml_expression.h" 
+
 #include "utility/math/geometry/UnitQuaternion.h"
 #include "utility/math/matrix/Transform2D.h"
 #include "utility/math/matrix/Transform3D.h"
@@ -212,7 +215,8 @@ namespace motion
         std::pair<Transform3D, Transform3D> updateFootPosition(double phase);
         void updateLowerBody(double phase, double leftFoot, double rightFoot);
         void updateUpperBody(double phase, const Sensors& sensors);
-        void hipCompensation(arma::vec3 footPhases, LimbID swingLeg, Transform3D rightFootT, Transform3D leftFootT);
+        void hipCompensation(const Sensors& sensors, arma::vec3 footPhases, LimbID swingLeg, Transform3D rightFootT, Transform3D leftFootT);
+        void supportMassCompensation(const Sensors& sensors, LimbID swingLeg, Transform3D rightFootT, Transform3D leftFootT);
         void updateStill(const Sensors& sensors = Sensors());
         std::unique_ptr<std::vector<ServoCommand>> updateStillWayPoints(const Sensors& sensors);
 
