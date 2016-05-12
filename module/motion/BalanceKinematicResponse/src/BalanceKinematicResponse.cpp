@@ -33,9 +33,13 @@ namespace motion
 //      UTILIZATION REFERENCE(S)
 /*=======================================================================================================*/
     using message::input::LimbID;
+    using message::motion::FootMotionUpdate;
+    using message::support::Configuration;
+
+    using utility::support::Expression;
     using utility::motion::kinematics::DarwinModel;
     using utility::math::matrix::Transform2D;
-    using message::motion::FootMotionUpdate;
+    using utility::math::matrix::Transform3D;
     using utility::nubugger::graph;
 /*=======================================================================================================*/
 /*      NUCLEAR METHOD: FootPlacementPlanner
@@ -50,14 +54,14 @@ namespace motion
         });
 
         on<Trigger<FootMotionUpdate>>().then([this] {
-            hipRollCompensation();
-            supportFootCompensation();
+            //hipCompensation();
+            //supportMassCompensation();
         });
     }
 /*=======================================================================================================*/
-/*      METHOD: supportFootCompensation
+/*      METHOD: hipCompensation
 /*=======================================================================================================*/
-	void BalanceKinematicResponse::hipRollCompensation(arma::vec3 footPhases, LimbID swingLeg, Transform3D rightFootT, Transform3D leftFootT) 
+	void BalanceKinematicResponse::hipCompensation(const Sensors& sensors, arma::vec3 footPhases, LimbID swingLeg, Transform3D rightFootT, Transform3D leftFootT) 
     {
         //If feature enabled, apply balance compensation through support actuator...
         if (balanceEnabled) 
@@ -77,9 +81,9 @@ namespace motion
         }
     }
 /*=======================================================================================================*/
-/*      METHOD: supportFootCompensation
+/*      METHOD: supportMassCompensation
 /*=======================================================================================================*/
-     void BalanceKinematicResponse::supportFootCompensation(LimbID swingLeg, Transform3D rightFootT, Transform3D leftFootT) 
+    void BalanceKinematicResponse::supportMassCompensation(const Sensors& sensors, LimbID swingLeg, Transform3D rightFootT, Transform3D leftFootT) 
     {
         //If feature enabled, apply balance compensation through support actuator...
         if (balanceEnabled) 
@@ -104,7 +108,7 @@ namespace motion
         qLArmEnd = stance["arms"]["left"]["end"].as<arma::vec>();
         qRArmStart = stance["arms"]["right"]["start"].as<arma::vec>();
         qRArmEnd = stance["arms"]["right"]["end"].as<arma::vec>();
-        setFootOffsetCoefficient(stance["foot_offset"].as<arma::vec>());
+        //setFootOffsetCoefficient(stance["foot_offset"].as<arma::vec>());
         // gToe/heel overlap checking values
         stanceLimitY2 = DarwinModel::Leg::LENGTH_BETWEEN_LEGS - stance["limit_margin_y"].as<Expression>();
 
