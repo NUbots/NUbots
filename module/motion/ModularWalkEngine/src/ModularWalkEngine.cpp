@@ -87,6 +87,42 @@ namespace motion
     using utility::math::angle::normalizeAngle;
     using utility::nubugger::graph;
     using utility::support::Expression;
+/*=======================================================================================================*/
+//      NAME: motionArms
+/*=======================================================================================================*/
+    std::unique_ptr<std::vector<ServoCommand>> UpperKinematicResponse::motionArms(double phase) 
+    {
+        auto waypoints = std::make_unique<std::vector<ServoCommand>>();
+        waypoints->reserve(6);
+
+        NUClear::clock::time_point time = NUClear::clock::now() + std::chrono::nanoseconds(std::nano::den/UPDATE_FREQUENCY);
+        waypoints->push_back({ subsumptionId, time, ServoID::R_SHOULDER_PITCH, float(qRArmActual[0]), jointGains[ServoID::R_SHOULDER_PITCH], 100 });
+        waypoints->push_back({ subsumptionId, time, ServoID::R_SHOULDER_ROLL,  float(qRArmActual[1]), jointGains[ServoID::R_SHOULDER_ROLL], 100 });
+        waypoints->push_back({ subsumptionId, time, ServoID::R_ELBOW,          float(qRArmActual[2]), jointGains[ServoID::R_ELBOW], 100 });
+        waypoints->push_back({ subsumptionId, time, ServoID::L_SHOULDER_PITCH, float(qLArmActual[0]), jointGains[ServoID::L_SHOULDER_PITCH], 100 });
+        waypoints->push_back({ subsumptionId, time, ServoID::L_SHOULDER_ROLL,  float(qLArmActual[1]), jointGains[ServoID::L_SHOULDER_ROLL], 100 });
+        waypoints->push_back({ subsumptionId, time, ServoID::L_ELBOW,          float(qLArmActual[2]), jointGains[ServoID::L_ELBOW], 100 });
+
+        return std::move(waypoints);
+    }    
+/*=======================================================================================================*/
+//      NAME: motionLegs
+/*=======================================================================================================*/
+    std::unique_ptr<std::vector<ServoCommand>> LowerKinematicResponse::motionLegs(std::vector<std::pair<ServoID, float>> joints) 
+    {
+        auto waypoints = std::make_unique<std::vector<ServoCommand>>();
+        waypoints->reserve(16);
+
+        NUClear::clock::time_point time = NUClear::clock::now() + std::chrono::nanoseconds(std::nano::den / UPDATE_FREQUENCY);
+
+        for (auto& joint : joints) 
+        {
+            waypoints->push_back({ subsumptionId, time, joint.first, joint.second, jointGains[joint.first], 100 }); // TODO: support separate gains for each leg
+        }
+
+        return std::move(waypoints);
+    }
+       
     /*=======================================================================================================*/
     //      NAME: ModularWalkEngine
     /*=======================================================================================================*/
