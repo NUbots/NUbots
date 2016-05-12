@@ -114,6 +114,8 @@ namespace motion
             zmpTorsoCoefficients();
         });
 
+        //on<Trigger<NewStepTargetInfo>>().then([this]){};
+
         //In the process of actuating a foot step and emitting updated positional data...
         on<Trigger<FootMotionUpdate>>().then("Torso Motion Planner - Received Foot Motion Update", [this] (const FootMotionUpdate& info) 
         {

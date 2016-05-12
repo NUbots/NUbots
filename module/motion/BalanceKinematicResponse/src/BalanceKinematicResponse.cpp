@@ -114,6 +114,8 @@ namespace motion
             
         });*/
 
+        //on<Trigger<NewStepTargetInfo>>().then([this]){};            
+
         on<Trigger<EnableBalanceResponse>>().then([this] (const EnableBalanceResponse& command) 
         {
             subsumptionId = command.subsumptionId;
@@ -191,7 +193,7 @@ namespace motion
 /*=======================================================================================================*/
 //      METHOD: updateLowerBody
 /*=======================================================================================================*/
-    std::pair<Transform3D, Transform3D> BalanceKinematicResponse::updateLowerBody(double phase, auto torsoWorld, auto feetLocal) 
+    std::pair<Transform3D, Transform3D> BalanceKinematicResponse::updateLowerBody(double phase, auto torsoWorld, const Transform2D& leftFootLocal, const Transform2D& rightFootLocal) 
     {
         // Transform feet targets to be relative to the robot torso...
         Transform3D leftFootTorso  =  leftFootLocal.worldToLocal(torsoWorld);
@@ -248,6 +250,234 @@ namespace motion
 
         //emit(motionArms(phase));
     }
+/*=======================================================================================================*/
+//      ENCAPSULATION METHOD: getTime
+/*=======================================================================================================*/
+    double BalanceKinematicResponse::getTime() 
+    {
+        return std::chrono::duration_cast<std::chrono::microseconds>(NUClear::clock::now().time_since_epoch()).count() * 1E-6;
+    }
+/*=======================================================================================================*/
+//      ENCAPSULATION METHOD: getDestinationTime
+/*=======================================================================================================*/
+    double BalanceKinematicResponse::getDestinationTime()
+    {
+        return (destinationTime);
+    }
+/*=======================================================================================================*/
+//      ENCAPSULATION METHOD: setDestinationTime
+/*=======================================================================================================*/
+    void BalanceKinematicResponse::setDestinationTime(double inDestinationTime)
+    {
+        destinationTime = inDestinationTime;
+    }
+/*=======================================================================================================*/
+//      ENCAPSULATION METHOD: getMotionPhase
+/*=======================================================================================================*/    
+    double BalanceKinematicResponse::getMotionPhase()
+    {
+        return (footMotionPhase);
+    }
+/*=======================================================================================================*/
+//      ENCAPSULATION METHOD: setMotionPhase
+/*=======================================================================================================*/
+    void BalanceKinematicResponse::setMotionPhase(double inMotionPhase)  
+    {
+        footMotionPhase = inMotionPhase;
+    } 
+/*=======================================================================================================*/
+//      ENCAPSULATION METHOD: getZmpParams
+/*=======================================================================================================*/    
+    arma::vec4 BalanceKinematicResponse::getZmpParams()
+    {
+        setZmpParams
+        ({
+            (getSupportMass().x() - getTorsoPositionArms().x()) / (stepTime * phase1Single),
+            (getTorsoDestination().x() - getSupportMass().x()) / (stepTime * (1 - phase2Single)),
+            (getSupportMass().y() - getTorsoPositionArms().y()) / (stepTime * phase1Single),
+            (getTorsoDestination().y() - getSupportMass().y()) / (stepTime * (1 - phase2Single)),
+        });
+        return (zmpParameters);
+    }
+/*=======================================================================================================*/
+//      ENCAPSULATION METHOD: setZmpParams
+/*=======================================================================================================*/
+    void BalanceKinematicResponse::setZmpParams(arma::vec4 inZmpParams)
+    {
+        zmpParameters = inZmpParams;
+    }       
+/*=======================================================================================================*/
+/*      ENCAPSULATION METHOD: getTorsoPosition
+/*=======================================================================================================*/
+    Transform2D BalanceKinematicResponse::getTorsoPositionArms()
+    {
+        return (torsoPositionsTransform.FrameArms);
+    }
+/*=======================================================================================================*/
+/*      ENCAPSULATION METHOD: getTorsoPosition
+/*=======================================================================================================*/
+    Transform2D BalanceKinematicResponse::getTorsoPositionLegs()
+    {
+        return (torsoPositionsTransform.FrameLegs);
+    }        
+/*=======================================================================================================*/
+/*      ENCAPSULATION METHOD: getTorsoPosition
+/*=======================================================================================================*/
+    Transform3D BalanceKinematicResponse::getTorsoPosition3D()
+    {
+        return (torsoPositionsTransform.Frame3D);
+    }            
+/*=======================================================================================================*/
+/*      ENCAPSULATION METHOD: setTorsoPositionLegs
+/*=======================================================================================================*/
+    void BalanceKinematicResponse::setTorsoPositionLegs(const Transform2D& inTorsoPosition)
+    {
+        torsoPositionsTransform.FrameLegs = inTorsoPosition;
+    }
+/*=======================================================================================================*/
+/*      ENCAPSULATION METHOD: setTorsoPositionArms
+/*=======================================================================================================*/
+    void BalanceKinematicResponse::setTorsoPositionArms(const Transform2D& inTorsoPosition)
+    {
+        torsoPositionsTransform.FrameArms = inTorsoPosition;
+    }    
+/*=======================================================================================================*/
+/*      ENCAPSULATION METHOD: setTorsoPosition3D
+/*=======================================================================================================*/
+    void BalanceKinematicResponse::setTorsoPosition3D(const Transform3D& inTorsoPosition)
+    {
+        torsoPositionsTransform.Frame3D = inTorsoPosition;
+    }    
+/*=======================================================================================================*/
+/*      ENCAPSULATION METHOD: getTorsoSource
+/*=======================================================================================================*/
+    Transform2D BalanceKinematicResponse::getTorsoSource()
+    {
+        return (torsoPositionSource);
+    }
+/*=======================================================================================================*/
+/*      ENCAPSULATION METHOD: setTorsoSource
+/*=======================================================================================================*/
+    void BalanceKinematicResponse::setTorsoSource(const Transform2D& inTorsoSource)
+    {
+        torsoPositionSource = inTorsoSource;
+    }
+/*=======================================================================================================*/
+/*      ENCAPSULATION METHOD: getTorsoDestination
+/*=======================================================================================================*/
+    Transform2D BalanceKinematicResponse::getTorsoDestination()
+    {
+        return (torsoPositionDestination);
+    }
+/*=======================================================================================================*/
+/*      ENCAPSULATION METHOD: setTorsoDestination
+/*=======================================================================================================*/
+    void BalanceKinematicResponse::setTorsoDestination(const Transform2D& inTorsoDestination)
+    {
+        torsoPositionDestination = inTorsoDestination;
+    }
+/*=======================================================================================================*/
+/*      ENCAPSULATION METHOD: getSupportMass
+/*=======================================================================================================*/
+    Transform2D BalanceKinematicResponse::getSupportMass()
+    {
+        return (uSupportMass);
+    }
+/*=======================================================================================================*/
+/*      ENCAPSULATION METHOD: setSupportMass
+/*=======================================================================================================*/
+    void BalanceKinematicResponse::setSupportMass(const Transform2D& inSupportMass)
+    {
+        uSupportMass = inSupportMass;
+    }    
+/*=======================================================================================================*/
+/*      ENCAPSULATION METHOD: getLeftFootPosition
+/*=======================================================================================================*/
+    Transform2D BalanceKinematicResponse::getLeftFootPosition()
+    {
+        return (leftFootPositionTransform);
+    }
+/*=======================================================================================================*/
+/*      ENCAPSULATION METHOD: setLeftFootPosition
+/*=======================================================================================================*/
+    void BalanceKinematicResponse::setLeftFootPosition(const Transform2D& inLeftFootPosition)
+    {
+        leftFootPositionTransform = inLeftFootPosition;
+    }
+/*=======================================================================================================*/
+/*      ENCAPSULATION METHOD: getRightFootPosition
+/*=======================================================================================================*/
+    Transform2D BalanceKinematicResponse::getRightFootPosition()
+    {
+        return (rightFootPositionTransform);
+    }
+/*=======================================================================================================*/
+/*      ENCAPSULATION METHOD: setRightFootPosition
+/*=======================================================================================================*/
+    void BalanceKinematicResponse::setRightFootPosition(const Transform2D& inRightFootPosition)
+    {
+        rightFootPositionTransform = inRightFootPosition;
+    }
+/*=======================================================================================================*/
+/*      ENCAPSULATION METHOD: getLeftFootSource
+/*=======================================================================================================*/
+    Transform2D BalanceKinematicResponse::getLeftFootSource()
+    {
+        return (leftFootSource);
+    }
+/*=======================================================================================================*/
+/*      ENCAPSULATION METHOD: setLeftFootSource
+/*=======================================================================================================*/
+    void BalanceKinematicResponse::setLeftFootSource(const Transform2D& inLeftFootSource)
+    {
+        leftFootSource = inLeftFootSource;
+    }
+/*=======================================================================================================*/
+/*      ENCAPSULATION METHOD: getRightFootSource
+/*=======================================================================================================*/
+    Transform2D BalanceKinematicResponse::getRightFootSource()
+    {
+        return (rightFootSource);
+    }
+/*=======================================================================================================*/
+/*      ENCAPSULATION METHOD: setRightFootSource
+/*=======================================================================================================*/
+    void BalanceKinematicResponse::setRightFootSource(const Transform2D& inRightFootSource)
+    {
+        rightFootSource = inRightFootSource;
+    }        
+/*=======================================================================================================*/
+//      METHOD: getLeftFootDestination
+/*=======================================================================================================*/
+    Transform2D BalanceKinematicResponse::getLeftFootDestination()
+    {
+        setNewStepReceived(false);
+        return (leftFootDestination.front());
+    }
+/*=======================================================================================================*/
+//      METHOD: setLeftFootDestination
+/*=======================================================================================================*/
+    void BalanceKinematicResponse::setLeftFootDestination(const Transform2D& inLeftFootDestination)
+    {
+        setNewStepReceived(true);
+        leftFootDestination.push(inLeftFootDestination);
+    }
+/*=======================================================================================================*/
+//      ENCAPSULATION METHOD: getRightFootDestination
+/*=======================================================================================================*/
+    Transform2D BalanceKinematicResponse::getRightFootDestination()
+    {
+        setNewStepReceived(false);
+        return (rightFootDestination.front());
+    }
+/*=======================================================================================================*/
+//      ENCAPSULATION METHOD: setRightFootDestination
+/*=======================================================================================================*/
+    void BalanceKinematicResponse::setRightFootDestination(const Transform2D& inRightFootDestination)
+    {
+        setNewStepReceived(true);
+        rightFootDestination.push(inRightFootDestination);
+    }    
 /*=======================================================================================================*/
 /*      METHOD: configure
 /*=======================================================================================================*/

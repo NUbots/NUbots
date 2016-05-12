@@ -138,7 +138,7 @@ namespace motion
         // zmp expoential coefficients aXP aXN aYP aYN
         arma::vec4 zmpCoefficients;
         // zmp params m1X, m2X, m1Y, m2Y
-        arma::vec4 zmpParams;
+        arma::vec4 zmpParameters;
         // ??
         Transform2D uSupportMass;
         // end state
