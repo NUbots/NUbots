@@ -169,7 +169,7 @@ namespace motion {
                 float x = rigidBody.position[0];
                 float y = rigidBody.position[1];
                 float z = rigidBody.position[2];
-                std::cout << "Rigid body " << id << " " << arma::vec({x,y,z}).t();
+                // std::cout << "Rigid body " << id << " " << arma::vec({x,y,z}).t();
                 if(id == head_id){
                         mocap_head_pos = oculus_to_robot_scale * mocap_to_robot * arma::vec3({x,y,z});
                         marker_count++;
@@ -183,7 +183,7 @@ namespace motion {
 
             }
             if(marker_count == 3){
-                std::cout << "calculating arms" << std::endl;
+                // std::cout << "calculating arms" << std::endl;
                 l_arm = (l_arm_raw - mocap_head_pos);
                 r_arm = (r_arm_raw - mocap_head_pos);
             }
@@ -210,8 +210,10 @@ namespace motion {
 
             //3DoF
             arma::vec3 gaze = currentCamPose.rotation().col(0);
+            Rotation3D yawlessOrientation = Rotation3D::createRotationZ(-sensors.orientation.yaw()) * sensors.orientation;
+
             if(gyro_compensation){
-                gaze = sensors.orientation * gaze;
+                gaze = yawlessOrientation * gaze;
             }
             auto joints = utility::motion::kinematics::calculateHeadJoints<DarwinModel>(gaze);
 

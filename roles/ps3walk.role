@@ -18,7 +18,6 @@ NUCLEAR_ROLE(
     # Motion
     motion::WalkEngine
     motion::ScriptEngine
-    motion::IKKick
 
     # Vision
     vision::LUTClassifier
@@ -33,7 +32,9 @@ NUCLEAR_ROLE(
     behaviour::skills::Getup
     behaviour::skills::DirectWalkController
     behaviour::strategy::PS3Walk
+    behaviour::skills::KickScript
 
     # Motion
     motion::HeadController
+
 )
