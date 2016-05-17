@@ -84,8 +84,15 @@ namespace motion
         double beginStepTime;
         // How to many 'steps' to take before lifting a foot when starting to walk
         int initialStep;
+        // Active torso relative positions struct
+        struct TorsoPositions 
+        {
+            Transform2D FrameArms;
+            Transform2D FrameLegs;
+            Transform3D Frame3D;
+        };
         // Active torso position
-        Transform2D torsoPositionTransform;
+        TorsoPositions torsoPositionsTransform;
         // Pre-step torso position
         Transform2D torsoPositionSource;
         // Torso step target position
@@ -229,6 +236,9 @@ namespace motion
         void updateVelocity();
         void stanceReset();
 
+        arma::vec4 getZmpParams();
+        void setZmpParams(arma::vec4 inZmpParams); 
+
         void localise(Transform2D position);
 
         std::unique_ptr<std::vector<ServoCommand>> motionLegs(std::vector<std::pair<ServoID, float>> joints);
@@ -274,16 +284,45 @@ namespace motion
         /**
          * @brief [brief description]
          * @details [long description]
-         * @return [description]
+         * 
+         * @param inTorsoPosition [description]
          */
-        Transform2D getTorsoPosition();
+        Transform2D getTorsoPositionArms();
         /**
          * @brief [brief description]
          * @details [long description]
          * 
          * @param inTorsoPosition [description]
          */
-        void setTorsoPosition(const Transform2D& inTorsoPosition);
+        Transform2D getTorsoPositionLegs();
+        /**
+         * @brief [brief description]
+         * @details [long description]
+         * 
+         * @param inTorsoPosition [description]
+         */
+        Transform3D getTorsoPosition3D();
+        /**
+         * @brief [brief description]
+         * @details [long description]
+         * 
+         * @param inTorsoPosition [description]
+         */
+        void setTorsoPositionArms(const Transform2D& inTorsoPosition);
+        /**
+         * @brief [brief description]
+         * @details [long description]
+         * 
+         * @param inTorsoPosition [description]
+         */
+        void setTorsoPositionLegs(const Transform2D& inTorsoPosition);
+        /**
+         * @brief [brief description]
+         * @details [long description]
+         * 
+         * @param inTorsoPosition [description]
+         */
+        void setTorsoPosition3D(const Transform3D& inTorsoPosition);
         /**
          * @brief [brief description]
          * @details [long description]

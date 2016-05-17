@@ -199,34 +199,6 @@ namespace motion
         return std::chrono::duration_cast<std::chrono::microseconds>(NUClear::clock::now().time_since_epoch()).count() * 1E-6;
     }
 /*=======================================================================================================*/
-//      ENCAPSULATION METHOD: getDestinationTime
-/*=======================================================================================================*/
-    double BalanceKinematicResponse::getDestinationTime()
-    {
-        return (destinationTime);
-    }
-/*=======================================================================================================*/
-//      ENCAPSULATION METHOD: setDestinationTime
-/*=======================================================================================================*/
-    void BalanceKinematicResponse::setDestinationTime(double inDestinationTime)
-    {
-        destinationTime = inDestinationTime;
-    }
-/*=======================================================================================================*/
-//      ENCAPSULATION METHOD: getMotionPhase
-/*=======================================================================================================*/    
-    double BalanceKinematicResponse::getMotionPhase()
-    {
-        return (footMotionPhase);
-    }
-/*=======================================================================================================*/
-//      ENCAPSULATION METHOD: setMotionPhase
-/*=======================================================================================================*/
-    void BalanceKinematicResponse::setMotionPhase(double inMotionPhase)  
-    {
-        footMotionPhase = inMotionPhase;
-    } 
-/*=======================================================================================================*/
 //      ENCAPSULATION METHOD: getZmpParams
 /*=======================================================================================================*/    
     arma::vec4 BalanceKinematicResponse::getZmpParams()
@@ -392,7 +364,6 @@ namespace motion
 /*=======================================================================================================*/
     Transform2D BalanceKinematicResponse::getLeftFootDestination()
     {
-        setNewStepReceived(false);
         return (leftFootDestination.front());
     }
 /*=======================================================================================================*/
@@ -400,7 +371,6 @@ namespace motion
 /*=======================================================================================================*/
     void BalanceKinematicResponse::setLeftFootDestination(const Transform2D& inLeftFootDestination)
     {
-        setNewStepReceived(true);
         leftFootDestination.push(inLeftFootDestination);
     }
 /*=======================================================================================================*/
@@ -408,7 +378,6 @@ namespace motion
 /*=======================================================================================================*/
     Transform2D BalanceKinematicResponse::getRightFootDestination()
     {
-        setNewStepReceived(false);
         return (rightFootDestination.front());
     }
 /*=======================================================================================================*/
@@ -416,7 +385,6 @@ namespace motion
 /*=======================================================================================================*/
     void BalanceKinematicResponse::setRightFootDestination(const Transform2D& inRightFootDestination)
     {
-        setNewStepReceived(true);
         rightFootDestination.push(inRightFootDestination);
     }    
 /*=======================================================================================================*/
