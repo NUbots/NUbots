@@ -60,8 +60,8 @@ namespace module
 namespace motion 
 {
 
-    class TorsoMotionPlanner : public NUClear::Reactor {
-
+    class TorsoMotionPlanner : public NUClear::Reactor 
+    {
     public:
         /**
          * The number of servo updates performnced per second

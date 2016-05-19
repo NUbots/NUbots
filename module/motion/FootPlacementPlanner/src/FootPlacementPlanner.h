@@ -48,7 +48,8 @@ namespace module
 namespace motion 
 {
 
-    class FootPlacementPlanner : public NUClear::Reactor {
+    class FootPlacementPlanner : public NUClear::Reactor 
+    {
     public:
         /**
          * The number of servo updates performnced per second

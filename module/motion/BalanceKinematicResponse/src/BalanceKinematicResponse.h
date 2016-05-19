@@ -47,7 +47,8 @@ namespace module
 {
 namespace motion 
 {
-    class BalanceKinematicResponse : public NUClear::Reactor {
+    class BalanceKinematicResponse : public NUClear::Reactor 
+    {
     public:
     	/**
          * The number of servo updates performnced per second
@@ -62,6 +63,7 @@ namespace motion
         static constexpr const char* ONTRIGGER_HEAD_INF = "Balance Response Planner - Received Update (Active Head Position) Info";
         static constexpr const char* ONTRIGGER_BLNC_CMD = "Balance Response Planner - Update Robot Posture";
         explicit BalanceKinematicResponse(std::unique_ptr<NUClear::Environment> environment);
+    private:
         using LimbID         = message::input::LimbID;
         using ServoCommand   = message::behaviour::ServoCommand;
         using Sensors        = message::input::Sensors;
@@ -199,7 +201,7 @@ namespace motion
         double supportTurn;*/
 
         // Initial body swing
-        // double toeTipCompensation;
+        double toeTipCompensation;
         double hipRollCompensation;
 
         // end config
