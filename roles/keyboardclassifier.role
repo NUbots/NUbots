@@ -22,9 +22,14 @@ NUCLEAR_ROLE(
     #motion::FootMotionPlanner
     #motion::FootPlacementPlanner
     #motion::TorsoMotionPlanner
+<<<<<<< d551f303e5bdf6612141f044ce4b09cc3dc7e0ad:roles/keyboardclassifier.role
     motion::BalanceKinematicResponse
     #motion::ModularWalkEngine
 >>>>>>> Balance Remodelling:roles/modularwalk.role
+=======
+    #motion::BalanceKinematicResponse
+    motion::ModularWalkEngine
+>>>>>>> Modular Walk Engine Remodel for waypoint handling:roles/modularwalk.role
     motion::ScriptEngine
     motion::HeadController
     motion::IKKick

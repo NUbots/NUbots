@@ -83,7 +83,7 @@ namespace motion
     BalanceKinematicResponse::BalanceKinematicResponse(std::unique_ptr<NUClear::Environment> environment)
     : Reactor(std::move(environment)) {
 
-        //Configure foot motion planner...
+        //Configure balance kinematic response...
         on<Configuration>("BalanceKinematicResponse.yaml").then("Balance Response Planner - Configure", [this] (const Configuration& config) 
         {
             configure(config.config);
