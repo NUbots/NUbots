@@ -81,7 +81,9 @@ namespace motion
         using Transform3D    = utility::math::matrix::Transform3D;
         using UnitQuaternion = utility::math::geometry::UnitQuaternion;
 
+        // The current state of the walk engine...
         enum State {
+
             /**
              * Walk engine has completely stopped and standing still
              */
@@ -101,7 +103,7 @@ namespace motion
              * Walk engine is walking as normal
              */
             WALKING
-        };
+        } StateOfWalk;
 
         /// Current subsumption ID key to access motors.
         size_t subsumptionId = 1;
@@ -109,10 +111,6 @@ namespace motion
         // Reaction handle for the main updateWaypoints loop, disabling when not moving will save unnecessary CPU
         ReactionHandle updateHandle;
 
-        // start state
-
-        // The state of the current walk
-        State state;
         // // Whether subsumption has currently interrupted the walk engine
         // bool interrupted;
         // TODO: ???

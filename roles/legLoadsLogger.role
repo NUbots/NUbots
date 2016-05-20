@@ -20,7 +20,15 @@ NUCLEAR_ROLE(
     platform::darwin::SensorFilter
 
     # Motion
+<<<<<<< bd2374949e2ffae2f36c1868d6a4dc40e06f4e11:roles/legLoadsLogger.role
     motion::WalkEngine
+=======
+    motion::FootMotionPlanner
+    motion::FootPlacementPlanner
+    motion::TorsoMotionPlanner
+    motion::BalanceKinematicResponse
+    motion::ModularWalkEngine
+>>>>>>> Compiles all modules - further remodelling required, let the testing begin...:roles/modularwalk.role
     motion::ScriptEngine
     motion::HeadController
     motion::IKKick

@@ -120,7 +120,7 @@ namespace motion
         {
             // TODO: This sets STOP_REQUEST, which appears not to be used anywhere.
             // If this is the case, we should delete or rethink the WalkStopCommand.
-            requestStop();
+            //requestStop();
         });
 
         // TODO: finish push detection and compensation
@@ -157,18 +157,18 @@ namespace motion
         {
             generateStandScriptReaction.disable();
             //generateAndSaveStandScript(sensors);
-            //state = State::LAST_STEP;
-            //start();
+            //StateOfWalk = State::LAST_STEP;
+            start();
         });
 
-        reset();
+        //reset();
     }
 /*=======================================================================================================*/
 //      NAME: generateAndSaveStandScript
 /*=======================================================================================================*/
     void ModularWalkEngine::generateAndSaveStandScript(const Sensors& sensors) 
     {
-        reset();
+        //reset();
         //stanceReset();
         auto waypoints = updateWaypoints(sensors);
 
@@ -185,7 +185,7 @@ namespace motion
         saveScript->config = standScript;
         emit(std::move(saveScript));
         //Try updateWaypoints(); ?
-        reset();
+        //reset();
         //stanceReset();
     }    
 /*=======================================================================================================*/
@@ -205,11 +205,35 @@ namespace motion
         emit(std::move(localisation));
     }
 /*=======================================================================================================*/
+//      NAME: start
+/*=======================================================================================================*/    
+    void ModularWalkEngine::start() 
+    {
+        if (StateOfWalk != State::WALKING) 
+        {
+            //swingLeg = swingLegInitial;
+            //beginStepTime = getTime();
+            //initialStep = 2;
+            StateOfWalk = State::WALKING;
+        }
+    }
+/*=======================================================================================================*/
+//      NAME: stop
+/*=======================================================================================================*/
+    void ModularWalkEngine::stop() 
+    {
+        StateOfWalk = State::STOPPED;
+        // emit(std::make_unique<ActionPriorites>(ActionPriorites { subsumptionId, { 0, 0 }})); // TODO: config
+        //log<NUClear::TRACE>("Walk Engine:: Stop request complete");
+        emit(std::make_unique<WalkStopped>());
+        emit(std::make_unique<std::vector<ServoCommand>>());
+    }    
+/*=======================================================================================================*/
 //      NAME: updateWaypoints
 /*=======================================================================================================*/
     std::unique_ptr<std::vector<ServoCommand>> ModularWalkEngine::updateWaypoints(const Sensors& sensors) 
     {
-        if (state == State::STOPPED) 
+        if (StateOfWalk == State::STOPPED) 
         {
             //identify state of robot, walk engine handles actual posture...
         }
@@ -242,8 +266,8 @@ namespace motion
         //DEBUGGING: Emit relative feet position with respect to robot torso model... 
         if (emitFootPosition)
         {
-            emit(graph("Right foot pos", rightFootTorso.translation()));
-            emit(graph("Left  foot pos",  leftFootTorso.translation()));
+            emit(graph("Right foot pos", arma::vec(rightFootTorso.translation())));
+            emit(graph("Left  foot pos",  arma::vec(leftFootTorso.translation())));
         }
 
         auto joints = calculateLegJoints<DarwinModel>(leftFootTorso, rightFootTorso);
@@ -296,6 +320,37 @@ namespace motion
     double ModularWalkEngine::linearInterpolationDeadband(double value, double deadband, double maxvalue) 
     {
         return std::abs(std::min(std::max(0.0, std::abs(value) - deadband), maxvalue));
+    }  
+/*=======================================================================================================*/
+//      ENCAPSULATION METHOD: getTime
+/*=======================================================================================================*/
+    Transform2D ModularWalkEngine::getVelocity() 
+    {
+        return velocityCurrent;
+    }      
+/*=======================================================================================================*/
+//      ENCAPSULATION METHOD: setVelocity
+/*=======================================================================================================*/    
+    void ModularWalkEngine::setVelocity(Transform2D velocity) 
+    {
+        // filter the commanded speed
+        velocity.x()     = std::min(std::max(velocity.x(),     velocityLimits(0,0)), velocityLimits(0,1));
+        velocity.y()     = std::min(std::max(velocity.y(),     velocityLimits(1,0)), velocityLimits(1,1));
+        velocity.angle() = std::min(std::max(velocity.angle(), velocityLimits(2,0)), velocityLimits(2,1));
+
+        // slow down when turning
+        double vFactor = 1 - std::abs(velocity.angle()) / accelerationTurningFactor;
+
+        double stepMag = std::sqrt(velocity.x() * velocity.x() + velocity.y() * velocity.y());
+        double magFactor = std::min(velocityLimits(0,1) * vFactor, stepMag) / (stepMag + 0.000001);
+
+        velocityCommand.x()     = velocity.x() * magFactor;
+        velocityCommand.y()     = velocity.y() * magFactor;
+        velocityCommand.angle() = velocity.angle();
+
+        velocityCommand.x()     = std::min(std::max(velocityCommand.x(),     velocityLimits(0,0)), velocityLimits(0,1));
+        velocityCommand.y()     = std::min(std::max(velocityCommand.y(),     velocityLimits(1,0)), velocityLimits(1,1));
+        velocityCommand.angle() = std::min(std::max(velocityCommand.angle(), velocityLimits(2,0)), velocityLimits(2,1));
     }    
 /*=======================================================================================================*/
 //      ENCAPSULATION METHOD: getTime
