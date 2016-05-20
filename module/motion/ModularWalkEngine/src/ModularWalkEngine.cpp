@@ -566,10 +566,10 @@ namespace motion
         auto& stance = config["stance"];
         bodyHeight = stance["body_height"].as<Expression>();
         bodyTilt = stance["body_tilt"].as<Expression>();
-        armLPostureTransform = stance["arms"]["left"]["start"].as<arma::vec>();
-        qLArmEnd = stance["arms"]["left"]["end"].as<arma::vec>();
-        qRArmStart = stance["arms"]["right"]["start"].as<arma::vec>();
-        qRArmEnd = stance["arms"]["right"]["end"].as<arma::vec>();
+        setLArmSource(stance["arms"]["left"]["start"].as<arma::vec>());
+        setLArmDestination(stance["arms"]["left"]["end"].as<arma::vec>());
+        setRArmSource(stance["arms"]["right"]["start"].as<arma::vec>());
+        setRArmDestination(stance["arms"]["right"]["end"].as<arma::vec>());
         footOffset = stance["foot_offset"].as<arma::vec>();
         // gToe/heel overlap checking values
         stanceLimitY2 = DarwinModel::Leg::LENGTH_BETWEEN_LEGS - stance["limit_margin_y"].as<Expression>();
