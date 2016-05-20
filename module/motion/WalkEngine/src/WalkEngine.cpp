@@ -76,6 +76,7 @@ namespace motion
     // using message::behaviour::ActionPriorites;
     using message::input::LimbID;
     using message::motion::WalkCommand;
+    using message::motion::NewWalkCommand;
     using message::motion::WalkStartCommand;
     using message::motion::WalkStopCommand;
     using message::motion::WalkStopped;
@@ -129,18 +130,35 @@ namespace motion
     WalkEngine::WalkEngine(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) 
     {
         //Configure modular walk engine...
-        on<Configuration>("WalkEngine.yaml").then("Modular Walk Engine - Configure", [this] (const Configuration& config) 
+        on<Configuration>("WalkEngine.yaml").then("Walk Engine - Configure", [this] (const Configuration& config) 
         {
             configure(config.config);
         });
 >>>>>>> Renaming modular walk -> walk engine + previous walk (refernce module)
 
-        //updateWaypoints sensor data at regular intervals...
-        updateHandle = on<Every<UPDATE_FREQUENCY, Per<std::chrono::seconds>>, With<Sensors>, Single, Priority::HIGH>()
+        //Broadcast constrained velocity to actuator modules...
+        on<Trigger<WalkCommand>>().then([this] (const WalkCommand& walkCommand)
+        {
+            auto velocity = walkCommand.command;
+            velocity.x()     *= velocity.x()     > 0 ? velocityLimits(0,1) : -velocityLimits(0,0);
+            velocity.y()     *= velocity.y()     > 0 ? velocityLimits(1,1) : -velocityLimits(1,0);
+            velocity.angle() *= velocity.angle() > 0 ? velocityLimits(2,1) : -velocityLimits(2,0);
+            setVelocity(velocity);
+            
+            emit(std::make_unique<NewWalkCommand>(getVelocity()));
+        });
+
+        //Update waypoints sensor data at regular intervals...updateHandle = 
+        on<Every<UPDATE_FREQUENCY, Per<std::chrono::seconds>>, With<Sensors>, Single, Priority::HIGH>()
         .then([this](const Sensors& sensors) 
         {
-            emit(std::move(updateWaypoints(sensors)));
-        }).disable();
+            //Debugging Walk Engine - self actuator with template data...
+            //std::unique_ptr<WalkCommand> command = std::make_unique<WalkCommand>();
+            //command->command = Transform2D({2, 1, 0.5});
+            emit(std::make_unique<WalkCommand>(1, Transform2D({2, 1, 0.5})));
+
+            //emit(std::move(updateWaypoints(sensors)));
+        });//.disable();
 
 <<<<<<< 1fcf3aa7e210a5c300ac935bfe7e3c77c76c1746
         on<Trigger<KinematicsModel>>().then("Update Kin Model", [this](const KinematicsModel& model){
@@ -154,7 +172,6 @@ namespace motion
         {
 >>>>>>> Renaming modular walk -> walk engine + previous walk (refernce module)
             subsumptionId = command.subsumptionId;
-
             //stanceReset(); // Reset stance as we don't know where our limbs are.
             updateHandle.enable();
         });
@@ -165,17 +182,6 @@ namespace motion
             updateHandle.disable(); 
 
             // TODO: Also disable the other walk command reactions?
-        });
-
-        on<Trigger<WalkCommand>>().then([this] (const WalkCommand& walkCommand) 
-        {
-            auto velocity = walkCommand.command;
-
-            velocity.x()     *= velocity.x()     > 0 ? velocityLimits(0,1) : -velocityLimits(0,0);
-            velocity.y()     *= velocity.y()     > 0 ? velocityLimits(1,1) : -velocityLimits(1,0);
-            velocity.angle() *= velocity.angle() > 0 ? velocityLimits(2,1) : -velocityLimits(2,0);
-
-            setVelocity(velocity);
         });
 
         on<Trigger<WalkStartCommand>>().then([this] 
@@ -290,6 +296,17 @@ namespace motion
             StateOfWalk = State::WALKING;
         }
     }
+/*=======================================================================================================*/
+/*      NAME: requestStop
+/*=======================================================================================================*/
+    /*void FootPlacementPlanner::requestStop() 
+    {
+        // always stops with feet together (which helps transition)
+        if (state == State::WALKING) 
+        {
+            state = State::STOP_REQUEST;
+        }
+    }*/    
 /*=======================================================================================================*/
 //      NAME: stop
 /*=======================================================================================================*/
