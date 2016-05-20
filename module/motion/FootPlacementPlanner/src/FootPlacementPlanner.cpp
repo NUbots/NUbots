@@ -341,10 +341,6 @@ namespace motion
         velocityCommand = arma::zeros(3);
         velocityDifference = arma::zeros(3);
 
-        // gZMP exponential coefficients:
-        zmpCoefficients = arma::zeros(4);
-        zmpParams = arma::zeros(4);
-
         // gGyro stabilization variables
         swingLeg = swingLegInitial;
         beginStepTime = getTime();
@@ -564,7 +560,6 @@ namespace motion
 
         auto& walkCycle = config["walk_cycle"];
         stepTime = walkCycle["step_time"].as<Expression>();
-        zmpTime = walkCycle["zmp_time"].as<Expression>();
         hipRollCompensation = walkCycle["hip_roll_compensation"].as<Expression>();
         stepHeight = walkCycle["step"]["height"].as<Expression>();
         stepLimits = walkCycle["step"]["limits"].as<arma::mat::fixed<3,2>>();

@@ -136,10 +136,6 @@ namespace motion
         Transform2D velocityDifference;
         // The leg that is 'swinging' in the step, opposite of the support foot
         LimbID swingLeg;
-        // zmp expoential coefficients aXP aXN aYP aYN
-        arma::vec4 zmpCoefficients;
-        // zmp params m1X, m2X, m1Y, m2Y
-        arma::vec4 zmpParameters;
         // ??
         Transform2D uSupportMass;
         // end state
@@ -160,7 +156,6 @@ namespace motion
         float gainArms;
         float gainLegs;
         double stepTime;
-        double zmpTime;
         double stepHeight;
         float step_height_slow_fraction;
         float step_height_fast_fraction;
