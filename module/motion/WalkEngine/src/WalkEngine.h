@@ -58,7 +58,8 @@ namespace module
 {
 namespace motion 
 {
-    class WalkEngine : public NUClear::Reactor {
+    class WalkEngine : public NUClear::Reactor 
+    {
     public:
         /**
          * The number of servo updates performnced per second
@@ -265,9 +266,6 @@ namespace motion
 
         std::unique_ptr<std::vector<ServoCommand>> updateWaypoints(const Sensors& sensors);
 
-        void setVelocity(Transform2D velocity);
-        void updateVelocity();
-
         void localise(Transform2D position);
 
         std::unique_ptr<std::vector<ServoCommand>> motionLegs(std::vector<std::pair<ServoID, float>> joints);
@@ -277,6 +275,8 @@ namespace motion
          * @return The current velocity
          */
         Transform2D getVelocity();
+        void setVelocity(Transform2D velocity);
+        void updateVelocity();
 
         /**
          * Solve the ZMP equation

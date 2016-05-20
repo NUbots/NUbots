@@ -38,8 +38,7 @@ namespace motion
     using message::motion::EnableFootPlacement;
     using message::motion::DisableFootPlacement;
     using message::motion::FootStepCompleted;
-    using message::motion::WalkStartCommand;
-    using message::motion::WalkStopCommand;
+    using message::motion::NewWalkCommand;
     using message::motion::FootPlacementStopped;
     using message::support::Configuration;
 
@@ -60,18 +59,10 @@ namespace motion
             configure(config.config);
         });
 
-        on<Trigger<WalkStartCommand>>().then([this] 
+        on<Trigger<NewWalkCommand>>().then("Foot Placement Planner - Calculate Target Foot Position", [this] (const NewWalkCommand& command) 
         {
-            lastVeloctiyUpdateTime = NUClear::clock::now();
-            start();
-            // emit(std::make_unique<ActionPriorites>(ActionPriorites { subsumptionId, { 25, 10 }})); // TODO: config
-        });
-
-        on<Trigger<WalkStopCommand>>().then([this] 
-        {
-            // TODO: This sets STOP_REQUEST, which appears not to be used anywhere.
-            // If this is the case, we should delete or rethink the WalkStopCommand.
-            requestStop();
+            setVelocity(command.velocityTarget);
+            NUClear::log("Messaging: Foot Placement Planner - Target Velocity"); //debugging
         });
 
         updateHandle = on<Trigger<FootStepCompleted>>().then("Foot Placement Planner - Calculate Target Foot Position", [this]
@@ -90,42 +81,6 @@ namespace motion
         {
             updateHandle.disable(); 
         });
-    }
-/*=======================================================================================================*/
-/*      METHOD: start
-/*=======================================================================================================*/
-    void FootPlacementPlanner::start() 
-    {
-        if (state != State::WALKING) 
-        {
-            swingLeg = swingLegInitial;
-            beginStepTime = getTime();
-            initialStep = 2;
-            state = State::WALKING;
-        }
-        calculateNewStep();
-    }
-/*=======================================================================================================*/
-/*      METHOD: requestStop
-/*=======================================================================================================*/
-    void FootPlacementPlanner::requestStop() 
-    {
-        // always stops with feet together (which helps transition)
-        if (state == State::WALKING) 
-        {
-            state = State::STOP_REQUEST;
-        }
-    }
-/*=======================================================================================================*/
-/*      METHOD: stop
-/*=======================================================================================================*/
-    void FootPlacementPlanner::stop() 
-    {
-        state = State::STOPPED;
-        // emit(std::make_unique<ActionPriorites>(ActionPriorites { subsumptionId, { 0, 0 }})); // TODO: config
-        log<NUClear::TRACE>("Walk Engine:: Stop request complete");
-        emit(std::make_unique<FootPlacementStopped>());
-        emit(std::make_unique<std::vector<ServoCommand>>());
     }
 /*=======================================================================================================*/
 //      NAME: calculateNewStep
