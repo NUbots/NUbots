@@ -91,6 +91,7 @@ namespace module {
 
                     }
                     else if (planType == message::behaviour::WalkApproach::DirectCommand) {
+                        //TO DO, change to Bezier stuff
 
                         std::unique_ptr<WalkCommand> command = std::make_unique<WalkCommand>();
                         command->command.xy()    = currentTargetPosition;
@@ -101,6 +102,8 @@ namespace module {
 
                     }
 
+                    
+
                     // TODO: support non-ball targets
 
                     float angle = std::atan2(ball.position[1], ball.position[0]);
@@ -110,6 +113,7 @@ namespace module {
                     // emit(graph("robot position", selfs.front().position));
                     // emit(graph("robot heading", selfs.front().heading));
 
+                    //Euclidean distance to ball
                     float distanceToBall = arma::norm(ball.position);
                     float scale = 2.0 / (1.0 + std::exp(-a * distanceToBall + b)) - 1.0;
                     float scale2 = angle / M_PI;

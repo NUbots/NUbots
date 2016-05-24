@@ -157,24 +157,25 @@ namespace module {
 
 
                     //make 2 11 long arrays, to descretize the bezier and bezier derivatives
-                    float bezier_X_points[11];
-                    float bezier_Y_points[11];
-                    float bezXdash[11];
-                    float bezYdash[11];
+                    float bezier_X_point;
+                    float bezier_Y_point;
+                    float bezXdash;
+                    float bezYdash;
+                    double u = 0.1 //variable determining how long along bezier curve robot looks, to move to config
                     //float bezXdashdash[11];
                     //float bezYdashdash[11];
-                    for (float u=0;u<=1;u+=0.1) {
-                        int i = int(10*u);
-                        bezier_X_points[i] = A0*(1-u)*(1-u)*(1-u) +3*A1*u*(1-u)*(1-u) +3*A2*u*u *(1-u) +A3*u*u*u;
-                        bezier_Y_points[i] = B0*(1-u)*(1-u)*(1-u) +3*B1*u*(1-u)*(1-u) +3*B2*u*u *(1-u) +B3*u*u*u;
-                        bezXdash[i] = 3*(u*u*(-A0+3*A1-3*A2+A3)+ 2*u*(A0-2*A1+A2)-A0+A1);
-                        bezYdash[i] = 3*(u*u*(-B0+3*B1-3*B2+B3)+ 2*u*(B0-2*B1+B2)-B0+B1);
-                        //bezXdashdash[i] = 6*(A0*(-u)+A0+3*A1*u-2*A1-3*A2 u+A2+A3*u);
-                        //bezYdashdash[i] = 6*(B0*(-u)+B0+3*B1*u-2*A1-3*B2 u+B2+B3*u);
-                    }
+                    
+                    bezier_X_points = A0*(1-u)*(1-u)*(1-u) +3*A1*u*(1-u)*(1-u) +3*A2*u*u *(1-u) +A3*u*u*u;
+                    bezier_Y_points = B0*(1-u)*(1-u)*(1-u) +3*B1*u*(1-u)*(1-u) +3*B2*u*u *(1-u) +B3*u*u*u;
+                    bezXdash = 3*(u*u*(-A0+3*A1-3*A2+A3)+ 2*u*(A0-2*A1+A2)-A0+A1);
+                    bezYdash = 3*(u*u*(-B0+3*B1-3*B2+B3)+ 2*u*(B0-2*B1+B2)-B0+B1);
+                    //bezXdashdash[i] = 6*(A0*(-u)+A0+3*A1*u-2*A1-3*A2 u+A2+A3*u);
+                    //bezYdashdash[i] = 6*(B0*(-u)+B0+3*B1*u-2*A1-3*B2 u+B2+B3*u);
 
                     arma::vec2 next_robot_position = arma::vec2(bezier_X_points[1], bezier_Y_points[1]);
 
+                    float old_bezier_Y_points[11] = bezier_Y_points
+                    float old_bezier_X_points[11] = bezier_X_points
                     
                     /* More complicated walk path follower, useful with more accurate locomotion
                     //Calculate radius of curvature at each point (using 5)
@@ -212,7 +213,7 @@ namespace module {
                     //float scale = 2.0 / (1.0 + std::exp(-a * distanceToPoint + b)) - 1.0;
                     //float scale2 = angle / M_PI;
                     //float finalForwardSpeed = forwardSpeed * scale * (1.0 - scale2);
-                    
+
                     // emit(graph("forwardSpeed1", forwardSpeed));
                     // emit(graph("scale", scale));
                     // emit(graph("distanceToBall", distanceToBall));

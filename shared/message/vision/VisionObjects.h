@@ -41,7 +41,8 @@ namespace message {
             struct Measurement {
                 arma::vec3 position;
                 arma::mat33 error;
-                //Optional vel measurement, currently used for ball only
+                //Optional vel measurement, currently used for ball only\
+                //XXX: THIS IS A TURRIBLE IDEA
                 arma::vec3 velocity;
                 arma::mat33 velCov;
             };

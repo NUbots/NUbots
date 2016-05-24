@@ -25,9 +25,9 @@ head:
 arm:
     distance_between_shoulders: 0.114 # distance between shoulders
     shoulder:
-        length: 0.017
+        length: 0.0
         width: 0.0245
-        height: 0
+        height: 0.017
         offset: [0.01, 0.088] # [x, z]
     upper_arm:
         length: 0.0615

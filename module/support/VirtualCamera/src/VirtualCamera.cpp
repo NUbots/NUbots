@@ -21,15 +21,28 @@
 
 #include "message/support/Configuration.h"
 #include "message/input/CameraParameters.h"
+#include "message/input/Image.h"
 
 namespace module {
 namespace support {
 
     using message::support::Configuration;
     using message::input::CameraParameters;
+    using message::input::Image;
 
     VirtualCamera::VirtualCamera(std::unique_ptr<NUClear::Environment> environment)
     : Reactor(std::move(environment)) {
+        
+        emitImageHandle = 
+        on<Every<30, Per<std::chrono::seconds>>, With<CameraParameters>, Single>().then("Simulated Images (VCamera)",
+        [this](const CameraParameters& cam){
+
+            //2 Bytes per pixel
+            std::vector<uint8_t> data(2 * cam.imageSizePixels[0] * cam.imageSizePixels[1], 255); // White pixels
+            emit(std::make_unique<Image>(cam.imageSizePixels[0], cam.imageSizePixels[1], NUClear::clock::now(), std::move(data)));
+
+        });
+
 
         on<Configuration>("VirtualCamera.yaml").then("VirtualCamera: Emit VirCam params",[this] (const Configuration& config) {
             // Use configuration here from file VirtualCamera.yaml
@@ -46,11 +59,18 @@ namespace support {
             cameraParameters->pixelsToTanThetaFactor << (tanHalfFOV[0] / imageCentre[0]) << (tanHalfFOV[1] / imageCentre[1]);
             cameraParameters->focalLengthPixels = imageCentre[0] / tanHalfFOV[0];
 
+            bool emit_images = config["emit_images"].as<bool>();
+            if(emit_images){
+                emitImageHandle.enable();
+            } else {
+                emitImageHandle.disable();
+            }
             std::cout << "Emitting camera parameters from VirtualCamera" << std::endl;
 
             emit<Scope::DIRECT>(std::move(cameraParameters));
 
         });
+
     }
 }
 }

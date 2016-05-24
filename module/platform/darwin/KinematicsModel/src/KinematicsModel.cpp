@@ -134,7 +134,7 @@ namespace darwin {
         DarwinModel::Arm::SHOULDER_HEIGHT = objShoulder["height"].as<float>();
         DarwinModel::Arm::UPPER_ARM_LENGTH = objUpperArm["length"].as<float>();
         DarwinModel::Arm::UPPER_ARM_Y_OFFSET = objUpperArm["offset"].as<arma::vec2>()[0];
-        DarwinModel::Arm::UPPER_ARM_Z_OFFSET = objUpperArm["offset"].as<arma::vec2>()[1];
+        DarwinModel::Arm::UPPER_ARM_X_OFFSET = objUpperArm["offset"].as<arma::vec2>()[1];
         DarwinModel::Arm::LOWER_ARM_LENGTH = objLowerArm["length"].as<float>();
         DarwinModel::Arm::LOWER_ARM_Y_OFFSET = objLowerArm["offset"].as<arma::vec2>()[0];
         DarwinModel::Arm::LOWER_ARM_Z_OFFSET = objLowerArm["offset"].as<arma::vec2>()[1];
