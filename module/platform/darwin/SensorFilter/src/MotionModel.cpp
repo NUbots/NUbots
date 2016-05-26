@@ -48,7 +48,7 @@ namespace module {
                 UnitQuaternion rotation(state.rows(QW, QZ));
 
                 // Add our global velocity to our position (rotate our local velocity)
-                newState.rows(PX, PZ) += rotation.rotateVector(state.rows(VX, VZ));
+                newState.rows(PX, PZ) += state.rows(VX, VZ);
 
                 // Robot rotational velocity delta
                 UnitQuaternion rotationDelta = UnitQuaternion(0, arma::vec3(state.rows(WX, WZ) * deltaT));
@@ -65,6 +65,7 @@ namespace module {
                 // Extract our rotation quaternion
                 UnitQuaternion rotation(state.rows(QW, QZ));
 
+                // TODO Josiah, maybe should be rotation.i().rotateVector here
                 // Make a gravity vector and return it
                 return rotation.rotateVector(arma::vec3({0, 0, G}));
             }
@@ -74,30 +75,43 @@ namespace module {
                 return state.rows(WX, WZ);
             }
 
-            // Flat foot odometry measurement
-            arma::vec6 MotionModel::predictedObservation(const arma::vec::fixed<size>& state, const MeasurementType::FLAT_FOOT_ODOMETRY&) {
+            // Foot up with z
+            arma::vec4 MotionModel::predictedObservation(const arma::vec::fixed<size>& state, const MeasurementType::FOOT_UP_WITH_Z&) {
 
-                arma::vec6 prediction;
+                arma::vec4 prediction;
 
                 // Extract our rotation quaternion
                 UnitQuaternion rotation(state.rows(QW, QZ));
 
-                prediction.rows(0, 2) = DELTAXYINFOOTSPACE??!?!?!?!;
-                prediction[2] = state[PZ];
+                // TODO Josiah, maybe should be rotation.i().rotateVector here
+                // First 3 is the up vector in torso space
+                prediction.rows(0,2) = rotation.rotateVector(arma::vec3({0,0,1}));
 
-                // Get an up vector as the second half of our state
-                prediction.rows(3, 5) = rotation.rotateVector(arma::vec3({0, 0, 1}));
+                // 4th component is our z height
+                prediction[3] = state[PZ];
+
+                return prediction;
+            }
+
+            // Flat foot odometry measurement
+            arma::vec2 MotionModel::predictedObservation(const arma::vec::fixed<size>& state, const arma::vec2& originalXY, const MeasurementType::FLAT_FOOT_ODOMETRY&)  {
+
+                // Predict our delta from our original position to our current position
+                return state.rows(PX, PY) - originalXY;
             }
 
 
             arma::vec MotionModel::observationDifference(const arma::vec& a, const arma::vec& b) {
                 return a - b;
-
             }
 
             arma::mat::fixed<MotionModel::size, MotionModel::size> MotionModel::processNoise() {
 
-                // TODO put a dwna covariance model in here
+                // TODO put a dwna covariance model in here or something
+                // TODO Josiah, we need a real process noise take a look at
+                // https://github.com/opengnc/libopengnc/blob/develop/include/opengnc/estimation/models/process/rigid_body/dwna_covariance_policy.hpp
+                // for the opengnc implementation of DWNA for the gyroscope/accelerometer
+                // Or alternatively just set it from a variable somewhere.
                 arma::mat::fixed<MotionModel::size, MotionModel::size> v;
                 return v;
 

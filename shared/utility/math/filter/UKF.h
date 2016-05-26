@@ -230,11 +230,11 @@ namespace utility {
                     return (1.0 - outlierProbability) * fract * exp(expTerm) + outlierProbability;
                 }
 
-                StateVec get() const {
+                const StateVec& get() const {
                     return mean;
                 }
 
-                StateMat getCovariance() const {
+                const StateMat& getCovariance() const {
                     return covariance;
                 }
             };

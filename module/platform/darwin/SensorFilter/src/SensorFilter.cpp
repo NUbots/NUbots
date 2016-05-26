@@ -356,37 +356,39 @@ namespace module {
                     // 3 points on the ground mean that we can assume this foot is flat
                     // We also have to ensure that the previous foot was also down for this to be valid
 
-                    // Check if we have previous sensors and our foot is currently down
-                    if (previousSensors && sensors->leftFootDown >= 0.75) {
+                    // Check if our foot is flat on the ground
+                    if (sensors->leftFootDown >= 0.75) {
 
-                        // If the foot wasn't previously down store the current foot position in world space
-                        if (previousSensors->leftFootDown < 0.75) {
+                        // Get the torso in foot space
+                        auto footToTorso = sensors->forwardKinematics[ServoID::L_ANKLE_ROLL].i();
 
-                            // Get the left foot in torso space
-                            auto& foot = sensors->forwardKinematics[ServoID::L_ANKLE_ROLL];
+                        // Construct our measurement vector from the up vector in torso space and the z height from the foot
+                        arma::vec4 footUpWithZ;
+                        // This is an up world vector in torso space
+                        footUpWithZ.rows(0,2) = sensors->forwardKinematics[ServoID::L_ANKLE_ROLL].col(2);
+                        // This is the z height of the torso above the ground
+                        footUpWithZ[3] = footToTorso.translation()[2];
+                        motionFilter.measurementUpdate(footUpWithZ, config.motionFilter.noise.measurement.footUpWithZ, MotionModel::MeasurementType::FOOT_UP_WITH_Z());
 
-                            // Get the transform from torso space to global space
-                            Rotation3D(UnitQuaternion(motionFilter.get().rows(MotionModel::QW, MotionModel::QZ)))
+                        // If we don't have previous sensors, or the previous sensors had the foot up
+                        if (!previousSensors || previousSensors->leftFootDown < 0.75) {
 
-                            // TODO we need to store the foot position in global space so we can do future measurements in global space
+                            // Get the torso's x,y position in left foot space and from the current estimation
+                            // We use this coordinates as the origins for our odometry position delta updates
+                            leftFootLanding = footToTorso.translation().rows(0,1);
+                            leftFootLandingWorld = motionFilter.get().rows(MotionModel::PX, MotionModel::PY);
                         }
                         else {
-                            // Make a measurement update based on the difference between the stored foot and global foot that we stored previously
+                            // Get how much our torso has moved from our foot landing in foot coordinates
+                            arma::vec2 footTorsoDelta = footToTorso.translation().rows(0,1) - leftFootLanding;
+
+                            // TODO Josiah need to rotate footTorsoDelta by the yaw between world space and this foot from the state
+                            // rotate footTorsoDelta by yaw between global and foot space to put the delta in global space
+
+                            // Do our measurement update and pass in the original state x,y we measured when the foot landed.
+                            motionFilter.measurementUpdate(footTorsoDelta, config.motionFilter.noise.measurement.flatFootOdometry, leftFootLandingWorld, MotionModel::MeasurementType::FLAT_FOOT_ODOMETRY());
                         }
                     }
-
-
-                    if (previousSensors
-                        && sensors->leftFootDown >= 0.75
-                        && previousSensors->leftFootDown >= 0.75) {
-
-
-
-
-                        // Perform a measurement update
-                        motionFilter.measurementUpdate(measurement, config.motionFilter.noise.measurement.flatFootOdometry, MotionModel::MeasurementType::FLAT_FOOT_ODOMETRY());
-                    }
-
 
                     // Gives us the quaternion representation
                     const auto& o = motionFilter.get();

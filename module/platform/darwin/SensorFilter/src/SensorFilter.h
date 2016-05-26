@@ -56,7 +56,8 @@ namespace module {
                             struct {
                                 arma::mat33 accelerometer;
                                 arma::mat33 gyroscope;
-                                arma::mat66 flatFootOdometry;
+                                arma::mat44 footUpWithZ;
+                                arma::mat22 flatFootOdometry;
                             } measurement;
                         } noise;
                     } motionFilter;
@@ -76,6 +77,16 @@ namespace module {
                 // Current state of the button pushes
                 bool leftDown = false;
                 bool middleDown = false;
+
+                // Our torso position from the left foot when it landed
+                arma::vec2 leftFootLanding;
+                // Our torso position from the global origin when the left foot landed
+                arma::vec2 leftFootLandingWorld;
+
+                // Our torso position from the right foot when it landed
+                arma::vec2 rightFootLanding;
+                // Our torso position from the global origin when the right foot landed
+                arma::vec2 rightFootLandingWorld;
             };
         }
     }

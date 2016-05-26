@@ -37,7 +37,7 @@ namespace module {
                 static constexpr uint PY = 1;
                 static constexpr uint PZ = 2;
 
-                // Our velocity in robot space
+                // Our velocity in global space
                 static constexpr uint VX = 3;
                 static constexpr uint VY = 4;
                 static constexpr uint VZ = 5;
@@ -59,6 +59,7 @@ namespace module {
                 struct MeasurementType {
                     struct GYROSCOPE {};
                     struct ACCELEROMETER {};
+                    struct FOOT_UP_WITH_Z {};
                     struct FLAT_FOOT_ODOMETRY {};
                 };
 
@@ -68,7 +69,8 @@ namespace module {
 
                 arma::vec3 predictedObservation(const arma::vec::fixed<size>& state, const MeasurementType::ACCELEROMETER&);
                 arma::vec3 predictedObservation(const arma::vec::fixed<size>& state, const MeasurementType::GYROSCOPE&);
-                arma::vec6 predictedObservation(const arma::vec::fixed<size>& state, const MeasurementType::FLAT_FOOT_ODOMETRY&);
+                arma::vec4 predictedObservation(const arma::vec::fixed<size>& state, const MeasurementType::FOOT_UP_WITH_Z&);
+                arma::vec2 predictedObservation(const arma::vec::fixed<size>& state, const arma::vec2& originalXY, const MeasurementType::FLAT_FOOT_ODOMETRY&);
 
                 arma::vec observationDifference(const arma::vec& a, const arma::vec& b);
 
