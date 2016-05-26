@@ -31,6 +31,7 @@
 #include "utility/math/angle.h"
 
 #include "message/input/Sensors.h"
+#include "message/input/LimbID.h"
 #include "message/input/ServoID.h"
 
 namespace utility {
@@ -418,11 +419,11 @@ namespace kinematics {
         arma::vec4 CoP = {0,0,0,1};
         float number_of_feet_down = 0;
         if (sensors.leftFootDown) {
-            CoP += fsrCentreInBodyCoords<RobotKinematicModel>(sensors, sensors.leftFSRCenter, true);
+            CoP += fsrCentreInBodyCoords<RobotKinematicModel>(sensors, sensors.fsrs[int(message::input::LimbID::LEFT_LEG)].centre, true);
             number_of_feet_down += 1.0f;
         }
         if(sensors.rightFootDown){
-            CoP += fsrCentreInBodyCoords<RobotKinematicModel>(sensors, sensors.rightFSRCenter, false);
+            CoP += fsrCentreInBodyCoords<RobotKinematicModel>(sensors, sensors.fsrs[int(message::input::LimbID::RIGHT_LEG)].centre, false);
             number_of_feet_down  += 1.0f;
         }
         if(number_of_feet_down == 2){
@@ -441,25 +442,25 @@ namespace kinematics {
     inline arma::mat33 calculateArmJacobian(const arma::vec3& a, bool isLeft){
         int negativeIfRight = isLeft ? 1 : -1;
 
-        const arma::vec3 t1 = 
+        const arma::vec3 t1 =
         {
             RobotKinematicModel::Arm::SHOULDER_LENGTH,
             negativeIfRight * RobotKinematicModel::Arm::SHOULDER_WIDTH,
             -RobotKinematicModel::Arm::SHOULDER_HEIGHT
         };
-        const arma::vec3 t2 = 
+        const arma::vec3 t2 =
         {
             RobotKinematicModel::Arm::UPPER_ARM_X_OFFSET,
             negativeIfRight * RobotKinematicModel::Arm::UPPER_ARM_Y_OFFSET,
             -RobotKinematicModel::Arm::UPPER_ARM_LENGTH
         };
-        const arma::vec3 t3 = 
+        const arma::vec3 t3 =
         {
             RobotKinematicModel::Arm::LOWER_ARM_LENGTH,
             negativeIfRight * RobotKinematicModel::Arm::LOWER_ARM_Y_OFFSET,
             -RobotKinematicModel::Arm::LOWER_ARM_Z_OFFSET
         };
-        
+
         arma::mat33 jRY1 = utility::math::matrix::Rotation3D::createRotationYJacobian(a[0]-M_PI_2);
         arma::mat33 jRX2 = utility::math::matrix::Rotation3D::createRotationXJacobian(a[1]);
         arma::mat33 jRY3 = utility::math::matrix::Rotation3D::createRotationXJacobian(a[2]);
@@ -487,26 +488,26 @@ namespace kinematics {
     inline arma::vec3 calculateArmPosition(const arma::vec3& a, bool isLeft){
         int negativeIfRight = isLeft ? 1 : -1;
 
-        const arma::vec3 t0 = 
+        const arma::vec3 t0 =
         {
             RobotKinematicModel::Arm::SHOULDER_X_OFFSET,
             negativeIfRight * RobotKinematicModel::Arm::DISTANCE_BETWEEN_SHOULDERS / 2.0,
             RobotKinematicModel::Arm::SHOULDER_Z_OFFSET
         };
 
-        const arma::vec3 t1 = 
+        const arma::vec3 t1 =
         {
             RobotKinematicModel::Arm::SHOULDER_LENGTH,
             negativeIfRight * RobotKinematicModel::Arm::SHOULDER_WIDTH,
             -RobotKinematicModel::Arm::SHOULDER_HEIGHT
         };
-        const arma::vec3 t2 = 
+        const arma::vec3 t2 =
         {
             RobotKinematicModel::Arm::UPPER_ARM_X_OFFSET,
             negativeIfRight * RobotKinematicModel::Arm::UPPER_ARM_Y_OFFSET,
             -RobotKinematicModel::Arm::UPPER_ARM_LENGTH
         };
-        const arma::vec3 t3 = 
+        const arma::vec3 t3 =
         {
             RobotKinematicModel::Arm::LOWER_ARM_LENGTH,
             negativeIfRight * RobotKinematicModel::Arm::LOWER_ARM_Y_OFFSET,
@@ -514,7 +515,7 @@ namespace kinematics {
         };
 
         arma::mat33 RY_PI_2 = utility::math::matrix::Rotation3D::createRotationY(M_PI_2);
-        
+
         arma::mat33 RY1 = utility::math::matrix::Rotation3D::createRotationY(a[0]-M_PI_2);
         arma::mat33 RX2 = utility::math::matrix::Rotation3D::createRotationX(a[1]);
         arma::mat33 RY3 = utility::math::matrix::Rotation3D::createRotationY(a[2]);

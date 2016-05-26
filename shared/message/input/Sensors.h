@@ -67,6 +67,11 @@ namespace message {
                 uint32_t colour;
             };
 
+            struct FSR {
+                arma::vec2 centre;
+                std::vector<double> values;
+            };
+
             NUClear::clock::time_point timestamp;
 
             float voltage;
@@ -80,21 +85,17 @@ namespace message {
             std::vector<Servo> servos;
             std::vector<Button> buttons;
             std::vector<LED> leds;
+            std::vector<FSR> fsrs;
 
             arma::vec3 centreOfPressure;
-            arma::vec2 leftFSRCenter;
-            arma::vec2 rightFSRCenter;
 
             arma::mat22 robotToIMU;
 
-            bool leftFootDown;
-            bool rightFootDown;
+            /// Percentage of the left foot that's considered "down" i.e. if 3/4 FSR sensors have weight this is 0.75
+            float leftFootDown;
+            float rightFootDown;
 
             std::map<message::input::ServoID, utility::math::matrix::Transform3D> forwardKinematics;
-
-            // utility::math::Transform3D odometry;
-            arma::vec2 odometry;
-            arma::mat22 odometryCovariance;
 
             float bodyCentreHeight;
 

@@ -26,7 +26,7 @@
 
 #include "utility/math/matrix/Transform3D.h"
 #include "utility/math/filter/UKF.h"
-#include "IMUModel.h"
+#include "MotionModel.h"
 #include "utility/motion/RobotModels.h"
 
 namespace module {
@@ -43,33 +43,37 @@ namespace module {
             public:
                 explicit SensorFilter(std::unique_ptr<NUClear::Environment> environment);
 
-                utility::math::filter::UKF<IMUModel> orientationFilter;
+                utility::math::filter::UKF<MotionModel> motionFilter;
 
-                double DEFAULT_NOISE_GAIN;
-                double HIGH_NOISE_THRESHOLD;
-                double HIGH_NOISE_GAIN;
-                double LOW_NOISE_THRESHOLD;
-                int DEBOUNCE_THRESHOLD;
+                struct {
+                    struct {
+                        float chargedVoltage;
+                        float flatVoltage;
+                    } battery;
 
-                double SUPPORT_FOOT_FSR_THRESHOLD;
-                int REQUIRED_NUMBER_OF_FSRS;
+                    struct {
+                        struct  {
+                            struct {
+                                arma::mat33 accelerometer;
+                                arma::mat33 gyroscope;
+                                arma::mat66 flatFootOdometry;
+                            } measurement;
+                        } noise;
+                    } motionFilter;
 
-                arma::mat33 MEASUREMENT_NOISE_ACCELEROMETER;
-                arma::mat33 MEASUREMENT_NOISE_GYROSCOPE;
-                arma::mat33 MEASUREMENT_NOISE_FOOT_UP;
-                double FOOT_UP_SAFE_ZONE;
+                    struct {
+                        struct {
+                            double footDownWeight;
+                        } fsr;
+                    } foot;
 
-                double odometry_covariance_factor = 0.05;
-
-                arma::vec2 integratedOdometry;
+                    struct {
+                        int debounceThreshold;
+                    } buttons;
+                } config;
 
             private:
-                utility::math::matrix::Transform3D calculateOdometryMatrix(
-                    const message::input::Sensors& sensors,
-                    const message::input::Sensors& previousSensors,
-                    utility::motion::kinematics::Side side);
-
-                // used to debounce button presses
+                // Current state of the button pushes
                 bool leftDown = false;
                 bool middleDown = false;
             };
