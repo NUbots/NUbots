@@ -28,6 +28,12 @@ namespace module {
         namespace darwin {
 
             class MotionModel {
+            private:    
+                double PositionProcessNoise = 0.001;
+                double VelocityProcessNoise = 1.0;
+                double OrientationProcessNoise = 0.001;
+                double RotationalVelocityProcessNoise = 1.0;
+                
             public:
                 // Gravity
                 static constexpr double G = -9.80665;
