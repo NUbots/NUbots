@@ -46,18 +46,11 @@ namespace robot {
     arma::vec::fixed<RobotModel::size> RobotModel::timeUpdate(
         const arma::vec::fixed<RobotModel::size>& state, double deltaT, const Sensors& sensors) {
         arma::vec::fixed<RobotModel::size> new_state = state;
-        // // Velocity in world space:
-        // new_state.rows(kX,kY) += deltaT * state.rows(kVX,kVY);
-
-        // Velocity in robot space:
-        // arma::vec2 worldRobotHeading = ImuToWorldHeadingTransform(state(kImuOffset), sensors.robotToIMU);
-        arma::vec2 worldRobotHeading = ImuToWorldHeadingTransform(state(kImuOffset), sensors.orientation);
-        arma::vec2 worldVelocity = RobotToWorldTransform(arma::vec2{0,0}, worldRobotHeading, state.rows(kVX, kVY));
-        new_state.rows(kX,kY) += worldVelocity * deltaT;
 
         return new_state;
     }
-
+    
+    
     /// Return the predicted observation of an object at the given position
     arma::vec RobotModel::predictedObservation(
         const arma::vec::fixed<RobotModel::size>& state,
@@ -65,30 +58,20 @@ namespace robot {
         const Sensors& sensors) {
         //Rewrite:
         arma::vec2 worldRobotHeading = ImuToWorldHeadingTransform(state(kImuOffset), sensors.orientation);
+        
+        //TODO: needs to incorporate new motion model position data
         auto obs = SphericalRobotObservation(state.rows(kX, kY),
                                              worldRobotHeading,
                                              actual_position);
         return obs;
     }
 
-    //Odometry
-    arma::vec RobotModel::predictedObservation(
-        const arma::vec::fixed<RobotModel::size>& state, const Sensors&/* sensors*/) {
-
-        // // Velocity in world space:
-        // arma::mat33 imuRotation = zRotationMatrix(state(kImuOffset));
-        // arma::vec3 robotHeading_world = imuRotation * arma::mat(sensors.orientation.t()).col(0);
-        // return WorldToRobotTransform(arma::vec2{0,0}, robotHeading_world.rows(0,1), state.rows(kVX, kVY));
-
-        // Velocity in robot space:
-        return state.rows(kVX, kVY);
-    }
-
     // Angle between goals
     arma::vec RobotModel::predictedObservation(
         const arma::vec::fixed<RobotModel::size>& state,
         const std::vector<arma::vec>& actual_positions) {
-
+        
+        //TODO: needs to incorporate new motion model position data
         arma::vec diff_1 = actual_positions[0].rows(0, 1) - state.rows(kX, kY);
         arma::vec diff_2 = actual_positions[1].rows(0, 1) - state.rows(kX, kY);
         arma::vec radial_1 = cartesianToRadial(diff_1);
@@ -125,34 +108,11 @@ namespace robot {
         arma::mat noise = arma::eye(RobotModel::size, RobotModel::size);
         noise(kX, kX) *= cfg_.processNoisePositionFactor;
         noise(kY, kY) *= cfg_.processNoisePositionFactor;
-        noise(kVX, kVX) *= cfg_.processNoiseVelocityFactor;
-        noise(kVY, kVY) *= cfg_.processNoiseVelocityFactor;
         noise(kImuOffset, kImuOffset) *= cfg_.processNoiseHeadingFactor;
         // std::cout << "process noise = \n" << noise << std::endl;
         return noise;
     }
 
-    // arma::mat33 RobotModel::getRobotToWorldTransform(const arma::vec::fixed<RobotModel::size>& state){
-    //     arma::vec2 normed_heading = arma::normalise(state.rows(kHeadingX,kHeadingY));
-    //     arma::mat33 T;
-
-    //     T << normed_heading[0] << -normed_heading[1] << state[kX] << arma::endr
-    //       << normed_heading[1] <<  normed_heading[0] << state[kY] << arma::endr
-    //       <<                 0 <<                  0 <<         1;
-
-    //     return T;
-    // }
-
-    // arma::mat33 RobotModel::getWorldToRobotTransform(const arma::vec::fixed<RobotModel::size>& state){
-    //     arma::vec2 normed_heading = arma::normalise(state.rows(kHeadingX,kHeadingY));
-    //     arma::mat33 Tinverse;
-    //     Tinverse << normed_heading[0] <<  normed_heading[1] <<         0 << arma::endr
-    //              <<-normed_heading[1] <<  normed_heading[0] <<         0 << arma::endr
-    //              <<                 0 <<                  0 <<         1;
-
-    //     Tinverse.submat(0,2,1,2) = -Tinverse.submat(0,0,1,1) * arma::vec2({state[kX], state[kY]});
-    //     return Tinverse;
-    // }
 
 }
 }

@@ -92,9 +92,6 @@ namespace localisation {
             const message::vision::Goal& observed_object,
             const utility::localisation::LocalisationFieldObject& actual_object);
 
-        //Odometry
-        double MeasurementUpdate(const message::input::Sensors& sensors);
-
         double MeasurementUpdate(
             const std::vector<message::vision::Goal>& observed_objects,
             const std::vector<utility::localisation::LocalisationFieldObject>& actual_objects);

@@ -101,16 +101,6 @@ double RobotHypothesis::MeasurementUpdate(
     return quality;
 }
 
-//Odometry
-void MultiModalRobotModel::MeasurementUpdate(const Sensors& sensors){
-    for (auto& model : robot_models_)
-        model->MeasurementUpdate(sensors);
-}
-
-double RobotHypothesis::MeasurementUpdate(const Sensors& sensors){
-    auto quality = filter_.measurementUpdate(sensors.odometry, sensors.odometryCovariance, sensors);
-    return quality;
-}
 
 double RobotHypothesis::MeasurementUpdate(
     const std::vector<message::vision::Goal>& /*observed_objects (commented for warnings)*/,
