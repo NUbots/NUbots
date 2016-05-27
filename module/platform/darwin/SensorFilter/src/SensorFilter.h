@@ -82,11 +82,15 @@ namespace module {
                 arma::vec2 leftFootLanding;
                 // Our torso position from the global origin when the left foot landed
                 arma::vec2 leftFootLandingWorld;
+                //The rotation from foot to world coordinates at landing
+                arma::mat33 leftFootLandingWorldRot;
 
                 // Our torso position from the right foot when it landed
                 arma::vec2 rightFootLanding;
                 // Our torso position from the global origin when the right foot landed
                 arma::vec2 rightFootLandingWorld;
+                //The rotation from foot to world coordinates at landing
+                arma::mat33 rightFootLandingWorldRot;
             };
         }
     }

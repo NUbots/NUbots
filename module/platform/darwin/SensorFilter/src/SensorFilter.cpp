@@ -365,7 +365,7 @@ namespace module {
                         // Construct our measurement vector from the up vector in torso space and the z height from the foot
                         arma::vec4 footUpWithZ;
                         // This is an up world vector in torso space
-                        footUpWithZ.rows(0,2) = sensors->forwardKinematics[ServoID::L_ANKLE_ROLL].col(2);
+                        footUpWithZ.rows(0,2) = sensors->forwardKinematics[ServoID::L_ANKLE_ROLL].col(2); //NOTE: this should have a decent amount of noise
                         // This is the z height of the torso above the ground
                         footUpWithZ[3] = footToTorso.translation()[2];
                         motionFilter.measurementUpdate(footUpWithZ, config.motionFilter.noise.measurement.footUpWithZ, MotionModel::MeasurementType::FOOT_UP_WITH_Z());
@@ -375,15 +375,15 @@ namespace module {
 
                             // Get the torso's x,y position in left foot space and from the current estimation
                             // We use this coordinates as the origins for our odometry position delta updates
-                            leftFootLanding = footToTorso.translation().rows(0,1);
+                            leftFootLanding = footToTorso.translation(); //.rows(0,1);
                             leftFootLandingWorld = motionFilter.get().rows(MotionModel::PX, MotionModel::PY);
+                            UnitQuaternion rotation(motionFilter.get().rows(MotionModel::QW, MotionModel::QZ));
+                            leftFootLandingWorldRot = Rotation3D(rotation.t()) * footToTorso.rotation().t(); //.cols(0,1)
                         }
                         else {
                             // Get how much our torso has moved from our foot landing in foot coordinates
-                            arma::vec2 footTorsoDelta = footToTorso.translation().rows(0,1) - leftFootLanding;
-
-                            // TODO Josiah need to rotate footTorsoDelta by the yaw between world space and this foot from the state
                             // rotate footTorsoDelta by yaw between global and foot space to put the delta in global space
+                            arma::vec2 footTorsoDelta = (footToTorso.translation() - leftFootLanding) * leftFootLandingWorldRot.cols(0,1);
 
                             // Do our measurement update and pass in the original state x,y we measured when the foot landed.
                             motionFilter.measurementUpdate(footTorsoDelta, config.motionFilter.noise.measurement.flatFootOdometry, leftFootLandingWorld, MotionModel::MeasurementType::FLAT_FOOT_ODOMETRY());
