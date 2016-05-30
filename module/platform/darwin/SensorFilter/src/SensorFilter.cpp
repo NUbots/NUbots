@@ -105,16 +105,17 @@ namespace module {
 
                     // Motion filter config
                     // Update our measurement noises
-                    this->config.motionFilter.noise.measurement.accelerometer = arma::eye(3,3) * config["motion_filter"]["noise"]["measurement"]["accelerometer"].as<double>();
-                    this->config.motionFilter.noise.measurement.gyroscope = arma::eye(3,3) * config["motion_filter"]["noise"]["measurement"]["gyroscope"].as<double>();
-                    this->config.motionFilter.noise.measurement.flatFootOdometry = arma::eye(2,2) * config["motion_filter"]["noise"]["measurement"]["flat_foot_odometry"].as<double>();
+                    this->config.motionFilter.noise.measurement.accelerometer =    arma::diagmat(config["motion_filter"]["noise"]["measurement"]["accelerometer"].as<arma::vec3>());
+                    this->config.motionFilter.noise.measurement.gyroscope =        arma::diagmat(config["motion_filter"]["noise"]["measurement"]["gyroscope"].as<arma::vec3>());
+                    this->config.motionFilter.noise.measurement.footUpWithZ =      arma::diagmat(config["motion_filter"]["noise"]["measurement"]["foot_up_with_z"].as<arma::vec4>());
+                    this->config.motionFilter.noise.measurement.flatFootOdometry = arma::diagmat(config["motion_filter"]["noise"]["measurement"]["flat_foot_odometry"].as<arma::vec2>());
 
                     // Update our process noises
                     this->config.motionFilter.noise.process.position           = config["motion_filter"]["noise"]["process"]["position"].as<arma::vec3>();
                     this->config.motionFilter.noise.process.velocity           = config["motion_filter"]["noise"]["process"]["velocity"].as<arma::vec3>();
                     this->config.motionFilter.noise.process.rotation           = config["motion_filter"]["noise"]["process"]["rotation"].as<arma::vec4>();
                     this->config.motionFilter.noise.process.rotationalVelocity = config["motion_filter"]["noise"]["process"]["rotational_velocity"].as<arma::vec3>();
-                    
+
                     // Set our process noise in our filter
                     arma::vec::fixed<MotionModel::size> processNoise;
                     processNoise.rows(MotionModel::PX, MotionModel::PZ) = this->config.motionFilter.noise.process.position;
@@ -388,7 +389,7 @@ namespace module {
                     // Gyroscope measurement update
                     std::cout << "GYROUPDATE" << std::endl;
                     motionFilter.measurementUpdate(sensors->gyroscope, config.motionFilter.noise.measurement.gyroscope, MotionModel::MeasurementType::GYROSCOPE());
-                    
+
                     std::cout << "BOOM" << std::endl;
                     // 3 points on the ground mean that we can assume this foot is flat
                     // We also have to ensure that the previous foot was also down for this to be valid
@@ -398,7 +399,7 @@ namespace module {
 
                         // Get the torso in foot space
                         auto footToTorso = sensors->forwardKinematics[ServoID::L_ANKLE_ROLL].i();
-                        
+
                     std::cout << "BOOM0" << std::endl;
                         // Construct our measurement vector from the up vector in torso space and the z height from the foot
                         arma::vec4 footUpWithZ;
@@ -440,7 +441,7 @@ namespace module {
 
                     // Gives us the quaternion representation
                     const auto& o = motionFilter.get();
-                    
+
                     // Map from robot to world coordinates
                     sensors->world.fill(0);
                     sensors->world.rotation() = Rotation3D(UnitQuaternion(o.rows(MotionModel::QW, MotionModel::QZ)));
@@ -453,7 +454,7 @@ namespace module {
                      ************************************************/
                      std::cout << "CENTREOFMASS" << std::endl;
                     sensors->centreOfMass = calculateCentreOfMass<DarwinModel>(sensors->forwardKinematics, true);
-                            
+
 
                     /************************************************
                      *                  Kinematics Horizon          *

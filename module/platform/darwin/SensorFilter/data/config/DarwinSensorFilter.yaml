@@ -4,7 +4,7 @@ battery:
 
 buttons:
   debounce_threshold : 7
-  
+
 foot:
   fsr:
     foot_down_weight: 0.1
@@ -12,9 +12,10 @@ foot:
 motion_filter:
   noise:
     measurement:
-      accelerometer: 1e-4
-      gyroscope: 1e-8
-      flat_foot_odometry: 1e-8
+      accelerometer: [1e-4, 1e-4, 1e-4]
+      gyroscope: [1e-8, 1e-8, 1e-8]
+      foot_up_with_z: [1e-8, 1e-8, 1e-8]
+      flat_foot_odometry: [1e-8, 1e-8]
     process:
       position: [1e-8, 1e-8, 1e-8]
       velocity: [1e-8, 1e-8, 1e-8]
