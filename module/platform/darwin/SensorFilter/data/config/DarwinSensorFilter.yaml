@@ -14,7 +14,7 @@ motion_filter:
     measurement:
       accelerometer: [1e-4, 1e-4, 1e-4]
       gyroscope: [1e-8, 1e-8, 1e-8]
-      foot_up_with_z: [1e-8, 1e-8, 1e-8]
+      foot_up_with_z: [1e-8, 1e-8, 1e-8, 1e-8]
       flat_foot_odometry: [1e-8, 1e-8]
     process:
       position: [1e-8, 1e-8, 1e-8]
