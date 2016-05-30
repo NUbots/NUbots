@@ -111,14 +111,13 @@ namespace module {
                 // for the opengnc implementation of DWNA for the gyroscope/accelerometer
                 // Or alternatively just set it from a variable somewhere.
                 // XXX: make this configurable and less hacky
-                arma::mat::fixed<MotionModel::size, MotionModel::size> v;
-                v.fill(0);
-                v(PX,PX) = v(PY,PY) = v(PZ,PZ) = PositionProcessNoise;
-                v(VX,VX) = v(VY,VY) = v(VZ,VZ) = VelocityProcessNoise;
-                v(QW,QW) = v(QX,QX) = v(QY,QY) = v(QZ,QZ) = OrientationProcessNoise;
-                v(WX,WX) = v(WY,WY) = v(WZ,WZ) = RotationalVelocityProcessNoise;
-                
-                return v;
+                arma::vec v(MotionModel::size);
+                v.fill(1.);
+                v.rows(PX,PZ) *= PositionProcessNoise;
+                v.rows(VX,VZ) *= VelocityProcessNoise;
+                v.rows(QW,QZ) *= OrientationProcessNoise;
+                v.rows(WX,WZ) *= RotationalVelocityProcessNoise;
+                return arma::diagmat(v);
             }
 
         }
