@@ -66,8 +66,8 @@ namespace localisation {
             double imuOffset = reset_self.heading + imuHeading;
 
             // arma::vec3 mean = arma::join_rows(reset_self.position, arma::vec(imuOffset));
-            arma::vec::fixed<robot::RobotModel::size> mean = arma::vec::fixed<robot::RobotModel::size>({reset_self.position(0), reset_self.position(1), imuOffset, 0, 0 });
-            arma::mat::fixed<robot::RobotModel::size, robot::RobotModel::size> cov = arma::eye(5,5) * 0.1;
+            arma::vec::fixed<robot::RobotModel::size> mean = arma::vec::fixed<robot::RobotModel::size>({reset_self.position(0), reset_self.position(1), imuOffset});
+            arma::mat::fixed<robot::RobotModel::size, robot::RobotModel::size> cov = arma::eye(robot::RobotModel::size,robot::RobotModel::size) * 0.1;
             cov.submat(0,0,1,1) = reset_self.position_cov;
             cov(2,2) = reset_self.heading_var;
             filter_.setState(mean, cov);
