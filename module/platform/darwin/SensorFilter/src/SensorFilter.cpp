@@ -345,12 +345,15 @@ namespace module {
                     double deltaT = (input.timestamp - (previousSensors ? previousSensors->timestamp : input.timestamp)).count() / double(NUClear::clock::period::den);
 
                     // Time update
+                    std::cout << "TIMEUPDATE" << std::endl;
                     motionFilter.timeUpdate(deltaT);
 
                     // Accelerometer measurment update
+                    std::cout << "ACCUPDATE" << std::endl;
                     motionFilter.measurementUpdate(sensors->accelerometer, config.motionFilter.noise.measurement.accelerometer, MotionModel::MeasurementType::ACCELEROMETER());
 
                     // Gyroscope measurement update
+                    std::cout << "GYROUPDATE" << std::endl;
                     motionFilter.measurementUpdate(sensors->gyroscope, config.motionFilter.noise.measurement.gyroscope, MotionModel::MeasurementType::GYROSCOPE());
 
                     // 3 points on the ground mean that we can assume this foot is flat
@@ -378,7 +381,7 @@ namespace module {
                             leftFootLanding = footToTorso.translation(); //.rows(0,1);
                             leftFootLandingWorld = motionFilter.get().rows(MotionModel::PX, MotionModel::PY);
                             UnitQuaternion rotation(motionFilter.get().rows(MotionModel::QW, MotionModel::QZ));
-                            leftFootLandingWorldRot = Rotation3D(rotation.t()) * footToTorso.rotation().t(); //.cols(0,1)
+                            leftFootLandingWorldRot = Rotation3D(rotation).i() * footToTorso.rotation().i(); //.cols(0,1)
                         }
                         else {
                             // Get how much our torso has moved from our foot landing in foot coordinates
