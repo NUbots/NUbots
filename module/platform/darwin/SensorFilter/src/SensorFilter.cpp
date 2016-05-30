@@ -402,7 +402,6 @@ namespace module {
                         footUpWithZ = sensors->forwardKinematics[ServoID::L_ANKLE_ROLL].col(2); //NOTE: this should have a decent amount of noise
                         // This is the z height of the torso above the ground
                         footUpWithZ[3] = footToTorso.translation()[2];
-                        std::cout << config.motionFilter.noise.measurement.footUpWithZ << std::endl;
                         motionFilter.measurementUpdate(footUpWithZ, config.motionFilter.noise.measurement.footUpWithZ, MotionModel::MeasurementType::FOOT_UP_WITH_Z());
 
                         // If we don't have previous sensors, or the previous sensors had the foot up
@@ -410,7 +409,6 @@ namespace module {
 
                             // Get the torso's x,y position in left foot space and from the current estimation
                             // We use this coordinates as the origins for our odometry position delta updates
-                    std::cout << footToTorso.translation();
                             leftFootLanding = footToTorso.translation(); 
                             leftFootLandingWorld = motionFilter.get().rows(MotionModel::PX, MotionModel::PY);
                             UnitQuaternion rotation(motionFilter.get().rows(MotionModel::QW, MotionModel::QZ));
