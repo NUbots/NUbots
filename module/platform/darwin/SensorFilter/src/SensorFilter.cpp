@@ -442,9 +442,11 @@ namespace module {
                     const auto& o = motionFilter.get();
                     
                     // Map from robot to world coordinates
-                    sensors->orientation = Rotation3D(UnitQuaternion(o.rows(MotionModel::QW, MotionModel::QZ)));
-                    std::cout << "ROBOTTOIMU" << std::endl;
-                    sensors->robotToIMU = calculateRobotToIMU(sensors->orientation);
+                    sensors->world.fill(0);
+                    sensors->world.rotation() = Rotation3D(UnitQuaternion(o.rows(MotionModel::QW, MotionModel::QZ)));
+                    sensors->world.translation() = sensors->world.rotation() * o.rows(MotionModel::PX, MotionModel::PZ);
+
+                    sensors->robotToIMU = calculateRobotToIMU(sensors->world.rotation());
 
                     /************************************************
                      *                  Mass Model                  *
@@ -457,7 +459,7 @@ namespace module {
                      *                  Kinematics Horizon          *
                      ************************************************/
                      std::cout << "KINEMATICSHORIZON" << std::endl;
-                    sensors->orientationBodyToGround = utility::motion::kinematics::calculateBodyToGround(sensors->orientation.submat(0,2,2,2), sensors->bodyCentreHeight);
+                    sensors->orientationBodyToGround = utility::motion::kinematics::calculateBodyToGround(sensors->world.submat(0,2,2,2), sensors->bodyCentreHeight);
                     sensors->orientationCamToGround = sensors->orientationBodyToGround * sensors->forwardKinematics[ServoID::HEAD_PITCH];
                     if(sensors->leftFootDown) {
                         sensors->kinematicsBodyToGround = utility::motion::kinematics::calculateBodyToGround(sensors->forwardKinematics[ServoID::L_ANKLE_ROLL].submat(0,2,2,2),sensors->bodyCentreHeight);

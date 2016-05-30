@@ -133,11 +133,11 @@ namespace localisation {
 
                 Self robot_model;
                 robot_model.position = model_state.rows(robot::kX, robot::kY);
-                robot_model.heading = utility::localisation::transform::ImuToWorldHeadingTransform(model_state(robot::kImuOffset), sensors.orientation);
-                
+                robot_model.heading = utility::localisation::transform::ImuToWorldHeadingTransform(model_state(robot::kImuOffset), sensors.world.rotation());
+
                 //TODO: fill in velocity from the motionmodel
                 //robot_model.velocity = model_state.rows(robot::kVX, robot::kVY);
-                
+
                 robot_model.position_cov = model_cov.submat(0,0,1,1);
                 robot_model.last_measurement_time = last_measurement_time;
                 robots.push_back(robot_model);

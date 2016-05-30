@@ -49,16 +49,16 @@ namespace robot {
 
         return new_state;
     }
-    
-    
+
+
     /// Return the predicted observation of an object at the given position
     arma::vec RobotModel::predictedObservation(
         const arma::vec::fixed<RobotModel::size>& state,
         const arma::vec3& actual_position,
         const Sensors& sensors) {
         //Rewrite:
-        arma::vec2 worldRobotHeading = ImuToWorldHeadingTransform(state(kImuOffset), sensors.orientation);
-        
+        arma::vec2 worldRobotHeading = ImuToWorldHeadingTransform(state(kImuOffset), sensors.world.rotation());
+
         //TODO: needs to incorporate new motion model position data
         auto obs = SphericalRobotObservation(state.rows(kX, kY),
                                              worldRobotHeading,
@@ -70,7 +70,7 @@ namespace robot {
     arma::vec RobotModel::predictedObservation(
         const arma::vec::fixed<RobotModel::size>& state,
         const std::vector<arma::vec>& actual_positions) {
-        
+
         //TODO: needs to incorporate new motion model position data
         arma::vec diff_1 = actual_positions[0].rows(0, 1) - state.rows(kX, kY);
         arma::vec diff_2 = actual_positions[1].rows(0, 1) - state.rows(kX, kY);

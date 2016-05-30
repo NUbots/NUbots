@@ -65,7 +65,7 @@ namespace module {
 
                     if(!falling
                         && !sensors.empty()
-                        && fabs(sensors.back()->orientation(2,2)) < FALLING_ANGLE) {
+                        && fabs(sensors.back()->world(2,2)) < FALLING_ANGLE) {
 
                         // We might be falling, check the accelerometer
                         double magnitude = 0;

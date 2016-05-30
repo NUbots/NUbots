@@ -58,7 +58,7 @@ namespace motion {
         //------------------------------------
 
         //Robot coords in world (:Robot -> World)
-        Rotation3D orientation = sensors.orientation.i();
+        Rotation3D orientation = sensors.world.rotation().i();
         Rotation3D yawlessOrientation = Rotation3D::createRotationZ(-orientation.yaw()) * orientation;
 
         // Removes any yaw component
@@ -139,7 +139,7 @@ namespace motion {
                                                        - translationPGainZ * total - translationDGainY * dTotal});
 
         // //Rotate from world space to torso space
-        // Rotation3D yawLessOrientation = Rotation3D::createRotationZ(-sensors.orientation.yaw()) * sensors.orientation;
+        // Rotation3D yawLessOrientation = Rotation3D::createRotationZ(-sensors.world.rotation().yaw()) * sensors.world.rotation();
 
         arma::vec3 torsoAdjustment_torso = torsoAdjustment_world;
 

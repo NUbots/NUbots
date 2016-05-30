@@ -195,7 +195,7 @@ namespace module {
                         if(lmax_error >= ERROR_THRESHOLD or rmax_error >= ERROR_THRESHOLD){
                             numberOfFails++;
                         }
-                        sensors->orientation = arma::eye(3,3);
+                        sensors->world = arma::eye(4,4);
                         emit(std::move(sensors));
                     }
                     std::cout<< "IK Leg NULL Test : "<< numberOfFails << " Total Failures " <<std::endl;
