@@ -100,24 +100,13 @@ namespace module {
                 return state.rows(PX, PY) - originalXY;
             }
 
-
             arma::vec MotionModel::observationDifference(const arma::vec& a, const arma::vec& b) {
                 return a - b;
             }
 
-            arma::mat::fixed<MotionModel::size, MotionModel::size> MotionModel::processNoise() {
-
-                // TODO put a dwna covariance model in here or something (set velocity noise to noise * 1/2 aT^2)
-                // for the opengnc implementation of DWNA for the gyroscope/accelerometer
-                // Or alternatively just set it from a variable somewhere.
-                // XXX: make this configurable and less hacky
-                arma::vec v(MotionModel::size);
-                v.fill(1.);
-                v.rows(PX,PZ) *= PositionProcessNoise;
-                v.rows(VX,VZ) *= VelocityProcessNoise;
-                v.rows(QW,QZ) *= OrientationProcessNoise;
-                v.rows(WX,WZ) *= RotationalVelocityProcessNoise;
-                return arma::diagmat(v);
+            const arma::mat::fixed<MotionModel::size, MotionModel::size>& MotionModel::processNoise() {
+                // Return our process noise matrix
+                return processNoiseMatrix;
             }
 
         }

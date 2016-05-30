@@ -59,7 +59,27 @@ namespace module {
                                 arma::mat44 footUpWithZ;
                                 arma::mat22 flatFootOdometry;
                             } measurement;
+                            struct {
+                                arma::vec3 position;
+                                arma::vec3 velocity;
+                                arma::vec4 rotation;
+                                arma::vec3 rotationalVelocity;
+                            } process;
                         } noise;
+                        struct {
+                            struct {
+                                arma::vec3 position;
+                                arma::vec3 velocity;
+                                arma::vec4 rotation;
+                                arma::vec3 rotationalVelocity;
+                            } mean;
+                            struct {
+                                arma::vec3 position;
+                                arma::vec3 velocity;
+                                arma::vec4 rotation;
+                                arma::vec3 rotationalVelocity;
+                            } covariance;
+                        } initial;
                     } motionFilter;
 
                     struct {

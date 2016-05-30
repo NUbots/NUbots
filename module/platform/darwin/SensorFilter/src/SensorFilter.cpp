@@ -24,6 +24,7 @@
 #include "message/input/CameraParameters.h"
 #include "message/support/Configuration.h"
 
+#include "utility/support/yaml_armadillo.h"
 #include "utility/math/matrix/Rotation3D.h"
 #include "utility/math/geometry/UnitQuaternion.h"
 #include "utility/nubugger/NUhelpers.h"
@@ -103,17 +104,51 @@ namespace module {
                     this->config.foot.fsr.footDownWeight = config["foot"]["fsr"]["foot_down_weight"].as<double>();
 
                     // Motion filter config
+
+                    // Update our measurement noises
                     this->config.motionFilter.noise.measurement.accelerometer = arma::eye(3,3) * config["motion_filter"]["noise"]["measurement"]["accelerometer"].as<double>();
                     this->config.motionFilter.noise.measurement.gyroscope = arma::eye(3,3) * config["motion_filter"]["noise"]["measurement"]["gyroscope"].as<double>();
                     this->config.motionFilter.noise.measurement.flatFootOdometry = arma::eye(6,6) * config["motion_filter"]["noise"]["measurement"]["gyroscope"].as<double>();
 
-                    // Set our process noise model parameters
-                    // Q_input_diag;
+                    // Update our process noises
+                    this->config.motionFilter.noise.process.position           = config["motion_filter"]["noise"]["process"]["position"].as<arma::vec3>();
+                    this->config.motionFilter.noise.process.velocity           = config["motion_filter"]["noise"]["process"]["velocity"].as<arma::vec3>();
+                    this->config.motionFilter.noise.process.rotation           = config["motion_filter"]["noise"]["process"]["rotation"].as<arma::vec4>();
+                    this->config.motionFilter.noise.process.rotationalVelocity = config["motion_filter"]["noise"]["process"]["rotational_velocity"].as<arma::vec3>();
 
-                    // orientationFilter.model.processNoiseDiagonal = arma::ones(orientationFilter.model.size);
-                    // orientationFilter.model.processNoiseDiagonal.rows(orientationFilter.model.QW,orientationFilter.model.QZ) *= config["imu_position_process_noise"].as<double>();
-                    // orientationFilter.model.processNoiseDiagonal.rows(orientationFilter.model.VX,orientationFilter.model.VZ) *= config["imu_velocity_process_noise"].as<double>();
-                    // NUClear::log("ProcessNoise Set: \n", orientationFilter.model.processNoiseDiagonal.t());
+                    // Set our process noise in our filter
+                    arma::vec::fixed<MotionModel::size> processNoise;
+                    processNoise.rows(MotionModel::PX, MotionModel::PZ) = this->config.motionFilter.noise.process.position;
+                    processNoise.rows(MotionModel::VX, MotionModel::VZ) = this->config.motionFilter.noise.process.velocity;
+                    processNoise.rows(MotionModel::QW, MotionModel::QZ) = this->config.motionFilter.noise.process.rotation;
+                    processNoise.rows(MotionModel::WX, MotionModel::WZ) = this->config.motionFilter.noise.process.rotationalVelocity;
+                    motionFilter.model.processNoiseMatrix = arma::diagmat(processNoise);
+
+                    // Update our mean configs and if it changed, reset the filter
+                    this->config.motionFilter.initial.mean.position                 = config["motion_filter"]["initial"]["mean"]["position"].as<arma::vec3>();
+                    this->config.motionFilter.initial.mean.velocity                 = config["motion_filter"]["initial"]["mean"]["velocity"].as<arma::vec3>();
+                    this->config.motionFilter.initial.mean.rotation                 = config["motion_filter"]["initial"]["mean"]["rotation"].as<arma::vec4>();
+                    this->config.motionFilter.initial.mean.rotationalVelocity       = config["motion_filter"]["initial"]["mean"]["rotational_velocity"].as<arma::vec3>();
+
+                    this->config.motionFilter.initial.covariance.position           = config["motion_filter"]["initial"]["covariance"]["position"].as<arma::vec3>();
+                    this->config.motionFilter.initial.covariance.velocity           = config["motion_filter"]["initial"]["covariance"]["velocity"].as<arma::vec3>();
+                    this->config.motionFilter.initial.covariance.rotation           = config["motion_filter"]["initial"]["covariance"]["rotation"].as<arma::vec4>();
+                    this->config.motionFilter.initial.covariance.rotationalVelocity = config["motion_filter"]["initial"]["covariance"]["rotational_velocity"].as<arma::vec3>();
+
+                    // Calculate our mean and covariance
+                    arma::vec::fixed<MotionModel::size> mean;
+                    mean.rows(MotionModel::PX, MotionModel::PZ) = this->config.motionFilter.initial.mean.position;
+                    mean.rows(MotionModel::VX, MotionModel::VZ) = this->config.motionFilter.initial.mean.velocity;
+                    mean.rows(MotionModel::QW, MotionModel::QZ) = this->config.motionFilter.initial.mean.rotation;
+                    mean.rows(MotionModel::WX, MotionModel::WZ) = this->config.motionFilter.initial.mean.rotationalVelocity;
+
+                    arma::vec::fixed<MotionModel::size> covariance;
+                    covariance.rows(MotionModel::PX, MotionModel::PZ) = this->config.motionFilter.initial.covariance.position;
+                    covariance.rows(MotionModel::VX, MotionModel::VZ) = this->config.motionFilter.initial.covariance.velocity;
+                    covariance.rows(MotionModel::QW, MotionModel::QZ) = this->config.motionFilter.initial.covariance.rotation;
+                    covariance.rows(MotionModel::WX, MotionModel::WZ) = this->config.motionFilter.initial.covariance.rotationalVelocity;
+
+                    motionFilter.setState(mean, arma::diagmat(covariance));
                 });
 
                 on<Last<20, Trigger<DarwinSensors>>, Single>().then([this](const std::list<std::shared_ptr<const DarwinSensors>>& sensors) {

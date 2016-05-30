@@ -28,12 +28,7 @@ namespace module {
         namespace darwin {
 
             class MotionModel {
-            private:    
-                double PositionProcessNoise = 1e-6;
-                double VelocityProcessNoise = 1e-3;
-                double OrientationProcessNoise = 1e-6;
-                double RotationalVelocityProcessNoise = 1e-3;
-                
+
             public:
                 // Gravity
                 static constexpr double G = -9.80665;
@@ -62,6 +57,9 @@ namespace module {
                 // The size of our state
                 static constexpr size_t size = 13;
 
+                // Our static process noise matrix
+                arma::mat::fixed<size, size> processNoiseMatrix;
+
                 struct MeasurementType {
                     struct GYROSCOPE {};
                     struct ACCELEROMETER {};
@@ -82,7 +80,7 @@ namespace module {
 
                 arma::vec::fixed<size> limitState(const arma::vec::fixed<size>& state);
 
-                arma::mat::fixed<size, size> processNoise();
+                const arma::mat::fixed<size, size>& processNoise();
             };
 
         }
