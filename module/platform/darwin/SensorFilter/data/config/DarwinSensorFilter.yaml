@@ -4,6 +4,10 @@ battery:
 
 buttons:
   debounce_threshold : 7
+  
+foot:
+  fsr:
+    foot_down_weight: 0.1
 
 motion_filter:
   noise:
@@ -26,5 +30,5 @@ motion_filter:
     covariance:
       position: [1e-10,1e-10,1]    # We are pretty sure of our x,y when we start
       velocity: [1e-3,1e-3,1e-3]   # We are unsure of our velocity
-      rotation: [1,1,1,1]          # Not very sure of rotation
+      rotation: [1e-3,1e-3,1e-3,1e-3]         # Not very sure of rotation
       rotational_velocity: [1,1,1] # Fairly unsure about our rotational velocity
