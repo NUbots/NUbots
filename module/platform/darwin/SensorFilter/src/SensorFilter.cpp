@@ -379,18 +379,14 @@ namespace module {
                     double deltaT = (input.timestamp - (previousSensors ? previousSensors->timestamp : input.timestamp)).count() / double(NUClear::clock::period::den);
 
                     // Time update
-                    std::cout << "TIMEUPDATE" << std::endl;
                     motionFilter.timeUpdate(deltaT);
 
                     // Accelerometer measurment update
-                    std::cout << "ACCUPDATE" << std::endl;
                     motionFilter.measurementUpdate(sensors->accelerometer, config.motionFilter.noise.measurement.accelerometer, MotionModel::MeasurementType::ACCELEROMETER());
 
                     // Gyroscope measurement update
-                    std::cout << "GYROUPDATE" << std::endl;
                     motionFilter.measurementUpdate(sensors->gyroscope, config.motionFilter.noise.measurement.gyroscope, MotionModel::MeasurementType::GYROSCOPE());
 
-                    std::cout << "BOOM" << std::endl;
                     // 3 points on the ground mean that we can assume this foot is flat
                     // We also have to ensure that the previous foot was also down for this to be valid
 
@@ -400,44 +396,35 @@ namespace module {
                         // Get the torso in foot space
                         auto footToTorso = sensors->forwardKinematics[ServoID::L_ANKLE_ROLL].i();
 
-                    std::cout << "BOOM0" << std::endl;
                         // Construct our measurement vector from the up vector in torso space and the z height from the foot
                         arma::vec4 footUpWithZ;
                         // This is an up world vector in torso space
                         footUpWithZ = sensors->forwardKinematics[ServoID::L_ANKLE_ROLL].col(2); //NOTE: this should have a decent amount of noise
                         // This is the z height of the torso above the ground
                         footUpWithZ[3] = footToTorso.translation()[2];
-                        std::cout << "BOOM1" << std::endl;
                         std::cout << config.motionFilter.noise.measurement.footUpWithZ << std::endl;
                         motionFilter.measurementUpdate(footUpWithZ, config.motionFilter.noise.measurement.footUpWithZ, MotionModel::MeasurementType::FOOT_UP_WITH_Z());
 
-                    std::cout << "BOOM2" << std::endl;
                         // If we don't have previous sensors, or the previous sensors had the foot up
                         if (!previousSensors || previousSensors->leftFootDown < 0.75) {
 
                             // Get the torso's x,y position in left foot space and from the current estimation
                             // We use this coordinates as the origins for our odometry position delta updates
-                    std::cout << "BOOM3" << std::endl;
-                            leftFootLanding = footToTorso.translation(); //.rows(0,1);
-                    std::cout << "BOOM4" << std::endl;
+                    std::cout << footToTorso.translation();
+                            leftFootLanding = footToTorso.translation(); 
                             leftFootLandingWorld = motionFilter.get().rows(MotionModel::PX, MotionModel::PY);
-                    std::cout << "BOOM5" << std::endl;
                             UnitQuaternion rotation(motionFilter.get().rows(MotionModel::QW, MotionModel::QZ));
-                    std::cout << "BOOM6" << std::endl;
-                            leftFootLandingWorldRot = Rotation3D(rotation).i() * footToTorso.rotation().i(); //.cols(0,1)
-                    std::cout << "BOOM7" << std::endl;
+                            leftFootLandingWorldRot = Rotation3D(rotation).i() * footToTorso.rotation().i();
                         }
                         else {
                             // Get how much our torso has moved from our foot landing in foot coordinates
                             // rotate footTorsoDelta by yaw between global and foot space to put the delta in global space
-                            arma::vec2 footTorsoDelta = (footToTorso.translation() - leftFootLanding) * leftFootLandingWorldRot.cols(0,1);
-                    std::cout << "BOOM8" << std::endl;
+                            arma::vec2 footTorsoDelta = ((footToTorso.translation() - leftFootLanding).t() * leftFootLandingWorldRot.cols(0,1)).t();
 
                             // Do our measurement update and pass in the original state x,y we measured when the foot landed.
                             motionFilter.measurementUpdate(footTorsoDelta, config.motionFilter.noise.measurement.flatFootOdometry, leftFootLandingWorld, MotionModel::MeasurementType::FLAT_FOOT_ODOMETRY());
                         }
                     }
-                    std::cout << "FOOTDONE" << std::endl;
 
                     // Gives us the quaternion representation
                     const auto& o = motionFilter.get();
@@ -452,14 +439,12 @@ namespace module {
                     /************************************************
                      *                  Mass Model                  *
                      ************************************************/
-                     std::cout << "CENTREOFMASS" << std::endl;
                     sensors->centreOfMass = calculateCentreOfMass<DarwinModel>(sensors->forwardKinematics, true);
 
 
                     /************************************************
                      *                  Kinematics Horizon          *
                      ************************************************/
-                     std::cout << "KINEMATICSHORIZON" << std::endl;
                     sensors->orientationBodyToGround = utility::motion::kinematics::calculateBodyToGround(sensors->world.submat(0,2,2,2), sensors->bodyCentreHeight);
                     sensors->orientationCamToGround = sensors->orientationBodyToGround * sensors->forwardKinematics[ServoID::HEAD_PITCH];
                     if(sensors->leftFootDown) {
@@ -476,10 +461,8 @@ namespace module {
                     /************************************************
                      *                  CENTRE OF PRESSURE          *
                      ************************************************/
-                     std::cout << "CENTREOFPRESSURE" << std::endl;
                     sensors->centreOfPressure = utility::motion::kinematics::calculateCentreOfPressure<DarwinModel>(*sensors);
 
-                    std::cout << "EMIT" << std::endl;
                     emit(std::move(sensors));
                 });
             }

@@ -99,7 +99,7 @@ namespace module {
                 bool middleDown = false;
 
                 // Our torso position from the left foot when it landed
-                arma::vec2 leftFootLanding;
+                arma::vec3 leftFootLanding;
                 // Our torso position from the global origin when the left foot landed
                 arma::vec2 leftFootLandingWorld;
                 //The rotation from foot to world coordinates at landing
