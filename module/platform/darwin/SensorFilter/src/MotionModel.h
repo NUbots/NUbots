@@ -29,10 +29,10 @@ namespace module {
 
             class MotionModel {
             private:    
-                double PositionProcessNoise = 0.001;
-                double VelocityProcessNoise = 1.0;
-                double OrientationProcessNoise = 0.001;
-                double RotationalVelocityProcessNoise = 1.0;
+                double PositionProcessNoise = 1e-6;
+                double VelocityProcessNoise = 1e-3;
+                double OrientationProcessNoise = 1e-6;
+                double RotationalVelocityProcessNoise = 1e-3;
                 
             public:
                 // Gravity
