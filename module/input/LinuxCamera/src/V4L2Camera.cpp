@@ -196,6 +196,7 @@ namespace module {
 
             settings.insert(std::make_pair("brightness",                 V4L2CameraSetting(fd, V4L2_CID_BRIGHTNESS)));
             settings.insert(std::make_pair("gain",                       V4L2CameraSetting(fd, V4L2_CID_GAIN)));
+            settings.insert(std::make_pair("gamma",                      V4L2CameraSetting(fd, V4L2_CID_GAMMA)));
             settings.insert(std::make_pair("contrast",                   V4L2CameraSetting(fd, V4L2_CID_CONTRAST)));
             settings.insert(std::make_pair("saturation",                 V4L2CameraSetting(fd, V4L2_CID_SATURATION)));
             settings.insert(std::make_pair("power_line_frequency",       V4L2CameraSetting(fd, V4L2_CID_POWER_LINE_FREQUENCY)));

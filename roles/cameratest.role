@@ -6,7 +6,6 @@ NUCLEAR_ROLE(
     support::extension::FileWatcher
     support::configuration::NetworkConfiguration
     support::configuration::GlobalConfig
-    support::configuration::NetworkConfiguration
     platform::darwin::HardwareIO
     platform::darwin::SensorFilter
     input::LinuxCamera
