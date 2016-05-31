@@ -65,7 +65,6 @@ namespace module {
                 // Extract our rotation quaternion
                 UnitQuaternion rotation(state.rows(QW, QZ));
 
-                // TODO Josiah, maybe should be rotation.i().rotateVector here
                 // Make a gravity vector and return it
                 return rotation.rotateVector(arma::vec3({0, 0, G}));
             }
@@ -83,7 +82,6 @@ namespace module {
                 // Extract our rotation quaternion
                 UnitQuaternion rotation(state.rows(QW, QZ));
 
-                // TODO Josiah, maybe should be rotation.i().rotateVector here
                 // First 3 is the up vector in torso space
                 prediction.rows(0,2) = rotation.rotateVector(arma::vec3({0,0,1}));
 

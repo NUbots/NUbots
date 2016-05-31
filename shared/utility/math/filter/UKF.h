@@ -79,11 +79,11 @@ namespace utility {
                     arma::mat chol;
                     try {
                         chol = arma::chol(covarianceSigmaWeights * covariance);
-                    } catch (...) {
+                    } catch (const std::exception& ex) {
                         std::cerr << __FILE__ << " " << __LINE__ << " : covarianceSigmaWeights * covariance was NOT positive-definite and the cholskey "
                                   << "decomposition failed.\ncovarianceSigmaWeights * covariance = \n" << std::endl
                                   << covarianceSigmaWeights * covariance << std::endl;
-                        throw std::exception();
+                        throw ex;
                     }
 
                     // Put our values in either end of the matrix

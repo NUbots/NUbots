@@ -76,7 +76,7 @@ namespace support {
             *sensorData.mutable_accelerometer() << arma::conv_to<arma::fvec>::from(sensors.accelerometer);
 
             // The orientation matrix
-            *sensorData.mutable_orientation() << sensors.world.rotation();
+            *sensorData.mutable_world() << sensors.world;
 
             // TODO: these do not exist in Sensors.h, this needs reimplementing
             // The left FSR values

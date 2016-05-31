@@ -84,7 +84,7 @@ message Sensors {
     int64 timestamp = 1;
     fvec3 accelerometer = 2;
     fvec3 gyroscope = 3;
-    mat33 orientation = 4;
+    mat44 world = 4;
     vec3 left_FSR = 5;
     vec3 right_FSR = 6;
     repeated Servo servo = 7;

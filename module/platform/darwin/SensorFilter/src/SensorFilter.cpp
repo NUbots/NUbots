@@ -409,7 +409,7 @@ namespace module {
 
                             // Get the torso's x,y position in left foot space and from the current estimation
                             // We use this coordinates as the origins for our odometry position delta updates
-                            leftFootLanding = footToTorso.translation(); 
+                            leftFootLanding = footToTorso.translation();
                             leftFootLandingWorld = motionFilter.get().rows(MotionModel::PX, MotionModel::PY);
                             UnitQuaternion rotation(motionFilter.get().rows(MotionModel::QW, MotionModel::QZ));
                             leftFootLandingWorldRot = Rotation3D(rotation).i() * footToTorso.rotation().i();
