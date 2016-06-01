@@ -51,10 +51,16 @@ namespace module {
                 newState.rows(PX, PZ) += state.rows(VX, VZ)*deltaT;
 
                 // Robot rotational velocity delta
-                UnitQuaternion rotationDelta = UnitQuaternion(0, arma::vec3(state.rows(WX, WZ) * deltaT));
+                const double omega = arma::norm(state.rows(VX, VZ)) + 0.00000000001;
+                //Negate to compensate for some later mistake.
+                //deltaT has been negative for a while and has masked an incorrect hack below
+                const double theta = -omega*deltaT*0.5;
+                const double sinTheta = sin(theta);
+                const double cosTheta = cos(theta);
+                arma::vec vq({cosTheta,state(VX)*sinTheta/omega,state(VY)*sinTheta/omega,state(VZ)*sinTheta/omega});
 
                 // Update our rotation
-                newState.rows(QW, QZ) = rotation * rotationDelta;
+                newState.rows(QW, QZ) = rotation * UnitQuaternion(vq);
 
                 return newState;
             }
