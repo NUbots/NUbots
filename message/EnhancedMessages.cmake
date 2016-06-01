@@ -8,6 +8,7 @@ SET(message_binary_include_dir "${CMAKE_BINARY_DIR}/${message_include_dir}")
 
 # Make our message include directories variable
 SET(NUCLEAR_MESSAGE_INCLUDE_DIRS
+    ${CMAKE_CURRENT_SOURCE_DIR}/include
     ${message_source_include_dir}
     ${message_binary_include_dir}
     CACHE INTERNAL "Include directories for the message folder and generated sources")
@@ -24,10 +25,37 @@ SET(message_binary_dir "${CMAKE_BINARY_DIR}/${message_dir}")
 FIND_PACKAGE(Protobuf REQUIRED)
 FIND_PACKAGE(PythonInterp REQUIRED)
 
-# Get all of our messages
-FILE(GLOB_RECURSE protobufs "${message_source_dir}/**.proto")
+# Build our builtin protobuf classes
+FILE(GLOB_RECURSE builtin "${CMAKE_CURRENT_SOURCE_DIR}/proto/**.proto")
+FOREACH(proto ${builtin})
 
-FOREACH(proto ${protobufs} ${builtin})
+    # Get the file without the extension
+    GET_FILENAME_COMPONENT(file_we ${proto} NAME_WE)
+
+    #${message_binary_dir}/
+
+    # Run the protocol buffer compiler on the builtin protocol buffers
+    ADD_CUSTOM_COMMAND(
+        OUTPUT "${message_binary_include_dir}/${file_we}.pb.cc"
+               "${message_binary_include_dir}/${file_we}.pb.h"
+               "${message_binary_include_dir}/${file_we}_pb2.py"
+        COMMAND ${PROTOBUF_PROTOC_EXECUTABLE}
+        ARGS --cpp_out ${message_binary_include_dir}
+             --python_out ${message_binary_include_dir}
+             -I${CMAKE_CURRENT_SOURCE_DIR}/proto
+             "${CMAKE_CURRENT_SOURCE_DIR}/proto/${file_we}.proto"
+        COMMENT "Compiling protocol buffer ${proto}")
+
+    SET(src ${src}
+            "${message_binary_include_dir}/${file_we}.pb.cc"
+            "${message_binary_include_dir}/${file_we}.pb.h"
+            "${message_binary_include_dir}/${file_we}_pb2.py")
+
+ENDFOREACH(proto)
+
+# Build all of our normal messages
+FILE(GLOB_RECURSE protobufs "${message_source_dir}/**.proto")
+FOREACH(proto ${protobufs})
 
     # Get the file without the extension
     GET_FILENAME_COMPONENT(file_we ${proto} NAME_WE)
@@ -46,6 +74,7 @@ FOREACH(proto ${protobufs} ${builtin})
                             --dependency_out=${CMAKE_CURRENT_BINARY_DIR}/temp1
                             --descriptor_set_out=${CMAKE_CURRENT_BINARY_DIR}/temp2
                             -I${message_source_include_dir}
+                            -I${CMAKE_CURRENT_SOURCE_DIR}/proto
                             ${proto})
 
     FILE(READ "${CMAKE_CURRENT_BINARY_DIR}/temp1" dependencies)
@@ -74,6 +103,7 @@ FOREACH(proto ${protobufs} ${builtin})
         COMMAND ${PROTOBUF_PROTOC_EXECUTABLE}
         ARGS --descriptor_set_out "${outputpath}/${file_we}.pb"
              -I${message_source_include_dir}
+             -I${CMAKE_CURRENT_SOURCE_DIR}/proto
              ${proto}
         DEPENDS ${source_depends}
         COMMENT "Extracting protocol buffer information from ${proto}")
@@ -97,6 +127,7 @@ FOREACH(proto ${protobufs} ${builtin})
         ARGS --cpp_out ${message_binary_include_dir}
              --python_out ${message_binary_include_dir}
              -I${message_binary_include_dir}
+             -I${CMAKE_CURRENT_SOURCE_DIR}/proto
              "${outputpath}/${file_we}.proto"
         DEPENDS ${binary_depends}
         COMMENT "Compiling protocol buffer ${proto}")

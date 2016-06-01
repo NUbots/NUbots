@@ -3,12 +3,7 @@ import re
 import os
 import sys
 import textwrap
-import datetime
 from google.protobuf.descriptor_pb2 import FileDescriptorSet, FieldOptions
-
-from pygments import highlight
-from pygments.lexers import CppLexer
-from pygments.formatters import Terminal256Formatter
 
 # Add our cwd to the path so we can import generated python protobufs
 # And extend our options with our MessageOptions
@@ -106,20 +101,20 @@ class Field:
         # Check for matrix and vector types
         elif vector_regex.match(t):
             r = vector_regex.match(t)
-            t = '::message::math::{}vec{}'.format(r.group(1), r.group(2))
+            t = '::message::conversion::math::{}vec{}'.format(r.group(1), r.group(2))
         elif matrix_regex.match(t):
             r = matrix_regex.match(t)
-            t = '::message::math::{}mat{}'.format(r.group(1), r.group(2))
+            t = '::message::conversion::math::{}mat{}'.format(r.group(1), r.group(2))
 
         # Transform and rotation types map to the Transform classes
         elif t == '.message.Transform2D':
-            t = '::message::math::Transform2D'
+            t = '::message::conversion::math::Transform2D'
         elif t == '.message.Transform3D':
-            t = '::message::math::Transform3D'
+            t = '::message::conversion::math::Transform3D'
         elif t == '.message.Rotation2D':
-            t = '::message::math::Rotation2D'
+            t = '::message::conversion::math::Rotation2D'
         elif t == '.message.Rotation3D':
-            t = '::message::math::Rotation3D'
+            t = '::message::conversion::math::Rotation3D'
 
         # Timestamps and durations map to real time/duration classes
         elif t == '.google.protobuf.Timestamp':
@@ -516,28 +511,21 @@ class File:
             '4"{}"'.format(self.name[:-6] + '.pb.h')
         }
 
+
         # We use a dirty hack here of putting a priority on each header
         # to make the includes be in a better order
         for d in self.dependencies:
-            if d in ['message/Vector.proto', 'message/Matrix.proto']:
-                includes.add('4"utility/conversion/matrix_types.h"')
-                includes.add('4"utility/conversion/proto_matrix.h"')
-            if d in ['message/Transform.proto']:
-                includes.add('4"utility/math/matrix/Transform2D.h"')
-                includes.add('4"utility/math/matrix/Transform3D.h"')
-                includes.add('4"utility/conversion/proto_transform.h"')
-            if d in ['message/Rotation.proto']:
-                includes.add('4"utility/math/matrix/Rotation2D.h"')
-                includes.add('4"utility/math/matrix/Rotation3D.h"')
-                includes.add('4"utility/conversion/proto_rotation.h"')
+            if d in ['Vector.proto', 'Matrix.proto']:
+                includes.add('4"message/conversion/proto_matrix.h"')
+            elif d in ['Transform.proto']:
+                includes.add('4"message/conversion/proto_transform.h"')
             elif d in ['google/protobuf/timestamp.proto', 'google/protobuf/duration.proto']:
-                includes.add('3<nuclear_bits/clock.hpp>')
-                includes.add('4"utility/conversion/proto_time.h"')
+                includes.add('4"message/conversion/proto_time.h"')
             elif d in ['google/protobuf/struct.proto']:
-                includes.add('3<yaml-cpp/yaml.h>')
-                includes.add('4"utility/conversion/proto_yaml.h"')
+                includes.add('4"utility/include/proto_struct.h"')
             else:
                 includes.add('4"{}"'.format(d[:-6] + '.h'))
+
         # Don't forget to remove the first character
         includes = '\n'.join(['#include {}'.format(i[1:]) for i in sorted(list(includes))])
 
