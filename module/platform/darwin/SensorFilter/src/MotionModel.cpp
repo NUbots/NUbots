@@ -48,7 +48,7 @@ namespace module {
                 UnitQuaternion rotation(state.rows(QW, QZ));
 
                 // Add our global velocity to our position (rotate our local velocity)
-                newState.rows(PX, PZ) += state.rows(VX, VZ);
+                newState.rows(PX, PZ) += state.rows(VX, VZ)*deltaT;
 
                 // Robot rotational velocity delta
                 UnitQuaternion rotationDelta = UnitQuaternion(0, arma::vec3(state.rows(WX, WZ) * deltaT));
