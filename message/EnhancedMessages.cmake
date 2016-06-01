@@ -140,7 +140,7 @@ FOREACH(proto ${protobufs})
         ARGS "${CMAKE_CURRENT_SOURCE_DIR}/build_message_class.py" "${outputpath}/${file_we}" ${outputpath}
         WORKING_DIRECTORY ${message_binary_dir}
         DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/build_message_class.py"
-                "${message_binary_dir}/MessageOptions_pb2.py"
+                "${message_binary_include_dir}/MessageOptions_pb2.py"
                 "${outputpath}/${file_we}.pb"
         COMMENT "Building classes for ${proto}")
 
