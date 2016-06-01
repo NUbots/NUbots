@@ -66,7 +66,7 @@ namespace geometry {
     arma::vec3 UnitQuaternion::rotateVector(const arma::vec3& v) const {
         // Do the math
         const arma::vec3 t = 2*arma::cross(imaginary(),v);
-        return v + imaginary() * t + arma::cross(imaginary(),t);
+        return v + real() * t + arma::cross(imaginary(),t);
     }
 
     arma::vec3 UnitQuaternion::getAxis() const {
