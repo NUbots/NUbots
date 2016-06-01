@@ -53,6 +53,9 @@ FOREACH(proto ${builtin})
 
 ENDFOREACH(proto)
 
+# Get our dependency files for our message class generator
+FILE(GLOB_RECURSE message_class_generator_depends "${CMAKE_CURRENT_SOURCE_DIR}/generator/**.py")
+
 # Build all of our normal messages
 FILE(GLOB_RECURSE protobufs "${message_source_dir}/**.proto")
 FOREACH(proto ${protobufs})
@@ -140,6 +143,7 @@ FOREACH(proto ${protobufs})
         ARGS "${CMAKE_CURRENT_SOURCE_DIR}/build_message_class.py" "${outputpath}/${file_we}" ${outputpath}
         WORKING_DIRECTORY ${message_binary_dir}
         DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/build_message_class.py"
+                ${message_class_generator_depends}
                 "${message_binary_include_dir}/MessageOptions_pb2.py"
                 "${outputpath}/${file_we}.pb"
         COMMENT "Building classes for ${proto}")
