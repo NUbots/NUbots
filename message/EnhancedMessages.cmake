@@ -32,8 +32,6 @@ FOREACH(proto ${builtin})
     # Get the file without the extension
     GET_FILENAME_COMPONENT(file_we ${proto} NAME_WE)
 
-    #${message_binary_dir}/
-
     # Run the protocol buffer compiler on the builtin protocol buffers
     ADD_CUSTOM_COMMAND(
         OUTPUT "${message_binary_include_dir}/${file_we}.pb.cc"

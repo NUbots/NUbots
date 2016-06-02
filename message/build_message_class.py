@@ -1,16 +1,7 @@
 #!/usr/bin/python
-import os
 import sys
 import generator.File
-from google.protobuf.descriptor_pb2 import FileDescriptorSet, FieldOptions
-
-# Add our cwd to the path so we can import generated python protobufs
-# And extend our options with our MessageOptions
-sys.path.append(os.getcwd())
-from MessageOptions_pb2 import pointer, PointerType
-FieldOptions.RegisterExtension(pointer)
-PointerType = dict(PointerType.items())
-
+from google.protobuf.descriptor_pb2 import FileDescriptorSet
 
 base_file = sys.argv[1]
 

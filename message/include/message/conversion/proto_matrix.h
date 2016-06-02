@@ -2,8 +2,8 @@
 #define MESSAGE_CONVERSION_PROTO_MATRIX_H
 
 #include "math_types.h"
-#include "message/Vector.pb.h"
-#include "message/Matrix.pb.h"
+#include "Vector.pb.h"
+#include "Matrix.pb.h"
 /**
  * @brief This type maps protocol buffer types to their vector equivalents
  * @tparam T the protocol buffer type to map
