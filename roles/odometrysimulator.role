@@ -3,7 +3,6 @@ NUCLEAR_ROLE(
     platform::darwin::KinematicsModel
     #Support
     #support::SignalCatcher
-    support::logging::ConsoleLogHandler
     support::extension::FileWatcher
     support::configuration::GlobalConfig
     support::configuration::NetworkConfiguration
@@ -24,14 +23,14 @@ NUCLEAR_ROLE(
 
     #Behaviour
     behaviour::Controller
-    behaviour::skills::Stand
+    behaviour::skills::WalkEngineStand
     behaviour::skills::FallingRelax
     behaviour::skills::Getup
     behaviour::skills::KickScript
+    behaviour::skills::DirectWalkController
     behaviour::skills::HeadBehaviourSoccer
 
     behaviour::strategy::KeyboardWalk
-
 
     #Motion
     motion::ScriptEngine

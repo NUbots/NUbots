@@ -123,7 +123,7 @@ namespace module {
                 refreshView();
 
                 // Trigger when stdin has something to read
-                on<IO>(::fileno(stdin), IO::READ).then([this] {
+                on<IO>(STDIN_FILENO, IO::READ).then([this] {
                     // Get the character the user has typed
                     switch(getch()) {
                         case KEY_UP: // Change selection up

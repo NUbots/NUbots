@@ -81,15 +81,19 @@ message Sensors {
         uint32 colour = 2;
     }
 
+    message FSR {
+        repeated float value = 1 [packed=true];
+        vec2 centre = 2;
+    }
+
     int64 timestamp = 1;
     fvec3 accelerometer = 2;
     fvec3 gyroscope = 3;
     mat44 world = 4;
-    vec3 left_FSR = 5;
-    vec3 right_FSR = 6;
-    repeated Servo servo = 7;
-    repeated Button button = 8;
-    repeated LED led = 9;
-    float voltage = 10;
-    float battery = 11;
+    repeated FSR fsr = 5;
+    repeated Servo servo = 6;
+    repeated Button button = 7;
+    repeated LED led = 8;
+    float voltage = 9;
+    float battery = 10;
 }

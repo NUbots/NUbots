@@ -411,13 +411,16 @@ namespace module {
                             // We use this coordinates as the origins for our odometry position delta updates
                             leftFootLanding = footToTorso.translation();
                             leftFootLandingWorld = motionFilter.get().rows(MotionModel::PX, MotionModel::PY);
-                            UnitQuaternion rotation(motionFilter.get().rows(MotionModel::QW, MotionModel::QZ));
-                            leftFootLandingWorldRot = Rotation3D(rotation).i() * footToTorso.rotation().i();
                         }
                         else {
+                            UnitQuaternion rotation(motionFilter.get().rows(MotionModel::QW, MotionModel::QZ));
+                            Rotation3D Rwf = Rotation3D(rotation).i() * footToTorso.rotation().i();
+
                             // Get how much our torso has moved from our foot landing in foot coordinates
                             // rotate footTorsoDelta by yaw between global and foot space to put the delta in global space
-                            arma::vec2 footTorsoDelta = ((footToTorso.translation() - leftFootLanding).t() * leftFootLandingWorldRot.cols(0,1)).t();
+
+                            // Rwf * rTFf
+                            arma::vec2 footTorsoDelta = Rwf.rows(0,1) * (footToTorso.translation() - leftFootLanding);
 
                             // Do our measurement update and pass in the original state x,y we measured when the foot landed.
                             motionFilter.measurementUpdate(footTorsoDelta, config.motionFilter.noise.measurement.flatFootOdometry, leftFootLandingWorld, MotionModel::MeasurementType::FLAT_FOOT_ODOMETRY());
