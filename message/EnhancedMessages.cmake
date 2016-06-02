@@ -42,6 +42,7 @@ FOREACH(proto ${builtin})
              --python_out ${message_binary_include_dir}
              -I${CMAKE_CURRENT_SOURCE_DIR}/proto
              "${CMAKE_CURRENT_SOURCE_DIR}/proto/${file_we}.proto"
+        DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/proto/${file_we}.proto"
         COMMENT "Compiling protocol buffer ${proto}")
 
     SET(src ${src}
@@ -166,6 +167,9 @@ ENDFOREACH(proto)
 
 # Build a library from these files
 ADD_LIBRARY(nuclear_message message.cpp ${protobufs} ${src})
+
+# The library uses protocol buffers
+TARGET_LINK_LIBRARIES(nuclear_message ${PROTOBUF_LIBRARIES})
 
 # Put it in an IDE group for shared
 SET_PROPERTY(TARGET nuclear_message PROPERTY FOLDER "shared/")

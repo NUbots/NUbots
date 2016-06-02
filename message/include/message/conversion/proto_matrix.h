@@ -333,6 +333,7 @@ Matrix& operator<< (Matrix& matrix, const ProtoMat<Matrix>& proto) {
 
 template <typename Proto>
 inline Proto& operator<< (Proto& proto, const DynamicVecProto<Proto> vector) {
+    proto.Reserve(vector.size());
     for(int i = 0; i < vector.size(); ++i) {
         proto.add_value(vector[i]);
     }
@@ -340,7 +341,7 @@ inline Proto& operator<< (Proto& proto, const DynamicVecProto<Proto> vector) {
 }
 template <typename Vector>
 inline Vector& operator<< (Vector& vector, const DynamicProtoVec<Vector> proto) {
-    vector.resize(proto);
+    vector.resize(proto.v_size());
     for (int i = 0; i < proto.v_size(); ++i) {
         vector[i] = proto.v(i);
     }
@@ -350,19 +351,22 @@ inline Vector& operator<< (Vector& vector, const DynamicProtoVec<Vector> proto) 
 template <typename Proto>
 inline Proto& operator<< (Proto& proto, const DynamicMatProto<Proto> matrix) {
 
+    // Set our rows and columns
     proto.set_rows(matrix.rows());
     proto.set_cols(matrix.cols());
 
     // Copy the data over
-    proto.mutable_v()->assign(matrix.data(), matrix.data() + matrix.size());
+    *proto.mutable_v() = std::remove_reference_t<decltype(*proto.mutable_v())>(matrix.data(), matrix.data() + matrix.size());
 
     return proto;
 }
 template <typename Matrix>
 inline Matrix& operator<< (Matrix& matrix, const DynamicProtoMat<Matrix> proto) {
 
+    // Resize our matrix to the correct size
     matrix.resize(proto.rows(), proto.cols());
 
+    // Copy the data over
     std::memcpy(matrix.data(), proto.v().data(), proto.v().size());
 
     return matrix;
