@@ -59,7 +59,10 @@ namespace module {
 
                 // Our static process noise matrix
                 arma::mat::fixed<size, size> processNoiseMatrix;
-
+                
+                // The velocity decay for x/y/z velocities (1.0 = no decay)
+                arma::vec3 timeUpdateVelocityDecay = {1,1,1};
+                
                 struct MeasurementType {
                     struct GYROSCOPE {};
                     struct ACCELEROMETER {};

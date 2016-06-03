@@ -51,16 +51,19 @@ namespace module {
                 newState.rows(PX, PZ) += state.rows(VX, VZ)*deltaT;
 
                 // Robot rotational velocity delta
-                const double omega = arma::norm(state.rows(VX, VZ)) + 0.00000000001;
+                const double omega = arma::norm(state.rows(WX, WZ)) + 0.00000000001;
                 //Negate to compensate for some later mistake.
                 //deltaT has been negative for a while and has masked an incorrect hack below
                 const double theta = -omega*deltaT*0.5;
                 const double sinTheta = sin(theta);
                 const double cosTheta = cos(theta);
-                arma::vec vq({cosTheta,state(VX)*sinTheta/omega,state(VY)*sinTheta/omega,state(VZ)*sinTheta/omega});
+                arma::vec vq({cosTheta,state(WX)*sinTheta/omega,state(WY)*sinTheta/omega,state(WZ)*sinTheta/omega});
 
                 // Update our rotation
                 newState.rows(QW, QZ) = rotation * UnitQuaternion(vq);
+                
+                //add velocity decay
+                newState.rows(VX, VZ) = newState.rows(VX, VZ) % timeUpdateVelocityDecay;
 
                 return newState;
             }
@@ -99,7 +102,6 @@ namespace module {
 
             // Flat foot odometry measurement
             arma::vec2 MotionModel::predictedObservation(const arma::vec::fixed<size>& state, const arma::vec2& originalXY, const MeasurementType::FLAT_FOOT_ODOMETRY&)  {
-
                 // Predict our delta from our original position to our current position
                 return state.rows(PX, PY) - originalXY;
             }
