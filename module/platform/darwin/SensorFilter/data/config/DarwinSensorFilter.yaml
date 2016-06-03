@@ -10,15 +10,17 @@ foot:
     foot_down_weight: 0.1
 
 motion_filter:
+  update:
+    velocity_decay: [.8, .8, .8]
   noise:
     measurement:
       accelerometer: [1e-4, 1e-4, 1e-4]
       gyroscope: [1e-8, 1e-8, 1e-8]
       foot_up_with_z: [1e-6, 1e-6, 1e-6, 1e-6]
-      flat_foot_odometry: [1e-8, 1e-8]
+      flat_foot_odometry: [1e-6, 1e-6]
     process:
       position: [1e-8, 1e-8, 1e-8]
-      velocity: [1e-4, 1e-4, 1e-4]
+      velocity: [1e-3, 1e-3, 1e-3]
       rotational_velocity: [1e-4, 1e-4, 1e-4]
       rotation: [1e-10, 1e-10, 1e-10, 1e-10]
 
@@ -29,8 +31,8 @@ motion_filter:
       rotational_velocity: [0, 0, 0] # Not spinning
       rotation: [1, 0, 0, 0]          # Upright
     covariance:
-      position: [1e-10, 1e-10, 1]    # We are pretty sure of our x,y when we start
-      velocity: [1e-2, 1e-2, 1e-2]   # We are unsure of our velocity
+      position: [1e-3, 1e-3, 1]    # We are pretty sure of our x,y when we start
+      velocity: [1e-3, 1e-3, 1e-3]   # We are unsure of our velocity
       rotation: [.1, .1, .1, .1]          # Not very sure of rotation
       rotational_velocity: [1, 1, 1] # Fairly unsure about our rotational velocity
 
