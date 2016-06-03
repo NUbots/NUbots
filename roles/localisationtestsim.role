@@ -1,0 +1,41 @@
+NUCLEAR_ROLE(
+    # This must come first as it populates global variables that other modules depend on.
+    platform::darwin::KinematicsModel
+    #Support
+    #support::SignalCatcher
+    support::logging::ConsoleLogHandler
+    support::extension::FileWatcher
+    support::configuration::GlobalConfig
+    support::configuration::SoccerConfig
+    support::configuration::NetworkConfiguration
+    support::NUbugger
+
+
+    #Simulation
+    platform::darwin::HardwareSimulator
+    support::SoccerSimulator
+    support::VirtualCamera
+
+    #Sensors
+    platform::darwin::SensorFilter
+
+    #Localisation
+    localisation::MMKFRobotLocalisation
+    localisation::KFBallLocalisation
+    
+    #Behaviour
+    behaviour::Controller
+    behaviour::skills::WalkEngineStand
+    behaviour::skills::FallingRelax
+    behaviour::skills::Getup
+    behaviour::skills::KickScript
+    behaviour::skills::DirectWalkController
+    behaviour::skills::HeadBehaviourSoccer
+
+    behaviour::strategy::KeyboardWalk
+
+    #Motion
+    motion::ScriptEngine
+    motion::WalkEngine
+    motion::HeadController
+)
