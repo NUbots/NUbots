@@ -104,6 +104,10 @@ namespace module {
                     this->config.foot.fsr.footDownWeight = config["foot"]["fsr"]["foot_down_weight"].as<double>();
 
                     // Motion filter config
+                    // Update our velocity timestep dekay
+                    this->config.motionFilter.velocityDecay =    config["motion_filter"]["update"]["velocity_decay"].as<arma::vec3>();
+                    motionFilter.model.timeUpdateVelocityDecay = this->config.motionFilter.velocityDecay;
+                    
                     // Update our measurement noises
                     this->config.motionFilter.noise.measurement.accelerometer =    arma::diagmat(config["motion_filter"]["noise"]["measurement"]["accelerometer"].as<arma::vec3>());
                     this->config.motionFilter.noise.measurement.gyroscope =        arma::diagmat(config["motion_filter"]["noise"]["measurement"]["gyroscope"].as<arma::vec3>());
@@ -405,16 +409,19 @@ namespace module {
                         motionFilter.measurementUpdate(footUpWithZ, config.motionFilter.noise.measurement.footUpWithZ, MotionModel::MeasurementType::FOOT_UP_WITH_Z());
 
                         // If we don't have previous sensors, or the previous sensors had the foot up
+                        
                         if (!previousSensors || previousSensors->leftFootDown < 0.75) {
 
                             // Get the torso's x,y position in left foot space and from the current estimation
                             // We use this coordinates as the origins for our odometry position delta updates
                             leftFootLanding = footToTorso.translation();
                             leftFootLandingWorld = motionFilter.get().rows(MotionModel::PX, MotionModel::PY);
+                            UnitQuaternion rotation(motionFilter.get().rows(MotionModel::QW, MotionModel::QZ));
+                            leftFootOrientation = Rotation3D(rotation);
                         }
                         else {
                             UnitQuaternion rotation(motionFilter.get().rows(MotionModel::QW, MotionModel::QZ));
-                            Rotation3D Rwf = Rotation3D(rotation).i() * footToTorso.rotation().i();
+                            Rotation3D Rwf = leftFootOrientation.i() * footToTorso.rotation().i();
 
                             // Get how much our torso has moved from our foot landing in foot coordinates
                             // rotate footTorsoDelta by yaw between global and foot space to put the delta in global space
@@ -433,7 +440,7 @@ namespace module {
                     // Map from robot to world coordinates
                     sensors->world.fill(0);
                     sensors->world.rotation() = Rotation3D(UnitQuaternion(o.rows(MotionModel::QW, MotionModel::QZ)));
-                    sensors->world.translation() = sensors->world.rotation() * o.rows(MotionModel::PX, MotionModel::PZ);
+                    sensors->world.translation() = o.rows(MotionModel::PX, MotionModel::PZ);
 
                     sensors->robotToIMU = calculateRobotToIMU(sensors->world.rotation());
 

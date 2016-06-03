@@ -25,6 +25,7 @@
 #include "message/input/Sensors.h"
 
 #include "utility/math/matrix/Transform3D.h"
+#include "utility/math/matrix/Rotation3D.h"
 #include "utility/math/filter/UKF.h"
 #include "MotionModel.h"
 #include "utility/motion/RobotModels.h"
@@ -52,6 +53,7 @@ namespace module {
                     } battery;
 
                     struct {
+                        arma::vec3 velocityDecay;
                         struct  {
                             struct {
                                 arma::mat33 accelerometer;
@@ -102,11 +104,15 @@ namespace module {
                 arma::vec3 leftFootLanding;
                 // Our torso position from the global origin when the left foot landed
                 arma::vec2 leftFootLandingWorld;
+                //the original IMU transform to reference when comparing
+                utility::math::matrix::Rotation3D leftFootOrientation;
 
                 // Our torso position from the right foot when it landed
-                arma::vec2 rightFootLanding;
+                arma::vec3 rightFootLanding;
                 // Our torso position from the global origin when the right foot landed
                 arma::vec2 rightFootLandingWorld;
+                //the original IMU transform to reference when comparing
+                utility::math::matrix::Rotation3D rightFootOrientation;
             };
         }
     }
