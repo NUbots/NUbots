@@ -31,22 +31,22 @@ namespace support {
     using std::chrono::microseconds;
 
     void NUbugger::provideReactionStatistics() {
-        handles["reaction_statistics"].push_back(on<Trigger<ReactionStatistics>>().then([this](const ReactionStatistics& stats) {
+        // handles["reaction_statistics"].push_back(on<Trigger<ReactionStatistics>>().then([this](const ReactionStatistics& stats) {
 
-            ReactionStatisticsProto reactionStatistics;
-            reactionStatistics.set_reactionid(stats.reactionId);
-            reactionStatistics.set_taskid(stats.taskId);
-            reactionStatistics.set_causereactionid(stats.causeReactionId);
-            reactionStatistics.set_causetaskid(stats.causeTaskId);
-            reactionStatistics.set_emitted(getUtcTimestamp<microseconds>(stats.emitted));
-            reactionStatistics.set_started(getUtcTimestamp<microseconds>(stats.started));
-            reactionStatistics.set_finished(getUtcTimestamp<microseconds>(stats.finished));
-            reactionStatistics.set_name(stats.identifier[0]);
-            reactionStatistics.set_triggername(stats.identifier[1]);
-            reactionStatistics.set_functionname(stats.identifier[2]);
+        //     ReactionStatisticsProto reactionStatistics;
+        //     reactionStatistics.set_reactionid(stats.reactionId);
+        //     reactionStatistics.set_taskid(stats.taskId);
+        //     reactionStatistics.set_causereactionid(stats.causeReactionId);
+        //     reactionStatistics.set_causetaskid(stats.causeTaskId);
+        //     reactionStatistics.set_emitted(getUtcTimestamp<microseconds>(stats.emitted));
+        //     reactionStatistics.set_started(getUtcTimestamp<microseconds>(stats.started));
+        //     reactionStatistics.set_finished(getUtcTimestamp<microseconds>(stats.finished));
+        //     reactionStatistics.set_name(stats.identifier[0]);
+        //     reactionStatistics.set_triggername(stats.identifier[1]);
+        //     reactionStatistics.set_functionname(stats.identifier[2]);
 
-            send(reactionStatistics);
-        }));
+        //     send(reactionStatistics);
+        // }));
     }
 }
 }
