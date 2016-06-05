@@ -132,13 +132,14 @@ namespace localisation {
                 auto model_cov = model->GetCovariance();
 
                 Self robot_model;
-                robot_model.position = model_state.rows(robot::kX, robot::kY) - sensors.world.translation().rows(0,1);
+                //robot_model.position = model_state.rows(robot::kX, robot::kY) - sensors.world.translation().rows(0,1);
                 
                 //calculate the total robot heading by rotating using the inverse robot orientation
-                robot_model.heading = model_state(robot::kImuOffset) - sensors.world.rotation().yaw();
+                double rmHeading = model_state(robot::kImuOffset) - sensors.world.rotation().yaw();
+                robot_model.heading = {std::cos(rmHeading),std::sin(rmHeading)};
 
                 //TODO: fill in velocity from the motionmodel
-                robot_model.velocity = arma::vec2();
+                //robot_model.velocity = arma::vec2();
                 //robot_model.velocity = sensors.world.translationVelocity().rows(0,1);
 
                 robot_model.position_cov = model_cov.submat(0,0,1,1);
