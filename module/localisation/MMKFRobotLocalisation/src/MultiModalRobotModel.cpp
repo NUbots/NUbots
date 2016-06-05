@@ -125,7 +125,7 @@ double RobotHypothesis::MeasurementUpdate(
     // arma::vec measurement = { std::abs(heading_diff) };
     // arma::mat cov = arma::eye(1, 1) * 0.1; // TODO: Calculate correct covariance
 
-    // double quality = filter_.measurementUpdate(measurement, cov, actual_positions);
+    // double quality = filter_.measurementUpdate(measurement, cov, actual_positions, *(obv_a.sensors));
 
     // return quality;
     return 1;

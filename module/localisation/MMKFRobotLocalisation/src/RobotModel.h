@@ -64,10 +64,6 @@ namespace robot {
             const arma::vec::fixed<RobotModel::size>& state, double deltaT,
             const message::input::Sensors& sensors);
 
-         arma::vec predictedObservation(
-             const arma::vec::fixed<RobotModel::size>& state,
-             const arma::vec& actual_position);
-
         arma::vec predictedObservation(
             const arma::vec::fixed<RobotModel::size>& state,
             const arma::vec3& actual_position,
@@ -79,7 +75,8 @@ namespace robot {
 
         arma::vec predictedObservation(
             const arma::vec::fixed<RobotModel::size>& state,
-            const std::vector<arma::vec>& actual_positions);
+            const std::vector<arma::vec>& actual_positions,
+            const message::input::Sensors& sensors);
 
         arma::vec observationDifference(const arma::vec& a, const arma::vec& b);
 
