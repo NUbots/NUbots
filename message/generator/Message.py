@@ -201,7 +201,7 @@ class Message:
         converter_impl = '\n\n'.join([protobuf_converter[1]])
 
         header_template = dedent("""\
-            struct {name} {{
+            struct alignas(16) {name} {{
                 // Enum Definitions
             {enums}
                 // Submessage Definitions
