@@ -44,6 +44,7 @@ namespace module {
             using message::platform::darwin::ButtonMiddleUp;
             using message::input::Sensors;
             using message::input::CameraParameters;
+            using message::input::ServoSide;
             using message::input::ServoID;
             using message::input::LimbID;
             using utility::nubugger::graph;
@@ -107,7 +108,7 @@ namespace module {
                     // Update our velocity timestep dekay
                     this->config.motionFilter.velocityDecay =    config["motion_filter"]["update"]["velocity_decay"].as<arma::vec3>();
                     motionFilter.model.timeUpdateVelocityDecay = this->config.motionFilter.velocityDecay;
-                    
+
                     // Update our measurement noises
                     this->config.motionFilter.noise.measurement.accelerometer =    arma::diagmat(config["motion_filter"]["noise"]["measurement"]["accelerometer"].as<arma::vec3>());
                     this->config.motionFilter.noise.measurement.gyroscope =        arma::diagmat(config["motion_filter"]["noise"]["measurement"]["gyroscope"].as<arma::vec3>());
@@ -370,10 +371,10 @@ namespace module {
                                           + (input.fsr.left.fsr4 > config.foot.fsr.footDownWeight ? 0.25 : 0.0);
 
                     // Count the number of FSRs that have more than 1/16th of the robots mass
-                    sensors->rightFootDown = (input.fsr.left.fsr1 > config.foot.fsr.footDownWeight ? 0.25 : 0.0)
-                                           + (input.fsr.left.fsr2 > config.foot.fsr.footDownWeight ? 0.25 : 0.0)
-                                           + (input.fsr.left.fsr3 > config.foot.fsr.footDownWeight ? 0.25 : 0.0)
-                                           + (input.fsr.left.fsr4 > config.foot.fsr.footDownWeight ? 0.25 : 0.0);
+                    sensors->rightFootDown = (input.fsr.right.fsr1 > config.foot.fsr.footDownWeight ? 0.25 : 0.0)
+                                           + (input.fsr.right.fsr2 > config.foot.fsr.footDownWeight ? 0.25 : 0.0)
+                                           + (input.fsr.right.fsr3 > config.foot.fsr.footDownWeight ? 0.25 : 0.0)
+                                           + (input.fsr.right.fsr4 > config.foot.fsr.footDownWeight ? 0.25 : 0.0);
 
                     /************************************************
                      *             Motion (IMU+Odometry)            *
@@ -393,44 +394,63 @@ namespace module {
 
                     // 3 points on the ground mean that we can assume this foot is flat
                     // We also have to ensure that the previous foot was also down for this to be valid
-
                     // Check if our foot is flat on the ground
-                    if (sensors->leftFootDown >= 0.75) {
+                    for (auto& side : { ServoSide::LEFT, ServoSide::RIGHT} ) {
 
-                        // Get the torso in foot space
-                        auto footToTorso = sensors->forwardKinematics[ServoID::L_ANKLE_ROLL].i();
+                        auto servoid = side == ServoSide::LEFT ? ServoID::L_ANKLE_ROLL : ServoID::R_ANKLE_ROLL;
 
-                        // Construct our measurement vector from the up vector in torso space and the z height from the foot
-                        arma::vec4 footUpWithZ;
-                        // This is an up world vector in torso space
-                        footUpWithZ = sensors->forwardKinematics[ServoID::L_ANKLE_ROLL].col(2); //NOTE: this should have a decent amount of noise
-                        // This is the z height of the torso above the ground
-                        footUpWithZ[3] = footToTorso.translation()[2];
-                        motionFilter.measurementUpdate(footUpWithZ, config.motionFilter.noise.measurement.footUpWithZ, MotionModel::MeasurementType::FOOT_UP_WITH_Z());
+                        const float footDown = side == ServoSide::LEFT
+                            ? sensors->leftFootDown
+                            : sensors->rightFootDown;
 
-                        // If we don't have previous sensors, or the previous sensors had the foot up
-                        
-                        if (!previousSensors || previousSensors->leftFootDown < 0.75) {
+                        const float prevFootDown = previousSensors
+                            ? side == ServoSide::LEFT
+                                ? previousSensors->leftFootDown
+                                : previousSensors->rightFootDown
+                            : 0.0;
 
-                            // Get the torso's x,y position in left foot space and from the current estimation
-                            // We use this coordinates as the origins for our odometry position delta updates
-                            leftFootLanding = footToTorso.translation();
-                            leftFootLandingWorld = motionFilter.get().rows(MotionModel::PX, MotionModel::PY);
-                            UnitQuaternion rotation(motionFilter.get().rows(MotionModel::QW, MotionModel::QZ));
-                            leftFootOrientation = Rotation3D(rotation);
-                        }
-                        else {
-                            UnitQuaternion rotation(motionFilter.get().rows(MotionModel::QW, MotionModel::QZ));
-                            Rotation3D Rwf = leftFootOrientation.i() * footToTorso.rotation().i();
+                        if (footDown >= 0.75) {
 
-                            // Get how much our torso has moved from our foot landing in foot coordinates
-                            // rotate footTorsoDelta by yaw between global and foot space to put the delta in global space
+                            // Get the foot in torso space and the torso in foot space
+                            Transform3D Hft = sensors->forwardKinematics[servoid];
+                            Transform3D Htf = Hft.i();
 
-                            // Rwf * rTFf
-                            arma::vec2 footTorsoDelta = Rwf.rows(0,1) * (footToTorso.translation() - leftFootLanding);
+                            Rotation3D Rft = Hft.rotation();
+                            arma::vec3 rFTt = Hft.translation();
 
-                            // Do our measurement update and pass in the original state x,y we measured when the foot landed.
-                            motionFilter.measurementUpdate(footTorsoDelta, config.motionFilter.noise.measurement.flatFootOdometry, leftFootLandingWorld, MotionModel::MeasurementType::FLAT_FOOT_ODOMETRY());
+                            Rotation3D Rtf = Htf.rotation();
+                            arma::vec3 rTFf = Htf.translation();
+
+                            // Construct our measurement vector from the up vector in torso space and the z height from the foot
+                            arma::vec4 footUpWithZ;
+                            footUpWithZ.rows(0, 2) = Rft.col(2);
+
+                            // This is the z height of the torso above the ground
+                            footUpWithZ[3] = rTFf[2];
+
+                            // Perform our measurement update
+                            motionFilter.measurementUpdate(footUpWithZ, config.motionFilter.noise.measurement.footUpWithZ, MotionModel::MeasurementType::FOOT_UP_WITH_Z());
+
+                            // If we don't have previous sensors, or the previous sensors had the foot up
+                            if (prevFootDown < 0.75) {
+                                // Store our torso from foot at foot landing
+                                footlanding_Rtf[side]  = Rtf;
+                                footlanding_rTFf[side] = rTFf;
+
+                                // Store our torso from world at foot landing
+                                footlanding_Rwt[side]  = Rotation3D(UnitQuaternion(motionFilter.get().rows(MotionModel::QW, MotionModel::QZ)));
+                                footlanding_rTWw[side] = motionFilter.get().rows(MotionModel::PX, MotionModel::PZ);
+                            }
+                            else {
+                                // Get our foot in world space
+                                Rotation3D Rwf = footlanding_Rwt[side].i() * Rtf.i();
+
+                                // Get our x/y delta position
+                                arma::vec3 delta = Rwf * arma::vec3(rTFf - footlanding_rTFf[side]);
+
+                                // Do our measurement update and pass in the original state x,y we measured when the foot landed.
+                                motionFilter.measurementUpdate(delta.rows(0,1), config.motionFilter.noise.measurement.flatFootOdometry, footlanding_rTWw[side].rows(0,1), MotionModel::MeasurementType::FLAT_FOOT_ODOMETRY());
+                            }
                         }
                     }
 
