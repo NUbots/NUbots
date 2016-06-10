@@ -102,22 +102,16 @@ namespace module {
                 bool middleDown = false;
                 
                 // Our sensor for foot down
-                DarwinVirtualLoadSensor leftFootDown;
-                // Our torso position from the left foot when it landed
-                arma::vec3 leftFootLanding;
-                // Our torso position from the global origin when the left foot landed
-                arma::vec2 leftFootLandingWorld;
-                //the original IMU transform to reference when comparing
-                utility::math::matrix::Rotation3D leftFootOrientation;
+                DarwinVirtualLoadSensor leftFootDown,rightFootDown;
+                // Our torso rotation from foot when it landed
+                std::array<utility::math::matrix::Rotation3D, 2> footlanding_Rtf;
+                // Our torso position from foot in foot coordinates when it landed
+                std::array<arma::vec3, 2> footlanding_rTFf;
 
-                // Our sensor for foot down
-                DarwinVirtualLoadSensor rightFootDown;
-                // Our torso position from the right foot when it landed
-                arma::vec3 rightFootLanding;
-                // Our torso position from the global origin when the right foot landed
-                arma::vec2 rightFootLandingWorld;
-                //the original IMU transform to reference when comparing
-                utility::math::matrix::Rotation3D rightFootOrientation;
+                // The worlds rotation from our torso
+                std::array<utility::math::matrix::Rotation3D, 2> footlanding_Rwt;
+                // The torsos position from the origin in world
+                std::array<arma::vec3, 2> footlanding_rTWw;
             };
         }
     }
