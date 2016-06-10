@@ -120,13 +120,13 @@ namespace module {
 
                     // Motion filter config
                     // Update our velocity timestep dekay
-                    this->config.motionFilter.velocityDecay =    config["motion_filter"]["update"]["velocity_decay"].as<arma::vec3>();
+                    this->config.motionFilter.velocityDecay    = config["motion_filter"]["update"]["velocity_decay"].as<arma::vec3>();
                     motionFilter.model.timeUpdateVelocityDecay = this->config.motionFilter.velocityDecay;
 
                     // Update our measurement noises
-                    this->config.motionFilter.noise.measurement.accelerometer =    arma::diagmat(config["motion_filter"]["noise"]["measurement"]["accelerometer"].as<arma::vec3>());
-                    this->config.motionFilter.noise.measurement.gyroscope =        arma::diagmat(config["motion_filter"]["noise"]["measurement"]["gyroscope"].as<arma::vec3>());
-                    this->config.motionFilter.noise.measurement.footUpWithZ =      arma::diagmat(config["motion_filter"]["noise"]["measurement"]["foot_up_with_z"].as<arma::vec4>());
+                    this->config.motionFilter.noise.measurement.accelerometer    = arma::diagmat(config["motion_filter"]["noise"]["measurement"]["accelerometer"].as<arma::vec3>());
+                    this->config.motionFilter.noise.measurement.gyroscope        = arma::diagmat(config["motion_filter"]["noise"]["measurement"]["gyroscope"].as<arma::vec3>());
+                    this->config.motionFilter.noise.measurement.footUpWithZ      = arma::diagmat(config["motion_filter"]["noise"]["measurement"]["foot_up_with_z"].as<arma::vec4>());
                     this->config.motionFilter.noise.measurement.flatFootOdometry = arma::diagmat(config["motion_filter"]["noise"]["measurement"]["flat_foot_odometry"].as<arma::vec2>());
 
                     // Update our process noises
