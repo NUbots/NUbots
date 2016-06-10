@@ -102,6 +102,20 @@ namespace module {
 
                     // Foot down config
                     this->config.foot.fsr.footDownWeight = config["foot"]["fsr"]["foot_down_weight"].as<double>();
+                    
+                    // Foot load sensor config
+                    leftFootDown = DarwinVirtualLoadSensor(
+                                        config["feature_weights"]["foot_down_weight"].as<arma::vec>(),
+                                        config["foot_sensor"]["intercept"].as<double>(),
+                                        config["foot_sensor"]["noise_factor"].as<double>(),
+                                        config["foot_sensor"]["certainty_threashold"].as<double>()
+                                        );
+                    rightFootDown = DarwinVirtualLoadSensor(
+                                        config["feature_weights"]["foot_down_weight"].as<arma::vec>(),
+                                        config["foot_sensor"]["intercept"].as<double>(),
+                                        config["foot_sensor"]["noise_factor"].as<double>(),
+                                        config["foot_sensor"]["certainty_threashold"].as<double>()
+                                        );
 
                     // Motion filter config
                     // Update our velocity timestep dekay

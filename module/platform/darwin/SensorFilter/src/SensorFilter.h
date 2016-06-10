@@ -28,6 +28,7 @@
 #include "utility/math/matrix/Rotation3D.h"
 #include "utility/math/filter/UKF.h"
 #include "MotionModel.h"
+#include "DarwinVirtualLoadSensor.h"
 #include "utility/motion/RobotModels.h"
 
 namespace module {
@@ -99,7 +100,9 @@ namespace module {
                 // Current state of the button pushes
                 bool leftDown = false;
                 bool middleDown = false;
-
+                
+                // Our sensor for foot down
+                DarwinVirtualLoadSensor leftFootDown;
                 // Our torso position from the left foot when it landed
                 arma::vec3 leftFootLanding;
                 // Our torso position from the global origin when the left foot landed
@@ -107,6 +110,8 @@ namespace module {
                 //the original IMU transform to reference when comparing
                 utility::math::matrix::Rotation3D leftFootOrientation;
 
+                // Our sensor for foot down
+                DarwinVirtualLoadSensor rightFootDown;
                 // Our torso position from the right foot when it landed
                 arma::vec3 rightFootLanding;
                 // Our torso position from the global origin when the right foot landed
