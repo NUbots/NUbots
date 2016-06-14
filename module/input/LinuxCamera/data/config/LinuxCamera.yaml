@@ -1,20 +1,20 @@
 deviceID: /dev/CAM
 
 # Picture brightness, or more precisely, the black level.
-# min=0 max=255 step=1 default=128
-brightness: 88
+# min=64 max=64 step=1 default=0
+brightness: 0
 
 # Gain control. This is effectively turning up the "Volume" of the signal, including the noise.
 # (int): min=0 max=255 step=1 default=0
-gain: 30
+# gain: 30
 
 # Picture contrast or luma gain.
-# (int) min=0 max=255 step=1 default=128
-contrast: 110
+# (int) min=0 max=50 step=1 default=0
+contrast: 0
 
 # Picture color saturation or chroma gain.
-# (int) min=0 max=255 step=1 default=128
-saturation: 205
+# (int) min=0 max=100 step=1 default=55
+saturation: 100
 
 # Enables a power line frequency filter to avoid flicker.
 # Possible values for enum v4l2_power_line_frequency are:
@@ -30,8 +30,8 @@ auto_white_balance: 0
 
 # This control specifies the white balance settings as a color temperature in Kelvin.
 # A driver should have a minimum of 2800 (incandescent) to 6500 (daylight).
-# (int): min=2000 max=6500 step=1 default=4000
-white_balance_temperature: 3500
+# (int): min=2800 max=6500 step=1 default=4500
+white_balance_temperature: 4500
 
 # Sets the current mode for automatic exposure. Can be set to one of the following options
 #   AUTO(0) - Automatically select the exposure mode
@@ -45,7 +45,7 @@ auto_exposure: 1
 # When auto exposure is set to AUTO or APERTURE_PRIORITY, this control determines if the device may dynamically vary the frame rate.
 # By default this feature is disabled (0) and the frame rate must remain constant.
 # (bool)   : default=0
-auto_exposure_priority: 0
+# auto_exposure_priority: 0
 
 # Determines the exposure time of the camera sensor. The exposure time is limited by the frame interval.
 # Drivers should interpret the values as 100 µs units, where the value 1 stands for 1/10000th of a second, 10000 for 1 second and 100000 for 10 seconds.
@@ -59,7 +59,7 @@ backlight_compensation: 0
 # Enables automatic focus adjustments.
 # The effect of manual focus adjustments while this feature is enabled is undefined, drivers should ignore such requests.
 # (bool): default=1
-auto_focus: 0
+# auto_focus: 0
 
 # This control sets the focal point of the camera to the specified position. The unit is undefined. Positive values set the focus closer to the camera, negative values towards infinity.
 # (int): min=0 max=250 step=5 default=0 value=0 flags=inactive
@@ -67,19 +67,19 @@ absolute_focus: 0
 
 # Specify the objective lens focal length as an absolute value. The zoom unit is driver-specific and its value should be a positive integer.
 # (int): min=100 max=500 step=1 default=100 value=100
-absolute_zoom: 100
+# absolute_zoom: 100
 
 # This control turns the camera horizontally to the specified position. Positive values move the camera to the right (clockwise when viewed from above), negative values to the left. Drivers should interpret the values as arc seconds, with valid values between -180 * 3600 and +180 * 3600 inclusive.
 # (int): min=-36000 max=36000 step=3600 default=0
-absolute_pan: 0
+# absolute_pan: 0
 
 # This control turns the camera vertically to the specified position. Positive values move the camera up, negative values down. Drivers should interpret the values as arc seconds, with valid values between -180 * 3600 and +180 * 3600 inclusive.
 # (int): min=-36000 max=36000 step=3600 default=0
-absolute_tilt: 0
+# absolute_tilt: 0
 
 # Adjusts the sharpness filters in a camera. The minimum value disables the filters, higher values give a sharper picture.
-# (int): min=0 max=255 step=1 default=128
-sharpness: 128
+# (int): min=0 max=10 step=1 default=2
+sharpness: 2
 
 imageFormat: YUYV
 imageWidth: 640
