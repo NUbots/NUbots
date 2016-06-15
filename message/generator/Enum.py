@@ -59,6 +59,8 @@ class Enum:
                 // Conversions
                 operator Value() const;
 
+                operator int() const;
+
                 operator std::string() const;
 
                 operator {protobuf_name}() const;
@@ -98,6 +100,10 @@ class Enum:
             }}
 
             {fqn}::operator Value() const {{
+                return value;
+            }}
+
+            {fqn}::operator int() const {{
                 return value;
             }}
 
