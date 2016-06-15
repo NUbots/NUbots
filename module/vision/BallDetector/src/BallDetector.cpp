@@ -193,7 +193,7 @@ namespace vision {
 
             auto balls = std::make_unique<std::vector<Ball>>();
             balls->reserve(ransacResults.size());
-            // log("ransacResults.size() = ", ransacResults.size());
+            log("ransacResults.size() = ", ransacResults.size());
 
             for(auto& result : ransacResults) {
 
@@ -236,14 +236,13 @@ namespace vision {
                 measurements.reserve(2);
 
                 // Transform our centre into kinematics coordinates
-                auto centre = imageToScreen(result.model.centre, image.dimensions);
+                arma::vec2 centre = imageToScreen(result.model.centre, image.dimensions);
 
                 // Get the 4 points around our circle
-                auto top   = centre + arma::vec2({ 0,  result.model.radius });
-                auto base  = centre + arma::vec2({ 0, -result.model.radius });
-                auto left  = centre + arma::vec2({  result.model.radius, 0 });
-                auto right = centre + arma::vec2({ -result.model.radius, 0 });
-
+                arma::vec2 top   = centre + arma::vec2({ 0,  result.model.radius });
+                arma::vec2 base  = centre + arma::vec2({ 0,  -result.model.radius });
+                arma::vec2 left  = centre + arma::vec2({  result.model.radius, 0 });
+                arma::vec2 right = centre + arma::vec2({ -result.model.radius, 0 });
                 double cameraHeight = sensors.orientationCamToGround(2, 3);
 
                 // Get a unit vector pointing to the centre of the ball
@@ -364,7 +363,7 @@ namespace vision {
             }
 
             emit(std::move(balls));
-
+            log("Balls seen = ", balls->size());
             lastFrame.time = sensors.timestamp;
         });
     }
