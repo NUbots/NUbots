@@ -86,12 +86,6 @@ namespace module {
                     } motionFilter;
 
                     struct {
-                        struct {
-                            double footDownWeight;
-                        } fsr;
-                    } foot;
-
-                    struct {
                         int debounceThreshold;
                     } buttons;
                 } config;
@@ -100,7 +94,7 @@ namespace module {
                 // Current state of the button pushes
                 bool leftDown = false;
                 bool middleDown = false;
-                
+
                 // Our sensor for foot down
                 DarwinVirtualLoadSensor leftFootDown,rightFootDown;
                 // Our torso rotation from foot when it landed

@@ -22,7 +22,7 @@ node nubotsvm {
     source => "/root/nubots-toolchain${toolchain_version}.deb",
   }
   installer { 'openrave':       url => 'https://github.com/rdiankov/openrave/archive/v0.8.2.tar.gz',}
-  
+
 }
 
 node nubotsvmbuild {
@@ -34,6 +34,8 @@ node nubotsvmbuild {
   Installer <| |> ~> class { 'toolchain_deb': }
 
   class { 'quex': }
+  installer { 'cmake':          url => 'https://cmake.org/files/v3.5/cmake-3.5.2.tar.gz'
+                                creates => '/nubots/toolchain/bin/cmake', }
   installer { 'zlib':           url => 'http://zlib.net/zlib-1.2.8.tar.gz',
                                 creates => '/nubots/toolchain/lib/libz.a' }
   installer { 'bzip2':          url => 'http://www.bzip.org/1.0.6/bzip2-1.0.6.tar.gz', }
@@ -48,6 +50,8 @@ node nubotsvmbuild {
                                 environment => ['TARGET=YONAH', 'USE_THREAD=1', 'BINARY=32', 'NUM_THREADS=2'],
                                 method => 'make', }
   installer { 'libsvm':         url => 'https://github.com/cjlin1/libsvm/archive/v321.tar.gz',
+                                postbuild => 'cp svm.h /nubots/toolchain/include; cp svm.o /nubots/toolchain/lib',
+                                creates =>'/nubots/toolchain/lib/svm.o',
                                 method => 'make', }
   installer { 'armadillo':      url => 'https://downloads.sourceforge.net/project/arma/armadillo-7.100.3.tar.xz',
                                 method => 'cmake',

@@ -101,21 +101,18 @@ namespace module {
                     this->config.battery.chargedVoltage = config["battery"]["charged_voltage"].as<float>();
                     this->config.battery.flatVoltage = config["battery"]["flat_voltage"].as<float>();
 
-                    // Foot down config
-                    this->config.foot.fsr.footDownWeight = config["foot"]["fsr"]["foot_down_weight"].as<double>();
-                    
                     // Foot load sensor config
                     leftFootDown = DarwinVirtualLoadSensor(
-                                        config["feature_weights"]["foot_down_weight"].as<arma::vec>(),
-                                        config["foot_sensor"]["intercept"].as<double>(),
-                                        config["foot_sensor"]["noise_factor"].as<double>(),
-                                        config["foot_sensor"]["certainty_threashold"].as<double>()
+                                        config["foot_load_sensor"]["feature_weights"].as<arma::vec>(),
+                                        config["foot_load_sensor"]["intercept"].as<double>(),
+                                        config["foot_load_sensor"]["noise_factor"].as<double>(),
+                                        config["foot_load_sensor"]["certainty_threashold"].as<double>()
                                         );
                     rightFootDown = DarwinVirtualLoadSensor(
-                                        config["feature_weights"]["foot_down_weight"].as<arma::vec>(),
-                                        config["foot_sensor"]["intercept"].as<double>(),
-                                        config["foot_sensor"]["noise_factor"].as<double>(),
-                                        config["foot_sensor"]["certainty_threashold"].as<double>()
+                                        config["foot_load_sensor"]["feature_weights"].as<arma::vec>(),
+                                        config["foot_load_sensor"]["intercept"].as<double>(),
+                                        config["foot_load_sensor"]["noise_factor"].as<double>(),
+                                        config["foot_load_sensor"]["certainty_threashold"].as<double>()
                                         );
 
                     // Motion filter config
