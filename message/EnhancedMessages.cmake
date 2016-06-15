@@ -83,6 +83,9 @@ FOREACH(proto ${protobufs})
     STRING(REGEX REPLACE "\\\\\n" ";" dependencies ${dependencies})
     FILE(REMOVE "${CMAKE_CURRENT_BINARY_DIR}/temp1" "${CMAKE_CURRENT_BINARY_DIR}/temp2")
 
+    UNSET(source_depends)
+    UNSET(binary_depends)
+
     # Clean our dependency list
     FOREACH(depend ${dependencies})
         STRING(STRIP ${depend} depend)
