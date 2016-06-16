@@ -37,6 +37,19 @@ namespace configuration {
             netConfig->multicastPort = config["port"].as<int>();
             emit<Scope::DIRECT>(netConfig);
         });
+
+
+        on<Trigger<NUClear::message::NetworkJoin>>().then([this](const NUClear::message::NetworkJoin& message){
+            char str[INET_ADDRSTRLEN];
+            inet_ntop(AF_INET, &(message.address), str, INET_ADDRSTRLEN);
+            log<NUClear::INFO>("Connected to", message.name, "on", str);
+        });  
+
+        on<Trigger<NUClear::message::NetworkLeave>>().then([this](const NUClear::message::NetworkLeave& message){
+            char str[INET_ADDRSTRLEN];
+            inet_ntop(AF_INET, &(message.address), str, INET_ADDRSTRLEN);
+            log<NUClear::INFO>("Disconnected from", message.name, "on", str);
+        });
     }
 }
 }

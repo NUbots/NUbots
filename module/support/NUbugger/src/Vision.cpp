@@ -120,7 +120,6 @@ namespace support {
         }));
 
         handles["vision_object"].push_back(on<Trigger<std::vector<Ball>>, Single, Priority::LOW>().then([this] (const std::vector<Ball>& balls) {
-
             VisionObjects objects;
 
             auto& object = *objects.add_object();
@@ -143,7 +142,7 @@ namespace support {
                 }
             }
 
-            send(object, object.camera_id() + 1, false, NUClear::clock::now());
+            send(objects, 1, false, NUClear::clock::now());
         }));
 
         handles["vision_object"].push_back(on<Trigger<std::vector<Goal>>, Single, Priority::LOW>().then([this] (const std::vector<Goal>& goals) {
@@ -175,7 +174,7 @@ namespace support {
                 }
             }
 
-            send(object, 2, false, NUClear::clock::now());
+            send(objects, 2, false, NUClear::clock::now());
         }));
 
         // TODO: needs refactoring so that this is really only a vision line handle
