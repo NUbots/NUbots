@@ -84,6 +84,10 @@ sharpness: 2
 imageFormat: YUYV
 imageWidth: 640
 imageHeight: 480
-FOV_X: 1.0472
-FOV_Y: 0.785398
+#Jake's calc:
+FOV_X: 0.8749 
+FOV_Y: 0.651
+#Jo's calc:
+# FOV_X: 0.869 
+# FOV_Y: 0.681
 DISTORTION_FACTOR: -0.000018
