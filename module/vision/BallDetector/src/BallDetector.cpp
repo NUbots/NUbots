@@ -193,7 +193,6 @@ namespace vision {
 
             auto balls = std::make_unique<std::vector<Ball>>();
             balls->reserve(ransacResults.size());
-            log("ransacResults.size() = ", ransacResults.size());
 
             for(auto& result : ransacResults) {
 
@@ -311,7 +310,6 @@ namespace vision {
                 // 0.002357231 * 2, 2.20107E-05 * 2, 4.33072E-05 * 2,
                 emit(graph("ballCentreGroundProj measurement", ballCentreGroundProj(0), ballCentreGroundProj(1), ballCentreGroundProj(2)));
                 emit(graph("ballCentreGroundProj measurement (spherical)", measurements.back().position(0), measurements.back().position(1), measurements.back().position(2)));
-
                 /*
                  *  IF VALID BUILD OUR BALL
                  */
@@ -363,7 +361,6 @@ namespace vision {
             }
 
             emit(std::move(balls));
-            log("Balls seen = ", balls->size());
             lastFrame.time = sensors.timestamp;
         });
     }
