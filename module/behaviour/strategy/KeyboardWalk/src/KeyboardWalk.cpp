@@ -191,14 +191,14 @@ namespace strategy {
     }
 
     void KeyboardWalk::lookUp() {
-        headPitch -= HEAD_DIFF;
+        headPitch += HEAD_DIFF;
         updateCommand();
         printStatus();
         log("look up");
     }
 
     void KeyboardWalk::lookDown() {
-        headPitch += HEAD_DIFF;
+        headPitch -= HEAD_DIFF;
         updateCommand();
         printStatus();
         log("look down");
