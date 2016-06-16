@@ -26,12 +26,12 @@
 #include "message/input/ServoID.h"
 #include "message/input/Sensors.h"
 #include "message/motion/ServoTarget.h"
-#include "message/platform/darwin/KinematicsModel.h"
+#include "message/platform/darwin/KinematicsModels.h"
 
 #include "utility/motion/InverseKinematics.h"
 #include "utility/motion/ForwardKinematics.h"
 #include "utility/math/matrix/Transform3D.h"
-#include "utility/motion/RobotModels.h"
+// #include "utility/motion/RobotModels.h"
 
 namespace module {
     namespace debug {

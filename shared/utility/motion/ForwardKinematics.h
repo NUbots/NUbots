@@ -27,7 +27,6 @@
 
 #include "utility/math/matrix/Transform3D.h"
 #include "utility/math/matrix/Rotation3D.h"
-#include "utility/motion/RobotModels.h"
 #include "utility/math/angle.h"
 
 #include "message/input/Sensors.h"

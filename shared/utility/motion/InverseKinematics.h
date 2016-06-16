@@ -29,7 +29,6 @@
 
 #include "utility/math/matrix/Transform3D.h"
 #include "utility/math/coordinates.h"
-#include "utility/motion/RobotModels.h"
 #include "utility/motion/ForwardKinematics.h"
 #include "message/input/ServoID.h"
 #include "message/input/Sensors.h"
@@ -79,7 +78,7 @@ namespace kinematics {
 
     template <typename KinematicModel>
     std::vector<std::pair<message::input::ServoID, float>> calculateLegJoints(const KinematicModel& model, utility::math::matrix::Transform3D target, message::input::LimbID limb) {
-        const float LENGTH_BETWEEN_LEGS = model.Leg.LENGTH_BETWEEN_LEGS;
+        const float LENGTH_BETWEEN_LEGS = 2 * model.Leg.LENGTH_BETWEEN_LEGS();
         const float DISTANCE_FROM_BODY_TO_HIP_JOINT = model.Leg.HIP_OFFSET_Z;
         const float HIP_OFFSET_X = model.Leg.HIP_OFFSET_X;
         const float UPPER_LEG_LENGTH = model.Leg.UPPER_LEG_LENGTH;

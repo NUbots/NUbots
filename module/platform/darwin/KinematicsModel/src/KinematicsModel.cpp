@@ -22,7 +22,7 @@
 #include "utility/support/yaml_armadillo.h"
 #include "utility/support/yaml_expression.h"
 
-#include "message/platform/darwin/RobotModels.h"
+#include "message/platform/darwin/KinematicsModels.h"
 
 namespace module {
 namespace platform {

@@ -22,12 +22,14 @@
 #define MESSAGE_MOTION_KINEMATICS_ROBOT_MODELS_H
 
 namespace message{
-    namespace motion{
-        namespace kinematics {
+    namespace platform{
+        namespace darwin{
             
-            struct DarwinModel{
+            class DarwinModel{
+            public:
                 //Convention: all values positive
-                struct Leg{
+                class {
+                public:
                     float HIP_OFFSET_X = 0.00;
                     float HIP_OFFSET_Y = 0.037; //DARWIN SAYS THIS IS 0.008
                     float HIP_OFFSET_Z = 0.034;
@@ -42,7 +44,7 @@ namespace message{
                     float FOOT_WIDTH = 0.066; // rough
                     float FOOT_CENTRE_TO_ANKLE_CENTRE = 0.011; // rough
 
-                    float LENGTH_BETWEEN_LEGS = HIP_OFFSET_Y * 2;
+                    float LENGTH_BETWEEN_LEGS(){return HIP_OFFSET_Y * 2;}
 
                     int LEFT_TO_RIGHT_HIP_YAW =       -1;
                     int LEFT_TO_RIGHT_HIP_ROLL =      -1;
@@ -50,9 +52,10 @@ namespace message{
                     int LEFT_TO_RIGHT_KNEE =           1;
                     int LEFT_TO_RIGHT_ANKLE_PITCH =    1;
                     int LEFT_TO_RIGHT_ANKLE_ROLL =    -1;
-                };
+                } Leg;
 
-                struct Head{    
+                class { 
+                public:   
                     float NECK_BASE_POS_FROM_ORIGIN_X = 0.013;
                     float NECK_BASE_POS_FROM_ORIGIN_Y = 0;
                     float NECK_BASE_POS_FROM_ORIGIN_Z = 0.11;
@@ -66,9 +69,10 @@ namespace message{
                     float MIN_YAW = -M_PI * 2 / 3;
                     float MAX_PITCH = M_PI / 3;
                     float MIN_PITCH = -M_PI / 3;
-                };
+                } Head;
 
-                struct Arm {
+                class {
+                public:
                     float DISTANCE_BETWEEN_SHOULDERS = 0.114;
                     float SHOULDER_Z_OFFSET = 0.088;
                     float SHOULDER_X_OFFSET = 0.01;
@@ -84,10 +88,11 @@ namespace message{
                     float LOWER_ARM_LENGTH = 0.13;
                     float LOWER_ARM_Y_OFFSET = 0;
                     float LOWER_ARM_Z_OFFSET = 0;  //Very rough
-                };
+                } Arm;
 
-                struct MassModel{
-                    std::array<arma::vec4, 21> masses = {
+                class{
+                public:
+                    arma::vec4 masses[21] = {
                         arma::vec4({-0.011264,         0.0109774,      -0.00139357,    0.025913}),  //  R_SHOULDER_PITCH
                         arma::vec4({-0.011264,         -0.0109774,     -0.00139357,    0.025913}),  //  L_SHOULDER_PITCH
                         arma::vec4({-0.025261,         -0.000659787,   0.000734065,    0.168377}),  //  R_SHOULDER_ROLL
@@ -110,9 +115,9 @@ namespace message{
                         arma::vec4({-0.035,                     0,           0.01,      0.11708}),  //  HEAD_PITCH
                         arma::vec4({-0.0066631,        -0.00311589,      0.0705563,      0.975599}) //  TORSO
                     };
-                };
+                } MassModel;
 
-                float TEAMDARWINCHEST_TO_ORIGIN = 0.096 - DarwinModel::Leg::HIP_OFFSET_Z; //Taken from team darwin OPkinematics.cpp : hipOffsetZ = .096;
+                float TEAMDARWINCHEST_TO_ORIGIN(){return 0.096 - Leg.HIP_OFFSET_Z;} //Taken from team darwin OPkinematics.cpp : hipOffsetZ = .096;
             };
 
         }
