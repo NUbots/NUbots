@@ -107,7 +107,7 @@ namespace vision {
 
         // emit(drawVisionLines(debug));
 
-        float greenRatio = actualSamples == 0 ? 1 : 1.0f - (numGreen / float(actualSamples));
+        float greenRatio = actualSamples == 0 ? 1 : (numGreen / float(actualSamples));
         return greenRatio;
     }
 
