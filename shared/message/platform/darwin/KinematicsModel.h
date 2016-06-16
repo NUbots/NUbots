@@ -17,116 +17,106 @@
  * Copyright 2013 NUBots <nubots@nubots.net>
  */
 
-#ifndef MESSAGE_PLATFORM_DARWIN_KINEMATICS_MODEL_H
-#define MESSAGE_PLATFORM_DARWIN_KINEMATICS_MODEL_H
 
-#include <armadillo>
+#ifndef MESSAGE_MOTION_KINEMATICS_ROBOT_MODELS_H
+#define MESSAGE_MOTION_KINEMATICS_ROBOT_MODELS_H
 
-namespace message {
-namespace platform {
-namespace darwin {
+namespace message{
+    namespace motion{
+        namespace kinematics {
+            
+            struct DarwinModel{
+                //Convention: all values positive
+                struct Leg{
+                    float HIP_OFFSET_X = 0.00;
+                    float HIP_OFFSET_Y = 0.037; //DARWIN SAYS THIS IS 0.008
+                    float HIP_OFFSET_Z = 0.034;
+                    float UPPER_LEG_LENGTH = 0.093;
+                    float LOWER_LEG_LENGTH = 0.093;
+                    float FOOT_HEIGHT = 0.0335;
 
-    struct DarwinKinematicsModel {
+                    float FOOT_LENGTH = 0.094; // rough
+                    float TOE_LENGTH = 0.0472; //measured
+                    float HEEL_LENGTH = 0.0451; //measured
 
-        struct Leg {
-            arma::vec3 hipOffset;
-            float upperLegLength;
-            float lowerLegLength;
-            float heelLength;
-            float lengthBetweenLegs;
-            float footCentreToAnkleCentre;
+                    float FOOT_WIDTH = 0.066; // rough
+                    float FOOT_CENTRE_TO_ANKLE_CENTRE = 0.011; // rough
 
-            struct Foot {
-                float width;
-                float height;
-                float length;
-                float toeLength;
-            } foot;
+                    float LENGTH_BETWEEN_LEGS = HIP_OFFSET_Y * 2;
 
-        } leg;
+                    int LEFT_TO_RIGHT_HIP_YAW =       -1;
+                    int LEFT_TO_RIGHT_HIP_ROLL =      -1;
+                    int LEFT_TO_RIGHT_HIP_PITCH =      1;
+                    int LEFT_TO_RIGHT_KNEE =           1;
+                    int LEFT_TO_RIGHT_ANKLE_PITCH =    1;
+                    int LEFT_TO_RIGHT_ANKLE_ROLL =    -1;
+                };
 
-        struct Head {
-            float cameraDeclinationAngleOffset;
-            arma::vec3 neckToCamera;
+                struct Head{    
+                    float NECK_BASE_POS_FROM_ORIGIN_X = 0.013;
+                    float NECK_BASE_POS_FROM_ORIGIN_Y = 0;
+                    float NECK_BASE_POS_FROM_ORIGIN_Z = 0.11;
+                    float NECK_LENGTH = 0.042;
+                    float NECK_TO_CAMERA_X = 0.036;
+                    float NECK_TO_CAMERA_Y = 0;
+                    float NECK_TO_CAMERA_Z = 0.028;
+                    float CAMERA_DECLINATION_ANGLE_OFFSET = -0.4; //default zero
+                    //Head movement limits
+                    float MAX_YAW = M_PI * 2 / 3;
+                    float MIN_YAW = -M_PI * 2 / 3;
+                    float MAX_PITCH = M_PI / 3;
+                    float MIN_PITCH = -M_PI / 3;
+                };
 
-            struct Neck {
-                float length;
-                arma::vec3 basePositionFromOrigin;
-            } neck;
+                struct Arm {
+                    float DISTANCE_BETWEEN_SHOULDERS = 0.114;
+                    float SHOULDER_Z_OFFSET = 0.088;
+                    float SHOULDER_X_OFFSET = 0.01;
 
-            struct HeadMovementLimits {
-                arma::vec2 yaw;
-                arma::vec2 pitch;
-            } headMovementLimits;
+                    float SHOULDER_LENGTH = 0.00;
+                    float SHOULDER_WIDTH = 0.0245;
+                    float SHOULDER_HEIGHT = 0.017;
 
-        } head;
+                    float UPPER_ARM_LENGTH = 0.0615;
+                    float UPPER_ARM_Y_OFFSET = 0;
+                    float UPPER_ARM_X_OFFSET = 0.02;   //Very rough
 
-        struct Arm {
-            float distanceBetweenShoulders;
+                    float LOWER_ARM_LENGTH = 0.13;
+                    float LOWER_ARM_Y_OFFSET = 0;
+                    float LOWER_ARM_Z_OFFSET = 0;  //Very rough
+                };
 
-            struct Shoulder {
-                float length;
-                float width;
-                float height;
-                arma::vec2 offset;
-            } shoulder;
+                struct MassModel{
+                    std::array<arma::vec4, 21> masses = {
+                        arma::vec4({-0.011264,         0.0109774,      -0.00139357,    0.025913}),  //  R_SHOULDER_PITCH
+                        arma::vec4({-0.011264,         -0.0109774,     -0.00139357,    0.025913}),  //  L_SHOULDER_PITCH
+                        arma::vec4({-0.025261,         -0.000659787,   0.000734065,    0.168377}),  //  R_SHOULDER_ROLL
+                        arma::vec4({-0.025261,         0.000659787,    0.000734065,    0.168377}),  //  L_SHOULDER_ROLL
+                        arma::vec4({-0.0841618,        -0.00666564,    -0.0134901,     0.0592885}), //  R_ELBOW
+                        arma::vec4({-0.0841618,        0.00666564,     -0.0134901,     0.0592885}), //  L_ELBOW
+                        arma::vec4({-0.0155628,        0,              0.000480135,    0.0270692}), //  R_HIP_YAW
+                        arma::vec4({-0.0155628,        0,              0.000480135,    0.0270692}), //  L_HIP_YAW
+                        arma::vec4({0.0138731,         -7.99828e-005,  -0.0182424,     0.167108}),  //  R_HIP_ROLL
+                        arma::vec4({0.0138731,         7.99828e-005,   -0.0182424,     0.167108}),  //  L_HIP_ROLL
+                        arma::vec4({-0.0300345,        0.000322635,    0.000691906,    0.119043}),  //  R_HIP_PITCH
+                        arma::vec4({-0.0300345,        -0.000322635,   0.000691906,    0.119043}),  //  L_HIP_PITCH
+                        arma::vec4({-0.0539545,        0.000592469,    0.00654763,     0.0703098}), //  R_KNEE
+                        arma::vec4({-0.0539545,        -0.000592469,   0.00654763,     0.0703098}), //  L_KNEE
+                        arma::vec4({-0.0138731,        0.000213732,    -0.0185361,     0.167108}),  //  R_ANKLE_PITCH
+                        arma::vec4({-0.0138731,        -0.000213732,   -0.0185361,     0.167108}),  //  L_ANKLE_PITCH
+                        arma::vec4({0.0259953,         -0.00950588,    -0.000502877,   0.0794462}), //  R_ANKLE_ROLL
+                        arma::vec4({0.0259953,         0.00950588,     -0.000502877,   0.0794462}), //  L_ANKLE_ROLL
+                        arma::vec4({-0.0165676,        0.00142428,     0.000712811,    0.0243577}), //  HEAD_YAW
+                        arma::vec4({-0.035,                     0,           0.01,      0.11708}),  //  HEAD_PITCH
+                        arma::vec4({-0.0066631,        -0.00311589,      0.0705563,      0.975599}) //  TORSO
+                    };
+                };
 
-            struct UpperArm {
-                float length;
-                arma::vec2 offset;
-            } upperArm;
+                float TEAMDARWINCHEST_TO_ORIGIN = 0.096 - DarwinModel::Leg::HIP_OFFSET_Z; //Taken from team darwin OPkinematics.cpp : hipOffsetZ = .096;
+            };
 
-            struct LowerArm {
-                float length;
-                arma::vec2 offset;
-            } lowerArm;
+        }
+    }
+}
 
-        } arm;
-
-        float teamDarwinChestToOrigin;
-
-        struct MassModel {
-            uint numberOfMasses;
-            uint massRepresentationDimension;
-
-            struct Masses {
-                arma::vec4 leftShoulderRoll;
-                arma::vec4 rightShoulderRoll;
-
-                arma::vec4 leftShoulderPitch;
-                arma::vec4 rightShoulderPitch;
-
-                arma::vec4 leftElbow;
-                arma::vec4 rightElbow;
-
-                arma::vec4 leftHipRoll;
-                arma::vec4 rightHipRoll;
-
-                arma::vec4 leftHipPitch;
-                arma::vec4 rightHipPitch;
-
-                arma::vec4 leftHipYaw;
-                arma::vec4 rightHipYaw;
-
-                arma::vec4 leftKnee;
-                arma::vec4 rightKnee;
-
-                arma::vec4 leftAnkleRoll;
-                arma::vec4 rightAnkleRoll;
-
-                arma::vec4 leftAnklePitch;
-                arma::vec4 rightAnklePitch;
-
-                arma::vec4 headPitch;
-                arma::vec4 headYaw;
-
-                arma::vec4 torso;
-            } masses;
-        } massModel;
-    };
-
-}  // darwin
-}  // platform
-}  // message
-
-#endif  // MESSAGE_PLATFORM_DARWIN_DARWINSENSORS_H
+#endif
