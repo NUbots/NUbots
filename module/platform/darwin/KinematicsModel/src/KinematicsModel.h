@@ -25,7 +25,7 @@
 #include <yaml-cpp/yaml.h>
 
 #include "message/support/Configuration.h"
-#include "message/platform/darwin/KinematicsModel.h"
+#include "message/platform/darwin/KinematicsModels.h"
 
 namespace module {
 namespace platform {
