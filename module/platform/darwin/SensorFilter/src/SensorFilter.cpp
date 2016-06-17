@@ -375,17 +375,36 @@ namespace module {
                     /************************************************
                      *            Foot down information             *
                      ************************************************/
-                    // Count the number of FSRs that have more than 1/16th of the robots mass
-                    sensors->leftFootDown = (input.fsr.left.fsr1 > config.foot.fsr.footDownWeight ? 0.25 : 0.0)
-                                          + (input.fsr.left.fsr2 > config.foot.fsr.footDownWeight ? 0.25 : 0.0)
-                                          + (input.fsr.left.fsr3 > config.foot.fsr.footDownWeight ? 0.25 : 0.0)
-                                          + (input.fsr.left.fsr4 > config.foot.fsr.footDownWeight ? 0.25 : 0.0);
+                    if(previousSensors) {
+                        // Use our virtual load sensor class to work out if our foot is down
+                        sensors->leftFootDown = leftFootDown.updateFoot(arma::vec({
+                              sensors->servos[size_t(ServoID::L_HIP_PITCH)].load
+                            , sensors->servos[size_t(ServoID::L_HIP_PITCH)].presentVelocity
+                            , sensors->servos[size_t(ServoID::L_HIP_PITCH)].presentVelocity - previousSensors->servos[size_t(ServoID::L_HIP_PITCH)].presentVelocity
+                            , sensors->servos[size_t(ServoID::L_KNEE)].load
+                            , sensors->servos[size_t(ServoID::L_KNEE)].presentVelocity
+                            , sensors->servos[size_t(ServoID::L_KNEE)].presentVelocity - previousSensors->servos[size_t(ServoID::L_KNEE)].presentVelocity
+                            , sensors->servos[size_t(ServoID::L_ANKLE_PITCH)].load
+                            , sensors->servos[size_t(ServoID::L_ANKLE_PITCH)].presentVelocity
+                            , sensors->servos[size_t(ServoID::L_ANKLE_PITCH)].presentVelocity - previousSensors->servos[size_t(ServoID::L_ANKLE_PITCH)].presentVelocity
+                        }));
 
-                    // Count the number of FSRs that have more than 1/16th of the robots mass
-                    sensors->rightFootDown = (input.fsr.right.fsr1 > config.foot.fsr.footDownWeight ? 0.25 : 0.0)
-                                           + (input.fsr.right.fsr2 > config.foot.fsr.footDownWeight ? 0.25 : 0.0)
-                                           + (input.fsr.right.fsr3 > config.foot.fsr.footDownWeight ? 0.25 : 0.0)
-                                           + (input.fsr.right.fsr4 > config.foot.fsr.footDownWeight ? 0.25 : 0.0);
+                        sensors->rightFootDown = rightFootDown.updateFoot(arma::vec({
+                              sensors->servos[size_t(ServoID::R_HIP_PITCH)].load
+                            , sensors->servos[size_t(ServoID::R_HIP_PITCH)].presentVelocity
+                            , sensors->servos[size_t(ServoID::R_HIP_PITCH)].presentVelocity - previousSensors->servos[size_t(ServoID::R_HIP_PITCH)].presentVelocity
+                            , sensors->servos[size_t(ServoID::R_KNEE)].load
+                            , sensors->servos[size_t(ServoID::R_KNEE)].presentVelocity
+                            , sensors->servos[size_t(ServoID::R_KNEE)].presentVelocity - previousSensors->servos[size_t(ServoID::R_KNEE)].presentVelocity
+                            , sensors->servos[size_t(ServoID::R_ANKLE_PITCH)].load
+                            , sensors->servos[size_t(ServoID::R_ANKLE_PITCH)].presentVelocity
+                            , sensors->servos[size_t(ServoID::R_ANKLE_PITCH)].presentVelocity - previousSensors->servos[size_t(ServoID::R_ANKLE_PITCH)].presentVelocity
+                        }));
+                    }
+                    else {
+                        sensors->leftFootDown = false;
+                        sensors->rightFootDown = false;
+                    }
 
                     /************************************************
                      *             Motion (IMU+Odometry)            *
@@ -410,17 +429,17 @@ namespace module {
 
                         auto servoid = side == ServoSide::LEFT ? ServoID::L_ANKLE_ROLL : ServoID::R_ANKLE_ROLL;
 
-                        const float footDown = side == ServoSide::LEFT
+                        const bool& footDown = side == ServoSide::LEFT
                             ? sensors->leftFootDown
                             : sensors->rightFootDown;
 
-                        const float prevFootDown = previousSensors
+                        const bool& prevFootDown = previousSensors
                             ? side == ServoSide::LEFT
                                 ? previousSensors->leftFootDown
                                 : previousSensors->rightFootDown
                             : 0.0;
 
-                        if (footDown >= 0.75) {
+                        if (footDown) {
 
                             // Get the foot in torso space and the torso in foot space
                             Transform3D Hft = sensors->forwardKinematics[servoid];
@@ -443,7 +462,7 @@ namespace module {
                             motionFilter.measurementUpdate(footUpWithZ, config.motionFilter.noise.measurement.footUpWithZ, MotionModel::MeasurementType::FOOT_UP_WITH_Z());
 
                             // If we don't have previous sensors, or the previous sensors had the foot up
-                            if (prevFootDown < 0.75) {
+                            if (prevFootDown) {
                                 // Store our torso from foot at foot landing
                                 footlanding_Rtf[side]  = Rtf;
                                 footlanding_rTFf[side] = rTFf;

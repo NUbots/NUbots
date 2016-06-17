@@ -92,8 +92,8 @@ namespace message {
             arma::mat22 robotToIMU;
 
             /// Percentage of the left foot that's considered "down" i.e. if 3/4 FSR sensors have weight this is 0.75
-            float leftFootDown;
-            float rightFootDown;
+            bool leftFootDown;
+            bool rightFootDown;
 
             std::map<message::input::ServoID, utility::math::matrix::Transform3D> forwardKinematics;
 
