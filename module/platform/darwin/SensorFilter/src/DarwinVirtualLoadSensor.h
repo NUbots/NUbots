@@ -50,7 +50,7 @@ namespace module {
                                             double certaintyThresh,
                                             double uncertaintyThresh);
 
-                    bool updateFoot(arma::vec legMotors);
+                    bool updateFoot(const arma::vec& legMotors);
             };
         }
     }

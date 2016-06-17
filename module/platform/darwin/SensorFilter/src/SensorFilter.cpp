@@ -106,13 +106,15 @@ namespace module {
                                         config["foot_load_sensor"]["feature_weights"].as<arma::vec>(),
                                         config["foot_load_sensor"]["intercept"].as<double>(),
                                         config["foot_load_sensor"]["noise_factor"].as<double>(),
-                                        config["foot_load_sensor"]["certainty_threashold"].as<double>()
+                                        config["foot_load_sensor"]["certainty_threashold"].as<double>(),
+                                        config["foot_load_sensor"]["uncertainty_threashold"].as<double>()
                                         );
                     rightFootDown = DarwinVirtualLoadSensor(
                                         config["foot_load_sensor"]["feature_weights"].as<arma::vec>(),
                                         config["foot_load_sensor"]["intercept"].as<double>(),
                                         config["foot_load_sensor"]["noise_factor"].as<double>(),
-                                        config["foot_load_sensor"]["certainty_threashold"].as<double>()
+                                        config["foot_load_sensor"]["certainty_threashold"].as<double>(),
+                                        config["foot_load_sensor"]["uncertainty_threashold"].as<double>()
                                         );
 
                     // Motion filter config

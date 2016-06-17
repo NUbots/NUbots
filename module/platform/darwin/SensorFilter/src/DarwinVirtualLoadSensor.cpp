@@ -27,25 +27,19 @@ namespace module {
             }
 
             DarwinVirtualLoadSensor::DarwinVirtualLoadSensor(arma::vec fWeights,
-                                    double interc,
-                                    double nFactor,
-                                    double certaintyThresh,
-                                    double uncertaintyThresh) {
-
-                noiseFactor = nFactor;
-                currentNoise = 2 * nFactor;
-                certaintyThreshold = certaintyThresh;
-                uncertaintyThreshold = uncertaintyThresh;
-
-                intercept = interc;
-                featureWeights = fWeights;
+                                    double intercept,
+                                    double noiseFactor,
+                                    double certaintyThreshold,
+                                    double uncertaintyThreshold)
+                    : currentNoise(2 * noiseFactor)
+                    , noiseFactor(noiseFactor)
+                    , intercept(intercept)
+                    , certaintyThreshold(certaintyThreshold)
+                    , uncertaintyThreshold(uncertaintyThreshold)
+                    , featureWeights(featureWeights) {
             }
 
-            bool DarwinVirtualLoadSensor::updateFoot(arma::vec legMotors) {
-                
-                //create the feature vector (a few nonlinear combinations of variables)
-                arma::vec features(legMotors.size());
-                features.rows(0,legMotors.size()-1) = legMotors;
+            bool DarwinVirtualLoadSensor::updateFoot(const arma::vec& features) {
 
                 //do the probability based prediction
                 double linResult = arma::dot(features, featureWeights) + intercept;
@@ -60,7 +54,7 @@ namespace module {
 
                 if (state >= certaintyThreshold) {
 
-                   outputState = true; 
+                   outputState = true;
                 } else if (state < uncertaintyThreshold) {
 
                     outputState = false;

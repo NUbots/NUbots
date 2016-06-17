@@ -7,9 +7,19 @@ buttons:
 
 foot_load_sensor:
   noise_factor: 1.0
-  certainty_threashold: 0.9
+  certainty_threashold: 0.8
+  uncertainty_threashold: 0.8
   intercept: 2.78621079426
-  feature_weights: [0.99570068, 0.17804938, 1.30788586, 2.50792701, -0.21298553, -2.14019866, 4.73891314, 0.04254997, 0.84463546]
+  feature_weights:
+   -  0.99570068  # HIP_PITCH load
+   -  0.17804938  # HIP_PITCH velocity
+   -  1.30788586  # HIP_PITCH acceleration
+   -  2.50792701  # KNEE load
+   - -0.21298553  # KNEE velocity
+   - -2.14019866  # KNEE acceleration
+   -  4.73891314  # ANKLE_PITCH load
+   -  0.04254997  # ANKLE_PITCH velocity
+   -  0.84463546  # ANKLE_PITCH acceleration
 
 motion_filter:
   update:
