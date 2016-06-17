@@ -29,34 +29,43 @@ namespace module {
             DarwinVirtualLoadSensor::DarwinVirtualLoadSensor(arma::vec fWeights,
                                     double interc,
                                     double nFactor,
-                                    double certaintyThresh) {
+                                    double certaintyThresh,
+                                    double uncertaintyThresh) {
 
                 noiseFactor = nFactor;
                 currentNoise = 2 * nFactor;
                 certaintyThreshold = certaintyThresh;
+                uncertaintyThreshold = uncertaintyThresh;
 
                 intercept = interc;
                 featureWeights = fWeights;
             }
 
             bool DarwinVirtualLoadSensor::updateFoot(arma::vec legMotors) {
-
+                
                 //create the feature vector (a few nonlinear combinations of variables)
-                arma::vec features(4*legMotors.size()-3);
+                arma::vec features(legMotors.size());
                 features.rows(0,legMotors.size()-1) = legMotors;
-                features.rows(legMotors.size(),2*legMotors.size()-1) = legMotors % arma::square(legMotors);
-                features.rows(2*legMotors.size(),2*legMotors.size()-2) = legMotors[0] * legMotors.rows(1,legMotors.size()-1);
-                features.rows(3*legMotors.size()-1,2*legMotors.size()-4) = legMotors[1] * legMotors.rows(2,legMotors.size()-1);
 
-                //do the prediction
-                double clss = arma::dot(features, featureWeights) + intercept > 0.;
+                //do the probability based prediction
+                double linResult = arma::dot(features, featureWeights) + intercept;
+                arma::vec probs = {linResult,1-linResult};
+                probs = arma::exp(probs-arma::max(probs));
+                probs /= arma::sum(probs);
 
                 //do the bayes update (1D kalman filter thing)
                 double k = currentNoise / (currentNoise + noiseFactor);
-                state += k*(clss-state);
+                state += k*(probs[0]-state);
                 currentNoise *= 1-k;
 
-                return state > certaintyThreshold;
+                if (state >= certaintyThreshold) {
+
+                   outputState = true; 
+                } else if (state < uncertaintyThreshold) {
+
+                    outputState = false;
+                }
+                return outputState;
             }
         }
     }

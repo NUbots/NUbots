@@ -35,16 +35,20 @@ namespace module {
                     double noiseFactor;
                     double intercept;
                     double certaintyThreshold;
+                    double uncertaintyThreshold;
                     arma::vec featureWeights;
                 public:
                     double state = 0.5;
+                    bool outputState = true;
+
 
                     DarwinVirtualLoadSensor();
 
                     DarwinVirtualLoadSensor(arma::vec fWeights,
                                             double interc,
                                             double nFactor,
-                                            double certaintyThresh);
+                                            double certaintyThresh,
+                                            double uncertaintyThresh);
 
                     bool updateFoot(arma::vec legMotors);
             };
