@@ -28,12 +28,8 @@ export CMAKE_PREFIX_PATH=$PREFIX
 if [[ $METHOD == 'autotools' || ($METHOD == 'auto' && -e "configure") ]]; then
     echo "Configuring using autotools"
 
-    # Do an out of source build
-    mkdir -p build
-    cd build
-
     # Run configure
-    ../configure $@ --prefix="$PREFIX"
+    ./configure $@ --prefix="$PREFIX"
 
     # Run make
     make -j$(nproc)
