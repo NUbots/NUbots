@@ -32,9 +32,9 @@ class dev_tools {
   package { 'python-dev': ensure => latest, }
   package { 'python-pip': ensure => latest, }
   package { 'libncurses5-dev': ensure => latest, }
-  package { 'gcc-5': ensure => latest, require => Apt::Ppa['ppa:ubuntu-toolchain-r/test'] }
-  package { 'g++-5': ensure => latest, require => Apt::Ppa['ppa:ubuntu-toolchain-r/test'] }
-  package { 'gfortran-5': ensure => latest, require => Apt::Ppa['ppa:ubuntu-toolchain-r/test'] }
+  package { 'gcc-6': ensure => latest, require => Apt::Ppa['ppa:ubuntu-toolchain-r/test'] }
+  package { 'g++-6': ensure => latest, require => Apt::Ppa['ppa:ubuntu-toolchain-r/test'] }
+  package { 'gfortran-6': ensure => latest, require => Apt::Ppa['ppa:ubuntu-toolchain-r/test'] }
   package { 'binutils': ensure => latest, require => Apt::Ppa['ppa:ubuntu-toolchain-r/test'] }
   package { 'binutils-dev': ensure => latest, require => Apt::Ppa['ppa:ubuntu-toolchain-r/test'] }
   package { 'ninja-build': ensure => latest, }
@@ -115,38 +115,13 @@ class dev_tools {
     mode => '755',
     source => 'puppet:///modules/dev_tools/toolchain_init.sh', }
 
-  # SETUP BINUTILS REDIRECTS TO USE PLUGINS
-  exec { 'redirect_ar':
-    command => 'mv /usr/bin/ar /usr/bin/ar_bin',
-    onlyif => 'file /usr/bin/ar | grep -q "ELF"' } ->
-  file { '/usr/bin/ar':
-    ensure => present,
-    mode => '755',
-    source => 'puppet:///modules/dev_tools/ar', }
-
-  exec { 'redirect_nm':
-    command => 'mv /usr/bin/nm /usr/bin/nm_bin',
-    onlyif => 'file /usr/bin/nm | grep -q "ELF"' } ->
-  file { '/usr/bin/nm':
-    ensure => present,
-    mode => '755',
-    source => 'puppet:///modules/dev_tools/nm', }
-
-  exec { 'redirect_ranlib':
-    command => 'mv /usr/bin/ranlib /usr/bin/ranlib_bin',
-    onlyif => 'file /usr/bin/ranlib | grep -q "ELF"' } ->
-  file { '/usr/bin/ranlib':
-    ensure => present,
-    mode => '755',
-    source => 'puppet:///modules/dev_tools/ranlib', }
-
   # SETUP OUR ALTERNATIVES SO WE USE THE CORRECT COMPILER
   exec {'fix_compiler_environment':
     command => 'update-alternatives --install /usr/bin/ld ld /usr/bin/ld.bfd 10 \
              && update-alternatives --install /usr/bin/ld ld /usr/bin/ld.gold 20 \
-             && update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-5 100 \
-                                    --slave /usr/bin/g++ g++ /usr/bin/g++-5 \
-                                    --slave /usr/bin/gfortran gfortran /usr/bin/gfortran-5',
-    require => [ Package['gcc-5'], Package['g++-5'], Package['gfortran-5'], Package['build-essential'], Package['binutils'] ]
+             && update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-6 100 \
+                                    --slave /usr/bin/g++ g++ /usr/bin/g++-6 \
+                                    --slave /usr/bin/gfortran gfortran /usr/bin/gfortran-6',
+    require => [ Package['gcc-6'], Package['g++-6'], Package['gfortran-6'], Package['build-essential'], Package['binutils'] ]
   }
 }

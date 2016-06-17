@@ -23,7 +23,6 @@ define installer (
   $url,
   $args = '',
   $environment = [],
-  $lto = true,
   $src_dir = '',
   $method = 'auto',
   $prefix = '/nubots/toolchain',
@@ -72,7 +71,7 @@ define installer (
       } ~>
       exec { "install_${name}":
         command => "${prebuild} ;
-                    install_from_source '${prefix}' '${method}' ${lto} ${args} ;
+                    install_from_source '${prefix}' '${method}' ${args} ;
                     ${postbuild} ;",
         creates => $creates,
         cwd => "/nubots/toolchain/src/${name}/${src_dir}",

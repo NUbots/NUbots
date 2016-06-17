@@ -6,22 +6,14 @@ set -e
 # Get our prefix
 PREFIX="$1"
 METHOD="$2"
-LTO="$3"
+
 # -mmovbe isn't enabled as it was specific to atom CPUs until haswell
 DARWIN_OPTIMISATION_FLAGS="-march=bonnell -mtune=bonnell -mno-movbe -mfxsr -mmmx -msahf -msse -msse2 -msse3 -mssse3 --param l1-cache-size=24 --param l1-cache-line-size=64 --param l2-cache-size=512"
-shift 3
+shift 2
 
-if [[ $LTO == "true" ]]; then
-    echo "Using LTO"
-    export CFLAGS="$CFLAGS -I$PREFIX/include $DARWIN_OPTIMISATION_FLAGS -fuse-linker-plugin -flto -ffat-lto-objects -Os"
-    export CXXFLAGS="$CXXFLAGS -I$PREFIX/include $DARWIN_OPTIMISATION_FLAGS -fuse-linker-plugin -flto -ffat-lto-objects -Os"
-    export LDFLAGS="$LDFLAGS -L$PREFIX/lib"
-else
-    echo "Not using LTO"
-    export CFLAGS="$CFLAGS -I$PREFIX/include $DARWIN_OPTIMISATION_FLAGS -O3"
-    export CXXFLAGS="$CXXFLAGS -I$PREFIX/include $DARWIN_OPTIMISATION_FLAGS -O3"
-    export LDFLAGS="$LDFLAGS -L$PREFIX/lib"
-fi
+export CFLAGS="$CFLAGS -I$PREFIX/include $DARWIN_OPTIMISATION_FLAGS -Os"
+export CXXFLAGS="$CXXFLAGS -I$PREFIX/include $DARWIN_OPTIMISATION_FLAGS -Os"
+export LDFLAGS="$LDFLAGS -L$PREFIX/lib"
 
 # Say what we're doing!
 echo "Installing $(basename $(pwd)) to $PREFIX"
@@ -36,8 +28,12 @@ export CMAKE_PREFIX_PATH=$PREFIX
 if [[ $METHOD == 'autotools' || ($METHOD == 'auto' && -e "configure") ]]; then
     echo "Configuring using autotools"
 
+    # Do an out of source build
+    mkdir -p build
+    cd build
+
     # Run configure
-    ./configure $@ --prefix="$PREFIX"
+    ../configure $@ --prefix="$PREFIX"
 
     # Run make
     make -j$(nproc)
@@ -46,7 +42,7 @@ if [[ $METHOD == 'autotools' || ($METHOD == 'auto' && -e "configure") ]]; then
     make install
 
 # We are using CMake
-elif [[ $METHOD == 'cmake' || $METHOD == 'auto' && -e "CMakeLists.txt" ]]; then
+elif [[ $METHOD == 'cmake' || ($METHOD == 'auto' && -e "CMakeLists.txt") ]]; then
     echo "Configuring using cmake"
 
     # Do an out of source build

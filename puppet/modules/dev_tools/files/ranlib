@@ -1,2 +1,0 @@
-#!/bin/bash
-/usr/bin/ranlib_bin $@ --plugin /usr/lib/gcc/i686-linux-gnu/5/liblto_plugin.so

@@ -21,8 +21,6 @@ node nubotsvm {
     ensure => 'latest',
     source => "/root/nubots-toolchain${toolchain_version}.deb",
   }
-  installer { 'openrave':       url => 'https://github.com/rdiankov/openrave/archive/v0.8.2.tar.gz',}
-
 }
 
 node nubotsvmbuild {
@@ -34,7 +32,7 @@ node nubotsvmbuild {
   Installer <| |> ~> class { 'toolchain_deb': }
 
   class { 'quex': }
-  installer { 'cmake':          url => 'https://cmake.org/files/v3.5/cmake-3.5.2.tar.gz'
+  installer { 'cmake':          url => 'https://cmake.org/files/v3.5/cmake-3.5.2.tar.gz',
                                 creates => '/nubots/toolchain/bin/cmake', }
   installer { 'zlib':           url => 'http://zlib.net/zlib-1.2.8.tar.gz',
                                 creates => '/nubots/toolchain/lib/libz.a' }
@@ -69,8 +67,7 @@ node nubotsvmbuild {
                                 args => '--disable-fortran --enable-shared', }
   installer { 'jpeg':           url => 'http://downloads.sourceforge.net/project/libjpeg-turbo/1.4.2/libjpeg-turbo-1.4.2.tar.gz', }
   installer { 'cppformat':      url => 'https://github.com/cppformat/cppformat/archive/2.0.0.tar.gz', }
-  installer { 'portaudio':      url => 'http://www.portaudio.com/archives/pa_stable_v19_20140130.tgz',
-                                lto => false, }
+  installer { 'portaudio':      url => 'http://www.portaudio.com/archives/pa_stable_v19_20140130.tgz', }
   installer { 'rtaudio':        url => 'http://www.music.mcgill.ca/~gary/rtaudio/release/rtaudio-4.1.1.tar.gz', }
   installer { 'muparserx':      url => 'https://github.com/beltoforion/muparserx/archive/v4.0.4.tar.gz', }
   installer { 'eigen3':         url => 'http://bitbucket.org/eigen/eigen/get/3.2.7.tar.gz',
@@ -81,16 +78,11 @@ node nubotsvmbuild {
   installer { 'mlpack':         url => 'https://github.com/mlpack/mlpack/archive/mlpack-2.0.0.tar.gz',
                                 require => [ Installer['armadillo'], Installer['boost'], Installer['xml2'], ],
                                 creates => '/nubots/toolchain/lib/libmlpack.so', }
-  installer { 'ompl':           url => 'https://bitbucket.org/ompl/ompl/downloads/ompl-1.1.0-Source.tar.gz',
-                                args => "-DOMPL_BUILD_DEMOS=OFF -DOMPL_BUILD_PYBINDINGS=OFF -DOMPL_BUILD_PYTESTS=OFF -DCMAKE_INSTALL_LIBDIR=lib",
-                                creates => '/nubots/toolchain/lib/libompl.so',
-                                require => [ Installer['eigen3'], Installer['boost'] ], }
   installer { 'espeak':         url => 'http://sourceforge.net/projects/espeak/files/espeak/espeak-1.48/espeak-1.48.04-source.zip',
                                 src_dir => 'espeak-1.48.04-source/src',
                                 prebuild => 'cp portaudio19.h portaudio.h',
                                 environment => ['AUDIO=PORTAUDIO'],
                                 require => [ Installer['portaudio'] ], }
-  installer { 'openrave':       url => 'https://github.com/rdiankov/openrave/archive/v0.8.2.tar.gz',}
   # Patch armadillo
   file { 'armadillo_config':    path => '/nubots/toolchain/include/armadillo_bits/config.hpp',
                                 source => 'puppet:///modules/files/nubots/toolchain/include/armadillo_bits/config.hpp',
