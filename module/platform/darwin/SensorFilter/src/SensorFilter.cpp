@@ -379,7 +379,7 @@ namespace module {
                      ************************************************/
                     if(previousSensors) {
                         // Use our virtual load sensor class to work out if our foot is down
-                        sensors->leftFootDown = leftFootDown.updateFoot(arma::vec({
+                        arma::vec leftFootFeatureVec = {
                               sensors->servos[size_t(ServoID::L_HIP_PITCH)].load
                             , sensors->servos[size_t(ServoID::L_HIP_PITCH)].presentVelocity
                             , sensors->servos[size_t(ServoID::L_HIP_PITCH)].presentVelocity - previousSensors->servos[size_t(ServoID::L_HIP_PITCH)].presentVelocity
@@ -389,9 +389,10 @@ namespace module {
                             , sensors->servos[size_t(ServoID::L_ANKLE_PITCH)].load
                             , sensors->servos[size_t(ServoID::L_ANKLE_PITCH)].presentVelocity
                             , sensors->servos[size_t(ServoID::L_ANKLE_PITCH)].presentVelocity - previousSensors->servos[size_t(ServoID::L_ANKLE_PITCH)].presentVelocity
-                        }));
+                        };
+                        sensors->leftFootDown = leftFootDown.updateFoot(leftFootFeatureVec);
 
-                        sensors->rightFootDown = rightFootDown.updateFoot(arma::vec({
+                        arma::vec rightFootFeatureVec = {
                               sensors->servos[size_t(ServoID::R_HIP_PITCH)].load
                             , sensors->servos[size_t(ServoID::R_HIP_PITCH)].presentVelocity
                             , sensors->servos[size_t(ServoID::R_HIP_PITCH)].presentVelocity - previousSensors->servos[size_t(ServoID::R_HIP_PITCH)].presentVelocity
@@ -401,7 +402,8 @@ namespace module {
                             , sensors->servos[size_t(ServoID::R_ANKLE_PITCH)].load
                             , sensors->servos[size_t(ServoID::R_ANKLE_PITCH)].presentVelocity
                             , sensors->servos[size_t(ServoID::R_ANKLE_PITCH)].presentVelocity - previousSensors->servos[size_t(ServoID::R_ANKLE_PITCH)].presentVelocity
-                        }));
+                        };
+                        sensors->rightFootDown = rightFootDown.updateFoot(rightFootFeatureVec);
                     }
                     else {
                         sensors->leftFootDown = false;

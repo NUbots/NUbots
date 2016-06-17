@@ -18,6 +18,7 @@
  */
 
 #include "DarwinVirtualLoadSensor.h"
+#include <nuclear>
 
 namespace module {
     namespace platform {
@@ -26,12 +27,12 @@ namespace module {
 
             }
 
-            DarwinVirtualLoadSensor::DarwinVirtualLoadSensor(arma::vec fWeights,
+            DarwinVirtualLoadSensor::DarwinVirtualLoadSensor(arma::vec featureWeights,
                                     double intercept,
                                     double noiseFactor,
                                     double certaintyThreshold,
                                     double uncertaintyThreshold)
-                    : currentNoise(2 * noiseFactor)
+                    : currentNoise(2.0 * noiseFactor)
                     , noiseFactor(noiseFactor)
                     , intercept(intercept)
                     , certaintyThreshold(certaintyThreshold)
@@ -41,16 +42,12 @@ namespace module {
 
             bool DarwinVirtualLoadSensor::updateFoot(const arma::vec& features) {
 
-                //do the probability based prediction
-                double linResult = arma::dot(features, featureWeights) + intercept;
-                arma::vec probs = {linResult,1-linResult};
-                probs = arma::exp(probs-arma::max(probs));
-                probs /= arma::sum(probs);
+                double linResult = 1.0 / (std::exp(-(arma::dot(features, featureWeights) + intercept)) + 1.0);
 
                 //do the bayes update (1D kalman filter thing)
                 double k = currentNoise / (currentNoise + noiseFactor);
-                state += k*(probs[0]-state);
-                currentNoise *= 1-k;
+                state += k*(linResult-state);
+                currentNoise *= 1.0 - k;
 
                 if (state >= certaintyThreshold) {
 
