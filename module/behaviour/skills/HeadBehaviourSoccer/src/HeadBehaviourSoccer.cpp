@@ -76,7 +76,6 @@ namespace module {
             Reactor(std::move(environment)),
             lastCentroid({0,0}),
             lostAndSearching(false),
-            lostLastTime(false),
             lastBallPriority(0),
             lastGoalPriority(0) {
 
@@ -177,23 +176,26 @@ namespace module {
 
                     //Determine state transition variables
                     bool lost = fixationObjects.size() <= 0;
-                    bool found = !lost && lostLastTime;
                     //Do we need to update our plan?
-                    bool updatePlan = headSearcher.size() <= 1 || found || (lastBallPriority != ballPriority) || (lastGoalPriority != goalPriority) ; //bool(Priorities have changed)
-
+                    bool updatePlan = (lastBallPriority != ballPriority) || (lastGoalPriority != goalPriority); //bool(Priorities have changed)
+                    //Has it been a long time since we have seen anything of interest?
                     bool searchTimedOut = std::chrono::duration_cast<std::chrono::milliseconds>(now - timeLastObjectSeen).count() > search_timeout_ms;
+                    //Did the object move in IMUspace?
+                    bool objectMoved = false;
+                    
 
                     // log("updatePlan", updatePlan);
                     // log("lost", lost);
                     // log("isGettingUp", isGettingUp);
                     // log("searchType", int(searchType));
                     // log("headSearcher.size()", headSearcher.size());
+
+                    //State execution
                     
-                    //Get robot pose
+                    //Get robot heat to body transform
                     Rotation3D orientation, headToBodyRotation;
                     if(!lost){
                         //We need to transform our view points to orientation space
-                        lostAndSearching = false;
                         headToBodyRotation = fixationObjects[0].sensors->forwardKinematics.at(ServoID::HEAD_PITCH).rotation();
                         orientation = fixationObjects[0].sensors->orientation.i();
                     } else {
@@ -202,7 +204,7 @@ namespace module {
                     }
                     Rotation3D headToIMUSpace = orientation * headToBodyRotation;
 
-                    //Check current centroid
+                    //If objects visible, check current centroid to see if it moved
                     if(!lost){
                         arma::vec2 currentCentroid = arma::vec2({0,0});
                         for(auto& ob : fixationObjects){
@@ -211,24 +213,37 @@ namespace module {
                         arma::vec2 currentCentroid_world = getIMUSpaceDirection(currentCentroid,headToIMUSpace);
                         //If our objects have moved, we need to replan
                         if(arma::norm(currentCentroid_world - lastCentroid) >= fractional_angular_update_threshold * std::fmax(cam.FOV[0],cam.FOV[1]) / 2.0){
-                            updatePlan = true;
+                            objectMoved = true;
                             lastCentroid = currentCentroid_world;
-                            //std::cout << "Replanning due to object movement." << std::endl;
+                            std::cout << "Replanning due to object movement." << std::endl;
                         }
                     }
 
-                    //If we lost what we are searching for.
-                    if(!lostAndSearching && searchTimedOut ){
-                        lostAndSearching = true;
-                        updatePlan = true;
-                        lastCentroid = {99999,99999};//reset centroid to impossible value to trigger reset TODO: find a better way
-                    }
-                    //If we are searching and we move by a threshold amount
-                    //TODO!! - Put search pattern back in IMU space and make replanning work
-                    else if(false && lostAndSearching && orientationHasChanged(sensors)){
-                        // log("orientation has changed: replanning");
-                        updatePlan = true;
-                        lastCentroid = {99999,99999};//reset centroid to impossible value to trigger reset TODO: find a better way
+                    //State Transitions
+                    switch(state){
+                        case FIXATION:
+                            if(lost) {
+                                state = WAIT;
+                            } else if(objectMoved) {
+                                updatePlan = true;
+                            }
+                            break;
+                        case WAIT:
+                            if(!lost){
+                                state = FIXATION;
+                                updatePlan = true;
+                            }   
+                            else if(searchTimedOut){
+                                state = SEARCH;
+                                updatePlan = true;
+                            }
+                            break;
+                        case SEARCH:
+                            if(!lost){
+                                state = FIXATION;
+                                updatePlan = true;
+                            }
+                            break;
                     }
 
                     //If we arent getting up, then we can update the plan if necessary
@@ -239,7 +254,7 @@ namespace module {
                         updateHeadPlan(fixationObjects, search, sensors, headToIMUSpace);
                     }
 
-                    //Update state machine
+                    //Update searcher
                     headSearcher.update(oscillate_search);
                     //Emit new result if possible
                     if(headSearcher.newGoal()){
@@ -255,7 +270,6 @@ namespace module {
                     lastGoalPriority = goalPriority;
                     lastBallPriority = ballPriority;
 
-                    lostLastTime = lost;
                 });
 
 

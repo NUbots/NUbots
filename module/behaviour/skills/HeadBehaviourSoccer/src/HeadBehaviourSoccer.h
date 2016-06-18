@@ -45,6 +45,12 @@ namespace module {
 
 
             private:
+                enum SearchState{
+                    FIXATION = 0,
+                    WAIT = 1,
+                    SEARCH = 2
+                };
+                SearchState state = SearchState::SEARCH;
 
                 std::vector<message::vision::VisionObject> getFixationObjects(std::shared_ptr<const std::vector<message::vision::Ball>> vballs,
                                                                               std::shared_ptr<const std::vector<message::vision::Goal>> vgoals, 
