@@ -263,14 +263,14 @@ namespace module {
 
             std::vector<VisionObject> HeadBehaviourSoccer::getFixationObjects(std::shared_ptr<const std::vector<Ball>> vballs, std::shared_ptr<const std::vector<Goal>> vgoals, bool& search){
 
-                std::vector<VisionObject> fixationObjects
-                int maxPriority = std::max(std::max(ballPriority,goalPriority),0);
+                auto now = NUClear::clock::now();
+                std::vector<VisionObject> fixationObjects;
 
+                int maxPriority = std::max(std::max(ballPriority,goalPriority),0);
                 if(ballPriority == goalPriority) log<NUClear::WARN>("HeadBehaviourSoccer - Multiple object searching currently not supported properly.");
 
-                auto now = NUClear::clock::now();
-
                 //TODO: make this a loop over a list of objects or something
+                //Get balls
                 if(ballPriority == maxPriority){
                     if(vballs != NULL && vballs->size() > 0){
                         //Fixate on ball
@@ -281,6 +281,7 @@ namespace module {
                         search = true;
                     }
                 }
+                //Get goals
                 if(goalPriority == maxPriority){
                     if(vgoals != NULL && vgoals->size() > 0){
                         //Fixate on goals and lines and other landmarks
@@ -299,6 +300,7 @@ namespace module {
                         search = true;
                     }
                 }
+
                 return fixationObjects;
             }
 
