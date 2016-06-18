@@ -168,50 +168,20 @@ namespace module {
                         locBallReceived = true;
                         lastLocBall = *locBall;
                     }
+                    auto now = NUClear::clock::now();
 
                     bool search = false;
 
-                    int maxPriority = std::max(std::max(ballPriority,goalPriority),0);
+                    //Get the list of objects which are currently visible
+                    std::vector<VisionObject> fixationObjects = getFixationObjects(vballs,vgoals, search);
 
-                    if(ballPriority == goalPriority) log<NUClear::WARN>("HeadBehaviourSoccer - Multiple object searching currently not supported properly.");
-
-                    std::vector<VisionObject> fixationObjects;
-
-                    auto now = NUClear::clock::now();
-
-                    //TODO: make this a loop over a list of objects or something
-                    if(ballPriority == maxPriority){
-                        if(vballs != NULL && vballs->size() > 0){
-                            //Fixate on ball
-                            timeLastObjectSeen = now;
-                            auto& ball = vballs->at(0);
-                            fixationObjects.push_back(VisionObject(ball));
-                        } else {
-                            search = true;
-                        }
-                    }
-                    if(goalPriority == maxPriority){
-                        if(vgoals != NULL && vgoals->size() > 0){
-                            //Fixate on goals and lines and other landmarks
-                            timeLastObjectSeen = now;
-                            std::set<Goal::Side> visiblePosts;
-                            //TODO treat goals as one object
-                            std::vector<VisionObject> goals;
-                            for (auto& goal : *vgoals){
-                                visiblePosts.insert(goal.side);
-                                goals.push_back(VisionObject(goal));
-                            }
-                            fixationObjects.push_back(combineVisionObjects(goals));
-                            search = (visiblePosts.find(Goal::Side::LEFT) == visiblePosts.end() ||//If left post not visible or
-                                      visiblePosts.find(Goal::Side::RIGHT) == visiblePosts.end());//right post not visible, then we need to search for the other goal post
-                        } else {
-                            search = true;
-                        }
-                    }
+                    //Determine state transition variables
                     bool lost = fixationObjects.size() <= 0;
                     bool found = !lost && lostLastTime;
                     //Do we need to update our plan?
                     bool updatePlan = headSearcher.size() <= 1 || found || (lastBallPriority != ballPriority) || (lastGoalPriority != goalPriority) ; //bool(Priorities have changed)
+
+                    bool searchTimedOut = std::chrono::duration_cast<std::chrono::milliseconds>(now - timeLastObjectSeen).count() > search_timeout_ms;
 
                     // log("updatePlan", updatePlan);
                     // log("lost", lost);
@@ -248,7 +218,7 @@ namespace module {
                     }
 
                     //If we lost what we are searching for.
-                    if(!lostAndSearching && std::chrono::duration_cast<std::chrono::milliseconds>(now - timeLastObjectSeen).count() > search_timeout_ms ){
+                    if(!lostAndSearching && searchTimedOut ){
                         lostAndSearching = true;
                         updatePlan = true;
                         lastCentroid = {99999,99999};//reset centroid to impossible value to trigger reset TODO: find a better way
@@ -290,6 +260,48 @@ namespace module {
 
 
             }
+
+            std::vector<VisionObject> HeadBehaviourSoccer::getFixationObjects(std::shared_ptr<const std::vector<Ball>> vballs, std::shared_ptr<const std::vector<Goal>> vgoals, bool& search){
+
+                std::vector<VisionObject> fixationObjects
+                int maxPriority = std::max(std::max(ballPriority,goalPriority),0);
+
+                if(ballPriority == goalPriority) log<NUClear::WARN>("HeadBehaviourSoccer - Multiple object searching currently not supported properly.");
+
+                auto now = NUClear::clock::now();
+
+                //TODO: make this a loop over a list of objects or something
+                if(ballPriority == maxPriority){
+                    if(vballs != NULL && vballs->size() > 0){
+                        //Fixate on ball
+                        timeLastObjectSeen = now;
+                        auto& ball = vballs->at(0);
+                        fixationObjects.push_back(VisionObject(ball));
+                    } else {
+                        search = true;
+                    }
+                }
+                if(goalPriority == maxPriority){
+                    if(vgoals != NULL && vgoals->size() > 0){
+                        //Fixate on goals and lines and other landmarks
+                        timeLastObjectSeen = now;
+                        std::set<Goal::Side> visiblePosts;
+                        //TODO treat goals as one object
+                        std::vector<VisionObject> goals;
+                        for (auto& goal : *vgoals){
+                            visiblePosts.insert(goal.side);
+                            goals.push_back(VisionObject(goal));
+                        }
+                        fixationObjects.push_back(combineVisionObjects(goals));
+                        search = (visiblePosts.find(Goal::Side::LEFT) == visiblePosts.end() ||//If left post not visible or
+                                  visiblePosts.find(Goal::Side::RIGHT) == visiblePosts.end());//right post not visible, then we need to search for the other goal post
+                    } else {
+                        search = true;
+                    }
+                }
+                return fixationObjects;
+            }
+
 
             void HeadBehaviourSoccer::updateHeadPlan(const std::vector<VisionObject>& fixationObjects, const bool& search, const Sensors& sensors, const Rotation3D& headToIMUSpace){
                 std::vector<arma::vec2> fixationPoints;

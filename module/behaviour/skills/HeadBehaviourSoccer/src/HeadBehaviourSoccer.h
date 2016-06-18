@@ -46,6 +46,11 @@ namespace module {
 
             private:
 
+                std::vector<message::vision::VisionObject> getFixationObjects(std::shared_ptr<const std::vector<message::vision::Ball>> vballs,
+                                                                              std::shared_ptr<const std::vector<message::vision::Goal>> vgoals, 
+                                                                              bool& search);
+
+
                 /*! @brief Updates the search plan when something has changed
                 */
                 void updateHeadPlan(const std::vector<message::vision::VisionObject>& fixationObjects, const bool& search, const message::input::Sensors& sensors, const utility::math::matrix::Rotation3D& headToIMUSpace);
