@@ -28,6 +28,7 @@
 #include "message/localisation/FieldObject.h"
 #include "message/vision/VisionObjects.h"
 #include "message/behaviour/MotionCommand.h"
+ #include "message/behaviour/KickPlan.h"
 
 
 namespace module {
@@ -52,8 +53,9 @@ namespace module {
                     //info for the current walk
                     arma::vec2 currentTargetPosition;
                     arma::vec2 currentTargetHeading;
-                    message::behaviour::WalkApproach planType;
-                    message::behaviour::WalkTarget targetHeading,targetPosition;
+                    message::behaviour::MotionCommand::Type planType;
+                    message::behaviour::KickPlan targetHeading;
+                    arma::vec2 targetPosition = {0, 0}; 
 
                 public:
                     explicit BezierWalkPathPlanner(std::unique_ptr<NUClear::Environment> environment);
