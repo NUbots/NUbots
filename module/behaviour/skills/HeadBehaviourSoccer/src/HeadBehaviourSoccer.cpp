@@ -58,7 +58,7 @@ namespace module {
         using message::motion::KillGetup;
 
         using utility::math::coordinates::sphericalToCartesian;
-        using utility::motion::kinematics::calculateHeadJoints;
+        using utility::motion::kinematics::calculateCameraLookJoints;
         using utility::motion::kinematics::DarwinModel;
         using utility::math::matrix::Rotation3D;
         using utility::math::geometry::Quad;
@@ -364,7 +364,7 @@ namespace module {
                 //Rotate target angles to World space
                 arma::vec3 lookVector = headToIMUSpace * lookVectorFromHead;
                 //Compute inverse kinematics for head direction angles
-                std::vector< std::pair<ServoID, float> > goalAngles = calculateHeadJoints<DarwinModel>(lookVector);
+                std::vector< std::pair<ServoID, float> > goalAngles = calculateCameraLookJoints<DarwinModel>(lookVector);
 
                 arma::vec2 result;
                 for(auto& angle : goalAngles){
@@ -405,7 +405,7 @@ namespace module {
 
 
                                 arma::vec3 adjustedLookVector = Rotation3D::createRotationY(sensors.orientation.pitch()) * lookVectorFromHead;
-                                std::vector< std::pair<ServoID, float> > goalAngles = calculateHeadJoints<DarwinModel>(adjustedLookVector);
+                                std::vector< std::pair<ServoID, float> > goalAngles = calculateCameraLookJoints<DarwinModel>(adjustedLookVector);
 
                                 for(auto& angle : goalAngles){
                                     if(angle.first == ServoID::HEAD_PITCH){
