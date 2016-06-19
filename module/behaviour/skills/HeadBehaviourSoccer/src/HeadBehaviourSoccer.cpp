@@ -58,7 +58,7 @@ namespace module {
         using message::motion::KillGetup;
 
         using utility::math::coordinates::sphericalToCartesian;
-        using utility::motion::kinematics::calculateHeadJoints;
+        using utility::motion::kinematics::calculateCameraLookJoints;
         using utility::motion::kinematics::DarwinModel;
         using utility::math::matrix::Rotation3D;
         using utility::math::geometry::Quad;
@@ -76,7 +76,6 @@ namespace module {
             Reactor(std::move(environment)),
             lastCentroid({0,0}),
             lostAndSearching(false),
-            lostLastTime(false),
             lastBallPriority(0),
             lastGoalPriority(0) {
 
@@ -132,10 +131,6 @@ namespace module {
                 });
 
 
-                on<Trigger<CameraParameters>>().then("Head Behaviour - Load CameraParameters",[this] (const CameraParameters& cam_) {
-                    cam = cam_;
-                });
-
                 on<Trigger<SoccerObjectPriority>, Sync<HeadBehaviourSoccer>>().then("Head Behaviour Soccer - Set priorities", [this] (const SoccerObjectPriority& p) {
                     ballPriority = p.ball;
                     goalPriority = p.goal;
@@ -151,79 +146,57 @@ namespace module {
                     Optional<With<std::vector<Ball>>>,
                     Optional<With<std::vector<Goal>>>,
                     Optional<With<LocBall>>,
+                    With<CameraParameters>,
                     Single,
                     Sync<HeadBehaviourSoccer>
                   >().then("Head Behaviour Main Loop", [this] ( const Sensors& sensors,
                                                         std::shared_ptr<const std::vector<Ball>> vballs,
                                                         std::shared_ptr<const std::vector<Goal>> vgoals,
-                                                        std::shared_ptr<const LocBall> locBall
+                                                        std::shared_ptr<const LocBall> locBall,
+                                                        const CameraParameters& cam_
                                                         ) {
 
                     // std::cout << "Seen: Balls: " <<
                     // ((vballs != nullptr) ? std::to_string(int(vballs->size())) : std::string("null")) << 
                     // "Goals: " <<
                     // ((vgoals != nullptr) ? std::to_string(int(vgoals->size())) : std::string("null")) << std::endl;
-                   
+                    
+                    //TODO: pass camera parameters around instead of this hack storage
+                    cam = cam_;
+
                     if(locBall) {
                         locBallReceived = true;
                         lastLocBall = *locBall;
                     }
-
-                    bool search = false;
-
-                    int maxPriority = std::max(std::max(ballPriority,goalPriority),0);
-
-                    if(ballPriority == goalPriority) log<NUClear::WARN>("HeadBehaviourSoccer - Multiple object searching currently not supported properly.");
-
-                    std::vector<VisionObject> fixationObjects;
-
                     auto now = NUClear::clock::now();
 
-                    //TODO: make this a loop over a list of objects or something
-                    if(ballPriority == maxPriority){
-                        if(vballs != NULL && vballs->size() > 0){
-                            //Fixate on ball
-                            timeLastObjectSeen = now;
-                            auto& ball = vballs->at(0);
-                            fixationObjects.push_back(VisionObject(ball));
-                        } else {
-                            search = true;
-                        }
-                    }
-                    if(goalPriority == maxPriority){
-                        if(vgoals != NULL && vgoals->size() > 0){
-                            //Fixate on goals and lines and other landmarks
-                            timeLastObjectSeen = now;
-                            std::set<Goal::Side> visiblePosts;
-                            //TODO treat goals as one object
-                            std::vector<VisionObject> goals;
-                            for (auto& goal : *vgoals){
-                                visiblePosts.insert(goal.side);
-                                goals.push_back(VisionObject(goal));
-                            }
-                            fixationObjects.push_back(combineVisionObjects(goals));
-                            search = (visiblePosts.find(Goal::Side::LEFT) == visiblePosts.end() ||//If left post not visible or
-                                      visiblePosts.find(Goal::Side::RIGHT) == visiblePosts.end());//right post not visible, then we need to search for the other goal post
-                        } else {
-                            search = true;
-                        }
-                    }
+                    bool objectsMissing = false;
+
+                    //Get the list of objects which are currently visible
+                    std::vector<VisionObject> fixationObjects = getFixationObjects(vballs,vgoals, objectsMissing);
+
+                    //Determine state transition variables
                     bool lost = fixationObjects.size() <= 0;
-                    bool found = !lost && lostLastTime;
                     //Do we need to update our plan?
-                    bool updatePlan = headSearcher.size() <= 1 || found || (lastBallPriority != ballPriority) || (lastGoalPriority != goalPriority) ; //bool(Priorities have changed)
+                    bool updatePlan = !isGettingUp && ((lastBallPriority != ballPriority) || (lastGoalPriority != goalPriority));
+                    //Has it been a long time since we have seen anything of interest?
+                    bool searchTimedOut = std::chrono::duration_cast<std::chrono::milliseconds>(now - timeLastObjectSeen).count() > search_timeout_ms;
+                    //Did the object move in IMUspace?
+                    bool objectMoved = false;
+                    
 
                     // log("updatePlan", updatePlan);
                     // log("lost", lost);
                     // log("isGettingUp", isGettingUp);
                     // log("searchType", int(searchType));
                     // log("headSearcher.size()", headSearcher.size());
+
+                    //State execution
                     
-                    //Get robot pose
+                    //Get robot heat to body transform
                     Rotation3D orientation, headToBodyRotation;
                     if(!lost){
                         //We need to transform our view points to orientation space
-                        lostAndSearching = false;
                         headToBodyRotation = fixationObjects[0].sensors->forwardKinematics.at(ServoID::HEAD_PITCH).rotation();
                         orientation = fixationObjects[0].sensors->orientation.i();
                     } else {
@@ -232,7 +205,7 @@ namespace module {
                     }
                     Rotation3D headToIMUSpace = orientation * headToBodyRotation;
 
-                    //Check current centroid
+                    //If objects visible, check current centroid to see if it moved
                     if(!lost){
                         arma::vec2 currentCentroid = arma::vec2({0,0});
                         for(auto& ob : fixationObjects){
@@ -241,35 +214,49 @@ namespace module {
                         arma::vec2 currentCentroid_world = getIMUSpaceDirection(currentCentroid,headToIMUSpace);
                         //If our objects have moved, we need to replan
                         if(arma::norm(currentCentroid_world - lastCentroid) >= fractional_angular_update_threshold * std::fmax(cam.FOV[0],cam.FOV[1]) / 2.0){
-                            updatePlan = true;
+                            objectMoved = true;
                             lastCentroid = currentCentroid_world;
-                            //std::cout << "Replanning due to object movement." << std::endl;
                         }
                     }
 
-                    //If we lost what we are searching for.
-                    if(!lostAndSearching && std::chrono::duration_cast<std::chrono::milliseconds>(now - timeLastObjectSeen).count() > search_timeout_ms ){
-                        lostAndSearching = true;
-                        updatePlan = true;
-                        lastCentroid = {99999,99999};//reset centroid to impossible value to trigger reset TODO: find a better way
-                    }
-                    //If we are searching and we move by a threshold amount
-                    //TODO!! - Put search pattern back in IMU space and make replanning work
-                    else if(false && lostAndSearching && orientationHasChanged(sensors)){
-                        // log("orientation has changed: replanning");
-                        updatePlan = true;
-                        lastCentroid = {99999,99999};//reset centroid to impossible value to trigger reset TODO: find a better way
+                    //State Transitions
+                    if(!isGettingUp){
+                        switch(state){
+                            case FIXATION:
+                                if(lost) {
+                                    state = WAIT;
+                                } else if(objectMoved) {
+                                    updatePlan = true;
+                                }
+                                break;
+                            case WAIT:
+                                if(!lost){
+                                    state = FIXATION;
+                                    updatePlan = true;
+                                }   
+                                else if(searchTimedOut){
+                                    state = SEARCH;
+                                    updatePlan = true;
+                                }
+                                break;
+                            case SEARCH:
+                                if(!lost){
+                                    state = FIXATION;
+                                    updatePlan = true;
+                                }
+                                break;
+                        }
                     }
 
                     //If we arent getting up, then we can update the plan if necessary
-                    if(updatePlan && !isGettingUp){
+                    if(updatePlan){
                         if(lost){
                             lastPlanOrientation = sensors.orientation;
                         }
-                        updateHeadPlan(fixationObjects, search, sensors, headToIMUSpace);
+                        updateHeadPlan(fixationObjects, objectsMissing, sensors, headToIMUSpace);
                     }
 
-                    //Update state machine
+                    //Update searcher
                     headSearcher.update(oscillate_search);
                     //Emit new result if possible
                     if(headSearcher.newGoal()){
@@ -278,18 +265,61 @@ namespace module {
                         std::unique_ptr<HeadCommand> command = std::make_unique<HeadCommand>();
                         command->yaw = direction[0];
                         command->pitch = direction[1];
-                        command->robotSpace = search;
+                        command->robotSpace = (state == SEARCH);
                         emit(std::move(command));
                     }
 
                     lastGoalPriority = goalPriority;
                     lastBallPriority = ballPriority;
 
-                    lostLastTime = lost;
                 });
 
 
             }
+
+            std::vector<VisionObject> HeadBehaviourSoccer::getFixationObjects(std::shared_ptr<const std::vector<Ball>> vballs, std::shared_ptr<const std::vector<Goal>> vgoals, bool& search){
+
+                auto now = NUClear::clock::now();
+                std::vector<VisionObject> fixationObjects;
+
+                int maxPriority = std::max(std::max(ballPriority,goalPriority),0);
+                if(ballPriority == goalPriority) log<NUClear::WARN>("HeadBehaviourSoccer - Multiple object searching currently not supported properly.");
+
+                //TODO: make this a loop over a list of objects or something
+                //Get balls
+                if(ballPriority == maxPriority){
+                    if(vballs != NULL && vballs->size() > 0){
+                        //Fixate on ball
+                        timeLastObjectSeen = now;
+                        auto& ball = vballs->at(0);
+                        fixationObjects.push_back(VisionObject(ball));
+                    } else {
+                        search = true;
+                    }
+                }
+                //Get goals
+                if(goalPriority == maxPriority){
+                    if(vgoals != NULL && vgoals->size() > 0){
+                        //Fixate on goals and lines and other landmarks
+                        timeLastObjectSeen = now;
+                        std::set<Goal::Side> visiblePosts;
+                        //TODO treat goals as one object
+                        std::vector<VisionObject> goals;
+                        for (auto& goal : *vgoals){
+                            visiblePosts.insert(goal.side);
+                            goals.push_back(VisionObject(goal));
+                        }
+                        fixationObjects.push_back(combineVisionObjects(goals));
+                        search = (visiblePosts.find(Goal::Side::LEFT) == visiblePosts.end() ||//If left post not visible or
+                                  visiblePosts.find(Goal::Side::RIGHT) == visiblePosts.end());//right post not visible, then we need to search for the other goal post
+                    } else {
+                        search = true;
+                    }
+                }
+
+                return fixationObjects;
+            }
+
 
             void HeadBehaviourSoccer::updateHeadPlan(const std::vector<VisionObject>& fixationObjects, const bool& search, const Sensors& sensors, const Rotation3D& headToIMUSpace){
                 std::vector<arma::vec2> fixationPoints;
@@ -334,7 +364,7 @@ namespace module {
                 //Rotate target angles to World space
                 arma::vec3 lookVector = headToIMUSpace * lookVectorFromHead;
                 //Compute inverse kinematics for head direction angles
-                std::vector< std::pair<ServoID, float> > goalAngles = calculateHeadJoints<DarwinModel>(lookVector);
+                std::vector< std::pair<ServoID, float> > goalAngles = calculateCameraLookJoints<DarwinModel>(lookVector);
 
                 arma::vec2 result;
                 for(auto& angle : goalAngles){
@@ -375,7 +405,7 @@ namespace module {
 
 
                                 arma::vec3 adjustedLookVector = Rotation3D::createRotationY(sensors.orientation.pitch()) * lookVectorFromHead;
-                                std::vector< std::pair<ServoID, float> > goalAngles = calculateHeadJoints<DarwinModel>(adjustedLookVector);
+                                std::vector< std::pair<ServoID, float> > goalAngles = calculateCameraLookJoints<DarwinModel>(adjustedLookVector);
 
                                 for(auto& angle : goalAngles){
                                     if(angle.first == ServoID::HEAD_PITCH){

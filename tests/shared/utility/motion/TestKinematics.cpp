@@ -27,7 +27,7 @@
 using message::input::ServoID;
 using message::input::Sensors;
 using utility::motion::kinematics::DarwinModel;
-using utility::motion::kinematics::calculateHeadJoints;
+using utility::motion::kinematics::calculateCameraLookJoints;
 
 TEST_CASE("Test the Head kinematics", "[utility][motion][kinematics][head]") {
 
@@ -43,7 +43,7 @@ TEST_CASE("Test the Head kinematics", "[utility][motion][kinematics][head]") {
 
         INFO("Testing with the random vector, " << camVec.t());
 
-        std::vector<std::pair<message::input::ServoID, float>> angles = utility::motion::kinematics::calculateHeadJoints<DarwinModel>(camVec);
+        std::vector<std::pair<message::input::ServoID, float>> angles = utility::motion::kinematics::calculateCameraLookJoints<DarwinModel>(camVec);
 
         // Make our sensors object
         Sensors sensors;
