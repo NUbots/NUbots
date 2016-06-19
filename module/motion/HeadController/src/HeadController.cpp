@@ -113,6 +113,7 @@ namespace module {
                 }
 
                 emit(graph("HeadController Final Angles", yaw, -pitch));
+                // log("HeadController Final Angles", yaw, -pitch);
 
 
                 //Create message

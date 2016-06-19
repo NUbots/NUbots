@@ -253,6 +253,7 @@ namespace module {
                         updatePlan = true;
                         lastCentroid = {99999,99999};//reset centroid to impossible value to trigger reset TODO: find a better way
                     }
+                    //If we are searching and we move by a threshold amount
                     //TODO!! - Put search pattern back in IMU space and make replanning work
                     else if(false && lostAndSearching && orientationHasChanged(sensors)){
                         // log("orientation has changed: replanning");
@@ -260,6 +261,7 @@ namespace module {
                         lastCentroid = {99999,99999};//reset centroid to impossible value to trigger reset TODO: find a better way
                     }
 
+                    //If we arent getting up, then we can update the plan if necessary
                     if(updatePlan && !isGettingUp){
                         if(lost){
                             lastPlanOrientation = sensors.orientation;
@@ -293,6 +295,7 @@ namespace module {
                 std::vector<arma::vec2> fixationPoints;
                 std::vector<arma::vec2> fixationSizes;
                 arma::vec centroid = {0,0};
+                auto currentPos = arma::vec2({sensors.servos.at(int(ServoID::HEAD_YAW)).presentPosition,sensors.servos.at(int(ServoID::HEAD_PITCH)).presentPosition});
                 for(uint i = 0; i < fixationObjects.size(); i++){
                     //TODO: fix arma meat errors here
                     //Should be vec2 (yaw,pitch)
@@ -302,6 +305,7 @@ namespace module {
                     centroid += arma::vec(fixationObjects[i].screenAngular) / (fixationObjects.size());
                 }
 
+                //If there are objects to find
                 if(search){
                     fixationPoints = getSearchPoints(fixationObjects, searchType, sensors);
                 }
@@ -309,7 +313,8 @@ namespace module {
                 if(fixationPoints.size() <= 0){
                     log("FOUND NO POINTS TO LOOK AT! - ARE THE SEARCHES PROPERLY CONFIGURED IN HEADBEHAVIOURSOCCER.YAML?");
                 }
-                auto currentPos = arma::vec2({sensors.servos.at(int(ServoID::HEAD_YAW)).presentPosition,sensors.servos.at(int(ServoID::HEAD_PITCH)).presentPosition});
+
+                //Transform to IMU space including compensation for current head pose
                 if(!search){
                     for(auto& p : fixationPoints){
                         p = getIMUSpaceDirection(p, headToIMUSpace);
