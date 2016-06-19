@@ -131,10 +131,6 @@ namespace module {
                 });
 
 
-                on<Trigger<CameraParameters>>().then("Head Behaviour - Load CameraParameters",[this] (const CameraParameters& cam_) {
-                    cam = cam_;
-                });
-
                 on<Trigger<SoccerObjectPriority>, Sync<HeadBehaviourSoccer>>().then("Head Behaviour Soccer - Set priorities", [this] (const SoccerObjectPriority& p) {
                     ballPriority = p.ball;
                     goalPriority = p.goal;
@@ -150,34 +146,39 @@ namespace module {
                     Optional<With<std::vector<Ball>>>,
                     Optional<With<std::vector<Goal>>>,
                     Optional<With<LocBall>>,
+                    With<CameraParameters>,
                     Single,
                     Sync<HeadBehaviourSoccer>
                   >().then("Head Behaviour Main Loop", [this] ( const Sensors& sensors,
                                                         std::shared_ptr<const std::vector<Ball>> vballs,
                                                         std::shared_ptr<const std::vector<Goal>> vgoals,
-                                                        std::shared_ptr<const LocBall> locBall
+                                                        std::shared_ptr<const LocBall> locBall,
+                                                        const CameraParameters& cam_
                                                         ) {
 
                     // std::cout << "Seen: Balls: " <<
                     // ((vballs != nullptr) ? std::to_string(int(vballs->size())) : std::string("null")) << 
                     // "Goals: " <<
                     // ((vgoals != nullptr) ? std::to_string(int(vgoals->size())) : std::string("null")) << std::endl;
-                   
+                    
+                    //TODO: pass camera parameters around instead of this hack storage
+                    cam = cam_;
+
                     if(locBall) {
                         locBallReceived = true;
                         lastLocBall = *locBall;
                     }
                     auto now = NUClear::clock::now();
 
-                    bool search = false;
+                    bool objectsMissing = false;
 
                     //Get the list of objects which are currently visible
-                    std::vector<VisionObject> fixationObjects = getFixationObjects(vballs,vgoals, search);
+                    std::vector<VisionObject> fixationObjects = getFixationObjects(vballs,vgoals, objectsMissing);
 
                     //Determine state transition variables
                     bool lost = fixationObjects.size() <= 0;
                     //Do we need to update our plan?
-                    bool updatePlan = (lastBallPriority != ballPriority) || (lastGoalPriority != goalPriority); //bool(Priorities have changed)
+                    bool updatePlan = !isGettingUp && ((lastBallPriority != ballPriority) || (lastGoalPriority != goalPriority));
                     //Has it been a long time since we have seen anything of interest?
                     bool searchTimedOut = std::chrono::duration_cast<std::chrono::milliseconds>(now - timeLastObjectSeen).count() > search_timeout_ms;
                     //Did the object move in IMUspace?
@@ -215,43 +216,44 @@ namespace module {
                         if(arma::norm(currentCentroid_world - lastCentroid) >= fractional_angular_update_threshold * std::fmax(cam.FOV[0],cam.FOV[1]) / 2.0){
                             objectMoved = true;
                             lastCentroid = currentCentroid_world;
-                            std::cout << "Replanning due to object movement." << std::endl;
                         }
                     }
 
                     //State Transitions
-                    switch(state){
-                        case FIXATION:
-                            if(lost) {
-                                state = WAIT;
-                            } else if(objectMoved) {
-                                updatePlan = true;
-                            }
-                            break;
-                        case WAIT:
-                            if(!lost){
-                                state = FIXATION;
-                                updatePlan = true;
-                            }   
-                            else if(searchTimedOut){
-                                state = SEARCH;
-                                updatePlan = true;
-                            }
-                            break;
-                        case SEARCH:
-                            if(!lost){
-                                state = FIXATION;
-                                updatePlan = true;
-                            }
-                            break;
+                    if(!isGettingUp){
+                        switch(state){
+                            case FIXATION:
+                                if(lost) {
+                                    state = WAIT;
+                                } else if(objectMoved) {
+                                    updatePlan = true;
+                                }
+                                break;
+                            case WAIT:
+                                if(!lost){
+                                    state = FIXATION;
+                                    updatePlan = true;
+                                }   
+                                else if(searchTimedOut){
+                                    state = SEARCH;
+                                    updatePlan = true;
+                                }
+                                break;
+                            case SEARCH:
+                                if(!lost){
+                                    state = FIXATION;
+                                    updatePlan = true;
+                                }
+                                break;
+                        }
                     }
 
                     //If we arent getting up, then we can update the plan if necessary
-                    if(updatePlan && !isGettingUp){
+                    if(updatePlan){
                         if(lost){
                             lastPlanOrientation = sensors.orientation;
                         }
-                        updateHeadPlan(fixationObjects, search, sensors, headToIMUSpace);
+                        updateHeadPlan(fixationObjects, objectsMissing, sensors, headToIMUSpace);
                     }
 
                     //Update searcher
@@ -263,7 +265,7 @@ namespace module {
                         std::unique_ptr<HeadCommand> command = std::make_unique<HeadCommand>();
                         command->yaw = direction[0];
                         command->pitch = direction[1];
-                        command->robotSpace = search;
+                        command->robotSpace = (state == SEARCH);
                         emit(std::move(command));
                     }
 
