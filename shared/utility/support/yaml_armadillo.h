@@ -76,6 +76,37 @@ namespace YAML {
         }
     };
 
+    template<>
+    struct convert<arma::mat> {
+        // TODO: use arma::vec decoding for each row?
+        static Node encode(const arma::mat& rhs) {
+            Node node;
+
+            for (uint i = 0; i < rhs.n_rows; ++i) {
+                Node row;
+                for (uint j = 0; j < rhs.n_cols; ++j) {
+                    row.push_back(rhs(i,j));
+                }
+                node.push_back(row);
+            }
+
+            return node;
+        }
+
+        static bool decode(const Node& node, arma::mat& rhs) {
+
+            rhs.resize(node.size(), node[0].size());
+
+            for (uint i = 0; i < node.size(); ++i) {
+                for (uint j = 0; j < node[i].size(); ++j) {
+                    rhs(i,j) = node[i][j].as<utility::support::Expression>();
+                }
+            }
+
+            return true;
+        }
+    };
+
     template<uint rows, uint cols>
     struct convert<arma::mat::fixed<rows, cols>> {
         // TODO: use arma::vec decoding for each row?

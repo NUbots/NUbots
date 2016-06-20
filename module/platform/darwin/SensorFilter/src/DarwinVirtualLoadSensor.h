@@ -37,11 +37,11 @@ namespace module {
                     double certaintyThreshold;
                     double uncertaintyThreshold;
 
-                    arma::mat hiddenLayer;
+                    arma::mat hiddenWeights;
                     arma::vec hiddenBias;
-                    arma::vec outputWeights;
-                    double outputBias;
-                    
+                    arma::mat outputWeights;
+                    arma::vec outputBias;
+
                 public:
                     double state = 0.5;
                     bool outputState = true;
@@ -49,14 +49,13 @@ namespace module {
 
                     DarwinVirtualLoadSensor();
 
-                    DarwinVirtualLoadSensor(arma::vec hiddenLayer,
+                    DarwinVirtualLoadSensor(arma::mat hiddenWeights,
                                             arma::vec hiddenBias,
-                                            arma::vec outputWeights,
-                                            double outputBias,
-                                            double interc,
-                                            double nFactor,
-                                            double certaintyThresh,
-                                            double uncertaintyThresh);
+                                            arma::mat outputWeights,
+                                            arma::vec outputBias,
+                                            double noiseFactor,
+                                            double certaintyThreshold,
+                                            double uncertaintyThreshold);
 
                     bool updateFoot(const arma::vec& legMotors);
             };
