@@ -224,7 +224,6 @@ namespace support {
                         Transform2D relativeBallPose = world.robotPose.worldToLocal(world.ball.position);
 
                         world.ball.position.rows(0,1) += world.robotPose.rotation() * arma::normalise(lastKickCommand.direction.rows(0, 1));
-                        log("Kicking!");
 
                     }
                     break;

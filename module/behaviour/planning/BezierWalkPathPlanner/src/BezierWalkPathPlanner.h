@@ -43,6 +43,11 @@ namespace module {
                  */
                 class BezierWalkPathPlanner : public NUClear::Reactor {
                 private:
+
+                    /// @brief Subsumption ID key to access motors
+                    const size_t subsumptionId;
+
+                    //Thresholds
                     float turnSpeed;
                     float forwardSpeed;
                     float a;
@@ -51,11 +56,12 @@ namespace module {
                     //-----------non-config variables (not defined in WalkPathPlanner.yaml)-----------
 
                     //info for the current walk
-                    arma::vec2 currentTargetPosition;
-                    arma::vec2 currentTargetHeading;
-                    message::behaviour::MotionCommand::Type planType;
-                    message::behaviour::KickPlan targetHeading;
-                    arma::vec2 targetPosition = {0, 0}; 
+                    message::behaviour::MotionCommand latestCommand;
+                    // arma::vec2 currentTargetPosition;
+                    // arma::vec2 currentTargetHeading;
+                    // message::behaviour::MotionCommand::Type planType;
+                    // message::behaviour::KickPlan targetHeading;
+                    // arma::vec2 targetPosition = {0, 0}; 
 
                 public:
                     explicit BezierWalkPathPlanner(std::unique_ptr<NUClear::Environment> environment);

@@ -35,6 +35,7 @@ NUCLEAR_ROLE(
     behaviour::planning::KickPlanner
     behaviour::planning::BezierWalkPathPlanner 
     behaviour::strategy::SoccerStrategy
+    behaviour::skills::DirectWalkController
 
     #Motion
     motion::ScriptEngine
