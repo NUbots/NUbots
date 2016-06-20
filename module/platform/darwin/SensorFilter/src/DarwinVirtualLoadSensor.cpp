@@ -27,22 +27,30 @@ namespace module {
 
             }
 
-            DarwinVirtualLoadSensor::DarwinVirtualLoadSensor(arma::vec featureWeights,
+            DarwinVirtualLoadSensor::DarwinVirtualLoadSensor(arma::vec hiddenLayer,
+                                    arma::vec hiddenBias,
+                                    arma::vec outputWeights,
+                                    double outputBias,
                                     double intercept,
                                     double noiseFactor,
                                     double certaintyThreshold,
                                     double uncertaintyThreshold)
-                    : currentNoise(2.0 * noiseFactor)
+                    : hiddenLayer(hiddenLayer)
+                    , hiddenBias(hiddenBias)
+                    , outputWeights(outputWeights)
+                    , outputBias(outputBias) 
+                    , currentNoise(2.0 * noiseFactor)
                     , noiseFactor(noiseFactor)
                     , intercept(intercept)
                     , certaintyThreshold(certaintyThreshold)
-                    , uncertaintyThreshold(uncertaintyThreshold)
-                    , featureWeights(featureWeights) {
+                    , uncertaintyThreshold(uncertaintyThreshold) {
             }
 
             bool DarwinVirtualLoadSensor::updateFoot(const arma::vec& features) {
 
-                double linResult = 1.0 / (std::exp(-(arma::dot(features, featureWeights) + intercept)) + 1.0);
+                //double linResult = 1.0 / (std::exp(-(arma::dot(features, featureWeights) + intercept)) + 1.0);
+
+                double linResult = std::max(double((hiddenLayer * features + hiddenBias).t() * outputWeights + outputBias), 0.);
 
                 //do the bayes update (1D kalman filter thing)
                 double k = currentNoise / (currentNoise + noiseFactor);

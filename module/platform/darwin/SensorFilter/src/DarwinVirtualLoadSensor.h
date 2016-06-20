@@ -36,7 +36,12 @@ namespace module {
                     double intercept;
                     double certaintyThreshold;
                     double uncertaintyThreshold;
-                    arma::vec featureWeights;
+
+                    arma::mat hiddenLayer;
+                    arma::vec hiddenBias;
+                    arma::vec outputWeights;
+                    double outputBias;
+                    
                 public:
                     double state = 0.5;
                     bool outputState = true;
@@ -44,7 +49,10 @@ namespace module {
 
                     DarwinVirtualLoadSensor();
 
-                    DarwinVirtualLoadSensor(arma::vec fWeights,
+                    DarwinVirtualLoadSensor(arma::vec hiddenLayer,
+                                            arma::vec hiddenBias,
+                                            arma::vec outputWeights,
+                                            double outputBias,
                                             double interc,
                                             double nFactor,
                                             double certaintyThresh,
