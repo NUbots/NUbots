@@ -46,6 +46,7 @@ namespace support {
     using message::support::FieldDescription;
     using message::motion::WalkCommand;
     using message::motion::KickCommand;
+    using message::motion::KickScriptCommand;
     using message::motion::KickFinished;
     using message::motion::KickPlannerConfig;
     using message::platform::darwin::DarwinSensors;
@@ -149,6 +150,11 @@ namespace support {
             kickQueue.push(k);
             kicking = true;
         });
+        
+        on<Trigger<KickScriptCommand>>().then("Simulator Queue KickCommand",[this](const KickScriptCommand& k){
+            kickQueue.push(KickCommand({1,0,0},k.direction));
+            kicking = true;
+        });
 
         on<Trigger<KickFinished>>().then("Simulator Kick Finished",[this] {
             kicking = false;
@@ -208,6 +214,7 @@ namespace support {
                     break;
 
                 case MotionType::MOTION:
+                    // log("check kick:", !kickQueue.empty(), !kicking, lastKicking);
                     if(!kickQueue.empty() && !kicking && lastKicking){
                         //Get last queue
                         KickCommand lastKickCommand = kickQueue.back();
@@ -217,6 +224,7 @@ namespace support {
                         Transform2D relativeBallPose = world.robotPose.worldToLocal(world.ball.position);
 
                         world.ball.position.rows(0,1) += world.robotPose.rotation() * arma::normalise(lastKickCommand.direction.rows(0, 1));
+                        log("Kicking!");
 
                     }
                     break;

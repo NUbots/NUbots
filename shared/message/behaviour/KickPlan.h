@@ -24,8 +24,8 @@ namespace message {
 namespace behaviour {
 
     enum class KickType {
-        IK_KICK,
-        SCRIPTED
+        SCRIPTED,
+        IK_KICK
     };
 
 	struct KickPlan {

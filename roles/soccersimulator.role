@@ -9,7 +9,6 @@ NUCLEAR_ROLE(
     support::configuration::NetworkConfiguration
     support::NUbugger
     support::configuration::SoccerConfig
-    support::GrimReaper
 
     #input
     input::GameController
@@ -25,18 +24,16 @@ NUCLEAR_ROLE(
     #Localisation
     localisation::MMKFRobotLocalisation
     localisation::KFBallLocalisation
-    localisation::SideChecker
-
+    
     #Behaviour
     behaviour::Controller
     behaviour::skills::Stand
     behaviour::skills::FallingRelax
     behaviour::skills::HeadBehaviourSoccer
     behaviour::skills::Getup
+    behaviour::skills::KickScript
     behaviour::planning::KickPlanner
-    behaviour::planning::OMPLPathPlanner  # Creates WalkPaths.
-    behaviour::skills::WalkPathFollower # Follows WalkPaths.
-    behaviour::skills::DirectWalkController
+    behaviour::planning::BezierWalkPathPlanner 
     behaviour::strategy::SoccerStrategy
 
     #Motion
