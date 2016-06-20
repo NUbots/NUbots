@@ -48,20 +48,16 @@ namespace module {
                 UnitQuaternion rotation(state.rows(QW, QZ));
 
                 // Add our global velocity to our position (rotate our local velocity)
-                newState.rows(PX, PZ) += state.rows(VX, VZ)*deltaT;
+                newState.rows(PX, PZ) += state.rows(VX, VZ) * deltaT;
 
-                // Robot rotational velocity delta
-                const double omega = arma::norm(state.rows(WX, WZ)) + 0.00000000001;
-                //Negate to compensate for some later mistake.
-                //deltaT has been negative for a while and has masked an incorrect hack below
-                const double theta = -omega*deltaT*0.5;
-                const double sinTheta = sin(theta);
-                const double cosTheta = cos(theta);
-                arma::vec vq({cosTheta,state(WX)*sinTheta/omega,state(WY)*sinTheta/omega,state(WZ)*sinTheta/omega});
+                // Apply our rotational velocity to our orientation
+                double t_2 = deltaT * 0.5;
+                UnitQuaternion qGyro;
+                qGyro.imaginary() = state.rows(WX, WZ) * t_2;
+                qGyro.real() = 1.0 - 0.5 * arma::sum(arma::square(qGyro.imaginary()));
 
-                // Update our rotation
-                newState.rows(QW, QZ) = rotation * UnitQuaternion(vq);
-                
+                newState.rows(QW, QZ) = qGyro * rotation;
+
                 //add velocity decay
                 newState.rows(VX, VZ) = newState.rows(VX, VZ) % timeUpdateVelocityDecay;
 

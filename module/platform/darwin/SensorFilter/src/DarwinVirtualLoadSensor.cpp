@@ -47,15 +47,15 @@ namespace module {
             bool DarwinVirtualLoadSensor::updateFoot(const arma::vec& features) {
 
                 double linResult =
-                std::max(
                     (
                         arma::vec(
                             arma::clamp(
                                 hiddenWeights * features + hiddenBias, 0.0, std::numeric_limits<double>::max()
                             )
                         ).t() * outputWeights + outputBias
-                    )[0], 0.0
-                );
+                    )[0];
+
+                linResult = std::tanh(linResult * 0.5) * 0.5 + 0.5;
 
                 //do the bayes update (1D kalman filter thing)
                 double k = currentNoise / (currentNoise + noiseFactor);

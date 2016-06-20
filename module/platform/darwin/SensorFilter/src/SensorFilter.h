@@ -98,12 +98,12 @@ namespace module {
                 // Our sensor for foot down
                 DarwinVirtualLoadSensor leftFootDown,rightFootDown;
                 // Our torso rotation from foot when it landed
-                std::array<utility::math::matrix::Rotation3D, 2> footlanding_Rtf;
+                std::array<utility::math::matrix::Rotation3D, 2> footlanding_Rft;
                 // Our torso position from foot in foot coordinates when it landed
                 std::array<arma::vec3, 2> footlanding_rTFf;
 
                 // The worlds rotation from our torso
-                std::array<utility::math::matrix::Rotation3D, 2> footlanding_Rwt;
+                std::array<utility::math::matrix::Rotation3D, 2> footlanding_Rtw;
                 // The torsos position from the origin in world
                 std::array<arma::vec3, 2> footlanding_rTWw;
             };
