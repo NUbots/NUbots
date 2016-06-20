@@ -115,21 +115,29 @@ namespace module {
 
                     // obtain VP, VS, A0, B0, A3, B3
                     float VP = 0.15; //selfs.velocity[0]; //velocity at robot position
-                    float VS = 0.15; //velocity at ball position, chosen as 0.1
+                    float VS = 0.15; //velocity at ball position, chosen as 0.15
                     float A0 = selfs.front().position[1];
+                    log("Self front position 1 = ", A0);
+                    
                     float B0 = selfs.front().position[0];
+                    log("Self front position 0 = ", B0);
+
                     float A3 = ball.position[1];
+                    log("Ball position 1 = ", A3);
+
                     float B3 = ball.position[0];
+                    log("Ball position 0 = ", B3);
+
                     float theta1 = 0.5; // selfs.heading; //angle orientation of robot in space
                     float theta2 = std::atan2(kick_target[1], kick_target[0]); //angle wanting to stike ball, angle of ball to goal
                     // Calculate RP, RS
                     float RP = VP*VP / 4; //Minimum radius of curvature required at point P (robot point), 4 = ar is maximum radial acceleration
-                    float RS = RS*VP / 4; //Mimimum radius of curvature required at point S (Ball point)
+                    float RS = VS*VS / 4; //Mimimum radius of curvature required at point S (Ball point)
 
                     // initialize d1,d2,ErMax
-                    float d1=1; //Inital value, can be changed
-                    float d2=1; //Inital value, can be changed
-                    float ErMax = 2; //Assigned Value, can be changed
+                    float d1=0.5; //Inital value, can be changed
+                    float d2=0.5; //Inital value, can be changed
+                    float ErMax = 0.9; //Assigned Value, can be changed
 
                     // calculate rhoP, rhoS
                     float h0 = B3-B0;
@@ -139,6 +147,8 @@ namespace module {
                     float g1 = 2*sin(theta2 - theta1);
                     float g2 = 2*sin(theta2 - theta1);
 
+
+                    // TO DO Fix algorithm
                     float rhoP = (3*d1*d1)/(h1+d2*g1);
                     float rhoS = (3*d2*d2)/(h2+d1*g2);
                     float Er1 = RP - rhoP;
@@ -153,12 +163,26 @@ namespace module {
                         Er1 = RP - rhoP;
                         Er2 = RS - rhoS;
                         error = std::max(std::abs(Er1), std::abs(Er2));
+                        log("Error = ",error);
+                        if (error > 10) {
+                            break;
+                        }
                     }
+
+
+                    d1 = std::min(float(1.0),std::max(d1,float(0.1)));
+
+                    d2 = std::min(float(1.0),std::max(d2,float(0.1)));
+
+
+                    log("d1 = ",d1,"\n d2 = ",d2);
+
                     float A1 = A0 +d1 * std::cos(theta1);
                     float B1 = B0 +d1 * std::sin(theta1);
                     float A2 = A3 +d2 * std::cos(M_PI +theta2);
                     float B2 = B3 +d2 *std::sin(M_PI + theta2);
 
+                    log("A1 = ", A1, "\n B1 = ", B1, "\n A2 = ", A2 , "\n B2 = ", B2);
 
                     //make 2 11 long arrays, to descretize the bezier and bezier derivatives
                     // float bezier_X_point;
@@ -183,6 +207,8 @@ namespace module {
 
                     arma::vec2 next_robot_position = arma::mean(bez_matrix);
 
+                    log("Robot next position = ", next_robot_position);
+
                     /* More complicated walk path follower, useful with more accurate locomotion
                     //Calculate radius of curvature at each point (using 5)
                     float radius_of_curvature[21];
@@ -206,8 +232,12 @@ namespace module {
 
                     float angle = std::atan2(ball.position[1], ball.position[0]);
 
+                    log("Angle 1 = ", angle);
+
                     //float angle = std::atan2(bezier_X_point,bezier_Y_point);
                     angle = std::min(turnSpeed, std::max(angle, -turnSpeed));
+                    log("Angle 2 = ", angle);
+
                     // emit(graph("angle", angle));
                     // emit(graph("ball position", ball.position));
                     // emit(graph("robot position", selfs.front().position));
@@ -219,6 +249,7 @@ namespace module {
                     float scale = 2.0 / (1.0 + std::exp(-a * distanceToPoint + b)) - 1.0;
                     float scale2 = angle / M_PI;
                     float finalForwardSpeed = forwardSpeed * scale * (1.0 - scale2);
+                    log("Final Forward Speed = ", finalForwardSpeed);
 
                     // emit(graph("forwardSpeed1", forwardSpeed));
                     // emit(graph("scale", scale));
