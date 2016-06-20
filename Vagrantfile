@@ -43,13 +43,13 @@ Vagrant.configure("2") do |config|
     shell.inline = "apt-get install -y puppet;
                     mkdir -p /etc/puppet/modules;
                     puppet module list | grep -q 'puppetlabs-apt' \
-                         || puppet module install puppetlabs-apt;
+                         || puppet module install puppetlabs-apt --module_repository https://forge.puppet.com;
                     puppet module list | grep -q 'puppetlabs-vcsrepo' \
-                         || puppet module install puppetlabs-vcsrepo;
+                         || puppet module install puppetlabs-vcsrepo --module_repository https://forge.puppet.com;
                     puppet module list | grep -q 'camptocamp-archive' \
-                         || puppet module install camptocamp-archive;
+                         || puppet module install camptocamp-archive --module_repository https://forge.puppet.com;
                     puppet module list | grep -q 'maestrodev-wget' \
-                         || puppet module install maestrodev-wget;"
+                         || puppet module install maestrodev-wget --module_repository https://forge.puppet.com;"
   end
 
   # Enable provisioning with Puppet stand alone.  Puppet manifests
