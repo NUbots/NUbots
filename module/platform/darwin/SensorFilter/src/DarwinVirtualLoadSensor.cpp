@@ -24,38 +24,52 @@ namespace module {
     namespace platform {
         namespace darwin {
             DarwinVirtualLoadSensor::DarwinVirtualLoadSensor() {
-
             }
 
-            DarwinVirtualLoadSensor::DarwinVirtualLoadSensor(arma::vec featureWeights,
-                                    double intercept,
+            DarwinVirtualLoadSensor::DarwinVirtualLoadSensor(arma::mat hiddenWeights,
+                                    arma::vec hiddenBias,
+                                    arma::mat outputWeights,
+                                    arma::vec outputBias,
                                     double noiseFactor,
                                     double certaintyThreshold,
                                     double uncertaintyThreshold)
-                    : currentNoise(2.0 * noiseFactor)
+                    : hiddenWeights(hiddenWeights)
+                    , hiddenBias(hiddenBias)
+                    , outputWeights(outputWeights)
+                    , outputBias(outputBias)
+                    , currentNoise(2.0 * noiseFactor)
                     , noiseFactor(noiseFactor)
                     , intercept(intercept)
                     , certaintyThreshold(certaintyThreshold)
-                    , uncertaintyThreshold(uncertaintyThreshold)
-                    , featureWeights(featureWeights) {
+                    , uncertaintyThreshold(uncertaintyThreshold) {
             }
 
             bool DarwinVirtualLoadSensor::updateFoot(const arma::vec& features) {
 
-                double linResult = 1.0 / (std::exp(-(arma::dot(features, featureWeights) + intercept)) + 1.0);
+                double linResult =
+                    (
+                        arma::vec(
+                            arma::clamp(
+                                hiddenWeights * features + hiddenBias, 0.0, std::numeric_limits<double>::max()
+                            )
+                        ).t() * outputWeights + outputBias
+                    )[0];
+
+                linResult = std::tanh(linResult * 0.5) * 0.5 + 0.5;
 
                 //do the bayes update (1D kalman filter thing)
                 double k = currentNoise / (currentNoise + noiseFactor);
-                state += k*(linResult-state);
+                state += k * (linResult - state);
                 currentNoise *= 1.0 - k;
+                currentNoise += 1.0;
 
                 if (state >= certaintyThreshold) {
-
                    outputState = true;
-                } else if (state < uncertaintyThreshold) {
-
+                }
+                else if (state < uncertaintyThreshold) {
                     outputState = false;
                 }
+
                 return outputState;
             }
         }

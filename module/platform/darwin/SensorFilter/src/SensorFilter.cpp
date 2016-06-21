@@ -26,6 +26,7 @@
 
 #include "utility/support/yaml_armadillo.h"
 #include "utility/math/matrix/Rotation3D.h"
+#include "utility/math/matrix/Rotation2D.h"
 #include "utility/math/geometry/UnitQuaternion.h"
 #include "utility/nubugger/NUhelpers.h"
 #include "utility/motion/ForwardKinematics.h"
@@ -55,6 +56,7 @@ namespace module {
             using utility::motion::kinematics::calculateRobotToIMU;
             using utility::math::matrix::Transform3D;
             using utility::math::matrix::Rotation3D;
+            using utility::math::matrix::Rotation2D;
             using utility::math::geometry::UnitQuaternion;
 
             std::string makeErrorString(const std::string& src, uint errorCode) {
@@ -103,19 +105,24 @@ namespace module {
 
                     // Foot load sensor config
                     leftFootDown = DarwinVirtualLoadSensor(
-                                        config["foot_load_sensor"]["feature_weights"].as<arma::vec>(),
-                                        config["foot_load_sensor"]["intercept"].as<double>(),
-                                        config["foot_load_sensor"]["noise_factor"].as<double>(),
-                                        config["foot_load_sensor"]["certainty_threashold"].as<double>(),
-                                        config["foot_load_sensor"]["uncertainty_threashold"].as<double>()
-                                        );
+                        config["foot_load_sensor"]["hidden_layer"]["weights"].as<arma::mat>()
+                      , config["foot_load_sensor"]["hidden_layer"]["bias"].as<arma::vec>()
+                      , config["foot_load_sensor"]["output_layer"]["weights"].as<arma::mat>()
+                      , config["foot_load_sensor"]["output_layer"]["bias"].as<arma::vec>()
+                      , config["foot_load_sensor"]["noise_factor"].as<double>()
+                      , config["foot_load_sensor"]["certainty_threshold"].as<double>()
+                      , config["foot_load_sensor"]["uncertainty_threshold"].as<double>()
+                    );
+
                     rightFootDown = DarwinVirtualLoadSensor(
-                                        config["foot_load_sensor"]["feature_weights"].as<arma::vec>(),
-                                        config["foot_load_sensor"]["intercept"].as<double>(),
-                                        config["foot_load_sensor"]["noise_factor"].as<double>(),
-                                        config["foot_load_sensor"]["certainty_threashold"].as<double>(),
-                                        config["foot_load_sensor"]["uncertainty_threashold"].as<double>()
-                                        );
+                        config["foot_load_sensor"]["hidden_layer"]["weights"].as<arma::mat>()
+                      , config["foot_load_sensor"]["hidden_layer"]["bias"].as<arma::vec>()
+                      , config["foot_load_sensor"]["output_layer"]["weights"].as<arma::mat>()
+                      , config["foot_load_sensor"]["output_layer"]["bias"].as<arma::vec>()
+                      , config["foot_load_sensor"]["noise_factor"].as<double>()
+                      , config["foot_load_sensor"]["certainty_threshold"].as<double>()
+                      , config["foot_load_sensor"]["uncertainty_threshold"].as<double>()
+                    );
 
                     // Motion filter config
                     // Update our velocity timestep dekay
@@ -126,7 +133,7 @@ namespace module {
                     this->config.motionFilter.noise.measurement.accelerometer    = arma::diagmat(config["motion_filter"]["noise"]["measurement"]["accelerometer"].as<arma::vec3>());
                     this->config.motionFilter.noise.measurement.gyroscope        = arma::diagmat(config["motion_filter"]["noise"]["measurement"]["gyroscope"].as<arma::vec3>());
                     this->config.motionFilter.noise.measurement.footUpWithZ      = arma::diagmat(config["motion_filter"]["noise"]["measurement"]["foot_up_with_z"].as<arma::vec4>());
-                    this->config.motionFilter.noise.measurement.flatFootOdometry = arma::diagmat(config["motion_filter"]["noise"]["measurement"]["flat_foot_odometry"].as<arma::vec2>());
+                    this->config.motionFilter.noise.measurement.flatFootOdometry = arma::diagmat(config["motion_filter"]["noise"]["measurement"]["flat_foot_odometry"].as<arma::vec4>());
 
                     // Update our process noises
                     this->config.motionFilter.noise.process.position           = config["motion_filter"]["noise"]["process"]["position"].as<arma::vec3>();
@@ -339,7 +346,7 @@ namespace module {
                         sensors->gyroscope = previousSensors->gyroscope;
                     }
                     else {
-                        sensors->gyroscope = {-input.gyroscope.x, -input.gyroscope.y, input.gyroscope.z};
+                        sensors->gyroscope = {input.gyroscope.x, input.gyroscope.y, -input.gyroscope.z};
                     }
 
                     // Put in our FSR information
@@ -380,28 +387,28 @@ namespace module {
                     if(previousSensors) {
                         // Use our virtual load sensor class to work out if our foot is down
                         arma::vec leftFootFeatureVec = {
-                              sensors->servos[size_t(ServoID::L_HIP_PITCH)].load
-                            , sensors->servos[size_t(ServoID::L_HIP_PITCH)].presentVelocity
+                              sensors->servos[size_t(ServoID::L_HIP_PITCH)].presentVelocity
                             , sensors->servos[size_t(ServoID::L_HIP_PITCH)].presentVelocity - previousSensors->servos[size_t(ServoID::L_HIP_PITCH)].presentVelocity
-                            , sensors->servos[size_t(ServoID::L_KNEE)].load
+                            , sensors->servos[size_t(ServoID::L_HIP_PITCH)].load
                             , sensors->servos[size_t(ServoID::L_KNEE)].presentVelocity
                             , sensors->servos[size_t(ServoID::L_KNEE)].presentVelocity - previousSensors->servos[size_t(ServoID::L_KNEE)].presentVelocity
-                            , sensors->servos[size_t(ServoID::L_ANKLE_PITCH)].load
+                            , sensors->servos[size_t(ServoID::L_KNEE)].load
                             , sensors->servos[size_t(ServoID::L_ANKLE_PITCH)].presentVelocity
                             , sensors->servos[size_t(ServoID::L_ANKLE_PITCH)].presentVelocity - previousSensors->servos[size_t(ServoID::L_ANKLE_PITCH)].presentVelocity
+                            , sensors->servos[size_t(ServoID::L_ANKLE_PITCH)].load
                         };
                         sensors->leftFootDown = leftFootDown.updateFoot(leftFootFeatureVec);
 
                         arma::vec rightFootFeatureVec = {
-                              sensors->servos[size_t(ServoID::R_HIP_PITCH)].load
-                            , sensors->servos[size_t(ServoID::R_HIP_PITCH)].presentVelocity
+                              sensors->servos[size_t(ServoID::R_HIP_PITCH)].presentVelocity
                             , sensors->servos[size_t(ServoID::R_HIP_PITCH)].presentVelocity - previousSensors->servos[size_t(ServoID::R_HIP_PITCH)].presentVelocity
-                            , sensors->servos[size_t(ServoID::R_KNEE)].load
+                            , sensors->servos[size_t(ServoID::R_HIP_PITCH)].load
                             , sensors->servos[size_t(ServoID::R_KNEE)].presentVelocity
                             , sensors->servos[size_t(ServoID::R_KNEE)].presentVelocity - previousSensors->servos[size_t(ServoID::R_KNEE)].presentVelocity
-                            , sensors->servos[size_t(ServoID::R_ANKLE_PITCH)].load
+                            , sensors->servos[size_t(ServoID::R_KNEE)].load
                             , sensors->servos[size_t(ServoID::R_ANKLE_PITCH)].presentVelocity
                             , sensors->servos[size_t(ServoID::R_ANKLE_PITCH)].presentVelocity - previousSensors->servos[size_t(ServoID::R_ANKLE_PITCH)].presentVelocity
+                            , sensors->servos[size_t(ServoID::R_ANKLE_PITCH)].load
                         };
                         sensors->rightFootDown = rightFootDown.updateFoot(rightFootFeatureVec);
                     }
@@ -441,23 +448,23 @@ namespace module {
                             ? side == ServoSide::LEFT
                                 ? previousSensors->leftFootDown
                                 : previousSensors->rightFootDown
-                            : 0.0;
+                            : false;
 
                         if (footDown) {
 
                             // Get the foot in torso space and the torso in foot space
-                            Transform3D Hft = sensors->forwardKinematics[servoid];
-                            Transform3D Htf = Hft.i();
-
-                            Rotation3D Rft = Hft.rotation();
-                            arma::vec3 rFTt = Hft.translation();
+                            Transform3D Htf = sensors->forwardKinematics[servoid];
+                            Transform3D Hft = Htf.i();
 
                             Rotation3D Rtf = Htf.rotation();
-                            arma::vec3 rTFf = Htf.translation();
+                            arma::vec3 rFTt = Htf.translation();
+
+                            Rotation3D Rft = Hft.rotation();
+                            arma::vec3 rTFf = Hft.translation();
 
                             // Construct our measurement vector from the up vector in torso space and the z height from the foot
                             arma::vec4 footUpWithZ;
-                            footUpWithZ.rows(0, 2) = Rft.col(2);
+                            footUpWithZ.rows(0, 2) = Rtf.col(2);
 
                             // This is the z height of the torso above the ground
                             footUpWithZ[3] = rTFf[2];
@@ -466,24 +473,31 @@ namespace module {
                             motionFilter.measurementUpdate(footUpWithZ, config.motionFilter.noise.measurement.footUpWithZ, MotionModel::MeasurementType::FOOT_UP_WITH_Z());
 
                             // If we don't have previous sensors, or the previous sensors had the foot up
-                            if (prevFootDown) {
+                            if (!prevFootDown) {
                                 // Store our torso from foot at foot landing
-                                footlanding_Rtf[side]  = Rtf;
-                                footlanding_rTFf[side] = rTFf;
+                                footlanding_thetaft[side]  = Rft.yaw();
+                                footlanding_rTFf[side] = rTFf.rows(0, 1);
 
                                 // Store our torso from world at foot landing
-                                footlanding_Rwt[side]  = Rotation3D(UnitQuaternion(motionFilter.get().rows(MotionModel::QW, MotionModel::QZ)));
-                                footlanding_rTWw[side] = motionFilter.get().rows(MotionModel::PX, MotionModel::PZ);
+                                UnitQuaternion q(motionFilter.get().rows(MotionModel::QW, MotionModel::QZ));
+
+                                footlanding_thetatw[side]  = Rotation3D(q).yaw();
+                                footlanding_rTWw[side] = motionFilter.get().rows(MotionModel::PX, MotionModel::PY);
                             }
                             else {
-                                // Get our foot in world space
-                                Rotation3D Rwf = footlanding_Rwt[side].i() * Rtf.i();
 
-                                // Get our x/y delta position
-                                arma::vec3 delta = Rwf * arma::vec3(rTFf - footlanding_rTFf[side]);
+                                // Do our delta based odometry since we have an origin for the foot
+                                arma::vec4 measurement;
 
-                                // Do our measurement update and pass in the original state x,y we measured when the foot landed.
-                                motionFilter.measurementUpdate(delta.rows(0,1), config.motionFilter.noise.measurement.flatFootOdometry, footlanding_rTWw[side].rows(0,1), MotionModel::MeasurementType::FLAT_FOOT_ODOMETRY());
+                                double thetaft = Rft.yaw();
+
+                                double thetawf = -footlanding_thetatw[side] - thetaft;
+                                measurement.rows(0, 1) = Rotation2D::createRotation(thetawf) * (rTFf.rows(0, 1) - footlanding_rTFf[side]) + footlanding_rTWw[side];
+
+                                double meas_thetatw = (-thetaft + footlanding_thetaft[side]) + footlanding_thetatw[side];
+                                measurement.rows(2, 3) = arma::vec({std::cos(meas_thetatw), std::sin(meas_thetatw)});
+
+                                motionFilter.measurementUpdate(measurement, config.motionFilter.noise.measurement.flatFootOdometry, MotionModel::MeasurementType::FLAT_FOOT_ODOMETRY());
                             }
                         }
                     }

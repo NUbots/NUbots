@@ -6,45 +6,53 @@ buttons:
   debounce_threshold : 7
 
 foot_load_sensor:
-  noise_factor: 1.0
-  certainty_threashold: 0.8
-  uncertainty_threashold: 0.8
-  intercept: 2.78621079426
-  feature_weights:
-   -  0.99570068  # HIP_PITCH load
-   -  0.17804938  # HIP_PITCH velocity
-   -  1.30788586  # HIP_PITCH acceleration
-   -  2.50792701  # KNEE load
-   - -0.21298553  # KNEE velocity
-   - -2.14019866  # KNEE acceleration
-   -  4.73891314  # ANKLE_PITCH load
-   -  0.04254997  # ANKLE_PITCH velocity
-   -  0.84463546  # ANKLE_PITCH acceleration
+  noise_factor: 1e-4
+  certainty_threshold: 0.5
+  uncertainty_threshold: 0.5
+
+  hidden_layer:
+    bias: [-1.4007659354518338, -0.29266754513848436, 1.2301010911917893, -1.1635026982972505, -1.0353893575196704]
+    weights:
+     - [0.2677716142183551, -0.6962840278756623, -1.0383666078247622, 0.41650339820688176, -0.26934750900542687, -0.6728724977139795, -0.8492904810168134, 0.45999465610210016, 0.9675055766288193]
+     - [1.6679395415862526, -0.10469683891625887, -5.749888775997755, -0.6391874095224066, 0.5467580054928894, 4.093886201268756, 0.016008907412207785, -0.6811860867726477, -2.9451278507746377]
+     - [1.1185315163018155, -0.3467398113467567, -2.778109844480142, 1.2969547905633203, -1.1623137657522407, -1.5563446761335313, 0.9892206629201332, -0.6134187790950223, -1.527047533898533]
+     - [1.4783945370436344, -0.7492646051791633, -3.1807743480992703, -0.9395623460589685, 1.372395837478987, 0.7838481314860388, 0.041767829145559036, -0.014592994410131826, -3.1879495688114763]
+     - [0.2499106095205081, 0.5608470771514561, -2.56820383334912, -1.035232601939994, 0.16763994154502115, 4.295920125819075, -0.5304907057730336, -0.15789826492198733, -1.419236523118261]
+
+  output_layer:
+    bias: [ 1.57524764]
+    weights:
+     - [-3.7321919307907523]
+     - [ 4.334559561546599]
+     - [-3.8746540427931615]
+     - [-2.6540767475071401]
+     - [-4.3881536199936138]
+
 
 motion_filter:
   update:
-    velocity_decay: [.8, .8, .8]
+    velocity_decay: [0.95, 0.95, 0.95]
   noise:
     measurement:
-      accelerometer: [1e-4, 1e-4, 1e-4]
-      gyroscope: [1e-8, 1e-8, 1e-8]
-      foot_up_with_z: [1e-6, 1e-6, 1e-6, 1e-6]
-      flat_foot_odometry: [1e-6, 1e-6]
+      accelerometer: [1e-4, 1e-4, 1e-4] # x, y, z
+      gyroscope: [1e-8, 1e-8, 1e-8] # x, y, z
+      foot_up_with_z: [1e-6, 1e-6, 1e-6, 1e-10] # x, y, z, zpos
+      flat_foot_odometry: [1e-6, 1e-6, 1e-4, 1e-4] # x, y, yawx, yawy
     process:
       position: [1e-8, 1e-8, 1e-8]
       velocity: [1e-3, 1e-3, 1e-3]
-      rotational_velocity: [1e-4, 1e-4, 1e-4]
+      rotational_velocity: [1e-8, 1e-8, 1e-8]
       rotation: [1e-10, 1e-10, 1e-10, 1e-10]
 
   initial:
     mean:
       position: [0, 0, 0.22]          # A little above the ground
-      velocity: [0, 0, 0]            # Not moving
-      rotational_velocity: [0, 0, 0] # Not spinning
+      velocity: [0, 0, 0]             # Not moving
+      rotational_velocity: [0, 0, 0]  # Not spinning
       rotation: [1, 0, 0, 0]          # Upright
     covariance:
-      position: [1e-3, 1e-3, 1]    # We are pretty sure of our x,y when we start
-      velocity: [1e-3, 1e-3, 1e-3]   # We are unsure of our velocity
-      rotation: [.1, .1, .1, .1]          # Not very sure of rotation
-      rotational_velocity: [1, 1, 1] # Fairly unsure about our rotational velocity
+      position: [1e-3, 1e-3, 1]       # We are pretty sure of our x,y when we start
+      velocity: [1e-3, 1e-3, 1e-3]    # We are unsure of our velocity
+      rotation: [0.1, 0.1, 0.1, 0.1]  # Not very sure of rotation
+      rotational_velocity: [1, 1, 1]  # Fairly unsure about our rotational velocity
 

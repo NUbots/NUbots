@@ -12,7 +12,7 @@ NUCLEAR_ROLE(
     #support::GrimReaper
 
     #input
-    input::GameController
+    #input::GameController
 
     #Simulation
     platform::darwin::HardwareSimulator
@@ -25,7 +25,7 @@ NUCLEAR_ROLE(
     #Localisation
     localisation::MMKFRobotLocalisation
     localisation::KFBallLocalisation
-    localisation::SideChecker
+    #localisation::SideChecker
 
     #Behaviour
     behaviour::Controller
@@ -34,7 +34,7 @@ NUCLEAR_ROLE(
     behaviour::skills::HeadBehaviourSoccer
     behaviour::skills::Getup
     behaviour::planning::KickPlanner
-    behaviour::planning::OMPLPathPlanner  # Creates WalkPaths.
+    #behaviour::planning::OMPLPathPlanner  # Creates WalkPaths.
     behaviour::skills::WalkPathFollower # Follows WalkPaths.
     behaviour::skills::DirectWalkController
     behaviour::strategy::SoccerStrategy

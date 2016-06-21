@@ -21,12 +21,14 @@
 #include "MotionModel.h"
 
 #include "utility/math/geometry/UnitQuaternion.h"
+#include "utility/math/matrix/Rotation3D.h"
 
 namespace module {
     namespace platform {
         namespace darwin {
 
             using utility::math::geometry::UnitQuaternion;
+            using utility::math::matrix::Rotation3D;
 
             arma::vec::fixed<MotionModel::size> MotionModel::limitState(const arma::vec::fixed<size>& state) {
                 arma::vec::fixed<size> newState = state;
@@ -47,21 +49,17 @@ namespace module {
                 // Extract our unit quaternion rotation
                 UnitQuaternion rotation(state.rows(QW, QZ));
 
-                // Add our global velocity to our position (rotate our local velocity)
-                newState.rows(PX, PZ) += state.rows(VX, VZ)*deltaT;
+                // Add our velocity to our position
+                newState.rows(PX, PZ) += state.rows(VX, VZ) * deltaT;
 
-                // Robot rotational velocity delta
-                const double omega = arma::norm(state.rows(WX, WZ)) + 0.00000000001;
-                //Negate to compensate for some later mistake.
-                //deltaT has been negative for a while and has masked an incorrect hack below
-                const double theta = -omega*deltaT*0.5;
-                const double sinTheta = sin(theta);
-                const double cosTheta = cos(theta);
-                arma::vec vq({cosTheta,state(WX)*sinTheta/omega,state(WY)*sinTheta/omega,state(WZ)*sinTheta/omega});
+                // Apply our rotational velocity to our orientation
+                double t_2 = deltaT * 0.5;
+                UnitQuaternion qGyro;
+                qGyro.imaginary() = state.rows(WX, WZ) * t_2;
+                qGyro.real() = 1.0 - 0.5 * arma::sum(arma::square(qGyro.imaginary()));
 
-                // Update our rotation
-                newState.rows(QW, QZ) = rotation * UnitQuaternion(vq);
-                
+                newState.rows(QW, QZ) = qGyro * rotation;
+
                 //add velocity decay
                 newState.rows(VX, VZ) = newState.rows(VX, VZ) % timeUpdateVelocityDecay;
 
@@ -100,10 +98,18 @@ namespace module {
                 return prediction;
             }
 
-            // Flat foot odometry measurement
-            arma::vec2 MotionModel::predictedObservation(const arma::vec::fixed<size>& state, const arma::vec2& originalXY, const MeasurementType::FLAT_FOOT_ODOMETRY&)  {
-                // Predict our delta from our original position to our current position
-                return state.rows(PX, PY) - originalXY;
+            arma::vec4 MotionModel::predictedObservation(const arma::vec::fixed<size>& state, const MeasurementType::FLAT_FOOT_ODOMETRY&) {
+
+                arma::vec4 measurement;
+                measurement.rows(0, 1) = state.rows(PX, PY);
+
+                Rotation3D rotation(UnitQuaternion(state.rows(QW, QZ)));
+                double yaw = rotation.yaw();
+
+                measurement[2] = std::cos(yaw);
+                measurement[3] = std::sin(yaw);
+
+                return measurement;
             }
 
             arma::vec MotionModel::observationDifference(const arma::vec& a, const arma::vec& b) {

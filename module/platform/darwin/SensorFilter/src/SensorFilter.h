@@ -60,7 +60,7 @@ namespace module {
                                 arma::mat33 accelerometer;
                                 arma::mat33 gyroscope;
                                 arma::mat44 footUpWithZ;
-                                arma::mat22 flatFootOdometry;
+                                arma::mat44 flatFootOdometry;
                             } measurement;
                             struct {
                                 arma::vec3 position;
@@ -96,16 +96,18 @@ namespace module {
                 bool middleDown = false;
 
                 // Our sensor for foot down
-                DarwinVirtualLoadSensor leftFootDown,rightFootDown;
+                DarwinVirtualLoadSensor leftFootDown;
+                DarwinVirtualLoadSensor rightFootDown;
+
                 // Our torso rotation from foot when it landed
-                std::array<utility::math::matrix::Rotation3D, 2> footlanding_Rtf;
+                std::array<double, 2> footlanding_thetaft;
                 // Our torso position from foot in foot coordinates when it landed
-                std::array<arma::vec3, 2> footlanding_rTFf;
+                std::array<arma::vec2, 2> footlanding_rTFf;
 
                 // The worlds rotation from our torso
-                std::array<utility::math::matrix::Rotation3D, 2> footlanding_Rwt;
+                std::array<double, 2> footlanding_thetatw;
                 // The torsos position from the origin in world
-                std::array<arma::vec3, 2> footlanding_rTWw;
+                std::array<arma::vec2, 2> footlanding_rTWw;
             };
         }
     }
