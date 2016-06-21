@@ -60,7 +60,7 @@ namespace module {
                                 arma::mat33 accelerometer;
                                 arma::mat33 gyroscope;
                                 arma::mat44 footUpWithZ;
-                                arma::mat22 flatFootOdometry;
+                                arma::mat77 flatFootOdometry;
                             } measurement;
                             struct {
                                 arma::vec3 position;

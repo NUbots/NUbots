@@ -97,9 +97,14 @@ namespace module {
             }
 
             // Flat foot odometry measurement
-            arma::vec2 MotionModel::predictedObservation(const arma::vec::fixed<size>& state, const arma::vec2& originalXY, const MeasurementType::FLAT_FOOT_ODOMETRY&)  {
-                // Predict our delta from our original position to our current position
-                return state.rows(PX, PY) - originalXY;
+            arma::vec7 MotionModel::predictedObservation(const arma::vec::fixed<size>& state, const MeasurementType::FLAT_FOOT_ODOMETRY&)  {
+
+                // Get our position and rotation quaternion
+                arma::vec7 measurement;
+                measurement.rows(0, 2) = state.rows(PX, PZ);
+                measurement.rows(3, 6) = state.rows(QW, QZ);
+
+                return measurement;
             }
 
             arma::vec MotionModel::observationDifference(const arma::vec& a, const arma::vec& b) {

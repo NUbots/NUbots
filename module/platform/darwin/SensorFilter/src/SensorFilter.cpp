@@ -131,7 +131,7 @@ namespace module {
                     this->config.motionFilter.noise.measurement.accelerometer    = arma::diagmat(config["motion_filter"]["noise"]["measurement"]["accelerometer"].as<arma::vec3>());
                     this->config.motionFilter.noise.measurement.gyroscope        = arma::diagmat(config["motion_filter"]["noise"]["measurement"]["gyroscope"].as<arma::vec3>());
                     this->config.motionFilter.noise.measurement.footUpWithZ      = arma::diagmat(config["motion_filter"]["noise"]["measurement"]["foot_up_with_z"].as<arma::vec4>());
-                    this->config.motionFilter.noise.measurement.flatFootOdometry = arma::diagmat(config["motion_filter"]["noise"]["measurement"]["flat_foot_odometry"].as<arma::vec2>());
+                    this->config.motionFilter.noise.measurement.flatFootOdometry = arma::diagmat(config["motion_filter"]["noise"]["measurement"]["flat_foot_odometry"].as<arma::vec7>());
 
                     // Update our process noises
                     this->config.motionFilter.noise.process.position           = config["motion_filter"]["noise"]["process"]["position"].as<arma::vec3>();
@@ -481,18 +481,24 @@ namespace module {
                                 footlanding_rTWw[side] = motionFilter.get().rows(MotionModel::PX, MotionModel::PZ);
                             }
                             else {
-                                // Get our foot in world space
-                                Rotation3D Rof = footlanding_Rtw[side].i() * Rft.i();
-                                Rotation3D Rofo = footlanding_Rtw[side].i() * footlanding_Rft[side].i();
+                                // Rotation from foot to old word
+                                Rotation3D Rwf  = footlanding_Rtw[side].i() * Rtf;
 
-                                // Rotation from old world to torso (Rto * (Rnf * Rof.t()))
-                                Rotation3D Rto = footlanding_Rtw[side] * (Rof * Rofo.i());
+                                // Predict our new torso position from the change in foot pose
+                                // from Rtf * footlanding_Rft == Rtw * footlanding_Rtw.i()
+                                UnitQuaternion pred_Rtw(Rotation3D(Rtf * footlanding_Rft[side] * footlanding_Rtw[side]));
 
-                                // Get translation from old torso to new toros in world
-                                arma::vec3 rTTw = Rof * arma::vec3(rTFf - footlanding_rTFf[side]);
+                                // Predict our new world offset from the change in foot pose
+                                // from Rwf(rTFf - footlanding_rTFf) == rTWw - footlanding_rTWw
+                                arma::vec3 pred_rTWw(Rwf * arma::vec3(rTFf - footlanding_rTFf[side]) + footlanding_rTWw[side]);
 
-                                // Do our measurement update and pass in the original state x,y we measured when the foot landed.
-                                motionFilter.measurementUpdate(rTTw.rows(0,1), config.motionFilter.noise.measurement.flatFootOdometry, footlanding_rTWw[side].rows(0,1), MotionModel::MeasurementType::FLAT_FOOT_ODOMETRY());
+                                // Build our measurement prediction vector
+                                arma::vec7 measurement;
+                                measurement.rows(0, 2) = pred_rTWw;
+                                measurement.rows(3, 6) = pred_Rtw;
+
+                                // Apply our measurement update
+                                motionFilter.measurementUpdate(measurement, config.motionFilter.noise.measurement.flatFootOdometry, MotionModel::MeasurementType::FLAT_FOOT_ODOMETRY());
                             }
                         }
                     }

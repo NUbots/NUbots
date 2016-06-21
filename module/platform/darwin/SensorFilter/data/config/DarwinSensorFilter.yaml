@@ -33,10 +33,10 @@ motion_filter:
     velocity_decay: [0.8, 0.8, 0.8]
   noise:
     measurement:
-      accelerometer: [1e-4, 1e-4, 1e-4]
-      gyroscope: [1e-8, 1e-8, 1e-8]
-      foot_up_with_z: [1e-6, 1e-6, 1e-6, 1e-10]
-      flat_foot_odometry: [1e-6, 1e-6]
+      accelerometer: [1e-4, 1e-4, 1e-4] # x, y, z
+      gyroscope: [1e-8, 1e-8, 1e-8] # x, y, z
+      foot_up_with_z: [1e-6, 1e-6, 1e-6, 1e-10] # x, y, z, zpos
+      flat_foot_odometry: [1e-6, 1e-6, 1e-6, 1e-6, 1e-6, 1e-6, 1e-6] # x, y, z, qw, qx, qy, qz
     process:
       position: [1e-8, 1e-8, 1e-8]
       velocity: [1e-3, 1e-3, 1e-3]
