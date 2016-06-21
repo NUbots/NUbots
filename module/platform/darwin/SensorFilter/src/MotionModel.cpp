@@ -21,12 +21,14 @@
 #include "MotionModel.h"
 
 #include "utility/math/geometry/UnitQuaternion.h"
+#include "utility/math/matrix/Rotation3D.h"
 
 namespace module {
     namespace platform {
         namespace darwin {
 
             using utility::math::geometry::UnitQuaternion;
+            using utility::math::matrix::Rotation3D;
 
             arma::vec::fixed<MotionModel::size> MotionModel::limitState(const arma::vec::fixed<size>& state) {
                 arma::vec::fixed<size> newState = state;
@@ -47,7 +49,7 @@ namespace module {
                 // Extract our unit quaternion rotation
                 UnitQuaternion rotation(state.rows(QW, QZ));
 
-                // Add our global velocity to our position (rotate our local velocity)
+                // Add our velocity to our position
                 newState.rows(PX, PZ) += state.rows(VX, VZ) * deltaT;
 
                 // Apply our rotational velocity to our orientation
@@ -96,13 +98,16 @@ namespace module {
                 return prediction;
             }
 
-            // Flat foot odometry measurement
-            arma::vec7 MotionModel::predictedObservation(const arma::vec::fixed<size>& state, const MeasurementType::FLAT_FOOT_ODOMETRY&)  {
+            arma::vec4 MotionModel::predictedObservation(const arma::vec::fixed<size>& state, const MeasurementType::FLAT_FOOT_ODOMETRY&) {
 
-                // Get our position and rotation quaternion
-                arma::vec7 measurement;
-                measurement.rows(0, 2) = state.rows(PX, PZ);
-                measurement.rows(3, 6) = state.rows(QW, QZ);
+                arma::vec4 measurement;
+                measurement.rows(0, 1) = state.rows(PX, PY);
+
+                Rotation3D rotation(UnitQuaternion(state.rows(QW, QZ)));
+                double yaw = rotation.yaw();
+
+                measurement[2] = std::cos(yaw);
+                measurement[3] = std::sin(yaw);
 
                 return measurement;
             }

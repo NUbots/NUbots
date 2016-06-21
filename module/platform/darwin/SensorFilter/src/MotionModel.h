@@ -77,7 +77,7 @@ namespace module {
                 arma::vec3 predictedObservation(const arma::vec::fixed<size>& state, const MeasurementType::ACCELEROMETER&);
                 arma::vec3 predictedObservation(const arma::vec::fixed<size>& state, const MeasurementType::GYROSCOPE&);
                 arma::vec4 predictedObservation(const arma::vec::fixed<size>& state, const MeasurementType::FOOT_UP_WITH_Z&);
-                arma::vec7 predictedObservation(const arma::vec::fixed<size>& state, const MeasurementType::FLAT_FOOT_ODOMETRY&);
+                arma::vec4 predictedObservation(const arma::vec::fixed<size>& state, const MeasurementType::FLAT_FOOT_ODOMETRY&);
 
                 arma::vec observationDifference(const arma::vec& a, const arma::vec& b);
 
