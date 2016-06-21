@@ -9,7 +9,7 @@ NUCLEAR_ROLE(
     support::configuration::NetworkConfiguration
     support::NUbugger
     support::configuration::SoccerConfig
-    support::GrimReaper
+    #support::GrimReaper
 
     #input
     input::GameController
@@ -43,6 +43,6 @@ NUCLEAR_ROLE(
     motion::ScriptEngine
     motion::WalkEngine
     motion::HeadController
-    motion::IKKick
+    #motion::IKKick
 )
 

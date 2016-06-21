@@ -37,5 +37,5 @@ NUCLEAR_ROLE(
     #Motion
     motion::ScriptEngine
     motion::WalkEngine
-    motion::HeadController
+    #motion::HeadController
 )
