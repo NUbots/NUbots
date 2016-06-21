@@ -59,7 +59,7 @@ namespace robot {
         
         //Rewrite:
         double rmHeading = sensors.world.rotation().yaw() - state(robot::kImuOffset);
-        arma::vec2 robotModelHeading = {std::cos(rmHeading),std::sin(rmHeading)};
+        arma::vec2 robotModelHeading = {std::cos(-rmHeading),std::sin(-rmHeading)};
 
         auto obs = SphericalRobotObservation(sensors.world.translation().rows(0,1) - state.rows(kX, kY),
                                              robotModelHeading,
