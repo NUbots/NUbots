@@ -82,6 +82,11 @@ namespace module {
                     forwardSpeed = file.config["forwardSpeed"].as<float>();
                     a = file.config["a"].as<float>();
                     b = file.config["b"].as<float>();
+                    VP = file.config["VP"].as<float>();
+                    VS = file.config["VS"].as<float>();
+                    d1 = file.config["d1"].as<float>();
+                    d2 = file.config["d2"].as<float>();
+                    ErMax = file.config["ErMax"].as<float>();
 
                 });
 
@@ -125,7 +130,7 @@ namespace module {
                  , With<message::localisation::Ball>
                  , With<std::vector<message::localisation::Self>>
                  , Optional<With<std::vector<message::vision::Obstacle>>>
-                 , Sync<BezierWalkPathPlanner>>().then([this] (
+                 , Sync<BezierWalkPathPlanner>>().then("Updates Bezier Plan", [this] (
                      const LocalisationBall& ball,
                      const std::vector<Self>& selfs,
                      std::shared_ptr<const std::vector<VisionObstacle>> robots) {
@@ -152,9 +157,11 @@ namespace module {
                         // log("MotionCommand:", int(latestCommand.type));
 
                         //TODO:use vision ball
+                        
                         arma::vec2 ball_world_position = RobotToWorldTransform(selfs.front().position, selfs.front().heading, ball.position);
                         arma::vec2 kick_target = latestCommand.kickTarget;//2 * ball_world_position - selfs.front().position;
                         emit(drawSphere("kick_target", arma::vec3({kick_target[0], kick_target[1], 0.0}), 0.1, arma::vec3({1, 0, 0}), 0));
+                        
 
                         //TO DO, change to Bezier stuff
                         // Include direction of goals
@@ -164,8 +171,8 @@ namespace module {
                         // From "A Bezier curve based path planning in a multi-agent robot soccer system without violating the acceleration limits" by K.G. Jolly, R. Sreerama Kumar, R. Vijayakumar
 
                         // obtain VP, VS, A0, B0, A3, B3
-                        float VP = 0.15; //selfs.velocity[0]; //velocity at robot position
-                        float VS = 0.15; //velocity at ball position, chosen as 0.15
+                        // VP = selfs.velocity[0]; //velocity at robot position
+                        // VS = velocity at ball position, chosen as 0.15
                         float A0 = selfs.front().position[1];
                         // log("Self front position 1 = ", A0);
                         
@@ -185,9 +192,9 @@ namespace module {
                         float RS = VS*VS / 4; //Mimimum radius of curvature required at point S (Ball point)
 
                         // initialize d1,d2,ErMax
-                        float d1=0.5; //Inital value, can be changed
-                        float d2=0.5; //Inital value, can be changed
-                        float ErMax = 0.9; //Assigned Value, can be changed
+                        // d1 = Inital value
+                        // d2 = Inital value
+                        // ErMax = Assigned Value
 
                         // calculate rhoP, rhoS
                         float h0 = B3-B0;
@@ -251,11 +258,14 @@ namespace module {
                         //bezXdashdash[i] = 6*(A0*(-u)+A0+3*A1*u-2*A1-3*A2 u+A2+A3*u);
                         //bezYdashdash[i] = 6*(B0*(-u)+B0+3*B1*u-2*A1-3*B2 u+B2+B3*u);
 
-                        arma::mat bez_matrix;
+                        arma::fmat bez_matrix;
                         bez_matrix << bezier_X_point << bezier_Y_point << arma::endr 
                                    << A0 << B0;
 
-                        arma::vec2 next_robot_position = arma::mean(bez_matrix);
+                        
+                        
+                        arma::fvec2 next_robot_position = arma::mean(bez_matrix).t();
+                        
 
                         // log("Robot next position = ", next_robot_position);
 

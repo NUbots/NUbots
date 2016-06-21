@@ -52,6 +52,11 @@ namespace module {
                     float forwardSpeed;
                     float a;
                     float b;
+                    float VP;
+                    float VS;
+                    float d1;
+                    float d2;
+                    float ErMax;
 
                     //-----------non-config variables (not defined in WalkPathPlanner.yaml)-----------
 
