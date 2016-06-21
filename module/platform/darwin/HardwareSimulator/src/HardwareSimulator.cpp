@@ -180,11 +180,14 @@ namespace darwin {
                 // emit(graph("torsoFromRightFoot", torsoFromRightFoot));
                 // emit(graph("torsoFromLeftFoot", torsoFromLeftFoot));
                 if(torsoFromRightFoot(2) > torsoFromLeftFoot(2)){
-                    setRightFootDown();
+                    setLeftFootDown(false);
+                    setRightFootDown(true);
                 } else if(torsoFromRightFoot(2) < torsoFromLeftFoot(2)){
-                    setLeftFootDown();
+                    setLeftFootDown(true);
+                    setRightFootDown(false);
                 } else {
-                    setBothFeetDown();
+                    setLeftFootDown(true);
+                    setRightFootDown(true);
                 }
             }
 
@@ -301,69 +304,34 @@ namespace darwin {
         sensors->gyroscope.z += noise.gyroscope.z * centered_noise();
     }
 
-    void HardwareSimulator::setRightFootDown(){
+    void HardwareSimulator::setRightFootDown(bool down) {
          // Sensors
-        sensors.fsr.right.fsr1 = 1;
-        sensors.fsr.right.fsr2 = 1;
-        sensors.fsr.right.fsr3 = 1;
-        sensors.fsr.right.fsr4 = 1;
+        sensors.fsr.right.fsr1 = down ? 1 : 0;
+        sensors.fsr.right.fsr2 = down ? 1 : 0;
+        sensors.fsr.right.fsr3 = down ? 1 : 0;
+        sensors.fsr.right.fsr4 = down ? 1 : 0;
+
+        // Set the knee loads to something huge to be foot down
+        sensors.servo[ServoID::R_KNEE].load = down ? 1.0 : -1.0;
 
         // Centre
-        sensors.fsr.right.centreX = 0;
-        sensors.fsr.right.centreY = 0;
-        // Sensors
-        sensors.fsr.left.fsr1 = 0;
-        sensors.fsr.left.fsr2 = 0;
-        sensors.fsr.left.fsr3 = 0;
-        sensors.fsr.left.fsr4 = 0;
-
-        // Centre
-        sensors.fsr.left.centreX = std::numeric_limits<double>::quiet_NaN();
-        sensors.fsr.left.centreY = std::numeric_limits<double>::quiet_NaN();
-
+        sensors.fsr.right.centreX = down ? 1 : std::numeric_limits<double>::quiet_NaN();
+        sensors.fsr.right.centreY = down ? 1 : std::numeric_limits<double>::quiet_NaN();
     }
 
-    void HardwareSimulator::setLeftFootDown(){
-         // Sensors
-        sensors.fsr.right.fsr1 = 0;
-        sensors.fsr.right.fsr2 = 0;
-        sensors.fsr.right.fsr3 = 0;
-        sensors.fsr.right.fsr4 = 0;
-
-        // Centre
-        sensors.fsr.right.centreX = std::numeric_limits<double>::quiet_NaN();
-        sensors.fsr.right.centreY = std::numeric_limits<double>::quiet_NaN();
+    void HardwareSimulator::setLeftFootDown(bool down) {
         // Sensors
-        sensors.fsr.left.fsr1 = 1;
-        sensors.fsr.left.fsr2 = 1;
-        sensors.fsr.left.fsr3 = 1;
-        sensors.fsr.left.fsr4 = 1;
+        sensors.fsr.left.fsr1 = down ? 1 : 0;
+        sensors.fsr.left.fsr2 = down ? 1 : 0;
+        sensors.fsr.left.fsr3 = down ? 1 : 0;
+        sensors.fsr.left.fsr4 = down ? 1 : 0;
+
+        // Set the knee loads to something huge to be foot down
+        sensors.servo[ServoID::L_KNEE].load = down ? 1.0 : -1.0;
 
         // Centre
-        sensors.fsr.left.centreX = 0;
-        sensors.fsr.left.centreY = 0;
-
-    }
-
-    void HardwareSimulator::setBothFeetDown(){
-         // Sensors
-        sensors.fsr.right.fsr1 = 1;
-        sensors.fsr.right.fsr2 = 1;
-        sensors.fsr.right.fsr3 = 1;
-        sensors.fsr.right.fsr4 = 1;
-
-        // Centre
-        sensors.fsr.right.centreX = 0;
-        sensors.fsr.right.centreY = 0;
-        // Sensors
-        sensors.fsr.left.fsr1 = 1;
-        sensors.fsr.left.fsr2 = 1;
-        sensors.fsr.left.fsr3 = 1;
-        sensors.fsr.left.fsr4 = 1;
-
-        // Centre
-        sensors.fsr.left.centreX = 0;
-        sensors.fsr.left.centreY = 0;
+        sensors.fsr.left.centreX = down ? 1 : std::numeric_limits<double>::quiet_NaN();
+        sensors.fsr.left.centreY = down ? 1 : std::numeric_limits<double>::quiet_NaN();
 
     }
 

@@ -26,6 +26,7 @@
 
 #include "utility/support/yaml_armadillo.h"
 #include "utility/math/matrix/Rotation3D.h"
+#include "utility/math/matrix/Rotation2D.h"
 #include "utility/math/geometry/UnitQuaternion.h"
 #include "utility/nubugger/NUhelpers.h"
 #include "utility/motion/ForwardKinematics.h"
