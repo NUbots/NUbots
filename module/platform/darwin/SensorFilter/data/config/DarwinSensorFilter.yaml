@@ -37,7 +37,8 @@ motion_filter:
       accelerometer: [1e-4, 1e-4, 1e-4] # x, y, z
       gyroscope: [1e-8, 1e-8, 1e-8] # x, y, z
       foot_up_with_z: [1e-6, 1e-6, 1e-6, 1e-10] # x, y, z, zpos
-      flat_foot_odometry: [1e-6, 1e-6, 1e-4, 1e-4] # x, y, yawx, yawy
+      flat_foot_odometry: [1e-8, 1e-8, 1e-8] # x, y, z
+      flat_foot_orientation: [1e-8, 1e-8, 1e-8, 1e-8] # QW, QX, QY, QZ
     process:
       position: [1e-8, 1e-8, 1e-8]
       velocity: [1e-3, 1e-3, 1e-3]
