@@ -98,18 +98,14 @@ namespace module {
                 return prediction;
             }
 
-            arma::vec4 MotionModel::predictedObservation(const arma::vec::fixed<size>& state, const MeasurementType::FLAT_FOOT_ODOMETRY&) {
+            arma::vec3 MotionModel::predictedObservation(const arma::vec::fixed<size>& state, const MeasurementType::FLAT_FOOT_ODOMETRY&) {
+            
+                return state.rows(PX, PZ);
+            }
+            
+            arma::vec4 MotionModel::predictedObservation(const arma::vec::fixed<size>& state, const MeasurementType::FLAT_FOOT_ORIENTATION&) {
 
-                arma::vec4 measurement;
-                measurement.rows(0, 1) = state.rows(PX, PY);
-
-                Rotation3D rotation(UnitQuaternion(state.rows(QW, QZ)));
-                double yaw = rotation.yaw();
-
-                measurement[2] = std::cos(yaw);
-                measurement[3] = std::sin(yaw);
-
-                return measurement;
+                return state.rows(QW, QZ);
             }
 
             arma::vec MotionModel::observationDifference(const arma::vec& a, const arma::vec& b) {

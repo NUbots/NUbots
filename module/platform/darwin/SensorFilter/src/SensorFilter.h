@@ -30,6 +30,7 @@
 #include "MotionModel.h"
 #include "DarwinVirtualLoadSensor.h"
 #include "utility/motion/RobotModels.h"
+#include "utility/math/matrix/Rotation3D.h"
 
 namespace module {
     namespace platform {
@@ -60,7 +61,8 @@ namespace module {
                                 arma::mat33 accelerometer;
                                 arma::mat33 gyroscope;
                                 arma::mat44 footUpWithZ;
-                                arma::mat44 flatFootOdometry;
+                                arma::mat33 flatFootOdometry;
+                                arma::mat44 flatFootOrientation;
                             } measurement;
                             struct {
                                 arma::vec3 position;
@@ -99,15 +101,15 @@ namespace module {
                 DarwinVirtualLoadSensor leftFootDown;
                 DarwinVirtualLoadSensor rightFootDown;
 
-                // Our torso rotation from foot when it landed
-                std::array<double, 2> footlanding_thetaft;
-                // Our torso position from foot in foot coordinates when it landed
-                std::array<arma::vec2, 2> footlanding_rTFf;
-
-                // The worlds rotation from our torso
-                std::array<double, 2> footlanding_thetatw;
-                // The torsos position from the origin in world
-                std::array<arma::vec2, 2> footlanding_rTWw;
+                //World to foot in world rotation when the foot landed
+                std::array<arma::vec3, 2> footlanding_rFWw;
+                
+                //Foot to world in foot-flat rotation when the foot landed
+                std::array<utility::math::matrix::Rotation3D, 2> footlanding_Rfw;
+                
+                //World to foot in foot-flat rotation when the foot landed
+                std::array<utility::math::matrix::Rotation3D, 2> footlanding_Rwf;
+                
             };
         }
     }
