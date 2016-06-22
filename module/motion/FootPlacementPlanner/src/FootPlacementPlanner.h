@@ -58,7 +58,7 @@ namespace motion
         static constexpr size_t UPDATE_FREQUENCY = 90;
         static constexpr const char* CONFIGURATION_PATH = "FootPlacementPlanner.yaml";
         static constexpr const char* CONFIGURATION_MSSG = "Foot Placement Planner - Configure";
-        static constexpr const char* ONTRIGGER_FOOT_CMD = "Foot Placement Planner - Update Foot Position";
+        static constexpr const char* ONTRIGGER_FOOT_CMD = "Foot Placement Planner - Update Foot Target";
         static constexpr const char* ONTRIGGER_FOOT_TGT = "Foot Placement Planner - Calculate Target Foot Position";
         explicit FootPlacementPlanner(std::unique_ptr<NUClear::Environment> environment);
     private:

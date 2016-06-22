@@ -77,16 +77,19 @@ namespace motion
         });
 
         //Transform analytical torso positions in accordance with the stipulated targets...
-        updateHandle = on<Every<UPDATE_FREQUENCY, Per<std::chrono::seconds>>, With<Sensors>, Single, Priority::HIGH>()
+        updateHandle = on<Every<1 /*RESTORE AFTER DEBUGGING: UPDATE_FREQUENCY*/, Per<std::chrono::seconds>>, With<Sensors>, Single, Priority::HIGH>()
         .then("Torso Motion Planner - Update Torso Position", [this](const Sensors& sensors) 
         {
-            updateTorsoPosition();
-        }).disable();
+                NUClear::log("Messaging: Torso Motion Planner - Update Torso Position(0)"); //debugging
+            //updateTorsoPosition();
+                NUClear::log("Messaging: Torso Motion Planner - Update Torso Position(1)"); //debugging
+        });//RESTORE AFTER DEBUGGING: .disable();
 
         //In the event of a new foot step target specified by the foot placement planning module...
         on<Trigger<FootStepTarget>>().then("Torso Motion Planner - Received Target Torso Position", [this] (const FootStepTarget& target) 
         {
-            if(target.supportMass == LimbID::LEFT_LEG)
+                NUClear::log("Messaging: Torso Motion Planner - Received Target Torso Position(0)"); //debugging
+            /*if(target.supportMass == LimbID::LEFT_LEG)
             {
                 setLeftFootDestination(target.targetDestination);
             }
@@ -95,7 +98,8 @@ namespace motion
                 setRightFootDestination(target.targetDestination);
             }
             setDestinationTime(target.targetTime); 
-            zmpTorsoCoefficients();
+            zmpTorsoCoefficients();*/
+                NUClear::log("Messaging: Torso Motion Planner - Received Target Torso Position(1)"); //debugging
         });
 
         //on<Trigger<NewStepTargetInfo>>().then([this]){};
@@ -103,7 +107,7 @@ namespace motion
         //In the process of actuating a foot step and emitting updated positional data...
         on<Trigger<FootMotionUpdate>>().then("Torso Motion Planner - Received Foot Motion Update", [this] (const FootMotionUpdate& info) 
         {
-            setMotionPhase(info.phase);
+            //setMotionPhase(info.phase);
         });
 
         on<Trigger<EnableTorsoMotion>>().then([this] (const EnableTorsoMotion& command) 

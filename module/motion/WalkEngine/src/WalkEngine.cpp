@@ -78,42 +78,26 @@ namespace motion
         //Broadcast constrained velocity to actuator modules...
         on<Trigger<WalkCommand>>().then([this] (const WalkCommand& walkCommand)
         {
-            auto velocity = walkCommand.command;
+                NUClear::log("WalkEngine - Trigger WalkCommand (0)"); //debugging
+            /*auto velocity = walkCommand.command;
             velocity.x()     *= velocity.x()     > 0 ? velocityLimits(0,1) : -velocityLimits(0,0);
             velocity.y()     *= velocity.y()     > 0 ? velocityLimits(1,1) : -velocityLimits(1,0);
             velocity.angle() *= velocity.angle() > 0 ? velocityLimits(2,1) : -velocityLimits(2,0);
-            setVelocity(velocity);
-            
-            emit(std::make_unique<NewWalkCommand>(getVelocity()));
+            std::cout << velocity;
+            setVelocity(velocity);*/
+            //emit(std::make_unique<NewWalkCommand>(getVelocity()));
+                NUClear::log("WalkEngine - Trigger WalkCommand (1)"); //debugging
         });
 
-        //Update waypoints sensor data at regular intervals...updateHandle = 
-        on<Every<UPDATE_FREQUENCY, Per<std::chrono::seconds>>, With<Sensors>, Single, Priority::HIGH>()
+        //Update waypoints sensor data at regular intervals...
+        updateHandle = on<Every<1 /*RESTORE AFTER DEBUGGING: UPDATE_FREQUENCY*/, Per<std::chrono::seconds>>, With<Sensors>, Single, Priority::HIGH>()
         .then([this](const Sensors& sensors) 
         {
-            //Debugging Walk Engine - self actuator with template data...
-            //std::unique_ptr<WalkCommand> command = std::make_unique<WalkCommand>();
-            //command->command = Transform2D({2, 1, 0.5});
-            emit(std::make_unique<WalkCommand>(1, Transform2D({2, 1, 0.5})));
-
-            //emit(std::move(updateWaypoints(sensors)));
-        });//.disable();
-
-        //Do we need enable/disable?
-        on<Trigger<EnableWalkEngineCommand>>().then([this] (const EnableWalkEngineCommand& command) 
-        {
-            subsumptionId = command.subsumptionId;
-            //stanceReset(); // Reset stance as we don't know where our limbs are.
-            updateHandle.enable();
-        });
-
-        on<Trigger<DisableWalkEngineCommand>>().then([this] 
-        {
-            // Nobody needs the walk engine, so we stop updating it.
-            updateHandle.disable(); 
-
-            // TODO: Also disable the other walk command reactions?
-        });
+                NUClear::log("WalkEngine - Emit WalkCommand(0)"); //debugging
+            //emit(std::make_unique<WalkCommand>(1, Transform2D({0.1, 0.05, 0.2}))); //debugging...
+            //RESTORE AFTER DEBUGGING: emit(std::move(updateWaypoints(sensors)));
+                NUClear::log("WalkEngine - Emit WalkCommand(1)"); //debugging
+        });//RESTORE AFTER DEBUGGING: .disable();
 
         on<Trigger<WalkStartCommand>>().then([this] 
         {
@@ -165,6 +149,22 @@ namespace motion
             //generateAndSaveStandScript(sensors);
             //StateOfWalk = State::LAST_STEP;
             start();
+        });
+
+        //Do we need enable/disable?
+        on<Trigger<EnableWalkEngineCommand>>().then([this] (const EnableWalkEngineCommand& command) 
+        {
+            subsumptionId = command.subsumptionId;
+            //stanceReset(); // Reset stance as we don't know where our limbs are.
+            updateHandle.enable();
+        });
+
+        on<Trigger<DisableWalkEngineCommand>>().then([this] 
+        {
+            // Nobody needs the walk engine, so we stop updating it.
+            updateHandle.disable(); 
+
+            // TODO: Also disable the other walk command reactions?
         });
 
         //reset();
@@ -229,9 +229,9 @@ namespace motion
     /*void FootPlacementPlanner::requestStop() 
     {
         // always stops with feet together (which helps transition)
-        if (state == State::WALKING) 
+        if (StateOfWalk == State::WALKING) 
         {
-            state = State::STOP_REQUEST;
+            StateOfWalk = State::STOP_REQUEST;
         }
     }*/    
 /*=======================================================================================================*/

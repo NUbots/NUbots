@@ -58,15 +58,18 @@ namespace motion
         });
 
         //Transform analytical foot positions in accordance with the stipulated targets...
-        updateHandle = on<Every<UPDATE_FREQUENCY, Per<std::chrono::seconds>>, With<Sensors>, Single, Priority::HIGH>()
+        updateHandle = on<Every<1 /*RESTORE AFTER DEBUGGING: UPDATE_FREQUENCY*/, Per<std::chrono::seconds>>, With<Sensors>, Single, Priority::HIGH>()
         .then("Foot Motion Planner - Update Foot Position", [this](const Sensors& sensors) 
         {
+                NUClear::log("Messaging: Foot Motion Planner - Update Foot Position(0)"); //debugging
             updateFootPosition(getMotionPhase(), getLeftFootDestination(), getRightFootDestination());
-        }).disable();
+                NUClear::log("Messaging: Foot Motion Planner - Update Foot Position(1)"); //debugging
+        });//RESTORE AFTER DEBUGGING: .disable();
 
         //In the event of a new foot step target specified by the foot placement planning module...
         on<Trigger<FootStepTarget>>().then("Foot Motion Planner - Received Target Foot Position", [this] (const FootStepTarget& target) 
         {
+                NUClear::log("Messaging: Foot Motion Planner - Received Target Foot Position(0)"); //debugging
             if(target.supportMass == LimbID::LEFT_LEG)
             {
                 setLeftFootDestination(target.targetDestination);
@@ -76,6 +79,7 @@ namespace motion
                 setRightFootDestination(target.targetDestination);
             }
             setDestinationTime(target.targetTime); 
+                NUClear::log("Messaging: Foot Motion Planner - Received Target Foot Position(1)"); //debugging
         });
 
         on<Trigger<EnableFootMotion>>().then([this] (const EnableFootMotion& command) 
@@ -95,31 +99,40 @@ namespace motion
 /*=======================================================================================================*/
     void FootMotionPlanner::updateFootPosition(double phase, const Transform2D& leftFootDestination, const Transform2D& rightFootDestination) 
     {
+        NUClear::log("Messaging: Foot Motion Planner - Instantiate footPhases"); //debugging
+        // Active left foot position
+        Transform2D leftFootPositionTransform;
+        // Active right foot position
+        Transform2D rightFootPositionTransform;
         //Instantiate unitless phases for x(=0), y(=1) and z(=2) foot motion...
         arma::vec3 footPhases = footPhase(phase, phase1Single, phase2Single);
 
         //Lift foot by amount depending on walk speed
+        NUClear::log("Messaging: Foot Motion Planner - footPhase limits and calculations"); //debugging
         auto& limit = (velocityCurrent.x() > velocityHigh ? accelerationLimitsHigh : accelerationLimits); // TODO: use a function instead
         float speed = std::min(1.0, std::max(std::abs(velocityCurrent.x() / limit[0]), std::abs(velocityCurrent.y() / limit[1])));
         float scale = (step_height_fast_fraction - step_height_slow_fraction) * speed + step_height_slow_fraction;
         footPhases[2] *= scale;
 
+        NUClear::log("Messaging: Foot Motion Planner - Interpolate Transform2D"); //debugging
         //Interpolate Transform2D from start to destination - deals with flat resolved movement in (x,y) coordinates
         if (swingLeg == LimbID::RIGHT_LEG) 
         {
             //Vector field function??
-            uRightFoot = uRightFootSource.interpolate(footPhases[0], rightFootDestination);
+            rightFootPositionTransform = getRightFootSource().interpolate(footPhases[0], rightFootDestination);
         }
         else
         {
             //Vector field function??
-            uLeftFoot  = uLeftFootSource.interpolate(footPhases[0],   leftFootDestination);
+            leftFootPositionTransform  = getLeftFootSource().interpolate(footPhases[0],   leftFootDestination);
         }
         
+        NUClear::log("Messaging: Foot Motion Planner - Instantiate FootLocal Variables"); //debugging
         //Translates foot motion into z dimension for stepping in three-dimensional space...
-        Transform3D leftFootLocal  = uLeftFoot;
-        Transform3D rightFootLocal = uRightFoot;
+        Transform3D leftFootLocal  = leftFootPositionTransform;
+        Transform3D rightFootLocal = rightFootPositionTransform;
 
+        NUClear::log("Messaging: Foot Motion Planner - Translate Z for support foot"); //debugging
         //Lift swing leg - manipulate(update) z component of foot position to action movement with a varying altitude locus...
         if (swingLeg == LimbID::RIGHT_LEG) 
         {
@@ -136,6 +149,7 @@ namespace motion
             emit(graph("Foot Phase Motion", phase));
         }
 
+        NUClear::log("Messaging: Foot Motion Planner - Emit FootMotionUpdate"); //debugging
         //Broadcast struct of updated foot motion data at corresponding phase identity...
         emit(std::make_unique<FootMotionUpdate>(phase, leftFootLocal, rightFootLocal));
     }
@@ -175,35 +189,59 @@ namespace motion
         destinationTime = inDestinationTime;
     }
 /*=======================================================================================================*/
-//      ENCAPSULATION METHOD: getLeftFootDestination
+/*      ENCAPSULATION METHOD: getLeftFootSource
+/*=======================================================================================================*/
+    Transform2D FootMotionPlanner::getLeftFootSource()
+    {
+        return (leftFootSource);
+    }
+/*=======================================================================================================*/
+/*      ENCAPSULATION METHOD: setLeftFootSource
+/*=======================================================================================================*/
+    void FootMotionPlanner::setLeftFootSource(const Transform2D& inLeftFootSource)
+    {
+        leftFootSource = inLeftFootSource;
+    }
+/*=======================================================================================================*/
+/*      ENCAPSULATION METHOD: getRightFootSource
+/*=======================================================================================================*/
+    Transform2D FootMotionPlanner::getRightFootSource()
+    {
+        return (rightFootSource);
+    }
+/*=======================================================================================================*/
+/*      ENCAPSULATION METHOD: setRightFootSource
+/*=======================================================================================================*/
+    void FootMotionPlanner::setRightFootSource(const Transform2D& inRightFootSource)
+    {
+        rightFootSource = inRightFootSource;
+    }
+/*=======================================================================================================*/
+/*      ENCAPSULATION METHOD: getLeftFootDestination
 /*=======================================================================================================*/
     Transform2D FootMotionPlanner::getLeftFootDestination()
     {
-        setNewStepReceived(false);
         return (leftFootDestination.front());
     }
 /*=======================================================================================================*/
-//      ENCAPSULATION METHOD: setLeftFootDestination
+/*      ENCAPSULATION METHOD: setLeftFootDestination
 /*=======================================================================================================*/
     void FootMotionPlanner::setLeftFootDestination(const Transform2D& inLeftFootDestination)
     {
-        setNewStepReceived(true);
         leftFootDestination.push(inLeftFootDestination);
     }
 /*=======================================================================================================*/
-//      ENCAPSULATION METHOD: getRightFootDestination
+/*      ENCAPSULATION METHOD: getRightFootDestination
 /*=======================================================================================================*/
     Transform2D FootMotionPlanner::getRightFootDestination()
     {
-        setNewStepReceived(false);
         return (rightFootDestination.front());
     }
 /*=======================================================================================================*/
-//      ENCAPSULATION METHOD: setRightFootDestination
+/*      ENCAPSULATION METHOD: setRightFootDestination
 /*=======================================================================================================*/
     void FootMotionPlanner::setRightFootDestination(const Transform2D& inRightFootDestination)
     {
-        setNewStepReceived(true);
         rightFootDestination.push(inRightFootDestination);
     }
 /*=======================================================================================================*/

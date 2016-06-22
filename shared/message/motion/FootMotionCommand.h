@@ -21,7 +21,7 @@
 #define MESSAGE_MOTION_FOOTMOTIONCOMMAND_H
 
 #include <armadillo>
-#include "utility/math/matrix/Transform2D.h"
+#include "utility/math/matrix/Transform3D.h"
 
 namespace message 
 {
@@ -37,16 +37,16 @@ namespace motion
     };
     */
 
-    using utility::math::matrix::Transform2D;
+    using utility::math::matrix::Transform3D;
 
     struct FootMotionStopped {};
 
     struct FootMotionUpdate 
     {
         double phase;
-        Transform2D leftFoot;
-        Transform2D rightFoot;
-        FootMotionUpdate(double phase, const Transform2D& leftFoot, const Transform2D& rightFoot)
+        Transform3D leftFoot;
+        Transform3D rightFoot;
+        FootMotionUpdate(double phase, const Transform3D& leftFoot, const Transform3D& rightFoot)
             : phase(phase)
             , leftFoot(leftFoot)
             , rightFoot(rightFoot) {}

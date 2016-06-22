@@ -59,8 +59,10 @@ namespace motion
         updateHandle = on<Every<UPDATE_FREQUENCY, Per<std::chrono::seconds>>, With<Sensors>, Single, Priority::HIGH>()
         .then("Balance Response Planner - Update Robot Posture", [this](const Sensors& sensors) 
         {
+                NUClear::log("Messaging: Balance Kinematic Response - Update Robot Posture(0)"); //debugging
             //hipCompensation();
             //supportMassCompensation();
+                NUClear::log("Messaging: Balance Kinematic Response - Update Robot Posture(0)"); //debugging
         }).disable();
 
         //Aim to avoid dependancy on target position to enhance statelessness and adaptive balance compensation...
