@@ -68,16 +68,19 @@ namespace motion
             configure(config.config);
         });
 
-        on<Trigger<NewWalkCommand>>().then("Foot Placement Planner - Calculate Target Foot Position", [this] (const NewWalkCommand& command) 
+        on<Trigger<NewWalkCommand>>().then("Foot Placement Planner - Update Foot Target", [this] (const NewWalkCommand& command) 
         {
-            setVelocity(command.velocityTarget);
-            NUClear::log("Messaging: Foot Placement Planner - Target Velocity"); //debugging
+                NUClear::log("Messaging: Foot Placement Planner - On New Walk Command(0)"); //debugging
+            //setVelocity(command.velocityTarget);
+                NUClear::log("Messaging: Foot Placement Planner - On New Walk Command(1)"); //debugging
         });
 
         updateHandle = on<Trigger<FootStepCompleted>>().then("Foot Placement Planner - Calculate Target Foot Position", [this]
         {
-            calculateNewStep();
-        });
+                NUClear::log("Messaging: Foot Placement Planner - Calculate Target Foot Position(0)"); //debugging
+            //calculateNewStep();
+                NUClear::log("Messaging: Foot Placement Planner - Calculate Target Foot Position(1)"); //debugging
+        });//RESTORE AFTER DEBUGGING: .disable();
 
         on<Trigger<EnableFootPlacement>>().then([this] (const EnableFootPlacement& command) 
         {

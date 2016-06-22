@@ -44,16 +44,17 @@ namespace motion
     struct WalkCommand 
     {
         WalkCommand() = delete;
-        WalkCommand(size_t id, Transform2D command_) : subsumptionId(id), command(command_) { }
+        
         size_t subsumptionId = 1;
-
-        // x and y are velocity in m/s and angle is in rads/s
-        utility::math::matrix::Transform2D command;
+        Transform2D command; // x and y are velocity in m/s and angle is in rads/s
+        WalkCommand(size_t id, const Transform2D& command) 
+        : subsumptionId(id), command(command) {}
     };
 
     struct WalkStartCommand 
     {
         //WalkStartCommand() = delete;
+        
         WalkStartCommand(size_t id) : subsumptionId(id) { }
         size_t subsumptionId = 1;
     };
@@ -68,6 +69,7 @@ namespace motion
     struct WalkStopCommand 
     {
         WalkStopCommand() = delete;
+        
         WalkStopCommand(size_t id) : subsumptionId(id) { }
         size_t subsumptionId = 1;
     };

@@ -77,15 +77,18 @@ namespace motion
         });
 
         //Transform analytical torso positions in accordance with the stipulated targets...
-        updateHandle = on<Every<UPDATE_FREQUENCY, Per<std::chrono::seconds>>, With<Sensors>, Single, Priority::HIGH>()
+        updateHandle = on<Every<1 /*RESTORE AFTER DEBUGGING: UPDATE_FREQUENCY*/, Per<std::chrono::seconds>>, With<Sensors>, Single, Priority::HIGH>()
         .then("Torso Motion Planner - Update Torso Position", [this](const Sensors& sensors) 
         {
-            updateTorsoPosition();
-        }).disable();
+                NUClear::log("Messaging: Torso Motion Planner - Update Torso Position(0)"); //debugging
+            //updateTorsoPosition();
+                NUClear::log("Messaging: Torso Motion Planner - Update Torso Position(1)"); //debugging
+        });//RESTORE AFTER DEBUGGING: .disable();
 
         //In the event of a new foot step target specified by the foot placement planning module...
         on<Trigger<FootStepTarget>>().then("Torso Motion Planner - Received Target Torso Position", [this] (const FootStepTarget& target) 
         {
+<<<<<<< 29fe3c741efbfe902cfd5e199220e262e93abc3c
 <<<<<<< f23d4331e4606fba733a1bb2327d6000df6cb997
 <<<<<<< e7199040444bd454e68ee7a37c6bfb4e3c9debc2
 <<<<<<< f10da9c4b0232f8ba743f03d26325ddc863f1f48
@@ -103,6 +106,10 @@ namespace motion
 =======
             if(target.supportMass == LimbID::LEFT_LEG)
 >>>>>>> Torso Motion Planner Fixing...
+=======
+                NUClear::log("Messaging: Torso Motion Planner - Received Target Torso Position(0)"); //debugging
+            /*if(target.supportMass == LimbID::LEFT_LEG)
+>>>>>>> Fixed vec size emit error (Transform2D to Transform3D) for Foot Motion Planner
             {
                 setLeftFootDestination(target.targetDestination);
             }
@@ -111,7 +118,8 @@ namespace motion
                 setRightFootDestination(target.targetDestination);
             }
             setDestinationTime(target.targetTime); 
-            zmpTorsoCoefficients();
+            zmpTorsoCoefficients();*/
+                NUClear::log("Messaging: Torso Motion Planner - Received Target Torso Position(1)"); //debugging
         });
 
         //on<Trigger<NewStepTargetInfo>>().then([this]){};
@@ -119,7 +127,7 @@ namespace motion
         //In the process of actuating a foot step and emitting updated positional data...
         on<Trigger<FootMotionUpdate>>().then("Torso Motion Planner - Received Foot Motion Update", [this] (const FootMotionUpdate& info) 
         {
-            setMotionPhase(info.phase);
+            //setMotionPhase(info.phase);
         });
 
         on<Trigger<EnableTorsoMotion>>().then([this] (const EnableTorsoMotion& command) 
