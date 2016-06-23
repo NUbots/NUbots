@@ -50,8 +50,8 @@ namespace motion
 /*=======================================================================================================*/
     FootMotionPlanner::FootMotionPlanner(std::unique_ptr<NUClear::Environment> environment)
     : Reactor(std::move(environment)) 
-    {
-    	//Configure foot motion planner...
+    {    	
+        //Configure foot motion planner...
         on<Configuration>("FootMotionPlanner.yaml").then("Foot Motion Planner - Configure", [this] (const Configuration& config) 
         {
             configure(config.config);
@@ -61,15 +61,15 @@ namespace motion
         updateHandle = on<Every<1 /*RESTORE AFTER DEBUGGING: UPDATE_FREQUENCY*/, Per<std::chrono::seconds>>, With<Sensors>, Single, Priority::HIGH>()
         .then("Foot Motion Planner - Update Foot Position", [this](const Sensors& sensors) 
         {
-                NUClear::log("Messaging: Foot Motion Planner - Update Foot Position(0)"); //debugging
+            if(DEBUG) { NUClear::log("Messaging: Foot Motion Planner - Update Foot Position(0)"); }
             updateFootPosition(getMotionPhase(), getLeftFootDestination(), getRightFootDestination());
-                NUClear::log("Messaging: Foot Motion Planner - Update Foot Position(1)"); //debugging
+            if(DEBUG) { NUClear::log("Messaging: Foot Motion Planner - Update Foot Position(1)"); }
         });//RESTORE AFTER DEBUGGING: .disable();
 
         //In the event of a new foot step target specified by the foot placement planning module...
         on<Trigger<FootStepTarget>>().then("Foot Motion Planner - Received Target Foot Position", [this] (const FootStepTarget& target) 
         {
-                NUClear::log("Messaging: Foot Motion Planner - Received Target Foot Position(0)"); //debugging
+            if(DEBUG) { NUClear::log("Messaging: Foot Motion Planner - Received Target Foot Position(0)"); }
             if(target.supportMass == LimbID::LEFT_LEG)
             {
                 setLeftFootDestination(target.targetDestination);
@@ -79,7 +79,7 @@ namespace motion
                 setRightFootDestination(target.targetDestination);
             }
             setDestinationTime(target.targetTime); 
-                NUClear::log("Messaging: Foot Motion Planner - Received Target Foot Position(1)"); //debugging
+            if(DEBUG) { NUClear::log("Messaging: Foot Motion Planner - Received Target Foot Position(1)"); }
         });
 
         on<Trigger<EnableFootMotion>>().then([this] (const EnableFootMotion& command) 
@@ -99,7 +99,6 @@ namespace motion
 /*=======================================================================================================*/
     void FootMotionPlanner::updateFootPosition(double phase, const Transform2D& leftFootDestination, const Transform2D& rightFootDestination) 
     {
-        NUClear::log("Messaging: Foot Motion Planner - Instantiate footPhases"); //debugging
         // Active left foot position
         Transform2D leftFootPositionTransform;
         // Active right foot position
@@ -108,13 +107,13 @@ namespace motion
         arma::vec3 footPhases = footPhase(phase, phase1Single, phase2Single);
 
         //Lift foot by amount depending on walk speed
-        NUClear::log("Messaging: Foot Motion Planner - footPhase limits and calculations"); //debugging
+        if(DEBUG) { NUClear::log("Messaging: Foot Motion Planner - footPhase limits and calculations"); }
         auto& limit = (velocityCurrent.x() > velocityHigh ? accelerationLimitsHigh : accelerationLimits); // TODO: use a function instead
         float speed = std::min(1.0, std::max(std::abs(velocityCurrent.x() / limit[0]), std::abs(velocityCurrent.y() / limit[1])));
         float scale = (step_height_fast_fraction - step_height_slow_fraction) * speed + step_height_slow_fraction;
         footPhases[2] *= scale;
 
-        NUClear::log("Messaging: Foot Motion Planner - Interpolate Transform2D"); //debugging
+        if(DEBUG) { NUClear::log("Messaging: Foot Motion Planner - Interpolate Transform2D"); }
         //Interpolate Transform2D from start to destination - deals with flat resolved movement in (x,y) coordinates
         if (swingLeg == LimbID::RIGHT_LEG) 
         {
@@ -127,12 +126,12 @@ namespace motion
             leftFootPositionTransform  = getLeftFootSource().interpolate(footPhases[0],   leftFootDestination);
         }
         
-        NUClear::log("Messaging: Foot Motion Planner - Instantiate FootLocal Variables"); //debugging
+        if(DEBUG) { NUClear::log("Messaging: Foot Motion Planner - Instantiate FootLocal Variables"); }
         //Translates foot motion into z dimension for stepping in three-dimensional space...
         Transform3D leftFootLocal  = leftFootPositionTransform;
         Transform3D rightFootLocal = rightFootPositionTransform;
 
-        NUClear::log("Messaging: Foot Motion Planner - Translate Z for support foot"); //debugging
+        if(DEBUG) { NUClear::log("Messaging: Foot Motion Planner - Translate Z for support foot"); }
         //Lift swing leg - manipulate(update) z component of foot position to action movement with a varying altitude locus...
         if (swingLeg == LimbID::RIGHT_LEG) 
         {
@@ -149,7 +148,7 @@ namespace motion
             emit(graph("Foot Phase Motion", phase));
         }
 
-        NUClear::log("Messaging: Foot Motion Planner - Emit FootMotionUpdate"); //debugging
+        if(DEBUG) { NUClear::log("Messaging: Foot Motion Planner - Emit FootMotionUpdate"); }
         //Broadcast struct of updated foot motion data at corresponding phase identity...
         emit(std::make_unique<FootMotionUpdate>(phase, leftFootLocal, rightFootLocal));
     }

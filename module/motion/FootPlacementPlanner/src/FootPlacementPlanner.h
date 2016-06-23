@@ -70,6 +70,9 @@ namespace motion
         using Transform3D    = utility::math::matrix::Transform3D;
         using UnitQuaternion = utility::math::geometry::UnitQuaternion;
 
+        //Debug output
+        bool DEBUG = true; 
+
         enum State {
             /**
              * Walk engine has completely stopped and standing still
