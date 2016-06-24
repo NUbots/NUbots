@@ -45,7 +45,8 @@ namespace module {
             using utility::motion::kinematics::calculateLegJoints;
             using utility::motion::kinematics::calculatePosition;
             using utility::motion::kinematics::Side;
-            using utility::motion::kinematics::calculateHeadJoints;
+            using utility::motion::kinematics::DarwinModel;
+            using utility::motion::kinematics::calculateCameraLookJoints;
 
             KinematicsDebug::KinematicsDebug(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
 
@@ -224,7 +225,7 @@ namespace module {
                             cameraVec *= 1/arma::norm(cameraVec,2);
                         }
 
-                        std::vector< std::pair<message::input::ServoID, float> > angles = calculateHeadJoints<DarwinModel>(model,cameraVec);
+                        std::vector< std::pair<message::input::ServoID, float> > angles = calculateCameraLookJoints<DarwinModel>(cameraVec);
                         Sensors sensors;
                         sensors.servos = std::vector<Sensors::Servo>(20);
 

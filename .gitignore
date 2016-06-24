@@ -35,7 +35,7 @@ packer/build.pwi
 
 # LaTeX stuff
 *.aux
-*.pdf
+
 *.out
 *.glo
 *.idx

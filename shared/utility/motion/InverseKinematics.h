@@ -244,11 +244,20 @@ namespace kinematics {
         return joints;
     }
 
+
+    template <typename KinematicModel>
+    std::vector< std::pair<message::input::ServoID, float> > calculateCameraLookJoints(const KinematicModel& model, arma::vec3 cameraUnitVector){
+        std::vector< std::pair<message::input::ServoID, float> > positions;
+        positions.push_back(std::make_pair(message::input::ServoID::HEAD_YAW, atan2(cameraUnitVector[1],cameraUnitVector[0]) ));
+        positions.push_back(std::make_pair(message::input::ServoID::HEAD_PITCH, atan2(-cameraUnitVector[2], std::sqrt(cameraUnitVector[0]*cameraUnitVector[0]+cameraUnitVector[1]*cameraUnitVector[1])) - model.Head.CAMERA_DECLINATION_ANGLE_OFFSET ));
+        return positions;
+    }
+
     template <typename KinematicModel>
     std::vector< std::pair<message::input::ServoID, float> > calculateHeadJoints(const KinematicModel& model, arma::vec3 cameraUnitVector){
         std::vector< std::pair<message::input::ServoID, float> > positions;
         positions.push_back(std::make_pair(message::input::ServoID::HEAD_YAW, atan2(cameraUnitVector[1],cameraUnitVector[0]) ));
-        positions.push_back(std::make_pair(message::input::ServoID::HEAD_PITCH, atan2(-cameraUnitVector[2], std::sqrt(cameraUnitVector[0]*cameraUnitVector[0]+cameraUnitVector[1]*cameraUnitVector[1])) ));
+        positions.push_back(std::make_pair(message::input::ServoID::HEAD_PITCH, atan2(-cameraUnitVector[2], std::sqrt(cameraUnitVector[0]*cameraUnitVector[0]+cameraUnitVector[1]*cameraUnitVector[1]))));
         return positions;
     }
 
@@ -276,7 +285,7 @@ namespace kinematics {
         // float headPitch = euler[1] - bodyAngle;
         // float headYaw = euler[2];
         arma::vec3 gaze = cameraToFeet.rotation().col(0);
-        auto headJoints = utility::motion::kinematics::calculateHeadJoints(model, gaze);
+        auto headJoints = utility::motion::kinematics::calculateCameraLookJoints<KinematicModel>(model, gaze);
         float headPitch = std::numeric_limits<float>::quiet_NaN();
         float headYaw = std::numeric_limits<float>::quiet_NaN();
         for(auto joint : headJoints){

@@ -107,7 +107,7 @@ namespace strategy {
         });
 
         // TODO: unhack
-        emit(std::make_unique<KickPlan>(KickPlan{{4.5, 0}, KickType::IK_KICK}));
+        emit(std::make_unique<KickPlan>(KickPlan{{4.5, 0}, KickType::SCRIPTED}));
 
 
         // For checking last seen times

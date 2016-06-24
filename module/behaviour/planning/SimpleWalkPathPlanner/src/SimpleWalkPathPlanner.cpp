@@ -27,6 +27,7 @@
 #include "message/vision/VisionObjects.h"
 #include "message/motion/WalkCommand.h"
 #include "message/motion/KickCommand.h"
+#include "message/behaviour/MotionCommand.h"
 #include "utility/nubugger/NUhelpers.h"
 #include "utility/localisation/transform.h"
 #include "utility/math/matrix/Transform2D.h"
@@ -39,8 +40,6 @@ namespace module {
             using message::support::Configuration;
             using message::input::Sensors;
             using message::motion::WalkCommand;
-            using message::behaviour::WalkTarget;
-            using message::behaviour::WalkApproach;
             using message::behaviour::KickPlan;
             using message::behaviour::MotionCommand;
             using message::motion::WalkStartCommand;
@@ -56,9 +55,10 @@ namespace module {
             using VisionBall = message::vision::Ball;
             using VisionObstacle = message::vision::Obstacle;
 
-            SimpleWalkPathPlanner::SimpleWalkPathPlanner(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
-                //we will initially stand still
-                planType = message::behaviour::WalkApproach::StandStill;
+            SimpleWalkPathPlanner::SimpleWalkPathPlanner(std::unique_ptr<NUClear::Environment> environment)
+             : Reactor(std::move(environment))
+             // , subsumptionId(size_t(this) * size_t(this) - size_t(this)) 
+             , planType(message::behaviour::MotionCommand::Type::StandStill) {
 
                 //do a little configurating
                 on<Configuration>("SimpleWalkPathPlanner.yaml").then([this] (const Configuration& file){
@@ -72,32 +72,32 @@ namespace module {
 
 
                 on<Trigger<KickFinished>>().then([this] (const KickFinished&) {
-                    emit(std::move(std::make_unique<WalkStartCommand>()));
+                    emit(std::move(std::make_unique<WalkStartCommand>(1)));
                 });
 
                 on<Every<20, Per<std::chrono::seconds>>
                  , With<message::localisation::Ball>
                  , With<std::vector<message::localisation::Self>>
-                 , With<Optional<std::vector<message::vision::Obstacle>>>
+                 , Optional<With<std::vector<message::vision::Obstacle>>>
                  , Sync<SimpleWalkPathPlanner>>().then([this] (
                      const LocalisationBall& ball,
                      const std::vector<Self>& selfs,
                      std::shared_ptr<const std::vector<VisionObstacle>> robots) {
 
-                    if (planType == message::behaviour::WalkApproach::StandStill) {
+                    if (planType == message::behaviour::MotionCommand::Type::StandStill) {
 
-                        emit(std::make_unique<WalkStopCommand>());
+                        emit(std::make_unique<WalkStopCommand>(1));
                         return;
 
                     }
-                    else if (planType == message::behaviour::WalkApproach::DirectCommand) {
+                    else if (planType == message::behaviour::MotionCommand::Type::DirectCommand) {
                         //TO DO, change to Bezier stuff
 
-                        std::unique_ptr<WalkCommand> command = std::make_unique<WalkCommand>();
+                        std::unique_ptr<WalkCommand> command = std::make_unique<WalkCommand>(1, Transform2D({currentTargetPosition[0], currentTargetPosition[1], 0.5}));
                         command->command.xy()    = currentTargetPosition;
                         command->command.angle() = currentTargetHeading[0];
                         emit(std::move(command));
-                        emit(std::move(std::make_unique<WalkStartCommand>()));
+                        emit(std::move(std::make_unique<WalkStartCommand>(1)));
                         return;
 
                     }
@@ -123,7 +123,7 @@ namespace module {
                     // emit(graph("distanceToBall", distanceToBall));
                     // emit(graph("forwardSpeed2", finalForwardSpeed));
 
-                    std::unique_ptr<WalkCommand> command = std::make_unique<WalkCommand>();
+                    std::unique_ptr<WalkCommand> command = std::make_unique<WalkCommand>(1, Transform2D({currentTargetPosition[0], currentTargetPosition[1], 0.5}));
                     command->command = Transform2D({finalForwardSpeed, 0, angle});
 
                     arma::vec2 ball_world_position = RobotToWorldTransform(selfs.front().position, selfs.front().heading, ball.position);
@@ -131,18 +131,18 @@ namespace module {
                     emit(drawSphere("kick_target", arma::vec3({kick_target[0], kick_target[1], 0.0}), 0.1, arma::vec3({1, 0, 0}), 0));
 
                     emit(std::make_unique<KickPlan>(KickPlan{kick_target}));
-                    emit(std::move(std::make_unique<WalkStartCommand>()));
+                    emit(std::move(std::make_unique<WalkStartCommand>(1)));
                     emit(std::move(command));
 
                 });
 
                 on<Trigger<MotionCommand>, Sync<SimpleWalkPathPlanner>>().then([this] (const MotionCommand& cmd) {
                     //save the plan
-                    planType = cmd.walkMovementType;
-                    targetHeading = cmd.targetHeadingType;
-                    targetPosition = cmd.targetPositionType;
-                    currentTargetPosition = cmd.target;
-                    currentTargetHeading = cmd.heading;
+                    planType = cmd.type;
+                    // targetHeading = cmd.kickTargetType;
+                    // targetPosition = cmd.targetPositionType;
+                    // currentTargetPosition = cmd.kickTarget;
+                    currentTargetHeading = std::atan2(cmd.kickTarget[1],cmd.kickTarget[0]);
                 });
 
             }

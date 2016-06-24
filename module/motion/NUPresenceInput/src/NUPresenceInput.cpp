@@ -215,7 +215,7 @@ namespace motion {
             if(gyro_compensation){
                 gaze = yawlessOrientation * gaze;
             }
-            auto joints = utility::motion::kinematics::calculateHeadJoints<DarwinModel>(gaze);
+            auto joints = utility::motion::kinematics::calculateCameraLookJoints<DarwinModel>(gaze);
 
             //TODO: 6DOF needs fixing
             // auto joints = utility::motion::kinematics::setHeadPoseFromFeet<DarwinModel>(currentCamPose, foot_separation, body_angle);

@@ -42,6 +42,10 @@ namespace behaviour {
         MotionCommand() { }
 
     public:
+        MotionCommand(const MotionCommand& c){
+            *this = c;
+        }
+
         static MotionCommand StandStill() {
             MotionCommand cmd;
             cmd.type = Type::StandStill;
