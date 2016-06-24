@@ -25,17 +25,17 @@
 #include <yaml-cpp/yaml.h>
 
 #include "message/support/Configuration.h"
-#include "message/platform/darwin/KinematicsModels.h"
+#include "message/motion/KinematicsModels.h"
 
 namespace module {
 namespace platform {
 namespace darwin {
 
-    class KinematicsModel : public NUClear::Reactor {
+    class KinematicsConfiguration : public NUClear::Reactor {
 
     public:
-        /// @brief Called by the powerplant to build and setup the KinematicsModel reactor.
-        explicit KinematicsModel(std::unique_ptr<NUClear::Environment> environment);
+        /// @brief Called by the powerplant to build and setup the KinematicsConfiguration reactor.
+        explicit KinematicsConfiguration(std::unique_ptr<NUClear::Environment> environment);
 
     private:
     	void configure (message::platform::darwin::DarwinKinematicsModel& darwinModel, const message::support::Configuration& objDarwinModel);
