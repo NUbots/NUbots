@@ -19,14 +19,14 @@
 
 #include "WalkEngine.h"
 
-#include "utility/motion/RobotModels.h"
+#include "message/motion/KinematicsModels.h"
 #include "utility/nubugger/NUhelpers.h"
 
 namespace module {
 namespace motion {
 
     using message::input::LimbID;
-    using utility::motion::kinematics::DarwinModel;
+    using message::motion::KinematicsModel;
     using utility::math::matrix::Transform2D;
     using utility::nubugger::graph;
 

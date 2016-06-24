@@ -22,7 +22,7 @@
 #include "message/motion/HeadCommand.h"
 #include "utility/math/coordinates.h"
 #include "utility/motion/InverseKinematics.h"
-#include "utility/motion/RobotModels.h"
+#include "message/motion/KinematicsModels.h"
 #include "utility/math/matrix/Rotation3D.h"
 #include "utility/math/matrix/Transform3D.h"
 #include "utility/math/geometry/UnitQuaternion.h"
@@ -59,7 +59,7 @@ namespace module {
 
         using utility::math::coordinates::sphericalToCartesian;
         using utility::motion::kinematics::calculateCameraLookJoints;
-        using utility::motion::kinematics::DarwinModel;
+        using message::motion::KinematicsModel;
         using utility::math::matrix::Rotation3D;
         using utility::math::geometry::Quad;
         using utility::math::geometry::UnitQuaternion;
@@ -82,10 +82,10 @@ namespace module {
                 on<Configuration>("HeadBehaviourSoccer.yaml").then("Head Behaviour Soccer Config", [this] (const Configuration& config) {
                     lastPlanUpdate = NUClear::clock::now();
                     timeLastObjectSeen = NUClear::clock::now();
-                    max_yaw = utility::motion::kinematics::DarwinModel::Head::MAX_YAW;
-                    min_yaw = utility::motion::kinematics::DarwinModel::Head::MIN_YAW;
-                    max_pitch = utility::motion::kinematics::DarwinModel::Head::MAX_PITCH;
-                    min_pitch = utility::motion::kinematics::DarwinModel::Head::MIN_PITCH;
+                    max_yaw = message::motion::KinematicsModel::Head::MAX_YAW;
+                    min_yaw = message::motion::KinematicsModel::Head::MIN_YAW;
+                    max_pitch = message::motion::KinematicsModel::Head::MAX_PITCH;
+                    min_pitch = message::motion::KinematicsModel::Head::MIN_PITCH;
 
                     //Config HeadBehaviourSoccer.yaml
                     fractional_view_padding = config["fractional_view_padding"].as<double>();
@@ -147,12 +147,14 @@ namespace module {
                     Optional<With<std::vector<Goal>>>,
                     Optional<With<LocBall>>,
                     With<CameraParameters>,
+                    With<KinematicsModel>,
                     Single,
                     Sync<HeadBehaviourSoccer>
                   >().then("Head Behaviour Main Loop", [this] ( const Sensors& sensors,
                                                         std::shared_ptr<const std::vector<Ball>> vballs,
                                                         std::shared_ptr<const std::vector<Goal>> vgoals,
                                                         std::shared_ptr<const LocBall> locBall,
+                                                        const KinematicsModel& kinematicsModel,
                                                         const CameraParameters& cam_
                                                         ) {
 
@@ -211,7 +213,7 @@ namespace module {
                         for(auto& ob : fixationObjects){
                             currentCentroid += ob.screenAngular / float(fixationObjects.size());
                         }
-                        arma::vec2 currentCentroid_world = getIMUSpaceDirection(currentCentroid,headToIMUSpace);
+                        arma::vec2 currentCentroid_world = getIMUSpaceDirection(kinematicsModel,currentCentroid,headToIMUSpace);
                         //If our objects have moved, we need to replan
                         if(arma::norm(currentCentroid_world - lastCentroid) >= fractional_angular_update_threshold * std::fmax(cam.FOV[0],cam.FOV[1]) / 2.0){
                             objectMoved = true;
@@ -253,7 +255,7 @@ namespace module {
                         if(lost){
                             lastPlanOrientation = sensors.orientation;
                         }
-                        updateHeadPlan(fixationObjects, objectsMissing, sensors, headToIMUSpace);
+                        updateHeadPlan(kinematicsModel,fixationObjects, objectsMissing, sensors, headToIMUSpace);
                     }
 
                     //Update searcher
@@ -321,7 +323,7 @@ namespace module {
             }
 
 
-            void HeadBehaviourSoccer::updateHeadPlan(const std::vector<VisionObject>& fixationObjects, const bool& search, const Sensors& sensors, const Rotation3D& headToIMUSpace){
+            void HeadBehaviourSoccer::updateHeadPlan(const KinematicsModel& kinematicsModel, const std::vector<VisionObject>& fixationObjects, const bool& search, const Sensors& sensors, const Rotation3D& headToIMUSpace){
                 std::vector<arma::vec2> fixationPoints;
                 std::vector<arma::vec2> fixationSizes;
                 arma::vec centroid = {0,0};
@@ -337,7 +339,7 @@ namespace module {
 
                 //If there are objects to find
                 if(search){
-                    fixationPoints = getSearchPoints(fixationObjects, searchType, sensors);
+                    fixationPoints = getSearchPoints(kinematicsModel,fixationObjects, searchType, sensors);
                 }
 
                 if(fixationPoints.size() <= 0){
@@ -347,15 +349,15 @@ namespace module {
                 //Transform to IMU space including compensation for current head pose
                 if(!search){
                     for(auto& p : fixationPoints){
-                        p = getIMUSpaceDirection(p, headToIMUSpace);
+                        p = getIMUSpaceDirection(kinematicsModel,p, headToIMUSpace);
                     }
-                    currentPos = getIMUSpaceDirection(currentPos, headToIMUSpace);
+                    currentPos = getIMUSpaceDirection(kinematicsModel,currentPos, headToIMUSpace);
                 }
 
                 headSearcher.replaceSearchPoints(fixationPoints, currentPos);
             }
 
-            arma::vec2 HeadBehaviourSoccer::getIMUSpaceDirection(const arma::vec2& screenAngles, Rotation3D headToIMUSpace){
+            arma::vec2 HeadBehaviourSoccer::getIMUSpaceDirection(const KinematicsModel& kinematicsModel, const arma::vec2& screenAngles, Rotation3D headToIMUSpace){
 
                 // arma::vec3 lookVectorFromHead = objectDirectionFromScreenAngular(screenAngles);
                 arma::vec3 lookVectorFromHead = sphericalToCartesian({1,screenAngles[0],screenAngles[1]});//This is an approximation relying on the robots small FOV
@@ -364,7 +366,7 @@ namespace module {
                 //Rotate target angles to World space
                 arma::vec3 lookVector = headToIMUSpace * lookVectorFromHead;
                 //Compute inverse kinematics for head direction angles
-                std::vector< std::pair<ServoID, float> > goalAngles = calculateCameraLookJoints<DarwinModel>(lookVector);
+                std::vector< std::pair<ServoID, float> > goalAngles = calculateCameraLookJoints(kinematicsModel, lookVector);
 
                 arma::vec2 result;
                 for(auto& angle : goalAngles){
@@ -380,14 +382,14 @@ namespace module {
             /*! Get search points which keep everything in view.
             Returns vector of arma::vec2
             */
-            std::vector<arma::vec2> HeadBehaviourSoccer::getSearchPoints(std::vector<VisionObject> fixationObjects, SearchType sType, const Sensors& sensors){
+            std::vector<arma::vec2> HeadBehaviourSoccer::getSearchPoints(const KinematicsModel& kinematicsModel,std::vector<VisionObject> fixationObjects, SearchType sType, const Sensors& sensors){
                     //If there is nothing of interest, we search fot points of interest
                     // log("getting search points");
                     if(fixationObjects.size() == 0){
                         // log("getting search points 2");
                         //Lost searches are normalised in terms of the FOV
                         std::vector<arma::vec2> scaledResults;
-                        //scaledResults.push_back(utility::motion::kinematics::headAnglesToSeeGroundPoint<DarwinModel>(lastLocBall.position,sensors));
+                        //scaledResults.push_back(utility::motion::kinematics::headAnglesToSeeGroundPoint(kinematicsModel, lastLocBall.position,sensors));
                         for(auto& p : searches[sType]){
                             // log("adding search point", p.t());
                             //old angles thing
@@ -405,7 +407,7 @@ namespace module {
 
 
                                 arma::vec3 adjustedLookVector = Rotation3D::createRotationY(sensors.orientation.pitch()) * lookVectorFromHead;
-                                std::vector< std::pair<ServoID, float> > goalAngles = calculateCameraLookJoints<DarwinModel>(adjustedLookVector);
+                                std::vector< std::pair<ServoID, float> > goalAngles = calculateCameraLookJoints(kinematicsModel, adjustedLookVector);
 
                                 for(auto& angle : goalAngles){
                                     if(angle.first == ServoID::HEAD_PITCH){

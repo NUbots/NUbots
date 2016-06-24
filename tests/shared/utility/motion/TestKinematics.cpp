@@ -26,7 +26,7 @@
 
 using message::input::ServoID;
 using message::input::Sensors;
-using utility::motion::kinematics::DarwinModel;
+using message::motion::KinematicsModel;
 using utility::motion::kinematics::calculateCameraLookJoints;
 
 TEST_CASE("Test the Head kinematics", "[utility][motion][kinematics][head]") {
@@ -34,6 +34,8 @@ TEST_CASE("Test the Head kinematics", "[utility][motion][kinematics][head]") {
     const double ITERATIONS = 10000;
 
     srand(time(nullptr));
+
+    KinematicsModel kinematicsModel;
 
     for(int i = 0; i < ITERATIONS; ++i) {
 
@@ -43,7 +45,7 @@ TEST_CASE("Test the Head kinematics", "[utility][motion][kinematics][head]") {
 
         INFO("Testing with the random vector, " << camVec.t());
 
-        std::vector<std::pair<message::input::ServoID, float>> angles = utility::motion::kinematics::calculateCameraLookJoints<DarwinModel>(camVec);
+        std::vector<std::pair<message::input::ServoID, float>> angles = utility::motion::kinematics::calculateCameraLookJoints(kinematicsModel,camVec);
 
         // Make our sensors object
         Sensors sensors;
@@ -60,7 +62,7 @@ TEST_CASE("Test the Head kinematics", "[utility][motion][kinematics][head]") {
         }
 
         // Do our forward kinematics
-        arma::mat44 fKin = utility::motion::kinematics::calculatePosition<DarwinModel>(sensors, ServoID::HEAD_PITCH)[ServoID::HEAD_PITCH];
+        arma::mat44 fKin = utility::motion::kinematics::calculatePosition(KinematicsModel(),sensors, ServoID::HEAD_PITCH)[ServoID::HEAD_PITCH];
 
         // Check that our vector that forward kinematics finds is close to what is expected
         REQUIRE(double(fKin(0, 0) - camVec[0]) == Approx(0));

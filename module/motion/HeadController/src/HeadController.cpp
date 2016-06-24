@@ -27,7 +27,7 @@
 #include "message/motion/HeadCommand.h"
 #include "utility/math/coordinates.h"
 #include "utility/motion/InverseKinematics.h"
-#include "utility/motion/RobotModels.h"
+#include "message/motion/KinematicsModels.h"
 #include "utility/support/yaml_expression.h"
 #include "utility/nubugger/NUhelpers.h"
 
@@ -47,7 +47,7 @@ namespace module {
         using utility::math::coordinates::cartesianToSpherical;
         using utility::motion::kinematics::calculateCameraLookJoints;
         using utility::motion::kinematics::calculateHeadJoints;
-        using utility::motion::kinematics::DarwinModel;
+        using message::motion::KinematicsModel;
         using utility::support::Expression;
 
         //internal only callback messages to start and stop our action
@@ -85,7 +85,9 @@ namespace module {
                 }
             });
 
-            updateHandle = on<Trigger<Sensors>, Single, Priority::HIGH>().then("Head Controller - Update Head Position",[this] (const Sensors& sensors) {
+            updateHandle = on<Trigger<Sensors, kinematicsModel>, Single, Priority::HIGH>()
+            .then("Head Controller - Update Head Position", [this] (const Sensors& sensors, const KinematicsModel& kinematicsModel) {
+                
                 emit(graph("HeadController Goal Angles", goalAngles[0], goalAngles[1]));
                 
                 //P controller
@@ -98,7 +100,7 @@ namespace module {
                 //Convert to robot space
                 arma::vec3 headUnitVector = goalRobotSpace ? goalHeadUnitVector_world : sensors.orientation * goalHeadUnitVector_world;
                 //Compute inverse kinematics for head
-                std::vector< std::pair<message::input::ServoID, float> > goalAnglesList = calculateHeadJoints<DarwinModel>(headUnitVector);
+                std::vector< std::pair<message::input::ServoID, float> > goalAnglesList = calculateHeadJoints(kinematicsModel, headUnitVector);
                 // arma::vec2 goalAngles = cartesianToSpherical(headUnitVector).rows(1,2);
 
                 //Clamp head angles

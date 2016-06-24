@@ -18,14 +18,14 @@
  */
 
 #include "IKKickControllers.h"
-#include "utility/motion/RobotModels.h"
+#include "message/motion/KinematicsModels.h"
 
 using message::input::Sensors;
 using message::input::LimbID;
 using message::input::ServoID;
 using message::support::Configuration;
 using utility::math::matrix::Transform3D;
-using utility::motion::kinematics::DarwinModel;
+using message::motion::KinematicsModel;
 
 namespace module{
 namespace motion{

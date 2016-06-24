@@ -23,8 +23,7 @@
 #include "utility/support/yaml_armadillo.h"
 #include "utility/motion/InverseKinematics.h"
 #include "utility/motion/ForwardKinematics.h"
-#include "utility/motion/RobotModels.h"
-#include "utility/motion/RobotModels.h"
+#include "message/motion/KinematicsModels.h"
 #include "message/behaviour/ServoCommand.h"
 #include "message/input/ServoID.h"
 #include "message/input/Sensors.h"
@@ -45,12 +44,12 @@ namespace motion {
     using message::input::Sensors;
     using message::input::LimbID;
     using message::input::proto::PresenceUserState;
+    using message::motion::KinematicsModel;
 
     using message::input::MotionCapture;
 
     using utility::math::matrix::Transform3D;
     using utility::math::matrix::Rotation3D;
-    using utility::motion::kinematics::DarwinModel;
     using utility::motion::kinematics::Side;
 
     using utility::support::Expression;
@@ -189,8 +188,8 @@ namespace motion {
             }
         });
 
-        on<Every<60,Per<std::chrono::seconds>>, With<Sensors>, Sync<NUPresenceInput>
-        >().then([this](const Sensors& sensors){
+        on<Every<60,Per<std::chrono::seconds>>, With<Sensors, KinematicsModel>, Sync<NUPresenceInput>
+        >().then([this](const Sensors& sensors, const KinematicsModel& kinematicsModel){
 			
         	//Record current arm position:
         	// arma::vec3 prevArmJointsL = {
@@ -215,19 +214,19 @@ namespace motion {
             if(gyro_compensation){
                 gaze = yawlessOrientation * gaze;
             }
-            auto joints = utility::motion::kinematics::calculateCameraLookJoints<DarwinModel>(gaze);
+            auto joints = utility::motion::kinematics::calculateCameraLookJoints(kinematicsModel, gaze);
 
             //TODO: 6DOF needs fixing
-            // auto joints = utility::motion::kinematics::setHeadPoseFromFeet<DarwinModel>(currentCamPose, foot_separation, body_angle);
+            // auto joints = utility::motion::kinematics::setHeadPoseFromFeet(kinematicsModel, currentCamPose, foot_separation, body_angle);
             
 			//Adjust arm position
         	// int max_number_of_iterations = 20;
             Transform3D camToBody = sensors.forwardKinematics.at(ServoID::HEAD_PITCH);
-            arma::vec3 kneckPos = { DarwinModel::Head::NECK_BASE_POS_FROM_ORIGIN_X,
-                                    DarwinModel::Head::NECK_BASE_POS_FROM_ORIGIN_Y,
-                                    DarwinModel::Head::NECK_BASE_POS_FROM_ORIGIN_Z};
-        	auto arm_jointsL = utility::motion::kinematics::setArmApprox<DarwinModel>(kneckPos + l_arm, true);
-        	auto arm_jointsR = utility::motion::kinematics::setArmApprox<DarwinModel>(kneckPos + r_arm, false);
+            arma::vec3 kneckPos = { kinematicsModel.Head.NECK_BASE_POS_FROM_ORIGIN_X,
+                                    kinematicsModel.Head.NECK_BASE_POS_FROM_ORIGIN_Y,
+                                    kinematicsModel.Head.NECK_BASE_POS_FROM_ORIGIN_Z};
+        	auto arm_jointsL = utility::motion::kinematics::setArmApprox(kinematicsModel, kneckPos + l_arm, true);
+        	auto arm_jointsR = utility::motion::kinematics::setArmApprox(kinematicsModel, kneckPos + r_arm, false);
             // joints.insert(joints.end(), arm_jointsL.begin(), arm_jointsL.end());
             // joints.insert(joints.end(), arm_jointsR.begin(), arm_jointsR.end());
 
@@ -249,7 +248,7 @@ namespace motion {
         	// Transform3D L_arm = sensors.forwardKinematics.at(ServoID::L_ELBOW);
 
         	// arma::vec3 zeros = arma::zeros(3);
-        	// arma::vec3 zero_pos = utility::motion::kinematics::calculateArmPosition<DarwinModel>(zeros, true);
+        	// arma::vec3 zero_pos = utility::motion::kinematics::calculateArmPosition(kinematicsModel, zeros, true);
 
         	// std::cout << "New zero pos = \n" << zero_pos << std::endl;
         	// std::cout << "Traditional FK R_shoulder_pitch = \n" << R_shoulder_pitch << std::endl;

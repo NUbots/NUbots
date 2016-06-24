@@ -32,7 +32,7 @@ namespace darwin {
     using message::motion::KinematicsModel;
 
     using utility::support::Expression;
-    using utility::motion::kinematics::DarwinModel;
+    using message::motion::KinematicsModel;
 
     KinematicsConfiguration::KinematicsConfiguration(std::unique_ptr<NUClear::Environment> environment)
     : Reactor(std::move(environment)) {

@@ -26,12 +26,12 @@
 #include "message/input/ServoID.h"
 #include "message/input/Sensors.h"
 #include "message/motion/ServoTarget.h"
-#include "message/platform/darwin/KinematicsModels.h"
+#include "message/motion/KinematicsModels.h"
 
 #include "utility/motion/InverseKinematics.h"
 #include "utility/motion/ForwardKinematics.h"
 #include "utility/math/matrix/Transform3D.h"
-// #include "utility/motion/RobotModels.h"
+// #include "message/motion/KinematicsModels.h"
 
 namespace module {
     namespace debug {
@@ -40,17 +40,17 @@ namespace module {
             using message::motion::ServoTarget;
             using message::input::ServoID;
             using message::input::Sensors;
-            using message::platform::darwin::DarwinKinematicsModel;
+            using message::motion::KinematicsModel;
             using utility::math::matrix::Transform3D;
             using utility::motion::kinematics::calculateLegJoints;
             using utility::motion::kinematics::calculatePosition;
             using utility::motion::kinematics::Side;
-            using utility::motion::kinematics::DarwinModel;
+            using message::motion::KinematicsModel;
             using utility::motion::kinematics::calculateCameraLookJoints;
 
             KinematicsDebug::KinematicsDebug(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
 
-                on<Configuration, With<DarwinKinematicsModel>>("InverseKinematicsRequest.yaml").then([this](const Configuration& request, const DarwinKinematicsModel& model) {
+                on<Configuration, With<KinematicsModel>>("InverseKinematicsRequest.yaml").then([this](const Configuration& request, const KinematicsModel& model) {
                     return;//WTF is this?
                     Transform3D target;
                     target = target.rotateY(request.config["yAngle"].as<double>());
@@ -68,7 +68,7 @@ namespace module {
                     auto waypoints = std::make_unique<std::vector<ServoTarget> >();
 
                     if (left) {
-                        std::vector<std::pair<ServoID, float> > legJoints = calculateLegJoints<DarwinModel>(model,target, LimbID::LEFT_LEG);
+                        std::vector<std::pair<ServoID, float> > legJoints = calculateLegJoints(kinematicsModel,model,target, LimbID::LEFT_LEG);
                         for (auto& legJoint : legJoints) {
                             ServoTarget waypoint;
 
@@ -87,7 +87,7 @@ namespace module {
                     }
 
                     if (right) {
-                        std::vector<std::pair<ServoID, float> > legJoints = calculateLegJoints<DarwinModel>(model,target, LimbID::RIGHT_LEG);
+                        std::vector<std::pair<ServoID, float> > legJoints = calculateLegJoints(kinematicsModel,model,target, LimbID::RIGHT_LEG);
                         for (auto& legJoint : legJoints) {
                             ServoTarget waypoint;
 
@@ -145,7 +145,7 @@ namespace module {
                         sensors->servos = std::vector<Sensors::Servo>(20);
 
                         if (left) {
-                            std::vector<std::pair<ServoID, float> > legJoints = calculateLegJoints<DarwinModel>(model,ikRequest, LimbID::LEFT_LEG);
+                            std::vector<std::pair<ServoID, float> > legJoints = calculateLegJoints(kinematicsModel,model,ikRequest, LimbID::LEFT_LEG);
                             for (auto& legJoint : legJoints) {
                                 ServoID servoID;
                                 float position;
@@ -157,7 +157,7 @@ namespace module {
                         }
 
                         if (right) {
-                            std::vector<std::pair<ServoID, float> > legJoints = calculateLegJoints<DarwinModel>(model,ikRequest, LimbID::RIGHT_LEG);
+                            std::vector<std::pair<ServoID, float> > legJoints = calculateLegJoints(kinematicsModel,model,ikRequest, LimbID::RIGHT_LEG);
                             for (auto& legJoint : legJoints) {
                                 ServoID servoID;
                                 float position;
@@ -168,8 +168,8 @@ namespace module {
                             }
                         }
                         std::cout<< "KinematicsNULLTest -calculating forward kinematics." <<std::endl;
-                        Transform3D lFootPosition = calculatePosition<DarwinModel>(model,*sensors, ServoID::L_ANKLE_ROLL)[ServoID::L_ANKLE_ROLL];
-                        Transform3D rFootPosition = calculatePosition<DarwinModel>(model,*sensors, ServoID::R_ANKLE_ROLL)[ServoID::R_ANKLE_ROLL];
+                        Transform3D lFootPosition = calculatePosition(kinematicsModel,model,*sensors, ServoID::L_ANKLE_ROLL)[ServoID::L_ANKLE_ROLL];
+                        Transform3D rFootPosition = calculatePosition(kinematicsModel,model,*sensors, ServoID::R_ANKLE_ROLL)[ServoID::R_ANKLE_ROLL];
                         NUClear::log<NUClear::DEBUG>("Forward Kinematics predicts left foot: \n",lFootPosition);
                         NUClear::log<NUClear::DEBUG>("Forward Kinematics predicts right foot: \n",rFootPosition);
                         std::cout << "Compared to request: \n" << ikRequest << std::endl;
@@ -225,7 +225,7 @@ namespace module {
                             cameraVec *= 1/arma::norm(cameraVec,2);
                         }
 
-                        std::vector< std::pair<message::input::ServoID, float> > angles = calculateCameraLookJoints<DarwinModel>(cameraVec);
+                        std::vector< std::pair<message::input::ServoID, float> > angles = calculateCameraLookJoints(camekinematicsModel,raVec);
                         Sensors sensors;
                         sensors.servos = std::vector<Sensors::Servo>(20);
 
@@ -238,7 +238,7 @@ namespace module {
                                 sensors.servos[static_cast<int>(servoID)].presentPosition = position;
                         }
 
-                        Transform3D fKin = calculatePosition<DarwinModel>(model,sensors, ServoID::HEAD_PITCH)[ServoID::HEAD_PITCH];
+                        Transform3D fKin = calculatePosition(kinematicsModel,model,sensors, ServoID::HEAD_PITCH)[ServoID::HEAD_PITCH];
 
                         float max_error = 0;
                         for(int i = 0; i < 3 ; i++){

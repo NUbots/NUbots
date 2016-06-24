@@ -45,7 +45,7 @@ namespace module {
             using message::input::ServoID;
             using utility::nubugger::graph;
             using utility::motion::kinematics::calculateAllPositions;
-            using utility::motion::kinematics::DarwinModel;
+            using message::motion::KinematicsModel;
             using utility::motion::kinematics::calculateCentreOfMass;
             using utility::motion::kinematics::Side;
             using utility::motion::kinematics::calculateRobotToIMU;
@@ -161,11 +161,13 @@ namespace module {
 
                 on< Trigger<DarwinSensors>
                   , Optional<With<Sensors>>
+                  , With<KinematicsModel>
                   , Single
                   , Priority::HIGH>().then(
                             "Main Sensors Loop",
                             [this](const DarwinSensors& input,
-                                   std::shared_ptr<const Sensors> previousSensors) {
+                                   std::shared_ptr<const Sensors> previousSensors,
+                                   const KinematicsModel& kinematicsModel) {
 
                     auto sensors = std::make_unique<Sensors>();
 
@@ -298,7 +300,7 @@ namespace module {
                      *                  Kinematics                  *
                      ************************************************/
                     // std::cout << __FILE__ << " " << __LINE__ << std::endl;
-                    sensors->forwardKinematics = calculateAllPositions<DarwinModel>(*sensors);
+                    sensors->forwardKinematics = calculateAllPositions(kinematicsModel,*sensors);
                     // std::cout << __FILE__ << " " << __LINE__ << std::endl;
 
                     /************************************************
@@ -456,7 +458,7 @@ namespace module {
                      *                  Mass Model                  *
                      ************************************************/
                     //LOOKOUT!!!! ARRAYOPS_MEAT
-                    arma::vec4 COM = calculateCentreOfMass<DarwinModel>(sensors->forwardKinematics, true);
+                    arma::vec4 COM = calculateCentreOfMass(kinematicsModel,sensors->forwardKinematics, true);
                     sensors->centreOfMass = {COM[0],COM[1], COM[2], COM[3]};
                     //emit(drawSphere("COM",sensors->centreOfMass.rows(0,2) + arma::vec3({0,0,2 * 0.093 + 0.0335 + 0.034}),0.1)); //Correcting for robot height in nubugger
                     //END MASS MODEL
@@ -482,7 +484,7 @@ namespace module {
                      *                  CENTRE OF PRESSURE          *
                      ************************************************/
 
-                    sensors->centreOfPressure = utility::motion::kinematics::calculateCentreOfPressure<DarwinModel>(*sensors);
+                    sensors->centreOfPressure = utility::motion::kinematics::calculateCentreOfPressure(kinematicsModel,*sensors);
                     // emit(graph("sensors->centreOfPressure", sensors->centreOfPressure));
                     // emit(graph("groundCoM", arma::vec3(sensors->centreOfMass.rows(0,2))));
                     // log("sensors->centreOfPressure", sensors->centreOfPressure.t());

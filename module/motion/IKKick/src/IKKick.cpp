@@ -29,11 +29,11 @@
 #include "message/support/FieldDescription.h"
 #include "message/motion/WalkCommand.h"
 #include "message/behaviour/KickPlan.h"
+#include "message/motion/KinematicsModels.h"
 
 
 #include "utility/math/matrix/Transform3D.h"
 #include "utility/motion/InverseKinematics.h"
-#include "utility/motion/RobotModels.h"
 #include "utility/support/yaml_armadillo.h"
 #include "utility/nubugger/NUhelpers.h"
 
@@ -56,11 +56,11 @@ namespace motion {
     using message::behaviour::KickPlan;
     using message::behaviour::KickType;
     using message::support::FieldDescription;
+    using message::motion::KinematicsModel;
 
     using utility::motion::kinematics::calculateLegJoints;
     using utility::math::matrix::Transform3D;
     using utility::motion::kinematics::calculateLegJoints;
-    using utility::motion::kinematics::DarwinModel;
     using utility::nubugger::graph;
 
     struct ExecuteKick{};
@@ -147,7 +147,7 @@ namespace motion {
             balancer.start(sensors);
         });
 
-        updater = on<Every<UPDATE_FREQUENCY, Per<std::chrono::seconds>>, With<Sensors>, Single>().then([this] (const Sensors& sensors) {
+        updater = on<Every<UPDATE_FREQUENCY, Per<std::chrono::seconds>>, With<Sensors, KinematicsModel>, Single>().then([this] (const Sensors& sensors, const KinematicsModel& kinematicsModel) {
 
             //Setup kick variables
             LimbID kickFoot;
@@ -200,8 +200,8 @@ namespace motion {
             std::vector<std::pair<message::input::ServoID, float>> joints;
 
             //IK
-            auto kickJoints = calculateLegJoints<DarwinModel>(kickFootGoal, kickFoot);
-            auto supportJoints = calculateLegJoints<DarwinModel>(supportFootGoal, supportFoot);
+            auto kickJoints = calculateLegJoints(kinematicsModel, kickFootGoal, kickFoot);
+            auto supportJoints = calculateLegJoints(kinematicsModel, supportFootGoal, supportFoot);
 
             //Combine left and right legs
             joints.insert(joints.end(),kickJoints.begin(),kickJoints.end());

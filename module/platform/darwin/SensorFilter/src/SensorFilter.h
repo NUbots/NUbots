@@ -27,7 +27,7 @@
 #include "utility/math/matrix/Transform3D.h"
 #include "utility/math/filter/UKF.h"
 #include "IMUModel.h"
-#include "utility/motion/RobotModels.h"
+#include "message/motion/KinematicsModels.h"
 
 namespace module {
     namespace platform {

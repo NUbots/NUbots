@@ -34,7 +34,7 @@
 #include "utility/math/matrix/Transform2D.h"
 #include "utility/math/matrix/Transform3D.h"
 #include "utility/motion/Balance.h"
-#include "utility/motion/RobotModels.h"
+#include "utility/motion/KinematicsModel.h"
 
 
 namespace module {
@@ -194,6 +194,8 @@ namespace motion {
         utility::motion::Balancer balancer;
 
         NUClear::clock::time_point pushTime;
+
+        message::motion::KinematicsModel kinematicsModel;
 
 
         /*arma::vec4 ankleImuParamX;
