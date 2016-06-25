@@ -4,7 +4,6 @@ NUCLEAR_ROLE(
     support::extension::FileWatcher
     support::configuration::GlobalConfig
     platform::darwin::HardwareIO
-    platform::darwin::SensorFilter
     behaviour::tools::ScriptTuner
     behaviour::Controller
     support::configuration::NetworkConfiguration
