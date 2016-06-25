@@ -26,7 +26,7 @@ namespace motion {
     using utility::math::matrix::Rotation3D;
     using utility::math::matrix::Transform3D;
     using utility::math::geometry::UnitQuaternion;
-    // using message::motion::KinematicsModel;
+    // using message::motion::kinematics::KinematicsModel;
 
     void Balancer::configure(const YAML::Node& config) {
         rotationPGain = config["angle_gain"]["p"].as<float>();

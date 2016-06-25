@@ -26,7 +26,7 @@
 
 using message::input::ServoID;
 using message::input::Sensors;
-using message::motion::KinematicsModel;
+using message::motion::kinematics::KinematicsModel;
 using utility::motion::kinematics::calculateCameraLookJoints;
 
 TEST_CASE("Test the Head kinematics", "[utility][motion][kinematics][head]") {

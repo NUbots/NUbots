@@ -56,7 +56,7 @@ namespace motion {
     using message::behaviour::KickPlan;
     using message::behaviour::KickType;
     using message::support::FieldDescription;
-    using message::motion::KinematicsModel;
+    using message::motion::kinematics::KinematicsModel;
 
     using utility::motion::kinematics::calculateLegJoints;
     using utility::math::matrix::Transform3D;

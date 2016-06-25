@@ -64,7 +64,7 @@ namespace motion {
     using message::motion::DisableWalkEngineCommand;
     using message::motion::ServoTarget;
     using message::motion::Script;
-    using message::motion::KinematicsModel;
+    using message::motion::kinematics::KinematicsModel;
     using message::support::SaveConfiguration;
     using message::support::Configuration;
 
@@ -208,7 +208,7 @@ namespace motion {
         qRArmEnd = stance["arms"]["right"]["end"].as<arma::vec>();
         footOffset = stance["foot_offset"].as<arma::vec>();
         // gToe/heel overlap checking values
-        stanceLimitY2 = kinematicsModel.Leg.LENGTH_BETWEEN_LEGS - stance["limit_margin_y"].as<Expression>();
+        stanceLimitY2 = kinematicsModel.Leg.LENGTH_BETWEEN_LEGS() - stance["limit_margin_y"].as<Expression>();
 
         auto& gains = stance["gains"];
         gainArms = gains["arms"].as<Expression>();

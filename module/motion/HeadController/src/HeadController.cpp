@@ -47,7 +47,7 @@ namespace module {
         using utility::math::coordinates::cartesianToSpherical;
         using utility::motion::kinematics::calculateCameraLookJoints;
         using utility::motion::kinematics::calculateHeadJoints;
-        using message::motion::KinematicsModel;
+        using message::motion::kinematics::KinematicsModel;
         using utility::support::Expression;
 
         //internal only callback messages to start and stop our action

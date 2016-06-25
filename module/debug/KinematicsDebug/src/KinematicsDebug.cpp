@@ -31,7 +31,6 @@
 #include "utility/motion/InverseKinematics.h"
 #include "utility/motion/ForwardKinematics.h"
 #include "utility/math/matrix/Transform3D.h"
-// #include "message/motion/KinematicsModels.h"
 
 namespace module {
     namespace debug {
@@ -40,17 +39,17 @@ namespace module {
             using message::motion::ServoTarget;
             using message::input::ServoID;
             using message::input::Sensors;
-            using message::motion::KinematicsModel;
+            using message::motion::kinematics::KinematicsModel;
+            using message::motion::kinematics::BodySide;
+            using message::motion::kinematics::KinematicsModel;
             using utility::math::matrix::Transform3D;
             using utility::motion::kinematics::calculateLegJoints;
             using utility::motion::kinematics::calculatePosition;
-            using utility::motion::kinematics::Side;
-            using message::motion::KinematicsModel;
             using utility::motion::kinematics::calculateCameraLookJoints;
 
             KinematicsDebug::KinematicsDebug(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
 
-                on<Configuration, With<KinematicsModel>>("InverseKinematicsRequest.yaml").then([this](const Configuration& request, const KinematicsModel& model) {
+                on<Configuration, With<KinematicsModel>>("InverseKinematicsRequest.yaml").then([this](const Configuration& request, const KinematicsModel& kinematicsModel) {
                     return;//WTF is this?
                     Transform3D target;
                     target = target.rotateY(request.config["yAngle"].as<double>());
@@ -108,7 +107,7 @@ namespace module {
                     emit(std::move(waypoints));
                 });
 
-                on<Configuration, With<DarwinKinematicsModel>>("InverseKinematicsRequest.yaml").then([this](const Configuration& request, const DarwinKinematicsModel& model) {
+                on<Configuration, With<KinematicsModel>>("InverseKinematicsRequest.yaml").then([this](const Configuration& request, const KinematicsModel& kinematicsModel) {
                     int iterations = 1;
                     int numberOfFails = 0;
                     float ERROR_THRESHOLD = request.config["ERROR_THRESHOLD"].as<float>();
@@ -204,7 +203,7 @@ namespace module {
 
                 });
 
-                on<Configuration, With<DarwinKinematicsModel>>("HeadKinematicsNULLTest.yaml").then([this](const Configuration& request, const DarwinKinematicsModel& model) {
+                on<Configuration, With<KinematicsModel>>("HeadKinematicsNULLTest.yaml").then([this](const Configuration& request, const KinematicsModel& kinematicsModel) {
                     int iterations = 1;
                     int numberOfFails = 0;
                     float ERROR_THRESHOLD = request.config["ERROR_THRESHOLD"].as<float>();

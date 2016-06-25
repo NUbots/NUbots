@@ -25,14 +25,13 @@
 #include "message/motion/KinematicsModels.h"
 
 namespace module {
-namespace platform {
-namespace darwin {
+namespace motion {
 
     using message::support::Configuration;
-    using message::motion::KinematicsModel;
+    using message::motion::kinematics::KinematicsModel;
 
     using utility::support::Expression;
-    using message::motion::KinematicsModel;
+    using message::motion::kinematics::KinematicsModel;
 
     KinematicsConfiguration::KinematicsConfiguration(std::unique_ptr<NUClear::Environment> environment)
     : Reactor(std::move(environment)) {
@@ -53,17 +52,17 @@ namespace darwin {
     }
 
     void KinematicsConfiguration::configureLeg (KinematicsModel& model, const YAML::Node& objLeg) {
-        model.Leg.hipOffset = objLeg["hip_offset"].as<arma::vec3>();
-        model.Leg.HIP_OFFSET_X = leg.hipOffset[0];
-        model.Leg.HIP_OFFSET_Y = leg.hipOffset[1];
-        model.Leg.HIP_OFFSET_Z = leg.hipOffset[2];
+        arma::vec3 leg_hipOffset = objLeg["hip_offset"].as<arma::vec3>();
+        model.Leg.HIP_OFFSET_X = leg_hipOffset[0];
+        model.Leg.HIP_OFFSET_Y = leg_hipOffset[1];
+        model.Leg.HIP_OFFSET_Z = leg_hipOffset[2];
 
         model.Leg.UPPER_LEG_LENGTH = objLeg["upper_leg_length"].as<float>();
         model.Leg.LOWER_LEG_LENGTH = objLeg["lower_leg_length"].as<float>();
 
         model.Leg.HEEL_LENGTH = objLeg["heel_length"].as<float>();
 
-        model.Leg.FOOT_CENTRE_TO_ANKLE_CENTRE objLeg["foot_centre_to_ankle_centre"].as<float>();
+        model.Leg.FOOT_CENTRE_TO_ANKLE_CENTRE = objLeg["foot_centre_to_ankle_centre"].as<float>();
 
         auto& objFoot = objLeg["foot"];
         model.Leg.FOOT_WIDTH = objFoot["width"].as<float>();
@@ -72,8 +71,8 @@ namespace darwin {
         model.Leg.TOE_LENGTH = objFoot["toe_length"].as<float>();
     }
 
-    void KinematicsConfiguration::configureHead (KinematicsModel::Head& head, const YAML::Node& objHead) {
-        model.Head.CAMERA_DECLINATION_ANGLE_OFFSET = head.cameraDeclinationAngleOffset = objHead["camera_declination_angle_offset"].as<float>();
+    void KinematicsConfiguration::configureHead (KinematicsModel& model, const YAML::Node& objHead) {
+        model.Head.CAMERA_DECLINATION_ANGLE_OFFSET = objHead["camera_declination_angle_offset"].as<float>();
 
         arma::vec3 head_neckToCamera = objHead["neck_to_camera"].as<arma::vec3>();
         model.Head.NECK_TO_CAMERA_X = head_neckToCamera[0];
@@ -82,7 +81,7 @@ namespace darwin {
 
         auto& objNeck = objHead["neck"];
 
-        model.Head.NECK_LENGTH = neck.length = objNeck["length"].as<float>();
+        model.Head.NECK_LENGTH = objNeck["length"].as<float>();
 
         arma::vec3 neck_basePositionFromOrigin = objNeck["base_position_from_origin"].as<arma::vec3>();
         model.Head.NECK_BASE_POS_FROM_ORIGIN_X = neck_basePositionFromOrigin[0];
@@ -100,7 +99,7 @@ namespace darwin {
 
     }
 
-    void KinematicsConfiguration::configureArm (KinematicsModel::Arm& arm, const YAML::Node& objArm) {
+    void KinematicsConfiguration::configureArm (KinematicsModel& model, const YAML::Node& objArm) {
         // arm.distanceBetweenShoulders = objArm["distance_between_shoulders"].as<float>();
 
         // auto& shoulder = arm.shoulder;
@@ -134,7 +133,7 @@ namespace darwin {
         model.Arm.LOWER_ARM_Z_OFFSET = objLowerArm["offset"].as<arma::vec2>()[1];
     }
 
-    void KinematicsConfiguration::configureMassModel (KinematicsModel::MassModel& massModel, const YAML::Node& objMassModel) {
+    void KinematicsConfiguration::configureMassModel (KinematicsModel& model, const YAML::Node& objMassModel) {
     	// massModel.numberOfMasses = objMassModel["number_of_masses"].as<float>();
      //    massModel.massRepresentationDimension = objMassModel["mass_representation_dimension"].as<float>();
 
@@ -170,9 +169,8 @@ namespace darwin {
 		// masses.torso = objMasses[20].as<arma::vec4>();
 
         auto masses = objMasses.as<std::vector<arma::vec4>>();
-        std::copy(masses.begin(), masses.end(), model.MassModel.masses.begin());
+        std::copy(masses.begin(), masses.end(), model.MassModel.masses);
     }
 
-}
 }
 }

@@ -26,7 +26,7 @@ namespace module {
 namespace motion {
 
     using message::input::LimbID;
-    using message::motion::KinematicsModel;
+    using message::motion::kinematics::KinematicsModel;
     using utility::math::matrix::Transform2D;
     using utility::nubugger::graph;
 
@@ -159,7 +159,7 @@ namespace motion {
 
         // Start feet collision detection:
         // Uses a rough measure to detect collision and move feet apart if too close
-        double overlap = DarwinModel::Leg::FOOT_LENGTH / 2.0 * std::abs(feetDifference.angle());
+        double overlap = kinematicsModel.Leg.FOOT_LENGTH / 2.0 * std::abs(feetDifference.angle());
         feetDifference.y() = std::max(feetDifference.y() * sign, stanceLimitY2 + overlap) * sign;
         // End feet collision detection
 

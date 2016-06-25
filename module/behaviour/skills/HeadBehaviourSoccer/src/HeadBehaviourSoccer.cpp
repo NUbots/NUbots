@@ -59,7 +59,7 @@ namespace module {
 
         using utility::math::coordinates::sphericalToCartesian;
         using utility::motion::kinematics::calculateCameraLookJoints;
-        using message::motion::KinematicsModel;
+        using message::motion::kinematics::KinematicsModel;
         using utility::math::matrix::Rotation3D;
         using utility::math::geometry::Quad;
         using utility::math::geometry::UnitQuaternion;
@@ -82,10 +82,10 @@ namespace module {
                 on<Configuration>("HeadBehaviourSoccer.yaml").then("Head Behaviour Soccer Config", [this] (const Configuration& config) {
                     lastPlanUpdate = NUClear::clock::now();
                     timeLastObjectSeen = NUClear::clock::now();
-                    max_yaw = message::motion::KinematicsModel::Head::MAX_YAW;
-                    min_yaw = message::motion::KinematicsModel::Head::MIN_YAW;
-                    max_pitch = message::motion::KinematicsModel::Head::MAX_PITCH;
-                    min_pitch = message::motion::KinematicsModel::Head::MIN_PITCH;
+                    max_yaw = message::motion::kinematics::KinematicsModel::Head::MAX_YAW;
+                    min_yaw = message::motion::kinematics::KinematicsModel::Head::MIN_YAW;
+                    max_pitch = message::motion::kinematics::KinematicsModel::Head::MAX_PITCH;
+                    min_pitch = message::motion::kinematics::KinematicsModel::Head::MIN_PITCH;
 
                     //Config HeadBehaviourSoccer.yaml
                     fractional_view_padding = config["fractional_view_padding"].as<double>();

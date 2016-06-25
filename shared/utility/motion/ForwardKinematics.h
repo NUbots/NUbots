@@ -38,7 +38,7 @@ namespace utility {
 namespace motion {
 namespace kinematics {
 
-    inline std::map<message::input::ServoID, utility::math::matrix::Transform3D> calculateHeadJointPosition(const message::motion::KinematicsModel& model, const float& HEAD_PITCH, const float& HEAD_YAW, message::input::ServoID servoID){
+    inline std::map<message::input::ServoID, utility::math::matrix::Transform3D> calculateHeadJointPosition(const message::motion::kinematics::KinematicsModel& model, const float& HEAD_PITCH, const float& HEAD_YAW, message::input::ServoID servoID){
         std::map<message::input::ServoID, utility::math::matrix::Transform3D> positions;
 
         utility::math::matrix::Transform3D runningTransform;
@@ -79,8 +79,8 @@ namespace kinematics {
         return positions;
     }
 
-    inline std::map<message::input::ServoID, utility::math::matrix::Transform3D> calculateHeadJointPosition(const message::motion::KinematicsModel& model, const message::input::Sensors& sensors, message::input::ServoID servoID){
-        return calculateHeadJointPosition<Model>(sensors.servos[static_cast<int>(message::input::ServoID::HEAD_PITCH)].presentPosition,
+    inline std::map<message::input::ServoID, utility::math::matrix::Transform3D> calculateHeadJointPosition(const message::motion::kinematics::KinematicsModel& model, const message::input::Sensors& sensors, message::input::ServoID servoID){
+        return calculateHeadJointPosition(model,sensors.servos[static_cast<int>(message::input::ServoID::HEAD_PITCH)].presentPosition,
                                           sensors.servos[static_cast<int>(message::input::ServoID::HEAD_YAW)  ].presentPosition,
                                           servoID);
     }
@@ -90,7 +90,7 @@ namespace kinematics {
 
         The basis 'faces' down its x axis.
     */
-    inline std::map<message::input::ServoID, utility::math::matrix::Transform3D> calculateLegJointPosition(const message::motion::KinematicsModel& model, const message::input::Sensors& sensors, message::input::ServoID servoID, Side isLeft){
+    inline std::map<message::input::ServoID, utility::math::matrix::Transform3D> calculateLegJointPosition(const message::motion::kinematics::KinematicsModel& model, const message::input::Sensors& sensors, message::input::ServoID servoID, message::motion::kinematics::BodySide isLeft){
         std::map<message::input::ServoID, utility::math::matrix::Transform3D> positions;
         utility::math::matrix::Transform3D runningTransform;
         //Variables to mask left and right leg differences:
@@ -184,7 +184,7 @@ namespace kinematics {
 
         The basis 'faces' down its x axis.
     */
-    inline std::map<message::input::ServoID, utility::math::matrix::Transform3D> calculateArmJointPosition(const message::motion::KinematicsModel& model, const message::input::Sensors& sensors, message::input::ServoID servoID, Side isLeft){
+    inline std::map<message::input::ServoID, utility::math::matrix::Transform3D> calculateArmJointPosition(const message::motion::kinematics::KinematicsModel& model, const message::input::Sensors& sensors, message::input::ServoID servoID, message::motion::kinematics::BodySide isLeft){
         std::map<message::input::ServoID, utility::math::matrix::Transform3D> positions;
         utility::math::matrix::Transform3D runningTransform;
         //Variables to mask left and right differences:
@@ -260,45 +260,45 @@ namespace kinematics {
 
     /*! @brief
     */
-    inline std::map<message::input::ServoID, utility::math::matrix::Transform3D> calculatePosition(const message::motion::KinematicsModel& model, const message::input::Sensors& sensors, message::input::ServoID servoID) {
+    inline std::map<message::input::ServoID, utility::math::matrix::Transform3D> calculatePosition(const message::motion::kinematics::KinematicsModel& model, const message::input::Sensors& sensors, message::input::ServoID servoID) {
         switch(servoID) {
             case message::input::ServoID::HEAD_YAW:
             case message::input::ServoID::HEAD_PITCH:
-                return calculateHeadJointPosition<Model>(sensors, servoID);
+                return calculateHeadJointPosition(model,sensors, servoID);
             case message::input::ServoID::R_SHOULDER_PITCH:
             case message::input::ServoID::R_SHOULDER_ROLL:
             case message::input::ServoID::R_ELBOW:
-                return calculateArmJointPosition<Model>(sensors, servoID, Side::RIGHT);
+                return calculateArmJointPosition(model,sensors, servoID, message::motion::kinematics::BodySide::RIGHT);
             case message::input::ServoID::L_SHOULDER_PITCH:
             case message::input::ServoID::L_SHOULDER_ROLL:
             case message::input::ServoID::L_ELBOW:
-                return calculateArmJointPosition<Model>(sensors, servoID, Side::LEFT);
+                return calculateArmJointPosition(model,sensors, servoID, message::motion::kinematics::BodySide::LEFT);
             case message::input::ServoID::R_HIP_YAW:
             case message::input::ServoID::R_HIP_ROLL:
             case message::input::ServoID::R_HIP_PITCH:
             case message::input::ServoID::R_KNEE:
             case message::input::ServoID::R_ANKLE_PITCH:
             case message::input::ServoID::R_ANKLE_ROLL:
-                return calculateLegJointPosition<Model>(sensors, servoID, Side::RIGHT);
+                return calculateLegJointPosition(model,sensors, servoID, message::motion::kinematics::BodySide::RIGHT);
             case message::input::ServoID::L_HIP_YAW:
             case message::input::ServoID::L_HIP_ROLL:
             case message::input::ServoID::L_HIP_PITCH:
             case message::input::ServoID::L_KNEE:
             case message::input::ServoID::L_ANKLE_PITCH:
             case message::input::ServoID::L_ANKLE_ROLL:
-                return calculateLegJointPosition<Model>(sensors, servoID, Side::LEFT);
+                return calculateLegJointPosition(model,sensors, servoID, message::motion::kinematics::BodySide::LEFT);
             default:
                 return std::map<message::input::ServoID, utility::math::matrix::Transform3D>();
         }
     }
 
 
-    inline std::map<message::input::ServoID, utility::math::matrix::Transform3D> calculateAllPositions(const message::motion::KinematicsModel& model, const message::input::Sensors& sensors) {
-        std::map<message::input::ServoID, utility::math::matrix::Transform3D> result = calculatePosition<Model>(sensors, message::input::ServoID::L_ANKLE_ROLL);
-        std::map<message::input::ServoID, utility::math::matrix::Transform3D> rightLegPositions = calculatePosition<Model>(sensors, message::input::ServoID::R_ANKLE_ROLL);
-        std::map<message::input::ServoID, utility::math::matrix::Transform3D> headPositions = calculatePosition<Model>(sensors, message::input::ServoID::HEAD_PITCH);
-        std::map<message::input::ServoID, utility::math::matrix::Transform3D> leftArm = calculatePosition<Model>(sensors, message::input::ServoID::L_ELBOW);
-        std::map<message::input::ServoID, utility::math::matrix::Transform3D> rightArm = calculatePosition<Model>(sensors, message::input::ServoID::R_ELBOW);
+    inline std::map<message::input::ServoID, utility::math::matrix::Transform3D> calculateAllPositions(const message::motion::kinematics::KinematicsModel& model, const message::input::Sensors& sensors) {
+        std::map<message::input::ServoID, utility::math::matrix::Transform3D> result = calculatePosition(model,sensors, message::input::ServoID::L_ANKLE_ROLL);
+        std::map<message::input::ServoID, utility::math::matrix::Transform3D> rightLegPositions = calculatePosition(model,sensors, message::input::ServoID::R_ANKLE_ROLL);
+        std::map<message::input::ServoID, utility::math::matrix::Transform3D> headPositions = calculatePosition(model,sensors, message::input::ServoID::HEAD_PITCH);
+        std::map<message::input::ServoID, utility::math::matrix::Transform3D> leftArm = calculatePosition(model,sensors, message::input::ServoID::L_ELBOW);
+        std::map<message::input::ServoID, utility::math::matrix::Transform3D> rightArm = calculatePosition(model,sensors, message::input::ServoID::R_ELBOW);
         result.insert(leftArm.begin(), leftArm.end());
         result.insert(rightArm.begin(), rightArm.end());
         result.insert(rightLegPositions.begin(), rightLegPositions.end());
@@ -308,7 +308,7 @@ namespace kinematics {
     /*! @brief Adds up the mass vectors stored in the robot model and normalises the resulting position
         @return [x_com, y_com, z_com, total_mass] relative to the torso basis
     */
-    inline arma::vec4 calculateCentreOfMass(const message::motion::KinematicsModel& model, const std::map<message::input::ServoID, utility::math::matrix::Transform3D>& jointPositions, bool includeTorso){
+    inline arma::vec4 calculateCentreOfMass(const message::motion::kinematics::KinematicsModel& model, const std::map<message::input::ServoID, utility::math::matrix::Transform3D>& jointPositions, bool includeTorso){
         arma::vec4 totalMassVector = arma::zeros(4);
 
         for(auto& joint : jointPositions){
@@ -345,9 +345,9 @@ namespace kinematics {
             NUClear::log<NUClear::ERROR>("ForwardKinematics::calculateCentreOfMass - Empty centre of mass request or no mass in mass model.");
             return arma::vec4();
         }
-    }Kinematic
+    }
 
-    inline utility::math::geometry::Line calculateHorizon(const message::motion::KinematicsModel& model, const math::matrix::Rotation3D groundToCamRotation, double cameraDistancePixels) {
+    inline utility::math::geometry::Line calculateHorizon(const message::motion::kinematics::KinematicsModel& model, const math::matrix::Rotation3D groundToCamRotation, double cameraDistancePixels) {
 
         // Normal of the line is the y and z of the z axis, however in the image the y axis is negated
         arma::vec2 normal = -arma::normalise(groundToCamRotation.submat(1,2,2,2));
@@ -395,7 +395,7 @@ namespace kinematics {
         return robotToImu;
     }
 
-    inline arma::vec4 fsrCentreInBodyCoords(const message::motion::KinematicsModel& model, const message::input::Sensors& sensors, const arma::vec2& foot, bool left) {
+    inline arma::vec4 fsrCentreInBodyCoords(const message::motion::kinematics::KinematicsModel& model, const message::input::Sensors& sensors, const arma::vec2& foot, bool left) {
         //sensors.orientationBodyToGround
 
         int negativeIfRight = left ? 1 : -1;
@@ -406,15 +406,15 @@ namespace kinematics {
         return sensors.forwardKinematics.find(left ? message::input::ServoID::L_ANKLE_ROLL : message::input::ServoID::R_ANKLE_ROLL)->second * centerFoot;
     }
 
-    inline arma::vec3 calculateCentreOfPressure(const message::motion::KinematicsModel& model, const message::input::Sensors& sensors) {
+    inline arma::vec3 calculateCentreOfPressure(const message::motion::kinematics::KinematicsModel& model, const message::input::Sensors& sensors) {
         arma::vec4 CoP = {0,0,0,1};
         float number_of_feet_down = 0;
         if (sensors.leftFootDown) {
-            CoP += fsrCentreInBodyCoords<Model>(sensors, sensors.leftFSRCenter, true);
+            CoP += fsrCentreInBodyCoords(model,sensors, sensors.leftFSRCenter, true);
             number_of_feet_down += 1.0f;
         }
         if(sensors.rightFootDown){
-            CoP += fsrCentreInBodyCoords<Model>(sensors, sensors.rightFSRCenter, false);
+            CoP += fsrCentreInBodyCoords(model,sensors, sensors.rightFSRCenter, false);
             number_of_feet_down  += 1.0f;
         }
         if(number_of_feet_down == 2){
@@ -429,7 +429,7 @@ namespace kinematics {
 
     /*! @return matrix J such that \overdot{X} = J * \overdot{theta}
     */
-    inline arma::mat33 calculateArmJacobian(const message::motion::KinematicsModel& model, const arma::vec3& a, bool isLeft){
+    inline arma::mat33 calculateArmJacobian(const message::motion::kinematics::KinematicsModel& model, const arma::vec3& a, bool isLeft){
         int negativeIfRight = isLeft ? 1 : -1;
 
         const arma::vec3 t1 = 
@@ -474,7 +474,7 @@ namespace kinematics {
     }
     /*! @return matrix J such that \overdot{X} = J * \overdot{theta}
     */
-    inline arma::vec3 calculateArmPosition(const message::motion::KinematicsModel& model, const arma::vec3& a, bool isLeft){
+    inline arma::vec3 calculateArmPosition(const message::motion::kinematics::KinematicsModel& model, const arma::vec3& a, bool isLeft){
         int negativeIfRight = isLeft ? 1 : -1;
 
         const arma::vec3 t0 = 

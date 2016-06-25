@@ -45,9 +45,9 @@ namespace module {
             using message::input::ServoID;
             using utility::nubugger::graph;
             using utility::motion::kinematics::calculateAllPositions;
-            using message::motion::KinematicsModel;
+            using message::motion::kinematics::KinematicsModel;
             using utility::motion::kinematics::calculateCentreOfMass;
-            using utility::motion::kinematics::Side;
+            using utility::motion::kinematics::BodySide;
             using utility::motion::kinematics::calculateRobotToIMU;
             using utility::math::matrix::Transform3D;
             using utility::math::matrix::Rotation3D;
@@ -531,7 +531,7 @@ namespace module {
             Transform3D SensorFilter::calculateOdometryMatrix(
                 const message::input::Sensors& sensors,
                 const message::input::Sensors& previousSensors,
-                utility::motion::kinematics::Side side) {
+                utility::motion::kinematics::BodySide side) {
                     Transform3D bodyFromAnkleInitialInverse, bodyFromAnkleFinal;
                     if(side == Side::LEFT){
                         bodyFromAnkleInitialInverse = previousSensors.forwardKinematics.at(ServoID::L_ANKLE_ROLL);   //Double Inverse

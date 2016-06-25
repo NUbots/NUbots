@@ -44,13 +44,13 @@ namespace motion {
     using message::input::Sensors;
     using message::input::LimbID;
     using message::input::proto::PresenceUserState;
-    using message::motion::KinematicsModel;
+    using message::motion::kinematics::KinematicsModel;
 
     using message::input::MotionCapture;
 
     using utility::math::matrix::Transform3D;
     using utility::math::matrix::Rotation3D;
-    using utility::motion::kinematics::Side;
+    using utility::motion::kinematics::BodySide;
 
     using utility::support::Expression;
     using message::behaviour::ServoCommand;

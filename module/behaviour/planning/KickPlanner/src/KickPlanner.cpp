@@ -60,7 +60,7 @@ using utility::math::coordinates::sphericalToCartesian;
 using utility::localisation::transform::WorldToRobotTransform;
 using utility::localisation::transform::RobotToWorldTransform;
 using utility::nubugger::graph;
-using message::motion::KinematicsModel;
+using message::motion::kinematics::KinematicsModel;
 
 namespace module {
 namespace behaviour {
