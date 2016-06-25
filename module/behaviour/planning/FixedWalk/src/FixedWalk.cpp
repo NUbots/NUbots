@@ -65,7 +65,7 @@ namespace planning {
                     active = false;
                     return;
                 }
-    			beginningOrientation = sensors.orientation;
+    			beginningOrientation = sensors.world.rotation();
             }
             //Emit command
             if(!walkSegments.empty()){
@@ -91,7 +91,7 @@ namespace planning {
             if(!active && !command.segments.empty()){
                 active = true;
     			segmentStart = NUClear::clock::now();
-    			beginningOrientation = sensors.orientation;
+    			beginningOrientation = sensors.world.rotation();
                 emit(std::make_unique<WalkStartCommand>());
     		}
     		for(auto& segment: command.segments){

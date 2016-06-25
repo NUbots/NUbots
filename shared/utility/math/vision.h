@@ -48,7 +48,7 @@ namespace vision {
 
         arma::mat cameraToBody_body = sensors.forwardKinematics.at(message::input::ServoID::HEAD_PITCH);
         arma::mat robotToBody_body = arma::eye(4,4);
-        robotToBody_body.submat(0,0,2,2) = sensors.orientation;
+        robotToBody_body.submat(0,0,2,2) = sensors.world.rotation();
 
         auto worldToCamera_camera = cameraToBody_body.i() * robotToBody_body * robotToWorld_world.i();
         //Confirmed to be correct by Jake Fountain 2014

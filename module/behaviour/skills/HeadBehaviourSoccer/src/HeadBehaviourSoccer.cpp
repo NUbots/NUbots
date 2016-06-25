@@ -157,7 +157,7 @@ namespace module {
                                                         ) {
 
                     // std::cout << "Seen: Balls: " <<
-                    // ((vballs != nullptr) ? std::to_string(int(vballs->size())) : std::string("null")) << 
+                    // ((vballs != nullptr) ? std::to_string(int(vballs->size())) : std::string("null")) <<
                     // "Goals: " <<
                     // ((vgoals != nullptr) ? std::to_string(int(vgoals->size())) : std::string("null")) << std::endl;
                     
@@ -198,10 +198,10 @@ namespace module {
                     if(!lost){
                         //We need to transform our view points to orientation space
                         headToBodyRotation = fixationObjects[0].sensors->forwardKinematics.at(ServoID::HEAD_PITCH).rotation();
-                        orientation = fixationObjects[0].sensors->orientation.i();
+                        orientation = fixationObjects[0].sensors->world.rotation().i();
                     } else {
                         headToBodyRotation = sensors.forwardKinematics.at(ServoID::HEAD_PITCH).rotation();
-                        orientation = sensors.orientation.i();
+                        orientation = sensors.world.rotation().i();
                     }
                     Rotation3D headToIMUSpace = orientation * headToBodyRotation;
 
@@ -251,7 +251,7 @@ namespace module {
                     //If we arent getting up, then we can update the plan if necessary
                     if(updatePlan){
                         if(lost){
-                            lastPlanOrientation = sensors.orientation;
+                            lastPlanOrientation = sensors.world.rotation();
                         }
                         updateHeadPlan(fixationObjects, objectsMissing, sensors, headToIMUSpace);
                     }
@@ -395,16 +395,16 @@ namespace module {
                             //auto angles = arma::vec2({((max_yaw - min_yaw) * p[0] + max_yaw + min_yaw) / 2,
                             //                                    ((max_pitch - min_pitch) * p[1] + max_pitch + min_pitch) / 2});
 
-                            //New absolute referencing 
+                            //New absolute referencing
                             arma::vec2 angles = p * M_PI / 180;
-                            if(std::fabs(sensors.orientation.pitch()) < pitch_plan_threshold){
+                            if(std::fabs(sensors.world.rotation().pitch()) < pitch_plan_threshold){
                                 arma::vec3 lookVectorFromHead = sphericalToCartesian({1,angles[0],angles[1]});//This is an approximation relying on the robots small FOV
 
 
                                 //TODO: Fix trying to look underneath and behind self!!
 
 
-                                arma::vec3 adjustedLookVector = Rotation3D::createRotationY(sensors.orientation.pitch()) * lookVectorFromHead;
+                                arma::vec3 adjustedLookVector = Rotation3D::createRotationY(sensors.world.rotation().pitch()) * lookVectorFromHead;
                                 std::vector< std::pair<ServoID, float> > goalAngles = calculateCameraLookJoints<DarwinModel>(adjustedLookVector);
 
                                 for(auto& angle : goalAngles){
@@ -481,7 +481,7 @@ namespace module {
 
 
             bool HeadBehaviourSoccer::orientationHasChanged(const message::input::Sensors& sensors){
-                Rotation3D diff = sensors.orientation.i() * lastPlanOrientation;
+                Rotation3D diff = sensors.world.rotation().i() * lastPlanOrientation;
                 UnitQuaternion quat = UnitQuaternion(diff);
                 float angle = quat.getAngle();
                 return std::fabs(angle) > replan_angle_threshold;

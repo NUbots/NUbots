@@ -25,9 +25,12 @@
 #include "message/input/Sensors.h"
 
 #include "utility/math/matrix/Transform3D.h"
+#include "utility/math/matrix/Rotation3D.h"
 #include "utility/math/filter/UKF.h"
-#include "IMUModel.h"
+#include "MotionModel.h"
+#include "DarwinVirtualLoadSensor.h"
 #include "utility/motion/RobotModels.h"
+#include "utility/math/matrix/Rotation3D.h"
 
 namespace module {
     namespace platform {
@@ -43,35 +46,70 @@ namespace module {
             public:
                 explicit SensorFilter(std::unique_ptr<NUClear::Environment> environment);
 
-                utility::math::filter::UKF<IMUModel> orientationFilter;
+                utility::math::filter::UKF<MotionModel> motionFilter;
 
-                double DEFAULT_NOISE_GAIN;
-                double HIGH_NOISE_THRESHOLD;
-                double HIGH_NOISE_GAIN;
-                double LOW_NOISE_THRESHOLD;
-                int DEBOUNCE_THRESHOLD;
+                struct {
+                    struct {
+                        float chargedVoltage;
+                        float flatVoltage;
+                    } battery;
 
-                double SUPPORT_FOOT_FSR_THRESHOLD;
-                int REQUIRED_NUMBER_OF_FSRS;
+                    struct {
+                        arma::vec3 velocityDecay;
+                        struct  {
+                            struct {
+                                arma::mat33 accelerometer;
+                                arma::mat33 gyroscope;
+                                arma::mat44 footUpWithZ;
+                                arma::mat33 flatFootOdometry;
+                                arma::mat44 flatFootOrientation;
+                            } measurement;
+                            struct {
+                                arma::vec3 position;
+                                arma::vec3 velocity;
+                                arma::vec4 rotation;
+                                arma::vec3 rotationalVelocity;
+                            } process;
+                        } noise;
+                        struct {
+                            struct {
+                                arma::vec3 position;
+                                arma::vec3 velocity;
+                                arma::vec4 rotation;
+                                arma::vec3 rotationalVelocity;
+                            } mean;
+                            struct {
+                                arma::vec3 position;
+                                arma::vec3 velocity;
+                                arma::vec4 rotation;
+                                arma::vec3 rotationalVelocity;
+                            } covariance;
+                        } initial;
+                    } motionFilter;
 
-                arma::mat33 MEASUREMENT_NOISE_ACCELEROMETER;
-                arma::mat33 MEASUREMENT_NOISE_GYROSCOPE;
-                arma::mat33 MEASUREMENT_NOISE_FOOT_UP;
-                double FOOT_UP_SAFE_ZONE;
-
-                double odometry_covariance_factor = 0.05;
-
-                arma::vec2 integratedOdometry;
+                    struct {
+                        int debounceThreshold;
+                    } buttons;
+                } config;
 
             private:
-                utility::math::matrix::Transform3D calculateOdometryMatrix(
-                    const message::input::Sensors& sensors,
-                    const message::input::Sensors& previousSensors,
-                    utility::motion::kinematics::Side side);
-
-                // used to debounce button presses
+                // Current state of the button pushes
                 bool leftDown = false;
                 bool middleDown = false;
+
+                // Our sensor for foot down
+                DarwinVirtualLoadSensor leftFootDown;
+                DarwinVirtualLoadSensor rightFootDown;
+
+                //World to foot in world rotation when the foot landed
+                std::array<arma::vec3, 2> footlanding_rFWw;
+                
+                //Foot to world in foot-flat rotation when the foot landed
+                std::array<utility::math::matrix::Rotation3D, 2> footlanding_Rfw;
+                
+                //World to foot in foot-flat rotation when the foot landed
+                std::array<utility::math::matrix::Rotation3D, 2> footlanding_Rwf;
+                
             };
         }
     }

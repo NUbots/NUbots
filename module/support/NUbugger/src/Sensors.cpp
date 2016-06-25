@@ -76,20 +76,18 @@ namespace support {
             *sensorData.mutable_accelerometer() << arma::conv_to<arma::fvec>::from(sensors.accelerometer);
 
             // The orientation matrix
-            *sensorData.mutable_orientation() << sensors.orientation;
+            *sensorData.mutable_world() << sensors.world;
 
-            // TODO: these do not exist in Sensors.h, this needs reimplementing
-            // The left FSR values
-            // auto* lfsr = sensorData->mutable_left_fsr();
-            // lfsr->set_x(sensors.leftFSR[0]);
-            // lfsr->set_y(sensors.leftFSR[1]);
-            // lfsr->set_z(sensors.leftFSR[2]);
+            // The FSR values
+            for (auto& fsr : sensors.fsrs) {
+                auto* proto = sensorData.add_fsr();
 
-            // // The right FSR values
-            // auto* rfsr = sensorData->mutable_right_fsr();
-            // rfsr->set_x(sensors.rightFSR[0]);
-            // rfsr->set_y(sensors.rightFSR[1]);
-            // rfsr->set_z(sensors.rightFSR[2]);
+                for (auto& v : fsr.values) {
+                    proto->add_value(v);
+                }
+
+                *proto->mutable_centre() << fsr.centre;
+            }
 
             // The LEDs
             for(auto& l : sensors.leds) {

@@ -101,16 +101,6 @@ double RobotHypothesis::MeasurementUpdate(
     return quality;
 }
 
-//Odometry
-void MultiModalRobotModel::MeasurementUpdate(const Sensors& sensors){
-    for (auto& model : robot_models_)
-        model->MeasurementUpdate(sensors);
-}
-
-double RobotHypothesis::MeasurementUpdate(const Sensors& sensors){
-    auto quality = filter_.measurementUpdate(sensors.odometry, sensors.odometryCovariance, sensors);
-    return quality;
-}
 
 double RobotHypothesis::MeasurementUpdate(
     const std::vector<message::vision::Goal>& /*observed_objects (commented for warnings)*/,
@@ -135,7 +125,7 @@ double RobotHypothesis::MeasurementUpdate(
     // arma::vec measurement = { std::abs(heading_diff) };
     // arma::mat cov = arma::eye(1, 1) * 0.1; // TODO: Calculate correct covariance
 
-    // double quality = filter_.measurementUpdate(measurement, cov, actual_positions);
+    // double quality = filter_.measurementUpdate(measurement, cov, actual_positions, *(obv_a.sensors));
 
     // return quality;
     return 1;

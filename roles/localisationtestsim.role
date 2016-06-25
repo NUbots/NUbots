@@ -3,11 +3,13 @@ NUCLEAR_ROLE(
     platform::darwin::KinematicsModel
     #Support
     #support::SignalCatcher
+    support::logging::ConsoleLogHandler
     support::extension::FileWatcher
     support::configuration::GlobalConfig
+    support::configuration::SoccerConfig
     support::configuration::NetworkConfiguration
     support::NUbugger
-    support::configuration::SoccerConfig
+
 
     #Simulation
     platform::darwin::HardwareSimulator
@@ -20,7 +22,7 @@ NUCLEAR_ROLE(
     #Localisation
     localisation::MMKFRobotLocalisation
     localisation::KFBallLocalisation
-
+    
     #Behaviour
     behaviour::Controller
     behaviour::skills::WalkEngineStand
@@ -35,6 +37,5 @@ NUCLEAR_ROLE(
     #Motion
     motion::ScriptEngine
     motion::WalkEngine
-    motion::HeadController
+    #motion::HeadController
 )
-

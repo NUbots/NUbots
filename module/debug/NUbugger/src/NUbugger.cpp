@@ -54,25 +54,6 @@ namespace debug {
 
         });
 
-        on<Trigger<DarwinSensors>>().then([this](const DarwinSensors& sensors) {
-            //Includes change to our standard coordinate system
-            emit(graph(
-                "Accelerometer",
-                -sensors.accelerometer.y,
-                sensors.accelerometer.x,
-                -sensors.accelerometer.z
-
-            ));
-
-            emit(graph(
-                "Gyro",
-                -sensors.gyroscope.x,
-                -sensors.gyroscope.y,
-                sensors.gyroscope.z
-            ));
-
-        });
-
         on<Trigger<Sensors>, Single, Priority::LOW>().then([this](const Sensors& sensors) {
 
             for (const auto& s : sensors.servos) {

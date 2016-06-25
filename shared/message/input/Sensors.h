@@ -67,6 +67,11 @@ namespace message {
                 uint32_t colour;
             };
 
+            struct FSR {
+                arma::vec2 centre;
+                std::vector<double> values;
+            };
+
             NUClear::clock::time_point timestamp;
 
             float voltage;
@@ -74,27 +79,23 @@ namespace message {
             arma::vec3 accelerometer;
             arma::vec3 gyroscope;
 
-            /*! The orientation matrix is the map from world to robot coordinates, measured by the gyro. It is the world coordinates in columns relative to the robot.*/
-            utility::math::matrix::Rotation3D orientation;
+            /// This is the transform from the robots space to world space. It measures the world in robot space.
+            utility::math::matrix::Transform3D world;
 
             std::vector<Servo> servos;
             std::vector<Button> buttons;
             std::vector<LED> leds;
+            std::vector<FSR> fsrs;
 
             arma::vec3 centreOfPressure;
-            arma::vec2 leftFSRCenter;
-            arma::vec2 rightFSRCenter;
 
             arma::mat22 robotToIMU;
 
+            /// Percentage of the left foot that's considered "down" i.e. if 3/4 FSR sensors have weight this is 0.75
             bool leftFootDown;
             bool rightFootDown;
 
             std::map<message::input::ServoID, utility::math::matrix::Transform3D> forwardKinematics;
-
-            // utility::math::Transform3D odometry;
-            arma::vec2 odometry;
-            arma::mat22 odometryCovariance;
 
             float bodyCentreHeight;
 

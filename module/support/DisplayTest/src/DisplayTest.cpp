@@ -46,7 +46,7 @@ namespace support {
 //         });
 
         on<Trigger<Sensors>, Single, Priority::HIGH>().then([this](const Sensors& sensors) {
-            emit(graph("orientation", sensors.orientation));
+            emit(graph("world", sensors.world));
         });
     }
 }

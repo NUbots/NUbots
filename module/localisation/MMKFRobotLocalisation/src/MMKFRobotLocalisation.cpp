@@ -127,17 +127,20 @@ namespace localisation {
             auto robots = std::vector<Self>();
 
             for (auto& model : hypotheses) {
-                // arma::vec::fixed<localisation::robot::RobotModel::size> model_state = model->GetEstimate();
                 auto model_state = model->GetEstimate();
                 auto model_cov = model->GetCovariance();
 
                 Self robot_model;
-                robot_model.position = model_state.rows(robot::kX, robot::kY);
-                // Rotation3D imuRotation = Rotation3D::createRotationZ(model_state(robot::kImuOffset));
-                // arma::vec3 world_heading = imuRotation * arma::mat(sensors.orientation.t()).col(0);
-                // robot_model.heading = world_heading.rows(0, 1);
-                robot_model.heading = utility::localisation::transform::ImuToWorldHeadingTransform(model_state(robot::kImuOffset), sensors.orientation);
-                robot_model.velocity = model_state.rows(robot::kVX, robot::kVY);
+                robot_model.position = sensors.world.translation().rows(0,1) - model_state.rows(robot::kX, robot::kY);
+                
+                //calculate the total robot heading by rotating using the inverse robot orientation
+                double rmHeading = sensors.world.rotation().yaw() - model_state(robot::kImuOffset);
+                robot_model.heading = {std::cos(rmHeading),std::sin(rmHeading)};
+
+                //TODO: fill in velocity from the motionmodel
+                robot_model.velocity = arma::vec2();
+                //robot_model.velocity = sensors.world.translationVelocity().rows(0,1);
+
                 robot_model.position_cov = model_cov.submat(0,0,1,1);
                 robot_model.last_measurement_time = last_measurement_time;
                 robots.push_back(robot_model);
@@ -153,16 +156,12 @@ namespace localisation {
         emit_data_handle.disable();
 
         on<Trigger<Sensors>, Sync<MMKFRobotLocalisation>, Single>()
-        .then("MMKFRobotLocalisation Odometry", [this](const Sensors& sensors) {
+        .then("MMKFRobotLocalisation Sensors Update", [this](const Sensors& sensors) {
             auto curr_time = NUClear::clock::now();
-
-            emit(graph("Odometry Measurement Update", sensors.odometry[0], sensors.odometry[1]));
-            // log("Odometry Measurement Update", sensors.odometry.t());
             engine_->TimeUpdate(curr_time, sensors);
-            engine_->OdometryMeasurementUpdate(sensors);
         });
 
-        // on<Every<100, Per<std::chrono::seconds>>,
+        // on<Every<30, Per<std::chrono::seconds>>,
         //    With<Sensors>,
         //    Sync<MMKFRobotLocalisation>>
         //    .then("MMKFRobotLocalisation Time", [this] (const Sensors& sensors) {
@@ -216,7 +215,7 @@ namespace localisation {
             auto curr_time = NUClear::clock::now();
             last_measurement_time = curr_time;
 
-            engine_->TimeUpdate(curr_time, sensors);
+            //engine_->TimeUpdate(curr_time, sensors);
             engine_->ProcessObjects(goals);
 
             graphMMRMHypotheses("update", engine_->robot_models_);

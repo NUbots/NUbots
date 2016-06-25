@@ -235,8 +235,5 @@ namespace localisation {
         }
     }
 
-    void MMKFRobotLocalisationEngine::OdometryMeasurementUpdate(const Sensors& sensors) {
-        robot_models_.MeasurementUpdate(sensors);
-    }
 }
 }

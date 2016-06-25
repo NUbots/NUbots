@@ -409,8 +409,8 @@ namespace strategy {
             && feetOffGround
             && !isGettingUp
             && !isDiving
-            && sensors.orientation(2,2) < 0.92
-            && sensors.orientation(2,2) > 0.88;
+            && sensors.world(2,2) < 0.92
+            && sensors.world(2,2) > 0.88;
 
     }
 

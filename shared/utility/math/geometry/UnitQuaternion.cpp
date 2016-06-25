@@ -48,35 +48,36 @@ namespace geometry {
 
     UnitQuaternion::UnitQuaternion(const arma::vec3& v) {
         real() = 0;
-    	imaginary() = v;
+        imaginary() = v;
     }
 
     UnitQuaternion::UnitQuaternion(const arma::vec3& axis, double angle) {
-    	real() = std::cos(angle / 2.0);
-    	imaginary() = std::sin(angle / 2.0) * arma::normalise(axis);
+        real() = std::cos(angle / 2.0);
+        imaginary() = std::sin(angle / 2.0) * arma::normalise(axis);
     }
 
     UnitQuaternion UnitQuaternion::i() const {
-    	UnitQuaternion qi = *this;
+        UnitQuaternion qi = *this;
         // take the congugate, as it is equal to the inverse when a unit vector
-    	qi.imaginary() *= -1;
-    	return qi;
+        qi.imaginary() *= -1;
+        return qi;
     }
 
     arma::vec3 UnitQuaternion::rotateVector(const arma::vec3& v) const {
-    	UnitQuaternion vRotated = *this * UnitQuaternion(v) * i();
-        return vRotated.imaginary();
+        // Do the math
+        const arma::vec3 t = 2*arma::cross(imaginary(),v);
+        return v + real() * t + arma::cross(imaginary(),t);
     }
 
     arma::vec3 UnitQuaternion::getAxis() const {
-    	double angle = getAngle();
-    	double sinThetaOnTwo = std::sin(angle / 2.0);
-    	return imaginary() / sinThetaOnTwo;
+        double angle = getAngle();
+        double sinThetaOnTwo = std::sin(angle / 2.0);
+        return imaginary() / sinThetaOnTwo;
     }
 
     double UnitQuaternion::getAngle() const {
         //Max and min prevent nand error, presumably due to computational limitations
-    	return 2 * utility::math::angle::acos_clamped(std::fmin(1,std::fmax(real(),-1)));
+        return 2 * utility::math::angle::acos_clamped(std::fmin(1,std::fmax(real(),-1)));
     }
 
     void UnitQuaternion::setAngle(double angle) {
@@ -100,8 +101,8 @@ namespace geometry {
         return *this * p.i();
     }
 
-	UnitQuaternion UnitQuaternion::operator * (const UnitQuaternion& p) const {
-		//From http://en.wikipedia.org/wiki/Quaternion#Quaternions_and_the_geometry_of_R3
+    UnitQuaternion UnitQuaternion::operator * (const UnitQuaternion& p) const {
+        //From http://en.wikipedia.org/wiki/Quaternion#Quaternions_and_the_geometry_of_R3
         double realPart = real() * p.real() - arma::dot(imaginary(), p.imaginary());
 
         arma::vec3 imaginaryPart = arma::cross(imaginary(), p.imaginary())
@@ -109,7 +110,7 @@ namespace geometry {
                                  +   real() * p.imaginary();
 
         return UnitQuaternion(realPart, imaginaryPart);
-	}
+    }
 
     UnitQuaternion UnitQuaternion::slerp(const UnitQuaternion& p, const double& t) {
         // See http://www.euclideanspace.com/maths/algebra/realNormedAlgebra/quaternions/slerp/

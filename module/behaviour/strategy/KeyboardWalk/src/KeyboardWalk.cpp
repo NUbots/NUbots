@@ -59,7 +59,7 @@ namespace strategy {
         printStatus();
 
         // Trigger when stdin has something to read
-        on<IO>(::fileno(stdin), IO::READ).then([this] {
+        on<IO>(STDIN_FILENO, IO::READ).then([this] {
 
             switch (tolower(getch())) {
                 case 'w':

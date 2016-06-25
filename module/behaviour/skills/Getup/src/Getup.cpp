@@ -62,7 +62,7 @@ namespace module {
                 fallenCheck = on<Trigger<Sensors>, Single>().then("Getup Fallen Check", [this] (const Sensors& sensors) {
 
                     //check if the orientation is smaller than the cosine of our fallen angle
-                    if (!gettingUp && fabs(sensors.orientation(2,2)) < FALLEN_ANGLE) {
+                    if (!gettingUp && fabs(sensors.world(2,2)) < FALLEN_ANGLE) {
                         updatePriority(GETUP_PRIORITY);
                         fallenCheck.disable();
                     }
@@ -73,7 +73,7 @@ namespace module {
                     gettingUp = true;
 
                     // Check with side we're getting up from
-                    if (sensors.orientation(0,2) < 0.0) {
+                    if (sensors.world(0,2) < 0.0) {
                         emit(std::make_unique<ExecuteScriptByName>(id, std::vector<std::string>({"StandUpFront.yaml","Stand.yaml"})));
                     }
                     else {
