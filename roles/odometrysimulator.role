@@ -18,8 +18,8 @@ NUCLEAR_ROLE(
     platform::darwin::SensorFilter
 
     #Localisation
-    localisation::MMKFRobotLocalisation
-    localisation::KFBallLocalisation
+    localisation::RobotFieldLocalisation
+    localisation::MMKFBallLocalisation
 
     #Behaviour
     behaviour::Controller

@@ -21,8 +21,8 @@ NUCLEAR_ROLE(
     vision::ObstacleDetector
 
     #Localisation
-    localisation::MMKFRobotLocalisation
-    localisation::KFBallLocalisation
+    localisation::RobotFieldLocalisation
+    localisation::MMKFBallLocalisation
 
     support::configuration::SoccerConfig
 )

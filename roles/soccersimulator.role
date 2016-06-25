@@ -22,8 +22,8 @@ NUCLEAR_ROLE(
     platform::darwin::SensorFilter
 
     #Localisation
-    localisation::MMKFRobotLocalisation
-    localisation::KFBallLocalisation
+    localisation::RobotFieldLocalisation
+    localisation::MMKFBallLocalisation
     #localisation::SideChecker
 
     #Behaviour
@@ -34,7 +34,7 @@ NUCLEAR_ROLE(
     behaviour::skills::Getup
     behaviour::skills::KickScript
     behaviour::planning::KickPlanner
-    behaviour::planning::BezierWalkPathPlanner 
+    behaviour::planning::BezierWalkPathPlanner
     behaviour::skills::DirectWalkController
     behaviour::strategy::SoccerStrategy
 

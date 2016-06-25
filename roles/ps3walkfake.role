@@ -27,6 +27,6 @@ NUCLEAR_ROLE(
     behaviour::strategy::PS3Walk
 
     # Localisation
-    #localisation::MMKFRobotLocalisation
-    #localisation::KFBallLocalisation
+    #localisation::RobotFieldLocalisation
+    #localisation::MMKFBallLocalisation
 )

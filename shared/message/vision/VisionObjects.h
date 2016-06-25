@@ -33,28 +33,11 @@ namespace message {
 
         struct VisionObject {
 
-            /**
-             * Measurements are taken from the ground plane below the robot
-             * It is measured in spherical coodinates and the error is a covariance
-             * matrix representing the uncertinaty.
-             */
-            struct Measurement {
-                arma::vec3 position;
-                arma::mat33 error;
-                //Optional vel measurement, currently used for ball only\
-                //XXX: THIS IS A TURRIBLE IDEA
-                arma::vec3 velocity;
-                arma::mat33 velCov;
-            };
-
             // Time the image was taken
             NUClear::clock::time_point timestamp;
 
-
-            // Position of object relative to ground to centre of object in spherical coordinates
-            std::vector<Measurement> measurements;
-
             // The angular position and size from the perspective of the camera
+            // Use these values to move the camera around to see this object
             arma::vec2 screenAngular;
             arma::vec2 angularSize;
 
@@ -71,24 +54,27 @@ namespace message {
         };
 
         struct Goal : public VisionObject {
+
             enum class Side {
                 UNKNOWN,
                 LEFT,
                 RIGHT,
             } side = Side::UNKNOWN;
 
-            enum class Team {
-                UNKNOWN,
-                OWN,
-                OPPONENT,
-            } team = Team::UNKNOWN;
+            enum class MeasurementType {
+                LEFT_NORMAL,
+                RIGHT_NORMAL,
+                TOP_POINT,
+                BASE_POINT
+            }
 
+            std::vector<std::pair<MeasurementType, arma::vec3>> measurements;
             utility::math::geometry::Quad quad;
         };
 
         struct Obstacle : public VisionObject {
 
-            enum class Team { // TODO: Rename to TeamColour?
+            enum class Team {
                 NONE,
                 MAGENTA,
                 CYAN
