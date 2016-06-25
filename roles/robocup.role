@@ -35,10 +35,8 @@ NUCLEAR_ROLE(
     behaviour::skills::Getup
     behaviour::skills::KickScript
     behaviour::skills::HeadBehaviourSoccer
-    behaviour::skills::WalkPathFollower # Follows WalkPaths.
-    behaviour::skills::DirectWalkController
     behaviour::planning::KickPlanner
-    #behaviour::planning::OMPLPathPlanner  # Creates WalkPaths.
+    #behaviour::planning::BezierWalkPathPlanner  # Creates WalkPaths.
     behaviour::strategy::SoccerStrategy
 
     #Motion
