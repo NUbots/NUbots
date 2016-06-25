@@ -82,10 +82,6 @@ namespace module {
                 on<Configuration>("HeadBehaviourSoccer.yaml").then("Head Behaviour Soccer Config", [this] (const Configuration& config) {
                     lastPlanUpdate = NUClear::clock::now();
                     timeLastObjectSeen = NUClear::clock::now();
-                    max_yaw = message::motion::kinematics::KinematicsModel::Head::MAX_YAW;
-                    min_yaw = message::motion::kinematics::KinematicsModel::Head::MIN_YAW;
-                    max_pitch = message::motion::kinematics::KinematicsModel::Head::MAX_PITCH;
-                    min_pitch = message::motion::kinematics::KinematicsModel::Head::MIN_PITCH;
 
                     //Config HeadBehaviourSoccer.yaml
                     fractional_view_padding = config["fractional_view_padding"].as<double>();
@@ -146,8 +142,8 @@ namespace module {
                     Optional<With<std::vector<Ball>>>,
                     Optional<With<std::vector<Goal>>>,
                     Optional<With<LocBall>>,
-                    With<CameraParameters>,
                     With<KinematicsModel>,
+                    With<CameraParameters>,
                     Single,
                     Sync<HeadBehaviourSoccer>
                   >().then("Head Behaviour Main Loop", [this] ( const Sensors& sensors,
@@ -157,6 +153,11 @@ namespace module {
                                                         const KinematicsModel& kinematicsModel,
                                                         const CameraParameters& cam_
                                                         ) {
+
+                    max_yaw = kinematicsModel.Head.MAX_YAW;
+                    min_yaw = kinematicsModel.Head.MIN_YAW;
+                    max_pitch = kinematicsModel.Head.MAX_PITCH;
+                    min_pitch = kinematicsModel.Head.MIN_PITCH;
 
                     // std::cout << "Seen: Balls: " <<
                     // ((vballs != nullptr) ? std::to_string(int(vballs->size())) : std::string("null")) << 

@@ -38,7 +38,7 @@ NUCLEAR_ROLE(
     behaviour::skills::WalkPathFollower # Follows WalkPaths.
     behaviour::skills::DirectWalkController
     behaviour::planning::KickPlanner
-    behaviour::planning::OMPLPathPlanner  # Creates WalkPaths.
+    #behaviour::planning::OMPLPathPlanner  # Creates WalkPaths.
     behaviour::strategy::SoccerStrategy
 
     #Motion

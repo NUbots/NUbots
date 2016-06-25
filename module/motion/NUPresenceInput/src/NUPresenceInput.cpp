@@ -50,7 +50,7 @@ namespace motion {
 
     using utility::math::matrix::Transform3D;
     using utility::math::matrix::Rotation3D;
-    using utility::motion::kinematics::BodySide;
+    using message::motion::kinematics::BodySide;
 
     using utility::support::Expression;
     using message::behaviour::ServoCommand;

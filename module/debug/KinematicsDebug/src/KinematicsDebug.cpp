@@ -67,7 +67,7 @@ namespace module {
                     auto waypoints = std::make_unique<std::vector<ServoTarget> >();
 
                     if (left) {
-                        std::vector<std::pair<ServoID, float> > legJoints = calculateLegJoints(kinematicsModel,model,target, LimbID::LEFT_LEG);
+                        std::vector<std::pair<ServoID, float> > legJoints = calculateLegJoints(kinematicsModel,target, LimbID::LEFT_LEG);
                         for (auto& legJoint : legJoints) {
                             ServoTarget waypoint;
 
@@ -86,7 +86,7 @@ namespace module {
                     }
 
                     if (right) {
-                        std::vector<std::pair<ServoID, float> > legJoints = calculateLegJoints(kinematicsModel,model,target, LimbID::RIGHT_LEG);
+                        std::vector<std::pair<ServoID, float> > legJoints = calculateLegJoints(kinematicsModel,target, LimbID::RIGHT_LEG);
                         for (auto& legJoint : legJoints) {
                             ServoTarget waypoint;
 
@@ -144,7 +144,7 @@ namespace module {
                         sensors->servos = std::vector<Sensors::Servo>(20);
 
                         if (left) {
-                            std::vector<std::pair<ServoID, float> > legJoints = calculateLegJoints(kinematicsModel,model,ikRequest, LimbID::LEFT_LEG);
+                            std::vector<std::pair<ServoID, float> > legJoints = calculateLegJoints(kinematicsModel,ikRequest, LimbID::LEFT_LEG);
                             for (auto& legJoint : legJoints) {
                                 ServoID servoID;
                                 float position;
@@ -156,7 +156,7 @@ namespace module {
                         }
 
                         if (right) {
-                            std::vector<std::pair<ServoID, float> > legJoints = calculateLegJoints(kinematicsModel,model,ikRequest, LimbID::RIGHT_LEG);
+                            std::vector<std::pair<ServoID, float> > legJoints = calculateLegJoints(kinematicsModel,ikRequest, LimbID::RIGHT_LEG);
                             for (auto& legJoint : legJoints) {
                                 ServoID servoID;
                                 float position;
@@ -167,8 +167,8 @@ namespace module {
                             }
                         }
                         std::cout<< "KinematicsNULLTest -calculating forward kinematics." <<std::endl;
-                        Transform3D lFootPosition = calculatePosition(kinematicsModel,model,*sensors, ServoID::L_ANKLE_ROLL)[ServoID::L_ANKLE_ROLL];
-                        Transform3D rFootPosition = calculatePosition(kinematicsModel,model,*sensors, ServoID::R_ANKLE_ROLL)[ServoID::R_ANKLE_ROLL];
+                        Transform3D lFootPosition = calculatePosition(kinematicsModel,*sensors, ServoID::L_ANKLE_ROLL)[ServoID::L_ANKLE_ROLL];
+                        Transform3D rFootPosition = calculatePosition(kinematicsModel,*sensors, ServoID::R_ANKLE_ROLL)[ServoID::R_ANKLE_ROLL];
                         NUClear::log<NUClear::DEBUG>("Forward Kinematics predicts left foot: \n",lFootPosition);
                         NUClear::log<NUClear::DEBUG>("Forward Kinematics predicts right foot: \n",rFootPosition);
                         std::cout << "Compared to request: \n" << ikRequest << std::endl;
@@ -224,7 +224,7 @@ namespace module {
                             cameraVec *= 1/arma::norm(cameraVec,2);
                         }
 
-                        std::vector< std::pair<message::input::ServoID, float> > angles = calculateCameraLookJoints(camekinematicsModel,raVec);
+                        std::vector< std::pair<message::input::ServoID, float> > angles = calculateCameraLookJoints(kinematicsModel,cameraVec);
                         Sensors sensors;
                         sensors.servos = std::vector<Sensors::Servo>(20);
 
@@ -237,7 +237,7 @@ namespace module {
                                 sensors.servos[static_cast<int>(servoID)].presentPosition = position;
                         }
 
-                        Transform3D fKin = calculatePosition(kinematicsModel,model,sensors, ServoID::HEAD_PITCH)[ServoID::HEAD_PITCH];
+                        Transform3D fKin = calculatePosition(kinematicsModel,sensors, ServoID::HEAD_PITCH)[ServoID::HEAD_PITCH];
 
                         float max_error = 0;
                         for(int i = 0; i < 3 ; i++){

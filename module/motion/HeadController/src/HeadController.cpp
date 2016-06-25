@@ -63,11 +63,7 @@ namespace module {
                 head_motor_gain = config["head_motors"]["gain"].as<double>();
                 head_motor_torque = config["head_motors"]["torque"].as<double>();
 
-                //head limits
-                max_yaw = DarwinModel::Head::MAX_YAW;
-                min_yaw = DarwinModel::Head::MIN_YAW;
-                max_pitch = DarwinModel::Head::MAX_PITCH;
-                min_pitch = DarwinModel::Head::MIN_PITCH;
+               
 
                 emit(std::make_unique<HeadCommand>( HeadCommand {config["initial"]["yaw"].as<float>(),
                                                                  config["initial"]["pitch"].as<float>(), false}));
@@ -85,7 +81,7 @@ namespace module {
                 }
             });
 
-            updateHandle = on<Trigger<Sensors, kinematicsModel>, Single, Priority::HIGH>()
+            updateHandle = on<Trigger<Sensors>, With<KinematicsModel>, Single, Priority::HIGH>()
             .then("Head Controller - Update Head Position", [this] (const Sensors& sensors, const KinematicsModel& kinematicsModel) {
                 
                 emit(graph("HeadController Goal Angles", goalAngles[0], goalAngles[1]));
@@ -102,6 +98,13 @@ namespace module {
                 //Compute inverse kinematics for head
                 std::vector< std::pair<message::input::ServoID, float> > goalAnglesList = calculateHeadJoints(kinematicsModel, headUnitVector);
                 // arma::vec2 goalAngles = cartesianToSpherical(headUnitVector).rows(1,2);
+ 
+
+                //head limits
+                max_yaw = kinematicsModel.Head.MAX_YAW;
+                min_yaw = kinematicsModel.Head.MIN_YAW;
+                max_pitch = kinematicsModel.Head.MAX_PITCH;
+                min_pitch = kinematicsModel.Head.MIN_PITCH;
 
                 //Clamp head angles
                 float pitch = 0;

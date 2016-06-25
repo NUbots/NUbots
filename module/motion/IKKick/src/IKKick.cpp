@@ -105,7 +105,7 @@ namespace motion {
             updatePriority(KICK_PRIORITY);
         });
 
-        on<Trigger<ExecuteKick>, With<KickCommand>, With<Sensors>>().then([this] (const KickCommand& command, const Sensors& sensors) {
+        on<Trigger<ExecuteKick>, With<KickCommand, Sensors, KinematicsModel>>().then([this] (const KickCommand& command, const Sensors& sensors,const KinematicsModel& kinematicsModel) {
 
             // Enable our kick pather
             updater.enable();
@@ -144,7 +144,7 @@ namespace motion {
             balancer.setKickParameters(supportFoot, ballPosition, goalPosition);
             kicker.setKickParameters(supportFoot, ballPosition, goalPosition);
 
-            balancer.start(sensors);
+            balancer.start(kinematicsModel, sensors);
         });
 
         updater = on<Every<UPDATE_FREQUENCY, Per<std::chrono::seconds>>, With<Sensors, KinematicsModel>, Single>().then([this] (const Sensors& sensors, const KinematicsModel& kinematicsModel) {
@@ -161,7 +161,7 @@ namespace motion {
 
             //State checker
             if(balancer.isStable()){
-                kicker.start(sensors);
+                kicker.start(kinematicsModel, sensors);
             }
 
             if(kicker.isStable()){
@@ -193,7 +193,7 @@ namespace motion {
             //Balance based on the IMU
 
             if(feedback_active){
-                feedbackBalancer.balance(supportFootGoal,supportFoot,sensors);
+                feedbackBalancer.balance(kinematicsModel,supportFootGoal,supportFoot,sensors);
             }
 
             //Calculate IK and send waypoints

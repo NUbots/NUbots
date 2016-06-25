@@ -67,7 +67,7 @@ namespace module {
                 utility::math::matrix::Transform3D calculateOdometryMatrix(
                     const message::input::Sensors& sensors,
                     const message::input::Sensors& previousSensors,
-                    utility::motion::kinematics::BodySide side);
+                    message::motion::kinematics::BodySide side);
 
                 // used to debounce button presses
                 bool leftDown = false;

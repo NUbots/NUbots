@@ -18,6 +18,8 @@
  */
 #include "Balance.h"
 
+#include "message/motion/KinematicsModels.h"
+
 namespace utility {
 namespace motion {
 
@@ -26,7 +28,7 @@ namespace motion {
     using utility::math::matrix::Rotation3D;
     using utility::math::matrix::Transform3D;
     using utility::math::geometry::UnitQuaternion;
-    // using message::motion::kinematics::KinematicsModel;
+    using message::motion::kinematics::KinematicsModel;
 
     void Balancer::configure(const YAML::Node& config) {
         rotationPGain = config["angle_gain"]["p"].as<float>();
@@ -49,7 +51,7 @@ namespace motion {
     }
 
 
-    void Balancer::balance(const arma::vec3& hip, Transform3D& footToTorso, const LimbID& leg, const Sensors& sensors) {
+    void Balancer::balance(const KinematicsModel& model, Transform3D& footToTorso, const LimbID& leg, const Sensors& sensors) {
 
         //Goal is based on the support foot rotation.
         Rotation3D goalTorsoOrientation = footToTorso.rotation().i();
@@ -93,13 +95,12 @@ namespace motion {
         footToTorso.rotation() = Rotation3D(ankleRotation) * footToTorso.rotation();
 
         // Get the position of our hip to rotate around
-        //TODO: template with model
         
-        // Transform3D hip = Transform3D(arma::vec3({
-        //     model.Leg.HIP_OFFSET_X,
-        //     model.Leg.HIP_OFFSET_Y * (leg == LimbID::RIGHT_LEG ? -1 : 1),
-        //     -model.Leg.HIP_OFFSET_Z
-        // }));
+        Transform3D hip = Transform3D(arma::vec3({
+            model.Leg.HIP_OFFSET_X,
+            model.Leg.HIP_OFFSET_Y * (leg == LimbID::RIGHT_LEG ? -1 : 1),
+            -model.Leg.HIP_OFFSET_Z
+        }));
 
         // Rotate around our hip to apply a balance
         footToTorso = footToTorso.rotateLocal(Rotation3D(hipRotation), hip); // Lean against the motion
