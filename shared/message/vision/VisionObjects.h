@@ -61,6 +61,12 @@ namespace message {
                 RIGHT,
             } side = Side::UNKNOWN;
 
+            enum class Team {
+                UNKNOWN,
+                OWN,
+                OPPONENT,
+            } team = Team::UNKNOWN;
+
             enum class MeasurementType {
                 LEFT_NORMAL,
                 RIGHT_NORMAL,

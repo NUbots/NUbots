@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with the NUbots Codebase.  If not, see <http://www.gnu.org/licenses/>.
  *
- * Copyright 2015 NUbots <nubots@nubots.net>
+ * Copyright 2016 NUbots <nubots@nubots.net>
  */
 
 #ifndef UTILITY_MATH_FILTER_MMUKF_H
