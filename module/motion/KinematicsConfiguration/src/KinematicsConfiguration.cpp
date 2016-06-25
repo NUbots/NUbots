@@ -36,14 +36,13 @@ namespace motion {
     : Reactor(std::move(environment)) {
 
         on<Configuration>("KinematicsConfiguration.yaml").then([this] (const Configuration& config) {
-            log("Init kinconf");
+           
             KinematicsModel model;
-            log("Configuring kinconf");
             configure(model, config);
-            log("Emitting kinconf");
             emit(std::make_unique<KinematicsModel>(model));
-            log("Emitted kinconf");
+
         });
+
     }
 
     void KinematicsConfiguration::configure (KinematicsModel& model, const Configuration& objDarwinModel) {
