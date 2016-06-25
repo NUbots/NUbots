@@ -29,17 +29,20 @@ namespace motion {
 
     using message::support::Configuration;
     using message::motion::kinematics::KinematicsModel;
-
     using utility::support::Expression;
-    using message::motion::kinematics::KinematicsModel;
+
 
     KinematicsConfiguration::KinematicsConfiguration(std::unique_ptr<NUClear::Environment> environment)
     : Reactor(std::move(environment)) {
 
         on<Configuration>("KinematicsConfiguration.yaml").then([this] (const Configuration& config) {
-        	KinematicsModel model;
-        	configure(model, config);
-			emit(std::make_unique<KinematicsModel>(model));
+            log("Init kinconf");
+            KinematicsModel model;
+            log("Configuring kinconf");
+            configure(model, config);
+            log("Emitting kinconf");
+            emit(std::make_unique<KinematicsModel>(model));
+            log("Emitted kinconf");
         });
     }
 
@@ -134,7 +137,7 @@ namespace motion {
     }
 
     void KinematicsConfiguration::configureMassModel (KinematicsModel& model, const YAML::Node& objMassModel) {
-    	// massModel.numberOfMasses = objMassModel["number_of_masses"].as<float>();
+        // massModel.numberOfMasses = objMassModel["number_of_masses"].as<float>();
      //    massModel.massRepresentationDimension = objMassModel["mass_representation_dimension"].as<float>();
 
         // auto& masses = massModel.masses;
@@ -145,7 +148,7 @@ namespace motion {
   //       masses.leftShoulderPitch = objMasses[1].as<arma::vec4>();
   //       masses.rightShoulderPitch = objMasses[0].as<arma::vec4>();
 
-		// masses.leftElbow = objMasses[5].as<arma::vec4>();
+        // masses.leftElbow = objMasses[5].as<arma::vec4>();
   //       masses.rightElbow = objMasses[4].as<arma::vec4>();
 
   //       masses.leftHipRoll = objMasses[9].as<arma::vec4>();
@@ -166,7 +169,7 @@ namespace motion {
   //       masses.headPitch = objMasses[19].as<arma::vec4>();
   //       masses.headYaw = objMasses[18].as<arma::vec4>();
 
-		// masses.torso = objMasses[20].as<arma::vec4>();
+        // masses.torso = objMasses[20].as<arma::vec4>();
 
         auto masses = objMasses.as<std::vector<arma::vec4>>();
         std::copy(masses.begin(), masses.end(), model.MassModel.masses);

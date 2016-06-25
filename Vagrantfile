@@ -21,8 +21,8 @@ Vagrant.configure("2") do |config|
     override.vm.box = "ubuntu/trusty32"
 
     # See http://www.virtualbox.org/manual/ch08.html#vboxmanage-modifyvm
-    v.memory = 4096
-    v.cpus = 4
+    v.memory = 8192
+    v.cpus = 8
     v.customize ["modifyvm", :id, "--vram", 128]
     v.customize ["modifyvm", :id, "--ioapic", "on"]
     v.customize ["modifyvm", :id, "--accelerate3d", "on"]

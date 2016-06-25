@@ -49,6 +49,10 @@ namespace module {
 
             KinematicsDebug::KinematicsDebug(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
 
+                on<Trigger<KinematicsModel>>().then([this](const KinematicsModel& model){
+                    log("New Kinematics Model Received!!!");
+                });
+
                 on<Configuration, With<KinematicsModel>>("InverseKinematicsRequest.yaml").then([this](const Configuration& request, const KinematicsModel& kinematicsModel) {
                     return;//WTF is this?
                     Transform3D target;
