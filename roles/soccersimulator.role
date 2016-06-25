@@ -35,7 +35,6 @@ NUCLEAR_ROLE(
     behaviour::skills::KickScript
     behaviour::planning::KickPlanner
     behaviour::planning::BezierWalkPathPlanner 
-    behaviour::skills::WalkPathFollower # Follows WalkPaths.
     behaviour::skills::DirectWalkController
     behaviour::strategy::SoccerStrategy
 
