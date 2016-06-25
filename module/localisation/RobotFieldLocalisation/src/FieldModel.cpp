@@ -19,18 +19,23 @@
  */
 
 #include "FieldModel.h"
+#include "utility/math/matrix/Rotation3D.h"
+#include "utility/math/matrix/Translation3D.h"
+#include "utility/math/matrix/Transform3D.h"
 
 namespace module {
     namespace platform {
         namespace darwin {
+
+            using utility::math::matrix::Rotation3D;
+            using utility::math::matrix::Translation3D;
+            using utility::math::matrix::Transform3D;
 
             arma::vec::fixed<FieldModel::size> FieldModel::limitState(const arma::vec::fixed<size>& state) {
                 return state;
             }
 
             arma::vec::fixed<FieldModel::size> FieldModel::timeUpdate(const arma::vec::fixed<size>& state, double deltaT) {
-
-                //TODO: create the Rwf transformation matrix so we can make Rcf
 
                 return state;
             }
@@ -45,7 +50,7 @@ namespace module {
 
                 //make a storage for our goal locations
                 arma::vec3 goalLocation;
-                goalLocation[2] = 0.;
+                goalLocation[2] = 0.0;
 
                 //choose which goalpost we are looking at
                 // Switch on Team
@@ -83,19 +88,21 @@ namespace module {
                 //create the camera to field transformation
                 Transform3D Hct = sensors.forwardKinematics[ServoID::HEAD_PITCH].i();
                 Transform3D Htw = sensors.forwardKinematics[ServoID::HEAD_PITCH];
-                arma::vec3 rFWf = state.rows(0,1);
 
+                //create the world-field transform
+                arma::vec3 rFWf;
+                rFWf[2] = 0.0;
+                rFWf.rows(0,1) = state.rows(0,1);
                 //XXX: check correctness
-                rFWf[2] = 0.;
-                rFWf = state.rows(0,1);
-                Transform3D Hwf = Transform3D::rotateZLocal(state[2],rFWf);
+                Transform3D Hwf = Transform3D::createRotationZ(state[2]) + Transform3D::createTranslation(rFWf);
+                Hwf(3,3) = 1.0;
 
                 //We create camera world by using camera-torso -> torso-world -> world->field
                 Transform3D Hcf = Hct * Htw * Hwf;
 
                 //transform the goals from field to camera
-                goalBaseCorners = Hcf.i() * goalBaseCorners;
-                goalTopCorners = Hcf.i() * goalTopCorners;
+                goalBaseCorners = arma::vec(Hcf.i() * goalBaseCorners).rows(0,2);
+                goalTopCorners = arma::vec(Hcf.i() * goalTopCorners).rows(0,2);
 
                 //Select the (tl, tr, bl, br) corner points for normals
                 arma::ivec4 cornerIndices;
