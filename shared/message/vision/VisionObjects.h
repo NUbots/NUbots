@@ -70,9 +70,9 @@ namespace message {
             enum class MeasurementType {
                 LEFT_NORMAL,
                 RIGHT_NORMAL,
-                TOP_POINT,
-                BASE_POINT
-            }
+                TOP_NORMAL,
+                BASE_NORMAL
+            };
 
             std::vector<std::pair<MeasurementType, arma::vec3>> measurements;
             utility::math::geometry::Quad quad;
