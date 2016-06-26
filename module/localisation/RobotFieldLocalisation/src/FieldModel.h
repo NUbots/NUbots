@@ -56,11 +56,11 @@ namespace module {
                 , const message::input::Sensors& sensors
                 , const MeasurementType::GOAL&);
 
-            arma::vec observationDifference(const arma::vec& a, const arma::vec& b);
+            arma::vec observationDifference(const arma::vec& a, const arma::vec& b) const;
 
-            arma::vec::fixed<size> limitState(const arma::vec::fixed<size>& state);
+            arma::vec::fixed<size> limitState(const arma::vec::fixed<size>& state) const;
 
-            arma::mat::fixed<size, size> processNoise();
+            arma::mat::fixed<size, size> processNoise() const;
         };
 
     }

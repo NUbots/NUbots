@@ -33,7 +33,6 @@ namespace utility {
                 // The model
                 Model model;
 
-            private:
                 // The number of sigma points
                 static constexpr uint NUM_SIGMA_POINTS = (Model::size * 2) + 1;
 
@@ -64,6 +63,7 @@ namespace utility {
                 SigmaVec meanWeights;
                 SigmaRowVec covarianceWeights;
 
+            private:
                 // UKF variables
                 double covarianceSigmaWeights;
 

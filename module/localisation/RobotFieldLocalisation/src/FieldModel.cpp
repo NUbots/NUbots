@@ -34,10 +34,6 @@ namespace module {
         using message::input::Sensors;
         using message::input::ServoID;
 
-        arma::vec::fixed<FieldModel::size> FieldModel::limitState(const arma::vec::fixed<size>& state) {
-            return state;
-        }
-
         arma::vec::fixed<FieldModel::size> FieldModel::timeUpdate(const arma::vec::fixed<size>& state, double /*deltaT*/) {
             return state;
         }
@@ -51,12 +47,15 @@ namespace module {
             return measureGoals(state,measurements,field,sensors);
         }
 
-        arma::vec FieldModel::observationDifference(const arma::vec& a, const arma::vec& b) {
+        arma::vec FieldModel::observationDifference(const arma::vec& a, const arma::vec& b) const {
             return a - b;
-
         }
 
-        arma::mat::fixed<FieldModel::size, FieldModel::size> FieldModel::processNoise() {
+        arma::vec::fixed<FieldModel::size> FieldModel::limitState(const arma::vec::fixed<size>& state) const {
+            return state;
+        }
+
+        arma::mat::fixed<FieldModel::size, FieldModel::size> FieldModel::processNoise() const {
             return arma::diagmat(processNoiseDiagonal);
         }
 

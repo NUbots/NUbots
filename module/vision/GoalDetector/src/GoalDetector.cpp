@@ -326,8 +326,7 @@ namespace vision {
                 arma::vec3 right  = arma::normalise(arma::cross(ctr, cbl));
                 it->measurements.push_back(std::make_pair(Goal::MeasurementType::RIGHT_NORMAL, right));
 
-                // TL TR cross product gives the top side
-                // Check that the top is not too close to the edges of the screen
+                // Check that the points are not too close to the edges of the screen
                 if(                         std::min(cbr[0], cbl[0]) > MEASUREMENT_LIMITS_LEFT
                 &&                          std::min(cbr[1], cbl[1]) > MEASUREMENT_LIMITS_TOP
                 && cam.imageSizePixels[0] - std::max(cbr[0], cbl[0]) < MEASUREMENT_LIMITS_TOP
@@ -338,6 +337,7 @@ namespace vision {
                     it->measurements.push_back(std::make_pair(Goal::MeasurementType::BASE_NORMAL, right));
                 }
 
+                // Check that the points are not too close to the edges of the screen
                 if(                         std::min(ctr[0], ctl[0]) > MEASUREMENT_LIMITS_LEFT
                 &&                          std::min(ctr[1], ctl[1]) > MEASUREMENT_LIMITS_TOP
                 && cam.imageSizePixels[0] - std::max(ctr[0], ctl[0]) < MEASUREMENT_LIMITS_TOP

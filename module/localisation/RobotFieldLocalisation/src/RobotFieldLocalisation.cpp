@@ -77,6 +77,7 @@ namespace localisation {
         on<Every<30, Per<std::chrono::seconds>>, Sync<RobotFieldLocalisation>>().then("Robot Localisation Time Update", [this] {
 
             // Do a time update on the models
+            filter.timeUpdate(1.0/30.0);
         });
 
         on<Trigger<std::vector<Goal>>, With<FieldDescription>, Sync<RobotFieldLocalisation>>().then("Localisation Goal Update", [this] (const std::vector<Goal>& goals, const FieldDescription& field) {

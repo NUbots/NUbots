@@ -31,27 +31,45 @@ namespace utility {
 
             template <typename Model>
             class MMUKF {
-            private:
-
+            public:
                 struct Filter {
                     double weight;
                     UKF<Model> filter;
+
+                    bool operator< (const Filter& other) {
+                        return weight < other.weight;
+                    }
                 };
 
+            private:
                 std::vector<Filter> filters;
-                int maxModels = 2;
+                uint maxModels = 2;
                 double mergeProbability = 0.9;
 
-                double bhattacharyyaDistance(const UKF<Model>& a, const UKF<Model>& b) {
+                static double bhattacharyyaDistance(const UKF<Model>& a, const UKF<Model>& b) {
                     // Get our state difference
-                    const arma::vec ud = a.model.observationDistance(a.get(), b.get());
+                    const arma::vec ud = a.model.observationDifference(a.get(), b.get());
 
                     // Get our 3 covariance matricies we need
                     const auto& s1 = a.getCovariance();
                     const auto& s2 = b.getCovariance();
                     arma::mat s = (s1 + s2) * 0.5;
 
-                    return (0.125 * ud).t() * arma::inv_sympd(s) * ud + 0.5 * std::log(arma::det(s) / std::sqrt(arma::det(s1) * arma::det(s2)));
+                    double d = arma::mat((0.125 * ud).t() * arma::inv_sympd(s) * ud)[0] + 0.5 * std::log(arma::det(s) / std::sqrt(arma::det(s1) * arma::det(s2)));
+                    return d;
+                }
+
+                void renormalise() {
+
+                    // Normalise our weights
+                    double totalWeight = 0;
+                    for (auto& filter : filters) {
+                        totalWeight += filter.weight;
+                    }
+                    totalWeight = 1.0 / totalWeight;
+                    for (auto& filter : filters) {
+                        filter.weight *= totalWeight;
+                    }
                 }
 
                 void prune() {
@@ -63,7 +81,7 @@ namespace utility {
                     // We can do this because merging models that we are going
                     // to cut off later is pointless. We only need the first
                     // n most probable models
-                    for (int i = 0; i < std::min(maxModels, filters.size()); ++i) {
+                    for (uint i = 0; i < std::min(maxModels, filters.size()); ++i) {
 
                         auto end = std::remove_if(filters.begin() + i + 1, filters.end(), [this, i] (const Filter& f) {
                             return mergeProbability < bhattacharyyaDistance(filters[i].filter, f.filter);
@@ -76,14 +94,7 @@ namespace utility {
                     filters.resize(maxModels);
 
                     // Normalise our weights
-                    double totalWeight = 0;
-                    for (auto& filter : filters) {
-                        totalWeight += filters.weight;
-                    }
-                    totalWeight = 1.0 / totalWeight;
-                    for (auto& filter : filters) {
-                        filters.weight *= totalWeight;
-                    }
+                    renormalise();
                 }
 
                 template <typename... TArgs, size_t... I>
@@ -92,6 +103,21 @@ namespace utility {
                 }
 
             public:
+
+                MMUKF(uint maxModels = 2
+                    , double mergeProbability = 0.9
+                    , typename UKF<Model>::StateVec initialMean = arma::zeros(Model::size)
+                    , typename UKF<Model>::StateMat initialCovariance = arma::eye(Model::size, Model::size) * 0.1
+                    , double alpha = 1e-1
+                    , double kappa = 0.f
+                    , double beta = 2.f)
+                : maxModels(maxModels)
+                , mergeProbability(mergeProbability) {
+
+                    // Add an initial first filter model
+                    filters.push_back(Filter{1.0, UKF<Model>(initialMean, initialCovariance, alpha, kappa, beta)});
+                }
+
                 template <typename... TAdditionalParameters>
                 void timeUpdate(double deltaT, const TAdditionalParameters&... additionalParameters) {
 
@@ -114,8 +140,6 @@ namespace utility {
                     }
                 }
 
-
-
                 template <typename TMeasurement, typename... TMeasurementArgs>
                 void measurementUpdate(const std::initializer_list<std::tuple<TMeasurement, arma::mat, TMeasurementArgs...>>& measurements) {
 
@@ -134,6 +158,9 @@ namespace utility {
                     }
 
                     filters = std::move(newFilters);
+
+                    // Normalise our weights
+                    renormalise();
                 }
             };
         }

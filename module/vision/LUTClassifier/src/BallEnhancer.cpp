@@ -283,7 +283,7 @@ namespace module {
 
             // Put our set into the object
             classifiedImage.ballPoints.insert(classifiedImage.ballPoints.begin(), pSet.begin(), pSet.end());
-            // NUClear::log("Finished enhancing ball regions: number of points = ", pSet.size());
+
             emit(drawVisionLines(debug));
         }
 
