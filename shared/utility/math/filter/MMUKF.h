@@ -42,7 +42,6 @@ namespace utility {
                     }
                 };
 
-            private:
                 std::vector<Filter> filters;
                 uint maxModels = 2;
                 double mergeProbability = 0.9;
