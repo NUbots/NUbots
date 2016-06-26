@@ -1,47 +1,37 @@
-- duration: 200
-  targets:
-    - id: HEAD_PITCH
-      position: -0.25
-      gain: 30
-      torque: 100
-    - id: HEAD_YAW
-      position: 0
-      gain: 30
-      torque: 100
 - targets:
     - id: HEAD_PITCH
-      position: 0.35
-      gain: 30
-      torque: 100
-    - id: HEAD_YAW
       position: 0
       gain: 30
       torque: 100
-  duration: 180
-- duration: 180
-  targets:
-    - id: HEAD_PITCH
-      position: -0.25
+    - id: HEAD_YAW
+      position: -0.5
       gain: 30
       torque: 100
-    - id: HEAD_YAW
+  duration: 190
+- targets:
+    - id: HEAD_PITCH
       position: 0
       gain: 30
       torque: 100
-- duration: 180
-  targets:
-    - id: HEAD_PITCH
-      position: 0.35
+    - id: HEAD_YAW
+      position: 0.5
       gain: 30
       torque: 100
-    - id: HEAD_YAW
+  duration: 190
+- duration: 190
+  targets:
+    - id: HEAD_PITCH
       position: 0
       gain: 30
       torque: 100
-- duration: 180
+    - id: HEAD_YAW
+      position: -0.5
+      gain: 30
+      torque: 100
+- duration: 90
   targets:
     - id: HEAD_PITCH
-      position: -0.25
+      position: 0
       gain: 30
       torque: 100
     - id: HEAD_YAW
