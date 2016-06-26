@@ -23,9 +23,10 @@
 #include "message/vision/VisionObjects.h"
 #include "message/support/Configuration.h"
 #include "message/support/FieldDescription.h"
- #include "message/localisation/FieldObject.h"
- #include "utility/math/matrix/Rotation2D.h"
- #include "utility/math/matrix/Rotation3D.h"
+#include "message/localisation/FieldObject.h"
+#include "utility/math/matrix/Rotation2D.h"
+#include "utility/math/matrix/Rotation3D.h"
+#include "utility/support/yaml_armadillo.h"
 
 namespace module {
 namespace localisation {
@@ -34,12 +35,31 @@ namespace localisation {
     using message::input::Sensors;
     using message::vision::Goal;
     using message::support::FieldDescription;
+    using utility::math::filter::MMUKF;
+    using utility::math::filter::UKF;
 
     RobotFieldLocalisation::RobotFieldLocalisation(std::unique_ptr<NUClear::Environment> environment)
     : Reactor(std::move(environment)) {
 
         on<Configuration>("RobotFieldLocalisation.yaml").then([this] (const Configuration& config) {
             // Use configuration here from file RobotFieldLocalisation.yaml
+
+            if (filter.filters.empty()) {
+                filter.filters.push_back(
+                        MMUKF<FieldModel>::Filter{
+                            1.0, 
+                            UKF<FieldModel>(
+                                config["initial_mean"].as<arma::vec3>()
+                                , config["initial_covariance"].as<arma::vec3>()
+                                )
+                            }
+                        );
+            }
+
+            for (auto& f : filter.filters) {
+                f.filter.model.processNoiseDiagonal = config["process_noise"].as<arma::vec3>();
+            }
+
         });
 
 
