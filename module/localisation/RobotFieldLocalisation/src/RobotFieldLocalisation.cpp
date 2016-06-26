@@ -50,7 +50,7 @@ namespace localisation {
                             1.0, 
                             UKF<FieldModel>(
                                 config["initial_mean"].as<arma::vec3>()
-                                , config["initial_covariance"].as<arma::vec3>()
+                                , arma::diagmat(config["initial_covariance"].as<arma::vec3>())
                                 )
                             }
                         );
@@ -136,7 +136,6 @@ namespace localisation {
 
             // We have one ambigous goal
             else if(goals.size() == 1) {
-
                 // Build our measurement list
                 std::vector<double> measurement;
 
@@ -151,16 +150,17 @@ namespace localisation {
                         measurement.push_back(m.second[2]);
 
                         // Insert the measurement type into our measurement type vector
-                        measurementTypes[1].push_back(std::make_tuple(Goal::Team::OWN, Goal::Side::LEFT, m.first));
-                        measurementTypes[2].push_back(std::make_tuple(Goal::Team::OWN, Goal::Side::RIGHT, m.first));
-                        measurementTypes[3].push_back(std::make_tuple(Goal::Team::OPPONENT, Goal::Side::LEFT, m.first));
-                        measurementTypes[4].push_back(std::make_tuple(Goal::Team::OPPONENT, Goal::Side::RIGHT, m.first));
+                        measurementTypes[0].push_back(std::make_tuple(Goal::Team::OWN, Goal::Side::LEFT, m.first));
+                        measurementTypes[1].push_back(std::make_tuple(Goal::Team::OWN, Goal::Side::RIGHT, m.first));
+                        measurementTypes[2].push_back(std::make_tuple(Goal::Team::OPPONENT, Goal::Side::LEFT, m.first));
+                        measurementTypes[3].push_back(std::make_tuple(Goal::Team::OPPONENT, Goal::Side::RIGHT, m.first));
                     }
                 }
 
                 arma::vec armaMeas = measurement;
 
                 // Apply our multiple measurement updates
+
                 filter.measurementUpdate({
                       std::make_tuple(armaMeas, arma::mat(arma::eye(armaMeas.n_elem, armaMeas.n_elem) * 1e-3), measurementTypes[0], field, *goals[0].sensors, FieldModel::MeasurementType::GOAL())
                     , std::make_tuple(armaMeas, arma::mat(arma::eye(armaMeas.n_elem, armaMeas.n_elem) * 1e-3), measurementTypes[1], field, *goals[0].sensors, FieldModel::MeasurementType::GOAL())
