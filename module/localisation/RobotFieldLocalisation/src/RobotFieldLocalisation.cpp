@@ -23,6 +23,9 @@
 #include "message/vision/VisionObjects.h"
 #include "message/support/Configuration.h"
 #include "message/support/FieldDescription.h"
+ #include "message/localisation/FieldObject.h"
+ #include "utility/math/matrix/Rotation2D.h"
+ #include "utility/math/matrix/Rotation3D.h"
 
 namespace module {
 namespace localisation {
@@ -43,6 +46,32 @@ namespace localisation {
         on<Trigger<Sensors>>().then("Localisation Field Space", [this] (const Sensors& sensors) {
 
             // Use the current world to field state we are holding to modify sensors.world and emit that
+            utility::math::matrix::Transform3D Htw = sensors.world;
+
+            //create the world-field transform
+            arma::vec3 rFWf;
+            rFWf[2] = 0.0;
+            rFWf.rows(0,1) = filter.get().rows(0,1);
+            //XXX: check correctness
+            utility::math::matrix::Transform3D Hwf = utility::math::matrix::Transform3D::createRotationZ(filter.get()[2]) 
+                                                   + utility::math::matrix::Transform3D::createTranslation(rFWf);
+            Hwf(3,3) = 1.0;
+
+            //extract the 2D yaw from the field-torso transform
+            utility::math::matrix::Transform3D Hft = utility::math::matrix::Transform3D(Htw * Hwf).i();
+            double yaw = utility::math::matrix::Rotation3D(Hft.rotation()).yaw();
+
+            //make a localisation object
+            message::localisation::Self robot;
+
+            //set position, covariance, and rotation
+            robot.position = Hft.translation().rows(0,1);
+            //TODO: check that this is indeed rotated the right way
+            robot.robot_to_world_rotation = utility::math::matrix::Rotation2D::createRotation(yaw);
+            robot.position_cov = robot.robot_to_world_rotation * filter.getCovariance().submat(0,0,1,1);
+            robot.heading = robot.robot_to_world_rotation.row(0).t();
+
+            emit(std::make_unique<std::vector<message::localisation::Self>>(std::vector<message::localisation::Self>(1,robot)));
         });
 
         on<Every<30, Per<std::chrono::seconds>>, Sync<RobotFieldLocalisation>>().then("Robot Localisation Time Update", [this] {
