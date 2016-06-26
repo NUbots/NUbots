@@ -73,10 +73,10 @@ namespace utility {
                 }
 
                 void prune() {
-
-                    // First we merge similar models
+                    // Sort so the most likely model is first
                     std::sort(std::begin(filters), std::end(filters));
 
+                    // First we merge similar models
                     // Now we merge to the number of models we need
                     // We can do this because merging models that we are going
                     // to cut off later is pointless. We only need the first
@@ -105,17 +105,9 @@ namespace utility {
             public:
 
                 MMUKF(uint maxModels = 2
-                    , double mergeProbability = 0.9
-                    , typename UKF<Model>::StateVec initialMean = arma::zeros(Model::size)
-                    , typename UKF<Model>::StateMat initialCovariance = arma::eye(Model::size, Model::size) * 0.1
-                    , double alpha = 1e-1
-                    , double kappa = 0.f
-                    , double beta = 2.f)
+                    , double mergeProbability = 0.9)
                 : maxModels(maxModels)
                 , mergeProbability(mergeProbability) {
-
-                    // Add an initial first filter model
-                    filters.push_back(Filter{1.0, UKF<Model>(initialMean, initialCovariance, alpha, kappa, beta)});
                 }
 
                 template <typename... TAdditionalParameters>
@@ -156,6 +148,8 @@ namespace utility {
                             newFilters.push_back(split);
                         }
                     }
+
+                    std::sort(newFilters.begin(), newFilters.end());
 
                     filters = std::move(newFilters);
 
