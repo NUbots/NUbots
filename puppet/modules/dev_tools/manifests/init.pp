@@ -82,9 +82,9 @@ class dev_tools {
 
   # INSTALL PYTHON PACKAGES (we need python-pip to use the pip provider)
   Package['python-pip'] -> Package <| provider == 'pip' |>
-  package { 'pyparsing': ensure => latest, provider => 'pip' }
-  package { 'pydotplus': ensure => latest, provider => 'pip' }
-  package { 'pygments': ensure => latest, provider => 'pip' }
+  package { 'pyparsing': ensure => installed, provider => 'pip' }
+  package { 'pydotplus': ensure => installed, provider => 'pip' }
+  package { 'pygments': ensure => installed, provider => 'pip' }
   # python::pip { 'pybfd': ensure => latest }#, url => 'https://github.com/Groundworkstech/pybfd/archive/master.tar.gz' }
 
   # SSH KEYS FOR THE VM
@@ -117,7 +117,8 @@ class dev_tools {
 
   # SETUP OUR ALTERNATIVES SO WE USE THE CORRECT COMPILER
   exec {'fix_compiler_environment':
-    command => 'update-alternatives --install /usr/bin/ld ld /usr/bin/ld.bfd 10 \
+    command => 'update-alternatives --remove-all gcc \
+             ;  update-alternatives --install /usr/bin/ld ld /usr/bin/ld.bfd 10 \
              && update-alternatives --install /usr/bin/ld ld /usr/bin/ld.gold 20 \
              && update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-6 100 \
                                     --slave /usr/bin/g++ g++ /usr/bin/g++-6 \
