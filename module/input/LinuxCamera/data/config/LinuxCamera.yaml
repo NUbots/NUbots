@@ -11,11 +11,11 @@ brightness: 0
 
 # Picture contrast or luma gain.
 # (int) min=0 max=255 step=1 default=128
-contrast: 60
+contrast: 20
 
 # Picture color saturation or chroma gain.
 # (int) min=0 max=255 step=1 default=128
-saturation: 45
+saturation: 65
 
 # Enables a power line frequency filter to avoid flicker.
 # Possible values for enum v4l2_power_line_frequency are:
@@ -32,7 +32,7 @@ auto_white_balance: 0
 # This control specifies the white balance settings as a color temperature in Kelvin.
 # A driver should have a minimum of 2800 (incandescent) to 6500 (daylight).
 # (int): min=2000 max=6500 step=1 default=4000
-white_balance_temperature: 4500
+white_balance_temperature: 4750
 
 # Sets the current mode for automatic exposure. Can be set to one of the following options
 #   AUTO(0) - Automatically select the exposure mode
@@ -52,7 +52,7 @@ auto_exposure: 1
 # Determines the exposure time of the camera sensor. The exposure time is limited by the frame interval.
 # Drivers should interpret the values as 100 µs units, where the value 1 stands for 1/10000th of a second, 10000 for 1 second and 100000 for 10 seconds.
 # (int): min=3 max=2047 step=1 default=250
-absolute_exposure: 350
+absolute_exposure: 325
 
 # Adjusts the backlight compensation in a camera. The minimum value disables backlight compensation.
 # (int): min=0 max=1 step=1 default=0
@@ -62,7 +62,7 @@ backlight_compensation: 0
 # Enables automatic focus adjustments.
 # The effect of manual focus adjustments while this feature is enabled is undefined, drivers should ignore such requests.
 # (bool): default=1
-# auto_focus: 0
+# auto_focus: 0ot
 
 # This control sets the focal point of the camera to the specified position. The unit is undefined. Positive values set the focus closer to the camera, negative values towards infinity.
 # (int): min=0 max=250 step=5 default=0 value=0 flags=inactive
