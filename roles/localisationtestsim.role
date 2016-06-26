@@ -1,10 +1,10 @@
 NUCLEAR_ROLE(
-    # This must come first as it populates global variables that other modules depend on.
-    platform::darwin::KinematicsModel
-    #Support
+    support::extension::FileWatcher
     #support::SignalCatcher
     support::logging::ConsoleLogHandler
-    support::extension::FileWatcher
+    # This must come first as it populates global variables that other modules depend on.
+    motion::KinematicsConfiguration
+    #Support
     support::configuration::GlobalConfig
     support::configuration::SoccerConfig
     support::configuration::NetworkConfiguration

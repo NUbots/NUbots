@@ -49,9 +49,9 @@ namespace module {
             using message::input::LimbID;
             using utility::nubugger::graph;
             using utility::motion::kinematics::calculateAllPositions;
-            using utility::motion::kinematics::DarwinModel;
+            using message::motion::kinematics::KinematicsModel;
             using utility::motion::kinematics::calculateCentreOfMass;
-            using utility::motion::kinematics::Side;
+            using message::motion::kinematics::BodySide;
             using utility::motion::kinematics::calculateRobotToIMU;
             using utility::math::matrix::Transform3D;
             using utility::math::matrix::Rotation3D;
@@ -223,8 +223,15 @@ namespace module {
                     }
                 });
 
-                on<Trigger<DarwinSensors>, Optional<With<Sensors>>, Single, Priority::HIGH>()
-                .then("Main Sensors Loop", [this](const DarwinSensors& input, std::shared_ptr<const Sensors> previousSensors) {
+                on< Trigger<DarwinSensors>
+                  , Optional<With<Sensors>>
+                  , With<KinematicsModel>
+                  , Single
+                  , Priority::HIGH>().then(
+                            "Main Sensors Loop",
+                            [this](const DarwinSensors& input,
+                                   std::shared_ptr<const Sensors> previousSensors,
+                                   const KinematicsModel& kinematicsModel) {
 
                     auto sensors = std::make_unique<Sensors>();
 
@@ -381,7 +388,8 @@ namespace module {
                     /************************************************
                      *                  Kinematics                  *
                      ************************************************/
-                    sensors->forwardKinematics = calculateAllPositions<DarwinModel>(*sensors);
+
+                    sensors->forwardKinematics = calculateAllPositions(kinematicsModel,*sensors);
 
                     /************************************************
                      *            Foot down information             *
@@ -525,7 +533,7 @@ namespace module {
                     // Gives us the quaternion representation
                     const auto& o = motionFilter.get();
 
-                    // Map from robot to world coordinates
+                    // Map from world to torso coordinates
                     sensors->world.fill(0);
                     sensors->world.rotation() = Rotation3D(UnitQuaternion(o.rows(MotionModel::QW, MotionModel::QZ)));
                     sensors->world.translation() = -(sensors->world.rotation() * o.rows(MotionModel::PX, MotionModel::PZ));
@@ -535,8 +543,8 @@ namespace module {
                     /************************************************
                      *                  Mass Model                  *
                      ************************************************/
-                    sensors->centreOfMass = calculateCentreOfMass<DarwinModel>(sensors->forwardKinematics, true);
 
+                    sensors->centreOfMass = calculateCentreOfMass(kinematicsModel,sensors->forwardKinematics, true);
 
                     /************************************************
                      *                  Kinematics Horizon          *
@@ -557,12 +565,12 @@ namespace module {
                     /************************************************
                      *                  CENTRE OF PRESSURE          *
                      ************************************************/
-                    sensors->centreOfPressure = utility::motion::kinematics::calculateCentreOfPressure<DarwinModel>(*sensors);
 
+                    sensors->centreOfPressure = utility::motion::kinematics::calculateCentreOfPressure(kinematicsModel,*sensors);
+                    
                     emit(std::move(sensors));
                 });
             }
-
         }  // darwin
     }  // platform
 }  // modules
