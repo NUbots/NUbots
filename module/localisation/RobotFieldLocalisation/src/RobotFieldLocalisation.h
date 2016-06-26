@@ -30,7 +30,7 @@ namespace localisation {
 
     class RobotFieldLocalisation : public NUClear::Reactor {
     private:
-        utility::math::MMUKF<FieldModel> filter;
+        utility::math::filter::MMUKF<FieldModel> filter;
 
     public:
         /// @brief Called by the powerplant to build and setup the RobotFieldLocalisation reactor.

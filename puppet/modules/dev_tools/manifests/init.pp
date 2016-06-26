@@ -82,9 +82,9 @@ class dev_tools {
 
   # INSTALL PYTHON PACKAGES (we need python-pip to use the pip provider)
   Package['python-pip'] -> Package <| provider == 'pip' |>
-  package { 'pyparsing': ensure => latest, provider => 'pip' }
-  package { 'pydotplus': ensure => latest, provider => 'pip' }
-  package { 'pygments': ensure => latest, provider => 'pip' }
+  package { 'pyparsing': ensure => installed, provider => 'pip' }
+  package { 'pydotplus': ensure => installed, provider => 'pip' }
+  package { 'pygments': ensure => installed, provider => 'pip' }
   # python::pip { 'pybfd': ensure => latest }#, url => 'https://github.com/Groundworkstech/pybfd/archive/master.tar.gz' }
 
   # SSH KEYS FOR THE VM

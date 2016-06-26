@@ -20,34 +20,36 @@
 
 #include "FieldModel.h"
 #include "utility/math/matrix/Rotation3D.h"
-#include "utility/math/matrix/Translation3D.h"
 #include "utility/math/matrix/Transform3D.h"
 
 namespace module {
-    namespace platform {
-        namespace darwin {
+    namespace localisation {
 
-            using utility::math::matrix::Rotation3D;
-            using utility::math::matrix::Translation3D;
-            using utility::math::matrix::Transform3D;
+        using utility::math::matrix::Rotation3D;
+        using utility::math::matrix::Transform3D;
+        using message::vision::Goal;
+        using message::support::FieldDescription;
+        using message::input::Sensors;
+        using message::input::ServoID;
 
-            arma::vec::fixed<FieldModel::size> FieldModel::limitState(const arma::vec::fixed<size>& state) {
-                return state;
-            }
+        arma::vec::fixed<FieldModel::size> FieldModel::limitState(const arma::vec::fixed<size>& state) {
+            return state;
+        }
 
-            arma::vec::fixed<FieldModel::size> FieldModel::timeUpdate(const arma::vec::fixed<size>& state, double deltaT) {
+        arma::vec::fixed<FieldModel::size> FieldModel::timeUpdate(const arma::vec::fixed<size>& state, double /*deltaT*/) {
+            return state;
+        }
 
-                return state;
-            }
+        arma::vec FieldModel::predictedObservation(const arma::vec::fixed<size>& state
+            , const std::vector<std::tuple<Goal::Team, Goal::Side, Goal::MeasurementType>>& measurements
+            , const FieldDescription& field
+            , const Sensors& sensors
+            , const MeasurementType::GOAL&) {
 
-            arma::vec FieldModel::predictedObservation(const arma::vec::fixed<size>& state
-                , const std::vector<std::tuple<Goal::Team, Goal::Side, Goal::MeasurementType>& measurements
-                , const FieldDescription& field
-                , const Sensors& sensors
-                , const MeasurementType::GOAL&) {
-
-                
-
+            //Get the x/y position for goals
+            arma::vec prediction(3*measurements.size());
+            int counter = 0;
+            for(auto& type : measurements) {
                 //make a storage for our goal locations
                 arma::vec3 goalLocation;
                 goalLocation[2] = 0.0;
@@ -59,17 +61,28 @@ namespace module {
                     case Goal::Team::OWN:
                         switch(std::get<1>(type)) {
                             case Goal::Side::LEFT:
-                                goalLocation.rows(0,1) = FieldModel.goalpost_own_l;
+                                goalLocation.rows(0,1) = field.goalpost_own_l;
+                                break;
                             case Goal::Side::RIGHT:
-                                goalLocation.rows(0,1) = FieldModel.goalpost_own_r;
+                                goalLocation.rows(0,1) = field.goalpost_own_r;
+                                break;
+                            case Goal::Side::UNKNOWN:
+                                break;
                         }
                     case Goal::Team::OPPONENT:
                         switch(std::get<1>(type)) {
                             case Goal::Side::LEFT:
-                                goalLocation.rows(0,1) = FieldModel.goalpost_opp_l;
+                                goalLocation.rows(0,1) = field.goalpost_opp_l;
+                                break;
                             case Goal::Side::RIGHT:
-                                goalLocation.rows(0,1) = FieldModel.goalpost_opp_r;
+                                goalLocation.rows(0,1) = field.goalpost_opp_r;
+                                break;
+                            case Goal::Side::UNKNOWN:
+                                break;
                         }
+
+                    case Goal::Team::UNKNOWN:
+                        break;
                 }
 
 
@@ -86,8 +99,8 @@ namespace module {
                 goalTopCorners.row(2) += field.goalpost_top_height;
 
                 //create the camera to field transformation
-                Transform3D Hct = sensors.forwardKinematics[ServoID::HEAD_PITCH].i();
-                Transform3D Htw = sensors.forwardKinematics[ServoID::HEAD_PITCH];
+                Transform3D Hct = sensors.forwardKinematics.find(ServoID::HEAD_PITCH)->second.i();
+                Transform3D Htw = sensors.world;
 
                 //create the world-field transform
                 arma::vec3 rFWf;
@@ -108,73 +121,72 @@ namespace module {
                 arma::ivec4 cornerIndices;
                 cornerIndices.fill(0);
 
-                arma::vec pvals = goalBaseCorners*arma::cross(goalBaseCorners[0],goalTopCorners[0]);
-                cornerIndices[2] = pvals.max_index();
-                cornerIndices[3] = pvals.min_index();
+                arma::vec pvals = goalBaseCorners * arma::cross(goalBaseCorners.col(0), goalTopCorners.col(0));
+                cornerIndices[2] = pvals.index_max();
+                cornerIndices[3] = pvals.index_min();
 
-                pvals = goalTopCorners*arma::cross(goalBaseCorners[0],goalTopCorners[0]);
-                cornerIndices[0] = pvals.max_index();
-                cornerIndices[1] = pvals.min_index();
+                pvals = goalTopCorners * arma::cross(goalBaseCorners.col(0), goalTopCorners.col(0));
+                cornerIndices[0] = pvals.index_max();
+                cornerIndices[1] = pvals.index_min();
 
-                //Get the x/y position for goals
-                arma::vec prediction(3*measurements.size());
-                int counter = 0;
-                for(auto& type : measurements) {
-                    // Switch on normal type
-                    switch(std::get<2>) {
+                // Switch on normal type
+                switch(std::get<2>(type)) {
 
-                        case Goal::MeasurementType::LEFT_NORMAL:
-                            arma::vec3 normal = arma::normalize(
-                                                        arma::cross(
-                                                            goalBaseCorners[cornerIndices[2]],
-                                                            goalTopCorners[cornerIndices[0]]
-                                                            )
-                                                    );
-                            prediction.rows(counter,counter+2) = normal;
+                    case Goal::MeasurementType::LEFT_NORMAL: {
+                        arma::vec3 normal = arma::normalise(
+                                                    arma::cross(
+                                                        goalBaseCorners.col(cornerIndices[2]),
+                                                        goalTopCorners.col(cornerIndices[0])
+                                                        )
+                                                );
+                        prediction.rows(counter,counter+2) = normal;
+                    } break;
 
-                        case Goal::MeasurementType::RIGHT_NORMAL:
-                            arma::vec3 normal = arma::normalize(
-                                                        arma::cross(
-                                                            goalTopCorners[cornerIndices[1]],
-                                                            goalBaseCorners[cornerIndices[3]]
-                                                            )
-                                                    );
-                            prediction.rows(counter,counter+2) = normal;
+                    case Goal::MeasurementType::RIGHT_NORMAL: {
+                        arma::vec3 normal = arma::normalise(
+                                                    arma::cross(
+                                                        goalTopCorners.col(cornerIndices[1]),
+                                                        goalBaseCorners.col(cornerIndices[3])
+                                                        )
+                                                );
+                        prediction.rows(counter,counter+2) = normal;
+                    } break;
 
-                        case Goal::MeasurementType::TOP_NORMAL:
-                            arma::vec3 normal = arma::normalize(
-                                                        arma::cross(
-                                                            goalTopCorners[cornerIndices[0]],
-                                                            goalTopCorners[cornerIndices[1]]
-                                                            )
-                                                    );
-                            prediction.rows(counter,counter+2) = normal;
+                    case Goal::MeasurementType::TOP_NORMAL: {
+                        arma::vec3 normal = arma::normalise(
+                                                    arma::cross(
+                                                        goalTopCorners.col(cornerIndices[0]),
+                                                        goalTopCorners.col(cornerIndices[1])
+                                                        )
+                                                );
+                        prediction.rows(counter,counter+2) = normal;
+                    } break;
 
-                        case Goal::MeasurementType::BASE_NORMAL:
-                            arma::vec3 normal = arma::normalize(
-                                                        arma::cross(
-                                                            goalBaseCorners[cornerIndices[3]],
-                                                            goalBaseCorners[cornerIndices[2]]
-                                                            )
-                                                    );
-                            prediction.rows(counter,counter+2) = normal;
+                    case Goal::MeasurementType::BASE_NORMAL: {
+                        arma::vec3 normal = arma::normalise(
+                                                    arma::cross(
+                                                        goalBaseCorners.col(cornerIndices[3]),
+                                                        goalBaseCorners.col(cornerIndices[2])
+                                                        )
+                                                );
+                        prediction.rows(counter,counter+2) = normal;
+                    } break;
 
-                    }
-                    counter += 3;
                 }
-
-                return prediction;
+                counter += 3;
             }
 
-            arma::vec FieldModel::observationDifference(const arma::vec& a, const arma::vec& b) {
-                return a - b;
+            return prediction;
+        }
 
-            }
-
-            arma::mat::fixed<FieldModel::size, FieldModel::size> FieldModel::processNoise() {
-                return arma::diagmat(processNoiseDiagonal);
-            }
+        arma::vec FieldModel::observationDifference(const arma::vec& a, const arma::vec& b) {
+            return a - b;
 
         }
+
+        arma::mat::fixed<FieldModel::size, FieldModel::size> FieldModel::processNoise() {
+            return arma::diagmat(processNoiseDiagonal);
+        }
+
     }
 }

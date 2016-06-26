@@ -23,17 +23,20 @@
 #include <nuclear>
 #include <armadillo>
 
+#include "UKF.h"
+
 namespace utility {
     namespace math {
         namespace filter {
 
             template <typename Model>
             class MMUKF {
+            private:
 
                 struct Filter {
                     double weight;
                     UKF<Model> filter;
-                }
+                };
 
                 std::vector<Filter> filters;
                 int maxModels = 2;
@@ -48,7 +51,7 @@ namespace utility {
                     const auto& s2 = b.getCovariance();
                     arma::mat s = (s1 + s2) * 0.5;
 
-                    return (0.125 * ud).t() * arma::sympd_inv(s) * ud + 0.5 * std::ln(arma::det(s) / std::sqrt(arma::det(s1) * arma::det(s2)));
+                    return (0.125 * ud).t() * arma::inv_sympd(s) * ud + 0.5 * std::log(arma::det(s) / std::sqrt(arma::det(s1) * arma::det(s2)));
                 }
 
                 void prune() {
@@ -62,8 +65,8 @@ namespace utility {
                     // n most probable models
                     for (int i = 0; i < std::min(maxModels, filters.size()); ++i) {
 
-                        auto end = std::remove_if(filters.begin() + i + 1, filters.end(); [](const Filter& f) {
-                            return mergeProbability < bhattacharyyaDistance(filters[i].filter, filter.filter);
+                        auto end = std::remove_if(filters.begin() + i + 1, filters.end(), [this, i] (const Filter& f) {
+                            return mergeProbability < bhattacharyyaDistance(filters[i].filter, f.filter);
                         });
 
                         filters.erase(end, filters.end());
@@ -78,11 +81,17 @@ namespace utility {
                         totalWeight += filters.weight;
                     }
                     totalWeight = 1.0 / totalWeight;
-                    for (auto& & filter : filters) {
+                    for (auto& filter : filters) {
                         filters.weight *= totalWeight;
                     }
                 }
 
+                template <typename... TArgs, size_t... I>
+                double applyMeasurement(Filter& filter, const std::tuple<TArgs...>& args, const std::index_sequence<I...>&) {
+                    return filter.filter.measurementUpdate(std::get<I>(args)...);
+                }
+
+            public:
                 template <typename... TAdditionalParameters>
                 void timeUpdate(double deltaT, const TAdditionalParameters&... additionalParameters) {
 
@@ -93,7 +102,6 @@ namespace utility {
                         filter.filter.timeUpdate(deltaT, additionalParameters...);
                     }
                 }
-
 
                 template <typename TMeasurement, typename... TMeasurementArgs>
                 void measurementUpdate(const TMeasurement& measurement
@@ -106,22 +114,19 @@ namespace utility {
                     }
                 }
 
-                template <typename... TArgs, size_t... I>
-                double applyMeasurement(Filter& filter, const std::tuple<TArgs...>& args, const std::index_sequence<I...>&) {
-                    return filter.filter.measurementUpdate(std::get<I>(args)...);
-                }
+
 
                 template <typename TMeasurement, typename... TMeasurementArgs>
-                void measurementUpdate(const std::vector<std::tuple<TMeasurement, arma::mat, TMeasurementArgs...>>& measurements) {
+                void measurementUpdate(const std::initializer_list<std::tuple<TMeasurement, arma::mat, TMeasurementArgs...>>& measurements) {
 
                     std::vector<Filter> newFilters;
 
                     for (auto& filter : filters) {
 
-                        for (int i = 0; i < measurements.size(); ++i) {
+                        for (auto& measurement : measurements) {
                             Filter split = filter;
 
-                            double weight = applyMeasurement(split, measurements, std::make_index_sequence<2 + sizeof...(TMeasurementArgs)>())
+                            double weight = applyMeasurement(split, measurement, std::make_index_sequence<2 + sizeof...(TMeasurementArgs)>());
                             split.weight *= weight;
 
                             newFilters.push_back(split);
@@ -130,7 +135,7 @@ namespace utility {
 
                     filters = std::move(newFilters);
                 }
-            }
+            };
         }
     }
 }

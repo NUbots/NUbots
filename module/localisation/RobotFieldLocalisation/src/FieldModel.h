@@ -22,6 +22,8 @@
 
 #include <armadillo>
 
+#include "message/input/Sensors.h"
+#include "message/vision/VisionObjects.h"
 #include "message/support/FieldDescription.h"
 
 namespace module {
@@ -48,9 +50,10 @@ namespace module {
 
             arma::vec::fixed<size> timeUpdate(const arma::vec::fixed<size>& state, double deltaT);
 
-            arma::vec3 predictedObservation(const arma::vec::fixed<size>& state
-                , const std::vector<std::tuple<Goal::Team, Goal::Side, Goal::MeasurementType>>& measurements
+            arma::vec predictedObservation(const arma::vec::fixed<size>& state
+                , const std::vector<std::tuple<message::vision::Goal::Team, message::vision::Goal::Side, message::vision::Goal::MeasurementType>>& measurements
                 , const message::support::FieldDescription& field
+                , const message::input::Sensors& sensors
                 , const MeasurementType::GOAL&);
 
             arma::vec observationDifference(const arma::vec& a, const arma::vec& b);

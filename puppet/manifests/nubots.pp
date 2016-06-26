@@ -10,7 +10,7 @@ node nubotsvm {
   class {'dev_tools': }
 
   # Get and install our toolchain
-  $toolchain_version = '1.1.5'
+  $toolchain_version = '1.1.6'
   wget::fetch { 'nubots_deb':
     destination => "/root/nubots-toolchain${toolchain_version}.deb",
     source => "http://nubots.net/debs/nubots-toolchain${toolchain_version}.deb",
@@ -51,7 +51,7 @@ node nubotsvmbuild {
                                 postbuild => 'cp svm.h /nubots/toolchain/include; cp svm.o /nubots/toolchain/lib',
                                 creates =>'/nubots/toolchain/lib/svm.o',
                                 method => 'make', }
-  installer { 'armadillo':      url => 'https://downloads.sourceforge.net/project/arma/armadillo-7.100.3.tar.xz',
+  installer { 'armadillo':      url => 'https://downloads.sourceforge.net/project/arma/armadillo-7.200.2.tar.xz',
                                 method => 'cmake',
                                 creates => '/nubots/toolchain/lib/libarmadillo.so',
                                 require => Installer['openblas'], }
