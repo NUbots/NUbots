@@ -37,7 +37,8 @@ namespace utility {
                     UKF<Model> filter;
 
                     bool operator< (const Filter& other) {
-                        return weight < other.weight;
+                        // Sort from big to small
+                        return weight > other.weight;
                     }
                 };
 
@@ -161,6 +162,14 @@ namespace utility {
 
                     // Normalise our weights
                     renormalise();
+                }
+
+                const typename UKF<Model>::StateVec& get() const {
+                    return filters[0].filter.get();
+                }
+
+                const typename UKF<Model>::StateMat& getCovariance() const {
+                    return filters[0].filter.getCovariance();
                 }
             };
         }
