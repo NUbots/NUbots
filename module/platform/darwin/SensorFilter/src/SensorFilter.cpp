@@ -533,7 +533,7 @@ namespace module {
                     // Gives us the quaternion representation
                     const auto& o = motionFilter.get();
 
-                    // Map from robot to world coordinates
+                    // Map from world to torso coordinates
                     sensors->world.fill(0);
                     sensors->world.rotation() = Rotation3D(UnitQuaternion(o.rows(MotionModel::QW, MotionModel::QZ)));
                     sensors->world.translation() = -(sensors->world.rotation() * o.rows(MotionModel::PX, MotionModel::PZ));
