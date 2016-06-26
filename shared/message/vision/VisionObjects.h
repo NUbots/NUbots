@@ -50,6 +50,8 @@ namespace message {
         };
 
         struct Ball : public VisionObject {
+
+            std::vector<arma::vec3> edgePoints;
             utility::math::geometry::Circle circle;
         };
 

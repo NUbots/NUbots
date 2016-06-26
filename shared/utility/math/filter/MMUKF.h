@@ -107,8 +107,8 @@ namespace utility {
                 }
 
                 template <typename... TArgs, size_t... I>
-                void applyMeasurement(Filter& filter, const std::tuple<TArgs...>& args, const std::index_sequence<I...>&) {
-                    filter.filter.measurementUpdate(std::get<I>(args)...);
+                double applyMeasurement(Filter& filter, const std::tuple<TArgs...>& args, const std::index_sequence<I...>&) {
+                    return filter.filter.measurementUpdate(std::get<I>(args)...);
                 }
 
                 template <typename TMeasurement, typename... TMeasurementArgs>
@@ -121,14 +121,14 @@ namespace utility {
                         for (int i = 0; i < measurements.size(); ++i) {
                             Filter split = filter;
 
-                            std::get<0>(measurements), std::get<1>(measurements), std::get<2...N>(measurements);
-
-                            double weight = split.filter.measurementUpdate(measurement[i], measurementVariances[i], measurementArgs[i]...);
+                            double weight = applyMeasurement(split, measurements, std::make_index_sequence<2 + sizeof...(TMeasurementArgs)>())
                             split.weight *= weight;
 
                             newFilters.push_back(split);
                         }
                     }
+
+                    filters = std::move(newFilters);
                 }
             }
         }
