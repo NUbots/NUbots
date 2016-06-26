@@ -31,9 +31,8 @@ namespace module {
             class DarwinVirtualLoadSensor {
                 //this implements a linear model (trained by logistic regression) with a bayes filter on the output
                 private:
-                    double currentNoise;
                     double noiseFactor;
-                    double intercept;
+                    double currentNoise;
                     double certaintyThreshold;
                     double uncertaintyThreshold;
 

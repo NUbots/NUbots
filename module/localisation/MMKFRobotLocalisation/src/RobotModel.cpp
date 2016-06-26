@@ -44,7 +44,7 @@ namespace robot {
     using utility::math::coordinates::cartesianToSpherical;
 
     arma::vec::fixed<RobotModel::size> RobotModel::timeUpdate(
-        const arma::vec::fixed<RobotModel::size>& state, double deltaT, const Sensors& sensors) {
+        const arma::vec::fixed<RobotModel::size>& state, double /*deltaT*/, const Sensors& /*sensors*/) {
         arma::vec::fixed<RobotModel::size> new_state = state;
 
         return new_state;
@@ -56,7 +56,7 @@ namespace robot {
         const arma::vec::fixed<RobotModel::size>& state,
         const arma::vec3& actual_position,
         const Sensors& sensors) {
-        
+
         //Rewrite:
         double rmHeading = sensors.world.rotation().yaw() - state(robot::kImuOffset);
         arma::vec2 robotModelHeading = {std::cos(-rmHeading),std::sin(-rmHeading)};
@@ -71,7 +71,7 @@ namespace robot {
     arma::vec RobotModel::predictedObservation(
         const arma::vec::fixed<RobotModel::size>& state,
         const std::vector<arma::vec>& actual_positions,
-        const Sensors& sensors) {
+        const Sensors& /*sensors*/) {
 
         //TODO: needs to incorporate new motion model position data
         arma::vec diff_1 = actual_positions[0].rows(0, 1) - state.rows(kX, kY);

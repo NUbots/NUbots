@@ -63,7 +63,7 @@ namespace module {
                 head_motor_gain = config["head_motors"]["gain"].as<double>();
                 head_motor_torque = config["head_motors"]["torque"].as<double>();
 
-               
+
 
                 emit(std::make_unique<HeadCommand>( HeadCommand {config["initial"]["yaw"].as<float>(),
                                                                  config["initial"]["pitch"].as<float>(), false}));
@@ -83,7 +83,7 @@ namespace module {
 
             updateHandle = on<Trigger<Sensors>, With<KinematicsModel>, Single, Priority::HIGH>()
             .then("Head Controller - Update Head Position", [this] (const Sensors& sensors, const KinematicsModel& kinematicsModel) {
-                
+
                 emit(graph("HeadController Goal Angles", goalAngles[0], goalAngles[1]));
 
                 //P controller
@@ -96,9 +96,9 @@ namespace module {
                 //Convert to robot space
                 arma::vec3 headUnitVector = goalRobotSpace ? goalHeadUnitVector_world : sensors.world.rotation() * goalHeadUnitVector_world;
                 //Compute inverse kinematics for head
-                std::vector< std::pair<message::input::ServoID, float> > goalAnglesList = calculateHeadJoints(kinematicsModel, headUnitVector);
+                std::vector< std::pair<message::input::ServoID, float> > goalAnglesList = calculateHeadJoints(headUnitVector);
                 // arma::vec2 goalAngles = cartesianToSpherical(headUnitVector).rows(1,2);
- 
+
 
                 //head limits
                 max_yaw = kinematicsModel.Head.MAX_YAW;

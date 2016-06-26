@@ -43,7 +43,7 @@ namespace utility {
                  *
                  * @author Josiah Walker
                  */
-                PGPEEstimator(const OptimiserParameters& params) {
+                PGPEEstimator(const OptimiserParameters& /*params*/) {
                      //XXX: in the future, set learning rate through params
                 };
 

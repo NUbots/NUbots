@@ -80,7 +80,7 @@ namespace support {
 
         }));
 
-        handles["overview"].push_back(on<Trigger<KickPlan>, Single, Priority::LOW>().then([this] (const KickPlan& kickPlan) {
+        handles["overview"].push_back(on<Trigger<KickPlan>, Single, Priority::LOW>().then([this] (const KickPlan& /*kickPlan*/) {
 
             // TODO fix runtime error:
             // *overview.mutable_kick_target() << kickTarget;

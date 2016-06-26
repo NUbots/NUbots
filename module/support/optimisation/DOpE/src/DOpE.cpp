@@ -111,7 +111,7 @@ namespace optimisation {
         }
     }
 
-    void DOpE::saveOptimisationState(const Optimisation& opt) {
+    void DOpE::saveOptimisationState(const Optimisation& /*opt*/) {
         // TODO save the optimisation
         // TODO merge the current yaml file with our new yaml file
         // TODO save the yaml file
@@ -121,7 +121,7 @@ namespace optimisation {
     DOpE::DOpE(std::unique_ptr<NUClear::Environment> environment)
     : Reactor(std::move(environment)) {
 
-        on<Configuration, Sync<DOpE>>("DOpE.yaml").then([this] (const Configuration& config) {
+        on<Configuration, Sync<DOpE>>("DOpE.yaml").then([this] (const Configuration& /*config*/) {
             // Use configuration here from file DOpE.yaml
             log("TODO load the configuration from any in progress optimisations here");
 

@@ -117,7 +117,8 @@ class dev_tools {
 
   # SETUP OUR ALTERNATIVES SO WE USE THE CORRECT COMPILER
   exec {'fix_compiler_environment':
-    command => 'update-alternatives --install /usr/bin/ld ld /usr/bin/ld.bfd 10 \
+    command => 'update-alternatives --remove-all gcc \
+             ;  update-alternatives --install /usr/bin/ld ld /usr/bin/ld.bfd 10 \
              && update-alternatives --install /usr/bin/ld ld /usr/bin/ld.gold 20 \
              && update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-6 100 \
                                     --slave /usr/bin/g++ g++ /usr/bin/g++-6 \

@@ -38,7 +38,7 @@ namespace input {
     PushDetector::PushDetector(std::unique_ptr<NUClear::Environment> environment)
     : Reactor(std::move(environment)) {
 
-        on<Configuration>("PushDetector.yaml").then([this] (const Configuration& config) {
+        on<Configuration>("PushDetector.yaml").then([this] (const Configuration& /*config*/) {
             // Use configuration here from file PushDetector.yaml
 
             // // Initialise the vector of load filters:
@@ -77,18 +77,18 @@ namespace input {
             double seconds = TimeDifferenceSeconds(currentTime, lastTimeUpdateTime);
             lastTimeUpdateTime = currentTime;
 
-            for (int i = 0; i < loadFilters.size(); i++) {
+            for (uint i = 0; i < loadFilters.size(); i++) {
                 auto& filter = loadFilters[i];
 
                 filter.timeUpdate(seconds);
                 arma::mat cov = { 0.1 };
                 arma::vec meas = { sensors[0]->servos[i].load };
-                float likelihood = filter.measurementUpdate(meas, cov);
+                filter.measurementUpdate(meas, cov);
             }
 
             // Output filtered values to NUsight:
             arma::vec::fixed<20> filteredLoads;
-            for (int i = 0; i < loadFilters.size(); i++) {
+            for (uint i = 0; i < loadFilters.size(); i++) {
                 filteredLoads(i) = loadFilters[i].get()(0);
             }
             emit(graph("PD: Filtered Loads", filteredLoads));

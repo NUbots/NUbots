@@ -249,14 +249,14 @@ namespace kinematics {
         return positions;
     }
 
-    std::vector< std::pair<message::input::ServoID, float> > calculateHeadJoints(const message::motion::kinematics::KinematicsModel& model, arma::vec3 cameraUnitVector){
+    std::vector< std::pair<message::input::ServoID, float> > calculateHeadJoints(arma::vec3 cameraUnitVector){
         std::vector< std::pair<message::input::ServoID, float> > positions;
         positions.push_back(std::make_pair(message::input::ServoID::HEAD_YAW, atan2(cameraUnitVector[1],cameraUnitVector[0]) ));
         positions.push_back(std::make_pair(message::input::ServoID::HEAD_PITCH, atan2(-cameraUnitVector[2], std::sqrt(cameraUnitVector[0]*cameraUnitVector[0]+cameraUnitVector[1]*cameraUnitVector[1]))));
         return positions;
     }
 
-    inline arma::vec2 calculateHeadJointsToLookAt(const message::motion::kinematics::KinematicsModel& model, arma::vec3 groundPoint, const utility::math::matrix::Transform3D& camToGround, const utility::math::matrix::Transform3D& orientationBodyToGround){
+    inline arma::vec2 calculateHeadJointsToLookAt(arma::vec3 groundPoint, const utility::math::matrix::Transform3D& camToGround, const utility::math::matrix::Transform3D& orientationBodyToGround){
     // TODO: Find point that is invariant under head position.
         arma::vec3 cameraPosition = camToGround.submat(0,3,2,3);
         arma::vec3 groundSpaceLookVector = groundPoint - cameraPosition;
@@ -266,12 +266,12 @@ namespace kinematics {
         return lookVectorSpherical.rows(1,2);
     }
 
-    inline arma::vec2 headAnglesToSeeGroundPoint(const message::motion::kinematics::KinematicsModel& model, const arma::vec2& gpos, const message::input::Sensors& sensors){
+    inline arma::vec2 headAnglesToSeeGroundPoint(const arma::vec2& gpos, const message::input::Sensors& sensors){
         arma::vec3 groundPos_ground = {gpos[0],gpos[1],0};
-        return calculateHeadJointsToLookAt(model, groundPos_ground, sensors.orientationCamToGround, sensors.orientationBodyToGround);
+        return calculateHeadJointsToLookAt(groundPos_ground, sensors.orientationCamToGround, sensors.orientationBodyToGround);
     }
 
-    std::vector<std::pair<message::input::ServoID, float>> setHeadPoseFromFeet(const message::motion::kinematics::KinematicsModel& model, const utility::math::matrix::Transform3D& cameraToFeet, const float& footSeparation, const float& bodyAngle){
+    std::vector<std::pair<message::input::ServoID, float>> setHeadPoseFromFeet(const message::motion::kinematics::KinematicsModel& model, const utility::math::matrix::Transform3D& cameraToFeet, const float& footSeparation){
         //Get camera pose relative to body
         // arma::vec3 euler = cameraToFeet.rotation().eulerAngles();
         // float headPitch = euler[1] - bodyAngle;
@@ -342,7 +342,7 @@ namespace kinematics {
         for(; i < number_of_iterations; i++){
             X = calculateArmPosition(model, angles, left);
             arma::vec3 dX = pos - X;
-            
+
             arma::mat33 J = calculateArmJacobian(model, angles, left);
             // std::cout << "pos = " << pos.t() << std::endl;
             // std::cout << "X = " << X.t() << std::endl;
@@ -363,13 +363,13 @@ namespace kinematics {
         std::cout << "Final error = " << arma::norm(pos-X) << std::endl;
         // std::cout << "Iterations = " << i << std::endl;
 
-        
+
         std::vector<std::pair<message::input::ServoID, float> > joints;
         joints.push_back(std::make_pair(SHOULDER_PITCH,utility::math::angle::normalizeAngle(angles[0])));
         joints.push_back(std::make_pair(SHOULDER_ROLL,utility::math::angle::normalizeAngle(angles[1])));
         joints.push_back(std::make_pair(ELBOW,utility::math::angle::normalizeAngle(angles[2])));
         return joints;
-    } 
+    }
 
     std::vector<std::pair<message::input::ServoID, float>> setArmApprox(const message::motion::kinematics::KinematicsModel& model, const arma::vec3& pos, bool left){
         //Setup variables
@@ -388,7 +388,7 @@ namespace kinematics {
         //Compute Angles
         float pitch,roll,elbow = 0;
 
-        arma::vec3 shoulderPos = {  
+        arma::vec3 shoulderPos = {
             model.Arm.SHOULDER_X_OFFSET,
             negativeIfRight * model.Arm.DISTANCE_BETWEEN_SHOULDERS / 2,
             model.Arm.SHOULDER_Z_OFFSET

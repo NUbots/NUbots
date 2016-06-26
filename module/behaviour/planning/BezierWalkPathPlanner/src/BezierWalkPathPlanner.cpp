@@ -45,6 +45,7 @@ namespace module {
             using message::input::Sensors;
             using message::motion::WalkCommand;
             using message::behaviour::KickPlan;
+            using message::behaviour::KickType;
             using message::behaviour::MotionCommand;
             using message::behaviour::RegisterAction;
             using message::behaviour::ActionPriorites;
@@ -133,7 +134,7 @@ namespace module {
                  , Sync<BezierWalkPathPlanner>>().then("Updates Bezier Plan", [this] (
                      const LocalisationBall& ball,
                      const std::vector<Self>& selfs,
-                     std::shared_ptr<const std::vector<VisionObstacle>> robots) {
+                     std::shared_ptr<const std::vector<VisionObstacle>> /*robots*/) {
 
                     if (latestCommand.type == MotionCommand::Type::StandStill) {
                         // log("Stand still motion command");
@@ -157,11 +158,11 @@ namespace module {
                         // log("MotionCommand:", int(latestCommand.type));
 
                         //TODO:use vision ball
-                        
+
                         arma::vec2 ball_world_position = RobotToWorldTransform(selfs.front().position, selfs.front().heading, ball.position);
                         arma::vec2 kick_target = latestCommand.kickTarget;//2 * ball_world_position - selfs.front().position;
                         emit(drawSphere("kick_target", arma::vec3({kick_target[0], kick_target[1], 0.0}), 0.1, arma::vec3({1, 0, 0}), 0));
-                        
+
 
                         //TO DO, change to Bezier stuff
                         // Include direction of goals
@@ -175,7 +176,7 @@ namespace module {
                         // VS = velocity at ball position, chosen as 0.15
                         float A0 = selfs.front().position[1];
                         // log("Self front position 1 = ", A0);
-                        
+
                         float B0 = selfs.front().position[0];
                         // log("Self front position 0 = ", B0);
 
@@ -250,22 +251,22 @@ namespace module {
 
                         //float bezXdashdash[11];
                         //float bezYdashdash[11];
-                        
+
                         float bezier_X_point = A0*(1-u)*(1-u)*(1-u) +3*A1*u*(1-u)*(1-u) +3*A2*u*u *(1-u) +A3*u*u*u;
                         float bezier_Y_point = B0*(1-u)*(1-u)*(1-u) +3*B1*u*(1-u)*(1-u) +3*B2*u*u *(1-u) +B3*u*u*u;
-                        float bezXdash = 3*(u*u*(-A0+3*A1-3*A2+A3)+ 2*u*(A0-2*A1+A2)-A0+A1);
-                        float bezYdash = 3*(u*u*(-B0+3*B1-3*B2+B3)+ 2*u*(B0-2*B1+B2)-B0+B1);
+                        //float bezXdash = 3*(u*u*(-A0+3*A1-3*A2+A3)+ 2*u*(A0-2*A1+A2)-A0+A1);
+                        //float bezYdash = 3*(u*u*(-B0+3*B1-3*B2+B3)+ 2*u*(B0-2*B1+B2)-B0+B1);
                         //bezXdashdash[i] = 6*(A0*(-u)+A0+3*A1*u-2*A1-3*A2 u+A2+A3*u);
                         //bezYdashdash[i] = 6*(B0*(-u)+B0+3*B1*u-2*A1-3*B2 u+B2+B3*u);
 
                         arma::fmat bez_matrix;
-                        bez_matrix << bezier_X_point << bezier_Y_point << arma::endr 
+                        bez_matrix << bezier_X_point << bezier_Y_point << arma::endr
                                    << A0 << B0;
 
-                        
-                        
+
+
                         arma::fvec2 next_robot_position = arma::mean(bez_matrix).t();
-                        
+
 
                         // log("Robot next position = ", next_robot_position);
 
@@ -316,12 +317,12 @@ namespace module {
                         // emit(graph("distanceToBall", distanceToBall));
                         // emit(graph("forwardSpeed2", finalForwardSpeed));
 
-                        
-                        emit(std::make_unique<KickPlan>(KickPlan{kick_target}));
+
+                        emit(std::make_unique<KickPlan>(KickPlan{kick_target, KickType::SCRIPTED}));
 
                         std::unique_ptr<WalkCommand> command = std::make_unique<WalkCommand>(subsumptionId, Transform2D({finalForwardSpeed, 0, angle}));
                         //command->command = Transform2D({bezXdash[1], bezYdash[1], angle});
-                        
+
 
                         emit(std::move(std::make_unique<WalkStartCommand>(1)));
                         emit(std::move(command));
@@ -329,7 +330,7 @@ namespace module {
                     }
                 });
 
-                
+
             }
 
         }  // planning
