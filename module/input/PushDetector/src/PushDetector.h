@@ -35,7 +35,7 @@ namespace input {
 
         ServoLoadModel() {} // empty constructor
 
-        arma::vec::fixed<size> timeUpdate(const arma::vec::fixed<size>& state, double deltaT) {
+        arma::vec::fixed<size> timeUpdate(const arma::vec::fixed<size>& state, double /*deltaT*/) {
             return state;
         }
 

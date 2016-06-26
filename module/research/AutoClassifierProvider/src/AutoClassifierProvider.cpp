@@ -43,16 +43,16 @@ namespace research {
 
             ballProvider.enable(config["ball"]["enabled"].as<bool>());
             ballEdgeBuffer = config["ball"]["edge_buffer"].as<int>();
-            ballLightnessMin = config["ball"]["lightness_range"][0].as<int>();
-            ballLightnessMax = config["ball"]["lightness_range"][1].as<int>();
+            ballLightnessMin = config["ball"]["lightness_range"][0].as<uint8_t>();
+            ballLightnessMax = config["ball"]["lightness_range"][1].as<uint8_t>();
             goalProvider.enable(config["goal"]["enabled"].as<bool>());
             goalEdgeBuffer = config["goal"]["edge_buffer"].as<int>();
-            goalLightnessMin = config["goal"]["lightness_range"][0].as<int>();
-            goalLightnessMax = config["goal"]["lightness_range"][1].as<int>();
+            goalLightnessMin = config["goal"]["lightness_range"][0].as<uint8_t>();
+            goalLightnessMax = config["goal"]["lightness_range"][1].as<uint8_t>();
             fieldProvider.enable(config["field"]["enabled"].as<bool>());
             fieldEdgeBuffer = config["field"]["edge_buffer"].as<int>();
-            fieldLightnessMin = config["field"]["lightness_range"][0].as<int>();
-            fieldLightnessMax = config["field"]["lightness_range"][1].as<int>();
+            fieldLightnessMin = config["field"]["lightness_range"][0].as<uint8_t>();
+            fieldLightnessMax = config["field"]["lightness_range"][1].as<uint8_t>();
             // lineProvider.enable(config["field"]["enabled"].as<bool>());
             // lineEdgeBuffer = config["field"]["edge_buffer"].as<int>();
 

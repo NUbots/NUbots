@@ -373,7 +373,7 @@ namespace input {
         sendCommand(Packet::Type::REQUEST_MODEL_DEFINITIONS);
     }
 
-    void NatNet::processResponse(const Packet& packet) {
+    void NatNet::processResponse(const Packet& /*packet*/) {
         // if(gCommandResponseSize==4)
         //     memcpy(&gCommandResponse, &PacketIn.Data.lData[0], gCommandResponseSize);
         // else

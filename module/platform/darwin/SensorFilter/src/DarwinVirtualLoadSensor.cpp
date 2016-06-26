@@ -33,15 +33,14 @@ namespace module {
                                     double noiseFactor,
                                     double certaintyThreshold,
                                     double uncertaintyThreshold)
-                    : hiddenWeights(hiddenWeights)
+                    : noiseFactor(noiseFactor)
+                    , currentNoise(2.0 * noiseFactor)
+                    , certaintyThreshold(certaintyThreshold)
+                    , uncertaintyThreshold(uncertaintyThreshold)
+                    , hiddenWeights(hiddenWeights)
                     , hiddenBias(hiddenBias)
                     , outputWeights(outputWeights)
-                    , outputBias(outputBias)
-                    , currentNoise(2.0 * noiseFactor)
-                    , noiseFactor(noiseFactor)
-                    , intercept(intercept)
-                    , certaintyThreshold(certaintyThreshold)
-                    , uncertaintyThreshold(uncertaintyThreshold) {
+                    , outputBias(outputBias) {
             }
 
             bool DarwinVirtualLoadSensor::updateFoot(const arma::vec& features) {

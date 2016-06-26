@@ -44,7 +44,7 @@ namespace utility {
                  *
                  * @author Josiah Walker
                  */
-                PGAEstimator(const OptimiserParameters& params) {
+                PGAEstimator(const OptimiserParameters& /*params*/) {
                     //XXX: still no good place to set c!
                 }
 

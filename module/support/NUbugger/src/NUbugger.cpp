@@ -48,7 +48,7 @@ namespace support {
     using message::vision::LookUpTable;
     using message::vision::SaveLookUpTable;
     using message::vision::Colour;
-    
+
     using message::support::SaveConfiguration;
 
     using utility::time::getUtcTimestamp;
@@ -190,7 +190,7 @@ namespace support {
             }
         });
 
-        on<Network<ReactionHandles>>().then([this](const NetworkSource& source, const ReactionHandles& command) {
+        on<Network<ReactionHandles>>().then([this](const NetworkSource& /*source*/, const ReactionHandles& /*command*/) {
             // auto config = std::make_unique<SaveConfiguration>();
             // config->config = currentConfig->config;
 

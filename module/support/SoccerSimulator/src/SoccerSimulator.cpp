@@ -150,7 +150,7 @@ namespace support {
             kickQueue.push(k);
             kicking = true;
         });
-        
+
         on<Trigger<KickScriptCommand>>().then("Simulator Queue KickCommand",[this](const KickScriptCommand& k){
             kickQueue.push(KickCommand({1,0,0},k.direction));
             kicking = true;
@@ -163,7 +163,7 @@ namespace support {
         on<Every<SIMULATION_UPDATE_FREQUENCY, Per<std::chrono::seconds>>,
             With<Sensors>,
             Optional<With<WalkCommand>>
-        >().then("Robot motion simulation", [this](const Sensors& sensors,
+        >().then("Robot motion simulation", [this](const Sensors& /*sensors*/,
                                  std::shared_ptr<const WalkCommand> walkCommand) {
             NUClear::clock::time_point now = NUClear::clock::now();
             double deltaT = 1e-6 * std::chrono::duration_cast<std::chrono::microseconds>(now - lastNow).count();
@@ -243,7 +243,7 @@ namespace support {
 
         // Simulate Vision
         on<Every<30, Per<std::chrono::seconds>>, With<Sensors>, With<CameraParameters>, Optional<With<FieldDescription>>, Single>()
-        .then("Vision Simulation", 
+        .then("Vision Simulation",
         [this](std::shared_ptr<const Sensors> sensors, const CameraParameters& camParams, const std::shared_ptr<const FieldDescription> fd) {
 
             if(!fd){

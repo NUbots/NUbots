@@ -37,7 +37,7 @@ namespace optimisation {
     TestDOpE::TestDOpE(std::unique_ptr<NUClear::Environment> environment)
     : Reactor(std::move(environment)) {
 
-        on<Configuration>("TestDOpE.yaml").then([this] (const Configuration& config) {
+        on<Configuration>("TestDOpE.yaml").then([this] (const Configuration& /*config*/) {
             // Use configuration here from file TestDOpE.yaml
         });
 

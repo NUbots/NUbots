@@ -106,7 +106,7 @@ namespace darwin {
 
     }
 
-    void KinematicsModel::configureArm (DarwinKinematicsModel::Arm& arm, const YAML::Node& objArm) {
+    void KinematicsModel::configureArm (DarwinKinematicsModel::Arm& /*arm*/, const YAML::Node& objArm) {
         // arm.distanceBetweenShoulders = objArm["distance_between_shoulders"].as<float>();
 
         // auto& shoulder = arm.shoulder;
@@ -140,7 +140,7 @@ namespace darwin {
         DarwinModel::Arm::LOWER_ARM_Z_OFFSET = objLowerArm["offset"].as<arma::vec2>()[1];
     }
 
-    void KinematicsModel::configureMassModel (DarwinKinematicsModel::MassModel& massModel, const YAML::Node& objMassModel) {
+    void KinematicsModel::configureMassModel (DarwinKinematicsModel::MassModel& /*massModel*/, const YAML::Node& objMassModel) {
     	// massModel.numberOfMasses = objMassModel["number_of_masses"].as<float>();
      //    massModel.massRepresentationDimension = objMassModel["mass_representation_dimension"].as<float>();
 

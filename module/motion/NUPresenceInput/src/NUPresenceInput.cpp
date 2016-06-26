@@ -270,7 +270,7 @@ namespace motion {
             [this] (const std::set<LimbID>&) {
                 // emit(std::make_unique<KillGetup>());
             },
-            [this] (const std::set<ServoID>& servoSet) {
+            [this] (const std::set<ServoID>& /*servoSet*/) {
                 //HACK 2014 Jake Fountain, Trent Houliston
                 //TODO track set limbs and wait for all to finish
                 // if(servoSet.find(ServoID::L_ANKLE_PITCH) != servoSet.end() ||

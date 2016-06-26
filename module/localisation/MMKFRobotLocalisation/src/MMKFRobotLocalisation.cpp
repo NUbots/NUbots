@@ -132,7 +132,7 @@ namespace localisation {
 
                 Self robot_model;
                 robot_model.position = sensors.world.translation().rows(0,1) - model_state.rows(robot::kX, robot::kY);
-                
+
                 //calculate the total robot heading by rotating using the inverse robot orientation
                 double rmHeading = sensors.world.rotation().yaw() - model_state(robot::kImuOffset);
                 robot_model.heading = {std::cos(rmHeading),std::sin(rmHeading)};
@@ -174,7 +174,7 @@ namespace localisation {
          , Sync<MMKFRobotLocalisation>
          , Single>()
          .then("MMKFRobotLocalisation Measurement Step",
-            [this](const std::vector<message::vision::Goal>& goals, const Sensors& sensors) {
+            [this](const std::vector<message::vision::Goal>& goals, const Sensors& /*sensors*/) {
 
             //Is this check necessary?
             if(!emit_data_handle.enabled()){

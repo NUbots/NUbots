@@ -66,7 +66,7 @@ namespace module {
         			for (auto& p : relativePoints){
         				p = p - refPoint;
         			}
-	        		auto iter = std::min_element(relativePoints.begin(),relativePoints.end(),comparator);
+	        		//auto iter = std::min_element(relativePoints.begin(),relativePoints.end(),comparator);
 	        		// current = std::distance(relativePoints.begin(), iter);
 					current = current % int(points.size());
 
@@ -108,7 +108,7 @@ namespace module {
 							int new_index = current + 1;
 							if(oscillate){
 								//Moves search forward and backward along path
-								if (new_index >= points.size()){
+								if (new_index >= int(points.size())){
 									forward = false;
 									current = std::max(current - 1, 0);
 								} else {

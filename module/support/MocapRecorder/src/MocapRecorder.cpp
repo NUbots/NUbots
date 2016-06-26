@@ -37,7 +37,7 @@ namespace support {
     MocapRecorder::MocapRecorder(std::unique_ptr<NUClear::Environment> environment)
     : Reactor(std::move(environment)) {
 
-        on<Configuration>("MocapRecorder.yaml").then([this] (const Configuration& config) {
+        on<Configuration>("MocapRecorder.yaml").then([this] (const Configuration& /*config*/) {
             // Use configuration here from file MocapRecorder.yaml
         });
 
@@ -57,16 +57,16 @@ namespace support {
                                             rigidBody.rotation().z()
                                             });
                 Rotation3D r(q);
-                rigidBodies.col(i++) = arma::vec({id,x,y,z, r.row(0)[0],r.row(0)[1],r.row(0)[2],
-	                										r.row(1)[0],r.row(1)[1],r.row(1)[2],
-	                										r.row(2)[0],r.row(2)[1],r.row(2)[2]});
+                rigidBodies.col(i++) = arma::vec({double(id),x,y,z, r.row(0)[0],r.row(0)[1],r.row(0)[2],
+	                									         	r.row(1)[0],r.row(1)[1],r.row(1)[2],
+	                				         						r.row(2)[0],r.row(2)[1],r.row(2)[2]});
 
             }
             auto now = NUClear::clock::now();
             std::stringstream filename;
             filename << "mocapdata/" << std::to_string(std::chrono::duration_cast<std::chrono::microseconds>(now.time_since_epoch()).count());
             log("Saving MotionCapture data to ",filename.str());
-            bool success = rigidBodies.save(filename.str());
+            rigidBodies.save(filename.str());
             // log(success ? "Saved Successfully" : "Save FAILED!!!");
         });
     }
