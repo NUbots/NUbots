@@ -27,10 +27,12 @@
 #include "utility/math/matrix/Transform3D.h"
 #include "utility/math/matrix/Rotation3D.h"
 #include "utility/math/filter/UKF.h"
+
 #include "MotionModel.h"
 #include "DarwinVirtualLoadSensor.h"
-#include "utility/motion/RobotModels.h"
 #include "utility/math/matrix/Rotation3D.h"
+#include "message/motion/KinematicsModels.h"
+
 
 namespace module {
     namespace platform {
@@ -94,6 +96,7 @@ namespace module {
 
             private:
                 // Current state of the button pushes
+                // used to debounce button presses
                 bool leftDown = false;
                 bool middleDown = false;
 

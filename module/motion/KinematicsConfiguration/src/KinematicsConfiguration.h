@@ -25,27 +25,25 @@
 #include <yaml-cpp/yaml.h>
 
 #include "message/support/Configuration.h"
-#include "message/platform/darwin/KinematicsModel.h"
+#include "message/motion/KinematicsModels.h"
 
 namespace module {
-namespace platform {
-namespace darwin {
+namespace motion {
 
-    class KinematicsModel : public NUClear::Reactor {
+    class KinematicsConfiguration : public NUClear::Reactor {
 
     public:
-        /// @brief Called by the powerplant to build and setup the KinematicsModel reactor.
-        explicit KinematicsModel(std::unique_ptr<NUClear::Environment> environment);
+        /// @brief Called by the powerplant to build and setup the KinematicsConfiguration reactor.
+        explicit KinematicsConfiguration(std::unique_ptr<NUClear::Environment> environment);
 
     private:
-    	void configure (message::platform::darwin::DarwinKinematicsModel& darwinModel, const message::support::Configuration& objDarwinModel);
-        void configureLeg (message::platform::darwin::DarwinKinematicsModel::Leg& leg, const YAML::Node& objLeg);
-        void configureHead (message::platform::darwin::DarwinKinematicsModel::Head& head, const YAML::Node& objHead);
-        void configureArm (message::platform::darwin::DarwinKinematicsModel::Arm& arm, const YAML::Node& objArm);
-    	void configureMassModel (message::platform::darwin::DarwinKinematicsModel::MassModel& massModel, const YAML::Node& objMassModel);
+    	void configure (message::motion::kinematics::KinematicsModel& model, const message::support::Configuration& objDarwinModel);
+        void configureLeg (message::motion::kinematics::KinematicsModel& model, const YAML::Node& objLeg);
+        void configureHead (message::motion::kinematics::KinematicsModel& model, const YAML::Node& objHead);
+        void configureArm (message::motion::kinematics::KinematicsModel& model, const YAML::Node& objArm);
+    	void configureMassModel (message::motion::kinematics::KinematicsModel& model, const YAML::Node& objMassModel);
     };
 
-}
 }
 }
 

@@ -24,9 +24,9 @@
 #include "utility/math/matrix/Transform3D.h"
 #include "utility/math/matrix/Rotation3D.h"
 #include "utility/math/geometry/UnitQuaternion.h"
-#include "utility/motion/RobotModels.h"
 
 #include "message/input/Sensors.h"
+#include "message/motion/KinematicsModels.h"
 #include "message/input/LimbID.h"
 #include "message/support/Configuration.h"
 #include <yaml-cpp/yaml.h>
@@ -65,7 +65,7 @@ namespace motion {
         NUClear::clock::time_point lastBalanceTime;
     public:
         void configure(const YAML::Node& config);
-        void balance(utility::math::matrix::Transform3D& footToTorso, const message::input::LimbID& leg, const message::input::Sensors& sensors);
+        void balance(const message::motion::kinematics::KinematicsModel& hip, utility::math::matrix::Transform3D& footToTorso, const message::input::LimbID& leg, const message::input::Sensors& sensors);
     };
 
 

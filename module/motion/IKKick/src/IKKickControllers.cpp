@@ -18,14 +18,14 @@
  */
 
 #include "IKKickControllers.h"
-#include "utility/motion/RobotModels.h"
+#include "message/motion/KinematicsModels.h"
 
 using message::input::Sensors;
 using message::input::LimbID;
 using message::input::ServoID;
 using message::support::Configuration;
 using utility::math::matrix::Transform3D;
-using utility::motion::kinematics::DarwinModel;
+using message::motion::kinematics::KinematicsModel;
 
 namespace module{
 namespace motion{
@@ -41,13 +41,13 @@ namespace motion{
 	}
 
 
-    void KickBalancer::computeStartMotion(const Sensors& sensors) {
+    void KickBalancer::computeStartMotion(const KinematicsModel& kinematicsModel, const Sensors& sensors) {
         Transform3D torsoToFoot = getTorsoPose(sensors);
         Transform3D startPose = torsoToFoot.i();
 
         int negativeIfRight = (supportFoot == LimbID::RIGHT_LEG) ? -1 : 1;
         Transform3D finishPose = torsoToFoot;
-        finishPose.translation() = arma::vec3({forward_lean, negativeIfRight * (adjustment + DarwinModel::Leg::FOOT_CENTRE_TO_ANKLE_CENTRE), stand_height});
+        finishPose.translation() = arma::vec3({forward_lean, negativeIfRight * (adjustment + kinematicsModel.Leg.FOOT_CENTRE_TO_ANKLE_CENTRE), stand_height});
         finishPose = finishPose.i();
 
         std::vector<SixDOFFrame> frames;
@@ -81,7 +81,7 @@ namespace motion{
 
 	}
 
-    void Kicker::computeStartMotion(const Sensors& sensors) {
+    void Kicker::computeStartMotion(const KinematicsModel& kinematicsModel, const Sensors& sensors) {
         Transform3D startPose = arma::eye(4,4);
 
         // Convert torso to support foot
@@ -110,7 +110,7 @@ namespace motion{
         //constrain to prevent leg collision
         arma::vec3 supportFootPos = supportToKickFoot.translation();
         int signSupportFootPosY = supportFootPos[1] < 0 ? -1 : 1;
-        float clippingPlaneY = supportFootPos[1] - signSupportFootPosY * (foot_separation_margin + (DarwinModel::Leg::FOOT_WIDTH / 2.0 - DarwinModel::Leg::FOOT_CENTRE_TO_ANKLE_CENTRE));
+        float clippingPlaneY = supportFootPos[1] - signSupportFootPosY * (foot_separation_margin + (kinematicsModel.Leg.FOOT_WIDTH / 2.0 - kinematicsModel.Leg.FOOT_CENTRE_TO_ANKLE_CENTRE));
 
         float liftClipDistance = (liftGoal[1] - clippingPlaneY);
         if(signSupportFootPosY * liftClipDistance > 0){

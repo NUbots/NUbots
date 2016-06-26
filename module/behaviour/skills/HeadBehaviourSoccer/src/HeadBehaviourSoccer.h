@@ -27,6 +27,7 @@
 #include "message/vision/VisionObjects.h"
 #include "message/motion/HeadCommand.h"
 #include "message/input/Sensors.h"
+#include "message/motion/KinematicsModels.h"
 #include "message/input/CameraParameters.h"
 #include "Searcher.h"
 #include "message/behaviour/SoccerObjectPriority.h"
@@ -59,15 +60,15 @@ namespace module {
 
                 /*! @brief Updates the search plan when something has changed
                 */
-                void updateHeadPlan(const std::vector<message::vision::VisionObject>& fixationObjects, const bool& search, const message::input::Sensors& sensors, const utility::math::matrix::Rotation3D& headToIMUSpace);
+                void updateHeadPlan(const message::motion::kinematics::KinematicsModel& kinematicsModel, const std::vector<message::vision::VisionObject>& fixationObjects, const bool& search, const message::input::Sensors& sensors, const utility::math::matrix::Rotation3D& headToIMUSpace);
 
                 /*! @brief Converts from camera space direction to IMU space direction
                 */
-                arma::vec2 getIMUSpaceDirection(const arma::vec2& screenAngles, utility::math::matrix::Rotation3D headToIMUSpace);
+                arma::vec2 getIMUSpaceDirection(const message::motion::kinematics::KinematicsModel& kinematicsModel, const arma::vec2& screenAngles, utility::math::matrix::Rotation3D headToIMUSpace);
 
                 /*! @brief Gets points which allow for simultaneous search and viewing of key objects
                 */
-                std::vector<arma::vec2> getSearchPoints(std::vector<message::vision::VisionObject> fixationObjects, message::behaviour::SearchType sType, const message::input::Sensors& sensors);
+                std::vector<arma::vec2> getSearchPoints(const message::motion::kinematics::KinematicsModel& kinematicsModel, std::vector<message::vision::VisionObject> fixationObjects, message::behaviour::SearchType sType, const message::input::Sensors& sensors);
 
                 /*! @brief Combines a collection of vision objects. The screen resulting screen angular region is the bounding box of the objects
                 */
