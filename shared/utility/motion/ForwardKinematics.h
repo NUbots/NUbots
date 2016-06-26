@@ -411,11 +411,11 @@ namespace kinematics {
         arma::vec4 CoP = {0,0,0,1};
         float number_of_feet_down = 0;
         if (sensors.leftFootDown) {
-            CoP += fsrCentreInBodyCoords(model,sensors, sensors.leftFSRCenter, true);
+            CoP += fsrCentreInBodyCoords(model,sensors, sensors.fsrs[int(message::input::LimbID::LEFT_LEG)].centre, true);
             number_of_feet_down += 1.0f;
         }
         if(sensors.rightFootDown){
-            CoP += fsrCentreInBodyCoords(model,sensors, sensors.rightFSRCenter, false);
+            CoP += fsrCentreInBodyCoords(model,sensors, sensors.fsrs[int(message::input::LimbID::RIGHT_LEG)].centre, false);
             number_of_feet_down  += 1.0f;
         }
         if(number_of_feet_down == 2){

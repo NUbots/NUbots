@@ -201,10 +201,10 @@ namespace module {
                     if(!lost){
                         //We need to transform our view points to orientation space
                         headToBodyRotation = fixationObjects[0].sensors->forwardKinematics.at(ServoID::HEAD_PITCH).rotation();
-                        orientation = fixationObjects[0].sensors->orientation.i();
+                        orientation = fixationObjects[0].sensors->world.rotation().i();
                     } else {
                         headToBodyRotation = sensors.forwardKinematics.at(ServoID::HEAD_PITCH).rotation();
-                        orientation = sensors.orientation.i();
+                        orientation = sensors.world.rotation().i();
                     }
                     Rotation3D headToIMUSpace = orientation * headToBodyRotation;
 
@@ -254,7 +254,7 @@ namespace module {
                     //If we arent getting up, then we can update the plan if necessary
                     if(updatePlan){
                         if(lost){
-                            lastPlanOrientation = sensors.orientation;
+                            lastPlanOrientation = sensors.world.rotation();
                         }
                         updateHeadPlan(kinematicsModel,fixationObjects, objectsMissing, sensors, headToIMUSpace);
                     }
@@ -400,14 +400,14 @@ namespace module {
 
                             //New absolute referencing 
                             arma::vec2 angles = p * M_PI / 180;
-                            if(std::fabs(sensors.orientation.pitch()) < pitch_plan_threshold){
+                            if(std::fabs(sensors.world.rotation().pitch()) < pitch_plan_threshold){
                                 arma::vec3 lookVectorFromHead = sphericalToCartesian({1,angles[0],angles[1]});//This is an approximation relying on the robots small FOV
 
 
                                 //TODO: Fix trying to look underneath and behind self!!
 
 
-                                arma::vec3 adjustedLookVector = Rotation3D::createRotationY(sensors.orientation.pitch()) * lookVectorFromHead;
+                                arma::vec3 adjustedLookVector = Rotation3D::createRotationY(sensors.world.rotation().pitch()) * lookVectorFromHead;
                                 std::vector< std::pair<ServoID, float> > goalAngles = calculateCameraLookJoints(kinematicsModel, adjustedLookVector);
 
                                 for(auto& angle : goalAngles){
@@ -484,7 +484,7 @@ namespace module {
 
 
             bool HeadBehaviourSoccer::orientationHasChanged(const message::input::Sensors& sensors){
-                Rotation3D diff = sensors.orientation.i() * lastPlanOrientation;
+                Rotation3D diff = sensors.world.rotation().i() * lastPlanOrientation;
                 UnitQuaternion quat = UnitQuaternion(diff);
                 float angle = quat.getAngle();
                 return std::fabs(angle) > replan_angle_threshold;

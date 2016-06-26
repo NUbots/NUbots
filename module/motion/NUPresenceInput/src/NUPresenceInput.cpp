@@ -209,7 +209,7 @@ namespace motion {
 
             //3DoF
             arma::vec3 gaze = currentCamPose.rotation().col(0);
-            Rotation3D yawlessOrientation = Rotation3D::createRotationZ(-sensors.orientation.yaw()) * sensors.orientation;
+            Rotation3D yawlessOrientation = Rotation3D::createRotationZ(-sensors.world.rotation().yaw()) * sensors.world.rotation();
 
             if(gyro_compensation){
                 gaze = yawlessOrientation * gaze;
