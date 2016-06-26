@@ -28,7 +28,7 @@ namespace module {
 
         using utility::math::matrix::Rotation3D;
         using utility::math::matrix::Transform3D;
-        using utility::math::vision::measureGoals;
+        using utility::math::vision::cameraSpaceGoalProjection;
         using message::vision::Goal;
         using message::support::FieldDescription;
         using message::input::Sensors;
@@ -44,7 +44,72 @@ namespace module {
             , const Sensors& sensors
             , const MeasurementType::GOAL&) 
         {
-            return measureGoals(state,measurements,field,sensors);
+
+            //Get the x/y position for goals
+            arma::vec prediction(3*measurements.size());
+            int counter = 0;
+            for(auto& type : measurements) {
+                //make a storage for our goal locations
+                arma::vec3 goalLocation;
+                goalLocation[2] = 0.0;
+
+                //choose which goalpost we are looking at
+                // Switch on Team
+                switch(std::get<0>(type)) {
+                    // Switch on Side
+                    case Goal::Team::OWN:
+                        switch(std::get<1>(type)) {
+                            case Goal::Side::LEFT:
+                                goalLocation.rows(0,1) = field.goalpost_own_l;
+                                break;
+                            case Goal::Side::RIGHT:
+                                goalLocation.rows(0,1) = field.goalpost_own_r;
+                                break;
+                            case Goal::Side::UNKNOWN:
+                                break;
+                        }
+                    case Goal::Team::OPPONENT:
+                        switch(std::get<1>(type)) {
+                            case Goal::Side::LEFT:
+                                goalLocation.rows(0,1) = field.goalpost_opp_l;
+                                break;
+                            case Goal::Side::RIGHT:
+                                goalLocation.rows(0,1) = field.goalpost_opp_r;
+                                break;
+                            case Goal::Side::UNKNOWN:
+                                break;
+                        }
+
+                    case Goal::Team::UNKNOWN:
+                        break;
+                }
+
+                arma::mat::fixed<3,4> goalNormals = cameraSpaceGoalProjection(state,goalLocation,field,sensors);
+
+                // Switch on normal type
+                switch(std::get<2>(type)) {
+
+                    case Goal::MeasurementType::LEFT_NORMAL: {
+                        prediction.rows(counter,counter+2) = prediction.col(0);
+                    } break;
+
+                    case Goal::MeasurementType::RIGHT_NORMAL: {
+                        prediction.rows(counter,counter+2) = prediction.col(1);
+                    } break;
+
+                    case Goal::MeasurementType::TOP_NORMAL: {
+                        prediction.rows(counter,counter+2) = prediction.col(2);
+                    } break;
+
+                    case Goal::MeasurementType::BASE_NORMAL: {
+                        prediction.rows(counter,counter+2) = prediction.col(3);
+                    } break;
+
+                }
+                counter += 3;
+            }
+
+            return prediction;
         }
 
         arma::vec FieldModel::observationDifference(const arma::vec& a, const arma::vec& b) const {
