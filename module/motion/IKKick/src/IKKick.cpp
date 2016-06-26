@@ -29,11 +29,11 @@
 #include "message/support/FieldDescription.h"
 #include "message/motion/WalkCommand.h"
 #include "message/behaviour/KickPlan.h"
+#include "message/motion/KinematicsModels.h"
 
 
 #include "utility/math/matrix/Transform3D.h"
 #include "utility/motion/InverseKinematics.h"
-#include "utility/motion/RobotModels.h"
 #include "utility/support/yaml_armadillo.h"
 #include "utility/nubugger/NUhelpers.h"
 
@@ -56,11 +56,11 @@ namespace motion {
     using message::behaviour::KickPlan;
     using message::behaviour::KickType;
     using message::support::FieldDescription;
+    using message::motion::kinematics::KinematicsModel;
 
     using utility::motion::kinematics::calculateLegJoints;
     using utility::math::matrix::Transform3D;
     using utility::motion::kinematics::calculateLegJoints;
-    using utility::motion::kinematics::DarwinModel;
     using utility::nubugger::graph;
 
     struct ExecuteKick{};
@@ -105,7 +105,7 @@ namespace motion {
             updatePriority(KICK_PRIORITY);
         });
 
-        on<Trigger<ExecuteKick>, With<KickCommand>, With<Sensors>>().then([this] (const KickCommand& command, const Sensors& sensors) {
+        on<Trigger<ExecuteKick>, With<KickCommand, Sensors, KinematicsModel>>().then([this] (const KickCommand& command, const Sensors& sensors,const KinematicsModel& kinematicsModel) {
 
             // Enable our kick pather
             updater.enable();
@@ -144,10 +144,10 @@ namespace motion {
             balancer.setKickParameters(supportFoot, ballPosition, goalPosition);
             kicker.setKickParameters(supportFoot, ballPosition, goalPosition);
 
-            balancer.start(sensors);
+            balancer.start(kinematicsModel, sensors);
         });
 
-        updater = on<Every<UPDATE_FREQUENCY, Per<std::chrono::seconds>>, With<Sensors>, Single>().then([this] (const Sensors& sensors) {
+        updater = on<Every<UPDATE_FREQUENCY, Per<std::chrono::seconds>>, With<Sensors, KinematicsModel>, Single>().then([this] (const Sensors& sensors, const KinematicsModel& kinematicsModel) {
 
             //Setup kick variables
             LimbID kickFoot;
@@ -161,7 +161,7 @@ namespace motion {
 
             //State checker
             if(balancer.isStable()){
-                kicker.start(sensors);
+                kicker.start(kinematicsModel, sensors);
             }
 
             if(kicker.isStable()){
@@ -193,15 +193,15 @@ namespace motion {
             //Balance based on the IMU
 
             if(feedback_active){
-                feedbackBalancer.balance(supportFootGoal,supportFoot,sensors);
+                feedbackBalancer.balance(kinematicsModel,supportFootGoal,supportFoot,sensors);
             }
 
             //Calculate IK and send waypoints
             std::vector<std::pair<message::input::ServoID, float>> joints;
 
             //IK
-            auto kickJoints = calculateLegJoints<DarwinModel>(kickFootGoal, kickFoot);
-            auto supportJoints = calculateLegJoints<DarwinModel>(supportFootGoal, supportFoot);
+            auto kickJoints = calculateLegJoints(kinematicsModel, kickFootGoal, kickFoot);
+            auto supportJoints = calculateLegJoints(kinematicsModel, supportFootGoal, supportFoot);
 
             //Combine left and right legs
             joints.insert(joints.end(),kickJoints.begin(),kickJoints.end());

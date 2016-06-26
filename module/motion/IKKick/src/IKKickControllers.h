@@ -26,6 +26,7 @@
 #include "message/input/LimbID.h"
 #include "message/support/Configuration.h"
 #include "message/input/ServoID.h"
+#include "message/motion/KinematicsModels.h"
 #include <armadillo>
 #include <nuclear>
 
@@ -104,16 +105,16 @@ namespace motion{
 				NUClear::clock::time_point motionStartTime;
 			public:
 
-				virtual void computeStartMotion(const message::input::Sensors& sensors) = 0;
+				virtual void computeStartMotion(const message::motion::kinematics::KinematicsModel& kinematicsModel, const message::input::Sensors& sensors) = 0;
 				virtual void computeStopMotion(const message::input::Sensors& sensors) = 0;
 
-				void start(const message::input::Sensors& sensors){
+				void start(const message::motion::kinematics::KinematicsModel& kinematicsModel, const message::input::Sensors& sensors){
 					if(stage == MotionStage::READY){
         				anim.reset();
 						stage = MotionStage::RUNNING;
 						stable = false;
         				motionStartTime = sensors.timestamp;
-						computeStartMotion(sensors);
+						computeStartMotion(kinematicsModel, sensors);
 					}
 				}
 
@@ -194,7 +195,7 @@ namespace motion{
 
 		public:
 			virtual void configure(const message::support::Configuration& config);
-			virtual void computeStartMotion(const message::input::Sensors& sensors);
+			virtual void computeStartMotion(const message::motion::kinematics::KinematicsModel& kinematicsModel, const message::input::Sensors& sensors);
 			virtual void computeStopMotion(const message::input::Sensors& sensors);
 
 		};
@@ -215,7 +216,7 @@ namespace motion{
 			float lift_before_windup_duration;
 		public:
 			virtual void configure(const message::support::Configuration& config);
-			virtual void computeStartMotion(const message::input::Sensors& sensors);
+			virtual void computeStartMotion(const message::motion::kinematics::KinematicsModel& kinematicsModel, const message::input::Sensors& sensors);
 			virtual void computeStopMotion(const message::input::Sensors& sensors);
 		};
 

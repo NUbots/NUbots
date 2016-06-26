@@ -38,7 +38,7 @@
 #include "utility/support/yaml_expression.h"
 #include "utility/motion/InverseKinematics.h"
 #include "utility/motion/ForwardKinematics.h"
-#include "utility/motion/RobotModels.h"
+#include "message/motion/KinematicsModels.h"
 #include "utility/math/angle.h"
 #include "utility/math/matrix/Rotation3D.h"
 #include "message/input/PushDetection.h"
@@ -64,11 +64,11 @@ namespace motion {
     using message::motion::DisableWalkEngineCommand;
     using message::motion::ServoTarget;
     using message::motion::Script;
+    using message::motion::kinematics::KinematicsModel;
     using message::support::SaveConfiguration;
     using message::support::Configuration;
 
     using utility::motion::kinematics::calculateLegJointsTeamDarwin;
-    using utility::motion::kinematics::DarwinModel;
     using utility::math::matrix::Transform2D;
     using utility::math::matrix::Transform3D;
     using utility::math::matrix::Rotation3D;
@@ -106,6 +106,10 @@ namespace motion {
         //         // nothing
         //     }
         // }));
+
+        on<Trigger<KinematicsModel>>().then("Update Kin Model", [this](const KinematicsModel& model){
+            kinematicsModel = model;
+        });
 
         on<Trigger<EnableWalkEngineCommand>>().then([this] (const EnableWalkEngineCommand& command) {
             subsumptionId = command.subsumptionId;
@@ -204,7 +208,7 @@ namespace motion {
         qRArmEnd = stance["arms"]["right"]["end"].as<arma::vec>();
         footOffset = stance["foot_offset"].as<arma::vec>();
         // gToe/heel overlap checking values
-        stanceLimitY2 = DarwinModel::Leg::LENGTH_BETWEEN_LEGS - stance["limit_margin_y"].as<Expression>();
+        stanceLimitY2 = kinematicsModel.Leg.LENGTH_BETWEEN_LEGS() - stance["limit_margin_y"].as<Expression>();
 
         auto& gains = stance["gains"];
         gainArms = gains["arms"].as<Expression>();
@@ -314,8 +318,8 @@ namespace motion {
             initialStep = 1;
         } else {
             // stance resetted
-            uLeftFoot = uTorso.localToWorld({footOffset[0], DarwinModel::Leg::HIP_OFFSET_Y - footOffset[1], 0});
-            uRightFoot = uTorso.localToWorld({footOffset[0], -DarwinModel::Leg::HIP_OFFSET_Y + footOffset[1], 0});
+            uLeftFoot = uTorso.localToWorld({footOffset[0], kinematicsModel.Leg.HIP_OFFSET_Y - footOffset[1], 0});
+            uRightFoot = uTorso.localToWorld({footOffset[0], -kinematicsModel.Leg.HIP_OFFSET_Y + footOffset[1], 0});
             initialStep = 2;
         }
 
@@ -329,7 +333,7 @@ namespace motion {
 
         uSupport = uTorso;
         beginStepTime = getTime();
-        uLRFootOffset = {0, DarwinModel::Leg::HIP_OFFSET_Y - footOffset[1], 0};
+        uLRFootOffset = {0, kinematicsModel.Leg.HIP_OFFSET_Y - footOffset[1], 0};
         startFromStep = false;
 
         calculateNewStep();
@@ -337,8 +341,8 @@ namespace motion {
 
     void WalkEngine::reset() {
         uTorso = {-footOffset[0], 0, 0};
-        uLeftFoot = {0, DarwinModel::Leg::HIP_OFFSET_Y, 0};
-        uRightFoot = {0, -DarwinModel::Leg::HIP_OFFSET_Y, 0};
+        uLeftFoot = {0, kinematicsModel.Leg.HIP_OFFSET_Y, 0};
+        uRightFoot = {0, -kinematicsModel.Leg.HIP_OFFSET_Y, 0};
 
         uTorsoSource = arma::zeros(3);
         uTorsoDestination = arma::zeros(3);
@@ -361,7 +365,7 @@ namespace motion {
         initialStep = 2;
 
         // gStandard offset
-        uLRFootOffset = {0, DarwinModel::Leg::HIP_OFFSET_Y - footOffset[1], 0};
+        uLRFootOffset = {0, kinematicsModel.Leg.HIP_OFFSET_Y - footOffset[1], 0};
 
         // gWalking/Stepping transition variables
         startFromStep = false;
@@ -475,7 +479,7 @@ namespace motion {
             leftFoot = leftFoot.translateZ(stepHeight * foot[2]);
         }
 
-        Transform2D uTorsoActual = uTorso.localToWorld({-DarwinModel::Leg::HIP_OFFSET_X, 0, 0});
+        Transform2D uTorsoActual = uTorso.localToWorld({-kinematicsModel.Leg.HIP_OFFSET_X, 0, 0});
         Transform3D torso = arma::vec6({uTorsoActual.x(), uTorsoActual.y(), bodyHeight, 0, bodyTilt, uTorsoActual.angle()});
 
         // Transform feet targets to be relative to the torso
@@ -500,7 +504,8 @@ namespace motion {
 
         if (balanceEnabled) {
             // Apply balance to our support foot
-            balancer.balance(swingLeg == LimbID::LEFT_LEG ? rightFootTorso : leftFootTorso
+            balancer.balance(kinematicsModel
+                , swingLeg == LimbID::LEFT_LEG ? rightFootTorso : leftFootTorso
                 , swingLeg == LimbID::LEFT_LEG ? LimbID::RIGHT_LEG : LimbID::LEFT_LEG
                 , sensors);
         }
@@ -508,7 +513,7 @@ namespace motion {
         // emit(graph("Right foot pos", rightFootTorso.translation()));
         // emit(graph("Left foot pos", leftFootTorso.translation()));
 
-        auto joints = calculateLegJointsTeamDarwin<DarwinModel>(leftFootTorso, rightFootTorso);
+        auto joints = calculateLegJointsTeamDarwin(kinematicsModel, leftFootTorso, rightFootTorso);
         auto waypoints = motionLegs(joints);
 
         auto arms = motionArms(phase);
@@ -519,7 +524,7 @@ namespace motion {
 
     std::unique_ptr<std::vector<ServoCommand>> WalkEngine::updateStillWayPoints(const Sensors& sensors) {
         uTorso = stepTorso(uLeftFoot, uRightFoot, 0.5);
-        Transform2D uTorsoActual = uTorso.localToWorld({-DarwinModel::Leg::HIP_OFFSET_X, 0, 0});
+        Transform2D uTorsoActual = uTorso.localToWorld({-kinematicsModel.Leg.HIP_OFFSET_X, 0, 0});
 
         Transform3D torso = arma::vec6({uTorsoActual.x(), uTorsoActual.y(), bodyHeight, 0, bodyTilt, uTorsoActual.angle()});
 
@@ -533,11 +538,11 @@ namespace motion {
 
         if (balanceEnabled) {
             // Apply balance to both legs when standing still
-            balancer.balance(leftFootTorso, LimbID::LEFT_LEG, sensors);
-            balancer.balance(rightFootTorso, LimbID::RIGHT_LEG, sensors);
+            balancer.balance(kinematicsModel,leftFootTorso, LimbID::LEFT_LEG, sensors);
+            balancer.balance(kinematicsModel,rightFootTorso, LimbID::RIGHT_LEG, sensors);
         }
 
-        auto joints = calculateLegJointsTeamDarwin<DarwinModel>(leftFootTorso, rightFootTorso);
+        auto joints = calculateLegJointsTeamDarwin(kinematicsModel, leftFootTorso, rightFootTorso);
         auto waypoints = motionLegs(joints);
 
         auto arms = motionArms(0.5);

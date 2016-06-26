@@ -27,7 +27,7 @@
 #include "message/motion/HeadCommand.h"
 #include "utility/math/coordinates.h"
 #include "utility/motion/InverseKinematics.h"
-#include "utility/motion/RobotModels.h"
+#include "message/motion/KinematicsModels.h"
 #include "utility/support/yaml_expression.h"
 #include "utility/nubugger/NUhelpers.h"
 
@@ -47,7 +47,7 @@ namespace module {
         using utility::math::coordinates::cartesianToSpherical;
         using utility::motion::kinematics::calculateCameraLookJoints;
         using utility::motion::kinematics::calculateHeadJoints;
-        using utility::motion::kinematics::DarwinModel;
+        using message::motion::kinematics::KinematicsModel;
         using utility::support::Expression;
 
         //internal only callback messages to start and stop our action
@@ -63,11 +63,7 @@ namespace module {
                 head_motor_gain = config["head_motors"]["gain"].as<double>();
                 head_motor_torque = config["head_motors"]["torque"].as<double>();
 
-                //head limits
-                max_yaw = DarwinModel::Head::MAX_YAW;
-                min_yaw = DarwinModel::Head::MIN_YAW;
-                max_pitch = DarwinModel::Head::MAX_PITCH;
-                min_pitch = DarwinModel::Head::MIN_PITCH;
+
 
                 emit(std::make_unique<HeadCommand>( HeadCommand {config["initial"]["yaw"].as<float>(),
                                                                  config["initial"]["pitch"].as<float>(), false}));
@@ -85,7 +81,9 @@ namespace module {
                 }
             });
 
-            updateHandle = on<Trigger<Sensors>, Single, Priority::HIGH>().then("Head Controller - Update Head Position",[this] (const Sensors& sensors) {
+            updateHandle = on<Trigger<Sensors>, With<KinematicsModel>, Single, Priority::HIGH>()
+            .then("Head Controller - Update Head Position", [this] (const Sensors& sensors, const KinematicsModel& kinematicsModel) {
+
                 emit(graph("HeadController Goal Angles", goalAngles[0], goalAngles[1]));
 
                 //P controller
@@ -98,8 +96,15 @@ namespace module {
                 //Convert to robot space
                 arma::vec3 headUnitVector = goalRobotSpace ? goalHeadUnitVector_world : sensors.world.rotation() * goalHeadUnitVector_world;
                 //Compute inverse kinematics for head
-                std::vector< std::pair<message::input::ServoID, float> > goalAnglesList = calculateHeadJoints<DarwinModel>(headUnitVector);
+                std::vector< std::pair<message::input::ServoID, float> > goalAnglesList = calculateHeadJoints(headUnitVector);
                 // arma::vec2 goalAngles = cartesianToSpherical(headUnitVector).rows(1,2);
+
+
+                //head limits
+                max_yaw = kinematicsModel.Head.MAX_YAW;
+                min_yaw = kinematicsModel.Head.MIN_YAW;
+                max_pitch = kinematicsModel.Head.MAX_PITCH;
+                min_pitch = kinematicsModel.Head.MIN_PITCH;
 
                 //Clamp head angles
                 float pitch = 0;

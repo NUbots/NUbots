@@ -29,12 +29,13 @@
 
 #include "utility/math/matrix/Transform3D.h"
 #include "utility/math/coordinates.h"
-#include "utility/motion/RobotModels.h"
 #include "utility/motion/ForwardKinematics.h"
 #include "message/input/ServoID.h"
 #include "message/input/Sensors.h"
 #include "utility/math/angle.h"
 #include "message/behaviour/Action.h"
+
+#include "message/motion/KinematicsModels.h"
 
 namespace utility {
 namespace motion {
@@ -52,20 +53,19 @@ namespace kinematics {
                         z is normal to the plane of the foot
         @param target The target 4x4 basis matrix for the ankle
         @param isLeft Request for left leg motors or right leg motors?
-        @param RobotKinematicModel The class containing the leg model of the robot.
+        @param RobotKinematicsModel The class containing the leg model of the robot.
     */
 
 
-    template <typename RobotKinematicModel>
-    bool legPoseValid(utility::math::matrix::Transform3D target, message::input::LimbID limb) {
-        const float HIP_OFFSET_Y = RobotKinematicModel::Leg::HIP_OFFSET_Y;
-        const float HIP_OFFSET_Z = RobotKinematicModel::Leg::HIP_OFFSET_Z;
-        const float HIP_OFFSET_X = RobotKinematicModel::Leg::HIP_OFFSET_X;
-        const float UPPER_LEG_LENGTH = RobotKinematicModel::Leg::UPPER_LEG_LENGTH;
-        const float LOWER_LEG_LENGTH = RobotKinematicModel::Leg::LOWER_LEG_LENGTH;
+    bool legPoseValid(const message::motion::kinematics::KinematicsModel& model, utility::math::matrix::Transform3D target, message::input::LimbID limb) {
+        const float HIP_OFFSET_Y = model.Leg.HIP_OFFSET_Y;
+        const float HIP_OFFSET_Z = model.Leg.HIP_OFFSET_Z;
+        const float HIP_OFFSET_X = model.Leg.HIP_OFFSET_X;
+        const float UPPER_LEG_LENGTH = model.Leg.UPPER_LEG_LENGTH;
+        const float LOWER_LEG_LENGTH = model.Leg.LOWER_LEG_LENGTH;
 
         //Translate up foot
-        auto targetLeg = target.translate(arma::vec3({0,0,RobotKinematicModel::Leg::FOOT_HEIGHT}));
+        auto targetLeg = target.translate(arma::vec3({0,0,model.Leg.FOOT_HEIGHT}));
 
         //Remove hip offset
         int negativeIfRight = (limb == message::input::LimbID::RIGHT_LEG) ? -1 : 1;
@@ -77,13 +77,12 @@ namespace kinematics {
         return (length < maxLegLength);
     }
 
-    template <typename RobotKinematicModel>
-    std::vector<std::pair<message::input::ServoID, float>> calculateLegJoints(utility::math::matrix::Transform3D target, message::input::LimbID limb) {
-        const float LENGTH_BETWEEN_LEGS = RobotKinematicModel::Leg::LENGTH_BETWEEN_LEGS;
-        const float DISTANCE_FROM_BODY_TO_HIP_JOINT = RobotKinematicModel::Leg::HIP_OFFSET_Z;
-        const float HIP_OFFSET_X = RobotKinematicModel::Leg::HIP_OFFSET_X;
-        const float UPPER_LEG_LENGTH = RobotKinematicModel::Leg::UPPER_LEG_LENGTH;
-        const float LOWER_LEG_LENGTH = RobotKinematicModel::Leg::LOWER_LEG_LENGTH;
+    std::vector<std::pair<message::input::ServoID, float>> calculateLegJoints(const message::motion::kinematics::KinematicsModel& model, utility::math::matrix::Transform3D target, message::input::LimbID limb) {
+        const float LENGTH_BETWEEN_LEGS = model.Leg.LENGTH_BETWEEN_LEGS();
+        const float DISTANCE_FROM_BODY_TO_HIP_JOINT = model.Leg.HIP_OFFSET_Z;
+        const float HIP_OFFSET_X = model.Leg.HIP_OFFSET_X;
+        const float UPPER_LEG_LENGTH = model.Leg.UPPER_LEG_LENGTH;
+        const float LOWER_LEG_LENGTH = model.Leg.LOWER_LEG_LENGTH;
 
         std::vector<std::pair<message::input::ServoID, float> > positions;
 
@@ -95,7 +94,7 @@ namespace kinematics {
         float ankleRoll = 0;
 
         //Correct for input referencing the bottom of the foot
-        target = target.translate(arma::vec3({0,0,RobotKinematicModel::Leg::FOOT_HEIGHT}));
+        target = target.translate(arma::vec3({0,0,model.Leg.FOOT_HEIGHT}));
 
         //TODO remove this. It was due to wrong convention use
         utility::math::matrix::Transform3D inputCoordinatesToCalcCoordinates;
@@ -211,49 +210,45 @@ namespace kinematics {
             positions.push_back(std::make_pair(message::input::ServoID::L_ANKLE_ROLL, ankleRoll));
         }
         else {
-            positions.push_back(std::make_pair(message::input::ServoID::R_HIP_YAW, (RobotKinematicModel::Leg::LEFT_TO_RIGHT_HIP_YAW) * -hipYaw));
-            positions.push_back(std::make_pair(message::input::ServoID::R_HIP_ROLL, (RobotKinematicModel::Leg::LEFT_TO_RIGHT_HIP_ROLL) * hipRoll));
-            positions.push_back(std::make_pair(message::input::ServoID::R_HIP_PITCH, (RobotKinematicModel::Leg::LEFT_TO_RIGHT_HIP_PITCH) * -hipPitch));
-            positions.push_back(std::make_pair(message::input::ServoID::R_KNEE, (RobotKinematicModel::Leg::LEFT_TO_RIGHT_KNEE) * (M_PI - knee) ));
-            positions.push_back(std::make_pair(message::input::ServoID::R_ANKLE_PITCH, (RobotKinematicModel::Leg::LEFT_TO_RIGHT_ANKLE_PITCH) * -anklePitch));
-            positions.push_back(std::make_pair(message::input::ServoID::R_ANKLE_ROLL, (RobotKinematicModel::Leg::LEFT_TO_RIGHT_ANKLE_ROLL) * ankleRoll));
+            positions.push_back(std::make_pair(message::input::ServoID::R_HIP_YAW, (model.Leg.LEFT_TO_RIGHT_HIP_YAW) * -hipYaw));
+            positions.push_back(std::make_pair(message::input::ServoID::R_HIP_ROLL, (model.Leg.LEFT_TO_RIGHT_HIP_ROLL) * hipRoll));
+            positions.push_back(std::make_pair(message::input::ServoID::R_HIP_PITCH, (model.Leg.LEFT_TO_RIGHT_HIP_PITCH) * -hipPitch));
+            positions.push_back(std::make_pair(message::input::ServoID::R_KNEE, (model.Leg.LEFT_TO_RIGHT_KNEE) * (M_PI - knee) ));
+            positions.push_back(std::make_pair(message::input::ServoID::R_ANKLE_PITCH, (model.Leg.LEFT_TO_RIGHT_ANKLE_PITCH) * -anklePitch));
+            positions.push_back(std::make_pair(message::input::ServoID::R_ANKLE_ROLL, (model.Leg.LEFT_TO_RIGHT_ANKLE_ROLL) * ankleRoll));
         }
 
         return positions;
     }
 
-    template <typename RobotKinematicModel>
-    std::vector<std::pair<message::input::ServoID, float>> calculateLegJoints(utility::math::matrix::Transform3D leftTarget, utility::math::matrix::Transform3D rightTarget) {
-        auto joints = calculateLegJoints<RobotKinematicModel>(leftTarget, message::input::LimbID::LEFT_LEG);
-        auto joints2 = calculateLegJoints<RobotKinematicModel>(rightTarget, message::input::LimbID::RIGHT_LEG);
+    std::vector<std::pair<message::input::ServoID, float>> calculateLegJoints(const message::motion::kinematics::KinematicsModel& model, utility::math::matrix::Transform3D leftTarget, utility::math::matrix::Transform3D rightTarget) {
+        auto joints = calculateLegJoints(model, leftTarget, message::input::LimbID::LEFT_LEG);
+        auto joints2 = calculateLegJoints(model, rightTarget, message::input::LimbID::RIGHT_LEG);
         joints.insert(joints.end(), joints2.begin(), joints2.end());
         return joints;
     }
 
-    template <typename RobotKinematicModel>
-    std::vector<std::pair<message::input::ServoID, float>> calculateLegJointsTeamDarwin(utility::math::matrix::Transform3D target, message::input::LimbID limb) {
-        target(2,3) += RobotKinematicModel::TEAMDARWINCHEST_TO_ORIGIN; // translate without regard to rotation
-        // target = target.translateZ(RobotKinematicModel::Leg::FOOT_HEIGHT); THIS HAS BEEN WRONG THE WHOLE TIME!!!! THIS ASSUMES THE FOOT IS FLAT RELATIVE TO THE TORSO (WHICH IT ISN'T BECAUSE THE BODY IS TILTED)
-        return calculateLegJoints<RobotKinematicModel>(target, limb);
+    std::vector<std::pair<message::input::ServoID, float>> calculateLegJointsTeamDarwin(const message::motion::kinematics::KinematicsModel& model, utility::math::matrix::Transform3D target, message::input::LimbID limb) {
+        target(2,3) += model.TEAMDARWINCHEST_TO_ORIGIN();// translate without regard to rotation
+        // target = target.translateZ(model.Leg.FOOT_HEIGHT); THIS HAS BEEN WRONG THE WHOLE TIME!!!! THIS ASSUMES THE FOOT IS FLAT RELATIVE TO THE TORSO (WHICH IT ISN'T BECAUSE THE BODY IS TILTED)
+        return calculateLegJoints(model, target, limb);
     }
 
-    template <typename RobotKinematicModel>
-    std::vector<std::pair<message::input::ServoID, float>> calculateLegJointsTeamDarwin(utility::math::matrix::Transform3D leftTarget, utility::math::matrix::Transform3D rightTarget) {
-        auto joints = calculateLegJointsTeamDarwin<RobotKinematicModel>(leftTarget, message::input::LimbID::LEFT_LEG);
-        auto joints2 = calculateLegJointsTeamDarwin<RobotKinematicModel>(rightTarget, message::input::LimbID::RIGHT_LEG);
+    std::vector<std::pair<message::input::ServoID, float>> calculateLegJointsTeamDarwin(const message::motion::kinematics::KinematicsModel& model, utility::math::matrix::Transform3D leftTarget, utility::math::matrix::Transform3D rightTarget) {
+        auto joints = calculateLegJointsTeamDarwin(model, leftTarget, message::input::LimbID::LEFT_LEG);
+        auto joints2 = calculateLegJointsTeamDarwin(model, rightTarget, message::input::LimbID::RIGHT_LEG);
         joints.insert(joints.end(), joints2.begin(), joints2.end());
         return joints;
     }
 
-    template <typename RobotKinematicModel>
-    std::vector< std::pair<message::input::ServoID, float> > calculateCameraLookJoints(arma::vec3 cameraUnitVector){
+
+    std::vector< std::pair<message::input::ServoID, float> > calculateCameraLookJoints(const message::motion::kinematics::KinematicsModel& model, arma::vec3 cameraUnitVector){
         std::vector< std::pair<message::input::ServoID, float> > positions;
         positions.push_back(std::make_pair(message::input::ServoID::HEAD_YAW, atan2(cameraUnitVector[1],cameraUnitVector[0]) ));
-        positions.push_back(std::make_pair(message::input::ServoID::HEAD_PITCH, atan2(-cameraUnitVector[2], std::sqrt(cameraUnitVector[0]*cameraUnitVector[0]+cameraUnitVector[1]*cameraUnitVector[1])) - DarwinModel::Head::CAMERA_DECLINATION_ANGLE_OFFSET ));
+        positions.push_back(std::make_pair(message::input::ServoID::HEAD_PITCH, atan2(-cameraUnitVector[2], std::sqrt(cameraUnitVector[0]*cameraUnitVector[0]+cameraUnitVector[1]*cameraUnitVector[1])) - model.Head.CAMERA_DECLINATION_ANGLE_OFFSET ));
         return positions;
     }
 
-    template <typename RobotKinematicModel>
     std::vector< std::pair<message::input::ServoID, float> > calculateHeadJoints(arma::vec3 cameraUnitVector){
         std::vector< std::pair<message::input::ServoID, float> > positions;
         positions.push_back(std::make_pair(message::input::ServoID::HEAD_YAW, atan2(cameraUnitVector[1],cameraUnitVector[0]) ));
@@ -261,7 +256,6 @@ namespace kinematics {
         return positions;
     }
 
-    template <typename RobotKinematicModel>
     inline arma::vec2 calculateHeadJointsToLookAt(arma::vec3 groundPoint, const utility::math::matrix::Transform3D& camToGround, const utility::math::matrix::Transform3D& orientationBodyToGround){
     // TODO: Find point that is invariant under head position.
         arma::vec3 cameraPosition = camToGround.submat(0,3,2,3);
@@ -272,20 +266,18 @@ namespace kinematics {
         return lookVectorSpherical.rows(1,2);
     }
 
-    template <typename RobotKinematicModel>
     inline arma::vec2 headAnglesToSeeGroundPoint(const arma::vec2& gpos, const message::input::Sensors& sensors){
         arma::vec3 groundPos_ground = {gpos[0],gpos[1],0};
-        return calculateHeadJointsToLookAt<RobotKinematicModel>(groundPos_ground, sensors.orientationCamToGround, sensors.orientationBodyToGround);
+        return calculateHeadJointsToLookAt(groundPos_ground, sensors.orientationCamToGround, sensors.orientationBodyToGround);
     }
 
-    template <typename RobotKinematicModel>
-    std::vector<std::pair<message::input::ServoID, float>> setHeadPoseFromFeet(const utility::math::matrix::Transform3D& cameraToFeet, const float& footSeparation, const float& bodyAngle){
+    std::vector<std::pair<message::input::ServoID, float>> setHeadPoseFromFeet(const message::motion::kinematics::KinematicsModel& model, const utility::math::matrix::Transform3D& cameraToFeet, const float& footSeparation){
         //Get camera pose relative to body
         // arma::vec3 euler = cameraToFeet.rotation().eulerAngles();
         // float headPitch = euler[1] - bodyAngle;
         // float headYaw = euler[2];
         arma::vec3 gaze = cameraToFeet.rotation().col(0);
-        auto headJoints = utility::motion::kinematics::calculateCameraLookJoints<RobotKinematicModel>(gaze);
+        auto headJoints = utility::motion::kinematics::calculateCameraLookJoints(model, gaze);
         float headPitch = std::numeric_limits<float>::quiet_NaN();
         float headYaw = std::numeric_limits<float>::quiet_NaN();
         for(auto joint : headJoints){
@@ -306,7 +298,7 @@ namespace kinematics {
             throw std::exception();
         }
 
-        auto headPoses = utility::motion::kinematics::calculateHeadJointPosition<RobotKinematicModel>(headPitch,
+        auto headPoses = utility::motion::kinematics::calculateHeadJointPosition(model, headPitch,
                                                                                                      headYaw,
                                                                                                      message::input::ServoID::HEAD_PITCH);
         auto cameraToBody = headPoses[message::input::ServoID::HEAD_PITCH];
@@ -317,8 +309,8 @@ namespace kinematics {
         utility::math::matrix::Transform3D F_r = F_c.translateY(-footSeparation / 2.0);
 
         //Get associated joint angles
-        auto joints = calculateLegJoints<RobotKinematicModel>(F_l, message::input::LimbID::LEFT_LEG);
-        auto joints2 = calculateLegJoints<RobotKinematicModel>(F_r, message::input::LimbID::RIGHT_LEG);
+        auto joints = calculateLegJoints(model, F_l, message::input::LimbID::LEFT_LEG);
+        auto joints2 = calculateLegJoints(model, F_r, message::input::LimbID::RIGHT_LEG);
         joints.insert(joints.end(), joints2.begin(), joints2.end());
         joints.insert(joints.end(),headJoints.begin(),headJoints.end());
 
@@ -326,8 +318,7 @@ namespace kinematics {
         return headJoints;
     }
 
-    template <typename RobotKinematicModel>
-    std::vector<std::pair<message::input::ServoID, float>> setArm(const arma::vec3& pos, bool left, int number_of_iterations = 300, arma::vec3 angleHint = arma::zeros(3)){
+    std::vector<std::pair<message::input::ServoID, float>> setArm(const message::motion::kinematics::KinematicsModel& model, const arma::vec3& pos, bool left, int number_of_iterations = 300, arma::vec3 angleHint = arma::zeros(3)){
         message::input::ServoID SHOULDER_PITCH, SHOULDER_ROLL, ELBOW;
         int negativeIfRight = 1;
 
@@ -349,10 +340,10 @@ namespace kinematics {
         arma::vec3 X = {0,0,0};
         int i = 0;
         for(; i < number_of_iterations; i++){
-            X = calculateArmPosition<RobotKinematicModel>(angles, left);
+            X = calculateArmPosition(model, angles, left);
             arma::vec3 dX = pos - X;
-            
-            arma::mat33 J = calculateArmJacobian<RobotKinematicModel>(angles, left);
+
+            arma::mat33 J = calculateArmJacobian(model, angles, left);
             // std::cout << "pos = " << pos.t() << std::endl;
             // std::cout << "X = " << X.t() << std::endl;
             // std::cout << "dX = " << dX.t() << std::endl;
@@ -372,16 +363,15 @@ namespace kinematics {
         std::cout << "Final error = " << arma::norm(pos-X) << std::endl;
         // std::cout << "Iterations = " << i << std::endl;
 
-        
+
         std::vector<std::pair<message::input::ServoID, float> > joints;
         joints.push_back(std::make_pair(SHOULDER_PITCH,utility::math::angle::normalizeAngle(angles[0])));
         joints.push_back(std::make_pair(SHOULDER_ROLL,utility::math::angle::normalizeAngle(angles[1])));
         joints.push_back(std::make_pair(ELBOW,utility::math::angle::normalizeAngle(angles[2])));
         return joints;
-    } 
+    }
 
-    template <typename RobotKinematicModel>
-    std::vector<std::pair<message::input::ServoID, float>> setArmApprox(const arma::vec3& pos, bool left){
+    std::vector<std::pair<message::input::ServoID, float>> setArmApprox(const message::motion::kinematics::KinematicsModel& model, const arma::vec3& pos, bool left){
         //Setup variables
         message::input::ServoID SHOULDER_PITCH, SHOULDER_ROLL, ELBOW;
         int negativeIfRight = 1;
@@ -398,10 +388,10 @@ namespace kinematics {
         //Compute Angles
         float pitch,roll,elbow = 0;
 
-        arma::vec3 shoulderPos = {  
-            RobotKinematicModel::Arm::SHOULDER_X_OFFSET,
-            negativeIfRight * RobotKinematicModel::Arm::DISTANCE_BETWEEN_SHOULDERS / 2,
-            RobotKinematicModel::Arm::SHOULDER_Z_OFFSET
+        arma::vec3 shoulderPos = {
+            model.Arm.SHOULDER_X_OFFSET,
+            negativeIfRight * model.Arm.DISTANCE_BETWEEN_SHOULDERS / 2,
+            model.Arm.SHOULDER_Z_OFFSET
         };
 
         arma::vec3 handFromShoulder = pos - shoulderPos;
@@ -411,8 +401,8 @@ namespace kinematics {
 
         //ELBOW
         float extensionLength = arma::norm(handFromShoulder);
-        float upperArmLength = RobotKinematicModel::Arm::UPPER_ARM_LENGTH;
-        float lowerArmLength = RobotKinematicModel::Arm::LOWER_ARM_LENGTH;
+        float upperArmLength = model.Arm.UPPER_ARM_LENGTH;
+        float lowerArmLength = model.Arm.LOWER_ARM_LENGTH;
         float sqrUpperArmLength = upperArmLength * upperArmLength;
         float sqrLowerArmLength = lowerArmLength * lowerArmLength;
         float sqrExtensionLength = extensionLength * extensionLength;

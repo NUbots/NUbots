@@ -34,7 +34,7 @@
 #include "utility/localisation/transform.h"
 #include "utility/nubugger/NUhelpers.h"
 #include "utility/math/matrix/Transform3D.h"
-#include "utility/motion/RobotModels.h"
+#include "message/motion/KinematicsModels.h"
 #include "utility/motion/InverseKinematics.h"
 
 
@@ -60,7 +60,7 @@ using utility::math::coordinates::sphericalToCartesian;
 using utility::localisation::transform::WorldToRobotTransform;
 using utility::localisation::transform::RobotToWorldTransform;
 using utility::nubugger::graph;
-using utility::motion::kinematics::DarwinModel;
+using message::motion::kinematics::KinematicsModel;
 
 namespace module {
 namespace behaviour {
