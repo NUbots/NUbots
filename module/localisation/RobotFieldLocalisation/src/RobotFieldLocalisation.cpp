@@ -88,7 +88,6 @@ namespace localisation {
 
             //set position, covariance, and rotation
             robot.position = Htf.translation().rows(0,1);
-            //TODO: check that this is indeed rotated the right way
             robot.robot_to_world_rotation = utility::math::matrix::Rotation2D::createRotation(yaw);
             robot.position_cov = robot.robot_to_world_rotation * filter.getCovariance().submat(0,0,1,1);
             robot.heading = robot.robot_to_world_rotation.row(0).t();
