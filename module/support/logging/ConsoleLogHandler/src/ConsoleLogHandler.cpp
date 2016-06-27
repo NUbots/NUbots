@@ -50,7 +50,7 @@ namespace module {
                             std::string exceptionName = NUClear::util::demangle(typeid(ex).name());
 
                             std::cout << reactor << " "
-                                      << (stats.identifier[0].empty() ? "" : stats.identifier[0] + " ")
+                                      << (stats.identifier[0].empty() ? "" : "- " + stats.identifier[0] + " ")
                                       << Colour::red << "Exception:" << " "
                                       << Colour::red << exceptionName << " "
                                       << ex.what()
@@ -60,7 +60,7 @@ namespace module {
                         catch (...) {
 
                             std::cout << reactor << " "
-                                      << stats.identifier[0]
+                                      << (stats.identifier[0].empty() ? "" : "- " + stats.identifier[0] + " ")
                                       << Colour::red << "Exception of unkown type"
                                       << std::endl;
                         }
