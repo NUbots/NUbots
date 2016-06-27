@@ -27,6 +27,7 @@
 #include "utility/math/matrix/Rotation2D.h"
 #include "utility/math/matrix/Rotation3D.h"
 #include "utility/support/yaml_armadillo.h"
+ #include "utility/nubugger/NUhelpers.h"
 
 namespace module {
 namespace localisation {
@@ -37,6 +38,7 @@ namespace localisation {
     using message::support::FieldDescription;
     using utility::math::filter::MMUKF;
     using utility::math::filter::UKF;
+    using utility::nubugger::graph;
 
     RobotFieldLocalisation::RobotFieldLocalisation(std::unique_ptr<NUClear::Environment> environment)
     : Reactor(std::move(environment)) {
@@ -78,19 +80,19 @@ namespace localisation {
             Hwf(3,3) = 1.0;
 
             //extract the 2D yaw from the field-torso transform
-            utility::math::matrix::Transform3D Hft = utility::math::matrix::Transform3D(Htw * Hwf).i();
-            double yaw = utility::math::matrix::Rotation3D(Hft.rotation()).yaw();
+            utility::math::matrix::Transform3D Htf = utility::math::matrix::Transform3D(Htw * Hwf);
+            double yaw = utility::math::matrix::Rotation3D(Htf.rotation()).yaw();
 
             //make a localisation object
             message::localisation::Self robot;
 
             //set position, covariance, and rotation
-            robot.position = Hft.translation().rows(0,1);
+            robot.position = Htf.translation().rows(0,1);
             //TODO: check that this is indeed rotated the right way
             robot.robot_to_world_rotation = utility::math::matrix::Rotation2D::createRotation(yaw);
             robot.position_cov = robot.robot_to_world_rotation * filter.getCovariance().submat(0,0,1,1);
             robot.heading = robot.robot_to_world_rotation.row(0).t();
-
+            emit(graph("LocalisationYaw",yaw));
             emit(std::make_unique<std::vector<message::localisation::Self>>(std::vector<message::localisation::Self>(1,robot)));
         });
 
