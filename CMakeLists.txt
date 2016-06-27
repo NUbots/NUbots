@@ -36,6 +36,9 @@ MARK_AS_ADVANCED(
     OMPL_LIBRARY
 )
 
+# Our banner file for placing at the top of the roles
+SET(NUCLEAR_ROLE_BANNER_FILE "${CMAKE_SOURCE_DIR}/cmake/banner.txt" CACHE PATH "The path the banner to print at the start of each role execution" FORCE)
+
 # Include the NUClear roles system
 ADD_SUBDIRECTORY(nuclear)
 
