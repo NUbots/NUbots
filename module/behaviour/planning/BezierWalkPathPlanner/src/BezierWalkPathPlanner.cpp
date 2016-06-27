@@ -65,7 +65,7 @@ namespace module {
             using utility::math::matrix::Transform2D;
             using utility::nubugger::graph;
             using utility::nubugger::drawSphere;
-
+            using utility::nubugger::drawArrow;
             using LocalisationBall = message::localisation::Ball;
             using Self = message::localisation::Self;
             using VisionBall = message::vision::Ball;
@@ -75,10 +75,12 @@ namespace module {
              : Reactor(std::move(environment)), subsumptionId(size_t(this) * size_t(this) - size_t(this)),
              latestCommand(MotionCommand::StandStill())
               {
+                // log("LocalisationBall = ",LocalisationBall); 
+                // log("Self = ",Self); 
 
                 //do a little configurating
                 on<Configuration>("BezierWalkPathPlanner.yaml").then([this] (const Configuration& file){
-
+                    log(__LINE__); 
                     turnSpeed = file.config["turnSpeed"].as<float>();
                     forwardSpeed = file.config["forwardSpeed"].as<float>();
                     a = file.config["a"].as<float>();
@@ -131,7 +133,8 @@ namespace module {
                  , With<message::localisation::Ball>
                  , With<std::vector<message::localisation::Self>>
                  , Optional<With<std::vector<message::vision::Obstacle>>>
-                 , Sync<BezierWalkPathPlanner>>().then("Updates Bezier Plan", [this] (
+                 , Sync<BezierWalkPathPlanner> 
+                 , Single>().then("Updates Bezier Plan", [this] ( 
                      const LocalisationBall& ball,
                      const std::vector<Self>& selfs,
                      std::shared_ptr<const std::vector<VisionObstacle>> /*robots*/) {
@@ -163,6 +166,8 @@ namespace module {
                         arma::vec2 kick_target = latestCommand.kickTarget;//2 * ball_world_position - selfs.front().position;
                         emit(drawSphere("kick_target", arma::vec3({kick_target[0], kick_target[1], 0.0}), 0.1, arma::vec3({1, 0, 0}), 0));
 
+                        // log("Kick Target = ",kick_target); 
+
 
                         //TO DO, change to Bezier stuff
                         // Include direction of goals
@@ -186,7 +191,7 @@ namespace module {
                         float B3 = ball.position[0];
                         // log("Ball position 0 = ", B3);
 
-                        float theta1 = 0.5; // selfs.heading; //angle orientation of robot in space
+                        float theta1 = 0.5; //std::atan2(selfs.front().position[1],selfs.front().position[0]); //angle orientation of robot in space
                         float theta2 = std::atan2(kick_target[1], kick_target[0]); //angle wanting to stike ball, angle of ball to goal
                         // Calculate RP, RS
                         float RP = VP*VP / 4; //Minimum radius of curvature required at point P (robot point), 4 = ar is maximum radial acceleration
@@ -212,9 +217,13 @@ namespace module {
                         float Er1 = RP - rhoP;
                         float Er2 = RS - rhoS;
                         float error = std::max(std::abs(Er1), std::abs(Er2));
+                        log("error = ",error, "\n ErMax = ",ErMax); 
+
                         while (error >= ErMax) {
                             d1 = d1+Er1/RP;
                             d2 = d2+Er2/RS;
+                            log("d1 = ",d1,"\n d2 = ",d2); 
+
                             // calculate rhoP, rhoS
                             rhoP = (3*d1*d1)/(h1+d2*g1);
                             rhoS = (3*d2*d2)/(h2+d1*g2);
@@ -228,17 +237,20 @@ namespace module {
                         }
 
 
-                        d1 = std::min(float(1.0),std::max(d1,float(0.1)));
+                        d1 = std::min(float(2.0),std::max(d1,float(0.1))); 
 
-                        d2 = std::min(float(1.0),std::max(d2,float(0.1)));
+                        d2 = std::min(float(2.0),std::max(d2,float(0.1))); 
 
 
-                        // log("d1 = ",d1,"\n d2 = ",d2);
+                        log("d1 = ",d1,"\n d2 = ",d2); 
 
                         float A1 = A0 +d1 * std::cos(theta1);
                         float B1 = B0 +d1 * std::sin(theta1);
                         float A2 = A3 +d2 * std::cos(M_PI +theta2);
                         float B2 = B3 +d2 *std::sin(M_PI + theta2);
+
+                        emit(drawSphere("Tangent 1", arma::vec3({B1, A1, 0.0}), 0.1, arma::vec3({0, 1, 0}), 0 )); 
+                        emit(drawSphere("Tangent 2", arma::vec3({B2, A2, 0.0}), 0.1, arma::vec3({0, 0, 1}), 0 )); 
 
                         // log("A1 = ", A1, "\n B1 = ", B1, "\n A2 = ", A2 , "\n B2 = ", B2);
 
