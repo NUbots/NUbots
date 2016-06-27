@@ -144,6 +144,7 @@ class VirtualGoalPost {
 			result.timestamp = sensors->timestamp; // TODO: Eventually allow this to be different to sensors.
 			result.side = side;
 			result.team = team;
+			result.quad = quad;
 			//If no measurements are in the goal, then it was not observed
 			return result;
 		}

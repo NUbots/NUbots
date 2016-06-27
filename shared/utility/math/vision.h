@@ -228,37 +228,45 @@ namespace vision {
         arma::mat goalTopCorners = goalBaseCorners;
         goalTopCorners.row(2) += field.goalpost_top_height;
 
+
         //create the camera to field transformation
         utility::math::matrix::Transform3D Hct = sensors.forwardKinematics.find(ServoID::HEAD_PITCH)->second.i();
         utility::math::matrix::Transform3D Htw = sensors.world;
+
 
         //create the world-field transform
         arma::vec3 rFWf;
         rFWf[2] = 0.0;
         rFWf.rows(0,1) = robotPose.rows(0,1);
+
         //XXX: check correctness
         utility::math::matrix::Transform3D Hwf = utility::math::matrix::Transform3D::createRotationZ(robotPose[2]) 
                                                + utility::math::matrix::Transform3D::createTranslation(rFWf);
         Hwf(3,3) = 1.0;
 
+
         //We create camera world by using camera-torso -> torso-world -> world->field
         utility::math::matrix::Transform3D Hcf = Hct * Htw * Hwf;
 
         //transform the goals from field to camera
-        goalBaseCorners = arma::vec(Hcf.i() * goalBaseCorners).rows(0,2);
-        goalTopCorners = arma::vec(Hcf.i() * goalTopCorners).rows(0,2);
+        goalBaseCorners = arma::mat(Hcf.i() * goalBaseCorners).rows(0,2);
+        goalTopCorners = arma::mat(Hcf.i() * goalTopCorners).rows(0,2);
+
 
         //Select the (tl, tr, bl, br) corner points for normals
         arma::ivec4 cornerIndices;
         cornerIndices.fill(0);
 
-        arma::vec pvals = goalBaseCorners * arma::cross(goalBaseCorners.col(0), goalTopCorners.col(0));
+
+        arma::vec pvals = goalBaseCorners.t() * arma::cross(goalBaseCorners.col(0), goalTopCorners.col(0));
         cornerIndices[2] = pvals.index_max();
         cornerIndices[3] = pvals.index_min();
 
-        pvals = goalTopCorners * arma::cross(goalBaseCorners.col(0), goalTopCorners.col(0));
+
+        pvals = goalTopCorners.t() * arma::cross(goalBaseCorners.col(0), goalTopCorners.col(0));
         cornerIndices[0] = pvals.index_max();
         cornerIndices[1] = pvals.index_min();
+
 
         //Create the quad normal predictions. Order is Left, Right, Top, Bottom
         arma::mat::fixed<3,4> prediction;
