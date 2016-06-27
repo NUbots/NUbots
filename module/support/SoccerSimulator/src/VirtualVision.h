@@ -77,7 +77,7 @@ class VirtualGoalPost {
 
 			return arma::conv_to<arma::vec>::from(
 						utility::math::vision::screenToImage(
-							utility::math::vision::projectCamSpaceToScreen(result, focalLength), 
+							utility::math::vision::projectCamSpaceToScreen(result, focalLength),
 							imSize
 						)
 					);
@@ -97,21 +97,16 @@ class VirtualGoalPost {
 		Goal::Side side = Goal::Side::UNKNOWN; // LEFT, RIGHT, or UNKNOWN
 		Goal::Team team = Goal::Team::UNKNOWN; // OWN, OPPONENT, or UNKNOWN
 
-		Goal detect(const CameraParameters& camParams, 
-					Transform2D& robotPose, 
-					std::shared_ptr<const Sensors> sensors, 
+		Goal detect(const CameraParameters& camParams,
+					Transform2D& robotPose,
+					std::shared_ptr<const Sensors> sensors,
 					arma::vec4& error,
 					const FieldDescription& field){
 			Goal result;
 
-			//make a non-homogeneous robot pose
-			arma::vec3 robotPose3;
-			robotPose3[2] = std::atan2(robotPose[1], robotPose[0]);
-			robotPose3.rows(0,1) = robotPose.submat(0,2,1,2);
-
 			//push the new measurement types
 			//TODO: simulate not having values if off screen
-			arma::mat::fixed<3,4> goalNormals = cameraSpaceGoalProjection(robotPose3, this->position, field, *sensors);
+			arma::mat::fixed<3,4> goalNormals = cameraSpaceGoalProjection(robotPose, this->position, field, *sensors);
 			result.measurements.push_back(
 				std::make_pair<Goal::MeasurementType, arma::vec3>(
 							Goal::MeasurementType::LEFT_NORMAL,
