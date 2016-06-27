@@ -219,7 +219,7 @@ namespace vision {
         //make the base goal corners
         arma::mat goalBaseCorners(4,4);
         goalBaseCorners.row(3).fill(1.0);
-        goalBaseCorners.each_col() = goalLocation;
+        goalBaseCorners.submat(0,0,2,3).each_col() = goalLocation;
         goalBaseCorners.submat(0,0,1,3) -= 0.5*field.dimensions.goalpost_diameter;
         goalBaseCorners.submat(0,0,1,0) += field.dimensions.goalpost_diameter;
         goalBaseCorners.submat(1,1,2,1) += field.dimensions.goalpost_diameter;
