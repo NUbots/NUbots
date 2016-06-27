@@ -267,7 +267,7 @@ namespace support {
                 for (auto& g : goalPosts) {
 
                     // Detect the goal:
-                    auto m = g.detect(camParams, world.robotPose, sensors, cfg_.vision_error);
+                    auto m = g.detect(camParams, world.robotPose, sensors, cfg_.vision_error, *fd);
 
                     if (!m.measurements.empty()) {
                         if (!cfg_.distinguish_own_and_opponent_goals) {
@@ -305,11 +305,11 @@ namespace support {
 
                 auto ball = world.ball.detect(camParams, world.robotPose, sensors, cfg_.vision_error);
 
-                if (!ball.measurements.empty()) {
+                /*if (!ball.measurements.empty()) {
 
                     ball_vec->push_back(ball);
 
-                }
+                }*/
 
                 emit(std::move(ball_vec));
 

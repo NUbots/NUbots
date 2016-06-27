@@ -28,12 +28,15 @@
 #include "utility/math/coordinates.h"
 #include "utility/math/geometry/Quad.h"
 #include "utility/localisation/transform.h"
+#include "utility/math/vision.h"
+#include "message/support/FieldDescription.h"
 
 namespace module {
 namespace support {
 
     using message::vision::Goal;
     using message::vision::Ball;
+    using utility::math::vision::cameraSpaceGoalProjection;
     using message::input::Sensors;
     using utility::math::matrix::Transform2D;
     using utility::localisation::transform::SphericalRobotObservation;
@@ -41,40 +44,45 @@ namespace support {
     using utility::math::coordinates::cartesianToSpherical;
     using utility::math::coordinates::sphericalToCartesian4;
     using utility::math::geometry::Quad;
+    using message::support::FieldDescription;
 
-    struct VisibleMeasurement {
-		std::vector<message::vision::VisionObject::Measurement> measurements;
-    	arma::vec2 screenAngular;
-    };
 
-	inline static VisibleMeasurement computeVisible(arma::vec3 objPosition, const CameraParameters& camParams, Transform2D robotPose, std::shared_ptr<const Sensors> sensors, arma::vec4 error){
-		//Assumes we need to see the bottom or...
-		message::vision::VisionObject::Measurement measurement;
-        measurement.position = SphericalRobotObservation(robotPose.xy(), robotPose.angle(), objPosition);
-        measurement.error = arma::eye(3, 3);
+class VirtualGoalPost {
+	private:
+		arma::vec2 getCamRay(const arma::vec3& norm1, const arma::vec3& norm2, double focalLength, arma::uvec2 imSize) {
+			//Solve the vector intersection between two planes to get the camera ray of the quad corner
+			arma::vec3 result;
+			const double zdiff = norm2[2]*norm1[1] - norm1[2] * norm2[1];
+			const double ydiff = norm2[1]*norm1[2] - norm1[1] * norm2[2];
+			if (std::abs(zdiff) > std::numeric_limits<double>::epsilon()) {
+				result[0] = 1.0;
+				result[2] = (norm1[0] * norm2[1] - norm1[1] * norm2[0]) / zdiff;
+				result[1] = (-norm1[0] - norm1[2] * result[2]) / norm1[1];
 
-        measurement.error[0] = std::fmax(error(0) * std::fabs(measurement.position(0)), error(1));
-        measurement.error.diag()[1] = error[1];
-        measurement.error.diag()[2] = error[2];
+			} else if (std::abs(ydiff) > std::numeric_limits<double>::epsilon()) {
+				result[0] = 1.0;
+				result[1] = (norm1[0] * norm2[2] - norm1[2] * norm2[0]) / ydiff;
+				result[2] = (-norm1[0] - norm1[1] * result[1]) / norm1[2];
 
-        arma::vec4 cam_space = sensors->kinematicsCamToGround.i() * sphericalToCartesian4(measurement.position);
-        arma::vec2 screenAngular = cartesianToSpherical(cam_space.rows(0,2)).rows(1,2);
+			} else {
+				result[2] = 1.0;
+				const double ndiff = norm1[0] * norm2[1] - norm1[1] * norm2[0];
+				result[2] = 1.0;
+				result[1] = (norm1[2] * norm2[0] - norm1[0] * norm2[2]) / ndiff;
+				result[0] = (-norm1[2] - norm1[1] * result[1]) / norm1[0];
+				if (result[0] < 0.0) {
+					result *= -1.0;
+				}
+			}
 
-		std::vector<message::vision::VisionObject::Measurement> measurements;
-        if(std::fabs(screenAngular[0]) < camParams.FOV[0] / 2 && std::fabs(screenAngular[1]) < camParams.FOV[1] / 2){
-        	measurements.push_back(measurement);
-        	//measurements.push_back(measurement); // TODO: Fix the need for double measurements.
-        }
+			return arma::conv_to<arma::vec>::from(
+						utility::math::vision::screenToImage(
+							utility::math::vision::projectCamSpaceToScreen(result, focalLength), 
+							imSize
+						)
+					);
+		}
 
-        VisibleMeasurement visibleMeas = {
-        	measurements,
-        	screenAngular
-        };
-
-        return visibleMeas;
-    }
-
-	class VirtualGoalPost {
 	public:
 		VirtualGoalPost(arma::vec3 position_, float height_, Goal::Side side_, Goal::Team team_){
 			position = position_;
@@ -89,21 +97,56 @@ namespace support {
 		Goal::Side side = Goal::Side::UNKNOWN; // LEFT, RIGHT, or UNKNOWN
 		Goal::Team team = Goal::Team::UNKNOWN; // OWN, OPPONENT, or UNKNOWN
 
-		Goal detect(const CameraParameters& camParams, Transform2D robotPose, std::shared_ptr<const Sensors> sensors, arma::vec4 error){
+		Goal detect(const CameraParameters& camParams, 
+					Transform2D& robotPose, 
+					std::shared_ptr<const Sensors> sensors, 
+					arma::vec4& error,
+					const FieldDescription& field){
 			Goal result;
 
-			auto visibleMeasurements = computeVisible(position,camParams,robotPose,sensors,error);
+			//make a non-homogeneous robot pose
+			arma::vec3 robotPose3;
+			robotPose3[2] = std::atan2(robotPose[1], robotPose[0]);
+			robotPose3.rows(0,1) = robotPose.submat(0,2,1,2);
 
-			for (auto & m : visibleMeasurements.measurements){
-				result.measurements.push_back(m);
-			}
+			//push the new measurement types
+			//TODO: simulate not having values if off screen
+			arma::mat::fixed<3,4> goalNormals = cameraSpaceGoalProjection(robotPose3, this->position, field, *sensors);
+			result.measurements.push_back(
+				std::make_pair<Goal::MeasurementType, arma::vec3>(
+							Goal::MeasurementType::LEFT_NORMAL,
+							goalNormals.col(0)
+						)
+				);
+			result.measurements.push_back(
+				std::make_pair<Goal::MeasurementType, arma::vec3>(
+							Goal::MeasurementType::RIGHT_NORMAL,
+							goalNormals.col(1)
+						)
+				);
+			result.measurements.push_back(
+				std::make_pair<Goal::MeasurementType, arma::vec3>(
+							Goal::MeasurementType::TOP_NORMAL,
+							goalNormals.col(2)
+						)
+				);
+			result.measurements.push_back(
+				std::make_pair<Goal::MeasurementType, arma::vec3>(
+							Goal::MeasurementType::BASE_NORMAL,
+							goalNormals.col(3)
+						)
+				);
 
-			result.screenAngular = visibleMeasurements.screenAngular;
+			//build the predicted quad
+            utility::math::geometry::Quad quad(
+            		getCamRay(goalNormals.col(0), goalNormals.col(3), camParams.focalLengthPixels, camParams.imageSizePixels),
+            		getCamRay(goalNormals.col(0), goalNormals.col(2), camParams.focalLengthPixels, camParams.imageSizePixels),
+            		getCamRay(goalNormals.col(1), goalNormals.col(2), camParams.focalLengthPixels, camParams.imageSizePixels),
+            		getCamRay(goalNormals.col(1), goalNormals.col(3), camParams.focalLengthPixels, camParams.imageSizePixels)
+            	);
+
 			result.sensors = sensors;
 			result.timestamp = sensors->timestamp; // TODO: Eventually allow this to be different to sensors.
-			//Singularity goals
-			result.angularSize = arma::vec2({0, 0});
-			result.quad = Quad(result.screenAngular,result.screenAngular,result.screenAngular,result.screenAngular);
 			result.side = side;
 			result.team = team;
 			//If no measurements are in the goal, then it was not observed
@@ -134,18 +177,18 @@ namespace support {
 		Ball detect(const CameraParameters& camParams, Transform2D robotPose, std::shared_ptr<const Sensors> sensors, arma::vec4 error){
 			Ball result;
 
-			auto visibleMeasurements = computeVisible(position,camParams,robotPose,sensors,error);
+			//auto visibleMeasurements = computeVisible(position,camParams,robotPose,sensors,error);
 
 			// TODO: set timestamp, sensors, classifiedImage?
-			for (auto& m : visibleMeasurements.measurements){
+			/*for (auto& m : visibleMeasurements.measurements){
 				m.velocity.rows(0,1) = robotPose.rotation().i() * velocity.rows(0,1);
 				m.velCov = 0.1 * arma::eye(3,3);
 				result.measurements.push_back(m);
-			}
+			}*/
 
 
-			result.screenAngular = visibleMeasurements.screenAngular;
-			result.angularSize = arma::vec2({0, 0});
+			//result.screenAngular = visibleMeasurements.screenAngular;
+			//result.angularSize = arma::vec2({0, 0});
 			result.sensors = sensors;
 			result.timestamp = sensors->timestamp; // TODO: Eventually allow this to be different to sensors.
 
