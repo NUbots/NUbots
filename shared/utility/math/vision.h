@@ -208,7 +208,7 @@ namespace vision {
 
     inline arma::mat::fixed<3,4> cameraSpaceGoalProjection(
             const arma::vec3& robotPose,
-            const arma::vec3 goalLocation,
+            const arma::vec3& goalLocation,
             const message::support::FieldDescription& field, 
             const message::input::Sensors& sensors)
     {
