@@ -36,7 +36,7 @@ FUNCTION(NUCLEAR_MODULE)
         # Copy configuration files over as needed
         ADD_CUSTOM_COMMAND(
             OUTPUT ${output_file}
-            COMMAND ${CMAKE_COMMAND} -E copy ${data_file} ${output_file}
+            COMMAND ${CMAKE_COMMAND} -E create_symlink ${data_file} ${output_file}
             DEPENDS ${data_file}
             COMMENT "Copying updated data file ${data_file}"
         )

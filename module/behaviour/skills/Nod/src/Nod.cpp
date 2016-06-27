@@ -24,6 +24,7 @@
 #include "message/motion/Script.h"
 #include "message/behaviour/Action.h"
 #include "message/support/Configuration.h"
+#include "message/behaviour/Nod.h"
 
 namespace module {
 namespace behaviour {
@@ -47,8 +48,8 @@ namespace skills {
             EXECUTION_PRIORITY = config["execution_priority"].as<float>();
         });
 
-        on<Trigger<message::behaviour::Nod>>().then([this] (const message::behaviour::Nod& command) {
-            value = nod;
+        on<Trigger<message::behaviour::Nod>>().then([this] (const message::behaviour::Nod& nod) {
+            value = nod.value;
             updatePriority(EXECUTION_PRIORITY);
         });
 

@@ -24,8 +24,9 @@
 
 namespace message {
 namespace behaviour {
-    struct Nod : public bool {
-    }
+    struct Nod {
+    	bool value;
+    };
 
 }
 }
