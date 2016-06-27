@@ -217,9 +217,10 @@ namespace vision {
 
         //NOTE: this code assumes that goalposts are boxes with width and high of goalpost_diameter
         //make the base goal corners
-        arma::mat goalBaseCorners(3,4);
+        arma::mat goalBaseCorners(4,4);
+        goalBaseCorners.row(3).fill(1.0);
         goalBaseCorners.each_col() = goalLocation;
-        goalBaseCorners.cols(0,1) -= 0.5*field.dimensions.goalpost_diameter;
+        goalBaseCorners.submat(0,0,1,3) -= 0.5*field.dimensions.goalpost_diameter;
         goalBaseCorners.submat(0,0,1,0) += field.dimensions.goalpost_diameter;
         goalBaseCorners.submat(1,1,2,1) += field.dimensions.goalpost_diameter;
 
