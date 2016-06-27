@@ -3,7 +3,7 @@ FIND_PACKAGE(PythonInterp REQUIRED)
 
 # Ninja code!
 FOREACH(robot 0 1 2 3 4 5 6 7)
-    FOREACH(config "" u o n i)
+    FOREACH(config "" u o n i p)
         FOREACH(ethernet "" e)
             IF("${robot}" STREQUAL "0")
                 SET(address "10.1.0.1")
@@ -15,6 +15,7 @@ FOREACH(robot 0 1 2 3 4 5 6 7)
 
             # Make our installer
             ADD_CUSTOM_TARGET("d${robot}${ethernet}${config}"
+                USES_TERMINAL
                 COMMAND ${PYTHON_EXECUTABLE}
                 "${CMAKE_SOURCE_DIR}/cmake/scripts/send.py" "--robot_ip=${address}" "--config=${config}" "--username=darwin"
                 DEPENDS ${NUCLEAR_ROLES} "${CMAKE_SOURCE_DIR}/cmake/scripts/send.py")
@@ -27,4 +28,4 @@ FOREACH(robot 0 1 2 3 4 5 6 7)
 ENDFOREACH(robot)
 
 ADD_CUSTOM_TARGET("dall"
-          DEPENDS d1eo d2eo d3eo d4eo d5eo d6eo)
+        DEPENDS d1eo d2eo d3eo d4eo d5eo d6eo)
