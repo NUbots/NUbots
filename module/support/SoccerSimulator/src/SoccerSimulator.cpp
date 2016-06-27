@@ -52,6 +52,8 @@ namespace support {
     using message::platform::darwin::DarwinSensors;
     using message::support::Configuration;
     using message::support::GlobalConfig;
+    using message::vision::Ball;
+    using message::vision::Goal;
     using utility::nubugger::drawArrow;
     using utility::nubugger::drawSphere;
     using utility::math::angle::normalizeAngle;
@@ -433,12 +435,6 @@ namespace support {
 
             arma::vec3 goal_own_l = {fd->goalpost_own_l[0],fd->goalpost_own_l[1],0};
             goalPosts.push_back(VirtualGoalPost(goal_own_l, 1.1, Goal::Side::LEFT, Goal::Team::OWN));
-
-            //DEBUG
-            // for(auto& g : goalPosts){
-            //     log("goalPost", g.position.t());
-            // }
-
     }
 
 }
