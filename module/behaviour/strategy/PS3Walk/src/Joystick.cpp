@@ -21,50 +21,52 @@
 #include <sstream>
 #include "unistd.h"
 
-Joystick::Joystick() : path("/dev/input/js0")
+Joystick::Joystick() : _fd(-1), path("/dev/input/js0")
 {
-  openPath(path);
+    openPath(path);
 }
 
-Joystick::Joystick(std::string path) : path(path)
+Joystick::Joystick(std::string path) : _fd(-1), path(path)
 {
-  openPath(path);
+    openPath(path);
 }
 
 void Joystick::openPath(std::string devicePath)
 {
-  std::cout << "Connecting to " << devicePath << std::endl;
-  _fd = open(devicePath.c_str(), O_RDONLY | O_NONBLOCK);
+    std::cout << "Connecting to " << devicePath << std::endl;
+    _fd = open(devicePath.c_str(), O_RDONLY | O_NONBLOCK);
 }
 
 bool Joystick::sample(JoystickEvent* event)
 {
-  int bytes = read(_fd, event, sizeof(*event));
+    int bytes = read(_fd, event, sizeof(*event));
 
-  if (bytes == -1)
-    return false;
+    if (bytes == -1)
+        return false;
 
-  // NOTE if this condition is not met, we're probably out of sync and this
-  // Joystick instance is likely unusable
-  return bytes == sizeof(*event);
+    // NOTE if this condition is not met, we're probably out of sync and this
+    // Joystick instance is likely unusable
+    return bytes == sizeof(*event);
 }
 
 bool Joystick::found()
 {
-  return _fd >= 0;
+    return _fd >= 0;
 }
 
-bool Joystick::valid() {
-  // Check if we can get the stats
-  return !(fcntl(_fd, F_GETFL) < 0 && errno == EBADF);
+bool Joystick::valid()
+{
+    // Check if we can get the stats
+    return !(fcntl(_fd, F_GETFL) < 0 && errno == EBADF);
 }
 
-void Joystick::reconnect() {
-  close(_fd);
-  openPath(path);
+void Joystick::reconnect()
+{
+    close(_fd);
+    openPath(path);
 }
 
 Joystick::~Joystick()
 {
-  close(_fd);
+    close(_fd);
 }

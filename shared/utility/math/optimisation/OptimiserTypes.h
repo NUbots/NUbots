@@ -27,12 +27,18 @@ namespace utility {
     namespace math {
         namespace optimisation {
             struct OptimiserEstimate {
+                OptimiserEstimate() : generation(0), estimate(), covariance() {}
+                OptimiserEstimate(int gen, const arma::vec& est, const arma::mat& cov)
+                    : generation(gen), estimate(est), covariance(cov) {}
                 int generation;
                 arma::vec estimate;
                 arma::mat covariance;
             };
 
             struct OptimiserParameters {
+                OptimiserParameters() : initial(), upperBound(), lowerBound(), batchSize(0) {}
+                OptimiserParameters(const OptimiserEstimate& init, const arma::vec& upper, const arma::vec& lower, uint size)
+                    : initial(init), upperBound(upper), lowerBound(lower), batchSize(size) {}
                 OptimiserEstimate initial;
                 arma::vec upperBound;
                 arma::vec lowerBound;

@@ -46,7 +46,10 @@ namespace skills {
 
     KickScript::KickScript(std::unique_ptr<NUClear::Environment> environment)
         : Reactor(std::move(environment))
-        , id(size_t(this) * size_t(this) - size_t(this)) {
+        , id(size_t(this) * size_t(this) - size_t(this))
+        , KICK_PRIORITY(0.0f)
+        , EXECUTION_PRIORITY(0.0f)
+        , kickCommand() {
 
         // do a little configurating
         on<Configuration>("KickScript.yaml").then([this] (const Configuration& config) {

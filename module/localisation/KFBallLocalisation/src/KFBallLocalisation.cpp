@@ -53,8 +53,10 @@ namespace localisation {
     }
 
     KFBallLocalisation::KFBallLocalisation(std::unique_ptr<NUClear::Environment> environment)
-            : Reactor(std::move(environment)) {
-
+            : Reactor(std::move(environment))
+            , engine_()
+            , emit_data_handle()
+            , last_measurement_time() {
 
         on<Configuration>("KFBallLocalisationEngine.yaml").then([this](const Configuration& config) {
             engine_.UpdateConfiguration(config);

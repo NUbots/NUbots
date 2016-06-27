@@ -33,6 +33,13 @@ namespace optimisation {
     class DOpE : public NUClear::Reactor {
     private:
         struct Optimisation {
+            Optimisation() : group(""), network(false), batchSize(0), optimiser(), estimateEpisodes(), episodes() {}
+            Optimisation(const std::string& group, bool network, uint size,
+                        std::unique_ptr<utility::math::optimisation::Optimiser>&& opt,
+                        const std::vector<message::support::optimisation::Episode>& estimateEpisodes,
+                        const std::vector<message::support::optimisation::Episode>& episodes)
+                : group(group), network(network), batchSize(size), optimiser(std::move(opt)),
+                  estimateEpisodes(estimateEpisodes), episodes(episodes) {}
             std::string group;
             bool network;
             uint batchSize;

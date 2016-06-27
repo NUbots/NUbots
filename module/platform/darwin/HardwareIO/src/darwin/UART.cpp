@@ -57,7 +57,7 @@ namespace Darwin {
         BUS_RESET_WAIT_TIME_uS = config["BUS_RESET_WAIT_TIME_uS"].as<int>();
     }
 
-    UART::UART(const char* name) : devName(name) {
+    UART::UART(const char* name) : devName(name), fd(-1), mutex() {
         connect();
     }
 

@@ -43,8 +43,7 @@ namespace ball {
     public:
         static constexpr size_t size = 4;
 
-
-        BallModel() {} // empty constructor
+        BallModel() : cfg_() {}
 
         // arma::vec::fixed<size> timeUpdate(
         //     const arma::vec::fixed<size>& state, double deltaT,

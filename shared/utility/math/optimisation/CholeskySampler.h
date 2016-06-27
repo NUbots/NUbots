@@ -41,7 +41,8 @@ namespace utility {
                 : batchSize(params.batchSize)
                 , generation(params.initial.generation)
                 , upperBound(params.upperBound)
-                , lowerBound(params.lowerBound) {}
+                , lowerBound(params.lowerBound)
+                , samples() {}
 
                 void clear() {
                     generation = -1;

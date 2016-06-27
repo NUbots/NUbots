@@ -32,6 +32,7 @@ namespace message {
     namespace vision {
 
         struct VisionObject {
+            VisionObject() : timestamp(), measurements(), screenAngular(arma::fill::zeros), angularSize(arma::fill::zeros), sensors(), classifiedImage() {}
 
             /**
              * Measurements are taken from the ground plane below the robot
@@ -39,6 +40,9 @@ namespace message {
              * matrix representing the uncertinaty.
              */
             struct Measurement {
+                Measurement() : position(arma::fill::zeros), error(arma::fill::zeros), velocity(arma::fill::zeros), velCov(arma::fill::zeros) {}
+                Measurement(const arma::vec3& pos, const arma::mat33& err, const arma::vec3& vel, const arma::mat33& cov)
+                        : position(pos), error(err), velocity(vel), velCov(cov) {}
                 arma::vec3 position;
                 arma::mat33 error;
                 //Optional vel measurement, currently used for ball only
@@ -67,10 +71,12 @@ namespace message {
         };
 
         struct Ball : public VisionObject {
+            Ball() : VisionObject(), circle() {}
             utility::math::geometry::Circle circle;
         };
 
         struct Goal : public VisionObject {
+            Goal() : VisionObject(), quad() {}
             enum class Side {
                 UNKNOWN,
                 LEFT,
@@ -87,6 +93,7 @@ namespace message {
         };
 
         struct Obstacle : public VisionObject {
+            Obstacle() : VisionObject(), polygon() {}
 
             enum class Team { // TODO: Rename to TeamColour?
                 NONE,

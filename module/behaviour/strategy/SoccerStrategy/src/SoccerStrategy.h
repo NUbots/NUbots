@@ -39,6 +39,14 @@ namespace strategy {
     private:
 
         struct Config {
+            Config() : ball_last_seen_max_time(), goal_last_seen_max_time(), ball_search_walk_start_speed(0.0f),
+                       ball_search_walk_stop_speed(0.0f), ball_search_walk_slow_time(0.0f),
+                       start_position_offensive(arma::fill::zeros), start_position_defensive(arma::fill::zeros),
+                       is_goalie(false), goalie_command_timeout(0.0f), goalie_rotation_speed_factor(0.0f),
+                       goalie_max_rotation_speed(0.0f), goalie_translation_speed_factor(0.0f),
+                       goalie_max_translation_speed(0.0f), goalie_side_walk_angle_threshold(0.0f),
+                       localisation_interval(), localisation_duration(), alwaysPowerKick(false), forcePlaying(false),
+                       forcePenaltyShootout(false) {}
             NUClear::clock::duration ball_last_seen_max_time;
             NUClear::clock::duration goal_last_seen_max_time;
 

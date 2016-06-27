@@ -72,8 +72,10 @@ namespace localisation {
     }
 
     MMKFRobotLocalisation::MMKFRobotLocalisation(std::unique_ptr<NUClear::Environment> environment)
-        : Reactor(std::move(environment)),
-          engine_(std::make_unique<MMKFRobotLocalisationEngine>()) {
+        : Reactor(std::move(environment))
+        , engine_(std::make_unique<MMKFRobotLocalisationEngine>())
+        , emit_data_handle()
+        , last_measurement_time() {
 
 
         on<Configuration>("MultiModalRobotModel.yaml")

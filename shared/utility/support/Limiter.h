@@ -30,6 +30,8 @@ namespace utility{
 		class Limiter{
 		private:
 			struct Range {
+				Range() : min(), max() {}
+				Range(const T& min, const T& max) : min(min), max(max) {}
 				T min;
 				T max;
 			};
@@ -47,6 +49,8 @@ namespace utility{
 			std::map<Index, T> lastValue;
 
 		public:
+			Limiter() : limits(), alpha(), lastValue() {}
+
 			void addLimit(Index i, T min, T max){
 				limits[i] = Range({min,max});
 			}
@@ -72,7 +76,7 @@ namespace utility{
 				}
 				if(alpha.count(i) > 0){
 					if(lastValue.count(i) > 0){
-						result = alpha[i] * result + (1-alpha[i]) * lastValue[i];						
+						result = alpha[i] * result + (1-alpha[i]) * lastValue[i];
 					}
 					lastValue[i] = result;
 				}

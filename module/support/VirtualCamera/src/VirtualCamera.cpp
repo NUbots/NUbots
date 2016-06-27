@@ -31,9 +31,9 @@ namespace support {
     using message::input::Image;
 
     VirtualCamera::VirtualCamera(std::unique_ptr<NUClear::Environment> environment)
-    : Reactor(std::move(environment)) {
-        
-        emitImageHandle = 
+        : Reactor(std::move(environment)), emitImageHandle() {
+
+        emitImageHandle =
         on<Every<30, Per<std::chrono::seconds>>, With<CameraParameters>, Single>().then("Simulated Images (VCamera)",
         [this](const CameraParameters& cam){
 

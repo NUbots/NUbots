@@ -130,7 +130,18 @@ namespace support {
     }
 
     SoccerSimulator::SoccerSimulator(std::unique_ptr<NUClear::Environment> environment)
-        : Reactor(std::move(environment)) {
+        : Reactor(std::move(environment))
+        , moduleStartupTime()
+        , kick_cfg()
+        , cfg_()
+        , goalPosts()
+        , world()
+        , kickQueue()
+        , oldRobotPose()
+        , oldBallPose()
+        , PLAYER_ID(0)
+        , lastNow() {
+
 
         on<Trigger<FieldDescription>>().then("FieldDescription Update", [this] (const FieldDescription& desc) {
             auto fdptr = std::make_shared<const FieldDescription>(desc);

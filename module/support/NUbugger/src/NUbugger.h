@@ -43,7 +43,10 @@ namespace module {
             template <typename T>
             struct NUsightMessage {
 
-                NUsightMessage() {};
+                NUsightMessage()
+                : proto()
+                , filterid()
+                , timestamp() {}
 
                 NUsightMessage(const T& proto
                                , uint8_t filterid

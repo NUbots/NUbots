@@ -45,7 +45,11 @@ namespace module {
             Getup::Getup(std::unique_ptr<NUClear::Environment> environment)
                 : Reactor(std::move(environment))
                 , id(size_t(this) * size_t(this) - size_t(this))
-                , gettingUp(false) {
+                , gettingUp(false)
+                , fallenCheck()
+                , FALLEN_ANGLE(0.0f)
+                , GETUP_PRIORITY(0.0f)
+                , EXECUTION_PRIORITY(0.0f) {
 
                 //do a little configurating
                 on<Configuration>("Getup.yaml").then([this] (const Configuration& file){

@@ -43,7 +43,7 @@ namespace module {
         using message::vision::ObjectClass;
         using message::vision::ClassifiedImage;
         using message::vision::Colour;
-        using message::support::Configuration; 
+        using message::support::Configuration;
         using message::support::SaveConfiguration;
         using utility::support::Expression;
 
@@ -69,7 +69,11 @@ namespace module {
             }
         }
 
-        LUTClassifier::LUTClassifier(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)), quex(new QuexClassifier) {
+        LUTClassifier::LUTClassifier(std::unique_ptr<NUClear::Environment> environment)
+            : Reactor(std::move(environment))
+            , quex(new QuexClassifier)
+            , greenCentroid(arma::fill::zeros)
+            , LUT_PATH("") {
 
             on<Configuration>("LookUpTable.yaml").then([this] (const Configuration& config) {
 
@@ -197,11 +201,5 @@ namespace module {
             });
 
         }
-
-        LUTClassifier::~LUTClassifier() {
-            // TODO work out how to fix pimpl and fix it damnit!!
-            delete quex;
-        }
-
     }  // vision
 }  // modules

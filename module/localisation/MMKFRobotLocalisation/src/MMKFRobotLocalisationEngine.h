@@ -37,8 +37,8 @@ namespace localisation {
     class MMKFRobotLocalisationEngine {
         public:
 
-        MMKFRobotLocalisationEngine() : cfg_({true, true, false, true}) {
-            last_time_update_time_ = NUClear::clock::now();
+        MMKFRobotLocalisationEngine()
+            : robot_models_(), field_description_(), cfg_({true, true, false, true}), goalpost_lfos_(), last_time_update_time_(NUClear::clock::now()) {
         }
 
         void TimeUpdate(NUClear::clock::time_point current_time,
@@ -77,14 +77,27 @@ namespace localisation {
         std::shared_ptr<message::support::FieldDescription> field_description_;
 
     private:
-        struct {
+        struct Config {
+            Config() : angle_between_goals_observation_enabled(false), goal_pair_observation_enabled(false),
+                       all_goals_are_own(false), emit_robot_fieldobjects(false) {}
+            Config(bool angle, bool goal, bool own, bool emit)
+                : angle_between_goals_observation_enabled(angle), goal_pair_observation_enabled(goal),
+                  all_goals_are_own(own), emit_robot_fieldobjects(emit) {}
+
             bool angle_between_goals_observation_enabled;
             bool goal_pair_observation_enabled;
             bool all_goals_are_own;
             bool emit_robot_fieldobjects;
         } cfg_;
 
-        struct {
+        struct GoalPostLFOs {
+            GoalPostLFOs() : own_l(), own_r(), opp_l(), opp_r() {}
+            GoalPostLFOs(const utility::localisation::LocalisationFieldObject& ownLeft,
+                         const utility::localisation::LocalisationFieldObject& ownRight,
+                         const utility::localisation::LocalisationFieldObject& oppLeft,
+                         const utility::localisation::LocalisationFieldObject& oppRight)
+                : own_l(ownLeft), own_r(ownRight), opp_l(oppLeft), opp_r(oppRight) {}
+
             utility::localisation::LocalisationFieldObject own_l;
             utility::localisation::LocalisationFieldObject own_r;
             utility::localisation::LocalisationFieldObject opp_l;

@@ -38,6 +38,7 @@ namespace message {
             std::string path;
             YAML::Node config;
 
+            Configuration() : path(""), config() {};
             Configuration(const std::string& path, YAML::Node config) : path(path), config(config) {};
 
             YAML::Node operator [] (const std::string& key) {
@@ -66,6 +67,9 @@ namespace message {
         };
 
         struct SaveConfiguration {
+            SaveConfiguration() : path(""), config() {};
+            SaveConfiguration(const std::string& path, YAML::Node config) : path(path), config(config) {};
+
             std::string path;
             YAML::Node config;
         };

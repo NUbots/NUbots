@@ -27,6 +27,7 @@ namespace message {
 namespace research {
 
 struct AutoClassifierPixels {
+    AutoClassifierPixels() : pixels(), classification() {}
     std::vector<input::Image::Pixel> pixels;
     vision::Colour classification;
 };

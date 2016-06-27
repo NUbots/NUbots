@@ -47,6 +47,7 @@ namespace darwin {
         static constexpr size_t UPDATE_FREQUENCY = 90;
         void addNoise(std::unique_ptr<message::platform::darwin::DarwinSensors>& sensors);
         struct NoiseConfig{
+            NoiseConfig() : accelerometer(), gyroscope() {}
             struct Vec3Noise {
                 float x = 0.001;
                 float y = 0.001;

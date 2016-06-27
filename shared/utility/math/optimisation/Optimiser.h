@@ -45,6 +45,7 @@ namespace utility {
                 virtual bool validSample(...) = 0;
                 virtual void reset() = 0;
                 virtual void reset(const OptimiserEstimate& est) = 0;
+                virtual ~Optimiser() = default;
             };
 
             /**
@@ -114,7 +115,7 @@ namespace utility {
                     sampler.clear();
                     estimator.clear();
                 }
-                
+
                 virtual void reset(const OptimiserEstimate& est) {
                     currentValues = est;
                     sampler.clear();

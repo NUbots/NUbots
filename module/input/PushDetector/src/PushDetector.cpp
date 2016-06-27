@@ -36,7 +36,7 @@ namespace input {
     using utility::nubugger::graph;
 
     PushDetector::PushDetector(std::unique_ptr<NUClear::Environment> environment)
-    : Reactor(std::move(environment)) {
+    : Reactor(std::move(environment)), loadFilters(), lastTimeUpdateTime() {
 
         on<Configuration>("PushDetector.yaml").then([this] (const Configuration& /*config*/) {
             // Use configuration here from file PushDetector.yaml

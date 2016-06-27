@@ -35,7 +35,24 @@ namespace message {
 
 
         struct Sensors {
+            Sensors() : timestamp(), voltage(0.0f), battery(0.0f), accelerometer(arma::fill::zeros),
+                        gyroscope(arma::fill::zeros), world(), servos(), buttons(), leds(), fsrs(),
+                        centreOfPressure(arma::fill::zeros), robotToIMU(arma::fill::zeros), leftFootDown(false),
+                        rightFootDown(false), forwardKinematics(), bodyCentreHeight(0.0f),
+                        centreOfMass(arma::fill::zeros), orientationBodyToGround(), orientationCamToGround(),
+                        kinematicsBodyToGround(), kinematicsCamToGround() {}
+
             struct Servo {
+                Servo() : errorFlags(0), id(), enabled(false), pGain(0.0f), iGain(0.0f), dGain(0.0f), goalPosition(0.0f),
+                          goalVelocity(0.0f), presentPosition(0.0f), presentVelocity(0.0f), load(0.0f), voltage(0.0f),
+                          temperature(0.0f) {}
+                Servo(uint16_t errorFlags, const ServoID& id, bool enabled, float pGain, float iGain, float dGain,
+                      float goalPosition, float goalVelocity, float presentPosition, float presentVelocity, float load,
+                      float voltage, float temperature)
+                    : errorFlags(errorFlags), id(id), enabled(enabled), pGain(pGain), iGain(iGain), dGain(dGain)
+                    , goalPosition(goalPosition), goalVelocity(goalVelocity), presentPosition(presentPosition)
+                    , presentVelocity(presentVelocity), load(load), voltage(voltage), temperature(temperature) {}
+
                 uint16_t errorFlags;
 
                 ServoID id;
@@ -58,16 +75,22 @@ namespace message {
             };
 
             struct Button {
+                Button() : id(0), value(false) {}
+                Button(uint id, bool value) : id(id), value(value) {}
                 uint id;
                 bool value;
             };
 
             struct LED {
+                LED() : id(0), colour(0) {}
+                LED(uint id, uint32_t colour) : id(id), colour(colour) {}
                 uint id;
                 uint32_t colour;
             };
 
             struct FSR {
+                FSR() : centre(arma::fill::zeros), values() {}
+                FSR(const arma::vec2& centre, const std::vector<double>& values) : centre(centre), values(values) {}
                 arma::vec2 centre;
                 std::vector<double> values;
             };

@@ -27,17 +27,24 @@ namespace message {
         struct MotionCapture {
 
             struct Marker {
+                Marker() : id(0), position(arma::fill::zeros), size(0.0f) {}
+                Marker(uint32_t id, const arma::fvec3& pos, float size) : id(id), position(pos), size(size) {}
                 uint32_t id;
                 arma::fvec3 position;
                 float size;
             };
 
             struct MarkerSet {
+                MarkerSet() : name(""), markers() {}
+                MarkerSet(const std::string& name, const std::vector<Marker>& markers) : name(name), markers(markers) {}
                 std::string name;
                 std::vector<Marker> markers;
             };
 
             struct RigidBody {
+                RigidBody()
+                    : id(0), position(arma::fill::zeros), rotation(arma::fill::zeros), markers(), error(0.0f),
+                      trackingValid(false), name(""), offset(arma::fill::zeros), parent(nullptr), children() {}
                 uint32_t id;
                 arma::fvec3 position;
                 arma::fvec4 rotation;
@@ -48,11 +55,14 @@ namespace message {
                 // Information added by the model
                 std::string name;
                 arma::fvec3 offset;
-                RigidBody* parent;
+                std::shared_ptr<RigidBody> parent;
                 std::vector<RigidBody*> children;
             };
 
             struct Skeleton {
+                Skeleton() : id(0), bones(), name("") {}
+                Skeleton(uint32_t id, const std::vector<RigidBody>& bones, const std::string& name)
+                    : id(id), bones(bones), name(name) {}
                 uint32_t id;
                 std::vector<RigidBody> bones;
 
@@ -61,15 +71,25 @@ namespace message {
             };
 
             struct LabeledMarker : public Marker {
+                LabeledMarker() : occluded(false), pointCloudSolved(false), modelSolved(false) {}
+                LabeledMarker(bool occluded, bool pointCloudSolved, bool modelSolved)
+                    : occluded(occluded), pointCloudSolved(pointCloudSolved), modelSolved(modelSolved) {}
                 bool occluded;
                 bool pointCloudSolved;
                 bool modelSolved;
             };
 
             struct ForcePlate {
+                ForcePlate() : id(0), channels() {}
+                ForcePlate(uint32_t id, const std::vector<std::vector<float>>& channels)
+                    : id(id), channels(channels) {}
                 uint32_t id;
                 std::vector<std::vector<float>> channels;
             };
+
+            MotionCapture()
+                : frameNumber(0), markerSets(), markers(), rigidBodies(), skeletons(), labeledMarkers(), forcePlates(),
+                  latency(0.0f), timecode(0), timecodeSub(0), timestamp(0.0), recording(false), trackedModelsChanged(false) {}
 
             uint32_t frameNumber;
             std::vector<MarkerSet> markerSets;

@@ -38,7 +38,7 @@ namespace module {
 
         using message::input::Image;
 
-        V4L2Camera::V4L2Camera() : fd(-1), width(0), height(0), deviceID(""), streaming(false) {
+        V4L2Camera::V4L2Camera() : buffers(), fd(-1), width(0), height(0), settings(), deviceID(""), format(""), streaming(false) {
         }
 
         Image V4L2Camera::getImage() {

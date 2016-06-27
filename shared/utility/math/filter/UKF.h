@@ -123,7 +123,19 @@ namespace utility {
                     StateMat initialCovariance = arma::eye(Model::size, Model::size) * 0.1,
                     double alpha = 1e-1,
                     double kappa = 0.f,
-                    double beta = 2.f) {
+                    double beta = 2.f)
+                        : model()
+                        , mean(arma::fill::zeros)
+                        , covariance(arma::fill::zeros)
+                        , sigmaMean(arma::fill::zeros)
+                        , sigmaPoints(arma::fill::zeros)
+                        , centredSigmaPoints(arma::fill::zeros)
+                        , d(arma::fill::zeros)
+                        , covarianceUpdate(arma::fill::zeros)
+                        , defaultCovarianceUpdate(arma::fill::zeros)
+                        , meanWeights(arma::fill::zeros)
+                        , covarianceWeights(arma::fill::zeros)
+                        , covarianceSigmaWeights(0.0) {
 
                     reset(initialMean, initialCovariance, alpha, kappa, beta);
                 }

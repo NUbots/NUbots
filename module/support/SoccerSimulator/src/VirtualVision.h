@@ -43,6 +43,10 @@ namespace support {
     using utility::math::geometry::Quad;
 
     struct VisibleMeasurement {
+        VisibleMeasurement() : measurements(), screenAngular(arma::fill::zeros) {}
+        VisibleMeasurement(const std::vector<message::vision::VisionObject::Measurement>& measures, const arma::vec2& screen)
+            : measurements(measures), screenAngular(screen) {}
+
 		std::vector<message::vision::VisionObject::Measurement> measurements;
     	arma::vec2 screenAngular;
     };
@@ -76,12 +80,8 @@ namespace support {
 
 	class VirtualGoalPost {
 	public:
-		VirtualGoalPost(arma::vec3 position_, float height_, Goal::Side side_, Goal::Team team_){
-			position = position_;
-			height = height_;
-			side = side_;
-			team = team_;
-		}
+		VirtualGoalPost(arma::vec3 position_, float height_, Goal::Side side_, Goal::Team team_)
+            : position(position_), height(height_), side(side_), team(team_) {}
 		~VirtualGoalPost(){}
 
 		arma::vec3 position = {0, 0, 0};
@@ -113,15 +113,9 @@ namespace support {
 
 	class VirtualBall {
 	public:
-		VirtualBall() {
-			position = arma::vec3({0,0,0});
-			diameter = 0.1;
-		}
+		VirtualBall() : position(arma::fill::zeros), velocity(arma::fill::zeros), diameter(0.1f) { }
 
-		VirtualBall(arma::vec2 position_, float diameter_) {
-			position = position_;
-			diameter = diameter_;
-		}
+		VirtualBall(arma::vec2 position_, float diameter_) : position(position_), velocity(arma::fill::zeros), diameter(diameter_) { }
 		~VirtualBall(){}
 
 		// utility::math::matrix::Transform2D ballPose;

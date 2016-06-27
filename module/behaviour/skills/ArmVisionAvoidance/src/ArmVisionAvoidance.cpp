@@ -42,8 +42,13 @@ namespace skills {
     using utility::support::Expression;
 
     ArmVisionAvoidance::ArmVisionAvoidance(std::unique_ptr<NUClear::Environment> environment)
-    : Reactor(std::move(environment))
-    , subsumptionId(size_t(this) * size_t(this) - size_t(this)) {
+        : Reactor(std::move(environment))
+        , updateHandle()
+        , subsumptionId(size_t(this) * size_t(this) - size_t(this))
+        , headYawLimit{0.0f, 0.0f}
+        , headPitchLimit(0.0f)
+        , gain(0.0f)
+        , torque(0.0f) {
 
         on<Configuration>("ArmVisionAvoidance.yaml").then([this] (const Configuration& config) {
             // The limits on how far the head can be turned before the corresponding arm starts to obscure vision.

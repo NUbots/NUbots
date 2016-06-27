@@ -41,7 +41,7 @@ namespace module {
         class LUTClassifier : public NUClear::Reactor {
         private:
             // A pointer to our quex class (since it is generated it is not defined at this point)
-            QuexClassifier* quex;
+            std::shared_ptr<QuexClassifier> quex;
 
             arma::fvec3 greenCentroid;
 
@@ -94,7 +94,6 @@ namespace module {
 
         public:
             explicit LUTClassifier(std::unique_ptr<NUClear::Environment> environment);
-            ~LUTClassifier();
         };
 
     }  // vision

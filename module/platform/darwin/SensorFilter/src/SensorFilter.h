@@ -50,37 +50,54 @@ namespace module {
 
                 utility::math::filter::UKF<MotionModel> motionFilter;
 
-                struct {
-                    struct {
+                struct Config {
+                    Config() : battery(), motionFilter(), buttons() {}
+
+                    struct Battery {
+                        Battery() : chargedVoltage(0.0f), flatVoltage(0.0f) {}
                         float chargedVoltage;
                         float flatVoltage;
                     } battery;
 
-                    struct {
+                    struct MotionFilter {
+                        MotionFilter() : velocityDecay(arma::fill::zeros), noise(), initial() {}
+
                         arma::vec3 velocityDecay;
-                        struct  {
-                            struct {
+
+                        struct Noise {
+                            Noise() : measurement(), process() {}
+                            struct Measurement {
+                                Measurement() : accelerometer(arma::fill::zeros), gyroscope(arma::fill::zeros),
+                                                footUpWithZ(arma::fill::zeros), flatFootOdometry(arma::fill::zeros),
+                                                flatFootOrientation(arma::fill::zeros) {}
                                 arma::mat33 accelerometer;
                                 arma::mat33 gyroscope;
                                 arma::mat44 footUpWithZ;
                                 arma::mat33 flatFootOdometry;
                                 arma::mat44 flatFootOrientation;
                             } measurement;
-                            struct {
+                            struct Process {
+                                Process() : position(arma::fill::zeros), velocity(arma::fill::zeros),
+                                            rotation(arma::fill::zeros), rotationalVelocity(arma::fill::zeros) {}
                                 arma::vec3 position;
                                 arma::vec3 velocity;
                                 arma::vec4 rotation;
                                 arma::vec3 rotationalVelocity;
                             } process;
                         } noise;
-                        struct {
-                            struct {
+                        struct Initial {
+                            Initial() : mean(), covariance() {}
+                            struct Mean {
+                                Mean() : position(arma::fill::zeros), velocity(arma::fill::zeros),
+                                         rotation(arma::fill::zeros), rotationalVelocity(arma::fill::zeros) {}
                                 arma::vec3 position;
                                 arma::vec3 velocity;
                                 arma::vec4 rotation;
                                 arma::vec3 rotationalVelocity;
                             } mean;
-                            struct {
+                            struct Covariance {
+                                Covariance() : position(arma::fill::zeros), velocity(arma::fill::zeros),
+                                               rotation(arma::fill::zeros), rotationalVelocity(arma::fill::zeros) {}
                                 arma::vec3 position;
                                 arma::vec3 velocity;
                                 arma::vec4 rotation;
@@ -89,7 +106,8 @@ namespace module {
                         } initial;
                     } motionFilter;
 
-                    struct {
+                    struct Button {
+                        Button() : debounceThreshold(0) {}
                         int debounceThreshold;
                     } buttons;
                 } config;
@@ -106,13 +124,13 @@ namespace module {
 
                 //World to foot in world rotation when the foot landed
                 std::array<arma::vec3, 2> footlanding_rFWw;
-                
+
                 //Foot to world in foot-flat rotation when the foot landed
                 std::array<utility::math::matrix::Rotation3D, 2> footlanding_Rfw;
-                
+
                 //World to foot in foot-flat rotation when the foot landed
                 std::array<utility::math::matrix::Rotation3D, 2> footlanding_Rwf;
-                
+
             };
         }
     }

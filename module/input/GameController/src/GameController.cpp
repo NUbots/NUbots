@@ -39,8 +39,13 @@ namespace input {
     using message::platform::darwin::ButtonMiddleDown;
 
     GameController::GameController(std::unique_ptr<NUClear::Environment> environment)
-    : Reactor(std::move(environment))
-    , port(0) {
+        : Reactor(std::move(environment))
+        , port(0)
+        , TEAM_ID(0)
+        , PLAYER_ID(0)
+        , listenHandle()
+        , packet()
+        , mode() {
 
         // Configure
         on<Configuration, Trigger<GlobalConfig>>("GameController.yaml").then("GameController Configuration", [this] (const Configuration& config, const GlobalConfig& globalConfig) {

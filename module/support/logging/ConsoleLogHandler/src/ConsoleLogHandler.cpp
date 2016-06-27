@@ -29,7 +29,8 @@ namespace module {
             using NUClear::message::ReactionStatistics;
             using utility::strutil::Colour;
 
-            ConsoleLogHandler::ConsoleLogHandler(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
+            ConsoleLogHandler::ConsoleLogHandler(std::unique_ptr<NUClear::Environment> environment)
+                : Reactor(std::move(environment)), mutex() {
                 on<Trigger<ReactionStatistics>>().then([this](const ReactionStatistics & stats) {
                     if (stats.exception) {
                         try {

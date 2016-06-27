@@ -32,7 +32,7 @@ namespace ransac {
     struct RansacResult {
     public:
 
-        RansacResult() {
+        RansacResult() : model(), first(), last() {
         }
 
         RansacResult(const Model& model, const Iterator& first, const Iterator& last)

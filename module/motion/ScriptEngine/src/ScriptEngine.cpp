@@ -32,7 +32,8 @@ namespace module {
         using message::motion::ExecuteScriptByName;
         using message::motion::ExecuteScript;
 
-        ScriptEngine::ScriptEngine(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
+        ScriptEngine::ScriptEngine(std::unique_ptr<NUClear::Environment> environment)
+            : Reactor(std::move(environment)), scripts() {
 
             on<Configuration>("scripts/").then([this](const Configuration& script) {
 

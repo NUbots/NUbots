@@ -43,7 +43,14 @@ namespace module {
             using message::behaviour::ActionPriorites;
             using message::input::LimbID;
 
-            FallingRelax::FallingRelax(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)), id(size_t(this) * size_t(this) - size_t(this)), falling(false) {
+            FallingRelax::FallingRelax(std::unique_ptr<NUClear::Environment> environment)
+                : Reactor(std::move(environment))
+                , id(size_t(this) * size_t(this) - size_t(this))
+                , falling(false)
+                , FALLING_ANGLE(0.0f)
+                , FALLING_ACCELERATION(0.0f)
+                , RECOVERY_ACCELERATION()
+                , PRIORITY(0.0f) {
 
                 //do a little configurating
                 on<Configuration>("FallingRelax.yaml").then([this] (const Configuration& config){

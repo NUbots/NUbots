@@ -23,14 +23,16 @@ namespace utility {
 namespace math {
 namespace geometry {
 
-    Circle::Circle() {
+    Circle::Circle() : radius(0.0), radiusSq(0.0), centre(arma::fill::zeros) {
     }
 
 
-    Circle::Circle(const double& radius, const arma::vec2& centre) : radius(radius), centre(centre) {
+    Circle::Circle(const double& radius, const arma::vec2& centre)
+            : radius(radius), radiusSq(radius * radius), centre(centre) {
     }
 
-    Circle::Circle(const arma::vec2& a, const arma::vec2& b, const arma::vec2& c, const double tolerance) {
+    Circle::Circle(const arma::vec2& a, const arma::vec2& b, const arma::vec2& c, const double tolerance)
+            : radius(0.0), radiusSq(0.0), centre(arma::fill::zeros) {
         setFromPoints(std::forward<const arma::vec2&>(a), std::forward<const arma::vec2&>(b), std::forward<const arma::vec2&>(c),tolerance);
     }
 

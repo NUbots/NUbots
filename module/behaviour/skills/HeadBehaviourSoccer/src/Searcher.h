@@ -52,10 +52,14 @@ namespace module {
 				bool forward = true;
 
             public:
-	           	Searcher():current(0), new_goal(false), switch_period(1000.0f){
-					lastSwitchTime = NUClear::clock::now();
+	           	Searcher()
+                    : points(std::vector<T>(1, arma::zeros<arma::vec>(2)))
+                    , current(0)
+                    , refPoint()
+                    , new_goal(false)
+                    , lastSwitchTime(NUClear::clock::now())
+                    , switch_period(1000.0f) {
 					//Init points to something sane
-					points = std::vector<T>(1,arma::vec({0,0}));
 				}
 
 				~Searcher(){}

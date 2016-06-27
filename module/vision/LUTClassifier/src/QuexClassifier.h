@@ -36,7 +36,7 @@ namespace module {
         class QuexClassifier {
         private:
             static constexpr size_t BUFFER_SIZE = 2000;
-            uint8_t buffer[BUFFER_SIZE]; // This should be big enough for now
+            uint8_t buffer[BUFFER_SIZE] = { 0 }; // This should be big enough for now
             quex::Lexer lexer;
             size_t& tknNumber;
 

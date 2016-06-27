@@ -28,9 +28,13 @@ namespace message {
 
         // Sent to NUbugger
         struct FieldObject {
+            FieldObject() : name(""), models() {}
+
             std::string name;
 
             struct Model {
+                Model() : wm_x(0.0), wm_y(0.0), heading(0.0), sd_heading(0.0), sd_x(0.0), sd_y(0.0), sr_xx(0.0), sr_xy(0.0), sr_yy(0.0), lost(false) {}
+
                 double wm_x; //world model x
                 double wm_y; //world model y
                 double heading; //direction
@@ -44,12 +48,11 @@ namespace message {
             };
 
             std::vector<Model> models;
-
         };
 
         class LocalisationObject {
         public:
-            LocalisationObject() {}
+            LocalisationObject() : position(arma::fill::zeros), position_cov(arma::fill::zeros), last_measurement_time() {}
 
             arma::vec2 position;
             arma::mat22 position_cov;
@@ -59,7 +62,7 @@ namespace message {
 
         class Ball : public LocalisationObject {
         public:
-            Ball() : LocalisationObject() {}
+            Ball() : LocalisationObject(), velocity(arma::fill::zeros), world_space(false) {}
             arma::vec2 velocity;
             bool world_space; // Ball will always be in robot space except
                               // when sent from MockRobot.
@@ -67,7 +70,7 @@ namespace message {
 
         class Self : public LocalisationObject {
         public:
-            Self() : LocalisationObject() {}
+            Self() : LocalisationObject(), heading(arma::fill::zeros), velocity(arma::fill::zeros), robot_to_world_rotation(arma::fill::zeros) {}
 
             arma::vec2 heading;     //robot face direction (vector 2)
             arma::vec2 velocity;    //robot velocity (vector 2)

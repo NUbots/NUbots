@@ -296,7 +296,11 @@ namespace research {
     }
 
     LayerAutoClassifier::LayerAutoClassifier(std::unique_ptr<NUClear::Environment> environment)
-        : Reactor(std::move(environment)) {
+        : Reactor(std::move(environment))
+        , maxSurfaceArea()
+        , maxVolume()
+        , volume()
+        , surfaceArea() {
 
         on<Configuration>("LayerAutoClassifier.yaml").then([this](const Configuration& config) {
 

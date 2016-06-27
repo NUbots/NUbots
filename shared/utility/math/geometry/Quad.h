@@ -35,7 +35,8 @@ namespace geometry {
         Quad();
         Quad(const Quad& other);
         Quad(arma::vec2 bottomLeft, arma::vec2 topLeft, arma::vec2 topRight, arma::vec2 bottomRight);
-        Quad(int left, int top, int right, int bottom);
+        Quad(arma::ivec2 bottomLeft, arma::ivec2 topLeft, arma::ivec2 topRight, arma::ivec2 bottomRight);
+        Quad(double left, double top, double right, double bottom);
 
         /**
          * Sets the Quad as a screen aligned rectangle given the specified positions.
@@ -44,7 +45,7 @@ namespace geometry {
          * @param right    The right x pixel value.
          * @param bottom   The bottom y pixel value.
          */
-        void set(int left, int top, int right, int bottom);
+        void set(double left, double top, double right, double bottom);
 
         /**
          * Sets the Quad given the specified corners.

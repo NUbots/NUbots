@@ -64,6 +64,7 @@ namespace motion {
         utility::math::geometry::UnitQuaternion lastErrorQuaternion;
         NUClear::clock::time_point lastBalanceTime;
     public:
+        Balancer() : lastErrorQuaternion(), lastBalanceTime() {}
         void configure(const YAML::Node& config);
         void balance(const message::motion::kinematics::KinematicsModel& hip, utility::math::matrix::Transform3D& footToTorso, const message::input::LimbID& leg, const message::input::Sensors& sensors);
     };

@@ -36,7 +36,13 @@ namespace module {
         // So we don't need a huge long type declaration everywhere...
         using iterators = std::pair<std::vector<std::reference_wrapper<RequestItem>>::iterator, std::vector<std::reference_wrapper<RequestItem>>::iterator>;
 
-        Controller::Controller(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
+        Controller::Controller(std::unique_ptr<NUClear::Environment> environment)
+            : Reactor(std::move(environment))
+            , actions()
+            , limbAccess()
+            , requests()
+            , currentActions()
+            , commandQueues() {
 
             on<Trigger<RegisterAction>, Sync<Controller>, Priority::HIGH>().then("Action Registration", [this] (const RegisterAction& action) {
                 if(action.id == 0) {

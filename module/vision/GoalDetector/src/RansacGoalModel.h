@@ -36,13 +36,15 @@ namespace vision {
         static constexpr size_t REQUIRED_POINTS = 2;
 
         struct GoalSegment {
+            GoalSegment() : left(arma::fill::zeros), right(arma::fill::zeros) {}
+            GoalSegment(const arma::vec2& l, const arma::vec2& r) : left(l), right(r) {}
             arma::vec2 left;
             arma::vec2 right;
         };
 
         using DataPoint = GoalSegment;
 
-        RansacGoalModel() {}
+        RansacGoalModel() : left(), right() {}
 
         bool regenerate(const std::array<DataPoint, REQUIRED_POINTS>& pts);
 
@@ -55,7 +57,7 @@ namespace vision {
             struct LIt {
                 Iterator state;
                 LIt(Iterator state) : state(state) {}
-                LIt operator++() { return ++state; }
+                LIt& operator++() { ++state; return *this; }
                 const arma::vec2& operator*() { return state->left; }
                 bool operator!=(const LIt& other) { return state != other.state; }
             };
@@ -64,7 +66,7 @@ namespace vision {
             struct RIt {
                 Iterator state;
                 RIt(Iterator state) : state(state) {}
-                RIt operator++() { return ++state; }
+                RIt& operator++() { ++state; return *this; }
                 const arma::vec2& operator*() { return state->right; }
                 bool operator!=(const RIt& other) { return state != other.state; }
             };

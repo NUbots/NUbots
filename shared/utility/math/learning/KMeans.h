@@ -26,17 +26,26 @@ namespace learning {
 
 	class KMeans {
 	public:
-		KMeans(){}
+		KMeans() : clusterModel(), config() {}
 		struct KMeansConfig{
+			KMeansConfig()
+				: number_of_clusters(1)
+				, k_means_iterations(1)
+				, em_iterations(0)
+				, variance_floor(1.0f)
+				, print_status(false)
+				, dist_mode("eucl_dist")
+				, seed_mode("static_spread")
+				{}
 			//NOTE: values here are safe defaults; the values you will want depend on the problem domain
-			int number_of_clusters = 1; // set the number of Gaussians
-			int k_means_iterations = 1; // the number of iterations of the k-means algorithm
-			int em_iterations = 0; // the number of iterations of the expectation maximisation algorithm
-			float variance_floor = 1; // the variance floor (smallest allowed value) for the diagonal covariances
-			bool print_status = false; // either true or false; enable or disable printing of progress during the k-means and EM algorithms
+			int number_of_clusters; // set the number of Gaussians
+			int k_means_iterations; // the number of iterations of the k-means algorithm
+			int em_iterations; // the number of iterations of the expectation maximisation algorithm
+			float variance_floor; // the variance floor (smallest allowed value) for the diagonal covariances
+			bool print_status; // either true or false; enable or disable printing of progress during the k-means and EM algorithms
 			//TODO:find the types of these
-			std::string dist_mode = "eucl_dist"; // specifies the distance used during the seeding of initial means and k-means clustering:
-			std::string seed_mode = "static_spread"; // specifies how the initial means are seeded prior to running k-means and/or EM algorithms
+			std::string dist_mode; // specifies the distance used during the seeding of initial means and k-means clustering:
+			std::string seed_mode; // specifies how the initial means are seeded prior to running k-means and/or EM algorithms
 
 			/* Parameters for dist_mode:
 			 * eucl_dist	   	Euclidean distance
