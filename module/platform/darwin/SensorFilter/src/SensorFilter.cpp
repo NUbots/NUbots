@@ -536,7 +536,8 @@ namespace module {
                     // Map from world to torso coordinates
                     sensors->world.fill(0);
                     sensors->world.rotation() = Rotation3D(UnitQuaternion(o.rows(MotionModel::QW, MotionModel::QZ)));
-                    sensors->world.translation() = -(sensors->world.rotation() * o.rows(MotionModel::PX, MotionModel::PZ));
+                    //sensors->world.translation() = -(sensors->world.rotation() * o.rows(MotionModel::PX, MotionModel::PZ));
+                    sensors->world.translation() = (o.rows(MotionModel::PX, MotionModel::PZ));
 
                     sensors->robotToIMU = calculateRobotToIMU(sensors->world.rotation());
 
