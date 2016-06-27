@@ -20,6 +20,7 @@
 #include "ConsoleLogHandler.h"
 
 #include "utility/strutil/ansi.h"
+#include "utility/support/evil/pure_evil.h"
 
 namespace module {
     namespace support {
@@ -30,26 +31,59 @@ namespace module {
             using utility::strutil::Colour;
 
             ConsoleLogHandler::ConsoleLogHandler(std::unique_ptr<NUClear::Environment> environment)
-                : Reactor(std::move(environment)), mutex() {
+             : Reactor(std::move(environment)), mutex() {
                 on<Trigger<ReactionStatistics>>().then([this](const ReactionStatistics & stats) {
                     if (stats.exception) {
+
+                        std::lock_guard<std::mutex> lock(mutex);
+
+                        // Get our reactor name
+                        std::string reactor = stats.identifier[1];
+
+                        // Strip to the last semicolon if we have one
+                        size_t lastC = reactor.find_last_of(':');
+                        reactor = lastC == std::string::npos ? reactor : reactor.substr(lastC + 1);
+
+#ifndef NDEBUG // We have a cold hearted monstrosity that got built!
+
+                        // Print our exception detals
+                        std::cout << reactor << " "
+                                  << (stats.identifier[0].empty() ? "" : "- " + stats.identifier[0] + " ")
+                                  << Colour::brightred << "Exception:" << " "
+                                  << Colour::brightred << utility::support::evil::exception_name
+                                  << std::endl;
+
+                        // Print our stack trace
+                        for (auto& s : utility::support::evil::stack) {
+                            std::cout << "\t" << Colour::brightmagenta << s.file
+                                      << ":" << Colour::brightmagenta << s.lineno
+                                      << " " << s.function
+                                      << std::endl;
+                        }
+#else
                         try {
                             std::rethrow_exception(stats.exception);
                         }
                         catch (const std::exception& ex) {
 
+                            std::string exceptionName = NUClear::util::demangle(typeid(ex).name());
 
-                            for (auto stat : stats.identifier) {
-                                NUClear::log<NUClear::ERROR>("Identifier:", stat);
-                            }
-                            NUClear::log<NUClear::ERROR>("Unhandled Exception:"
-                                , NUClear::util::demangle(typeid(ex).name()),
-                                ex.what());
+                            std::cout << reactor << " "
+                                      << (stats.identifier[0].empty() ? "" : "- " + stats.identifier[0] + " ")
+                                      << Colour::brightred << "Exception:" << " "
+                                      << Colour::brightred << exceptionName << " "
+                                      << ex.what()
+                                      << std::endl;
                         }
                         // We don't actually want to crash
                         catch (...) {
-                            NUClear::log<NUClear::ERROR>("Unhandled Exception of unknown type");
+
+                            std::cout << reactor << " "
+                                      << (stats.identifier[0].empty() ? "" : "- " + stats.identifier[0] + " ")
+                                      << Colour::brightred << "Exception of unkown type"
+                                      << std::endl;
                         }
+#endif
                     }
                 });
 
@@ -71,7 +105,7 @@ namespace module {
                         reactor = lastC == std::string::npos ? reactor : reactor.substr(lastC + 1);
 
                         // This is our source
-                        source = reactor + " ";
+                        source = reactor + " " + (message.task->identifier[0].empty() ? "" : "- " + message.task->identifier[0] + " ");
                     }
 
                     // Output the level
@@ -89,10 +123,10 @@ namespace module {
                             std::cout << source << Colour::yellow << "WARN: ";
                             break;
                         case NUClear::ERROR:
-                            std::cout << source << Colour::red << "ERROR: ";
+                            std::cout << source << Colour::brightred << "ERROR: ";
                             break;
                         case NUClear::FATAL:
-                            std::cout << source << Colour::red << "FATAL: ";
+                            std::cout << source << Colour::brightred << "FATAL: ";
                             break;
                     }
 

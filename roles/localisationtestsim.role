@@ -32,7 +32,7 @@ NUCLEAR_ROLE(
     behaviour::skills::DirectWalkController
     behaviour::skills::HeadBehaviourSoccer
 
-    behaviour::strategy::KeyboardWalk
+    #behaviour::strategy::KeyboardWalk
 
     #Motion
     motion::ScriptEngine

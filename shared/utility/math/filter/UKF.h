@@ -234,7 +234,7 @@ namespace utility {
                     arma::mat innovationVariance = predictedCovariance + measurementVariance;
                     arma::mat scalarlikelihoodExponent = ((innovation.t() * innovationVariance.i()) * innovation);
 
-                    double expTerm = -0.5 * scalarlikelihoodExponent(0, 0);
+                    double expTerm = -0.5 * arma::as_scalar(scalarlikelihoodExponent);
                     double normalisationFactor = pow(2 * M_PI, measurementVariance.n_rows) * arma::det(innovationVariance);
                     double fract = 1 / sqrt(normalisationFactor);
                     const float outlierProbability = 0.05;
