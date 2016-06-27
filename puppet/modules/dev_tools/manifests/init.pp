@@ -85,6 +85,7 @@ class dev_tools {
   package { 'pyparsing': ensure => installed, provider => 'pip' }
   package { 'pydotplus': ensure => installed, provider => 'pip' }
   package { 'pygments': ensure => installed, provider => 'pip' }
+  package { 'termcolor': ensure => installed, provider => 'pip' }
   # python::pip { 'pybfd': ensure => latest }#, url => 'https://github.com/Groundworkstech/pybfd/archive/master.tar.gz' }
 
   # SSH KEYS FOR THE VM
