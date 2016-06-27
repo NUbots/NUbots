@@ -41,7 +41,7 @@ namespace utility {
 				int id;
 			};
 		private:
-			int numberOfFalseFeaturesDetected = 1;
+			int numberOfFalseFeaturesDetected;
 			int MAX_DISTINCT_FALSE_FEATURES;
 			std::vector<MockFeature> mockFeatures;
 			double uniformSample(arma::vec/*2*/ range);
@@ -50,6 +50,12 @@ namespace utility {
 			std::vector<MockFeature> setParameters(const YAML::Node& config);
 			class ExtractedFeature {
 			public:
+				ExtractedFeature()
+					: screenAngular()
+					, screenPosition()
+					, MISCLASSIFIED_PROB(0.0)
+					, featureID(0)
+					, numberOfTimesUpdated(0) {}
 				arma::vec screenAngular;	//Compulsory
 				arma::vec screenPosition;
 				double MISCLASSIFIED_PROB;

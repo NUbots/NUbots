@@ -43,7 +43,11 @@ namespace behaviour {
 
 
     NUPresenceServer::NUPresenceServer(std::unique_ptr<NUClear::Environment> environment)
-    : Reactor(std::move(environment)) {
+        : Reactor(std::move(environment))
+        , robot_to_head(arma::fill::zeros)
+        , robot_to_head_scale(0.0f)
+        , reliable(false)
+        , camera_to_robot(arma::fill::zeros) {
 
         on<Configuration>("NUPresenceServer.yaml").then([this] (const Configuration& config) {
             reliable = config["reliable"];
@@ -54,7 +58,7 @@ namespace behaviour {
             float yaw = config["robot_to_head"]["yaw"].as<Expression>();
             float pitch = config["robot_to_head"]["pitch"].as<Expression>();
             arma::vec3 pos = config["robot_to_head"]["pos"].as<arma::vec>();
-            
+
             robot_to_head_scale = config["robot_to_head"]["scale"].as<Expression>();
             robot_to_head = Transform3D::createTranslation(pos) * Transform3D::createRotationZ(yaw) * Transform3D::createRotationY(pitch);
 

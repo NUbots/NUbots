@@ -68,7 +68,19 @@ namespace motion {
 
     IKKick::IKKick(std::unique_ptr<NUClear::Environment> environment)
         : Reactor(std::move(environment))
-        , subsumptionId(size_t(this) * size_t(this) - size_t(this)) {
+        , supportFoot()
+        , ballPosition(arma::fill::zeros)
+        , goalPosition(arma::fill::zeros)
+        , subsumptionId(size_t(this) * size_t(this) - size_t(this))
+        , leftFootIsSupport(false)
+        , foot_separation(0.0f)
+        , KICK_PRIORITY(0.0f)
+        , EXECUTION_PRIORITY(0.0f)
+        , feedback_active(false)
+        , feedbackBalancer()
+        , balancer()
+        , kicker()
+        , updater() {
 
         on<Configuration>("IKKick.yaml").then([this] (const Configuration& config) {
             balancer.configure(config);

@@ -35,10 +35,17 @@ namespace message {
         struct CancelFixedWalk{};
         class FixedWalkCommand{
         public:
-            FixedWalkCommand(){}
+            FixedWalkCommand() : segments() {}
 
             struct WalkSegment
             {
+                WalkSegment()
+                    : direction(arma::fill::zeros)
+                    , curvePeriod(0.0)
+                    , normalisedVelocity(0.0)
+                    , normalisedAngularVelocity(0.0)
+                    , duration() {}
+
                 arma::vec2 direction;
                 double curvePeriod;
 

@@ -45,18 +45,23 @@ namespace motion {
 
         bool gyro_compensation = true;
 
-        struct {
+        struct EulerLimits {
             struct Range {
                 float max = 0;
                 float min = 0;
             };
+
+            EulerLimits() : roll(), pitch(), yaw() {}
+            EulerLimits(const Range& roll, const Range& pitch, const Range& yaw)
+                : roll(roll), pitch(pitch), yaw(yaw) {}
+
             Range roll;
             Range pitch;
             Range yaw;
         } eulerLimits;
-        
+
         float distance_limit = 0.1;
-        
+
         //State:
         utility::math::matrix::Transform3D goalCamPose;
         utility::math::matrix::Transform3D currentCamPose;

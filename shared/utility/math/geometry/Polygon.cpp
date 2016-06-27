@@ -24,7 +24,7 @@ namespace utility {
 namespace math {
 namespace geometry {
 
-    Polygon::Polygon(const std::vector<arma::vec2>& vertices){
+    Polygon::Polygon(const std::vector<arma::vec2>& vertices) : edges() {
 	set(vertices);
     }
 

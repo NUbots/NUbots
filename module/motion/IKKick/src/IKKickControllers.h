@@ -50,9 +50,9 @@ namespace motion{
 		public:
 			utility::math::matrix::Transform3D pose;
 			float duration;
-			SixDOFFrame():pose(){}
+			SixDOFFrame() : pose(arma::fill::zeros), duration(0.0f) {}
 			SixDOFFrame(utility::math::matrix::Transform3D pose_, float duration_) : pose(pose_), duration(duration_){}
-			SixDOFFrame(const YAML::Node& config){
+			SixDOFFrame(const YAML::Node& config) : SixDOFFrame() {
 				duration = config["duration"].as<float>();
 				arma::vec3 pos = config["pos"].as<arma::vec>();
 				arma::vec3 orientation = (180.0 / M_PI ) * config["orientation"].as<arma::vec>();
@@ -70,10 +70,8 @@ namespace motion{
 		public:
 			std::vector<SixDOFFrame> frames;
 			int i = 0;
-			Animator(){frames.push_back(SixDOFFrame{utility::math::matrix::Transform3D(),0});}
-			Animator(std::vector<SixDOFFrame> frames_){
-				frames = frames_;
-			}
+			Animator() : frames() {frames.push_back(SixDOFFrame{utility::math::matrix::Transform3D(),0});}
+			Animator(const std::vector<SixDOFFrame>& frames_) : frames(frames_) { }
 			int clampPrev(int k) const {return std::max(std::min(k,int(frames.size()-2)),0);}
 			int clampCurrent(int k) const {return std::max(std::min(k,int(frames.size()-1)),0);}
 			void next(){i = clampPrev(i+1);}
@@ -104,6 +102,15 @@ namespace motion{
 
 				NUClear::clock::time_point motionStartTime;
 			public:
+				SixDOFFootController()
+					: supportFoot()
+					, forward_duration(0.0f)
+					, return_duration(0.0f)
+					, anim()
+					, ballPosition(arma::fill::zeros)
+					, goalPosition(arma::fill::zeros)
+					, motionStartTime() {}
+				virtual ~SixDOFFootController() = default;
 
 				virtual void computeStartMotion(const message::motion::kinematics::KinematicsModel& kinematicsModel, const message::input::Sensors& sensors) = 0;
 				virtual void computeStopMotion(const message::input::Sensors& sensors) = 0;
@@ -215,6 +222,18 @@ namespace motion{
 			float return_before_place_duration;
 			float lift_before_windup_duration;
 		public:
+			Kicker()
+				: lift_foot()
+				, kick()
+				, place_foot()
+				, kick_velocity(0.0f)
+				, follow_through(0.0f)
+				, kick_height(0.0f)
+				, wind_up(0.0f)
+				, foot_separation_margin(0.0f)
+				, return_before_place_duration(0.0f)
+				, lift_before_windup_duration(0.0f) {}
+
 			virtual void configure(const message::support::Configuration& config);
 			virtual void computeStartMotion(const message::motion::kinematics::KinematicsModel& kinematicsModel, const message::input::Sensors& sensors);
 			virtual void computeStopMotion(const message::input::Sensors& sensors);

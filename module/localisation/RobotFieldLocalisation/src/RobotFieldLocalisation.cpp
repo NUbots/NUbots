@@ -41,7 +41,8 @@ namespace localisation {
     using utility::nubugger::graph;
 
     RobotFieldLocalisation::RobotFieldLocalisation(std::unique_ptr<NUClear::Environment> environment)
-    : Reactor(std::move(environment)) {
+    : Reactor(std::move(environment))
+    , filter() {
 
         on<Configuration>("RobotFieldLocalisation.yaml").then([this] (const Configuration& config) {
             // Use configuration here from file RobotFieldLocalisation.yaml
@@ -49,7 +50,7 @@ namespace localisation {
             if (filter.filters.empty()) {
                 filter.filters.push_back(
                         MMUKF<FieldModel>::Filter{
-                            1.0, 
+                            1.0,
                             UKF<FieldModel>(
                                 config["initial_mean"].as<arma::vec3>()
                                 , arma::diagmat(config["initial_covariance"].as<arma::vec3>())
@@ -75,7 +76,7 @@ namespace localisation {
             rFWf[2] = 0.0;
             rFWf.rows(0,1) = filter.get().rows(0,1);
             //XXX: check correctness
-            utility::math::matrix::Transform3D Hwf = utility::math::matrix::Transform3D::createRotationZ(filter.get()[2]) 
+            utility::math::matrix::Transform3D Hwf = utility::math::matrix::Transform3D::createRotationZ(filter.get()[2])
                                                    + utility::math::matrix::Transform3D::createTranslation(rFWf);
             Hwf(3,3) = 1.0;
 

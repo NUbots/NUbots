@@ -58,7 +58,16 @@ namespace support {
     struct UploadLUT {};
 
     NUbugger::NUbugger(std::unique_ptr<NUClear::Environment> environment)
-        : Reactor(std::move(environment)) {
+        : Reactor(std::move(environment))
+        , max_image_duration()
+        , max_classified_image_duration()
+        , handles()
+        , dataPointFilterIds()
+        , overview()
+        , actionRegisters()
+        , outputFile()
+        , networkMutex()
+        , fileMutex() {
 
         // These go first so the config can do things with them
         provideOverview();

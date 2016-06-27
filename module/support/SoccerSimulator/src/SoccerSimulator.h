@@ -84,6 +84,7 @@ namespace support {
         static constexpr size_t SIMULATION_UPDATE_FREQUENCY = 180;
 
         struct Config{
+            Config() : robot(), ball() {}
 
             bool simulate_goal_observations = true;
             bool simulate_ball_observations = true;
@@ -91,6 +92,8 @@ namespace support {
             bool distinguish_left_and_right_goals = true;
 
             struct Motion {
+                Motion() : path() {}
+
                 MotionType motion_type = MotionType::PATH;
                 struct Path{
                     float period = 10;
@@ -118,6 +121,7 @@ namespace support {
 
         //World State
         struct WorldState {
+            WorldState() : robotPose(), robotVelocity(), ball() {}
             //Transform2D == (x,y,heading)
             utility::math::matrix::Transform2D robotPose;
             utility::math::matrix::Transform2D robotVelocity;

@@ -103,7 +103,7 @@ namespace localisation {
 
     class MultiModalRobotModel {
     public:
-        MultiModalRobotModel() {
+        MultiModalRobotModel() : robot_models_(), cfg_() {
             robot_models_.push_back(std::make_unique<RobotHypothesis>());
         }
 

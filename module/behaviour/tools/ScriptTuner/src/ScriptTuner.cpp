@@ -44,13 +44,15 @@ namespace module {
 
             struct LockServo {};
 
-            ScriptTuner::ScriptTuner(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)),
-                    id(size_t(this) * size_t(this) - size_t(this)),
-                    scriptPath("ERROR"),
-                    frame(0),
-                    selection(0),
-                    angleOrGain(true),
-                    running(true) {
+            ScriptTuner::ScriptTuner(std::unique_ptr<NUClear::Environment> environment)
+                    : Reactor(std::move(environment))
+                    , id(size_t(this) * size_t(this) - size_t(this))
+                    , scriptPath("ERROR")
+                    , script()
+                    , frame(0)
+                    , selection(0)
+                    , angleOrGain(true)
+                    , running(true) {
 
                 // Add a blank frame to start with
                 script.frames.emplace_back();

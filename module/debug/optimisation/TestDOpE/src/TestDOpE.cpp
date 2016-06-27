@@ -35,7 +35,7 @@ namespace optimisation {
     using message::support::optimisation::RegisterOptimisation;
 
     TestDOpE::TestDOpE(std::unique_ptr<NUClear::Environment> environment)
-    : Reactor(std::move(environment)) {
+    : Reactor(std::move(environment)), currentParameters() {
 
         on<Configuration>("TestDOpE.yaml").then([this] (const Configuration& /*config*/) {
             // Use configuration here from file TestDOpE.yaml

@@ -32,6 +32,9 @@ namespace message {
          * @author Trent Houliston
          */
         struct ServoTarget {
+            ServoTarget() : time(), id(), position(0.0f), gain(0.0f), torque(0.0f) {}
+            ServoTarget(const NUClear::clock::time_point& time, const input::ServoID& id, float pos, float gain, float torque)
+                : time(time), id(id), position(pos), gain(gain), torque(torque) {}
             NUClear::clock::time_point time;
             input::ServoID id;
             float position;

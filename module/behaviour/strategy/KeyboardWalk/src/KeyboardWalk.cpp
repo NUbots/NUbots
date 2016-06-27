@@ -42,9 +42,7 @@ namespace strategy {
     using utility::math::matrix::Transform2D;
 
     KeyboardWalk::KeyboardWalk(std::unique_ptr<NUClear::Environment> environment)
-        : Reactor(std::move(environment)) {
-
-        velocity.zeros();
+        : Reactor(std::move(environment)), velocity(arma::fill::zeros) {
 
         // Start curses mode
         initscr();

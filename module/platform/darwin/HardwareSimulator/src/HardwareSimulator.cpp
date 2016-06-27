@@ -44,7 +44,8 @@ namespace darwin {
     using message::input::Sensors;
     using message::support::Configuration;
 
-    HardwareSimulator::HardwareSimulator(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
+    HardwareSimulator::HardwareSimulator(std::unique_ptr<NUClear::Environment> environment)
+            : Reactor(std::move(environment)), sensors(), gyroQueue(), gyroQueueMutex(), noise() {
 
         /*
          CM730 Data

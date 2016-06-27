@@ -36,7 +36,7 @@ namespace extension {
 
     FileWatcher::FileWatcher(std::unique_ptr<NUClear::Environment> environment)
     : Reactor(std::move(environment))
-    , watcherFd(inotify_init()) {
+    , watcherFd(inotify_init()), handlers(), watchPaths() {
 
         fcntl (watcherFd, F_SETFL, fcntl (watcherFd, F_GETFL) | O_NONBLOCK);
 

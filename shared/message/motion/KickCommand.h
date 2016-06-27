@@ -43,6 +43,7 @@ namespace message {
             arma::vec3 direction; // force is the magnitude
             KickCommandType kickCommandType = KickCommandType::NORMAL;
 
+            KickCommand() : target(arma::fill::zeros), direction(arma::fill::zeros) {}
             KickCommand(const arma::vec3& target, const arma::vec3& direction, const KickCommandType& kickCommandType = KickCommandType::NORMAL)
             : target(target)
             , direction(direction)
@@ -56,12 +57,17 @@ namespace message {
          * @author Brendan Annable
          */
         struct KickScriptCommand {
+            KickScriptCommand() : direction(arma::fill::zeros), leg() {}
+            KickScriptCommand(const arma::vec3& dir, const message::input::LimbID& limb) : direction(dir), leg(limb) {}
             arma::vec3 direction; // Direction to kick with magnitude determining force
             message::input::LimbID leg; // Leg to kick with
         };
 
 
         struct KickPlannerConfig{
+            KickPlannerConfig() : max_ball_distance(0.0f), kick_corridor_width(0.0f), seconds_not_seen_limit(0.0f), kick_forward_angle_limit(0.0f) {}
+            KickPlannerConfig(float distance, float width, float time, float angle)
+                : max_ball_distance(distance), kick_corridor_width(width), seconds_not_seen_limit(time), kick_forward_angle_limit(angle) {}
             float max_ball_distance;
             float kick_corridor_width;
             float seconds_not_seen_limit;
@@ -72,6 +78,8 @@ namespace message {
         };
 
         struct IKKickParams{
+            IKKickParams() : stand_height(0.0f) {}
+            IKKickParams(float height) : stand_height(height) {}
             float stand_height;
         };
 

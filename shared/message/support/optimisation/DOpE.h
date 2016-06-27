@@ -30,17 +30,20 @@ namespace message {
         namespace optimisation {
 
             struct RegisterOptimisation {
+                RegisterOptimisation() : group(""), network(false), parameters() {}
                 std::string group;
                 bool network;
                 utility::math::optimisation::OptimiserParameters parameters;
             };
 
             struct RequestParameters {
+                RequestParameters() : group(""), nSamples(0) {}
                 std::string group;
                 int nSamples;
             };
 
             struct Parameters {
+                Parameters() : group(""), generation(0), samples(), covariance() {}
                 std::string group;
                 int generation;
                 arma::mat samples;

@@ -28,6 +28,9 @@ namespace message {
         struct FileWatch {
             using FileWatchStore = NUClear::dsl::store::ThreadStore<FileWatch>;
 
+            FileWatch() : path(""), events(0) {}
+            FileWatch(const std::string& path, int events) : path(path), events(events) {}
+
             enum Event {
                 ACCESS        = 1,
                 ATTRIBUTES    = 2,
@@ -56,6 +59,7 @@ namespace message {
         };
 
         struct FileWatchRequest {
+            FileWatchRequest() : path(""), events(0), reaction() {}
             std::string path;
             int events;
             std::shared_ptr<NUClear::threading::Reaction> reaction;

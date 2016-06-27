@@ -100,7 +100,7 @@ class VirtualGoalPost {
 		Goal detect(const CameraParameters& camParams,
 					Transform2D& robotPose,
 					std::shared_ptr<const Sensors> sensors,
-					arma::vec4& error,
+					arma::vec4& /*error*/,
 					const FieldDescription& field){
 			Goal result;
 
@@ -151,14 +151,16 @@ class VirtualGoalPost {
 
 	class VirtualBall {
 	public:
-		VirtualBall() {
-			position = arma::vec3({0,0,0});
-			diameter = 0.1;
+		VirtualBall()
+		: position(arma::fill::zeros)
+		, velocity(arma::fill::zeros)
+		, diameter(0.1) {
 		}
 
-		VirtualBall(arma::vec2 position_, float diameter_) {
-			position = position_;
-			diameter = diameter_;
+		VirtualBall(arma::vec2 position, float diameter)
+		: position(position)
+		, velocity(arma::fill::zeros)
+		, diameter(diameter) {
 		}
 		~VirtualBall(){}
 
@@ -169,7 +171,7 @@ class VirtualGoalPost {
 		// arma::vec2 position;
 		float diameter;
 
-		Ball detect(const CameraParameters& camParams, Transform2D robotPose, std::shared_ptr<const Sensors> sensors, arma::vec4 error){
+		Ball detect(const CameraParameters& /*camParams*/, Transform2D /*robotPose*/, std::shared_ptr<const Sensors> sensors, arma::vec4 /*error*/){
 			Ball result;
 
 			//auto visibleMeasurements = computeVisible(position,camParams,robotPose,sensors,error);

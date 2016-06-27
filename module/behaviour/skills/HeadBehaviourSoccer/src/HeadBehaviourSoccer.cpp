@@ -72,12 +72,26 @@ namespace module {
         using message::behaviour::SearchType;
         using message::behaviour::searchTypeFromString;
 
-            HeadBehaviourSoccer::HeadBehaviourSoccer(std::unique_ptr<NUClear::Environment> environment) :
-            Reactor(std::move(environment)),
-            lastCentroid({0,0}),
-            lostAndSearching(false),
-            lastBallPriority(0),
-            lastGoalPriority(0) {
+            HeadBehaviourSoccer::HeadBehaviourSoccer(std::unique_ptr<NUClear::Environment> environment)
+                : Reactor(std::move(environment))
+                , max_yaw(0.0f)
+                , min_yaw(0.0f)
+                , max_pitch(0.0f)
+                , min_pitch(0.0f)
+                , replan_angle_threshold(0.0f)
+                , lastPlanOrientation()
+                , cam()
+                , pitch_plan_threshold(0.0f)
+                , fractional_view_padding(0.0)
+                , search_timeout_ms(0.0f)
+                , fractional_angular_update_threshold(0.0f)
+                , oscillate_search(false)
+                , lastLocBall()
+                , searches()
+                , headSearcher()
+                , lastPlanUpdate()
+                , timeLastObjectSeen()
+                , lastCentroid(arma::fill::zeros) {
 
                 on<Configuration>("HeadBehaviourSoccer.yaml").then("Head Behaviour Soccer Config", [this] (const Configuration& config) {
                     lastPlanUpdate = NUClear::clock::now();
@@ -160,10 +174,10 @@ namespace module {
                     min_pitch = kinematicsModel.Head.MIN_PITCH;
 
                     // std::cout << "Seen: Balls: " <<
-                    // ((vballs != nullptr) ? std::to_string(int(vballs->size())) : std::string("null")) << 
+                    // ((vballs != nullptr) ? std::to_string(int(vballs->size())) : std::string("null")) <<
                     // "Goals: " <<
                     // ((vgoals != nullptr) ? std::to_string(int(vgoals->size())) : std::string("null")) << std::endl;
-                    
+
                     //TODO: pass camera parameters around instead of this hack storage
                     cam = cam_;
 
@@ -186,7 +200,7 @@ namespace module {
                     bool searchTimedOut = std::chrono::duration_cast<std::chrono::milliseconds>(now - timeLastObjectSeen).count() > search_timeout_ms;
                     //Did the object move in IMUspace?
                     bool objectMoved = false;
-                    
+
 
                     // log("updatePlan", updatePlan);
                     // log("lost", lost);
@@ -195,7 +209,7 @@ namespace module {
                     // log("headSearcher.size()", headSearcher.size());
 
                     //State execution
-                    
+
                     //Get robot heat to body transform
                     Rotation3D orientation, headToBodyRotation;
                     if(!lost){
@@ -236,7 +250,7 @@ namespace module {
                                 if(!lost){
                                     state = FIXATION;
                                     updatePlan = true;
-                                }   
+                                }
                                 else if(searchTimedOut){
                                     state = SEARCH;
                                     updatePlan = true;
@@ -398,7 +412,7 @@ namespace module {
                             //auto angles = arma::vec2({((max_yaw - min_yaw) * p[0] + max_yaw + min_yaw) / 2,
                             //                                    ((max_pitch - min_pitch) * p[1] + max_pitch + min_pitch) / 2});
 
-                            //New absolute referencing 
+                            //New absolute referencing
                             arma::vec2 angles = p * M_PI / 180;
                             if(std::fabs(sensors.world.rotation().pitch()) < pitch_plan_threshold){
                                 arma::vec3 lookVectorFromHead = sphericalToCartesian({1,angles[0],angles[1]});//This is an approximation relying on the robots small FOV

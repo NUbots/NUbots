@@ -22,4 +22,5 @@ syntax = "proto3";
 package message.support.nubugger.proto;
 
 message Ping {
+    uint64 time = 1;
 }

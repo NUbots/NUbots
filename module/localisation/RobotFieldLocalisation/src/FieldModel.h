@@ -46,7 +46,7 @@ namespace module {
             arma::vec3 processNoiseDiagonal;
 
 
-            FieldModel() {} // empty constructor
+            FieldModel() : processNoiseDiagonal(arma::fill::eye) {} // empty constructor
 
             arma::vec::fixed<size> timeUpdate(const arma::vec::fixed<size>& state, double deltaT);
 

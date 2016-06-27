@@ -30,7 +30,7 @@ namespace Darwin {
     using message::input::stringFromId;
 
     // Initialize all of the sensor handler objects using the passed uart
-    Darwin::Darwin(const char* name) : uart(name)
+    Darwin::Darwin(const char* name) : uart(name), bulkReadCommand()
     , cm730(uart, ID::CM730)
     , rShoulderPitch(uart, ID::R_SHOULDER_PITCH)
     , lShoulderPitch(uart, ID::L_SHOULDER_PITCH)

@@ -146,7 +146,8 @@ namespace darwin {
         return sensors;
     }
 
-    HardwareIO::HardwareIO(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)), darwin("/dev/CM730") {
+    HardwareIO::HardwareIO(std::unique_ptr<NUClear::Environment> environment)
+         : Reactor(std::move(environment)), darwin("/dev/CM730"), cm730State(), servoState() {
 
         on<Configuration>("DarwinPlatform.yaml").then([this] (const Configuration& config) {
             darwin.setConfig(config);

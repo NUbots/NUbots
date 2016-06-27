@@ -23,7 +23,15 @@
 namespace module {
     namespace platform {
         namespace darwin {
-            DarwinVirtualLoadSensor::DarwinVirtualLoadSensor() {
+            DarwinVirtualLoadSensor::DarwinVirtualLoadSensor()
+                    : noiseFactor(0.0)
+                    , currentNoise(2.0 * noiseFactor)
+                    , certaintyThreshold(0.0)
+                    , uncertaintyThreshold(0.0)
+                    , hiddenWeights()
+                    , hiddenBias()
+                    , outputWeights()
+                    , outputBias() {
             }
 
             DarwinVirtualLoadSensor::DarwinVirtualLoadSensor(arma::mat hiddenWeights,

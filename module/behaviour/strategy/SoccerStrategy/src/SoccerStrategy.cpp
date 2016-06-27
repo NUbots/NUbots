@@ -77,7 +77,14 @@ namespace strategy {
     using utility::time::durationFromSeconds;
     using utility::math::geometry::Circle;
 
-    SoccerStrategy::SoccerStrategy(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
+    SoccerStrategy::SoccerStrategy(std::unique_ptr<NUClear::Environment> environment)
+        : Reactor(std::move(environment))
+        , cfg_()
+        , walkTarget()
+        , lookTarget()
+        , kickType()
+        , ballSearchStartTime()
+        , selfLastMeasured() {
 
         on<Configuration>("SoccerStrategy.yaml").then([this](const Configuration& config) {
 

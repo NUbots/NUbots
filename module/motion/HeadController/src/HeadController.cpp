@@ -53,10 +53,21 @@ namespace module {
         //internal only callback messages to start and stop our action
         struct ExecuteHeadController {};
 
-        HeadController::HeadController(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)), id(size_t(this) * size_t(this) - size_t(this)) {
+        HeadController::HeadController(std::unique_ptr<NUClear::Environment> environment)
+            : Reactor(std::move(environment))
+            , id(size_t(this) * size_t(this) - size_t(this))
+            , min_yaw(0.0)
+            , max_yaw(0.0)
+            , min_pitch(0.0)
+            , max_pitch(0.0)
+            , head_motor_gain(0.0)
+            , head_motor_torque(0.0)
+            , p_gain(0.0)
+            , updateHandle()
+            , lastTime()
+            , currentAngles(arma::fill::zeros)
+            , goalAngles(arma::fill::zeros) {
 
-            currentAngles = {0,0};//TODO: set this to current motor positions
-            goalAngles = {0,0};//TODO: set this to current motor positions
             //do a little configurating
             on<Configuration>("HeadController.yaml").then("Head Controller - Config", [this] (const Configuration& config) {
                 //Gains

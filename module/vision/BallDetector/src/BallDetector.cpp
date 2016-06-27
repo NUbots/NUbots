@@ -112,7 +112,22 @@ namespace vision {
     }
 
     BallDetector::BallDetector(std::unique_ptr<NUClear::Environment> environment)
-        : Reactor(std::move(environment)) {
+        : Reactor(std::move(environment))
+        , MINIMUM_POINTS_FOR_CONSENSUS(0)
+        , MAXIMUM_ITERATIONS_PER_FITTING(0)
+        , MAXIMUM_FITTED_MODELS(0)
+        , CONSENSUS_ERROR_THRESHOLD(0.0)
+        , MAXIMUM_DISAGREEMENT_RATIO(0.0)
+        , maximum_relative_seed_point_distance(0.0)
+        , measurement_distance_variance_factor(0.0)
+        , measurement_bearing_variance(0.0)
+        , measurement_elevation_variance(0.0)
+        , green_ratio_threshold(0.0)
+        , green_radial_samples(0.0)
+        , green_angular_samples(0.0)
+        , kmeansClusterer()
+        , lastFrame() {
+
 
         on<Configuration>("BallDetector.yaml").then([this] (const Configuration& config) {
 

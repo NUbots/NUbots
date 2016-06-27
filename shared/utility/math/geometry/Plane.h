@@ -35,8 +35,8 @@ namespace geometry {
 		Vector normal;
 		Vector point;
 
-		Plane(){}
-		Plane(Vector normal_, Vector point_){
+		Plane() : normal(arma::fill::zeros), point(arma::fill::zeros) {}
+		Plane(Vector normal_, Vector point_) : normal(arma::fill::zeros), point(arma::fill::zeros) {
 			setFromNormal(normal_, point_);
 		}
 

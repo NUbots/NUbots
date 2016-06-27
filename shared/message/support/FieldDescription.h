@@ -25,10 +25,30 @@
 namespace message {namespace support {
 
 class FieldDescription {
-public:
+    public:
+    FieldDescription() : dimensions(), ball_radius(0.0), goalpost_top_height(0.0), penalty_robot_start(0.0),
+                         goalpost_own_l(arma::fill::zeros), goalpost_own_r(arma::fill::zeros),
+                         goalpost_opp_l(arma::fill::zeros), goalpost_opp_r(arma::fill::zeros) {}
 
     // Field dimensions as defined in the Robocup rules:
     struct FieldDimensions {
+        FieldDimensions()
+            : line_width(0.0)
+            , mark_width(0.0)
+            , field_length(0.0)
+            , field_width(0.0)
+            , goal_depth(0.0)
+            , goal_width(0.0)
+            , goal_area_length(0.0)
+            , goal_area_width(0.0)
+            , goal_crossbar_height(0.0)
+            , goalpost_diameter(0.0)
+            , goal_crossbar_diameter(0.0)
+            , goal_net_height(0.0)
+            , penalty_mark_distance(0.0)
+            , center_circle_diameter(0.0)
+            , border_strip_min_width(0.0) {}
+
         double line_width;
         double mark_width;
         double field_length;

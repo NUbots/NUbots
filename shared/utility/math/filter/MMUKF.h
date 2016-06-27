@@ -33,6 +33,9 @@ namespace utility {
             class MMUKF {
             public:
                 struct Filter {
+
+                    Filter(double weight = 1.0, UKF<Model> filter = UKF<Model>()) : weight(weight), filter(filter) {}
+
                     double weight;
                     UKF<Model> filter;
 
@@ -106,7 +109,8 @@ namespace utility {
 
                 MMUKF(uint maxModels = 2
                     , double mergeProbability = 0.9)
-                : maxModels(maxModels)
+                : filters()
+                , maxModels(maxModels)
                 , mergeProbability(mergeProbability) {
                 }
 

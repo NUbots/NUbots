@@ -34,8 +34,8 @@ namespace geometry {
         Vector direction;
         Vector point;
         arma::vec2 tLimits = {-std::numeric_limits<double>::infinity(), std::numeric_limits<double>::infinity()};
-        ParametricLine(){}
-        ParametricLine(const Vector& p1, const Vector& p2, bool segment = false) {
+        ParametricLine() : direction(arma::fill::zeros), point(arma::fill::zeros) {}
+        ParametricLine(const Vector& p1, const Vector& p2, bool segment = false) : direction(arma::fill::zeros), point(arma::fill::zeros) {
             setFromTwoPoints(p1, p2, segment);
         };
 

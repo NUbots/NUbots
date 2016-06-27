@@ -42,7 +42,7 @@ namespace utility {
             std::string name_;
 
         public:
-            LocalisationFieldObject() { } // Necessary?
+            LocalisationFieldObject() : location_(arma::fill::zeros), id_(LFOId::kInvalid), name_("") { }
 
             LocalisationFieldObject(arma::vec2 location, LFOId id, const std::string& name)
                 : location_(location), id_(id), name_(name) { }

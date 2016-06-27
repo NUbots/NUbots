@@ -119,7 +119,7 @@ namespace optimisation {
     }
 
     DOpE::DOpE(std::unique_ptr<NUClear::Environment> environment)
-    : Reactor(std::move(environment)) {
+    : Reactor(std::move(environment)), optimisations() {
 
         on<Configuration, Sync<DOpE>>("DOpE.yaml").then([this] (const Configuration& /*config*/) {
             // Use configuration here from file DOpE.yaml

@@ -33,7 +33,8 @@ namespace utility {
 
 		using message::input::ServoID;
 
-		MockFeatureExtractor::MockFeatureExtractor(){}
+		MockFeatureExtractor::MockFeatureExtractor()
+			 : numberOfFalseFeaturesDetected(1), MAX_DISTINCT_FALSE_FEATURES(0), mockFeatures(), FOV_X(0.0), FOV_Y(0.0) {}
 
 		std::vector<MockFeatureExtractor::MockFeature> MockFeatureExtractor::setParameters(const YAML::Node& config){
 			int NUMBER_OF_MOCK_POINTS = config["NUMBER_OF_MOCK_POINTS"].as<int>();

@@ -39,10 +39,10 @@ namespace behaviour {
         };
 
     private:
-        MotionCommand() { }
+        MotionCommand() : goalState(), walkCommand() { }
 
     public:
-        MotionCommand(const MotionCommand& c){
+        MotionCommand(const MotionCommand& c) : goalState(), walkCommand() {
             *this = c;
         }
 

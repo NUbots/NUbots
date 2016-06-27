@@ -71,7 +71,22 @@ namespace vision {
     // TODO the system needs to throw out the kinematics and height based measurements when it cannot be sure it saw the tops and bottoms of the goals
 
     GoalDetector::GoalDetector(std::unique_ptr<NUClear::Environment> environment)
-        : Reactor(std::move(environment)) {
+        : Reactor(std::move(environment))
+        , MINIMUM_POINTS_FOR_CONSENSUS(0)
+        , MAXIMUM_ITERATIONS_PER_FITTING(0)
+        , MAXIMUM_FITTED_MODELS(0)
+        , CONSENSUS_ERROR_THRESHOLD(0.0)
+        , MAXIMUM_ASPECT_RATIO(0.0)
+        , MINIMUM_ASPECT_RATIO(0.0)
+        , VISUAL_HORIZON_BUFFER(0.0)
+        , MAXIMUM_GOAL_HORIZON_NORMAL_ANGLE(0.0)
+        , MAXIMUM_ANGLE_BETWEEN_GOALS(0.0)
+        , MAXIMUM_VERTICAL_GOAL_PERSPECTIVE_ANGLE(0.0)
+        , MEASUREMENT_LIMITS_LEFT(10)
+        , MEASUREMENT_LIMITS_RIGHT(10)
+        , MEASUREMENT_LIMITS_TOP(10)
+        , MEASUREMENT_LIMITS_BASE(10) {
+
 
         // Trigger the same function when either update
         on<Configuration, Trigger<CameraParameters>>("GoalDetector.yaml")

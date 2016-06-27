@@ -123,7 +123,19 @@ namespace utility {
                     StateMat initialCovariance = arma::eye(Model::size, Model::size) * 0.1,
                     double alpha = 1e-1,
                     double kappa = 0.f,
-                    double beta = 2.f) {
+                    double beta = 2.f)
+                        : model()
+                        , mean(arma::fill::zeros)
+                        , covariance(arma::fill::zeros)
+                        , sigmaMean(arma::fill::zeros)
+                        , sigmaPoints(arma::fill::zeros)
+                        , centredSigmaPoints(arma::fill::zeros)
+                        , d(arma::fill::zeros)
+                        , covarianceUpdate(arma::fill::zeros)
+                        , defaultCovarianceUpdate(arma::fill::zeros)
+                        , meanWeights(arma::fill::zeros)
+                        , covarianceWeights(arma::fill::zeros)
+                        , covarianceSigmaWeights(0.0) {
 
                     reset(initialMean, initialCovariance, alpha, kappa, beta);
                 }
@@ -222,7 +234,7 @@ namespace utility {
                     arma::mat innovationVariance = predictedCovariance + measurementVariance;
                     arma::mat scalarlikelihoodExponent = ((innovation.t() * innovationVariance.i()) * innovation);
 
-                    double expTerm = -0.5 * scalarlikelihoodExponent(0, 0);
+                    double expTerm = -0.5 * arma::as_scalar(scalarlikelihoodExponent);
                     double normalisationFactor = pow(2 * M_PI, measurementVariance.n_rows) * arma::det(innovationVariance);
                     double fract = 1 / sqrt(normalisationFactor);
                     const float outlierProbability = 0.05;

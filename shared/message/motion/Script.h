@@ -37,14 +37,29 @@ namespace message {
         struct Script {
             struct Frame {
                 struct Target {
+                    Target() : id(), position(0.0f), gain(0.0f), torque(0.0f) {}
+                    Target(const input::ServoID& servo, float pos, float gain, float torque)
+                        : id(servo), position(pos), gain(gain), torque(torque) {}
+                    Target(const Target& other)
+                        : id(other.id), position(other.position), gain(other.gain), torque(other.torque) {}
+
                     input::ServoID id;
                     float position;
                     float gain;
                     float torque;
                 };
+
+                Frame() : duration(), targets() {}
+                Frame(const NUClear::clock::duration& dur, const std::vector<Target>& targets)
+                    : duration(dur), targets(targets) {}
+
                 NUClear::clock::duration duration;
                 std::vector<Target> targets;
             };
+
+            Script() : frames() {}
+            Script(const std::vector<Frame>& frames) : frames(frames) {}
+
             std::vector<Frame> frames;
         };
 

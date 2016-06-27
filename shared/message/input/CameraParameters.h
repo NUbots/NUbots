@@ -26,12 +26,19 @@ namespace message {
     namespace input {
 
         struct CameraParameters{
-           arma::uvec2 imageSizePixels;
-           arma::vec2 FOV;     //Anglular Field of view
-           arma::vec2 pixelsToTanThetaFactor;    //(x,y) screen -> thetax =atan(x*screenAngularFactor[0]), thetay = atan(y*screenAngularFactor[1])
-           double focalLengthPixels;    //Distance to the virtual screen in pixels
+            CameraParameters() : imageSizePixels(arma::fill::zeros), FOV(arma::fill::zeros),
+                                 pixelsToTanThetaFactor(arma::fill::zeros), focalLengthPixels(0.0),
+                                 distortionFactor(0.0) {}
+            CameraParameters(const arma::uvec2& size, const arma::vec2& FOV, const arma::vec2& tanThetaFactor,
+                             double focalLength, double distortion) : imageSizePixels(size), FOV(FOV),
+                                 pixelsToTanThetaFactor(tanThetaFactor), focalLengthPixels(focalLength),
+                                 distortionFactor(distortion) {}
+            arma::uvec2 imageSizePixels;
+            arma::vec2 FOV;     //Anglular Field of view
+            arma::vec2 pixelsToTanThetaFactor;    //(x,y) screen -> thetax =atan(x*screenAngularFactor[0]), thetay = atan(y*screenAngularFactor[1])
+            double focalLengthPixels;    //Distance to the virtual screen in pixels
 
-           double distortionFactor; //see RADIAL_CORRECTION_COEFFICIENT in VisionKinematics.h (may not be used yet)
+            double distortionFactor; //see RADIAL_CORRECTION_COEFFICIENT in VisionKinematics.h (may not be used yet)
         };
 
     }

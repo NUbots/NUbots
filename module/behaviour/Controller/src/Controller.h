@@ -40,11 +40,24 @@ namespace module {
         struct Request {
             using callback = std::function<void (std::set<message::input::LimbID>)>;
 
+            Request()
+            : id(0)
+            , name("")
+            , active(false)
+            , maxPriority(std::numeric_limits<float>::min())
+            , mainElement(0)
+            , items()
+            , start()
+            , kill()
+            , completed() {}
+
             Request(size_t id, std::string name, callback start, callback kill, std::function<void (std::set<message::input::ServoID>)> completed)
             : id(id)
             , name(name)
             , active(false)
             , maxPriority(std::numeric_limits<float>::min())
+            , mainElement(0)
+            , items()
             , start(start)
             , kill(kill)
             , completed(completed) {}
@@ -75,6 +88,7 @@ namespace module {
 
         struct RequestItem {
 
+            //RequestItem() : group(Request()), index(0), active(false), priority(std::numeric_limits<float>::min()), limbSet() {}
             RequestItem(Request& group, size_t index, float priority, const std::set<message::input::LimbID>& limbSet)
             : group(group)
             , index(index)

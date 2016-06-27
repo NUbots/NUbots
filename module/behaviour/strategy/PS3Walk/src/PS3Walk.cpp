@@ -37,7 +37,7 @@ namespace strategy {
     using utility::math::matrix::Transform2D;
 
     PS3Walk::PS3Walk(std::unique_ptr<NUClear::Environment> environment)
-        : Reactor(std::move(environment)) {
+        : Reactor(std::move(environment)), joystick() {
 
         on<Every<1, std::chrono::milliseconds>, Single>().then([this] {
 

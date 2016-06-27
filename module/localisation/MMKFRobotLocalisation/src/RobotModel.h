@@ -56,9 +56,8 @@ namespace robot {
     public:
         static constexpr size_t size = 3;
 
-        RobotModel() {
-            currentImuOrientation.zeros();
-        } // empty constructor
+        RobotModel() : cfg_(), currentImuOrientation(arma::fill::zeros) {
+        }
 
         arma::vec::fixed<RobotModel::size> timeUpdate(
             const arma::vec::fixed<RobotModel::size>& state, double deltaT,

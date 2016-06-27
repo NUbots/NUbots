@@ -32,6 +32,7 @@ namespace message {
     namespace vision {
 
         struct VisionObject {
+            VisionObject() : timestamp(), screenAngular(arma::fill::zeros), angularSize(arma::fill::zeros), sensors(), classifiedImage() {}
 
             // Time the image was taken
             NUClear::clock::time_point timestamp;
@@ -51,11 +52,15 @@ namespace message {
 
         struct Ball : public VisionObject {
 
+            Ball() : VisionObject(), edgePoints(), circle() {}
+
             std::vector<arma::vec3> edgePoints;
             utility::math::geometry::Circle circle;
         };
 
         struct Goal : public VisionObject {
+
+            Goal() : VisionObject(), measurements(), quad() {}
 
             enum class Side {
                 UNKNOWN,
@@ -81,6 +86,8 @@ namespace message {
         };
 
         struct Obstacle : public VisionObject {
+
+            Obstacle() : VisionObject(), polygon() {}
 
             enum class Team {
                 NONE,

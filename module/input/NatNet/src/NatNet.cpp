@@ -29,7 +29,12 @@ namespace input {
     using message::support::Configuration;
 
     NatNet::NatNet(std::unique_ptr<NUClear::Environment> environment)
-    : Reactor(std::move(environment)) {
+        : Reactor(std::move(environment))
+        , markerSetModels()
+        , rigidBodyModels()
+        , skeletonModels()
+        , commandHandle()
+        , dataHandle() {
 
         on<Configuration>("NatNet.yaml").then([this] (const Configuration& config) {
 
@@ -213,7 +218,7 @@ namespace input {
                 // Get a pointer to our parent if it exists and is not us
                 rigidBody.parent = parent->id == rigidBody.id         ? nullptr
                                  : parent == mocap->rigidBodies.end() ? nullptr
-                                 : &*parent;
+                                 : std::make_shared<message::input::MotionCapture::RigidBody>(*parent);
             }
             // We need to update our models
             else {
@@ -256,7 +261,7 @@ namespace input {
 
                         bone.parent = parent->id == bone.id          ? nullptr
                                     : parent == skeleton.bones.end() ? nullptr
-                                    : &*parent;
+                                    : std::make_shared<message::input::MotionCapture::RigidBody>(*parent);
                     }
                     // We need to update our models
                     else {

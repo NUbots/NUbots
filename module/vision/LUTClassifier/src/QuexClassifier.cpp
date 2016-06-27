@@ -29,7 +29,9 @@ namespace module {
         using message::vision::ClassifiedImage;
         using quex::Token;
 
-        QuexClassifier::QuexClassifier() : lexer(buffer, BUFFER_SIZE, buffer + 1), tknNumber(lexer.token_p()->number) {
+        QuexClassifier::QuexClassifier()
+            : lexer(buffer, BUFFER_SIZE, buffer + 1)
+            , tknNumber(lexer.token_p()->number) {
         }
 
         std::vector<ClassifiedImage<ObjectClass>::Segment> QuexClassifier::classify(const Image& image, const LookUpTable& lut, const arma::ivec2& start, const arma::ivec2& end, const uint& subsample) {

@@ -52,6 +52,10 @@ namespace vision {
         utility::math::learning::KMeans kmeansClusterer;
 
         struct Frame{
+            Frame() : time(), widthBall(arma::fill::zeros), projBall(arma::fill::zeros) {}
+            Frame(const NUClear::clock::time_point& time, const arma::vec3& width, const arma::vec3& proj)
+                : time(time), widthBall(width), projBall(proj) {}
+
             NUClear::clock::time_point time;
             arma::vec3 widthBall;
             arma::vec3 projBall;

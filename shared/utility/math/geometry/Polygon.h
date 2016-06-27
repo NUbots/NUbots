@@ -31,7 +31,7 @@ namespace geometry {
     private:
     	std::vector<ParametricLine<2>> edges;
     public:
-    	Polygon() {}
+    	Polygon() : edges() {}
     	Polygon(const std::vector<arma::vec2>& vertices);
 
     	void set(const std::vector<arma::vec2>& vertices);

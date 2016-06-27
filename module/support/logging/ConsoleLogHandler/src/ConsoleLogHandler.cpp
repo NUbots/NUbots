@@ -20,6 +20,7 @@
 #include "ConsoleLogHandler.h"
 
 #include "utility/strutil/ansi.h"
+#include "utility/support/evil/pure_evil.h"
 
 namespace module {
     namespace support {
@@ -29,7 +30,8 @@ namespace module {
             using NUClear::message::ReactionStatistics;
             using utility::strutil::Colour;
 
-            ConsoleLogHandler::ConsoleLogHandler(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
+            ConsoleLogHandler::ConsoleLogHandler(std::unique_ptr<NUClear::Environment> environment)
+             : Reactor(std::move(environment)), mutex() {
                 on<Trigger<ReactionStatistics>>().then([this](const ReactionStatistics & stats) {
                     if (stats.exception) {
 
@@ -42,6 +44,23 @@ namespace module {
                         size_t lastC = reactor.find_last_of(':');
                         reactor = lastC == std::string::npos ? reactor : reactor.substr(lastC + 1);
 
+#ifndef NDEBUG // We have a cold hearted monstrosity that got built!
+
+                        // Print our exception detals
+                        std::cout << reactor << " "
+                                  << (stats.identifier[0].empty() ? "" : "- " + stats.identifier[0] + " ")
+                                  << Colour::brightred << "Exception:" << " "
+                                  << Colour::brightred << utility::support::evil::exception_name
+                                  << std::endl;
+
+                        // Print our stack trace
+                        for (auto& s : utility::support::evil::stack) {
+                            std::cout << "\t" << Colour::brightmagenta << s.file
+                                      << ":" << Colour::brightmagenta << s.lineno
+                                      << " " << s.function
+                                      << std::endl;
+                        }
+#else
                         try {
                             std::rethrow_exception(stats.exception);
                         }
@@ -51,8 +70,8 @@ namespace module {
 
                             std::cout << reactor << " "
                                       << (stats.identifier[0].empty() ? "" : "- " + stats.identifier[0] + " ")
-                                      << Colour::red << "Exception:" << " "
-                                      << Colour::red << exceptionName << " "
+                                      << Colour::brightred << "Exception:" << " "
+                                      << Colour::brightred << exceptionName << " "
                                       << ex.what()
                                       << std::endl;
                         }
@@ -61,9 +80,10 @@ namespace module {
 
                             std::cout << reactor << " "
                                       << (stats.identifier[0].empty() ? "" : "- " + stats.identifier[0] + " ")
-                                      << Colour::red << "Exception of unkown type"
+                                      << Colour::brightred << "Exception of unkown type"
                                       << std::endl;
                         }
+#endif
                     }
                 });
 
@@ -85,7 +105,7 @@ namespace module {
                         reactor = lastC == std::string::npos ? reactor : reactor.substr(lastC + 1);
 
                         // This is our source
-                        source = reactor + " " + (message.task->identifier[0].empty() ? "" : message.task->identifier[0] + " ");
+                        source = reactor + " " + (message.task->identifier[0].empty() ? "" : "- " + message.task->identifier[0] + " ");
                     }
 
                     // Output the level
@@ -103,10 +123,10 @@ namespace module {
                             std::cout << source << Colour::yellow << "WARN: ";
                             break;
                         case NUClear::ERROR:
-                            std::cout << source << Colour::red << "ERROR: ";
+                            std::cout << source << Colour::brightred << "ERROR: ";
                             break;
                         case NUClear::FATAL:
-                            std::cout << source << Colour::red << "FATAL: ";
+                            std::cout << source << Colour::brightred << "FATAL: ";
                             break;
                     }
 

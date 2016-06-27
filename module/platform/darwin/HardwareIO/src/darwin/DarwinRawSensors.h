@@ -34,15 +34,17 @@ namespace Darwin {
          * @brief This represents the raw gyro values from the CM730 (they are read from the board in ZYX)
          */
         struct Gyro {
-            uint16_t z;
-            uint16_t y;
+            Gyro() : x(0), y(0), z(0) {}
             uint16_t x;
+            uint16_t y;
+            uint16_t z;
         };
 
         /**
          * @brief This represents the raw accelerometer values from the CM730
          */
         struct Accelerometer {
+            Accelerometer() : x(0), y(0), z(0) {}
             uint16_t x;
             uint16_t y;
             uint16_t z;
@@ -52,6 +54,7 @@ namespace Darwin {
          * @brief This represents the data that comes from one of the MX28 motors
          */
         struct MX28Data {
+            MX28Data() : presentPosition(0), presentSpeed(0), load(0), voltage(0), temperature(0) {}
             uint16_t presentPosition;
             uint16_t presentSpeed;
             uint16_t load;
@@ -63,6 +66,7 @@ namespace Darwin {
          * This represents data that comes from the Force Sensitive Resistors
          */
         struct FSRData {
+            FSRData() : fsr1(0), fsr2(0), fsr3(0), fsr4(0), centreX(0), centreY(0) {}
             uint16_t fsr1;
             uint16_t fsr2;
             uint16_t fsr3;
@@ -75,8 +79,9 @@ namespace Darwin {
          * @brief This represents data that comes from the CM730
          */
         struct CM730Data {
+            CM730Data() : buttons(0), gyroscope(), accelerometer(), voltage(0) {}
             uint8_t buttons;
-            uint8_t reserved[7];
+            uint8_t reserved[7] = { 0 };
             Gyro gyroscope;
             Accelerometer accelerometer;
             uint8_t voltage;
@@ -86,6 +91,7 @@ namespace Darwin {
          * This is a type that is used control the motors, It is sent to the motors to cause a change
          */
         struct ServoValues {
+            ServoValues() : servoId(0), dGain(0), iGain(0), pGain(0), reserved(0), goalPostion(0), movingSpeed(0) {}
             uint8_t servoId;
             uint8_t dGain;
             uint8_t iGain;
@@ -100,12 +106,13 @@ namespace Darwin {
      * @brief This represents the bulk read results we get when we do one
      */
     struct BulkReadResults {
+        BulkReadResults() : cm730() {}
         /// @brief Holds data from the CM730
         Types::CM730Data cm730;
         /// @brief Holds data from the 20 servos (stored in location ServoID - 1)
-        Types::MX28Data servos[20];
+        Types::MX28Data servos[20] = { Types::MX28Data() };
         /// @brief Holds data from the 2 FSR (stored as Right Left)
-        Types::FSRData fsr[2];
+        Types::FSRData fsr[2] = { Types::FSRData() };
 
         /// @brief Holds the error code (if any) from the CM730
         uint8_t cm730ErrorCode = 0;

@@ -39,7 +39,18 @@ namespace message {
             , data(std::move(data)) {
         }
 
-        LookUpTable::LookUpTable() {
+        LookUpTable::LookUpTable()
+            : BITS_Y(0)
+            , BITS_CB(0)
+            , BITS_CR(0)
+            , LUT_SIZE(1 << (BITS_Y + BITS_CB + BITS_CR))
+            , BITS_Y_REMOVED(sizeof(uint8_t) * 8 - BITS_Y)
+            , BITS_CB_REMOVED(sizeof(uint8_t) * 8 - BITS_CB)
+            , BITS_CR_REMOVED(sizeof(uint8_t) * 8 - BITS_CR)
+            , BITS_CB_CR(BITS_CB + BITS_CR)
+            , BITS_CB_MASK(std::pow(2, BITS_CB) - 1)
+            , BITS_CR_MASK(std::pow(2, BITS_CR) - 1)
+            , data() {
         }
 
         const Colour& LookUpTable::operator()(const message::input::Image::Pixel& p) const {

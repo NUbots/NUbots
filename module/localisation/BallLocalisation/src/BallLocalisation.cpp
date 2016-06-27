@@ -10,7 +10,7 @@ namespace localisation {
     BallLocalisation::BallLocalisation(std::unique_ptr<NUClear::Environment> environment)
     : Reactor(std::move(environment)) {
 
-        on<Configuration>("BallLocalisation.yaml").then([this] (const Configuration& config) {
+        on<Configuration>("BallLocalisation.yaml").then([this] (const Configuration&) {
             // Use configuration here from file BallLocalisation.yaml
         });
     }

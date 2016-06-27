@@ -37,7 +37,7 @@ namespace research {
     using message::research::AutoClassifierPixels;
 
     AutoClassifierProvider::AutoClassifierProvider(std::unique_ptr<NUClear::Environment> environment)
-        : Reactor(std::move(environment)) {
+        : Reactor(std::move(environment)), ballProvider(), goalProvider(), fieldProvider(), lineProvider() {
 
         on<Configuration>("AutoClassifierProvider.yaml").then([this] (const Configuration& config) {
 

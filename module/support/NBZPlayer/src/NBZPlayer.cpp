@@ -38,7 +38,10 @@ namespace support {
     using Serialise = NUClear::util::serialise::Serialise<T>;
 
     NBZPlayer::NBZPlayer(std::unique_ptr<NUClear::Environment> environment)
-        : Reactor(std::move(environment)) {
+        : Reactor(std::move(environment))
+        , initialTime()
+        , offset()
+        , input() {
 
         on<Configuration>("NBZPlayer.yaml").then([this](const Configuration& config) {
 

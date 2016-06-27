@@ -43,6 +43,12 @@ ADD_CUSTOM_COMMAND(
     COMMENT "Generating Quex lexer for vision"
     VERBATIM)
 
+# Turn off Effective C++ compiler warnings for this module
+ADD_COMPILE_OPTIONS("-Wno-effc++")
+
+# Turn off uninitialized variable check (for the generated lexer files)
+ADD_COMPILE_OPTIONS("-Wno-error=maybe-uninitialized")
+
 # Build our NUClear module
 NUCLEAR_MODULE(SOURCES
     ${outputpath}/Lexer-token_ids.hpp

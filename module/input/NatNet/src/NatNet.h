@@ -42,17 +42,20 @@ namespace input {
                 UNRECOGNIZED_REQUEST      = 100
             };
 
+            Packet() : type(Type::PING), length(0), data(0) {}
             Type type;
             uint16_t length;
             char data;
         };
 
         struct MarkerSetModel {
+            MarkerSetModel() : name(""), markerNames() {}
             std::string name;
             std::vector<std::string> markerNames;
         };
 
         struct RigidBodyModel {
+            RigidBodyModel() : name(""), id(0), parentId(0), offset(arma::fill::zeros) {}
             std::string name;
             uint32_t id;
             uint32_t parentId;
@@ -60,6 +63,7 @@ namespace input {
         };
 
         struct SkeletonModel {
+            SkeletonModel() : name(""), id(0), boneModels() {}
             std::string name;
             uint32_t id;
             std::map<uint32_t, RigidBodyModel> boneModels;

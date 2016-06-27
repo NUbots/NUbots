@@ -36,7 +36,8 @@ namespace module {
         using message::input::Image;
 
         // We assume that the device will always be video0, if not then change this
-        LinuxCamera::LinuxCamera(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
+        LinuxCamera::LinuxCamera(std::unique_ptr<NUClear::Environment> environment)
+            : Reactor(std::move(environment)), camera() {
 
             // This trigger gets us as close as we can to the frame rate as possible (as high resolution as we can)
             on<Every<V4L2Camera::FRAMERATE, Per<std::chrono::seconds>>, Single>().then("Read Camera", [this] {

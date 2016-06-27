@@ -67,7 +67,7 @@ namespace behaviour {
 namespace planning {
 
     KickPlanner::KickPlanner(std::unique_ptr<NUClear::Environment> environment)
-        : Reactor(std::move(environment)) {
+        : Reactor(std::move(environment)), cfg() {
 
 
         on<Configuration>("KickPlanner.yaml").then([this](const Configuration& config) {

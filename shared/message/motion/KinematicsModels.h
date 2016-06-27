@@ -29,12 +29,13 @@ namespace message{
                 LEFT = true,
                 RIGHT = false
             };
-            
+
             class KinematicsModel{
             public:
+                KinematicsModel() : Leg(), Head(), Arm(), MassModel() {}
+
                 //Convention: all values positive
-                class {
-                public:
+                struct {
                     float HIP_OFFSET_X = 0.00;
                     float HIP_OFFSET_Y = 0.037; //DARWIN SAYS THIS IS 0.008
                     float HIP_OFFSET_Z = 0.034;
@@ -59,8 +60,7 @@ namespace message{
                     int LEFT_TO_RIGHT_ANKLE_ROLL =    -1;
                 } Leg;
 
-                class { 
-                public:   
+                struct {
                     float NECK_BASE_POS_FROM_ORIGIN_X = 0.013;
                     float NECK_BASE_POS_FROM_ORIGIN_Y = 0;
                     float NECK_BASE_POS_FROM_ORIGIN_Z = 0.11;
@@ -76,8 +76,7 @@ namespace message{
                     float MIN_PITCH = -M_PI / 3;
                 } Head;
 
-                class {
-                public:
+                struct {
                     float DISTANCE_BETWEEN_SHOULDERS = 0.114;
                     float SHOULDER_Z_OFFSET = 0.088;
                     float SHOULDER_X_OFFSET = 0.01;
@@ -95,8 +94,7 @@ namespace message{
                     float LOWER_ARM_Z_OFFSET = 0;  //Very rough
                 } Arm;
 
-                class{
-                public:
+                struct{
                     arma::vec4 masses[21] = {
                         arma::vec4({-0.011264,         0.0109774,      -0.00139357,    0.025913}),  //  R_SHOULDER_PITCH
                         arma::vec4({-0.011264,         -0.0109774,     -0.00139357,    0.025913}),  //  L_SHOULDER_PITCH
