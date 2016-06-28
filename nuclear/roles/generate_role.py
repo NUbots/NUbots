@@ -55,8 +55,8 @@ with open(role_name, 'w') as file:
     # Add our banner
     for banner_line in banner:
 
-        # Add the initial cout
-        file.write('    std::cout')
+        # Add the initial cerr
+        file.write('    std::cerr')
 
         # Split our line into sections for colours
         sections = [[k,len(list(g))] for k, g in itertools.groupby(banner_line)]
@@ -110,7 +110,7 @@ with open(role_name, 'w') as file:
         file.write(' << std::endl;\n');
 
     # Insert banner for the name of the executing role
-    rolebanner = '    std::cout << utility::strutil::banner("{0}");\n    std::cout << std::endl;\n'.format(os.path.splitext(os.path.basename(role_name))[0])
+    rolebanner = '    std::cerr << utility::strutil::banner("{0}");\n    std::cerr << std::endl;\n'.format(os.path.splitext(os.path.basename(role_name))[0])
     file.write(rolebanner)
 
     start = """
@@ -125,7 +125,7 @@ with open(role_name, 'w') as file:
     file.write(start)
 
     for module in role_modules:
-        file.write('    std::cout << "Installing " << "{0}" << std::endl;\n'.format(module))
+        file.write('    std::cerr << "Installing " << "{0}" << std::endl;\n'.format(module))
         file.write('    plant.install<module::{0}>();\n'.format(module))
 
     end = """
