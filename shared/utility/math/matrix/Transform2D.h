@@ -55,6 +55,7 @@ namespace matrix {
              */
             Transform(const arma::vec2 xy_, double angle_);
 
+           
             /**
              * Construct a transform that represents the position and
              * orientation of a camera positioned at 'from' and facing toward
