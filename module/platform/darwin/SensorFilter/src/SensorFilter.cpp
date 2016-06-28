@@ -140,9 +140,7 @@ namespace module {
                     this->config.motionFilter.noise.measurement.gyroscope        = arma::diagmat(config["motion_filter"]["noise"]["measurement"]["gyroscope"].as<arma::vec3>());
                     this->config.motionFilter.noise.measurement.footUpWithZ      = arma::diagmat(config["motion_filter"]["noise"]["measurement"]["foot_up_with_z"].as<arma::vec4>());
                     this->config.motionFilter.noise.measurement.flatFootOdometry = arma::diagmat(config["motion_filter"]["noise"]["measurement"]["flat_foot_odometry"].as<arma::vec3>());
-                    std::cout << "CA" << std::endl;
-                    this->config.motionFilter.noise.measurement.flatFootOrientation = arma::diagmat(config["motion_filter"]["noise"]["measurement"]["flat_foot_orientation"].as<arma::vec4>());
-                    std::cout << "CB" << std::endl;
+                    this->config.motionFilter.noise.measurement.flatFootOrientation = arma::diagmat(config["motion_filter"]["noise"]["measurement"]["flat_foot_orientation"].as<arma::vec4>());                    
 
                     // Update our process noises
                     this->config.motionFilter.noise.process.position           = config["motion_filter"]["noise"]["process"]["position"].as<arma::vec3>();
@@ -541,7 +539,7 @@ namespace module {
                     const auto& o = motionFilter.get();
 
                     // Map from world to torso coordinates
-                    sensors->world.fill(0);
+                    sensors->world.eye();
                     sensors->world.rotation() = Rotation3D(UnitQuaternion(o.rows(MotionModel::QW, MotionModel::QZ)));
                     //sensors->world.translation() = -(sensors->world.rotation() * o.rows(MotionModel::PX, MotionModel::PZ));
                     sensors->world.translation() = (o.rows(MotionModel::PX, MotionModel::PZ));

@@ -30,12 +30,12 @@ NUCLEAR_ROLE(
     behaviour::skills::Getup
     behaviour::skills::KickScript
     behaviour::skills::DirectWalkController
-    behaviour::skills::HeadBehaviourSoccer
+    #behaviour::skills::HeadBehaviourSoccer
 
     #behaviour::strategy::KeyboardWalk
 
     #Motion
     motion::ScriptEngine
     motion::WalkEngine
-    #motion::HeadController
+    motion::HeadController
 )

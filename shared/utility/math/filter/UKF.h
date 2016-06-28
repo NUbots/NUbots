@@ -233,13 +233,8 @@ namespace utility {
                     arma::mat predictedCovariance = covarianceFromSigmas(predictedObservations, predictedMean);
                     arma::mat innovationVariance = predictedCovariance + measurementVariance;
                     arma::mat scalarlikelihoodExponent = ((innovation.t() * innovationVariance.i()) * innovation);
-
-                    double expTerm = -0.5 * arma::as_scalar(scalarlikelihoodExponent);
-                    double normalisationFactor = pow(2 * M_PI, measurementVariance.n_rows) * arma::det(innovationVariance);
-                    double fract = 1 / sqrt(normalisationFactor);
-                    const float outlierProbability = 0.05;
-
-                    return (1.0 - outlierProbability) * fract * exp(expTerm) + outlierProbability;
+                    double loglikelihood = 0.5 * (std::log(arma::det(innovationVariance)) + std::abs(scalarlikelihoodExponent[0]) + innovation.n_elem * std::log(2 * M_PI));
+                    return -loglikelihood;
                 }
 
                 const StateVec& get() const {

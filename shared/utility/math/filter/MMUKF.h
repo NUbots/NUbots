@@ -67,11 +67,11 @@ namespace utility {
                     // Normalise our weights
                     double totalWeight = 0;
                     for (auto& filter : filters) {
-                        totalWeight += filter.weight;
+                        totalWeight = std::min(filter.weight, totalWeight);
                     }
-                    totalWeight = 1.0 / totalWeight;
+                    //totalWeight = 1.0 / totalWeight;
                     for (auto& filter : filters) {
-                        filter.weight *= totalWeight;
+                        filter.weight -= totalWeight;
                     }
                 }
 
@@ -132,7 +132,7 @@ namespace utility {
 
                     for (auto& filter : filters) {
                         double weight = filter.filter.measurementUpdate(measurement, measurementVariance, measurementArgs...);
-                        filter.weight *= weight;
+                        filter.weight += weight;
                     }
                 }
 
@@ -140,14 +140,13 @@ namespace utility {
                 void measurementUpdate(const std::initializer_list<std::tuple<TMeasurement, arma::mat, TMeasurementArgs...>>& measurements) {
 
                     std::vector<Filter> newFilters;
-
                     for (auto& filter : filters) {
 
                         for (auto& measurement : measurements) {
                             Filter split = filter;
 
                             double weight = applyMeasurement(split, measurement, std::make_index_sequence<2 + sizeof...(TMeasurementArgs)>());
-                            split.weight *= weight;
+                            split.weight += weight;
 
                             newFilters.push_back(split);
                         }
