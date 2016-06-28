@@ -115,8 +115,10 @@ namespace support {
         cfg_.ball.path.type = pathTypeFromString(config["ball"]["path"]["type"].as<std::string>());
 
         world.robotPose = config["initial"]["robot_pose"].as<arma::vec3>();
-        world.ball.position = config["initial"]["ball"]["position"].as<arma::vec3>();
-        world.ball.diameter = config["initial"]["ball"]["diameter"].as<Expression>();
+        world.ball = VirtualBall(
+            config["initial"]["ball"]["position"].as<arma::vec2>(),
+            config["initial"]["ball"]["diameter"].as<Expression>()
+        );
 
         cfg_.blind_robot = config["blind_robot"].as<bool>();
 

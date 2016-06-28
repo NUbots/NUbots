@@ -87,9 +87,9 @@ namespace support {
         double radius = cam.focalLengthPixels * std::tan(angle * 0.5);
 
         // Check our ball is on the screen at all and if so set the values
-        if (  centre[0] > int(cam.imageSizePixels[0])
+        if (  centre[0] > 0
            && centre[0] < int(cam.imageSizePixels[0])
-           && centre[1] > int(cam.imageSizePixels[1])
+           && centre[1] > 0
            && centre[1] < int(cam.imageSizePixels[1])) {
 
             // Set our circle parameters for simulating the ball

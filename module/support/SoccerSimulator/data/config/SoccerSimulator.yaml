@@ -48,7 +48,7 @@ initial:
   robot_pose: [-0.0, -0, 0] #pi / 2] # starting position
   # robot_pose: [-0.5, -3, pi / 2] # after penalty
   ball:
-    position: [0 , 0, 0]
+    position: [0, 0]
     diameter: 0.1
 
 # Turns off vision but leaves localisation running with no observations.
