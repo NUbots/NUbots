@@ -73,27 +73,16 @@ namespace localisation {
             // Use the current world to field state we are holding to modify sensors.world and emit that
             utility::math::matrix::Transform3D Htw = sensors.world;
 
-            //create the world-field transform
-            arma::vec3 rFWf;
-            rFWf[2] = 0.0;
-            rFWf.rows(0,1) = filter.get().rows(0,1);
-            //XXX: check correctness
-            utility::math::matrix::Transform3D Hwf = utility::math::matrix::Transform3D::createRotationZ(filter.get()[2])
-                                                   + utility::math::matrix::Transform3D::createTranslation(rFWf);
-            Hwf(3,3) = 1.0;
-
-            //get the robot's current pose in 2D
-            Transform2D currentPose = sensors.world.projectTo2D(arma::vec3({0,0,1}),arma::vec3({1,0,0}));
-            currentPose += filter.get();
+            //this actually gets Field to Torso???
             utility::math::matrix::Transform3D Hcf = utility::math::vision::getFieldToCam(
-                    currentPose,
-                    sensors.orientationCamToGround
+                    filter.get(),
+                    Htw
                 );
 
             //make a localisation object
             message::localisation::Self robot;
             Transform2D currentLocalisation = Hcf.i().projectTo2D(arma::vec3({0,0,1}),arma::vec3({1,0,0}));
-
+            std::cerr << "Localisation Offset: " << std::endl << filter.get() << std::endl;
             //set position, covariance, and rotation
             robot.position = currentLocalisation.rows(0,1);
             robot.robot_to_world_rotation = utility::math::matrix::Rotation2D::createRotation(currentLocalisation[2]);
@@ -109,7 +98,6 @@ namespace localisation {
         });
 
         on<Trigger<std::vector<Goal>>, With<FieldDescription>, Sync<RobotFieldLocalisation>>().then("Localisation Goal Update", [this] (const std::vector<Goal>& goals, const FieldDescription& field) {
-
             // If we have two goals that are left/right
             if(goals.size() == 2) {
 
