@@ -1,17 +1,17 @@
 
 ransac:
-  minimum_points_for_consensus: 10
+  minimum_points_for_consensus: 15
   maximum_iterations_per_fitting: 100
-  maximum_fitted_models: 3
-  consensus_error_threshold: 5
-maximum_disagreement_ratio: 1.15
-maximum_relative_seed_point_distance: 0.1
-measurement_distance_variance_factor: 0.1
-measurement_bearing_variance: 0.05
-measurement_elevation_variance: 0.05
-green_ratio_threshold: 0.1
-green_radial_samples: 3
-green_angular_samples: 8
+  maximum_fitted_models: 25
+  consensus_error_threshold: 6
+maximum_disagreement_ratio: 1.4
+maximum_relative_seed_point_distance: 0.2
+measurement_distance_variance_factor: 0.5
+measurement_bearing_variance: 0.2
+measurement_elevation_variance: 0.2
+green_ratio_threshold: 0.03
+green_radial_samples: 30
+green_angular_samples: 30
 
 clustering:
   number_of_clusters: 4 # set the number of Gaussians
