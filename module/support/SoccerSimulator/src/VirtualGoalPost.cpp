@@ -140,13 +140,24 @@ namespace support {
                 result.measurements.erase(result.measurements.begin()+2);
             }
             //goal sides visibility check
-            if ( not (((quad.getBottomLeft()[0] > 0 && quad.getBottomLeft()[0] < camParams.imageSizePixels[0]
-             && quad.getBottomRight()[0] > 0 && quad.getBottomRight()[0] < camParams.imageSizePixels[0])
-             || (quad.getTopLeft()[0] > 0 && quad.getTopLeft()[0] < camParams.imageSizePixels[0]
-             && quad.getTopRight()[0] > 0 && quad.getTopRight()[0] < camParams.imageSizePixels[0] ))
-             && (quad.getBottomRight()[1] < 0 && quad.getTopRight()[1] > camParams.imageSizePixels[1]
-             || quad.getBottomLeft()[1] < 0 && quad.getTopLeft()[1] > camParams.imageSizePixels[1]))
-
+            if (
+                not(
+                    (
+                        // One of the top or the bottom are in the screen coordinates of x
+                        (
+                            quad.getBottomLeft()[0] > 0 && quad.getBottomLeft()[0] < camParams.imageSizePixels[0] && quad.getBottomRight()[0] > 0 && quad.getBottomRight()[0] < camParams.imageSizePixels[0]
+                        ) || (
+                            quad.getTopLeft()[0] > 0 && quad.getTopLeft()[0] < camParams.imageSizePixels[0] && quad.getTopRight()[0] > 0 && quad.getTopRight()[0] < camParams.imageSizePixels[0]
+                        )
+                    ) && (
+                        // Check that the bottom is below the top of the screen and the top is below the bottom of the screen
+                        (
+                            quad.getBottomRight()[1] < camParams.imageSizePixels[1] && quad.getTopRight()[1] > 0
+                        ) || (
+                            quad.getBottomLeft()[1] < camParams.imageSizePixels[1] && quad.getTopLeft()[1] > 0
+                        )
+                    )
+                )
             ) {
                 result.measurements.erase(result.measurements.begin()+1);
                 result.measurements.erase(result.measurements.begin());
@@ -154,11 +165,6 @@ namespace support {
             if (!result.measurements.empty()) {
                 result.quad = quad;
             }
-            /*std::cout << result.measurements.size() << std::endl
-                      << quad.getTopLeft() << std::endl
-                      << quad.getTopRight()  << std::endl
-                      << quad.getBottomLeft() << std::endl
-                      << quad.getBottomRight() << std::endl;*/
         }
         result.sensors = sensors;
         result.timestamp = sensors->timestamp; // TODO: Eventually allow this to be different to sensors.
