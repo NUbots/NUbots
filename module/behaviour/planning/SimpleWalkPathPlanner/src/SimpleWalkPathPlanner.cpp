@@ -33,6 +33,10 @@
 #include "utility/math/matrix/Transform2D.h"
 
 
+#include "message/behaviour/Action.h"
+#include "message/input/LimbID.h"
+#include "message/input/ServoID.h"
+
 namespace module {
     namespace behaviour {
         namespace planning {
@@ -50,6 +54,21 @@ namespace module {
             using utility::math::matrix::Transform2D;
             using utility::nubugger::graph;
             using utility::nubugger::drawSphere;
+
+            using message::behaviour::MotionCommand;
+            using message::behaviour::RegisterAction;
+            using message::behaviour::ActionPriorites;
+            using message::input::LimbID;
+            using message::input::ServoID;
+
+            using message::motion::WalkStopped;
+            using message::motion::WalkCommand;
+            using message::motion::WalkStartCommand;
+            using message::motion::WalkStopCommand;
+            using message::motion::EnableWalkEngineCommand;
+            using message::motion::DisableWalkEngineCommand;
+
+
 
             using message::vision::Ball;
             using message::localisation::Self;
