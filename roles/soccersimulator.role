@@ -12,7 +12,7 @@ NUCLEAR_ROLE(
     support::configuration::SoccerConfig
 
     #input
-    #input::GameController
+    input::GameController
 
     #Simulation
     platform::darwin::HardwareSimulator
@@ -25,7 +25,6 @@ NUCLEAR_ROLE(
     #Localisation
     localisation::MMKFRobotLocalisation
     localisation::KFBallLocalisation
-    #localisation::SideChecker
 
     #Behaviour
     behaviour::Controller
@@ -36,7 +35,6 @@ NUCLEAR_ROLE(
     behaviour::skills::KickScript
     behaviour::planning::KickPlanner
     behaviour::planning::BezierWalkPathPlanner 
-    behaviour::skills::DirectWalkController
     behaviour::strategy::SoccerStrategy
 
     #Motion

@@ -1,12 +1,12 @@
 
 #WARNING: TURNING OFF auto_start_behaviour RESULTS IN LOCALISATION BEING SPAMMED WITH RESET HYPOTHESIS COMMANDS
-auto_start_behaviour: false
+auto_start_behaviour: true
 #-----------------------------------------------------------------------------
 
 vision:
   # Disabling either of these emits corresponding ground truth simulation results
   # as localisation result
-  goal_observations: true
+  goal_observations: false
   ball_observations: true
 
   distinguish_own_and_opponent_goals: false
@@ -45,7 +45,7 @@ ball:
 
 # Initial pose of the robot, mainly for MOTION type
 initial:
-  robot_pose: [-3.0, -3, pi / 2] # starting position
+  robot_pose: [-1, 0, 0] # starting position
   # robot_pose: [-0.5, -3, pi / 2] # after penalty
   ball:
     position: [0 , 0, 0]
