@@ -230,8 +230,7 @@ namespace vision {
 
 
         //create the camera to field transformation
-        utility::math::matrix::Transform3D Hct = sensors.forwardKinematics.find(ServoID::HEAD_PITCH)->second.i();
-        utility::math::matrix::Transform3D Htw = sensors.world;
+        utility::math::matrix::Transform3D Hgc = sensors.orientationCamToGround;
 
 
         //create the world-field transform
@@ -240,17 +239,19 @@ namespace vision {
         rFWw.rows(0,1) = robotPose.rows(0,1);
 
         //XXX: check correctness
-        utility::math::matrix::Transform3D Hwf = utility::math::matrix::Transform3D::createRotationZ(robotPose[2]);
+        utility::math::matrix::Transform3D Hgf = utility::math::matrix::Transform3D::createTranslation(rFWw) * utility::math::matrix::Transform3D::createRotationZ(-robotPose[2]);
 
         //We create camera world by using camera-torso -> torso-world -> world->field
-        utility::math::matrix::Transform3D Hcf = Hct * utility::math::matrix::Transform3D::createTranslation(rFWw) * Htw * Hwf;
+        utility::math::matrix::Transform3D Hcf = Hgc.i() * Hgf;
         //std::cout  << "meas data" << std::endl << Hct << std::endl << Htw << std::endl << Hwf << utility::math::matrix::Transform3D::createTranslation(rFWf) << std::endl << utility::math::matrix::Transform3D::createRotationZ(robotPose[2]) << std::endl << std::endl << Hcf << std::endl;
         //transform the goals from field to camera
         //std::cout << arma::mat(Hcf * goalBaseCorners) << std::endl;
         goalBaseCorners = arma::mat(Hcf * goalBaseCorners).rows(0,2);
         arma::mat::fixed<3,4> prediction;
+        
+
         //if the goals are not in front of us, do not return valid normals
-        if (arma::any(goalBaseCorners.row(0) < 0.0)) {
+        if (arma::any(goalBaseCorners.row(0) > 0.0)) {
             prediction.fill(0);
             return prediction;
         }
