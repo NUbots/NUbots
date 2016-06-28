@@ -56,7 +56,7 @@ namespace module {
 
             SimpleWalkPathPlanner::SimpleWalkPathPlanner(std::unique_ptr<NUClear::Environment> environment)
              : Reactor(std::move(environment)),
-             // , subsumptionId(size_t(this) * size_t(this) - size_t(this)) 
+             subsumptionId(size_t(this) * size_t(this) - size_t(this)),
              currentTargetPosition(arma::fill::zeros),
              currentTargetHeading(arma::fill::zeros),
              planType(message::behaviour::MotionCommand::Type::StandStill),
@@ -73,9 +73,39 @@ namespace module {
 
                 });
 
+                emit<Scope::INITIALIZE>(std::make_unique<RegisterAction>(RegisterAction {
+                    subsumptionId,
+                    "Simple Walk Path Planner",
+                    {
+                        // Limb sets required by the walk engine:
+                        std::pair<double, std::set<LimbID>>(0, {LimbID::LEFT_LEG, LimbID::RIGHT_LEG}),
+                        std::pair<double, std::set<LimbID>>(0, {LimbID::LEFT_ARM, LimbID::RIGHT_ARM}),
+                    },
+                    [this] (const std::set<LimbID>& givenLimbs) {
+                        if (givenLimbs.find(LimbID::LEFT_LEG) != givenLimbs.end()) {
+                            // Enable the walk engine.
+                            emit<Scope::DIRECT>(std::move(std::make_unique<EnableWalkEngineCommand>(subsumptionId)));
+                        }
+                    },
+                    [this] (const std::set<LimbID>& takenLimbs) {
+                        if (takenLimbs.find(LimbID::LEFT_LEG) != takenLimbs.end()) {
+                            // Shut down the walk engine, since we don't need it right now.
+                            emit<Scope::DIRECT>(std::move(std::make_unique<DisableWalkEngineCommand>(subsumptionId)));
+                        }
+                    },
+                    [this] (const std::set<ServoID>&) {
+                        // nothing
+                    }
+                }));
+
 
                 on<Trigger<KickFinished>>().then([this] (const KickFinished&) {
                     emit(std::move(std::make_unique<WalkStartCommand>(1)));
+                });
+
+                on<Trigger<MotionCommand>, Sync<SimpleWalkPathPlanner>>().then([this] (const MotionCommand& cmd) {
+                    //save the plan
+                    planType = cmd.type;
                 });
 
                 on<Every<20, Per<std::chrono::seconds>>

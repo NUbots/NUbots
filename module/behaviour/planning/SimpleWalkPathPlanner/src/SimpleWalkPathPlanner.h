@@ -43,6 +43,7 @@ namespace module {
                  */
                 class SimpleWalkPathPlanner : public NUClear::Reactor {
                 private:
+                    const size_t subsumptionId;
                     float turnSpeed = 0.8;
                     float forwardSpeed = 1;
                     float a = 7;
