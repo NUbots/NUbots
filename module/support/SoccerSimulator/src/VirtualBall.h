@@ -20,6 +20,7 @@
 #ifndef MODULE_SUPPORT_VIRTUALBALL
 #define MODULE_SUPPORT_VIRTUALBALL
 
+#include <random>
 #include <armadillo>
 
 #include "utility/math/matrix/Transform2D.h"
@@ -38,8 +39,11 @@ namespace support {
 
         arma::vec3 position;
         arma::vec3 velocity;
-
         float diameter;
+
+        std::mt19937 rd;
+        std::normal_distribution<> angularDistribution = std::normal_distribution<>(0, M_PI_2);
+        std::normal_distribution<> radialDistribution = std::normal_distribution<>(0, 0.01);
 
         message::vision::Ball detect(const message::input::CameraParameters& camParams, utility::math::matrix::Transform2D robotPose, std::shared_ptr<const message::input::Sensors> sensors, arma::vec4 error);
     };

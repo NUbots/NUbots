@@ -24,6 +24,7 @@
 #include "message/vision/VisionObjects.h"
 #include "message/input/CameraParameters.h"
 #include "message/input/Sensors.h"
+#include "utility/math/matrix/Rotation3D.h"
 #include "utility/math/coordinates.h"
 #include "utility/math/vision.h"
 
@@ -33,18 +34,24 @@ namespace support {
     using message::vision::Ball;
     using message::input::Sensors;
     using utility::math::matrix::Transform2D;
+    using utility::math::matrix::Rotation3D;
+    using utility::math::vision::projectCamSpaceToScreen;
+    using utility::math::vision::screenToImage;
+    using utility::math::vision::getCamToField;
     using message::input::CameraParameters;
 
     VirtualBall::VirtualBall()
     : position(arma::fill::zeros)
     , velocity(arma::fill::zeros)
-    , diameter(0.1) {
+    , diameter(0.1)
+    , rd(rand()) {
     }
 
     VirtualBall::VirtualBall(arma::vec2 position, float diameter)
-    : position(position)
+    : position({position[0], position[1], diameter * 0.5})
     , velocity(arma::fill::zeros)
-    , diameter(diameter) {
+    , diameter(diameter)
+    , rd(rand()) {
     }
 
     // utility::math::matrix::Transform2D ballPose;
@@ -54,21 +61,70 @@ namespace support {
     // arma::vec2 position;
     float diameter;
 
-    Ball VirtualBall::detect(const CameraParameters& /*camParams*/, Transform2D /*robotPose*/, std::shared_ptr<const Sensors> sensors, arma::vec4 /*error*/){
+    Ball VirtualBall::detect(const CameraParameters& cam, Transform2D robotPose, std::shared_ptr<const Sensors> sensors, arma::vec4 /*error*/){
+
         Ball result;
 
-        //auto visibleMeasurements = computeVisible(position,camParams,robotPose,sensors,error);
+        Transfrom3D Hcf = getFieldToCam(robotPose, sensors.orientationCamToGround);
+        Transfrom3D Hfc = Hcf.i();
 
-        // TODO: set timestamp, sensors, classifiedImage?
-        /*for (auto& m : visibleMeasurements.measurements){
-            m.velocity.rows(0,1) = robotPose.rotation().i() * velocity.rows(0,1);
-            m.velCov = 0.1 * arma::eye(3,3);
-            result.measurements.push_back(m);
-        }*/
+        // Ball position in field
+        arma::vec3 rBFf = position;
+
+        // Camera position in field
+        arma::vec3 rCFf = Hfc.translation();
+
+        // Get our ball position in camera
+        arma::vec3 rBCc = Hcf.rotation() * arma::vec3(rBFf - rCFf);
+        double rBCcLength = arma::norm(rBCc);
+
+        // The angular width of the cone we are drawing
+        double angle = 2.0 * std::asin((diameter * 0.5) / arma::norm(rBCc));
+
+        // Project the centre to the screen and work out the radius as if it was in the centre
+        arma::ivec2 centre = screenToImage(projectCamSpaceToScreen(rBCc, cam.focalLengthPixels), cam.imageSizePixels);
+        double radius = cam.focalLengthPixels * std::tan(angle * 0.5);
+
+        // Check our ball is on the screen at all and if so set the values
+        if (  centre[0] > int(cam.imageSizePixels[0])
+           && centre[0] < int(cam.imageSizePixels[0])
+           && centre[1] > int(cam.imageSizePixels[1])
+           && centre[1] < int(cam.imageSizePixels[1])) {
+
+            // Set our circle parameters for simulating the ball
+            result.circle.centre = arma::conv_to<arma::vec>::from(centre);
+            result.circle.radius = radius;
+
+            // Measure points around the ball as a normal distribution
+            arma::vec3 rEBc;
+            if (rBCc[0] == 0.0 && rBCc[1] == 0.0 ) {
+                if (rBCc[2] > 0.0) {
+                    rEBc = { 1, 0, 0};
+                } else {
+                    rEBc = { -1, 0, 0};
+                }
+            }
+            else {
+                //NOTE: this may not work correctly for view fields > 180 degrees
+                rEBc = { M_SQRT1_2, 0, M_SQRT1_2 };
+            }
+            //set rEBC to be a properly sized radius vector facing from the ball centre towards the (top or inner int he case of extreme values) ball edge
+            rEBc = rBCcLength * arma::normalise(rEBc - rEBc * arma::dot(rEBc, rBCc) / rBCcLength);
 
 
-        //result.screenAngular = visibleMeasurements.screenAngular;
-        //result.angularSize = arma::vec2({0, 0});
+            for (int i = 0; i < 50; ++i) {
+                //
+                double radialJitter = radialDistribution(rd);
+                double angleOffset = angularDistribution(rd);
+
+                // Get a random number for which direciton the measurement is
+                arma::vec3 rEBc = rEBc * std::tan(angle + radialJitter / 2.0);
+
+                // Make a rotation matrix to rotate our vector to our target
+                result.edgePoints.push_back(arma::normalise(Rotation3D(arma::normalise(rBCc), angle + angleOffset) * rEBc));
+            }
+        }
+
         result.sensors = sensors;
         result.timestamp = sensors->timestamp; // TODO: Eventually allow this to be different to sensors.
 
