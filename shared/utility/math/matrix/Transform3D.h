@@ -22,7 +22,7 @@
 
 #include <armadillo>
 
-#include "utility/math/matrix/Transform2D.h"
+#include "Transform2D.h"
 #include "utility/math/matrix/Rotation3D.h"
 #include "utility/math/geometry/UnitQuaternion.h"
 
@@ -225,6 +225,13 @@ namespace matrix {
              * @return  alpha * (T2 - T1) + T1;
              */
             static Transform3D interpolate(Transform3D T1, Transform3D T2, float alpha);
+
+            /**
+             * @brief Construct transform from a transform 3D assuming the angle is around the yawAxis 
+             * and the translation is projected onto the plane normal to yawAxis
+             */
+            Transform2D projectTo2D(const arma::vec3& yawAxis, const arma::vec3& forwardAxis) const;
+
     };
 
 }  // matrix

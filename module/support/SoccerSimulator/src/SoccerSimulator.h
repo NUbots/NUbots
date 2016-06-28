@@ -140,6 +140,7 @@ namespace support {
 
 
         bool kicking = false;
+        bool walking = false;
         bool lastKicking = false;
         uint PLAYER_ID;
 

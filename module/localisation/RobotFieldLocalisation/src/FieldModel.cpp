@@ -21,6 +21,7 @@
 #include "FieldModel.h"
 #include "utility/math/matrix/Rotation3D.h"
 #include "utility/math/matrix/Transform3D.h"
+#include "utility/math/matrix/Transform2D.h"
 #include "utility/math/vision.h"
 
 namespace module {
@@ -28,6 +29,7 @@ namespace module {
 
         using utility::math::matrix::Rotation3D;
         using utility::math::matrix::Transform3D;
+        using utility::math::matrix::Transform2D;
         using utility::math::vision::cameraSpaceGoalProjection;
         using message::vision::Goal;
         using message::support::FieldDescription;
@@ -84,7 +86,8 @@ namespace module {
                         break;
                 }
 
-                arma::mat::fixed<3,4> goalNormals = cameraSpaceGoalProjection(state,goalLocation,field,sensors);
+                Transform2D world = sensors.world.projectTo2D(arma::vec3{0,0,1},arma::vec3{1,0,0});
+                arma::mat::fixed<3,4> goalNormals = cameraSpaceGoalProjection(state + world,goalLocation,field,sensors);
                 // Switch on normal type
                 switch(std::get<2>(type)) {
 
