@@ -88,7 +88,7 @@ namespace module {
                         break;
                 }
                 //XXX: this should use a torso transform that includes our IMU orientation
-                if ( arma::any(lastGoalLocation == goalLocation) ) {
+                if ( !arma::all(lastGoalLocation == goalLocation) ) {
                     goalNormals = cameraSpaceGoalProjection(state + world,goalLocation,field,sensors.orientationCamToGround);
                 }
                 // Switch on normal type
