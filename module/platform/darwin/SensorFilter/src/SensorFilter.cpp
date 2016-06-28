@@ -140,7 +140,7 @@ namespace module {
                     this->config.motionFilter.noise.measurement.gyroscope        = arma::diagmat(config["motion_filter"]["noise"]["measurement"]["gyroscope"].as<arma::vec3>());
                     this->config.motionFilter.noise.measurement.footUpWithZ      = arma::diagmat(config["motion_filter"]["noise"]["measurement"]["foot_up_with_z"].as<arma::vec4>());
                     this->config.motionFilter.noise.measurement.flatFootOdometry = arma::diagmat(config["motion_filter"]["noise"]["measurement"]["flat_foot_odometry"].as<arma::vec3>());
-                    this->config.motionFilter.noise.measurement.flatFootOrientation = arma::diagmat(config["motion_filter"]["noise"]["measurement"]["flat_foot_orientation"].as<arma::vec4>());                    
+                    this->config.motionFilter.noise.measurement.flatFootOrientation = arma::diagmat(config["motion_filter"]["noise"]["measurement"]["flat_foot_orientation"].as<arma::vec4>());
 
                     // Update our process noises
                     this->config.motionFilter.noise.process.position           = config["motion_filter"]["noise"]["process"]["position"].as<arma::vec3>();
@@ -555,6 +555,9 @@ namespace module {
                     /************************************************
                      *                  Kinematics Horizon          *
                      ************************************************/
+
+                    sensors->bodyCentreHeight = motionFilter.get()[MotionModel::PZ];
+
                     sensors->orientationBodyToGround = utility::motion::kinematics::calculateBodyToGround(sensors->world.submat(0,2,2,2), sensors->bodyCentreHeight);
                     sensors->orientationCamToGround = sensors->orientationBodyToGround * sensors->forwardKinematics[ServoID::HEAD_PITCH];
                     if(sensors->leftFootDown) {
