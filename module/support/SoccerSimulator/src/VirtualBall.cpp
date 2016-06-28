@@ -34,10 +34,11 @@ namespace support {
     using message::vision::Ball;
     using message::input::Sensors;
     using utility::math::matrix::Transform2D;
+    using utility::math::matrix::Transform3D;
     using utility::math::matrix::Rotation3D;
     using utility::math::vision::projectCamSpaceToScreen;
     using utility::math::vision::screenToImage;
-    using utility::math::vision::getCamToField;
+    using utility::math::vision::getFieldToCam;
     using message::input::CameraParameters;
 
     VirtualBall::VirtualBall()
@@ -65,8 +66,8 @@ namespace support {
 
         Ball result;
 
-        Transfrom3D Hcf = getFieldToCam(robotPose, sensors.orientationCamToGround);
-        Transfrom3D Hfc = Hcf.i();
+        Transform3D Hcf = getFieldToCam(robotPose, sensors->orientationCamToGround);
+        Transform3D Hfc = Hcf.i();
 
         // Ball position in field
         arma::vec3 rBFf = position;
