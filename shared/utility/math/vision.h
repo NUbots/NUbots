@@ -208,18 +208,21 @@ namespace vision {
 
     inline utility::math::matrix::Transform3D getFieldToCam (
                     const arma::vec3& robotPose2D,
+                    //camToGround is Hwc
                     const utility::math::matrix::Transform3D& camToGround
 
                 ) {
 
-        //create the world-field transform
-        arma::vec3 rFWw;
-        rFWw[2] = 0.0;
-        rFWw.rows(0,1) = robotPose2D.rows(0,1);
+        arma::vec3 rWFf;
+        rWFf.rows(0,1) = -robotPose2D.rows(0,1);
+        rWFf[2] = 0.0;
+        // Hwf = rWFw * Rwf
+        utility::math::matrix::Transform3D Hwf = 
+            utility::math::matrix::Transform3D::createRotationZ(-robotPose2D[2])
+            * utility::math::matrix::Transform3D::createTranslation(rWFf); 
 
-        utility::math::matrix::Transform3D Hgf = utility::math::matrix::Transform3D::createTranslation(-rFWw) * 
-                                                 utility::math::matrix::Transform3D::createRotationZ(-robotPose2D[2]);
-        return camToGround.i() * Hgf;
+
+        return camToGround.i() * Hwf;
     }
 
     inline arma::mat::fixed<3,4> cameraSpaceGoalProjection(
@@ -231,6 +234,7 @@ namespace vision {
         using message::input::ServoID;
         using message::vision::Goal;
 
+        utility::math::matrix::Transform3D Hcf = getFieldToCam(robotPose,camToGround);
         //NOTE: this code assumes that goalposts are boxes with width and high of goalpost_diameter
         //make the base goal corners
         arma::mat goalBaseCorners(4,4);
@@ -239,26 +243,24 @@ namespace vision {
         goalBaseCorners.submat(0,0,1,3) -= 0.5*field.dimensions.goalpost_diameter;
         goalBaseCorners.submat(0,0,1,0) += field.dimensions.goalpost_diameter;
         goalBaseCorners.submat(1,1,2,1) += field.dimensions.goalpost_diameter;
-
         //make the top corner points
         arma::mat goalTopCorners = goalBaseCorners;
-        goalTopCorners.row(2).fill(field.goalpost_top_height);
         
 
         //We create camera world by using camera-torso -> torso-world -> world->field
-        utility::math::matrix::Transform3D Hcf = getFieldToCam(robotPose,camToGround);
         //transform the goals from field to camera
         goalBaseCorners = arma::mat(Hcf * goalBaseCorners).rows(0,2);
-        arma::mat::fixed<3,4> prediction;
+
         
 
         //if the goals are not in front of us, do not return valid normals
-        if (arma::any(goalBaseCorners.row(0) > 0.0)) {
+        arma::mat::fixed<3,4> prediction;
+        if (arma::any(goalBaseCorners.row(0) < 0.0)) {
             prediction.fill(0);
             return prediction;
         }
 
-
+        goalTopCorners.row(2).fill(field.goalpost_top_height);
         goalTopCorners = arma::mat(Hcf * goalTopCorners).rows(0,2);
 
         //Select the (tl, tr, bl, br) corner points for normals
