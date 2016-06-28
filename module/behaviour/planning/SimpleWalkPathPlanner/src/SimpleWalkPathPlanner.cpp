@@ -75,10 +75,10 @@ namespace module {
 
             SimpleWalkPathPlanner::SimpleWalkPathPlanner(std::unique_ptr<NUClear::Environment> environment)
              : Reactor(std::move(environment)),
+             latestCommand(MotionCommand::StandStill()),
              subsumptionId(size_t(this) * size_t(this) - size_t(this)),
              currentTargetPosition(arma::fill::zeros),
              currentTargetHeading(arma::fill::zeros),
-             planType(message::behaviour::MotionCommand::Type::StandStill),
              targetHeading({arma::vec2({0,0}),KickType::SCRIPTED})
              {
 
@@ -122,11 +122,6 @@ namespace module {
                     emit(std::move(std::make_unique<WalkStartCommand>(1)));
                 });
 
-                on<Trigger<MotionCommand>, Sync<SimpleWalkPathPlanner>>().then([this] (const MotionCommand& cmd) {
-                    //save the plan
-                    planType = cmd.type;
-                });
-
                 on<Every<20, Per<std::chrono::seconds>>
                  , With<std::vector<Ball>>
                  , With<std::vector<Self>>
@@ -134,20 +129,22 @@ namespace module {
                     const std::vector<Ball>& ball,
                     const std::vector<Self>& selfs) {
 
-                    if (planType == message::behaviour::MotionCommand::Type::StandStill) {
+                    if (latestCommand.type == message::behaviour::MotionCommand::Type::StandStill) {
 
+                        
                         emit(std::make_unique<WalkStopCommand>(1));
+                        emit(std::make_unique<ActionPriorites>(ActionPriorites { subsumptionId, { 26, 11 }}));
+
                         return;
 
                     }
-                    else if (planType == message::behaviour::MotionCommand::Type::DirectCommand) {
+                    else if (latestCommand.type == message::behaviour::MotionCommand::Type::DirectCommand) {
                         //TO DO, change to Bezier stuff
 
-                        std::unique_ptr<WalkCommand> command = std::make_unique<WalkCommand>(1, Transform2D({currentTargetPosition[0], currentTargetPosition[1], 0.5}));
-                        command->command.xy()    = currentTargetPosition;
-                        command->command.angle() = currentTargetHeading[0];
+                        std::unique_ptr<WalkCommand> command = std::make_unique<WalkCommand>(subsumptionId,latestCommand.walkCommand);
                         emit(std::move(command));
                         emit(std::move(std::make_unique<WalkStartCommand>(1)));
+                        emit(std::make_unique<ActionPriorites>(ActionPriorites { subsumptionId, { 26, 11 }}));
                         return;
 
                     }
@@ -155,7 +152,9 @@ namespace module {
                     
 
                     // TODO: support non-ball targets
-                    arma::vec2 position = ball[0].measurements[0].position.rows(0,1);
+                    arma::vec2 position = ball.size() > 0 ? ball[0].measurements[0].position.rows(0,1) : 
+                                                            arma::vec2({1,0});
+
 
                     float angle = std::atan2(position[1], position[0]);
                     angle = std::min(turnSpeed, std::max(angle, -turnSpeed));
@@ -174,7 +173,7 @@ namespace module {
                     // emit(graph("distanceToBall", distanceToBall));
                     // emit(graph("forwardSpeed2", finalForwardSpeed));
 
-                    std::unique_ptr<WalkCommand> command = std::make_unique<WalkCommand>(1, Transform2D({currentTargetPosition[0], currentTargetPosition[1], 0.5}));
+                    std::unique_ptr<WalkCommand> command = std::make_unique<WalkCommand>(subsumptionId, Transform2D({currentTargetPosition[0], currentTargetPosition[1], 0.5}));
                     command->command = Transform2D({finalForwardSpeed, 0, angle});
 
                     arma::vec2 ball_world_position = RobotToWorldTransform(selfs.front().position, selfs.front().heading, position);
@@ -185,15 +184,13 @@ namespace module {
                     emit(std::move(std::make_unique<WalkStartCommand>(1)));
                     emit(std::move(command));
 
+                    emit(std::make_unique<ActionPriorites>(ActionPriorites { subsumptionId, { 26, 11 }}));
                 });
 
                 on<Trigger<MotionCommand>, Sync<SimpleWalkPathPlanner>>().then([this] (const MotionCommand& cmd) {
                     //save the plan
-                    planType = cmd.type;
-                    // targetHeading = cmd.kickTargetType;
-                    // targetPosition = cmd.targetPositionType;
-                    // currentTargetPosition = cmd.kickTarget;
-                    currentTargetHeading = std::atan2(cmd.kickTarget[1],cmd.kickTarget[0]);
+                    latestCommand = cmd;
+
                 });
 
             }

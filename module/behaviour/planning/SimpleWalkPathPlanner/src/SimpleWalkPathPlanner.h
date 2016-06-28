@@ -43,6 +43,7 @@ namespace module {
                  */
                 class SimpleWalkPathPlanner : public NUClear::Reactor {
                 private:
+                    message::behaviour::MotionCommand latestCommand;
                     const size_t subsumptionId;
                     float turnSpeed = 0.8;
                     float forwardSpeed = 1;
@@ -54,7 +55,6 @@ namespace module {
                     //info for the current walk
                     arma::vec2 currentTargetPosition;
                     arma::vec2 currentTargetHeading;
-                    message::behaviour::MotionCommand::Type planType;
                     message::behaviour::KickPlan targetHeading;
                     arma::vec2 targetPosition = {0, 0}; 
                     
