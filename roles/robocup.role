@@ -37,6 +37,7 @@ NUCLEAR_ROLE(
     behaviour::skills::KickScript
     behaviour::skills::HeadBehaviourSoccer
     behaviour::planning::KickPlanner
+    behaviour::planning::SimpleWalkPathPlanner  # Creates WalkPaths.
     #behaviour::planning::BezierWalkPathPlanner  # Creates WalkPaths.
     behaviour::strategy::SoccerStrategy
 

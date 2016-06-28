@@ -43,10 +43,10 @@ namespace module {
                  */
                 class SimpleWalkPathPlanner : public NUClear::Reactor {
                 private:
-                    float turnSpeed;
-                    float forwardSpeed;
-                    float a;
-                    float b;
+                    float turnSpeed = 0.8;
+                    float forwardSpeed = 1;
+                    float a = 7;
+                    float b = 0;
 
                     //-----------non-config variables (not defined in WalkPathPlanner.yaml)-----------
 
