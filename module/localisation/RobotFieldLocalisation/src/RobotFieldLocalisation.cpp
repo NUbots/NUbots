@@ -27,7 +27,8 @@
 #include "utility/math/matrix/Rotation2D.h"
 #include "utility/math/matrix/Rotation3D.h"
 #include "utility/support/yaml_armadillo.h"
- #include "utility/nubugger/NUhelpers.h"
+#include "utility/nubugger/NUhelpers.h"
+#include "utility/math/vision.h"
 
 namespace module {
 namespace localisation {
@@ -39,6 +40,7 @@ namespace localisation {
     using utility::math::filter::MMUKF;
     using utility::math::filter::UKF;
     using utility::nubugger::graph;
+    using utility::math::matrix::Transform2D;
 
     RobotFieldLocalisation::RobotFieldLocalisation(std::unique_ptr<NUClear::Environment> environment)
     : Reactor(std::move(environment))
@@ -80,16 +82,21 @@ namespace localisation {
                                                    + utility::math::matrix::Transform3D::createTranslation(rFWf);
             Hwf(3,3) = 1.0;
 
-            //extract the 2D yaw from the field-torso transform
-            utility::math::matrix::Transform3D Htf = utility::math::matrix::Transform3D(Htw * Hwf);
-            double yaw = utility::math::matrix::Rotation3D(Htf.rotation()).yaw();
+            //get the robot's current pose in 2D
+            Transform2D currentPose = sensors.world.projectTo2D(arma::vec3({0,0,1}),arma::vec3({1,0,0}));
+            currentPose += filter.get();
+            utility::math::matrix::Transform3D Hcf = utility::math::vision::getFieldToCam(
+                    currentPose,
+                    sensors.orientationCamToGround
+                );
 
             //make a localisation object
             message::localisation::Self robot;
+            Transform2D currentLocalisation = Hcf.i().projectTo2D(arma::vec3({0,0,1}),arma::vec3({1,0,0}));
 
             //set position, covariance, and rotation
-            robot.position = Htf.translation().rows(0,1);
-            robot.robot_to_world_rotation = utility::math::matrix::Rotation2D::createRotation(yaw);
+            robot.position = currentLocalisation.rows(0,1);
+            robot.robot_to_world_rotation = utility::math::matrix::Rotation2D::createRotation(currentLocalisation[2]);
             robot.position_cov = robot.robot_to_world_rotation * filter.getCovariance().submat(0,0,1,1);
             robot.heading = robot.robot_to_world_rotation.row(0).t();
             emit(std::make_unique<std::vector<message::localisation::Self>>(std::vector<message::localisation::Self>(1,robot)));

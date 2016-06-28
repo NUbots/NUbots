@@ -206,11 +206,27 @@ namespace vision {
         return {std::atan2(v[1],v[0]),std::atan2(v[2],v[0])};
     }
 
+    inline utility::math::matrix::Transform3D getFieldToCam (
+                    const arma::vec3& robotPose2D,
+                    const utility::math::matrix::Transform3D& camToGround
+
+                ) {
+
+        //create the world-field transform
+        arma::vec3 rFWw;
+        rFWw[2] = 0.0;
+        rFWw.rows(0,1) = robotPose2D.rows(0,1);
+
+        utility::math::matrix::Transform3D Hgf = utility::math::matrix::Transform3D::createTranslation(rFWw) * 
+                                                 utility::math::matrix::Transform3D::createRotationZ(-robotPose2D[2]);
+        return camToGround.i() * Hgf;;
+    }
+
     inline arma::mat::fixed<3,4> cameraSpaceGoalProjection(
             const arma::vec3& robotPose,
             const arma::vec3& goalLocation,
             const message::support::FieldDescription& field, 
-            const message::input::Sensors& sensors)
+            const utility::math::matrix::Transform3D& camToGround) //camtoground is either camera to ground or camera to world, depending on application
     {
         using message::input::ServoID;
         using message::vision::Goal;
@@ -227,25 +243,11 @@ namespace vision {
         //make the top corner points
         arma::mat goalTopCorners = goalBaseCorners;
         goalTopCorners.row(2).fill(field.goalpost_top_height);
-
-
-        //create the camera to field transformation
-        utility::math::matrix::Transform3D Hgc = sensors.orientationCamToGround;
-
-
-        //create the world-field transform
-        arma::vec3 rFWw;
-        rFWw[2] = 0.0;
-        rFWw.rows(0,1) = robotPose.rows(0,1);
-
-        //XXX: check correctness
-        utility::math::matrix::Transform3D Hgf = utility::math::matrix::Transform3D::createTranslation(rFWw) * utility::math::matrix::Transform3D::createRotationZ(-robotPose[2]);
+        
 
         //We create camera world by using camera-torso -> torso-world -> world->field
-        utility::math::matrix::Transform3D Hcf = Hgc.i() * Hgf;
-        //std::cout  << "meas data" << std::endl << Hct << std::endl << Htw << std::endl << Hwf << utility::math::matrix::Transform3D::createTranslation(rFWf) << std::endl << utility::math::matrix::Transform3D::createRotationZ(robotPose[2]) << std::endl << std::endl << Hcf << std::endl;
+        utility::math::matrix::Transform3D Hcf = getFieldToCam(robotPose,camToGround);
         //transform the goals from field to camera
-        //std::cout << arma::mat(Hcf * goalBaseCorners) << std::endl;
         goalBaseCorners = arma::mat(Hcf * goalBaseCorners).rows(0,2);
         arma::mat::fixed<3,4> prediction;
         
@@ -259,8 +261,6 @@ namespace vision {
 
         goalTopCorners = arma::mat(Hcf * goalTopCorners).rows(0,2);
 
-
-        //std::cout << goalTopCorners << std::endl;
         //Select the (tl, tr, bl, br) corner points for normals
         arma::ivec4 cornerIndices;
         cornerIndices.fill(0);

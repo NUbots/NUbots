@@ -92,7 +92,7 @@ namespace support {
         //push the new measurement types
         //TODO: simulate not having values if off screen
         //std::cout << this->position;
-        arma::mat::fixed<3,4> goalNormals = cameraSpaceGoalProjection(robotPose, this->position, field, *sensors);
+        arma::mat::fixed<3,4> goalNormals = cameraSpaceGoalProjection(robotPose, this->position, field, sensors->orientationCamToGround);
         if (arma::any(arma::any(goalNormals > 0.0))) {
             result.measurements.push_back(
                 std::make_pair<Goal::MeasurementType, arma::vec3>(
