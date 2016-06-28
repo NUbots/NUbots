@@ -85,35 +85,33 @@ namespace module {
                 }
 
                 arma::mat::fixed<3,4> goalNormals = cameraSpaceGoalProjection(state,goalLocation,field,sensors);
-
                 // Switch on normal type
                 switch(std::get<2>(type)) {
 
                     case Goal::MeasurementType::LEFT_NORMAL: {
-                        prediction.rows(counter,counter+2) = prediction.col(0);
+                        prediction.rows(counter,counter+2) = goalNormals.col(0);
                     } break;
 
                     case Goal::MeasurementType::RIGHT_NORMAL: {
-                        prediction.rows(counter,counter+2) = prediction.col(1);
+                        prediction.rows(counter,counter+2) = goalNormals.col(1);
                     } break;
 
                     case Goal::MeasurementType::TOP_NORMAL: {
-                        prediction.rows(counter,counter+2) = prediction.col(2);
+                        prediction.rows(counter,counter+2) = goalNormals.col(2);
                     } break;
 
                     case Goal::MeasurementType::BASE_NORMAL: {
-                        prediction.rows(counter,counter+2) = prediction.col(3);
+                        prediction.rows(counter,counter+2) = goalNormals.col(3);
                     } break;
 
                 }
                 counter += 3;
             }
-
             return prediction;
         }
 
         arma::vec FieldModel::observationDifference(const arma::vec& a, const arma::vec& b) const {
-            return a - b;
+            return (a - b);
         }
 
         arma::vec::fixed<FieldModel::size> FieldModel::limitState(const arma::vec::fixed<size>& state) const {
