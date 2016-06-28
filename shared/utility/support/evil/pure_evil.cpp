@@ -54,11 +54,7 @@ extern "C" {
 
         if(filename && function) {
             // Add a new one
-            stack->emplace_back();
-            stack->back().lineno = lineno;
-            stack->back().pc = pc;
-            stack->back().file = filename;
-            stack->back().function = NUClear::util::demangle(function);
+            stack->emplace_back(pc, filename, lineno, NUClear::util::demangle(function));
         }
 
         return 0;
