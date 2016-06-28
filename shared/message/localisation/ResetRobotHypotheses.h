@@ -26,7 +26,7 @@ namespace message {
     namespace localisation {
         struct ResetRobotHypotheses {
             struct Self {
-                Self() : position(arma::fill::zeros), position_cov(arma::fill::zeros), heading(0.0), heading_var(0.0) {}
+                Self() : position(arma::fill::zeros), position_cov(arma::fill::eye), heading(0.0), heading_var(0.0) {}
 
                 arma::vec2 position;
                 arma::mat22 position_cov;

@@ -67,9 +67,9 @@ namespace module {
                         struct Noise {
                             Noise() : measurement(), process() {}
                             struct Measurement {
-                                Measurement() : accelerometer(arma::fill::zeros), gyroscope(arma::fill::zeros),
-                                                footUpWithZ(arma::fill::zeros), flatFootOdometry(arma::fill::zeros),
-                                                flatFootOrientation(arma::fill::zeros) {}
+                                Measurement() : accelerometer(arma::fill::eye), gyroscope(arma::fill::eye),
+                                                footUpWithZ(arma::fill::eye), flatFootOdometry(arma::fill::eye),
+                                                flatFootOrientation(arma::fill::eye) {}
                                 arma::mat33 accelerometer;
                                 arma::mat33 gyroscope;
                                 arma::mat44 footUpWithZ;
@@ -77,8 +77,8 @@ namespace module {
                                 arma::mat44 flatFootOrientation;
                             } measurement;
                             struct Process {
-                                Process() : position(arma::fill::zeros), velocity(arma::fill::zeros),
-                                            rotation(arma::fill::zeros), rotationalVelocity(arma::fill::zeros) {}
+                                Process() : position(arma::fill::ones), velocity(arma::fill::ones),
+                                            rotation(arma::fill::ones), rotationalVelocity(arma::fill::ones) {}
                                 arma::vec3 position;
                                 arma::vec3 velocity;
                                 arma::vec4 rotation;
@@ -88,16 +88,16 @@ namespace module {
                         struct Initial {
                             Initial() : mean(), covariance() {}
                             struct Mean {
-                                Mean() : position(arma::fill::zeros), velocity(arma::fill::zeros),
-                                         rotation(arma::fill::zeros), rotationalVelocity(arma::fill::zeros) {}
+                                Mean() : position(arma::fill::ones), velocity(arma::fill::ones),
+                                         rotation(arma::fill::ones), rotationalVelocity(arma::fill::ones) {}
                                 arma::vec3 position;
                                 arma::vec3 velocity;
                                 arma::vec4 rotation;
                                 arma::vec3 rotationalVelocity;
                             } mean;
                             struct Covariance {
-                                Covariance() : position(arma::fill::zeros), velocity(arma::fill::zeros),
-                                               rotation(arma::fill::zeros), rotationalVelocity(arma::fill::zeros) {}
+                                Covariance() : position(arma::fill::ones), velocity(arma::fill::ones),
+                                               rotation(arma::fill::ones), rotationalVelocity(arma::fill::ones) {}
                                 arma::vec3 position;
                                 arma::vec3 velocity;
                                 arma::vec4 rotation;

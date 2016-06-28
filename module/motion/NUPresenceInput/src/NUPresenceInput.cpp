@@ -64,13 +64,13 @@ namespace motion {
         , head_id(0)
         , l_arm_id(0)
         , r_arm_id(0)
-        , camera_to_robot(arma::fill::zeros)
-        , robot_to_head(arma::fill::zeros)
-        , mocap_to_robot(arma::fill::zeros)
+        , camera_to_robot()
+        , robot_to_head()
+        , mocap_to_robot()
         , oculus_to_robot_scale(0.0f)
         , eulerLimits()
-        , goalCamPose(arma::fill::zeros)
-        , currentCamPose(arma::fill::zeros)
+        , goalCamPose()
+        , currentCamPose()
         , jointLimiter()
         , id(size_t(this) * size_t(this) - size_t(this)) {
 

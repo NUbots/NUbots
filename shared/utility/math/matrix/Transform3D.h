@@ -217,7 +217,7 @@ namespace matrix {
              * @return The rotation transform
              */
             static Transform3D createRotationZ(double radians);
-            
+
             /**
              * @brief Interpolates between two transforms
              *

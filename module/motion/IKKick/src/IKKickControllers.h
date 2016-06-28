@@ -50,7 +50,7 @@ namespace motion{
 		public:
 			utility::math::matrix::Transform3D pose;
 			float duration;
-			SixDOFFrame() : pose(arma::fill::zeros), duration(0.0f) {}
+			SixDOFFrame() : pose(), duration(0.0f) {}
 			SixDOFFrame(utility::math::matrix::Transform3D pose_, float duration_) : pose(pose_), duration(duration_){}
 			SixDOFFrame(const YAML::Node& config) : SixDOFFrame() {
 				duration = config["duration"].as<float>();
