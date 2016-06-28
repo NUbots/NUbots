@@ -41,6 +41,7 @@ namespace module {
             using message::input::Sensors;
             using message::motion::WalkCommand;
             using message::behaviour::KickPlan;
+            using message::behaviour::KickType;
             using message::behaviour::MotionCommand;
             using message::motion::WalkStartCommand;
             using message::motion::WalkStopCommand;
@@ -50,15 +51,17 @@ namespace module {
             using utility::nubugger::graph;
             using utility::nubugger::drawSphere;
 
-            using LocalisationBall = message::localisation::Ball;
-            using Self = message::localisation::Self;
-            using VisionBall = message::vision::Ball;
-            using VisionObstacle = message::vision::Obstacle;
+            using message::vision::Ball;
+            using message::localisation::Self;
 
             SimpleWalkPathPlanner::SimpleWalkPathPlanner(std::unique_ptr<NUClear::Environment> environment)
-             : Reactor(std::move(environment))
+             : Reactor(std::move(environment)),
              // , subsumptionId(size_t(this) * size_t(this) - size_t(this)) 
-             , planType(message::behaviour::MotionCommand::Type::StandStill) {
+             currentTargetPosition(arma::fill::zeros),
+             currentTargetHeading(arma::fill::zeros),
+             planType(message::behaviour::MotionCommand::Type::StandStill),
+             targetHeading({arma::vec2({0,0}),KickType::SCRIPTED})
+             {
 
                 //do a little configurating
                 on<Configuration>("SimpleWalkPathPlanner.yaml").then([this] (const Configuration& file){
@@ -76,13 +79,11 @@ namespace module {
                 });
 
                 on<Every<20, Per<std::chrono::seconds>>
-                 , With<message::localisation::Ball>
-                 , With<std::vector<message::localisation::Self>>
-                 , Optional<With<std::vector<message::vision::Obstacle>>>
+                 , With<std::vector<Ball>>
+                 , With<std::vector<Self>>
                  , Sync<SimpleWalkPathPlanner>>().then([this] (
-                     const LocalisationBall& ball,
-                     const std::vector<Self>& selfs,
-                     std::shared_ptr<const std::vector<VisionObstacle>> robots) {
+                    const std::vector<Ball>& ball,
+                    const std::vector<Self>& selfs) {
 
                     if (planType == message::behaviour::MotionCommand::Type::StandStill) {
 
@@ -105,16 +106,17 @@ namespace module {
                     
 
                     // TODO: support non-ball targets
+                    arma::vec2 position = ball[0].measurements[0].position.rows(0,1);
 
-                    float angle = std::atan2(ball.position[1], ball.position[0]);
+                    float angle = std::atan2(position[1], position[0]);
                     angle = std::min(turnSpeed, std::max(angle, -turnSpeed));
                     // emit(graph("angle", angle));
-                    // emit(graph("ball position", ball.position));
+                    // emit(graph("ball position", position));
                     // emit(graph("robot position", selfs.front().position));
                     // emit(graph("robot heading", selfs.front().heading));
 
                     //Euclidean distance to ball
-                    float distanceToBall = arma::norm(ball.position);
+                    float distanceToBall = arma::norm(position);
                     float scale = 2.0 / (1.0 + std::exp(-a * distanceToBall + b)) - 1.0;
                     float scale2 = angle / M_PI;
                     float finalForwardSpeed = forwardSpeed * scale * (1.0 - scale2);
@@ -126,11 +128,11 @@ namespace module {
                     std::unique_ptr<WalkCommand> command = std::make_unique<WalkCommand>(1, Transform2D({currentTargetPosition[0], currentTargetPosition[1], 0.5}));
                     command->command = Transform2D({finalForwardSpeed, 0, angle});
 
-                    arma::vec2 ball_world_position = RobotToWorldTransform(selfs.front().position, selfs.front().heading, ball.position);
+                    arma::vec2 ball_world_position = RobotToWorldTransform(selfs.front().position, selfs.front().heading, position);
                     arma::vec2 kick_target = 2 * ball_world_position - selfs.front().position;
                     emit(drawSphere("kick_target", arma::vec3({kick_target[0], kick_target[1], 0.0}), 0.1, arma::vec3({1, 0, 0}), 0));
 
-                    emit(std::make_unique<KickPlan>(KickPlan{kick_target}));
+                    emit(std::make_unique<KickPlan>(KickPlan{kick_target,KickType::SCRIPTED}));
                     emit(std::move(std::make_unique<WalkStartCommand>(1)));
                     emit(std::move(command));
 
