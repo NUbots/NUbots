@@ -217,9 +217,9 @@ namespace vision {
         rFWw[2] = 0.0;
         rFWw.rows(0,1) = robotPose2D.rows(0,1);
 
-        utility::math::matrix::Transform3D Hgf = utility::math::matrix::Transform3D::createTranslation(rFWw) * 
+        utility::math::matrix::Transform3D Hgf = utility::math::matrix::Transform3D::createTranslation(-rFWw) * 
                                                  utility::math::matrix::Transform3D::createRotationZ(-robotPose2D[2]);
-        return camToGround.i() * Hgf;;
+        return camToGround.i() * Hgf;
     }
 
     inline arma::mat::fixed<3,4> cameraSpaceGoalProjection(
