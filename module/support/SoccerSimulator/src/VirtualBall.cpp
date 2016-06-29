@@ -102,6 +102,14 @@ namespace support {
             result.circle.centre = arma::conv_to<arma::vec>::from(centre);
             result.circle.radius = radius;
 
+            // Get our transform to world coordinates
+            const Transform3D& Htw = sensors->world;
+            const Transform3D& Htc = sensors->forwardKinematics.find(ServoID::HEAD_PITCH)->second;
+            Transform3D Hcw = Htc.i() * Htw;
+            Transform3D Hwc = Hcw.i();
+
+            result.position = Hwc.transformPoint(rBCc);
+
             // Measure points around the ball as a normal distribution
             arma::vec3 rEBc;
             if (rBCc[0] == 0.0 && rBCc[1] == 0.0 ) {
