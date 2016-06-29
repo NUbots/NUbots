@@ -321,7 +321,9 @@ namespace strategy {
                         currentState = Behaviour::MOVE_TO_CENTRE;
                     } else {
                         find({FieldTarget::BALL});
-                        spinWalk();
+                        walkTo(fieldDescription, FieldTarget::BALL);
+                        // spinWalk();
+
                         currentState = Behaviour::SEARCH_FOR_BALL;
                     }
                 }

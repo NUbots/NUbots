@@ -20,7 +20,6 @@ namespace localisation {
         });
 
         on<Trigger<std::vector<message::vision::Ball>>>().then([this](const std::vector<message::vision::Ball>& balls){
-        	log("emitting loc ball");
         	if(balls.size()>0){
 	        	auto message = std::make_unique<std::vector<Ball>>();
 	        	message->push_back(Ball());

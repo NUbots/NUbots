@@ -122,7 +122,7 @@ namespace module {
 
             // Loop through all of our possible ball segments
             std::vector<arma::ivec2> points;
-            auto hSegments = classifiedImage.horizontalSegments.equal_range(ObjectClass::GOAL);
+            auto hSegments = classifiedImage.horizontalSegments.equal_range(ObjectClass::BALL);
             // NUClear::log("hSegments size = ", std::distance(hSegments.first,hSegments.second));
             for(auto it = hSegments.first; it != hSegments.second; ++it) {
 
