@@ -51,7 +51,10 @@ namespace module {
             arma::vec3 goalLocation;
             goalLocation[2] = 0.0;
             arma::mat::fixed<3,4> goalNormals;
+
             Transform2D world = sensors.world.projectTo2D(arma::vec3({0,0,1}),arma::vec3({1,0,0}));
+            std::cerr << "world = \n" << sensors.world << std::endl;
+            std::cerr << "proj world = \n" << world << std::endl;
             //Get the x/y position for goals
             arma::vec prediction(3*measurements.size());
             int counter = 0;

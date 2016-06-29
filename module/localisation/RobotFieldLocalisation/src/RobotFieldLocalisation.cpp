@@ -98,7 +98,7 @@ namespace localisation {
             auto now = NUClear::clock::now();
             float deltaT = std::chrono::duration_cast<std::chrono::nanoseconds>(now - lastUpdateTime).count() * (1 / std::nano::den);
             lastUpdateTime = now;
-            filter.timeUpdate(std::max(deltaT,0.1));
+            filter.timeUpdate(std::fmin(deltaT,0.1));
             // If we have two goals that are left/right
             if(goals.size() == 2) {
 
