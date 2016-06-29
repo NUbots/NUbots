@@ -12,7 +12,7 @@ leg:
         length: 0.094 # rough
         toe_length: 0.0472 # measured
 head:
-    camera_declination_angle_offset: 0.3
+    camera_declination_angle_offset: -0.45 # TODO - fix 1's head pitch motor offset
     neck_to_camera: [0.036, 0, 0.028] # [x, y, z]
     neck:
         length: 0.042
