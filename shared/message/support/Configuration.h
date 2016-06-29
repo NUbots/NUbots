@@ -25,6 +25,7 @@
 #include <yaml-cpp/yaml.h>
 
 #include "message/support/FileWatch.h"
+#include "utility/strutil/strutil.h"
 
 namespace message {
     namespace support {
@@ -100,7 +101,7 @@ namespace NUClear {
                     ::message::support::FileWatch watch = DSLProxy<::message::support::FileWatch>::get<DSL>(t);
 
                     // Check if the watch is valid
-                    if(watch) {
+                    if(watch && utility::strutil::endsWith(watch.path, ".yaml")) {
                         // Return our yaml file
                         try{
                             return std::make_shared<::message::support::Configuration>(watch.path, YAML::LoadFile(watch.path));
