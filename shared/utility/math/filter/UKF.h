@@ -33,12 +33,13 @@ namespace utility {
                 // The model
                 Model model;
 
-                // The number of sigma points
-                static constexpr uint NUM_SIGMA_POINTS = (Model::size * 2) + 1;
-
                 // Dimension types for vectors and square matricies
                 using StateVec = arma::vec::fixed<Model::size>;
                 using StateMat = arma::mat::fixed<Model::size, Model::size>;
+
+            private:
+                // The number of sigma points
+                static constexpr uint NUM_SIGMA_POINTS = (Model::size * 2) + 1;
 
                 using SigmaVec = arma::vec::fixed<NUM_SIGMA_POINTS>;
                 using SigmaRowVec = arma::rowvec::fixed<NUM_SIGMA_POINTS>;
@@ -216,7 +217,7 @@ namespace utility {
 
                     // Update our state
                     covarianceUpdate -= covarianceUpdate.t() * centredObservations.t() *
-                                        (measurementVariance + centredObservations * covarianceUpdate * centredObservations.t()).i() *
+                                        arma::inv_sympd(measurementVariance + centredObservations * covarianceUpdate * centredObservations.t()) *
                                         centredObservations * covarianceUpdate;
 
                     const arma::mat innovation = model.observationDifference(measurement, predictedMean);
