@@ -42,7 +42,7 @@ namespace module {
                 explicit HeadController(std::unique_ptr<NUClear::Environment> environment);
                 arma::vec2 currentAngles;
                 arma::vec2 goalAngles;
-                bool goalRobotSpace = false;
+                bool goalRobotSpace = true;
             };
 
     }  // motion

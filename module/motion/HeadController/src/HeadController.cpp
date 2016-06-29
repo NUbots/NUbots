@@ -107,6 +107,21 @@ namespace module {
                 //Convert to robot space
                 arma::vec3 headUnitVector = goalRobotSpace ? goalHeadUnitVector_world : sensors.world.rotation() * goalHeadUnitVector_world;
                 //Compute inverse kinematics for head
+
+
+
+
+
+                //!!!!!!!!!!!!!!
+                //!!!!!!!!!!!!!!
+                //!!!!!!!!!!!!!!
+                //!!!!!!!!!!!!!!
+                //TODO::::MAKE THIS NOT FAIL FOR ANGLES OVER 90deg
+                //!!!!!!!!!!!!!!
+                //!!!!!!!!!!!!!!
+                //!!!!!!!!!!!!!!
+                //!!!!!!!!!!!!!!
+                //!!!!!!!!!!!!!!
                 std::vector< std::pair<message::input::ServoID, float> > goalAnglesList = calculateHeadJoints(headUnitVector);
                 // arma::vec2 goalAngles = cartesianToSpherical(headUnitVector).rows(1,2);
 
