@@ -271,13 +271,15 @@ namespace vision {
 
 
         arma::vec pvals = goalBaseCorners.t() * arma::cross(goalBaseCorners.col(0), goalTopCorners.col(0));
-        cornerIndices[2] = pvals.index_min();
-        cornerIndices[3] = pvals.index_max();
+        arma::uvec baseIndices = arma::sort_index(pvals);
+        cornerIndices[2] = baseIndices[0];
+        cornerIndices[3] = baseIndices[3];
 
 
         pvals = goalTopCorners.t() * arma::cross(goalBaseCorners.col(0), goalTopCorners.col(0));
-        cornerIndices[0] = pvals.index_min();
-        cornerIndices[1] = pvals.index_max();
+        arma::uvec topIndices = arma::sort_index(pvals);
+        cornerIndices[0] = topIndices[0];
+        cornerIndices[1] = topIndices[3];
 
 
         //Create the quad normal predictions. Order is Left, Right, Top, Bottom
@@ -294,6 +296,22 @@ namespace vision {
                                         goalTopCorners.col(cornerIndices[3])
                                         )
                                 );
+
+        //for the top and bottom, we check the inner lines in case they are a better match (this stabilizes observations and reflects real world)
+        if (goalBaseCorners(2,baseIndices[0]) > goalBaseCorners(2,baseIndices[1])) {
+            cornerIndices[2] = baseIndices[1];
+        }
+        if (goalBaseCorners(2,baseIndices[3]) > goalBaseCorners(2,baseIndices[2])) {
+            cornerIndices[3] = baseIndices[2];
+        }
+        if (goalTopCorners(2,topIndices[0]) > goalTopCorners(2,topIndices[1])) {
+            cornerIndices[0] = topIndices[1];
+        }
+        if (goalTopCorners(2,topIndices[3]) > goalTopCorners(2,topIndices[2])) {
+            cornerIndices[1] = topIndices[2];
+        }
+
+
         prediction.col(2) = arma::normalise(
                                     arma::cross(
                                         goalTopCorners.col(cornerIndices[0]),
