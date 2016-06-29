@@ -62,6 +62,9 @@ namespace vision {
         };
         Frame lastFrame;
 
+
+        bool print_throwout_logs;
+
         float approximateCircleGreenRatio(const utility::math::geometry::Circle& circle, const message::input::Image& image, const message::vision::LookUpTable& lut);
     public:
 

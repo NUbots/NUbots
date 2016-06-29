@@ -13,6 +13,8 @@ green_ratio_threshold: 0.03
 green_radial_samples: 30
 green_angular_samples: 30
 
+print_throwout_logs: false
+
 clustering:
   number_of_clusters: 4 # set the number of Gaussians
 

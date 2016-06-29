@@ -129,7 +129,8 @@ namespace vision {
         , green_radial_samples(0.0)
         , green_angular_samples(0.0)
         , kmeansClusterer()
-        , lastFrame() {
+        , lastFrame(),
+        print_throwout_logs(false) {
 
 
         on<Configuration>("BallDetector.yaml").then([this] (const Configuration& config) {
@@ -152,6 +153,8 @@ namespace vision {
             green_angular_samples = config["green_angular_samples"].as<Expression>();
 
             kmeansClusterer.configure(config["clustering"]);
+
+            print_throwout_logs = config["print_throwout_logs"].as<bool>();
 
             lastFrame.time = NUClear::clock::now();
         });
@@ -188,6 +191,7 @@ namespace vision {
             auto balls = std::make_unique<std::vector<Ball>>();
             balls->reserve(ransacResults.size());
 
+            if(print_throwout_logs) log("Ransac : ", ransacResults.size(), "results");
             for (auto& result : ransacResults) {
 
                 // Transform our centre into kinematics coordinates
@@ -213,12 +217,14 @@ namespace vision {
                  ************************************************/
                 // CENTRE OF BALL IS ABOVE THE HORIZON
                 if(image.horizon.y(result.model.centre[0]) > result.model.centre[1]) {
+                    if(print_throwout_logs) log("Ball discarded: image.horizon.y(result.model.centre[0]) > result.model.centre[1]");
                     continue;
                 }
 
                 // DOES HAVE INTERNAL GREEN
                 float greenRatio = approximateCircleGreenRatio(result.model, *(image.image), lut);
                 if (greenRatio > green_ratio_threshold) {
+                    if(print_throwout_logs) log("Ball discarded: greenRatio > green_ratio_threshold");
                     continue;
                 }
 
@@ -236,12 +242,14 @@ namespace vision {
                 }
                 // Check if our largest one is too far away
                 if(arma::max(sDist) / result.model.radius > maximum_relative_seed_point_distance) {
+                    if(print_throwout_logs) log("Ball discarded: arma::max(sDist) / result.model.radius > maximum_relative_seed_point_distance");
                     continue;
                 }
 
                 // BALL IS CLOSER THAN 1/2 THE HEIGHT OF THE ROBOT BY WIDTH
                 double widthDistance = widthBasedDistanceToCircle(field.ball_radius, top, base, cam.focalLengthPixels);
                 if(widthDistance < cameraHeight * 0.5) {
+                    if(print_throwout_logs) log("Ball discarded: widthDistance < cameraHeight * 0.5");
                     continue;
                 }
 
@@ -251,7 +259,8 @@ namespace vision {
                 arma::vec3 ballCentreGroundProj = projectCamToPlane(ballCentreRay, sensors.orientationCamToGround, ballBisectorPlane);
                 double ballCentreGroundProjDistance = arma::norm(ballCentreGroundProj);
 
-                if(std::abs((widthDistance - ballCentreGroundProjDistance) / std::max(ballCentreGroundProjDistance, widthDistance)) < MAXIMUM_DISAGREEMENT_RATIO) {
+                if(std::abs((widthDistance - ballCentreGroundProjDistance) / std::max(ballCentreGroundProjDistance, widthDistance)) > MAXIMUM_DISAGREEMENT_RATIO) {
+                    if(print_throwout_logs) log("Ball discarded: Width and proj distance disagree too much: width =", widthDistance, "proj =", ballCentreGroundProjDistance);
                     continue;
                 }
 
@@ -320,7 +329,7 @@ namespace vision {
                     }
                 }
             }
-
+            if(print_throwout_logs) log("Final result: ", balls->size(), "balls");
             emit(std::move(balls));
             lastFrame.time = sensors.timestamp;
         });
