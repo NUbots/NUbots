@@ -77,6 +77,12 @@ namespace support {
 
         // Get our ball position in camera
         arma::vec3 rBCc = Hcf.rotation() * arma::vec3(rBFf - rCFf);
+        if (rBCc[0] < 0.0) {
+            result.edgePoints.clear();
+            return result;
+        }
+
+
         double rBCcLength = arma::norm(rBCc);
 
         // The angular width of the cone we are drawing
