@@ -208,9 +208,11 @@ namespace vision {
     }
 
     inline utility::math::matrix::Transform3D getFieldToCam (
-                    const utility::math::matrix::Transform2D& Tfr,
-                    //Hwc is Hwc
-                    const utility::math::matrix::Transform3D& Hrc
+                    const utility::math::matrix::Transform2D& Tft,
+                    //f = field
+                    //t = torso
+                    //c = camera
+                    const utility::math::matrix::Transform3D& Htc
 
                 ) {
 
@@ -222,9 +224,9 @@ namespace vision {
         //     utility::math::matrix::Transform3D::createRotationZ(-Twf[2])
         //     * utility::math::matrix::Transform3D::createTranslation(rWFf);
 
-        utility::math::matrix::Transform3D Hrf = utility::math::matrix::Transform3D(Tfr).i();
+        utility::math::matrix::Transform3D Htf = utility::math::matrix::Transform3D(Tft).i();
 
-        return Hrc.i() * Hrf;
+        return Htc.i() * Htf;
     }
 
     inline arma::mat::fixed<3,4> cameraSpaceGoalProjection(
