@@ -31,19 +31,19 @@ foot_load_sensor:
 
 motion_filter:
   update:
-    velocity_decay: [0.95, 0.95, 0.95]
+    velocity_decay: [0.98, 0.98, 0.98]
   noise:
     measurement:
-      accelerometer: [1e-4, 1e-4, 1e-4] # x, y, z
+      accelerometer: [1e-3, 1e-3, 1e-3] # x, y, z
       gyroscope: [1e-8, 1e-8, 1e-8] # x, y, z
       foot_up_with_z: [1e-6, 1e-6, 1e-6, 1e-10] # x, y, z, zpos
-      flat_foot_odometry: [1e-8, 1e-8, 1e-8] # x, y, z
-      flat_foot_orientation: [1e-8, 1e-8, 1e-8, 1e-8] # QW, QX, QY, QZ
+      flat_foot_odometry: [1e-7, 1e-7, 1e-7] # x, y, z
+      flat_foot_orientation: [1e-5, 1e-5, 1e-5, 1e-5] # QW, QX, QY, QZ
     process:
-      position: [1e-8, 1e-8, 1e-8]
-      velocity: [1e-3, 1e-3, 1e-3]
+      position: [1e-10, 1e-10, 1e-10]
+      velocity: [1e-6, 1e-6, 1e-6]
       rotational_velocity: [1e-8, 1e-8, 1e-8]
-      rotation: [1e-10, 1e-10, 1e-10, 1e-10]
+      rotation: [1e-12, 1e-12, 1e-12, 1e-12]
 
   initial:
     mean:

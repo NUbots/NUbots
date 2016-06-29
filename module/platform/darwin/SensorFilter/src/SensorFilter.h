@@ -67,10 +67,11 @@ namespace module {
                         struct Noise {
                             Noise() : measurement(), process() {}
                             struct Measurement {
-                                Measurement() : accelerometer(arma::fill::eye), gyroscope(arma::fill::eye),
+                                Measurement() : accelerometer(arma::fill::eye), accelerometerMagnitude(arma::fill::eye), gyroscope(arma::fill::eye),
                                                 footUpWithZ(arma::fill::eye), flatFootOdometry(arma::fill::eye),
                                                 flatFootOrientation(arma::fill::eye) {}
                                 arma::mat33 accelerometer;
+                                arma::mat33 accelerometerMagnitude;
                                 arma::mat33 gyroscope;
                                 arma::mat44 footUpWithZ;
                                 arma::mat33 flatFootOdometry;

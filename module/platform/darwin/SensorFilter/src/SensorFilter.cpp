@@ -137,6 +137,7 @@ namespace module {
 
                     // Update our measurement noises
                     this->config.motionFilter.noise.measurement.accelerometer    = arma::diagmat(config["motion_filter"]["noise"]["measurement"]["accelerometer"].as<arma::vec3>());
+                    this->config.motionFilter.noise.measurement.accelerometerMagnitude    = arma::diagmat(config["motion_filter"]["noise"]["measurement"]["accelerometer_magnitude"].as<arma::vec3>());
                     this->config.motionFilter.noise.measurement.gyroscope        = arma::diagmat(config["motion_filter"]["noise"]["measurement"]["gyroscope"].as<arma::vec3>());
                     this->config.motionFilter.noise.measurement.footUpWithZ      = arma::diagmat(config["motion_filter"]["noise"]["measurement"]["foot_up_with_z"].as<arma::vec4>());
                     this->config.motionFilter.noise.measurement.flatFootOdometry = arma::diagmat(config["motion_filter"]["noise"]["measurement"]["flat_foot_odometry"].as<arma::vec3>());
@@ -360,7 +361,7 @@ namespace module {
                         sensors->gyroscope = previousSensors->gyroscope;
                     }
                     else {
-                        sensors->gyroscope = {-input.gyroscope.x, -input.gyroscope.y, input.gyroscope.z};
+                        sensors->gyroscope = {input.gyroscope.x, input.gyroscope.y, -input.gyroscope.z};
                     }
 
                     // Put in our FSR information
@@ -443,7 +444,10 @@ namespace module {
                     motionFilter.timeUpdate(deltaT);
 
                     // Accelerometer measurment update
-                    motionFilter.measurementUpdate(sensors->accelerometer, config.motionFilter.noise.measurement.accelerometer, MotionModel::MeasurementType::ACCELEROMETER());
+                    motionFilter.measurementUpdate(sensors->accelerometer,      
+                                                    config.motionFilter.noise.measurement.accelerometer + 
+                                                    arma::norm(sensors->accelerometer) * config.motionFilter.noise.measurement.accelerometerMagnitude, 
+                                                    MotionModel::MeasurementType::ACCELEROMETER());
 
                     // Gyroscope measurement update
                     motionFilter.measurementUpdate(sensors->gyroscope, config.motionFilter.noise.measurement.gyroscope, MotionModel::MeasurementType::GYROSCOPE());
