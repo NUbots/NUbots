@@ -196,8 +196,8 @@ namespace matrix {
         float theta_x_from_f = std::atan2(xNew[1],xNew[0]);//sin/cos
         result.angle() = theta_x_from_f; 
 
-        std::cerr << "in = \n" << *this << std::endl;
-        std::cerr << "out = \n" << result << std::endl;
+        // std::cerr << "in = \n" << *this << std::endl;
+        // std::cerr << "out = \n" << result << std::endl;
         return result;
     }
 
