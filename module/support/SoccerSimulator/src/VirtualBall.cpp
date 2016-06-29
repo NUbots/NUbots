@@ -24,6 +24,7 @@
 #include "message/vision/VisionObjects.h"
 #include "message/input/CameraParameters.h"
 #include "message/input/Sensors.h"
+#include "message/input/ServoID.h"
 #include "utility/math/matrix/Rotation3D.h"
 #include "utility/math/coordinates.h"
 #include "utility/math/vision.h"
@@ -40,6 +41,7 @@ namespace support {
     using utility::math::vision::screenToImage;
     using utility::math::vision::getFieldToCam;
     using message::input::CameraParameters;
+    using message::input::ServoID;
 
     VirtualBall::VirtualBall()
     : position(arma::fill::zeros)
