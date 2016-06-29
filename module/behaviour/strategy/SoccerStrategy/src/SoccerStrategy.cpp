@@ -32,6 +32,7 @@
 #include "message/localisation/SideChecker.h"
 #include "message/support/Configuration.h"
 #include "message/platform/darwin/DarwinSensors.h"
+#include "message/behaviour/Nod.h"
 
 #include "utility/time/time.h"
 #include "utility/localisation/transform.h"
@@ -72,6 +73,7 @@ namespace strategy {
     using utility::math::matrix::Transform2D;
     using message::platform::darwin::ButtonMiddleDown;
     using message::platform::darwin::ButtonLeftDown;
+    using message::behaviour::Nod;
 
     using utility::localisation::transform::RobotToWorldTransform;
     using utility::time::durationFromSeconds;
@@ -170,6 +172,7 @@ namespace strategy {
 
             if (!cfg_.forcePlaying) {
                 NUClear::log("Force playing started.");
+                emit(std::make_unique<Nod>(true));
                 cfg_.forcePlaying = true;
             }
 
@@ -179,6 +182,7 @@ namespace strategy {
 
             if (!cfg_.forcePenaltyShootout) {
                 NUClear::log("Force penalty shootout started.");
+                emit(std::make_unique<Nod>(true));                
                 cfg_.forcePenaltyShootout = true;
             }
 

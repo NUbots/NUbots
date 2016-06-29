@@ -41,7 +41,9 @@ namespace skills {
 
     Nod::Nod(std::unique_ptr<NUClear::Environment> environment)
         : Reactor(std::move(environment))
-        , id(size_t(this) * size_t(this) - size_t(this)) {
+        , id(size_t(this) * size_t(this) - size_t(this))
+        , value(false)
+        , EXECUTION_PRIORITY(0.0f) {
 
         // do a little configurating
         on<Configuration>("Nod.yaml").then([this] (const Configuration& config) {

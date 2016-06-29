@@ -17,8 +17,8 @@
  * Copyright 2016 NUbots <nubots@nubots.net>
  */
 
-#ifndef MODULES_BEHAVIOUR_REFLEXES_KICKSCRIPT_H
-#define MODULES_BEHAVIOUR_REFLEXES_KICKSCRIPT_H
+#ifndef MODULE_BEHAVIOUR_SKILLS_NOD_H
+#define MODULE_BEHAVIOUR_SKILLS_NOD_H
 
 #include <nuclear>
 #include "message/motion/KickCommand.h"
@@ -45,4 +45,4 @@ namespace skills {
 }
 
 
-#endif
+#endif  // MODULE_BEHAVIOUR_SKILLS_NOD_H

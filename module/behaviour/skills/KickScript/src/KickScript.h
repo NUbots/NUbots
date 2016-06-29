@@ -17,8 +17,8 @@
  * Copyright 2013 NUBots <nubots@nubots.net>
  */
 
-#ifndef MODULES_BEHAVIOUR_REFLEXES_KICKSCRIPT_H
-#define MODULES_BEHAVIOUR_REFLEXES_KICKSCRIPT_H
+#ifndef MODULE_BEHAVIOUR_SKILLS_KICKSCRIPT_H
+#define MODULE_BEHAVIOUR_SKILLS_KICKSCRIPT_H
 
 #include <nuclear>
 #include "message/motion/KickCommand.h"
