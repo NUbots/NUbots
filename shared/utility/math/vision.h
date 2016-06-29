@@ -25,6 +25,7 @@
 #include "message/localisation/FieldObject.h"
 #include "message/input/Sensors.h"
 #include "utility/math/matrix/Transform3D.h"
+#include "utility/math/matrix/Transform2D.h"
 #include "utility/math/geometry/Plane.h"
 #include "utility/math/geometry/ParametricLine.h"
 #include "utility/math/angle.h"
@@ -207,22 +208,23 @@ namespace vision {
     }
 
     inline utility::math::matrix::Transform3D getFieldToCam (
-                    const arma::vec3& robotPose2D,
-                    //camToGround is Hwc
-                    const utility::math::matrix::Transform3D& camToGround
+                    const utility::math::matrix::Transform2D& Tfr,
+                    //Hwc is Hwc
+                    const utility::math::matrix::Transform3D& Hrc
 
                 ) {
 
-        arma::vec3 rWFf;
-        rWFf.rows(0,1) = -robotPose2D.rows(0,1);
-        rWFf[2] = 0.0;
-        // Hwf = rWFw * Rwf
-        utility::math::matrix::Transform3D Hwf = 
-            utility::math::matrix::Transform3D::createRotationZ(-robotPose2D[2])
-            * utility::math::matrix::Transform3D::createTranslation(rWFf); 
+        // arma::vec3 rWFf;
+        // rWFf.rows(0,1) = -Twf.rows(0,1);
+        // rWFf[2] = 0.0;
+        // // Hwf = rWFw * Rwf
+        // utility::math::matrix::Transform3D Hwf = 
+        //     utility::math::matrix::Transform3D::createRotationZ(-Twf[2])
+        //     * utility::math::matrix::Transform3D::createTranslation(rWFf);
 
+        utility::math::matrix::Transform3D Hrf = utility::math::matrix::Transform3D(Tfr).i();
 
-        return camToGround.i() * Hwf;
+        return Hrc.i() * Hrf;
     }
 
     inline arma::mat::fixed<3,4> cameraSpaceGoalProjection(

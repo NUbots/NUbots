@@ -74,18 +74,25 @@ namespace localisation {
         on<Trigger<Sensors>, Sync<RobotFieldLocalisation>, Single>().then("Localisation Field Space", [this] (const Sensors& sensors) {
 
             // Use the current world to field state we are holding to modify sensors.world and emit that
-            utility::math::matrix::Transform3D Htw = sensors.world;
+            utility::math::matrix::Transform3D Htg = sensors.world;
 
             //this actually gets Field to Torso???
+            //g = odometry space
+            //r = robot space (on the ground below the robot)
+            //t = torso space
+            Transform2D Tgr = filter.get();
             utility::math::matrix::Transform3D Hcf = utility::math::vision::getFieldToCam(
-                    filter.get(),
-                    Htw
+                    Tgr,
+                    Htg
                 );
 
             //make a localisation object
             message::localisation::Self robot;
             Transform2D currentLocalisation = Hcf.i().projectTo2D(arma::vec3({0,0,1}),arma::vec3({1,0,0}));
-            std::cerr << "Localisation Offset: " << std::endl << filter.get() << std::endl;
+            Transform2D currentOdometry = Htg.i().projectTo2D(arma::vec3({0,0,1}),arma::vec3({1,0,0}));
+            std::cerr << "currentOdometry : " << std::endl << currentOdometry << std::endl;
+            std::cerr << "internal Localisation state: " << std::endl << Tgr << std::endl;
+            std::cerr << "currentLocalisation: " << std::endl << currentLocalisation << std::endl;
             //set position, covariance, and rotation
             robot.position = currentLocalisation.rows(0,1);
             robot.robot_to_world_rotation = utility::math::matrix::Rotation2D::createRotation(currentLocalisation[2]);

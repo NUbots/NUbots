@@ -55,7 +55,6 @@ namespace module {
 
             //Transform2D world = sensors.world.projectTo2D(arma::vec3({0,0,1}),arma::vec3({1,0,0}));
             Transform3D Htw = sensors.world;
-            std::cerr << "sensors.world \n" << sensors.world;
             Transform3D Htc = sensors.forwardKinematics.find(ServoID::HEAD_PITCH)->second;
             Transform3D Hwc = Htw.i() * Htc;
             //Get the x/y position for goals
