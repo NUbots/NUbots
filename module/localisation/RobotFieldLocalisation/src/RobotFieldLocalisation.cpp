@@ -83,13 +83,14 @@ namespace localisation {
             Transform2D Tgr = filter.get();
             utility::math::matrix::Transform3D Hcf = utility::math::vision::getFieldToCam(
                     Tgr,
-                    Htg
+                    Htg.i()
                 );
 
             //make a localisation object
             message::localisation::Self robot;
             Transform2D currentLocalisation = Hcf.i().projectTo2D(arma::vec3({0,0,1}),arma::vec3({1,0,0}));
             Transform2D currentOdometry = Htg.i().projectTo2D(arma::vec3({0,0,1}),arma::vec3({1,0,0}));
+            std::cerr << "Hcf : " << std::endl << Hcf << std::endl;
             std::cerr << "currentOdometry : " << std::endl << currentOdometry << std::endl;
             std::cerr << "internal Localisation state: " << std::endl << Tgr << std::endl;
             std::cerr << "currentLocalisation: " << std::endl << currentLocalisation << std::endl;
