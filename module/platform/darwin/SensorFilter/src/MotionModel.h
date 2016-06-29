@@ -71,7 +71,7 @@ namespace module {
                     struct FLAT_FOOT_ORIENTATION {};
                 };
 
-                MotionModel() : processNoiseMatrix(arma::fill::zeros) {} // empty constructor
+                MotionModel() : processNoiseMatrix(arma::fill::eye) {} // empty constructor
 
                 arma::vec::fixed<size> timeUpdate(const arma::vec::fixed<size>& state, double deltaT);
 

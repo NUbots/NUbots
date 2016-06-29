@@ -75,6 +75,12 @@ namespace matrix {
         return result;
     }
 
+    Transform2D Transform2D::i() const {
+        arma::vec2 newDisplacement = -worldToLocal(*this).xy();
+        return Transform2D(newDisplacement,-this->angle());
+    } 
+
+
 }
 }
 }

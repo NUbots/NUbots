@@ -33,7 +33,6 @@ namespace utility {
                 // The model
                 Model model;
 
-            private:
                 // The number of sigma points
                 static constexpr uint NUM_SIGMA_POINTS = (Model::size * 2) + 1;
 
@@ -64,6 +63,7 @@ namespace utility {
                 SigmaVec meanWeights;
                 SigmaRowVec covarianceWeights;
 
+            private:
                 // UKF variables
                 double covarianceSigmaWeights;
 
@@ -126,13 +126,13 @@ namespace utility {
                     double beta = 2.f)
                         : model()
                         , mean(arma::fill::zeros)
-                        , covariance(arma::fill::zeros)
+                        , covariance(arma::fill::eye)
                         , sigmaMean(arma::fill::zeros)
                         , sigmaPoints(arma::fill::zeros)
                         , centredSigmaPoints(arma::fill::zeros)
                         , d(arma::fill::zeros)
-                        , covarianceUpdate(arma::fill::zeros)
-                        , defaultCovarianceUpdate(arma::fill::zeros)
+                        , covarianceUpdate(arma::fill::eye)
+                        , defaultCovarianceUpdate(arma::fill::eye)
                         , meanWeights(arma::fill::zeros)
                         , covarianceWeights(arma::fill::zeros)
                         , covarianceSigmaWeights(0.0) {
@@ -233,13 +233,8 @@ namespace utility {
                     arma::mat predictedCovariance = covarianceFromSigmas(predictedObservations, predictedMean);
                     arma::mat innovationVariance = predictedCovariance + measurementVariance;
                     arma::mat scalarlikelihoodExponent = ((innovation.t() * innovationVariance.i()) * innovation);
-
-                    double expTerm = -0.5 * arma::as_scalar(scalarlikelihoodExponent);
-                    double normalisationFactor = pow(2 * M_PI, measurementVariance.n_rows) * arma::det(innovationVariance);
-                    double fract = 1 / sqrt(normalisationFactor);
-                    const float outlierProbability = 0.05;
-
-                    return (1.0 - outlierProbability) * fract * exp(expTerm) + outlierProbability;
+                    double loglikelihood = 0.5 * (std::log(arma::det(innovationVariance)) + std::abs(scalarlikelihoodExponent[0]) + innovation.n_elem * std::log(2 * M_PI));
+                    return -loglikelihood;
                 }
 
                 const StateVec& get() const {

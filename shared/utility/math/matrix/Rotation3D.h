@@ -144,7 +144,17 @@ namespace matrix {
              * @return The yaw (z-axis) of the rotation matrix
              */
             inline double yaw() const { return eulerAngles()[2]; }
+            /**
+             * @return The (x-axis) of the basis
+             */
+            inline const arma::vec3 x() const { return submat(0,0,2,0); }
+            inline arma::subview<double> x() { return submat(0,0,2,0); }
 
+            inline const arma::vec3 y() const { return submat(0,1,2,1); }
+            inline arma::subview<double> y() { return submat(0,1,2,1); }
+
+            inline const arma::vec3 z() const { return submat(0,2,2,2); }
+            inline arma::subview<double> z() { return submat(0,2,2,2); }
             /**
              * @brief Creates a rotation matrix around the X axis by the given radians
              *

@@ -47,7 +47,7 @@ namespace module {
 #ifndef NDEBUG // We have a cold hearted monstrosity that got built!
 
                         // Print our exception detals
-                        std::cout << reactor << " "
+                        std::cerr << reactor << " "
                                   << (stats.identifier[0].empty() ? "" : "- " + stats.identifier[0] + " ")
                                   << Colour::brightred << "Exception:" << " "
                                   << Colour::brightred << utility::support::evil::exception_name
@@ -55,7 +55,7 @@ namespace module {
 
                         // Print our stack trace
                         for (auto& s : utility::support::evil::stack) {
-                            std::cout << "\t" << Colour::brightmagenta << s.file
+                            std::cerr << "\t" << Colour::brightmagenta << s.file
                                       << ":" << Colour::brightmagenta << s.lineno
                                       << " " << s.function
                                       << std::endl;
@@ -68,7 +68,7 @@ namespace module {
 
                             std::string exceptionName = NUClear::util::demangle(typeid(ex).name());
 
-                            std::cout << reactor << " "
+                            std::cerr << reactor << " "
                                       << (stats.identifier[0].empty() ? "" : "- " + stats.identifier[0] + " ")
                                       << Colour::brightred << "Exception:" << " "
                                       << Colour::brightred << exceptionName << " "
@@ -78,7 +78,7 @@ namespace module {
                         // We don't actually want to crash
                         catch (...) {
 
-                            std::cout << reactor << " "
+                            std::cerr << reactor << " "
                                       << (stats.identifier[0].empty() ? "" : "- " + stats.identifier[0] + " ")
                                       << Colour::brightred << "Exception of unkown type"
                                       << std::endl;
@@ -111,27 +111,27 @@ namespace module {
                     // Output the level
                     switch(message.level) {
                         case NUClear::TRACE:
-                            std::cout << source << "TRACE: ";
+                            std::cerr << source << "TRACE: ";
                             break;
                         case NUClear::DEBUG:
-                            std::cout << source << Colour::green << "DEBUG: ";
+                            std::cerr << source << Colour::green << "DEBUG: ";
                             break;
                         case NUClear::INFO:
-                            std::cout << source << Colour::brightblue << "INFO: ";
+                            std::cerr << source << Colour::brightblue << "INFO: ";
                             break;
                         case NUClear::WARN:
-                            std::cout << source << Colour::yellow << "WARN: ";
+                            std::cerr << source << Colour::yellow << "WARN: ";
                             break;
                         case NUClear::ERROR:
-                            std::cout << source << Colour::brightred << "ERROR: ";
+                            std::cerr << source << Colour::brightred << "ERROR: ";
                             break;
                         case NUClear::FATAL:
-                            std::cout << source << Colour::brightred << "FATAL: ";
+                            std::cerr << source << Colour::brightred << "FATAL: ";
                             break;
                     }
 
                     // Output the message
-                    std::cout << message.message << std::endl;
+                    std::cerr << message.message << std::endl;
                 });
             }
 

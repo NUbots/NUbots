@@ -38,9 +38,11 @@ namespace vision {
         double MAXIMUM_GOAL_HORIZON_NORMAL_ANGLE;
         double MAXIMUM_ANGLE_BETWEEN_GOALS;
         double MAXIMUM_VERTICAL_GOAL_PERSPECTIVE_ANGLE;
-        double measurement_distance_covariance_factor;
-        double measurement_bearing_variance;
-        double measurement_elevation_variance;
+
+        uint MEASUREMENT_LIMITS_LEFT;
+        uint MEASUREMENT_LIMITS_RIGHT;
+        uint MEASUREMENT_LIMITS_TOP;
+        uint MEASUREMENT_LIMITS_BASE;
 
     public:
         /// @brief Called by the powerplant to build and setup the GoalDetector reactor.

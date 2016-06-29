@@ -44,10 +44,10 @@ namespace behaviour {
 
     NUPresenceServer::NUPresenceServer(std::unique_ptr<NUClear::Environment> environment)
         : Reactor(std::move(environment))
-        , robot_to_head(arma::fill::zeros)
+        , robot_to_head()
         , robot_to_head_scale(0.0f)
         , reliable(false)
-        , camera_to_robot(arma::fill::zeros) {
+        , camera_to_robot() {
 
         on<Configuration>("NUPresenceServer.yaml").then([this] (const Configuration& config) {
             reliable = config["reliable"];

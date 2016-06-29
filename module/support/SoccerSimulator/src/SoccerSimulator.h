@@ -32,7 +32,8 @@
 #include "message/input/CameraParameters.h"
 #include "message/motion/KickCommand.h"
 
-#include "VirtualVision.h"
+#include "VirtualGoalPost.h"
+#include "VirtualBall.h"
 
 namespace module {
 namespace support {
@@ -134,11 +135,12 @@ namespace support {
 
         std::queue<message::motion::KickCommand> kickQueue;
 
-        Transform2D oldRobotPose;
-        Transform2D oldBallPose;
+        utility::math::matrix::Transform2D oldRobotPose;
+        utility::math::matrix::Transform2D oldBallPose;
 
 
         bool kicking = false;
+        bool walking = false;
         bool lastKicking = false;
         uint PLAYER_ID;
 

@@ -52,7 +52,7 @@ namespace message {
 
         class LocalisationObject {
         public:
-            LocalisationObject() : position(arma::fill::zeros), position_cov(arma::fill::zeros), last_measurement_time() {}
+            LocalisationObject() : position(arma::fill::zeros), position_cov(arma::fill::eye), last_measurement_time() {}
 
             arma::vec2 position;
             arma::mat22 position_cov;
@@ -70,7 +70,7 @@ namespace message {
 
         class Self : public LocalisationObject {
         public:
-            Self() : LocalisationObject(), heading(arma::fill::zeros), velocity(arma::fill::zeros), robot_to_world_rotation(arma::fill::zeros) {}
+            Self() : LocalisationObject(), heading(arma::fill::zeros), velocity(arma::fill::zeros), robot_to_world_rotation(arma::fill::eye) {}
 
             arma::vec2 heading;     //robot face direction (vector 2)
             arma::vec2 velocity;    //robot velocity (vector 2)

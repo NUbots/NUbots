@@ -174,6 +174,33 @@ namespace matrix {
         return TResult;
     }
 
+
+    Transform2D Transform3D::projectTo2D(const arma::vec3& yawAxis, const arma::vec3& forwardAxis) const{
+        Transform2D result;
+
+        //Translation
+        arma::vec3 orthoForwardAxis = arma::normalise(arma::cross(yawAxis,arma::cross(forwardAxis,yawAxis)));
+        arma::vec3 r = translation();
+        Rotation3D newSpaceToWorld;
+        newSpaceToWorld.x() = orthoForwardAxis;
+        newSpaceToWorld.y() = arma::cross(yawAxis,orthoForwardAxis);
+        newSpaceToWorld.z() = yawAxis;
+        Rotation3D worldToNewSpace = newSpaceToWorld.i();
+        arma::vec3 rNewSpace =  worldToNewSpace * r;
+        result.xy() = rNewSpace.rows(0,1);
+        
+        //Rotation
+        Rotation3D rot = rotation();
+        arma::vec3 x = rot.x();
+        arma::vec3 xNew = worldToNewSpace * x; 
+        float theta_x_from_f = std::atan2(xNew[1],xNew[0]);//sin/cos
+        result.angle() = theta_x_from_f; 
+
+        // std::cerr << "in = \n" << *this << std::endl;
+        // std::cerr << "out = \n" << result << std::endl;
+        return result;
+    }
+
 }
 }
 }

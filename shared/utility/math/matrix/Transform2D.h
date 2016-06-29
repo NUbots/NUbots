@@ -55,6 +55,7 @@ namespace matrix {
              */
             Transform(const arma::vec2 xy_, double angle_);
 
+           
             /**
              * Construct a transform that represents the position and
              * orientation of a camera positioned at 'from' and facing toward
@@ -89,6 +90,8 @@ namespace matrix {
              */
             Transform2D interpolate(double t, const Transform2D& target) const;
 
+            Transform2D i() const;
+
             inline double x() const { return at(0); }
             inline double& x() { return at(0); }
 
@@ -97,6 +100,7 @@ namespace matrix {
 
             inline double angle() const { return at(2); }
             inline double& angle() { return at(2); }
+
 
             inline Rotation2D rotation() {return Rotation2D::createRotation(angle());}
 

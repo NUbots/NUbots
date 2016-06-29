@@ -45,6 +45,8 @@ namespace support {
     using message::support::Configuration;
     using message::support::FieldDescription;
     using message::motion::WalkCommand;
+    using message::motion::WalkStartCommand;
+    using message::motion::WalkStopCommand;
     using message::motion::KickCommand;
     using message::motion::KickScriptCommand;
     using message::motion::KickFinished;
@@ -52,6 +54,8 @@ namespace support {
     using message::platform::darwin::DarwinSensors;
     using message::support::Configuration;
     using message::support::GlobalConfig;
+    using message::vision::Ball;
+    using message::vision::Goal;
     using utility::nubugger::drawArrow;
     using utility::nubugger::drawSphere;
     using utility::math::angle::normalizeAngle;
@@ -111,8 +115,10 @@ namespace support {
         cfg_.ball.path.type = pathTypeFromString(config["ball"]["path"]["type"].as<std::string>());
 
         world.robotPose = config["initial"]["robot_pose"].as<arma::vec3>();
-        world.ball.position = config["initial"]["ball"]["position"].as<arma::vec3>();
-        world.ball.diameter = config["initial"]["ball"]["diameter"].as<Expression>();
+        world.ball = VirtualBall(
+            config["initial"]["ball"]["position"].as<arma::vec2>(),
+            config["initial"]["ball"]["diameter"].as<Expression>()
+        );
 
         cfg_.blind_robot = config["blind_robot"].as<bool>();
 
@@ -171,6 +177,14 @@ namespace support {
             kicking = false;
         });
 
+        on<Trigger<WalkStartCommand>>().then("Sim walk start",[this]{
+            walking = true;
+        });
+
+        on<Trigger<WalkStopCommand>>().then("Sim walk start",[this]{
+            walking = false;
+        });
+
         on<Every<SIMULATION_UPDATE_FREQUENCY, Per<std::chrono::seconds>>,
             With<Sensors>,
             Optional<With<WalkCommand>>
@@ -199,7 +213,7 @@ namespace support {
                 case MotionType::MOTION:
 
                 //Update based on walk engine
-                    if(walkCommand && !kicking) {
+                    if(walking && walkCommand && !kicking) {
                         world.robotVelocity.xy() = walkCommand->command.xy() * 0.2;
                         // world.robotVelocity.xy() = sensors.odometry;
                         //angle from command:
@@ -278,7 +292,7 @@ namespace support {
                 for (auto& g : goalPosts) {
 
                     // Detect the goal:
-                    auto m = g.detect(camParams, world.robotPose, sensors, cfg_.vision_error);
+                    auto m = g.detect(camParams, world.robotPose, sensors, cfg_.vision_error, *fd);
 
                     if (!m.measurements.empty()) {
                         if (!cfg_.distinguish_own_and_opponent_goals) {
@@ -316,10 +330,9 @@ namespace support {
 
                 auto ball = world.ball.detect(camParams, world.robotPose, sensors, cfg_.vision_error);
 
-                if (!ball.measurements.empty()) {
-
+                // If we have measurements
+                if (!ball.edgePoints.empty()) {
                     ball_vec->push_back(ball);
-
                 }
 
                 emit(std::move(ball_vec));
@@ -433,12 +446,6 @@ namespace support {
 
             arma::vec3 goal_own_l = {fd->goalpost_own_l[0],fd->goalpost_own_l[1],0};
             goalPosts.push_back(VirtualGoalPost(goal_own_l, 1.1, Goal::Side::LEFT, Goal::Team::OWN));
-
-            //DEBUG
-            // for(auto& g : goalPosts){
-            //     log("goalPost", g.position.t());
-            // }
-
     }
 
 }

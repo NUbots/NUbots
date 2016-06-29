@@ -135,11 +135,11 @@ namespace support {
                 circle->set_radius(b.circle.radius);
                 *circle->mutable_centre() << b.circle.centre;
 
-                for(auto& measurement : b.measurements) {
-                    auto m = ball->add_measurement();
-                    *m->mutable_position() << measurement.position;
-                    *m->mutable_covariance() << measurement.error;
-                }
+                // for(auto& measurement : b.measurements) {
+                //     auto m = ball->add_measurement();
+                //     *m->mutable_position() << measurement.position;
+                //     *m->mutable_covariance() << measurement.error;
+                // }
             }
 
             send(objects, 1, false, NUClear::clock::now());
@@ -167,11 +167,11 @@ namespace support {
                 *quad->mutable_bl() << g.quad.getBottomLeft();
                 *quad->mutable_br() << g.quad.getBottomRight();
 
-                for(auto& measurement : g.measurements) {
-                    auto g = goal->add_measurement();
-                    *g->mutable_position() << measurement.position;
-                    *g->mutable_covariance() << measurement.error;
-                }
+                // for(auto& measurement : g.measurements) {
+                //     auto g = goal->add_measurement();
+                //     *g->mutable_position() << measurement.position;
+                //     *g->mutable_covariance() << measurement.error;
+                // }
             }
 
             send(objects, 2, false, NUClear::clock::now());

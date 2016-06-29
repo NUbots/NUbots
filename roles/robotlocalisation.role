@@ -26,8 +26,8 @@ NUCLEAR_ROLE(
     vision::ObstacleDetector
 
     # Localisation
-    localisation::MMKFRobotLocalisation
-    localisation::KFBallLocalisation
+    localisation::RobotFieldLocalisation
+    localisation::BallLocalisation
 
     # Behaviour
     behaviour::Controller
@@ -36,7 +36,7 @@ NUCLEAR_ROLE(
     # behaviour::strategy::KeyboardWalk
     behaviour::skills::Getup
     behaviour::strategy::SoccerStrategy
-    behaviour::skills::HeadBehaviourSoccer
+    # behaviour::skills::HeadBehaviourSoccer
 
     # Motion
     # motion::WalkEngine

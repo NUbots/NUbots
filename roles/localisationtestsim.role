@@ -20,9 +20,9 @@ NUCLEAR_ROLE(
     platform::darwin::SensorFilter
 
     #Localisation
-    localisation::MMKFRobotLocalisation
-    localisation::KFBallLocalisation
-    
+    localisation::RobotFieldLocalisation
+    localisation::BallLocalisation
+
     #Behaviour
     behaviour::Controller
     behaviour::skills::WalkEngineStand
@@ -30,12 +30,12 @@ NUCLEAR_ROLE(
     behaviour::skills::Getup
     behaviour::skills::KickScript
     behaviour::skills::DirectWalkController
-    behaviour::skills::HeadBehaviourSoccer
+    #behaviour::skills::HeadBehaviourSoccer
 
-    #behaviour::strategy::KeyboardWalk
+    behaviour::strategy::KeyboardWalk
 
     #Motion
     motion::ScriptEngine
     motion::WalkEngine
-    #motion::HeadController
+    motion::HeadController
 )

@@ -51,7 +51,7 @@ node nubotsvmbuild {
                                 postbuild => 'cp svm.h /nubots/toolchain/include; cp svm.o /nubots/toolchain/lib',
                                 creates =>'/nubots/toolchain/lib/svm.o',
                                 method => 'make', }
-  installer { 'armadillo':      url => 'https://downloads.sourceforge.net/project/arma/armadillo-7.100.3.tar.xz',
+  installer { 'armadillo':      url => 'https://downloads.sourceforge.net/project/arma/armadillo-7.200.2.tar.xz',
                                 method => 'cmake',
                                 creates => '/nubots/toolchain/lib/libarmadillo.so',
                                 require => Installer['openblas'], }

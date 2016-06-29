@@ -63,7 +63,7 @@ backlight_compensation: 0
 # Enables automatic focus adjustments.
 # The effect of manual focus adjustments while this feature is enabled is undefined, drivers should ignore such requests.
 # (bool): default=1
-# auto_focus: 0
+# auto_focus: 0ot
 
 # This control sets the focal point of the camera to the specified position. The unit is undefined. Positive values set the focus closer to the camera, negative values towards infinity.
 # (int): min=0 max=250 step=5 default=0 value=0 flags=inactive
