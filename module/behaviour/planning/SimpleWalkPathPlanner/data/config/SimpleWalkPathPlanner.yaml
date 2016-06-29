@@ -2,3 +2,4 @@ forwardSpeed: 0.8
 turnSpeed : 1
 a: 7
 b: 0
+search_timeout: 3

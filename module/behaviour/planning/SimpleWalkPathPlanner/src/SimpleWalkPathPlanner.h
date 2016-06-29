@@ -49,6 +49,7 @@ namespace module {
                     float forwardSpeed = 1;
                     float a = 7;
                     float b = 0;
+                    float search_timeout = 3;
 
                     //-----------non-config variables (not defined in WalkPathPlanner.yaml)-----------
 
@@ -58,6 +59,8 @@ namespace module {
                     message::behaviour::KickPlan targetHeading;
                     arma::vec2 targetPosition = {0, 0}; 
                     
+                    NUClear::clock::time_point timeBallLastSeen;
+                    arma::vec3 rBWw = {10,0,0};
                 public:
                     explicit SimpleWalkPathPlanner(std::unique_ptr<NUClear::Environment> environment);
             };
