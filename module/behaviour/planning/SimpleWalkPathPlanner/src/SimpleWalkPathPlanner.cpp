@@ -31,6 +31,7 @@
 #include "utility/nubugger/NUhelpers.h"
 #include "utility/localisation/transform.h"
 #include "utility/math/matrix/Transform2D.h"
+#include "utility/math/matrix/Transform3D.h"
 
 
 #include "message/behaviour/Action.h"
@@ -52,6 +53,7 @@ namespace module {
             using message::motion::KickFinished;
             using utility::localisation::transform::RobotToWorldTransform;
             using utility::math::matrix::Transform2D;
+            using utility::math::matrix::Transform3D;
             using utility::nubugger::graph;
             using utility::nubugger::drawSphere;
 
@@ -79,7 +81,8 @@ namespace module {
              subsumptionId(size_t(this) * size_t(this) - size_t(this)),
              currentTargetPosition(arma::fill::zeros),
              currentTargetHeading(arma::fill::zeros),
-             targetHeading({arma::vec2({0,0}),KickType::SCRIPTED})
+             targetHeading({arma::vec2({0,0}),KickType::SCRIPTED}),
+             timeBallLastSeen(NUClear::clock::now())
              {
 
                 //do a little configurating
@@ -89,6 +92,7 @@ namespace module {
                     forwardSpeed = file.config["forwardSpeed"].as<float>();
                     a = file.config["a"].as<float>();
                     b = file.config["b"].as<float>();
+                    search_timeout = file.config["search_timeout"].as<float>();
 
                 });
 
@@ -125,9 +129,12 @@ namespace module {
                 on<Every<20, Per<std::chrono::seconds>>
                  , With<std::vector<Ball>>
                  , With<std::vector<Self>>
+                 , With<Sensors>
                  , Sync<SimpleWalkPathPlanner>>().then([this] (
                     const std::vector<Ball>& ball,
-                    const std::vector<Self>& selfs) {
+                    const std::vector<Self>& selfs,
+                    const Sensors& sensors
+                    ) {
 
                     if (latestCommand.type == message::behaviour::MotionCommand::Type::StandStill) {
 
@@ -149,11 +156,21 @@ namespace module {
 
                     }
 
+                    Transform3D Htw = sensors.world;
+                    auto now = NUClear::clock::now();
+                    float timeSinceBallSeen = std::chrono::duration_cast<std::chrono::nanoseconds>(now - timeBallLastSeen).count() * (1 / std::nano::den);
                     
-
                     // TODO: support non-ball targets
-                    arma::vec2 position = ball.size() > 0 ? ball[0].measurements[0].position.rows(0,1) : 
-                                                            arma::vec2({1,0});
+                    if(ball.size() > 0){
+                        rBWw = ball[0].position.rows(0,1);
+                        timeBallLastSeen = now;
+                    } else {
+                        rBWw = timeSinceBallSeen < search_timeout ? 
+                               rBWw : // Place last seen
+                               Htw.x() + Htw.translation(); //In front of the robot 
+                    }
+
+                    arma::vec3 position = Htw.transformPoint(rBWw);
 
 
                     float angle = std::atan2(position[1], position[0]);

@@ -29,6 +29,7 @@
 #include "utility/support/yaml_expression.h"
 
 #include "utility/math/geometry/Plane.h"
+#include "utility/math/matrix/Transform3D.h"
 
 #include "utility/math/ransac/Ransac.h"
 #include "utility/math/ransac/RansacCircleModel.h"
@@ -41,6 +42,7 @@ namespace vision {
 
     using message::input::CameraParameters;
     using message::input::Sensors;
+    using message::input::ServoID;
 
     using message::vision::ObjectClass;
     using message::vision::ClassifiedImage;
@@ -57,6 +59,7 @@ namespace vision {
     using utility::math::vision::getCamFromScreen;
     using utility::math::vision::getParallaxAngle;
     using utility::math::vision::projectCamSpaceToScreen;
+    using utility::math::matrix::Transform3D;
     using utility::math::geometry::Circle;
 
     using utility::math::coordinates::cartesianToSpherical;
@@ -257,6 +260,24 @@ namespace vision {
                  ************************************************/
 
                 Ball b;
+
+                // Get our transform to world coordinates
+                const Transform3D& Htw = sensors.world;
+                const Transform3D& Htc = sensors.forwardKinematics.find(ServoID::HEAD_PITCH)->second;
+                Transform3D Hcw = Htc.i() * Htw;
+                Transform3D Hwc = Hcw.i();
+
+                // Work out how far away the ball must be to be at the distance it is from the camera
+                arma::vec3 width_rBWw = Hwc.transformPoint(ballCentreRay * widthDistance);
+
+                // Put our ball centre projection into the same space
+                arma::vec3 proj_rBWw = Hwc.transformPoint(ballCentreGroundProj);
+
+                // Average our two centroids
+                arma::vec3 rBWw = (width_rBWw + proj_rBWw) * 0.5;
+
+                // Attach the position to the object
+                b.position = rBWw;
 
                 // On screen visual shape
                 b.circle.radius = result.model.radius;

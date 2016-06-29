@@ -187,6 +187,18 @@ namespace matrix {
             }
 
             /**
+             * @return The (x-axis) of the basis
+             */
+            inline const arma::vec3 x() const { return rotation().submat(0,0,2,0); }
+            inline arma::subview<double> x() { return rotation().submat(0,0,2,0); }
+
+            inline const arma::vec3 y() const { return rotation().submat(0,1,2,1); }
+            inline arma::subview<double> y() { return rotation().submat(0,1,2,1); }
+
+            inline const arma::vec3 z() const { return rotation().submat(0,2,2,2); }
+            inline arma::subview<double> z() { return rotation().submat(0,2,2,2); }
+
+            /**
              * @brief Creates a translation transform by the given 3D vector
              *
              * @param translation The 3D translation vector to translate by

@@ -1,6 +1,6 @@
 
 #WARNING: TURNING OFF auto_start_behaviour RESULTS IN LOCALISATION BEING SPAMMED WITH RESET HYPOTHESIS COMMANDS
-auto_start_behaviour: false
+auto_start_behaviour: true
 #-----------------------------------------------------------------------------
 
 vision:

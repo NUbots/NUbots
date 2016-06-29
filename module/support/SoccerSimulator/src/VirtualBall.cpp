@@ -24,6 +24,7 @@
 #include "message/vision/VisionObjects.h"
 #include "message/input/CameraParameters.h"
 #include "message/input/Sensors.h"
+#include "message/input/ServoID.h"
 #include "utility/math/matrix/Rotation3D.h"
 #include "utility/math/coordinates.h"
 #include "utility/math/vision.h"
@@ -40,6 +41,7 @@ namespace support {
     using utility::math::vision::screenToImage;
     using utility::math::vision::getFieldToCam;
     using message::input::CameraParameters;
+    using message::input::ServoID;
 
     VirtualBall::VirtualBall()
     : position(arma::fill::zeros)
@@ -101,6 +103,14 @@ namespace support {
             // Set our circle parameters for simulating the ball
             result.circle.centre = arma::conv_to<arma::vec>::from(centre);
             result.circle.radius = radius;
+
+            // Get our transform to world coordinates
+            const Transform3D& Htw = sensors->world;
+            const Transform3D& Htc = sensors->forwardKinematics.find(ServoID::HEAD_PITCH)->second;
+            Transform3D Hcw = Htc.i() * Htw;
+            Transform3D Hwc = Hcw.i();
+
+            result.position = Hwc.transformPoint(rBCc);
 
             // Measure points around the ball as a normal distribution
             arma::vec3 rEBc;

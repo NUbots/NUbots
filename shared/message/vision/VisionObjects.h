@@ -52,7 +52,10 @@ namespace message {
 
         struct Ball : public VisionObject {
 
-            Ball() : VisionObject(), edgePoints(), circle() {}
+            Ball() : VisionObject(), position(arma::fill::zeros), edgePoints(), circle() {}
+
+            // The position of the ball in world coordinates
+            arma::vec3 position;
 
             std::vector<arma::vec3> edgePoints;
             utility::math::geometry::Circle circle;
