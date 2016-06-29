@@ -102,7 +102,11 @@ namespace NUClear {
                     // Check if the watch is valid
                     if(watch) {
                         // Return our yaml file
-                        return std::make_shared<::message::support::Configuration>(watch.path, YAML::LoadFile(watch.path));
+                        try{
+                            return std::make_shared<::message::support::Configuration>(watch.path, YAML::LoadFile(watch.path));
+                        } catch (const YAML::ParserException& e){
+                            throw std::runtime_error(watch.path + " " + std::string(e.what()));
+                        }
                     }
                     else {
                         // Return an empty configuration (which will show up invalid)
