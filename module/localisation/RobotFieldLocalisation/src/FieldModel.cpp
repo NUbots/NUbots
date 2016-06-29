@@ -94,7 +94,7 @@ namespace module {
                 }
                 //XXX: this should use a torso transform that includes our IMU orientation
                 if ( !arma::all(lastGoalLocation == goalLocation) ) {
-                    goalNormals = cameraSpaceGoalProjection(state,goalLocation,field,Hwc);
+                    goalNormals = cameraSpaceGoalProjection(state,goalLocation,field,Hwc,false);
                 }
                 // Switch on normal type
                 switch(std::get<2>(type)) {
@@ -122,6 +122,7 @@ namespace module {
         }
 
         arma::vec FieldModel::observationDifference(const arma::vec& a, const arma::vec& b) const {
+            //std::cerr << (a-b) << std::endl << a << std::endl << b << std::endl << std::endl;
             return (a - b);
         }
 
