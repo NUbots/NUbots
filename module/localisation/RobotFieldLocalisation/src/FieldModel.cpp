@@ -54,7 +54,10 @@ namespace module {
             // Transform2D world = sensors.world.projectTo2D(arma::vec3({0,0,1}),arma::vec3({1,0,0}));
 
             //Transform2D world = sensors.world.projectTo2D(arma::vec3({0,0,1}),arma::vec3({1,0,0}));
-            Transform3D Hcw = sensors.forwardKinematics.find(ServoID::HEAD_PITCH)->second.i() * sensors.world;
+            Transform3D Htw = sensors.world;
+            std::cerr << "sensors.world \n" << sensors.world;
+            Transform3D Htc = sensors.forwardKinematics.find(ServoID::HEAD_PITCH)->second;
+            Transform3D Hwc = Htw.i() * Htc;
             //Get the x/y position for goals
             arma::vec prediction(3*measurements.size());
             int counter = 0;
@@ -92,7 +95,7 @@ namespace module {
                 }
                 //XXX: this should use a torso transform that includes our IMU orientation
                 if ( !arma::all(lastGoalLocation == goalLocation) ) {
-                    goalNormals = cameraSpaceGoalProjection(state,goalLocation,field,Hcw.i());
+                    goalNormals = cameraSpaceGoalProjection(state,goalLocation,field,Hwc);
                 }
                 // Switch on normal type
                 switch(std::get<2>(type)) {

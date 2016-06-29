@@ -102,7 +102,7 @@ namespace message {
             arma::vec3 accelerometer;
             arma::vec3 gyroscope;
 
-            /// This is the transform from the robots space to world space. It measures the world in robot space.
+            /// This is the transform from the world space to robot space (=Htw). It measures the world in robot space.
             utility::math::matrix::Transform3D world;
 
             std::vector<Servo> servos;
