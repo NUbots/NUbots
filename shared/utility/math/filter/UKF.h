@@ -23,6 +23,8 @@
 #include <nuclear>
 #include <armadillo>
 
+#include "utility/support/LazyEvaluation.h"
+
 namespace utility {
     namespace math {
         namespace filter {
@@ -74,15 +76,7 @@ namespace utility {
                     points.col(0) = mean;
 
                     // Get our cholskey decomposition
-                    arma::mat chol;
-                    try {
-                        chol = arma::chol(covarianceSigmaWeights * covariance);
-                    } catch (const std::exception& ex) {
-                        std::cerr << __FILE__ << " " << __LINE__ << " : covarianceSigmaWeights * covariance was NOT positive-definite and the cholskey "
-                                  << "decomposition failed.\ncovarianceSigmaWeights * covariance = \n" << std::endl
-                                  << covarianceSigmaWeights * covariance << std::endl;
-                        throw ex;
-                    }
+                    arma::mat chol = arma::chol(covarianceSigmaWeights * covariance);
 
                     // Put our values in either end of the matrix
                     for (uint i = 1; i < Model::size + 1; ++i) {
@@ -115,6 +109,8 @@ namespace utility {
                 }
 
             public:
+
+
                 UKF(StateVec initialMean = arma::zeros(Model::size),
                     StateMat initialCovariance = arma::eye(Model::size, Model::size) * 0.1,
                     double alpha = 1e-1,
@@ -194,7 +190,7 @@ namespace utility {
                 }
 
                 template <typename TMeasurement, typename... TMeasurementArgs>
-                double measurementUpdate(const TMeasurement& measurement,
+                utility::support::LazyEvaluation<double> measurementUpdate(const TMeasurement& measurement,
                                          const arma::mat& measurementVariance,
                                          const TMeasurementArgs&... measurementArgs) {
 
@@ -227,12 +223,14 @@ namespace utility {
                     // Calculate and return the likelihood of the prior mean
                     // and covariance given the new measurement (i.e. the
                     // prior probability density of the measurement):
-                    arma::mat predictedCovariance;
-                    covarianceFromSigmas(predictedCovariance, predictedObservations, predictedMean);
-                    arma::mat innovationVariance = predictedCovariance + measurementVariance;
-                    arma::mat scalarlikelihoodExponent = ((innovation.t() * innovationVariance.i()) * innovation);
-                    double loglikelihood = 0.5 * (std::log(arma::det(innovationVariance)) + std::abs(scalarlikelihoodExponent[0]) + innovation.n_elem * std::log(2 * M_PI));
-                    return -loglikelihood;
+                    return utility::support::LazyEvaluation<double>([this, predictedObservations, predictedMean, measurementVariance, innovation] {
+                        arma::mat predictedCovariance;
+                        covarianceFromSigmas(predictedCovariance, predictedObservations, predictedMean);
+                        arma::mat innovationVariance = predictedCovariance + measurementVariance;
+                        arma::mat scalarlikelihoodExponent = ((innovation.t() * innovationVariance.i()) * innovation);
+                        double loglikelihood = 0.5 * (std::log(arma::det(innovationVariance)) + std::abs(scalarlikelihoodExponent[0]) + innovation.n_elem * std::log(2 * M_PI));
+                        return -loglikelihood;
+                    });
                 }
 
                 const StateVec& get() const {
