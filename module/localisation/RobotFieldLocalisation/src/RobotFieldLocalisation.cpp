@@ -44,7 +44,8 @@ namespace localisation {
 
     RobotFieldLocalisation::RobotFieldLocalisation(std::unique_ptr<NUClear::Environment> environment)
     : Reactor(std::move(environment))
-    , filter() {
+    , filter(),
+    lastUpdateTime(NUClear::clock::now()) {
 
         on<Configuration>("RobotFieldLocalisation.yaml").then([this] (const Configuration& config) {
             // Use configuration here from file RobotFieldLocalisation.yaml
@@ -64,6 +65,8 @@ namespace localisation {
             for (auto& f : filter.filters) {
                 f.filter.model.processNoiseDiagonal = config["process_noise"].as<arma::vec3>();
             }
+
+            lastUpdateTime = NUClear::clock::now();
 
         });
 
@@ -91,13 +94,11 @@ namespace localisation {
             emit(std::make_unique<std::vector<message::localisation::Self>>(std::vector<message::localisation::Self>(1,robot)));
         });
 
-        on<Every<30, Per<std::chrono::seconds>>, Sync<RobotFieldLocalisation>>().then("Robot Localisation Time Update", [this] {
-
-            // Do a time update on the models
-            filter.timeUpdate(1.0/30.0);
-        });
-
         on<Trigger<std::vector<Goal>>, With<FieldDescription>, Sync<RobotFieldLocalisation>>().then("Localisation Goal Update", [this] (const std::vector<Goal>& goals, const FieldDescription& field) {
+            auto now = NUClear::clock::now();
+            float deltaT = std::chrono::duration_cast<std::chrono::nanoseconds>(now - lastUpdateTime).count() * (1 / std::nano::den);
+            lastUpdateTime = now;
+            filter.timeUpdate(std::max(deltaT,0.1));
             // If we have two goals that are left/right
             if(goals.size() == 2) {
 
