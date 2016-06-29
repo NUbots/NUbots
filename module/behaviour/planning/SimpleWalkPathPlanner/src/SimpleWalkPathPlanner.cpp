@@ -190,7 +190,7 @@ namespace module {
                     // emit(graph("distanceToBall", distanceToBall));
                     // emit(graph("forwardSpeed2", finalForwardSpeed));
 
-                    std::unique_ptr<WalkCommand> command = std::make_unique<WalkCommand>(subsumptionId, Transform2D({currentTargetPosition[0], currentTargetPosition[1], 0.5}));
+                    std::unique_ptr<WalkCommand> command = std::make_unique<WalkCommand>(subsumptionId, Transform2D({0, 0, 0}));
                     command->command = Transform2D({finalForwardSpeed, 0, angle});
 
                     arma::vec2 ball_world_position = RobotToWorldTransform(selfs.front().position, selfs.front().heading, position);
