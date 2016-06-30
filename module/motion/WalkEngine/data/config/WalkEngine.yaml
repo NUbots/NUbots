@@ -61,7 +61,7 @@ walk_cycle:
     high_speed: 0.06
   acceleration:
     # Acceleration limits
-    limits: [0.08, 0.025, 0.6]
+    limits: [0.08, 0.045, 0.6]
     # When moving at 'fast' speed or faster, use these limits instead
     limits_high: [0.08, 0.05, 0.6]
     # Factor to slow down walk when turning
