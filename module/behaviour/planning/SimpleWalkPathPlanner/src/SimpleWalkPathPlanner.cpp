@@ -93,6 +93,7 @@ namespace module {
                     a = file.config["a"].as<float>();
                     b = file.config["b"].as<float>();
                     search_timeout = file.config["search_timeout"].as<float>();
+                    robot_ground_space = file.config["robot_ground_space"].as<bool>();
 
                 });
 
@@ -160,35 +161,53 @@ namespace module {
                     auto now = NUClear::clock::now();
                     float timeSinceBallSeen = std::chrono::duration_cast<std::chrono::nanoseconds>(now - timeBallLastSeen).count() * (1 / std::nano::den);
                     
+                    // position = {1,0,0};
                     // TODO: support non-ball targets
-                    if(ball.size() > 0){
-                        rBWw = ball[0].position.rows(0,1);
-                        timeBallLastSeen = now;
+                    if(!robot_ground_space){
+                        if(ball.size() > 0){
+                            rBWw = ball[0].position.rows(0,1);
+                            timeBallLastSeen = now;
+                            log("ball seen");
+                        } else {
+                            rBWw = timeSinceBallSeen < search_timeout ? 
+                                   rBWw : // Place last seen
+                                   Htw.x() + Htw.translation(); //In front of the robot 
+                        }
+                        position = Htw.transformPoint(rBWw);
                     } else {
-                        rBWw = timeSinceBallSeen < search_timeout ? 
-                               rBWw : // Place last seen
-                               Htw.x() + Htw.translation(); //In front of the robot 
+                        if(ball.size() > 0){
+                            position =  ball[0].torsoSpacePosition;
+                            timeBallLastSeen = now;
+                        } else {
+                            position = timeSinceBallSeen < search_timeout ? 
+                                   position : // Place last seen
+                                   arma::vec3({1,0,0}); //In front of the robot 
+                        }
                     }
 
-                    arma::vec3 position = Htw.transformPoint(rBWw);
+                    // log("rBWw",rBWw.t());
+                    // log("Htw\n",Htw);
+
 
 
                     float angle = std::atan2(position[1], position[0]);
+                    // log("ball bearing", angle);
                     angle = std::min(turnSpeed, std::max(angle, -turnSpeed));
-                    // emit(graph("angle", angle));
-                    // emit(graph("ball position", position));
-                    // emit(graph("robot position", selfs.front().position));
-                    // emit(graph("robot heading", selfs.front().heading));
+                    // log("turnSpeed", turnSpeed);
+                    // log("ball bearing", angle);
+                    // log("ball position", position);
+                    // log("loc position", selfs.front().position.t());
+                    // log("loc heading", selfs.front().heading);
 
                     //Euclidean distance to ball
-                    float distanceToBall = arma::norm(position);
+                    float distanceToBall = arma::norm(position.rows(0,1));
                     float scale = 2.0 / (1.0 + std::exp(-a * distanceToBall + b)) - 1.0;
                     float scale2 = angle / M_PI;
                     float finalForwardSpeed = forwardSpeed * scale * (1.0 - scale2);
-                    // emit(graph("forwardSpeed1", forwardSpeed));
-                    // emit(graph("scale", scale));
-                    // emit(graph("distanceToBall", distanceToBall));
-                    // emit(graph("forwardSpeed2", finalForwardSpeed));
+                    // log("forwardSpeed1", forwardSpeed);
+                    // log("scale", scale);
+                    // log("distanceToBall", distanceToBall);
+                    // log("forwardSpeed2", finalForwardSpeed);
 
                     std::unique_ptr<WalkCommand> command = std::make_unique<WalkCommand>(subsumptionId, Transform2D({0, 0, 0}));
                     command->command = Transform2D({finalForwardSpeed, 0, angle});
@@ -196,6 +215,8 @@ namespace module {
                     arma::vec2 ball_world_position = RobotToWorldTransform(selfs.front().position, selfs.front().heading, position);
                     arma::vec2 kick_target = 2 * ball_world_position - selfs.front().position;
                     emit(drawSphere("kick_target", arma::vec3({kick_target[0], kick_target[1], 0.0}), 0.1, arma::vec3({1, 0, 0}), 0));
+                    // log("walkcommand",command->command[0],command->command[1]);
+                    // log("anglewalkcommand",command->command[2]);
 
                     emit(std::make_unique<KickPlan>(KickPlan{kick_target,KickType::SCRIPTED}));
                     emit(std::move(std::make_unique<WalkStartCommand>(1)));

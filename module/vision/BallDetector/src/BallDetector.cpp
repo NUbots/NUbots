@@ -283,10 +283,20 @@ namespace vision {
                 arma::vec3 proj_rBWw = Hwc.transformPoint(ballCentreGroundProj);
 
                 // Average our two centroids
-                arma::vec3 rBWw = (width_rBWw + proj_rBWw) * 0.5;
+                arma::vec3 rBWw = (width_rBWw);
 
                 // Attach the position to the object
                 b.position = rBWw;
+
+                Transform3D Hgc = sensors.orientationCamToGround;
+                arma::vec3 width_rBGg = Hgc.transformPoint(ballCentreRay * widthDistance);
+                arma::vec3 proj_rBGg = Hgc.transformPoint(ballCentreGroundProj);
+                b.torsoSpacePosition = width_rBGg;
+                // log("ball pos1 =", b.position);
+                log("ball pos2 =", b.torsoSpacePosition.t());
+                log("width_rBGg =", width_rBGg.t());
+                log("proj_rBGg =", proj_rBGg.t());
+                log("ballCentreRay =",cartesianToSpherical(ballCentreRay).t());
 
                 // On screen visual shape
                 b.circle.radius = result.model.radius;
