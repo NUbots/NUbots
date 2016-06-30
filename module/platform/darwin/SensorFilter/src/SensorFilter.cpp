@@ -187,19 +187,19 @@ namespace module {
 
 
 
-                on<Trigger<ResetRobotHypotheses>>()
-                 .then("Localisation ResetRobotHypotheses", [this] {
-                    //this reset's the odometry position when localisation does a reset so that we don't have an odometry offset form our new position
-                    arma::vec::fixed<MotionModel::size> covariance;
-                    covariance.rows(MotionModel::PX, MotionModel::PZ) = this->config.motionFilter.initial.covariance.position;
-                    covariance.rows(MotionModel::VX, MotionModel::VZ) = this->config.motionFilter.initial.covariance.velocity;
-                    covariance.rows(MotionModel::QW, MotionModel::QZ) = this->config.motionFilter.initial.covariance.rotation;
-                    covariance.rows(MotionModel::WX, MotionModel::WZ) = this->config.motionFilter.initial.covariance.rotationalVelocity;
+                // on<Trigger<ResetRobotHypotheses>>()
+                //  .then("Localisation ResetRobotHypotheses", [this] {
+                //     //this reset's the odometry position when localisation does a reset so that we don't have an odometry offset form our new position
+                //     arma::vec::fixed<MotionModel::size> covariance;
+                //     covariance.rows(MotionModel::PX, MotionModel::PZ) = this->config.motionFilter.initial.covariance.position;
+                //     covariance.rows(MotionModel::VX, MotionModel::VZ) = this->config.motionFilter.initial.covariance.velocity;
+                //     covariance.rows(MotionModel::QW, MotionModel::QZ) = this->config.motionFilter.initial.covariance.rotation;
+                //     covariance.rows(MotionModel::WX, MotionModel::WZ) = this->config.motionFilter.initial.covariance.rotationalVelocity;
 
-                    arma::vec::fixed<MotionModel::size>  newFilter = motionFilter.get();
-                    newFilter.rows(MotionModel::PX, MotionModel::PY) *= 0.;
-                    motionFilter.setState(newFilter, arma::diagmat(covariance));
-                });
+                //     arma::vec::fixed<MotionModel::size>  newFilter = motionFilter.get();
+                //     newFilter.rows(MotionModel::PX, MotionModel::PY) *= 0.;
+                //     motionFilter.setState(newFilter, arma::diagmat(covariance));
+                // });
 
                 on<Last<20, Trigger<DarwinSensors>>, Single>().then([this](const std::list<std::shared_ptr<const DarwinSensors>>& sensors) {
 

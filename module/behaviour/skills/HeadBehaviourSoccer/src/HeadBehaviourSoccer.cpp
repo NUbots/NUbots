@@ -284,7 +284,7 @@ namespace module {
                         command->yaw = direction[0];
                         command->pitch = direction[1];
                         command->robotSpace = (state == SEARCH);
-                        // log("head angles robot space :", command->robotSpace);
+                        log("head angles robot space :", command->robotSpace);
                         emit(std::move(command));
                     }
 
@@ -399,7 +399,7 @@ namespace module {
             /*! Get search points which keep everything in view.
             Returns vector of arma::vec2
             */
-            std::vector<arma::vec2> HeadBehaviourSoccer::getSearchPoints(const KinematicsModel& kinematicsModel,std::vector<VisionObject> fixationObjects, SearchType sType, const Sensors& sensors){
+            std::vector<arma::vec2> HeadBehaviourSoccer::getSearchPoints(const KinematicsModel&,std::vector<VisionObject> fixationObjects, SearchType sType, const Sensors&){
                     //If there is nothing of interest, we search fot points of interest
                     // log("getting search points");
                     if(fixationObjects.size() == 0){
@@ -416,8 +416,8 @@ namespace module {
 
                             //New absolute referencing
                             arma::vec2 angles = p * M_PI / 180;
-                            if(std::fabs(sensors.world.rotation().pitch()) < pitch_plan_threshold){
-                                arma::vec3 lookVectorFromHead = sphericalToCartesian({1,angles[0],angles[1]});//This is an approximation relying on the robots small FOV
+                            // if(std::fabs(sensors.world.rotation().pitch()) < pitch_plan_threshold){
+                                // arma::vec3 lookVectorFromHead = sphericalToCartesian({1,angles[0],angles[1]});//This is an approximation relying on the robots small FOV
 
 
                                 //TODO: Fix trying to look underneath and behind self!!
@@ -426,17 +426,18 @@ namespace module {
                                 // arma::vec3 adjustedLookVector = lookVectorFromHead;
                                 //TODO: fix:
                                 // arma::vec3 adjustedLookVector = Rotation3D::createRotationX(sensors.world.rotation().pitch()) * lookVectorFromHead;
-                                arma::vec3 adjustedLookVector = Rotation3D::createRotationX(pitch_plan_value) * lookVectorFromHead;
-                                std::vector< std::pair<ServoID, float> > goalAngles = calculateCameraLookJoints(kinematicsModel, adjustedLookVector);
+                                // arma::vec3 adjustedLookVector = Rotation3D::createRotationY(-pitch_plan_value) * lookVectorFromHead;
+                                // std::vector< std::pair<ServoID, float> > goalAngles = calculateCameraLookJoints(kinematicsModel, adjustedLookVector);
 
-                                for(auto& angle : goalAngles){
-                                    if(angle.first == ServoID::HEAD_PITCH){
-                                        angles[1] = angle.second;
-                                    } else if(angle.first == ServoID::HEAD_YAW){
-                                        angles[0] = angle.second;
-                                    }
-                                }
-                            }
+                                // for(auto& angle : goalAngles){
+                                //     if(angle.first == ServoID::HEAD_PITCH){
+                                //         angles[1] = angle.second;
+                                //     } else if(angle.first == ServoID::HEAD_YAW){
+                                //         angles[0] = angle.second;
+                                //     }
+                                // }
+                                // log("goalAngles",angles.t());
+                            // }
                             // emit(graph("IMUSpace Head Lost Angles", angles));
 
                             scaledResults.push_back(angles);
