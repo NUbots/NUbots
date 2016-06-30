@@ -82,6 +82,11 @@ namespace motion
         using Transform3D    = utility::math::matrix::Transform3D;
         using UnitQuaternion = utility::math::geometry::UnitQuaternion;
 
+        //Debug output
+        bool DEBUG = false; 
+
+        int counter_auto = 0;
+
         // The current state of the walk engine...
         enum State {
 

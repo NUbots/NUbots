@@ -79,9 +79,11 @@ namespace motion
                 setRightFootDestination(target.targetDestination);
             }
             setDestinationTime(target.targetTime); 
+                std::cout << "Destination Time - FMP:" << getDestinationTime() << "\n\r";//debugging
             if(DEBUG) { NUClear::log("Messaging: Foot Motion Planner - Received Target Foot Position(1)"); }
         });
 
+        //If foot motion is requested, enable updating...
         on<Trigger<EnableFootMotion>>().then([this] (const EnableFootMotion& command) 
         {
             subsumptionId = command.subsumptionId;
@@ -98,7 +100,7 @@ namespace motion
 //      METHOD: updateFootPosition
 /*=======================================================================================================*/
     void FootMotionPlanner::updateFootPosition(double phase, const Transform2D& leftFootDestination, const Transform2D& rightFootDestination) 
-    {
+    {       
         // Active left foot position
         Transform2D leftFootPositionTransform;
         // Active right foot position

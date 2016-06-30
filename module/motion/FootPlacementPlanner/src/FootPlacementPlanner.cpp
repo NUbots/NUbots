@@ -63,6 +63,7 @@ namespace motion
         {
             if(DEBUG) { NUClear::log("Messaging: Foot Placement Planner - On New Walk Command(0)"); }
             setVelocity(command.velocityTarget);
+            calculateNewStep();
             if(DEBUG) { NUClear::log("Messaging: Foot Placement Planner - On New Walk Command(1)"); }
         });
 
@@ -138,7 +139,7 @@ namespace motion
             Transform2D uLeftFootModded = uTorsoModded.localToWorld(uLeftFootTorso);
             setSupportMass(uLeftFootModded.localToWorld({-getFootOffsetCoefficient(0), -getFootOffsetCoefficient(1), 0}));
             emit(std::make_unique<FootStepTarget>(swingLeg, getTime() + stepTime, getRightFootDestination())); //Trigger NewStep
-
+                std::cout << "Destination Time - FPP:" << (getTime() + stepTime) << "\n\r";//debugging
         }
         else 
         {
@@ -147,8 +148,8 @@ namespace motion
             Transform2D uRightFootModded = uTorsoModded.localToWorld(uRightFootTorso);
             setSupportMass(uRightFootModded.localToWorld({-getFootOffsetCoefficient(0), getFootOffsetCoefficient(1), 0}));
             emit(std::make_unique<FootStepTarget>(swingLeg, getTime() + stepTime, getLeftFootDestination())); //Trigger NewStep
+                std::cout << "Destination Time - FPP:" << (getTime() + stepTime) << "\n\r";//debugging
         }
-
         emit(std::make_unique<NewStepTargetInfo>(getLeftFootSource(), getRightFootSource(), getLeftFootDestination(), getRightFootDestination(), getSupportMass())); //Torso Information
         //emit destinations for fmp and/or zmp
         //may combine NewStep and NewStepTorso

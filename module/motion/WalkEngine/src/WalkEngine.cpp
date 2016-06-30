@@ -75,28 +75,38 @@ namespace motion
             configure(config.config);
         });
 
-        //Broadcast constrained velocity to actuator modules...
+        //Automate walk engine command for testing...
+        updateHandle = on<Every<1 /*RESTORE AFTER DEBUGGING: UPDATE_FREQUENCY*/, Per<std::chrono::seconds>>, With<Sensors>, Single, Priority::HIGH>()
+        .then([this](const Sensors& sensors) 
+        {
+            if(DEBUG) { NUClear::log("WalkEngine - Emit WalkCommand(0)"); }
+            if((counter_auto++)%15 == 0)
+            {
+                emit(std::make_unique<WalkCommand>(1, Transform2D({0.1, 0.05, 0.2}))); //debugging...
+            }
+            if(DEBUG) { NUClear::log("WalkEngine - Emit WalkCommand(1)"); }
+        });//RESTORE AFTER DEBUGGING: .disable();
+
+        //Broadcast constrained velocity vector parameter to actuator modules...
         on<Trigger<WalkCommand>>().then([this] (const WalkCommand& walkCommand)
         {
-                NUClear::log("WalkEngine - Trigger WalkCommand (0)"); //debugging
-            /*auto velocity = walkCommand.command;
+            if(DEBUG) { NUClear::log("WalkEngine - Trigger WalkCommand (0)"); }
+            auto velocity = walkCommand.command;
             velocity.x()     *= velocity.x()     > 0 ? velocityLimits(0,1) : -velocityLimits(0,0);
             velocity.y()     *= velocity.y()     > 0 ? velocityLimits(1,1) : -velocityLimits(1,0);
             velocity.angle() *= velocity.angle() > 0 ? velocityLimits(2,1) : -velocityLimits(2,0);
-            std::cout << velocity;
-            setVelocity(velocity);*/
-            //emit(std::make_unique<NewWalkCommand>(getVelocity()));
-                NUClear::log("WalkEngine - Trigger WalkCommand (1)"); //debugging
+            setVelocity(velocity);
+            emit(std::make_unique<NewWalkCommand>(getVelocity()));
+            if(DEBUG) { NUClear::log("WalkEngine - Trigger WalkCommand (1)"); }
         });
 
         //Update waypoints sensor data at regular intervals...
         updateHandle = on<Every<1 /*RESTORE AFTER DEBUGGING: UPDATE_FREQUENCY*/, Per<std::chrono::seconds>>, With<Sensors>, Single, Priority::HIGH>()
         .then([this](const Sensors& sensors) 
         {
-                NUClear::log("WalkEngine - Emit WalkCommand(0)"); //debugging
-            //emit(std::make_unique<WalkCommand>(1, Transform2D({0.1, 0.05, 0.2}))); //debugging...
-            //RESTORE AFTER DEBUGGING: emit(std::move(updateWaypoints(sensors)));
-                NUClear::log("WalkEngine - Emit WalkCommand(1)"); //debugging
+            if(DEBUG) { NUClear::log("WalkEngine - Update Waypoints(0)"); }
+            //emit(std::move(updateWaypoints(sensors)));
+            if(DEBUG) { NUClear::log("WalkEngine - Update Waypoints(1)"); }
         });//RESTORE AFTER DEBUGGING: .disable();
 
         on<Trigger<WalkStartCommand>>().then([this] 
