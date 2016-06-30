@@ -31,6 +31,7 @@ namespace localisation {
     class RobotFieldLocalisation : public NUClear::Reactor {
     private:
         utility::math::filter::MMUKF<FieldModel> filter;
+        double defaultMeasurementCovariance;
         NUClear::clock::time_point lastUpdateTime;
 
     public:
