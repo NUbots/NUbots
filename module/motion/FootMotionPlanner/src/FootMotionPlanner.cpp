@@ -78,8 +78,7 @@ namespace motion
             {
                 setRightFootDestination(target.targetDestination);
             }
-            setDestinationTime(target.targetTime); 
-                std::cout << "Destination Time - FMP:" << getDestinationTime() << "\n\r";//debugging
+            setDestinationTime(target.targetTime);
             if(DEBUG) { NUClear::log("Messaging: Foot Motion Planner - Received Target Foot Position(1)"); }
         });
 

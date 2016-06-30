@@ -90,8 +90,7 @@ namespace motion
         on<Trigger<FootStepTarget>>().then("Torso Motion Planner - Received Target Footstep", [this] (const FootStepTarget& target) 
         {
             if(DEBUG) { NUClear::log("Messaging: Torso Motion Planner - Received Target Footstep(0)"); }
-            setDestinationTime(target.targetTime); 
-                std::cout << "Destination Time - TMP:" << getDestinationTime() << "\n\r";//debugging
+            setDestinationTime(target.targetTime);
             if(DEBUG) { NUClear::log("Messaging: Torso Motion Planner - Received Target Footstep(1)"); }
         });
 
