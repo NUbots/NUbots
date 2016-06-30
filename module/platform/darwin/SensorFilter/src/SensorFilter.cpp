@@ -23,6 +23,7 @@
 #include "message/input/LimbID.h"
 #include "message/input/CameraParameters.h"
 #include "message/support/Configuration.h"
+#include "message/localisation/ResetRobotHypotheses.h"
 
 #include "utility/support/yaml_armadillo.h"
 #include "utility/math/matrix/Rotation2D.h"
@@ -47,6 +48,7 @@ namespace module {
             using message::input::ServoSide;
             using message::input::ServoID;
             using message::input::LimbID;
+            using message::localisation::ResetRobotHypotheses;
             using utility::nubugger::graph;
             using utility::motion::kinematics::calculateAllPositions;
             using message::motion::kinematics::KinematicsModel;
@@ -181,6 +183,22 @@ namespace module {
                     covariance.rows(MotionModel::QW, MotionModel::QZ) = this->config.motionFilter.initial.covariance.rotation;
                     covariance.rows(MotionModel::WX, MotionModel::WZ) = this->config.motionFilter.initial.covariance.rotationalVelocity;
                     motionFilter.setState(mean, arma::diagmat(covariance));
+                });
+
+
+
+                on<Trigger<ResetRobotHypotheses>>()
+                 .then("Localisation ResetRobotHypotheses", [this] {
+                    //this reset's the odometry position when localisation does a reset so that we don't have an odometry offset form our new position
+                    arma::vec::fixed<MotionModel::size> covariance;
+                    covariance.rows(MotionModel::PX, MotionModel::PZ) = this->config.motionFilter.initial.covariance.position;
+                    covariance.rows(MotionModel::VX, MotionModel::VZ) = this->config.motionFilter.initial.covariance.velocity;
+                    covariance.rows(MotionModel::QW, MotionModel::QZ) = this->config.motionFilter.initial.covariance.rotation;
+                    covariance.rows(MotionModel::WX, MotionModel::WZ) = this->config.motionFilter.initial.covariance.rotationalVelocity;
+
+                    arma::vec::fixed<MotionModel::size>  newFilter = motionFilter.get();
+                    newFilter.rows(MotionModel::PX, MotionModel::PY) *= 0.;
+                    motionFilter.setState(newFilter, arma::diagmat(covariance));
                 });
 
                 on<Last<20, Trigger<DarwinSensors>>, Single>().then([this](const std::list<std::shared_ptr<const DarwinSensors>>& sensors) {
