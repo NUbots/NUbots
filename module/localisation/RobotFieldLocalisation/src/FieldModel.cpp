@@ -49,7 +49,7 @@ namespace module {
 
             //make a storage for our goal locations
             arma::vec3 goalLocation;
-            goalLocation[2] = 0.0;
+            goalLocation.fill(0.0);
             arma::mat::fixed<3,4> goalNormals;
             // Transform2D world = sensors.world.projectTo2D(arma::vec3({0,0,1}),arma::vec3({1,0,0}));
 
@@ -60,6 +60,7 @@ namespace module {
             //Get the x/y position for goals
             arma::vec prediction(3*measurements.size());
             int counter = 0;
+            //std::string ans = "";
             for(auto& type : measurements) {
                 arma::vec3 lastGoalLocation = goalLocation;
                 //choose which goalpost we are looking at
@@ -67,33 +68,41 @@ namespace module {
                 switch(std::get<0>(type)) {
                     // Switch on Side
                     case Goal::Team::OWN:
+                        //ans += " own";
                         switch(std::get<1>(type)) {
                             case Goal::Side::LEFT:
                                 goalLocation.rows(0,1) = field.goalpost_own_l;
+                                //ans += " left";
                                 break;
                             case Goal::Side::RIGHT:
                                 goalLocation.rows(0,1) = field.goalpost_own_r;
+                                //ans += " right";
                                 break;
                             case Goal::Side::UNKNOWN:
                                 break;
                         }
+                        break;
                     case Goal::Team::OPPONENT:
+                        //ans += " opponent";
                         switch(std::get<1>(type)) {
                             case Goal::Side::LEFT:
+                                //ans += " left";
                                 goalLocation.rows(0,1) = field.goalpost_opp_l;
                                 break;
                             case Goal::Side::RIGHT:
+                                //ans += " right";
                                 goalLocation.rows(0,1) = field.goalpost_opp_r;
                                 break;
                             case Goal::Side::UNKNOWN:
                                 break;
                         }
-
+                        break;
                     case Goal::Team::UNKNOWN:
                         break;
                 }
-                //XXX: this should use a torso transform that includes our IMU orientation
+                //only update the goal data if we're looking at a different i
                 if ( !arma::all(lastGoalLocation == goalLocation) ) {
+                    //std::cerr << ans << " goal" << std::endl;
                     goalNormals = cameraSpaceGoalProjection(state,goalLocation,field,Hwc,false);
                 }
                 // Switch on normal type
