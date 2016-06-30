@@ -166,7 +166,7 @@ namespace localisation {
             }
 
             // We have one ambigous goal
-            else if(goals.size() == 1) {
+            else if(goals.size() == 1 && false) {
 
                 // Build our measurement list
                 std::vector<double> measurement;
