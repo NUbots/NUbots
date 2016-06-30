@@ -62,12 +62,6 @@ namespace motion
     : Reactor(std::move(environment)) 
 >>>>>>> Further Modularization in development hierarchy, reorganised directory structure:module/motion/FootPlacementPlanner/src/FootPlacementPlanner.cpp
     {
-        //Configure foot motion planner...
-        on<Configuration>("FootPlacementPlanner.yaml").then("Foot Placement Planner - Configure", [this] (const Configuration& config) 
-        {
-            configure(config.config);
-        });
-
         on<Trigger<NewWalkCommand>>().then("Foot Placement Planner - Update Foot Target", [this] (const NewWalkCommand& command) 
         {
             if(DEBUG) { NUClear::log("Messaging: Foot Placement Planner - On New Walk Command(0)"); }
@@ -93,6 +87,12 @@ namespace motion
         on<Trigger<DisableFootPlacement>>().then([this] 
         {
             updateHandle.disable(); 
+        });
+
+        //Configure foot motion planner...
+        on<Configuration>("FootPlacementPlanner.yaml").then("Foot Placement Planner - Configure", [this] (const Configuration& config) 
+        {
+            configure(config.config);
         });
     }
 /*=======================================================================================================*/
@@ -148,7 +148,10 @@ namespace motion
             Transform2D uLeftFootModded = uTorsoModded.localToWorld(uLeftFootTorso);
             setSupportMass(uLeftFootModded.localToWorld({-getFootOffsetCoefficient(0), -getFootOffsetCoefficient(1), 0}));
             emit(std::make_unique<FootStepTarget>(swingLeg, getTime() + stepTime, getRightFootDestination())); //Trigger NewStep
-                std::cout << "Destination Time - FPP:" << (getTime() + stepTime) << "\n\r";//debugging
+                std::cout << "(Left)  Destination Time - FPP:" << (getTime() + stepTime) << "\n\r";//debugging
+                std::cout << "Get Time                 - FPP:" << getTime() << "\n\r";//debugging
+                std::cout << "Step Time                - FPP:" << stepTime << "\n\r";//debugging
+                std::cout << "Check Values             - FPP:" << stepHeight << step_height_fast_fraction << ",  " << "\n\r";//debugging
         }
         else 
         {
@@ -157,7 +160,9 @@ namespace motion
             Transform2D uRightFootModded = uTorsoModded.localToWorld(uRightFootTorso);
             setSupportMass(uRightFootModded.localToWorld({-getFootOffsetCoefficient(0), getFootOffsetCoefficient(1), 0}));
             emit(std::make_unique<FootStepTarget>(swingLeg, getTime() + stepTime, getLeftFootDestination())); //Trigger NewStep
-                std::cout << "Destination Time - FPP:" << (getTime() + stepTime) << "\n\r";//debugging
+                std::cout << "(Right) Destination Time - FPP:" << (getTime() + stepTime) << "\n\r";//debugging
+                std::cout << "Get Time                 - FPP:" << getTime() << "\n\r";//debugging
+                std::cout << "Step Time                - FPP:" << stepTime << "\n\r";//debugging
         }
         emit(std::make_unique<NewStepTargetInfo>(getLeftFootSource(), getRightFootSource(), getLeftFootDestination(), getRightFootDestination(), getSupportMass())); //Torso Information
         //emit destinations for fmp and/or zmp
@@ -329,7 +334,7 @@ namespace motion
 /*=======================================================================================================*/
     double FootPlacementPlanner::getTime() 
     {
-        return std::chrono::duration_cast<std::chrono::microseconds>(NUClear::clock::now().time_since_epoch()).count() * 1E-6;
+        return std::chrono::duration_cast<std::chrono::microseconds>(NUClear::clock::now().time_since_epoch()).count() * 1e-6;
     }    
 /*=======================================================================================================*/
 /*      ENCAPSULATION METHOD: getTorsoPosition

@@ -126,9 +126,13 @@ namespace motion
             }
 =======
             if(DEBUG) { NUClear::log("Messaging: Torso Motion Planner - Received Target Footstep(0)"); }
+<<<<<<< e36e3d5df345d5503f7efd56f001d1558f2018aa
 >>>>>>> Tracing message flow and debugging information semantics...
             setDestinationTime(target.targetTime); 
                 std::cout << "Destination Time - TMP:" << getDestinationTime() << "\n\r";//debugging
+=======
+            setDestinationTime(target.targetTime);
+>>>>>>> Config (YAML) not populating values, time reference not changing over time...
             if(DEBUG) { NUClear::log("Messaging: Torso Motion Planner - Received Target Footstep(1)"); }
         });
 
