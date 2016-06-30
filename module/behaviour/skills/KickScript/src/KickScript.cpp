@@ -92,9 +92,9 @@ namespace skills {
             auto leg = kickCommand.leg;
 
             if (leg == LimbID::RIGHT_LEG) {
-                emit(std::make_unique<ExecuteScriptByName>(id,  std::vector<std::string>({"RightFootForwardKickNew.yaml"})));
+                emit(std::make_unique<ExecuteScriptByName>(id,  std::vector<std::string>({"Stand.yaml", "RightFootForwardKickNew.yaml"})));
             } else { //if (leg == LimbID::LEFT_LEG) {
-                emit(std::make_unique<ExecuteScriptByName>(id,  std::vector<std::string>({"LeftFootForwardKickNew.yaml"})));
+                emit(std::make_unique<ExecuteScriptByName>(id,  std::vector<std::string>({"Stand.yaml", "LeftFootForwardKickNew.yaml"})));
             }
 
             // if (kickCommand.kickCommandType == KickType::SCRIPTED) {
