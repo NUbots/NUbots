@@ -89,31 +89,37 @@ namespace motion
             configure(config.config);
         });
 
-        updateHandle = on<Every<UPDATE_FREQUENCY, Per<std::chrono::seconds>>, With<Sensors>, Single, Priority::HIGH>()
+        updateHandle = on<Every<1 /*RESTORE AFTER DEBUGGING: UPDATE_FREQUENCY*/, Per<std::chrono::seconds>>, With<Sensors>, Single, Priority::HIGH>()
         .then("Balance Response Planner - Update Robot Posture", [this](const Sensors& sensors) 
         {
-                NUClear::log("Messaging: Balance Kinematic Response - Update Robot Posture(0)"); //debugging
+            if(DEBUG) { NUClear::log("Messaging: Balance Kinematic Response - Update Robot Posture(0)"); }
             //hipCompensation();
             //supportMassCompensation();
-                NUClear::log("Messaging: Balance Kinematic Response - Update Robot Posture(0)"); //debugging
-        }).disable();
+            if(DEBUG) { NUClear::log("Messaging: Balance Kinematic Response - Update Robot Posture(1)"); }
+        });//RESTORE AFTER DEBUGGING: .disable();
 
         //Aim to avoid dependancy on target position to enhance statelessness and adaptive balance compensation...
         on<Trigger<FootMotionUpdate>>().then("Balance Response Planner - Received Update (Active Foot Position) Info", [this] 
         {
-            
+            if(DEBUG) { NUClear::log("Messaging: Balance Kinematic Response - Received Update (Active Foot Position) Info(0)"); }
+
+            if(DEBUG) { NUClear::log("Messaging: Balance Kinematic Response - Received Update (Active Foot Position) Info(1)"); }
         });
 
         //Aim to avoid dependancy on target position to enhance statelessness and adaptive balance compensation...
         on<Trigger<TorsoMotionUpdate>>().then("Balance Response Planner - Received Update (Active Torso Position) Info", [this] 
         {
-            
+            if(DEBUG) { NUClear::log("Messaging: Balance Kinematic Response - Received Update (Active Torso Position) Info(0)"); }
+
+            if(DEBUG) { NUClear::log("Messaging: Balance Kinematic Response - Received Update (Active Torso Position) Info(1)"); }
         });
 
         /*Aim to avoid dependancy on target position to enhance statelessness and adaptive balance compensation...
         on<Trigger<HeadMotionUpdate>>().then("Balance Response Planner - Received Update (Active Head Position) Info", [this] 
         {
-            
+            if(DEBUG) { NUClear::log("Messaging: Balance Kinematic Response - Received Update (Active Head Position) Info(0)"); }
+
+            if(DEBUG) { NUClear::log("Messaging: Balance Kinematic Response - Received Update (Active Head Position) Info(1)"); }
         });*/
 
         //on<Trigger<NewStepTargetInfo>>().then([this]){};            

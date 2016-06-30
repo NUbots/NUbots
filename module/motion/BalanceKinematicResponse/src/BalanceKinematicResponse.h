@@ -72,6 +72,9 @@ namespace motion
         using Transform3D    = utility::math::matrix::Transform3D;
         using UnitQuaternion = utility::math::geometry::UnitQuaternion;
 
+        //Debug output
+        bool DEBUG = false; 
+
         /// Current subsumption ID key to access motors.
         size_t subsumptionId = 1;
 

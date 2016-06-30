@@ -71,7 +71,7 @@ namespace motion
         using UnitQuaternion = utility::math::geometry::UnitQuaternion;
 
         //Debug output
-        bool DEBUG = true; 
+        bool DEBUG = false; 
 
         enum State {
             /**

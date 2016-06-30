@@ -84,7 +84,7 @@ namespace motion
         using UnitQuaternion = utility::math::geometry::UnitQuaternion;
 
         //Debug output
-        bool DEBUG = true; 
+        bool DEBUG = false; 
 
         /// Current subsumption ID key to access motors.
         size_t subsumptionId = 1;

@@ -47,6 +47,7 @@ namespace motion
     using message::motion::WalkStopCommand;
     using message::motion::WalkStopped;
     using message::motion::FootStepTarget;
+    using message::motion::NewStepTargetInfo;
     using message::motion::FootMotionUpdate;
     using message::motion::TorsoMotionUpdate;
     using message::motion::EnableTorsoMotion;
@@ -81,13 +82,14 @@ namespace motion
         .then("Torso Motion Planner - Update Torso Position", [this](const Sensors& sensors) 
         {
             if(DEBUG) { NUClear::log("Messaging: Torso Motion Planner - Update Torso Position(0)"); }
-            //updateTorsoPosition();
+            updateTorsoPosition();
             if(DEBUG) { NUClear::log("Messaging: Torso Motion Planner - Update Torso Position(1)"); }
         });//RESTORE AFTER DEBUGGING: .disable();
 
         //In the event of a new foot step target specified by the foot placement planning module...
-        on<Trigger<FootStepTarget>>().then("Torso Motion Planner - Received Target Torso Position", [this] (const FootStepTarget& target) 
+        on<Trigger<FootStepTarget>>().then("Torso Motion Planner - Received Target Footstep", [this] (const FootStepTarget& target) 
         {
+<<<<<<< 6d1d5a16ea2eaf62518f3670a828e73935f85876
 <<<<<<< 0619086197d38a321f8b54f9394dfd8cf073b65d
 <<<<<<< 29fe3c741efbfe902cfd5e199220e262e93abc3c
 <<<<<<< f23d4331e4606fba733a1bb2327d6000df6cb997
@@ -122,18 +124,32 @@ namespace motion
             {
                 setRightFootDestination(target.targetDestination);
             }
+=======
+            if(DEBUG) { NUClear::log("Messaging: Torso Motion Planner - Received Target Footstep(0)"); }
+>>>>>>> Tracing message flow and debugging information semantics...
             setDestinationTime(target.targetTime); 
-            zmpTorsoCoefficients();
-            if(DEBUG) { NUClear::log("Messaging: Torso Motion Planner - Received Target Torso Position(1)"); }
+                std::cout << "Destination Time - TMP:" << getDestinationTime() << "\n\r";//debugging
+            if(DEBUG) { NUClear::log("Messaging: Torso Motion Planner - Received Target Footstep(1)"); }
         });
 
-        //on<Trigger<NewStepTargetInfo>>().then([this]){};
+        //In the event of a new foot step position info specified by the foot placement planning module...
+        on<Trigger<NewStepTargetInfo>>().then("Torso Motion Planner - Received Footstep Info", [this] (const NewStepTargetInfo& info) 
+        {
+            if(DEBUG) { NUClear::log("Messaging: Torso Motion Planner - Received Footstep Info(0)"); }
+            setLeftFootSource(info.leftFootSource);
+            setRightFootSource(info.rightFootSource);
+            setLeftFootDestination(info.leftFootDestination);
+            setRightFootDestination(info.rightFootDestination);
+            setSupportMass(info.supportMass); 
+            zmpTorsoCoefficients();
+            if(DEBUG) { NUClear::log("Messaging: Torso Motion Planner - Received Footstep Info(1)"); }
+        });
 
         //In the process of actuating a foot step and emitting updated positional data...
         on<Trigger<FootMotionUpdate>>().then("Torso Motion Planner - Received Foot Motion Update", [this] (const FootMotionUpdate& info) 
         {
             if(DEBUG) { NUClear::log("Messaging: Torso Motion Planner - Received Foot Motion Update(0)"); }
-            //setMotionPhase(info.phase);
+            setMotionPhase(info.phase);
             if(DEBUG) { NUClear::log("Messaging: Torso Motion Planner - Received Foot Motion Update(1)"); }
         });
 
