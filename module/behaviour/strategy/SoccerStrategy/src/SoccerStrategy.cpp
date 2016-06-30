@@ -178,13 +178,14 @@ namespace strategy {
 
         });
 
-        on<Trigger<ButtonLeftDown>, Single>().then([this] {
+        on<Trigger<ButtonLeftDown>, Single, With<Sensors>>().then([this] (
+                    const Sensors& sensors
+                ) {
+            NUClear::log("Localisation Orientation reset. Localisation resets will now orient this as forwards.");
+            manualOrientationReset = true;
+            emit(std::make_unique<Nod>(true));
+            manualOrientation  = -sensors.world.rotation().yaw();
 
-            if (!cfg_.forcePenaltyShootout) {
-                NUClear::log("Force penalty shootout started.");
-                emit(std::make_unique<Nod>(true));                
-                cfg_.forcePenaltyShootout = true;
-            }
 
         });
 
@@ -339,9 +340,14 @@ namespace strategy {
         selfSideBaseLine.position = arma::vec2({-fieldDescription.dimensions.field_length * 0.5 + fieldDescription.dimensions.goal_area_length, 0});
         selfSideBaseLine.position_cov = arma::eye(2, 2) * 0.1;
         selfSideBaseLine.heading = 0;
-        selfSideBaseLine.heading_var = 0.05;
-        reset->hypotheses.push_back(selfSideBaseLine);
+        selfSideBaseLine.heading_var = 0.005;
+        if (manualOrientationReset) {
+            selfSideBaseLine.heading = manualOrientation;
+            selfSideBaseLine.heading_var = 0.00005;
+            selfSideBaseLine.absoluteYaw = true;
+        }
 
+        reset->hypotheses.push_back(selfSideBaseLine);
         emit(std::move(reset));
 
     }
@@ -354,7 +360,12 @@ namespace strategy {
         selfSideBaseLine.position = arma::vec2({2, 0});
         selfSideBaseLine.position_cov = arma::eye(2, 2) * 0.1;
         selfSideBaseLine.heading = 0;
-        selfSideBaseLine.heading_var = 0.05;
+        selfSideBaseLine.heading_var = 0.005;
+        if (manualOrientationReset) {
+            selfSideBaseLine.heading = manualOrientation;
+            selfSideBaseLine.heading_var = 0.00005;
+            selfSideBaseLine.absoluteYaw = true;
+        }
         reset->hypotheses.push_back(selfSideBaseLine);
 
         emit(std::move(reset));
@@ -368,21 +379,36 @@ namespace strategy {
         selfSideLeft.position = arma::vec2({-fieldDescription.penalty_robot_start, fieldDescription.dimensions.field_width * 0.5});
         selfSideLeft.position_cov = arma::eye(2, 2) * 0.1;
         selfSideLeft.heading = -M_PI_2;
-        selfSideLeft.heading_var = 0.05;
+        selfSideLeft.heading_var = 0.005;
+        if (manualOrientationReset) {
+            selfSideLeft.heading = manualOrientation;
+            selfSideLeft.heading_var = 0.00005;
+            selfSideLeft.absoluteYaw = true;
+        }
         reset->hypotheses.push_back(selfSideLeft);
 
         ResetRobotHypotheses::Self selfSideRight;
         selfSideRight.position = arma::vec2({-fieldDescription.penalty_robot_start, -fieldDescription.dimensions.field_width * 0.5});
         selfSideRight.position_cov = arma::eye(2, 2) * 0.1;
         selfSideRight.heading = M_PI_2;
-        selfSideRight.heading_var = 0.05;
+        selfSideRight.heading_var = 0.005;
+        if (manualOrientationReset) {
+            selfSideRight.heading = manualOrientation;
+            selfSideRight.heading_var = 0.00005;
+            selfSideRight.absoluteYaw = true;
+        }
         reset->hypotheses.push_back(selfSideRight);
 
         ResetRobotHypotheses::Self selfSideBaseLine;
         selfSideBaseLine.position = arma::vec2({-fieldDescription.dimensions.field_length * 0.5 + fieldDescription.dimensions.goal_area_length, 0});
         selfSideBaseLine.position_cov = arma::eye(2, 2) * 0.1;
         selfSideBaseLine.heading = 0;
-        selfSideBaseLine.heading_var = 0.05;
+        selfSideBaseLine.heading_var = 0.005;
+        if (manualOrientationReset) {
+            selfSideBaseLine.heading = manualOrientation;
+            selfSideBaseLine.heading_var = 0.00005;
+            selfSideBaseLine.absoluteYaw = true;
+        }
         reset->hypotheses.push_back(selfSideBaseLine);
 
         emit(std::move(reset));

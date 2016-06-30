@@ -80,6 +80,8 @@ namespace strategy {
         bool isDiving = false;
         bool selfPenalised = false;
         bool isSideChecking = false;
+        bool manualOrientationReset = false;
+        double manualOrientation = 0.0;
         message::behaviour::KickType kickType;
         message::behaviour::proto::Behaviour::State currentState = message::behaviour::proto::Behaviour::INIT;
 

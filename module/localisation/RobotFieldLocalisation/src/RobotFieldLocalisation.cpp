@@ -24,6 +24,7 @@
 #include "message/support/Configuration.h"
 #include "message/support/FieldDescription.h"
 #include "message/localisation/FieldObject.h"
+#include "message/localisation/ResetRobotHypotheses.h"
 #include "utility/math/matrix/Rotation2D.h"
 #include "utility/math/matrix/Rotation3D.h"
 #include "utility/support/yaml_armadillo.h"
@@ -37,6 +38,7 @@ namespace localisation {
     using message::input::Sensors;
     using message::vision::Goal;
     using message::support::FieldDescription;
+    using message::localisation::ResetRobotHypotheses;
     using utility::math::filter::MMUKF;
     using utility::math::filter::UKF;
     using utility::nubugger::graph;
@@ -44,12 +46,13 @@ namespace localisation {
 
     RobotFieldLocalisation::RobotFieldLocalisation(std::unique_ptr<NUClear::Environment> environment)
     : Reactor(std::move(environment))
-    , filter(),
-    lastUpdateTime(NUClear::clock::now()) {
+    , filter()
+    , defaultMeasurementCovariance(1e-3)
+    , lastUpdateTime(NUClear::clock::now()) {
 
         on<Configuration>("RobotFieldLocalisation.yaml").then([this] (const Configuration& config) {
             // Use configuration here from file RobotFieldLocalisation.yaml
-
+            defaultMeasurementCovariance = config["measurement_noise"].as<double>();
             if (filter.filters.empty()) {
                 filter.filters.push_back(
                         MMUKF<FieldModel>::Filter{
@@ -70,6 +73,29 @@ namespace localisation {
 
         });
 
+
+        on<Trigger<ResetRobotHypotheses>
+         , With<Sensors>
+         , Sync<RobotFieldLocalisation>>()
+         .then("Localisation ResetRobotHypotheses", [this](
+                const ResetRobotHypotheses& reset
+              , const Sensors& sensors
+            ) {
+            //Reset the filter to use the new robot hypotheses
+            filter.filters.resize(0);
+            for (const auto& h : reset.hypotheses) {
+                arma::vec3 Tgr = arma::vec3{h.position[0],h.position[1],h.heading};
+                if (!h.absoluteYaw) {
+                    Tgr[2] -= sensors.world.rotation().yaw();
+                }
+
+                arma::mat33 stateCov(arma::fill::eye);
+                stateCov.submat(0,0,1,1) = h.position_cov;
+                stateCov(2,2) = h.heading_var;
+                filter.filters.emplace_back(0.0, UKF<FieldModel>(Tgr, stateCov));
+            }
+            filter.timeUpdate(0.0);
+        });
 
         on<Trigger<Sensors>, Sync<RobotFieldLocalisation>, Single>().then("Localisation Field Space", [this] (const Sensors& sensors) {
 
@@ -92,8 +118,8 @@ namespace localisation {
             Transform2D currentOdometry = Htg.i().projectTo2D(arma::vec3({0,0,1}),arma::vec3({1,0,0}));
             // std::cerr << "Hcf : " << std::endl << Hcf << std::endl;
             // std::cerr << "currentOdometry : " << std::endl << currentOdometry << std::endl;
-            // std::cerr << "internal Localisation state: " << std::endl << Tgr << std::endl;
-            // std::cerr << "currentLocalisation: " << std::endl << currentLocalisation << std::endl;
+            //std::cerr << "internal Localisation state: " << std::endl << Tgr << std::endl;
+            //std::cerr << "currentLocalisation: " << std::endl << currentLocalisation << std::endl;
             //set position, covariance, and rotation
             robot.position = currentLocalisation.rows(0,1);
             robot.robot_to_world_rotation = utility::math::matrix::Rotation2D::createRotation(currentLocalisation[2]);
@@ -134,8 +160,8 @@ namespace localisation {
 
                 // Apply our multiple measurement updates
                 filter.measurementUpdate({
-                      std::make_tuple(armaMeas, arma::mat(arma::eye(armaMeas.n_elem, armaMeas.n_elem) * 1e-4), measurementTypesOwn,      field, *goals[0].sensors, FieldModel::MeasurementType::GOAL())
-                    , std::make_tuple(armaMeas, arma::mat(arma::eye(armaMeas.n_elem, armaMeas.n_elem) * 1e-4), measurementTypesOpponent, field, *goals[0].sensors, FieldModel::MeasurementType::GOAL())
+                      std::make_tuple(armaMeas, arma::mat(arma::eye(armaMeas.n_elem, armaMeas.n_elem) * defaultMeasurementCovariance), measurementTypesOwn,      field, *goals[0].sensors, FieldModel::MeasurementType::GOAL())
+                    , std::make_tuple(armaMeas, arma::mat(arma::eye(armaMeas.n_elem, armaMeas.n_elem) * defaultMeasurementCovariance), measurementTypesOpponent, field, *goals[0].sensors, FieldModel::MeasurementType::GOAL())
                 });
             }
 
@@ -144,6 +170,7 @@ namespace localisation {
 
                 // Build our measurement list
                 std::vector<double> measurement;
+                measurement.reserve(3*goals.size());
 
                 // Build our measurement types list
                 std::vector<std::tuple<Goal::Team, Goal::Side, Goal::MeasurementType>> measurementTypes[4];
@@ -168,10 +195,10 @@ namespace localisation {
                 // Apply our multiple measurement updates
 
                 filter.measurementUpdate({
-                      std::make_tuple(armaMeas, arma::mat(arma::eye(armaMeas.n_elem, armaMeas.n_elem) * 1e-4), measurementTypes[0], field, *goals[0].sensors, FieldModel::MeasurementType::GOAL())
-                    , std::make_tuple(armaMeas, arma::mat(arma::eye(armaMeas.n_elem, armaMeas.n_elem) * 1e-4), measurementTypes[1], field, *goals[0].sensors, FieldModel::MeasurementType::GOAL())
-                    , std::make_tuple(armaMeas, arma::mat(arma::eye(armaMeas.n_elem, armaMeas.n_elem) * 1e-4), measurementTypes[2], field, *goals[0].sensors, FieldModel::MeasurementType::GOAL())
-                    , std::make_tuple(armaMeas, arma::mat(arma::eye(armaMeas.n_elem, armaMeas.n_elem) * 1e-4), measurementTypes[3], field, *goals[0].sensors, FieldModel::MeasurementType::GOAL())
+                      std::make_tuple(armaMeas, arma::mat(arma::eye(armaMeas.n_elem, armaMeas.n_elem) * defaultMeasurementCovariance), measurementTypes[0], field, *goals[0].sensors, FieldModel::MeasurementType::GOAL())
+                    , std::make_tuple(armaMeas, arma::mat(arma::eye(armaMeas.n_elem, armaMeas.n_elem) * defaultMeasurementCovariance), measurementTypes[1], field, *goals[0].sensors, FieldModel::MeasurementType::GOAL())
+                    , std::make_tuple(armaMeas, arma::mat(arma::eye(armaMeas.n_elem, armaMeas.n_elem) * defaultMeasurementCovariance), measurementTypes[2], field, *goals[0].sensors, FieldModel::MeasurementType::GOAL())
+                    , std::make_tuple(armaMeas, arma::mat(arma::eye(armaMeas.n_elem, armaMeas.n_elem) * defaultMeasurementCovariance), measurementTypes[3], field, *goals[0].sensors, FieldModel::MeasurementType::GOAL())
                 });
             }
         });
