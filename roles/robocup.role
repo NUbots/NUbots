@@ -21,17 +21,17 @@ NUCLEAR_ROLE(
 
     #Vision
     vision::LUTClassifier
-    vision::GoalDetector
+    #vision::GoalDetector
     vision::BallDetector
-    vision::ObstacleDetector
+    #vision::ObstacleDetector
 
     #Localisation
-    localisation::RobotFieldLocalisation
+    #localisation::RobotFieldLocalisation
     localisation::BallLocalisation
 
     #Behaviour
     behaviour::Controller
-    behaviour::skills::Stand
+    behaviour::skills::WalkEngineStand
     behaviour::skills::FallingRelax
     behaviour::skills::Getup
     behaviour::skills::KickScript

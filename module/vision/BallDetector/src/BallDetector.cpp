@@ -163,7 +163,8 @@ namespace vision {
          , With<CameraParameters>
          , With<FieldDescription>
          , With<LookUpTable>
-         , Single>().then("Ball Detector", [this](
+         , Single
+         , Priority::LOW>().then("Ball Detector", [this](
             std::shared_ptr<const ClassifiedImage<ObjectClass>> rawImage
             , const CameraParameters& cam
             , const FieldDescription& field

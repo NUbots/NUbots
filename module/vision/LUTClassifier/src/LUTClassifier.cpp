@@ -156,7 +156,8 @@ namespace module {
             on<Trigger<Image>
             , With<LookUpTable>
             , With<Sensors>
-            , Single>().then("Classify Image", [this] (std::shared_ptr<const Image> rawImage
+            , Single
+            , Priority::LOW>().then("Classify Image", [this] (std::shared_ptr<const Image> rawImage
                       , const LookUpTable& lut
                       , std::shared_ptr<const Sensors> sensors) {
 
