@@ -233,7 +233,8 @@ namespace vision {
             const arma::vec3& robotPose,
             const arma::vec3& goalLocation,
             const message::support::FieldDescription& field, 
-            const utility::math::matrix::Transform3D& camToGround) //camtoground is either camera to ground or camera to world, depending on application
+            const utility::math::matrix::Transform3D& camToGround,
+            const bool& failIfNegative = true) //camtoground is either camera to ground or camera to world, depending on application
     {
         using message::input::ServoID;
         using message::vision::Goal;
@@ -259,7 +260,7 @@ namespace vision {
 
         //if the goals are not in front of us, do not return valid normals
         arma::mat::fixed<3,4> prediction;
-        if (arma::any(goalBaseCorners.row(0) < 0.0)) {
+        if (failIfNegative and arma::any(goalBaseCorners.row(0) < 0.0)) {
             prediction.fill(0);
             return prediction;
         }
