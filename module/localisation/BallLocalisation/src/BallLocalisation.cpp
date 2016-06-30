@@ -11,7 +11,8 @@ namespace localisation {
     using message::localisation::Ball;
 
     BallLocalisation::BallLocalisation(std::unique_ptr<NUClear::Environment> environment)
-    : Reactor(std::move(environment)){
+    : Reactor(std::move(environment))
+    , filter() {
 
         on<Configuration>("BallLocalisation.yaml").then([this] (const Configuration&) {
         	auto message = std::make_unique<std::vector<Ball>>();
