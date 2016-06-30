@@ -38,7 +38,11 @@ namespace module {
             on<Configuration>("scripts/").then([this](const Configuration& script) {
 
                 // Add this script to our list of scripts
-                scripts.insert(std::make_pair(utility::file::pathSplit(script.path).second, script.config.as<Script>()));
+                try{
+                    scripts.insert(std::make_pair(utility::file::pathSplit(script.path).second, script.config.as<Script>()));
+                } catch(const std::exception& e){
+                    log<NUClear::ERROR>("Script is bad conversion:", script.path, e.what());
+                }  
             });
 
             on<Trigger<ExecuteScriptByName>>().then([this](const ExecuteScriptByName& command) {

@@ -12,7 +12,7 @@ leg:
         length: 0.094 # rough
         toe_length: 0.0472 # measured
 head:
-    camera_declination_angle_offset: -0.45 # TODO - fix 1's head pitch motor offset
+    camera_declination_angle_offset: 0.018
     neck_to_camera: [0.036, 0, 0.028] # [x, y, z]
     neck:
         length: 0.042
@@ -24,7 +24,7 @@ head:
 # rough measurements
 arm:
     distance_between_shoulders: 0.114 # distance between shoulders
-    shoulder:
+    shoulder: 
         length: 0.0
         width: 0.0245
         height: 0.017
