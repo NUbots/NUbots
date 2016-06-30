@@ -27,6 +27,7 @@
 #include "utility/math/coordinates.h"
 #include "utility/math/geometry/Quad.h"
 #include "utility/localisation/transform.h"
+#include "utility/math/matrix/Rotation3D.h"
 #include "utility/math/vision.h"
 #include "message/support/FieldDescription.h"
 
@@ -37,9 +38,12 @@ namespace support {
     using utility::math::vision::cameraSpaceGoalProjection;
     using message::input::Sensors;
     using utility::math::matrix::Transform2D;
+    using utility::math::matrix::Transform3D;
+    using utility::math::matrix::Rotation3D;
     using message::input::CameraParameters;
     using utility::math::geometry::Quad;
     using message::support::FieldDescription;
+        using message::input::ServoID;
 
     arma::vec2 VirtualGoalPost::getCamRay(const arma::vec3& norm1, const arma::vec3& norm2, double focalLength, arma::uvec2 imSize) {
         //Solve the vector intersection between two planes to get the camera ray of the quad corner
@@ -88,11 +92,23 @@ namespace support {
                 const FieldDescription& field){
         Goal result;
 
+        // t = torso; c = camera; g = ground; f = foot;
+        Transform3D Htc = sensors->forwardKinematics.find(ServoID::HEAD_PITCH)->second;
+        //get the torso to foot transform
+        Transform3D Hgt = sensors->forwardKinematics.find(ServoID::R_ANKLE_ROLL)->second.i();
+        Transform3D Hgt2 = sensors->forwardKinematics.find(ServoID::L_ANKLE_ROLL)->second.i();
+        if (Hgt2(3,2) < Hgt(3,2)) {
+            Hgt = Hgt2;
+        }
+        //remove translation components from the transform
+        Hgt.submat(0,3,1,3) *= 0.0;
+        Hgt.rotation() = Rotation3D::createRotationZ(-Rotation3D(Hgt.rotation()).yaw()) * Hgt.rotation();
+        //create the camera to ground transform
+        Transform3D Hgc =  Hgt * Htc;
 
         //push the new measurement types
-        //TODO: simulate not having values if off screen
-        //std::cout << this->position;
-        arma::mat::fixed<3,4> goalNormals = cameraSpaceGoalProjection(robotPose, this->position, field, sensors->orientationCamToGround);
+
+        arma::mat::fixed<3,4> goalNormals = cameraSpaceGoalProjection(robotPose, this->position, field, Hgc);
         if (arma::any(arma::any(goalNormals > 0.0))) {
             result.measurements.push_back(
                 std::make_pair<Goal::MeasurementType, arma::vec3>(
