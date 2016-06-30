@@ -67,7 +67,7 @@ namespace behaviour {
 namespace planning {
 
     KickPlanner::KickPlanner(std::unique_ptr<NUClear::Environment> environment)
-        : Reactor(std::move(environment)), cfg(), ball_last_measurement_time(NUClear::clock::now()) {
+        : Reactor(std::move(environment)), cfg(), ball_last_measurement_time(NUClear::clock::now()),lastTimeValid(NUClear::clock::now()) {
 
 
         on<Configuration>("KickPlanner.yaml").then([this](const Configuration& config) {
@@ -112,8 +112,14 @@ namespace planning {
             // log("KickAngle",KickAngle);
             // log("ballPosition",ballPosition);
             // log("secondsSinceLastSeen",secondsSinceLastSeen);
+            bool kickIsValid = kickValid(ballPosition, params.stand_height, sensors);
+            if(kickIsValid){
+                lastTimeValid = now;
+            }
+            float timeSinceValid = (now - lastTimeValid).count() * (1 / double(NUClear::clock::period::den));
+
             if(secondsSinceLastSeen < cfg.seconds_not_seen_limit
-                && kickValid(ballPosition, params.stand_height, sensors)
+                && kickIsValid
                 && KickAngle < cfg.kick_forward_angle_limit) {
 
                 switch (kickPlan.kickType) {
@@ -139,7 +145,7 @@ namespace planning {
                         break;
                     default: throw new std::runtime_error("KickPlanner: Invalid KickType");
                 }
-            } else if(secondsSinceLastSeen > cfg.seconds_not_seen_limit){
+            } else if(secondsSinceLastSeen > cfg.seconds_not_seen_limit || timeSinceValid > cfg.seconds_not_seen_limit){
                 emit(std::make_unique<WantsToKick>(WantsToKick{false}));
             }
 

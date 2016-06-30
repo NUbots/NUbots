@@ -284,7 +284,7 @@ namespace module {
                         command->yaw = direction[0];
                         command->pitch = direction[1];
                         command->robotSpace = (state == SEARCH);
-                        log("head angles robot space :", command->robotSpace);
+                        // log("head angles robot space :", command->robotSpace);
                         emit(std::move(command));
                     }
 

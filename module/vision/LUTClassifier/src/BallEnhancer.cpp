@@ -215,7 +215,7 @@ namespace module {
 
                 // Go clockwise
                 arma::ivec2 point = edge;
-                for(int i = 0; i < 100; ++i) {
+                for(int i = 0; i < 10; ++i) {
 
                     // Break if we hit the edge of the screen
                     if(point[0] < 4 || point[0] > (int(image.width) - 4) || point[1] < 4 || point[1] > (int(image.height) - 4)) {

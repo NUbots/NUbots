@@ -89,8 +89,8 @@ absolute_focus: 0
 sharpness: 3
 
 imageFormat: YUYV
-imageWidth: 640
-imageHeight: 480
+imageWidth: 320
+imageHeight: 240
 FOV_X: 1.0472
 FOV_Y: 0.785398
 DISTORTION_FACTOR: -0.000018
