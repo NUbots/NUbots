@@ -293,10 +293,10 @@ namespace vision {
                 arma::vec3 proj_rBGg = Hgc.transformPoint(ballCentreGroundProj);
                 b.torsoSpacePosition = width_rBGg;
                 // log("ball pos1 =", b.position);
-                log("ball pos2 =", b.torsoSpacePosition.t());
-                log("width_rBGg =", width_rBGg.t());
-                log("proj_rBGg =", proj_rBGg.t());
-                log("ballCentreRay =",cartesianToSpherical(ballCentreRay).t());
+                // log("ball pos2 =", b.torsoSpacePosition.t());
+                // log("width_rBGg =", width_rBGg.t());
+                // log("proj_rBGg =", proj_rBGg.t());
+                // log("ballCentreRay =",cartesianToSpherical(ballCentreRay).t());
 
                 // On screen visual shape
                 b.circle.radius = result.model.radius;

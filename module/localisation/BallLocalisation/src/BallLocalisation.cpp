@@ -25,6 +25,7 @@ namespace localisation {
 	        	auto message = std::make_unique<std::vector<Ball>>();
 	        	message->push_back(Ball());
 	        	message->back().last_measurement_time = NUClear::clock::now();
+	        	message->back().position = balls[0].torsoSpacePosition;
 	        	emit(message);
         	}
         });

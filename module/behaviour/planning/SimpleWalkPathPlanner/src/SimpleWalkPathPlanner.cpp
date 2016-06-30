@@ -167,7 +167,7 @@ namespace module {
                         if(ball.size() > 0){
                             rBWw = ball[0].position.rows(0,1);
                             timeBallLastSeen = now;
-                            log("ball seen");
+                            // log("ball seen");
                         } else {
                             rBWw = timeSinceBallSeen < search_timeout ? 
                                    rBWw : // Place last seen

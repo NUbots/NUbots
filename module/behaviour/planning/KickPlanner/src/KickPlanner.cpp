@@ -67,7 +67,7 @@ namespace behaviour {
 namespace planning {
 
     KickPlanner::KickPlanner(std::unique_ptr<NUClear::Environment> environment)
-        : Reactor(std::move(environment)), cfg() {
+        : Reactor(std::move(environment)), cfg(), ball_last_measurement_time(NUClear::clock::now()) {
 
 
         on<Configuration>("KickPlanner.yaml").then([this](const Configuration& config) {
@@ -79,13 +79,13 @@ namespace planning {
         });
 
 
-        on<Trigger<Ball>,
+        on<Trigger<std::vector<Ball>>,
             With<std::vector<Self>>,
             With<FieldDescription>,
             With<KickPlan>,
             With<Sensors>,
             With<IKKickParams>>().then([this] (
-            const Ball& ball,
+            const std::vector<Ball>& ball,
             const std::vector<Self>& selfs,
             const FieldDescription& fd,
             const KickPlan& kickPlan,
@@ -94,16 +94,25 @@ namespace planning {
 
             //Get time since last seen ball
             auto now = NUClear::clock::now();
-            double secondsSinceLastSeen = std::chrono::duration_cast<std::chrono::microseconds>(now - ball.last_measurement_time).count() * 1e-6;
+            double secondsSinceLastSeen = std::chrono::duration_cast<std::chrono::microseconds>(now - ball_last_measurement_time).count() * 1e-6;
 
             //Compute target in robot coords
             auto self = selfs[0];
-            arma::vec2 kickTarget = WorldToRobotTransform(self.position, self.heading, kickPlan.target);
-            arma::vec3 ballPosition = {ball.position[0], ball.position[1], fd.ball_radius};
+            arma::vec2 kickTarget = {1,0,0}; //Kick forwards
+            // arma::vec2 kickTarget = WorldToRobotTransform(self.position, self.heading, kickPlan.target);
+            arma::vec3 ballPosition = {100,0,0};//too far to kick
+            if(ball.size()>0){
+                ballPosition = {ball[0].position[0], ball[0].position[1], fd.ball_radius};
+                ball_last_measurement_time = now;
+            }
 
             float KickAngle = std::fabs(std::atan2(kickTarget[1], kickTarget[0]));
 
             //Check whether to kick
+            // log("kickTarget",kickTarget.t());
+            // log("KickAngle",KickAngle);
+            // log("ballPosition",ballPosition);
+            // log("secondsSinceLastSeen",secondsSinceLastSeen);
             if(secondsSinceLastSeen < cfg.seconds_not_seen_limit
                 && kickValid(ballPosition, params.stand_height, sensors)
                 && KickAngle < cfg.kick_forward_angle_limit) {
@@ -118,7 +127,7 @@ namespace planning {
                         }
                         break;
                     case KickType::SCRIPTED:
-                        // NUClear::log("scripted");
+                        NUClear::log("scripted");
                         if(ballPosition[1] > 0){
                             emit(std::make_unique<KickScriptCommand>(KickScriptCommand({{1, 0, 0}, LimbID::LEFT_LEG})));
                         } else {

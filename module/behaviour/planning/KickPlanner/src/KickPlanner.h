@@ -37,6 +37,7 @@ namespace planning {
     private:
         bool kickValid(const arma::vec3& ballPos, float standHeight, const message::input::Sensors& sensors);
        	message::motion::KickPlannerConfig cfg;
+       	NUClear::clock::time_point ball_last_measurement_time;
     };
 
 }
