@@ -2,4 +2,5 @@
 max_ball_distance: 0.30
 kick_corridor_width: 0.2
 kick_forward_angle_limit: 2.0
-seconds_not_seen_limit: 0.5
+seconds_not_seen_limit: 3
+

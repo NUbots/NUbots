@@ -48,9 +48,9 @@ using message::motion::KickCommandType;
 using message::motion::KickScriptCommand;
 using message::motion::KickPlannerConfig;
 using message::support::Configuration;
-using message::motion::WalkStopCommand;
 using message::input::LimbID;
 using message::behaviour::KickPlan;
+using message::behaviour::WantsToKick;
 using message::behaviour::KickType;
 using message::support::FieldDescription;
 
@@ -77,7 +77,6 @@ namespace planning {
             cfg.kick_forward_angle_limit = config["kick_forward_angle_limit"].as<float>();
             emit(std::make_unique<KickPlannerConfig>(cfg));
         });
-
 
         on<Trigger<std::vector<Ball>>,
             With<std::vector<Self>>,
@@ -122,20 +121,26 @@ namespace planning {
                         NUClear::log("ik_kick");
                         if(ballPosition[1] > 0){
                             emit(std::make_unique<KickCommand>(KickCommand({0.1,0.04,0}, {1, 0, 0}, KickCommandType::NORMAL )));
+                            emit(std::make_unique<WantsToKick>(true));
                         } else {
                             emit(std::make_unique<KickCommand>(KickCommand({0.1,-0.04,0}, {1, 0, 0}, KickCommandType::NORMAL )));
+                            emit(std::make_unique<WantsToKick>(true));
                         }
                         break;
                     case KickType::SCRIPTED:
                         NUClear::log("scripted");
                         if(ballPosition[1] > 0){
                             emit(std::make_unique<KickScriptCommand>(KickScriptCommand({{1, 0, 0}, LimbID::LEFT_LEG})));
+                            emit(std::make_unique<WantsToKick>(true));;
                         } else {
                             emit(std::make_unique<KickScriptCommand>(KickScriptCommand({{1, 0, 0}, LimbID::RIGHT_LEG})));
+                            emit(std::make_unique<WantsToKick>(true));;
                         }
                         break;
                     default: throw new std::runtime_error("KickPlanner: Invalid KickType");
                 }
+            } else if(secondsSinceLastSeen > cfg.seconds_not_seen_limit){
+                emit(std::make_unique<WantsToKick>(WantsToKick{false}));
             }
 
         });

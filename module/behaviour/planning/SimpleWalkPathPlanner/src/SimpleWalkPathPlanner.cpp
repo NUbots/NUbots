@@ -51,6 +51,7 @@ namespace module {
             using message::motion::WalkStartCommand;
             using message::motion::WalkStopCommand;
             using message::motion::KickFinished;
+            using message::behaviour::WantsToKick;
             using utility::localisation::transform::RobotToWorldTransform;
             using utility::math::matrix::Transform2D;
             using utility::math::matrix::Transform3D;
@@ -109,6 +110,7 @@ namespace module {
                         if (givenLimbs.find(LimbID::LEFT_LEG) != givenLimbs.end()) {
                             // Enable the walk engine.
                             emit<Scope::DIRECT>(std::move(std::make_unique<EnableWalkEngineCommand>(subsumptionId)));
+                            emit(std::move(std::make_unique<WalkStartCommand>(subsumptionId)));
                         }
                     },
                     [this] (const std::set<LimbID>& takenLimbs) {
@@ -122,26 +124,32 @@ namespace module {
                     }
                 }));
 
-
-                on<Trigger<KickFinished>>().then([this] (const KickFinished&) {
-                    emit(std::move(std::make_unique<WalkStartCommand>(1)));
+                on<Trigger<WalkStopped>>().then([this]{
+                    emit(std::make_unique<ActionPriorites>(ActionPriorites { subsumptionId, { 0, 0 }}));
                 });
 
                 on<Every<20, Per<std::chrono::seconds>>
                  , With<std::vector<Ball>>
                  , With<std::vector<Self>>
                  , With<Sensors>
+                 , With<WantsToKick>
                  , Sync<SimpleWalkPathPlanner>>().then([this] (
                     const std::vector<Ball>& ball,
                     const std::vector<Self>& selfs,
-                    const Sensors& sensors
+                    const Sensors& sensors,
+                    const WantsToKick& wantsTo
                     ) {
+
+                    if(wantsTo.kick){
+                        emit(std::make_unique<WalkStopCommand>(subsumptionId));
+                        return;
+                    }
 
                     if (latestCommand.type == message::behaviour::MotionCommand::Type::StandStill) {
 
                         
-                        emit(std::make_unique<WalkStopCommand>(1));
-                        emit(std::make_unique<ActionPriorites>(ActionPriorites { subsumptionId, { 26, 11 }}));
+                        emit(std::make_unique<WalkStopCommand>(subsumptionId));
+                        //emit(std::make_unique<ActionPriorites>(ActionPriorites { subsumptionId, { 40, 11 }}));
 
                         return;
 
@@ -151,8 +159,8 @@ namespace module {
 
                         std::unique_ptr<WalkCommand> command = std::make_unique<WalkCommand>(subsumptionId,latestCommand.walkCommand);
                         emit(std::move(command));
-                        emit(std::move(std::make_unique<WalkStartCommand>(1)));
-                        emit(std::make_unique<ActionPriorites>(ActionPriorites { subsumptionId, { 26, 11 }}));
+                        emit(std::move(std::make_unique<WalkStartCommand>(subsumptionId)));
+                        emit(std::make_unique<ActionPriorites>(ActionPriorites { subsumptionId, { 40, 11 }}));
                         return;
 
                     }
@@ -219,10 +227,10 @@ namespace module {
                     // log("anglewalkcommand",command->command[2]);
 
                     emit(std::make_unique<KickPlan>(KickPlan{kick_target,KickType::SCRIPTED}));
-                    emit(std::move(std::make_unique<WalkStartCommand>(1)));
+                    emit(std::move(std::make_unique<WalkStartCommand>(subsumptionId)));
                     emit(std::move(command));
 
-                    emit(std::make_unique<ActionPriorites>(ActionPriorites { subsumptionId, { 26, 11 }}));
+                    emit(std::make_unique<ActionPriorites>(ActionPriorites { subsumptionId, { 40, 11 }}));
                 });
 
                 on<Trigger<MotionCommand>, Sync<SimpleWalkPathPlanner>>().then([this] (const MotionCommand& cmd) {

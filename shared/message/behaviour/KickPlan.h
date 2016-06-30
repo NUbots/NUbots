@@ -33,6 +33,12 @@ namespace behaviour {
         KickType kickType;
 	};
 
+	struct WantsToKick {
+		WantsToKick(bool kick) : kick(kick) {}
+
+		bool kick = true;
+	};
+
 }
 }
 #endif
