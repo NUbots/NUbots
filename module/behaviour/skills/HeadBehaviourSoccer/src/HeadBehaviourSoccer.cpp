@@ -115,6 +115,7 @@ namespace module {
                     replan_angle_threshold = config["replan_angle_threshold"].as<float>();
 
                     pitch_plan_threshold = config["pitch_plan_threshold"].as<float>() * M_PI / 180.0f;
+                    pitch_plan_value = config["pitch_plan_value"].as<float>() * M_PI / 180.0f;
 
                     //Load searches:
                     for(auto& search : config["searches"]){
@@ -283,7 +284,7 @@ namespace module {
                         command->yaw = direction[0];
                         command->pitch = direction[1];
                         command->robotSpace = (state == SEARCH);
-                        log("head angles robot space :", command->robotSpace);
+                        // log("head angles robot space :", command->robotSpace);
                         emit(std::move(command));
                     }
 
@@ -422,7 +423,10 @@ namespace module {
                                 //TODO: Fix trying to look underneath and behind self!!
 
 
-                                arma::vec3 adjustedLookVector = Rotation3D::createRotationY(sensors.world.rotation().pitch()) * lookVectorFromHead;
+                                // arma::vec3 adjustedLookVector = lookVectorFromHead;
+                                //TODO: fix:
+                                // arma::vec3 adjustedLookVector = Rotation3D::createRotationX(sensors.world.rotation().pitch()) * lookVectorFromHead;
+                                arma::vec3 adjustedLookVector = Rotation3D::createRotationX(pitch_plan_value) * lookVectorFromHead;
                                 std::vector< std::pair<ServoID, float> > goalAngles = calculateCameraLookJoints(kinematicsModel, adjustedLookVector);
 
                                 for(auto& angle : goalAngles){

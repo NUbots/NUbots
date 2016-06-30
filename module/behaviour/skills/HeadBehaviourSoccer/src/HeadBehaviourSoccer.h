@@ -95,6 +95,7 @@ namespace module {
 
                 //CONFIG from HeadBehaviourSoccer.yaml
                 float pitch_plan_threshold;
+                float pitch_plan_value = 20;
                 double fractional_view_padding;
                 float search_timeout_ms;
                 float fractional_angular_update_threshold;
