@@ -105,6 +105,7 @@ namespace module {
                     }
                 }
                 greenCentroid /= float(nPoints);
+                greenCentroid[0] *= 2.0;
                 this->greenCentroid = greenCentroid;
 
                 LUT_PATH = config.path;

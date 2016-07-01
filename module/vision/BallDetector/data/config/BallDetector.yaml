@@ -1,15 +1,15 @@
 
 ransac:
   minimum_points_for_consensus: 10
-  maximum_iterations_per_fitting: 30
-  maximum_fitted_models: 15
-  consensus_error_threshold: 8
+  maximum_iterations_per_fitting: 50
+  maximum_fitted_models: 5
+  consensus_error_threshold: 10
 maximum_disagreement_ratio: 1.3
 maximum_relative_seed_point_distance: 0.2
 measurement_distance_variance_factor: 0.5
 measurement_bearing_variance: 0.2
 measurement_elevation_variance: 0.2
-green_ratio_threshold: 0.03
+green_ratio_threshold: 0.2
 green_radial_samples: 12
 green_angular_samples: 12
 
