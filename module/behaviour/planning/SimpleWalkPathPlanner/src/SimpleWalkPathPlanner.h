@@ -47,6 +47,7 @@ namespace module {
                     const size_t subsumptionId;
                     float turnSpeed = 0.8;
                     float forwardSpeed = 1;
+                    float sideSpeed = 1;
                     float a = 7;
                     float b = 0;
                     float search_timeout = 3;

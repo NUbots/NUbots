@@ -20,6 +20,7 @@
 #include "SimpleWalkPathPlanner.h"
 
 #include <cmath>
+#include <math.h>
 #include "message/behaviour/KickPlan.h"
 #include "message/support/Configuration.h"
 #include "message/input/Sensors.h"
@@ -96,12 +97,13 @@ namespace module {
 
                     turnSpeed = file.config["turnSpeed"].as<float>();
                     forwardSpeed = file.config["forwardSpeed"].as<float>();
+                    sideSpeed = file.config["sideSpeed"].as<float>();
                     a = file.config["a"].as<float>();
                     b = file.config["b"].as<float>();
                     search_timeout = file.config["search_timeout"].as<float>();
                     robot_ground_space = file.config["robot_ground_space"].as<bool>();
                     ball_approach_dist = file.config["ball_approach_dist"].as<float>();
-                    useLocalisation = file.config["useLocalisation"].as<float>();
+                    useLocalisation = file.config["useLocalisation"].as<bool>();
 
                     emit(std::make_unique<WantsToKick>(false));
                 });
@@ -215,37 +217,28 @@ namespace module {
                                    position : // Place last seen
                                    arma::vec2({1,0}); //In front of the robot 
                         }
-                    log("position before localisation",position.t());
                     // }
 
                     //Hack Planner:
-
+                    float headingChange = 0;
+                    float sideStep = 0;
                     if(useLocalisation){
                         arma::vec2 kick_target = WorldToRobotTransform(selfs.front().position, selfs.front().heading, kickPlan.target);
-                        // emit(drawSphere("kick_target_local", arma::vec3({kick_target[0], kick_target[1], 0.0}), 0.1, arma::vec3({0, 1, 1}), 0));
                         // //approach point:
-                        // log("kick_target",kick_target);
-                        // log("arma::normalise(kick_target - position)",arma::normalise(kick_target - position));
-                        // log("arma::normalise(kick_target - position) * ball_approach_dist",arma::normalise(kick_target - position) * ball_approach_dist);
-                        arma::vec2 kick_point = position - arma::normalise(kick_target - position) * ball_approach_dist;
+                        arma::vec2 ballToTarget = arma::normalise(kick_target - position);
+                        arma::vec2 kick_point = position - ballToTarget * ball_approach_dist;
 
                         if(arma::norm(position) > ball_approach_dist + 0.1){
-                            // log("appraoching behind ball");
                             position = kick_point;
+                        }else{
+                            headingChange = std::atan2(ballToTarget[1], ballToTarget[0]);
+                            sideStep = 1;
                         }
                     }
-                    arma::vec2 ball_world_position = WorldToRobotTransform(selfs.front().position, selfs.front().heading, position);
-
-                    // emit(drawSphere("walk_to_position", arma::vec3({ball_world_position[0], ball_world_position[1], 0.0}), 0.1, arma::vec3({0, 0, 0}), 0));
-                    // emit(drawSphere("robot_pos", arma::vec3({selfs.front().position[0], selfs.front().position[1], 0.0}), 0.1, arma::vec3({1,1,1}), 0));
-                    // emit(drawSphere("kick_target", arma::vec3({kickPlan.target[0], kickPlan.target[1], 0.0}), 0.1, arma::vec3({1,1,1}), 0));
-                    // log("position",position.t());
-                    // log("kickPlan.target",kickPlan.target.t());
-                    // log("selfs.front().position",selfs.front().position.t());
-                    // log("selfs.front().heading",selfs.front().heading.t());
+                    // arma::vec2 ball_world_position = WorldToRobotTransform(selfs.front().position, selfs.front().heading, position);
 
 
-                    float angle = std::atan2(position[1], position[0]);
+                    float angle = std::atan2(position[1], position[0]) + headingChange;
                     // log("ball bearing", angle);
                     angle = std::min(turnSpeed, std::max(angle, -turnSpeed));
                     // log("turnSpeed", turnSpeed);
@@ -255,18 +248,21 @@ namespace module {
                     // log("loc heading", selfs.front().heading);
 
                     //Euclidean distance to ball
-                    float distanceToBall = arma::norm(position);
-                    float scale = 2.0 / (1.0 + std::exp(-a * distanceToBall + b)) - 1.0;
-                    float scale2 = angle / M_PI;
-                    float finalForwardSpeed = forwardSpeed * scale * (1.0 - scale2);
+                    float scaleF = 2.0 / (1.0 + std::exp(-a * std::fabs(position[0]) + b)) - 1.0;
+                    float scaleF2 = angle / M_PI;
+                    float finalForwardSpeed = forwardSpeed * scaleF * (1.0 - scaleF2);
+
+                    float scaleS = 2.0 / (1.0 + std::exp(-a * std::fabs(position[1]) + b)) - 1.0;
+                    float scaleS2 = angle / M_PI;
+                    float finalSideSpeed = -((0 < position[1]) - (position[1] < 0)) * sideStep * sideSpeed * scaleS * (1.0 - scaleS2);
                     // log("forwardSpeed1", forwardSpeed);
                     // log("scale", scale);
                     // log("distanceToBall", distanceToBall);
                     // log("forwardSpeed2", finalForwardSpeed);
 
                     std::unique_ptr<WalkCommand> command = std::make_unique<WalkCommand>(subsumptionId, Transform2D({0, 0, 0}));
-                    command->command = Transform2D({finalForwardSpeed, 0, angle});
-                    // log("walkcommand",command->command[0],command->command[1]);
+                    command->command = Transform2D({finalForwardSpeed, finalSideSpeed, angle});
+                    // log("walkcommand",command->command[0],command->command[1],command->command[2]);
                     // log("anglewalkcommand",command->command[2]);
 
                     emit(std::move(std::make_unique<WalkStartCommand>(subsumptionId)));
