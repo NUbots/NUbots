@@ -74,7 +74,7 @@ namespace module {
             // Find out how green each pixel is!
             std::array<float, 24> greenness;
             for(int i = 0; i < int(greenness.size()); ++i) {
-                greenness[i] = arma::norm(greenCentroid - arma::fvec3({ float(pixels[i].y), float(pixels[i].cb), float(pixels[i].cr) }));
+                greenness[i] = arma::norm(greenCentroid - arma::fvec3({ float(pixels[i].y * 2), float(pixels[i].cb), float(pixels[i].cr) }));
             }
 
             constexpr float M_1_SQRT5 = 0.4472135955;
@@ -133,7 +133,7 @@ namespace module {
                 // Are too small
                 if((classifiedImage.visualHorizonAtPoint(pt.start[0]) <= pt.start[1]
                 || classifiedImage.visualHorizonAtPoint(pt.end[0]) <= pt.end[1])
-                && pt.length > 3) {
+                && pt.length > 1) {
                     points.push_back(pt.midpoint);
                 }
             }
