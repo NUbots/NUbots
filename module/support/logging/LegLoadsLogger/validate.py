@@ -10,13 +10,13 @@ right_certainty = 0.5
 right_uncertainty = 0.3
 
 # Load our ground truth validation data
-with open('validation', 'r') as f:
+with open('validation_ground_truth', 'r') as f:
     data = f.readlines()
-    left_truth = [int(d.strip().split(' ')[0]) for d in data[0::2]]
-    right_truth = [int(d.strip().split(' ')[0]) for d in data[1::2]]
+    left_truth = [float(d.strip().split(' ')[0]) for d in data[0::2]]
+    right_truth = [float(d.strip().split(' ')[0]) for d in data[1::2]]
 
 # Load our predicted output data
-with open('validation_output', 'r') as f:
+with open('validation_prediction', 'r') as f:
     data = f.readlines()
     left_probability = [float(d.strip().split(' ')[2]) for d in data[1::2]]
     right_probability = [float(d.strip().split(' ')[2]) for d in data[2::2]]
@@ -56,7 +56,7 @@ for v in right_probability:
     k = n / (n + np) #2 * v)
     s = s + k * (v - s)
     n = (1 - k) * n+1
-    
+
     right_predict.append(s)
 
     # Apply our hysteresis
