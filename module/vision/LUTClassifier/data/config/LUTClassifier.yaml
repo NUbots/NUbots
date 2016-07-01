@@ -5,7 +5,7 @@ visual_horizon:
   # The spacing in radians between sampled pixels vertically
   subsampling: 0.02
   # The distance in radians above the horizon to begin scanning
-  horizon_buffer: 0.01
+  horizon_buffer: 0.00
   # The size in radians of the smallest segment to consider for the horizon
   minimum_segment_size: 0.06
 
@@ -22,9 +22,9 @@ ball:
   # A multiplier for spacing between ball finder lines (based on the closeness)
   horizontal_subsample_factor: 0.5
   # The longest pixel count we can strike a lighitng bolt around things
-  maximum_lighting_bolt_length: 10
+  maximum_lighting_bolt_length: 20
   # The minimum magnitude of gradient a lighting bolt can have before it stops
-  minimum_lighting_bolt_strength: 2.0
+  minimum_lighting_bolt_strength: 15.0
 
 # Settings related to the goal finder
 goals:
