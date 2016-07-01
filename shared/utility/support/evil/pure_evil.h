@@ -50,8 +50,8 @@ namespace utility {
                 std::string function;
             };
 
-            thread_local std::vector<StackFrame> stack;
-            thread_local std::string exception_name;
+            extern thread_local std::vector<StackFrame> stack;
+            extern thread_local std::string exception_name;
         }
     }
 }
