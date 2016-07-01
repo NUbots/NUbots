@@ -74,6 +74,9 @@ namespace module {
             double FOCAL_LENGTH_PIXELS = 2.0;
             double ALPHA = 2.0;
 
+            int MAXIMUM_LIGHTNING_BOLT_LENGTH = 10;
+            int MINIMUM_LIGHTNING_BOLT_STRENGTH = 10;
+
             std::string LUT_PATH;
 
             void insertSegments(message::vision::ClassifiedImage<message::vision::ObjectClass>& image

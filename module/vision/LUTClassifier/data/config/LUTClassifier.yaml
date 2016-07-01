@@ -21,6 +21,10 @@ ball:
   maximum_vertical_cluster_spacing: 0.1
   # A multiplier for spacing between ball finder lines (based on the closeness)
   horizontal_subsample_factor: 0.5
+  # The longest pixel count we can strike a lighitng bolt around things
+  maximum_lighting_bolt_length: 10
+  # The minimum magnitude of gradient a lighting bolt can have before it stops
+  minimum_lighting_bolt_strength: 2.0
 
 # Settings related to the goal finder
 goals:

@@ -215,7 +215,7 @@ namespace module {
 
                 // Go clockwise
                 arma::ivec2 point = edge;
-                for(int i = 0; i < 10; ++i) {
+                for(int i = 0; i < MAXIMUM_LIGHTNING_BOLT_LENGTH; ++i) {
 
                     // Break if we hit the edge of the screen
                     if(point[0] < 4 || point[0] > (int(image.width) - 4) || point[1] < 4 || point[1] > (int(image.height) - 4)) {
@@ -230,14 +230,18 @@ namespace module {
                     std::tie(strength, direction) = fieldEdgeDirection(point, image, greenCentroid);
 
                     // If our strength get's too low then stop
-                    if(strength < 2) {
+                    if(strength < MINIMUM_LIGHTNING_BOLT_STRENGTH) {
                         break;
                     }
 
                     point += direction;
 
+                    bool isNew;
+                    std::tie(std::ignore, isNew) = pSet.insert(point);
 
-                    pSet.insert(point);
+                    if(!isNew) {
+                        break;
+                    }
 
                     // std::get<1>(d)  = point;
 
@@ -249,7 +253,7 @@ namespace module {
 
                 // Go Anticlockwise
                 point = edge;
-                for(int i = 0; i < 100; ++i) {
+                for(int i = 0; i < MAXIMUM_LIGHTNING_BOLT_LENGTH; ++i) {
 
                     // Break if we hit the edge of the screen
                     if(point[0] < 4 || point[0] > (int(image.width) - 4) || point[1] < 4 || point[1] > (int(image.height) - 4)) {
@@ -264,13 +268,18 @@ namespace module {
                     std::tie(strength, direction) = fieldEdgeDirection(point, image, greenCentroid);
 
                     // If our strength get's too low then stop
-                    if(strength < 2) {
+                    if(strength < MINIMUM_LIGHTNING_BOLT_STRENGTH) {
                         break;
                     }
 
                     point -= direction;
 
-                    pSet.insert(point);
+                    bool isNew;
+                    std::tie(std::ignore, isNew) = pSet.insert(point);
+
+                    if(!isNew) {
+                        break;
+                    }
 
                     // std::get<1>(d)  = point;
 
