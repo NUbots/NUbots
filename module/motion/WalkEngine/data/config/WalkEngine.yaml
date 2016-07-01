@@ -54,7 +54,7 @@ walk_cycle:
   velocity:
     # Velocity limits for the walk
     limits:
-      - [-0.027, 0.05] # [min_x, max_x]
+      - [-0.027, 0.03] # [min_x, max_x]
       - [-0.01, 0.01] # [min_y, max_y]
       - [-0.8, 0.8] # [min_angle, max_angle]
     # This defines a 'fast' speed in the forward direction
