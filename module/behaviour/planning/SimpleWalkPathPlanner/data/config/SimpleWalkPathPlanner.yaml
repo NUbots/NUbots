@@ -4,3 +4,7 @@ a: 7
 b: 0
 search_timeout: 3
 robot_ground_space: true
+
+
+ball_approach_dist: 1
+useLocalisation: 0.2

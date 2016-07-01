@@ -97,8 +97,8 @@ namespace planning {
 
             //Compute target in robot coords
             auto self = selfs[0];
-            arma::vec2 kickTarget = {1,0,0}; //Kick forwards
-            // arma::vec2 kickTarget = WorldToRobotTransform(self.position, self.heading, kickPlan.target);
+            // arma::vec2 kickTarget = {1,0,0}; //Kick forwards
+            arma::vec2 kickTarget = WorldToRobotTransform(self.position, self.heading, kickPlan.target);
             arma::vec3 ballPosition = {100,0,0};//too far to kick
             if(ball.size()>0){
                 ballPosition = {ball[0].position[0], ball[0].position[1], fd.ball_radius};

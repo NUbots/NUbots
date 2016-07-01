@@ -31,7 +31,7 @@ namespace localisation {
         on<Trigger<ButtonLeftDown>, Single, With<Sensors>, Sync<OdometryLocalisation>>().then([this] (
                     const Sensors& sensors
                 ) {
-            NUClear::log("Localisation Orientation reset. Localisation resets will now orient this as forwards.");
+            NUClear::log("Localisation Orientation reset. This direction is now forward.");
             emit(std::make_unique<Nod>(true));
             Transform2D Trw = sensors.world.projectTo2D();
             localisationOffset = Trw.i();
@@ -43,19 +43,21 @@ namespace localisation {
         	Transform2D Trw = sensors.world.projectTo2D();
         	Transform2D Twr = Trw.i();
         	
-        	if(arma::norm(Twr.localToWorld(Trw)) > 0.00001){
-        		log("arma::norm(Twr.localToWorld(Trw))",Trw.t(),Twr.t(),Twr.localToWorld(Trw).t());
-        	}
-        	if(arma::norm(Trw.localToWorld(Twr)) > 0.00001){
-        		log("arma::norm(Trw.localToWorld(Twr))",Trw.t(),Twr.t(),Trw.localToWorld(Twr).t());
-        	}
+            if(arma::norm(Twr.localToWorld(Trw)) > 0.00001){
+                log("arma::norm(Twr.localToWorld(Trw))",Trw.t(),Twr.t(),Twr.localToWorld(Trw).t());
+            }
+            if(arma::norm(Trw.localToWorld(Twr)) > 0.00001){
+                log("arma::norm(Trw.localToWorld(Twr))",Trw.t(),Twr.t(),Trw.localToWorld(Twr).t());
+            }
 
-        	Transform2D state = localisationOffset.localToWorld(Twr);
+            Transform2D state = localisationOffset.localToWorld(Twr);
 
-        	auto selfs = std::make_unique<std::vector<Self>>();
-        	selfs->push_back(Self());
-        	selfs->back().position = state.xy();
-        	selfs->back().heading = arma::vec2({std::cos(state.angle()),std::sin(state.angle())});
+            auto selfs = std::make_unique<std::vector<Self>>();
+            selfs->push_back(Self());
+            selfs->back().position = state.xy();
+            selfs->back().heading = arma::vec2({std::cos(state.angle()),std::sin(state.angle())});
+            // log("sensors world",Twr.t());
+            log("selfs->back().position",selfs->back().position.t());
         	emit(selfs);
         });
     }

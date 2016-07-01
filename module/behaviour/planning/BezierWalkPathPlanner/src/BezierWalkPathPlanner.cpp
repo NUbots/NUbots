@@ -49,6 +49,7 @@ namespace module {
             using message::behaviour::MotionCommand;
             using message::behaviour::RegisterAction;
             using message::behaviour::ActionPriorites;
+            using message::behaviour::WantsToKick;
             using message::motion::WalkStopped;
             using message::motion::WalkCommand;
             using message::motion::WalkStartCommand;
@@ -100,6 +101,7 @@ namespace module {
                     d1 = file.config["d1"].as<float>();
                     d2 = file.config["d2"].as<float>();
                     ErMax = file.config["ErMax"].as<float>();
+                    emit(std::make_unique<WantsToKick>(false));
 
                 });
 
@@ -129,30 +131,40 @@ namespace module {
                     }
                 }));
 
-                on<Trigger<KickFinished>>().then([this] (const KickFinished&) {
-                    emit(std::move(std::make_unique<WalkStartCommand>(1)));
-                });
+                // on<Trigger<KickFinished>>().then([this] (const KickFinished&) {
+                //     emit(std::move(std::make_unique<WalkStartCommand>(subsumptionId)));
+                // });
 
                 on<Trigger<MotionCommand>, Sync<BezierWalkPathPlanner>>().then([this] (const MotionCommand& cmd) {
                     //save the plan
                     latestCommand = cmd;
                 });
 
+                on<Trigger<WalkStopped>>().then([this]{
+                    emit(std::make_unique<ActionPriorites>(ActionPriorites { subsumptionId, { 0, 0 }}));
+                });
+
                 on<Every<20, Per<std::chrono::seconds>>
                  , With<message::localisation::Ball>
                  , With<std::vector<message::localisation::Self>>
+                 , With<WantsToKick>
                  , Optional<With<std::vector<message::vision::Obstacle>>>
                  , Sync<BezierWalkPathPlanner>
                  , Single>().then("Updates Bezier Plan", [this] (
                      const LocalisationBall& ball,
                      const std::vector<Self>& selfs,
+                     const WantsToKick& wantsTo,
                      std::shared_ptr<const std::vector<VisionObstacle>> /*robots*/) {
+
+                    if(wantsTo.kick){
+                        emit(std::make_unique<WalkStopCommand>(subsumptionId));
+                        return;
+                    }
 
                     if (latestCommand.type == MotionCommand::Type::StandStill) {
                         // log("Stand still motion command");
 
-                        emit(std::make_unique<WalkStopCommand>(1));
-                        emit(std::make_unique<ActionPriorites>(ActionPriorites { subsumptionId, { 26, 11 }}));
+                        emit(std::make_unique<WalkStopCommand>(subsumptionId));
 
                         return;
 
@@ -163,7 +175,7 @@ namespace module {
 
                         std::unique_ptr<WalkCommand> command = std::make_unique<WalkCommand>(subsumptionId,latestCommand.walkCommand);
                         emit(std::move(command));
-                        emit(std::move(std::make_unique<WalkStartCommand>(1)));
+                        emit(std::move(std::make_unique<WalkStartCommand>(subsumptionId)));
                         emit(std::make_unique<ActionPriorites>(ActionPriorites { subsumptionId, { 26, 11 }}));
 
                     } else {
@@ -228,27 +240,27 @@ namespace module {
                         float error = std::max(std::abs(Er1), std::abs(Er2));
                         log("error = ",error, "\n ErMax = ",ErMax);
 
-                        // while (error >= ErMax) {
-                        //     d1 = d1+Er1/RP;
-                        //     d2 = d2+Er2/RS;
-                        //     log("d1 = ",d1,"\n d2 = ",d2);
+                        while (error >= ErMax) {
+                            d1 = d1+Er1/RP;
+                            d2 = d2+Er2/RS;
+                            log("d1 = ",d1,"\n d2 = ",d2);
 
-                        //     // calculate rhoP, rhoS
-                        //     rhoP = (3*d1*d1)/(h1+d2*g1);
-                        //     rhoS = (3*d2*d2)/(h2+d1*g2);
-                        //     Er1 = RP - rhoP;
-                        //     Er2 = RS - rhoS;
-                        //     error = std::max(std::abs(Er1), std::abs(Er2));
-                        //     // log("Error = ",error);
-                        //     if (error > 10) {
-                        //         break;
-                        //     }
-                        // }
+                            // calculate rhoP, rhoS
+                            rhoP = (3*d1*d1)/(h1+d2*g1);
+                            rhoS = (3*d2*d2)/(h2+d1*g2);
+                            Er1 = RP - rhoP;
+                            Er2 = RS - rhoS;
+                            error = std::max(std::abs(Er1), std::abs(Er2));
+                            // log("Error = ",error);
+                            if (error > 10) {
+                                break;
+                            }
+                        }
 
 
-                        // d1 = std::min(float(2.0),std::max(d1,float(0.1)));
+                        d1 = std::min(float(2.0),std::max(d1,float(0.1)));
 
-                        // d2 = std::min(float(2.0),std::max(d2,float(0.1)));
+                        d2 = std::min(float(2.0),std::max(d2,float(0.1)));
 
 
                         log("d1 = ",d1,"\n d2 = ",d2);
@@ -318,7 +330,7 @@ namespace module {
 
                         // TODO: support non-ball targets
 
-                        float angle = std::atan2(ball.position[1], ball.position[0]);
+                        float angle = std::atan2(next_robot_position[1], next_robot_position[0]);
 
                         // log("Angle 1 = ", angle);
 
@@ -351,9 +363,9 @@ namespace module {
                         //command->command = Transform2D({bezXdash[1], bezYdash[1], angle});
 
 
-                        emit(std::move(std::make_unique<WalkStartCommand>(1)));
+                        emit(std::move(std::make_unique<WalkStartCommand>(subsumptionId)));
                         emit(std::move(command));
-                        emit(std::make_unique<ActionPriorites>(ActionPriorites { subsumptionId, { 26, 11 }}));
+                        emit(std::make_unique<ActionPriorites>(ActionPriorites { subsumptionId, { 40, 11 }}));
                     }
                 });
 
