@@ -580,7 +580,10 @@ namespace module {
 
                     sensors->bodyCentreHeight = motionFilter.get()[MotionModel::PZ];
 
-                    sensors->orientationBodyToGround = utility::motion::kinematics::calculateBodyToGround(sensors->world.submat(0,2,2,2), sensors->bodyCentreHeight);
+                    Rotation3D Rwt = sensors->world.rotation().t();
+                    //remove translation components from the transform
+                    sensors->orientationBodyToGround = Rotation3D::createRotationZ(-Rwt.yaw()) * Rwt.rotation();
+
                     sensors->orientationCamToGround = sensors->orientationBodyToGround * sensors->forwardKinematics[ServoID::HEAD_PITCH];
                     if(sensors->leftFootDown) {
                         sensors->kinematicsBodyToGround = utility::motion::kinematics::calculateBodyToGround(sensors->forwardKinematics[ServoID::L_ANKLE_ROLL].submat(0,2,2,2),sensors->bodyCentreHeight);
