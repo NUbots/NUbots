@@ -148,6 +148,9 @@ namespace module {
                 BALL_MAXIMUM_VERTICAL_CLUSTER_SPACING = std::max(1, int(cam.focalLengthPixels * tan(config["ball"]["maximum_vertical_cluster_spacing"].as<double>())));
                 BALL_HORIZONTAL_SUBSAMPLE_FACTOR = config["ball"]["horizontal_subsample_factor"].as<double>();
 
+                MAXIMUM_LIGHTNING_BOLT_LENGTH = config["ball"]["maximum_lighting_bolt_length"].as<int>();
+                MINIMUM_LIGHTNING_BOLT_STRENGTH = config["ball"]["minimum_lighting_bolt_strength"].as<double>();
+
                 // Camera settings
                 ALPHA = cam.pixelsToTanThetaFactor[1];
                 FOCAL_LENGTH_PIXELS = cam.focalLengthPixels;
