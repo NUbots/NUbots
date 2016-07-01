@@ -26,7 +26,7 @@ NUCLEAR_ROLE(
     #vision::ObstacleDetector
 
     #Localisation
-    #localisation::RobotFieldLocalisation
+    localisation::OdometryLocalisation
     localisation::BallLocalisation
 
     #Behaviour

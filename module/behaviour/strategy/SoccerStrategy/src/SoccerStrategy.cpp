@@ -281,10 +281,11 @@ namespace strategy {
             }
         });
 
-        on<Trigger<std::vector<Self>>, With<FieldDescription>>().then([this] (const std::vector<Self>& selfs, const FieldDescription& fieldDescription) {
-            auto kickTarget = getKickPlan(selfs, fieldDescription);
-            emit(std::make_unique<KickPlan>(KickPlan{kickTarget, kickType}));
-            emit(utility::nubugger::drawCircle("SocStrat_kickTarget", Circle(0.05, kickTarget), 0.123, {0.8, 0.8, 0}));
+        on<Trigger<std::vector<Self>>, With<FieldDescription>>().then([this] (const std::vector<Self>&, const FieldDescription&) {
+            // auto kickTarget = getKickPlan(selfs, fieldDescription);
+
+            emit(std::make_unique<KickPlan>(KickPlan{{100, 0}, KickType::SCRIPTED}));
+            // emit(utility::nubugger::drawCircle("SocStrat_kickTarget", Circle(0.05, kickTarget), 0.123, {0.8, 0.8, 0}));
         });
 
     }

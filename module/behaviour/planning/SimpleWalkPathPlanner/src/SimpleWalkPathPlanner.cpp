@@ -103,6 +103,7 @@ namespace module {
                     search_timeout = file.config["search_timeout"].as<float>();
                     robot_ground_space = file.config["robot_ground_space"].as<bool>();
                     ball_approach_dist = file.config["ball_approach_dist"].as<float>();
+                    slowdown_distance = file.config["slowdown_distance"].as<float>();
                     useLocalisation = file.config["useLocalisation"].as<bool>();
                     slow_approach_factor = file.config["slow_approach_factor"].as<float>();
 
@@ -230,7 +231,7 @@ namespace module {
                         arma::vec2 ballToTarget = arma::normalise(kick_target - position);
                         arma::vec2 kick_point = position - ballToTarget * ball_approach_dist;
 
-                        if(arma::norm(position) > ball_approach_dist + 0.1){
+                        if(arma::norm(position) > slowdown_distance){
                             position = kick_point;
                         }else{
                             speedFactor = slow_approach_factor;

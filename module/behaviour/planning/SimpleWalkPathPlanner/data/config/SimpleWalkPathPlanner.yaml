@@ -8,5 +8,14 @@ search_timeout: 3
 robot_ground_space: true
 
 
-ball_approach_dist: 0.4
+ball_approach_dist: 0.2
+slowdown_distance: 0.3
 useLocalisation: true
+
+
+
+
+
+
+
+

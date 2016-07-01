@@ -66,6 +66,7 @@ namespace module {
                     bool robot_ground_space = true;
                     arma::vec2 position = {1,0};//ball pos rel to robot
                     float ball_approach_dist = 0.2;
+                    float slowdown_distance = 0.2;
                     bool useLocalisation = true;
                 public:
                     explicit SimpleWalkPathPlanner(std::unique_ptr<NUClear::Environment> environment);
