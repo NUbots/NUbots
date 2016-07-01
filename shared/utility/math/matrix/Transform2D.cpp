@@ -18,6 +18,7 @@
  */
 
 #include "Transform2D.h"
+#include "Rotation2D.h"
 
 #include <nuclear>
 
@@ -29,6 +30,7 @@ namespace matrix {
 
     using utility::math::angle::normalizeAngle;
     using utility::math::angle::vectorToBearing;
+    using utility::math::matrix::Rotation2D;
 
     Transform2D::Transform() {
         zeros();
@@ -47,12 +49,12 @@ namespace matrix {
 
 
     Transform2D Transform2D::localToWorld(const Transform2D& reference) const {
-        double cosAngle = std::cos(angle());
-        double sinAngle = std::sin(angle());
         // translates to this + rotZ(this.angle) * reference
+        Rotation2D R = Rotation2D::createRotation(angle());
+        arma::vec2 newPos = R * reference.xy();
         return {
-            x() + cosAngle * reference.x() - sinAngle * reference.y(),
-            y() + sinAngle * reference.x() + cosAngle * reference.y(),
+            x() + newPos[0],
+            y() + newPos[1],
             angle() + reference.angle() // do not use normalizeAngle here, causes bad things when turning! TODO: unsure on cause
         };
     }
@@ -76,7 +78,7 @@ namespace matrix {
     }
 
     Transform2D Transform2D::i() const {
-        arma::vec2 newDisplacement = -worldToLocal(*this).xy();
+        arma::vec2 newDisplacement = -Rotation2D::createRotation(angle()).i() * xy();
         return Transform2D(newDisplacement,-this->angle());
     } 
 
