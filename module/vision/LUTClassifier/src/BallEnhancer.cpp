@@ -138,14 +138,11 @@ namespace module {
                 }
             }
 
-            // std::vector<std::tuple<arma::ivec2, arma::ivec2, arma::vec4>> debug;
+            // std::vector<std::tuple<arma::ivec2, arma::ivec2, arma::vec4>> debug; // DEBUG LINE
             std::vector<arma::ivec2> edges;
 
             // For each of these points move upward until we find a strong transition to green
             for(auto& point : points) {
-
-                // The last pixel we looked at
-                // auto lastPixel = image(point[0], point[1]);
 
                 int minY = int(std::max(3.0, classifiedImage.horizon.y(point[0])));
                 for(int y = point[1]; y > minY; --y) {
@@ -156,7 +153,7 @@ namespace module {
                         auto p = arma::ivec2({ point[0], y - 1 });
                         edges.push_back(p);
                         classifiedImage.ballSeedPoints[0].push_back(p);
-                        // debug.push_back(std::make_tuple(point, edges.back(), arma::vec4({0,1,1,1})));
+                        // debug.push_back(std::make_tuple(point, edges.back(), arma::vec4({0,1,1,1}))); // DEBUG LINE
                         break;
                     }
                 }
@@ -164,9 +161,6 @@ namespace module {
 
             // For each of these points move leftward until we find a strong transition to green
             for(auto& point : points) {
-
-                // The last pixel we looked at
-                // auto lastPixel = image(point[0], point[1]);
 
                 for(int x = point[0]; x > 3; --x) {
 
@@ -176,7 +170,7 @@ namespace module {
                         auto p = arma::ivec2({ x + 1, point[1] });
                         edges.push_back(p);
                         classifiedImage.ballSeedPoints[1].push_back(p);
-                        // debug.push_back(std::make_tuple(point, edges.back(), arma::vec4({0,1,1,1})));
+                        // debug.push_back(std::make_tuple(point, edges.back(), arma::vec4({0,1,1,1}))); // DEBUG LINE
                         break;
                     }
                 }
@@ -184,9 +178,6 @@ namespace module {
 
             // For each of these points move rightward until we find a strong transition to green
             for(auto& point : points) {
-
-                // The last pixel we looked at
-                // auto lastPixel = image(point[0], point[1]);
 
                 for(int x = point[0]; x < int(image.width) - 3; ++x) {
 
@@ -196,7 +187,7 @@ namespace module {
                         auto p = arma::ivec2({ x - 1, point[1] });
                         edges.push_back(p);
                         classifiedImage.ballSeedPoints[2].push_back(p);
-                        // debug.push_back(std::make_tuple(point, edges.back(), arma::vec4({0,1,1,1})));
+                        // debug.push_back(std::make_tuple(point, edges.back(), arma::vec4({0,1,1,1}))); // DEBUG LINE
                         break;
                     }
                 }
@@ -222,8 +213,8 @@ namespace module {
                         break;
                     }
 
-                    // std::tuple<arma::ivec2, arma::ivec2, arma::vec4> d;
-                    // std::get<0>(d) = point;
+                    // std::tuple<arma::ivec2, arma::ivec2, arma::vec4> d; // DEBUG LINE
+                    // std::get<0>(d) = point; // DEBUG LINE
 
                     float strength;
                     arma::ivec2 direction;
@@ -243,12 +234,12 @@ namespace module {
                         break;
                     }
 
-                    // std::get<1>(d)  = point;
+                    // std::get<1>(d)  = point; // DEBUG LINE
 
-                    // float r = (strength / 30);
-                    // float b = 1 - (strength / 30);
-                    // std::get<2>(d)  = arma::vec4({r,0,b,1});
-                    // debug.push_back(d);
+                    // float r = (strength / 30); // DEBUG LINE
+                    // float b = 1 - (strength / 30); // DEBUG LINE
+                    // std::get<2>(d)  = arma::vec4({r,0,b,1}); // DEBUG LINE
+                    // debug.push_back(d); // DEBUG LINE
                 }
 
                 // Go Anticlockwise
@@ -260,8 +251,8 @@ namespace module {
                         break;
                     }
 
-                    // std::tuple<arma::ivec2, arma::ivec2, arma::vec4> d;
-                    // std::get<0>(d) = point;
+                    // std::tuple<arma::ivec2, arma::ivec2, arma::vec4> d; // DEBUG LINE
+                    // std::get<0>(d) = point; // DEBUG LINE
 
                     float strength;
                     arma::ivec2 direction;
@@ -281,18 +272,18 @@ namespace module {
                         break;
                     }
 
-                    // std::get<1>(d)  = point;
+                    // std::get<1>(d)  = point; // DEBUG LINE
 
-                    // float r = (strength / 30);
-                    // float b = 1 - (strength / 30);
-                    // std::get<2>(d)  = arma::vec4({r,0,b,1});
-                    // debug.push_back(d);
+                    // float r = (strength / 30); // DEBUG LINE
+                    // float b = 1 - (strength / 30); // DEBUG LINE
+                    // std::get<2>(d)  = arma::vec4({r,0,b,1}); // DEBUG LINE
+                    // debug.push_back(d); // DEBUG LINE
                 }
             }
 
             // Put our set into the object
             classifiedImage.ballPoints.insert(classifiedImage.ballPoints.begin(), pSet.begin(), pSet.end());
-            // emit(drawVisionLines(debug));
+            // emit(drawVisionLines(debug)); // DEBUG LINE
         }
 
     }  // vision
