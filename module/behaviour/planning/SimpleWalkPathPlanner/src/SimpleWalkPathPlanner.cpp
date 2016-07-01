@@ -213,26 +213,32 @@ namespace module {
                         } else {
                             position = timeSinceBallSeen < search_timeout ? 
                                    position : // Place last seen
-                                   arma::vec3({1,0,0}); //In front of the robot 
+                                   arma::vec2({1,0}); //In front of the robot 
                         }
+                    log("position before localisation",position.t());
                     // }
 
                     //Hack Planner:
 
                     if(useLocalisation){
                         arma::vec2 kick_target = WorldToRobotTransform(selfs.front().position, selfs.front().heading, kickPlan.target);
-                        //approach point:
+                        // emit(drawSphere("kick_target_local", arma::vec3({kick_target[0], kick_target[1], 0.0}), 0.1, arma::vec3({0, 1, 1}), 0));
+                        // //approach point:
+                        // log("kick_target",kick_target);
+                        // log("arma::normalise(kick_target - position)",arma::normalise(kick_target - position));
+                        // log("arma::normalise(kick_target - position) * ball_approach_dist",arma::normalise(kick_target - position) * ball_approach_dist);
                         arma::vec2 kick_point = position - arma::normalise(kick_target - position) * ball_approach_dist;
 
-                        if(arma::norm(position.rows(0,1)) > ball_approach_dist + 0.1){
-                            position = WorldToRobotTransform(selfs.front().position, selfs.front().heading, kick_point);
+                        if(arma::norm(position) > ball_approach_dist + 0.1){
+                            // log("appraoching behind ball");
+                            position = kick_point;
                         }
                     }
                     arma::vec2 ball_world_position = WorldToRobotTransform(selfs.front().position, selfs.front().heading, position);
 
-                    emit(drawSphere("walk_to_position", arma::vec3({ball_world_position[0], ball_world_position[1], 0.0}), 0.1, arma::vec3({0, 0, 0}), 0));
-                    emit(drawSphere("robot_pos", arma::vec3({selfs.front().position[0], selfs.front().position[1], 0.0}), 0.1, arma::vec3({1,1,1}), 0));
-                    emit(drawSphere("kick_target", arma::vec3({kickPlan.target[0], kickPlan.target[1], 0.0}), 0.1, arma::vec3({1,1,1}), 0));
+                    // emit(drawSphere("walk_to_position", arma::vec3({ball_world_position[0], ball_world_position[1], 0.0}), 0.1, arma::vec3({0, 0, 0}), 0));
+                    // emit(drawSphere("robot_pos", arma::vec3({selfs.front().position[0], selfs.front().position[1], 0.0}), 0.1, arma::vec3({1,1,1}), 0));
+                    // emit(drawSphere("kick_target", arma::vec3({kickPlan.target[0], kickPlan.target[1], 0.0}), 0.1, arma::vec3({1,1,1}), 0));
                     // log("position",position.t());
                     // log("kickPlan.target",kickPlan.target.t());
                     // log("selfs.front().position",selfs.front().position.t());
@@ -249,7 +255,7 @@ namespace module {
                     // log("loc heading", selfs.front().heading);
 
                     //Euclidean distance to ball
-                    float distanceToBall = arma::norm(position.rows(0,1));
+                    float distanceToBall = arma::norm(position);
                     float scale = 2.0 / (1.0 + std::exp(-a * distanceToBall + b)) - 1.0;
                     float scale2 = angle / M_PI;
                     float finalForwardSpeed = forwardSpeed * scale * (1.0 - scale2);

@@ -62,7 +62,7 @@ namespace module {
                     NUClear::clock::time_point timeBallLastSeen;
                     arma::vec3 rBWw = {10,0,0};
                     bool robot_ground_space = true;
-                    arma::vec3 position = {1,0,0};//ball pos rel to robot
+                    arma::vec2 position = {1,0};//ball pos rel to robot
                     float ball_approach_dist = 0.2;
                     bool useLocalisation = true;
                 public:

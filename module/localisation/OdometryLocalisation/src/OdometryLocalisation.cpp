@@ -57,7 +57,6 @@ namespace localisation {
             selfs->back().position = state.xy();
             selfs->back().heading = arma::vec2({std::cos(state.angle()),std::sin(state.angle())});
             // log("sensors world",Twr.t());
-            log("selfs->back().position",selfs->back().position.t());
         	emit(selfs);
         });
     }
