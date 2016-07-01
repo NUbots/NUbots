@@ -47,12 +47,12 @@ namespace localisation {
     RobotFieldLocalisation::RobotFieldLocalisation(std::unique_ptr<NUClear::Environment> environment)
     : Reactor(std::move(environment))
     , filter()
-    , defaultMeasurementCovariance(1e-3)
+    , defaultMeasurementCovariance(arma::fill::ones)
     , lastUpdateTime(NUClear::clock::now()) {
 
         on<Configuration>("RobotFieldLocalisation.yaml").then([this] (const Configuration& config) {
             // Use configuration here from file RobotFieldLocalisation.yaml
-            defaultMeasurementCovariance = config["measurement_noise"].as<double>();
+            defaultMeasurementCovariance = config["measurement_noise"].as<arma::vec3>();
             if (filter.filters.empty()) {
                 filter.filters.push_back(
                         MMUKF<FieldModel>::Filter{
@@ -159,14 +159,20 @@ namespace localisation {
                 arma::vec armaMeas = measurement;
 
                 // Apply our multiple measurement updates
+                arma::mat covmat = arma::diagmat(
+                                    arma::repmat(
+                                        arma::mat(defaultMeasurementCovariance),
+                                        armaMeas.n_elem/defaultMeasurementCovariance.n_elem,
+                                        1)
+                                    );
                 filter.measurementUpdate({
-                      std::make_tuple(armaMeas, arma::mat(arma::eye(armaMeas.n_elem, armaMeas.n_elem) * defaultMeasurementCovariance), measurementTypesOwn,      field, *goals[0].sensors, FieldModel::MeasurementType::GOAL())
-                    , std::make_tuple(armaMeas, arma::mat(arma::eye(armaMeas.n_elem, armaMeas.n_elem) * defaultMeasurementCovariance), measurementTypesOpponent, field, *goals[0].sensors, FieldModel::MeasurementType::GOAL())
+                      std::make_tuple(armaMeas, covmat, measurementTypesOwn,      field, *goals[0].sensors, FieldModel::MeasurementType::GOAL())
+                    , std::make_tuple(armaMeas, covmat, measurementTypesOpponent, field, *goals[0].sensors, FieldModel::MeasurementType::GOAL())
                 });
             }
 
             // We have one ambigous goal
-            else if(goals.size() == 1 && false) {
+            else if(goals.size() == 1) {
 
                 // Build our measurement list
                 std::vector<double> measurement;
@@ -193,12 +199,17 @@ namespace localisation {
                 arma::vec armaMeas = measurement;
 
                 // Apply our multiple measurement updates
-
+                arma::mat covmat = arma::diagmat(
+                                    arma::repmat(
+                                        arma::mat(defaultMeasurementCovariance),
+                                        armaMeas.n_elem/defaultMeasurementCovariance.n_elem,
+                                        1)
+                                    );
                 filter.measurementUpdate({
-                      std::make_tuple(armaMeas, arma::mat(arma::eye(armaMeas.n_elem, armaMeas.n_elem) * defaultMeasurementCovariance), measurementTypes[0], field, *goals[0].sensors, FieldModel::MeasurementType::GOAL())
-                    , std::make_tuple(armaMeas, arma::mat(arma::eye(armaMeas.n_elem, armaMeas.n_elem) * defaultMeasurementCovariance), measurementTypes[1], field, *goals[0].sensors, FieldModel::MeasurementType::GOAL())
-                    , std::make_tuple(armaMeas, arma::mat(arma::eye(armaMeas.n_elem, armaMeas.n_elem) * defaultMeasurementCovariance), measurementTypes[2], field, *goals[0].sensors, FieldModel::MeasurementType::GOAL())
-                    , std::make_tuple(armaMeas, arma::mat(arma::eye(armaMeas.n_elem, armaMeas.n_elem) * defaultMeasurementCovariance), measurementTypes[3], field, *goals[0].sensors, FieldModel::MeasurementType::GOAL())
+                      std::make_tuple(armaMeas, covmat, measurementTypes[0], field, *goals[0].sensors, FieldModel::MeasurementType::GOAL())
+                    , std::make_tuple(armaMeas, covmat, measurementTypes[1], field, *goals[0].sensors, FieldModel::MeasurementType::GOAL())
+                    , std::make_tuple(armaMeas, covmat, measurementTypes[2], field, *goals[0].sensors, FieldModel::MeasurementType::GOAL())
+                    , std::make_tuple(armaMeas, covmat, measurementTypes[3], field, *goals[0].sensors, FieldModel::MeasurementType::GOAL())
                 });
             }
         });
