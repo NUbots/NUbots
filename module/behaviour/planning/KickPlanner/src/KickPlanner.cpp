@@ -118,6 +118,9 @@ namespace planning {
             }
             float timeSinceValid = (now - lastTimeValid).count() * (1 / double(NUClear::clock::period::den));
 
+            log("kick checks",secondsSinceLastSeen < cfg.seconds_not_seen_limit
+                , kickIsValid
+                , KickAngle < cfg.kick_forward_angle_limit);
             if(secondsSinceLastSeen < cfg.seconds_not_seen_limit
                 && kickIsValid
                 && KickAngle < cfg.kick_forward_angle_limit) {

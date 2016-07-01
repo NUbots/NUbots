@@ -48,6 +48,7 @@ namespace module {
                     float turnSpeed = 0.8;
                     float forwardSpeed = 1;
                     float sideSpeed = 1;
+                    float slow_approach_factor = 0.5;
                     float a = 7;
                     float b = 0;
                     float search_timeout = 3;

@@ -104,6 +104,7 @@ namespace module {
                     robot_ground_space = file.config["robot_ground_space"].as<bool>();
                     ball_approach_dist = file.config["ball_approach_dist"].as<float>();
                     useLocalisation = file.config["useLocalisation"].as<bool>();
+                    slow_approach_factor = file.config["slow_approach_factor"].as<float>();
 
                     emit(std::make_unique<WantsToKick>(false));
                 });
@@ -134,9 +135,9 @@ namespace module {
                     }
                 }));
 
-                // on<Trigger<WalkStopped>>().then([this]{
-                //     emit(std::make_unique<ActionPriorites>(ActionPriorites { subsumptionId, { 0, 0 }}));
-                // });
+                on<Trigger<WalkStopped>>().then([this]{
+                    emit(std::make_unique<ActionPriorites>(ActionPriorites { subsumptionId, { 0, 0 }}));
+                });
 
                 // on<Trigger<std::vector<Ball>>>().then([this]{
                 //     log("std::vector<Ball>");
@@ -222,6 +223,7 @@ namespace module {
                     //Hack Planner:
                     float headingChange = 0;
                     float sideStep = 0;
+                    float speedFactor = 1;
                     if(useLocalisation){
                         arma::vec2 kick_target = WorldToRobotTransform(selfs.front().position, selfs.front().heading, kickPlan.target);
                         // //approach point:
@@ -231,6 +233,7 @@ namespace module {
                         if(arma::norm(position) > ball_approach_dist + 0.1){
                             position = kick_point;
                         }else{
+                            speedFactor = slow_approach_factor;
                             headingChange = std::atan2(ballToTarget[1], ballToTarget[0]);
                             sideStep = 1;
                         }
@@ -250,11 +253,11 @@ namespace module {
                     //Euclidean distance to ball
                     float scaleF = 2.0 / (1.0 + std::exp(-a * std::fabs(position[0]) + b)) - 1.0;
                     float scaleF2 = angle / M_PI;
-                    float finalForwardSpeed = forwardSpeed * scaleF * (1.0 - scaleF2);
+                    float finalForwardSpeed = speedFactor * forwardSpeed * scaleF * (1.0 - scaleF2);
 
                     float scaleS = 2.0 / (1.0 + std::exp(-a * std::fabs(position[1]) + b)) - 1.0;
                     float scaleS2 = angle / M_PI;
-                    float finalSideSpeed = -((0 < position[1]) - (position[1] < 0)) * sideStep * sideSpeed * scaleS * (1.0 - scaleS2);
+                    float finalSideSpeed = - speedFactor * ((0 < position[1]) - (position[1] < 0)) * sideStep * sideSpeed * scaleS * (1.0 - scaleS2);
                     // log("forwardSpeed1", forwardSpeed);
                     // log("scale", scale);
                     // log("distanceToBall", distanceToBall);
@@ -262,10 +265,11 @@ namespace module {
 
                     std::unique_ptr<WalkCommand> command = std::make_unique<WalkCommand>(subsumptionId, Transform2D({0, 0, 0}));
                     command->command = Transform2D({finalForwardSpeed, finalSideSpeed, angle});
-                    // log("walkcommand",command->command[0],command->command[1],command->command[2]);
+                    log("walkcommand",command->command[0],command->command[1],command->command[2]);
                     // log("anglewalkcommand",command->command[2]);
 
                     emit(std::move(std::make_unique<WalkStartCommand>(subsumptionId)));
+
                     emit(std::move(command));
 
                     emit(std::make_unique<ActionPriorites>(ActionPriorites { subsumptionId, { 40, 11 }}));

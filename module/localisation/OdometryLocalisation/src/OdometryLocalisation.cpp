@@ -34,7 +34,7 @@ namespace localisation {
             NUClear::log("Localisation Orientation reset. This direction is now forward.");
             emit(std::make_unique<Nod>(true));
             Transform2D Trw = sensors.world.projectTo2D();
-            localisationOffset = Trw.i();
+            localisationOffset = Trw;
         });
 
 
@@ -56,7 +56,9 @@ namespace localisation {
             selfs->push_back(Self());
             selfs->back().position = state.xy();
             selfs->back().heading = arma::vec2({std::cos(state.angle()),std::sin(state.angle())});
-            // log("sensors world",Twr.t());
+            // log("sensors world", state.t());
+            // log("offset", localisationOffset.t());
+            // log("world", Twr.t());
         	emit(selfs);
         });
     }
