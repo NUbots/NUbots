@@ -7,6 +7,9 @@
 #include "message/platform/darwin/DarwinSensors.h"
 #include "message/behaviour/Nod.h"
 
+#include "utility/support/yaml_armadillo.h"
+#include "utility/support/yaml_expression.h"
+
 namespace module {
 namespace localisation {
 
@@ -20,8 +23,9 @@ namespace localisation {
     OdometryLocalisation::OdometryLocalisation(std::unique_ptr<NUClear::Environment> environment)
     : Reactor(std::move(environment)) {
 
-        on<Configuration>("OdometryLocalisation.yaml").then([this] (const Configuration&) {
+        on<Configuration>("OdometryLocalisation.yaml").then([this] (const Configuration& config) {
             // Use configuration here from file OdometryLocalisation.yaml
+            localisationOffset = config["localisationOffset"].as<arma::vec>();
         });
 
         on<Trigger<ButtonLeftDown>, Single, With<Sensors>, Sync<OdometryLocalisation>>().then([this] (

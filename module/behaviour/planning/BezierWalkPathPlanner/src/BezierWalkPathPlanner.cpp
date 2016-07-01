@@ -138,7 +138,6 @@ namespace module {
                     latestCommand = cmd;
                 });
 
-
                 on<Every<20, Per<std::chrono::seconds>>
                  , With<message::localisation::Ball>
                  , With<std::vector<message::localisation::Self>>
@@ -201,7 +200,7 @@ namespace module {
                         float B3 = ball.position[0];
                         // log("Ball position 0 = ", B3);
 
-                        float theta1 = 0.5; //std::atan2(selfs.front().position[1],selfs.front().position[0]); //angle orientation of robot in space
+                        float theta1 = std::atan2(selfs.front().heading[1],selfs.front().heading[0]); //angle orientation of robot in space
                         float theta2 = std::atan2(kick_target[1], kick_target[0]); //angle wanting to stike ball, angle of ball to goal
                         // Calculate RP, RS
                         float RP = VP*VP / 4; //Minimum radius of curvature required at point P (robot point), 4 = ar is maximum radial acceleration
@@ -229,27 +228,27 @@ namespace module {
                         float error = std::max(std::abs(Er1), std::abs(Er2));
                         log("error = ",error, "\n ErMax = ",ErMax);
 
-                        while (error >= ErMax) {
-                            d1 = d1+Er1/RP;
-                            d2 = d2+Er2/RS;
-                            log("d1 = ",d1,"\n d2 = ",d2);
+                        // while (error >= ErMax) {
+                        //     d1 = d1+Er1/RP;
+                        //     d2 = d2+Er2/RS;
+                        //     log("d1 = ",d1,"\n d2 = ",d2);
 
-                            // calculate rhoP, rhoS
-                            rhoP = (3*d1*d1)/(h1+d2*g1);
-                            rhoS = (3*d2*d2)/(h2+d1*g2);
-                            Er1 = RP - rhoP;
-                            Er2 = RS - rhoS;
-                            error = std::max(std::abs(Er1), std::abs(Er2));
-                            // log("Error = ",error);
-                            if (error > 10) {
-                                break;
-                            }
-                        }
+                        //     // calculate rhoP, rhoS
+                        //     rhoP = (3*d1*d1)/(h1+d2*g1);
+                        //     rhoS = (3*d2*d2)/(h2+d1*g2);
+                        //     Er1 = RP - rhoP;
+                        //     Er2 = RS - rhoS;
+                        //     error = std::max(std::abs(Er1), std::abs(Er2));
+                        //     // log("Error = ",error);
+                        //     if (error > 10) {
+                        //         break;
+                        //     }
+                        // }
 
 
-                        d1 = std::min(float(2.0),std::max(d1,float(0.1)));
+                        // d1 = std::min(float(2.0),std::max(d1,float(0.1)));
 
-                        d2 = std::min(float(2.0),std::max(d2,float(0.1)));
+                        // d2 = std::min(float(2.0),std::max(d2,float(0.1)));
 
 
                         log("d1 = ",d1,"\n d2 = ",d2);
@@ -259,8 +258,14 @@ namespace module {
                         float A2 = A3 +d2 * std::cos(M_PI +theta2);
                         float B2 = B3 +d2 *std::sin(M_PI + theta2);
 
-                        emit(drawSphere("Tangent 1", arma::vec3({B1, A1, 0.0}), 0.1, arma::vec3({0, 1, 0}), 0 ));
-                        emit(drawSphere("Tangent 2", arma::vec3({B2, A2, 0.0}), 0.1, arma::vec3({0, 0, 1}), 0 ));
+                        A3 = A2;
+                        B3 = B2;
+                        A2 = A2 +d2 * std::cos(M_PI +theta2);
+                        B2 = B2 +d2 *std::sin(M_PI + theta2);                        
+
+
+                        emit(drawSphere("Tangent 1", arma::vec3({A1, B1, 0.0}), 0.1, arma::vec3({0, 1, 0}), 0 ));
+                        emit(drawSphere("Tangent 2", arma::vec3({A2, B2, 0.0}), 0.1, arma::vec3({0, 0, 1}), 0 ));
 
                         // log("A1 = ", A1, "\n B1 = ", B1, "\n A2 = ", A2 , "\n B2 = ", B2);
 
@@ -269,7 +274,7 @@ namespace module {
                         // float bezier_Y_point;
                         // float bezXdash;
                         // float bezYdash;
-                        double u = 0.1; //variable determining how long along bezier curve robot looks, to move to config
+                        double u = 0.2; //variable determining how long along bezier curve robot looks, to move to config
 
                         //float bezXdashdash[11];
                         //float bezYdashdash[11];

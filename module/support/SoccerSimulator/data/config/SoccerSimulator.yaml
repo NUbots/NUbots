@@ -7,7 +7,7 @@ vision:
   # Disabling either of these emits corresponding ground truth simulation results
   # as localisation result
   goal_observations: true
-  ball_observations: true
+  ball_observations: false
 
   distinguish_own_and_opponent_goals: false
   distinguish_left_and_right_goals: false
@@ -45,7 +45,7 @@ ball:
 
 # Initial pose of the robot, mainly for MOTION type
 initial:
-  robot_pose: [-0.0, -0, 0] #pi / 2] # starting position
+  robot_pose: [-4.5, -2, 0] #pi / 2] # starting position
   # robot_pose: [-0.5, -3, pi / 2] # after penalty
   ball:
     position: [0, 0]
