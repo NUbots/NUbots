@@ -25,7 +25,7 @@ if __name__ == '__main__':
     subcommands.help = "The command to run from the script. See each help for more information."
 
     # Get all of the packages that are in the build tools
-    print tools_path
+    print(tools_path)
     modules = pkgutil.iter_modules(path=[tools_path])
 
     # Our tools dictionary
