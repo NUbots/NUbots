@@ -8,6 +8,15 @@
 
 #include <iostream>
 
+namespace utility {
+    namespace support {
+        namespace evil {
+            thread_local std::vector<utility::support::evil::StackFrame> stack = std::vector<utility::support::evil::StackFrame>();
+            thread_local std::string exception_name = std::string();
+        }
+    }
+}
+
 extern "C" {
 
     // Don't know what to do with this
