@@ -13,11 +13,10 @@ namespace logging {
     using message::input::ServoID;
 
     LegLoadsLogger::LegLoadsLogger(std::unique_ptr<NUClear::Environment> environment)
-        : Reactor(std::move(environment)), logFile(), logFilePath("NON_EXISTENT_FILE.CSV"), logFileHeader("LEG LOADS LOGGER") {
+        : Reactor(std::move(environment)), logFile(), logFilePath("NON_EXISTENT_FILE.CSV") {
 
         on<Configuration>("LegLoadsLogger.yaml").then("Leg Loads Logger Configuration", [this] (const Configuration& config) {
             logFilePath   = config["log_file"].as<std::string>("NON_EXISTENT_FILE.CSV");
-            logFileHeader = config["log_header"].as<std::string>("LEG LOADS LOGGER");
         });
 
         on<Startup>().then("Leg Loads Logger Startup", [this] ()
@@ -26,14 +25,13 @@ namespace logging {
 
             if ((logFile.is_open() == true) && (logFile.good() == true))
             {
-                logFile << logFileHeader << std::endl;
                 logFile << "RIGHT_FOOT_DISPLACEMENT, LEFT_FOOT_DISPLACEMENT, "
-                        << "RIGHT_HIP_PITCH_PRESENT_VELOCITY, RIGHT_HIP_PITCH_LOAD, "
-                        << "LEFT_HIP_PITCH_PRESENT_VELOCITY, LEFT_HIP_PITCH_LOAD, "
-                        << "RIGHT_KNEE_PRESENT_VELOCITY, RIGHT_KNEE_LOAD, "
-                        << "LEFT_KNEE_PRESENT_VELOCITY, LEFT_KNEE_LOAD, "
-                        << "RIGHT_ANKLE_PITCH_PRESENT_VELOCITY, RIGHT_ANKLE_PITCH_LOAD, "
-                        << "LEFT_ANKLE_PITCH_PRESENT_VELOCITY, LEFT_ANKLE_PITCH_LOAD" << std::endl;
+                        << "R_HIP_PITCH_PRESENT_VELOCITY, R_HIP_PITCH_LOAD, "
+                        << "L_HIP_PITCH_PRESENT_VELOCITY, L_HIP_PITCH_LOAD, "
+                        << "R_KNEE_PRESENT_VELOCITY, R_KNEE_LOAD, "
+                        << "L_KNEE_PRESENT_VELOCITY, L_KNEE_LOAD, "
+                        << "R_ANKLE_PITCH_PRESENT_VELOCITY, R_ANKLE_PITCH_LOAD, "
+                        << "L_ANKLE_PITCH_PRESENT_VELOCITY, L_ANKLE_PITCH_LOAD" << std::endl;
             }
 
             else

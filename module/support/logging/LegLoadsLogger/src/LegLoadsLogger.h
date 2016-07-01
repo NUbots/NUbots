@@ -16,7 +16,7 @@ namespace logging {
         explicit LegLoadsLogger(std::unique_ptr<NUClear::Environment> environment);
     private:
         std::ofstream logFile;
-        std::string   logFilePath, logFileHeader;
+        std::string   logFilePath;
     };
 
 }
