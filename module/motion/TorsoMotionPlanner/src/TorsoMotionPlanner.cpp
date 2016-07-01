@@ -215,7 +215,8 @@ namespace motion
 /*=======================================================================================================*/
     double TorsoMotionPlanner::getTime() 
     {
-        return std::chrono::duration_cast<std::chrono::microseconds>(NUClear::clock::now().time_since_epoch()).count() * 1E-6;
+        if(DEBUG) { printf("System Time:%f\n\r", double(NUClear::clock::now().time_since_epoch().count()) * (1.0 / double(NUClear::clock::period::den))); }
+        return (double(NUClear::clock::now().time_since_epoch().count()) * (1.0 / double(NUClear::clock::period::den)));
     }
 /*=======================================================================================================*/
 //      ENCAPSULATION METHOD: getDestinationTime

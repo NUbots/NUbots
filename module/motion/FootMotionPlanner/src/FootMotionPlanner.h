@@ -104,7 +104,7 @@ namespace motion
         // zmp params m1X, m2X, m1Y, m2Y
         arma::vec4 zmpParams;
         // The leg that is 'swinging' in the step, opposite of the support foot
-        LimbID swingLeg;
+        LimbID activeForwardLimb;
         // The last foot goal rotation
         UnitQuaternion lastFootGoalRotation;
         UnitQuaternion footGoalErrorSum;
@@ -197,6 +197,9 @@ namespace motion
         double getTime();
         double getDestinationTime();
         void setDestinationTime(double inDestinationTime);
+
+        LimbID getActiveForwardLimb();
+        void setActiveForwardLimb(LimbID inActiveForwardLimb);
 
         bool getNewStepReceived();
         void setNewStepReceived(bool inUpdateStepInstruction);

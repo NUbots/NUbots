@@ -70,7 +70,8 @@ namespace motion
         on<Trigger<FootStepTarget>>().then("Foot Motion Planner - Received Target Foot Position", [this] (const FootStepTarget& target) 
         {
             if(DEBUG) { NUClear::log("Messaging: Foot Motion Planner - Received Target Foot Position(0)"); }
-            if(target.supportMass == LimbID::LEFT_LEG)
+            setActiveForwardLimb(target.supportMass);
+            if(getActiveForwardLimb() == LimbID::LEFT_LEG)
             {
                 setLeftFootDestination(target.targetDestination);
             }
@@ -114,9 +115,11 @@ namespace motion
         float scale = (step_height_fast_fraction - step_height_slow_fraction) * speed + step_height_slow_fraction;
         footPhases[2] *= scale;
 
+        std::cout << "\n\rLeft  Foot:" << leftFootPositionTransform << "\n\rRight Foot:"  << rightFootPositionTransform << "\n\r";  //debugging
+
         if(DEBUG) { NUClear::log("Messaging: Foot Motion Planner - Interpolate Transform2D"); }
         //Interpolate Transform2D from start to destination - deals with flat resolved movement in (x,y) coordinates
-        if (swingLeg == LimbID::RIGHT_LEG) 
+        if (getActiveForwardLimb() == LimbID::RIGHT_LEG) 
         {
             //Vector field function??
             rightFootPositionTransform = getRightFootSource().interpolate(footPhases[0], rightFootDestination);
@@ -131,17 +134,21 @@ namespace motion
         //Translates foot motion into z dimension for stepping in three-dimensional space...
         Transform3D leftFootLocal  = leftFootPositionTransform;
         Transform3D rightFootLocal = rightFootPositionTransform;
+        std::cout << "\n\rLeft  Foot:" << leftFootPositionTransform << "\n\rRight Foot:"  << rightFootPositionTransform << "\n\r";  //debugging
+        std::cout << "\n\rLeft  Foot:" << leftFootLocal << "\n\rRight Foot:"  << rightFootLocal << "\n\rPhase:" << phase << "\n\r"; //debugging
 
         if(DEBUG) { NUClear::log("Messaging: Foot Motion Planner - Translate Z for support foot"); }
         //Lift swing leg - manipulate(update) z component of foot position to action movement with a varying altitude locus...
-        if (swingLeg == LimbID::RIGHT_LEG) 
+        if (getActiveForwardLimb() == LimbID::RIGHT_LEG) 
         {
             rightFootLocal = rightFootLocal.translateZ(stepHeight * footPhases[2]);
         }
         else
         {
-            leftFootLocal  = leftFootLocal.translateZ(stepHeight * footPhases[2]);
-        }      
+            leftFootLocal  = leftFootLocal.translateZ(stepHeight  * footPhases[2]);
+        }     
+
+        std::cout << "\n\rLeft  Foot:" << leftFootLocal << "\n\rRight Foot:"  << rightFootLocal << "\n\rPhase:" << phase << "\n\r"; //debugging 
 
         //DEBUGGING: Emit relative feet position phase with respect to robot state... 
         if (emitFootPosition)
@@ -172,7 +179,8 @@ namespace motion
 /*=======================================================================================================*/
     double FootMotionPlanner::getTime() 
     {
-        return std::chrono::duration_cast<std::chrono::microseconds>(NUClear::clock::now().time_since_epoch()).count() * 1E-6;
+        if(DEBUG) { printf("System Time:%f\n\r", double(NUClear::clock::now().time_since_epoch().count()) * (1.0 / double(NUClear::clock::period::den))); }
+        return (double(NUClear::clock::now().time_since_epoch().count()) * (1.0 / double(NUClear::clock::period::den)));
     }
 /*=======================================================================================================*/
 //      ENCAPSULATION METHOD: getDestinationTime
@@ -245,6 +253,20 @@ namespace motion
         rightFootDestination.push(inRightFootDestination);
     }
 /*=======================================================================================================*/
+//      ENCAPSULATION METHOD: getActiveForwardLimb
+/*=======================================================================================================*/
+    LimbID FootMotionPlanner::getActiveForwardLimb()
+    {
+        return (activeForwardLimb);
+    }
+/*=======================================================================================================*/
+//      ENCAPSULATION METHOD: setActiveForwardLimb
+/*=======================================================================================================*/
+    void FootMotionPlanner::setActiveForwardLimb(LimbID inActiveForwardLimb)
+    {
+        activeForwardLimb = inActiveForwardLimb;
+    }    
+/*=======================================================================================================*/
 //      ENCAPSULATION METHOD: isNewStepReceived
 /*=======================================================================================================*/
     bool FootMotionPlanner::getNewStepReceived()
@@ -284,6 +306,7 @@ namespace motion
     void FootMotionPlanner::configure(const YAML::Node& config)
     {
         emitLocalisation = config["emit_localisation"].as<bool>();
+        emitFootPosition = config["emit_foot_position"].as<bool>();
 
         auto& stance = config["stance"];
         bodyHeight = stance["body_height"].as<Expression>();
