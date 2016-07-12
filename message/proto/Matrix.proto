@@ -1,0 +1,105 @@
+syntax = "proto3";
+
+import "Vector.proto";
+
+message mat {
+    uint32 rows = 1;
+    uint32 cols = 2;
+    repeated double v = 3 [packed=true];
+}
+
+message fmat {
+    uint32 rows = 1;
+    uint32 cols = 2;
+    repeated float v = 3 [packed=true];
+}
+
+message imat {
+    uint32 rows = 1;
+    uint32 cols = 2;
+    repeated sint32 v = 3 [packed=true];
+}
+
+message umat {
+    uint32 rows = 1;
+    uint32 cols = 2;
+    repeated uint32 v = 3 [packed=true];
+}
+
+message cmat {
+    uint32 rows = 1;
+    uint32 cols = 2;
+    bytes v = 3;
+}
+
+message mat22 {
+    vec2 x = 1;
+    vec2 y = 2;
+}
+
+message fmat22 {
+    fvec2 x = 1;
+    fvec2 y = 2;
+}
+
+message imat22 {
+    ivec2 x = 1;
+    ivec2 y = 2;
+}
+
+message umat22 {
+    uvec2 x = 1;
+    uvec2 y = 2;
+}
+
+message mat33 {
+    vec3 x = 1;
+    vec3 y = 2;
+    vec3 z = 3;
+}
+
+message fmat33 {
+    fvec3 x = 1;
+    fvec3 y = 2;
+    fvec3 z = 3;
+}
+
+message imat33 {
+    ivec3 x = 1;
+    ivec3 y = 2;
+    ivec3 z = 3;
+}
+
+message umat33 {
+    uvec3 x = 1;
+    uvec3 y = 2;
+    uvec3 z = 3;
+}
+
+message mat44 {
+    vec4 x = 1;
+    vec4 y = 2;
+    vec4 z = 3;
+    vec4 t = 4;
+}
+
+message fmat44 {
+    fvec4 x = 1;
+    fvec4 y = 2;
+    fvec4 z = 3;
+    fvec4 t = 4;
+}
+
+message imat44 {
+    ivec4 x = 1;
+    ivec4 y = 2;
+    ivec4 z = 3;
+    ivec4 t = 4;
+}
+
+message umat44 {
+    uvec4 x = 1;
+    uvec4 y = 2;
+    uvec4 z = 3;
+    uvec4 t = 4;
+}
