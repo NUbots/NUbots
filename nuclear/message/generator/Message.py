@@ -73,18 +73,18 @@ class Message:
                         lines.append(indent('}'))
 
                     elif v.type[1].special_cpp_type:
-                        lines.append(indent('for (auto& _v : proto.{}()) {{'.format(v.name)))
+                        lines.append(indent('for (auto& _v : proto.{}()) {{'.format(v.name.lower())))
                         lines.append(indent('{}[_v.first] << _v.second;'.format(to_camel_case(v.name)), 8))
                         lines.append(indent('}'))
 
                     else:  # Basic and other types are handled the same
-                        lines.append(indent('{0}.insert(std::begin(proto.{1}()), std::end(proto.{1}()));'.format(to_camel_case(v.name), v.name), 8))
+                        lines.append(indent('{0}.insert(std::begin(proto.{1}()), std::end(proto.{1}()));'.format(to_camel_case(v.name), v.name.lower()), 8))
 
                 elif v.repeated:
                     if v.bytes_type:
                         lines.append(indent('{}.resize(proto.{}_size());'.format(to_camel_case(v.name), v.name)))
                         lines.append(indent('for (size_t _i = 0; _i < {}.size(); ++_i) {{'.format(to_camel_case(v.name))))
-                        lines.append(indent('{0}[_i].insert(std::end({0}[_i]), std::begin(proto.{1}(_i)), std::end(proto.{1}(_i)));'.format(to_camel_case(v.name), v.name), 8))
+                        lines.append(indent('{0}[_i].insert(std::end({0}[_i]), std::begin(proto.{1}(_i)), std::end(proto.{1}(_i)));'.format(to_camel_case(v.name), v.name.lower()), 8))
                         lines.append(indent('}'))
 
                     elif v.special_cpp_type:
@@ -95,17 +95,17 @@ class Message:
                         lines.append(indent('}'))
 
                     else:  # Basic and other types are handled the same
-                        lines.append(indent('{0}.insert(std::end({0}), std::begin(proto.{1}()), std::end(proto.{1}()));'.format(to_camel_case(v.name), v.name)))
+                        lines.append(indent('{0}.insert(std::end({0}), std::begin(proto.{1}()), std::end(proto.{1}()));'.format(to_camel_case(v.name), v.name.lower())))
 
                 else:
                     if v.bytes_type:
-                        lines.append(indent('{0}.insert(std::end({0}), std::begin(proto.{1}()), std::end(proto.{1}()));'.format(to_camel_case(v.name), v.name)))
+                        lines.append(indent('{0}.insert(std::end({0}), std::begin(proto.{1}()), std::end(proto.{1}()));'.format(to_camel_case(v.name), v.name.lower())))
 
                     elif v.special_cpp_type:
-                        lines.append(indent('{} << proto.{}();'.format(to_camel_case(v.name), v.name)))
+                        lines.append(indent('{} << proto.{}();'.format(to_camel_case(v.name), v.name.lower())))
 
                     else:  # Basic and other types are handled the same
-                        lines.append(indent('{} = proto.{}();'.format(to_camel_case(v.name), v.name)))
+                        lines.append(indent('{} = proto.{}();'.format(to_camel_case(v.name), v.name.lower())))
 
             lines.append('}')
 
@@ -150,25 +150,25 @@ class Message:
                     lines.append(indent('for (auto& _v : {}) {{'.format(to_camel_case(v.name))))
 
                     if v.bytes_type:
-                        lines.append(indent('proto.add_{}()->append(std::begin(_v), std::end(_v));'.format(v.name), 8))
+                        lines.append(indent('proto.add_{}()->append(std::begin(_v), std::end(_v));'.format(v.name.lower()), 8))
                     elif v.special_cpp_type:
-                        lines.append(indent('*proto.add_{}() << _v;'.format(v.name), 8))
+                        lines.append(indent('*proto.add_{}() << _v;'.format(v.name.lower()), 8))
                     elif v.basic:
-                        lines.append(indent('proto.add_{}(_v);'.format(v.name), 8))
+                        lines.append(indent('proto.add_{}(_v);'.format(v.name.lower()), 8))
                     else:
-                        lines.append(indent('*proto.add_{}() = _v;'.format(v.name), 8))
+                        lines.append(indent('*proto.add_{}() = _v;'.format(v.name.lower()), 8))
 
                     lines.append(indent('}'))
 
                 else:
                     if v.bytes_type:
-                        lines.append(indent('proto.mutable_{0}()->append(std::begin({1}), std::end({1}));'.format(v.name, to_camel_case(v.name)), 8))
+                        lines.append(indent('proto.mutable_{0}()->append(std::begin({1}), std::end({1}));'.format(v.name.lower(), to_camel_case(v.name)), 8))
                     elif v.special_cpp_type:
-                        lines.append(indent('*proto.mutable_{}() << {};'.format(v.name, to_camel_case(v.name))))
+                        lines.append(indent('*proto.mutable_{}() << {};'.format(v.name.lower(), to_camel_case(v.name))))
                     elif v.basic:
-                        lines.append(indent('proto.set_{}({});'.format(v.name, to_camel_case(v.name))))
+                        lines.append(indent('proto.set_{}({});'.format(v.name.lower(), to_camel_case(v.name))))
                     else:
-                        lines.append(indent('*proto.mutable_{}() = {};'.format(v.name, to_camel_case(v.name))))
+                        lines.append(indent('*proto.mutable_{}() = {};'.format(v.name.lower(), to_camel_case(v.name))))
 
             lines.append(indent('return proto;'))
             lines.append('}')
@@ -201,7 +201,7 @@ class Message:
         converter_impl = '\n\n'.join([protobuf_converter[1]])
 
         header_template = dedent("""\
-            struct {name} {{
+            struct alignas(16) {name} {{
                 // Enum Definitions
             {enums}
                 // Submessage Definitions

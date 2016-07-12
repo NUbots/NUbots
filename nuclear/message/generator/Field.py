@@ -62,6 +62,9 @@ class Field:
             self.type = type_info[0]
             self.default_value = f.default_value if f.default_value else type_info[1]
 
+        if self.type == '.google.protobuf.Timestamp':
+            self.default_value = 'NUClear::clock::now()'
+
         # If we are repeated or a pointer our default is changed
         if self.repeated:
             self.default_value = ''
