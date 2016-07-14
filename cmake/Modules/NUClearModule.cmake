@@ -62,7 +62,7 @@ FUNCTION(NUCLEAR_MODULE)
 
     # Add all our code to a library and if we are doing a shared build make it a shared library
     IF(NUCLEAR_SHARED_BUILD)
-        ADD_LIBRARY(${module_name} SHARED ${src} ${MODULE_SOURCES} ${data} ${data_files} )
+        ADD_LIBRARY(${module_name} SHARED ${src} ${MODULE_SOURCES} ${data} ${data_files})
         SET_PROPERTY(TARGET ${module_name} PROPERTY LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin/lib")
     ELSE()
         ADD_LIBRARY(${module_name} STATIC ${src} ${MODULE_SOURCES} ${data} ${data_files})

@@ -20,6 +20,6 @@ SET(CMAKE_MACOSX_RPATH ON)
 SET(CMAKE_INSTALL_RPATH ${CMAKE_INSTALL_RPATH} lib/ ../lib/ bin/lib)
 
 IF(NOT MSVC)
-	# Compilation must be done with c++14 for NUClear to work
+    # Compilation must be done with c++14 for NUClear to work
     ADD_COMPILE_OPTIONS(-std=c++14 -fPIC)
 ENDIF()
