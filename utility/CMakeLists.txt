@@ -1,7 +1,5 @@
 cmake_minimum_required(VERSION 3.4)
 
-MESSAGE(${CMAKE_SOURCE_DIR})
-
 # This directory contains our message types and other shared types
 INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/shared/)
 
