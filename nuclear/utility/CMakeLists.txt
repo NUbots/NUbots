@@ -14,17 +14,20 @@ SET(NUCLEAR_UTILITY_INCLUDE_DIRS
 INCLUDE_DIRECTORIES(${NUCLEAR_UTILITY_INCLUDE_DIRS})
 
 # Use a recursive glob to get all c++ files in utility to use
-FILE(GLOB_RECURSE src
-        "${NUCLEAR_UTILITY_DIR}/**.cpp"
-        "${NUCLEAR_UTILITY_DIR}/**.cc"
-        "${NUCLEAR_UTILITY_DIR}/**.ipp"
-        "${NUCLEAR_UTILITY_DIR}/**.hpp"
-        "${NUCLEAR_UTILITY_DIR}/**.c"
-        "${NUCLEAR_UTILITY_DIR}/**.h"
-)
+# FILE(GLOB_RECURSE src
+#         "${NUCLEAR_UTILITY_DIR}/**.cpp"
+#         "${NUCLEAR_UTILITY_DIR}/**.cc"
+#         "${NUCLEAR_UTILITY_DIR}/**.ipp"
+#         "${NUCLEAR_UTILITY_DIR}/**.hpp"
+#         "${NUCLEAR_UTILITY_DIR}/**.c"
+#         "${NUCLEAR_UTILITY_DIR}/**.h"
+# )
+
+#Get utility files from NUtilities. Sets NUTILITIES_SRC_FILES
+INCLUDE(${NUCLEAR_UTILITY_DIR}/GetNUtilities.cmake)
 
 # Build a library from these files
-ADD_LIBRARY(nuclear_utility utility.cpp ${src})
+ADD_LIBRARY(nuclear_utility utility.cpp ${NUTILITIES_SRC_FILES})
 
 # Link our additional shared libraries
 TARGET_LINK_LIBRARIES(nuclear_utility ${NUCLEAR_ADDITIONAL_SHARED_LIBRARIES})
