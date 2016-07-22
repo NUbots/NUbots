@@ -23,6 +23,8 @@ INCLUDE_DIRECTORIES(${NUCLEAR_UTILITY_INCLUDE_DIRS})
 #         "${NUCLEAR_UTILITY_DIR}/**.h"
 # )
 
+#Hint to NUtilities where it is. TODO: this is dumb, somehow get rid of the need for this line
+SET(NUTILITIES_DIR ${NUCLEAR_UTILITY_DIR})
 #Get utility files from NUtilities. Sets NUTILITIES_SRC_FILES
 INCLUDE(${NUCLEAR_UTILITY_DIR}/GetNUtilities.cmake)
 
