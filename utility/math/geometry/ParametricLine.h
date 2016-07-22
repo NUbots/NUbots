@@ -21,8 +21,6 @@
 
 #include <armadillo>
 
-#include <ros/ros.h>
-
 namespace utility {
 namespace math {
 namespace geometry {
@@ -36,8 +34,8 @@ namespace geometry {
         Vector direction;
         Vector point;
         arma::vec2 tLimits = {-std::numeric_limits<double>::infinity(), std::numeric_limits<double>::infinity()};
-        ParametricLine(){}
-        ParametricLine(const Vector& p1, const Vector& p2, bool segment = false) {
+        ParametricLine() : direction(arma::fill::zeros), point(arma::fill::zeros) {}
+        ParametricLine(const Vector& p1, const Vector& p2, bool segment = false) : direction(arma::fill::zeros), point(arma::fill::zeros) {
             setFromTwoPoints(p1, p2, segment);
         };
 
@@ -51,9 +49,7 @@ namespace geometry {
 
         void setFromDirection(const Vector& direction_, const Vector& point_, const arma::vec2& tLimits_ = {-std::numeric_limits<double>::infinity(), std::numeric_limits<double>::infinity()}){
             if(arma::norm(direction_,1) <= 0){
-                ROS_ERROR("%s: ParametricLine::setFromDirection - Direction is zero vector!",
-                          ros::this_node::getName().c_str());
-                return;
+                throw std::domain_error("ParametricLine::setFromDirection - Direction is zero vector!");
             }
             direction = arma::normalise(direction_);
             point = point_;
@@ -63,9 +59,7 @@ namespace geometry {
         void setFromTwoPoints(const Vector& p1, const Vector& p2, bool segment = false) {
             double norm = arma::norm(p2 - p1);
             if(norm <= 0){
-                ROS_ERROR("%s: ParametricLine::setFromTwoPoints - Two points are identical!",
-                          ros::this_node::getName().c_str());
-                return;
+                throw std::domain_error("ParametricLine::setFromTwoPoints - Two points are identical!");
             }
             direction = (p2 - p1) / norm;
             point = p1;
@@ -85,24 +79,21 @@ namespace geometry {
         }
 
         double distanceToPoint(const Vector& p) const {
+            //TODO: optimise
             return arma::norm(vectorToLineFromPoint(p));
         }
 
         Vector intersect(const ParametricLine<n>& l) const{
             //Do not use for n > 2
             if(n > 2){
-                ROS_ERROR("%s: ParametricLine::intersect - Lines in more than two dimensions rarely meet! Feature to be added later.",
-                          ros::this_node::getName().c_str());
-                return(Vector());
+                throw std::domain_error("Line::intersect - Lines in more than two dimensions rarely meet! Feature to be added later.");
             }
             //Setup linear equations:
             arma::mat Ainverse;
             //Check extended lines intersect at all
             double determinant = - direction[0] * l.direction[1] + direction[1] * l.direction[0];
             if(determinant == 0){
-                ROS_ERROR("%s: ParametricLine::intersect - Lines do not intersect (parallel).",
-                          ros::this_node::getName().c_str());
-                return(Vector());
+                throw std::domain_error("Line::intersect - Lines do not intersect (parallel)");
             } else {
                 Ainverse << -l.direction[1] << l.direction[0] << arma::endr
                          << -direction[1]   << direction[0];
@@ -115,9 +106,7 @@ namespace geometry {
             if(tValues[0] < tLimits[0] || tValues[0] > tLimits[1] //ie outside range of first line
             || tValues[1] < l.tLimits[0] || tValues[1] > l.tLimits[1] //outside range of second
               ){
-                ROS_ERROR("%s: ParametricLine::intersect - Lines do not intersect (tValues out of range).",
-                          ros::this_node::getName().c_str());
-                return(Vector());
+                throw std::domain_error("Line::intersect - Lines do not intersect (tValues out of range)");
             }
             return point + tValues[0] * direction;
         }

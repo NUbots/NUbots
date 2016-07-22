@@ -42,7 +42,7 @@ namespace math {
         inline double normalizeAngle(const double value) {
 
             double angle = std::fmod(value, 2 * M_PI);
-
+            
             if (angle <= -M_PI)
                 angle += M_PI * 2;
 
@@ -77,17 +77,17 @@ namespace math {
          */
         inline double signedDifference(const double a, const double b) {
 
-            double x = a - b;
+            auto x = a - b;
 
-            double m = x - std::floor(x/(2*M_PI)) * (2*M_PI);
+            auto m = x - std::floor(x/(2*M_PI)) * (2*M_PI);
 
-            double d = std::fmod(m + M_PI, 2*M_PI) - M_PI;
+            auto d = std::fmod(m + M_PI, 2*M_PI) - M_PI;
 
             return d;
         }
 
         inline double vectorToBearing(arma::vec2 dirVec) {
-            return(std::atan2(dirVec(1), dirVec(0)));
+            return std::atan2(dirVec(1), dirVec(0));
         }
 
         inline arma::vec2 bearingToUnitVector(double angle) {

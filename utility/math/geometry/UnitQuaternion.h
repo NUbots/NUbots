@@ -22,8 +22,15 @@
 
 #include <armadillo>
 
+#include "utility/math/matrix/Rotation3D.h"
+
 namespace utility {
 namespace math {
+namespace matrix {
+    template <int Dimensions>
+    class Rotation;
+    using Rotation3D = Rotation<3>;
+}
 namespace geometry {
 
     class UnitQuaternion : public arma::vec4 {
@@ -37,6 +44,8 @@ namespace geometry {
 
         public:
             UnitQuaternion();
+
+            UnitQuaternion(const matrix::Rotation3D& rotation);
 
             UnitQuaternion(double W, double X, double Y, double Z);
 
@@ -69,8 +78,6 @@ namespace geometry {
             void normalise();
 
             double norm();
-
-            arma::mat33 toRotationMatrix();
 
             // real part
             inline double kW() const { return at(0); };

@@ -1,4 +1,12 @@
 build
+message
+utility/nubugger
+#TODO: add yaml and pure evil to NUtilities
+utility/support
+utility/vision
+utility/motion
+utility/math/vision.h
+utility/error
 
 # Compiled Object files
 *.slo
