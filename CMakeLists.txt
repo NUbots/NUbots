@@ -1,12 +1,12 @@
 cmake_minimum_required(VERSION 3.4)
 
 # This directory contains our message types and other shared types
-INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/shared/)
+INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/shared/ ${CMAKE_SOURCE_DIR}/)
 
-IF(OPENGL_FOUND)
-	FILE(GLOB_RECURSE opengl "opengl/**.cpp" "opengl/**.c" "opengl/**.h")
-	SET(src ${src} opengl)
-ENDIF()
+# IF(OPENGL_FOUND)
+# 	FILE(GLOB_RECURSE opengl "opengl/**.cpp" "opengl/**.c" "opengl/**.h")
+# 	SET(src ${src} opengl)
+# ENDIF()
 
 # This gets all of our source files
 FILE(GLOB_RECURSE src "*/**.cpp" "*/**.c" "*/**.h")
