@@ -13,26 +13,21 @@ SET(NUCLEAR_UTILITY_INCLUDE_DIRS
     CACHE INTERNAL "Include directories for the utility folder and generated sources")
 INCLUDE_DIRECTORIES(${NUCLEAR_UTILITY_INCLUDE_DIRS})
 
-# Use a recursive glob to get all c++ files in utility to use
-# FILE(GLOB_RECURSE src
-#         "${NUCLEAR_UTILITY_DIR}/**.cpp"
-#         "${NUCLEAR_UTILITY_DIR}/**.cc"
-#         "${NUCLEAR_UTILITY_DIR}/**.ipp"
-#         "${NUCLEAR_UTILITY_DIR}/**.hpp"
-#         "${NUCLEAR_UTILITY_DIR}/**.c"
-#         "${NUCLEAR_UTILITY_DIR}/**.h"
-# )
+# Get the relative path to our utility directory
+GET_FILENAME_COMPONENT(utility_path "${NUCLEAR_UTILITY_DIR}" ABSOLUTE)
+FILE(RELATIVE_PATH utility_rel_path ${CMAKE_SOURCE_DIR} ${utility_path})
 
-#Hint to NUtilities where it is. TODO: this is dumb, somehow get rid of the need for this line
-SET(NUTILITIES_DIR ${NUCLEAR_UTILITY_DIR})
-#Get utility files from NUtilities. Sets NUTILITIES_SRC_FILES
-INCLUDE(${NUCLEAR_UTILITY_DIR}/GetNUtilities.cmake)
+#Set bin directory to mirror source directory
+UNSET(NUCLEAR_UTILITY_LIBRARIES CACHE)
+
+#Get utilities library
+ADD_SUBDIRECTORY(${NUCLEAR_UTILITY_DIR} "${CMAKE_BINARY_DIR}/${utility_rel_path}")
 
 # Build a library from these files
-ADD_LIBRARY(nuclear_utility utility.cpp ${NUTILITIES_SRC_FILES})
+ADD_LIBRARY(nuclear_utility utility.cpp )
 
 # Link our additional shared libraries
-TARGET_LINK_LIBRARIES(nuclear_utility ${NUCLEAR_ADDITIONAL_SHARED_LIBRARIES})
+TARGET_LINK_LIBRARIES(nuclear_utility ${NUCLEAR_ADDITIONAL_SHARED_LIBRARIES} ${NUCLEAR_UTILITY_LIBRARIES})
 
 # Put it in an IDE group for shared
 SET_PROPERTY(TARGET nuclear_utility PROPERTY FOLDER "shared/")
