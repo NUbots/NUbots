@@ -1,18 +1,18 @@
 /*
- * This file is part of the NUbots Codebase.
+ * This file is part of the Autocalibration Codebase.
  *
- * The NUbots Codebase is free software: you can redistribute it and/or modify
+ * The Autocalibration Codebase is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * The NUbots Codebase is distributed in the hope that it will be useful,
+ * The Autocalibration Codebase is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with the NUbots Codebase.  If not, see <http://www.gnu.org/licenses/>.
+ * along with the Autocalibration Codebase.  If not, see <http://www.gnu.org/licenses/>.
  *
  * Copyright 2013 NUBots <nubots@nubots.net>
  */
@@ -52,6 +52,7 @@ namespace matrix {
              */
             Rotation();
 
+            Rotation(const arma::mat& m);
             /**
              * @brief Convert from a quaternions vec4
              */
@@ -68,9 +69,6 @@ namespace matrix {
              * @brief Create a rotation matrix based on a vec3 as the X axis and an angle
              */
             Rotation(const arma::vec3& axis, double angle);
-
-
-
 
             /**
              * @brief Rotates matrix around the local X axis
@@ -130,6 +128,24 @@ namespace matrix {
              */
             arma::vec3 eulerAngles() const;
 
+            Rotation3D orthogonalise() const;
+
+            inline const arma::vec3 x() const { return submat(0,0,2,0); }
+            inline arma::subview<double> x() { return submat(0,0,2,0); }
+
+            inline const arma::vec3 y() const { return submat(0,1,2,1); }
+            inline arma::subview<double> y() { return submat(0,1,2,1); }
+
+            inline const arma::vec3 z() const { return submat(0,2,2,2); }
+            inline arma::subview<double> z() { return submat(0,2,2,2); }
+
+
+            /**
+             * @brief Computes 'size' of the transform T
+             *
+             */
+            static float norm(Rotation3D T);
+
             /**
              * @return The roll (x-axis) of the rotation matrix
              */
@@ -144,17 +160,7 @@ namespace matrix {
              * @return The yaw (z-axis) of the rotation matrix
              */
             inline double yaw() const { return eulerAngles()[2]; }
-            /**
-             * @return The (x-axis) of the basis
-             */
-            inline const arma::vec3 x() const { return submat(0,0,2,0); }
-            inline arma::subview<double> x() { return submat(0,0,2,0); }
 
-            inline const arma::vec3 y() const { return submat(0,1,2,1); }
-            inline arma::subview<double> y() { return submat(0,1,2,1); }
-
-            inline const arma::vec3 z() const { return submat(0,2,2,2); }
-            inline arma::subview<double> z() { return submat(0,2,2,2); }
             /**
              * @brief Creates a rotation matrix around the X axis by the given radians
              *

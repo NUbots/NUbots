@@ -1,18 +1,18 @@
 /*
- * This file is part of the NUbots Codebase.
+ * This file is part of the Autocalibration Codebase.
  *
- * The NUbots Codebase is free software: you can redistribute it and/or modify
+ * The Autocalibration Codebase is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * The NUbots Codebase is distributed in the hope that it will be useful,
+ * The Autocalibration Codebase is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with the NUbots Codebase.  If not, see <http://www.gnu.org/licenses/>.
+ * along with the Autocalibration Codebase.  If not, see <http://www.gnu.org/licenses/>.
  *
  * Copyright 2013 NUBots <nubots@nubots.net>
  */
@@ -22,7 +22,6 @@
 #include "utility/math/comparison.h"
 #include "utility/math/angle.h"
 
-#include <nuclear>
 
 namespace utility {
 namespace math {
@@ -33,6 +32,11 @@ namespace matrix {
 
     Rotation3D::Rotation() {
         eye(); // identity matrix by default
+    }
+
+    Rotation3D::Rotation(const arma::mat& m){
+        *this = m.submat(0,0,2,2);
+        *this = this->orthogonalise();
     }
 
     Rotation3D::Rotation(const UnitQuaternion& q) {
@@ -49,7 +53,7 @@ namespace matrix {
 
         if (normAxis == 0) {
             // Axis has zero length
-            NUClear::log<NUClear::WARN>("utility::math::matrix::Rotation3D: WARNING Zero rotation axis given");
+            std::cout << "utility::math::matrix::Rotation3D: WARNING Zero rotation axis given" << std::endl;
             eye();
             return;
         }
@@ -64,6 +68,14 @@ namespace matrix {
         // Rotate by angle
 
         *this *= Rotation3D::createRotationX(angle) * i();
+    }
+
+    Rotation3D Rotation3D::orthogonalise() const{
+        Rotation3D R;
+        R.x() = this->x();
+        R.z() = arma::cross(this->x(),this->y());
+        R.y() = arma::cross(R.z(),R.x());
+        return R;
     }
 
     Rotation3D Rotation3D::rotateX(double radians) const {
@@ -147,6 +159,16 @@ namespace matrix {
             }
         }
         return {roll, pitch, yaw};
+    }
+
+    float Rotation3D::norm(Rotation3D T){
+        UnitQuaternion q = UnitQuaternion(T);
+        //Get angle between -2Pi and 2pi
+        float angle = q.getAngle();
+        //Just want magnitude
+        float theta = std::fabs(angle);
+        //But rotating more that Pi in one direction is equivalent to a rotation in the other direction
+        return std::fmin(2 * M_PI - theta, theta);
     }
 
 
