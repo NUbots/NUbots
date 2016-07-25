@@ -1,18 +1,18 @@
 /*
- * This file is part of the NUbots Codebase.
+ * This file is part of the Autocalibration Codebase.
  *
- * The NUbots Codebase is free software: you can redistribute it and/or modify
+ * The Autocalibration Codebase is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * The NUbots Codebase is distributed in the hope that it will be useful,
+ * The Autocalibration Codebase is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with the NUbots Codebase.  If not, see <http://www.gnu.org/licenses/>.
+ * along with the Autocalibration Codebase.  If not, see <http://www.gnu.org/licenses/>.
  *
  * Copyright 2013 NUBots <nubots@nubots.net>
  */
@@ -22,8 +22,8 @@
 
 #include <armadillo>
 
-#include "Transform2D.h"
 #include "utility/math/matrix/Rotation3D.h"
+#include "utility/math/matrix/Transform2D.h"
 #include "utility/math/geometry/UnitQuaternion.h"
 
 namespace utility {
@@ -69,7 +69,13 @@ namespace matrix {
             /**
              * @brief Convert from a Rotation3D matrix
              */
-            Transform(const Rotation3D& rotation);
+
+            Transform(const Rotation3D& rotation); 
+
+            /**
+             * @brief Convert from a Rotation3D matrix
+             */
+            Transform(const Rotation3D& rotation, const arma::vec3& translation);
 
             /**
              * @brief Convert from a vec6 representing [position_x, position_y, position_z, rotation_x, rotation_y, rotation_z]
@@ -140,6 +146,8 @@ namespace matrix {
              */
             Transform3D rotateZ(double radians) const;
 
+            Transform3D scale(const arma::vec3& v) const;
+
             Transform3D rotateLocal(const Rotation3D& rotation, const Transform3D& local) const;
             Transform3D rotateXLocal(double radians, const Transform3D& local) const;
             Transform3D rotateYLocal(double radians, const Transform3D& local) const;
@@ -182,21 +190,35 @@ namespace matrix {
             inline const arma::vec3 translation() const { return submat(0,3,2,3); }
             inline arma::subview<double> translation() { return submat(0,3,2,3); }
 
+            inline const arma::vec3 x() const { return submat(0,0,2,0); }
+            inline arma::subview<double> x() { return submat(0,0,2,0); }
+
+            inline const arma::vec3 y() const { return submat(0,1,2,1); }
+            inline arma::subview<double> y() { return submat(0,1,2,1); }
+
+            inline const arma::vec3 z() const { return submat(0,2,2,2); }
+            inline arma::subview<double> z() { return submat(0,2,2,2); }
+
             arma::vec3 eulerAngles() const {
                 return rotation().eulerAngles();
             }
 
             /**
-             * @return The (x-axis) of the basis
+             * @brief Computes 'size' of the transform T
+             *
              */
-            inline const arma::vec3 x() const { return rotation().submat(0,0,2,0); }
-            inline arma::subview<double> x() { return rotation().submat(0,0,2,0); }
+            static float norm(Transform3D T);
 
-            inline const arma::vec3 y() const { return rotation().submat(0,1,2,1); }
-            inline arma::subview<double> y() { return rotation().submat(0,1,2,1); }
+            static float random(float a, float b);
+            /**
+             * @brief Gets a random transform
+             * U for uniform
+             * N for normal
+             *
+             */
+            static Transform3D getRandomU(float max_angle, float max_displacement);
+            static Transform3D getRandomN(float stddev_angle, float stddev_disp);
 
-            inline const arma::vec3 z() const { return rotation().submat(0,2,2,2); }
-            inline arma::subview<double> z() { return rotation().submat(0,2,2,2); }
 
             /**
              * @brief Creates a translation transform by the given 3D vector
@@ -229,7 +251,9 @@ namespace matrix {
              * @return The rotation transform
              */
             static Transform3D createRotationZ(double radians);
-
+            
+            static Transform3D createScale(const arma::vec3& v);
+            
             /**
              * @brief Interpolates between two transforms
              *

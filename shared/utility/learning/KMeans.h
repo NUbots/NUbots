@@ -21,7 +21,6 @@
 #include <armadillo>
 
 namespace utility {
-namespace math {
 namespace learning {
 
 	class KMeans {
@@ -66,7 +65,6 @@ namespace learning {
     	arma::gmm_diag clusterModel;
 		KMeansConfig config;
 	};
-}
 }
 }
 

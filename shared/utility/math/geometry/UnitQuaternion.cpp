@@ -1,18 +1,18 @@
 /*
- * This file is part of the NUbots Codebase.
+ * This file is part of the Autocalibration Codebase.
  *
- * The NUbots Codebase is free software: you can redistribute it and/or modify
+ * The Autocalibration Codebase is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * The NUbots Codebase is distributed in the hope that it will be useful,
+ * The Autocalibration Codebase is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with the NUbots Codebase.  If not, see <http://www.gnu.org/licenses/>.
+ * along with the Autocalibration Codebase.  If not, see <http://www.gnu.org/licenses/>.
  *
  * Copyright 2013 NUBots <nubots@nubots.net>
  */
@@ -73,6 +73,11 @@ namespace geometry {
         this->normalise();
     }
 
+    void UnitQuaternion::rectify(){
+        if(kW() < 0){
+            *this = -*this;
+        }
+    }
 
     UnitQuaternion UnitQuaternion::i() const {
         UnitQuaternion qi = *this;
@@ -109,6 +114,68 @@ namespace geometry {
 
     void UnitQuaternion::normalise() {
         *this = arma::normalise(*this);
+    }
+
+    arma::mat44 UnitQuaternion::getLeftQuatMultMatrix() const{
+        arma::mat44 Q;
+        Q << kW() << -kX() << -kY() << -kZ() << arma::endr
+          << kX() <<  kW() << -kZ() <<  kY() << arma::endr
+          << kY() <<  kZ() <<  kW() << -kX() << arma::endr
+          << kZ() << -kY() <<  kX() <<  kW() << arma::endr;
+        return Q;
+    }
+
+    arma::mat44 UnitQuaternion::getRightQuatMultMatrix() const{
+        arma::mat44 W;
+        W << kW() << -kX() << -kY() << -kZ() << arma::endr
+          << kX() <<  kW() <<  kZ() << -kY() << arma::endr
+          << kY() << -kZ() <<  kW() <<  kX() << arma::endr
+          << kZ() <<  kY() << -kX() <<  kW() << arma::endr;
+        return W;
+    }
+
+
+    float UnitQuaternion::random(float a, float b){
+        float alpha = rand() / float(RAND_MAX);
+        return a * alpha + b * (1 - alpha);
+    }
+
+    UnitQuaternion UnitQuaternion::getRandomU(float max_angle){
+        //Get angle:
+        float angle = random(0,max_angle);
+
+        //Get axis:
+        float phi = random(0,2 * M_PI);
+        float costheta = random(-1,1);
+
+        float theta = std::acos( costheta );
+        float r = 1;
+
+        float x = r * sin( theta) * cos( phi );
+        float y = r * sin( theta) * sin( phi );
+        float z = r * cos( theta );
+        arma::vec3 axis = {x,y,z};
+
+        return UnitQuaternion(axis, angle);
+    }
+
+    UnitQuaternion UnitQuaternion::getRandomN(float stddev){
+        //Get angle:
+        float angle = stddev * arma::randn(1)[0];
+
+        //Get axis:
+        float phi = random(0,2 * M_PI);
+        float costheta = random(-1,1);
+
+        float theta = std::acos( costheta );
+        float r = 1;
+
+        float x = r * sin( theta) * cos( phi );
+        float y = r * sin( theta) * sin( phi );
+        float z = r * cos( theta );
+        arma::vec3 axis = {x,y,z};
+
+        return UnitQuaternion(axis, angle);
     }
 
     double UnitQuaternion::norm() {

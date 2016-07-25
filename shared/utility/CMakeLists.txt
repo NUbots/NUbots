@@ -1,11 +1,30 @@
+CMAKE_MINIMUM_REQUIRED(VERSION 2.8)
 # This directory contains our message types and other shared types
 INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/shared/ ${CMAKE_SOURCE_DIR}/)
 
-#Get files to compile
-INCLUDE(GetNUtilities.cmake)
+#Set project name found variable
+STRING(TOUPPER ${CMAKE_PROJECT_NAME} PROJECT_NAME)
+SET(${PROJECT_NAME}_PROJECT_FOUND TRUE)
 
-# Build a library from these files
-ADD_LIBRARY(utility ${NUTILITIES_SRC_FILES})
+#Include tools
+INCLUDE(ConfigureUtilities.cmake)
 
-# Put it in an IDE group for shared
-SET_PROPERTY(TARGET utility PROPERTY FOLDER "shared/")
+#Note where we are
+SET(NUTILITIES_DIR ${CMAKE_CURRENT_SOURCE_DIR})
+
+#Find all subdirectories
+SUBDIRLIST(directories ${CMAKE_CURRENT_SOURCE_DIR})
+
+#initialise variables which will contain our collected files and libs
+UNSET(NUTILITIES_LIBRARIES_FILES CACHE)
+
+#Add each subdirectory with selection for loaded libraries
+FOREACH(dir ${directories})
+	ADD_SUBDIRECTORY(${CMAKE_CURRENT_SOURCE_DIR}/${dir})
+ENDFOREACH()
+
+#Compile the nutilities library
+ADD_LIBRARY(nutilities ${NUTILITIES_LIBRARIES_FILES})
+
+# SET(NUCLEAR_UTILITY_LIBRARIES ${NUCLEAR_UTILITY_LIBRARIES} ${NUTILITIES_LIBRARIES} CACHE INTERNAL "Library for NUClear utilities" FORCE)
+SET(NUCLEAR_UTILITY_LIBRARIES nutilities CACHE INTERNAL "Library for NUClear utilities" FORCE)

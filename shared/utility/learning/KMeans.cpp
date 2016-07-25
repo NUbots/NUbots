@@ -21,7 +21,6 @@
 #include "utility/support/yaml_expression.h"
 
 namespace utility {
-namespace math {
 namespace learning {
 
 	void KMeans::configure(const YAML::Node& conf){
@@ -107,7 +106,7 @@ namespace learning {
 
 }
 }
-}
+
 
 
 
