@@ -1,7 +1,7 @@
 SET(dependencies 
 	ARMADILLO
 	YAML-CPP
-	muParser
+	muParserX
 	NUBOTS_PROJECT
 	)
 

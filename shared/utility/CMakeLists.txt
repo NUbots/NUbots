@@ -1,6 +1,6 @@
 CMAKE_MINIMUM_REQUIRED(VERSION 2.8)
 # This directory contains our message types and other shared types
-INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/shared/ ${CMAKE_SOURCE_DIR}/)
+INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/shared/ ${CMAKE_SOURCE_DIR}/ SYSTEM)
 
 #Set project name found variable
 STRING(TOUPPER ${CMAKE_PROJECT_NAME} PROJECT_NAME)

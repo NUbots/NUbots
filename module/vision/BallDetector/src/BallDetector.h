@@ -25,7 +25,7 @@
 #include "utility/math/geometry/Circle.h"
 #include "message/vision/LookUpTable.h"
 #include "message/input/Image.h"
-#include "utility/math/learning/KMeans.h"
+#include "utility/learning/KMeans.h"
 
 namespace module {
 namespace vision {
@@ -49,7 +49,7 @@ namespace vision {
         double green_radial_samples;
         double green_angular_samples;
 
-        utility::math::learning::KMeans kmeansClusterer;
+        utility::learning::KMeans kmeansClusterer;
 
         struct Frame{
             Frame() : time(), widthBall(arma::fill::zeros), projBall(arma::fill::zeros) {}
