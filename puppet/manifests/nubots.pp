@@ -342,4 +342,3 @@ set(CMAKE_CXX_FLAGS \"\${CMAKE_CXX_FLAGS} ${compile_params}\" CACHE STRING \"\" 
       before  => Class['toolchain_deb'],
     }
   }
-}

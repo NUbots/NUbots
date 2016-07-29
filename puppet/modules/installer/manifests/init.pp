@@ -22,6 +22,19 @@ class installer::prerequisites (Hash $archs) {
       ensure => directory,
     }
   }
+
+  # Make the architecture specific directories.
+  $archs.each |String $arch, Hash $params| {
+    file { [ "/nubots/toolchain/${arch}",
+             "/nubots/toolchain/${arch}/bin",
+             "/nubots/toolchain/${arch}/include",
+             "/nubots/toolchain/${arch}/lib${abi}",
+             "/nubots/toolchain/${arch}/man",
+             "/nubots/toolchain/${arch}/share",
+             "/nubots/toolchain/${arch}/src" ]:
+      ensure => directory,
+    }
+  }
 }
 
 define installer (
