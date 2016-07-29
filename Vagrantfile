@@ -6,7 +6,7 @@ Vagrant.configure("2") do |config|
   # Settings for a parallels provider
   config.vm.provider "parallels" do |v, override|
     # Use parallels virtualbox
-    override.vm.box = "parallels/ubuntu-14.04-i386"
+    override.vm.box = "parallels/ubuntu-16.04"
 
     # See http://www.virtualbox.org/manual/ch08.html#vboxmanage-modifyvm
     # and http://parallels.github.io/vagrant-parallels/docs/configuration.html
@@ -18,7 +18,10 @@ Vagrant.configure("2") do |config|
   # Settings if using a virtualbox provider
   config.vm.provider "virtualbox" do |v, override|
     # Use the official ubuntu box
-    override.vm.box = "ubuntu/trusty32"
+    # override.vm.box = "ubuntu/xenial64"
+
+    # Use local box because official Ubuntu one is shit
+    override.vm.box = "/home/bidski/Projects/nubots/xenial64.box"
 
     # See http://www.virtualbox.org/manual/ch08.html#vboxmanage-modifyvm
     v.memory = 8192
@@ -26,10 +29,8 @@ Vagrant.configure("2") do |config|
     v.customize ["modifyvm", :id, "--vram", 128]
     v.customize ["modifyvm", :id, "--ioapic", "on"]
     v.customize ["modifyvm", :id, "--accelerate3d", "on"]
+    v.customize ["modifyvm", :id, "--cableconnected1", "on"]
   end
-
-  # Use Ubuntu 14.04 32bit VM
-  config.vm.box = "puphpet/ubuntu1404-x32"
 
   # Fix the no tty error when installing
   config.vm.provision "fix-no-tty", type: "shell" do |shell|
@@ -61,7 +62,8 @@ Vagrant.configure("2") do |config|
     puppet.options = [
       # See https://docs.puppetlabs.com/references/3.6.2/man/agent.html#OPTIONS
       "--verbose",
-      "--debug"
+      "--debug",
+      "--parser=future"
     ]
   end
 
