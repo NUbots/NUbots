@@ -2,7 +2,7 @@ class dev_tools {
 
   # Update apt before getting any packages (if we need to)
   exec { "apt-update":
-    command => "/usr/bin/apt-get update",
+    command => "/usr/bin/apt-key update && /usr/bin/apt-get update",
     onlyif => "/bin/sh -c '[ ! -f /var/cache/apt/pkgcache.bin ] || /usr/bin/find /etc/apt/* -cnewer /var/cache/apt/pkgcache.bin | /bin/grep . > /dev/null'",
   } ->
   exec { "install-software-properties":
