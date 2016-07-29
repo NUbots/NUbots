@@ -7,12 +7,11 @@ set -e
 PREFIX="$1"
 METHOD="$2"
 
-# -mmovbe isn't enabled as it was specific to atom CPUs until haswell
-DARWIN_OPTIMISATION_FLAGS="-march=bonnell -mtune=bonnell -mno-movbe -mfxsr -mmmx -msahf -msse -msse2 -msse3 -mssse3 --param l1-cache-size=24 --param l1-cache-line-size=64 --param l2-cache-size=512"
+OPTIMISATION_FLAGS="$3"
 shift 2
 
-export CFLAGS="$CFLAGS -I$PREFIX/include $DARWIN_OPTIMISATION_FLAGS -Os"
-export CXXFLAGS="$CXXFLAGS -I$PREFIX/include $DARWIN_OPTIMISATION_FLAGS -Os"
+export CFLAGS="$CFLAGS -I$PREFIX/include $OPTIMISATION_FLAGS -Os"
+export CXXFLAGS="$CXXFLAGS -I$PREFIX/include $OPTIMISATION_FLAGS -Os"
 export LDFLAGS="$LDFLAGS -L$PREFIX/lib"
 
 # Say what we're doing!
