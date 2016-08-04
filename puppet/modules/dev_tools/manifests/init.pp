@@ -21,6 +21,7 @@ class dev_tools {
   package { 'zsh': ensure => latest, }
   package { 'htop': ensure => latest, }
   package { 'gdb': ensure => latest, }
+  package { 'cmake': ensure => latest, }
   package { 'cmake-curses-gui': ensure => latest, }
   package { 'linux-headers-generic': ensure => latest, }
   package { 'dos2unix': ensure => latest, }
@@ -32,11 +33,11 @@ class dev_tools {
   package { 'python-dev': ensure => latest, }
   package { 'python-pip': ensure => latest, }
   package { 'libncurses5-dev': ensure => latest, }
-  package { 'gcc-6': ensure => latest, require => Apt::Ppa['ppa:ubuntu-toolchain-r/test'] }
-  package { 'g++-6': ensure => latest, require => Apt::Ppa['ppa:ubuntu-toolchain-r/test'] }
-  package { 'gfortran-6': ensure => latest, require => Apt::Ppa['ppa:ubuntu-toolchain-r/test'] }
-  package { 'binutils': ensure => latest, require => Apt::Ppa['ppa:ubuntu-toolchain-r/test'] }
-  package { 'binutils-dev': ensure => latest, require => Apt::Ppa['ppa:ubuntu-toolchain-r/test'] }
+  package { 'gcc-6': name => 'gcc-6-multilib', ensure => latest, require => Apt::Ppa['ppa:ubuntu-toolchain-r/test'] }
+  package { 'g++-6': name => 'g++-6-multilib', ensure => latest, require => Apt::Ppa['ppa:ubuntu-toolchain-r/test'] }
+  package { 'gfortran-6': name => 'gfortran-6-multilib', ensure => latest, require => Apt::Ppa['ppa:ubuntu-toolchain-r/test'] }
+  package { 'binutils': name => 'binutils-multiarch', ensure => latest, require => Apt::Ppa['ppa:ubuntu-toolchain-r/test'] }
+  package { 'binutils-dev': name => 'binutils-multiarch-dev', ensure => latest, require => Apt::Ppa['ppa:ubuntu-toolchain-r/test'] }
   package { 'ninja-build': ensure => latest, }
   package { 'yasm': ensure => latest, }
 
