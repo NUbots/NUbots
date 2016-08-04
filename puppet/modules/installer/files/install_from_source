@@ -6,16 +6,19 @@ set -e
 # Get our prefix
 PREFIX="$1"
 METHOD="$2"
+FLAGS="$3"
 
-OPTIMISATION_FLAGS="$3"
 shift 2
 
-export CFLAGS="$CFLAGS -I$PREFIX/include $OPTIMISATION_FLAGS -Os"
-export CXXFLAGS="$CXXFLAGS -I$PREFIX/include $OPTIMISATION_FLAGS -Os"
+export CFLAGS="$CFLAGS -I$PREFIX/include $FLAGS -Os"
+export CXXFLAGS="$CXXFLAGS -I$PREFIX/include $FLAGS -Os"
 export LDFLAGS="$LDFLAGS -L$PREFIX/lib"
 
 # Say what we're doing!
 echo "Installing $(basename $(pwd)) to $PREFIX"
+echo "Using CFLAGS   = $CFLAGS"
+echo "Using CXXFLAGS = $CXXFLAGS"
+echo "Using LDFLAGS  = $LDFLAGS"
 
 # Set our package config so it finds things in the toolchain
 export PKG_CONFIG_PATH="$PREFIX/lib/pkgconfig"
@@ -75,6 +78,8 @@ elif [[ $METHOD == 'boost' || $METHOD == 'auto' && -e "Jamroot" ]]; then
 elif [[ $METHOD == 'make' || $METHOD == 'auto' && -e "Makefile" ]]; then
     echo "Building using make"
 
+    # These two are used for setting compiler flags for OpenBLAS
+    # NOTE: -O3 will overwrite the previously set -Os
     export COMMON_OPT="$CFLAGS -O3"
     export FCOMMON_OPT="$CXXFLAGS -O3"
 
