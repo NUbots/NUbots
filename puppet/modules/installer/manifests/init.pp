@@ -18,6 +18,14 @@ class installer::prerequisites (Hash $archs = {'DarwinOp' => {'abi' => 32, 'args
 
   # Make the architecture specific directories.
   $archs.each |String $arch, Hash $params| {
+    if $params['abi'] == 64 {
+      $abi = $params['abi']
+    }
+
+    else {
+      $abi = ''
+    }
+
     file { [ "/nubots/toolchain/${arch}",
              "/nubots/toolchain/${arch}/bin",
              "/nubots/toolchain/${arch}/include",
@@ -31,9 +39,9 @@ class installer::prerequisites (Hash $archs = {'DarwinOp' => {'abi' => 32, 'args
 }
 
 define installer (
-  $url,
+  $url = '',
   $creates = '',
-  $args = '',
+  $args = [],
   $environment = [],
   $src_dir = '',
   $method = 'auto',
@@ -41,24 +49,12 @@ define installer (
   $prebuild = 'echo', # Colon is a noop
   $postbuild = 'echo', # Colon is a noop
   $strip_components = 1,
+  $extension = 'UNKNOWN',
   Hash $archs = $archs,
 ) {
 
-  $extension = $url ? {
-    /.*\.zip/       => 'zip',
-    /.*\.tgz/       => 'tgz',
-    /.*\.tar\.gz/   => 'tar.gz',
-    /.*\.txz/       => 'txz',
-    /.*\.tar\.xz/   => 'tar.xz',
-    /.*\.tbz/       => 'tbz',
-    /.*\.tbz2/      => 'tbz2',
-    /.*\.tar\.bz2/  => 'tar.bz2',
-    /.*\.h/         => 'h',
-    /.*\.hpp/       => 'hpp',
-    default         => 'UNKNOWN',
-  }
-
   $archs.each |String $arch, Hash $params| {
+    # Determine which ABI we are using.
     if $params['abi'] == 64 {
       $abi = $params['abi']
     }
@@ -67,8 +63,7 @@ define installer (
       $abi = ''
     }
 
-    $args = $params['args']
-
+    # Ensure we have a valid "creates" variable.
     if $creates == '' {
       $create = "${prefix}/${arch}/lib${abi}/lib${name}.a"
     }
@@ -76,6 +71,15 @@ define installer (
     else {
       $create = "${prefix}/${arch}/lib${abi}/${creates}"
     }
+
+    # Get the environment.
+    $flags       = $params['args'].reduce |$flags, $value| { "${flags} ${value}" }
+    $cflags      = "CFLAGS=${flags}"
+    $cxxflags    = "CXXFLAGS=${flags}"
+    $environment = $environment + [$cflags, $cxxflags] + $params['environment']
+
+    # Reduce the args array to a space separated list of arguments.
+    $args = $args.reduce |$args, $value| { "${args} ${value}" }
 
     case $extension {
       'h', 'hpp': {
@@ -88,38 +92,32 @@ define installer (
         }
       }
       default: {
-        # Download and install
-        archive { "${arch}_${name}":
-          url    => $url,
-          target => "/nubots/toolchain/${arch}/src/${name}",
-          src_target => "/nubots/toolchain/${arch}/src",
-          purge_target => true,
-          checksum => false,
-          follow_redirects => true,
-          timeout => 0,
-          extension => $extension,
-          strip_components => $strip_components,
+        # Copy extracted archive to local arch directory, then build and install.
+        # NOTE: Done as an exec to suppress to boat-loads of output that 'file' generates for recursive copies.
+        exec { "mirror_${arch}_${name}":
+          command     => "mkdir -p ${prefix}/${arch}/src/${name}/${src_dir} ;
+                          cp -r ${prefix}/src/${name}/ ${prefix}/${arch}/src/",
+          cwd         => "${prefix}/${arch}/src",
+          environment => $environment,
+          path        =>  [ "${prefix}/${arch}/bin", "${prefix}/bin",
+                            '/usr/local/bin', '/usr/local/sbin/', '/usr/bin/', '/usr/sbin/', '/bin/', '/sbin/' ],
+          refreshonly => true,
+          require     => [ Class['installer::prerequisites'], Class['dev_tools'], ],
         } ~>
         exec { "install_${arch}_${name}":
-          command => "${prebuild} ;
-                      install_from_source '${prefix}' '${method}' '${args}' ;
-                      ${postbuild} ;",
-          creates => "${create}",
-          cwd => "/nubots/toolchain/${arch}/src/${name}/${src_dir}",
+          command     => "${prebuild} ;
+                          install_from_source '${prefix}/${arch}' '${method}' '${args}' ;
+                          ${postbuild} ;",
+          creates     => "${create}",
+          cwd         => "${prefix}/${arch}/src/${name}/${src_dir}",
           environment => $environment,
-          path =>  [  "/nubots/toolchain/${arch}/bin", '/usr/local/bin', '/usr/local/sbin/', '/usr/bin/', '/usr/sbin/', '/bin/', '/sbin/' ],
-          timeout => 0,
+          path        =>  [ "${prefix}/${arch}/bin", "${prefix}/bin",
+                            '/usr/local/bin', '/usr/local/sbin/', '/usr/bin/', '/usr/sbin/', '/bin/', '/sbin/' ],
+          timeout     => 0,
           refreshonly => true,
-          require => [
-            Class['installer::prerequisites'],
-            Archive["${arch}_${name}"],
-            Class['dev_tools'],
-          ],
+          require     => [ Class['installer::prerequisites'], Class['dev_tools'], ],
         }
       }
     }
   }
-
-
-
 }
