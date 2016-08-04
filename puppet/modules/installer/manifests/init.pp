@@ -41,7 +41,7 @@ class installer::prerequisites (Hash $archs) {
     file { [ "/nubots/toolchain/${arch}",
              "/nubots/toolchain/${arch}/bin",
              "/nubots/toolchain/${arch}/include",
-             "/nubots/toolchain/${arch}/lib${abi}",
+             "/nubots/toolchain/${arch}/lib",
              "/nubots/toolchain/${arch}/man",
              "/nubots/toolchain/${arch}/share",
              "/nubots/toolchain/${arch}/src" ]:
