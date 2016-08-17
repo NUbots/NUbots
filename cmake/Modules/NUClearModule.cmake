@@ -33,12 +33,16 @@ FUNCTION(NUCLEAR_MODULE)
         # Add the file we will generate to our output
         LIST(APPEND data "${output_file}")
 
+        # Create the required folder
+        GET_FILENAME_COMPONENT(output_folder ${output_file} DIRECTORY)
+        FILE(MAKE_DIRECTORY ${output_folder})
+
         # Copy configuration files over as needed
         ADD_CUSTOM_COMMAND(
             OUTPUT ${output_file}
             COMMAND ${CMAKE_COMMAND} -E create_symlink ${data_file} ${output_file}
             DEPENDS ${data_file}
-            COMMENT "Copying updated data file ${data_file}"
+            COMMENT "Creating symbolic link for file ${data_file}"
         )
 
     ENDFOREACH(data_file)

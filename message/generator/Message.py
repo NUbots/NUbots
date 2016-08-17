@@ -230,7 +230,6 @@ class Message:
             """);
 
         # TODO
-        # {name}() : defaultvalues {{}}
         # {name}(const YAML::Node& node) {{ CONVERT }}
         # {name}(const PyObject* pyobj) {{ CONVERT }}
 

@@ -38,8 +38,8 @@ FOREACH(proto ${builtin})
                "${message_binary_include_dir}/${file_we}.pb.h"
                "${message_binary_include_dir}/${file_we}_pb2.py"
         COMMAND ${PROTOBUF_PROTOC_EXECUTABLE}
-        ARGS --cpp_out ${message_binary_include_dir}
-             --python_out ${message_binary_include_dir}
+        ARGS --cpp_out=lite:${message_binary_include_dir}
+             --python_out=${message_binary_include_dir}
              -I${CMAKE_CURRENT_SOURCE_DIR}/proto
              "${CMAKE_CURRENT_SOURCE_DIR}/proto/${file_we}.proto"
         DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/proto/${file_we}.proto"
@@ -106,7 +106,7 @@ FOREACH(proto ${protobufs})
     ADD_CUSTOM_COMMAND(
         OUTPUT "${outputpath}/${file_we}.pb"
         COMMAND ${PROTOBUF_PROTOC_EXECUTABLE}
-        ARGS --descriptor_set_out "${outputpath}/${file_we}.pb"
+        ARGS --descriptor_set_out="${outputpath}/${file_we}.pb"
              -I${message_source_include_dir}
              -I${CMAKE_CURRENT_SOURCE_DIR}/proto
              ${proto}
@@ -129,8 +129,8 @@ FOREACH(proto ${protobufs})
                "${outputpath}/${file_we}.pb.h"
                "${outputpath}/${file_we}_pb2.py"
         COMMAND ${PROTOBUF_PROTOC_EXECUTABLE}
-        ARGS --cpp_out ${message_binary_include_dir}
-             --python_out ${message_binary_include_dir}
+        ARGS --cpp_out=lite:${message_binary_include_dir}
+             --python_out=${message_binary_include_dir}
              -I${message_binary_include_dir}
              -I${CMAKE_CURRENT_SOURCE_DIR}/proto
              "${outputpath}/${file_we}.proto"

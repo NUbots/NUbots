@@ -1,20 +1,45 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 
 import sys
 import os
 import argparse
 import pkgutil
+import re
 
 # Don't make .pyc files
 sys.dont_write_bytecode = True
 
-tools_path = os.path.dirname(os.path.realpath(__file__)) + os.sep + 'tools'
+# Go and get all the relevant directories and variables from cmake
+nuclear_dir = os.path.dirname(os.path.realpath(__file__))
+project_dir = os.path.dirname(nuclear_dir)
 
-# Add our builtin tools to the path
-sys.path.append(tools_path)
+# Get the tools directories to find b modules
+nuclear_tools_path = os.path.join(nuclear_dir, 'tools')
+user_tools_path    = os.path.join(project_dir, 'tools')
 
-# Add add tools to the path in case the user has some in their pwd
-sys.path.append('tools')
+cmake_cache = {}
+
+# Try to find our cmake cache file
+if os.path.isfile('CMakeCache.txt'):
+    with open('CMakeCache.txt', 'r') as f:
+        cmake_cache_text = f.readlines()
+
+elif os.path.isfile(os.path.join(project_dir, 'build', 'CMakeCache.txt')):
+    with open(os.path.join(project_dir, 'build', 'CMakeCache.txt'), 'r') as f:
+        cmake_cache_text = f.readlines()
+
+for l in cmake_cache_text:
+    l = l.strip()
+    if len(l) > 0 and not l.startswith('//') and not l.startswith('#'):
+        g = re.match(r'([a-zA-Z_$][a-zA-Z_$0-9-]*):(\w+)=(.*)', l).groups()
+        cmake_cache[g[0]] = g[2] if ';' not in g[2].strip(';') else g[2].strip(';').split(';');
+
+for key in cmake_cache:
+    print key, ':', cmake_cache[key]
+
+# Add our builtin tools to the path and user tools
+sys.path.append(nuclear_tools_path)
+sys.path.append(user_tools_path)
 
 if __name__ == '__main__':
 
@@ -24,13 +49,12 @@ if __name__ == '__main__':
     subcommands.help = "The command to run from the script. See each help for more information."
 
     # Get all of the packages that are in the build tools
-
-    modules = pkgutil.iter_modules(path=[tools_path])
+    modules = pkgutil.iter_modules(path=[nuclear_tools_path, user_tools_path])
 
     # Our tools dictionary
     tools = {}
 
-    # Loop through all the modules we have
+    # Loop through all the modules we have to set them up in the parser
     for loader, module_name, ispkg in modules:
 
         # Get our module, class name and registration function
