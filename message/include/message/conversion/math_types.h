@@ -7,23 +7,23 @@ namespace message {
     namespace conversion {
         namespace math {
 
-            using vec    = Eigen::Matrix<double, 1, Eigen::Dynamic>;
-            using fvec   = Eigen::Matrix<float, 1, Eigen::Dynamic>;
-            using ivec   = Eigen::Matrix<int, 1, Eigen::Dynamic>;
-            using uvec   = Eigen::Matrix<unsigned int, 1, Eigen::Dynamic>;
-            using cvec   = Eigen::Matrix<uint8_t, 1, Eigen::Dynamic>;
-            using vec2   = Eigen::Matrix<double, 1, 2>;
-            using fvec2  = Eigen::Matrix<float, 1, 2>;
-            using ivec2  = Eigen::Matrix<int, 1, 2>;
-            using uvec2  = Eigen::Matrix<unsigned int, 1, 2>;
-            using vec3   = Eigen::Matrix<double, 1, 3>;
-            using fvec3  = Eigen::Matrix<float, 1, 3>;
-            using ivec3  = Eigen::Matrix<int, 1, 3>;
-            using uvec3  = Eigen::Matrix<unsigned int, 1, 3>;
-            using vec4   = Eigen::Matrix<double, 1, 4>;
-            using fvec4  = Eigen::Matrix<float, 1, 4>;
-            using ivec4  = Eigen::Matrix<int, 1, 4>;
-            using uvec4  = Eigen::Matrix<unsigned int, 1, 4>;
+            using vec    = Eigen::Matrix<double, Eigen::Dynamic, 1>;
+            using fvec   = Eigen::Matrix<float, Eigen::Dynamic, 1>;
+            using ivec   = Eigen::Matrix<int, Eigen::Dynamic, 1>;
+            using uvec   = Eigen::Matrix<unsigned int, Eigen::Dynamic, 1>;
+            using cvec   = Eigen::Matrix<uint8_t, Eigen::Dynamic, 1>;
+            using vec2   = Eigen::Matrix<double, 2, 1>;
+            using fvec2  = Eigen::Matrix<float, 2, 1>;
+            using ivec2  = Eigen::Matrix<int, 2, 1>;
+            using uvec2  = Eigen::Matrix<unsigned int, 2, 1>;
+            using vec3   = Eigen::Matrix<double, 3, 1>;
+            using fvec3  = Eigen::Matrix<float, 3, 1>;
+            using ivec3  = Eigen::Matrix<int, 3, 1>;
+            using uvec3  = Eigen::Matrix<unsigned int, 3, 1>;
+            using vec4   = Eigen::Matrix<double, 4, 1>;
+            using fvec4  = Eigen::Matrix<float, 4, 1>;
+            using ivec4  = Eigen::Matrix<int, 4, 1>;
+            using uvec4  = Eigen::Matrix<unsigned int, 4, 1>;
 
             using mat    = Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>;
             using fmat   = Eigen::Matrix<float, Eigen::Dynamic, Eigen::Dynamic>;
