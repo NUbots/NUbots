@@ -37,7 +37,7 @@ FUNCTION(NUCLEAR_MODULE)
         GET_FILENAME_COMPONENT(output_folder ${output_file} DIRECTORY)
         FILE(MAKE_DIRECTORY ${output_folder})
 
-        # Copy configuration files over as needed
+        # Create symlinks to the files
         ADD_CUSTOM_COMMAND(
             OUTPUT ${output_file}
             COMMAND ${CMAKE_COMMAND} -E create_symlink ${data_file} ${output_file}
@@ -60,9 +60,9 @@ FUNCTION(NUCLEAR_MODULE)
     INCLUDE_DIRECTORIES(SYSTEM ${MODULE_INCLUDES})
 
     # Include any directories used in utility or messages
-    INCLUDE_DIRECTORIES($<TARGET_PROPERTY:nuclear_message,INCLUDE_DIRECTORIES>)
-    INCLUDE_DIRECTORIES($<TARGET_PROPERTY:nuclear_utility,INCLUDE_DIRECTORIES>)
-    INCLUDE_DIRECTORIES($<TARGET_PROPERTY:nuclear_extension,INCLUDE_DIRECTORIES>)
+    INCLUDE_DIRECTORIES($<TARGET_PROPERTY:${NUCLEAR_MESSAGE_LIBRARIES},INCLUDE_DIRECTORIES>)
+    INCLUDE_DIRECTORIES($<TARGET_PROPERTY:${NUCLEAR_UTILITY_LIBRARIES},INCLUDE_DIRECTORIES>)
+    INCLUDE_DIRECTORIES($<TARGET_PROPERTY:${NUCLEAR_EXTENSION_LIBRARIES},INCLUDE_DIRECTORIES>)
 
     # Add all our code to a library and if we are doing a shared build make it a shared library
     IF(NUCLEAR_SHARED_BUILD)
@@ -72,7 +72,7 @@ FUNCTION(NUCLEAR_MODULE)
         ADD_LIBRARY(${module_name} STATIC ${src} ${MODULE_SOURCES} ${data} ${data_files})
     ENDIF()
 
-    TARGET_LINK_LIBRARIES(${module_name} nuclear_utility nuclear_message nuclear_extension ${MODULE_LIBRARIES} ${NUCLEAR_LIBRARY})
+    TARGET_LINK_LIBRARIES(${module_name} ${NUCLEAR_UTILITY_LIBRARIES} ${NUCLEAR_MESSAGE_LIBRARIES} ${NUCLEAR_EXTENSION_LIBRARIES} ${MODULE_LIBRARIES} ${NUCLEAR_LIBRARY})
 
     # Put it in an IDE group for shared
     SET_PROPERTY(TARGET ${module_name} PROPERTY FOLDER ${module_path})
