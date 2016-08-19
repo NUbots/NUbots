@@ -30,7 +30,6 @@ class dev_tools {
   package { 'git': ensure => latest, }
   package { 'graphviz': ensure => latest, }
   package { 'build-essential': ensure => latest, }
-  package { 'python-dev': ensure => latest, }
   package { 'python-pip': ensure => latest, }
   package { 'libncurses5-dev': ensure => latest, }
   package { 'gcc-6': name => 'gcc-6-multilib', ensure => latest, require => Apt::Ppa['ppa:ubuntu-toolchain-r/test'] }
@@ -39,7 +38,18 @@ class dev_tools {
   package { 'binutils': name => 'binutils-multiarch', ensure => latest, require => Apt::Ppa['ppa:ubuntu-toolchain-r/test'] }
   package { 'binutils-dev': name => 'binutils-multiarch-dev', ensure => latest, require => Apt::Ppa['ppa:ubuntu-toolchain-r/test'] }
   package { 'ninja-build': ensure => latest, }
-  package { 'yasm': ensure => latest, }
+  package { 'nasm': ensure => latest, }
+
+  # For ELLCC
+  package { 'subversion': ensure => latest, }
+  package { 'texinfo': ensure => latest, }
+  package { 'byacc': ensure => latest, }
+  package { 'flex': ensure => latest, }
+  package { 'pkg-config': ensure => latest, }
+  package { 'zlib1g-dev': ensure => latest, }
+  package { 'libglib2.0-dev': ensure => latest, }
+  package { 'autoconf': ensure => latest, }
+  package { 'libtool': ensure => latest, }
 
   # Set the vagrant shell to zsh
   user { 'vagrant': shell => '/bin/zsh', require => Package['zsh'], }
@@ -61,7 +71,34 @@ class dev_tools {
   file { '/home/vagrant/.zpreztorc': ensure => link, target => '/home/vagrant/.zprezto/runcoms/zpreztorc', require => Vcsrepo['zprezto'], }
   file { '/home/vagrant/.zprofile':  ensure => link, target => '/home/vagrant/.zprezto/runcoms/zprofile',  require => Vcsrepo['zprezto'], }
   file { '/home/vagrant/.zshenv':    ensure => link, target => '/home/vagrant/.zprezto/runcoms/zshenv',    require => Vcsrepo['zprezto'], }
-  file { '/home/vagrant/.zshrc':     ensure => link, target => '/home/vagrant/.zprezto/runcoms/zshrc',     require => Vcsrepo['zprezto'], }
+
+  # Make sure .zshrc has key bindings for the numpad.
+  # One at a time so puppet can only append the line if it is not already in the file.
+  # Confirm key codes by pressing <ctrl>+v followed by the key in question
+  # http://superuser.com/questions/742171/zsh-z-shell-numpad-numlock-doesnt-work
+  file { '/home/vagrant/.zshrc':     ensure => link, target => '/home/vagrant/.zprezto/runcoms/zshrc',     require => Vcsrepo['zprezto'], } ->
+  file_line{ 'zshrc_numpad00': path => '/home/vagrant/.zshrc', line => '# Keypad'} ->
+  file_line{ 'zshrc_numpad01': path => '/home/vagrant/.zshrc', line => '# 0 . Enter'} ->
+  file_line{ 'zshrc_numpad02': path => '/home/vagrant/.zshrc', line => 'bindkey -s "^[[2~" "0"'} ->
+  file_line{ 'zshrc_numpad03': path => '/home/vagrant/.zshrc', line => '#bindkey -s "^[[3~" "."'} ->
+  file_line{ 'zshrc_numpad04': path => '/home/vagrant/.zshrc', line => 'bindkey -s "^[OM" "^M"'} ->
+  file_line{ 'zshrc_numpad05': path => '/home/vagrant/.zshrc', line => '# 1 2 3'} ->
+  file_line{ 'zshrc_numpad06': path => '/home/vagrant/.zshrc', line => '#bindkey -s "^[OF" "1"'} ->
+  file_line{ 'zshrc_numpad07': path => '/home/vagrant/.zshrc', line => '#bindkey -s "^[OB" "2"'} ->
+  file_line{ 'zshrc_numpad08': path => '/home/vagrant/.zshrc', line => '#bindkey -s "^[[6~" "3"'} ->
+  file_line{ 'zshrc_numpad09': path => '/home/vagrant/.zshrc', line => '# 4 5 6'} ->
+  file_line{ 'zshrc_numpad10': path => '/home/vagrant/.zshrc', line => '#bindkey -s "^[OD" "4"'} ->
+  file_line{ 'zshrc_numpad11': path => '/home/vagrant/.zshrc', line => '#bindkey -s "^[OE" "5"'} ->
+  file_line{ 'zshrc_numpad12': path => '/home/vagrant/.zshrc', line => '#bindkey -s "^[OC" "6"'} ->
+  file_line{ 'zshrc_numpad13': path => '/home/vagrant/.zshrc', line => '# 7 8 9'} ->
+  file_line{ 'zshrc_numpad14': path => '/home/vagrant/.zshrc', line => '#bindkey -s "^[OH" "7"'} ->
+  file_line{ 'zshrc_numpad15': path => '/home/vagrant/.zshrc', line => '#bindkey -s "^[OA" "8"'} ->
+  file_line{ 'zshrc_numpad16': path => '/home/vagrant/.zshrc', line => '#bindkey -s "^[[5~" "9"'} ->
+  file_line{ 'zshrc_numpad17': path => '/home/vagrant/.zshrc', line => '# + - * /'} ->
+  file_line{ 'zshrc_numpad18': path => '/home/vagrant/.zshrc', line => 'bindkey -s "^[Ok" "+"'} ->
+  file_line{ 'zshrc_numpad19': path => '/home/vagrant/.zshrc', line => 'bindkey -s "^[Om" "-"'} ->
+  file_line{ 'zshrc_numpad20': path => '/home/vagrant/.zshrc', line => 'bindkey -s "^[Oj" "*"'} ->
+  file_line{ 'zshrc_numpad21': path => '/home/vagrant/.zshrc', line => 'bindkey -s "^[Oo" "/"'}
 
   # Enable the git module for zprezto
   file_line { 'zprezto_modules':
@@ -79,7 +116,8 @@ class dev_tools {
   }
 
   # System libraries
-  package { 'libasound2-dev': ensure => latest, }
+  package { 'libasound2-dev:amd64': ensure => latest, }
+  package { 'libasound2-dev:i386': ensure => latest, }
 
   # INSTALL PYTHON PACKAGES (we need python-pip to use the pip provider)
   Package['python-pip'] -> Package <| provider == 'pip' |>
@@ -110,12 +148,6 @@ class dev_tools {
       source => 'puppet:///modules/dev_tools/ssh_config',
       owner => 'vagrant',
       mode => '600', }
-
-  # SETUP ENVIRONMENT VARIABLES FOR SHELLS
-  file { '/etc/profile.d/toolchain_init.sh':
-    ensure => present,
-    mode => '755',
-    source => 'puppet:///modules/dev_tools/toolchain_init.sh', }
 
   # SETUP OUR ALTERNATIVES SO WE USE THE CORRECT COMPILER
   exec {'fix_compiler_environment':
