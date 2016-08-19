@@ -25,18 +25,10 @@ class installer::prerequisites (Hash $archs) {
 
   # Make the architecture specific directories.
   $archs.each |String $arch, Hash $params| {
-    if $params['abi'] == 64 {
-      $abi = $params['abi']
-    }
-
-    else {
-      $abi = ''
-    }
-
     file { [ "/nubots/toolchain/${arch}",
              "/nubots/toolchain/${arch}/bin",
              "/nubots/toolchain/${arch}/include",
-             "/nubots/toolchain/${arch}/lib${abi}",
+             "/nubots/toolchain/${arch}/lib",
              "/nubots/toolchain/${arch}/man",
              "/nubots/toolchain/${arch}/share",
              "/nubots/toolchain/${arch}/src" ]:
@@ -192,15 +184,6 @@ define installer (
       $arg1 = regsubst($arg, 'PREFIX', "${prefix}/${arch}")
       $args_str = $arg1.reduce |$args_str, $value| { "${args_str} ${value}" }
     }
-
-    # Get the environment.
-    $flags       = $params['args'].reduce |$flags, $value| { "${flags} ${value}" }
-    $cflags      = "CFLAGS=${flags}"
-    $cxxflags    = "CXXFLAGS=${flags}"
-    $environment = $environment + [$cflags, $cxxflags] + $params['environment']
-
-    # Reduce the args array to a space separated list of arguments.
-    $args = $args.reduce |$args, $value| { "${args} ${value}" }
 
     case $extension {
       'h', 'hpp': {
