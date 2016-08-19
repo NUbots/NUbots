@@ -18,18 +18,20 @@ Vagrant.configure("2") do |config|
   # Settings if using a virtualbox provider
   config.vm.provider "virtualbox" do |v, override|
     # Use the official ubuntu box
-    # override.vm.box = "ubuntu/xenial64"
+    #override.vm.box = "ubuntu/xenial64"
 
-    # Use local box because official Ubuntu one is shit
-    override.vm.box = "/home/bidski/Projects/nubots/xenial64.box"
+    # Use custom box because official Ubuntu one is shit.
+    override.vm.box = "nubots_xenial64"
+    override.vm.box_url = "https://uoneduau-my.sharepoint.com/personal/c3124185_uon_edu_au/_layouts/15/guestaccess.aspx?guestaccesstoken=%2bndUQAG0OSfCUAOTNpjewJE%2bv0slyCCyfeEonMpJwpU%3d&docid=03ac69c7a811041dba5afe5247c253a59&rev=1"
 
     # See http://www.virtualbox.org/manual/ch08.html#vboxmanage-modifyvm
     v.memory = 8192
-    v.cpus = 8
+    v.cpus = 4
     v.customize ["modifyvm", :id, "--vram", 128]
     v.customize ["modifyvm", :id, "--ioapic", "on"]
     v.customize ["modifyvm", :id, "--accelerate3d", "on"]
     v.customize ["modifyvm", :id, "--cableconnected1", "on"]
+    v.customize ["modifyvm", :id, "--natdnshostresolver1", "on"]
   end
 
   # Fix the no tty error when installing

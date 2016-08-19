@@ -19,9 +19,6 @@ INCLUDE(SharedLibraries)
 # Include specific compiler options
 INCLUDE(Compiler)
 
-# Include our platform details
-INCLUDE(Platform)
-
 # Hide some cmake variables that will never be used
 MARK_AS_ADVANCED(
     CMAKE_INSTALL_PREFIX
