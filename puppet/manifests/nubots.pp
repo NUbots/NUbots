@@ -24,13 +24,13 @@ node nubotsvm {
 
 node nubotsvmbuild {
   $archs = {
-    'DarwinOp' => {'abi'         => 32,
-                   'args'        => ['-march=bonnell', '-mtune=bonnell', '-m32', '-mno-movbe', '-mfxsr', '-mmmx', '-msahf', '-msse', '-msse2', '-msse3', '-mssse3 --param l1-cache-size=24 --param l1-cache-line-size=64 --param l2-cache-size=512', ],
-                   'environment' => ['TARGET=YONAH', 'USE_THREAD=1', 'BINARY=32', 'NUM_THREADS=2', 'AUDIO=PORTAUDIO']
+    'DarwinOp' => {'flags'       => ['-march=bonnell', '-mtune=bonnell', '-m32', '-mno-movbe', '-mfxsr', '-mmmx', '-msahf', '-msse', '-msse2', '-msse3', '-mssse3', ],
+                   'params'      => ['--param l1-cache-size=24', '--param l1-cache-line-size=64', '--param l2-cache-size=512', ],
+                   'environment' => {'TARGET' => 'YONAH', 'USE_THREAD' => '1', 'BINARY' => '32', 'NUM_THREADS' => '2', 'AUDIO' => 'PORTAUDIO', 'LDFLAGS' => '-m32', },
                    },
-    'NimbroOp' => {'abi'         => 64,
-                   'args'        => ['-march=broadwell', '-mtune=broadwell', '-m64', '-mabm', '-madx', '-maes', '-mavx', '-mavx2', '-mbmi', '-mbmi2', '-mcx16', '-mf16c', '-mfma', '-mfsgsbase', '-mfxsr', '-mlzcnt', '-mmmx', '-mmovbe', '-mpclmul', '-mpopcnt', '-mprfchw', '-mrdrnd', '-mrdseed', '-msahf', '-msse', '-msse2', '-msse3', '-msse4', '-msse4.1', '-msse4.2', '-mssse3', '-mxsave', '-mxsaveopt --param l1-cache-size=32 --param l1-cache-line-size=64 --param l2-cache-size=4096', ],
-                   'environment' => ['TARGET=HASWELL', 'USE_THREAD=1', 'BINARY=64', 'NUM_THREADS=2', 'AUDIO=PORTAUDIO']
+    'NimbroOp' => {'flags'       => ['-march=broadwell', '-mtune=broadwell', '-m64', '-mabm', '-madx', '-maes', '-mavx', '-mavx2', '-mbmi', '-mbmi2', '-mcx16', '-mf16c', '-mfma', '-mfsgsbase', '-mfxsr', '-mlzcnt', '-mmmx', '-mmovbe', '-mpclmul', '-mpopcnt', '-mprfchw', '-mrdrnd', '-mrdseed', '-msahf', '-msse', '-msse2', '-msse3', '-msse4', '-msse4.1', '-msse4.2', '-mssse3', '-mxsave', '-mxsaveopt', ],
+                   'params'      => ['--param l1-cache-size=32', '--param l1-cache-line-size=64', '--param l2-cache-size=4096', ],
+                   'environment' => {'TARGET' => 'HASWELL', 'USE_THREAD' => '1', 'BINARY' => '64', 'NUM_THREADS' => '2', 'AUDIO' => 'PORTAUDIO', 'LDFLAGS' => '-m64', },
                   },
   }
 
@@ -42,62 +42,192 @@ node nubotsvmbuild {
   # We need dev tools to use the installer
   class {'dev_tools': } -> Installer <| |>
 
-  # After we have installed, build our deb
-  Installer <| |> ~> class { 'toolchain_deb': }
-
   # List all of the archives that need to be downloaded along with any other associated parameters (creates, requires, etc).
   $archives = {
-      'zlib'      => {'url'         => 'http://zlib.net/zlib-1.2.8.tar.gz',
-                      'creates'     => 'libz.a'},
-      'bzip2'     => {'url'         => 'http://www.bzip.org/1.0.6/bzip2-1.0.6.tar.gz'},
-      'xml2'      => {'url'         => 'http://xmlsoft.org/sources/libxml2-2.9.3.tar.gz'},
-      'protobuf'  => {'url'         => 'https://github.com/google/protobuf/releases/download/v3.0.0-beta-3/protobuf-python-3.0.0-beta-3.tar.gz',
-                      'args'        => [ '--with-zlib', ],
-                      'require'     => [ Installer['zlib'], ]},
-      'nuclear'   => {'url'         => 'https://github.com/Fastcode/NUClear/archive/develop.tar.gz',
-                      'args'        => [ '-DBUILD_TESTS=OFF', ]},
-      'openblas'  => {'url'         => 'https://github.com/xianyi/OpenBLAS/archive/v0.2.18.tar.gz',
-                      'method'      => 'make'},
-      'libsvm'    => {'url'         => 'https://github.com/cjlin1/libsvm/archive/v321.tar.gz',
-                      'creates'     =>'svm.o',
-                      'method'      => 'make'},
-      'armadillo' => {'url'         => 'https://downloads.sourceforge.net/project/arma/armadillo-7.200.2.tar.xz',
-                      'method'      => 'cmake',
-                      'creates'     => 'libarmadillo.so',
-                      'require'     => [ Installer['openblas'], ]},
-      'tcmalloc'  => {'url'         => 'https://github.com/gperftools/gperftools/releases/download/gperftools-2.5/gperftools-2.5.tar.gz',
-                      'args'        => [ '--with-tcmalloc-pagesize=64', '--enable-minimal', ],
-                      'creates'     => 'libtcmalloc_minimal.a'},
-      'yaml-cpp'  => {'url'         => 'https://github.com/jbeder/yaml-cpp/archive/master.tar.gz',
-                      'args'        => [ '-DYAML_CPP_BUILD_CONTRIB=OFF', '-DYAML_CPP_BUILD_TOOLS=OFF', ]},
-      'fftw3'     => {'url'         => 'http://www.fftw.org/fftw-3.3.4.tar.gz',
-                      'args'        => [ '--disable-fortran', '--enable-shared', ]},
-      'jpeg'      => {'url'         => 'http://downloads.sourceforge.net/project/libjpeg-turbo/1.4.2/libjpeg-turbo-1.4.2.tar.gz'},
-      'cppformat' => {'url'         => 'https://github.com/cppformat/cppformat/archive/2.0.0.tar.gz'},
-      'portaudio' => {'url'         => 'http://www.portaudio.com/archives/pa_stable_v19_20140130.tgz'},
-      'rtaudio'   => {'url'         => 'http://www.music.mcgill.ca/~gary/rtaudio/release/rtaudio-4.1.1.tar.gz'},
-      'muparserx' => {'url'         => 'https://github.com/beltoforion/muparserx/archive/v4.0.4.tar.gz'},
-      'eigen3'    => {'url'         => 'http://bitbucket.org/eigen/eigen/get/3.2.7.tar.gz',
-                      'creates'     => 'Eigen'},
-      'boost'     => {'url'         => 'http://downloads.sourceforge.net/project/boost/boost/1.59.0/boost_1_59_0.tar.gz',
-                      'args'        => [ 'link=static', ],
-                      'require'     => [ Package['python-dev'], Installer['zlib'], Installer['bzip2'], ]},
-      'mlpack'    => {'url'         => 'https://github.com/mlpack/mlpack/archive/mlpack-2.0.0.tar.gz',
-                      'require'     => [ Installer['armadillo'], Installer['boost'], Installer['xml2'], ],
-                      'creates'     => 'libmlpack.so'},
-      'espeak'    => {'url'         => 'http://sourceforge.net/projects/espeak/files/espeak/espeak-1.48/espeak-1.48.04-source.zip',
-                      'src_dir'     => 'espeak-1.48.04-source/src',
-                      'prebuild'    => 'cp portaudio19.h portaudio.h',
-                      'require'     => [ Installer['portaudio'] ]},
+      'python'       => {'url'         => 'https://www.python.org/ftp/python/2.7.12/Python-2.7.12.tar.xz',
+                         'creates'     => 'lib/libpython2.7.a',
+                         'args'        => { 'DarwinOp' => [ '--host=i686-linux-gnu', '--build=x86_64-unknown-linux-gnu', '--disable-ipv6', ],
+                                            'NimbroOp' => [ '', ], },
+                         'method'      => 'autotools',
+                         'require'     => [ File['python_config_site'], ],},
+      'zlib'         => {'url'         => 'http://zlib.net/zlib-1.2.8.tar.gz',
+                         'creates'     => 'lib/libz.a',
+                         'method'      => 'cmake',},
+      'bzip2-static' => {'url'         => 'http://www.bzip.org/1.0.6/bzip2-1.0.6.tar.gz',
+                         'creates'     => 'lib/libbz2.a',
+                         'method'      => 'make',},
+      'bzip2-shared' => {'url'         => 'http://www.bzip.org/1.0.6/bzip2-1.0.6.tar.gz',
+                         'creates'     => 'lib/libbz2.so',
+                         'args'        => { 'DarwinOp' => [ '-f Makefile-libbz2_so', ],
+                                            'NimbroOp' => [ '-f Makefile-libbz2_so', ], },
+                         'method'      => 'make',
+                         'require'     => [ Exec['correct_bzip2-shared_Makefile_07'], ],},
+      'xml2'         => {'url'         => 'http://xmlsoft.org/sources/libxml2-2.9.3.tar.gz',
+                         'args'        => { 'DarwinOp' => [ '--host=i686-linux-gnu', '--build=x86_64-unknown-linux-gnu', '--with-zlib=ZLIB_PATH', ],
+                                            'NimbroOp' => [ '--with-zlib=ZLIB_PATH', ], },
+                         'method'      => 'autotools',},
+      'protobuf'     => {'url'         => 'https://github.com/google/protobuf/releases/download/v3.0.0-beta-3/protobuf-python-3.0.0-beta-3.tar.gz',
+                         'args'        => { 'DarwinOp' => [ '--host=i686-linux-gnu', '--build=x86_64-unknown-linux-gnu', '--with-zlib', ],
+                                            'NimbroOp' => [ '--with-zlib', ], },
+                         'require'     => [ Installer['zlib'], ],
+                         'method'      => 'autotools',},
+      'nuclear'      => {'url'         => 'https://github.com/Fastcode/NUClear/archive/develop.tar.gz',
+                         'args'        => { 'DarwinOp' => [ '-DBUILD_TESTS=OFF', ],
+                                            'NimbroOp' => [ '-DBUILD_TESTS=OFF', ], },
+                         'method'      => 'cmake',},
+      # NOTE: OpenBLAS CMake support is experimental and only supports x86 at the moment.
+      'openblas'     => {'url'         => 'https://github.com/xianyi/OpenBLAS/archive/v0.2.18.tar.gz',
+                         'method'      => 'make',},
+      'libsvm'       => {'url'         => 'https://github.com/cjlin1/libsvm/archive/v321.tar.gz',
+                         'creates'     =>'lib/svm.o',
+                         'method'      => 'make',
+                         'require'     => [ File_line['correct_libsvm_Makefile_06'], ],},
+      'armadillo'    => {'url'         => 'https://downloads.sourceforge.net/project/arma/armadillo-7.200.2.tar.xz',
+                         'method'      => 'cmake',
+                         'creates'     => 'lib/libarmadillo.so',
+                         'require'     => [ Installer['openblas'], ],},
+      'tcmalloc'     => {'url'         => 'https://github.com/gperftools/gperftools/releases/download/gperftools-2.5/gperftools-2.5.tar.gz',
+                         'args'        => { 'DarwinOp' => [ '--host=i686-linux-gnu', '--build=x86_64-unknown-linux-gnu', '--with-tcmalloc-pagesize=64', '--enable-minimal', ],
+                                            'NimbroOp' => [ '--with-tcmalloc-pagesize=64', '--enable-minimal', ], },
+                         'creates'     => 'lib/libtcmalloc_minimal.a',
+                         'method'      => 'autotools',},
+      'yaml-cpp'     => {'url'         => 'https://github.com/jbeder/yaml-cpp/archive/master.tar.gz',
+                         'args'        => { 'DarwinOp' => [ '-DYAML_CPP_BUILD_CONTRIB=OFF', '-DYAML_CPP_BUILD_TOOLS=OFF', ],
+                                            'NimbroOp' => [ '-DYAML_CPP_BUILD_CONTRIB=OFF', '-DYAML_CPP_BUILD_TOOLS=OFF', ], },
+                         'method'      => 'cmake',},
+      'fftw3'        => {'url'         => 'http://www.fftw.org/fftw-3.3.4.tar.gz',
+                         'args'        => { 'DarwinOp' => [ '--host=i686-linux-gnu', '--build=x86_64-unknown-linux-gnu', '--disable-fortran', '--enable-shared', ],
+                                            'NimbroOp' => [ '--disable-fortran', '--enable-shared', ], },
+                         'method'      => 'autotools',},
+      'jpeg'         => {'url'         => 'http://downloads.sourceforge.net/project/libjpeg-turbo/1.4.2/libjpeg-turbo-1.4.2.tar.gz',
+                         'args'        => { 'DarwinOp' => [ '--host=i686-linux-gnu', '--build=x86_64-unknown-linux-gnu', 'CCASFLAGS="-f elf32"', ],
+                                            'NimbroOp' => [ 'CCASFLAGS="-f elf64"', ], },
+                         'method'      => 'autotools',},
+      'cppformat'    => {'url'         => 'https://github.com/cppformat/cppformat/archive/2.0.0.tar.gz',
+                         'method'      => 'cmake',},
+      'portaudio'    => {'url'         => 'http://www.portaudio.com/archives/pa_stable_v19_20140130.tgz',
+                         'args'        => { 'DarwinOp' => [ '--host=i686-linux-gnu', '--build=x86_64-unknown-linux-gnu', ],
+                                            'NimbroOp' => [ '', ], },
+                         'method'      => 'autotools',},
+      'rtaudio'      => {'url'         => 'http://www.music.mcgill.ca/~gary/rtaudio/release/rtaudio-4.1.1.tar.gz',
+                         'args'        => { 'DarwinOp' => [ '--host=i686-linux-gnu', '--build=x86_64-unknown-linux-gnu', ],
+                                               'NimbroOp' => [ '', ], },
+                         'method'      => 'autotools',},
+      'muparserx'    => {'url'         => 'https://github.com/beltoforion/muparserx/archive/v4.0.4.tar.gz',
+                         'method'      => 'cmake',},
+      'eigen3'       => {'url'         => 'http://bitbucket.org/eigen/eigen/get/3.2.7.tar.gz',
+                         'creates'     => 'include/eigen3/Eigen/Eigen',
+                         'method'      => 'cmake',},
+      'boost'        => {'url'         => 'http://downloads.sourceforge.net/project/boost/boost/1.59.0/boost_1_59_0.tar.gz',
+                         'args'        => { 'DarwinOp' => [ 'address-model=32', 'architecture=x86', 'link=static', ],
+                                            'NimbroOp' => [ 'address-model=64', 'architecture=x86', 'link=static', ], },
+                         'method'      => 'boost',
+                         'creates'     => 'lib/libboost_system.a',
+                         'require'     => [ Installer['python'], Installer['zlib'], Installer['bzip2-shared'], Installer['bzip2-static'], ],},
+      'mlpack'       => {'url'         => 'https://github.com/mlpack/mlpack/archive/mlpack-2.0.0.tar.gz',
+                         'args'        => { 'DarwinOp' => [ '-DLAPACK_LIBRARY=PREFIX/lib/libopenblas.so', '-DBLAS_LIBRARY=PREFIX/lib/libopenblas.so', ],
+                                            'NimbroOp' => [ '-DLAPACK_LIBRARY=PREFIX/lib/libopenblas.so', '-DBLAS_LIBRARY=PREFIX/lib/libopenblas.so', ], },
+                         'require'     => [ Installer['armadillo'], Installer['boost'], Installer['xml2'], ],
+                         'creates'     => 'lib/libmlpack.so',
+                         'method'      => 'cmake',},
+      'espeak'       => {'url'         => 'http://sourceforge.net/projects/espeak/files/espeak/espeak-1.48/espeak-1.48.04-source.zip',
+                         'src_dir'     => 'espeak-1.48.04-source/src',
+                         'prebuild'    => 'cp portaudio19.h portaudio.h',
+                         'method'      => 'make',
+                         'require'     => [ File_line['correct_espeak_Makefile'], Installer['portaudio'] ]},
+  }
+
+  file { 'python_config_site':
+    path    => "/nubots/toolchain/src/python/config.site",
+    ensure  => present,
+    content => "ac_cv_file__dev_ptmx=no
+                ac_cv_file__dev_ptc=no",
+    require => [ Archive['python'], ],
+  }
+
+  # Correct CXXFLAGS definition in eSpeak Makefile to firstly append to CXXFLAGS and to allow narrowing conversions to be treated as warnings.
+  file_line { 'correct_espeak_Makefile':
+    path    => '/nubots/toolchain/src/espeak/espeak-1.48.04-source/src/Makefile',
+    match   => '^CXXFLAGS=-O2',
+    line    => 'CXXFLAGS += -Wno-error=narrowing',
+    ensure  => present,
+    require => [ Archive['espeak'], ],
+  }
+
+  # Append an install target to the bzip2-shared Makefile.
+  file_line { 'correct_bzip2-shared_Makefile_00':
+    path    => '/nubots/toolchain/src/bzip2-shared/Makefile-libbz2_so',
+    line    => 'PREFIX=/usr/local',
+    require => [ Archive['bzip2-shared'], ],
+  } ~>
+  file_line { 'correct_bzip2-shared_Makefile_01':
+    path    => '/nubots/toolchain/src/bzip2-shared/Makefile-libbz2_so',
+    line    => 'install: all'
+  } ~>
+  file_line { 'correct_bzip2-shared_Makefile_02':
+    path    => '/nubots/toolchain/src/bzip2-shared/Makefile-libbz2_so',
+    line    => "\ttest -d $(PREFIX) || mkdir -p $(PREFIX)",
+  } ~>
+  file_line { 'correct_bzip2-shared_Makefile_03':
+    path    => '/nubots/toolchain/src/bzip2-shared/Makefile-libbz2_so',
+    line    => "\ttest -d $(PREFIX)/lib || mkdir -p $(PREFIX)/lib",
+  } ~>
+  file_line { 'correct_bzip2-shared_Makefile_04':
+    path    => '/nubots/toolchain/src/bzip2-shared/Makefile-libbz2_so',
+    line    => "\tinstall -m 0755 libbz2.so.1.0.6 $(PREFIX)/lib",
+  } ~>
+  file_line { 'correct_bzip2-shared_Makefile_05':
+    path    => '/nubots/toolchain/src/bzip2-shared/Makefile-libbz2_so',
+    line    => "\tln -s $(PREFIX)/lib/libbz2.so.1.0.6 $(PREFIX)/lib/libbz2.so.1.0",
+  } ~>
+  file_line { 'correct_bzip2-shared_Makefile_06':
+    path    => '/nubots/toolchain/src/bzip2-shared/Makefile-libbz2_so',
+    line    => "\tln -s $(PREFIX)/lib/libbz2.so.1.0.6 $(PREFIX)/lib/libbz2.so",
+  } ~>
+  exec { 'correct_bzip2-shared_Makefile_07':
+    command => "sed -i 's/\$(CC) -shared/\$(CC) \$(CFLAGS) -shared/' Makefile-libbz2_so",
+    cwd     => '/nubots/toolchain/src/bzip2-shared',
+    path    =>  [ '/nubots/toolchain/bin', '/usr/local/bin', '/usr/local/sbin/', '/usr/bin/', '/usr/sbin/', '/bin/', '/sbin/' ],
+  }
+
+  # Append an install target to the libsvm Makefile.
+  file_line { 'correct_libsvm_Makefile_00':
+    path    => '/nubots/toolchain/src/libsvm/Makefile',
+    line    => 'PREFIX=/usr/local',
+    require => [ Archive['libsvm'], ],
+  } ~>
+  file_line { 'correct_libsvm_Makefile_01':
+    path    => '/nubots/toolchain/src/libsvm/Makefile',
+    line    => 'install: all'
+  } ~>
+  file_line { 'correct_libsvm_Makefile_02':
+    path    => '/nubots/toolchain/src/libsvm/Makefile',
+    line    => "\ttest -d $(PREFIX) || mkdir -p $(PREFIX)",
+  } ~>
+  file_line { 'correct_libsvm_Makefile_03':
+    path    => '/nubots/toolchain/src/libsvm/Makefile',
+    line    => "\ttest -d $(PREFIX)/include || mkdir -p $(PREFIX)/include",
+  } ~>
+  file_line { 'correct_libsvm_Makefile_04':
+    path    => '/nubots/toolchain/src/libsvm/Makefile',
+    line    => "\ttest -d $(PREFIX)/lib || mkdir -p $(PREFIX)/lib",
+  } ~>
+  file_line { 'correct_libsvm_Makefile_05':
+    path    => '/nubots/toolchain/src/libsvm/Makefile',
+    line    => "\tinstall -m 0644 svm.h $(PREFIX)/include",
+  } ~>
+  file_line { 'correct_libsvm_Makefile_06':
+    path    => '/nubots/toolchain/src/libsvm/Makefile',
+    line    => "\tinstall -m 0755 svm.o $(PREFIX)/lib",
   }
 
   # Download each archive and spawn Installers for each one.
   $archives.each |String $archive,
                   Struct[{'url' => String,
                           Optional['creates'] => String,
-                          Optional['args'] => Array[String, 1, default],
+                          Optional['args'] => Hash,
                           Optional['require'] => Tuple[Any, 1, default],
-                          Optional['method'] => String,
+                          'method' => String,
                           Optional['src_dir'] => String,
                           Optional['prebuild'] => String,
                           Optional['postbuild'] => String}] $params| {
@@ -126,12 +256,13 @@ node nubotsvmbuild {
           timeout          => 0,
           extension        => $extension,
           strip_components => 1,
+          root_dir         => '.',
           require          => [ Class['installer::prerequisites'], Class['dev_tools'], ],
-        } ~>
+        }
         installer { "${archive}":
           archs       => $archs,
           creates     => $params['creates'],
-          require     => $params['require'],
+          require     => delete_undef_values(flatten([ Archive["${archive}"], $params['require'], Class['installer::prerequisites'], Class['dev_tools'], ])),
           args        => $params['args'],
           src_dir     => $params['src_dir'],
           prebuild    => $params['prebuild'],
@@ -149,39 +280,57 @@ node nubotsvmbuild {
     url       => 'https://raw.githubusercontent.com/philsquared/Catch/master/single_include/catch.hpp',
     archs     => $archs,
     extension => 'hpp',
+    method    => 'wget',
   }
 
   # Perform any complicated postbuild instructions here.
   $archs.each |String $arch, Hash $params| {
-    # Find the correct ABI (for libsvm).
-    if $params['abi'] == 64 {
-      $abi = $params['abi']
-    }
-
-    else {
-      $abi = ''
-    }
-
     # Update the armadillo config header file for all archs.
     file { "armadillo_${arch}_config":
-        path    => "/nubots/toolchain/${arch}/include/armadillo_bits/config.hpp",
-        source  => 'puppet:///modules/files/nubots/toolchain/include/armadillo_bits/config.hpp',
-        ensure  => present,
-        require => [ Installer['armadillo'], ],
+      path    => "/nubots/toolchain/${arch}/include/armadillo_bits/config.hpp",
+      source  => 'puppet:///modules/files/nubots/toolchain/include/armadillo_bits/config.hpp',
+      ensure  => present,
+      require => [ Installer['armadillo'], ],
     }
+  }
 
-    # Copy the libsvm header and library to their correct locations.
-    file { "svm_${arch}_include_postbuild":
-        path    => "/nubots/toolchain/${arch}/include/svm.h",
-        source  => "/nubots/toolchain/${arch}/src/libsvm/svm.h",
-        ensure  => present,
-        require => [ Installer['libsvm'], ],
-    }
-    file { "svm_${arch}_lib_postbuild":
-        path    => "/nubots/toolchain/${arch}/lib${abi}/svm.o",
-        source  => "/nubots/toolchain/${arch}/src/libsvm/svm.o",
-        ensure  => present,
-        require => [ Installer['libsvm'], ],
+  # After we have installed, create the CMake toolchain files and then build our deb.
+  Installer <| |> ~> class { 'toolchain_deb': }
+
+  $archs.each |String $arch, Hash $params| {
+    # Create CMake toolchain files.
+    $compile_options = join(prefix(suffix($params['flags'], ')'), 'add_compile_options('), "\n")
+    $compile_params = join($params['params'], " ")
+
+    file { "${arch}.cmake":
+      content  => "
+set(CMAKE_SYSTEM_NAME Linux)
+
+set(CMAKE_C_COMPILER /usr/bin/gcc)
+set(CMAKE_CXX_COMPILER /usr/bin/g++)
+
+set(CMAKE_FIND_ROOT_PATH \"/nubots/toolchain/${arch}\"
+       \"/nubots/toolchain\"
+       \"/usr/local\"
+       \"/usr\")
+set(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM NEVER)
+set(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY ONLY)
+set(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE ONLY)
+set(CMAKE_FIND_ROOT_PATH_MODE_PACKAGE ONLY)
+
+${compile_options}
+
+set(CMAKE_C_FLAGS \"\${CMAKE_C_FLAGS} ${compile_params}\" CACHE STRING \"\" FORCE)
+set(CMAKE_CXX_FLAGS \"\${CMAKE_CXX_FLAGS} ${compile_params}\" CACHE STRING \"\" FORCE)
+
+set( ENV{LD_LIBRARY_PATH} \"/nubots/toolchain/${arch}\")
+set( ENV{PATH} \"/nubots/toolchain/${arch}/bin:/nubots/toolchain/bin:\$ENV{PATH}\")
+set( ENV{PKG_CONFIG_PATH} \"/nubots/toolchain/${arch}/lib/pkgconfig\")
+set( ENV{CMAKE_PREFIX_PATH} \"/nubots/toolchain/${arch}\")
+",
+      ensure   => present,
+      path     => "/nubots/toolchain/${arch}.cmake",
+      before   => Class['toolchain_deb'],
     }
   }
 }
