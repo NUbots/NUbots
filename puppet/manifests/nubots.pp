@@ -14,8 +14,8 @@ node nubotsvm {
     destination => "/root/nubots-toolchain${toolchain_version}.deb",
     source => "http://nubots.net/debs/nubots-toolchain${toolchain_version}.deb",
     timeout => 0,
-  }
-  -> package { 'nubots-toolchain':
+  } ->
+  package { 'nubots-toolchain':
     provider => 'dpkg',
     ensure => 'latest',
     source => "/root/nubots-toolchain${toolchain_version}.deb",
@@ -299,18 +299,19 @@ node nubotsvmbuild {
 
   $archs.each |String $arch, Hash $params| {
     # Create CMake toolchain files.
+    $prefix          = '/nubots/toolchain'
     $compile_options = join(prefix(suffix($params['flags'], ')'), 'add_compile_options('), "\n")
-    $compile_params = join($params['params'], " ")
+    $compile_params  = join($params['params'], " ")
 
     file { "${arch}.cmake":
-      content  => "
-set(CMAKE_SYSTEM_NAME Linux)
+      content =>
+"set(CMAKE_SYSTEM_NAME Linux)
 
 set(CMAKE_C_COMPILER /usr/bin/gcc)
 set(CMAKE_CXX_COMPILER /usr/bin/g++)
 
-set(CMAKE_FIND_ROOT_PATH \"/nubots/toolchain/${arch}\"
-       \"/nubots/toolchain\"
+set(CMAKE_FIND_ROOT_PATH \"${prefix}/${arch}\"
+       \"${prefix}\"
        \"/usr/local\"
        \"/usr\")
 set(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM NEVER)
@@ -322,15 +323,24 @@ ${compile_options}
 
 set(CMAKE_C_FLAGS \"\${CMAKE_C_FLAGS} ${compile_params}\" CACHE STRING \"\" FORCE)
 set(CMAKE_CXX_FLAGS \"\${CMAKE_CXX_FLAGS} ${compile_params}\" CACHE STRING \"\" FORCE)
-
-set( ENV{LD_LIBRARY_PATH} \"/nubots/toolchain/${arch}\")
-set( ENV{PATH} \"/nubots/toolchain/${arch}/bin:/nubots/toolchain/bin:\$ENV{PATH}\")
-set( ENV{PKG_CONFIG_PATH} \"/nubots/toolchain/${arch}/lib/pkgconfig\")
-set( ENV{CMAKE_PREFIX_PATH} \"/nubots/toolchain/${arch}\")
 ",
-      ensure   => present,
-      path     => "/nubots/toolchain/${arch}.cmake",
-      before   => Class['toolchain_deb'],
+      ensure  => present,
+      path    => "${prefix}/${arch}.cmake",
+      before  => Class['toolchain_deb'],
+    }
+
+    # Ensure toolchain initialisation functions are generated.
+    file { "${arch}_toolchain_init.sh":
+      content =>
+"function ${arch} {
+    export LD_LIBRARY_PATH=\"${prefix}/${arch}/lib\"
+    export PATH=\"${prefix}/${arch}/bin:${prefix}/bin:/usr/local/bin:/usr/local/sbin:/usr/sbin:/usr/bin:/sbin:/bin\"
+    export PKG_CONFIG_PATH=\"${prefix}/${arch}/lib/pkgconfig\"
+    export CMAKE_PREFIX_PATH=\"${prefix}/${arch}\"
+}",
+      ensure  => present,
+      path    => "/etc/profile.d/${arch}_toolchain_init.sh",
+      before  => Class['toolchain_deb'],
     }
   }
 }
