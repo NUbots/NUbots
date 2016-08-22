@@ -53,7 +53,7 @@ def run(path, **kwargs):
     print '\t', config_path
 
     # Split our provided path
-    parts = path.split('/')
+    parts = ['module'] + os.path.relpath(path, module_path).split('/')
 
     print 'Generating files'
 

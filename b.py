@@ -51,11 +51,6 @@ if __name__ == "__main__":
     print "\tBinary:", cmake_cache[cmake_cache["CMAKE_PROJECT_NAME"] + '_BINARY_DIR']
     print
 
-    # print cmake_cache["NUCLEAR_MODULE_DIR"]
-    # print cmake_cache["NUCLEAR_UTILITY_DIR"]
-    # print cmake_cache["NUCLEAR_EXTENSION_DIR"]
-    # print cmake_cache["NUCLEAR_MESSAGE_DIR"]
-
     # Add our builtin tools to the path and user tools
     sys.path.append(nuclear_tools_path)
     sys.path.append(user_tools_path)
