@@ -47,9 +47,9 @@ class dev_tools {
   package { 'flex': ensure => latest, }
   package { 'pkg-config': ensure => latest, }
   package { 'zlib1g-dev': ensure => latest, }
-  package { 'libglib2.0-dev': ensure => latest, }
   package { 'autoconf': ensure => latest, }
   package { 'libtool': ensure => latest, }
+  package { 'libglib2.0-dev': ensure => latest, }
 
   # Set the vagrant shell to zsh
   user { 'vagrant': shell => '/bin/zsh', require => Package['zsh'], }
@@ -106,13 +106,6 @@ class dev_tools {
     path   => '/home/vagrant/.zpreztorc',
     match  => '  \'prompt\'',
     line   => "  \'git\' \'command-not-found\' \'prompt\'",
-  }
-
-  # Load environment variables for the toolchain in zsh
-  file_line { 'zsh_toolchain_environment':
-    ensure => present,
-    path   => '/home/vagrant/.zshrc',
-    line   => 'source /etc/profile.d/toolchain_init.sh',
   }
 
   # System libraries

@@ -111,7 +111,7 @@ node nubotsvmbuild {
                          'method'      => 'autotools',},
       'rtaudio'      => {'url'         => 'http://www.music.mcgill.ca/~gary/rtaudio/release/rtaudio-4.1.1.tar.gz',
                          'args'        => { 'DarwinOp' => [ '--host=i686-linux-gnu', '--build=x86_64-unknown-linux-gnu', ],
-                                               'NimbroOp' => [ '', ], },
+                                            'NimbroOp' => [ '', ], },
                          'method'      => 'autotools',},
       'muparserx'    => {'url'         => 'https://github.com/beltoforion/muparserx/archive/v4.0.4.tar.gz',
                          'method'      => 'cmake',},
@@ -137,6 +137,7 @@ node nubotsvmbuild {
                          'require'     => [ File_line['correct_espeak_Makefile'], Installer['portaudio'] ]},
   }
 
+  # Create config.site for cross-compiling (64 bit host, 32 bit target) python.
   file { 'python_config_site':
     path    => "/nubots/toolchain/src/python/config.site",
     ensure  => present,
@@ -321,6 +322,9 @@ set(CMAKE_FIND_ROOT_PATH_MODE_PACKAGE ONLY)
 
 ${compile_options}
 
+include_directories(SYSTEM \"${prefix}/${arch}/include\")
+include_directories(SYSTEM \"${prefix}/include\")
+
 set(CMAKE_C_FLAGS \"\${CMAKE_C_FLAGS} ${compile_params}\" CACHE STRING \"\" FORCE)
 set(CMAKE_CXX_FLAGS \"\${CMAKE_CXX_FLAGS} ${compile_params}\" CACHE STRING \"\" FORCE)
 ",
@@ -332,14 +336,12 @@ set(CMAKE_CXX_FLAGS \"\${CMAKE_CXX_FLAGS} ${compile_params}\" CACHE STRING \"\" 
     # Ensure toolchain initialisation functions are generated.
     file { "${arch}_toolchain_init.sh":
       content =>
-"function ${arch} {
-    export LD_LIBRARY_PATH=\"${prefix}/${arch}/lib\"
-    export PATH=\"${prefix}/${arch}/bin:${prefix}/bin:/usr/local/bin:/usr/local/sbin:/usr/sbin:/usr/bin:/sbin:/bin\"
-    export PKG_CONFIG_PATH=\"${prefix}/${arch}/lib/pkgconfig\"
-    export CMAKE_PREFIX_PATH=\"${prefix}/${arch}\"
-}",
+"export LD_LIBRARY_PATH=\"${prefix}/${arch}/lib\"
+ export PATH=\"${prefix}/${arch}/bin:${prefix}/bin:/usr/local/bin:/usr/local/sbin:/usr/sbin:/usr/bin:/sbin:/bin\"
+ export PKG_CONFIG_PATH=\"${prefix}/${arch}/lib/pkgconfig\"
+ export CMAKE_PREFIX_PATH=\"${prefix}/${arch}\"",
       ensure  => present,
-      path    => "/etc/profile.d/${arch}_toolchain_init.sh",
+      path    => "${prefix}/${arch}_toolchain_init.sh",
       before  => Class['toolchain_deb'],
     }
   }
