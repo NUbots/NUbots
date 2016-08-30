@@ -70,7 +70,8 @@ IF(protobufs)
     ENDFOREACH()
 
     # The protobuf files are generated
-    SET_SOURCE_FILES_PROPERTIES(${proto_src} ${proto_h} PROPERTIES GENERATED TRUE)
+    SET_SOURCE_FILES_PROPERTIES(${proto_src} ${proto_h} PROPERTIES GENERATED TRUE
+                                                                   COMPILE_FLAGS -Wno-effc++)
 
     # Add the protocol buffers in with our source
     SET(src ${src} ${proto_src} ${proto_h})

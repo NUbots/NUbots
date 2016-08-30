@@ -157,7 +157,8 @@ FOREACH(proto ${protobufs})
                                 "${outputpath}/${file_we}.pb.h"
                                 "${outputpath}/${file_we}.cpp"
                                 "${outputpath}/${file_we}.h"
-                                 PROPERTIES GENERATED TRUE)
+                                 PROPERTIES GENERATED TRUE
+                                            COMPILE_FLAGS -Wno-effc++)
 
     # Add the generated files to our list
     SET(src ${src}
