@@ -43,7 +43,6 @@ class dev_tools {
   # For ELLCC
   package { 'subversion': ensure => latest, }
   package { 'texinfo': ensure => latest, }
-  package { 'byacc': ensure => latest, }
   package { 'flex': ensure => latest, }
   package { 'pkg-config': ensure => latest, }
   package { 'zlib1g-dev': ensure => latest, }
