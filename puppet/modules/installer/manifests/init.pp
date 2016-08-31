@@ -199,8 +199,7 @@ define installer (
           onlyif      => "test \"${method}\" = \"autotools\" ",
           command     => "${prebuild} &&
                           if [ -e \"autogen.sh\" ]; then ./autogen.sh ; fi &&
-                          if [ -e \"config.site\" ]; then CONFIG_SITE=config.site ./configure ${args_str} --prefix=\"${prefix}/${arch}\" ;
-                          else ./configure ${args_str} --prefix=\"${prefix}/${arch}\" ; fi &&
+                          ./configure ${args_str} --prefix=\"${prefix}/${arch}\" &&
                           make -j\$(nproc) &&
                           make install &&
                           ${postbuild}",
@@ -236,7 +235,7 @@ define installer (
           creates     => "${create}",
           onlyif      => "test \"${method}\" = \"boost\" ",
           command     => "${prebuild} &&
-                          ./bootstrap.sh --prefix=\"${prefix}/${arch}\" --with-python-root=\"${prefix}/${arch}\" &&
+                          ./bootstrap.sh --prefix=\"${prefix}/${arch}\" --without-libraries=python &&
                           ./bjam include=\"${prefix}/${arch}/include\" library-path=\"${prefix}/${arch}/lib\" ${args_str} -j\$(nproc) -q \\
                                 cflags=\"${flags}\" cxxflags=\"${flags}\" linkflags=\"${linkflags}\" &&
                           ./bjam install &&
