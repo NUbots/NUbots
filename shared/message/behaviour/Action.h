@@ -22,6 +22,7 @@
 
 #include <nuclear>
 #include "message/input/LimbID.h"
+#include <functional>
 
 namespace message {
     namespace behaviour {
