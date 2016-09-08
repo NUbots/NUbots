@@ -19,11 +19,6 @@
 
 #include "KinematicsConfiguration.h"
 
-#include "utility/support/yaml_armadillo.h"
-#include "utility/support/yaml_expression.h"
-
-#include "message/motion/KinematicsModels.h"
-
 namespace module {
 namespace motion {
 

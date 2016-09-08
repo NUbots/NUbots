@@ -41,7 +41,7 @@ namespace motion
     using message::support::Configuration;
 
     using utility::support::Expression;
-    using utility::motion::kinematics::DarwinModel;
+    using message::motion::kinematics::KinematicsModel;
     using utility::math::matrix::Transform2D;
     using utility::math::matrix::Transform3D;
     using utility::nubugger::graph;
@@ -49,7 +49,25 @@ namespace motion
 //      NUCLEAR METHOD: FootMotionPlanner
 /*=======================================================================================================*/
     FootMotionPlanner::FootMotionPlanner(std::unique_ptr<NUClear::Environment> environment)
-    : Reactor(std::move(environment)) 
+    : Reactor(std::move(environment))
+        , DEBUG(false), DEBUG_ITER(0), initialStep(0)
+        , balanceEnabled(0.0), emitLocalisation(false), emitFootPosition(false)
+        , updateHandle(), subsumptionId(1)
+        , leftFootPositionTransform(), leftFootSource(), rightFootPositionTransform()
+        , rightFootSource(), leftFootDestination(), rightFootDestination(), uSupportMass()
+        , activeForwardLimb(), activeLimbInitial(LimbID::LEFT_LEG)
+        , bodyTilt(0.0), bodyHeight(0.0), stanceLimitY2(0.0), stepTime(0.0), stepHeight(0.0)
+        , step_height_slow_fraction(0.0f), step_height_fast_fraction(0.0f)
+        , stepLimits(arma::fill::zeros), footOffset(arma::fill::zeros), uLRFootOffset()
+        , beginStepTime(0.0), lastVeloctiyUpdateTime()
+        , velocityHigh(0.0), accelerationTurningFactor(0.0), velocityLimits(arma::fill::zeros)
+        , accelerationLimits(arma::fill::zeros), accelerationLimitsHigh(arma::fill::zeros)
+        , velocityCurrent(), velocityCommand()
+        , zmpCoefficients(arma::fill::zeros), zmpParameters(arma::fill::zeros)
+        , zmpTime(0.0), phase1Single(0.0), phase2Single(0.0)
+        , kinematicsModel()
+        , lastFootGoalRotation(), footGoalErrorSum() 
+        , startFromStep(false), updateStepInstruction(false), destinationTime(0)
     {    	
         //Configure foot motion planner...
         on<Configuration>("FootMotionPlanner.yaml").then("Foot Motion Planner - Configure", [this] (const Configuration& config) 
@@ -59,7 +77,7 @@ namespace motion
 
         //Transform analytical foot positions in accordance with the stipulated targets...
         updateHandle = on<Every<1 /*RESTORE AFTER DEBUGGING: UPDATE_FREQUENCY*/, Per<std::chrono::seconds>>, With<Sensors>, Single, Priority::HIGH>()
-        .then("Foot Motion Planner - Update Foot Position", [this](const Sensors& sensors) 
+        .then("Foot Motion Planner - Update Foot Position", [this](/*const Sensors& sensors*/) 
         {
             if(DEBUG) { NUClear::log("Messaging: Foot Motion Planner - Update Foot Position(0)"); }
             updateFootPosition(getMotionPhase(), getLeftFootDestination(), getRightFootDestination());
@@ -106,14 +124,14 @@ namespace motion
         // Active right foot position
         Transform2D rightFootPositionTransform;
         //Instantiate unitless phases for x(=0), y(=1) and z(=2) foot motion...
-        arma::vec3 footPhases = footPhase(phase, phase1Single, phase2Single);
+        arma::vec3 getFootPhases = getFootPhase(phase, phase1Single, phase2Single);
 
         //Lift foot by amount depending on walk speed
-        if(DEBUG) { NUClear::log("Messaging: Foot Motion Planner - footPhase limits and calculations"); }
+        if(DEBUG) { NUClear::log("Messaging: Foot Motion Planner - getFootPhase limits and calculations"); }
         auto& limit = (velocityCurrent.x() > velocityHigh ? accelerationLimitsHigh : accelerationLimits); // TODO: use a function instead
         float speed = std::min(1.0, std::max(std::abs(velocityCurrent.x() / limit[0]), std::abs(velocityCurrent.y() / limit[1])));
         float scale = (step_height_fast_fraction - step_height_slow_fraction) * speed + step_height_slow_fraction;
-        footPhases[2] *= scale;
+        getFootPhases[2] *= scale;
 
         std::cout << "\n\rLeft  Foot:" << leftFootPositionTransform << "\n\rRight Foot:"  << rightFootPositionTransform << "\n\r";  //debugging
 
@@ -122,12 +140,12 @@ namespace motion
         if (getActiveForwardLimb() == LimbID::RIGHT_LEG) 
         {
             //Vector field function??
-            rightFootPositionTransform = getRightFootSource().interpolate(footPhases[0], rightFootDestination);
+            rightFootPositionTransform = getRightFootSource().interpolate(getFootPhases[0], rightFootDestination);
         }
         else
         {
             //Vector field function??
-            leftFootPositionTransform  = getLeftFootSource().interpolate(footPhases[0],   leftFootDestination);
+            leftFootPositionTransform  = getLeftFootSource().interpolate(getFootPhases[0],   leftFootDestination);
         }
         
         if(DEBUG) { NUClear::log("Messaging: Foot Motion Planner - Instantiate FootLocal Variables"); }
@@ -141,11 +159,11 @@ namespace motion
         //Lift swing leg - manipulate(update) z component of foot position to action movement with a varying altitude locus...
         if (getActiveForwardLimb() == LimbID::RIGHT_LEG) 
         {
-            rightFootLocal = rightFootLocal.translateZ(stepHeight * footPhases[2]);
+            rightFootLocal = rightFootLocal.translateZ(stepHeight * getFootPhases[2]);
         }
         else
         {
-            leftFootLocal  = leftFootLocal.translateZ(stepHeight  * footPhases[2]);
+            leftFootLocal  = leftFootLocal.translateZ(stepHeight  * getFootPhases[2]);
         }     
 
         std::cout << "\n\rLeft  Foot:" << leftFootLocal << "\n\rRight Foot:"  << rightFootLocal << "\n\rPhase:" << phase << "\n\r"; //debugging 
@@ -161,9 +179,9 @@ namespace motion
         emit(std::make_unique<FootMotionUpdate>(phase, leftFootLocal, rightFootLocal));
     }
 /*=======================================================================================================*/
-//      METHOD: footPhase
+//      METHOD: getFootPhase
 /*=======================================================================================================*/
-    arma::vec3 FootMotionPlanner::footPhase(double phase, double phase1Single, double phase2Single) 
+    arma::vec3 FootMotionPlanner::getFootPhase(double phase, double phase1Single, double phase2Single) 
     {
         // Computes relative x,z motion of foot during single support phase
         // phSingle = 0: x=0, z=0, phSingle = 1: x=1,z=0
@@ -197,72 +215,56 @@ namespace motion
         destinationTime = inDestinationTime;
     }
 /*=======================================================================================================*/
-/*      ENCAPSULATION METHOD: getLeftFootSource
+//      ENCAPSULATION METHOD: getLeftFootSource
 /*=======================================================================================================*/
     Transform2D FootMotionPlanner::getLeftFootSource()
     {
         return (leftFootSource);
     }
 /*=======================================================================================================*/
-/*      ENCAPSULATION METHOD: setLeftFootSource
+//      ENCAPSULATION METHOD: setLeftFootSource
 /*=======================================================================================================*/
     void FootMotionPlanner::setLeftFootSource(const Transform2D& inLeftFootSource)
     {
         leftFootSource = inLeftFootSource;
     }
 /*=======================================================================================================*/
-/*      ENCAPSULATION METHOD: getRightFootSource
+//      ENCAPSULATION METHOD: getRightFootSource
 /*=======================================================================================================*/
     Transform2D FootMotionPlanner::getRightFootSource()
     {
         return (rightFootSource);
     }
 /*=======================================================================================================*/
-/*      ENCAPSULATION METHOD: setRightFootSource
+//      ENCAPSULATION METHOD: setRightFootSource
 /*=======================================================================================================*/
     void FootMotionPlanner::setRightFootSource(const Transform2D& inRightFootSource)
     {
         rightFootSource = inRightFootSource;
     }
 /*=======================================================================================================*/
-/*      ENCAPSULATION METHOD: getLeftFootDestination
+//      ENCAPSULATION METHOD: getLeftFootDestination
 /*=======================================================================================================*/
     Transform2D FootMotionPlanner::getLeftFootDestination()
     {
         return (leftFootDestination.front());
     }
 /*=======================================================================================================*/
-/*      ENCAPSULATION METHOD: setLeftFootDestination
+//      ENCAPSULATION METHOD: setLeftFootDestination
 /*=======================================================================================================*/
     void FootMotionPlanner::setLeftFootDestination(const Transform2D& inLeftFootDestination)
     {
         leftFootDestination.push(inLeftFootDestination);
     }
-<<<<<<< 10dc0520add22a7f4f7ad7e432ea63bdcaef581f
-<<<<<<< f10da9c4b0232f8ba743f03d26325ddc863f1f48
-<<<<<<< cdf96fbdd5a07a2529fcd01d4c07dd1dfe64510f
-=======
->>>>>>> Message Headers, emit structs, and further encapsulation of
-    /*=======================================================================================================*/
-    //      NAME: getRightFootDestination
-    /*=======================================================================================================*/
-    /*
-     *      @input  : <TODO: INSERT DESCRIPTION>
-     *      @output : <TODO: INSERT DESCRIPTION>
-     *      @pre-condition  : <TODO: INSERT DESCRIPTION>
-     *      @post-condition : <TODO: INSERT DESCRIPTION>
-    */
-=======
 /*=======================================================================================================*/
-/*      ENCAPSULATION METHOD: getRightFootDestination
+//      ENCAPSULATION METHOD: getRightFootDestination
 /*=======================================================================================================*/
->>>>>>> Documentation Changes to Foot Motion Planner
     Transform2D FootMotionPlanner::getRightFootDestination()
     {
         return (rightFootDestination.front());
     }
 /*=======================================================================================================*/
-/*      ENCAPSULATION METHOD: setRightFootDestination
+//      ENCAPSULATION METHOD: setRightFootDestination
 /*=======================================================================================================*/
     void FootMotionPlanner::setRightFootDestination(const Transform2D& inRightFootDestination)
     {
@@ -324,61 +326,15 @@ namespace motion
         emitLocalisation = config["emit_localisation"].as<bool>();
         emitFootPosition = config["emit_foot_position"].as<bool>();
 
-<<<<<<< 98fb8c92f4155568ba3378095590c40273990270
-        return {xf, phaseSingle, zf};
-    }
-<<<<<<< f10da9c4b0232f8ba743f03d26325ddc863f1f48
-=======
-
->>>>>>> Added messages between modules
-=======
->>>>>>> Message Headers, emit structs, and further encapsulation of
-    /*=======================================================================================================*/
-    //      NAME: updateFootPosition
-    /*=======================================================================================================*/
-    /*
-     *      @input  : <TODO: INSERT DESCRIPTION>
-     *      @output : <TODO: INSERT DESCRIPTION>
-     *      @pre-condition  : <TODO: INSERT DESCRIPTION>
-     *      @post-condition : <TODO: INSERT DESCRIPTION>
-    */
-    void FootMotionPlanner::updateFootPosition(double phase, auto leftFootDestination, auto rightFootDestination) 
-    {
-        //Instantiate unitless phases for x(=0), y(=1) and z(=2) foot motion...
-        arma::vec3 footPhases = footPhase(phase, phase1Single, phase2Single);
-=======
         auto& stance = config["stance"];
         bodyHeight = stance["body_height"].as<Expression>();
         bodyTilt = stance["body_tilt"].as<Expression>();
-        qLArmStart = stance["arms"]["left"]["start"].as<arma::vec>();
-        qLArmEnd = stance["arms"]["left"]["end"].as<arma::vec>();
-        qRArmStart = stance["arms"]["right"]["start"].as<arma::vec>();
-        qRArmEnd = stance["arms"]["right"]["end"].as<arma::vec>();
         footOffset = stance["foot_offset"].as<arma::vec>();
-        // gToe/heel overlap checking values
-        stanceLimitY2 = DarwinModel::Leg::LENGTH_BETWEEN_LEGS - stance["limit_margin_y"].as<Expression>();
->>>>>>> Debugging for compilation of FootMotionPlanner
-
-        auto& gains = stance["gains"];
-        gainArms = gains["arms"].as<Expression>();
-        gainLegs = gains["legs"].as<Expression>();
-
-        for(ServoID i = ServoID(0); i < ServoID::NUMBER_OF_SERVOS; i = ServoID(int(i)+1))
-        {
-            if(int(i) < 6)
-            {
-                jointGains[i] = gainArms;
-            } 
-            else 
-            {
-                jointGains[i] = gainLegs;
-            }
-        }
+        stanceLimitY2 = kinematicsModel.Leg.LENGTH_BETWEEN_LEGS() - stance["limit_margin_y"].as<Expression>();
 
         auto& walkCycle = config["walk_cycle"];
         stepTime = walkCycle["step_time"].as<Expression>();
         zmpTime = walkCycle["zmp_time"].as<Expression>();
-        hipRollCompensation = walkCycle["hip_roll_compensation"].as<Expression>();
         stepHeight = walkCycle["step"]["height"].as<Expression>();
         stepLimits = walkCycle["step"]["limits"].as<arma::mat::fixed<3,2>>();
 
@@ -399,44 +355,6 @@ namespace motion
 
         auto& balance = walkCycle["balance"];
         balanceEnabled = balance["enabled"].as<bool>();
-        // balanceAmplitude = balance["amplitude"].as<Expression>();
-        // balanceWeight = balance["weight"].as<Expression>();
-        // balanceOffset = balance["offset"].as<Expression>();
-
-        balancer.configure(balance);
-
-        for(auto& gain : balance["servo_gains"])
-        {
-            float p = gain["p"].as<Expression>();
-            ServoID sr = message::input::idFromPartialString(gain["id"].as<std::string>(),message::input::ServoSide::RIGHT);
-            ServoID sl = message::input::idFromPartialString(gain["id"].as<std::string>(),message::input::ServoSide::LEFT);
-            servoControlPGains[sr] = p;
-            servoControlPGains[sl] = p;
-        }
-        /* TODO
-        // gCompensation parameters
-        toeTipCompensation = config["toeTipCompensation"].as<Expression>();
-        ankleMod = {-toeTipCompensation, 0};
-
-        // gGyro stabilization parameters
-        ankleImuParamX = config["ankleImuParamX"].as<arma::vec>();
-        ankleImuParamY = config["ankleImuParamY"].as<arma::vec>();
-        kneeImuParamX = config["kneeImuParamX"].as<arma::vec>();
-        hipImuParamY = config["hipImuParamY"].as<arma::vec>();
-        armImuParamX = config["armImuParamX"].as<arma::vec>();
-        armImuParamY = config["armImuParamY"].as<arma::vec>();
-
-        // gSupport bias parameters to reduce backlash-based instability
-        velFastForward = config["velFastForward"].as<Expression>();
-        velFastTurn = config["velFastTurn"].as<Expression>();
-        supportFront = config["supportFront"].as<Expression>();
-        supportFront2 = config["supportFront2"].as<Expression>();
-        supportBack = config["supportBack"].as<Expression>();
-        supportSideX = config["supportSideX"].as<Expression>();
-        supportSideY = config["supportSideY"].as<Expression>();
-        supportTurn = config["supportTurn"].as<Expression>();
-        */
-        STAND_SCRIPT_DURATION = config["STAND_SCRIPT_DURATION"].as<Expression>();
     }
 }  // motion
 }  // modules

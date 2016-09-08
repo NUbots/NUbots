@@ -23,37 +23,32 @@
 #include <nuclear>
 #include <armadillo>
 
-namespace module {
-    namespace motion {
+namespace module 
+{
+namespace motion 
+{
 
             /**
              * Executes a HeadController action.
              *
              * @author Jake Fountain
              */
-            class HeadController : public NUClear::Reactor {
-            public:
-                arma::vec2 currentAngles;
-                arma::vec2 goalAngles;
-<<<<<<< 285656e6e5f2d52a63ec3cbf0b0be03928f0eba9
-                bool goalRobotSpace = true;
-=======
-                bool goalRobotSpace = false;
-                static constexpr const char* CONFIGURATION_PATH = "HeadController.yaml";
-                static constexpr const char* CONFIGURATION_MSSG = "Head Controller - Configure";
-                static constexpr const char* ONTRIGGER_HEAD_CMD = "Head Controller - Register Head Command";
-                static constexpr const char* ONTRIGGER_HEAD_POS = "Head Controller - Update Head Position";
-                explicit HeadController(std::unique_ptr<NUClear::Environment> environment);
+            class HeadController : public NUClear::Reactor 
+            {
             private:
                 const size_t id;
                 double min_yaw,max_yaw,min_pitch,max_pitch,head_motor_gain,head_motor_torque, p_gain;
                 ReactionHandle updateHandle;
                 //Debug var:
-                NUClear::clock::time_point lastTime;    
->>>>>>> Further changes...
+                NUClear::clock::time_point lastTime;
+            public:
+                explicit HeadController(std::unique_ptr<NUClear::Environment> environment);
+                arma::vec2 currentAngles;
+                arma::vec2 goalAngles;
+                bool goalRobotSpace = true;
             };
 
-    }  // motion
+}  // motion
 }  // modules
 
 #endif  // MODULES_BEHAVIOURS_REFLEX_HEADCONTROLLER_H

@@ -39,8 +39,7 @@
 #include "utility/math/geometry/UnitQuaternion.h"
 #include "utility/math/matrix/Transform2D.h"
 #include "utility/math/matrix/Transform3D.h"
-#include "utility/nubugger/NUhelpers.h" 
-#include "utility/motion/RobotModels.h"
+#include "utility/nubugger/NUhelpers.h"
 #include "utility/motion/Balance.h"
 
 namespace module 

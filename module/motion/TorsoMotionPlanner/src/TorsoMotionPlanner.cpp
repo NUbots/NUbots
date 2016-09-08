@@ -89,50 +89,8 @@ namespace motion
         //In the event of a new foot step target specified by the foot placement planning module...
         on<Trigger<FootStepTarget>>().then("Torso Motion Planner - Received Target Footstep", [this] (const FootStepTarget& target) 
         {
-<<<<<<< 6d1d5a16ea2eaf62518f3670a828e73935f85876
-<<<<<<< 0619086197d38a321f8b54f9394dfd8cf073b65d
-<<<<<<< 29fe3c741efbfe902cfd5e199220e262e93abc3c
-<<<<<<< f23d4331e4606fba733a1bb2327d6000df6cb997
-<<<<<<< e7199040444bd454e68ee7a37c6bfb4e3c9debc2
-<<<<<<< f10da9c4b0232f8ba743f03d26325ddc863f1f48
-<<<<<<< cdf96fbdd5a07a2529fcd01d4c07dd1dfe64510f
-            torsoZMP();
-=======
-            zmpTorsoCoefficients();
->>>>>>> Message Headers, emit structs, and further encapsulation of
-        });
-<<<<<<< 96dd3deaa26010585080bb841a4e4f1773925448
-        
-            zmpTorsoCoefficients();
-=======
-            if(supportFoot)
-=======
-            if(target.supportMass == LimbID::LEFT_LEG)
->>>>>>> Torso Motion Planner Fixing...
-=======
-                NUClear::log("Messaging: Torso Motion Planner - Received Target Torso Position(0)"); //debugging
-            /*if(target.supportMass == LimbID::LEFT_LEG)
->>>>>>> Fixed vec size emit error (Transform2D to Transform3D) for Foot Motion Planner
-=======
-            if(DEBUG) { NUClear::log("Messaging: Torso Motion Planner - Received Target Torso Position(0)"); }
-            if(target.supportMass == LimbID::LEFT_LEG)
->>>>>>> Tidy up of debugging output
-            {
-                setLeftFootDestination(target.targetDestination);
-            }
-            else
-            {
-                setRightFootDestination(target.targetDestination);
-            }
-=======
             if(DEBUG) { NUClear::log("Messaging: Torso Motion Planner - Received Target Footstep(0)"); }
-<<<<<<< e36e3d5df345d5503f7efd56f001d1558f2018aa
->>>>>>> Tracing message flow and debugging information semantics...
-            setDestinationTime(target.targetTime); 
-                std::cout << "Destination Time - TMP:" << getDestinationTime() << "\n\r";//debugging
-=======
             setDestinationTime(target.targetTime);
->>>>>>> Config (YAML) not populating values, time reference not changing over time...
             if(DEBUG) { NUClear::log("Messaging: Torso Motion Planner - Received Target Footstep(1)"); }
         });
 
@@ -168,63 +126,17 @@ namespace motion
         {
             updateHandle.disable(); 
         });
-<<<<<<< 183df72fb88459adef7436f0515b768fde100df7:module/motion/ModularWalkEngine/src/TorsoMotionPlanner.cpp
-
->>>>>>> Configuration Management for Modular Design
-        }
-<<<<<<< f10da9c4b0232f8ba743f03d26325ddc863f1f48
->>>>>>> Added messages between modules
-=======
->>>>>>> Message Headers, emit structs, and further encapsulation of
-=======
->>>>>>> Adding emits and triggers for flow of data
-=======
->>>>>>> Further Modularization in development hierarchy, reorganised directory structure:module/motion/TorsoMotionPlanner/src/TorsoMotionPlanner.cpp
     }
 /*=======================================================================================================*/
 //      METHOD: updateTorsoPosition
 /*=======================================================================================================*/
     void TorsoMotionPlanner::updateTorsoPosition()
     {
-<<<<<<< 9e5a07dc46c3445fbc91dc33cf2ab1e8ce88898a
-<<<<<<< 879e6a350d98efce1da5d047cdca18f50dae0616
-<<<<<<< f23d4331e4606fba733a1bb2327d6000df6cb997
-<<<<<<< 64307f428050a70febbcdd787f038b25be0bf9ed
-=======
-        uTorso = zmpTorsoCompensation(phase, zmpTorsoCoefficients, zmpParams, stepTime, zmpTime, phase1Single, phase2Single, uSupport, uLeftFootSource, uRightFootSource);
->>>>>>> Torso Motion Planner Fixing...
-        torso.uTorso = zmpTorsoCompensation(phase, zmpTorsoCoefficients, zmpParams, stepTime, zmpTime, phase1Single, phase2Single, uSupport, uLeftFootDestination, uLeftFootSource, uRightFootDestination, uRightFootSource);
-        Transform2D uTorsoActual = uTorso.localToWorld({-DarwinModel::Leg::HIP_OFFSET_X, 0, 0});
-        Transform3D torso.torso = arma::vec6({uTorsoActual.x(), uTorsoActual.y(), bodyHeight, 0, bodyTilt, uTorsoActual.angle()});
-<<<<<<< 516dea1ebe52244ad71bd95f20eab281f5e8dd69
-        emit(std:make_unique<TorsoUpdate>(uTorso, torso)); //uTorso is needed by motionArms and torso is needed for feet position
-                             //could also move calculation of torso to response
-<<<<<<< f23d4331e4606fba733a1bb2327d6000df6cb997
-=======
-        uTorso = zmpTorsoCompensation(phase, zmpTorsoCoefficients, zmpParams, stepTime, zmpTime, phase1Single, phase2Single, uSupport, uLeftFootSource, uRightFootSource);
->>>>>>> Modifications to TorsoMotionPlanner
-=======
->>>>>>> Torso Motion Planner Fixing...
-=======
-        emit(std::make_unique<TorsoUpdate>(uTorso, torso)); 
-                            //uTorso is needed by motionArms and torso is needed for feet position
-                            //could also move calculation of torso to response
->>>>>>> Error fixes in Torso Motion Planner
-=======
-        setTorsoPositionArms(zmpTorsoCompensation(getMotionPhase(), zmpTorsoCoefficients(), zmpParams, stepTime, zmpTime, phase1Single, phase2Single, getLeftFootSource(), getRightFootSource()));
-        setTorsoPositionLegs(zmpTorsoCompensation(getMotionPhase(), zmpTorsoCoefficients(), zmpParams, stepTime, zmpTime, phase1Single, phase2Single, getLeftFootSource(), getRightFootSource()));
-=======
         setTorsoPositionArms(zmpTorsoCompensation(getMotionPhase(), zmpTorsoCoefficients(), getZmpParams(), stepTime, zmpTime, phase1Single, phase2Single, getLeftFootSource(), getRightFootSource()));
         setTorsoPositionLegs(zmpTorsoCompensation(getMotionPhase(), zmpTorsoCoefficients(), getZmpParams(), stepTime, zmpTime, phase1Single, phase2Single, getLeftFootSource(), getRightFootSource()));
->>>>>>> TorsoMotionPlanner compiles again - further remodelling required
         Transform2D uTorsoWorld = getTorsoPositionArms().localToWorld({-DarwinModel::Leg::HIP_OFFSET_X, 0, 0});
         setTorsoPosition3D(arma::vec6({uTorsoWorld.x(), uTorsoWorld.y(), bodyHeight, 0, bodyTilt, uTorsoWorld.angle()}));
-<<<<<<< 2b4d7ec9700518d8944243ec26dc14adda977657
-        emit(std::make_unique<NewTorsoInformation>(getTorsoPositionArms(), getTorsoPositionLegs(), getTorsoPosition3D())); 
->>>>>>> Further remodelling...
-=======
         emit(std::make_unique<TorsoMotionUpdate>(getTorsoPositionArms(), getTorsoPositionLegs(), getTorsoPosition3D())); 
->>>>>>> WalkEngine Remodelling - balance compiles successfully
     }
 /*=======================================================================================================*/
 //      METHOD: stepTorso
@@ -235,42 +147,10 @@ namespace motion
         Transform2D uRightFootSupport = uRightFoot.localToWorld({-footOffset[0], footOffset[1], 0});
         return uLeftFootSupport.interpolate(shiftFactor, uRightFootSupport);
     }
-<<<<<<< dcc82b066432acf9647cd69193125f69aafab895
-
-<<<<<<< f23d4331e4606fba733a1bb2327d6000df6cb997
-    /*=======================================================================================================*/
-    //      NAME: zmpTorsoCoefficients
-    /*=======================================================================================================*/
-    /*
-     *      @input  : <TODO: INSERT DESCRIPTION>
-     *      @output : <TODO: INSERT DESCRIPTION>
-     *      @pre-condition  : <TODO: INSERT DESCRIPTION>
-     *      @post-condition : <TODO: INSERT DESCRIPTION>
-    */
-<<<<<<< f10da9c4b0232f8ba743f03d26325ddc863f1f48
-<<<<<<< cdf96fbdd5a07a2529fcd01d4c07dd1dfe64510f
-    void TorsoMotionPlanner::torsoZMP() //originally part of CalculateNewStep
-=======
-    void ModularWalkEngine::zmpCoefficients() //originally part of CalculateNewStep
->>>>>>> Added messages between modules
-=======
-=======
 /*=======================================================================================================*/
 //      METHOD: zmpTorsoCoefficients
 /*=======================================================================================================*/
-<<<<<<< 9e5a07dc46c3445fbc91dc33cf2ab1e8ce88898a
-
->>>>>>> Torso Motion Planner Fixing...
-=======
-/*=======================================================================================================*/
-//      METHOD: zmpTorsoCoefficients
-/*=======================================================================================================*/
->>>>>>> Torso Motion Planner Changes...
-    void TorsoMotionPlanner::zmpTorsoCoefficients() //originally part of CalculateNewStep
->>>>>>> Message Headers, emit structs, and further encapsulation of
-=======
     arma::vec4 TorsoMotionPlanner::zmpTorsoCoefficients()
->>>>>>> TorsoMotionPlanner compiles again - further remodelling required
     {
         arma::vec4 zmpCoefficients;
         setTorsoDestination(stepTorso(getLeftFootDestination(), getRightFootDestination(), 0.5));
@@ -281,34 +161,10 @@ namespace motion
         
         return (zmpCoefficients);
     }
-<<<<<<< f23d4331e4606fba733a1bb2327d6000df6cb997
-    /*=======================================================================================================*/
-    //      NAME: zmpSolve
-    /*=======================================================================================================*/
-    /*
-     *      @input  : <TODO: INSERT DESCRIPTION>
-     *      @output : <TODO: INSERT DESCRIPTION>
-     *      @pre-condition  : <TODO: INSERT DESCRIPTION>
-     *      @post-condition : <TODO: INSERT DESCRIPTION>
-    */
-<<<<<<< f10da9c4b0232f8ba743f03d26325ddc863f1f48
-<<<<<<< cdf96fbdd5a07a2529fcd01d4c07dd1dfe64510f
-    arma::vec2 TorsoMotionPlanner::zmpSolve(double zs, double z1, double z2, double x1, double x2, double phase1Single, double phase2Single, double stepTime, double zmpTime) 
-=======
-    arma::vec2 ModularWalkEngine::zmpTorsoCompensation(double zs, double z1, double z2, double x1, double x2, double phase1Single, double phase2Single, double stepTime, double zmpTime) 
->>>>>>> Added messages between modules
-=======
-=======
 /*=======================================================================================================*/
 //      METHOD: zmpSolve
 /*=======================================================================================================*/
-<<<<<<< dcc82b066432acf9647cd69193125f69aafab895
-
->>>>>>> Torso Motion Planner Fixing...
-=======
->>>>>>> Torso Motion Planner Changes...
     arma::vec2 TorsoMotionPlanner::zmpSolve(double zs, double z1, double z2, double x1, double x2, double phase1Single, double phase2Single, double stepTime, double zmpTime) 
->>>>>>> Message Headers, emit structs, and further encapsulation of
     {
         /*
         Solves ZMP equations.
@@ -412,140 +268,140 @@ namespace motion
         zmpParameters = inZmpParams;
     }       
 /*=======================================================================================================*/
-/*      ENCAPSULATION METHOD: getTorsoPosition
+//      ENCAPSULATION METHOD: getTorsoPosition
 /*=======================================================================================================*/
     Transform2D TorsoMotionPlanner::getTorsoPositionArms()
     {
         return (torsoPositionsTransform.FrameArms);
     }
 /*=======================================================================================================*/
-/*      ENCAPSULATION METHOD: getTorsoPosition
+//      ENCAPSULATION METHOD: getTorsoPosition
 /*=======================================================================================================*/
     Transform2D TorsoMotionPlanner::getTorsoPositionLegs()
     {
         return (torsoPositionsTransform.FrameLegs);
     }        
 /*=======================================================================================================*/
-/*      ENCAPSULATION METHOD: getTorsoPosition
+//      ENCAPSULATION METHOD: getTorsoPosition
 /*=======================================================================================================*/
     Transform3D TorsoMotionPlanner::getTorsoPosition3D()
     {
         return (torsoPositionsTransform.Frame3D);
     }            
 /*=======================================================================================================*/
-/*      ENCAPSULATION METHOD: setTorsoPositionLegs
+//      ENCAPSULATION METHOD: setTorsoPositionLegs
 /*=======================================================================================================*/
     void TorsoMotionPlanner::setTorsoPositionLegs(const Transform2D& inTorsoPosition)
     {
         torsoPositionsTransform.FrameLegs = inTorsoPosition;
     }
 /*=======================================================================================================*/
-/*      ENCAPSULATION METHOD: setTorsoPositionArms
+//      ENCAPSULATION METHOD: setTorsoPositionArms
 /*=======================================================================================================*/
     void TorsoMotionPlanner::setTorsoPositionArms(const Transform2D& inTorsoPosition)
     {
         torsoPositionsTransform.FrameArms = inTorsoPosition;
     }    
 /*=======================================================================================================*/
-/*      ENCAPSULATION METHOD: setTorsoPosition3D
+//      ENCAPSULATION METHOD: setTorsoPosition3D
 /*=======================================================================================================*/
     void TorsoMotionPlanner::setTorsoPosition3D(const Transform3D& inTorsoPosition)
     {
         torsoPositionsTransform.Frame3D = inTorsoPosition;
     }    
 /*=======================================================================================================*/
-/*      ENCAPSULATION METHOD: getTorsoSource
+//      ENCAPSULATION METHOD: getTorsoSource
 /*=======================================================================================================*/
     Transform2D TorsoMotionPlanner::getTorsoSource()
     {
         return (torsoPositionSource);
     }
 /*=======================================================================================================*/
-/*      ENCAPSULATION METHOD: setTorsoSource
+//      ENCAPSULATION METHOD: setTorsoSource
 /*=======================================================================================================*/
     void TorsoMotionPlanner::setTorsoSource(const Transform2D& inTorsoSource)
     {
         torsoPositionSource = inTorsoSource;
     }
 /*=======================================================================================================*/
-/*      ENCAPSULATION METHOD: getTorsoDestination
+//      ENCAPSULATION METHOD: getTorsoDestination
 /*=======================================================================================================*/
     Transform2D TorsoMotionPlanner::getTorsoDestination()
     {
         return (torsoPositionDestination);
     }
 /*=======================================================================================================*/
-/*      ENCAPSULATION METHOD: setTorsoDestination
+//      ENCAPSULATION METHOD: setTorsoDestination
 /*=======================================================================================================*/
     void TorsoMotionPlanner::setTorsoDestination(const Transform2D& inTorsoDestination)
     {
         torsoPositionDestination = inTorsoDestination;
     }
 /*=======================================================================================================*/
-/*      ENCAPSULATION METHOD: getSupportMass
+//      ENCAPSULATION METHOD: getSupportMass
 /*=======================================================================================================*/
     Transform2D TorsoMotionPlanner::getSupportMass()
     {
         return (uSupportMass);
     }
 /*=======================================================================================================*/
-/*      ENCAPSULATION METHOD: setSupportMass
+//      ENCAPSULATION METHOD: setSupportMass
 /*=======================================================================================================*/
     void TorsoMotionPlanner::setSupportMass(const Transform2D& inSupportMass)
     {
         uSupportMass = inSupportMass;
     }    
 /*=======================================================================================================*/
-/*      ENCAPSULATION METHOD: getLeftFootPosition
+//      ENCAPSULATION METHOD: getLeftFootPosition
 /*=======================================================================================================*/
     Transform2D TorsoMotionPlanner::getLeftFootPosition()
     {
         return (leftFootPositionTransform);
     }
 /*=======================================================================================================*/
-/*      ENCAPSULATION METHOD: setLeftFootPosition
+//      ENCAPSULATION METHOD: setLeftFootPosition
 /*=======================================================================================================*/
     void TorsoMotionPlanner::setLeftFootPosition(const Transform2D& inLeftFootPosition)
     {
         leftFootPositionTransform = inLeftFootPosition;
     }
 /*=======================================================================================================*/
-/*      ENCAPSULATION METHOD: getRightFootPosition
+//      ENCAPSULATION METHOD: getRightFootPosition
 /*=======================================================================================================*/
     Transform2D TorsoMotionPlanner::getRightFootPosition()
     {
         return (rightFootPositionTransform);
     }
 /*=======================================================================================================*/
-/*      ENCAPSULATION METHOD: setRightFootPosition
+//      ENCAPSULATION METHOD: setRightFootPosition
 /*=======================================================================================================*/
     void TorsoMotionPlanner::setRightFootPosition(const Transform2D& inRightFootPosition)
     {
         rightFootPositionTransform = inRightFootPosition;
     }
 /*=======================================================================================================*/
-/*      ENCAPSULATION METHOD: getLeftFootSource
+//      ENCAPSULATION METHOD: getLeftFootSource
 /*=======================================================================================================*/
     Transform2D TorsoMotionPlanner::getLeftFootSource()
     {
         return (leftFootSource);
     }
 /*=======================================================================================================*/
-/*      ENCAPSULATION METHOD: setLeftFootSource
+//      ENCAPSULATION METHOD: setLeftFootSource
 /*=======================================================================================================*/
     void TorsoMotionPlanner::setLeftFootSource(const Transform2D& inLeftFootSource)
     {
         leftFootSource = inLeftFootSource;
     }
 /*=======================================================================================================*/
-/*      ENCAPSULATION METHOD: getRightFootSource
+//      ENCAPSULATION METHOD: getRightFootSource
 /*=======================================================================================================*/
     Transform2D TorsoMotionPlanner::getRightFootSource()
     {
         return (rightFootSource);
     }
 /*=======================================================================================================*/
-/*      ENCAPSULATION METHOD: setRightFootSource
+//      ENCAPSULATION METHOD: setRightFootSource
 /*=======================================================================================================*/
     void TorsoMotionPlanner::setRightFootSource(const Transform2D& inRightFootSource)
     {
@@ -598,7 +454,7 @@ namespace motion
         updateStepInstruction = inUpdateStepInstruction;
     }    
 /*=======================================================================================================*/
-/*      METHOD: configure
+//      METHOD: configure
 /*=======================================================================================================*/
     void TorsoMotionPlanner::configure(const YAML::Node& config)
     {

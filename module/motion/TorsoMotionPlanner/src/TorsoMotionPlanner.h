@@ -46,7 +46,6 @@
 #include "utility/math/matrix/Transform2D.h"
 #include "utility/math/matrix/Transform3D.h"
 #include "utility/motion/Balance.h"
-#include "utility/motion/RobotModels.h"
 #include "utility/nubugger/NUhelpers.h"
 #include "utility/support/yaml_armadillo.h"
 #include "utility/support/yaml_expression.h"
@@ -95,12 +94,6 @@ namespace motion
         // // Whether subsumption has currently interrupted the walk engine
         // bool interrupted;
         // TODO: ???
-<<<<<<< 183df72fb88459adef7436f0515b768fde100df7:module/motion/ModularWalkEngine/src/TorsoMotionPlanner.h
-<<<<<<< 64307f428050a70febbcdd787f038b25be0bf9ed
-
-=======
-=======
->>>>>>> Further Modularization in development hierarchy, reorganised directory structure:module/motion/TorsoMotionPlanner/src/TorsoMotionPlanner.h
         bool startFromStep;
         // The time when the current step begun
         double beginStepTime;
@@ -110,14 +103,6 @@ namespace motion
         double destinationTime;
         // How to many 'steps' to take before lifting a foot when starting to walk
         int initialStep;
-<<<<<<< 879e6a350d98efce1da5d047cdca18f50dae0616
-<<<<<<< 183df72fb88459adef7436f0515b768fde100df7:module/motion/ModularWalkEngine/src/TorsoMotionPlanner.h
->>>>>>> Modifications to TorsoMotionPlanner
-=======
->>>>>>> Further Modularization in development hierarchy, reorganised directory structure:module/motion/TorsoMotionPlanner/src/TorsoMotionPlanner.h
-        // Current torso position
-        Transform2D uTorso;
-=======
         // Active torso relative positions struct
         struct TorsoPositions 
         {
@@ -127,7 +112,6 @@ namespace motion
         };
         // Active torso position
         TorsoPositions torsoPositionsTransform;
->>>>>>> Further remodelling...
         // Pre-step torso position
         Transform2D torsoPositionSource;
         // Torso step target position

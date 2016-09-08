@@ -70,20 +70,10 @@ namespace motion
             , goalAngles(arma::fill::zeros) {
 
             //do a little configurating
-            on<Configuration>("HeadController.yaml").then("Head Controller - Configure", [this] (const Configuration& config) {
+            on<Configuration>("HeadController.yaml").then("Head Controller - Config", [this] (const Configuration& config) {
                 //Gains
                 head_motor_gain = config["head_motors"]["gain"].as<double>();
                 head_motor_torque = config["head_motors"]["torque"].as<double>();
-
-<<<<<<< 6f6ad405799140cc85cb5a384f5a0022a7b5ee99
-
-=======
-                //head limits
-                max_yaw   = DarwinModel::Head::MAX_YAW;
-                min_yaw   = DarwinModel::Head::MIN_YAW;
-                max_pitch = DarwinModel::Head::MAX_PITCH;
-                min_pitch = DarwinModel::Head::MIN_PITCH;
->>>>>>> Foot Motion Planer Compiles - Pending Testing...
 
                 emit(std::make_unique<HeadCommand>( HeadCommand {config["initial"]["yaw"].as<float>(),
                                                                  config["initial"]["pitch"].as<float>(), false}));
@@ -101,15 +91,11 @@ namespace motion
                 }
             });
 
-<<<<<<< 6f6ad405799140cc85cb5a384f5a0022a7b5ee99
             updateHandle = on<Trigger<Sensors>, With<KinematicsModel>, Single, Priority::HIGH>()
             .then("Head Controller - Update Head Position", [this] (const Sensors& sensors, const KinematicsModel& kinematicsModel) {
 
                 emit(graph("HeadController Goal Angles", goalAngles[0], goalAngles[1]));
 
-=======
-            updateHandle = on<Trigger<Sensors>, Single, Priority::HIGH>().then("Head Controller - Update Head Position", [this] (const Sensors& sensors) {
->>>>>>> Foot Motion Planer Compiles - Pending Testing...
                 //P controller
                 currentAngles = p_gain * goalAngles + (1 - p_gain) * currentAngles;
 
@@ -120,10 +106,6 @@ namespace motion
                 //Convert to robot space
                 arma::vec3 headUnitVector = goalRobotSpace ? goalHeadUnitVector_world : sensors.world.rotation() * goalHeadUnitVector_world;
                 //Compute inverse kinematics for head
-
-
-
-
 
                 //!!!!!!!!!!!!!!
                 //!!!!!!!!!!!!!!

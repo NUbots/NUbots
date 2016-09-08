@@ -16,19 +16,7 @@ NUCLEAR_ROLE(
     platform::darwin::SensorFilter
 
     # Motion
-<<<<<<< 9a3357a8e3639b4a38183b580f2bde9d9d2b5cc8:roles/keyboardwalk.role
-<<<<<<< 6f6ad405799140cc85cb5a384f5a0022a7b5ee99:roles/keyboardwalk.role
     motion::WalkEngine
-=======
-    #motion::FootMotionPlanner
-=======
-    motion::FootMotionPlanner
->>>>>>> Update struct parameters in Foot Motion Planner:roles/modularwalk.role
-    motion::FootPlacementPlanner
-    #motion::TorsoMotionPlanner
-    #motion::BalanceKinematicResponse
-    #motion::ModularWalkEngine
->>>>>>> Foot Motion Planer Compiles - Pending Testing...:roles/modularwalk.role
     motion::ScriptEngine
     motion::HeadController
     motion::IKKick

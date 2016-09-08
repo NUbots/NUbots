@@ -10,7 +10,7 @@ Vagrant.configure("2") do |config|
 
     # See http://www.virtualbox.org/manual/ch08.html#vboxmanage-modifyvm
     # and http://parallels.github.io/vagrant-parallels/docs/configuration.html
-    v.memory = 8192
+    v.memory = 4096
     v.cpus = 4
     v.update_guest_tools = true
   end
@@ -21,8 +21,8 @@ Vagrant.configure("2") do |config|
     override.vm.box = "ubuntu/trusty32"
 
     # See http://www.virtualbox.org/manual/ch08.html#vboxmanage-modifyvm
-    v.memory = 8192
-    v.cpus = 8
+    v.memory = 4096
+    v.cpus = 4
     v.customize ["modifyvm", :id, "--vram", 128]
     v.customize ["modifyvm", :id, "--ioapic", "on"]
     v.customize ["modifyvm", :id, "--accelerate3d", "on"]
