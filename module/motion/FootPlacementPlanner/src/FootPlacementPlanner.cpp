@@ -54,22 +54,24 @@ namespace motion
     : Reactor(std::move(environment)) 
         , DEBUG(false), DEBUG_ITER(0), initialStep(0)
         , balanceEnabled(0.0), emitLocalisation(false), emitFootPosition(false)
-        , updateHandle(), subsumptionId(1)
+        , updateHandle(), generateStandScriptReaction(), subsumptionId(1)
+        , startFromStep(false)
+        , StateOfWalk()
+        , torsoPositionTransform(), torsoPositionSource(), torsoPositionDestination()
         , leftFootPositionTransform(), leftFootSource(), rightFootPositionTransform()
         , rightFootSource(), leftFootDestination(), rightFootDestination(), uSupportMass()
         , activeForwardLimb(), activeLimbInitial(LimbID::LEFT_LEG)
         , bodyTilt(0.0), bodyHeight(0.0), stanceLimitY2(0.0), stepTime(0.0), stepHeight(0.0)
         , step_height_slow_fraction(0.0f), step_height_fast_fraction(0.0f)
-        , stepLimits(arma::fill::zeros), footOffset(arma::fill::zeros), uLRFootOffset()
-        , beginStepTime(0.0), lastVeloctiyUpdateTime()
+        , stepLimits(arma::fill::zeros), footOffsetCoefficient(arma::fill::zeros), uLRFootOffset()
+        , beginStepTime(0.0), STAND_SCRIPT_DURATION(0.0), lastVeloctiyUpdateTime()
         , velocityHigh(0.0), accelerationTurningFactor(0.0), velocityLimits(arma::fill::zeros)
         , accelerationLimits(arma::fill::zeros), accelerationLimitsHigh(arma::fill::zeros)
-        , velocityCurrent(), velocityCommand()
+        , velocityCurrent(), velocityCommand(), velocityDifference()
         , zmpCoefficients(arma::fill::zeros), zmpParameters(arma::fill::zeros)
         , zmpTime(0.0), phase1Single(0.0), phase2Single(0.0)
         , kinematicsModel()
-        , lastFootGoalRotation(), footGoalErrorSum() 
-        , startFromStep(false), updateStepInstruction(false), destinationTime(0)
+        , lastFootGoalRotation(), footGoalErrorSum()
     {
         //Configure foot motion planner...
         on<Configuration>("FootPlacementPlanner.yaml").then("Foot Placement Planner - Configure", [this] (const Configuration& config) 
@@ -120,10 +122,10 @@ namespace motion
 
         arma::vec2 supportMod = arma::zeros(2); // support point modulation for wallkick
 
-        if (state == State::STOP_REQUEST) 
+        if (StateOfWalk == State::STOP_REQUEST) 
         {
             log<NUClear::TRACE>("Walk Engine:: Stop requested");
-            state = State::LAST_STEP;
+            StateOfWalk = State::LAST_STEP;
             velocityCurrent = arma::zeros(3);
             velocityCommand = arma::zeros(3);
 
@@ -197,7 +199,7 @@ namespace motion
 
         // Start feet collision detection:
         // Uses a rough measure to detect collision and move feet apart if too close
-        double overlap = DarwinModel::Leg::FOOT_LENGTH / 2.0 * std::abs(feetDifference.angle());
+        double overlap = kinematicsModel.Leg.FOOT_LENGTH / 2.0 * std::abs(feetDifference.angle());
         feetDifference.y() = std::max(feetDifference.y() * sign, stanceLimitY2 + overlap) * sign;
         // End feet collision detection
 
@@ -276,12 +278,12 @@ namespace motion
         else 
         {
             // stance resetted
-            setLeftFootPosition(getTorsoPosition().localToWorld({getFootOffsetCoefficient(0), DarwinModel::Leg::HIP_OFFSET_Y - getFootOffsetCoefficient(1), 0}));
-            setRightFootPosition(getTorsoPosition().localToWorld({getFootOffsetCoefficient(0), -DarwinModel::Leg::HIP_OFFSET_Y + getFootOffsetCoefficient(1), 0}));
+            setLeftFootPosition(getTorsoPosition().localToWorld({getFootOffsetCoefficient(0), kinematicsModel.Leg.HIP_OFFSET_Y - getFootOffsetCoefficient(1), 0}));
+            setRightFootPosition(getTorsoPosition().localToWorld({getFootOffsetCoefficient(0), -kinematicsModel.Leg.HIP_OFFSET_Y + getFootOffsetCoefficient(1), 0}));
             initialStep = 2;
         }
 
-        activeForwardLimb = activeForwardLimbInitial;
+        activeForwardLimb = activeLimbInitial;
 
         setLeftFootSource(getLeftFootPosition());
         setLeftFootDestination(getLeftFootPosition());
@@ -291,7 +293,7 @@ namespace motion
 
         setSupportMass(getTorsoPosition());
         beginStepTime = getTime();
-        uLRFootOffset = {0, DarwinModel::Leg::HIP_OFFSET_Y - getFootOffsetCoefficient(1), 0};
+        uLRFootOffset = {0, kinematicsModel.Leg.HIP_OFFSET_Y - getFootOffsetCoefficient(1), 0};
         startFromStep = false;
 
         calculateNewStep();
@@ -302,8 +304,8 @@ namespace motion
     void FootPlacementPlanner::reset() 
     {
         setTorsoPosition({-getFootOffsetCoefficient(0), 0, 0});
-        setLeftFootPosition({0, DarwinModel::Leg::HIP_OFFSET_Y, 0});
-        setRightFootPosition({0, -DarwinModel::Leg::HIP_OFFSET_Y, 0});
+        setLeftFootPosition({0, kinematicsModel.Leg.HIP_OFFSET_Y, 0});
+        setRightFootPosition({0, -kinematicsModel.Leg.HIP_OFFSET_Y, 0});
 
         setTorsoSource(arma::zeros(3));
         setTorsoDestination(arma::zeros(3));
@@ -317,17 +319,17 @@ namespace motion
         velocityDifference = arma::zeros(3);
 
         // gGyro stabilization variables
-        activeForwardLimb = activeForwardLimbInitial;
+        activeForwardLimb = activeLimbInitial;
         beginStepTime = getTime();
         initialStep = 2;
 
         // gStandard offset
-        uLRFootOffset = {0, DarwinModel::Leg::HIP_OFFSET_Y - getFootOffsetCoefficient(1), 0};
+        uLRFootOffset = {0, kinematicsModel.Leg.HIP_OFFSET_Y - getFootOffsetCoefficient(1), 0};
 
         // gWalking/Stepping transition variables
         startFromStep = false;
 
-        state = State::STOPPED;
+        StateOfWalk = State::STOPPED;
 
         // interrupted = false;
     }
@@ -516,7 +518,6 @@ namespace motion
 
         auto& walkCycle = config["walk_cycle"];
         stepTime = walkCycle["step_time"].as<Expression>();
-        hipRollCompensation = walkCycle["hip_roll_compensation"].as<Expression>();
         stepHeight = walkCycle["step"]["height"].as<Expression>();
         stepLimits = walkCycle["step"]["limits"].as<arma::mat::fixed<3,2>>();
 

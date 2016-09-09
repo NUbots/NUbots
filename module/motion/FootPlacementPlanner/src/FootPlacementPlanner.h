@@ -110,6 +110,11 @@ namespace motion
         size_t subsumptionId;                           // subsumption ID key to access motors
 
         /**
+         * Decision abstractions and notify variables...
+         */
+        bool startFromStep;
+
+        /**
          * The current abstract state of WalkEngine...
          */
         enum State {
@@ -151,8 +156,6 @@ namespace motion
         double stepHeight;                              //
         float  step_height_slow_fraction;               //
         float  step_height_fast_fraction;               //
-        float  gainArms;                                //
-        float  gainLegs;                                //
         arma::mat::fixed<3,2> stepLimits;               //              
         arma::vec2 footOffsetCoefficient;               //
         Transform2D uLRFootOffset;                      // standard offset
@@ -195,6 +198,12 @@ namespace motion
         message::motion::kinematics::KinematicsModel kinematicsModel;   //
 
         /**
+         * The last foot goal rotation...
+         */
+        UnitQuaternion lastFootGoalRotation;            //
+        UnitQuaternion footGoalErrorSum;                //
+
+        /**
          * @brief [brief description]
          * @details [long description]
          */
@@ -214,6 +223,11 @@ namespace motion
          * @details [long description]
          */
         void stop();        
+        /**
+         * @brief [brief description]
+         * @details [long description]
+         */
+        void stanceReset();  
         /**
          * @brief [brief description]
          * @details [long description]

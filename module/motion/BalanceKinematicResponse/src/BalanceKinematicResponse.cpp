@@ -40,7 +40,7 @@ namespace motion
     using message::support::Configuration;
 
     using utility::support::Expression;
-    using utility::motion::kinematics::DarwinModel;
+    using message::motion::kinematics::KinematicsModel;
     using utility::math::matrix::Transform2D;
     using utility::math::matrix::Transform3D;
     using utility::nubugger::graph;
@@ -48,7 +48,32 @@ namespace motion
 //      NUCLEAR METHOD: FootPlacementPlanner
 /*=======================================================================================================*/
     BalanceKinematicResponse::BalanceKinematicResponse(std::unique_ptr<NUClear::Environment> environment)
-    : Reactor(std::move(environment)) {
+    : Reactor(std::move(environment)) 
+        , DEBUG(false), DEBUG_ITER(0), initialStep(0)
+        , balanceEnabled(0.0), emitLocalisation(false), emitFootPosition(false)
+        , updateHandle(), generateStandScriptReaction(), subsumptionId(1)
+        , torsoPositionsTransform(), torsoPositionSource(), torsoPositionDestination()
+        , leftFootPositionTransform(), leftFootSource(), rightFootPositionTransform()
+        , rightFootSource(), leftFootDestination(), rightFootDestination(), uSupportMass()
+        , activeForwardLimb(), activeLimbInitial(LimbID::LEFT_LEG)
+        , bodyTilt(0.0), bodyHeight(0.0), stanceLimitY2(0.0), stepTime(0.0), stepHeight(0.0)
+        , step_height_slow_fraction(0.0f), step_height_fast_fraction(0.0f)
+        , stepLimits(arma::fill::zeros), footOffsetCoefficient(arma::fill::zeros), uLRFootOffset()
+        , armLPostureTransform(), armLPostureSource(), armLPostureDestination()
+        , armRPostureTransform(), armRPostureSource(), armRPostureDestination()
+        , beginStepTime(0.0)
+        , STAND_SCRIPT_DURATION(0.0), pushTime(), lastVeloctiyUpdateTime()
+        , velocityHigh(0.0), accelerationTurningFactor(0.0), velocityLimits(arma::fill::zeros)
+        , accelerationLimits(arma::fill::zeros), accelerationLimitsHigh(arma::fill::zeros)
+        , velocityCurrent(), velocityCommand()
+        , zmpCoefficients(arma::fill::zeros), zmpParameters(arma::fill::zeros)
+        , zmpTime(0.0), phase1Single(0.0), phase2Single(0.0)
+        , toeTipCompensation(), hipRollCompensation()
+        , balancer(), kinematicsModel()
+        , balanceAmplitude(0.0), balanceWeight(0.0), balanceOffset(0.0)
+        , balancePGain(0.0), balanceIGain(0.0), balanceDGain(0.0)
+        , lastFootGoalRotation(), footGoalErrorSum()       
+    {
 
         //Configure balance kinematic response...
         on<Configuration>("BalanceKinematicResponse.yaml").then("Balance Response Planner - Configure", [this] (const Configuration& config) 
@@ -57,7 +82,7 @@ namespace motion
         });
 
         updateHandle = on<Every<1 /*RESTORE AFTER DEBUGGING: UPDATE_FREQUENCY*/, Per<std::chrono::seconds>>, With<Sensors>, Single, Priority::HIGH>()
-        .then("Balance Response Planner - Update Robot Posture", [this](const Sensors& sensors) 
+        .then("Balance Response Planner - Update Robot Posture", [this](/*const Sensors& sensors*/) 
         {
             if(DEBUG) { NUClear::log("Messaging: Balance Kinematic Response - Update Robot Posture(0)"); }
             //hipCompensation();
@@ -106,7 +131,7 @@ namespace motion
 /*=======================================================================================================*/
 //      METHOD: hipCompensation
 /*=======================================================================================================*/
-	void BalanceKinematicResponse::hipCompensation(const Sensors& sensors, arma::vec3 footPhases, LimbID swingLeg, Transform3D rightFootT, Transform3D leftFootT) 
+	void BalanceKinematicResponse::hipCompensation(const Sensors& sensors, arma::vec3 footPhases, LimbID activeForwardLimb, Transform3D rightFootT, Transform3D leftFootT) 
     {
         //If feature enabled, apply balance compensation through support actuator...
         if (balanceEnabled) 
@@ -115,7 +140,7 @@ namespace motion
             double yBoundedMinimumPhase = std::min({1.0, footPhases[1] / 0.1, (1 - footPhases[1]) / 0.1});
 
             //Rotate foot around hip by the given hip roll compensation...
-            if (swingLeg == LimbID::LEFT_LEG) 
+            if (activeForwardLimb == LimbID::LEFT_LEG) 
             {
                 rightFootT = rightFootT.rotateZLocal(-hipRollCompensation * yBoundedMinimumPhase, sensors.forwardKinematics.find(ServoID::R_HIP_ROLL)->second);
             }
@@ -128,21 +153,21 @@ namespace motion
 /*=======================================================================================================*/
 //      METHOD: supportMassCompensation
 /*=======================================================================================================*/
-    void BalanceKinematicResponse::supportMassCompensation(const Sensors& sensors, LimbID swingLeg, Transform3D rightFootT, Transform3D leftFootT) 
+    void BalanceKinematicResponse::supportMassCompensation(const Sensors& sensors, LimbID activeForwardLimb, Transform3D rightFootT, Transform3D leftFootT) 
     {
         //If feature enabled, apply balance compensation through support actuator...
         if (balanceEnabled) 
         {
         	//Apply balance transformation to stipulated support actuator...
-            balancer.balance(swingLeg == LimbID::LEFT_LEG ? rightFootT : leftFootT
-                           , swingLeg == LimbID::LEFT_LEG ? LimbID::RIGHT_LEG : LimbID::LEFT_LEG
+            balancer.balance(kinematicsModel, activeForwardLimb == LimbID::LEFT_LEG ? rightFootT : leftFootT
+                           , activeForwardLimb == LimbID::LEFT_LEG ? LimbID::RIGHT_LEG : LimbID::LEFT_LEG
                            , sensors);
         }
     }  
 /*=======================================================================================================*/
 //      METHOD: updateLowerBody
 /*=======================================================================================================*/
-    std::pair<Transform3D, Transform3D> BalanceKinematicResponse::updateLowerBody(double phase, auto torsoWorld, const Transform2D& leftFootLocal, const Transform2D& rightFootLocal) 
+    std::pair<Transform3D, Transform3D> BalanceKinematicResponse::updateLowerBody(const Transform2D& torsoWorld, const Transform2D& leftFootLocal, const Transform2D& rightFootLocal) 
     {
         // Transform feet targets to be relative to the robot torso...
         Transform3D leftFootTorso  =  leftFootLocal.worldToLocal(torsoWorld);
@@ -151,8 +176,8 @@ namespace motion
         //DEBUGGING: Emit relative feet position with respect to robot torso model... 
         if (emitFootPosition)
         {
-            emit(graph("Right foot position", rightFootTorso.translation()));
-            emit(graph("Left  foot position",  leftFootTorso.translation()));
+            //emit(graph("Right foot position", rightFootTorso.translation()));
+            //emit(graph("Left  foot position",  leftFootTorso.translation()));
         }
 
         return {leftFootTorso, rightFootTorso};
@@ -160,13 +185,13 @@ namespace motion
 /*=======================================================================================================*/
 //      NAME: updateUpperBody
 /*=======================================================================================================*/
-    void BalanceKinematicResponse::updateUpperBody(double phase, const Sensors& sensors) 
+    void BalanceKinematicResponse::updateUpperBody(/*const Sensors& sensors*/) 
     {
         /*
         //BEGIN: Update Position of Arms
             // Converts the phase into a sine wave that oscillates between 0 and 1 with a period of 2 phases
             double easing = std::sin(M_PI * phase - M_PI / 2.0) / 2.0 + 0.5;
-            if (swingLeg == LimbID::LEFT_LEG) 
+            if (activeForwardLimb == LimbID::LEFT_LEG) 
             {
                 easing = -easing + 1.0; // Gets the 2nd half of the sine wave
             }
@@ -228,6 +253,90 @@ namespace motion
     {
         zmpParameters = inZmpParams;
     }       
+/*=======================================================================================================*/
+//      ENCAPSULATION METHOD: getLArmPosition
+/*=======================================================================================================*/    
+    arma::vec3 BalanceKinematicResponse::getLArmPosition()
+    {
+        return (armLPostureTransform);
+    }
+/*=======================================================================================================*/
+//      ENCAPSULATION METHOD: setLArmPosition
+/*=======================================================================================================*/     
+    void BalanceKinematicResponse::setLArmPosition(arma::vec3 inLArm)
+    {
+        armLPostureTransform = inLArm;
+    }
+/*=======================================================================================================*/
+//      ENCAPSULATION METHOD: getLArmSource
+/*=======================================================================================================*/     
+    arma::vec3 BalanceKinematicResponse::getLArmSource()
+    {
+        return (armLPostureSource);
+    }
+/*=======================================================================================================*/
+//      ENCAPSULATION METHOD: setLArmSource
+/*=======================================================================================================*/     
+    void BalanceKinematicResponse::setLArmSource(arma::vec3 inLArm)
+    {
+        armLPostureSource = inLArm;
+    }
+/*=======================================================================================================*/
+//      ENCAPSULATION METHOD: getLArmDestination
+/*=======================================================================================================*/     
+    arma::vec3 BalanceKinematicResponse::getLArmDestination()
+    {
+        return (armLPostureDestination);
+    }
+/*=======================================================================================================*/
+//      ENCAPSULATION METHOD: setLArmDestination
+/*=======================================================================================================*/     
+    void BalanceKinematicResponse::setLArmDestination(arma::vec3 inLArm)
+    {
+        armLPostureDestination = inLArm;
+    }
+/*=======================================================================================================*/
+//      ENCAPSULATION METHOD: getRArmPosition
+/*=======================================================================================================*/ 
+    arma::vec3 BalanceKinematicResponse::getRArmPosition()
+    {
+        return (armRPostureTransform);
+    }
+/*=======================================================================================================*/
+//      ENCAPSULATION METHOD: setRArmPosition
+/*=======================================================================================================*/     
+    void BalanceKinematicResponse::setRArmPosition(arma::vec3 inRArm)
+    {
+        armRPostureTransform = inRArm;
+    }
+/*=======================================================================================================*/
+//      ENCAPSULATION METHOD: getRArmSource
+/*=======================================================================================================*/     
+    arma::vec3 BalanceKinematicResponse::getRArmSource()
+    {
+        return (armRPostureSource);
+    }
+/*=======================================================================================================*/
+//      ENCAPSULATION METHOD: setRArmSource
+/*=======================================================================================================*/     
+    void BalanceKinematicResponse::setRArmSource(arma::vec3 inRArm)
+    {
+        armRPostureSource = inRArm;
+    }
+/*=======================================================================================================*/
+//      ENCAPSULATION METHOD: getRArmDestination
+/*=======================================================================================================*/     
+    arma::vec3 BalanceKinematicResponse::getRArmDestination()
+    {
+        return (armRPostureDestination);
+    }
+/*=======================================================================================================*/
+//      ENCAPSULATION METHOD: setRArmDestination
+/*=======================================================================================================*/     
+    void BalanceKinematicResponse::setRArmDestination(arma::vec3 inRArm)
+    {
+        armRPostureDestination = inRArm;
+    }      
 /*=======================================================================================================*/
 //      ENCAPSULATION METHOD: getTorsoPosition
 /*=======================================================================================================*/
@@ -382,7 +491,7 @@ namespace motion
     {
         leftFootDestination.push(inLeftFootDestination);
     }
-/*=======================================================================================================*/
+
 //      ENCAPSULATION METHOD: getRightFootDestination
 /*=======================================================================================================*/
     Transform2D BalanceKinematicResponse::getRightFootDestination()
@@ -406,29 +515,13 @@ namespace motion
         auto& stance = config["stance"];
         bodyHeight = stance["body_height"].as<Expression>();
         bodyTilt = stance["body_tilt"].as<Expression>();
-        qLArmStart = stance["arms"]["left"]["start"].as<arma::vec>();
-        qLArmEnd = stance["arms"]["left"]["end"].as<arma::vec>();
-        qRArmStart = stance["arms"]["right"]["start"].as<arma::vec>();
-        qRArmEnd = stance["arms"]["right"]["end"].as<arma::vec>();
+        setLArmSource(stance["arms"]["left"]["start"].as<arma::vec>());
+        setLArmDestination(stance["arms"]["left"]["end"].as<arma::vec>());
+        setRArmSource(stance["arms"]["right"]["start"].as<arma::vec>());
+        setRArmDestination(stance["arms"]["right"]["end"].as<arma::vec>());
         //setFootOffsetCoefficient(stance["foot_offset"].as<arma::vec>());
         // gToe/heel overlap checking values
-        stanceLimitY2 = DarwinModel::Leg::LENGTH_BETWEEN_LEGS - stance["limit_margin_y"].as<Expression>();
-
-        auto& gains = stance["gains"];
-        gainArms = gains["arms"].as<Expression>();
-        gainLegs = gains["legs"].as<Expression>();
-
-        for(ServoID i = ServoID(0); i < ServoID::NUMBER_OF_SERVOS; i = ServoID(int(i)+1))
-        {
-            if(int(i) < 6)
-            {
-                jointGains[i] = gainArms;
-            } 
-            else 
-            {
-                jointGains[i] = gainLegs;
-            }
-        }
+        stanceLimitY2 = kinematicsModel.Leg.LENGTH_BETWEEN_LEGS() - stance["limit_margin_y"].as<Expression>();
 
         auto& walkCycle = config["walk_cycle"];
         stepTime = walkCycle["step_time"].as<Expression>();
@@ -460,14 +553,7 @@ namespace motion
 
         balancer.configure(balance);
 
-        for(auto& gain : balance["servo_gains"])
-        {
-            float p = gain["p"].as<Expression>();
-            ServoID sr = message::input::idFromPartialString(gain["id"].as<std::string>(),message::input::ServoSide::RIGHT);
-            ServoID sl = message::input::idFromPartialString(gain["id"].as<std::string>(),message::input::ServoSide::LEFT);
-            servoControlPGains[sr] = p;
-            servoControlPGains[sl] = p;
-        }
+        
         /* TODO
         // gCompensation parameters
         toeTipCompensation = config["toeTipCompensation"].as<Expression>();
@@ -491,7 +577,6 @@ namespace motion
         supportSideY = config["supportSideY"].as<Expression>();
         supportTurn = config["supportTurn"].as<Expression>();
         */
-        STAND_SCRIPT_DURATION = config["STAND_SCRIPT_DURATION"].as<Expression>();
     }          
 }  // motion
 }  // modules   

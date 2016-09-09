@@ -111,22 +111,12 @@ namespace motion
          */
         ReactionHandle updateHandle;                    // handle(updateWaypoints), disabling when not moving will save unnecessary CPU resources
         ReactionHandle generateStandScriptReaction;     // handle(generateStandAndSaveScript), disabling when not required for capturing standing phase
-        size_t subsumptionId;                           // subsumption ID key to access motors
+        size_t subsumptionId;                           // subsumption ID key to access motors      
 
-/////////////////////////////////////////////////////////////////
-        // The time when the current step begun
-        double beginStepTime;
-        // Update to step is received
-        bool updateStepInstruction;
-        // The time when the current is to be completed
-        double destinationTime;
-        // How to many 'steps' to take before lifting a foot when starting to walk
-        int initialStep;
-        // zmp params m1X, m2X, m1Y, m2Y
-        arma::vec4 zmpParameters;
-         // end state
-        double footMotionPhase;
-/////////////////////////////////////////////////////////////////        
+        /**
+         * Decision abstractions and notify variables...
+         */
+        bool updateStepInstruction;     // Update to step is received 
 
         /**
          * Anthropomorphic metrics for relevant humanoid joints & actuators...
@@ -195,6 +185,8 @@ namespace motion
          * Internal timing reference variables...
          */
         double beginStepTime;                                   // The time when the current step begun
+        double destinationTime;                                 // The time when the current motion is to be completed
+        double footMotionPhase;                                 // Phase representation of foot motion state
         double STAND_SCRIPT_DURATION;                           //
         NUClear::clock::time_point pushTime;                    //
         NUClear::clock::time_point lastVeloctiyUpdateTime;      //
@@ -253,7 +245,9 @@ namespace motion
          */
         Transform2D stepTorso(Transform2D uLeftFoot, Transform2D uRightFoot, double shiftFactor);
         /**
-         * Solve the ZMP equation
+         * @brief [Solve the ZMP equation]
+         * @details [long description]
+         * @return [description]
          */
         arma::vec2 zmpSolve(double zs, double z1, double z2, double x1, double x2, double phase1Single, double phase2Single, double stepTime, double zmpTime);
         /**
@@ -267,7 +261,7 @@ namespace motion
          *
          * @return The torso position in Transform2D
          */
-        Transform2D zmpTorsoCompensation(double phase, arma::vec4 zmpCoefficients, arma::vec4 zmpParams, double stepTime, double zmpTime, double phase1Zmp, double phase2Zmp, Transform2D uSupport, Transform2D uLeftFootDestination, Transform2D uLeftFootSource, Transform2D uRightFootDestination, Transform2D uRightFootSource);
+        Transform2D zmpTorsoCompensation(double phase, arma::vec4 zmpCoefficients, arma::vec4 zmpParams, double stepTime, double zmpTime, double phase1Zmp, double phase2Zmp, Transform2D uLeftFootSource, Transform2D uRightFootSource);
         /**
          * @brief [brief description]
          * @details [long description]
@@ -346,6 +340,90 @@ namespace motion
          * @param inTorsoPosition [description]
          */
         void setVelocity(Transform2D velocity);
+        /**
+         * @brief [brief description]
+         * @details [long description]
+         * 
+         * @param inTorsoPosition [description]
+         */
+        arma::vec3 getLArmPosition();
+        /**
+         * @brief [brief description]
+         * @details [long description]
+         * 
+         * @param inTorsoPosition [description]
+         */
+        void setLArmPosition(arma::vec3 inLArm);
+        /**
+         * @brief [brief description]
+         * @details [long description]
+         * 
+         * @param inTorsoPosition [description]
+         */
+        arma::vec3 getLArmSource();
+        /**
+         * @brief [brief description]
+         * @details [long description]
+         * 
+         * @param inTorsoPosition [description]
+         */
+        void setLArmSource(arma::vec3 inLArm);
+        /**
+         * @brief [brief description]
+         * @details [long description]
+         * 
+         * @param inTorsoPosition [description]
+         */
+        arma::vec3 getLArmDestination();
+        /**
+         * @brief [brief description]
+         * @details [long description]
+         * 
+         * @param inTorsoPosition [description]
+         */
+        void setLArmDestination(arma::vec3 inLArm);
+        /**
+         * @brief [brief description]
+         * @details [long description]
+         * 
+         * @param inTorsoPosition [description]
+         */
+        arma::vec3 getRArmPosition();
+        /**
+         * @brief [brief description]
+         * @details [long description]
+         * 
+         * @param inTorsoPosition [description]
+         */
+        void setRArmPosition(arma::vec3 inRArm);
+        /**
+         * @brief [brief description]
+         * @details [long description]
+         * 
+         * @param inTorsoPosition [description]
+         */
+        arma::vec3 getRArmSource();
+        /**
+         * @brief [brief description]
+         * @details [long description]
+         * 
+         * @param inTorsoPosition [description]
+         */
+        void setRArmSource(arma::vec3 inRArm);
+        /**
+         * @brief [brief description]
+         * @details [long description]
+         * 
+         * @param inTorsoPosition [description]
+         */
+        arma::vec3 getRArmDestination();
+        /**
+         * @brief [brief description]
+         * @details [long description]
+         * 
+         * @param inTorsoPosition [description]
+         */
+        void setRArmDestination(arma::vec3 inRArm);
         /**
          * @brief [brief description]
          * @details [long description]

@@ -68,7 +68,7 @@ namespace motion
 /*=======================================================================================================*/
     WalkEngine::WalkEngine(std::unique_ptr<NUClear::Environment> environment) 
     : Reactor(std::move(environment))
-        , DEBUG(false), DEBUG_ITER(0), initialStep(0)
+        , DEBUG(true), DEBUG_ITER(0), initialStep(0)
         , balanceEnabled(0.0), emitLocalisation(false), emitFootPosition(false)
         , updateHandle(), generateStandScriptReaction(), subsumptionId(1)
         , StateOfWalk()

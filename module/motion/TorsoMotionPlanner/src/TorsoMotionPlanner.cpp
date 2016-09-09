@@ -70,7 +70,7 @@ namespace motion
         , DEBUG(false), DEBUG_ITER(0), initialStep(0)
         , balanceEnabled(0.0), emitLocalisation(false), emitFootPosition(false)
         , updateHandle(), generateStandScriptReaction(), subsumptionId(1)
-        , StateOfWalk()
+        , updateStepInstruction(false)
         , torsoPositionsTransform(), torsoPositionSource(), torsoPositionDestination()
         , leftFootPositionTransform(), leftFootSource(), rightFootPositionTransform()
         , rightFootSource(), leftFootDestination(), rightFootDestination(), uSupportMass()
@@ -80,7 +80,8 @@ namespace motion
         , stepLimits(arma::fill::zeros), footOffsetCoefficient(arma::fill::zeros), uLRFootOffset()
         , armLPostureTransform(), armLPostureSource(), armLPostureDestination()
         , armRPostureTransform(), armRPostureSource(), armRPostureDestination()
-        , beginStepTime(0.0), STAND_SCRIPT_DURATION(0.0), pushTime(), lastVeloctiyUpdateTime()
+        , beginStepTime(0.0), destinationTime(), footMotionPhase()
+        , STAND_SCRIPT_DURATION(0.0), pushTime(), lastVeloctiyUpdateTime()
         , velocityHigh(0.0), accelerationTurningFactor(0.0), velocityLimits(arma::fill::zeros)
         , accelerationLimits(arma::fill::zeros), accelerationLimitsHigh(arma::fill::zeros)
         , velocityCurrent(), velocityCommand()
@@ -97,7 +98,7 @@ namespace motion
 
         //Transform analytical torso positions in accordance with the stipulated targets...
         updateHandle = on<Every<1 /*RESTORE AFTER DEBUGGING: UPDATE_FREQUENCY*/, Per<std::chrono::seconds>>, With<Sensors>, Single, Priority::HIGH>()
-        .then("Torso Motion Planner - Update Torso Position", [this](const Sensors& sensors) 
+        .then("Torso Motion Planner - Update Torso Position", [this](/*const Sensors& sensors*/) 
         {
             if(DEBUG) { NUClear::log("Messaging: Torso Motion Planner - Update Torso Position(0)"); }
             updateTorsoPosition();
@@ -152,7 +153,7 @@ namespace motion
     {
         setTorsoPositionArms(zmpTorsoCompensation(getMotionPhase(), zmpTorsoCoefficients(), getZmpParams(), stepTime, zmpTime, phase1Single, phase2Single, getLeftFootSource(), getRightFootSource()));
         setTorsoPositionLegs(zmpTorsoCompensation(getMotionPhase(), zmpTorsoCoefficients(), getZmpParams(), stepTime, zmpTime, phase1Single, phase2Single, getLeftFootSource(), getRightFootSource()));
-        Transform2D uTorsoWorld = getTorsoPositionArms().localToWorld({-DarwinModel::Leg::HIP_OFFSET_X, 0, 0});
+        Transform2D uTorsoWorld = getTorsoPositionArms().localToWorld({-kinematicsModel.Leg.HIP_OFFSET_X, 0, 0});
         setTorsoPosition3D(arma::vec6({uTorsoWorld.x(), uTorsoWorld.y(), bodyHeight, 0, bodyTilt, uTorsoWorld.angle()}));
         emit(std::make_unique<TorsoMotionUpdate>(getTorsoPositionArms(), getTorsoPositionLegs(), getTorsoPosition3D())); 
     }
@@ -161,8 +162,8 @@ namespace motion
 /*=======================================================================================================*/
     Transform2D TorsoMotionPlanner::stepTorso(Transform2D uLeftFoot, Transform2D uRightFoot, double shiftFactor) 
     {
-        Transform2D uLeftFootSupport  = uLeftFoot.localToWorld({-getFootOffsetCoefficien(0), -getFootOffsetCoefficien(1), 0});
-        Transform2D uRightFootSupport = uRightFoot.localToWorld({-getFootOffsetCoefficien(0), getFootOffsetCoefficien(1), 0});
+        Transform2D uLeftFootSupport  = uLeftFoot.localToWorld({-getFootOffsetCoefficient(0), -getFootOffsetCoefficient(1), 0});
+        Transform2D uRightFootSupport = uRightFoot.localToWorld({-getFootOffsetCoefficient(0), getFootOffsetCoefficient(1), 0});
         return uLeftFootSupport.interpolate(shiftFactor, uRightFootSupport);
     }
 /*=======================================================================================================*/
@@ -285,6 +286,90 @@ namespace motion
     {
         zmpParameters = inZmpParams;
     }       
+/*=======================================================================================================*/
+//      ENCAPSULATION METHOD: getLArmPosition
+/*=======================================================================================================*/    
+    arma::vec3 TorsoMotionPlanner::getLArmPosition()
+    {
+        return (armLPostureTransform);
+    }
+/*=======================================================================================================*/
+//      ENCAPSULATION METHOD: setLArmPosition
+/*=======================================================================================================*/     
+    void TorsoMotionPlanner::setLArmPosition(arma::vec3 inLArm)
+    {
+        armLPostureTransform = inLArm;
+    }
+/*=======================================================================================================*/
+//      ENCAPSULATION METHOD: getLArmSource
+/*=======================================================================================================*/     
+    arma::vec3 TorsoMotionPlanner::getLArmSource()
+    {
+        return (armLPostureSource);
+    }
+/*=======================================================================================================*/
+//      ENCAPSULATION METHOD: setLArmSource
+/*=======================================================================================================*/     
+    void TorsoMotionPlanner::setLArmSource(arma::vec3 inLArm)
+    {
+        armLPostureSource = inLArm;
+    }
+/*=======================================================================================================*/
+//      ENCAPSULATION METHOD: getLArmDestination
+/*=======================================================================================================*/     
+    arma::vec3 TorsoMotionPlanner::getLArmDestination()
+    {
+        return (armLPostureDestination);
+    }
+/*=======================================================================================================*/
+//      ENCAPSULATION METHOD: setLArmDestination
+/*=======================================================================================================*/     
+    void TorsoMotionPlanner::setLArmDestination(arma::vec3 inLArm)
+    {
+        armLPostureDestination = inLArm;
+    }
+/*=======================================================================================================*/
+//      ENCAPSULATION METHOD: getRArmPosition
+/*=======================================================================================================*/ 
+    arma::vec3 TorsoMotionPlanner::getRArmPosition()
+    {
+        return (armRPostureTransform);
+    }
+/*=======================================================================================================*/
+//      ENCAPSULATION METHOD: setRArmPosition
+/*=======================================================================================================*/     
+    void TorsoMotionPlanner::setRArmPosition(arma::vec3 inRArm)
+    {
+        armRPostureTransform = inRArm;
+    }
+/*=======================================================================================================*/
+//      ENCAPSULATION METHOD: getRArmSource
+/*=======================================================================================================*/     
+    arma::vec3 TorsoMotionPlanner::getRArmSource()
+    {
+        return (armRPostureSource);
+    }
+/*=======================================================================================================*/
+//      ENCAPSULATION METHOD: setRArmSource
+/*=======================================================================================================*/     
+    void TorsoMotionPlanner::setRArmSource(arma::vec3 inRArm)
+    {
+        armRPostureSource = inRArm;
+    }
+/*=======================================================================================================*/
+//      ENCAPSULATION METHOD: getRArmDestination
+/*=======================================================================================================*/     
+    arma::vec3 TorsoMotionPlanner::getRArmDestination()
+    {
+        return (armRPostureDestination);
+    }
+/*=======================================================================================================*/
+//      ENCAPSULATION METHOD: setRArmDestination
+/*=======================================================================================================*/     
+    void TorsoMotionPlanner::setRArmDestination(arma::vec3 inRArm)
+    {
+        armRPostureDestination = inRArm;
+    }      
 /*=======================================================================================================*/
 //      ENCAPSULATION METHOD: getTorsoPosition
 /*=======================================================================================================*/
