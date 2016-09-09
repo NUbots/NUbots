@@ -43,7 +43,6 @@ namespace motion
     using message::behaviour::WalkConfigSaved;
     // using message::behaviour::RegisterAction;
     // using message::behaviour::ActionPriorites;
-    using message::input::LimbID;
     using message::motion::WalkCommand;
     using message::motion::NewWalkCommand;
     using message::motion::WalkStartCommand;
@@ -80,7 +79,7 @@ namespace motion
         , bodyTilt(0.0), bodyHeight(0.0), stanceLimitY2(0.0), stepTime(0.0), stepHeight(0.0)
         , step_height_slow_fraction(0.0f), step_height_fast_fraction(0.0f)
         , gainArms(0.0f), gainLegs(0.0f), stepLimits(arma::fill::zeros)
-        , footOffset(arma::fill::zeros), uLRFootOffset()
+        , footOffsetCoefficient(arma::fill::zeros), uLRFootOffset()
         , armLPostureTransform(), armLPostureSource(), armLPostureDestination()
         , armRPostureTransform(), armRPostureSource(), armRPostureDestination()
         , beginStepTime(0.0), STAND_SCRIPT_DURATION(0.0), pushTime(), lastVeloctiyUpdateTime()
@@ -605,6 +604,27 @@ namespace motion
         uSupportMass = inSupportMass;
     }    
 /*=======================================================================================================*/
+//      ENCAPSULATION METHOD: getFootOffsetCoefficient
+/*=======================================================================================================*/
+    double WalkEngine::getFootOffsetCoefficient(int index)
+    {
+        return (footOffsetCoefficient[index]);
+    }
+/*=======================================================================================================*/
+//      ENCAPSULATION METHOD: setFootOffsetCoefficient
+/*=======================================================================================================*/
+    void WalkEngine::setFootOffsetCoefficient(const arma::vec2& inFootOffsetCoefficient)
+    {
+        footOffsetCoefficient = inFootOffsetCoefficient;
+    }      
+/*=======================================================================================================*/
+//      ENCAPSULATION METHOD: setFootOffsetCoefficient
+/*=======================================================================================================*/
+    void WalkEngine::setFootOffsetCoefficient(int index, double inValue)
+    {
+        footOffsetCoefficient[index] = inValue;
+    }    
+/*=======================================================================================================*/
 //      ENCAPSULATION METHOD: getLeftFootPosition
 /*=======================================================================================================*/
     Transform2D WalkEngine::getLeftFootPosition()
@@ -702,7 +722,7 @@ namespace motion
         setLArmDestination(stance["arms"]["left"]["end"].as<arma::vec>());
         setRArmSource(stance["arms"]["right"]["start"].as<arma::vec>());
         setRArmDestination(stance["arms"]["right"]["end"].as<arma::vec>());
-        footOffset = stance["foot_offset"].as<arma::vec>();
+        setFootOffsetCoefficient(stance["foot_offset"].as<arma::vec>());
         // gToe/heel overlap checking values
         stanceLimitY2 = kinematicsModel.Leg.LENGTH_BETWEEN_LEGS() - stance["limit_margin_y"].as<Expression>();
 

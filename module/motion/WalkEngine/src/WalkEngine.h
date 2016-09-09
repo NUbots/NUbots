@@ -171,7 +171,7 @@ namespace motion
         float  gainArms;                                //
         float  gainLegs;                                //
         arma::mat::fixed<3,2> stepLimits;               //              
-        arma::vec2 footOffset;                          //
+        arma::vec2 footOffsetCoefficient;               //
         Transform2D uLRFootOffset;                      // standard offset
 
         /**

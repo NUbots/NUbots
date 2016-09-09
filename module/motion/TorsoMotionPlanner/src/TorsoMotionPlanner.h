@@ -29,30 +29,38 @@
 #include <yaml-cpp/yaml.h>
 
 #include "message/support/Configuration.h"
+
 #include "message/behaviour/Action.h"
 #include "message/behaviour/ServoCommand.h"
+#include "message/behaviour/FixedWalkCommand.h"
+
+#include "message/input/Sensors.h"
+#include "message/input/PushDetection.h"
+
+#include "message/motion/KinematicsModels.h"
 #include "message/motion/WalkCommand.h"
 #include "message/motion/FootMotionCommand.h" 
 #include "message/motion/FootPlacementCommand.h" 
 #include "message/motion/TorsoMotionCommand.h" 
-#include "message/input/Sensors.h"
 #include "message/motion/ServoTarget.h"
 #include "message/motion/Script.h"
-#include "message/behaviour/FixedWalkCommand.h"
-#include "message/localisation/FieldObject.h"
-#include "message/input/PushDetection.h"
 
+#include "message/localisation/FieldObject.h"
+
+#include "utility/support/yaml_armadillo.h"
+#include "utility/support/yaml_expression.h"
+
+#include "utility/math/angle.h"
+#include "utility/math/matrix/Rotation3D.h"
 #include "utility/math/geometry/UnitQuaternion.h"
 #include "utility/math/matrix/Transform2D.h"
 #include "utility/math/matrix/Transform3D.h"
+
 #include "utility/motion/Balance.h"
-#include "utility/nubugger/NUhelpers.h"
-#include "utility/support/yaml_armadillo.h"
-#include "utility/support/yaml_expression.h"
 #include "utility/motion/InverseKinematics.h"
 #include "utility/motion/ForwardKinematics.h"
-#include "utility/math/angle.h"
-#include "utility/math/matrix/Rotation3D.h"
+
+#include "utility/nubugger/NUhelpers.h" 
 
 namespace module 
 {
@@ -67,11 +75,13 @@ namespace motion
          * TODO: Probably be a global config somewhere, waiting on NUClear to support runtime on<Every> arguments
          */
         static constexpr size_t UPDATE_FREQUENCY = 90;
+
         static constexpr const char* CONFIGURATION_PATH = "TorsoMotionPlanner.yaml";
         static constexpr const char* CONFIGURATION_MSSG = "Torso Motion Planner - Configure";
         static constexpr const char* ONTRIGGER_TORSO_CMD = "Torso Motion Planner - Update Torso Position";
         static constexpr const char* ONTRIGGER_TORSO_TGT = "Torso Motion Planner - Received Target Torso Position";
         static constexpr const char* ONTRIGGER_FOOT_INFO = "Torso Motion Planner - Received Foot Motion Update";
+
         explicit TorsoMotionPlanner(std::unique_ptr<NUClear::Environment> environment);
     private:
         using LimbID         = message::input::LimbID;
@@ -82,19 +92,28 @@ namespace motion
         using Transform3D    = utility::math::matrix::Transform3D;
         using UnitQuaternion = utility::math::geometry::UnitQuaternion;
 
-        //Debug output
-        bool DEBUG = false; 
+         /**
+         * Temporary debugging variables for local output logging...
+         */ 
+        bool DEBUG;                 //
+        int  DEBUG_ITER;            //
+        int  initialStep;           // TODO: How to many 'steps' to take before lifting a foot when starting to walk
 
-        /// Current subsumption ID key to access motors.
-        size_t subsumptionId = 1;
+        /**
+         * NUsight feedback initialized from configuration script, see config file for documentation...
+         */
+        bool balanceEnabled;        //
+        bool emitLocalisation;      //
+        bool emitFootPosition;      //
 
-        // Reaction handle for the main update loop, disabling when not moving will save unnecessary CPU
-        ReactionHandle updateHandle;
+        /**
+         * Resource abstractions for id and handler instances...
+         */
+        ReactionHandle updateHandle;                    // handle(updateWaypoints), disabling when not moving will save unnecessary CPU resources
+        ReactionHandle generateStandScriptReaction;     // handle(generateStandAndSaveScript), disabling when not required for capturing standing phase
+        size_t subsumptionId;                           // subsumption ID key to access motors
 
-        // // Whether subsumption has currently interrupted the walk engine
-        // bool interrupted;
-        // TODO: ???
-        bool startFromStep;
+/////////////////////////////////////////////////////////////////
         // The time when the current step begun
         double beginStepTime;
         // Update to step is received
@@ -103,114 +122,152 @@ namespace motion
         double destinationTime;
         // How to many 'steps' to take before lifting a foot when starting to walk
         int initialStep;
-        // Active torso relative positions struct
-        struct TorsoPositions 
+        // zmp params m1X, m2X, m1Y, m2Y
+        arma::vec4 zmpParameters;
+         // end state
+        double footMotionPhase;
+/////////////////////////////////////////////////////////////////        
+
+        /**
+         * Anthropomorphic metrics for relevant humanoid joints & actuators...
+         */
+        struct TorsoPositions                           // Active torso relative positions struct
         {
+            TorsoPositions() 
+            : FrameArms()
+            , FrameLegs()
+            , Frame3D()
+            {
+                FrameArms = Transform2D();
+                FrameLegs = Transform2D();
+                Frame3D = Transform2D();
+            }
+            ~TorsoPositions() {}
+
             Transform2D FrameArms;
             Transform2D FrameLegs;
             Transform3D Frame3D;
         };
-        // Active torso position
-        TorsoPositions torsoPositionsTransform;
-        // Pre-step torso position
-        Transform2D torsoPositionSource;
-        // Torso step target position
-        Transform2D torsoPositionDestination;
-        // Active left foot position
-        Transform2D leftFootPositionTransform;
-        // Pre-step left foot position
-        Transform2D leftFootSource;
-        // Active right foot position
-        Transform2D rightFootPositionTransform;
-        // Pre-step right foot position
-        Transform2D rightFootSource;
-        // Destination placement Transform2D left foot positions
-        std::queue<Transform2D> leftFootDestination;
-        // Destination placement Transform2D right foot positions
-        std::queue<Transform2D> rightFootDestination;
-        // TODO: ??? Appears to be support foot pre-step position
-        Transform2D uSupportMass;
-        // zmp params m1X, m2X, m1Y, m2Y
-        arma::vec4 zmpParameters;
-         // end state
+        TorsoPositions torsoPositionsTransform;         // Active torso position
+        Transform2D torsoPositionSource;                // Pre-step torso position
+        Transform2D torsoPositionDestination;           // Torso step target position
+        Transform2D leftFootPositionTransform;          // Active left foot position
+        Transform2D leftFootSource;                     // Pre-step left foot position
+        Transform2D rightFootPositionTransform;         // Active right foot position
+        Transform2D rightFootSource;                    // Pre-step right foot position
+        std::queue<Transform2D> leftFootDestination;    // Destination placement Transform2D left foot positions
+        std::queue<Transform2D> rightFootDestination;   // Destination placement Transform2D right foot positions
+        Transform2D uSupportMass;                       // Appears to be support foot pre-step position
+        LimbID activeForwardLimb;                       // The leg that is 'swinging' in the step, opposite of the support foot
+        LimbID activeLimbInitial;                       // TODO: Former initial non-support leg for deterministic walking approach
 
-        double footMotionPhase;
+        /**
+         * Anthropomorphic metrics initialized from configuration script, see config file for documentation...
+         */
+        double bodyTilt;                                // 
+        double bodyHeight;                              //
+    //  double supportFront;                            //
+    //  double supportFront2;                           //
+    //  double supportBack;                             //
+    //  double supportSideX;                            //
+    //  double supportSideY;                            //
+    //  double supportTurn;                             //    
+        double stanceLimitY2;                           //
+        double stepTime;                                //
+        double stepHeight;                              //
+        float  step_height_slow_fraction;               //
+        float  step_height_fast_fraction;               //
+        arma::mat::fixed<3,2> stepLimits;               //              
+        arma::vec2 footOffsetCoefficient;               //
+        Transform2D uLRFootOffset;                      // standard offset
 
-        // start config, see config file for documentation
-        arma::mat::fixed<3,2> stepLimits;
-        arma::mat::fixed<3,2> velocityLimits;
-        arma::vec3 accelerationLimits;
-        arma::vec3 accelerationLimitsHigh;
-        double velocityHigh;
-        double accelerationTurningFactor;
-        double bodyHeight;
-        double bodyTilt;
-        float gainArms;
-        float gainLegs;
-        double stepTime;
-        double zmpTime;
-        double stepHeight;
-        float step_height_slow_fraction;
-        float step_height_fast_fraction;
-        double phase1Single;
-        double phase2Single;
-        arma::vec2 footOffset;
-        // standard offset
-        Transform2D uLRFootOffset;
-        // arm poses
-        arma::vec3 qLArmStart;
-        arma::vec3 qLArmEnd;
-        arma::vec3 qRArmStart;
-        arma::vec3 qRArmEnd;
-        LimbID swingLegInitial = LimbID::LEFT_LEG;
+        /**
+         * Arm Position vectors initialized from configuration script, see config file for documentation...
+         */
+        arma::vec3 armLPostureTransform;                // 
+        arma::vec3 armLPostureSource;                   //  
+        arma::vec3 armLPostureDestination;              //  
+        arma::vec3 armRPostureTransform;                //  
+        arma::vec3 armRPostureSource;                   //  
+        arma::vec3 armRPostureDestination;              //  
 
-        bool balanceEnabled;
-        bool emitLocalisation;
-        bool emitFootPosition;
+        /**
+         * Internal timing reference variables...
+         */
+        double beginStepTime;                                   // The time when the current step begun
+        double STAND_SCRIPT_DURATION;                           //
+        NUClear::clock::time_point pushTime;                    //
+        NUClear::clock::time_point lastVeloctiyUpdateTime;      //
 
-        double balanceAmplitude;
-        double balanceWeight;
-        double balanceOffset;
-        double balancePGain;
-        double balanceIGain;
-        double balanceDGain;
+        /**
+         * Motion data for relevant humanoid actuators...
+         */
+        double velocityHigh;                            // 
+        double accelerationTurningFactor;               //
+        arma::mat::fixed<3,2> velocityLimits;           //
+        arma::vec3 accelerationLimits;                  //
+        arma::vec3 accelerationLimitsHigh;              //
+        Transform2D velocityCurrent;                    // Current robot velocity
+        Transform2D velocityCommand;                    // Current velocity command
 
-        NUClear::clock::time_point lastVeloctiyUpdateTime;
+        /**
+         * Motion data initialized from configuration script, see config file for documentation...
+         */
+    //  double velFastForward;                          //
+    //  double velFastTurn;                             //
+        
+        /**
+         * Dynamic analysis parameters for relevant motion planning...
+         */
+        arma::vec4 zmpCoefficients;                     // zmp expoential coefficients aXP aXN aYP aYN
+        arma::vec4 zmpParameters;                       // zmp params m1X, m2X, m1Y, m2Y
 
-        // jointGains are the current gains sent to the servos
-        std::map<ServoID, float> jointGains;
-        // servoControlPGains are the constant proportionality
-        // constants which define the current values of jointGains based on the robot's balance state
-        std::map<ServoID, float> servoControlPGains;
+        /**
+         * Dynamic analysis parameters initialized from configuration script, see config file for documentation...
+         */
+        double zmpTime;                                 // 
+        double phase1Single;                            //
+        double phase2Single;                            //
 
+        /**
+         * Balance & Kinematics module initialization...
+         */
+        message::motion::kinematics::KinematicsModel kinematicsModel;   //
 
-        utility::motion::Balancer balancer;
-
-        NUClear::clock::time_point pushTime;
-
-
-        /*arma::vec4 ankleImuParamX;
-        arma::vec4 ankleImuParamY;
-        arma::vec4 kneeImuParamX;
-        arma::vec4 hipImuParamY;
-        arma::vec4 armImuParamX;
-        arma::vec4 armImuParamY;
-
-        double velFastForward;
-        double velFastTurn;
-        double supportFront;
-        double supportFront2;
-        double supportBack;
-        double supportSideX;
-        double supportSideY;
-        double supportTurn;*/
-
-        // Initial body swing
-        // double toeTipCompensation;
-        double hipRollCompensation;
-
-        // end config
-
+        /**
+         * The last foot goal rotation...
+         */
+        UnitQuaternion lastFootGoalRotation;            //
+        UnitQuaternion footGoalErrorSum;                //
+       
+        /**
+         * @brief [brief description]
+         * @details [long description]
+         * @return [description]
+         */
+        void updateTorsoPosition();
+        /**
+         * @brief [brief description]
+         * @details [long description]
+         * @return [description]
+         */
+        Transform2D stepTorso(Transform2D uLeftFoot, Transform2D uRightFoot, double shiftFactor);
+        /**
+         * Solve the ZMP equation
+         */
+        arma::vec2 zmpSolve(double zs, double z1, double z2, double x1, double x2, double phase1Single, double phase2Single, double stepTime, double zmpTime);
+        /**
+         * @brief [brief description]
+         * @details [long description]
+         * @return [description]
+         */
+        arma::vec4 zmpTorsoCoefficients();
+        /**
+         * Uses ZMP to determine the torso position
+         *
+         * @return The torso position in Transform2D
+         */
+        Transform2D zmpTorsoCompensation(double phase, arma::vec4 zmpCoefficients, arma::vec4 zmpParams, double stepTime, double zmpTime, double phase1Zmp, double phase2Zmp, Transform2D uSupport, Transform2D uLeftFootDestination, Transform2D uLeftFootSource, Transform2D uRightFootDestination, Transform2D uRightFootSource);
         /**
          * @brief [brief description]
          * @details [long description]
@@ -218,13 +275,77 @@ namespace motion
          * @param config [description]
          */
         void configure(const YAML::Node& config);
-
-        double STAND_SCRIPT_DURATION;
-        ReactionHandle generateStandScriptReaction;
-
-        void updateTorsoPosition();
-
-        arma::vec4 zmpTorsoCoefficients();
+        /**
+         * @brief [brief description]
+         * @details [long description]
+         * @return get a unix timestamp (in decimal seconds that are accurate to the microsecond)
+         * 
+         * @param inTorsoPosition [description]
+         */
+        double getTime();
+        /**
+         * @brief [brief description]
+         * @details [long description]
+         * @return [description]
+         */
+        double getDestinationTime();
+        /**
+         * @brief [brief description]
+         * @details [long description]
+         * @return [description]
+         */
+        void setDestinationTime(double inDestinationTime);
+        /**
+         * @brief [brief description]
+         * @details [long description]
+         * @return [description]
+         */
+        bool getNewStepReceived();
+        /**
+         * @brief [brief description]
+         * @details [long description]
+         * @return [description]
+         */
+        void setNewStepReceived(bool inUpdateStepInstruction);
+        /**
+         * @brief [brief description]
+         * @details [long description]
+         * @return [description]
+         */
+        double getMotionPhase();
+        /**
+         * @brief [brief description]
+         * @details [long description]
+         * @return [description]
+         */
+        void setMotionPhase(double inMotionPhase);
+        /**
+         * @brief [brief description]
+         * @details [long description]
+         * @return [description]
+         */
+        arma::vec4 getZmpParams();
+        /**
+         * @brief [brief description]
+         * @details [long description]
+         * @return [description]
+         */
+        void setZmpParams(arma::vec4 inZmpParams);   
+         /**
+         * @brief [brief description]
+         * @details [long description]
+         * @return Current velocity
+         * 
+         * @param inTorsoPosition [description]
+         */
+        Transform2D getVelocity();
+        /**
+         * @brief [brief description]
+         * @details [long description]
+         * 
+         * @param inTorsoPosition [description]
+         */
+        void setVelocity(Transform2D velocity);
         /**
          * @brief [brief description]
          * @details [long description]
@@ -309,6 +430,29 @@ namespace motion
         /**
          * @brief [brief description]
          * @details [long description]
+         * 
+         * @param index [description]
+         * @return [description]
+         */
+        double getFootOffsetCoefficient(int index);
+        /**
+         * @brief [brief description]
+         * @details [long description]
+         * 
+         * @param inFootOffsetCoefficient [description]
+         */
+        void setFootOffsetCoefficient(const arma::vec2& inFootOffsetCoefficient);
+        /**
+         * @brief [brief description]
+         * @details [long description]
+         * 
+         * @param index [description]
+         * @param inValue [description]
+         */
+        void setFootOffsetCoefficient(int index, double inValue);
+        /**
+         * @brief [brief description]
+         * @details [long description]
          * @return [description]
          */
         Transform2D getLeftFootPosition();
@@ -384,53 +528,6 @@ namespace motion
          * @param inRightFootDestination [description]
          */
         void setRightFootDestination(const Transform2D& inRightFootDestination);
-
-        Transform2D stepTorso(Transform2D uLeftFoot, Transform2D uRightFoot, double shiftFactor);
-
-        /**
-         * @brief [return current velocity]
-         * @details [long description]
-         * @return [description]
-         */
-        Transform2D getVelocity();
-
-        bool getNewStepReceived();
-        void setNewStepReceived(bool inUpdateStepInstruction);
-
-        arma::vec2 zmpSolve(double zs, double z1, double z2, double x1, double x2, double phase1Single, double phase2Single, double stepTime, double zmpTime);
-
-        arma::vec4 getZmpParams();
-        void setZmpParams(arma::vec4 inZmpParams);    
-
-        /**
-         * Uses ZMP to determine the torso position
-         *
-         * @return The torso position in Transform2D
-         */
-        Transform2D zmpTorsoCompensation(double phase, arma::vec4 zmpCoefficients, arma::vec4 zmpParams, double stepTime, double zmpTime, double phase1Zmp, double phase2Zmp, Transform2D uLeftFootSource, Transform2D uRightFootSource);
-
-        /**
-         * This is an easing function that returns 3 values {x,y,z} with the range [0,1]
-         * This is used to 'ease' the foot path through its trajectory.
-         * The params phase1Single and phase2Single are used to tune the amount of time the robot spends on two feet
-         * Note: Only x/z are used currently and y is always 0
-         * See: http://easings.net/ to reference common easing functions
-         *
-         * @param phase The input to the easing function, with a range of [0,1].
-         * @param phase1Single The phase time between [0,1] to start the step. A value of 0.1 means the step will not start until phase is >= 0.1
-         * @param phase2Single The phase time between [0,1] to end the step. A value of 0.9 means the step will end when phase >= 0.9
-         */
-        
-        double getMotionPhase();
-        void setMotionPhase(double inMotionPhase);
-
-        double getTime();
-        double getDestinationTime();
-        void setDestinationTime(double inDestinationTime);
-
-        /**
-         * @return A clamped between 0 and maxvalue, offset by deadband
-         */
     };
 
 }  // motion

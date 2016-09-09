@@ -26,21 +26,38 @@
 #include <yaml-cpp/yaml.h>
 
 #include "message/support/Configuration.h"
+
 #include "message/behaviour/Action.h"
+#include "message/behaviour/ServoCommand.h"
+#include "message/behaviour/FixedWalkCommand.h"
+
+#include "message/input/Sensors.h"
+#include "message/input/PushDetection.h"
+
+#include "message/motion/KinematicsModels.h"
 #include "message/motion/WalkCommand.h"
 #include "message/motion/FootMotionCommand.h" 
 #include "message/motion/FootPlacementCommand.h"
-#include "message/behaviour/ServoCommand.h"
-#include "message/input/Sensors.h"
+#include "message/motion/ServoTarget.h"
+#include "message/motion/Script.h"
+
+#include "message/localisation/FieldObject.h"
 
 #include "utility/support/yaml_armadillo.h"
 #include "utility/support/yaml_expression.h"
 
+#include "utility/math/angle.h"
+#include "utility/math/matrix/Rotation3D.h"
 #include "utility/math/geometry/UnitQuaternion.h"
 #include "utility/math/matrix/Transform2D.h"
 #include "utility/math/matrix/Transform3D.h"
+
 #include "utility/motion/Balance.h"
+#include "utility/motion/InverseKinematics.h"
+#include "utility/motion/ForwardKinematics.h"
+
 #include "utility/nubugger/NUhelpers.h"
+
 
 namespace module 
 {
@@ -55,10 +72,12 @@ namespace motion
          * TODO: Probably be a global config somewhere, waiting on NUClear to support runtime on<Every> arguments
          */
         static constexpr size_t UPDATE_FREQUENCY = 90;
+
         static constexpr const char* CONFIGURATION_PATH = "FootPlacementPlanner.yaml";
         static constexpr const char* CONFIGURATION_MSSG = "Foot Placement Planner - Configure";
         static constexpr const char* ONTRIGGER_FOOT_CMD = "Foot Placement Planner - Update Foot Target";
         static constexpr const char* ONTRIGGER_FOOT_TGT = "Foot Placement Planner - Calculate Target Foot Position";
+
         explicit FootPlacementPlanner(std::unique_ptr<NUClear::Environment> environment);
     private:
     	using LimbID         = message::input::LimbID;
@@ -69,144 +88,112 @@ namespace motion
         using Transform3D    = utility::math::matrix::Transform3D;
         using UnitQuaternion = utility::math::geometry::UnitQuaternion;
 
-        //Debug output
-        bool DEBUG = false; 
-
-        enum State {
-            /**
-             * Walk engine has completely stopped and standing still
-             */
-            STOPPED,
-
-            /**
-             * A stop request has been made but not received
-             */
-            STOP_REQUEST,
-
-            /**
-             * Stop request has been made and now taking the last step before stopping
-             */
-            LAST_STEP,
-
-            /**
-             * Walk engine is walking as normal
-             */
-            WALKING
-        };
-
-        /// Current subsumption ID key to access motors.
-        size_t subsumptionId = 1;
-
-        // Reaction handle for the main update loop, disabling when not moving will save unnecessary CPU
-        ReactionHandle updateHandle;
-
-        // start state
-
-        // The state of the current walk
-        State state;
-        // // Whether subsumption has currently interrupted the walk engine
-        // bool interrupted;
-        // TODO: ???
-        bool startFromStep;
-        // The time when the current step begun
-        double beginStepTime;
-        // How to many 'steps' to take before lifting a foot when starting to walk
-        int initialStep;
-        // Active torso position
-        Transform2D torsoPositionTransform;
-        // Pre-step torso position
-        Transform2D torsoPositionSource;
-        // Torso step target position
-        Transform2D torsoPositionDestination;
-        // Active left foot position
-        Transform2D leftFootPositionTransform;
-        // Pre-step left foot position
-        Transform2D leftFootSource;
-        // Active right foot position
-        Transform2D rightFootPositionTransform;
-        // Pre-step right foot position
-        Transform2D rightFootSource;
-        // Destination placement Transform2D left foot positions
-        std::queue<Transform2D> leftFootDestination;
-        // Destination placement Transform2D right foot positions
-        std::queue<Transform2D> rightFootDestination;
-        // Current robot velocity
-        Transform2D velocityCurrent;
-        // Current velocity command
-        Transform2D velocityCommand;
-        // ??
-        Transform2D velocityDifference;
-        // The leg that is 'swinging' in the step, opposite of the support foot
-        LimbID swingLeg;
-        // ??
-        Transform2D uSupportMass;
-        // end state
-
-        double STAND_SCRIPT_DURATION;
-
-        // start config, see config file for documentation
-
-        double stanceLimitY2;
-        arma::mat::fixed<3,2> stepLimits;
-        arma::mat::fixed<3,2> velocityLimits;
-        arma::vec3 accelerationLimits;
-        arma::vec3 accelerationLimitsHigh;
-        double velocityHigh;
-        double accelerationTurningFactor;
-        double bodyHeight;
-        double bodyTilt;
-        float gainArms;
-        float gainLegs;
-        double stepTime;
-        double stepHeight;
-        float step_height_slow_fraction;
-        float step_height_fast_fraction;
-        double phase1Single;
-        double phase2Single;
-        arma::vec2 footOffsetCoefficient;
-        // standard offset
-        Transform2D uLRFootOffset;
-        // arm poses
-        arma::vec3 qLArmStart;
-        arma::vec3 qLArmEnd;
-        arma::vec3 qRArmStart;
-        arma::vec3 qRArmEnd;
-        LimbID swingLegInitial = LimbID::LEFT_LEG;
-
-        bool balanceEnabled;
-        bool emitLocalisation;
-        bool emitFootPosition;
-
-        double balanceAmplitude;
-        double balanceWeight;
-        double balanceOffset;
-        double balancePGain;
-        double balanceIGain;
-        double balanceDGain;
-
-        double hipRollCompensation;
-
-        NUClear::clock::time_point lastVeloctiyUpdateTime;
-
-        // jointGains are the current gains sent to the servos
-        std::map<ServoID, float> jointGains;
-        // servoControlPGains are the constant proportionality
-        // constants which define the current values of jointGains based on the robot's balance state
-        std::map<ServoID, float> servoControlPGains;
-
-        utility::motion::Balancer balancer;
-
-        NUClear::clock::time_point pushTime;
-        
-        // end config
+        /**
+         * Temporary debugging variables for local output logging...
+         */ 
+        bool DEBUG;                 //
+        int  DEBUG_ITER;            //
+        int  initialStep;           // TODO: How to many 'steps' to take before lifting a foot when starting to walk
 
         /**
-         * @brief [brief description]
-         * @details [long description]
-         * 
-         * @param config [description]
+         * NUsight feedback initialized from configuration script, see config file for documentation...
          */
-        void configure(const YAML::Node& config);
+        bool balanceEnabled;        //
+        bool emitLocalisation;      //
+        bool emitFootPosition;      //
+
+        /**
+         * Resource abstractions for id and handler instances...
+         */
+        ReactionHandle updateHandle;                    // handle(updateWaypoints), disabling when not moving will save unnecessary CPU resources
+        ReactionHandle generateStandScriptReaction;     // handle(generateStandAndSaveScript), disabling when not required for capturing standing phase
+        size_t subsumptionId;                           // subsumption ID key to access motors
+
+        /**
+         * The current abstract state of WalkEngine...
+         */
+        enum State {
+            STOPPED,            // Walk engine has completely stopped and standing still
+            STOP_REQUEST,       // A stop request has been made but not received
+            LAST_STEP,          // Stop request has been made and now taking the last step before stopping
+            WALKING             // Walk engine is walking as normal
+        } StateOfWalk;
+
+        /**
+         * Anthropomorphic metrics for relevant humanoid joints & actuators...
+         */
+        Transform2D torsoPositionTransform;             // Active torso position
+        Transform2D torsoPositionSource;                // Pre-step torso position
+        Transform2D torsoPositionDestination;           // Torso step target position
+        Transform2D leftFootPositionTransform;          // Active left foot position
+        Transform2D leftFootSource;                     // Pre-step left foot position
+        Transform2D rightFootPositionTransform;         // Active right foot position
+        Transform2D rightFootSource;                    // Pre-step right foot position
+        std::queue<Transform2D> leftFootDestination;    // Destination placement Transform2D left foot positions
+        std::queue<Transform2D> rightFootDestination;   // Destination placement Transform2D right foot positions
+        Transform2D uSupportMass;                       // Appears to be support foot pre-step position
+        LimbID activeForwardLimb;                       // The leg that is 'swinging' in the step, opposite of the support foot
+        LimbID activeLimbInitial;                       // TODO: Former initial non-support leg for deterministic walking approach
+        
+        /**
+         * Anthropomorphic metrics initialized from configuration script, see config file for documentation...
+         */
+        double bodyTilt;                                // 
+        double bodyHeight;                              //
+    //  double supportFront;                            //
+    //  double supportFront2;                           //
+    //  double supportBack;                             //
+    //  double supportSideX;                            //
+    //  double supportSideY;                            //
+    //  double supportTurn;                             //    
+        double stanceLimitY2;                           //
+        double stepTime;                                //
+        double stepHeight;                              //
+        float  step_height_slow_fraction;               //
+        float  step_height_fast_fraction;               //
+        float  gainArms;                                //
+        float  gainLegs;                                //
+        arma::mat::fixed<3,2> stepLimits;               //              
+        arma::vec2 footOffsetCoefficient;               //
+        Transform2D uLRFootOffset;                      // standard offset
+
+        /**
+         * Internal timing reference variables...
+         */
+        double beginStepTime;                                   // The time when the current step begun
+        double STAND_SCRIPT_DURATION;                           //
+        NUClear::clock::time_point lastVeloctiyUpdateTime;      //
+
+        /**
+         * Motion data for relevant humanoid actuators...
+         */
+        double velocityHigh;                            // 
+        double accelerationTurningFactor;               //
+        arma::mat::fixed<3,2> velocityLimits;           //
+        arma::vec3 accelerationLimits;                  //
+        arma::vec3 accelerationLimitsHigh;              //
+        Transform2D velocityCurrent;                    // Current robot velocity
+        Transform2D velocityCommand;                    // Current velocity command
+        Transform2D velocityDifference;                 // Current velocity differential
+
+        /**
+         * Dynamic analysis parameters for relevant motion planning...
+         */
+        arma::vec4 zmpCoefficients;                     // zmp expoential coefficients aXP aXN aYP aYN
+        arma::vec4 zmpParameters;                       // zmp params m1X, m2X, m1Y, m2Y
+
+        /**
+         * Dynamic analysis parameters initialized from configuration script, see config file for documentation...
+         */
+        double zmpTime;                                 // 
+        double phase1Single;                            //
+        double phase2Single;                            //
+
+        /**
+         * Balance & Kinematics module initialization...
+         */
+        message::motion::kinematics::KinematicsModel kinematicsModel;   //
+
         /**
          * @brief [brief description]
          * @details [long description]
@@ -226,12 +213,24 @@ namespace motion
          * @brief [brief description]
          * @details [long description]
          */
-        void stop();
+        void stop();        
         /**
          * @brief [brief description]
          * @details [long description]
+         * 
+         * @param config [description]
          */
         void calculateNewStep();
+        /**
+         * @brief [brief description]
+         * @details [long description]
+         * 
+         * @param velocity [description]
+         * @param swingLeg [description]
+         * 
+         * @return [description]
+         */
+        Transform2D getNewFootTarget(const Transform2D& velocity, const LimbID& swingLeg);
         /**
          * @brief [brief description]
          * @details [long description]
@@ -248,7 +247,19 @@ namespace motion
          * @brief [brief description]
          * @details [long description]
          */
-        void stanceReset();
+        void configure(const YAML::Node& config);
+        /**
+         * @brief [brief description]
+         * @details [long description]
+         * @return [description]
+         */
+        double getTime();
+        /**
+         * @brief [brief description]
+         * @details [long description]
+         * @return [description]
+         */
+        Transform2D getVelocity();
         /**
          * @brief [brief description]
          * @details [long description]
@@ -401,29 +412,7 @@ namespace motion
          * 
          * @param inRightFootDestination [description]
          */
-        void setRightFootDestination(const Transform2D& inRightFootDestination);
-        /**
-         * @brief [brief description]
-         * @details [long description]
-         * 
-         * @param velocity [description]
-         * @param swingLeg [description]
-         * 
-         * @return [description]
-         */
-        Transform2D getNewFootTarget(const Transform2D& velocity, const LimbID& swingLeg);
-        /**
-         * @brief [brief description]
-         * @details [long description]
-         * @return [description]
-         */
-        Transform2D getVelocity();
-        /**
-         * @brief [brief description]
-         * @details [long description]
-         * @return [description]
-         */
-        double getTime();
+        void setRightFootDestination(const Transform2D& inRightFootDestination);        
     };
 }  // motion
 }  // modules

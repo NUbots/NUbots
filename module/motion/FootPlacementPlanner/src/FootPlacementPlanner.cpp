@@ -43,7 +43,7 @@ namespace motion
     using message::support::Configuration;
 
     using utility::support::Expression;
-    using utility::motion::kinematics::DarwinModel;
+    using message::motion::kinematics::KinematicsModel;
     using utility::math::matrix::Transform2D;
     using utility::math::matrix::Transform3D;
     using utility::nubugger::graph;
@@ -52,6 +52,24 @@ namespace motion
 /*=======================================================================================================*/
     FootPlacementPlanner::FootPlacementPlanner(std::unique_ptr<NUClear::Environment> environment)
     : Reactor(std::move(environment)) 
+        , DEBUG(false), DEBUG_ITER(0), initialStep(0)
+        , balanceEnabled(0.0), emitLocalisation(false), emitFootPosition(false)
+        , updateHandle(), subsumptionId(1)
+        , leftFootPositionTransform(), leftFootSource(), rightFootPositionTransform()
+        , rightFootSource(), leftFootDestination(), rightFootDestination(), uSupportMass()
+        , activeForwardLimb(), activeLimbInitial(LimbID::LEFT_LEG)
+        , bodyTilt(0.0), bodyHeight(0.0), stanceLimitY2(0.0), stepTime(0.0), stepHeight(0.0)
+        , step_height_slow_fraction(0.0f), step_height_fast_fraction(0.0f)
+        , stepLimits(arma::fill::zeros), footOffset(arma::fill::zeros), uLRFootOffset()
+        , beginStepTime(0.0), lastVeloctiyUpdateTime()
+        , velocityHigh(0.0), accelerationTurningFactor(0.0), velocityLimits(arma::fill::zeros)
+        , accelerationLimits(arma::fill::zeros), accelerationLimitsHigh(arma::fill::zeros)
+        , velocityCurrent(), velocityCommand()
+        , zmpCoefficients(arma::fill::zeros), zmpParameters(arma::fill::zeros)
+        , zmpTime(0.0), phase1Single(0.0), phase2Single(0.0)
+        , kinematicsModel()
+        , lastFootGoalRotation(), footGoalErrorSum() 
+        , startFromStep(false), updateStepInstruction(false), destinationTime(0)
     {
         //Configure foot motion planner...
         on<Configuration>("FootPlacementPlanner.yaml").then("Foot Placement Planner - Configure", [this] (const Configuration& config) 
@@ -94,7 +112,7 @@ namespace motion
         updateVelocity();
 
         // swap swing and support legs
-        swingLeg = (swingLeg == LimbID::LEFT_LEG) ? LimbID::RIGHT_LEG : LimbID::LEFT_LEG;
+        activeForwardLimb = (activeForwardLimb == LimbID::LEFT_LEG) ? LimbID::RIGHT_LEG : LimbID::LEFT_LEG;
 
         setLeftFootSource(getLeftFootDestination());
         setRightFootSource(getRightFootDestination());
@@ -110,7 +128,7 @@ namespace motion
             velocityCommand = arma::zeros(3);
 
             // Stop with feet together by targetting swing leg next to support leg
-            if (swingLeg == LimbID::RIGHT_LEG) 
+            if (activeForwardLimb == LimbID::RIGHT_LEG) 
             {
                 setRightFootDestination(getLeftFootSource().localToWorld(-2 * uLRFootOffset));
             }
@@ -122,23 +140,23 @@ namespace motion
         else 
         {
             // normal walk, advance steps
-            if (swingLeg == LimbID::RIGHT_LEG) 
+            if (activeForwardLimb == LimbID::RIGHT_LEG) 
             {
-                setRightFootDestination(getNewFootTarget(velocityCurrent, swingLeg));
+                setRightFootDestination(getNewFootTarget(velocityCurrent, activeForwardLimb));
             }
             else 
             {
-                setLeftFootDestination(getNewFootTarget(velocityCurrent,  swingLeg));
+                setLeftFootDestination(getNewFootTarget(velocityCurrent,  activeForwardLimb));
             }
         }
         // apply velocity-based support point modulation for SupportMass
-        if (swingLeg == LimbID::RIGHT_LEG) 
+        if (activeForwardLimb == LimbID::RIGHT_LEG) 
         {
             Transform2D uLeftFootTorso = getTorsoSource().worldToLocal(getLeftFootSource());
             Transform2D uTorsoModded = getTorsoPosition().localToWorld({supportMod[0], supportMod[1], 0});
             Transform2D uLeftFootModded = uTorsoModded.localToWorld(uLeftFootTorso);
             setSupportMass(uLeftFootModded.localToWorld({-getFootOffsetCoefficient(0), -getFootOffsetCoefficient(1), 0}));
-            emit(std::make_unique<FootStepTarget>(swingLeg, getTime() + stepTime, getRightFootDestination())); //Trigger NewStep
+            emit(std::make_unique<FootStepTarget>(activeForwardLimb, getTime() + stepTime, getRightFootDestination())); //Trigger NewStep
         }
         else 
         {
@@ -146,7 +164,7 @@ namespace motion
             Transform2D uTorsoModded = getTorsoPosition().localToWorld({supportMod[0], supportMod[1], 0});
             Transform2D uRightFootModded = uTorsoModded.localToWorld(uRightFootTorso);
             setSupportMass(uRightFootModded.localToWorld({-getFootOffsetCoefficient(0), getFootOffsetCoefficient(1), 0}));
-            emit(std::make_unique<FootStepTarget>(swingLeg, getTime() + stepTime, getLeftFootDestination())); //Trigger NewStep
+            emit(std::make_unique<FootStepTarget>(activeForwardLimb, getTime() + stepTime, getLeftFootDestination())); //Trigger NewStep
         }
         emit(std::make_unique<NewStepTargetInfo>(getLeftFootSource(), getRightFootSource(), getLeftFootDestination(), getRightFootDestination(), getSupportMass())); //Torso Information
         //emit destinations for fmp and/or zmp
@@ -155,10 +173,10 @@ namespace motion
 /*=======================================================================================================*/
 //      METHOD: getNewFootTarget
 /*=======================================================================================================*/
-    Transform2D FootPlacementPlanner::getNewFootTarget(const Transform2D& velocity, const LimbID& swingLeg) 
+    Transform2D FootPlacementPlanner::getNewFootTarget(const Transform2D& velocity, const LimbID& activeForwardLimb) 
     {   
         // Negative if right leg to account for the mirroring of the foot target
-        int8_t sign = swingLeg == LimbID::LEFT_LEG ? 1 : -1;
+        int8_t sign = activeForwardLimb == LimbID::LEFT_LEG ? 1 : -1;
         // Get midpoint between the two feet
         Transform2D midPoint = getLeftFootSource().interpolate(0.5, getRightFootSource());
         // Get midpoint 1.5 steps in future
@@ -170,7 +188,7 @@ namespace motion
 
         // Start applying step limits:
         // Get the vector between the feet and clamp the components between the min and max step limits
-        setSupportMass(swingLeg == LimbID::LEFT_LEG ? getRightFootSource() : getLeftFootSource());
+        setSupportMass(activeForwardLimb == LimbID::LEFT_LEG ? getRightFootSource() : getLeftFootSource());
         Transform2D feetDifference = getSupportMass().worldToLocal(footTarget);
         feetDifference.x()     = std::min(std::max(feetDifference.x(),            stepLimits(0,0)), stepLimits(0,1));
         feetDifference.y()     = std::min(std::max(feetDifference.y()     * sign, stepLimits(1,0)), stepLimits(1,1)) * sign;
@@ -263,7 +281,7 @@ namespace motion
             initialStep = 2;
         }
 
-        swingLeg = swingLegInitial;
+        activeForwardLimb = activeForwardLimbInitial;
 
         setLeftFootSource(getLeftFootPosition());
         setLeftFootDestination(getLeftFootPosition());
@@ -299,7 +317,7 @@ namespace motion
         velocityDifference = arma::zeros(3);
 
         // gGyro stabilization variables
-        swingLeg = swingLegInitial;
+        activeForwardLimb = activeForwardLimbInitial;
         beginStepTime = getTime();
         initialStep = 2;
 
@@ -492,29 +510,9 @@ namespace motion
         auto& stance = config["stance"];
         bodyHeight = stance["body_height"].as<Expression>();
         bodyTilt = stance["body_tilt"].as<Expression>();
-        qLArmStart = stance["arms"]["left"]["start"].as<arma::vec>();
-        qLArmEnd = stance["arms"]["left"]["end"].as<arma::vec>();
-        qRArmStart = stance["arms"]["right"]["start"].as<arma::vec>();
-        qRArmEnd = stance["arms"]["right"]["end"].as<arma::vec>();
         setFootOffsetCoefficient(stance["foot_offset"].as<arma::vec>());
         // gToe/heel overlap checking values
-        stanceLimitY2 = DarwinModel::Leg::LENGTH_BETWEEN_LEGS - stance["limit_margin_y"].as<Expression>();
-
-        auto& gains = stance["gains"];
-        gainArms = gains["arms"].as<Expression>();
-        gainLegs = gains["legs"].as<Expression>();
-
-        for(ServoID i = ServoID(0); i < ServoID::NUMBER_OF_SERVOS; i = ServoID(int(i)+1))
-        {
-            if(int(i) < 6)
-            {
-                jointGains[i] = gainArms;
-            } 
-            else 
-            {
-                jointGains[i] = gainLegs;
-            }
-        }
+        stanceLimitY2 = kinematicsModel.Leg.LENGTH_BETWEEN_LEGS() - stance["limit_margin_y"].as<Expression>();
 
         auto& walkCycle = config["walk_cycle"];
         stepTime = walkCycle["step_time"].as<Expression>();
@@ -539,43 +537,7 @@ namespace motion
 
         auto& balance = walkCycle["balance"];
         balanceEnabled = balance["enabled"].as<bool>();
-        // balanceAmplitude = balance["amplitude"].as<Expression>();
-        // balanceWeight = balance["weight"].as<Expression>();
-        // balanceOffset = balance["offset"].as<Expression>();
 
-        balancer.configure(balance);
-
-        for(auto& gain : balance["servo_gains"])
-        {
-            float p = gain["p"].as<Expression>();
-            ServoID sr = message::input::idFromPartialString(gain["id"].as<std::string>(),message::input::ServoSide::RIGHT);
-            ServoID sl = message::input::idFromPartialString(gain["id"].as<std::string>(),message::input::ServoSide::LEFT);
-            servoControlPGains[sr] = p;
-            servoControlPGains[sl] = p;
-        }
-        /* TODO
-        // gCompensation parameters
-        toeTipCompensation = config["toeTipCompensation"].as<Expression>();
-        ankleMod = {-toeTipCompensation, 0};
-
-        // gGyro stabilization parameters
-        ankleImuParamX = config["ankleImuParamX"].as<arma::vec>();
-        ankleImuParamY = config["ankleImuParamY"].as<arma::vec>();
-        kneeImuParamX = config["kneeImuParamX"].as<arma::vec>();
-        hipImuParamY = config["hipImuParamY"].as<arma::vec>();
-        armImuParamX = config["armImuParamX"].as<arma::vec>();
-        armImuParamY = config["armImuParamY"].as<arma::vec>();
-
-        // gSupport bias parameters to reduce backlash-based instability
-        velFastForward = config["velFastForward"].as<Expression>();
-        velFastTurn = config["velFastTurn"].as<Expression>();
-        supportFront = config["supportFront"].as<Expression>();
-        supportFront2 = config["supportFront2"].as<Expression>();
-        supportBack = config["supportBack"].as<Expression>();
-        supportSideX = config["supportSideX"].as<Expression>();
-        supportSideY = config["supportSideY"].as<Expression>();
-        supportTurn = config["supportTurn"].as<Expression>();
-        */
         STAND_SCRIPT_DURATION = config["STAND_SCRIPT_DURATION"].as<Expression>();
     }
 }  // motion    
