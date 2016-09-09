@@ -19,11 +19,7 @@ Vagrant.configure("2") do |config|
   config.vm.provider "virtualbox" do |v, override|
     # Use the official ubuntu box
     #override.vm.box = "ubuntu/xenial64"
-<<<<<<< d8616c6caf3827d6e9bae26af69a47736fddff86
     
-=======
-
->>>>>>> Removed install_from_source and toolchain_init.sh scripts from puppet provisioning, updated puppet provisioning to build all libraries from source using execs instead. Puppet now generates CMake toolchain files to facilitate building for the different platforms.
     # Use custom box because official Ubuntu one is shit.
     override.vm.box = "nubots_xenial64"
     override.vm.box_url = "https://uoneduau-my.sharepoint.com/personal/c3124185_uon_edu_au/_layouts/15/guestaccess.aspx?guestaccesstoken=%2bndUQAG0OSfCUAOTNpjewJE%2bv0slyCCyfeEonMpJwpU%3d&docid=03ac69c7a811041dba5afe5247c253a59&rev=1"
