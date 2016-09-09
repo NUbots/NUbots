@@ -62,7 +62,7 @@ IF(protobufs)
         ADD_CUSTOM_COMMAND(
             OUTPUT "${outputpath}/${file_we}.pb.cc"
                    "${outputpath}/${file_we}.pb.h"
-            COMMAND ${PROTOBUF_PROTOC_EXECUTABLE}
+            COMMAND LD_LIBRARY_PATH=/nubots/toolchain/lib ${PROTOBUF_PROTOC_EXECUTABLE}
             ARGS --cpp_out ${CMAKE_BINARY_DIR}/shared -I ${CMAKE_SOURCE_DIR}/shared ${abs_file}
             DEPENDS ${abs_file}
             COMMENT "Running C++ protocol buffer compiler on ${proto}"

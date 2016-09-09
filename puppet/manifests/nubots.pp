@@ -49,9 +49,9 @@ node nubotsvmbuild {
   # List all of the archives that need to be downloaded along with any other associated parameters (creates, requires, etc).
   $archives = {
     'protobuf'     => {'url'         => 'https://github.com/google/protobuf/releases/download/v3.0.0-beta-3/protobuf-python-3.0.0-beta-3.tar.gz',
-                       'args'        => { 'native'   => [ '--host=x86_64-unknown-linux-gnu', '--build=x86_64-unknown-linux-gnu', '--with-zlib', '--with-protoc=PROTOC_PATH', ],
+                       'args'        => { 'native'   => [ '--with-zlib', '--with-protoc=PROTOC_PATH', ],
                                           'DarwinOp' => [ '--host=i686-linux-gnu', '--build=x86_64-unknown-linux-gnu', '--with-zlib', '--with-protoc=PROTOC_PATH', ],
-                                          'NimbroOp' => [ '--host=x86_64-linux-gnu', '--build=x86_64-unknown-linux-gnu', '--with-zlib', '--with-protoc=PROTOC_PATH',  ], },
+                                          'NimbroOp' => [ '--with-zlib', '--with-protoc=PROTOC_PATH',  ], },
                        'require'     => [ Class['protobuf'], Installer['zlib'], ],
                        'prebuild'    => 'make distclean',
                        'method'      => 'autotools', },
@@ -347,6 +347,8 @@ include_directories(SYSTEM \"${prefix}/include\")
 set(CMAKE_C_FLAGS \"\${CMAKE_C_FLAGS} ${compile_params}\" CACHE STRING \"\" FORCE)
 set(CMAKE_CXX_FLAGS \"\${CMAKE_CXX_FLAGS} ${compile_params}\" CACHE STRING \"\" FORCE)
 set(PROTOBUF_PROTOC_EXECUTABLE \"${prefix}/bin/protoc\" CACHE STRING \"\" FORCE)
+set(PROTOBUF_PROTOC_LIBRARY \"${prefix}/lib/libprotoc.so\" CACHE STRING \"\" FORCE)
+set(PROTOBUF_PROTOC_LIBRARY_DEBUG \"${prefix}/lib/libprotoc.so\" CACHE STRING \"\" FORCE)
 ",
       ensure  => present,
       path    => "${prefix}/${arch}.cmake",
