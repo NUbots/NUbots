@@ -31,7 +31,8 @@ class dev_tools {
   package { 'graphviz': ensure => latest, }
   package { 'build-essential': ensure => latest, }
   package { 'python-pip': ensure => latest, }
-  package { 'libncurses5-dev': ensure => latest, }
+  package { 'libncurses5-dev:amd64': ensure => latest, }
+  package { 'libncurses5-dev:i386': ensure => latest, }
   package { 'gcc-6': name => 'gcc-6-multilib', ensure => latest, require => Apt::Ppa['ppa:ubuntu-toolchain-r/test'] }
   package { 'g++-6': name => 'g++-6-multilib', ensure => latest, require => Apt::Ppa['ppa:ubuntu-toolchain-r/test'] }
   package { 'gfortran-6': name => 'gfortran-6-multilib', ensure => latest, require => Apt::Ppa['ppa:ubuntu-toolchain-r/test'] }

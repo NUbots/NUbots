@@ -99,12 +99,12 @@ define installer (
     }
 
     if has_key($params['environment'], 'LDFLAGS') {
-      $linkflags  = "-L${prefix}/${arch}/lib ${params['environment']['LDFLAGS']}"
+      $linkflags  = "-L${prefix}/${arch}/lib -L${prefix}/lib ${params['environment']['LDFLAGS']}"
       $env4 = delete($env3, 'LDFLAGS')
     }
 
     else {
-      $linkflags = "-L${prefix}/${arch}/lib"
+      $linkflags = "-L${prefix}/${arch}/lib -L${prefix}/lib"
       $env4 = $env3
     }
 
@@ -146,7 +146,7 @@ define installer (
     }
 
     else {
-      $ltsyslibpath = "LT_SYS_LIBRARY_PATH=${prefix}/${arch}/lib"
+      $ltsyslibpath = "LT_SYS_LIBRARY_PATH=${prefix}/${arch}/lib:${prefix}/lib"
       $env8 = $env7
     }
 
@@ -156,7 +156,7 @@ define installer (
     }
 
     else {
-      $ldlibrarypath = "LD_LIBRARY_PATH=${prefix}/${arch}/lib"
+      $ldlibrarypath = "LD_LIBRARY_PATH=${prefix}/${arch}/lib:${prefix}/lib"
       $env9 = $env8
     }
 
@@ -167,9 +167,10 @@ define installer (
 
     # Reduce the args array to a space separated list of arguments.
     if $args {
-      $arg = regsubst($args["${arch}"], 'ZLIB_PATH', "${prefix}/${arch}")
-      $arg1 = regsubst($arg, 'PREFIX', "${prefix}/${arch}")
-      $args_str = $arg1.reduce |$args_str, $value| { "${args_str} ${value}" }
+      $arg      = regsubst($args["${arch}"], 'ZLIB_PATH', "${prefix}/${arch}")
+      $arg1     = regsubst($arg, 'PREFIX', "${prefix}/${arch}")
+      $arg2     = regsubst($arg1, 'PROTOC_PATH', "${prefix}/bin/protoc")
+      $args_str = $arg2.reduce |$args_str, $value| { "${args_str} ${value}" }
     }
 
     case $extension {
