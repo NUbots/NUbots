@@ -28,6 +28,7 @@
 #include "message/input/Sensors.h"
 #include "message/motion/KinematicsModels.h"
 #include "message/input/LimbID.h"
+#include "message/input/ServoID.h"
 #include "message/support/Configuration.h"
 #include <yaml-cpp/yaml.h>
 

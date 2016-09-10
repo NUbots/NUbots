@@ -1,10 +1,13 @@
 NUCLEAR_ROLE(
+
+    support::extension::FileWatcher
+
     # This must come first as it emits config which many roles depend on (e.g. SensorFilter, WalkEngine)
     motion::KinematicsConfiguration
 
     # Support and Configuration
     support::SignalCatcher
-    support::extension::FileWatcher
+
     support::configuration::GlobalConfig
     support::configuration::SoccerConfig
     support::configuration::NetworkConfiguration
@@ -25,10 +28,10 @@ NUCLEAR_ROLE(
     motion::IKKick
 
     #Vision
-    vision::LUTClassifier
-    vision::GoalDetector
-    vision::BallDetector
-    vision::ObstacleDetector
+    #vision::LUTClassifier
+    #vision::GoalDetector
+    #vision::BallDetector
+    #vision::ObstacleDetector
 
     # Behaviour
     behaviour::Controller

@@ -82,7 +82,7 @@ namespace motion
         });
 
         updateHandle = on<Every<1 /*RESTORE AFTER DEBUGGING: UPDATE_FREQUENCY*/, Per<std::chrono::seconds>>, With<Sensors>, Single, Priority::HIGH>()
-        .then("Balance Response Planner - Update Robot Posture", [this](/*const Sensors& sensors*/) 
+        .then("Balance Response Planner - Update Robot Posture", [this] /*(const Sensors& sensors)*/
         {
             if(DEBUG) { NUClear::log("Messaging: Balance Kinematic Response - Update Robot Posture(0)"); }
             //hipCompensation();

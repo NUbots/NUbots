@@ -1,18 +1,18 @@
 /*
- * This file is part of the NUbots Codebase.
+ * This file is part of the Autocalibration Codebase.
  *
- * The NUbots Codebase is free software: you can redistribute it and/or modify
+ * The Autocalibration Codebase is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * The NUbots Codebase is distributed in the hope that it will be useful,
+ * The Autocalibration Codebase is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with the NUbots Codebase.  If not, see <http://www.gnu.org/licenses/>.
+ * along with the Autocalibration Codebase.  If not, see <http://www.gnu.org/licenses/>.
  *
  * Copyright 2013 NUBots <nubots@nubots.net>
  */
@@ -47,6 +47,10 @@ namespace geometry {
 
             UnitQuaternion(const matrix::Rotation3D& rotation);
 
+            UnitQuaternion(double W, double X, double Y, double Z);
+
+            UnitQuaternion(const arma::vec3& vec1, const arma::vec3& vec2);
+
             UnitQuaternion operator - (const UnitQuaternion& p) const;
 
             UnitQuaternion operator * (const UnitQuaternion& p) const;
@@ -56,6 +60,10 @@ namespace geometry {
             /*! @brief Creates quaternion which rotates about 3D axis by angle radians
             */
             UnitQuaternion(const arma::vec3& axis, double angle);
+            
+            /*! @brief Swaps quat to -quat if kW < 0
+            */
+            void rectify();
 
             /*! @brief Gets the inverse of the quaternion
             */
@@ -72,6 +80,20 @@ namespace geometry {
             void scaleAngle(double scale);
 
             void normalise();
+
+            /* @return Matrix Q(q) such that given another quaternion q', then
+             * Q(q) * q' = q * q'
+            */
+            arma::mat44 getLeftQuatMultMatrix() const;
+
+            /* @return Matrix W(q) such that given another quaternion q', then
+             * W(q) * q' = q' * q
+            */
+            arma::mat44 getRightQuatMultMatrix() const;
+
+            static float random(float a, float b);
+            static UnitQuaternion getRandomU(float max_angle);
+            static UnitQuaternion getRandomN(float stddev);
 
             double norm();
 
@@ -95,7 +117,7 @@ namespace geometry {
             inline arma::subview_col<double> imaginary() { return rows(1,3); }
 
             UnitQuaternion slerp(const UnitQuaternion& p, const double& t);
-
+            static inline UnitQuaternion Identity() { return(arma::vec4({1.0, 0.0, 0.0, 0.0})); }
     };
 
 }

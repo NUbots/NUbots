@@ -17,6 +17,8 @@
  * Copyright 2014 NUbots <nubots@nubots.net>
  */
  
+syntax = "proto2";
+
 package message.support.nubugger.proto;
 
 message ConfigurationState {

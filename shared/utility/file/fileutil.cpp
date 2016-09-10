@@ -28,6 +28,8 @@ extern "C" {
 #include <system_error>
 #include <stack>
 
+#include "utility/strutil/strutil.h"
+
 namespace utility {
 namespace file {
     std::string loadFromFile(const std::string& path) {
@@ -45,6 +47,19 @@ namespace file {
         // Shamelessly stolen from: http://stackoverflow.com/a/12774387/1387006
         struct stat buffer;
         return (stat (path.c_str(), &buffer) == 0);
+    }
+
+    std::chrono::system_clock::time_point getModificationTime(const std::string& path) {
+        int status;
+        struct stat st_buf;
+
+        // Get the status of the file system object.
+        status = stat(path.c_str(), &st_buf);
+        if (status != 0) {
+            throw std::system_error(errno, std::system_category(), "Error checking if path is file or directory");
+        }
+
+        return(std::chrono::system_clock::from_time_t(st_buf.st_mtime));
     }
 
     // Test if a passed path is a directory
@@ -97,7 +112,7 @@ namespace file {
 
     std::pair<std::string, std::string> pathSplit(const std::string& input) {
 
-        uint lastSlash = input.rfind('/');
+        size_t lastSlash = input.rfind('/');
 
         // There was no slash
         if(lastSlash == std::string::npos) {
@@ -151,6 +166,49 @@ namespace file {
         }
         // return the list of files
         return files;
+    }
+
+    bool makeDirectory(const std::string& directory, bool parent)
+    {
+        std::vector<std::string> elements;
+
+        // Get elements of the path to create.
+        if (parent == true)
+        {
+            elements = utility::strutil::split(directory, '/');
+        }
+
+        else
+        {
+            elements.push_back(directory);
+        }
+
+        std::string path;
+
+        // Traverse all elements of the path.
+        for (const auto& element : elements)
+        {
+            // Append the next path element. Add a / if the front of the element is missing it.
+            path.append(((element.front() != '/') ? "/" : "") + element);
+
+            // If the current path doesn't exist, create it.
+            if (isDir(path) == false)
+            {
+                // Create the current path element with the following permissions.
+                // U = RWX
+                // G = R_X
+                // O = R_X
+                auto status = mkdir(path.c_str(), S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH);
+
+                // If we fail at any point then bail out.
+                if (status != 0)
+                {
+                    return(false);
+                }
+            }
+        }
+
+        return(true);
     }
 }
 }

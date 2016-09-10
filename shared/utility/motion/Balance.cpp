@@ -24,6 +24,7 @@ namespace utility {
 namespace motion {
 
     using message::input::LimbID;
+    using message::input::ServoID;
     using message::input::Sensors;
     using utility::math::matrix::Rotation3D;
     using utility::math::matrix::Transform3D;
@@ -111,10 +112,18 @@ namespace motion {
         //------------------------------------
         // Translation
         //------------------------------------
-        //Get error signal
-        double pitch = Rotation3D(errorQuaternion).pitch();
+        //Get servo load signals
+        // ServoID balanceServo = ServoID::L_ANKLE_PITCH;
+        // if(leg == LimbID::RIGHT_LEG){
+        //     balanceServo = ServoID::R_ANKLE_PITCH;
+        // }
+        // // float anklePitchTorque = sensors.servos[int(balanceServo)].load;
+
+        //Get error signal        
+        double pitch_gyro = Rotation3D(errorQuaternion).pitch();
+        double pitch = pitch_gyro; //anklePitchTorque;
         double roll = Rotation3D(errorQuaternion).roll();
-        double total = std::fabs(pitch) + std::fabs(roll);
+        double total = std::fabs(pitch_gyro) + std::fabs(roll);
 
         //Differentiate error signal
         auto now = NUClear::clock::now();

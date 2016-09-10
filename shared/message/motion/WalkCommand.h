@@ -21,72 +21,48 @@
 #define MESSAGE_MOTION_WALKCOMMAND_H
 
 #include <armadillo>
+
 #include "utility/math/matrix/Transform2D.h"
 
-namespace message 
-{
-namespace motion 
-{
-    /*
-    struct [name]
-    {
-        [variables]
-        [structure](...)
-            : ...
-            , ... {}
-    };
-    */
+namespace message {
+namespace motion {
 
     using utility::math::matrix::Transform2D;
 
-    struct WalkStopped {};
-
-    struct WalkCommand 
-    {
+    struct WalkCommand {
         WalkCommand() = delete;
-        
+        WalkCommand(size_t id, Transform2D command_) : subsumptionId(id), command(command_) { }
         size_t subsumptionId = 1;
-        Transform2D command; // x and y are velocity in m/s and angle is in rads/s
-        WalkCommand(size_t id, const Transform2D& command) 
-        : subsumptionId(id), command(command) {}
+
+        // x and y are velocity in m/s and angle is in rads/s
+        utility::math::matrix::Transform2D command;
     };
 
-    struct WalkStartCommand 
-    {
-        //WalkStartCommand() = delete;
-        
+    struct WalkStartCommand {
+        WalkStartCommand() = delete;
         WalkStartCommand(size_t id) : subsumptionId(id) { }
         size_t subsumptionId = 1;
     };
 
-    struct NewWalkCommand 
-    {
-        Transform2D velocityTarget;
-        NewWalkCommand(const Transform2D& velocityTarget)
-        : velocityTarget(velocityTarget) {}
-    };
-
-    struct WalkStopCommand 
-    {
+    struct WalkStopCommand {
         WalkStopCommand() = delete;
-        
         WalkStopCommand(size_t id) : subsumptionId(id) { }
         size_t subsumptionId = 1;
     };
+    struct WalkStopped {
+    };
 
-    struct EnableWalkEngineCommand 
-    {
+    struct EnableWalkEngineCommand {
         EnableWalkEngineCommand() = delete;
         EnableWalkEngineCommand(size_t id) : subsumptionId(id) { }
         size_t subsumptionId = 1;
     };
-    struct DisableWalkEngineCommand 
-    {
+    struct DisableWalkEngineCommand {
         DisableWalkEngineCommand() = delete;
         DisableWalkEngineCommand(size_t id) : subsumptionId(id) { }
         size_t subsumptionId = 1;
     };
-}  // motion
-}  // message
+}
+}
 
 #endif  // MESSAGE_MOTION_WALKCOMMAND_H

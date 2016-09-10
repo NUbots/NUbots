@@ -98,7 +98,7 @@ namespace motion
 
         //Transform analytical torso positions in accordance with the stipulated targets...
         updateHandle = on<Every<1 /*RESTORE AFTER DEBUGGING: UPDATE_FREQUENCY*/, Per<std::chrono::seconds>>, With<Sensors>, Single, Priority::HIGH>()
-        .then("Torso Motion Planner - Update Torso Position", [this](/*const Sensors& sensors*/) 
+        .then("Torso Motion Planner - Update Torso Position", [this] /*(const Sensors& sensors)*/
         {
             if(DEBUG) { NUClear::log("Messaging: Torso Motion Planner - Update Torso Position(0)"); }
             updateTorsoPosition();

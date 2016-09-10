@@ -24,9 +24,6 @@
 #include <armadillo>
 #include <yaml-cpp/yaml.h>
 
-#include "utility/support/yaml_armadillo.h"
-#include "utility/support/yaml_expression.h"
-
 #include "message/support/Configuration.h"
 #include "message/motion/KinematicsModels.h"
 

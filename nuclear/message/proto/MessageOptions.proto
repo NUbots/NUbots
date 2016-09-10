@@ -1,0 +1,21 @@
+syntax = "proto3";
+
+import "google/protobuf/descriptor.proto";
+
+enum PointerType {
+    NONE = 0;
+    RAW = 1;
+    SHARED = 2;
+    UNIQUE = 3;
+}
+
+enum MapType {
+    NORMAL = 0;
+    UNORDERED = 1;
+    MULTIMAP = 2;
+}
+
+extend google.protobuf.FieldOptions {
+    PointerType pointer = 50000;
+    MapType map_type = 50001;
+}

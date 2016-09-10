@@ -79,7 +79,8 @@ namespace geometry {
         }
 
         double distanceToPoint(const Vector& p) const {
-            return arma::norm(vectorToLine(p));
+            //TODO: optimise
+            return arma::norm(vectorToLineFromPoint(p));
         }
 
         Vector intersect(const ParametricLine<n>& l) const{

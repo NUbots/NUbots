@@ -1,25 +1,23 @@
 /*
- * This file is part of the NUbots Codebase.
+ * This file is part of the Autocalibration Codebase.
  *
- * The NUbots Codebase is free software: you can redistribute it and/or modify
+ * The Autocalibration Codebase is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * The NUbots Codebase is distributed in the hope that it will be useful,
+ * The Autocalibration Codebase is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with the NUbots Codebase.  If not, see <http://www.gnu.org/licenses/>.
+ * along with the Autocalibration Codebase.  If not, see <http://www.gnu.org/licenses/>.
  *
  * Copyright 2013 NUBots <nubots@nubots.net>
  */
 
 #include "Transform3D.h"
-
-#include <nuclear>
 
 namespace utility {
 namespace math {
@@ -37,6 +35,11 @@ namespace matrix {
 
     Transform3D::Transform(const Rotation3D& rotation) : Transform() {
         submat(0,0,2,2) = rotation;
+    }
+
+    Transform3D::Transform(const Rotation3D& rotation, const arma::vec3& translation) : Transform() {
+        submat(0,0,2,2) = rotation;
+        this->translation() = translation;
     }
 
     Transform3D::Transform(const Transform2D& transform) : Transform(Transform3D().translate({transform.x(), transform.y(), 0}).rotateZ(transform.angle())) {
@@ -77,6 +80,10 @@ namespace matrix {
 
     Transform3D Transform3D::rotateZ(double radians) const {
         return *this * createRotationZ(radians);
+    }
+
+    Transform3D Transform3D::scale(const arma::vec3& v) const{
+        return *this * createScale(v);
     }
 
     Transform3D Transform3D::rotateLocal(const Rotation3D& rotation, const Transform3D& local) const {
@@ -125,11 +132,54 @@ namespace matrix {
         // Transpose the rotation submatrix (top-left 3x3), this is equivalent to taking the inverse of the rotation matrix
         inverseTransform3D.submat(0,0,2,2) = submat(0,0,2,2).t();
         // Multiply translation vector (top-right column vector) by the negated inverse rotation matrix
-        inverseTransform3D.submat(0,3,2,3) = -(inverseTransform3D.submat(0,0,2,2) * submat(0,3,2,3));
+
+        inverseTransform3D.submat(0,3,2,3) = -inverseTransform3D.submat(0,0,2,2) * submat(0,3,2,3);
         /*if (arma::norm(inverseTransform3D * (*this) - arma::eye(4,4)) > 1e-10){
             NUClear::log<NUClear::WARN>("Inverse failed! Matrix is singular");
         }*/
         return inverseTransform3D;
+    }
+
+    float Transform3D::norm(Transform3D T){
+        float pos_norm = arma::norm(T.translation());
+        // return Rotation3D::norm(T.rotation());
+        //TODO: how to weight these two?
+        return pos_norm + Rotation3D::norm(T.rotation());
+    }
+
+    float Transform3D::random(float a, float b){
+        float alpha = rand() / float(RAND_MAX);
+        return a * alpha + b * (1 - alpha);
+    }
+
+    Transform3D Transform3D::getRandomU(float max_angle, float max_displacement){
+        UnitQuaternion q = UnitQuaternion::getRandomU(max_angle);
+        Rotation3D R(q);
+
+        //Get displacement:
+
+        float phi = random(0,2 * M_PI);
+        float costheta = random(-1,1);
+        float u = random(0,1);
+
+        float theta = std::acos( costheta );
+        float r = max_displacement * std::pow( u , 1/3.0);
+
+        float x = r * sin( theta) * cos( phi );
+        float y = r * sin( theta) * sin( phi );
+        float z = r * cos( theta );
+
+        return Transform3D(R, arma::vec3({x,y,z}));
+    }
+
+    Transform3D Transform3D::getRandomN(float stddev_angle, float stddev_disp){
+        UnitQuaternion q = UnitQuaternion::getRandomN(stddev_angle);
+        Rotation3D R(q);
+
+        //Get displacement:
+        arma::vec3 displacement = stddev_disp * arma::randn(3);
+
+        return Transform3D(R, displacement);
     }
 
     Transform3D Transform3D::createTranslation(const arma::vec3& translation) {
@@ -153,6 +203,12 @@ namespace matrix {
     Transform3D Transform3D::createRotationZ(double radians) {
         Transform3D transform;
         transform.submat(0,0,2,2) = Rotation3D::createRotationZ(radians);
+        return transform;
+    }
+
+    Transform3D Transform3D::createScale(const arma::vec3& v){
+        Transform3D transform;
+        transform.rotation() = arma::diagmat(v);
         return transform;
     }
 

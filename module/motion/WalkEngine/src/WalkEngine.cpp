@@ -102,8 +102,9 @@ namespace motion
 
         //Automate walk engine command for testing...
         updateHandle = on<Every<1 /*RESTORE AFTER DEBUGGING: UPDATE_FREQUENCY*/, Per<std::chrono::seconds>>, With<Sensors>, Single, Priority::HIGH>()
-        .then([this](/*const Sensors& sensors*/) 
+        .then([this] /*(const Sensors& sensors)*/
         {
+            std::cout << "Walk Engine (" << DEBUG_ITER << ")";
             if(DEBUG) { NUClear::log("WalkEngine - Emit WalkCommand(0)"); }
             if((DEBUG_ITER++)%15 == 0)
             {
@@ -113,21 +114,21 @@ namespace motion
         });//RESTORE AFTER DEBUGGING: .disable();
 
         //Broadcast constrained velocity vector parameter to actuator modules...
-        on<Trigger<WalkCommand>>().then([this] (const WalkCommand& walkCommand)
+        on<Trigger<WalkCommand>>().then([this] /*(const WalkCommand& walkCommand)*/
         {
             if(DEBUG) { NUClear::log("WalkEngine - Trigger WalkCommand (0)"); }
-            auto velocity = walkCommand.command;
+            /*auto velocity = walkCommand.command;
             velocity.x()     *= velocity.x()     > 0 ? velocityLimits(0,1) : -velocityLimits(0,0);
             velocity.y()     *= velocity.y()     > 0 ? velocityLimits(1,1) : -velocityLimits(1,0);
             velocity.angle() *= velocity.angle() > 0 ? velocityLimits(2,1) : -velocityLimits(2,0);
             setVelocity(velocity);
-            emit(std::make_unique<NewWalkCommand>(getVelocity()));
+            emit(std::make_unique<NewWalkCommand>(getVelocity()));*/
             if(DEBUG) { NUClear::log("WalkEngine - Trigger WalkCommand (1)"); }
         });
 
         //Update waypoints sensor data at regular intervals...
         updateHandle = on<Every<1 /*RESTORE AFTER DEBUGGING: UPDATE_FREQUENCY*/, Per<std::chrono::seconds>>, With<Sensors>, Single, Priority::HIGH>()
-        .then([this](/*const Sensors& sensors*/) 
+        .then([this] /*(const Sensors& sensors)*/
         {
             if(DEBUG) { NUClear::log("WalkEngine - Update Waypoints(0)"); }
             //emit(std::move(updateWaypoints(sensors)));

@@ -23,18 +23,15 @@
 #include <nuclear>
 #include <armadillo>
 
-namespace module 
-{
-namespace motion 
-{
+namespace module {
+    namespace motion {
 
             /**
              * Executes a HeadController action.
              *
              * @author Jake Fountain
              */
-            class HeadController : public NUClear::Reactor 
-            {
+            class HeadController : public NUClear::Reactor {
             private:
                 const size_t id;
                 double min_yaw,max_yaw,min_pitch,max_pitch,head_motor_gain,head_motor_torque, p_gain;
@@ -48,7 +45,7 @@ namespace motion
                 bool goalRobotSpace = true;
             };
 
-}  // motion
+    }  // motion
 }  // modules
 
 #endif  // MODULES_BEHAVIOURS_REFLEX_HEADCONTROLLER_H

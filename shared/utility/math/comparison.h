@@ -23,25 +23,38 @@
 #include <limits>
 #include <type_traits>
 
-namespace utility {
-namespace math {
-
-/**
- * Compare two floating-point numbers for 'almost' equality.
- *
- * Source: http://en.cppreference.com/w/cpp/types/numeric_limits/epsilon
- */
-template<class T>
-typename std::enable_if<!std::numeric_limits<T>::is_integer, bool>::type almost_equal(T x, T y, int ulp)
+namespace utility
 {
-    // the machine epsilon has to be scaled to the magnitude of the values used
-    // and multiplied by the desired precision in ULPs (units in the last place)
-    return std::abs(x-y) < std::numeric_limits<T>::epsilon() * std::abs(x+y) * ulp
-    // unless the result is subnormal
-           || std::abs(x-y) < std::numeric_limits<T>::min();
-}
+    namespace math
+    {
 
-}
+        /**
+         * Compare two floating-point numbers for 'almost' equality.
+         *
+         * Source: http://en.cppreference.com/w/cpp/types/numeric_limits/epsilon
+         */
+        template<class T>
+        typename std::enable_if<!std::numeric_limits<T>::is_integer, bool>::type almost_equal(T x, T y, int ulp)
+        {
+            // the machine epsilon has to be scaled to the magnitude of the values used
+            // and multiplied by the desired precision in ULPs (units in the last place)
+            return std::abs(x-y) < std::numeric_limits<T>::epsilon() * std::abs(x+y) * ulp
+            // unless the result is subnormal
+                   || std::abs(x-y) < std::numeric_limits<T>::min();
+        }
+
+        /**
+         * signum function.
+         * Returns either -1, 0, or 1 based on the sign of the number.
+         * If -Wtype-limits is triggered, then need to specialise for unsigned types.
+         * http://stackoverflow.com/questions/1903954/is-there-a-standard-sign-function-signum-sgn-in-c-c
+         */
+        template <typename T>
+        inline int sgn(T val)
+        {
+            return (T(0) < val) - (val < T(0));
+        }
+    }
 }
 
 #endif  // UTILITY_MATH_COMPARISON_H
