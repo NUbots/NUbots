@@ -873,7 +873,7 @@ namespace module {
                                 mvprintw(YPOSITION[i][j], XPOSITION[i][j], "     ");
                                 move(YPOSITION[i][j],XPOSITION[i][j]);
                                 newGain = userInputToGain();
-                                if(isnan(newGain)) {
+                                if(std::isnan(newGain)) {
                                     mvprintw(YPOSITION[i][j],XPOSITION[i][j],"---.-");
                                     upperGainS=-1;
                                     lowerGainS=-1;

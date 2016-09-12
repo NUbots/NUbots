@@ -178,13 +178,13 @@ namespace darwin {
 
                     // If our torque should be disabled then we disable our torque
                     if(servoState[i].torqueEnabled &&
-                       (isnan(servoState[i].goalPosition) || servoState[i].torque == 0)) {
+                       (std::isnan(servoState[i].goalPosition) || servoState[i].torque == 0)) {
                         servoState[i].torqueEnabled = false;
                         darwin[i + 1].write(Darwin::MX28::Address::TORQUE_ENABLE, false);
                     }
                     else {
                         // If our torque was disabled but is now enabled
-                        if(!servoState[i].torqueEnabled && !isnan(servoState[i].goalPosition) && servoState[i].torque != 0) {
+                        if(!servoState[i].torqueEnabled && !std::isnan(servoState[i].goalPosition) && servoState[i].torque != 0) {
                             servoState[i].torqueEnabled = true;
                             darwin[i + 1].write(Darwin::MX28::Address::TORQUE_ENABLE, true);
                         }
