@@ -92,5 +92,8 @@ IF(protobufs)
     TARGET_LINK_LIBRARIES(nuclear_message ${PROTOBUF_LIBRARIES})
 ENDIF(protobufs)
 
+# Add to our list of NUClear message libraries
+SET(NUCLEAR_MESSAGE_LIBRARIES nuclear_message CACHE INTERNAL "List of libraries that are built as messages" FORCE)
+
 # Put it in an IDE group for shared
 SET_PROPERTY(TARGET nuclear_message PROPERTY FOLDER "shared/")
