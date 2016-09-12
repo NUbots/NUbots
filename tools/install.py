@@ -43,6 +43,11 @@ def run(ip_addr, config, user, **kwargs):
     files = glob.glob(os.path.join(build_dir, 'bin', '*'))
     call(['rsync', '-avzPl', '--checksum', '-e ssh'] + files + [target_dir])
 
+    # Get all of our required shared libraries in our toolchain and send them
+    cprint('Installing toolchain library files', 'blue', attrs=['bold'])
+    libs = glob.glob('/nubots/toolchain/lib/*.so*')
+    call(['rsync', '-avzPl', '--checksum', '-e ssh'] + libs + [target_dir + 'toolchain'])
+
     if config in ['overwrite', 'o']:
         cprint('Overwriting configuration files on target', 'blue', attrs=['bold'])
         call(['rsync', '-avzPL', '--checksum', '-e ssh', config_dir, target_dir])
