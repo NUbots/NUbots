@@ -33,12 +33,16 @@ FUNCTION(NUCLEAR_MODULE)
         # Add the file we will generate to our output
         LIST(APPEND data "${output_file}")
 
-        # Copy configuration files over as needed
+        # Create the required folder
+        GET_FILENAME_COMPONENT(output_folder ${output_file} DIRECTORY)
+        FILE(MAKE_DIRECTORY ${output_folder})
+
+        # Create symlinks to the files
         ADD_CUSTOM_COMMAND(
             OUTPUT ${output_file}
             COMMAND ${CMAKE_COMMAND} -E create_symlink ${data_file} ${output_file}
             DEPENDS ${data_file}
-            COMMENT "Copying updated data file ${data_file}"
+            COMMENT "Creating symbolic link for file ${data_file}"
         )
 
     ENDFOREACH(data_file)
@@ -55,20 +59,20 @@ FUNCTION(NUCLEAR_MODULE)
     # Include any directories passed into the function
     INCLUDE_DIRECTORIES(SYSTEM ${MODULE_INCLUDES})
 
-    # Include any directories used in utility or messages
-    INCLUDE_DIRECTORIES($<TARGET_PROPERTY:nuclear_message,INCLUDE_DIRECTORIES>)
-    INCLUDE_DIRECTORIES($<TARGET_PROPERTY:nuclear_utility,INCLUDE_DIRECTORIES>)
-    INCLUDE_DIRECTORIES($<TARGET_PROPERTY:nuclear_extension,INCLUDE_DIRECTORIES>)
+    # Include any directories used in messages utilities and extensions
+    FOREACH(lib ${NUCLEAR_MESSAGE_LIBRARIES} ${NUCLEAR_UTILITY_LIBRARIES} ${NUCLEAR_EXTENSION_LIBRARIES})
+        INCLUDE_DIRECTORIES($<TARGET_PROPERTY:${lib},INCLUDE_DIRECTORIES>)
+    ENDFOREACH(lib)
 
     # Add all our code to a library and if we are doing a shared build make it a shared library
     IF(NUCLEAR_SHARED_BUILD)
-        ADD_LIBRARY(${module_name} SHARED ${src} ${MODULE_SOURCES} ${data} ${data_files} )
+        ADD_LIBRARY(${module_name} SHARED ${src} ${MODULE_SOURCES} ${data} ${data_files})
         SET_PROPERTY(TARGET ${module_name} PROPERTY LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin/lib")
     ELSE()
         ADD_LIBRARY(${module_name} STATIC ${src} ${MODULE_SOURCES} ${data} ${data_files})
     ENDIF()
 
-    TARGET_LINK_LIBRARIES(${module_name} nuclear_utility nuclear_message nuclear_extension ${MODULE_LIBRARIES} ${NUCLEAR_LIBRARY})
+    TARGET_LINK_LIBRARIES(${module_name} ${NUCLEAR_UTILITY_LIBRARIES} ${NUCLEAR_MESSAGE_LIBRARIES} ${NUCLEAR_EXTENSION_LIBRARIES} ${MODULE_LIBRARIES} ${NUCLEAR_LIBRARY})
 
     # Put it in an IDE group for shared
     SET_PROPERTY(TARGET ${module_name} PROPERTY FOLDER ${module_path})
