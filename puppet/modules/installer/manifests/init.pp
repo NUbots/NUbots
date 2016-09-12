@@ -173,6 +173,8 @@ define installer (
       $args_str = $arg2.reduce |$args_str, $value| { "${args_str} ${value}" }
     }
 
+    $postbuild = regsubst($postbuild, 'PREFIX', "${prefix}/${arch}")
+
     case $extension {
       'h', 'hpp': {
         # Download and put in include

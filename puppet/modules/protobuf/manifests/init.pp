@@ -2,7 +2,7 @@
 class protobuf {
     # Build ELLCC
     archive { 'protobuf-native':
-      url              => 'https://github.com/google/protobuf/releases/download/v3.0.0-beta-3/protobuf-python-3.0.0-beta-3.tar.gz',
+      url              => 'https://github.com/google/protobuf/releases/download/v3.0.2/protobuf-python-3.0.2.tar.gz',
       target           => '/nubots/toolchain/src/protobuf',
       src_target       => '/nubots/toolchain/src',
       purge_target     => true,

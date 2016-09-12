@@ -48,12 +48,13 @@ node nubotsvmbuild {
 
   # List all of the archives that need to be downloaded along with any other associated parameters (creates, requires, etc).
   $archives = {
-    'protobuf'     => {'url'         => 'https://github.com/google/protobuf/releases/download/v3.0.0-beta-3/protobuf-python-3.0.0-beta-3.tar.gz',
+    'protobuf'     => {'url'         => 'https://github.com/google/protobuf/releases/download/v3.0.2/protobuf-python-3.0.2.tar.gz',
                        'args'        => { 'native'   => [ '--with-zlib', '--with-protoc=PROTOC_PATH', ],
                                           'DarwinOp' => [ '--host=i686-linux-gnu', '--build=x86_64-unknown-linux-gnu', '--with-zlib', '--with-protoc=PROTOC_PATH', ],
                                           'NimbroOp' => [ '--with-zlib', '--with-protoc=PROTOC_PATH',  ], },
                        'require'     => [ Class['protobuf'], Installer['zlib'], ],
                        'prebuild'    => 'make distclean',
+                       'postbuild'   => 'rm PREFIX/lib/libprotobuf* && rm PREFIX/bin/protoc',
                        'method'      => 'autotools', },
     'zlib'         => {'url'         => 'http://zlib.net/zlib-1.2.8.tar.gz',
                        'creates'     => 'lib/libz.a',
@@ -334,7 +335,7 @@ set(CMAKE_FIND_ROOT_PATH \"${prefix}/${arch}\"
        \"${prefix}\"
        \"/usr/local\"
        \"/usr\")
-set(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM NEVER)
+set(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM BOTH)
 set(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY ONLY)
 set(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE ONLY)
 set(CMAKE_FIND_ROOT_PATH_MODE_PACKAGE ONLY)
@@ -346,9 +347,12 @@ include_directories(SYSTEM \"${prefix}/include\")
 
 set(CMAKE_C_FLAGS \"\${CMAKE_C_FLAGS} ${compile_params}\" CACHE STRING \"\" FORCE)
 set(CMAKE_CXX_FLAGS \"\${CMAKE_CXX_FLAGS} ${compile_params}\" CACHE STRING \"\" FORCE)
+
 set(PROTOBUF_PROTOC_EXECUTABLE \"${prefix}/bin/protoc\" CACHE STRING \"\" FORCE)
 set(PROTOBUF_PROTOC_LIBRARY \"${prefix}/lib/libprotoc.so\" CACHE STRING \"\" FORCE)
 set(PROTOBUF_PROTOC_LIBRARY_DEBUG \"${prefix}/lib/libprotoc.so\" CACHE STRING \"\" FORCE)
+
+set(PLATFORM \"${arch}\" CACHE STRING \"The platform to build for.\" FORCE)
 ",
       ensure  => present,
       path    => "${prefix}/${arch}.cmake",
@@ -356,15 +360,15 @@ set(PROTOBUF_PROTOC_LIBRARY_DEBUG \"${prefix}/lib/libprotoc.so\" CACHE STRING \"
     }
 
     # Ensure toolchain initialisation functions are generated.
-    file { "${arch}_toolchain_init.sh":
-      content =>
-"export LD_LIBRARY_PATH=\"${prefix}/${arch}/lib\"
- export PATH=\"${prefix}/${arch}/bin:${prefix}/bin:/usr/local/bin:/usr/local/sbin:/usr/sbin:/usr/bin:/sbin:/bin\"
- export PKG_CONFIG_PATH=\"${prefix}/${arch}/lib/pkgconfig\"
- export CMAKE_PREFIX_PATH=\"${prefix}/${arch}\"",
-      ensure  => present,
-      path    => "${prefix}/${arch}_toolchain_init.sh",
-      before  => Class['toolchain_deb'],
-    }
+    #file { "${arch}_toolchain_init.sh":
+      #content =>
+#"export LD_LIBRARY_PATH=\"${prefix}/${arch}/lib\"
+ #export PATH=\"${prefix}/${arch}/bin:${prefix}/bin:/usr/local/bin:/usr/local/sbin:/usr/sbin:/usr/bin:/sbin:/bin\"
+ #export PKG_CONFIG_PATH=\"${prefix}/${arch}/lib/pkgconfig\"
+ #export CMAKE_PREFIX_PATH=\"${prefix}/${arch}\"",
+      #ensure  => present,
+      #path    => "${prefix}/${arch}_toolchain_init.sh",
+      #before  => Class['toolchain_deb'],
+    #}
   }
 }
