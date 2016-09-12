@@ -142,6 +142,12 @@ class dev_tools {
       owner => 'vagrant',
       mode => '600', }
 
+  # SETUP ENVIRONMENT VARIABLES FOR SHELLS
+  file { '/etc/profile.d/toolchain_init.sh':
+    ensure => present,
+    mode => '755',
+    source => 'puppet:///modules/dev_tools/toolchain_init.sh', }
+
   # SETUP OUR ALTERNATIVES SO WE USE THE CORRECT COMPILER
   exec {'fix_compiler_environment':
     command => 'update-alternatives --remove-all gcc \

@@ -54,7 +54,7 @@ node nubotsvmbuild {
                                           'NimbroOp' => [ '--with-zlib', '--with-protoc=PROTOC_PATH',  ], },
                        'require'     => [ Class['protobuf'], Installer['zlib'], ],
                        'prebuild'    => 'make distclean',
-                       'postbuild'   => 'rm PREFIX/lib/libprotobuf* && rm PREFIX/bin/protoc',
+                       'postbuild'   => 'rm PREFIX/lib/libprotoc* && rm PREFIX/bin/protoc',
                        'method'      => 'autotools', },
     'zlib'         => {'url'         => 'http://zlib.net/zlib-1.2.8.tar.gz',
                        'creates'     => 'lib/libz.a',
@@ -348,27 +348,11 @@ include_directories(SYSTEM \"${prefix}/include\")
 set(CMAKE_C_FLAGS \"\${CMAKE_C_FLAGS} ${compile_params}\" CACHE STRING \"\" FORCE)
 set(CMAKE_CXX_FLAGS \"\${CMAKE_CXX_FLAGS} ${compile_params}\" CACHE STRING \"\" FORCE)
 
-set(PROTOBUF_PROTOC_EXECUTABLE \"${prefix}/bin/protoc\" CACHE STRING \"\" FORCE)
-set(PROTOBUF_PROTOC_LIBRARY \"${prefix}/lib/libprotoc.so\" CACHE STRING \"\" FORCE)
-set(PROTOBUF_PROTOC_LIBRARY_DEBUG \"${prefix}/lib/libprotoc.so\" CACHE STRING \"\" FORCE)
-
 set(PLATFORM \"${arch}\" CACHE STRING \"The platform to build for.\" FORCE)
 ",
       ensure  => present,
       path    => "${prefix}/${arch}.cmake",
       before  => Class['toolchain_deb'],
     }
-
-    # Ensure toolchain initialisation functions are generated.
-    #file { "${arch}_toolchain_init.sh":
-      #content =>
-#"export LD_LIBRARY_PATH=\"${prefix}/${arch}/lib\"
- #export PATH=\"${prefix}/${arch}/bin:${prefix}/bin:/usr/local/bin:/usr/local/sbin:/usr/sbin:/usr/bin:/sbin:/bin\"
- #export PKG_CONFIG_PATH=\"${prefix}/${arch}/lib/pkgconfig\"
- #export CMAKE_PREFIX_PATH=\"${prefix}/${arch}\"",
-      #ensure  => present,
-      #path    => "${prefix}/${arch}_toolchain_init.sh",
-      #before  => Class['toolchain_deb'],
-    #}
   }
 }

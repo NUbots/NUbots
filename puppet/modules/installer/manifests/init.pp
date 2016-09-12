@@ -167,13 +167,13 @@ define installer (
 
     # Reduce the args array to a space separated list of arguments.
     if $args {
-      $arg      = regsubst($args["${arch}"], 'ZLIB_PATH', "${prefix}/${arch}")
-      $arg1     = regsubst($arg, 'PREFIX', "${prefix}/${arch}")
-      $arg2     = regsubst($arg1, 'PROTOC_PATH', "${prefix}/bin/protoc")
+      $arg      = regsubst($args["${arch}"], 'ZLIB_PATH', "${prefix}/${arch}", 'G')
+      $arg1     = regsubst($arg, 'PREFIX', "${prefix}/${arch}", 'G')
+      $arg2     = regsubst($arg1, 'PROTOC_PATH', "${prefix}/bin/protoc", 'G')
       $args_str = $arg2.reduce |$args_str, $value| { "${args_str} ${value}" }
     }
 
-    $postbuild = regsubst($postbuild, 'PREFIX', "${prefix}/${arch}")
+    $postbuild_cmd = regsubst($postbuild, 'PREFIX', "${prefix}/${arch}", 'G')
 
     case $extension {
       'h', 'hpp': {
@@ -205,7 +205,7 @@ define installer (
                           ./configure ${args_str} --prefix=\"${prefix}/${arch}\" &&
                           make -j\$(nproc) &&
                           make install &&
-                          ${postbuild}",
+                          ${postbuild_cmd}",
           cwd         => "${prefix}/${arch}/src/${name}/${src_dir}",
           environment => $environment,
           path        =>  [ "${prefix}/${arch}/bin", "${prefix}/bin",
@@ -224,7 +224,7 @@ define installer (
                           cmake .. ${args_str} -DCMAKE_BUILD_TYPE=\"Release\" -DCMAKE_C_FLAGS_RELEASE=\"${flags}\" -DCMAKE_CXX_FLAGS_RELEASE=\"${flags}\" -DCMAKE_INSTALL_PREFIX:PATH=\"${prefix}/${arch}\" &&
                           make -j\$(nproc) &&
                           make install &&
-                          ${postbuild}",
+                          ${postbuild_cmd}",
           cwd         => "${prefix}/${arch}/src/${name}/${src_dir}",
           environment => $environment,
           path        =>  [ "${prefix}/${arch}/bin", "${prefix}/bin",
@@ -242,7 +242,7 @@ define installer (
                           ./bjam include=\"${prefix}/${arch}/include\" library-path=\"${prefix}/${arch}/lib\" ${args_str} -j\$(nproc) -q \\
                                 cflags=\"${flags}\" cxxflags=\"${flags}\" linkflags=\"${linkflags}\" &&
                           ./bjam install &&
-                          ${postbuild}",
+                          ${postbuild_cmd}",
           cwd         => "${prefix}/${arch}/src/${name}/${src_dir}",
           environment => $environment,
           path        =>  [ "${prefix}/${arch}/bin", "${prefix}/bin",
@@ -258,7 +258,7 @@ define installer (
           command     => "${prebuild} &&
                           make ${args_str} -j\$(nproc) &&
                           make ${args_str} PREFIX=\"${prefix}/${arch}\" install &&
-                          ${postbuild}",
+                          ${postbuild_cmd}",
           cwd         => "${prefix}/${arch}/src/${name}/${src_dir}",
           environment => $environment,
           path        =>  [ "${prefix}/${arch}/bin", "${prefix}/bin",

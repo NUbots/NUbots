@@ -62,7 +62,7 @@ IF(protobufs)
         ADD_CUSTOM_COMMAND(
             OUTPUT "${outputpath}/${file_we}.pb.cc"
                    "${outputpath}/${file_we}.pb.h"
-            COMMAND LD_LIBRARY_PATH=/nubots/toolchain/lib ${PROTOBUF_PROTOC_EXECUTABLE}
+            COMMAND ${PROTOBUF_PROTOC_EXECUTABLE}
             ARGS --cpp_out ${CMAKE_BINARY_DIR}/shared -I ${CMAKE_SOURCE_DIR}/shared ${abs_file}
             DEPENDS ${abs_file}
             COMMENT "Running C++ protocol buffer compiler on ${proto}"
@@ -71,7 +71,7 @@ IF(protobufs)
 
     # The protobuf files are generated
     SET_SOURCE_FILES_PROPERTIES(${proto_src} ${proto_h} PROPERTIES GENERATED TRUE
-                                                                   COMPILE_FLAGS -Wno-effc++)
+                                                                   COMPILE_FLAGS "-Wno-effc++ -Wno-error=unused-parameter")
 
     # Add the protocol buffers in with our source
     SET(src ${src} ${proto_src} ${proto_h})

@@ -6,7 +6,7 @@ class toolchain_deb {
     ensure  => directory,
   } ->
   exec { "copy-toolchain":
-    command => "rsync -a --exclude=\"*/src\" /nubots .",
+    command => "rsync -a --exclude=\"*/src\" --exclude=\"*/bin\" /nubots .",
     cwd     => "${build_dir}",
   } ->
   file { 'toolchain_control':
