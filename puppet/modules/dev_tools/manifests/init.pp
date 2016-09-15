@@ -122,31 +122,56 @@ class dev_tools {
 
   # SSH KEYS FOR THE VM
   file { 'vm_private_key':
-      path => '/home/vagrant/.ssh/id_rsa',
-      ensure => present,
-      source => 'puppet:///modules/dev_tools/id_rsa',
-      owner => 'vagrant',
-      mode => '600', }
+    path => '/home/vagrant/.ssh/id_rsa',
+    ensure => present,
+    source => 'puppet:///modules/dev_tools/id_rsa',
+    owner => 'vagrant',
+    mode => '600', 
+    replace => true,
+  }
 
   file { 'vm_public_key':
-      path => '/home/vagrant/.ssh/id_rsa.pub',
-      ensure => present,
-      source => 'puppet:///modules/dev_tools/id_rsa.pub',
-      owner => 'vagrant', }
+    path => '/home/vagrant/.ssh/id_rsa.pub',
+    ensure => present,
+    source => 'puppet:///modules/dev_tools/id_rsa.pub',
+    owner => 'vagrant', 
+    replace => true,
+  }
 
   # SSH CONFIG FOR THE VM
   file { 'ssh_config':
-      path => '/home/vagrant/.ssh/config',
-      ensure => present,
-      source => 'puppet:///modules/dev_tools/ssh_config',
-      owner => 'vagrant',
-      mode => '600', }
+    path => '/home/vagrant/.ssh/config',
+    ensure => present,
+    source => 'puppet:///modules/dev_tools/ssh_config',
+    owner => 'vagrant',
+    mode => '600', 
+    replace => true,
+  }
 
   # SETUP ENVIRONMENT VARIABLES FOR SHELLS
+  # This file does not need execute permissions (it is "sourced" not "executed")
   file { '/etc/profile.d/toolchain_init.sh':
     ensure => present,
+    mode => '644',
+    source => 'puppet:///modules/dev_tools/toolchain_init.sh', 
+    replace => true,
+  }
+
+  # SETUP ROBOT HOSTS
+  file { '/etc/hosts':
+    ensure => present,
+    mode => '644',
+    source => 'puppet:///modules/dev_tools/hosts', 
+    replace => true,
+  }
+
+  # INSTALL ROBOT HOST PARSER
+  file { '/nubots/toolchain/find_robot_hosts.sh':
+    ensure => present,
     mode => '755',
-    source => 'puppet:///modules/dev_tools/toolchain_init.sh', }
+    source => 'puppet:///modules/dev_tools/find_robot_hosts.sh', 
+    replace => true,
+  }
 
   # SETUP OUR ALTERNATIVES SO WE USE THE CORRECT COMPILER
   exec {'fix_compiler_environment':

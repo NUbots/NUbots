@@ -1,31 +1,29 @@
 # We need python!
 FIND_PACKAGE(PythonInterp REQUIRED)
 
+EXECUTE_PROCESS(COMMAND "/nubots/toolchain/find_robot_hosts.sh" OUTPUT_VARIABLE HOSTS)
+SEPARATE_ARGUMENTS(KNOWN_HOSTS UNIX_COMMAND "${HOSTS}")
+
 # Ninja code!
-FOREACH(robot 0 1 2 3 4 5 6 7)
-    FOREACH(config "" u o n i p)
-        FOREACH(ethernet "" e)
-            IF("${robot}" STREQUAL "0")
-                SET(address "10.1.0.1")
-            ELSEIF("${ethernet}" STREQUAL "e")
-                SET(address "10.1.2.${robot}")
-            ELSE()
-                SET(address "10.1.1.${robot}")
-            ENDIF()
+FOREACH(host ${KNOWN_HOSTS})
+    FOREACH(config "" -new -update -overwrite -pull -ignore)
+        IF ("${host}" MATCHES "i[0-9]+")
+            SET(user "nubots")
+        ELSE()
+            SET(user "darwin")
+        ENDIF()
+        
+        # Make our installer
+        ADD_CUSTOM_TARGET("${host}${config}"
+            USES_TERMINAL
+            COMMAND ${PYTHON_EXECUTABLE}
+            "${CMAKE_SOURCE_DIR}/nuclear/b.py" "install" "${host}" "--config=${config}" "--user=${user}"
+            DEPENDS ${NUCLEAR_ROLES} "${CMAKE_SOURCE_DIR}/cmake/scripts/send.py")
 
-            # Make our installer
-            ADD_CUSTOM_TARGET("d${robot}${ethernet}${config}"
-                USES_TERMINAL
-                COMMAND ${PYTHON_EXECUTABLE}
-                "${CMAKE_SOURCE_DIR}/cmake/scripts/send.py" "--robot_ip=${address}" "--config=${config}" "--username=darwin"
-                DEPENDS ${NUCLEAR_ROLES} "${CMAKE_SOURCE_DIR}/cmake/scripts/send.py")
-
-            # Move our installer to an IDE group
-            SET_PROPERTY(TARGET "d${robot}${ethernet}${config}" PROPERTY FOLDER "installers")
-
-        ENDFOREACH(ethernet)
+        # Move our installer to an IDE group
+        SET_PROPERTY(TARGET "${host}${config}" PROPERTY FOLDER "installers")
     ENDFOREACH(config)
-ENDFOREACH(robot)
+ENDFOREACH(host)
 
 ADD_CUSTOM_TARGET("dall"
-        DEPENDS d1eo d2eo d3eo d4eo d5eo d6eo)
+        DEPENDS d1e-overwrite d2e-overwrite d3e-overwrite d4e-overwrite d5e-overwrite d6e-overwrite i1e-overwrite)

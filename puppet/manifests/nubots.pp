@@ -68,7 +68,7 @@ node nubotsvmbuild {
                                           'DarwinOp' => [ '-f Makefile-libbz2_so', ],
                                           'NimbroOp' => [ '-f Makefile-libbz2_so', ], },
                        'method'      => 'make',
-                       'require'     => [ Exec['correct_bzip2-shared_Makefile_08'], ],},
+                       'require'     => [ Exec['correct_bzip2-shared_Makefile_10'], ],},
     'xml2'         => {'url'         => 'http://xmlsoft.org/sources/libxml2-2.9.3.tar.gz',
                        'args'        => { 'native'   => [ '--with-zlib=ZLIB_PATH', '--without-python', ],
                                           'DarwinOp' => [ '--host=i686-linux-gnu', '--build=x86_64-unknown-linux-gnu', '--with-zlib=ZLIB_PATH', '--without-python', ],
@@ -183,18 +183,26 @@ node nubotsvmbuild {
   } ~>
   file_line { 'correct_bzip2-shared_Makefile_05':
     path    => '/nubots/toolchain/src/bzip2-shared/Makefile-libbz2_so',
-    line    => "\tln -s $(PREFIX)/lib/libbz2.so.1.0.6 $(PREFIX)/lib/libbz2.so.1.0",
+    line    => "\tln -s libbz2.so.1.0.6 libbz2.so.1.0",
   } ~>
   file_line { 'correct_bzip2-shared_Makefile_06':
     path    => '/nubots/toolchain/src/bzip2-shared/Makefile-libbz2_so',
-    line    => "\tln -s $(PREFIX)/lib/libbz2.so.1.0.6 $(PREFIX)/lib/libbz2.so",
+    line    => "\tln -s libbz2.so.1.0 libbz2.so",
   } ~>
-  exec { 'correct_bzip2-shared_Makefile_07':
+  file_line { 'correct_bzip2-shared_Makefile_07':
+    path    => '/nubots/toolchain/src/bzip2-shared/Makefile-libbz2_so',
+    line    => "\tinstall -m 0755 libbz2.so.1.0 $(PREFIX)/lib",
+  } ~>
+  file_line { 'correct_bzip2-shared_Makefile_08':
+    path    => '/nubots/toolchain/src/bzip2-shared/Makefile-libbz2_so',
+    line    => "\tinstall -m 0755 libbz2.so $(PREFIX)/lib",
+  } ~>
+  exec { 'correct_bzip2-shared_Makefile_09':
     command => "sed -i 's/\$(CC) -shared/\$(CC) \$(CFLAGS) -shared/' Makefile-libbz2_so",
     cwd     => '/nubots/toolchain/src/bzip2-shared',
     path    =>  [ '/nubots/toolchain/bin', '/usr/local/bin', '/usr/local/sbin/', '/usr/bin/', '/usr/sbin/', '/bin/', '/sbin/' ],
   } ~>
-  exec { 'correct_bzip2-shared_Makefile_08':
+  exec { 'correct_bzip2-shared_Makefile_10':
     command => "sed -i 's/^CFLAGS=/CFLAGS +=/' Makefile-libbz2_so",
     cwd     => '/nubots/toolchain/src/bzip2-shared',
     path    =>  [ '/nubots/toolchain/bin', '/usr/local/bin', '/usr/local/sbin/', '/usr/bin/', '/usr/sbin/', '/bin/', '/sbin/' ],

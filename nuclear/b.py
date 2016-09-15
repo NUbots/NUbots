@@ -43,12 +43,16 @@ for l in cmake_cache_text:
         # Store our value and split it into a list if it is a list
         cmake_cache[g[0]] = g[2] if ';' not in g[2].strip(';') else g[2].strip(';').split(';');
 
+source_dir = cmake_cache[cmake_cache["CMAKE_PROJECT_NAME"] + '_SOURCE_DIR']
+binary_dir = cmake_cache[cmake_cache["CMAKE_PROJECT_NAME"] + '_BINARY_DIR']
+
+
 if __name__ == "__main__":
 
     # Print some information for the user
     print "b script for", cmake_cache["CMAKE_PROJECT_NAME"]
-    print "\tSource:", cmake_cache[cmake_cache["CMAKE_PROJECT_NAME"] + '_SOURCE_DIR']
-    print "\tBinary:", cmake_cache[cmake_cache["CMAKE_PROJECT_NAME"] + '_BINARY_DIR']
+    print "\tSource:", source_dir
+    print "\tBinary:", binary_dir
     print
 
     # Add our builtin tools to the path and user tools

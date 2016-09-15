@@ -22,7 +22,7 @@ def register(command):
 
     command.add_argument('-c', '--config'
         , metavar='config'
-        , choices=['new', 'update', 'overwrite', 'pull', 'ignore']
+        , choices=['', 'new', 'update', 'overwrite', 'pull', 'ignore']
         , default='new'
         , help='method to use for configuration files when installing')
 
@@ -37,6 +37,7 @@ def run(ip_addr, config, user, **kwargs):
     target_dir = '{0}@{1}:/home/{0}/'.format(user, ip_addr)
     build_dir = b.binary_dir
     config_dir = os.path.join(build_dir, 'config')
+    platform_dir = '/nubots/toolchain/{0}'.format(b.cmake_cache["PLATFORM"])
 
 
     cprint('Installing binaries to ' + target_dir, 'blue', attrs=['bold'])
@@ -45,7 +46,7 @@ def run(ip_addr, config, user, **kwargs):
 
     # Get all of our required shared libraries in our toolchain and send them
     cprint('Installing toolchain library files', 'blue', attrs=['bold'])
-    libs = glob.glob('/nubots/toolchain/lib/*.so*')
+    libs = glob.glob('{0}/lib/*.so*'.format(platform_dir))
     call(['rsync', '-avzPl', '--checksum', '-e ssh'] + libs + [target_dir + 'toolchain'])
 
     if config in ['overwrite', 'o']:
@@ -56,7 +57,7 @@ def run(ip_addr, config, user, **kwargs):
         cprint('Adding new configuration files to target', 'blue', attrs=['bold'])
         call(['rsync', '-avzuPL', '--checksum', '-e ssh', config_dir, target_dir])
 
-    if config in ['new', 'n']:
+    if not config or config in ['new', 'n']:
         cprint('Adding new configuration files to the target', 'blue', attrs=['bold'])
         call(['rsync', '-avzPL', '--checksum', '--ignore-existing', '-e ssh', 'config', target_dir])
 
