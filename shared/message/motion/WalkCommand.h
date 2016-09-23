@@ -21,11 +21,21 @@
 #define MESSAGE_MOTION_WALKCOMMAND_H
 
 #include <armadillo>
-
 #include "utility/math/matrix/Transform2D.h"
 
-namespace message {
-namespace motion {
+namespace message 
+{
+namespace motion 
+{
+    /*
+    struct [name]
+    {
+        [variables]
+        [structure](...)
+            : ...
+            , ... {}
+    };
+    */
 
     using utility::math::matrix::Transform2D;
 
@@ -51,6 +61,7 @@ namespace motion {
 
     struct NewWalkCommand 
     {
+        //NewWalkCommand() = delete;
         Transform2D velocityTarget;     //
 
         NewWalkCommand(const Transform2D& velocityTarget)
@@ -72,14 +83,15 @@ namespace motion {
 
         EnableWalkEngineCommand(size_t id) : subsumptionId(id) { }
     };
-    
+
     struct DisableWalkEngineCommand 
     {
         //DisableWalkEngineCommand() = delete;
         size_t subsumptionId;           //
-        
+
         DisableWalkEngineCommand(size_t id) : subsumptionId(id) { }
     };
+
 } //motion
 } //message
 
