@@ -246,7 +246,7 @@ namespace strategy {
 
     void KeyboardWalk::quit() {
         endwin();
-        std::raise(SIGINT);
+        std::raise(SIGTERM); //Change back to SIGINT if required by NUbots messaging system//
     }
 
 }

@@ -33,10 +33,10 @@ namespace motion {
 
     struct WalkCommand 
     {
-        WalkCommand() = delete;
-        
-        size_t subsumptionId = 1;
-        Transform2D command; // x and y are velocity in m/s and angle is in rads/s
+        //WalkCommand() = delete;
+        size_t subsumptionId;           //
+        Transform2D command;            // x and y are velocity in m/s and angle is in rads/s
+
         WalkCommand(size_t id, const Transform2D& command) 
         : subsumptionId(id), command(command) {}
     };
@@ -44,38 +44,41 @@ namespace motion {
     struct WalkStartCommand 
     {
         //WalkStartCommand() = delete;
-        
+        size_t subsumptionId;           //
+
         WalkStartCommand(size_t id) : subsumptionId(id) { }
-        size_t subsumptionId = 1;
     };
 
     struct NewWalkCommand 
     {
-        Transform2D velocityTarget;
+        Transform2D velocityTarget;     //
+
         NewWalkCommand(const Transform2D& velocityTarget)
         : velocityTarget(velocityTarget) {}
     };
 
     struct WalkStopCommand 
     {
-        WalkStopCommand() = delete;
-        
+        //WalkStopCommand() = delete;
+        size_t subsumptionId;           //
+
         WalkStopCommand(size_t id) : subsumptionId(id) { }
-        size_t subsumptionId = 1;
     };
 
     struct EnableWalkEngineCommand 
     {
-        EnableWalkEngineCommand() = delete;
+        //EnableWalkEngineCommand() = delete;
+        size_t subsumptionId;           //
+
         EnableWalkEngineCommand(size_t id) : subsumptionId(id) { }
-        size_t subsumptionId = 1;
     };
     
     struct DisableWalkEngineCommand 
     {
-        DisableWalkEngineCommand() = delete;
+        //DisableWalkEngineCommand() = delete;
+        size_t subsumptionId;           //
+        
         DisableWalkEngineCommand(size_t id) : subsumptionId(id) { }
-        size_t subsumptionId = 1;
     };
 } //motion
 } //message

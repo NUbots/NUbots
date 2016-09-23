@@ -1,21 +1,20 @@
 NUCLEAR_ROLE(
-
     support::extension::FileWatcher
 
     # This must come first as it emits config which many roles depend on (e.g. SensorFilter, WalkEngine)
     motion::KinematicsConfiguration
-
+  
     # Support and Configuration
     support::SignalCatcher
 
+    support::configuration::NetworkConfiguration
     support::configuration::GlobalConfig
     support::configuration::SoccerConfig
-    support::configuration::NetworkConfiguration
     support::NUbugger
 
     # Hardware Interface
-    platform::darwin::HardwareSimulator
-    platform::darwin::SensorFilter
+    #platform::darwin::HardwareSimulator <- math runtime error, size() init
+    #platform::darwin::SensorFilter      <- math runtime error, size() init
 
     # Motion
     motion::FootMotionPlanner

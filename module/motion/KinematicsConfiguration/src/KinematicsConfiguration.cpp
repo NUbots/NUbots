@@ -42,7 +42,7 @@ namespace motion {
             emit(std::make_unique<KinematicsModel>(model));
 
         });
-
+        
     }
 
     void KinematicsConfiguration::configure (KinematicsModel& model, const Configuration& objDarwinModel) {
@@ -50,7 +50,7 @@ namespace motion {
         configureHead(model, objDarwinModel["head"]);
         configureArm(model, objDarwinModel["arm"]);
 
-        configureMassModel(model, objDarwinModel["mass_model"]);
+        configureMassModel(model, objDarwinModel["mass_model"]);     
     }
 
     void KinematicsConfiguration::configureLeg (KinematicsModel& model, const YAML::Node& objLeg) {
