@@ -133,8 +133,6 @@ namespace motion
         float scale = (step_height_fast_fraction - step_height_slow_fraction) * speed + step_height_slow_fraction;
         getFootPhases[2] *= scale;
 
-        std::cout << "\n\rLeft  Foot:" << leftFootPositionTransform << "\n\rRight Foot:"  << rightFootPositionTransform << "\n\r";  //debugging
-
         if(DEBUG) { NUClear::log("Messaging: Foot Motion Planner - Interpolate Transform2D"); }
         //Interpolate Transform2D from start to destination - deals with flat resolved movement in (x,y) coordinates
         if (getActiveForwardLimb() == LimbID::RIGHT_LEG) 
@@ -152,8 +150,6 @@ namespace motion
         //Translates foot motion into z dimension for stepping in three-dimensional space...
         Transform3D leftFootLocal  = leftFootPositionTransform;
         Transform3D rightFootLocal = rightFootPositionTransform;
-        std::cout << "\n\rLeft  Foot:" << leftFootPositionTransform << "\n\rRight Foot:"  << rightFootPositionTransform << "\n\r";  //debugging
-        std::cout << "\n\rLeft  Foot:" << leftFootLocal << "\n\rRight Foot:"  << rightFootLocal << "\n\rPhase:" << phase << "\n\r"; //debugging
 
         if(DEBUG) { NUClear::log("Messaging: Foot Motion Planner - Translate Z for support foot"); }
         //Lift swing leg - manipulate(update) z component of foot position to action movement with a varying altitude locus...
@@ -165,8 +161,6 @@ namespace motion
         {
             leftFootLocal  = leftFootLocal.translateZ(stepHeight  * getFootPhases[2]);
         }     
-
-        std::cout << "\n\rLeft  Foot:" << leftFootLocal << "\n\rRight Foot:"  << rightFootLocal << "\n\rPhase:" << phase << "\n\r"; //debugging 
 
         //DEBUGGING: Emit relative feet position phase with respect to robot state... 
         if (emitFootPosition)

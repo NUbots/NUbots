@@ -13,8 +13,8 @@ NUCLEAR_ROLE(
     support::NUbugger
 
     # Hardware Interface
-    #platform::darwin::HardwareSimulator <- math runtime error, size() init
-    #platform::darwin::SensorFilter      <- math runtime error, size() init
+    platform::darwin::HardwareSimulator
+    platform::darwin::SensorFilter
 
     # Motion
     motion::FootMotionPlanner

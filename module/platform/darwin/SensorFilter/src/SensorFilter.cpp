@@ -201,13 +201,14 @@ namespace module {
                 //     motionFilter.setState(newFilter, arma::diagmat(covariance));
                 // });
 
-                on<Last<20, Trigger<DarwinSensors>>, Single>().then([this](const std::list<std::shared_ptr<const DarwinSensors>>& sensors) {
-
+                on<Last<20, Trigger<DarwinSensors>>, Single>().then([this](const std::list<std::shared_ptr<const DarwinSensors>>& sensors) 
+                {
                     int leftCount = 0;
                     int middleCount = 0;
 
                     // If we have any downs in the last 20 frames then we are button pushed
-                    for (const auto& s : sensors) {
+                    for (const auto& s : sensors) 
+                    {
                         if(s->buttons.left && !s->cm730ErrorFlags) {
                             ++leftCount;
                         }
@@ -219,7 +220,8 @@ namespace module {
                     bool newLeftDown = leftCount > config.buttons.debounceThreshold;
                     bool newMiddleDown = middleCount > config.buttons.debounceThreshold;
 
-                    if(newLeftDown != leftDown) {
+                    if(newLeftDown != leftDown) 
+                    {
 
                         leftDown = newLeftDown;
 
@@ -232,7 +234,8 @@ namespace module {
                             emit(std::make_unique<ButtonLeftUp>());
                         }
                     }
-                    if(newMiddleDown != middleDown) {
+                    if(newMiddleDown != middleDown) 
+                    {
 
                         middleDown = newMiddleDown;
 
@@ -244,19 +247,19 @@ namespace module {
                             log("Middle Button Up");
                             emit(std::make_unique<ButtonMiddleUp>());
                         }
-                    }
+                    }                
                 });
 
-                on< Trigger<DarwinSensors>
+                on<Trigger<DarwinSensors>
                   , Optional<With<Sensors>>
                   , With<KinematicsModel>
                   , Single
-                  , Priority::HIGH>().then(
-                            "Main Sensors Loop",
-                            [this](const DarwinSensors& input,
-                                   std::shared_ptr<const Sensors> previousSensors,
-                                   const KinematicsModel& kinematicsModel) {
-
+                  , Priority::HIGH>().then("Main Sensors Loop", [this](
+                                                                            const DarwinSensors& input, 
+                                                                            std::shared_ptr<const Sensors> previousSensors,
+                                                                            const KinematicsModel& kinematicsModel
+                                                                      ) 
+                {
                     auto sensors = std::make_unique<Sensors>();
 
                     /************************************************
@@ -287,12 +290,14 @@ namespace module {
                     }
 
                     // Read through all of our sensors
-                    for(uint i = 0; i < 20; ++i) {
+                    for(uint i = 0; i < 20; ++i) 
+                    {
                         auto& original = input.servo[i];
                         auto& error = original.errorFlags;
 
                         // Check for an error on the servo and report it
-                        while(error != DarwinSensors::Error::OK) {
+                        while(error != DarwinSensors::Error::OK) 
+                        {
                             std::stringstream s;
                             s << "Error on Servo " << (i + 1) << " (" << message::input::stringFromId(ServoID(i)) << "):";
 
@@ -325,7 +330,8 @@ namespace module {
 
                         // If we have previous sensors and our current sensors have an error
                         // we then use our previous sensor values with some updates
-                        if(previousSensors && error != DarwinSensors::Error::OK) {
+                        if(previousSensors && error != DarwinSensors::Error::OK) 
+                        {
                             // Add the sensor values to the system properly
                             sensors->servos.push_back({
                                 error,
@@ -344,7 +350,8 @@ namespace module {
                             });
                         }
                         // Otherwise we can just use the new values as is
-                        else {
+                        else 
+                        {
                             // Add the sensor values to the system properly
                             sensors->servos.push_back({
                                 error,
@@ -362,23 +369,26 @@ namespace module {
                                 float(original.temperature)
                             });
                         }
-
-                    }
+                    }       
 
                     // If we have a previous sensors and our cm730 has errors then reuse our last sensor value
-                    if(previousSensors && (input.cm730ErrorFlags)) {
+                    if(previousSensors && (input.cm730ErrorFlags)) 
+                    {
                         sensors->accelerometer = previousSensors->accelerometer;
                     }
-                    else {
+                    else 
+                    {
                         sensors->accelerometer = {-input.accelerometer.y, input.accelerometer.x, -input.accelerometer.z};
                     }
 
                     // If we have a previous sensors and our cm730 has errors then reuse our last sensor value
-                    if(previousSensors && (input.cm730ErrorFlags || arma::norm(arma::vec({input.gyroscope.x, input.gyroscope.y, input.gyroscope.z}), 2) > 4 * M_PI)) {
+                    if(previousSensors && (input.cm730ErrorFlags || arma::norm(arma::vec({input.gyroscope.x, input.gyroscope.y, input.gyroscope.z}), 2) > 4 * M_PI)) 
+                    {
                         NUClear::log<NUClear::WARN>("Bad gyroscope value", arma::norm(arma::vec({input.gyroscope.x, input.gyroscope.y, input.gyroscope.z}), 2));
                         sensors->gyroscope = previousSensors->gyroscope;
                     }
-                    else {
+                    else 
+                    {
                         sensors->gyroscope = {input.gyroscope.x, input.gyroscope.y, -input.gyroscope.z};
                     }
 
@@ -418,7 +428,8 @@ namespace module {
                     /************************************************
                      *            Foot down information             *
                      ************************************************/
-                    if(previousSensors) {
+                    if(previousSensors) 
+                    {
                         // Use our virtual load sensor class to work out if our foot is down
                         arma::vec leftFootFeatureVec = {
                               sensors->servos[size_t(ServoID::L_HIP_PITCH)].presentVelocity
@@ -446,7 +457,8 @@ namespace module {
                         };
                         sensors->rightFootDown = rightFootDown.updateFoot(rightFootFeatureVec);
                     }
-                    else {
+                    else 
+                    {
                         sensors->leftFootDown = false;
                         sensors->rightFootDown = false;
                     }
@@ -470,10 +482,8 @@ namespace module {
                     // Gyroscope measurement update
                     motionFilter.measurementUpdate(sensors->gyroscope, config.motionFilter.noise.measurement.gyroscope, MotionModel::MeasurementType::GYROSCOPE());
 
-
-
-                    if (sensors->leftFootDown or sensors->rightFootDown) {
-
+                    if (sensors->leftFootDown or sensors->rightFootDown) 
+                    {
                         //pre-calculate common foot-down variables - these are the torso to world transforms.
                         arma::vec3 rTWw = motionFilter.get().rows(MotionModel::PX, MotionModel::PZ);
                         Rotation3D Rtw(UnitQuaternion(motionFilter.get().rows(MotionModel::QW, MotionModel::QZ)));
@@ -481,7 +491,8 @@ namespace module {
                         // 3 points on the ground mean that we can assume this foot is flat
                         // We also have to ensure that the previous foot was also down for this to be valid
                         // Check if our foot is flat on the ground
-                        for (auto& side : { ServoSide::LEFT, ServoSide::RIGHT} ) {
+                        for (auto& side : { ServoSide::LEFT, ServoSide::RIGHT} ) 
+                        {
 
                             auto servoid = side == ServoSide::LEFT ? ServoID::L_ANKLE_ROLL : ServoID::R_ANKLE_ROLL;
 
@@ -495,7 +506,8 @@ namespace module {
                                     : previousSensors->rightFootDown
                                 : false;
 
-                            if (footDown) {
+                            if (footDown) 
+                            {
                                 Transform3D Htf = sensors->forwardKinematics[servoid];
                                 Transform3D Hft = Htf.i();
 
@@ -506,7 +518,8 @@ namespace module {
                                 arma::vec3 rTFf = Hft.translation();
 
 
-                                if (!prevFootDown) {
+                                if (!prevFootDown) 
+                                {
                                     //NOTE: footflat measurements assume the foot is flat on the ground. These decorrelate the accelerometer and gyro from translation.
                                     Rotation3D footflat_Rwt = Rotation3D::createRotationZ(Rtw.i().yaw());
                                     Rotation3D footflat_Rtf = Rotation3D::createRotationZ(Rtf.yaw());
@@ -522,7 +535,9 @@ namespace module {
 
                                     //NOTE: an optional foot up with Z calculation can be done here
 
-                                } else {
+                                } 
+                                else 
+                                {
                                     //NOTE: translation and rotation updates are performed separately so that they can be turned off independently for debugging
 
                                     //encode the old->new torso-world rotation as a quaternion
@@ -552,6 +567,7 @@ namespace module {
                             }
                         }
                     }
+
                     //emit(graph("LeftFootDown", sensors->leftFootDown));
                     //emit(graph("RightFootDown", sensors->rightFootDown));
                     //emit(graph("LeftLoadState", leftFootDown.state));
@@ -571,38 +587,47 @@ namespace module {
                     /************************************************
                      *                  Mass Model                  *
                      ************************************************/
-
                     sensors->centreOfMass = calculateCentreOfMass(kinematicsModel,sensors->forwardKinematics, true);
 
                     /************************************************
                      *                  Kinematics Horizon          *
-                     ************************************************/
-
+                     ************************************************/         
                     sensors->bodyCentreHeight = motionFilter.get()[MotionModel::PZ];
-
+                
                     Rotation3D Rwt = sensors->world.rotation().t();
                     //remove translation components from the transform
-                    sensors->orientationBodyToGround = Rotation3D::createRotationZ(-Rwt.yaw()) * Rwt;
-
+std::cout << "On Trigger DarwinSensors : orientationBodyToGround\n\r";      
+std::cout << "On Trigger DarwinSensors : Rwt\n\r" << Rwt << "\n\r";   
+std::cout << "On Trigger DarwinSensors : Rwt.yaw()\n\r" << Rwt.yaw() << "\n\r";  
+std::cout << "On Trigger DarwinSensors : sensors->orientationBodyToGround\n\r" << sensors->orientationBodyToGround << "\n\r";     
+std::cout << "On Trigger DarwinSensors : Rotation3D::createRotationZ(-Rwt.yaw())\n\r" << Rotation3D::createRotationZ(-Rwt.yaw()) << "\n\r";    
+std::cout << "On Trigger DarwinSensors : sensors->orientationCamToGround\n\r" << sensors->orientationCamToGround << "\n\r";   
+std::cout << "On Trigger DarwinSensors : sensors->kinematicsBodyToGround\n\r" << sensors->kinematicsBodyToGround << "\n\r";   
+std::cout << "On Trigger DarwinSensors : sensors->kinematicsCamToGround\n\r" << sensors->kinematicsCamToGround << "\n\r";     
+                    sensors->orientationBodyToGround = Rotation3D::createRotationZ(-Rwt.yaw()) * Rwt;               
+std::cout << "On Trigger DarwinSensors : Set sensors->orientationBodyToGround\n\r" << sensors->orientationBodyToGround << "\n\r";                      
                     sensors->orientationCamToGround = sensors->orientationBodyToGround * sensors->forwardKinematics[ServoID::HEAD_PITCH];
-                    if(sensors->leftFootDown) {
+
+                    if(sensors->leftFootDown) 
+                    {
                         sensors->kinematicsBodyToGround = utility::motion::kinematics::calculateBodyToGround(sensors->forwardKinematics[ServoID::L_ANKLE_ROLL].submat(0,2,2,2),sensors->bodyCentreHeight);
-                    } else if (sensors->rightFootDown) {
+                    } 
+                    else if (sensors->rightFootDown) 
+                    {
                         sensors->kinematicsBodyToGround = utility::motion::kinematics::calculateBodyToGround(sensors->forwardKinematics[ServoID::R_ANKLE_ROLL].submat(0,2,2,2),sensors->bodyCentreHeight);
                     }
-                    else {
+                    else 
+                    {
                         sensors->kinematicsBodyToGround = sensors->orientationCamToGround;
                     }
                     sensors->kinematicsCamToGround = sensors->orientationBodyToGround * sensors->forwardKinematics[ServoID::HEAD_PITCH];
 
-
                     /************************************************
                      *                  CENTRE OF PRESSURE          *
                      ************************************************/
-
                     sensors->centreOfPressure = utility::motion::kinematics::calculateCentreOfPressure(kinematicsModel,*sensors);
 
-                    emit(std::move(sensors));
+                    emit(std::move(sensors));                  
                 });
             }
         }  // darwin
