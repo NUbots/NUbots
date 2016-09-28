@@ -24,53 +24,8 @@ namespace module {
 namespace platform {
 namespace darwin {
 
-    /// Picks which direction a motor should be measured in (forward or reverse)
-    const int8_t Convert::SERVO_DIRECTION[] = {
-        -1,             // [0]  R_SHOULDER_PITCH
-        1,              // [1]  L_SHOULDER_PITCH
-        -1,             // [2]  R_SHOULDER_ROLL
-        -1,             // [3]  L_SHOULDER_ROLL
-        -1,             // [4]  R_ELBOW
-        1,              // [5]  L_ELBOW
-        -1,             // [6]  R_HIP_YAW
-        -1,             // [7]  L_HIP_YAW
-        -1,             // [8]  R_HIP_ROLL
-        -1,             // [9]  L_HIP_ROLL
-        1,              // [10] R_HIP_PITCH
-        -1,             // [11] L_HIP_PITCH
-        1,              // [12] R_KNEE
-        -1,             // [13] L_KNEE
-        -1,             // [14] R_ANKLE_PITCH
-        1,              // [15] L_ANKLE_PITCH
-        1,              // [16] R_ANKLE_ROLL
-        1,              // [17] L_ANKLE_ROLL
-        1,              // [18]  HEAD_YAW
-        1,             // [19]  HEAD_PITCH
-    };
-
-    /// Offsets the radian angles of motors to change their 0 position
-    const double Convert::SERVO_OFFSET[] = {
-        -M_PI_2,       // [0]  R_SHOULDER_PITCH
-        M_PI_2,        // [1]  L_SHOULDER_PITCH
-        M_PI_4,        // [2]  R_SHOULDER_ROLL
-        -M_PI_4,       // [3]  L_SHOULDER_ROLL
-        M_PI_2,        // [4]  R_ELBOW
-        -M_PI_2,       // [5]  L_ELBOW
-        0.0,           // [6]  R_HIP_YAW
-        0.0,           // [7]  L_HIP_YAW
-        0.0,           // [8]  R_HIP_ROLL
-        0.0,           // [9]  L_HIP_ROLL
-        0.0,           // [10] R_HIP_PITCH
-        0.0,           // [11] L_HIP_PITCH
-        0.0,           // [12] R_KNEE
-        0.0,           // [13] L_KNEE
-        0.0,           // [14] R_ANKLE_PITCH
-        0.0,           // [15] L_ANKLE_PITCH
-        0.0,           // [16] R_ANKLE_ROLL
-        0.0,           // [17] L_ANKLE_ROLL
-        0.0,           // [18] HEAD_YAW
-        0.0,         // [19] HEAD_PITCH
-    };
+    int8_t Convert::SERVO_DIRECTION[20] = {0};
+    double Convert::SERVO_OFFSET[20]    = {0};
 
     float Convert::accelerometer(uint16_t value) {
         return (value - 512) * ACCELEROMETER_CONVERSION_FACTOR;

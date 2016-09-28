@@ -66,11 +66,11 @@ namespace darwin {
         /// The MX28 measures its speed between 0 and 1023 where 1023 means a speed of 117.07rpm
         static constexpr double SPEED_CONVERSION_FACTOR = (117.07 * 2.0 * M_PI) / (1023.0 * 60);
 
-        /// Picks which direction a motor should be measured in (forward or reverse)
-        static const int8_t SERVO_DIRECTION[];
+        /// Picks which direction a motor should be measured in (forward or reverse) -- configurable based on the specific humanoid being used.
+        static int8_t SERVO_DIRECTION[20];
 
-        /// Offsets the radian angles of motors to change their 0 position
-        static const double SERVO_OFFSET[];
+        /// Offsets the radian angles of motors to change their 0 position -- configurable based on the specific humanoid being used.
+        static double SERVO_OFFSET[20];
 
         template <int bit>
         static bool getBit(const uint16_t value) {

@@ -24,6 +24,7 @@
 #include "message/platform/darwin/DarwinSensors.h"
 #include "message/motion/ServoTarget.h"
 #include "message/support/Configuration.h"
+#include "utility/support/yaml_expression.h"
 
 
 namespace module {
@@ -33,6 +34,7 @@ namespace darwin {
     using message::platform::darwin::DarwinSensors;
     using message::motion::ServoTarget;
     using message::support::Configuration;
+    using utility::support::Expression;
 
     DarwinSensors HardwareIO::parseSensors(const Darwin::BulkReadResults& data) {
         DarwinSensors sensors;
@@ -151,6 +153,14 @@ namespace darwin {
 
         on<Configuration>("DarwinPlatform.yaml").then([this] (const Configuration& config) {
             darwin.setConfig(config);
+
+            for (size_t i = 0; i < config["servo_offset"].size(); i++) {
+                Convert::SERVO_OFFSET[i] = config["servo_offset"][i].as<Expression>();
+            }
+
+            for (size_t i = 0; i < config["servo_direction"].size(); i++) {
+                Convert::SERVO_DIRECTION[i] = config["servo_direction"][i].as<int>();
+            }
         });
 
         // This trigger gets the sensor data from the CM730

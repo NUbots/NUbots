@@ -22,6 +22,8 @@
 
 #include <nuclear>
 
+#include <yaml-cpp/yaml.h>
+
 #include "darwin/Darwin.h"
 #include "message/platform/darwin/DarwinSensors.h"
 
