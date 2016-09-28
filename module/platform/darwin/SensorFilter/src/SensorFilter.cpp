@@ -582,7 +582,7 @@ namespace module {
 
                     Rotation3D Rwt = sensors->world.rotation().t();
                     //remove translation components from the transform
-                    sensors->orientationBodyToGround = Rotation3D::createRotationZ(-Rwt.yaw()) * Rwt;
+                    sensors->orientationBodyToGround = Transform3D::createRotationZ(-Rwt.yaw()) * Transform3D(Rwt);
 
                     sensors->orientationCamToGround = sensors->orientationBodyToGround * sensors->forwardKinematics[ServoID::HEAD_PITCH];
                     if(sensors->leftFootDown) {
