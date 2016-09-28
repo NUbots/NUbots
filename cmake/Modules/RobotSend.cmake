@@ -18,7 +18,7 @@ FOREACH(host ${KNOWN_HOSTS})
             USES_TERMINAL
             COMMAND ${PYTHON_EXECUTABLE}
             "${CMAKE_SOURCE_DIR}/nuclear/b.py" "install" "${host}" "--config=${config}" "--user=${user}"
-            DEPENDS ${NUCLEAR_ROLES} "${CMAKE_SOURCE_DIR}/cmake/scripts/send.py")
+            DEPENDS ${NUCLEAR_ROLES} "${CMAKE_SOURCE_DIR}/tools/install.py")
 
         # Move our installer to an IDE group
         SET_PROPERTY(TARGET "${host}${config}" PROPERTY FOLDER "installers")
