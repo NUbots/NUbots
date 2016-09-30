@@ -14,7 +14,7 @@ NUCLEAR_ROLE(
 
     # Hardware Interface
     platform::darwin::HardwareSimulator
-    #platform::darwin::SensorFilter
+    platform::darwin::SensorFilter
 
     # Motion
     motion::FootMotionPlanner

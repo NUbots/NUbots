@@ -595,31 +595,29 @@ namespace module {
                     sensors->bodyCentreHeight = motionFilter.get()[MotionModel::PZ];
                 
                     Rotation3D Rwt = sensors->world.rotation().t();
-                    //remove translation components from the transform
-std::cout << "On Trigger DarwinSensors : orientationBodyToGround\n\r";      
-std::cout << "On Trigger DarwinSensors : Rwt\n\r" << Rwt << "\n\r";   
-std::cout << "On Trigger DarwinSensors : Rwt.yaw()\n\r" << Rwt.yaw() << "\n\r";  
-std::cout << "On Trigger DarwinSensors : sensors->orientationBodyToGround\n\r" << sensors->orientationBodyToGround << "\n\r";     
-std::cout << "On Trigger DarwinSensors : Rotation3D::createRotationZ(-Rwt.yaw())\n\r" << Rotation3D::createRotationZ(-Rwt.yaw()) << "\n\r";    
-std::cout << "On Trigger DarwinSensors : sensors->orientationCamToGround\n\r" << sensors->orientationCamToGround << "\n\r";   
-std::cout << "On Trigger DarwinSensors : sensors->kinematicsBodyToGround\n\r" << sensors->kinematicsBodyToGround << "\n\r";   
-std::cout << "On Trigger DarwinSensors : sensors->kinematicsCamToGround\n\r" << sensors->kinematicsCamToGround << "\n\r";     
-                    sensors->orientationBodyToGround = Rotation3D::createRotationZ(-Rwt.yaw()) * Rwt;               
-std::cout << "On Trigger DarwinSensors : Set sensors->orientationBodyToGround\n\r" << sensors->orientationBodyToGround << "\n\r";                      
+                    //remove translation components from the transform 
+                    // TODO: When attempting to run './bin/modularwalk' from the 'NUbots' directory 
+                    // in preference to './modularwalk' from within the 'bin' directory, error:
+                    // Mat::init(): size is fixed and hence cannot be changed, would be output at the
+                    // line which immediately follows this comment.
+                    // When outputing the sensors->orientationBodyToGround, Rwt and createRotationZ
+                    // values they were of Mat size [4x4] (default identity), [3x3] and [3x3] respectively.
+                    sensors->orientationBodyToGround = Rotation3D::createRotationZ(-Rwt.yaw()) * Rwt;                              
                     sensors->orientationCamToGround = sensors->orientationBodyToGround * sensors->forwardKinematics[ServoID::HEAD_PITCH];
 
                     if(sensors->leftFootDown) 
-                    {
+                    {           
                         sensors->kinematicsBodyToGround = utility::motion::kinematics::calculateBodyToGround(sensors->forwardKinematics[ServoID::L_ANKLE_ROLL].submat(0,2,2,2),sensors->bodyCentreHeight);
                     } 
                     else if (sensors->rightFootDown) 
                     {
+
                         sensors->kinematicsBodyToGround = utility::motion::kinematics::calculateBodyToGround(sensors->forwardKinematics[ServoID::R_ANKLE_ROLL].submat(0,2,2,2),sensors->bodyCentreHeight);
                     }
                     else 
                     {
                         sensors->kinematicsBodyToGround = sensors->orientationCamToGround;
-                    }
+                    }                                    
                     sensors->kinematicsCamToGround = sensors->orientationBodyToGround * sensors->forwardKinematics[ServoID::HEAD_PITCH];
 
                     /************************************************

@@ -90,6 +90,7 @@ namespace motion
         updateHandle = on<Trigger<FootStepCompleted>>().then("Foot Placement Planner - Calculate Target Foot Position", [this]
         {
             if(DEBUG) { NUClear::log("Messaging: Foot Placement Planner - Calculate Target Foot Position(0)"); }
+            std::cout << "FootStepCompleted";
             calculateNewStep();
             if(DEBUG) { NUClear::log("Messaging: Foot Placement Planner - Calculate Target Foot Position(1)"); }
         });//RESTORE AFTER DEBUGGING: .disable();
