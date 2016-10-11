@@ -594,15 +594,12 @@ namespace module {
                      ************************************************/         
                     sensors->bodyCentreHeight = motionFilter.get()[MotionModel::PZ];
                 
-                    Rotation3D Rwt = sensors->world.rotation().t();
-                    //remove translation components from the transform 
-                    // TODO: When attempting to run './bin/modularwalk' from the 'NUbots' directory 
-                    // in preference to './modularwalk' from within the 'bin' directory, error:
-                    // Mat::init(): size is fixed and hence cannot be changed, would be output at the
-                    // line which immediately follows this comment.
-                    // When outputing the sensors->orientationBodyToGround, Rwt and createRotationZ
-                    // values they were of Mat size [4x4] (default identity), [3x3] and [3x3] respectively.
-                    sensors->orientationBodyToGround = Rotation3D::createRotationZ(-Rwt.yaw()) * Rwt;                              
+                    Rotation3D Rwt = sensors->world.rotation().t();     //remove translation components from the transform 
+                    Rotation3D oBodyToGround = Rotation3D::createRotationZ(-Rwt.yaw()) * Rwt;
+                    // sensors->orientationBodyToGround : Mat size [4x4] (default identity)
+                    // createRotationZ : Mat size [3x3] 
+                    // Rwt : Mat size [3x3]
+                    sensors->orientationBodyToGround = Transform3D(oBodyToGround);                          
                     sensors->orientationCamToGround = sensors->orientationBodyToGround * sensors->forwardKinematics[ServoID::HEAD_PITCH];
 
                     if(sensors->leftFootDown) 
