@@ -160,11 +160,14 @@ namespace motion
             updateHandle.enable();
         });
 
-        on<Trigger<DisableWalkEngineCommand>>().then([this] 
+        on<Trigger<DisableWalkEngineCommand>>().then([this] (const DisableWalkEngineCommand& command)
         {
-            // Nobody needs the walk engine, so we stop updating it.
+            // If nobody needs the walk engine, stop updating it...
+            emit<Scope::DIRECT>(std::move(std::make_unique<DisableFootPlacement>(command.subsumptionId + 1)));
+            emit<Scope::DIRECT>(std::move(std::make_unique<DisableFootMotion>(command.subsumptionId + 1)));
+            emit<Scope::DIRECT>(std::move(std::make_unique<DisableTorsoMotion>(command.subsumptionId + 1)));
+            emit<Scope::DIRECT>(std::move(std::make_unique<DisableBalanceResponse>(command.subsumptionId + 1)));
             updateHandle.disable(); 
-            // TODO: Also disable the other walk command reactions?
         });
 
         on<Trigger<WalkStartCommand>>().then([this] 
@@ -218,22 +221,6 @@ namespace motion
         //    //StateOfWalk = State::LAST_STEP;
         //    start();
         //});
-
-        //Do we need enable/disable?
-        on<Trigger<EnableWalkEngineCommand>>().then([this] (const EnableWalkEngineCommand& command) 
-        {
-            subsumptionId = command.subsumptionId;
-            //stanceReset(); // Reset stance as we don't know where our limbs are.
-            updateHandle.enable();
-        });
-
-        on<Trigger<DisableWalkEngineCommand>>().then([this] 
-        {
-            // Nobody needs the walk engine, so we stop updating it.
-            updateHandle.disable(); 
-
-            // TODO: Also disable the other walk command reactions?
-        });
 
         //reset();
     }

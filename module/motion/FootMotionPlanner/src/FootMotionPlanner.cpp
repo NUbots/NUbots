@@ -84,12 +84,13 @@ namespace motion
             {
                 if((DEBUG_ITER++)%5 == 0)
                 {
+                    printf("\rUpdate Foot Position : FMP (%d, %d)\n", leftFootDestination.size(), rightFootDestination.size());
                     if(DEBUG) { NUClear::log("\rUpdate Foot Position : FMP (%d, %d)\n", leftFootDestination.size(), rightFootDestination.size()); }                  
                 }
                 updateFootPosition(getMotionPhase(), getLeftFootDestination(), getRightFootDestination());
             }
             if(DEBUG) { NUClear::log("Messaging: Foot Motion Planner - Update Foot Position(1)"); }
-        });//RESTORE AFTER DEBUGGING: .disable();
+        }).disable();
 
         //In the event of a new foot step target specified by the foot placement planning module...
         on<Trigger<FootStepTarget>>().then("Foot Motion Planner - Received Target Foot Position", [this] (const FootStepTarget& target) 
@@ -110,8 +111,7 @@ namespace motion
 
         //If foot motion is requested, enable updating...
         on<Trigger<EnableFootMotion>>().then([this] (const EnableFootMotion& command) 
-        {
-printf("\rEnableFootMotion\n");             
+        {            
             subsumptionId = command.subsumptionId;
             updateHandle.enable();
         });

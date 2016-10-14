@@ -103,7 +103,7 @@ namespace motion
             if(DEBUG) { NUClear::log("Messaging: Torso Motion Planner - Update Torso Position(0)"); }
             updateTorsoPosition();
             if(DEBUG) { NUClear::log("Messaging: Torso Motion Planner - Update Torso Position(1)"); }
-        });//RESTORE AFTER DEBUGGING: .disable();
+        }).disable();
 
         //In the event of a new foot step target specified by the foot placement planning module...
         on<Trigger<FootStepTarget>>().then("Torso Motion Planner - Received Target Footstep", [this] (const FootStepTarget& target) 
@@ -135,8 +135,7 @@ namespace motion
         });
 
         on<Trigger<EnableTorsoMotion>>().then([this] (const EnableTorsoMotion& command) 
-        {
-printf("\rEnableTorsoMotion\n");            
+        {       
             subsumptionId = command.subsumptionId;
             updateHandle.enable();
         });

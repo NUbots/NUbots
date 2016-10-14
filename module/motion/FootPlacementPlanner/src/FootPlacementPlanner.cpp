@@ -79,6 +79,13 @@ namespace motion
             configure(config.config);
         });
 
+        updateHandle = on<Trigger<FootStepCompleted>>().then("Foot Placement Planner - Calculate Target Foot Position", [this]
+        {
+            if(DEBUG) { NUClear::log("Messaging: Foot Placement Planner - Calculate Target Foot Position(0)"); }
+            calculateNewStep();
+            if(DEBUG) { NUClear::log("Messaging: Foot Placement Planner - Calculate Target Foot Position(1)"); }
+        }).disable();
+
         on<Trigger<NewWalkCommand>>().then("Foot Placement Planner - Update Foot Target", [this] (const NewWalkCommand& command) 
         {         
             if(DEBUG) { NUClear::log("Messaging: Foot Placement Planner - On New Walk Command(0)"); }
@@ -87,16 +94,8 @@ namespace motion
             if(DEBUG) { NUClear::log("Messaging: Foot Placement Planner - On New Walk Command(1)"); }
         });
 
-        updateHandle = on<Trigger<FootStepCompleted>>().then("Foot Placement Planner - Calculate Target Foot Position", [this]
-        {
-            if(DEBUG) { NUClear::log("Messaging: Foot Placement Planner - Calculate Target Foot Position(0)"); }
-            calculateNewStep();
-            if(DEBUG) { NUClear::log("Messaging: Foot Placement Planner - Calculate Target Foot Position(1)"); }
-        });//RESTORE AFTER DEBUGGING: .disable();
-
         on<Trigger<EnableFootPlacement>>().then([this] (const EnableFootPlacement& command) 
-        {
-printf("\rEnableFootPlacement\n");             
+        {         
             subsumptionId = command.subsumptionId;
             updateHandle.enable();
         });

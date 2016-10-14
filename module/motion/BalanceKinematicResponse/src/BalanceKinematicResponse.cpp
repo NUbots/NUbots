@@ -88,7 +88,7 @@ namespace motion
             //hipCompensation();
             //supportMassCompensation();
             if(DEBUG) { NUClear::log("Messaging: Balance Kinematic Response - Update Robot Posture(1)"); }
-        });//RESTORE AFTER DEBUGGING: .disable();
+        }).disable();
 
         //Aim to avoid dependancy on target position to enhance statelessness and adaptive balance compensation...
         on<Trigger<FootMotionUpdate>>().then("Balance Response Planner - Received Update (Active Foot Position) Info", [this] 
@@ -117,8 +117,7 @@ namespace motion
         //on<Trigger<NewStepTargetInfo>>().then([this]){};            
 
         on<Trigger<EnableBalanceResponse>>().then([this] (const EnableBalanceResponse& command) 
-        {
-printf("\rEnableBalanceResponse\n");            
+        {          
             subsumptionId = command.subsumptionId;
             updateHandle.enable();
         });
