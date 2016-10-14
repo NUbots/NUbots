@@ -44,13 +44,13 @@ namespace motion
     
     struct FootStepTarget
     {
-        LimbID supportMass;
+        LimbID activeForwardLimb;
         double targetTime;
         Transform2D targetDestination;
-        FootStepTarget(const LimbID& supportMass, 
+        FootStepTarget(const LimbID& activeForwardLimb, 
                        double targetTime, 
                        const Transform2D& targetDestination)
-            : supportMass(supportMass)
+            : activeForwardLimb(activeForwardLimb)
             , targetTime(targetTime)
             , targetDestination(targetDestination) {}
     };
@@ -60,17 +60,17 @@ namespace motion
         Transform2D rightFootSource;
         Transform2D leftFootDestination;
         Transform2D rightFootDestination;
-        Transform2D supportMass;
+        Transform2D activeForwardLimb;
         NewStepTargetInfo(const Transform2D& leftFootSource, 
                              const Transform2D& rightFootSource,
                              const Transform2D& leftFootDestination,
                              const Transform2D& rightFootDestination,
-                             const Transform2D& supportMass)
+                             const Transform2D& activeForwardLimb)
             : leftFootSource(leftFootSource)
             , rightFootSource(rightFootSource)
             , leftFootDestination(leftFootDestination)
             , rightFootDestination(rightFootDestination)
-            , supportMass(supportMass) {}
+            , activeForwardLimb(activeForwardLimb) {}
     };
     struct EnableFootPlacement
     {

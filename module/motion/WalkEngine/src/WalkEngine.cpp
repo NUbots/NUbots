@@ -50,6 +50,14 @@ namespace motion
     using message::motion::WalkStopped;
     using message::motion::EnableWalkEngineCommand;
     using message::motion::DisableWalkEngineCommand;
+    using message::motion::EnableBalanceResponse;
+    using message::motion::DisableBalanceResponse;
+    using message::motion::EnableTorsoMotion;
+    using message::motion::DisableTorsoMotion;
+    using message::motion::EnableFootPlacement;
+    using message::motion::DisableFootPlacement;
+    using message::motion::EnableFootMotion;
+    using message::motion::DisableFootMotion;
     using message::motion::ServoTarget;
     using message::motion::Script;
     using message::motion::kinematics::KinematicsModel;
@@ -102,16 +110,16 @@ namespace motion
         });
 
         //Automate walk engine command for testing...
-        on<Every<1, Per<std::chrono::seconds>>, Single, Priority::HIGH>()
+        /*on<Every<1, Per<std::chrono::seconds>>, Single, Priority::HIGH>()
         .then([this]
         {
             if(DEBUG) { NUClear::log("WalkEngine - Emit WalkCommand(0)"); }
-            if((DEBUG_ITER++)%30 == 0)
+            if((DEBUG_ITER++)%5 == 0)
             {
                 emit(std::make_unique<WalkCommand>(1, Transform2D({0.1, 0.05, 0.2}))); //debugging...
             }
             if(DEBUG) { NUClear::log("WalkEngine - Emit WalkCommand(1)"); }
-        });
+        });*/
 
         //Broadcast constrained velocity vector parameter to actuator modules...
         on<Trigger<WalkCommand>>().then([this] (const WalkCommand& walkCommand)
@@ -144,6 +152,10 @@ namespace motion
         on<Trigger<EnableWalkEngineCommand>>().then([this] (const EnableWalkEngineCommand& command) 
         {
             subsumptionId = command.subsumptionId;
+            emit<Scope::DIRECT>(std::move(std::make_unique<EnableFootPlacement>(command.subsumptionId + 1)));
+            emit<Scope::DIRECT>(std::move(std::make_unique<EnableFootMotion>(command.subsumptionId + 1)));
+            emit<Scope::DIRECT>(std::move(std::make_unique<EnableTorsoMotion>(command.subsumptionId + 1)));
+            emit<Scope::DIRECT>(std::move(std::make_unique<EnableBalanceResponse>(command.subsumptionId + 1)));
             //stanceReset(); // Reset stance as we don't know where our limbs are.
             updateHandle.enable();
         });
@@ -311,7 +323,7 @@ namespace motion
             //identify state of robot, walk engine handles actual posture...
         }
 
-        //get relevant torso models from TorsoMotionUpdate...
+        // Get relevant torso models from TorsoMotionUpdate...
         /*
         uTorso = stepTorso(uLeftFoot, uRightFoot, 0.5);
         Transform2D uTorsoActual = uTorso.localToWorld({-kinematicsModel.Leg.HIP_OFFSET_X, 0, 0});

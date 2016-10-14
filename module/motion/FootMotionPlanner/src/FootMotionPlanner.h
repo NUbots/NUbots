@@ -116,7 +116,7 @@ namespace motion
         std::queue<Transform2D> leftFootDestination;    // Destination placement Transform2D left foot positions
         std::queue<Transform2D> rightFootDestination;   // Destination placement Transform2D right foot positions
         Transform2D uSupportMass;                       // Appears to be support foot pre-step position
-        LimbID activeForwardLimb;                       // The leg that is 'swinging' in the step, opposite of the support foot
+        std::queue<LimbID> activeForwardLimb;           // The leg that is 'swinging' in the step, opposite of the support foot
         LimbID activeLimbInitial;                       // TODO: Former initial non-support leg for deterministic walking approach
 
          /**
@@ -137,6 +137,7 @@ namespace motion
          * Internal timing reference variables...
          */
         double beginStepTime;                                   // The time when the current step begun
+        std::queue<double> destinationTime;                     // The time when the current is to be completed
         NUClear::clock::time_point lastVeloctiyUpdateTime;      //
 
         /**
@@ -178,10 +179,6 @@ namespace motion
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
         bool startFromStep;
-        // Update to step is received
-        bool updateStepInstruction;
-        // The time when the current is to be completed
-        double destinationTime;
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -242,12 +239,6 @@ namespace motion
          * @return [description]
          */
         bool getNewStepReceived();
-        /**
-         * @brief [brief description]
-         * @details [long description]
-         * @return [description]
-         */
-        void setNewStepReceived(bool inUpdateStepInstruction);
         /**
          * @brief [brief description]
          * @details [long description]

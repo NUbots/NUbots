@@ -80,7 +80,7 @@ namespace motion
         });
 
         on<Trigger<NewWalkCommand>>().then("Foot Placement Planner - Update Foot Target", [this] (const NewWalkCommand& command) 
-        {
+        {         
             if(DEBUG) { NUClear::log("Messaging: Foot Placement Planner - On New Walk Command(0)"); }
             setVelocity(command.velocityTarget);
             calculateNewStep();
@@ -90,13 +90,13 @@ namespace motion
         updateHandle = on<Trigger<FootStepCompleted>>().then("Foot Placement Planner - Calculate Target Foot Position", [this]
         {
             if(DEBUG) { NUClear::log("Messaging: Foot Placement Planner - Calculate Target Foot Position(0)"); }
-            std::cout << "FootStepCompleted";
             calculateNewStep();
             if(DEBUG) { NUClear::log("Messaging: Foot Placement Planner - Calculate Target Foot Position(1)"); }
         });//RESTORE AFTER DEBUGGING: .disable();
 
         on<Trigger<EnableFootPlacement>>().then([this] (const EnableFootPlacement& command) 
         {
+printf("\rEnableFootPlacement\n");             
             subsumptionId = command.subsumptionId;
             updateHandle.enable();
         });
@@ -339,7 +339,7 @@ namespace motion
 /*=======================================================================================================*/
     double FootPlacementPlanner::getTime() 
     {
-        if(DEBUG) { printf("System Time:%f\n\r", double(NUClear::clock::now().time_since_epoch().count()) * (1.0 / double(NUClear::clock::period::den))); }
+        if(DEBUG) { NUClear::log("System Time:%f\n\r", double(NUClear::clock::now().time_since_epoch().count()) * (1.0 / double(NUClear::clock::period::den))); }
         return (double(NUClear::clock::now().time_since_epoch().count()) * (1.0 / double(NUClear::clock::period::den)));
     }    
 /*=======================================================================================================*/

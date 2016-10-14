@@ -107,7 +107,7 @@ namespace motion
 
         //In the event of a new foot step target specified by the foot placement planning module...
         on<Trigger<FootStepTarget>>().then("Torso Motion Planner - Received Target Footstep", [this] (const FootStepTarget& target) 
-        {
+        {     
             if(DEBUG) { NUClear::log("Messaging: Torso Motion Planner - Received Target Footstep(0)"); }
             setDestinationTime(target.targetTime);
             if(DEBUG) { NUClear::log("Messaging: Torso Motion Planner - Received Target Footstep(1)"); }
@@ -115,20 +115,20 @@ namespace motion
 
         //In the event of a new foot step position info specified by the foot placement planning module...
         on<Trigger<NewStepTargetInfo>>().then("Torso Motion Planner - Received Footstep Info", [this] (const NewStepTargetInfo& info) 
-        {
+        {            
             if(DEBUG) { NUClear::log("Messaging: Torso Motion Planner - Received Footstep Info(0)"); }
             setLeftFootSource(info.leftFootSource);
             setRightFootSource(info.rightFootSource);
             setLeftFootDestination(info.leftFootDestination);
             setRightFootDestination(info.rightFootDestination);
-            setSupportMass(info.supportMass); 
+            setSupportMass(info.activeForwardLimb); 
             zmpTorsoCoefficients();
             if(DEBUG) { NUClear::log("Messaging: Torso Motion Planner - Received Footstep Info(1)"); }
         });
 
         //In the process of actuating a foot step and emitting updated positional data...
         on<Trigger<FootMotionUpdate>>().then("Torso Motion Planner - Received Foot Motion Update", [this] (const FootMotionUpdate& info) 
-        {
+        {            
             if(DEBUG) { NUClear::log("Messaging: Torso Motion Planner - Received Foot Motion Update(0)"); }
             setMotionPhase(info.phase);
             if(DEBUG) { NUClear::log("Messaging: Torso Motion Planner - Received Foot Motion Update(1)"); }
@@ -136,6 +136,7 @@ namespace motion
 
         on<Trigger<EnableTorsoMotion>>().then([this] (const EnableTorsoMotion& command) 
         {
+printf("\rEnableTorsoMotion\n");            
             subsumptionId = command.subsumptionId;
             updateHandle.enable();
         });

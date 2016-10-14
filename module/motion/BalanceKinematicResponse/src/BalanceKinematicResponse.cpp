@@ -118,6 +118,7 @@ namespace motion
 
         on<Trigger<EnableBalanceResponse>>().then([this] (const EnableBalanceResponse& command) 
         {
+printf("\rEnableBalanceResponse\n");            
             subsumptionId = command.subsumptionId;
             updateHandle.enable();
         });
