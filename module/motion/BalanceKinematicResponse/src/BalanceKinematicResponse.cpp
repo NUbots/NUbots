@@ -35,6 +35,7 @@ namespace motion
     using message::input::LimbID;
     using message::motion::FootMotionUpdate;
     using message::motion::TorsoMotionUpdate;
+    using message::motion::BalanceBodyUpdate;
     using message::motion::EnableBalanceResponse;
     using message::motion::DisableBalanceResponse;
     using message::support::Configuration;
@@ -169,10 +170,34 @@ namespace motion
         }
     }  
 /*=======================================================================================================*/
+//      NAME: updateBody
+/*=======================================================================================================*/
+    void BalanceKinematicResponse::updateBody()
+    {
+        // Apply balance and compensation functions to robot posture...
+        updateLowerBody();
+        //updateUpperBody();
+
+        //DEBUGGING: Emit relative feet position with respect to robot torso model... 
+        if (emitFootPosition)
+        {
+            //emit(graph("Right foot position", rightFootTorso.translation()));
+            //emit(graph("Left  foot position",  leftFootTorso.translation()));
+        }
+
+        emit(std::make_unique<BalanceBodyUpdate>(getMotionPhase(), getLeftFootPosition(), getRightFootPosition(), getTorsoPositionLegs(), getTorsoPositionLegs(), getTorsoPosition3D()));
+    }      
+/*=======================================================================================================*/
 //      METHOD: updateLowerBody
 /*=======================================================================================================*/
     void BalanceKinematicResponse::updateLowerBody() 
     {
+        //DEBUGGING: Emit relative torso position with respect to world model... 
+        if (emitLocalisation) 
+        {
+            localise(getTorsoPositionArms().localToWorld({-kinematicsModel.Leg.HIP_OFFSET_X, 0, 0}));
+        }
+
         //hipCompensation();
         //ankleCompensation();
         //supportMassCompensation();
@@ -226,31 +251,23 @@ namespace motion
         */
 
         //emit(motionArms(phase));
-    }
+    }   
 /*=======================================================================================================*/
-//      NAME: updateBody
+//      NAME: localise
 /*=======================================================================================================*/
-    void updateBody()
+    void WalkEngine::localise(Transform2D position) 
     {
-        // Apply balance and compensation functions to robot posture...
-        updateLowerBody();
-        //updateUpperBody();
-
-        //Emit relative torso position with respect to world model... 
-        if (emitLocalisation) 
-        {
-            localise(getTorsoPositionArms().localToWorld({-kinematicsModel.Leg.HIP_OFFSET_X, 0, 0}));
-        }
-
-        //DEBUGGING: Emit relative feet position with respect to robot torso model... 
-        if (emitFootPosition)
-        {
-            //emit(graph("Right foot position", rightFootTorso.translation()));
-            //emit(graph("Left  foot position",  leftFootTorso.translation()));
-        }
-
-        emit(std::make_unique<BalanceBodyUpdate>(getMotionPhase(), getLeftFootPosition(), getRightFootPosition(), getTorsoPositionLegs(), getTorsoPositionLegs(), getTorsoPosition3D()));
-    }     
+        // emit position as a fake localisation
+        auto localisation = std::make_unique<std::vector<message::localisation::Self>>();
+        message::localisation::Self self;
+        self.position = {position.x(), position.y()};
+        self.position_cov = arma::eye(2,2) * 0.1; // made up
+        self.heading = {std::cos(position.angle()), std::sin(position.angle())}; // convert to cartesian coordinates
+        self.velocity = arma::zeros(2); // not used
+        self.robot_to_world_rotation = arma::zeros(2,2); // not used
+        localisation->push_back(self);
+        emit(std::move(localisation));
+    }    
 /*=======================================================================================================*/
 //      ENCAPSULATION METHOD: getTime
 /*=======================================================================================================*/

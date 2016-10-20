@@ -257,9 +257,8 @@ namespace motion
         /**
          * @brief [brief description]
          * @details [long description]
-         * @return [description]
          */
-        void update(const Sensors& sensors);
+        void updateBody();
         /**
          * @brief [brief description]
          * @details [long description]
@@ -272,11 +271,6 @@ namespace motion
          * @return [description]
          */
         void updateUpperBody(/*const Sensors& sensors*/);
-        /**
-         * @brief [brief description]
-         * @details [long description]
-         */
-        void updateBody();
         /**
          * @brief [brief description]
          * @details [long description]
@@ -294,36 +288,6 @@ namespace motion
          * @details [long description]
          * @return [description]
          */
-        void updateStill(const Sensors& sensors = Sensors());
-        /**
-         * @brief [brief description]
-         * @details [long description]
-         * @return [description]
-         */
-        std::unique_ptr<std::vector<ServoCommand>> updateStillWayPoints(const Sensors& sensors);
-        /**
-         * @brief [brief description]
-         * @details [long description]
-         * @return [description]
-         */
-        void calculateNewStep();
-        /**
-         * @brief [brief description]
-         * @details [long description]
-         * @return [description]
-         */
-        void setVelocity(Transform2D velocity);
-        /**
-         * @brief [brief description]
-         * @details [long description]
-         * @return [description]
-         */
-        void updateVelocity();
-        /**
-         * @brief [brief description]
-         * @details [long description]
-         * @return [description]
-         */
         double getMotionPhase();
         /**
          * @brief [brief description]
@@ -331,24 +295,6 @@ namespace motion
          * @return [description]
          */
         void setMotionPhase(double inMotionPhase);
-        /**
-         * @brief [brief description]
-         * @details [long description]
-         * @return [description]
-         */
-        void localise(Transform2D position);
-        /**
-         * @brief [brief description]
-         * @details [long description]
-         * @return [description]
-         */
-        Transform2D getNewFootTarget(const Transform2D& velocity, const Transform2D& leftFoot, const Transform2D& rightFoot, const LimbID& swingLeg);
-        /**
-         * @brief [Get the next torso position]
-         * @details [long description]
-         * @return [description]
-         */
-        Transform2D stepTorso(const Transform2D& uLeftFoot, const Transform2D& uRightFoot, double shiftFactor);
         /**
          * @brief [brief description]
          * @details [get a unix timestamp (in decimal seconds that are accurate to the microsecond)]
@@ -361,12 +307,6 @@ namespace motion
          * @return A clamped value between 0 and maxvalue, offset by deadband
          */
         double linearInterpolationDeadband(double a, double deadband, double maxvalue);
-        /**
-         * @brief [brief description]
-         * @details [long description]
-         * @return [The current velocity]
-         */
-        Transform2D getVelocity();
         /**
          * @brief [brief description]
          * @details [long description]
@@ -520,29 +460,6 @@ namespace motion
          * @param inSupportMass [description]
          */
         void setSupportMass(const Transform2D& inSupportMass);
-        /**
-         * @brief [brief description]
-         * @details [long description]
-         * 
-         * @param index [description]
-         * @return [description]
-         */
-        double getFootOffsetCoefficient(int index);
-        /**
-         * @brief [brief description]
-         * @details [long description]
-         * 
-         * @param inFootOffsetCoefficient [description]
-         */
-        void setFootOffsetCoefficient(const arma::vec2& inFootOffsetCoefficient);
-        /**
-         * @brief [brief description]
-         * @details [long description]
-         * 
-         * @param index [description]
-         * @param inValue [description]
-         */
-        void setFootOffsetCoefficient(int index, double inValue);
         /**
          * @brief [brief description]
          * @details [long description]

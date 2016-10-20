@@ -295,13 +295,6 @@ namespace motion
          * 
          * @param inTorsoPosition [description]
          */
-        void localise(Transform2D position); 
-        /**
-         * @brief [brief description]
-         * @details [long description]
-         * 
-         * @param inTorsoPosition [description]
-         */
         std::unique_ptr<std::vector<ServoCommand>> updateWaypoints();
         /**
          * @brief [brief description]

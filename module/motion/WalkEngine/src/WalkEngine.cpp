@@ -235,22 +235,6 @@ namespace motion
         //stanceReset();
     }    
 /*=======================================================================================================*/
-//      NAME: localise
-/*=======================================================================================================*/
-    void WalkEngine::localise(Transform2D position) 
-    {
-        // emit position as a fake localisation
-        auto localisation = std::make_unique<std::vector<message::localisation::Self>>();
-        message::localisation::Self self;
-        self.position = {position.x(), position.y()};
-        self.position_cov = arma::eye(2,2) * 0.1; // made up
-        self.heading = {std::cos(position.angle()), std::sin(position.angle())}; // convert to cartesian coordinates
-        self.velocity = arma::zeros(2); // not used
-        self.robot_to_world_rotation = arma::zeros(2,2); // not used
-        localisation->push_back(self);
-        emit(std::move(localisation));
-    }
-/*=======================================================================================================*/
 //      NAME: start
 /*=======================================================================================================*/    
     void WalkEngine::start() 
