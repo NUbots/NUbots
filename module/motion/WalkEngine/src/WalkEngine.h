@@ -135,7 +135,7 @@ namespace motion
             {
                 FrameArms = Transform2D();
                 FrameLegs = Transform2D();
-                Frame3D = Transform2D();
+                Frame3D = Transform3D();
             }
             ~TorsoPositions() {}
 
@@ -144,14 +144,8 @@ namespace motion
             Transform3D Frame3D;
         };
         TorsoPositions torsoPositionsTransform;         // Active torso position
-        Transform2D torsoPositionSource;                // Pre-step torso position
-        Transform2D torsoPositionDestination;           // Torso step target position
         Transform2D leftFootPositionTransform;          // Active left foot position
-        Transform2D leftFootSource;                     // Pre-step left foot position
         Transform2D rightFootPositionTransform;         // Active right foot position
-        Transform2D rightFootSource;                    // Pre-step right foot position
-        std::queue<Transform2D> leftFootDestination;    // Destination placement Transform2D left foot positions
-        std::queue<Transform2D> rightFootDestination;   // Destination placement Transform2D right foot positions
         Transform2D uSupportMass;                       // Appears to be support foot pre-step position
         LimbID activeForwardLimb;                       // The leg that is 'swinging' in the step, opposite of the support foot
         LimbID activeLimbInitial;                       // TODO: Former initial non-support leg for deterministic walking approach
@@ -181,12 +175,8 @@ namespace motion
         /**
          * Arm Position vectors initialized from configuration script, see config file for documentation...
          */
-        arma::vec3 armLPostureTransform;                // 
-        arma::vec3 armLPostureSource;                   //  
-        arma::vec3 armLPostureDestination;              //  
-        arma::vec3 armRPostureTransform;                //  
-        arma::vec3 armRPostureSource;                   //  
-        arma::vec3 armRPostureDestination;              //  
+        arma::vec3 armLPostureTransform;                //
+        arma::vec3 armRPostureTransform;                //
 
         /**
          * Ankle Position vectors initialized from configuration script, see config file for documentation...
@@ -270,7 +260,7 @@ namespace motion
          * 
          * @param inTorsoPosition [description]
          */
-        void generateAndSaveStandScript(const Sensors& sensors);
+        void generateAndSaveStandScript();
         /**
          * @brief [brief description]
          * @details [long description]
@@ -312,7 +302,7 @@ namespace motion
          * 
          * @param inTorsoPosition [description]
          */
-        std::unique_ptr<std::vector<ServoCommand>> updateWaypoints(const Sensors& sensors);
+        std::unique_ptr<std::vector<ServoCommand>> updateWaypoints();
         /**
          * @brief [brief description]
          * @details [long description]
@@ -335,36 +325,6 @@ namespace motion
          * @param inTorsoPosition [description]
          */
         void updateVelocity();
-        /**
-         * Solve the ZMP equation
-         */
-        arma::vec2 zmpSolve(double zs, double z1, double z2, double x1, double x2, double phase1Single, double phase2Single, double stepTime, double zmpTime);
-        /**
-         * Uses ZMP to determine the torso position
-         *
-         * @return The torso position in Transform2D
-         */
-        Transform2D zmpTorsoCompensation(double phase, arma::vec4 zmpCoefficients, arma::vec4 zmpParams, double stepTime, double zmpTime, double phase1Zmp, double phase2Zmp, Transform2D uSupport, Transform2D uLeftFootDestination, Transform2D uLeftFootSource, Transform2D uRightFootDestination, Transform2D uRightFootSource);
-        /**
-         * This is an easing function that returns 3 values {x,y,z} with the range [0,1]
-         * This is used to 'ease' the foot path through its trajectory.
-         * The params phase1Single and phase2Single are used to tune the amount of time the robot spends on two feet
-         * Note: Only x/z are used currently and y is always 0
-         * See: http://easings.net/ to reference common easing functions
-         *
-         * @param phase The input to the easing function, with a range of [0,1].
-         * @param phase1Single The phase time between [0,1] to start the step. A value of 0.1 means the step will not start until phase is >= 0.1
-         * @param phase2Single The phase time between [0,1] to end the step. A value of 0.9 means the step will end when phase >= 0.9
-         */
-        arma::vec3 footPhase(double phase, double phase1Single, double phase2Single);
-        /**
-         * @brief [brief description]
-         * @details [long description]
-         * @return A clamped between 0 and maxvalue, offset by deadband
-         * 
-         * @param inTorsoPosition [description]
-         */
-        double linearInterpolationDeadband(double a, double deadband, double maxvalue);
         /**
          * @brief [brief description]
          * @details [long description]
@@ -408,77 +368,7 @@ namespace motion
          * 
          * @param inTorsoPosition [description]
          */
-        void setLArmPosition(arma::vec3 inLArm);
-        /**
-         * @brief [brief description]
-         * @details [long description]
-         * 
-         * @param inTorsoPosition [description]
-         */
-        arma::vec3 getLArmSource();
-        /**
-         * @brief [brief description]
-         * @details [long description]
-         * 
-         * @param inTorsoPosition [description]
-         */
-        void setLArmSource(arma::vec3 inLArm);
-        /**
-         * @brief [brief description]
-         * @details [long description]
-         * 
-         * @param inTorsoPosition [description]
-         */
-        arma::vec3 getLArmDestination();
-        /**
-         * @brief [brief description]
-         * @details [long description]
-         * 
-         * @param inTorsoPosition [description]
-         */
-        void setLArmDestination(arma::vec3 inLArm);
-        /**
-         * @brief [brief description]
-         * @details [long description]
-         * 
-         * @param inTorsoPosition [description]
-         */
         arma::vec3 getRArmPosition();
-        /**
-         * @brief [brief description]
-         * @details [long description]
-         * 
-         * @param inTorsoPosition [description]
-         */
-        void setRArmPosition(arma::vec3 inRArm);
-        /**
-         * @brief [brief description]
-         * @details [long description]
-         * 
-         * @param inTorsoPosition [description]
-         */
-        arma::vec3 getRArmSource();
-        /**
-         * @brief [brief description]
-         * @details [long description]
-         * 
-         * @param inTorsoPosition [description]
-         */
-        void setRArmSource(arma::vec3 inRArm);
-        /**
-         * @brief [brief description]
-         * @details [long description]
-         * 
-         * @param inTorsoPosition [description]
-         */
-        arma::vec3 getRArmDestination();
-        /**
-         * @brief [brief description]
-         * @details [long description]
-         * 
-         * @param inTorsoPosition [description]
-         */
-        void setRArmDestination(arma::vec3 inRArm);
         /**
          * @brief [brief description]
          * @details [long description]
@@ -503,86 +393,9 @@ namespace motion
         /**
          * @brief [brief description]
          * @details [long description]
-         * 
-         * @param inTorsoPosition [description]
-         */
-        void setTorsoPositionArms(const Transform2D& inTorsoPosition);
-        /**
-         * @brief [brief description]
-         * @details [long description]
-         * 
-         * @param inTorsoPosition [description]
-         */
-        void setTorsoPositionLegs(const Transform2D& inTorsoPosition);
-        /**
-         * @brief [brief description]
-         * @details [long description]
-         * 
-         * @param inTorsoPosition [description]
-         */
-        void setTorsoPosition3D(const Transform3D& inTorsoPosition);
-        /**
-         * @brief [brief description]
-         * @details [long description]
-         * @return [description]
-         */
-        Transform2D getTorsoSource();
-        /**
-         * @brief [brief description]
-         * @details [long description]
-         * 
-         * @param inTorsoPosition [description]
-         */
-        void setTorsoSource(const Transform2D& inTorsoPosition);
-        /**
-         * @brief [brief description]
-         * @details [long description]
-         * @return [description]
-         */
-        Transform2D getTorsoDestination();
-        /**
-         * @brief [brief description]
-         * @details [long description]
-         * 
-         * @param inTorsoPosition [description]
-         */
-        void setTorsoDestination(const Transform2D& inTorsoPosition);
-        /**
-         * @brief [brief description]
-         * @details [long description]
          * @return [description]
          */
         Transform2D getSupportMass();
-        /**
-         * @brief [brief description]
-         * @details [long description]
-         * 
-         * @param inSupportMass [description]
-         */
-        void setSupportMass(const Transform2D& inSupportMass);
-        /**
-         * @brief [brief description]
-         * @details [long description]
-         * 
-         * @param index [description]
-         * @return [description]
-         */
-        double getFootOffsetCoefficient(int index);
-        /**
-         * @brief [brief description]
-         * @details [long description]
-         * 
-         * @param inFootOffsetCoefficient [description]
-         */
-        void setFootOffsetCoefficient(const arma::vec2& inFootOffsetCoefficient);
-        /**
-         * @brief [brief description]
-         * @details [long description]
-         * 
-         * @param index [description]
-         * @param inValue [description]
-         */
-        void setFootOffsetCoefficient(int index, double inValue);
         /**
          * @brief [brief description]
          * @details [long description]
@@ -592,75 +405,9 @@ namespace motion
         /**
          * @brief [brief description]
          * @details [long description]
-         * 
-         * @param inLeftFootPosition [description]
-         */
-        void setLeftFootPosition(const Transform2D& inLeftFootPosition);
-        /**
-         * @brief [brief description]
-         * @details [long description]
          * @return [description]
          */
         Transform2D getRightFootPosition();
-        /**
-         * @brief [brief description]
-         * @details [long description]
-         * 
-         * @param inRightFootPosition [description]
-         */
-        void setRightFootPosition(const Transform2D& inRightFootPosition);
-        /**
-         * @brief [brief description]
-         * @details [long description]
-         * @return [description]
-         */
-        Transform2D getLeftFootSource();
-        /**
-         * @brief [brief description]
-         * @details [long description]
-         * 
-         * @param inLeftFootSource [description]
-         */
-        void setLeftFootSource(const Transform2D& inLeftFootSource);
-        /**
-         * @brief [brief description]
-         * @details [long description]
-         * @return [description]
-         */
-        Transform2D getRightFootSource();
-        /**
-         * @brief [brief description]
-         * @details [long description]
-         * 
-         * @param inRightFootSource [description]
-         */
-        void setRightFootSource(const Transform2D& inRightFootSource);
-        /**
-         * @brief [brief description]
-         * @details [long description]
-         * @return [description]
-         */
-        Transform2D getLeftFootDestination();
-        /**
-         * @brief [brief description]
-         * @details [long description]
-         * 
-         * @param inLeftFootDestination [description]
-         */
-        void setLeftFootDestination(const Transform2D& inLeftFootDestination);
-        /**
-         * @brief [brief description]
-         * @details [long description]
-         * @return [description]
-         */
-        Transform2D getRightFootDestination();
-        /**
-         * @brief [brief description]
-         * @details [long description]
-         * 
-         * @param inRightFootDestination [description]
-         */
-        void setRightFootDestination(const Transform2D& inRightFootDestination);
     };
 
 }  // motion

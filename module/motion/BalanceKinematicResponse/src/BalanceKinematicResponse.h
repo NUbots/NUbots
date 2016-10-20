@@ -122,7 +122,7 @@ namespace motion
             {
                 FrameArms = Transform2D();
                 FrameLegs = Transform2D();
-                Frame3D = Transform2D();
+                Frame3D = Transform3D();
             }
             ~TorsoPositions() {}
 
@@ -131,14 +131,8 @@ namespace motion
             Transform3D Frame3D;
         };
         TorsoPositions torsoPositionsTransform;         // Active torso position
-        Transform2D torsoPositionSource;                // Pre-step torso position
-        Transform2D torsoPositionDestination;           // Torso step target position
-        Transform2D leftFootPositionTransform;          // Active left foot position
-        Transform2D leftFootSource;                     // Pre-step left foot position
-        Transform2D rightFootPositionTransform;         // Active right foot position
-        Transform2D rightFootSource;                    // Pre-step right foot position
-        std::queue<Transform2D> leftFootDestination;    // Destination placement Transform2D left foot positions
-        std::queue<Transform2D> rightFootDestination;   // Destination placement Transform2D right foot positions
+        Transform3D leftFootPositionTransform;          // Active left foot position    
+        Transform3D rightFootPositionTransform;         // Active right foot position
         Transform2D uSupportMass;                       // Appears to be support foot pre-step position
         LimbID activeForwardLimb;                       // The leg that is 'swinging' in the step, opposite of the support foot
         LimbID activeLimbInitial;                       // TODO: Former initial non-support leg for deterministic walking approach
@@ -187,6 +181,7 @@ namespace motion
          * Internal timing reference variables...
          */
         double beginStepTime;                                   // The time when the current step begun
+        double footMotionPhase;                                 // Phase representation of foot motion state
         double STAND_SCRIPT_DURATION;                           //
         NUClear::clock::time_point pushTime;                    //
         NUClear::clock::time_point lastVeloctiyUpdateTime;      //
@@ -211,13 +206,10 @@ namespace motion
         /**
          * Dynamic analysis parameters for relevant motion planning...
          */
-        arma::vec4 zmpCoefficients;                     // zmp expoential coefficients aXP aXN aYP aYN
-        arma::vec4 zmpParameters;                       // zmp params m1X, m2X, m1Y, m2Y
 
         /**
          * Dynamic analysis parameters initialized from configuration script, see config file for documentation...
          */
-        double zmpTime;                                 // 
         double phase1Single;                            //
         double phase2Single;                            //
 
@@ -273,19 +265,18 @@ namespace motion
          * @details [long description]
          * @return [description]
          */
-        std::pair<Transform3D, Transform3D> updateFootPosition(double phase);
+        void updateLowerBody();
         /**
-         * @brief [brief description]
-         * @details [long description]
-         * @return [description]
-         */
-        std::pair<Transform3D, Transform3D> updateLowerBody(const Transform2D& torsoWorld, const Transform2D& leftFootLocal, const Transform2D& rightFootLocal);
-        /**
-         * @brief [brief description]
+         * @brief [brief description]std::pair
          * @details [long description]
          * @return [description]
          */
         void updateUpperBody(/*const Sensors& sensors*/);
+        /**
+         * @brief [brief description]
+         * @details [long description]
+         */
+        void updateBody();
         /**
          * @brief [brief description]
          * @details [long description]
@@ -297,7 +288,7 @@ namespace motion
          * @details [long description]
          * @return [description]
          */
-        void supportMassCompensation(const Sensors& sensors, LimbID swingLeg, Transform3D rightFootT, Transform3D leftFootT);
+        void supportMassCompensation(const Sensors& sensors, LimbID swingLeg, Transform3D rightFootTorso, Transform3D leftFootTorso);
         /**
          * @brief [brief description]
          * @details [long description]
@@ -333,13 +324,13 @@ namespace motion
          * @details [long description]
          * @return [description]
          */
-        arma::vec4 getZmpParams();
+        double getMotionPhase();
         /**
          * @brief [brief description]
          * @details [long description]
          * @return [description]
          */
-        void setZmpParams(arma::vec4 inZmpParams); 
+        void setMotionPhase(double inMotionPhase);
         /**
          * @brief [brief description]
          * @details [long description]
@@ -390,30 +381,6 @@ namespace motion
          * @param inTorsoPosition [description]
          */
         std::unique_ptr<std::vector<ServoCommand>> motionArms();
-        /**
-         * @brief [Solve the ZMP equation]
-         * @details [long description]
-         * @return [description]
-         */
-        arma::vec2 zmpSolve(double zs, double z1, double z2, double x1, double x2, double phase1Single, double phase2Single, double stepTime, double zmpTime);
-        /**
-         * @brief [Uses ZMP to determine the torso position]
-         * @details [long description]
-         * @return [The torso position in Transform2D]
-         */
-        Transform2D zmpTorsoCompensation(double phase, arma::vec4 zmpCoefficients, arma::vec4 zmpParams, double stepTime, double zmpTime, double phase1Zmp, double phase2Zmp, Transform2D uSupport, Transform2D uLeftFootDestination, Transform2D uLeftFootSource, Transform2D uRightFootDestination, Transform2D uRightFootSource);
-        /**
-         * This is an easing function that returns 3 values {x,y,z} with the range [0,1]
-         * This is used to 'ease' the foot path through its trajectory.
-         * The params phase1Single and phase2Single are used to tune the amount of time the robot spends on two feet
-         * Note: Only x/z are used currently and y is always 0
-         * See: http://easings.net/ to reference common easing functions
-         *
-         * @param phase The input to the easing function, with a range of [0,1].
-         * @param phase1Single The phase time between [0,1] to start the step. A value of 0.1 means the step will not start until phase is >= 0.1
-         * @param phase2Single The phase time between [0,1] to end the step. A value of 0.9 means the step will end when phase >= 0.9
-         */
-        arma::vec3 footPhase(double phase, double phase1Single, double phase2Single);
         /**
          * @brief [brief description]
          * @details [long description]
@@ -545,32 +512,6 @@ namespace motion
          * @details [long description]
          * @return [description]
          */
-        Transform2D getTorsoSource();
-        /**
-         * @brief [brief description]
-         * @details [long description]
-         * 
-         * @param inTorsoPosition [description]
-         */
-        void setTorsoSource(const Transform2D& inTorsoPosition);
-        /**
-         * @brief [brief description]
-         * @details [long description]
-         * @return [description]
-         */
-        Transform2D getTorsoDestination();
-        /**
-         * @brief [brief description]
-         * @details [long description]
-         * 
-         * @param inTorsoPosition [description]
-         */
-        void setTorsoDestination(const Transform2D& inTorsoPosition);
-        /**
-         * @brief [brief description]
-         * @details [long description]
-         * @return [description]
-         */
         Transform2D getSupportMass();
         /**
          * @brief [brief description]
@@ -607,79 +548,27 @@ namespace motion
          * @details [long description]
          * @return [description]
          */
-        Transform2D getLeftFootPosition();
+        Transform3D getLeftFootPosition();
         /**
          * @brief [brief description]
          * @details [long description]
          * 
          * @param inLeftFootPosition [description]
          */
-        void setLeftFootPosition(const Transform2D& inLeftFootPosition);
+        void setLeftFootPosition(const Transform3D& inLeftFootPosition);
         /**
          * @brief [brief description]
          * @details [long description]
          * @return [description]
          */
-        Transform2D getRightFootPosition();
+        Transform3D getRightFootPosition();
         /**
          * @brief [brief description]
          * @details [long description]
          * 
          * @param inRightFootPosition [description]
          */
-        void setRightFootPosition(const Transform2D& inRightFootPosition);
-        /**
-         * @brief [brief description]
-         * @details [long description]
-         * @return [description]
-         */
-        Transform2D getLeftFootSource();
-        /**
-         * @brief [brief description]
-         * @details [long description]
-         * 
-         * @param inLeftFootSource [description]
-         */
-        void setLeftFootSource(const Transform2D& inLeftFootSource);
-        /**
-         * @brief [brief description]
-         * @details [long description]
-         * @return [description]
-         */
-        Transform2D getRightFootSource();
-        /**
-         * @brief [brief description]
-         * @details [long description]
-         * 
-         * @param inRightFootSource [description]
-         */
-        void setRightFootSource(const Transform2D& inRightFootSource);
-        /**
-         * @brief [brief description]
-         * @details [long description]
-         * @return [description]
-         */
-        Transform2D getLeftFootDestination();
-        /**
-         * @brief [brief description]
-         * @details [long description]
-         * 
-         * @param inLeftFootDestination [description]
-         */
-        void setLeftFootDestination(const Transform2D& inLeftFootDestination);
-        /**
-         * @brief [brief description]
-         * @details [long description]
-         * @return [description]
-         */
-        Transform2D getRightFootDestination();
-        /**
-         * @brief [brief description]
-         * @details [long description]
-         * 
-         * @param inRightFootDestination [description]
-         */
-        void setRightFootDestination(const Transform2D& inRightFootDestination);
+        void setRightFootPosition(const Transform3D& inRightFootPosition);
     };
 }  // motion
 }  // modules   

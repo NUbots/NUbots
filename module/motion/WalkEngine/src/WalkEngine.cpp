@@ -80,16 +80,14 @@ namespace motion
         , balanceEnabled(0.0), emitLocalisation(false), emitFootPosition(false)
         , updateHandle(), generateStandScriptReaction(), subsumptionId(1)
         , StateOfWalk()
-        , torsoPositionsTransform(), torsoPositionSource(), torsoPositionDestination()
-        , leftFootPositionTransform(), leftFootSource(), rightFootPositionTransform()
-        , rightFootSource(), leftFootDestination(), rightFootDestination(), uSupportMass()
+        , torsoPositionsTransform(), leftFootPositionTransform()
+        , rightFootPositionTransform(), uSupportMass()
         , activeForwardLimb(), activeLimbInitial(LimbID::LEFT_LEG)
         , bodyTilt(0.0), bodyHeight(0.0), stanceLimitY2(0.0), stepTime(0.0), stepHeight(0.0)
         , step_height_slow_fraction(0.0f), step_height_fast_fraction(0.0f)
         , gainArms(0.0f), gainLegs(0.0f), stepLimits(arma::fill::zeros)
         , footOffsetCoefficient(arma::fill::zeros), uLRFootOffset()
-        , armLPostureTransform(), armLPostureSource(), armLPostureDestination()
-        , armRPostureTransform(), armRPostureSource(), armRPostureDestination()
+        , armLPostureTransform(), armRPostureTransform()
         , beginStepTime(0.0), STAND_SCRIPT_DURATION(0.0), pushTime(), lastVeloctiyUpdateTime()
         , velocityHigh(0.0), accelerationTurningFactor(0.0), velocityLimits(arma::fill::zeros)
         , accelerationLimits(arma::fill::zeros), accelerationLimitsHigh(arma::fill::zeros)
@@ -109,17 +107,14 @@ namespace motion
             configure(config.config);       
         });
 
-        //Automate walk engine command for testing...
-        /*on<Every<1, Per<std::chrono::seconds>>, Single, Priority::HIGH>()
-        .then([this]
+        //Update waypoints sensor data at regular intervals...
+        updateHandle =on<Every<UPDATE_FREQUENCY, Per<std::chrono::seconds>>, With<Sensors>, Single, Priority::HIGH>()
+        .then([this] /*(const Sensors& sensors)*/
         {
-            if(DEBUG) { NUClear::log("WalkEngine - Emit WalkCommand(0)"); }
-            if((DEBUG_ITER++)%5 == 0)
-            {
-                emit(std::make_unique<WalkCommand>(1, Transform2D({0.1, 0.05, 0.2}))); //debugging...
-            }
-            if(DEBUG) { NUClear::log("WalkEngine - Emit WalkCommand(1)"); }
-        });*/
+            if(DEBUG) { NUClear::log("WalkEngine - Update Waypoints(0)"); }
+            emit(std::move(updateWaypoints(/*sensors*/)));
+            if(DEBUG) { NUClear::log("WalkEngine - Update Waypoints(1)"); }
+        }).disable();
 
         //Broadcast constrained velocity vector parameter to actuator modules...
         on<Trigger<WalkCommand>>().then([this] (const WalkCommand& walkCommand)
@@ -134,16 +129,6 @@ namespace motion
             if(DEBUG) { NUClear::log("WalkEngine - Trigger WalkCommand(1)"); }
         });
 
-        //Update waypoints sensor data at regular intervals...
-        /*updateHandle =*/ on<Every<1 /*RESTORE AFTER DEBUGGING: UPDATE_FREQUENCY*/, Per<std::chrono::seconds>>, With<Sensors>, Single, Priority::HIGH>()
-        .then([this] (const Sensors& sensors)
-        {
-            if(DEBUG) { NUClear::log("WalkEngine - Update Waypoints(0)"); }
-            emit(std::move(updateWaypoints(sensors)));
-            if(DEBUG) { NUClear::log("WalkEngine - Update Waypoints(1)"); }
-        });//RESTORE AFTER DEBUGGING: .disable();
-
-
         on<Trigger<KinematicsModel>>().then("WalkEngine - Update Kinematics Model", [this](const KinematicsModel& model)
         {
             kinematicsModel = model;
@@ -152,9 +137,9 @@ namespace motion
         on<Trigger<EnableWalkEngineCommand>>().then([this] (const EnableWalkEngineCommand& command) 
         {
             subsumptionId = command.subsumptionId;
-            emit<Scope::DIRECT>(std::move(std::make_unique<EnableFootPlacement>(command.subsumptionId + 1)));
-            emit<Scope::DIRECT>(std::move(std::make_unique<EnableFootMotion>(command.subsumptionId + 1)));
-            emit<Scope::DIRECT>(std::move(std::make_unique<EnableTorsoMotion>(command.subsumptionId + 1)));
+            emit<Scope::DIRECT>(std::move(std::make_unique<EnableFootPlacement>(command.subsumptionId + 2)));
+            emit<Scope::DIRECT>(std::move(std::make_unique<EnableFootMotion>(command.subsumptionId + 3)));
+            emit<Scope::DIRECT>(std::move(std::make_unique<EnableTorsoMotion>(command.subsumptionId + 3)));
             emit<Scope::DIRECT>(std::move(std::make_unique<EnableBalanceResponse>(command.subsumptionId + 1)));
             //stanceReset(); // Reset stance as we don't know where our limbs are.
             updateHandle.enable();
@@ -163,9 +148,9 @@ namespace motion
         on<Trigger<DisableWalkEngineCommand>>().then([this] (const DisableWalkEngineCommand& command)
         {
             // If nobody needs the walk engine, stop updating it...
-            emit<Scope::DIRECT>(std::move(std::make_unique<DisableFootPlacement>(command.subsumptionId + 1)));
-            emit<Scope::DIRECT>(std::move(std::make_unique<DisableFootMotion>(command.subsumptionId + 1)));
-            emit<Scope::DIRECT>(std::move(std::make_unique<DisableTorsoMotion>(command.subsumptionId + 1)));
+            emit<Scope::DIRECT>(std::move(std::make_unique<DisableFootPlacement>(command.subsumptionId + 2)));
+            emit<Scope::DIRECT>(std::move(std::make_unique<DisableFootMotion>(command.subsumptionId + 3)));
+            emit<Scope::DIRECT>(std::move(std::make_unique<DisableTorsoMotion>(command.subsumptionId + 3)));
             emit<Scope::DIRECT>(std::move(std::make_unique<DisableBalanceResponse>(command.subsumptionId + 1)));
             updateHandle.disable(); 
         });
@@ -227,11 +212,11 @@ namespace motion
 /*=======================================================================================================*/
 //      NAME: generateAndSaveStandScript
 /*=======================================================================================================*/
-    void WalkEngine::generateAndSaveStandScript(const Sensors& sensors) 
+    void WalkEngine::generateAndSaveStandScript() 
     {
         //reset();
         //stanceReset();
-        auto waypoints = updateWaypoints(sensors);
+        auto waypoints = updateWaypoints();
 
         Script standScript;
         Script::Frame frame;
@@ -303,49 +288,10 @@ namespace motion
 /*=======================================================================================================*/
 //      NAME: updateWaypoints
 /*=======================================================================================================*/
-    std::unique_ptr<std::vector<ServoCommand>> WalkEngine::updateWaypoints(const Sensors& sensors) 
+    std::unique_ptr<std::vector<ServoCommand>> WalkEngine::updateWaypoints() 
     {
-        if (StateOfWalk == State::STOPPED) 
-        {
-            //identify state of robot, walk engine handles actual posture...
-        }
-
-        // Get relevant torso models from TorsoMotionUpdate...
-        /*
-        uTorso = stepTorso(uLeftFoot, uRightFoot, 0.5);
-        Transform2D uTorsoActual = uTorso.localToWorld({-kinematicsModel.Leg.HIP_OFFSET_X, 0, 0});
-        Transform3D torso = arma::vec6({uTorsoActual.x(), uTorsoActual.y(), bodyHeight, 0, bodyTilt, uTorsoActual.angle()});
-        */
-
-        // Transform feet targets to be relative to the torso...
-        Transform3D leftFootTorso  = Transform3D(getLeftFootPosition()).worldToLocal(getTorsoPosition3D());
-        Transform3D rightFootTorso = Transform3D(getRightFootPosition()).worldToLocal(getTorsoPosition3D());
-        Transform2D uTorsoWorld    = getTorsoPositionArms().localToWorld({-kinematicsModel.Leg.HIP_OFFSET_X, 0, 0});
-
-        //DEBUGGING: Emit relative torso position with respect to world model... 
-        if (emitLocalisation) 
-        {
-            localise(uTorsoWorld);
-        }
-
-        if (balanceEnabled) 
-        {
-            // Apply balance to our support foot
-            balancer.balance(kinematicsModel, activeForwardLimb == LimbID::LEFT_LEG ? rightFootTorso : leftFootTorso 
-                                            , activeForwardLimb == LimbID::LEFT_LEG ? LimbID::RIGHT_LEG : LimbID::LEFT_LEG, sensors);
-            // Apply balance to both legs when standing still
-            balancer.balance(kinematicsModel, leftFootTorso,  LimbID::LEFT_LEG,  sensors);
-            balancer.balance(kinematicsModel, rightFootTorso, LimbID::RIGHT_LEG, sensors);
-        }
-
-        //DEBUGGING: Emit relative feet position with respect to robot torso model... 
-        if (emitFootPosition)
-        {
-            emit(graph("Right foot pos", arma::vec(rightFootTorso.translation())));
-            emit(graph("Left  foot pos",  arma::vec(leftFootTorso.translation())));
-        }
-
-        auto joints = calculateLegJoints(kinematicsModel, leftFootTorso, rightFootTorso);
+        // Received foot positions are mapped relative to robot torso...
+        auto joints = calculateLegJoints(kinematicsModel, getLeftFootPosition(), getRightFootPosition());
         auto robotWaypoints = motionLegs(joints);
         auto upperWaypoints = motionArms();
 
@@ -389,13 +335,6 @@ namespace motion
 
         return std::move(waypoints);
     }
-/*=======================================================================================================*/
-//      NAME: linearInterpolationDeadband
-/*=======================================================================================================*/
-    double WalkEngine::linearInterpolationDeadband(double value, double deadband, double maxvalue) 
-    {
-        return std::abs(std::min(std::max(0.0, std::abs(value) - deadband), maxvalue));
-    }  
 /*=======================================================================================================*/
 //      ENCAPSULATION METHOD: getTime
 /*=======================================================================================================*/
@@ -443,82 +382,12 @@ namespace motion
         return (armLPostureTransform);
     }
 /*=======================================================================================================*/
-//      ENCAPSULATION METHOD: setLArmPosition
-/*=======================================================================================================*/     
-    void WalkEngine::setLArmPosition(arma::vec3 inLArm)
-    {
-        armLPostureTransform = inLArm;
-    }
-/*=======================================================================================================*/
-//      ENCAPSULATION METHOD: getLArmSource
-/*=======================================================================================================*/     
-    arma::vec3 WalkEngine::getLArmSource()
-    {
-        return (armLPostureSource);
-    }
-/*=======================================================================================================*/
-//      ENCAPSULATION METHOD: setLArmSource
-/*=======================================================================================================*/     
-    void WalkEngine::setLArmSource(arma::vec3 inLArm)
-    {
-        armLPostureSource = inLArm;
-    }
-/*=======================================================================================================*/
-//      ENCAPSULATION METHOD: getLArmDestination
-/*=======================================================================================================*/     
-    arma::vec3 WalkEngine::getLArmDestination()
-    {
-        return (armLPostureDestination);
-    }
-/*=======================================================================================================*/
-//      ENCAPSULATION METHOD: setLArmDestination
-/*=======================================================================================================*/     
-    void WalkEngine::setLArmDestination(arma::vec3 inLArm)
-    {
-        armLPostureDestination = inLArm;
-    }
-/*=======================================================================================================*/
 //      ENCAPSULATION METHOD: getRArmPosition
 /*=======================================================================================================*/ 
     arma::vec3 WalkEngine::getRArmPosition()
     {
         return (armRPostureTransform);
     }
-/*=======================================================================================================*/
-//      ENCAPSULATION METHOD: setRArmPosition
-/*=======================================================================================================*/     
-    void WalkEngine::setRArmPosition(arma::vec3 inRArm)
-    {
-        armRPostureTransform = inRArm;
-    }
-/*=======================================================================================================*/
-//      ENCAPSULATION METHOD: getRArmSource
-/*=======================================================================================================*/     
-    arma::vec3 WalkEngine::getRArmSource()
-    {
-        return (armRPostureSource);
-    }
-/*=======================================================================================================*/
-//      ENCAPSULATION METHOD: setRArmSource
-/*=======================================================================================================*/     
-    void WalkEngine::setRArmSource(arma::vec3 inRArm)
-    {
-        armRPostureSource = inRArm;
-    }
-/*=======================================================================================================*/
-//      ENCAPSULATION METHOD: getRArmDestination
-/*=======================================================================================================*/     
-    arma::vec3 WalkEngine::getRArmDestination()
-    {
-        return (armRPostureDestination);
-    }
-/*=======================================================================================================*/
-//      ENCAPSULATION METHOD: setRArmDestination
-/*=======================================================================================================*/     
-    void WalkEngine::setRArmDestination(arma::vec3 inRArm)
-    {
-        armRPostureDestination = inRArm;
-    }  
 /*=======================================================================================================*/
 //      ENCAPSULATION METHOD: getTorsoPosition
 /*=======================================================================================================*/
@@ -541,89 +410,12 @@ namespace motion
         return (torsoPositionsTransform.Frame3D);
     }            
 /*=======================================================================================================*/
-//      ENCAPSULATION METHOD: setTorsoPositionLegs
-/*=======================================================================================================*/
-    void WalkEngine::setTorsoPositionLegs(const Transform2D& inTorsoPosition)
-    {
-        torsoPositionsTransform.FrameLegs = inTorsoPosition;
-    }
-/*=======================================================================================================*/
-//      ENCAPSULATION METHOD: setTorsoPositionArms
-/*=======================================================================================================*/
-    void WalkEngine::setTorsoPositionArms(const Transform2D& inTorsoPosition)
-    {
-        torsoPositionsTransform.FrameArms = inTorsoPosition;
-    }    
-/*=======================================================================================================*/
-//      ENCAPSULATION METHOD: setTorsoPosition3D
-/*=======================================================================================================*/
-    void WalkEngine::setTorsoPosition3D(const Transform3D& inTorsoPosition)
-    {
-        torsoPositionsTransform.Frame3D = inTorsoPosition;
-    }    
-/*=======================================================================================================*/
-//      ENCAPSULATION METHOD: getTorsoSource
-/*=======================================================================================================*/
-    Transform2D WalkEngine::getTorsoSource()
-    {
-        return (torsoPositionSource);
-    }
-/*=======================================================================================================*/
-//      ENCAPSULATION METHOD: setTorsoSource
-/*=======================================================================================================*/
-    void WalkEngine::setTorsoSource(const Transform2D& inTorsoSource)
-    {
-        torsoPositionSource = inTorsoSource;
-    }
-/*=======================================================================================================*/
-//      ENCAPSULATION METHOD: getTorsoDestination
-/*=======================================================================================================*/
-    Transform2D WalkEngine::getTorsoDestination()
-    {
-        return (torsoPositionDestination);
-    }
-/*=======================================================================================================*/
-//      ENCAPSULATION METHOD: setTorsoDestination
-/*=======================================================================================================*/
-    void WalkEngine::setTorsoDestination(const Transform2D& inTorsoDestination)
-    {
-        torsoPositionDestination = inTorsoDestination;
-    }
-/*=======================================================================================================*/
 //      ENCAPSULATION METHOD: getSupportMass
 /*=======================================================================================================*/
     Transform2D WalkEngine::getSupportMass()
     {
         return (uSupportMass);
     }
-/*=======================================================================================================*/
-//      ENCAPSULATION METHOD: setSupportMass
-/*=======================================================================================================*/
-    void WalkEngine::setSupportMass(const Transform2D& inSupportMass)
-    {
-        uSupportMass = inSupportMass;
-    }    
-/*=======================================================================================================*/
-//      ENCAPSULATION METHOD: getFootOffsetCoefficient
-/*=======================================================================================================*/
-    double WalkEngine::getFootOffsetCoefficient(int index)
-    {
-        return (footOffsetCoefficient[index]);
-    }
-/*=======================================================================================================*/
-//      ENCAPSULATION METHOD: setFootOffsetCoefficient
-/*=======================================================================================================*/
-    void WalkEngine::setFootOffsetCoefficient(const arma::vec2& inFootOffsetCoefficient)
-    {
-        footOffsetCoefficient = inFootOffsetCoefficient;
-    }      
-/*=======================================================================================================*/
-//      ENCAPSULATION METHOD: setFootOffsetCoefficient
-/*=======================================================================================================*/
-    void WalkEngine::setFootOffsetCoefficient(int index, double inValue)
-    {
-        footOffsetCoefficient[index] = inValue;
-    }    
 /*=======================================================================================================*/
 //      ENCAPSULATION METHOD: getLeftFootPosition
 /*=======================================================================================================*/
@@ -632,82 +424,12 @@ namespace motion
         return (leftFootPositionTransform);
     }
 /*=======================================================================================================*/
-//      ENCAPSULATION METHOD: setLeftFootPosition
-/*=======================================================================================================*/
-    void WalkEngine::setLeftFootPosition(const Transform2D& inLeftFootPosition)
-    {
-        leftFootPositionTransform = inLeftFootPosition;
-    }
-/*=======================================================================================================*/
 //      ENCAPSULATION METHOD: getRightFootPosition
 /*=======================================================================================================*/
     Transform2D WalkEngine::getRightFootPosition()
     {
         return (rightFootPositionTransform);
     }
-/*=======================================================================================================*/
-//      ENCAPSULATION METHOD: setRightFootPosition
-/*=======================================================================================================*/
-    void WalkEngine::setRightFootPosition(const Transform2D& inRightFootPosition)
-    {
-        rightFootPositionTransform = inRightFootPosition;
-    }
-/*=======================================================================================================*/
-//      ENCAPSULATION METHOD: getLeftFootSource
-/*=======================================================================================================*/
-    Transform2D WalkEngine::getLeftFootSource()
-    {
-        return (leftFootSource);
-    }
-/*=======================================================================================================*/
-//      ENCAPSULATION METHOD: setLeftFootSource
-/*=======================================================================================================*/
-    void WalkEngine::setLeftFootSource(const Transform2D& inLeftFootSource)
-    {
-        leftFootSource = inLeftFootSource;
-    }
-/*=======================================================================================================*/
-//      ENCAPSULATION METHOD: getRightFootSource
-/*=======================================================================================================*/
-    Transform2D WalkEngine::getRightFootSource()
-    {
-        return (rightFootSource);
-    }
-/*=======================================================================================================*/
-//      ENCAPSULATION METHOD: setRightFootSource
-/*=======================================================================================================*/
-    void WalkEngine::setRightFootSource(const Transform2D& inRightFootSource)
-    {
-        rightFootSource = inRightFootSource;
-    }        
-/*=======================================================================================================*/
-//      METHOD: getLeftFootDestination
-/*=======================================================================================================*/
-    Transform2D WalkEngine::getLeftFootDestination()
-    {
-        return (leftFootDestination.front());
-    }
-/*=======================================================================================================*/
-//      METHOD: setLeftFootDestination
-/*=======================================================================================================*/
-    void WalkEngine::setLeftFootDestination(const Transform2D& inLeftFootDestination)
-    {
-        leftFootDestination.push(inLeftFootDestination);
-    }
-/*=======================================================================================================*/
-//      ENCAPSULATION METHOD: getRightFootDestination
-/*=======================================================================================================*/
-    Transform2D WalkEngine::getRightFootDestination()
-    {
-        return (rightFootDestination.front());
-    }
-/*=======================================================================================================*/
-//      ENCAPSULATION METHOD: setRightFootDestination
-/*=======================================================================================================*/
-    void WalkEngine::setRightFootDestination(const Transform2D& inRightFootDestination)
-    {
-        rightFootDestination.push(inRightFootDestination);
-    }        
 /*=======================================================================================================*/
 //      METHOD: configure
 /*=======================================================================================================*/
@@ -718,11 +440,6 @@ namespace motion
         auto& stance = config["stance"];
         bodyHeight = stance["body_height"].as<Expression>();
         bodyTilt = stance["body_tilt"].as<Expression>();
-        setLArmSource(stance["arms"]["left"]["start"].as<arma::vec>());
-        setLArmDestination(stance["arms"]["left"]["end"].as<arma::vec>());
-        setRArmSource(stance["arms"]["right"]["start"].as<arma::vec>());
-        setRArmDestination(stance["arms"]["right"]["end"].as<arma::vec>());
-        setFootOffsetCoefficient(stance["foot_offset"].as<arma::vec>());
         // gToe/heel overlap checking values
         stanceLimitY2 = kinematicsModel.Leg.LENGTH_BETWEEN_LEGS() - stance["limit_margin_y"].as<Expression>();
 

@@ -130,7 +130,7 @@ namespace motion
             {
                 FrameArms = Transform2D();
                 FrameLegs = Transform2D();
-                Frame3D = Transform2D();
+                Frame3D = Transform3D();
             }
             ~TorsoPositions() {}
 

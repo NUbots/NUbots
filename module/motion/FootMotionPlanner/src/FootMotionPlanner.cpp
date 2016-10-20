@@ -145,12 +145,12 @@ namespace motion
         //Interpolate Transform2D from start to destination - deals with flat resolved movement in (x,y) coordinates
         if (getActiveForwardLimb() == LimbID::RIGHT_LEG) 
         {
-            //Vector field function??
+            //TODO: Vector field function??
             rightFootPositionTransform = getRightFootSource().interpolate(getFootPhases[0], rightFootDestination);
         }
         else
         {
-            //Vector field function??
+            //TODO: Vector field function??
             leftFootPositionTransform  = getLeftFootSource().interpolate(getFootPhases[0],   leftFootDestination);
         }
         

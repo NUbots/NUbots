@@ -22,6 +22,7 @@
 
 #include <armadillo>
 #include "utility/math/matrix/Transform2D.h"
+#include "utility/math/matrix/Transform3D.h"
 
 namespace message 
 {
@@ -39,6 +40,31 @@ namespace motion
     
     using message::input::LimbID;
     using utility::math::matrix::Transform2D;
+    using utility::math::matrix::Transform3D;
+
+    struct BalanceBodyUpdate
+    {
+        double phase;
+        Transform3D leftFoot;
+        Transform3D rightFoot;
+        Transform2D frameArms;
+        Transform2D frameLegs;
+        Transform3D frame3D;
+        BalanceBodyUpdate(
+                            double phase,
+                            const Transform3D& leftFoot,  
+                            const Transform3D& rightFoot,
+                            const Transform2D& inFrameArms,
+                            const Transform2D& inFrameLegs,
+                            const Transform3D& inFrame3D
+                         )
+            : phase(phase)
+            , leftFoot(leftFoot)
+            , rightFoot(rightFoot)
+            , frameArms(inFrameArms) 
+            , frameLegs(inFrameLegs)
+            , frame3D(inFrame3D) {}
+    };
 
     struct EnableBalanceResponse
     {
