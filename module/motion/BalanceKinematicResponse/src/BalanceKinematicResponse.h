@@ -254,6 +254,13 @@ namespace motion
          * @param config [description]
          */
         void configure(const YAML::Node& config);
+                /**
+         * @brief [brief description]
+         * @details [long description]
+         * 
+         * @param inTorsoPosition [description]
+         */
+        void localise(Transform2D position); 
         /**
          * @brief [brief description]
          * @details [long description]

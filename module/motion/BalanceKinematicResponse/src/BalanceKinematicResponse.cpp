@@ -255,7 +255,7 @@ namespace motion
 /*=======================================================================================================*/
 //      NAME: localise
 /*=======================================================================================================*/
-    void WalkEngine::localise(Transform2D position) 
+    void BalanceKinematicResponse::localise(Transform2D position) 
     {
         // emit position as a fake localisation
         auto localisation = std::make_unique<std::vector<message::localisation::Self>>();
