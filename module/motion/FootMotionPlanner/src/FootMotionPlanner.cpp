@@ -84,7 +84,6 @@ namespace motion
             {
                 if((DEBUG_ITER++)%5 == 0)
                 {
-                    printf("\rUpdate Foot Position : FMP (%d, %d)\n", leftFootDestination.size(), rightFootDestination.size());
                     if(DEBUG) { NUClear::log("\rUpdate Foot Position : FMP (%d, %d)\n", leftFootDestination.size(), rightFootDestination.size()); }                  
                 }
                 updateFootPosition(getMotionPhase(), getLeftFootDestination(), getRightFootDestination());

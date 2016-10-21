@@ -78,9 +78,7 @@ namespace motion
 
         static constexpr const char* CONFIGURATION_PATH = "WalkEngine.yaml";
         static constexpr const char* CONFIGURATION_MSSG = "Walk Engine - Configure";
-        static constexpr const char* ONTRIGGER_FTMN_INF = "Walk Engine - Received update (Balanced Foot Position) Info";
-        static constexpr const char* ONTRIGGER_TRSM_INF = "Walk Engine - Received update (Balanced Torso Position) Info";
-        static constexpr const char* ONTRIGGER_HEAD_INF = "Walk Engine - Received update (Balanced Head Position) Info";
+        static constexpr const char* ONTRIGGER_BODY_INF = "Walk Engine - Received update (Balanced Robot Posture) Info";
 
         explicit WalkEngine(std::unique_ptr<NUClear::Environment> environment);
     private:
@@ -361,7 +359,21 @@ namespace motion
          * 
          * @param inTorsoPosition [description]
          */
+        void setLArmPosition(arma::vec3 inLArm);
+        /**
+         * @brief [brief description]
+         * @details [long description]
+         * 
+         * @param inTorsoPosition [description]
+         */
         arma::vec3 getRArmPosition();
+        /**
+         * @brief [brief description]
+         * @details [long description]
+         * 
+         * @param inTorsoPosition [description]
+         */
+        void setRArmPosition(arma::vec3 inRArm);
         /**
          * @brief [brief description]
          * @details [long description]
@@ -386,9 +398,37 @@ namespace motion
         /**
          * @brief [brief description]
          * @details [long description]
+         * 
+         * @param inTorsoPosition [description]
+         */
+        void setTorsoPositionArms(const Transform2D& inTorsoPosition);
+        /**
+         * @brief [brief description]
+         * @details [long description]
+         * 
+         * @param inTorsoPosition [description]
+         */
+        void setTorsoPositionLegs(const Transform2D& inTorsoPosition);
+        /**
+         * @brief [brief description]
+         * @details [long description]
+         * 
+         * @param inTorsoPosition [description]
+         */
+        void setTorsoPosition3D(const Transform3D& inTorsoPosition);
+        /**
+         * @brief [brief description]
+         * @details [long description]
          * @return [description]
          */
         Transform2D getSupportMass();
+        /**
+         * @brief [brief description]
+         * @details [long description]
+         * 
+         * @param inSupportMass [description]
+         */
+        void setSupportMass(const Transform2D& inSupportMass);
         /**
          * @brief [brief description]
          * @details [long description]
@@ -398,9 +438,23 @@ namespace motion
         /**
          * @brief [brief description]
          * @details [long description]
+         * 
+         * @param inLeftFootPosition [description]
+         */
+        void setLeftFootPosition(const Transform3D& inLeftFootPosition);
+        /**
+         * @brief [brief description]
+         * @details [long description]
          * @return [description]
          */
-        Transform2D getRightFootPosition();
+        Transform3D getRightFootPosition();
+        /**
+         * @brief [brief description]
+         * @details [long description]
+         * 
+         * @param inRightFootPosition [description]
+         */
+        void setRightFootPosition(const Transform3D& inRightFootPosition);
     };
 
 }  // motion

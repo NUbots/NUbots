@@ -285,91 +285,7 @@ namespace motion
     void TorsoMotionPlanner::setZmpParams(arma::vec4 inZmpParams)
     {
         zmpParameters = inZmpParams;
-    }       
-/*=======================================================================================================*/
-//      ENCAPSULATION METHOD: getLArmPosition
-/*=======================================================================================================*/    
-    arma::vec3 TorsoMotionPlanner::getLArmPosition()
-    {
-        return (armLPostureTransform);
-    }
-/*=======================================================================================================*/
-//      ENCAPSULATION METHOD: setLArmPosition
-/*=======================================================================================================*/     
-    void TorsoMotionPlanner::setLArmPosition(arma::vec3 inLArm)
-    {
-        armLPostureTransform = inLArm;
-    }
-/*=======================================================================================================*/
-//      ENCAPSULATION METHOD: getLArmSource
-/*=======================================================================================================*/     
-    arma::vec3 TorsoMotionPlanner::getLArmSource()
-    {
-        return (armLPostureSource);
-    }
-/*=======================================================================================================*/
-//      ENCAPSULATION METHOD: setLArmSource
-/*=======================================================================================================*/     
-    void TorsoMotionPlanner::setLArmSource(arma::vec3 inLArm)
-    {
-        armLPostureSource = inLArm;
-    }
-/*=======================================================================================================*/
-//      ENCAPSULATION METHOD: getLArmDestination
-/*=======================================================================================================*/     
-    arma::vec3 TorsoMotionPlanner::getLArmDestination()
-    {
-        return (armLPostureDestination);
-    }
-/*=======================================================================================================*/
-//      ENCAPSULATION METHOD: setLArmDestination
-/*=======================================================================================================*/     
-    void TorsoMotionPlanner::setLArmDestination(arma::vec3 inLArm)
-    {
-        armLPostureDestination = inLArm;
-    }
-/*=======================================================================================================*/
-//      ENCAPSULATION METHOD: getRArmPosition
-/*=======================================================================================================*/ 
-    arma::vec3 TorsoMotionPlanner::getRArmPosition()
-    {
-        return (armRPostureTransform);
-    }
-/*=======================================================================================================*/
-//      ENCAPSULATION METHOD: setRArmPosition
-/*=======================================================================================================*/     
-    void TorsoMotionPlanner::setRArmPosition(arma::vec3 inRArm)
-    {
-        armRPostureTransform = inRArm;
-    }
-/*=======================================================================================================*/
-//      ENCAPSULATION METHOD: getRArmSource
-/*=======================================================================================================*/     
-    arma::vec3 TorsoMotionPlanner::getRArmSource()
-    {
-        return (armRPostureSource);
-    }
-/*=======================================================================================================*/
-//      ENCAPSULATION METHOD: setRArmSource
-/*=======================================================================================================*/     
-    void TorsoMotionPlanner::setRArmSource(arma::vec3 inRArm)
-    {
-        armRPostureSource = inRArm;
-    }
-/*=======================================================================================================*/
-//      ENCAPSULATION METHOD: getRArmDestination
-/*=======================================================================================================*/     
-    arma::vec3 TorsoMotionPlanner::getRArmDestination()
-    {
-        return (armRPostureDestination);
-    }
-/*=======================================================================================================*/
-//      ENCAPSULATION METHOD: setRArmDestination
-/*=======================================================================================================*/     
-    void TorsoMotionPlanner::setRArmDestination(arma::vec3 inRArm)
-    {
-        armRPostureDestination = inRArm;
-    }      
+    }            
 /*=======================================================================================================*/
 //      ENCAPSULATION METHOD: getTorsoPosition
 /*=======================================================================================================*/
@@ -587,10 +503,6 @@ namespace motion
         auto& stance = config["stance"];
         bodyHeight = stance["body_height"].as<Expression>();
         bodyTilt = stance["body_tilt"].as<Expression>();
-        setLArmSource(stance["arms"]["left"]["start"].as<arma::vec>());
-        setLArmDestination(stance["arms"]["left"]["end"].as<arma::vec>());
-        setRArmSource(stance["arms"]["right"]["start"].as<arma::vec>());
-        setRArmDestination(stance["arms"]["right"]["end"].as<arma::vec>());
         setFootOffsetCoefficient(stance["foot_offset"].as<arma::vec>());
         // gToe/heel overlap checking values
         stanceLimitY2 = kinematicsModel.Leg.LENGTH_BETWEEN_LEGS() - stance["limit_margin_y"].as<Expression>();

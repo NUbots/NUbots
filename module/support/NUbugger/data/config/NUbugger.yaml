@@ -12,7 +12,7 @@ reaction_handles:
   # Overview information for the dashboard, designed for minimum bandwidth
   overview: true
   # Motor positions, orientation, etc.
-  sensor_data: false
+  sensor_data: true
   # Raw image
   image: false
   # Classified image
@@ -26,11 +26,11 @@ reaction_handles:
   # Field drawn objects such as an arrow, sphere, etc
   draw_objects: false
   # Subsumption data
-  subsumption: false
+  subsumption: true
   # GameController information
   game_state: false
   # Behaviour information
-  behaviour: false
+  behaviour: true
   # Statistics about reactions, modules and runtimes
   reaction_statistics: false
 
@@ -43,7 +43,7 @@ reaction_handles:
   # Ping packets
   ping: false
   # Configuration window
-  configuration_state: false
+  configuration_state: true
   # Lookup table packets
   lookup_table: false
   # Lookup table delta packets (autoclassifier)

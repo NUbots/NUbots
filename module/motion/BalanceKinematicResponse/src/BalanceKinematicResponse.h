@@ -244,12 +244,6 @@ namespace motion
         /**
          * @brief [brief description]
          * @details [long description]
-         * @return [description]
-         */
-        void generateAndSaveStandScript(const Sensors& sensors);
-        /**
-         * @brief [brief description]
-         * @details [long description]
          * 
          * @param config [description]
          */

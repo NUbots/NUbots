@@ -43,6 +43,7 @@ namespace motion
     using message::behaviour::WalkConfigSaved;
     // using message::behaviour::RegisterAction;
     // using message::behaviour::ActionPriorites;
+    using message::motion::BalanceBodyUpdate;
     using message::motion::WalkCommand;
     using message::motion::NewWalkCommand;
     using message::motion::WalkStartCommand;
@@ -132,6 +133,23 @@ namespace motion
         on<Trigger<KinematicsModel>>().then("WalkEngine - Update Kinematics Model", [this](const KinematicsModel& model)
         {
             kinematicsModel = model;
+        });
+
+        on<Trigger<BalanceBodyUpdate>>().then("Walk Engine - Received update (Balanced Robot Posture) Info", [this](const BalanceBodyUpdate& info)
+        {
+            setLeftFootPosition(info.leftFoot);
+            setRightFootPosition(info.rightFoot);
+            setTorsoPositionArms(info.frameArms);
+            setTorsoPositionLegs(info.frameLegs);
+            setTorsoPosition3D(info.frame3D);
+            if((DEBUG_ITER++)%5 == 0)
+                {
+                    std::cout << "\n\r" << getLeftFootPosition();
+                    std::cout << "\n\r" << getRightFootPosition();
+                    std::cout << "\n\r" << getTorsoPositionLegs();
+                    std::cout << "\n\r" << getTorsoPositionArms();
+                    std::cout << "\n\r" << getTorsoPosition3D();
+                }
         });
 
         on<Trigger<EnableWalkEngineCommand>>().then([this] (const EnableWalkEngineCommand& command) 
@@ -366,12 +384,26 @@ namespace motion
         return (armLPostureTransform);
     }
 /*=======================================================================================================*/
+//      ENCAPSULATION METHOD: setLArmPosition
+/*=======================================================================================================*/     
+    void WalkEngine::setLArmPosition(arma::vec3 inLArm)
+    {
+        armLPostureTransform = inLArm;
+    }    
+/*=======================================================================================================*/
 //      ENCAPSULATION METHOD: getRArmPosition
 /*=======================================================================================================*/ 
     arma::vec3 WalkEngine::getRArmPosition()
     {
         return (armRPostureTransform);
     }
+/*=======================================================================================================*/
+//      ENCAPSULATION METHOD: setRArmPosition
+/*=======================================================================================================*/     
+    void WalkEngine::setRArmPosition(arma::vec3 inRArm)
+    {
+        armRPostureTransform = inRArm;
+    }    
 /*=======================================================================================================*/
 //      ENCAPSULATION METHOD: getTorsoPosition
 /*=======================================================================================================*/
@@ -394,12 +426,40 @@ namespace motion
         return (torsoPositionsTransform.Frame3D);
     }            
 /*=======================================================================================================*/
+//      ENCAPSULATION METHOD: setTorsoPositionLegs
+/*=======================================================================================================*/
+    void WalkEngine::setTorsoPositionLegs(const Transform2D& inTorsoPosition)
+    {
+        torsoPositionsTransform.FrameLegs = inTorsoPosition;
+    }
+/*=======================================================================================================*/
+//      ENCAPSULATION METHOD: setTorsoPositionArms
+/*=======================================================================================================*/
+    void WalkEngine::setTorsoPositionArms(const Transform2D& inTorsoPosition)
+    {
+        torsoPositionsTransform.FrameArms = inTorsoPosition;
+    }    
+/*=======================================================================================================*/
+//      ENCAPSULATION METHOD: setTorsoPosition3D
+/*=======================================================================================================*/
+    void WalkEngine::setTorsoPosition3D(const Transform3D& inTorsoPosition)
+    {
+        torsoPositionsTransform.Frame3D = inTorsoPosition;
+    }        
+/*=======================================================================================================*/
 //      ENCAPSULATION METHOD: getSupportMass
 /*=======================================================================================================*/
     Transform2D WalkEngine::getSupportMass()
     {
         return (uSupportMass);
     }
+/*=======================================================================================================*/
+//      ENCAPSULATION METHOD: setSupportMass
+/*=======================================================================================================*/
+    void WalkEngine::setSupportMass(const Transform2D& inSupportMass)
+    {
+        uSupportMass = inSupportMass;
+    }        
 /*=======================================================================================================*/
 //      ENCAPSULATION METHOD: getLeftFootPosition
 /*=======================================================================================================*/
@@ -408,11 +468,25 @@ namespace motion
         return (leftFootPositionTransform);
     }
 /*=======================================================================================================*/
+//      ENCAPSULATION METHOD: setLeftFootPosition
+/*=======================================================================================================*/
+    void WalkEngine::setLeftFootPosition(const Transform3D& inLeftFootPosition)
+    {
+        leftFootPositionTransform = inLeftFootPosition;
+    }
+/*=======================================================================================================*/
 //      ENCAPSULATION METHOD: getRightFootPosition
 /*=======================================================================================================*/
-    Transform2D WalkEngine::getRightFootPosition()
+    Transform3D WalkEngine::getRightFootPosition()
     {
         return (rightFootPositionTransform);
+    }
+/*=======================================================================================================*/
+//      ENCAPSULATION METHOD: setRightFootPosition
+/*=======================================================================================================*/
+    void WalkEngine::setRightFootPosition(const Transform3D& inRightFootPosition)
+    {
+        rightFootPositionTransform = inRightFootPosition;
     }
 /*=======================================================================================================*/
 //      METHOD: configure
