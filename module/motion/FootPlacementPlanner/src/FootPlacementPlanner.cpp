@@ -189,12 +189,15 @@ std::cout << "FPP: Left :\n\r" << getTime() + stepTime << "\n\r" << getLeftFootD
         int8_t sign = activeForwardLimb == LimbID::LEFT_LEG ? 1 : -1;
         // Get midpoint between the two feet
         Transform2D midPoint = getLeftFootSource().interpolate(0.5, getRightFootSource());
+std::cout << "Midpoint\n\r" << midPoint << "\n\r";         
         // Get midpoint 1.5 steps in future
         // Note: The reason for 1.5 rather than 1 is because it takes an extra 0.5 steps
-        // for the torso to reach a given position when you want both feet together
+        // for the torso to reach a given position when you want both feet together   
         Transform2D forwardPoint = midPoint.localToWorld(1.5 * velocity);
-        // Offset to towards the foot in use to get the target location
+std::cout << "Forward Point\n\r" << forwardPoint << "\n\r";             
+        // Offset to towards the foot in use to get the target location          
         Transform2D footTarget = forwardPoint.localToWorld(sign * uLRFootOffset);
+std::cout << "Foot Target\n\r" << footTarget << "\n\r";         
 
         // Start applying step limits:
         // Get the vector between the feet and clamp the components between the min and max step limits

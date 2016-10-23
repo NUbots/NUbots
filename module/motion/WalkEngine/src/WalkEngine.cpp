@@ -117,7 +117,7 @@ namespace motion
         .then([this] /*(const Sensors& sensors)*/
         {
             if(DEBUG) { NUClear::log("WalkEngine - Update Waypoints(0)"); }
-            emit(std::move(updateWaypoints(/*sensors*/)));
+            //emit(std::move(updateWaypoints(/*sensors*/)));
             if(DEBUG) { NUClear::log("WalkEngine - Update Waypoints(1)"); }
         }).disable();
 
@@ -125,11 +125,7 @@ namespace motion
         on<Trigger<WalkCommand>>().then([this] (const WalkCommand& walkCommand)
         {
             if(DEBUG) { NUClear::log("WalkEngine - Trigger WalkCommand(0)"); }
-            auto velocity = walkCommand.command;
-            velocity.x()     *= velocity.x()     > 0 ? velocityLimits(0,1) : -velocityLimits(0,0);
-            velocity.y()     *= velocity.y()     > 0 ? velocityLimits(1,1) : -velocityLimits(1,0);
-            velocity.angle() *= velocity.angle() > 0 ? velocityLimits(2,1) : -velocityLimits(2,0);
-            setVelocity(velocity);
+            setVelocity(walkCommand.command);  
             emit(std::make_unique<NewWalkCommand>(getVelocity()));
             if(DEBUG) { NUClear::log("WalkEngine - Trigger WalkCommand(1)"); }
         });
@@ -311,33 +307,40 @@ namespace motion
     {
         return velocityCurrent;
     }        
-    void WalkEngine::setVelocity(Transform2D velocity) 
+    void WalkEngine::setVelocity(Transform2D inVelocityCommand) 
     {
+        // hard limit commanded speed ??? not sure if necessary ???
+        inVelocityCommand.x()     *= inVelocityCommand.x()     > 0 ? velocityLimits(0,1) : -velocityLimits(0,0);
+        inVelocityCommand.y()     *= inVelocityCommand.y()     > 0 ? velocityLimits(1,1) : -velocityLimits(1,0);
+        inVelocityCommand.angle() *= inVelocityCommand.angle() > 0 ? velocityLimits(2,1) : -velocityLimits(2,0);
+        if(DEBUG) { NUClear::log("Velocity(hard limit)"); }       
         // filter the commanded speed
-        velocity.x()     = std::min(std::max(velocity.x(),     velocityLimits(0,0)), velocityLimits(0,1));
-        velocity.y()     = std::min(std::max(velocity.y(),     velocityLimits(1,0)), velocityLimits(1,1));
-        velocity.angle() = std::min(std::max(velocity.angle(), velocityLimits(2,0)), velocityLimits(2,1));
-
+        inVelocityCommand.x()     = std::min(std::max(inVelocityCommand.x(),     velocityLimits(0,0)), velocityLimits(0,1));
+        inVelocityCommand.y()     = std::min(std::max(inVelocityCommand.y(),     velocityLimits(1,0)), velocityLimits(1,1));
+        inVelocityCommand.angle() = std::min(std::max(inVelocityCommand.angle(), velocityLimits(2,0)), velocityLimits(2,1));
+        if(DEBUG) { NUClear::log("Velocity(filtered 1)"); }
         // slow down when turning
-        double vFactor = 1 - std::abs(velocity.angle()) / accelerationTurningFactor;
-
-        double stepMag = std::sqrt(velocity.x() * velocity.x() + velocity.y() * velocity.y());
+        double vFactor = 1 - std::abs(inVelocityCommand.angle()) / accelerationTurningFactor;
+        double stepMag = std::sqrt(inVelocityCommand.x() * inVelocityCommand.x() + inVelocityCommand.y() * inVelocityCommand.y());
         double magFactor = std::min(velocityLimits(0,1) * vFactor, stepMag) / (stepMag + 0.000001);
 
-        velocityCommand.x()     = velocity.x() * magFactor;
-        velocityCommand.y()     = velocity.y() * magFactor;
-        velocityCommand.angle() = velocity.angle();
-
-        velocityCommand.x()     = std::min(std::max(velocityCommand.x(),     velocityLimits(0,0)), velocityLimits(0,1));
-        velocityCommand.y()     = std::min(std::max(velocityCommand.y(),     velocityLimits(1,0)), velocityLimits(1,1));
-        velocityCommand.angle() = std::min(std::max(velocityCommand.angle(), velocityLimits(2,0)), velocityLimits(2,1));
+        inVelocityCommand.x()     = inVelocityCommand.x() * magFactor;
+        inVelocityCommand.y()     = inVelocityCommand.y() * magFactor;
+        inVelocityCommand.angle() = inVelocityCommand.angle();
+        if(DEBUG) { NUClear::log("Velocity(slow  turn)"); }
+        // filter the decelarated speed
+        inVelocityCommand.x()     = std::min(std::max(inVelocityCommand.x(),     velocityLimits(0,0)), velocityLimits(0,1));
+        inVelocityCommand.y()     = std::min(std::max(inVelocityCommand.y(),     velocityLimits(1,0)), velocityLimits(1,1));
+        inVelocityCommand.angle() = std::min(std::max(inVelocityCommand.angle(), velocityLimits(2,0)), velocityLimits(2,1));
+        if(DEBUG) { NUClear::log("Velocity(filtered 2)"); }  
+        velocityCurrent = inVelocityCommand;
     }    
 /*=======================================================================================================*/
 //      ENCAPSULATION METHOD: Time
 /*=======================================================================================================*/
     double WalkEngine::getTime() 
     {
-        if(DEBUG) { printf("System Time:%f\n\r", double(NUClear::clock::now().time_since_epoch().count()) * (1.0 / double(NUClear::clock::period::den))); }
+        if(DEBUG) { NUClear::log("System Time:%f\n\r", double(NUClear::clock::now().time_since_epoch().count()) * (1.0 / double(NUClear::clock::period::den))); }
         return (double(NUClear::clock::now().time_since_epoch().count()) * (1.0 / double(NUClear::clock::period::den)));
     }
 /*=======================================================================================================*/
