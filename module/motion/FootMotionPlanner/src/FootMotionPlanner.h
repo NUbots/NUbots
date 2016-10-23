@@ -34,7 +34,6 @@
 #include "message/input/Sensors.h"
 #include "message/input/PushDetection.h"
 
-#include "message/motion/KinematicsModels.h"
 #include "message/motion/WalkCommand.h"
 #include "message/motion/FootMotionCommand.h" 
 #include "message/motion/FootPlacementCommand.h" 
@@ -123,8 +122,7 @@ namespace motion
          * Anthropomorphic metrics initialized from configuration script, see config file for documentation...
          */
         double bodyTilt;                                // 
-        double bodyHeight;                              //  
-        double stanceLimitY2;                           //
+        double bodyHeight;                              //
         double stepTime;                                //
         double stepHeight;                              //
         float  step_height_slow_fraction;               //
@@ -167,7 +165,6 @@ namespace motion
         /**
          * Balance & Kinematics module initialization...
          */
-        message::motion::kinematics::KinematicsModel kinematicsModel;   //
 
         /**
          * The last foot goal rotation...

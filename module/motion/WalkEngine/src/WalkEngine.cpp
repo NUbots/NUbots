@@ -78,7 +78,7 @@ namespace motion
     WalkEngine::WalkEngine(std::unique_ptr<NUClear::Environment> environment) 
     : Reactor(std::move(environment))
         , DEBUG(false), DEBUG_ITER(0), initialStep(0)
-        , balanceEnabled(0.0), emitLocalisation(false), emitFootPosition(false)
+        , emitLocalisation(false), emitFootPosition(false)
         , updateHandle(), generateStandScriptReaction(), subsumptionId(1)
         , StateOfWalk()
         , torsoPositionsTransform(), leftFootPositionTransform()
@@ -93,9 +93,7 @@ namespace motion
         , velocityHigh(0.0), accelerationTurningFactor(0.0), velocityLimits(arma::fill::zeros)
         , accelerationLimits(arma::fill::zeros), accelerationLimitsHigh(arma::fill::zeros)
         , velocityCurrent(), velocityCommand()
-        , zmpCoefficients(arma::fill::zeros), zmpParameters(arma::fill::zeros)
-        , zmpTime(0.0), phase1Single(0.0), phase2Single(0.0)
-        , balancer(), kinematicsModel()
+        , kinematicsModel()
         , balanceAmplitude(0.0), balanceWeight(0.0), balanceOffset(0.0)
         , balancePGain(0.0), balanceIGain(0.0), balanceDGain(0.0)
         , jointGains(), servoControlPGains()
@@ -106,6 +104,12 @@ namespace motion
         on<Configuration>("WalkEngine.yaml").then("Walk Engine - Configure", [this] (const Configuration& config) 
         {
             configure(config.config);       
+        });
+
+        //Define kinematics model for physical calculations...
+        on<Trigger<KinematicsModel>>().then("WalkEngine - Update Kinematics Model", [this](const KinematicsModel& model)
+        {
+            kinematicsModel = model;
         });
 
         //Update waypoints sensor data at regular intervals...
@@ -130,27 +134,44 @@ namespace motion
             if(DEBUG) { NUClear::log("WalkEngine - Trigger WalkCommand(1)"); }
         });
 
-        on<Trigger<KinematicsModel>>().then("WalkEngine - Update Kinematics Model", [this](const KinematicsModel& model)
-        {
-            kinematicsModel = model;
-        });
-
         on<Trigger<BalanceBodyUpdate>>().then("Walk Engine - Received update (Balanced Robot Posture) Info", [this](const BalanceBodyUpdate& info)
         {
+            if(DEBUG) { NUClear::log("WalkEngine - Trigger BalanceBodyUpdate(0)"); }
             setLeftFootPosition(info.leftFoot);
             setRightFootPosition(info.rightFoot);
             setTorsoPositionArms(info.frameArms);
             setTorsoPositionLegs(info.frameLegs);
             setTorsoPosition3D(info.frame3D);
-            if((DEBUG_ITER++)%5 == 0)
-                {
-                    std::cout << "\n\r" << getLeftFootPosition();
-                    std::cout << "\n\r" << getRightFootPosition();
-                    std::cout << "\n\r" << getTorsoPositionLegs();
-                    std::cout << "\n\r" << getTorsoPositionArms();
-                    std::cout << "\n\r" << getTorsoPosition3D();
-                }
+            if(DEBUG) { NUClear::log("WalkEngine - Trigger BalanceBodyUpdate(1)"); }
         });
+
+        on<Trigger<WalkStartCommand>>().then([this] 
+        {
+            lastVeloctiyUpdateTime = NUClear::clock::now();
+            start();
+            // emit(std::make_unique<ActionPriorites>(ActionPriorites { subsumptionId, { 25, 10 }})); // TODO: config
+        });
+
+        on<Trigger<WalkStopCommand>>().then([this] 
+        {
+            // TODO: This sets STOP_REQUEST, which appears not to be used anywhere.
+            // If this is the case, we should delete or rethink the WalkStopCommand.
+            //requestStop();
+        });
+
+        on<Trigger<WalkOptimiserCommand>>().then([this] (const WalkOptimiserCommand& command) 
+        {
+            configure(command.walkConfig);
+            emit(std::make_unique<WalkConfigSaved>());
+        });
+
+        //generateStandScriptReaction = on<Trigger<Sensors>, Single>().then([this] (/*const Sensors& sensors*/) 
+        //{
+        //    generateStandScriptReaction.disable();
+        //    //generateAndSaveStandScript(sensors);
+        //    //StateOfWalk = State::LAST_STEP;
+        //    start();
+        //});
 
         on<Trigger<EnableWalkEngineCommand>>().then([this] (const EnableWalkEngineCommand& command) 
         {
@@ -172,60 +193,6 @@ namespace motion
             emit<Scope::DIRECT>(std::move(std::make_unique<DisableBalanceResponse>(command.subsumptionId + 1)));
             updateHandle.disable(); 
         });
-
-        on<Trigger<WalkStartCommand>>().then([this] 
-        {
-            lastVeloctiyUpdateTime = NUClear::clock::now();
-            start();
-            // emit(std::make_unique<ActionPriorites>(ActionPriorites { subsumptionId, { 25, 10 }})); // TODO: config
-        });
-
-        on<Trigger<WalkStopCommand>>().then([this] 
-        {
-            // TODO: This sets STOP_REQUEST, which appears not to be used anywhere.
-            // If this is the case, we should delete or rethink the WalkStopCommand.
-            //requestStop();
-        });
-
-        // TODO: finish push detection and compensation
-        // pushTime = NUClear::clock::now();
-        // on<Trigger<PushDetection>, With<Configuration>>().then([this](const PushDetection& pd, const Configuration& config) 
-        // {
-        //     balanceEnabled = true;
-        //     // balanceAmplitude = balance["amplitude"].as<Expression>();
-        //     // balanceWeight = balance["weight"].as<Expression>();
-        //     // balanceOffset = balance["offset"].as<Expression>();
-        //     balancer.configure(config["walk_cycle"]["balance"]["push_recovery"]);
-        //     pushTime = NUClear::clock::now();
-        //     // configure(config.config);
-        // });
-
-        // on<Every<10, std::chrono::milliseconds>>(With<Configuration<WalkEngine>>>().then([this](const Configuration& config) 
-        // {
-        //     [this](const WalkOptimiserCommand& command) 
-        //     {
-        //     if ((NUClear::clock::now() - pushTime) > std::chrono::milliseconds(config["walk_cycle"]["balance"]["balance_time"].as<int>)) 
-        //     {
-        //         balancer.configure(config["walk_cycle"]["balance"]);
-        //     }
-        // });
-
-
-        on<Trigger<WalkOptimiserCommand>>().then([this] (const WalkOptimiserCommand& command) 
-        {
-            configure(command.walkConfig);
-            emit(std::make_unique<WalkConfigSaved>());
-        });
-
-        //generateStandScriptReaction = on<Trigger<Sensors>, Single>().then([this] (/*const Sensors& sensors*/) 
-        //{
-        //    generateStandScriptReaction.disable();
-        //    //generateAndSaveStandScript(sensors);
-        //    //StateOfWalk = State::LAST_STEP;
-        //    start();
-        //});
-
-        //reset();
     }
 /*=======================================================================================================*/
 //      NAME: generateAndSaveStandScript
@@ -268,7 +235,7 @@ namespace motion
 /*=======================================================================================================*/
 //      NAME: requestStop
 /*=======================================================================================================*/
-    /*void FootPlacementPlanner::requestStop() 
+    /*void WalkEngine::requestStop() 
     {
         // always stops with feet together (which helps transition)
         if (StateOfWalk == State::WALKING) 
@@ -338,15 +305,12 @@ namespace motion
         return std::move(waypoints);
     }
 /*=======================================================================================================*/
-//      ENCAPSULATION METHOD: getTime
+//      ENCAPSULATION METHOD: Velocity
 /*=======================================================================================================*/
     Transform2D WalkEngine::getVelocity() 
     {
         return velocityCurrent;
-    }      
-/*=======================================================================================================*/
-//      ENCAPSULATION METHOD: setVelocity
-/*=======================================================================================================*/    
+    }        
     void WalkEngine::setVelocity(Transform2D velocity) 
     {
         // filter the commanded speed
@@ -369,7 +333,7 @@ namespace motion
         velocityCommand.angle() = std::min(std::max(velocityCommand.angle(), velocityLimits(2,0)), velocityLimits(2,1));
     }    
 /*=======================================================================================================*/
-//      ENCAPSULATION METHOD: getTime
+//      ENCAPSULATION METHOD: Time
 /*=======================================================================================================*/
     double WalkEngine::getTime() 
     {
@@ -377,119 +341,89 @@ namespace motion
         return (double(NUClear::clock::now().time_since_epoch().count()) * (1.0 / double(NUClear::clock::period::den)));
     }
 /*=======================================================================================================*/
-//      ENCAPSULATION METHOD: getLArmPosition
+//      ENCAPSULATION METHOD: Left Arm Position
 /*=======================================================================================================*/    
     arma::vec3 WalkEngine::getLArmPosition()
     {
         return (armLPostureTransform);
-    }
-/*=======================================================================================================*/
-//      ENCAPSULATION METHOD: setLArmPosition
-/*=======================================================================================================*/     
+    }    
     void WalkEngine::setLArmPosition(arma::vec3 inLArm)
     {
         armLPostureTransform = inLArm;
     }    
 /*=======================================================================================================*/
-//      ENCAPSULATION METHOD: getRArmPosition
+//      ENCAPSULATION METHOD: Right Arm Position
 /*=======================================================================================================*/ 
     arma::vec3 WalkEngine::getRArmPosition()
     {
         return (armRPostureTransform);
-    }
-/*=======================================================================================================*/
-//      ENCAPSULATION METHOD: setRArmPosition
-/*=======================================================================================================*/     
+    } 
     void WalkEngine::setRArmPosition(arma::vec3 inRArm)
     {
         armRPostureTransform = inRArm;
     }    
 /*=======================================================================================================*/
-//      ENCAPSULATION METHOD: getTorsoPosition
+//      ENCAPSULATION METHOD: Torso Position
 /*=======================================================================================================*/
     Transform2D WalkEngine::getTorsoPositionArms()
     {
         return (torsoPositionsTransform.FrameArms);
     }
-/*=======================================================================================================*/
-//      ENCAPSULATION METHOD: getTorsoPosition
-/*=======================================================================================================*/
-    Transform2D WalkEngine::getTorsoPositionLegs()
-    {
-        return (torsoPositionsTransform.FrameLegs);
-    }        
-/*=======================================================================================================*/
-//      ENCAPSULATION METHOD: getTorsoPosition
-/*=======================================================================================================*/
-    Transform3D WalkEngine::getTorsoPosition3D()
-    {
-        return (torsoPositionsTransform.Frame3D);
-    }            
-/*=======================================================================================================*/
-//      ENCAPSULATION METHOD: setTorsoPositionLegs
-/*=======================================================================================================*/
     void WalkEngine::setTorsoPositionLegs(const Transform2D& inTorsoPosition)
     {
         torsoPositionsTransform.FrameLegs = inTorsoPosition;
     }
-/*=======================================================================================================*/
-//      ENCAPSULATION METHOD: setTorsoPositionArms
-/*=======================================================================================================*/
+    Transform2D WalkEngine::getTorsoPositionLegs()
+    {
+        return (torsoPositionsTransform.FrameLegs);
+    }        
     void WalkEngine::setTorsoPositionArms(const Transform2D& inTorsoPosition)
     {
         torsoPositionsTransform.FrameArms = inTorsoPosition;
-    }    
-/*=======================================================================================================*/
-//      ENCAPSULATION METHOD: setTorsoPosition3D
-/*=======================================================================================================*/
+    }   
+    Transform3D WalkEngine::getTorsoPosition3D()
+    {
+        return (torsoPositionsTransform.Frame3D);
+    }            
     void WalkEngine::setTorsoPosition3D(const Transform3D& inTorsoPosition)
     {
         torsoPositionsTransform.Frame3D = inTorsoPosition;
-    }        
+    }  
 /*=======================================================================================================*/
-//      ENCAPSULATION METHOD: getSupportMass
+//      ENCAPSULATION METHOD: Support Mass
 /*=======================================================================================================*/
     Transform2D WalkEngine::getSupportMass()
     {
         return (uSupportMass);
     }
-/*=======================================================================================================*/
-//      ENCAPSULATION METHOD: setSupportMass
-/*=======================================================================================================*/
     void WalkEngine::setSupportMass(const Transform2D& inSupportMass)
     {
         uSupportMass = inSupportMass;
     }        
 /*=======================================================================================================*/
-//      ENCAPSULATION METHOD: getLeftFootPosition
+//      ENCAPSULATION METHOD: Left Foot Position
 /*=======================================================================================================*/
-    Transform2D WalkEngine::getLeftFootPosition()
+    Transform3D WalkEngine::getLeftFootPosition()
     {
         return (leftFootPositionTransform);
     }
-/*=======================================================================================================*/
-//      ENCAPSULATION METHOD: setLeftFootPosition
-/*=======================================================================================================*/
     void WalkEngine::setLeftFootPosition(const Transform3D& inLeftFootPosition)
     {
         leftFootPositionTransform = inLeftFootPosition;
     }
 /*=======================================================================================================*/
-//      ENCAPSULATION METHOD: getRightFootPosition
+//      ENCAPSULATION METHOD: Right Foot Position
 /*=======================================================================================================*/
     Transform3D WalkEngine::getRightFootPosition()
     {
         return (rightFootPositionTransform);
     }
-/*=======================================================================================================*/
-//      ENCAPSULATION METHOD: setRightFootPosition
-/*=======================================================================================================*/
     void WalkEngine::setRightFootPosition(const Transform3D& inRightFootPosition)
     {
         rightFootPositionTransform = inRightFootPosition;
     }
 /*=======================================================================================================*/
-//      METHOD: configure
+//      INITIALISATION METHOD: Configuration
 /*=======================================================================================================*/
     void WalkEngine::configure(const YAML::Node& config)
     {
@@ -519,7 +453,6 @@ namespace motion
 
         auto& walkCycle = config["walk_cycle"];
         stepTime = walkCycle["step_time"].as<Expression>();
-        zmpTime = walkCycle["zmp_time"].as<Expression>();
         //hipRollCompensation = walkCycle["hip_roll_compensation"].as<Expression>();
         stepHeight = walkCycle["step"]["height"].as<Expression>();
         stepLimits = walkCycle["step"]["limits"].as<arma::mat::fixed<3,2>>();
@@ -536,16 +469,10 @@ namespace motion
         accelerationLimitsHigh = acceleration["limits_high"].as<arma::vec>();
         accelerationTurningFactor = acceleration["turning_factor"].as<Expression>();
 
-        phase1Single = walkCycle["single_support_phase"]["start"].as<Expression>();
-        phase2Single = walkCycle["single_support_phase"]["end"].as<Expression>();
-
         auto& balance = walkCycle["balance"];
-        balanceEnabled = balance["enabled"].as<bool>();
         // balanceAmplitude = balance["amplitude"].as<Expression>();
         // balanceWeight = balance["weight"].as<Expression>();
         // balanceOffset = balance["offset"].as<Expression>();
-
-        balancer.configure(balance);
 
         for(auto& gain : balance["servo_gains"])
         {
@@ -555,29 +482,6 @@ namespace motion
             servoControlPGains[sr] = p;
             servoControlPGains[sl] = p;
         }
-        /* TODO
-        // gCompensation parameters
-        toeTipCompensation = config["toeTipCompensation"].as<Expression>();
-        ankleMod = {-toeTipCompensation, 0};
-
-        // gGyro stabilization parameters
-        ankleImuParamX = config["ankleImuParamX"].as<arma::vec>();
-        ankleImuParamY = config["ankleImuParamY"].as<arma::vec>();
-        kneeImuParamX = config["kneeImuParamX"].as<arma::vec>();
-        hipImuParamY = config["hipImuParamY"].as<arma::vec>();
-        armImuParamX = config["armImuParamX"].as<arma::vec>();
-        armImuParamY = config["armImuParamY"].as<arma::vec>();
-
-        // gSupport bias parameters to reduce backlash-based instability
-        velFastForward = config["velFastForward"].as<Expression>();
-        velFastTurn = config["velFastTurn"].as<Expression>();
-        supportFront = config["supportFront"].as<Expression>();
-        supportFront2 = config["supportFront2"].as<Expression>();
-        supportBack = config["supportBack"].as<Expression>();
-        supportSideX = config["supportSideX"].as<Expression>();
-        supportSideY = config["supportSideY"].as<Expression>();
-        supportTurn = config["supportTurn"].as<Expression>();
-        */
         STAND_SCRIPT_DURATION = config["STAND_SCRIPT_DURATION"].as<Expression>();
     }    
 }  // motion

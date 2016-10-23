@@ -100,7 +100,6 @@ namespace motion
         /**
          * NUsight feedback initialized from configuration script, see config file for documentation...
          */
-        bool balanceEnabled;        //
         bool emitLocalisation;      //
         bool emitFootPosition;      //
 
@@ -142,8 +141,8 @@ namespace motion
             Transform3D Frame3D;
         };
         TorsoPositions torsoPositionsTransform;         // Active torso position
-        Transform2D leftFootPositionTransform;          // Active left foot position
-        Transform2D rightFootPositionTransform;         // Active right foot position
+        Transform3D leftFootPositionTransform;          // Active left foot position
+        Transform3D rightFootPositionTransform;         // Active right foot position
         Transform2D uSupportMass;                       // Appears to be support foot pre-step position
         LimbID activeForwardLimb;                       // The leg that is 'swinging' in the step, opposite of the support foot
         LimbID activeLimbInitial;                       // TODO: Former initial non-support leg for deterministic walking approach
@@ -212,22 +211,8 @@ namespace motion
     //  double velFastTurn;                             //
         
         /**
-         * Dynamic analysis parameters for relevant motion planning...
-         */
-        arma::vec4 zmpCoefficients;                     // zmp expoential coefficients aXP aXN aYP aYN
-        arma::vec4 zmpParameters;                       // zmp params m1X, m2X, m1Y, m2Y
-
-        /**
-         * Dynamic analysis parameters initialized from configuration script, see config file for documentation...
-         */
-        double zmpTime;                                 // 
-        double phase1Single;                            //
-        double phase2Single;                            //
-
-        /**
          * Balance & Kinematics module initialization...
          */
-        utility::motion::Balancer balancer;                             //
         message::motion::kinematics::KinematicsModel kinematicsModel;   //
 
         /**
@@ -434,7 +419,7 @@ namespace motion
          * @details [long description]
          * @return [description]
          */
-        Transform2D getLeftFootPosition();
+        Transform3D getLeftFootPosition();
         /**
          * @brief [brief description]
          * @details [long description]

@@ -41,7 +41,6 @@ namespace motion
     using message::support::Configuration;
 
     using utility::support::Expression;
-    using message::motion::kinematics::KinematicsModel;
     using utility::math::matrix::Transform2D;
     using utility::math::matrix::Transform3D;
     using utility::nubugger::graph;
@@ -56,7 +55,7 @@ namespace motion
         , leftFootPositionTransform(), leftFootSource(), rightFootPositionTransform()
         , rightFootSource(), leftFootDestination(), rightFootDestination(), uSupportMass()
         , activeForwardLimb(), activeLimbInitial(LimbID::LEFT_LEG)
-        , bodyTilt(0.0), bodyHeight(0.0), stanceLimitY2(0.0), stepTime(0.0), stepHeight(0.0)
+        , bodyTilt(0.0), bodyHeight(0.0), stepTime(0.0), stepHeight(0.0)
         , step_height_slow_fraction(0.0f), step_height_fast_fraction(0.0f)
         , stepLimits(arma::fill::zeros), footOffset(arma::fill::zeros), uLRFootOffset()
         , beginStepTime(0.0), destinationTime(), lastVeloctiyUpdateTime()
@@ -65,7 +64,6 @@ namespace motion
         , velocityCurrent(), velocityCommand()
         , zmpCoefficients(arma::fill::zeros), zmpParameters(arma::fill::zeros)
         , zmpTime(0.0), phase1Single(0.0), phase2Single(0.0)
-        , kinematicsModel()
         , lastFootGoalRotation(), footGoalErrorSum() 
         , startFromStep(false)
     {    	
@@ -371,7 +369,6 @@ namespace motion
         bodyHeight = stance["body_height"].as<Expression>();
         bodyTilt = stance["body_tilt"].as<Expression>();
         footOffset = stance["foot_offset"].as<arma::vec>();
-        stanceLimitY2 = kinematicsModel.Leg.LENGTH_BETWEEN_LEGS() - stance["limit_margin_y"].as<Expression>();
 
         auto& walkCycle = config["walk_cycle"];
         stepTime = walkCycle["step_time"].as<Expression>();

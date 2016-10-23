@@ -96,6 +96,12 @@ namespace motion
             configure(config.config);
         });
 
+        //Define kinematics model for physical calculations...
+        on<Trigger<KinematicsModel>>().then("WalkEngine - Update Kinematics Model", [this](const KinematicsModel& model)
+        {
+            kinematicsModel = model;
+        });
+
         //Transform analytical torso positions in accordance with the stipulated targets...
         updateHandle = on<Every<1 /*RESTORE AFTER DEBUGGING: UPDATE_FREQUENCY*/, Per<std::chrono::seconds>>, /*With<Sensors>,*/ Single, Priority::HIGH>()
         .then("Torso Motion Planner - Update Torso Position", [this] /*(const Sensors& sensors)*/

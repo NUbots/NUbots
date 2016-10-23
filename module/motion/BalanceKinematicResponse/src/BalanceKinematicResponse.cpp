@@ -80,6 +80,12 @@ namespace motion
             configure(config.config);
         });
 
+        //Define kinematics model for physical calculations...
+        on<Trigger<KinematicsModel>>().then("WalkEngine - Update Kinematics Model", [this](const KinematicsModel& model)
+        {
+            kinematicsModel = model;
+        });
+
         updateHandle = on<Every<1 /*RESTORE AFTER DEBUGGING: UPDATE_FREQUENCY*/, Per<std::chrono::seconds>>, /*With<Sensors>,*/ Single, Priority::HIGH>()
         .then("Balance Response Planner - Update Robot Posture", [this] /*(const Sensors& sensors)*/
         {
@@ -117,7 +123,30 @@ namespace motion
             if(DEBUG) { NUClear::log("Messaging: Balance Kinematic Response - Received Update (Active Head Position) Info(1)"); }
         });*/
 
-        //on<Trigger<NewStepTargetInfo>>().then([this]){};            
+        //on<Trigger<NewStepTargetInfo>>().then([this]){};   
+
+        // TODO: finish push detection and compensation
+        // pushTime = NUClear::clock::now();
+        // on<Trigger<PushDetection>, With<Configuration>>().then([this](const PushDetection& pd, const Configuration& config) 
+        // {
+        //     balanceEnabled = true;
+        //     // balanceAmplitude = balance["amplitude"].as<Expression>();
+        //     // balanceWeight = balance["weight"].as<Expression>();
+        //     // balanceOffset = balance["offset"].as<Expression>();
+        //     balancer.configure(config["walk_cycle"]["balance"]["push_recovery"]);
+        //     pushTime = NUClear::clock::now();
+        //     // configure(config.config);
+        // });
+
+        // on<Every<10, std::chrono::milliseconds>>(With<Configuration<WalkEngine>>>().then([this](const Configuration& config) 
+        // {
+        //     [this](const WalkOptimiserCommand& command) 
+        //     {
+        //     if ((NUClear::clock::now() - pushTime) > std::chrono::milliseconds(config["walk_cycle"]["balance"]["balance_time"].as<int>)) 
+        //     {
+        //         balancer.configure(config["walk_cycle"]["balance"]);
+        //     }
+        // });         
 
         on<Trigger<EnableBalanceResponse>>().then([this] (const EnableBalanceResponse& command) 
         {          
@@ -176,15 +205,14 @@ namespace motion
     {
         // Apply balance and compensation functions to robot posture...
         updateLowerBody();
-        //updateUpperBody();
+        updateUpperBody();
 
         //DEBUGGING: Emit relative feet position with respect to robot torso model... 
         if (emitFootPosition)
         {
             //emit(graph("Right foot position", rightFootTorso.translation()));
             //emit(graph("Left  foot position",  leftFootTorso.translation()));
-        }
-
+        }  
         emit(std::make_unique<BalanceBodyUpdate>(getMotionPhase(), getLeftFootPosition(), getRightFootPosition(), getTorsoPositionLegs(), getTorsoPositionLegs(), getTorsoPosition3D()));
     }      
 /*=======================================================================================================*/
