@@ -593,28 +593,23 @@ namespace module {
                      *                  Kinematics Horizon          *
                      ************************************************/         
                     sensors->bodyCentreHeight = motionFilter.get()[MotionModel::PZ];
-                
-                    Rotation3D Rwt = sensors->world.rotation().t();     //remove translation components from the transform 
+
+                    Rotation3D Rwt = sensors->world.rotation().t();     //remove translation components from the transform
                     Rotation3D oBodyToGround = Rotation3D::createRotationZ(-Rwt.yaw()) * Rwt;
                     // sensors->orientationBodyToGround : Mat size [4x4] (default identity)
                     // createRotationZ : Mat size [3x3] 
                     // Rwt : Mat size [3x3]
-                    sensors->orientationBodyToGround = Transform3D(oBodyToGround);                          
+                    sensors->orientationBodyToGround = Transform3D(oBodyToGround);  
                     sensors->orientationCamToGround = sensors->orientationBodyToGround * sensors->forwardKinematics[ServoID::HEAD_PITCH];
-
-                    if(sensors->leftFootDown) 
-                    {           
+                    
+                    if(sensors->leftFootDown) {
                         sensors->kinematicsBodyToGround = utility::motion::kinematics::calculateBodyToGround(sensors->forwardKinematics[ServoID::L_ANKLE_ROLL].submat(0,2,2,2),sensors->bodyCentreHeight);
-                    } 
-                    else if (sensors->rightFootDown) 
-                    {
-
+                    } else if (sensors->rightFootDown) {
                         sensors->kinematicsBodyToGround = utility::motion::kinematics::calculateBodyToGround(sensors->forwardKinematics[ServoID::R_ANKLE_ROLL].submat(0,2,2,2),sensors->bodyCentreHeight);
                     }
-                    else 
-                    {
+                    else {
                         sensors->kinematicsBodyToGround = sensors->orientationCamToGround;
-                    }                                    
+                    }
                     sensors->kinematicsCamToGround = sensors->orientationBodyToGround * sensors->forwardKinematics[ServoID::HEAD_PITCH];
 
                     /************************************************
