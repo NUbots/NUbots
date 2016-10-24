@@ -77,7 +77,7 @@ namespace skills {
             if (command.type == MotionCommand::Type::DirectCommand) {
                 emit(std::make_unique<ActionPriorites>(ActionPriorites { subsumptionId, { 26, 11 }}));
                 emit(std::move(std::make_unique<WalkStartCommand>(subsumptionId)));
-                emit(std::move(std::make_unique<WalkCommand>(subsumptionId, command.walkCommand)));
+                emit(std::move(std::make_unique<WalkCommand>(subsumptionId, command.walkCommand)));           
             } else if (command.type == MotionCommand::Type::StandStill) {
                 emit(std::make_unique<ActionPriorites>(ActionPriorites { subsumptionId, { 26, 11 }}));
                 emit(std::move(std::make_unique<WalkStopCommand>(subsumptionId)));

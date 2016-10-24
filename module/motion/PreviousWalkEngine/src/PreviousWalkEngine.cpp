@@ -60,8 +60,8 @@ namespace motion {
     using message::motion::WalkStartCommand;
     using message::motion::WalkStopCommand;
     using message::motion::WalkStopped;
-    using message::motion::EnablePreviousWalkEngineCommand;
-    using message::motion::DisablePreviousWalkEngineCommand;
+    using message::motion::EnableWalkEngineCommand;
+    using message::motion::DisableWalkEngineCommand;
     using message::motion::ServoTarget;
     using message::motion::Script;
     using message::motion::kinematics::KinematicsModel;
@@ -127,14 +127,14 @@ namespace motion {
             kinematicsModel = model;
         });
 
-        on<Trigger<EnablePreviousWalkEngineCommand>>().then([this] (const EnablePreviousWalkEngineCommand& command) {
+        on<Trigger<EnableWalkEngineCommand>>().then([this] (const EnableWalkEngineCommand& command) {
             subsumptionId = command.subsumptionId;
 
             stanceReset(); // Reset stance as we don't know where our limbs are.
             updateHandle.enable();
         });
 
-        on<Trigger<DisablePreviousWalkEngineCommand>>().then([this] {
+        on<Trigger<DisableWalkEngineCommand>>().then([this] {
             // Nobody needs the walk engine, so we stop updating it.
             updateHandle.disable();
 
@@ -146,7 +146,8 @@ namespace motion {
             update(sensors);
         }).disable();
 
-        on<Trigger<WalkCommand>>().then([this] (const WalkCommand& walkCommand) {
+        on<Trigger<WalkCommand>>().then([this] (const WalkCommand& walkCommand) 
+        {          
             auto velocity = walkCommand.command;
 
             velocity.x()     *= velocity.x()     > 0 ? velocityLimits(0,1) : -velocityLimits(0,0);
@@ -154,6 +155,8 @@ namespace motion {
             velocity.angle() *= velocity.angle() > 0 ? velocityLimits(2,1) : -velocityLimits(2,0);
 
             setVelocity(velocity);
+
+std::cout << "\n\rPrevious Walk Engine WalkCommand";  
         });
 
         on<Trigger<WalkStartCommand>>().then([this] {
@@ -533,7 +536,7 @@ namespace motion {
         auto arms = motionArms(phase);
         waypoints->insert(waypoints->end(), arms->begin(), arms->end());
 
-        emit(std::move(waypoints));
+        emit(std::move(waypoints));      
     }
 
     std::unique_ptr<std::vector<ServoCommand>> PreviousWalkEngine::updateStillWayPoints(const Sensors& sensors) {

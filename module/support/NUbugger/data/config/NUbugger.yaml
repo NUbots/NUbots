@@ -39,11 +39,11 @@ reaction_handles:
   # NUsight commands (download_lut, etc)
   command: false
   # Updates to enabled reaction handles
-  reaction_handles: true
+  reaction_handles: false
   # Ping packets
   ping: false
   # Configuration window
-  configuration_state: true
+  configuration_state: false
   # Lookup table packets
   lookup_table: false
   # Lookup table delta packets (autoclassifier)

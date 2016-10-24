@@ -78,7 +78,7 @@ namespace motion
     WalkEngine::WalkEngine(std::unique_ptr<NUClear::Environment> environment) 
     : Reactor(std::move(environment))
         , DEBUG(false), DEBUG_ITER(0), initialStep(0)
-        , emitLocalisation(false), emitFootPosition(false)
+        , newPostureReceived(false), emitLocalisation(false), emitFootPosition(false)
         , updateHandle(), generateStandScriptReaction(), subsumptionId(1)
         , StateOfWalk()
         , torsoPositionsTransform(), leftFootPositionTransform()
@@ -113,11 +113,14 @@ namespace motion
         });
 
         //Update waypoints sensor data at regular intervals...
-        updateHandle =on<Every<UPDATE_FREQUENCY, Per<std::chrono::seconds>>, With<Sensors>, Single, Priority::HIGH>()
+        updateHandle =on<Every<UPDATE_FREQUENCY, Per<std::chrono::seconds>>, /*With<Sensors>,*/ Single, Priority::HIGH>()
         .then([this] /*(const Sensors& sensors)*/
         {
             if(DEBUG) { NUClear::log("WalkEngine - Update Waypoints(0)"); }
-            //emit(std::move(updateWaypoints(/*sensors*/)));
+            if(isNewPostureReceived()) 
+            { 
+                emit(std::move(updateWaypoints(/*sensors*/))); 
+            }
             if(DEBUG) { NUClear::log("WalkEngine - Update Waypoints(1)"); }
         }).disable();
 
@@ -128,11 +131,17 @@ namespace motion
             setVelocity(walkCommand.command);  
             emit(std::make_unique<NewWalkCommand>(getVelocity()));
             if(DEBUG) { NUClear::log("WalkEngine - Trigger WalkCommand(1)"); }
+
+std::cout << "\n\rModular Walk Engine WalkCommand";             
         });
 
         on<Trigger<BalanceBodyUpdate>>().then("Walk Engine - Received update (Balanced Robot Posture) Info", [this](const BalanceBodyUpdate& info)
         {
             if(DEBUG) { NUClear::log("WalkEngine - Trigger BalanceBodyUpdate(0)"); }
+            if(!isNewPostureReceived()) 
+            {
+                 setNewPostureReceived(true); 
+            }
             setLeftFootPosition(info.leftFoot);
             setRightFootPosition(info.rightFoot);
             setTorsoPositionArms(info.frameArms);
@@ -314,11 +323,13 @@ namespace motion
         inVelocityCommand.y()     *= inVelocityCommand.y()     > 0 ? velocityLimits(1,1) : -velocityLimits(1,0);
         inVelocityCommand.angle() *= inVelocityCommand.angle() > 0 ? velocityLimits(2,1) : -velocityLimits(2,0);
         if(DEBUG) { NUClear::log("Velocity(hard limit)"); }       
+        
         // filter the commanded speed
         inVelocityCommand.x()     = std::min(std::max(inVelocityCommand.x(),     velocityLimits(0,0)), velocityLimits(0,1));
         inVelocityCommand.y()     = std::min(std::max(inVelocityCommand.y(),     velocityLimits(1,0)), velocityLimits(1,1));
         inVelocityCommand.angle() = std::min(std::max(inVelocityCommand.angle(), velocityLimits(2,0)), velocityLimits(2,1));
         if(DEBUG) { NUClear::log("Velocity(filtered 1)"); }
+        
         // slow down when turning
         double vFactor = 1 - std::abs(inVelocityCommand.angle()) / accelerationTurningFactor;
         double stepMag = std::sqrt(inVelocityCommand.x() * inVelocityCommand.x() + inVelocityCommand.y() * inVelocityCommand.y());
@@ -328,11 +339,13 @@ namespace motion
         inVelocityCommand.y()     = inVelocityCommand.y() * magFactor;
         inVelocityCommand.angle() = inVelocityCommand.angle();
         if(DEBUG) { NUClear::log("Velocity(slow  turn)"); }
+        
         // filter the decelarated speed
         inVelocityCommand.x()     = std::min(std::max(inVelocityCommand.x(),     velocityLimits(0,0)), velocityLimits(0,1));
         inVelocityCommand.y()     = std::min(std::max(inVelocityCommand.y(),     velocityLimits(1,0)), velocityLimits(1,1));
         inVelocityCommand.angle() = std::min(std::max(inVelocityCommand.angle(), velocityLimits(2,0)), velocityLimits(2,1));
         if(DEBUG) { NUClear::log("Velocity(filtered 2)"); }  
+        
         velocityCurrent = inVelocityCommand;
     }    
 /*=======================================================================================================*/
@@ -343,6 +356,17 @@ namespace motion
         if(DEBUG) { NUClear::log("System Time:%f\n\r", double(NUClear::clock::now().time_since_epoch().count()) * (1.0 / double(NUClear::clock::period::den))); }
         return (double(NUClear::clock::now().time_since_epoch().count()) * (1.0 / double(NUClear::clock::period::den)));
     }
+/*=======================================================================================================*/
+//      ENCAPSULATION METHOD: New Step Received
+/*=======================================================================================================*/
+    bool WalkEngine::isNewPostureReceived()
+    {
+        return (newPostureReceived);
+    }  
+    void WalkEngine::setNewPostureReceived(bool inNewPostureReceived)
+    {
+        newPostureReceived = inNewPostureReceived;
+    }  
 /*=======================================================================================================*/
 //      ENCAPSULATION METHOD: Left Arm Position
 /*=======================================================================================================*/    

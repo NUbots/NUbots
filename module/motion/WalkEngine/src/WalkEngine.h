@@ -100,6 +100,7 @@ namespace motion
         /**
          * NUsight feedback initialized from configuration script, see config file for documentation...
          */
+        bool newPostureReceived;    // Identifies the instance of valid posture data for waypoint emission.
         bool emitLocalisation;      //
         bool emitFootPosition;      //
 
@@ -316,6 +317,19 @@ namespace motion
          * @param inTorsoPosition [description]
          */
         double getTime();
+        /**
+         * @brief [brief description]
+         * @details [long description]
+         * @return [description]
+         */
+        bool isNewPostureReceived();
+        /**
+         * @brief [brief description]
+         * @details [long description]
+         * 
+         * @param inNewPostureReceived [description]
+         */
+        void setNewPostureReceived(bool inNewPostureReceived);
         /**
          * @brief [brief description]
          * @details [long description]
