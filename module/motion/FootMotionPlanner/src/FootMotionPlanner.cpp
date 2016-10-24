@@ -175,7 +175,7 @@ namespace motion
 
         if(DEBUG) { NUClear::log("Messaging: Foot Motion Planner - Emit FootMotionUpdate"); }
         //Broadcast struct of updated foot motion data at corresponding phase identity...
-        emit(std::make_unique<FootMotionUpdate>(phase, leftFootLocal, rightFootLocal));
+        emit(std::make_unique<FootMotionUpdate>(phase, leftFootLocal, rightFootLocal));           
     }
 /*=======================================================================================================*/
 //      METHOD: getFootPhase
@@ -192,7 +192,7 @@ namespace motion
         return {xf, phaseSingle, zf};
     }
 /*=======================================================================================================*/
-//      ENCAPSULATION METHOD: getTime
+//      ENCAPSULATION METHOD: Time
 /*=======================================================================================================*/
     double FootMotionPlanner::getTime() 
     {
@@ -200,7 +200,7 @@ namespace motion
         return (double(NUClear::clock::now().time_since_epoch().count()) * (1.0 / double(NUClear::clock::period::den)));
     }
 /*=======================================================================================================*/
-//      ENCAPSULATION METHOD: getDestinationTime
+//      ENCAPSULATION METHOD: Destination Time
 /*=======================================================================================================*/
     double FootMotionPlanner::getDestinationTime()
     {
@@ -213,43 +213,34 @@ namespace motion
             return (0); //DEBUGGING: blank value
         }
     }
-/*=======================================================================================================*/
-//      ENCAPSULATION METHOD: setDestinationTime
-/*=======================================================================================================*/
     void FootMotionPlanner::setDestinationTime(double inDestinationTime)
     {
         destinationTime.push(inDestinationTime);
     }
 /*=======================================================================================================*/
-//      ENCAPSULATION METHOD: getLeftFootSource
+//      ENCAPSULATION METHOD: Left Foot Source
 /*=======================================================================================================*/
     Transform2D FootMotionPlanner::getLeftFootSource()
     {
         return (leftFootSource);
     }
-/*=======================================================================================================*/
-//      ENCAPSULATION METHOD: setLeftFootSource
-/*=======================================================================================================*/
     void FootMotionPlanner::setLeftFootSource(const Transform2D& inLeftFootSource)
     {
         leftFootSource = inLeftFootSource;
     }
 /*=======================================================================================================*/
-//      ENCAPSULATION METHOD: getRightFootSource
+//      ENCAPSULATION METHOD: Right Foot Source
 /*=======================================================================================================*/
     Transform2D FootMotionPlanner::getRightFootSource()
     {
         return (rightFootSource);
     }
-/*=======================================================================================================*/
-//      ENCAPSULATION METHOD: setRightFootSource
-/*=======================================================================================================*/
     void FootMotionPlanner::setRightFootSource(const Transform2D& inRightFootSource)
     {
         rightFootSource = inRightFootSource;
     }
 /*=======================================================================================================*/
-//      ENCAPSULATION METHOD: getLeftFootDestination
+//      ENCAPSULATION METHOD: Left Foot Destination
 /*=======================================================================================================*/
     Transform2D FootMotionPlanner::getLeftFootDestination()
     {
@@ -262,15 +253,12 @@ namespace motion
             return (Transform2D({0, 0, 0})); //DEBUGGING: blank value
         }
     }
-/*=======================================================================================================*/
-//      ENCAPSULATION METHOD: setLeftFootDestination
-/*=======================================================================================================*/
     void FootMotionPlanner::setLeftFootDestination(const Transform2D& inLeftFootDestination)
     {
         leftFootDestination.push(inLeftFootDestination);
     }
 /*=======================================================================================================*/
-//      ENCAPSULATION METHOD: getRightFootDestination
+//      ENCAPSULATION METHOD: Right Foot Destination
 /*=======================================================================================================*/
     Transform2D FootMotionPlanner::getRightFootDestination()
     {
@@ -283,15 +271,12 @@ namespace motion
             return (Transform2D({0, 0, 0})); //DEBUGGING: blank value
         }
     }
-/*=======================================================================================================*/
-//      ENCAPSULATION METHOD: setRightFootDestination
-/*=======================================================================================================*/
     void FootMotionPlanner::setRightFootDestination(const Transform2D& inRightFootDestination)
     {
         rightFootDestination.push(inRightFootDestination);
     }
 /*=======================================================================================================*/
-//      ENCAPSULATION METHOD: getActiveForwardLimb
+//      ENCAPSULATION METHOD: Active Forward Limb
 /*=======================================================================================================*/
     LimbID FootMotionPlanner::getActiveForwardLimb()
     {
@@ -304,22 +289,19 @@ namespace motion
             return (activeLimbInitial); //DEBUGGING: blank value
         }
     }
-/*=======================================================================================================*/
-//      ENCAPSULATION METHOD: setActiveForwardLimb
-/*=======================================================================================================*/
     void FootMotionPlanner::setActiveForwardLimb(LimbID inActiveForwardLimb)
     {
         activeForwardLimb.push(inActiveForwardLimb);
     }    
 /*=======================================================================================================*/
-//      ENCAPSULATION METHOD: isNewStepReceived
+//      ENCAPSULATION METHOD: New Step Received
 /*=======================================================================================================*/
     bool FootMotionPlanner::getNewStepReceived()
     {
         return ((leftFootDestination.size() > 0) | (rightFootDestination.size() > 0));
     }
 /*=======================================================================================================*/
-//      ENCAPSULATION METHOD: getMotionPhase
+//      ENCAPSULATION METHOD: Motion Phase
 /*=======================================================================================================*/
     double FootMotionPlanner::getMotionPhase()
     {
@@ -358,7 +340,7 @@ namespace motion
         return (motionPhase);
     }
 /*=======================================================================================================*/
-//      METHOD: configure
+//      METHOD: Configuration
 /*=======================================================================================================*/
     void FootMotionPlanner::configure(const YAML::Node& config)
     {

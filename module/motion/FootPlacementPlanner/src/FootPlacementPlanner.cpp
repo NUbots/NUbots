@@ -163,8 +163,7 @@ namespace motion
             Transform2D uLeftFootTorso = getTorsoSource().worldToLocal(getLeftFootSource());
             Transform2D uTorsoModded = getTorsoPosition().localToWorld({supportMod[0], supportMod[1], 0});
             Transform2D uLeftFootModded = uTorsoModded.localToWorld(uLeftFootTorso);
-            setSupportMass(uLeftFootModded.localToWorld({-getFootOffsetCoefficient(0), -getFootOffsetCoefficient(1), 0}));
-std::cout << "FPP: Right:\n\r" << getTime() + stepTime << "\n\r" << getRightFootDestination() << "\n\r";           
+            setSupportMass(uLeftFootModded.localToWorld({-getFootOffsetCoefficient(0), -getFootOffsetCoefficient(1), 0}));       
             emit(std::make_unique<FootStepTarget>(activeForwardLimb, getTime() + stepTime, getRightFootDestination())); //Trigger NewStep
         }
         else 
@@ -172,8 +171,7 @@ std::cout << "FPP: Right:\n\r" << getTime() + stepTime << "\n\r" << getRightFoot
             Transform2D uRightFootTorso = getTorsoSource().worldToLocal(getRightFootSource());
             Transform2D uTorsoModded = getTorsoPosition().localToWorld({supportMod[0], supportMod[1], 0});
             Transform2D uRightFootModded = uTorsoModded.localToWorld(uRightFootTorso);
-            setSupportMass(uRightFootModded.localToWorld({-getFootOffsetCoefficient(0), getFootOffsetCoefficient(1), 0}));
-std::cout << "FPP: Left :\n\r" << getTime() + stepTime << "\n\r" << getLeftFootDestination() << "\n\r";           
+            setSupportMass(uRightFootModded.localToWorld({-getFootOffsetCoefficient(0), getFootOffsetCoefficient(1), 0}));         
             emit(std::make_unique<FootStepTarget>(activeForwardLimb, getTime() + stepTime, getLeftFootDestination())); //Trigger NewStep
         }        
         emit(std::make_unique<NewStepTargetInfo>(getLeftFootSource(), getRightFootSource(), getLeftFootDestination(), getRightFootDestination(), getSupportMass())); //Torso Information
@@ -188,16 +186,13 @@ std::cout << "FPP: Left :\n\r" << getTime() + stepTime << "\n\r" << getLeftFootD
         // Negative if right leg to account for the mirroring of the foot target
         int8_t sign = activeForwardLimb == LimbID::LEFT_LEG ? 1 : -1;
         // Get midpoint between the two feet
-        Transform2D midPoint = getLeftFootSource().interpolate(0.5, getRightFootSource());
-std::cout << "Midpoint\n\r" << midPoint << "\n\r";         
+        Transform2D midPoint = getLeftFootSource().interpolate(0.5, getRightFootSource());       
         // Get midpoint 1.5 steps in future
         // Note: The reason for 1.5 rather than 1 is because it takes an extra 0.5 steps
         // for the torso to reach a given position when you want both feet together   
-        Transform2D forwardPoint = midPoint.localToWorld(1.5 * velocity);
-std::cout << "Forward Point\n\r" << forwardPoint << "\n\r";             
+        Transform2D forwardPoint = midPoint.localToWorld(1.5 * velocity);          
         // Offset to towards the foot in use to get the target location          
-        Transform2D footTarget = forwardPoint.localToWorld(sign * uLRFootOffset);
-std::cout << "Foot Target\n\r" << footTarget << "\n\r";         
+        Transform2D footTarget = forwardPoint.localToWorld(sign * uLRFootOffset);    
 
         // Start applying step limits:
         // Get the vector between the feet and clamp the components between the min and max step limits
@@ -216,6 +211,8 @@ std::cout << "Foot Target\n\r" << footTarget << "\n\r";
 
         // Update foot target to be 'feetDistance' away from the support foot
         footTarget = getSupportMass().localToWorld(feetDifference);
+
+        // TODO: Improve feedback logic to provide 'smart' feet coordination...
 
         return footTarget;
     }
