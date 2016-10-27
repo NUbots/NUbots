@@ -456,22 +456,22 @@ namespace motion
 /*=======================================================================================================*/
     Transform2D FootPlacementPlanner::getLeftFootDestination()
     {
-        return (leftFootDestination.front());
+        return (leftFootDestination);
     }
     void FootPlacementPlanner::setLeftFootDestination(const Transform2D& inLeftFootDestination)
     {
-        leftFootDestination.push(inLeftFootDestination);
+        leftFootDestination = inLeftFootDestination;
     }
 /*=======================================================================================================*/
 //      ENCAPSULATION METHOD: Right Foot Destination
 /*=======================================================================================================*/
     Transform2D FootPlacementPlanner::getRightFootDestination()
     {
-        return (rightFootDestination.front());
+        return (rightFootDestination);
     }
     void FootPlacementPlanner::setRightFootDestination(const Transform2D& inRightFootDestination)
     {
-        rightFootDestination.push(inRightFootDestination);
+        rightFootDestination = inRightFootDestination;
     }
 /*=======================================================================================================*/
 //      METHOD: configure
