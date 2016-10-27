@@ -74,13 +74,11 @@ namespace motion
     };
     struct EnableFootPlacement
     {
-        EnableFootPlacement(size_t id) : subsumptionId(id) { }
-        size_t subsumptionId = 1;
+        EnableFootPlacement()  { }
     };
     struct DisableFootPlacement
     {
-        DisableFootPlacement(size_t id) : subsumptionId(id) { }
-        size_t subsumptionId = 1;
+        DisableFootPlacement() { }
     };
 }  // motion
 }  // message

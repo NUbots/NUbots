@@ -61,14 +61,12 @@ namespace motion
 
     struct EnableFootMotion 
     {
-        EnableFootMotion(size_t id) : subsumptionId(id) { }
-        size_t subsumptionId = 1;
+        EnableFootMotion()  { }
     };
 
     struct DisableFootMotion
     {
-        DisableFootMotion(size_t id) : subsumptionId(id) { }
-        size_t subsumptionId = 1;
+        DisableFootMotion() { }
     };
 }  // motion
 }  // message

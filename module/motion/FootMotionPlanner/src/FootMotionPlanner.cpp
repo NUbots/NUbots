@@ -51,7 +51,7 @@ namespace motion
     : Reactor(std::move(environment))
         , DEBUG(false), DEBUG_ITER(0), initialStep(0)
         , balanceEnabled(0.0), emitLocalisation(false), emitFootPosition(false)
-        , updateHandle(), subsumptionId(1)
+        , updateHandle()
         , leftFootPositionTransform(), leftFootSource(), rightFootPositionTransform()
         , rightFootSource(), leftFootDestination(), rightFootDestination(), uSupportMass()
         , activeForwardLimb(), activeLimbInitial(LimbID::LEFT_LEG)
@@ -109,7 +109,6 @@ namespace motion
         //If foot motion is requested, enable updating...
         on<Trigger<EnableFootMotion>>().then([this] (const EnableFootMotion& command) 
         {            
-            subsumptionId = command.subsumptionId;
             updateHandle.enable();
         });
 

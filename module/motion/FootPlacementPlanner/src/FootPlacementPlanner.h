@@ -107,7 +107,6 @@ namespace motion
          */
         ReactionHandle updateHandle;                    // handle(updateWaypoints), disabling when not moving will save unnecessary CPU resources
         ReactionHandle generateStandScriptReaction;     // handle(generateStandAndSaveScript), disabling when not required for capturing standing phase
-        size_t subsumptionId;                           // subsumption ID key to access motors
 
         /**
          * Decision abstractions and notify variables...

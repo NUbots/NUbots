@@ -52,7 +52,7 @@ namespace motion
     : Reactor(std::move(environment)) 
         , DEBUG(false), DEBUG_ITER(0), initialStep(0)
         , balanceEnabled(0.0), emitLocalisation(false), emitFootPosition(false)
-        , updateHandle(), generateStandScriptReaction(), subsumptionId(1)
+        , updateHandle(), generateStandScriptReaction()
         , torsoPositionsTransform(), leftFootPositionTransform()
         , rightFootPositionTransform(), uSupportMass()
         , activeForwardLimb(), activeLimbInitial(LimbID::LEFT_LEG)
@@ -150,7 +150,6 @@ namespace motion
 
         on<Trigger<EnableBalanceResponse>>().then([this] (const EnableBalanceResponse& command) 
         {          
-            subsumptionId = command.subsumptionId;
             updateHandle.enable();
         });
 

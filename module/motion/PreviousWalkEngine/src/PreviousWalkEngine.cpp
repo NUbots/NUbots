@@ -147,16 +147,14 @@ namespace motion {
         }).disable();
 
         on<Trigger<WalkCommand>>().then([this] (const WalkCommand& walkCommand) 
-        {          
+        {                
             auto velocity = walkCommand.command;
 
             velocity.x()     *= velocity.x()     > 0 ? velocityLimits(0,1) : -velocityLimits(0,0);
             velocity.y()     *= velocity.y()     > 0 ? velocityLimits(1,1) : -velocityLimits(1,0);
             velocity.angle() *= velocity.angle() > 0 ? velocityLimits(2,1) : -velocityLimits(2,0);
 
-            setVelocity(velocity);
-
-std::cout << "\n\rPrevious Walk Engine WalkCommand";  
+            setVelocity(velocity); 
         });
 
         on<Trigger<WalkStartCommand>>().then([this] {

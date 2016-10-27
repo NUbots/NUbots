@@ -68,13 +68,11 @@ namespace motion
 
     struct EnableBalanceResponse
     {
-        EnableBalanceResponse(size_t id) : subsumptionId(id) { }
-        size_t subsumptionId = 1;
+        EnableBalanceResponse()  { }
     };
     struct DisableBalanceResponse
     {
-        DisableBalanceResponse(size_t id) : subsumptionId(id) { }
-        size_t subsumptionId = 1;
+        DisableBalanceResponse() { }
     };
 }  // motion
 }  // message

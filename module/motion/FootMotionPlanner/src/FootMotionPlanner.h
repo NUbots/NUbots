@@ -103,7 +103,6 @@ namespace motion
          * Resource abstractions for id and handler instances...
          */
         ReactionHandle updateHandle;                    // handle(updateWaypoints), disabling when not moving will save unnecessary CPU resources
-        size_t subsumptionId;                           // subsumption ID key to access motors
         
         /**
          * Anthropomorphic metrics for relevant humanoid joints & actuators...

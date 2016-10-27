@@ -118,7 +118,7 @@ namespace motion
         {
             if(DEBUG) { NUClear::log("WalkEngine - Update Waypoints(0)"); }
             if(isNewPostureReceived()) 
-            { 
+            {                 
                 emit(std::move(updateWaypoints(/*sensors*/))); 
             }
             if(DEBUG) { NUClear::log("WalkEngine - Update Waypoints(1)"); }
@@ -126,13 +126,11 @@ namespace motion
 
         //Broadcast constrained velocity vector parameter to actuator modules...
         on<Trigger<WalkCommand>>().then([this] (const WalkCommand& walkCommand)
-        {
+        {            
             if(DEBUG) { NUClear::log("WalkEngine - Trigger WalkCommand(0)"); }
             setVelocity(walkCommand.command);  
             emit(std::make_unique<NewWalkCommand>(getVelocity()));
-            if(DEBUG) { NUClear::log("WalkEngine - Trigger WalkCommand(1)"); }
-
-std::cout << "\n\rModular Walk Engine WalkCommand";             
+            if(DEBUG) { NUClear::log("WalkEngine - Trigger WalkCommand(1)"); }           
         });
 
         on<Trigger<BalanceBodyUpdate>>().then("Walk Engine - Received update (Balanced Robot Posture) Info", [this](const BalanceBodyUpdate& info)
@@ -181,21 +179,21 @@ std::cout << "\n\rModular Walk Engine WalkCommand";
         on<Trigger<EnableWalkEngineCommand>>().then([this] (const EnableWalkEngineCommand& command) 
         {
             subsumptionId = command.subsumptionId;
-            emit<Scope::DIRECT>(std::move(std::make_unique<EnableFootPlacement>(command.subsumptionId + 2)));
-            emit<Scope::DIRECT>(std::move(std::make_unique<EnableFootMotion>(command.subsumptionId + 3)));
-            emit<Scope::DIRECT>(std::move(std::make_unique<EnableTorsoMotion>(command.subsumptionId + 3)));
-            emit<Scope::DIRECT>(std::move(std::make_unique<EnableBalanceResponse>(command.subsumptionId + 1)));
+            emit<Scope::DIRECT>(std::move(std::make_unique<EnableFootPlacement>()));
+            emit<Scope::DIRECT>(std::move(std::make_unique<EnableFootMotion>()));
+            emit<Scope::DIRECT>(std::move(std::make_unique<EnableTorsoMotion>()));
+            emit<Scope::DIRECT>(std::move(std::make_unique<EnableBalanceResponse>()));
             //stanceReset(); // Reset stance as we don't know where our limbs are.
             updateHandle.enable();
         });
 
-        on<Trigger<DisableWalkEngineCommand>>().then([this] (const DisableWalkEngineCommand& command)
+        on<Trigger<DisableWalkEngineCommand>>().then([this]
         {
             // If nobody needs the walk engine, stop updating it...
-            emit<Scope::DIRECT>(std::move(std::make_unique<DisableFootPlacement>(command.subsumptionId + 2)));
-            emit<Scope::DIRECT>(std::move(std::make_unique<DisableFootMotion>(command.subsumptionId + 3)));
-            emit<Scope::DIRECT>(std::move(std::make_unique<DisableTorsoMotion>(command.subsumptionId + 3)));
-            emit<Scope::DIRECT>(std::move(std::make_unique<DisableBalanceResponse>(command.subsumptionId + 1)));
+            emit<Scope::DIRECT>(std::move(std::make_unique<DisableFootPlacement>()));
+            emit<Scope::DIRECT>(std::move(std::make_unique<DisableFootMotion>()));
+            emit<Scope::DIRECT>(std::move(std::make_unique<DisableTorsoMotion>()));
+            emit<Scope::DIRECT>(std::move(std::make_unique<DisableBalanceResponse>()));
             updateHandle.disable(); 
         });
     }

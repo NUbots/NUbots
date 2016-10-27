@@ -69,7 +69,7 @@ namespace motion
     : Reactor(std::move(environment)) 
         , DEBUG(false), DEBUG_ITER(0), initialStep(0)
         , balanceEnabled(0.0), emitLocalisation(false), emitFootPosition(false)
-        , updateHandle(), generateStandScriptReaction(), subsumptionId(1)
+        , updateHandle(), generateStandScriptReaction()
         , updateStepInstruction(false)
         , torsoPositionsTransform(), torsoPositionSource(), torsoPositionDestination()
         , leftFootPositionTransform(), leftFootSource(), rightFootPositionTransform()
@@ -142,7 +142,6 @@ namespace motion
 
         on<Trigger<EnableTorsoMotion>>().then([this] (const EnableTorsoMotion& command) 
         {       
-            subsumptionId = command.subsumptionId;
             updateHandle.enable();
         });
 
