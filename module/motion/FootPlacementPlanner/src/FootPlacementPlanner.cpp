@@ -163,7 +163,7 @@ namespace motion
             Transform2D uTorsoModded = getTorsoPosition().localToWorld({supportMod[0], supportMod[1], 0});
             Transform2D uLeftFootModded = uTorsoModded.localToWorld(uLeftFootTorso);
             setSupportMass(uLeftFootModded.localToWorld({-getFootOffsetCoefficient(0), -getFootOffsetCoefficient(1), 0}));       
-std::cout << "Right\t[X= " << getRightFootDestination().x() << "]\t[Y= " << getRightFootDestination().y() << "]\n\r";
+//std::cout << "Right FPP\t[X= " << getRightFootDestination().x() << "]\t[Y= " << getRightFootDestination().y() << "]\n\r";
         }
         else 
         {
@@ -171,8 +171,8 @@ std::cout << "Right\t[X= " << getRightFootDestination().x() << "]\t[Y= " << getR
             Transform2D uTorsoModded = getTorsoPosition().localToWorld({supportMod[0], supportMod[1], 0});
             Transform2D uRightFootModded = uTorsoModded.localToWorld(uRightFootTorso);
             setSupportMass(uRightFootModded.localToWorld({-getFootOffsetCoefficient(0), getFootOffsetCoefficient(1), 0}));         
-std::cout << "Left\t[X= " << getLeftFootDestination().x() << "]\t[Y= " << getLeftFootDestination().y() << "]\n\r";
-        }        
+//std::cout << "Left FPP\t[X= " << getLeftFootDestination().x() << "]\t[Y= " << getLeftFootDestination().y() << "]\n\r";
+        }              
         emit(std::make_unique<NewStepTargetInfo>(getTime() + stepTime, activeForwardLimb, getVelocityCurrent(), getLeftFootSource(), getRightFootSource(), getLeftFootDestination(), getRightFootDestination(), getSupportMass())); //New Step Target Information
         //emit destinations for fmp and/or zmp
         //may combine NewStep and NewStepTorso
@@ -241,9 +241,7 @@ std::cout << "Left\t[X= " << getLeftFootDestination().x() << "]\t[Y= " << getLef
         velocityDifference.y()     = std::min(std::max(getVelocityCommand().y()     - getVelocityCurrent().y(),     -limit[1]), limit[1]);
         velocityDifference.angle() = std::min(std::max(getVelocityCommand().angle() - getVelocityCurrent().angle(), -limit[2]), limit[2]);
 
-        getVelocityCurrent().x()     += velocityDifference.x();
-        getVelocityCurrent().y()     += velocityDifference.y();
-        getVelocityCurrent().angle() += velocityDifference.angle();
+        setVelocityCurrent(Transform2D({getVelocityCurrent().x() + velocityDifference.x(), getVelocityCurrent().y() + velocityDifference.y(), getVelocityCurrent().angle() + velocityDifference.angle()}));
     }
 /*=======================================================================================================*/
 //      METHOD: stanceReset
@@ -505,7 +503,7 @@ std::cout << "Left\t[X= " << getLeftFootDestination().x() << "]\t[Y= " << getLef
         accelerationTurningFactor = acceleration["turning_factor"].as<Expression>();
 
         phase1Single = walkCycle["single_support_phase"]["start"].as<Expression>();
-        phase2Single = walkCycle["single_support_phase"]["end"].as<Expression>();
+        phase2Single = walkCycle["single_support_phase"]["end"].as<Expression>();          
 
         auto& balance = walkCycle["balance"];
         balanceEnabled = balance["enabled"].as<bool>();
