@@ -113,7 +113,6 @@ namespace motion
         Transform2D rightFootSource;                    // Pre-step right foot position
         std::queue<Transform2D> leftFootDestination;    // Destination placement Transform2D left foot positions
         std::queue<Transform2D> rightFootDestination;   // Destination placement Transform2D right foot positions
-        Transform2D uSupportMass;                       // Appears to be support foot pre-step position
         std::queue<LimbID> activeForwardLimb;           // The leg that is 'swinging' in the step, opposite of the support foot
         LimbID activeLimbInitial;                       // TODO: Former initial non-support leg for deterministic walking approach
 
@@ -146,7 +145,6 @@ namespace motion
         arma::vec3 accelerationLimits;                  //
         arma::vec3 accelerationLimitsHigh;              //
         Transform2D velocityCurrent;                    // Current robot velocity
-        Transform2D velocityCommand;                    // Current velocity command
 
         /**
          * Dynamic analysis parameters for relevant motion planning...
@@ -234,7 +232,7 @@ namespace motion
          * @details [long description]
          * @return [description]
          */
-        bool getNewStepReceived();
+        bool isNewStepReceived();
         /**
          * @brief [brief description]
          * @details [long description]
@@ -252,14 +250,14 @@ namespace motion
          * @details [long description]
          * @return [description]
          */
-        Transform2D getSupportMass();
+        Transform2D getVelocityCurrent();
         /**
          * @brief [brief description]
          * @details [long description]
          * 
-         * @param inSupportMass [description]
+         * @param velocity [description]
          */
-        void setSupportMass(const Transform2D& inSupportMass);
+        void setVelocityCurrent(Transform2D inVelocityCommand);
          /**
          * @brief [brief description]
          * @details [long description]
