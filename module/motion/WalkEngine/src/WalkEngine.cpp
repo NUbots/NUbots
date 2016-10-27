@@ -178,12 +178,12 @@ namespace motion
 
         on<Trigger<EnableWalkEngineCommand>>().then([this] (const EnableWalkEngineCommand& command) 
         {
+            // If the walk engine is required, enable relevant submodules and award subsumption...
             subsumptionId = command.subsumptionId;
             emit<Scope::DIRECT>(std::move(std::make_unique<EnableFootPlacement>()));
             emit<Scope::DIRECT>(std::move(std::make_unique<EnableFootMotion>()));
             emit<Scope::DIRECT>(std::move(std::make_unique<EnableTorsoMotion>()));
             emit<Scope::DIRECT>(std::move(std::make_unique<EnableBalanceResponse>()));
-            //stanceReset(); // Reset stance as we don't know where our limbs are.
             updateHandle.enable();
         });
 

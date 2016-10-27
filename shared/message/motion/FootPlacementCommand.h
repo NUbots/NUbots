@@ -42,35 +42,32 @@ namespace motion
 
     struct FootPlacementStopped {};
     
-    struct FootStepTarget
-    {
-        LimbID activeForwardLimb;
-        double targetTime;
-        Transform2D targetDestination;
-        FootStepTarget(const LimbID& activeForwardLimb, 
-                       double targetTime, 
-                       const Transform2D& targetDestination)
-            : activeForwardLimb(activeForwardLimb)
-            , targetTime(targetTime)
-            , targetDestination(targetDestination) {}
-    };
     struct NewStepTargetInfo
     {
+        double targetTime;
+        LimbID activeForwardLimb;
+        Transform2D velocityCurrent;
         Transform2D leftFootSource;
         Transform2D rightFootSource;
         Transform2D leftFootDestination;
         Transform2D rightFootDestination;
-        Transform2D activeForwardLimb;
-        NewStepTargetInfo(const Transform2D& leftFootSource, 
-                             const Transform2D& rightFootSource,
-                             const Transform2D& leftFootDestination,
-                             const Transform2D& rightFootDestination,
-                             const Transform2D& activeForwardLimb)
-            : leftFootSource(leftFootSource)
+        Transform2D supportMass;
+        NewStepTargetInfo(  double targetTime, 
+                            const LimbID& activeForwardLimb,
+                            const Transform2D& velocityCurrent,
+                            const Transform2D& leftFootSource, 
+                            const Transform2D& rightFootSource,
+                            const Transform2D& leftFootDestination,
+                            const Transform2D& rightFootDestination,
+                            const Transform2D& supportMass)
+            : targetTime(targetTime)
+            , activeForwardLimb(activeForwardLimb)
+            , velocityCurrent(velocityCurrent)
+            , leftFootSource(leftFootSource)
             , rightFootSource(rightFootSource)
             , leftFootDestination(leftFootDestination)
             , rightFootDestination(rightFootDestination)
-            , activeForwardLimb(activeForwardLimb) {}
+            , supportMass(supportMass) {}
     };
     struct EnableFootPlacement
     {

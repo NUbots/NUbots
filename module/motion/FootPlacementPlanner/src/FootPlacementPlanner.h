@@ -176,7 +176,6 @@ namespace motion
         arma::vec3 accelerationLimitsHigh;              //
         Transform2D velocityCurrent;                    // Current robot velocity
         Transform2D velocityCommand;                    // Current velocity command
-        Transform2D velocityDifference;                 // Current velocity differential
 
         /**
          * Dynamic analysis parameters for relevant motion planning...
@@ -247,10 +246,29 @@ namespace motion
         /**
          * @brief [brief description]
          * @details [long description]
+         * @return [description]
+         */
+        Transform2D getVelocityCurrent();
+        /**
+         * @brief [brief description]
+         * @details [long description]
          * 
          * @param velocity [description]
          */
-        void setVelocity(Transform2D velocity);
+        void setVelocityCurrent(Transform2D inVelocityCommand);
+        /**
+         * @brief [brief description]
+         * @details [long description]
+         * @return [description]
+         */
+        Transform2D getVelocityCommand();
+        /**
+         * @brief [brief description]
+         * @details [long description]
+         * 
+         * @param velocity [description]
+         */
+        void setVelocityCommand(Transform2D inVelocityCommand);
         /**
          * @brief [brief description]
          * @details [long description]
@@ -267,12 +285,6 @@ namespace motion
          * @return [description]
          */
         double getTime();
-        /**
-         * @brief [brief description]
-         * @details [long description]
-         * @return [description]
-         */
-        Transform2D getVelocity();
         /**
          * @brief [brief description]
          * @details [long description]

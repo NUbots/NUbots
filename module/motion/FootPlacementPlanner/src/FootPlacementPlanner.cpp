@@ -33,7 +33,6 @@ namespace motion
 //      UTILIZATION REFERENCE(S)
 /*=======================================================================================================*/
     using message::input::LimbID;
-    using message::motion::FootStepTarget;
     using message::motion::NewStepTargetInfo;
     using message::motion::EnableFootPlacement;
     using message::motion::DisableFootPlacement;
@@ -67,7 +66,7 @@ namespace motion
         , beginStepTime(0.0), STAND_SCRIPT_DURATION(0.0), lastVeloctiyUpdateTime()
         , velocityHigh(0.0), accelerationTurningFactor(0.0), velocityLimits(arma::fill::zeros)
         , accelerationLimits(arma::fill::zeros), accelerationLimitsHigh(arma::fill::zeros)
-        , velocityCurrent(), velocityCommand(), velocityDifference()
+        , velocityCurrent(), velocityCommand()
         , zmpCoefficients(arma::fill::zeros), zmpParameters(arma::fill::zeros)
         , zmpTime(0.0), phase1Single(0.0), phase2Single(0.0)
         , kinematicsModel()
@@ -95,13 +94,14 @@ namespace motion
         on<Trigger<NewWalkCommand>>().then("Foot Placement Planner - Update Foot Target", [this] (const NewWalkCommand& command) 
         {         
             if(DEBUG) { NUClear::log("Messaging: Foot Placement Planner - On New Walk Command(0)"); }
-            setVelocity(command.velocityTarget);
+            setVelocityCommand(command.velocityTarget);
             calculateNewStep();
             if(DEBUG) { NUClear::log("Messaging: Foot Placement Planner - On New Walk Command(1)"); }
         });
 
-        on<Trigger<EnableFootPlacement>>().then([this] (const EnableFootPlacement& command) 
+        on<Trigger<EnableFootPlacement>>().then([this]
         {         
+            stanceReset(); // Reset stance as we don't know where our limbs are.
             updateHandle.enable();
         });
 
@@ -131,8 +131,8 @@ namespace motion
         {
             log<NUClear::TRACE>("Walk Engine:: Stop requested");
             StateOfWalk = State::LAST_STEP;
-            velocityCurrent = arma::zeros(3);
-            velocityCommand = arma::zeros(3);
+            setVelocityCurrent(arma::zeros(3));
+            setVelocityCommand(arma::zeros(3));
 
             // Stop with feet together by targetting swing leg next to support leg
             if (activeForwardLimb == LimbID::RIGHT_LEG) 
@@ -149,11 +149,11 @@ namespace motion
             // normal walk, advance steps
             if (activeForwardLimb == LimbID::RIGHT_LEG) 
             {
-                setRightFootDestination(getNewFootTarget(velocityCurrent, activeForwardLimb));
+                setRightFootDestination(getNewFootTarget(getVelocityCurrent(), activeForwardLimb));
             }
             else 
             {
-                setLeftFootDestination(getNewFootTarget(velocityCurrent,  activeForwardLimb));
+                setLeftFootDestination(getNewFootTarget(getVelocityCurrent(),  activeForwardLimb));
             }
         }
         // apply velocity-based support point modulation for SupportMass
@@ -163,7 +163,7 @@ namespace motion
             Transform2D uTorsoModded = getTorsoPosition().localToWorld({supportMod[0], supportMod[1], 0});
             Transform2D uLeftFootModded = uTorsoModded.localToWorld(uLeftFootTorso);
             setSupportMass(uLeftFootModded.localToWorld({-getFootOffsetCoefficient(0), -getFootOffsetCoefficient(1), 0}));       
-            emit(std::make_unique<FootStepTarget>(activeForwardLimb, getTime() + stepTime, getRightFootDestination())); //Trigger NewStep
+std::cout << "Right\t[X= " << getRightFootDestination().x() << "]\t[Y= " << getRightFootDestination().y() << "]\n\r";
         }
         else 
         {
@@ -171,9 +171,9 @@ namespace motion
             Transform2D uTorsoModded = getTorsoPosition().localToWorld({supportMod[0], supportMod[1], 0});
             Transform2D uRightFootModded = uTorsoModded.localToWorld(uRightFootTorso);
             setSupportMass(uRightFootModded.localToWorld({-getFootOffsetCoefficient(0), getFootOffsetCoefficient(1), 0}));         
-            emit(std::make_unique<FootStepTarget>(activeForwardLimb, getTime() + stepTime, getLeftFootDestination())); //Trigger NewStep
+std::cout << "Left\t[X= " << getLeftFootDestination().x() << "]\t[Y= " << getLeftFootDestination().y() << "]\n\r";
         }        
-        emit(std::make_unique<NewStepTargetInfo>(getLeftFootSource(), getRightFootSource(), getLeftFootDestination(), getRightFootDestination(), getSupportMass())); //Torso Information
+        emit(std::make_unique<NewStepTargetInfo>(getTime() + stepTime, activeForwardLimb, getVelocityCurrent(), getLeftFootSource(), getRightFootSource(), getLeftFootDestination(), getRightFootDestination(), getSupportMass())); //New Step Target Information
         //emit destinations for fmp and/or zmp
         //may combine NewStep and NewStepTorso
     }
@@ -182,20 +182,26 @@ namespace motion
 /*=======================================================================================================*/
     Transform2D FootPlacementPlanner::getNewFootTarget(const Transform2D& velocity, const LimbID& activeForwardLimb) 
     {   
+//std::cout << "\n\rVelocity\t[X= " << velocity.x() << "]\t[Y= " << velocity.y() << "]\n\r";
+//std::cout << "Left Source\t[X= " << getLeftFootSource().x() << "]\t[Y= " << getLeftFootSource().y() << "]\n\r";
+//std::cout << "Right Source\t[X= " << getRightFootSource().x() << "]\t[Y= " << getRightFootSource().y() << "]\n\r";
         // Negative if right leg to account for the mirroring of the foot target
         int8_t sign = activeForwardLimb == LimbID::LEFT_LEG ? 1 : -1;
         // Get midpoint between the two feet
-        Transform2D midPoint = getLeftFootSource().interpolate(0.5, getRightFootSource());       
+        Transform2D midPoint = getLeftFootSource().interpolate(0.5, getRightFootSource());  
+//std::cout << "midPoint\t[X= " << midPoint.x() << "]\t[Y= " << midPoint.y() << "]\n\r";     
         // Get midpoint 1.5 steps in future
         // Note: The reason for 1.5 rather than 1 is because it takes an extra 0.5 steps
         // for the torso to reach a given position when you want both feet together   
-        Transform2D forwardPoint = midPoint.localToWorld(1.5 * velocity);          
+        Transform2D forwardPoint = midPoint.localToWorld(1.5 * velocity);     
+//std::cout << "forwardPoint\t[X= " << forwardPoint.x() << "]\t[Y= " << forwardPoint.y() << "]\n\r";              
         // Offset to towards the foot in use to get the target location          
-        Transform2D footTarget = forwardPoint.localToWorld(sign * uLRFootOffset);    
+        Transform2D footTarget = forwardPoint.localToWorld(sign * uLRFootOffset);   
+//std::cout << "footTarget\t[X= " << footTarget.x() << "]\t[Y= " << footTarget.y() << "]\n\r";          
 
         // Start applying step limits:
         // Get the vector between the feet and clamp the components between the min and max step limits
-        setSupportMass(activeForwardLimb == LimbID::LEFT_LEG ? getRightFootSource() : getLeftFootSource());
+        setSupportMass(activeForwardLimb == LimbID::LEFT_LEG ? getRightFootSource() : getLeftFootSource());       
         Transform2D feetDifference = getSupportMass().worldToLocal(footTarget);
         feetDifference.x()     = std::min(std::max(feetDifference.x(),            stepLimits(0,0)), stepLimits(0,1));
         feetDifference.y()     = std::min(std::max(feetDifference.y()     * sign, stepLimits(1,0)), stepLimits(1,1)) * sign;
@@ -208,8 +214,10 @@ namespace motion
         feetDifference.y() = std::max(feetDifference.y() * sign, stanceLimitY2 + overlap) * sign;
         // End feet collision detection
 
+
         // Update foot target to be 'feetDistance' away from the support foot
         footTarget = getSupportMass().localToWorld(feetDifference);
+//std::cout << "footTarget\t[X= " << footTarget.x() << "]\t[Y= " << footTarget.y() << "]\n\r";         
 
         // TODO: Improve feedback logic to provide 'smart' feet coordination...
 
@@ -226,15 +234,16 @@ namespace motion
         double deltaT = std::chrono::duration_cast<std::chrono::microseconds>(now - lastVeloctiyUpdateTime).count() * 1e-6;
         lastVeloctiyUpdateTime = now;
 
-        auto& limit = (velocityCurrent.x() > velocityHigh ? accelerationLimitsHigh : accelerationLimits) * deltaT; // TODO: use a function instead
+        auto& limit = (getVelocityCurrent().x() > velocityHigh ? accelerationLimitsHigh : accelerationLimits) * deltaT; // TODO: use a function instead
 
-        velocityCurrent.x()     = std::min(std::max(velocityCommand.x()     - velocityCurrent.x(),     -limit[0]), limit[0]);
-        velocityDifference.y()     = std::min(std::max(velocityCommand.y()     - velocityCurrent.y(),     -limit[1]), limit[1]);
-        velocityDifference.angle() = std::min(std::max(velocityCommand.angle() - velocityCurrent.angle(), -limit[2]), limit[2]);
+        Transform2D velocityDifference = arma::zeros(3); // Current velocity differential
+        velocityDifference.x()     = std::min(std::max(getVelocityCommand().x()     - getVelocityCurrent().x(),     -limit[0]), limit[0]);
+        velocityDifference.y()     = std::min(std::max(getVelocityCommand().y()     - getVelocityCurrent().y(),     -limit[1]), limit[1]);
+        velocityDifference.angle() = std::min(std::max(getVelocityCommand().angle() - getVelocityCurrent().angle(), -limit[2]), limit[2]);
 
-        velocityCurrent.x()     += velocityDifference.x();
-        velocityCurrent.y()     += velocityDifference.y();
-        velocityCurrent.angle() += velocityDifference.angle();
+        getVelocityCurrent().x()     += velocityDifference.x();
+        getVelocityCurrent().y()     += velocityDifference.y();
+        getVelocityCurrent().angle() += velocityDifference.angle();
     }
 /*=======================================================================================================*/
 //      METHOD: stanceReset
@@ -254,8 +263,11 @@ namespace motion
         else 
         {
             // stance resetted
-            setLeftFootPosition(getTorsoPosition().localToWorld({getFootOffsetCoefficient(0), kinematicsModel.Leg.HIP_OFFSET_Y - getFootOffsetCoefficient(1), 0}));
-            setRightFootPosition(getTorsoPosition().localToWorld({getFootOffsetCoefficient(0), -kinematicsModel.Leg.HIP_OFFSET_Y + getFootOffsetCoefficient(1), 0}));
+            setTorsoPosition({-getFootOffsetCoefficient(0), 0, 0});
+            setLeftFootPosition({0, kinematicsModel.Leg.HIP_OFFSET_Y, 0});
+            setRightFootPosition({0, -kinematicsModel.Leg.HIP_OFFSET_Y, 0});
+            //setLeftFootPosition(getTorsoPosition().localToWorld({getFootOffsetCoefficient(0), kinematicsModel.Leg.HIP_OFFSET_Y - getFootOffsetCoefficient(1), 0}));
+            //setRightFootPosition(getTorsoPosition().localToWorld({getFootOffsetCoefficient(0), -kinematicsModel.Leg.HIP_OFFSET_Y + getFootOffsetCoefficient(1), 0}));
             initialStep = 2;
         }
 
@@ -271,8 +283,6 @@ namespace motion
         beginStepTime = getTime();
         uLRFootOffset = {0, kinematicsModel.Leg.HIP_OFFSET_Y - getFootOffsetCoefficient(1), 0};
         startFromStep = false;
-
-        calculateNewStep();
     }
 /*=======================================================================================================*/
 //      METHOD: reset
@@ -290,9 +300,8 @@ namespace motion
         setRightFootSource(arma::zeros(3));
         setRightFootDestination(arma::zeros(3));
 
-        velocityCurrent = arma::zeros(3);
-        velocityCommand = arma::zeros(3);
-        velocityDifference = arma::zeros(3);
+        setVelocityCurrent(arma::zeros(3));
+        setVelocityCommand(arma::zeros(3));
 
         // gGyro stabilization variables
         activeForwardLimb = activeLimbInitial;
@@ -318,32 +327,23 @@ namespace motion
         return (double(NUClear::clock::now().time_since_epoch().count()) * (1.0 / double(NUClear::clock::period::den)));
     }  
 /*=======================================================================================================*/
-//      METHOD: Velocity
+//      ENCAPSULATION METHOD: Velocity
 /*=======================================================================================================*/
-    Transform2D FootPlacementPlanner::getVelocity() 
+    Transform2D FootPlacementPlanner::getVelocityCurrent() 
     {
-        return velocityCurrent;
+        return (velocityCurrent);
     }
-    void FootPlacementPlanner::setVelocity(Transform2D velocity) 
+    void FootPlacementPlanner::setVelocityCurrent(Transform2D inVelocityCurrent) 
     {
-        // filter the commanded speed
-        velocity.x()     = std::min(std::max(velocity.x(),     velocityLimits(0,0)), velocityLimits(0,1));
-        velocity.y()     = std::min(std::max(velocity.y(),     velocityLimits(1,0)), velocityLimits(1,1));
-        velocity.angle() = std::min(std::max(velocity.angle(), velocityLimits(2,0)), velocityLimits(2,1));
-
-        // slow down when turning
-        double vFactor = 1 - std::abs(velocity.angle()) / accelerationTurningFactor;
-
-        double stepMag = std::sqrt(velocity.x() * velocity.x() + velocity.y() * velocity.y());
-        double magFactor = std::min(velocityLimits(0,1) * vFactor, stepMag) / (stepMag + 0.000001);
-
-        velocityCommand.x()     = velocity.x() * magFactor;
-        velocityCommand.y()     = velocity.y() * magFactor;
-        velocityCommand.angle() = velocity.angle();
-
-        velocityCommand.x()     = std::min(std::max(velocityCommand.x(),     velocityLimits(0,0)), velocityLimits(0,1));
-        velocityCommand.y()     = std::min(std::max(velocityCommand.y(),     velocityLimits(1,0)), velocityLimits(1,1));
-        velocityCommand.angle() = std::min(std::max(velocityCommand.angle(), velocityLimits(2,0)), velocityLimits(2,1));
+        velocityCurrent = inVelocityCurrent;
+    }   
+    Transform2D FootPlacementPlanner::getVelocityCommand() 
+    {
+        return (velocityCommand);
+    }
+    void FootPlacementPlanner::setVelocityCommand(Transform2D inVelocityCommand) 
+    {
+        velocityCommand = inVelocityCommand;
     }      
 /*=======================================================================================================*/
 //      ENCAPSULATION METHOD: Torso Position
