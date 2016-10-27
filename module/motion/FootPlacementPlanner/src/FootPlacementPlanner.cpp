@@ -228,7 +228,7 @@ namespace motion
 
         auto& limit = (velocityCurrent.x() > velocityHigh ? accelerationLimitsHigh : accelerationLimits) * deltaT; // TODO: use a function instead
 
-        velocityCurrent.x()     = std::min(std::max(velocityCommand.x()     - velocityCurrent.x(),     -limit[0]), limit[0]);
+        velocityDifference.x()     = std::min(std::max(velocityCommand.x()     - velocityCurrent.x(),     -limit[0]), limit[0]);
         velocityDifference.y()     = std::min(std::max(velocityCommand.y()     - velocityCurrent.y(),     -limit[1]), limit[1]);
         velocityDifference.angle() = std::min(std::max(velocityCommand.angle() - velocityCurrent.angle(), -limit[2]), limit[2]);
 
@@ -456,7 +456,7 @@ namespace motion
 /*=======================================================================================================*/
     Transform2D FootPlacementPlanner::getLeftFootDestination()
     {
-        return (leftFootDestination);
+        return (leftFootDestination);   
     }
     void FootPlacementPlanner::setLeftFootDestination(const Transform2D& inLeftFootDestination)
     {
