@@ -236,16 +236,10 @@ namespace motion
 
         auto& limit = (getVelocityCurrent().x() > velocityHigh ? accelerationLimitsHigh : accelerationLimits) * deltaT; // TODO: use a function instead
 
-<<<<<<< HEAD
-        velocityDifference.x()     = std::min(std::max(velocityCommand.x()     - velocityCurrent.x(),     -limit[0]), limit[0]);
-        velocityDifference.y()     = std::min(std::max(velocityCommand.y()     - velocityCurrent.y(),     -limit[1]), limit[1]);
-        velocityDifference.angle() = std::min(std::max(velocityCommand.angle() - velocityCurrent.angle(), -limit[2]), limit[2]);
-=======
         Transform2D velocityDifference = arma::zeros(3); // Current velocity differential
         velocityDifference.x()     = std::min(std::max(getVelocityCommand().x()     - getVelocityCurrent().x(),     -limit[0]), limit[0]);
         velocityDifference.y()     = std::min(std::max(getVelocityCommand().y()     - getVelocityCurrent().y(),     -limit[1]), limit[1]);
         velocityDifference.angle() = std::min(std::max(getVelocityCommand().angle() - getVelocityCurrent().angle(), -limit[2]), limit[2]);
->>>>>>> f8a41f36771d9c5baa5f8b7c42e9cf28ff44fa28
 
         setVelocityCurrent(Transform2D({getVelocityCurrent().x() + velocityDifference.x(), getVelocityCurrent().y() + velocityDifference.y(), getVelocityCurrent().angle() + velocityDifference.angle()}));
     }

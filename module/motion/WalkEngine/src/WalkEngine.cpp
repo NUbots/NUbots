@@ -119,6 +119,7 @@ namespace motion
             if(DEBUG) { NUClear::log("WalkEngine - Update Waypoints(0)"); }
             if(isNewPostureReceived()) 
             {                 
+                if(DEBUG) { NUClear::log("New Posture(%d)", DEBUG_ITER++); }
                 emit(std::move(updateWaypoints(/*sensors*/))); 
             }
             if(DEBUG) { NUClear::log("WalkEngine - Update Waypoints(1)"); }

@@ -132,7 +132,7 @@ namespace motion
             if(DEBUG) { NUClear::log("Messaging: Torso Motion Planner - Received Foot Motion Update(1)"); }
         });
 
-        on<Trigger<EnableTorsoMotion>>().then([this] (const EnableTorsoMotion& command) 
+        on<Trigger<EnableTorsoMotion>>().then([this]
         {       
             updateHandle.enable();
         });
@@ -149,7 +149,9 @@ namespace motion
     void TorsoMotionPlanner::updateTorsoPosition()
     {
         setTorsoPositionArms(zmpTorsoCompensation(getMotionPhase(), zmpTorsoCoefficients(), getZmpParams(), stepTime, zmpTime, phase1Single, phase2Single, getLeftFootSource(), getRightFootSource()));
+std::cout << "\n\rTorso Position (Arms)\t[X= " << getTorsoPositionArms().x() << "]\t[Y= " << getTorsoPositionArms().y() << "]\n\r";         
         setTorsoPositionLegs(zmpTorsoCompensation(getMotionPhase(), zmpTorsoCoefficients(), getZmpParams(), stepTime, zmpTime, phase1Single, phase2Single, getLeftFootSource(), getRightFootSource()));
+std::cout << "Torso Position (Legs)\t[X= " << getTorsoPositionLegs().x() << "]\t[Y= " << getTorsoPositionLegs().y() << "]\n\r";                 
         Transform2D uTorsoWorld = getTorsoPositionArms().localToWorld({-kinematicsModel.Leg.HIP_OFFSET_X, 0, 0});
         setTorsoPosition3D(arma::vec6({uTorsoWorld.x(), uTorsoWorld.y(), bodyHeight, 0, bodyTilt, uTorsoWorld.angle()}));
         emit(std::make_unique<TorsoMotionUpdate>(getTorsoPositionArms(), getTorsoPositionLegs(), getTorsoPosition3D()));
@@ -227,43 +229,37 @@ namespace motion
         return com;
     }
 /*=======================================================================================================*/
-//      ENCAPSULATION METHOD: getTime
+//      ENCAPSULATION METHOD: Time
 /*=======================================================================================================*/
     double TorsoMotionPlanner::getTime() 
     {
-        if(DEBUG) { printf("System Time:%f\n\r", double(NUClear::clock::now().time_since_epoch().count()) * (1.0 / double(NUClear::clock::period::den))); }
+        if(DEBUG) { NUClear::log("System Time:%f\n\r", double(NUClear::clock::now().time_since_epoch().count()) * (1.0 / double(NUClear::clock::period::den))); }
         return (double(NUClear::clock::now().time_since_epoch().count()) * (1.0 / double(NUClear::clock::period::den)));
     }
 /*=======================================================================================================*/
-//      ENCAPSULATION METHOD: getDestinationTime
+//      ENCAPSULATION METHOD: Destination Time
 /*=======================================================================================================*/
     double TorsoMotionPlanner::getDestinationTime()
     {
         return (destinationTime);
     }
-/*=======================================================================================================*/
-//      ENCAPSULATION METHOD: setDestinationTime
-/*=======================================================================================================*/
     void TorsoMotionPlanner::setDestinationTime(double inDestinationTime)
     {
         destinationTime = inDestinationTime;
     }
 /*=======================================================================================================*/
-//      ENCAPSULATION METHOD: getMotionPhase
+//      ENCAPSULATION METHOD: Motion Phase
 /*=======================================================================================================*/    
     double TorsoMotionPlanner::getMotionPhase()
     {
         return (footMotionPhase);
     }
-/*=======================================================================================================*/
-//      ENCAPSULATION METHOD: setMotionPhase
-/*=======================================================================================================*/
     void TorsoMotionPlanner::setMotionPhase(double inMotionPhase)  
     {
         footMotionPhase = inMotionPhase;
     } 
 /*=======================================================================================================*/
-//      ENCAPSULATION METHOD: getZmpParams
+//      ENCAPSULATION METHOD: ZMP Parameters
 /*=======================================================================================================*/    
     arma::vec4 TorsoMotionPlanner::getZmpParams()
     {
@@ -276,201 +272,150 @@ namespace motion
         });
         return (zmpParameters);
     }
-/*=======================================================================================================*/
-//      ENCAPSULATION METHOD: setZmpParams
-/*=======================================================================================================*/
     void TorsoMotionPlanner::setZmpParams(arma::vec4 inZmpParams)
     {
         zmpParameters = inZmpParams;
     }            
 /*=======================================================================================================*/
-//      ENCAPSULATION METHOD: getTorsoPosition
+//      ENCAPSULATION METHOD: Torso Position
 /*=======================================================================================================*/
     Transform2D TorsoMotionPlanner::getTorsoPositionArms()
     {
         return (torsoPositionsTransform.FrameArms);
     }
-/*=======================================================================================================*/
-//      ENCAPSULATION METHOD: getTorsoPosition
-/*=======================================================================================================*/
-    Transform2D TorsoMotionPlanner::getTorsoPositionLegs()
-    {
-        return (torsoPositionsTransform.FrameLegs);
-    }        
-/*=======================================================================================================*/
-//      ENCAPSULATION METHOD: getTorsoPosition
-/*=======================================================================================================*/
-    Transform3D TorsoMotionPlanner::getTorsoPosition3D()
-    {
-        return (torsoPositionsTransform.Frame3D);
-    }            
-/*=======================================================================================================*/
-//      ENCAPSULATION METHOD: setTorsoPositionLegs
-/*=======================================================================================================*/
-    void TorsoMotionPlanner::setTorsoPositionLegs(const Transform2D& inTorsoPosition)
-    {
-        torsoPositionsTransform.FrameLegs = inTorsoPosition;
-    }
-/*=======================================================================================================*/
-//      ENCAPSULATION METHOD: setTorsoPositionArms
-/*=======================================================================================================*/
     void TorsoMotionPlanner::setTorsoPositionArms(const Transform2D& inTorsoPosition)
     {
         torsoPositionsTransform.FrameArms = inTorsoPosition;
     }    
-/*=======================================================================================================*/
-//      ENCAPSULATION METHOD: setTorsoPosition3D
-/*=======================================================================================================*/
+    Transform2D TorsoMotionPlanner::getTorsoPositionLegs()
+    {
+        return (torsoPositionsTransform.FrameLegs);
+    }        
+    void TorsoMotionPlanner::setTorsoPositionLegs(const Transform2D& inTorsoPosition)
+    {
+        torsoPositionsTransform.FrameLegs = inTorsoPosition;
+    }
+    Transform3D TorsoMotionPlanner::getTorsoPosition3D()
+    {
+        return (torsoPositionsTransform.Frame3D);
+    }            
     void TorsoMotionPlanner::setTorsoPosition3D(const Transform3D& inTorsoPosition)
     {
         torsoPositionsTransform.Frame3D = inTorsoPosition;
     }    
 /*=======================================================================================================*/
-//      ENCAPSULATION METHOD: getTorsoSource
+//      ENCAPSULATION METHOD: Torso Source
 /*=======================================================================================================*/
     Transform2D TorsoMotionPlanner::getTorsoSource()
     {
         return (torsoPositionSource);
     }
-/*=======================================================================================================*/
-//      ENCAPSULATION METHOD: setTorsoSource
-/*=======================================================================================================*/
     void TorsoMotionPlanner::setTorsoSource(const Transform2D& inTorsoSource)
     {
         torsoPositionSource = inTorsoSource;
     }
 /*=======================================================================================================*/
-//      ENCAPSULATION METHOD: getTorsoDestination
+//      ENCAPSULATION METHOD: Torso Destination
 /*=======================================================================================================*/
     Transform2D TorsoMotionPlanner::getTorsoDestination()
     {
         return (torsoPositionDestination);
     }
-/*=======================================================================================================*/
-//      ENCAPSULATION METHOD: setTorsoDestination
-/*=======================================================================================================*/
     void TorsoMotionPlanner::setTorsoDestination(const Transform2D& inTorsoDestination)
     {
         torsoPositionDestination = inTorsoDestination;
     }
 /*=======================================================================================================*/
-//      ENCAPSULATION METHOD: getSupportMass
+//      ENCAPSULATION METHOD: Support Mass
 /*=======================================================================================================*/
     Transform2D TorsoMotionPlanner::getSupportMass()
     {
         return (uSupportMass);
     }
-/*=======================================================================================================*/
-//      ENCAPSULATION METHOD: setSupportMass
-/*=======================================================================================================*/
     void TorsoMotionPlanner::setSupportMass(const Transform2D& inSupportMass)
     {
         uSupportMass = inSupportMass;
     }    
 /*=======================================================================================================*/
-//      ENCAPSULATION METHOD: getFootOffsetCoefficient
+//      ENCAPSULATION METHOD: Foot Offset Coefficient
 /*=======================================================================================================*/
     double TorsoMotionPlanner::getFootOffsetCoefficient(int index)
     {
         return (footOffsetCoefficient[index]);
     }
-/*=======================================================================================================*/
-//      ENCAPSULATION METHOD: setFootOffsetCoefficient
-/*=======================================================================================================*/
     void TorsoMotionPlanner::setFootOffsetCoefficient(const arma::vec2& inFootOffsetCoefficient)
     {
         footOffsetCoefficient = inFootOffsetCoefficient;
-    }    
-/*=======================================================================================================*/
-//      ENCAPSULATION METHOD: setFootOffsetCoefficient
-/*=======================================================================================================*/
+    }
     void TorsoMotionPlanner::setFootOffsetCoefficient(int index, double inValue)
     {
         footOffsetCoefficient[index] = inValue;
     }    
 /*=======================================================================================================*/
-//      ENCAPSULATION METHOD: getLeftFootPosition
+//      ENCAPSULATION METHOD: Left Foot Position
 /*=======================================================================================================*/
     Transform2D TorsoMotionPlanner::getLeftFootPosition()
     {
         return (leftFootPositionTransform);
     }
-/*=======================================================================================================*/
-//      ENCAPSULATION METHOD: setLeftFootPosition
-/*=======================================================================================================*/
     void TorsoMotionPlanner::setLeftFootPosition(const Transform2D& inLeftFootPosition)
     {
         leftFootPositionTransform = inLeftFootPosition;
     }
 /*=======================================================================================================*/
-//      ENCAPSULATION METHOD: getRightFootPosition
+//      ENCAPSULATION METHOD: Right Foot Position
 /*=======================================================================================================*/
     Transform2D TorsoMotionPlanner::getRightFootPosition()
     {
         return (rightFootPositionTransform);
     }
-/*=======================================================================================================*/
-//      ENCAPSULATION METHOD: setRightFootPosition
-/*=======================================================================================================*/
     void TorsoMotionPlanner::setRightFootPosition(const Transform2D& inRightFootPosition)
     {
         rightFootPositionTransform = inRightFootPosition;
     }
 /*=======================================================================================================*/
-//      ENCAPSULATION METHOD: getLeftFootSource
+//      ENCAPSULATION METHOD: Left Foot Source
 /*=======================================================================================================*/
     Transform2D TorsoMotionPlanner::getLeftFootSource()
     {
         return (leftFootSource);
     }
-/*=======================================================================================================*/
-//      ENCAPSULATION METHOD: setLeftFootSource
-/*=======================================================================================================*/
     void TorsoMotionPlanner::setLeftFootSource(const Transform2D& inLeftFootSource)
     {
         leftFootSource = inLeftFootSource;
     }
 /*=======================================================================================================*/
-//      ENCAPSULATION METHOD: getRightFootSource
+//      ENCAPSULATION METHOD: Right Foot Source
 /*=======================================================================================================*/
     Transform2D TorsoMotionPlanner::getRightFootSource()
     {
         return (rightFootSource);
     }
-/*=======================================================================================================*/
-//      ENCAPSULATION METHOD: setRightFootSource
-/*=======================================================================================================*/
     void TorsoMotionPlanner::setRightFootSource(const Transform2D& inRightFootSource)
     {
         rightFootSource = inRightFootSource;
     }        
 /*=======================================================================================================*/
-//      METHOD: getLeftFootDestination
+//      ENCAPSULATION METHOD: Left Foot Destination
 /*=======================================================================================================*/
     Transform2D TorsoMotionPlanner::getLeftFootDestination()
     {
         setNewStepReceived(false);
         return (leftFootDestination.front());
     }
-/*=======================================================================================================*/
-//      METHOD: setLeftFootDestination
-/*=======================================================================================================*/
     void TorsoMotionPlanner::setLeftFootDestination(const Transform2D& inLeftFootDestination)
     {
         setNewStepReceived(true);
         leftFootDestination.push(inLeftFootDestination);
     }
 /*=======================================================================================================*/
-//      ENCAPSULATION METHOD: getRightFootDestination
+//      ENCAPSULATION METHOD: Right Foot Destination
 /*=======================================================================================================*/
     Transform2D TorsoMotionPlanner::getRightFootDestination()
     {
         setNewStepReceived(false);
         return (rightFootDestination.front());
     }
-/*=======================================================================================================*/
-//      ENCAPSULATION METHOD: setRightFootDestination
-/*=======================================================================================================*/
     void TorsoMotionPlanner::setRightFootDestination(const Transform2D& inRightFootDestination)
     {
         setNewStepReceived(true);
