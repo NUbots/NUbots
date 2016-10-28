@@ -144,8 +144,8 @@ namespace motion
         Transform2D leftFootSource;                     // Pre-step left foot position
         Transform2D rightFootPositionTransform;         // Active right foot position
         Transform2D rightFootSource;                    // Pre-step right foot position
-        std::queue<Transform2D> leftFootDestination;    // Destination placement Transform2D left foot positions
-        std::queue<Transform2D> rightFootDestination;   // Destination placement Transform2D right foot positions
+        Transform2D leftFootDestination;                // Destination placement Transform2D left foot positions
+        Transform2D rightFootDestination;               // Destination placement Transform2D right foot positions
         Transform2D uSupportMass;                       // Appears to be support foot pre-step position
         LimbID activeForwardLimb;                       // The leg that is 'swinging' in the step, opposite of the support foot
         LimbID activeLimbInitial;                       // TODO: Former initial non-support leg for deterministic walking approach
@@ -288,18 +288,6 @@ namespace motion
          * @return [description]
          */
         void setDestinationTime(double inDestinationTime);
-        /**
-         * @brief [brief description]
-         * @details [long description]
-         * @return [description]
-         */
-        bool getNewStepReceived();
-        /**
-         * @brief [brief description]
-         * @details [long description]
-         * @return [description]
-         */
-        void setNewStepReceived(bool inUpdateStepInstruction);
         /**
          * @brief [brief description]
          * @details [long description]

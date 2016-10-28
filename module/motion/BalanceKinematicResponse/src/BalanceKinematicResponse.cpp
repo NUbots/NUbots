@@ -148,7 +148,7 @@ namespace motion
         //     }
         // });         
 
-        on<Trigger<EnableBalanceResponse>>().then([this] (const EnableBalanceResponse& command) 
+        on<Trigger<EnableBalanceResponse>>().then([this] 
         {          
             updateHandle.enable();
         });

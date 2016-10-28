@@ -34,6 +34,7 @@ namespace motion
 /*=======================================================================================================*/
     using message::input::LimbID;
     using message::motion::NewStepTargetInfo;
+    using message::motion::TorsoDestinationUpdate;
     using message::motion::EnableFootPlacement;
     using message::motion::DisableFootPlacement;
     using message::motion::FootStepCompleted;
@@ -82,6 +83,14 @@ namespace motion
         on<Trigger<KinematicsModel>>().then("WalkEngine - Update Kinematics Model", [this](const KinematicsModel& model)
         {
             kinematicsModel = model;
+        });
+
+        //When new torso destination is computed, inform FPP in preparation for next footstep...
+        on<Trigger<TorsoDestinationUpdate>>().then("Foot Placement Planner - Received Torso Destination Update", [this] (const TorsoDestinationUpdate& info) 
+        {            
+            if(DEBUG) { NUClear::log("Messaging: Foot Placement Planner - Received Torso Destination Update(0)"); }    
+            setTorsoDestination(info.torsoDestination);       
+            if(DEBUG) { NUClear::log("Messaging: Foot Placement Planner - Received Torso Destination Update(1)"); }
         });
 
         updateHandle = on<Trigger<FootStepCompleted>>().then("Foot Placement Planner - Calculate Target Foot Position", [this]

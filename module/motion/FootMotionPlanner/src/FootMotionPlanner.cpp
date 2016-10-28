@@ -97,12 +97,12 @@ namespace motion
             setActiveForwardLimb(target.activeForwardLimb);
             setVelocityCurrent(target.velocityCurrent);
             if(getActiveForwardLimb() == LimbID::LEFT_LEG)
-            {
+            {           
                 setLeftFootDestination(target.leftFootDestination);
                 setLeftFootSource(target.leftFootSource);
             }
             else
-            {
+            {               
                 setRightFootDestination(target.rightFootDestination);
                 setRightFootSource(target.rightFootSource);
             }
@@ -356,7 +356,7 @@ namespace motion
             if(!isNewStepReceived())
             {
                 // Notify helper modules of completed footstep (trigger request for new step instruction)...
-                emit(std::make_unique<FootStepCompleted>(true));
+                emit(std::make_unique<FootStepCompleted>(true)); 
             }
         }
         return (motionPhase);

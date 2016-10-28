@@ -54,6 +54,13 @@ namespace motion
             , frame3D(inFrame3D) {}
     };
 
+    struct TorsoDestinationUpdate
+    {
+        Transform2D torsoDestination;
+        TorsoDestinationUpdate(const Transform2D& inTorsoDestination)
+            : torsoDestination(inTorsoDestination) {}
+    };
+
     struct EnableTorsoMotion 
     {
         EnableTorsoMotion()  { }
