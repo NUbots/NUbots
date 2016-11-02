@@ -92,16 +92,19 @@ namespace motion
         /**
          * Temporary debugging variables for local output logging...
          */ 
-        bool DEBUG;                 //
-        int  DEBUG_ITER;            //
-        int  initialStep;           // TODO: How to many 'steps' to take before lifting a foot when starting to walk
+        bool DEBUG;                         //
+        int  DEBUG_ITER;                    //
+        int  initialStep;                   // TODO: How to many 'steps' to take before lifting a foot when starting to walk
 
         /**
          * NUsight feedback initialized from configuration script, see config file for documentation...
          */
-        bool balanceEnabled;        //
-        bool emitLocalisation;      //
-        bool emitFootPosition;      //
+        bool balanceEnabled;                //
+        bool hipCompensationEnabled;        //
+        bool ankleCompensationEnabled;      //
+        bool supportCompensationEnabled;    //
+        bool emitLocalisation;              //
+        bool emitFootPosition;              //
 
         /**
          * Resource abstractions for id and handler instances...
@@ -130,6 +133,8 @@ namespace motion
             Transform3D Frame3D;
         };
         TorsoPositions torsoPositionsTransform;         // Active torso position
+        Transform2D leftFootPosition2D;                 // Transform2D state of left foot position    
+        Transform2D rightFootPosition2D;                // Transform2D state of right foot position
         Transform3D leftFootPositionTransform;          // Active left foot position    
         Transform3D rightFootPositionTransform;         // Active right foot position
         Transform2D uSupportMass;                       // Appears to be support foot pre-step position
@@ -258,13 +263,13 @@ namespace motion
          * @brief [brief description]
          * @details [long description]
          */
-        void updateBody();
+        void updateBody(const Sensors& sensors);
         /**
          * @brief [brief description]
          * @details [long description]
          * @return [description]
          */
-        void updateLowerBody();
+        void updateLowerBody(const Sensors& sensors);
         /**
          * @brief [brief description]std::pair
          * @details [long description]
@@ -276,13 +281,13 @@ namespace motion
          * @details [long description]
          * @return [description]
          */
-        void hipCompensation(const Sensors& sensors, arma::vec3 footPhases, LimbID swingLeg);
+        void hipCompensation(const Sensors& sensors);
         /**
          * @brief [brief description]
          * @details [long description]
          * @return [description]
          */
-        void supportMassCompensation(const Sensors& sensors, LimbID swingLeg, Transform3D rightFootTorso, Transform3D leftFootTorso);
+        void supportMassCompensation(const Sensors& sensors);
         /**
          * @brief [brief description]
          * @details [long description]
@@ -301,6 +306,18 @@ namespace motion
          * @return [description]
          */
         double getTime();
+        /**
+         * This is an easing function that returns 3 values {x,y,z} with the range [0,1]
+         * This is used to 'ease' the foot path through its trajectory.
+         * The params phase1Single and phase2Single are used to tune the amount of time the robot spends on two feet
+         * Note: Only x/z are used currently and y is always 0
+         * See: http://easings.net/ to reference common easing functions
+         *
+         * @param phase The input to the easing function, with a range of [0,1].
+         * @param phase1Single The phase time between [0,1] to start the step. A value of 0.1 means the step will not start until phase is >= 0.1
+         * @param phase2Single The phase time between [0,1] to end the step. A value of 0.9 means the step will end when phase >= 0.9
+         */
+        arma::vec3 getFootPhase(double phase, double phase1Single, double phase2Single);
         /**
          * @brief [brief description]
          * @details [get a unix timestamp (in decimal seconds that are accurate to the microsecond)]
@@ -452,6 +469,18 @@ namespace motion
          * @details [long description]
          * @return [description]
          */
+        LimbID getActiveForwardLimb();
+        /**
+         * @brief [brief description]
+         * @details [long description]
+         * @return [description]
+         */
+        void setActiveForwardLimb(LimbID inActiveForwardLimb);
+        /**
+         * @brief [brief description]
+         * @details [long description]
+         * @return [description]
+         */
         Transform2D getSupportMass();
         /**
          * @brief [brief description]
@@ -460,6 +489,32 @@ namespace motion
          * @param inSupportMass [description]
          */
         void setSupportMass(const Transform2D& inSupportMass);
+        /**
+         * @brief [brief description]
+         * @details [long description]
+         * @return [description]
+         */
+        Transform2D getLeftFootPosition2D();
+        /**
+         * @brief [brief description]
+         * @details [long description]
+         * 
+         * @param inLeftFootPosition [description]
+         */
+        void setLeftFootPosition2D(const Transform2D& inLeftFootPosition);
+        /**
+         * @brief [brief description]
+         * @details [long description]
+         * @return [description]
+         */
+        Transform2D getRightFootPosition2D();
+        /**
+         * @brief [brief description]
+         * @details [long description]
+         * 
+         * @param inRightFootPosition [description]
+         */
+        void setRightFootPosition2D(const Transform2D& inRightFootPosition);
         /**
          * @brief [brief description]
          * @details [long description]

@@ -142,15 +142,15 @@ namespace motion
         on<Trigger<BalanceBodyUpdate>>().then("Walk Engine - Received update (Balanced Robot Posture) Info", [this](const BalanceBodyUpdate& info)
         {
             if(DEBUG) { NUClear::log("WalkEngine - Trigger BalanceBodyUpdate(0)"); }
-            if(!isNewPostureReceived()) 
-            {
-                 setNewPostureReceived(true); 
-            }
             setLeftFootPosition(info.leftFoot);
             setRightFootPosition(info.rightFoot);
             setTorsoPositionArms(info.frameArms);
             setTorsoPositionLegs(info.frameLegs);
             setTorsoPosition3D(info.frame3D);
+            if(!isNewPostureReceived()) 
+            {
+                 setNewPostureReceived(true); 
+            }
             if(DEBUG) { NUClear::log("WalkEngine - Trigger BalanceBodyUpdate(1)"); }
         });
 
