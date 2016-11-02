@@ -165,10 +165,10 @@ namespace motion
         
         if(DEBUG) { NUClear::log("Messaging: Foot Motion Planner - Instantiate FootLocal Variables"); }
         //Translates foot motion into z dimension for stepping in three-dimensional space...
-        Transform3D leftFootLocal  = getLeftFootPosition();
-        Transform3D rightFootLocal = getRightFootPosition();
-//std::cout << "\n\rMWE: Left     Foot\n\r\t[\n\r\t" << leftFootLocal  << "\t]";  
-//std::cout << "\n\rMWE: Right    Foot\n\r\t[\n\r\t" << rightFootLocal << "\t]";          
+        Transform3D leftFootLocal  = Transform2D({ 5, -1,  0.5}); //getLeftFootPosition();
+        Transform3D rightFootLocal = Transform2D({-5,  1, -0.5}); //getRightFootPosition();
+std::cout << "\n\rMWE: Left     Foot\n\r\t[\n\r\t" << leftFootLocal  << "\t]";  
+std::cout << "\n\rMWE: Right    Foot\n\r\t[\n\r\t" << rightFootLocal << "\t]";          
 
         if(DEBUG) { NUClear::log("Messaging: Foot Motion Planner - Translate Z for support foot"); }
         //Lift swing leg - manipulate(update) z component of foot position to action movement with a varying altitude locus...

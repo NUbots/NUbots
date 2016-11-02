@@ -276,7 +276,7 @@ namespace motion
          * @details [long description]
          * @return [description]
          */
-        void hipCompensation(const Sensors& sensors, arma::vec3 footPhases, LimbID swingLeg, Transform3D rightFootT, Transform3D leftFootT);
+        void hipCompensation(const Sensors& sensors, arma::vec3 footPhases, LimbID swingLeg);
         /**
          * @brief [brief description]
          * @details [long description]

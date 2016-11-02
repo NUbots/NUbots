@@ -105,6 +105,8 @@ namespace motion
 //std::cout << "\n\rMWE: TorsoPosition 3D\n\r\t[\n\r\t" << getTorsoPosition3D() << "\t]";               
             setLeftFootPosition(info.leftFoot.worldToLocal(getTorsoPosition3D()));
             setRightFootPosition(info.rightFoot.worldToLocal(getTorsoPosition3D()));
+//std::cout << "\n\rMWE: Left     Foot\n\r\t[\n\r\t" << getLeftFootPosition()  << "\t]";  
+//std::cout << "\n\rMWE: Right    Foot\n\r\t[\n\r\t" << getRightFootPosition() << "\t]";              
             if(DEBUG) { NUClear::log("Messaging: Balance Kinematic Response - Received Update (Active Foot Position) Info(1)"); }
         });
 
@@ -165,7 +167,7 @@ namespace motion
 /*=======================================================================================================*/
 //      METHOD: hipCompensation
 /*=======================================================================================================*/
-	void BalanceKinematicResponse::hipCompensation(const Sensors& sensors, arma::vec3 footPhases, LimbID activeForwardLimb, Transform3D rightFootT, Transform3D leftFootT) 
+	void BalanceKinematicResponse::hipCompensation(const Sensors& sensors, arma::vec3 footPhases, LimbID activeForwardLimb) 
     {
         //If feature enabled, apply balance compensation through support actuator...
         if (balanceEnabled) 
@@ -174,13 +176,13 @@ namespace motion
             double yBoundedMinimumPhase = std::min({1.0, footPhases[1] / 0.1, (1 - footPhases[1]) / 0.1});
 
             //Rotate foot around hip by the given hip roll compensation...
-            if (activeForwardLimb == LimbID::LEFT_LEG) 
+            if (activeForwardLimb == LimbID::LEFT_LEG)
             {
-                rightFootT = rightFootT.rotateZLocal(-hipRollCompensation * yBoundedMinimumPhase, sensors.forwardKinematics.find(ServoID::R_HIP_ROLL)->second);
+                setRightFootPosition(getRightFootPosition().rotateZLocal(-hipRollCompensation * yBoundedMinimumPhase, sensors.forwardKinematics.find(ServoID::R_HIP_ROLL)->second));
             }
             else 
             {
-                leftFootT  = leftFootT.rotateZLocal( hipRollCompensation  * yBoundedMinimumPhase, sensors.forwardKinematics.find(ServoID::L_HIP_ROLL)->second);
+                setLeftFootPosition(getLeftFootPosition().rotateZLocal( hipRollCompensation  * yBoundedMinimumPhase, sensors.forwardKinematics.find(ServoID::L_HIP_ROLL)->second));
             }
         }
     }
@@ -193,11 +195,11 @@ namespace motion
         if (balanceEnabled) 
         {
             // Apply balance to our support foot
-            balancer.balance(kinematicsModel, activeForwardLimb == LimbID::LEFT_LEG ? rightFootTorso : leftFootTorso 
+            balancer.balance(kinematicsModel, activeForwardLimb == LimbID::LEFT_LEG ? getRightFootPosition() : getLeftFootPosition() 
                                             , activeForwardLimb == LimbID::LEFT_LEG ? LimbID::RIGHT_LEG : LimbID::LEFT_LEG, sensors);
             // Apply balance to both legs when standing still
-            balancer.balance(kinematicsModel, leftFootTorso,  LimbID::LEFT_LEG,  sensors);
-            balancer.balance(kinematicsModel, rightFootTorso, LimbID::RIGHT_LEG, sensors);
+            balancer.balance(kinematicsModel, getLeftFootPosition(),  LimbID::LEFT_LEG,  sensors);
+            balancer.balance(kinematicsModel, getRightFootPosition(), LimbID::RIGHT_LEG, sensors);
         }
     }  
 /*=======================================================================================================*/
@@ -238,49 +240,34 @@ namespace motion
 /*=======================================================================================================*/
     void BalanceKinematicResponse::updateUpperBody(/*const Sensors& sensors*/) 
     {
-        // Get relevant torso models from TorsoMotionUpdate...
-        /*
-        uTorso = stepTorso(uLeftFoot, uRightFoot, 0.5);
-        Transform2D uTorsoActual = uTorso.localToWorld({-kinematicsModel.Leg.HIP_OFFSET_X, 0, 0});
-        Transform3D torso = arma::vec6({uTorsoActual.x(), uTorsoActual.y(), bodyHeight, 0, bodyTilt, uTorsoActual.angle()});
-        */
+        // Converts the phase into a sine wave that oscillates between 0 and 1 with a period of 2 phases
+        /*double easing = std::sin(M_PI * getMotionPhase() - M_PI / 2.0) / 2.0 + 0.5;
+        if (activeForwardLimb == LimbID::LEFT_LEG) 
+        {
+            easing = -easing + 1.0; // Gets the 2nd half of the sine wave
+        }
 
-        /*
-        //BEGIN: Update Position of Arms
-            // Converts the phase into a sine wave that oscillates between 0 and 1 with a period of 2 phases
-            double easing = std::sin(M_PI * phase - M_PI / 2.0) / 2.0 + 0.5;
-            if (activeForwardLimb == LimbID::LEFT_LEG) 
-            {
-                easing = -easing + 1.0; // Gets the 2nd half of the sine wave
-            }
+        // Linearly interpolate between the start and end positions using the easing parameter
+        setLArmPosition(easing * getLArmSource() + (1.0 - easing) * getLArmDestination());
+        setRArmPosition((1.0 - easing) * getRArmSource() + easing * getRArmDestination());
 
-            // Linearly interpolate between the start and end positions using the easing parameter
-            arma::vec3 qLArmActual = easing * qLArmStart + (1.0 - easing) * qLArmEnd;
-            arma::vec3 qRArmActual = (1.0 - easing) * qRArmStart + easing * qRArmEnd;
-
-            // Start arm/leg collision/prevention
-            double rotLeftA = normalizeAngle(uLeftFoot.angle() - uTorso.angle());
-            double rotRightA = normalizeAngle(uTorso.angle() - uRightFoot.angle());
-            Transform2D leftLegTorso = uTorso.worldToLocal(uLeftFoot);
-            Transform2D rightLegTorso = uTorso.worldToLocal(uRightFoot);
-            double leftMinValue = 5 * M_PI / 180 + std::max(0.0, rotLeftA) / 2 + std::max(0.0, leftLegTorso.y() - 0.04) / 0.02 * (6 * M_PI / 180);
-            double rightMinValue = -5 * M_PI / 180 - std::max(0.0, rotRightA) / 2 - std::max(0.0, -rightLegTorso.y() - 0.04) / 0.02 * (6 * M_PI / 180);
-            // update shoulder pitch to move arm away from body
-            qLArmActual[1] = std::max(leftMinValue, qLArmActual[1]);
-            qRArmActual[1] = std::min(rightMinValue, qRArmActual[1]);
-            // End arm/leg collision/prevention
-        //END: Update Position of Arms  
-        */
-
-        /*
+        // Start arm/leg collision/prevention
+        double rotLeftA = normalizeAngle(getLeftFootPosition()[] - getTorsoPositionArms().angle());
+        double rotRightA = normalizeAngle(getTorsoPositionArms().angle() - getRightFootPosition()[]);
+        Transform2D leftLegTorso = getTorsoPositionArms().worldToLocal(getLeftFootPosition());
+        Transform2D rightLegTorso = getTorsoPositionArms().worldToLocal(getRightFootPosition());
+        double leftMinValue = 5 * M_PI / 180 + std::max(0.0, rotLeftA) / 2 + std::max(0.0, leftLegTorso.y() - 0.04) / 0.02 * (6 * M_PI / 180);
+        double rightMinValue = -5 * M_PI / 180 - std::max(0.0, rotRightA) / 2 - std::max(0.0, -rightLegTorso.y() - 0.04) / 0.02 * (6 * M_PI / 180);
+        
+        // update shoulder pitch to move arm away from body
+        setLArmPosition(arma::vec3({getLArmPosition()[0], std::max(leftMinValue,  getLArmPosition()[1]), getLArmPosition()[2]}));
+        setRArmPosition(arma::vec3({getRArmPosition()[0], std::min(rightMinValue, getRArmPosition()[1]), getRArmPosition()[2]}));
+*/
         //DEBUGGING: Emit relative torsoWorldMetrics position with respect to world model... 
         if (emitLocalisation) 
         {
-            localise(uTorsoWorld);
+            localise(getTorsoPositionLegs());
         }
-        */
-
-        //emit(motionArms(phase));
     }   
 /*=======================================================================================================*/
 //      NAME: localise
