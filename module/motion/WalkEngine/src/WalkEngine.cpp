@@ -119,7 +119,12 @@ namespace motion
             if(DEBUG) { NUClear::log("WalkEngine - Update Waypoints(0)"); }
             if(isNewPostureReceived()) 
             {                 
-                if(DEBUG) { NUClear::log("New Posture(%d)", DEBUG_ITER++); }
+                if(true) { NUClear::log("New Posture(%d)", DEBUG_ITER++); }
+//std::cout << "\n\rMWE: Left     Foot\n\r\t[\n\r\t" << getLeftFootPosition()  << "\t]";  
+//std::cout << "\n\rMWE: Right    Foot\n\r\t[\n\r\t" << getRightFootPosition() << "\t]";    
+//std::cout << "MWE: Torso PosArms\n\r\t[\n\r\t" << getTorsoPositionArms() << "\t]\n\r";       
+//std::cout << "MWE: Torso PosLegs\n\r\t[\n\r\t" << getTorsoPositionLegs() << "\t]\n\r";        
+//std::cout << "MWE: Torso   Pos3D\n\r\t[\n\r\t" << getTorsoPosition3D()   << "\t]\n\r";                
                 emit(std::move(updateWaypoints(/*sensors*/))); 
             }
             if(DEBUG) { NUClear::log("WalkEngine - Update Waypoints(1)"); }

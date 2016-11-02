@@ -126,10 +126,6 @@ namespace motion
 /*=======================================================================================================*/
     void FootMotionPlanner::updateFootPosition(double phase, const Transform2D& leftFootDestination, const Transform2D& rightFootDestination) 
     {       
-        // Active left foot position
-        Transform2D leftFootPositionTransform;
-        // Active right foot position
-        Transform2D rightFootPositionTransform;
         //Instantiate unitless phases for x(=0), y(=1) and z(=2) foot motion...
         arma::vec3 getFootPhases = getFootPhase(phase, phase1Single, phase2Single);
 
@@ -146,25 +142,33 @@ namespace motion
         if (getActiveForwardLimb() == LimbID::RIGHT_LEG) 
         {
             //TODO: Vector field function??
-            rightFootPositionTransform = getRightFootSource().interpolate(getFootPhases[0], rightFootDestination);
-//std::cout << "Right Source\t[X= " << getRightFootSource().x() << "]\t[Y= " << getRightFootSource().y() << "]\n\r";
-//std::cout << "Right Destination\t[X= " << rightFootDestination.x() << "]\t[Y= " << rightFootDestination.y() << "]\n\r";               
-//std::cout << "Right FMP\t[X= " << rightFootPositionTransform.x() << "]\t[Y= " << rightFootPositionTransform.y() << "]\n\r";          
+            setRightFootPosition(getRightFootSource().interpolate(getFootPhases[0], rightFootDestination));
+//std::cout << "\n\n\rRight    Interpolate\t[X= " << (rightFootDestination.x() - getRightFootSource().x()) << "]\t[Y= " << (rightFootDestination.y() - getRightFootSource().y()) << "]\n\r";
+//std::cout << "\n\n\rRight      Source\t[X= " << getRightFootSource().x() << "]\t[Y= " << getRightFootSource().y() << "]\n\r";      
+//std::cout << "Right Destination\t[X= " << rightFootDestination.x() << "]\t[Y= " << rightFootDestination.y() << "]\n\r"; 
+//std::cout << "\n\rRight    Position\t[X= " << getRightFootPosition().x() << "]\t[Y= " << getRightFootPosition().y() << "]\t[A= " << getRightFootPosition().angle() << "]\n\r";              
+//std::cout << "Foot       Phases\t[0= " << getFootPhases[0] << "]\t[1= " << getFootPhases[1] << "]\t[2= " << getFootPhases[2] << "]\n\r";  
+//std::cout << "Right FMP\t[X= " << getRightFootPosition().x() << "]\t[Y= " << getRightFootPosition().y() << "]\n\r";          
         }
         else
         {
             //TODO: Vector field function??
-            leftFootPositionTransform  = getLeftFootSource().interpolate(getFootPhases[0],   leftFootDestination);  
-//std::cout << "Left  Source\t[X= " << getLeftFootSource().x() << "]\t[Y= " << getLeftFootSource().y() << "]\n\r";      
-//std::cout << "Left  Destination\t[X= " << leftFootDestination.x() << "]\t[Y= " << leftFootDestination.y() << "]\n\r";                
-//std::cout << "Left  FMP\t[X= " << leftFootPositionTransform.x() << "]\t[Y= " << leftFootPositionTransform.y() << "]\n\r";  
+            setLeftFootPosition(getLeftFootSource().interpolate(getFootPhases[0],   leftFootDestination));
+//std::cout << "\n\n\rLeft     Interpolate\t[X= " << (leftFootDestination.x() - getLeftFootSource().x()) << "]\t[Y= " << (leftFootDestination.y() - getLeftFootSource().y()) << "]\n\r";
+//std::cout << "\n\n\rLeft       Source\t[X= " << getLeftFootSource().x() << "]\t[Y= " << getLeftFootSource().y() << "]\n\r";      
+//std::cout << "Left  Destination\t[X= " << leftFootDestination.x() << "]\t[Y= " << leftFootDestination.y() << "]\n\r"; 
+//std::cout << "\n\rLeft     Position\t[X= " << getLeftFootPosition().x() << "]\t[Y= " << getLeftFootPosition().y() << "]\t[A= " << getLeftFootPosition().angle() << "]\n\r";                
+//std::cout << "Foot       Phases\t[0= " << getFootPhases[0] << "]\t[1= " << getFootPhases[1] << "]\t[2= " << getFootPhases[2] << "]\n\r"; 
+//std::cout << "Left  FMP\t[X= " << getLeftFootPosition().x() << "]\t[Y= " << getLeftFootPosition().y() << "]\n\r";  
 
         }
         
         if(DEBUG) { NUClear::log("Messaging: Foot Motion Planner - Instantiate FootLocal Variables"); }
         //Translates foot motion into z dimension for stepping in three-dimensional space...
-        Transform3D leftFootLocal  = leftFootPositionTransform;
-        Transform3D rightFootLocal = rightFootPositionTransform;
+        Transform3D leftFootLocal  = getLeftFootPosition();
+        Transform3D rightFootLocal = getRightFootPosition();
+//std::cout << "\n\rMWE: Left     Foot\n\r\t[\n\r\t" << leftFootLocal  << "\t]";  
+//std::cout << "\n\rMWE: Right    Foot\n\r\t[\n\r\t" << rightFootLocal << "\t]";          
 
         if(DEBUG) { NUClear::log("Messaging: Foot Motion Planner - Translate Z for support foot"); }
         //Lift swing leg - manipulate(update) z component of foot position to action movement with a varying altitude locus...
@@ -239,6 +243,28 @@ namespace motion
     {
         velocityCurrent = inVelocityCurrent;
     }       
+/*=======================================================================================================*/
+//      ENCAPSULATION METHOD: Left Foot Position
+/*=======================================================================================================*/
+    Transform2D FootMotionPlanner::getLeftFootPosition()
+    {
+        return (leftFootPositionTransform);
+    }
+    void FootMotionPlanner::setLeftFootPosition(const Transform2D& inLeftFootPosition)
+    {
+        leftFootPositionTransform = inLeftFootPosition;
+    }
+/*=======================================================================================================*/
+//      ENCAPSULATION METHOD: Right Foot Position
+/*=======================================================================================================*/
+    Transform2D FootMotionPlanner::getRightFootPosition()
+    {
+        return (rightFootPositionTransform);
+    }
+    void FootMotionPlanner::setRightFootPosition(const Transform2D& inRightFootPosition)
+    {
+        rightFootPositionTransform = inRightFootPosition;
+    }    
 /*=======================================================================================================*/
 //      ENCAPSULATION METHOD: Left Foot Source
 /*=======================================================================================================*/

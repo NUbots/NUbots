@@ -86,7 +86,7 @@ namespace motion
             kinematicsModel = model;
         });
 
-        updateHandle = on<Every<1 /*RESTORE AFTER DEBUGGING: UPDATE_FREQUENCY*/, Per<std::chrono::seconds>>, /*With<Sensors>,*/ Single, Priority::HIGH>()
+        updateHandle = on<Every<UPDATE_FREQUENCY, Per<std::chrono::seconds>>, /*With<Sensors>,*/ Single, Priority::HIGH>()
         .then("Balance Response Planner - Update Robot Posture", [this] /*(const Sensors& sensors)*/
         {
             if(DEBUG) { NUClear::log("Messaging: Balance Kinematic Response - Update Robot Posture(0)"); }
@@ -100,6 +100,9 @@ namespace motion
             if(DEBUG) { NUClear::log("Messaging: Balance Kinematic Response - Received Update (Active Foot Position) Info(0)"); }
             setMotionPhase(info.phase);
             // Transform feet positions to be relative to the robot torso...
+//std::cout << "\n\rMWE: Left     Foot\n\r\t[\n\r\t" << info.leftFoot  << "\t]";  
+//std::cout << "\n\rMWE: Right    Foot\n\r\t[\n\r\t" << info.rightFoot << "\t]";  
+//std::cout << "\n\rMWE: TorsoPosition 3D\n\r\t[\n\r\t" << getTorsoPosition3D() << "\t]";               
             setLeftFootPosition(info.leftFoot.worldToLocal(getTorsoPosition3D()));
             setRightFootPosition(info.rightFoot.worldToLocal(getTorsoPosition3D()));
             if(DEBUG) { NUClear::log("Messaging: Balance Kinematic Response - Received Update (Active Foot Position) Info(1)"); }
@@ -212,7 +215,7 @@ namespace motion
             //emit(graph("Right foot position", rightFootTorso.translation()));
             //emit(graph("Left  foot position",  leftFootTorso.translation()));
         }  
-        emit(std::make_unique<BalanceBodyUpdate>(getMotionPhase(), getLeftFootPosition(), getRightFootPosition(), getTorsoPositionLegs(), getTorsoPositionLegs(), getTorsoPosition3D()));
+        emit(std::make_unique<BalanceBodyUpdate>(getMotionPhase(), getLeftFootPosition(), getRightFootPosition(), getTorsoPositionArms(), getTorsoPositionLegs(), getTorsoPosition3D()));
     }      
 /*=======================================================================================================*/
 //      METHOD: updateLowerBody
