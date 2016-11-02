@@ -224,7 +224,9 @@ activeForwardLimb = info.activeForwardLimb; //TODO: delete - debugging...
 /*=======================================================================================================*/
     Transform2D TorsoMotionPlanner::zmpTorsoCompensation(double phase, arma::vec4 zmpTorsoCoefficients, arma::vec4 zmpParams, double stepTime, double zmpTime, double phase1Single, double phase2Single, Transform2D uLeftFootSource, Transform2D uRightFootSource) 
     {
-std::cout << "\n\rPhase: " << phase << "\n\rzmpParameters=[" << zmpParams[0] << ",\t" << zmpParams[1] << ",\t" << zmpParams[2] << ",\t" << zmpParams[3] << "\t]\n\rzmpCoefficients=[" << zmpTorsoCoefficients[0] << ",\t" << zmpTorsoCoefficients[1] << ",\t" << zmpTorsoCoefficients[2] << ",\t" << zmpTorsoCoefficients[3] << "\t]\n\r";
+std::cout << "\n\rPhase: " << phase << "\n\r";
+std::cout << "zmpParameters  =\n\r\t[\n\r\t" << zmpParams[0] << ",\n\r\t" << zmpParams[1] << ",\n\r\t" << zmpParams[2] << ",\n\r\t" << zmpParams[3] << "\n\r\t]\n\r";
+std::cout << "zmpCoefficients=\n\r\t[\n\r\t" << zmpTorsoCoefficients[0] << ",\n\r\t" << zmpTorsoCoefficients[1] << ",\n\r\t" << zmpTorsoCoefficients[2] << ",\n\r\t" << zmpTorsoCoefficients[3] << "\n\r\t]\n\r";
 
         //Note that phase is the only variable updated during a step
         Transform2D com = {0, 0, 0};
