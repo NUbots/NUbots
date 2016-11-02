@@ -34,7 +34,7 @@ namespace motion
 /*=======================================================================================================*/
     using message::input::LimbID;
     using message::motion::NewStepTargetInfo;
-    using message::motion::TorsoDestinationUpdate;
+    using message::motion::TorsoMotionUpdate;
     using message::motion::EnableFootPlacement;
     using message::motion::DisableFootPlacement;
     using message::motion::FootStepCompleted;
@@ -86,10 +86,11 @@ namespace motion
         });
 
         //When new torso destination is computed, inform FPP in preparation for next footstep...
-        on<Trigger<TorsoDestinationUpdate>>().then("Foot Placement Planner - Received Torso Destination Update", [this] (const TorsoDestinationUpdate& info) 
+        on<Trigger<TorsoMotionUpdate>>().then("Foot Placement Planner - Received Torso Destination Update", [this] (const TorsoMotionUpdate& info) 
         {            
             if(DEBUG) { NUClear::log("Messaging: Foot Placement Planner - Received Torso Destination Update(0)"); }    
-            setTorsoDestination(info.torsoDestination);       
+            setTorsoPosition(info.frameArms);  
+            setTorsoDestination(info.frameDestination);     
             if(DEBUG) { NUClear::log("Messaging: Foot Placement Planner - Received Torso Destination Update(1)"); }
         });
 
@@ -169,7 +170,10 @@ namespace motion
         if (activeForwardLimb == LimbID::RIGHT_LEG) 
         {
             Transform2D uLeftFootTorso = getTorsoSource().worldToLocal(getLeftFootSource());
+//std::cout << "\n\rMWE: TorsoSource() \t[X= " << getTorsoSource().x() << "]\t[Y= " << getTorsoSource().y() << "]\n\r";              
             Transform2D uTorsoModded = getTorsoPosition().localToWorld({supportMod[0], supportMod[1], 0});
+//std::cout << "\n\rMWE: TorsoPosition() \t[X= " << getTorsoPosition().x() << "]\t[Y= " << getTorsoPosition().y() << "]\n\r";   
+//std::cout << "\n\rMWE: uTorsoModded \t[X= " << uTorsoModded.x() << "]\t[Y= " << uTorsoModded.y() << "]\n\r";                
             Transform2D uLeftFootModded = uTorsoModded.localToWorld(uLeftFootTorso);
             setSupportMass(uLeftFootModded.localToWorld({-getFootOffsetCoefficient(0), -getFootOffsetCoefficient(1), 0}));       
 //std::cout << "Right FPP\t[X= " << getRightFootDestination().x() << "]\t[Y= " << getRightFootDestination().y() << "]\n\r";
@@ -177,7 +181,10 @@ namespace motion
         else 
         {
             Transform2D uRightFootTorso = getTorsoSource().worldToLocal(getRightFootSource());
+//std::cout << "\n\rMWE: TorsoSource() \t[X= " << getTorsoSource().x() << "]\t[Y= " << getTorsoSource().y() << "]\n\r";             
             Transform2D uTorsoModded = getTorsoPosition().localToWorld({supportMod[0], supportMod[1], 0});
+//std::cout << "\n\rMWE: TorsoPosition() \t[X= " << getTorsoPosition().x() << "]\t[Y= " << getTorsoPosition().y() << "]\n\r";   
+//std::cout << "\n\rMWE: uTorsoModded \t[X= " << uTorsoModded.x() << "]\t[Y= " << uTorsoModded.y() << "]\n\r";                     
             Transform2D uRightFootModded = uTorsoModded.localToWorld(uRightFootTorso);
             setSupportMass(uRightFootModded.localToWorld({-getFootOffsetCoefficient(0), getFootOffsetCoefficient(1), 0}));         
 //std::cout << "Left FPP\t[X= " << getLeftFootDestination().x() << "]\t[Y= " << getLeftFootDestination().y() << "]\n\r";

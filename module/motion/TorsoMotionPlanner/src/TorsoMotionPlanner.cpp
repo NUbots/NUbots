@@ -46,7 +46,6 @@ namespace motion
     using message::motion::NewStepTargetInfo;
     using message::motion::FootMotionUpdate;
     using message::motion::TorsoMotionUpdate;
-    using message::motion::TorsoDestinationUpdate;
     using message::motion::EnableTorsoMotion;
     using message::motion::DisableTorsoMotion;
     using message::motion::ServoTarget;
@@ -111,17 +110,17 @@ namespace motion
                 {
             if (activeForwardLimb == LimbID::RIGHT_LEG) //TODO: delete
             {
-std::cout << "\n\n\n\n\rTMP: RIGHT\n\r";                
+//std::cout << "\n\n\n\n\rTMP: RIGHT\n\r";                
             }
             else 
             {
-std::cout << "\n\n\n\n\rTMP:  LEFT\n\r";  
+//std::cout << "\n\n\n\n\rTMP:  LEFT\n\r";  
             }
-std::cout << "ZMPTC: Torso Destination\t[X= " << getTorsoDestination().x() << "]\t[Y= " << getTorsoDestination().y() << "]\n\r";         
-std::cout << "ZMPTC: Torso Source\t[X= " << getTorsoSource().x() << "]\t[Y= " << getTorsoSource().y() << "]\n\r"; 
-std::cout << "ZMPTC: Support Mass\t[X= " << getSupportMass().x() << "]\t[Y= " << getSupportMass().y() << "]\n\r"; 
-std::cout << "ZMPTC: Step Time\t[" << stepTime << "]\n\r"; 
-std::cout << "ZMPTC: ZMP Time\t[" << zmpTime << "]\n\r"; 
+//std::cout << "ZMPTC: Torso Destination\t[X= " << getTorsoDestination().x() << "]\t[Y= " << getTorsoDestination().y() << "]\n\r";         
+//std::cout << "ZMPTC: Torso Source\t[X= " << getTorsoSource().x() << "]\t[Y= " << getTorsoSource().y() << "]\n\r"; 
+//std::cout << "ZMPTC: Support Mass\t[X= " << getSupportMass().x() << "]\t[Y= " << getSupportMass().y() << "]\n\r"; 
+//std::cout << "ZMPTC: Step Time\t[" << stepTime << "]\n\r"; 
+//std::cout << "ZMPTC: ZMP Time\t[" << zmpTime << "]\n\r"; 
                 }
                     updateTorsoPosition();    
             if(DEBUG) { NUClear::log("Messaging: Torso Motion Planner - Update Torso Position(1)"); }
@@ -137,10 +136,8 @@ std::cout << "ZMPTC: ZMP Time\t[" << zmpTime << "]\n\r";
             setLeftFootDestination(info.leftFootDestination);
             setRightFootDestination(info.rightFootDestination);
             setSupportMass(info.supportMass); 
-activeForwardLimb = info.activeForwardLimb; //TODO: delete
+activeForwardLimb = info.activeForwardLimb; //TODO: delete - debugging...
             setTorsoSource(getTorsoDestination());
-            zmpTorsoCoefficients(); // Determine Torso Destination and Update FPP for next Foot Step...
-            emit(std::make_unique<TorsoDestinationUpdate>(getTorsoDestination()));
            if(DEBUG) { NUClear::log("Messaging: Torso Motion Planner - Received Footstep Info(1)"); }
         });
 
@@ -170,11 +167,11 @@ activeForwardLimb = info.activeForwardLimb; //TODO: delete
     {
         setTorsoPositionArms(zmpTorsoCompensation(getMotionPhase(), zmpTorsoCoefficients(), getZmpParams(), stepTime, zmpTime, phase1Single, phase2Single, getLeftFootSource(), getRightFootSource()));
 //std::cout << "\n\rTorso Position (Arms)\t[X= " << getTorsoPositionArms().x() << "]\t[Y= " << getTorsoPositionArms().y() << "]\n\r";         
-        setTorsoPositionLegs(zmpTorsoCompensation(getMotionPhase(), zmpTorsoCoefficients(), getZmpParams(), stepTime, zmpTime, phase1Single, phase2Single, getLeftFootSource(), getRightFootSource()));
+        setTorsoPositionLegs(getTorsoPositionArms().localToWorld({-kinematicsModel.Leg.HIP_OFFSET_X, 0, 0}));
 //std::cout << "Torso Position (Legs)\t[X= " << getTorsoPositionLegs().x() << "]\t[Y= " << getTorsoPositionLegs().y() << "]\n\r";                 
         Transform2D uTorsoWorld = getTorsoPositionArms().localToWorld({-kinematicsModel.Leg.HIP_OFFSET_X, 0, 0});
         setTorsoPosition3D(arma::vec6({uTorsoWorld.x(), uTorsoWorld.y(), bodyHeight, 0, bodyTilt, uTorsoWorld.angle()}));
-        emit(std::make_unique<TorsoMotionUpdate>(getTorsoPositionArms(), getTorsoPositionLegs(), getTorsoPosition3D()));
+        emit(std::make_unique<TorsoMotionUpdate>(getTorsoPositionArms(), getTorsoPositionLegs(), getTorsoPosition3D(), getTorsoDestination()));
     }
 /*=======================================================================================================*/
 //      METHOD: stepTorso
@@ -227,8 +224,10 @@ activeForwardLimb = info.activeForwardLimb; //TODO: delete
 /*=======================================================================================================*/
     Transform2D TorsoMotionPlanner::zmpTorsoCompensation(double phase, arma::vec4 zmpTorsoCoefficients, arma::vec4 zmpParams, double stepTime, double zmpTime, double phase1Single, double phase2Single, Transform2D uLeftFootSource, Transform2D uRightFootSource) 
     {
-//std::cout << "Phase: " << phase << "\tstepTime: " << stepTime << "\n\rphase1Single: " << phase1Single << "\n\rphase2Single: " << phase2Single << "\n\r";
-std::cout << "\n\rPhase: " << phase << "\n\rzmpcoefficents" << zmpTorsoCoefficients << "\n\rzmpParameters: " << zmpParams << "\n\r";
+        if(int(getMotionPhase()*10)%5 == 0)
+        {
+            //std::cout << "\n\rPhase: " << phase << "\n\rzmpcoefficents" << zmpTorsoCoefficients << "\n\rzmpParameters: " << zmpParams << "\n\r";
+        }
         //Note that phase is the only variable updated during a step
         Transform2D com = {0, 0, 0};
         double expT = std::exp(stepTime * phase / zmpTime);
@@ -284,6 +283,14 @@ std::cout << "\n\rPhase: " << phase << "\n\rzmpcoefficents" << zmpTorsoCoefficie
 /*=======================================================================================================*/    
     arma::vec4 TorsoMotionPlanner::getZmpParams()
     {
+        if(int(getMotionPhase()*10)%5 == 0)
+        {
+std::cout << "\n\rPWE: getTorsoPositionArms() \t[X= " << getTorsoPositionArms().x() << "]\t[Y= " << getTorsoPositionArms().y() << "]\n\r";
+std::cout << "\n\rPWE: getSupportMass() \t[X= " << getSupportMass().x() << "]\t[Y= " << getSupportMass().y() << "]\n\r";
+std::cout << "\n\rPWE: getTorsoDestination()\t[X= " << getTorsoDestination().x() << "]\t[Y= " << getTorsoDestination().y() << "]\n\r";         
+std::cout << "\n\rPWE: stepTime\t=" << stepTime << ",\tphase1Single\t=" << phase1Single << ",\tphase2Single\t=" << phase2Single << "\n\r";          
+        }
+
         setZmpParams
         ({
             (getSupportMass().x() - getTorsoPositionArms().x()) / (stepTime * phase1Single),

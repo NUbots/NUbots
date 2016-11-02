@@ -90,7 +90,7 @@ namespace motion {
         // apply velocity-based support point modulation for uSupport
         if (swingLeg == LimbID::RIGHT_LEG) {
             Transform2D uLeftFootTorso = uTorsoSource.worldToLocal(uLeftFootSource);
-            Transform2D uTorsoModded = uTorso.localToWorld({supportMod[0], supportMod[1], 0});
+            Transform2D uTorsoModded = uTorso.localToWorld({supportMod[0], supportMod[1], 0});         
             Transform2D uLeftFootModded = uTorsoModded.localToWorld(uLeftFootTorso);
             uSupport = uLeftFootModded.localToWorld({-footOffset[0], -footOffset[1], 0});
         } else {
@@ -99,6 +99,12 @@ namespace motion {
             Transform2D uRightFootModded = uTorsoModded.localToWorld(uRightFootTorso);
             uSupport = uRightFootModded.localToWorld({-footOffset[0], footOffset[1], 0});
         }
+
+std::cout << "\n\rPWE: uTorso \t[X= " << uTorso.x() << "]\t[Y= " << uTorso.y() << "]\n\r";
+std::cout << "\n\rPWE: uSupport \t[X= " << uSupport.x() << "]\t[Y= " << uSupport.y() << "]\n\r";
+std::cout << "\n\rPWE: uTorsoDestination\t[X= " << uTorsoDestination.x() << "]\t[Y= " << uTorsoDestination.y() << "]\n\r";                 
+std::cout << "\n\rPWE: stepTime\t=" << stepTime << ",\tphase1Single\t=" << phase1Single << ",\tphase2Single\t=" << phase2Single << "\n\r";          
+
 
         // compute ZMP coefficients
         zmpParams = {

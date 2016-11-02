@@ -482,8 +482,7 @@ namespace motion {
             uLeftFoot = uLeftFootSource.interpolate(foot[0], uLeftFootDestination);
         }
         //I hear you like arguments...
-        uTorso = zmpCom(phase, zmpCoefficients, zmpParams, stepTime, zmpTime, phase1Single, phase2Single, uSupport, uLeftFootDestination, uLeftFootSource, uRightFootDestination, uRightFootSource);
-
+        uTorso = zmpCom(phase, zmpCoefficients, zmpParams, stepTime, zmpTime, phase1Single, phase2Single, uSupport, uLeftFootDestination, uLeftFootSource, uRightFootDestination, uRightFootSource);       
         Transform3D leftFoot = uLeftFoot;
         Transform3D rightFoot = uRightFoot;
 
@@ -494,9 +493,8 @@ namespace motion {
             leftFoot = leftFoot.translateZ(stepHeight * foot[2]);
         }
 
-        Transform2D uTorsoActual = uTorso.localToWorld({-kinematicsModel.Leg.HIP_OFFSET_X, 0, 0});
+        Transform2D uTorsoActual = uTorso.localToWorld({-kinematicsModel.Leg.HIP_OFFSET_X, 0, 0});    
         Transform3D torso = arma::vec6({uTorsoActual.x(), uTorsoActual.y(), bodyHeight, 0, bodyTilt, uTorsoActual.angle()});
-
         // Transform feet targets to be relative to the torso
         Transform3D leftFootTorso = leftFoot.worldToLocal(torso);
         Transform3D rightFootTorso = rightFoot.worldToLocal(torso);
@@ -538,10 +536,9 @@ namespace motion {
     }
 
     std::unique_ptr<std::vector<ServoCommand>> PreviousWalkEngine::updateStillWayPoints(const Sensors& sensors) {
-        uTorso = stepTorso(uLeftFoot, uRightFoot, 0.5);
-        Transform2D uTorsoActual = uTorso.localToWorld({-kinematicsModel.Leg.HIP_OFFSET_X, 0, 0});
-        Transform3D torso = arma::vec6({uTorsoActual.x(), uTorsoActual.y(), bodyHeight, 0, bodyTilt, uTorsoActual.angle()});
-
+        uTorso = stepTorso(uLeftFoot, uRightFoot, 0.5);        
+        Transform2D uTorsoActual = uTorso.localToWorld({-kinematicsModel.Leg.HIP_OFFSET_X, 0, 0});     
+        Transform3D torso = arma::vec6({uTorsoActual.x(), uTorsoActual.y(), bodyHeight, 0, bodyTilt, uTorsoActual.angle()});    
         // Transform feet targets to be relative to the torso
         Transform3D leftFootTorso = Transform3D(uLeftFoot).worldToLocal(torso);
         Transform3D rightFootTorso = Transform3D(uRightFoot).worldToLocal(torso);
@@ -673,6 +670,10 @@ namespace motion {
     }
 
     Transform2D PreviousWalkEngine::zmpCom(double phase, arma::vec4 zmpCoefficients, arma::vec4 zmpParams, double stepTime, double zmpTime, double phase1Single, double phase2Single, Transform2D uSupport, Transform2D uLeftFootDestination, Transform2D uLeftFootSource, Transform2D uRightFootDestination, Transform2D uRightFootSource) {
+        if(int(phase*10)%5 == 0)
+        {
+            //std::cout << "\n\rPhase: " << phase << "\n\rzmpcoefficents" << zmpCoefficients << "\n\rzmpParameters: " << zmpParams << "\n\r";        
+        }
         Transform2D com = {0, 0, 0};
         double expT = std::exp(stepTime * phase / zmpTime);
         com.x() = uSupport.x() + zmpCoefficients[0] * expT + zmpCoefficients[1] / expT;
