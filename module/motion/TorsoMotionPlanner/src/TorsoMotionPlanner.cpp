@@ -224,10 +224,8 @@ activeForwardLimb = info.activeForwardLimb; //TODO: delete - debugging...
 /*=======================================================================================================*/
     Transform2D TorsoMotionPlanner::zmpTorsoCompensation(double phase, arma::vec4 zmpTorsoCoefficients, arma::vec4 zmpParams, double stepTime, double zmpTime, double phase1Single, double phase2Single, Transform2D uLeftFootSource, Transform2D uRightFootSource) 
     {
-        if(int(getMotionPhase()*10)%5 == 0)
-        {
-            //std::cout << "\n\rPhase: " << phase << "\n\rzmpcoefficents" << zmpTorsoCoefficients << "\n\rzmpParameters: " << zmpParams << "\n\r";
-        }
+std::cout << "\n\rPhase: " << phase << "\n\rzmpParameters=[" << zmpParams[0] << ",\t" << zmpParams[1] << ",\t" << zmpParams[2] << ",\t" << zmpParams[3] << "\t]\n\rzmpCoefficients=[" << zmpTorsoCoefficients[0] << ",\t" << zmpTorsoCoefficients[1] << ",\t" << zmpTorsoCoefficients[2] << ",\t" << zmpTorsoCoefficients[3] << "\t]\n\r";
+
         //Note that phase is the only variable updated during a step
         Transform2D com = {0, 0, 0};
         double expT = std::exp(stepTime * phase / zmpTime);
@@ -283,14 +281,6 @@ activeForwardLimb = info.activeForwardLimb; //TODO: delete - debugging...
 /*=======================================================================================================*/    
     arma::vec4 TorsoMotionPlanner::getZmpParams()
     {
-        if(int(getMotionPhase()*10)%5 == 0)
-        {
-std::cout << "\n\rPWE: getTorsoPositionArms() \t[X= " << getTorsoPositionArms().x() << "]\t[Y= " << getTorsoPositionArms().y() << "]\n\r";
-std::cout << "\n\rPWE: getSupportMass() \t[X= " << getSupportMass().x() << "]\t[Y= " << getSupportMass().y() << "]\n\r";
-std::cout << "\n\rPWE: getTorsoDestination()\t[X= " << getTorsoDestination().x() << "]\t[Y= " << getTorsoDestination().y() << "]\n\r";         
-std::cout << "\n\rPWE: stepTime\t=" << stepTime << ",\tphase1Single\t=" << phase1Single << ",\tphase2Single\t=" << phase2Single << "\n\r";          
-        }
-
         setZmpParams
         ({
             (getSupportMass().x() - getTorsoPositionArms().x()) / (stepTime * phase1Single),

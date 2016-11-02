@@ -99,13 +99,7 @@ namespace motion {
             Transform2D uRightFootModded = uTorsoModded.localToWorld(uRightFootTorso);
             uSupport = uRightFootModded.localToWorld({-footOffset[0], footOffset[1], 0});
         }
-
-std::cout << "\n\rPWE: uTorso \t[X= " << uTorso.x() << "]\t[Y= " << uTorso.y() << "]\n\r";
-std::cout << "\n\rPWE: uSupport \t[X= " << uSupport.x() << "]\t[Y= " << uSupport.y() << "]\n\r";
-std::cout << "\n\rPWE: uTorsoDestination\t[X= " << uTorsoDestination.x() << "]\t[Y= " << uTorsoDestination.y() << "]\n\r";                 
-std::cout << "\n\rPWE: stepTime\t=" << stepTime << ",\tphase1Single\t=" << phase1Single << ",\tphase2Single\t=" << phase2Single << "\n\r";          
-
-
+        
         // compute ZMP coefficients
         zmpParams = {
             (uSupport.x() - uTorso.x()) / (stepTime * phase1Single),

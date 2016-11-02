@@ -670,10 +670,8 @@ namespace motion {
     }
 
     Transform2D PreviousWalkEngine::zmpCom(double phase, arma::vec4 zmpCoefficients, arma::vec4 zmpParams, double stepTime, double zmpTime, double phase1Single, double phase2Single, Transform2D uSupport, Transform2D uLeftFootDestination, Transform2D uLeftFootSource, Transform2D uRightFootDestination, Transform2D uRightFootSource) {
-        if(int(phase*10)%5 == 0)
-        {
-            //std::cout << "\n\rPhase: " << phase << "\n\rzmpcoefficents" << zmpCoefficients << "\n\rzmpParameters: " << zmpParams << "\n\r";        
-        }
+std::cout << "\n\rPhase: " << phase << "\n\rzmpParameters=[" << zmpParams[0] << ",\t" << zmpParams[1] << ",\t" << zmpParams[2] << ",\t" << zmpParams[3] << "\t]\n\rzmpCoefficients=[" << zmpCoefficients[0] << ",\t" << zmpCoefficients[1] << ",\t" << zmpCoefficients[2] << ",\t" << zmpCoefficients[3] << "\t]\n\r";
+
         Transform2D com = {0, 0, 0};
         double expT = std::exp(stepTime * phase / zmpTime);
         com.x() = uSupport.x() + zmpCoefficients[0] * expT + zmpCoefficients[1] / expT;
