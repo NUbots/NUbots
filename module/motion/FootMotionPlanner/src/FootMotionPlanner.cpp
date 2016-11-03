@@ -60,7 +60,7 @@ namespace motion
         , bodyTilt(0.0), bodyHeight(0.0), stepTime(0.0), stepHeight(0.0)
         , step_height_slow_fraction(0.0f), step_height_fast_fraction(0.0f)
         , stepLimits(arma::fill::zeros), footOffset(arma::fill::zeros), uLRFootOffset()
-        , INITIAL_STEP(false), beginStepTime(0.0), destinationTime(), lastVeloctiyUpdateTime()
+        , INITIAL_STEP(false), newStepStartTime(0.0), destinationTime(), lastVeloctiyUpdateTime()
         , velocityHigh(0.0), accelerationTurningFactor(0.0), velocityLimits(arma::fill::zeros)
         , accelerationLimits(arma::fill::zeros), accelerationLimitsHigh(arma::fill::zeros)
         , velocityCurrent()
@@ -108,6 +108,7 @@ namespace motion
                 setActiveLimbSource(target.leftFootSource);             //Queued    : FPP
                 if(INITIAL_STEP == false) 
                 { 
+std::cout << "\n\rPosition\n\r";                    
                     setRightFootPosition(target.rightFootSource);       //Trigger   : FPP
                     INITIAL_STEP = true;
                 }         
@@ -118,6 +119,7 @@ namespace motion
                 setActiveLimbSource(target.rightFootSource);            //Queued    : FPP
                 if(INITIAL_STEP == false) 
                 { 
+std::cout << "\n\rPosition\n\r";                     
                     setLeftFootPosition(target.leftFootSource);         //Trigger   : FPP
                     INITIAL_STEP = true;
                 }
@@ -238,6 +240,17 @@ namespace motion
         if(DEBUG) { NUClear::log("System Time:%f\n\r", double(NUClear::clock::now().time_since_epoch().count()) * (1.0 / double(NUClear::clock::period::den))); }
         return (double(NUClear::clock::now().time_since_epoch().count()) * (1.0 / double(NUClear::clock::period::den)));
     }
+/*=======================================================================================================*/
+//      ENCAPSULATION METHOD: New Step Start Time
+/*=======================================================================================================*/
+    double FootMotionPlanner::getNewStepStartTime()
+    {
+        return (newStepStartTime);
+    }
+    void FootMotionPlanner::setNewStepStartTime(double inNewStartTime)
+    {
+        newStepStartTime = inNewStartTime;
+    }    
 /*=======================================================================================================*/
 //      ENCAPSULATION METHOD: Destination Time
 /*=======================================================================================================*/
@@ -390,10 +403,10 @@ namespace motion
         // Obtain current system time...
         double currentTime = getTime();
         // The percentage completed of the current step, range: [0,1]...    
-        double motionPhase = 1 - ((getDestinationTime() - currentTime) / stepTime);        
+        double motionPhase = 1 - (((getNewStepStartTime() + getDestinationTime()) - currentTime) / stepTime);        
         // Bind phase value to range [0,1], emit status if step completed...
         if (motionPhase > 1)
-        {     
+        {
             motionPhase = std::fmod(motionPhase, 1);
             // Consume completed step instructions, only once an entire new set has been received...
             if(isNewStepReceived())
@@ -405,7 +418,9 @@ namespace motion
                 if (activeLimbDestination.size() > 0)   { activeLimbDestination.pop();  }
             }
             // Notify whenever a foot step is completed...
-            emit(std::make_unique<FootStepCompleted>(true));           
+            emit(std::make_unique<FootStepCompleted>(true));
+            // Increment relative step motionphase...
+            setNewStepStartTime(getTime());   
             // If there has already been an updated instruction, then process before requesting new data...
             if(!isNewStepAvailable()) 
             {

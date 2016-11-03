@@ -192,7 +192,7 @@ namespace motion
             Transform2D uRightFootModded = uTorsoModded.localToWorld(uRightFootTorso);
             setSupportMass(uRightFootModded.localToWorld({-getFootOffsetCoefficient(0), getFootOffsetCoefficient(1), 0}));  
         }                   
-        emit(std::make_unique<NewStepTargetInfo>(getTime() + stepTime, inVelocityCurrent, getSupportMass())); //New Step Target Information
+        emit(std::make_unique<NewStepTargetInfo>(stepTime, inVelocityCurrent, getSupportMass())); //New Step Target Information
         emit(std::make_unique<NewFootTargetInfo>(getLeftFootSource(), getRightFootSource(), getActiveForwardLimb(), getLeftFootDestination(), getRightFootDestination()));  //New Foot Target Information
         //emit destinations for fmp and/or zmp
         //may combine NewStep and NewStepTorso

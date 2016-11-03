@@ -130,8 +130,8 @@ namespace motion
          * Internal timing reference variables...
          */
         bool  INITIAL_STEP;                                     // Indicates if the first step has been consumed
-        double beginStepTime;                                   // The time when the current step begun
-        std::queue<double> destinationTime;                     // The time when the current is to be completed
+        double newStepStartTime;                                // The time when the current step is scheduled
+        std::queue<double> destinationTime;                     // The relative time when the current is to be completed
         NUClear::clock::time_point lastVeloctiyUpdateTime;      //
 
         /**
@@ -213,6 +213,18 @@ namespace motion
          * @param inTorsoPosition [description]
          */
         double getTime();
+        /**
+         * @brief [brief description]
+         * @details [long description]
+         * @return [description]
+         */
+        double getNewStepStartTime();
+        /**
+         * @brief [brief description]
+         * @details [long description]
+         * @return [description]
+         */
+        void setNewStepStartTime(double inNewStartTime);
         /**
          * @brief [brief description]
          * @details [long description]
