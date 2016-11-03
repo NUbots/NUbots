@@ -73,7 +73,7 @@ walk_cycle:
   # TODO: balance params disabled until they are futher understood
   balance:
     enabled: true
-    hip_compensation: true
+    hip_compensation: false
     ankle_compensation: false
     support_compensation: false
     amplitude: 1.0

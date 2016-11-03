@@ -28,11 +28,13 @@ namespace message {
         //which contains all the constituent servos (e.g. An arm contains shoulder (pitch + roll)) and elbow.
 
         enum class LimbID {
+            INVALID = -1,
             LEFT_LEG = 0,
             RIGHT_LEG = 1,
             LEFT_ARM = 2,
             RIGHT_ARM = 3,
             HEAD = 4
+
         };
 
         inline std::set<ServoID> servosForLimb(const LimbID& limb) {

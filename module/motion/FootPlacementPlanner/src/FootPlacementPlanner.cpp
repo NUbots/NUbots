@@ -135,6 +135,10 @@ namespace motion
         setRightFootSource(getRightFootDestination());
         setTorsoSource(getTorsoDestination());
 
+//std::cout << "Left  FPP\t[Source= " << getLeftFootSource().x()  << "]\t[Destination= " << getLeftFootDestination().x()  << "]\n\r";
+//std::cout << "Right FPP\t[Source= " << getRightFootSource().x() << "]\t[Destination= " << getRightFootDestination().x() << "]\n\r";
+
+
         arma::vec2 supportMod = arma::zeros(2); // support point modulation for wallkick
 
         if (StateOfWalk == State::STOP_REQUEST) 

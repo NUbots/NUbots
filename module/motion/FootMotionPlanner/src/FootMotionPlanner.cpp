@@ -78,13 +78,16 @@ namespace motion
         .then("Foot Motion Planner - Update Foot Position", [this] /*(const Sensors& sensors)*/
         {
             if(DEBUG) { NUClear::log("Messaging: Foot Motion Planner - Update Foot Position(0)"); }       
+            // NewStepTargetInfo syncronizes on calculating motionPhase, which needs to occur before updating foot position(s)...
+            double motionPhase = getMotionPhase(); 
+            // If there is some foot target queued for computation, then update robot...
             if(isNewStepReceived())
             {
-                if((DEBUG_ITER++)%5 == 0)
+                if((DEBUG_ITER++)%1 == 0)
                 {
                     if(DEBUG) { NUClear::log("\rUpdate Foot Position : FMP (%d, %d)\n", leftFootDestination.size(), rightFootDestination.size()); }                  
                 }
-                updateFootPosition(getMotionPhase(), getLeftFootDestination(), getRightFootDestination());
+                updateFootPosition(motionPhase, getLeftFootDestination(), getRightFootDestination());
             }
             if(DEBUG) { NUClear::log("Messaging: Foot Motion Planner - Update Foot Position(1)"); }
         }).disable();
@@ -96,15 +99,15 @@ namespace motion
             setDestinationTime(target.targetTime);
             setActiveForwardLimb(target.activeForwardLimb);
             setVelocityCurrent(target.velocityCurrent);
+            setLeftFootSource(target.leftFootSource);
+            setRightFootSource(target.rightFootSource);
             if(getActiveForwardLimb() == LimbID::LEFT_LEG)
-            {           
-                setLeftFootDestination(target.leftFootDestination);
-                setLeftFootSource(target.leftFootSource);
+            {  
+                setLeftFootDestination(target.leftFootDestination);                
             }
             else
-            {               
-                setRightFootDestination(target.rightFootDestination);
-                setRightFootSource(target.rightFootSource);
+            {       
+               setRightFootDestination(target.rightFootDestination);
             }
             if(DEBUG) { NUClear::log("Messaging: Foot Motion Planner - Received Target Foot Position(1)"); }
         });
@@ -140,7 +143,7 @@ namespace motion
         if(DEBUG) { NUClear::log("Messaging: Foot Motion Planner - Interpolate Transform2D"); }
         //Interpolate Transform2D from start to destination - deals with flat resolved movement in (x,y) coordinates
         if (getActiveForwardLimb() == LimbID::RIGHT_LEG) 
-        {
+        {         
             //TODO: Vector field function??
             setRightFootPosition(getRightFootSource().interpolate(getFootPhases[0], rightFootDestination));
 //std::cout << "\n\n\rRight    Interpolate\t[X= " << (rightFootDestination.x() - getRightFootSource().x()) << "]\t[Y= " << (rightFootDestination.y() - getRightFootSource().y()) << "]\n\r";
@@ -151,7 +154,7 @@ namespace motion
 //std::cout << "Right FMP\t[X= " << getRightFootPosition().x() << "]\t[Y= " << getRightFootPosition().y() << "]\n\r";          
         }
         else
-        {
+        {         
             //TODO: Vector field function??
             setLeftFootPosition(getLeftFootSource().interpolate(getFootPhases[0],   leftFootDestination));
 //std::cout << "\n\n\rLeft     Interpolate\t[X= " << (leftFootDestination.x() - getLeftFootSource().x()) << "]\t[Y= " << (leftFootDestination.y() - getLeftFootSource().y()) << "]\n\r";
@@ -160,7 +163,6 @@ namespace motion
 //std::cout << "\n\rLeft     Position\t[X= " << getLeftFootPosition().x() << "]\t[Y= " << getLeftFootPosition().y() << "]\t[A= " << getLeftFootPosition().angle() << "]\n\r";                
 //std::cout << "Foot       Phases\t[0= " << getFootPhases[0] << "]\t[1= " << getFootPhases[1] << "]\t[2= " << getFootPhases[2] << "]\n\r"; 
 //std::cout << "Left  FMP\t[X= " << getLeftFootPosition().x() << "]\t[Y= " << getLeftFootPosition().y() << "]\n\r";  
-
         }
         
         if(DEBUG) { NUClear::log("Messaging: Foot Motion Planner - Instantiate FootLocal Variables"); }
@@ -223,7 +225,7 @@ namespace motion
         }
         else
         {
-            return (0); //DEBUGGING: blank value
+            return (getTime()); //DEBUGGING: blank value
         }
     }
     void FootMotionPlanner::setDestinationTime(double inDestinationTime)
@@ -331,8 +333,8 @@ namespace motion
             return (activeForwardLimb.front());
         }
         else
-        {
-            return (activeLimbInitial); //DEBUGGING: blank value
+        {         
+            return (LimbID::INVALID); //DEBUGGING: blank value
         }
     }
     void FootMotionPlanner::setActiveForwardLimb(LimbID inActiveForwardLimb)
@@ -354,16 +356,20 @@ namespace motion
         // Obtain current system time...
         double currentTime = getTime();
         // The percentage completed of the current step, range: [0,1]...
+        //std::cout << "lol1\n\r";
+printf("\rActiveLimb Size(%d), Time Size(%d)\n", activeForwardLimb.size(), destinationTime.size());        
         double motionPhase = 1 - ((getDestinationTime() - currentTime) / stepTime);        
         // Bind phase value to range [0,1], emit status if step completed...
         if (motionPhase > 1)
         {
+            //std::cout << "lol2\n\r";
             motionPhase = std::fmod(motionPhase, 1);
             // Consume completed step instruction...
             if (getActiveForwardLimb() == LimbID::LEFT_LEG) 
             {
                 if(leftFootDestination.size() > 0)
-                {                
+                {
+                   // std::cout << "leftFootDestination.front():  " << leftFootDestination.front().x() << "\n\r";
                     leftFootDestination.pop();
                 }
             }
@@ -371,11 +377,18 @@ namespace motion
             {
                 if(rightFootDestination.size() > 0)
                 {                  
+                    // std::cout << "rightFootDestination.front(): " << rightFootDestination.front().x() << "\n\r\n\r";
                     rightFootDestination.pop();
                 }
             }      
-            activeForwardLimb.pop();
-            destinationTime.pop();
+            if(activeForwardLimb.size() > 0)
+            {
+                activeForwardLimb.pop();
+            }
+            if(destinationTime.size() > 0)
+            {
+                destinationTime.pop();
+            }
             // If there has already been an updated instruction, then process before requesting new data...
             if(!isNewStepReceived())
             {
@@ -383,6 +396,7 @@ namespace motion
                 emit(std::make_unique<FootStepCompleted>(true)); 
             }
         }
+printf("\rUpdate Foot Position : FMP (%d, %d)\n", leftFootDestination.size(), rightFootDestination.size());        
         return (motionPhase);
     }
 /*=======================================================================================================*/
