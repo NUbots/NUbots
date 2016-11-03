@@ -104,8 +104,8 @@ namespace motion
         on<Trigger<NewWalkCommand>>().then("Foot Placement Planner - Update Foot Target", [this] (const NewWalkCommand& command) 
         {         
             if(DEBUG) { NUClear::log("Messaging: Foot Placement Planner - On New Walk Command(0)"); }
-            setVelocityCommand(command.velocityTarget);
-            calculateNewStep();
+            setVelocityCommand(command.velocityTarget);           
+            calculateNewStep();          
             if(DEBUG) { NUClear::log("Messaging: Foot Placement Planner - On New Walk Command(1)"); }
         });
 
@@ -125,7 +125,7 @@ namespace motion
 //      NAME: calculateNewStep
 /*=======================================================================================================*/
     void FootPlacementPlanner::calculateNewStep() 
-    {
+    {       
         updateVelocity();
 
         // swap swing and support legs
@@ -192,7 +192,7 @@ namespace motion
             Transform2D uRightFootModded = uTorsoModded.localToWorld(uRightFootTorso);
             setSupportMass(uRightFootModded.localToWorld({-getFootOffsetCoefficient(0), getFootOffsetCoefficient(1), 0}));         
 //std::cout << "Left FPP\t[X= " << getLeftFootDestination().x() << "]\t[Y= " << getLeftFootDestination().y() << "]\n\r";
-        }              
+        }         
         emit(std::make_unique<NewStepTargetInfo>(getTime() + stepTime, activeForwardLimb, getVelocityCurrent(), getLeftFootSource(), getRightFootSource(), getLeftFootDestination(), getRightFootDestination(), getSupportMass())); //New Step Target Information
         //emit destinations for fmp and/or zmp
         //may combine NewStep and NewStepTorso
@@ -282,15 +282,15 @@ namespace motion
         {
             // stance resetted
             setTorsoPosition({-getFootOffsetCoefficient(0), 0, 0});
-            setLeftFootPosition({0, kinematicsModel.Leg.HIP_OFFSET_Y, 0});
-            setRightFootPosition({0, -kinematicsModel.Leg.HIP_OFFSET_Y, 0});
-            //setLeftFootPosition(getTorsoPosition().localToWorld({getFootOffsetCoefficient(0), kinematicsModel.Leg.HIP_OFFSET_Y - getFootOffsetCoefficient(1), 0}));
-            //setRightFootPosition(getTorsoPosition().localToWorld({getFootOffsetCoefficient(0), -kinematicsModel.Leg.HIP_OFFSET_Y + getFootOffsetCoefficient(1), 0}));
+            //setLeftFootPosition({0, kinematicsModel.Leg.HIP_OFFSET_Y, 0});
+            //setRightFootPosition({0, -kinematicsModel.Leg.HIP_OFFSET_Y, 0});
+            setLeftFootPosition(getTorsoPosition().localToWorld({getFootOffsetCoefficient(0), kinematicsModel.Leg.HIP_OFFSET_Y - getFootOffsetCoefficient(1), 0}));
+            setRightFootPosition(getTorsoPosition().localToWorld({getFootOffsetCoefficient(0), -kinematicsModel.Leg.HIP_OFFSET_Y + getFootOffsetCoefficient(1), 0}));
             initialStep = 2;
         }
 
         activeForwardLimb = activeLimbInitial;
-
+ 
         setLeftFootSource(getLeftFootPosition());
         setLeftFootDestination(getLeftFootPosition());
 

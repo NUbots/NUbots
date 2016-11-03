@@ -111,8 +111,7 @@ namespace motion
         Transform2D leftFootSource;                     // Pre-step left foot position
         Transform2D rightFootPositionTransform;         // Active right foot position
         Transform2D rightFootSource;                    // Pre-step right foot position
-        std::queue<Transform2D> leftFootDestination;    // Destination placement Transform2D left foot positions
-        std::queue<Transform2D> rightFootDestination;   // Destination placement Transform2D right foot positions
+        std::queue<Transform2D> activeLimbDestination;  // Destination placement Transform2D active foot positions
         std::queue<LimbID> activeForwardLimb;           // The leg that is 'swinging' in the step, opposite of the support foot
         LimbID activeLimbInitial;                       // TODO: Former initial non-support leg for deterministic walking approach
 
@@ -199,7 +198,7 @@ namespace motion
          * @details [long description]
          * @return [description]
          */
-        void updateFootPosition(double phase, const Transform2D& leftFootDestination, const Transform2D& rightFootDestination);
+        void updateFootPosition(double phase, const Transform2D& activeLimbDestination);
         /**
          * @brief [brief description]
          * @details [long description]
@@ -315,27 +314,14 @@ namespace motion
          * @details [long description]
          * @return [description]
          */
-        Transform2D getLeftFootDestination();
+        Transform2D getActiveLimbDestination();
         /**
          * @brief [brief description]
          * @details [long description]
          * 
          * @param inLeftFootDestination [description]
          */
-        void setLeftFootDestination(const Transform2D& inLeftFootDestination);
-        /**
-         * @brief [brief description]
-         * @details [long description]
-         * @return [description]
-         */
-        Transform2D getRightFootDestination();
-        /**
-         * @brief [brief description]
-         * @details [long description]
-         * 
-         * @param inRightFootDestination [description]
-         */
-        void setRightFootDestination(const Transform2D& inRightFootDestination);
+        void setActiveLimbDestination(const Transform2D& inActiveLimbDestination);
     };
 
 }  // motion

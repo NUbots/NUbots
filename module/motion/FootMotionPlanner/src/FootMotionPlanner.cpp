@@ -53,7 +53,7 @@ namespace motion
         , balanceEnabled(0.0), emitLocalisation(false), emitFootPosition(false)
         , updateHandle()
         , leftFootPositionTransform(), leftFootSource(), rightFootPositionTransform()
-        , rightFootSource(), leftFootDestination(), rightFootDestination()
+        , rightFootSource(), activeLimbDestination(), rightFootDestination()
         , activeForwardLimb(), activeLimbInitial(LimbID::LEFT_LEG)
         , bodyTilt(0.0), bodyHeight(0.0), stepTime(0.0), stepHeight(0.0)
         , step_height_slow_fraction(0.0f), step_height_fast_fraction(0.0f)
@@ -78,16 +78,17 @@ namespace motion
         .then("Foot Motion Planner - Update Foot Position", [this] /*(const Sensors& sensors)*/
         {
             if(DEBUG) { NUClear::log("Messaging: Foot Motion Planner - Update Foot Position(0)"); }       
-            // NewStepTargetInfo syncronizes on calculating motionPhase, which needs to occur before updating foot position(s)...
-            double motionPhase = getMotionPhase(); 
+            // NewStepTargetInfo syncronizes on calculating motionPhase, which needs to occur before updating foot position(s)... 
+            double motionPhase = getMotionPhase();           
             // If there is some foot target queued for computation, then update robot...
             if(isNewStepReceived())
             {
                 if((DEBUG_ITER++)%1 == 0)
                 {
-                    if(DEBUG) { NUClear::log("\rUpdate Foot Position : FMP (%d, %d)\n", leftFootDestination.size(), rightFootDestination.size()); }                  
+                    if(DEBUG) { NUClear::log("\rUpdate Foot Position : FMP (%d, %d)\n", activeLimbDestination.size(), rightFootDestination.size()); }                   
                 }
-                updateFootPosition(motionPhase, getLeftFootDestination(), getRightFootDestination());
+                //FIX setting up with single foot destination queue
+                updateFootPosition(motionPhase, getActiveLimbDestination(), getActiveLimbDestination());
             }
             if(DEBUG) { NUClear::log("Messaging: Foot Motion Planner - Update Foot Position(1)"); }
         }).disable();
@@ -100,15 +101,20 @@ namespace motion
             setActiveForwardLimb(target.activeForwardLimb);
             setVelocityCurrent(target.velocityCurrent);
             setLeftFootSource(target.leftFootSource);
-            setRightFootSource(target.rightFootSource);
+            setRightFootSource(target.rightFootSource);           
             if(getActiveForwardLimb() == LimbID::LEFT_LEG)
             {  
-                setLeftFootDestination(target.leftFootDestination);                
+                if(!isNewStepReceived()) { setRightFootPosition(getRightFootSource()); }
+                    //FIX setting up with single foot destination queue  
+                    setActiveLimbDestination(target.activeLimbDestination);                       
             }
             else
             {       
-               setRightFootDestination(target.rightFootDestination);
-            }
+                if(!isNewStepReceived()) {  setLeftFootPosition(getLeftFootSource());  }
+                    //FIX setting up with single foot destination queue
+                    setActiveLimbDestination(target.activeLimbDestination);
+                //setRightFootDestination(target.rightFootDestination);              
+            }             
             if(DEBUG) { NUClear::log("Messaging: Foot Motion Planner - Received Target Foot Position(1)"); }
         });
 
@@ -127,7 +133,7 @@ namespace motion
 /*=======================================================================================================*/
 //      METHOD: updateFootPosition
 /*=======================================================================================================*/
-    void FootMotionPlanner::updateFootPosition(double phase, const Transform2D& leftFootDestination, const Transform2D& rightFootDestination) 
+    void FootMotionPlanner::updateFootPosition(double phase, const Transform2D& activeLimbDestination) 
     {       
         //Instantiate unitless phases for x(=0), y(=1) and z(=2) foot motion...
         arma::vec3 getFootPhases = getFootPhase(phase, phase1Single, phase2Single);
@@ -145,7 +151,7 @@ namespace motion
         if (getActiveForwardLimb() == LimbID::RIGHT_LEG) 
         {         
             //TODO: Vector field function??
-            setRightFootPosition(getRightFootSource().interpolate(getFootPhases[0], rightFootDestination));
+            setRightFootPosition(getRightFootSource().interpolate(getFootPhases[0], activeLimbDestination));
 //std::cout << "\n\n\rRight    Interpolate\t[X= " << (rightFootDestination.x() - getRightFootSource().x()) << "]\t[Y= " << (rightFootDestination.y() - getRightFootSource().y()) << "]\n\r";
 //std::cout << "\n\n\rRight      Source\t[X= " << getRightFootSource().x() << "]\t[Y= " << getRightFootSource().y() << "]\n\r";      
 //std::cout << "Right Destination\t[X= " << rightFootDestination.x() << "]\t[Y= " << rightFootDestination.y() << "]\n\r"; 
@@ -156,10 +162,10 @@ namespace motion
         else
         {         
             //TODO: Vector field function??
-            setLeftFootPosition(getLeftFootSource().interpolate(getFootPhases[0],   leftFootDestination));
-//std::cout << "\n\n\rLeft     Interpolate\t[X= " << (leftFootDestination.x() - getLeftFootSource().x()) << "]\t[Y= " << (leftFootDestination.y() - getLeftFootSource().y()) << "]\n\r";
+            setLeftFootPosition(getLeftFootSource().interpolate(getFootPhases[0],   activeLimbDestination));
+//std::cout << "\n\n\rLeft     Interpolate\t[X= " << (activeLimbDestination.x() - getLeftFootSource().x()) << "]\t[Y= " << (activeLimbDestination.y() - getLeftFootSource().y()) << "]\n\r";
 //std::cout << "\n\n\rLeft       Source\t[X= " << getLeftFootSource().x() << "]\t[Y= " << getLeftFootSource().y() << "]\n\r";      
-//std::cout << "Left  Destination\t[X= " << leftFootDestination.x() << "]\t[Y= " << leftFootDestination.y() << "]\n\r"; 
+//std::cout << "Left  Destination\t[X= " << activeLimbDestination.x() << "]\t[Y= " << activeLimbDestination.y() << "]\n\r"; 
 //std::cout << "\n\rLeft     Position\t[X= " << getLeftFootPosition().x() << "]\t[Y= " << getLeftFootPosition().y() << "]\t[A= " << getLeftFootPosition().angle() << "]\n\r";                
 //std::cout << "Foot       Phases\t[0= " << getFootPhases[0] << "]\t[1= " << getFootPhases[1] << "]\t[2= " << getFootPhases[2] << "]\n\r"; 
 //std::cout << "Left  FMP\t[X= " << getLeftFootPosition().x() << "]\t[Y= " << getLeftFootPosition().y() << "]\n\r";  
@@ -224,7 +230,7 @@ namespace motion
             return (destinationTime.front());
         }
         else
-        {
+        {            
             return (getTime()); //DEBUGGING: blank value
         }
     }
@@ -290,38 +296,20 @@ namespace motion
 /*=======================================================================================================*/
 //      ENCAPSULATION METHOD: Left Foot Destination
 /*=======================================================================================================*/
-    Transform2D FootMotionPlanner::getLeftFootDestination()
+    Transform2D FootMotionPlanner::getActiveLimbDestination()
     {
-        if(leftFootDestination.size() > 0)
+        if(activeLimbDestination.size() > 0)
         {
-            return (leftFootDestination.front());
+            return (activeLimbDestination.front());
         }
         else
         {
             return (Transform2D({0, 0, 0})); //DEBUGGING: blank value
         }
     }
-    void FootMotionPlanner::setLeftFootDestination(const Transform2D& inLeftFootDestination)
+    void FootMotionPlanner::setActiveLimbDestination(const Transform2D& inActiveLimbDestination)
     {
-        leftFootDestination.push(inLeftFootDestination);
-    }
-/*=======================================================================================================*/
-//      ENCAPSULATION METHOD: Right Foot Destination
-/*=======================================================================================================*/
-    Transform2D FootMotionPlanner::getRightFootDestination()
-    {
-        if(rightFootDestination.size() > 0)
-        {
-            return (rightFootDestination.front());
-        }
-        else
-        {
-            return (Transform2D({0, 0, 0})); //DEBUGGING: blank value
-        }
-    }
-    void FootMotionPlanner::setRightFootDestination(const Transform2D& inRightFootDestination)
-    {
-        rightFootDestination.push(inRightFootDestination);
+        activeLimbDestination.push(inActiveLimbDestination);
     }
 /*=======================================================================================================*/
 //      ENCAPSULATION METHOD: Active Forward Limb
@@ -333,7 +321,7 @@ namespace motion
             return (activeForwardLimb.front());
         }
         else
-        {         
+        {          
             return (LimbID::INVALID); //DEBUGGING: blank value
         }
     }
@@ -346,7 +334,7 @@ namespace motion
 /*=======================================================================================================*/
     bool FootMotionPlanner::isNewStepReceived()
     {
-        return ((leftFootDestination.size() > 0) | (rightFootDestination.size() > 0));
+        return ((activeLimbDestination.size() > 0) | (destinationTime.size() > 0) | (activeForwardLimb.size() > 0));
     }
 /*=======================================================================================================*/
 //      ENCAPSULATION METHOD: Motion Phase
@@ -355,48 +343,24 @@ namespace motion
     {
         // Obtain current system time...
         double currentTime = getTime();
-        // The percentage completed of the current step, range: [0,1]...
-        //std::cout << "lol1\n\r";
-printf("\rActiveLimb Size(%d), Time Size(%d)\n", activeForwardLimb.size(), destinationTime.size());        
+        // The percentage completed of the current step, range: [0,1]...    
         double motionPhase = 1 - ((getDestinationTime() - currentTime) / stepTime);        
         // Bind phase value to range [0,1], emit status if step completed...
         if (motionPhase > 1)
         {
-            //std::cout << "lol2\n\r";
             motionPhase = std::fmod(motionPhase, 1);
-            // Consume completed step instruction...
-            if (getActiveForwardLimb() == LimbID::LEFT_LEG) 
+            if(isNewStepReceived()) // Consume completed step instructions...
             {
-                if(leftFootDestination.size() > 0)
-                {
-                   // std::cout << "leftFootDestination.front():  " << leftFootDestination.front().x() << "\n\r";
-                    leftFootDestination.pop();
-                }
-            }
-            else
-            {
-                if(rightFootDestination.size() > 0)
-                {                  
-                    // std::cout << "rightFootDestination.front(): " << rightFootDestination.front().x() << "\n\r\n\r";
-                    rightFootDestination.pop();
-                }
-            }      
-            if(activeForwardLimb.size() > 0)
-            {
+                activeLimbDestination.pop();
                 activeForwardLimb.pop();
-            }
-            if(destinationTime.size() > 0)
-            {
                 destinationTime.pop();
             }
-            // If there has already been an updated instruction, then process before requesting new data...
-            if(!isNewStepReceived())
+            else // If there has already been an updated instruction, then process before requesting new data...
             {
                 // Notify helper modules of completed footstep (trigger request for new step instruction)...
                 emit(std::make_unique<FootStepCompleted>(true)); 
             }
-        }
-printf("\rUpdate Foot Position : FMP (%d, %d)\n", leftFootDestination.size(), rightFootDestination.size());        
+        }      
         return (motionPhase);
     }
 /*=======================================================================================================*/

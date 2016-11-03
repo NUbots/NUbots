@@ -190,8 +190,8 @@ namespace motion
             subsumptionId = command.subsumptionId;
             emit<Scope::DIRECT>(std::move(std::make_unique<EnableFootPlacement>()));
             emit<Scope::DIRECT>(std::move(std::make_unique<EnableFootMotion>()));
-            //emit<Scope::DIRECT>(std::move(std::make_unique<EnableTorsoMotion>()));
-            //emit<Scope::DIRECT>(std::move(std::make_unique<EnableBalanceResponse>()));
+            emit<Scope::DIRECT>(std::move(std::make_unique<EnableTorsoMotion>()));
+            emit<Scope::DIRECT>(std::move(std::make_unique<EnableBalanceResponse>()));
             updateHandle.enable();
         });
 
