@@ -109,7 +109,10 @@ namespace motion
         .then("Torso Motion Planner - Update Torso Position", [this] /*(const Sensors& sensors)*/
         {
             if(DEBUG) { NUClear::log("Messaging: Torso Motion Planner - Update Torso Position(0)"); }
-                updateTorsoPosition();
+                if(isNewStepAvailable())
+                {                  
+                    updateTorsoPosition();
+                }
             if(DEBUG) { NUClear::log("Messaging: Torso Motion Planner - Update Torso Position(1)"); }
         }).disable();
 
@@ -124,12 +127,12 @@ namespace motion
         //In the event of a new foot step target specified by the foot placement planning module...
         on<Trigger<NewFootTargetInfo>>().then("Torso Motion Planner - Received Footstep Info", [this] (const NewFootTargetInfo& info) 
         {            
-            if(DEBUG) { NUClear::log("Messaging: Torso Motion Planner - Received Footstep Info(0)"); }
+            if(DEBUG) { NUClear::log("Messaging: Torso Motion Planner - Received Footstep Info(0)"); }          
                 setLeftFootSource(info.leftFootSource);             //Queued    : FPP
                 setRightFootSource(info.rightFootSource);           //Queued    : FPP
-                setLeftFootDestination(info.leftFootDestination);   //Queued    : FPP
+                setLeftFootDestination(info.leftFootDestination);   //Queued    : FPP                 
                 setRightFootDestination(info.rightFootDestination); //Queued    : FPP
-                setTorsoSource(getTorsoDestination());              //Internal  : TMP
+                setTorsoSource(getTorsoDestination());              //Internal  : TMP                
            if(DEBUG) { NUClear::log("Messaging: Torso Motion Planner - Received Footstep Info(1)"); }
         });
 
@@ -145,17 +148,12 @@ namespace motion
         on<Trigger<FootStepCompleted>>().then("Torso Motion Planner - Completed Queued Foot Step Target", [this]
         {
             if(DEBUG) { NUClear::log("Messaging: Torso Motion Planner - Completed Queued Foot Step Target(0)"); }
-                //Release CurrentFootTargetInfo from queued step as it is now completed
-// std::cout << "\n\r\tLFS: " <<  (leftFootSource.size()) << "\n\r"; 
-// std::cout << "\tRFS: " <<  (rightFootSource.size()) << "\n\r";
-// std::cout << "\tLFD: " <<  (leftFootDestination.size()) << "\n\r";
-// std::cout << "\tRFD: " <<  (rightFootDestination.size()) << "\n\r";
-// std::cout << "\tQSM: " <<  (q_supportMass.size()) << "\n\r";             
+                //Release CurrentFootTargetInfo from queued step as it is now completed                   
                 if (leftFootSource.size() > 0)          { leftFootSource.pop();         }
                 if (rightFootSource.size() > 0)         { rightFootSource.pop();        }
-                if (leftFootDestination.size() > 0)     { leftFootDestination.pop();    }
+                if (leftFootDestination.size() > 0)     { leftFootDestination.pop();    }                  
                 if (rightFootDestination.size() > 0)    { rightFootDestination.pop();   }
-                if (q_supportMass.size() > 0)           { q_supportMass.pop();          }         
+                if (q_supportMass.size() > 0)           { q_supportMass.pop();          }                                     
             if(DEBUG) { NUClear::log("Messaging: Torso Motion Planner - Completed Queued Foot Step Target(1)"); }
         });
 
@@ -287,6 +285,32 @@ namespace motion
     {
         zmpParameters = inZmpParams;
     }            
+/*=======================================================================================================*/
+//      ENCAPSULATION METHOD: New Step Available
+/*=======================================================================================================*/
+    bool TorsoMotionPlanner::isNewStepAvailable()
+    {    
+        return (
+                    (leftFootSource.size() > 0)             && 
+                    (rightFootSource.size() > 0)            && 
+                    (leftFootDestination.size() > 0)        && 
+                    (rightFootDestination.size() > 0)       &&
+                    (q_supportMass.size() > 0)                         
+               );
+    }    
+/*=======================================================================================================*/
+//      ENCAPSULATION METHOD: New Step Received
+/*=======================================================================================================*/
+    bool TorsoMotionPlanner::isNewStepReceived()
+    {             
+        return (
+                    (leftFootSource.size() > 0)                                     && 
+                    (leftFootSource.size() == rightFootSource.size())               && 
+                    (rightFootSource.size() == leftFootDestination.size())          && 
+                    (leftFootDestination.size() == rightFootDestination.size())     &&
+                    (rightFootDestination.size() == q_supportMass.size())                         
+               );
+    }    
 /*=======================================================================================================*/
 //      ENCAPSULATION METHOD: Torso Position
 /*=======================================================================================================*/

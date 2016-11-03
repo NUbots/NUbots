@@ -96,7 +96,7 @@ namespace motion
         .then("Balance Response Planner - Update Robot Posture", [this] (const Sensors& sensors)
         {
             if(DEBUG) { NUClear::log("Messaging: Balance Kinematic Response - Update Robot Posture(0)"); }
-            updateBody(sensors);
+                updateBody(sensors);
             if(DEBUG) { NUClear::log("Messaging: Balance Kinematic Response - Update Robot Posture(1)"); }
         }).disable();
 
@@ -104,13 +104,19 @@ namespace motion
         on<Trigger<FootMotionUpdate>>().then("Balance Response Planner - Received Update (Active Foot Position) Info", [this] (const FootMotionUpdate& info)
         {
             if(DEBUG) { NUClear::log("Messaging: Balance Kinematic Response - Received Update (Active Foot Position) Info(0)"); }
-            setMotionPhase(info.phase);
-            setActiveForwardLimb(info.activeForwardLimb);
-            setLeftFootPosition2D(info.leftFoot2D);
-            setRightFootPosition2D(info.rightFoot2D);   
-            // Transform feet positions to be relative to the robot torso...            
-            setLeftFootPosition(info.leftFoot3D.worldToLocal(getTorsoPosition3D()));
-            setRightFootPosition(info.rightFoot3D.worldToLocal(getTorsoPosition3D()));          
+                setMotionPhase(info.phase);
+// std::cout << "\n\rSet Phase\n\r";
+                setActiveForwardLimb(info.activeForwardLimb);
+// std::cout << "\n\rSet Forward Limb\n\r";           
+                setLeftFootPosition2D(info.leftFoot2D);
+// std::cout << "\n\rSet  LeftFoot\n\r";          
+                setRightFootPosition2D(info.rightFoot2D);  
+// std::cout << "\n\rSet RightFoot\n\r";           
+                // Transform feet positions to be relative to the robot torso...            
+                setLeftFootPosition(info.leftFoot3D.worldToLocal(getTorsoPosition3D()));
+// std::cout << "\n\rSet Left  Foot\n\r";           
+                setRightFootPosition(info.rightFoot3D.worldToLocal(getTorsoPosition3D()));
+// std::cout << "\n\rSet Right Foot\n\r";                     
             if(DEBUG) { NUClear::log("Messaging: Balance Kinematic Response - Received Update (Active Foot Position) Info(1)"); }
         });
 
@@ -118,9 +124,12 @@ namespace motion
         on<Trigger<TorsoMotionUpdate>>().then("Balance Response Planner - Received Update (Active Torso Position) Info", [this] (const TorsoMotionUpdate& info)
         {
             if(DEBUG) { NUClear::log("Messaging: Balance Kinematic Response - Received Update (Active Torso Position) Info(0)"); }
-            setTorsoPositionLegs(info.frameArms);
-            setTorsoPositionArms(info.frameLegs);
-            setTorsoPosition3D(info.frame3D);
+                setTorsoPositionLegs(info.frameArms);
+// std::cout << "\n\rSet Torso 1\n\r";           
+                setTorsoPositionArms(info.frameLegs);
+// std::cout << "\n\rSet Torso 2\n\r";              
+                setTorsoPosition3D(info.frame3D);
+// std::cout << "\n\rSet Torso 3\n\r";              
             if(DEBUG) { NUClear::log("Messaging: Balance Kinematic Response - Received Update (Active Torso Position) Info(1)"); }
         });
 
@@ -439,7 +448,7 @@ namespace motion
     {
         return (activeForwardLimb);
     }
-    void BalanceKinematicResponse::setActiveForwardLimb(LimbID inActiveForwardLimb)
+    void BalanceKinematicResponse::setActiveForwardLimb(const LimbID& inActiveForwardLimb)
     {
         activeForwardLimb = inActiveForwardLimb;
     }      

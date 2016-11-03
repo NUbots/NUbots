@@ -233,7 +233,7 @@ namespace motion
          * 
          * @param config [description]
          */
-        void calculateNewStep();
+        void calculateNewStep(const Transform2D& inVelocityCurrent, const Transform2D& inTorsoSource, const Transform2D& inTorsoPosition);
         /**
          * @brief [brief description]
          * @details [long description]
@@ -243,7 +243,7 @@ namespace motion
          * 
          * @return [description]
          */
-        Transform2D getNewFootTarget(const Transform2D& velocity, const LimbID& swingLeg);
+        Transform2D getNewFootTarget(const Transform2D& inVelocity, const LimbID& inActiveForwardLimb);
         /**
          * @brief [brief description]
          * @details [long description]
@@ -325,6 +325,18 @@ namespace motion
          * @param inTorsoPosition [description]
          */
         void setTorsoDestination(const Transform2D& inTorsoPosition);
+        /**
+         * @brief [brief description]
+         * @details [long description]
+         * @return [description]
+         */
+        LimbID getActiveForwardLimb();
+        /**
+         * @brief [brief description]
+         * @details [long description]
+         * @return [description]
+         */
+        void setActiveForwardLimb(const LimbID& inActiveForwardLimb);
         /**
          * @brief [brief description]
          * @details [long description]

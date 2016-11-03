@@ -120,11 +120,11 @@ namespace motion
             if(isNewPostureReceived()) 
             {                 
                 if(DEBUG) { NUClear::log("New Posture(%d)", DEBUG_ITER++); }
-//std::cout << "\n\rMWE: Left     Foot\n\r\t[\n\r\t" << getLeftFootPosition()  << "\t]";  
-//std::cout << "\n\rMWE: Right    Foot\n\r\t[\n\r\t" << getRightFootPosition() << "\t]";    
-//std::cout << "MWE: Torso PosArms\n\r\t[\n\r\t" << getTorsoPositionArms() << "\t]\n\r";       
-//std::cout << "MWE: Torso PosLegs\n\r\t[\n\r\t" << getTorsoPositionLegs() << "\t]\n\r";        
-//std::cout << "MWE: Torso   Pos3D\n\r\t[\n\r\t" << getTorsoPosition3D()   << "\t]\n\r";                
+// std::cout << "\n\rMWE: Left     Foot\n\r\t[\n\r\t" << getLeftFootPosition()  << "\t]";  
+// std::cout << "\n\rMWE: Right    Foot\n\r\t[\n\r\t" << getRightFootPosition() << "\t]";    
+// std::cout << "MWE: Torso PosArms\n\r\t[\n\r\t" << getTorsoPositionArms() << "\t]\n\r";       
+// std::cout << "MWE: Torso PosLegs\n\r\t[\n\r\t" << getTorsoPositionLegs() << "\t]\n\r";        
+// std::cout << "MWE: Torso   Pos3D\n\r\t[\n\r\t" << getTorsoPosition3D()   << "\t]\n\r";                
                 emit(std::move(updateWaypoints(/*sensors*/))); 
             }
             if(DEBUG) { NUClear::log("WalkEngine - Update Waypoints(1)"); }
@@ -142,17 +142,17 @@ namespace motion
         on<Trigger<BalanceBodyUpdate>>().then("Walk Engine - Received update (Balanced Robot Posture) Info", [this](const BalanceBodyUpdate& info)
         {
             if(DEBUG) { NUClear::log("WalkEngine - Trigger BalanceBodyUpdate(0)"); }
-            setLeftFootPosition(info.leftFoot);
-            setRightFootPosition(info.rightFoot);
-            setTorsoPositionArms(info.frameArms);
-            setTorsoPositionLegs(info.frameLegs);
-            setTorsoPosition3D(info.frame3D);
-            setLArmPosition(info.armLPosition);
-            setRArmPosition(info.armRPosition);
-            if(!isNewPostureReceived()) 
-            {
-                 setNewPostureReceived(true); 
-            }
+                setNewPostureReceived(false);
+
+                setLeftFootPosition(info.leftFoot);
+                setRightFootPosition(info.rightFoot);
+                setTorsoPositionArms(info.frameArms);
+                setTorsoPositionLegs(info.frameLegs);
+                setTorsoPosition3D(info.frame3D);
+                setLArmPosition(info.armLPosition);
+                setRArmPosition(info.armRPosition);
+                
+                setNewPostureReceived(true); 
             if(DEBUG) { NUClear::log("WalkEngine - Trigger BalanceBodyUpdate(1)"); }
         });
 

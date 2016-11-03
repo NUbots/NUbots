@@ -197,7 +197,7 @@ namespace motion
          * @details [long description]
          * @return [description]
          */
-        void updateFootPosition(double phase, const Transform2D& activeLimbDestination);
+        void updateFootPosition(double inPhase, const Transform2D& inActiveLimbSource, const LimbID& inActiveForwardLimb, const Transform2D& inActiveLimbDestination);
         /**
          * @brief [brief description]
          * @details [long description]
@@ -230,6 +230,12 @@ namespace motion
          * @details [long description]
          * @return [description]
          */
+        bool isNewStepAvailable();
+        /**
+         * @brief [brief description]
+         * @details [long description]
+         * @return [description]
+         */
         bool isNewStepReceived();
         /**
          * @brief [brief description]
@@ -242,7 +248,7 @@ namespace motion
          * @details [long description]
          * @return [description]
          */
-        void setActiveForwardLimb(LimbID inActiveForwardLimb);
+        void setActiveForwardLimb(const LimbID& inActiveForwardLimb);
         /**
          * @brief [brief description]
          * @details [long description]

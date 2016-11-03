@@ -98,7 +98,7 @@ namespace motion
         updateHandle = on<Trigger<FootStepRequested>>().then("Foot Placement Planner - Calculate Target Foot Position", [this]
         {
             if(DEBUG) { NUClear::log("Messaging: Foot Placement Planner - Calculate Target Foot Position(0)"); }
-            calculateNewStep();
+            calculateNewStep(getVelocityCurrent(), getTorsoSource(), getTorsoPosition());
             if(DEBUG) { NUClear::log("Messaging: Foot Placement Planner - Calculate Target Foot Position(1)"); }
         }).disable();
 
@@ -106,7 +106,7 @@ namespace motion
         {         
             if(DEBUG) { NUClear::log("Messaging: Foot Placement Planner - On New Walk Command(0)"); }
             setVelocityCommand(command.velocityTarget);           
-            calculateNewStep();          
+            calculateNewStep(getVelocityCurrent(), getTorsoSource(), getTorsoPosition());          
             if(DEBUG) { NUClear::log("Messaging: Foot Placement Planner - On New Walk Command(1)"); }
         });
 
@@ -125,12 +125,12 @@ namespace motion
 /*=======================================================================================================*/
 //      NAME: calculateNewStep
 /*=======================================================================================================*/
-    void FootPlacementPlanner::calculateNewStep() 
+    void FootPlacementPlanner::calculateNewStep(const Transform2D& inVelocityCurrent, const Transform2D& inTorsoSource, const Transform2D& inTorsoPosition) 
     {       
         updateVelocity();
 
         // swap swing and support legs
-        activeForwardLimb = (activeForwardLimb == LimbID::LEFT_LEG) ? LimbID::RIGHT_LEG : LimbID::LEFT_LEG;
+        setActiveForwardLimb((getActiveForwardLimb() == LimbID::LEFT_LEG) ? LimbID::RIGHT_LEG : LimbID::LEFT_LEG);
 
         setLeftFootSource(getLeftFootDestination());
         setRightFootSource(getRightFootDestination());
@@ -150,7 +150,7 @@ namespace motion
             setVelocityCommand(arma::zeros(3));
 
             // Stop with feet together by targetting swing leg next to support leg
-            if (activeForwardLimb == LimbID::RIGHT_LEG) 
+            if (getActiveForwardLimb() == LimbID::RIGHT_LEG) 
             {
                 setRightFootDestination(getLeftFootSource().localToWorld(-2 * uLRFootOffset));
             }
@@ -161,22 +161,22 @@ namespace motion
         }
         else 
         {
-            // normal walk, advance steps
-            if (activeForwardLimb == LimbID::RIGHT_LEG) 
+            // normal walk, advance steps       
+            if (getActiveForwardLimb() == LimbID::RIGHT_LEG) 
             {
-                setRightFootDestination(getNewFootTarget(getVelocityCurrent(), activeForwardLimb));
+                setRightFootDestination(getNewFootTarget(inVelocityCurrent, getActiveForwardLimb()));
             }
             else 
             {
-                setLeftFootDestination(getNewFootTarget(getVelocityCurrent(),  activeForwardLimb));
+                setLeftFootDestination(getNewFootTarget(inVelocityCurrent,  getActiveForwardLimb()));
             }
-        }
+        }       
         // apply velocity-based support point modulation for SupportMass
-        if (activeForwardLimb == LimbID::RIGHT_LEG) 
+        if (getActiveForwardLimb() == LimbID::RIGHT_LEG) 
         {
-            Transform2D uLeftFootTorso = getTorsoSource().worldToLocal(getLeftFootSource());
-//std::cout << "\n\rMWE: TorsoSource() \t[X= " << getTorsoSource().x() << "]\t[Y= " << getTorsoSource().y() << "]\n\r";              
-            Transform2D uTorsoModded = getTorsoPosition().localToWorld({supportMod[0], supportMod[1], 0});
+            Transform2D uLeftFootTorso = inTorsoSource.worldToLocal(getLeftFootSource());
+//std::cout << "\n\rMWE: TorsoSource() \t[X= " << inTorsoSource.x() << "]\t[Y= " << inTorsoSource.y() << "]\n\r";              
+            Transform2D uTorsoModded = inTorsoPosition.localToWorld({supportMod[0], supportMod[1], 0});
 //std::cout << "\n\rMWE: TorsoPosition() \t[X= " << getTorsoPosition().x() << "]\t[Y= " << getTorsoPosition().y() << "]\n\r";   
 //std::cout << "\n\rMWE: uTorsoModded \t[X= " << uTorsoModded.x() << "]\t[Y= " << uTorsoModded.y() << "]\n\r";                
             Transform2D uLeftFootModded = uTorsoModded.localToWorld(uLeftFootTorso);
@@ -184,36 +184,36 @@ namespace motion
         }
         else 
         {
-            Transform2D uRightFootTorso = getTorsoSource().worldToLocal(getRightFootSource());
-//std::cout << "\n\rMWE: TorsoSource() \t[X= " << getTorsoSource().x() << "]\t[Y= " << getTorsoSource().y() << "]\n\r";             
-            Transform2D uTorsoModded = getTorsoPosition().localToWorld({supportMod[0], supportMod[1], 0});
+            Transform2D uRightFootTorso = inTorsoSource.worldToLocal(getRightFootSource());
+//std::cout << "\n\rMWE: TorsoSource() \t[X= " << inTorsoSource.x() << "]\t[Y= " << inTorsoSource.y() << "]\n\r";             
+            Transform2D uTorsoModded = inTorsoPosition.localToWorld({supportMod[0], supportMod[1], 0});
 //std::cout << "\n\rMWE: TorsoPosition() \t[X= " << getTorsoPosition().x() << "]\t[Y= " << getTorsoPosition().y() << "]\n\r";   
 //std::cout << "\n\rMWE: uTorsoModded \t[X= " << uTorsoModded.x() << "]\t[Y= " << uTorsoModded.y() << "]\n\r";                     
             Transform2D uRightFootModded = uTorsoModded.localToWorld(uRightFootTorso);
             setSupportMass(uRightFootModded.localToWorld({-getFootOffsetCoefficient(0), getFootOffsetCoefficient(1), 0}));  
-        }         
-        emit(std::make_unique<NewStepTargetInfo>(getTime() + stepTime, getVelocityCurrent(), getSupportMass())); //New Step Target Information
-        emit(std::make_unique<NewFootTargetInfo>(getLeftFootSource(), getRightFootSource(), activeForwardLimb, getLeftFootDestination(), getRightFootDestination()));  //New Foot Target Information
+        }                   
+        emit(std::make_unique<NewStepTargetInfo>(getTime() + stepTime, inVelocityCurrent, getSupportMass())); //New Step Target Information
+        emit(std::make_unique<NewFootTargetInfo>(getLeftFootSource(), getRightFootSource(), getActiveForwardLimb(), getLeftFootDestination(), getRightFootDestination()));  //New Foot Target Information
         //emit destinations for fmp and/or zmp
         //may combine NewStep and NewStepTorso
     }
 /*=======================================================================================================*/
 //      METHOD: getNewFootTarget
 /*=======================================================================================================*/
-    Transform2D FootPlacementPlanner::getNewFootTarget(const Transform2D& velocity, const LimbID& activeForwardLimb) 
+    Transform2D FootPlacementPlanner::getNewFootTarget(const Transform2D& inVelocity, const LimbID& inActiveForwardLimb) 
     {   
-//std::cout << "\n\rVelocity\t[X= " << velocity.x() << "]\t[Y= " << velocity.y() << "]\n\r";
+//std::cout << "\n\rVelocity\t[X= " << inVelocity.x() << "]\t[Y= " << inVelocity.y() << "]\n\r";
 //std::cout << "Left Source\t[X= " << getLeftFootSource().x() << "]\t[Y= " << getLeftFootSource().y() << "]\n\r";
 //std::cout << "Right Source\t[X= " << getRightFootSource().x() << "]\t[Y= " << getRightFootSource().y() << "]\n\r";
         // Negative if right leg to account for the mirroring of the foot target
-        int8_t sign = activeForwardLimb == LimbID::LEFT_LEG ? 1 : -1;
+        int8_t sign = (inActiveForwardLimb == LimbID::LEFT_LEG) ? 1 : -1;
         // Get midpoint between the two feet
         Transform2D midPoint = getLeftFootSource().interpolate(0.5, getRightFootSource());  
 //std::cout << "midPoint\t[X= " << midPoint.x() << "]\t[Y= " << midPoint.y() << "]\n\r";     
         // Get midpoint 1.5 steps in future
         // Note: The reason for 1.5 rather than 1 is because it takes an extra 0.5 steps
         // for the torso to reach a given position when you want both feet together   
-        Transform2D forwardPoint = midPoint.localToWorld(1.5 * velocity);     
+        Transform2D forwardPoint = midPoint.localToWorld(1.5 * inVelocity);     
 //std::cout << "forwardPoint\t[X= " << forwardPoint.x() << "]\t[Y= " << forwardPoint.y() << "]\n\r";              
         // Offset to towards the foot in use to get the target location          
         Transform2D footTarget = forwardPoint.localToWorld(sign * uLRFootOffset);   
@@ -221,7 +221,7 @@ namespace motion
 
         // Start applying step limits:
         // Get the vector between the feet and clamp the components between the min and max step limits
-        setSupportMass(activeForwardLimb == LimbID::LEFT_LEG ? getRightFootSource() : getLeftFootSource());       
+        setSupportMass((inActiveForwardLimb == LimbID::LEFT_LEG) ? getRightFootSource() : getLeftFootSource());       
         Transform2D feetDifference = getSupportMass().worldToLocal(footTarget);
         feetDifference.x()     = std::min(std::max(feetDifference.x(),            stepLimits(0,0)), stepLimits(0,1));
         feetDifference.y()     = std::min(std::max(feetDifference.y()     * sign, stepLimits(1,0)), stepLimits(1,1)) * sign;
@@ -289,7 +289,7 @@ namespace motion
             initialStep = 2;
         }
 
-        activeForwardLimb = activeLimbInitial;
+        setActiveForwardLimb(activeLimbInitial);
  
         setLeftFootSource(getLeftFootPosition());
         setLeftFootDestination(getLeftFootPosition());
@@ -322,7 +322,7 @@ namespace motion
         setVelocityCommand(arma::zeros(3));
 
         // gGyro stabilization variables
-        activeForwardLimb = activeLimbInitial;
+        setActiveForwardLimb(activeLimbInitial);
         beginStepTime = getTime();
         initialStep = 2;
 
@@ -396,6 +396,17 @@ namespace motion
     {
         torsoPositionDestination = inTorsoDestination;
     }
+/*=======================================================================================================*/
+//      ENCAPSULATION METHOD: Active Forward Limb
+/*=======================================================================================================*/
+    LimbID FootPlacementPlanner::getActiveForwardLimb()
+    {
+        return (activeForwardLimb);
+    }
+    void FootPlacementPlanner::setActiveForwardLimb(const LimbID& inActiveForwardLimb)
+    {
+        activeForwardLimb = inActiveForwardLimb;
+    }          
 /*=======================================================================================================*/
 //      ENCAPSULATION METHOD: Support Mass
 /*=======================================================================================================*/

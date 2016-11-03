@@ -309,6 +309,18 @@ namespace motion
         /**
          * @brief [brief description]
          * @details [long description]
+         * @return [description]
+         */
+        bool isNewStepAvailable();
+        /**
+         * @brief [brief description]
+         * @details [long description]
+         * @return [description]
+         */
+        bool isNewStepReceived();
+        /**
+         * @brief [brief description]
+         * @details [long description]
          * 
          * @param inTorsoPosition [description]
          */

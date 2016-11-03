@@ -482,7 +482,7 @@ namespace motion
          * @details [long description]
          * @return [description]
          */
-        void setActiveForwardLimb(LimbID inActiveForwardLimb);
+        void setActiveForwardLimb(const LimbID& inActiveForwardLimb);
         /**
          * @brief [brief description]
          * @details [long description]
