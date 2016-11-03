@@ -65,7 +65,7 @@ namespace motion
     using message::support::SaveConfiguration;
     using message::support::Configuration;
 
-    using utility::motion::kinematics::calculateLegJoints;
+    using utility::motion::kinematics::calculateLegJointsTeamDarwin; //TODO: advised to change to calculateLegJoints (no TeamDarwin)
     using utility::math::matrix::Transform2D;
     using utility::math::matrix::Transform3D;
     using utility::math::matrix::Rotation3D;
@@ -147,6 +147,8 @@ namespace motion
             setTorsoPositionArms(info.frameArms);
             setTorsoPositionLegs(info.frameLegs);
             setTorsoPosition3D(info.frame3D);
+            setLArmPosition(info.armLPosition);
+            setRArmPosition(info.armRPosition);
             if(!isNewPostureReceived()) 
             {
                  setNewPostureReceived(true); 
@@ -269,7 +271,7 @@ namespace motion
     std::unique_ptr<std::vector<ServoCommand>> WalkEngine::updateWaypoints() 
     {
         // Received foot positions are mapped relative to robot torso...
-        auto joints = calculateLegJoints(kinematicsModel, getLeftFootPosition(), getRightFootPosition());
+        auto joints = calculateLegJointsTeamDarwin(kinematicsModel, getLeftFootPosition(), getRightFootPosition()); //TODO: advised to change to calculateLegJoints (no TeamDarwin)
         auto robotWaypoints = motionLegs(joints);
         auto upperWaypoints = motionArms();
 

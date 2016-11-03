@@ -7,22 +7,22 @@ stance:
   arms:
       left:
         start:
-          -  135 * pi / 180 # Shoulder Pitch
+          -  115 * pi / 180 # Shoulder Pitch
           -   0 * pi / 180 # Shoulder Roll
-          - -140 * pi / 180 # Elbow
+          - -110 * pi / 180 # Elbow
         end:
-          -  135 * pi / 180 # Shoulder Pitch
-          -   0 * pi / 180 # Shoulder Roll
-          - -140 * pi / 180 # Elbow
+          -   95 * pi / 180 # Shoulder Pitch
+          -    0 * pi / 180 # Shoulder Roll
+          - -100 * pi / 180 # Elbow
       right:
         start:
-          -   135 * pi / 180 # Shoulder Pitch
-          -   0 * pi / 180 # Shoulder Roll
-          - -140 * pi / 180 # Elbow
+          -  115 * pi / 180 # Shoulder Pitch
+          -    0 * pi / 180 # Shoulder Roll
+          - -110 * pi / 180 # Elbow
         end:
-          -  135 * pi / 180 # Shoulder Pitch
-          -   0 * pi / 180 # Shoulder Roll
-          - -140 * pi / 180 # Elbow
+          -   95 * pi / 180 # Shoulder Pitch
+          -    0 * pi / 180 # Shoulder Roll
+          - -100 * pi / 180 # Elbow
 
   foot_offset:
     - -0.025 # The distance the ankles are offset from the torso, in meters.
@@ -73,7 +73,7 @@ walk_cycle:
   # TODO: balance params disabled until they are futher understood
   balance:
     enabled: true
-    hip_compensation: false
+    hip_compensation: true
     ankle_compensation: false
     support_compensation: false
     amplitude: 1.0

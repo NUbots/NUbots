@@ -50,20 +50,26 @@ namespace motion
         Transform2D frameArms;
         Transform2D frameLegs;
         Transform3D frame3D;
+        arma::vec3 armLPosition;
+        arma::vec3 armRPosition;
         BalanceBodyUpdate(
                             double phase,
                             const Transform3D& leftFoot,  
                             const Transform3D& rightFoot,
                             const Transform2D& inFrameArms,
                             const Transform2D& inFrameLegs,
-                            const Transform3D& inFrame3D
+                            const Transform3D& inFrame3D,
+                            const arma::vec3& armLPosition,
+                            const arma::vec3& armRPosition
                          )
             : phase(phase)
             , leftFoot(leftFoot)
             , rightFoot(rightFoot)
             , frameArms(inFrameArms) 
             , frameLegs(inFrameLegs)
-            , frame3D(inFrame3D) {}
+            , frame3D(inFrame3D) 
+            , armLPosition(armLPosition) 
+            , armRPosition(armRPosition) {}
     };
 
     struct EnableBalanceResponse

@@ -53,7 +53,8 @@ namespace motion
     : Reactor(std::move(environment)) 
         , DEBUG(false), DEBUG_ITER(0), initialStep(0)
         , balanceEnabled(false)
-        , hipCompensationEnabled(false), ankleCompensationEnabled(false), supportCompensationEnabled(false)
+        , hipCompensationEnabled(false), ankleCompensationEnabled(false)
+        , toeTipCompensationEnabled(false), supportCompensationEnabled(false)
         , emitLocalisation(false), emitFootPosition(false)
         , updateHandle(), generateStandScriptReaction()
         , torsoPositionsTransform()
@@ -105,12 +106,12 @@ namespace motion
             if(DEBUG) { NUClear::log("Messaging: Balance Kinematic Response - Received Update (Active Foot Position) Info(0)"); }
             setMotionPhase(info.phase);
             setActiveForwardLimb(info.activeForwardLimb);
-            // Transform feet positions to be relative to the robot torso...
 //std::cout << "\n\rMWE: Left     Foot\n\r\t[\n\r\t" << info.leftFoot  << "\t]";  
 //std::cout << "\n\rMWE: Right    Foot\n\r\t[\n\r\t" << info.rightFoot << "\t]";  
 //std::cout << "\n\rMWE: TorsoPosition 3D\n\r\t[\n\r\t" << getTorsoPosition3D() << "\t]";
             setLeftFootPosition2D(info.leftFoot2D);
-            setRightFootPosition2D(info.rightFoot2D);               
+            setRightFootPosition2D(info.rightFoot2D);   
+            // Transform feet positions to be relative to the robot torso...            
             setLeftFootPosition(info.leftFoot3D.worldToLocal(getTorsoPosition3D()));
             setRightFootPosition(info.rightFoot3D.worldToLocal(getTorsoPosition3D()));
 //std::cout << "\n\rMWE: Left     Foot\n\r\t[\n\r\t" << getLeftFootPosition()  << "\t]";  
@@ -170,6 +171,17 @@ namespace motion
             updateHandle.disable(); 
         });
     }
+/*=======================================================================================================*/
+//      METHOD: toeCompensation
+/*=======================================================================================================*/
+    void BalanceKinematicResponse::toeCompensation(/*const Sensors& sensors*/) 
+    {
+        //If feature enabled, apply balance compensation through support actuator...
+        if (toeTipCompensationEnabled) 
+        {
+            //
+        }
+    }    
 /*=======================================================================================================*/
 //      METHOD: hipCompensation
 /*=======================================================================================================*/
@@ -245,7 +257,7 @@ namespace motion
             //emit(graph("Left  foot position",  leftFootTorso.translation()));
         }  
 
-        emit(std::make_unique<BalanceBodyUpdate>(getMotionPhase(), getLeftFootPosition(), getRightFootPosition(), getTorsoPositionArms(), getTorsoPositionLegs(), getTorsoPosition3D()));
+        emit(std::make_unique<BalanceBodyUpdate>(getMotionPhase(), getLeftFootPosition(), getRightFootPosition(), getTorsoPositionArms(), getTorsoPositionLegs(), getTorsoPosition3D(), getLArmPosition(), getRArmPosition()));
     }      
 /*=======================================================================================================*/
 //      METHOD: updateLowerBody
@@ -280,7 +292,6 @@ namespace motion
         Transform2D rightLegTorso = getTorsoPositionArms().worldToLocal(getRightFootPosition2D());
         double leftMinValue = 5 * M_PI / 180 + std::max(0.0, rotLeftA) / 2 + std::max(0.0, leftLegTorso.y() - 0.04) / 0.02 * (6 * M_PI / 180);
         double rightMinValue = -5 * M_PI / 180 - std::max(0.0, rotRightA) / 2 - std::max(0.0, -rightLegTorso.y() - 0.04) / 0.02 * (6 * M_PI / 180);
-        
         // update shoulder pitch to move arm away from body
         setLArmPosition(arma::vec3({getLArmPosition()[0], std::max(leftMinValue,  getLArmPosition()[1]), getLArmPosition()[2]}));
         setRArmPosition(arma::vec3({getRArmPosition()[0], std::min(rightMinValue, getRArmPosition()[1]), getRArmPosition()[2]}));
@@ -288,7 +299,7 @@ namespace motion
 /*=======================================================================================================*/
 //      NAME: localise
 /*=======================================================================================================*/
-    void BalanceKinematicResponse::localise(Transform2D position) 
+    void BalanceKinematicResponse::localise(Transform2D position)
     {
         // emit position as a fake localisation
         auto localisation = std::make_unique<std::vector<message::localisation::Self>>();

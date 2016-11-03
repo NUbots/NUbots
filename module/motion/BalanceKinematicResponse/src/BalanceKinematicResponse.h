@@ -102,6 +102,7 @@ namespace motion
         bool balanceEnabled;                //
         bool hipCompensationEnabled;        //
         bool ankleCompensationEnabled;      //
+        bool toeTipCompensationEnabled;     //
         bool supportCompensationEnabled;    //
         bool emitLocalisation;              //
         bool emitFootPosition;              //
@@ -276,6 +277,12 @@ namespace motion
          * @return [description]
          */
         void updateUpperBody(/*const Sensors& sensors*/);
+        /**
+         * @brief [brief description]std::pair
+         * @details [long description]
+         * @return [description]
+         */
+        void toeCompensation(/*const Sensors& sensors*/);
         /**
          * @brief [brief description]
          * @details [long description]
