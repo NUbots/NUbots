@@ -45,34 +45,45 @@ namespace motion
     struct NewStepTargetInfo
     {
         double targetTime;
-        LimbID activeForwardLimb;
         Transform2D velocityCurrent;
+        Transform2D supportMass;
+        NewStepTargetInfo(  
+                            double inTargetTime, 
+                            const Transform2D& inVelocityCurrent,
+                            const Transform2D& inSupportMass
+                         )
+            : targetTime(inTargetTime)
+            , velocityCurrent(inVelocityCurrent) 
+            , supportMass(inSupportMass) {}
+    };
+
+    struct NewFootTargetInfo
+    {
         Transform2D leftFootSource;
         Transform2D rightFootSource;
+        LimbID activeForwardLimb;
         Transform2D leftFootDestination;
         Transform2D rightFootDestination;
-        Transform2D supportMass;
-        NewStepTargetInfo(  double targetTime, 
-                            const LimbID& activeForwardLimb,
-                            const Transform2D& velocityCurrent,
-                            const Transform2D& leftFootSource, 
-                            const Transform2D& rightFootSource,
-                            const Transform2D& leftFootDestination,
-                            const Transform2D& rightFootDestination,
-                            const Transform2D& supportMass)
-            : targetTime(targetTime)
-            , activeForwardLimb(activeForwardLimb)
-            , velocityCurrent(velocityCurrent)
-            , leftFootSource(leftFootSource)
-            , rightFootSource(rightFootSource)
-            , leftFootDestination(leftFootDestination)
-            , rightFootDestination(rightFootDestination)
-            , supportMass(supportMass) {}
+        NewFootTargetInfo(
+                            const Transform2D& inLeftFootSource,
+                            const Transform2D& inRightFootSource,
+                            const LimbID& inActiveForwardLimb,
+                            const Transform2D& inLeftFootDestination, 
+                            const Transform2D& inRightFootDestination
+                         )
+            : leftFootSource(inLeftFootSource)
+            , rightFootSource(inRightFootSource)
+            , activeForwardLimb(inActiveForwardLimb)
+            , leftFootDestination(inLeftFootDestination)
+            , rightFootDestination(inRightFootDestination) {}
+            
     };
+
     struct EnableFootPlacement
     {
         EnableFootPlacement()  { }
     };
+
     struct DisableFootPlacement
     {
         DisableFootPlacement() { }

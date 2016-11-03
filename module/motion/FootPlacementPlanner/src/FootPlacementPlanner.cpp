@@ -34,10 +34,11 @@ namespace motion
 /*=======================================================================================================*/
     using message::input::LimbID;
     using message::motion::NewStepTargetInfo;
+    using message::motion::NewFootTargetInfo;
     using message::motion::TorsoMotionUpdate;
     using message::motion::EnableFootPlacement;
     using message::motion::DisableFootPlacement;
-    using message::motion::FootStepCompleted;
+    using message::motion::FootStepRequested;
     using message::motion::NewWalkCommand;
     using message::motion::FootPlacementStopped;
     using message::support::Configuration;
@@ -94,7 +95,7 @@ namespace motion
             if(DEBUG) { NUClear::log("Messaging: Foot Placement Planner - Received Torso Destination Update(1)"); }
         });
 
-        updateHandle = on<Trigger<FootStepCompleted>>().then("Foot Placement Planner - Calculate Target Foot Position", [this]
+        updateHandle = on<Trigger<FootStepRequested>>().then("Foot Placement Planner - Calculate Target Foot Position", [this]
         {
             if(DEBUG) { NUClear::log("Messaging: Foot Placement Planner - Calculate Target Foot Position(0)"); }
             calculateNewStep();
@@ -179,8 +180,7 @@ namespace motion
 //std::cout << "\n\rMWE: TorsoPosition() \t[X= " << getTorsoPosition().x() << "]\t[Y= " << getTorsoPosition().y() << "]\n\r";   
 //std::cout << "\n\rMWE: uTorsoModded \t[X= " << uTorsoModded.x() << "]\t[Y= " << uTorsoModded.y() << "]\n\r";                
             Transform2D uLeftFootModded = uTorsoModded.localToWorld(uLeftFootTorso);
-            setSupportMass(uLeftFootModded.localToWorld({-getFootOffsetCoefficient(0), -getFootOffsetCoefficient(1), 0}));       
-//std::cout << "Right FPP\t[X= " << getRightFootDestination().x() << "]\t[Y= " << getRightFootDestination().y() << "]\n\r";
+            setSupportMass(uLeftFootModded.localToWorld({-getFootOffsetCoefficient(0), -getFootOffsetCoefficient(1), 0})); 
         }
         else 
         {
@@ -190,10 +190,10 @@ namespace motion
 //std::cout << "\n\rMWE: TorsoPosition() \t[X= " << getTorsoPosition().x() << "]\t[Y= " << getTorsoPosition().y() << "]\n\r";   
 //std::cout << "\n\rMWE: uTorsoModded \t[X= " << uTorsoModded.x() << "]\t[Y= " << uTorsoModded.y() << "]\n\r";                     
             Transform2D uRightFootModded = uTorsoModded.localToWorld(uRightFootTorso);
-            setSupportMass(uRightFootModded.localToWorld({-getFootOffsetCoefficient(0), getFootOffsetCoefficient(1), 0}));         
-//std::cout << "Left FPP\t[X= " << getLeftFootDestination().x() << "]\t[Y= " << getLeftFootDestination().y() << "]\n\r";
+            setSupportMass(uRightFootModded.localToWorld({-getFootOffsetCoefficient(0), getFootOffsetCoefficient(1), 0}));  
         }         
-        emit(std::make_unique<NewStepTargetInfo>(getTime() + stepTime, activeForwardLimb, getVelocityCurrent(), getLeftFootSource(), getRightFootSource(), getLeftFootDestination(), getRightFootDestination(), getSupportMass())); //New Step Target Information
+        emit(std::make_unique<NewStepTargetInfo>(getTime() + stepTime, getVelocityCurrent(), getSupportMass())); //New Step Target Information
+        emit(std::make_unique<NewFootTargetInfo>(getLeftFootSource(), getRightFootSource(), activeForwardLimb, getLeftFootDestination(), getRightFootDestination()));  //New Foot Target Information
         //emit destinations for fmp and/or zmp
         //may combine NewStep and NewStepTorso
     }

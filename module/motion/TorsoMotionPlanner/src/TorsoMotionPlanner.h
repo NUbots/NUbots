@@ -141,12 +141,12 @@ namespace motion
         Transform2D torsoPositionSource;                // Pre-step torso position
         Transform2D torsoPositionDestination;           // Torso step target position
         Transform2D leftFootPositionTransform;          // Active left foot position
-        Transform2D leftFootSource;                     // Pre-step left foot position
         Transform2D rightFootPositionTransform;         // Active right foot position
-        Transform2D rightFootSource;                    // Pre-step right foot position
-        Transform2D leftFootDestination;                // Destination placement Transform2D left foot positions
-        Transform2D rightFootDestination;               // Destination placement Transform2D right foot positions
-        Transform2D uSupportMass;                       // Appears to be support foot pre-step position
+        std::queue<Transform2D> leftFootSource;         // Pre-step left foot position
+        std::queue<Transform2D> rightFootSource;        // Pre-step right foot position
+        std::queue<Transform2D> leftFootDestination;    // Destination placement Transform2D left foot positions
+        std::queue<Transform2D> rightFootDestination;   // Destination placement Transform2D right foot positions
+        std::queue<Transform2D> q_supportMass;           // Appears to be support foot pre-step position
         LimbID activeForwardLimb;                       // The leg that is 'swinging' in the step, opposite of the support foot
         LimbID activeLimbInitial;                       // TODO: Former initial non-support leg for deterministic walking approach
 
@@ -184,7 +184,6 @@ namespace motion
          * Internal timing reference variables...
          */
         double beginStepTime;                                   // The time when the current step begun
-        double destinationTime;                                 // The time when the current motion is to be completed
         double footMotionPhase;                                 // Phase representation of foot motion state
         double STAND_SCRIPT_DURATION;                           //
         NUClear::clock::time_point pushTime;                    //
@@ -268,26 +267,6 @@ namespace motion
          * @param config [description]
          */
         void configure(const YAML::Node& config);
-        /**
-         * @brief [brief description]
-         * @details [long description]
-         * @return get a unix timestamp (in decimal seconds that are accurate to the microsecond)
-         * 
-         * @param inTorsoPosition [description]
-         */
-        double getTime();
-        /**
-         * @brief [brief description]
-         * @details [long description]
-         * @return [description]
-         */
-        double getDestinationTime();
-        /**
-         * @brief [brief description]
-         * @details [long description]
-         * @return [description]
-         */
-        void setDestinationTime(double inDestinationTime);
         /**
          * @brief [brief description]
          * @details [long description]

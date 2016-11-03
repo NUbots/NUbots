@@ -108,9 +108,8 @@ namespace motion
          * Anthropomorphic metrics for relevant humanoid joints & actuators...
          */
         Transform2D leftFootPositionTransform;          // Active left foot position
-        Transform2D leftFootSource;                     // Pre-step left foot position
         Transform2D rightFootPositionTransform;         // Active right foot position
-        Transform2D rightFootSource;                    // Pre-step right foot position
+        std::queue<Transform2D> activeLimbSource;       // Pre-step active limb position
         std::queue<Transform2D> activeLimbDestination;  // Destination placement Transform2D active foot positions
         std::queue<LimbID> activeForwardLimb;           // The leg that is 'swinging' in the step, opposite of the support foot
         LimbID activeLimbInitial;                       // TODO: Former initial non-support leg for deterministic walking approach
@@ -143,7 +142,7 @@ namespace motion
         arma::mat::fixed<3,2> velocityLimits;           //
         arma::vec3 accelerationLimits;                  //
         arma::vec3 accelerationLimitsHigh;              //
-        Transform2D velocityCurrent;                    // Current robot velocity
+        std::queue<Transform2D> velocityCurrent;        // Current robot velocity
 
         /**
          * Dynamic analysis parameters for relevant motion planning...
@@ -288,27 +287,14 @@ namespace motion
          * @details [long description]
          * @return [description]
          */
-        Transform2D getLeftFootSource();
-        /**
-         * @brief [brief description]
-         * @details [long description]
-         * 
-         * @param inLeftFootSource [description]
-         */
-        void setLeftFootSource(const Transform2D& inLeftFootSource);
-        /**
-         * @brief [brief description]
-         * @details [long description]
-         * @return [description]
-         */
-        Transform2D getRightFootSource();
+        Transform2D getActiveLimbSource();
         /**
          * @brief [brief description]
          * @details [long description]
          * 
          * @param inRightFootSource [description]
          */
-        void setRightFootSource(const Transform2D& inRightFootSource);
+        void setActiveLimbSource(const Transform2D& inActiveLimbSource);
         /**
          * @brief [brief description]
          * @details [long description]

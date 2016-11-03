@@ -68,6 +68,13 @@ namespace motion
             , rightFoot3D(rightFoot3D) {}
     };
 
+    struct FootStepRequested
+    {
+        bool status;
+        FootStepRequested(bool status)
+            : status(status) {}
+    };
+    
     struct FootStepCompleted
     {
         bool status;

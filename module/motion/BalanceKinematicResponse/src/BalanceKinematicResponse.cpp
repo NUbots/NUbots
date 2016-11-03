@@ -106,16 +106,11 @@ namespace motion
             if(DEBUG) { NUClear::log("Messaging: Balance Kinematic Response - Received Update (Active Foot Position) Info(0)"); }
             setMotionPhase(info.phase);
             setActiveForwardLimb(info.activeForwardLimb);
-//std::cout << "\n\rMWE: Left     Foot\n\r\t[\n\r\t" << info.leftFoot  << "\t]";  
-//std::cout << "\n\rMWE: Right    Foot\n\r\t[\n\r\t" << info.rightFoot << "\t]";  
-//std::cout << "\n\rMWE: TorsoPosition 3D\n\r\t[\n\r\t" << getTorsoPosition3D() << "\t]";
             setLeftFootPosition2D(info.leftFoot2D);
             setRightFootPosition2D(info.rightFoot2D);   
             // Transform feet positions to be relative to the robot torso...            
             setLeftFootPosition(info.leftFoot3D.worldToLocal(getTorsoPosition3D()));
-            setRightFootPosition(info.rightFoot3D.worldToLocal(getTorsoPosition3D()));
-//std::cout << "\n\rMWE: Left     Foot\n\r\t[\n\r\t" << getLeftFootPosition()  << "\t]";  
-//std::cout << "\n\rMWE: Right    Foot\n\r\t[\n\r\t" << getRightFootPosition() << "\t]";              
+            setRightFootPosition(info.rightFoot3D.worldToLocal(getTorsoPosition3D()));          
             if(DEBUG) { NUClear::log("Messaging: Balance Kinematic Response - Received Update (Active Foot Position) Info(1)"); }
         });
 
