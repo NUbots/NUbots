@@ -110,7 +110,7 @@ namespace motion
         {
             if(DEBUG) { NUClear::log("Messaging: Torso Motion Planner - Update Torso Position(0)"); }
                 if(isNewStepAvailable())
-                {                  
+                {                               
                     updateTorsoPosition();
                 }
             if(DEBUG) { NUClear::log("Messaging: Torso Motion Planner - Update Torso Position(1)"); }
@@ -131,8 +131,7 @@ namespace motion
                 setLeftFootSource(info.leftFootSource);             //Queued    : FPP
                 setRightFootSource(info.rightFootSource);           //Queued    : FPP
                 setLeftFootDestination(info.leftFootDestination);   //Queued    : FPP                 
-                setRightFootDestination(info.rightFootDestination); //Queued    : FPP
-                setTorsoSource(getTorsoDestination());              //Internal  : TMP                
+                setRightFootDestination(info.rightFootDestination); //Queued    : FPP               
            if(DEBUG) { NUClear::log("Messaging: Torso Motion Planner - Received Footstep Info(1)"); }
         });
 
@@ -196,11 +195,14 @@ namespace motion
     arma::vec4 TorsoMotionPlanner::zmpTorsoCoefficients()
     {
         arma::vec4 zmpCoefficients;
+        setTorsoSource(getTorsoDestination());
         setTorsoDestination(stepTorso(getLeftFootDestination(), getRightFootDestination(), 0.5));
+// std::cout << "\n\rTorso Source     \t[X= " << getTorsoSource().x() << "]\t[Y= " << getTorsoSource().y() << "]\n\r";        
+// std::cout << "\n\rTorso Destination\t[X= " << getTorsoDestination().x() << "]\t[Y= " << getTorsoDestination().y() << "]\n\r";                 
         // Compute ZMP coefficients...
         zmpCoefficients.rows(0,1) = zmpSolve(getSupportMass().x(), getTorsoSource().x(), getTorsoDestination().x(), getTorsoSource().x(), getTorsoDestination().x(), phase1Single, phase2Single, stepTime, zmpTime);
-        zmpCoefficients.rows(2,3) = zmpSolve(getSupportMass().y(), getTorsoSource().y(), getTorsoDestination().y(), getTorsoSource().y(), getTorsoDestination().y(), phase1Single, phase2Single, stepTime, zmpTime);        
-        
+        zmpCoefficients.rows(2,3) = zmpSolve(getSupportMass().y(), getTorsoSource().y(), getTorsoDestination().y(), getTorsoSource().y(), getTorsoDestination().y(), phase1Single, phase2Single, stepTime, zmpTime);
+
         return (zmpCoefficients);
     }
 /*=======================================================================================================*/

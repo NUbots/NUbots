@@ -98,7 +98,7 @@ namespace motion
         updateHandle = on<Trigger<FootStepRequested>>().then("Foot Placement Planner - Calculate Target Foot Position", [this]
         {
             if(DEBUG) { NUClear::log("Messaging: Foot Placement Planner - Calculate Target Foot Position(0)"); }             
-            calculateNewStep(getVelocityCurrent(), getTorsoSource(), getTorsoPosition());
+            calculateNewStep(getVelocityCurrent(), getTorsoDestination(), getTorsoPosition());
             if(DEBUG) { NUClear::log("Messaging: Foot Placement Planner - Calculate Target Foot Position(1)"); }
         }).disable();
 
@@ -106,7 +106,7 @@ namespace motion
         {         
             if(DEBUG) { NUClear::log("Messaging: Foot Placement Planner - On New Walk Command(0)"); }          
             setVelocityCommand(command.velocityTarget);
-            calculateNewStep(getVelocityCurrent(), getTorsoSource(), getTorsoPosition());          
+            calculateNewStep(getVelocityCurrent(), getTorsoDestination(), getTorsoPosition());          
             if(DEBUG) { NUClear::log("Messaging: Foot Placement Planner - On New Walk Command(1)"); }
         });
 
@@ -125,7 +125,7 @@ namespace motion
 /*=======================================================================================================*/
 //      NAME: calculateNewStep
 /*=======================================================================================================*/
-    void FootPlacementPlanner::calculateNewStep(const Transform2D& inVelocityCurrent, const Transform2D& inTorsoSource, const Transform2D& inTorsoPosition) 
+    void FootPlacementPlanner::calculateNewStep(const Transform2D& inVelocityCurrent, const Transform2D& inTorsoDestination, const Transform2D& inTorsoPosition) 
     {       
         updateVelocity();
 
@@ -134,7 +134,7 @@ namespace motion
 
         setLeftFootSource(getLeftFootDestination());
         setRightFootSource(getRightFootDestination());
-        setTorsoSource(getTorsoDestination());
+        setTorsoSource(inTorsoDestination);
 
 // std::cout << "Left  FPP\t[Source= " << getLeftFootSource().y()  << "]\t[Destination= " << getLeftFootDestination().y()  << "]\n\r";
 // std::cout << "Right FPP\t[Source= " << getRightFootSource().y() << "]\t[Destination= " << getRightFootDestination().y() << "]\n\r";
@@ -161,7 +161,7 @@ namespace motion
         }
         else 
         {
-            // normal walk, advance steps       
+            // normal walk, advance steps       rightFootSource
             if (getActiveForwardLimb() == LimbID::RIGHT_LEG) 
             {
                 setRightFootDestination(getNewFootTarget(inVelocityCurrent, getActiveForwardLimb()));
@@ -174,7 +174,7 @@ namespace motion
         // apply velocity-based support point modulation for SupportMass
         if (getActiveForwardLimb() == LimbID::RIGHT_LEG) 
         {
-            Transform2D uLeftFootTorso = inTorsoSource.worldToLocal(getLeftFootSource());
+            Transform2D uLeftFootTorso = getTorsoSource().worldToLocal(getLeftFootSource());
 //std::cout << "\n\rMWE: TorsoSource() \t[X= " << inTorsoSource.x() << "]\t[Y= " << inTorsoSource.y() << "]\n\r";              
             Transform2D uTorsoModded = inTorsoPosition.localToWorld({supportMod[0], supportMod[1], 0});
 //std::cout << "\n\rMWE: TorsoPosition() \t[X= " << getTorsoPosition().x() << "]\t[Y= " << getTorsoPosition().y() << "]\n\r";   
@@ -184,7 +184,7 @@ namespace motion
         }
         else 
         {
-            Transform2D uRightFootTorso = inTorsoSource.worldToLocal(getRightFootSource());
+            Transform2D uRightFootTorso = getTorsoSource().worldToLocal(getRightFootSource());
 //std::cout << "\n\rMWE: TorsoSource() \t[X= " << inTorsoSource.x() << "]\t[Y= " << inTorsoSource.y() << "]\n\r";             
             Transform2D uTorsoModded = inTorsoPosition.localToWorld({supportMod[0], supportMod[1], 0});
 //std::cout << "\n\rMWE: TorsoPosition() \t[X= " << getTorsoPosition().x() << "]\t[Y= " << getTorsoPosition().y() << "]\n\r";   
@@ -274,9 +274,6 @@ namespace motion
             setLeftFootPosition(arma::zeros(3));
             setRightFootPosition(arma::zeros(3));
             setTorsoPosition(arma::zeros(3));
-
-            // start walking asap
-            initialStep = 1;
         } 
         else 
         {
@@ -286,7 +283,6 @@ namespace motion
             //setRightFootPosition({0, -kinematicsModel.Leg.HIP_OFFSET_Y, 0});
             setLeftFootPosition(getTorsoPosition().localToWorld({getFootOffsetCoefficient(0), kinematicsModel.Leg.HIP_OFFSET_Y - getFootOffsetCoefficient(1), 0}));
             setRightFootPosition(getTorsoPosition().localToWorld({getFootOffsetCoefficient(0), -kinematicsModel.Leg.HIP_OFFSET_Y + getFootOffsetCoefficient(1), 0}));
-            initialStep = 2;
         }
 
         setActiveForwardLimb(activeLimbInitial);
@@ -298,7 +294,6 @@ namespace motion
         setRightFootDestination(getRightFootPosition());
 
         setSupportMass(getTorsoPosition());
-        beginStepTime = getTime();
         uLRFootOffset = {0, kinematicsModel.Leg.HIP_OFFSET_Y - getFootOffsetCoefficient(1), 0};
         startFromStep = false;
     }
@@ -323,8 +318,6 @@ namespace motion
 
         // gGyro stabilization variables
         setActiveForwardLimb(activeLimbInitial);
-        beginStepTime = getTime();
-        initialStep = 2;
 
         // gStandard offset
         uLRFootOffset = {0, kinematicsModel.Leg.HIP_OFFSET_Y - getFootOffsetCoefficient(1), 0};

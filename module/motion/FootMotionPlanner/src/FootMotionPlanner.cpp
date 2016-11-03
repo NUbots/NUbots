@@ -102,29 +102,23 @@ namespace motion
         //In the event of a new foot step target specified by the foot placement planning module...
         on<Trigger<NewFootTargetInfo>>().then("Foot Motion Planner - Received Target Foot Position", [this] (const NewFootTargetInfo& target) 
         {
-            if(DEBUG) { NUClear::log("Messaging: Foot Motion Planner - Received Target Foot Position(0)"); }           
+            if(DEBUG) { NUClear::log("Messaging: Foot Motion Planner - Received Target Foot Position(0)"); }             
             if(target.activeForwardLimb == LimbID::LEFT_LEG)
             {  
                 setActiveLimbSource(target.leftFootSource);             //Queued    : FPP
-                if(INITIAL_STEP == false) 
-                { 
-std::cout << "\n\rPosition\n\r";                    
-                    setRightFootPosition(target.rightFootSource);       //Trigger   : FPP
-                    INITIAL_STEP = true;
-                }         
                 setActiveLimbDestination(target.leftFootDestination);   //Queued    : FPP          
             }
             else
             {       
                 setActiveLimbSource(target.rightFootSource);            //Queued    : FPP
-                if(INITIAL_STEP == false) 
-                { 
-std::cout << "\n\rPosition\n\r";                     
-                    setLeftFootPosition(target.leftFootSource);         //Trigger   : FPP
-                    INITIAL_STEP = true;
-                }
                 setActiveLimbDestination(target.rightFootDestination);  //Queued    : FPP      
             }                  
+            if(INITIAL_STEP == false) 
+            {                    
+                setLeftFootPosition(target.leftFootSource);             //Trigger   : FPP
+                setRightFootPosition(target.rightFootSource);           //Trigger   : FPP
+                INITIAL_STEP = true;
+            }     
             setActiveForwardLimb(target.activeForwardLimb);             //Queued    : FPP           
             if(DEBUG) { NUClear::log("Messaging: Foot Motion Planner - Received Target Foot Position(1)"); }
         });
@@ -151,7 +145,9 @@ std::cout << "\n\rPosition\n\r";
 
         //Lift foot by amount depending on walk speed
         if(DEBUG) { NUClear::log("Messaging: Foot Motion Planner - getFootPhase limits and calculations"); }
-//std::cout << "\n\rVelocity\t[X= " << getVelocityCurrent().x() << "]\t[Y= " << getVelocityCurrent().y() << "]\n\r";        
+// std::cout << "\n\rVelocity\t[X= " << getVelocityCurrent().x() << "]\t[Y= " << getVelocityCurrent().y() << "]\n\r";
+// std::cout << "\n\rLeft     Position\t[X= " << getLeftFootPosition().x() << "]\t[Y= " << getLeftFootPosition().y() << "]\t[A= " << getLeftFootPosition().angle() << "]\n\r";                
+// std::cout << "\n\rRight    Position\t[X= " << getRightFootPosition().x() << "]\t[Y= " << getRightFootPosition().y() << "]\t[A= " << getRightFootPosition().angle() << "]\n\r";              
         auto& limit = (getVelocityCurrent().x() > velocityHigh ? accelerationLimitsHigh : accelerationLimits); // TODO: use a function instead
         float speed = std::min(1.0, std::max(std::abs(getVelocityCurrent().x() / limit[0]), std::abs(getVelocityCurrent().y() / limit[1])));
         float scale = (step_height_fast_fraction - step_height_slow_fraction) * speed + step_height_slow_fraction;
