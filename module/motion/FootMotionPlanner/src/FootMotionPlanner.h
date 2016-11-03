@@ -90,7 +90,6 @@ namespace motion
          */ 
         bool DEBUG;                 //
         int  DEBUG_ITER;            //
-        int  initialStep;           // TODO: How to many 'steps' to take before lifting a foot when starting to walk
 
         /**
          * NUsight feedback initialized from configuration script, see config file for documentation...
@@ -130,6 +129,7 @@ namespace motion
         /**
          * Internal timing reference variables...
          */
+        bool  INITIAL_STEP;                                     // Indicates if the first step has been consumed
         double beginStepTime;                                   // The time when the current step begun
         std::queue<double> destinationTime;                     // The time when the current is to be completed
         NUClear::clock::time_point lastVeloctiyUpdateTime;      //

@@ -97,15 +97,15 @@ namespace motion
 
         updateHandle = on<Trigger<FootStepRequested>>().then("Foot Placement Planner - Calculate Target Foot Position", [this]
         {
-            if(DEBUG) { NUClear::log("Messaging: Foot Placement Planner - Calculate Target Foot Position(0)"); }
+            if(DEBUG) { NUClear::log("Messaging: Foot Placement Planner - Calculate Target Foot Position(0)"); }             
             calculateNewStep(getVelocityCurrent(), getTorsoSource(), getTorsoPosition());
             if(DEBUG) { NUClear::log("Messaging: Foot Placement Planner - Calculate Target Foot Position(1)"); }
         }).disable();
 
         on<Trigger<NewWalkCommand>>().then("Foot Placement Planner - Update Foot Target", [this] (const NewWalkCommand& command) 
         {         
-            if(DEBUG) { NUClear::log("Messaging: Foot Placement Planner - On New Walk Command(0)"); }
-            setVelocityCommand(command.velocityTarget);           
+            if(DEBUG) { NUClear::log("Messaging: Foot Placement Planner - On New Walk Command(0)"); }          
+            setVelocityCommand(command.velocityTarget);
             calculateNewStep(getVelocityCurrent(), getTorsoSource(), getTorsoPosition());          
             if(DEBUG) { NUClear::log("Messaging: Foot Placement Planner - On New Walk Command(1)"); }
         });
@@ -136,8 +136,8 @@ namespace motion
         setRightFootSource(getRightFootDestination());
         setTorsoSource(getTorsoDestination());
 
-//std::cout << "Left  FPP\t[Source= " << getLeftFootSource().x()  << "]\t[Destination= " << getLeftFootDestination().x()  << "]\n\r";
-//std::cout << "Right FPP\t[Source= " << getRightFootSource().x() << "]\t[Destination= " << getRightFootDestination().x() << "]\n\r";
+// std::cout << "Left  FPP\t[Source= " << getLeftFootSource().y()  << "]\t[Destination= " << getLeftFootDestination().y()  << "]\n\r";
+// std::cout << "Right FPP\t[Source= " << getRightFootSource().y() << "]\t[Destination= " << getRightFootDestination().y() << "]\n\r";
 
 
         arma::vec2 supportMod = arma::zeros(2); // support point modulation for wallkick
