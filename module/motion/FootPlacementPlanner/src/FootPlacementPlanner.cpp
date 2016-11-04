@@ -88,7 +88,7 @@ namespace motion
 
         //When new torso destination is computed, inform FPP in preparation for next footstep...
         on<Trigger<TorsoMotionUpdate>>().then("Foot Placement Planner - Received Torso Destination Update", [this] (const TorsoMotionUpdate& info) 
-        {            
+        {                     
             if(DEBUG) { NUClear::log("Messaging: Foot Placement Planner - Received Torso Destination Update(0)"); }    
             setTorsoPosition(info.frameArms);  
             setTorsoDestination(info.frameDestination);     
@@ -96,30 +96,30 @@ namespace motion
         });
 
         updateHandle = on<Trigger<FootStepRequested>>().then("Foot Placement Planner - Calculate Target Foot Position", [this]
-        {
+        {          
             if(DEBUG) { NUClear::log("Messaging: Foot Placement Planner - Calculate Target Foot Position(0)"); }             
             calculateNewStep(getVelocityCurrent(), getTorsoDestination(), getTorsoPosition());
             if(DEBUG) { NUClear::log("Messaging: Foot Placement Planner - Calculate Target Foot Position(1)"); }
         }).disable();
 
         on<Trigger<NewWalkCommand>>().then("Foot Placement Planner - Update Foot Target", [this] (const NewWalkCommand& command) 
-        {         
+        {                            
             if(DEBUG) { NUClear::log("Messaging: Foot Placement Planner - On New Walk Command(0)"); }          
             setVelocityCommand(command.velocityTarget);
             calculateNewStep(getVelocityCurrent(), getTorsoDestination(), getTorsoPosition());          
             if(DEBUG) { NUClear::log("Messaging: Foot Placement Planner - On New Walk Command(1)"); }
-        });
+        }).enable();
 
         on<Trigger<EnableFootPlacement>>().then([this]
         {         
-            stanceReset(); // Reset stance as we don't know where our limbs are.
+            postureInitialize(); // Reset stance as we don't know where our limbs are.
             updateHandle.enable();
         });
 
         //If foot motion no longer requested, cease updating...
         on<Trigger<DisableFootPlacement>>().then([this] 
         {
-            updateHandle.disable(); 
+            updateHandle.disable();
         });
     }
 /*=======================================================================================================*/
@@ -264,38 +264,35 @@ namespace motion
         setVelocityCurrent(Transform2D({getVelocityCurrent().x() + velocityDifference.x(), getVelocityCurrent().y() + velocityDifference.y(), getVelocityCurrent().angle() + velocityDifference.angle()}));
     }
 /*=======================================================================================================*/
-//      METHOD: stanceReset
+//      METHOD: Reset The Stance of the Humanoid to Initial Valid Stance
 /*=======================================================================================================*/
-    void FootPlacementPlanner::stanceReset() 
-    {
-        // standup/sitdown/falldown handling
-        if (startFromStep) 
-        {
-            setLeftFootPosition(arma::zeros(3));
-            setRightFootPosition(arma::zeros(3));
-            setTorsoPosition(arma::zeros(3));
-        } 
-        else 
-        {
-            // stance resetted
-            setTorsoPosition({-getFootOffsetCoefficient(0), 0, 0});
-            //setLeftFootPosition({0, kinematicsModel.Leg.HIP_OFFSET_Y, 0});
-            //setRightFootPosition({0, -kinematicsModel.Leg.HIP_OFFSET_Y, 0});
-            setLeftFootPosition(getTorsoPosition().localToWorld({getFootOffsetCoefficient(0), kinematicsModel.Leg.HIP_OFFSET_Y - getFootOffsetCoefficient(1), 0}));
-            setRightFootPosition(getTorsoPosition().localToWorld({getFootOffsetCoefficient(0), -kinematicsModel.Leg.HIP_OFFSET_Y + getFootOffsetCoefficient(1), 0}));
-        }
+    void FootPlacementPlanner::postureInitialize() 
+    {        
+        // Default Initial Torso Position...
+        setTorsoPosition({-getFootOffsetCoefficient(0), 0, 0});
+   
+        // Default Initial Left  Foot Position...
+        setLeftFootPosition(getTorsoPosition().localToWorld({getFootOffsetCoefficient(0), kinematicsModel.Leg.HIP_OFFSET_Y - getFootOffsetCoefficient(1), 0}));
+     
+        // Default Initial Right Foot Position...
+        setRightFootPosition(getTorsoPosition().localToWorld({getFootOffsetCoefficient(0), -kinematicsModel.Leg.HIP_OFFSET_Y + getFootOffsetCoefficient(1), 0}));
 
+        // Default Active Forward Limb...
         setActiveForwardLimb(activeLimbInitial);
- 
+      
+        // Default Left  Foot Targets...
         setLeftFootSource(getLeftFootPosition());
         setLeftFootDestination(getLeftFootPosition());
 
+        // Default Right Foot Targets...
         setRightFootSource(getRightFootPosition());
         setRightFootDestination(getRightFootPosition());
 
+        // Default Support Mass Reference...
         setSupportMass(getTorsoPosition());
-        uLRFootOffset = {0, kinematicsModel.Leg.HIP_OFFSET_Y - getFootOffsetCoefficient(1), 0};
-        startFromStep = false;
+
+        // Default Inner Foot Offset...
+        uLRFootOffset = {0, kinematicsModel.Leg.HIP_OFFSET_Y - getFootOffsetCoefficient(1), 0};    
     }
 /*=======================================================================================================*/
 //      METHOD: reset

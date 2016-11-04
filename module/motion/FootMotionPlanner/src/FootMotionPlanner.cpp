@@ -43,6 +43,7 @@ namespace motion
     using message::support::Configuration;
 
     using utility::support::Expression;
+    using message::motion::kinematics::KinematicsModel;
     using utility::math::matrix::Transform2D;
     using utility::math::matrix::Transform3D;
     using utility::nubugger::graph;
@@ -59,13 +60,14 @@ namespace motion
         , activeForwardLimb(), activeLimbInitial(LimbID::LEFT_LEG)
         , bodyTilt(0.0), bodyHeight(0.0), stepTime(0.0), stepHeight(0.0)
         , step_height_slow_fraction(0.0f), step_height_fast_fraction(0.0f)
-        , stepLimits(arma::fill::zeros), footOffset(arma::fill::zeros), uLRFootOffset()
+        , stepLimits(arma::fill::zeros), footOffsetCoefficient(arma::fill::zeros), uLRFootOffset()
         , INITIAL_STEP(false), newStepStartTime(0.0), destinationTime(), lastVeloctiyUpdateTime()
         , velocityHigh(0.0), accelerationTurningFactor(0.0), velocityLimits(arma::fill::zeros)
         , accelerationLimits(arma::fill::zeros), accelerationLimitsHigh(arma::fill::zeros)
         , velocityCurrent()
         , zmpCoefficients(arma::fill::zeros), zmpParameters(arma::fill::zeros)
         , zmpTime(0.0), phase1Single(0.0), phase2Single(0.0)
+        , kinematicsModel()
         , lastFootGoalRotation(), footGoalErrorSum() 
         , startFromStep(false)
     {    	
@@ -75,16 +77,22 @@ namespace motion
             configure(config.config);          
         });
 
+        //Define kinematics model for physical calculations...
+        on<Trigger<KinematicsModel>>().then("WalkEngine - Update Kinematics Model", [this](const KinematicsModel& model)
+        {
+            kinematicsModel = model;
+        });
+
         //Transform analytical foot positions in accordance with the stipulated targets...
         updateHandle = on<Every<UPDATE_FREQUENCY, Per<std::chrono::seconds>>, /*With<Sensors>,*/ Single, Priority::HIGH>()
         .then("Foot Motion Planner - Update Foot Position", [this] /*(const Sensors& sensors)*/
         {
             if(DEBUG) { NUClear::log("Messaging: Foot Motion Planner - Update Foot Position(0)"); }       
             // NewTargetInfo syncronizes on calculating motionPhase, needs to occur before updating foot position(s)... 
-            double motionPhase = getMotionPhase();
+            double motionPhase = getMotionPhase();          
             // If there is some foot target data queued for computation, then update robot...
             if(isNewStepReceived())
-            {   
+            {                            
                 updateFootPosition(motionPhase, getActiveLimbSource(), getActiveForwardLimb(), getActiveLimbDestination());
             }
             if(DEBUG) { NUClear::log("Messaging: Foot Motion Planner - Update Foot Position(1)"); }
@@ -101,8 +109,8 @@ namespace motion
 
         //In the event of a new foot step target specified by the foot placement planning module...
         on<Trigger<NewFootTargetInfo>>().then("Foot Motion Planner - Received Target Foot Position", [this] (const NewFootTargetInfo& target) 
-        {
-            if(DEBUG) { NUClear::log("Messaging: Foot Motion Planner - Received Target Foot Position(0)"); }             
+        {               
+            if(DEBUG) { NUClear::log("Messaging: Foot Motion Planner - Received Target Foot Position(0)"); }                      
             if(target.activeForwardLimb == LimbID::LEFT_LEG)
             {  
                 setActiveLimbSource(target.leftFootSource);             //Queued    : FPP
@@ -112,20 +120,20 @@ namespace motion
             {       
                 setActiveLimbSource(target.rightFootSource);            //Queued    : FPP
                 setActiveLimbDestination(target.rightFootDestination);  //Queued    : FPP      
-            }                  
-            if(INITIAL_STEP == false) 
+            }                         
+            setActiveForwardLimb(target.activeForwardLimb);             //Queued    : FPP         
+            if(isInitialStep()) 
             {                    
                 setLeftFootPosition(target.leftFootSource);             //Trigger   : FPP
                 setRightFootPosition(target.rightFootSource);           //Trigger   : FPP
-                INITIAL_STEP = true;
-            }     
-            setActiveForwardLimb(target.activeForwardLimb);             //Queued    : FPP           
+            }        
             if(DEBUG) { NUClear::log("Messaging: Foot Motion Planner - Received Target Foot Position(1)"); }
         });
 
         //If foot motion is requested, enable updating...
         on<Trigger<EnableFootMotion>>().then([this]
         {            
+            postureInitialize(); // Reset stance as we don't know where our limbs are.
             updateHandle.enable();
         });
 
@@ -229,6 +237,18 @@ namespace motion
         return {xf, phaseSingle, zf};
     }
 /*=======================================================================================================*/
+//      METHOD: Reset The Stance of the Humanoid to Initial Valid Stance
+/*=======================================================================================================*/
+    void FootMotionPlanner::postureInitialize() 
+    {    
+        // Default Initial Torso Position...
+        Transform2D uTorso = Transform2D({-getFootOffsetCoefficient(0), 0, 0});
+        // Default Initial Left  Foot Position...
+        setLeftFootPosition(uTorso.localToWorld({getFootOffsetCoefficient(0), kinematicsModel.Leg.HIP_OFFSET_Y - getFootOffsetCoefficient(1), 0}));        
+        // Default Initial Right Foot Position...
+        setRightFootPosition(uTorso.localToWorld({getFootOffsetCoefficient(0), -kinematicsModel.Leg.HIP_OFFSET_Y + getFootOffsetCoefficient(1), 0}));               
+    }    
+/*=======================================================================================================*/
 //      ENCAPSULATION METHOD: Time
 /*=======================================================================================================*/
     double FootMotionPlanner::getTime() 
@@ -265,6 +285,24 @@ namespace motion
     {
         destinationTime.push(inDestinationTime);
     }
+/*=======================================================================================================*/
+//      ENCAPSULATION METHOD: Foot Offset Coefficient
+/*=======================================================================================================*/
+    double FootMotionPlanner::getFootOffsetCoefficient(int index)
+    {
+        return (footOffsetCoefficient[index]);
+    }
+    void FootMotionPlanner::setFootOffsetCoefficient(const arma::vec2& inFootOffsetCoefficient)
+    {
+        footOffsetCoefficient = inFootOffsetCoefficient;
+    }
+/*=======================================================================================================*/
+//      ENCAPSULATION METHOD: setFootOffsetCoefficient
+/*=======================================================================================================*/
+    void FootMotionPlanner::setFootOffsetCoefficient(int index, double inValue)
+    {
+        footOffsetCoefficient[index] = inValue;
+    }  
 /*=======================================================================================================*/
 //      ENCAPSULATION METHOD: Velocity
 /*=======================================================================================================*/
@@ -362,6 +400,15 @@ namespace motion
 /*=======================================================================================================*/
 //      ENCAPSULATION METHOD: New Step Available
 /*=======================================================================================================*/
+    bool FootMotionPlanner::isInitialStep()
+    {   
+        bool output = INITIAL_STEP;
+        INITIAL_STEP = false;
+        return (output);
+    }     
+/*=======================================================================================================*/
+//      ENCAPSULATION METHOD: New Step Available
+/*=======================================================================================================*/
     bool FootMotionPlanner::isNewStepAvailable()
     {    
         return (
@@ -437,7 +484,7 @@ namespace motion
         auto& stance = config["stance"];
         bodyHeight = stance["body_height"].as<Expression>();
         bodyTilt = stance["body_tilt"].as<Expression>();
-        footOffset = stance["foot_offset"].as<arma::vec>();
+        setFootOffsetCoefficient(stance["foot_offset"].as<arma::vec>());
 
         auto& walkCycle = config["walk_cycle"];
         stepTime = walkCycle["step_time"].as<Expression>();

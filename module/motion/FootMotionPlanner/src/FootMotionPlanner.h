@@ -34,6 +34,7 @@
 #include "message/input/Sensors.h"
 #include "message/input/PushDetection.h"
 
+#include "message/motion/KinematicsModels.h"
 #include "message/motion/WalkCommand.h"
 #include "message/motion/FootMotionCommand.h" 
 #include "message/motion/FootPlacementCommand.h" 
@@ -123,7 +124,7 @@ namespace motion
         float  step_height_slow_fraction;               //
         float  step_height_fast_fraction;               //
         arma::mat::fixed<3,2> stepLimits;               //              
-        arma::vec2 footOffset;                          //
+        arma::vec2 footOffsetCoefficient;                          //
         Transform2D uLRFootOffset;                      // standard offset
 
         /**
@@ -160,6 +161,7 @@ namespace motion
         /**
          * Balance & Kinematics module initialization...
          */
+        message::motion::kinematics::KinematicsModel kinematicsModel;   //
 
         /**
          * The last foot goal rotation...
@@ -208,11 +210,36 @@ namespace motion
         /**
          * @brief [brief description]
          * @details [long description]
-         * @return get a unix timestamp (in decimal seconds that are accurate to the microsecond)
-         * 
-         * @param inTorsoPosition [description]
+         */
+        void postureInitialize();  
+        /**
+         * @brief [brief description]
+         * @details [long description]
          */
         double getTime();
+        /**
+         * @brief [brief description]
+         * @details [long description]
+         * 
+         * @param index [description]
+         * @return [description]
+         */
+        double getFootOffsetCoefficient(int index);
+        /**
+         * @brief [brief description]
+         * @details [long description]
+         * 
+         * @param inFootOffsetCoefficient [description]
+         */
+        void setFootOffsetCoefficient(const arma::vec2& inFootOffsetCoefficient);
+        /**
+         * @brief [brief description]
+         * @details [long description]
+         * 
+         * @param index [description]
+         * @param inValue [description]
+         */
+        void setFootOffsetCoefficient(int index, double inValue);
         /**
          * @brief [brief description]
          * @details [long description]
@@ -237,6 +264,12 @@ namespace motion
          * @return [description]
          */
         void setDestinationTime(double inDestinationTime);
+        /**
+         * @brief [brief description]
+         * @details [long description]
+         * @return [description]
+         */
+        bool isInitialStep();
         /**
          * @brief [brief description]
          * @details [long description]

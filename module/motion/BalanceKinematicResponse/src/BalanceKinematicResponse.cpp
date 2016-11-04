@@ -105,18 +105,12 @@ namespace motion
         {
             if(DEBUG) { NUClear::log("Messaging: Balance Kinematic Response - Received Update (Active Foot Position) Info(0)"); }
                 setMotionPhase(info.phase);
-// std::cout << "\n\rSet Phase\n\r";
-                setActiveForwardLimb(info.activeForwardLimb);
-// std::cout << "\n\rSet Forward Limb\n\r";           
-                setLeftFootPosition2D(info.leftFoot2D);
-// std::cout << "\n\rSet  LeftFoot\n\r";          
-                setRightFootPosition2D(info.rightFoot2D);  
-// std::cout << "\n\rSet RightFoot\n\r";           
+                setActiveForwardLimb(info.activeForwardLimb);          
+                setLeftFootPosition2D(info.leftFoot2D);       
+                setRightFootPosition2D(info.rightFoot2D);           
                 // Transform feet positions to be relative to the robot torso...            
-                setLeftFootPosition(info.leftFoot3D.worldToLocal(getTorsoPosition3D()));
-// std::cout << "\n\rSet Left  Foot\n\r";           
-                setRightFootPosition(info.rightFoot3D.worldToLocal(getTorsoPosition3D()));
-// std::cout << "\n\rSet Right Foot\n\r";                     
+                setLeftFootPosition(info.leftFoot3D.worldToLocal(getTorsoPosition3D()));         
+                setRightFootPosition(info.rightFoot3D.worldToLocal(getTorsoPosition3D()));                    
             if(DEBUG) { NUClear::log("Messaging: Balance Kinematic Response - Received Update (Active Foot Position) Info(1)"); }
         });
 
@@ -124,12 +118,9 @@ namespace motion
         on<Trigger<TorsoMotionUpdate>>().then("Balance Response Planner - Received Update (Active Torso Position) Info", [this] (const TorsoMotionUpdate& info)
         {
             if(DEBUG) { NUClear::log("Messaging: Balance Kinematic Response - Received Update (Active Torso Position) Info(0)"); }
-                setTorsoPositionLegs(info.frameArms);
-// std::cout << "\n\rSet Torso 1\n\r";           
-                setTorsoPositionArms(info.frameLegs);
-// std::cout << "\n\rSet Torso 2\n\r";              
-                setTorsoPosition3D(info.frame3D);
-// std::cout << "\n\rSet Torso 3\n\r";              
+                setTorsoPositionLegs(info.frameArms);       
+                setTorsoPositionArms(info.frameLegs);             
+                setTorsoPosition3D(info.frame3D);            
             if(DEBUG) { NUClear::log("Messaging: Balance Kinematic Response - Received Update (Active Torso Position) Info(1)"); }
         });
 
@@ -166,6 +157,7 @@ namespace motion
 
         on<Trigger<EnableBalanceResponse>>().then([this] 
         {          
+            postureInitialize(); // Reset stance as we don't know where our limbs are.
             updateHandle.enable();
         });
 
@@ -328,6 +320,50 @@ namespace motion
         double xf = 0.5 * (1 - std::cos(M_PI * phaseSingleSkew));
         double zf = 0.5 * (1 - std::cos(2 * M_PI * phaseSingleSkew));
         return {xf, phaseSingle, zf};
+    }    
+/*=======================================================================================================*/
+//      METHOD: Reset The Stance of the Humanoid to Initial Valid Stance
+/*=======================================================================================================*/
+    void BalanceKinematicResponse::postureInitialize() 
+    {      
+         // Default Initial Torso Position...
+        Transform2D uTorso = Transform2D({-getFootOffsetCoefficient(0), 0, 0});
+        
+        // Default Initial Left  Foot Position...
+        setLeftFootPosition2D(uTorso.localToWorld({getFootOffsetCoefficient(0), kinematicsModel.Leg.HIP_OFFSET_Y - getFootOffsetCoefficient(1), 0}));        
+        
+        // Default Initial Right Foot Position...
+        setRightFootPosition2D(uTorso.localToWorld({getFootOffsetCoefficient(0), -kinematicsModel.Leg.HIP_OFFSET_Y + getFootOffsetCoefficient(1), 0}));
+        
+        Transform3D leftFootLocal  =  getLeftFootPosition2D();
+        Transform3D rightFootLocal = getRightFootPosition2D();       
+
+        // Default Initial Left  Foot Position 3D...
+        setLeftFootPosition(leftFootLocal.worldToLocal(uTorso));         
+        
+        // Default Initial Right Foot Position 3D...
+        setRightFootPosition(rightFootLocal.worldToLocal(uTorso));      
+        
+        // Default Active Forward Limb...
+        setActiveForwardLimb(activeLimbInitial);      
+    }     
+/*=======================================================================================================*/
+//      ENCAPSULATION METHOD: Foot Offset Coefficient
+/*=======================================================================================================*/
+    double BalanceKinematicResponse::getFootOffsetCoefficient(int index)
+    {
+        return (footOffsetCoefficient[index]);
+    }
+    void BalanceKinematicResponse::setFootOffsetCoefficient(const arma::vec2& inFootOffsetCoefficient)
+    {
+        footOffsetCoefficient = inFootOffsetCoefficient;
+    }
+/*=======================================================================================================*/
+//      ENCAPSULATION METHOD: setFootOffsetCoefficient
+/*=======================================================================================================*/
+    void BalanceKinematicResponse::setFootOffsetCoefficient(int index, double inValue)
+    {
+        footOffsetCoefficient[index] = inValue;
     }    
 /*=======================================================================================================*/
 //      ENCAPSULATION METHOD: Time
@@ -515,7 +551,7 @@ namespace motion
         setLArmDestination(stance["arms"]["left"]["end"].as<arma::vec>());
         setRArmSource(stance["arms"]["right"]["start"].as<arma::vec>());
         setRArmDestination(stance["arms"]["right"]["end"].as<arma::vec>());
-        //setFootOffsetCoefficient(stance["foot_offset"].as<arma::vec>());
+        setFootOffsetCoefficient(stance["foot_offset"].as<arma::vec>());
         // gToe/heel overlap checking values
         stanceLimitY2 = kinematicsModel.Leg.LENGTH_BETWEEN_LEGS() - stance["limit_margin_y"].as<Expression>();
 

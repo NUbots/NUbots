@@ -226,7 +226,7 @@ namespace motion
          * @brief [brief description]
          * @details [long description]
          */
-        void stanceReset();  
+        void postureInitialize();  
         /**
          * @brief [brief description]
          * @details [long description]

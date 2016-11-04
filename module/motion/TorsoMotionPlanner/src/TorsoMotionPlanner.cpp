@@ -396,28 +396,6 @@ namespace motion
         footOffsetCoefficient[index] = inValue;
     }    
 /*=======================================================================================================*/
-//      ENCAPSULATION METHOD: Left Foot Position
-/*=======================================================================================================*/
-    Transform2D TorsoMotionPlanner::getLeftFootPosition()
-    {
-        return (leftFootPositionTransform);
-    }
-    void TorsoMotionPlanner::setLeftFootPosition(const Transform2D& inLeftFootPosition)
-    {
-        leftFootPositionTransform = inLeftFootPosition;
-    }
-/*=======================================================================================================*/
-//      ENCAPSULATION METHOD: Right Foot Position
-/*=======================================================================================================*/
-    Transform2D TorsoMotionPlanner::getRightFootPosition()
-    {
-        return (rightFootPositionTransform);
-    }
-    void TorsoMotionPlanner::setRightFootPosition(const Transform2D& inRightFootPosition)
-    {
-        rightFootPositionTransform = inRightFootPosition;
-    }
-/*=======================================================================================================*/
 //      ENCAPSULATION METHOD: Left Foot Source
 /*=======================================================================================================*/
     Transform2D TorsoMotionPlanner::getLeftFootSource()

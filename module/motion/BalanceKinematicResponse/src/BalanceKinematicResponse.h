@@ -309,8 +309,40 @@ namespace motion
         void setMotionPhase(double inMotionPhase);
         /**
          * @brief [brief description]
+         * @details [long description]
+         */
+        void postureInitialize();  
+        /**
+         * @brief [brief description]
          * @details [get a unix timestamp (in decimal seconds that are accurate to the microsecond)]
          * @return [description]
+         */
+        /**
+         * @brief [brief description]
+         * @details [long description]
+         * 
+         * @param index [description]
+         * @return [description]
+         */
+        double getFootOffsetCoefficient(int index);
+        /**
+         * @brief [brief description]
+         * @details [long description]
+         * 
+         * @param inFootOffsetCoefficient [description]
+         */
+        void setFootOffsetCoefficient(const arma::vec2& inFootOffsetCoefficient);
+        /**
+         * @brief [brief description]
+         * @details [long description]
+         * 
+         * @param index [description]
+         * @param inValue [description]
+         */
+        void setFootOffsetCoefficient(int index, double inValue);
+         /**
+         * @brief [brief description]
+         * @details [long description]
          */
         double getTime();
         /**
