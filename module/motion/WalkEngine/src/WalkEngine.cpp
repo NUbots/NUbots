@@ -184,6 +184,7 @@ namespace motion
         //    start();
         //});
 
+        //Activation of WalkEngine (and default) subordinate actuator modules...
         on<Trigger<EnableWalkEngineCommand>>().then([this] (const EnableWalkEngineCommand& command) 
         {
             // If the walk engine is required, enable relevant submodules and award subsumption...
