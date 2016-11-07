@@ -108,13 +108,13 @@ namespace motion
         // TODO: Optimise balance configuration using feedback from environmental noise...
         updateOptimiser = on<Every<10, Per<std::chrono::milliseconds>>, With<Configuration>>().then([this](const Configuration& config) 
         {
-            [this](const BalanceOptimiserCommand& command) 
-            {
-                if ((NUClear::clock::now() - pushTime) > std::chrono::milliseconds(config["walk_cycle"]["balance"]["balance_time"].as<int>)) 
-                {
-                    balancer.configure(config["walk_cycle"]["balance"]);
-                }
-            }
+            // [this](const BalanceOptimiserCommand& command) 
+            // {
+            //     if ((NUClear::clock::now() - pushTime) > std::chrono::milliseconds(config["walk_cycle"]["balance"]["balance_time"].as<int>)) 
+            //     {
+            //         balancer.configure(config["walk_cycle"]["balance"]);
+            //     }
+            // }
         }).disable(); 
 
         // Aim to avoid dependancy on target position to enhance statelessness and adaptive balance compensation...

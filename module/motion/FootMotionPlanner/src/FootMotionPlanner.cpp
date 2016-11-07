@@ -216,7 +216,7 @@ namespace motion
         //DEBUGGING: Emit relative feet position phase with respect to robot state... 
         if (emitFootPosition)
         {
-            emit(graph("Foot Phase Motion", inPhase));
+            emit(graph("Foot TranslateZ Motion", stepHeight * getFootPhases[2]));
         }
 
         if(DEBUG) { NUClear::log("Messaging: Foot Motion Planner - Emit FootMotionUpdate"); }
