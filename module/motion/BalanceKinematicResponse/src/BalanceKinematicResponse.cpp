@@ -35,6 +35,7 @@ namespace motion
     using message::input::LimbID;
     using message::input::PushDetection;
     using message::motion::FootMotionUpdate;
+    using message::motion::HeadMotionUpdate;
     using message::motion::TorsoMotionUpdate;
     using message::motion::BalanceBodyUpdate;
     using message::motion::EnableBalanceResponse;
@@ -104,7 +105,7 @@ namespace motion
         }).disable();
 
         // TODO: Optimise balance configuration using feedback from environmental noise...
-        updateOptimiser = on<Every<10, Per<std::chrono::milliseconds>>, With<Configuration<BalanceKinematicResponse>>>().then([this](const Configuration& config) 
+        updateOptimiser = on<Every<10, Per<std::chrono::milliseconds>>, With<Configuration>>().then([this](const Configuration& config) 
         {
             [this](const BalanceOptimiserCommand& command) 
             {
