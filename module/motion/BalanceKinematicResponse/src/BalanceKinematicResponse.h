@@ -99,18 +99,22 @@ namespace motion
         /**
          * NUsight feedback initialized from configuration script, see config file for documentation...
          */
-        bool balanceEnabled;                //
-        bool hipCompensationEnabled;        //
-        bool ankleCompensationEnabled;      //
-        bool toeTipCompensationEnabled;     //
-        bool supportCompensationEnabled;    //
-        bool emitLocalisation;              //
-        bool emitFootPosition;              //
+        bool balanceEnabled;                    //
+        bool hipRollCompensationEnabled;        //
+        bool ankleTorqueCompensationEnabled;    //
+        bool armRollCompensationEnabled;        //
+        bool toeTipCompensationEnabled;         //
+        bool supportCompensationEnabled;        //
+        bool balanceOptimiserEnabled;           //
+        bool pushRecoveryEnabled;               //
+        bool emitLocalisation;                  //
+        bool emitFootPosition;                  //
 
         /**
          * Resource abstractions for id and handler instances...
          */
         ReactionHandle updateHandle;                    // handle(updateWaypoints), disabling when not moving will save unnecessary CPU resources
+        ReactionHandle updateOptimiser;                 // handle(updateOptimiser), disabling when not required will save unnecessary CPU resources
         ReactionHandle generateStandScriptReaction;     // handle(generateStandAndSaveScript), disabling when not required for capturing standing phase
 
         /**
@@ -221,8 +225,8 @@ namespace motion
         /**
          * Balance & Post-alignment parameters used for humanoid stability techniques...
          */
-        double toeTipCompensation;                      //
-        double hipRollCompensation;                     //
+        double toeTipParameter;                      //
+        double hipRollParameter;                     //
 
         /**
          * Balance & Kinematics module initialization...
@@ -264,6 +268,11 @@ namespace motion
          * @brief [brief description]
          * @details [long description]
          */
+        void updateBodyPushRecovery();
+        /**
+         * @brief [brief description]
+         * @details [long description]
+         */
         void updateBody(const Sensors& sensors);
         /**
          * @brief [brief description]
@@ -282,13 +291,25 @@ namespace motion
          * @details [long description]
          * @return [description]
          */
-        void toeCompensation(/*const Sensors& sensors*/);
+        void armRollCompensation(/*const Sensors& sensors*/);
+        /**
+         * @brief [brief description]std::pair
+         * @details [long description]
+         * @return [description]
+         */
+        void ankleTorqueCompensation(/*const Sensors& sensors*/);
+        /**
+         * @brief [brief description]std::pair
+         * @details [long description]
+         * @return [description]
+         */
+        void toeTipCompensation(/*const Sensors& sensors*/);
         /**
          * @brief [brief description]
          * @details [long description]
          * @return [description]
          */
-        void hipCompensation(const Sensors& sensors);
+        void hipRollCompensation(const Sensors& sensors);
         /**
          * @brief [brief description]
          * @details [long description]

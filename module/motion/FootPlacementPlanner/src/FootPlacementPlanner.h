@@ -32,7 +32,6 @@
 #include "message/behaviour/FixedWalkCommand.h"
 
 #include "message/input/Sensors.h"
-#include "message/input/PushDetection.h"
 
 #include "message/motion/KinematicsModels.h"
 #include "message/motion/WalkCommand.h"
@@ -113,16 +112,6 @@ namespace motion
          * Decision abstractions and notify variables...
          */
         bool startFromStep;
-
-        /**
-         * The current abstract state of WalkEngine...
-         */
-        enum State {
-            STOPPED,            // Walk engine has completely stopped and standing still
-            STOP_REQUEST,       // A stop request has been made but not received
-            LAST_STEP,          // Stop request has been made and now taking the last step before stopping
-            WALKING             // Walk engine is walking as normal
-        } StateOfWalk;
 
         /**
          * Anthropomorphic metrics for relevant humanoid joints & actuators...
@@ -222,6 +211,11 @@ namespace motion
          * @details [long description]
          */
         void stop();        
+        /**
+         * @brief [brief description]
+         * @details [long description]
+         */
+        bool isZeroVelocityRequest();
         /**
          * @brief [brief description]
          * @details [long description]

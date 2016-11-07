@@ -32,8 +32,6 @@ namespace motion
 /*=======================================================================================================*/
 //      UTILIZATION REFERENCE(S)
 /*=======================================================================================================*/
-
-    using message::input::PushDetection;
     using message::input::ServoID;
     using message::input::Sensors;
     using message::input::LimbID;

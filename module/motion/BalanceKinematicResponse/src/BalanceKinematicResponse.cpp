@@ -33,6 +33,7 @@ namespace motion
 //      UTILIZATION REFERENCE(S)
 /*=======================================================================================================*/
     using message::input::LimbID;
+    using message::input::PushDetection;
     using message::motion::FootMotionUpdate;
     using message::motion::TorsoMotionUpdate;
     using message::motion::BalanceBodyUpdate;
@@ -53,10 +54,11 @@ namespace motion
     : Reactor(std::move(environment)) 
         , DEBUG(false), DEBUG_ITER(0), initialStep(0)
         , balanceEnabled(false)
-        , hipCompensationEnabled(false), ankleCompensationEnabled(false)
+        , hipRollCompensationEnabled(false), ankleTorqueCompensationEnabled(false)
         , toeTipCompensationEnabled(false), supportCompensationEnabled(false)
+        , balanceOptimiserEnabled(false), pushRecoveryEnabled(false)
         , emitLocalisation(false), emitFootPosition(false)
-        , updateHandle(), generateStandScriptReaction()
+        , updateHandle(), updateOptimiser(), generateStandScriptReaction()
         , torsoPositionsTransform()
         , leftFootPosition2D(), rightFootPosition2D()
         , leftFootPositionTransform(), rightFootPositionTransform()
@@ -73,7 +75,7 @@ namespace motion
         , accelerationLimits(arma::fill::zeros), accelerationLimitsHigh(arma::fill::zeros)
         , velocityCurrent(), velocityCommand()
         , phase1Single(0.0), phase2Single(0.0)
-        , toeTipCompensation(), hipRollCompensation()
+        , toeTipParameter(), hipRollParameter()
         , balancer(), kinematicsModel()
         , balanceAmplitude(0.0), balanceWeight(0.0), balanceOffset(0.0)
         , balancePGain(0.0), balanceIGain(0.0), balanceDGain(0.0)
@@ -92,6 +94,7 @@ namespace motion
             kinematicsModel = model;
         });
 
+        // Tune requested robot posture such that balance is maintained and motion is differential... 
         updateHandle = on<Every<UPDATE_FREQUENCY, Per<std::chrono::seconds>>, With<Sensors>, Single, Priority::HIGH>()
         .then("Balance Response Planner - Update Robot Posture", [this] (const Sensors& sensors)
         {
@@ -100,7 +103,19 @@ namespace motion
             if(DEBUG) { NUClear::log("Messaging: Balance Kinematic Response - Update Robot Posture(1)"); }
         }).disable();
 
-        //Aim to avoid dependancy on target position to enhance statelessness and adaptive balance compensation...
+        // TODO: Optimise balance configuration using feedback from environmental noise...
+        updateOptimiser = on<Every<10, Per<std::chrono::milliseconds>>, With<Configuration<WalkEngine>>>().then([this](const Configuration& config) 
+        {
+            [this](const BalanceOptimiserCommand& command) 
+            {
+                if ((NUClear::clock::now() - pushTime) > std::chrono::milliseconds(config["walk_cycle"]["balance"]["balance_time"].as<int>)) 
+                {
+                    balancer.configure(config["walk_cycle"]["balance"]);
+                }
+            }
+        }).disable(); 
+
+        // Aim to avoid dependancy on target position to enhance statelessness and adaptive balance compensation...
         on<Trigger<FootMotionUpdate>>().then("Balance Response Planner - Received Update (Active Foot Position) Info", [this] (const FootMotionUpdate& info)
         {
             if(DEBUG) { NUClear::log("Messaging: Balance Kinematic Response - Received Update (Active Foot Position) Info(0)"); }
@@ -114,7 +129,7 @@ namespace motion
             if(DEBUG) { NUClear::log("Messaging: Balance Kinematic Response - Received Update (Active Foot Position) Info(1)"); }
         });
 
-        //Aim to avoid dependancy on target position to enhance statelessness and adaptive balance compensation...
+        // Aim to avoid dependancy on target position to enhance statelessness and adaptive balance compensation...
         on<Trigger<TorsoMotionUpdate>>().then("Balance Response Planner - Received Update (Active Torso Position) Info", [this] (const TorsoMotionUpdate& info)
         {
             if(DEBUG) { NUClear::log("Messaging: Balance Kinematic Response - Received Update (Active Torso Position) Info(0)"); }
@@ -124,53 +139,69 @@ namespace motion
             if(DEBUG) { NUClear::log("Messaging: Balance Kinematic Response - Received Update (Active Torso Position) Info(1)"); }
         });
 
-        /*Aim to avoid dependancy on target position to enhance statelessness and adaptive balance compensation...
+        // Aim to avoid dependancy on target position to enhance statelessness and adaptive balance compensation...
         on<Trigger<HeadMotionUpdate>>().then("Balance Response Planner - Received Update (Active Head Position) Info", [this] 
         {
             if(DEBUG) { NUClear::log("Messaging: Balance Kinematic Response - Received Update (Active Head Position) Info(0)"); }
 
             if(DEBUG) { NUClear::log("Messaging: Balance Kinematic Response - Received Update (Active Head Position) Info(1)"); }
-        });*/  
-
-        // TODO: finish push detection and compensation
-        // pushTime = NUClear::clock::now();
-        // on<Trigger<PushDetection>, With<Configuration>>().then([this](const PushDetection& pd, const Configuration& config) 
-        // {
-        //     balanceEnabled = true;
-        //     // balanceAmplitude = balance["amplitude"].as<Expression>();
-        //     // balanceWeight = balance["weight"].as<Expression>();
-        //     // balanceOffset = balance["offset"].as<Expression>();
-        //     balancer.configure(config["walk_cycle"]["balance"]["push_recovery"]);
-        //     pushTime = NUClear::clock::now();
-        //     // configure(config.config);
-        // });
-
-        // on<Every<10, std::chrono::milliseconds>>(With<Configuration<WalkEngine>>>().then([this](const Configuration& config) 
-        // {
-        //     [this](const WalkOptimiserCommand& command) 
-        //     {
-        //     if ((NUClear::clock::now() - pushTime) > std::chrono::milliseconds(config["walk_cycle"]["balance"]["balance_time"].as<int>)) 
-        //     {
-        //         balancer.configure(config["walk_cycle"]["balance"]);
-        //     }
-        // });         
-
-        on<Trigger<EnableBalanceResponse>>().then([this] 
-        {          
-            postureInitialize(); // Reset stance as we don't know where our limbs are.
-            updateHandle.enable();
         });
 
-        //If balance response no longer requested, cease updating...
+        // If significant environmental noise is present, attempt to recover stability...
+        pushTime = NUClear::clock::now();
+        on<Trigger<PushDetection>, With<Configuration>>().then([this](const PushDetection& pd, const Configuration& config) 
+        {
+            if(DEBUG) { NUClear::log("Messaging: Balance Kinematic Response - Received Update (Push Detected) Info(0)"); }               
+                updateBodyPushRecovery();
+            if(DEBUG) { NUClear::log("Messaging: Balance Kinematic Response - Received Update (Push Detected) Info(1)"); }
+        });        
+
+        // If balance response is required, enable updating...
+        on<Trigger<EnableBalanceResponse>>().then([this] 
+        {          
+            postureInitialize(); // Reset stance as we don't know where our limbs are
+            updateHandle.enable();
+            if(balanceOptimiserEnabled)
+            {
+                updateOptimiser.enable();
+            }
+        });
+
+        // If balance response no longer requested, cease updating...
         on<Trigger<DisableBalanceResponse>>().then([this] 
         {
             updateHandle.disable(); 
+            updateOptimiser.disable();
         });
     }
 /*=======================================================================================================*/
-//      METHOD: toeCompensation
+//      METHOD: armRollCompensation
 /*=======================================================================================================*/
-    void BalanceKinematicResponse::toeCompensation(/*const Sensors& sensors*/) 
+    void BalanceKinematicResponse::armRollCompensation(/*const Sensors& sensors*/) 
+    {
+        //If feature enabled, apply balance compensation through support actuator...
+        if (armRollCompensationEnabled) 
+        {
+            //sensors[0]->gyroscope;
+            //sensors[0]->accelerometer;
+            //
+        }
+    }      
+/*=======================================================================================================*/
+//      METHOD: ankleTorqueCompensation
+/*=======================================================================================================*/
+    void BalanceKinematicResponse::ankleTorqueCompensation(/*const Sensors& sensors*/) 
+    {
+        //If feature enabled, apply balance compensation through support actuator...
+        if (ankleTorqueCompensationEnabled) 
+        {
+            //
+        }
+    }      
+/*=======================================================================================================*/
+//      METHOD: toeTipCompensation
+/*=======================================================================================================*/
+    void BalanceKinematicResponse::toeTipCompensation(/*const Sensors& sensors*/) 
     {
         //If feature enabled, apply balance compensation through support actuator...
         if (toeTipCompensationEnabled) 
@@ -181,10 +212,10 @@ namespace motion
 /*=======================================================================================================*/
 //      METHOD: hipCompensation
 /*=======================================================================================================*/
-	void BalanceKinematicResponse::hipCompensation(const Sensors& sensors) 
+	void BalanceKinematicResponse::hipRollCompensation(const Sensors& sensors) 
     {
         //If feature enabled, apply balance compensation through support actuator...
-        if (hipCompensationEnabled) 
+        if (hipRollCompensationEnabled) 
         {
             //Instantiate unitless phases for x(=0), y(=1) and z(=2) foot motion...
             arma::vec3 getFootPhases = getFootPhase(getMotionPhase(), phase1Single, phase2Single);
@@ -195,11 +226,11 @@ namespace motion
             //Rotate foot around hip by the given hip roll compensation...
             if (getActiveForwardLimb() == LimbID::LEFT_LEG)
             {
-                setRightFootPosition(getRightFootPosition().rotateZLocal(-hipRollCompensation * yBoundedMinimumPhase, sensors.forwardKinematics.find(ServoID::R_HIP_ROLL)->second));
+                setRightFootPosition(getRightFootPosition().rotateZLocal(-hipRollParameter * yBoundedMinimumPhase, sensors.forwardKinematics.find(ServoID::R_HIP_ROLL)->second));
             }
             else 
             {
-                setLeftFootPosition(getLeftFootPosition().rotateZLocal( hipRollCompensation  * yBoundedMinimumPhase, sensors.forwardKinematics.find(ServoID::L_HIP_ROLL)->second));
+                setLeftFootPosition(getLeftFootPosition().rotateZLocal( hipRollParameter  * yBoundedMinimumPhase, sensors.forwardKinematics.find(ServoID::L_HIP_ROLL)->second));
             }
         }
     }
@@ -215,19 +246,30 @@ namespace motion
             Transform3D leftFoot  = getLeftFootPosition();
             Transform3D rightFoot = getRightFootPosition();
 
-            // Apply balance to our support foot
+            // Balance the support foot, upon stopping this will be applied alternatively to both feet...
             balancer.balance(kinematicsModel, (getActiveForwardLimb() == LimbID::LEFT_LEG) ? rightFoot : leftFoot 
                                             , (getActiveForwardLimb() == LimbID::LEFT_LEG) ? LimbID::RIGHT_LEG : LimbID::LEFT_LEG, sensors);
             
-            // Apply balance to both legs when standing still
-            //balancer.balance(kinematicsModel, leftFoot,  LimbID::LEFT_LEG,  sensors);
-            //balancer.balance(kinematicsModel, rightFoot, LimbID::RIGHT_LEG, sensors);
-
             // Apply changes from balancer to respective left and right foot positions...
             setLeftFootPosition(leftFoot);
             setRightFootPosition(rightFoot);
         }
     }  
+/*=======================================================================================================*/
+//      NAME: updateBody
+/*=======================================================================================================*/
+    void BalanceKinematicResponse::updateBodyPushRecovery()
+    {
+        if(pushRecoveryEnabled)
+        {
+            // balanceAmplitude = balance["amplitude"].as<Expression>();
+            // balanceWeight = balance["weight"].as<Expression>();
+            // balanceOffset = balance["offset"].as<Expression>();
+            // balancer.configure(config["walk_cycle"]["balance"]["push_recovery"]);
+            // pushTime = NUClear::clock::now();
+            // configure(config.config);
+        } 
+    }
 /*=======================================================================================================*/
 //      NAME: updateBody
 /*=======================================================================================================*/
@@ -260,8 +302,10 @@ namespace motion
 /*=======================================================================================================*/
     void BalanceKinematicResponse::updateLowerBody(const Sensors& sensors) 
     {
-        hipCompensation(sensors);
-        //ankleCompensation();
+        hipRollCompensation(sensors);
+        ankleTorqueCompensation();
+        toeTipCompensation();
+        armRollCompensation();
         supportMassCompensation(sensors);
         //etc.
     }
@@ -557,7 +601,7 @@ namespace motion
 
         auto& walkCycle = config["walk_cycle"];
         stepTime = walkCycle["step_time"].as<Expression>();
-        hipRollCompensation = walkCycle["hip_roll_compensation"].as<Expression>();
+        hipRollParameter = walkCycle["hip_roll_compensation"].as<Expression>();
         stepHeight = walkCycle["step"]["height"].as<Expression>();
         stepLimits = walkCycle["step"]["limits"].as<arma::mat::fixed<3,2>>();
 
@@ -578,19 +622,25 @@ namespace motion
 
         auto& balance = walkCycle["balance"];
         balanceEnabled = balance["enabled"].as<bool>();
-        hipCompensationEnabled = balance["hip_compensation"].as<bool>();
-        ankleCompensationEnabled = balance["ankle_compensation"].as<bool>();
+        balanceOptimiserEnabled = balance["optimiser_enabled"].as<bool>();
+        hipRollCompensationEnabled = balance["hip_compensation"].as<bool>();
+        toeTipCompensationEnabled = balance["toe_compensation"].as<bool>();
+        ankleTorqueCompensationEnabled = balance["ankle_compensation"].as<bool>();
+        armRollCompensationEnabled = balance["arm_compensation"].as<bool>();
         supportCompensationEnabled = balance["support_compensation"].as<bool>();
         //balanceAmplitude = balance["amplitude"].as<Expression>();
         //balanceWeight = balance["weight"].as<Expression>();
         //balanceOffset = balance["offset"].as<Expression>();
+
+        auto& pushRecovery = balance["push_recovery"];
+        pushRecoveryEnabled = pushRecovery["enabled"].as<bool>();
 
         balancer.configure(balance);
 
         
         /* TODO
         // gCompensation parameters
-        toeTipCompensation = config["toeTipCompensation"].as<Expression>();
+        toeTipParameter = config["toeTipCompensation"].as<Expression>();
         ankleMod = {-toeTipCompensation, 0};
 
         // gGyro stabilization parameters

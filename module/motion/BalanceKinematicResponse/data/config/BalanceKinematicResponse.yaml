@@ -73,8 +73,11 @@ walk_cycle:
   # TODO: balance params disabled until they are futher understood
   balance:
     enabled: true
+    optimiser_enabled: false
     hip_compensation: false
+    toe_compensation: false
     ankle_compensation: false
+    arm_compensation: false
     support_compensation: false
     amplitude: 1.0
     weight: 0.7
@@ -98,8 +101,8 @@ walk_cycle:
         p: 0.035
         d: 0
     push_recovery:
-      balance_time: 800
       enabled: false
+      balance_time: 800
       amplitude: 1.0
       weight: 0.7
       offset: 0 * pi / 180

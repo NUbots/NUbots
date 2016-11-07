@@ -35,7 +35,6 @@
 #include "message/behaviour/FixedWalkCommand.h"
 
 #include "message/input/Sensors.h"
-#include "message/input/PushDetection.h"
 
 #include "message/motion/KinematicsModels.h"
 #include "message/motion/WalkCommand.h"

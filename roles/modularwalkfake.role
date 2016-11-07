@@ -16,6 +16,9 @@ NUCLEAR_ROLE(
     platform::darwin::HardwareSimulator
     platform::darwin::SensorFilter
 
+    # Input
+    input::PushDetector
+
     # Motion
     motion::FootMotionPlanner
     motion::FootPlacementPlanner
