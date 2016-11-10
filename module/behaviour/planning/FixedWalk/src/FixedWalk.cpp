@@ -27,7 +27,6 @@ namespace behaviour {
 namespace planning {
 
     using message::motion::WalkCommand;
-    using message::motion::WalkStartCommand;
     using message::motion::StopCommand;
 	using message::motion::WalkStopped;
 	using message::behaviour::FixedWalkCommand;
@@ -83,7 +82,7 @@ namespace planning {
             if(!active){
                 emit(std::make_unique<FixedWalkFinished>());
             } else {
-                NUClear::log("!!!!!!!!!!!!!!!!!!!!WARNING: Walk finised prematurely!!!!!!!!!!!!!!!!!!!!");
+                NUClear::log("!!!!!!!!!!!!!!!!!!!!WARNING: Walk finished prematurely!!!!!!!!!!!!!!!!!!!!");
             }
         });
 
@@ -92,7 +91,6 @@ namespace planning {
                 active = true;
     			segmentStart = NUClear::clock::now();
     			beginningOrientation = sensors.world.rotation();
-                emit(std::make_unique<WalkStartCommand>());
     		}
     		for(auto& segment: command.segments){
     			walkSegments.push_back(segment);

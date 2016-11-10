@@ -16,7 +16,7 @@ NUCLEAR_ROLE(
     platform::darwin::SensorFilter
 
     # Motion
-    motion::PreviousWalkEngine
+    motion::WalkEngine
     motion::ScriptEngine
     motion::HeadController
     motion::IKKick

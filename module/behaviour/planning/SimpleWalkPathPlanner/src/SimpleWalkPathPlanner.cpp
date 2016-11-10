@@ -43,38 +43,36 @@ namespace module {
         namespace planning {
 
             using message::support::Configuration;
+
+            using message::input::LimbID;
             using message::input::Sensors;
+            using message::input::ServoID;
+            
             using message::motion::WalkCommand;
+            using message::motion::StopCommand;
+            using message::motion::WalkStopped;
+            using message::motion::EnableWalkEngineCommand;
+            using message::motion::DisableWalkEngineCommand;
+            using message::motion::KickFinished;
+
             using message::behaviour::KickPlan;
             using message::behaviour::KickType;
-            using message::behaviour::MotionCommand;
-            using message::motion::WalkStartCommand;
-            using message::motion::StopCommand;
-            using message::motion::KickFinished;
             using message::behaviour::WantsToKick;
-            using utility::localisation::transform::RobotToWorldTransform;
-            using utility::math::matrix::Transform2D;
-            using utility::math::matrix::Transform3D;
-            using utility::nubugger::graph;
-            using utility::nubugger::drawSphere;
-
             using message::behaviour::MotionCommand;
             using message::behaviour::RegisterAction;
             using message::behaviour::ActionPriorites;
-            using message::input::LimbID;
-            using message::input::ServoID;
 
-            using message::motion::WalkStopped;
-            using message::motion::WalkCommand;
-            using message::motion::WalkStartCommand;
-            using message::motion::StopCommand;
-            using message::motion::EnableWalkEngineCommand;
-            using message::motion::DisableWalkEngineCommand;
-
-
+            using message::localisation::Self;
 
             using message::vision::Ball;
-            using message::localisation::Self;
+
+            using utility::localisation::transform::RobotToWorldTransform;
+           
+            using utility::math::matrix::Transform2D;
+            using utility::math::matrix::Transform3D;
+            
+            using utility::nubugger::graph;
+            using utility::nubugger::drawSphere;
 
             SimpleWalkPathPlanner::SimpleWalkPathPlanner(std::unique_ptr<NUClear::Environment> environment)
              : Reactor(std::move(environment)),
@@ -110,7 +108,6 @@ namespace module {
                         if (givenLimbs.find(LimbID::LEFT_LEG) != givenLimbs.end()) {
                             // Enable the walk engine.
                             emit<Scope::DIRECT>(std::move(std::make_unique<EnableWalkEngineCommand>(subsumptionId)));
-                            emit(std::move(std::make_unique<WalkStartCommand>(subsumptionId)));
                         }
                     },
                     [this] (const std::set<LimbID>& takenLimbs) {
@@ -159,7 +156,6 @@ namespace module {
 
                         std::unique_ptr<WalkCommand> command = std::make_unique<WalkCommand>(subsumptionId,latestCommand.walkCommand);
                         emit(std::move(command));
-                        emit(std::move(std::make_unique<WalkStartCommand>(subsumptionId)));
                         emit(std::make_unique<ActionPriorites>(ActionPriorites { subsumptionId, { 40, 11 }}));
                         return;
 
@@ -227,9 +223,8 @@ namespace module {
                     // log("anglewalkcommand",command->command[2]);
 
                     emit(std::make_unique<KickPlan>(KickPlan{kick_target,KickType::SCRIPTED}));
-                    emit(std::move(std::make_unique<WalkStartCommand>(subsumptionId)));
+                    
                     emit(std::move(command));
-
                     emit(std::make_unique<ActionPriorites>(ActionPriorites { subsumptionId, { 40, 11 }}));
                 });
 
