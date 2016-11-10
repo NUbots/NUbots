@@ -110,10 +110,7 @@ namespace input
             // emit(std::make_unique<StandingDetected>(standing));
 
             // Notify if sensor data suggests robot is begining to fall...
-            FallingDetected falling;
-            falling.x  = arma::norm(xzGyroDiff);
-            falling.y  = arma::norm(yzGyroDiff);
-            falling.z  = arma::norm(xyGyroDiff); //TODO: Verify mathematical suitability.
+            FallingDetected falling(arma::norm(xzGyroDiff), arma::norm(yzGyroDiff), arma::norm(xyGyroDiff)); //TODO: Verify mathematical suitability
             emit(std::make_unique<FallingDetected>(falling));
         });
     }
