@@ -16,17 +16,12 @@
  *
  * Copyright 2015 NUbots <nubots@nubots.net>
  */
+#include "PostureRecogniser.h"
 
-#include "PostureRecognition.h"
-
-#include "message/support/Configuration.h"
-#include "utility/time/time.h"
-#include "utility/nubugger/NUhelpers.h"
-#include "message/input/Sensors.h"
-#include "message/input/PushDetection.h"
-
-namespace module {
-namespace input {
+namespace module 
+{
+namespace input 
+{
 
     using message::support::Configuration;
 
@@ -47,12 +42,12 @@ namespace input {
 /*=======================================================================================================*/
 //      NAME: Push Detector
 /*=======================================================================================================*/
-    PostureRecognition::PostureRecognition(std::unique_ptr<NUClear::Environment> environment)
+    PostureRecogniser::PostureRecogniser(std::unique_ptr<NUClear::Environment> environment)
     : Reactor(std::move(environment)), loadFilters(), lastTimeUpdateTime(), DEBUG(false), DEBUG_ITER(0) 
     {
 
         // Configure posture recognition...
-        on<Configuration>("PostureRecognition.yaml").then([this] (const Configuration& config) 
+        on<Configuration>("PostureRecogniser.yaml").then([this] (const Configuration& config) 
         {
             configure(config.config); 
         });
@@ -61,12 +56,12 @@ namespace input {
         on<Last<2, Trigger<Sensors>>>().then([this] (const std::vector<std::shared_ptr<const Sensors>>& sensors) 
         {
             // Only continue if there is at least 2 sets of sensor data...
-            if(DEBUG) { log<NUClear::TRACE>("Posture Recognition - Enter Trigger(0)"); }
+            if(DEBUG) { log<NUClear::TRACE>("Posture Recogniser - Enter Trigger(0)"); }
             if (sensors.size() < 2) 
             {
                 return;
             }
-            if(DEBUG) { log<NUClear::TRACE>("Posture Recognition- Enter Trigger(1)"); }
+            if(DEBUG) { log<NUClear::TRACE>("Posture Recogniser- Enter Trigger(1)"); }
 
             // The acceleration amplitude for stationary postures is typically smaller than 0.40g...
             // The rotational rate amplitude for stationary postures typically is smaller than 1.0472 rads/s...
@@ -125,7 +120,7 @@ namespace input {
 /*=======================================================================================================*/
 //      INITIALISATION METHOD: Configuration
 /*=======================================================================================================*/
-    void PostureRecognition::configure(const YAML::Node& config)
+    void PostureRecogniser::configure(const YAML::Node& config)
     {
         auto& debug = config["debugging"];
         DEBUG = debug["enabled"].as<bool>();

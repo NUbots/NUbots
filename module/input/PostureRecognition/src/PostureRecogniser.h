@@ -17,19 +17,29 @@
  * Copyright 2015 NUbots <nubots@nubots.net>
  */
 
-#ifndef MODULES_INPUT_POSTURERECOGNITION_H
-#define MODULES_INPUT_POSTURERECOGNITION_H
+#ifndef MODULES_INPUT_POSTURERECOGNISER_H
+#define MODULES_INPUT_POSTURERECOGNISER_H
 
 #include <nuclear>
 #include <armadillo>
 #include <chrono>
 #include <yaml-cpp/yaml.h>
 
+#include "message/support/Configuration.h"
+
 #include "message/input/Sensors.h"
+#include "message/input/PostureRecognition.h"
+
 #include "utility/math/filter/UKF.h"
 
-namespace module {
-namespace input {
+#include "utility/time/time.h"
+
+#include "utility/nubugger/NUhelpers.h"
+
+namespace module 
+{
+namespace input 
+{
 
     class ServoLoadModel {
        public:
@@ -58,12 +68,12 @@ namespace input {
         }
     };
 
-    class PostureRecognition : public NUClear::Reactor 
+    class PostureRecogniser : public NUClear::Reactor 
     {
 
     public:
-        /// @brief Called by the powerplant to build and setup the PostureRecognition reactor.
-        explicit PostureRecognition(std::unique_ptr<NUClear::Environment> environment);
+        /// @brief Called by the powerplant to build and setup the PostureRecogniser reactor.
+        explicit PostureRecogniser(std::unique_ptr<NUClear::Environment> environment);
 
         std::vector<utility::math::filter::UKF<ServoLoadModel>> loadFilters;
         NUClear::clock::time_point lastTimeUpdateTime;
@@ -87,4 +97,4 @@ namespace input {
 }
 }
 
-#endif  // MODULES_INPUT_POSTURERECOGNITION_H
+#endif  // MODULES_INPUT_POSTURERECOGNISER_H
