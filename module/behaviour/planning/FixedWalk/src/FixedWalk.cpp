@@ -28,7 +28,7 @@ namespace planning {
 
     using message::motion::WalkCommand;
     using message::motion::WalkStartCommand;
-    using message::motion::WalkStopCommand;
+    using message::motion::StopCommand;
 	using message::motion::WalkStopped;
 	using message::behaviour::FixedWalkCommand;
     using message::behaviour::FixedWalkFinished;
@@ -61,7 +61,7 @@ namespace planning {
 
                 if(walkSegments.empty()){
                     emit(std::make_unique<WalkCommand>());
-                    emit(std::make_unique<WalkStopCommand>());
+                    emit(std::make_unique<StopCommand>());
                     active = false;
                     return;
                 }
@@ -74,7 +74,7 @@ namespace planning {
         });
 
         on<Trigger<CancelFixedWalk>, Sync<FixedWalk>>().then([this] {
-            emit(std::make_unique<WalkStopCommand>());
+            emit(std::make_unique<StopCommand>());
             active = false;
             walkSegments.clear();
         });

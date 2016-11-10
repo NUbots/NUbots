@@ -45,10 +45,10 @@ namespace motion
     // using message::behaviour::ActionPriorites;
     using message::motion::BalanceBodyUpdate;
     using message::motion::WalkCommand;
-    using message::motion::NewWalkCommand;
-    using message::motion::WalkStartCommand;
-    using message::motion::WalkStopCommand;
+    using message::motion::StopCommand;
+    using message::motion::WalkStarted;
     using message::motion::WalkStopped;
+    using message::motion::NewWalkCommand;
     using message::motion::EnableWalkEngineCommand;
     using message::motion::DisableWalkEngineCommand;
     using message::motion::EnableBalanceResponse;
@@ -77,10 +77,9 @@ namespace motion
 /*=======================================================================================================*/
     WalkEngine::WalkEngine(std::unique_ptr<NUClear::Environment> environment) 
     : Reactor(std::move(environment))
-        , DEBUG(false), DEBUG_ITER(0), initialStep(0)
+        , DEBUG(false), DEBUG_ITER(0)
         , newPostureReceived(false), emitLocalisation(false), emitFootPosition(false)
         , updateHandle(), generateStandScriptReaction(), subsumptionId(1)
-        , StateOfWalk()
         , torsoPositionsTransform(), leftFootPositionTransform()
         , rightFootPositionTransform(), uSupportMass()
         , activeForwardLimb(), activeLimbInitial(LimbID::LEFT_LEG)
@@ -89,7 +88,7 @@ namespace motion
         , gainArms(0.0f), gainLegs(0.0f), stepLimits(arma::fill::zeros)
         , footOffsetCoefficient(arma::fill::zeros), uLRFootOffset()
         , armLPostureTransform(), armRPostureTransform()
-        , beginStepTime(0.0), STAND_SCRIPT_DURATION(0.0), pushTime(), lastVeloctiyUpdateTime()
+        , beginStepTime(0.0), STAND_SCRIPT_DURATION(0.0), pushTime()
         , velocityHigh(0.0), accelerationTurningFactor(0.0), velocityLimits(arma::fill::zeros)
         , accelerationLimits(arma::fill::zeros), accelerationLimitsHigh(arma::fill::zeros)
         , velocityCurrent(), velocityCommand()
@@ -100,26 +99,26 @@ namespace motion
         , lastFootGoalRotation(), footGoalErrorSum()       
     {
 
-        //Configure modular walk engine...
+        // Configure modular walk engine...
         on<Configuration>("WalkEngine.yaml").then("Walk Engine - Configure", [this] (const Configuration& config) 
         {
             configure(config.config);       
         });
 
-        //Define kinematics model for physical calculations...
+        // Define kinematics model for physical calculations...
         on<Trigger<KinematicsModel>>().then("WalkEngine - Update Kinematics Model", [this](const KinematicsModel& model)
         {
             kinematicsModel = model;
         });
 
-        //Update waypoints sensor data at regular intervals...
+        // Update waypoints sensor data at regular intervals...
         updateHandle =on<Every<UPDATE_FREQUENCY, Per<std::chrono::seconds>>, /*With<Sensors>,*/ Single, Priority::HIGH>()
         .then([this] /*(const Sensors& sensors)*/
         {
-            if(DEBUG) { NUClear::log("WalkEngine - Update Waypoints(0)"); }
+            if(DEBUG) { log<NUClear::TRACE>("WalkEngine - Update Waypoints(0)"); }
             if(isNewPostureReceived()) 
             {                 
-                if(DEBUG) { NUClear::log("New Posture(%d)", DEBUG_ITER++); }                       
+                if(DEBUG) { log<NUClear::TRACE>("New Posture(%d)", DEBUG_ITER++); }                       
                 emit(std::move(updateWaypoints(/*sensors*/))); 
             }
             emit(graph("MWE Left  Foot",    getLeftFootPosition()));   
@@ -127,21 +126,36 @@ namespace motion
             emit(graph("MWE Torso (Arms)", getTorsoPositionArms()));       
             emit(graph("MWE Torso (Legs)", getTorsoPositionLegs()));          
             emit(graph("MWE Torso   (3D)",   getTorsoPosition3D()));
-            if(DEBUG) { NUClear::log("WalkEngine - Update Waypoints(1)"); }
+            if(DEBUG) { log<NUClear::TRACE>("WalkEngine - Update Waypoints(1)"); }
         }).disable();
 
-        //Broadcast constrained velocity vector parameter to actuator modules...
+        // Broadcast constrained velocity vector parameter to actuator modules...
         on<Trigger<WalkCommand>>().then([this] (const WalkCommand& walkCommand)
         {            
-            if(DEBUG) { NUClear::log("WalkEngine - Trigger WalkCommand(0)"); }
-            setVelocity(walkCommand.command);  
-            emit(std::make_unique<NewWalkCommand>(getVelocity()));
-            if(DEBUG) { NUClear::log("WalkEngine - Trigger WalkCommand(1)"); }           
+            if(DEBUG) { log<NUClear::TRACE>("WalkEngine - Trigger WalkCommand(0)"); }
+                setVelocity(walkCommand.command);  
+                emit(std::make_unique<NewWalkCommand>(getVelocity()));
+                // Notify behavioural modules of current standstill...
+                emit(std::make_unique<WalkStarted>());
+            if(DEBUG) { log<NUClear::TRACE>("WalkEngine - Trigger WalkCommand(1)"); }           
         });
 
+        // If override stop command is issued, signal zero velocity command...
+        on<Trigger<StopCommand>>().then([this] 
+        {
+            if(DEBUG) { log<NUClear::TRACE>("WalkEngine - Trigger StopCommand(0)"); }
+                // Emit zero velocity command to trigger final adjustment step...
+                emit(std::make_unique<NewWalkCommand>(Transform2D({0, 0, 0})));
+                // Notify behavioural modules of current standstill...
+                emit(std::make_unique<WalkStopped>());
+                emit(std::make_unique<std::vector<ServoCommand>>());
+            if(DEBUG) { log<NUClear::TRACE>("WalkEngine - Trigger WalkCommand(1)"); }
+        });
+
+        // Update goal robot posture given new balance information...
         on<Trigger<BalanceBodyUpdate>>().then("Walk Engine - Received update (Balanced Robot Posture) Info", [this](const BalanceBodyUpdate& info)
         {
-            if(DEBUG) { NUClear::log("WalkEngine - Trigger BalanceBodyUpdate(0)"); }
+            if(DEBUG) { log<NUClear::TRACE>("WalkEngine - Trigger BalanceBodyUpdate(0)"); }
                 setNewPostureReceived(false);
 
                 setLeftFootPosition(info.leftFoot);
@@ -153,21 +167,7 @@ namespace motion
                 setRArmPosition(info.armRPosition);
                 
                 setNewPostureReceived(true); 
-            if(DEBUG) { NUClear::log("WalkEngine - Trigger BalanceBodyUpdate(1)"); }
-        });
-
-        on<Trigger<WalkStartCommand>>().then([this] 
-        {
-            lastVeloctiyUpdateTime = NUClear::clock::now();
-            start();
-            // emit(std::make_unique<ActionPriorites>(ActionPriorites { subsumptionId, { 25, 10 }})); // TODO: config
-        });
-
-        on<Trigger<WalkStopCommand>>().then([this] 
-        {
-            // TODO: This sets STOP_REQUEST, which appears not to be used anywhere.
-            // If this is the case, we should delete or rethink the WalkStopCommand.
-            //requestStop();
+            if(DEBUG) { log<NUClear::TRACE>("WalkEngine - Trigger BalanceBodyUpdate(1)"); }
         });
 
         on<Trigger<WalkOptimiserCommand>>().then([this] (const WalkOptimiserCommand& command) 
@@ -180,7 +180,6 @@ namespace motion
         //{
         //    generateStandScriptReaction.disable();
         //    //generateAndSaveStandScript(sensors);
-        //    //StateOfWalk = State::LAST_STEP;
         //    start();
         //});
 
@@ -230,42 +229,7 @@ namespace motion
         //Try updateWaypoints(); ?
         //reset();
         //stanceReset();
-    }    
-/*=======================================================================================================*/
-//      NAME: start
-/*=======================================================================================================*/    
-    void WalkEngine::start() 
-    {
-        if (StateOfWalk != State::WALKING) 
-        {
-            //activeForwardLimb = activeLimbInitial;
-            //beginStepTime = getTime();
-            //initialStep = 2;
-            StateOfWalk = State::WALKING;
-        }
-    }
-/*=======================================================================================================*/
-//      NAME: requestStop
-/*=======================================================================================================*/
-    /*void WalkEngine::requestStop() 
-    {
-        // always stops with feet together (which helps transition)
-        if (StateOfWalk == State::WALKING) 
-        {
-            StateOfWalk = State::STOP_REQUEST;
-        }
-    }*/    
-/*=======================================================================================================*/
-//      NAME: stop
-/*=======================================================================================================*/
-    void WalkEngine::stop() 
-    {
-        StateOfWalk = State::STOPPED;
-        // emit(std::make_unique<ActionPriorites>(ActionPriorites { subsumptionId, { 0, 0 }})); // TODO: config
-        //log<NUClear::TRACE>("Walk Engine:: Stop request complete");
-        emit(std::make_unique<WalkStopped>());
-        emit(std::make_unique<std::vector<ServoCommand>>());
-    }    
+    }      
 /*=======================================================================================================*/
 //      NAME: updateWaypoints
 /*=======================================================================================================*/
@@ -329,13 +293,13 @@ namespace motion
         inVelocityCommand.x()     *= inVelocityCommand.x()     > 0 ? velocityLimits(0,1) : -velocityLimits(0,0);
         inVelocityCommand.y()     *= inVelocityCommand.y()     > 0 ? velocityLimits(1,1) : -velocityLimits(1,0);
         inVelocityCommand.angle() *= inVelocityCommand.angle() > 0 ? velocityLimits(2,1) : -velocityLimits(2,0);
-        if(DEBUG) { NUClear::log("Velocity(hard limit)"); }       
+        if(DEBUG) { log<NUClear::TRACE>("Velocity(hard limit)"); }       
         
         // filter the commanded speed
         inVelocityCommand.x()     = std::min(std::max(inVelocityCommand.x(),     velocityLimits(0,0)), velocityLimits(0,1));
         inVelocityCommand.y()     = std::min(std::max(inVelocityCommand.y(),     velocityLimits(1,0)), velocityLimits(1,1));
         inVelocityCommand.angle() = std::min(std::max(inVelocityCommand.angle(), velocityLimits(2,0)), velocityLimits(2,1));
-        if(DEBUG) { NUClear::log("Velocity(filtered 1)"); }
+        if(DEBUG) { log<NUClear::TRACE>("Velocity(filtered 1)"); }
         
         // slow down when turning
         double vFactor = 1 - std::abs(inVelocityCommand.angle()) / accelerationTurningFactor;
@@ -345,13 +309,13 @@ namespace motion
         inVelocityCommand.x()     = inVelocityCommand.x() * magFactor;
         inVelocityCommand.y()     = inVelocityCommand.y() * magFactor;
         inVelocityCommand.angle() = inVelocityCommand.angle();
-        if(DEBUG) { NUClear::log("Velocity(slow  turn)"); }
+        if(DEBUG) { log<NUClear::TRACE>("Velocity(slow  turn)"); }
         
         // filter the decelarated speed
         inVelocityCommand.x()     = std::min(std::max(inVelocityCommand.x(),     velocityLimits(0,0)), velocityLimits(0,1));
         inVelocityCommand.y()     = std::min(std::max(inVelocityCommand.y(),     velocityLimits(1,0)), velocityLimits(1,1));
         inVelocityCommand.angle() = std::min(std::max(inVelocityCommand.angle(), velocityLimits(2,0)), velocityLimits(2,1));
-        if(DEBUG) { NUClear::log("Velocity(filtered 2)"); }  
+        if(DEBUG) { log<NUClear::TRACE>("Velocity(filtered 2)"); }  
         
         velocityCurrent = inVelocityCommand;
     }    
@@ -360,7 +324,7 @@ namespace motion
 /*=======================================================================================================*/
     double WalkEngine::getTime() 
     {
-        if(DEBUG) { NUClear::log("System Time:%f\n\r", double(NUClear::clock::now().time_since_epoch().count()) * (1.0 / double(NUClear::clock::period::den))); }
+        if(DEBUG) { log<NUClear::TRACE>("System Time:%f\n\r", double(NUClear::clock::now().time_since_epoch().count()) * (1.0 / double(NUClear::clock::period::den))); }
         return (double(NUClear::clock::now().time_since_epoch().count()) * (1.0 / double(NUClear::clock::period::den)));
     }
 /*=======================================================================================================*/
@@ -461,6 +425,9 @@ namespace motion
 /*=======================================================================================================*/
     void WalkEngine::configure(const YAML::Node& config)
     {
+        auto& debug = config["debugging"];
+        DEBUG = debug["enabled"].as<bool>();
+        
         emitLocalisation = config["emit_localisation"].as<bool>();
 
         auto& stance = config["stance"];

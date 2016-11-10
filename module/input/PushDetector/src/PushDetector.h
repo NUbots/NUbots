@@ -56,7 +56,8 @@ namespace input {
         }
     };
 
-    class PushDetector : public NUClear::Reactor {
+    class PushDetector : public NUClear::Reactor 
+    {
 
     public:
         /// @brief Called by the powerplant to build and setup the PushDetector reactor.
@@ -64,6 +65,21 @@ namespace input {
 
         std::vector<utility::math::filter::UKF<ServoLoadModel>> loadFilters;
         NUClear::clock::time_point lastTimeUpdateTime;
+    private:
+
+        /**
+         * Temporary debugging variables for local output logging...
+         */ 
+        bool DEBUG;                 //
+        int  DEBUG_ITER;            //
+
+        /**
+         * @brief [brief description]
+         * @details [long description]
+         * 
+         * @param inTorsoPosition [description]
+         */
+        void configure(const YAML::Node& config);
     };
 
 }

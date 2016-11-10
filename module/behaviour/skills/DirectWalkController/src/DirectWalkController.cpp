@@ -34,10 +34,9 @@ namespace skills {
     using message::behaviour::MotionCommand;
     using message::behaviour::RegisterAction;
     using message::behaviour::ActionPriorites;
-    using message::motion::WalkStopped;
     using message::motion::WalkCommand;
-    using message::motion::WalkStartCommand;
-    using message::motion::WalkStopCommand;
+    using message::motion::StopCommand;
+    using message::motion::WalkStopped;
     using message::motion::EnableWalkEngineCommand;
     using message::motion::DisableWalkEngineCommand;
     using message::input::LimbID;
@@ -48,9 +47,9 @@ namespace skills {
     , subsumptionId(size_t(this) * size_t(this) - size_t(this)) {
 
         // Register this module with the subsumption system:
-        emit<Scope::INITIALIZE>(std::make_unique<RegisterAction>(RegisterAction {
-            subsumptionId,
-            "DirectWalkController",
+        emit<Scope::INITIALIZE>(std::make_unique<RegisterAction>(RegisterAction 
+        {
+            subsumptionId, "DirectWalkController",
             {
                 // Limb sets required by the walk engine:
                 std::pair<double, std::set<LimbID>>(0, {LimbID::LEFT_LEG, LimbID::RIGHT_LEG}),
@@ -73,20 +72,26 @@ namespace skills {
             }
         }));
 
-        on<Trigger<MotionCommand>>().then([this] (const MotionCommand& command) {
-            if (command.type == MotionCommand::Type::DirectCommand) {
+        on<Trigger<MotionCommand>>().then([this] (const MotionCommand& command) 
+        {
+            if (command.type == MotionCommand::Type::DirectCommand) 
+            {
                 emit(std::make_unique<ActionPriorites>(ActionPriorites { subsumptionId, { 26, 11 }}));
-                emit(std::move(std::make_unique<WalkStartCommand>(subsumptionId)));
                 emit(std::move(std::make_unique<WalkCommand>(subsumptionId, command.walkCommand)));           
-            } else if (command.type == MotionCommand::Type::StandStill) {
+            } 
+            else if (command.type == MotionCommand::Type::StandStill) 
+            {
                 emit(std::make_unique<ActionPriorites>(ActionPriorites { subsumptionId, { 26, 11 }}));
-                emit(std::move(std::make_unique<WalkStopCommand>(subsumptionId)));
-            } else {
+                emit(std::move(std::make_unique<StopCommand>(subsumptionId)));
+            } 
+            else 
+            {
                 emit(std::make_unique<ActionPriorites>(ActionPriorites { subsumptionId, { 0, 0 }}));
             }
         });
 
-        on<Trigger<WalkStopped>>().then([this] {
+        on<Trigger<WalkStopped>>().then([this] 
+        {
             emit(std::make_unique<ActionPriorites>(ActionPriorites { subsumptionId, { 0, 0 }}));
         });
     }

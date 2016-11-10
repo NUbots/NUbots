@@ -88,25 +88,25 @@ namespace motion
         //When new torso destination is computed, inform FPP in preparation for next footstep...
         on<Trigger<TorsoMotionUpdate>>().then("Foot Placement Planner - Received Torso Destination Update", [this] (const TorsoMotionUpdate& info) 
         {                     
-            if(DEBUG) { NUClear::log("Messaging: Foot Placement Planner - Received Torso Destination Update(0)"); }    
+            if(DEBUG) { log<NUClear::TRACE>("Messaging: Foot Placement Planner - Received Torso Destination Update(0)"); }    
             setTorsoPosition(info.frameArms);  
             setTorsoDestination(info.frameDestination);     
-            if(DEBUG) { NUClear::log("Messaging: Foot Placement Planner - Received Torso Destination Update(1)"); }
+            if(DEBUG) { log<NUClear::TRACE>("Messaging: Foot Placement Planner - Received Torso Destination Update(1)"); }
         });
 
         updateHandle = on<Trigger<FootStepRequested>>().then("Foot Placement Planner - Calculate Target Foot Position", [this]
         {          
-            if(DEBUG) { NUClear::log("Messaging: Foot Placement Planner - Calculate Target Foot Position(0)"); }             
+            if(DEBUG) { log<NUClear::TRACE>("Messaging: Foot Placement Planner - Calculate Target Foot Position(0)"); }             
             calculateNewStep(getVelocityCurrent(), getTorsoDestination(), getTorsoPosition());
-            if(DEBUG) { NUClear::log("Messaging: Foot Placement Planner - Calculate Target Foot Position(1)"); }
+            if(DEBUG) { log<NUClear::TRACE>("Messaging: Foot Placement Planner - Calculate Target Foot Position(1)"); }
         }).disable();
 
         on<Trigger<NewWalkCommand>>().then("Foot Placement Planner - Update Foot Target", [this] (const NewWalkCommand& command) 
         {                            
-            if(DEBUG) { NUClear::log("Messaging: Foot Placement Planner - On New Walk Command(0)"); }          
+            if(DEBUG) { log<NUClear::TRACE>("Messaging: Foot Placement Planner - On New Walk Command(0)"); }          
             setVelocityCommand(command.velocityTarget);
             calculateNewStep(getVelocityCurrent(), getTorsoDestination(), getTorsoPosition());          
-            if(DEBUG) { NUClear::log("Messaging: Foot Placement Planner - On New Walk Command(1)"); }
+            if(DEBUG) { log<NUClear::TRACE>("Messaging: Foot Placement Planner - On New Walk Command(1)"); }
         }).enable();
 
         on<Trigger<EnableFootPlacement>>().then([this]
@@ -310,7 +310,7 @@ namespace motion
 /*=======================================================================================================*/
     double FootPlacementPlanner::getTime() 
     {
-        if(DEBUG) { NUClear::log("System Time:%f\n\r", double(NUClear::clock::now().time_since_epoch().count()) * (1.0 / double(NUClear::clock::period::den))); }
+        if(DEBUG) { log<NUClear::TRACE>("System Time:%f\n\r", double(NUClear::clock::now().time_since_epoch().count()) * (1.0 / double(NUClear::clock::period::den))); }
         return (double(NUClear::clock::now().time_since_epoch().count()) * (1.0 / double(NUClear::clock::period::den)));
     }  
 /*=======================================================================================================*/
@@ -487,6 +487,9 @@ namespace motion
 /*=======================================================================================================*/
     void FootPlacementPlanner::configure(const YAML::Node& config)
     {
+        auto& debug = config["debugging"];
+        DEBUG = debug["enabled"].as<bool>();
+        
         emitLocalisation = config["emit_localisation"].as<bool>();
 
         auto& stance = config["stance"];

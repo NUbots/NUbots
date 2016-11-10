@@ -106,52 +106,52 @@ namespace motion
         updateHandle = on<Every<UPDATE_FREQUENCY, Per<std::chrono::seconds>>, /*With<Sensors>,*/ Single, Priority::HIGH>()
         .then("Torso Motion Planner - Update Torso Position", [this] /*(const Sensors& sensors)*/
         {
-            if(DEBUG) { NUClear::log("Messaging: Torso Motion Planner - Update Torso Position(0)"); }
+            if(DEBUG) { log<NUClear::TRACE>("Messaging: Torso Motion Planner - Update Torso Position(0)"); }
                 if(isNewStepAvailable())
                 {                               
                     updateTorsoPosition();
                 }
-            if(DEBUG) { NUClear::log("Messaging: Torso Motion Planner - Update Torso Position(1)"); }
+            if(DEBUG) { log<NUClear::TRACE>("Messaging: Torso Motion Planner - Update Torso Position(1)"); }
         }).disable();
 
         //In the event of a new foot step target specified by the foot placement planning module...
         on<Trigger<NewStepTargetInfo>>().then("Torso Motion Planner - Received Target Foot Position", [this] (const NewStepTargetInfo& info) 
         {
-            if(DEBUG) { NUClear::log("Messaging: Foot Motion Planner - Received Target Foot Position(0)"); }
+            if(DEBUG) { log<NUClear::TRACE>("Messaging: Foot Motion Planner - Received Target Foot Position(0)"); }
                 setSupportMass(info.supportMass);                   //Queued    : FPP
-            if(DEBUG) { NUClear::log("Messaging: Foot Motion Planner - Received Target Foot Position(1)"); }
+            if(DEBUG) { log<NUClear::TRACE>("Messaging: Foot Motion Planner - Received Target Foot Position(1)"); }
         });
 
         //In the event of a new foot step target specified by the foot placement planning module...
         on<Trigger<NewFootTargetInfo>>().then("Torso Motion Planner - Received Footstep Info", [this] (const NewFootTargetInfo& info) 
         {            
-            if(DEBUG) { NUClear::log("Messaging: Torso Motion Planner - Received Footstep Info(0)"); }          
+            if(DEBUG) { log<NUClear::TRACE>("Messaging: Torso Motion Planner - Received Footstep Info(0)"); }          
                 setLeftFootSource(info.leftFootSource);             //Queued    : FPP
                 setRightFootSource(info.rightFootSource);           //Queued    : FPP
                 setLeftFootDestination(info.leftFootDestination);   //Queued    : FPP                 
                 setRightFootDestination(info.rightFootDestination); //Queued    : FPP               
-           if(DEBUG) { NUClear::log("Messaging: Torso Motion Planner - Received Footstep Info(1)"); }
+           if(DEBUG) { log<NUClear::TRACE>("Messaging: Torso Motion Planner - Received Footstep Info(1)"); }
         });
 
         //In the process of actuating a foot step and emitting updated positional data...
         on<Trigger<FootMotionUpdate>>().then("Torso Motion Planner - Received Foot Motion Update", [this] (const FootMotionUpdate& info) 
         {            
-            if(DEBUG) { NUClear::log("Messaging: Torso Motion Planner - Received Foot Motion Update(0)"); }
+            if(DEBUG) { log<NUClear::TRACE>("Messaging: Torso Motion Planner - Received Foot Motion Update(0)"); }
                 setMotionPhase(info.phase);                         //Real-time : FMP
-            if(DEBUG) { NUClear::log("Messaging: Torso Motion Planner - Received Foot Motion Update(1)"); }
+            if(DEBUG) { log<NUClear::TRACE>("Messaging: Torso Motion Planner - Received Foot Motion Update(1)"); }
         });
 
         //If the foot motion planning module completes a step, then update queued target data...
         on<Trigger<FootStepCompleted>>().then("Torso Motion Planner - Completed Queued Foot Step Target", [this]
         {
-            if(DEBUG) { NUClear::log("Messaging: Torso Motion Planner - Completed Queued Foot Step Target(0)"); }
+            if(DEBUG) { log<NUClear::TRACE>("Messaging: Torso Motion Planner - Completed Queued Foot Step Target(0)"); }
                 //Release CurrentFootTargetInfo from queued step as it is now completed                   
                 if (leftFootSource.size() > 0)          { leftFootSource.pop();         }
                 if (rightFootSource.size() > 0)         { rightFootSource.pop();        }
                 if (leftFootDestination.size() > 0)     { leftFootDestination.pop();    }                  
                 if (rightFootDestination.size() > 0)    { rightFootDestination.pop();   }
                 if (q_supportMass.size() > 0)           { q_supportMass.pop();          }                                     
-            if(DEBUG) { NUClear::log("Messaging: Torso Motion Planner - Completed Queued Foot Step Target(1)"); }
+            if(DEBUG) { log<NUClear::TRACE>("Messaging: Torso Motion Planner - Completed Queued Foot Step Target(1)"); }
         });
 
         on<Trigger<EnableTorsoMotion>>().then([this]
@@ -470,6 +470,9 @@ namespace motion
 /*=======================================================================================================*/
     void TorsoMotionPlanner::configure(const YAML::Node& config)
     {
+        auto& debug = config["debugging"];
+        DEBUG = debug["enabled"].as<bool>();
+        
         emitLocalisation = config["emit_localisation"].as<bool>();
 
         auto& stance = config["stance"];

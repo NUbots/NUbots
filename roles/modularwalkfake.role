@@ -17,7 +17,7 @@ NUCLEAR_ROLE(
     platform::darwin::SensorFilter
 
     # Input
-    #input::PushDetector
+    input::PushDetector
 
     # Motion
     motion::FootMotionPlanner

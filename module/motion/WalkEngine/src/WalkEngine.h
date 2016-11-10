@@ -95,7 +95,6 @@ namespace motion
          */ 
         bool DEBUG;                 //
         int  DEBUG_ITER;            //
-        int  initialStep;           // TODO: How to many 'steps' to take before lifting a foot when starting to walk
 
         /**
          * NUsight feedback initialized from configuration script, see config file for documentation...
@@ -110,16 +109,6 @@ namespace motion
         ReactionHandle updateHandle;                    // handle(updateWaypoints), disabling when not moving will save unnecessary CPU resources
         ReactionHandle generateStandScriptReaction;     // handle(generateStandAndSaveScript), disabling when not required for capturing standing phase
         size_t subsumptionId;                           // subsumption ID key to access motors
-
-        /**
-         * The current abstract state of WalkEngine...
-         */
-        enum State {
-            STOPPED,            // Walk engine has completely stopped and standing still
-            STOP_REQUEST,       // A stop request has been made but not received
-            LAST_STEP,          // Stop request has been made and now taking the last step before stopping
-            WALKING             // Walk engine is walking as normal
-        } StateOfWalk;
         
         /**
          * Anthropomorphic metrics for relevant humanoid joints & actuators...
@@ -192,7 +181,6 @@ namespace motion
         double beginStepTime;                                   // The time when the current step begun
         double STAND_SCRIPT_DURATION;                           //
         NUClear::clock::time_point pushTime;                    //
-        NUClear::clock::time_point lastVeloctiyUpdateTime;      //
 
         /**
          * Motion data for relevant humanoid actuators...
@@ -252,27 +240,6 @@ namespace motion
          * @param inTorsoPosition [description]
          */
         void reset();
-        /**
-         * @brief [brief description]
-         * @details [long description]
-         * 
-         * @param inTorsoPosition [description]
-         */
-        void start();
-        /**
-         * @brief [brief description]
-         * @details [long description]
-         * 
-         * @param inTorsoPosition [description]
-         */
-        void requestStop();
-        /**
-         * @brief [brief description]
-         * @details [long description]
-         * 
-         * @param inTorsoPosition [description]
-         */
-        void stop();
         /**
          * @brief [brief description]
          * @details [long description]

@@ -62,7 +62,7 @@ namespace localisation {
     using message::motion::KickFinished;
     using message::motion::WalkCommand;
     using message::motion::WalkStartCommand;
-    using message::motion::WalkStopCommand;
+    using message::motion::StopCommand;
     using message::motion::EnableWalkEngineCommand;
     using message::motion::DisableWalkEngineCommand;
 

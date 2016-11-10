@@ -104,9 +104,9 @@ namespace motion
         updateHandle = on<Every<UPDATE_FREQUENCY, Per<std::chrono::seconds>>, With<Sensors>, Single, Priority::HIGH>()
         .then("Balance Response Planner - Update Robot Posture", [this] (const Sensors& sensors)
         {
-            if(DEBUG) { NUClear::log("Messaging: Balance Kinematic Response - Update Robot Posture(0)"); }
+            if(DEBUG) { log<NUClear::TRACE>("Messaging: Balance Kinematic Response - Update Robot Posture(0)"); }
                 updateBody(sensors);
-            if(DEBUG) { NUClear::log("Messaging: Balance Kinematic Response - Update Robot Posture(1)"); }
+            if(DEBUG) { log<NUClear::TRACE>("Messaging: Balance Kinematic Response - Update Robot Posture(1)"); }
         }).disable();
 
         // TODO: Optimise balance configuration using feedback from environmental noise...
@@ -124,7 +124,7 @@ namespace motion
         // Aim to avoid dependancy on target position to enhance statelessness and adaptive balance compensation...
         on<Trigger<FootMotionUpdate>>().then("Balance Response Planner - Received Update (Active Foot Position) Info", [this] (const FootMotionUpdate& info)
         {
-            if(DEBUG) { NUClear::log("Messaging: Balance Kinematic Response - Received Update (Active Foot Position) Info(0)"); }
+            if(DEBUG) { log<NUClear::TRACE>("Messaging: Balance Kinematic Response - Received Update (Active Foot Position) Info(0)"); }
                 setMotionPhase(info.phase);
                 setActiveForwardLimb(info.activeForwardLimb);          
                 setLeftFootPosition2D(info.leftFoot2D);       
@@ -132,34 +132,34 @@ namespace motion
                 // Transform feet positions to be relative to the robot torso...            
                 setLeftFootPosition(info.leftFoot3D.worldToLocal(getTorsoPosition3D()));         
                 setRightFootPosition(info.rightFoot3D.worldToLocal(getTorsoPosition3D()));                    
-            if(DEBUG) { NUClear::log("Messaging: Balance Kinematic Response - Received Update (Active Foot Position) Info(1)"); }
+            if(DEBUG) { log<NUClear::TRACE>("Messaging: Balance Kinematic Response - Received Update (Active Foot Position) Info(1)"); }
         });
 
         // Aim to avoid dependancy on target position to enhance statelessness and adaptive balance compensation...
         on<Trigger<TorsoMotionUpdate>>().then("Balance Response Planner - Received Update (Active Torso Position) Info", [this] (const TorsoMotionUpdate& info)
         {
-            if(DEBUG) { NUClear::log("Messaging: Balance Kinematic Response - Received Update (Active Torso Position) Info(0)"); }
+            if(DEBUG) { log<NUClear::TRACE>("Messaging: Balance Kinematic Response - Received Update (Active Torso Position) Info(0)"); }
                 setTorsoPositionLegs(info.frameArms);       
                 setTorsoPositionArms(info.frameLegs);             
                 setTorsoPosition3D(info.frame3D);            
-            if(DEBUG) { NUClear::log("Messaging: Balance Kinematic Response - Received Update (Active Torso Position) Info(1)"); }
+            if(DEBUG) { log<NUClear::TRACE>("Messaging: Balance Kinematic Response - Received Update (Active Torso Position) Info(1)"); }
         });
 
         // Aim to avoid dependancy on target position to enhance statelessness and adaptive balance compensation...
         on<Trigger<HeadMotionUpdate>>().then("Balance Response Planner - Received Update (Active Head Position) Info", [this] 
         {
-            if(DEBUG) { NUClear::log("Messaging: Balance Kinematic Response - Received Update (Active Head Position) Info(0)"); }
+            if(DEBUG) { log<NUClear::TRACE>("Messaging: Balance Kinematic Response - Received Update (Active Head Position) Info(0)"); }
 
-            if(DEBUG) { NUClear::log("Messaging: Balance Kinematic Response - Received Update (Active Head Position) Info(1)"); }
+            if(DEBUG) { log<NUClear::TRACE>("Messaging: Balance Kinematic Response - Received Update (Active Head Position) Info(1)"); }
         });
 
         // If significant environmental noise is present, attempt to recover stability...
         pushTime = NUClear::clock::now();
         on<Trigger<PushDetection>, With<Configuration>>().then([this](const PushDetection& pd, const Configuration& config) 
         {
-            if(DEBUG) { NUClear::log("Messaging: Balance Kinematic Response - Received Update (Push Detected) Info(0)"); }               
+            if(DEBUG) { log<NUClear::TRACE>("Messaging: Balance Kinematic Response - Received Update (Push Detected) Info(0)"); }               
                 updateBodyPushRecovery();
-            if(DEBUG) { NUClear::log("Messaging: Balance Kinematic Response - Received Update (Push Detected) Info(1)"); }
+            if(DEBUG) { log<NUClear::TRACE>("Messaging: Balance Kinematic Response - Received Update (Push Detected) Info(1)"); }
         });        
 
         // If there is some impulse relating to the robots orientation, then capture values for processing...
@@ -170,6 +170,13 @@ namespace motion
             {
                 return;
             }
+
+            // The acceleration amplitude for stationary postures is typically smaller than 0.40g...
+            // The rotational rate amplitude for stationary postures typically is smaller than 1.0472 rads/s...
+            // Evaluate thresholds for dynamic postures and abrupt noise (such as falling, jumping, etc.):
+            // Acceleration amplitude = 3.0g...
+            // Rotational rate = 3.49066 rads/sec...
+            // Bending vs. Standing is considered at an offset of 0.610865 rads...
 
             // Capture x,y differences in gyroscope data...
             arma::vec3 gyroDiff = sensors[0]->gyroscope - sensors[1]->gyroscope;
@@ -636,6 +643,9 @@ std::cout << "Gyro triggered:\n\r" << getArmRollParameter();
 /*=======================================================================================================*/
     void BalanceKinematicResponse::configure(const YAML::Node& config)
     {
+        auto& debug = config["debugging"];
+        DEBUG = debug["enabled"].as<bool>();
+        
         emitLocalisation = config["emit_localisation"].as<bool>();
 
         auto& stance = config["stance"];

@@ -36,7 +36,7 @@ namespace planning {
     using VisionBall = message::vision::Ball;
     using message::motion::DiveCommand;
     using message::support::Configuration;
-    using message::motion::WalkStopCommand;
+    using message::motion::StopCommand;
     using message::input::LimbID;
 
     DivePlanner::DivePlanner(std::unique_ptr<NUClear::Environment> environment)

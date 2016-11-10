@@ -58,7 +58,7 @@ namespace motion {
     using message::input::LimbID;
     using message::motion::WalkCommand;
     using message::motion::WalkStartCommand;
-    using message::motion::WalkStopCommand;
+    using message::motion::StopCommand;
     using message::motion::WalkStopped;
     using message::motion::EnableWalkEngineCommand;
     using message::motion::DisableWalkEngineCommand;
@@ -163,9 +163,9 @@ namespace motion {
             // emit(std::make_unique<ActionPriorites>(ActionPriorites { subsumptionId, { 25, 10 }})); // TODO: config
         });
 
-        on<Trigger<WalkStopCommand>>().then([this] {
+        on<Trigger<StopCommand>>().then([this] {
             // TODO: This sets STOP_REQUEST, which appears not to be used anywhere.
-            // If this is the case, we should delete or rethink the WalkStopCommand.
+            // If this is the case, we should delete or rethink the StopCommand.
             requestStop();
         });
 

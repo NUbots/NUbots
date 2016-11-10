@@ -52,7 +52,7 @@ namespace skills {
     using message::motion::KickFinished;
     using message::motion::WalkCommand;
     using message::motion::WalkStartCommand;
-    using message::motion::WalkStopCommand;
+    using message::motion::StopCommand;
     using message::motion::EnableWalkEngineCommand;
     using message::motion::DisableWalkEngineCommand;
 
@@ -224,6 +224,7 @@ namespace skills {
 
             emit(std::move(walkCommand));
 
+            //TODO: walkCommand->subsumptionId = subsumptionId; emit(std::move(walkCommand));
 
             emit(std::move(std::make_unique<WalkStartCommand>(subsumptionId)));
 

@@ -35,7 +35,7 @@ namespace skills {
     using message::motion::WalkStopped;
     using message::motion::WalkCommand;
     using message::motion::WalkStartCommand;
-    using message::motion::WalkStopCommand;
+    using message::motion::StopCommand;
     using message::motion::EnableWalkEngineCommand;
     using message::motion::DisableWalkEngineCommand;
     using message::input::LimbID;
@@ -54,7 +54,7 @@ namespace skills {
             { std::pair<float, std::set<LimbID>>(std::numeric_limits<float>::epsilon(), { LimbID::LEFT_LEG, LimbID::RIGHT_LEG, LimbID::LEFT_ARM, LimbID::RIGHT_ARM}) },
             [this] (const std::set<LimbID>&) {
                 emit<Scope::DIRECT>(std::move(std::make_unique<EnableWalkEngineCommand>(subsumptionId)));
-                emit(std::move(std::make_unique<WalkStopCommand>(subsumptionId)));
+                emit(std::move(std::make_unique<StopCommand>(subsumptionId)));
             },
             [this] (const std::set<LimbID>&) {
                 emit<Scope::DIRECT>(std::move(std::make_unique<DisableWalkEngineCommand>(subsumptionId)));

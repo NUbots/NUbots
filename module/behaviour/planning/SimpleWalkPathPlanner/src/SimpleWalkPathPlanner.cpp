@@ -49,7 +49,7 @@ namespace module {
             using message::behaviour::KickType;
             using message::behaviour::MotionCommand;
             using message::motion::WalkStartCommand;
-            using message::motion::WalkStopCommand;
+            using message::motion::StopCommand;
             using message::motion::KickFinished;
             using message::behaviour::WantsToKick;
             using utility::localisation::transform::RobotToWorldTransform;
@@ -67,7 +67,7 @@ namespace module {
             using message::motion::WalkStopped;
             using message::motion::WalkCommand;
             using message::motion::WalkStartCommand;
-            using message::motion::WalkStopCommand;
+            using message::motion::StopCommand;
             using message::motion::EnableWalkEngineCommand;
             using message::motion::DisableWalkEngineCommand;
 
@@ -141,14 +141,14 @@ namespace module {
                     ) {
 
                     if(wantsTo.kick){
-                        emit(std::make_unique<WalkStopCommand>(subsumptionId));
+                        emit(std::make_unique<StopCommand>(subsumptionId));
                         return;
                     }
 
                     if (latestCommand.type == message::behaviour::MotionCommand::Type::StandStill) {
 
                         
-                        emit(std::make_unique<WalkStopCommand>(subsumptionId));
+                        emit(std::make_unique<StopCommand>(subsumptionId));
                         //emit(std::make_unique<ActionPriorites>(ActionPriorites { subsumptionId, { 40, 11 }}));
 
                         return;

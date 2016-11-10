@@ -52,7 +52,7 @@ namespace module {
             using message::motion::WalkStopped;
             using message::motion::WalkCommand;
             using message::motion::WalkStartCommand;
-            using message::motion::WalkStopCommand;
+            using message::motion::StopCommand;
             using message::motion::EnableWalkEngineCommand;
             using message::motion::DisableWalkEngineCommand;
             using message::motion::KickFinished;
@@ -152,7 +152,7 @@ namespace module {
                     if (latestCommand.type == MotionCommand::Type::StandStill) {
                         // log("Stand still motion command");
 
-                        emit(std::make_unique<WalkStopCommand>(1));
+                        emit(std::make_unique<StopCommand>(1));
                         emit(std::make_unique<ActionPriorites>(ActionPriorites { subsumptionId, { 26, 11 }}));
 
                         return;
@@ -164,6 +164,7 @@ namespace module {
 
                         std::unique_ptr<WalkCommand> command = std::make_unique<WalkCommand>(subsumptionId,latestCommand.walkCommand);
                         emit(std::move(command));
+                        //TODO : remove startcommand...
                         emit(std::move(std::make_unique<WalkStartCommand>(1)));
                         emit(std::make_unique<ActionPriorites>(ActionPriorites { subsumptionId, { 26, 11 }}));
 
@@ -344,7 +345,6 @@ namespace module {
 
                         std::unique_ptr<WalkCommand> command = std::make_unique<WalkCommand>(subsumptionId, Transform2D({finalForwardSpeed, 0, angle}));
                         //command->command = Transform2D({bezXdash[1], bezYdash[1], angle});
-
 
                         emit(std::move(std::make_unique<WalkStartCommand>(1)));
                         emit(std::move(command));

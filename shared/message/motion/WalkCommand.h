@@ -39,24 +39,32 @@ namespace motion
 
     using utility::math::matrix::Transform2D;
 
+    struct WalkStarted {};
     struct WalkStopped {};
 
     struct WalkCommand 
     {
         //WalkCommand() = delete;
-        size_t subsumptionId;           //
+        size_t subsumptionId;           // reservation identifier for servo control
         Transform2D command;            // x and y are velocity in m/s and angle is in rads/s
 
-        WalkCommand(size_t id, const Transform2D& command) 
-        : subsumptionId(id), command(command) {}
+        WalkCommand     (
+                            size_t id, 
+                            const Transform2D& command
+                        ) 
+        : subsumptionId(id)
+        , command(command) {}
     };
 
-    struct WalkStartCommand 
+    struct StopCommand 
     {
-        //WalkStartCommand() = delete;
-        size_t subsumptionId;           //
+        //StopCommand() = delete;
+        size_t subsumptionId;           // reservation identifier for servo control
 
-        WalkStartCommand(size_t id) : subsumptionId(id) { }
+        StopCommand     (
+                            size_t id
+                        ) 
+        : subsumptionId(id) {}
     };
 
     struct NewWalkCommand 
@@ -68,18 +76,10 @@ namespace motion
         : velocityTarget(velocityTarget) {}
     };
 
-    struct WalkStopCommand 
-    {
-        //WalkStopCommand() = delete;
-        size_t subsumptionId;           //
-
-        WalkStopCommand(size_t id) : subsumptionId(id) { }
-    };
-
     struct EnableWalkEngineCommand 
     {
         //EnableWalkEngineCommand() = delete;
-        size_t subsumptionId;           //
+        size_t subsumptionId;           // reservation identifier for servo control
 
         EnableWalkEngineCommand(size_t id) : subsumptionId(id) { }
     };
@@ -87,7 +87,7 @@ namespace motion
     struct DisableWalkEngineCommand 
     {
         //DisableWalkEngineCommand() = delete;
-        size_t subsumptionId;           //
+        size_t subsumptionId;           // reservation identifier for servo control
 
         DisableWalkEngineCommand(size_t id) : subsumptionId(id) { }
     };
