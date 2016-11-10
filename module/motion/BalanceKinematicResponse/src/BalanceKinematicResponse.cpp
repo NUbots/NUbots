@@ -201,7 +201,7 @@ namespace motion
             {
 std::cout << "Gyro roll:\n\r" << getShoulderRollParameter();                
             }
-            if(getShoulderPitchlParameter() > 0)
+            if(getShoulderPitchParameter() > 0)
             {
 std::cout << "Gyro pitch:\n\r" << getShoulderPitchParameter();                
             }
