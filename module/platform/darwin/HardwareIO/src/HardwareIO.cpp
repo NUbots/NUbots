@@ -253,11 +253,7 @@ namespace darwin {
 
                 p = diff * pFactor;
                 d = abs(diff - error[(int)command.id]) * dFactor;
-                error[(int)command.id] = diff;              
-
-std::cout << "\n\rP: " << p << "\n\r"; 
-std::cout << "\n\rD: " << d << "\n\r";    
-std::cout << "\n\rP+D: " << (p+d) << "\n\r";               
+                error[(int)command.id] = diff;                          
 
                 float speed;
                 if(duration.count() > 0) 

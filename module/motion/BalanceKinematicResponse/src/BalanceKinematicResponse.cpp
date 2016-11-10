@@ -215,7 +215,7 @@ namespace motion
             // sensors.gyroscope.y
             // sensors.gyroscope.z
 
-            if(getArmRollParameter() > 5)
+            if(getArmRollParameter() > 1)
             {
 std::cout << "Gyro triggered:\n\r" << getArmRollParameter();                
             }
