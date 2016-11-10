@@ -93,7 +93,7 @@ namespace motion
          */ 
         bool DEBUG;                 //
         int  DEBUG_ITER;            //
-        int  initialStep;           // TODO: How to many 'steps' to take before lifting a foot when starting to walk
+        double  EPSILON;            //
 
         /**
          * NUsight feedback initialized from configuration script, see config file for documentation...

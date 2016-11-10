@@ -27,31 +27,21 @@
 
 #include "message/support/Configuration.h"
 
-#include "message/behaviour/Action.h"
-#include "message/behaviour/ServoCommand.h"
-#include "message/behaviour/FixedWalkCommand.h"
-
+#include "message/input/LimbID.h"
 #include "message/input/Sensors.h"
 
 #include "message/motion/KinematicsModels.h"
-#include "message/motion/WalkCommand.h"
 #include "message/motion/FootMotionCommand.h" 
-#include "message/motion/FootPlacementCommand.h" 
-#include "message/motion/ServoTarget.h"
-#include "message/motion/Script.h"
-
-#include "message/localisation/FieldObject.h"
+#include "message/motion/FootPlacementCommand.h"
 
 #include "utility/support/yaml_armadillo.h"
 #include "utility/support/yaml_expression.h"
 
 #include "utility/math/angle.h"
 #include "utility/math/matrix/Rotation3D.h"
-#include "utility/math/geometry/UnitQuaternion.h"
 #include "utility/math/matrix/Transform2D.h"
 #include "utility/math/matrix/Transform3D.h"
 
-#include "utility/motion/Balance.h"
 #include "utility/motion/InverseKinematics.h"
 #include "utility/motion/ForwardKinematics.h"
 
@@ -78,12 +68,9 @@ namespace motion
         explicit FootMotionPlanner(std::unique_ptr<NUClear::Environment> environment);
     private:
         using LimbID         = message::input::LimbID;
-        using ServoCommand   = message::behaviour::ServoCommand;
         using Sensors        = message::input::Sensors;
-        using ServoID        = message::input::ServoID;
         using Transform2D    = utility::math::matrix::Transform2D;
         using Transform3D    = utility::math::matrix::Transform3D;
-        using UnitQuaternion = utility::math::geometry::UnitQuaternion;
 
         /**
          * Temporary debugging variables for local output logging...
@@ -94,8 +81,6 @@ namespace motion
         /**
          * NUsight feedback initialized from configuration script, see config file for documentation...
          */
-        bool balanceEnabled;        //
-        bool emitLocalisation;      //
         bool emitFootPosition;      //
 
         /**
@@ -116,15 +101,12 @@ namespace motion
          /**
          * Anthropomorphic metrics initialized from configuration script, see config file for documentation...
          */
-        double bodyTilt;                                // 
-        double bodyHeight;                              //
         double stepTime;                                //
         double stepHeight;                              //
         float  step_height_slow_fraction;               //
         float  step_height_fast_fraction;               //
         arma::mat::fixed<3,2> stepLimits;               //              
-        arma::vec2 footOffsetCoefficient;                          //
-        Transform2D uLRFootOffset;                      // standard offset
+        arma::vec2 footOffsetCoefficient;               //
 
         /**
          * Internal timing reference variables...
@@ -147,13 +129,12 @@ namespace motion
         /**
          * Dynamic analysis parameters for relevant motion planning...
          */
-        arma::vec4 zmpCoefficients;                     // zmp expoential coefficients aXP aXN aYP aYN
-        arma::vec4 zmpParameters;                       // zmp params m1X, m2X, m1Y, m2Y
+            //...
+            //...
 
         /**
          * Dynamic analysis parameters initialized from configuration script, see config file for documentation...
          */
-        double zmpTime;                                 // 
         double phase1Single;                            //
         double phase2Single;                            //
 
@@ -161,19 +142,6 @@ namespace motion
          * Balance & Kinematics module initialization...
          */
         message::motion::kinematics::KinematicsModel kinematicsModel;   //
-
-        /**
-         * The last foot goal rotation...
-         */
-        UnitQuaternion lastFootGoalRotation;            //
-        UnitQuaternion footGoalErrorSum;                //
-
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-        bool startFromStep;
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
         /**
          * @brief [brief description]
@@ -269,6 +237,12 @@ namespace motion
          * @return [description]
          */
         bool isInitialStep();
+        /**
+         * @brief [brief description]
+         * @details [long description]
+         * @return [description]
+         */
+        bool isTargetStepUnchanged();
         /**
          * @brief [brief description]
          * @details [long description]

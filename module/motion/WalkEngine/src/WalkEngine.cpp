@@ -119,14 +119,14 @@ namespace motion
             if(DEBUG) { NUClear::log("WalkEngine - Update Waypoints(0)"); }
             if(isNewPostureReceived()) 
             {                 
-                if(DEBUG) { NUClear::log("New Posture(%d)", DEBUG_ITER++); }
-// std::cout << "\n\rMWE: Left     Foot\n\r\t[\n\r\t" << getLeftFootPosition()  << "\t]";  
-// std::cout << "\n\rMWE: Right    Foot\n\r\t[\n\r\t" << getRightFootPosition() << "\t]";    
-// std::cout << "MWE: Torso PosArms\n\r\t[\n\r\t" << getTorsoPositionArms() << "\t]\n\r";       
-// std::cout << "MWE: Torso PosLegs\n\r\t[\n\r\t" << getTorsoPositionLegs() << "\t]\n\r";        
-// std::cout << "MWE: Torso   Pos3D\n\r\t[\n\r\t" << getTorsoPosition3D()   << "\t]\n\r";                
+                if(DEBUG) { NUClear::log("New Posture(%d)", DEBUG_ITER++); }                       
                 emit(std::move(updateWaypoints(/*sensors*/))); 
             }
+            emit(graph("MWE Left  Foot",    getLeftFootPosition()));   
+            emit(graph("MWE Right Foot",   getRightFootPosition()));       
+            emit(graph("MWE Torso (Arms)", getTorsoPositionArms()));       
+            emit(graph("MWE Torso (Legs)", getTorsoPositionLegs()));          
+            emit(graph("MWE Torso   (3D)",   getTorsoPosition3D()));
             if(DEBUG) { NUClear::log("WalkEngine - Update Waypoints(1)"); }
         }).disable();
 
@@ -306,7 +306,7 @@ namespace motion
         auto waypoints = std::make_unique<std::vector<ServoCommand>>();
         waypoints->reserve(16);
 
-        NUClear::clock::time_point time = NUClear::clock::now() + std::chrono::nanoseconds(std::nano::den / UPDATE_FREQUENCY);
+        NUClear::clock::time_point time = NUClear::clock::now() + std::chrono::nanoseconds(std::nano::den / (UPDATE_FREQUENCY/2));
 
         for (auto& joint : joints) 
         {

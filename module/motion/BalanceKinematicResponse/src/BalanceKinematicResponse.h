@@ -228,6 +228,7 @@ namespace motion
          */
         double toeTipParameter;                      //
         double hipRollParameter;                     //
+        double armRollParameter;
 
         /**
          * Balance & Kinematics module initialization...
@@ -286,13 +287,13 @@ namespace motion
          * @details [long description]
          * @return [description]
          */
-        void updateUpperBody(/*const Sensors& sensors*/);
+        void updateUpperBody(const Sensors& sensors);
         /**
          * @brief [brief description]std::pair
          * @details [long description]
          * @return [description]
          */
-        void armRollCompensation(/*const Sensors& sensors*/);
+        void armRollCompensation(const Sensors& sensors);
         /**
          * @brief [brief description]std::pair
          * @details [long description]
@@ -385,6 +386,16 @@ namespace motion
          * @return A clamped value between 0 and maxvalue, offset by deadband
          */
         double linearInterpolationDeadband(double a, double deadband, double maxvalue);
+        /**
+         * @brief [brief description]
+         * @details [long description]
+         */
+        double getArmRollParameter();
+        /**
+         * @brief [brief description]
+         * @details [long description]
+         */
+        void setArmRollParameter(double inArmRollParameter);
         /**
          * @brief [brief description]
          * @details [long description]

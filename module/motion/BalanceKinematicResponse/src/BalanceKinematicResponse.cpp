@@ -33,20 +33,24 @@ namespace motion
 //      UTILIZATION REFERENCE(S)
 /*=======================================================================================================*/
     using message::input::LimbID;
+    using message::input::Sensors;
     using message::input::PushDetection;
+
     using message::motion::FootMotionUpdate;
     using message::motion::HeadMotionUpdate;
     using message::motion::TorsoMotionUpdate;
     using message::motion::BalanceBodyUpdate;
     using message::motion::EnableBalanceResponse;
     using message::motion::DisableBalanceResponse;
-    using message::support::Configuration;
-
-    using utility::support::Expression;
     using message::motion::kinematics::KinematicsModel;
+
+    using message::support::Configuration;
+    using utility::support::Expression;
+
     using utility::math::matrix::Transform2D;
     using utility::math::matrix::Transform3D;
     using utility::math::angle::normalizeAngle;
+
     using utility::nubugger::graph;
 /*=======================================================================================================*/
 //      NUCLEAR METHOD: BalanceKinematicResponse
@@ -77,7 +81,7 @@ namespace motion
         , accelerationLimits(arma::fill::zeros), accelerationLimitsHigh(arma::fill::zeros)
         , velocityCurrent(), velocityCommand()
         , phase1Single(0.0), phase2Single(0.0)
-        , toeTipParameter(), hipRollParameter()
+        , toeTipParameter(0.0), hipRollParameter(0.0), armRollParameter(0.0)
         , balancer(), kinematicsModel()
         , balanceAmplitude(0.0), balanceWeight(0.0), balanceOffset(0.0)
         , balancePGain(0.0), balanceIGain(0.0), balanceDGain(0.0)
@@ -158,6 +162,23 @@ namespace motion
             if(DEBUG) { NUClear::log("Messaging: Balance Kinematic Response - Received Update (Push Detected) Info(1)"); }
         });        
 
+        // If there is some impulse relating to the robots orientation, then capture values for processing...
+        on<Last<2, Trigger<Sensors>>>().then([this] (const std::vector<std::shared_ptr<const Sensors>>& sensors) 
+        {
+            // Only continue if there is at least 2 sets of sensor data...
+            if (sensors.size() < 2) 
+            {
+                return;
+            }
+
+            // Capture x,y differences in gyroscope data...
+            arma::vec3 gyroDiff = sensors[0]->gyroscope - sensors[1]->gyroscope;
+            arma::vec2 xyDiff = { gyroDiff(0), gyroDiff(1) };
+
+            // Capture normalised angular acceleration experienced...
+            setArmRollParameter(arma::norm(xyDiff));
+        });
+
         // If balance response is required, enable updating...
         on<Trigger<EnableBalanceResponse>>().then([this] 
         {          
@@ -179,14 +200,27 @@ namespace motion
 /*=======================================================================================================*/
 //      METHOD: armRollCompensation
 /*=======================================================================================================*/
-    void BalanceKinematicResponse::armRollCompensation(/*const Sensors& sensors*/) 
+    void BalanceKinematicResponse::armRollCompensation(const Sensors& sensors) 
     {
         //If feature enabled, apply balance compensation through support actuator...
         if (armRollCompensationEnabled) 
         {
-            //sensors[0]->gyroscope;
-            //sensors[0]->accelerometer;
-            //
+            // Accelerometer (in m/s^2)
+            // sensors.accelerometer.x
+            // sensors.accelerometer.y
+            // sensors.accelerometer.z
+
+            // Gyroscope (in radians/second)
+            // sensors.gyroscope.x
+            // sensors.gyroscope.y
+            // sensors.gyroscope.z
+
+            if(getArmRollParameter() > 5)
+            {
+std::cout << "Gyro triggered:\n\r" << getArmRollParameter();                
+            }
+
+
         }
     }      
 /*=======================================================================================================*/
@@ -281,7 +315,7 @@ namespace motion
         //if(balanceEnabled)
         //{
             updateLowerBody(sensors);
-            updateUpperBody();
+            updateUpperBody(sensors);
         //}
 
         //DEBUGGING: Emit relative torso position with respect to world model... 
@@ -307,14 +341,13 @@ namespace motion
         hipRollCompensation(sensors);
         ankleTorqueCompensation();
         toeTipCompensation();
-        armRollCompensation();
         supportMassCompensation(sensors);
         //etc.
     }
 /*=======================================================================================================*/
 //      NAME: updateUpperBody
 /*=======================================================================================================*/
-    void BalanceKinematicResponse::updateUpperBody(/*const Sensors& sensors*/) 
+    void BalanceKinematicResponse::updateUpperBody(const Sensors& sensors) 
     {
         // Converts the phase into a sine wave that oscillates between 0 and 1 with a period of 2 phases
         double easing = std::sin(M_PI * getMotionPhase() - M_PI / 2.0) / 2.0 + 0.5;
@@ -327,6 +360,9 @@ namespace motion
         setLArmPosition(easing * getLArmSource() + (1.0 - easing) * getLArmDestination());
         setRArmPosition((1.0 - easing) * getRArmSource() + easing * getRArmDestination());
 
+        // Compensation for balance reactions with arm dynamic roll...
+        armRollCompensation(sensors);
+
         // Start arm/leg collision/prevention
         double rotLeftA = normalizeAngle(getLeftFootPosition2D().angle() - getTorsoPositionArms().angle());
         double rotRightA = normalizeAngle(getTorsoPositionArms().angle() - getRightFootPosition2D().angle());
@@ -334,6 +370,7 @@ namespace motion
         Transform2D rightLegTorso = getTorsoPositionArms().worldToLocal(getRightFootPosition2D());
         double leftMinValue = 5 * M_PI / 180 + std::max(0.0, rotLeftA) / 2 + std::max(0.0, leftLegTorso.y() - 0.04) / 0.02 * (6 * M_PI / 180);
         double rightMinValue = -5 * M_PI / 180 - std::max(0.0, rotRightA) / 2 - std::max(0.0, -rightLegTorso.y() - 0.04) / 0.02 * (6 * M_PI / 180);
+        
         // update shoulder pitch to move arm away from body
         setLArmPosition(arma::vec3({getLArmPosition()[0], std::max(leftMinValue,  getLArmPosition()[1]), getLArmPosition()[2]}));
         setRArmPosition(arma::vec3({getRArmPosition()[0], std::min(rightMinValue, getRArmPosition()[1]), getRArmPosition()[2]}));
@@ -419,6 +456,17 @@ namespace motion
         if(DEBUG) { printf("System Time:%f\n\r", double(NUClear::clock::now().time_since_epoch().count()) * (1.0 / double(NUClear::clock::period::den))); }
         return (double(NUClear::clock::now().time_since_epoch().count()) * (1.0 / double(NUClear::clock::period::den)));
     }
+/*=======================================================================================================*/
+//      ENCAPSULATION METHOD: Arm Roll Parameter
+/*=======================================================================================================*/    
+    double BalanceKinematicResponse::getArmRollParameter()
+    {
+        return (armRollParameter);
+    }
+    void BalanceKinematicResponse::setArmRollParameter(double inArmRollParameter)
+    {
+        armRollParameter = inArmRollParameter;
+    }    
 /*=======================================================================================================*/
 //      ENCAPSULATION METHOD: Motion Phase
 /*=======================================================================================================*/    

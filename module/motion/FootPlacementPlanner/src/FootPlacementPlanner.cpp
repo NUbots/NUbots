@@ -53,7 +53,7 @@ namespace motion
 /*=======================================================================================================*/
     FootPlacementPlanner::FootPlacementPlanner(std::unique_ptr<NUClear::Environment> environment)
     : Reactor(std::move(environment)) 
-        , DEBUG(false), DEBUG_ITER(0), initialStep(0)
+        , DEBUG(false), DEBUG_ITER(0), EPSILON(1e-6)
         , balanceEnabled(0.0), emitLocalisation(false), emitFootPosition(false)
         , updateHandle(), generateStandScriptReaction()
         , startFromStep(false)
@@ -140,7 +140,7 @@ namespace motion
         arma::vec2 supportMod = arma::zeros(2); // support point modulation for wallkick
 
         if(isZeroVelocityRequest()) 
-        {
+        {         
             setVelocityCurrent(arma::zeros(3));
             // Stop with feet together by targetting swing leg next to support leg...
             if (getActiveForwardLimb() == LimbID::RIGHT_LEG) 
@@ -153,7 +153,7 @@ namespace motion
             }
         }
         else 
-        {
+        {           
             // Calculate projected foot position to achieve input velocity...
             if (getActiveForwardLimb() == LimbID::RIGHT_LEG) 
             {
@@ -189,17 +189,17 @@ namespace motion
     {   
         // Negative if right leg to account for the mirroring of the foot target
         int8_t sign = (inActiveForwardLimb == LimbID::LEFT_LEG) ? 1 : -1;
+
         // Get midpoint between the two feet
         Transform2D midPoint = getLeftFootSource().interpolate(0.5, getRightFootSource());  
-//std::cout << "midPoint\t[X= " << midPoint.x() << "]\t[Y= " << midPoint.y() << "]\n\r";     
+
         // Get midpoint 1.5 steps in future
         // Note: The reason for 1.5 rather than 1 is because it takes an extra 0.5 steps
         // for the torso to reach a given position when you want both feet together   
         Transform2D forwardPoint = midPoint.localToWorld(1.5 * inVelocity);     
-//std::cout << "forwardPoint\t[X= " << forwardPoint.x() << "]\t[Y= " << forwardPoint.y() << "]\n\r";              
+
         // Offset to towards the foot in use to get the target location          
-        Transform2D footTarget = forwardPoint.localToWorld(sign * uLRFootOffset);   
-//std::cout << "footTarget\t[X= " << footTarget.x() << "]\t[Y= " << footTarget.y() << "]\n\r";          
+        Transform2D footTarget = forwardPoint.localToWorld(sign * uLRFootOffset);       
 
         // Start applying step limits:
         // Get the vector between the feet and clamp the components between the min and max step limits
@@ -218,8 +218,7 @@ namespace motion
 
 
         // Update foot target to be 'feetDistance' away from the support foot
-        footTarget = getSupportMass().localToWorld(feetDifference);
-//std::cout << "footTarget\t[X= " << footTarget.x() << "]\t[Y= " << footTarget.y() << "]\n\r";         
+        footTarget = getSupportMass().localToWorld(feetDifference);        
 
         // TODO: Improve feedback logic to provide 'smart' feet coordination...
 
@@ -339,9 +338,9 @@ namespace motion
     bool FootPlacementPlanner::isZeroVelocityRequest()
     {
         return  (
-                    getVelocityCommand().x()        == 0   &&
-                    getVelocityCommand().y()        == 0   &&
-                    getVelocityCommand().angle()    == 0
+                    abs(getVelocityCommand().x())        < EPSILON   &&
+                    abs(getVelocityCommand().y())        < EPSILON   &&
+                    abs(getVelocityCommand().angle())    < EPSILON
                 );
     }    
 /*=======================================================================================================*/

@@ -53,23 +53,20 @@ namespace motion
     FootMotionPlanner::FootMotionPlanner(std::unique_ptr<NUClear::Environment> environment)
     : Reactor(std::move(environment))
         , DEBUG(false), DEBUG_ITER(0)
-        , balanceEnabled(0.0), emitLocalisation(false), emitFootPosition(false)
+        , emitFootPosition(false)
         , updateHandle()
         , leftFootPositionTransform(), rightFootPositionTransform()
         , activeLimbSource(), activeLimbDestination()
         , activeForwardLimb(), activeLimbInitial(LimbID::LEFT_LEG)
-        , bodyTilt(0.0), bodyHeight(0.0), stepTime(0.0), stepHeight(0.0)
+        , stepTime(0.0), stepHeight(0.0)
         , step_height_slow_fraction(0.0f), step_height_fast_fraction(0.0f)
-        , stepLimits(arma::fill::zeros), footOffsetCoefficient(arma::fill::zeros), uLRFootOffset()
+        , stepLimits(arma::fill::zeros), footOffsetCoefficient(arma::fill::zeros)
         , INITIAL_STEP(false), newStepStartTime(0.0), destinationTime(), lastVeloctiyUpdateTime()
         , velocityHigh(0.0), accelerationTurningFactor(0.0), velocityLimits(arma::fill::zeros)
         , accelerationLimits(arma::fill::zeros), accelerationLimitsHigh(arma::fill::zeros)
         , velocityCurrent()
-        , zmpCoefficients(arma::fill::zeros), zmpParameters(arma::fill::zeros)
-        , zmpTime(0.0), phase1Single(0.0), phase2Single(0.0)
+        , phase1Single(0.0), phase2Single(0.0)
         , kinematicsModel()
-        , lastFootGoalRotation(), footGoalErrorSum() 
-        , startFromStep(false)
     {    	
         //Configure foot motion planner...
         on<Configuration>("FootMotionPlanner.yaml").then("Foot Motion Planner - Configure", [this] (const Configuration& config) 
@@ -93,7 +90,11 @@ namespace motion
             // If there is some foot target data queued for computation, then update robot...
             if(isNewStepReceived())
             {                            
-                updateFootPosition(motionPhase, getActiveLimbSource(), getActiveForwardLimb(), getActiveLimbDestination());
+                // If the intended footstep is unchanged, cease z-translation to conserve energy and stop, otherwise proceed...
+                if(!isTargetStepUnchanged())
+                {
+                    updateFootPosition(motionPhase, getActiveLimbSource(), getActiveForwardLimb(), getActiveLimbDestination());
+                }
             }
             if(DEBUG) { NUClear::log("Messaging: Foot Motion Planner - Update Foot Position(1)"); }
         }).disable();
@@ -122,11 +123,11 @@ namespace motion
                 setActiveLimbDestination(target.rightFootDestination);  //Queued    : FPP      
             }                         
             setActiveForwardLimb(target.activeForwardLimb);             //Queued    : FPP         
-            if(isInitialStep()) 
-            {                    
-                setLeftFootPosition(target.leftFootSource);             //Trigger   : FPP
-                setRightFootPosition(target.rightFootSource);           //Trigger   : FPP
-            }        
+            // if(isInitialStep()) // Not sure if still required?
+            // {                    
+            //     setLeftFootPosition(target.leftFootSource);             //Trigger   : FPP
+            //     setRightFootPosition(target.rightFootSource);           //Trigger   : FPP
+            // }        
             if(DEBUG) { NUClear::log("Messaging: Foot Motion Planner - Received Target Foot Position(1)"); }
         });
 
@@ -153,46 +154,22 @@ namespace motion
 
         //Lift foot by amount depending on walk speed
         if(DEBUG) { NUClear::log("Messaging: Foot Motion Planner - getFootPhase limits and calculations"); }
-// std::cout << "\n\rVelocity\t[X= " << getVelocityCurrent().x() << "]\t[Y= " << getVelocityCurrent().y() << "]\n\r";
-// std::cout << "\n\rLeft     Position\t[X= " << getLeftFootPosition().x() << "]\t[Y= " << getLeftFootPosition().y() << "]\t[A= " << getLeftFootPosition().angle() << "]\n\r";                
-// std::cout << "\n\rRight    Position\t[X= " << getRightFootPosition().x() << "]\t[Y= " << getRightFootPosition().y() << "]\t[A= " << getRightFootPosition().angle() << "]\n\r";              
         auto& limit = (getVelocityCurrent().x() > velocityHigh ? accelerationLimitsHigh : accelerationLimits); // TODO: use a function instead
         float speed = std::min(1.0, std::max(std::abs(getVelocityCurrent().x() / limit[0]), std::abs(getVelocityCurrent().y() / limit[1])));
         float scale = (step_height_fast_fraction - step_height_slow_fraction) * speed + step_height_slow_fraction;
         getFootPhases[2] *= scale;
         if(DEBUG) { NUClear::log("Messaging: Foot Motion Planner - Interpolate Transform2D"); }           
+        
         //Interpolate Transform2D from start to destination - deals with flat resolved movement in (x,y) coordinates     
         if (inActiveForwardLimb == LimbID::RIGHT_LEG) 
         {         
             //TODO: Vector field function??
             setRightFootPosition(inActiveLimbSource.interpolate(getFootPhases[0], inActiveLimbDestination));
-//std::cout << "\n\n\rRight    Interpolate\t[X= " << (rightFootDestination.x() - getRightFootSource().x()) << "]\t[Y= " << (rightFootDestination.y() - getRightFootSource().y()) << "]\n\r";
-// if(inActiveLimbSource.y() > 0)
-// {
-// std::cout << "\n\n\rRight    Source\t[X= " << inActiveLimbSource.x() << "]\t[Y= " << inActiveLimbSource.y() << "]\n\r";   
-// }
-//std::cout << "Right Destination\t[X= " << rightFootDestination.x() << "]\t[Y= " << rightFootDestination.y() << "]\n\r"; 
-// if(getRightFootPosition().y() > 0)
-// {
-// std::cout << "\n\rRight    Position\t[X= " << getRightFootPosition().x() << "]\t[Y= " << getRightFootPosition().y() << "]\t[A= " << getRightFootPosition().angle() << "]\n\r";              
-// }
-//std::cout << "Foot       Phases\t[0= " << getFootPhases[0] << "]\t[1= " << getFootPhases[1] << "]\t[2= " << getFootPhases[2] << "]\n\r";           
         }
         else
         {         
             //TODO: Vector field function??
             setLeftFootPosition(inActiveLimbSource.interpolate(getFootPhases[0],  inActiveLimbDestination));
-//std::cout << "\n\n\rLeft     Interpolate\t[X= " << (inActiveLimbSource.x() - inActiveLimbSource.x()) << "]\t[Y= " << (activeLimbDestination.y() - activeLimbSource.y()) << "]\n\r";
-// if(inActiveLimbSource.y() < 0)
-// {
-// std::cout << "\n\n\rLeft     Source\t[X= " << inActiveLimbSource.x() << "]\t[Y= " << inActiveLimbSource.y() << "]\n\r";      
-// }
-//std::cout << "Left  Destination\t[X= " << activeLimbDestination.x() << "]\t[Y= " << activeLimbDestination.y() << "]\n\r"; 
-// if(getLeftFootPosition().y() < 0)
-// {
-// std::cout << "\n\rLeft     Position\t[X= " << getLeftFootPosition().x() << "]\t[Y= " << getLeftFootPosition().y() << "]\t[A= " << getLeftFootPosition().angle() << "]\n\r";                
-// }
-//std::cout << "Foot       Phases\t[0= " << getFootPhases[0] << "]\t[1= " << getFootPhases[1] << "]\t[2= " << getFootPhases[2] << "]\n\r"; 
         }
         
         if(DEBUG) { NUClear::log("Messaging: Foot Motion Planner - Instantiate FootLocal Variables"); }
@@ -224,7 +201,7 @@ namespace motion
         emit(std::make_unique<FootMotionUpdate>(inPhase, inActiveForwardLimb, getLeftFootPosition(), getRightFootPosition(), leftFootLocal, rightFootLocal));              
     }
 /*=======================================================================================================*/
-//      METHOD: getFootPhase
+//      METHOD: Foot Phase
 /*=======================================================================================================*/
     arma::vec3 FootMotionPlanner::getFootPhase(double phase, double phase1Single, double phase2Single) 
     {
@@ -398,6 +375,17 @@ namespace motion
         activeForwardLimb.push(inActiveForwardLimb);
     }    
 /*=======================================================================================================*/
+//      ENCAPSULATION METHOD: Is New Step the Same as Previous
+/*=======================================================================================================*/    
+    bool FootMotionPlanner::isTargetStepUnchanged()
+    {
+        return  (
+                    (getActiveLimbSource().x() == getActiveLimbDestination().x())       &&
+                    (getActiveLimbSource().y() == getActiveLimbDestination().y())       &&
+                    (getActiveLimbSource().angle() == getActiveLimbDestination().angle())
+                );
+    }
+/*=======================================================================================================*/
 //      ENCAPSULATION METHOD: New Step Available
 /*=======================================================================================================*/
     bool FootMotionPlanner::isInitialStep()
@@ -423,13 +411,7 @@ namespace motion
 //      ENCAPSULATION METHOD: New Step Received
 /*=======================================================================================================*/
     bool FootMotionPlanner::isNewStepReceived()
-    {     
-// std::cout << "\n\r\t" << ((getActiveForwardLimb() == LimbID::LEFT_LEG) ? "Left " : "Right") << "\n\r";
-// std::cout << "\tSDT: " <<  (destinationTime.size()) << "\n\r"; 
-// std::cout << "\tSVC: " <<  (velocityCurrent.size()) << "\n\r";
-// std::cout << "\tALS: " <<  (activeLimbSource.size()) << "\n\r";
-// std::cout << "\tAFL: " <<  (activeForwardLimb.size()) << "\n\r";
-// std::cout << "\tALD: " <<  (activeLimbDestination.size()) << "\n\r";         
+    {         
         return (
                     (destinationTime.size() > 0)                                && 
                     (destinationTime.size() == velocityCurrent.size())          && 
@@ -478,17 +460,13 @@ namespace motion
 /*=======================================================================================================*/
     void FootMotionPlanner::configure(const YAML::Node& config)
     {
-        emitLocalisation = config["emit_localisation"].as<bool>();
         emitFootPosition = config["emit_foot_position"].as<bool>();
 
         auto& stance = config["stance"];
-        bodyHeight = stance["body_height"].as<Expression>();
-        bodyTilt = stance["body_tilt"].as<Expression>();
         setFootOffsetCoefficient(stance["foot_offset"].as<arma::vec>());
 
         auto& walkCycle = config["walk_cycle"];
         stepTime = walkCycle["step_time"].as<Expression>();
-        zmpTime = walkCycle["zmp_time"].as<Expression>();
         stepHeight = walkCycle["step"]["height"].as<Expression>();
         stepLimits = walkCycle["step"]["limits"].as<arma::mat::fixed<3,2>>();
 
@@ -506,9 +484,6 @@ namespace motion
 
         phase1Single = walkCycle["single_support_phase"]["start"].as<Expression>();
         phase2Single = walkCycle["single_support_phase"]["end"].as<Expression>();      
-
-        auto& balance = walkCycle["balance"];
-        balanceEnabled = balance["enabled"].as<bool>();
     }
 }  // motion
 }  // modules
