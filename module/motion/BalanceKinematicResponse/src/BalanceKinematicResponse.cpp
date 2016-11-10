@@ -35,6 +35,7 @@ namespace motion
     using message::input::LimbID;
     using message::input::Sensors;
     using message::input::PushDetection;
+    using message::input::FallingDetected;
 
     using message::motion::FootMotionUpdate;
     using message::motion::HeadMotionUpdate;
@@ -81,7 +82,7 @@ namespace motion
         , accelerationLimits(arma::fill::zeros), accelerationLimitsHigh(arma::fill::zeros)
         , velocityCurrent(), velocityCommand()
         , phase1Single(0.0), phase2Single(0.0)
-        , toeTipParameter(0.0), hipRollParameter(0.0), armRollParameter(0.0)
+        , toeTipParameter(0.0), hipRollParameter(0.0), shoulderRollParameter(0.0)
         , balancer(), kinematicsModel()
         , balanceAmplitude(0.0), balanceWeight(0.0), balanceOffset(0.0)
         , balancePGain(0.0), balanceIGain(0.0), balanceDGain(0.0)
@@ -163,27 +164,11 @@ namespace motion
         });        
 
         // If there is some impulse relating to the robots orientation, then capture values for processing...
-        on<Last<2, Trigger<Sensors>>>().then([this] (const std::vector<std::shared_ptr<const Sensors>>& sensors) 
+        on<Trigger<FallingDetected>>().then("Balance Response Planner - Received Update (Falling) Info", [this](const FallingDetected& info) 
         {
-            // Only continue if there is at least 2 sets of sensor data...
-            if (sensors.size() < 2) 
-            {
-                return;
-            }
-
-            // The acceleration amplitude for stationary postures is typically smaller than 0.40g...
-            // The rotational rate amplitude for stationary postures typically is smaller than 1.0472 rads/s...
-            // Evaluate thresholds for dynamic postures and abrupt noise (such as falling, jumping, etc.):
-            // Acceleration amplitude = 3.0g...
-            // Rotational rate = 3.49066 rads/sec...
-            // Bending vs. Standing is considered at an offset of 0.610865 rads...
-
-            // Capture x,y differences in gyroscope data...
-            arma::vec3 gyroDiff = sensors[0]->gyroscope - sensors[1]->gyroscope;
-            arma::vec2 xyDiff = { gyroDiff(0), gyroDiff(1) };
-
             // Capture normalised angular acceleration experienced...
-            setArmRollParameter(arma::norm(xyDiff));
+            setShoulderRollParameter(info.y);
+            setShoulderPitchParameter(info.x);
         });
 
         // If balance response is required, enable updating...
@@ -212,21 +197,14 @@ namespace motion
         //If feature enabled, apply balance compensation through support actuator...
         if (armRollCompensationEnabled) 
         {
-            // Accelerometer (in m/s^2)
-            // sensors.accelerometer.x
-            // sensors.accelerometer.y
-            // sensors.accelerometer.z
-
-            // Gyroscope (in radians/second)
-            // sensors.gyroscope.x
-            // sensors.gyroscope.y
-            // sensors.gyroscope.z
-
-            if(getArmRollParameter() > 1)
+            if(getShoulderRollParameter() > 0)
             {
-std::cout << "Gyro triggered:\n\r" << getArmRollParameter();                
+std::cout << "Gyro roll:\n\r" << getShoulderRollParameter();                
             }
-
+            if(getShoulderPitchlParameter() > 0)
+            {
+std::cout << "Gyro pitch:\n\r" << getShoulderPitchParameter();                
+            }
 
         }
     }      
@@ -448,9 +426,6 @@ std::cout << "Gyro triggered:\n\r" << getArmRollParameter();
     {
         footOffsetCoefficient = inFootOffsetCoefficient;
     }
-/*=======================================================================================================*/
-//      ENCAPSULATION METHOD: setFootOffsetCoefficient
-/*=======================================================================================================*/
     void BalanceKinematicResponse::setFootOffsetCoefficient(int index, double inValue)
     {
         footOffsetCoefficient[index] = inValue;
@@ -464,16 +439,27 @@ std::cout << "Gyro triggered:\n\r" << getArmRollParameter();
         return (double(NUClear::clock::now().time_since_epoch().count()) * (1.0 / double(NUClear::clock::period::den)));
     }
 /*=======================================================================================================*/
-//      ENCAPSULATION METHOD: Arm Roll Parameter
+//      ENCAPSULATION METHOD: Shoulder Roll Parameter
 /*=======================================================================================================*/    
-    double BalanceKinematicResponse::getArmRollParameter()
+    double BalanceKinematicResponse::getShoulderRollParameter()
     {
-        return (armRollParameter);
+        return (shoulderRollParameter);
     }
-    void BalanceKinematicResponse::setArmRollParameter(double inArmRollParameter)
+    void BalanceKinematicResponse::setShoulderRollParameter(double inShoulderRollParameter)
     {
-        armRollParameter = inArmRollParameter;
+        shoulderRollParameter = inShoulderRollParameter;
     }    
+/*=======================================================================================================*/
+//      ENCAPSULATION METHOD: Shoulder Pitch Parameter
+/*=======================================================================================================*/    
+    double BalanceKinematicResponse::getShoulderPitchParameter()
+    {
+        return (shoulderPitchParameter);
+    }
+    void BalanceKinematicResponse::setShoulderPitchParameter(double inShoulderPitchParameter)
+    {
+        shoulderPitchParameter = inShoulderPitchParameter;
+    }        
 /*=======================================================================================================*/
 //      ENCAPSULATION METHOD: Motion Phase
 /*=======================================================================================================*/    

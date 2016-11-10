@@ -34,21 +34,22 @@ namespace motion
 /*=======================================================================================================*/
 //      UTILIZATION REFERENCE(S)
 /*=======================================================================================================*/
-    using message::input::PushDetection;
+    using message::input::LimbID;
     using message::input::ServoID;
     using message::input::Sensors;
-    using message::input::LimbID;
+
     using message::behaviour::ServoCommand;
     using message::behaviour::WalkOptimiserCommand;
     using message::behaviour::WalkConfigSaved;
     // using message::behaviour::RegisterAction;
     // using message::behaviour::ActionPriorites;
-    using message::motion::BalanceBodyUpdate;
+
     using message::motion::WalkCommand;
     using message::motion::StopCommand;
     using message::motion::WalkStarted;
     using message::motion::WalkStopped;
     using message::motion::NewWalkCommand;
+    using message::motion::BalanceBodyUpdate;
     using message::motion::EnableWalkEngineCommand;
     using message::motion::DisableWalkEngineCommand;
     using message::motion::EnableBalanceResponse;
@@ -62,16 +63,19 @@ namespace motion
     using message::motion::ServoTarget;
     using message::motion::Script;
     using message::motion::kinematics::KinematicsModel;
+    using utility::motion::kinematics::calculateLegJointsTeamDarwin; //TODO: advised to change to calculateLegJoints (no TeamDarwin)
+
     using message::support::SaveConfiguration;
     using message::support::Configuration;
 
-    using utility::motion::kinematics::calculateLegJointsTeamDarwin; //TODO: advised to change to calculateLegJoints (no TeamDarwin)
+    using utility::support::Expression;
+
     using utility::math::matrix::Transform2D;
     using utility::math::matrix::Transform3D;
     using utility::math::matrix::Rotation3D;
     using utility::math::angle::normalizeAngle;
-    using utility::nubugger::graph;
-    using utility::support::Expression;  
+
+    using utility::nubugger::graph;  
 /*=======================================================================================================*/
 //      NAME: WalkEngine
 /*=======================================================================================================*/
@@ -427,7 +431,7 @@ namespace motion
     {
         auto& debug = config["debugging"];
         DEBUG = debug["enabled"].as<bool>();
-        
+
         emitLocalisation = config["emit_localisation"].as<bool>();
 
         auto& stance = config["stance"];

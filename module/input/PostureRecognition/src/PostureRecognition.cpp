@@ -1,0 +1,134 @@
+/*
+ * This file is part of NUbots Codebase.
+ *
+ * The NUbots Codebase is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * The NUbots Codebase is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with the NUbots Codebase.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ * Copyright 2015 NUbots <nubots@nubots.net>
+ */
+
+#include "PostureRecognition.h"
+
+#include "message/support/Configuration.h"
+#include "utility/time/time.h"
+#include "utility/nubugger/NUhelpers.h"
+#include "message/input/Sensors.h"
+#include "message/input/PushDetection.h"
+
+namespace module {
+namespace input {
+
+    using message::support::Configuration;
+
+    using message::input::Sensors;
+    using message::input::WalkingDetected;
+    using message::input::BendingDetected;
+    using message::input::KickingDetected;
+    using message::input::SittingDetected;
+    using message::input::StandingDetected;
+    using message::input::FallingDetected;
+
+    using utility::math::filter::UKF;
+
+    using utility::time::TimeDifferenceSeconds;
+
+    using utility::nubugger::graph;
+
+/*=======================================================================================================*/
+//      NAME: Push Detector
+/*=======================================================================================================*/
+    PostureRecognition::PostureRecognition(std::unique_ptr<NUClear::Environment> environment)
+    : Reactor(std::move(environment)), loadFilters(), lastTimeUpdateTime(), DEBUG(false), DEBUG_ITER(0) 
+    {
+
+        // Configure posture recognition...
+        on<Configuration>("PostureRecognition.yaml").then([this] (const Configuration& config) 
+        {
+            configure(config.config); 
+        });
+
+        // If there is some impulse relating robots posture and orientation, then capture values for processing...
+        on<Last<2, Trigger<Sensors>>>().then([this] (const std::vector<std::shared_ptr<const Sensors>>& sensors) 
+        {
+            // Only continue if there is at least 2 sets of sensor data...
+            if(DEBUG) { log<NUClear::TRACE>("Posture Recognition - Enter Trigger(0)"); }
+            if (sensors.size() < 2) 
+            {
+                return;
+            }
+            if(DEBUG) { log<NUClear::TRACE>("Posture Recognition- Enter Trigger(1)"); }
+
+            // The acceleration amplitude for stationary postures is typically smaller than 0.40g...
+            // The rotational rate amplitude for stationary postures typically is smaller than 1.0472 rads/s...
+            // Evaluate thresholds for dynamic postures and abrupt noise (such as falling, jumping, etc.):
+            // Acceleration amplitude = 3.0g...
+            // Rotational rate = 3.49066 rads/sec...
+            // Bending vs. Standing is considered at an offset of 0.610865 rads...
+
+            // Gyroscope (in radians/second)
+            // Capture axis differences in gyroscope data...
+            arma::vec3 gyroDiff = sensors[0]->gyroscope - sensors[1]->gyroscope;
+            arma::vec2 xzGyroDiff = { gyroDiff(0), gyroDiff(2) };
+            arma::vec2 yzGyroDiff = { gyroDiff(1), gyroDiff(2) };
+            arma::vec2 xyGyroDiff = { gyroDiff(0), gyroDiff(1) };
+
+            // Accelerometer (in m/s^2)
+            // Capture axis differences in accelerometer data...
+            arma::vec3 accelDiff = sensors[0]->accelerometer - sensors[1]->accelerometer;
+            arma::vec2 xzAccelDiff = { accelDiff(0), accelDiff(2) };
+            arma::vec2 yzAccelDiff = { accelDiff(1), accelDiff(2) };
+            arma::vec2 xyAccelDiff = { accelDiff(0), accelDiff(1) };
+
+            // Notify if sensor data suggests robot is walking...  TODO: likely requies greater collection of sensor data
+            // WalkingDetected walking;
+            //    ...
+            // emit(std::make_unique<WalkingDetected>(walking));
+
+            // Notify if sensor data suggests robot is bending over...  TODO: likely requies greater collection of sensor data
+            // BendingDetected bending;
+            //    ...
+            // emit(std::make_unique<BendingDetected>(bending));
+
+            // Notify if sensor data suggests robot is kicking...  TODO: likely requies greater collection of sensor data
+            // KickingDetected kicking;
+            //    ...
+            // emit(std::make_unique<KickingDetected>(kicking));
+
+            // Notify if sensor data suggests robot is sitting down...  TODO: likely requies greater collection of sensor data
+            // SittingDetected sitting;
+            //    ...
+            // emit(std::make_unique<SittingDetected>(sitting));
+
+            // Notify if sensor data suggests robot is standing up... TODO: likely requies greater collection of sensor data
+            // StandingDetected standing;
+            //    ...
+            // emit(std::make_unique<StandingDetected>(standing));
+
+            // Notify if sensor data suggests robot is begining to fall...
+            FallingDetected falling;
+            falling.x  = arma::norm(xzGyroDiff);
+            falling.y  = arma::norm(yzGyroDiff);
+            falling.z  = arma::norm(xyGyroDiff); //TODO: Verify mathematical suitability.
+            emit(std::make_unique<FallingDetected>(falling));
+        });
+    }
+/*=======================================================================================================*/
+//      INITIALISATION METHOD: Configuration
+/*=======================================================================================================*/
+    void PostureRecognition::configure(const YAML::Node& config)
+    {
+        auto& debug = config["debugging"];
+        DEBUG = debug["enabled"].as<bool>();
+    }        
+}
+}

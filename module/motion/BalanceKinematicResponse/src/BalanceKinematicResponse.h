@@ -33,6 +33,7 @@
 
 #include "message/input/Sensors.h"
 #include "message/input/PushDetection.h"
+#include "message/input/PostureRecognition.h"
 
 #include "message/motion/KinematicsModels.h"
 #include "message/motion/WalkCommand.h"
@@ -228,7 +229,9 @@ namespace motion
          */
         double toeTipParameter;                      //
         double hipRollParameter;                     //
-        double armRollParameter;
+        double shoulderRollParameter;                //
+        double shoulderPitchParameter;               //
+
 
         /**
          * Balance & Kinematics module initialization...
@@ -390,12 +393,22 @@ namespace motion
          * @brief [brief description]
          * @details [long description]
          */
-        double getArmRollParameter();
+        double getShoulderRollParameter();
         /**
          * @brief [brief description]
          * @details [long description]
          */
-        void setArmRollParameter(double inArmRollParameter);
+        void setShoulderRollParameter(double inShoulderRollParameter);
+        /**
+         * @brief [brief description]
+         * @details [long description]
+         */
+        double getShoulderPitchParameter();
+        /**
+         * @brief [brief description]
+         * @details [long description]
+         */
+        void setShoulderPitchParameter(double inShoulderPitchParameter);
         /**
          * @brief [brief description]
          * @details [long description]

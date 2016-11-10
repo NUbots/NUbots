@@ -36,6 +36,7 @@
 
 #include "message/input/Sensors.h"
 #include "message/input/PushDetection.h"
+#include "message/input/PostureRecognition.h"
 
 #include "message/motion/KinematicsModels.h"
 #include "message/motion/WalkCommand.h"

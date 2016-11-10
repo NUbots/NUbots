@@ -17,8 +17,8 @@
  * Copyright 2015 NUbots <nubots@nubots.net>
  */
 
-#ifndef MODULES_INPUT_PUSHDETECTOR_H
-#define MODULES_INPUT_PUSHDETECTOR_H
+#ifndef MODULES_INPUT_POSTURERECOGNITION_H
+#define MODULES_INPUT_POSTURERECOGNITION_H
 
 #include <nuclear>
 #include <armadillo>
@@ -58,12 +58,12 @@ namespace input {
         }
     };
 
-    class PushDetector : public NUClear::Reactor 
+    class PostureRecognition : public NUClear::Reactor 
     {
 
     public:
-        /// @brief Called by the powerplant to build and setup the PushDetector reactor.
-        explicit PushDetector(std::unique_ptr<NUClear::Environment> environment);
+        /// @brief Called by the powerplant to build and setup the PostureRecognition reactor.
+        explicit PostureRecognition(std::unique_ptr<NUClear::Environment> environment);
 
         std::vector<utility::math::filter::UKF<ServoLoadModel>> loadFilters;
         NUClear::clock::time_point lastTimeUpdateTime;
@@ -87,4 +87,4 @@ namespace input {
 }
 }
 
-#endif  // MODULES_INPUT_PUSHDETECTOR_H
+#endif  // MODULES_INPUT_POSTURERECOGNITION_H
