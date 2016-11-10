@@ -18,6 +18,7 @@ NUCLEAR_ROLE(
 
     # Input
     input::PushDetector
+    input::PostureRecognition
 
     # Motion
     motion::FootMotionPlanner
