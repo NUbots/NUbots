@@ -227,6 +227,7 @@ namespace motion
         /**
          * Balance & Post-alignment parameters used for humanoid stability techniques...
          */
+
         double rollParameter;                //
         double pitchParameter;               //
         double yawParameter;                 // 
@@ -403,7 +404,7 @@ namespace motion
          * @brief [brief description]
          * @details [long description]
          */
-        void setRollParameter(double inShoulderRollParameter);
+        void setRollParameter(double inRollParameter);
         /**
          * @brief [brief description]
          * @details [long description]
@@ -413,7 +414,19 @@ namespace motion
          * @brief [brief description]
          * @details [long description]
          */
-        void setPitchParameter(double inShoulderPitchParameter);
+        void setPitchParameter(double inPitchParameter);
+        /**
+         * @brief [brief description]
+         * @details [long description]
+         * 
+         * @param inTorsoPosition [description]
+         */
+        double getYawParameter();
+        /**
+         * @brief [brief description]
+         * @details [long description]
+         */
+        void setYawParameter(double inYawParameter);
         /**
          * @brief [brief description]
          * @details [long description]

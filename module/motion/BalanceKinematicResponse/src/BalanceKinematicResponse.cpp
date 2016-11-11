@@ -177,6 +177,7 @@ namespace motion
             // Capture normalised angular acceleration experienced...
             setRollParameter(info.y);
             setPitchParameter(info.x);
+	        setYawParameter(info.z);
         });
 
         // If balance response is required, enable updating...
@@ -224,7 +225,14 @@ std::cout << "Gyro pitch:\n\r" << getPitchParameter();
         //If feature enabled, apply balance compensation through support actuator...
         if (ankleTorqueCompensationEnabled) 
         {
-            //
+            if (getActiveForwardLimb() == LimbID::LEFT_LEG)
+            {
+                setRightFootPosition(getRightFootPosition().rotateZ(0)); //insert factor based on orientation
+            }
+            else 
+            {
+                setLeftFootPosition(getLeftFootPosition().rotateZ(0));
+            }
         }
     }      
 /*=======================================================================================================*/
@@ -447,7 +455,7 @@ std::cout << "Gyro pitch:\n\r" << getPitchParameter();
         return (double(NUClear::clock::now().time_since_epoch().count()) * (1.0 / double(NUClear::clock::period::den)));
     }
 /*=======================================================================================================*/
-//      ENCAPSULATION METHOD: Shoulder Roll Parameter
+//      ENCAPSULATION METHOD: Roll Parameter
 /*=======================================================================================================*/    
     double BalanceKinematicResponse::getRollParameter()
     {
@@ -458,7 +466,7 @@ std::cout << "Gyro pitch:\n\r" << getPitchParameter();
         rollParameter = inRollParameter;
     }    
 /*=======================================================================================================*/
-//      ENCAPSULATION METHOD: Shoulder Pitch Parameter
+//      ENCAPSULATION METHOD: Pitch Parameter
 /*=======================================================================================================*/    
     double BalanceKinematicResponse::getPitchParameter()
     {
@@ -467,6 +475,17 @@ std::cout << "Gyro pitch:\n\r" << getPitchParameter();
     void BalanceKinematicResponse::setPitchParameter(double inPitchParameter)
     {
         pitchParameter = inPitchParameter;
+    }        
+/*=======================================================================================================*/
+//      ENCAPSULATION METHOD: Yaw Parameter
+/*=======================================================================================================*/    
+    double BalanceKinematicResponse::getYawParameter()
+    {
+        return (yawParameter);
+    }
+    void BalanceKinematicResponse::setYawParameter(double inYawParameter)
+    {
+        yawParameter = inYawParameter;
     }        
 /*=======================================================================================================*/
 //      ENCAPSULATION METHOD: Motion Phase
