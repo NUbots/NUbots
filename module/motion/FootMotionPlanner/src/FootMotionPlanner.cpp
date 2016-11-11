@@ -60,7 +60,7 @@ namespace motion
         , activeForwardLimb(), activeLimbInitial(LimbID::LEFT_LEG)
         , stepTime(0.0), stepHeight(0.0)
         , step_height_slow_fraction(0.0f), step_height_fast_fraction(0.0f)
-        , ankle_pitch_lift(0.0),, ankle_pitch_fall(0.0)
+        , ankle_pitch_lift(0.0), ankle_pitch_fall(0.0)
         , stepLimits(arma::fill::zeros), footOffsetCoefficient(arma::fill::zeros)
         , INITIAL_STEP(false), newStepStartTime(0.0), destinationTime(), lastVeloctiyUpdateTime()
         , velocityHigh(0.0), accelerationTurningFactor(0.0), velocityLimits(arma::fill::zeros)
