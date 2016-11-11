@@ -70,7 +70,7 @@ namespace motion
         , kinematicsModel()
     {    	
         //Configure foot motion planner...
-        on<Configuration>("FootMotionPlanner.yaml").then("Foot Motion Planner - Configure", [this] (const Configuration& config) 
+        on<Configuration>("WalkEngine.yaml").then("Foot Motion Planner - Configure", [this] (const Configuration& config) 
         {             
             configure(config.config);          
         });
@@ -189,7 +189,7 @@ namespace motion
         //DEBUGGING: Emit relative feet position phase with respect to robot state... 
         if (emitFootPosition)
         {
-            emit(graph("Foot Phases", getFootPhases[2]));
+            emit(graph("Foot Phases", getFootPhases[0]));
             emit(graph("Foot TranslateZ Motion", stepHeight * getFootPhases[2]));
         }
 
@@ -486,36 +486,41 @@ namespace motion
 /*=======================================================================================================*/
     void FootMotionPlanner::configure(const YAML::Node& config)
     {         
-        auto& debug = config["debugging"];
-        DEBUG = debug["enabled"].as<bool>();
-        
-        emitFootPosition = debug["emit_foot_position"].as<bool>();
+std::cout << "Test Config(S)\n\r";           
+        auto& wlk = config["walk_engine"];
+        auto& fmp = config["foot_motion_planner"];
 
-        auto& stance = config["stance"];
+        auto& debug = fmp["debugging"];
+        DEBUG = debug["enabled"].as<bool>();
+        emitFootPosition = debug["emit_foot_position"].as<bool>();
+        
+        auto& stance = wlk["stance"];
         setFootOffsetCoefficient(stance["foot_offset"].as<arma::vec>());
 
-        auto& walkCycle = config["walk_cycle"];
-        stepTime = walkCycle["step_time"].as<Expression>();
-        stepHeight = walkCycle["step"]["height"].as<Expression>();
-        stepLimits = walkCycle["step"]["limits"].as<arma::mat::fixed<3,2>>();
+        auto& walkCycle = fmp["walk_cycle"];
+        ankle_pitch_lift = walkCycle["lift_ankle_pitch"].as<Expression>();
+        ankle_pitch_fall = walkCycle["fall_ankle_pitch"].as<Expression>();
+
+        walkCycle = wlk["walk_cycle"];
+        stepTime    = walkCycle["step_time"].as<Expression>();
+        stepHeight  = walkCycle["step"]["height"].as<Expression>();
+        stepLimits  = walkCycle["step"]["limits"].as<arma::mat::fixed<3,2>>();
 
         step_height_slow_fraction = walkCycle["step"]["height_slow_fraction"].as<float>();
         step_height_fast_fraction = walkCycle["step"]["height_fast_fraction"].as<float>();
 
-        ankle_pitch_lift = walkCycle["lift_ankle_pitch"].as<Expression>();
-        ankle_pitch_fall = walkCycle["fall_ankle_pitch"].as<Expression>();
-
         auto& velocity = walkCycle["velocity"];
         velocityLimits = velocity["limits"].as<arma::mat::fixed<3,2>>();
-        velocityHigh = velocity["high_speed"].as<Expression>();
+        velocityHigh   = velocity["high_speed"].as<Expression>();
 
         auto& acceleration = walkCycle["acceleration"];
-        accelerationLimits = acceleration["limits"].as<arma::vec>();
-        accelerationLimitsHigh = acceleration["limits_high"].as<arma::vec>();
-        accelerationTurningFactor = acceleration["turning_factor"].as<Expression>();
+        accelerationLimits          = acceleration["limits"].as<arma::vec>();
+        accelerationLimitsHigh      = acceleration["limits_high"].as<arma::vec>();
+        accelerationTurningFactor   = acceleration["turning_factor"].as<Expression>();
 
         phase1Single = walkCycle["single_support_phase"]["start"].as<Expression>();
-        phase2Single = walkCycle["single_support_phase"]["end"].as<Expression>();            
+        phase2Single = walkCycle["single_support_phase"]["end"].as<Expression>();         
+std::cout << "Test Config(E)\n\r";               
     }
 }  // motion
 }  // modules

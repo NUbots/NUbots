@@ -66,8 +66,7 @@ namespace motion
 /*=======================================================================================================*/
     TorsoMotionPlanner::TorsoMotionPlanner(std::unique_ptr<NUClear::Environment> environment)
     : Reactor(std::move(environment)) 
-        , DEBUG(false), DEBUG_ITER(0), initialStep(0)
-        , balanceEnabled(0.0), emitLocalisation(false), emitFootPosition(false)
+        , DEBUG(false), DEBUG_ITER(0)
         , updateHandle(), generateStandScriptReaction()
         , updateStepInstruction(false)
         , torsoPositionsTransform(), torsoPositionSource(), torsoPositionDestination()
@@ -91,7 +90,7 @@ namespace motion
         , lastFootGoalRotation(), footGoalErrorSum()       
     {
         //Configure foot motion planner...
-        on<Configuration>("TorsoMotionPlanner.yaml").then("Torso Motion Planner - Configure", [this] (const Configuration& config) 
+        on<Configuration>("WalkEngine.yaml").then("Torso Motion Planner - Configure", [this] (const Configuration& config) 
         {
             configure(config.config);
         });
@@ -470,43 +469,44 @@ namespace motion
 /*=======================================================================================================*/
     void TorsoMotionPlanner::configure(const YAML::Node& config)
     {
-        auto& debug = config["debugging"];
+std::cout << "Test Config(S)\n\r";         
+        auto& wlk = config["walk_engine"];
+        auto& tmp = config["torso_motion_planner"];
+
+        auto& debug = tmp["debugging"];
         DEBUG = debug["enabled"].as<bool>();
-        
-        emitLocalisation = config["emit_localisation"].as<bool>();
 
-        auto& stance = config["stance"];
-        bodyHeight = stance["body_height"].as<Expression>();
-        bodyTilt = stance["body_tilt"].as<Expression>();
+        auto& stance = wlk["stance"];
+        auto& body   = stance["body"];
+        bodyHeight   = body["height"].as<Expression>();
+        bodyTilt     = body["tilt"].as<Expression>();
         setFootOffsetCoefficient(stance["foot_offset"].as<arma::vec>());
-        // gToe/heel overlap checking values
-        stanceLimitY2 = kinematicsModel.Leg.LENGTH_BETWEEN_LEGS() - stance["limit_margin_y"].as<Expression>();
+        stanceLimitY2 = kinematicsModel.Leg.LENGTH_BETWEEN_LEGS() - stance["limit_margin_y"].as<Expression>(); 
+        STAND_SCRIPT_DURATION = stance["STAND_SCRIPT_DURATION"].as<Expression>();  
 
-        auto& walkCycle = config["walk_cycle"];
-        stepTime = walkCycle["step_time"].as<Expression>();
-        zmpTime = walkCycle["zmp_time"].as<Expression>();
-        stepHeight = walkCycle["step"]["height"].as<Expression>();
-        stepLimits = walkCycle["step"]["limits"].as<arma::mat::fixed<3,2>>();
+        auto& walkCycle = tmp["walk_cycle"];
+        zmpTime     = walkCycle["zmp_time"].as<Expression>();
+        
+        walkCycle = wlk["walk_cycle"];
+        stepTime    = walkCycle["step_time"].as<Expression>();
+        stepHeight  = walkCycle["step"]["height"].as<Expression>();
+        stepLimits  = walkCycle["step"]["limits"].as<arma::mat::fixed<3,2>>();
 
         step_height_slow_fraction = walkCycle["step"]["height_slow_fraction"].as<float>();
         step_height_fast_fraction = walkCycle["step"]["height_fast_fraction"].as<float>();
 
         auto& velocity = walkCycle["velocity"];
         velocityLimits = velocity["limits"].as<arma::mat::fixed<3,2>>();
-        velocityHigh = velocity["high_speed"].as<Expression>();
+        velocityHigh   = velocity["high_speed"].as<Expression>();
 
         auto& acceleration = walkCycle["acceleration"];
-        accelerationLimits = acceleration["limits"].as<arma::vec>();
-        accelerationLimitsHigh = acceleration["limits_high"].as<arma::vec>();
-        accelerationTurningFactor = acceleration["turning_factor"].as<Expression>();
+        accelerationLimits          = acceleration["limits"].as<arma::vec>();
+        accelerationLimitsHigh      = acceleration["limits_high"].as<arma::vec>();
+        accelerationTurningFactor   = acceleration["turning_factor"].as<Expression>();
 
         phase1Single = walkCycle["single_support_phase"]["start"].as<Expression>();
         phase2Single = walkCycle["single_support_phase"]["end"].as<Expression>();
-
-        auto& balance = walkCycle["balance"];
-        balanceEnabled = balance["enabled"].as<bool>();
-
-        STAND_SCRIPT_DURATION = config["STAND_SCRIPT_DURATION"].as<Expression>();       
+std::cout << "Test Config(E)\n\r";        
     }    
 }  // motion
 }  // modules

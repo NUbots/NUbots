@@ -98,9 +98,7 @@ namespace motion
         /**
          * NUsight feedback initialized from configuration script, see config file for documentation...
          */
-        bool balanceEnabled;        //
-        bool emitLocalisation;      //
-        bool emitFootPosition;      //
+        
 
         /**
          * Resource abstractions for id and handler instances...

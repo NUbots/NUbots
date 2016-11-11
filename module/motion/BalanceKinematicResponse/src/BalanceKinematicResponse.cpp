@@ -90,7 +90,7 @@ namespace motion
     {
 
         //Configure balance kinematic response...
-        on<Configuration>("BalanceKinematicResponse.yaml").then("Balance Response Planner - Configure", [this] (const Configuration& config) 
+        on<Configuration>("WalkEngine.yaml").then("Balance Response Planner - Configure", [this] (const Configuration& config) 
         {
             configure(config.config);
         });
@@ -167,8 +167,8 @@ namespace motion
         on<Trigger<FallingDetected>>().then("Balance Response Planner - Received Update (Falling) Info", [this](const FallingDetected& info) 
         {
             // Capture normalised angular acceleration experienced...
-            setShoulderRollParameter(info.y);
-            setShoulderPitchParameter(info.x);
+            setRollParameter(info.y);
+            setPitchParameter(info.x);
         });
 
         // If balance response is required, enable updating...
@@ -197,9 +197,9 @@ namespace motion
         //If feature enabled, apply balance compensation through support actuator...
         if (armRollCompensationEnabled) 
         {
-            if(getShoulderRollParameter() > 0)
+            if(getRollParameter() > 0)
             {
-std::cout << "Gyro roll:\n\r" << getShoulderRollParameter();                
+std::cout << "Gyro roll:\n\r" << getRollParameter();                
             }
             if(getShoulderPitchParameter() > 0)
             {
@@ -441,11 +441,11 @@ std::cout << "Gyro pitch:\n\r" << getShoulderPitchParameter();
 /*=======================================================================================================*/
 //      ENCAPSULATION METHOD: Shoulder Roll Parameter
 /*=======================================================================================================*/    
-    double BalanceKinematicResponse::getShoulderRollParameter()
+    double BalanceKinematicResponse::getRollParameter()
     {
         return (shoulderRollParameter);
     }
-    void BalanceKinematicResponse::setShoulderRollParameter(double inShoulderRollParameter)
+    void BalanceKinematicResponse::setRollParameter(double inShoulderRollParameter)
     {
         shoulderRollParameter = inShoulderRollParameter;
     }    
@@ -456,7 +456,7 @@ std::cout << "Gyro pitch:\n\r" << getShoulderPitchParameter();
     {
         return (shoulderPitchParameter);
     }
-    void BalanceKinematicResponse::setShoulderPitchParameter(double inShoulderPitchParameter)
+    void BalanceKinematicResponse::setPitchParameter(double inShoulderPitchParameter)
     {
         shoulderPitchParameter = inShoulderPitchParameter;
     }        
@@ -629,44 +629,63 @@ std::cout << "Gyro pitch:\n\r" << getShoulderPitchParameter();
 /*=======================================================================================================*/
     void BalanceKinematicResponse::configure(const YAML::Node& config)
     {
-        auto& debug = config["debugging"];
+std::cout << "Test Config(S)\n\r";          
+        auto& wlk = config["walk_engine"];
+        auto& bkr  = wlk["balance_kinematic_response"];
+
+        auto& debug = bkr["debugging"];
         DEBUG = debug["enabled"].as<bool>();
+        emitLocalisation = debug["emit_localisation"].as<bool>();
+
+std::cout << "Test Config(1)\n\r";        
+
+        auto& sensors  = wlk["sensors"];
+        auto& sensors_gyro = sensors["gyro"];
+
+        auto& sensors_imu = sensors["imu"];
+        ankleImuParamX  = sensors_imu["ankleImuParamX"].as<Expression>();
+        ankleImuParamY  = sensors_imu["ankleImuParamY"].as<Expression>();
+        kneeImuParamX   = sensors_imu["kneeImuParamX"].as<Expression>();
+        hipImuParamY    = sensors_imu["hipImuParamY"].as<Expression>();
+        armImuParamX    = sensors_imu["armImuParamX"].as<Expression>();
+        armImuParamY    = sensors_imu["armImuParamY"].as<Expression>();        
+
+        auto& stance = bkr["stance"];
+        auto& arms   = stance["arms"];
+        setLArmSource(arms["left"]["start"].as<arma::vec>());
+        setLArmDestination(arms["left"]["end"].as<arma::vec>());
+        setRArmSource(arms["right"]["start"].as<arma::vec>());
+        setRArmDestination(arms["right"]["end"].as<arma::vec>());
         
-        emitLocalisation = config["emit_localisation"].as<bool>();
-
-        auto& stance = config["stance"];
-        bodyHeight = stance["body_height"].as<Expression>();
-        bodyTilt = stance["body_tilt"].as<Expression>();
-        setLArmSource(stance["arms"]["left"]["start"].as<arma::vec>());
-        setLArmDestination(stance["arms"]["left"]["end"].as<arma::vec>());
-        setRArmSource(stance["arms"]["right"]["start"].as<arma::vec>());
-        setRArmDestination(stance["arms"]["right"]["end"].as<arma::vec>());
+        stance = wlk["stance"];
+        auto& body   = stance["body"];
+        bodyHeight   = body["height"].as<Expression>();
+        bodyTilt     = body["tilt"].as<Expression>();
         setFootOffsetCoefficient(stance["foot_offset"].as<arma::vec>());
-        // gToe/heel overlap checking values
-        stanceLimitY2 = kinematicsModel.Leg.LENGTH_BETWEEN_LEGS() - stance["limit_margin_y"].as<Expression>();
+        stanceLimitY2 = kinematicsModel.Leg.LENGTH_BETWEEN_LEGS() - stance["limit_margin_y"].as<Expression>(); 
+        STAND_SCRIPT_DURATION = stance["STAND_SCRIPT_DURATION"].as<Expression>();   
 
-        auto& walkCycle = config["walk_cycle"];
-        stepTime = walkCycle["step_time"].as<Expression>();
-        hipRollParameter = walkCycle["hip_roll_compensation"].as<Expression>();
-        stepHeight = walkCycle["step"]["height"].as<Expression>();
-        stepLimits = walkCycle["step"]["limits"].as<arma::mat::fixed<3,2>>();
+        auto& walkCycle = wlk["walk_cycle"];
+        stepTime    = walkCycle["step_time"].as<Expression>();
+        stepHeight  = walkCycle["step"]["height"].as<Expression>();
+        stepLimits  = walkCycle["step"]["limits"].as<arma::mat::fixed<3,2>>();
 
         step_height_slow_fraction = walkCycle["step"]["height_slow_fraction"].as<float>();
         step_height_fast_fraction = walkCycle["step"]["height_fast_fraction"].as<float>();
 
         auto& velocity = walkCycle["velocity"];
         velocityLimits = velocity["limits"].as<arma::mat::fixed<3,2>>();
-        velocityHigh = velocity["high_speed"].as<Expression>();
+        velocityHigh   = velocity["high_speed"].as<Expression>();
 
         auto& acceleration = walkCycle["acceleration"];
-        accelerationLimits = acceleration["limits"].as<arma::vec>();
-        accelerationLimitsHigh = acceleration["limits_high"].as<arma::vec>();
-        accelerationTurningFactor = acceleration["turning_factor"].as<Expression>();
+        accelerationLimits          = acceleration["limits"].as<arma::vec>();
+        accelerationLimitsHigh      = acceleration["limits_high"].as<arma::vec>();
+        accelerationTurningFactor   = acceleration["turning_factor"].as<Expression>();
 
         phase1Single = walkCycle["single_support_phase"]["start"].as<Expression>();
-        phase2Single = walkCycle["single_support_phase"]["end"].as<Expression>();
+        phase2Single = walkCycle["single_support_phase"]["end"].as<Expression>();        
 
-        auto& balance = walkCycle["balance"];
+        auto& balance = bkr["balance"];
         balanceEnabled = balance["enabled"].as<bool>();
         balanceOptimiserEnabled = balance["optimiser_enabled"].as<bool>();
         hipRollCompensationEnabled = balance["hip_compensation"].as<bool>();
@@ -674,38 +693,34 @@ std::cout << "Gyro pitch:\n\r" << getShoulderPitchParameter();
         ankleTorqueCompensationEnabled = balance["ankle_compensation"].as<bool>();
         armRollCompensationEnabled = balance["arm_compensation"].as<bool>();
         supportCompensationEnabled = balance["support_compensation"].as<bool>();
-        //balanceAmplitude = balance["amplitude"].as<Expression>();
-        //balanceWeight = balance["weight"].as<Expression>();
-        //balanceOffset = balance["offset"].as<Expression>();
 
-        auto& pushRecovery = balance["push_recovery"];
+        hipCompensationScale = balance["hip_compensation_scale"].as<bool>();
+        toeCompensationScale = balance["toe_compensation_scale"].as<bool>();
+        ankleCompensationScale = balance["ankle_compensation_scale"].as<bool>();
+        armCompensationScale = balance["arm_compensation_scale"].as<bool>();
+        supportCompensationScale = balance["support_compensation_scale"].as<bool>();
+
+        balanceAmplitude = balance["amplitude"].as<Expression>();
+        balanceWeight    = balance["weight"].as<Expression>();
+        balanceOffset    = balance["offset"].as<Expression>();
+
+        auto& pushRecovery = bkr["push_recovery"];
         pushRecoveryEnabled = pushRecovery["enabled"].as<bool>();
+        
+        auto& bias = bkr["support_bias"];
+        velFastForward      = bias["velFastForward"].as<Expression>();
+        velFastTurn         = bias["velFastTurn"].as<Expression>();
+        supportFront        = bias["supportFront"].as<Expression>();
+        supportFront2       = bias["supportFront2"].as<Expression>();
+        supportBack         = bias["supportBack"].as<Expression>();
+        supportSideX        = bias["supportSideX"].as<Expression>();
+        supportSideY        = bias["supportSideY"].as<Expression>();
+        toeTipParameter     = bias["toe_tip_compensation"].as<Expression>();
+        hipRollParameter    = bias["hip_roll_compensation"].as<Expression>();
+        //ankleMod            = {-toeTipCompensation, 0};
 
         balancer.configure(balance);
-        
-        /* TODO
-        // gCompensation parameters
-        toeTipParameter = config["toeTipCompensation"].as<Expression>();
-        ankleMod = {-toeTipCompensation, 0};
-
-        // gGyro stabilization parameters
-        ankleImuParamX = config["ankleImuParamX"].as<arma::vec>();
-        ankleImuParamY = config["ankleImuParamY"].as<arma::vec>();
-        kneeImuParamX = config["kneeImuParamX"].as<arma::vec>();
-        hipImuParamY = config["hipImuParamY"].as<arma::vec>();
-        armImuParamX = config["armImuParamX"].as<arma::vec>();
-        armImuParamY = config["armImuParamY"].as<arma::vec>();
-
-        // gSupport bias parameters to reduce backlash-based instability
-        velFastForward = config["velFastForward"].as<Expression>();
-        velFastTurn = config["velFastTurn"].as<Expression>();
-        supportFront = config["supportFront"].as<Expression>();
-        supportFront2 = config["supportFront2"].as<Expression>();
-        supportBack = config["supportBack"].as<Expression>();
-        supportSideX = config["supportSideX"].as<Expression>();
-        supportSideY = config["supportSideY"].as<Expression>();
-        supportTurn = config["supportTurn"].as<Expression>();
-        */
+std::cout << "Test Config(E)\n\r";                  
     }          
 }  // motion
 }  // modules   

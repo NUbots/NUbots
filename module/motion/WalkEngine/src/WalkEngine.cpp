@@ -89,7 +89,7 @@ namespace motion
         , activeForwardLimb(), activeLimbInitial(LimbID::LEFT_LEG)
         , bodyTilt(0.0), bodyHeight(0.0), stanceLimitY2(0.0), stepTime(0.0), stepHeight(0.0)
         , step_height_slow_fraction(0.0f), step_height_fast_fraction(0.0f)
-        , gainArms(0.0f), gainLegs(0.0f), stepLimits(arma::fill::zeros)
+        , gainRArm(0.0f), gainRLeg(0.0f), gainLArm(0.0f), gainLLeg(0.0f), stepLimits(arma::fill::zeros)
         , footOffsetCoefficient(arma::fill::zeros), uLRFootOffset()
         , armLPostureTransform(), armRPostureTransform()
         , beginStepTime(0.0), STAND_SCRIPT_DURATION(0.0), pushTime()
@@ -429,57 +429,33 @@ namespace motion
 /*=======================================================================================================*/
     void WalkEngine::configure(const YAML::Node& config)
     {
-        auto& debug = config["debugging"];
+        auto& wlk = config["walk_engine"];
+        
+        auto& debug = wlk["debugging"];
         DEBUG = debug["enabled"].as<bool>();
+        emitLocalisation = debug["emit_localisation"].as<bool>();
 
-        emitLocalisation = config["emit_localisation"].as<bool>();
-
-        auto& stance = config["stance"];
-        bodyHeight = stance["body_height"].as<Expression>();
-        bodyTilt = stance["body_tilt"].as<Expression>();
-        // gToe/heel overlap checking values
-        stanceLimitY2 = kinematicsModel.Leg.LENGTH_BETWEEN_LEGS() - stance["limit_margin_y"].as<Expression>();
-
-        auto& gains = stance["gains"];
-        gainArms = gains["arms"].as<Expression>();
-        gainLegs = gains["legs"].as<Expression>();
+std::cout << "Test Config(S)\n\r";  
+        auto& servos  = wlk["servos"];
+        auto& servos_gain = servos["gain"];
+        gainLArm = servos_gain["left_arm"].as<Expression>();
+        gainRArm = servos_gain["right_arm"].as<Expression>();
+        gainLLeg = servos_gain["left_leg"].as<Expression>();
+        gainRLeg = servos_gain["right_leg"].as<Expression>();
 
         for(ServoID i = ServoID(0); i < ServoID::NUMBER_OF_SERVOS; i = ServoID(int(i)+1))
         {
             if(int(i) < 6)
             {
-                jointGains[i] = gainArms;
+                jointGains[i] = gainRArm;
             } 
             else 
             {
-                jointGains[i] = gainLegs;
+                jointGains[i] = gainRLeg;
             }
         }
-
-        auto& walkCycle = config["walk_cycle"];
-        stepTime = walkCycle["step_time"].as<Expression>();
-        //hipRollCompensation = walkCycle["hip_roll_compensation"].as<Expression>();
-        stepHeight = walkCycle["step"]["height"].as<Expression>();
-        stepLimits = walkCycle["step"]["limits"].as<arma::mat::fixed<3,2>>();
-
-        step_height_slow_fraction = walkCycle["step"]["height_slow_fraction"].as<float>();
-        step_height_fast_fraction = walkCycle["step"]["height_fast_fraction"].as<float>();
-
-        auto& velocity = walkCycle["velocity"];
-        velocityLimits = velocity["limits"].as<arma::mat::fixed<3,2>>();
-        velocityHigh = velocity["high_speed"].as<Expression>();
-
-        auto& acceleration = walkCycle["acceleration"];
-        accelerationLimits = acceleration["limits"].as<arma::vec>();
-        accelerationLimitsHigh = acceleration["limits_high"].as<arma::vec>();
-        accelerationTurningFactor = acceleration["turning_factor"].as<Expression>();
-
-        auto& balance = walkCycle["balance"];
-        // balanceAmplitude = balance["amplitude"].as<Expression>();
-        // balanceWeight = balance["weight"].as<Expression>();
-        // balanceOffset = balance["offset"].as<Expression>();
-
-        for(auto& gain : balance["servo_gains"])
+std::cout << "Test Config(0)\n\r";
+        for(auto& gain : servos["gains"])
         {
             float p = gain["p"].as<Expression>();
             ServoID sr = message::input::idFromPartialString(gain["id"].as<std::string>(),message::input::ServoSide::RIGHT);
@@ -487,7 +463,58 @@ namespace motion
             servoControlPGains[sr] = p;
             servoControlPGains[sl] = p;
         }
-        STAND_SCRIPT_DURATION = config["STAND_SCRIPT_DURATION"].as<Expression>();   
+std::cout << "Test Config(1)\n\r";        
+
+        auto& sensors  = wlk["sensors"];
+        auto& sensors_gyro = sensors["gyro"];
+
+        auto& sensors_imu = sensors["imu"];
+        ankleImuParamX  = sensors_imu["ankleImuParamX"].as<Expression>();
+        ankleImuParamY  = sensors_imu["ankleImuParamY"].as<Expression>();
+        kneeImuParamX   = sensors_imu["kneeImuParamX"].as<Expression>();
+        hipImuParamY    = sensors_imu["hipImuParamY"].as<Expression>();
+        armImuParamX    = sensors_imu["armImuParamX"].as<Expression>();
+        armImuParamY    = sensors_imu["armImuParamY"].as<Expression>();
+
+        auto& stance = wlk["stance"];
+        auto& body   = stance["body"];
+        bodyHeight   = body["height"].as<Expression>();
+        bodyTilt     = body["tilt"].as<Expression>();
+        stanceLimitY2 = kinematicsModel.Leg.LENGTH_BETWEEN_LEGS() - stance["limit_margin_y"].as<Expression>(); 
+        STAND_SCRIPT_DURATION = stance["STAND_SCRIPT_DURATION"].as<Expression>();   
+
+        auto& walkCycle = wlk["walk_cycle"];
+        stepTime    = walkCycle["step_time"].as<Expression>();
+        stepHeight  = walkCycle["step"]["height"].as<Expression>();
+        stepLimits  = walkCycle["step"]["limits"].as<arma::mat::fixed<3,2>>();
+
+        step_height_slow_fraction = walkCycle["step"]["height_slow_fraction"].as<float>();
+        step_height_fast_fraction = walkCycle["step"]["height_fast_fraction"].as<float>();
+
+        auto& velocity = walkCycle["velocity"];
+        velocityLimits = velocity["limits"].as<arma::mat::fixed<3,2>>();
+        velocityHigh   = velocity["high_speed"].as<Expression>();
+
+        auto& acceleration = walkCycle["acceleration"];
+        accelerationLimits          = acceleration["limits"].as<arma::vec>();
+        accelerationLimitsHigh      = acceleration["limits_high"].as<arma::vec>();
+        accelerationTurningFactor   = acceleration["turning_factor"].as<Expression>();
+
+        auto& bkr  = wlk["balance_kinematic_response"];
+        auto& balance = bkr["balance"];
+        balanceAmplitude = balance["amplitude"].as<Expression>();
+        balanceWeight    = balance["weight"].as<Expression>();
+        balanceOffset    = balance["offset"].as<Expression>();
+        auto& bias = bkr["support_bias"];
+        velFastForward      = bias["velFastForward"].as<Expression>();
+        velFastTurn         = bias["velFastTurn"].as<Expression>();
+        supportFront        = bias["supportFront"].as<Expression>();
+        supportFront2       = bias["supportFront2"].as<Expression>();
+        supportBack         = bias["supportBack"].as<Expression>();
+        supportSideX        = bias["supportSideX"].as<Expression>();
+        supportSideY        = bias["supportSideY"].as<Expression>();
+        toeTipCompensation  = bias["toeTipCompensation"].as<Expression>();
+std::cout << "Test Config(E)\n\r";          
     }    
 }  // motion
 }  // modules

@@ -153,12 +153,12 @@ namespace motion
          */
         double bodyTilt;                                // 
         double bodyHeight;                              //
-    //  double supportFront;                            //
-    //  double supportFront2;                           //
-    //  double supportBack;                             //
-    //  double supportSideX;                            //
-    //  double supportSideY;                            //
-    //  double supportTurn;                             //    
+        double supportFront;                            //
+        double supportFront2;                           //
+        double supportBack;                             //
+        double supportSideX;                            //
+        double supportSideY;                            //
+        double supportTurn;                             //    
         double stanceLimitY2;                           //
         double stepTime;                                //
         double stepHeight;                              //
@@ -181,12 +181,12 @@ namespace motion
         /**
          * Ankle Position vectors initialized from configuration script, see config file for documentation...
          */
-    //  arma::vec4 ankleImuParamX;                      //
-    //  arma::vec4 ankleImuParamY;                      //
-    //  arma::vec4 kneeImuParamX;                       //
-    //  arma::vec4 hipImuParamY;                        //
-    //  arma::vec4 armImuParamX;                        //
-    //  arma::vec4 armImuParamY;                        //
+        arma::vec4 ankleImuParamX;                      //
+        arma::vec4 ankleImuParamY;                      //
+        arma::vec4 kneeImuParamX;                       //
+        arma::vec4 hipImuParamY;                        //
+        arma::vec4 armImuParamX;                        //
+        arma::vec4 armImuParamY;                        //
 
         /**
          * Internal timing reference variables...
@@ -211,8 +211,8 @@ namespace motion
         /**
          * Motion data initialized from configuration script, see config file for documentation...
          */
-    //  double velFastForward;                          //
-    //  double velFastTurn;                             //
+        double velFastForward;                          //
+        double velFastTurn;                             //   
         
         /**
          * Dynamic analysis parameters for relevant motion planning...
@@ -227,11 +227,14 @@ namespace motion
         /**
          * Balance & Post-alignment parameters used for humanoid stability techniques...
          */
-        double toeTipParameter;                      //
-        double hipRollParameter;                     //
-        double shoulderRollParameter;                //
-        double shoulderPitchParameter;               //
-
+        double rollParameter;                //
+        double pitchParameter;               //
+        double yawParameter;                 // 
+        double hipCompensationScale;         //
+        double toeCompensationScale;         //
+        double ankleCompensationScale;       //
+        double armCompensationScale;         //
+        double supportCompensationScale;     //
 
         /**
          * Balance & Kinematics module initialization...
@@ -393,22 +396,22 @@ namespace motion
          * @brief [brief description]
          * @details [long description]
          */
-        double getShoulderRollParameter();
+        double getRollParameter();
         /**
          * @brief [brief description]
          * @details [long description]
          */
-        void setShoulderRollParameter(double inShoulderRollParameter);
+        void setRollParameter(double inShoulderRollParameter);
         /**
          * @brief [brief description]
          * @details [long description]
          */
-        double getShoulderPitchParameter();
+        double getPitchParameter();
         /**
          * @brief [brief description]
          * @details [long description]
          */
-        void setShoulderPitchParameter(double inShoulderPitchParameter);
+        void setPitchParameter(double inShoulderPitchParameter);
         /**
          * @brief [brief description]
          * @details [long description]

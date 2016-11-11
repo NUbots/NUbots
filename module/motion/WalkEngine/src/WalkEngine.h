@@ -143,19 +143,21 @@ namespace motion
          */
         double bodyTilt;                                // 
         double bodyHeight;                              //
-    //  double supportFront;                            //
-    //  double supportFront2;                           //
-    //  double supportBack;                             //
-    //  double supportSideX;                            //
-    //  double supportSideY;                            //
-    //  double supportTurn;                             //    
+        double supportFront;                            //
+        double supportFront2;                           //
+        double supportBack;                             //
+        double supportSideX;                            //
+        double supportSideY;                            //
+        double supportTurn;                             //    
         double stanceLimitY2;                           //
         double stepTime;                                //
         double stepHeight;                              //
         float  step_height_slow_fraction;               //
         float  step_height_fast_fraction;               //
-        float  gainArms;                                //
-        float  gainLegs;                                //
+        float  gainRArm;                                //
+        float  gainRLeg;                                //
+        float  gainLArm;                                //
+        float  gainRLeg;                                //
         arma::mat::fixed<3,2> stepLimits;               //              
         arma::vec2 footOffsetCoefficient;               //
         Transform2D uLRFootOffset;                      // standard offset
@@ -169,12 +171,12 @@ namespace motion
         /**
          * Ankle Position vectors initialized from configuration script, see config file for documentation...
          */
-    //  arma::vec4 ankleImuParamX;                      //
-    //  arma::vec4 ankleImuParamY;                      //
-    //  arma::vec4 kneeImuParamX;                       //
-    //  arma::vec4 hipImuParamY;                        //
-    //  arma::vec4 armImuParamX;                        //
-    //  arma::vec4 armImuParamY;                        //
+        arma::vec4 ankleImuParamX;                      //
+        arma::vec4 ankleImuParamY;                      //
+        arma::vec4 kneeImuParamX;                       //
+        arma::vec4 hipImuParamY;                        //
+        arma::vec4 armImuParamX;                        //
+        arma::vec4 armImuParamY;                        //
 
         /**
          * Internal timing reference variables...
@@ -197,9 +199,8 @@ namespace motion
         /**
          * Motion data initialized from configuration script, see config file for documentation...
          */
-    //  double velFastForward;                          //
-    //  double velFastTurn;                             //
-        
+        double velFastForward;                          //
+        double velFastTurn;                             //        
         /**
          * Balance & Kinematics module initialization...
          */
