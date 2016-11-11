@@ -25,9 +25,10 @@
 #include <chrono>
 #include <yaml-cpp/yaml.h>
 
-#include "ServoLoadModel.h"
-
 #include "message/input/Sensors.h"
+
+#include "utility/input/ServoLoadModel.h"
+
 #include "utility/math/filter/UKF.h"
 
 namespace module 

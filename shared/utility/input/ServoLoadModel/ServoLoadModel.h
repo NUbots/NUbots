@@ -28,7 +28,7 @@
 #include "message/input/Sensors.h"
 // #include "utility/math/filter/UKF.h"
 
-namespace module 
+namespace utility 
 {
 namespace input 
 {

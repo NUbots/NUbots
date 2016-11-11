@@ -25,12 +25,16 @@
 #include "message/input/Sensors.h"
 #include "message/input/PushDetection.h"
 
-namespace module {
-namespace input {
+namespace module 
+{
+namespace input 
+{
 
     using message::support::Configuration;
     using message::input::Sensors;
     using message::input::PushDetection;
+    
+    using utility::input::ServoLoadModel;
     using utility::math::filter::UKF;
     using utility::time::TimeDifferenceSeconds;
     using utility::nubugger::graph;

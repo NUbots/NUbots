@@ -33,10 +33,9 @@ namespace input
     using message::input::StandingDetected;
     using message::input::FallingDetected;
 
+    using utility::input::ServoLoadModel;
     using utility::math::filter::UKF;
-
     using utility::time::TimeDifferenceSeconds;
-
     using utility::nubugger::graph;
 
 /*=======================================================================================================*/

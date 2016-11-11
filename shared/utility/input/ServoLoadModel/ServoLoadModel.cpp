@@ -20,7 +20,12 @@
 /*=======================================================================================================*/
 //      NAME: Servo Load Model
 /*=======================================================================================================*/
-    class ServoLoadModel 
+namespace utility 
+{
+namespace input 
+{
+
+   class ServoLoadModel 
     {
        public:
         static constexpr size_t size = 1;
@@ -47,3 +52,5 @@
             return arma::eye(ServoLoadModel::size, ServoLoadModel::size) * 0.001;
         }
     };
+}
+}

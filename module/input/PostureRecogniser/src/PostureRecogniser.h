@@ -25,12 +25,12 @@
 #include <chrono>
 #include <yaml-cpp/yaml.h>
 
-#include "ServoLoadModel.h"
-
 #include "message/support/Configuration.h"
 
 #include "message/input/Sensors.h"
 #include "message/input/PostureRecognition.h"
+
+#include "utility/input/ServoLoadModel.h"
 
 #include "utility/math/filter/UKF.h"
 
