@@ -86,17 +86,17 @@ namespace motion
         .then("Foot Motion Planner - Update Foot Position", [this] /*(const Sensors& sensors)*/
         {
             if(DEBUG) { log<NUClear::TRACE>("Messaging: Foot Motion Planner - Update Foot Position(0)"); }       
-            // NewTargetInfo syncronizes on calculating motionPhase, needs to occur before updating foot position(s)... 
-            double motionPhase = getMotionPhase();          
-            // If there is some foot target data queued for computation, then update robot...
-            if(isNewStepReceived())
-            {                            
-                // If the intended footstep is unchanged, cease z-translation to conserve energy and stop, otherwise proceed...
-                if(!isTargetStepUnchanged())
-                {
-                    updateFootPosition(motionPhase, getActiveLimbSource(), getActiveForwardLimb(), getActiveLimbDestination());
+                // NewTargetInfo syncronizes on calculating motionPhase, needs to occur before updating foot position(s)... 
+                double motionPhase = getMotionPhase();          
+                // If there is some foot target data queued for computation, then update robot...
+                if(isNewStepReceived())
+                {                            
+                    // If the intended footstep is unchanged, cease z-translation to conserve energy and stop, otherwise proceed...
+                    if(!isTargetStepUnchanged())
+                    {
+                        updateFootPosition(motionPhase, getActiveLimbSource(), getActiveForwardLimb(), getActiveLimbDestination());
+                    }
                 }
-            }
             if(DEBUG) { log<NUClear::TRACE>("Messaging: Foot Motion Planner - Update Foot Position(1)"); }
         }).disable();
 
@@ -104,8 +104,8 @@ namespace motion
         on<Trigger<NewStepTargetInfo>>().then("Foot Motion Planner - Received Target Foot Position", [this] (const NewStepTargetInfo& target) 
         {
             if(DEBUG) { log<NUClear::TRACE>("Messaging: Foot Motion Planner - Received Target Foot Position(0)"); }
-            setDestinationTime(target.targetTime);                      //Queued    : FPP
-            setVelocityCurrent(target.velocityCurrent);                 //Queued    : FPP             
+                setDestinationTime(target.targetTime);                      //Queued    : FPP
+                setVelocityCurrent(target.velocityCurrent);                 //Queued    : FPP             
             if(DEBUG) { log<NUClear::TRACE>("Messaging: Foot Motion Planner - Received Target Foot Position(1)"); }
         });
 
@@ -113,17 +113,17 @@ namespace motion
         on<Trigger<NewFootTargetInfo>>().then("Foot Motion Planner - Received Target Foot Position", [this] (const NewFootTargetInfo& target) 
         {               
             if(DEBUG) { log<NUClear::TRACE>("Messaging: Foot Motion Planner - Received Target Foot Position(0)"); }                      
-            if(target.activeForwardLimb == LimbID::LEFT_LEG)
-            {  
-                setActiveLimbSource(target.leftFootSource);             //Queued    : FPP
-                setActiveLimbDestination(target.leftFootDestination);   //Queued    : FPP          
-            }
-            else
-            {       
-                setActiveLimbSource(target.rightFootSource);            //Queued    : FPP
-                setActiveLimbDestination(target.rightFootDestination);  //Queued    : FPP      
-            }                         
-            setActiveForwardLimb(target.activeForwardLimb);             //Queued    : FPP            
+                if(target.activeForwardLimb == LimbID::LEFT_LEG)
+                {  
+                    setActiveLimbSource(target.leftFootSource);             //Queued    : FPP
+                    setActiveLimbDestination(target.leftFootDestination);   //Queued    : FPP          
+                }
+                else
+                {       
+                    setActiveLimbSource(target.rightFootSource);            //Queued    : FPP
+                    setActiveLimbDestination(target.rightFootDestination);  //Queued    : FPP      
+                }                         
+                setActiveForwardLimb(target.activeForwardLimb);             //Queued    : FPP            
             if(DEBUG) { log<NUClear::TRACE>("Messaging: Foot Motion Planner - Received Target Foot Position(1)"); }
         });
 
@@ -145,8 +145,6 @@ namespace motion
 /*=======================================================================================================*/
     void FootMotionPlanner::updateFootPosition(double inPhase, const Transform2D& inActiveLimbSource, const LimbID& inActiveForwardLimb, const Transform2D& inActiveLimbDestination) 
     {       
-        //Instantiate ankle pitch rotation parameter...
-        double anklePitch = 0;
         //Instantiate unitless phases for x(=0), y(=1) and z(=2) foot motion...
         arma::vec3 getFootPhases = getFootPhase(inPhase, phase1Single, phase2Single);
 
@@ -176,32 +174,16 @@ namespace motion
         Transform3D rightFootLocal = getRightFootPosition();       
 
         if(DEBUG) { log<NUClear::TRACE>("Messaging: Foot Motion Planner - Translate Z for support foot"); }
-        //Lift swing leg - manipulate(update) z component of foot position to action movement with a varying altitude locus...
-        if(inPhase <= 0.1)
-        {
-            anklePitch = (10.0 * inPhase) * ankle_pitch_lift; // Scale 0.0 to 0.1 -> 0.0 to 1.0 for proportionality...
-        }
-        else if(inPhase <= 0.9)
-        {
-            anklePitch = (1.25 - (2.5 * inPhase)); // Simplified (-1 - 1/(0.9 - 0.1)) * (inPhase - 0.9) -1...
-        }
-        else if(inPhase <= 1.0)
-        {
-            anklePitch = (10 * (inPhase - 1.0)) * ankle_pitch_fall; // Scale 0.9 to 1.0 -> -1.0 to 0.0 for proportionality...
-        }
-
+        //Manipulate(update) z component of foot position to action movement with a varying altitude locus...
         if (inActiveForwardLimb == LimbID::RIGHT_LEG) 
         {
-            //TODO: Vector field function??
-            rightFootLocal = rightFootLocal.translateZ(stepHeight * getFootPhases[2]);
-            rightFootLocal = rightFootLocal.rotateY(anklePitch);
+            rightFootLocal = rightFootLocal.translateZ(stepHeight * getFootPhases[2]); //TODO: Vector field function??
+            rightFootLocal = rightFootLocal.rotateY(calculateAnklePitch(inPhase)); // Rotate ankle pitch...
         }
         else
         {
-            //TODO: Vector field function??
-            leftFootLocal  = leftFootLocal.translateZ(stepHeight  * getFootPhases[2]);
-            leftFootLocal  = leftFootLocal.rotateY(anklePitch);
-            //leftFootLocal = leftFootLocal.rotateZ(0.3);
+            leftFootLocal  = leftFootLocal.translateZ(stepHeight  * getFootPhases[2]); //TODO: Vector field function??
+            leftFootLocal  = leftFootLocal.rotateY(calculateAnklePitch(inPhase)); // Rotate ankle pitch...
         }     
 
         //DEBUGGING: Emit relative feet position phase with respect to robot state... 
@@ -227,6 +209,35 @@ namespace motion
         double xf = 0.5 * (1 - std::cos(M_PI * phaseSingleSkew));
         double zf = 0.5 * (1 - std::cos(2 * M_PI * phaseSingleSkew));
         return {xf, phaseSingle, zf};
+    }
+/*=======================================================================================================*/
+//      METHOD: Calculate Ankle Pitch
+/*=======================================================================================================*/
+    double FootMotionPlanner::calculateAnklePitch(double inPhase)
+    {
+        //Instantiate ankle pitch rotation parameter...
+        double anklePitch = 0;
+        if(inPhase <= 0.1)
+        {
+            // Scale 0.0 to 0.1 -> 0.0 to 1.0 for proportionality...
+            anklePitch = (10.0 * inPhase) * ankle_pitch_lift; 
+        }
+        else if(inPhase <= 0.5)
+        {
+            // Simplified ((0 - 1)/(0.5 - 0.1)) * (inPhase - 0.5) + 0...
+            anklePitch = (1.25 - (2.5 * inPhase)) * ankle_pitch_lift; 
+        }
+        else if(inPhase <= 0.9)
+        {
+            // Simplified ((1 - 0)/(0.9 - 0.5)) * (inPhase - 0.9) + 1...
+            anklePitch = (1.25 - (2.5 * inPhase)) * ankle_pitch_fall; 
+        }
+        else if(inPhase <= 1.0)
+        {
+            // Scale 0.9 to 1.0 -> -1.0 to 0.0 for proportionality...
+            anklePitch = (10 * (inPhase - 1.0)) * ankle_pitch_fall; 
+        }
+        return (anklePitch);
     }
 /*=======================================================================================================*/
 //      METHOD: Reset The Stance of the Humanoid to Initial Valid Stance

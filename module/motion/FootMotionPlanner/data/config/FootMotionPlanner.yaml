@@ -11,8 +11,8 @@ stance:
 
 walk_cycle:
   step_time: 0.30 # Defines how long it will take for the robot to take its next step, in seconds.
-  lift_ankle_pitch: 35 * (pi / 180.0) # Defines the maximum rotation of the ankle pitch at start of motion.
-  fall_ankle_pitch: 25 * (pi / 180.0) # Defines the maximum rotation of the ankle pitch at end of motion.
+  lift_ankle_pitch: 25 * (pi / 180.0) # Defines the maximum rotation of the ankle pitch at start of motion.
+  fall_ankle_pitch: 12 * (pi / 180.0) # Defines the maximum rotation of the ankle pitch at end of motion.
   step:
     height: 0.040 # The height to which the robot raises its foot at each step. Very sensitive in terms of balance.
     height_slow_fraction: 0.5 # height of foot as a fraction of height
@@ -24,7 +24,7 @@ walk_cycle:
   
   velocity:
     limits: # Velocity limits for the walk
-      - [-0.027, 0.03]      # [min_x, max_x]
+      - [-0.027, 0.04]      # [min_x, max_x]
       - [-0.01, 0.01]       # [min_y, max_y]
       - [-0.8, 0.8]         # [min_angle, max_angle]
     high_speed: 0.06  # This defines a 'fast' speed in the forward direction

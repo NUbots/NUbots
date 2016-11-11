@@ -189,6 +189,11 @@ namespace motion
         /**
          * @brief [brief description]
          * @details [long description]
+         */
+        double calculateAnklePitch(double inPhase);
+        /**
+         * @brief [brief description]
+         * @details [long description]
          * 
          * @param index [description]
          * @return [description]
