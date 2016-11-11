@@ -487,7 +487,7 @@ namespace motion
             servoControlPGains[sr] = p;
             servoControlPGains[sl] = p;
         }
-        STAND_SCRIPT_DURATION = config["STAND_SCRIPT_DURATION"].as<Expression>();
+        STAND_SCRIPT_DURATION = config["STAND_SCRIPT_DURATION"].as<Expression>();   
     }    
 }  // motion
 }  // modules

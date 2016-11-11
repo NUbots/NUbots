@@ -60,6 +60,7 @@ namespace motion
         , activeForwardLimb(), activeLimbInitial(LimbID::LEFT_LEG)
         , stepTime(0.0), stepHeight(0.0)
         , step_height_slow_fraction(0.0f), step_height_fast_fraction(0.0f)
+        , ankle_pitch_lift(0.0),, ankle_pitch_fall(0.0)
         , stepLimits(arma::fill::zeros), footOffsetCoefficient(arma::fill::zeros)
         , INITIAL_STEP(false), newStepStartTime(0.0), destinationTime(), lastVeloctiyUpdateTime()
         , velocityHigh(0.0), accelerationTurningFactor(0.0), velocityLimits(arma::fill::zeros)
@@ -122,12 +123,7 @@ namespace motion
                 setActiveLimbSource(target.rightFootSource);            //Queued    : FPP
                 setActiveLimbDestination(target.rightFootDestination);  //Queued    : FPP      
             }                         
-            setActiveForwardLimb(target.activeForwardLimb);             //Queued    : FPP         
-            // if(isInitialStep()) // Not sure if still required?
-            // {                    
-            //     setLeftFootPosition(target.leftFootSource);             //Trigger   : FPP
-            //     setRightFootPosition(target.rightFootSource);           //Trigger   : FPP
-            // }        
+            setActiveForwardLimb(target.activeForwardLimb);             //Queued    : FPP            
             if(DEBUG) { log<NUClear::TRACE>("Messaging: Foot Motion Planner - Received Target Foot Position(1)"); }
         });
 
@@ -149,6 +145,8 @@ namespace motion
 /*=======================================================================================================*/
     void FootMotionPlanner::updateFootPosition(double inPhase, const Transform2D& inActiveLimbSource, const LimbID& inActiveForwardLimb, const Transform2D& inActiveLimbDestination) 
     {       
+        //Instantiate ankle pitch rotation parameter...
+        double anklePitch = 0;
         //Instantiate unitless phases for x(=0), y(=1) and z(=2) foot motion...
         arma::vec3 getFootPhases = getFootPhase(inPhase, phase1Single, phase2Single);
 
@@ -179,20 +177,37 @@ namespace motion
 
         if(DEBUG) { log<NUClear::TRACE>("Messaging: Foot Motion Planner - Translate Z for support foot"); }
         //Lift swing leg - manipulate(update) z component of foot position to action movement with a varying altitude locus...
+        if(inPhase <= 0.1)
+        {
+            anklePitch = (10.0 * inPhase) * ankle_pitch_lift; // Scale 0.0 to 0.1 -> 0.0 to 1.0 for proportionality...
+        }
+        else if(inPhase <= 0.9)
+        {
+            anklePitch = (1.25 - (2.5 * inPhase)); // Simplified (-1 - 1/(0.9 - 0.1)) * (inPhase - 0.9) -1...
+        }
+        else if(inPhase <= 1.0)
+        {
+            anklePitch = (10 * (inPhase - 1.0)) * ankle_pitch_fall; // Scale 0.9 to 1.0 -> -1.0 to 0.0 for proportionality...
+        }
+
         if (inActiveForwardLimb == LimbID::RIGHT_LEG) 
         {
             //TODO: Vector field function??
             rightFootLocal = rightFootLocal.translateZ(stepHeight * getFootPhases[2]);
+            rightFootLocal = rightFootLocal.rotateY(anklePitch);
         }
         else
         {
             //TODO: Vector field function??
             leftFootLocal  = leftFootLocal.translateZ(stepHeight  * getFootPhases[2]);
+            leftFootLocal  = leftFootLocal.rotateY(anklePitch);
+            //leftFootLocal = leftFootLocal.rotateZ(0.3);
         }     
 
         //DEBUGGING: Emit relative feet position phase with respect to robot state... 
         if (emitFootPosition)
         {
+            emit(graph("Foot Phases", getFootPhases[2]));
             emit(graph("Foot TranslateZ Motion", stepHeight * getFootPhases[2]));
         }
 
@@ -459,11 +474,11 @@ namespace motion
 //      METHOD: Configuration
 /*=======================================================================================================*/
     void FootMotionPlanner::configure(const YAML::Node& config)
-    {
+    {         
         auto& debug = config["debugging"];
         DEBUG = debug["enabled"].as<bool>();
         
-        emitFootPosition = config["emit_foot_position"].as<bool>();
+        emitFootPosition = debug["emit_foot_position"].as<bool>();
 
         auto& stance = config["stance"];
         setFootOffsetCoefficient(stance["foot_offset"].as<arma::vec>());
@@ -476,6 +491,9 @@ namespace motion
         step_height_slow_fraction = walkCycle["step"]["height_slow_fraction"].as<float>();
         step_height_fast_fraction = walkCycle["step"]["height_fast_fraction"].as<float>();
 
+        ankle_pitch_lift = walkCycle["lift_ankle_pitch"].as<Expression>();
+        ankle_pitch_fall = walkCycle["fall_ankle_pitch"].as<Expression>();
+
         auto& velocity = walkCycle["velocity"];
         velocityLimits = velocity["limits"].as<arma::mat::fixed<3,2>>();
         velocityHigh = velocity["high_speed"].as<Expression>();
@@ -486,7 +504,7 @@ namespace motion
         accelerationTurningFactor = acceleration["turning_factor"].as<Expression>();
 
         phase1Single = walkCycle["single_support_phase"]["start"].as<Expression>();
-        phase2Single = walkCycle["single_support_phase"]["end"].as<Expression>();      
+        phase2Single = walkCycle["single_support_phase"]["end"].as<Expression>();            
     }
 }  // motion
 }  // modules

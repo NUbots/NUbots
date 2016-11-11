@@ -11,7 +11,8 @@ stance:
 
 walk_cycle:
   step_time: 0.30 # Defines how long it will take for the robot to take its next step, in seconds.
-  
+  lift_ankle_pitch: 35 * (pi / 180.0) # Defines the maximum rotation of the ankle pitch at start of motion.
+  fall_ankle_pitch: 25 * (pi / 180.0) # Defines the maximum rotation of the ankle pitch at end of motion.
   step:
     height: 0.040 # The height to which the robot raises its foot at each step. Very sensitive in terms of balance.
     height_slow_fraction: 0.5 # height of foot as a fraction of height

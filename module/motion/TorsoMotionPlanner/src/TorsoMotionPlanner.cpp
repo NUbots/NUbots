@@ -506,7 +506,7 @@ namespace motion
         auto& balance = walkCycle["balance"];
         balanceEnabled = balance["enabled"].as<bool>();
 
-        STAND_SCRIPT_DURATION = config["STAND_SCRIPT_DURATION"].as<Expression>();
+        STAND_SCRIPT_DURATION = config["STAND_SCRIPT_DURATION"].as<Expression>();       
     }    
 }  // motion
 }  // modules

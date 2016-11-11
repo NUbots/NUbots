@@ -682,7 +682,6 @@ std::cout << "Gyro pitch:\n\r" << getShoulderPitchParameter();
         pushRecoveryEnabled = pushRecovery["enabled"].as<bool>();
 
         balancer.configure(balance);
-
         
         /* TODO
         // gCompensation parameters

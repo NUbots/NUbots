@@ -89,23 +89,23 @@ namespace motion
         on<Trigger<TorsoMotionUpdate>>().then("Foot Placement Planner - Received Torso Destination Update", [this] (const TorsoMotionUpdate& info) 
         {                     
             if(DEBUG) { log<NUClear::TRACE>("Messaging: Foot Placement Planner - Received Torso Destination Update(0)"); }    
-            setTorsoPosition(info.frameArms);  
-            setTorsoDestination(info.frameDestination);     
+                setTorsoPosition(info.frameArms);  
+                setTorsoDestination(info.frameDestination);     
             if(DEBUG) { log<NUClear::TRACE>("Messaging: Foot Placement Planner - Received Torso Destination Update(1)"); }
         });
 
         updateHandle = on<Trigger<FootStepRequested>>().then("Foot Placement Planner - Calculate Target Foot Position", [this]
         {          
             if(DEBUG) { log<NUClear::TRACE>("Messaging: Foot Placement Planner - Calculate Target Foot Position(0)"); }             
-            calculateNewStep(getVelocityCurrent(), getTorsoDestination(), getTorsoPosition());
+                calculateNewStep(getVelocityCurrent(), getTorsoDestination(), getTorsoPosition());
             if(DEBUG) { log<NUClear::TRACE>("Messaging: Foot Placement Planner - Calculate Target Foot Position(1)"); }
         }).disable();
 
         on<Trigger<NewWalkCommand>>().then("Foot Placement Planner - Update Foot Target", [this] (const NewWalkCommand& command) 
         {                            
             if(DEBUG) { log<NUClear::TRACE>("Messaging: Foot Placement Planner - On New Walk Command(0)"); }          
-            setVelocityCommand(command.velocityTarget);
-            calculateNewStep(getVelocityCurrent(), getTorsoDestination(), getTorsoPosition());          
+                setVelocityCommand(command.velocityTarget);
+                calculateNewStep(getVelocityCurrent(), getTorsoDestination(), getTorsoPosition());          
             if(DEBUG) { log<NUClear::TRACE>("Messaging: Foot Placement Planner - On New Walk Command(1)"); }
         }).enable();
 
@@ -491,7 +491,6 @@ namespace motion
         DEBUG = debug["enabled"].as<bool>();
         
         emitLocalisation = config["emit_localisation"].as<bool>();
-
         auto& stance = config["stance"];
         bodyHeight = stance["body_height"].as<Expression>();
         bodyTilt = stance["body_tilt"].as<Expression>();
@@ -522,7 +521,7 @@ namespace motion
         auto& balance = walkCycle["balance"];
         balanceEnabled = balance["enabled"].as<bool>();
 
-        STAND_SCRIPT_DURATION = config["STAND_SCRIPT_DURATION"].as<Expression>();
+        STAND_SCRIPT_DURATION = config["STAND_SCRIPT_DURATION"].as<Expression>();    
     }
 }  // motion    
 }  // modules

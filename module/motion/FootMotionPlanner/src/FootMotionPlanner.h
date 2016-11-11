@@ -105,6 +105,8 @@ namespace motion
         double stepHeight;                              //
         float  step_height_slow_fraction;               //
         float  step_height_fast_fraction;               //
+        float  ankle_pitch_lift; 
+        float  ankle_pitch_fall; 
         arma::mat::fixed<3,2> stepLimits;               //              
         arma::vec2 footOffsetCoefficient;               //
 

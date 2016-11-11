@@ -84,7 +84,7 @@ walk_cycle:
     hip_compensation: false
     toe_compensation: false
     ankle_compensation: false
-    arm_compensation: true
+    arm_compensation: false
     support_compensation: false
     amplitude: 1.0
     weight: 0.7
