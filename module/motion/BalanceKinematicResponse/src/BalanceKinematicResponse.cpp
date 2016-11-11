@@ -216,7 +216,14 @@ std::cout << "Gyro pitch:\n\r" << getShoulderPitchParameter();
         //If feature enabled, apply balance compensation through support actuator...
         if (ankleTorqueCompensationEnabled) 
         {
-            //
+            if (getActiveForwardLimb() == LimbID::LEFT_LEG)
+            {
+                setRightFootPosition(getRightFootPosition().rotateZ(0)); //insert factor based on orientation
+            }
+            else 
+            {
+                setLeftFootPosition(getLeftFootPosition().rotateZ(0));
+            }
         }
     }      
 /*=======================================================================================================*/
