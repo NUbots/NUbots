@@ -229,8 +229,9 @@ namespace motion
          */
         double toeTipParameter;                      //
         double hipRollParameter;                     //
-        double shoulderRollParameter;                //
-        double shoulderPitchParameter;               //
+        double rollParameter;                //
+        double pitchParameter;               //
+        double yawParameter;               //
 
 
         /**
@@ -393,22 +394,34 @@ namespace motion
          * @brief [brief description]
          * @details [long description]
          */
-        double getShoulderRollParameter();
+        double getRollParameter();
         /**
          * @brief [brief description]
          * @details [long description]
          */
-        void setShoulderRollParameter(double inShoulderRollParameter);
+        void setRollParameter(double inShoulderRollParameter);
         /**
          * @brief [brief description]
          * @details [long description]
          */
-        double getShoulderPitchParameter();
+        double getPitchParameter();
         /**
          * @brief [brief description]
          * @details [long description]
          */
-        void setShoulderPitchParameter(double inShoulderPitchParameter);
+        void setPitchParameter(double inShoulderPitchParameter);
+        /**
+         * @brief [brief description]
+         * @details [long description]
+         * 
+         * @param inTorsoPosition [description]
+         */
+         double getYawParameter();
+        /**
+         * @brief [brief description]
+         * @details [long description]
+         */
+        void setYawParameter(double inShoulderPitchParameter);
         /**
          * @brief [brief description]
          * @details [long description]
