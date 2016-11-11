@@ -49,7 +49,7 @@ namespace input
         /// @brief Called by the powerplant to build and setup the PostureRecogniser reactor.
         explicit PostureRecogniser(std::unique_ptr<NUClear::Environment> environment);
 
-        std::vector<utility::math::filter::UKF<ServoLoadModel>> loadFilters;
+        std::vector<utility::math::filter::UKF<utility::input::ServoLoadModel>> loadFilters;
         NUClear::clock::time_point lastTimeUpdateTime;
 
     private:
