@@ -16,16 +16,20 @@
  *
  * Copyright 2015 NUbots <nubots@nubots.net>
  */
-#include "ServoLoadModel.h"
-/*=======================================================================================================*/
-//      NAME: Servo Load Model
-/*=======================================================================================================*/
+
+#ifndef MODULES_INPUT_SERVOLOADMODEL_H
+#define MODULES_INPUT_SERVOLOADMODEL_H
+
+#include <nuclear>
+#include <armadillo>
+#include <chrono>
+#include <yaml-cpp/yaml.h>
+
 namespace utility 
 {
 namespace input 
 {
-
-   class ServoLoadModel 
+    class ServoLoadModel 
     {
        public:
         static constexpr size_t size = 1;
@@ -54,3 +58,5 @@ namespace input
     };
 }
 }
+
+#endif  // MODULES_INPUT_SERVOLOADMODEL_H
