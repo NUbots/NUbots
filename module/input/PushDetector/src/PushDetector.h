@@ -25,38 +25,15 @@
 #include <chrono>
 #include <yaml-cpp/yaml.h>
 
+#include "ServoLoadModel.h"
+
 #include "message/input/Sensors.h"
 #include "utility/math/filter/UKF.h"
 
-namespace module {
-namespace input {
-
-    class ServoLoadModel {
-       public:
-        static constexpr size_t size = 1;
-
-        ServoLoadModel() {} // empty constructor
-
-        arma::vec::fixed<size> timeUpdate(const arma::vec::fixed<size>& state, double /*deltaT*/) {
-            return state;
-        }
-
-        arma::vec::fixed<size> predictedObservation(const arma::vec::fixed<size>& state) {
-            return state;
-        }
-
-        arma::vec observationDifference(const arma::vec& a, const arma::vec& b) {
-            return a - b;
-        }
-
-        arma::vec::fixed<size> limitState(const arma::vec::fixed<size>& state) {
-            return state;
-        }
-
-        arma::mat::fixed<size, size> processNoise() {
-            return arma::eye(ServoLoadModel::size, ServoLoadModel::size) * 0.001;
-        }
-    };
+namespace module 
+{
+namespace input 
+{
 
     class PushDetector : public NUClear::Reactor 
     {
@@ -79,7 +56,7 @@ namespace input {
          * @brief [brief description]
          * @details [long description]
          * 
-         * @param inTorsoPosition [description]
+         * @param config [description]
          */
         void configure(const YAML::Node& config);
     };

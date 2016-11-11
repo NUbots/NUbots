@@ -40,7 +40,7 @@ namespace input
     using utility::nubugger::graph;
 
 /*=======================================================================================================*/
-//      NAME: Push Detector
+//      NAME: Posture Recogniser
 /*=======================================================================================================*/
     PostureRecogniser::PostureRecogniser(std::unique_ptr<NUClear::Environment> environment)
     : Reactor(std::move(environment)), loadFilters(), lastTimeUpdateTime(), DEBUG(false), DEBUG_ITER(0) 

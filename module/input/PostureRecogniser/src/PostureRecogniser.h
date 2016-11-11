@@ -25,6 +25,8 @@
 #include <chrono>
 #include <yaml-cpp/yaml.h>
 
+#include "ServoLoadModel.h"
+
 #include "message/support/Configuration.h"
 
 #include "message/input/Sensors.h"
@@ -40,34 +42,6 @@ namespace module
 {
 namespace input 
 {
-
-    class ServoLoadModel {
-       public:
-        static constexpr size_t size = 1;
-
-        ServoLoadModel() {} // empty constructor
-
-        arma::vec::fixed<size> timeUpdate(const arma::vec::fixed<size>& state, double /*deltaT*/) {
-            return state;
-        }
-
-        arma::vec::fixed<size> predictedObservation(const arma::vec::fixed<size>& state) {
-            return state;
-        }
-
-        arma::vec observationDifference(const arma::vec& a, const arma::vec& b) {
-            return a - b;
-        }
-
-        arma::vec::fixed<size> limitState(const arma::vec::fixed<size>& state) {
-            return state;
-        }
-
-        arma::mat::fixed<size, size> processNoise() {
-            return arma::eye(ServoLoadModel::size, ServoLoadModel::size) * 0.001;
-        }
-    };
-
     class PostureRecogniser : public NUClear::Reactor 
     {
 
@@ -77,8 +51,8 @@ namespace input
 
         std::vector<utility::math::filter::UKF<ServoLoadModel>> loadFilters;
         NUClear::clock::time_point lastTimeUpdateTime;
-    private:
 
+    private:
         /**
          * Temporary debugging variables for local output logging...
          */ 
