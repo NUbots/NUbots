@@ -167,8 +167,9 @@ namespace motion
         on<Trigger<FallingDetected>>().then("Balance Response Planner - Received Update (Falling) Info", [this](const FallingDetected& info) 
         {
             // Capture normalised angular acceleration experienced...
-            setShoulderRollParameter(info.y);
-            setShoulderPitchParameter(info.x);
+            setRollParameter(info.y);
+            setPitchParameter(info.x);
+	    setYawParameter(info.z)
         });
 
         // If balance response is required, enable updating...
@@ -199,11 +200,11 @@ namespace motion
         {
             if(getShoulderRollParameter() > 0)
             {
-std::cout << "Gyro roll:\n\r" << getShoulderRollParameter();                
+std::cout << "Gyro roll:\n\r" << getRollParameter();                
             }
             if(getShoulderPitchParameter() > 0)
             {
-std::cout << "Gyro pitch:\n\r" << getShoulderPitchParameter();                
+std::cout << "Gyro pitch:\n\r" << getPitchParameter();                
             }
 
         }
@@ -446,26 +447,37 @@ std::cout << "Gyro pitch:\n\r" << getShoulderPitchParameter();
         return (double(NUClear::clock::now().time_since_epoch().count()) * (1.0 / double(NUClear::clock::period::den)));
     }
 /*=======================================================================================================*/
-//      ENCAPSULATION METHOD: Shoulder Roll Parameter
+//      ENCAPSULATION METHOD: Roll Parameter
 /*=======================================================================================================*/    
-    double BalanceKinematicResponse::getShoulderRollParameter()
+    double BalanceKinematicResponse::getRollParameter()
     {
         return (shoulderRollParameter);
     }
-    void BalanceKinematicResponse::setShoulderRollParameter(double inShoulderRollParameter)
+    void BalanceKinematicResponse::setRollParameter(double inShoulderRollParameter)
     {
         shoulderRollParameter = inShoulderRollParameter;
     }    
 /*=======================================================================================================*/
-//      ENCAPSULATION METHOD: Shoulder Pitch Parameter
+//      ENCAPSULATION METHOD: Pitch Parameter
 /*=======================================================================================================*/    
-    double BalanceKinematicResponse::getShoulderPitchParameter()
+    double BalanceKinematicResponse::getPitchParameter()
     {
         return (shoulderPitchParameter);
     }
-    void BalanceKinematicResponse::setShoulderPitchParameter(double inShoulderPitchParameter)
+    void BalanceKinematicResponse::setPitchParameter(double inShoulderPitchParameter)
     {
         shoulderPitchParameter = inShoulderPitchParameter;
+    }        
+/*=======================================================================================================*/
+//      ENCAPSULATION METHOD: Yaw Parameter
+/*=======================================================================================================*/    
+    double BalanceKinematicResponse::getYawParameter()
+    {
+        return (yawPitchParameter);
+    }
+    void BalanceKinematicResponse::setYawParameter(double inYawPitchParameter)
+    {
+        YawParameter = inYawParameter;
     }        
 /*=======================================================================================================*/
 //      ENCAPSULATION METHOD: Motion Phase
