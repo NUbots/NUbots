@@ -486,7 +486,7 @@ namespace motion
 /*=======================================================================================================*/
     void FootPlacementPlanner::configure(const YAML::Node& config)
     {
-std::cout << "Test Config(S)\n\r";           
+        if(DEBUG) { log<NUClear::TRACE>("Configure FootPlacementPlanner - Start"); }         
         auto& wlk = config["walk_engine"];
         auto& fpp = config["foot_placement_planner"];
 
@@ -520,7 +520,7 @@ std::cout << "Test Config(S)\n\r";
 
         phase1Single = walkCycle["single_support_phase"]["start"].as<Expression>();
         phase2Single = walkCycle["single_support_phase"]["end"].as<Expression>();         
-std::cout << "Test Config(E)\n\r";      
+        if(DEBUG) { log<NUClear::TRACE>("Configure FootPlacementPlanner - Finish"); }
     }
 }  // motion    
 }  // modules

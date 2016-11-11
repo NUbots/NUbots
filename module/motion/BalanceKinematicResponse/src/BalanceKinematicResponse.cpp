@@ -71,18 +71,26 @@ namespace motion
         , leftFootPositionTransform(), rightFootPositionTransform()
         , uSupportMass()
         , activeForwardLimb(), activeLimbInitial(LimbID::LEFT_LEG)
-        , bodyTilt(0.0), bodyHeight(0.0), stanceLimitY2(0.0), stepTime(0.0), stepHeight(0.0)
+        , bodyTilt(0.0), bodyHeight(0.0)
+        , supportFront(0.0), supportFront2(0.0), supportBack(0.0)
+        , supportSideX(0.0), supportSideY(0.0), supportTurn(0.0)           
+        , stanceLimitY2(0.0), stepTime(0.0), stepHeight(0.0)
         , step_height_slow_fraction(0.0f), step_height_fast_fraction(0.0f)
         , stepLimits(arma::fill::zeros), footOffsetCoefficient(arma::fill::zeros), uLRFootOffset()
         , armLPostureTransform(), armLPostureSource(), armLPostureDestination()
         , armRPostureTransform(), armRPostureSource(), armRPostureDestination()
-        , beginStepTime(0.0), footMotionPhase()
+        , ankleImuParamX(), ankleImuParamY(), kneeImuParamX()
+        , hipImuParamY(), armImuParamX(), armImuParamY()
+        , beginStepTime(0.0), footMotionPhase(0.0)
         , STAND_SCRIPT_DURATION(0.0), pushTime(), lastVeloctiyUpdateTime()
         , velocityHigh(0.0), accelerationTurningFactor(0.0), velocityLimits(arma::fill::zeros)
         , accelerationLimits(arma::fill::zeros), accelerationLimitsHigh(arma::fill::zeros)
-        , velocityCurrent(), velocityCommand()
+        , velocityCurrent(), velocityCommand(), velFastForward(0.0), velFastTurn(0.0)
         , phase1Single(0.0), phase2Single(0.0)
-        , toeTipParameter(0.0), hipRollParameter(0.0), shoulderRollParameter(0.0)
+        , rollParameter(0.0), pitchParameter(0.0), yawParameter(0.0)
+        , toeTipParameter(0.0), hipRollParameter(0.0)
+        , hipCompensationScale(1.0), toeCompensationScale(1.0)
+        , ankleCompensationScale(1.0), armCompensationScale(1.0), supportCompensationScale(1.0)
         , balancer(), kinematicsModel()
         , balanceAmplitude(0.0), balanceWeight(0.0), balanceOffset(0.0)
         , balancePGain(0.0), balanceIGain(0.0), balanceDGain(0.0)
@@ -201,9 +209,9 @@ namespace motion
             {
 std::cout << "Gyro roll:\n\r" << getRollParameter();                
             }
-            if(getShoulderPitchParameter() > 0)
+            if(getPitchParameter() > 0)
             {
-std::cout << "Gyro pitch:\n\r" << getShoulderPitchParameter();                
+std::cout << "Gyro pitch:\n\r" << getPitchParameter();                
             }
 
         }
@@ -336,7 +344,7 @@ std::cout << "Gyro pitch:\n\r" << getShoulderPitchParameter();
     {
         // Converts the phase into a sine wave that oscillates between 0 and 1 with a period of 2 phases
         double easing = std::sin(M_PI * getMotionPhase() - M_PI / 2.0) / 2.0 + 0.5;
-        if (getActiveForwardLimb() == LimbID::LEFT_LEG) 
+        if (getActiveForwardLimb() == LimbID::RIGHT_LEG) 
         {
             easing = -easing + 1.0; // Gets the 2nd half of the sine wave
         }
@@ -443,22 +451,22 @@ std::cout << "Gyro pitch:\n\r" << getShoulderPitchParameter();
 /*=======================================================================================================*/    
     double BalanceKinematicResponse::getRollParameter()
     {
-        return (shoulderRollParameter);
+        return (rollParameter);
     }
-    void BalanceKinematicResponse::setRollParameter(double inShoulderRollParameter)
+    void BalanceKinematicResponse::setRollParameter(double inRollParameter)
     {
-        shoulderRollParameter = inShoulderRollParameter;
+        rollParameter = inRollParameter;
     }    
 /*=======================================================================================================*/
 //      ENCAPSULATION METHOD: Shoulder Pitch Parameter
 /*=======================================================================================================*/    
-    double BalanceKinematicResponse::getShoulderPitchParameter()
+    double BalanceKinematicResponse::getPitchParameter()
     {
-        return (shoulderPitchParameter);
+        return (pitchParameter);
     }
-    void BalanceKinematicResponse::setPitchParameter(double inShoulderPitchParameter)
+    void BalanceKinematicResponse::setPitchParameter(double inPitchParameter)
     {
-        shoulderPitchParameter = inShoulderPitchParameter;
+        pitchParameter = inPitchParameter;
     }        
 /*=======================================================================================================*/
 //      ENCAPSULATION METHOD: Motion Phase
@@ -628,42 +636,41 @@ std::cout << "Gyro pitch:\n\r" << getShoulderPitchParameter();
 //      METHOD: Configuration
 /*=======================================================================================================*/
     void BalanceKinematicResponse::configure(const YAML::Node& config)
-    {
-std::cout << "Test Config(S)\n\r";          
+    {    
+        if(DEBUG) { log<NUClear::TRACE>("Configure BalanceKinematicResponse - Start"); }
         auto& wlk = config["walk_engine"];
-        auto& bkr  = wlk["balance_kinematic_response"];
-
+        auto& bkr = config["balance_kinematic_response"];
+   
         auto& debug = bkr["debugging"];
-        DEBUG = debug["enabled"].as<bool>();
+        DEBUG = debug["enabled"].as<bool>();           
         emitLocalisation = debug["emit_localisation"].as<bool>();
 
-std::cout << "Test Config(1)\n\r";        
 
         auto& sensors  = wlk["sensors"];
         auto& sensors_gyro = sensors["gyro"];
 
-        auto& sensors_imu = sensors["imu"];
-        ankleImuParamX  = sensors_imu["ankleImuParamX"].as<Expression>();
-        ankleImuParamY  = sensors_imu["ankleImuParamY"].as<Expression>();
-        kneeImuParamX   = sensors_imu["kneeImuParamX"].as<Expression>();
-        hipImuParamY    = sensors_imu["hipImuParamY"].as<Expression>();
-        armImuParamX    = sensors_imu["armImuParamX"].as<Expression>();
-        armImuParamY    = sensors_imu["armImuParamY"].as<Expression>();        
+        auto& sensors_imu  = sensors["imu"];        
+        ankleImuParamX  = sensors_imu["ankleImuParamX"].as<arma::vec>();
+        ankleImuParamY  = sensors_imu["ankleImuParamY"].as<arma::vec>();
+        kneeImuParamX   = sensors_imu["kneeImuParamX"].as<arma::vec>();
+        hipImuParamY    = sensors_imu["hipImuParamY"].as<arma::vec>();
+        armImuParamX    = sensors_imu["armImuParamX"].as<arma::vec>();
+        armImuParamY    = sensors_imu["armImuParamY"].as<arma::vec>();      
 
-        auto& stance = bkr["stance"];
-        auto& arms   = stance["arms"];
+        auto& bkr_stance = bkr["stance"];
+        auto& arms   = bkr_stance["arms"];
         setLArmSource(arms["left"]["start"].as<arma::vec>());
         setLArmDestination(arms["left"]["end"].as<arma::vec>());
         setRArmSource(arms["right"]["start"].as<arma::vec>());
-        setRArmDestination(arms["right"]["end"].as<arma::vec>());
+        setRArmDestination(arms["right"]["end"].as<arma::vec>());       
         
-        stance = wlk["stance"];
-        auto& body   = stance["body"];
+        auto& wlk_stance = wlk["stance"];
+        auto& body   = wlk_stance["body"];
         bodyHeight   = body["height"].as<Expression>();
         bodyTilt     = body["tilt"].as<Expression>();
-        setFootOffsetCoefficient(stance["foot_offset"].as<arma::vec>());
-        stanceLimitY2 = kinematicsModel.Leg.LENGTH_BETWEEN_LEGS() - stance["limit_margin_y"].as<Expression>(); 
-        STAND_SCRIPT_DURATION = stance["STAND_SCRIPT_DURATION"].as<Expression>();   
+        setFootOffsetCoefficient(wlk_stance["foot_offset"].as<arma::vec>());
+        stanceLimitY2 = kinematicsModel.Leg.LENGTH_BETWEEN_LEGS() - wlk_stance["limit_margin_y"].as<Expression>(); 
+        STAND_SCRIPT_DURATION = wlk_stance["STAND_SCRIPT_DURATION"].as<Expression>();   
 
         auto& walkCycle = wlk["walk_cycle"];
         stepTime    = walkCycle["step_time"].as<Expression>();
@@ -694,11 +701,11 @@ std::cout << "Test Config(1)\n\r";
         armRollCompensationEnabled = balance["arm_compensation"].as<bool>();
         supportCompensationEnabled = balance["support_compensation"].as<bool>();
 
-        hipCompensationScale = balance["hip_compensation_scale"].as<bool>();
-        toeCompensationScale = balance["toe_compensation_scale"].as<bool>();
-        ankleCompensationScale = balance["ankle_compensation_scale"].as<bool>();
-        armCompensationScale = balance["arm_compensation_scale"].as<bool>();
-        supportCompensationScale = balance["support_compensation_scale"].as<bool>();
+        hipCompensationScale = balance["hip_compensation_scale"].as<double>();
+        toeCompensationScale = balance["toe_compensation_scale"].as<double>();
+        ankleCompensationScale = balance["ankle_compensation_scale"].as<double>();
+        armCompensationScale = balance["arm_compensation_scale"].as<double>();
+        supportCompensationScale = balance["support_compensation_scale"].as<double>();
 
         balanceAmplitude = balance["amplitude"].as<Expression>();
         balanceWeight    = balance["weight"].as<Expression>();
@@ -719,8 +726,8 @@ std::cout << "Test Config(1)\n\r";
         hipRollParameter    = bias["hip_roll_compensation"].as<Expression>();
         //ankleMod            = {-toeTipCompensation, 0};
 
-        balancer.configure(balance);
-std::cout << "Test Config(E)\n\r";                  
+        balancer.configure(balance);        
+        if(DEBUG) { log<NUClear::TRACE>("Configure BalanceKinematicResponse - Finish"); }       
     }          
 }  // motion
 }  // modules   

@@ -82,20 +82,25 @@ namespace motion
     WalkEngine::WalkEngine(std::unique_ptr<NUClear::Environment> environment) 
     : Reactor(std::move(environment))
         , DEBUG(false), DEBUG_ITER(0)
-        , newPostureReceived(false), emitLocalisation(false), emitFootPosition(false)
+        , newPostureReceived(false)
         , updateHandle(), generateStandScriptReaction(), subsumptionId(1)
         , torsoPositionsTransform(), leftFootPositionTransform()
         , rightFootPositionTransform(), uSupportMass()
         , activeForwardLimb(), activeLimbInitial(LimbID::LEFT_LEG)
-        , bodyTilt(0.0), bodyHeight(0.0), stanceLimitY2(0.0), stepTime(0.0), stepHeight(0.0)
+        , bodyTilt(0.0), bodyHeight(0.0)
+        , supportFront(0.0), supportFront2(0.0), supportBack(0.0)
+        , supportSideX(0.0), supportSideY(0.0), supportTurn(0.0)   
+        , stanceLimitY2(0.0), stepTime(0.0), stepHeight(0.0)
         , step_height_slow_fraction(0.0f), step_height_fast_fraction(0.0f)
         , gainRArm(0.0f), gainRLeg(0.0f), gainLArm(0.0f), gainLLeg(0.0f), stepLimits(arma::fill::zeros)
         , footOffsetCoefficient(arma::fill::zeros), uLRFootOffset()
         , armLPostureTransform(), armRPostureTransform()
+        , ankleImuParamX(), ankleImuParamY(), kneeImuParamX()
+        , hipImuParamY(), armImuParamX(), armImuParamY()
         , beginStepTime(0.0), STAND_SCRIPT_DURATION(0.0), pushTime()
         , velocityHigh(0.0), accelerationTurningFactor(0.0), velocityLimits(arma::fill::zeros)
         , accelerationLimits(arma::fill::zeros), accelerationLimitsHigh(arma::fill::zeros)
-        , velocityCurrent(), velocityCommand()
+        , velocityCurrent(), velocityCommand(), velFastForward(0.0), velFastTurn(0.0)
         , kinematicsModel()
         , balanceAmplitude(0.0), balanceWeight(0.0), balanceOffset(0.0)
         , balancePGain(0.0), balanceIGain(0.0), balanceDGain(0.0)
@@ -429,13 +434,12 @@ namespace motion
 /*=======================================================================================================*/
     void WalkEngine::configure(const YAML::Node& config)
     {
+        if(DEBUG) { log<NUClear::TRACE>("Configure WalkEngine - Start"); }
         auto& wlk = config["walk_engine"];
         
         auto& debug = wlk["debugging"];
         DEBUG = debug["enabled"].as<bool>();
-        emitLocalisation = debug["emit_localisation"].as<bool>();
 
-std::cout << "Test Config(S)\n\r";  
         auto& servos  = wlk["servos"];
         auto& servos_gain = servos["gain"];
         gainLArm = servos_gain["left_arm"].as<Expression>();
@@ -454,7 +458,7 @@ std::cout << "Test Config(S)\n\r";
                 jointGains[i] = gainRLeg;
             }
         }
-std::cout << "Test Config(0)\n\r";
+
         for(auto& gain : servos["gains"])
         {
             float p = gain["p"].as<Expression>();
@@ -462,19 +466,18 @@ std::cout << "Test Config(0)\n\r";
             ServoID sl = message::input::idFromPartialString(gain["id"].as<std::string>(),message::input::ServoSide::LEFT);
             servoControlPGains[sr] = p;
             servoControlPGains[sl] = p;
-        }
-std::cout << "Test Config(1)\n\r";        
+        }       
 
         auto& sensors  = wlk["sensors"];
         auto& sensors_gyro = sensors["gyro"];
 
-        auto& sensors_imu = sensors["imu"];
-        ankleImuParamX  = sensors_imu["ankleImuParamX"].as<Expression>();
-        ankleImuParamY  = sensors_imu["ankleImuParamY"].as<Expression>();
-        kneeImuParamX   = sensors_imu["kneeImuParamX"].as<Expression>();
-        hipImuParamY    = sensors_imu["hipImuParamY"].as<Expression>();
-        armImuParamX    = sensors_imu["armImuParamX"].as<Expression>();
-        armImuParamY    = sensors_imu["armImuParamY"].as<Expression>();
+        auto& sensors_imu  = sensors["imu"];
+        ankleImuParamX  = sensors_imu["ankleImuParamX"].as<arma::vec>();
+        ankleImuParamY  = sensors_imu["ankleImuParamY"].as<arma::vec>();
+        kneeImuParamX   = sensors_imu["kneeImuParamX"].as<arma::vec>();
+        hipImuParamY    = sensors_imu["hipImuParamY"].as<arma::vec>();
+        armImuParamX    = sensors_imu["armImuParamX"].as<arma::vec>();
+        armImuParamY    = sensors_imu["armImuParamY"].as<arma::vec>();        
 
         auto& stance = wlk["stance"];
         auto& body   = stance["body"];
@@ -489,7 +492,7 @@ std::cout << "Test Config(1)\n\r";
         stepLimits  = walkCycle["step"]["limits"].as<arma::mat::fixed<3,2>>();
 
         step_height_slow_fraction = walkCycle["step"]["height_slow_fraction"].as<float>();
-        step_height_fast_fraction = walkCycle["step"]["height_fast_fraction"].as<float>();
+        step_height_fast_fraction = walkCycle["step"]["height_fast_fraction"].as<float>();        
 
         auto& velocity = walkCycle["velocity"];
         velocityLimits = velocity["limits"].as<arma::mat::fixed<3,2>>();
@@ -498,23 +501,8 @@ std::cout << "Test Config(1)\n\r";
         auto& acceleration = walkCycle["acceleration"];
         accelerationLimits          = acceleration["limits"].as<arma::vec>();
         accelerationLimitsHigh      = acceleration["limits_high"].as<arma::vec>();
-        accelerationTurningFactor   = acceleration["turning_factor"].as<Expression>();
-
-        auto& bkr  = wlk["balance_kinematic_response"];
-        auto& balance = bkr["balance"];
-        balanceAmplitude = balance["amplitude"].as<Expression>();
-        balanceWeight    = balance["weight"].as<Expression>();
-        balanceOffset    = balance["offset"].as<Expression>();
-        auto& bias = bkr["support_bias"];
-        velFastForward      = bias["velFastForward"].as<Expression>();
-        velFastTurn         = bias["velFastTurn"].as<Expression>();
-        supportFront        = bias["supportFront"].as<Expression>();
-        supportFront2       = bias["supportFront2"].as<Expression>();
-        supportBack         = bias["supportBack"].as<Expression>();
-        supportSideX        = bias["supportSideX"].as<Expression>();
-        supportSideY        = bias["supportSideY"].as<Expression>();
-        toeTipCompensation  = bias["toeTipCompensation"].as<Expression>();
-std::cout << "Test Config(E)\n\r";          
+        accelerationTurningFactor   = acceleration["turning_factor"].as<Expression>();         
+        if(DEBUG) { log<NUClear::TRACE>("Configure WalkEngine - Finish"); }
     }    
 }  // motion
 }  // modules

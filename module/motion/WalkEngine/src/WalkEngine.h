@@ -101,8 +101,6 @@ namespace motion
          * NUsight feedback initialized from configuration script, see config file for documentation...
          */
         bool newPostureReceived;    // Identifies the instance of valid posture data for waypoint emission.
-        bool emitLocalisation;      //
-        bool emitFootPosition;      //
 
         /**
          * Resource abstractions for id and handler instances...
@@ -157,7 +155,7 @@ namespace motion
         float  gainRArm;                                //
         float  gainRLeg;                                //
         float  gainLArm;                                //
-        float  gainRLeg;                                //
+        float  gainLLeg;                                //
         arma::mat::fixed<3,2> stepLimits;               //              
         arma::vec2 footOffsetCoefficient;               //
         Transform2D uLRFootOffset;                      // standard offset

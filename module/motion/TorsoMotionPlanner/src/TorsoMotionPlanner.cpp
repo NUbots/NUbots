@@ -469,7 +469,7 @@ namespace motion
 /*=======================================================================================================*/
     void TorsoMotionPlanner::configure(const YAML::Node& config)
     {
-std::cout << "Test Config(S)\n\r";         
+        if(DEBUG) { log<NUClear::TRACE>("Configure TorsoMotionPlanner - Start"); }    
         auto& wlk = config["walk_engine"];
         auto& tmp = config["torso_motion_planner"];
 
@@ -484,29 +484,29 @@ std::cout << "Test Config(S)\n\r";
         stanceLimitY2 = kinematicsModel.Leg.LENGTH_BETWEEN_LEGS() - stance["limit_margin_y"].as<Expression>(); 
         STAND_SCRIPT_DURATION = stance["STAND_SCRIPT_DURATION"].as<Expression>();  
 
-        auto& walkCycle = tmp["walk_cycle"];
-        zmpTime     = walkCycle["zmp_time"].as<Expression>();
+        auto& tmp_walkCycle = tmp["walk_cycle"];
+        zmpTime     = tmp_walkCycle["zmp_time"].as<Expression>();
         
-        walkCycle = wlk["walk_cycle"];
-        stepTime    = walkCycle["step_time"].as<Expression>();
-        stepHeight  = walkCycle["step"]["height"].as<Expression>();
-        stepLimits  = walkCycle["step"]["limits"].as<arma::mat::fixed<3,2>>();
+        auto& wlk_walkCycle = wlk["walk_cycle"];
+        stepTime    = wlk_walkCycle["step_time"].as<Expression>();
+        stepHeight  = wlk_walkCycle["step"]["height"].as<Expression>();
+        stepLimits  = wlk_walkCycle["step"]["limits"].as<arma::mat::fixed<3,2>>();
 
-        step_height_slow_fraction = walkCycle["step"]["height_slow_fraction"].as<float>();
-        step_height_fast_fraction = walkCycle["step"]["height_fast_fraction"].as<float>();
+        step_height_slow_fraction = wlk_walkCycle["step"]["height_slow_fraction"].as<float>();
+        step_height_fast_fraction = wlk_walkCycle["step"]["height_fast_fraction"].as<float>();
 
-        auto& velocity = walkCycle["velocity"];
+        auto& velocity = wlk_walkCycle["velocity"];
         velocityLimits = velocity["limits"].as<arma::mat::fixed<3,2>>();
         velocityHigh   = velocity["high_speed"].as<Expression>();
 
-        auto& acceleration = walkCycle["acceleration"];
+        auto& acceleration = wlk_walkCycle["acceleration"];
         accelerationLimits          = acceleration["limits"].as<arma::vec>();
         accelerationLimitsHigh      = acceleration["limits_high"].as<arma::vec>();
         accelerationTurningFactor   = acceleration["turning_factor"].as<Expression>();
 
-        phase1Single = walkCycle["single_support_phase"]["start"].as<Expression>();
-        phase2Single = walkCycle["single_support_phase"]["end"].as<Expression>();
-std::cout << "Test Config(E)\n\r";        
+        phase1Single = wlk_walkCycle["single_support_phase"]["start"].as<Expression>();
+        phase2Single = wlk_walkCycle["single_support_phase"]["end"].as<Expression>();
+        if(DEBUG) { log<NUClear::TRACE>("Configure TorsoMotionPlanner - Finish"); }      
     }    
 }  // motion
 }  // modules
