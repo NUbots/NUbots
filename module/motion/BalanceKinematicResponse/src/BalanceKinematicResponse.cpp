@@ -206,15 +206,8 @@ namespace motion
         //If feature enabled, apply balance compensation through support actuator...
         if (armRollCompensationEnabled) 
         {
-            if(getRollParameter() > 0)
-            {
-std::cout << "Gyro roll:\n\r" << getRollParameter();                
-            }
-            if(getPitchParameter() > 0)
-            {
-std::cout << "Gyro pitch:\n\r" << getPitchParameter();                
-            }
-
+            setLArmPosition(arma::vec3({getLArmPosition()[0],/*base roll multipled with */ getRollParameter()*getArmCompensationScale() , getLArmPosition()[2]}));            }
+            setRArmPosition(arma::vec3({getLArmPosition()[0],/*base roll multipled with */ getRollParameter()*getArmCompensationScale() , getLArmPosition()[2]}));            }
         }
     }      
 /*=======================================================================================================*/
@@ -227,11 +220,14 @@ std::cout << "Gyro pitch:\n\r" << getPitchParameter();
         {
             if (getActiveForwardLimb() == LimbID::LEFT_LEG)
             {
-                setRightFootPosition(getRightFootPosition().rotateZ(0)); //insert factor based on orientation
+                setRightFootPosition(getRightFootPosition().rotateZ(getRollParameter()*getAnkleCompensationScale())); //insert factor based on orientation
+                setRightFootPosition(getRightFootPosition().rotateY(getPitchParameter()*getAnkleCompensationScale()));
             }
             else 
             {
-                setLeftFootPosition(getLeftFootPosition().rotateZ(0));
+                setLeftFootPosition(getLeftFootPosition().rotateZ(getRollParameter()*getAnkleCompensationScale()));
+                setLeftFootPosition(getLeftFootPosition().rotateY(getPitchParameter()*getAnkleCompensationScale()));
+
             }
         }
     }      
@@ -651,6 +647,28 @@ std::cout << "Gyro pitch:\n\r" << getPitchParameter();
     {
         rightFootPositionTransform = inRightFootPosition;
     }
+
+    double BalanceKinematicResponse::getHipCopensationScale()
+    {
+        return hipCompensationScale;
+    }
+    double BalanceKinematicResponse::getAnkleCompensationScale()
+    {
+        return ankleCompensationScale;
+    }
+    double BalanceKinematicResponse::getToeCompensationScale()
+    {
+        return toeCompensationScale;
+    }
+    double BalanceKinematicResponse::getArmCompensationScale()
+    {
+        return armCompensationScale;
+    }
+    double BalanceKinematicResponse::getSupportCompensationScale()
+    {
+        return supportCompensationScale;
+    }
+
 /*=======================================================================================================*/
 //      METHOD: Configuration
 /*=======================================================================================================*/
