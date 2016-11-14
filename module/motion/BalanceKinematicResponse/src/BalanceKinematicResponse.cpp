@@ -206,8 +206,8 @@ namespace motion
         //If feature enabled, apply balance compensation through support actuator...
         if (armRollCompensationEnabled) 
         {
-            setLArmPosition(arma::vec3({getLArmPosition()[0],/*base roll multipled with */ getRollParameter()*getArmCompensationScale() , getLArmPosition()[2]}));            }
-            setRArmPosition(arma::vec3({getLArmPosition()[0],/*base roll multipled with */ getRollParameter()*getArmCompensationScale() , getLArmPosition()[2]}));            }
+            setLArmPosition(arma::vec3({getLArmPosition()[0],/*base roll multipled with */ getRollParameter()*getArmCompensationScale() , getLArmPosition()[2]}));            
+            setRArmPosition(arma::vec3({getLArmPosition()[0],/*base roll multipled with */ getRollParameter()*getArmCompensationScale() , getLArmPosition()[2]}));            
         }
     }      
 /*=======================================================================================================*/

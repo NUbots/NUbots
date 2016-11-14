@@ -433,6 +433,17 @@ namespace motion
          * 
          * @param inTorsoPosition [description]
          */
+        double getHipCopensationScale();
+
+        double getAnkleCompensationScale();
+
+        double getToeCompensationScale();
+
+        double getArmCompensationScale();
+        
+        double getSupportCompensationScale();
+
+
         std::unique_ptr<std::vector<ServoCommand>> motionLegs(std::vector<std::pair<ServoID, float>> joints);
         /**
          * @brief [brief description]
