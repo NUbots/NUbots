@@ -44,7 +44,7 @@ namespace input
     PostureRecogniser::PostureRecogniser(std::unique_ptr<NUClear::Environment> environment)
     : Reactor(std::move(environment))
     , loadFilters(), lastTimeUpdateTime()
-    , DEBUG(false), DEBUG_ITER(0), 
+    , DEBUG(false), DEBUG_ITER(0)
     , emitAccelerometer(false), emitGyroscope(false), emitFallingScaleFactor(false)
     {
 
@@ -157,9 +157,9 @@ namespace input
     {
         auto& debug = config["debugging"];
         DEBUG = debug["enabled"].as<bool>();
-        emitAccelerometer = = debug["emit_accelerometer"].as<bool>();
-        emitGyroscope = = debug["emit_gyroscope"].as<bool>();
-        emitFallingScaleFactor = = debug["emit_falling_scale_factor"].as<bool>();
+        emitAccelerometer = debug["emit_accelerometer"].as<bool>();
+        emitGyroscope = debug["emit_gyroscope"].as<bool>();
+        emitFallingScaleFactor = debug["emit_falling_scale_factor"].as<bool>();
     }        
 }
 }
