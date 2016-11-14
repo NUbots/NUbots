@@ -175,8 +175,8 @@ namespace motion
         on<Trigger<FallingDetected>>().then("Balance Response Planner - Received Update (Falling) Info", [this](const FallingDetected& info) 
         {
             // Capture normalised angular acceleration experienced...           
-            setRollParameter(info.y);
-            setPitchParameter(info.x);
+            setRollParameter(info.x);
+            setPitchParameter(info.y);
 	        setYawParameter(info.z);
         });
 
@@ -205,9 +205,9 @@ namespace motion
     {
         //If feature enabled, apply balance compensation through support actuator...
         if (armRollCompensationEnabled) 
-        {
-            setLArmPosition(arma::vec3({getLArmPosition()[0],/*base roll multipled with */ getRollParameter()*getArmCompensationScale() , getLArmPosition()[2]}));            
-            setRArmPosition(arma::vec3({getLArmPosition()[0],/*base roll multipled with */ getRollParameter()*getArmCompensationScale() , getLArmPosition()[2]}));            
+        {          
+            setLArmPosition(arma::vec3({getLArmPosition()[0], getLArmPosition()[1] + ((getRollParameter() * getArmCompensationScale()) * armRollParameter), getLArmPosition()[2]}));            
+            setRArmPosition(arma::vec3({getRArmPosition()[0], getRArmPosition()[1] + ((getRollParameter() * getArmCompensationScale()) * armRollParameter), getRArmPosition()[2]}));            
         }
     }      
 /*=======================================================================================================*/
@@ -220,14 +220,11 @@ namespace motion
         {
             if (getActiveForwardLimb() == LimbID::LEFT_LEG)
             {
-                setRightFootPosition(getRightFootPosition().rotateZ(getRollParameter()*getAnkleCompensationScale())); //insert factor based on orientation
-                setRightFootPosition(getRightFootPosition().rotateY(getPitchParameter()*getAnkleCompensationScale()));
+                setRightFootPosition(getRightFootPosition().rotateX(getRollParameter() * getAnkleCompensationScale()));
             }
             else 
             {
-                setLeftFootPosition(getLeftFootPosition().rotateZ(getRollParameter()*getAnkleCompensationScale()));
-                setLeftFootPosition(getLeftFootPosition().rotateY(getPitchParameter()*getAnkleCompensationScale()));
-
+                setLeftFootPosition(getLeftFootPosition().rotateX(getRollParameter() * getAnkleCompensationScale()));
             }
         }
     }      
@@ -239,7 +236,14 @@ namespace motion
         //If feature enabled, apply balance compensation through support actuator...
         if (toeTipCompensationEnabled) 
         {
-            //
+            if (getActiveForwardLimb() == LimbID::LEFT_LEG)
+            {
+                setRightFootPosition(getRightFootPosition().rotateY(getPitchParameter() * getAnkleCompensationScale()));
+            }
+            else 
+            {
+                setLeftFootPosition(getLeftFootPosition().rotateY(getPitchParameter() * getAnkleCompensationScale()));
+            }
         }
     }    
 /*=======================================================================================================*/
@@ -369,6 +373,7 @@ namespace motion
         double rightMinValue = -5 * M_PI / 180 - std::max(0.0, rotRightA) / 2 - std::max(0.0, -rightLegTorso.y() - 0.04) / 0.02 * (6 * M_PI / 180);
         
         // update shoulder pitch to move arm away from body
+        // TODO min of max of values... for arm compensation...
         setLArmPosition(arma::vec3({getLArmPosition()[0], std::max(leftMinValue,  getLArmPosition()[1]), getLArmPosition()[2]}));
         setRArmPosition(arma::vec3({getRArmPosition()[0], std::min(rightMinValue, getRArmPosition()[1]), getRArmPosition()[2]}));
     }   
@@ -761,10 +766,11 @@ namespace motion
         supportSideY        = bias["supportSideY"].as<Expression>();
         toeTipParameter     = bias["toe_tip_compensation"].as<Expression>();
         hipRollParameter    = bias["hip_roll_compensation"].as<Expression>();
+        armRollParameter    = bias["arm_roll_compensation"].as<Expression>();
         //ankleMod            = {-toeTipCompensation, 0};
 
         balancer.configure(balance);        
-        if(DEBUG) { log<NUClear::TRACE>("Configure BalanceKinematicResponse - Finish"); }       
+        if(DEBUG) { log<NUClear::TRACE>("Configure BalanceKinematicResponse - Finish"); }  
     }          
 }  // motion
 }  // modules   

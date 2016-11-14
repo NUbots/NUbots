@@ -233,6 +233,7 @@ namespace motion
         double yawParameter;                 // 
         double toeTipParameter;              //
         double hipRollParameter;             //
+        double armRollParameter;             //
         double hipCompensationScale;         //
         double toeCompensationScale;         //
         double ankleCompensationScale;       //

@@ -110,9 +110,13 @@ namespace input
                 // Simplified 1 + (((sensors[1]->world(2,2) - 0.5)(0-1))/(0.915-0.5));  
                 fallingScaleY = (2.40964 * (0.5 - sensors[1]->world(2,2))) + 1;
             }
+            // Enclosure scaling values to [0,1]...
+            fallingScaleY = (fallingScaleY > 1.0) ? 1.0 : ((fallingScaleY < -1.0) ? -1.0 : fallingScaleY); 
 
             // Simplified 1 + ((((sensors[1]->world(1,2)) - 0.6)(1--1))/(0.6--0.6));
             double fallingScaleX = (1.66667 * ((sensors[1]->world(1,2))-0.6)) + 1; 
+            // Enclosure scaling values to [0,1]...
+            fallingScaleX = (fallingScaleX > 1.0) ? 1.0 : ((fallingScaleX < -1.0) ? -1.0 : fallingScaleX); 
 
              // DEBUG: FallingDetected data...
             if(emitFallingScaleFactor)

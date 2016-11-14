@@ -54,10 +54,10 @@ walk_engine:
     STAND_SCRIPT_DURATION: 1 
 
   walk_cycle:
-    step_time: 0.300 # Defines how long it will take for the robot to take its next step, in seconds.
+    step_time: 1.200 # Defines how long it will take for the robot to take its next step, in seconds.
 
     step:
-      height: 0.040 # The height to which the robot raises its foot at each step. Very sensitive in terms of balance.
+      height: 0.140 # The height to which the robot raises its foot at each step. Very sensitive in terms of balance.
       height_slow_fraction: 0.5 # height of foot as a fraction of height
       height_fast_fraction: 1.5 # height of foot as a fraction of height
       limits: # These limit the distance a footstep will take
@@ -182,6 +182,7 @@ balance_kinematic_response:
     supportSideY: -0.005
     toe_tip_compensation:  0 * pi / 180  
     hip_roll_compensation: 4 * pi / 180
+    arm_roll_compensation: 90 * pi / 180
 
 ######################################################################################################################
 
