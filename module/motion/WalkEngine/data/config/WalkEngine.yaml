@@ -54,16 +54,16 @@ walk_engine:
     STAND_SCRIPT_DURATION: 1 
 
   walk_cycle:
-    step_time: 0.800 # Defines how long it will take for the robot to take its next step, in seconds.
+    step_time: 0.300 # Defines how long it will take for the robot to take its next step, in seconds.
 
     step:
-      height: 0.140 # The height to which the robot raises its foot at each step. Very sensitive in terms of balance.
+      height: 0.040 # The height to which the robot raises its foot at each step. Very sensitive in terms of balance.
       height_slow_fraction: 0.5 # height of foot as a fraction of height
       height_fast_fraction: 1.5 # height of foot as a fraction of height
       limits: # These limit the distance a footstep will take
-        - [-0.1, 0.35]        # [min_x, max_x]
-        - [0.0, 0.5]          # [min_y, max_y]
-        - [0, 15 * pi / 180]  # [min_angle, max_angle]
+        - [-0.100, 0.150]           # [min_x, max_x]
+        - [ 0.000, 0.300]           # [min_y, max_y]
+        - [ 0.000, 15 * pi / 180]   # [min_angle, max_angle]
 
     velocity:
       limits: # Velocity limits for the walk
@@ -206,5 +206,5 @@ foot_motion_planner:
     emit_foot_position: true # Emit characteristic foot elevation for duration of phase...
 
   walk_cycle:
-    lift_ankle_pitch: 25 * (pi / 180.0) # Defines the maximum rotation of the ankle pitch at start of motion.
-    fall_ankle_pitch: 12 * (pi / 180.0) # Defines the maximum rotation of the ankle pitch at end of motion.
+    lift_ankle_pitch: 0* 25 * (pi / 180.0) # Defines the maximum rotation of the ankle pitch at start of motion.
+    fall_ankle_pitch: 0* 12 * (pi / 180.0) # Defines the maximum rotation of the ankle pitch at end of motion.

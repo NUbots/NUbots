@@ -42,7 +42,10 @@ namespace input
 //      NAME: Posture Recogniser
 /*=======================================================================================================*/
     PostureRecogniser::PostureRecogniser(std::unique_ptr<NUClear::Environment> environment)
-    : Reactor(std::move(environment)), loadFilters(), lastTimeUpdateTime(), DEBUG(false), DEBUG_ITER(0) 
+    : Reactor(std::move(environment))
+    , loadFilters(), lastTimeUpdateTime()
+    , DEBUG(false), DEBUG_ITER(0), 
+    , emitAccelerometer(false), emitGyroscope(false), emitFallingScaleFactor(false)
     {
 
         // Configure posture recognition...
@@ -75,6 +78,14 @@ namespace input
             arma::vec2 xzGyroDiff = { gyroDiff(0), gyroDiff(2) };
             arma::vec2 yzGyroDiff = { gyroDiff(1), gyroDiff(2) };
             arma::vec2 xyGyroDiff = { gyroDiff(0), gyroDiff(1) };
+            
+            // DEBUG: Accelerometer data...
+            if(emitAccelerometer)
+            {
+                emit(graph("xyGyroDiff", xyGyroDiff));   
+                emit(graph("xzGyroDiff", xzGyroDiff));
+                emit(graph("yzGyroDiff", yzGyroDiff));         
+            }
 
             // Accelerometer (in m/s^2)
             // Capture axis differences in accelerometer data...
@@ -82,6 +93,32 @@ namespace input
             arma::vec2 xzAccelDiff = { accelDiff(0), accelDiff(2) };
             arma::vec2 yzAccelDiff = { accelDiff(1), accelDiff(2) };
             arma::vec2 xyAccelDiff = { accelDiff(0), accelDiff(1) };
+            
+             // DEBUG: Gyroscope data...
+            if(emitGyroscope)
+            {
+                emit(graph("xyAccelDiff", xyAccelDiff));   
+                emit(graph("xzAccelDiff", xzAccelDiff));
+                emit(graph("yzAccelDiff", yzAccelDiff));        
+            }
+
+            // Robot Orientation (cosine of torso anglular position)
+            // Consider a normalisation of the sensor values to a unitless severity scale...
+            double fallingScaleY = 0;
+            if((sensors[1]->world(2,2)) < 0.915) //TODO : Make these parameters configurable...
+            {
+                // Simplified 1 + (((sensors[1]->world(2,2) - 0.5)(0-1))/(0.915-0.5));  
+                fallingScaleY = (2.40964 * (0.5 - sensors[1]->world(2,2))) + 1;
+            }
+
+            // Simplified 1 + ((((sensors[1]->world(1,2)) - 0.6)(1--1))/(0.6--0.6));
+            double fallingScaleX = (1.66667 * ((sensors[1]->world(1,2))-0.6)) + 1; 
+
+             // DEBUG: FallingDetected data...
+            if(emitFallingScaleFactor)
+            {
+                emit(graph("Falling Detected Scaling Factor", fallingScaleX, fallingScaleY));
+            }
 
             // Notify if sensor data suggests robot is walking...  TODO: likely requies greater collection of sensor data
             // WalkingDetected walking;
@@ -109,7 +146,7 @@ namespace input
             // emit(std::make_unique<StandingDetected>(standing));
 
             // Notify if sensor data suggests robot is begining to fall...
-            FallingDetected falling(arma::norm(xzGyroDiff), arma::norm(yzGyroDiff), arma::norm(xyGyroDiff)); //TODO: Verify mathematical suitability
+            FallingDetected falling(fallingScaleX, fallingScaleY, 0.0);
             emit(std::make_unique<FallingDetected>(falling));
         });
     }
@@ -120,6 +157,9 @@ namespace input
     {
         auto& debug = config["debugging"];
         DEBUG = debug["enabled"].as<bool>();
+        emitAccelerometer = = debug["emit_accelerometer"].as<bool>();
+        emitGyroscope = = debug["emit_gyroscope"].as<bool>();
+        emitFallingScaleFactor = = debug["emit_falling_scale_factor"].as<bool>();
     }        
 }
 }

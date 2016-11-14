@@ -60,6 +60,13 @@ namespace input
         int  DEBUG_ITER;            //
 
         /**
+         * NUsight feedback initialized from configuration script, see config file for documentation...
+         */
+        bool emitAccelerometer;
+        bool emitGyroscope;
+        bool emitFallingScaleFactor;
+
+        /**
          * @brief [brief description]
          * @details [long description]
          * 
