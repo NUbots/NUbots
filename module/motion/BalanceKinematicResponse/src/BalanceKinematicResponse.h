@@ -239,6 +239,12 @@ namespace motion
         double ankleCompensationScale;       //
         double armCompensationScale;         //
         double supportCompensationScale;     //
+        double hipCompensationMax;         //
+        double toeCompensationMax;         //
+        double ankleCompensationMax;       //
+        double armCompensationMax;         //
+        double supportCompensationMax;     //
+
 
         /**
          * Balance & Kinematics module initialization...
@@ -434,7 +440,7 @@ namespace motion
          * 
          * @param inTorsoPosition [description]
          */
-        double getHipCopensationScale();
+        double getHipCompensationScale();
 
         double getAnkleCompensationScale();
 
@@ -443,6 +449,16 @@ namespace motion
         double getArmCompensationScale();
         
         double getSupportCompensationScale();
+
+        double getHipCompensationMax();
+
+        double getAnkleCompensationMax();
+
+        double getToeCompensationMax();
+
+        double getArmCompensationMax();
+        
+        double getSupportCompensationMax();
 
 
         std::unique_ptr<std::vector<ServoCommand>> motionLegs(std::vector<std::pair<ServoID, float>> joints);

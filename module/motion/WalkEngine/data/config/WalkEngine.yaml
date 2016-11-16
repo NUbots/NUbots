@@ -128,6 +128,13 @@ balance_kinematic_response:
     arm_compensation_scale:     1.0
     support_compensation_scale: 1.0
 
+
+    hip_compensation_max:     90 * pi / 180
+    toe_compensation_max:     5 * pi / 180
+    ankle_compensation_max:   10 * pi / 180
+    arm_compensation_max:     30 * pi / 180
+    support_compensation_max: 90 * pi / 180
+
     hip_rotation_scale: 2.0
     ankle_rotation_scale: 0.5
 

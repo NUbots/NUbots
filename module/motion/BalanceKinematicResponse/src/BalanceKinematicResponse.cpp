@@ -207,8 +207,10 @@ namespace motion
         if (armRollCompensationEnabled) 
         {          
             setLArmPosition(arma::vec3({getLArmPosition()[0], getLArmPosition()[1] + ((getRollParameter() * getArmCompensationScale()) * armRollParameter), getLArmPosition()[2]}));            
-            setRArmPosition(arma::vec3({getRArmPosition()[0], getRArmPosition()[1] + ((getRollParameter() * getArmCompensationScale()) * armRollParameter), getRArmPosition()[2]}));            
+            setRArmPosition(arma::vec3({getRArmPosition()[0], getRArmPosition()[1] + ((getRollParameter() * getArmCompensationScale())) * armRollParameter, getRArmPosition()[2]}));            
         }
+
+        std::min(/*Maxium Roll*/0.0, std::max(/*Minimum Roll*/1.0,/*Calculated Roll Offset * 45° Base roll? */0.5));
     }      
 /*=======================================================================================================*/
 //      METHOD: ankleTorqueCompensation
@@ -220,11 +222,11 @@ namespace motion
         {
             if (getActiveForwardLimb() == LimbID::LEFT_LEG)
             {
-                setRightFootPosition(getRightFootPosition().rotateX(getRollParameter() * getAnkleCompensationScale()));
+                setRightFootPosition(getRightFootPosition().rotateX(std::max(getAnkleCompensationMax(), getRollParameter() * getAnkleCompensationScale())));
             }
             else 
             {
-                setLeftFootPosition(getLeftFootPosition().rotateX(getRollParameter() * getAnkleCompensationScale()));
+                setLeftFootPosition(getLeftFootPosition().rotateX(std::max(getAnkleCompensationMax(), getRollParameter() * getAnkleCompensationScale())));
             }
         }
     }      
@@ -238,11 +240,11 @@ namespace motion
         {
             if (getActiveForwardLimb() == LimbID::LEFT_LEG)
             {
-                setRightFootPosition(getRightFootPosition().rotateY(getPitchParameter() * getAnkleCompensationScale()));
+                setRightFootPosition(getRightFootPosition().rotateY(std::max(getToeCompensationMax(), getPitchParameter() * getAnkleCompensationScale())));
             }
             else 
             {
-                setLeftFootPosition(getLeftFootPosition().rotateY(getPitchParameter() * getAnkleCompensationScale()));
+                setLeftFootPosition(getLeftFootPosition().rotateY(std::max(getToeCompensationMax(), getPitchParameter() * getAnkleCompensationScale())));
             }
         }
     }    
@@ -653,7 +655,7 @@ namespace motion
         rightFootPositionTransform = inRightFootPosition;
     }
 
-    double BalanceKinematicResponse::getHipCopensationScale()
+    double BalanceKinematicResponse::getHipCompensationScale()
     {
         return hipCompensationScale;
     }
@@ -672,6 +674,27 @@ namespace motion
     double BalanceKinematicResponse::getSupportCompensationScale()
     {
         return supportCompensationScale;
+    }
+
+    double BalanceKinematicResponse::getHipCompensationMax()
+    {
+        return hipCompensationMax;
+    }
+    double BalanceKinematicResponse::getAnkleCompensationMax()
+    {
+        return ankleCompensationMax;
+    }
+    double BalanceKinematicResponse::getToeCompensationMax()
+    {
+        return toeCompensationMax;
+    }
+    double BalanceKinematicResponse::getArmCompensationMax()
+    {
+        return armCompensationMax;
+    }
+    double BalanceKinematicResponse::getSupportCompensationMax()
+    {
+        return supportCompensationMax;
     }
 
 /*=======================================================================================================*/
@@ -748,6 +771,14 @@ namespace motion
         ankleCompensationScale = balance["ankle_compensation_scale"].as<double>();
         armCompensationScale = balance["arm_compensation_scale"].as<double>();
         supportCompensationScale = balance["support_compensation_scale"].as<double>();
+
+        hipCompensationMax = balance["hip_compensation_max"].as<double>();
+        toeCompensationMax = balance["toe_compensation_max"].as<double>();
+        ankleCompensationMax = balance["ankle_compensation_max"].as<double>();
+        armCompensationMax = balance["arm_compensation_max"].as<double>();
+        supportCompensationMax = balance["support_compensation_max"].as<double>();
+
+
 
         balanceAmplitude = balance["amplitude"].as<Expression>();
         balanceWeight    = balance["weight"].as<Expression>();
