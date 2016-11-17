@@ -120,7 +120,7 @@ namespace message{
                     };
                 } MassModel;
 
-                float TEAMDARWINCHEST_TO_ORIGIN() const {return 0.096 - Leg.HIP_OFFSET_Z;} //Taken from team darwin OPkinematics.cpp : hipOffsetZ = .096;
+                float TEAMDARWINCHEST_TO_ORIGIN = 0.096 - Leg.HIP_OFFSET_Z; //Taken from team darwin OPkinematics.cpp : hipOffsetZ = .096;
             };
 
         }

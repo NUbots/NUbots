@@ -210,7 +210,7 @@ namespace kinematics {
     }
 
     std::vector<std::pair<message::input::ServoID, float>> calculateLegJointsTeamDarwin(const message::motion::kinematics::KinematicsModel& model, utility::math::matrix::Transform3D target, message::input::LimbID limb) {
-        target(2,3) += model.TEAMDARWINCHEST_TO_ORIGIN();// translate without regard to rotation
+        target(2,3) += model.TEAMDARWINCHEST_TO_ORIGIN;// translate without regard to rotation
         // target = target.translateZ(model.Leg.FOOT_HEIGHT); THIS HAS BEEN WRONG THE WHOLE TIME!!!! THIS ASSUMES THE FOOT IS FLAT RELATIVE TO THE TORSO (WHICH IT ISN'T BECAUSE THE BODY IS TILTED)
         return calculateLegJoints(model, target, limb);
     }

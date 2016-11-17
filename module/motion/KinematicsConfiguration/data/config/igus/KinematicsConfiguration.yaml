@@ -1,39 +1,40 @@
 leg:
     # darwin says this is [0.008, 0.008, 0.034]
-    hip_offset: [0.00, 0.037, 0.034] # [x, y, z]
-    upper_leg_length: 0.093
-    lower_leg_length: 0.093
-    heel_length: 0.0451 # measured
-    foot_centre_to_ankle_centre: 0.011 # rough
+    hip_offset: [0.00, 0.055, 0.045] # [x, y, z]
+    upper_leg_length: 0.2
+    lower_leg_length: 0.2
+    heel_length: 0.085 # measured
+    foot_centre_to_ankle_centre: 0.02 # rough
     # length_between_legs: hip_offset[1] * 2
     foot:
-        width: 0.066 # rough
-        height: 0.0335
-        length: 0.094 # rough
-        toe_length: 0.0472 # measured
+        width: 0.130 # rough
+        height: 0.04
+        length: 0.215 # rough
+        toe_length: 0.13 # measured
 head:
-    camera_declination_angle_offset: -0.0 # TODO - fix 1's head pitch motor offset
-    neck_to_camera: [0.036, 0, 0.028] # [x, y, z]
-    neck:
+    camera_declination_angle_offset: 0.0
+    neck_to_camera: [0.06, 0, 0.06] # [x, y, z]
+    ipd: 0.065 # Interpupillary distance - y axis
+    neck: # not yet calculated
         length: 0.042
         base_position_from_origin: [0.013, 0, 0.11] # [x, y, z]
     # head movement limits
-    limits:
+    limits: # pitch limit is a function of yaw ... need to calculate this properly
         yaw: [-pi * 2 / 3, pi * 2 / 3] # [min_yaw, max_yaw]
-        pitch: [-pi / 6, pi / 2 - pi / 8] # [min_pitch, max_pitch]
+        pitch: [-pi / 6, pi / 2] # [min_pitch, max_pitch]
 # rough measurements
 arm:
-    distance_between_shoulders: 0.114 # distance between shoulders
+    distance_between_shoulders: 0.17 # distance between shoulders
     shoulder:
         length: 0.0
-        width: 0.0245
-        height: 0.017
-        offset: [0.01, 0.088] # [x, z]
+        width: 0.04
+        height: 0.010
+        offset: [0.0, 0.1905] # [x, z]
     upper_arm:
-        length: 0.0615
-        offset: [0, 0.02] # [y, z] very rough
+        length: 0.16
+        offset: [0, 0.03] # [y, x] very rough
     lower_arm:
-        length: 0.13
+        length: 0.235
         offset: [0, 0] # [y, z] very rough
 mass_model:
     number_of_masses: 21
@@ -61,4 +62,4 @@ mass_model:
         - [-0.035,                     0,           0.01,      0.11708]     # 19 - HEAD_PITCH
         - [-0.0066631,        -0.00311589,      0.0705563,      0.975599]   # 20 - TORSO
 
-team_darwin_chest_to_origin: 0.096 # - leg.hip_offset[2] # taken from team darwin OPkinematics.cpp - hipOffsetZ = .096;
+team_darwin_chest_to_origin: 0.18 # - leg.hip_offset[2] # rough

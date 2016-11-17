@@ -51,6 +51,7 @@ namespace motion {
         configureArm(model, objDarwinModel["arm"]);
 
         configureMassModel(model, objDarwinModel["mass_model"]);
+        model.TEAMDARWINCHEST_TO_ORIGIN = objDarwinModel["team_darwin_chest_to_origin"].as<float>() - model.Leg.HIP_OFFSET_Z;
     }
 
     void KinematicsConfiguration::configureLeg (KinematicsModel& model, const YAML::Node& objLeg) {
