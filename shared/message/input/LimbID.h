@@ -21,6 +21,7 @@
 #define MESSAGE_INPUT_LIMBID_H
 
 #include "message/input/ServoID.h"
+#include <set>
 
 namespace message {
     namespace input {

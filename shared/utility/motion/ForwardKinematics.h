@@ -297,12 +297,14 @@ namespace kinematics {
     inline std::map<message::input::ServoID, utility::math::matrix::Transform3D> calculateAllPositions(const message::motion::kinematics::KinematicsModel& model, const message::input::Sensors& sensors) {
         std::map<message::input::ServoID, utility::math::matrix::Transform3D> result = calculatePosition(model,sensors, message::input::ServoID::L_ANKLE_ROLL);
         std::map<message::input::ServoID, utility::math::matrix::Transform3D> rightLegPositions = calculatePosition(model,sensors, message::input::ServoID::R_ANKLE_ROLL);
+        std::map<message::input::ServoID, utility::math::matrix::Transform3D> leftLegPositions = calculatePosition(model,sensors, message::input::ServoID::L_ANKLE_ROLL);
         std::map<message::input::ServoID, utility::math::matrix::Transform3D> headPositions = calculatePosition(model,sensors, message::input::ServoID::HEAD_PITCH);
         std::map<message::input::ServoID, utility::math::matrix::Transform3D> leftArm = calculatePosition(model,sensors, message::input::ServoID::L_ELBOW);
         std::map<message::input::ServoID, utility::math::matrix::Transform3D> rightArm = calculatePosition(model,sensors, message::input::ServoID::R_ELBOW);
         result.insert(leftArm.begin(), leftArm.end());
         result.insert(rightArm.begin(), rightArm.end());
         result.insert(rightLegPositions.begin(), rightLegPositions.end());
+        result.insert(leftLegPositions.begin(), leftLegPositions.end());
         result.insert(headPositions.begin(), headPositions.end());
         return result;
     }

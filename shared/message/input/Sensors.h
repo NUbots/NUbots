@@ -22,13 +22,13 @@
 
 #include <nuclear>
 #include <armadillo>
-#include <nuclear>
 
 #include "ServoID.h"
 
 #include "utility/math/matrix/Transform3D.h"
 #include "utility/math/matrix/Rotation3D.h"
 #include "utility/math/geometry/Line.h"
+#include <map>
 
 namespace message {
     namespace input {
