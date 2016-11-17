@@ -40,6 +40,10 @@ class dev_tools {
   package { 'binutils-dev': name => 'binutils-multiarch-dev', ensure => latest, require => Apt::Ppa['ppa:ubuntu-toolchain-r/test'] }
   package { 'ninja-build': ensure => latest, }
   package { 'nasm': ensure => latest, }
+  package { 'libusb-1.0-0:amd64': ensure => latest, }
+  package { 'libusb-1.0-0:i386': ensure => latest, }
+  package { 'libusb-1.0-0-dev:amd64': ensure => latest, }
+  package { 'libusb-1.0-0-dev:i386': ensure => latest, }
 
   # For ELLCC
   package { 'subversion': ensure => latest, }

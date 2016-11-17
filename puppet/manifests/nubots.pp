@@ -148,7 +148,19 @@ node nubotsvmbuild {
                        'prebuild'    => 'cp portaudio19.h portaudio.h',
                        'method'      => 'make',
                        'require'     => [ File_line['correct_espeak_Makefile'], Installer['portaudio'] ]},
+    'raw1394'      => {'url'         => 'http://downloads.sourceforge.net/project/libraw1394/libraw1394/libraw1394-2.0.5.tar.gz',
+                       'args'        => { 'native'   => [ '', ],
+                                          'DarwinOp' => [ '', ],
+                                          'NimbroOp' => [ '', ], },
+                       'method'      => 'autotools',},
+    'dc1394'       => {'url'         => 'http://downloads.sourceforge.net/project/libdc1394/libdc1394-2/2.2.4/libdc1394-2.2.4.tar.gz',
+                       'args'        => { 'native'   => [ '--disable-doxygen-doc', '--disable-examples', ],
+                                          'DarwinOp' => [ '--disable-doxygen-doc', '--disable-examples', ],
+                                          'NimbroOp' => [ '--disable-doxygen-doc', '--disable-examples', ], },
+                       'method'      => 'autotools',
+                       'require'     => [ Installer['raw1394'], ],},
   }
+  
 
   # Correct CXXFLAGS definition in eSpeak Makefile to firstly append to CXXFLAGS and to allow narrowing conversions to be treated as warnings.
   file_line { 'correct_espeak_Makefile':
