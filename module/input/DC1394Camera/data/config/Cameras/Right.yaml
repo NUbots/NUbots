@@ -1,0 +1,262 @@
+device: 0x00B09D0100E81B94
+driver: dc1394
+
+format:
+  width: 1280
+  height: 1024
+  output_format: YUV444     # Not currently used.
+  fps: 60
+
+settings:
+  exposure:
+    auto: true
+    value: 0
+  gain:
+    auto: true
+    value: 0
+  brightness: 
+    auto: true
+    value: 0
+  sharpness:
+    auto: true
+    value: 0
+  white_balance:
+    auto: true
+    u_b_value: 0
+    v_r_value: 0
+  hue:
+    auto: true
+    value: 0
+  saturation:
+    auto: true
+    value: 0
+  gamma:
+    auto: true
+    value: 0
+  temperature:
+    auto: true
+    value: 0
+  trigger:
+    auto: true
+    value: 0
+  trigger_delay:
+    auto: true
+    value: 0
+  white_shading:
+    auto: true
+    r_value: 0
+    g_value: 0
+    b_value: 0
+# Shutter time is controlled by the frame rate which we set using FPS above.
+#  shutter:
+#    auto: true
+#    value: 0
+# Frame rate is set using FPS above.
+#  frame_rate:
+#    auto: true
+#    value: 0
+
+lens:
+  placeholder
+
+# IIDC V1.32 Specifications
+# https://damien.douxchamps.net/ieee1394/libdc1394/iidc/IIDC_1.32.pdf
+#
+# Point Grey Flea3 Datasheet
+# https://www.ptgrey.com/support/downloads/10136
+#
+# Point Grey Flea3 Technical Reference
+# https://www.ptgrey.com/support/downloads/10120
+#
+# Point Grey Flea3 Register Reference
+# https://www.ptgrey.com/support/downloads/10130
+#
+# ------ Camera information ------
+# Vendor                            :     Point Grey Research
+# Model                             :     Flea3 FL3-U3-13E4C
+# Unit                              :     0
+# Specifications ID                 :     0xa02d
+# Software revision                 :     0x102
+# IIDC version code                 :     549
+# Unit directory offset             :     0x428
+# Unit dependent directory offset   :     0x440
+# Commands registers base           :     0xf00000
+# Unique ID                         :     0x00b09d0100e81b94
+# Vendor ID                         :     0xb09d
+# Model ID                          :     0x1
+# Advanced features found at offset :     0xf01000
+# 1394b mode capable (>=800Mbit/s)  :     Yes
+# Platform backend                  :     usb
+# ------ Camera platform-specific information ------
+# USB Bus Number                    :     3
+# USB Device Address                :     2
+# Vendor ID                         :     0x1e10
+# Product ID                        :     0x3300
+# 
+# "------ Features report ------
+# OP   - one push capable
+# RC   - readout capable
+# O/OC - on/off capable
+# AC   - auto capable
+# MC   - manual capable
+# ABS  - absolute capable
+# -----------------------------
+#
+# Brightness:
+#   RC  MC  (active is: MAN)  AC  (active is: MAN)  ABS  
+#   min: 0 max 164
+#   current value is: 0
+#   absolute settings:
+#    value: 0.000000
+#    min: 0.000000
+#    max: 16.015625
+# Exposure:
+#   RC  O/OC  MC  (active is: AUTO)  AC  (active is: AUTO)  OP  (active is: AUTO)  ABS  
+#   Feature: ON  min: 1 max 1023
+#   current value is: 512
+#   absolute settings:
+#    value: 1.415039
+#    min: -7.584961
+#    max: 2.413635
+# Sharpness:
+#   RC  
+#   min: 0 max 4095
+#   current value is: 1024
+# White Balance:
+#   RC  O/OC  MC  (active is: AUTO)  AC  (active is: AUTO)  OP  (active is: AUTO)  
+#   Feature: ON  min: 0 max 1023
+#   B/U value: 810 R/V value: 550
+# Hue:
+#   RC  ABS  
+#   min: 0 max 4095
+#   current value is: 2048
+#   absolute settings:
+#    value: 0.000000
+#    min: -180.000000
+#    max: 179.912109
+# Saturation:
+#   RC  ABS  
+#   min: 0 max 4095
+#   current value is: 1024
+#   absolute settings:
+#    value: 100.000000
+#    min: 0.000000
+#    max: 399.902344
+# Gamma:
+#   RC  ABS  
+#   min: 512 max 4095
+#   current value is: 1024
+#   absolute settings:
+#    value: 1.000000
+#    min: 0.500000
+#    max: 3.999023
+# Shutter:
+#   RC  MC  (active is: AUTO)  AC  (active is: AUTO)  OP  (active is: AUTO)  ABS  
+#   min: 1 max 1590
+#   current value is: 1590
+#   absolute settings:
+#    value: 0.024973
+#    min: 0.000016
+#    max: 0.024973
+# Gain:
+#   RC  MC  (active is: AUTO)  AC  (active is: AUTO)  OP  (active is: AUTO)  ABS  
+#   min: 0 max 255
+#   current value is: 0
+#   absolute settings:
+#    value: 0.000000
+#    min: 0.000000
+#    max: 24.014038
+# Iris:
+#   NOT AVAILABLE
+# Focus:
+#   NOT AVAILABLE
+# Temperature:
+#   RC  ABS  
+#   min: 2231 max 4095
+#   Target temp: 12005376 Current Temp: 3139
+#   absolute settings:
+#    value: 313.910004
+#    min: 0.000000
+#    max: inf
+# Trigger:
+#   RC  O/OC  
+#   Feature: OFF  
+#   AvailableTriggerModes: 384 391 
+#   AvailableTriggerSources: 576 578 579 580 
+#   Polarity Change Capable: True
+#   Current Polarity: NEG
+#   current mode: 384
+# 
+#   current source: 576
+# Trigger Delay:
+#   RC  O/OC  MC  (active is: MAN)  ABS  
+#   Feature: OFF  min: 0 max 4095
+#   current value is: 0
+#   absolute settings:
+#    value: 0.000000
+#    min: 0.000000
+#    max: 0.025000
+# White Shading:
+#   NOT AVAILABLE
+# Frame Rate:
+#   RC  O/OC  MC  (active is: AUTO)  AC  (active is: AUTO)  ABS  
+#   Feature: ON  min: 480 max 3665
+#   current value is: 480
+#   absolute settings:
+#    value: 40.000000
+#    min: 1.000000
+#    max: 40.000000
+# Zoom:
+#   NOT AVAILABLE
+# Pan:
+#   NOT AVAILABLE
+# Tilt:
+#   NOT AVAILABLE
+# Optical Filter:
+#   NOT AVAILABLE
+# Capture Size:
+#   NOT AVAILABLE
+# Capture Quality:
+#   NOT AVAILABLE
+# 
+# ---------------------------------
+#
+# Suported Video Modes:
+# 79 80 81 85 88 89 90 95 
+# 
+# DC1394_VIDEO_MODE_160x120_YUV444= 64,
+# DC1394_VIDEO_MODE_320x240_YUV422,
+# DC1394_VIDEO_MODE_640x480_YUV411,
+# DC1394_VIDEO_MODE_640x480_YUV422,
+# DC1394_VIDEO_MODE_640x480_RGB8,
+# DC1394_VIDEO_MODE_640x480_MONO8,
+# DC1394_VIDEO_MODE_640x480_MONO16,
+# DC1394_VIDEO_MODE_800x600_YUV422,
+# DC1394_VIDEO_MODE_800x600_RGB8,
+# DC1394_VIDEO_MODE_800x600_MONO8,
+# DC1394_VIDEO_MODE_1024x768_YUV422,
+# DC1394_VIDEO_MODE_1024x768_RGB8,
+# DC1394_VIDEO_MODE_1024x768_MONO8,
+# DC1394_VIDEO_MODE_800x600_MONO16,
+# DC1394_VIDEO_MODE_1024x768_MONO16,
+# DC1394_VIDEO_MODE_1280x960_YUV422 = 79,
+# DC1394_VIDEO_MODE_1280x960_RGB8 = 80,
+# DC1394_VIDEO_MODE_1280x960_MONO8 = 81,
+# DC1394_VIDEO_MODE_1600x1200_YUV422,
+# DC1394_VIDEO_MODE_1600x1200_RGB8,
+# DC1394_VIDEO_MODE_1600x1200_MONO8,
+# DC1394_VIDEO_MODE_1280x960_MONO16 = 85,
+# DC1394_VIDEO_MODE_1600x1200_MONO16,
+# DC1394_VIDEO_MODE_EXIF,
+# DC1394_VIDEO_MODE_FORMAT7_0 = 88,
+# DC1394_VIDEO_MODE_FORMAT7_1 = 89,
+# DC1394_VIDEO_MODE_FORMAT7_2 = 90,
+# DC1394_VIDEO_MODE_FORMAT7_3,
+# DC1394_VIDEO_MODE_FORMAT7_4,
+# DC1394_VIDEO_MODE_FORMAT7_5,
+# DC1394_VIDEO_MODE_FORMAT7_6,
+# DC1394_VIDEO_MODE_FORMAT7_7 = 95
+
+# ---------------------------------
+
+

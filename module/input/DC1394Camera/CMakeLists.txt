@@ -1,0 +1,6 @@
+# Find DC1394 library
+FIND_PACKAGE(dc1394 REQUIRED)
+
+# Build our NUClear module
+NUCLEAR_MODULE(INCLUDES ${dc1394_INCLUDE_DIRS}
+               LIBRARIES ${dc1394_LIBRARIES})
