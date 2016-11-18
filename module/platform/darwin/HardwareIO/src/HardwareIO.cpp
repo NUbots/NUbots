@@ -277,7 +277,7 @@ namespace darwin {
 
                     servoState[uint(command.id)].pGain = command.gain;
                     servoState[uint(command.id)].iGain = command.gain * 0;
-                    servoState[uint(command.id)].dGain = command.gain * -10;
+                    servoState[uint(command.id)].dGain = command.gain * 0;
 
                     servoState[uint(command.id)].movingSpeed = speed;
                     servoState[uint(command.id)].goalPosition = command.position;
