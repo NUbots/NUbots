@@ -12,16 +12,22 @@ FOREACH(host ${KNOWN_HOSTS})
         ELSE()
             SET(user "darwin")
         ENDIF()
+
+        IF (config MATCHES "[a-z]+")
+            SET(target "${host}-${config}")
+        ELSE()
+            SET(target "${host}")
+        ENDIF()
         
         # Make our installer
-        ADD_CUSTOM_TARGET("${host}-${config}"
+        ADD_CUSTOM_TARGET("${target}"
             USES_TERMINAL
             COMMAND ${PYTHON_EXECUTABLE}
             "${CMAKE_SOURCE_DIR}/nuclear/b.py" "install" "${host}" "--config=${config}" "--user=${user}"
             DEPENDS ${NUCLEAR_ROLES} "${CMAKE_SOURCE_DIR}/tools/install.py")
 
         # Move our installer to an IDE group
-        SET_PROPERTY(TARGET "${host}-${config}" PROPERTY FOLDER "installers")
+        SET_PROPERTY(TARGET "${target}" PROPERTY FOLDER "installers")
     ENDFOREACH(config)
 ENDFOREACH(host)
 
