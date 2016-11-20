@@ -138,10 +138,9 @@ namespace motion
 
         arma::vec2 supportMod = arma::zeros(2); // support point modulation for wallkick
 
-        if(isZeroVelocityRequest()) 
+        if(isZeroVelocityRequired()) 
         {         
-            setVelocityCurrent(arma::zeros(3));
-            // Stop with feet together by targetting swing leg next to support leg...
+            // Stop with feet together by targetting swing leg next setTorsoDestinationto support leg...
             if (getActiveForwardLimb() == LimbID::RIGHT_LEG) 
             {
                 setRightFootDestination(getLeftFootSource().localToWorld(-2 * uLRFootOffset));
@@ -163,7 +162,7 @@ namespace motion
                 setLeftFootDestination(getNewFootTarget(inVelocityCurrent,  getActiveForwardLimb()));
             }
         }       
-        // apply velocity-based support point modulation for SupportMass
+        // Apply velocity-based support point modulation for SupportMass
         if (getActiveForwardLimb() == LimbID::RIGHT_LEG) 
         {
             Transform2D uLeftFootTorso = getTorsoSource().worldToLocal(getLeftFootSource());            
@@ -180,6 +179,7 @@ namespace motion
         }                   
         emit(std::make_unique<NewStepTargetInfo>(stepTime, inVelocityCurrent, getSupportMass())); //New Step Target Information
         emit(std::make_unique<NewFootTargetInfo>(getLeftFootSource(), getRightFootSource(), getActiveForwardLimb(), getLeftFootDestination(), getRightFootDestination()));  //New Foot Target Information
+std::cout << "\n\rinVelocityCurrent: " << inVelocityCurrent;     
     }
 /*=======================================================================================================*/
 //      METHOD: getNewFootTarget
@@ -247,7 +247,7 @@ namespace motion
 //      METHOD: Reset The Stance of the Humanoid to Initial Valid Stance
 /*=======================================================================================================*/
     void FootPlacementPlanner::postureInitialize() 
-    {        
+    {                   
         // Default Initial Torso Position...
         setTorsoPosition({-getFootOffsetCoefficient(0), 0, 0});
    
@@ -278,7 +278,7 @@ namespace motion
 //      METHOD: reset
 /*=======================================================================================================*/
     void FootPlacementPlanner::reset() 
-    {
+    {      
         setTorsoPosition({-getFootOffsetCoefficient(0), 0, 0});
         setLeftFootPosition({0, kinematicsModel.Leg.HIP_OFFSET_Y, 0});
         setRightFootPosition({0, -kinematicsModel.Leg.HIP_OFFSET_Y, 0});
@@ -332,14 +332,14 @@ namespace motion
         velocityCommand = inVelocityCommand;
     }      
 /*=======================================================================================================*/
-//      ENCAPSULATION METHOD: isZeroVelocityRequest
+//      ENCAPSULATION METHOD: isZeroVelocityRequired
 /*=======================================================================================================*/
-    bool FootPlacementPlanner::isZeroVelocityRequest()
+    bool FootPlacementPlanner::isZeroVelocityRequired()
     {
         return  (
-                    abs(getVelocityCommand().x())        < EPSILON   &&
-                    abs(getVelocityCommand().y())        < EPSILON   &&
-                    abs(getVelocityCommand().angle())    < EPSILON
+                    abs(getVelocityCurrent().x())        < EPSILON   &&
+                    abs(getVelocityCurrent().y())        < EPSILON   &&
+                    abs(getVelocityCurrent().angle())    < EPSILON
                 );
     }    
 /*=======================================================================================================*/
@@ -442,6 +442,7 @@ namespace motion
 /*=======================================================================================================*/
     Transform2D FootPlacementPlanner::getLeftFootSource()
     {
+//std::cout << "\n\rL Source: " << leftFootSource;
         return (leftFootSource);
     }
     void FootPlacementPlanner::setLeftFootSource(const Transform2D& inLeftFootSource)
@@ -453,6 +454,7 @@ namespace motion
 /*=======================================================================================================*/
     Transform2D FootPlacementPlanner::getRightFootSource()
     {
+//std::cout << "\n\rR Source: " << rightFootSource;      
         return (rightFootSource);
     }
     void FootPlacementPlanner::setRightFootSource(const Transform2D& inRightFootSource)
@@ -464,6 +466,7 @@ namespace motion
 /*=======================================================================================================*/
     Transform2D FootPlacementPlanner::getLeftFootDestination()
     {
+//std::cout << "\n\rL Destination: " << leftFootDestination;         
         return (leftFootDestination);   
     }
     void FootPlacementPlanner::setLeftFootDestination(const Transform2D& inLeftFootDestination)
@@ -475,6 +478,7 @@ namespace motion
 /*=======================================================================================================*/
     Transform2D FootPlacementPlanner::getRightFootDestination()
     {
+//std::cout << "\n\rR Destination: " << rightFootDestination;          
         return (rightFootDestination);
     }
     void FootPlacementPlanner::setRightFootDestination(const Transform2D& inRightFootDestination)

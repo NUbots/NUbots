@@ -213,7 +213,7 @@ namespace motion
          * @brief [brief description]
          * @details [long description]
          */
-        bool isZeroVelocityRequest();
+        bool isZeroVelocityRequired();
         /**
          * @brief [brief description]
          * @details [long description]

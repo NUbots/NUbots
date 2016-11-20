@@ -92,7 +92,8 @@ namespace skills {
 
         on<Trigger<WalkStopped>>().then([this] 
         {
-            emit(std::make_unique<ActionPriorites>(ActionPriorites { subsumptionId, { 0, 0 }}));
+            // TODO : Right now, this causes the walk engine to become unaware of positions and negatively impact servo positions...
+            //emit(std::make_unique<ActionPriorites>(ActionPriorites { subsumptionId, { 0, 0 }}));
         });
     }
 }
