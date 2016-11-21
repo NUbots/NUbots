@@ -65,6 +65,8 @@ namespace motion
         , supportCompensationEnabled(false)
         , balanceOptimiserEnabled(false), pushRecoveryEnabled(false)
         , emitLocalisation(false), emitFootPosition(false)
+        , isFootMotionUpdated(false), isTorsoMotionUpdated(false)
+        , armMotionEnabled(false)
         , updateHandle(), updateOptimiser(), generateStandScriptReaction()
         , torsoPositionsTransform()
         , leftFootPosition2D(), rightFootPosition2D()
@@ -124,7 +126,6 @@ namespace motion
                 DEBUG_ITER++;            
             }
             motion = getMotionPhase();  
-            emit(graph("BKR Motion Phase", getMotionPhase())); 
             
             if(DEBUG) { log<NUClear::TRACE>("Messaging: Balance Kinematic Response - Update Robot Posture(0)"); }
                 updateBody(sensors);
@@ -146,7 +147,6 @@ namespace motion
         // Aim to avoid dependancy on target position to enhance statelessness and adaptive balance compensation...
         on<Trigger<FootMotionUpdate>>().then("Balance Response Planner - Received Update (Active Foot Position) Info", [this] (const FootMotionUpdate& info)
         {
-
             if(DEBUG) { log<NUClear::TRACE>("Messaging: Balance Kinematic Response - Received Update (Active Foot Position) Info(0)"); }
                 setMotionPhase(info.phase);
                 setActiveForwardLimb(info.activeForwardLimb);          
@@ -154,7 +154,8 @@ namespace motion
                 setRightFootPosition2D(info.rightFoot2D);           
                 // Transform feet positions to be relative to the robot torso...            
                 setLeftFootPosition(info.leftFoot3D.worldToLocal(getTorsoPosition3D()));         
-                setRightFootPosition(info.rightFoot3D.worldToLocal(getTorsoPosition3D()));                    
+                setRightFootPosition(info.rightFoot3D.worldToLocal(getTorsoPosition3D()));  
+                isFootMotionUpdated = true;
             if(DEBUG) { log<NUClear::TRACE>("Messaging: Balance Kinematic Response - Received Update (Active Foot Position) Info(1)"); }
         });
 
@@ -164,7 +165,8 @@ namespace motion
             if(DEBUG) { log<NUClear::TRACE>("Messaging: Balance Kinematic Response - Received Update (Active Torso Position) Info(0)"); }
                 setTorsoPositionLegs(info.frameArms);       
                 setTorsoPositionArms(info.frameLegs);             
-                setTorsoPosition3D(info.frame3D);            
+                setTorsoPosition3D(info.frame3D);     
+                isTorsoMotionUpdated = true;       
             if(DEBUG) { log<NUClear::TRACE>("Messaging: Balance Kinematic Response - Received Update (Active Torso Position) Info(1)"); }
         });
 
@@ -220,10 +222,10 @@ namespace motion
         //If feature enabled, apply balance compensation through support actuator...
         if (armRollCompensationEnabled) 
         {          
-            setLArmPosition(arma::vec3({getLArmPosition()[0], getLArmPosition()[1] + ((getRollParameter() * getArmCompensationScale()) * armRollParameter), getLArmPosition()[2]}));            
-            setRArmPosition(arma::vec3({getRArmPosition()[0], getRArmPosition()[1] + ((getRollParameter() * getArmCompensationScale()) * armRollParameter), getRArmPosition()[2]}));            
+            double shiftShoulder = ((getRollParameter() * getArmCompensationScale()) * armRollParameter);
+            setLArmPosition(arma::vec3({getLArmPosition()[0], getLArmPosition()[1] + (shiftShoulder > 0 ?  shiftShoulder : 0), getLArmPosition()[2]}));            
+            setRArmPosition(arma::vec3({getRArmPosition()[0], getRArmPosition()[1] - (shiftShoulder < 0 ? -shiftShoulder : 0), getRArmPosition()[2]}));            
         }
-
         //std::min(/*Maxium Roll*/0.0, std::max(/*Minimum Roll*/1.0,/*Calculated Roll Offset * 45° Base roll? */0.5));
     }      
 /*=======================================================================================================*/
@@ -347,7 +349,9 @@ namespace motion
             emit(graph("Right foot position", getRightFootPosition2D()));
             emit(graph("Left  foot position",  getLeftFootPosition2D()));
         }  
-        if(DEBUG_ITER++ > 100)
+
+        // Emit new robot posture once there has been valid data set in all relevant variables...
+        if(isMotionDataReady())
         {
             emit(std::make_unique<BalanceBodyUpdate>(getMotionPhase(), getLeftFootPosition(), getRightFootPosition(), getLArmPosition(), getRArmPosition()));
         }
@@ -368,16 +372,26 @@ namespace motion
 /*=======================================================================================================*/
     void BalanceKinematicResponse::updateUpperBody(const Sensors& sensors) 
     {
-        // Converts the phase into a sine wave that oscillates between 0 and 1 with a period of 2 phases
-        double easing = (1.0 - armRollParameter) * (std::sin(M_PI * getMotionPhase() - M_PI / 2.0) / 2.0 + 0.5);
-        if (getActiveForwardLimb() == LimbID::RIGHT_LEG) 
+        // Move arms so as to reduce ground reaction vector and converse momentum...
+        if(armMotionEnabled)
         {
-            easing = -easing + ((1.0 - armRollParameter) * 1.0); // Gets the 2nd half of the sine wave
-        }
+            // Converts the phase into a sine wave that oscillates between 0 and 1 with a period of 2 phases...
+            double easing = (1.0 - abs(getRollParameter())) * (std::sin(M_PI * getMotionPhase() - M_PI / 2.0) / 2.0 + 0.5);
+            if (getActiveForwardLimb() == LimbID::RIGHT_LEG) 
+            {
+                // Gets the 2nd half of the sine wave...
+                easing = -easing + ((1.0 - abs(getRollParameter())) * 1.0); 
+            }
 
-        // Linearly interpolate between the start and end positions using the easing parameter
-        setLArmPosition(easing * getLArmSource() + (1.0 - easing) * getLArmDestination());
-        setRArmPosition((1.0 - easing) * getRArmSource() + easing * getRArmDestination());
+            // Linearly interpolate between the start and end positions using the easing parameter
+            setLArmPosition(easing * getLArmSource() + (1.0 - easing) * getLArmDestination());
+            setRArmPosition((1.0 - easing) * getRArmSource() + easing * getRArmDestination());
+        }
+        else
+        {
+            setLArmPosition(getLArmSource());
+            setRArmPosition(getRArmSource());
+        }
 
         // Compensation for balance reactions with arm dynamic roll...
         armRollCompensation(sensors);
@@ -389,7 +403,7 @@ namespace motion
         Transform2D rightLegTorso = getTorsoPositionArms().worldToLocal(getRightFootPosition2D());
         double leftMinValue  =  5 * M_PI / 180 + std::max(0.0, rotLeftA) / 2 + std::max(0.0, leftLegTorso.y() - 0.04) / 0.02 * (6 * M_PI / 180);
         double rightMinValue = -5 * M_PI / 180 - std::max(0.0, rotRightA) / 2 - std::max(0.0, -rightLegTorso.y() - 0.04) / 0.02 * (6 * M_PI / 180);
-        
+    
         // Update shoulder pitch to move arm away from body
         // TODO min of max of values... for arm compensation...
         setLArmPosition(arma::vec3({getLArmPosition()[0], std::max(leftMinValue,  getLArmPosition()[1]), getLArmPosition()[2]}));
@@ -516,7 +530,14 @@ namespace motion
     void BalanceKinematicResponse::setMotionPhase(double inMotionPhase)  
     {
         footMotionPhase = inMotionPhase;
-    }       
+    }    
+/*=======================================================================================================*/
+//      ENCAPSULATION METHOD: Is Motion Data Ready
+/*=======================================================================================================*/    
+    bool BalanceKinematicResponse::isMotionDataReady()
+    {
+        return (isFootMotionUpdated && isTorsoMotionUpdated);
+    }        
 /*=======================================================================================================*/
 //      ENCAPSULATION METHOD: Left Arm Position
 /*=======================================================================================================*/    
@@ -743,7 +764,9 @@ namespace motion
         setLArmSource(arms["left"]["start"].as<arma::vec>());
         setLArmDestination(arms["left"]["end"].as<arma::vec>());
         setRArmSource(arms["right"]["start"].as<arma::vec>());
-        setRArmDestination(arms["right"]["end"].as<arma::vec>());       
+        setRArmDestination(arms["right"]["end"].as<arma::vec>()); 
+        armMotionEnabled = bkr_stance["moving_enabled"].as<bool>();
+
         
         auto& wlk_stance = wlk["stance"];
         auto& body   = wlk_stance["body"];
@@ -794,8 +817,6 @@ namespace motion
         armCompensationMax = balance["arm_compensation_max"].as<Expression>();
         supportCompensationMax = balance["support_compensation_max"].as<Expression>();
 
-
-
         balanceAmplitude = balance["amplitude"].as<Expression>();
         balanceWeight    = balance["weight"].as<Expression>();
         balanceOffset    = balance["offset"].as<Expression>();
@@ -817,7 +838,7 @@ namespace motion
         //ankleMod            = {-toeTipCompensation, 0};
 
         balancer.configure(balance);        
-        if(DEBUG) { log<NUClear::TRACE>("Configure BalanceKinematicResponse - Finish"); }  
+        if(DEBUG) { log<NUClear::TRACE>("Configure BalanceKinematicResponse - Finish"); }                 
     }          
 }  // motion
 }  // modules   

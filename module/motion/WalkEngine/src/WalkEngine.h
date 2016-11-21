@@ -106,59 +106,23 @@ namespace motion
          * Resource abstractions for id and handler instances...
          */
         ReactionHandle updateHandle;                    // handle(updateWaypoints), disabling when not moving will save unnecessary CPU resources
-        ReactionHandle generateStandScriptReaction;     // handle(generateStandAndSaveScript), disabling when not required for capturing standing phase
+        ReactionHandle handleStandScript;               // handle(generateStandAndSaveScript), disabling when not required for capturing standing phase
         size_t subsumptionId;                           // subsumption ID key to access motors
         
         /**
          * Anthropomorphic metrics for relevant humanoid joints & actuators...
          */
-        struct TorsoPositions                           // Active torso relative positions struct
-        {
-            TorsoPositions() 
-            : FrameArms()
-            , FrameLegs()
-            , Frame3D()
-            {
-                FrameArms = Transform2D();
-                FrameLegs = Transform2D();
-                Frame3D = Transform3D();
-            }
-            ~TorsoPositions() {}
-
-            Transform2D FrameArms;
-            Transform2D FrameLegs;
-            Transform3D Frame3D;
-        };
-        TorsoPositions torsoPositionsTransform;         // Active torso position
         Transform3D leftFootPositionTransform;          // Active left foot position
         Transform3D rightFootPositionTransform;         // Active right foot position
-        Transform2D uSupportMass;                       // Appears to be support foot pre-step position
-        LimbID activeForwardLimb;                       // The leg that is 'swinging' in the step, opposite of the support foot
-        LimbID activeLimbInitial;                       // TODO: Former initial non-support leg for deterministic walking approach
-        
+
         /**
          * Anthropomorphic metrics initialized from configuration script, see config file for documentation...
          */
-        double bodyTilt;                                // 
-        double bodyHeight;                              //
-        double supportFront;                            //
-        double supportFront2;                           //
-        double supportBack;                             //
-        double supportSideX;                            //
-        double supportSideY;                            //
-        double supportTurn;                             //    
-        double stanceLimitY2;                           //
-        double stepTime;                                //
-        double stepHeight;                              //
-        float  step_height_slow_fraction;               //
-        float  step_height_fast_fraction;               //
         float  gainRArm;                                //
         float  gainRLeg;                                //
         float  gainLArm;                                //
         float  gainLLeg;                                //
-        arma::mat::fixed<3,2> stepLimits;               //              
-        arma::vec2 footOffsetCoefficient;               //
-        Transform2D uLRFootOffset;                      // standard offset
+        float  gainHead;                                //           
 
         /**
          * Arm Position vectors initialized from configuration script, see config file for documentation...
@@ -167,21 +131,9 @@ namespace motion
         arma::vec3 armRPostureTransform;                //
 
         /**
-         * Ankle Position vectors initialized from configuration script, see config file for documentation...
-         */
-        arma::vec4 ankleImuParamX;                      //
-        arma::vec4 ankleImuParamY;                      //
-        arma::vec4 kneeImuParamX;                       //
-        arma::vec4 hipImuParamY;                        //
-        arma::vec4 armImuParamX;                        //
-        arma::vec4 armImuParamY;                        //
-
-        /**
          * Internal timing reference variables...
          */
-        double beginStepTime;                                   // The time when the current step begun
         double STAND_SCRIPT_DURATION;                           //
-        NUClear::clock::time_point pushTime;                    //
 
         /**
          * Motion data for relevant humanoid actuators...
@@ -205,16 +157,6 @@ namespace motion
         message::motion::kinematics::KinematicsModel kinematicsModel;   //
 
         /**
-         * Balance parameters initialized from configuration script, see config file for documentation...
-         */
-        double balanceAmplitude;                //
-        double balanceWeight;                   //
-        double balanceOffset;                   //
-        double balancePGain;                    //
-        double balanceIGain;                    //
-        double balanceDGain;                    //
-
-        /**
          * Actuator servo gains...
          */
         std::map<ServoID, float> jointGains;            // current gains sent to the servos
@@ -232,7 +174,7 @@ namespace motion
          * 
          * @param inTorsoPosition [description]
          */
-        void generateAndSaveStandScript();
+        void scriptStandAndSave();
         /**
          * @brief [brief description]
          * @details [long description]

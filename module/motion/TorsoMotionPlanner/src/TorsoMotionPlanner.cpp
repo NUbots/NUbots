@@ -126,10 +126,11 @@ namespace motion
         {            
             if(DEBUG) { log<NUClear::TRACE>("Messaging: Torso Motion Planner - Received Foot Motion Update(0)"); }
                 setMotionPhase(info.phase);                         //Real-time : FMP
-                if(isNewStepAvailable())
-                {                               
-                    updateTorsoPosition();
-                }
+                updateTorsoPosition();
+                // if(isNewStepAvailable())
+                // {                               
+                //     updateTorsoPosition();
+                // }
             if(DEBUG) { log<NUClear::TRACE>("Messaging: Torso Motion Planner - Received Foot Motion Update(1)"); }
         }).disable();
 
@@ -497,7 +498,7 @@ namespace motion
 
         phase1Single = wlk_walkCycle["single_support_phase"]["start"].as<Expression>();
         phase2Single = wlk_walkCycle["single_support_phase"]["end"].as<Expression>();
-        if(DEBUG) { log<NUClear::TRACE>("Configure TorsoMotionPlanner - Finish"); }      
+        if(DEBUG) { log<NUClear::TRACE>("Configure TorsoMotionPlanner - Finish"); }                    
     }    
 }  // motion
 }  // modules

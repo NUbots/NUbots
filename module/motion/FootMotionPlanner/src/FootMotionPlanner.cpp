@@ -250,7 +250,7 @@ namespace motion
         // Default Initial Torso Position...
         Transform2D uTorso = Transform2D({-getFootOffsetCoefficient(0), 0, 0});
         // Default Initial Left  Foot Position...
-        setLeftFootPosition(uTorso.localToWorld({getFootOffsetCoefficient(0),   kinematicsModel.Leg.HIP_OFFSET_Y - getFootOffsetCoefficient(1), 0}));        
+        setLeftFootPosition(uTorso.localToWorld({getFootOffsetCoefficient(0), kinematicsModel.Leg.HIP_OFFSET_Y - getFootOffsetCoefficient(1), 0}));        
         // Default Initial Right Foot Position...
         setRightFootPosition(uTorso.localToWorld({getFootOffsetCoefficient(0), -kinematicsModel.Leg.HIP_OFFSET_Y + getFootOffsetCoefficient(1), 0}));               
     }    
@@ -523,7 +523,7 @@ namespace motion
 
         phase1Single = wlk_walkCycle["single_support_phase"]["start"].as<Expression>();
         phase2Single = wlk_walkCycle["single_support_phase"]["end"].as<Expression>();         
-        if(DEBUG) { log<NUClear::TRACE>("Configure FootMotionPlanner - Finish"); }
+        if(DEBUG) { log<NUClear::TRACE>("Configure FootMotionPlanner - Finish"); }               
     }
 }  // motion
 }  // modules

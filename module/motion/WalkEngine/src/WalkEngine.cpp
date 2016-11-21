@@ -83,26 +83,15 @@ namespace motion
     : Reactor(std::move(environment))
         , DEBUG(false), DEBUG_ITER(0)
         , newPostureReceived(false)
-        , updateHandle(), generateStandScriptReaction(), subsumptionId(1)
-        , leftFootPositionTransform(), rightFootPositionTransform(), uSupportMass()
-        , activeForwardLimb(), activeLimbInitial(LimbID::LEFT_LEG)
-        , bodyTilt(0.0), bodyHeight(0.0)
-        , supportFront(0.0), supportFront2(0.0), supportBack(0.0)
-        , supportSideX(0.0), supportSideY(0.0), supportTurn(0.0)   
-        , stanceLimitY2(0.0), stepTime(0.0), stepHeight(0.0)
-        , step_height_slow_fraction(0.0f), step_height_fast_fraction(0.0f)
-        , gainRArm(0.0f), gainRLeg(0.0f), gainLArm(0.0f), gainLLeg(0.0f), stepLimits(arma::fill::zeros)
-        , footOffsetCoefficient(arma::fill::zeros), uLRFootOffset()
+        , updateHandle(), handleStandScript(), subsumptionId(1)
+        , leftFootPositionTransform(), rightFootPositionTransform()
+        , gainRArm(0.0f), gainRLeg(0.0f), gainLArm(0.0f), gainLLeg(0.0f), gainHead(0.0f)
         , armLPostureTransform(), armRPostureTransform()
-        , ankleImuParamX(), ankleImuParamY(), kneeImuParamX()
-        , hipImuParamY(), armImuParamX(), armImuParamY()
-        , beginStepTime(0.0), STAND_SCRIPT_DURATION(0.0), pushTime()
+        , STAND_SCRIPT_DURATION(0.0)
         , velocityHigh(0.0), accelerationTurningFactor(0.0), velocityLimits(arma::fill::zeros)
         , accelerationLimits(arma::fill::zeros), accelerationLimitsHigh(arma::fill::zeros)
         , velocityCurrent(), velocityCommand(), velFastForward(0.0), velFastTurn(0.0)
         , kinematicsModel()
-        , balanceAmplitude(0.0), balanceWeight(0.0), balanceOffset(0.0)
-        , balancePGain(0.0), balanceIGain(0.0), balanceDGain(0.0)
         , jointGains(), servoControlPGains()
         , lastFootGoalRotation(), footGoalErrorSum()       
     {
@@ -158,18 +147,19 @@ namespace motion
             if(DEBUG) { log<NUClear::TRACE>("WalkEngine - Trigger BalanceBodyUpdate(1)"); }
         }).disable();
 
+        // Update walk configuration with optimiser parameters...
         on<Trigger<WalkOptimiserCommand>>().then([this] (const WalkOptimiserCommand& command) 
         {
             configure(command.walkConfig);
             emit(std::make_unique<WalkConfigSaved>());
         });
 
-        //generateStandScriptReaction = on<Trigger<Sensors>, Single>().then([this] (/*const Sensors& sensors*/) 
-        //{
-        //    generateStandScriptReaction.disable();
-        //    //generateAndSaveStandScript(sensors);
-        //    start();
-        //});
+        // Update stand configuration with active walk posture...
+        handleStandScript = on<Trigger<Sensors>, Single>().then([this]
+        {
+           handleStandScript.disable();
+           scriptStandAndSave();
+        });
 
         //Activation of WalkEngine (and default) subordinate actuator modules...
         on<Trigger<EnableWalkEngineCommand>>().then([this] (const EnableWalkEngineCommand& command) 
@@ -183,27 +173,25 @@ namespace motion
             updateHandle.enable();
         });
 
+        // If WalkEngine no longer requested, cease updating...
         on<Trigger<DisableWalkEngineCommand>>().then([this]
         {
-            // If nobody needs the walk engine, stop updating it...
-            // emit<Scope::DIRECT>(std::move(std::make_unique<DisableFootPlacement>()));
-            // emit<Scope::DIRECT>(std::move(std::make_unique<DisableFootMotion>()));
-            // emit<Scope::DIRECT>(std::move(std::make_unique<DisableTorsoMotion>()));
-            // emit<Scope::DIRECT>(std::move(std::make_unique<DisableBalanceResponse>()));
-            // updateHandle.disable(); 
+            //If nobody needs the walk engine, stop updating dependancies...
+            emit<Scope::DIRECT>(std::move(std::make_unique<DisableFootPlacement>()));
+            emit<Scope::DIRECT>(std::move(std::make_unique<DisableFootMotion>()));
+            emit<Scope::DIRECT>(std::move(std::make_unique<DisableTorsoMotion>()));
+            emit<Scope::DIRECT>(std::move(std::make_unique<DisableBalanceResponse>()));
+            updateHandle.disable(); 
         });
     }
 /*=======================================================================================================*/
-//      NAME: generateAndSaveStandScript
+//      NAME: scriptStandAndSave
 /*=======================================================================================================*/
-    void WalkEngine::generateAndSaveStandScript() 
+    void WalkEngine::scriptStandAndSave() 
     {
-        //reset();
-        //stanceReset();
-        auto waypoints = updateWaypoints();
-
         Script standScript;
         Script::Frame frame;
+        auto waypoints = updateWaypoints();
         frame.duration = std::chrono::milliseconds(int(round(1000 * STAND_SCRIPT_DURATION)));
         for (auto& waypoint : *waypoints) 
         {
@@ -214,9 +202,6 @@ namespace motion
         saveScript->path = "scripts/Stand.yaml";
         saveScript->config = standScript;
         emit(std::move(saveScript));
-        //Try updateWaypoints(); ?
-        //reset();
-        //stanceReset();
     }      
 /*=======================================================================================================*/
 //      NAME: updateWaypoints
@@ -240,7 +225,7 @@ namespace motion
         auto waypoints = std::make_unique<std::vector<ServoCommand>>();
         waypoints->reserve(6);
 
-        NUClear::clock::time_point time = NUClear::clock::now() + std::chrono::nanoseconds(std::nano::den/UPDATE_FREQUENCY);
+        NUClear::clock::time_point time = NUClear::clock::now() + std::chrono::nanoseconds(std::nano::den / UPDATE_FREQUENCY);
         waypoints->push_back({ subsumptionId, time, ServoID::R_SHOULDER_PITCH, float(getRArmPosition()[0]), jointGains[ServoID::R_SHOULDER_PITCH], 100 });
         waypoints->push_back({ subsumptionId, time, ServoID::R_SHOULDER_ROLL,  float(getRArmPosition()[1]), jointGains[ServoID::R_SHOULDER_ROLL], 100 });
         waypoints->push_back({ subsumptionId, time, ServoID::R_ELBOW,          float(getRArmPosition()[2]), jointGains[ServoID::R_ELBOW], 100 });
@@ -259,12 +244,11 @@ namespace motion
         waypoints->reserve(16);
 
         NUClear::clock::time_point time = NUClear::clock::now() + std::chrono::nanoseconds(std::nano::den / UPDATE_FREQUENCY);
-        //std::cout << (std::chrono::nanoseconds(std::nano::den / UPDATE_FREQUENCY)).count() << "\n\r";
 
         for (auto& joint : joints) 
         {
+            // Supports seperate parameterised gains for each leg...
             waypoints->push_back({ subsumptionId, time, joint.first, joint.second, jointGains[joint.first], 100 }); 
-            // TODO: support separate gains for each leg
         }
 
         return std::move(waypoints);
@@ -350,17 +334,6 @@ namespace motion
         armRPostureTransform = inRArm;
     }    
 /*=======================================================================================================*/
-//      ENCAPSULATION METHOD: Support Mass
-/*=======================================================================================================*/
-    Transform2D WalkEngine::getSupportMass()
-    {
-        return (uSupportMass);
-    }
-    void WalkEngine::setSupportMass(const Transform2D& inSupportMass)
-    {
-        uSupportMass = inSupportMass;
-    }        
-/*=======================================================================================================*/
 //      ENCAPSULATION METHOD: Left Foot Position
 /*=======================================================================================================*/
     Transform3D WalkEngine::getLeftFootPosition()
@@ -399,16 +372,25 @@ namespace motion
         gainRArm = servos_gain["right_arm"].as<Expression>();
         gainLLeg = servos_gain["left_leg"].as<Expression>();
         gainRLeg = servos_gain["right_leg"].as<Expression>();
-
+        gainHead = servos_gain["head"].as<Expression>();
+  
         for(ServoID i = ServoID(0); i < ServoID::NUMBER_OF_SERVOS; i = ServoID(int(i)+1))
         {
             if(int(i) < 6)
             {
-                jointGains[i] = gainRArm;
+                jointGains[i]   = gainRArm;              
+                i = ServoID(int(i)+1);
+                jointGains[i]   = gainLArm;               
             } 
-            else 
+            else if(int(i) < 18)
             {
-                jointGains[i] = gainRLeg;
+                jointGains[i]   = gainRLeg;               
+                i = ServoID(int(i)+1);
+                jointGains[i]   = gainLLeg;            
+            }
+            else
+            {
+                jointGains[i]   = gainHead;               
             }
         }
 
@@ -421,32 +403,10 @@ namespace motion
             servoControlPGains[sl] = p;
         }       
 
-        auto& sensors  = wlk["sensors"];
-        auto& sensors_gyro = sensors["gyro"];
-
-        auto& sensors_imu  = sensors["imu"];
-        ankleImuParamX  = sensors_imu["ankleImuParamX"].as<arma::vec>();
-        ankleImuParamY  = sensors_imu["ankleImuParamY"].as<arma::vec>();
-        kneeImuParamX   = sensors_imu["kneeImuParamX"].as<arma::vec>();
-        hipImuParamY    = sensors_imu["hipImuParamY"].as<arma::vec>();
-        armImuParamX    = sensors_imu["armImuParamX"].as<arma::vec>();
-        armImuParamY    = sensors_imu["armImuParamY"].as<arma::vec>();        
-
         auto& stance = wlk["stance"];
-        auto& body   = stance["body"];
-        bodyHeight   = body["height"].as<Expression>();
-        bodyTilt     = body["tilt"].as<Expression>();
-        stanceLimitY2 = kinematicsModel.Leg.LENGTH_BETWEEN_LEGS() - stance["limit_margin_y"].as<Expression>(); 
         STAND_SCRIPT_DURATION = stance["STAND_SCRIPT_DURATION"].as<Expression>();   
 
         auto& walkCycle = wlk["walk_cycle"];
-        stepTime    = walkCycle["step_time"].as<Expression>();
-        stepHeight  = walkCycle["step"]["height"].as<Expression>();
-        stepLimits  = walkCycle["step"]["limits"].as<arma::mat::fixed<3,2>>();
-
-        step_height_slow_fraction = walkCycle["step"]["height_slow_fraction"].as<float>();
-        step_height_fast_fraction = walkCycle["step"]["height_fast_fraction"].as<float>();        
-
         auto& velocity = walkCycle["velocity"];
         velocityLimits = velocity["limits"].as<arma::mat::fixed<3,2>>();
         velocityHigh   = velocity["high_speed"].as<Expression>();

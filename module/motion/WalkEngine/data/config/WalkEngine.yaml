@@ -8,6 +8,7 @@ walk_engine:
       right_arm: 30
       left_leg:  30
       right_leg: 30
+      head: 30
       p_gain: 30
       d_gain: 0
       i_gain: 0
@@ -47,7 +48,7 @@ walk_engine:
   stance:
     body:
       height: 0.265 # Body height, in meters; changing this will alter how high the robot's natural stance is.
-      tilt:   25 * pi / 180  # The angle of the torso when walking
+      tilt:   20 * pi / 180  # The angle of the torso when walking
 
     limit_margin_y: 0.015  # gToe/heel + length between legs overlap checking values
 
@@ -112,11 +113,12 @@ balance_kinematic_response:
           -   80 * pi / 180 # Shoulder Pitch
           -  -15 * pi / 180 # Shoulder Roll
           -  -90 * pi / 180 # Elbow
+    moving_enabled: false
 
   balance: # TODO: balance params disabled until they are futher understood
     enabled: true
     optimiser_enabled:    false
-    hip_compensation:     true
+    hip_compensation:     false
     toe_compensation:     false
     ankle_compensation:   false
     arm_compensation:     false

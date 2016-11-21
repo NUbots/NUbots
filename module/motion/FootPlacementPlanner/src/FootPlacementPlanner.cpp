@@ -178,8 +178,7 @@ namespace motion
             setSupportMass(uRightFootModded.localToWorld({-getFootOffsetCoefficient(0), getFootOffsetCoefficient(1), 0}));  
         }                   
         emit(std::make_unique<NewStepTargetInfo>(stepTime, inVelocityCurrent, getSupportMass())); //New Step Target Information
-        emit(std::make_unique<NewFootTargetInfo>(getLeftFootSource(), getRightFootSource(), getActiveForwardLimb(), getLeftFootDestination(), getRightFootDestination()));  //New Foot Target Information
-std::cout << "\n\rinVelocityCurrent: " << inVelocityCurrent;     
+        emit(std::make_unique<NewFootTargetInfo>(getLeftFootSource(), getRightFootSource(), getActiveForwardLimb(), getLeftFootDestination(), getRightFootDestination()));  //New Foot Target Information   
     }
 /*=======================================================================================================*/
 //      METHOD: getNewFootTarget
@@ -524,7 +523,7 @@ std::cout << "\n\rinVelocityCurrent: " << inVelocityCurrent;
 
         phase1Single = walkCycle["single_support_phase"]["start"].as<Expression>();
         phase2Single = walkCycle["single_support_phase"]["end"].as<Expression>();         
-        if(DEBUG) { log<NUClear::TRACE>("Configure FootPlacementPlanner - Finish"); }
+        if(DEBUG) { log<NUClear::TRACE>("Configure FootPlacementPlanner - Finish"); }               
     }
 }  // motion    
 }  // modules

@@ -72,7 +72,7 @@ namespace motion
          * The number of servo updates performnced per second
          * TODO: Probably be a global config somewhere, waiting on NUClear to support runtime on<Every> arguments
          */
-        static constexpr size_t UPDATE_FREQUENCY = 80;
+        static constexpr size_t UPDATE_FREQUENCY = 90;
 
         static constexpr const char* CONFIGURATION_PATH = "BalanceKinematicResponse.yaml";
         static constexpr const char* CONFIGURATION_MSSG = "Balance Response Planner - Configure";
@@ -111,6 +111,9 @@ namespace motion
         bool pushRecoveryEnabled;               //
         bool emitLocalisation;                  //
         bool emitFootPosition;                  //
+        bool isFootMotionUpdated;
+        bool isTorsoMotionUpdated;
+        bool armMotionEnabled;                  // Determines if the upper body can move the arms throughout motion.
 
         /**
          * Resource abstractions for id and handler instances...
@@ -384,6 +387,11 @@ namespace motion
          * @details [long description]
          */
         double getTime();
+        /**
+         * @brief [brief description]
+         * @details [long description]
+         */
+        bool isMotionDataReady();
         /**
          * This is an easing function that returns 3 values {x,y,z} with the range [0,1]
          * This is used to 'ease' the foot path through its trajectory.
