@@ -84,8 +84,7 @@ namespace motion
         , DEBUG(false), DEBUG_ITER(0)
         , newPostureReceived(false)
         , updateHandle(), generateStandScriptReaction(), subsumptionId(1)
-        , torsoPositionsTransform(), leftFootPositionTransform()
-        , rightFootPositionTransform(), uSupportMass()
+        , leftFootPositionTransform(), rightFootPositionTransform(), uSupportMass()
         , activeForwardLimb(), activeLimbInitial(LimbID::LEFT_LEG)
         , bodyTilt(0.0), bodyHeight(0.0)
         , supportFront(0.0), supportFront2(0.0), supportBack(0.0)
@@ -149,9 +148,6 @@ namespace motion
             if(DEBUG) { log<NUClear::TRACE>("WalkEngine - Trigger BalanceBodyUpdate(0)"); }
                 setLeftFootPosition(info.leftFoot);
                 setRightFootPosition(info.rightFoot);
-                setTorsoPositionArms(info.frameArms);
-                setTorsoPositionLegs(info.frameLegs);
-                setTorsoPosition3D(info.frame3D);
                 setLArmPosition(info.armLPosition);
                 setRArmPosition(info.armRPosition);
             
@@ -190,11 +186,11 @@ namespace motion
         on<Trigger<DisableWalkEngineCommand>>().then([this]
         {
             // If nobody needs the walk engine, stop updating it...
-            emit<Scope::DIRECT>(std::move(std::make_unique<DisableFootPlacement>()));
-            emit<Scope::DIRECT>(std::move(std::make_unique<DisableFootMotion>()));
-            emit<Scope::DIRECT>(std::move(std::make_unique<DisableTorsoMotion>()));
-            emit<Scope::DIRECT>(std::move(std::make_unique<DisableBalanceResponse>()));
-            updateHandle.disable(); 
+            // emit<Scope::DIRECT>(std::move(std::make_unique<DisableFootPlacement>()));
+            // emit<Scope::DIRECT>(std::move(std::make_unique<DisableFootMotion>()));
+            // emit<Scope::DIRECT>(std::move(std::make_unique<DisableTorsoMotion>()));
+            // emit<Scope::DIRECT>(std::move(std::make_unique<DisableBalanceResponse>()));
+            // updateHandle.disable(); 
         });
     }
 /*=======================================================================================================*/
@@ -353,33 +349,6 @@ namespace motion
     {
         armRPostureTransform = inRArm;
     }    
-/*=======================================================================================================*/
-//      ENCAPSULATION METHOD: Torso Position
-/*=======================================================================================================*/
-    Transform2D WalkEngine::getTorsoPositionArms()
-    {
-        return (torsoPositionsTransform.FrameArms);
-    }
-    void WalkEngine::setTorsoPositionLegs(const Transform2D& inTorsoPosition)
-    {
-        torsoPositionsTransform.FrameLegs = inTorsoPosition;
-    }
-    Transform2D WalkEngine::getTorsoPositionLegs()
-    {
-        return (torsoPositionsTransform.FrameLegs);
-    }        
-    void WalkEngine::setTorsoPositionArms(const Transform2D& inTorsoPosition)
-    {
-        torsoPositionsTransform.FrameArms = inTorsoPosition;
-    }   
-    Transform3D WalkEngine::getTorsoPosition3D()
-    {
-        return (torsoPositionsTransform.Frame3D);
-    }            
-    void WalkEngine::setTorsoPosition3D(const Transform3D& inTorsoPosition)
-    {
-        torsoPositionsTransform.Frame3D = inTorsoPosition;
-    }  
 /*=======================================================================================================*/
 //      ENCAPSULATION METHOD: Support Mass
 /*=======================================================================================================*/

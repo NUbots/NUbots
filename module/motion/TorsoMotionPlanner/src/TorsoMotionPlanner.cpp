@@ -187,8 +187,6 @@ namespace motion
         arma::vec4 zmpCoefficients;
         setTorsoSource(getTorsoDestination());
         setTorsoDestination(stepTorso(getLeftFootDestination(), getRightFootDestination(), 0.5));
-// std::cout << "\n\rTorso Source     \t[X= " << getTorsoSource().x() << "]\t[Y= " << getTorsoSource().y() << "]\n\r";        
-// std::cout << "\n\rTorso Destination\t[X= " << getTorsoDestination().x() << "]\t[Y= " << getTorsoDestination().y() << "]\n\r";                 
         // Compute ZMP coefficients...
         zmpCoefficients.rows(0,1) = zmpSolve(getSupportMass().x(), getTorsoSource().x(), getTorsoDestination().x(), getTorsoSource().x(), getTorsoDestination().x(), phase1Single, phase2Single, stepTime, zmpTime);
         zmpCoefficients.rows(2,3) = zmpSolve(getSupportMass().y(), getTorsoSource().y(), getTorsoDestination().y(), getTorsoSource().y(), getTorsoDestination().y(), phase1Single, phase2Single, stepTime, zmpTime);

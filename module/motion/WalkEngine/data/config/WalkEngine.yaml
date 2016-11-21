@@ -37,12 +37,12 @@ walk_engine:
       # Ratio to normalize gyro gains into units of degree/second
       gyroFactor: 0.18 * 0.273 * pi / 180 * 300 / 1024 # dps to rad/s conversion
     imu:  
-      ankleImuParamX: [0.5, 0.3 * 0.00025126605, 1 * pi / 180, 25 * pi / 180]
-      ankleImuParamY: [0.5, 1.2 * 0.00025126605, 1 * pi / 180, 25 * pi / 180]
-      kneeImuParamX:  [0.5, 0.7 * 0.00025126605, 1 * pi / 180, 25 * pi / 180]
-      hipImuParamY:   [0.5, 0.3 * 0.00025126605, 1 * pi / 180, 25 * pi / 180]
+      ankleImuParamX: [0.5, 0.3 * 0.00025126605,   1 * pi / 180, 25 * pi / 180]
+      ankleImuParamY: [0.5, 1.2 * 0.00025126605,   1 * pi / 180, 25 * pi / 180]
+      kneeImuParamX:  [0.5, 0.7 * 0.00025126605,   1 * pi / 180, 25 * pi / 180]
+      hipImuParamY:   [0.5, 0.3 * 0.00025126605,   1 * pi / 180, 25 * pi / 180]
       armImuParamX:   [0.5, 10.0 * 0.00025126605, 20 * pi / 180, 45 * pi / 180]
-      armImuParamY:   [0.5, 0.0 * 0.00025126605, 20 * pi / 180, 45 * pi / 180]   # supportTurn: 0.02        
+      armImuParamY:   [0.5, 0.0 * 0.00025126605,  20 * pi / 180, 45 * pi / 180]   # supportTurn: 0.02        
   
   stance:
     body:
@@ -90,7 +90,7 @@ walk_engine:
 balance_kinematic_response:
   debugging:
     enabled: false  # Determine whether or not to include NUclear trace logs during execution...
-    emit_localisation: true # Emit fake localisation Self objects based on the walk engine's blind belief
+    emit_localisation: false # Emit fake localisation Self objects based on the walk engine's blind belief
 
   stance: 
     arms:

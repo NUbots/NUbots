@@ -221,7 +221,7 @@ namespace motion
         if (armRollCompensationEnabled) 
         {          
             setLArmPosition(arma::vec3({getLArmPosition()[0], getLArmPosition()[1] + ((getRollParameter() * getArmCompensationScale()) * armRollParameter), getLArmPosition()[2]}));            
-            setRArmPosition(arma::vec3({getRArmPosition()[0], getRArmPosition()[1] + ((getRollParameter() * getArmCompensationScale())) * armRollParameter, getRArmPosition()[2]}));            
+            setRArmPosition(arma::vec3({getRArmPosition()[0], getRArmPosition()[1] + ((getRollParameter() * getArmCompensationScale()) * armRollParameter), getRArmPosition()[2]}));            
         }
 
         //std::min(/*Maxium Roll*/0.0, std::max(/*Minimum Roll*/1.0,/*Calculated Roll Offset * 45° Base roll? */0.5));
@@ -329,27 +329,29 @@ namespace motion
     void BalanceKinematicResponse::updateBody(const Sensors& sensors)
     {
         // Apply balance and compensation functions to robot posture...
-        //if(balanceEnabled)
-        //{
+        if(balanceEnabled)
+        {
             updateLowerBody(sensors);
             updateUpperBody(sensors);
-        //}
+        }
 
         //DEBUGGING: Emit relative torso position with respect to world model... 
         if (emitLocalisation) 
         {
-            //localise(getTorsoPositionArms().localToWorld({-kinematicsModel.Leg.HIP_OFFSET_X, 0, 0}));
+            localise(getTorsoPositionArms().localToWorld({-kinematicsModel.Leg.HIP_OFFSET_X, 0, 0}));
         }
 
         //DEBUGGING: Emit relative feet position with respect to robot torso model... 
         if (emitFootPosition)
         {
-            //emit(graph("Right foot position", rightFootTorso.translation()));
-            //emit(graph("Left  foot position",  leftFootTorso.translation()));
+            emit(graph("Right foot position", getRightFootPosition2D()));
+            emit(graph("Left  foot position",  getLeftFootPosition2D()));
         }  
-
-        emit(std::make_unique<BalanceBodyUpdate>(getMotionPhase(), getLeftFootPosition(), getRightFootPosition(), getTorsoPositionArms(), getTorsoPositionLegs(), getTorsoPosition3D(), getLArmPosition(), getRArmPosition()));
-    }      
+        if(DEBUG_ITER++ > 100)
+        {
+            emit(std::make_unique<BalanceBodyUpdate>(getMotionPhase(), getLeftFootPosition(), getRightFootPosition(), getLArmPosition(), getRArmPosition()));
+        }
+    } 
 /*=======================================================================================================*/
 //      METHOD: updateLowerBody
 /*=======================================================================================================*/
@@ -367,10 +369,10 @@ namespace motion
     void BalanceKinematicResponse::updateUpperBody(const Sensors& sensors) 
     {
         // Converts the phase into a sine wave that oscillates between 0 and 1 with a period of 2 phases
-        double easing = std::sin(M_PI * getMotionPhase() - M_PI / 2.0) / 2.0 + 0.5;
+        double easing = (1.0 - armRollParameter) * (std::sin(M_PI * getMotionPhase() - M_PI / 2.0) / 2.0 + 0.5);
         if (getActiveForwardLimb() == LimbID::RIGHT_LEG) 
         {
-            easing = -easing + 1.0; // Gets the 2nd half of the sine wave
+            easing = -easing + ((1.0 - armRollParameter) * 1.0); // Gets the 2nd half of the sine wave
         }
 
         // Linearly interpolate between the start and end positions using the easing parameter
@@ -381,14 +383,14 @@ namespace motion
         armRollCompensation(sensors);
 
         // Start arm/leg collision/prevention
-        double rotLeftA = normalizeAngle(getLeftFootPosition2D().angle() - getTorsoPositionArms().angle());
+        double rotLeftA  = normalizeAngle(getLeftFootPosition2D().angle() - getTorsoPositionArms().angle());
         double rotRightA = normalizeAngle(getTorsoPositionArms().angle() - getRightFootPosition2D().angle());
-        Transform2D leftLegTorso = getTorsoPositionArms().worldToLocal(getLeftFootPosition2D());
+        Transform2D leftLegTorso  = getTorsoPositionArms().worldToLocal(getLeftFootPosition2D());
         Transform2D rightLegTorso = getTorsoPositionArms().worldToLocal(getRightFootPosition2D());
-        double leftMinValue = 5 * M_PI / 180 + std::max(0.0, rotLeftA) / 2 + std::max(0.0, leftLegTorso.y() - 0.04) / 0.02 * (6 * M_PI / 180);
+        double leftMinValue  =  5 * M_PI / 180 + std::max(0.0, rotLeftA) / 2 + std::max(0.0, leftLegTorso.y() - 0.04) / 0.02 * (6 * M_PI / 180);
         double rightMinValue = -5 * M_PI / 180 - std::max(0.0, rotRightA) / 2 - std::max(0.0, -rightLegTorso.y() - 0.04) / 0.02 * (6 * M_PI / 180);
         
-        // update shoulder pitch to move arm away from body
+        // Update shoulder pitch to move arm away from body
         // TODO min of max of values... for arm compensation...
         setLArmPosition(arma::vec3({getLArmPosition()[0], std::max(leftMinValue,  getLArmPosition()[1]), getLArmPosition()[2]}));
         setRArmPosition(arma::vec3({getRArmPosition()[0], std::min(rightMinValue, getRArmPosition()[1]), getRArmPosition()[2]}));
