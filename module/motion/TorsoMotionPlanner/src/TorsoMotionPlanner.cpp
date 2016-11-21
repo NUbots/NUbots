@@ -126,11 +126,10 @@ namespace motion
         {            
             if(DEBUG) { log<NUClear::TRACE>("Messaging: Torso Motion Planner - Received Foot Motion Update(0)"); }
                 setMotionPhase(info.phase);                         //Real-time : FMP
-                updateTorsoPosition();
-                // if(isNewStepAvailable())
-                // {                               
-                //     updateTorsoPosition();
-                // }
+                if(isNewStepAvailable())
+                {                               
+                    updateTorsoPosition();
+                }
             if(DEBUG) { log<NUClear::TRACE>("Messaging: Torso Motion Planner - Received Foot Motion Update(1)"); }
         }).disable();
 

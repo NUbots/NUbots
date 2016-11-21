@@ -83,7 +83,7 @@ namespace motion
     : Reactor(std::move(environment))
         , DEBUG(false), DEBUG_ITER(0)
         , newPostureReceived(false)
-        , updateHandle(), handleStandScript(), subsumptionId(1)
+        , handleUpdate(), handleStandScript(), subsumptionId(1)
         , leftFootPositionTransform(), rightFootPositionTransform()
         , gainRArm(0.0f), gainRLeg(0.0f), gainLArm(0.0f), gainLLeg(0.0f), gainHead(0.0f)
         , armLPostureTransform(), armRPostureTransform()
@@ -132,14 +132,26 @@ namespace motion
         });
 
         // Update goal robot posture given new balance information...
-        updateHandle = on<Trigger<BalanceBodyUpdate>>().then("Walk Engine - Received update (Balanced Robot Posture) Info", [this](const BalanceBodyUpdate& info)
+        handleUpdate = on<Trigger<BalanceBodyUpdate>>().then("Walk Engine - Received update (Balanced Robot Posture) Info", [this](const BalanceBodyUpdate& info)
         {
             if(DEBUG) { log<NUClear::TRACE>("WalkEngine - Trigger BalanceBodyUpdate(0)"); }
                 setLeftFootPosition(info.leftFoot);
                 setRightFootPosition(info.rightFoot);
                 setLArmPosition(info.armLPosition);
                 setRArmPosition(info.armRPosition);
-            
+                
+                static double motion = info.phase;
+                if (motion > info.phase)
+                {
+                    std::cout << DEBUG_ITER << "\n\r";
+                    DEBUG_ITER = 0;
+                }
+                else
+                {
+                    DEBUG_ITER++;            
+                }
+                motion = info.phase; 
+
                 emit(graph("WE: Left  Foot Joint Position",    getLeftFootPosition()));   
                 emit(graph("WE: Right Foot Joint Position",   getRightFootPosition()));                    
                 
@@ -170,7 +182,7 @@ namespace motion
             emit<Scope::DIRECT>(std::move(std::make_unique<EnableFootMotion>()));
             emit<Scope::DIRECT>(std::move(std::make_unique<EnableTorsoMotion>()));
             emit<Scope::DIRECT>(std::move(std::make_unique<EnableBalanceResponse>()));
-            updateHandle.enable();
+            handleUpdate.enable();
         });
 
         // If WalkEngine no longer requested, cease updating...
@@ -181,7 +193,7 @@ namespace motion
             emit<Scope::DIRECT>(std::move(std::make_unique<DisableFootMotion>()));
             emit<Scope::DIRECT>(std::move(std::make_unique<DisableTorsoMotion>()));
             emit<Scope::DIRECT>(std::move(std::make_unique<DisableBalanceResponse>()));
-            updateHandle.disable(); 
+            handleUpdate.disable(); 
         });
     }
 /*=======================================================================================================*/

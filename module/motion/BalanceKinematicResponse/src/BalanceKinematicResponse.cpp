@@ -37,9 +37,9 @@ namespace motion
     using message::input::PushDetection;
     using message::input::FallingDetected;
 
-    using message::motion::FootMotionUpdate;
+    using FootMotionUpdate  = message::motion::FootMotionUpdate;
     using message::motion::HeadMotionUpdate;
-    using message::motion::TorsoMotionUpdate;
+    using TorsoMotionUpdate = message::motion::TorsoMotionUpdate;
     using message::motion::BalanceBodyUpdate;
     using message::motion::EnableBalanceResponse;
     using message::motion::DisableBalanceResponse;
@@ -111,27 +111,6 @@ namespace motion
             kinematicsModel = model;
         });
 
-        // Tune requested robot posture such that balance is maintained and motion is differential... 
-        updateHandle = on<Every<UPDATE_FREQUENCY, Per<std::chrono::seconds>>, With<Sensors>, Single, Priority::HIGH>()
-        .then("Balance Response Planner - Update Robot Posture", [this] (const Sensors& sensors)
-        {       
-            static double motion = getMotionPhase();
-            if (motion > getMotionPhase())
-            {
-                // std::cout << DEBUG_ITER << "\n\r";
-                DEBUG_ITER = 0;
-            }
-            else
-            {
-                DEBUG_ITER++;            
-            }
-            motion = getMotionPhase();  
-            
-            if(DEBUG) { log<NUClear::TRACE>("Messaging: Balance Kinematic Response - Update Robot Posture(0)"); }
-                updateBody(sensors);
-            if(DEBUG) { log<NUClear::TRACE>("Messaging: Balance Kinematic Response - Update Robot Posture(1)"); }
-        }).disable();
-
         // TODO: Optimise balance configuration using feedback from environmental noise...
         updateOptimiser = on<Every<10, Per<std::chrono::milliseconds>>, With<Configuration>>().then([this](const Configuration& config) 
         {
@@ -145,30 +124,38 @@ namespace motion
         }).disable(); 
 
         // Aim to avoid dependancy on target position to enhance statelessness and adaptive balance compensation...
-        on<Trigger<FootMotionUpdate>>().then("Balance Response Planner - Received Update (Active Foot Position) Info", [this] (const FootMotionUpdate& info)
+        // Single, Priority::HIGH //
+        updateHandle = on<Trigger<TorsoMotionUpdate>, With<FootMotionUpdate>, With<Sensors>>().then("Balance Response Planner - Received Update (Torso & Foot Position) Info", [this] (
+            const TorsoMotionUpdate& tmu,
+            const FootMotionUpdate&  fmu, 
+            const Sensors&       sensors)
         {
-            if(DEBUG) { log<NUClear::TRACE>("Messaging: Balance Kinematic Response - Received Update (Active Foot Position) Info(0)"); }
-                setMotionPhase(info.phase);
-                setActiveForwardLimb(info.activeForwardLimb);          
-                setLeftFootPosition2D(info.leftFoot2D);       
-                setRightFootPosition2D(info.rightFoot2D);           
-                // Transform feet positions to be relative to the robot torso...            
-                setLeftFootPosition(info.leftFoot3D.worldToLocal(getTorsoPosition3D()));         
-                setRightFootPosition(info.rightFoot3D.worldToLocal(getTorsoPosition3D()));  
-                isFootMotionUpdated = true;
-            if(DEBUG) { log<NUClear::TRACE>("Messaging: Balance Kinematic Response - Received Update (Active Foot Position) Info(1)"); }
-        });
-
-        // Aim to avoid dependancy on target position to enhance statelessness and adaptive balance compensation...
-        on<Trigger<TorsoMotionUpdate>>().then("Balance Response Planner - Received Update (Active Torso Position) Info", [this] (const TorsoMotionUpdate& info)
-        {
+            // Torso Position is a queued evaluation... 
             if(DEBUG) { log<NUClear::TRACE>("Messaging: Balance Kinematic Response - Received Update (Active Torso Position) Info(0)"); }
-                setTorsoPositionLegs(info.frameArms);       
-                setTorsoPositionArms(info.frameLegs);             
-                setTorsoPosition3D(info.frame3D);     
-                isTorsoMotionUpdated = true;       
-            if(DEBUG) { log<NUClear::TRACE>("Messaging: Balance Kinematic Response - Received Update (Active Torso Position) Info(1)"); }
-        });
+                setTorsoPositionLegs(tmu.frameArms);       
+                setTorsoPositionArms(tmu.frameLegs);             
+                setTorsoPosition3D(tmu.frame3D);                   
+            if(DEBUG) { log<NUClear::TRACE>("Messaging: Balance Kinematic Response - Received Update (Active Torso Position) Info(1)"); }        
+            
+            // Foot Position is a queued, continuous evaluation... 
+            if(DEBUG) { log<NUClear::TRACE>("Messaging: Balance Kinematic Response - Received Update (Active Foot Position) Info(0)"); }              
+                setMotionPhase(fmu.phase);            
+                setActiveForwardLimb(fmu.activeForwardLimb);          
+                setLeftFootPosition2D(fmu.leftFoot2D);       
+                setRightFootPosition2D(fmu.rightFoot2D);                        
+                // Transform feet positions to be relative to the robot torso...            
+                setLeftFootPosition(fmu.leftFoot3D.worldToLocal(getTorsoPosition3D()));         
+                setRightFootPosition(fmu.rightFoot3D.worldToLocal(getTorsoPosition3D()));
+            if(DEBUG) { log<NUClear::TRACE>("Messaging: Balance Kinematic Response - Received Update (Active Foot Position) Info(1)"); }  
+
+            // With a set of valid anthopomorphic data, balance posture and update WalkEngine...
+            if(DEBUG) { log<NUClear::TRACE>("Messaging: Balance Kinematic Response - Update Robot Posture(0)"); }
+                updateBody(sensors);
+            if(DEBUG) { log<NUClear::TRACE>("Messaging: Balance Kinematic Response - Update Robot Posture(1)"); }
+
+            //DEBUG: Printout of motion phase function...
+            emit(graph("BKR Synchronising Motion Phase", fmu.phase));
+        }).disable();
 
         // Aim to avoid dependancy on target position to enhance statelessness and adaptive balance compensation...
         on<Trigger<HeadMotionUpdate>>().then("Balance Response Planner - Received Update (Active Head Position) Info", [this] 
@@ -351,10 +338,7 @@ namespace motion
         }  
 
         // Emit new robot posture once there has been valid data set in all relevant variables...
-        if(isMotionDataReady())
-        {
-            emit(std::make_unique<BalanceBodyUpdate>(getMotionPhase(), getLeftFootPosition(), getRightFootPosition(), getLArmPosition(), getRArmPosition()));
-        }
+        emit(std::make_unique<BalanceBodyUpdate>(getMotionPhase(), getLeftFootPosition(), getRightFootPosition(), getLArmPosition(), getRArmPosition()));
     } 
 /*=======================================================================================================*/
 //      METHOD: updateLowerBody
