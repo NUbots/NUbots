@@ -112,7 +112,20 @@ namespace motion
         // Tune requested robot posture such that balance is maintained and motion is differential... 
         updateHandle = on<Every<UPDATE_FREQUENCY, Per<std::chrono::seconds>>, With<Sensors>, Single, Priority::HIGH>()
         .then("Balance Response Planner - Update Robot Posture", [this] (const Sensors& sensors)
-        {
+        {       
+            static double motion = getMotionPhase();
+            if (motion > getMotionPhase())
+            {
+                // std::cout << DEBUG_ITER << "\n\r";
+                DEBUG_ITER = 0;
+            }
+            else
+            {
+                DEBUG_ITER++;            
+            }
+            motion = getMotionPhase();  
+            emit(graph("BKR Motion Phase", getMotionPhase())); 
+            
             if(DEBUG) { log<NUClear::TRACE>("Messaging: Balance Kinematic Response - Update Robot Posture(0)"); }
                 updateBody(sensors);
             if(DEBUG) { log<NUClear::TRACE>("Messaging: Balance Kinematic Response - Update Robot Posture(1)"); }
@@ -133,6 +146,7 @@ namespace motion
         // Aim to avoid dependancy on target position to enhance statelessness and adaptive balance compensation...
         on<Trigger<FootMotionUpdate>>().then("Balance Response Planner - Received Update (Active Foot Position) Info", [this] (const FootMotionUpdate& info)
         {
+
             if(DEBUG) { log<NUClear::TRACE>("Messaging: Balance Kinematic Response - Received Update (Active Foot Position) Info(0)"); }
                 setMotionPhase(info.phase);
                 setActiveForwardLimb(info.activeForwardLimb);          
@@ -210,7 +224,7 @@ namespace motion
             setRArmPosition(arma::vec3({getRArmPosition()[0], getRArmPosition()[1] + ((getRollParameter() * getArmCompensationScale())) * armRollParameter, getRArmPosition()[2]}));            
         }
 
-        std::min(/*Maxium Roll*/0.0, std::max(/*Minimum Roll*/1.0,/*Calculated Roll Offset * 45° Base roll? */0.5));
+        //std::min(/*Maxium Roll*/0.0, std::max(/*Minimum Roll*/1.0,/*Calculated Roll Offset * 45° Base roll? */0.5));
     }      
 /*=======================================================================================================*/
 //      METHOD: ankleTorqueCompensation
@@ -222,11 +236,11 @@ namespace motion
         {
             if (getActiveForwardLimb() == LimbID::LEFT_LEG)
             {
-                setRightFootPosition(getRightFootPosition().rotateX(std::max(getAnkleCompensationMax(), getRollParameter() * getAnkleCompensationScale())));
+                setRightFootPosition(getRightFootPosition().rotateX(std::min(getAnkleCompensationMax(), getAnkleCompensationMax() * getRollParameter() * getAnkleCompensationScale())));
             }
             else 
             {
-                setLeftFootPosition(getLeftFootPosition().rotateX(std::max(getAnkleCompensationMax(), getRollParameter() * getAnkleCompensationScale())));
+                setLeftFootPosition(getLeftFootPosition().rotateX(std::min(getAnkleCompensationMax(), getAnkleCompensationMax() * getRollParameter() * getAnkleCompensationScale())));
             }
         }
     }      
@@ -240,11 +254,11 @@ namespace motion
         {
             if (getActiveForwardLimb() == LimbID::LEFT_LEG)
             {
-                setRightFootPosition(getRightFootPosition().rotateY(std::max(getToeCompensationMax(), getPitchParameter() * getAnkleCompensationScale())));
+                setRightFootPosition(getRightFootPosition().rotateY(std::max(getToeCompensationMax(), getToeCompensationMax() * getPitchParameter() * getAnkleCompensationScale())));
             }
             else 
             {
-                setLeftFootPosition(getLeftFootPosition().rotateY(std::max(getToeCompensationMax(), getPitchParameter() * getAnkleCompensationScale())));
+                setLeftFootPosition(getLeftFootPosition().rotateY(std::max(getToeCompensationMax(), getToeCompensationMax() * getPitchParameter() * getAnkleCompensationScale())));
             }
         }
     }    
@@ -772,11 +786,11 @@ namespace motion
         armCompensationScale = balance["arm_compensation_scale"].as<double>();
         supportCompensationScale = balance["support_compensation_scale"].as<double>();
 
-        hipCompensationMax = balance["hip_compensation_max"].as<double>();
-        toeCompensationMax = balance["toe_compensation_max"].as<double>();
-        ankleCompensationMax = balance["ankle_compensation_max"].as<double>();
-        armCompensationMax = balance["arm_compensation_max"].as<double>();
-        supportCompensationMax = balance["support_compensation_max"].as<double>();
+        hipCompensationMax = balance["hip_compensation_max"].as<Expression>();
+        toeCompensationMax = balance["toe_compensation_max"].as<Expression>();
+        ankleCompensationMax = balance["ankle_compensation_max"].as<Expression>();
+        armCompensationMax = balance["arm_compensation_max"].as<Expression>();
+        supportCompensationMax = balance["support_compensation_max"].as<Expression>();
 
 
 

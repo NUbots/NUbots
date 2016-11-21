@@ -120,24 +120,6 @@ namespace motion
             kinematicsModel = model;
         });
 
-        // Update waypoints sensor data at regular intervals...
-        updateHandle =on<Every<UPDATE_FREQUENCY, Per<std::chrono::seconds>>, /*With<Sensors>,*/ Single, Priority::HIGH>()
-        .then([this] /*(const Sensors& sensors)*/
-        {
-            if(DEBUG) { log<NUClear::TRACE>("WalkEngine - Update Waypoints(0)"); }
-            if(isNewPostureReceived()) 
-            {                 
-                if(DEBUG) { log<NUClear::TRACE>("New Posture(%d)", DEBUG_ITER++); }                       
-                emit(std::move(updateWaypoints(/*sensors*/))); 
-            }
-            emit(graph("MWE Left  Foot",    getLeftFootPosition()));   
-            emit(graph("MWE Right Foot",   getRightFootPosition()));       
-            emit(graph("MWE Torso (Arms)", getTorsoPositionArms()));       
-            emit(graph("MWE Torso (Legs)", getTorsoPositionLegs()));          
-            emit(graph("MWE Torso   (3D)",   getTorsoPosition3D()));
-            if(DEBUG) { log<NUClear::TRACE>("WalkEngine - Update Waypoints(1)"); }
-        }).disable();
-
         // Broadcast constrained velocity vector parameter to actuator modules...
         on<Trigger<WalkCommand>>().then([this] (const WalkCommand& walkCommand)
         {            
@@ -162,11 +144,9 @@ namespace motion
         });
 
         // Update goal robot posture given new balance information...
-        on<Trigger<BalanceBodyUpdate>>().then("Walk Engine - Received update (Balanced Robot Posture) Info", [this](const BalanceBodyUpdate& info)
+        updateHandle = on<Trigger<BalanceBodyUpdate>>().then("Walk Engine - Received update (Balanced Robot Posture) Info", [this](const BalanceBodyUpdate& info)
         {
             if(DEBUG) { log<NUClear::TRACE>("WalkEngine - Trigger BalanceBodyUpdate(0)"); }
-                setNewPostureReceived(false);
-
                 setLeftFootPosition(info.leftFoot);
                 setRightFootPosition(info.rightFoot);
                 setTorsoPositionArms(info.frameArms);
@@ -174,10 +154,13 @@ namespace motion
                 setTorsoPosition3D(info.frame3D);
                 setLArmPosition(info.armLPosition);
                 setRArmPosition(info.armRPosition);
+            
+                emit(graph("WE: Left  Foot Joint Position",    getLeftFootPosition()));   
+                emit(graph("WE: Right Foot Joint Position",   getRightFootPosition()));                    
                 
-                setNewPostureReceived(true); 
+                emit(std::move(updateWaypoints(/*sensors*/)));       
             if(DEBUG) { log<NUClear::TRACE>("WalkEngine - Trigger BalanceBodyUpdate(1)"); }
-        });
+        }).disable();
 
         on<Trigger<WalkOptimiserCommand>>().then([this] (const WalkOptimiserCommand& command) 
         {
@@ -279,7 +262,8 @@ namespace motion
         auto waypoints = std::make_unique<std::vector<ServoCommand>>();
         waypoints->reserve(16);
 
-        NUClear::clock::time_point time = NUClear::clock::now() + std::chrono::nanoseconds(std::nano::den / (UPDATE_FREQUENCY/2));
+        NUClear::clock::time_point time = NUClear::clock::now() + std::chrono::nanoseconds(std::nano::den / UPDATE_FREQUENCY);
+        //std::cout << (std::chrono::nanoseconds(std::nano::den / UPDATE_FREQUENCY)).count() << "\n\r";
 
         for (auto& joint : joints) 
         {

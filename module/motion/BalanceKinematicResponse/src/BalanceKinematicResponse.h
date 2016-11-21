@@ -72,7 +72,7 @@ namespace motion
          * The number of servo updates performnced per second
          * TODO: Probably be a global config somewhere, waiting on NUClear to support runtime on<Every> arguments
          */
-        static constexpr size_t UPDATE_FREQUENCY = 90;
+        static constexpr size_t UPDATE_FREQUENCY = 80;
 
         static constexpr const char* CONFIGURATION_PATH = "BalanceKinematicResponse.yaml";
         static constexpr const char* CONFIGURATION_MSSG = "Balance Response Planner - Configure";

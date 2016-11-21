@@ -101,18 +101,6 @@ namespace motion
             kinematicsModel = model;
         });
 
-        //Transform analytical torso positions in accordance with the stipulated targets...
-        updateHandle = on<Every<UPDATE_FREQUENCY, Per<std::chrono::seconds>>, /*With<Sensors>,*/ Single, Priority::HIGH>()
-        .then("Torso Motion Planner - Update Torso Position", [this] /*(const Sensors& sensors)*/
-        {
-            if(DEBUG) { log<NUClear::TRACE>("Messaging: Torso Motion Planner - Update Torso Position(0)"); }
-                if(isNewStepAvailable())
-                {                               
-                    updateTorsoPosition();
-                }
-            if(DEBUG) { log<NUClear::TRACE>("Messaging: Torso Motion Planner - Update Torso Position(1)"); }
-        }).disable();
-
         //In the event of a new foot step target specified by the foot placement planning module...
         on<Trigger<NewStepTargetInfo>>().then("Torso Motion Planner - Received Target Foot Position", [this] (const NewStepTargetInfo& info) 
         {
@@ -133,12 +121,17 @@ namespace motion
         });
 
         //In the process of actuating a foot step and emitting updated positional data...
-        on<Trigger<FootMotionUpdate>>().then("Torso Motion Planner - Received Foot Motion Update", [this] (const FootMotionUpdate& info) 
+        //Transform analytical torso positions in accordance with the stipulated targets...
+        updateHandle = on<Trigger<FootMotionUpdate>>().then("Torso Motion Planner - Received Foot Motion Update", [this] (const FootMotionUpdate& info) 
         {            
             if(DEBUG) { log<NUClear::TRACE>("Messaging: Torso Motion Planner - Received Foot Motion Update(0)"); }
                 setMotionPhase(info.phase);                         //Real-time : FMP
+                if(isNewStepAvailable())
+                {                               
+                    updateTorsoPosition();
+                }
             if(DEBUG) { log<NUClear::TRACE>("Messaging: Torso Motion Planner - Received Foot Motion Update(1)"); }
-        });
+        }).disable();
 
         //If the foot motion planning module completes a step, then update queued target data...
         on<Trigger<FootStepCompleted>>().then("Torso Motion Planner - Completed Queued Foot Step Target", [this]

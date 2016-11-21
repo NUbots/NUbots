@@ -40,6 +40,10 @@ namespace darwin {
         /// @brief Our internal darwin class that is used for interacting with the hardware
         Darwin::Darwin darwin;
         message::platform::darwin::DarwinSensors parseSensors(const Darwin::BulkReadResults& data);
+        float dGain = 0;
+        float iGain = 0;
+        float pGain = 0;
+
 
         struct CM730State {
             message::platform::darwin::DarwinSensors::LEDPanel ledPanel = { false, false, false };

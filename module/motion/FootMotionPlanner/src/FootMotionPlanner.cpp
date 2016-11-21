@@ -85,7 +85,7 @@ namespace motion
         updateHandle = on<Every<UPDATE_FREQUENCY, Per<std::chrono::seconds>>, /*With<Sensors>,*/ Single, Priority::HIGH>()
         .then("Foot Motion Planner - Update Foot Position", [this] /*(const Sensors& sensors)*/
         {
-            if(DEBUG) { log<NUClear::TRACE>("Messaging: Foot Motion Planner - Update Foot Position(0)"); }       
+             if(DEBUG) { log<NUClear::TRACE>("Messaging: Foot Motion Planner - Update Foot Position(0)"); }       
                 // NewTargetInfo syncronizes on calculating motionPhase, needs to occur before updating foot position(s)... 
                 double motionPhase = getMotionPhase();          
                 // If there is some foot target data queued for computation, then update robot...
@@ -94,9 +94,11 @@ namespace motion
                     // If the intended footstep is unchanged, cease z-translation to conserve energy and stop, otherwise proceed...
                     if(!isTargetStepUnchanged())
                     {
+                        // DEBUG_ITER++;
                         updateFootPosition(motionPhase, getActiveLimbSource(), getActiveForwardLimb(), getActiveLimbDestination());
                     }
                 }
+                emit(graph("FMP Synchronising Motion Phase", motionPhase));
             if(DEBUG) { log<NUClear::TRACE>("Messaging: Foot Motion Planner - Update Foot Position(1)"); }
         }).disable();
 
@@ -111,7 +113,9 @@ namespace motion
 
         //In the event of a new foot step target specified by the foot placement planning module...
         on<Trigger<NewFootTargetInfo>>().then("Foot Motion Planner - Received Target Foot Position", [this] (const NewFootTargetInfo& target) 
-        {               
+        {      
+            // std::cout << DEBUG_ITER << "\n\r";
+            // DEBUG_ITER = 0;
             if(DEBUG) { log<NUClear::TRACE>("Messaging: Foot Motion Planner - Received Target Foot Position(0)"); }                      
                 if(target.activeForwardLimb == LimbID::LEFT_LEG)
                 {  
@@ -189,7 +193,6 @@ namespace motion
         //DEBUGGING: Emit relative feet position phase with respect to robot state... 
         if (emitFootPosition)
         {
-            emit(graph("Foot Phases", getFootPhases[0]));
             emit(graph("Foot TranslateZ Motion", stepHeight * getFootPhases[2]));
         }
 

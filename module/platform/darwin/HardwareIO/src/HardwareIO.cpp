@@ -153,6 +153,14 @@ namespace darwin {
             darwin.setConfig(config);
         });
 
+        on<Configuration>("WalkEngine.yaml").then([this] (const Configuration& config) {
+            auto& gain = config["walk_engine"]["servos"]["gain"];
+            pGain = gain["p_gain"].as<float>();
+            dGain = gain["d_gain"].as<float>();
+            iGain = gain["i_gain"].as<float>();
+
+        });
+
         // This trigger gets the sensor data from the CM730
         on<Every<90, Per<std::chrono::seconds>>, Single, Priority::HIGH>().then("Hardware Loop", [this] {
 
@@ -268,16 +276,16 @@ namespace darwin {
                 // Update our internal state
                 if(servoState[uint(command.id)].pGain != command.gain
                 || servoState[uint(command.id)].iGain != command.gain * 0
-                || servoState[uint(command.id)].dGain != command.gain
+                || servoState[uint(command.id)].dGain != command.gain * 0
                 || servoState[uint(command.id)].movingSpeed != speed
                 || servoState[uint(command.id)].goalPosition != command.position
                 || servoState[uint(command.id)].torque != command.torque) {
 
                     servoState[uint(command.id)].dirty = true;
 
-                    servoState[uint(command.id)].pGain = command.gain;
-                    servoState[uint(command.id)].iGain = command.gain * 0;
-                    servoState[uint(command.id)].dGain = command.gain * 0;
+                    servoState[uint(command.id)].pGain = pGain;//command.gain;
+                    servoState[uint(command.id)].iGain = iGain;//command.gain * 0;
+                    servoState[uint(command.id)].dGain = dGain;//command.gain * 0;
 
                     servoState[uint(command.id)].movingSpeed = speed;
                     servoState[uint(command.id)].goalPosition = command.position;
