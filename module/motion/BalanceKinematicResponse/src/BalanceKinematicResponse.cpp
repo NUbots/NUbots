@@ -65,7 +65,6 @@ namespace motion
         , supportCompensationEnabled(false)
         , balanceOptimiserEnabled(false), pushRecoveryEnabled(false)
         , emitLocalisation(false), emitFootPosition(false)
-        , isFootMotionUpdated(false), isTorsoMotionUpdated(false)
         , armMotionEnabled(false)
         , updateHandle(), updateOptimiser(), generateStandScriptReaction()
         , torsoPositionsTransform()
@@ -514,14 +513,7 @@ namespace motion
     void BalanceKinematicResponse::setMotionPhase(double inMotionPhase)  
     {
         footMotionPhase = inMotionPhase;
-    }    
-/*=======================================================================================================*/
-//      ENCAPSULATION METHOD: Is Motion Data Ready
-/*=======================================================================================================*/    
-    bool BalanceKinematicResponse::isMotionDataReady()
-    {
-        return (isFootMotionUpdated && isTorsoMotionUpdated);
-    }        
+    }         
 /*=======================================================================================================*/
 //      ENCAPSULATION METHOD: Left Arm Position
 /*=======================================================================================================*/    

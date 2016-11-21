@@ -111,8 +111,6 @@ namespace motion
         bool pushRecoveryEnabled;               //
         bool emitLocalisation;                  //
         bool emitFootPosition;                  //
-        bool isFootMotionUpdated;
-        bool isTorsoMotionUpdated;
         bool armMotionEnabled;                  // Determines if the upper body can move the arms throughout motion.
 
         /**
@@ -387,11 +385,6 @@ namespace motion
          * @details [long description]
          */
         double getTime();
-        /**
-         * @brief [brief description]
-         * @details [long description]
-         */
-        bool isMotionDataReady();
         /**
          * This is an easing function that returns 3 values {x,y,z} with the range [0,1]
          * This is used to 'ease' the foot path through its trajectory.

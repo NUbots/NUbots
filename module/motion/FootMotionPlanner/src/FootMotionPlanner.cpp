@@ -33,8 +33,8 @@ namespace motion
 //      UTILIZATION REFERENCE(S)
 /*=======================================================================================================*/
     using message::input::LimbID;
-    using message::motion::NewStepTargetInfo;
-    using message::motion::NewFootTargetInfo;
+    using NewStepTargetInfo = message::motion::NewStepTargetInfo;
+    using NewFootTargetInfo = message::motion::NewFootTargetInfo;
     using message::motion::FootMotionUpdate;
     using message::motion::EnableFootMotion;
     using message::motion::DisableFootMotion;
@@ -85,49 +85,47 @@ namespace motion
         updateHandle = on<Every<UPDATE_FREQUENCY, Per<std::chrono::seconds>>, /*With<Sensors>,*/ Single, Priority::HIGH>()
         .then("Foot Motion Planner - Update Foot Position", [this] /*(const Sensors& sensors)*/
         {
-             if(DEBUG) { log<NUClear::TRACE>("Messaging: Foot Motion Planner - Update Foot Position(0)"); }       
-                // NewTargetInfo syncronizes on calculating motionPhase, needs to occur before updating foot position(s)... 
+            if(DEBUG) { log<NUClear::TRACE>("Messaging: Foot Motion Planner - Update Foot Position(0)"); }       
+            // If there is some foot target data queued for computation, then update robot...
+            if(isNewStepReceived())
+            {                            
                 double motionPhase = getMotionPhase();          
-                // If there is some foot target data queued for computation, then update robot...
-                if(isNewStepReceived())
-                {                            
-                    // If the intended footstep is unchanged, cease z-translation to conserve energy and stop, otherwise proceed...
-                    if(!isTargetStepUnchanged())
-                    {
-                        // DEBUG_ITER++;
-                        updateFootPosition(motionPhase, getActiveLimbSource(), getActiveForwardLimb(), getActiveLimbDestination());
-                    }
+                // If the intended footstep is unchanged, cease z-translation to conserve energy and stop, otherwise proceed...
+                if(!isTargetStepUnchanged())
+                {
+                    updateFootPosition(motionPhase, getActiveLimbSource(), getActiveForwardLimb(), getActiveLimbDestination());
                 }
+                
+                //DEBUG: Printout of motion phase function...
                 emit(graph("FMP Synchronising Motion Phase", motionPhase));
+            }
             if(DEBUG) { log<NUClear::TRACE>("Messaging: Foot Motion Planner - Update Foot Position(1)"); }
         }).disable();
 
         //In the event of a new foot step target specified by the foot placement planning module...
-        on<Trigger<NewStepTargetInfo>>().then("Foot Motion Planner - Received Target Foot Position", [this] (const NewStepTargetInfo& target) 
-        {
-            if(DEBUG) { log<NUClear::TRACE>("Messaging: Foot Motion Planner - Received Target Foot Position(0)"); }
-                setDestinationTime(target.targetTime);                      //Queued    : FPP
-                setVelocityCurrent(target.velocityCurrent);                 //Queued    : FPP             
-            if(DEBUG) { log<NUClear::TRACE>("Messaging: Foot Motion Planner - Received Target Foot Position(1)"); }
-        });
-
-        //In the event of a new foot step target specified by the foot placement planning module...
-        on<Trigger<NewFootTargetInfo>>().then("Foot Motion Planner - Received Target Foot Position", [this] (const NewFootTargetInfo& target) 
+        on<Trigger<NewFootTargetInfo>, With<NewStepTargetInfo>>().then("Foot Motion Planner - Received Target Foot Position", [this] (
+            const NewFootTargetInfo& nft,
+            const NewStepTargetInfo& nst) 
         {      
-            // std::cout << DEBUG_ITER << "\n\r";
-            // DEBUG_ITER = 0;
+            // Step Target Data queued evaluation...
+            if(DEBUG) { log<NUClear::TRACE>("Messaging: Foot Motion Planner - Received Target Foot Position(0)"); }
+                setDestinationTime(nst.targetTime);                      //Queued    : FPP
+                setVelocityCurrent(nst.velocityCurrent);                 //Queued    : FPP             
+            if(DEBUG) { log<NUClear::TRACE>("Messaging: Foot Motion Planner - Received Target Foot Position(1)"); }
+
+            // Foot Target Data queued evaluation...
             if(DEBUG) { log<NUClear::TRACE>("Messaging: Foot Motion Planner - Received Target Foot Position(0)"); }                      
-                if(target.activeForwardLimb == LimbID::LEFT_LEG)
+                if(nft.activeForwardLimb == LimbID::LEFT_LEG)
                 {  
-                    setActiveLimbSource(target.leftFootSource);             //Queued    : FPP
-                    setActiveLimbDestination(target.leftFootDestination);   //Queued    : FPP          
+                    setActiveLimbSource(nft.leftFootSource);             //Queued    : FPP
+                    setActiveLimbDestination(nft.leftFootDestination);   //Queued    : FPP          
                 }
                 else
                 {       
-                    setActiveLimbSource(target.rightFootSource);            //Queued    : FPP
-                    setActiveLimbDestination(target.rightFootDestination);  //Queued    : FPP      
+                    setActiveLimbSource(nft.rightFootSource);            //Queued    : FPP
+                    setActiveLimbDestination(nft.rightFootDestination);  //Queued    : FPP      
                 }                         
-                setActiveForwardLimb(target.activeForwardLimb);             //Queued    : FPP            
+                setActiveForwardLimb(nft.activeForwardLimb);             //Queued    : FPP            
             if(DEBUG) { log<NUClear::TRACE>("Messaging: Foot Motion Planner - Received Target Foot Position(1)"); }
         });
 
@@ -471,8 +469,6 @@ namespace motion
                 if (activeForwardLimb.size() > 0)       { activeForwardLimb.pop();      }
                 if (activeLimbDestination.size() > 0)   { activeLimbDestination.pop();  }
             }
-            // Notify whenever a foot step is completed...
-            emit(std::make_unique<FootStepCompleted>(true));
             // Increment relative step motionphase...
             setNewStepStartTime(getTime());   
             // If there has already been an updated instruction, then process before requesting new data...
@@ -481,6 +477,8 @@ namespace motion
                 // Notify helper modules of completed footstep (trigger request for new step instruction)...
                 emit(std::make_unique<FootStepRequested>(true)); 
             }
+            // Notify whenever a foot step is completed...
+            emit(std::make_unique<FootStepCompleted>(true));
         }      
         return (motionPhase);
     }
