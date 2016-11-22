@@ -84,30 +84,26 @@ namespace motion
             kinematicsModel = model;
         });
 
-        //When new torso destination is computed, inform FPP in preparation for next footstep...
-        // on<Trigger<TorsoMotionUpdate>>().then("Foot Placement Planner - Received Torso Destination Update", [this] (const TorsoMotionUpdate& info) 
-        // {                     
-        //     if(DEBUG) { log<NUClear::TRACE>("Messaging: Foot Placement Planner - Received Torso Destination Update(0)"); }    
-        //         setTorsoPosition(info.frameArms);  
-        //         setTorsoDestination(info.frameDestination);     
-        //     if(DEBUG) { log<NUClear::TRACE>("Messaging: Foot Placement Planner - Received Torso Destination Update(1)"); }
-        // });
-
+        // Upon the completion of queued footsteps, calculate and broadcast a new step target to helper modules...
         updateHandle = on<Trigger<FootStepRequested>, With<TorsoMotionUpdate>>().then("Foot Placement Planner - Calculate Target Foot Position", [this](
             const TorsoMotionUpdate& info)
         {          
+            // When new torso destination is computed, inform FPP in preparation for next footstep...
             if(DEBUG) { log<NUClear::TRACE>("Messaging: Foot Placement Planner - Received Torso Destination Update(0)"); }    
                 setTorsoPosition(info.frameArms);  
                 setTorsoDestination(info.frameDestination);     
             if(DEBUG) { log<NUClear::TRACE>("Messaging: Foot Placement Planner - Received Torso Destination Update(1)"); }
 
+            // Calculate a new footstep to facilitate walk progression...
             if(DEBUG) { log<NUClear::TRACE>("Messaging: Foot Placement Planner - Calculate Target Foot Position(0)"); }             
                 calculateNewStep(getVelocityCurrent(), getTorsoDestination(), getTorsoPosition());
             if(DEBUG) { log<NUClear::TRACE>("Messaging: Foot Placement Planner - Calculate Target Foot Position(1)"); }
         }).disable();
 
+        // Upon receiving a new walk command from the WalkEngine, broadcast to helper modules...
         on<Trigger<NewWalkCommand>>().then("Foot Placement Planner - Update Foot Target", [this] (const NewWalkCommand& command) 
         {
+            //
             if(DEBUG) { log<NUClear::TRACE>("Messaging: Foot Placement Planner - On New Walk Command(0)"); }          
                 setVelocityCommand(command.velocityTarget);
                 calculateNewStep(getVelocityCurrent(), getTorsoDestination(), getTorsoPosition());          

@@ -84,30 +84,34 @@ namespace motion
         });
 
         //Transform analytical foot positions in accordance with the stipulated targets...
-        updateHandle = on<Every<UPDATE_FREQUENCY, Per<std::chrono::seconds>>, /*With<Sensors>,*/ Single, Priority::HIGH>()
-        .then("Foot Motion Planner - Update Foot Position", [this] /*(const Sensors& sensors)*/
+        updateHandle = on<Every<UPDATE_FREQUENCY, Per<std::chrono::seconds>>, Single, Priority::HIGH>()
+        .then("Foot Motion Planner - Update Foot Position", [this]
         {
             if(DEBUG) { log<NUClear::TRACE>("Messaging: Foot Motion Planner - Update Foot Position(0)"); }       
             // If there is some foot target data queued for computation, then update robot...
-            if(isNewStepReceived())
-            {                            
-                double motionPhase = getMotionPhase();   
-            if(!isTargetStepUnchanged())      // TODO : Wierd that this is required, otherwise robot does strange sh*t...
-            {                
+            // if(isNewStepReceived())
+            // {                            
+                   
+            // if(!isTargetStepUnchanged())      // TODO : Wierd that this is required, otherwise robot does strange sh*t...
+            // {                
+                double motionPhase = getMotionPhase();
                 updateFootPosition(motionPhase, getActiveLimbSource(), getActiveForwardLimb(), getActiveLimbDestination());
-            }
 
                 //DEBUG: Printout of motion phase function...
                 emit(graph("FMP Synchronising Motion Phase", arma::vec({motionPhase, (getActiveForwardLimb() == LimbID::LEFT_LEG ? 1  : 0)})));
-            }
+                emit(graph("FMP Synchronising Data Queues", arma::vec({
+                                                                            destinationTime.size(), 
+                                                                            velocityCurrent.size(), 
+                                                                            activeLimbSource.size(), 
+                                                                            activeForwardLimb.size(), 
+                                                                            activeLimbDestination.size(), 
+                                                                            newStepInfoSets.size()
+                                                                          })));
+            // }
 
-            emit(graph("FMP Synchronising Data Queues", arma::vec({
-                                                                    destinationTime.size(), 
-                                                                    velocityCurrent.size(), 
-                                                                    activeLimbSource.size(), 
-                                                                    activeForwardLimb.size(), 
-                                                                    activeLimbDestination.size()
-                                                                  })));
+            // }
+
+            
             if(DEBUG) { log<NUClear::TRACE>("Messaging: Foot Motion Planner - Update Foot Position(1)"); }
         }).disable();
 
@@ -314,7 +318,7 @@ namespace motion
         }
         else
         {            
-            return (getTime()); //DEBUGGING: blank value
+            return (stepTime); //DEBUGGING: blank value            
         }
     }
     void FootMotionPlanner::setDestinationTime(double inDestinationTime)
@@ -450,11 +454,11 @@ namespace motion
     bool FootMotionPlanner::isNewStepAvailable()
     {    
         return (
-                    (destinationTime.size() > 0)        && 
-                    (velocityCurrent.size() > 0)        && 
-                    (activeLimbSource.size() > 0)       && 
-                    (activeForwardLimb.size() > 0)      &&
-                    (activeLimbDestination.size() > 0)                         
+                    (destinationTime.size() > 1)        && 
+                    (velocityCurrent.size() > 1)        && 
+                    (activeLimbSource.size() > 1)       && 
+                    (activeForwardLimb.size() > 1)      &&
+                    (activeLimbDestination.size() > 1)                         
                );
     }    
 /*=======================================================================================================*/
@@ -463,7 +467,7 @@ namespace motion
     bool FootMotionPlanner::isNewStepReceived()
     {         
         return (
-                    (destinationTime.size() > 0)                                && 
+                    (destinationTime.size() > 1)                                && 
                     (destinationTime.size() == velocityCurrent.size())          && 
                     (velocityCurrent.size() == activeLimbSource.size())         && 
                     (activeLimbSource.size() == activeForwardLimb.size())       &&
@@ -478,7 +482,7 @@ namespace motion
         // Obtain current system time...
         double currentTime = getTime();
         // The percentage completed of the current step, range: [0,1]...    
-        double motionPhase = 1.0 - (((getNewStepStartTime() + getDestinationTime()) - currentTime) / stepTime);        
+        double motionPhase = 1.0 - (((getNewStepStartTime() + getDestinationTime()) - currentTime) / stepTime);         
         // Bind phase value to range [0,1], emit status if step completed...
         if (motionPhase > 1)
         {
@@ -486,13 +490,13 @@ namespace motion
             // Consume completed step instructions, only once an entire new set has been received...
             if(isNewStepReceived())
             {                    
-                if (destinationTime.size() > 0)         { destinationTime.pop();        }
-                if (velocityCurrent.size() > 0)         { velocityCurrent.pop();        }
-                if (activeLimbSource.size() > 0)        { activeLimbSource.pop();       }
-                if (activeForwardLimb.size() > 0)       { activeForwardLimb.pop();      }
-                if (activeLimbDestination.size() > 0)   { activeLimbDestination.pop();  }
+                if (destinationTime.size() > 1)         { destinationTime.pop();        }
+                if (velocityCurrent.size() > 1)         { velocityCurrent.pop();        }
+                if (activeLimbSource.size() > 1)        { activeLimbSource.pop();       }
+                if (activeForwardLimb.size() > 1)       { activeForwardLimb.pop();      }
+                if (activeLimbDestination.size() > 1)   { activeLimbDestination.pop();  }
             }
-            newStepInfoSets.pop(); //TODO
+            if (newStepInfoSets.size() > 1)   { newStepInfoSets.pop();  } // TODO
             // Increment relative step motionphase...
             setNewStepStartTime(getTime());   
             // If there has already been an updated instruction, then process before requesting new data...
@@ -501,7 +505,7 @@ namespace motion
                 // Notify helper modules of completed footstep (trigger request for new step instruction)...
                 emit(std::make_unique<FootStepRequested>(true)); 
             }
-        }      
+        }
         return (motionPhase);
     }
 /*=======================================================================================================*/

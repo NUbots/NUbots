@@ -102,13 +102,13 @@ namespace motion
 
         //In the process of actuating a foot step and emitting updated positional data...
         //Transform analytical torso positions in accordance with the stipulated targets...
-        on<Trigger<FootMotionUpdate>, With<NextFootTargetInfo>>().then("Torso Motion Planner - Received Foot Motion Update", [this] (
-            const FootMotionUpdate& info,
-            const NextFootTargetInfo& nft)
+        on<Trigger<NextFootTargetInfo>, With<FootMotionUpdate>>().then("Torso Motion Planner - Received Foot Motion Update", [this] (
+            const NextFootTargetInfo&   nft,
+            const FootMotionUpdate&     fmu)
         {                 
             // Motion Phase...
             if(DEBUG) { log<NUClear::TRACE>("Messaging: Torso Motion Planner - Received Foot Motion Update(0)"); }
-                setMotionPhase(info.phase);                         //Real-time : FMP
+                setMotionPhase(fmu.phase);                         //Real-time : FMP
             if(DEBUG) { log<NUClear::TRACE>("Messaging: Torso Motion Planner - Received Foot Motion Update(1)"); }
                              
             // Step Target Data queued evaluation...
@@ -130,7 +130,7 @@ namespace motion
             if(DEBUG) { log<NUClear::TRACE>("Messaging: Torso Motion Planner - Update Torso Position(1)"); }
 
             //DEBUG: Printout of motion phase function...
-            emit(graph("TMP Synchronising Motion Phase", info.phase));
+            emit(graph("TMP Synchronising Motion Phase", fmu.phase));
         });
 
         on<Trigger<EnableTorsoMotion>>().then([this]
