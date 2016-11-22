@@ -59,6 +59,7 @@ namespace motion
          * TODO: Probably be a global config somewhere, waiting on NUClear to support runtime on<Every> arguments
          */
         static constexpr size_t UPDATE_FREQUENCY = 90;
+        static constexpr size_t MIN_QUEUE_SIZE   = 1;
 
         static constexpr const char* CONFIGURATION_PATH = "FootMotionPlanner.yaml";
         static constexpr const char* CONFIGURATION_MSSG = "Foot Motion Planner - Configure";

@@ -454,11 +454,11 @@ namespace motion
     bool FootMotionPlanner::isNewStepAvailable()
     {    
         return (
-                    (destinationTime.size() > 1)        && 
-                    (velocityCurrent.size() > 1)        && 
-                    (activeLimbSource.size() > 1)       && 
-                    (activeForwardLimb.size() > 1)      &&
-                    (activeLimbDestination.size() > 1)                         
+                    (destinationTime.size() > MIN_QUEUE_SIZE)        && 
+                    (velocityCurrent.size() > MIN_QUEUE_SIZE)        && 
+                    (activeLimbSource.size() > MIN_QUEUE_SIZE)       && 
+                    (activeForwardLimb.size() > MIN_QUEUE_SIZE)      &&
+                    (activeLimbDestination.size() > MIN_QUEUE_SIZE)                         
                );
     }    
 /*=======================================================================================================*/
@@ -467,7 +467,7 @@ namespace motion
     bool FootMotionPlanner::isNewStepReceived()
     {         
         return (
-                    (destinationTime.size() > 1)                                && 
+                    (destinationTime.size() > MIN_QUEUE_SIZE)                   && 
                     (destinationTime.size() == velocityCurrent.size())          && 
                     (velocityCurrent.size() == activeLimbSource.size())         && 
                     (activeLimbSource.size() == activeForwardLimb.size())       &&
@@ -490,13 +490,13 @@ namespace motion
             // Consume completed step instructions, only once an entire new set has been received...
             if(isNewStepReceived())
             {                    
-                if (destinationTime.size() > 1)         { destinationTime.pop();        }
-                if (velocityCurrent.size() > 1)         { velocityCurrent.pop();        }
-                if (activeLimbSource.size() > 1)        { activeLimbSource.pop();       }
-                if (activeForwardLimb.size() > 1)       { activeForwardLimb.pop();      }
-                if (activeLimbDestination.size() > 1)   { activeLimbDestination.pop();  }
+                if (destinationTime.size() > MIN_QUEUE_SIZE)         { destinationTime.pop();        }
+                if (velocityCurrent.size() > MIN_QUEUE_SIZE)         { velocityCurrent.pop();        }
+                if (activeLimbSource.size() > MIN_QUEUE_SIZE)        { activeLimbSource.pop();       }
+                if (activeForwardLimb.size() > MIN_QUEUE_SIZE)       { activeForwardLimb.pop();      }
+                if (activeLimbDestination.size() > MIN_QUEUE_SIZE)   { activeLimbDestination.pop();  }
             }
-            if (newStepInfoSets.size() > 1)   { newStepInfoSets.pop();  } // TODO
+            if (newStepInfoSets.size() > MIN_QUEUE_SIZE)   { newStepInfoSets.pop();  } // TODO
             // Increment relative step motionphase...
             setNewStepStartTime(getTime());   
             // If there has already been an updated instruction, then process before requesting new data...
