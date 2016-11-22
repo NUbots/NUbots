@@ -33,8 +33,9 @@ namespace motion
 //      UTILIZATION REFERENCE(S)
 /*=======================================================================================================*/
     using message::input::LimbID;
-    using NewStepTargetInfo = message::motion::NewStepTargetInfo;
-    using NewFootTargetInfo = message::motion::NewFootTargetInfo;
+    using NewStepTargetInfo  = message::motion::NewStepTargetInfo;
+    using NewFootTargetInfo  = message::motion::NewFootTargetInfo;
+    using NextFootTargetInfo = message::motion::NextFootTargetInfo;
     using message::motion::FootMotionUpdate;
     using message::motion::EnableFootMotion;
     using message::motion::DisableFootMotion;
@@ -58,6 +59,7 @@ namespace motion
         , leftFootPositionTransform(), rightFootPositionTransform()
         , activeLimbSource(), activeLimbDestination()
         , activeForwardLimb(), activeLimbInitial(LimbID::LEFT_LEG)
+        , newStepInfoSets()
         , stepTime(0.0), stepHeight(0.0)
         , step_height_slow_fraction(0.0f), step_height_fast_fraction(0.0f)
         , ankle_pitch_lift(0.0), ankle_pitch_fall(0.0)
@@ -89,16 +91,23 @@ namespace motion
             // If there is some foot target data queued for computation, then update robot...
             if(isNewStepReceived())
             {                            
-                double motionPhase = getMotionPhase();          
-                // If the intended footstep is unchanged, cease z-translation to conserve energy and stop, otherwise proceed...
-                if(!isTargetStepUnchanged())
-                {
-                    updateFootPosition(motionPhase, getActiveLimbSource(), getActiveForwardLimb(), getActiveLimbDestination());
-                }
-                
-                //DEBUG: Printout of motion phase function...
-                emit(graph("FMP Synchronising Motion Phase", motionPhase));
+                double motionPhase = getMotionPhase();   
+            if(!isTargetStepUnchanged())      // TODO : Wierd that this is required, otherwise robot does strange sh*t...
+            {                
+                updateFootPosition(motionPhase, getActiveLimbSource(), getActiveForwardLimb(), getActiveLimbDestination());
             }
+
+                //DEBUG: Printout of motion phase function...
+                emit(graph("FMP Synchronising Motion Phase", arma::vec({motionPhase, (getActiveForwardLimb() == LimbID::LEFT_LEG ? 1  : 0)})));
+            }
+
+            emit(graph("FMP Synchronising Data Queues", arma::vec({
+                                                                    destinationTime.size(), 
+                                                                    velocityCurrent.size(), 
+                                                                    activeLimbSource.size(), 
+                                                                    activeForwardLimb.size(), 
+                                                                    activeLimbDestination.size()
+                                                                  })));
             if(DEBUG) { log<NUClear::TRACE>("Messaging: Foot Motion Planner - Update Foot Position(1)"); }
         }).disable();
 
@@ -115,7 +124,7 @@ namespace motion
 
             // Foot Target Data queued evaluation...
             if(DEBUG) { log<NUClear::TRACE>("Messaging: Foot Motion Planner - Received Target Foot Position(0)"); }                      
-                if(nft.activeForwardLimb == LimbID::LEFT_LEG)
+                if(nst.activeForwardLimb == LimbID::LEFT_LEG)
                 {  
                     setActiveLimbSource(nft.leftFootSource);             //Queued    : FPP
                     setActiveLimbDestination(nft.leftFootDestination);   //Queued    : FPP          
@@ -125,8 +134,19 @@ namespace motion
                     setActiveLimbSource(nft.rightFootSource);            //Queued    : FPP
                     setActiveLimbDestination(nft.rightFootDestination);  //Queued    : FPP      
                 }                         
-                setActiveForwardLimb(nft.activeForwardLimb);             //Queued    : FPP            
+                setActiveForwardLimb(nst.activeForwardLimb);             //Queued    : FPP            
             if(DEBUG) { log<NUClear::TRACE>("Messaging: Foot Motion Planner - Received Target Foot Position(1)"); }
+            
+            // Next step data queued forwarding...
+            if(DEBUG) { log<NUClear::TRACE>("Messaging: Foot Motion Planner - Generate Foot Position Set(0)"); }
+                NewStepInfo nextStep = NewStepInfo();
+                    nextStep.lFootSource = nft.leftFootSource;
+                    nextStep.rFootSource = nft.rightFootSource;
+                    nextStep.sMass = nft.supportMass;
+                    nextStep.lFootDestination = nft.leftFootDestination;
+                    nextStep.rFootDestination = nft.rightFootDestination;
+                newStepInfoSets.push(nextStep);
+            if(DEBUG) { log<NUClear::TRACE>("Messaging: Foot Motion Planner - Generate Foot Position Set(1)"); }
         });
 
         //If foot motion is requested, enable updating...
@@ -176,27 +196,39 @@ namespace motion
         Transform3D rightFootLocal = getRightFootPosition();       
 
         if(DEBUG) { log<NUClear::TRACE>("Messaging: Foot Motion Planner - Translate Z for support foot"); }
-        //Manipulate(update) z component of foot position to action movement with a varying altitude locus...
-        if (inActiveForwardLimb == LimbID::RIGHT_LEG) 
+        // If the intended footstep is unchanged, cease z-translation to conserve energy and stop, otherwise proceed...
+        if(!isTargetStepUnchanged())
         {
-            rightFootLocal = rightFootLocal.translateZ(stepHeight * getFootPhases[2]); //TODO: Vector field function??
-            rightFootLocal = rightFootLocal.rotateY(calculateAnklePitch(inPhase)); // Rotate ankle pitch...
+            // Manipulate(update) z component of foot position to action movement with a varying altitude locus...
+            if (inActiveForwardLimb == LimbID::RIGHT_LEG) 
+            {
+                rightFootLocal = rightFootLocal.translateZ(stepHeight * getFootPhases[2]); //TODO: Vector field function??
+                rightFootLocal = rightFootLocal.rotateY(calculateAnklePitch(inPhase)); // Rotate ankle pitch...
+            }
+            else
+            {
+                leftFootLocal  = leftFootLocal.translateZ(stepHeight  * getFootPhases[2]); //TODO: Vector field function??
+                leftFootLocal  = leftFootLocal.rotateY(calculateAnklePitch(inPhase)); // Rotate ankle pitch...
+            }     
         }
-        else
-        {
-            leftFootLocal  = leftFootLocal.translateZ(stepHeight  * getFootPhases[2]); //TODO: Vector field function??
-            leftFootLocal  = leftFootLocal.rotateY(calculateAnklePitch(inPhase)); // Rotate ankle pitch...
-        }     
 
         //DEBUGGING: Emit relative feet position phase with respect to robot state... 
         if (emitFootPosition)
         {
-            emit(graph("Foot TranslateZ Motion", stepHeight * getFootPhases[2]));
+            emit(graph("FMP Synchronising Foot Motion", stepHeight * getFootPhases[2]));
         }
 
         if(DEBUG) { log<NUClear::TRACE>("Messaging: Foot Motion Planner - Emit FootMotionUpdate"); }
         //Broadcast struct of updated foot motion data at corresponding phase identity...
         emit(std::make_unique<FootMotionUpdate>(inPhase, inActiveForwardLimb, getLeftFootPosition(), getRightFootPosition(), leftFootLocal, rightFootLocal));              
+        // Notify whenever a subsequent foot step is promoted...
+        emit(std::make_unique<NextFootTargetInfo>(  
+                                                    newStepInfoSets.front().lFootSource,
+                                                    newStepInfoSets.front().rFootSource,
+                                                    newStepInfoSets.front().sMass,
+                                                    newStepInfoSets.front().lFootDestination,
+                                                    newStepInfoSets.front().rFootDestination
+                                                 ));
     }
 /*=======================================================================================================*/
 //      METHOD: Foot Phase
@@ -415,15 +447,6 @@ namespace motion
 /*=======================================================================================================*/
 //      ENCAPSULATION METHOD: New Step Available
 /*=======================================================================================================*/
-    bool FootMotionPlanner::isInitialStep()
-    {   
-        bool output = INITIAL_STEP;
-        INITIAL_STEP = false;
-        return (output);
-    }     
-/*=======================================================================================================*/
-//      ENCAPSULATION METHOD: New Step Available
-/*=======================================================================================================*/
     bool FootMotionPlanner::isNewStepAvailable()
     {    
         return (
@@ -455,7 +478,7 @@ namespace motion
         // Obtain current system time...
         double currentTime = getTime();
         // The percentage completed of the current step, range: [0,1]...    
-        double motionPhase = 1 - (((getNewStepStartTime() + getDestinationTime()) - currentTime) / stepTime);        
+        double motionPhase = 1.0 - (((getNewStepStartTime() + getDestinationTime()) - currentTime) / stepTime);        
         // Bind phase value to range [0,1], emit status if step completed...
         if (motionPhase > 1)
         {
@@ -469,6 +492,7 @@ namespace motion
                 if (activeForwardLimb.size() > 0)       { activeForwardLimb.pop();      }
                 if (activeLimbDestination.size() > 0)   { activeLimbDestination.pop();  }
             }
+            newStepInfoSets.pop(); //TODO
             // Increment relative step motionphase...
             setNewStepStartTime(getTime());   
             // If there has already been an updated instruction, then process before requesting new data...
@@ -477,8 +501,6 @@ namespace motion
                 // Notify helper modules of completed footstep (trigger request for new step instruction)...
                 emit(std::make_unique<FootStepRequested>(true)); 
             }
-            // Notify whenever a foot step is completed...
-            emit(std::make_unique<FootStepCompleted>(true));
         }      
         return (motionPhase);
     }

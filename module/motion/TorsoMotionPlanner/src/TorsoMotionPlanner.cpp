@@ -41,9 +41,8 @@ namespace motion
     // using message::behaviour::RegisterAction;
     // using message::behaviour::ActionPriorites;
     using message::motion::WalkCommand;
-    using NewStepTargetInfo = message::motion::NewStepTargetInfo;
-    using NewFootTargetInfo = message::motion::NewFootTargetInfo;
-    using message::motion::FootMotionUpdate;
+    using NextFootTargetInfo = message::motion::NextFootTargetInfo;
+    using FootMotionUpdate   = message::motion::FootMotionUpdate;
     using message::motion::FootStepCompleted;
     using message::motion::TorsoMotionUpdate;
     using message::motion::EnableTorsoMotion;
@@ -72,7 +71,7 @@ namespace motion
         , torsoPositionsTransform(), torsoPositionSource(), torsoPositionDestination()
         , leftFootPositionTransform(), rightFootPositionTransform()
         , leftFootSource(), rightFootSource(), leftFootDestination(), rightFootDestination()
-        , q_supportMass()
+        , m_supportMass()
         , activeForwardLimb(), activeLimbInitial(LimbID::LEFT_LEG)
         , bodyTilt(0.0), bodyHeight(0.0), stanceLimitY2(0.0), stepTime(0.0), stepHeight(0.0)
         , step_height_slow_fraction(0.0f), step_height_fast_fraction(0.0f)
@@ -101,14 +100,20 @@ namespace motion
             kinematicsModel = model;
         });
 
-        //In the event of a new foot step target specified by the foot placement planning module...
-        on<Trigger<NewFootTargetInfo>, With<NewStepTargetInfo>>().then("Torso Motion Planner - Received Target Info", [this] (
-            const NewFootTargetInfo& nft,
-            const NewStepTargetInfo& nst)
-        {            
+        //In the process of actuating a foot step and emitting updated positional data...
+        //Transform analytical torso positions in accordance with the stipulated targets...
+        on<Trigger<FootMotionUpdate>, With<NextFootTargetInfo>>().then("Torso Motion Planner - Received Foot Motion Update", [this] (
+            const FootMotionUpdate& info,
+            const NextFootTargetInfo& nft)
+        {                 
+            // Motion Phase...
+            if(DEBUG) { log<NUClear::TRACE>("Messaging: Torso Motion Planner - Received Foot Motion Update(0)"); }
+                setMotionPhase(info.phase);                         //Real-time : FMP
+            if(DEBUG) { log<NUClear::TRACE>("Messaging: Torso Motion Planner - Received Foot Motion Update(1)"); }
+                             
             // Step Target Data queued evaluation...
             if(DEBUG) { log<NUClear::TRACE>("Messaging: Foot Motion Planner - Received Target Foot Position(0)"); }
-                setSupportMass(nst.supportMass);                   //Queued    : FPP
+                setSupportMass(nft.supportMass);                   //Queued    : FPP
             if(DEBUG) { log<NUClear::TRACE>("Messaging: Foot Motion Planner - Received Target Foot Position(1)"); }
 
             // Foot Target Data queued evaluation...
@@ -117,39 +122,15 @@ namespace motion
                 setRightFootSource(nft.rightFootSource);           //Queued    : FPP
                 setLeftFootDestination(nft.leftFootDestination);   //Queued    : FPP                 
                 setRightFootDestination(nft.rightFootDestination); //Queued    : FPP               
-           if(DEBUG) { log<NUClear::TRACE>("Messaging: Torso Motion Planner - Received Footstep Info(1)"); }
-        });
+            if(DEBUG) { log<NUClear::TRACE>("Messaging: Torso Motion Planner - Received Footstep Info(1)"); }
 
-        //In the process of actuating a foot step and emitting updated positional data...
-        //Transform analytical torso positions in accordance with the stipulated targets...
-        updateHandle = on<Trigger<FootMotionUpdate>>().then("Torso Motion Planner - Received Foot Motion Update", [this] (const FootMotionUpdate& info) 
-        {                 
-            if(DEBUG) { log<NUClear::TRACE>("Messaging: Torso Motion Planner - Received Foot Motion Update(0)"); }
-                setMotionPhase(info.phase);                         //Real-time : FMP
-                if(isNewStepAvailable())
-                {                               
-                    updateTorsoPosition();
-                }
-            if(DEBUG) { log<NUClear::TRACE>("Messaging: Torso Motion Planner - Received Foot Motion Update(1)"); }
+             // Update Torso Positions...
+            if(DEBUG) { log<NUClear::TRACE>("Messaging: Torso Motion Planner - Update Torso Position(0)"); }  
+                updateTorsoPosition();            
+            if(DEBUG) { log<NUClear::TRACE>("Messaging: Torso Motion Planner - Update Torso Position(1)"); }
 
             //DEBUG: Printout of motion phase function...
             emit(graph("TMP Synchronising Motion Phase", info.phase));
-        }).disable();
-
-        //If the foot motion planning module completes a step, then update queued target data...
-        on<Trigger<FootStepCompleted>>().then("Torso Motion Planner - Completed Queued Foot Step Target", [this]
-        {
-            if(DEBUG) { log<NUClear::TRACE>("Messaging: Torso Motion Planner - Completed Queued Foot Step Target(0)"); }
-                //Release CurrentFootTargetInfo from queued step as it is now completed 
-                if(isNewStepReceived())        
-                {          
-                    if (leftFootSource.size() > 0)          { leftFootSource.pop();         }
-                    if (rightFootSource.size() > 0)         { rightFootSource.pop();        }
-                    if (leftFootDestination.size() > 0)     { leftFootDestination.pop();    }                  
-                    if (rightFootDestination.size() > 0)    { rightFootDestination.pop();   }
-                    if (q_supportMass.size() > 0)           { q_supportMass.pop();          } 
-                }                                    
-            if(DEBUG) { log<NUClear::TRACE>("Messaging: Torso Motion Planner - Completed Queued Foot Step Target(1)"); }
         });
 
         on<Trigger<EnableTorsoMotion>>().then([this]
@@ -287,11 +268,7 @@ namespace motion
     bool TorsoMotionPlanner::isNewStepAvailable()
     {    
         return (
-                    (leftFootSource.size() > 0)             && 
-                    (rightFootSource.size() > 0)            && 
-                    (leftFootDestination.size() > 0)        && 
-                    (rightFootDestination.size() > 0)       &&
-                    (q_supportMass.size() > 0)                         
+                   true                     
                );
     }    
 /*=======================================================================================================*/
@@ -300,11 +277,7 @@ namespace motion
     bool TorsoMotionPlanner::isNewStepReceived()
     {             
         return (
-                    (leftFootSource.size() > 0)                                     && 
-                    (leftFootSource.size() == rightFootSource.size())               && 
-                    (rightFootSource.size() == leftFootDestination.size())          && 
-                    (leftFootDestination.size() == rightFootDestination.size())     &&
-                    (rightFootDestination.size() == q_supportMass.size())                         
+                   true            
                );
     }    
 /*=======================================================================================================*/
@@ -361,18 +334,11 @@ namespace motion
 /*=======================================================================================================*/
     Transform2D TorsoMotionPlanner::getSupportMass()
     {
-        if(q_supportMass.size() > 0)
-        {
-            return (q_supportMass.front());
-        }
-        else
-        {          
-            return (Transform2D({0, 0, 0})); //DEBUGGING: blank value
-        }
+        return (m_supportMass);
     }
     void TorsoMotionPlanner::setSupportMass(const Transform2D& inSupportMass)
     {
-        q_supportMass.push(inSupportMass);
+        m_supportMass = inSupportMass;
     }    
 /*=======================================================================================================*/
 //      ENCAPSULATION METHOD: Foot Offset Coefficient
@@ -394,72 +360,44 @@ namespace motion
 /*=======================================================================================================*/
     Transform2D TorsoMotionPlanner::getLeftFootSource()
     {
-        if(leftFootSource.size() > 0)
-        {
-            return (leftFootSource.front());
-        }
-        else
-        {          
-            return (Transform2D({0, 0, 0})); //DEBUGGING: blank value
-        }
+        return (leftFootSource);
     }
     void TorsoMotionPlanner::setLeftFootSource(const Transform2D& inLeftFootSource)
     {
-        leftFootSource.push(inLeftFootSource);
+        leftFootSource = inLeftFootSource;
     }
 /*=======================================================================================================*/
 //      ENCAPSULATION METHOD: Right Foot Source
 /*=======================================================================================================*/
     Transform2D TorsoMotionPlanner::getRightFootSource()
     {
-        if(rightFootSource.size() > 0)
-        {
-            return (rightFootSource.front());
-        }
-        else
-        {          
-            return (Transform2D({0, 0, 0})); //DEBUGGING: blank value
-        }
+        return (rightFootSource);
     }
     void TorsoMotionPlanner::setRightFootSource(const Transform2D& inRightFootSource)
     {
-        rightFootSource.push(inRightFootSource);
+        rightFootSource = inRightFootSource;
     }        
 /*=======================================================================================================*/
 //      ENCAPSULATION METHOD: Left Foot Destination
 /*=======================================================================================================*/
     Transform2D TorsoMotionPlanner::getLeftFootDestination()
     {
-        if(leftFootDestination.size() > 0)
-        {
-            return (leftFootDestination.front());
-        }
-        else
-        {          
-            return (Transform2D({0, 0, 0})); //DEBUGGING: blank value
-        }
+        return (leftFootDestination);
     }
     void TorsoMotionPlanner::setLeftFootDestination(const Transform2D& inLeftFootDestination)
     {
-        leftFootDestination.push(inLeftFootDestination);
+        leftFootDestination = inLeftFootDestination;
     }
 /*=======================================================================================================*/
 //      ENCAPSULATION METHOD: Right Foot Destination
 /*=======================================================================================================*/
     Transform2D TorsoMotionPlanner::getRightFootDestination()
     {
-        if(rightFootDestination.size() > 0)
-        {
-            return (rightFootDestination.front());
-        }
-        else
-        {          
-            return (Transform2D({0, 0, 0})); //DEBUGGING: blank value
-        }
+        return (rightFootDestination);
     }
     void TorsoMotionPlanner::setRightFootDestination(const Transform2D& inRightFootDestination)
     {
-        rightFootDestination.push(inRightFootDestination);
+        rightFootDestination = inRightFootDestination;
     }   
 /*=======================================================================================================*/
 //      METHOD: configure

@@ -9,9 +9,9 @@ walk_engine:
       left_leg:  30
       right_leg: 30
       head: 30
-      p_gain: 30
-      d_gain: 0
-      i_gain: 0
+      p_gain: 15
+      d_gain: 5
+      i_gain: 1
 
     gains: # The gains to use for the servos during the walk
       -
@@ -47,13 +47,13 @@ walk_engine:
   
   stance:
     body:
-      height: 0.265 # Body height, in meters; changing this will alter how high the robot's natural stance is.
+      height: 0.285 # Body height, in meters; changing this will alter how high the robot's natural stance is.
       tilt:   20 * pi / 180  # The angle of the torso when walking
 
     limit_margin_y: 0.015  # gToe/heel + length between legs overlap checking values
 
     foot_offset:
-      - -0.025  # The distance the ankles are offset from the torso, in meters.
+      - -0.030  # The distance the ankles are offset from the torso, in meters.
       -  0.000  # How far from the center of the foot the center of mass is placed during each step.
 
     STAND_SCRIPT_DURATION: 1 
@@ -67,7 +67,7 @@ walk_engine:
       height_fast_fraction: 1.5 # height of foot as a fraction of height
       limits: # These limit the distance a footstep will take
         - [-0.100, 0.150]           # [min_x, max_x]
-        - [ 0.000, 0.300]           # [min_y, max_y]
+        - [ 0.010, 0.300]           # [min_y, max_y]
         - [ 0.000, 15 * pi / 180]   # [min_angle, max_angle]
 
     velocity:

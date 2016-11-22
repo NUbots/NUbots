@@ -46,34 +46,34 @@ namespace motion
     {
         double targetTime;
         Transform2D velocityCurrent;
-        Transform2D supportMass;
+        LimbID activeForwardLimb;
         NewStepTargetInfo(  
                             double inTargetTime, 
                             const Transform2D& inVelocityCurrent,
-                            const Transform2D& inSupportMass
+                            const LimbID& inActiveForwardLimb
                          )
             : targetTime(inTargetTime)
             , velocityCurrent(inVelocityCurrent) 
-            , supportMass(inSupportMass) {}
+            , activeForwardLimb(inActiveForwardLimb) {}
     };
 
     struct NewFootTargetInfo
     {
         Transform2D leftFootSource;
         Transform2D rightFootSource;
-        LimbID activeForwardLimb;
+        Transform2D supportMass;
         Transform2D leftFootDestination;
         Transform2D rightFootDestination;
         NewFootTargetInfo(
                             const Transform2D& inLeftFootSource,
                             const Transform2D& inRightFootSource,
-                            const LimbID& inActiveForwardLimb,
+                            const Transform2D& inSupportMass,
                             const Transform2D& inLeftFootDestination, 
                             const Transform2D& inRightFootDestination
                          )
             : leftFootSource(inLeftFootSource)
             , rightFootSource(inRightFootSource)
-            , activeForwardLimb(inActiveForwardLimb)
+            , supportMass(inSupportMass)
             , leftFootDestination(inLeftFootDestination)
             , rightFootDestination(inRightFootDestination) {}
             

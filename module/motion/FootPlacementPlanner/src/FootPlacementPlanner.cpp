@@ -85,23 +85,29 @@ namespace motion
         });
 
         //When new torso destination is computed, inform FPP in preparation for next footstep...
-        on<Trigger<TorsoMotionUpdate>>().then("Foot Placement Planner - Received Torso Destination Update", [this] (const TorsoMotionUpdate& info) 
-        {                     
+        // on<Trigger<TorsoMotionUpdate>>().then("Foot Placement Planner - Received Torso Destination Update", [this] (const TorsoMotionUpdate& info) 
+        // {                     
+        //     if(DEBUG) { log<NUClear::TRACE>("Messaging: Foot Placement Planner - Received Torso Destination Update(0)"); }    
+        //         setTorsoPosition(info.frameArms);  
+        //         setTorsoDestination(info.frameDestination);     
+        //     if(DEBUG) { log<NUClear::TRACE>("Messaging: Foot Placement Planner - Received Torso Destination Update(1)"); }
+        // });
+
+        updateHandle = on<Trigger<FootStepRequested>, With<TorsoMotionUpdate>>().then("Foot Placement Planner - Calculate Target Foot Position", [this](
+            const TorsoMotionUpdate& info)
+        {          
             if(DEBUG) { log<NUClear::TRACE>("Messaging: Foot Placement Planner - Received Torso Destination Update(0)"); }    
                 setTorsoPosition(info.frameArms);  
                 setTorsoDestination(info.frameDestination);     
             if(DEBUG) { log<NUClear::TRACE>("Messaging: Foot Placement Planner - Received Torso Destination Update(1)"); }
-        });
 
-        updateHandle = on<Trigger<FootStepRequested>>().then("Foot Placement Planner - Calculate Target Foot Position", [this]
-        {          
             if(DEBUG) { log<NUClear::TRACE>("Messaging: Foot Placement Planner - Calculate Target Foot Position(0)"); }             
                 calculateNewStep(getVelocityCurrent(), getTorsoDestination(), getTorsoPosition());
             if(DEBUG) { log<NUClear::TRACE>("Messaging: Foot Placement Planner - Calculate Target Foot Position(1)"); }
         }).disable();
 
         on<Trigger<NewWalkCommand>>().then("Foot Placement Planner - Update Foot Target", [this] (const NewWalkCommand& command) 
-        {                            
+        {
             if(DEBUG) { log<NUClear::TRACE>("Messaging: Foot Placement Planner - On New Walk Command(0)"); }          
                 setVelocityCommand(command.velocityTarget);
                 calculateNewStep(getVelocityCurrent(), getTorsoDestination(), getTorsoPosition());          
@@ -177,8 +183,8 @@ namespace motion
             Transform2D uRightFootModded = uTorsoModded.localToWorld(uRightFootTorso);
             setSupportMass(uRightFootModded.localToWorld({-getFootOffsetCoefficient(0), getFootOffsetCoefficient(1), 0}));  
         }                   
-        emit(std::make_unique<NewStepTargetInfo>(stepTime, inVelocityCurrent, getSupportMass())); //New Step Target Information
-        emit(std::make_unique<NewFootTargetInfo>(getLeftFootSource(), getRightFootSource(), getActiveForwardLimb(), getLeftFootDestination(), getRightFootDestination()));  //New Foot Target Information   
+        emit(std::make_unique<NewStepTargetInfo>(stepTime, inVelocityCurrent, getActiveForwardLimb())); //New Step Target Information
+        emit(std::make_unique<NewFootTargetInfo>(getLeftFootSource(), getRightFootSource(), getSupportMass(), getLeftFootDestination(), getRightFootDestination()));  //New Foot Target Information   
     }
 /*=======================================================================================================*/
 //      METHOD: getNewFootTarget
@@ -233,7 +239,7 @@ namespace motion
         double deltaT = std::chrono::duration_cast<std::chrono::microseconds>(now - lastVeloctiyUpdateTime).count() * 1e-6;
         lastVeloctiyUpdateTime = now;
 
-        auto& limit = (getVelocityCurrent().x() > velocityHigh ? accelerationLimitsHigh : accelerationLimits) * deltaT; // TODO: use a function instead
+        auto& limit = (getVelocityCurrent().x() > velocityHigh ? accelerationLimitsHigh : accelerationLimits) * deltaT;
 
         Transform2D velocityDifference = arma::zeros(3); // Current velocity differential
         velocityDifference.x()     = std::min(std::max(getVelocityCommand().x()     - getVelocityCurrent().x(),     -limit[0]), limit[0]);

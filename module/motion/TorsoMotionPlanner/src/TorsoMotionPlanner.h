@@ -137,11 +137,11 @@ namespace motion
         Transform2D torsoPositionDestination;           // Torso step target position
         Transform2D leftFootPositionTransform;          // Active left foot position
         Transform2D rightFootPositionTransform;         // Active right foot position
-        std::queue<Transform2D> leftFootSource;         // Pre-step left foot position
-        std::queue<Transform2D> rightFootSource;        // Pre-step right foot position
-        std::queue<Transform2D> leftFootDestination;    // Destination placement Transform2D left foot positions
-        std::queue<Transform2D> rightFootDestination;   // Destination placement Transform2D right foot positions
-        std::queue<Transform2D> q_supportMass;           // Appears to be support foot pre-step position
+        Transform2D leftFootSource;                     // Pre-step left foot position
+        Transform2D rightFootSource;                    // Pre-step right foot position
+        Transform2D leftFootDestination;                // Destination placement Transform2D left foot positions
+        Transform2D rightFootDestination;               // Destination placement Transform2D right foot positions
+        Transform2D m_supportMass;                      // Appears to be support foot pre-step position
         LimbID activeForwardLimb;                       // The leg that is 'swinging' in the step, opposite of the support foot
         LimbID activeLimbInitial;                       // TODO: Former initial non-support leg for deterministic walking approach
 
@@ -149,13 +149,7 @@ namespace motion
          * Anthropomorphic metrics initialized from configuration script, see config file for documentation...
          */
         double bodyTilt;                                // 
-        double bodyHeight;                              //
-    //  double supportFront;                            //
-    //  double supportFront2;                           //
-    //  double supportBack;                             //
-    //  double supportSideX;                            //
-    //  double supportSideY;                            //
-    //  double supportTurn;                             //    
+        double bodyHeight;                              //   
         double stanceLimitY2;                           //
         double stepTime;                                //
         double stepHeight;                              //

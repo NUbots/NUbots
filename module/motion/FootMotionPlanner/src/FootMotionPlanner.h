@@ -97,6 +97,31 @@ namespace motion
         std::queue<Transform2D> activeLimbDestination;  // Destination placement Transform2D active foot positions
         std::queue<LimbID> activeForwardLimb;           // The leg that is 'swinging' in the step, opposite of the support foot
         LimbID activeLimbInitial;                       // TODO: Former initial non-support leg for deterministic walking approach
+        
+        struct NewStepInfo                              // Capture Next Step Data
+        {
+            NewStepInfo() 
+            : lFootSource()
+            , rFootSource()
+            , sMass()
+            , lFootDestination()
+            , rFootDestination()
+            {
+                lFootSource = Transform2D();
+                rFootSource = Transform2D();
+                sMass = Transform2D();
+                lFootDestination = Transform2D();
+                rFootDestination = Transform2D();
+            }
+            ~NewStepInfo() {}
+
+            Transform2D lFootSource;
+            Transform2D rFootSource;
+            Transform2D sMass;
+            Transform2D lFootDestination;
+            Transform2D rFootDestination;
+        };
+        std::queue<NewStepInfo> newStepInfoSets;
 
          /**
          * Anthropomorphic metrics initialized from configuration script, see config file for documentation...

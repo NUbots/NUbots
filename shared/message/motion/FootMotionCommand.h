@@ -68,6 +68,27 @@ namespace motion
             , rightFoot3D(rightFoot3D) {}
     };
 
+    struct NextFootTargetInfo
+    {
+        Transform2D leftFootSource;
+        Transform2D rightFootSource;
+        Transform2D supportMass;
+        Transform2D leftFootDestination;
+        Transform2D rightFootDestination;
+        NextFootTargetInfo(
+                            const Transform2D& inLeftFootSource,
+                            const Transform2D& inRightFootSource,
+                            const Transform2D& inSupportMass,
+                            const Transform2D& inLeftFootDestination, 
+                            const Transform2D& inRightFootDestination
+                         )
+            : leftFootSource(inLeftFootSource)
+            , rightFootSource(inRightFootSource)
+            , supportMass(inSupportMass)
+            , leftFootDestination(inLeftFootDestination)
+            , rightFootDestination(inRightFootDestination) {}
+    };
+
     struct FootStepRequested
     {
         bool status;
