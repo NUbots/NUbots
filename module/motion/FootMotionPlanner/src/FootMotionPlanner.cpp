@@ -58,8 +58,8 @@ namespace motion
         , updateHandle()
         , leftFootPositionTransform(), rightFootPositionTransform()
         , activeLimbSource(), activeLimbDestination()
-        , activeForwardLimb(), activeLimbInitial(LimbID::LEFT_LEG)
-        , newStepInfoSets()
+        , activeForwardLimb(), newStepInfoSets()
+        , activeLimbInitial(LimbID::LEFT_LEG)
         , stepTime(0.0), stepHeight(0.0)
         , step_height_slow_fraction(0.0f), step_height_fast_fraction(0.0f)
         , ankle_pitch_lift(0.0), ankle_pitch_fall(0.0)
@@ -87,32 +87,21 @@ namespace motion
         updateHandle = on<Every<UPDATE_FREQUENCY, Per<std::chrono::seconds>>, Single, Priority::HIGH>()
         .then("Foot Motion Planner - Update Foot Position", [this]
         {
-            if(DEBUG) { log<NUClear::TRACE>("Messaging: Foot Motion Planner - Update Foot Position(0)"); }       
-            // If there is some foot target data queued for computation, then update robot...
-            // if(isNewStepReceived())
-            // {                            
-                   
-            // if(!isTargetStepUnchanged())      // TODO : Wierd that this is required, otherwise robot does strange sh*t...
-            // {                
-                double motionPhase = getMotionPhase();
-                updateFootPosition(motionPhase, getActiveLimbSource(), getActiveForwardLimb(), getActiveLimbDestination());
-
-                //DEBUG: Printout of motion phase function...
-                emit(graph("FMP Synchronising Motion Phase", arma::vec({motionPhase, (getActiveForwardLimb() == LimbID::LEFT_LEG ? 1  : 0)})));
-                emit(graph("FMP Synchronising Data Queues", arma::vec({
-                                                                            destinationTime.size(), 
-                                                                            velocityCurrent.size(), 
-                                                                            activeLimbSource.size(), 
-                                                                            activeForwardLimb.size(), 
-                                                                            activeLimbDestination.size(), 
-                                                                            newStepInfoSets.size()
-                                                                          })));
-            // }
-
-            // }
-
-            
+            double motionPhase = getMotionPhase();
+            if(DEBUG) { log<NUClear::TRACE>("Messaging: Foot Motion Planner - Update Foot Position(0)"); }                     
+                updateFootPosition(motionPhase, getActiveLimbSource(), getActiveForwardLimb(), getActiveLimbDestination());         
             if(DEBUG) { log<NUClear::TRACE>("Messaging: Foot Motion Planner - Update Foot Position(1)"); }
+
+            //DEBUG: Printout of motion phase function...
+            emit(graph("FMP Synchronising Motion Phase", arma::vec({motionPhase, (getActiveForwardLimb() == LimbID::LEFT_LEG ? 1  : 0)})));
+            emit(graph("FMP Synchronising Data Queues", arma::vec({
+                                                                        destinationTime.size(), 
+                                                                        velocityCurrent.size(), 
+                                                                        activeLimbSource.size(), 
+                                                                        activeForwardLimb.size(), 
+                                                                        activeLimbDestination.size(), 
+                                                                        newStepInfoSets.size()
+                                                                      })));   
         }).disable();
 
         //In the event of a new foot step target specified by the foot placement planning module...

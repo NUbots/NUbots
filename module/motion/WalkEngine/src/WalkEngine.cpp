@@ -139,18 +139,6 @@ namespace motion
                 setRightFootPosition(info.rightFoot);
                 setLArmPosition(info.armLPosition);
                 setRArmPosition(info.armRPosition);
-                
-                // static double motion = info.phase;
-                // if (motion > info.phase)
-                // {
-                //     std::cout << DEBUG_ITER << "\n\r";
-                //     DEBUG_ITER = 0;
-                // }
-                // else
-                // {
-                //     DEBUG_ITER++;            
-                // }
-                // motion = info.phase; 
 
                 emit(graph("WE: Left  Foot Joint Position",    getLeftFootPosition()));   
                 emit(graph("WE: Right Foot Joint Position",   getRightFootPosition()));                    

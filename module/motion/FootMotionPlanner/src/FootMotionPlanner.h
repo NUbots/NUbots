@@ -59,7 +59,7 @@ namespace motion
          * TODO: Probably be a global config somewhere, waiting on NUClear to support runtime on<Every> arguments
          */
         static constexpr size_t UPDATE_FREQUENCY = 90;
-        static constexpr size_t MIN_QUEUE_SIZE   = 1;
+        static constexpr size_t MIN_QUEUE_SIZE   =  1;
 
         static constexpr const char* CONFIGURATION_PATH = "FootMotionPlanner.yaml";
         static constexpr const char* CONFIGURATION_MSSG = "Foot Motion Planner - Configure";
@@ -117,10 +117,10 @@ namespace motion
         };
         Transform2D leftFootPositionTransform;          // Active left foot position
         Transform2D rightFootPositionTransform;         // Active right foot position
-        std::queue<NewStepInfo> newStepInfoSets;
         std::queue<Transform2D> activeLimbSource;       // Pre-step active limb position
         std::queue<Transform2D> activeLimbDestination;  // Destination placement Transform2D active foot positions
         std::queue<LimbID> activeForwardLimb;           // The leg that is 'swinging' in the step, opposite of the support foot
+        std::queue<NewStepInfo> newStepInfoSets;        // Collective FPP data for queueing TMP sync
         LimbID activeLimbInitial;                       // TODO: Former initial non-support leg for deterministic walking approach
 
          /**
