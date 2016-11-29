@@ -23,8 +23,9 @@
 namespace message {
     namespace input {
 
-        Image::Image(uint width, uint height, NUClear::clock::time_point timestamp, std::vector<uint8_t>&& data)
-            : width(width)
+        Image::Image(const std::string& serialNumber, uint width, uint height, NUClear::clock::time_point timestamp, std::vector<uint8_t>&& data)
+            : serialNumber(serialNumber)
+            , width(width)
             , height(height)
             , timestamp(timestamp)
             , data(std::move(data)) {

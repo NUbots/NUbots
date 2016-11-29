@@ -2,12 +2,42 @@
 #define MODULE_INPUT_SPINNAKERCAMERA_H
 
 #include <nuclear>
+#include <string>
 #include <Spinnaker.h>
 #include <SpinGenApi/SpinnakerGenApi.h>
+
+#include "message/input/Image.h"
 
 
 namespace module {
 namespace input {
+
+    struct ImageEvent : public Spinnaker::ImageEvent {
+        ImageEvent(const std::string& serialNumber, Spinnaker::CameraPtr&& camera, NUClear::Reactor& reactor) 
+            : serialNumber(serialNumber), camera(std::move(camera)), reactor(reactor) {}
+        ~ImageEvent()
+        {
+            camera->EndAcquisition();
+            camera->UnregisterEvent(*this);
+            camera->DeInit();
+        }
+
+        std::string serialNumber;
+        Spinnaker::CameraPtr camera;
+        NUClear::Reactor& reactor;
+
+        void OnImageEvent(Spinnaker::ImagePtr image)
+        {
+            // Check image retrieval status
+            if (!image->IsIncomplete())
+            {
+                auto timestamp = NUClear::clock::time_point(std::chrono::nanoseconds(image->GetTimeStamp()));
+                std::vector<uint8_t> data((uint8_t*)image->GetData(), (uint8_t*)image->GetData() + image->GetBufferSize());
+
+                reactor.emit(std::make_unique<message::input::Image>(serialNumber, image->GetWidth(), image->GetHeight(), timestamp, std::move(data)));
+            }
+        }
+    };
 
     class SpinnakerCamera : public NUClear::Reactor {
 
@@ -25,7 +55,7 @@ namespace input {
 
     private:
         Spinnaker::SystemPtr system;
-        std::vector<Spinnaker::CameraPtr> cameras;
+        std::map<std::string, struct ImageEvent> cameras;
     };
 
 }

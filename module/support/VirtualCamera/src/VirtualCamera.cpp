@@ -39,7 +39,7 @@ namespace support {
 
             //2 Bytes per pixel
             std::vector<uint8_t> data(2 * cam.imageSizePixels[0] * cam.imageSizePixels[1], 255); // White pixels
-            emit(std::make_unique<Image>(cam.imageSizePixels[0], cam.imageSizePixels[1], NUClear::clock::now(), std::move(data)));
+            emit(std::make_unique<Image>("", cam.imageSizePixels[0], cam.imageSizePixels[1], NUClear::clock::now(), std::move(data)));
 
         });
 

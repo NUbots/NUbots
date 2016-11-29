@@ -42,11 +42,12 @@ namespace message {
                 uint8_t cr;
             };
 
-            Image(uint width, uint height, NUClear::clock::time_point, std::vector<uint8_t>&& data);
+            Image(const std::string& serialNumber, uint width, uint height, NUClear::clock::time_point, std::vector<uint8_t>&& data);
 
             Pixel operator()(uint x, uint y) const;
             Pixel operator()(const arma::ivec2& p) const;
 
+            std::string serialNumber;
             uint width;
             uint height;
             NUClear::clock::time_point timestamp;

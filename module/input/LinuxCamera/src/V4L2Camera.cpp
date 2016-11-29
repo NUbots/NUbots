@@ -127,7 +127,7 @@ namespace module {
             // }
 
             // Move this data into the image
-            return Image(width, height, timestamp, std::move(data));
+            return Image("", width, height, timestamp, std::move(data));
         }
 
         void V4L2Camera::resetCamera(const std::string& device, const std::string& fmt, size_t w, size_t h) {

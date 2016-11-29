@@ -136,7 +136,7 @@ namespace support {
                 std::memcpy(pixels.data(), source.data(), source.size());
 
                 // Build the image
-                auto image = std::make_unique<Image>(width, height, NUClear::clock::now(), std::move(pixels));
+                auto image = std::make_unique<Image>("", width, height, NUClear::clock::now(), std::move(pixels));
 
                 // Wait until it's time to display it
                 std::this_thread::sleep_until(timeToRun);
