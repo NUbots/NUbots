@@ -17,7 +17,7 @@ IF(CMAKE_CXX_COMPILER_ID MATCHES GNU)
     ENDIF()
 ENDIF()
 
-SET(CMAKE_INSTALL_RPATH ${CMAKE_INSTALL_RPATH} toolchain /home/darwin/toolchain)
+SET(CMAKE_INSTALL_RPATH ${CMAKE_INSTALL_RPATH} /home/darwin/toolchain/ /home/nubots/toolchain/)
 
 # Disable armadillo bounds checking in release and min size release builds
 SET(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -DARMA_NO_DEBUG")
