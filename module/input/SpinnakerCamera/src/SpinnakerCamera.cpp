@@ -61,7 +61,7 @@ namespace input {
 
                 if (IsAvailable(newPixelFormat) && IsReadable(newPixelFormat))
                 {
-                    newPixelFormat->SetIntValue(newPixelFormat->GetValue());
+                    ptrPixelFormat->SetIntValue(newPixelFormat->GetValue());
                 }
 
                 else
