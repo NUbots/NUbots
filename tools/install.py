@@ -8,7 +8,7 @@ import tempfile
 import b
 
 from termcolor import cprint
-from subprocess import call
+from subprocess import call, STDOUT
 
 def register(command):
 
@@ -48,6 +48,16 @@ def run(ip_addr, config, user, **kwargs):
     cprint('Installing toolchain library files', 'blue', attrs=['bold'])
     libs = glob.glob('{0}/lib/*.so*'.format(platform_dir))
     call(['rsync', '-avzPl', '--checksum', '-e ssh'] + libs + [target_dir + 'toolchain'])
+
+    # Set rpath for all libs on the remote machine
+    cprint('Setting rpath for all toolchain libs to {0}'.format(target_dir + 'toolchain'), 'blue', attrs=['bold'])
+    FNULL = open(os.devnull, 'w')
+    for lib in libs:
+        command = 'patchelf --set-rpath /home/{0}/toolchain {1}'.format(user, lib.replace('{0}/lib'.format(platform_dir), '/home/{0}/toolchain'.format(user)))
+        host = '{0}@{1}'.format(user, ip_addr)
+        cprint('Running {0} on {1}'.format(command, host), 'blue', attrs=['bold'])
+        call(['ssh', host, command], stdout=FNULL, stderr=STDOUT)
+    FNULL.close()
 
     if config in ['overwrite', 'o']:
         cprint('Overwriting configuration files on target', 'blue', attrs=['bold'])
