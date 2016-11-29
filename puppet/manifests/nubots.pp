@@ -74,7 +74,7 @@ node nubotsvmbuild {
                                           'DarwinOp' => [ '--host=i686-linux-gnu', '--build=x86_64-unknown-linux-gnu', '--with-zlib=ZLIB_PATH', '--without-python', ],
                                           'NimbroOp' => [ '--with-zlib=ZLIB_PATH', '--without-python', ], },
                        'method'      => 'autotools',},
-    'nuclear'      => {'url'         => 'https://github.com/Fastcode/NUClear/archive/develop.tar.gz',
+    'nuclear'      => {'url'         => 'https://github.com/Fastcode/NUClear/archive/release/1.0.tar.gz',
                        'args'        => { 'native'   => [ '-DBUILD_TESTS=OFF', ],
                                           'DarwinOp' => [ '-DBUILD_TESTS=OFF', ],
                                           'NimbroOp' => [ '-DBUILD_TESTS=OFF', ], },
