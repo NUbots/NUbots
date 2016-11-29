@@ -33,8 +33,6 @@ namespace input {
         : Reactor(std::move(environment)),
         context(dc1394_new(), dc1394_free), cameras() {
 
-        const int NUM_BUFFERS = 4;
-
         on<Configuration>("Cameras/").then([this] (const Configuration& config)
         {
             // Our error variable
@@ -54,16 +52,32 @@ namespace input {
 
                 if(newCam) 
                 {
-                    // Set some important bus options
-                    if ((err = dc1394_video_set_operation_mode(newCam.get(), DC1394_OPERATION_MODE_1394B)) > 0)
+                    // Reset the camera to ensure it is in a known state.
+                    err = dc1394_camera_reset(newCam.get());
+
+                    if (err != DC1394_SUCCESS)
                     {
-                        throw std::system_error(err, utility::error::dc1394_error_category());
+                        NUClear::log("Failed to issue IIDC reset to camera: ", dc1394_error_get_string(err));
+                        return;
                     }
 
-                    // Setup our capture
-                    if ((err = dc1394_capture_setup(newCam.get(), NUM_BUFFERS, DC1394_CAPTURE_FLAGS_DEFAULT)) > 0)
+                    auto err1 = dc1394_camera_set_power(newCam.get(), DC1394_OFF);
+                    auto err2 = dc1394_camera_set_power(newCam.get(), DC1394_ON);
+
+                    if ((err1 != DC1394_SUCCESS) || (err2 != DC1394_SUCCESS))
                     {
-                        throw std::system_error(err, utility::error::dc1394_error_category());
+                        NUClear::log("Failed to power cycle the camera: ", dc1394_error_get_string(err));
+                        return;
+                    }
+
+                    // Make sure we are not operating in legacy mode.
+                    // This should should be necessary to use ISO speeds greater than S400.
+                    err = dc1394_video_set_operation_mode(newCam.get(), DC1394_OPERATION_MODE_1394B);
+
+                    if (err != DC1394_SUCCESS)
+                    {
+                        NUClear::log("Failed to set 1394B operation mode: ", dc1394_error_get_string(err));
+                        return;
                     }
 
                     // Speed    Cycle period    Max. packet size    Max. bandwidth per ISO channel
@@ -79,40 +93,52 @@ namespace input {
                     //                     = 1280x1024x3 * 60 Hz / 8000 Hz
                     //                     = 29491.2 B
                     //                     = 28.8 KB
-                    uint width  = config["format"]["width"].as<uint>();
-                    uint height = config["format"]["height"].as<uint>();
-                    uint fps    = config["format"]["fps"].as<uint>();
+                    uint width      = config["format"]["width"].as<uint>();
+                    uint height     = config["format"]["height"].as<uint>();
+                    uint fps        = config["format"]["fps"].as<uint>();
+                    uint min, max;
+                    dc1394_format7_get_packet_parameters(newCam.get(), DC1394_VIDEO_MODE_FORMAT7_0, &min, &max);
+                    uint packetSize = std::max(min, std::min((width * height * 3 * fps) / 8000, max));
 
-                    float packetSize = (width * height * 3 * fps) / 8000;
+                    fps = (8000 * packetSize) / (width * height * 3);
 
-                    if (packetSize < 1024)
+                    log("packetSize ", packetSize);
+                    log("actual fps ", fps);
+
+                    if (packetSize <= 1024)
                     {
-                        dc1394_video_set_iso_speed(newCam.get(), DC1394_ISO_SPEED_100);
+                        err = dc1394_video_set_iso_speed(newCam.get(), DC1394_ISO_SPEED_100);
+                        log("ISO Speed: S100");
                     }
 
-                    else if (packetSize < 2048)
+                    else if (packetSize <= 2048)
                     {
-                        dc1394_video_set_iso_speed(newCam.get(), DC1394_ISO_SPEED_200);
+                        err = dc1394_video_set_iso_speed(newCam.get(), DC1394_ISO_SPEED_200);
+                        log("ISO Speed: S200");
                     }
 
-                    else if (packetSize < 4096)
+                    else if (packetSize <= 4096)
                     {
-                        dc1394_video_set_iso_speed(newCam.get(), DC1394_ISO_SPEED_400);
+                        err = dc1394_video_set_iso_speed(newCam.get(), DC1394_ISO_SPEED_400);
+                        log("ISO Speed: S400");
                     }
 
-                    else if (packetSize < 8192)
+                    else if (packetSize <= 8192)
                     {
-                        dc1394_video_set_iso_speed(newCam.get(), DC1394_ISO_SPEED_800);
+                        err = dc1394_video_set_iso_speed(newCam.get(), DC1394_ISO_SPEED_800);
+                        log("ISO Speed: S800");
                     }
 
-                    else if (packetSize < 16384)
+                    else if (packetSize <= 16384)
                     {
-                        dc1394_video_set_iso_speed(newCam.get(), DC1394_ISO_SPEED_1600);
+                        err = dc1394_video_set_iso_speed(newCam.get(), DC1394_ISO_SPEED_1600);
+                        log("ISO Speed: S1600");
                     }
 
-                    else if (packetSize < 32768)
+                    else if (packetSize <= 32768)
                     {
-                        dc1394_video_set_iso_speed(newCam.get(), DC1394_ISO_SPEED_3200);
+                        err = dc1394_video_set_iso_speed(newCam.get(), DC1394_ISO_SPEED_3200);
+                        log("ISO Speed: S3200");
                     }
 
                     else
@@ -121,25 +147,106 @@ namespace input {
                         return;
                     }
 
+                    if (err != DC1394_SUCCESS)
+                    {
+                        NUClear::log("Failed to set ISO speed with: ", dc1394_error_get_string(err));
+                        return;
+                    }
+
                     // Set video mode to Format-7 Mode 0.
                     // Mode 0 allows only for specifying a region of interest, and does not perform 
                     // any binning. Frame rate increases when ROI size is reduced.
-                    dc1394_video_set_mode(newCam.get(), DC1394_VIDEO_MODE_FORMAT7_0);
-
-                    err = dc1394_format7_set_roi(newCam.get(),
-                                                 DC1394_VIDEO_MODE_FORMAT7_0,
-                                                 DC1394_COLOR_CODING_YUV444,
-                                                 DC1394_USE_RECOMMENDED,
-                                                 0, 0, width, height);
+                    err = dc1394_video_set_mode(newCam.get(), DC1394_VIDEO_MODE_FORMAT7_0);
 
                     if (err != DC1394_SUCCESS)
                     {
-                        NUClear::log("Failed to set format7 mode 0 with:", dc1394_error_get_string(err));
+                        NUClear::log("Failed to set format7 mode 0: ", dc1394_error_get_string(err));
+                        return;
+                    }
+
+                    log("Format7 Mode 0 set.");
+                    std::string colourCoding = config["format"]["output_format"].as<std::string>();
+
+                    if (colourCoding.compare("RGB8") == 0)
+                    {
+                        err = dc1394_format7_set_color_coding(newCam.get(), DC1394_VIDEO_MODE_FORMAT7_0, DC1394_COLOR_CODING_RGB8);
+                        log("Colour Coding: RGB8");
+                    }
+
+                    else if (colourCoding.compare("RGB16") == 0)
+                    {
+                        err = dc1394_format7_set_color_coding(newCam.get(), DC1394_VIDEO_MODE_FORMAT7_0, DC1394_COLOR_CODING_RGB16);
+                        log("Colour Coding: RGB16");
+                    }
+
+                    else if (colourCoding.compare("YUV411") == 0)
+                    {
+                        err = dc1394_format7_set_color_coding(newCam.get(), DC1394_VIDEO_MODE_FORMAT7_0, DC1394_COLOR_CODING_YUV411);
+                        log("Colour Coding: YUV411");
+                    }
+
+                    else if (colourCoding.compare("YUV422") == 0)
+                    {
+                        err = dc1394_format7_set_color_coding(newCam.get(), DC1394_VIDEO_MODE_FORMAT7_0, DC1394_COLOR_CODING_YUV422);
+                        log("Colour Coding: YUV422");
+                    }
+
+                    else if (colourCoding.compare("YUV444") == 0)
+                    {
+                        err = dc1394_format7_set_color_coding(newCam.get(), DC1394_VIDEO_MODE_FORMAT7_0, DC1394_COLOR_CODING_YUV444);
+                        log("Colour Coding: YUV444");
+                    }
+
+                    else if (colourCoding.compare("RAW8") == 0)
+                    {
+                        err = dc1394_format7_set_color_coding(newCam.get(), DC1394_VIDEO_MODE_FORMAT7_0, DC1394_COLOR_CODING_RAW8);
+                        log("Colour Coding: RAW8");
+                    }
+
+                    else if (colourCoding.compare("RAW16") == 0)
+                    {
+                        err = dc1394_format7_set_color_coding(newCam.get(), DC1394_VIDEO_MODE_FORMAT7_0, DC1394_COLOR_CODING_RAW16);
+                        log("Colour Coding: RAW16");
+                    }
+
+                    else
+                    {
+                        NUClear::log("Invalid colour coding specified.");
+                        return;
+                    }
+
+                    if (err != DC1394_SUCCESS)
+                    {
+                        NUClear::log("Failed to set format7 mode 0 colour coding: ", dc1394_error_get_string(err));
+                        return;
+                    }
+
+                    err = dc1394_format7_set_image_position(newCam.get(), DC1394_VIDEO_MODE_FORMAT7_0, 0, 0);
+
+                    if (err != DC1394_SUCCESS)
+                    {
+                        NUClear::log("Failed to set format7 mode 0 image position: ", dc1394_error_get_string(err));
+                        return;
+                    }
+
+                    err = dc1394_format7_set_image_size(newCam.get(), DC1394_VIDEO_MODE_FORMAT7_0, width, height);
+
+                    if (err != DC1394_SUCCESS)
+                    {
+                        NUClear::log("Failed to set format7 mode 0 image size: ", dc1394_error_get_string(err));
+                        return;
+                    }
+
+                    err = dc1394_format7_set_packet_size(newCam.get(), DC1394_VIDEO_MODE_FORMAT7_0, packetSize);
+
+                    if (err != DC1394_SUCCESS)
+                    {
+                        NUClear::log("Failed to set format7 mode 0 packet size: ", dc1394_error_get_string(err));
                         return;
                     }
 
                     // Add our camera to the list
-                    cameras.insert(std::make_pair(deviceId, std::move(newCam)));
+                    camera = cameras.insert(std::make_pair(deviceId, std::move(newCam))).first;
                 }
 
                 else
@@ -150,14 +257,13 @@ namespace input {
                 }
             }
 
-            /*
             bool autoExposure = config["settings"]["exposure"]["auto"].as<bool>();
             err = dc1394_feature_set_mode(camera->second.get(), DC1394_FEATURE_EXPOSURE, 
                                 autoExposure ? DC1394_FEATURE_MODE_AUTO 
                                               : DC1394_FEATURE_MODE_MANUAL);
             if (err != DC1394_SUCCESS) 
             {
-                log("Failed to set auto exposure:", dc1394_error_get_string(err));
+                log("Failed to set auto exposure: ", dc1394_error_get_string(err));
                 return;
             }
 
@@ -167,7 +273,7 @@ namespace input {
                 err = dc1394_feature_set_absolute_value(camera->second.get(), DC1394_FEATURE_EXPOSURE, exposure);
                 if (err != DC1394_SUCCESS)
                 {
-                    log("Failed to set exposure value:", dc1394_error_get_string(err));
+                    log("Failed to set exposure value: ", dc1394_error_get_string(err));
                     return;
                 }
             }
@@ -178,7 +284,7 @@ namespace input {
                                          : DC1394_FEATURE_MODE_MANUAL);
             if (err != DC1394_SUCCESS) 
             {
-                log("Failed to set auto gain:", dc1394_error_get_string(err));
+                log("Failed to set auto gain: ", dc1394_error_get_string(err));
                 return;
             }
 
@@ -188,7 +294,7 @@ namespace input {
                 err = dc1394_feature_set_absolute_value(camera->second.get(), DC1394_FEATURE_GAIN, gain);
                 if (err != DC1394_SUCCESS)
                 {
-                    log("Failed to set gain value:", dc1394_error_get_string(err));
+                    log("Failed to set gain value: ", dc1394_error_get_string(err));
                     return;
                 }
             }
@@ -199,7 +305,7 @@ namespace input {
                                                : DC1394_FEATURE_MODE_MANUAL);
             if (err != DC1394_SUCCESS) 
             {
-                log("Failed to set auto brightness:", dc1394_error_get_string(err));
+                log("Failed to set auto brightness: ", dc1394_error_get_string(err));
                 return;
             }
 
@@ -209,7 +315,7 @@ namespace input {
                 err = dc1394_feature_set_absolute_value(camera->second.get(), DC1394_FEATURE_BRIGHTNESS, brightness);
                 if (err != DC1394_SUCCESS)
                 {
-                    log("Failed to set brightness value:", dc1394_error_get_string(err));
+                    log("Failed to set brightness value: ", dc1394_error_get_string(err));
                     return;
                 }
             }
@@ -220,7 +326,7 @@ namespace input {
                                               : DC1394_FEATURE_MODE_MANUAL);
             if (err != DC1394_SUCCESS) 
             {
-                log("Failed to set auto sharpness:", dc1394_error_get_string(err));
+                log("Failed to set auto sharpness: ", dc1394_error_get_string(err));
                 return;
             }
 
@@ -230,7 +336,7 @@ namespace input {
                 err = dc1394_feature_set_absolute_value(camera->second.get(), DC1394_FEATURE_SHARPNESS, sharpness);
                 if (err != DC1394_SUCCESS)
                 {
-                    log("Failed to set sharpness value:", dc1394_error_get_string(err));
+                    log("Failed to set sharpness value: ", dc1394_error_get_string(err));
                     return;
                 }
             }
@@ -241,7 +347,7 @@ namespace input {
                                                  : DC1394_FEATURE_MODE_MANUAL);
             if (err != DC1394_SUCCESS) 
             {
-                log("Failed to set auto white balance:", dc1394_error_get_string(err));
+                log("Failed to set auto white balance: ", dc1394_error_get_string(err));
                 return;
             }
 
@@ -252,7 +358,7 @@ namespace input {
                 err = dc1394_feature_whitebalance_set_value(camera->second.get(), u_b_value, v_r_value);
                 if (err != DC1394_SUCCESS)
                 {
-                    log("Failed to set white balance value:", dc1394_error_get_string(err));
+                    log("Failed to set white balance value: ", dc1394_error_get_string(err));
                     return;
                 }
             }
@@ -263,7 +369,7 @@ namespace input {
                                         : DC1394_FEATURE_MODE_MANUAL);
             if (err != DC1394_SUCCESS) 
             {
-                log("Failed to set auto hue:", dc1394_error_get_string(err));
+                log("Failed to set auto hue: ", dc1394_error_get_string(err));
                 return;
             }
 
@@ -273,7 +379,7 @@ namespace input {
                 err = dc1394_feature_set_absolute_value(camera->second.get(), DC1394_FEATURE_HUE, hue);
                 if (err != DC1394_SUCCESS)
                 {
-                    log("Failed to set hue value:", dc1394_error_get_string(err));
+                    log("Failed to set hue value: ", dc1394_error_get_string(err));
                     return;
                 }
             }
@@ -284,7 +390,7 @@ namespace input {
                                                : DC1394_FEATURE_MODE_MANUAL);
             if (err != DC1394_SUCCESS) 
             {
-                log("Failed to set auto saturation:", dc1394_error_get_string(err));
+                log("Failed to set auto saturation: ", dc1394_error_get_string(err));
                 return;
             }
 
@@ -294,7 +400,7 @@ namespace input {
                 err = dc1394_feature_set_absolute_value(camera->second.get(), DC1394_FEATURE_SATURATION, saturation);
                 if (err != DC1394_SUCCESS)
                 {
-                    log("Failed to set saturation value:", dc1394_error_get_string(err));
+                    log("Failed to set saturation value: ", dc1394_error_get_string(err));
                     return;
                 }
             }
@@ -305,7 +411,7 @@ namespace input {
                                           : DC1394_FEATURE_MODE_MANUAL);
             if (err != DC1394_SUCCESS) 
             {
-                log("Failed to set auto gamma:", dc1394_error_get_string(err));
+                log("Failed to set auto gamma: ", dc1394_error_get_string(err));
                 return;
             }
 
@@ -315,7 +421,7 @@ namespace input {
                 err = dc1394_feature_set_absolute_value(camera->second.get(), DC1394_FEATURE_GAMMA, gamma);
                 if (err != DC1394_SUCCESS)
                 {
-                    log("Failed to set gamma value:", dc1394_error_get_string(err));
+                    log("Failed to set gamma value: ", dc1394_error_get_string(err));
                     return;
                 }
             }
@@ -326,7 +432,7 @@ namespace input {
                                          : DC1394_FEATURE_MODE_MANUAL);
             if (err != DC1394_SUCCESS) 
             {
-                log("Failed to set auto temperature:", dc1394_error_get_string(err));
+                log("Failed to set auto temperature: ", dc1394_error_get_string(err));
                 return;
             }
 
@@ -336,60 +442,18 @@ namespace input {
                 err = dc1394_feature_temperature_set_value(camera->second.get(), temperature);
                 if (err != DC1394_SUCCESS)
                 {
-                    log("Failed to set temperature value:", dc1394_error_get_string(err));
+                    log("Failed to set temperature value: ", dc1394_error_get_string(err));
                     return;
                 }
             }
-
-            bool autoTrigger = config["settings"]["trigger"]["auto"].as<bool>();
-            err = dc1394_feature_set_mode(camera->second.get(), DC1394_FEATURE_TRIGGER, 
-                                autoTrigger ? DC1394_FEATURE_MODE_AUTO 
-                                            : DC1394_FEATURE_MODE_MANUAL);
-            if (err != DC1394_SUCCESS) 
-            {
-                log("Failed to set auto trigger:", dc1394_error_get_string(err));
-                return;
-            }
-
-            if (!autoTrigger) 
-            {
-                float trigger = config["settings"]["trigger"]["value"].as<float>();
-                err = dc1394_feature_set_absolute_value(camera->second.get(), DC1394_FEATURE_TRIGGER, trigger);
-                if (err != DC1394_SUCCESS)
-                {
-                    log("Failed to set trigger value:", dc1394_error_get_string(err));
-                    return;
-                }
-            }
-
-            bool autoTriggerDelay = config["settings"]["trigger_delay"]["auto"].as<bool>();
-            err = dc1394_feature_set_mode(camera->second.get(), DC1394_FEATURE_TRIGGER_DELAY,
-                                autoTriggerDelay ? DC1394_FEATURE_MODE_AUTO 
-                                                 : DC1394_FEATURE_MODE_MANUAL);
-            if (err != DC1394_SUCCESS) 
-            {
-                log("Failed to set auto trigger delay:", dc1394_error_get_string(err));
-                return;
-            }
-
-            if (!autoTriggerDelay) 
-            {
-                float trigger_delay = config["settings"]["trigger_delay"]["value"].as<float>();
-                err = dc1394_feature_set_absolute_value(camera->second.get(), DC1394_FEATURE_TRIGGER_DELAY, trigger_delay);
-                if (err != DC1394_SUCCESS)
-                {
-                    log("Failed to set trigger delay value:", dc1394_error_get_string(err));
-                    return;
-                }
-            }
-
+            
             bool autoWhiteShading = config["settings"]["white_shading"]["auto"].as<bool>();
             err = dc1394_feature_set_mode(camera->second.get(), DC1394_FEATURE_WHITE_SHADING,
                                 autoWhiteShading ? DC1394_FEATURE_MODE_AUTO 
                                                  : DC1394_FEATURE_MODE_MANUAL);
             if (err != DC1394_SUCCESS) 
             {
-                log("Failed to set white shading delay:", dc1394_error_get_string(err));
+                log("Failed to set white shading delay: ", dc1394_error_get_string(err));
                 return;
             }
 
@@ -401,37 +465,37 @@ namespace input {
                 err = dc1394_feature_whiteshading_set_value(camera->second.get(), r_value, g_value, b_value);
                 if (err != DC1394_SUCCESS)
                 {
-                    log("Failed to set white shading value:", dc1394_error_get_string(err));
+                    log("Failed to set white shading value: ", dc1394_error_get_string(err));
                     return;
                 }
             }
-            */
 
             err = dc1394_capture_setup(camera->second.get(), 4, DC1394_CAPTURE_FLAGS_DEFAULT);
+
             if (err != DC1394_SUCCESS) 
             {
-                log("Failed to set setup capture with:", dc1394_error_get_string(err));
+                log("Failed to set setup capture with: ", dc1394_error_get_string(err));
                 return;
             }
 
             err = dc1394_video_set_transmission(camera->second.get(), DC1394_ON);
+
             if (err != DC1394_SUCCESS)
             {
-                log("Failed to set video transmission with:", dc1394_error_get_string(err));
+                log("Failed to set video transmission with: ", dc1394_error_get_string(err));
                 return;
             }
 
             on<IO>(dc1394_capture_get_fileno(camera->second.get()), IO::READ).then("Image Capture", [this, &camera]
             {
-                //map[e.fd] e.fd 
-
                 if (camera->second) 
                 {
                     dc1394video_frame_t* frame;
                     dc1394error_t err = dc1394_capture_dequeue(camera->second.get(), DC1394_CAPTURE_POLICY_WAIT, &frame);
+
                     if (err != DC1394_SUCCESS)
                     {
-                        log("Failed capture image with:", dc1394_error_get_string(err));
+                        log("Failed to capture image with: ", dc1394_error_get_string(err));
                         return;
                     }
 

@@ -4,7 +4,7 @@ driver: dc1394
 format:
   width: 1280
   height: 1024
-  output_format: YUV444     # Not currently used.
+  output_format: YUV444 
   fps: 60
 
 settings:
@@ -34,12 +34,6 @@ settings:
     auto: true
     value: 0
   temperature:
-    auto: true
-    value: 0
-  trigger:
-    auto: true
-    value: 0
-  trigger_delay:
     auto: true
     value: 0
   white_shading:
@@ -258,5 +252,10 @@ lens:
 # DC1394_VIDEO_MODE_FORMAT7_7 = 95
 
 # ---------------------------------
-
-
+# 
+# Format7 details:
+#   Max image size: 1280x1024
+#   Supported colour codings: 352 353 354 355 356 357 361 362 
+#   Packet parameters: 116 < packet_size < 14500 (14500 recommended)
+#   Packets per frame: 64
+# 
