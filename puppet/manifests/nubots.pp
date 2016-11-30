@@ -335,6 +335,41 @@ node nubotsvmbuild {
     }
   }
 
+  archive { "Spinnaker":
+    url              => "https://uoneduau-my.sharepoint.com/personal/c3124185_uon_edu_au/_layouts/15/guestaccess.aspx?guestaccesstoken=eKIYc15%2bIayZcInvlaxM2YPIpQ8Uf0NjD9F7Iqba9Rs%3d&docid=00cae2e28b3744b88b21396b00967a746&rev=1",
+    target           => "/nubots/toolchain/NimbroOp/src/Spinnaker",
+    src_target       => "/nubots/toolchain/NimbroOp/src",
+    purge_target     => true,
+    checksum         => false,
+    follow_redirects => true,
+    timeout          => 0,
+    extension        => "tar.gz",
+    strip_components => 1,
+    root_dir         => '.',
+    require          => [ Class['installer::prerequisites'], Class['dev_tools'], ],
+  }
+  exec { "Spinnaker_Files":
+    creates  => "/nubots/toolchain/NimbroOp/include/Spinnaker.h",
+    command  => "cd include && cp -r ./* /nubots/toolchain/NimbroOp/include/ && cd .. &&
+                 cd lib && 
+                 cp libGCBase_gcc540_v3_0.so* /nubots/toolchain/NimbroOp/lib/ &&
+                 cp libGenApi_gcc540_v3_0.so* /nubots/toolchain/NimbroOp/lib/ &&
+                 cp libLog_gcc540_v3_0.so* /nubots/toolchain/NimbroOp/lib/ &&
+                 cp libMathParser_gcc540_v3_0.so* /nubots/toolchain/NimbroOp/lib/ &&
+                 cp libNodeMapData_gcc540_v3_0.so* /nubots/toolchain/NimbroOp/lib/ &&
+                 cp libptgreyvideoencoder.so* /nubots/toolchain/NimbroOp/lib/ &&
+                 cp libSpinnaker.so* /nubots/toolchain/NimbroOp/lib/ &&
+                 cp libXmlParser_gcc540_v3_0.so* /nubots/toolchain/NimbroOp/lib/ &&
+                 cd ..",
+    cwd      => "/nubots/toolchain/NimbroOp/src/Spinnaker",
+    path     =>  [ "${prefix}/${arch}/bin", "${prefix}/bin",
+                   '/usr/local/bin', '/usr/local/sbin/', '/usr/bin/', '/usr/sbin/', '/bin/', '/sbin/' ],
+    timeout  => 0,
+    provider => 'shell',
+    require  => [ Archive["Spinnaker"], ],
+    before   => Class['toolchain_deb'],
+  }
+
   # After we have installed, create the CMake toolchain files and then build our deb.
   Installer <| |> ~> class { 'toolchain_deb': }
 
