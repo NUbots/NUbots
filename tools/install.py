@@ -49,6 +49,15 @@ def run(ip_addr, config, user, **kwargs):
     libs = glob.glob('{0}/lib/*.so*'.format(platform_dir))
     call(['rsync', '-avzPl', '--checksum', '-e ssh'] + libs + [target_dir + 'toolchain'])
 
+    # Find all data files and send them
+    # Data files are located in the build directory (mixed in with the make files and CMake cache).
+    cprint('Installing data files to ' + target_dir, 'blue', attrs=['bold'])
+    files = [fn for fn in glob.glob(os.path.join(build_dir, '*'))
+             if not os.path.basename(fn).endswith('ninja') and 
+                not os.path.basename(fn).lower().startswith('cmake') and 
+                not os.path.isdir(fn)]
+    call(['rsync', '-avzPl', '--checksum', '-e ssh'] + files + [target_dir])
+
     # Set rpath for all libs on the remote machine
     cprint('Setting rpath for all toolchain libs to {0}'.format(target_dir + 'toolchain'), 'blue', attrs=['bold'])
     command = 'for lib in /home/{0}/toolchain/*.so*; do patchelf --set-rpath /home/{0}/toolchain $lib; done'.format(user)
