@@ -8,153 +8,174 @@ namespace input {
     using message::support::Configuration;
 
     SpinnakerCamera::SpinnakerCamera(std::unique_ptr<NUClear::Environment> environment)
-    : Reactor(std::move(environment)), system(Spinnaker::System::GetInstance()), cameras() {
+    : Reactor(std::move(environment)), system(Spinnaker::System::GetInstance()), camList(system->GetCameras(true, true)), cameras() {
+
+        on<Shutdown>().then("SpinnakerCamera Shutdown", [this] {
+            cameras.clear();
+
+            if (system)
+            {
+                system->ReleaseInstance();
+            }
+        });
 
         on<Configuration>("Cameras").then([this] (const Configuration& config)
         {
-            log("Entered config handler.");
-
-            Spinnaker::CameraList camList = system->GetCameras();
-
-            if (camList.GetSize() < 1)
+            try
             {
                 log("Found ", camList.GetSize(), " cameras.");
-                return;
-            }
 
-            std::string serialNumber = config["device"]["serial"].as<std::string>();
-
-            log("Processing camera with serial number ", serialNumber);
-
-            // See if we already have this camera
-            auto camera = cameras.find(serialNumber);
-
-            if (camera == cameras.end())
-            {
-                // Get camera from system enumerated list.
-                auto newCamera = camList.GetBySerial(serialNumber);
-
-                // Ensure we found the camera.
-                if (newCamera)
+                if (camList.GetSize() < 1)
                 {
-                    // Initlise the camera.
-                    newCamera->Init();
-
-                    // Add camera to list.
-                    camera = cameras.insert(std::make_pair(serialNumber, std::make_unique<ImageEvent>(serialNumber, std::move(newCamera), *this))).first;
-                    log("Camera ", serialNumber, " added to map.");
-                }
-
-                else
-                {
-                    log("Failed to find camera with serial number: ", serialNumber);
                     return;
                 }
-            }
 
-            // Get device node map.
-            auto& nodeMap = camera->second->camera->GetNodeMap();
+                std::string serialNumber = config["device"]["serial"].as<std::string>();
 
-            // Set the pixel format.
-            Spinnaker::GenApi::CEnumerationPtr ptrPixelFormat = nodeMap.GetNode("PixelFormat");
+                log("Processing camera with serial number ", serialNumber);
 
-            if (IsAvailable(ptrPixelFormat) && IsWritable(ptrPixelFormat))
-            {
-                // Retrieve the desired entry node from the enumeration node
-                std::string format = config["format"]["pixel"].as<std::string>();
-                Spinnaker::GenApi::CEnumEntryPtr newPixelFormat = ptrPixelFormat->GetEntryByName(format.c_str());
+                // See if we already have this camera
+                auto camera = cameras.find(serialNumber);
 
-                if (IsAvailable(newPixelFormat) && IsReadable(newPixelFormat))
+                if (camera == cameras.end())
                 {
-                    ptrPixelFormat->SetIntValue(newPixelFormat->GetValue());
-                    log("Pixel format for camera ", camera->first," set to ", format);
+                    Spinnaker::CameraPtr newCamera = camList.GetBySerial(serialNumber);
+
+                    // Ensure we found the camera.
+                    if (newCamera)
+                    {
+                        // Initlise the camera.
+                        newCamera->Init();
+
+                        // Add camera to list.
+                        camera = cameras.insert(std::make_pair(serialNumber, std::make_unique<ImageEvent>(serialNumber, std::move(newCamera), *this))).first;
+                        log("Camera ", serialNumber, " added to map.");
+                    }
+
+                    else
+                    {
+                        log("Failed to find camera with serial number: ", serialNumber);
+                        return;
+                    }
                 }
 
                 else
                 {
-                    log("Failed to set pixel format to ", format, " for camera ", camera->first);
+                    camera->second->camera->EndAcquisition();
                 }
-            }
 
-            else
-            {
-                log("Failed to retrieve pixel format for camera ", camera->first);
-            }
+                // Get device node map.
+                auto& nodeMap = camera->second->camera->GetNodeMap();
 
-            // Set the width and height of the image.
-            Spinnaker::GenApi::CIntegerPtr ptrWidth = nodeMap.GetNode("Width");
+                // Set the pixel format.
+                Spinnaker::GenApi::CEnumerationPtr ptrPixelFormat = nodeMap.GetNode("PixelFormat");
 
-            if (IsAvailable(ptrWidth) && IsWritable(ptrWidth))
-            {
-                int64_t width = config["format"]["width"].as<int>();
-
-                // Ensure the width is a multiple of the increment.
-                if ((width % ptrWidth->GetInc()) != 0)
+                if (IsAvailable(ptrPixelFormat) && IsWritable(ptrPixelFormat))
                 {
-                    width = std::min(ptrWidth->GetMax(), std::max(ptrWidth->GetMin(), width - (width % ptrWidth->GetInc())));
+                    // Retrieve the desired entry node from the enumeration node
+                    std::string format = config["format"]["pixel"].as<std::string>();
+                    Spinnaker::GenApi::CEnumEntryPtr newPixelFormat = ptrPixelFormat->GetEntryByName(format.c_str());
+
+                    if (IsAvailable(newPixelFormat) && IsReadable(newPixelFormat))
+                    {
+                        camera->second->pixelFormat = (Spinnaker::PixelFormatEnums)newPixelFormat->GetValue();
+                        ptrPixelFormat->SetIntValue(newPixelFormat->GetValue());
+                        
+                        log("Pixel format for camera ", camera->first," set to ", format);
+                    }
+
+                    else
+                    {
+                        log("Failed to set pixel format to ", format, " for camera ", camera->first);
+                    }
                 }
 
-                ptrWidth->SetValue(width);
-                log("Image width for camera ", camera->first," set to ", width);
-            }
-
-            else
-            {
-                log("Failed to retrieve image width for camera ", camera->first);
-            }
-
-            Spinnaker::GenApi::CIntegerPtr ptrHeight = nodeMap.GetNode("Height");
-
-            if (IsAvailable(ptrHeight) && IsWritable(ptrHeight))
-            {
-                int64_t height = config["format"]["height"].as<int>();
-
-                // Ensure the height is a multiple of the increment.
-                if ((height % ptrHeight->GetInc()) != 0)
+                else
                 {
-                    height = std::min(ptrHeight->GetMax(), std::max(ptrHeight->GetMin(), height - (height % ptrHeight->GetInc())));
+                    log("Failed to retrieve pixel format for camera ", camera->first);
                 }
 
-                ptrHeight->SetValue(height);
-                log("Image height for camera ", camera->first," set to ", height);
+                // Set the width and height of the image.
+                Spinnaker::GenApi::CIntegerPtr ptrWidth = nodeMap.GetNode("Width");
+
+                if (IsAvailable(ptrWidth) && IsWritable(ptrWidth))
+                {
+                    int64_t width = config["format"]["width"].as<int>();
+
+                    // Ensure the width is a multiple of the increment.
+                    if ((width % ptrWidth->GetInc()) != 0)
+                    {
+                        width = std::min(ptrWidth->GetMax(), std::max(ptrWidth->GetMin(), width - (width % ptrWidth->GetInc())));
+                    }
+
+                    ptrWidth->SetValue(width);
+                    log("Image width for camera ", camera->first," set to ", width);
+                }
+
+                else
+                {
+                    log("Failed to retrieve image width for camera ", camera->first);
+                }
+
+                Spinnaker::GenApi::CIntegerPtr ptrHeight = nodeMap.GetNode("Height");
+
+                if (IsAvailable(ptrHeight) && IsWritable(ptrHeight))
+                {
+                    int64_t height = config["format"]["height"].as<int>();
+
+                    // Ensure the height is a multiple of the increment.
+                    if ((height % ptrHeight->GetInc()) != 0)
+                    {
+                        height = std::min(ptrHeight->GetMax(), std::max(ptrHeight->GetMin(), height - (height % ptrHeight->GetInc())));
+                    }
+
+                    ptrHeight->SetValue(height);
+                    log("Image height for camera ", camera->first," set to ", height);
+                }
+
+                else
+                {
+                    log("Failed to retrieve image height for camera ", camera->first);
+                }
+
+                // Set acquisition mode to continuous
+                Spinnaker::GenApi::CEnumerationPtr ptrAcquisitionMode = nodeMap.GetNode("AcquisitionMode");
+
+                if (!IsAvailable(ptrAcquisitionMode) || !IsWritable(ptrAcquisitionMode))
+                {
+                    log("Failed to retrieve acquisition mode for camera ", camera->first);
+                    return;
+                }
+
+                Spinnaker::GenApi::CEnumEntryPtr ptrAcquisitionModeContinuous = ptrAcquisitionMode->GetEntryByName("Continuous");
+                
+                if (!IsAvailable(ptrAcquisitionModeContinuous) || !IsReadable(ptrAcquisitionModeContinuous))
+                {
+                    log("Failed to retrieve continuous acquisition mode entry for camera ", camera->first);
+                    return;
+                }
+
+                ptrAcquisitionMode->SetIntValue(ptrAcquisitionModeContinuous->GetValue());
+
+                log("Camera ", camera->first, " set to continuous acquisition mode.");
+
+                // Setup the event handler for image acquisition.
+                camera->second->camera->RegisterEvent(*camera->second);
+
+                log("Camera ", camera->first, " image event handler registered.");
+
+                // Begin acquisition.
+                camera->second->camera->BeginAcquisition();
+
+                log("Camera ", camera->first, " image acquisition started.");
             }
 
-            else
+            catch (Spinnaker::Exception &e)
             {
-                log("Failed to retrieve image height for camera ", camera->first);
+                log("Fatal error: ", e.GetFullErrorMessage());
             }
-
-            // Set acquisition mode to continuous
-            Spinnaker::GenApi::CEnumerationPtr ptrAcquisitionMode = nodeMap.GetNode("AcquisitionMode");
-
-            if (!IsAvailable(ptrAcquisitionMode) || !IsWritable(ptrAcquisitionMode))
-            {
-                log("Failed to retrieve acquisition mode for camera ", camera->first);
-                return;
-            }
-
-            Spinnaker::GenApi::CEnumEntryPtr ptrAcquisitionModeContinuous = ptrAcquisitionMode->GetEntryByName("Continuous");
-            
-            if (!IsAvailable(ptrAcquisitionModeContinuous) || !IsReadable(ptrAcquisitionModeContinuous))
-            {
-                log("Failed to retrieve continuous acquisition mode entry for camera ", camera->first);
-                return;
-            }
-
-            ptrAcquisitionMode->SetIntValue(ptrAcquisitionModeContinuous->GetValue());
-
-            log("Camera ", camera->first, " set to continuous acquisition mode.");
-
-            // Setup the event handler for image acquisition.
-            camera->second->camera->RegisterEvent(*camera->second);
-
-            log("Camera ", camera->first, " image event handler registered.");
-
-            // Begin acquisition.
-            camera->second->camera->BeginAcquisition();
-
-            log("Camera ", camera->first, " image acquisition started.");
         });
     }
+
 }
 }
