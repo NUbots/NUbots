@@ -51,12 +51,11 @@ def run(ip_addr, config, user, **kwargs):
 
     # Set rpath for all libs on the remote machine
     cprint('Setting rpath for all toolchain libs to {0}'.format(target_dir + 'toolchain'), 'blue', attrs=['bold'])
+    command = 'for lib in /home/{0}/toolchain/*.so*; do patchelf --set-rpath /home/{0}/toolchain $lib; done'.format(user)
+    host = '{0}@{1}'.format(user, ip_addr)
+    cprint('Running {0} on {1}'.format(command, host), 'blue', attrs=['bold'])
     FNULL = open(os.devnull, 'w')
-    for lib in libs:
-        command = 'patchelf --set-rpath /home/{0}/toolchain {1}'.format(user, lib.replace('{0}/lib'.format(platform_dir), '/home/{0}/toolchain'.format(user)))
-        host = '{0}@{1}'.format(user, ip_addr)
-        cprint('Running {0} on {1}'.format(command, host), 'blue', attrs=['bold'])
-        call(['ssh', host, command], stdout=FNULL, stderr=STDOUT)
+    call(['ssh', host, command], stdout=FNULL, stderr=STDOUT)
     FNULL.close()
 
     if config in ['overwrite', 'o']:
