@@ -10,16 +10,21 @@ namespace input {
     SpinnakerCamera::SpinnakerCamera(std::unique_ptr<NUClear::Environment> environment)
     : Reactor(std::move(environment)), system(Spinnaker::System::GetInstance()), cameras() {
 
-        on<Configuration>("Cameras/").then([this] (const Configuration& config)
+        on<Configuration>("Cameras").then([this] (const Configuration& config)
         {
+            log("Entered config handler.");
+
             Spinnaker::CameraList camList = system->GetCameras();
 
             if (camList.GetSize() < 1)
             {
+                log("Found ", camList.GetSize(), " cameras.");
                 return;
             }
 
             std::string serialNumber = config["device"]["serial"].as<std::string>();
+
+            log("Processing camera with serial number ", serialNumber);
 
             // See if we already have this camera
             auto camera = cameras.find(serialNumber);
@@ -36,8 +41,8 @@ namespace input {
                     newCamera->Init();
 
                     // Add camera to list.
-                    struct ImageEvent imageEvent(serialNumber, std::move(newCamera), *this);
-                    camera = cameras.insert(std::make_pair(serialNumber, imageEvent)).first;
+                    camera = cameras.insert(std::make_pair(serialNumber, std::make_unique<ImageEvent>(serialNumber, std::move(newCamera), *this))).first;
+                    log("Camera ", serialNumber, " added to map.");
                 }
 
                 else
@@ -48,7 +53,7 @@ namespace input {
             }
 
             // Get device node map.
-            auto& nodeMap = camera->second.camera->GetNodeMap();
+            auto& nodeMap = camera->second->camera->GetNodeMap();
 
             // Set the pixel format.
             Spinnaker::GenApi::CEnumerationPtr ptrPixelFormat = nodeMap.GetNode("PixelFormat");
@@ -62,6 +67,7 @@ namespace input {
                 if (IsAvailable(newPixelFormat) && IsReadable(newPixelFormat))
                 {
                     ptrPixelFormat->SetIntValue(newPixelFormat->GetValue());
+                    log("Pixel format for camera ", camera->first," set to ", format);
                 }
 
                 else
@@ -89,6 +95,7 @@ namespace input {
                 }
 
                 ptrWidth->SetValue(width);
+                log("Image width for camera ", camera->first," set to ", width);
             }
 
             else
@@ -109,6 +116,7 @@ namespace input {
                 }
 
                 ptrHeight->SetValue(height);
+                log("Image height for camera ", camera->first," set to ", height);
             }
 
             else
@@ -135,11 +143,17 @@ namespace input {
 
             ptrAcquisitionMode->SetIntValue(ptrAcquisitionModeContinuous->GetValue());
 
+            log("Camera ", camera->first, " set to continuous acquisition mode.");
+
             // Setup the event handler for image acquisition.
-            camera->second.camera->RegisterEvent(camera->second);
+            camera->second->camera->RegisterEvent(*camera->second);
+
+            log("Camera ", camera->first, " image event handler registered.");
 
             // Begin acquisition.
-            camera->second.camera->BeginAcquisition();
+            camera->second->camera->BeginAcquisition();
+
+            log("Camera ", camera->first, " image acquisition started.");
         });
     }
 }

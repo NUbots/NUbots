@@ -28,6 +28,8 @@ namespace input {
 
         void OnImageEvent(Spinnaker::ImagePtr image)
         {
+            NUClear::log("Recevied image for camera ", serialNumber);
+
             // Check image retrieval status
             if (!image->IsIncomplete())
             {
@@ -35,6 +37,7 @@ namespace input {
                 std::vector<uint8_t> data((uint8_t*)image->GetData(), (uint8_t*)image->GetData() + image->GetBufferSize());
 
                 reactor.emit(std::make_unique<message::input::Image>(serialNumber, image->GetWidth(), image->GetHeight(), timestamp, std::move(data)));
+                NUClear::log("Emitting image from camera ", serialNumber);
             }
         }
     };
@@ -47,6 +50,8 @@ namespace input {
 
         ~SpinnakerCamera()
         {
+            cameras.clear();
+
             if (system)
             {
                 system->ReleaseInstance();
@@ -55,7 +60,7 @@ namespace input {
 
     private:
         Spinnaker::SystemPtr system;
-        std::map<std::string, struct ImageEvent> cameras;
+        std::map<std::string, std::unique_ptr<ImageEvent>> cameras;
     };
 
 }

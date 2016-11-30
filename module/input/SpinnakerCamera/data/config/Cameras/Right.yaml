@@ -4,7 +4,7 @@ device:
 format:
   width: 1280
   height: 1024
-  output_format: YUV444 
+  pixel: YUV444 
   fps: 60
 
 settings:
