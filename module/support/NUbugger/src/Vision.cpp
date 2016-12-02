@@ -61,7 +61,7 @@ namespace support {
             imageData.mutable_dimensions()->set_y(image.height);
 
             std::string* imageBytes = imageData.mutable_data();
-            imageData.set_format(message::input::proto::Image::YCbCr422);
+            imageData.set_format(uint32_t(image.fourcc));
 
             // Reserve enough space in the image data to store the output
             imageBytes->reserve(image.source().size());

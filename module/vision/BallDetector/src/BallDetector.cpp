@@ -37,8 +37,12 @@
 #include "utility/nubugger/NUhelpers.h"
 #include "utility/math/coordinates.h"
 
+#include "utility/vision/fourcc.h"
+
 namespace module {
 namespace vision {
+
+    using namespace utility::vision;
 
     using message::input::CameraParameters;
     using message::input::Sensors;
@@ -85,7 +89,7 @@ namespace vision {
                 arma::ivec2 ipos = arma::ivec({int(std::round(circle.centre[0])), int(std::round(circle.centre[1]))});
                 if(ipos[0] >= 0 && ipos[0] < int(image.width) && ipos[1] >= 0 && ipos[1] < int(image.height)){
                     // debug.push_back(std::make_tuple(ipos, ipos + arma::ivec2{1,1}, arma::vec4{1,1,1,1}));
-                    if(lut(image(ipos)) == 'g'){
+                    if (lut(getPixel(ipos[0], ipos[1], image.width, image.height, image.source(), image.fourcc)) == 'g') {
                         numGreen++;
                     }
                     actualSamples++;
@@ -99,7 +103,7 @@ namespace vision {
                 arma::ivec2 ipos = arma::ivec2({int(std::round(pos[0])),int(std::round(pos[1]))});
                 if(ipos[0] >= 0 && ipos[0] < int(image.width) && ipos[1] >= 0 && ipos[1] < int(image.height)){
                     // debug.push_back(std::make_tuple(ipos, ipos + arma::ivec2{1,1}, arma::vec4{1,1,1,1}));
-                    if(lut(image(ipos)) == 'g'){
+                    if (lut(getPixel(ipos[0], ipos[1], image.width, image.height, image.source(), image.fourcc)) == 'g') {
                         numGreen++;
                     }
                     actualSamples++;

@@ -34,10 +34,15 @@
 #include "utility/math/ransac/NPartiteRansac.h"
 #include "utility/math/vision.h"
 #include "utility/math/coordinates.h"
+
+#include "utility/vision/fourcc.h"
+
 #include "message/input/CameraParameters.h"
 
 namespace module {
 namespace vision {
+
+    using namespace utility::vision;
 
     using message::input::CameraParameters;
     using message::input::Sensors;
@@ -203,7 +208,7 @@ namespace vision {
                     (point[0] < image.dimensions[0]) && (point[0] > 0) && (point[1] < image.dimensions[1]);
                     point += direction) {
 
-                    char c = lut(image.image->operator()(int(point[0]), int(point[1])));
+                    char c = lut(getPixel(int(point[0]), int(point[1]), image.image->width, image.image->height, image.image->source(), image.image->fourcc));
 
                     if(c != 'y') {
                         ++notWhiteLen;

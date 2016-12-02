@@ -1,10 +1,10 @@
 device: 
-  serial: "00E81B94"
+  serial: "15211412" # "E81B94"
 
 format:
   width: 1280
   height: 1024
-  pixel: YUV444 
+  pixel: YCbCr422_8_CbYCrY
   fps: 60
 
 settings:

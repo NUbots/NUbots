@@ -53,11 +53,11 @@ namespace message {
             , data() {
         }
 
-        const Colour& LookUpTable::operator()(const message::input::Image::Pixel& p) const {
+        const Colour& LookUpTable::operator()(const utility::vision::Pixel& p) const {
             return data[getLUTIndex(p)];
         }
 
-        Colour& LookUpTable::operator()(const message::input::Image::Pixel& p) {
+        Colour& LookUpTable::operator()(const utility::vision::Pixel& p) {
             return data[getLUTIndex(p)];
         }
 
@@ -73,7 +73,7 @@ namespace message {
             return data;
         }
 
-        uint LookUpTable::getLUTIndex(const message::input::Image::Pixel& colour) const {
+        uint LookUpTable::getLUTIndex(const utility::vision::Pixel& colour) const {
             unsigned int index = 0;
 
             index += ((colour.y >> BITS_Y_REMOVED) << BITS_CB_CR);
@@ -83,12 +83,12 @@ namespace message {
             return index;
         }
 
-        message::input::Image::Pixel LookUpTable::getPixelFromIndex(const uint& index) const {
+        utility::vision::Pixel LookUpTable::getPixelFromIndex(const uint& index) const {
             uint8_t y = (index >> BITS_CB_CR) << BITS_Y_REMOVED;
             uint8_t cb = ((index >> BITS_CR) & BITS_CB_MASK) << BITS_CB_REMOVED;
             uint8_t cr = (index & BITS_CR_MASK) << BITS_CR_REMOVED;
 
-            return message::input::Image::Pixel{y, cb, cr};
+            return utility::vision::Pixel{y, cb, cr};
         }
 
     } //vision

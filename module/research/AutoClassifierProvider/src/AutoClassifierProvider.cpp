@@ -24,9 +24,12 @@
 #include "message/support/Configuration.h"
 #include "message/research/AutoClassifierPixels.h"
 
+#include "utility/vision/fourcc.h"
+
 namespace module {
 namespace research {
 
+    using namespace utility::vision;
     using message::input::Image;
     using message::vision::Ball;
     using message::vision::Goal;
@@ -85,7 +88,7 @@ namespace research {
                     uint maxX = std::min(edgePoints[1], double(image.width - 1));
 
                     for (uint x = minX + ballEdgeBuffer; x <= maxX - ballEdgeBuffer; ++x) {
-                        auto pixel = image(x, y);
+                        auto pixel = getPixel(x, y, image.width, image.height, image.source(), image.fourcc);
                         if(pixel.y > ballLightnessMin && y < ballLightnessMax) {
                             pixels->pixels.push_back(pixel);
                         }
@@ -123,7 +126,7 @@ namespace research {
                     uint maxX = std::min(edgePoints[1], double(image.width - 1));
 
                     for (uint x = minX + goalEdgeBuffer; x <= maxX - goalEdgeBuffer; ++x) {
-                        auto pixel = image(x, y);
+                        auto pixel = getPixel(x, y, image.width, image.height, image.source(), image.fourcc);
                         if(pixel.y > goalLightnessMin && y < goalLightnessMax) {
                             pixels->pixels.push_back(pixel);
                         }
@@ -145,7 +148,7 @@ namespace research {
             for (uint x = fieldEdgeBuffer; x < classifiedImage.dimensions[0] - fieldEdgeBuffer; ++x) {
 
                 for (uint y = classifiedImage.visualHorizonAtPoint(x) + fieldEdgeBuffer; y < classifiedImage.dimensions[1] - fieldEdgeBuffer; ++y) {
-                    auto pixel = image(x, y);
+                    auto pixel = getPixel(x, y, image.width, image.height, image.source(), image.fourcc);
                     if(pixel.y > fieldLightnessMin && y < fieldLightnessMax) {
                         pixels->pixels.push_back(pixel);
                     }

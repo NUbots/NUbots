@@ -18,34 +18,18 @@
  */
 
 #include "Image.h"
-#include <cstring>
 
 namespace message {
     namespace input {
 
-        Image::Image(const std::string& serialNumber, uint width, uint height, NUClear::clock::time_point timestamp, std::vector<uint8_t>&& data)
+        Image::Image(const std::string& serialNumber, uint width, uint height, NUClear::clock::time_point timestamp, const utility::vision::FOURCC& fourcc, std::vector<uint8_t>&& data)
             : serialNumber(serialNumber)
             , width(width)
             , height(height)
             , timestamp(timestamp)
+            , fourcc(fourcc)
             , data(std::move(data)) {
         }
-
-        Image::Pixel Image::operator()(uint x, uint y) const {
-            int origin = (y * width + x) * 2;
-            int shift = (x % 2) * 2;
-
-            return {
-                data[origin + 0],
-                data[origin + 1 - shift],
-                data[origin + 3 - shift]
-            };
-        }
-
-        Image::Pixel Image::operator()(const arma::ivec2& p) const {
-            return operator()(p[0],p[1]);
-        }
-
 
         const std::vector<uint8_t>& Image::source() const {
             return data;

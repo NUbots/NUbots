@@ -22,6 +22,7 @@
 #include "message/support/Configuration.h"
 #include "message/input/CameraParameters.h"
 #include "message/input/Image.h"
+#include "utility/vision/fourcc.h"
 
 namespace module {
 namespace support {
@@ -29,6 +30,7 @@ namespace support {
     using message::support::Configuration;
     using message::input::CameraParameters;
     using message::input::Image;
+    using namespace utility::vision;
 
     VirtualCamera::VirtualCamera(std::unique_ptr<NUClear::Environment> environment)
         : Reactor(std::move(environment)), emitImageHandle() {
@@ -39,7 +41,7 @@ namespace support {
 
             //2 Bytes per pixel
             std::vector<uint8_t> data(2 * cam.imageSizePixels[0] * cam.imageSizePixels[1], 255); // White pixels
-            emit(std::make_unique<Image>("", cam.imageSizePixels[0], cam.imageSizePixels[1], NUClear::clock::now(), std::move(data)));
+            emit(std::make_unique<Image>("VirtualCamera", cam.imageSizePixels[0], cam.imageSizePixels[1], NUClear::clock::now(), FOURCC::YUYV, std::move(data)));
 
         });
 

@@ -22,10 +22,12 @@
 
 #include "utility/math/vision.h"
 #include "utility/nubugger/NUhelpers.h"
+#include "utility/vision/fourcc.h"
 
 namespace module {
     namespace vision {
 
+        using namespace utility::vision;
         using message::input::Image;
         using message::vision::LookUpTable;
         using message::vision::ObjectClass;
@@ -40,35 +42,35 @@ namespace module {
 
             // Get our relevant pixels
             //TODO:bounds check
-            std::array<Image::Pixel, 24> pixels {
-                image(base[0] - 2, base[1] - 2),
-                image(base[0] - 2, base[1] - 1),
-                image(base[0] - 2, base[1] + 0),
-                image(base[0] - 2, base[1] + 1),
-                image(base[0] - 2, base[1] + 2),
+            std::array<Pixel, 24> pixels {
+                getPixel(base[0] - 2, base[1] - 2, image.width, image.height, image.source(), image.fourcc),
+                getPixel(base[0] - 2, base[1] - 1, image.width, image.height, image.source(), image.fourcc),
+                getPixel(base[0] - 2, base[1] + 0, image.width, image.height, image.source(), image.fourcc),
+                getPixel(base[0] - 2, base[1] + 1, image.width, image.height, image.source(), image.fourcc),
+                getPixel(base[0] - 2, base[1] + 2, image.width, image.height, image.source(), image.fourcc),
 
-                image(base[0] - 1, base[1] - 2),
-                image(base[0] - 1, base[1] - 1),
-                image(base[0] - 1, base[1] + 0),
-                image(base[0] - 1, base[1] + 1),
-                image(base[0] - 1, base[1] + 2),
+                getPixel(base[0] - 1, base[1] - 2, image.width, image.height, image.source(), image.fourcc),
+                getPixel(base[0] - 1, base[1] - 1, image.width, image.height, image.source(), image.fourcc),
+                getPixel(base[0] - 1, base[1] + 0, image.width, image.height, image.source(), image.fourcc),
+                getPixel(base[0] - 1, base[1] + 1, image.width, image.height, image.source(), image.fourcc),
+                getPixel(base[0] - 1, base[1] + 2, image.width, image.height, image.source(), image.fourcc),
 
-                image(base[0] + 0, base[1] - 2),
-                image(base[0] + 0, base[1] - 1),
-                image(base[0] + 0, base[1] + 1),
-                image(base[0] + 0, base[1] + 2),
+                getPixel(base[0] + 0, base[1] - 2, image.width, image.height, image.source(), image.fourcc),
+                getPixel(base[0] + 0, base[1] - 1, image.width, image.height, image.source(), image.fourcc),
+                getPixel(base[0] + 0, base[1] + 1, image.width, image.height, image.source(), image.fourcc),
+                getPixel(base[0] + 0, base[1] + 2, image.width, image.height, image.source(), image.fourcc),
 
-                image(base[0] + 1, base[1] - 2),
-                image(base[0] + 1, base[1] - 1),
-                image(base[0] + 1, base[1] + 0),
-                image(base[0] + 1, base[1] + 1),
-                image(base[0] + 1, base[1] + 2),
+                getPixel(base[0] + 1, base[1] - 2, image.width, image.height, image.source(), image.fourcc),
+                getPixel(base[0] + 1, base[1] - 1, image.width, image.height, image.source(), image.fourcc),
+                getPixel(base[0] + 1, base[1] + 0, image.width, image.height, image.source(), image.fourcc),
+                getPixel(base[0] + 1, base[1] + 1, image.width, image.height, image.source(), image.fourcc),
+                getPixel(base[0] + 1, base[1] + 2, image.width, image.height, image.source(), image.fourcc),
 
-                image(base[0] + 2, base[1] - 2),
-                image(base[0] + 2, base[1] - 1),
-                image(base[0] + 2, base[1] + 0),
-                image(base[0] + 2, base[1] + 1),
-                image(base[0] + 2, base[1] + 2)
+                getPixel(base[0] + 2, base[1] - 2, image.width, image.height, image.source(), image.fourcc),
+                getPixel(base[0] + 2, base[1] - 1, image.width, image.height, image.source(), image.fourcc),
+                getPixel(base[0] + 2, base[1] + 0, image.width, image.height, image.source(), image.fourcc),
+                getPixel(base[0] + 2, base[1] + 1, image.width, image.height, image.source(), image.fourcc),
+                getPixel(base[0] + 2, base[1] + 2, image.width, image.height, image.source(), image.fourcc)
             };
 
             // Find out how green each pixel is!
@@ -147,7 +149,7 @@ namespace module {
                 int minY = int(std::max(3.0, classifiedImage.horizon.y(point[0])));
                 for(int y = point[1]; y > minY; --y) {
 
-                    char c = lut(image(point[0], y));
+                    char c = lut(getPixel(point[0], y, image.width, image.height, image.source(), image.fourcc));
 
                     if(c == 'g') {
                         auto p = arma::ivec2({ point[0], y - 1 });
@@ -164,7 +166,7 @@ namespace module {
 
                 for(int x = point[0]; x > 3; --x) {
 
-                    char c = lut(image(x, point[1]));
+                    char c = lut(getPixel(x, point[1], image.width, image.height, image.source(), image.fourcc));
 
                     if(c == 'g') {
                         auto p = arma::ivec2({ x + 1, point[1] });
@@ -181,7 +183,7 @@ namespace module {
 
                 for(int x = point[0]; x < int(image.width) - 3; ++x) {
 
-                    char c = lut(image(x, point[1]));
+                    char c = lut(getPixel(x, point[1], image.width, image.height, image.source(), image.fourcc));
 
                     if(c == 'g') {
                         auto p = arma::ivec2({ x - 1, point[1] });

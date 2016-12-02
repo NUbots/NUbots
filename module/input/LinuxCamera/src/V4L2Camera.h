@@ -25,6 +25,7 @@
 #include <string>
 
 #include "message/input/Image.h"
+#include "utility/vision/fourcc.h"
 #include "V4L2CameraSetting.h"
 
 namespace module {
@@ -67,6 +68,7 @@ namespace module {
 
             /// @brief the format that we are reading in from the camera
             std::string format;
+            utility::vision::FOURCC fourcc;
 
             /// @brief Whether the camera is currently in streaming mode
             bool streaming;
@@ -106,7 +108,7 @@ namespace module {
              * @param h the image's height
              * @param f whether the camera is mounted upside down
              */
-            void resetCamera(const std::string& device, const std::string& fmt, size_t w, size_t h);
+            void resetCamera(const std::string& device, const std::string& fmt, const utility::vision::FOURCC& fourcc, size_t w, size_t h);
 
             /**
              * @brief Returns a map of all configurable settings

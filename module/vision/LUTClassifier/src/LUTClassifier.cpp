@@ -26,6 +26,7 @@
 #include "message/support/Configuration.h"
 
 #include "utility/support/yaml_expression.h"
+#include "utility/vision/fourcc.h"
 
 #include "QuexClassifier.h"
 
@@ -34,6 +35,7 @@
 namespace module {
     namespace vision {
 
+        using namespace utility::vision;
         using message::input::Image;
         using message::input::ServoID;
         using message::input::Sensors;
@@ -96,7 +98,7 @@ namespace module {
                             // If this is a field voxel
                             if(c == Colour::GREEN) {
                                 // Get our LUT pixel for this index
-                                Image::Pixel p = lut->getPixelFromIndex(index);
+                                Pixel p = lut->getPixelFromIndex(index);
 
                                 ++nPoints;
                                 greenCentroid += arma::fvec3({ float(p.y), float(p.cb), float(p.cr) });

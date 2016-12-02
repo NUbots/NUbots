@@ -8,13 +8,15 @@
 
 #include "message/input/Image.h"
 
+#include "utility/vision/fourcc.h"
+
 
 namespace module {
 namespace input {
 
     struct ImageEvent : public Spinnaker::ImageEvent {
-        ImageEvent(const std::string& serialNumber, Spinnaker::CameraPtr&& camera, NUClear::Reactor& reactor) 
-            : serialNumber(serialNumber), camera(std::move(camera)), reactor(reactor), pixelFormat() {}
+        ImageEvent(const std::string& serialNumber, Spinnaker::CameraPtr&& camera, NUClear::Reactor& reactor, const utility::vision::FOURCC& fourcc) 
+            : serialNumber(serialNumber), camera(std::move(camera)), reactor(reactor), fourcc(fourcc) {}
         ~ImageEvent()
         {
             if (camera)
@@ -28,7 +30,7 @@ namespace input {
         std::string serialNumber;
         Spinnaker::CameraPtr camera;
         NUClear::Reactor& reactor;
-        Spinnaker::PixelFormatEnums pixelFormat;
+        utility::vision::FOURCC fourcc;
 
         void OnImageEvent(Spinnaker::ImagePtr image)
         {
@@ -36,14 +38,11 @@ namespace input {
             if (!image->IsIncomplete())
             {
                 auto timestamp = NUClear::clock::time_point(std::chrono::nanoseconds(image->GetTimeStamp()));
-                //Spinnaker::ImagePtr convertedImage = image->Convert(pixelFormat, Spinnaker::HQ_LINEAR);
                 std::vector<uint8_t> data((uint8_t*)image->GetData(), (uint8_t*)image->GetData() + image->GetBufferSize());
 
-                NUClear::log("New image: width = ", image->GetWidth(), ", height = ", image->GetHeight(), ", bytes = ", image->GetBufferSize());
-                //NUClear::log("New image: width = ", convertedImage->GetWidth(), ", height = ", convertedImage->GetHeight());
+                //NUClear::log("New image: width = ", image->GetWidth(), ", height = ", image->GetHeight(), ", bytes = ", image->GetBufferSize());
 
-                reactor.emit(std::make_unique<message::input::Image>(serialNumber, image->GetWidth(), image->GetHeight(), timestamp, std::move(data)));
-                //reactor.emit(std::make_unique<message::input::Image>(serialNumber, convertedImage->GetWidth(), convertedImage->GetHeight(), timestamp, std::move(data)));
+                reactor.emit(std::make_unique<message::input::Image>(serialNumber, image->GetWidth(), image->GetHeight(), timestamp, fourcc, std::move(data)));
             }
         }
     };

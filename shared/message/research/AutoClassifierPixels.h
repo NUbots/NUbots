@@ -23,12 +23,14 @@
 #include "message/input/Image.h"
 #include "message/vision/LookUpTable.h"
 
+#include "utility/vision/fourcc.h"
+
 namespace message {
 namespace research {
 
 struct AutoClassifierPixels {
     AutoClassifierPixels() : pixels(), classification() {}
-    std::vector<input::Image::Pixel> pixels;
+    std::vector<utility::vision::Pixel> pixels;
     vision::Colour classification;
 };
 

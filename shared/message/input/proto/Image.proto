@@ -25,15 +25,8 @@ import "message/Vector.proto";
 
 message Image {
 
-    enum Format {
-        UNKNOWN  = 0;
-        YCbCr422 = 1;
-        YCbCr444 = 2;
-        JPEG     = 3;
-    };
-
     uint32 camera_id = 4;
-    Format format = 1;
+    uint32 format = 1;
     uvec2 dimensions = 2;
     bytes data = 3;
 }

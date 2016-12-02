@@ -24,7 +24,10 @@
 #include <armadillo>
 #include <cstdint>
 #include <cstddef>
+#include <string>
 #include <vector>
+
+#include "utility/vision/fourcc.h"
 
 namespace message {
     namespace input {
@@ -36,21 +39,13 @@ namespace message {
          */
         class Image {
         public:
-            struct Pixel {
-                uint8_t y;
-                uint8_t cb;
-                uint8_t cr;
-            };
-
-            Image(const std::string& serialNumber, uint width, uint height, NUClear::clock::time_point, std::vector<uint8_t>&& data);
-
-            Pixel operator()(uint x, uint y) const;
-            Pixel operator()(const arma::ivec2& p) const;
+            Image(const std::string& serialNumber, uint width, uint height, NUClear::clock::time_point, const utility::vision::FOURCC& fourcc, std::vector<uint8_t>&& data);
 
             std::string serialNumber;
             uint width;
             uint height;
             NUClear::clock::time_point timestamp;
+            utility::vision::FOURCC fourcc;
 
             // Returns the raw data that this is using
             const std::vector<uint8_t>& source() const;

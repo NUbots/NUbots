@@ -34,7 +34,7 @@
 #include <cmath>
 #include <cstring>
 #include <yaml-cpp/yaml.h>
-#include "message/input/Image.h"
+#include "utility/vision/fourcc.h"
 
 namespace message {
     namespace vision {
@@ -72,21 +72,21 @@ namespace message {
                 @param p the pixel
                 @return Returns the colour classification of this pixel
              */
-            const message::vision::Colour& operator()(const message::input::Image::Pixel& p) const;
-            message::vision::Colour& operator()(const message::input::Image::Pixel& p);
+            const message::vision::Colour& operator()(const utility::vision::Pixel& p) const;
+            message::vision::Colour& operator()(const utility::vision::Pixel& p);
 
             /*!
              *   @brief Gets the index of the pixel in the LUT
              *   @param p The pixel to be classified.
              *   @return Returns the colour index for the given pixel.
              */
-            uint getLUTIndex(const message::input::Image::Pixel& colour) const;
+            uint getLUTIndex(const utility::vision::Pixel& colour) const;
 
             /*!
              *   @brief The inverse of getLUTIndex
              *   NOTE: This inverse is NOT injective (e.g. not 1-to-1)
              */
-            message::input::Image::Pixel getPixelFromIndex(const uint& index) const;
+            utility::vision::Pixel getPixelFromIndex(const uint& index) const;
         private:
 
             uint8_t BITS_Y_REMOVED;

@@ -27,6 +27,7 @@ extern "C" {
 #include "message/input/Image.h"
 #include "message/input/CameraParameters.h"
 #include "message/support/Configuration.h"
+#include "utility/vision/fourcc.h"
 
 namespace module {
     namespace input {
@@ -34,6 +35,7 @@ namespace module {
         using message::support::Configuration;
         using message::input::CameraParameters;
         using message::input::Image;
+        using namespace utility::vision;
 
         // We assume that the device will always be video0, if not then change this
         LinuxCamera::LinuxCamera(std::unique_ptr<NUClear::Environment> environment)
@@ -76,12 +78,13 @@ namespace module {
                     int height = config["imageHeight"].as<uint>();
                     std::string deviceID = config["deviceID"].as<std::string>();
                     std::string format = config["imageFormat"].as<std::string>();
+                    FOURCC fourcc = getFourCCFromDescription(format);
 
                     if (camera.getWidth() != static_cast<size_t>(width)
                         || camera.getHeight() != static_cast<size_t>(height)
                         || camera.getFormat() != format
                         || camera.getDeviceID() != deviceID) {
-                        camera.resetCamera(deviceID, format, width, height);
+                        camera.resetCamera(deviceID, format, fourcc, width, height);
                     }
 
                     // Set all other camera settings

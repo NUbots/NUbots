@@ -21,6 +21,8 @@
 
 #include <iostream>
 
+#include "utility/vision/fourcc.h"
+
 namespace module {
     namespace vision {
         using message::input::Image;
@@ -28,6 +30,7 @@ namespace module {
         using message::vision::ObjectClass;
         using message::vision::ClassifiedImage;
         using quex::Token;
+        using namespace utility::vision;
 
         QuexClassifier::QuexClassifier()
             : lexer(buffer, BUFFER_SIZE, buffer + 1)
@@ -45,7 +48,7 @@ namespace module {
                 size_t length = end[1] - start[1] + 1;
 
                 for(uint i = 0; i < length / subsample; ++i) {
-                    buffer[i + 1] = lut(image(start[0], start[1] + (i * subsample)));
+                    buffer[i + 1] = lut(getPixel(start[0], start[1] + (i * subsample), image.width, image.height, image.source(), image.fourcc));
                 }
 
                 lexer.buffer_fill_region_finish(length / subsample);
@@ -57,7 +60,7 @@ namespace module {
                 size_t length = end[0] - start[0] + 1;
 
                 for(uint i = 0; i < length / subsample; ++i) {
-                    buffer[i + 1] = lut(image(start[0] + (i * subsample), start[1]));
+                    buffer[i + 1] = lut(getPixel(start[0] + (i * subsample), start[1], image.width, image.height, image.source(), image.fourcc));
                 }
 
                 lexer.buffer_fill_region_finish(length / subsample);

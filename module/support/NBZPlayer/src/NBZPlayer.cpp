@@ -25,10 +25,12 @@
 #include "message/platform/darwin/DarwinSensors.h"
 #include "message/input/proto/Image.pb.h"
 #include "message/input/proto/Sensors.pb.h"
+#include "utility/vision/fourcc.h"
 
 namespace module {
 namespace support {
 
+    using namespace utility::vision;
     using message::support::Configuration;
     using message::input::Image;
     using message::platform::darwin::DarwinSensors;
@@ -136,7 +138,7 @@ namespace support {
                 std::memcpy(pixels.data(), source.data(), source.size());
 
                 // Build the image
-                auto image = std::make_unique<Image>("", width, height, NUClear::clock::now(), std::move(pixels));
+                auto image = std::make_unique<Image>("NBZPlayer", width, height, NUClear::clock::now(), FOURCC::YUYV, std::move(pixels));
 
                 // Wait until it's time to display it
                 std::this_thread::sleep_until(timeToRun);

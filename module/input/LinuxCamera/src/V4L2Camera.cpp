@@ -37,8 +37,9 @@ namespace module {
         constexpr size_t numbuffers = 2;
 
         using message::input::Image;
+        using namespace utility::vision;
 
-        V4L2Camera::V4L2Camera() : buffers(), fd(-1), width(0), height(0), settings(), deviceID(""), format(""), streaming(false) {
+        V4L2Camera::V4L2Camera() : buffers(), fd(-1), width(0), height(0), settings(), deviceID(""), format(""), fourcc(FOURCC::UNKNOWN), streaming(false) {
         }
 
         Image V4L2Camera::getImage() {
@@ -127,16 +128,17 @@ namespace module {
             // }
 
             // Move this data into the image
-            return Image("", width, height, timestamp, std::move(data));
+            return Image(deviceID, width, height, timestamp, fourcc, std::move(data));
         }
 
-        void V4L2Camera::resetCamera(const std::string& device, const std::string& fmt, size_t w, size_t h) {
+        void V4L2Camera::resetCamera(const std::string& device, const std::string& fmt, const FOURCC& cc, size_t w, size_t h) {
             // if the camera device is already open, close it
             closeCamera();
 
             // Store our new state
             deviceID = device;
             format = fmt;
+            fourcc = cc;
             width = w;
             height = h;
 
