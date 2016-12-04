@@ -12,7 +12,7 @@ reaction_handles:
   # Overview information for the dashboard, designed for minimum bandwidth
   overview: true
   # Motor positions, orientation, etc.
-  sensor_data: false
+  sensor_data: true
   # Raw image
   image: false
   # Classified image
@@ -22,7 +22,7 @@ reaction_handles:
   # Localisation state estimates and uncertainties
   localisation: false
   # Data for chart tool in NUsight
-  data_point: false
+  data_point: true
   # Field drawn objects such as an arrow, sphere, etc
   draw_objects: false
   # Subsumption data
@@ -30,7 +30,7 @@ reaction_handles:
   # GameController information
   game_state: false
   # Behaviour information
-  behaviour: false
+  behaviour: true
   # Statistics about reactions, modules and runtimes
   reaction_statistics: false
 

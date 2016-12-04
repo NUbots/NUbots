@@ -37,6 +37,7 @@ Vagrant
 4. To set up vagrant and simulator
 
 		$ vagrant ssh
+		$ mkdir NUbots/build
 		$ cd NUbots/build
 		$ cmake .. -G Ninja
 		$ ninja

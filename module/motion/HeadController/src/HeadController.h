@@ -39,7 +39,13 @@ namespace module {
                 //Debug var:
                 NUClear::clock::time_point lastTime;
             public:
+                static constexpr const char* CONFIGURATION_PATH = "HeadController.yaml";
+                static constexpr const char* CONFIGURATION_MSSG = "Head Controller - Configure";
+                static constexpr const char* ONTRIGGER_HEAD_CMD = "Head Controller - Register Head Command";
+                static constexpr const char* ONTRIGGER_HEAD_POS = "Head Controller - Update Head Position";
+
                 explicit HeadController(std::unique_ptr<NUClear::Environment> environment);
+                
                 arma::vec2 currentAngles;
                 arma::vec2 goalAngles;
                 bool goalRobotSpace = true;

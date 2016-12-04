@@ -21,6 +21,10 @@ NUCLEAR_ROLE(
 
     # Motion
     motion::IKKick
+    motion::FootMotionPlanner
+    motion::FootPlacementPlanner
+    motion::TorsoMotionPlanner
+    motion::BalanceKinematicResponse
     motion::WalkEngine
     motion::ScriptEngine
 

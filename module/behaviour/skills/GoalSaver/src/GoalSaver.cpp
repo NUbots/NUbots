@@ -47,7 +47,7 @@ namespace skills {
     using message::motion::DiveCommand;
     using message::motion::DiveFinished;
     using message::support::Configuration;
-    using message::motion::WalkStopCommand;
+    using message::motion::StopCommand;
     using message::input::LimbID;
 
     GoalSaver::GoalSaver(std::unique_ptr<NUClear::Environment> environment)

@@ -21,48 +21,78 @@
 #define MESSAGE_MOTION_WALKCOMMAND_H
 
 #include <armadillo>
-
 #include "utility/math/matrix/Transform2D.h"
 
-namespace message {
-namespace motion {
+namespace message 
+{
+namespace motion 
+{
+    /*
+    struct [name]
+    {
+        [variables]
+        [structure](...)
+            : ...
+            , ... {}
+    };
+    */
 
     using utility::math::matrix::Transform2D;
 
-    struct WalkCommand {
-        WalkCommand() = delete;
-        WalkCommand(size_t id, Transform2D command_) : subsumptionId(id), command(command_) { }
-        size_t subsumptionId = 1;
+    struct WalkStarted {};
+    struct WalkStopped {};
 
-        // x and y are velocity in m/s and angle is in rads/s
-        utility::math::matrix::Transform2D command;
+    struct WalkCommand 
+    {
+        //WalkCommand() = delete;
+        size_t subsumptionId;           // reservation identifier for servo control
+        Transform2D command;            // x and y are velocity in m/s and angle is in rads/s
+
+        WalkCommand     (
+                            size_t id, 
+                            const Transform2D& command
+                        ) 
+        : subsumptionId(id)
+        , command(command) {}
     };
 
-    struct WalkStartCommand {
-        WalkStartCommand() = delete;
-        WalkStartCommand(size_t id) : subsumptionId(id) { }
-        size_t subsumptionId = 1;
+    struct StopCommand 
+    {
+        //StopCommand() = delete;
+        size_t subsumptionId;           // reservation identifier for servo control
+
+        StopCommand     (
+                            size_t id
+                        ) 
+        : subsumptionId(id) {}
     };
 
-    struct WalkStopCommand {
-        WalkStopCommand() = delete;
-        WalkStopCommand(size_t id) : subsumptionId(id) { }
-        size_t subsumptionId = 1;
-    };
-    struct WalkStopped {
+    struct NewWalkCommand 
+    {
+        //NewWalkCommand() = delete;
+        Transform2D velocityTarget;     //
+
+        NewWalkCommand(const Transform2D& velocityTarget)
+        : velocityTarget(velocityTarget) {}
     };
 
-    struct EnableWalkEngineCommand {
-        EnableWalkEngineCommand() = delete;
+    struct EnableWalkEngineCommand 
+    {
+        //EnableWalkEngineCommand() = delete;
+        size_t subsumptionId;           // reservation identifier for servo control
+
         EnableWalkEngineCommand(size_t id) : subsumptionId(id) { }
-        size_t subsumptionId = 1;
     };
-    struct DisableWalkEngineCommand {
-        DisableWalkEngineCommand() = delete;
+
+    struct DisableWalkEngineCommand 
+    {
+        //DisableWalkEngineCommand() = delete;
+        size_t subsumptionId;           // reservation identifier for servo control
+
         DisableWalkEngineCommand(size_t id) : subsumptionId(id) { }
-        size_t subsumptionId = 1;
     };
-}
-}
+
+} //motion
+} //message
 
 #endif  // MESSAGE_MOTION_WALKCOMMAND_H

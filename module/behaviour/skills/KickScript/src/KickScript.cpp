@@ -35,15 +35,17 @@ namespace skills {
     struct FinishKick{};
 
     using message::support::Configuration;
-    using message::input::ServoID;
-    using message::motion::ExecuteScriptByName;
-    using message::behaviour::RegisterAction;
-    using message::behaviour::ActionPriorites;
-    using message::motion::WalkStartCommand;
+
     using message::input::LimbID;
+    using message::input::ServoID;
+
+    using message::motion::ExecuteScriptByName;
     using message::motion::KickScriptCommand;
     using message::motion::KickFinished;
 
+    using message::behaviour::RegisterAction;
+    using message::behaviour::ActionPriorites;
+    
     KickScript::KickScript(std::unique_ptr<NUClear::Environment> environment)
         : Reactor(std::move(environment))
         , id(size_t(this) * size_t(this) - size_t(this))

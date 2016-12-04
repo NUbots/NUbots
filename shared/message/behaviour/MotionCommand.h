@@ -32,7 +32,7 @@ namespace behaviour {
 
         // Defines the possible types of motion command:
         enum class Type {
-            StandStill,   // Stop moving and just stand still.
+            StandStill,   // Stop moving and just stand still, (equivalent to a VelocityCommand of {0} m/s).
             WalkToState,  // Walk to a given position and heading on the field, avoiding obstacles.
             BallApproach, // Approach the ball, ready to perform a forward kick toward the given kickTarget. Avoids obstacles.
             DirectCommand // Stop all current motion and directly send the given WalkCommand to the WalkEngine.

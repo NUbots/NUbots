@@ -46,13 +46,13 @@ namespace module {
 namespace localisation {
 
     using message::support::Configuration;
-
-    using message::support::Configuration;
+    using message::support::FieldDescription;
+    
     using Self = message::localisation::Self;
     using message::localisation::SideCheckingComplete;
+    using message::localisation::ResetRobotHypotheses;
 
     using message::behaviour::MotionCommand;
-    using message::support::FieldDescription;
     using message::behaviour::WalkPath;
     using message::behaviour::RegisterAction;
     using message::behaviour::ActionPriorites;
@@ -61,20 +61,17 @@ namespace localisation {
 
     using message::motion::KickFinished;
     using message::motion::WalkCommand;
-    using message::motion::WalkStartCommand;
-    using message::motion::WalkStopCommand;
+    using message::motion::StopCommand;
     using message::motion::EnableWalkEngineCommand;
     using message::motion::DisableWalkEngineCommand;
 
 	using message::vision::Goal;
 	using message::vision::VisionObject;
 
-    using message::localisation::ResetRobotHypotheses;
-
     using message::input::LimbID;
     using message::input::ServoID;
-    using SelfPenalisation = message::input::gameevents::Penalisation<message::input::gameevents::SELF>;
 
+    using SelfPenalisation = message::input::gameevents::Penalisation<message::input::gameevents::SELF>;
     using SelfUnpenalisation = message::input::gameevents::Unpenalisation<message::input::gameevents::SELF>;
 
     using utility::math::geometry::RotatedRectangle;

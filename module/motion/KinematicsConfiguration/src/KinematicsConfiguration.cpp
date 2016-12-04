@@ -42,7 +42,7 @@ namespace motion {
             emit(std::make_unique<KinematicsModel>(model));
 
         });
-
+        
     }
 
     void KinematicsConfiguration::configure (KinematicsModel& model, const Configuration& objDarwinModel) {

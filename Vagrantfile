@@ -10,7 +10,7 @@ Vagrant.configure("2") do |config|
 
     # See http://www.virtualbox.org/manual/ch08.html#vboxmanage-modifyvm
     # and http://parallels.github.io/vagrant-parallels/docs/configuration.html
-    v.memory = 8192
+    v.memory = 5120
     v.cpus = 4
     v.update_guest_tools = true
   end

@@ -32,9 +32,10 @@
 #include "utility/nubugger/NUhelpers.h"
 
 
-namespace module {
-    namespace motion {
-
+namespace module 
+{    
+namespace motion 
+{
         using utility::nubugger::graph;
         using message::input::ServoID;
         using message::input::Sensors;
@@ -69,12 +70,10 @@ namespace module {
             , goalAngles(arma::fill::zeros) {
 
             //do a little configurating
-            on<Configuration>("HeadController.yaml").then("Head Controller - Config", [this] (const Configuration& config) {
+            on<Configuration>("HeadController.yaml").then("Head Controller - Configure", [this] (const Configuration& config) {
                 //Gains
                 head_motor_gain = config["head_motors"]["gain"].as<double>();
                 head_motor_torque = config["head_motors"]["torque"].as<double>();
-
-
 
                 emit(std::make_unique<HeadCommand>( HeadCommand {config["initial"]["yaw"].as<float>(),
                                                                  config["initial"]["pitch"].as<float>(), false}));
@@ -96,7 +95,6 @@ namespace module {
             .then("Head Controller - Update Head Position", [this] (const Sensors& sensors, const KinematicsModel& kinematicsModel) {
 
                 emit(graph("HeadController Goal Angles", goalAngles[0], goalAngles[1]));
-
                 //P controller
                 currentAngles = p_gain * goalAngles + (1 - p_gain) * currentAngles;
 
@@ -107,11 +105,6 @@ namespace module {
                 //Convert to robot space
                 arma::vec3 headUnitVector = goalRobotSpace ? goalHeadUnitVector_world : sensors.world.rotation() * goalHeadUnitVector_world;
                 //Compute inverse kinematics for head
-
-
-
-
-
                 //!!!!!!!!!!!!!!
                 //!!!!!!!!!!!!!!
                 //!!!!!!!!!!!!!!
@@ -124,7 +117,6 @@ namespace module {
                 //!!!!!!!!!!!!!!
                 std::vector< std::pair<message::input::ServoID, float> > goalAnglesList = calculateHeadJoints(headUnitVector);
                 // arma::vec2 goalAngles = cartesianToSpherical(headUnitVector).rows(1,2);
-
 
                 //head limits
                 max_yaw = kinematicsModel.Head.MAX_YAW;

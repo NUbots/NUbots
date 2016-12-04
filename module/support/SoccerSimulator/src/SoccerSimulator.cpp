@@ -45,8 +45,7 @@ namespace support {
     using message::support::Configuration;
     using message::support::FieldDescription;
     using message::motion::WalkCommand;
-    using message::motion::WalkStartCommand;
-    using message::motion::WalkStopCommand;
+    using message::motion::StopCommand;
     using message::motion::KickCommand;
     using message::motion::KickScriptCommand;
     using message::motion::KickFinished;
@@ -177,11 +176,11 @@ namespace support {
             kicking = false;
         });
 
-        on<Trigger<WalkStartCommand>>().then("Sim walk start",[this]{
+        on<Trigger<WalkCommand>>().then("Sim walk start",[this]{
             walking = true;
         });
 
-        on<Trigger<WalkStopCommand>>().then("Sim walk start",[this]{
+        on<Trigger<StopCommand>>().then("Sim walk start",[this]{
             walking = false;
         });
 

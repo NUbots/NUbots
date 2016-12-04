@@ -41,6 +41,7 @@ namespace behaviour {
 namespace skills {
 
     using message::support::Configuration;
+
     using Self = message::localisation::Self;
     using Ball = message::localisation::Ball;
 
@@ -51,8 +52,7 @@ namespace skills {
 
     using message::motion::KickFinished;
     using message::motion::WalkCommand;
-    using message::motion::WalkStartCommand;
-    using message::motion::WalkStopCommand;
+    using message::motion::StopCommand;
     using message::motion::EnableWalkEngineCommand;
     using message::motion::DisableWalkEngineCommand;
 
@@ -62,7 +62,6 @@ namespace skills {
     using utility::math::geometry::RotatedRectangle;
     using utility::math::matrix::Transform2D;
     using utility::math::angle::vectorToBearing;
-
 
     WalkPathFollower::WalkPathFollower(std::unique_ptr<NUClear::Environment> environment)
     : Reactor(std::move(environment))
@@ -127,7 +126,7 @@ namespace skills {
 
         // // TODO: Review the interaction of the kick with the WalkPathFollower.
         // on<Trigger<KickFinished>>().then([this] (const KickFinished&) {
-        //     emit(std::move(std::make_unique<WalkStartCommand>(subsumptionId)));
+        //     Re-issue walk command with target velocity...
         // });
 
         updatePathReaction = on<Trigger<WalkPath>,
@@ -224,9 +223,6 @@ namespace skills {
 
             emit(std::move(walkCommand));
 
-
-            emit(std::move(std::make_unique<WalkStartCommand>(subsumptionId)));
-
             emit(utility::nubugger::drawRectangle("WPF_Closest", RotatedRectangle(targetState, {0.12, 0.17}), {0, 0, 0}));
 
             emit(utility::nubugger::drawArrow("WPF_Closest_Arrow", targetState, {1,0,1}, 1));
@@ -239,7 +235,6 @@ namespace skills {
             // }
 
             // // Emit a walk command to move towards the target state:
-            // emit(std::move(std::make_unique<WalkStartCommand>(subsumptionId)));
             // emit(std::move(walkToNextNode(currentState)));
         }).disable();
     }

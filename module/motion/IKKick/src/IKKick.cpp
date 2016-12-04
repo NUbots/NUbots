@@ -43,7 +43,7 @@ namespace module {
 namespace motion {
 
     using message::support::Configuration;
-    using message::motion::WalkStopCommand;
+    using message::motion::StopCommand;
     using message::motion::KickCommand;
     using message::motion::IKKickParams;
     using message::motion::KickFinished;
@@ -112,7 +112,7 @@ namespace motion {
         on<Trigger<KickCommand>>().then([this] {
             // We want to kick!
 
-            emit(std::make_unique<WalkStopCommand>(subsumptionId)); // Stop the walk
+            emit(std::make_unique<StopCommand>(subsumptionId)); // Stop the walk
 
             updatePriority(KICK_PRIORITY);
         });

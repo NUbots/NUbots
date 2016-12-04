@@ -37,6 +37,11 @@ namespace message {
             bool robotSpace; // if true, the yaw and pitch are interpreted in robot space, instead of IMU space
         };
 
+        struct HeadMotionUpdate
+        {
+            //TODO...
+        };
+
     }  // motion
 }  // message
 

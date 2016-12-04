@@ -163,6 +163,14 @@ namespace darwin {
             }
         });
 
+        on<Configuration>("WalkEngine.yaml").then([this] (const Configuration& config) {
+            auto& gain = config["walk_engine"]["servos"]["gain"];
+            pGain = gain["p_gain"].as<float>();
+            dGain = gain["d_gain"].as<float>();
+            iGain = gain["i_gain"].as<float>();
+
+        });
+
         // This trigger gets the sensor data from the CM730
         on<Every<90, Per<std::chrono::seconds>>, Single, Priority::HIGH>().then("Hardware Loop", [this] {
 
@@ -249,19 +257,31 @@ namespace darwin {
         on<Trigger<std::vector<ServoTarget>>, With<DarwinSensors>>().then([this](const std::vector<ServoTarget>& commands, const DarwinSensors& sensors) {
 
             // Loop through each of our commands
-            for (const auto& command : commands) {
+            int index = 0;
+            static float error[] = {0};
+            float p = 0,
+                  d = 0, 
+                  pFactor = 1,
+                  dFactor = 10;
+            for (const auto& command : commands) 
+            {
 
                 float diff = utility::math::angle::difference(command.position, sensors.servo[command.id].presentPosition);
                 NUClear::clock::duration duration = command.time - NUClear::clock::now();
 
-                float speed;
-                if(duration.count() > 0) {
-                    speed = diff / (double(duration.count()) / double(NUClear::clock::period::den));
-                }
-                else {
-                    speed = 0;
-                }
+                p = diff * pFactor;
+                d = abs(diff - error[(int)command.id]) * dFactor;
+                error[(int)command.id] = diff;                          
 
+                float speed;
+                if(duration.count() > 0) 
+                {
+                    speed = diff / (double(duration.count()) / double(NUClear::clock::period::den));             
+                }
+                else 
+                {
+                    speed = 0;
+                }               
 
                 // Update our internal state
                 if(servoState[uint(command.id)].pGain != command.gain
@@ -273,14 +293,14 @@ namespace darwin {
 
                     servoState[uint(command.id)].dirty = true;
 
-                    servoState[uint(command.id)].pGain = command.gain;
-                    servoState[uint(command.id)].iGain = command.gain * 0;
-                    servoState[uint(command.id)].dGain = command.gain * 0;
+                    servoState[uint(command.id)].pGain = 20;//pGain;//command.gain;
+                    servoState[uint(command.id)].iGain = 0;//iGain;//command.gain * 0;
+                    servoState[uint(command.id)].dGain = 5;//dGain;//command.gain * 0;
 
                     servoState[uint(command.id)].movingSpeed = speed;
                     servoState[uint(command.id)].goalPosition = command.position;
 
-                    servoState[uint(command.id)].torque = command.torque;
+                    servoState[uint(command.id)].torque = command.torque*0.7;
                 }
             }
         });
