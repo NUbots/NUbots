@@ -93,8 +93,8 @@ namespace motion
             if(DEBUG) { log<NUClear::TRACE>("Messaging: Foot Motion Planner - Update Foot Position(1)"); }
 
             //DEBUG: Printout of motion phase function...
-            emit(graph("FMP Synchronising Motion Phase", arma::vec({motionPhase, (getActiveForwardLimb() == LimbID::LEFT_LEG ? 1  : 0)})));
-            emit(graph("FMP Synchronising Data Queues", arma::vec({
+            emit(graph("FMP Synchronising Motion Phase", arma::vec({motionPhase, (getActiveForwardLimb() == LimbID::LEFT_LEG ? 1.0 : 0.0)})));
+            emit(graph("FMP Synchronising Data Queues", arma::Col<size_t>({
                                                                         destinationTime.size(), 
                                                                         velocityCurrent.size(), 
                                                                         activeLimbSource.size(), 

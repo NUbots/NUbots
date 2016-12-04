@@ -257,21 +257,20 @@ namespace darwin {
         on<Trigger<std::vector<ServoTarget>>, With<DarwinSensors>>().then([this](const std::vector<ServoTarget>& commands, const DarwinSensors& sensors) {
 
             // Loop through each of our commands
-            int index = 0;
-            static float error[] = {0};
-            float p = 0,
-                  d = 0, 
-                  pFactor = 1,
-                  dFactor = 10;
+            //static float error[] = {0};
+            //float p = 0,
+                  //d = 0, 
+                  //pFactor = 1,
+                  //dFactor = 10;
             for (const auto& command : commands) 
             {
 
                 float diff = utility::math::angle::difference(command.position, sensors.servo[command.id].presentPosition);
                 NUClear::clock::duration duration = command.time - NUClear::clock::now();
 
-                p = diff * pFactor;
-                d = abs(diff - error[(int)command.id]) * dFactor;
-                error[(int)command.id] = diff;                          
+                //p = diff * pFactor;
+                //d = abs(diff - error[(int)command.id]) * dFactor;
+                //error[(int)command.id] = diff;                          
 
                 float speed;
                 if(duration.count() > 0) 

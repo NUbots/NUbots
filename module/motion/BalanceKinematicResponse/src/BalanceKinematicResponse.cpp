@@ -89,9 +89,11 @@ namespace motion
         , velocityCurrent(), velocityCommand(), velFastForward(0.0), velFastTurn(0.0)
         , phase1Single(0.0), phase2Single(0.0)
         , rollParameter(0.0), pitchParameter(0.0), yawParameter(0.0)
-        , toeTipParameter(0.0), hipRollParameter(0.0)
+        , toeTipParameter(0.0), hipRollParameter(0.0), armRollParameter(0.0)
         , hipCompensationScale(1.0), toeCompensationScale(1.0)
         , ankleCompensationScale(1.0), armCompensationScale(1.0), supportCompensationScale(1.0)
+        , hipCompensationMax(0.0), toeCompensationMax(0.0), ankleCompensationMax(0.0)
+        , armCompensationMax(0.0), supportCompensationMax(0.0)
         , balancer(), kinematicsModel()
         , balanceAmplitude(0.0), balanceWeight(0.0), balanceOffset(0.0)
         , balancePGain(0.0), balanceIGain(0.0), balanceDGain(0.0)
@@ -111,7 +113,7 @@ namespace motion
         });
 
         // TODO: Optimise balance configuration using feedback from environmental noise...
-        updateOptimiser = on<Every<10, Per<std::chrono::milliseconds>>, With<Configuration>>().then([this](const Configuration& config) 
+        updateOptimiser = on<Every<10, Per<std::chrono::milliseconds>>, With<Configuration>>().then([this](const Configuration& /*config*/) 
         {
             // [this](const BalanceOptimiserCommand& command) 
             // {
@@ -166,7 +168,7 @@ namespace motion
 
         // If significant environmental noise is present, attempt to recover stability...
         pushTime = NUClear::clock::now();
-        on<Trigger<PushDetection>, With<Configuration>>().then([this](const PushDetection& pd, const Configuration& config) 
+        on<Trigger<PushDetection>, With<Configuration>>().then([this](const PushDetection& /*pd*/, const Configuration& /*config*/) 
         {
             if(DEBUG) { log<NUClear::TRACE>("Messaging: Balance Kinematic Response - Received Update (Push Detected) Info(0)"); }               
                 updateBodyPushRecovery();
@@ -203,7 +205,7 @@ namespace motion
 /*=======================================================================================================*/
 //      METHOD: armRollCompensation
 /*=======================================================================================================*/
-    void BalanceKinematicResponse::armRollCompensation(const Sensors& sensors) 
+    void BalanceKinematicResponse::armRollCompensation(const Sensors& /*sensors*/) 
     {
         //If feature enabled, apply balance compensation through support actuator...
         if (armRollCompensationEnabled) 
