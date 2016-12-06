@@ -157,8 +157,8 @@ namespace motion
         // Update stand configuration with active walk posture...
         handleStandScript = on<Trigger<Sensors>, Single>().then([this]
         {
-           handleStandScript.disable();
            scriptStandAndSave();
+           handleStandScript.unbind();
         });
 
         //Activation of WalkEngine (and default) subordinate actuator modules...
