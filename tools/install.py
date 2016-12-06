@@ -56,7 +56,7 @@ def run(ip_addr, config, user, **kwargs):
              if not os.path.basename(fn).endswith('ninja') and 
                 not os.path.basename(fn).lower().startswith('cmake') and 
                 not os.path.isdir(fn)]
-    call(['rsync', '-avzPl', '--checksum', '-e ssh'] + files + [target_dir])
+    call(['rsync', '-avzPL', '--checksum', '-e ssh'] + files + [target_dir])
 
     # Set rpath for all libs on the remote machine
     cprint('Setting rpath for all toolchain libs to {0}'.format(target_dir + 'toolchain'), 'blue', attrs=['bold'])
