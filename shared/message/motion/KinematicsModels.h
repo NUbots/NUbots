@@ -50,7 +50,8 @@ namespace message{
                     float FOOT_WIDTH = 0.066; // rough
                     float FOOT_CENTRE_TO_ANKLE_CENTRE = 0.011; // rough
 
-                    float LENGTH_BETWEEN_LEGS() const{return HIP_OFFSET_Y * 2;}
+                    float LENGTH_BETWEEN_LEGS = HIP_OFFSET_Y * 2;
+                    //float LENGTH_BETWEEN_LEGS() const{return HIP_OFFSET_Y * 2;}
 
                     int LEFT_TO_RIGHT_HIP_YAW =       -1;
                     int LEFT_TO_RIGHT_HIP_ROLL =      -1;
