@@ -19,6 +19,8 @@ namespace input {
             : serialNumber(serialNumber), camera(std::move(camera)), reactor(reactor), fourcc(fourcc) {}
         ~ImageEvent()
         {
+            NUClear::log("ImageEvent Destructor");
+
             if (camera)
             {
                 camera->EndAcquisition();
@@ -34,13 +36,15 @@ namespace input {
 
         void OnImageEvent(Spinnaker::ImagePtr image)
         {
-            // Check image retrieval status
+            // We have a complete image, emit it.
             if (!image->IsIncomplete())
             {
+                NUClear::log("Received complete image with status. Width:", image->GetWidth(), "Height:", image->GetHeight(), "ID:", image->GetID(), "FrameID:", image->GetFrameID());
+                NUClear::log("Pixel Format:", image->GetPixelFormatName(), "Timestamp:", image->GetTimeStamp());
+                NUClear::log("Status:", image->GetImageStatusDescription(image->GetImageStatus()));
+
                 auto timestamp = NUClear::clock::time_point(std::chrono::nanoseconds(image->GetTimeStamp()));
                 std::vector<uint8_t> data((uint8_t*)image->GetData(), (uint8_t*)image->GetData() + image->GetBufferSize());
-
-                //NUClear::log("New image: width = ", image->GetWidth(), ", height = ", image->GetHeight(), ", bytes = ", image->GetBufferSize());
 
                 reactor.emit(std::make_unique<message::input::Image>(serialNumber, image->GetWidth(), image->GetHeight(), timestamp, fourcc, std::move(data)));
             }

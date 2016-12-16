@@ -1,17 +1,26 @@
 #include "SpinnakerCamera.h"
 
+#include <cmath>
+#include <armadillo>
+
 #include "message/support/Configuration.h"
+#include "utility/support/yaml_expression.h"
+#include "utility/support/yaml_armadillo.h"
+#include "utility/vision/Spinnaker.h"
 
 namespace module {
 namespace input {
 
     using message::support::Configuration;
+    using utility::support::Expression;
     using namespace utility::vision;
 
     SpinnakerCamera::SpinnakerCamera(std::unique_ptr<NUClear::Environment> environment)
     : Reactor(std::move(environment)), system(Spinnaker::System::GetInstance()), camList(system->GetCameras(true, true)), cameras() {
 
         on<Shutdown>().then("SpinnakerCamera Shutdown", [this] {
+            NUClear::log("SpinnakerCamera Shutdown");
+
             cameras.clear();
 
             if (system)
@@ -36,133 +45,256 @@ namespace input {
             // See if we already have this camera
             auto camera = cameras.find(serialNumber);
 
-            if (camera == cameras.end())
+            if (camera != cameras.end())
             {
-                Spinnaker::CameraPtr newCamera = camList.GetBySerial(serialNumber);
+                log("Removing camera with serial number: ", serialNumber);
+                cameras.erase(camera);
+            }
 
-                // Ensure we found the camera.
-                if (newCamera)
-                {
-                    // Initlise the camera.
-                    newCamera->Init();
+            Spinnaker::CameraPtr newCamera = camList.GetBySerial(serialNumber);
 
-                    // Add camera to list.
-                    FOURCC fourcc = getFourCCFromDescription(config["format"]["pixel"].as<std::string>());
-                    camera = cameras.insert(std::make_pair(serialNumber, std::make_unique<ImageEvent>(serialNumber, std::move(newCamera), *this, fourcc))).first;
-                    log("Camera ", serialNumber, " added to map.");
-                }
+            // Ensure we found the camera.
+            if (newCamera)
+            {
+                // Initlise the camera.
+                newCamera->Init();
 
-                else
-                {
-                    log("Failed to find camera with serial number: ", serialNumber);
-                    return;
-                }
+                // Add camera to list.
+                FOURCC fourcc = getFourCCFromDescription(config["format"]["pixel"].as<std::string>());
+                camera = cameras.insert(std::make_pair(serialNumber, std::make_unique<ImageEvent>(serialNumber, std::move(newCamera), *this, fourcc))).first;
+                log("Camera ", serialNumber, " added to map.");
             }
 
             else
             {
-                camera->second->camera->EndAcquisition();
+                log("Failed to find camera with serial number: ", serialNumber);
+                return;
             }
 
-            // Get device node map.
-            auto& nodeMap = camera->second->camera->GetNodeMap();
+            // Get device node maps
+            auto& nodeMap  = camera->second->camera->GetNodeMap();
+            auto& sNodeMap = camera->second->camera->GetTLStreamNodeMap();
+
+            // Set the width and height of the image.
+            if (!setNumericParam(sNodeMap, "StreamDefaultBufferCount", config["buffer_count"].as<int64_t>()))
+            {
+                log("Failed to set software buffer count for camera", camera->first, "to", config["buffer_count"].as<int64_t>());
+            }
 
             // Set the pixel format.
-            Spinnaker::GenApi::CEnumerationPtr ptrPixelFormat = nodeMap.GetNode("PixelFormat");
-
-            if (IsAvailable(ptrPixelFormat) && IsWritable(ptrPixelFormat))
+            if(!setEnumParam(nodeMap, "PixelFormat", config["format"]["pixel"].as<std::string>()))
             {
-                // Retrieve the desired entry node from the enumeration node
-                std::string format = config["format"]["pixel"].as<std::string>();
-                Spinnaker::GenApi::CEnumEntryPtr newPixelFormat = ptrPixelFormat->GetEntryByName(format.c_str());
-
-                if (IsAvailable(newPixelFormat) && IsReadable(newPixelFormat))
-                {
-                    ptrPixelFormat->SetIntValue(newPixelFormat->GetValue());
-                    
-                    log("Pixel format for camera ", camera->first," set to ", format);
-                }
-
-                else
-                {
-                    log("Failed to set pixel format to ", format, " for camera ", camera->first);
-                    log("PixelFormat enum entry is '", format, "' available? ", IsAvailable(newPixelFormat) ? "yes" : "no");
-                    log("PixelFormat enum entry is '", format, "' writable? ", IsWritable(newPixelFormat) ? "yes" : "no");
-                }
-            }
-
-            else
-            {
-                log("Failed to retrieve pixel format for camera ", camera->first);
-                log("PixelFormat enum entry is available? ", IsAvailable(ptrPixelFormat) ? "yes" : "no");
-                log("PixelFormat enum entry is writable? ", IsWritable(ptrPixelFormat) ? "yes" : "no");
+                log("Failed to set pixel format for camera", camera->first, "to", config["format"]["pixel"].as<int64_t>());
             }
 
             // Set the width and height of the image.
-            Spinnaker::GenApi::CIntegerPtr ptrWidth = nodeMap.GetNode("Width");
-
-            if (IsAvailable(ptrWidth) && IsWritable(ptrWidth))
+            if (!setNumericParam(nodeMap, "Width", config["format"]["width"].as<int64_t>()))
             {
-                int64_t width = config["format"]["width"].as<int>();
+                log("Failed to set image width for camera", camera->first, "to", config["format"]["width"].as<int64_t>());
+            }
 
-                // Ensure the width is a multiple of the increment.
-                if ((width % ptrWidth->GetInc()) != 0)
+            if (!setNumericParam(nodeMap, "Height", config["format"]["height"].as<int64_t>()))
+            {
+                log("Failed to set image height for camera", camera->first, "to", config["format"]["height"].as<int64_t>());
+            }
+
+            // Set exposure.
+            auto exposure = config["settings"]["exposure"].as<Expression>();
+
+            if (!setEnumParam(nodeMap, "ExposureAuto", (std::isfinite(exposure.value) ? "Off" : "Continuous")))
+            {
+                log("Failed to set auto exposure mode for camera", camera->first, "to", (std::isfinite(exposure.value) ? "'Off'" : "'Continuous'"));
+            }
+
+            if (std::isfinite(exposure.value))
+            {
+                if (!setEnumParam(nodeMap, "ExposureMode", "Timed"))
                 {
-                    width = std::min(ptrWidth->GetMax(), std::max(ptrWidth->GetMin(), width - (width % ptrWidth->GetInc())));
+                    log("Failed to set exposure mode for camera", camera->first, "to 'Timed'");
                 }
 
-                ptrWidth->SetValue(width);
-                log("Image width for camera ", camera->first," set to ", width);
-            }
-
-            else
-            {
-                log("Failed to retrieve image width for camera ", camera->first);
-                log("Width entry is available? ", IsAvailable(ptrWidth) ? "yes" : "no");
-                log("Width entry is writable? ", IsWritable(ptrWidth) ? "yes" : "no");
-            }
-
-            Spinnaker::GenApi::CIntegerPtr ptrHeight = nodeMap.GetNode("Height");
-
-            if (IsAvailable(ptrHeight) && IsWritable(ptrHeight))
-            {
-                int64_t height = config["format"]["height"].as<int>();
-
-                // Ensure the height is a multiple of the increment.
-                if ((height % ptrHeight->GetInc()) != 0)
+                if (!setNumericParam(nodeMap, "ExposureTime", exposure.value))
                 {
-                    height = std::min(ptrHeight->GetMax(), std::max(ptrHeight->GetMin(), height - (height % ptrHeight->GetInc())));
+                    log("Failed to set exposure time for camera", camera->first, "to", exposure.value, "us.");
+                }
+            }
+
+            // Set gain.
+            auto gain = config["settings"]["gain"].as<Expression>();
+
+            if (!setEnumParam(nodeMap, "GainAuto", (std::isfinite(gain.value) ? "Off" : "Continuous")))
+            {
+                log("Failed to set auto gain mode for camera", camera->first, "to", (std::isfinite(gain.value) ? "'Off'" : "'Continuous'"));
+            }
+
+            if (std::isfinite(gain.value))
+            {
+                if (!setNumericParam(nodeMap, "Gain", gain.value))
+                {
+                    log("Failed to set gain time for camera", camera->first, "to", gain.value, "us.");
+                }
+            }
+
+            // Set gamma.
+            double gamma = config["settings"]["gamma"].as<double>();
+
+            if (!setBooleanParam(nodeMap, "GammaEnabled", (gamma != 0.0)))
+            {
+                log("Failed to", ((gamma == 0.0) ? "disable" : "enable"), "gamma for camera", camera->first);
+            }
+
+            if (gamma != 0.0)
+            {
+                if (!setNumericParam(nodeMap, "Gamma", gamma))
+                {
+                    log("Failed to set gamma for camera", camera->first, "to", gain);
+                }
+            }
+
+            // Set black level.
+            auto blackLevel = config["settings"]["black_level"].as<Expression>();
+
+            if (!setEnumParam(nodeMap, "BlackLevelAuto", ((std::isfinite(blackLevel.value) && (blackLevel.value != 0.0)) ? "Off" : "Continuous")))
+            {
+                log("Failed to set auto black level for camera", camera->first, "to", ((std::isfinite(blackLevel.value) && (blackLevel.value != 0.0)) ? "'Off'" : "'Continuous'"));
+            }
+
+            if (std::isfinite(blackLevel.value) && (blackLevel.value != 0.0))
+            {
+                if (!setNumericParam(nodeMap, "BlackLevel", blackLevel.value))
+                {
+                    log("Failed to set black level for camera", camera->first, "to", blackLevel.value);
+                }
+            }
+
+            // Set sharpness.
+            auto sharpness = config["settings"]["sharpness"].as<Expression>();
+
+            if (!setEnumParam(nodeMap, "SharpnessAuto", (std::isfinite(sharpness.value) ? "Off" : "Continuous")))
+            {
+                log("Failed to set auto sharpness for camera", camera->first, "to", (std::isfinite(sharpness.value) ? "'Off'" : "'Continuous'"));
+            }
+
+            if (std::isfinite(sharpness.value))
+            {
+                if (!setNumericParam(nodeMap, "Sharpness", sharpness.value))
+                {
+                    log("Failed to set sharpness for camera", camera->first, "to", sharpness.value);
+                }
+            }
+
+            // Set hue.
+            auto hue = config["settings"]["hue"].as<Expression>();
+
+            if (!setEnumParam(nodeMap, "SharpnessAuto", (std::isfinite(hue.value) ? "Off" : "Continuous")))
+            {
+                log("Failed to set auto hue for camera", camera->first, "to", (std::isfinite(hue.value) ? "'Off'" : "'Continuous'"));
+            }
+
+            if (std::isfinite(hue.value))
+            {
+                if (!setNumericParam(nodeMap, "Hue", hue.value))
+                {
+                    log("Failed to set hue for camera", camera->first, "to", hue.value);
+                }
+            }
+
+            /*
+            // Set saturation.
+            auto saturation = config["settings"]["saturation"].as<Expression>();
+
+            if (!setEnumParam(nodeMap, "SaturationAuto", (std::isfinite(saturation.value) ? "Off" : "Continuous")))
+            {
+                log("Failed to set auto saturation for camera", camera->first, "to", (std::isfinite(saturation.value) ? "'Off'" : "'Continuous'"));
+
+                Spinnaker::GenApi::CEnumerationPtr enumName = nodeMap.GetNode("SaturationAuto");
+
+                if (!IsAvailable(enumName))
+                {
+                    log("Auto saturation: enum SaturationAuto not available.");
                 }
 
-                ptrHeight->SetValue(height);
-                log("Image height for camera ", camera->first," set to ", height);
+                if (!IsWritable(enumName))
+                {
+                    log("Auto saturation: enum SaturationAuto not writable.");
+                }
+
+                Spinnaker::GenApi::NodeList_t entries;
+                enumName->GetEntries(entries);
+
+                for (const auto& entry : entries)
+                {
+                    log("Auto saturation: entry '", entry->GetName(), "'.");
+                }
             }
 
-            else
+            if (std::isfinite(saturation.value))
             {
-                log("Failed to retrieve image height for camera ", camera->first);
-                log("Height entry is available? ", IsAvailable(ptrHeight) ? "yes" : "no");
-                log("Height entry is writable? ", IsWritable(ptrHeight) ? "yes" : "no");
+                if (!setNumericParam(nodeMap, "Saturation", saturation.value))
+                {
+                    log("Failed to set saturation for camera", camera->first, "to", saturation.value);
+                }
             }
+
+            // Set white balance.
+            // int64_t to be (trivially) type compatible with Spinnaker libray.
+            arma::Col<int64_t> whiteBalance = config["settings"]["white_balance"].as<arma::Col<int64_t>>();
+
+            if (!setEnumParam(nodeMap, "BalanceWhiteAuto", (arma::all(whiteBalance) ? "Off" : "Continuous")))
+            {
+                log("Failed to set auto white balance for camera", camera->first, "to", (arma::all(whiteBalance) ? "'Off'" : "'Continuous'"));
+
+                Spinnaker::GenApi::CEnumerationPtr enumName = nodeMap.GetNode("BalanceWhiteAuto");
+
+                if (!IsAvailable(enumName))
+                {
+                    log("Auto white balance: enum BalanceWhiteAuto not available.");
+                }
+
+                if (!IsWritable(enumName))
+                {
+                    log("Auto white balance: enum BalanceWhiteAuto not writable.");
+                }
+
+                Spinnaker::GenApi::NodeList_t entries;
+                enumName->GetEntries(entries);
+
+                for (const auto& entry : entries)
+                {
+                    log("Auto white balance: entry '", entry->GetName(), "'.");
+                } 
+            }
+
+            // If both elements of the vector are non-zero then we are setting a manual value.
+            if (arma::all(whiteBalance))
+            {
+                if (!setEnumParam(nodeMap, "BalanceRatioSelector", "Red"))
+                {
+                    log("Failed to set white balance ratio selector for camera", camera->first, "to 'Red (V)'");
+                }
+
+                if (!setNumericParam(nodeMap, "BalanceRatio", whiteBalance[0]))
+                {
+                    log("Failed to set saturation for camera", camera->first, "to", whiteBalance[0]);
+                }
+
+                if (!setEnumParam(nodeMap, "BalanceRatioSelector", "Blue"))
+                {
+                    log("Failed to set white balance ratio selector for camera", camera->first, "to 'Blue (U)'");
+                }
+
+                if (!setNumericParam(nodeMap, "BalanceRatio", whiteBalance[1]))
+                {
+                    log("Failed to set saturation for camera", camera->first, "to", whiteBalance[1]);
+                }
+            }
+            */
 
             // Set acquisition mode to continuous
-            Spinnaker::GenApi::CEnumerationPtr ptrAcquisitionMode = nodeMap.GetNode("AcquisitionMode");
-
-            if (!IsAvailable(ptrAcquisitionMode) || !IsWritable(ptrAcquisitionMode))
+            if(!setEnumParam(nodeMap, "AcquisitionMode", "Continuous"))
             {
-                log("Failed to retrieve acquisition mode for camera ", camera->first);
-                return;
+                log("Failed to set acquisition mode for camera", camera->first, "to 'Continuous'.");
             }
-
-            Spinnaker::GenApi::CEnumEntryPtr ptrAcquisitionModeContinuous = ptrAcquisitionMode->GetEntryByName("Continuous");
-            
-            if (!IsAvailable(ptrAcquisitionModeContinuous) || !IsReadable(ptrAcquisitionModeContinuous))
-            {
-                log("Failed to retrieve continuous acquisition mode entry for camera ", camera->first);
-                return;
-            }
-
-            ptrAcquisitionMode->SetIntValue(ptrAcquisitionModeContinuous->GetValue());
 
             log("Camera ", camera->first, " set to continuous acquisition mode.");
 
@@ -176,6 +308,24 @@ namespace input {
 
             log("Camera ", camera->first, " image acquisition started.");
         });
+/*
+        on<Every<30, Per<std::chrono::seconds>>, Single>().then("SpinnakerCamera Acquisition", [this]
+        {
+            for (auto& camera : cameras)
+            {
+                log("Acquiring image for camera ", camera.first);
+
+                Spinnaker::ImagePtr image = camera.second->camera->GetNextImage();
+
+                auto timestamp = NUClear::clock::time_point(std::chrono::nanoseconds(image->GetTimeStamp()));
+                std::vector<uint8_t> data((uint8_t*)image->GetData(), (uint8_t*)image->GetData() + image->GetBufferSize());
+
+                emit(std::make_unique<message::input::Image>(camera.second->serialNumber, image->GetWidth(), image->GetHeight(), timestamp, camera.second->fourcc, std::move(data)));
+
+                image->Release();
+            }
+        });
+*/
     }
 
 }
