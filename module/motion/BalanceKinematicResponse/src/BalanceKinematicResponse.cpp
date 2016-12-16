@@ -751,7 +751,7 @@ namespace motion
         bodyHeight   = body["height"].as<Expression>();
         bodyTilt     = body["tilt"].as<Expression>();
         setFootOffsetCoefficient(wlk_stance["foot_offset"].as<arma::vec>());
-        stanceLimitY2 = kinematicsModel.Leg.LENGTH_BETWEEN_LEGS() - wlk_stance["limit_margin_y"].as<Expression>(); 
+        stanceLimitY2 = kinematicsModel.Leg.LENGTH_BETWEEN_LEGS - wlk_stance["limit_margin_y"].as<Expression>(); 
         STAND_SCRIPT_DURATION = wlk_stance["STAND_SCRIPT_DURATION"].as<Expression>();   
 
         auto& walkCycle = wlk["walk_cycle"];

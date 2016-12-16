@@ -72,6 +72,8 @@ namespace motion {
         model.Leg.FOOT_HEIGHT = objFoot["height"].as<float>();
         model.Leg.FOOT_LENGTH = objFoot["length"].as<float>();
         model.Leg.TOE_LENGTH = objFoot["toe_length"].as<float>();
+
+        model.Leg.LENGTH_BETWEEN_LEGS = objLeg["length_between_legs"].as<float>();
     }
 
     void KinematicsConfiguration::configureHead (KinematicsModel& model, const YAML::Node& objHead) {
