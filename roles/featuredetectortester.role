@@ -5,7 +5,8 @@ NUCLEAR_ROLE(
     # This must come first as it emits config which many roles depend on (e.g. SensorFilter, WalkEngine)
     motion::KinematicsConfiguration
     support::configuration::GlobalConfig
-    input::LinuxCamera
+    #input::LinuxCamera
+    input::SpinnakerCamera
     vision::LUTClassifier
     vision::GoalDetector
     vision::BallDetector
