@@ -38,7 +38,8 @@ NUCLEAR_ROLE(
 
     # Behaviour
     behaviour::Controller
-    behaviour::skills::Stand
+    behaviour::skills::WalkEngineStand
+    #behaviour::skills::Stand
     behaviour::skills::Getup
     behaviour::skills::DirectWalkController
     behaviour::strategy::KeyboardWalk
