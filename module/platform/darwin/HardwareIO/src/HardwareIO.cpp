@@ -283,14 +283,14 @@ namespace darwin {
 
                     servoState[uint(command.id)].dirty = true;
 
-                    servoState[uint(command.id)].pGain = 20;//pGain;//command.gain;
-                    servoState[uint(command.id)].iGain = 0;//iGain;//command.gain * 0;
-                    servoState[uint(command.id)].dGain = 5;//dGain;//command.gain * 0;
+                    servoState[uint(command.id)].pGain = command.gain;
+                    servoState[uint(command.id)].iGain = command.gain * 0;
+                    servoState[uint(command.id)].dGain = command.gain * 0;
 
                     servoState[uint(command.id)].movingSpeed = speed;
                     servoState[uint(command.id)].goalPosition = command.position;
 
-                    servoState[uint(command.id)].torque = command.torque*0.7;
+                    servoState[uint(command.id)].torque = command.torque;
                 }
             }
         });
