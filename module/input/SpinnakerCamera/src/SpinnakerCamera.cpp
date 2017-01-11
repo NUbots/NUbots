@@ -31,7 +31,7 @@ namespace input {
 
         on<Configuration>("Cameras").then([this] (const Configuration& config)
         {
-            log("Found ", camList.GetSize(), " cameras.");
+            log<NUClear::DEBUG>("Found ", camList.GetSize(), " cameras.");
 
             if (camList.GetSize() < 1)
             {
@@ -40,35 +40,46 @@ namespace input {
 
             std::string serialNumber = config["device"]["serial"].as<std::string>();
 
-            log("Processing camera with serial number ", serialNumber);
+            log<NUClear::DEBUG>("Processing camera", config.path, "with serial number", serialNumber);
 
             // See if we already have this camera
             auto camera = cameras.find(serialNumber);
 
-            if (camera != cameras.end())
+            if (camera == cameras.end())
             {
-                log("Removing camera with serial number: ", serialNumber);
-                cameras.erase(camera);
-            }
+                try 
+                {
+                    Spinnaker::CameraPtr newCamera = camList.GetBySerial(serialNumber);
 
-            Spinnaker::CameraPtr newCamera = camList.GetBySerial(serialNumber);
+                    // Ensure we found the camera.
+                    if (newCamera)
+                    {
+                        // Initlise the camera.
+                        newCamera->Init();
 
-            // Ensure we found the camera.
-            if (newCamera)
-            {
-                // Initlise the camera.
-                newCamera->Init();
+                        // Add camera to list.
+                        FOURCC fourcc = getFourCCFromDescription(config["format"]["pixel"].as<std::string>());
+                        camera = cameras.insert(std::make_pair(serialNumber, std::make_unique<ImageEvent>(config.path, serialNumber, std::move(newCamera), *this, fourcc))).first;
+                        log<NUClear::DEBUG>("Camera ", serialNumber, " added to map.");
+                    }
 
-                // Add camera to list.
-                FOURCC fourcc = getFourCCFromDescription(config["format"]["pixel"].as<std::string>());
-                camera = cameras.insert(std::make_pair(serialNumber, std::make_unique<ImageEvent>(serialNumber, std::move(newCamera), *this, fourcc))).first;
-                log("Camera ", serialNumber, " added to map.");
+                    else
+                    {
+                        log<NUClear::WARN>("Failed to find camera", config.path, " with serial number: ", serialNumber);
+                        return;
+                    }
+                }
+
+                catch(const Spinnaker::Exception& ex) 
+                {
+                    log<NUClear::WARN>("Failed to find camera", config.path, " with serial number: ", serialNumber);
+                    return;
+                }
             }
 
             else
             {
-                log("Failed to find camera with serial number: ", serialNumber);
-                return;
+                camera->second->camera->EndAcquisition();
             }
 
             // Get device node maps
@@ -135,6 +146,7 @@ namespace input {
                 }
             }
 
+            /*
             // Set gamma.
             double gamma = config["settings"]["gamma"].as<double>();
 
@@ -147,9 +159,10 @@ namespace input {
             {
                 if (!setNumericParam(nodeMap, "Gamma", gamma))
                 {
-                    log("Failed to set gamma for camera", camera->first, "to", gain);
+                    log("Failed to set gamma for camera", camera->first, "to", gamma);
                 }
             }
+            */
 
             // Set black level.
             auto blackLevel = config["settings"]["black_level"].as<Expression>();
@@ -167,6 +180,7 @@ namespace input {
                 }
             }
 
+            /*
             // Set sharpness.
             auto sharpness = config["settings"]["sharpness"].as<Expression>();
 
@@ -198,6 +212,7 @@ namespace input {
                     log("Failed to set hue for camera", camera->first, "to", hue.value);
                 }
             }
+            */
 
             /*
             // Set saturation.
@@ -308,24 +323,6 @@ namespace input {
 
             log("Camera ", camera->first, " image acquisition started.");
         });
-/*
-        on<Every<30, Per<std::chrono::seconds>>, Single>().then("SpinnakerCamera Acquisition", [this]
-        {
-            for (auto& camera : cameras)
-            {
-                log("Acquiring image for camera ", camera.first);
-
-                Spinnaker::ImagePtr image = camera.second->camera->GetNextImage();
-
-                auto timestamp = NUClear::clock::time_point(std::chrono::nanoseconds(image->GetTimeStamp()));
-                std::vector<uint8_t> data((uint8_t*)image->GetData(), (uint8_t*)image->GetData() + image->GetBufferSize());
-
-                emit(std::make_unique<message::input::Image>(camera.second->serialNumber, image->GetWidth(), image->GetHeight(), timestamp, camera.second->fourcc, std::move(data)));
-
-                image->Release();
-            }
-        });
-*/
     }
 
 }

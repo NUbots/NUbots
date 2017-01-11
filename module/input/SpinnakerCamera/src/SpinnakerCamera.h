@@ -15,12 +15,10 @@ namespace module {
 namespace input {
 
     struct ImageEvent : public Spinnaker::ImageEvent {
-        ImageEvent(const std::string& serialNumber, Spinnaker::CameraPtr&& camera, NUClear::Reactor& reactor, const utility::vision::FOURCC& fourcc) 
-            : serialNumber(serialNumber), camera(std::move(camera)), reactor(reactor), fourcc(fourcc) {}
+        ImageEvent(const std::string& name, const std::string& serialNumber, Spinnaker::CameraPtr&& camera, NUClear::Reactor& reactor, const utility::vision::FOURCC& fourcc) 
+            : name(name), serialNumber(serialNumber), camera(std::move(camera)), reactor(reactor), fourcc(fourcc) {}
         ~ImageEvent()
         {
-            NUClear::log("ImageEvent Destructor");
-
             if (camera)
             {
                 camera->EndAcquisition();
@@ -29,6 +27,7 @@ namespace input {
             }
         }
 
+        std::string name;
         std::string serialNumber;
         Spinnaker::CameraPtr camera;
         NUClear::Reactor& reactor;
@@ -39,14 +38,16 @@ namespace input {
             // We have a complete image, emit it.
             if (!image->IsIncomplete())
             {
-                NUClear::log("Received complete image with status. Width:", image->GetWidth(), "Height:", image->GetHeight(), "ID:", image->GetID(), "FrameID:", image->GetFrameID());
-                NUClear::log("Pixel Format:", image->GetPixelFormatName(), "Timestamp:", image->GetTimeStamp());
-                NUClear::log("Status:", image->GetImageStatusDescription(image->GetImageStatus()));
-
                 auto timestamp = NUClear::clock::time_point(std::chrono::nanoseconds(image->GetTimeStamp()));
                 std::vector<uint8_t> data((uint8_t*)image->GetData(), (uint8_t*)image->GetData() + image->GetBufferSize());
 
-                reactor.emit(std::make_unique<message::input::Image>(serialNumber, image->GetWidth(), image->GetHeight(), timestamp, fourcc, std::move(data)));
+                auto msg = std::make_unique<message::input::Image>(serialNumber, image->GetWidth(), image->GetHeight(), timestamp, fourcc, std::move(data));
+
+                //NUClear::log("Received complete image with status. Width:", image->GetWidth(), "Height:", image->GetHeight(), "ID:", image->GetID(), "FrameID:", image->GetFrameID());
+                //NUClear::log("Pixel Format:", image->GetPixelFormatName(), "Timestamp:", image->GetTimeStamp());
+                //NUClear::log("Status:", image->GetImageStatusDescription(image->GetImageStatus()));
+
+                reactor.emit(msg);
             }
         }
     };
