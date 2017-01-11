@@ -9,29 +9,6 @@ walk_engine:
       left_leg:  30
       right_leg: 30
       head: 30
-      p_gain: 15
-      d_gain: 5
-      i_gain: 1
-
-    gains: # The gains to use for the servos during the walk
-      -
-        id: "HIP_YAW"
-        p: 100
-      -
-        id: "HIP_ROLL"
-        p: 100
-      -
-        id: "HIP_PITCH"
-        p: 100
-      -
-        id: "KNEE"
-        p: 1000
-      -
-        id: "ANKLE_PITCH"
-        p: 100
-      -
-        id: "ANKLE_ROLL"
-        p: 100 
   
   sensors:
     gyro:
@@ -140,24 +117,6 @@ balance_kinematic_response:
     ankle_compensation_max:   10 * pi / 180
     arm_compensation_max:     30 * pi / 180
     support_compensation_max: 90 * pi / 180
-
-    hip_rotation_scale: 2.0
-    ankle_rotation_scale: 0.5
-
-    angle_gain:
-      p: 0.1
-      i: 0.0
-      d: 0.0
-    translation_gain:
-      X:
-        p: 0.0
-        d: -0.0
-      Y:
-        p: 0
-        d: 0
-      Z:
-        p: 0.035
-        d: 0
 
   push_recovery:
     enabled: false
