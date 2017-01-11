@@ -61,6 +61,90 @@ namespace utility {
             };
         }
 
+        inline Pixel getGRBGPixel(uint x, uint y, int width, int /*height*/, const std::vector<uint8_t>& data)
+        {
+            // Asumming pixels are stored as
+            // Col    0 1 2 3 4 5
+            // Row 0: G R G R G R ....
+            // Row 1: B G B G B G ....
+            // Red   pixels are in even rows, but odd  columns
+            // Green pixels are in every row, but in the even columns on even rows and the odd columns on odd rows.
+            // Blue  pixels are in odd rows,  but even columns
+            int origin = (y * width + x);
+
+            int row = y % 2;
+            int col = x % 2;
+
+            return {
+                static_cast<uint8_t>(((row == 0) && (col == 1)) ? data[origin] : 0), 
+                static_cast<uint8_t>((      (row == col)      ) ? data[origin] : 0), 
+                static_cast<uint8_t>(((row == 1) && (col == 0)) ? data[origin] : 0)
+            };
+        }
+
+        inline Pixel getRGGBPixel(uint x, uint y, int width, int /*height*/, const std::vector<uint8_t>& data)
+        {
+            // Asumming pixels are stored as
+            // Col    0 1 2 3 4 5
+            // Row 0: R G R G R G ....
+            // Row 1: G B G B G B ....
+            // Red   pixels are in even rows, but even columns
+            // Green pixels are in every row, but in the odd columns on even rows and the even columns on odd rows.
+            // Blue  pixels are in odd rows,  but odd  columns
+            int origin = (y * width + x);
+
+            int row = y % 2;
+            int col = x % 2;
+
+            return {
+                static_cast<uint8_t>(((row == 0) && (col == 0)) ? data[origin] : 0), 
+                static_cast<uint8_t>((      (row != col)      ) ? data[origin] : 0), 
+                static_cast<uint8_t>(((row == 1) && (col == 1)) ? data[origin] : 0)
+            };
+        }
+
+        inline Pixel getGBRGPixel(uint x, uint y, int width, int /*height*/, const std::vector<uint8_t>& data)
+        {
+            // Asumming pixels are stored as
+            // Col    0 1 2 3 4 5
+            // Row 0: G B G B G B ....
+            // Row 1: R G R G R G ....
+            // Red   pixels are in odd rows,  but even columns
+            // Green pixels are in every row, but in the even columns on even rows and the odd columns on odd rows.
+            // Blue  pixels are in even rows, but odd columns
+            int origin = (y * width + x);
+
+            int row = y % 2;
+            int col = x % 2;
+
+            return {
+                static_cast<uint8_t>(((row == 1) && (col == 0)) ? data[origin] : 0), 
+                static_cast<uint8_t>((      (row == col)      ) ? data[origin] : 0), 
+                static_cast<uint8_t>(((row == 0) && (col == 1)) ? data[origin] : 0)
+            };
+        }
+
+        inline Pixel getBGGRPixel(uint x, uint y, int width, int /*height*/, const std::vector<uint8_t>& data)
+        {
+            // Asumming pixels are stored as
+            // Col    0 1 2 3 4 5
+            // Row 0: B G B G B G ....
+            // Row 1: G R G R G R ....
+            // Red   pixels are in odd rows,  but odd columns
+            // Green pixels are in every row, but in the even columns on odd rows and the odd columns on even rows.
+            // Blue  pixels are in even rows, but even columns
+            int origin = (y * width + x);
+
+            int row = y % 2;
+            int col = x % 2;
+
+            return {
+                static_cast<uint8_t>(((row == 1) && (col == 1)) ? data[origin] : 0), 
+                static_cast<uint8_t>((      (row != col)      ) ? data[origin] : 0), 
+                static_cast<uint8_t>(((row == 0) && (col == 0)) ? data[origin] : 0)
+            };
+        }
+
         inline Pixel getGrey16Pixel(uint x, uint y, int width, int /*height*/, const std::vector<uint8_t>& data)
         {
             int origin = (y * width + x) * 2;
@@ -200,12 +284,27 @@ namespace utility {
                     return(getRGB3Pixel(x, y, width, height, data));
                 }
 
-                // Bayer pixels will require demosaicing.
-                // This is a "future me" problem.
                 case GRBG:
+                {
+                    return(getGRBGPixel(x, y, width, height, data));
+                }
+
                 case RGGB:
+                {
+                    return(getRGGBPixel(x, y, width, height, data));
+                }
+
                 case GBRG:
+                {
+                    return(getGBRGPixel(x, y, width, height, data));
+                }
+
                 case BGGR:
+                {
+                    return(getBGGRPixel(x, y, width, height, data));
+                }
+
+
                 case GR12:
                 case RG12:
                 case GB12:
