@@ -1,4 +1,5 @@
-#!/usr/bin/python
+#!/usr/bin/env python3
+
 #
 # File:   generate.py
 # Authors:
@@ -35,7 +36,7 @@ with open(role_name, 'w') as file:
         header = re.sub(r'::', r'/', module)
         # replace last name with src/name.h
         header = re.sub(r'([^\/]+)$', r'\1/src/\1.h', header)
-        file.write('#include "{}/{}"\n'.format(module_path, header))
+        file.write('#include "{}"\n'.format(header))
 
     # Add our main function and include headers
     main = textwrap.dedent("""
@@ -55,8 +56,8 @@ with open(role_name, 'w') as file:
     # Add our banner
     for banner_line in banner:
 
-        # Add the initial cout
-        file.write('    std::cout')
+        # Add the initial cerr
+        file.write('    std::cerr')
 
         # Split our line into sections for colours
         sections = [[k,len(list(g))] for k, g in itertools.groupby(banner_line)]
@@ -101,7 +102,7 @@ with open(role_name, 'w') as file:
                 elif section[0] in 'W':   # white
                     file.write(' << Colour::brightgray')
                 else:
-                    print "The banner file contains an invalid character", section
+                    print("The banner file contains an invalid character", section)
                     exit(1)
 
                 # Write the actual banner text
@@ -110,13 +111,13 @@ with open(role_name, 'w') as file:
         file.write(' << std::endl;\n');
 
     # Insert banner for the name of the executing role
-    rolebanner = '    std::cout << utility::strutil::banner("{0}");\n    std::cout << std::endl;\n'.format(os.path.splitext(os.path.basename(role_name))[0])
+    rolebanner = '    std::cerr << utility::strutil::banner("{0}");\n    std::cerr << std::endl;\n'.format(os.path.splitext(os.path.basename(role_name))[0])
     file.write(rolebanner)
 
     start = """
 
     NUClear::PowerPlant::Configuration config;
-    unsigned int nThreads = std::thread::hardware_concurrency();
+    unsigned int nThreads = std::thread::hardware_concurrency() + 2;
     config.threadCount = nThreads >= 4 ? nThreads : 4;
 
     NUClear::PowerPlant plant(config, argc, const_cast<const char**>(argv));
@@ -125,7 +126,7 @@ with open(role_name, 'w') as file:
     file.write(start)
 
     for module in role_modules:
-        file.write('    std::cout << "Installing " << "{0}" << std::endl;\n'.format(module))
+        file.write('    std::cerr << "Installing " << "{0}" << std::endl;\n'.format(module))
         file.write('    plant.install<module::{0}>();\n'.format(module))
 
     end = """

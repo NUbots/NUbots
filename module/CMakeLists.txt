@@ -1,5 +1,5 @@
 # We use NUClearModule
-INCLUDE(NUClearModule)
+INCLUDE(NUClearModule.cmake)
 
 # Remove any duplicate modules (used in more then one role)
 SET(modules ${NUCLEAR_MODULES})
@@ -12,5 +12,5 @@ FOREACH(module ${NUCLEAR_MODULES})
     STRING(REPLACE "::" "" module_name "${module}")
 
     # Add the subdirectories
-    ADD_SUBDIRECTORY("${NUCLEAR_MODULE_DIR}/${module_path}" "${CMAKE_CURRENT_BINARY_DIR}/${module_path}")
+    ADD_SUBDIRECTORY("${PROJECT_SOURCE_DIR}/${NUCLEAR_MODULE_DIR}/${module_path}" "${PROJECT_BINARY_DIR}/${NUCLEAR_MODULE_DIR}/${module_path}")
 ENDFOREACH()

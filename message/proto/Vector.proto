@@ -1,0 +1,93 @@
+syntax = "proto3";
+
+message vec {
+    repeated double v = 1 [packed=true];
+}
+
+message fvec {
+    repeated float v = 1 [packed=true];
+}
+
+message ivec {
+    repeated sint32 v = 1 [packed=true];
+}
+
+message uvec {
+    repeated uint32 v = 1 [packed=true];
+}
+
+message cvec {
+    bytes v = 1;
+}
+
+message vec2 {
+     double x = 1;
+     double y = 2;
+}
+
+message fvec2 {
+     float x = 1;
+     float y = 2;
+}
+
+message ivec2 {
+     sint32 x = 1;
+     sint32 y = 2;
+}
+
+message uvec2 {
+     uint32 x = 1;
+     uint32 y = 2;
+}
+
+message vec3 {
+     double x = 1;
+     double y = 2;
+     double z = 3;
+}
+
+message fvec3 {
+     float x = 1;
+     float y = 2;
+     float z = 3;
+}
+
+message ivec3 {
+     sint32 x = 1;
+     sint32 y = 2;
+     sint32 z = 3;
+}
+
+message uvec3 {
+     uint32 x = 1;
+     uint32 y = 2;
+     uint32 z = 3;
+}
+
+message vec4 {
+     double x = 1;
+     double y = 2;
+     double z = 3;
+     double t = 4;
+}
+
+message fvec4 {
+     float x = 1;
+     float y = 2;
+     float z = 3;
+     float t = 4;
+}
+
+message ivec4 {
+     sint32 x = 1;
+     sint32 y = 2;
+     sint32 z = 3;
+     sint32 t = 4;
+}
+
+message uvec4 {
+     uint32 x = 1;
+     uint32 y = 2;
+     uint32 z = 3;
+     uint32 t = 4;
+}
