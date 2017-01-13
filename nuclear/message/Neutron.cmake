@@ -1,10 +1,10 @@
 # Get the relative path to our message directory
-GET_FILENAME_COMPONENT(message_include_dir "${NUCLEAR_MESSAGE_DIR}/.." ABSOLUTE)
-FILE(RELATIVE_PATH message_include_dir ${CMAKE_SOURCE_DIR} ${message_include_dir})
+GET_FILENAME_COMPONENT(message_include_dir "${PROJECT_SOURCE_DIR}/${NUCLEAR_MESSAGE_DIR}/.." ABSOLUTE)
+FILE(RELATIVE_PATH message_include_dir ${PROJECT_SOURCE_DIR} ${message_include_dir})
 
 # Get our two include directories for message
-SET(message_source_include_dir "${CMAKE_SOURCE_DIR}/${message_include_dir}")
-SET(message_binary_include_dir "${CMAKE_BINARY_DIR}/${message_include_dir}")
+SET(message_source_include_dir "${PROJECT_SOURCE_DIR}/${message_include_dir}")
+SET(message_binary_include_dir "${PROJECT_BINARY_DIR}/${message_include_dir}")
 
 # Make our message include directories variable
 SET(NUCLEAR_MESSAGE_INCLUDE_DIRS
@@ -12,18 +12,28 @@ SET(NUCLEAR_MESSAGE_INCLUDE_DIRS
     ${message_source_include_dir}
     ${message_binary_include_dir}
     CACHE INTERNAL "Include directories for the message folder and generated sources")
+
+# Include our message directories
 INCLUDE_DIRECTORIES(${NUCLEAR_MESSAGE_INCLUDE_DIRS})
 
-# Get the relative path to our message directory
-FILE(RELATIVE_PATH message_dir ${CMAKE_SOURCE_DIR} ${NUCLEAR_MESSAGE_DIR})
-
 # Get our source and binary directories for message
-SET(message_source_dir "${CMAKE_SOURCE_DIR}/${message_dir}")
-SET(message_binary_dir "${CMAKE_BINARY_DIR}/${message_dir}")
+SET(message_source_dir "${PROJECT_SOURCE_DIR}/${NUCLEAR_MESSAGE_DIR}")
+SET(message_binary_dir "${PROJECT_BINARY_DIR}/${NUCLEAR_MESSAGE_DIR}")
 
-# We need protobuf and python to generate the enhanced messages
+# We need protobuf and python to generate the neutron messages
 FIND_PACKAGE(Protobuf REQUIRED)
-FIND_PACKAGE(PythonInterp REQUIRED)
+FIND_PACKAGE(PythonInterp 3 REQUIRED)
+
+# If we have the package pybind11 we can use to go generate python bindings
+FIND_PACKAGE(pybind11)
+
+# If we found pybind11 include its directories
+IF(pybind11_FOUND)
+    FIND_PACKAGE(PythonLibsNew 3 REQUIRED)
+
+    INCLUDE_DIRECTORIES(SYSTEM ${pybind11_INCLUDE_DIRS})
+    INCLUDE_DIRECTORIES(SYSTEM ${PYTHON_INCLUDE_DIRS})
+ENDIF()
 
 # Build our builtin protobuf classes
 FILE(GLOB_RECURSE builtin "${CMAKE_CURRENT_SOURCE_DIR}/proto/**.proto")
@@ -55,6 +65,8 @@ ENDFOREACH(proto)
 # Get our dependency files for our message class generator
 FILE(GLOB_RECURSE message_class_generator_depends "${CMAKE_CURRENT_SOURCE_DIR}/generator/**.py")
 
+UNSET(relative_messages)
+
 # Build all of our normal messages
 FILE(GLOB_RECURSE protobufs "${message_source_dir}/**.proto")
 FOREACH(proto ${protobufs})
@@ -63,9 +75,12 @@ FOREACH(proto ${protobufs})
     GET_FILENAME_COMPONENT(file_we ${proto} NAME_WE)
 
     # Calculate the Output Directory
-    FILE(RELATIVE_PATH outputpath ${message_source_dir} ${proto})
-    GET_FILENAME_COMPONENT(outputpath ${outputpath} PATH)
+    FILE(RELATIVE_PATH message_rel_path ${message_source_dir} ${proto})
+    GET_FILENAME_COMPONENT(outputpath ${message_rel_path} PATH)
     SET(outputpath "${message_binary_dir}/${outputpath}")
+
+    # Add our relative message path to our list (for later use in generation)
+    SET(relative_messages ${relative_messages} ${message_rel_path})
 
     # Create the output directory
     FILE(MAKE_DIRECTORY ${outputpath})
@@ -140,13 +155,14 @@ FOREACH(proto ${protobufs})
     # Build our c++ class from the extracted information
     ADD_CUSTOM_COMMAND(
         OUTPUT "${outputpath}/${file_we}.cpp"
+               "${outputpath}/${file_we}.py.cpp"
                "${outputpath}/${file_we}.h"
         COMMAND ${PYTHON_EXECUTABLE}
         ARGS "${CMAKE_CURRENT_SOURCE_DIR}/build_message_class.py" "${outputpath}/${file_we}" ${outputpath}
         WORKING_DIRECTORY ${message_binary_dir}
         DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/build_message_class.py"
                 ${message_class_generator_depends}
-                "${message_binary_include_dir}/MessageOptions_pb2.py"
+                "${message_binary_include_dir}/Neutron_pb2.py"
                 "${outputpath}/${file_we}.pb"
         COMMENT "Building classes for ${proto}")
 
@@ -156,9 +172,9 @@ FOREACH(proto ${protobufs})
                                 "${outputpath}/${file_we}.pb.cc"
                                 "${outputpath}/${file_we}.pb.h"
                                 "${outputpath}/${file_we}.cpp"
+                                "${outputpath}/${file_we}.py.cpp"
                                 "${outputpath}/${file_we}.h"
-                                 PROPERTIES GENERATED TRUE
-                                            COMPILE_FLAGS -Wno-effc++ -Wno-error=unused-parameter)
+                                 PROPERTIES GENERATED TRUE)
 
     # Add the generated files to our list
     SET(src ${src}
@@ -167,14 +183,61 @@ FOREACH(proto ${protobufs})
             "${outputpath}/${file_we}.cpp"
             "${outputpath}/${file_we}.h")
 
+    # If we have pybind11 also add the python bindings
+    IF(pybind11_FOUND)
+        SET(src ${src} "${outputpath}/${file_we}.py.cpp")
+    ENDIF()
+
 ENDFOREACH(proto)
+
+# If we have pybind11 we need to generate our final binding class
+IF(pybind11_FOUND)
+    # Build our outer python binding wrapper class
+    ADD_CUSTOM_COMMAND(
+        OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/outer_python_binding.cpp"
+        COMMAND ${PYTHON_EXECUTABLE}
+        ARGS "${CMAKE_CURRENT_SOURCE_DIR}/build_outer_python_binding.py"
+             "${CMAKE_CURRENT_BINARY_DIR}/outer_python_binding.cpp"
+              ${relative_messages}
+        WORKING_DIRECTORY ${message_binary_dir}
+        DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/build_outer_python_binding.py"
+        COMMENT "Building outer python message binding")
+
+    SET(src ${src} "${CMAKE_CURRENT_BINARY_DIR}/outer_python_binding.cpp")
+ENDIF()
 
 IF(src)
     # Build a library from these files
-    ADD_LIBRARY(nuclear_message ${protobufs} ${src})
+    ADD_LIBRARY(nuclear_message SHARED ${protobufs} ${src})
+    SET_PROPERTY(TARGET nuclear_message PROPERTY LIBRARY_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}/bin/lib")
 
     # The library uses protocol buffers
     TARGET_LINK_LIBRARIES(nuclear_message ${PROTOBUF_LIBRARIES})
+    TARGET_LINK_LIBRARIES(nuclear_message ${NUClear_LIBRARIES})
+
+    # If we have pybind11 we need to make this a python library too
+    IF(pybind11_FOUND)
+        TARGET_LINK_LIBRARIES(nuclear_message ${PYTHON_LIBRARIES})
+
+        # Work out what python expects the name of the library to be
+        SET(python_module_path "${PYTHON_MODULE_PREFIX}message${PYTHON_MODULE_EXTENSION}")
+
+        # Make our NUClear python directory for including
+        FILE(MAKE_DIRECTORY "${PROJECT_BINARY_DIR}/python/nuclear")
+
+        # Create symlinks to the files
+        ADD_CUSTOM_COMMAND(TARGET nuclear_message POST_BUILD
+            COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:nuclear_message> "${PROJECT_BINARY_DIR}/python/nuclear/${python_module_path}"
+            COMMENT "Copying messages lib into python file format"
+        )
+
+        ADD_CUSTOM_COMMAND(TARGET nuclear_message POST_BUILD
+            COMMAND ${CMAKE_COMMAND} -E copy "${NUCLEAR_ROLES_DIR}/module/python/nuclear.py" "${PROJECT_BINARY_DIR}/python/nuclear/nuclear.py"
+            DEPENDS "${NUCLEAR_ROLES_DIR}/module/python/nuclear.py"
+            COMMENT "Copying nuclear.py to python build directory"
+        )
+
+    ENDIF()
 
     # Add to our list of NUClear message libraries
     SET(NUCLEAR_MESSAGE_LIBRARIES nuclear_message CACHE INTERNAL "List of libraries that are built as messages" FORCE)

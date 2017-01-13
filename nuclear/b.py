@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 import sys
 import os
 import argparse
@@ -38,22 +38,21 @@ for l in cmake_cache_text:
     # Remove lines that are comments
     if len(l) > 0 and not l.startswith('//') and not l.startswith('#'):
         # Extract our variable name from our values
-        g = re.match(r'([a-zA-Z_$][a-zA-Z_$0-9-]*):(\w+)=(.*)', l).groups()
+        g = re.match(r'([a-zA-Z_$][a-zA-Z_.$0-9-]*):(\w+)=(.*)', l).groups()
 
         # Store our value and split it into a list if it is a list
         cmake_cache[g[0]] = g[2] if ';' not in g[2].strip(';') else g[2].strip(';').split(';');
 
-source_dir = cmake_cache[cmake_cache["CMAKE_PROJECT_NAME"] + '_SOURCE_DIR']
 binary_dir = cmake_cache[cmake_cache["CMAKE_PROJECT_NAME"] + '_BINARY_DIR']
-
+source_dir = cmake_cache[cmake_cache["CMAKE_PROJECT_NAME"] + '_SOURCE_DIR']
 
 if __name__ == "__main__":
 
     # Print some information for the user
-    print "b script for", cmake_cache["CMAKE_PROJECT_NAME"]
-    print "\tSource:", source_dir
-    print "\tBinary:", binary_dir
-    print
+    print("b script for", cmake_cache["CMAKE_PROJECT_NAME"])
+    print("\tSource:", cmake_cache[cmake_cache["CMAKE_PROJECT_NAME"] + '_SOURCE_DIR'])
+    print("\tBinary:", cmake_cache[cmake_cache["CMAKE_PROJECT_NAME"] + '_BINARY_DIR'])
+    print()
 
     # Add our builtin tools to the path and user tools
     sys.path.append(nuclear_tools_path)

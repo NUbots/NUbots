@@ -39,47 +39,47 @@ def run(path, **kwargs):
         sys.stderr.write('Module generation aborted.\n')
         sys.exit(1)
 
-    print 'Module directory', module_path
-    print 'Creating directories'
+    print('Module directory', module_path)
+    print('Creating directories')
 
     # Create the required directories
     os.makedirs(path)
-    print '\t', path
+    print('\t', path)
     os.makedirs(src_path)
-    print '\t', src_path
+    print('\t', src_path)
     os.makedirs(tests_path)
-    print '\t', tests_path
+    print('\t', tests_path)
     os.makedirs(config_path)
-    print '\t', config_path
+    print('\t', config_path)
 
     # Split our provided path
     parts = ['module'] + os.path.relpath(path, module_path).split('/')
 
-    print 'Generating files'
+    print('Generating files')
 
     # Write all of our files
     with open('{}/CMakeLists.txt'.format(path), "w") as output:
         output.write(generate_cmake(parts))
-        print '\t', '{}/CMakeLists.txt'.format(path)
+        print('\t', '{}/CMakeLists.txt'.format(path))
 
     with open('{}/README.md'.format(path), "w") as output:
         output.write(generate_readme(parts))
-        print '\t', '{}/README.md'.format(path)
+        print('\t', '{}/README.md'.format(path))
 
     with open('{0}/{1}.h'.format(src_path, module_name), "w") as output:
         output.write(generate_header(parts))
-        print '\t', '{0}/{1}.h'.format(src_path, module_name)
+        print('\t', '{0}/{1}.h'.format(src_path, module_name))
 
     with open('{0}/{1}.cpp'.format(src_path, module_name), "w") as output:
         output.write(generate_cpp(parts))
-        print '\t', '{0}/{1}.cpp'.format(src_path, module_name)
+        print('\t', '{0}/{1}.cpp'.format(src_path, module_name))
 
     with open('{0}/{1}Test.cpp'.format(tests_path, module_name), "w") as output:
         output.write(generate_test(parts))
-        print '\t', '{0}/{1}Test.cpp'.format(tests_path, module_name)
+        print('\t', '{0}/{1}Test.cpp'.format(tests_path, module_name))
 
     with open('{0}/{1}.yaml'.format(config_path, module_name), 'a'):
-        print '\t', '{0}/{1}.yaml'.format(config_path, module_name)
+        print('\t', '{0}/{1}.yaml'.format(config_path, module_name))
 
 
 def generate_cmake(parts):

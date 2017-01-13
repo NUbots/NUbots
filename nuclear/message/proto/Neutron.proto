@@ -9,13 +9,7 @@ enum PointerType {
     UNIQUE = 3;
 }
 
-enum MapType {
-    NORMAL = 0;
-    UNORDERED = 1;
-    MULTIMAP = 2;
-}
-
 extend google.protobuf.FieldOptions {
     PointerType pointer = 50000;
-    MapType map_type = 50001;
+    uint32 array_size = 50001;
 }

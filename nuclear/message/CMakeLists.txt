@@ -1,6 +1,7 @@
-# Switch between enhanced messages and normal messages
-IF(NUCLEAR_ENHANCED_MESSAGES)
-    INCLUDE(EnhancedMessages.cmake)
+# If the user has provided their own CMakeLists.txt file in the messages dir use that
+# otherwise we default to using the Neutron messaging system
+IF(EXISTS "${PROJECT_SOURCE_DIR}/${NUCLEAR_MESSAGE_DIR}/CMakeLists.txt")
+    ADD_SUBDIRECTORY("${PROJECT_SOURCE_DIR}/${NUCLEAR_MESSAGE_DIR}" "${PROJECT_BINARY_DIR}/${NUCLEAR_MESSAGE_DIR}")
 ELSE()
-    INCLUDE(StandardMessages.cmake)
-ENDIF(NUCLEAR_ENHANCED_MESSAGES)
+    INCLUDE(Neutron.cmake)
+ENDIF()

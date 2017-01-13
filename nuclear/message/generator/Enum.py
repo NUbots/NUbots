@@ -1,4 +1,6 @@
-from textutil import indent, dedent
+#!/usr/bin/env python3
+
+from generator.textutil import indent, dedent
 
 
 class Enum:
@@ -6,6 +8,7 @@ class Enum:
         self.name = e.name
         self.fqn = '{}.{}'.format(context.fqn, self.name)
         self.values = [(v.name, v.number) for v in e.value]
+        self.include_path = context.include_path
         # e.name contains the name of the enum
         # e.value is a list of enum values
         # e.options is a set of enum options (allow_alias, deprecated, list of uninterpreted options)
@@ -30,7 +33,7 @@ class Enum:
 
         # Make our fancy enums
         header_template = dedent("""\
-            struct {name} {{
+            struct {name} : public ::message::MessageBase<{name}> {{
                 enum Value {{
             {values}
                 }};
@@ -39,22 +42,34 @@ class Enum:
                 // Constructors
                 {name}();
 
-                {name}(const int& v);
+                {name}(int const& v);
 
-                {name}(const Value& value);
+                {name}(Value const& value);
 
-                {name}(const std::string& str);
+                {name}(std::string const& str);
 
-                {name}(const {protobuf_name}& p);
+                {name}({protobuf_name} const& p);
 
                 // Operators
-                bool operator <(const {name}& other) const;
+                bool operator <({name} const& other) const;
 
-                bool operator <(const {name}::Value& other) const;
+                bool operator >({name} const& other) const;
 
-                bool operator ==(const {name}& other) const;
+                bool operator <=({name} const& other) const;
 
-                bool operator ==(const {name}::Value& other) const;
+                bool operator >=({name} const& other) const;
+
+                bool operator ==({name} const& other) const;
+
+                bool operator <({name}::Value const& other) const;
+
+                bool operator >({name}::Value const& other) const;
+
+                bool operator <=({name}::Value const& other) const;
+
+                bool operator >=({name}::Value const& other) const;
+
+                bool operator ==({name}::Value const& other) const;
 
                 // Conversions
                 operator Value() const;
@@ -64,38 +79,61 @@ class Enum:
                 operator std::string() const;
 
                 operator {protobuf_name}() const;
-            }};
-            """)
+            }};""")
 
         impl_template = dedent("""\
             {fqn}::{name}() : value(Value::{default_value}) {{}}
 
-            {fqn}::{name}(const int& v) : value(static_cast<Value>(v)) {{}}
+            {fqn}::{name}(int const& v) : value(static_cast<Value>(v)) {{}}
 
-            {fqn}::{name}(const Value& value) : value(value) {{}}
+            {fqn}::{name}(Value const& value) : value(value) {{}}
 
-            {fqn}::{name}(const std::string& str) {{
+            {fqn}::{name}(std::string const& str) {{
             {if_chain}
                 throw std::runtime_error("String did not match any enum for {name}");
             }}
 
-            {fqn}::{name}(const {protobuf_name}& p) {{
+            {fqn}::{name}({protobuf_name} const& p) {{
                 value = static_cast<Value>(p);
             }}
 
-            bool {fqn}::operator <(const {name}& other) const {{
+            bool {fqn}::operator <({name} const& other) const {{
                 return value < other.value;
             }}
 
-            bool {fqn}::operator <(const {name}::Value& other) const {{
-                return value < other;
+            bool {fqn}::operator >({name} const& other) const {{
+                return value > other.value;
             }}
 
-            bool {fqn}::operator ==(const {name}& other) const {{
+            bool {fqn}::operator <=({name} const& other) const {{
+                return value <= other.value;
+            }}
+
+            bool {fqn}::operator >=({name} const& other) const {{
+                return value >= other.value;
+            }}
+
+            bool {fqn}::operator ==({name} const& other) const {{
                 return value == other.value;
             }}
 
-            bool {fqn}::operator ==(const {name}::Value& other) const {{
+            bool {fqn}::operator <({name}::Value const& other) const {{
+                return value < other;
+            }}
+
+            bool {fqn}::operator >({name}::Value const& other) const {{
+                return value > other;
+            }}
+
+            bool {fqn}::operator <=({name}::Value const& other) const {{
+                return value <= other;
+            }}
+
+            bool {fqn}::operator >=({name}::Value const& other) const {{
+                return value >= other;
+            }}
+
+            bool {fqn}::operator ==({name}::Value const& other) const {{
                 return value == other;
             }}
 
@@ -117,8 +155,41 @@ class Enum:
 
             {fqn}::operator {protobuf_name}() const {{
                 return static_cast<{protobuf_name}>(value);
-            }}
-            """)
+            }}""")
+
+        python_template = dedent("""\
+            // Local scope for this enum
+            {{
+                auto enumclass = pybind11::class_<{fqn}, std::shared_ptr<{fqn}>>(context, "{name}")
+                    .def(pybind11::init<>())
+                    .def(pybind11::init<int const&>())
+                    .def(pybind11::init<{fqn}::Value const&>())
+                    .def(pybind11::init<std::string const&>())
+                    .def(pybind11::self < pybind11::self)
+                    .def(pybind11::self > pybind11::self)
+                    .def(pybind11::self <= pybind11::self)
+                    .def(pybind11::self >= pybind11::self)
+                    .def(pybind11::self == pybind11::self)
+                    .def(pybind11::self < {fqn}::Value())
+                    .def(pybind11::self > {fqn}::Value())
+                    .def(pybind11::self <= {fqn}::Value())
+                    .def(pybind11::self >= {fqn}::Value())
+                    .def(pybind11::self == {fqn}::Value())
+                    .def_static("include_path", [] {{
+                        return "{include_path}";
+                    }})
+                    .def("_emit", [] ({fqn}& msg, pybind11::capsule capsule) {{
+                        // Extract our reactor from the capsule
+                        NUClear::Reactor* reactor = capsule;
+
+                        // Do the emit
+                        reactor->powerplant.emit_shared<NUClear::dsl::word::emit::Local>(msg.shared_from_this());
+                    }});
+
+                pybind11::enum_<{fqn}::Value>(enumclass, "Value")
+            {value_list}
+                    .export_values();
+            }}""")
 
         return header_template.format(
             name=self.name,
@@ -131,5 +202,10 @@ class Enum:
             default_value=default_value,
             if_chain=if_chain,
             switches=switches
-        ),
+        ), python_template.format(
+            fqn='::'.join(self.fqn.split('.')),
+            name=self.name,
+            include_path=self.include_path,
+            value_list=indent('\n'.join('.value("{name}", {fqn}::{name})'.format(name=v[0], fqn=self.fqn.replace('.', '::')) for v in self.values), 8)
+        )
 
