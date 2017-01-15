@@ -77,7 +77,7 @@ class Message:
 
                     elif v.type[1].special_cpp_type:
                         lines.append(indent('for (auto& _v : proto.{}()) {{'.format(v.name.lower())))
-                        lines.append(indent('{}[_v.first] << _v.second;'.format(v.name), 8))
+                        lines.append(indent('message::conversion::convert({}[_v.first], _v.second);'.format(v.name), 8))
                         lines.append(indent('}'))
 
                     else:  # Basic and other types are handled the same
@@ -93,13 +93,13 @@ class Message:
                     elif v.special_cpp_type:
                         if v.array_size > 0:
                             lines.append(indent('for (size_t _i = 0; _i < {0}.size() && _i < size_t(proto.{1}_size()); ++_i) {{'.format(v.name, v.name.lower())))
-                            lines.append(indent('{0}[_i] << proto.{1}(_i);'.format(v.name, v.name.lower()), 8))
+                            lines.append(indent('message::conversion::convert({0}[_i], proto.{1}(_i));'.format(v.name, v.name.lower()), 8))
                             lines.append(indent('}'))
                         else:
                             # Add the top of our for loop for the repeated field
                             lines.append(indent('{0}.resize(proto.{1}_size());'.format(v.name, v.name.lower())))
                             lines.append(indent('for (size_t _i = 0; _i < {0}.size(); ++_i) {{'.format(v.name)))
-                            lines.append(indent('{0}[_i] << proto.{1}(_i);'.format(v.name, v.name.lower()), 8))
+                            lines.append(indent('message::conversion::convert({0}[_i], proto.{1}(_i));'.format(v.name, v.name.lower()), 8))
                             lines.append(indent('}'))
 
                     else:  # Basic and other types are handled the same
@@ -115,7 +115,7 @@ class Message:
                         lines.append(indent('{0}.insert(std::end({0}), std::begin(proto.{1}()), std::end(proto.{1}()));'.format(v.name, v.name.lower())))
 
                     elif v.special_cpp_type:
-                        lines.append(indent('{} << proto.{}();'.format(v.name, v.name.lower())))
+                        lines.append(indent('message::conversion::convert({}, proto.{}());'.format(v.name, v.name.lower())))
 
                     else:  # Basic and other types are handled the same
                         lines.append(indent('{} = proto.{}();'.format(v.name, v.name.lower())))
@@ -152,7 +152,7 @@ class Message:
                     if v.type[1].bytes_type:
                         lines.append(indent('(*proto.mutable_{}())[_v.first].append(std::begin(_v.second), std::end(_v.second));'.format(v.name), 8))
                     elif v.type[1].special_cpp_type:
-                        lines.append(indent('(*proto.mutable_{}())[_v.first] << _v.second;'.format(v.name), 8))
+                        lines.append(indent('message::conversion::convert((*proto.mutable_{}())[_v.first], _v.second);'.format(v.name), 8))
                     else: # Basic and others are handled the same
                         lines.append(indent('(*proto.mutable_{}())[_v.first] = _v.second;'.format(v.name), 8))
 
@@ -165,7 +165,7 @@ class Message:
                     if v.bytes_type:
                         lines.append(indent('proto.add_{}()->append(std::begin(_v), std::end(_v));'.format(v.name.lower()), 8))
                     elif v.special_cpp_type:
-                        lines.append(indent('*proto.add_{}() << _v;'.format(v.name.lower()), 8))
+                        lines.append(indent('message::conversion::convert(*proto.add_{}(), _v);'.format(v.name.lower()), 8))
                     elif v.basic:
                         lines.append(indent('proto.add_{}(_v);'.format(v.name.lower()), 8))
                     else:
@@ -177,7 +177,7 @@ class Message:
                     if v.bytes_type:
                         lines.append(indent('proto.mutable_{0}()->append(std::begin({1}), std::end({1}));'.format(v.name.lower(), v.name), 8))
                     elif v.special_cpp_type:
-                        lines.append(indent('*proto.mutable_{}() << {};'.format(v.name.lower(), v.name)))
+                        lines.append(indent('message::conversion::convert(*proto.mutable_{}(), {});'.format(v.name.lower(), v.name)))
                     elif v.basic:
                         lines.append(indent('proto.set_{}({});'.format(v.name.lower(), v.name)))
                     else:
