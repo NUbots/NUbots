@@ -29,7 +29,7 @@ namespace message {
             using fmat   = Eigen::Matrix<float, Eigen::Dynamic, Eigen::Dynamic>;
             using imat   = Eigen::Matrix<int, Eigen::Dynamic, Eigen::Dynamic>;
             using umat   = Eigen::Matrix<unsigned int, Eigen::Dynamic, Eigen::Dynamic>;
-            using cmat   = Eigen::Matrix<uint8_t, Eigen::Dynamic, Eigen::Dynamic>;
+            using cmat   = Eigen::Matrix<uint8_t, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>;
             using mat22  = Eigen::Matrix<double, 2, 2>;
             using fmat22 = Eigen::Matrix<float, 2, 2>;
             using imat22 = Eigen::Matrix<int, 2, 2>;

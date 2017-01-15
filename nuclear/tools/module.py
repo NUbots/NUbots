@@ -20,18 +20,18 @@ def register(command):
 def run(path, **kwargs):
     # Try to get our actual module directory from the cmake cache
     if 'NUCLEAR_MODULE_DIR' in b.cmake_cache:
-        module_path = b.cmake_cache['NUCLEAR_MODULE_DIR']
+        module_path = os.path.join(b.source_dir, b.cmake_cache['NUCLEAR_MODULE_DIR'])
     else:
         sys.stderr.write('Warning: the system couldn\'t find the real module directory.')
         sys.stderr.write('defaulting to module\n')
         module_path = 'module'
 
     # Calculate all of our file paths
-    path = '{}/{}'.format(module_path, path)
-    src_path = '{}/src'.format(path)
-    tests_path = '{}/tests'.format(path)
-    config_path = '{}/data/config'.format(path)
-    module_name = path.split('/')[-1]
+    path = os.path.join(module_path, path)
+    src_path = os.path.join(path, 'src')
+    tests_path = os.path.join(path, 'tests')
+    config_path = os.path.join(path, 'data', 'config')
+    module_name = os.path.split(path)[-1]
 
     # Check if the path already exists
     if os.path.exists(path):
@@ -53,33 +53,33 @@ def run(path, **kwargs):
     print('\t', config_path)
 
     # Split our provided path
-    parts = ['module'] + os.path.relpath(path, module_path).split('/')
+    parts = ['module'] + os.path.relpath(path, module_path).split(os.sep)
 
     print('Generating files')
 
     # Write all of our files
-    with open('{}/CMakeLists.txt'.format(path), "w") as output:
+    with open(os.path.join(path, 'CMakeLists.txt'), "w") as output:
         output.write(generate_cmake(parts))
-        print('\t', '{}/CMakeLists.txt'.format(path))
+        print('\t', os.path.join(path, 'CMakeLists.txt'))
 
-    with open('{}/README.md'.format(path), "w") as output:
+    with open(os.path.join(path, 'README.md'), "w") as output:
         output.write(generate_readme(parts))
-        print('\t', '{}/README.md'.format(path))
+        print('\t', os.path.join(src_path, 'README.md'))
 
-    with open('{0}/{1}.h'.format(src_path, module_name), "w") as output:
+    with open(os.path.join(src_path, '{}.h'.format(module_name)), "w") as output:
         output.write(generate_header(parts))
-        print('\t', '{0}/{1}.h'.format(src_path, module_name))
+        print('\t', os.path.join(src_path, '{}.h'.format(module_name)))
 
-    with open('{0}/{1}.cpp'.format(src_path, module_name), "w") as output:
+    with open(os.path.join(src_path, '{}.cpp'.format(module_name)), "w") as output:
         output.write(generate_cpp(parts))
-        print('\t', '{0}/{1}.cpp'.format(src_path, module_name))
+        print('\t', os.path.join(src_path, '{}.cpp'.format(module_name)))
 
-    with open('{0}/{1}Test.cpp'.format(tests_path, module_name), "w") as output:
+    with open(os.path.join(tests_path, '{}.cpp'.format(module_name)), "w") as output:
         output.write(generate_test(parts))
-        print('\t', '{0}/{1}Test.cpp'.format(tests_path, module_name))
+        print('\t', os.path.join(tests_path, '{}.cpp'.format(module_name)))
 
-    with open('{0}/{1}.yaml'.format(config_path, module_name), 'a'):
-        print('\t', '{0}/{1}.yaml'.format(config_path, module_name))
+    with open(os.path.join(config_path, '{}.yaml'.format(module_name)), 'a'):
+        print('\t', os.path.join(config_path, '{}.yaml'.format(module_name)))
 
 
 def generate_cmake(parts):
