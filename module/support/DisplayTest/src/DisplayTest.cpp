@@ -19,7 +19,7 @@
 
 #include "DisplayTest.h"
 #include "utility/nubugger/NUhelpers.h"
-#include "message/input/proto/MotionCapture.pb.h"
+#include "message/input/proto/MotionCapture.h"
 #include "message/input/Sensors.h"
 
 using utility::nubugger::graph;

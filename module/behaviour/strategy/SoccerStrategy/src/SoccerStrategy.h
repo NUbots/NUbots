@@ -25,7 +25,7 @@
 
 #include "message/behaviour/KickPlan.h"
 #include "message/behaviour/FieldTarget.h"
-#include "message/behaviour/proto/Behaviour.pb.h"
+#include "message/behaviour/proto/Behaviour.h"
 #include "message/localisation/FieldObject.h"
 #include "message/input/Sensors.h"
 #include "message/support/FieldDescription.h"

@@ -19,7 +19,6 @@
 
 #include "SoccerStrategy.h"
 
-#include "message/behaviour/LookStrategy.h"
 #include "message/behaviour/Look.h"
 #include "message/behaviour/MotionCommand.h"
 #include "message/behaviour/SoccerObjectPriority.h"
@@ -54,7 +53,6 @@ namespace strategy {
     using message::localisation::Self;
     using message::localisation::SideCheckingComplete;
     using message::behaviour::MotionCommand;
-    using message::behaviour::LookStrategy;
     using message::behaviour::Look;
     using message::behaviour::FieldTarget;
     using message::behaviour::KickPlan;

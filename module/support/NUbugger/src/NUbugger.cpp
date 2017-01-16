@@ -21,11 +21,10 @@
 
 #include "message/vision/LookUpTable.h"
 #include "message/support/Configuration.h"
-#include "message/support/nubugger/proto/Ping.pb.h"
-#include "message/support/nubugger/proto/ReactionHandles.pb.h"
-#include "message/support/nubugger/proto/Command.pb.h"
-#include "message/support/nubugger/proto/ConfigurationState.pb.h"
-#include "message/vision/proto/LookUpTable.pb.h"
+#include "message/support/nubugger/proto/Ping.h"
+#include "message/support/nubugger/proto/ReactionHandles.h"
+#include "message/support/nubugger/proto/Command.h"
+#include "message/vision/proto/LookUpTable.h"
 
 #include "utility/nubugger/NUhelpers.h"
 #include "utility/time/time.h"
@@ -41,7 +40,6 @@ namespace support {
     using message::support::nubugger::proto::Ping;
     using message::support::nubugger::proto::ReactionHandles;
     using message::support::nubugger::proto::Command;
-    using message::support::nubugger::proto::ConfigurationState;
 
     using LookUpTableProto = message::vision::proto::LookUpTable;
 
@@ -156,23 +154,23 @@ namespace support {
 
             LookUpTableProto lutMessage;
 
-            lutMessage.set_table(lut.getData());
-            lutMessage.set_bits_y(lut.BITS_Y);
-            lutMessage.set_bits_cb(lut.BITS_CB);
-            lutMessage.set_bits_cr(lut.BITS_CR);
+            for (auto& s : lut.getData()) {
+                lutMessage.table.push_back(s);
+            }
+            lutMessage.bits_y = lut.BITS_Y;
+            lutMessage.bits_cb = lut.BITS_CB;
+            lutMessage.bits_cr = lut.BITS_CR;
 
             send(lutMessage);
         });
 
         on<Network<Command>>().then("Network Command", [this](const Command& message) {
-            std::string command = message.command();
+            std::string command = message.command;
             log<NUClear::INFO>("Received command:", command);
             if (command == "download_lut") {
 
                 // Emit something to make it upload the lut
                 emit<Scope::DIRECT>(std::make_unique<UploadLUT>());
-            } else if (command == "get_configuration_state") {
-                sendConfigurationState();
             } else if (command == "get_reaction_handles") {
                 sendReactionHandles();
             } else if (command == "get_subsumption") {
@@ -182,7 +180,7 @@ namespace support {
 
         on<Network<LookUpTableProto>>().then([this](const LookUpTableProto& lookuptable) {
 
-            const std::string& lutData = lookuptable.table();
+            const std::vector<uint8_t>& lutData = lookuptable.table;
 
             log<NUClear::INFO>("Loading LUT");
             std::vector<message::vision::Colour> data;
@@ -190,10 +188,10 @@ namespace support {
             for (auto& s : lutData) {
                 data.push_back(message::vision::Colour(s));
             }
-            auto lut = std::make_unique<LookUpTable>(lookuptable.bits_y(), lookuptable.bits_cb(), lookuptable.bits_cr(), std::move(data));
+            auto lut = std::make_unique<LookUpTable>(lookuptable.bits_y, lookuptable.bits_cb, lookuptable.bits_cr, std::move(data));
             emit<Scope::DIRECT>(std::move(lut));
 
-            if (lookuptable.save()) {
+            if (lookuptable.save) {
                 log<NUClear::INFO>("Saving LUT to file");
                 emit<Scope::DIRECT>(std::make_unique<SaveLookUpTable>());
             }
@@ -221,10 +219,6 @@ namespace support {
             // emit(std::move(config));
         });
 
-        on<Network<ConfigurationState>>().then([this](const ConfigurationState& state) {
-            recvConfigurationState(state);
-        });
-
         sendReactionHandles();
 
         // When we shutdown, close our publisher and our file if we have one
@@ -245,10 +239,11 @@ namespace support {
         ReactionHandles reactionHandles;
 
         for (auto& handle : handles) {
-            auto* objHandles = reactionHandles.add_handles();
+            ReactionHandles::Handle objHandle;
+            objHandle.type = handle.first;
             auto& value = handle.second;
-            objHandles->set_type(handle.first);
-            objHandles->set_enabled(value.empty() ? true : value.front().enabled());
+            objHandle.enabled = (value.empty()) ? true : value.front().enabled();
+            reactionHandles.handles.push_back(objHandle);
         }
 
         send(reactionHandles, 0, true, NUClear::clock::now());

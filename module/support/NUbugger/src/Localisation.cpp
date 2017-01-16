@@ -20,7 +20,7 @@
 #include "NUbugger.h"
 
 #include "message/localisation/FieldObject.h"
-#include "message/localisation/proto/Localisation.pb.h"
+#include "message/localisation/proto/Localisation.h"
 
 #include "utility/time/time.h"
 #include "utility/localisation/transform.h"
@@ -123,40 +123,47 @@ namespace support {
 
         Localisation localisation;
 
-        auto* api_field_object = localisation.add_field_object();
-        api_field_object->set_name(robot_model->name);
+        message::localisation::proto::LocalisationFieldObject robotFieldObject;
+        message::localisation::proto::LocalisationFieldObject ballFieldObject;
+
+        robotFieldObject.name = robot_model->name;
 
         for (FieldObject::Model model : robot_model->models) {
-            auto* api_model = api_field_object->add_models();
+            message::localisation::proto::Model api_model;
 
-            api_model->set_wm_x(model.wm_x);
-            api_model->set_wm_y(model.wm_y);
-            api_model->set_heading(model.heading);
-            api_model->set_sd_x(model.sd_x);
-            api_model->set_sd_y(model.sd_y);
-            api_model->set_sr_xx(model.sr_xx);
-            api_model->set_sr_xy(model.sr_xy);
-            api_model->set_sr_yy(model.sr_yy);
-            api_model->set_lost(model.lost);
+            api_model.wm_x    = model.wm_x;
+            api_model.wm_y    = model.wm_y;
+            api_model.heading = model.heading;
+            api_model.sd_x    = model.sd_x;
+            api_model.sd_y    = model.sd_y;
+            api_model.sr_xx   = model.sr_xx;
+            api_model.sr_xy   = model.sr_xy;
+            api_model.sr_yy   = model.sr_yy;
+            api_model.lost    = model.lost;
+
+            robotFieldObject.models.push_back(api_model);
         }
 
-        api_field_object = localisation.add_field_object();
-        api_field_object->set_name(ball_model->name);
+        ballFieldObject.name = ball_model->name;
 
         for (FieldObject::Model model : ball_model->models) {
-            auto* api_model = api_field_object->add_models();
+            message::localisation::proto::Model api_model;
 
-            api_model->set_wm_x(model.wm_x);
-            api_model->set_wm_y(model.wm_y);
-            api_model->set_heading(model.heading);
-            api_model->set_sd_x(model.sd_x);
-            api_model->set_sd_y(model.sd_y);
-            api_model->set_sr_xx(model.sr_xx);
-            api_model->set_sr_xy(model.sr_xy);
-            api_model->set_sr_yy(model.sr_yy);
-            api_model->set_lost(model.lost);
+            api_model.wm_x    = model.wm_x;
+            api_model.wm_y    = model.wm_y;
+            api_model.heading = model.heading;
+            api_model.sd_x    = model.sd_x;
+            api_model.sd_y    = model.sd_y;
+            api_model.sr_xx   = model.sr_xx;
+            api_model.sr_xy   = model.sr_xy;
+            api_model.sr_yy   = model.sr_yy;
+            api_model.lost    = model.lost;
+
+            ballFieldObject.models.push_back(api_model);
         }
 
+        localisation.field_object.push_back(robotFieldObject);
+        localisation.field_object.push_back(ballFieldObject);
         send(localisation, 1);
     }
 }

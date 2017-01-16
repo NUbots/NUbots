@@ -23,12 +23,13 @@
 #include <armadillo>
 #include <nuclear>
 #include "message/localisation/FieldObject.h"
-#include "message/input/Sensors.h"
+#include "message/input/proto/Sensors.h"
 #include "utility/math/matrix/Transform3D.h"
 #include "utility/math/matrix/Transform2D.h"
 #include "utility/math/geometry/Plane.h"
 #include "utility/math/geometry/ParametricLine.h"
 #include "utility/math/angle.h"
+#include "utility/support/eigen_armadillo.h"
 #include "message/vision/VisionObjects.h"
 #include "message/support/FieldDescription.h"
 
@@ -37,24 +38,35 @@ namespace utility {
 namespace math {
 namespace vision {
 
+    using ServoID = message::input::proto::Sensors::ServoID::Value;
+
     /**************************************************************
      *SLAME STUFF: TO BE REMOVED FOR GOOD STUFF BELOW (DO NOT USE)*
      **************************************************************/
     /*! @brief Calculates the transformation for taking homogeneous points from world coordinates to camera coordinates
     */
-    inline arma::mat calculateWorldToCameraTransform(const message::input::Sensors& sensors, const message::localisation::Self& self){
+    inline arma::mat44 calculateWorldToCameraTransform(const message::input::proto::Sensors& sensors, const message::localisation::Self& self){
         arma::vec selfHeading = arma::normalise(self.heading);
-        arma::mat robotToWorld_world;
+        arma::mat44 robotToWorld_world;
         robotToWorld_world <<  selfHeading[0]  <<  -selfHeading[1]  <<  0 <<      self.position[0] << arma::endr
                            <<  selfHeading[1]  <<   selfHeading[0]  <<  0 <<      self.position[1] << arma::endr
                            <<               0  <<                0  <<  1 <<  sensors.bodyCentreHeight << arma::endr
                            <<               0  <<                0  <<  0 <<                                 1;
 
-        arma::mat cameraToBody_body = sensors.forwardKinematics.at(message::input::ServoID::HEAD_PITCH);
-        arma::mat robotToBody_body = arma::eye(4,4);
-        robotToBody_body.submat(0,0,2,2) = sensors.world.rotation();
+        arma::mat44 cameraToBody_body;
 
-        auto worldToCamera_camera = cameraToBody_body.i() * robotToBody_body * robotToWorld_world.i();
+        for (const auto& entry : sensors.forwardKinematics)
+        {
+            if (entry.servoID == ServoID::HEAD_PITCH)
+            {
+                cameraToBody_body = convert<double, 4, 4>(entry.kinematics);
+            }
+        }
+
+        arma::mat44 robotToBody_body = arma::eye(4,4);
+        robotToBody_body.submat(0,0,2,2) = utility::math::matrix::Transform3D(convert<double, 4, 4>(sensors.world)).rotation();
+
+        arma::mat44 worldToCamera_camera = cameraToBody_body.i() * robotToBody_body * robotToWorld_world.i();
         //Confirmed to be correct by Jake Fountain 2014
         return worldToCamera_camera;
     }
@@ -236,7 +248,6 @@ namespace vision {
             const utility::math::matrix::Transform3D& camToGround,
             const bool& failIfNegative = true) //camtoground is either camera to ground or camera to world, depending on application
     {
-        using message::input::ServoID;
         using message::vision::Goal;
 
         utility::math::matrix::Transform3D Hcf = getFieldToCam(robotPose,camToGround);

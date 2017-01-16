@@ -21,8 +21,9 @@ syntax = "proto3";
 
 package message.input.proto;
 
-import "message/Vector.proto";
-import "message/Matrix.proto";
+import "google/protobuf/timestamp.proto";
+import "Vector.proto";
+import "Matrix.proto";
 
 message Sensors {
 
@@ -45,8 +46,14 @@ message Sensors {
         L_ANKLE_PITCH       = 15;
         R_ANKLE_ROLL        = 16;
         L_ANKLE_ROLL        = 17;
-        HEAD_PAN            = 18;
-        HEAD_TILT           = 19;
+        HEAD_YAW            = 18;
+        HEAD_PITCH          = 19;
+    }
+
+    // Because you can't have a enum type as the key in a map.
+    message ServoIDKinematicsMap {
+        ServoID servoID    = 1;
+        mat44   kinematics = 2;
     }
 
     message Servo {
@@ -86,14 +93,31 @@ message Sensors {
         vec2 centre = 2;
     }
 
-    int64 timestamp = 1;
-    fvec3 accelerometer = 2;
-    fvec3 gyroscope = 3;
-    mat44 world = 4;
-    repeated FSR fsr = 5;
-    repeated Servo servo = 6;
-    repeated Button button = 7;
-    repeated LED led = 8;
-    float voltage = 9;
-    float battery = 10;
+    google.protobuf.Timestamp timestamp             = 1;
+    vec3 accelerometer                              = 2;
+    vec3 gyroscope                                  = 3;
+
+    /// This is the transform from the odometry (world) space to robot space (=Htw). It measures the world in robot space.
+    mat44 world                                     = 4;
+    repeated FSR fsr                                = 5;
+    repeated Servo servo                            = 6;
+    repeated Button button                          = 7;
+    repeated LED led                                = 8;
+    float voltage                                   = 9;
+    float battery                                   = 10;
+    vec3 centreOfPressure                           = 11;
+    mat22 robotToIMU                                = 12;
+
+    /// Percentage of the left foot that's considered "down" i.e. if 3/4 FSR sensors have weight this is 0.75
+    bool leftFootDown                               = 13;
+    bool rightFootDown                              = 14;
+
+    // Because you can't have a enum type as the key in a map.
+    repeated ServoIDKinematicsMap forwardKinematics = 15;
+    float bodyCentreHeight                          = 16;
+    vec4 centreOfMass                               = 17;
+    mat44 orientationBodyToGround                   = 18;
+    mat44 orientationCamToGround                    = 19;
+    mat44 kinematicsBodyToGround                    = 20;
+    mat44 kinematicsCamToGround                     = 21;
 }

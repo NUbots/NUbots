@@ -23,8 +23,8 @@
 #include <nuclear>
 #include <armadillo>
 
-#include "message/input/Image.h"
-#include "message/input/Sensors.h"
+#include "message/input/proto/Image.h"
+#include "message/input/proto/Sensors.h"
 #include "message/vision/ClassifiedImage.h"
 #include "message/vision/LookUpTable.h"
 

@@ -23,8 +23,8 @@ package message.support.nubugger.proto;
 
 import "message/behaviour/proto/Behaviour.proto";
 import "message/input/proto/GameState.proto";
-import "message/Vector.proto";
-import "message/Matrix.proto";
+import "Vector.proto";
+import "Matrix.proto";
 
 message Overview {
 

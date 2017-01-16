@@ -20,7 +20,7 @@
 #include "NUbugger.h"
 
 #include "utility/time/time.h"
-#include "message/support/nubugger/proto/DrawObjects.pb.h"
+#include "message/support/nubugger/proto/DrawObjects.h"
 
 namespace module {
 namespace support {

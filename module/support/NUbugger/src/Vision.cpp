@@ -22,14 +22,14 @@
 #include "message/input/Image.h"
 #include "message/vision/ClassifiedImage.h"
 #include "message/vision/VisionObjects.h"
-#include "message/input/proto/Image.pb.h"
-#include "message/vision/proto/LookUpTable.pb.h"
-#include "message/vision/proto/LookUpTableDiff.pb.h"
-#include "message/vision/proto/ClassifiedImage.pb.h"
-#include "message/vision/proto/VisionObjects.pb.h"
+#include "message/input/proto/Image.h"
+#include "message/vision/proto/LookUpTable.h"
+#include "message/vision/proto/LookUpTableDiff.h"
+#include "message/vision/proto/ClassifiedImage.h"
+#include "message/vision/proto/VisionObjects.h"
 
 #include "utility/time/time.h"
-#include "utility/support/proto_armadillo.h"
+#include "utility/support/eigen_armadillo.h"
 
 namespace module {
 namespace support {
@@ -56,16 +56,14 @@ namespace support {
 
             ImageProto imageData;
 
-            imageData.set_camera_id(0);
-            imageData.mutable_dimensions()->set_x(image.width);
-            imageData.mutable_dimensions()->set_y(image.height);
-
-            std::string* imageBytes = imageData.mutable_data();
-            imageData.set_format(uint32_t(image.fourcc));
+            imageData.camera_id = 0;
+            imageData.dimensions.x() = image.width;
+            imageData.dimensions.y() = image.height;
+            imageData.format = static_cast<uint32_t>(image.fourcc);
 
             // Reserve enough space in the image data to store the output
-            imageBytes->reserve(image.source().size());
-            imageBytes->insert(imageBytes->begin(), std::begin(image.source()), std::end(image.source()));
+            imageData.data.reserve(image.source().size());
+            imageData.data.insert(imageData.data.begin(), image.source().begin(), image.source().end());
 
             send(imageData, 1, false, NUClear::clock::now());
 
@@ -80,41 +78,38 @@ namespace support {
 
             ClassifiedImageProto imageData;
 
-            imageData.set_camera_id(0);
-            *imageData.mutable_dimensions() << image.dimensions;
+            imageData.camera_id = 0;
+            imageData.dimensions = convert<uint, 2>(image.dimensions);
 
             // Add the vertical segments to the list
             for(const auto& segment : image.verticalSegments) {
-                auto* s = imageData.add_segment();
-
-                s->set_colour(uint(segment.first));
-                s->set_subsample(segment.second.subsample);
-
-                *s->mutable_start() << segment.second.start;
-                *s->mutable_end() << segment.second.end;
+                ClassifiedImageProto::Segment protoSegment;
+                protoSegment.colour = static_cast<uint32_t>(segment.first);
+                protoSegment.subsample = segment.second.subsample;
+                protoSegment.start = convert<int, 2>(segment.second.start);
+                protoSegment.end = convert<int, 2>(segment.second.end);
+                imageData.segment.push_back(protoSegment);
             }
 
             // Add the horizontal segments to the list
             for(const auto& segment : image.horizontalSegments) {
-                auto* s = imageData.add_segment();
-
-                s->set_colour(uint(segment.first));
-                s->set_subsample(segment.second.subsample);
-
-                *s->mutable_start() << segment.second.start;
-                *s->mutable_end() << segment.second.end;
+                ClassifiedImageProto::Segment protoSegment;
+                protoSegment.colour = static_cast<uint32_t>(segment.first);
+                protoSegment.subsample = segment.second.subsample;
+                protoSegment.start = convert<int, 2>(segment.second.start);
+                protoSegment.end = convert<int, 2>(segment.second.end);
+                imageData.segment.push_back(protoSegment);
             }
 
             // Add in the actual horizon (the points on the left and right side)
-            auto* horizon = imageData.mutable_horizon();
-            *horizon->mutable_normal() << image.horizon.normal;
-            horizon->set_distance(image.horizon.distance);
+            imageData.horizon.normal   = convert<double, 2>(image.horizon.normal);
+            imageData.horizon.distance = image.horizon.distance;
 
             for(const auto& visualHorizon : image.visualHorizon) {
-                *imageData.add_visual_horizon() << visualHorizon;
+                imageData.visual_horizon.push_back(convert<int, 2>(visualHorizon));
             }
 
-            send(imageData, imageData.camera_id() + 1, false, NUClear::clock::now());
+            send(imageData, imageData.camera_id + 1, false, NUClear::clock::now());
 
             last_classified_image = NUClear::clock::now();
         }));
@@ -122,58 +117,63 @@ namespace support {
         handles["vision_object"].push_back(on<Trigger<std::vector<Ball>>, Single, Priority::LOW>().then([this] (const std::vector<Ball>& balls) {
             VisionObjects objects;
 
-            auto& object = *objects.add_object();
+            VisionObject object;
 
-            object.set_type(VisionObject::BALL);
-            object.set_camera_id(0);
+            object.type = VisionObject::ObjectType::Value::BALL;
+            object.camera_id = 0;
 
             for(const auto& b : balls) {
+                VisionObject::Ball ball;
+                ball.circle.radius = b.circle.radius;
+                ball.circle.centre = convert<double, 2>(b.circle.centre);
 
-                auto* ball = object.add_ball();
+                /*
+                for (auto& measurement : b.measurements) {
+                    VisionObject::Measurement m;
+                    m.position   = convert<double, 3>(measurement.position);
+                    m.covariance = convert<double, 3, 3>(measurement.error);
+                    ball.measurement.push_back(m);
+                }
+                */
 
-                auto* circle = ball->mutable_circle();
-                circle->set_radius(b.circle.radius);
-                *circle->mutable_centre() << b.circle.centre;
-
-                // for(auto& measurement : b.measurements) {
-                //     auto m = ball->add_measurement();
-                //     *m->mutable_position() << measurement.position;
-                //     *m->mutable_covariance() << measurement.error;
-                // }
+                object.ball.push_back(ball);
             }
 
+            objects.object.push_back(object);
             send(objects, 1, false, NUClear::clock::now());
         }));
 
         handles["vision_object"].push_back(on<Trigger<std::vector<Goal>>, Single, Priority::LOW>().then([this] (const std::vector<Goal>& goals) {
 
             VisionObjects objects;
+            VisionObject  object;
 
-            auto& object = *objects.add_object();
-
-            object.set_type(VisionObject::GOAL);
-            object.set_camera_id(0);
+            object.type = VisionObject::ObjectType::Value::GOAL;
+            object.camera_id = 0;
 
             for(const auto& g : goals) {
-                auto* goal = object.add_goal();
+                VisionObject::Goal goal;
+                goal.side = (g.side == Goal::Side::LEFT  ? VisionObject::Goal::Side::Value::LEFT
+                           : g.side == Goal::Side::RIGHT ? VisionObject::Goal::Side::Value::RIGHT
+                           : VisionObject::Goal::Side::Value::UNKNOWN);
+                goal.quad.tl = convert<double, 2>(g.quad.getTopLeft());
+                goal.quad.tr = convert<double, 2>(g.quad.getTopRight());
+                goal.quad.bl = convert<double, 2>(g.quad.getBottomLeft());
+                goal.quad.br = convert<double, 2>(g.quad.getBottomRight());
 
-                goal->set_side(g.side == Goal::Side::LEFT ? VisionObject::Goal::LEFT
-                             : g.side == Goal::Side::RIGHT ? VisionObject::Goal::RIGHT
-                             : VisionObject::Goal::UNKNOWN);
+                /*
+                for (auto& measurement : g.measurements) {
+                    VisionObject::Measurement m;
+                    m.position   = convert<double, 3>(measurement.position);
+                    m.covariance = convert<double, 3, 3>(measurement.error);
+                    goal.measurement.push_back(m);
+                }
+                */
 
-                auto* quad = goal->mutable_quad();
-                *quad->mutable_tl() << g.quad.getTopLeft();
-                *quad->mutable_tr() << g.quad.getTopRight();
-                *quad->mutable_bl() << g.quad.getBottomLeft();
-                *quad->mutable_br() << g.quad.getBottomRight();
-
-                // for(auto& measurement : g.measurements) {
-                //     auto g = goal->add_measurement();
-                //     *g->mutable_position() << measurement.position;
-                //     *g->mutable_covariance() << measurement.error;
-                // }
+                object.goal.push_back(goal);
             }
 
+            objects.object.push_back(object);
             send(objects, 2, false, NUClear::clock::now());
         }));
 
@@ -182,7 +182,7 @@ namespace support {
 
             VisionObjects objects;
 
-            *objects.add_object() = visionObject;
+            objects.object.push_back(visionObject);
 
             send(objects, 3, false, NUClear::clock::now());
             // NUClear::log("Vision lines emitted");

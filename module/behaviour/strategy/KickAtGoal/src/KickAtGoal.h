@@ -22,7 +22,7 @@
 
 #include <nuclear>
 
-#include "message/behaviour/proto/Behaviour.pb.h"
+#include "message/behaviour/proto/Behaviour.h"
 
 namespace module {
 namespace behaviour {

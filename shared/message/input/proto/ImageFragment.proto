@@ -21,8 +21,8 @@ syntax = "proto3";
 
 package message.input.proto;
 
-import "message/Vector.proto";
-import "message/Matrix.proto";
+import "Vector.proto";
+import "Matrix.proto";
 
 message ImageFragment {
 

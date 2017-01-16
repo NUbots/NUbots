@@ -20,7 +20,7 @@
 #include "MocapRecorder.h"
 
 #include "message/support/Configuration.h"
-#include "message/input/proto/MotionCapture.pb.h"
+#include "message/input/proto/MotionCapture.h"
 #include "utility/math/geometry/UnitQuaternion.h"
 #include "utility/math/matrix/Rotation3D.h"
 

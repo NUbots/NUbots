@@ -21,7 +21,7 @@ syntax = "proto3";
 
 package message.input.proto;
 
-import "message/Matrix.proto";
+import "Matrix.proto";
 
 message PresenceUserState {
 

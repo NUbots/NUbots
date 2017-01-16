@@ -22,7 +22,7 @@
 #include "message/research/AutoClassifierPixels.h"
 #include "message/support/Configuration.h"
 #include "message/vision/LookUpTable.h"
-#include "message/vision/proto/LookUpTableDiff.pb.h"
+#include "message/vision/proto/LookUpTableDiff.h"
 
 namespace module {
 namespace research {
@@ -367,9 +367,10 @@ namespace research {
 
                             // Now time to choose the colour
                             if(c == Colour::YELLOW && isRemoveable(lut, index)) {
-                                auto& diff = *tableDiff->add_diff();
-                                diff.set_lut_index(index);
-                                diff.set_classification(Colour::CYAN);
+                                LookUpTableDiff::Diff diff;
+                                diff.lut_index      = index;
+                                diff.classification = Colour::CYAN;
+                                tableDiff->diff.push_back(diff);
                             }
                         }
                     }
@@ -389,9 +390,10 @@ namespace research {
 
                             // Now time to choose the colour
                             if(c == Colour::YELLOW && isInternal(lut, index)) {
-                                auto& diff = *tableDiff->add_diff();
-                                diff.set_lut_index(index);
-                                diff.set_classification(Colour::YELLOW);
+                                LookUpTableDiff::Diff diff;
+                                diff.lut_index      = index;
+                                diff.classification = Colour::YELLOW;
+                                tableDiff->diff.push_back(diff);
                             }
                         }
                     }
@@ -412,9 +414,10 @@ namespace research {
 
                             // Now time to choose the colour
                             if(c == Colour::YELLOW && !isRemoveable(lut, index) && !isInternal(lut, index)) {
-                                auto& diff = *tableDiff->add_diff();
-                                diff.set_lut_index(index);
-                                diff.set_classification(Colour::MAGENTA);
+                                LookUpTableDiff::Diff diff;
+                                diff.lut_index      = index;
+                                diff.classification = Colour::MAGENTA;
+                                tableDiff->diff.push_back(diff);
                             }
                         }
                     }
@@ -463,9 +466,10 @@ namespace research {
                             // Emit the diff of the voxels we are about to remove
                             for(auto& s : sa) {
                                 // Add our diff for displaying
-                                auto& diff = *tableDiff->add_diff();
-                                diff.set_lut_index(s);
-                                diff.set_classification(Colour::UNCLASSIFIED);
+                                LookUpTableDiff::Diff diff;
+                                diff.lut_index      = s;
+                                diff.classification = Colour::UNCLASSIFIED;
+                                tableDiff->diff.push_back(diff);
                             }
 
                             // Shed our voxel layer
@@ -499,18 +503,20 @@ namespace research {
                             }
 
                             // Add our diff for displaying
-                            auto& diff = *tableDiff->add_diff();
-                            diff.set_lut_index(index);
-                            diff.set_classification(c);
+                            LookUpTableDiff::Diff diff;
+                            diff.lut_index      = index;
+                            diff.classification = c;
+                            tableDiff->diff.push_back(diff);
 
                             // If we exceeded our SA constraint then shed
                             if(sa.size() >= maxSA) {
                                 // Emit the diff of the voxels we are about to remove
                                 for(auto& s : sa) {
                                     // Add our diff for displaying
-                                    auto& diff = *tableDiff->add_diff();
-                                    diff.set_lut_index(s);
-                                    diff.set_classification(Colour::UNCLASSIFIED);
+                                    LookUpTableDiff::Diff diff;
+                                    diff.lut_index      = s;
+                                    diff.classification = Colour::UNCLASSIFIED;
+                                    tableDiff->diff.push_back(diff);
                                 }
 
                                 shed(mLut, c, sa, vol);
@@ -520,7 +526,7 @@ namespace research {
                 }
             }
 
-            if (tableDiff->diff_size() > 0) {
+            if (tableDiff->diff.size() > 0) {
                 emit(std::move(tableDiff));
             }
         });

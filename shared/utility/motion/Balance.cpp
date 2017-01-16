@@ -20,12 +20,14 @@
 
 #include "message/motion/KinematicsModels.h"
 
+#include "utility/support/eigen_armadillo.h"
+
 namespace utility {
 namespace motion {
 
-    using message::input::LimbID;
-    using message::input::ServoID;
-    using message::input::Sensors;
+    using LimbID  = message::behaviour::proto::Subsumption::Limb::Value;
+    using ServoID = message::input::proto::Sensors::ServoID::Value;
+    using message::input::proto::Sensors;
     using utility::math::matrix::Rotation3D;
     using utility::math::matrix::Transform3D;
     using utility::math::geometry::UnitQuaternion;
@@ -62,7 +64,7 @@ namespace motion {
         //------------------------------------
 
         //Robot coords in world (:Robot -> World)
-        Rotation3D orientation = sensors.world.rotation().i();
+        Rotation3D orientation = Transform3D(convert<double, 4, 4>(sensors.world)).rotation().i();
         Rotation3D yawlessOrientation = Rotation3D::createRotationZ(-orientation.yaw()) * orientation;
 
         // Removes any yaw component
@@ -151,7 +153,7 @@ namespace motion {
                                                        - translationPGainZ * total - translationDGainY * dTotal});
 
         // //Rotate from world space to torso space
-        // Rotation3D yawLessOrientation = Rotation3D::createRotationZ(-sensors.world.rotation().yaw()) * sensors.world.rotation();
+        // Rotation3D yawLessOrientation = Rotation3D::createRotationZ(-Transform3D(convert<double, 4, 4>(sensors.world)).rotation()).yaw()) * Transform3D(convert<double, 4, 4>(sensors.world)).rotation();
 
         arma::vec3 torsoAdjustment_torso = torsoAdjustment_world;
 

@@ -25,7 +25,7 @@
 
 namespace module {
     namespace vision {
-        using message::input::Image;
+        using message::input::proto::Image;
         using message::vision::LookUpTable;
         using message::vision::ObjectClass;
         using message::vision::ClassifiedImage;
@@ -48,7 +48,7 @@ namespace module {
                 size_t length = end[1] - start[1] + 1;
 
                 for(uint i = 0; i < length / subsample; ++i) {
-                    buffer[i + 1] = lut(getPixel(start[0], start[1] + (i * subsample), image.width, image.height, image.source(), image.fourcc));
+                    buffer[i + 1] = lut(getPixel(start[0], start[1] + (i * subsample), image.width, image.height, image.data, image.format));
                 }
 
                 lexer.buffer_fill_region_finish(length / subsample);
@@ -60,7 +60,7 @@ namespace module {
                 size_t length = end[0] - start[0] + 1;
 
                 for(uint i = 0; i < length / subsample; ++i) {
-                    buffer[i + 1] = lut(getPixel(start[0] + (i * subsample), start[1], image.width, image.height, image.source(), image.fourcc));
+                    buffer[i + 1] = lut(getPixel(start[0] + (i * subsample), start[1], image.width, image.height, image.data, image.format));
                 }
 
                 lexer.buffer_fill_region_finish(length / subsample);

@@ -20,9 +20,9 @@
 #include "NUbugger.h"
 
 #include "message/input/Sensors.h"
-#include "message/input/proto/Sensors.pb.h"
+#include "message/input/proto/Sensors.h"
 
-#include "utility/support/proto_armadillo.h"
+#include "utility/support/eigen_armadillo.h"
 #include "utility/time/time.h"
 
 namespace module {
@@ -39,68 +39,73 @@ namespace support {
 
             ProtoSensors sensorData;
 
-            sensorData.set_timestamp(sensors.timestamp.time_since_epoch().count());
-            sensorData.set_voltage(sensors.voltage);
-            sensorData.set_battery(sensors.battery);
+            sensorData.timestamp = sensors.timestamp.time_since_epoch().count();
+            sensorData.voltage = sensors.voltage;
+            sensorData.battery = sensors.battery;
 
             // Add each of the servos into the protocol buffer
-            for(const auto& s : sensors.servos) {
+            for(const auto& servo : sensors.servos) {
 
-                auto* servo = sensorData.add_servo();
+                ProtoSensors::Servo protoServo;
 
-                servo->set_error_flags(s.errorFlags);
+                protoServo.error_flags = servo.errorFlags;
 
-                servo->set_id(static_cast<message::input::proto::Sensors_ServoID>(s.id));
+                protoServo.id = static_cast<ProtoSensors::ServoID::Value>(servo.id);
 
-                servo->set_enabled(s.enabled);
+                protoServo.enabled = servo.enabled;
 
-                servo->set_p_gain(s.pGain);
-                servo->set_i_gain(s.iGain);
-                servo->set_d_gain(s.dGain);
+                protoServo.p_gain = servo.pGain;
+                protoServo.i_gain = servo.iGain;
+                protoServo.d_gain = servo.dGain;
 
-                servo->set_goal_position(s.goalPosition);
-                servo->set_goal_velocity(s.goalVelocity);
+                protoServo.goal_position = servo.goalPosition;
+                protoServo.goal_velocity = servo.goalVelocity;
 
-                servo->set_present_position(s.presentPosition);
-                servo->set_present_velocity(s.presentVelocity);
+                protoServo.present_position = servo.presentPosition;
+                protoServo.present_velocity = servo.presentVelocity;
 
-                servo->set_load(s.load);
-                servo->set_voltage(s.voltage);
-                servo->set_temperature(s.temperature);
+                protoServo.load = servo.load;
+                protoServo.voltage = servo.voltage;
+                protoServo.temperature = servo.temperature;
+
+                sensorData.servo.push_back(protoServo);
             }
 
             // The gyroscope values (x,y,z)
-            *sensorData.mutable_gyroscope() << arma::conv_to<arma::fvec>::from(sensors.gyroscope);
+            sensorData.gyroscope = convert<double, 3>(sensors.gyroscope);
 
             // The accelerometer values (x,y,z)
-            *sensorData.mutable_accelerometer() << arma::conv_to<arma::fvec>::from(sensors.accelerometer);
+            sensorData.accelerometer = convert<double, 3>(sensors.accelerometer);
 
             // The orientation matrix
-            *sensorData.mutable_world() << sensors.world;
+            sensorData.world = convert<double, 4, 4>(sensors.world);
 
             // The FSR values
             for (auto& fsr : sensors.fsrs) {
-                auto* proto = sensorData.add_fsr();
+                ProtoSensors::FSR protoFSR;
+                protoFSR.centre = convert<double, 2>(fsr.centre);
 
                 for (auto& v : fsr.values) {
-                    proto->add_value(v);
+                    protoFSR.value.push_back(v);
                 }
 
-                *proto->mutable_centre() << fsr.centre;
+                sensorData.fsr.push_back(protoFSR);
             }
 
             // The LEDs
-            for(auto& l : sensors.leds) {
-                auto* led = sensorData.add_led();
-                led->set_id(l.id);
-                led->set_colour(l.colour);
+            for(auto& led : sensors.leds) {
+                ProtoSensors::LED protoLED;
+                protoLED.id     = led.id;
+                protoLED.colour = led.colour;
+                sensorData.led.push_back(protoLED);
             }
 
             // The Buttons
-            for(auto& b : sensors.buttons) {
-                auto* button = sensorData.add_button();
-                button->set_id(b.id);
-                button->set_value(b.value);
+            for(auto& button : sensors.buttons) {
+                ProtoSensors::Button protoButton;
+                protoButton.id    = button.id;
+                protoButton.value = button.value;
+                sensorData.button.push_back(protoButton);
             }
 
             send(sensorData, 1, false, sensors.timestamp);

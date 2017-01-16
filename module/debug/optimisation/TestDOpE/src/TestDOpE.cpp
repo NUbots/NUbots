@@ -21,8 +21,8 @@
 
 #include "message/support/Configuration.h"
 #include "message/support/optimisation/DOpE.h"
-#include "message/support/optimisation/Episode.pb.h"
-#include "utility/support/proto_armadillo.h"
+#include "message/support/optimisation/Episode.h"
+#include "utility/support/eigen_armadillo.h"
 
 namespace module {
 namespace debug {
@@ -56,13 +56,13 @@ namespace optimisation {
 
             auto e = std::make_unique<Episode>();
 
-            e->set_group("test_dope");
-            e->set_generation(currentParameters.generation);
-            *e->mutable_values() << currentParameters.samples.col(0);
-            *e->mutable_covariance() << currentParameters.covariance;
+            e->group = "test_dope";
+            e->generation = currentParameters.generation;
+            e->values = convert<double>(arma::conv_to<arma::vec>(currentParameters.samples.col(0)));
+            e->covariance = convert<double>(currentParameters.covariance);
 
-            auto* fitness = e->add_fitness();
-            fitness->set_weight(1);
+            Episode::Fitness fitness;
+            fitness.weight = 1.0;
 
             double f = 0;
             for(uint i = 0; i < currentParameters.samples.col(0).n_elem; ++i) {
@@ -70,7 +70,8 @@ namespace optimisation {
                 v *= v;
                 f += -v;
             }
-            fitness->set_fitness(f);
+            fitness.fitness = f;
+            e->fitness.push_back(fitness);
 
             emit(e);
 

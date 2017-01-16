@@ -68,7 +68,7 @@ namespace input {
                 // Bind our new handle
                 std::tie(listenHandle, std::ignore, std::ignore) = on<UDP::Broadcast, With<GameState>>(port).then([this] (const UDP::Packet& p, const GameState& gameState) {
                     // Get our packet contents
-                    const GameControllerPacket& newPacket = *reinterpret_cast<const GameControllerPacket*>(p.data.data());
+                    const GameControllerPacket& newPacket = *reinterpret_cast<const GameControllerPacket*>(p.payload.data());
 
                     // Get the IP we are getting this packet from
                     // Store it and use it to send back to the game controller using emit UDP

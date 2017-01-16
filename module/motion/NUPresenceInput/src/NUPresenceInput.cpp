@@ -27,7 +27,7 @@
 #include "message/behaviour/ServoCommand.h"
 #include "message/input/ServoID.h"
 #include "message/input/Sensors.h"
-#include "message/input/proto/PresenceUserState.pb.h"
+#include "message/input/proto/PresenceUserState.h"
 #include "message/behaviour/Action.h"
 #include "message/input/MotionCapture.h"
 #include "utility/support/yaml_expression.h"

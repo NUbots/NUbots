@@ -44,7 +44,7 @@ namespace extension {
             for(auto pIt = handlers.begin(); pIt != handlers.end(); ++pIt) {
                 for(auto fIt = pIt->second.begin(); fIt != pIt->second.end(); ++fIt) {
                     for(auto rIt = fIt->second.begin(); rIt != fIt->second.end(); ++rIt) {
-                        if (rIt->first->reactionId == fw.reactionId) {
+                        if (rIt->first->id == fw.id) {
 
                             // Erase this reaction
                             fIt->second.erase(rIt);

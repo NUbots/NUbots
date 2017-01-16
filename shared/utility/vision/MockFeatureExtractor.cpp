@@ -23,7 +23,7 @@
 #include <armadillo>
 
 #include "MockFeatureExtractor.h"
-#include "message/input/ServoID.h"
+#include "message/input/proto/Sensors.h"
 #include "utility/math/vision.h"
 #include "utility/support/yaml_armadillo.h"
 
@@ -31,7 +31,7 @@ namespace utility {
 	namespace vision {
 		bool operator==(const MockFeatureExtractor::ExtractedFeature& lhs, const MockFeatureExtractor::ExtractedFeature& rhs){return (lhs.featureID == rhs.featureID);}
 
-		using message::input::ServoID;
+		using ServodID = message::input::proto::Sensors::ServoID;
 
 		MockFeatureExtractor::MockFeatureExtractor()
 			 : numberOfFalseFeaturesDetected(1), MAX_DISTINCT_FALSE_FEATURES(0), mockFeatures(), FOV_X(0.0), FOV_Y(0.0) {}
@@ -76,7 +76,7 @@ namespace utility {
 			return mockFeatures;
 		}
 
-		std::vector<MockFeatureExtractor::ExtractedFeature> MockFeatureExtractor::extractFeatures(const message::localisation::Self& self, const message::input::Sensors& sensors){
+		std::vector<MockFeatureExtractor::ExtractedFeature> MockFeatureExtractor::extractFeatures(const message::localisation::Self& self, const message::input::proto::Sensors& sensors){
 			std::vector<MockFeatureExtractor::ExtractedFeature> features;
 			arma::mat worldToCamera_camera = utility::math::vision::calculateWorldToCameraTransform(sensors, self);
 

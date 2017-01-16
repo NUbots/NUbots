@@ -22,7 +22,7 @@
 #include "message/research/AutoClassifierPixels.h"
 #include "message/support/Configuration.h"
 #include "message/vision/LookUpTable.h"
-#include "message/vision/proto/LookUpTableDiff.pb.h"
+#include "message/vision/proto/LookUpTableDiff.h"
 
 namespace module {
 namespace research {

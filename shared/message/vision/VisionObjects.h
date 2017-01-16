@@ -25,7 +25,7 @@
 #include "utility/math/geometry/Circle.h"
 #include "utility/math/geometry/Quad.h"
 #include "utility/math/geometry/Polygon.h"
-#include "message/input/Sensors.h"
+#include "message/input/proto/Sensors.h"
 #include "message/vision/ClassifiedImage.h"
 
 namespace message {
@@ -43,7 +43,7 @@ namespace message {
             arma::vec2 angularSize;
 
             // The sensor frame that was used to detect this object
-            std::shared_ptr<const message::input::Sensors> sensors;
+            std::shared_ptr<const message::input::proto::Sensors> sensors;
 
             // The classified image that was used to detect this object
             // TODO: Why is this here?

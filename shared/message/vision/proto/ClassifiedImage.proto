@@ -21,7 +21,7 @@ syntax = "proto3";
 
 package message.vision.proto;
 
-import "message/Vector.proto";
+import "Vector.proto";
 import "message/Geometry.proto";
 
 message ClassifiedImage {

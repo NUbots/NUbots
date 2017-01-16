@@ -23,8 +23,8 @@
 #include <map>
 #include <armadillo>
 
-#include "message/input/Sensors.h"
-#include "message/input/Image.h"
+#include "message/input/proto/Sensors.h"
+#include "message/input/proto/Image.h"
 #include "utility/math/geometry/Line.h"
 
 namespace message {
@@ -66,10 +66,10 @@ namespace message {
             };
 
             // The sensor frame that happened with this image
-            std::shared_ptr<const message::input::Sensors> sensors;
+            std::shared_ptr<const message::input::proto::Sensors> sensors;
 
             // The image that was used to create this classified image
-            std::shared_ptr<const message::input::Image> image;
+            std::shared_ptr<const message::input::proto::Image> image;
 
             // Our images dimensions
             arma::uvec2 dimensions;

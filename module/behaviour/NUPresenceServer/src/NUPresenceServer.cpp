@@ -24,7 +24,7 @@
 #include "message/input/Image.h"
 #include "message/input/Sensors.h"
 #include "message/input/ServoID.h"
-#include "message/input/proto/ImageFragment.pb.h"
+#include "message/input/proto/ImageFragment.h"
 #include "utility/math/matrix/Transform3D.h"
 #include "utility/support/yaml_armadillo.h"
 #include "utility/support/yaml_expression.h"

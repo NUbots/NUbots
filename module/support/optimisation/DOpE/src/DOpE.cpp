@@ -23,11 +23,11 @@
 #include <cppformat/format.h>
 #include <google/protobuf/util/message_differencer.h>
 
-#include "utility/support/proto_armadillo.h"
+#include "utility/support/eigen_armadillo.h"
 #include "message/support/Configuration.h"
 #include "message/support/optimisation/DOpE.h"
-#include "message/support/optimisation/Episode.pb.h"
-#include "message/support/optimisation/Estimate.pb.h"
+#include "message/support/optimisation/Episode.h"
+#include "message/support/optimisation/Estimate.h"
 
 namespace module {
 namespace support {
@@ -54,24 +54,23 @@ namespace optimisation {
         auto e = std::make_unique<Estimate>();
 
         // Set our group
-        e->set_group(opt.group);
+        e->group = opt.group;
 
         // Add our generation
-        e->set_generation(current.generation);
+        e->generation = current.generation;
 
         // Add our values and covariance
-        *e->mutable_values() << current.estimate;
-        *e->mutable_covariance() << current.covariance;
-
+        e->values = convert<double>(current.estimate);
+        e->covariance = convert<double>(current.covariance);
 
         log<NUClear::FATAL>("Current Estimate", current.estimate.t());
 
         // Add our episodes
         for (auto& episode : opt.episodes) {
-            *e->add_episode() = episode;
+            e->episode.push_back(episode);
         }
         for (auto& episode : opt.estimateEpisodes) {
-            *e->add_estimate_episode() = episode;
+            e->estimate_episode.push_back(episode);
         }
 
         // Send it to the remote
@@ -90,12 +89,12 @@ namespace optimisation {
 
             // Make our combined fitness
             fitnesses[i] = 0;
-            for(auto& f : opt.episodes[i].fitness()) {
-                fitnesses[i] += f.fitness() * f.weight();
+            for(auto& f : opt.episodes[i].fitness) {
+                fitnesses[i] += f.fitness * f.weight;
             }
 
             for (uint j = 0; j < samples.n_cols; ++j) {
-                samples(i, j) = opt.episodes[i].values().v(j);
+                samples(i, j) = opt.episodes[i].values[j];
             }
         }
 
@@ -143,9 +142,9 @@ namespace optimisation {
 
         on<Network<Estimate>, Sync<DOpE>>().then("Network Estimate", [this] (const NetworkSource& src, const Estimate& estimate) {
 
-            log<NUClear::INFO>(fmt::format("Estimate {} gen {} received from {}", estimate.group(), estimate.generation(), src.name));
+            log<NUClear::INFO>(fmt::format("Estimate {} gen {} received from {}", estimate.group, estimate.generation, src.name));
 
-            auto el = optimisations.find(estimate.group());
+            auto el = optimisations.find(estimate.group);
             if (el != optimisations.end()) {
                 auto& opt = el->second;
 
@@ -157,19 +156,19 @@ namespace optimisation {
 
                     // We use the network version if it has a newer generation
                     // or we are the same generation, we choose based on the bitwise xor of the estimate
-                    if(currentEstimate.generation < estimate.generation()) {
+                    if(currentEstimate.generation < estimate.generation) {
                         // || (opt.optimiser->estimate().generation == estimate.generation() && fitness < fitness) {
 
                         OptimiserEstimate e;
-                        e.generation = estimate.generation();
-                        e.estimate << estimate.values();
-                        e.covariance << estimate.covariance();
+                        e.generation = estimate.generation;
+                        e.estimate = convert<double>(estimate.values);
+                        e.covariance = convert<double>(estimate.covariance);
 
                         // Reset with these parameters
                         opt.optimiser->reset(e);
 
-                        std::vector<Episode> newEpisodes(estimate.episode().begin(), estimate.episode().end());
-                        std::vector<Episode> newEstimateEpisodes(estimate.estimate_episode().begin(), estimate.estimate_episode().end());
+                        std::vector<Episode> newEpisodes(estimate.episode.begin(), estimate.episode.end());
+                        std::vector<Episode> newEstimateEpisodes(estimate.estimate_episode.begin(), estimate.estimate_episode.end());
 
                         // Go through our episodes and throw out ones that are in either list
                         // or are no longer valid for this state

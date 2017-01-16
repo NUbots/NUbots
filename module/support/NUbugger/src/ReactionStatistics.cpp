@@ -20,7 +20,7 @@
 #include "NUbugger.h"
 
 #include "utility/time/time.h"
-#include "message/support/nuclear/proto/ReactionStatistics.pb.h"
+#include "message/support/nuclear/proto/ReactionStatistics.h"
 
 namespace module {
 namespace support {

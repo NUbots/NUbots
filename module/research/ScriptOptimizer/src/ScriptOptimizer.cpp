@@ -20,8 +20,8 @@
 #include "ScriptOptimizer.h"
 #include "message/motion/Script.h"
 #include "message/motion/ServoWaypoint.h"
-#include "message/research/scriptoptimizer/OptimizeScript.pb.h"
-#include "message/research/scriptoptimizer/OptimizeScriptResult.pb.h"
+#include "message/research/scriptoptimizer/OptimizeScript.h"
+#include "message/research/scriptoptimizer/OptimizeScriptResult.h"
 #include "message/platform/darwin/DarwinSensors.h"
 
 namespace module {

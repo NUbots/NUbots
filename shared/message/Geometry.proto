@@ -21,8 +21,8 @@ syntax = "proto3";
 
 package message;
 
-import "message/Vector.proto";
-import "message/Matrix.proto";
+import "Vector.proto";
+import "Matrix.proto";
 
 message Line {
     vec2 normal = 1;

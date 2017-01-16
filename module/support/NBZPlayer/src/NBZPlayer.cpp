@@ -23,8 +23,8 @@
 #include "message/input/Image.h"
 #include "message/input/CameraParameters.h"
 #include "message/platform/darwin/DarwinSensors.h"
-#include "message/input/proto/Image.pb.h"
-#include "message/input/proto/Sensors.pb.h"
+#include "message/input/proto/Image.h"
+#include "message/input/proto/Sensors.h"
 #include "utility/vision/fourcc.h"
 
 namespace module {

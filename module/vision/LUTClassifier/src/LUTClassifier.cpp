@@ -19,9 +19,7 @@
 
 #include "LUTClassifier.h"
 
-#include "message/input/Image.h"
 #include "message/input/CameraParameters.h"
-#include "message/input/Sensors.h"
 #include "message/vision/LookUpTable.h"
 #include "message/support/Configuration.h"
 
@@ -36,9 +34,9 @@ namespace module {
     namespace vision {
 
         using namespace utility::vision;
-        using message::input::Image;
-        using message::input::ServoID;
-        using message::input::Sensors;
+        using message::input::proto::Image;
+        using ServoID = message::input::proto::Sensors::ServoID;
+        using message::input::proto::Sensors;
         using message::input::CameraParameters;
         using message::vision::LookUpTable;
         using message::vision::SaveLookUpTable;

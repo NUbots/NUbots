@@ -21,7 +21,7 @@
 #include <nuclear>
 
 #include "utility/nubugger/NUhelpers.h"
-#include "message/input/proto/MotionCapture.pb.h"
+#include "message/input/proto/MotionCapture.h"
 
 namespace module {
 namespace debug {
