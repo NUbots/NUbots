@@ -117,10 +117,9 @@ namespace motion
         };
         Transform2D leftFootPositionTransform;          // Active left foot position
         Transform2D rightFootPositionTransform;         // Active right foot position
-        std::queue<Transform2D> activeLimbSource;       // Pre-step active limb position
-        std::queue<Transform2D> activeLimbDestination;  // Destination placement Transform2D active foot positions
-        std::queue<LimbID> activeForwardLimb;           // The leg that is 'swinging' in the step, opposite of the support foot
-        std::queue<NewStepInfo> newStepInfoSets;        // Collective FPP data for queueing TMP sync
+        Transform2D activeLimbSource;       // Pre-step active limb position
+        Transform2D activeLimbDestination;  // Destination placement Transform2D active foot positions
+        LimbID activeForwardLimb;           // The leg that is 'swinging' in the step, opposite of the support foot
         LimbID activeLimbInitial;                       // TODO: Former initial non-support leg for deterministic walking approach
 
          /**
@@ -140,7 +139,7 @@ namespace motion
          */
         bool  INITIAL_STEP;                                     // Indicates if the first step has been consumed
         double newStepStartTime;                                // The time when the current step is scheduled
-        std::queue<double> destinationTime;                     // The relative time when the current is to be completed
+        double destinationTime;                     // The relative time when the current is to be completed
         NUClear::clock::time_point lastVeloctiyUpdateTime;      //
 
         /**
@@ -151,7 +150,7 @@ namespace motion
         arma::mat::fixed<3,2> velocityLimits;           //
         arma::vec3 accelerationLimits;                  //
         arma::vec3 accelerationLimitsHigh;              //
-        std::queue<Transform2D> velocityCurrent;        // Current robot velocity
+        Transform2D velocityCurrent;        // Current robot velocity
 
         /**
          * Dynamic analysis parameters for relevant motion planning...

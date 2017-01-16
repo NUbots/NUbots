@@ -41,7 +41,7 @@ namespace motion
     // using message::behaviour::RegisterAction;
     // using message::behaviour::ActionPriorites;
     using message::motion::WalkCommand;
-    using NextFootTargetInfo = message::motion::NextFootTargetInfo;
+    using NewFootTargetInfo = message::motion::NewFootTargetInfo;
     using FootMotionUpdate   = message::motion::FootMotionUpdate;
     using message::motion::FootStepCompleted;
     using message::motion::TorsoMotionUpdate;
@@ -100,17 +100,8 @@ namespace motion
             kinematicsModel = model;
         });
 
-        //In the process of actuating a foot step and emitting updated positional data...
-        //Transform analytical torso positions in accordance with the stipulated targets...
-        on<Trigger<NextFootTargetInfo>, With<FootMotionUpdate>>().then("Torso Motion Planner - Received Foot Motion Update", [this] (
-            const NextFootTargetInfo&   nft,
-            const FootMotionUpdate&     fmu)
-        {                 
-            // Motion Phase...
-            if(DEBUG) { log<NUClear::TRACE>("Messaging: Torso Motion Planner - Received Foot Motion Update(0)"); }
-                setMotionPhase(fmu.phase);                         //Real-time : FMP
-            if(DEBUG) { log<NUClear::TRACE>("Messaging: Torso Motion Planner - Received Foot Motion Update(1)"); }
-                             
+        on<Trigger<NewFootTargetInfo>>().then("Torso Motion Planner - Received Foot Motion Update", [this] (const NewFootTargetInfo&   nft)
+        {
             // Step Target Data queued evaluation...
             if(DEBUG) { log<NUClear::TRACE>("Messaging: Foot Motion Planner - Received Target Foot Position(0)"); }
                 setSupportMass(nft.supportMass);                   //Queued    : FPP
@@ -123,8 +114,19 @@ namespace motion
                 setLeftFootDestination(nft.leftFootDestination);   //Queued    : FPP                 
                 setRightFootDestination(nft.rightFootDestination); //Queued    : FPP               
             if(DEBUG) { log<NUClear::TRACE>("Messaging: Torso Motion Planner - Received Footstep Info(1)"); }
+        });
 
-             // Update Torso Positions...
+        //In the process of actuating a foot step and emitting updated positional data...
+        //Transform analytical torso positions in accordance with the stipulated targets...
+        on<Trigger<FootMotionUpdate>>().then("Torso Motion Planner - Received Foot Motion Update", [this] (
+            const FootMotionUpdate&     fmu)
+        {                 
+            // Motion Phase...
+            if(DEBUG) { log<NUClear::TRACE>("Messaging: Torso Motion Planner - Received Foot Motion Update(0)"); }
+                setMotionPhase(fmu.phase);                         //Real-time : FMP
+            if(DEBUG) { log<NUClear::TRACE>("Messaging: Torso Motion Planner - Received Foot Motion Update(1)"); }
+                             
+            // Update Torso Positions...
             if(DEBUG) { log<NUClear::TRACE>("Messaging: Torso Motion Planner - Update Torso Position(0)"); }  
                 updateTorsoPosition();            
             if(DEBUG) { log<NUClear::TRACE>("Messaging: Torso Motion Planner - Update Torso Position(1)"); }

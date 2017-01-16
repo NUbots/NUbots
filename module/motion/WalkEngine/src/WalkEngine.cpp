@@ -142,8 +142,8 @@ namespace motion
 
                 emit(graph("WE: Left  Foot Joint Position",    getLeftFootPosition()));   
                 emit(graph("WE: Right Foot Joint Position",   getRightFootPosition()));                    
-                
-                emit(std::move(updateWaypoints(/*sensors*/)));       
+                emit(std::move(updateWaypoints()));       
+
             if(DEBUG) { log<NUClear::TRACE>("WalkEngine - Trigger BalanceBodyUpdate(1)"); }
         }).disable();
 
