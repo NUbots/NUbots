@@ -160,8 +160,19 @@ define installer (
       $env9 = $env8
     }
 
+    if has_key($params['environment'], 'CCAS') {
+      $ccas = "CCAS=${params['environment']['CCAS']}"
+      $env10 = delete($env9, 'CCAS')
+    }
+
+    else {
+      $ccas = "CCAS=as"
+      $env10 = $env9
+    }
+
+
     $environment = [$cflags, $cxxflags, $common_opt, $fcommon_opt,
-                    $ldflags, $ccasflags, $pkgconfig, $cmake_prefix,
+                    $ldflags, $ccas, $ccasflags, $pkgconfig, $cmake_prefix,
                     $ltsyslibpath, $ldlibrarypath,
                     $libzlib, $inczlib, $libbzip, $incbzip, ] + join_keys_to_values($env9, "=")
 

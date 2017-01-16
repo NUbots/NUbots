@@ -30,7 +30,6 @@ class dev_tools {
   package { 'git': ensure => latest, }
   package { 'graphviz': ensure => latest, }
   package { 'build-essential': ensure => latest, }
-  package { 'python-pip': ensure => latest, }
   package { 'libncurses5-dev:amd64': ensure => latest, }
   package { 'libncurses5-dev:i386': ensure => latest, }
   package { 'gcc-6': name => 'gcc-6-multilib', ensure => latest, require => Apt::Ppa['ppa:ubuntu-toolchain-r/test'] }
@@ -44,6 +43,10 @@ class dev_tools {
   package { 'libusb-1.0-0:i386': ensure => latest, }
   package { 'libusb-1.0-0-dev:amd64': ensure => latest, }
   package { 'libusb-1.0-0-dev:i386': ensure => latest, }
+
+  # System libraries
+  package { 'libasound2-dev:amd64': ensure => latest, }
+  package { 'libasound2-dev:i386': ensure => latest, }
 
   # For ELLCC
   package { 'subversion': ensure => latest, }
@@ -112,18 +115,6 @@ class dev_tools {
     line   => "  \'git\' \'command-not-found\' \'prompt\'",
   }
 
-  # System libraries
-  package { 'libasound2-dev:amd64': ensure => latest, }
-  package { 'libasound2-dev:i386': ensure => latest, }
-
-  # INSTALL PYTHON PACKAGES (we need python-pip to use the pip provider)
-  Package['python-pip'] -> Package <| provider == 'pip' |>
-  package { 'pyparsing': ensure => installed, provider => 'pip' }
-  package { 'pydotplus': ensure => installed, provider => 'pip' }
-  package { 'pygments': ensure => installed, provider => 'pip' }
-  package { 'termcolor': ensure => installed, provider => 'pip' }
-  # python::pip { 'pybfd': ensure => latest }#, url => 'https://github.com/Groundworkstech/pybfd/archive/master.tar.gz' }
-
   # SSH KEYS FOR THE VM
   file { 'vm_private_key':
     path => '/home/vagrant/.ssh/id_rsa',
@@ -180,11 +171,13 @@ class dev_tools {
   # SETUP OUR ALTERNATIVES SO WE USE THE CORRECT COMPILER
   exec {'fix_compiler_environment':
     command => 'update-alternatives --remove-all gcc \
+             ;  update-alternatives --remove-all g++ \
+             ;  update-alternatives --remove-all gfortan \
              ;  update-alternatives --install /usr/bin/ld ld /usr/bin/ld.bfd 10 \
              && update-alternatives --install /usr/bin/ld ld /usr/bin/ld.gold 20 \
              && update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-6 100 \
                                     --slave /usr/bin/g++ g++ /usr/bin/g++-6 \
                                     --slave /usr/bin/gfortran gfortran /usr/bin/gfortran-6',
-    require => [ Package['gcc-6'], Package['g++-6'], Package['gfortran-6'], Package['build-essential'], Package['binutils'] ]
+    require => [ Package['gcc-6'], Package['g++-6'], Package['gfortran-6'], Package['build-essential'], Package['binutils'], ]
   }
 }

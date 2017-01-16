@@ -51,24 +51,17 @@ node nubotsvmbuild {
     'protobuf'     => {'url'         => 'https://github.com/google/protobuf/releases/download/v3.0.2/protobuf-python-3.0.2.tar.gz',
                        'args'        => { 'native'   => [ '--with-zlib', '--with-protoc=PROTOC_PATH', ],
                                           'DarwinOp' => [ '--host=i686-linux-gnu', '--build=x86_64-unknown-linux-gnu', '--with-zlib', '--with-protoc=PROTOC_PATH', ],
-                                          'NimbroOp' => [ '--with-zlib', '--with-protoc=PROTOC_PATH',  ], },
+                                          'NimbroOp' => [ '--with-zlib', '--with-protoc=PROTOC_PATH', ], },
                        'require'     => [ Class['protobuf'], Installer['zlib'], ],
                        'prebuild'    => 'make distclean',
                        'postbuild'   => 'rm PREFIX/lib/libprotoc* && rm PREFIX/bin/protoc',
                        'method'      => 'autotools', },
-    'zlib'         => {'url'         => 'http://zlib.net/zlib-1.2.8.tar.gz',
+    'zlib'         => {'url'         => 'http://www.zlib.net/zlib-1.2.10.tar.gz',
                        'creates'     => 'lib/libz.a',
                        'method'      => 'cmake',},
-    'bzip2-static' => {'url'         => 'http://www.bzip.org/1.0.6/bzip2-1.0.6.tar.gz',
-                       'creates'     => 'lib/libbz2.a',
-                       'method'      => 'make',},
-    'bzip2-shared' => {'url'         => 'http://www.bzip.org/1.0.6/bzip2-1.0.6.tar.gz',
+    'bzip2'        => {'url'         => 'https://github.com/Bidski/bzip2/archive/v1.0.6.tar.gz',
                        'creates'     => 'lib/libbz2.so',
-                       'args'        => { 'native'   => [ '-f Makefile-libbz2_so', ],
-                                          'DarwinOp' => [ '-f Makefile-libbz2_so', ],
-                                          'NimbroOp' => [ '-f Makefile-libbz2_so', ], },
-                       'method'      => 'make',
-                       'require'     => [ Exec['correct_bzip2-shared_Makefile_10'], ],},
+                       'method'      => 'make',},
     'xml2'         => {'url'         => 'http://xmlsoft.org/sources/libxml2-2.9.3.tar.gz',
                        'args'        => { 'native'   => [ '--with-zlib=ZLIB_PATH', '--without-python', ],
                                           'DarwinOp' => [ '--host=i686-linux-gnu', '--build=x86_64-unknown-linux-gnu', '--with-zlib=ZLIB_PATH', '--without-python', ],
@@ -82,10 +75,9 @@ node nubotsvmbuild {
     # NOTE: OpenBLAS CMake support is experimental and only supports x86 at the moment.
     'openblas'     => {'url'         => 'https://github.com/xianyi/OpenBLAS/archive/v0.2.18.tar.gz',
                        'method'      => 'make',},
-    'libsvm'       => {'url'         => 'https://github.com/cjlin1/libsvm/archive/v321.tar.gz',
+    'libsvm'       => {'url'         => 'https://github.com/Bidski/libsvm/archive/v322.tar.gz',
                        'creates'     =>'lib/svm.o',
-                       'method'      => 'make',
-                       'require'     => [ File_line['correct_libsvm_Makefile_06'], ],},
+                       'method'      => 'make', },
     'armadillo'    => {'url'         => 'https://downloads.sourceforge.net/project/arma/armadillo-7.200.2.tar.xz',
                        'method'      => 'cmake',
                        'creates'     => 'lib/libarmadillo.so',
@@ -135,19 +127,19 @@ node nubotsvmbuild {
                        'method'      => 'boost',
                        'creates'     => 'src/boost/build_complete',
                        'postbuild'   => 'touch build_complete',
-                       'require'     => [ Installer['zlib'], Installer['bzip2-shared'], Installer['bzip2-static'], ],},
-    'mlpack'       => {'url'         => 'https://github.com/mlpack/mlpack/archive/mlpack-2.0.0.tar.gz',
-                       'args'        => { 'native'   => [ '-DLAPACK_LIBRARY=PREFIX/lib/libopenblas.so', '-DBLAS_LIBRARY=PREFIX/lib/libopenblas.so', ],
-                                          'DarwinOp' => [ '-DLAPACK_LIBRARY=PREFIX/lib/libopenblas.so', '-DBLAS_LIBRARY=PREFIX/lib/libopenblas.so', ],
-                                          'NimbroOp' => [ '-DLAPACK_LIBRARY=PREFIX/lib/libopenblas.so', '-DBLAS_LIBRARY=PREFIX/lib/libopenblas.so', ], },
-                       'require'     => [ Exec['correct_mlpack_CMakeLists'], Installer['armadillo'], Installer['boost'], Installer['xml2'], ],
+                       'require'     => [ Installer['zlib'], Installer['bzip2'], ],},
+    'mlpack'       => {'url'         => 'https://github.com/mlpack/mlpack/archive/mlpack-2.1.0.tar.gz',
+                       'args'        => { 'native'   => [ '-DBUILD_TESTS=OFF', '-DLAPACK_LIBRARY=PREFIX/lib/libopenblas.so', '-DBLAS_LIBRARY=PREFIX/lib/libopenblas.so', ],
+                                          'DarwinOp' => [ '-DBUILD_TESTS=OFF', '-DLAPACK_LIBRARY=PREFIX/lib/libopenblas.so', '-DBLAS_LIBRARY=PREFIX/lib/libopenblas.so', ],
+                                          'NimbroOp' => [ '-DBUILD_TESTS=OFF', '-DLAPACK_LIBRARY=PREFIX/lib/libopenblas.so', '-DBLAS_LIBRARY=PREFIX/lib/libopenblas.so', ], },
+                       'require'     => [ Installer['armadillo'], Installer['boost'], Installer['xml2'], ],
                        'creates'     => 'lib/libmlpack.so',
                        'method'      => 'cmake',},
-    'espeak'       => {'url'         => 'http://sourceforge.net/projects/espeak/files/espeak/espeak-1.48/espeak-1.48.04-source.zip',
-                       'src_dir'     => 'espeak-1.48.04-source/src',
+    'espeak'       => {'url'         => 'https://github.com/Bidski/espeak/archive/v1.48.04.tar.gz',
+                       'src_dir'     => 'src',
                        'prebuild'    => 'cp portaudio19.h portaudio.h',
                        'method'      => 'make',
-                       'require'     => [ File_line['correct_espeak_Makefile'], Installer['portaudio'] ]},
+                       'require'     => [ Installer['portaudio'], ],},
     'raw1394'      => {'url'         => 'http://downloads.sourceforge.net/project/libraw1394/libraw1394/libraw1394-2.0.5.tar.gz',
                        'args'        => { 'native'   => [ '', ],
                                           'DarwinOp' => [ '', ],
@@ -159,104 +151,13 @@ node nubotsvmbuild {
                                           'NimbroOp' => [ '--disable-doxygen-doc', '--disable-examples', ], },
                        'method'      => 'autotools',
                        'require'     => [ Installer['raw1394'], ],},
-  }
-  
-
-  # Correct CXXFLAGS definition in eSpeak Makefile to firstly append to CXXFLAGS and to allow narrowing conversions to be treated as warnings.
-  file_line { 'correct_espeak_Makefile':
-    path    => '/nubots/toolchain/src/espeak/espeak-1.48.04-source/src/Makefile',
-    match   => '^CXXFLAGS=-O2',
-    line    => 'CXXFLAGS += -Wno-error=narrowing',
-    ensure  => present,
-    require => [ Archive['espeak'], ],
-  }
-
-  # Append an install target to the bzip2-shared Makefile.
-  file_line { 'correct_bzip2-shared_Makefile_00':
-    path    => '/nubots/toolchain/src/bzip2-shared/Makefile-libbz2_so',
-    line    => 'PREFIX=/usr/local',
-    require => [ Archive['bzip2-shared'], ],
-  } ~>
-  file_line { 'correct_bzip2-shared_Makefile_01':
-    path    => '/nubots/toolchain/src/bzip2-shared/Makefile-libbz2_so',
-    line    => 'install: all'
-  } ~>
-  file_line { 'correct_bzip2-shared_Makefile_02':
-    path    => '/nubots/toolchain/src/bzip2-shared/Makefile-libbz2_so',
-    line    => "\ttest -d $(PREFIX) || mkdir -p $(PREFIX)",
-  } ~>
-  file_line { 'correct_bzip2-shared_Makefile_03':
-    path    => '/nubots/toolchain/src/bzip2-shared/Makefile-libbz2_so',
-    line    => "\ttest -d $(PREFIX)/lib || mkdir -p $(PREFIX)/lib",
-  } ~>
-  file_line { 'correct_bzip2-shared_Makefile_04':
-    path    => '/nubots/toolchain/src/bzip2-shared/Makefile-libbz2_so',
-    line    => "\tinstall -m 0755 libbz2.so.1.0.6 $(PREFIX)/lib",
-  } ~>
-  file_line { 'correct_bzip2-shared_Makefile_05':
-    path    => '/nubots/toolchain/src/bzip2-shared/Makefile-libbz2_so',
-    line    => "\tln -s libbz2.so.1.0.6 libbz2.so.1.0",
-  } ~>
-  file_line { 'correct_bzip2-shared_Makefile_06':
-    path    => '/nubots/toolchain/src/bzip2-shared/Makefile-libbz2_so',
-    line    => "\tln -s libbz2.so.1.0 libbz2.so",
-  } ~>
-  file_line { 'correct_bzip2-shared_Makefile_07':
-    path    => '/nubots/toolchain/src/bzip2-shared/Makefile-libbz2_so',
-    line    => "\tinstall -m 0755 libbz2.so.1.0 $(PREFIX)/lib",
-  } ~>
-  file_line { 'correct_bzip2-shared_Makefile_08':
-    path    => '/nubots/toolchain/src/bzip2-shared/Makefile-libbz2_so',
-    line    => "\tinstall -m 0755 libbz2.so $(PREFIX)/lib",
-  } ~>
-  exec { 'correct_bzip2-shared_Makefile_09':
-    command => "sed -i 's/\$(CC) -shared/\$(CC) \$(CFLAGS) -shared/' Makefile-libbz2_so",
-    cwd     => '/nubots/toolchain/src/bzip2-shared',
-    path    =>  [ '/nubots/toolchain/bin', '/usr/local/bin', '/usr/local/sbin/', '/usr/bin/', '/usr/sbin/', '/bin/', '/sbin/' ],
-  } ~>
-  exec { 'correct_bzip2-shared_Makefile_10':
-    command => "sed -i 's/^CFLAGS=/CFLAGS +=/' Makefile-libbz2_so",
-    cwd     => '/nubots/toolchain/src/bzip2-shared',
-    path    =>  [ '/nubots/toolchain/bin', '/usr/local/bin', '/usr/local/sbin/', '/usr/bin/', '/usr/sbin/', '/bin/', '/sbin/' ],
-  }
-
-  # Append an install target to the libsvm Makefile.
-  file_line { 'correct_libsvm_Makefile_00':
-    path    => '/nubots/toolchain/src/libsvm/Makefile',
-    line    => 'PREFIX=/usr/local',
-    require => [ Archive['libsvm'], ],
-  } ~>
-  file_line { 'correct_libsvm_Makefile_01':
-    path    => '/nubots/toolchain/src/libsvm/Makefile',
-    line    => 'install: all'
-  } ~>
-  file_line { 'correct_libsvm_Makefile_02':
-    path    => '/nubots/toolchain/src/libsvm/Makefile',
-    line    => "\ttest -d $(PREFIX) || mkdir -p $(PREFIX)",
-  } ~>
-  file_line { 'correct_libsvm_Makefile_03':
-    path    => '/nubots/toolchain/src/libsvm/Makefile',
-    line    => "\ttest -d $(PREFIX)/include || mkdir -p $(PREFIX)/include",
-  } ~>
-  file_line { 'correct_libsvm_Makefile_04':
-    path    => '/nubots/toolchain/src/libsvm/Makefile',
-    line    => "\ttest -d $(PREFIX)/lib || mkdir -p $(PREFIX)/lib",
-  } ~>
-  file_line { 'correct_libsvm_Makefile_05':
-    path    => '/nubots/toolchain/src/libsvm/Makefile',
-    line    => "\tinstall -m 0644 svm.h $(PREFIX)/include",
-  } ~>
-  file_line { 'correct_libsvm_Makefile_06':
-    path    => '/nubots/toolchain/src/libsvm/Makefile',
-    line    => "\tinstall -m 0755 svm.o $(PREFIX)/lib",
-  }
-
-  # Prohibit the execution of tests when building mlpack
-  exec { 'correct_mlpack_CMakeLists':
-    command => "sed -i 's/^\s*tests/#tests/' CMakeLists.txt",
-    cwd     => '/nubots/toolchain/src/mlpack/src/mlpack',
-    path    =>  [ '/nubots/toolchain/bin', '/usr/local/bin', '/usr/local/sbin/', '/usr/bin/', '/usr/sbin/', '/bin/', '/sbin/' ],
-    require => [ Archive['mlpack'], ],
+    'pybind11'     => {'url'         => 'https://github.com/pybind/pybind11/archive/v2.0.1.tar.gz',
+                       'args'        => { 'native'   => [ '-DPYBIND11_TEST=OFF', '-DPYTHON_EXECUTABLE=PREFIX/pypy/bin/pypy' ],
+                                          'DarwinOp' => [ '-DPYBIND11_TEST=OFF', '-DPYTHON_EXECUTABLE=PREFIX/pypy/bin/pypy' ],
+                                          'NimbroOp' => [ '-DPYBIND11_TEST=OFF', '-DPYTHON_EXECUTABLE=PREFIX/pypy/bin/pypy' ], },
+                       'creates'     => 'lib/libpybind11.so',
+                       'require'     => [ Installer['eigen3'], Exec['PyPy_native_Files'], Exec['PyPy_NimbroOp_Files'], Exec['PyPy_DarwinOp_Files'], ],
+                       'method'      => 'cmake',},
   }
 
   # Download each archive and spawn Installers for each one.
@@ -335,8 +236,8 @@ node nubotsvmbuild {
     }
   }
 
-  archive { "Spinnaker":
-    url              => "https://uoneduau-my.sharepoint.com/personal/c3124185_uon_edu_au/_layouts/15/guestaccess.aspx?guestaccesstoken=eKIYc15%2bIayZcInvlaxM2YPIpQ8Uf0NjD9F7Iqba9Rs%3d&docid=00cae2e28b3744b88b21396b00967a746&rev=1",
+  archive { "Spinnaker_amd64":
+    url              => "http://nubots.net/tarballs/spinnaker_1_0_0_295_amd64.tar.gz",
     target           => "/nubots/toolchain/NimbroOp/src/Spinnaker",
     src_target       => "/nubots/toolchain/NimbroOp/src",
     purge_target     => true,
@@ -348,7 +249,20 @@ node nubotsvmbuild {
     root_dir         => '.',
     require          => [ Class['installer::prerequisites'], Class['dev_tools'], ],
   }
-  exec { "Spinnaker_Files":
+  archive { "Spinnaker_i386":
+    url              => "http://nubots.net/tarballs/spinnaker_1_0_0_295_i386.tar.gz",
+    target           => "/nubots/toolchain/DarwinOp/src/Spinnaker",
+    src_target       => "/nubots/toolchain/DarwinOp/src",
+    purge_target     => true,
+    checksum         => false,
+    follow_redirects => true,
+    timeout          => 0,
+    extension        => "tar.gz",
+    strip_components => 1,
+    root_dir         => '.',
+    require          => [ Class['installer::prerequisites'], Class['dev_tools'], ],
+  }
+  exec { "Spinnaker_amd64_Files":
     creates  => "/nubots/toolchain/NimbroOp/include/Spinnaker.h",
     command  => "cd include && cp -r ./* /nubots/toolchain/NimbroOp/include/ && cd .. &&
                  cd lib && 
@@ -362,12 +276,127 @@ node nubotsvmbuild {
                  cp libXmlParser_gcc540_v3_0.so* /nubots/toolchain/NimbroOp/lib/ &&
                  cd ..",
     cwd      => "/nubots/toolchain/NimbroOp/src/Spinnaker",
-    path     =>  [ "${prefix}/${arch}/bin", "${prefix}/bin",
+    path     =>  [ "/nubots/toolchain/NimbroOp/bin", "/nubots/toolchain/bin",
                    '/usr/local/bin', '/usr/local/sbin/', '/usr/bin/', '/usr/sbin/', '/bin/', '/sbin/' ],
     timeout  => 0,
     provider => 'shell',
-    require  => [ Archive["Spinnaker"], ],
+    require  => [ Archive["Spinnaker_amd64"], ],
     before   => Class['toolchain_deb'],
+  }
+  exec { "Spinnaker_i386_Files":
+    creates  => "/nubots/toolchain/NimbroOp/include/Spinnaker.h",
+    command  => "cd include && cp -r ./* /nubots/toolchain/NimbroOp/include/ && cd .. &&
+                 cd lib && 
+                 cp libGCBase_gcc540_v3_0.so* /nubots/toolchain/NimbroOp/lib/ &&
+                 cp libGenApi_gcc540_v3_0.so* /nubots/toolchain/NimbroOp/lib/ &&
+                 cp libLog_gcc540_v3_0.so* /nubots/toolchain/NimbroOp/lib/ &&
+                 cp libMathParser_gcc540_v3_0.so* /nubots/toolchain/NimbroOp/lib/ &&
+                 cp libNodeMapData_gcc540_v3_0.so* /nubots/toolchain/NimbroOp/lib/ &&
+                 cp libptgreyvideoencoder.so* /nubots/toolchain/NimbroOp/lib/ &&
+                 cp libSpinnaker.so* /nubots/toolchain/NimbroOp/lib/ &&
+                 cp libXmlParser_gcc540_v3_0.so* /nubots/toolchain/NimbroOp/lib/ &&
+                 cd ..",
+    cwd      => "/nubots/toolchain/DarwinOp/src/Spinnaker",
+    path     =>  [ "/nubots/toolchain/DarwinOp/bin", "/nubots/toolchain/bin",
+                   '/usr/local/bin', '/usr/local/sbin/', '/usr/bin/', '/usr/sbin/', '/bin/', '/sbin/' ],
+    timeout  => 0,
+    provider => 'shell',
+    require  => [ Archive["Spinnaker_i386"], ],
+    before   => Class['toolchain_deb'],
+  }
+
+  archive { "PyPy_native":
+    url              => "https://bitbucket.org/squeaky/portable-pypy/downloads/pypy3.3-5.5-alpha-20161013-linux_x86_64-portable.tar.bz2",
+    target           => "/nubots/toolchain/native/src/pypy",
+    src_target       => "/nubots/toolchain/native/src",
+    purge_target     => false,
+    checksum         => false,
+    follow_redirects => true,
+    timeout          => 0,
+    extension        => "tar.bz2",
+    strip_components => 1,
+    root_dir         => '.',
+    require          => [ Class['installer::prerequisites'], Class['dev_tools'], ],
+  }
+  archive { "PyPy_NimbroOp":
+    url              => "https://bitbucket.org/squeaky/portable-pypy/downloads/pypy3.3-5.5-alpha-20161013-linux_x86_64-portable.tar.bz2",
+    target           => "/nubots/toolchain/NimbroOp/src/pypy",
+    src_target       => "/nubots/toolchain/NimbroOp/src",
+    purge_target     => false,
+    checksum         => false,
+    follow_redirects => true,
+    timeout          => 0,
+    extension        => "tar.bz2",
+    strip_components => 1,
+    root_dir         => '.',
+    require          => [ Class['installer::prerequisites'], Class['dev_tools'], ],
+  }
+  archive { "PyPy_DarwinOp":
+    url              => "https://bitbucket.org/squeaky/portable-pypy/downloads/pypy3.3-5.5-alpha-20161014-linux_i686-portable.tar.bz2",
+    target           => "/nubots/toolchain/DarwinOp/src/pypy",
+    src_target       => "/nubots/toolchain/DarwinOp/src",
+    purge_target     => false,
+    checksum         => false,
+    follow_redirects => true,
+    timeout          => 0,
+    extension        => "tar.bz2",
+    strip_components => 1,
+    root_dir         => '.',
+    require          => [ Class['installer::prerequisites'], Class['dev_tools'], ],
+  }
+  exec { "PyPy_NimbroOp_Files":
+    creates     => "/nubots/toolchain/NimbroOp/pypy/bin/pypy",
+    command     => "./bin/virtualenv-pypy --always-copy /nubots/toolchain/NimbroOp/pypy &&
+                    /nubots/toolchain/NimbroOp/pypy/bin/pip3 install pyparsing &&
+                    /nubots/toolchain/NimbroOp/pypy/bin/pip3 install pydotplus &&
+                    /nubots/toolchain/NimbroOp/pypy/bin/pip3 install pygments &&
+                    /nubots/toolchain/NimbroOp/pypy/bin/pip3 install termcolor &&
+                    /nubots/toolchain/NimbroOp/pypy/bin/pip3 install mmh3 &&
+                    /nubots/toolchain/NimbroOp/pypy/bin/pip3 install protobuf",
+    cwd         => "/nubots/toolchain/NimbroOp/src/pypy",
+    path        =>  [ "/nubots/toolchain/NimbroOp/bin", "/nubots/toolchain/bin",
+                      '/usr/local/bin', '/usr/local/sbin/', '/usr/bin/', '/usr/sbin/', '/bin/', '/sbin/' ],
+    environment => ["LD_LIBRARY_PATH=\"/nubots/toolchain/NimbroOp/lib:/nubots/toolchain/lib\""],
+    timeout     => 0,
+    provider    => 'shell',
+    require     => [ Archive["PyPy_NimbroOp"], Installer['bzip2'], ],
+    before      => Class['toolchain_deb'],
+  }
+  exec { "PyPy_native_Files":
+    creates     => "/nubots/toolchain/native/pypy/bin/pypy",
+    command     => "./bin/virtualenv-pypy --always-copy /nubots/toolchain/native/pypy &&
+                    /nubots/toolchain/native/pypy/bin/pip3 install pyparsing &&
+                    /nubots/toolchain/native/pypy/bin/pip3 install pydotplus &&
+                    /nubots/toolchain/native/pypy/bin/pip3 install pygments &&
+                    /nubots/toolchain/native/pypy/bin/pip3 install termcolor &&
+                    /nubots/toolchain/native/pypy/bin/pip3 install mmh3 &&
+                    /nubots/toolchain/native/pypy/bin/pip3 install protobuf",
+    cwd         => "/nubots/toolchain/native/src/pypy",
+    path        =>  [ "/nubots/toolchain/native/bin", "/nubots/toolchain/bin",
+                      '/usr/local/bin', '/usr/local/sbin/', '/usr/bin/', '/usr/sbin/', '/bin/', '/sbin/' ],
+    environment => ["LD_LIBRARY_PATH=\"/nubots/toolchain/native/lib:/nubots/toolchain/lib\""],
+    timeout     => 0,
+    provider    => 'shell',
+    require     => [ Archive["PyPy_native"], Installer['bzip2'], ],
+    before      => Class['toolchain_deb'],
+  }
+  exec { "PyPy_DarwinOp_Files":
+    creates     => "/nubots/toolchain/DarwinOp/pypy/bin/pypy",
+    command     => "LD_LIBRARY_PATH=\"/nubots/toolchain/DarwinOp/lib:/nubots/toolchain/lib\" ./bin/virtualenv-pypy --always-copy /nubots/toolchain/DarwinOp/pypy &&
+                    LD_LIBRARY_PATH=\"/nubots/toolchain/DarwinOp/lib:/nubots/toolchain/lib\" /nubots/toolchain/DarwinOp/pypy/bin/pip3 install pyparsing &&
+                    LD_LIBRARY_PATH=\"/nubots/toolchain/DarwinOp/lib:/nubots/toolchain/lib\" /nubots/toolchain/DarwinOp/pypy/bin/pip3 install pydotplus &&
+                    LD_LIBRARY_PATH=\"/nubots/toolchain/DarwinOp/lib:/nubots/toolchain/lib\" /nubots/toolchain/DarwinOp/pypy/bin/pip3 install pygments &&
+                    LD_LIBRARY_PATH=\"/nubots/toolchain/DarwinOp/lib:/nubots/toolchain/lib\" /nubots/toolchain/DarwinOp/pypy/bin/pip3 install termcolor &&
+                    LD_LIBRARY_PATH=\"/nubots/toolchain/DarwinOp/lib:/nubots/toolchain/lib\" /nubots/toolchain/DarwinOp/pypy/bin/pip3 install mmh3 &&
+                    LD_LIBRARY_PATH=\"/nubots/toolchain/DarwinOp/lib:/nubots/toolchain/lib\" /nubots/toolchain/DarwinOp/pypy/bin/pip3 install protobuf",
+    cwd         => "/nubots/toolchain/DarwinOp/src/pypy",
+    path        =>  [ "/nubots/toolchain/DarwinOp/bin", "/nubots/toolchain/bin",
+                      '/usr/local/bin', '/usr/local/sbin/', '/usr/bin/', '/usr/sbin/', '/bin/', '/sbin/' ],
+    environment => ["LD_LIBRARY_PATH=\"/nubots/toolchain/DarwinOp/lib:/nubots/toolchain/lib\""],
+    timeout     => 0,
+    provider    => 'shell',
+    require     => [ Archive["PyPy_DarwinOp"], Installer['bzip2'], ],
+    before      => Class['toolchain_deb'],
   }
 
   # After we have installed, create the CMake toolchain files and then build our deb.
@@ -404,6 +433,8 @@ set(CMAKE_C_FLAGS \"\${CMAKE_C_FLAGS} ${compile_params}\" CACHE STRING \"\" FORC
 set(CMAKE_CXX_FLAGS \"\${CMAKE_CXX_FLAGS} ${compile_params}\" CACHE STRING \"\" FORCE)
 
 set(PLATFORM \"${arch}\" CACHE STRING \"The platform to build for.\" FORCE)
+
+set(PYTHON_EXECUTABLE \"${prefix}/${arch}/pypy/bin/pypy\" CACHE STRING \"Path to the python interpreter to use.\" FORCE)
 ",
       ensure  => present,
       path    => "${prefix}/${arch}.cmake",
