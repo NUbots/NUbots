@@ -25,7 +25,7 @@
 
 #include <yaml-cpp/yaml.h>
 
-#include "message/support/Configuration.h"
+#include "extension/Configuration.h"
 
 #include "message/input/LimbID.h"
 #include "message/input/Sensors.h"

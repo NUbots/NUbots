@@ -19,22 +19,24 @@
 
 #include "LinuxCamera.h"
 
+#include <armadillo>
+
 extern "C" {
     #include <jpeglib.h>
 }
 
 #include "V4L2Camera.h"
-#include "message/input/Image.h"
-#include "message/input/CameraParameters.h"
-#include "message/support/Configuration.h"
+#include "message/input/proto/Image.h"
+#include "message/input/proto/CameraParameters.h"
+#include "extension/Configuration.h"
 #include "utility/vision/fourcc.h"
 
 namespace module {
     namespace input {
 
-        using message::support::Configuration;
-        using message::input::CameraParameters;
-        using message::input::Image;
+        using extension::Configuration;
+        using message::input::proto::CameraParameters;
+        using message::input::proto::Image;
         using namespace utility::vision;
 
         // We assume that the device will always be video0, if not then change this
@@ -59,14 +61,14 @@ namespace module {
 
                 auto cameraParameters = std::make_unique<CameraParameters>();
 
-                cameraParameters->imageSizePixels << config["imageWidth"].as<uint>() << config["imageHeight"].as<uint>();
-                cameraParameters->FOV << config["FOV_X"].as<double>() << config["FOV_Y"].as<double>();
+                cameraParameters->imageSizePixels << config["imageWidth"].as<uint>(), config["imageHeight"].as<uint>();
+                cameraParameters->FOV << config["FOV_X"].as<double>(), config["FOV_Y"].as<double>();
                 cameraParameters->distortionFactor = config["DISTORTION_FACTOR"].as<double>();
                 arma::vec2 tanHalfFOV;
                 tanHalfFOV << std::tan(cameraParameters->FOV[0] * 0.5) << std::tan(cameraParameters->FOV[1] * 0.5);
                 arma::vec2 imageCentre;
                 imageCentre << cameraParameters->imageSizePixels[0] * 0.5 << cameraParameters->imageSizePixels[1] * 0.5;
-                cameraParameters->pixelsToTanThetaFactor << (tanHalfFOV[0] / imageCentre[0]) << (tanHalfFOV[1] / imageCentre[1]);
+                cameraParameters->pixelsToTanThetaFactor << (tanHalfFOV[0] / imageCentre[0]), (tanHalfFOV[1] / imageCentre[1]);
                 cameraParameters->focalLengthPixels = imageCentre[0] / tanHalfFOV[0];
 
 

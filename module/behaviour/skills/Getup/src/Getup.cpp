@@ -24,7 +24,7 @@
 #include "message/motion/Script.h"
 #include "message/behaviour/Action.h"
 #include "message/behaviour/ServoCommand.h"
-#include "message/support/Configuration.h"
+#include "extension/Configuration.h"
 #include "message/input/Sensors.h"
 #include "message/motion/GetupCommand.h"
 
@@ -32,7 +32,7 @@ namespace module {
     namespace behaviour {
         namespace skills {
 
-            using message::support::Configuration;
+            using extension::Configuration;
             using message::input::Sensors;
             using message::input::ServoID;
             using message::motion::ExecuteScriptByName;

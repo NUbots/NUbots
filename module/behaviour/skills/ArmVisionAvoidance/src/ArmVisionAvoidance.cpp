@@ -24,7 +24,7 @@
 #include "message/behaviour/Action.h"
 #include "message/behaviour/ServoCommand.h"
 #include "message/input/Sensors.h"
-#include "message/support/Configuration.h"
+#include "extension/Configuration.h"
 
 #include "utility/math/coordinates.h"
 #include "utility/support/yaml_expression.h"
@@ -38,7 +38,7 @@ namespace skills {
     using message::input::Sensors;
     using message::behaviour::ServoCommand;
     using message::behaviour::RegisterAction;
-    using message::support::Configuration;
+    using extension::Configuration;
     using utility::support::Expression;
 
     ArmVisionAvoidance::ArmVisionAvoidance(std::unique_ptr<NUClear::Environment> environment)

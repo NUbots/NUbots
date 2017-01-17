@@ -26,7 +26,7 @@
 namespace module {
     namespace vision {
 
-        using message::input::Image;
+        using message::input::proto::Image;
         using message::vision::LookUpTable;
         using message::vision::ObjectClass;
         using message::vision::ClassifiedImage;
@@ -43,17 +43,17 @@ namespace module {
             auto& minVisualHorizon = classifiedImage.minVisualHorizon;
 
             // Cast lines to find our visual horizon
-            for(uint x = 0; x < image.width; x += VISUAL_HORIZON_SPACING) {
+            for(uint x = 0; x < image.dimensions[0]; x += VISUAL_HORIZON_SPACING) {
 
                 // Find our point to classify from (slightly above the horizon)
                 int top = std::max(int(lround(horizon.y(x)) - VISUAL_HORIZON_BUFFER), int(0));
-                top = std::min(top, int(image.height - 1));
+                top = std::min(top, int(image.dimensions[1] - 1));
 
                 // Classify our segments
-                auto segments = quex->classify(image, lut, { int(x), top }, { int(x), int(image.height - 1) }, VISUAL_HORIZON_SUBSAMPLING);
+                auto segments = quex->classify(image, lut, { int(x), top }, { int(x), int(image.dimensions[1] - 1) }, VISUAL_HORIZON_SUBSAMPLING);
 
                 // Our default green point is the bottom of the screen
-                arma::ivec2 greenPoint = { int(x), int(image.height) };
+                arma::ivec2 greenPoint = { int(x), int(image.dimensions[1]) };
 
                 // Loop through our segments to find our first green segment
                 for (auto it = segments.begin(); it != segments.end(); ++it) {
@@ -71,7 +71,7 @@ namespace module {
                     }
                 }
                 // Only put the green point in if it's on the screen
-                if(greenPoint[1] < int(image.height)) {
+                if(greenPoint[1] < int(image.dimensions[1])) {
                     visualHorizon.push_back(std::move(greenPoint));
                 }
 
@@ -79,20 +79,20 @@ namespace module {
             }
 
             // If we don't have a line on the right of the image, make one
-            if(image.width - 1 % VISUAL_HORIZON_SPACING != 0) {
+            if(image.dimensions[0] - 1 % VISUAL_HORIZON_SPACING != 0) {
 
                 // Find our point to classify from (slightly above the horizon)
-                int top = std::max(int(lround(horizon.y(image.width - 1)) - VISUAL_HORIZON_BUFFER), int(0));
-                top = std::min(top, int(image.height - 1));
+                int top = std::max(int(lround(horizon.y(image.dimensions[0] - 1)) - VISUAL_HORIZON_BUFFER), int(0));
+                top = std::min(top, int(image.dimensions[1] - 1));
 
-                arma::ivec2 start = { int(image.width - 1), top };
-                arma::ivec2 end = { int(image.width - 1), int(image.height - 1) };
+                arma::ivec2 start = { int(image.dimensions[0] - 1), top };
+                arma::ivec2 end = { int(image.dimensions[0] - 1), int(image.dimensions[1] - 1) };
 
                 // Classify our segments
                 auto segments = quex->classify(image, lut, start, end, VISUAL_HORIZON_SUBSAMPLING);
 
                 // Our default green point is the bottom of the screen
-                arma::ivec2 greenPoint = { int(image.width - 1), int(image.height) };
+                arma::ivec2 greenPoint = { int(image.dimensions[0] - 1), int(image.dimensions[1]) };
 
                 // Loop through our segments to find our first green segment
                 for (auto it = segments.begin(); it != segments.end(); ++it) {
@@ -106,7 +106,7 @@ namespace module {
                 }
 
                 // Only put the green point in if it's on the screen
-                if(greenPoint[1] < int(image.height)) {
+                if(greenPoint[1] < int(image.dimensions[1])) {
                     visualHorizon.push_back(std::move(greenPoint));
                 }
                 insertSegments(classifiedImage, segments, true);
@@ -133,8 +133,8 @@ namespace module {
 
             // If we don't have any points add two
             if(visualHorizon.empty()) {
-                visualHorizon.push_back(arma::ivec2({0,                    int(image.height - 1)}));
-                visualHorizon.push_back(arma::ivec2({int(image.width - 1), int(image.height - 1)}));
+                visualHorizon.push_back(arma::ivec2({0,                            int(image.dimensions[1] - 1)}));
+                visualHorizon.push_back(arma::ivec2({int(image.dimensions[0] - 1), int(image.dimensions[1] - 1)}));
             }
             else {
                 // Now we need to apply our hull to the edges
@@ -143,25 +143,25 @@ namespace module {
                     auto& a = visualHorizon.front();
 
                     // Insert this new point at the front
-                    arma::ivec2 p({std::max(0, int(a[0] - VISUAL_HORIZON_SPACING)), int(image.height - 1)});
+                    arma::ivec2 p({std::max(0, int(a[0] - VISUAL_HORIZON_SPACING)), int(image.dimensions[1] - 1)});
                     visualHorizon.insert(visualHorizon.begin(), p);
 
                     // If this new point wasn't at 0, then add a new one there too
                     if(p[0] > 0) {
-                        visualHorizon.insert(visualHorizon.begin(), arma::ivec({0, int(image.height - 1)}));
+                        visualHorizon.insert(visualHorizon.begin(), arma::ivec({0, int(image.dimensions[1] - 1)}));
                     }
                 }
-                if(visualHorizon.back()[0] != int(image.width) - 1) {
+                if(visualHorizon.back()[0] != int(image.dimensions[0]) - 1) {
                     // Our last point
                     auto& a = visualHorizon.back();
 
                     // Insert this new point at the end
-                    arma::ivec2 p({std::min(int(image.width) - 1, int(a[0] + VISUAL_HORIZON_SPACING)), int(image.height) - 1});
+                    arma::ivec2 p({std::min(int(image.dimensions[0]) - 1, int(a[0] + VISUAL_HORIZON_SPACING)), int(image.dimensions[1]) - 1});
                     visualHorizon.insert(visualHorizon.end(), p);
 
                     // If this new point wasn't at the end, then add a new one there to
-                    if(p[0] < int(image.width - 1)) {
-                        visualHorizon.insert(visualHorizon.end(), arma::ivec({int(image.width) - 1, int(image.height) - 1}));
+                    if(p[0] < int(image.dimensions[0] - 1)) {
+                        visualHorizon.insert(visualHorizon.end(), arma::ivec({int(image.dimensions[0]) - 1, int(image.dimensions[1]) - 1}));
                     }
                 }
             }

@@ -21,10 +21,10 @@
 
 #include "message/behaviour/proto/WalkPath.h"
 #include "message/behaviour/proto/KickPlan.h"
-#include "message/input/gameevents/GameEvents.h"
-#include "message/input/Image.h"
+#include "message/input/proto/Image.h"
+#include "message/input/proto/Sensors.h"
 #include "message/vision/VisionObjects.h"
-#include "message/motion/WalkCommand.h"
+#include "message/motion/proto/WalkCommand.h"
 
 #include "utility/time/time.h"
 #include "utility/localisation/transform.h"
@@ -40,16 +40,15 @@ namespace support {
     using message::behaviour::proto::Behaviour;
     using message::behaviour::proto::WalkPath;
     using message::behaviour::proto::KickPlan;
-    using message::input::gameevents::GameState;
-    using message::input::Image;
-    using message::input::Sensors;
-    using message::localisation::Self;
-    using LocalisationBall = message::localisation::Ball;
+    using message::input::proto::Image;
+    using message::input::proto::Sensors;
+    using message::input::proto::GameState;
+    using message::localisation::proto::Self;
+    using LocalisationBall = message::localisation::proto::Ball;
     using VisionGoal = message::vision::Goal;
     using VisionBall = message::vision::Ball;
-    using message::motion::WalkCommand;
+    using message::motion::proto::WalkCommand;
 
-    using utility::time::getUtcTimestamp;
     using utility::localisation::transform::RobotToWorldTransform;
 
     /**
@@ -100,13 +99,13 @@ namespace support {
             Self self = selfs.front();
 
             // Set robot position.
-            overview.robot_position = convert<double, 2>(self.position);
+            overview.robot_position = self.locObject.position;
 
             // Set robot position covariance.
-            overview.robot_position_covariance = convert<double, 2, 2>(self.position_cov);
+            overview.robot_position_covariance = self.locObject.position_cov;
 
             // Set robot heading.
-            overview.robot_heading = convert<double, 2>(self.heading);
+            overview.robot_heading = self.heading;
         }));
 
         handles["overview"].push_back(on<Trigger<std::vector<LocalisationBall>>, With<std::vector<Self>>, Single, Priority::LOW>()
@@ -117,36 +116,38 @@ namespace support {
             Self self = selfs.front();
 
             // Set local ball position.
-            overview.ball_position = convert<double, 2>(ball.position);
+            overview.ball_position = ball.locObject.position;
 
             // Set world ball position.
-            overview.ball_world_position = convert<double, 2>(RobotToWorldTransform(self.position, self.heading, ball.position));
+            overview.ball_world_position = convert<double, 2>(RobotToWorldTransform(convert<double, 2>(self.locObject.position), 
+                                                                                    convert<double, 2>(self.heading), 
+                                                                                    convert<double, 2>(ball.locObject.position)));
         }));
 
         handles["overview"].push_back(on<Trigger<Image>, Single, Priority::LOW>().then([this] {
 
-            overview.last_camera_image = getUtcTimestamp();
+            overview.last_camera_image = NUClear::clock::now();
         }));
 
         handles["overview"].push_back(on<Trigger<std::vector<VisionBall>>, Single, Priority::LOW>().then([this] (const std::vector<VisionBall>& balls) {
 
             if (!balls.empty()) {
-                overview.last_seen_ball = getUtcTimestamp();
+                overview.last_seen_ball = NUClear::clock::now();
             }
         }));
 
         handles["overview"].push_back(on<Trigger<std::vector<VisionGoal>>, Single, Priority::LOW>().then([this] (const std::vector<VisionGoal>& goals) {
 
             if (!goals.empty()) {
-                overview.last_seen_goal = getUtcTimestamp();
+                overview.last_seen_goal = NUClear::clock::now();
             }
         }));
 
         handles["overview"].push_back(on<Trigger<GameState>, Single, Priority::LOW>().then([this] (const GameState& gameState) {
 
-            overview.game_mode = getMode(gameState.mode);
-            overview.game_phase = getPhase(gameState.phase);
-            overview.penalty_reason = getPenaltyReason(gameState.self.penaltyReason);
+            overview.game_mode      = gameState.data.mode;
+            overview.game_phase     = gameState.data.phase;
+            overview.penalty_reason = gameState.data.self.penalty_reason;
         }));
 
         handles["overview"].push_back(on<Trigger<WalkPath>, Single, Priority::LOW>().then([this] (const WalkPath& walkPath) {
@@ -160,7 +161,7 @@ namespace support {
 
         handles["overview"].push_back(on<Trigger<WalkCommand>, Single, Priority::LOW>().then([this] (const WalkCommand& walkCommand) {
 
-            overview.walk_command = convert<double, 3>(walkCommand.command);
+            overview.walk_command = walkCommand.command;
         }));
 
     }

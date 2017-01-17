@@ -29,7 +29,7 @@
 #include "message/localisation/FieldObject.h"
 #include "message/localisation/ResetRobotHypotheses.h"
 #include "message/localisation/SideChecker.h"
-#include "message/support/Configuration.h"
+#include "extension/Configuration.h"
 #include "message/platform/darwin/DarwinSensors.h"
 #include "message/behaviour/Nod.h"
 
@@ -44,7 +44,7 @@ namespace module {
 namespace behaviour {
 namespace strategy {
 
-    using message::support::Configuration;
+    using extension::Configuration;
     using message::input::Sensors;
     using message::input::gameevents::GameState;
     using message::input::gameevents::Mode;

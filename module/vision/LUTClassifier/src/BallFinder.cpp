@@ -27,9 +27,9 @@
 namespace module {
     namespace vision {
 
-        using message::input::Image;
-        using message::input::ServoID;
-        using message::input::Sensors;
+        using message::input::proto::Image;
+        using ServoID = message::input::proto::Sensors::ServoID::Value;
+        using message::input::proto::Sensors;
         using message::vision::LookUpTable;
         using message::vision::ObjectClass;
         using message::vision::ClassifiedImage;
@@ -54,17 +54,17 @@ namespace module {
 
             auto& visualHorizon = classifiedImage.visualHorizon;
             auto& minHorizon = classifiedImage.minVisualHorizon;
-            auto& sensors = *classifiedImage.sensors;
 
             arma::vec2 topY = imageToScreen(arma::ivec2({ classifiedImage.maxVisualHorizon->at(0), int(classifiedImage.maxVisualHorizon->at(1)) })
                                           , classifiedImage.dimensions);
             topY[0] = 0;    //Choose centre of screen
 
             // Get the positions of the top of our green horizion, and the bottom of the screen
-            auto xb = getGroundPointFromScreen({ 0, -double(image.height - 1) / 2}, sensors.orientationCamToGround, FOCAL_LENGTH_PIXELS);
-            auto xt = getGroundPointFromScreen(topY, sensors.orientationCamToGround, FOCAL_LENGTH_PIXELS);
+            arma::mat44 orientationCamToGround = convert<double, 4, 4>(classifiedImage.sensors->orientationCamToGround);
+            auto xb = getGroundPointFromScreen({ 0, -double(image.dimensions[1] - 1) / 2}, orientationCamToGround, FOCAL_LENGTH_PIXELS);
+            auto xt = getGroundPointFromScreen(topY, orientationCamToGround, FOCAL_LENGTH_PIXELS);
             double dx = 2 * BALL_RADIUS / BALL_MINIMUM_INTERSECTIONS_COARSE;
-            double cameraHeight = sensors.orientationCamToGround(2,3);
+            double cameraHeight = orientationCamToGround(2, 3);
 
             // This describes the direction of travel
             arma::vec3 direction = arma::normalise(xb);
@@ -88,19 +88,19 @@ namespace module {
             // Do our inital calculation to get our first Y
             arma::vec4 worldPosition = arma::ones(4);
             worldPosition.rows(0, 2) = xStart * direction;
-            auto camPoint = projectWorldPointToScreen(worldPosition, sensors.orientationCamToGround, FOCAL_LENGTH_PIXELS);
+            auto camPoint = projectWorldPointToScreen(worldPosition, orientationCamToGround, FOCAL_LENGTH_PIXELS);
             int y = screenToImage(camPoint, classifiedImage.dimensions)[1];
 
             for(double x = xStart; x < xEnd && y >= 0; x += std::max(dx, (dx * x) / (cameraHeight - dx))) {
 
                 // Calculate our next Y
                 worldPosition.rows(0, 2) = (x + std::max(dx, (dx * x) / (cameraHeight - dx))) * direction;
-                camPoint = projectWorldPointToScreen(worldPosition, sensors.orientationCamToGround, FOCAL_LENGTH_PIXELS);
+                camPoint = projectWorldPointToScreen(worldPosition, orientationCamToGround, FOCAL_LENGTH_PIXELS);
                 int nextY = screenToImage(camPoint, classifiedImage.dimensions)[1];
 
                 // Work out our details
                 arma::ivec2 start = { 0, y };
-                arma::ivec2 end = { int(image.width - 1), y };
+                arma::ivec2 end = { int(image.dimensions[0] - 1), y };
                 int subsample = std::max(1, int(lround((y - nextY) * BALL_HORIZONTAL_SUBSAMPLE_FACTOR)));
 
                 // If our left hand side is in range, or we are over the top

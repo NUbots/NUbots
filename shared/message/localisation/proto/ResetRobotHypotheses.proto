@@ -16,15 +16,21 @@
  *
  * Copyright 2013 NUBots <nubots@nubots.net>
  */
+syntax = "proto3";
 
-#ifndef MESSAGE_MOTION_GETUPCOMMAND_H
-#define MESSAGE_MOTION_GETUPCOMMAND_H
+package message.localisation.proto;
 
-namespace message {
-    namespace motion {
-    	//internal only callback messages to start and stop our action
-		struct ExecuteGetup{};
-		struct KillGetup{};
+import "Matrix.proto";
+import "Vector.proto";
+
+message ResetRobotHypotheses {
+	message Self {
+	    vec2   position     = 1;
+	    mat22  position_cov = 2;
+	    double heading      = 3;
+	    double heading_var  = 4;
+	    bool   absoluteYaw  = 5;
 	}
+
+    repeated Self hypotheses = 1;
 }
-#endif  // MESSAGE_MOTION_KICKCOMMAND_H

@@ -23,7 +23,7 @@
 #include <nuclear>
 #include <chrono>
 #include "utility/localisation/LocalisationFieldObject.h"
-#include "message/support/Configuration.h"
+#include "extension/Configuration.h"
 #include "message/support/FieldDescription.h"
 #include "message/vision/VisionObjects.h"
 #include "message/input/Sensors.h"
@@ -62,9 +62,9 @@ namespace localisation {
 
         void set_field_description(std::shared_ptr<message::support::FieldDescription> desc);
 
-        void UpdateMultiModalRobotModelConfiguration(const message::support::Configuration& config);
+        void UpdateMultiModalRobotModelConfiguration(const extension::Configuration& config);
 
-        void UpdateRobotLocalisationEngineConfiguration(const message::support::Configuration& config);
+        void UpdateRobotLocalisationEngineConfiguration(const extension::Configuration& config);
 
         bool CanEmitFieldObjects();
 

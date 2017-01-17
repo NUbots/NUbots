@@ -19,24 +19,23 @@
 
 #include "BallDetector.h"
 
+#include "extension/Configuration.h"
+
+#include "message/input/proto/CameraParameters.h"
+#include "message/support/proto/FieldDescription.h"
 #include "message/vision/ClassifiedImage.h"
 #include "message/vision/VisionObjects.h"
 #include "message/vision/LookUpTable.h"
-#include "message/input/CameraParameters.h"
-#include "message/support/Configuration.h"
-#include "message/support/FieldDescription.h"
 
-#include "utility/support/yaml_expression.h"
-
+#include "utility/math/coordinates.h"
 #include "utility/math/geometry/Plane.h"
 #include "utility/math/matrix/Transform3D.h"
-
 #include "utility/math/ransac/Ransac.h"
 #include "utility/math/ransac/RansacCircleModel.h"
 #include "utility/math/vision.h"
 #include "utility/nubugger/NUhelpers.h"
-#include "utility/math/coordinates.h"
-
+#include "utility/support/eigen_armadillo.h"
+#include "utility/support/yaml_expression.h"
 #include "utility/vision/fourcc.h"
 
 namespace module {
@@ -44,16 +43,16 @@ namespace vision {
 
     using namespace utility::vision;
 
-    using message::input::CameraParameters;
-    using message::input::Sensors;
-    using message::input::ServoID;
+    using message::input::proto::CameraParameters;
+    using message::input::proto::Sensors;
+    using ServoID = message::input::proto::Sensors::ServoID::Value;
 
     using message::vision::ObjectClass;
     using message::vision::ClassifiedImage;
     using message::vision::VisionObject;
     using message::vision::Ball;
     using message::vision::LookUpTable;
-    using message::input::Image;
+    using message::input::proto::Image;
 
     using Plane = utility::math::geometry::Plane<3>;
 
@@ -69,8 +68,8 @@ namespace vision {
     using utility::math::coordinates::cartesianToSpherical;
     using utility::nubugger::graph;
 
-    using message::support::Configuration;
-    using message::support::FieldDescription;
+    using extension::Configuration;
+    using message::support::proto::FieldDescription;
 
     using utility::math::ransac::Ransac;
     using utility::math::ransac::RansacCircleModel;
@@ -87,9 +86,9 @@ namespace vision {
             float theta = 0;
             if(r == 0){
                 arma::ivec2 ipos = arma::ivec({int(std::round(circle.centre[0])), int(std::round(circle.centre[1]))});
-                if(ipos[0] >= 0 && ipos[0] < int(image.width) && ipos[1] >= 0 && ipos[1] < int(image.height)){
+                if(ipos[0] >= 0 && ipos[0] < int(image.dimensions[0]) && ipos[1] >= 0 && ipos[1] < int(image.dimensions[1])){
                     // debug.push_back(std::make_tuple(ipos, ipos + arma::ivec2{1,1}, arma::vec4{1,1,1,1}));
-                    if (lut(getPixel(ipos[0], ipos[1], image.width, image.height, image.source(), image.fourcc)) == 'g') {
+                    if (lut(getPixel(ipos[0], ipos[1], image.dimensions[0], image.dimensions[1], image.data, static_cast<FOURCC>(image.format))) == 'g') {
                         numGreen++;
                     }
                     actualSamples++;
@@ -101,9 +100,9 @@ namespace vision {
                 float y = r * std::sin(theta);
                 arma::vec2 pos = circle.centre + arma::vec2({x,y});
                 arma::ivec2 ipos = arma::ivec2({int(std::round(pos[0])),int(std::round(pos[1]))});
-                if(ipos[0] >= 0 && ipos[0] < int(image.width) && ipos[1] >= 0 && ipos[1] < int(image.height)){
+                if(ipos[0] >= 0 && ipos[0] < int(image.dimensions[0]) && ipos[1] >= 0 && ipos[1] < int(image.dimensions[1])){
                     // debug.push_back(std::make_tuple(ipos, ipos + arma::ivec2{1,1}, arma::vec4{1,1,1,1}));
-                    if (lut(getPixel(ipos[0], ipos[1], image.width, image.height, image.source(), image.fourcc)) == 'g') {
+                    if (lut(getPixel(ipos[0], ipos[1], image.dimensions[0], image.dimensions[1], image.data, static_cast<FOURCC>(image.format))) == 'g') {
                         numGreen++;
                     }
                     actualSamples++;
@@ -197,6 +196,9 @@ namespace vision {
             balls->reserve(ransacResults.size());
 
             if(print_throwout_logs) log("Ransac : ", ransacResults.size(), "results");
+
+            arma::mat44 orientationCamToGround = convert<double, 4, 4>(sensors.orientationCamToGround);
+
             for (auto& result : ransacResults) {
 
                 // Transform our centre into kinematics coordinates
@@ -208,7 +210,7 @@ namespace vision {
                 arma::vec2 left  = centre + arma::vec2({  result.model.radius, 0 });
                 arma::vec2 right = centre + arma::vec2({ -result.model.radius, 0 });
 
-                double cameraHeight = sensors.orientationCamToGround(2, 3);
+                double cameraHeight = orientationCamToGround(2, 3);
 
                 // Get a unit vector pointing to the centre of the ball
                 arma::vec3 ballCentreRay = arma::normalise(arma::normalise(getCamFromScreen(top, cam.focalLengthPixels))
@@ -261,7 +263,7 @@ namespace vision {
                 // IF THE DISAGREEMENT BETWEEN THE WIDTH AND PROJECTION BASED DISTANCES ARE TOO LARGE
                 // Project this vector to a plane midway through the ball
                 Plane ballBisectorPlane({ 0, 0, 1 }, { 0, 0, field.ball_radius });
-                arma::vec3 ballCentreGroundProj = projectCamToPlane(ballCentreRay, sensors.orientationCamToGround, ballBisectorPlane);
+                arma::vec3 ballCentreGroundProj = projectCamToPlane(ballCentreRay, orientationCamToGround, ballBisectorPlane);
                 double ballCentreGroundProjDistance = arma::norm(ballCentreGroundProj);
 
                 if(std::abs((widthDistance - ballCentreGroundProjDistance) / std::max(ballCentreGroundProjDistance, widthDistance)) > MAXIMUM_DISAGREEMENT_RATIO) {
@@ -276,8 +278,16 @@ namespace vision {
                 Ball b;
 
                 // Get our transform to world coordinates
-                const Transform3D& Htw = sensors.world;
-                const Transform3D& Htc = sensors.forwardKinematics.find(ServoID::HEAD_PITCH)->second;
+                const Transform3D& Htw = convert<double, 4, 4>(sensors.world);
+                Transform3D Htc;
+                for (const auto& entry : sensors.forwardKinematics)
+                {
+                    if (entry.servoID == ServoID::HEAD_PITCH)
+                    {
+                         Htc = convert<double, 4, 4>(entry.kinematics);
+                         break;
+                    }
+                }
                 Transform3D Hcw = Htc.i() * Htw;
                 Transform3D Hwc = Hcw.i();
 
@@ -293,7 +303,7 @@ namespace vision {
                 // Attach the position to the object
                 b.position = rBWw;
 
-                Transform3D Hgc = sensors.orientationCamToGround;
+                Transform3D Hgc = orientationCamToGround;
                 arma::vec3 width_rBGg = Hgc.transformPoint(ballCentreRay * widthDistance);
                 arma::vec3 proj_rBGg = Hgc.transformPoint(ballCentreGroundProj);
                 b.torsoSpacePosition = width_rBGg;
@@ -308,7 +318,7 @@ namespace vision {
                 b.circle.centre = result.model.centre;
 
                 // Angular positions from the camera
-                b.screenAngular = arma::atan(cam.pixelsToTanThetaFactor % ballCentreScreen);
+                b.screenAngular = arma::atan(convert<double, 2>(cam.pixelsToTanThetaFactor) % ballCentreScreen);
                 b.angularSize = { getParallaxAngle(left, right, cam.focalLengthPixels), getParallaxAngle(top, base, cam.focalLengthPixels) };
 
                 // Add our points

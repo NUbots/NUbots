@@ -19,11 +19,13 @@
 
 #include "LUTClassifier.h"
 
-#include "message/input/CameraParameters.h"
+#include "message/input/proto/CameraParameters.h"
+#include "message/support/proto/SaveConfiguration.h"
 #include "message/vision/LookUpTable.h"
-#include "message/support/Configuration.h"
+#include "extension/Configuration.h"
 
 #include "utility/support/yaml_expression.h"
+#include "utility/support/eigen_armadillo.h"
 #include "utility/vision/fourcc.h"
 
 #include "QuexClassifier.h"
@@ -35,16 +37,16 @@ namespace module {
 
         using namespace utility::vision;
         using message::input::proto::Image;
-        using ServoID = message::input::proto::Sensors::ServoID;
+        using ServoID = message::input::proto::Sensors::ServoID::Value;
         using message::input::proto::Sensors;
-        using message::input::CameraParameters;
+        using message::input::proto::CameraParameters;
         using message::vision::LookUpTable;
         using message::vision::SaveLookUpTable;
         using message::vision::ObjectClass;
         using message::vision::ClassifiedImage;
         using message::vision::Colour;
-        using message::support::Configuration;
-        using message::support::SaveConfiguration;
+        using extension::Configuration;
+        using message::support::proto::SaveConfiguration;
         using utility::support::Expression;
 
         void LUTClassifier::insertSegments(ClassifiedImage<ObjectClass>& image, std::vector<ClassifiedImage<ObjectClass>::Segment>& segments, bool vertical) {
@@ -113,8 +115,8 @@ namespace module {
                 emit(std::move(lut));
             });
 
-            on<Trigger<SaveLookUpTable>, With<LookUpTable>>().then([this] (const LookUpTable& lut) {
-                emit(std::make_unique<SaveConfiguration>(SaveConfiguration{ LUT_PATH, YAML::Node(lut) }));
+            on<Trigger<SaveLookUpTable>, With<LookUpTable>>().then([this] (const LookUpTable& /*lut*/) {
+                // TODO: emit(std::make_unique<SaveConfiguration>(SaveConfiguration{ LUT_PATH, YAML::Node(lut) }));
             });
 
             // Trigger the same function when either update
@@ -174,7 +176,7 @@ namespace module {
                 auto classifiedImage = std::make_unique<ClassifiedImage<ObjectClass>>();
 
                 // Set our width and height
-                classifiedImage->dimensions = { image.width, image.height };
+                classifiedImage->dimensions = convert<uint, 2>(image.dimensions);
 
                 // Attach our sensors
                 // std::cout << "sensor-vision latency = " << std::chrono::duration_cast<std::chrono::microseconds>(NUClear::clock::now() - sensors->timestamp).count() << std::endl;

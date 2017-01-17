@@ -21,7 +21,7 @@
 
 #include "message/motion/WalkCommand.h"
 #include "message/localisation/FieldObject.h"
-#include "message/support/Configuration.h"
+#include "extension/Configuration.h"
 #include "message/behaviour/Action.h"
 #include "message/behaviour/ServoCommand.h"
 #include "message/behaviour/KickPlan.h"
@@ -47,7 +47,7 @@ using message::motion::KickCommand;
 using message::motion::KickCommandType;
 using message::motion::KickScriptCommand;
 using message::motion::KickPlannerConfig;
-using message::support::Configuration;
+using extension::Configuration;
 using message::input::LimbID;
 using message::behaviour::KickPlan;
 using message::behaviour::WantsToKick;

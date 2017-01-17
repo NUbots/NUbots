@@ -14,27 +14,10 @@
  * You should have received a copy of the GNU General Public License
  * along with the NUbots Codebase.  If not, see <http://www.gnu.org/licenses/>.
  *
- * Copyright 2013 NUBots <nubots@nubots.net>
+ * Copyright 2015 NUBots <nubots@nubots.net>
  */
+syntax = "proto3";
 
-#ifndef MESSAGE_OUTPUT_SAY_H
-#define MESSAGE_OUTPUT_SAY_H
+package message.localisation.proto;
 
-#include <string>
-
-namespace message {
-    namespace output {
-
-        /**
-         * TODO document
-         *
-         * @author Trent Houliston
-         */
-        struct Say : public std::string {
-            Say(std::string message) : std::string(message) {};
-        };
-
-    }  // output
-}  // message
-
-#endif  // MESSAGE_OUTPUT_SAY_H
+message SideCheckingComplete {}

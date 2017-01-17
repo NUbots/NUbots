@@ -26,11 +26,10 @@
 #include "utility/math/angle.h"
 #include "utility/support/yaml_armadillo.h"
 #include "utility/nubugger/NUhelpers.h"
-#include "message/motion/ServoTarget.h"
+#include "message/motion/proto/ServoTarget.h"
 #include "message/platform/darwin/DarwinSensors.h"
-#include "message/input/ServoID.h"
-#include "message/input/Sensors.h"
-#include "message/support/Configuration.h"
+#include "message/input/proto/Sensors.h"
+#include "extension/Configuration.h"
 
 namespace module {
 namespace platform {
@@ -39,10 +38,10 @@ namespace darwin {
     using utility::nubugger::graph;
     using utility::support::Expression;
     using message::platform::darwin::DarwinSensors;
-    using message::motion::ServoTarget;
-    using message::input::ServoID;
-    using message::input::Sensors;
-    using message::support::Configuration;
+    using message::motion::proto::ServoTarget;
+    using ServoID = message::input::proto::Sensors::ServoID::Value;
+    using message::input::proto::Sensors;
+    using extension::Configuration;
 
     HardwareSimulator::HardwareSimulator(std::unique_ptr<NUClear::Environment> environment)
             : Reactor(std::move(environment)), sensors(), gyroQueue(), gyroQueueMutex(), noise() {

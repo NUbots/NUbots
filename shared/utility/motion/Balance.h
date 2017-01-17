@@ -27,10 +27,10 @@
 
 #include "message/behaviour/proto/Subsumption.h"
 #include "message/input/proto/Sensors.h"
-#include "message/motion/KinematicsModels.h"
+#include "message/motion/proto/KinematicsModels.h"
 #include "utility/input/LimbID.h"
 #include "utility/input/ServoID.h"
-#include "message/support/Configuration.h"
+#include "extension/Configuration.h"
 #include <yaml-cpp/yaml.h>
 
 #include <nuclear>
@@ -68,7 +68,7 @@ namespace motion {
     public:
         Balancer() : lastErrorQuaternion(), lastBalanceTime() {}
         void configure(const YAML::Node& config);
-        void balance(const message::motion::kinematics::KinematicsModel& hip, utility::math::matrix::Transform3D& footToTorso, const message::behaviour::proto::Subsumption::Limb::Value& leg, const message::input::proto::Sensors& sensors);
+        void balance(const message::motion::proto::KinematicsModel& hip, utility::math::matrix::Transform3D& footToTorso, const message::behaviour::proto::Subsumption::Limb::Value& leg, const message::input::proto::Sensors& sensors);
     };
 
 

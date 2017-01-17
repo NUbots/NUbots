@@ -27,7 +27,7 @@
 #include "utility/motion/ForwardKinematics.h"
 #include "utility/support/yaml_armadillo.h"
 #include "message/vision/VisionObjects.h"
-#include "message/support/Configuration.h"
+#include "extension/Configuration.h"
 #include "message/localisation/FieldObject.h"
 #include "message/input/ServoID.h"
 #include "message/input/CameraParameters.h"
@@ -42,7 +42,7 @@ namespace support {
     using message::input::Sensors;
     using message::input::ServoID;
     using message::input::CameraParameters;
-    using message::support::Configuration;
+    using extension::Configuration;
     using message::support::FieldDescription;
     using message::motion::WalkCommand;
     using message::motion::StopCommand;
@@ -51,7 +51,7 @@ namespace support {
     using message::motion::KickFinished;
     using message::motion::KickPlannerConfig;
     using message::platform::darwin::DarwinSensors;
-    using message::support::Configuration;
+    using extension::Configuration;
     using message::support::GlobalConfig;
     using message::vision::Ball;
     using message::vision::Goal;

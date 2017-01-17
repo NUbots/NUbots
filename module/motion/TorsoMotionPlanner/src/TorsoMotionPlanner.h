@@ -28,7 +28,7 @@
 
 #include <yaml-cpp/yaml.h>
 
-#include "message/support/Configuration.h"
+#include "extension/Configuration.h"
 
 #include "message/behaviour/Action.h"
 #include "message/behaviour/ServoCommand.h"

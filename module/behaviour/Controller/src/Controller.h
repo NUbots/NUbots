@@ -28,9 +28,11 @@
 #include <set>
 #include <list>
 
-#include "message/behaviour/Action.h"
-#include "message/behaviour/ServoCommand.h"
-#include "message/input/ServoID.h"
+#include "message/behaviour/proto/ServoCommand.h"
+#include "message/behaviour/proto/Subsumption.h"
+#include "message/input/proto/Sensors.h"
+
+#include "utility/behaviour/Action.h"
 
 namespace module {
     namespace behaviour {
@@ -38,7 +40,7 @@ namespace module {
         struct RequestItem;
 
         struct Request {
-            using callback = std::function<void (std::set<message::input::LimbID>)>;
+            using callback = std::function<void (std::set<message::behaviour::proto::Subsumption::Limb::Value>)>;
 
             Request()
             : id(0)
@@ -51,7 +53,7 @@ namespace module {
             , kill()
             , completed() {}
 
-            Request(size_t id, std::string name, callback start, callback kill, std::function<void (std::set<message::input::ServoID>)> completed)
+            Request(size_t id, std::string name, callback start, callback kill, std::function<void (std::set<message::input::proto::Sensors::ServoID::Value>)> completed)
             : id(id)
             , name(name)
             , active(false)
@@ -89,7 +91,7 @@ namespace module {
         struct RequestItem {
 
             //RequestItem() : group(Request()), index(0), active(false), priority(std::numeric_limits<float>::min()), limbSet() {}
-            RequestItem(Request& group, size_t index, float priority, const std::set<message::input::LimbID>& limbSet)
+            RequestItem(Request& group, size_t index, float priority, const std::set<message::behaviour::proto::Subsumption::Limb::Value>& limbSet)
             : group(group)
             , index(index)
             , active(false)

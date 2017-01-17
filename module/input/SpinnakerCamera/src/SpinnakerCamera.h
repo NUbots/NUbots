@@ -6,7 +6,7 @@
 #include <Spinnaker.h>
 #include <SpinGenApi/SpinnakerGenApi.h>
 
-#include "message/input/Image.h"
+#include "message/input/proto/Image.h"
 
 #include "utility/vision/fourcc.h"
 
@@ -38,10 +38,13 @@ namespace input {
             // We have a complete image, emit it.
             if (!image->IsIncomplete())
             {
-                auto timestamp = NUClear::clock::time_point(std::chrono::nanoseconds(image->GetTimeStamp()));
-                std::vector<uint8_t> data((uint8_t*)image->GetData(), (uint8_t*)image->GetData() + image->GetBufferSize());
-
-                auto msg = std::make_unique<message::input::Image>(serialNumber, image->GetWidth(), image->GetHeight(), timestamp, fourcc, std::move(data));
+                auto msg          = std::make_unique<message::input::proto::Image>();
+                msg->timestamp    = NUClear::clock::time_point(std::chrono::nanoseconds(image->GetTimeStamp()));
+                msg->format       = static_cast<uint32_t>(fourcc);
+                msg->dimensions   << image->GetWidth(), image->GetHeight();
+                msg->serialNumber = serialNumber;
+                msg->camera_id    = 0;
+                msg->data.insert(msg->data.end(), static_cast<uint8_t*>(image->GetData()), static_cast<uint8_t*>(image->GetData()) + image->GetBufferSize());
 
                 //NUClear::log("Received complete image with status. Width:", image->GetWidth(), "Height:", image->GetHeight(), "ID:", image->GetID(), "FrameID:", image->GetFrameID());
                 //NUClear::log("Pixel Format:", image->GetPixelFormatName(), "Timestamp:", image->GetTimeStamp());

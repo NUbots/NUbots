@@ -25,78 +25,21 @@ import "Vector.proto";
 message MotionCommand {
     // Defines the possible types of motion command:
     enum Type {
-        StandStill = 0;    // Stop moving and just stand still, (equivalent to a VelocityCommand of {0} m/s).
-        WalkToState = 1;   // Walk to a given position and heading on the field, avoiding obstacles.
-        BallApproach = 2;  // Approach the ball, ready to perform a forward kick toward the given kickTarget. Avoids obstacles.
+        StandStill    = 0;    // Stop moving and just stand still, (equivalent to a VelocityCommand of {0} m/s).
+        WalkToState   = 1;   // Walk to a given position and heading on the field, avoiding obstacles.
+        BallApproach  = 2;  // Approach the ball, ready to perform a forward kick toward the given kickTarget. Avoids obstacles.
         DirectCommand = 3; // Stop all current motion and directly send the given WalkCommand to the WalkEngine.
     }
 
     // The type of this motion command:
-    Type type = 1;
+    Type type        = 1;
 
     // Required data for WalkToState command:
-    vec2 goalState = 2;
+    vec3 goalState   = 2;
 
     // Required data for WalkToBall command:
-    vec2 kickTarget = 3;
+    vec2 kickTarget  = 3;
 
     // Required data for DirectCommand command:
     vec3 walkCommand = 4;
 }
-
-/*
-namespace message {
-namespace behaviour {
-
-    using utility::math::matrix::Transform2D;
-
-    struct MotionCommand {
-    public:
-        MotionCommand(const MotionCommand& c) : goalState(), walkCommand() {
-            *this = c;
-        }
-
-        static MotionCommand StandStill() {
-            MotionCommand cmd;
-            cmd.type = Type::StandStill;
-            return cmd;
-        }
-
-        static MotionCommand WalkToState(Transform2D goalState_) {
-            MotionCommand cmd;
-            cmd.type = Type::WalkToState;
-            cmd.goalState = goalState_;
-            return cmd;
-        }
-
-        static MotionCommand BallApproach(arma::vec2 kickTarget_) {
-            MotionCommand cmd;
-            cmd.type = Type::BallApproach;
-            cmd.kickTarget = kickTarget_;
-            return cmd;
-        }
-
-        static MotionCommand DirectCommand(Transform2D walkCommand_) {
-            MotionCommand cmd;
-            cmd.type = Type::DirectCommand;
-            cmd.walkCommand = walkCommand_;
-            return cmd;
-        }
-
-        // TODO: Create accessor methods that throw errors if the data
-        // accessed does not correspond to the command type?
-
-        // Note: We used to use more generic goal and kickTarget types, but
-        // these have been removed for simplicity.
-        // // What to face towards upon reaching the goal.
-        // // enum class TargetType {
-        // //     WayPoint,
-        // //     Ball
-        // // };
-        // // TargetType targetLookAt = WayPoint;
-    };
-}
-}
-
-#endif
-*/

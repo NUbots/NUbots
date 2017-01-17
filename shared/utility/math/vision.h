@@ -22,7 +22,7 @@
 #include <cmath>
 #include <armadillo>
 #include <nuclear>
-#include "message/localisation/FieldObject.h"
+#include "message/localisation/proto/FieldObject.h"
 #include "message/input/proto/Sensors.h"
 #include "utility/math/matrix/Transform3D.h"
 #include "utility/math/matrix/Transform2D.h"
@@ -31,7 +31,7 @@
 #include "utility/math/angle.h"
 #include "utility/support/eigen_armadillo.h"
 #include "message/vision/VisionObjects.h"
-#include "message/support/FieldDescription.h"
+#include "message/support/proto/FieldDescription.h"
 
 
 namespace utility {
@@ -45,13 +45,13 @@ namespace vision {
      **************************************************************/
     /*! @brief Calculates the transformation for taking homogeneous points from world coordinates to camera coordinates
     */
-    inline arma::mat44 calculateWorldToCameraTransform(const message::input::proto::Sensors& sensors, const message::localisation::Self& self){
-        arma::vec selfHeading = arma::normalise(self.heading);
+    inline arma::mat44 calculateWorldToCameraTransform(const message::input::proto::Sensors& sensors, const message::localisation::proto::Self& self){
+        arma::vec2 selfHeading = arma::normalise(convert<double, 2>(self.heading));
         arma::mat44 robotToWorld_world;
-        robotToWorld_world <<  selfHeading[0]  <<  -selfHeading[1]  <<  0 <<      self.position[0] << arma::endr
-                           <<  selfHeading[1]  <<   selfHeading[0]  <<  0 <<      self.position[1] << arma::endr
-                           <<               0  <<                0  <<  1 <<  sensors.bodyCentreHeight << arma::endr
-                           <<               0  <<                0  <<  0 <<                                 1;
+        robotToWorld_world <<  selfHeading[0]  <<  -selfHeading[1]  <<  0 <<  self.locObject.position[0] << arma::endr
+                           <<  selfHeading[1]  <<   selfHeading[0]  <<  0 <<  self.locObject.position[1] << arma::endr
+                           <<               0  <<                0  <<  1 <<  sensors.bodyCentreHeight   << arma::endr
+                           <<               0  <<                0  <<  0 <<           1;
 
         arma::mat44 cameraToBody_body;
 
@@ -244,7 +244,7 @@ namespace vision {
     inline arma::mat::fixed<3,4> cameraSpaceGoalProjection(
             const arma::vec3& robotPose,
             const arma::vec3& goalLocation,
-            const message::support::FieldDescription& field, 
+            const message::support::proto::FieldDescription& field, 
             const utility::math::matrix::Transform3D& camToGround,
             const bool& failIfNegative = true) //camtoground is either camera to ground or camera to world, depending on application
     {

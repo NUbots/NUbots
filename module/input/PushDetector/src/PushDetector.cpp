@@ -19,7 +19,7 @@
 
 #include "PushDetector.h"
 
-#include "message/support/Configuration.h"
+#include "extension/Configuration.h"
 #include "utility/time/time.h"
 #include "utility/nubugger/NUhelpers.h"
 #include "message/input/Sensors.h"
@@ -30,7 +30,7 @@ namespace module
 namespace input 
 {
 
-    using message::support::Configuration;
+    using extension::Configuration;
     using message::input::Sensors;
     using message::input::PushDetection;
     

@@ -19,7 +19,7 @@
 
 #include "DirectWalkController.h"
 
-#include "message/support/Configuration.h"
+#include "extension/Configuration.h"
 #include "message/behaviour/Action.h"
 #include "message/behaviour/MotionCommand.h"
 #include "message/motion/WalkCommand.h"
@@ -30,7 +30,7 @@ namespace module {
 namespace behaviour {
 namespace skills {
 
-    using message::support::Configuration;
+    using extension::Configuration;
     using message::behaviour::MotionCommand;
     using message::behaviour::RegisterAction;
     using message::behaviour::ActionPriorites;

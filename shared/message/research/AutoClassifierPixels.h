@@ -20,9 +20,6 @@
 #ifndef MESSAGE_RESEARCH_AUTOCLASSIFIERPIXELS_H
 #define MESSAGE_RESEARCH_AUTOCLASSIFIERPIXELS_H
 
-#include "message/input/Image.h"
-#include "message/vision/LookUpTable.h"
-
 #include "utility/vision/fourcc.h"
 
 namespace message {

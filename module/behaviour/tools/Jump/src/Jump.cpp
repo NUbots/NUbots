@@ -19,7 +19,7 @@
 
 #include "Jump.h"
 
-#include "message/support/Configuration.h"
+#include "extension/Configuration.h"
 
 
 #include "message/input/ServoID.h"
@@ -33,8 +33,7 @@ namespace module {
 namespace behaviour {
 namespace tools {
 
-    using message::support::Configuration;
-    using message::support::Configuration;
+    using extension::Configuration;
     using message::input::ServoID;
     using message::motion::ExecuteScriptByName;
     using message::behaviour::RegisterAction;

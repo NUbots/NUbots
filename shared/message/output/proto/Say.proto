@@ -14,18 +14,17 @@
  * You should have received a copy of the GNU General Public License
  * along with the NUbots Codebase.  If not, see <http://www.gnu.org/licenses/>.
  *
- * Copyright 2015 NUBots <nubots@nubots.net>
+ * Copyright 2013 NUBots <nubots@nubots.net>
  */
+syntax = "proto3";
 
-#ifndef MESSAGE_LOCALISATION_SIDECHECKER
-#define MESSAGE_LOCALISATION_SIDECHECKER
+package message.output.proto;
 
-#include <armadillo>
-
-namespace message {
-    namespace localisation {
-        struct SideCheckingComplete { };
-    }
+/**
+ * TODO document
+ *
+ * @author Trent Houliston
+ */
+message Say {
+    string message = 1;
 }
-
-#endif

@@ -16,31 +16,12 @@
  *
  * Copyright 2013 NUBots <nubots@nubots.net>
  */
+syntax = "proto3";
 
-#ifndef MESSAGE_MOTION_DIVECOMMAND_H
-#define MESSAGE_MOTION_DIVECOMMAND_H
+package message.support.proto;
 
-#include <nuclear>
-#include <armadillo>
-#include "message/behaviour/Action.h"
-
-namespace message {
-    namespace motion {
-
-        /**
-         * TODO document
-         *
-         * @author Trent Houliston
-         * @author Jake Fountain
-         */
-        struct DiveCommand {
-            arma::vec2 direction;
-        };
-
-        struct DiveFinished{
-        };
-
-    }  // motion
-}  // message
-
-#endif  // MESSAGE_MOTION_DIVECOMMAND_H
+// Field dimensions as defined in the Robocup rules:
+message GlobalConfig {
+    uint32 playerId = 1;
+    uint32 teamId   = 2;
+}

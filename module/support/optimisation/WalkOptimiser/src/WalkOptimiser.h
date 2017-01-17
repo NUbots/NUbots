@@ -25,7 +25,7 @@
 
 #include "message/input/Sensors.h"
 #include "message/motion/GetupCommand.h"
-#include "message/support/Configuration.h"
+#include "extension/Configuration.h"
 #include "message/behaviour/FixedWalkCommand.h"
 
 namespace module {
@@ -63,12 +63,12 @@ namespace module {
 
                 int configuration_wait_milliseconds = 2000;
 
-                message::support::Configuration initialConfig;
+                extension::Configuration initialConfig;
 
                 static constexpr const char* backupLocation = "WalkEngine_Optimised.yaml";
 
                 void printState(const arma::vec& state);
-                arma::vec getState(const message::support::Configuration& walkConfig);
+                arma::vec getState(const extension::Configuration& walkConfig);
                 YAML::Node getWalkConfig(const arma::vec& state);
                 void saveConfig(const YAML::Node& config);
                 void setWalkParameters(const YAML::Node& config);

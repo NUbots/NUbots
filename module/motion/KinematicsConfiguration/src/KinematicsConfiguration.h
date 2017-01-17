@@ -17,15 +17,15 @@
  * Copyright 2015 NUbots <nubots@nubots.net>
  */
 
-#ifndef MODULES_PLATFORM_DARWIN_KINEMATICSMODEL_H
-#define MODULES_PLATFORM_DARWIN_KINEMATICSMODEL_H
+#ifndef MODULE_MOTION_KINEMATICSCONFIGURATION_H
+#define MODULE_MOTION_KINEMATICSCONFIGURATION_H
 
 #include <nuclear>
 #include <armadillo>
 #include <yaml-cpp/yaml.h>
 
-#include "message/support/Configuration.h"
-#include "message/motion/KinematicsModels.h"
+#include "extension/Configuration.h"
+#include "message/motion/proto/KinematicsModels.h"
 
 namespace module {
 namespace motion {
@@ -37,14 +37,14 @@ namespace motion {
         explicit KinematicsConfiguration(std::unique_ptr<NUClear::Environment> environment);
 
     private:
-    	void configure (message::motion::kinematics::KinematicsModel& model, const message::support::Configuration& objDarwinModel);
-        void configureLeg (message::motion::kinematics::KinematicsModel& model, const YAML::Node& objLeg);
-        void configureHead (message::motion::kinematics::KinematicsModel& model, const YAML::Node& objHead);
-        void configureArm (message::motion::kinematics::KinematicsModel& model, const YAML::Node& objArm);
-    	void configureMassModel (message::motion::kinematics::KinematicsModel& model, const YAML::Node& objMassModel);
+    	void configure (message::motion::proto::KinematicsModel& model, const extension::Configuration& objDarwinModel);
+        void configureLeg (message::motion::proto::KinematicsModel& model, const YAML::Node& objLeg);
+        void configureHead (message::motion::proto::KinematicsModel& model, const YAML::Node& objHead);
+        void configureArm (message::motion::proto::KinematicsModel& model, const YAML::Node& objArm);
+    	void configureMassModel (message::motion::proto::KinematicsModel& model, const YAML::Node& objMassModel);
     };
 
 }
 }
 
-#endif  // MODULES_PLATFORM_DARWIN_KINEMATICSMODEL_H
+#endif  // MODULE_MOTION_KINEMATICSCONFIGURATION_H

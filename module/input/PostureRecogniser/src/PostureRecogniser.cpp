@@ -23,7 +23,7 @@ namespace module
 namespace input 
 {
 
-    using message::support::Configuration;
+    using extension::Configuration;
 
     using message::input::Sensors;
     using message::input::WalkingDetected;

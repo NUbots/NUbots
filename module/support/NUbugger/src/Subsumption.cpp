@@ -21,20 +21,15 @@
 
 #include "message/behaviour/proto/Subsumption.h"
 #include "utility/behaviour/Action.h"
-#include "message/input/LimbID.h"
-
-#include "utility/time/time.h"
 
 namespace module {
 namespace support {
-    using utility::time::getUtcTimestamp;
 
     using utility::behaviour::ActionStart;
     using utility::behaviour::ActionKill;
     using utility::behaviour::RegisterAction;
     using utility::behaviour::ActionPriorites;
     using message::behaviour::proto::Subsumption;
-
     using LimbID = Subsumption::Limb::Value;
 
     void NUbugger::provideSubsumption() {

@@ -1,6 +1,6 @@
 #include "LegLoadsLogger.h"
 
-#include "message/support/Configuration.h"
+#include "extension/Configuration.h"
 #include "message/input/Sensors.h"
 #include "message/input/ServoID.h"
 
@@ -8,7 +8,7 @@ namespace module {
 namespace support {
 namespace logging {
 
-    using message::support::Configuration;
+    using extension::Configuration;
     using message::input::Sensors;
     using message::input::ServoID;
 

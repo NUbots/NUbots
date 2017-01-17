@@ -25,7 +25,7 @@
 #include <chrono>
 #include <yaml-cpp/yaml.h>
 
-#include "message/support/Configuration.h"
+#include "extension/Configuration.h"
 
 #include "message/input/Sensors.h"
 #include "message/input/PostureRecognition.h"

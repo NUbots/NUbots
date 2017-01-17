@@ -16,28 +16,27 @@
  *
  * Copyright 2013 NUBots <nubots@nubots.net>
  */
-
 syntax = "proto3";
 
 package message.localisation.proto;
 
 message Model {
-    uint32 model_id = 1;
+    uint32 model_id   = 1;
 
-    float wm_x = 2;
-    float wm_y = 3;
+    float  wm_x       = 2;  //world model x
+    float  wm_y       = 3;  //world model y
 
-    float sd_x = 4;
-    float sd_y = 5;
+    float  sd_x       = 4;
+    float  sd_y       = 5;
 
-    float sr_xx = 6;
-    float sr_xy = 7;
-    float sr_yy = 8;
+    float  sr_xx      = 6;  //covariance
+    float  sr_xy      = 7;
+    float  sr_yy      = 8;
 
-    float heading = 9;
-    float sd_heading = 10;
+    float  heading    = 9;  //direction
+    float  sd_heading = 10;  //stdev
 
-    bool lost = 11;
+    bool   lost       = 11;
 }
 
 message LocalisationFieldObject {

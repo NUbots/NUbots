@@ -51,7 +51,7 @@ namespace Darwin {
         return (~checksum);
     }
 
-    void UART::setConfig(const message::support::Configuration& config){
+    void UART::setConfig(const extension::Configuration& config){
         PACKET_WAIT = config["packet_wait"].as<int>();
         BYTE_WAIT = config["byte_wait"].as<int>();
         BUS_RESET_WAIT_TIME_uS = config["bus_reset_wait_time_us"].as<int>();

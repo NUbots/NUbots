@@ -27,7 +27,7 @@
 #include <stdint.h>
 #include <linux/serial.h>
 
-#include "message/support/Configuration.h"
+#include "extension/Configuration.h"
 
 #include <mutex>
 #include <cstring>
@@ -151,7 +151,7 @@ namespace Darwin {
         size_t writeBytes(const void* buf, size_t count);
 
     public:
-        void setConfig(const message::support::Configuration& config);
+        void setConfig(const extension::Configuration& config);
         /**
          * @brief Constructs a new UART instance using the passed device path as the TTY device
          *

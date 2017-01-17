@@ -24,10 +24,10 @@
 #include <cstdio>
 #include <cppformat/format.h>
 
-#include "message/behaviour/MotionCommand.h"
-#include "message/motion/HeadCommand.h"
-#include "message/motion/KickCommand.h"
-#include "message/behaviour/Action.h"
+#include "utility/behaviour/MotionCommand.h"
+#include "message/behaviour/proto/MotionCommand.h"
+#include "message/motion/proto/HeadCommand.h"
+#include "message/motion/proto/KickCommand.h"
 #include "utility/math/matrix/Transform2D.h"
 
 namespace module {
@@ -35,10 +35,9 @@ namespace behaviour {
 namespace strategy {
 
     using NUClear::message::LogMessage;
-    using message::behaviour::MotionCommand;
-    using message::motion::HeadCommand;
-    using message::motion::KickCommand;
-    using message::input::LimbID;
+    using message::behaviour::proto::MotionCommand;
+    using message::motion::proto::HeadCommand;
+    using message::motion::proto::KickCommand;
     using utility::math::matrix::Transform2D;
 
     KeyboardWalk::KeyboardWalk(std::unique_ptr<NUClear::Environment> environment)
@@ -204,7 +203,7 @@ namespace strategy {
 
     void KeyboardWalk::walkToggle() {
         if (moving) {
-            emit(std::make_unique<MotionCommand>(MotionCommand::StandStill()));
+            emit(std::make_unique<MotionCommand>(utility::behaviour::StandStill()));
             moving = false;
         } else {
             moving = true;
@@ -226,7 +225,7 @@ namespace strategy {
     void KeyboardWalk::updateCommand() {
         if (moving) {
             std::cout << "New command " << velocity.t() <<  " " << rotation << std::endl;
-            emit(std::make_unique<MotionCommand>(MotionCommand::DirectCommand(Transform2D(velocity, rotation))));
+            emit(std::make_unique<MotionCommand>(utility::behaviour::DirectCommand(Transform2D(velocity, rotation))));
         }
 
         auto headCommand = std::make_unique<HeadCommand>();

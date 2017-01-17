@@ -3,7 +3,7 @@
 #include <cmath>
 #include <armadillo>
 
-#include "message/support/Configuration.h"
+#include "extension/Configuration.h"
 #include "utility/support/yaml_expression.h"
 #include "utility/support/yaml_armadillo.h"
 #include "utility/vision/Spinnaker.h"
@@ -11,7 +11,7 @@
 namespace module {
 namespace input {
 
-    using message::support::Configuration;
+    using extension::Configuration;
     using utility::support::Expression;
     using namespace utility::vision;
 

@@ -19,10 +19,9 @@
 
 #include "NUbugger.h"
 
-#include "message/input/Image.h"
+#include "message/input/proto/Image.h"
 #include "message/vision/ClassifiedImage.h"
 #include "message/vision/VisionObjects.h"
-#include "message/input/proto/Image.h"
 #include "message/vision/proto/LookUpTable.h"
 #include "message/vision/proto/LookUpTableDiff.h"
 #include "message/vision/proto/ClassifiedImage.h"
@@ -35,8 +34,7 @@ namespace module {
 namespace support {
     using utility::time::getUtcTimestamp;
 
-    using message::input::Sensors;
-    using ImageProto = message::input::proto::Image;
+    using message::input::proto::Image;
     using ClassifiedImageProto = message::vision::proto::ClassifiedImage;
     using message::vision::proto::VisionObjects;
     using message::vision::proto::VisionObject;
@@ -45,7 +43,6 @@ namespace support {
     using message::vision::ClassifiedImage;
     using message::vision::Goal;
     using message::vision::Ball;
-    using message::input::Image;
 
     void NUbugger::provideVision() {
         handles["image"].push_back(on<Trigger<Image>, Single, Priority::LOW>().then([this](const Image& image) {
@@ -54,18 +51,7 @@ namespace support {
                 return;
             }
 
-            ImageProto imageData;
-
-            imageData.camera_id = 0;
-            imageData.dimensions.x() = image.width;
-            imageData.dimensions.y() = image.height;
-            imageData.format = static_cast<uint32_t>(image.fourcc);
-
-            // Reserve enough space in the image data to store the output
-            imageData.data.reserve(image.source().size());
-            imageData.data.insert(imageData.data.begin(), image.source().begin(), image.source().end());
-
-            send(imageData, 1, false, NUClear::clock::now());
+            send(image, 1, false, NUClear::clock::now());
 
             last_image = NUClear::clock::now();
         }));

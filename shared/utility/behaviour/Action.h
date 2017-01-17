@@ -27,8 +27,8 @@
 namespace utility {
     namespace behaviour {
 
-        using LimbID  = message::behaviour::proto::Subsumption::Limb;
-        using ServoID = message::input::proto::Sensors::ServoID;
+        using LimbID  = message::behaviour::proto::Subsumption::Limb::Value;
+        using ServoID = message::input::proto::Sensors::ServoID::Value;
 
         struct RegisterAction {
 

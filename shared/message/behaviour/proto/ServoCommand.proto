@@ -24,10 +24,10 @@ import "google/protobuf/timestamp.proto";
 import "message/input/proto/Sensors.proto";
 
 message ServoCommand {
-    int64 source = 1;
-    google.protobuf.Timestamp time = 2;
-    input.proto.Sensors.ServoID id = 3;
-    float position = 4;
-    float gain = 5;
-    float torque = 6;
+    uint64                      source   = 1;
+    google.protobuf.Timestamp   time     = 2;
+    input.proto.Sensors.ServoID id       = 3;
+    float                       position = 4;
+    float                       gain     = 5;
+    float                       torque   = 6;
 }

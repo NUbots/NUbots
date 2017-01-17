@@ -19,7 +19,7 @@
 
 #include "MocapRecorder.h"
 
-#include "message/support/Configuration.h"
+#include "extension/Configuration.h"
 #include "message/input/proto/MotionCapture.h"
 #include "utility/math/geometry/UnitQuaternion.h"
 #include "utility/math/matrix/Rotation3D.h"
@@ -32,7 +32,7 @@ namespace support {
     using utility::math::geometry::UnitQuaternion;
     using utility::math::matrix::Rotation3D;
 	using message::input::proto::MotionCapture;
-    using message::support::Configuration;
+    using extension::Configuration;
 
     MocapRecorder::MocapRecorder(std::unique_ptr<NUClear::Environment> environment)
     : Reactor(std::move(environment)) {

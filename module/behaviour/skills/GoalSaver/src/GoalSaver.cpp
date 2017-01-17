@@ -24,7 +24,7 @@
 #include "message/motion/WalkCommand.h"
 #include "message/motion/DiveCommand.h"
 #include "message/localisation/FieldObject.h"
-#include "message/support/Configuration.h"
+#include "extension/Configuration.h"
 #include "message/input/ServoID.h"
 #include "message/behaviour/Action.h"
 #include "message/behaviour/ServoCommand.h"
@@ -46,7 +46,7 @@ namespace skills {
     using message::localisation::Self;
     using message::motion::DiveCommand;
     using message::motion::DiveFinished;
-    using message::support::Configuration;
+    using extension::Configuration;
     using message::motion::StopCommand;
     using message::input::LimbID;
 

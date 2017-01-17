@@ -66,7 +66,7 @@ namespace motion
     using utility::motion::kinematics::calculateLegJointsTeamDarwin; //TODO: advised to change to calculateLegJoints (no TeamDarwin)
 
     using message::support::SaveConfiguration;
-    using message::support::Configuration;
+    using extension::Configuration;
 
     using utility::support::Expression;
 

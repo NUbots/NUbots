@@ -23,7 +23,6 @@
 #include <nuclear>
 #include "message/vision/LookUpTable.h"
 #include "message/vision/proto/LookUpTable.h"
-#include "message/input/Image.h"
 
 namespace module {
 namespace research {

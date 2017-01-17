@@ -24,7 +24,7 @@
 #include "utility/support/yaml_armadillo.h"
 #include "message/input/Sensors.h"
 #include "message/input/LimbID.h"
-#include "message/support/Configuration.h"
+#include "extension/Configuration.h"
 #include "message/input/ServoID.h"
 #include "message/motion/KinematicsModels.h"
 #include <armadillo>
@@ -189,7 +189,7 @@ namespace motion{
 		        	return result;
 				}
 
-				virtual void configure(const message::support::Configuration& config) = 0;
+				virtual void configure(const extension::Configuration& config) = 0;
 		};
 
 		class KickBalancer : public SixDOFFootController{
@@ -201,7 +201,7 @@ namespace motion{
 			float adjustment = 0.011;
 
 		public:
-			virtual void configure(const message::support::Configuration& config);
+			virtual void configure(const extension::Configuration& config);
 			virtual void computeStartMotion(const message::motion::kinematics::KinematicsModel& kinematicsModel, const message::input::Sensors& sensors);
 			virtual void computeStopMotion(const message::input::Sensors& sensors);
 
@@ -234,7 +234,7 @@ namespace motion{
 				, return_before_place_duration(0.0f)
 				, lift_before_windup_duration(0.0f) {}
 
-			virtual void configure(const message::support::Configuration& config);
+			virtual void configure(const extension::Configuration& config);
 			virtual void computeStartMotion(const message::motion::kinematics::KinematicsModel& kinematicsModel, const message::input::Sensors& sensors);
 			virtual void computeStopMotion(const message::input::Sensors& sensors);
 		};

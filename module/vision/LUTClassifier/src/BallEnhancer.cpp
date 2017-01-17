@@ -28,7 +28,7 @@ namespace module {
     namespace vision {
 
         using namespace utility::vision;
-        using message::input::Image;
+        using message::input::proto::Image;
         using message::vision::LookUpTable;
         using message::vision::ObjectClass;
         using message::vision::ClassifiedImage;
@@ -43,34 +43,34 @@ namespace module {
             // Get our relevant pixels
             //TODO:bounds check
             std::array<Pixel, 24> pixels {
-                getPixel(base[0] - 2, base[1] - 2, image.width, image.height, image.source(), image.fourcc),
-                getPixel(base[0] - 2, base[1] - 1, image.width, image.height, image.source(), image.fourcc),
-                getPixel(base[0] - 2, base[1] + 0, image.width, image.height, image.source(), image.fourcc),
-                getPixel(base[0] - 2, base[1] + 1, image.width, image.height, image.source(), image.fourcc),
-                getPixel(base[0] - 2, base[1] + 2, image.width, image.height, image.source(), image.fourcc),
+                getPixel(base[0] - 2, base[1] - 2, image.dimensions[0], image.dimensions[1], image.data, static_cast<utility::vision::FOURCC>(image.format)),
+                getPixel(base[0] - 2, base[1] - 1, image.dimensions[0], image.dimensions[1], image.data, static_cast<utility::vision::FOURCC>(image.format)),
+                getPixel(base[0] - 2, base[1] + 0, image.dimensions[0], image.dimensions[1], image.data, static_cast<utility::vision::FOURCC>(image.format)),
+                getPixel(base[0] - 2, base[1] + 1, image.dimensions[0], image.dimensions[1], image.data, static_cast<utility::vision::FOURCC>(image.format)),
+                getPixel(base[0] - 2, base[1] + 2, image.dimensions[0], image.dimensions[1], image.data, static_cast<utility::vision::FOURCC>(image.format)),
 
-                getPixel(base[0] - 1, base[1] - 2, image.width, image.height, image.source(), image.fourcc),
-                getPixel(base[0] - 1, base[1] - 1, image.width, image.height, image.source(), image.fourcc),
-                getPixel(base[0] - 1, base[1] + 0, image.width, image.height, image.source(), image.fourcc),
-                getPixel(base[0] - 1, base[1] + 1, image.width, image.height, image.source(), image.fourcc),
-                getPixel(base[0] - 1, base[1] + 2, image.width, image.height, image.source(), image.fourcc),
+                getPixel(base[0] - 1, base[1] - 2, image.dimensions[0], image.dimensions[1], image.data, static_cast<utility::vision::FOURCC>(image.format)),
+                getPixel(base[0] - 1, base[1] - 1, image.dimensions[0], image.dimensions[1], image.data, static_cast<utility::vision::FOURCC>(image.format)),
+                getPixel(base[0] - 1, base[1] + 0, image.dimensions[0], image.dimensions[1], image.data, static_cast<utility::vision::FOURCC>(image.format)),
+                getPixel(base[0] - 1, base[1] + 1, image.dimensions[0], image.dimensions[1], image.data, static_cast<utility::vision::FOURCC>(image.format)),
+                getPixel(base[0] - 1, base[1] + 2, image.dimensions[0], image.dimensions[1], image.data, static_cast<utility::vision::FOURCC>(image.format)),
 
-                getPixel(base[0] + 0, base[1] - 2, image.width, image.height, image.source(), image.fourcc),
-                getPixel(base[0] + 0, base[1] - 1, image.width, image.height, image.source(), image.fourcc),
-                getPixel(base[0] + 0, base[1] + 1, image.width, image.height, image.source(), image.fourcc),
-                getPixel(base[0] + 0, base[1] + 2, image.width, image.height, image.source(), image.fourcc),
+                getPixel(base[0] + 0, base[1] - 2, image.dimensions[0], image.dimensions[1], image.data, static_cast<utility::vision::FOURCC>(image.format)),
+                getPixel(base[0] + 0, base[1] - 1, image.dimensions[0], image.dimensions[1], image.data, static_cast<utility::vision::FOURCC>(image.format)),
+                getPixel(base[0] + 0, base[1] + 1, image.dimensions[0], image.dimensions[1], image.data, static_cast<utility::vision::FOURCC>(image.format)),
+                getPixel(base[0] + 0, base[1] + 2, image.dimensions[0], image.dimensions[1], image.data, static_cast<utility::vision::FOURCC>(image.format)),
 
-                getPixel(base[0] + 1, base[1] - 2, image.width, image.height, image.source(), image.fourcc),
-                getPixel(base[0] + 1, base[1] - 1, image.width, image.height, image.source(), image.fourcc),
-                getPixel(base[0] + 1, base[1] + 0, image.width, image.height, image.source(), image.fourcc),
-                getPixel(base[0] + 1, base[1] + 1, image.width, image.height, image.source(), image.fourcc),
-                getPixel(base[0] + 1, base[1] + 2, image.width, image.height, image.source(), image.fourcc),
+                getPixel(base[0] + 1, base[1] - 2, image.dimensions[0], image.dimensions[1], image.data, static_cast<utility::vision::FOURCC>(image.format)),
+                getPixel(base[0] + 1, base[1] - 1, image.dimensions[0], image.dimensions[1], image.data, static_cast<utility::vision::FOURCC>(image.format)),
+                getPixel(base[0] + 1, base[1] + 0, image.dimensions[0], image.dimensions[1], image.data, static_cast<utility::vision::FOURCC>(image.format)),
+                getPixel(base[0] + 1, base[1] + 1, image.dimensions[0], image.dimensions[1], image.data, static_cast<utility::vision::FOURCC>(image.format)),
+                getPixel(base[0] + 1, base[1] + 2, image.dimensions[0], image.dimensions[1], image.data, static_cast<utility::vision::FOURCC>(image.format)),
 
-                getPixel(base[0] + 2, base[1] - 2, image.width, image.height, image.source(), image.fourcc),
-                getPixel(base[0] + 2, base[1] - 1, image.width, image.height, image.source(), image.fourcc),
-                getPixel(base[0] + 2, base[1] + 0, image.width, image.height, image.source(), image.fourcc),
-                getPixel(base[0] + 2, base[1] + 1, image.width, image.height, image.source(), image.fourcc),
-                getPixel(base[0] + 2, base[1] + 2, image.width, image.height, image.source(), image.fourcc)
+                getPixel(base[0] + 2, base[1] - 2, image.dimensions[0], image.dimensions[1], image.data, static_cast<utility::vision::FOURCC>(image.format)),
+                getPixel(base[0] + 2, base[1] - 1, image.dimensions[0], image.dimensions[1], image.data, static_cast<utility::vision::FOURCC>(image.format)),
+                getPixel(base[0] + 2, base[1] + 0, image.dimensions[0], image.dimensions[1], image.data, static_cast<utility::vision::FOURCC>(image.format)),
+                getPixel(base[0] + 2, base[1] + 1, image.dimensions[0], image.dimensions[1], image.data, static_cast<utility::vision::FOURCC>(image.format)),
+                getPixel(base[0] + 2, base[1] + 2, image.dimensions[0], image.dimensions[1], image.data, static_cast<utility::vision::FOURCC>(image.format))
             };
 
             // Find out how green each pixel is!
@@ -149,7 +149,7 @@ namespace module {
                 int minY = int(std::max(3.0, classifiedImage.horizon.y(point[0])));
                 for(int y = point[1]; y > minY; --y) {
 
-                    char c = lut(getPixel(point[0], y, image.width, image.height, image.source(), image.fourcc));
+                    char c = lut(getPixel(point[0], y, image.dimensions[0], image.dimensions[1], image.data, static_cast<utility::vision::FOURCC>(image.format)));
 
                     if(c == 'g') {
                         auto p = arma::ivec2({ point[0], y - 1 });
@@ -166,7 +166,7 @@ namespace module {
 
                 for(int x = point[0]; x > 3; --x) {
 
-                    char c = lut(getPixel(x, point[1], image.width, image.height, image.source(), image.fourcc));
+                    char c = lut(getPixel(x, point[1], image.dimensions[0], image.dimensions[1], image.data, static_cast<utility::vision::FOURCC>(image.format)));
 
                     if(c == 'g') {
                         auto p = arma::ivec2({ x + 1, point[1] });
@@ -181,9 +181,9 @@ namespace module {
             // For each of these points move rightward until we find a strong transition to green
             for(auto& point : points) {
 
-                for(int x = point[0]; x < int(image.width) - 3; ++x) {
+                for(int x = point[0]; x < int(image.dimensions[0]) - 3; ++x) {
 
-                    char c = lut(getPixel(x, point[1], image.width, image.height, image.source(), image.fourcc));
+                    char c = lut(getPixel(x, point[1], image.dimensions[0], image.dimensions[1], image.data, static_cast<utility::vision::FOURCC>(image.format)));
 
                     if(c == 'g') {
                         auto p = arma::ivec2({ x - 1, point[1] });
@@ -211,7 +211,7 @@ namespace module {
                 for(int i = 0; i < MAXIMUM_LIGHTNING_BOLT_LENGTH; ++i) {
 
                     // Break if we hit the edge of the screen
-                    if(point[0] < 4 || point[0] > (int(image.width) - 4) || point[1] < 4 || point[1] > (int(image.height) - 4)) {
+                    if(point[0] < 4 || point[0] > (int(image.dimensions[0]) - 4) || point[1] < 4 || point[1] > (int(image.dimensions[1]) - 4)) {
                         break;
                     }
 
@@ -249,7 +249,7 @@ namespace module {
                 for(int i = 0; i < MAXIMUM_LIGHTNING_BOLT_LENGTH; ++i) {
 
                     // Break if we hit the edge of the screen
-                    if(point[0] < 4 || point[0] > (int(image.width) - 4) || point[1] < 4 || point[1] > (int(image.height) - 4)) {
+                    if(point[0] < 4 || point[0] > (int(image.dimensions[0]) - 4) || point[1] < 4 || point[1] > (int(image.dimensions[1]) - 4)) {
                         break;
                     }
 

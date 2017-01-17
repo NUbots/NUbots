@@ -48,7 +48,7 @@ namespace module {
                 size_t length = end[1] - start[1] + 1;
 
                 for(uint i = 0; i < length / subsample; ++i) {
-                    buffer[i + 1] = lut(getPixel(start[0], start[1] + (i * subsample), image.width, image.height, image.data, image.format));
+                    buffer[i + 1] = lut(getPixel(start[0], start[1] + (i * subsample), image.dimensions[0], image.dimensions[1], image.data, static_cast<FOURCC>(image.format)));
                 }
 
                 lexer.buffer_fill_region_finish(length / subsample);
@@ -60,7 +60,7 @@ namespace module {
                 size_t length = end[0] - start[0] + 1;
 
                 for(uint i = 0; i < length / subsample; ++i) {
-                    buffer[i + 1] = lut(getPixel(start[0] + (i * subsample), start[1], image.width, image.height, image.data, image.format));
+                    buffer[i + 1] = lut(getPixel(start[0] + (i * subsample), start[1], image.dimensions[0], image.dimensions[1], image.data, static_cast<FOURCC>(image.format)));
                 }
 
                 lexer.buffer_fill_region_finish(length / subsample);

@@ -25,8 +25,8 @@
 namespace module {
     namespace vision {
 
-        using message::input::Image;
-        using message::input::Sensors;
+        using message::input::proto::Image;
+        using message::input::proto::Sensors;
         using message::vision::LookUpTable;
         using message::vision::ObjectClass;
         using message::vision::ClassifiedImage;
@@ -45,7 +45,7 @@ namespace module {
             for(int y = 0; y < classifiedImage.maxVisualHorizon->at(1); y += GOAL_LINE_SPACING) {
 
                 arma::ivec2 start = { 0, y };
-                arma::ivec2 end = { int(image.width - 1), y };
+                arma::ivec2 end = { int(image.dimensions[0] - 1), y };
 
                 // Insert our segments
                 auto segments = quex->classify(image, lut, start, end, GOAL_SUBSAMPLING);

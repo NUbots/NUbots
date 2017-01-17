@@ -24,7 +24,7 @@
 #include "message/input/Image.h"
 #include "message/localisation/FieldObject.h"
 #include "message/input/Sensors.h"
-#include "message/support/Configuration.h"
+#include "extension/Configuration.h"
 #include "utility/math/filter/UKF.h"
 #include "utility/math/vision.h"
 #include "utility/math/angle.h"
@@ -70,7 +70,7 @@ namespace module{
             {
                 lastTime = NUClear::clock::now();
             }
-            void setParameters(const message::support::Configuration& config){
+            void setParameters(const extension::Configuration& config){
                 MAX_MATCHES = config["MAX_MATCHES"].template as<size_t>();
                 MEASUREMENT_COV_FACTOR = config["MEASUREMENT_COV_FACTOR"].template as<float>();
                 RHO_INITIAL = config["RHO_INITIAL"].template as<float>();

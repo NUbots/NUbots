@@ -22,9 +22,9 @@
 
 #include <armadillo>
 
-#include "message/input/Sensors.h"
+#include "message/input/proto/Sensors.h"
 #include "message/vision/VisionObjects.h"
-#include "message/support/FieldDescription.h"
+#include "message/support/proto/FieldDescription.h"
 
 namespace module {
     namespace localisation {
@@ -50,14 +50,14 @@ namespace module {
             arma::vec::fixed<size> timeUpdate(const arma::vec::fixed<size>& state, double deltaT);
 
             arma::vec3 predictedObservation(const arma::vec::fixed<size>& state
-                , const message::support::FieldDescription& field
-                , const message::input::Sensors& sensors
+                , const message::support::proto::FieldDescription& field
+                , const message::input::proto::Sensors& sensors
                 , const MeasurementType::BALL&) const;
 
             arma::vec observationDifference(const arma::vec& measurement
                 , const arma::vec3& rBCc
-                , const message::support::FieldDescription& field
-                , const message::input::Sensors& sensors
+                , const message::support::proto::FieldDescription& field
+                , const message::input::proto::Sensors& sensors
                 , const MeasurementType::BALL&) const;
 
             arma::vec::fixed<size> limitState(const arma::vec::fixed<size>& state) const;

@@ -24,8 +24,7 @@
 #include "message/vision/ClassifiedImage.h"
 #include "message/vision/VisionObjects.h"
 #include "message/vision/LookUpTable.h"
-#include "message/support/Configuration.h"
-#include "message/support/FieldDescription.h"
+#include "extension/Configuration.h"
 
 #include "utility/math/geometry/Quad.h"
 #include "utility/math/geometry/Line.h"
@@ -37,15 +36,14 @@
 
 #include "utility/vision/fourcc.h"
 
-#include "message/input/CameraParameters.h"
+#include "message/input/proto/CameraParameters.h"
 
 namespace module {
 namespace vision {
 
     using namespace utility::vision;
 
-    using message::input::CameraParameters;
-    using message::input::Sensors;
+    using message::input::proto::CameraParameters;
 
     using utility::math::coordinates::cartesianToSpherical;
 
@@ -69,8 +67,7 @@ namespace vision {
     using message::vision::VisionObject;
     using message::vision::Goal;
 
-    using message::support::Configuration;
-    using message::support::FieldDescription;
+    using extension::Configuration;
 
     // TODO the system is too generous with adding segments above and below the goals and makes them too tall, stop it
     // TODO the system needs to throw out the kinematics and height based measurements when it cannot be sure it saw the tops and bottoms of the goals
@@ -208,7 +205,7 @@ namespace vision {
                     (point[0] < image.dimensions[0]) && (point[0] > 0) && (point[1] < image.dimensions[1]);
                     point += direction) {
 
-                    char c = lut(getPixel(int(point[0]), int(point[1]), image.image->width, image.image->height, image.image->source(), image.image->fourcc));
+                    char c = lut(getPixel(int(point[0]), int(point[1]), image.image->dimensions[0], image.image->dimensions[1], image.image->data, static_cast<utility::vision::FOURCC>(image.image->format)));
 
                     if(c != 'y') {
                         ++notWhiteLen;
@@ -372,11 +369,12 @@ namespace vision {
                 it->sensors = image.sensors;
 
                 // Angular positions from the camera
-                it->screenAngular = arma::atan(cam.pixelsToTanThetaFactor % screenGoalCentre);
-                arma::vec2 brAngular = arma::atan(cam.pixelsToTanThetaFactor % br);
-                arma::vec2 trAngular = arma::atan(cam.pixelsToTanThetaFactor % tr);
-                arma::vec2 blAngular = arma::atan(cam.pixelsToTanThetaFactor % bl);
-                arma::vec2 tlAngular = arma::atan(cam.pixelsToTanThetaFactor % tl);
+                arma::vec2 pixelsToTanThetaFactor = convert<double, 2>(cam.pixelsToTanThetaFactor);
+                it->screenAngular = arma::atan(pixelsToTanThetaFactor % screenGoalCentre);
+                arma::vec2 brAngular = arma::atan(pixelsToTanThetaFactor % br);
+                arma::vec2 trAngular = arma::atan(pixelsToTanThetaFactor % tr);
+                arma::vec2 blAngular = arma::atan(pixelsToTanThetaFactor % bl);
+                arma::vec2 tlAngular = arma::atan(pixelsToTanThetaFactor % tl);
                 Quad angularQuad(blAngular,tlAngular,trAngular,brAngular);
                 it->angularSize = angularQuad.getSize();
             }

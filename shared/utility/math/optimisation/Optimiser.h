@@ -23,7 +23,7 @@
 #include <armadillo>
 #include <cmath>
 
-#include "OptimiserTypes.h"
+#include "message/support/optimisation/OptimiserTypes.h"
 
 #include "GaussianSampler.h"
 #include "MirroredSampler.h"
@@ -36,6 +36,8 @@
 namespace utility {
     namespace math {
         namespace optimisation {
+            using message::support::optimisation::OptimiserParameters;
+            using message::support::optimisation::OptimiserEstimate;
 
             class Optimiser {
             public:
@@ -65,7 +67,7 @@ namespace utility {
                 OptimiserEstimate currentValues;
 
             public:
-                OptimiserSet(const OptimiserParameters& params)
+                OptimiserSet(const ptimiserParameters& params)
                 : estimator(params)
                 , sampler(params)
                 , startValues(params.initial)

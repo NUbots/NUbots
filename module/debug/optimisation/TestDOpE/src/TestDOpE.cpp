@@ -19,7 +19,7 @@
 
 #include "TestDOpE.h"
 
-#include "message/support/Configuration.h"
+#include "extension/Configuration.h"
 #include "message/support/optimisation/DOpE.h"
 #include "message/support/optimisation/Episode.h"
 #include "utility/support/eigen_armadillo.h"
@@ -28,7 +28,7 @@ namespace module {
 namespace debug {
 namespace optimisation {
 
-    using message::support::Configuration;
+    using extension::Configuration;
     using message::support::optimisation::Episode;
     using message::support::optimisation::Parameters;
     using message::support::optimisation::RequestParameters;
@@ -58,14 +58,14 @@ namespace optimisation {
 
             e->group = "test_dope";
             e->generation = currentParameters.generation;
-            e->values = convert<double>(arma::conv_to<arma::vec>(currentParameters.samples.col(0)));
-            e->covariance = convert<double>(currentParameters.covariance);
+            e->values = currentParameters.samples.col(0);
+            e->covariance = currentParameters.covariance;
 
             Episode::Fitness fitness;
             fitness.weight = 1.0;
 
             double f = 0;
-            for(uint i = 0; i < currentParameters.samples.col(0).n_elem; ++i) {
+            for(uint i = 0; i < currentParameters.samples.col(0).size(); ++i) {
                 double v = currentParameters.samples(i, 0) + i;
                 v *= v;
                 f += -v;

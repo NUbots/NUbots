@@ -19,96 +19,21 @@
 
 #include "NUbugger.h"
 
-#include "message/input/Sensors.h"
 #include "message/input/proto/Sensors.h"
 
 #include "utility/support/eigen_armadillo.h"
-#include "utility/time/time.h"
 
 namespace module {
 namespace support {
-    using utility::time::getUtcTimestamp;
 
-    using message::input::Sensors;
-    using ProtoSensors = message::input::proto::Sensors;
+    using message::input::proto::Sensors;
 
     void NUbugger::provideSensors() {
 
         // This trigger gets the output from the sensors (unfiltered)
         handles["sensor_data"].push_back(on<Trigger<Sensors>, Single, Priority::LOW>().then([this](const Sensors& sensors) {
 
-            ProtoSensors sensorData;
-
-            sensorData.timestamp = sensors.timestamp.time_since_epoch().count();
-            sensorData.voltage = sensors.voltage;
-            sensorData.battery = sensors.battery;
-
-            // Add each of the servos into the protocol buffer
-            for(const auto& servo : sensors.servos) {
-
-                ProtoSensors::Servo protoServo;
-
-                protoServo.error_flags = servo.errorFlags;
-
-                protoServo.id = static_cast<ProtoSensors::ServoID::Value>(servo.id);
-
-                protoServo.enabled = servo.enabled;
-
-                protoServo.p_gain = servo.pGain;
-                protoServo.i_gain = servo.iGain;
-                protoServo.d_gain = servo.dGain;
-
-                protoServo.goal_position = servo.goalPosition;
-                protoServo.goal_velocity = servo.goalVelocity;
-
-                protoServo.present_position = servo.presentPosition;
-                protoServo.present_velocity = servo.presentVelocity;
-
-                protoServo.load = servo.load;
-                protoServo.voltage = servo.voltage;
-                protoServo.temperature = servo.temperature;
-
-                sensorData.servo.push_back(protoServo);
-            }
-
-            // The gyroscope values (x,y,z)
-            sensorData.gyroscope = convert<double, 3>(sensors.gyroscope);
-
-            // The accelerometer values (x,y,z)
-            sensorData.accelerometer = convert<double, 3>(sensors.accelerometer);
-
-            // The orientation matrix
-            sensorData.world = convert<double, 4, 4>(sensors.world);
-
-            // The FSR values
-            for (auto& fsr : sensors.fsrs) {
-                ProtoSensors::FSR protoFSR;
-                protoFSR.centre = convert<double, 2>(fsr.centre);
-
-                for (auto& v : fsr.values) {
-                    protoFSR.value.push_back(v);
-                }
-
-                sensorData.fsr.push_back(protoFSR);
-            }
-
-            // The LEDs
-            for(auto& led : sensors.leds) {
-                ProtoSensors::LED protoLED;
-                protoLED.id     = led.id;
-                protoLED.colour = led.colour;
-                sensorData.led.push_back(protoLED);
-            }
-
-            // The Buttons
-            for(auto& button : sensors.buttons) {
-                ProtoSensors::Button protoButton;
-                protoButton.id    = button.id;
-                protoButton.value = button.value;
-                sensorData.button.push_back(protoButton);
-            }
-
-            send(sensorData, 1, false, sensors.timestamp);
+            send(sensors, 1, false, sensors.timestamp);
 
         }));
     }

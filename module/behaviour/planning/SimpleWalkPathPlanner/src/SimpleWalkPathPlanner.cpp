@@ -21,7 +21,7 @@
 
 #include <cmath>
 #include "message/behaviour/KickPlan.h"
-#include "message/support/Configuration.h"
+#include "extension/Configuration.h"
 #include "message/input/Sensors.h"
 #include "message/localisation/FieldObject.h"
 #include "message/vision/VisionObjects.h"
@@ -42,7 +42,7 @@ namespace module {
     namespace behaviour {
         namespace planning {
 
-            using message::support::Configuration;
+            using extension::Configuration;
 
             using message::input::LimbID;
             using message::input::Sensors;

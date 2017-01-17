@@ -26,7 +26,7 @@
 namespace module {
     namespace vision {
 
-        using message::input::Image;
+        using message::input::proto::Image;
         using message::vision::LookUpTable;
         using message::vision::ObjectClass;
         using message::vision::ClassifiedImage;
@@ -149,13 +149,13 @@ namespace module {
                     // Get our centre point
                     arma::vec2 p = model.model.line.pointFromTangentialDistance(d);
 
-                    if((p[1] > int(image.height) - 1) || (p[1] < 0)) {
+                    if((p[1] > int(image.dimensions[1]) - 1) || (p[1] < 0)) {
                         continue;
                     }
 
                     // Start and end
                     arma::ivec2 s({ std::max(0, int(std::round(p[0] - lineHalfWidth))), int(std::round(p[1]))});
-                    arma::ivec2 e({ std::min(int(image.width) - 1, int(std::round(p[0] + lineHalfWidth))), int(std::round(p[1]))});
+                    arma::ivec2 e({ std::min(int(image.dimensions[0]) - 1, int(std::round(p[0] + lineHalfWidth))), int(std::round(p[1]))});
 
                     if(e[0] > 0) {
                         auto segments = quex->classify(image, lut, s, e);

@@ -19,7 +19,7 @@
 
 #include "NUPresenceServer.h"
 
-#include "message/support/Configuration.h"
+#include "extension/Configuration.h"
 
 #include "message/input/Image.h"
 #include "message/input/Sensors.h"
@@ -32,7 +32,7 @@
 namespace module {
 namespace behaviour {
 
-    using message::support::Configuration;
+    using extension::Configuration;
 
     using message::input::Image;
     using message::input::Sensors;

@@ -22,9 +22,9 @@
 
 #include <armadillo>
 
-#include "message/input/Sensors.h"
+#include "message/input/proto/Sensors.h"
 #include "message/vision/VisionObjects.h"
-#include "message/support/FieldDescription.h"
+#include "message/support/proto/FieldDescription.h"
 
 namespace module {
     namespace localisation {
@@ -52,8 +52,8 @@ namespace module {
 
             arma::vec predictedObservation(const arma::vec::fixed<size>& state
                 , const std::vector<std::tuple<message::vision::Goal::Team, message::vision::Goal::Side, message::vision::Goal::MeasurementType>>& measurements
-                , const message::support::FieldDescription& field
-                , const message::input::Sensors& sensors
+                , const message::support::proto::FieldDescription& field
+                , const message::input::proto::Sensors& sensors
                 , const MeasurementType::GOAL&);
 
             arma::vec observationDifference(const arma::vec& a, const arma::vec& b) const;

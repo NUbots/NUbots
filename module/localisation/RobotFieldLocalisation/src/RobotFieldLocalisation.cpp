@@ -19,30 +19,36 @@
 
 #include "RobotFieldLocalisation.h"
 
-#include "message/input/Sensors.h"
+#include "message/input/proto/Sensors.h"
 #include "message/vision/VisionObjects.h"
-#include "message/support/Configuration.h"
-#include "message/support/FieldDescription.h"
-#include "message/localisation/FieldObject.h"
-#include "message/localisation/ResetRobotHypotheses.h"
+#include "extension/Configuration.h"
+#include "message/support/proto/FieldDescription.h"
+#include "message/localisation/proto/FieldObject.h"
+#include "message/localisation/proto/ResetRobotHypotheses.h"
 #include "utility/math/matrix/Rotation2D.h"
 #include "utility/math/matrix/Rotation3D.h"
+#include "utility/math/matrix/Transform2D.h"
+#include "utility/math/matrix/Transform3D.h"
 #include "utility/support/yaml_armadillo.h"
 #include "utility/nubugger/NUhelpers.h"
 #include "utility/math/vision.h"
+#include "utility/support/eigen_armadillo.h"
 
 namespace module {
 namespace localisation {
 
-    using message::support::Configuration;
-    using message::input::Sensors;
+    using extension::Configuration;
+    using message::input::proto::Sensors;
     using message::vision::Goal;
-    using message::support::FieldDescription;
-    using message::localisation::ResetRobotHypotheses;
+    using message::support::proto::FieldDescription;
+    using message::localisation::proto::ResetRobotHypotheses;
     using utility::math::filter::MMUKF;
     using utility::math::filter::UKF;
     using utility::nubugger::graph;
+    using utility::math::matrix::Rotation2D;
+    using utility::math::matrix::Rotation3D;
     using utility::math::matrix::Transform2D;
+    using utility::math::matrix::Transform3D;
 
     RobotFieldLocalisation::RobotFieldLocalisation(std::unique_ptr<NUClear::Environment> environment)
     : Reactor(std::move(environment))
@@ -81,26 +87,30 @@ namespace localisation {
                 const ResetRobotHypotheses& reset
               , const Sensors& sensors
             ) {
+
             //Reset the filter to use the new robot hypotheses
             filter.filters.resize(0);
+
             for (const auto& h : reset.hypotheses) {
-                arma::vec3 Tgr = arma::vec3{h.position[0],h.position[1],h.heading};
+                arma::vec3 Tgr = arma::vec3{h.position[0], h.position[1], h.heading};
+
                 if (!h.absoluteYaw) {
-                    Tgr[2] -= sensors.world.rotation().yaw();
+                    Tgr[2] -= Rotation3D(Transform3D(convert<double, 4, 4>(sensors.world)).rotation()).yaw();
                 }
 
                 arma::mat33 stateCov(arma::fill::eye);
-                stateCov.submat(0,0,1,1) = h.position_cov;
-                stateCov(2,2) = h.heading_var;
+                stateCov.submat(0, 0, 1, 1) = convert<double, 2, 2>(h.position_cov);
+                stateCov(2, 2) = h.heading_var;
                 filter.filters.emplace_back(0.0, UKF<FieldModel>(Tgr, stateCov));
             }
+
             filter.timeUpdate(0.0);
         });
 
         on<Trigger<Sensors>, Sync<RobotFieldLocalisation>, Single>().then("Localisation Field Space", [this] (const Sensors& sensors) {
 
             // Use the current world to field state we are holding to modify sensors.world and emit that
-            utility::math::matrix::Transform3D Htg = sensors.world;
+            utility::math::matrix::Transform3D Htg = convert<double, 4, 4>(sensors.world);
 
             //this actually gets Field to Torso???
             //g = odometry space
@@ -113,7 +123,7 @@ namespace localisation {
                 );
 
             //make a localisation object
-            message::localisation::Self robot;
+            message::localisation::proto::Self robot;
             Transform2D currentLocalisation = Hcf.i().projectTo2D(arma::vec3({0,0,1}),arma::vec3({1,0,0}));
             Transform2D currentOdometry = Htg.i().projectTo2D(arma::vec3({0,0,1}),arma::vec3({1,0,0}));
             // std::cerr << "Hcf : " << std::endl << Hcf << std::endl;
@@ -121,11 +131,11 @@ namespace localisation {
             //std::cerr << "internal Localisation state: " << std::endl << Tgr << std::endl;
             //std::cerr << "currentLocalisation: " << std::endl << currentLocalisation << std::endl;
             //set position, covariance, and rotation
-            robot.position = currentLocalisation.rows(0,1);
-            robot.robot_to_world_rotation = utility::math::matrix::Rotation2D::createRotation(currentLocalisation[2]);
-            robot.position_cov = robot.robot_to_world_rotation * filter.getCovariance().submat(0,0,1,1);
-            robot.heading = robot.robot_to_world_rotation.row(0).t();
-            emit(std::make_unique<std::vector<message::localisation::Self>>(std::vector<message::localisation::Self>(1,robot)));
+            robot.locObject.position      = convert<double, 2>(currentLocalisation.rows(0, 1));
+            robot.robot_to_world_rotation = convert<double, 2, 2>(Rotation2D::createRotation(currentLocalisation[2]));
+            robot.locObject.position_cov  = robot.robot_to_world_rotation * convert<double, 2, 2>(filter.getCovariance().submat(0, 0, 1, 1));
+            robot.heading                 = robot.robot_to_world_rotation.row(0).transpose();
+            emit(std::make_unique<std::vector<message::localisation::proto::Self>>(std::vector<message::localisation::proto::Self>(1, robot)));
         });
 
         on<Trigger<std::vector<Goal>>, With<FieldDescription>, Sync<RobotFieldLocalisation>>().then("Localisation Goal Update", [this] (const std::vector<Goal>& goals, const FieldDescription& field) {

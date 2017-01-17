@@ -24,6 +24,7 @@
 #include "utility/math/matrix/Transform3D.h"
 #include "utility/math/matrix/Transform2D.h"
 #include "utility/math/vision.h"
+#include "utility/support/eigen_armadillo.h"
 
 namespace module {
     namespace localisation {
@@ -32,9 +33,9 @@ namespace module {
         using utility::math::matrix::Transform3D;
         using utility::math::matrix::Transform2D;
         using message::vision::Ball;
-        using message::support::FieldDescription;
-        using message::input::Sensors;
-        using message::input::ServoID;
+        using message::support::proto::FieldDescription;
+        using message::input::proto::Sensors;
+        using ServoID = message::input::proto::Sensors::ServoID::Value;
 
         arma::vec::fixed<BallModel::size> BallModel::timeUpdate(const arma::vec::fixed<size>& state, double /*deltaT*/) {
             return state;
@@ -46,8 +47,16 @@ namespace module {
             , const MeasurementType::BALL&) const {
 
             // Get our transform to world coordinates
-            const Transform3D& Htw = sensors.world;
-            const Transform3D& Htc = sensors.forwardKinematics.find(ServoID::HEAD_PITCH)->second;
+            const Transform3D& Htw = convert<double, 4, 4>(sensors.world);
+            Transform3D Htc; 
+            for (const auto& entry : sensors.forwardKinematics)
+            {
+                if (entry.servoID == ServoID::HEAD_PITCH)
+                {
+                    Htc = convert<double, 4, 4>(entry.kinematics);
+                    break;
+                }
+            }
             Transform3D Hcw = Htc.i() * Htw;
 
             arma::vec3 rBWw = { state[PX], state[PY], field.ball_radius };

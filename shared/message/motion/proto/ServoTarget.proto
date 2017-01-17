@@ -16,33 +16,22 @@
  *
  * Copyright 2013 NUBots <nubots@nubots.net>
  */
+syntax = "proto3";
 
-#ifndef MESSAGE_RESETROBOTHYPOTHESES
-#define MESSAGE_RESETROBOTHYPOTHESES
+package message.motion.proto;
 
-#include <armadillo>
+import "google/protobuf/timestamp.proto";
+import "message/input/proto/Sensors.proto";
 
-namespace message {
-    namespace localisation {
-        struct ResetRobotHypotheses {
-            struct Self {
-                Self() : position(arma::fill::zeros) 
-                       , position_cov(arma::fill::eye)
-                       , heading(0.0)
-                       , heading_var(0.0)
-                       , absoluteYaw(false) {}
-                arma::vec2 position;
-                arma::mat22 position_cov;
-                double heading;
-                double heading_var;
-                bool absoluteYaw;
-            };
-
-            ResetRobotHypotheses() : hypotheses() {}
-
-            std::vector<Self> hypotheses;
-        };
-    }
+/**
+ * TODO document
+ *
+ * @author Trent Houliston
+ */
+message ServoTarget {
+    google.protobuf.Timestamp   time     = 1;
+    input.proto.Sensors.ServoID id       = 2;
+    float                       position = 3;
+    float                       gain     = 4;
+    float                       torque   = 5;
 }
-
-#endif

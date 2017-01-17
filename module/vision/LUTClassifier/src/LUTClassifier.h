@@ -83,17 +83,17 @@ namespace module {
                 , std::vector<message::vision::ClassifiedImage<message::vision::ObjectClass>::Segment>& segments
                 , bool vertical);
 
-            void findHorizon(const message::input::Image& image, const message::vision::LookUpTable& lut, message::vision::ClassifiedImage<message::vision::ObjectClass>& classifiedImage);
+            void findHorizon(const message::input::proto::Image& image, const message::vision::LookUpTable& lut, message::vision::ClassifiedImage<message::vision::ObjectClass>& classifiedImage);
 
-            void findVisualHorizon(const message::input::Image& image, const message::vision::LookUpTable& lut, message::vision::ClassifiedImage<message::vision::ObjectClass>& classifiedImage);
+            void findVisualHorizon(const message::input::proto::Image& image, const message::vision::LookUpTable& lut, message::vision::ClassifiedImage<message::vision::ObjectClass>& classifiedImage);
 
-            void findBall(const message::input::Image& image, const message::vision::LookUpTable& lut, message::vision::ClassifiedImage<message::vision::ObjectClass>& classifiedImage);
+            void findBall(const message::input::proto::Image& image, const message::vision::LookUpTable& lut, message::vision::ClassifiedImage<message::vision::ObjectClass>& classifiedImage);
 
-            void findGoals(const message::input::Image& image, const message::vision::LookUpTable& lut, message::vision::ClassifiedImage<message::vision::ObjectClass>& classifiedImage);
+            void findGoals(const message::input::proto::Image& image, const message::vision::LookUpTable& lut, message::vision::ClassifiedImage<message::vision::ObjectClass>& classifiedImage);
 
-            void enhanceBall(const message::input::Image& image, const message::vision::LookUpTable& lut, message::vision::ClassifiedImage<message::vision::ObjectClass>& classifiedImage);
+            void enhanceBall(const message::input::proto::Image& image, const message::vision::LookUpTable& lut, message::vision::ClassifiedImage<message::vision::ObjectClass>& classifiedImage);
 
-            void enhanceGoals(const message::input::Image& image, const message::vision::LookUpTable& lut, message::vision::ClassifiedImage<message::vision::ObjectClass>& classifiedImage);
+            void enhanceGoals(const message::input::proto::Image& image, const message::vision::LookUpTable& lut, message::vision::ClassifiedImage<message::vision::ObjectClass>& classifiedImage);
 
         public:
             explicit LUTClassifier(std::unique_ptr<NUClear::Environment> environment);

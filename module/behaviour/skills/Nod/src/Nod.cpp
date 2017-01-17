@@ -23,7 +23,7 @@
 #include "message/input/ServoID.h"
 #include "message/motion/Script.h"
 #include "message/behaviour/Action.h"
-#include "message/support/Configuration.h"
+#include "extension/Configuration.h"
 #include "message/behaviour/Nod.h"
 
 namespace module {
@@ -32,7 +32,7 @@ namespace skills {
 
     struct ExecuteNod {};
 
-    using message::support::Configuration;
+    using extension::Configuration;
     using message::input::ServoID;
     using message::motion::ExecuteScriptByName;
     using message::behaviour::RegisterAction;

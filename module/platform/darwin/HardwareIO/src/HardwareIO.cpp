@@ -22,8 +22,8 @@
 
 #include "utility/math/angle.h"
 #include "message/platform/darwin/DarwinSensors.h"
-#include "message/motion/ServoTarget.h"
-#include "message/support/Configuration.h"
+#include "message/motion/proto/ServoTarget.h"
+#include "extension/Configuration.h"
 #include "utility/support/yaml_expression.h"
 
 
@@ -32,8 +32,8 @@ namespace platform {
 namespace darwin {
 
     using message::platform::darwin::DarwinSensors;
-    using message::motion::ServoTarget;
-    using message::support::Configuration;
+    using message::motion::proto::ServoTarget;
+    using extension::Configuration;
     using utility::support::Expression;
 
     DarwinSensors HardwareIO::parseSensors(const Darwin::BulkReadResults& data) {
@@ -154,11 +154,11 @@ namespace darwin {
         on<Configuration>("DarwinPlatform.yaml").then([this] (const Configuration& config) {
             darwin.setConfig(config);
 
-            for (size_t i = 0; i < config["servo_offset"].size(); i++) {
+            for (size_t i = 0; i < config["servo_offset"].config.size(); i++) {
                 Convert::SERVO_OFFSET[i] = config["servo_offset"][i].as<Expression>();
             }
 
-            for (size_t i = 0; i < config["servo_direction"].size(); i++) {
+            for (size_t i = 0; i < config["servo_direction"].config.size(); i++) {
                 Convert::SERVO_DIRECTION[i] = config["servo_direction"][i].as<int>();
             }
         });
@@ -265,12 +265,12 @@ namespace darwin {
             for (const auto& command : commands) 
             {
 
-                float diff = utility::math::angle::difference(command.position, sensors.servo[command.id].presentPosition);
+                float diff = utility::math::angle::difference(command.position, sensors.servo[command.id.value].presentPosition);
                 NUClear::clock::duration duration = command.time - NUClear::clock::now();
 
                 //p = diff * pFactor;
-                //d = abs(diff - error[(int)command.id]) * dFactor;
-                //error[(int)command.id] = diff;                          
+                //d = abs(diff - error[(int)command.id.value]) * dFactor;
+                //error[(int)command.id.value] = diff;                          
 
                 float speed;
                 if(duration.count() > 0) 
@@ -283,23 +283,23 @@ namespace darwin {
                 }               
 
                 // Update our internal state
-                if(servoState[uint(command.id)].pGain != command.gain
-                || servoState[uint(command.id)].iGain != command.gain * 0
-                || servoState[uint(command.id)].dGain != command.gain * 0
-                || servoState[uint(command.id)].movingSpeed != speed
-                || servoState[uint(command.id)].goalPosition != command.position
-                || servoState[uint(command.id)].torque != command.torque) {
+                if(servoState[uint(command.id.value)].pGain != command.gain
+                || servoState[uint(command.id.value)].iGain != command.gain * 0
+                || servoState[uint(command.id.value)].dGain != command.gain * 0
+                || servoState[uint(command.id.value)].movingSpeed != speed
+                || servoState[uint(command.id.value)].goalPosition != command.position
+                || servoState[uint(command.id.value)].torque != command.torque) {
 
-                    servoState[uint(command.id)].dirty = true;
+                    servoState[uint(command.id.value)].dirty = true;
 
-                    servoState[uint(command.id)].pGain = 20;//pGain;//command.gain;
-                    servoState[uint(command.id)].iGain = 0;//iGain;//command.gain * 0;
-                    servoState[uint(command.id)].dGain = 5;//dGain;//command.gain * 0;
+                    servoState[uint(command.id.value)].pGain = 20;//pGain;//command.gain;
+                    servoState[uint(command.id.value)].iGain = 0;//iGain;//command.gain * 0;
+                    servoState[uint(command.id.value)].dGain = 5;//dGain;//command.gain * 0;
 
-                    servoState[uint(command.id)].movingSpeed = speed;
-                    servoState[uint(command.id)].goalPosition = command.position;
+                    servoState[uint(command.id.value)].movingSpeed = speed;
+                    servoState[uint(command.id.value)].goalPosition = command.position;
 
-                    servoState[uint(command.id)].torque = command.torque*0.7;
+                    servoState[uint(command.id.value)].torque = command.torque*0.7;
                 }
             }
         });

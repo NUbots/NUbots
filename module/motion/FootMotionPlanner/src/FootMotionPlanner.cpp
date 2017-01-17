@@ -41,7 +41,7 @@ namespace motion
     using message::motion::DisableFootMotion;
     using message::motion::FootStepRequested;
     using message::motion::FootStepCompleted;
-    using message::support::Configuration;
+    using extension::Configuration;
 
     using utility::support::Expression;
     using message::motion::kinematics::KinematicsModel;

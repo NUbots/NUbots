@@ -21,12 +21,12 @@
 #include "Parse.h"
 #include <cppformat/format.h>
 
-#include "message/support/Configuration.h"
+#include "extension/Configuration.h"
 
 namespace module {
 namespace input {
 
-    using message::support::Configuration;
+    using extension::Configuration;
 
     NatNet::NatNet(std::unique_ptr<NUClear::Environment> environment)
         : Reactor(std::move(environment))

@@ -29,7 +29,7 @@
 #include "utility/localisation/transform.h"
 #include "message/vision/VisionObjects.h"
 #include "message/input/Sensors.h"
-#include "message/support/Configuration.h"
+#include "extension/Configuration.h"
 #include "message/support/FieldDescription.h"
 #include "message/localisation/FieldObject.h"
 #include "message/localisation/ResetRobotHypotheses.h"
@@ -40,7 +40,7 @@ using utility::math::matrix::Rotation3D;
 using utility::math::angle::bearingToUnitVector;
 using utility::nubugger::graph;
 using utility::localisation::LocalisationFieldObject;
-using message::support::Configuration;
+using extension::Configuration;
 using message::support::FieldDescription;
 using message::input::Sensors;
 using message::vision::Goal;

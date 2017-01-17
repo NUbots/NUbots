@@ -20,22 +20,24 @@
 #include "SensorFilter.h"
 
 #include "message/platform/darwin/DarwinSensors.h"
-#include "message/input/LimbID.h"
-#include "message/input/CameraParameters.h"
-#include "message/support/Configuration.h"
-#include "message/localisation/ResetRobotHypotheses.h"
+#include "utility/input/ServoID.h"
+#include "utility/input/LimbID.h"
+#include "message/input/proto/CameraParameters.h"
+#include "extension/Configuration.h"
+//#include "message/localisation/proto/ResetRobotHypotheses.h"
 
 #include "utility/support/yaml_armadillo.h"
 #include "utility/math/matrix/Rotation2D.h"
 #include "utility/math/geometry/UnitQuaternion.h"
 #include "utility/nubugger/NUhelpers.h"
 #include "utility/motion/ForwardKinematics.h"
+#include "utility/support/eigen_armadillo.h"
 
 namespace module {
     namespace platform {
         namespace darwin {
 
-            using message::support::Configuration;
+            using extension::Configuration;
             using utility::nubugger::drawArrow;
             using utility::nubugger::drawSphere;
             using message::platform::darwin::DarwinSensors;
@@ -43,17 +45,17 @@ namespace module {
             using message::platform::darwin::ButtonLeftUp;
             using message::platform::darwin::ButtonMiddleDown;
             using message::platform::darwin::ButtonMiddleUp;
-            using message::input::Sensors;
-            using message::input::CameraParameters;
-            using message::input::ServoSide;
-            using message::input::ServoID;
-            using message::input::LimbID;
-            using message::localisation::ResetRobotHypotheses;
+            using message::input::proto::Sensors;
+            using message::input::proto::CameraParameters;
+            using utility::input::ServoSide;
+            using ServoID = message::input::proto::Sensors::ServoID::Value;
+            using utility::input::LimbID;
+            //using message::localisation::proto::ResetRobotHypotheses;
             using utility::nubugger::graph;
             using utility::motion::kinematics::calculateAllPositions;
-            using message::motion::kinematics::KinematicsModel;
+            using message::motion::proto::KinematicsModel;
             using utility::motion::kinematics::calculateCentreOfMass;
-            using message::motion::kinematics::BodySide;
+            using message::motion::proto::BodySide;
             using utility::motion::kinematics::calculateRobotToIMU;
             using utility::math::matrix::Transform3D;
             using utility::math::matrix::Rotation3D;
@@ -299,7 +301,7 @@ namespace module {
                         while(error != DarwinSensors::Error::OK) 
                         {
                             std::stringstream s;
-                            s << "Error on Servo " << (i + 1) << " (" << message::input::stringFromId(ServoID(i)) << "):";
+                            s << "Error on Servo " << (i + 1) << " (" << utility::input::stringFromId(ServoID(i)) << "):";
 
                             if(error & DarwinSensors::Error::INPUT_VOLTAGE) {
                                 s << " Input Voltage - " << original.voltage;
@@ -333,7 +335,7 @@ namespace module {
                         if(previousSensors && error != DarwinSensors::Error::OK) 
                         {
                             // Add the sensor values to the system properly
-                            sensors->servos.push_back({
+                            sensors->servo.push_back({
                                 error,
                                 static_cast<ServoID>(i),
                                 original.torqueEnabled,
@@ -342,18 +344,18 @@ namespace module {
                                 original.dGain,
                                 original.goalPosition,
                                 original.movingSpeed,
-                                previousSensors->servos[i].presentPosition,
-                                previousSensors->servos[i].presentVelocity,
-                                previousSensors->servos[i].load,
-                                previousSensors->servos[i].voltage,
-                                previousSensors->servos[i].temperature
+                                previousSensors->servo[i].present_position,
+                                previousSensors->servo[i].present_velocity,
+                                previousSensors->servo[i].load,
+                                previousSensors->servo[i].voltage,
+                                previousSensors->servo[i].temperature
                             });
                         }
                         // Otherwise we can just use the new values as is
                         else 
                         {
                             // Add the sensor values to the system properly
-                            sensors->servos.push_back({
+                            sensors->servo.push_back({
                                 error,
                                 static_cast<ServoID>(i),
                                 original.torqueEnabled,
@@ -393,37 +395,42 @@ namespace module {
                     }
 
                     // Put in our FSR information
-                    sensors->fsrs.emplace_back();
-                    sensors->fsrs.emplace_back();
+                    sensors->fsr.emplace_back();
+                    sensors->fsr.emplace_back();
 
-                    sensors->fsrs[int(LimbID::LEFT_LEG)].centre = { input.fsr.left.centreX, input.fsr.left.centreY };
-                    sensors->fsrs[int(LimbID::LEFT_LEG)].values.push_back(input.fsr.left.fsr1);
-                    sensors->fsrs[int(LimbID::LEFT_LEG)].values.push_back(input.fsr.left.fsr2);
-                    sensors->fsrs[int(LimbID::LEFT_LEG)].values.push_back(input.fsr.left.fsr3);
-                    sensors->fsrs[int(LimbID::LEFT_LEG)].values.push_back(input.fsr.left.fsr4);
+                    sensors->fsr[int(LimbID::LEFT_LEG)].centre = { input.fsr.left.centreX, input.fsr.left.centreY };
+                    sensors->fsr[int(LimbID::LEFT_LEG)].value.push_back(input.fsr.left.fsr1);
+                    sensors->fsr[int(LimbID::LEFT_LEG)].value.push_back(input.fsr.left.fsr2);
+                    sensors->fsr[int(LimbID::LEFT_LEG)].value.push_back(input.fsr.left.fsr3);
+                    sensors->fsr[int(LimbID::LEFT_LEG)].value.push_back(input.fsr.left.fsr4);
 
-                    sensors->fsrs[int(LimbID::RIGHT_LEG)].centre = { input.fsr.right.centreX, input.fsr.right.centreY };
-                    sensors->fsrs[int(LimbID::RIGHT_LEG)].values.push_back(input.fsr.right.fsr1);
-                    sensors->fsrs[int(LimbID::RIGHT_LEG)].values.push_back(input.fsr.right.fsr2);
-                    sensors->fsrs[int(LimbID::RIGHT_LEG)].values.push_back(input.fsr.right.fsr3);
-                    sensors->fsrs[int(LimbID::RIGHT_LEG)].values.push_back(input.fsr.right.fsr4);
+                    sensors->fsr[int(LimbID::RIGHT_LEG)].centre = { input.fsr.right.centreX, input.fsr.right.centreY };
+                    sensors->fsr[int(LimbID::RIGHT_LEG)].value.push_back(input.fsr.right.fsr1);
+                    sensors->fsr[int(LimbID::RIGHT_LEG)].value.push_back(input.fsr.right.fsr2);
+                    sensors->fsr[int(LimbID::RIGHT_LEG)].value.push_back(input.fsr.right.fsr3);
+                    sensors->fsr[int(LimbID::RIGHT_LEG)].value.push_back(input.fsr.right.fsr4);
 
                     /************************************************
                      *               Buttons and LEDs               *
                      ************************************************/
-                    sensors->buttons.push_back({ 0, input.buttons.left });
-                    sensors->buttons.push_back({ 1, input.buttons.middle });
-                    sensors->leds.push_back({ 0, uint32_t(input.ledPanel.led2 ? 0xFF0000 : 0) });
-                    sensors->leds.push_back({ 1, uint32_t(input.ledPanel.led3 ? 0xFF0000 : 0) });
-                    sensors->leds.push_back({ 2, uint32_t(input.ledPanel.led4 ? 0xFF0000 : 0) });
-                    sensors->leds.push_back({ 3, uint32_t((input.headLED.r << 16) | (input.headLED.g << 8) | (input.headLED.b)) }); // Head
-                    sensors->leds.push_back({ 4, uint32_t((input.eyeLED.r  << 16) | (input.eyeLED.g  << 8) | (input.eyeLED.b))  }); // Eye
+                    sensors->button.push_back({ 0, input.buttons.left });
+                    sensors->button.push_back({ 1, input.buttons.middle });
+                    sensors->led.push_back({ 0, uint32_t(input.ledPanel.led2 ? 0xFF0000 : 0) });
+                    sensors->led.push_back({ 1, uint32_t(input.ledPanel.led3 ? 0xFF0000 : 0) });
+                    sensors->led.push_back({ 2, uint32_t(input.ledPanel.led4 ? 0xFF0000 : 0) });
+                    sensors->led.push_back({ 3, uint32_t((input.headLED.r << 16) | (input.headLED.g << 8) | (input.headLED.b)) }); // Head
+                    sensors->led.push_back({ 4, uint32_t((input.eyeLED.r  << 16) | (input.eyeLED.g  << 8) | (input.eyeLED.b))  }); // Eye
 
                     /************************************************
                      *                  Kinematics                  *
                      ************************************************/
 
-                    sensors->forwardKinematics = calculateAllPositions(kinematicsModel,*sensors);
+                    auto forwardKinematics = calculateAllPositions(kinematicsModel, *sensors);
+                    sensors->forwardKinematics.clear();
+                    for (const auto& entry : forwardKinematics)
+                    {
+                        sensors->forwardKinematics.push_back(Sensors::ServoIDKinematicsMap(entry.first, convert<double, 4, 4>(entry.second)));
+                    }
 
                     /************************************************
                      *            Foot down information             *
@@ -432,28 +439,28 @@ namespace module {
                     {
                         // Use our virtual load sensor class to work out if our foot is down
                         arma::vec leftFootFeatureVec = {
-                              sensors->servos[size_t(ServoID::L_HIP_PITCH)].presentVelocity
-                            , sensors->servos[size_t(ServoID::L_HIP_PITCH)].presentVelocity - previousSensors->servos[size_t(ServoID::L_HIP_PITCH)].presentVelocity
-                            , sensors->servos[size_t(ServoID::L_HIP_PITCH)].load
-                            , sensors->servos[size_t(ServoID::L_KNEE)].presentVelocity
-                            , sensors->servos[size_t(ServoID::L_KNEE)].presentVelocity - previousSensors->servos[size_t(ServoID::L_KNEE)].presentVelocity
-                            , sensors->servos[size_t(ServoID::L_KNEE)].load
-                            , sensors->servos[size_t(ServoID::L_ANKLE_PITCH)].presentVelocity
-                            , sensors->servos[size_t(ServoID::L_ANKLE_PITCH)].presentVelocity - previousSensors->servos[size_t(ServoID::L_ANKLE_PITCH)].presentVelocity
-                            , sensors->servos[size_t(ServoID::L_ANKLE_PITCH)].load
+                              sensors->servo[size_t(ServoID::L_HIP_PITCH)].present_velocity
+                            , sensors->servo[size_t(ServoID::L_HIP_PITCH)].present_velocity - previousSensors->servo[size_t(ServoID::L_HIP_PITCH)].present_velocity
+                            , sensors->servo[size_t(ServoID::L_HIP_PITCH)].load
+                            , sensors->servo[size_t(ServoID::L_KNEE)].present_velocity
+                            , sensors->servo[size_t(ServoID::L_KNEE)].present_velocity - previousSensors->servo[size_t(ServoID::L_KNEE)].present_velocity
+                            , sensors->servo[size_t(ServoID::L_KNEE)].load
+                            , sensors->servo[size_t(ServoID::L_ANKLE_PITCH)].present_velocity
+                            , sensors->servo[size_t(ServoID::L_ANKLE_PITCH)].present_velocity - previousSensors->servo[size_t(ServoID::L_ANKLE_PITCH)].present_velocity
+                            , sensors->servo[size_t(ServoID::L_ANKLE_PITCH)].load
                         };
                         sensors->leftFootDown = leftFootDown.updateFoot(leftFootFeatureVec);
 
                         arma::vec rightFootFeatureVec = {
-                              sensors->servos[size_t(ServoID::R_HIP_PITCH)].presentVelocity
-                            , sensors->servos[size_t(ServoID::R_HIP_PITCH)].presentVelocity - previousSensors->servos[size_t(ServoID::R_HIP_PITCH)].presentVelocity
-                            , sensors->servos[size_t(ServoID::R_HIP_PITCH)].load
-                            , sensors->servos[size_t(ServoID::R_KNEE)].presentVelocity
-                            , sensors->servos[size_t(ServoID::R_KNEE)].presentVelocity - previousSensors->servos[size_t(ServoID::R_KNEE)].presentVelocity
-                            , sensors->servos[size_t(ServoID::R_KNEE)].load
-                            , sensors->servos[size_t(ServoID::R_ANKLE_PITCH)].presentVelocity
-                            , sensors->servos[size_t(ServoID::R_ANKLE_PITCH)].presentVelocity - previousSensors->servos[size_t(ServoID::R_ANKLE_PITCH)].presentVelocity
-                            , sensors->servos[size_t(ServoID::R_ANKLE_PITCH)].load
+                              sensors->servo[size_t(ServoID::R_HIP_PITCH)].present_velocity
+                            , sensors->servo[size_t(ServoID::R_HIP_PITCH)].present_velocity - previousSensors->servo[size_t(ServoID::R_HIP_PITCH)].present_velocity
+                            , sensors->servo[size_t(ServoID::R_HIP_PITCH)].load
+                            , sensors->servo[size_t(ServoID::R_KNEE)].present_velocity
+                            , sensors->servo[size_t(ServoID::R_KNEE)].present_velocity - previousSensors->servo[size_t(ServoID::R_KNEE)].present_velocity
+                            , sensors->servo[size_t(ServoID::R_KNEE)].load
+                            , sensors->servo[size_t(ServoID::R_ANKLE_PITCH)].present_velocity
+                            , sensors->servo[size_t(ServoID::R_ANKLE_PITCH)].present_velocity - previousSensors->servo[size_t(ServoID::R_ANKLE_PITCH)].present_velocity
+                            , sensors->servo[size_t(ServoID::R_ANKLE_PITCH)].load
                         };
                         sensors->rightFootDown = rightFootDown.updateFoot(rightFootFeatureVec);
                     }
@@ -474,13 +481,13 @@ namespace module {
                     motionFilter.timeUpdate(deltaT);
 
                     // Accelerometer measurment update
-                    motionFilter.measurementUpdate(sensors->accelerometer,      
+                    motionFilter.measurementUpdate(convert<double, 3>(sensors->accelerometer), 
                                                     config.motionFilter.noise.measurement.accelerometer + 
-                                                    arma::norm(sensors->accelerometer) * config.motionFilter.noise.measurement.accelerometerMagnitude, 
+                                                    arma::norm(convert<double, 3>(sensors->accelerometer)) * config.motionFilter.noise.measurement.accelerometerMagnitude, 
                                                     MotionModel::MeasurementType::ACCELEROMETER());
 
                     // Gyroscope measurement update
-                    motionFilter.measurementUpdate(sensors->gyroscope, config.motionFilter.noise.measurement.gyroscope, MotionModel::MeasurementType::GYROSCOPE());
+                    motionFilter.measurementUpdate(convert<double, 3>(sensors->gyroscope), config.motionFilter.noise.measurement.gyroscope, MotionModel::MeasurementType::GYROSCOPE());
 
                     if (sensors->leftFootDown or sensors->rightFootDown) 
                     {
@@ -508,7 +515,15 @@ namespace module {
 
                             if (footDown) 
                             {
-                                Transform3D Htf = sensors->forwardKinematics[servoid];
+                                Transform3D Htf;
+                                for (const auto& entry : sensors->forwardKinematics)
+                                {
+                                    if (entry.servoID == servoid)
+                                    {
+                                        Htf = convert<double, 4, 4>(entry.kinematics);
+                                        break;
+                                    }
+                                }
                                 Transform3D Hft = Htf.i();
 
                                 Rotation3D Rtf = Htf.rotation();
@@ -577,45 +592,81 @@ namespace module {
                     const auto& o = motionFilter.get();
 
                     // Map from world to torso coordinates
-                    sensors->world.eye();
-                    sensors->world.rotation() = Rotation3D(UnitQuaternion(o.rows(MotionModel::QW, MotionModel::QZ)));
-                    sensors->world.translation() = -(sensors->world.rotation() * o.rows(MotionModel::PX, MotionModel::PZ));
-                    // sensors->world.translation() = (o.rows(MotionModel::PX, MotionModel::PZ));
+                    Transform3D world;
+                    world.eye();
+                    world.rotation() = Rotation3D(UnitQuaternion(o.rows(MotionModel::QW, MotionModel::QZ)));
+                    world.translation() = -(world.rotation() * o.rows(MotionModel::PX, MotionModel::PZ));
+                    // world.translation() = (o.rows(MotionModel::PX, MotionModel::PZ));
+                    sensors->world = convert<double, 4, 4>(world);
 
-                    sensors->robotToIMU = calculateRobotToIMU(sensors->world.rotation());
+                    sensors->robotToIMU = convert<double, 2, 2>(calculateRobotToIMU(world.rotation()));
 
                     /************************************************
                      *                  Mass Model                  *
                      ************************************************/
-                    sensors->centreOfMass = calculateCentreOfMass(kinematicsModel,sensors->forwardKinematics, true);
+                    sensors->centreOfMass = convert<double, 4>(calculateCentreOfMass(kinematicsModel, sensors->forwardKinematics, true));
 
                     /************************************************
                      *                  Kinematics Horizon          *
                      ************************************************/         
                     sensors->bodyCentreHeight = motionFilter.get()[MotionModel::PZ];
 
-                    Rotation3D Rwt = sensors->world.rotation().t();     //remove translation components from the transform
+                    Rotation3D Rwt = world.rotation().t();     //remove translation components from the transform
                     Rotation3D oBodyToGround = Rotation3D::createRotationZ(-Rwt.yaw()) * Rwt;
                     // sensors->orientationBodyToGround : Mat size [4x4] (default identity)
                     // createRotationZ : Mat size [3x3] 
                     // Rwt : Mat size [3x3]
-                    sensors->orientationBodyToGround = Transform3D(oBodyToGround);  
-                    sensors->orientationCamToGround = sensors->orientationBodyToGround * sensors->forwardKinematics[ServoID::HEAD_PITCH];
+                    sensors->orientationBodyToGround = convert<double, 4, 4>(Transform3D(oBodyToGround));
+                    Eigen::Matrix4d headPitchKinematics;
+                    for (const auto& entry : sensors->forwardKinematics)
+                    {
+                        if (entry.servoID == ServoID::HEAD_PITCH)
+                        {
+                            sensors->orientationCamToGround = sensors->orientationBodyToGround * entry.kinematics;
+                            headPitchKinematics = entry.kinematics;
+                            break;
+                        }
+                    }
                     
                     if(sensors->leftFootDown) {
-                        sensors->kinematicsBodyToGround = utility::motion::kinematics::calculateBodyToGround(sensors->forwardKinematics[ServoID::L_ANKLE_ROLL].submat(0,2,2,2),sensors->bodyCentreHeight);
-                    } else if (sensors->rightFootDown) {
-                        sensors->kinematicsBodyToGround = utility::motion::kinematics::calculateBodyToGround(sensors->forwardKinematics[ServoID::R_ANKLE_ROLL].submat(0,2,2,2),sensors->bodyCentreHeight);
+                        arma::vec3 lAnkleRoll;
+
+                        for (const auto& entry : sensors->forwardKinematics)
+                        {
+                            if (entry.servoID == ServoID::L_ANKLE_ROLL)
+                            {
+                                lAnkleRoll = convert<double, 4, 4>(entry.kinematics).submat(0, 2, 2, 2);
+                                break;
+                            }
+                        }
+
+                        sensors->kinematicsBodyToGround = convert<double, 4, 4>(utility::motion::kinematics::calculateBodyToGround(lAnkleRoll, sensors->bodyCentreHeight));
+                    } 
+
+                    else if (sensors->rightFootDown) {
+                        arma::vec3 rAnkleRoll;
+
+                        for (const auto& entry : sensors->forwardKinematics)
+                        {
+                            if (entry.servoID == ServoID::R_ANKLE_ROLL)
+                            {
+                                rAnkleRoll = convert<double, 4, 4>(entry.kinematics).submat(0, 2, 2, 2);
+                                break;
+                            }
+                        }
+
+                        sensors->kinematicsBodyToGround = convert<double, 4, 4>(utility::motion::kinematics::calculateBodyToGround(rAnkleRoll, sensors->bodyCentreHeight));
                     }
+
                     else {
                         sensors->kinematicsBodyToGround = sensors->orientationCamToGround;
                     }
-                    sensors->kinematicsCamToGround = sensors->orientationBodyToGround * sensors->forwardKinematics[ServoID::HEAD_PITCH];
+                    sensors->kinematicsCamToGround = sensors->orientationBodyToGround * headPitchKinematics;
 
                     /************************************************
                      *                  CENTRE OF PRESSURE          *
                      ************************************************/
-                    sensors->centreOfPressure = utility::motion::kinematics::calculateCentreOfPressure(kinematicsModel,*sensors);
+                    sensors->centreOfPressure = convert<double, 3>(utility::motion::kinematics::calculateCentreOfPressure(kinematicsModel, *sensors));
 
                     emit(std::move(sensors));                  
                 });

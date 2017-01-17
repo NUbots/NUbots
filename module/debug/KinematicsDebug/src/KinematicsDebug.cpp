@@ -22,7 +22,7 @@
 #include <cstdlib>
 
 #include "message/behaviour/Action.h"
-#include "message/support/Configuration.h"
+#include "extension/Configuration.h"
 #include "message/input/ServoID.h"
 #include "message/input/Sensors.h"
 #include "message/motion/ServoTarget.h"
@@ -35,7 +35,7 @@
 namespace module {
     namespace debug {
             using message::input::LimbID;
-            using message::support::Configuration;
+            using extension::Configuration;
             using message::motion::ServoTarget;
             using message::input::ServoID;
             using message::input::Sensors;

@@ -25,7 +25,6 @@ import "google/protobuf/timestamp.proto";
 import "Vector.proto";
 
 message Image {
-
     uint32                    format       = 1;
     uvec2                     dimensions   = 2;
     bytes                     data         = 3;

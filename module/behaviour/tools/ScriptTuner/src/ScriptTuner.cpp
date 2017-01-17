@@ -18,7 +18,7 @@
  */
 
 #include "ScriptTuner.h"
-#include "message/support/Configuration.h"
+#include "extension/Configuration.h"
 #include "message/platform/darwin/DarwinSensors.h"
 #include "message/motion/ServoTarget.h"
 #include "utility/math/angle.h"

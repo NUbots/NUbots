@@ -3,7 +3,7 @@ NUCLEAR_ROLE(
     support::logging::ConsoleLogHandler
     
     #Config
-    support::extension::FileWatcher
+    extension::FileWatcher
     support::configuration::NetworkConfiguration
     
     #Debugging

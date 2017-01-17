@@ -1,0 +1,55 @@
+/*
+ * This file is part of the NUbots Codebase.
+ *
+ * The NUbots Codebase is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * The NUbots Codebase is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with the NUbots Codebase.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ * Copyright 2013 NUBots <nubots@nubots.net>
+ */
+syntax = "proto3";
+
+package message.support.proto;
+
+import "Vector.proto";
+
+message FieldDescription {
+    message FieldDimensions {
+        double line_width             = 1;
+        double mark_width             = 2;
+        double field_length           = 3;
+        double field_width            = 4;
+        double goal_depth             = 5;
+        double goal_width             = 6;
+        double goal_area_length       = 7;
+        double goal_area_width        = 8;
+        double goal_crossbar_height   = 9;
+        double goalpost_diameter      = 10;
+        double goal_crossbar_diameter = 11;
+        double goal_net_height        = 12;
+        double penalty_mark_distance  = 13;
+        double center_circle_diameter = 14;
+        double border_strip_min_width = 15;
+    }
+
+    double          ball_radius         = 1;
+    double          goalpost_top_height = 2;
+    double          penalty_robot_start = 3;
+         
+    // Coordinates of goalpost centers calculated from the FieldDimensions:
+    vec2            goalpost_own_l      = 4;
+    vec2            goalpost_own_r      = 5;
+    vec2            goalpost_opp_l      = 6;
+    vec2            goalpost_opp_r      = 7;
+
+    FieldDimensions dimensions          = 8;
+}

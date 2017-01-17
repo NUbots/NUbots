@@ -24,12 +24,12 @@ package message.behaviour.proto;
 message Subsumption {
 
     enum Limb {
-        UNKNOWN = 0;
-        LEFT_LEG = 1;
+        UNKNOWN   = 0;
+        LEFT_LEG  = 1;
         RIGHT_LEG = 2;
-        LEFT_ARM = 3;
+        LEFT_ARM  = 3;
         RIGHT_ARM = 4;
-        HEAD = 5;
+        HEAD      = 5;
     }
 
     message LimbSet {

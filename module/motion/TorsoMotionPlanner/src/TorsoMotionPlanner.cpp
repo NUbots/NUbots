@@ -51,7 +51,7 @@ namespace motion
     using message::motion::Script;
     using message::motion::kinematics::KinematicsModel;
     using message::support::SaveConfiguration;
-    using message::support::Configuration;
+    using extension::Configuration;
 
     using utility::motion::kinematics::calculateLegJoints;
     using utility::math::matrix::Transform2D;

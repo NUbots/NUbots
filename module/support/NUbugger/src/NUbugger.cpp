@@ -20,10 +20,11 @@
 #include "NUbugger.h"
 
 #include "message/vision/LookUpTable.h"
-#include "message/support/Configuration.h"
+#include "extension/Configuration.h"
 #include "message/support/nubugger/proto/Ping.h"
 #include "message/support/nubugger/proto/ReactionHandles.h"
 #include "message/support/nubugger/proto/Command.h"
+#include "message/support/proto/SaveConfiguration.h"
 #include "message/vision/proto/LookUpTable.h"
 
 #include "utility/nubugger/NUhelpers.h"
@@ -36,7 +37,7 @@ namespace support {
 
     using utility::nubugger::graph;
 
-    using message::support::Configuration;
+    using extension::Configuration;
     using message::support::nubugger::proto::Ping;
     using message::support::nubugger::proto::ReactionHandles;
     using message::support::nubugger::proto::Command;
@@ -47,9 +48,8 @@ namespace support {
     using message::vision::SaveLookUpTable;
     using message::vision::Colour;
 
-    using message::support::SaveConfiguration;
+    using message::support::proto::SaveConfiguration;
 
-    using utility::time::getUtcTimestamp;
     using utility::time::durationFromSeconds;
 
     // Flag struct to upload a lut
@@ -115,7 +115,7 @@ namespace support {
                 fileEnabled = false;
             }
 
-            for (auto& setting : config["reaction_handles"]) {
+            for (auto& setting : config["reaction_handles"].config) {
                 // Lowercase the name
                 std::string name = setting.first.as<std::string>();
                 std::transform(name.begin(), name.end(), name.begin(), ::tolower);
@@ -229,8 +229,8 @@ namespace support {
             outputFile.close();
         });
 
-        on<Trigger<SaveConfiguration>>().then("Save Config",[this](const SaveConfiguration& config){
-            saveConfigurationFile(config.path,config.config);
+        on<Trigger<SaveConfiguration>>().then("Save Config",[this](const SaveConfiguration& /*config*/){
+            // TODO: saveConfigurationFile(config.path,config.config);
         });
     }
 

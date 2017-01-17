@@ -18,7 +18,7 @@
  */
 
 #include "HeadBehaviourSoccer.h"
-#include "message/support/Configuration.h"
+#include "extension/Configuration.h"
 #include "message/motion/HeadCommand.h"
 #include "utility/math/coordinates.h"
 #include "utility/motion/InverseKinematics.h"
@@ -46,7 +46,7 @@ namespace module {
         using message::vision::Goal;
         using message::vision::Ball;
         using message::vision::VisionObject;
-        using message::support::Configuration;
+        using extension::Configuration;
         // using message::localisation::Ball;
         using message::localisation::Self;
         using LocBall = message::localisation::Ball;

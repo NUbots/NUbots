@@ -16,33 +16,13 @@
  *
  * Copyright 2013 NUBots <nubots@nubots.net>
  */
+syntax = "proto3";
 
-#ifndef MESSAGE_MOTION_HEADCOMMAND_H
-#define MESSAGE_MOTION_HEADCOMMAND_H
+package message.support.proto;
 
-#include <armadillo>
+message SaveConfiguration {
+    string path = 1;
 
-namespace message {
-    namespace motion {
-
-        /**
-         * Tell the head where to look in world space.
-         * This command is interpreted such that the robot will use IMU data to fixate at these angles in the world even when rotating.
-         *
-         * @author Jake Fountain
-         */
-        struct HeadCommand {
-            float yaw;
-            float pitch;
-            bool robotSpace; // if true, the yaw and pitch are interpreted in robot space, instead of IMU space
-        };
-
-        struct HeadMotionUpdate
-        {
-            //TODO...
-        };
-
-    }  // motion
-}  // message
-
-#endif  // MESSAGE_MOTION_HEADCOMMAND_H
+    // TODO: How to represent a YAML file?
+    //YAML::Node config;
+}

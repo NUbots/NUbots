@@ -78,6 +78,7 @@ message GameState {
         google.protobuf.Timestamp secondary_time  = 8;
         Team team                                 = 9;
         Team opponent                             = 10;
+        Robot self                                = 11;
     }
 
     Data data = 1;

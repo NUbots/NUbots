@@ -19,7 +19,7 @@
 
 #include "NUPresenceInput.h"
 
-#include "message/support/Configuration.h"
+#include "extension/Configuration.h"
 #include "utility/support/yaml_armadillo.h"
 #include "utility/motion/InverseKinematics.h"
 #include "utility/motion/ForwardKinematics.h"
@@ -36,7 +36,7 @@
 namespace module {
 namespace motion {
 
-    using message::support::Configuration;
+    using extension::Configuration;
     using message::behaviour::RegisterAction;
     using message::behaviour::ActionPriorites;
     using message::input::ServoID;

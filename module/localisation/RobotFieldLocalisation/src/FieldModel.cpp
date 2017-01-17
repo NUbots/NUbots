@@ -23,6 +23,7 @@
 #include "utility/math/matrix/Transform3D.h"
 #include "utility/math/matrix/Transform2D.h"
 #include "utility/math/vision.h"
+#include "utility/support/eigen_armadillo.h"
 
 namespace module {
     namespace localisation {
@@ -32,9 +33,9 @@ namespace module {
         using utility::math::matrix::Transform2D;
         using utility::math::vision::cameraSpaceGoalProjection;
         using message::vision::Goal;
-        using message::support::FieldDescription;
-        using message::input::Sensors;
-        using message::input::ServoID;
+        using message::support::proto::FieldDescription;
+        using message::input::proto::Sensors;
+        using ServoID = message::input::proto::Sensors::ServoID::Value;
 
         arma::vec::fixed<FieldModel::size> FieldModel::timeUpdate(const arma::vec::fixed<size>& state, double /*deltaT*/) {
             return state;
@@ -54,8 +55,16 @@ namespace module {
             // Transform2D world = sensors.world.projectTo2D(arma::vec3({0,0,1}),arma::vec3({1,0,0}));
 
             //Transform2D world = sensors.world.projectTo2D(arma::vec3({0,0,1}),arma::vec3({1,0,0}));
-            Transform3D Htw = sensors.world;
-            Transform3D Htc = sensors.forwardKinematics.find(ServoID::HEAD_PITCH)->second;
+            Transform3D Htw = convert<double, 4, 4>(sensors.world);
+            Transform3D Htc;
+            for (const auto& entry : sensors.forwardKinematics)
+            {
+                if (entry.servoID == ServoID::HEAD_PITCH)
+                {
+                    Htc = convert<double, 4, 4>(entry.kinematics);
+                    break;
+                }
+            }
             Transform3D Hwc = Htw.i() * Htc;
             //Get the x/y position for goals
             arma::vec prediction(3*measurements.size());
@@ -71,11 +80,11 @@ namespace module {
                         //ans += " own";
                         switch(std::get<1>(type)) {
                             case Goal::Side::LEFT:
-                                goalLocation.rows(0,1) = field.goalpost_own_l;
+                                goalLocation.rows(0,1) = convert<double, 2>(field.goalpost_own_l);
                                 //ans += " left";
                                 break;
                             case Goal::Side::RIGHT:
-                                goalLocation.rows(0,1) = field.goalpost_own_r;
+                                goalLocation.rows(0,1) = convert<double, 2>(field.goalpost_own_r);
                                 //ans += " right";
                                 break;
                             case Goal::Side::UNKNOWN:
@@ -87,11 +96,11 @@ namespace module {
                         switch(std::get<1>(type)) {
                             case Goal::Side::LEFT:
                                 //ans += " left";
-                                goalLocation.rows(0,1) = field.goalpost_opp_l;
+                                goalLocation.rows(0,1) = convert<double, 2>(field.goalpost_opp_l);
                                 break;
                             case Goal::Side::RIGHT:
                                 //ans += " right";
-                                goalLocation.rows(0,1) = field.goalpost_opp_r;
+                                goalLocation.rows(0,1) = convert<double, 2>(field.goalpost_opp_r);
                                 break;
                             case Goal::Side::UNKNOWN:
                                 break;

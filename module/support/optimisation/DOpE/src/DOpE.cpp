@@ -24,7 +24,7 @@
 #include <google/protobuf/util/message_differencer.h>
 
 #include "utility/support/eigen_armadillo.h"
-#include "message/support/Configuration.h"
+#include "extension/Configuration.h"
 #include "message/support/optimisation/DOpE.h"
 #include "message/support/optimisation/Episode.h"
 #include "message/support/optimisation/Estimate.h"
@@ -40,7 +40,7 @@ namespace optimisation {
     using utility::math::optimisation::Optimiser;
     using utility::math::optimisation::OptimiserEstimate;
     using utility::math::optimisation::PGAOptimiser;
-    using message::support::Configuration;
+    using extension::Configuration;
     using message::support::optimisation::Episode;
     using message::support::optimisation::Estimate;
     using message::support::optimisation::RequestParameters;

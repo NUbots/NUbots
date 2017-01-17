@@ -19,7 +19,7 @@
 
 #include "VirtualCamera.h"
 
-#include "message/support/Configuration.h"
+#include "extension/Configuration.h"
 #include "message/input/CameraParameters.h"
 #include "message/input/Image.h"
 #include "utility/vision/fourcc.h"
@@ -27,7 +27,7 @@
 namespace module {
 namespace support {
 
-    using message::support::Configuration;
+    using extension::Configuration;
     using message::input::CameraParameters;
     using message::input::Image;
     using namespace utility::vision;

@@ -21,6 +21,7 @@ syntax = "proto3";
 
 package message.support.nubugger.proto;
 
+import "google/protobuf/timestamp.proto";
 import "message/behaviour/proto/Behaviour.proto";
 import "message/input/proto/GameState.proto";
 import "Vector.proto";
@@ -51,12 +52,12 @@ message Overview {
     input.proto.GameState.Data.PenaltyReason penalty_reason = 9;
 
     // Hardware
-    uint64 last_camera_image = 10;
+    google.protobuf.Timestamp last_camera_image = 10;
     // TODO: motor overloads?
 
     // Vision
-    uint64 last_seen_ball = 11;
-    uint64 last_seen_goal = 12;
+    google.protobuf.Timestamp last_seen_ball = 11;
+    google.protobuf.Timestamp last_seen_goal = 12;
 
     // Walk engine
     repeated vec2 path_plan = 16;

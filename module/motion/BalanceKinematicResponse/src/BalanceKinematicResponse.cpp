@@ -45,7 +45,7 @@ namespace motion
     using message::motion::DisableBalanceResponse;
     using message::motion::kinematics::KinematicsModel;
 
-    using message::support::Configuration;
+    using extension::Configuration;
     using utility::support::Expression;
 
     using utility::math::matrix::Transform2D;

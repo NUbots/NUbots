@@ -16,20 +16,9 @@
  *
  * Copyright 2013 NUBots <nubots@nubots.net>
  */
+syntax = "proto3";
 
-#ifndef MESSAGE_SUPPORT_GLOBALCONFIG_H
-#define MESSAGE_SUPPORT_GLOBALCONFIG_H
+package message.motion.proto;
 
-namespace message {
-namespace support {
-
-    // Field dimensions as defined in the Robocup rules:
-    struct GlobalConfig {
-        uint playerId;
-        uint teamId;
-    };
-
-}
-}
-
-#endif
+message ExecuteGetup {} 
+message KillGetup    {}

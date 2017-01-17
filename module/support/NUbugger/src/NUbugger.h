@@ -21,11 +21,14 @@
 #define MODULES_SUPPORT_NUBUGGER_H
 
 #include <nuclear>
-#include "message/localisation/FieldObject.h"
+#include <fstream>
+
+#include "message/localisation/proto/FieldObject.h"
 #include "message/input/proto/GameEvents.h"
+#include "message/input/proto/GameState.h"
 #include "message/support/nubugger/proto/Overview.h"
 #include "message/behaviour/proto/Subsumption.h"
-#include "message/support/Configuration.h"
+#include "extension/Configuration.h"
 
 namespace module {
     namespace support {
@@ -119,8 +122,8 @@ namespace module {
             }
 
             void EmitLocalisationModels(
-                const std::unique_ptr<message::localisation::FieldObject>& robot_model,
-                const std::unique_ptr<message::localisation::FieldObject>& ball_model);
+                const std::unique_ptr<message::localisation::proto::FieldObject>& robot_model,
+                const std::unique_ptr<message::localisation::proto::FieldObject>& ball_model);
 
             // message::support::nubugger::proto::Message::Type getMessageTypeFromString(std::string type_name);
             // std::string getStringFromMessageType(message::support::nubugger::proto::Message::Type type);

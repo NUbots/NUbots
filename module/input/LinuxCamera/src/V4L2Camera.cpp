@@ -36,7 +36,7 @@ namespace module {
 
         constexpr size_t numbuffers = 2;
 
-        using message::input::Image;
+        using message::input::proto::Image;
         using namespace utility::vision;
 
         V4L2Camera::V4L2Camera() : buffers(), fd(-1), width(0), height(0), settings(), deviceID(""), format(""), fourcc(FOURCC::UNKNOWN), streaming(false) {
@@ -128,7 +128,14 @@ namespace module {
             // }
 
             // Move this data into the image
-            return Image(deviceID, width, height, timestamp, fourcc, std::move(data));
+            Image image;
+            image.dimensions   << width, height;
+            image.format       = fourcc;
+            image.serialNumber = deviceID;
+            image.timestamp    = timestamp;
+            image.data         = std::move(data);
+            image.camera_id    = 0;
+            return image;
         }
 
         void V4L2Camera::resetCamera(const std::string& device, const std::string& fmt, const FOURCC& cc, size_t w, size_t h) {

@@ -24,7 +24,7 @@
 #include "message/motion/Script.h"
 #include "message/behaviour/Action.h"
 #include "message/behaviour/ServoCommand.h"
-#include "message/support/Configuration.h"
+#include "extension/Configuration.h"
 #include "message/motion/WalkCommand.h"
 
 namespace module {
@@ -34,7 +34,7 @@ namespace skills {
     struct ExecuteKick{};
     struct FinishKick{};
 
-    using message::support::Configuration;
+    using extension::Configuration;
 
     using message::input::LimbID;
     using message::input::ServoID;

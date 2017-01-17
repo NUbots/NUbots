@@ -18,26 +18,36 @@
  */
 
 #include "LUTClassifier.h"
+
+#include "utility/math/matrix/Transform3D.h"
 #include "utility/motion/ForwardKinematics.h"
+#include "utility/support/eigen_armadillo.h"
 
 namespace module {
     namespace vision {
 
-        using message::input::Image;
-        using message::input::ServoID;
-        using message::input::Sensors;
+        using message::input::proto::Image;
+        using ServoID = message::input::proto::Sensors::ServoID::Value;
         using message::vision::LookUpTable;
         using message::vision::ObjectClass;
         using message::vision::ClassifiedImage;
         using utility::math::matrix::Rotation3D;
+        using utility::math::matrix::Transform3D;
 
         void LUTClassifier::findHorizon(const Image& image, const LookUpTable&, ClassifiedImage<ObjectClass>& classifiedImage) {
 
                 auto& sensors = *classifiedImage.sensors;
 
                 // Get our transform to world coordinates
-                const Rotation3D& Rtw = sensors.world.rotation();
-                const Rotation3D& Rtc = sensors.forwardKinematics.find(ServoID::HEAD_PITCH)->second.rotation();
+                const Rotation3D& Rtw = Transform3D(convert<double, 4, 4>(sensors.world)).rotation();
+                Rotation3D Rtc;
+                for (const auto& entry : sensors.forwardKinematics)
+                {
+                    if (entry.servoID == ServoID::HEAD_PITCH)
+                    {
+                        Rtc = Transform3D(convert<double, 4, 4>(entry.kinematics)).rotation();
+                    }
+                }
                 Rotation3D Rcw =  Rtc.i() * Rtw;
 
                 // Rcw = Rotation3D::createRotationZ(-Rcw.yaw()) * Rcw;
@@ -48,7 +58,7 @@ namespace module {
 
 
                 // Move our axis to be at the top left of the screen
-                classifiedImage.horizon.distance = -classifiedImage.horizon.distanceToPoint({ -double(image.width) * 0.5, -double(image.height) * 0.5 });
+                classifiedImage.horizon.distance = -classifiedImage.horizon.distanceToPoint({ -double(image.dimensions[0]) * 0.5, -double(image.dimensions[1]) * 0.5 });
         }
 
     }  // vision

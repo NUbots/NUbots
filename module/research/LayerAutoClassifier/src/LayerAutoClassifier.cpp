@@ -20,16 +20,15 @@
 #include "LayerAutoClassifier.h"
 
 #include "message/research/AutoClassifierPixels.h"
-#include "message/support/Configuration.h"
+#include "extension/Configuration.h"
 #include "message/vision/LookUpTable.h"
 #include "message/vision/proto/LookUpTableDiff.h"
 
 namespace module {
 namespace research {
 
-    using message::input::Image;
     using message::research::AutoClassifierPixels;
-    using message::support::Configuration;
+    using extension::Configuration;
     using message::vision::LookUpTable;
     using message::vision::proto::LookUpTableDiff;
     using message::vision::Colour;
@@ -305,7 +304,7 @@ namespace research {
         on<Configuration>("LayerAutoClassifier.yaml").then([this](const Configuration& config) {
 
             //Loop through each classification char
-            for(auto& limit : config["limits"]) {
+            for(auto& limit : config["limits"].config) {
                 Colour c          = static_cast<Colour>(limit.first.as<char>());
                 maxVolume[c]      = limit.second["max_volume"].as<uint>();
                 maxSurfaceArea[c] = limit.second["surface_area_volume_ratio"].as<double>() * maxVolume[c];

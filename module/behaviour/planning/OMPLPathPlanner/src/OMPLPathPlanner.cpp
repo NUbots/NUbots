@@ -20,7 +20,7 @@
 #include "OMPLPathPlanner.h"
 
 #include <sstream>
-#include "message/support/Configuration.h"
+#include "extension/Configuration.h"
 #include "message/support/FieldDescription.h"
 #include "message/localisation/FieldObject.h"
 #include "message/vision/VisionObjects.h"
@@ -36,7 +36,7 @@
 namespace module {
 namespace behaviour {
 namespace planning {
-    using message::support::Configuration;
+    using extension::Configuration;
     using message::support::FieldDescription;
 
     using utility::nubugger::graph;

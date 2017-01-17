@@ -19,17 +19,21 @@
 
 #include "HeadController.h"
 
-#include "message/input/ServoID.h"
-#include "message/behaviour/Action.h"
-#include "message/behaviour/ServoCommand.h"
-#include "message/input/Sensors.h"
-#include "message/support/Configuration.h"
-#include "message/motion/HeadCommand.h"
+#include "extension/Configuration.h"
+
+#include "message/behaviour/proto/ServoCommand.h"
+#include "message/behaviour/proto/Subsumption.h"
+#include "message/input/proto/Sensors.h"
+#include "message/motion/proto/HeadCommand.h"
+#include "message/motion/proto/KinematicsModels.h"
+
+#include "utility/behaviour/Action.h"
 #include "utility/math/coordinates.h"
+#include "utility/math/matrix/Transform3D.h"
 #include "utility/motion/InverseKinematics.h"
-#include "message/motion/KinematicsModels.h"
-#include "utility/support/yaml_expression.h"
 #include "utility/nubugger/NUhelpers.h"
+#include "utility/support/eigen_armadillo.h"
+#include "utility/support/yaml_expression.h"
 
 
 namespace module 
@@ -37,18 +41,19 @@ namespace module
 namespace motion 
 {
         using utility::nubugger::graph;
-        using message::input::ServoID;
-        using message::input::Sensors;
-        using message::behaviour::RegisterAction;
-        using message::input::LimbID;
-        using message::support::Configuration;
-        using message::behaviour::ServoCommand;
-        using message::motion::HeadCommand;
+        using ServoID = message::input::proto::Sensors::ServoID::Value;
+        using LimbID = message::behaviour::proto::Subsumption::Limb::Value;
+        using message::input::proto::Sensors;
+        using utility::behaviour::RegisterAction;
+        using extension::Configuration;
+        using message::behaviour::proto::ServoCommand;
+        using message::motion::proto::HeadCommand;
         using utility::math::coordinates::sphericalToCartesian;
         using utility::math::coordinates::cartesianToSpherical;
+        using utility::math::matrix::Transform3D;
         using utility::motion::kinematics::calculateCameraLookJoints;
         using utility::motion::kinematics::calculateHeadJoints;
-        using message::motion::kinematics::KinematicsModel;
+        using message::motion::proto::KinematicsModel;
         using utility::support::Expression;
 
         //internal only callback messages to start and stop our action
@@ -103,7 +108,7 @@ namespace motion
                 //The goal angles are for the neck directly, so we have to offset the camera declination again
                 arma::vec3 goalHeadUnitVector_world = sphericalToCartesian({1, currentAngles[0], currentAngles[1]});
                 //Convert to robot space
-                arma::vec3 headUnitVector = goalRobotSpace ? goalHeadUnitVector_world : sensors.world.rotation() * goalHeadUnitVector_world;
+                arma::vec3 headUnitVector = goalRobotSpace ? goalHeadUnitVector_world : Transform3D(convert<double, 4, 4>(sensors.world)).rotation() * goalHeadUnitVector_world;
                 //Compute inverse kinematics for head
                 //!!!!!!!!!!!!!!
                 //!!!!!!!!!!!!!!
@@ -115,14 +120,14 @@ namespace motion
                 //!!!!!!!!!!!!!!
                 //!!!!!!!!!!!!!!
                 //!!!!!!!!!!!!!!
-                std::vector< std::pair<message::input::ServoID, float> > goalAnglesList = calculateHeadJoints(headUnitVector);
+                std::vector< std::pair<ServoID, float> > goalAnglesList = calculateHeadJoints(headUnitVector);
                 // arma::vec2 goalAngles = cartesianToSpherical(headUnitVector).rows(1,2);
 
                 //head limits
-                max_yaw = kinematicsModel.Head.MAX_YAW;
-                min_yaw = kinematicsModel.Head.MIN_YAW;
-                max_pitch = kinematicsModel.Head.MAX_PITCH;
-                min_pitch = kinematicsModel.Head.MIN_PITCH;
+                max_yaw = kinematicsModel.head.MAX_YAW;
+                min_yaw = kinematicsModel.head.MIN_YAW;
+                max_pitch = kinematicsModel.head.MAX_PITCH;
+                min_pitch = kinematicsModel.head.MIN_PITCH;
 
                 //Clamp head angles
                 float pitch = 0;
@@ -166,7 +171,6 @@ namespace motion
                 },
                 [this] (const std::set<ServoID>& ) { } //Servos reached target
             }));
-
         }
 
     }  // motion

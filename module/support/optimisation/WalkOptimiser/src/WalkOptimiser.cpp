@@ -42,7 +42,7 @@ namespace module {
             using message::motion::KillGetup;
 
             using message::support::SaveConfiguration;
-            using message::support::Configuration;
+            using extension::Configuration;
 
             WalkOptimiser::WalkOptimiser(std::unique_ptr<NUClear::Environment> environment)
                 : Reactor(std::move(environment)),

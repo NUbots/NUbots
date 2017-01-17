@@ -19,12 +19,8 @@
 
 #include "NUbugger.h"
 
-#include "utility/time/time.h"
-
 namespace module {
 namespace support {
-    using utility::time::getUtcTimestamp;
-
     using TeamColour     = message::input::proto::GameEvents::TeamColour;
     using Score          = message::input::proto::GameEvents::Score;
     using GoalScored     = message::input::proto::GameEvents::GoalScored;

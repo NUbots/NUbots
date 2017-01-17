@@ -24,7 +24,7 @@
 #include "message/motion/Script.h"
 #include "message/behaviour/Action.h"
 #include "message/behaviour/ServoCommand.h"
-#include "message/support/Configuration.h"
+#include "extension/Configuration.h"
 #include "message/input/Sensors.h"
 
 namespace module {
@@ -35,7 +35,7 @@ namespace module {
             struct Falling {};
             struct KillFalling {};
 
-            using message::support::Configuration;
+            using extension::Configuration;
             using message::input::Sensors;
             using message::input::ServoID;
             using message::motion::ExecuteScriptByName;

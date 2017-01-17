@@ -20,13 +20,13 @@
 #include "DC1394Camera.h"
 
 #include "message/input/Image.h"
-#include "message/support/Configuration.h"
+#include "extension/Configuration.h"
 #include "utility/error/dc1394_error_category.h"
 
 namespace module {
 namespace input {
 
-    using message::support::Configuration;
+    using extension::Configuration;
     using message::input::Image;
 
     DC1394Camera::DC1394Camera(std::unique_ptr<NUClear::Environment> environment)
