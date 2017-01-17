@@ -158,6 +158,11 @@ node nubotsvmbuild {
                        'creates'     => 'lib/libpybind11.so',
                        'require'     => [ Installer['eigen3'], Exec['PyPy_native_Files'], Exec['PyPy_NimbroOp_Files'], Exec['PyPy_DarwinOp_Files'], ],
                        'method'      => 'cmake',},
+    'fswatch'      => {'url'         => 'https://github.com/emcrisostomo/fswatch/archive/1.9.3.tar.gz',
+                       'args'        => { 'native'   => [ '', ],
+                                          'DarwinOp' => [ '--host=i686-linux-gnu', '--build=x86_64-unknown-linux-gnu', ],
+                                          'NimbroOp' => [ '', ], },
+                       'method'      => 'autotools', },
   }
 
   # Download each archive and spawn Installers for each one.

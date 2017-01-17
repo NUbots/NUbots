@@ -43,6 +43,8 @@ class dev_tools {
   package { 'libusb-1.0-0:i386': ensure => latest, }
   package { 'libusb-1.0-0-dev:amd64': ensure => latest, }
   package { 'libusb-1.0-0-dev:i386': ensure => latest, }
+  package { 'autopoint': ensure => latest, }
+  package { 'gettext': ensure => latest, }
 
   # System libraries
   package { 'libasound2-dev:amd64': ensure => latest, }
