@@ -30,7 +30,6 @@
 #include "utility/math/geometry/ParametricLine.h"
 #include "utility/math/angle.h"
 #include "utility/support/eigen_armadillo.h"
-#include "message/vision/VisionObjects.h"
 #include "message/support/proto/FieldDescription.h"
 
 
@@ -248,8 +247,6 @@ namespace vision {
             const utility::math::matrix::Transform3D& camToGround,
             const bool& failIfNegative = true) //camtoground is either camera to ground or camera to world, depending on application
     {
-        using message::vision::Goal;
-
         utility::math::matrix::Transform3D Hcf = getFieldToCam(robotPose,camToGround);
         //NOTE: this code assumes that goalposts are boxes with width and high of goalpost_diameter
         //make the base goal corners

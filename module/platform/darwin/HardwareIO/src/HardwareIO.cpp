@@ -20,10 +20,14 @@
 #include "HardwareIO.h"
 #include "Convert.h"
 
-#include "utility/math/angle.h"
-#include "message/platform/darwin/DarwinSensors.h"
-#include "message/motion/proto/ServoTarget.h"
 #include "extension/Configuration.h"
+
+#include "message/input/proto/Sensors.h"
+#include "message/motion/proto/ServoTarget.h"
+#include "message/platform/darwin/DarwinSensors.h"
+
+#include "utility/math/angle.h"
+#include "utility/platform/darwin/DarwinSensors.h"
 #include "utility/support/yaml_expression.h"
 
 
@@ -31,6 +35,7 @@ namespace module {
 namespace platform {
 namespace darwin {
 
+    using ServoID = message::input::proto::Sensors::ServoID::Value;
     using message::platform::darwin::DarwinSensors;
     using message::motion::proto::ServoTarget;
     using extension::Configuration;
@@ -47,7 +52,7 @@ namespace darwin {
          */
 
         // Read our Error code
-        sensors.cm730ErrorFlags = data.cm730ErrorCode == 0xFF ? DarwinSensors::Error::TIMEOUT : DarwinSensors::Error(data.cm730ErrorCode);
+        sensors.cm730ErrorFlags = data.cm730ErrorCode == 0xFF ? DarwinSensors::Error::TIMEOUT : DarwinSensors::Error(data.cm730ErrorCode).value;
 
         // LED Panel
         sensors.ledPanel = cm730State.ledPanel;
@@ -81,7 +86,7 @@ namespace darwin {
 
         // Right Sensor
         // Error
-        sensors.fsr.right.errorFlags = data.fsrErrorCodes[0] == 0xFF ? DarwinSensors::Error::TIMEOUT : DarwinSensors::Error(data.fsrErrorCodes[0]);
+        sensors.fsr.right.errorFlags = data.fsrErrorCodes[0] == 0xFF ? DarwinSensors::Error::TIMEOUT : DarwinSensors::Error(data.fsrErrorCodes[0]).value;
 
         // Sensors
         sensors.fsr.right.fsr1 = Convert::fsrForce(data.fsr[0].fsr1);
@@ -96,7 +101,7 @@ namespace darwin {
 
         // Left Sensor
         // Error
-        sensors.fsr.left.errorFlags = data.fsrErrorCodes[1] == 0xFF ? DarwinSensors::Error::TIMEOUT : DarwinSensors::Error(data.fsrErrorCodes[1]);
+        sensors.fsr.left.errorFlags = data.fsrErrorCodes[1] == 0xFF ? DarwinSensors::Error::TIMEOUT : DarwinSensors::Error(data.fsrErrorCodes[1]).value;
 
         // Sensors
         sensors.fsr.left.fsr1 = Convert::fsrForce(data.fsr[1].fsr1);
@@ -115,10 +120,10 @@ namespace darwin {
 
         for(int i = 0; i < 20; ++i) {
             // Get a reference to the servo we are populating
-            DarwinSensors::Servo& servo = sensors.servo[i];
+            DarwinSensors::Servo& servo = utility::platform::darwin::getDarwinServo(ServoID(i), sensors);
 
             // Error code
-            servo.errorFlags = data.servoErrorCodes[i] == 0xFF ? DarwinSensors::Error::TIMEOUT : DarwinSensors::Error(data.servoErrorCodes[i]);
+            servo.errorFlags = data.servoErrorCodes[i] == 0xFF ? DarwinSensors::Error::TIMEOUT : DarwinSensors::Error(data.servoErrorCodes[i]).value;
 
             // Booleans
             servo.torqueEnabled = servoState[i].torqueEnabled;
@@ -264,8 +269,9 @@ namespace darwin {
                   //dFactor = 10;
             for (const auto& command : commands) 
             {
+                DarwinSensors::Servo currentServo;
 
-                float diff = utility::math::angle::difference(command.position, sensors.servo[command.id.value].presentPosition);
+                float diff = utility::math::angle::difference(command.position, utility::platform::darwin::getDarwinServo(command.id.value, sensors).presentPosition);
                 NUClear::clock::duration duration = command.time - NUClear::clock::now();
 
                 //p = diff * pFactor;
@@ -317,7 +323,9 @@ namespace darwin {
             // Update our internal state
             cm730State.headLED = led;
 
-            darwin.cm730.write(Darwin::CM730::Address::LED_HEAD_L, Convert::colourLEDInverse(led.r, led.g, led.b));
+            darwin.cm730.write(Darwin::CM730::Address::LED_HEAD_L, Convert::colourLEDInverse(static_cast<uint8_t>((led.RGB & 0x00FF0000) >> 24), 
+                                                                                             static_cast<uint8_t>((led.RGB & 0x0000FF00) >>  8), 
+                                                                                             static_cast<uint8_t>( led.RGB & 0x000000FF)));
         });
 
         // If we get a EyeLED command then write it
@@ -325,7 +333,9 @@ namespace darwin {
             // Update our internal state
             cm730State.eyeLED = led;
 
-            darwin.cm730.write(Darwin::CM730::Address::LED_EYE_L, Convert::colourLEDInverse(led.r, led.g, led.b));
+            darwin.cm730.write(Darwin::CM730::Address::LED_EYE_L, Convert::colourLEDInverse(static_cast<uint8_t>((led.RGB & 0x00FF0000) >> 24), 
+                                                                                            static_cast<uint8_t>((led.RGB & 0x0000FF00) >>  8), 
+                                                                                            static_cast<uint8_t>( led.RGB & 0x000000FF)));
         });
     }
 }

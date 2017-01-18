@@ -86,13 +86,11 @@ namespace optimisation {
         op->group = "test_dope";
         op->network = true;
         op->parameters.initial.generation = 0;
-        op->parameters.initial.estimate = arma::vec(5, arma::fill::randu);
-        op->parameters.initial.covariance = arma::diagmat(arma::vec({ 0.1, 0.1, 0.1, 0.1, 0.1 }));
-        op->parameters.upperBound = arma::vec(5);
-        op->parameters.upperBound.fill(std::numeric_limits<double>::max());
-        op->parameters.lowerBound = arma::vec(5);
-        op->parameters.lowerBound.fill(std::numeric_limits<double>::min());
-        op->parameters.batchSize = 10;
+        op->parameters.initial.estimate   = convert<double>(arma::vec(5, arma::fill::randu));
+        op->parameters.initial.covariance = convert<double>(arma::diagmat(arma::vec({ 0.1, 0.1, 0.1, 0.1, 0.1 })));
+        op->parameters.upperBound         = Eigen::VectorXd::Constant(5, std::numeric_limits<double>::max());
+        op->parameters.lowerBound         = Eigen::VectorXd::Constant(5, std::numeric_limits<double>::min());
+        op->parameters.batchSize          = 10;
 
         emit<Scope::INITIALIZE>(op);
 

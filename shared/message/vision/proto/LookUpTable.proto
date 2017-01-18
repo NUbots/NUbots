@@ -22,9 +22,10 @@ syntax = "proto3";
 package message.vision.proto;
 
 message LookUpTable {
-    bytes table = 1;
-    uint32 bits_y = 2;
+    bytes  table   = 1;
+    uint32 bits_y  = 2;
     uint32 bits_cb = 3;
     uint32 bits_cr = 4;
-    bool save = 5;
 }
+
+message SaveLookUpTable {}

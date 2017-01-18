@@ -21,26 +21,28 @@
 
 #include "extension/Configuration.h"
 
-
-#include "message/input/ServoID.h"
-#include "message/motion/Script.h"
-#include "message/behaviour/Action.h"
-#include "message/behaviour/ServoCommand.h"
-#include "message/input/Sensors.h"
+#include "message/behaviour/proto/ServoCommand.h"
+#include "message/behaviour/proto/Subsumption.h"
+#include "message/input/proto/Sensors.h"
 #include "message/platform/darwin/DarwinSensors.h"
+
+#include "utility/behaviour/Action.h"
+#include "utility/motion/Script.h"
 
 namespace module {
 namespace behaviour {
 namespace tools {
 
     using extension::Configuration;
-    using message::input::ServoID;
-    using message::motion::ExecuteScriptByName;
-    using message::behaviour::RegisterAction;
-    using message::behaviour::ActionPriorites;
-    using message::input::LimbID;
+
+    using ServoID = message::input::proto::Sensors::ServoID::Value;
+    using LimbID  = message::behaviour::proto::Subsumption::Limb::Value;
     using message::platform::darwin::ButtonMiddleDown;
     using message::platform::darwin::ButtonLeftDown;
+
+    using utility::behaviour::RegisterAction;
+    using utility::behaviour::ActionPriorites;
+    using utility::motion::ExecuteScriptByName;
 
     Jump::Jump(std::unique_ptr<NUClear::Environment> environment)
     : Reactor(std::move(environment)) {

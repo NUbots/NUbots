@@ -49,8 +49,9 @@ namespace darwin {
 
         struct CM730State {
             message::platform::darwin::DarwinSensors::LEDPanel ledPanel = { false, false, false };
-            message::platform::darwin::DarwinSensors::HeadLED headLED = { 0x00, 0xFF, 0x00 };
-            message::platform::darwin::DarwinSensors::EyeLED eyeLED = { 0x00, 0x00, 0xFF };
+                                                                        //  0x00, 0xRR, 0xGG, 0xBB
+            message::platform::darwin::DarwinSensors::HeadLED headLED   = { 0x0000FF00 };
+            message::platform::darwin::DarwinSensors::EyeLED eyeLED     = { 0x000000FF };
         };
 
         struct ServoState {

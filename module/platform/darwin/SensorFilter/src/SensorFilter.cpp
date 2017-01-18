@@ -26,12 +26,13 @@
 #include "extension/Configuration.h"
 //#include "message/localisation/proto/ResetRobotHypotheses.h"
 
-#include "utility/support/yaml_armadillo.h"
-#include "utility/math/matrix/Rotation2D.h"
 #include "utility/math/geometry/UnitQuaternion.h"
-#include "utility/nubugger/NUhelpers.h"
+#include "utility/math/matrix/Rotation2D.h"
 #include "utility/motion/ForwardKinematics.h"
+#include "utility/nubugger/NUhelpers.h"
+#include "utility/platform/darwin/DarwinSensors.h"
 #include "utility/support/eigen_armadillo.h"
+#include "utility/support/yaml_armadillo.h"
 
 namespace module {
     namespace platform {
@@ -294,7 +295,7 @@ namespace module {
                     // Read through all of our sensors
                     for(uint i = 0; i < 20; ++i) 
                     {
-                        auto& original = input.servo[i];
+                        auto& original = utility::platform::darwin::getDarwinServo(ServoID(i), input);
                         auto& error = original.errorFlags;
 
                         // Check for an error on the servo and report it
@@ -418,8 +419,8 @@ namespace module {
                     sensors->led.push_back({ 0, uint32_t(input.ledPanel.led2 ? 0xFF0000 : 0) });
                     sensors->led.push_back({ 1, uint32_t(input.ledPanel.led3 ? 0xFF0000 : 0) });
                     sensors->led.push_back({ 2, uint32_t(input.ledPanel.led4 ? 0xFF0000 : 0) });
-                    sensors->led.push_back({ 3, uint32_t((input.headLED.r << 16) | (input.headLED.g << 8) | (input.headLED.b)) }); // Head
-                    sensors->led.push_back({ 4, uint32_t((input.eyeLED.r  << 16) | (input.eyeLED.g  << 8) | (input.eyeLED.b))  }); // Eye
+                    sensors->led.push_back({ 3, uint32_t(input.headLED.RGB) }); // Head
+                    sensors->led.push_back({ 4, uint32_t(input.eyeLED.RGB)  }); // Eye
 
                     /************************************************
                      *                  Kinematics                  *

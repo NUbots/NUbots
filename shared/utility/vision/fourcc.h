@@ -4,6 +4,8 @@
 #include <vector>
 #include <string>
 
+#include "Vision.h"
+
 namespace utility {
     namespace vision {
 
@@ -30,23 +32,6 @@ namespace utility {
             RGB3 = 0x33424752,
             JPEG = 0x4745504a,
             UNKNOWN = 0
-        };
-
-        struct Pixel {
-            union {
-                uint8_t r;
-                uint8_t y;
-            };
-            union {
-                uint8_t g;
-                uint8_t u;
-                uint8_t cb;
-            };
-            union {
-                uint8_t b;
-                uint8_t v;
-                uint8_t cr;
-            };
         };
 
         inline Pixel getGrey8Pixel(uint x, uint y, int width, int /*height*/, const std::vector<uint8_t>& data)

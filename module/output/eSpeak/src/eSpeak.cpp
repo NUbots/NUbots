@@ -35,21 +35,21 @@ namespace module {
             espeak_SetParameter(espeakVOLUME, 100, 0);
             espeak_SetParameter(espeakCAPITALS, 6, 0);
 
-            on<Trigger<Say>, Sync<eSpeak>>().then([](const Say& message) {
+            on<Trigger<Say>, Sync<eSpeak>>().then([](const Say& say) {
                 // Wait to finish the current message (if any)
                 // By waiting here this reaction can finish and return to the pool
                 // if it does not have to wait for another say message
                 espeak_Synchronize();
 
                 // Say the new message
-                espeak_Synth(message.c_str(),       // Text
-                             message.size() + 1,    // Size (including null at end)
-                             0,                     // Start position
-                             POS_CHARACTER,         // Position Type (irrelevant since we start at the beginning)
-                             0,                     // End position (0 means no end position)
-                             espeakCHARS_AUTO,      // Flags (auto encoding)
-                             nullptr,               // User identifier for callback
-                             nullptr                // Callback
+                espeak_Synth(say.message.c_str(),    // Text
+                             say.message.size() + 1, // Size (including null at end)
+                             0,                      // Start position
+                             POS_CHARACTER,          // Position Type (irrelevant since we start at the beginning)
+                             0,                      // End position (0 means no end position)
+                             espeakCHARS_AUTO,       // Flags (auto encoding)
+                             nullptr,                // User identifier for callback
+                             nullptr                 // Callback
                         );
             });
 

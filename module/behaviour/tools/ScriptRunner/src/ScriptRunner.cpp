@@ -19,19 +19,21 @@
 
 #include "ScriptRunner.h"
 
-#include "message/motion/Script.h"
-#include "message/behaviour/Action.h"
-#include "message/behaviour/ServoCommand.h"
+#include "utility/motion/Script.h"
+#include "utility/behaviour/Action.h"
+
+#include "message/behaviour/proto/Subsumption.h"
+#include "message/input/proto/Sensors.h"
 
 namespace module {
     namespace behaviour {
         namespace tools {
 
             using NUClear::message::CommandLineArguments;
-            using message::motion::ExecuteScriptByName;
-            using message::behaviour::RegisterAction;
-            using message::input::LimbID;
-            using message::input::ServoID;
+            using utility::motion::ExecuteScriptByName;
+            using utility::behaviour::RegisterAction;
+            using LimbID = message::behaviour::proto::Subsumption::Limb::Value;
+            using ServoID = message::input::proto::Sensors::ServoID::Value;
 
             struct ExecuteNextScript {};
 

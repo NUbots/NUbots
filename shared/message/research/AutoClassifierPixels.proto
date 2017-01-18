@@ -16,25 +16,11 @@
  *
  * Copyright 2013 NUBots <nubots@nubots.net>
  */
+syntax = "proto3";
 
-#ifndef MESSAGE_RESEARCH_AUTOCLASSIFIERPIXELS_H
-#define MESSAGE_RESEARCH_AUTOCLASSIFIERPIXELS_H
+package message.research;
 
-#include "utility/vision/fourcc.h"
-
-namespace message {
-namespace research {
-
-struct AutoClassifierPixels {
-    AutoClassifierPixels() : pixels(), classification() {}
-    std::vector<utility::vision::Pixel> pixels;
-    vision::Colour classification;
-};
-
+message AutoClassifierPixels {
+	repeated uint32 pixels         = 1;
+	uint32          classification = 2;
 }
-}
-
-#endif
-
-
-

@@ -17,8 +17,8 @@
  * Copyright 2013 NUBots <nubots@nubots.net>
  */
 
-#ifndef MESSAGE_SCRIPT_H
-#define MESSAGE_SCRIPT_H
+#ifndef UTILITY_SCRIPT_H
+#define UTILITY_SCRIPT_H
 
 #include <chrono>
 #include <yaml-cpp/yaml.h>
@@ -27,7 +27,7 @@
 
 #include "utility/input/ServoID.h"
 
-namespace message {
+namespace utility {
     namespace motion {
 
         using ServoID = message::input::proto::Sensors::ServoID::Value;

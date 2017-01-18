@@ -27,27 +27,25 @@
 
 #include "extension/Configuration.h"
 
-#include "message/behaviour/Action.h"
-#include "message/behaviour/ServoCommand.h"
-#include "message/behaviour/FixedWalkCommand.h"
+#include "message/behaviour/proto/FixedWalkCommand.h"
+#include "message/behaviour/proto/ServoCommand.h"
+#include "message/behaviour/proto/Subsumption.h"
 
-#include "message/input/Sensors.h"
-#include "message/input/PushDetection.h"
-#include "message/input/PostureRecognition.h"
+#include "message/input/proto/Sensors.h"
+#include "message/input/proto/PushDetection.h"
+#include "message/input/proto/PostureRecognition.h"
 
-#include "message/motion/KinematicsModels.h"
-#include "message/motion/WalkCommand.h"
-#include "message/motion/FootMotionCommand.h" 
-#include "message/motion/TorsoMotionCommand.h"  
-#include "message/motion/BalanceCommand.h" 
-#include "message/motion/HeadCommand.h" 
-#include "message/motion/ServoTarget.h"
-#include "message/motion/Script.h"
+#include "message/motion/proto/KinematicsModels.h"
+#include "message/motion/proto/WalkCommand.h"
+#include "message/motion/proto/FootMotionCommand.h" 
+#include "message/motion/proto/TorsoMotionCommand.h"  
+#include "message/motion/proto/BalanceCommand.h" 
+#include "message/motion/proto/HeadCommand.h" 
+#include "message/motion/proto/ServoTarget.h"
 
-#include "message/localisation/FieldObject.h"
+#include "message/localisation/proto/FieldObject.h"
 
-#include "utility/support/yaml_armadillo.h"
-#include "utility/support/yaml_expression.h"
+#include "utility/behaviour/Action.h"
 
 #include "utility/math/angle.h"
 #include "utility/math/matrix/Rotation3D.h"
@@ -58,8 +56,12 @@
 #include "utility/motion/Balance.h"
 #include "utility/motion/InverseKinematics.h"
 #include "utility/motion/ForwardKinematics.h"
+#include "utility/motion/Script.h"
 
 #include "utility/nubugger/NUhelpers.h"
+
+#include "utility/support/yaml_armadillo.h"
+#include "utility/support/yaml_expression.h"
 
 namespace module 
 {
@@ -83,10 +85,10 @@ namespace motion
 
         explicit BalanceKinematicResponse(std::unique_ptr<NUClear::Environment> environment);
     private:
-        using LimbID         = message::input::LimbID;
-        using ServoCommand   = message::behaviour::ServoCommand;
-        using Sensors        = message::input::Sensors;
-        using ServoID        = message::input::ServoID;
+        using LimbID         = message::behaviour::proto::Subsumption::Limb::Value;
+        using ServoCommand   = message::behaviour::proto::ServoCommand;
+        using Sensors        = message::input::proto::Sensors;
+        using ServoID        = message::input::proto::Sensors::ServoID::Value;
         using Transform2D    = utility::math::matrix::Transform2D;
         using Transform3D    = utility::math::matrix::Transform3D;
         using UnitQuaternion = utility::math::geometry::UnitQuaternion;
@@ -251,7 +253,7 @@ namespace motion
          * Balance & Kinematics module initialization...
          */
         utility::motion::Balancer balancer;                             //
-        message::motion::kinematics::KinematicsModel kinematicsModel;   //
+        message::motion::proto::KinematicsModel kinematicsModel;   //
 
         /**
          * Balance parameters initialized from configuration script, see config file for documentation...

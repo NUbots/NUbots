@@ -21,11 +21,14 @@
 
 #include "message/input/proto/CameraParameters.h"
 #include "message/support/proto/SaveConfiguration.h"
+#include "message/vision/proto/Colour.h"
+#include "message/vision/proto/Pixel.h"
 #include "message/vision/LookUpTable.h"
 #include "extension/Configuration.h"
 
 #include "utility/support/yaml_expression.h"
 #include "utility/support/eigen_armadillo.h"
+#include "utility/vision/Colour.h"
 #include "utility/vision/fourcc.h"
 
 #include "QuexClassifier.h"
@@ -35,7 +38,7 @@
 namespace module {
     namespace vision {
 
-        using namespace utility::vision;
+        using message::vision::proto::Pixel;
         using message::input::proto::Image;
         using ServoID = message::input::proto::Sensors::ServoID::Value;
         using message::input::proto::Sensors;
@@ -44,7 +47,7 @@ namespace module {
         using message::vision::SaveLookUpTable;
         using message::vision::ObjectClass;
         using message::vision::ClassifiedImage;
-        using message::vision::Colour;
+        using Colour = message::vision::proto::Colour::Colours::Value;
         using extension::Configuration;
         using message::support::proto::SaveConfiguration;
         using utility::support::Expression;
@@ -93,7 +96,7 @@ namespace module {
 
                             // Get our voxel
                             uint index = (((x << lut->BITS_CR) | y) << lut->BITS_CB) | z;
-                            char c = lut->getRawData()[index];
+                            char c = utility::vision::getColourCodeFromEnum(lut->getRawData()[index]);
 
                             // If this is a field voxel
                             if(c == Colour::GREEN) {

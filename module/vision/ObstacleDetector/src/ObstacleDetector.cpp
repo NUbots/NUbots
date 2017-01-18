@@ -20,44 +20,64 @@
 #include "ObstacleDetector.h"
 
 #include <armadillo>
-#include "message/vision/ClassifiedImage.h"
+
+#include "message/vision/proto/ClassifiedImage.h"
+
+#include "utility/support/eigen_armadillo.h"
+#include "utility/vision/ClassifiedImage.h"
 
 namespace module {
 namespace vision {
 
-    using message::vision::ObjectClass;
-    using message::vision::ClassifiedImage;
+    using message::vision::proto::ClassifiedImage;
+    using SegmentClass = ClassifiedImage::SegmentClass;
 
     ObstacleDetector::ObstacleDetector(std::unique_ptr<NUClear::Environment> environment)
         : Reactor(std::move(environment)) {
 
-        on<Trigger<ClassifiedImage<ObjectClass>>, Single>().then("Obstacle Detector", [this] (const ClassifiedImage<ObjectClass>& image) {
+        on<Trigger<ClassifiedImage>, Single>().then("Obstacle Detector", [this] (const ClassifiedImage& image) {
 
             std::vector<arma::ivec2> points;
 
             // Get all the segments that are relevant to finding an obstacle
-            for(int i = 0; i < 6; ++i) {
+            for(int i = 0; i < 6; ++i) 
+            {
+                std::vector<ClassifiedImage::Segments> segments;
+                const auto& sourceSegments = ((i % 2) == 0) ? image.horizontalSegments : image.verticalSegments;
 
-                auto segments = i == 0 ? image.horizontalSegments.equal_range(ObjectClass::UNKNOWN)
-                              : i == 1 ? image.verticalSegments.equal_range(ObjectClass::UNKNOWN)
-                              : i == 2 ? image.horizontalSegments.equal_range(ObjectClass::CYAN_TEAM)
-                              : i == 3 ? image.verticalSegments.equal_range(ObjectClass::CYAN_TEAM)
-                              : i == 4 ? image.horizontalSegments.equal_range(ObjectClass::MAGENTA_TEAM)
-                              : image.verticalSegments.equal_range(ObjectClass::MAGENTA_TEAM);
+                std::copy_if(sourceSegments.begin(), sourceSegments.end(), segments.end(), [&] (const ClassifiedImage::Segments& segments) -> bool
+                {
+                    if (((i == 0) || (i == 1)) && (segments.class.value == SegmentClass::UNKNOWN))
+                    {
+                        return(true);
+                    }
+                    
+                    if (((i == 2) || (i == 3)) && (segments.class.value == SegmentClass::CYAN_TEAM))
+                    {
+                        return(true);
+                    }
+                    
+                    if (((i == 4) || (i == 5)) && (segments.class.value == SegmentClass::MAGENTA_TEAM))
+                    {
+                        return(true);
+                    }
 
-                for(auto it = segments.first; it != segments.second; ++it) {
+                    return(false);
+                });
 
-                    auto& start = it->second.start;
-                    auto& end = it->second.end;
+                for (const auto& segment : segments)
+                {
+                    const auto& start = segment.segment.start;
+                    const auto& end   = segment.segment.end;
 
                     // Check if we have a subsequent segment
-                    if(it->second.previous && image.visualHorizonAtPoint(start[0]) < start[1]) {
-                        points.push_back(start);
+                    if(segment.segment.previous && utility::vision::visualHorizonAtPoint(start[0]) < start[1]) {
+                        points.push_back(convert<double, 2>(start));
                     }
 
                     // Check if we have a subsequent segment
-                    if(it->second.next && image.visualHorizonAtPoint(end[0]) < end[1]) {
-                        points.push_back(end);
+                    if(segment.segment.next && utility::vision::visualHorizonAtPoint(end[0]) < end[1]) {
+                        points.push_back(convert<double, 2>(end));
                     }
                 }
             }

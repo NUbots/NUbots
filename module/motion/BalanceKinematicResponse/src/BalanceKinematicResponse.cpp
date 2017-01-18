@@ -22,6 +22,9 @@
 //      INCLUDE(S)
 /*===========================================================================================================*/
 #include "BalanceKinematicResponse.h"
+
+#include "utility/support/eigen_armadillo.h"
+
 /*===========================================================================================================*/
 //      NAMESPACE(S)
 /*===========================================================================================================*/
@@ -32,18 +35,19 @@ namespace motion
 /*=======================================================================================================*/
 //      UTILIZATION REFERENCE(S)
 /*=======================================================================================================*/
-    using message::input::LimbID;
-    using message::input::Sensors;
-    using message::input::PushDetection;
-    using message::input::FallingDetected;
+    using ServoID = message::input::proto::Sensors::ServoID::Value;
+    using LimbID  = message::behaviour::proto::Subsumption::Limb::Value;
+    using message::input::proto::Sensors;
+    using message::input::proto::PushDetection;
+    using message::input::proto::FallingDetected;
 
-    using FootMotionUpdate  = message::motion::FootMotionUpdate;
-    using message::motion::HeadMotionUpdate;
-    using TorsoMotionUpdate = message::motion::TorsoMotionUpdate;
-    using message::motion::BalanceBodyUpdate;
-    using message::motion::EnableBalanceResponse;
-    using message::motion::DisableBalanceResponse;
-    using message::motion::kinematics::KinematicsModel;
+    using message::motion::proto::FootMotionUpdate;
+    using message::motion::proto::HeadMotionUpdate;
+    using message::motion::proto::TorsoMotionUpdate;
+    using message::motion::proto::BalanceBodyUpdate;
+    using message::motion::proto::EnableBalanceResponse;
+    using message::motion::proto::DisableBalanceResponse;
+    using message::motion::proto::KinematicsModel;
 
     using extension::Configuration;
     using utility::support::Expression;
@@ -133,20 +137,20 @@ namespace motion
         {
             // Torso Position is a queued evaluation... 
             if(DEBUG) { log<NUClear::TRACE>("Messaging: Balance Kinematic Response - Received Update (Active Torso Position) Info(0)"); }
-                setTorsoPositionLegs(tmu.frameArms);       
-                setTorsoPositionArms(tmu.frameLegs);             
-                setTorsoPosition3D(tmu.frame3D);                   
+                setTorsoPositionLegs(convert<double, 3>(tmu.frameArms));
+                setTorsoPositionArms(convert<double, 3>(tmu.frameLegs));
+                setTorsoPosition3D(convert<double, 4, 4>(tmu.frame3D));
             if(DEBUG) { log<NUClear::TRACE>("Messaging: Balance Kinematic Response - Received Update (Active Torso Position) Info(1)"); }        
             
             // Foot Position is a queued, continuous evaluation... 
             if(DEBUG) { log<NUClear::TRACE>("Messaging: Balance Kinematic Response - Received Update (Active Foot Position) Info(0)"); }              
-                setMotionPhase(fmu.phase);            
-                setActiveForwardLimb(fmu.activeForwardLimb);          
-                setLeftFootPosition2D(fmu.leftFoot2D);       
-                setRightFootPosition2D(fmu.rightFoot2D);                        
+                setMotionPhase(fmu.phase);
+                setActiveForwardLimb(fmu.activeForwardLimb);
+                setLeftFootPosition2D(convert<double, 3>(fmu.leftFoot2D));
+                setRightFootPosition2D(convert<double, 3>(fmu.rightFoot2D));
                 // Transform feet positions to be relative to the robot torso...            
-                setLeftFootPosition(fmu.leftFoot3D.worldToLocal(getTorsoPosition3D()));         
-                setRightFootPosition(fmu.rightFoot3D.worldToLocal(getTorsoPosition3D()));
+                setLeftFootPosition(Transform3D(convert<double, 4, 4>(fmu.leftFoot3D)).worldToLocal(getTorsoPosition3D()));
+                setRightFootPosition(Transform3D(convert<double, 4, 4>(fmu.rightFoot3D)).worldToLocal(getTorsoPosition3D()));
             if(DEBUG) { log<NUClear::TRACE>("Messaging: Balance Kinematic Response - Received Update (Active Foot Position) Info(1)"); }  
 
             // With a set of valid anthopomorphic data, balance posture and update WalkEngine...
@@ -269,11 +273,29 @@ namespace motion
             //Rotate foot around hip by the given hip roll compensation...
             if (getActiveForwardLimb() == LimbID::LEFT_LEG)
             {
-                setRightFootPosition(getRightFootPosition().rotateZLocal(-hipRollParameter * yBoundedMinimumPhase, sensors.forwardKinematics.find(ServoID::R_HIP_ROLL)->second));
+                arma::mat44 rHipRoll;
+                for (const auto& entry : sensors.forwardKinematics)
+                {
+                    if (entry.servoID == ServoID::R_HIP_ROLL)
+                    {
+                        rHipRoll = convert<double, 4, 4>(entry.kinematics);
+                        break;
+                    }
+                }
+                setRightFootPosition(getRightFootPosition().rotateZLocal(-hipRollParameter * yBoundedMinimumPhase, rHipRoll));
             }
             else 
             {
-                setLeftFootPosition(getLeftFootPosition().rotateZLocal( hipRollParameter  * yBoundedMinimumPhase, sensors.forwardKinematics.find(ServoID::L_HIP_ROLL)->second));
+                arma::mat44 lHipRoll;
+                for (const auto& entry : sensors.forwardKinematics)
+                {
+                    if (entry.servoID == ServoID::L_HIP_ROLL)
+                    {
+                        lHipRoll = convert<double, 4, 4>(entry.kinematics);
+                        break;
+                    }
+                }
+                setLeftFootPosition(getLeftFootPosition().rotateZLocal( hipRollParameter  * yBoundedMinimumPhase, lHipRoll));
             }
         }
     }
@@ -328,7 +350,7 @@ namespace motion
         //DEBUGGING: Emit relative torso position with respect to world model... 
         if (emitLocalisation) 
         {
-            localise(getTorsoPositionArms().localToWorld({-kinematicsModel.Leg.HIP_OFFSET_X, 0, 0}));
+            localise(getTorsoPositionArms().localToWorld({-kinematicsModel.leg.HIP_OFFSET_X, 0, 0}));
         }
 
         //DEBUGGING: Emit relative feet position with respect to robot torso model... 
@@ -339,7 +361,11 @@ namespace motion
         }  
 
         // Emit new robot posture once there has been valid data set in all relevant variables...
-        emit(std::make_unique<BalanceBodyUpdate>(getMotionPhase(), getLeftFootPosition(), getRightFootPosition(), getLArmPosition(), getRArmPosition()));
+        emit(std::make_unique<BalanceBodyUpdate>(getMotionPhase(), 
+                                                 convert<double, 4, 4>(getLeftFootPosition()), 
+                                                 convert<double, 4, 4>(getRightFootPosition()), 
+                                                 convert<double, 3>(getLArmPosition()), 
+                                                 convert<double, 3>(getRArmPosition())));
     } 
 /*=======================================================================================================*/
 //      METHOD: updateLowerBody
@@ -400,13 +426,13 @@ namespace motion
     void BalanceKinematicResponse::localise(Transform2D position)
     {
         // emit position as a fake localisation
-        auto localisation = std::make_unique<std::vector<message::localisation::Self>>();
-        message::localisation::Self self;
-        self.position = {position.x(), position.y()};
-        self.position_cov = arma::eye(2,2) * 0.1; // made up
-        self.heading = {std::cos(position.angle()), std::sin(position.angle())}; // convert to cartesian coordinates
-        self.velocity = arma::zeros(2); // not used
-        self.robot_to_world_rotation = arma::zeros(2,2); // not used
+        auto localisation = std::make_unique<std::vector<message::localisation::proto::Self>>();
+        message::localisation::proto::Self self;
+        self.locObject.position = {position.x(), position.y()};
+        self.locObject.position_cov = Eigen::Matrix2d::Identity() * 0.1; // made up
+        self.heading  << std::cos(position.angle()), std::sin(position.angle()); // convert to cartesian coordinates
+        self.velocity.setZero(); // not used
+        self.robot_to_world_rotation.setZero(); // not used
         localisation->push_back(self);
         emit(std::move(localisation));
     }    
@@ -432,10 +458,10 @@ namespace motion
         Transform2D uTorso = Transform2D({-getFootOffsetCoefficient(0), 0, 0});
         
         // Default Initial Left  Foot Position...
-        setLeftFootPosition2D(uTorso.localToWorld({getFootOffsetCoefficient(0), kinematicsModel.Leg.HIP_OFFSET_Y - getFootOffsetCoefficient(1), 0}));        
+        setLeftFootPosition2D(uTorso.localToWorld({getFootOffsetCoefficient(0), kinematicsModel.leg.HIP_OFFSET_Y - getFootOffsetCoefficient(1), 0}));        
         
         // Default Initial Right Foot Position...
-        setRightFootPosition2D(uTorso.localToWorld({getFootOffsetCoefficient(0), -kinematicsModel.Leg.HIP_OFFSET_Y + getFootOffsetCoefficient(1), 0}));
+        setRightFootPosition2D(uTorso.localToWorld({getFootOffsetCoefficient(0), -kinematicsModel.leg.HIP_OFFSET_Y + getFootOffsetCoefficient(1), 0}));
         
         Transform3D leftFootLocal  =  getLeftFootPosition2D();
         Transform3D rightFootLocal = getRightFootPosition2D();       
@@ -751,7 +777,7 @@ namespace motion
         bodyHeight   = body["height"].as<Expression>();
         bodyTilt     = body["tilt"].as<Expression>();
         setFootOffsetCoefficient(wlk_stance["foot_offset"].as<arma::vec>());
-        stanceLimitY2 = kinematicsModel.Leg.LENGTH_BETWEEN_LEGS - wlk_stance["limit_margin_y"].as<Expression>(); 
+        stanceLimitY2 = kinematicsModel.leg.LENGTH_BETWEEN_LEGS - wlk_stance["limit_margin_y"].as<Expression>(); 
         STAND_SCRIPT_DURATION = wlk_stance["STAND_SCRIPT_DURATION"].as<Expression>();   
 
         auto& walkCycle = wlk["walk_cycle"];

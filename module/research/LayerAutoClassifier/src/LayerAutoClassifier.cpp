@@ -31,7 +31,7 @@ namespace research {
     using extension::Configuration;
     using message::vision::LookUpTable;
     using message::vision::proto::LookUpTableDiff;
-    using message::vision::Colour;
+    using Colour = message::vision::proto::Colour::Colours::Value;
 
 
     /**
@@ -434,7 +434,7 @@ namespace research {
         .then([this] (const AutoClassifierPixels& pixels, const LookUpTable& lut) {
 
             // Some aliases
-            const auto& c = pixels.classification;
+            const auto& c = pixels.classification.value;
             auto& vol     = volume[c];
             auto& maxVol  = maxVolume[c];
             auto& sa      = surfaceArea[c];

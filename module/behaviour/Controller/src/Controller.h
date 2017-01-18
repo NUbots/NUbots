@@ -85,7 +85,7 @@ namespace module {
             /// The callback to execute when a new limb is started
             callback start;
             callback kill;
-            std::function<void (std::set<message::input::ServoID>)> completed;
+            std::function<void (std::set<message::input::proto::Sensors::ServoID::Value>)> completed;
         };
 
         struct RequestItem {
@@ -105,7 +105,7 @@ namespace module {
             bool active;
 
             float priority;
-            std::set<message::input::LimbID> limbSet;
+            std::set<message::behaviour::proto::Subsumption::Limb::Value> limbSet;
         };
 
         /**
@@ -121,7 +121,7 @@ namespace module {
             std::vector<std::reference_wrapper<RequestItem>> currentActions;
 
 
-            std::array<std::list<message::behaviour::ServoCommand>, 20> commandQueues;
+            std::array<std::list<message::behaviour::proto::ServoCommand>, 20> commandQueues;
 
             void selectAction();
         public:

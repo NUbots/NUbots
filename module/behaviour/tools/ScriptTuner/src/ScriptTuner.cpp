@@ -18,12 +18,17 @@
  */
 
 #include "ScriptTuner.h"
+
 #include "extension/Configuration.h"
+
+#include "message/behaviour/proto/Subsumption.h"
+#include "message/input/proto/Sensors.h"
+#include "message/motion/proto/ServoTarget.h"
 #include "message/platform/darwin/DarwinSensors.h"
-#include "message/motion/ServoTarget.h"
+
+#include "utility/behaviour/Action.h"
 #include "utility/math/angle.h"
 #include "utility/file/fileutil.h"
-#include "message/behaviour/Action.h"
 
 #include <ncurses.h>
 #include <cstdio>
@@ -33,13 +38,12 @@ namespace module {
     namespace behaviour {
         namespace tools {
             using NUClear::message::CommandLineArguments;
-            using message::motion::Script;
-            using message::motion::ExecuteScript;
-            using message::motion::Script;
-            using message::input::ServoID;
-            using message::motion::ServoTarget;
-            using message::behaviour::RegisterAction;
-            using message::input::LimbID;
+            using utility::motion::Script;
+            using utility::motion::ExecuteScript;
+            using message::motion::proto::ServoTarget;
+            using utility::behaviour::RegisterAction;
+            using LimbID = message::behaviour::proto::Subsumption::Limb::Value;
+            using ServoID = message::input::proto::Sensors::ServoID::Value;
             using message::platform::darwin::DarwinSensors;
 
             struct LockServo {};
@@ -81,7 +85,7 @@ namespace module {
 
                     Script::Frame::Target target;
 
-                    target.id = static_cast<message::input::ServoID>(id);
+                    target.id = static_cast<ServoID>(id);
                     target.position = sensors.servo[id].presentPosition;
                     target.gain = defaultGain;
                     target.torque = 100;
@@ -378,7 +382,7 @@ namespace module {
                     // Emit a waypoint so that the motor will turn off gain (go limp)
                     auto waypoint = std::make_unique<ServoTarget>();
                     waypoint->time = NUClear::clock::now();
-                    waypoint->id = static_cast<message::input::ServoID>(selection < 2 ? 18 + selection : selection - 2);
+                    waypoint->id = static_cast<ServoID>(selection < 2 ? 18 + selection : selection - 2);
                     waypoint->gain = 0;
                     waypoint->position = std::numeric_limits<float>::quiet_NaN();
                     waypoint->torque = 0;
@@ -492,7 +496,7 @@ namespace module {
                         if(it == std::end(script.frames[frame].targets)) {
                             it = script.frames[frame].targets.emplace(std::end(script.frames[frame].targets));
                             auto id = selection < 2 ? 18 + selection : selection - 2;
-                            it->id = static_cast<message::input::ServoID>(id);
+                            it->id = static_cast<ServoID>(id);
                             it->position = 0;
                             it->gain = defaultGain;
                         }
@@ -691,7 +695,8 @@ namespace module {
                             case ServoID::L_HIP_YAW:
                                 newFrame.targets.push_back({ ServoID::R_HIP_YAW, -target.position, target.gain, target.torque});
                                 break;
-                            case ServoID::NUMBER_OF_SERVOS:
+                            //case ServoID::NUMBER_OF_SERVOS:
+                            default:
                                 break;
                         }//end switch(target.id)
                     }
@@ -1004,7 +1009,8 @@ namespace module {
                                         target.gain = lowerGainS;
                                     }
                                     break;
-                                case ServoID::NUMBER_OF_SERVOS:
+                                //case ServoID::NUMBER_OF_SERVOS:
+                                default:
                                     break;
                             }
                         }
@@ -1043,7 +1049,8 @@ namespace module {
                                     target.gain = lowerGainF;
                                 }
                                 break;
-                            case ServoID::NUMBER_OF_SERVOS:
+                            //case ServoID::NUMBER_OF_SERVOS:
+                            default:
                                 break;
                         }
                     }

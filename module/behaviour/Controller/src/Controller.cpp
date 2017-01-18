@@ -19,19 +19,21 @@
 
 #include "Controller.h"
 
-#include "message/motion/ServoTarget.h"
+#include "message/motion/proto/ServoTarget.h"
+
+#include "utility/input/LimbID.h"
 
 namespace module {
     namespace behaviour {
 
-        using message::input::ServoID;
-        using message::motion::ServoTarget;
-        using message::behaviour::RegisterAction;
-        using message::behaviour::ActionPriorites;
-        using message::behaviour::ServoCommand;
-        using message::input::LimbID;
-        using message::behaviour::ActionStart;
-        using message::behaviour::ActionKill;
+        using ServoID = message::input::proto::Sensors::ServoID::Value;
+        using LimbID  = message::behaviour::proto::Subsumption::Limb::Value;
+        using message::motion::proto::ServoTarget;
+        using message::behaviour::proto::ServoCommand;
+        using utility::behaviour::RegisterAction;
+        using utility::behaviour::ActionPriorites;
+        using utility::behaviour::ActionStart;
+        using utility::behaviour::ActionKill;
 
         // So we don't need a huge long type declaration everywhere...
         using iterators = std::pair<std::vector<std::reference_wrapper<RequestItem>>::iterator, std::vector<std::reference_wrapper<RequestItem>>::iterator>;
@@ -142,10 +144,10 @@ namespace module {
                 for (auto& command : commands) {
 
                     // Check if we have access
-                    if (this->limbAccess[uint(message::input::limbForServo(command.id))] == command.source) {
+                    if (this->limbAccess[uint(utility::input::limbForServo(command.id))] == command.source) {
 
                         // Get our queue
-                        auto& queue = commandQueues[uint(command.id)];
+                        auto& queue = commandQueues[uint(command.id.value)];
 
                         // Clear commands until we get back one that we are after
                         while(!queue.empty() && queue.back().time > command.time) {
@@ -159,11 +161,11 @@ namespace module {
 
                         // If we don't have a source
                         if(source == requests.end()) {
-                            log<NUClear::WARN>("Motor command from unregistered source", command.source, "denied access: SERVO", int(command.id));
+                            log<NUClear::WARN>("Motor command from unregistered source", command.source, "denied access: SERVO", int(command.id.value));
                         }
                         else {
                             auto& name = requests.find(command.source)->second->name;
-                            log<NUClear::WARN>("Motor command (from ", name, ") denied access: SERVO ", int(command.id));
+                            log<NUClear::WARN>("Motor command (from ", name, ") denied access: SERVO ", int(command.id.value));
                         }
                     }
                 }
@@ -189,7 +191,7 @@ namespace module {
                         }
 
                         // Add to our waypoints
-                        waypoints->push_back({ command.time, command.id, command.position, command.gain, command.torque});
+                        waypoints->push_back({ command.time, command.id.value, command.position, command.gain, command.torque});
 
                         // Dirty hack the waypoint
                         command.source = 0;
@@ -222,7 +224,7 @@ namespace module {
                     for (auto& servo : emptiedQueues) {
 
                         // Get the lease holder on the limb this servo belongs to
-                        auto id = limbAccess[uint(message::input::limbForServo(servo))];
+                        auto id = limbAccess[uint(utility::input::limbForServo(servo))];
                         completeMap[id].insert(servo);
                     }
 
@@ -410,7 +412,7 @@ namespace module {
 
                 // Clear our queues for this limb
                 for(const auto& limb : k.second) {
-                    for (const auto& servo : message::input::servosForLimb(limb)) {
+                    for (const auto& servo : utility::input::servosForLimb(limb)) {
                         commandQueues[uint(servo)].clear();
                     }
                 }

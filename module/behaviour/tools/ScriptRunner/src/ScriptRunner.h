@@ -23,7 +23,7 @@
 #include <nuclear>
 #include <queue>
 
-#include "message/motion/Script.h"
+#include "utility/motion/Script.h"
 
 namespace module {
     namespace behaviour {
