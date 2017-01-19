@@ -52,7 +52,7 @@ class Message:
     def generate_rule_of_five(self):
 
         raw_pointer = [v.name for v in self.fields if v.pointer and v.pointer == PointerType['RAW']]
-        raw_pointer_warning = '#warning "The following fields in {0} are raw pointers and copying or moving will copy the raw pointer address: {1}"\n'.format(self.name, raw_pointer) 
+        raw_pointer_warning = '#pragma message ( "WARNING: The following fields in {0} are raw pointers and copying or moving will copy the raw pointer address: {1}") \n'.format(self.name, ', '.join(raw_pointer)) 
 
         rule_of_five = dedent("""{warning}\
             {name}(const {name}&) = default;
@@ -163,11 +163,11 @@ class Message:
                     lines.append(indent('for (auto& _v : {}) {{'.format(v.name)))
 
                     if v.type[1].bytes_type:
-                        lines.append(indent('(*proto.mutable_{}())[_v.first].append(std::begin(_v.second), std::end(_v.second));'.format(v.name), 8))
+                        lines.append(indent('(*proto.mutable_{}())[_v.first].append(std::begin(_v.second), std::end(_v.second));'.format(v.name.lower()), 8))
                     elif v.type[1].special_cpp_type:
-                        lines.append(indent('message::conversion::convert((*proto.mutable_{}())[_v.first], _v.second);'.format(v.name), 8))
+                        lines.append(indent('message::conversion::convert((*proto.mutable_{}())[_v.first], _v.second);'.format(v.name.lower()), 8))
                     else: # Basic and others are handled the same
-                        lines.append(indent('(*proto.mutable_{}())[_v.first] = _v.second;'.format(v.name), 8))
+                        lines.append(indent('(*proto.mutable_{}())[_v.first] = _v.second;'.format(v.name.lower()), 8))
 
                     lines.append(indent('}'))
 
