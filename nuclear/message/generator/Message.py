@@ -1,9 +1,8 @@
 #!/usr/bin/env python3
 
 from generator.textutil import indent, dedent
-from generator.Field import Field
+from generator.Field import Field, PointerType
 from generator.Enum import Enum
-
 
 class Message:
     def __init__(self, m, context):
@@ -49,6 +48,20 @@ class Message:
 
             return ('{}({});'.format(self.name, default_field_list),
                     '{}::{}({}) : {} {{}}'.format(cpp_fqn, self.name, field_list, field_set))
+
+    def generate_rule_of_five(self):
+
+        raw_pointer = [v.name for v in self.fields if v.pointer and v.pointer == PointerType['RAW']]
+        raw_pointer_warning = '#warning "The following fields in {0} are raw pointers and copying or moving will copy the raw pointer address: {1}"\n'.format(self.name, raw_pointer) 
+
+        rule_of_five = dedent("""{warning}\
+            {name}(const {name}&) = default;
+            {name}({name}&&) = default;
+            ~{name}() = default;
+            {name}& operator=(const {name}&) = default;
+            {name}& operator=({name}&&) = default;""")
+
+        return (rule_of_five.format(name=self.name, warning=raw_pointer_warning if raw_pointer else ''), '')
 
     def generate_protobuf_constructor(self):
 
@@ -210,10 +223,11 @@ class Message:
 
         # Get our function code
         default_constructor = self.generate_default_constructor()
+        rule_of_five = self.generate_rule_of_five()
         protobuf_constructor = self.generate_protobuf_constructor()
         protobuf_converter = self.generate_protobuf_converter()
 
-        constructor_headers = indent('\n\n'.join([default_constructor[0], protobuf_constructor[0]]))
+        constructor_headers = indent('\n\n'.join([default_constructor[0], rule_of_five[0], protobuf_constructor[0]]))
         constructor_impl = '\n\n'.join([default_constructor[1], protobuf_constructor[1]])
         converter_headers = indent('\n\n'.join([protobuf_converter[0]]))
         converter_impl = '\n\n'.join([protobuf_converter[1]])
