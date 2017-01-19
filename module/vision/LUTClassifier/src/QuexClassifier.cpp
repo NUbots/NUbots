@@ -21,23 +21,26 @@
 
 #include <iostream>
 
+#include "utility/support/eigen_armadillo.h"
 #include "utility/vision/fourcc.h"
+#include "utility/vision/LookUpTable.h"
+#include "utility/vision/Vision.h"
 
 namespace module {
     namespace vision {
         using message::input::proto::Image;
-        using message::vision::LookUpTable;
-        using message::vision::ObjectClass;
-        using message::vision::ClassifiedImage;
+        using message::vision::proto::LookUpTable;
+        using message::vision::proto::ClassifiedImage;
+        using SegmentClass = message::vision::proto::ClassifiedImage::SegmentClass::Value;
         using quex::Token;
-        using namespace utility::vision;
+        using FOURCC = utility::vision::FOURCC;
 
         QuexClassifier::QuexClassifier()
             : lexer(buffer, BUFFER_SIZE, buffer + 1)
             , tknNumber(lexer.token_p()->number) {
         }
 
-        std::vector<ClassifiedImage<ObjectClass>::Segment> QuexClassifier::classify(const Image& image, const LookUpTable& lut, const arma::ivec2& start, const arma::ivec2& end, const uint& subsample) {
+        std::vector<ClassifiedImage::Segment> QuexClassifier::classify(const Image& image, const LookUpTable& lut, const arma::ivec2& start, const arma::ivec2& end, const uint& subsample) {
 
             // Start reading data
             lexer.buffer_fill_region_prepare();
@@ -48,7 +51,8 @@ namespace module {
                 size_t length = end[1] - start[1] + 1;
 
                 for(uint i = 0; i < length / subsample; ++i) {
-                    buffer[i + 1] = lut(getPixel(start[0], start[1] + (i * subsample), image.dimensions[0], image.dimensions[1], image.data, static_cast<FOURCC>(image.format)));
+                    buffer[i + 1] = static_cast<uint8_t>(utility::vision::getPixelColour(lut, 
+                        utility::vision::getPixel(start[0], start[1] + (i * subsample), image.dimensions[0], image.dimensions[1], image.data, static_cast<FOURCC>(image.format))));
                 }
 
                 lexer.buffer_fill_region_finish(length / subsample);
@@ -60,7 +64,8 @@ namespace module {
                 size_t length = end[0] - start[0] + 1;
 
                 for(uint i = 0; i < length / subsample; ++i) {
-                    buffer[i + 1] = lut(getPixel(start[0] + (i * subsample), start[1], image.dimensions[0], image.dimensions[1], image.data, static_cast<FOURCC>(image.format)));
+                    buffer[i + 1] = static_cast<uint8_t>(utility::vision::getPixelColour(lut, 
+                        utility::vision::getPixel(start[0] + (i * subsample), start[1], image.dimensions[0], image.dimensions[1], image.data, static_cast<FOURCC>(image.format))));
                 }
 
                 lexer.buffer_fill_region_finish(length / subsample);
@@ -72,7 +77,7 @@ namespace module {
             }
 
             // Our output
-            std::vector<ClassifiedImage<ObjectClass>::Segment> output;
+            std::vector<ClassifiedImage::Segment> output;
             output.reserve(64);
 
             // Our vector of position
@@ -91,31 +96,31 @@ namespace module {
 
                 switch(typeID) {
                     case QUEX_TKN_FIELD:
-                        output.push_back({ObjectClass::FIELD, len, subsample, s, position, m, nullptr, nullptr});
+                        output.push_back(ClassifiedImage::Segment(SegmentClass::FIELD, len, subsample, convert<int, 2>(s), convert<int, 2>(position), convert<int, 2>(m), nullptr, nullptr));
                         break;
 
                     case QUEX_TKN_BALL:
-                        output.push_back({ObjectClass::BALL, len, subsample, s, position, m, nullptr, nullptr});
+                        output.push_back(ClassifiedImage::Segment(SegmentClass::BALL, len, subsample, convert<int, 2>(s), convert<int, 2>(position), convert<int, 2>(m), nullptr, nullptr));
                         break;
 
                     case QUEX_TKN_GOAL:
-                        output.push_back({ObjectClass::GOAL, len, subsample, s, position, m, nullptr, nullptr});
+                        output.push_back(ClassifiedImage::Segment(SegmentClass::GOAL, len, subsample, convert<int, 2>(s), convert<int, 2>(position), convert<int, 2>(m), nullptr, nullptr));
                         break;
 
                     case QUEX_TKN_LINE:
-                        output.push_back({ObjectClass::LINE, len, subsample, s, position, m, nullptr, nullptr});
+                        output.push_back(ClassifiedImage::Segment(SegmentClass::LINE, len, subsample, convert<int, 2>(s), convert<int, 2>(position), convert<int, 2>(m), nullptr, nullptr));
                         break;
 
                     case QUEX_TKN_CYAN_TEAM:
-                        output.push_back({ObjectClass::CYAN_TEAM, len, subsample, s, position, m, nullptr, nullptr});
+                        output.push_back(ClassifiedImage::Segment(SegmentClass::CYAN_TEAM, len, subsample, convert<int, 2>(s), convert<int, 2>(position), convert<int, 2>(m), nullptr, nullptr));
                         break;
 
                     case QUEX_TKN_MAGENTA_TEAM:
-                        output.push_back({ObjectClass::MAGENTA_TEAM, len, subsample, s, position, m, nullptr, nullptr});
+                        output.push_back(ClassifiedImage::Segment(SegmentClass::MAGENTA_TEAM, len, subsample, convert<int, 2>(s), convert<int, 2>(position), convert<int, 2>(m), nullptr, nullptr));
                         break;
 
                     case QUEX_TKN_UNCLASSIFIED:
-                        output.push_back({ObjectClass::UNKNOWN, len, subsample, s, position, m, nullptr, nullptr});
+                        output.push_back(ClassifiedImage::Segment(SegmentClass::UNKNOWN_CLASS, len, subsample, convert<int, 2>(s), convert<int, 2>(position), convert<int, 2>(m), nullptr, nullptr));
                         break;
                 }
             }

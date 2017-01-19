@@ -28,8 +28,8 @@
 
 #include "utility/support/yaml_expression.h"
 #include "utility/support/eigen_armadillo.h"
-#include "utility/vision/Colour.h"
 #include "utility/vision/fourcc.h"
+#include "utility/vision/Vision.h"
 
 #include "QuexClassifier.h"
 
@@ -43,29 +43,29 @@ namespace module {
         using ServoID = message::input::proto::Sensors::ServoID::Value;
         using message::input::proto::Sensors;
         using message::input::proto::CameraParameters;
-        using message::vision::LookUpTable;
-        using message::vision::SaveLookUpTable;
-        using message::vision::ObjectClass;
-        using message::vision::ClassifiedImage;
-        using Colour = message::vision::proto::Colour::Colours::Value;
+        using message::vision::proto::LookUpTable;
+        using message::vision::proto::SaveLookUpTable;
+        using message::vision::proto::ClassifiedImage;
+        using Colour = utility::vision::Colour;
         using extension::Configuration;
         using message::support::proto::SaveConfiguration;
         using utility::support::Expression;
 
-        void LUTClassifier::insertSegments(ClassifiedImage<ObjectClass>& image, std::vector<ClassifiedImage<ObjectClass>::Segment>& segments, bool vertical) {
-            ClassifiedImage<ObjectClass>::Segment* previous = nullptr;
-            ClassifiedImage<ObjectClass>::Segment* current = nullptr;
+        void LUTClassifier::insertSegments(ClassifiedImage& image, std::vector<ClassifiedImage::Segment>& segments, bool vertical) {
+            ClassifiedImage::Segment* previous = nullptr;
+            ClassifiedImage::Segment* current = nullptr;
 
             auto& target = vertical ? image.verticalSegments : image.horizontalSegments;
 
-            for (auto& s : segments) {
+            for (auto& segment : segments) {
 
                 // Move in the data
-                current = &(target.insert(std::make_pair(s.colour, std::move(s)))->second);
+                current = &segment;
 
                 // Link up the results
                 current->previous = previous;
-                if(previous) {
+
+                if (previous) {
                     previous->next = current;
                 }
 
@@ -96,10 +96,10 @@ namespace module {
 
                             // Get our voxel
                             uint index = (((x << lut->BITS_CR) | y) << lut->BITS_CB) | z;
-                            char c = utility::vision::getColourCodeFromEnum(lut->getRawData()[index]);
+                            char c = lut->table[index];
 
                             // If this is a field voxel
-                            if(c == Colour::GREEN) {
+                            if (c == Colour::GREEN) {
                                 // Get our LUT pixel for this index
                                 Pixel p = lut->getPixelFromIndex(index);
 
@@ -176,10 +176,10 @@ namespace module {
                 const auto& image = *rawImage;
 
                 // Our classified image
-                auto classifiedImage = std::make_unique<ClassifiedImage<ObjectClass>>();
+                auto classifiedImage = std::make_unique<ClassifiedImage>();
 
                 // Set our width and height
-                classifiedImage->dimensions = convert<uint, 2>(image.dimensions);
+                classifiedImage->dimensions = image.dimensions;
 
                 // Attach our sensors
                 // std::cout << "sensor-vision latency = " << std::chrono::duration_cast<std::chrono::microseconds>(NUClear::clock::now() - sensors->timestamp).count() << std::endl;

@@ -39,19 +39,14 @@ message ClassifiedImage {
     }
 
     message Segment {
-        uint32  colour    = 1;
-        uint32  length    = 2;
-        uint32  subsample = 3;
-        ivec2   start     = 4;
-        ivec2   end       = 5;
-        ivec2   midpoint  = 6;
-        Segment previous  = 7 [(pointer) = RAW];
-        Segment next      = 8 [(pointer) = RAW];
-    }
-
-    message Segments {
-        SegmentClass class   = 1;
-        Segment      segment = 2;
+        SegmentClass segmentClass = 1;
+        uint32       length       = 2;
+        uint32       subsample    = 3;
+        ivec2        start        = 4;
+        ivec2        end          = 5;
+        ivec2        midpoint     = 6;
+        Segment      previous     = 7 [(pointer) = RAW];
+        Segment      next         = 8 [(pointer) = RAW];
     }
 
     message SeedPoints {
@@ -82,8 +77,8 @@ message ClassifiedImage {
     repeated ivec2            minVisualHorizon   = 9;
 
     // Our segments, split into vertical and horizontal components
-    repeated Segments         horizontalSegments = 10;
-    repeated Segments         verticalSegments   = 11;
+    repeated Segment          horizontalSegments = 10;
+    repeated Segment          verticalSegments   = 11;
     //map<uint32, Segment>      horizontalSegments = 10;
     //map<uint32, Segment>      verticalSegments   = 11;
 }

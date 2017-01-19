@@ -32,25 +32,25 @@ namespace motion
 /*=======================================================================================================*/
 //      UTILIZATION REFERENCE(S)
 /*=======================================================================================================*/
-    using message::input::ServoID;
-    using message::input::Sensors;
-    using message::input::LimbID;
-    using message::behaviour::ServoCommand;
-    using message::behaviour::WalkOptimiserCommand;
-    using message::behaviour::WalkConfigSaved;
+
+    using ServoID        = message::input::proto::Sensors::ServoID::Value;
+    using Sensors        = message::input::proto::Sensors;
+    using LimbID         = message::behaviour::proto::Subsumption::Limb::Value;
+    using ServoCommand   = message::behaviour::proto::ServoCommand;
+    using message::behaviour::proto::WalkOptimiserCommand;
+    using message::behaviour::proto::WalkConfigSaved;
     // using message::behaviour::RegisterAction;
     // using message::behaviour::ActionPriorites;
-    using message::motion::WalkCommand;
-    using NextFootTargetInfo = message::motion::NextFootTargetInfo;
-    using FootMotionUpdate   = message::motion::FootMotionUpdate;
-    using message::motion::FootStepCompleted;
-    using message::motion::TorsoMotionUpdate;
-    using message::motion::EnableTorsoMotion;
-    using message::motion::DisableTorsoMotion;
-    using message::motion::ServoTarget;
-    using message::motion::Script;
-    using message::motion::kinematics::KinematicsModel;
-    using message::support::SaveConfiguration;
+    using message::motion::proto::WalkCommand;
+    using NextFootTargetInfo = message::motion::proto::NextFootTargetInfo;
+    using FootMotionUpdate   = message::motion::proto::FootMotionUpdate;
+    using message::motion::proto::FootStepCompleted;
+    using message::motion::proto::TorsoMotionUpdate;
+    using message::motion::proto::EnableTorsoMotion;
+    using message::motion::proto::DisableTorsoMotion;
+    using message::motion::proto::ServoTarget;
+    using message::motion::proto::KinematicsModel;
+    using message::support::proto::SaveConfiguration;
     using extension::Configuration;
 
     using utility::motion::kinematics::calculateLegJoints;
@@ -58,6 +58,7 @@ namespace motion
     using utility::math::matrix::Transform3D;
     using utility::math::matrix::Rotation3D;
     using utility::math::angle::normalizeAngle;
+    using utility::motion::Script;
     using utility::nubugger::graph;
     using utility::support::Expression;  
 /*=======================================================================================================*/
@@ -118,10 +119,10 @@ namespace motion
 
             // Foot Target Data queued evaluation...
             if(DEBUG) { log<NUClear::TRACE>("Messaging: Torso Motion Planner - Received Footstep Info(0)"); }          
-                setLeftFootSource(nft.leftFootSource);             //Queued    : FPP
-                setRightFootSource(nft.rightFootSource);           //Queued    : FPP
-                setLeftFootDestination(nft.leftFootDestination);   //Queued    : FPP                 
-                setRightFootDestination(nft.rightFootDestination); //Queued    : FPP               
+                setLeftFootSource(convert<double, 3>(nft.leftFootSource));             //Queued    : FPP
+                setRightFootSource(convert<double, 3>(nft.rightFootSource));           //Queued    : FPP
+                setLeftFootDestination(convert<double, 3>(nft.leftFootDestination));   //Queued    : FPP                 
+                setRightFootDestination(convert<double, 3>(nft.rightFootDestination)); //Queued    : FPP               
             if(DEBUG) { log<NUClear::TRACE>("Messaging: Torso Motion Planner - Received Footstep Info(1)"); }
 
              // Update Torso Positions...
@@ -151,9 +152,9 @@ namespace motion
     {
         setTorsoPositionArms(zmpTorsoCompensation(getMotionPhase(), zmpTorsoCoefficients(), getZmpParams(), stepTime, zmpTime, phase1Single, phase2Single, getLeftFootSource(), getRightFootSource()));
 //std::cout << "\n\rTorso Position (Arms)\t[X= " << getTorsoPositionArms().x() << "]\t[Y= " << getTorsoPositionArms().y() << "]\n\r";         
-        setTorsoPositionLegs(getTorsoPositionArms().localToWorld({-kinematicsModel.Leg.HIP_OFFSET_X, 0, 0}));
+        setTorsoPositionLegs(getTorsoPositionArms().localToWorld({-kinematicsModel.leg.HIP_OFFSET_X, 0, 0}));
 //std::cout << "Torso Position (Legs)\t[X= " << getTorsoPositionLegs().x() << "]\t[Y= " << getTorsoPositionLegs().y() << "]\n\r";                 
-        Transform2D uTorsoWorld = getTorsoPositionArms().localToWorld({-kinematicsModel.Leg.HIP_OFFSET_X, 0, 0});
+        Transform2D uTorsoWorld = getTorsoPositionArms().localToWorld({-kinematicsModel.leg.HIP_OFFSET_X, 0, 0});
         setTorsoPosition3D(arma::vec6({uTorsoWorld.x(), uTorsoWorld.y(), bodyHeight, 0, bodyTilt, uTorsoWorld.angle()}));
         emit(std::make_unique<TorsoMotionUpdate>(getTorsoPositionArms(), getTorsoPositionLegs(), getTorsoPosition3D(), getTorsoDestination()));
     }
@@ -416,7 +417,7 @@ namespace motion
         bodyHeight   = body["height"].as<Expression>();
         bodyTilt     = body["tilt"].as<Expression>();
         setFootOffsetCoefficient(stance["foot_offset"].as<arma::vec>());
-        stanceLimitY2 = kinematicsModel.Leg.LENGTH_BETWEEN_LEGS - stance["limit_margin_y"].as<Expression>(); 
+        stanceLimitY2 = kinematicsModel.leg.LENGTH_BETWEEN_LEGS - stance["limit_margin_y"].as<Expression>(); 
         STAND_SCRIPT_DURATION = stance["STAND_SCRIPT_DURATION"].as<Expression>();  
 
         auto& tmp_walkCycle = tmp["walk_cycle"];

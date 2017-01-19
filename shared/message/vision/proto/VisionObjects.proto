@@ -1,3 +1,4 @@
+
 /*
  * This file is part of the NUbots Codebase.
  *
@@ -23,12 +24,76 @@ package message.vision.proto;
 import "google/protobuf/timestamp.proto";
 import "Neutron.proto";
 import "Vector.proto";
-
+import "Matrix.proto";
 import "message/Geometry.proto";
 import "message/input/proto/Sensors.proto";
-import "message/vision/proto/ClassifiedImage.proto";
 
 message VisionObject {
+
+    enum MeasurementType {
+        UNKNOWN_MEASUREMENT = 0;
+        LEFT_NORMAL         = 1;
+        RIGHT_NORMAL        = 2;
+        TOP_NORMAL          = 3;
+        BASE_NORMAL         = 4;
+    }
+    message Measurement {
+        vec3            position   = 1;
+        mat33           covariance = 2;
+        MeasurementType type       = 3;
+    }
+
+    message Goal {
+        enum Side {
+            UNKNOWN = 0;
+            LEFT    = 1;
+            RIGHT   = 2;
+        }
+
+        enum Team {
+            UNKNOWN_TEAM = 0;
+            OWN          = 1;
+            OPPONENT     = 2;
+        }
+
+        Side                 side        = 1;
+        Quad                 quad        = 2;
+        repeated Measurement measurement = 3;
+    }
+
+    message Ball {
+        Circle               circle             = 1;
+        repeated Measurement measurement        = 2;
+        repeated vec3        torsoSpacePosition = 3;
+        repeated vec3        edgePoints         = 4;
+    }
+
+    message Obstacle {
+        enum Team {
+            UNKNOWN_TEAM = 0;
+            MAGENTA      = 1;
+            CYAN         = 2;
+        }
+
+        Polygon              shape       = 1;
+        repeated Measurement measurement = 2;
+        Team                 team        = 3;
+    }
+
+    message Line {
+        ivec2 start = 1;
+        ivec2 end   = 2;
+        vec4 colour = 3;
+    }
+
+    enum ObjectType {
+        UNKNOWN  = 0;
+        GOAL     = 1;
+        BALL     = 2;
+        OBSTACLE = 3;
+        LINE     = 4;
+    }
+
     // Time the image was taken
     google.protobuf.Timestamp timestamp       = 1;
 
@@ -40,64 +105,19 @@ message VisionObject {
     // The sensor frame that was used to detect this object
     input.proto.Sensors       sensors         = 4 [(pointer) = SHARED];
 
-    // The classified image that was used to detect this object
-    // TODO: Why is this here?
-    ClassifiedImage           classifiedImage = 5 [(pointer) = SHARED];
-}
+    // The typye of the object.
+    ObjectType type                           = 5;
 
-message Ball {
-    VisionObject  visObject          = 1;
+    // Details about the object that was detected.
+    repeated Goal             goal            = 6;
+    repeated Ball             ball            = 7;
+    repeated Obstacle         obstacle        = 8;
+    repeated Line             line            = 9;
 
-    // The position of the ball in world coordinates
-    vec3          position           = 2;
-    vec3          torsoSpacePosition = 3;
-
-    repeated vec3 edgePoints         = 4;
-    Circle        circle             = 5;
-}
-
-message Goal {
-    enum Side {
-        UNKNOWN_SIDE = 0;
-        LEFT         = 1;
-        RIGHT        = 2;
-    }
-
-    enum Team {
-        UNKNOWN_TEAM = 0;
-        OWN          = 1;
-        OPPONENT     = 2;
-    }
-
-    enum MeasurementType {
-        UNKNOWN_MEASUREMENT = 0;
-        LEFT_NORMAL         = 1;
-        RIGHT_NORMAL        = 2;
-        TOP_NORMAL          = 3;
-        BASE_NORMAL         = 4;
-    }
-
-    message Measurement {
-        MeasurementType type        = 1;
-        vec3            measurement = 2;
-    }
-
-    VisionObject  visObject           = 1;
-    repeated Measurement measurements = 2;
-    Quad                 quad         = 3;
-}
-
-message Obstacle{
-    enum Team {
-        UNKNOWN_TEAM = 0;
-        MAGENTA      = 1;
-        CYAN         = 2;
-    }
-
-    VisionObject visObject = 1;
-    Polygon      polygon   = 2;
+    // The camera which saw the object.
+    uint32                    camera_id       = 10;
 }
 
 message VisionObjects {
-    repeated VisionObject objects = 1;
+    repeated VisionObject object = 1;
 }

@@ -22,14 +22,18 @@
 
 #include <vector>
 
+#include <armadillo>
+
 #define QUEX_SETTING_BUFFER_MIN_FALLBACK_N 0
 #define QUEX_OPTION_ASSERTS_DISABLED
 #define QUEX_OPTION_COMPUTED_GOTOS
 #define QUEX_OPTION_TERMINATION_ZERO_DISABLED
+
 #include "Lexer.hpp"
+
 #include "message/input/proto/Image.h"
-#include "message/vision/LookUpTable.h"
-#include "message/vision/ClassifiedImage.h"
+#include "message/vision/proto/LookUpTable.h"
+#include "message/vision/proto/ClassifiedImage.h"
 
 namespace module {
     namespace vision {
@@ -43,7 +47,7 @@ namespace module {
         public:
             QuexClassifier();
 
-            std::vector<message::vision::ClassifiedImage<message::vision::ObjectClass>::Segment> classify(const message::input::proto::Image& image, const message::vision::LookUpTable& lut, const arma::ivec2& start, const arma::ivec2& end, const uint& stratification = 1);
+            std::vector<message::vision::proto::ClassifiedImage::Segment> classify(const message::input::proto::Image& image, const message::vision::proto::LookUpTable& lut, const arma::ivec2& start, const arma::ivec2& end, const uint& stratification = 1);
         };
     }
 }

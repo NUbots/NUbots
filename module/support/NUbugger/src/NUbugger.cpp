@@ -19,8 +19,8 @@
 
 #include "NUbugger.h"
 
-#include "message/vision/LookUpTable.h"
 #include "extension/Configuration.h"
+
 #include "message/support/nubugger/proto/Ping.h"
 #include "message/support/nubugger/proto/ReactionHandles.h"
 #include "message/support/nubugger/proto/Command.h"
@@ -42,11 +42,8 @@ namespace support {
     using message::support::nubugger::proto::ReactionHandles;
     using message::support::nubugger::proto::Command;
 
-    using LookUpTableProto = message::vision::proto::LookUpTable;
-
-    using message::vision::LookUpTable;
-    using message::vision::SaveLookUpTable;
-    using message::vision::Colour;
+    using message::vision::proto::LookUpTable;
+    using message::vision::proto::SaveLookUpTable;
 
     using message::support::proto::SaveConfiguration;
 
@@ -152,16 +149,7 @@ namespace support {
 
         on<Trigger<UploadLUT>, With<LookUpTable>>().then([this](const LookUpTable& lut) {
 
-            LookUpTableProto lutMessage;
-
-            for (auto& s : lut.getData()) {
-                lutMessage.table.push_back(s);
-            }
-            lutMessage.bits_y = lut.BITS_Y;
-            lutMessage.bits_cb = lut.BITS_CB;
-            lutMessage.bits_cr = lut.BITS_CR;
-
-            send(lutMessage);
+            send(lut);
         });
 
         on<Network<Command>>().then("Network Command", [this](const Command& message) {
@@ -178,23 +166,18 @@ namespace support {
             }
         });
 
-        on<Network<LookUpTableProto>>().then([this](const LookUpTableProto& lookuptable) {
-
-            const std::vector<uint8_t>& lutData = lookuptable.table;
+        on<Network<LookUpTable>>().then([this](const LookUpTable& lut) {
 
             log<NUClear::INFO>("Loading LUT");
-            std::vector<message::vision::Colour> data;
-            data.reserve(lutData.size());
-            for (auto& s : lutData) {
-                data.push_back(message::vision::Colour(s));
-            }
-            auto lut = std::make_unique<LookUpTable>(lookuptable.bits_y, lookuptable.bits_cb, lookuptable.bits_cr, std::move(data));
+
             emit<Scope::DIRECT>(std::move(lut));
 
-            if (lookuptable.save) {
+            /*
+            if (lut.save) {
                 log<NUClear::INFO>("Saving LUT to file");
                 emit<Scope::DIRECT>(std::make_unique<SaveLookUpTable>());
             }
+            */
         });
 
         on<Network<ReactionHandles>>().then([this](const NetworkSource& /*source*/, const ReactionHandles& /*command*/) {

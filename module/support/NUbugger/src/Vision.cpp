@@ -20,12 +20,11 @@
 #include "NUbugger.h"
 
 #include "message/input/proto/Image.h"
-#include "message/vision/ClassifiedImage.h"
-#include "message/vision/VisionObjects.h"
+#include "message/vision/proto/ClassifiedImage.h"
+#include "message/vision/proto/VisionObjects.h"
 #include "message/vision/proto/LookUpTable.h"
 #include "message/vision/proto/LookUpTableDiff.h"
 #include "message/vision/proto/ClassifiedImage.h"
-#include "message/vision/proto/VisionObjects.h"
 
 #include "utility/time/time.h"
 #include "utility/support/eigen_armadillo.h"
@@ -35,14 +34,12 @@ namespace support {
     using utility::time::getUtcTimestamp;
 
     using message::input::proto::Image;
-    using ClassifiedImageProto = message::vision::proto::ClassifiedImage;
     using message::vision::proto::VisionObjects;
     using message::vision::proto::VisionObject;
     using message::vision::proto::LookUpTableDiff;
-    using message::vision::ObjectClass;
-    using message::vision::ClassifiedImage;
-    using message::vision::Goal;
-    using message::vision::Ball;
+    using message::vision::proto::ClassifiedImage;
+    using message::vision::proto::VisionObject::Goal;
+    using message::vision::proto::VisionObject::Ball;
 
     void NUbugger::provideVision() {
         handles["image"].push_back(on<Trigger<Image>, Single, Priority::LOW>().then([this](const Image& image) {
@@ -56,46 +53,13 @@ namespace support {
             last_image = NUClear::clock::now();
         }));
 
-        handles["classified_image"].push_back(on<Trigger<ClassifiedImage<ObjectClass>>, Single, Priority::LOW>().then([this](const ClassifiedImage<ObjectClass>& image) {
+        handles["classified_image"].push_back(on<Trigger<ClassifiedImage>, Single, Priority::LOW>().then([this](const ClassifiedImage& image) {
 
             if (NUClear::clock::now() - last_classified_image < max_classified_image_duration) {
                 return;
             }
 
-            ClassifiedImageProto imageData;
-
-            imageData.camera_id = 0;
-            imageData.dimensions = convert<uint, 2>(image.dimensions);
-
-            // Add the vertical segments to the list
-            for(const auto& segment : image.verticalSegments) {
-                ClassifiedImageProto::Segment protoSegment;
-                protoSegment.colour = static_cast<uint32_t>(segment.first);
-                protoSegment.subsample = segment.second.subsample;
-                protoSegment.start = convert<int, 2>(segment.second.start);
-                protoSegment.end = convert<int, 2>(segment.second.end);
-                imageData.segment.push_back(protoSegment);
-            }
-
-            // Add the horizontal segments to the list
-            for(const auto& segment : image.horizontalSegments) {
-                ClassifiedImageProto::Segment protoSegment;
-                protoSegment.colour = static_cast<uint32_t>(segment.first);
-                protoSegment.subsample = segment.second.subsample;
-                protoSegment.start = convert<int, 2>(segment.second.start);
-                protoSegment.end = convert<int, 2>(segment.second.end);
-                imageData.segment.push_back(protoSegment);
-            }
-
-            // Add in the actual horizon (the points on the left and right side)
-            imageData.horizon.normal   = convert<double, 2>(image.horizon.normal);
-            imageData.horizon.distance = image.horizon.distance;
-
-            for(const auto& visualHorizon : image.visualHorizon) {
-                imageData.visual_horizon.push_back(convert<int, 2>(visualHorizon));
-            }
-
-            send(imageData, imageData.camera_id + 1, false, NUClear::clock::now());
+            send(image, image.camera_id + 1, false, NUClear::clock::now());
 
             last_classified_image = NUClear::clock::now();
         }));
@@ -107,25 +71,9 @@ namespace support {
 
             object.type = VisionObject::ObjectType::Value::BALL;
             object.camera_id = 0;
-
-            for(const auto& b : balls) {
-                VisionObject::Ball ball;
-                ball.circle.radius = b.circle.radius;
-                ball.circle.centre = convert<double, 2>(b.circle.centre);
-
-                /*
-                for (auto& measurement : b.measurements) {
-                    VisionObject::Measurement m;
-                    m.position   = convert<double, 3>(measurement.position);
-                    m.covariance = convert<double, 3, 3>(measurement.error);
-                    ball.measurement.push_back(m);
-                }
-                */
-
-                object.ball.push_back(ball);
-            }
-
+            object.ball = balls;
             objects.object.push_back(object);
+
             send(objects, 1, false, NUClear::clock::now());
         }));
 
@@ -136,30 +84,9 @@ namespace support {
 
             object.type = VisionObject::ObjectType::Value::GOAL;
             object.camera_id = 0;
-
-            for(const auto& g : goals) {
-                VisionObject::Goal goal;
-                goal.side = (g.side == Goal::Side::LEFT  ? VisionObject::Goal::Side::Value::LEFT
-                           : g.side == Goal::Side::RIGHT ? VisionObject::Goal::Side::Value::RIGHT
-                           : VisionObject::Goal::Side::Value::UNKNOWN);
-                goal.quad.tl = convert<double, 2>(g.quad.getTopLeft());
-                goal.quad.tr = convert<double, 2>(g.quad.getTopRight());
-                goal.quad.bl = convert<double, 2>(g.quad.getBottomLeft());
-                goal.quad.br = convert<double, 2>(g.quad.getBottomRight());
-
-                /*
-                for (auto& measurement : g.measurements) {
-                    VisionObject::Measurement m;
-                    m.position   = convert<double, 3>(measurement.position);
-                    m.covariance = convert<double, 3, 3>(measurement.error);
-                    goal.measurement.push_back(m);
-                }
-                */
-
-                object.goal.push_back(goal);
-            }
-
+            object.goal = goals;
             objects.object.push_back(object);
+            
             send(objects, 2, false, NUClear::clock::now());
         }));
 

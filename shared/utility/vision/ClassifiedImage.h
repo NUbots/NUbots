@@ -20,7 +20,7 @@
 #ifndef UTILITY_VISION_CLASSIFIEDIMAGE_H
 #define UTILITY_VISION_CLASSIFIEDIMAGE_H
 
-#include <armadillo>
+#include <Eigen/Core>
 
 #include "message/vision/proto/ClassifiedImage.h"
 
@@ -32,11 +32,11 @@ namespace utility {
         int visualHorizonAtPoint(const message::vision::proto::ClassifiedImage& classifiedImage, int x) {
 
             struct {
-                bool operator()(const int& k, const arma::ivec2& v) {
+                bool operator()(const int& k, const Eigen::Vector2i& v) {
                     return k < v[0];
                 }
 
-                bool operator()(const arma::ivec2& v, const int& k) {
+                bool operator()(const Eigen::Vector2i& v, const int& k) {
                     return v[0] < k;
                 }
             } comparator;
@@ -46,7 +46,7 @@ namespace utility {
             p2 -= p2 == classifiedImage.visualHorizon.end() ? 1 : 0;
             auto p1 = p2 - 1;
 
-            utility::math::geometry::Line l({ double(p1->at(0)), double(p1->at(1))}, {double(p2->at(0)), double(p2->at(1))});
+            utility::math::geometry::Line l({ double(p1->x()), double(p1->y())}, {double(p2->x()), double(p2->y())});
 
             return int(lround(l.y(x)));
         }

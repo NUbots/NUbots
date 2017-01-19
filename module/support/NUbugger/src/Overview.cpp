@@ -23,7 +23,7 @@
 #include "message/behaviour/proto/KickPlan.h"
 #include "message/input/proto/Image.h"
 #include "message/input/proto/Sensors.h"
-#include "message/vision/VisionObjects.h"
+#include "message/vision/proto/VisionObjects.h"
 #include "message/motion/proto/WalkCommand.h"
 
 #include "utility/time/time.h"
@@ -45,8 +45,8 @@ namespace support {
     using message::input::proto::GameState;
     using message::localisation::proto::Self;
     using LocalisationBall = message::localisation::proto::Ball;
-    using VisionGoal = message::vision::Goal;
-    using VisionBall = message::vision::Ball;
+    using VisionGoal = message::vision::proto::VisionObject::Goal;
+    using VisionBall = message::vision::proto::VisionObject::Ball;
     using message::motion::proto::WalkCommand;
 
     using utility::localisation::transform::RobotToWorldTransform;

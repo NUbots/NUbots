@@ -30,27 +30,28 @@
 
 #include "extension/Configuration.h"
 
-#include "message/behaviour/proto/ServoCommand.h"
 #include "message/behaviour/proto/FixedWalkCommand.h"
+#include "message/behaviour/proto/ServoCommand.h"
+#include "message/behaviour/proto/Subsumption.h"
 #include "message/input/proto/Sensors.h"
 #include "message/localisation/proto/FieldObject.h"
-#include "message/motion/proto/KinematicsModels.h"
-#include "message/motion/proto/WalkCommand.h"
 #include "message/motion/proto/FootMotionCommand.h" 
 #include "message/motion/proto/FootPlacementCommand.h" 
-#include "message/motion/proto/TorsoMotionCommand.h" 
+#include "message/motion/proto/KinematicsModels.h"
 #include "message/motion/proto/ServoTarget.h"
-
+#include "message/motion/proto/TorsoMotionCommand.h" 
+#include "message/motion/proto/WalkCommand.h"
+#include "message/support/proto/SaveConfiguration.h"
 
 #include "utility/behaviour/Action.h"
 #include "utility/math/angle.h"
-#include "utility/math/matrix/Rotation3D.h"
 #include "utility/math/geometry/UnitQuaternion.h"
+#include "utility/math/matrix/Rotation3D.h"
 #include "utility/math/matrix/Transform2D.h"
 #include "utility/math/matrix/Transform3D.h"
 #include "utility/motion/Balance.h"
-#include "utility/motion/InverseKinematics.h"
 #include "utility/motion/ForwardKinematics.h"
+#include "utility/motion/InverseKinematics.h"
 #include "utility/motion/Script.h"
 #include "utility/nubugger/NUhelpers.h" 
 #include "utility/support/yaml_armadillo.h"
@@ -78,10 +79,10 @@ namespace motion
 
         explicit TorsoMotionPlanner(std::unique_ptr<NUClear::Environment> environment);
     private:
-        using LimbID         = message::input::LimbID;
-        using ServoCommand   = message::behaviour::ServoCommand;
-        using Sensors        = message::input::Sensors;
-        using ServoID        = message::input::ServoID;
+        using LimbID         = message::behaviour::proto::Subsumption::Limb::Value;
+        using ServoCommand   = message::behaviour::proto::ServoCommand;
+        using Sensors        = message::input::proto::Sensors;
+        using ServoID        = message::input::proto::Sensors::ServoID::Value;
         using Transform2D    = utility::math::matrix::Transform2D;
         using Transform3D    = utility::math::matrix::Transform3D;
         using UnitQuaternion = utility::math::geometry::UnitQuaternion;
@@ -206,7 +207,7 @@ namespace motion
         /**
          * Balance & Kinematics module initialization...
          */
-        message::motion::kinematics::KinematicsModel kinematicsModel;   //
+        message::motion::proto::KinematicsModel kinematicsModel;   //
 
         /**
          * The last foot goal rotation...

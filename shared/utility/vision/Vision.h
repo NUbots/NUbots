@@ -34,13 +34,16 @@ namespace utility {
 
             // Ambiguous Classifications
             WHITE_GREEN  = 'f'
-        }
+        };
 
         struct Pixel {
             Pixel() : rgba(0) {}
             Pixel(uint32_t rgba) : rgba(rgba) {}
-            Pixel(uint8_t r, uint8_t g, uint8_t b, uint8_t a) : r(r), g(g), b(b), a(a) {}
-            Pixel(uint8_t r, uint8_t g, uint8_t b) : r(r), g(g), b(b), a(0) {}
+            Pixel(uint8_t r, uint8_t g, uint8_t b, uint8_t a) : 
+                        components({ r, g, b, a}) {}
+            Pixel(uint8_t r, uint8_t g, uint8_t b) :
+                        components({ r, g, b, 0}) {}
+            Pixel(const Pixel& pixel) : rgba(pixel.rgba) {}
 
             union {
                 struct {
@@ -60,7 +63,7 @@ namespace utility {
                     };
 
                     uint8_t a;
-                };
+                } components;
 
                 uint32_t rgba;
             };
