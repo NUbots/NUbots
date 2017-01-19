@@ -26,14 +26,12 @@ namespace module {
     namespace vision {
 
         using message::input::proto::Image;
-        using message::input::proto::Sensors;
-        using message::vision::LookUpTable;
-        using message::vision::ObjectClass;
-        using message::vision::ClassifiedImage;
+        using message::vision::proto::LookUpTable;
+        using message::vision::proto::ClassifiedImage;
 
         using utility::math::geometry::Line;
 
-        void LUTClassifier::findGoals(const Image& image, const LookUpTable& lut, ClassifiedImage<ObjectClass>& classifiedImage) {
+        void LUTClassifier::findGoals(const Image& image, const LookUpTable& lut, ClassifiedImage& classifiedImage) {
 
             /*
                Here we cast classification lines to attempt to locate the general area of the goals.
@@ -41,8 +39,12 @@ namespace module {
                classify the mostly empty green below.
              */
 
+            const auto& maxVisualHorizon = classifiedImage.visualHorizon.front()[1] > classifiedImage.visualHorizon.back()[1] 
+                                            ? classifiedImage.visualHorizon.begin() 
+                                            : classifiedImage.visualHorizon.end() - 1;
+
             // Cast lines upward to find the goals starting at the lowest point of the visual horizon
-            for(int y = 0; y < classifiedImage.maxVisualHorizon->at(1); y += GOAL_LINE_SPACING) {
+            for(int y = 0; y < maxVisualHorizon->y(); y += GOAL_LINE_SPACING) {
 
                 arma::ivec2 start = { 0, y };
                 arma::ivec2 end = { int(image.dimensions[0] - 1), y };

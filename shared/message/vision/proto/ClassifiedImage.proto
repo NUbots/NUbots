@@ -73,13 +73,11 @@ message ClassifiedImage {
 
     // The points of the visual horizon
     repeated ivec2            visualHorizon      = 7;
-    repeated ivec2            maxVisualHorizon   = 8;
-    repeated ivec2            minVisualHorizon   = 9;
 
     // Our segments, split into vertical and horizontal components
-    repeated Segment          horizontalSegments = 10;
-    repeated Segment          verticalSegments   = 11;
-    //map<uint32, Segment>      horizontalSegments = 10;
-    //map<uint32, Segment>      verticalSegments   = 11;
+    repeated Segment          horizontalSegments = 8;
+    repeated Segment          verticalSegments   = 9;
+    //map<uint32, Segment>      horizontalSegments = 8;
+    //map<uint32, Segment>      verticalSegments   = 9;
 }
 

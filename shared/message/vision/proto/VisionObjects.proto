@@ -56,9 +56,14 @@ message VisionObject {
             OPPONENT     = 2;
         }
 
-        Side                 side        = 1;
-        Quad                 quad        = 2;
-        repeated Measurement measurement = 3;
+        Side                 side          = 1;
+        Quad                 quad          = 2;
+        repeated Measurement measurement   = 3;
+
+        // The angular position and size from the perspective of the camera
+        // Use these values to move the camera around to see this object
+        vec2                 screenAngular = 4;
+        vec2                 angularSize   = 5;
     }
 
     message Ball {
@@ -87,35 +92,30 @@ message VisionObject {
     }
 
     enum ObjectType {
-        UNKNOWN  = 0;
-        GOAL     = 1;
-        BALL     = 2;
-        OBSTACLE = 3;
-        LINE     = 4;
+        UNKNOWN_OBJECT = 0;
+        GOAL           = 1;
+        BALL           = 2;
+        OBSTACLE       = 3;
+        LINE           = 4;
     }
 
     // Time the image was taken
     google.protobuf.Timestamp timestamp       = 1;
 
-    // The angular position and size from the perspective of the camera
-    // Use these values to move the camera around to see this object
-    vec2                      screenAngular   = 2;
-    vec2                      angularSize     = 3;
-
     // The sensor frame that was used to detect this object
-    input.proto.Sensors       sensors         = 4 [(pointer) = SHARED];
+    input.proto.Sensors       sensors         = 2 [(pointer) = SHARED];
 
     // The typye of the object.
-    ObjectType type                           = 5;
+    ObjectType                type            = 3;
 
     // Details about the object that was detected.
-    repeated Goal             goal            = 6;
-    repeated Ball             ball            = 7;
-    repeated Obstacle         obstacle        = 8;
-    repeated Line             line            = 9;
+    repeated Goal             goal            = 4;
+    repeated Ball             ball            = 5;
+    repeated Obstacle         obstacle        = 6;
+    repeated Line             line            = 7;
 
     // The camera which saw the object.
-    uint32                    camera_id       = 10;
+    uint32                    camera_id       = 8;
 }
 
 message VisionObjects {

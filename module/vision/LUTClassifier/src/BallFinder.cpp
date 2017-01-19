@@ -30,9 +30,8 @@ namespace module {
         using message::input::proto::Image;
         using ServoID = message::input::proto::Sensors::ServoID::Value;
         using message::input::proto::Sensors;
-        using message::vision::LookUpTable;
-        using message::vision::ObjectClass;
-        using message::vision::ClassifiedImage;
+        using message::vision::proto::LookUpTable;
+        using message::vision::proto::ClassifiedImage;
 
         using utility::math::geometry::Line;
         using utility::math::vision::getGroundPointFromScreen;
@@ -40,7 +39,7 @@ namespace module {
         using utility::math::vision::screenToImage;
         using utility::math::vision::imageToScreen;
 
-        void LUTClassifier::findBall(const Image& image, const LookUpTable& lut, ClassifiedImage<ObjectClass>& classifiedImage) {
+        void LUTClassifier::findBall(const Image& image, const LookUpTable& lut, ClassifiedImage& classifiedImage) {
 
             /*
                 Here we cast lines to find balls.
@@ -53,10 +52,17 @@ namespace module {
              */
 
             auto& visualHorizon = classifiedImage.visualHorizon;
-            auto& minHorizon = classifiedImage.minVisualHorizon;
 
-            arma::vec2 topY = imageToScreen(arma::ivec2({ classifiedImage.maxVisualHorizon->at(0), int(classifiedImage.maxVisualHorizon->at(1)) })
-                                          , classifiedImage.dimensions);
+            // As this is a convex function, we just need to progress till the next point is lower
+            std::vector<Eigen::Vector2i>::iterator minHorizon;
+            for(minHorizon = visualHorizon.begin();
+                minHorizon < visualHorizon.end() - 1
+                && minHorizon->y() > (minHorizon + 1)->y();
+                ++minHorizon);
+
+            const auto& maxVisualHorizon = visualHorizon.front()[1] > visualHorizon.back()[1] ? visualHorizon.begin() : visualHorizon.end() - 1;
+
+            arma::vec2 topY = imageToScreen(arma::ivec2({ maxVisualHorizon->x(), int(maxVisualHorizon->y()) }), convert<uint, 2>(classifiedImage.dimensions));
             topY[0] = 0;    //Choose centre of screen
 
             // Get the positions of the top of our green horizion, and the bottom of the screen
@@ -89,14 +95,14 @@ namespace module {
             arma::vec4 worldPosition = arma::ones(4);
             worldPosition.rows(0, 2) = xStart * direction;
             auto camPoint = projectWorldPointToScreen(worldPosition, orientationCamToGround, FOCAL_LENGTH_PIXELS);
-            int y = screenToImage(camPoint, classifiedImage.dimensions)[1];
+            int y = screenToImage(camPoint, convert<uint, 2>(classifiedImage.dimensions))[1];
 
             for(double x = xStart; x < xEnd && y >= 0; x += std::max(dx, (dx * x) / (cameraHeight - dx))) {
 
                 // Calculate our next Y
                 worldPosition.rows(0, 2) = (x + std::max(dx, (dx * x) / (cameraHeight - dx))) * direction;
                 camPoint = projectWorldPointToScreen(worldPosition, orientationCamToGround, FOCAL_LENGTH_PIXELS);
-                int nextY = screenToImage(camPoint, classifiedImage.dimensions)[1];
+                int nextY = screenToImage(camPoint, convert<uint, 2>(classifiedImage.dimensions))[1];
 
                 // Work out our details
                 arma::ivec2 start = { 0, y };
@@ -104,20 +110,20 @@ namespace module {
                 int subsample = std::max(1, int(lround((y - nextY) * BALL_HORIZONTAL_SUBSAMPLE_FACTOR)));
 
                 // If our left hand side is in range, or we are over the top
-                if(hLeft->at(1) >= y) {
+                if(hLeft->y() >= y) {
 
                     while(hLeft < minHorizon) {
 
                         auto p1 = hLeft;
                         auto p2 = hLeft + 1;
 
-                        if(y <= p1->at(1) && y >= p2->at(1)) {
+                        if(y <= p1->y() && y >= p2->y()) {
 
                             // Make a line from the two points and find our x
-                            Line l({ double(p1->at(0)), double(p1->at(1))}, {double(p2->at(0)), double(p2->at(1))});
+                            Line l({ double(p1->x()), double(p1->y())}, {double(p2->x()), double(p2->y())});
 
                             if(l.isHorizontal()) {
-                                start[0] = p2->at(0);
+                                start[0] = p2->x();
                             }
                             else {
                                 start[0] = round(l.x(y));
@@ -133,20 +139,20 @@ namespace module {
                 }
 
                 // If our right hand side is in range and has not gone out of scope
-                if(hRight->at(1) >= y) {
+                if(hRight->y() >= y) {
 
                     while(hRight > minHorizon) {
 
                         auto p1 = hRight - 1;
                         auto p2 = hRight;
 
-                        if(y >= p1->at(1) && y <= p2->at(1)) {
+                        if(y >= p1->y() && y <= p2->y()) {
 
                             // Make a line from the two points and find our x
-                            Line l({ double(p1->at(0)), double(p1->at(1))}, {double(p2->at(0)), double(p2->at(1))});
+                            Line l({ double(p1->x()), double(p1->y())}, {double(p2->x()), double(p2->y())});
 
                             if(l.isHorizontal()) {
-                                end[0] = p1->at(0);
+                                end[0] = p1->x();
                             }
                             else {
                                 end[0] = round(l.x(y));

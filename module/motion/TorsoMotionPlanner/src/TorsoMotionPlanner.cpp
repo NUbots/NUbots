@@ -114,7 +114,7 @@ namespace motion
                              
             // Step Target Data queued evaluation...
             if(DEBUG) { log<NUClear::TRACE>("Messaging: Foot Motion Planner - Received Target Foot Position(0)"); }
-                setSupportMass(nft.supportMass);                   //Queued    : FPP
+                setSupportMass(convert<double, 3>(nft.supportMass));                   //Queued    : FPP
             if(DEBUG) { log<NUClear::TRACE>("Messaging: Foot Motion Planner - Received Target Foot Position(1)"); }
 
             // Foot Target Data queued evaluation...

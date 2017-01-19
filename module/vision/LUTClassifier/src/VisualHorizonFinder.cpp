@@ -27,20 +27,17 @@ namespace module {
     namespace vision {
 
         using message::input::proto::Image;
-        using message::vision::LookUpTable;
-        using message::vision::ObjectClass;
-        using message::vision::ClassifiedImage;
+        using message::vision::proto::LookUpTable;
+        using message::vision::proto::ClassifiedImage;
         using utility::math::geometry::Line;
         using utility::math::geometry::Quad;
         using utility::nubugger::drawVisionLines;
 
-        void LUTClassifier::findVisualHorizon(const Image& image, const LookUpTable& lut, ClassifiedImage<ObjectClass>& classifiedImage) {
+        void LUTClassifier::findVisualHorizon(const Image& image, const LookUpTable& lut, ClassifiedImage& classifiedImage) {
 
             // Get some local references to class variables to make text shorter
             auto& horizon = classifiedImage.horizon;
             auto& visualHorizon = classifiedImage.visualHorizon;
-            auto& maxVisualHorizon = classifiedImage.maxVisualHorizon;
-            auto& minVisualHorizon = classifiedImage.minVisualHorizon;
 
             // Cast lines to find our visual horizon
             for(uint x = 0; x < image.dimensions[0]; x += VISUAL_HORIZON_SPACING) {
@@ -165,15 +162,6 @@ namespace module {
                     }
                 }
             }
-
-            // As this is a convex hull, the max visual horizon will always be at one of the edges
-            maxVisualHorizon = visualHorizon.front()[1] > visualHorizon.back()[1] ? visualHorizon.begin() : visualHorizon.end() - 1;
-
-            // As this is a convex function, we just need to progress till the next point is lower
-            for(minVisualHorizon = visualHorizon.begin();
-                minVisualHorizon < visualHorizon.end() - 1
-                && minVisualHorizon->at(1) > (minVisualHorizon + 1)->at(1);
-                ++minVisualHorizon);
         }
 
     }  // vision

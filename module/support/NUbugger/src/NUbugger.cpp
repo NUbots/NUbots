@@ -170,7 +170,7 @@ namespace support {
 
             log<NUClear::INFO>("Loading LUT");
 
-            emit<Scope::DIRECT>(std::move(lut));
+            emit<Scope::DIRECT>(std::make_unique<LookUpTable>(lut));
 
             /*
             if (lut.save) {

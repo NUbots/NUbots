@@ -102,7 +102,7 @@ namespace YAML {
             node["bits"]["cb"] = uint(rhs.bits_cb);
             node["bits"]["cr"] = uint(rhs.bits_cr);
 
-            node["lut"] = rhs.getData();
+            node["lut"] = rhs.table;
 
             return node;
         }

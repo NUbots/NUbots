@@ -32,22 +32,25 @@ namespace motion
 /*=======================================================================================================*/
 //      UTILIZATION REFERENCE(S)
 /*=======================================================================================================*/
-    using message::input::LimbID;
-    using message::motion::NewStepTargetInfo;
-    using message::motion::NewFootTargetInfo;
-    using message::motion::TorsoMotionUpdate;
-    using message::motion::EnableFootPlacement;
-    using message::motion::DisableFootPlacement;
-    using message::motion::FootStepRequested;
-    using message::motion::NewWalkCommand;
-    using message::motion::FootPlacementStopped;
+
     using extension::Configuration;
 
+    using LimbID = message::behaviour::proto::Subsumption::Limb::Value;
+    using message::motion::proto::NewStepTargetInfo;
+    using message::motion::proto::NewFootTargetInfo;
+    using message::motion::proto::TorsoMotionUpdate;
+    using message::motion::proto::EnableFootPlacement;
+    using message::motion::proto::DisableFootPlacement;
+    using message::motion::proto::FootStepRequested;
+    using message::motion::proto::NewWalkCommand;
+    using message::motion::proto::FootPlacementStopped;
+    using message::motion::proto::KinematicsModel;
+
     using utility::support::Expression;
-    using message::motion::kinematics::KinematicsModel;
     using utility::math::matrix::Transform2D;
     using utility::math::matrix::Transform3D;
     using utility::nubugger::graph;
+
 /*=======================================================================================================*/
 //      NUCLEAR METHOD: FootPlacementPlanner
 /*=======================================================================================================*/
@@ -90,8 +93,8 @@ namespace motion
         {          
             // When new torso destination is computed, inform FPP in preparation for next footstep...
             if(DEBUG) { log<NUClear::TRACE>("Messaging: Foot Placement Planner - Received Torso Destination Update(0)"); }    
-                setTorsoPosition(info.frameArms);  
-                setTorsoDestination(info.frameDestination);     
+                setTorsoPosition(convert<double, 3>(info.frameArms));
+                setTorsoDestination(convert<double, 3>(info.frameDestination));
             if(DEBUG) { log<NUClear::TRACE>("Messaging: Foot Placement Planner - Received Torso Destination Update(1)"); }
 
             // Calculate a new footstep to facilitate walk progression...
@@ -105,7 +108,7 @@ namespace motion
         {
             //
             if(DEBUG) { log<NUClear::TRACE>("Messaging: Foot Placement Planner - On New Walk Command(0)"); }          
-                setVelocityCommand(command.velocityTarget);
+                setVelocityCommand(convert<double, 3>(command.velocityTarget));
                 calculateNewStep(getVelocityCurrent(), getTorsoDestination(), getTorsoPosition());          
             if(DEBUG) { log<NUClear::TRACE>("Messaging: Foot Placement Planner - On New Walk Command(1)"); }
         }).enable();
@@ -179,8 +182,12 @@ namespace motion
             Transform2D uRightFootModded = uTorsoModded.localToWorld(uRightFootTorso);
             setSupportMass(uRightFootModded.localToWorld({-getFootOffsetCoefficient(0), getFootOffsetCoefficient(1), 0}));  
         }                   
-        emit(std::make_unique<NewStepTargetInfo>(stepTime, inVelocityCurrent, getActiveForwardLimb())); //New Step Target Information
-        emit(std::make_unique<NewFootTargetInfo>(getLeftFootSource(), getRightFootSource(), getSupportMass(), getLeftFootDestination(), getRightFootDestination()));  //New Foot Target Information   
+        emit(std::make_unique<NewStepTargetInfo>(stepTime, convert<double, 3>(inVelocityCurrent), getActiveForwardLimb())); //New Step Target Information
+        emit(std::make_unique<NewFootTargetInfo>(convert<double, 3>(getLeftFootSource()), 
+                                                 convert<double, 3>(getRightFootSource()), 
+                                                 convert<double, 3>(getSupportMass()), 
+                                                 convert<double, 3>(getLeftFootDestination()), 
+                                                 convert<double, 3>(getRightFootDestination())));  //New Foot Target Information   
     }
 /*=======================================================================================================*/
 //      METHOD: getNewFootTarget
@@ -212,7 +219,7 @@ namespace motion
 
         // Start feet collision detection:
         // Uses a rough measure to detect collision and move feet apart if too close
-        double overlap = kinematicsModel.Leg.FOOT_LENGTH / 2.0 * std::abs(feetDifference.angle());
+        double overlap = kinematicsModel.leg.FOOT_LENGTH / 2.0 * std::abs(feetDifference.angle());
         feetDifference.y() = std::max(feetDifference.y() * sign, stanceLimitY2 + overlap) * sign;
         // End feet collision detection
 
@@ -253,10 +260,10 @@ namespace motion
         setTorsoPosition({-getFootOffsetCoefficient(0), 0, 0});
    
         // Default Initial Left  Foot Position...
-        setLeftFootPosition(getTorsoPosition().localToWorld({getFootOffsetCoefficient(0), kinematicsModel.Leg.HIP_OFFSET_Y - getFootOffsetCoefficient(1), 0}));
+        setLeftFootPosition(getTorsoPosition().localToWorld({getFootOffsetCoefficient(0), kinematicsModel.leg.HIP_OFFSET_Y - getFootOffsetCoefficient(1), 0}));
      
         // Default Initial Right Foot Position...
-        setRightFootPosition(getTorsoPosition().localToWorld({getFootOffsetCoefficient(0), -kinematicsModel.Leg.HIP_OFFSET_Y + getFootOffsetCoefficient(1), 0}));
+        setRightFootPosition(getTorsoPosition().localToWorld({getFootOffsetCoefficient(0), -kinematicsModel.leg.HIP_OFFSET_Y + getFootOffsetCoefficient(1), 0}));
 
         // Default Active Forward Limb...
         setActiveForwardLimb(activeLimbInitial);
@@ -273,7 +280,7 @@ namespace motion
         setSupportMass(getTorsoPosition());
 
         // Default Inner Foot Offset...
-        uLRFootOffset = {0, kinematicsModel.Leg.HIP_OFFSET_Y - getFootOffsetCoefficient(1), 0};    
+        uLRFootOffset = {0, kinematicsModel.leg.HIP_OFFSET_Y - getFootOffsetCoefficient(1), 0};    
     }
 /*=======================================================================================================*/
 //      METHOD: reset
@@ -281,8 +288,8 @@ namespace motion
     void FootPlacementPlanner::reset() 
     {      
         setTorsoPosition({-getFootOffsetCoefficient(0), 0, 0});
-        setLeftFootPosition({0, kinematicsModel.Leg.HIP_OFFSET_Y, 0});
-        setRightFootPosition({0, -kinematicsModel.Leg.HIP_OFFSET_Y, 0});
+        setLeftFootPosition({0, kinematicsModel.leg.HIP_OFFSET_Y, 0});
+        setRightFootPosition({0, -kinematicsModel.leg.HIP_OFFSET_Y, 0});
 
         setTorsoSource(arma::zeros(3));
         setTorsoDestination(arma::zeros(3));
@@ -298,7 +305,7 @@ namespace motion
         setActiveForwardLimb(activeLimbInitial);
 
         // gStandard offset
-        uLRFootOffset = {0, kinematicsModel.Leg.HIP_OFFSET_Y - getFootOffsetCoefficient(1), 0};
+        uLRFootOffset = {0, kinematicsModel.leg.HIP_OFFSET_Y - getFootOffsetCoefficient(1), 0};
 
         // gWalking/Stepping transition variables
         startFromStep = false;
@@ -503,7 +510,7 @@ namespace motion
         bodyHeight   = body["height"].as<Expression>();
         bodyTilt     = body["tilt"].as<Expression>();
         setFootOffsetCoefficient(stance["foot_offset"].as<arma::vec>());
-        stanceLimitY2 = kinematicsModel.Leg.LENGTH_BETWEEN_LEGS - stance["limit_margin_y"].as<Expression>(); 
+        stanceLimitY2 = kinematicsModel.leg.LENGTH_BETWEEN_LEGS - stance["limit_margin_y"].as<Expression>(); 
         STAND_SCRIPT_DURATION = stance["STAND_SCRIPT_DURATION"].as<Expression>();   
 
         auto& walkCycle = wlk["walk_cycle"];

@@ -38,8 +38,6 @@ namespace support {
     using message::vision::proto::VisionObject;
     using message::vision::proto::LookUpTableDiff;
     using message::vision::proto::ClassifiedImage;
-    using message::vision::proto::VisionObject::Goal;
-    using message::vision::proto::VisionObject::Ball;
 
     void NUbugger::provideVision() {
         handles["image"].push_back(on<Trigger<Image>, Single, Priority::LOW>().then([this](const Image& image) {
@@ -59,12 +57,12 @@ namespace support {
                 return;
             }
 
-            send(image, image.camera_id + 1, false, NUClear::clock::now());
+            send(image, image.image->camera_id + 1, false, NUClear::clock::now());
 
             last_classified_image = NUClear::clock::now();
         }));
 
-        handles["vision_object"].push_back(on<Trigger<std::vector<Ball>>, Single, Priority::LOW>().then([this] (const std::vector<Ball>& balls) {
+        handles["vision_object"].push_back(on<Trigger<std::vector<VisionObject::Ball>>, Single, Priority::LOW>().then([this] (const std::vector<VisionObject::Ball>& balls) {
             VisionObjects objects;
 
             VisionObject object;
@@ -77,7 +75,7 @@ namespace support {
             send(objects, 1, false, NUClear::clock::now());
         }));
 
-        handles["vision_object"].push_back(on<Trigger<std::vector<Goal>>, Single, Priority::LOW>().then([this] (const std::vector<Goal>& goals) {
+        handles["vision_object"].push_back(on<Trigger<std::vector<VisionObject::Goal>>, Single, Priority::LOW>().then([this] (const std::vector<VisionObject::Goal>& goals) {
 
             VisionObjects objects;
             VisionObject  object;
