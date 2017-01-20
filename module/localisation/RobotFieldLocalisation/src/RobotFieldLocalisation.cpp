@@ -42,8 +42,8 @@ namespace localisation {
     using extension::Configuration;
     using message::input::proto::Sensors;
     using message::vision::proto::VisionObject;
-    using GoalSide = message::vision::proto::VisionObject::Goal::Side::Value;
-    using GoalTeam = message::vision::proto::VisionObject::Goal::Team::Value;
+    using GoalSide = message::vision::proto::Goal::Side::Value;
+    using GoalTeam = message::vision::proto::Goal::Team::Value;
     using MeasurementType = message::vision::proto::VisionObject::MeasurementType;
     using message::support::proto::FieldDescription;
     using message::localisation::proto::ResetRobotHypotheses;

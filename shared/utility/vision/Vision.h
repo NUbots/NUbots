@@ -39,10 +39,11 @@ namespace utility {
             Value value;
         
             // Constructors
-            Colour() : value(Value::UNCLASSIFIED) {}
-            Colour(int const& value) : value(static_cast<Value>(value)) {}
-            Colour(uint8_t const& value) : value(static_cast<Value>(value)) {}
-            Colour(Value const& value) : value(value) {}
+            Colour()                       : value(Value::UNCLASSIFIED)       {}
+            Colour(int const& value)       : value(static_cast<Value>(value)) {}
+            Colour(uint8_t const& value)   : value(static_cast<Value>(value)) {}
+            Colour(uint32_t const& value)  : value(static_cast<Value>(value)) {}
+            Colour(Value const& value)     : value(value) {}
             Colour(std::string const& str) : value(Value::UNCLASSIFIED) {
                 if (str == "UNCLASSIFIED") value = Value::UNCLASSIFIED;
                 if (str == "WHITE")        value = Value::WHITE;
@@ -55,7 +56,7 @@ namespace utility {
                 throw std::runtime_error("String did not match any enum for Colour");
             }
         
-            Colour(char const& c) : value(Value::UNCLASSIFIED) {
+            Colour(char const& c)         : value(Value::UNCLASSIFIED) {
                 if (c == 'u') value = Value::UNCLASSIFIED;
                 if (c == 'w') value = Value::WHITE;
                 if (c == 'g') value = Value::GREEN;
@@ -82,9 +83,10 @@ namespace utility {
             bool operator !=(Colour::Value const& other) const { return value != other;       }
         
             // Conversions
-            operator Value() const   { return value; }
-            operator int() const     { return value; }
-            operator uint8_t() const { return value; }
+            operator Value() const    { return value; }
+            operator int() const      { return value; }
+            operator uint8_t() const  { return value; }
+            operator uint32_t() const { return value; }
         
             operator std::string() const {
                 switch(value) {

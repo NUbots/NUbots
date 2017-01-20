@@ -58,6 +58,7 @@ message Overview {
     // Vision
     google.protobuf.Timestamp last_seen_ball = 11;
     google.protobuf.Timestamp last_seen_goal = 12;
+    google.protobuf.Timestamp last_seen_obstacle = 19;
 
     // Walk engine
     repeated vec2 path_plan = 16;

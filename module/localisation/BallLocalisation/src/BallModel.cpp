@@ -32,7 +32,6 @@ namespace module {
         using utility::math::matrix::Rotation3D;
         using utility::math::matrix::Transform3D;
         using utility::math::matrix::Transform2D;
-        using message::vision::Ball;
         using message::support::proto::FieldDescription;
         using message::input::proto::Sensors;
         using ServoID = message::input::proto::Sensors::ServoID::Value;

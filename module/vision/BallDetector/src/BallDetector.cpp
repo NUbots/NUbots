@@ -50,7 +50,7 @@ namespace vision {
     using ServoID = message::input::proto::Sensors::ServoID::Value;
 
     using message::vision::proto::ClassifiedImage;
-    using message::vision::proto::VisionObject;
+    using message::vision::proto::Ball;
     using message::vision::proto::LookUpTable;
     using message::input::proto::Image;
     using message::support::proto::FieldDescription;
@@ -199,10 +199,8 @@ namespace vision {
                                                                     , MAXIMUM_FITTED_MODELS
                                                                     , CONSENSUS_ERROR_THRESHOLD);
 
-            auto balls = std::make_unique<VisionObject>();
-            balls->ball.reserve(ransacResults.size());
-            balls->type    = VisionObject::ObjectType::BALL;
-            balls->sensors = image.sensors;
+            auto balls = std::make_unique<std::vector<Ball>>();
+            balls->reserve(ransacResults.size());
 
             if(print_throwout_logs) log("Ransac : ", ransacResults.size(), "results");
 
@@ -285,6 +283,7 @@ namespace vision {
                  ************************************************/
 
                 VisionObject::Ball b;
+                b.visObject.sensors = image.sensors;
 
                 // Get our transform to world coordinates
                 const Transform3D& Htw = convert<double, 4, 4>(sensors.world);
@@ -327,31 +326,31 @@ namespace vision {
                 b.circle.centre = convert<double, 2>(result.model.centre);
 
                 // Angular positions from the camera
-                b.screenAngular = convert<double, 2>(arma::atan(convert<double, 2>(cam.pixelsToTanThetaFactor) % ballCentreScreen));
-                b.angularSize   << getParallaxAngle(left, right, cam.focalLengthPixels), getParallaxAngle(top, base, cam.focalLengthPixels);
+                b.visObject.screenAngular = convert<double, 2>(arma::atan(convert<double, 2>(cam.pixelsToTanThetaFactor) % ballCentreScreen));
+                b.visObject.angularSize   << getParallaxAngle(left, right, cam.focalLengthPixels), getParallaxAngle(top, base, cam.focalLengthPixels);
 
                 // Add our points
                 for (auto& point : result) {
                     b.edgePoints.push_back(convert<double, 3>(getCamFromScreen(imageToScreen(point, convert<uint, 2>(image.dimensions)), cam.focalLengthPixels)));
                 }
 
-                balls->ball.push_back(std::move(b));
+                balls->push_back(std::move(b));
             }
 
-            for(auto a = balls->ball.begin(); a != balls->ball.end(); ++a) {
+            for(auto a = balls->begin(); a != balls->end(); ++a) {
                 Circle acircle(a->circle.radius, convert<double, 2>(a->circle.centre));
 
-                for(auto b = a + 1; b != balls->ball.end();) {
+                for(auto b = a + 1; b != balls->end();) {
 
                     // If our balls overlap
                     if(acircle.distanceToPoint(convert<double, 2>(b->circle.centre)) < b->circle.radius) {
                         // Pick the better ball
                         if(acircle.radius < b->circle.radius) {
                             // Throw-out b
-                            b = balls->ball.erase(b);
+                            b = balls->erase(b);
                         }
                         else {
-                            a = balls->ball.erase(a);
+                            a = balls->erase(a);
 
                             if(a == b) {
                                 ++b;
@@ -363,7 +362,7 @@ namespace vision {
                     }
                 }
             }
-            if(print_throwout_logs) log("Final result: ", balls->ball.size(), "balls");
+            if(print_throwout_logs) log("Final result: ", balls->size(), "balls");
             emit(std::move(balls));
             lastFrame.time = sensors.timestamp;
         });

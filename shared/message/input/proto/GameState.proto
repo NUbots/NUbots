@@ -56,9 +56,9 @@ message GameState {
         }
 
         message Robot {
-            uint32 id                    = 1;
-            PenaltyReason penalty_reason = 2;
-            uint64 unpenalised           = 3;
+            uint32                    id             = 1;
+            PenaltyReason             penalty_reason = 2;
+            google.protobuf.Timestamp unpenalised    = 3;
         }
 
         message Team {

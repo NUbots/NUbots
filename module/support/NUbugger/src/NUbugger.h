@@ -62,6 +62,30 @@ namespace module {
                 uint64_t timestamp;
             };
 
+            template <typename T>
+            struct NUsightVectorMessage {
+
+                NUsightVectorMessage()
+                : proto()
+                , filterid()
+                , timestamp()
+                , count() {}
+
+                NUsightVectorMessage(const std::vector<T>& proto
+                               , uint8_t filterid
+                               , uint64_t timestamp
+                               , uint64_t count)
+                : proto(proto)
+                , filterid(filterid)
+                , timestamp(timestamp)
+                , count(count) {}
+
+                std::vector<T> proto;
+                uint8_t filterid;
+                uint64_t timestamp;
+                uint64_t count;
+            };
+
             uint pubPort = 0;
             uint subPort = 0;
 
@@ -106,14 +130,29 @@ namespace module {
             void sendGameState(std::string event, const message::input::proto::GameState& gameState);
 
             void saveConfigurationFile(std::string path, const YAML::Node& root);
-            void sendSubsumption();
+            void sendSubsumpt ion();
 
             template <typename T>
             void send(T&& proto, uint8_t filterId = 0, bool reliable = false, NUClear::clock::time_point time = NUClear::clock::now()) {
                 using ProtobufType = std::remove_reference_t<T>;
 
                 // Wrap our protobuf in a message with filter information
-                auto msg = std::make_unique<NUsightMessage<ProtobufType>>(std::forward<T>(proto), filterId, std::chrono::duration_cast<std::chrono::milliseconds>(time.time_since_epoch()).count());
+                auto msg = std::make_unique<NUsightMessage<ProtobufType>>(std::forward<T>(proto), 
+                                            filterId, std::chrono::duration_cast<std::chrono::milliseconds>(time.time_since_epoch()).count());
+
+                // Send the message over the network
+                if(networkEnabled) {
+                    emit<Scope::NETWORK>(msg, "nusight", reliable);
+                }
+            }
+
+            template <typename T>
+            void send(std::vector<T>&& proto, uint8_t filterId = 0, bool reliable = false, NUClear::clock::time_point time = NUClear::clock::now()) {
+                using ProtobufType = std::remove_reference_t<T>;
+
+                // Wrap our protobuf in a message with filter information
+                auto msg = std::make_unique<NUsightVectorMessage<ProtobufType>>(std::forward<std::vector<T>>(proto), 
+                                            filterId, std::chrono::duration_cast<std::chrono::milliseconds>(time.time_since_epoch()).count(), proto.size());
 
                 // Send the message over the network
                 if(networkEnabled) {
@@ -196,6 +235,87 @@ namespace NUClear {
                     protobuf_type type;
 
                     auto name = "NUsight<" + type.GetTypeName().substr(9) + ">";
+
+                    // We base the hash on the name of the protocol buffer
+                    return murmurHash3(name.c_str(), name.size());
+                }
+            };
+
+            template <typename T>
+            struct Serialise<module::support::NUbugger::NUsightVectorMessage<T>, module::support::NUbugger::NUsightVectorMessage<T>> {
+
+                using Type = module::support::NUbugger::NUsightVectorMessage<T>;
+                using protobuf_type = typename T::protobuf_type;
+
+                static inline std::vector<char> serialise(const Type& in) {
+
+                    constexpr int metasize = sizeof(uint8_t) + sizeof(uint64_t) + sizeof(uint64_t);
+
+                    protobuf_type proto = in.proto;
+
+                    // Allocate our buffer
+                    uint64_t bytes = metasize;
+                    for (const auto& msg : proto)
+                    {
+                        bytes += msg.ByteSize();
+                    }
+                    std::vector<char> output(bytes);
+
+                    // Get the pointers for our metadata
+                    uint8_t*  filterid  = reinterpret_cast<uint8_t*>(output.data());
+                    uint64_t* timestamp = reinterpret_cast<uint64_t*>(output.data() + sizeof(uint8_t));
+                    uint64_t* count     = reinterpret_cast<uint64_t*>(output.data() + sizeof(uint8_t) + sizeof(uint64_t));
+
+                    // Write our metadata
+                    *filterid  = in.filterid;
+                    *timestamp = in.timestamp;
+                    *count     = in.count;
+
+                    // Write our actual protocol buffer
+                    for (uint64_t i = 0; i < *count; i++)
+                    {
+                        proto[i].SerializeToArray(output.data() + metasize + (i * proto[i].ByteSize()), proto[i].ByteSize());
+                    }
+
+                    return output;
+                }
+
+                static inline Type deserialise(const std::vector<char>& in) {
+
+                    constexpr int metasize = sizeof(uint8_t) + sizeof(uint64_t) + sizeof(uint64_t);
+
+                    // Make a buffer
+                    Type out;
+
+                    // Get the pointers for our metadata
+                    uint8_t*  filterid  = reinterpret_cast<uint8_t*>(in.data());
+                    uint64_t* timestamp = reinterpret_cast<uint64_t*>(in.data() + sizeof(uint8_t));
+                    uint64_t* count     = reinterpret_cast<uint64_t*>(in.data() + sizeof(uint8_t) + sizeof(uint64_t));
+
+                    // Deserialize it
+                    out.filterid  = *filterid;
+                    out.timestamp = *timestamp;
+                    out.count     = *count;
+                    out.proto.resize(out.count);
+
+                    // Deserialize it
+                    for (uint64_t i = 0; i < *count; i++)
+                    {
+                        if (!out.proto[i].ParseFromArray(in.data() + metasize + (i * out.proto[i].ByteSize()), out.proto[i].ByteSize()))
+                        {
+                            throw std::runtime_error("Message failed to deserialise.");
+                        }
+                    }
+
+                    return out;
+                }
+
+                static inline std::array<uint64_t, 2> hash() {
+
+                    // We have to construct an instance to call the reflection functions
+                    protobuf_type type;
+
+                    auto name = "NUsight<vector<" + type.GetTypeName().substr(9) + ">>";
 
                     // We base the hash on the name of the protocol buffer
                     return murmurHash3(name.c_str(), name.size());

@@ -45,8 +45,9 @@ namespace support {
     using message::input::proto::GameState;
     using message::localisation::proto::Self;
     using LocalisationBall = message::localisation::proto::Ball;
-    using VisionGoal = message::vision::proto::VisionObject::Goal;
-    using VisionBall = message::vision::proto::VisionObject::Ball;
+    using VisionBall     = message::vision::proto::Ball;
+    using VisionGoal     = message::vision::proto::Goal;
+    using VisionObstacle = message::vision::proto::Obstacle;
     using message::motion::proto::WalkCommand;
 
     using utility::localisation::transform::RobotToWorldTransform;
@@ -140,6 +141,13 @@ namespace support {
 
             if (!goals.empty()) {
                 overview.last_seen_goal = NUClear::clock::now();
+            }
+        }));
+
+        handles["overview"].push_back(on<Trigger<std::vector<VisionObstacle>>, Single, Priority::LOW>().then([this] (const std::vector<VisionObstacle>& obstacles) {
+
+            if (!obstacles.empty()) {
+                overview.last_seen_obstacle = NUClear::clock::now();
             }
         }));
 

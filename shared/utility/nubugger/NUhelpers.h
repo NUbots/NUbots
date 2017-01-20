@@ -361,25 +361,23 @@ namespace nubugger {
         return utility::nubugger::drawPolyline(name, positions, line_width, colour, timeout);
     }
 
-    inline std::unique_ptr<message::vision::proto::VisionObject> drawVisionLines(std::vector<std::tuple<arma::ivec2, arma::ivec2, arma::vec4>> lines) {
+    inline std::unique_ptr<std::vector<message::vision::proto::Line>> drawVisionLines(std::vector<std::tuple<arma::ivec2, arma::ivec2, arma::vec4>> lines) {
 
-        auto visionObject = std::make_unique<message::vision::proto::VisionObject>();
-
-        visionObject->type = message::vision::proto::VisionObject::ObjectType::LINE;
-        visionObject->camera_id = 0;    // TODO
+        auto msg = std::make_unique<std::vector<message::vision::proto::Line>>();
 
         for (const auto& line : lines) {
-            message::vision::proto::VisionObject::Line objLine;
+            message::vision::proto::Line objLine;
+            objLine.visObject.camera_id = 0;    // TODO
             objLine.start  = convert<int,    2>(std::get<0>(line));
             objLine.end    = convert<int,    2>(std::get<1>(line));
             objLine.colour = convert<double, 4>(std::get<2>(line));
-            visionObject->line.push_back(objLine);
+            msg->push_back(objLine);
         }
 
-        return std::move(visionObject);
+        return std::move(msg);
     }
 
-    inline std::unique_ptr<message::vision::proto::VisionObject> drawVisionLines(std::vector<std::pair<arma::ivec2, arma::ivec2>> lines, arma::vec4 colour = arma::vec4({1, 1, 1, 1})) {
+    inline std::unique_ptr<std::vector<message::vision::proto::Line>> drawVisionLines(std::vector<std::pair<arma::ivec2, arma::ivec2>> lines, arma::vec4 colour = arma::vec4({1, 1, 1, 1})) {
 
         std::vector<std::tuple<arma::ivec2, arma::ivec2, arma::vec4>> colouredLines;
         colouredLines.reserve(lines.size());
@@ -391,7 +389,7 @@ namespace nubugger {
         return drawVisionLines(colouredLines);
     }
 
-    inline std::unique_ptr<message::vision::proto::VisionObject> drawVisionLine(arma::ivec2 start, arma::ivec2 end, arma::vec4 colour = arma::vec4({1, 1, 1, 1})) {
+    inline std::unique_ptr<std::vector<message::vision::proto::Line>> drawVisionLine(arma::ivec2 start, arma::ivec2 end, arma::vec4 colour = arma::vec4({1, 1, 1, 1})) {
         
         return drawVisionLines({std::make_tuple(start, end, colour)});
     }

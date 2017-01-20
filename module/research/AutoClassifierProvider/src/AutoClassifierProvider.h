@@ -46,12 +46,11 @@ namespace research {
         int lineLightnessMin = 0;
         int lineLightnessMax = 255;
 
-        bool goalProvider, ballProvider;
-
         void handleVisionGoals(const message::vision::proto::VisionObject& goals);
         void handleVisionBalls(const message::vision::proto::VisionObject& balls);
 
-        ReactionHandle visionObjectProvider;
+        ReactionHandle ballProvider;
+        ReactionHandle goalProvider;
         ReactionHandle fieldProvider;
         ReactionHandle lineProvider;
     };

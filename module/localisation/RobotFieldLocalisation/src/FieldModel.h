@@ -51,9 +51,9 @@ namespace module {
             arma::vec::fixed<size> timeUpdate(const arma::vec::fixed<size>& state, double deltaT);
 
             arma::vec predictedObservation(const arma::vec::fixed<size>& state
-                , const std::vector<std::tuple<message::vision::proto::VisionObject::Goal::Team::Value, 
-                                               message::vision::proto::VisionObject::Goal::Side::Value, 
-                                               message::vision::proto::VisionObject::MeasurementType::Value>>& measurements
+                , const std::vector<std::tuple<message::vision::proto::Goal::Team::Value, 
+                                               message::vision::proto::Goal::Side::Value, 
+                                               message::vision::proto::Goal::MeasurementType::Value>>& measurements
                 , const message::support::proto::FieldDescription& field
                 , const message::input::proto::Sensors& sensors
                 , const MeasurementType::GOAL&);

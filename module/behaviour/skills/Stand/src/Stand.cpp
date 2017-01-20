@@ -21,10 +21,10 @@
 
 #include "message/behaviour/proto/Subsumption.h"
 #include "message/input/proto/Sensors.h"
-#include "message/motion/Script.h"
-#include "message/behaviour/ServoCommand.h"
+#include "message/behaviour/proto/ServoCommand.h"
 
 #include "utility/behaviour/Action.h"
+#include "utility/motion/Script.h"
 
 namespace module {
     namespace behaviour {
@@ -33,7 +33,7 @@ namespace module {
             using ServoID = message::input::proto::Sensors::ServoID::Value;
             using utility::motion::ExecuteScriptByName;
             using utility::behaviour::RegisterAction;
-            using LimbID = message::behaviour::Subsumption::Limb::Value;
+            using LimbID = message::behaviour::proto::Subsumption::Limb::Value;
 
             //internal only callback messages to start and stop our action
             struct ExecuteStand {};

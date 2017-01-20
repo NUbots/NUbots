@@ -86,8 +86,8 @@ namespace optimisation {
         op->group = "test_dope";
         op->network = true;
         op->parameters.initial.generation = 0;
-        op->parameters.initial.estimate   = convert<double>(arma::vec(5, arma::fill::randu));
-        op->parameters.initial.covariance = convert<double>(arma::diagmat(arma::vec({ 0.1, 0.1, 0.1, 0.1, 0.1 })));
+        op->parameters.initial.estimate   = Eigen::VectorXd::Random(5);
+        op->parameters.initial.covariance = Eigen::VectorXd::Constant(5, 0.1).asDiagonal();
         op->parameters.upperBound         = Eigen::VectorXd::Constant(5, std::numeric_limits<double>::max());
         op->parameters.lowerBound         = Eigen::VectorXd::Constant(5, std::numeric_limits<double>::min());
         op->parameters.batchSize          = 10;

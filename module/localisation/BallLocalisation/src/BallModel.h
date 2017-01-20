@@ -23,7 +23,6 @@
 #include <armadillo>
 
 #include "message/input/proto/Sensors.h"
-#include "message/vision/VisionObjects.h"
 #include "message/support/proto/FieldDescription.h"
 
 namespace module {

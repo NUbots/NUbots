@@ -23,14 +23,16 @@
 #include <nuclear>
 #include <armadillo>
 #include <set>
-#include "message/localisation/FieldObject.h"
-#include "message/vision/VisionObjects.h"
-#include "message/motion/HeadCommand.h"
-#include "message/input/Sensors.h"
-#include "message/motion/KinematicsModels.h"
-#include "message/input/CameraParameters.h"
+
 #include "Searcher.h"
-#include "message/behaviour/SoccerObjectPriority.h"
+
+#include "message/localisation/proto/FieldObject.h"
+#include "message/vision/proto/VisionObjects.h"
+#include "message/motion/proto/HeadCommand.h"
+#include "message/input/proto/Sensors.h"
+#include "message/motion/proto/KinematicsModels.h"
+#include "message/input/proto/CameraParameters.h"
+#include "message/behaviour/proto/SoccerObjectPriority.h"
 
 namespace module {
     namespace behaviour{
@@ -53,32 +55,35 @@ namespace module {
                 };
                 SearchState state = SearchState::SEARCH;
 
-                std::vector<message::vision::VisionObject> getFixationObjects(std::shared_ptr<const std::vector<message::vision::Ball>> vballs,
-                                                                              std::shared_ptr<const std::vector<message::vision::Goal>> vgoals, 
-                                                                              bool& search);
+                std::vector<message::vision::proto::Ball> getFixationObjects(std::shared_ptr<const std::vector<message::vision::proto::Ball>> vballs, bool& search);
+                std::vector<message::vision::proto::Goal> getFixationObjects(std::shared_ptr<const std::vector<message::vision::proto::Goal>> vgoals, bool& search);
 
 
                 /*! @brief Updates the search plan when something has changed
                 */
-                void updateHeadPlan(const message::motion::kinematics::KinematicsModel& kinematicsModel, const std::vector<message::vision::VisionObject>& fixationObjects, const bool& search, const message::input::Sensors& sensors, const utility::math::matrix::Rotation3D& headToIMUSpace);
+                void updateHeadPlan(const message::motion::proto::KinematicsModel& kinematicsModel, const std::vector<message::vision::proto::Ball>& fixationObjects, const bool& search, const message::input::proto::Sensors& sensors, const utility::math::matrix::Rotation3D& headToIMUSpace);
+                void updateHeadPlan(const message::motion::proto::KinematicsModel& kinematicsModel, const std::vector<message::vision::proto::Goal>& fixationObjects, const bool& search, const message::input::proto::Sensors& sensors, const utility::math::matrix::Rotation3D& headToIMUSpace);
 
                 /*! @brief Converts from camera space direction to IMU space direction
                 */
-                arma::vec2 getIMUSpaceDirection(const message::motion::kinematics::KinematicsModel& kinematicsModel, const arma::vec2& screenAngles, utility::math::matrix::Rotation3D headToIMUSpace);
+                arma::vec2 getIMUSpaceDirection(const message::motion::proto::KinematicsModel& kinematicsModel, const arma::vec2& screenAngles, utility::math::matrix::Rotation3D headToIMUSpace);
 
                 /*! @brief Gets points which allow for simultaneous search and viewing of key objects
                 */
-                std::vector<arma::vec2> getSearchPoints(const message::motion::kinematics::KinematicsModel& kinematicsModel, std::vector<message::vision::VisionObject> fixationObjects, message::behaviour::SearchType sType, const message::input::Sensors& sensors);
+                std::vector<arma::vec2> getSearchPoints(const message::motion::proto::KinematicsModel& kinematicsModel, std::vector<message::vision::proto::Ball> fixationObjects, message::behaviour::proto::SearchType sType, const message::input::proto::Sensors& sensors);
+                std::vector<arma::vec2> getSearchPoints(const message::motion::proto::KinematicsModel& kinematicsModel, std::vector<message::vision::proto::Goal> fixationObjects, message::behaviour::proto::SearchType sType, const message::input::proto::Sensors& sensors);
 
                 /*! @brief Combines a collection of vision objects. The screen resulting screen angular region is the bounding box of the objects
                 */
-                message::vision::VisionObject combineVisionObjects(const std::vector<message::vision::VisionObject>& obs);
+                message::vision::proto::Ball combineVisionObjects(const std::vector<message::vision::proto::Ball>& obs);
+                message::vision::proto::Goal combineVisionObjects(const std::vector<message::vision::proto::Goal>& obs);
 
                 /*! @brief Gets a bounding box in screen angular space of a set of vision objects
                 */
-                utility::math::geometry::Quad getScreenAngularBoundingBox(const std::vector<message::vision::VisionObject>& obs);
+                utility::math::geometry::Quad getScreenAngularBoundingBox(const std::vector<message::vision::proto::Ball>& obs);
+                utility::math::geometry::Quad getScreenAngularBoundingBox(const std::vector<message::vision::proto::Goal>& obs);
 
-                bool orientationHasChanged(const message::input::Sensors& sensors);
+                bool orientationHasChanged(const message::input::proto::Sensors& sensors);
 
 
                 //CONFIG - loaded elsewhere
@@ -103,16 +108,16 @@ namespace module {
                 bool oscillate_search;
 
                 bool locBallReceived = false;
-                message::localisation::Ball lastLocBall;
+                message::localisation::proto::Ball lastLocBall;
 
-                std::map<message::behaviour::SearchType, std::vector<arma::vec2>> searches;
+                std::map<message::behaviour::proto::SearchType, std::vector<arma::vec2>> searches;
 
                 //State variables
                 Searcher<arma::vec2> headSearcher;
 
                 int ballPriority = 0;
                 int goalPriority = 0;
-                message::behaviour::SearchType searchType = message::behaviour::SearchType::LOST;
+                message::behaviour::proto::SearchType searchType = message::behaviour::proto::SearchType::LOST;
 
                 NUClear::clock::time_point lastPlanUpdate;
                 NUClear::clock::time_point timeLastObjectSeen;

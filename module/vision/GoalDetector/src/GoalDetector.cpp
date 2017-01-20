@@ -68,7 +68,7 @@ namespace vision {
     using message::vision::proto::LookUpTable;
     using message::vision::proto::ClassifiedImage;
     using SegmentClass = message::vision::proto::ClassifiedImage::SegmentClass::Value;
-    using message::vision::proto::VisionObject;
+    using message::vision::proto::Goal;
 
     // TODO the system is too generous with adding segments above and below the goals and makes them too tall, stop it
     // TODO the system needs to throw out the kinematics and height based measurements when it cannot be sure it saw the tops and bottoms of the goals
@@ -123,10 +123,7 @@ namespace vision {
             const auto& image = *rawImage;
             // Our segments that may be a part of a goal
             std::vector<RansacGoalModel::GoalSegment> segments;
-            auto goals = std::make_unique<VisionObject>();
-
-            goals->type    = VisionObject::ObjectType::GOAL;
-            goals->sensors = image.sensors;
+            auto goals = std::make_unique<std::vector<Goal>>();
 
             // Get our goal segments
             for (const auto& segment : image.horizontalSegments) {
@@ -249,8 +246,9 @@ namespace vision {
                 arma::vec2 p4 = midP2 - right.distanceToPoint(midP2) * arma::dot(right.normal, mid.normal) * mid.normal;
 
                 // Make a quad
-                VisionObject::Goal g;
-                g.side = VisionObject::Goal::Side::UNKNOWN_SIDE;
+                Goal goal;
+                goal.visObject.sensors = image.sensors;
+                goal.side = Goal::Side::UNKNOWN_SIDE;
 
                 // Seperate tl and bl
                 arma::vec2 tl = p1[1] > p2[1] ? p2 : p1;
@@ -258,18 +256,18 @@ namespace vision {
                 arma::vec2 tr = p3[1] > p4[1] ? p4 : p3;
                 arma::vec2 br = p3[1] > p4[1] ? p3 : p4;
 
-                g.quad.bl = convert<double, 2>(bl);
-                g.quad.tl = convert<double, 2>(tl);
-                g.quad.tr = convert<double, 2>(tr);
-                g.quad.br = convert<double, 2>(br);
+                goal.quad.bl = convert<double, 2>(bl);
+                goal.quad.tl = convert<double, 2>(tl);
+                goal.quad.tr = convert<double, 2>(tr);
+                goal.quad.br = convert<double, 2>(br);
 
-                goals->goal.push_back(std::move(g));
+                goals->push_back(std::move(goal));
             }
 
             utility::math::geometry::Line horizon(convert<double, 2>(image.horizon.normal), image.horizon.distance);
 
             // Throwout invalid quads
-            for(auto it = goals->goal.begin(); it != goals->goal.end();) {
+            for(auto it = goals->begin(); it != goals->end();) {
 
                 utility::math::geometry::Quad quad(convert<double, 2>(it->quad.bl),
                                                    convert<double, 2>(it->quad.tl),
@@ -303,7 +301,7 @@ namespace vision {
 
 
                 if(!valid) {
-                    it = goals->goal.erase(it);
+                    it = goals->erase(it);
                 }
                 else {
                     ++it;
@@ -311,13 +309,13 @@ namespace vision {
             }
 
             // Merge close goals
-            for (auto a = goals->goal.begin(); a != goals->goal.end(); ++a) {
+            for (auto a = goals->begin(); a != goals->end(); ++a) {
                 utility::math::geometry::Quad aquad(convert<double, 2>(a->quad.bl),
                                                     convert<double, 2>(a->quad.tl),
                                                     convert<double, 2>(a->quad.tr),
                                                     convert<double, 2>(a->quad.br));
 
-                for (auto b = std::next(a); b != goals->goal.end();) {
+                for (auto b = std::next(a); b != goals->end();) {
 
                     utility::math::geometry::Quad bquad(convert<double, 2>(b->quad.bl),
                                                         convert<double, 2>(b->quad.tl),
@@ -340,7 +338,7 @@ namespace vision {
                         a->quad.tl = convert<double, 2>(tl);
                         a->quad.tr = convert<double, 2>(tr);
                         a->quad.br = convert<double, 2>(br);
-                        b = goals->goal.erase(b);
+                        b = goals->erase(b);
                     }
                     else {
                         b++;
@@ -349,7 +347,7 @@ namespace vision {
             }
 
             // Store our measurements
-            for(auto it = goals->goal.begin(); it != goals->goal.end(); ++it) {
+            for(auto it = goals->begin(); it != goals->end(); ++it) {
                 utility::math::geometry::Quad quad(convert<double, 2>(it->quad.bl),
                                                    convert<double, 2>(it->quad.tl),
                                                    convert<double, 2>(it->quad.tr),
@@ -371,11 +369,11 @@ namespace vision {
                 // Get our four normals for each edge
                 // BL TL cross product gives left side
                 auto left   = convert<double, 3>(arma::normalise(arma::cross(cbl, ctl)));
-                it->measurement.push_back(VisionObject::Measurement(left, Eigen::Matrix3d::Identity(), VisionObject::MeasurementType::LEFT_NORMAL));
+                it->measurement.push_back(Goal::Measurement(Goal::MeasurementType::LEFT_NORMAL, left));
 
                 // TR BL cross product gives right side
                 auto right  = convert<double, 3>(arma::normalise(arma::cross(ctr, cbl)));
-                it->measurement.push_back(VisionObject::Measurement(right, Eigen::Matrix3d::Identity(), VisionObject::MeasurementType::RIGHT_NORMAL));
+                it->measurement.push_back(Goal::Measurement(Goal::MeasurementType::RIGHT_NORMAL, right));
 
                 // Check that the points are not too close to the edges of the screen
                 if(                         std::min(cbr[0], cbl[0]) > MEASUREMENT_LIMITS_LEFT
@@ -385,7 +383,7 @@ namespace vision {
 
                     // BR BL cross product gives the bottom side
                     auto bottom = convert<double, 3>(arma::normalise(arma::cross(cbr, cbl)));
-                    it->measurement.push_back(VisionObject::Measurement(bottom, Eigen::Matrix3d::Identity(), VisionObject::MeasurementType::BASE_NORMAL));
+                    it->measurement.push_back(Goal::Measurement(Goal::MeasurementType::BASE_NORMAL, bottom));
                 }
 
                 // Check that the points are not too close to the edges of the screen
@@ -396,39 +394,39 @@ namespace vision {
 
                     // TL TR cross product gives the top side
                     auto top    = convert<double, 3>(arma::normalise(arma::cross(ctl, ctr)));
-                    it->measurement.push_back(VisionObject::Measurement(top, Eigen::Matrix3d::Identity(), VisionObject::MeasurementType::TOP_NORMAL));
+                    it->measurement.push_back(Goal::Measurement(Goal::MeasurementType::TOP_NORMAL, top));
                 }
 
                 // Angular positions from the camera
                 arma::vec2 pixelsToTanThetaFactor = convert<double, 2>(cam.pixelsToTanThetaFactor);
-                it->screenAngular = convert<double, 2>(arma::atan(pixelsToTanThetaFactor % screenGoalCentre));
+                it->visObject.screenAngular = convert<double, 2>(arma::atan(pixelsToTanThetaFactor % screenGoalCentre));
                 arma::vec2 brAngular = arma::atan(pixelsToTanThetaFactor % br);
                 arma::vec2 trAngular = arma::atan(pixelsToTanThetaFactor % tr);
                 arma::vec2 blAngular = arma::atan(pixelsToTanThetaFactor % bl);
                 arma::vec2 tlAngular = arma::atan(pixelsToTanThetaFactor % tl);
                 Quad angularQuad(blAngular,tlAngular,trAngular,brAngular);
-                it->angularSize = convert<double, 2>(angularQuad.getSize());
+                it->visObject.angularSize = convert<double, 2>(angularQuad.getSize());
             }
 
 
             // Assign leftness and rightness to goals
-            if (goals->goal.size() == 2) {
-                utility::math::geometry::Quad quad0(convert<double, 2>(goals->goal.at(0).quad.bl),
-                                                    convert<double, 2>(goals->goal.at(0).quad.tl),
-                                                    convert<double, 2>(goals->goal.at(0).quad.tr),
-                                                    convert<double, 2>(goals->goal.at(0).quad.br));
+            if (goals->size() == 2) {
+                utility::math::geometry::Quad quad0(convert<double, 2>(goals->at(0).quad.bl),
+                                                    convert<double, 2>(goals->at(0).quad.tl),
+                                                    convert<double, 2>(goals->at(0).quad.tr),
+                                                    convert<double, 2>(goals->at(0).quad.br));
 
-                utility::math::geometry::Quad quad1(convert<double, 2>(goals->goal.at(1).quad.bl),
-                                                    convert<double, 2>(goals->goal.at(1).quad.tl),
-                                                    convert<double, 2>(goals->goal.at(1).quad.tr),
-                                                    convert<double, 2>(goals->goal.at(1).quad.br));
+                utility::math::geometry::Quad quad1(convert<double, 2>(goals->at(1).quad.bl),
+                                                    convert<double, 2>(goals->at(1).quad.tl),
+                                                    convert<double, 2>(goals->at(1).quad.tr),
+                                                    convert<double, 2>(goals->at(1).quad.br));
 
                 if (quad0.getCentre()(0) < quad1.getCentre()(0)) {
-                    goals->goal.at(0).side = VisionObject::Goal::Side::LEFT;
-                    goals->goal.at(1).side = VisionObject::Goal::Side::RIGHT;
+                    goals->at(0).side = Goal::Side::LEFT;
+                    goals->at(1).side = Goal::Side::RIGHT;
                 } else {
-                    goals->goal.at(0).side = VisionObject::Goal::Side::RIGHT;
-                    goals->goal.at(1).side = VisionObject::Goal::Side::LEFT;
+                    goals->at(0).side = Goal::Side::RIGHT;
+                    goals->at(1).side = Goal::Side::LEFT;
                 }
             }
 

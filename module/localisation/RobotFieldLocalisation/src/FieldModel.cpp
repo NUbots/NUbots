@@ -32,20 +32,19 @@ namespace module {
         using utility::math::matrix::Transform3D;
         using utility::math::matrix::Transform2D;
         using utility::math::vision::cameraSpaceGoalProjection;
-        using message::vision::proto::VisionObject;
         using message::support::proto::FieldDescription;
         using message::input::proto::Sensors;
-        using ServoID         = message::input::proto::Sensors::ServoID::Value;
-        using GoalSide        = VisionObject::Goal::Side::Value;
-        using GoalTeam        = VisionObject::Goal::Team::Value;
-        using MeasurementType = VisionObject::MeasurementType::Value;
+        using ServoID             = message::input::proto::Sensors::ServoID::Value;
+        using GoalSide            = message::vision::proto::Goal::Side::Value;
+        using GoalTeam            = message::vision::proto::Goal::Team::Value;
+        using GoalMeasurementType = message::vision::proto::Goal::MeasurementType::Value;
 
         arma::vec::fixed<FieldModel::size> FieldModel::timeUpdate(const arma::vec::fixed<size>& state, double /*deltaT*/) {
             return state;
         }
 
         arma::vec FieldModel::predictedObservation(const arma::vec::fixed<size>& state
-            , const std::vector<std::tuple<GoalTeam, GoalSide, MeasurementType>>& measurements
+            , const std::vector<std::tuple<GoalTeam, GoalSide, GoalMeasurementType>>& measurements
             , const FieldDescription& field
             , const Sensors& sensors
             , const MeasurementType::GOAL&) 
@@ -79,7 +78,7 @@ namespace module {
                 // Switch on Team
                 switch(std::get<0>(type)) {
                     // Switch on Side
-                    case GoalTeam::Value::OWN:
+                    case GoalTeam::OWN:
                         //ans += " own";
                         switch(std::get<1>(type)) {
                             case GoalSide::LEFT:
@@ -105,11 +104,11 @@ namespace module {
                                 //ans += " right";
                                 goalLocation.rows(0,1) = convert<double, 2>(field.goalpost_opp_r);
                                 break;
-                            case GoalSide::UNKNOWN:
+                            case GoalSide::UNKNOWN_SIDE:
                                 break;
                         }
                         break;
-                    case Goal::Team::UNKNOWN:
+                    case GoalTeam::UNKNOWN_TEAM:
                         break;
                 }
                 //only update the goal data if we're looking at a different i
@@ -120,22 +119,22 @@ namespace module {
                 // Switch on normal type
                 switch(std::get<2>(type)) {
 
-                    case MeasurementType::LEFT_NORMAL: {
+                    case GoalMeasurementType::LEFT_NORMAL: {
                         prediction.rows(counter,counter+2) = goalNormals.col(0);
                     } break;
 
-                    case MeasurementType::RIGHT_NORMAL: {
+                    case GoalMeasurementType::RIGHT_NORMAL: {
                         prediction.rows(counter,counter+2) = goalNormals.col(1);
                     } break;
 
-                    case MeasurementType::TOP_NORMAL: {
+                    case GoalMeasurementType::TOP_NORMAL: {
                         prediction.rows(counter,counter+2) = goalNormals.col(2);
                     } break;
 
-                    case MeasurementType::BASE_NORMAL: {
+                    case GoalMeasurementType::BASE_NORMAL: {
                         prediction.rows(counter,counter+2) = goalNormals.col(3);
                     } break;
-
+                    default: break;
                 }
                 counter += 3;
             }

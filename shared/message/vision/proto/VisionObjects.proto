@@ -50,7 +50,7 @@ message VisionObject {
 }
 
 message Ball {
-    VisionObject  VisionObject       = 1;
+    VisionObject  visObject          = 1;
 
     // The position of the ball in world coordinates
     vec3          position           = 2;
@@ -86,11 +86,11 @@ message Goal {
         vec3            position   = 2;
     }
 
-    VisionObject         VisionObject = 1;
-    Side                 side         = 2;
-    Team                 team         = 3;
-    Quad                 quad         = 4;
-    repeated Measurement measurement  = 5;
+    VisionObject         visObject   = 1;
+    Side                 side        = 2;
+    Team                 team        = 3;
+    Quad                 quad        = 4;
+    repeated Measurement measurement = 5;
 }
 
 message Obstacle {
@@ -100,13 +100,14 @@ message Obstacle {
         CYAN         = 2;
     }
 
-    VisionObject VisionObject = 1;
-    Polygon      shape        = 2;
-    Team         team         = 3;
+    VisionObject visObject = 1;
+    Polygon      shape     = 2;
+    Team         team      = 3;
 }
 
 message Line {
-    ivec2 start  = 1;
-    ivec2 end    = 2;
-    vec4  colour = 3;
+    VisionObject visObject = 1;
+    ivec2        start     = 2;
+    ivec2        end       = 3;
+    vec4         colour    = 4;
 }

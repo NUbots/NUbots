@@ -34,8 +34,10 @@ namespace support {
     using utility::time::getUtcTimestamp;
 
     using message::input::proto::Image;
-    using message::vision::proto::VisionObjects;
-    using message::vision::proto::VisionObject;
+    using message::vision::proto::Ball;
+    using message::vision::proto::Goal;
+    using message::vision::proto::Line;
+    using message::vision::proto::Obstacle;
     using message::vision::proto::LookUpTableDiff;
     using message::vision::proto::ClassifiedImage;
 
@@ -46,7 +48,9 @@ namespace support {
                 return;
             }
 
-            send(image, 1, false, NUClear::clock::now());
+            auto imageData = image;
+            send<Image>(imageData, 1, false, NUClear::clock::now());
+            //send<Image>(std::make_unique<Image>(image), 1, false, NUClear::clock::now());
 
             last_image = NUClear::clock::now();
         }));
@@ -57,51 +61,34 @@ namespace support {
                 return;
             }
 
-            send(image, image.image->camera_id + 1, false, NUClear::clock::now());
+            send<ClassifiedImage>(std::make_unique<ClassifiedImage>(image), image.image->camera_id + 1, false, NUClear::clock::now());
 
             last_classified_image = NUClear::clock::now();
         }));
 
-        handles["vision_object"].push_back(on<Trigger<std::vector<VisionObject::Ball>>, Single, Priority::LOW>().then([this] (const std::vector<VisionObject::Ball>& balls) {
-            VisionObjects objects;
+        handles["vision_object"].push_back(on<Trigger<std::vector<Ball>>, Single, Priority::LOW>().then([this] (const std::vector<Ball>& balls) {
 
-            VisionObject object;
-
-            object.type = VisionObject::ObjectType::Value::BALL;
-            object.camera_id = 0;
-            object.ball = balls;
-            objects.object.push_back(object);
-
-            send(objects, 1, false, NUClear::clock::now());
+            send<Ball>(std::make_unique<std::vector<Ball>>(balls), 1, false, NUClear::clock::now());
         }));
 
-        handles["vision_object"].push_back(on<Trigger<std::vector<VisionObject::Goal>>, Single, Priority::LOW>().then([this] (const std::vector<VisionObject::Goal>& goals) {
+        handles["vision_object"].push_back(on<Trigger<std::vector<Goal>>, Single, Priority::LOW>().then([this] (const std::vector<Goal>& goals) {
 
-            VisionObjects objects;
-            VisionObject  object;
-
-            object.type = VisionObject::ObjectType::Value::GOAL;
-            object.camera_id = 0;
-            object.goal = goals;
-            objects.object.push_back(object);
-            
-            send(objects, 2, false, NUClear::clock::now());
+            send<Goal>(std::make_unique<std::vector<Goal>>(goals), 2, false, NUClear::clock::now());
         }));
 
-        // TODO: needs refactoring so that this is really only a vision line handle
-        handles["vision_object"].push_back(on<Trigger<VisionObject>, Single, Priority::LOW>().then([this] (const VisionObject& visionObject) {
+        handles["vision_object"].push_back(on<Trigger<std::vector<Line>>, Single, Priority::LOW>().then([this] (const std::vector<Line>& lines) {
 
-            VisionObjects objects;
+            send<Line>(std::make_unique<std::vector<Line>>(lines), 3, false, NUClear::clock::now());
+        }));
 
-            objects.object.push_back(visionObject);
+        handles["vision_object"].push_back(on<Trigger<std::vector<Obstacle>>, Single, Priority::LOW>().then([this] (const std::vector<Obstacle>& obstacles) {
 
-            send(objects, 3, false, NUClear::clock::now());
-            // NUClear::log("Vision lines emitted");
+            send<Obstacle>(std::make_unique<std::vector<Obstacle>>(obstacles), 4, false, NUClear::clock::now());
         }));
 
         handles["lookup_table_diff"].push_back(on<Trigger<LookUpTableDiff>, Single, Priority::LOW>().then([this] (const LookUpTableDiff& tableDiff) {
 
-            send(tableDiff, 0, true, NUClear::clock::now());
+            send<LookUpTableDiff>(std::make_unique<LookUpTableDiff>(tableDiff), 0, true, NUClear::clock::now());
         }));
     }
 }

@@ -20,10 +20,13 @@
 #include "PushDetector.h"
 
 #include "extension/Configuration.h"
-#include "utility/time/time.h"
+
+#include "message/input/proto/Sensors.h"
+#include "message/input/proto/PushDetection.h"
+
 #include "utility/nubugger/NUhelpers.h"
-#include "message/input/Sensors.h"
-#include "message/input/PushDetection.h"
+#include "utility/support/eigen_armadillo.h"
+#include "utility/time/time.h"
 
 namespace module 
 {
@@ -31,8 +34,9 @@ namespace input
 {
 
     using extension::Configuration;
-    using message::input::Sensors;
-    using message::input::PushDetection;
+
+    using message::input::proto::Sensors;
+    using message::input::proto::PushDetection;
     
     using utility::input::ServoLoadModel;
     using utility::math::filter::UKF;
@@ -69,7 +73,7 @@ namespace input
             // Rotational rate = 3.49066 rads/sec...
             // Bending vs. Standing is considered at an offset of 0.610865 rads...
 
-            arma::vec3 diff = sensors[0]->accelerometer - sensors[1]->accelerometer;
+            arma::vec3 diff = convert<double, 3>(sensors[0]->accelerometer - sensors[1]->accelerometer);
             arma::vec2 xzDiff = { diff(0), diff(2) };
 
             if (arma::norm(xzDiff) > 5) 
@@ -95,7 +99,7 @@ namespace input
 
                 filter.timeUpdate(seconds);
                 arma::mat cov = { 0.1 };
-                arma::vec meas = { sensors[0]->servos[i].load };
+                arma::vec meas = { sensors[0]->servo[i].load };
                 filter.measurementUpdate(meas, cov);
             }
 
