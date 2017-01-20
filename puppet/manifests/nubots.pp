@@ -117,7 +117,7 @@ node nubotsvmbuild {
                        'method'      => 'autotools',},
     'muparserx'    => {'url'         => 'https://github.com/beltoforion/muparserx/archive/v4.0.4.tar.gz',
                        'method'      => 'cmake',},
-    'eigen3'       => {'url'         => 'http://bitbucket.org/eigen/eigen/get/3.2.7.tar.gz',
+    'eigen3'       => {'url'         => 'http://bitbucket.org/eigen/eigen/get/3.3.2.tar.gz',
                        'creates'     => 'include/eigen3/Eigen/Eigen',
                        'method'      => 'cmake',},
     'boost'        => {'url'         => 'http://downloads.sourceforge.net/project/boost/boost/1.59.0/boost_1_59_0.tar.gz',
