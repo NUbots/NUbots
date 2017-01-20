@@ -156,7 +156,10 @@ namespace motion
 //std::cout << "Torso Position (Legs)\t[X= " << getTorsoPositionLegs().x() << "]\t[Y= " << getTorsoPositionLegs().y() << "]\n\r";                 
         Transform2D uTorsoWorld = getTorsoPositionArms().localToWorld({-kinematicsModel.leg.HIP_OFFSET_X, 0, 0});
         setTorsoPosition3D(arma::vec6({uTorsoWorld.x(), uTorsoWorld.y(), bodyHeight, 0, bodyTilt, uTorsoWorld.angle()}));
-        emit(std::make_unique<TorsoMotionUpdate>(getTorsoPositionArms(), getTorsoPositionLegs(), getTorsoPosition3D(), getTorsoDestination()));
+        emit(std::make_unique<TorsoMotionUpdate>(convert<double, 3>(getTorsoPositionArms()), 
+                                                 convert<double, 3>(getTorsoPositionLegs()), 
+                                                 convert<double, 4, 4>(getTorsoPosition3D()), 
+                                                 convert<double, 3>(getTorsoDestination())));
     }
 /*=======================================================================================================*/
 //      METHOD: stepTorso

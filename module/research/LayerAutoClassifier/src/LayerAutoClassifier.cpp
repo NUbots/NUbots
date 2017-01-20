@@ -19,19 +19,23 @@
 
 #include "LayerAutoClassifier.h"
 
-#include "message/research/AutoClassifierPixels.h"
 #include "extension/Configuration.h"
-#include "message/vision/LookUpTable.h"
+
+#include "message/research/AutoClassifierPixels.h"
+#include "message/vision/proto/LookUpTable.h"
 #include "message/vision/proto/LookUpTableDiff.h"
+
+#include "utility/vision/LookUpTable.h"
 
 namespace module {
 namespace research {
 
-    using message::research::AutoClassifierPixels;
     using extension::Configuration;
-    using message::vision::LookUpTable;
+
+    using message::research::AutoClassifierPixels;
+    using message::vision::proto::LookUpTable;
     using message::vision::proto::LookUpTableDiff;
-    using Colour = message::vision::proto::Colour::Colours::Value;
+    using Colour = utility::vision::Colour;
 
 
     /**
@@ -45,7 +49,7 @@ namespace research {
      * @return the array index that represents these coordinates in the lut
      */
     inline uint getIndex(const LookUpTable& lut, const uint8_t& x, const uint8_t& y, const uint8_t& z) {
-        return (((x << lut.BITS_CR) | y) << lut.BITS_CB) | z;
+        return (((x << lut.bits_cr) | y) << lut.bits_cb) | z;
     }
 
     /**
@@ -58,9 +62,9 @@ namespace research {
      */
     inline std::array<uint, 3> getCoordinates(const LookUpTable& lut, const uint& index) {
 
-        uint x = (index >> (lut.BITS_CB + lut.BITS_CR)) & ((1 << lut.BITS_Y) - 1);
-        uint y = (index >> lut.BITS_CR) & ((1 << lut.BITS_CB) - 1);
-        uint z = index & ((1 << lut.BITS_CR) - 1);
+        uint x = (index >> (lut.bits_cb + lut.bits_cr)) & ((1 << lut.bits_y) - 1);
+        uint y = (index >> lut.bits_cr) & ((1 << lut.bits_cb) - 1);
+        uint z = index & ((1 << lut.bits_cr) - 1);
 
         return { x, y, z };
     }
@@ -73,20 +77,8 @@ namespace research {
      *
      * @return the colour that is located at this index in the lut
      */
-    inline const Colour& getAt(const LookUpTable& lut, const uint& index) {
-        return lut.getRawData()[index];
-    }
-
-    /**
-     * @brief Gets the Colour that is at this position in the lookup table
-     *
-     * @param lut the lookup table that we are searching in
-     * @param index the array index that represents these coordinates in the lut
-     *
-     * @return the colour that is located at this index in the lut
-     */
-    inline Colour& getAt(LookUpTable& lut, const uint& index) {
-        return lut.getRawData()[index];
+    inline Colour getAt(const LookUpTable& lut, const uint& index) {
+        return lut.table[index];
     }
 
     /**
@@ -104,7 +96,7 @@ namespace research {
     inline bool isTouching(const LookUpTable& lut, const uint& index, const Colour& c) {
 
         // Loop through each axis and check any are filled
-        for(uint i : { 1, 1 << lut.BITS_CR, 1 << (lut.BITS_CB + lut.BITS_CR) }) {
+        for(uint i : { 1, 1 << lut.bits_cr, 1 << (lut.bits_cb + lut.bits_cr) }) {
 
             // If either direction is the colour we are looking for we are touching
             if(getAt(lut, index + i) == c
@@ -135,7 +127,7 @@ namespace research {
         bool internal = true;
 
         // Loop through each axis and check they are all filled
-        for(uint i : { 1, 1 << lut.BITS_CR, 1 << (lut.BITS_CB + lut.BITS_CR) }) {
+        for(uint i : { 1, 1 << lut.bits_cr, 1 << (lut.bits_cb + lut.bits_cr) }) {
             internal &= getAt(lut, index + i) == c;
             internal &= getAt(lut, index - i) == c;
         }
@@ -159,13 +151,13 @@ namespace research {
         std::set<uint> inf;
 
         // Each of our touchign faces
-        for(uint i : { 1, 1 << lut.BITS_CR, 1 << (lut.BITS_CB + lut.BITS_CR) }) {
+        for(uint i : { 1, 1 << lut.bits_cr, 1 << (lut.bits_cb + lut.bits_cr) }) {
             inf.insert(index + i);
             inf.insert(index - i);
         }
 
         // Insert our side diagonals
-        for(uint i : {1 << lut.BITS_CR, 1 << (lut.BITS_CB + lut.BITS_CR) }) {
+        for(uint i : {1 << lut.bits_cr, 1 << (lut.bits_cb + lut.bits_cr) }) {
 
             inf.insert(index + i + 1);
             inf.insert(index - i + 1);
@@ -205,7 +197,7 @@ namespace research {
         bool removeable = false;
 
         // Loop through each axis
-        for(uint i : { 1, 1 << lut.BITS_CR, 1 << (lut.BITS_CB + lut.BITS_CR) }) {
+        for(uint i : { 1, 1 << lut.bits_cr, 1 << (lut.bits_cb + lut.bits_cr) }) {
 
             // Check if we have a filled cell opposite to a non filled cell
             if(!(getAt(lut, index + i) == c && getAt(lut, index - i) == c)) {
@@ -227,7 +219,7 @@ namespace research {
             uint nonOppositeInternal = 0;
 
             // Loop through each axis again
-            for(uint i : { 1, 1 << lut.BITS_CR, 1 << (lut.BITS_CB + lut.BITS_CR) }) {
+            for(uint i : { 1, 1 << lut.bits_cr, 1 << (lut.bits_cb + lut.bits_cr) }) {
 
                 // Check if either side is internal
                 bool a = getAt(lut, index + i) == c && isInternal(lut, index + 1);
@@ -305,7 +297,7 @@ namespace research {
 
             //Loop through each classification char
             for(auto& limit : config["limits"].config) {
-                Colour c          = static_cast<Colour>(limit.first.as<char>());
+                Colour c          = limit.first.as<char>();
                 maxVolume[c]      = limit.second["max_volume"].as<uint>();
                 maxSurfaceArea[c] = limit.second["surface_area_volume_ratio"].as<double>() * maxVolume[c];
             }
@@ -319,9 +311,9 @@ namespace research {
             std::map<Colour, uint> newVol;
 
             // Loop through every voxel in the lut
-            for(uint x = 0; x < uint(1 << lut.BITS_Y); ++x) {
-                for (uint y = 0; y < uint(1 << lut.BITS_CB); ++y) {
-                    for (uint z = 0; z < uint(1 << lut.BITS_CR); ++z) {
+            for(uint x = 0; x < uint(1 << lut.bits_y); ++x) {
+                for (uint y = 0; y < uint(1 << lut.bits_cb); ++y) {
+                    for (uint z = 0; z < uint(1 << lut.bits_cr); ++z) {
 
                         // Get our index and classification
                         uint index = getIndex(lut, x, y, z);
@@ -356,9 +348,9 @@ namespace research {
 
             // Show the removeable surface
             if(i % 3 == 0) {
-                for(uint x = 0; x < uint(1 << lut.BITS_Y); ++x) {
-                    for (uint y = 0; y < uint(1 << lut.BITS_CB); ++y) {
-                        for (uint z = 0; z < uint(1 << lut.BITS_CR); ++z) {
+                for(uint x = 0; x < uint(1 << lut.bits_y); ++x) {
+                    for (uint y = 0; y < uint(1 << lut.bits_cb); ++y) {
+                        for (uint z = 0; z < uint(1 << lut.bits_cr); ++z) {
 
                             // Get our relevant information
                             uint index = getIndex(lut, x, y, z);
@@ -379,9 +371,9 @@ namespace research {
             // Show the internal voxels
             else if(i % 3 == 1) {
 
-                for(uint x = 0; x < uint(1 << lut.BITS_Y); ++x) {
-                    for (uint y = 0; y < uint(1 << lut.BITS_CB); ++y) {
-                        for (uint z = 0; z < uint(1 << lut.BITS_CR); ++z) {
+                for(uint x = 0; x < uint(1 << lut.bits_y); ++x) {
+                    for (uint y = 0; y < uint(1 << lut.bits_cb); ++y) {
+                        for (uint z = 0; z < uint(1 << lut.bits_cr); ++z) {
 
                             // Get our relevant information
                             uint index = getIndex(lut, x, y, z);
@@ -403,9 +395,9 @@ namespace research {
             // Show the other voxels
             if(i % 3 == 2) {
 
-                for(uint x = 0; x < uint(1 << lut.BITS_Y); ++x) {
-                    for (uint y = 0; y < uint(1 << lut.BITS_CB); ++y) {
-                        for (uint z = 0; z < uint(1 << lut.BITS_CR); ++z) {
+                for(uint x = 0; x < uint(1 << lut.bits_y); ++x) {
+                    for (uint y = 0; y < uint(1 << lut.bits_cb); ++y) {
+                        for (uint z = 0; z < uint(1 << lut.bits_cr); ++z) {
 
                             // Get our relevant information
                             uint index = getIndex(lut, x, y, z);
@@ -434,7 +426,7 @@ namespace research {
         .then([this] (const AutoClassifierPixels& pixels, const LookUpTable& lut) {
 
             // Some aliases
-            const auto& c = pixels.classification.value;
+            const Colour& c = pixels.classification;
             auto& vol     = volume[c];
             auto& maxVol  = maxVolume[c];
             auto& sa      = surfaceArea[c];
@@ -446,13 +438,13 @@ namespace research {
             for(auto& p : pixels.pixels) {
 
                 // Lookup the pixel
-                auto colour = lut(p);
+                auto colour = utility::vision::getPixelColour(lut, p);
 
                 // If it's an unclassified pixel then we can do something
                 if(colour == Colour::UNCLASSIFIED) {
 
                     // Get our voxel coordinates for this pixel
-                    uint index = lut.getLUTIndex(p);
+                    uint index = utility::vision::getLUTIndex(lut, p);
 
                     // Check if we are touching a filled voxel
                     if(isTouching(lut, index, c)) {

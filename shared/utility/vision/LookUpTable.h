@@ -44,13 +44,13 @@ namespace utility {
          *   @param p The pixel to be classified.
          *   @return Returns the colour index for the given pixel.
          */
-        uint getLUTIndex(const message::vision::proto::LookUpTable& lut, const Pixel& p) {
+        uint32_t getLUTIndex(const message::vision::proto::LookUpTable& lut, const Pixel& p) {
             const uint8_t BITS_Y_REMOVED  = sizeof(uint8_t) * 8 - lut.bits_y;
             const uint8_t BITS_CB_REMOVED = sizeof(uint8_t) * 8 - lut.bits_cb;
             const uint8_t BITS_CR_REMOVED = sizeof(uint8_t) * 8 - lut.bits_cr;
             const uint8_t BITS_CB_CR      = lut.bits_cb + lut.bits_cr;
 
-            unsigned int index = 0;
+            uint32_t index = 0;
 
             index += ((p.components.y  >> BITS_Y_REMOVED)  << BITS_CB_CR);
             index += ((p.components.cb >> BITS_CB_REMOVED) << lut.bits_cr);
@@ -65,7 +65,7 @@ namespace utility {
             @return Returns the colour classification of this pixel
          */
         Colour getPixelColour(const message::vision::proto::LookUpTable& lut, const Pixel& p) {
-            return static_cast<Colour>(lut.table[getLUTIndex(lut, p)]);
+            return lut.table[getLUTIndex(lut, p)];
         }
 
         /*!

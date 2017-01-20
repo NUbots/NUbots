@@ -250,7 +250,7 @@ namespace vision {
 
                 // Make a quad
                 VisionObject::Goal g;
-                g.side = VisionObject::Goal::Side::UNKNOWN;
+                g.side = VisionObject::Goal::Side::UNKNOWN_SIDE;
 
                 // Seperate tl and bl
                 arma::vec2 tl = p1[1] > p2[1] ? p2 : p1;

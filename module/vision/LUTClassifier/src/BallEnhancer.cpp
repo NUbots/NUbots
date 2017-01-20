@@ -21,140 +21,146 @@
 #include "QuexClassifier.h"
 
 #include "utility/math/vision.h"
+#include "utility/math/geometry/Line.h"
 #include "utility/nubugger/NUhelpers.h"
+#include "utility/vision/ClassifiedImage.h"
 #include "utility/vision/fourcc.h"
+#include "utility/vision/LookUpTable.h"
+#include "utility/vision/Vision.h"
 
 namespace module {
     namespace vision {
 
-        using namespace utility::vision;
         using message::input::proto::Image;
-        using message::vision::LookUpTable;
-        using message::vision::ObjectClass;
-        using message::vision::ClassifiedImage;
+        using message::vision::proto::LookUpTable;
+        using message::vision::proto::ClassifiedImage;
 
+        using utility::math::geometry::Line;
         using utility::math::vision::getGroundPointFromScreen;
         using utility::math::vision::projectWorldPointToScreen;
         using utility::math::vision::imageToScreen;
         using utility::nubugger::drawVisionLines;
+        using Colour = utility::vision::Colour;
+        using FOURCC = utility::vision::FOURCC;
+        using Pixel  = utility::vision::Pixel;
 
-        std::pair<float, arma::ivec2> fieldEdgeDirection(const arma::ivec2& base, const Image& image, const arma::fvec3 greenCentroid) {
+        std::pair<float, Eigen::Vector2i> fieldEdgeDirection(const Eigen::Vector2i& base, const Image& image, const Eigen::Vector3f& greenCentroid) {
 
             // Get our relevant pixels
             //TODO:bounds check
             std::array<Pixel, 24> pixels {
-                getPixel(base[0] - 2, base[1] - 2, image.dimensions[0], image.dimensions[1], image.data, static_cast<utility::vision::FOURCC>(image.format)),
-                getPixel(base[0] - 2, base[1] - 1, image.dimensions[0], image.dimensions[1], image.data, static_cast<utility::vision::FOURCC>(image.format)),
-                getPixel(base[0] - 2, base[1] + 0, image.dimensions[0], image.dimensions[1], image.data, static_cast<utility::vision::FOURCC>(image.format)),
-                getPixel(base[0] - 2, base[1] + 1, image.dimensions[0], image.dimensions[1], image.data, static_cast<utility::vision::FOURCC>(image.format)),
-                getPixel(base[0] - 2, base[1] + 2, image.dimensions[0], image.dimensions[1], image.data, static_cast<utility::vision::FOURCC>(image.format)),
+                getPixel(base[0] - 2, base[1] - 2, image.dimensions[0], image.dimensions[1], image.data, static_cast<FOURCC>(image.format)),
+                getPixel(base[0] - 2, base[1] - 1, image.dimensions[0], image.dimensions[1], image.data, static_cast<FOURCC>(image.format)),
+                getPixel(base[0] - 2, base[1] + 0, image.dimensions[0], image.dimensions[1], image.data, static_cast<FOURCC>(image.format)),
+                getPixel(base[0] - 2, base[1] + 1, image.dimensions[0], image.dimensions[1], image.data, static_cast<FOURCC>(image.format)),
+                getPixel(base[0] - 2, base[1] + 2, image.dimensions[0], image.dimensions[1], image.data, static_cast<FOURCC>(image.format)),
 
-                getPixel(base[0] - 1, base[1] - 2, image.dimensions[0], image.dimensions[1], image.data, static_cast<utility::vision::FOURCC>(image.format)),
-                getPixel(base[0] - 1, base[1] - 1, image.dimensions[0], image.dimensions[1], image.data, static_cast<utility::vision::FOURCC>(image.format)),
-                getPixel(base[0] - 1, base[1] + 0, image.dimensions[0], image.dimensions[1], image.data, static_cast<utility::vision::FOURCC>(image.format)),
-                getPixel(base[0] - 1, base[1] + 1, image.dimensions[0], image.dimensions[1], image.data, static_cast<utility::vision::FOURCC>(image.format)),
-                getPixel(base[0] - 1, base[1] + 2, image.dimensions[0], image.dimensions[1], image.data, static_cast<utility::vision::FOURCC>(image.format)),
+                getPixel(base[0] - 1, base[1] - 2, image.dimensions[0], image.dimensions[1], image.data, static_cast<FOURCC>(image.format)),
+                getPixel(base[0] - 1, base[1] - 1, image.dimensions[0], image.dimensions[1], image.data, static_cast<FOURCC>(image.format)),
+                getPixel(base[0] - 1, base[1] + 0, image.dimensions[0], image.dimensions[1], image.data, static_cast<FOURCC>(image.format)),
+                getPixel(base[0] - 1, base[1] + 1, image.dimensions[0], image.dimensions[1], image.data, static_cast<FOURCC>(image.format)),
+                getPixel(base[0] - 1, base[1] + 2, image.dimensions[0], image.dimensions[1], image.data, static_cast<FOURCC>(image.format)),
 
-                getPixel(base[0] + 0, base[1] - 2, image.dimensions[0], image.dimensions[1], image.data, static_cast<utility::vision::FOURCC>(image.format)),
-                getPixel(base[0] + 0, base[1] - 1, image.dimensions[0], image.dimensions[1], image.data, static_cast<utility::vision::FOURCC>(image.format)),
-                getPixel(base[0] + 0, base[1] + 1, image.dimensions[0], image.dimensions[1], image.data, static_cast<utility::vision::FOURCC>(image.format)),
-                getPixel(base[0] + 0, base[1] + 2, image.dimensions[0], image.dimensions[1], image.data, static_cast<utility::vision::FOURCC>(image.format)),
+                getPixel(base[0] + 0, base[1] - 2, image.dimensions[0], image.dimensions[1], image.data, static_cast<FOURCC>(image.format)),
+                getPixel(base[0] + 0, base[1] - 1, image.dimensions[0], image.dimensions[1], image.data, static_cast<FOURCC>(image.format)),
+                getPixel(base[0] + 0, base[1] + 1, image.dimensions[0], image.dimensions[1], image.data, static_cast<FOURCC>(image.format)),
+                getPixel(base[0] + 0, base[1] + 2, image.dimensions[0], image.dimensions[1], image.data, static_cast<FOURCC>(image.format)),
 
-                getPixel(base[0] + 1, base[1] - 2, image.dimensions[0], image.dimensions[1], image.data, static_cast<utility::vision::FOURCC>(image.format)),
-                getPixel(base[0] + 1, base[1] - 1, image.dimensions[0], image.dimensions[1], image.data, static_cast<utility::vision::FOURCC>(image.format)),
-                getPixel(base[0] + 1, base[1] + 0, image.dimensions[0], image.dimensions[1], image.data, static_cast<utility::vision::FOURCC>(image.format)),
-                getPixel(base[0] + 1, base[1] + 1, image.dimensions[0], image.dimensions[1], image.data, static_cast<utility::vision::FOURCC>(image.format)),
-                getPixel(base[0] + 1, base[1] + 2, image.dimensions[0], image.dimensions[1], image.data, static_cast<utility::vision::FOURCC>(image.format)),
+                getPixel(base[0] + 1, base[1] - 2, image.dimensions[0], image.dimensions[1], image.data, static_cast<FOURCC>(image.format)),
+                getPixel(base[0] + 1, base[1] - 1, image.dimensions[0], image.dimensions[1], image.data, static_cast<FOURCC>(image.format)),
+                getPixel(base[0] + 1, base[1] + 0, image.dimensions[0], image.dimensions[1], image.data, static_cast<FOURCC>(image.format)),
+                getPixel(base[0] + 1, base[1] + 1, image.dimensions[0], image.dimensions[1], image.data, static_cast<FOURCC>(image.format)),
+                getPixel(base[0] + 1, base[1] + 2, image.dimensions[0], image.dimensions[1], image.data, static_cast<FOURCC>(image.format)),
 
-                getPixel(base[0] + 2, base[1] - 2, image.dimensions[0], image.dimensions[1], image.data, static_cast<utility::vision::FOURCC>(image.format)),
-                getPixel(base[0] + 2, base[1] - 1, image.dimensions[0], image.dimensions[1], image.data, static_cast<utility::vision::FOURCC>(image.format)),
-                getPixel(base[0] + 2, base[1] + 0, image.dimensions[0], image.dimensions[1], image.data, static_cast<utility::vision::FOURCC>(image.format)),
-                getPixel(base[0] + 2, base[1] + 1, image.dimensions[0], image.dimensions[1], image.data, static_cast<utility::vision::FOURCC>(image.format)),
-                getPixel(base[0] + 2, base[1] + 2, image.dimensions[0], image.dimensions[1], image.data, static_cast<utility::vision::FOURCC>(image.format))
+                getPixel(base[0] + 2, base[1] - 2, image.dimensions[0], image.dimensions[1], image.data, static_cast<FOURCC>(image.format)),
+                getPixel(base[0] + 2, base[1] - 1, image.dimensions[0], image.dimensions[1], image.data, static_cast<FOURCC>(image.format)),
+                getPixel(base[0] + 2, base[1] + 0, image.dimensions[0], image.dimensions[1], image.data, static_cast<FOURCC>(image.format)),
+                getPixel(base[0] + 2, base[1] + 1, image.dimensions[0], image.dimensions[1], image.data, static_cast<FOURCC>(image.format)),
+                getPixel(base[0] + 2, base[1] + 2, image.dimensions[0], image.dimensions[1], image.data, static_cast<FOURCC>(image.format))
             };
 
             // Find out how green each pixel is!
             std::array<float, 24> greenness;
             for(int i = 0; i < int(greenness.size()); ++i) {
-                greenness[i] = arma::norm(greenCentroid - arma::fvec3({ float(pixels[i].y * 2), float(pixels[i].cb), float(pixels[i].cr) }));
+                greenness[i] = (greenCentroid - Eigen::Vector3f({ float(pixels[i].components.y * 2), float(pixels[i].components.cb), float(pixels[i].components.cr) })).norm();
             }
 
             constexpr float M_1_SQRT5 = 0.4472135955;
             constexpr float M_2_SQRT5 = 0.894427191;
             constexpr float M_SQRT2_2 = M_SQRT2 * 0.5;
 
-            arma::fvec2 greenDirection = (arma::fvec2({-M_SQRT2_2, -M_SQRT2_2}) * greenness[0])
-                                       + (arma::fvec2({-M_2_SQRT5, -M_1_SQRT5}) * greenness[1])
-                                       + (arma::fvec2({-1        , +0})         * greenness[2])
-                                       + (arma::fvec2({-M_2_SQRT5, +M_1_SQRT5}) * greenness[3])
-                                       + (arma::fvec2({-M_SQRT2_2, +M_SQRT2_2}) * greenness[4])
-                                       + (arma::fvec2({-M_1_SQRT5, -M_2_SQRT5}) * greenness[5])
-                                       + (arma::fvec2({-M_SQRT2_2, -M_SQRT2_2}) * greenness[6])
-                                       + (arma::fvec2({-1        , +0})         * greenness[7])
-                                       + (arma::fvec2({-M_SQRT2_2, +M_SQRT2_2}) * greenness[8])
-                                       + (arma::fvec2({-M_1_SQRT5, +M_2_SQRT5}) * greenness[9])
-                                       + (arma::fvec2({+0        , -1})         * greenness[10])
-                                       + (arma::fvec2({+0        , -1})         * greenness[11])
-                                       + (arma::fvec2({+0        , +1})         * greenness[12])
-                                       + (arma::fvec2({+0        , +1})         * greenness[13])
-                                       + (arma::fvec2({+M_1_SQRT5, -M_2_SQRT5}) * greenness[14])
-                                       + (arma::fvec2({+M_SQRT2_2, -M_SQRT2_2}) * greenness[15])
-                                       + (arma::fvec2({+1        , +0})         * greenness[16])
-                                       + (arma::fvec2({+M_SQRT2_2, +M_SQRT2_2}) * greenness[17])
-                                       + (arma::fvec2({+M_1_SQRT5, +M_2_SQRT5}) * greenness[14])
-                                       + (arma::fvec2({+M_SQRT2_2, -M_SQRT2_2}) * greenness[19])
-                                       + (arma::fvec2({+M_2_SQRT5, -M_1_SQRT5}) * greenness[20])
-                                       + (arma::fvec2({+1        , +0})         * greenness[21])
-                                       + (arma::fvec2({+M_2_SQRT5, +M_1_SQRT5}) * greenness[22])
-                                       + (arma::fvec2({+M_SQRT2_2, +M_SQRT2_2}) * greenness[23]);
+            Eigen::Vector2f greenDirection = (Eigen::Vector2f({-M_SQRT2_2, -M_SQRT2_2}) * greenness[0])
+                                           + (Eigen::Vector2f({-M_2_SQRT5, -M_1_SQRT5}) * greenness[1])
+                                           + (Eigen::Vector2f({-1        , +0})         * greenness[2])
+                                           + (Eigen::Vector2f({-M_2_SQRT5, +M_1_SQRT5}) * greenness[3])
+                                           + (Eigen::Vector2f({-M_SQRT2_2, +M_SQRT2_2}) * greenness[4])
+                                           + (Eigen::Vector2f({-M_1_SQRT5, -M_2_SQRT5}) * greenness[5])
+                                           + (Eigen::Vector2f({-M_SQRT2_2, -M_SQRT2_2}) * greenness[6])
+                                           + (Eigen::Vector2f({-1        , +0})         * greenness[7])
+                                           + (Eigen::Vector2f({-M_SQRT2_2, +M_SQRT2_2}) * greenness[8])
+                                           + (Eigen::Vector2f({-M_1_SQRT5, +M_2_SQRT5}) * greenness[9])
+                                           + (Eigen::Vector2f({+0        , -1})         * greenness[10])
+                                           + (Eigen::Vector2f({+0        , -1})         * greenness[11])
+                                           + (Eigen::Vector2f({+0        , +1})         * greenness[12])
+                                           + (Eigen::Vector2f({+0        , +1})         * greenness[13])
+                                           + (Eigen::Vector2f({+M_1_SQRT5, -M_2_SQRT5}) * greenness[14])
+                                           + (Eigen::Vector2f({+M_SQRT2_2, -M_SQRT2_2}) * greenness[15])
+                                           + (Eigen::Vector2f({+1        , +0})         * greenness[16])
+                                           + (Eigen::Vector2f({+M_SQRT2_2, +M_SQRT2_2}) * greenness[17])
+                                           + (Eigen::Vector2f({+M_1_SQRT5, +M_2_SQRT5}) * greenness[14])
+                                           + (Eigen::Vector2f({+M_SQRT2_2, -M_SQRT2_2}) * greenness[19])
+                                           + (Eigen::Vector2f({+M_2_SQRT5, -M_1_SQRT5}) * greenness[20])
+                                           + (Eigen::Vector2f({+1        , +0})         * greenness[21])
+                                           + (Eigen::Vector2f({+M_2_SQRT5, +M_1_SQRT5}) * greenness[22])
+                                           + (Eigen::Vector2f({+M_SQRT2_2, +M_SQRT2_2}) * greenness[23]);
 
             // How strong is our greenness movement?
-            double strength = arma::norm(greenDirection);
+            double strength = greenDirection.norm();
 
             // Normalise our direction
             greenDirection /= strength;
 
             strength /= greenness.size();
-            arma::ivec2 greenNormal({ -int(std::round(greenDirection[1])), int(std::round(greenDirection[0])) });
+            Eigen::Vector2i greenNormal({ -int(std::round(greenDirection[1])), int(std::round(greenDirection[0])) });
 
             return std::make_pair(strength, greenNormal);
         }
 
-        void LUTClassifier::enhanceBall(const Image& image, const LookUpTable& lut, ClassifiedImage<ObjectClass>& classifiedImage) {
+        void LUTClassifier::enhanceBall(const Image& image, const LookUpTable& lut, ClassifiedImage& classifiedImage) {
 
             // Loop through all of our possible ball segments
-            std::vector<arma::ivec2> points;
-            auto hSegments = classifiedImage.horizontalSegments.equal_range(ObjectClass::BALL);
+            std::vector<Eigen::Vector2i> points;
             // NUClear::log("hSegments size = ", std::distance(hSegments.first,hSegments.second));
-            for(auto it = hSegments.first; it != hSegments.second; ++it) {
-
-                auto& pt = it->second;
+            for(auto it = classifiedImage.horizontalSegments.begin(); it != classifiedImage.horizontalSegments.end(); ++it) {
 
                 // We throw out points if they:
                 // Have both edges above the green horizon
                 // Are too small
-                if((classifiedImage.visualHorizonAtPoint(pt.start[0]) <= pt.start[1]
-                || classifiedImage.visualHorizonAtPoint(pt.end[0]) <= pt.end[1])
-                && pt.length > 1) {
-                    points.push_back(pt.midpoint);
+                if((it->segmentClass == ClassifiedImage::SegmentClass::BALL) &&
+                   (utility::vision::visualHorizonAtPoint(classifiedImage, it->start[0]) <= it->start[1] ||
+                    utility::vision::visualHorizonAtPoint(classifiedImage, it->end[0])   <= it->end[1])
+                    && it->length > 1) 
+                {
+                    points.push_back(it->midpoint);
                 }
             }
 
             // std::vector<std::tuple<arma::ivec2, arma::ivec2, arma::vec4>> debug; // DEBUG LINE
-            std::vector<arma::ivec2> edges;
+            std::vector<Eigen::Vector2i> edges;
 
             // For each of these points move upward until we find a strong transition to green
             for(auto& point : points) {
-
-                int minY = int(std::max(3.0, classifiedImage.horizon.y(point[0])));
+                Line horizon(convert<double, 2>(classifiedImage.horizon.normal), classifiedImage.horizon.distance);
+                int minY = int(std::max(3.0, horizon.y(point[0])));
                 for(int y = point[1]; y > minY; --y) {
 
-                    char c = lut(getPixel(point[0], y, image.dimensions[0], image.dimensions[1], image.data, static_cast<utility::vision::FOURCC>(image.format)));
+                    char c = static_cast<char>(utility::vision::getPixelColour(lut, 
+                            getPixel(point[0], y, image.dimensions[0], image.dimensions[1], image.data, static_cast<FOURCC>(image.format))));
 
-                    if(c == 'g') {
-                        auto p = arma::ivec2({ point[0], y - 1 });
+                    if (c == static_cast<char>(Colour::GREEN)) {
+                        auto p = Eigen::Vector2i( point[0], y - 1 );
                         edges.push_back(p);
-                        classifiedImage.ballSeedPoints[0].push_back(p);
+                        classifiedImage.ballSeedPoints[0].points.push_back(p);
                         // debug.push_back(std::make_tuple(point, edges.back(), arma::vec4({0,1,1,1}))); // DEBUG LINE
                         break;
                     }
@@ -166,12 +172,13 @@ namespace module {
 
                 for(int x = point[0]; x > 3; --x) {
 
-                    char c = lut(getPixel(x, point[1], image.dimensions[0], image.dimensions[1], image.data, static_cast<utility::vision::FOURCC>(image.format)));
+                    char c = static_cast<char>(utility::vision::getPixelColour(lut, 
+                             getPixel(x, point[1], image.dimensions[0], image.dimensions[1], image.data, static_cast<FOURCC>(image.format))));
 
-                    if(c == 'g') {
-                        auto p = arma::ivec2({ x + 1, point[1] });
+                    if (c == static_cast<char>(Colour::GREEN)) {
+                        auto p = Eigen::Vector2i( x + 1, point[1] );
                         edges.push_back(p);
-                        classifiedImage.ballSeedPoints[1].push_back(p);
+                        classifiedImage.ballSeedPoints[1].points.push_back(p);
                         // debug.push_back(std::make_tuple(point, edges.back(), arma::vec4({0,1,1,1}))); // DEBUG LINE
                         break;
                     }
@@ -183,12 +190,13 @@ namespace module {
 
                 for(int x = point[0]; x < int(image.dimensions[0]) - 3; ++x) {
 
-                    char c = lut(getPixel(x, point[1], image.dimensions[0], image.dimensions[1], image.data, static_cast<utility::vision::FOURCC>(image.format)));
+                    char c = static_cast<char>(utility::vision::getPixelColour(lut, 
+                             getPixel(x, point[1], image.dimensions[0], image.dimensions[1], image.data, static_cast<FOURCC>(image.format))));
 
-                    if(c == 'g') {
-                        auto p = arma::ivec2({ x - 1, point[1] });
+                    if (c == static_cast<char>(Colour::GREEN)) {
+                        auto p = Eigen::Vector2i( x - 1, point[1] );
                         edges.push_back(p);
-                        classifiedImage.ballSeedPoints[2].push_back(p);
+                        classifiedImage.ballSeedPoints[2].points.push_back(p);
                         // debug.push_back(std::make_tuple(point, edges.back(), arma::vec4({0,1,1,1}))); // DEBUG LINE
                         break;
                     }
@@ -196,10 +204,10 @@ namespace module {
             }
 
             // While we still have edges
-            auto setComparator = [] (const arma::ivec2& a, const arma::ivec2& b) {
+            auto setComparator = [] (const Eigen::Vector2i& a, const Eigen::Vector2i& b) {
                 return a[0] == b[0] ? a[1] < b[1] : a[0] < b[0];
             };
-            std::set<arma::ivec2, decltype(setComparator)> pSet(setComparator);
+            std::set<Eigen::Vector2i, decltype(setComparator)> pSet(setComparator);
 
             for(auto& edge : edges) {
 
@@ -207,7 +215,7 @@ namespace module {
                 pSet.insert(edge);
 
                 // Go clockwise
-                arma::ivec2 point = edge;
+                Eigen::Vector2i point = edge;
                 for(int i = 0; i < MAXIMUM_LIGHTNING_BOLT_LENGTH; ++i) {
 
                     // Break if we hit the edge of the screen
@@ -219,7 +227,7 @@ namespace module {
                     // std::get<0>(d) = point; // DEBUG LINE
 
                     float strength;
-                    arma::ivec2 direction;
+                    Eigen::Vector2i direction;
                     std::tie(strength, direction) = fieldEdgeDirection(point, image, greenCentroid);
 
                     // If our strength get's too low then stop
@@ -257,7 +265,7 @@ namespace module {
                     // std::get<0>(d) = point; // DEBUG LINE
 
                     float strength;
-                    arma::ivec2 direction;
+                    Eigen::Vector2i direction;
                     std::tie(strength, direction) = fieldEdgeDirection(point, image, greenCentroid);
 
                     // If our strength get's too low then stop

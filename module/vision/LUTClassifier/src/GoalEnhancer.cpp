@@ -82,6 +82,8 @@ namespace module {
                 We first generate segments above and below that are 2x the width of the segment
              */
 
+            Line horizon(convert<double, 2>(classifiedImage.horizon.normal), classifiedImage.horizon.distance);
+
             // Get our goal segments
             std::vector<GoalPOI> points;
             std::vector<ClassifiedImage::Segment> hSegments; // = classifiedImage.horizontalSegments.equal_range(SegmentClass::GOAL);
@@ -97,8 +99,7 @@ namespace module {
             // Partition our segments so that they are split between above and below the horizon
             auto split = std::partition(std::begin(points), std::end(points), [&] (const GoalPOI& point) {
                 // Is the midpoint above or below the horizon?
-                utility::math::geometry::Line horizon(convert<double, 2>(classifiedImage.horizon.normal), classifiedImage.horizon.distance);
-                return horizon.distanceToPoint(convert<double, 2>(point.midpoint)) > 0;
+                return horizon.distanceToPoint(point.midpoint) > 0;
             });
 
             // Make an array of our partitions
@@ -114,7 +115,7 @@ namespace module {
                                                                 , GOAL_RANSAC_MAXIMUM_ITERATIONS_PER_FITTING
                                                                 , GOAL_RANSAC_MAXIMUM_FITTED_MODELS
                                                                 , GOAL_RANSAC_CONSENSUS_ERROR_THRESHOLD
-                                                                , classifiedImage.horizon.tangent()
+                                                                , horizon.tangent()
                                                                 , GOAL_MAX_HORIZON_ANGLE);
 
 

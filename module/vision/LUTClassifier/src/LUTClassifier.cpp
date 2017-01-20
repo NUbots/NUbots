@@ -19,37 +19,39 @@
 
 #include "LUTClassifier.h"
 
-#include "message/input/proto/CameraParameters.h"
-#include "message/support/proto/SaveConfiguration.h"
-#include "message/vision/proto/Colour.h"
-#include "message/vision/proto/Pixel.h"
-#include "message/vision/LookUpTable.h"
-#include "extension/Configuration.h"
-
-#include "utility/support/yaml_expression.h"
-#include "utility/support/eigen_armadillo.h"
-#include "utility/vision/fourcc.h"
-#include "utility/vision/Vision.h"
-
 #include "QuexClassifier.h"
 
 #include "Lexer.hpp"
 
+#include "extension/Configuration.h"
+
+#include "message/input/proto/CameraParameters.h"
+#include "message/support/proto/SaveConfiguration.h"
+#include "message/vision/proto/LookUpTable.h"
+
+#include "utility/support/eigen_armadillo.h"
+#include "utility/support/yaml_expression.h"
+#include "utility/vision/fourcc.h"
+#include "utility/vision/LookUpTable.h"
+#include "utility/vision/Vision.h"
+
 namespace module {
     namespace vision {
 
-        using message::vision::proto::Pixel;
+        using extension::Configuration;
+
         using message::input::proto::Image;
-        using ServoID = message::input::proto::Sensors::ServoID::Value;
         using message::input::proto::Sensors;
         using message::input::proto::CameraParameters;
         using message::vision::proto::LookUpTable;
         using message::vision::proto::SaveLookUpTable;
         using message::vision::proto::ClassifiedImage;
-        using Colour = utility::vision::Colour;
-        using extension::Configuration;
         using message::support::proto::SaveConfiguration;
         using utility::support::Expression;
+
+        using ServoID = message::input::proto::Sensors::ServoID::Value;
+        using Colour  = utility::vision::Colour;
+        using Pixel   = utility::vision::Pixel;
 
         void LUTClassifier::insertSegments(ClassifiedImage& image, std::vector<ClassifiedImage::Segment>& segments, bool vertical) {
             ClassifiedImage::Segment* previous = nullptr;
@@ -60,7 +62,7 @@ namespace module {
             for (auto& segment : segments) {
 
                 // Move in the data
-                current = &segment;
+                current = &(*target.insert(target.end(), std::move(segment)));
 
                 // Link up the results
                 current->previous = previous;
@@ -77,7 +79,7 @@ namespace module {
         LUTClassifier::LUTClassifier(std::unique_ptr<NUClear::Environment> environment)
             : Reactor(std::move(environment))
             , quex(new QuexClassifier)
-            , greenCentroid(arma::fill::zeros)
+            , greenCentroid(Eigen::Vector3f::Zero())
             , LUT_PATH("") {
 
             on<Configuration>("LookUpTable.yaml").then([this] (const Configuration& config) {
@@ -86,25 +88,25 @@ namespace module {
                 auto lut = std::make_unique<LookUpTable>(config.config.as<LookUpTable>());
 
                 // Calculate our green centroid for ball detection
-                arma::fvec3 greenCentroid({0, 0, 0});
+                Eigen::Vector3f greenCentroid(0, 0, 0);
                 uint nPoints = 0;
 
                 // Loop through every voxel in the lut
-                for(uint x = 0; x < uint(1 << lut->BITS_Y); ++x) {
-                    for (uint y = 0; y < uint(1 << lut->BITS_CB); ++y) {
-                        for (uint z = 0; z < uint(1 << lut->BITS_CR); ++z) {
+                for(uint x = 0; x < uint(1 << lut->bits_y); ++x) {
+                    for (uint y = 0; y < uint(1 << lut->bits_cb); ++y) {
+                        for (uint z = 0; z < uint(1 << lut->bits_cr); ++z) {
 
                             // Get our voxel
-                            uint index = (((x << lut->BITS_CR) | y) << lut->BITS_CB) | z;
+                            uint index = (((x << lut->bits_cr) | y) << lut->bits_cb) | z;
                             char c = lut->table[index];
 
                             // If this is a field voxel
-                            if (c == Colour::GREEN) {
+                            if (c == static_cast<char>(Colour::GREEN)) {
                                 // Get our LUT pixel for this index
-                                Pixel p = lut->getPixelFromIndex(index);
+                                Pixel p = utility::vision::getPixelFromIndex(*lut, index);
 
                                 ++nPoints;
-                                greenCentroid += arma::fvec3({ float(p.y), float(p.cb), float(p.cr) });
+                                greenCentroid += Eigen::Vector3f({ float(p.components.y), float(p.components.cb), float(p.components.cr) });
                             }
                         }
                     }
@@ -166,45 +168,43 @@ namespace module {
             , With<LookUpTable>
             , With<Sensors>
             , Single
-            , Priority::LOW>().then("Classify Image", [this] (std::shared_ptr<const Image> rawImage
+            , Priority::LOW>().then("Classify Image", [this] (const Image& rawImage
                       , const LookUpTable& lut
-                      , std::shared_ptr<const Sensors> sensors) {
+                      , const Sensors& sensors) {
 
                 //TODO
                 // if(std::fabs(sensors.servo[ServoID::HEAD_PITCH].currentVelocity) + std::fabs(sensors.servo[ServoID::HEAD_YAW].currentVelocity) > threshold)
-
-                const auto& image = *rawImage;
 
                 // Our classified image
                 auto classifiedImage = std::make_unique<ClassifiedImage>();
 
                 // Set our width and height
-                classifiedImage->dimensions = image.dimensions;
+                classifiedImage->dimensions = rawImage.dimensions;
 
                 // Attach our sensors
                 // std::cout << "sensor-vision latency = " << std::chrono::duration_cast<std::chrono::microseconds>(NUClear::clock::now() - sensors->timestamp).count() << std::endl;
-                classifiedImage->sensors = sensors;
+                classifiedImage->sensors = const_cast<Sensors*>(&sensors)->shared_from_this();
 
                 // Attach the image
-                classifiedImage->image = rawImage;
+                classifiedImage->image = const_cast<Image*>(&rawImage)->shared_from_this();
 
                 // Find our horizon
-                findHorizon(image, lut, *classifiedImage);
+                findHorizon(rawImage, lut, *classifiedImage);
 
                 // Find our visual horizon
-                findVisualHorizon(image, lut, *classifiedImage);
+                findVisualHorizon(rawImage, lut, *classifiedImage);
 
                 // Find our goals
-                findGoals(image, lut, *classifiedImage);
+                findGoals(rawImage, lut, *classifiedImage);
 
                 // Enhance our goals
-                enhanceGoals(image, lut, *classifiedImage);
+                enhanceGoals(rawImage, lut, *classifiedImage);
 
                 // Find our ball (also helps with the bottom of goals)
-                findBall(image, lut, *classifiedImage);
+                findBall(rawImage, lut, *classifiedImage);
 
                 // Enhance our ball
-                enhanceBall(image, lut, *classifiedImage);
+                enhanceBall(rawImage, lut, *classifiedImage);
 
                 // Emit our classified image
                 emit(std::move(classifiedImage));

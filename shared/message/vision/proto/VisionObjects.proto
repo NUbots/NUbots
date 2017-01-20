@@ -27,8 +27,51 @@ import "Vector.proto";
 import "Matrix.proto";
 import "message/Geometry.proto";
 import "message/input/proto/Sensors.proto";
+import "message/vision/proto/ClassifiedImage.proto";
 
 message VisionObject {
+    // Time the image was taken
+    google.protobuf.Timestamp timestamp       = 1;
+
+    // The angular position and size from the perspective of the camera
+    // Use these values to move the camera around to see this object
+    vec2                      screenAngular   = 2;
+    vec2                      angularSize     = 3;
+
+    // The sensor frame that was used to detect this object
+    input.proto.Sensors       sensors         = 4 [(pointer) = SHARED];
+
+    // The classified image that was used to detect this object
+    // TODO: Why is this here?
+    ClassifiedImage           classifiedImage = 5 [(pointer) = SHARED];
+
+    // The camera which saw the object.
+    uint32                    camera_id       = 6;
+}
+
+message Ball {
+    VisionObject  VisionObject       = 1;
+
+    // The position of the ball in world coordinates
+    vec3          position           = 2;
+    vec3          torsoSpacePosition = 3;
+
+    repeated vec3 edgePoints         = 4;
+    Circle        circle             = 5;
+}
+
+message Goal {
+    enum Side {
+        UNKNOWN_SIDE = 0;
+        LEFT         = 1;
+        RIGHT        = 2;
+    }
+
+    enum Team {
+        UNKNOWN_TEAM = 0;
+        OWN          = 1;
+        OPPONENT     = 2;
+    }
 
     enum MeasurementType {
         UNKNOWN_MEASUREMENT = 0;
@@ -37,87 +80,33 @@ message VisionObject {
         TOP_NORMAL          = 3;
         BASE_NORMAL         = 4;
     }
+
     message Measurement {
-        vec3            position   = 1;
-        mat33           covariance = 2;
-        MeasurementType type       = 3;
+        MeasurementType type       = 1;
+        vec3            position   = 2;
     }
 
-    message Goal {
-        enum Side {
-            UNKNOWN = 0;
-            LEFT    = 1;
-            RIGHT   = 2;
-        }
-
-        enum Team {
-            UNKNOWN_TEAM = 0;
-            OWN          = 1;
-            OPPONENT     = 2;
-        }
-
-        Side                 side          = 1;
-        Quad                 quad          = 2;
-        repeated Measurement measurement   = 3;
-
-        // The angular position and size from the perspective of the camera
-        // Use these values to move the camera around to see this object
-        vec2                 screenAngular = 4;
-        vec2                 angularSize   = 5;
-    }
-
-    message Ball {
-        Circle               circle             = 1;
-        repeated Measurement measurement        = 2;
-        repeated vec3        torsoSpacePosition = 3;
-        repeated vec3        edgePoints         = 4;
-    }
-
-    message Obstacle {
-        enum Team {
-            UNKNOWN_TEAM = 0;
-            MAGENTA      = 1;
-            CYAN         = 2;
-        }
-
-        Polygon              shape       = 1;
-        repeated Measurement measurement = 2;
-        Team                 team        = 3;
-    }
-
-    message Line {
-        ivec2 start = 1;
-        ivec2 end   = 2;
-        vec4 colour = 3;
-    }
-
-    enum ObjectType {
-        UNKNOWN_OBJECT = 0;
-        GOAL           = 1;
-        BALL           = 2;
-        OBSTACLE       = 3;
-        LINE           = 4;
-    }
-
-    // Time the image was taken
-    google.protobuf.Timestamp timestamp       = 1;
-
-    // The sensor frame that was used to detect this object
-    input.proto.Sensors       sensors         = 2 [(pointer) = SHARED];
-
-    // The typye of the object.
-    ObjectType                type            = 3;
-
-    // Details about the object that was detected.
-    repeated Goal             goal            = 4;
-    repeated Ball             ball            = 5;
-    repeated Obstacle         obstacle        = 6;
-    repeated Line             line            = 7;
-
-    // The camera which saw the object.
-    uint32                    camera_id       = 8;
+    VisionObject         VisionObject = 1;
+    Side                 side         = 2;
+    Team                 team         = 3;
+    Quad                 quad         = 4;
+    repeated Measurement measurement  = 5;
 }
 
-message VisionObjects {
-    repeated VisionObject object = 1;
+message Obstacle {
+    enum Team {
+        UNKNOWN_TEAM = 0;
+        MAGENTA      = 1;
+        CYAN         = 2;
+    }
+
+    VisionObject VisionObject = 1;
+    Polygon      shape        = 2;
+    Team         team         = 3;
+}
+
+message Line {
+    ivec2 start  = 1;
+    ivec2 end    = 2;
+    vec4  colour = 3;
 }

@@ -32,17 +32,20 @@ namespace module {
         using utility::math::matrix::Transform3D;
         using utility::math::matrix::Transform2D;
         using utility::math::vision::cameraSpaceGoalProjection;
-        using message::vision::Goal;
+        using message::vision::proto::VisionObject;
         using message::support::proto::FieldDescription;
         using message::input::proto::Sensors;
-        using ServoID = message::input::proto::Sensors::ServoID::Value;
+        using ServoID         = message::input::proto::Sensors::ServoID::Value;
+        using GoalSide        = VisionObject::Goal::Side::Value;
+        using GoalTeam        = VisionObject::Goal::Team::Value;
+        using MeasurementType = VisionObject::MeasurementType::Value;
 
         arma::vec::fixed<FieldModel::size> FieldModel::timeUpdate(const arma::vec::fixed<size>& state, double /*deltaT*/) {
             return state;
         }
 
         arma::vec FieldModel::predictedObservation(const arma::vec::fixed<size>& state
-            , const std::vector<std::tuple<Goal::Team, Goal::Side, Goal::MeasurementType>>& measurements
+            , const std::vector<std::tuple<GoalTeam, GoalSide, MeasurementType>>& measurements
             , const FieldDescription& field
             , const Sensors& sensors
             , const MeasurementType::GOAL&) 
@@ -76,33 +79,33 @@ namespace module {
                 // Switch on Team
                 switch(std::get<0>(type)) {
                     // Switch on Side
-                    case Goal::Team::OWN:
+                    case GoalTeam::Value::OWN:
                         //ans += " own";
                         switch(std::get<1>(type)) {
-                            case Goal::Side::LEFT:
+                            case GoalSide::LEFT:
                                 goalLocation.rows(0,1) = convert<double, 2>(field.goalpost_own_l);
                                 //ans += " left";
                                 break;
-                            case Goal::Side::RIGHT:
+                            case GoalSide::RIGHT:
                                 goalLocation.rows(0,1) = convert<double, 2>(field.goalpost_own_r);
                                 //ans += " right";
                                 break;
-                            case Goal::Side::UNKNOWN:
+                            case GoalSide::UNKNOWN_SIDE:
                                 break;
                         }
                         break;
-                    case Goal::Team::OPPONENT:
+                    case GoalTeam::OPPONENT:
                         //ans += " opponent";
                         switch(std::get<1>(type)) {
-                            case Goal::Side::LEFT:
+                            case GoalSide::LEFT:
                                 //ans += " left";
                                 goalLocation.rows(0,1) = convert<double, 2>(field.goalpost_opp_l);
                                 break;
-                            case Goal::Side::RIGHT:
+                            case GoalSide::RIGHT:
                                 //ans += " right";
                                 goalLocation.rows(0,1) = convert<double, 2>(field.goalpost_opp_r);
                                 break;
-                            case Goal::Side::UNKNOWN:
+                            case GoalSide::UNKNOWN:
                                 break;
                         }
                         break;
@@ -117,19 +120,19 @@ namespace module {
                 // Switch on normal type
                 switch(std::get<2>(type)) {
 
-                    case Goal::MeasurementType::LEFT_NORMAL: {
+                    case MeasurementType::LEFT_NORMAL: {
                         prediction.rows(counter,counter+2) = goalNormals.col(0);
                     } break;
 
-                    case Goal::MeasurementType::RIGHT_NORMAL: {
+                    case MeasurementType::RIGHT_NORMAL: {
                         prediction.rows(counter,counter+2) = goalNormals.col(1);
                     } break;
 
-                    case Goal::MeasurementType::TOP_NORMAL: {
+                    case MeasurementType::TOP_NORMAL: {
                         prediction.rows(counter,counter+2) = goalNormals.col(2);
                     } break;
 
-                    case Goal::MeasurementType::BASE_NORMAL: {
+                    case MeasurementType::BASE_NORMAL: {
                         prediction.rows(counter,counter+2) = goalNormals.col(3);
                     } break;
 

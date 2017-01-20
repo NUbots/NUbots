@@ -22,6 +22,7 @@
 
 #include <nuclear>
 #include <armadillo>
+#include <Eigen/Core>
 
 #include "message/input/proto/Image.h"
 #include "message/input/proto/Sensors.h"
@@ -43,7 +44,7 @@ namespace module {
             // A pointer to our quex class (since it is generated it is not defined at this point)
             std::shared_ptr<QuexClassifier> quex;
 
-            arma::fvec3 greenCentroid;
+            Eigen::Vector3f greenCentroid;
 
             int VISUAL_HORIZON_SPACING = 100;
             int VISUAL_HORIZON_BUFFER = 0;

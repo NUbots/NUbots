@@ -27,8 +27,9 @@
 #include "message/platform/darwin/DarwinSensors.h"
 
 #include "utility/behaviour/Action.h"
-#include "utility/math/angle.h"
 #include "utility/file/fileutil.h"
+#include "utility/math/angle.h"
+#include "utility/platform/darwin/DarwinSensors.h"
 
 #include <ncurses.h>
 #include <cstdio>
@@ -86,7 +87,7 @@ namespace module {
                     Script::Frame::Target target;
 
                     target.id = static_cast<ServoID>(id);
-                    target.position = sensors.servo[id].presentPosition;
+                    target.position = utility::platform::darwin::getDarwinServo(target.id, sensors).presentPosition;
                     target.gain = defaultGain;
                     target.torque = 100;
 

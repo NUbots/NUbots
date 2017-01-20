@@ -19,27 +19,32 @@
 
 #include "RobotFieldLocalisation.h"
 
-#include "message/input/proto/Sensors.h"
-#include "message/vision/VisionObjects.h"
 #include "extension/Configuration.h"
-#include "message/support/proto/FieldDescription.h"
-#include "message/localisation/proto/FieldObject.h"
+
+#include "message/input/proto/Sensors.h"
 #include "message/localisation/proto/ResetRobotHypotheses.h"
+#include "message/localisation/proto/FieldObject.h"
+#include "message/support/proto/FieldDescription.h"
+#include "message/vision/proto/VisionObjects.h"
+
 #include "utility/math/matrix/Rotation2D.h"
 #include "utility/math/matrix/Rotation3D.h"
 #include "utility/math/matrix/Transform2D.h"
 #include "utility/math/matrix/Transform3D.h"
-#include "utility/support/yaml_armadillo.h"
-#include "utility/nubugger/NUhelpers.h"
 #include "utility/math/vision.h"
+#include "utility/nubugger/NUhelpers.h"
 #include "utility/support/eigen_armadillo.h"
+#include "utility/support/yaml_armadillo.h"
 
 namespace module {
 namespace localisation {
 
     using extension::Configuration;
     using message::input::proto::Sensors;
-    using message::vision::Goal;
+    using message::vision::proto::VisionObject;
+    using GoalSide = message::vision::proto::VisionObject::Goal::Side::Value;
+    using GoalTeam = message::vision::proto::VisionObject::Goal::Team::Value;
+    using MeasurementType = message::vision::proto::VisionObject::MeasurementType;
     using message::support::proto::FieldDescription;
     using message::localisation::proto::ResetRobotHypotheses;
     using utility::math::filter::MMUKF;
@@ -150,8 +155,8 @@ namespace localisation {
                 std::vector<double> measurement;
 
                 // Build our measurement types list
-                std::vector<std::tuple<Goal::Team, Goal::Side, Goal::MeasurementType>> measurementTypesOwn;
-                std::vector<std::tuple<Goal::Team, Goal::Side, Goal::MeasurementType>> measurementTypesOpponent;
+                std::vector<std::tuple<GoalTeam, GoalSide, MeasurementType>> measurementTypesOwn;
+                std::vector<std::tuple<GoalTeam, GoalSide, MeasurementType>> measurementTypesOpponent;
 
                 for (auto& goal : goals) {
                     for (auto& m : goal.measurements) {
@@ -161,8 +166,8 @@ namespace localisation {
                         measurement.push_back(m.second[2]);
 
                         // Insert the measurement type into our measurement type vector
-                        measurementTypesOwn.push_back(std::make_tuple(Goal::Team::OWN, goal.side, m.first));
-                        measurementTypesOpponent.push_back(std::make_tuple(Goal::Team::OPPONENT, goal.side, m.first));
+                        measurementTypesOwn.push_back(std::make_tuple(GoalTeam::OWN, goal.side, m.first));
+                        measurementTypesOpponent.push_back(std::make_tuple(GoalTeam::OPPONENT, goal.side, m.first));
                     }
                 }
 
@@ -189,7 +194,7 @@ namespace localisation {
                 measurement.reserve(3*goals.size());
 
                 // Build our measurement types list
-                std::vector<std::tuple<Goal::Team, Goal::Side, Goal::MeasurementType>> measurementTypes[4];
+                std::vector<std::tuple<GoalTeam, GoalSide, MeasurementType>> measurementTypes[4];
 
                 for (auto& goal : goals) {
                     for (auto& m : goal.measurements) {
@@ -199,10 +204,10 @@ namespace localisation {
                         measurement.push_back(m.second[2]);
 
                         // Insert the measurement type into our measurement type vector
-                        measurementTypes[0].push_back(std::make_tuple(Goal::Team::OWN, Goal::Side::LEFT, m.first));
-                        measurementTypes[1].push_back(std::make_tuple(Goal::Team::OWN, Goal::Side::RIGHT, m.first));
-                        measurementTypes[2].push_back(std::make_tuple(Goal::Team::OPPONENT, Goal::Side::LEFT, m.first));
-                        measurementTypes[3].push_back(std::make_tuple(Goal::Team::OPPONENT, Goal::Side::RIGHT, m.first));
+                        measurementTypes[0].push_back(std::make_tuple(GoalTeam::OWN, GoalSide::LEFT, m.first));
+                        measurementTypes[1].push_back(std::make_tuple(GoalTeam::OWN, GoalSide::RIGHT, m.first));
+                        measurementTypes[2].push_back(std::make_tuple(GoalTeam::OPPONENT, GoalSide::LEFT, m.first));
+                        measurementTypes[3].push_back(std::make_tuple(GoalTeam::OPPONENT, GoalSide::RIGHT, m.first));
                     }
                 }
 

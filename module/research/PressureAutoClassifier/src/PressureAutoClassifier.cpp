@@ -331,7 +331,7 @@ namespace research {
             //Loop through each classification char
             for(auto& limit : config["limits"]) {
 
-                Colour c          = static_cast<Colour>(limit.first.as<char>());
+                Colour c          = limit.first.as<char>();
                 maxVolume[c]      = limit.second["max_volume"].as<uint>();
                 maxSurfaceArea[c] = limit.second["surface_area_volume_ratio"].as<double>() * maxVolume[c];
                 zeroPoints[c]       = 0;

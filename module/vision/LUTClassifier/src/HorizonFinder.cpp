@@ -28,13 +28,12 @@ namespace module {
 
         using message::input::proto::Image;
         using ServoID = message::input::proto::Sensors::ServoID::Value;
-        using message::vision::LookUpTable;
-        using message::vision::ObjectClass;
-        using message::vision::ClassifiedImage;
+        using message::vision::proto::LookUpTable;
+        using message::vision::proto::ClassifiedImage;
         using utility::math::matrix::Rotation3D;
         using utility::math::matrix::Transform3D;
 
-        void LUTClassifier::findHorizon(const Image& image, const LookUpTable&, ClassifiedImage<ObjectClass>& classifiedImage) {
+        void LUTClassifier::findHorizon(const Image& image, const LookUpTable&, ClassifiedImage& classifiedImage) {
 
                 auto& sensors = *classifiedImage.sensors;
 
@@ -54,11 +53,11 @@ namespace module {
 
                 // Coordinate system: 0,0 is the centre of the screen. pos[0] is along the y axis of the
                 // camera transform, pos[1] is along the z axis (x points out of the camera)
-                classifiedImage.horizon = utility::motion::kinematics::calculateHorizon(Rcw, FOCAL_LENGTH_PIXELS);
-
+                auto horizon = utility::motion::kinematics::calculateHorizon(Rcw, FOCAL_LENGTH_PIXELS);
+                classifiedImage.horizon.normal = convert<double, 2>(horizon.normal);
 
                 // Move our axis to be at the top left of the screen
-                classifiedImage.horizon.distance = -classifiedImage.horizon.distanceToPoint({ -double(image.dimensions[0]) * 0.5, -double(image.dimensions[1]) * 0.5 });
+                classifiedImage.horizon.distance = -horizon.distanceToPoint({ -double(image.dimensions[0]) * 0.5, -double(image.dimensions[1]) * 0.5 });
         }
 
     }  // vision

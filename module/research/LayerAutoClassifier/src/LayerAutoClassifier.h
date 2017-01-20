@@ -22,17 +22,17 @@
 
 #include <nuclear>
 
-#include "message/vision/proto/Colour.h"
+#include "utility/vision/Vision.h"
 
 namespace module {
 namespace research {
 
     class LayerAutoClassifier : public NUClear::Reactor {
     private:
-        std::map<message::vision::Colour::Colours::Value, uint> maxSurfaceArea;
-        std::map<message::vision::Colour::Colours::Value, uint> maxVolume;
-        std::map<message::vision::Colour::Colours::Value, uint> volume;
-        std::map<message::vision::Colour::Colours::Value, std::set<uint>> surfaceArea;
+        std::map<utility::vision::Colour, uint> maxSurfaceArea;
+        std::map<utility::vision::Colour, uint> maxVolume;
+        std::map<utility::vision::Colour, uint> volume;
+        std::map<utility::vision::Colour, std::set<uint>> surfaceArea;
 
     public:
         /// @brief Called by the powerplant to build and setup the LayerAutoClassifier reactor.
