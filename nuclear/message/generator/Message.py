@@ -49,10 +49,25 @@ class Message:
             return ('{}({});'.format(self.name, default_field_list),
                     '{}::{}({}) : {} {{}}'.format(cpp_fqn, self.name, field_list, field_set))
 
+    def generate_equality_operator(self):
+
+        # Fully qualified c++ name
+        cpp_fqn = '::'.join(self.fqn.split('.'));
+
+        # If we are empty it's easy
+        if not self.fields:
+            return ('bool operator== (const {}&);'.format(self.name),
+                    'bool {}::operator== () {{ return true; }}'.format(cpp_fqn, self.name))
+        else:
+            equality_test = ' && '.join(['{0} == other.{0}'.format(v.name) for v in self.fields])
+
+            return ('bool operator== (const {}& other);'.format(self.name),
+                    'bool {}::operator== (const {}& other) {{ return {}; }}'.format(cpp_fqn, self.name, equality_test))
+
     def generate_rule_of_five(self):
 
         raw_pointer = [v.name for v in self.fields if v.pointer and v.pointer == PointerType['RAW']]
-        raw_pointer_warning = '#pragma message ( "WARNING: The following fields in {0} are raw pointers and copying or moving will copy the raw pointer address: {1}") \n'.format(self.name, ', '.join(raw_pointer)) 
+        raw_pointer_warning = '#pragma message ( "WARNING: The following fields in {0} are raw pointers and copying or moving will copy the raw pointer address: {1}") \n'.format(self.name, ', '.join(raw_pointer))
 
         rule_of_five = dedent("""{warning}\
             {name}(const {name}&) = default;
@@ -226,9 +241,10 @@ class Message:
         rule_of_five = self.generate_rule_of_five()
         protobuf_constructor = self.generate_protobuf_constructor()
         protobuf_converter = self.generate_protobuf_converter()
+        equality_operator = self.generate_equality_operator()
 
-        constructor_headers = indent('\n\n'.join([default_constructor[0], rule_of_five[0], protobuf_constructor[0]]))
-        constructor_impl = '\n\n'.join([default_constructor[1], protobuf_constructor[1]])
+        constructor_headers = indent('\n\n'.join([default_constructor[0], rule_of_five[0], protobuf_constructor[0], equality_operator[0]]))
+        constructor_impl = '\n\n'.join([default_constructor[1], protobuf_constructor[1], equality_operator[1]])
         converter_headers = indent('\n\n'.join([protobuf_converter[0]]))
         converter_impl = '\n\n'.join([protobuf_converter[1]])
 
