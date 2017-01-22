@@ -61,6 +61,8 @@ class Enum:
 
                 bool operator ==({name} const& other) const;
 
+                bool operator !=({name} const& other) const;
+
                 bool operator <({name}::Value const& other) const;
 
                 bool operator >({name}::Value const& other) const;
@@ -70,6 +72,8 @@ class Enum:
                 bool operator >=({name}::Value const& other) const;
 
                 bool operator ==({name}::Value const& other) const;
+
+                bool operator !=({name}::Value const& other) const;
 
                 // Conversions
                 operator Value() const;
@@ -117,6 +121,10 @@ class Enum:
                 return value == other.value;
             }}
 
+            bool {fqn}::operator !=({name} const& other) const {{
+                return value != other.value;
+            }}
+
             bool {fqn}::operator <({name}::Value const& other) const {{
                 return value < other;
             }}
@@ -135,6 +143,10 @@ class Enum:
 
             bool {fqn}::operator ==({name}::Value const& other) const {{
                 return value == other;
+            }}
+
+            bool {fqn}::operator !=({name}::Value const& other) const {{
+                return value != other;
             }}
 
             {fqn}::operator Value() const {{
