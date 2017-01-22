@@ -56,13 +56,13 @@ class Message:
 
         # If we are empty it's easy
         if not self.fields:
-            return ('bool operator== (const {}&);'.format(self.name),
-                    'bool {}::operator== () {{ return true; }}'.format(cpp_fqn, self.name))
+            return ('bool operator== (const {}&) const;'.format(self.name),
+                    'bool {}::operator== (const {}&) const {{ return true; }}'.format(cpp_fqn, self.name))
         else:
             equality_test = ' && '.join(['{0} == other.{0}'.format(v.name) for v in self.fields])
 
-            return ('bool operator== (const {}& other);'.format(self.name),
-                    'bool {}::operator== (const {}& other) {{ return {}; }}'.format(cpp_fqn, self.name, equality_test))
+            return ('bool operator== (const {}& other) const;'.format(self.name),
+                    'bool {}::operator== (const {}& other) const {{ return {}; }}'.format(cpp_fqn, self.name, equality_test))
 
     def generate_rule_of_five(self):
 
