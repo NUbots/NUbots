@@ -32,12 +32,12 @@ namespace module {
         using utility::math::matrix::Transform3D;
         using utility::math::matrix::Transform2D;
         using utility::math::vision::cameraSpaceGoalProjection;
-        using message::support::proto::FieldDescription;
-        using message::input::proto::Sensors;
-        using ServoID             = message::input::proto::Sensors::ServoID::Value;
-        using GoalSide            = message::vision::proto::Goal::Side::Value;
-        using GoalTeam            = message::vision::proto::Goal::Team::Value;
-        using GoalMeasurementType = message::vision::proto::Goal::MeasurementType::Value;
+        using message::support::FieldDescription;
+        using message::input::Sensors;
+        using ServoID             = message::input::Sensors::ServoID::Value;
+        using GoalSide            = message::vision::Goal::Side::Value;
+        using GoalTeam            = message::vision::Goal::Team::Value;
+        using GoalMeasurementType = message::vision::Goal::MeasurementType;
 
         arma::vec::fixed<FieldModel::size> FieldModel::timeUpdate(const arma::vec::fixed<size>& state, double /*deltaT*/) {
             return state;
@@ -117,7 +117,7 @@ namespace module {
                     goalNormals = cameraSpaceGoalProjection(state,goalLocation,field,Hwc,false);
                 }
                 // Switch on normal type
-                switch(std::get<2>(type)) {
+                switch(std::get<2>(type).value) {
 
                     case GoalMeasurementType::LEFT_NORMAL: {
                         prediction.rows(counter,counter+2) = goalNormals.col(0);

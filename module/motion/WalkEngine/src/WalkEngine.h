@@ -30,9 +30,9 @@
 
 #include "extension/Configuration.h"
 
-#include "message/behaviour/Action.h"
-#include "message/behaviour/ServoCommand.h"
 #include "message/behaviour/FixedWalkCommand.h"
+#include "message/behaviour/ServoCommand.h"
+#include "message/behaviour/Subsumption.h"
 
 #include "message/input/Sensors.h"
 #include "message/input/PushDetection.h"
@@ -45,9 +45,16 @@
 #include "message/motion/FootPlacementCommand.h" 
 #include "message/motion/FootMotionCommand.h" 
 #include "message/motion/ServoTarget.h"
-#include "message/motion/Script.h"
 
 #include "message/localisation/FieldObject.h"
+
+#include "message/support/SaveConfiguration.h"
+
+#include "utility/behaviour/Action.h"
+
+#include "utility/input/ServoID.h"
+
+#include "utility/motion/Script.h"
 
 #include "utility/support/yaml_armadillo.h"
 #include "utility/support/yaml_expression.h"
@@ -83,10 +90,10 @@ namespace motion
 
         explicit WalkEngine(std::unique_ptr<NUClear::Environment> environment);
     private:
-        using LimbID         = message::input::LimbID;
+        using LimbID         = message::behaviour::Subsumption::Limb::Value;
         using ServoCommand   = message::behaviour::ServoCommand;
         using Sensors        = message::input::Sensors;
-        using ServoID        = message::input::ServoID;
+        using ServoID        = message::input::Sensors::ServoID::Value;
         using Transform2D    = utility::math::matrix::Transform2D;
         using Transform3D    = utility::math::matrix::Transform3D;
         using UnitQuaternion = utility::math::geometry::UnitQuaternion;
@@ -154,7 +161,7 @@ namespace motion
         /**
          * Balance & Kinematics module initialization...
          */
-        message::motion::kinematics::KinematicsModel kinematicsModel;   //
+        message::motion::KinematicsModel kinematicsModel;   //
 
         /**
          * Actuator servo gains...

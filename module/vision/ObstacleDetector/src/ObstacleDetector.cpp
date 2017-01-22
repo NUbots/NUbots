@@ -21,7 +21,7 @@
 
 #include <armadillo>
 
-#include "message/vision/proto/ClassifiedImage.h"
+#include "message/vision/ClassifiedImage.h"
 
 #include "utility/support/eigen_armadillo.h"
 #include "utility/vision/ClassifiedImage.h"
@@ -29,7 +29,7 @@
 namespace module {
 namespace vision {
 
-    using message::vision::proto::ClassifiedImage;
+    using message::vision::ClassifiedImage;
     using SegmentClass = ClassifiedImage::SegmentClass;
 
     ObstacleDetector::ObstacleDetector(std::unique_ptr<NUClear::Environment> environment)

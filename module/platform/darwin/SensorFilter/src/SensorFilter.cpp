@@ -22,9 +22,9 @@
 #include "message/platform/darwin/DarwinSensors.h"
 #include "utility/input/ServoID.h"
 #include "utility/input/LimbID.h"
-#include "message/input/proto/CameraParameters.h"
+#include "message/input/CameraParameters.h"
 #include "extension/Configuration.h"
-//#include "message/localisation/proto/ResetRobotHypotheses.h"
+//#include "message/localisation/ResetRobotHypotheses.h"
 
 #include "utility/math/geometry/UnitQuaternion.h"
 #include "utility/math/matrix/Rotation2D.h"
@@ -46,17 +46,17 @@ namespace module {
             using message::platform::darwin::ButtonLeftUp;
             using message::platform::darwin::ButtonMiddleDown;
             using message::platform::darwin::ButtonMiddleUp;
-            using message::input::proto::Sensors;
-            using message::input::proto::CameraParameters;
+            using message::input::Sensors;
+            using message::input::CameraParameters;
             using utility::input::ServoSide;
-            using ServoID = message::input::proto::Sensors::ServoID::Value;
+            using ServoID = message::input::Sensors::ServoID::Value;
             using utility::input::LimbID;
-            //using message::localisation::proto::ResetRobotHypotheses;
+            //using message::localisation::ResetRobotHypotheses;
             using utility::nubugger::graph;
             using utility::motion::kinematics::calculateAllPositions;
-            using message::motion::proto::KinematicsModel;
+            using message::motion::KinematicsModel;
             using utility::motion::kinematics::calculateCentreOfMass;
-            using message::motion::proto::BodySide;
+            using message::motion::BodySide;
             using utility::motion::kinematics::calculateRobotToIMU;
             using utility::math::matrix::Transform3D;
             using utility::math::matrix::Rotation3D;

@@ -21,9 +21,9 @@
 
 #include "extension/Configuration.h"
 
-#include "message/behaviour/proto/Subsumption.h"
-#include "message/input/proto/Sensors.h"
-#include "message/motion/proto/ServoTarget.h"
+#include "message/behaviour/Subsumption.h"
+#include "message/input/Sensors.h"
+#include "message/motion/ServoTarget.h"
 #include "message/platform/darwin/DarwinSensors.h"
 
 #include "utility/behaviour/Action.h"
@@ -41,10 +41,10 @@ namespace module {
             using NUClear::message::CommandLineArguments;
             using utility::motion::Script;
             using utility::motion::ExecuteScript;
-            using message::motion::proto::ServoTarget;
+            using message::motion::ServoTarget;
             using utility::behaviour::RegisterAction;
-            using LimbID = message::behaviour::proto::Subsumption::Limb::Value;
-            using ServoID = message::input::proto::Sensors::ServoID::Value;
+            using LimbID = message::behaviour::Subsumption::Limb::Value;
+            using ServoID = message::input::Sensors::ServoID::Value;
             using message::platform::darwin::DarwinSensors;
 
             struct LockServo {};

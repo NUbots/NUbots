@@ -20,17 +20,21 @@
 #include "VirtualCamera.h"
 
 #include "extension/Configuration.h"
+
 #include "message/input/CameraParameters.h"
 #include "message/input/Image.h"
+
 #include "utility/vision/fourcc.h"
 
 namespace module {
 namespace support {
 
     using extension::Configuration;
+
     using message::input::CameraParameters;
     using message::input::Image;
-    using namespace utility::vision;
+
+    using FOURCC = utility::vision::FOURCC;
 
     VirtualCamera::VirtualCamera(std::unique_ptr<NUClear::Environment> environment)
         : Reactor(std::move(environment)), emitImageHandle() {
@@ -41,7 +45,7 @@ namespace support {
 
             //2 Bytes per pixel
             std::vector<uint8_t> data(2 * cam.imageSizePixels[0] * cam.imageSizePixels[1], 255); // White pixels
-            emit(std::make_unique<Image>("VirtualCamera", cam.imageSizePixels[0], cam.imageSizePixels[1], NUClear::clock::now(), FOURCC::YUYV, std::move(data)));
+            emit(std::make_unique<Image>(FOURCC::YUYV, cam.imageSizePixels, std::move(data), 0, "VirtualCamera", NUClear::clock::now()));
 
         });
 
@@ -51,14 +55,15 @@ namespace support {
 
         	auto cameraParameters = std::make_unique<CameraParameters>();
 
-            cameraParameters->imageSizePixels << config["imageWidth"].as<uint>() << config["imageHeight"].as<uint>();
-            cameraParameters->FOV << config["FOV_X"].as<double>() << config["FOV_Y"].as<double>();
+            cameraParameters->imageSizePixels << config["imageWidth"].as<uint>(), config["imageHeight"].as<uint>();
+            cameraParameters->FOV << config["FOV_X"].as<double>(), config["FOV_Y"].as<double>();
             cameraParameters->distortionFactor = config["DISTORTION_FACTOR"].as<double>();
-            arma::vec2 tanHalfFOV;
-            tanHalfFOV << std::tan(cameraParameters->FOV[0] * 0.5) << std::tan(cameraParameters->FOV[1] * 0.5);
-            arma::vec2 imageCentre;
-            imageCentre << cameraParameters->imageSizePixels[0] * 0.5 << cameraParameters->imageSizePixels[1] * 0.5;
-            cameraParameters->pixelsToTanThetaFactor << (tanHalfFOV[0] / imageCentre[0]) << (tanHalfFOV[1] / imageCentre[1]);
+            double tanHalfFOV[2], imageCentre[2];
+            tanHalfFOV[0] = std::tan(cameraParameters->FOV[0] * 0.5);
+            tanHalfFOV[1] = std::tan(cameraParameters->FOV[1] * 0.5);
+            imageCentre[0] = cameraParameters->imageSizePixels[0] * 0.5;
+            imageCentre[1] = cameraParameters->imageSizePixels[1] * 0.5;
+            cameraParameters->pixelsToTanThetaFactor << (tanHalfFOV[0] / imageCentre[0]), (tanHalfFOV[1] / imageCentre[1]);
             cameraParameters->focalLengthPixels = imageCentre[0] / tanHalfFOV[0];
 
             bool emit_images = config["emit_images"].as<bool>();

@@ -22,8 +22,8 @@
 #include "extension/Configuration.h"
 
 #include "message/research/AutoClassifierPixels.h"
-#include "message/vision/proto/LookUpTable.h"
-#include "message/vision/proto/LookUpTableDiff.h"
+#include "message/vision/LookUpTable.h"
+#include "message/vision/LookUpTableDiff.h"
 
 #include "utility/vision/LookUpTable.h"
 
@@ -33,8 +33,8 @@ namespace research {
     using extension::Configuration;
 
     using message::research::AutoClassifierPixels;
-    using message::vision::proto::LookUpTable;
-    using message::vision::proto::LookUpTableDiff;
+    using message::vision::LookUpTable;
+    using message::vision::LookUpTableDiff;
     using Colour = utility::vision::Colour;
 
 

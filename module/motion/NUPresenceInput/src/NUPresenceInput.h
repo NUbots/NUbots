@@ -21,10 +21,12 @@
 #define MODULES_MOTION_HEAD6DOFCONTROLLER_H
 
 #include <nuclear>
+
+#include "message/input/Sensors.h"
+
 #include "utility/math/matrix/Transform3D.h"
 #include "utility/math/matrix/Rotation3D.h"
 #include "utility/support/Limiter.h"
-#include "message/input/ServoID.h"
 
 namespace module {
 namespace motion {
@@ -67,7 +69,7 @@ namespace motion {
         utility::math::matrix::Transform3D currentCamPose;
 
         //Servo limiter
-        utility::support::Limiter<message::input::ServoID, float> jointLimiter;
+        utility::support::Limiter<message::input::Sensors::ServoID::Value, float> jointLimiter;
 
         //Subsumption:
     	size_t id;

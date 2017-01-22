@@ -20,41 +20,42 @@
 #include "NUPresenceInput.h"
 
 #include "extension/Configuration.h"
-#include "utility/support/yaml_armadillo.h"
+
+#include "message/behaviour/ServoCommand.h"
+#include "message/behaviour/Subsumption.h"
+#include "message/input/Sensors.h"
+#include "message/input/PresenceUserState.h"
+#include "message/input/MotionCapture.h"
+#include "message/motion/KinematicsModels.h"
+
+#include "utility/behaviour/Action.h"
+#include "utility/input/ServoID.h"
 #include "utility/motion/InverseKinematics.h"
 #include "utility/motion/ForwardKinematics.h"
-#include "message/motion/KinematicsModels.h"
-#include "message/behaviour/ServoCommand.h"
-#include "message/input/ServoID.h"
-#include "message/input/Sensors.h"
-#include "message/input/proto/PresenceUserState.h"
-#include "message/behaviour/Action.h"
-#include "message/input/MotionCapture.h"
+#include "utility/support/eigen_armadillo.h"
 #include "utility/support/yaml_expression.h"
-#include "utility/support/proto_armadillo.h"
+#include "utility/support/yaml_armadillo.h"
 
 namespace module {
 namespace motion {
 
     using extension::Configuration;
-    using message::behaviour::RegisterAction;
-    using message::behaviour::ActionPriorites;
-    using message::input::ServoID;
-    using message::input::ServoSide;
-    using message::input::Sensors;
-    using message::input::LimbID;
-    using message::input::proto::PresenceUserState;
-    using message::motion::kinematics::KinematicsModel;
 
+    using message::behaviour::ServoCommand;
+    using LimbID  = message::behaviour::Subsumption::Limb::Value;
     using message::input::MotionCapture;
+    using message::input::PresenceUserState;
+    using message::input::Sensors;
+    using ServoID = message::input::Sensors::ServoID::Value;
+    using message::motion::KinematicsModel;
+    using message::motion::BodySide;
 
+    using utility::behaviour::RegisterAction;
+    using utility::behaviour::ActionPriorites;
+    using ServoSide = utility::input::ServoSide;
     using utility::math::matrix::Transform3D;
     using utility::math::matrix::Rotation3D;
-    using message::motion::kinematics::BodySide;
-
     using utility::support::Expression;
-    using message::behaviour::ServoCommand;
-
 
     NUPresenceInput::NUPresenceInput(std::unique_ptr<NUClear::Environment> environment)
         : Reactor(std::move(environment))
@@ -111,14 +112,14 @@ namespace motion {
             eulerLimits.yaw.max = config["limits"]["yaw"][1].as<Expression>();
 
             //Servo Limits:
-            for(auto& servo : config["limits"]["servos"]){
-                ServoID id = message::input::idFromString(servo[0].as<std::string>());
+            for(auto& servo : config["limits"]["servos"].config) {
+                ServoID id = utility::input::idFromString(servo[0].as<std::string>());
                 float min = servo[1].as<Expression>();
                 float max = servo[2].as<Expression>();
                 jointLimiter.addLimit(id, min, max);
             }
-            for(auto& servo : config["limits"]["smoothing"]){
-                ServoID id = message::input::idFromString(servo[0].as<std::string>());
+            for(auto& servo : config["limits"]["smoothing"].config) {
+                ServoID id = utility::input::idFromString(servo[0].as<std::string>());
                 float alpha = servo[1].as<Expression>();
                 jointLimiter.addSmoothing(id, alpha);
             }
@@ -140,26 +141,9 @@ namespace motion {
         });
 
         on<Network<PresenceUserState>, Sync<NUPresenceInput>>().then("NUPresenceInput Network Input",[this](const PresenceUserState& user){
-            goalCamPose(0,0) = user.head_pose().x().x();
-            goalCamPose(1,0) = user.head_pose().x().y();
-            goalCamPose(2,0) = user.head_pose().x().z();
-            goalCamPose(3,0) = user.head_pose().x().t();
-
-            goalCamPose(0,1) = user.head_pose().y().x();
-            goalCamPose(1,1) = user.head_pose().y().y();
-            goalCamPose(2,1) = user.head_pose().y().z();
-            goalCamPose(3,1) = user.head_pose().y().t();
-
-            goalCamPose(0,2) = user.head_pose().z().x();
-            goalCamPose(1,2) = user.head_pose().z().y();
-            goalCamPose(2,2) = user.head_pose().z().z();
-            goalCamPose(3,2) = user.head_pose().z().t();
-
-            goalCamPose(0,3) = user.head_pose().t().x();
-            goalCamPose(1,3) = user.head_pose().t().y();
-            goalCamPose(2,3) = user.head_pose().t().z();
-            goalCamPose(3,3) = user.head_pose().t().t();
+            
             //Rotate to robot coordinate system
+            goalCamPose = arma::conv_to<arma::mat>::from(convert<float, 4, 4>(user.head_pose));
             goalCamPose = camera_to_robot * goalCamPose.i() * camera_to_robot.t();
             goalCamPose.translation() *= oculus_to_robot_scale;
 
@@ -222,7 +206,8 @@ namespace motion {
 
             //3DoF
             arma::vec3 gaze = currentCamPose.rotation().col(0);
-            Rotation3D yawlessOrientation = Rotation3D::createRotationZ(-sensors.world.rotation().yaw()) * sensors.world.rotation();
+            Rotation3D yawlessOrientation = Rotation3D::createRotationZ(Rotation3D(Transform3D(convert<double, 4, 4>(-sensors.world)).rotation()).yaw()) * 
+                                                                        Transform3D(convert<double, 4, 4>( sensors.world)).rotation();
 
             if(gyro_compensation){
                 gaze = yawlessOrientation * gaze;
@@ -234,10 +219,18 @@ namespace motion {
 
 			//Adjust arm position
         	// int max_number_of_iterations = 20;
-            Transform3D camToBody = sensors.forwardKinematics.at(ServoID::HEAD_PITCH);
-            arma::vec3 kneckPos = { kinematicsModel.Head.NECK_BASE_POS_FROM_ORIGIN_X,
-                                    kinematicsModel.Head.NECK_BASE_POS_FROM_ORIGIN_Y,
-                                    kinematicsModel.Head.NECK_BASE_POS_FROM_ORIGIN_Z};
+            Transform3D camToBody;
+            for (const auto& entry : sensors.forwardKinematics)
+            {
+                if (entry.servoID == ServoID::HEAD_PITCH)
+                {
+                    camToBody = convert<double, 4, 4>(entry.kinematics);
+                    break;
+                }
+            }
+            arma::vec3 kneckPos = { kinematicsModel.head.NECK_BASE_POS_FROM_ORIGIN_X,
+                                    kinematicsModel.head.NECK_BASE_POS_FROM_ORIGIN_Y,
+                                    kinematicsModel.head.NECK_BASE_POS_FROM_ORIGIN_Z};
         	auto arm_jointsL = utility::motion::kinematics::setArmApprox(kinematicsModel, kneckPos + l_arm, true);
         	auto arm_jointsR = utility::motion::kinematics::setArmApprox(kinematicsModel, kneckPos + r_arm, false);
             // joints.insert(joints.end(), arm_jointsL.begin(), arm_jointsL.end());
@@ -249,7 +242,7 @@ namespace motion {
 	        NUClear::clock::time_point time = NUClear::clock::now();
 
 	        for (auto& joint : joints) {
-	            waypoints->push_back({ id, time, joint.first, jointLimiter.clampAndSmooth(joint.first,joint.second), 30, 100 }); // TODO: support separate gains for each leg
+                waypoints->push_back(ServoCommand(id, time, joint.first, jointLimiter.clampAndSmooth(joint.first, joint.second), 30, 100)); // TODO: support separate gains for each leg
         	}
         	emit(waypoints);
 

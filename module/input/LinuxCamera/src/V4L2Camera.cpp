@@ -36,7 +36,7 @@ namespace module {
 
         constexpr size_t numbuffers = 2;
 
-        using message::input::proto::Image;
+        using message::input::Image;
         using namespace utility::vision;
 
         V4L2Camera::V4L2Camera() : buffers(), fd(-1), width(0), height(0), settings(), deviceID(""), format(""), fourcc(FOURCC::UNKNOWN), streaming(false) {

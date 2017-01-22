@@ -20,7 +20,7 @@
 #include "NUcapLocalisation.h"
 #include "utility/nubugger/NUhelpers.h"
 #include "utility/math/matrix/Rotation3D.h"
-#include "message/input/proto/MotionCapture.h"
+#include "message/input/MotionCapture.h"
 #include "message/input/Sensors.h"
 #include "utility/math/geometry/UnitQuaternion.h"
 #include "extension/Configuration.h"
@@ -31,7 +31,7 @@
 namespace module {
 namespace localisation {
 
-    using message::input::proto::MotionCapture;
+    using message::input::MotionCapture;
     using message::input::Sensors;
     using message::localisation::Self;
     using extension::Configuration;

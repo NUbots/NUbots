@@ -32,9 +32,9 @@ namespace module {
         using utility::math::matrix::Rotation3D;
         using utility::math::matrix::Transform3D;
         using utility::math::matrix::Transform2D;
-        using message::support::proto::FieldDescription;
-        using message::input::proto::Sensors;
-        using ServoID = message::input::proto::Sensors::ServoID::Value;
+        using message::support::FieldDescription;
+        using message::input::Sensors;
+        using ServoID = message::input::Sensors::ServoID::Value;
 
         arma::vec::fixed<BallModel::size> BallModel::timeUpdate(const arma::vec::fixed<size>& state, double /*deltaT*/) {
             return state;

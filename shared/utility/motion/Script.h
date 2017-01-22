@@ -23,14 +23,14 @@
 #include <chrono>
 #include <yaml-cpp/yaml.h>
 
-#include "message/input/proto/Sensors.h"
+#include "message/input/Sensors.h"
 
 #include "utility/input/ServoID.h"
 
 namespace utility {
     namespace motion {
 
-        using ServoID = message::input::proto::Sensors::ServoID::Value;
+        using ServoID = message::input::Sensors::ServoID::Value;
 
         /**
          * TODO document

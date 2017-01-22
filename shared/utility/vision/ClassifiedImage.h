@@ -20,16 +20,18 @@
 #ifndef UTILITY_VISION_CLASSIFIEDIMAGE_H
 #define UTILITY_VISION_CLASSIFIEDIMAGE_H
 
+#pragma GCC diagnostic ignored "-Weffc++"
 #include <Eigen/Core>
+#pragma GCC diagnostic pop
 
-#include "message/vision/proto/ClassifiedImage.h"
+#include "message/vision/ClassifiedImage.h"
 
 #include "utility/math/geometry/Line.h"
 
 namespace utility {
     namespace vision {
 
-        int visualHorizonAtPoint(const message::vision::proto::ClassifiedImage& classifiedImage, int x) {
+        static inline int visualHorizonAtPoint(const message::vision::ClassifiedImage& classifiedImage, int x) {
 
             struct {
                 bool operator()(const int& k, const Eigen::Vector2i& v) {

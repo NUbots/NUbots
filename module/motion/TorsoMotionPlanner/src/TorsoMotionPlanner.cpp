@@ -33,24 +33,24 @@ namespace motion
 //      UTILIZATION REFERENCE(S)
 /*=======================================================================================================*/
 
-    using ServoID        = message::input::proto::Sensors::ServoID::Value;
-    using Sensors        = message::input::proto::Sensors;
-    using LimbID         = message::behaviour::proto::Subsumption::Limb::Value;
-    using ServoCommand   = message::behaviour::proto::ServoCommand;
-    using message::behaviour::proto::WalkOptimiserCommand;
-    using message::behaviour::proto::WalkConfigSaved;
+    using ServoID        = message::input::Sensors::ServoID::Value;
+    using Sensors        = message::input::Sensors;
+    using LimbID         = message::behaviour::Subsumption::Limb::Value;
+    using ServoCommand   = message::behaviour::ServoCommand;
+    using message::behaviour::WalkOptimiserCommand;
+    using message::behaviour::WalkConfigSaved;
     // using message::behaviour::RegisterAction;
     // using message::behaviour::ActionPriorites;
-    using message::motion::proto::WalkCommand;
-    using NextFootTargetInfo = message::motion::proto::NextFootTargetInfo;
-    using FootMotionUpdate   = message::motion::proto::FootMotionUpdate;
-    using message::motion::proto::FootStepCompleted;
-    using message::motion::proto::TorsoMotionUpdate;
-    using message::motion::proto::EnableTorsoMotion;
-    using message::motion::proto::DisableTorsoMotion;
-    using message::motion::proto::ServoTarget;
-    using message::motion::proto::KinematicsModel;
-    using message::support::proto::SaveConfiguration;
+    using message::motion::WalkCommand;
+    using NextFootTargetInfo = message::motion::NextFootTargetInfo;
+    using FootMotionUpdate   = message::motion::FootMotionUpdate;
+    using message::motion::FootStepCompleted;
+    using message::motion::TorsoMotionUpdate;
+    using message::motion::EnableTorsoMotion;
+    using message::motion::DisableTorsoMotion;
+    using message::motion::ServoTarget;
+    using message::motion::KinematicsModel;
+    using message::support::SaveConfiguration;
     using extension::Configuration;
 
     using utility::motion::kinematics::calculateLegJoints;

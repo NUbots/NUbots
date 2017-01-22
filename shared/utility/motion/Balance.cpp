@@ -18,20 +18,20 @@
  */
 #include "Balance.h"
 
-#include "message/motion/proto/KinematicsModels.h"
+#include "message/motion/KinematicsModels.h"
 
 #include "utility/support/eigen_armadillo.h"
 
 namespace utility {
 namespace motion {
 
-    using LimbID  = message::behaviour::proto::Subsumption::Limb::Value;
-    using ServoID = message::input::proto::Sensors::ServoID::Value;
-    using message::input::proto::Sensors;
+    using LimbID  = message::behaviour::Subsumption::Limb::Value;
+    using ServoID = message::input::Sensors::ServoID::Value;
+    using message::input::Sensors;
     using utility::math::matrix::Rotation3D;
     using utility::math::matrix::Transform3D;
     using utility::math::geometry::UnitQuaternion;
-    using message::motion::proto::KinematicsModel;
+    using message::motion::KinematicsModel;
 
     void Balancer::configure(const YAML::Node& config) {
         rotationPGain = config["angle_gain"]["p"].as<float>();

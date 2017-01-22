@@ -20,12 +20,12 @@
 #include "eSpeak.h"
 
 #include <espeak/speak_lib.h>
-#include "message/output/proto/Say.h"
+#include "message/output/Say.h"
 
 namespace module {
     namespace output {
 
-        using message::output::proto::Say;
+        using message::output::Say;
 
         eSpeak::eSpeak(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
 

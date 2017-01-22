@@ -20,20 +20,20 @@
 #include <atomic>
 #include "GameController.h"
 #include "extension/Configuration.h"
-#include "message/support/proto/GlobalConfig.h"
+#include "message/support/GlobalConfig.h"
 #include "message/platform/darwin/DarwinSensors.h"
 
 namespace module {
 namespace input {
 
     using extension::Configuration;
-    using message::support::proto::GlobalConfig;
+    using message::support::GlobalConfig;
     using gamecontroller::GameControllerPacket;
     using gamecontroller::GameControllerReplyPacket;
     using gamecontroller::ReplyMessage;
     using gamecontroller::Team;
-    using message::input::proto::GameEvents;
-    using TeamColour = message::input::proto::GameEvents::TeamColour::Value;
+    using message::input::GameEvents;
+    using TeamColour = message::input::GameEvents::TeamColour::Value;
     using Score          = GameEvents::Score;
     using GoalScored     = GameEvents::GoalScored;
     using Penalisation   = GameEvents::Penalisation;
@@ -44,9 +44,9 @@ namespace input {
     using KickOffTeam    = GameEvents::KickOffTeam;
     using GamePhase      = GameEvents::GamePhase;
     using GameMode       = GameEvents::GameMode;
-    using message::input::proto::GameState;
+    using message::input::GameState;
     using PenaltyReason  = GameState::Data::PenaltyReason;
-    using TeamColourEvent = message::input::proto::GameEvents::TeamColour;
+    using TeamColourEvent = message::input::GameEvents::TeamColour;
     using message::platform::darwin::ButtonLeftDown;
     using message::platform::darwin::ButtonMiddleDown;
 

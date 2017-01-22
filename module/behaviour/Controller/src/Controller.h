@@ -28,9 +28,9 @@
 #include <set>
 #include <list>
 
-#include "message/behaviour/proto/ServoCommand.h"
-#include "message/behaviour/proto/Subsumption.h"
-#include "message/input/proto/Sensors.h"
+#include "message/behaviour/ServoCommand.h"
+#include "message/behaviour/Subsumption.h"
+#include "message/input/Sensors.h"
 
 #include "utility/behaviour/Action.h"
 
@@ -40,7 +40,7 @@ namespace module {
         struct RequestItem;
 
         struct Request {
-            using callback = std::function<void (std::set<message::behaviour::proto::Subsumption::Limb::Value>)>;
+            using callback = std::function<void (std::set<message::behaviour::Subsumption::Limb::Value>)>;
 
             Request()
             : id(0)
@@ -53,7 +53,7 @@ namespace module {
             , kill()
             , completed() {}
 
-            Request(size_t id, std::string name, callback start, callback kill, std::function<void (std::set<message::input::proto::Sensors::ServoID::Value>)> completed)
+            Request(size_t id, std::string name, callback start, callback kill, std::function<void (std::set<message::input::Sensors::ServoID::Value>)> completed)
             : id(id)
             , name(name)
             , active(false)
@@ -85,13 +85,13 @@ namespace module {
             /// The callback to execute when a new limb is started
             callback start;
             callback kill;
-            std::function<void (std::set<message::input::proto::Sensors::ServoID::Value>)> completed;
+            std::function<void (std::set<message::input::Sensors::ServoID::Value>)> completed;
         };
 
         struct RequestItem {
 
             //RequestItem() : group(Request()), index(0), active(false), priority(std::numeric_limits<float>::min()), limbSet() {}
-            RequestItem(Request& group, size_t index, float priority, const std::set<message::behaviour::proto::Subsumption::Limb::Value>& limbSet)
+            RequestItem(Request& group, size_t index, float priority, const std::set<message::behaviour::Subsumption::Limb::Value>& limbSet)
             : group(group)
             , index(index)
             , active(false)
@@ -105,7 +105,7 @@ namespace module {
             bool active;
 
             float priority;
-            std::set<message::behaviour::proto::Subsumption::Limb::Value> limbSet;
+            std::set<message::behaviour::Subsumption::Limb::Value> limbSet;
         };
 
         /**
@@ -121,7 +121,7 @@ namespace module {
             std::vector<std::reference_wrapper<RequestItem>> currentActions;
 
 
-            std::array<std::list<message::behaviour::proto::ServoCommand>, 20> commandQueues;
+            std::array<std::list<message::behaviour::ServoCommand>, 20> commandQueues;
 
             void selectAction();
         public:

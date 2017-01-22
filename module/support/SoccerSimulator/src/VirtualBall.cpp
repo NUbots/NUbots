@@ -21,27 +21,25 @@
 
 #include <armadillo>
 
-#include "message/vision/VisionObjects.h"
-#include "message/input/CameraParameters.h"
-#include "message/input/Sensors.h"
-#include "message/input/ServoID.h"
 #include "utility/math/matrix/Rotation3D.h"
 #include "utility/math/coordinates.h"
 #include "utility/math/vision.h"
+#include "utility/support/eigen_armadillo.h"
 
 namespace module {
 namespace support {
 
-    using message::vision::Ball;
+    using message::input::CameraParameters;
     using message::input::Sensors;
+    using message::vision::Ball;
+    using ServoID = message::input::Sensors::ServoID::Value;
+
     using utility::math::matrix::Transform2D;
     using utility::math::matrix::Transform3D;
     using utility::math::matrix::Rotation3D;
     using utility::math::vision::projectCamSpaceToScreen;
     using utility::math::vision::screenToImage;
     using utility::math::vision::getFieldToCam;
-    using message::input::CameraParameters;
-    using message::input::ServoID;
 
     VirtualBall::VirtualBall()
     : position(arma::fill::zeros)
@@ -64,11 +62,11 @@ namespace support {
     // arma::vec2 position;
     float diameter;
 
-    Ball VirtualBall::detect(const CameraParameters& cam, Transform2D robotPose, std::shared_ptr<const Sensors> sensors, arma::vec4 /*error*/){
+    Ball VirtualBall::detect(const CameraParameters& cam, Transform2D robotPose, const Sensors& sensors, arma::vec4 /*error*/){
 
         Ball result;
 
-        Transform3D Hcf = getFieldToCam(robotPose, sensors->orientationCamToGround);
+        Transform3D Hcf = getFieldToCam(robotPose, convert<double, 4, 4>(sensors.orientationCamToGround));
         Transform3D Hfc = Hcf.i();
 
         // Ball position in field
@@ -91,7 +89,7 @@ namespace support {
         double angle = 2.0 * std::asin((diameter * 0.5) / arma::norm(rBCc));
 
         // Project the centre to the screen and work out the radius as if it was in the centre
-        arma::ivec2 centre = screenToImage(projectCamSpaceToScreen(rBCc, cam.focalLengthPixels), cam.imageSizePixels);
+        arma::ivec2 centre = screenToImage(projectCamSpaceToScreen(rBCc, cam.focalLengthPixels), convert<uint, 2>(cam.imageSizePixels));
         double radius = cam.focalLengthPixels * std::tan(angle * 0.5);
 
         // Check our ball is on the screen at all and if so set the values
@@ -101,16 +99,25 @@ namespace support {
            && centre[1] < int(cam.imageSizePixels[1])) {
 
             // Set our circle parameters for simulating the ball
-            result.circle.centre = arma::conv_to<arma::vec>::from(centre);
+            result.circle.centre = convert<double, 2>(arma::conv_to<arma::vec>::from(centre));
             result.circle.radius = radius;
 
             // Get our transform to world coordinates
-            const Transform3D& Htw = sensors->world;
-            const Transform3D& Htc = sensors->forwardKinematics.find(ServoID::HEAD_PITCH)->second;
+            const Transform3D& Htw = convert<double, 4, 4>(sensors.world);
+            Transform3D Htc;
+            for (const auto& entry : sensors.forwardKinematics)
+            {
+                if (entry.servoID == ServoID::HEAD_PITCH)
+                {
+                    Htc = convert<double, 4, 4>(entry.kinematics);
+                    break;
+                }
+            }
+
             Transform3D Hcw = Htc.i() * Htw;
             Transform3D Hwc = Hcw.i();
 
-            result.position = Hwc.transformPoint(rBCc);
+            result.position = convert<double, 3>(Hwc.transformPoint(rBCc));
 
             // Measure points around the ball as a normal distribution
             arma::vec3 rEBc;
@@ -138,12 +145,12 @@ namespace support {
                 arma::vec3 rEBc = rEBc * std::tan(angle + radialJitter / 2.0);
 
                 // Make a rotation matrix to rotate our vector to our target
-                result.edgePoints.push_back(arma::normalise(Rotation3D(arma::normalise(rBCc), angle + angleOffset) * rEBc));
+                result.edgePoints.push_back(convert<double, 3>(arma::normalise(Rotation3D(arma::normalise(rBCc), angle + angleOffset) * rEBc)));
             }
         }
 
-        result.sensors = sensors;
-        result.timestamp = sensors->timestamp; // TODO: Eventually allow this to be different to sensors.
+        result.visObject.sensors = const_cast<Sensors*>(&sensors)->shared_from_this();
+        result.visObject.timestamp = sensors.timestamp; // TODO: Eventually allow this to be different to sensors.
 
 
         //If no measurements are in the Ball, then there it was not observed

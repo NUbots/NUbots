@@ -20,11 +20,14 @@
 #include "Nod.h"
 #include <nuclear>
 
-#include "message/input/ServoID.h"
-#include "message/motion/Script.h"
-#include "message/behaviour/Action.h"
 #include "extension/Configuration.h"
+
 #include "message/behaviour/Nod.h"
+#include "message/behaviour/Subsumption.h"
+#include "message/input/Sensors.h"
+
+#include "utility/behaviour/Action.h"
+#include "utility/motion/Script.h"
 
 namespace module {
 namespace behaviour {
@@ -33,11 +36,13 @@ namespace skills {
     struct ExecuteNod {};
 
     using extension::Configuration;
-    using message::input::ServoID;
-    using message::motion::ExecuteScriptByName;
-    using message::behaviour::RegisterAction;
-    using message::behaviour::ActionPriorites;
-    using message::input::LimbID;
+
+    using ServoID = message::input::Sensors::ServoID::Value;
+    using LimbID  = message::behaviour::Subsumption::Limb::Value;
+
+    using utility::motion::ExecuteScriptByName;
+    using utility::behaviour::RegisterAction;
+    using utility::behaviour::ActionPriorites;
 
     Nod::Nod(std::unique_ptr<NUClear::Environment> environment)
         : Reactor(std::move(environment))

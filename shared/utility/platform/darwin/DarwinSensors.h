@@ -20,12 +20,12 @@
 #define UTILITY_PLATFORM_DARWIN_DARWINSENSORS_H
 
 #include "message/platform/darwin/DarwinSensors.h"
-#include "message/input/proto/Sensors.h"
+#include "message/input/Sensors.h"
 
 namespace utility {
     namespace platform {
         namespace darwin {
-            using ServoID = message::input::proto::Sensors::ServoID::Value;
+            using ServoID = message::input::Sensors::ServoID::Value;
             using message::platform::darwin::DarwinSensors;
 
             const DarwinSensors::Servo& getDarwinServo(ServoID servoId, const DarwinSensors& sensors) {

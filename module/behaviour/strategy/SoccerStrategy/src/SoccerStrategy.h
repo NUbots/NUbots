@@ -25,11 +25,12 @@
 
 #include "message/behaviour/KickPlan.h"
 #include "message/behaviour/FieldTarget.h"
-#include "message/behaviour/proto/Behaviour.h"
+#include "message/behaviour/Behaviour.h"
 #include "message/localisation/FieldObject.h"
 #include "message/input/Sensors.h"
+#include "message/input/GameEvents.h"
+#include "message/input/GameState.h"
 #include "message/support/FieldDescription.h"
-#include "message/input/gameevents/GameEvents.h"
 
 namespace module {
 namespace behaviour {
@@ -82,8 +83,8 @@ namespace strategy {
         bool isSideChecking = false;
         bool manualOrientationReset = false;
         double manualOrientation = 0.0;
-        message::behaviour::KickType kickType;
-        message::behaviour::proto::Behaviour::State currentState = message::behaviour::proto::Behaviour::INIT;
+        message::behaviour::KickPlan::KickType kickType;
+        message::behaviour::Behaviour::State currentState = message::behaviour::Behaviour::State::INIT;
 
         NUClear::clock::time_point lastLocalised = NUClear::clock::now();
 
@@ -96,7 +97,7 @@ namespace strategy {
 
         void standStill();
         void searchWalk();
-        void walkTo(const message::support::FieldDescription& fieldDescription, const message::behaviour::FieldTarget& object);
+        void walkTo(const message::support::FieldDescription& fieldDescription, const message::behaviour::FieldTarget::Target& object);
         void walkTo(const message::support::FieldDescription& fieldDescription, arma::vec position);
         void find(const std::vector<message::behaviour::FieldTarget>& objects);
         void spinWalk();
@@ -105,7 +106,7 @@ namespace strategy {
         bool ballDistance(const message::localisation::Ball& ball);
         void goalieWalk(const std::vector<message::localisation::Self>& selfs, const std::vector<message::localisation::Ball>& balls);
         arma::vec2 getKickPlan(const std::vector<message::localisation::Self>& selfs, const message::support::FieldDescription& fieldDescription);
-        void play(const std::vector<message::localisation::Self>& selfs, const std::vector<message::localisation::Ball>& balls, const message::support::FieldDescription& fieldDescription, const message::input::gameevents::Mode& mode);
+        void play(const std::vector<message::localisation::Self>& selfs, const std::vector<message::localisation::Ball>& balls, const message::support::FieldDescription& fieldDescription, const message::input::GameState::Data::Mode& mode);
 
     public:
         explicit SoccerStrategy(std::unique_ptr<NUClear::Environment> environment);

@@ -21,12 +21,12 @@ syntax = "proto3";
 
 package message.research.scriptoptimizer;
 
-import "message/input/proto/Sensors.proto";
+import "message/input/Sensors.proto";
 
 message OptimizeScript {
 
     message Target {
-        input.proto.Sensors.ServoID id = 1;
+        input.Sensors.ServoID id = 1;
         float position = 2;
         float gain = 3;
     }

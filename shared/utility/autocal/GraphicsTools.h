@@ -1,3 +1,6 @@
+#ifndef UTILITY_AUTOCAL_GRAPHICSTOOLS_H
+#define UTILITY_AUTOCAL_GRAPHICSTOOLS_H
+
 #ifdef __APPLE__
     // #include <OpenGL/gl.h>
     #include <GL/glew.h>  
@@ -344,3 +347,4 @@ void drawSensorStreams(autocal::SensorPlant& sensorPlant, std::string referenceF
     }
 }
 
+#endif

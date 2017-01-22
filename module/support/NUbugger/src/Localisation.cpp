@@ -19,8 +19,8 @@
 
 #include "NUbugger.h"
 
-#include "message/localisation/proto/FieldObject.h"
-#include "message/localisation/proto/Localisation.h"
+#include "message/localisation/FieldObject.h"
+#include "message/localisation/Localisation.h"
 
 #include "utility/time/time.h"
 #include "utility/localisation/transform.h"
@@ -32,11 +32,11 @@ namespace support {
 
     using utility::nubugger::graph;
     using utility::time::getUtcTimestamp;
-    using message::localisation::proto::FieldObject;
-    using message::localisation::proto::Ball;
-    using message::localisation::proto::Self;
-    using message::localisation::proto::Localisation;
-    using message::localisation::proto::Model;
+    using message::localisation::FieldObject;
+    using message::localisation::Ball;
+    using message::localisation::Self;
+    using message::localisation::Localisation;
+    using message::localisation::Model;
 
     void NUbugger::provideLocalisation() {
         handles["localisation"].push_back(
@@ -125,8 +125,8 @@ namespace support {
 
         Localisation localisation;
 
-        message::localisation::proto::LocalisationFieldObject robotFieldObject;
-        message::localisation::proto::LocalisationFieldObject ballFieldObject;
+        message::localisation::LocalisationFieldObject robotFieldObject;
+        message::localisation::LocalisationFieldObject ballFieldObject;
 
         robotFieldObject.name   = robot_model->name;
         robotFieldObject.models = robot_model->models;

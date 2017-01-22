@@ -20,10 +20,12 @@
 #include "WalkEngineStand.h"
 
 #include "extension/Configuration.h"
-#include "message/behaviour/Action.h"
+
+#include "message/behaviour/Subsumption.h"
 #include "message/motion/WalkCommand.h"
-#include "message/input/LimbID.h"
-#include "message/input/ServoID.h"
+#include "message/input/Sensors.h"
+
+#include "utility/behaviour/Action.h"
 
 namespace module {
 namespace behaviour {
@@ -31,17 +33,17 @@ namespace skills {
 
     using extension::Configuration;
 
-    using message::input::LimbID;
-    using message::input::ServoID;
-
-    using message::behaviour::RegisterAction;
-    using message::behaviour::ActionPriorites;
+    using LimbID  = message::behaviour::Subsumption::Limb::Value;
+    using ServoID = message::input::Sensors::ServoID::Value;
 
     using message::motion::WalkCommand;
     using message::motion::StopCommand;
     using message::motion::WalkStopped;
     using message::motion::EnableWalkEngineCommand;
     using message::motion::DisableWalkEngineCommand;
+
+    using utility::behaviour::RegisterAction;
+    using utility::behaviour::ActionPriorites;
 
 	//internal only callback messages to start and stop our action
     // struct ExecuteStand {};

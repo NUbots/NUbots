@@ -1,0 +1,52 @@
+/*
+ * This file is part of the NUbots Codebase.
+ *
+ * The NUbots Codebase is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * The NUbots Codebase is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with the NUbots Codebase.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ * Copyright 2013 NUBots <nubots@nubots.net>
+ */
+syntax = "proto3";
+
+package message.input;
+
+import "google/protobuf/timestamp.proto";
+
+/**
+ * TODO document
+ *
+ * @author Trent Houliston
+ */
+message SoundChunkSettings {
+    /// The number of samples that are taken each second for the sound chunks
+    uint64 sampleRate = 1;
+    /// The number of channels that the sound chunks will have
+    uint64 channels   = 2;
+    /// The number of frames (a frame is a single sample for all channels) that each emitted chunk will have
+    uint64 chunkSize  = 3;
+}
+
+message SoundFileStart {
+    string                    fileName = 1;
+    google.protobuf.Timestamp time     = 2;
+}
+
+/**
+ * TODO document
+ *
+ * @author Jake Woods
+ */
+ message SoundChunk {
+    google.protobuf.Timestamp endTime = 1;
+    repeated int32            data    = 2;          // Be sure to cast to int16!
+ }

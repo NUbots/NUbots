@@ -29,9 +29,9 @@
 namespace module {
     namespace vision {
 
-        using message::input::proto::Image;
-        using message::vision::proto::LookUpTable;
-        using message::vision::proto::ClassifiedImage;
+        using message::input::Image;
+        using message::vision::LookUpTable;
+        using message::vision::ClassifiedImage;
         using utility::math::geometry::Line;
         using utility::math::geometry::Quad;
         using utility::nubugger::drawVisionLines;

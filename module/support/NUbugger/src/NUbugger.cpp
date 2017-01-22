@@ -21,11 +21,11 @@
 
 #include "extension/Configuration.h"
 
-#include "message/support/nubugger/proto/Ping.h"
-#include "message/support/nubugger/proto/ReactionHandles.h"
-#include "message/support/nubugger/proto/Command.h"
-#include "message/support/proto/SaveConfiguration.h"
-#include "message/vision/proto/LookUpTable.h"
+#include "message/support/nubugger/Ping.h"
+#include "message/support/nubugger/ReactionHandles.h"
+#include "message/support/nubugger/Command.h"
+#include "message/support/SaveConfiguration.h"
+#include "message/vision/LookUpTable.h"
 
 #include "utility/nubugger/NUhelpers.h"
 #include "utility/time/time.h"
@@ -38,14 +38,14 @@ namespace support {
     using utility::nubugger::graph;
 
     using extension::Configuration;
-    using message::support::nubugger::proto::Ping;
-    using message::support::nubugger::proto::ReactionHandles;
-    using message::support::nubugger::proto::Command;
+    using message::support::nubugger::Ping;
+    using message::support::nubugger::ReactionHandles;
+    using message::support::nubugger::Command;
 
-    using message::vision::proto::LookUpTable;
-    using message::vision::proto::SaveLookUpTable;
+    using message::vision::LookUpTable;
+    using message::vision::SaveLookUpTable;
 
-    using message::support::proto::SaveConfiguration;
+    using message::support::SaveConfiguration;
 
     using utility::time::durationFromSeconds;
 

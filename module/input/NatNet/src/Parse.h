@@ -21,15 +21,20 @@
 #define MODULES_INPUT_NATNET_PARSE_H
 
 #include <nuclear>
-#include <armadillo>
 
 #include "NatNet.h"
+
 #include "message/input/MotionCapture.h"
 
 namespace module {
 namespace input {
 
-    using message::input::MotionCapture;
+    using Marker        = message::input::MotionCapture::Marker;
+    using MarkerSet     = message::input::MotionCapture::MarkerSet;
+    using RigidBody     = message::input::MotionCapture::RigidBody;
+    using Skeleton      = message::input::MotionCapture::Skeleton;
+    using LabeledMarker = message::input::MotionCapture::LabeledMarker;
+    using ForcePlate    = message::input::MotionCapture::ForcePlate;
 
     // Read plain old datatypes
     template <typename T>
@@ -53,17 +58,21 @@ namespace input {
         }
     };
 
-    // Read armadillo vectors
-    template <uint size>
-    struct ReadData<arma::fvec::fixed<size>> {
-        static inline arma::fvec::fixed<size> read(const char*& ptr, const uint32_t version) {
+    // Read Eigen vectors
+    template <typename Scalar, int rows, int cols>
+    struct ReadData<Eigen::Matrix<Scalar, rows, cols>> {
+        static inline Eigen::Matrix<Scalar, rows, cols> read(const char*& ptr, const uint32_t /*version*/) {
 
-            arma::fvec::fixed<size> data;
-            for (uint i = 0; i < size; ++i) {
-                // Read the value
-                data[i] = ReadData<float>::read(ptr, version);
-            }
+            auto data = Eigen::Map<const Eigen::Matrix<Scalar, rows, cols>>(reinterpret_cast<const Scalar*>(ptr), rows, cols);
+            ptr += sizeof(Scalar) * rows * cols;
             return data;
+
+            //for (uint col = 0; col < cols; ++col) {
+            //    for (uint row = 0; row < rows; ++row) {
+            //        // Read the value
+            //        data(row, col) = ReadData<Scalar>::read(ptr, version);
+            //    }
+            //}
         }
     };
 
@@ -85,15 +94,15 @@ namespace input {
 
     // Read Markers (they must be read as a vector as they are split into parallel arrays)
     template <>
-    struct ReadData<std::vector<MotionCapture::Marker>> {
-        static inline std::vector<MotionCapture::Marker> read(const char*& ptr, const uint32_t version) {
+    struct ReadData<std::vector<Marker>> {
+        static inline std::vector<Marker> read(const char*& ptr, const uint32_t version) {
 
             // Create a vector of the correct length to hold the markers
-            std::vector<MotionCapture::Marker> markers(ReadData<uint32_t>::read(ptr, version));
+            std::vector<Marker> markers(ReadData<uint32_t>::read(ptr, version));
 
             // Read all the positions
             for (auto& marker : markers) {
-                marker.position = ReadData<arma::fvec3>::read(ptr, version);
+            marker.position = ReadData<Eigen::Matrix<float, 3, 1>>::read(ptr, version);
             }
 
             // If we are version 2 or greater we have additional information
@@ -118,18 +127,18 @@ namespace input {
 
     // Read Marker Sets
     template <>
-    struct ReadData<MotionCapture::MarkerSet> {
-        static inline MotionCapture::MarkerSet read(const char*& ptr, const uint32_t version) {
+    struct ReadData<MarkerSet> {
+        static inline MarkerSet read(const char*& ptr, const uint32_t version) {
 
-            MotionCapture::MarkerSet set;
+            MarkerSet set;
 
             set.name = ReadData<std::string>::read(ptr, version);
-            auto markersPositions = ReadData<std::vector<arma::fvec3>>::read(ptr, version);
+            auto markersPositions = ReadData<std::vector<Eigen::Matrix<float, 3, 1>>>::read(ptr, version);
             set.markers.reserve(markersPositions.size());
 
             // Build markers
             for (auto position : markersPositions) {
-                MotionCapture::Marker marker;
+                Marker marker;
                 marker.position = position;
                 marker.id = -1;
                 marker.size = -1;
@@ -142,15 +151,15 @@ namespace input {
 
     // Read Rigid Bodies
     template <>
-    struct ReadData<MotionCapture::RigidBody> {
-        static inline MotionCapture::RigidBody read(const char*& ptr, const uint32_t version) {
+    struct ReadData<RigidBody> {
+        static inline RigidBody read(const char*& ptr, const uint32_t version) {
 
-            MotionCapture::RigidBody rigidBody;
+            RigidBody rigidBody;
 
             rigidBody.id            = ReadData<uint32_t>::read(ptr, version);
-            rigidBody.position      = ReadData<arma::fvec3>::read(ptr, version);
-            rigidBody.rotation      = ReadData<arma::fvec4>::read(ptr, version);
-            rigidBody.markers       = ReadData<std::vector<MotionCapture::Marker>>::read(ptr, version);
+            rigidBody.position      = ReadData<Eigen::Matrix<float, 3, 1>>::read(ptr, version);
+            rigidBody.rotation      = ReadData<Eigen::Matrix<float, 4, 1>>::read(ptr, version);
+            rigidBody.markers       = ReadData<std::vector<Marker>>::read(ptr, version);
 
             // Version specific information
             rigidBody.error         = version >= 0x02000000 ? ReadData<float>::read(ptr, version) : -1;
@@ -162,13 +171,13 @@ namespace input {
 
     // Read Skeletons
     template <>
-    struct ReadData<MotionCapture::Skeleton> {
-        static inline MotionCapture::Skeleton read(const char*& ptr, const uint32_t version) {
+    struct ReadData<Skeleton> {
+        static inline Skeleton read(const char*& ptr, const uint32_t version) {
 
-            MotionCapture::Skeleton skeleton;
+            Skeleton skeleton;
 
             skeleton.id    = ReadData<uint32_t>::read(ptr, version);
-            skeleton.bones = ReadData<std::vector<MotionCapture::RigidBody>>::read(ptr, version);
+            skeleton.bones = ReadData<std::vector<RigidBody>>::read(ptr, version);
 
             return skeleton;
         }
@@ -176,14 +185,14 @@ namespace input {
 
     // Read Labeled Markers
     template <>
-    struct ReadData<MotionCapture::LabeledMarker> {
-        static inline MotionCapture::LabeledMarker read(const char*& ptr, const uint32_t version) {
+    struct ReadData<LabeledMarker> {
+        static inline LabeledMarker read(const char*& ptr, const uint32_t version) {
 
-            MotionCapture::LabeledMarker marker;
+            LabeledMarker marker;
 
-            marker.id       = ReadData<uint32_t>::read(ptr, version);
-            marker.position = ReadData<arma::fvec3>::read(ptr, version);
-            marker.size     = ReadData<float>::read(ptr, version);
+            marker.marker.id       = ReadData<uint32_t>::read(ptr, version);
+            marker.marker.position = ReadData<Eigen::Matrix<float, 3, 1>>::read(ptr, version);
+            marker.marker.size     = ReadData<float>::read(ptr, version);
 
             if (version >= 0x02060000) {
                 short params = ReadData<short>::read(ptr, version);
@@ -203,13 +212,18 @@ namespace input {
 
     // Read Force Plates
     template <>
-    struct ReadData<MotionCapture::ForcePlate> {
-        static inline MotionCapture::ForcePlate read(const char*& ptr, const uint32_t version) {
+    struct ReadData<ForcePlate> {
+        static inline ForcePlate read(const char*& ptr, const uint32_t version) {
 
-            MotionCapture::ForcePlate forcePlate;
+            ForcePlate forcePlate;
 
             forcePlate.id       = ReadData<uint32_t>::read(ptr, version);
-            forcePlate.channels = ReadData<std::vector<std::vector<float>>>::read(ptr, version);
+            auto channels       = ReadData<std::vector<std::vector<float>>>::read(ptr, version);
+            forcePlate.channels.reserve(channels.size());
+            for (uint channel = 0; channel < channels.size(); channel++)
+            {
+                forcePlate.channels[channel].channel = std::move(channels[channel]);
+            }
 
             return forcePlate;
         }
@@ -221,7 +235,7 @@ namespace input {
         static inline NatNet::MarkerSetModel read(const char*& ptr, const uint32_t version) {
 
             NatNet::MarkerSetModel m;
-            m.name = ReadData<std::string>::read(ptr, version);
+            m.name        = ReadData<std::string>::read(ptr, version);
             m.markerNames = ReadData<std::vector<std::string>>::read(ptr, version);
             return m;
         }
@@ -233,10 +247,10 @@ namespace input {
         static inline NatNet::RigidBodyModel read(const char*& ptr, const uint32_t version) {
 
             NatNet::RigidBodyModel m;
-            m.name = version >= 0x02000000 ? ReadData<std::string>::read(ptr, version) : "";
-            m.id = ReadData<uint32_t>::read(ptr, version);
+            m.name     = version >= 0x02000000 ? ReadData<std::string>::read(ptr, version) : "";
+            m.id       = ReadData<uint32_t>::read(ptr, version);
             m.parentId = ReadData<uint32_t>::read(ptr, version);
-            m.offset = ReadData<arma::fvec3>::read(ptr, version);
+            m.offset   = ReadData<Eigen::Matrix<float, 3, 1>>::read(ptr, version);
             return m;
         }
     };
@@ -248,7 +262,7 @@ namespace input {
 
             NatNet::SkeletonModel m;
             m.name = ReadData<std::string>::read(ptr, version);
-            m.id = ReadData<uint32_t>::read(ptr, version);
+            m.id   = ReadData<uint32_t>::read(ptr, version);
 
             // Convert our bone models into a map
             auto boneModels = ReadData<std::vector<NatNet::RigidBodyModel>>::read(ptr, version);

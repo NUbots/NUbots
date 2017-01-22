@@ -22,29 +22,29 @@
 #include <cmath>
 #include <armadillo>
 #include <nuclear>
-#include "message/localisation/proto/FieldObject.h"
-#include "message/input/proto/Sensors.h"
+#include "message/localisation/FieldObject.h"
+#include "message/input/Sensors.h"
 #include "utility/math/matrix/Transform3D.h"
 #include "utility/math/matrix/Transform2D.h"
 #include "utility/math/geometry/Plane.h"
 #include "utility/math/geometry/ParametricLine.h"
 #include "utility/math/angle.h"
 #include "utility/support/eigen_armadillo.h"
-#include "message/support/proto/FieldDescription.h"
+#include "message/support/FieldDescription.h"
 
 
 namespace utility {
 namespace math {
 namespace vision {
 
-    using ServoID = message::input::proto::Sensors::ServoID::Value;
+    using ServoID = message::input::Sensors::ServoID::Value;
 
     /**************************************************************
      *SLAME STUFF: TO BE REMOVED FOR GOOD STUFF BELOW (DO NOT USE)*
      **************************************************************/
     /*! @brief Calculates the transformation for taking homogeneous points from world coordinates to camera coordinates
     */
-    inline arma::mat44 calculateWorldToCameraTransform(const message::input::proto::Sensors& sensors, const message::localisation::proto::Self& self){
+    inline arma::mat44 calculateWorldToCameraTransform(const message::input::Sensors& sensors, const message::localisation::Self& self){
         arma::vec2 selfHeading = arma::normalise(convert<double, 2>(self.heading));
         arma::mat44 robotToWorld_world;
         robotToWorld_world <<  selfHeading[0]  <<  -selfHeading[1]  <<  0 <<  self.locObject.position[0] << arma::endr
@@ -243,7 +243,7 @@ namespace vision {
     inline arma::mat::fixed<3,4> cameraSpaceGoalProjection(
             const arma::vec3& robotPose,
             const arma::vec3& goalLocation,
-            const message::support::proto::FieldDescription& field, 
+            const message::support::FieldDescription& field, 
             const utility::math::matrix::Transform3D& camToGround,
             const bool& failIfNegative = true) //camtoground is either camera to ground or camera to world, depending on application
     {

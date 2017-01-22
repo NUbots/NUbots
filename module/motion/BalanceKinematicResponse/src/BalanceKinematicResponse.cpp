@@ -35,19 +35,19 @@ namespace motion
 /*=======================================================================================================*/
 //      UTILIZATION REFERENCE(S)
 /*=======================================================================================================*/
-    using ServoID = message::input::proto::Sensors::ServoID::Value;
-    using LimbID  = message::behaviour::proto::Subsumption::Limb::Value;
-    using message::input::proto::Sensors;
-    using message::input::proto::PushDetection;
-    using message::input::proto::FallingDetected;
+    using ServoID = message::input::Sensors::ServoID::Value;
+    using LimbID  = message::behaviour::Subsumption::Limb::Value;
+    using message::input::Sensors;
+    using message::input::PushDetection;
+    using message::input::FallingDetected;
 
-    using message::motion::proto::FootMotionUpdate;
-    using message::motion::proto::HeadMotionUpdate;
-    using message::motion::proto::TorsoMotionUpdate;
-    using message::motion::proto::BalanceBodyUpdate;
-    using message::motion::proto::EnableBalanceResponse;
-    using message::motion::proto::DisableBalanceResponse;
-    using message::motion::proto::KinematicsModel;
+    using message::motion::FootMotionUpdate;
+    using message::motion::HeadMotionUpdate;
+    using message::motion::TorsoMotionUpdate;
+    using message::motion::BalanceBodyUpdate;
+    using message::motion::EnableBalanceResponse;
+    using message::motion::DisableBalanceResponse;
+    using message::motion::KinematicsModel;
 
     using extension::Configuration;
     using utility::support::Expression;
@@ -426,8 +426,8 @@ namespace motion
     void BalanceKinematicResponse::localise(Transform2D position)
     {
         // emit position as a fake localisation
-        auto localisation = std::make_unique<std::vector<message::localisation::proto::Self>>();
-        message::localisation::proto::Self self;
+        auto localisation = std::make_unique<std::vector<message::localisation::Self>>();
+        message::localisation::Self self;
         self.locObject.position = {position.x(), position.y()};
         self.locObject.position_cov = Eigen::Matrix2d::Identity() * 0.1; // made up
         self.heading  << std::cos(position.angle()), std::sin(position.angle()); // convert to cartesian coordinates

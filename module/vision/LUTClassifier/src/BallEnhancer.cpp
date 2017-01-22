@@ -18,22 +18,17 @@
  */
 
 #include "LUTClassifier.h"
-#include "QuexClassifier.h"
 
 #include "utility/math/vision.h"
 #include "utility/math/geometry/Line.h"
 #include "utility/nubugger/NUhelpers.h"
-#include "utility/vision/ClassifiedImage.h"
-#include "utility/vision/fourcc.h"
-#include "utility/vision/LookUpTable.h"
-#include "utility/vision/Vision.h"
 
 namespace module {
     namespace vision {
 
-        using message::input::proto::Image;
-        using message::vision::proto::LookUpTable;
-        using message::vision::proto::ClassifiedImage;
+        using message::input::Image;
+        using message::vision::LookUpTable;
+        using message::vision::ClassifiedImage;
 
         using utility::math::geometry::Line;
         using utility::math::vision::getGroundPointFromScreen;

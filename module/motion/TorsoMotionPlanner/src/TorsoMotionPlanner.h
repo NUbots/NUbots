@@ -30,18 +30,18 @@
 
 #include "extension/Configuration.h"
 
-#include "message/behaviour/proto/FixedWalkCommand.h"
-#include "message/behaviour/proto/ServoCommand.h"
-#include "message/behaviour/proto/Subsumption.h"
-#include "message/input/proto/Sensors.h"
-#include "message/localisation/proto/FieldObject.h"
-#include "message/motion/proto/FootMotionCommand.h" 
-#include "message/motion/proto/FootPlacementCommand.h" 
-#include "message/motion/proto/KinematicsModels.h"
-#include "message/motion/proto/ServoTarget.h"
-#include "message/motion/proto/TorsoMotionCommand.h" 
-#include "message/motion/proto/WalkCommand.h"
-#include "message/support/proto/SaveConfiguration.h"
+#include "message/behaviour/FixedWalkCommand.h"
+#include "message/behaviour/ServoCommand.h"
+#include "message/behaviour/Subsumption.h"
+#include "message/input/Sensors.h"
+#include "message/localisation/FieldObject.h"
+#include "message/motion/FootMotionCommand.h" 
+#include "message/motion/FootPlacementCommand.h" 
+#include "message/motion/KinematicsModels.h"
+#include "message/motion/ServoTarget.h"
+#include "message/motion/TorsoMotionCommand.h" 
+#include "message/motion/WalkCommand.h"
+#include "message/support/SaveConfiguration.h"
 
 #include "utility/behaviour/Action.h"
 #include "utility/math/angle.h"
@@ -79,10 +79,10 @@ namespace motion
 
         explicit TorsoMotionPlanner(std::unique_ptr<NUClear::Environment> environment);
     private:
-        using LimbID         = message::behaviour::proto::Subsumption::Limb::Value;
-        using ServoCommand   = message::behaviour::proto::ServoCommand;
-        using Sensors        = message::input::proto::Sensors;
-        using ServoID        = message::input::proto::Sensors::ServoID::Value;
+        using LimbID         = message::behaviour::Subsumption::Limb::Value;
+        using ServoCommand   = message::behaviour::ServoCommand;
+        using Sensors        = message::input::Sensors;
+        using ServoID        = message::input::Sensors::ServoID::Value;
         using Transform2D    = utility::math::matrix::Transform2D;
         using Transform3D    = utility::math::matrix::Transform3D;
         using UnitQuaternion = utility::math::geometry::UnitQuaternion;
@@ -207,7 +207,7 @@ namespace motion
         /**
          * Balance & Kinematics module initialization...
          */
-        message::motion::proto::KinematicsModel kinematicsModel;   //
+        message::motion::KinematicsModel kinematicsModel;   //
 
         /**
          * The last foot goal rotation...

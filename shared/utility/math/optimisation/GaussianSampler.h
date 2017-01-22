@@ -94,7 +94,8 @@ namespace utility {
 
                         //reset required variables
                         sampleCount = 0;
-                        bestParams.covariance = convert<double>(arma::conv_to<arma::mat>(arma::diagmat(weights)));
+                        arma::mat covariance = arma::diagmat(weights);
+                        bestParams.covariance = convert<double>(covariance);
                     }
                     sampleCount += numSamples;
                     return samples.cols(sampleCount-numSamples,sampleCount-1);

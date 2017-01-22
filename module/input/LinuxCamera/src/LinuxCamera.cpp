@@ -26,8 +26,8 @@ extern "C" {
 }
 
 #include "V4L2Camera.h"
-#include "message/input/proto/Image.h"
-#include "message/input/proto/CameraParameters.h"
+#include "message/input/Image.h"
+#include "message/input/CameraParameters.h"
 #include "extension/Configuration.h"
 #include "utility/vision/fourcc.h"
 
@@ -35,8 +35,8 @@ namespace module {
     namespace input {
 
         using extension::Configuration;
-        using message::input::proto::CameraParameters;
-        using message::input::proto::Image;
+        using message::input::CameraParameters;
+        using message::input::Image;
         using namespace utility::vision;
 
         // We assume that the device will always be video0, if not then change this

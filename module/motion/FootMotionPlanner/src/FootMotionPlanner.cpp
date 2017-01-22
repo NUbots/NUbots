@@ -32,7 +32,9 @@ namespace motion
 /*=======================================================================================================*/
 //      UTILIZATION REFERENCE(S)
 /*=======================================================================================================*/
-    using message::input::LimbID;
+    using extension::Configuration;
+
+    using LimbID = message::behaviour::Subsumption::Limb::Value;
     using NewStepTargetInfo  = message::motion::NewStepTargetInfo;
     using NewFootTargetInfo  = message::motion::NewFootTargetInfo;
     using NextFootTargetInfo = message::motion::NextFootTargetInfo;
@@ -41,10 +43,9 @@ namespace motion
     using message::motion::DisableFootMotion;
     using message::motion::FootStepRequested;
     using message::motion::FootStepCompleted;
-    using extension::Configuration;
+    using message::motion::KinematicsModel;
 
     using utility::support::Expression;
-    using message::motion::kinematics::KinematicsModel;
     using utility::math::matrix::Transform2D;
     using utility::math::matrix::Transform3D;
     using utility::nubugger::graph;
@@ -112,20 +113,20 @@ namespace motion
             // Step Target Data queued evaluation...
             if(DEBUG) { log<NUClear::TRACE>("Messaging: Foot Motion Planner - Received Target Foot Position(0)"); }
                 setDestinationTime(nst.targetTime);                      //Queued    : FPP
-                setVelocityCurrent(nst.velocityCurrent);                 //Queued    : FPP             
+                setVelocityCurrent(convert<double, 3>(nst.velocityCurrent));                 //Queued    : FPP             
             if(DEBUG) { log<NUClear::TRACE>("Messaging: Foot Motion Planner - Received Target Foot Position(1)"); }
 
             // Foot Target Data queued evaluation...
             if(DEBUG) { log<NUClear::TRACE>("Messaging: Foot Motion Planner - Received Target Foot Position(0)"); }                      
                 if(nst.activeForwardLimb == LimbID::LEFT_LEG)
                 {  
-                    setActiveLimbSource(nft.leftFootSource);             //Queued    : FPP
-                    setActiveLimbDestination(nft.leftFootDestination);   //Queued    : FPP          
+                    setActiveLimbSource(convert<double, 3>(nft.leftFootSource));             //Queued    : FPP
+                    setActiveLimbDestination(convert<double, 3>(nft.leftFootDestination));   //Queued    : FPP          
                 }
                 else
                 {       
-                    setActiveLimbSource(nft.rightFootSource);            //Queued    : FPP
-                    setActiveLimbDestination(nft.rightFootDestination);  //Queued    : FPP      
+                    setActiveLimbSource(convert<double, 3>(nft.rightFootSource));            //Queued    : FPP
+                    setActiveLimbDestination(convert<double, 3>(nft.rightFootDestination));  //Queued    : FPP      
                 }                         
                 setActiveForwardLimb(nst.activeForwardLimb);             //Queued    : FPP            
             if(DEBUG) { log<NUClear::TRACE>("Messaging: Foot Motion Planner - Received Target Foot Position(1)"); }
@@ -133,11 +134,11 @@ namespace motion
             // Next step data queued forwarding...
             if(DEBUG) { log<NUClear::TRACE>("Messaging: Foot Motion Planner - Generate Foot Position Set(0)"); }
                 NewStepInfo nextStep = NewStepInfo();
-                    nextStep.lFootSource = nft.leftFootSource;
-                    nextStep.rFootSource = nft.rightFootSource;
-                    nextStep.sMass = nft.supportMass;
-                    nextStep.lFootDestination = nft.leftFootDestination;
-                    nextStep.rFootDestination = nft.rightFootDestination;
+                    nextStep.lFootSource      = convert<double, 3>(nft.leftFootSource);
+                    nextStep.rFootSource      = convert<double, 3>(nft.rightFootSource);
+                    nextStep.sMass            = convert<double, 3>(nft.supportMass);
+                    nextStep.lFootDestination = convert<double, 3>(nft.leftFootDestination);
+                    nextStep.rFootDestination = convert<double, 3>(nft.rightFootDestination);
                 newStepInfoSets.push(nextStep);
             if(DEBUG) { log<NUClear::TRACE>("Messaging: Foot Motion Planner - Generate Foot Position Set(1)"); }
         });
@@ -213,14 +214,19 @@ namespace motion
 
         if(DEBUG) { log<NUClear::TRACE>("Messaging: Foot Motion Planner - Emit FootMotionUpdate"); }
         //Broadcast struct of updated foot motion data at corresponding phase identity...
-        emit(std::make_unique<FootMotionUpdate>(inPhase, inActiveForwardLimb, getLeftFootPosition(), getRightFootPosition(), leftFootLocal, rightFootLocal));              
+        emit(std::make_unique<FootMotionUpdate>(inPhase, 
+                                                inActiveForwardLimb, 
+                                                convert<double, 3>(getLeftFootPosition()),
+                                                convert<double, 3>(getRightFootPosition()),
+                                                convert<double, 4, 4>(leftFootLocal),
+                                                convert<double, 4, 4>(rightFootLocal)));
         // Notify whenever a subsequent foot step is promoted...
         emit(std::make_unique<NextFootTargetInfo>(  
-                                                    newStepInfoSets.front().lFootSource,
-                                                    newStepInfoSets.front().rFootSource,
-                                                    newStepInfoSets.front().sMass,
-                                                    newStepInfoSets.front().lFootDestination,
-                                                    newStepInfoSets.front().rFootDestination
+                                                    convert<double, 3>(newStepInfoSets.front().lFootSource),
+                                                    convert<double, 3>(newStepInfoSets.front().rFootSource),
+                                                    convert<double, 3>(newStepInfoSets.front().sMass),
+                                                    convert<double, 3>(newStepInfoSets.front().lFootDestination),
+                                                    convert<double, 3>(newStepInfoSets.front().rFootDestination)
                                                  ));
     }
 /*=======================================================================================================*/
@@ -273,9 +279,9 @@ namespace motion
         // Default Initial Torso Position...
         Transform2D uTorso = Transform2D({-getFootOffsetCoefficient(0), 0, 0});
         // Default Initial Left  Foot Position...
-        setLeftFootPosition(uTorso.localToWorld({getFootOffsetCoefficient(0), kinematicsModel.Leg.HIP_OFFSET_Y - getFootOffsetCoefficient(1), 0}));        
+        setLeftFootPosition(uTorso.localToWorld({getFootOffsetCoefficient(0), kinematicsModel.leg.HIP_OFFSET_Y - getFootOffsetCoefficient(1), 0}));        
         // Default Initial Right Foot Position...
-        setRightFootPosition(uTorso.localToWorld({getFootOffsetCoefficient(0), -kinematicsModel.Leg.HIP_OFFSET_Y + getFootOffsetCoefficient(1), 0}));               
+        setRightFootPosition(uTorso.localToWorld({getFootOffsetCoefficient(0), -kinematicsModel.leg.HIP_OFFSET_Y + getFootOffsetCoefficient(1), 0}));               
     }    
 /*=======================================================================================================*/
 //      ENCAPSULATION METHOD: Time
@@ -419,7 +425,7 @@ namespace motion
         }
         else
         {                   
-            return (LimbID::INVALID); //DEBUGGING: blank value
+            return (LimbID::UNKNOWN); //DEBUGGING: blank value
         }
     }
     void FootMotionPlanner::setActiveForwardLimb(const LimbID& inActiveForwardLimb)

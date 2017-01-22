@@ -21,11 +21,11 @@
 
 #include "extension/Configuration.h"
 
-#include "message/input/proto/CameraParameters.h"
-#include "message/support/proto/FieldDescription.h"
-#include "message/vision/proto/ClassifiedImage.h"
-#include "message/vision/proto/VisionObjects.h"
-#include "message/vision/proto/LookUpTable.h"
+#include "message/input/CameraParameters.h"
+#include "message/support/FieldDescription.h"
+#include "message/vision/ClassifiedImage.h"
+#include "message/vision/VisionObjects.h"
+#include "message/vision/LookUpTable.h"
 
 #include "utility/math/coordinates.h"
 #include "utility/math/geometry/Plane.h"
@@ -45,15 +45,15 @@ namespace vision {
 
     using extension::Configuration;
 
-    using message::input::proto::CameraParameters;
-    using message::input::proto::Sensors;
-    using ServoID = message::input::proto::Sensors::ServoID::Value;
+    using message::input::CameraParameters;
+    using message::input::Sensors;
+    using ServoID = message::input::Sensors::ServoID::Value;
 
-    using message::vision::proto::ClassifiedImage;
-    using message::vision::proto::Ball;
-    using message::vision::proto::LookUpTable;
-    using message::input::proto::Image;
-    using message::support::proto::FieldDescription;
+    using message::vision::ClassifiedImage;
+    using message::vision::Ball;
+    using message::vision::LookUpTable;
+    using message::input::Image;
+    using message::support::FieldDescription;
 
     using Plane = utility::math::geometry::Plane<3>;
 
@@ -282,7 +282,7 @@ namespace vision {
                  *                 MEASUREMENTS                 *
                  ************************************************/
 
-                VisionObject::Ball b;
+                Ball b;
                 b.visObject.sensors = image.sensors;
 
                 // Get our transform to world coordinates

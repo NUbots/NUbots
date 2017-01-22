@@ -21,7 +21,7 @@
 
 #include "extension/Configuration.h"
 
-#include "message/vision/proto/ClassifiedImage.h"
+#include "message/vision/ClassifiedImage.h"
 #include "message/research/AutoClassifierPixels.h"
 
 #include "utility/math/geometry/Circle.h"
@@ -36,9 +36,9 @@ namespace research {
 
     using extension::Configuration;
 
-    using message::vision::proto::Ball;
-    using message::vision::proto::Goal;
-    using message::vision::proto::ClassifiedImage;
+    using message::vision::Ball;
+    using message::vision::Goal;
+    using message::vision::ClassifiedImage;
     using message::research::AutoClassifierPixels;
 
     using utility::math::geometry::Circle;

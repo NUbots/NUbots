@@ -32,7 +32,7 @@
 #include <cstring>
 #include <yaml-cpp/yaml.h>
 
-#include "message/vision/proto/LookUpTable.h"
+#include "message/vision/LookUpTable.h"
 
 #include "Vision.h"
 
@@ -44,7 +44,7 @@ namespace utility {
          *   @param p The pixel to be classified.
          *   @return Returns the colour index for the given pixel.
          */
-        uint32_t getLUTIndex(const message::vision::proto::LookUpTable& lut, const Pixel& p) {
+        static inline uint32_t getLUTIndex(const message::vision::LookUpTable& lut, const Pixel& p) {
             const uint8_t BITS_Y_REMOVED  = sizeof(uint8_t) * 8 - lut.bits_y;
             const uint8_t BITS_CB_REMOVED = sizeof(uint8_t) * 8 - lut.bits_cb;
             const uint8_t BITS_CR_REMOVED = sizeof(uint8_t) * 8 - lut.bits_cr;
@@ -64,7 +64,7 @@ namespace utility {
             @param p the pixel
             @return Returns the colour classification of this pixel
          */
-        Colour getPixelColour(const message::vision::proto::LookUpTable& lut, const Pixel& p) {
+        static inline Colour getPixelColour(const message::vision::LookUpTable& lut, const Pixel& p) {
             return lut.table[getLUTIndex(lut, p)];
         }
 
@@ -72,7 +72,7 @@ namespace utility {
          *   @brief The inverse of getLUTIndex
          *   NOTE: This inverse is NOT injective (e.g. not 1-to-1)
          */
-        Pixel getPixelFromIndex(const message::vision::proto::LookUpTable& lut, const uint& index) {
+        static inline Pixel getPixelFromIndex(const message::vision::LookUpTable& lut, const uint& index) {
             const uint8_t BITS_Y_REMOVED  = sizeof(uint8_t) * 8 - lut.bits_y;
             const uint8_t BITS_CB_REMOVED = sizeof(uint8_t) * 8 - lut.bits_cb;
             const uint8_t BITS_CR_REMOVED = sizeof(uint8_t) * 8 - lut.bits_cr;
@@ -94,8 +94,8 @@ namespace utility {
 namespace YAML {
 
     template<>
-    struct convert<message::vision::proto::LookUpTable> {
-        static Node encode(const message::vision::proto::LookUpTable& rhs) {
+    struct convert<message::vision::LookUpTable> {
+        static Node encode(const message::vision::LookUpTable& rhs) {
             Node node;
 
             node["bits"]["y"] = uint(rhs.bits_y);
@@ -107,7 +107,7 @@ namespace YAML {
             return node;
         }
 
-        static bool decode(const Node& node, message::vision::proto::LookUpTable& rhs) {
+        static bool decode(const Node& node, message::vision::LookUpTable& rhs) {
 
             uint8_t bitsY  = node["bits"]["y"].as<uint>();
             uint8_t bitsCb = node["bits"]["cb"].as<uint>();
@@ -115,7 +115,7 @@ namespace YAML {
 
             std::vector<uint8_t> data = node["lut"].as<std::vector<uint8_t>>();
 
-            rhs = message::vision::proto::LookUpTable(std::move(data), bitsY, bitsCb, bitsCr);
+            rhs = message::vision::LookUpTable(std::move(data), bitsY, bitsCb, bitsCr);
 
             return true;
         }

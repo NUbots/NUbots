@@ -22,7 +22,7 @@
 
 #include <nuclear>
 
-#include "message/input/proto/Sensors.h"
+#include "message/input/Sensors.h"
 
 #include "utility/math/matrix/Transform3D.h"
 #include "utility/math/matrix/Rotation3D.h"
@@ -31,7 +31,7 @@
 #include "MotionModel.h"
 #include "DarwinVirtualLoadSensor.h"
 #include "utility/math/matrix/Rotation3D.h"
-#include "message/motion/proto/KinematicsModels.h"
+#include "message/motion/KinematicsModels.h"
 
 
 namespace module {

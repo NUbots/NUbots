@@ -19,7 +19,7 @@
 
 #include "NUbugger.h"
 
-#include "message/behaviour/proto/Subsumption.h"
+#include "message/behaviour/Subsumption.h"
 #include "utility/behaviour/Action.h"
 
 namespace module {
@@ -29,7 +29,7 @@ namespace support {
     using utility::behaviour::ActionKill;
     using utility::behaviour::RegisterAction;
     using utility::behaviour::ActionPriorites;
-    using message::behaviour::proto::Subsumption;
+    using message::behaviour::Subsumption;
     using LimbID = Subsumption::Limb::Value;
 
     void NUbugger::provideSubsumption() {

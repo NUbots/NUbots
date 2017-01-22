@@ -18,7 +18,6 @@
  */
 
 #include "LUTClassifier.h"
-#include "QuexClassifier.h"
 
 #include "utility/math/geometry/Line.h"
 
@@ -27,11 +26,11 @@
 namespace module {
     namespace vision {
 
-        using message::input::proto::Image;
-        using ServoID = message::input::proto::Sensors::ServoID::Value;
-        using message::input::proto::Sensors;
-        using message::vision::proto::LookUpTable;
-        using message::vision::proto::ClassifiedImage;
+        using message::input::Image;
+        using ServoID = message::input::Sensors::ServoID::Value;
+        using message::input::Sensors;
+        using message::vision::LookUpTable;
+        using message::vision::ClassifiedImage;
 
         using utility::math::geometry::Line;
         using utility::math::vision::getGroundPointFromScreen;

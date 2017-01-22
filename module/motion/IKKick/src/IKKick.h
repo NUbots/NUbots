@@ -21,9 +21,13 @@
 #define MODULES_MOTION_IKKICK_H
 
 #include <nuclear>
+
 #include "IKKickControllers.h"
-#include "message/motion/KickCommand.h"
+
+#include "message/behaviour/Subsumption.h"
 #include "message/input/Sensors.h"
+#include "message/motion/KickCommand.h"
+
 #include "utility/motion/Balance.h"
 
 namespace module {
@@ -34,7 +38,7 @@ namespace motion {
     private:
 
         // ID of support foot
-        message::input::LimbID supportFoot;
+        message::behaviour::Subsumption::Limb::Value supportFoot;
         // NEED the vector from the point on the surface of the ball where we want to kick to the front of the kick foot which is rightFootFront
         // KickPlanner has to add the radius of the all to get the location of the centre of the ball
         // point position of ball

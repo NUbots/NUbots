@@ -205,6 +205,9 @@ namespace matrix {
                 return rotation().eulerAngles();
             }
 
+            inline const arma::mat44 raw() const { return *this; }
+            inline arma::mat44 raw() { return *this; }
+
             /**
              * @brief Computes 'size' of the transform T
              *

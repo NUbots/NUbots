@@ -21,6 +21,7 @@
 #define MODULE_BEHAVIOUR_SKILLS_KICKSCRIPT_H
 
 #include <nuclear>
+
 #include "message/motion/KickCommand.h"
 
 namespace module {

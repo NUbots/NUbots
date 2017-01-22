@@ -35,7 +35,7 @@ namespace strategy {
     using message::behaviour::MotionCommand;
     using message::behaviour::KickPlan;
     using extension::Configuration;
-    using message::behaviour::proto::Behaviour;
+    using message::behaviour::Behaviour;
     using VisionBall = message::vision::Ball;
     using VisionGoal = message::vision::Goal;
     using utility::time::durationFromSeconds;

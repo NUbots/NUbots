@@ -21,11 +21,11 @@ syntax = "proto3";
 
 package message.research.scriptoptimizer;
 
-import "message/input/proto/Sensors.proto";
+import "message/input/Sensors.proto";
 
 message OptimizeScriptResult {
 
     uint32 iteration = 1;
     string metadata = 2;
-    repeated input.proto.Sensors sensors = 3;
+    repeated input.Sensors sensors = 3;
 }

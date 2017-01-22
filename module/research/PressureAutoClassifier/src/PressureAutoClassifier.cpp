@@ -22,7 +22,7 @@
 #include "message/research/AutoClassifierPixels.h"
 #include "extension/Configuration.h"
 #include "message/vision/LookUpTable.h"
-#include "message/vision/proto/LookUpTableDiff.h"
+#include "message/vision/LookUpTableDiff.h"
 
 namespace module {
 namespace research {
@@ -31,7 +31,7 @@ namespace research {
     using message::research::AutoClassifierPixels;
     using extension::Configuration;
     using message::vision::LookUpTable;
-    using message::vision::proto::LookUpTableDiff;
+    using message::vision::LookUpTableDiff;
     using message::vision::Colour;
 
 

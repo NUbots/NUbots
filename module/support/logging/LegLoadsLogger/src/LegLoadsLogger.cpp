@@ -1,22 +1,29 @@
 #include "LegLoadsLogger.h"
 
 #include "extension/Configuration.h"
+
 #include "message/input/Sensors.h"
-#include "message/input/ServoID.h"
+
+#include "utility/math/matrix/Transform3D.h"
+#include "utility/support/eigen_armadillo.h"
 
 namespace module {
 namespace support {
 namespace logging {
 
     using extension::Configuration;
+
     using message::input::Sensors;
-    using message::input::ServoID;
+    using ServoID = message::input::Sensors::ServoID::Value;
+
+    using utility::math::matrix::Transform3D;
 
     LegLoadsLogger::LegLoadsLogger(std::unique_ptr<NUClear::Environment> environment)
         : Reactor(std::move(environment)), logFile(), logFilePath("NON_EXISTENT_FILE.CSV") {
 
         on<Configuration>("LegLoadsLogger.yaml").then("Leg Loads Logger Configuration", [this] (const Configuration& config) {
-            logFilePath   = config["log_file"].as<std::string>("NON_EXISTENT_FILE.CSV");
+            //logFilePath = config["log_file"].as<std::string>("NON_EXISTENT_FILE.CSV");
+            logFilePath = config["log_file"].as<std::string>();
         });
 
         on<Startup>().then("Leg Loads Logger Startup", [this] ()
@@ -47,22 +54,61 @@ namespace logging {
 
         on<Trigger<Sensors>>().then("Leg Loads Logger Sensor Update", [this] (const Sensors& sensors)
         {
+            float RightHipPitchPresentVelocity, LeftHipPitchPresentVelocity, RightKneePresentVelocity, 
+                  LeftKneePresentVelocity, RightAnklePitchPresentVelocity, LeftAnklePitchPresentVelocity;
+
+            float RightHipPitchLoad, LeftHipPitchLoad, RightKneeLoad, LeftKneeLoad, LeftAnklePitchLoad, 
+                  RightAnklePitchLoad;
+
             // RightFootDisplacement FK -> RightAnkleRoll -> inverse -> translation -> negate
             // LeftFootDisplacement  FK -> LeftAnkleRoll  -> inverse -> translation -> negate
-            arma::vec3 RightFootDisplacement          = -sensors.forwardKinematics.at(ServoID::R_ANKLE_ROLL).i().translation();
-            arma::vec3 LeftFootDisplacement           = -sensors.forwardKinematics.at(ServoID::L_ANKLE_ROLL).i().translation();
-            float      RightHipPitchPresentVelocity   =  sensors.servos[int(ServoID::R_HIP_PITCH)].presentVelocity;
-            float      RightHipPitchLoad              =  sensors.servos[int(ServoID::R_HIP_PITCH)].load;
-            float      LeftHipPitchPresentVelocity    =  sensors.servos[int(ServoID::L_HIP_PITCH)].presentVelocity;
-            float      LeftHipPitchLoad               =  sensors.servos[int(ServoID::L_HIP_PITCH)].load;
-            float      RightKneePresentVelocity       =  sensors.servos[int(ServoID::R_KNEE)].presentVelocity;
-            float      RightKneeLoad                  =  sensors.servos[int(ServoID::R_KNEE)].load;
-            float      LeftKneePresentVelocity        =  sensors.servos[int(ServoID::L_KNEE)].presentVelocity;
-            float      LeftKneeLoad                   =  sensors.servos[int(ServoID::L_KNEE)].load;
-            float      RightAnklePitchPresentVelocity =  sensors.servos[int(ServoID::R_ANKLE_PITCH)].presentVelocity;
-            float      RightAnklePitchLoad            =  sensors.servos[int(ServoID::R_ANKLE_PITCH)].load;
-            float      LeftAnklePitchPresentVelocity  =  sensors.servos[int(ServoID::L_ANKLE_PITCH)].presentVelocity;
-            float      LeftAnklePitchLoad             =  sensors.servos[int(ServoID::L_ANKLE_PITCH)].load;
+            for (const auto& servo : sensors.servo)
+            {
+                if (servo.id == ServoID::R_HIP_PITCH)
+                {
+                    RightHipPitchPresentVelocity = servo.present_velocity;
+                    RightHipPitchLoad            = servo.load;
+                }
+                if (servo.id == ServoID::L_HIP_PITCH)
+                {
+                    LeftHipPitchPresentVelocity = servo.present_velocity;
+                    LeftHipPitchLoad            = servo.load;
+                }
+                if (servo.id == ServoID::R_KNEE)
+                {
+                    RightKneePresentVelocity = servo.present_velocity;
+                    RightKneeLoad            = servo.load;
+                }
+                if (servo.id == ServoID::L_KNEE)
+                {
+                    LeftKneePresentVelocity = servo.present_velocity;
+                    LeftKneeLoad            = servo.load;
+                }
+                if (servo.id == ServoID::R_ANKLE_PITCH)
+                {
+                    RightAnklePitchPresentVelocity = servo.present_velocity;
+                    RightAnklePitchLoad            = servo.load;
+                }
+                if (servo.id == ServoID::L_ANKLE_PITCH)
+                {
+                    LeftAnklePitchPresentVelocity = servo.present_velocity;
+                    LeftAnklePitchLoad            = servo.load;
+                }
+            }
+
+            arma::vec3 RightFootDisplacement, LeftFootDisplacement;
+
+            for (const auto& entry : sensors.forwardKinematics)
+            {
+                if (entry.servoID == ServoID::R_ANKLE_ROLL)
+                {
+                    RightFootDisplacement = Transform3D(convert<double, 4, 4>(-entry.kinematics)).i().translation();
+                }
+                if (entry.servoID == ServoID::L_ANKLE_ROLL)
+                {
+                    LeftFootDisplacement = Transform3D(convert<double, 4, 4>(-entry.kinematics)).i().translation();
+                }
+            }
 
             if ((logFile.is_open() == true) && (logFile.good() == true))
             {

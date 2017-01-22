@@ -23,25 +23,32 @@
 #include <armadillo>
 #include <mutex>
 
+#include "extension/Configuration.h"
+
+#include "message/motion/ServoTarget.h"
+#include "message/platform/darwin/DarwinSensors.h"
+#include "message/input/Sensors.h"
+
 #include "utility/math/angle.h"
 #include "utility/support/yaml_armadillo.h"
 #include "utility/nubugger/NUhelpers.h"
-#include "message/motion/proto/ServoTarget.h"
-#include "message/platform/darwin/DarwinSensors.h"
-#include "message/input/proto/Sensors.h"
-#include "extension/Configuration.h"
+#include "utility/platform/darwin/DarwinSensors.h"
+#include "utility/math/matrix/Transform3D.h"
 
 namespace module {
 namespace platform {
 namespace darwin {
 
+    using extension::Configuration;
+
+    using message::platform::darwin::DarwinSensors;
+    using message::motion::ServoTarget;
+    using ServoID = message::input::Sensors::ServoID::Value;
+    using message::input::Sensors;
+
+    using utility::math::matrix::Transform3D;
     using utility::nubugger::graph;
     using utility::support::Expression;
-    using message::platform::darwin::DarwinSensors;
-    using message::motion::proto::ServoTarget;
-    using ServoID = message::input::proto::Sensors::ServoID::Value;
-    using message::input::proto::Sensors;
-    using extension::Configuration;
 
     HardwareSimulator::HardwareSimulator(std::unique_ptr<NUClear::Environment> environment)
             : Reactor(std::move(environment)), sensors(), gyroQueue(), gyroQueueMutex(), noise() {
@@ -58,14 +65,10 @@ namespace darwin {
         sensors.ledPanel.led4 = 0;
 
         // Head LED
-        sensors.headLED.r = 0;
-        sensors.headLED.g = 0;
-        sensors.headLED.b = 0;
+        sensors.headLED.RGB = 0;
 
         // Head LED
-        sensors.eyeLED.r = 0;
-        sensors.eyeLED.g = 0;
-        sensors.eyeLED.b = 0;
+        sensors.eyeLED.RGB = 0;
 
         // Buttons
         sensors.buttons.left = 0;
@@ -117,7 +120,7 @@ namespace darwin {
 
         for (int i = 0; i < 20; ++i) {
             // Get a reference to the servo we are populating
-            DarwinSensors::Servo& servo = sensors.servo[i];
+            DarwinSensors::Servo& servo = utility::platform::darwin::getDarwinServo(static_cast<ServoID>(i), sensors);
 
             // Error code
             servo.errorFlags = 0;
@@ -173,8 +176,19 @@ namespace darwin {
         on<Every<UPDATE_FREQUENCY, Per<std::chrono::seconds>>, Optional<With<Sensors>>, Single>()
         .then([this] (std::shared_ptr<const Sensors> previousSensors) {
             if (previousSensors) {
-                auto rightFootPose = previousSensors->forwardKinematics.find(ServoID::R_ANKLE_ROLL)->second;
-                auto leftFootPose = previousSensors->forwardKinematics.find(ServoID::L_ANKLE_ROLL)->second;
+                Transform3D rightFootPose;
+                Transform3D leftFootPose;
+                for (const auto& entry : previousSensors->forwardKinematics)
+                {
+                    if (entry.servoID == ServoID::R_ANKLE_ROLL)
+                    {
+                        rightFootPose = convert<double, 4, 4>(entry.kinematics);
+                    }
+                    if (entry.servoID == ServoID::L_ANKLE_ROLL)
+                    {
+                        leftFootPose = convert<double, 4, 4>(entry.kinematics);
+                    }
+                }
                 arma::vec3 torsoFromRightFoot = -rightFootPose.rotation().i() * rightFootPose.translation();
                 arma::vec3 torsoFromLeftFoot = -leftFootPose.rotation().i() * leftFootPose.translation();
                 // emit(graph("torsoFromRightFoot", torsoFromRightFoot));
@@ -193,7 +207,7 @@ namespace darwin {
 
             for (int i = 0; i < 20; ++i) {
 
-                auto& servo = sensors.servo[i];
+                auto& servo = utility::platform::darwin::getDarwinServo(static_cast<ServoID>(i), sensors);
                 float movingSpeed = servo.movingSpeed == 0 ? 0.1 : servo.movingSpeed / UPDATE_FREQUENCY;
                 movingSpeed = movingSpeed > 0.1 ? 0.1 : movingSpeed;
 
@@ -261,7 +275,7 @@ namespace darwin {
             for (auto& command : commands) {
 
                 // Calculate our moving speed
-                float diff = utility::math::angle::difference(command.position, sensors.servo[command.id].presentPosition);
+                float diff = utility::math::angle::difference(command.position, utility::platform::darwin::getDarwinServo(static_cast<ServoID>(command.id), sensors).presentPosition);
                 NUClear::clock::duration duration = command.time - NUClear::clock::now();
 
                 float speed;
@@ -273,7 +287,7 @@ namespace darwin {
                 }
 
                 // Set our variables
-                auto& servo = sensors.servo[command.id];
+                auto& servo = utility::platform::darwin::getDarwinServo(static_cast<ServoID>(command.id), sensors);
                 servo.movingSpeed = speed;
                 servo.goalPosition = utility::math::angle::normalizeAngle(command.position);
                 // std::cout << __LINE__ << std::endl;
@@ -312,7 +326,7 @@ namespace darwin {
         sensors.fsr.right.fsr4 = down ? 1 : 0;
 
         // Set the knee loads to something huge to be foot down
-        sensors.servo[ServoID::R_KNEE].load = down ? 1.0 : -1.0;
+        utility::platform::darwin::getDarwinServo(ServoID::R_KNEE, sensors).load = down ? 1.0 : -1.0;
 
         // Centre
         sensors.fsr.right.centreX = down ? 1 : std::numeric_limits<double>::quiet_NaN();
@@ -327,7 +341,7 @@ namespace darwin {
         sensors.fsr.left.fsr4 = down ? 1 : 0;
 
         // Set the knee loads to something huge to be foot down
-        sensors.servo[ServoID::L_KNEE].load = down ? 1.0 : -1.0;
+        utility::platform::darwin::getDarwinServo(ServoID::L_KNEE, sensors).load = down ? 1.0 : -1.0;
 
         // Centre
         sensors.fsr.left.centreX = down ? 1 : std::numeric_limits<double>::quiet_NaN();

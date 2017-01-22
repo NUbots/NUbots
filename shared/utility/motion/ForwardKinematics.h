@@ -33,19 +33,19 @@
 #include "utility/input/ServoID.h"
 #include "utility/support/eigen_armadillo.h"
 
-#include "message/input/proto/Sensors.h"
+#include "message/input/Sensors.h"
 
-#include "message/motion/proto/KinematicsModels.h"
+#include "message/motion/KinematicsModels.h"
 
 namespace utility {
 namespace motion {
 namespace kinematics {
 
-    using LimbID  = message::behaviour::proto::Subsumption::Limb::Value;
-    using ServoID = message::input::proto::Sensors::ServoID::Value;
-    using message::input::proto::Sensors;
-    using message::motion::proto::KinematicsModel;
-    using BodySide = message::motion::proto::BodySide::Value;
+    using LimbID  = message::behaviour::Subsumption::Limb::Value;
+    using ServoID = message::input::Sensors::ServoID::Value;
+    using message::input::Sensors;
+    using message::motion::KinematicsModel;
+    using BodySide = message::motion::BodySide::Value;
  
 
     inline std::map<ServoID, utility::math::matrix::Transform3D> calculateHeadJointPosition(const KinematicsModel& model, const float& HEAD_PITCH, const float& HEAD_YAW, ServoID servoID){
@@ -319,7 +319,7 @@ namespace kinematics {
     /*! @brief Adds up the mass vectors stored in the robot model and normalises the resulting position
         @return [x_com, y_com, z_com, total_mass] relative to the torso basis
     */
-    inline arma::vec4 calculateCentreOfMass(const KinematicsModel& model, const std::vector<message::input::proto::Sensors::ServoIDKinematicsMap>& jointPositions, bool includeTorso){
+    inline arma::vec4 calculateCentreOfMass(const KinematicsModel& model, const std::vector<message::input::Sensors::ServoIDKinematicsMap>& jointPositions, bool includeTorso){
         arma::vec4 totalMassVector = arma::zeros(4);
 
         for(auto& joint : jointPositions){

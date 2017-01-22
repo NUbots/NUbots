@@ -20,16 +20,16 @@
 #ifndef UTILITY_INPUT_LIMBID_H
 #define UTILITY_INPUT_LIMBID_H
 
-#include "message/behaviour/proto/Subsumption.h"
-#include "message/input/proto/Sensors.h"
+#include "message/behaviour/Subsumption.h"
+#include "message/input/Sensors.h"
 
 namespace utility {
     namespace input {
         //LimbID is a higher level of ServoID (see ServoID.h),
         //which contains all the constituent servos (e.g. An arm contains shoulder (pitch + roll)) and elbow.
 
-        using LimbID  = message::behaviour::proto::Subsumption::Limb::Value;
-        using ServoID = message::input::proto::Sensors::ServoID::Value;
+        using LimbID  = message::behaviour::Subsumption::Limb::Value;
+        using ServoID = message::input::Sensors::ServoID::Value;
 
         inline std::set<ServoID> servosForLimb(const LimbID& limb) {
             switch(limb) {

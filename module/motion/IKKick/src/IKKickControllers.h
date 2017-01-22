@@ -20,15 +20,18 @@
 #ifndef MODULES_MOTION_IKKICKCONTROLLERS_H
 #define MODULES_MOTION_IKKICKCONTROLLERS_H
 
-#include "utility/math/matrix/Transform3D.h"
-#include "utility/support/yaml_armadillo.h"
-#include "message/input/Sensors.h"
-#include "message/input/LimbID.h"
-#include "extension/Configuration.h"
-#include "message/input/ServoID.h"
-#include "message/motion/KinematicsModels.h"
-#include <armadillo>
 #include <nuclear>
+#include <armadillo>
+
+#include "extension/Configuration.h"
+
+#include "message/behaviour/Subsumption.h"
+#include "message/input/Sensors.h"
+#include "message/motion/KinematicsModels.h"
+
+#include "utility/math/matrix/Transform3D.h"
+#include "utility/support/eigen_armadillo.h"
+#include "utility/support/yaml_armadillo.h"
 
 namespace module{
 namespace motion{
@@ -82,15 +85,13 @@ namespace motion{
 			bool stable(){return i >= int(frames.size()-2);}
 		};
 
-
-
 		class SixDOFFootController{
 			protected:
 				MotionStage stage = MotionStage::READY;
 				bool stable = false;
 
 				//State variables
-				message::input::LimbID supportFoot;
+				message::behaviour::Subsumption::Limb::Value supportFoot;
 
 				float forward_duration;
 				float return_duration;
@@ -112,10 +113,10 @@ namespace motion{
 					, motionStartTime() {}
 				virtual ~SixDOFFootController() = default;
 
-				virtual void computeStartMotion(const message::motion::kinematics::KinematicsModel& kinematicsModel, const message::input::Sensors& sensors) = 0;
+				virtual void computeStartMotion(const message::motion::KinematicsModel& kinematicsModel, const message::input::Sensors& sensors) = 0;
 				virtual void computeStopMotion(const message::input::Sensors& sensors) = 0;
 
-				void start(const message::motion::kinematics::KinematicsModel& kinematicsModel, const message::input::Sensors& sensors){
+				void start(const message::motion::KinematicsModel& kinematicsModel, const message::input::Sensors& sensors){
 					if(stage == MotionStage::READY){
         				anim.reset();
 						stage = MotionStage::RUNNING;
@@ -141,7 +142,7 @@ namespace motion{
 				void reset()		{stage = MotionStage::READY; stable = false; anim.reset();}
 
 
-				void setKickParameters(message::input::LimbID supportFoot_, arma::vec3 ballPosition_, arma::vec3 goalPosition_) {
+				void setKickParameters(message::behaviour::Subsumption::Limb::Value supportFoot_, arma::vec3 ballPosition_, arma::vec3 goalPosition_) {
 					supportFoot = supportFoot_;
 					ballPosition = ballPosition_;
 					goalPosition = goalPosition_;
@@ -149,12 +150,22 @@ namespace motion{
 				}
 
 				utility::math::matrix::Transform3D getTorsoPose(const message::input::Sensors& sensors) {
-			        // Get our foot positions
-			        auto leftFoot = sensors.forwardKinematics.find(message::input::ServoID::L_ANKLE_ROLL)->second;
-			        auto rightFoot = sensors.forwardKinematics.find(message::input::ServoID::R_ANKLE_ROLL)->second;
-
 			        // Find position vector from support foot to torso in support foot coordinates.
-		        	return supportFoot == message::input::LimbID::LEFT_LEG ? leftFoot.i() : rightFoot.i();
+			        for (const auto& entry : sensors.forwardKinematics)
+			        {
+			        	if ((supportFoot == message::behaviour::Subsumption::Limb::Value::LEFT_LEG) && 
+			        		(entry.servoID == message::input::Sensors::ServoID::Value::L_ANKLE_ROLL))
+			        	{
+			        		return utility::math::matrix::Transform3D(convert<double, 4, 4>(entry.kinematics)).i();
+			        	}
+			        	if ((supportFoot == message::behaviour::Subsumption::Limb::Value::RIGHT_LEG) && 
+			        		(entry.servoID == message::input::Sensors::ServoID::Value::R_ANKLE_ROLL))
+			        	{
+			        		return utility::math::matrix::Transform3D(convert<double, 4, 4>(entry.kinematics)).i();
+			        	}
+			        }
+
+			        return utility::math::matrix::Transform3D();
 		        }
 
 				utility::math::matrix::Transform3D getFootPose(const message::input::Sensors& sensors) {
@@ -168,10 +179,10 @@ namespace motion{
 						result = utility::math::matrix::Transform3D::interpolate(anim.previousFrame().pose,anim.currentFrame().pose,alpha);
 
 						bool servosAtGoal = true;
-						for (auto& servo : sensors.servos){
+						for (auto& servo : sensors.servo){
 							if(    int(servo.id) >= 6    //R_HIP_YAW
 								&& int(servo.id) <= 17){ //L_ANKLE_ROLL
-								servosAtGoal = servosAtGoal && std::fabs(servo.goalPosition - servo.presentPosition) < servo_angle_threshold;
+								servosAtGoal = servosAtGoal && std::fabs(servo.goal_position - servo.present_position) < servo_angle_threshold;
 							}
 						}
 
@@ -189,7 +200,7 @@ namespace motion{
 		        	return result;
 				}
 
-				virtual void configure(const extension::Configuration& config) = 0;
+				virtual void configure(const ::extension::Configuration& config) = 0;
 		};
 
 		class KickBalancer : public SixDOFFootController{
@@ -201,8 +212,8 @@ namespace motion{
 			float adjustment = 0.011;
 
 		public:
-			virtual void configure(const extension::Configuration& config);
-			virtual void computeStartMotion(const message::motion::kinematics::KinematicsModel& kinematicsModel, const message::input::Sensors& sensors);
+			virtual void configure(const ::extension::Configuration& config);
+			virtual void computeStartMotion(const message::motion::KinematicsModel& kinematicsModel, const message::input::Sensors& sensors);
 			virtual void computeStopMotion(const message::input::Sensors& sensors);
 
 		};
@@ -234,8 +245,8 @@ namespace motion{
 				, return_before_place_duration(0.0f)
 				, lift_before_windup_duration(0.0f) {}
 
-			virtual void configure(const extension::Configuration& config);
-			virtual void computeStartMotion(const message::motion::kinematics::KinematicsModel& kinematicsModel, const message::input::Sensors& sensors);
+			virtual void configure(const ::extension::Configuration& config);
+			virtual void computeStartMotion(const message::motion::KinematicsModel& kinematicsModel, const message::input::Sensors& sensors);
 			virtual void computeStopMotion(const message::input::Sensors& sensors);
 		};
 

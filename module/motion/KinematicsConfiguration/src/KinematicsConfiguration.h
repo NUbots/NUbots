@@ -25,7 +25,7 @@
 #include <yaml-cpp/yaml.h>
 
 #include "extension/Configuration.h"
-#include "message/motion/proto/KinematicsModels.h"
+#include "message/motion/KinematicsModels.h"
 
 namespace module {
 namespace motion {
@@ -37,11 +37,11 @@ namespace motion {
         explicit KinematicsConfiguration(std::unique_ptr<NUClear::Environment> environment);
 
     private:
-    	void configure (message::motion::proto::KinematicsModel& model, const ::extension::Configuration& objDarwinModel);
-        void configureLeg (message::motion::proto::KinematicsModel& model, const YAML::Node& objLeg);
-        void configureHead (message::motion::proto::KinematicsModel& model, const YAML::Node& objHead);
-        void configureArm (message::motion::proto::KinematicsModel& model, const YAML::Node& objArm);
-    	void configureMassModel (message::motion::proto::KinematicsModel& model, const YAML::Node& objMassModel);
+    	void configure (message::motion::KinematicsModel& model, const ::extension::Configuration& objDarwinModel);
+        void configureLeg (message::motion::KinematicsModel& model, const YAML::Node& objLeg);
+        void configureHead (message::motion::KinematicsModel& model, const YAML::Node& objHead);
+        void configureArm (message::motion::KinematicsModel& model, const YAML::Node& objArm);
+    	void configureMassModel (message::motion::KinematicsModel& model, const YAML::Node& objMassModel);
     };
 
 }

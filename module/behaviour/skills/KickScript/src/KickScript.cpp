@@ -16,16 +16,19 @@
  *
  * Copyright 2013 NUBots <nubots@nubots.net>
  */
-
-#include "KickScript.h"
 #include <nuclear>
 
-#include "message/input/ServoID.h"
-#include "message/motion/Script.h"
-#include "message/behaviour/Action.h"
-#include "message/behaviour/ServoCommand.h"
+#include "KickScript.h"
+
 #include "extension/Configuration.h"
+
+#include "message/behaviour/ServoCommand.h"
+#include "message/behaviour/Subsumption.h"
+#include "message/input/Sensors.h"
 #include "message/motion/WalkCommand.h"
+
+#include "utility/behaviour/Action.h"
+#include "utility/motion/Script.h"
 
 namespace module {
 namespace behaviour {
@@ -36,15 +39,15 @@ namespace skills {
 
     using extension::Configuration;
 
-    using message::input::LimbID;
-    using message::input::ServoID;
+    using LimbID  = message::behaviour::Subsumption::Limb::Value;
+    using ServoID = message::input::Sensors::ServoID::Value;
 
-    using message::motion::ExecuteScriptByName;
     using message::motion::KickScriptCommand;
     using message::motion::KickFinished;
 
-    using message::behaviour::RegisterAction;
-    using message::behaviour::ActionPriorites;
+    using utility::behaviour::RegisterAction;
+    using utility::behaviour::ActionPriorites;
+    using utility::motion::ExecuteScriptByName;
     
     KickScript::KickScript(std::unique_ptr<NUClear::Environment> environment)
         : Reactor(std::move(environment))
@@ -78,7 +81,7 @@ namespace skills {
                     valid = false;
                 }
             } else {
-                NUClear::log<NUClear::WARN>("Cannot kick with limb: ", uint(leg));
+                NUClear::log<NUClear::WARN>("Cannot kick with limb: ", std::string(leg));
                 updatePriority(0);
                 valid = false;
             }
@@ -90,7 +93,7 @@ namespace skills {
         });
 
         on<Trigger<ExecuteKick>>().then([this] {
-            auto direction = kickCommand.direction;
+            // auto direction = kickCommand.direction;
             auto leg = kickCommand.leg;
 
             if (leg == LimbID::RIGHT_LEG) {

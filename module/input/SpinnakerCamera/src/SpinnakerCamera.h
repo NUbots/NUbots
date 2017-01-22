@@ -6,7 +6,7 @@
 #include <Spinnaker.h>
 #include <SpinGenApi/SpinnakerGenApi.h>
 
-#include "message/input/proto/Image.h"
+#include "message/input/Image.h"
 
 #include "utility/vision/fourcc.h"
 
@@ -38,7 +38,7 @@ namespace input {
             // We have a complete image, emit it.
             if (!image->IsIncomplete())
             {
-                auto msg          = std::make_unique<message::input::proto::Image>();
+                auto msg          = std::make_unique<message::input::Image>();
                 msg->timestamp    = NUClear::clock::time_point(std::chrono::nanoseconds(image->GetTimeStamp()));
                 msg->format       = static_cast<uint32_t>(fourcc);
                 msg->dimensions   << image->GetWidth(), image->GetHeight();

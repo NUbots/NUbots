@@ -19,14 +19,14 @@
 
 #include "NUbugger.h"
 
-#include "message/input/proto/Sensors.h"
+#include "message/input/Sensors.h"
 
 #include "utility/support/eigen_armadillo.h"
 
 namespace module {
 namespace support {
 
-    using message::input::proto::Sensors;
+    using message::input::Sensors;
 
     void NUbugger::provideSensors() {
 

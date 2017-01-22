@@ -18,7 +18,9 @@
  */
 
 #include "NatNet.h"
+
 #include "Parse.h"
+
 #include <cppformat/format.h>
 
 #include "extension/Configuration.h"
@@ -27,6 +29,8 @@ namespace module {
 namespace input {
 
     using extension::Configuration;
+
+    using message::input::MotionCapture;
 
     NatNet::NatNet(std::unique_ptr<NUClear::Environment> environment)
         : Reactor(std::move(environment))
@@ -59,7 +63,7 @@ namespace input {
 
                 // Create a listening UDP port for commands
                 std::tie(commandHandle, std::ignore, commandFd) = on<UDP>().then("NatNet Command", [this] (UDP::Packet packet) {
-                    process(packet.data);
+                    process(packet.payload);
                 });
 
                 // Create a listening UDP port for data
@@ -68,7 +72,7 @@ namespace input {
                     // Test if we are "connected" to this remote
                     // And if we are we can use the data
                     if (remote == packet.remote.address && version != 0) {
-                        process(packet.data);
+                        process(packet.payload);
                     }
                     // We have started connecting but haven't received a return ping
                     else if (remote == packet.remote.address && version == 0) {
@@ -133,7 +137,8 @@ namespace input {
         mocap->markerSets = ReadData<std::vector<MotionCapture::MarkerSet>>::read(ptr, version);
 
         // Read the free floating markers
-        auto freeMarkers = ReadData<std::vector<arma::fvec3>>::read(ptr, version);
+        auto freeMarkers = ReadData<std::vector<Eigen::Matrix<float, 3, 1>>>::read(ptr, version);
+        mocap->markers.reserve(freeMarkers.size());
         // Build markers
         for (auto position : freeMarkers) {
             MotionCapture::Marker marker;
@@ -216,9 +221,9 @@ namespace input {
                 });
 
                 // Get a pointer to our parent if it exists and is not us
-                rigidBody.parent = parent->id == rigidBody.id         ? nullptr
-                                 : parent == mocap->rigidBodies.end() ? nullptr
-                                 : std::make_shared<message::input::MotionCapture::RigidBody>(*parent);
+                rigidBody.parent = parent->id == rigidBody.id             ?  0
+                                 : parent     == mocap->rigidBodies.end() ? -1
+                                 : std::distance(mocap->rigidBodies.begin(), parent);
             }
             // We need to update our models
             else {
@@ -234,9 +239,9 @@ namespace input {
         }
 
         // Now we reverse link all our rigid bodies
-        for (auto& rigidBody : mocap->rigidBodies) {
-            if(rigidBody.parent) {
-                rigidBody.parent->children.push_back(&rigidBody);
+        for (auto rigidBody = mocap->rigidBodies.begin(); rigidBody != mocap->rigidBodies.end(); rigidBody++) {
+            if (rigidBody->parent > 0) {
+                mocap->rigidBodies.at(rigidBody->parent).children.push_back(std::distance(mocap->rigidBodies.begin(), rigidBody));
             }
         }
 
@@ -259,9 +264,9 @@ namespace input {
                             return rb.id == boneModel->second.id;
                         });
 
-                        bone.parent = parent->id == bone.id          ? nullptr
-                                    : parent == skeleton.bones.end() ? nullptr
-                                    : std::make_shared<message::input::MotionCapture::RigidBody>(*parent);
+                        bone.parent = parent->id == bone.id              ?  0
+                                    : parent     == skeleton.bones.end() ? -1
+                                    : std::distance(skeleton.bones.begin(), parent);
                     }
                     // We need to update our models
                     else {
@@ -289,9 +294,9 @@ namespace input {
             }
 
             // Now we reverse link all our bones
-            for (auto& rigidBody : skeleton.bones) {
-                if(rigidBody.parent) {
-                    rigidBody.parent->children.push_back(&rigidBody);
+            for (auto rigidBody = skeleton.bones.begin(); rigidBody != skeleton.bones.end(); rigidBody++) {
+                if (rigidBody->parent > 0) {
+                    skeleton.bones.at(rigidBody->parent).children.push_back(std::distance(skeleton.bones.begin(), rigidBody));
                 }
             }
         }

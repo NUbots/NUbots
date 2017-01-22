@@ -144,7 +144,7 @@ namespace module {
                             auto* servo = s->add_servo();
 
                             servo->set_error_flags(sensor->servo[i].errorFlags);
-                            servo->set_id(static_cast<message::input::proto::Sensors_ServoID>(i));
+                            servo->set_id(static_cast<message::input::Sensors_ServoID>(i));
                             servo->set_enabled(sensor->servo[i].torqueEnabled);
                             servo->set_p_gain(sensor->servo[i].pGain);
                             servo->set_i_gain(sensor->servo[i].iGain);

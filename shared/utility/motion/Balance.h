@@ -25,9 +25,9 @@
 #include "utility/math/matrix/Rotation3D.h"
 #include "utility/math/geometry/UnitQuaternion.h"
 
-#include "message/behaviour/proto/Subsumption.h"
-#include "message/input/proto/Sensors.h"
-#include "message/motion/proto/KinematicsModels.h"
+#include "message/behaviour/Subsumption.h"
+#include "message/input/Sensors.h"
+#include "message/motion/KinematicsModels.h"
 #include "utility/input/LimbID.h"
 #include "utility/input/ServoID.h"
 #include "extension/Configuration.h"
@@ -68,7 +68,7 @@ namespace motion {
     public:
         Balancer() : lastErrorQuaternion(), lastBalanceTime() {}
         void configure(const YAML::Node& config);
-        void balance(const message::motion::proto::KinematicsModel& hip, utility::math::matrix::Transform3D& footToTorso, const message::behaviour::proto::Subsumption::Limb::Value& leg, const message::input::proto::Sensors& sensors);
+        void balance(const message::motion::KinematicsModel& hip, utility::math::matrix::Transform3D& footToTorso, const message::behaviour::Subsumption::Limb::Value& leg, const message::input::Sensors& sensors);
     };
 
 

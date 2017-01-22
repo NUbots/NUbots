@@ -22,9 +22,9 @@
 
 #include <nuclear>
 #include <armadillo>
-#include "message/support/nubugger/proto/DataPoint.h"
-#include "message/support/nubugger/proto/DrawObjects.h"
-#include "message/vision/proto/VisionObjects.h"
+#include "message/support/nubugger/DataPoint.h"
+#include "message/support/nubugger/DrawObjects.h"
+#include "message/vision/VisionObjects.h"
 #include "utility/math/matrix/Rotation3D.h"
 #include "utility/math/geometry/RotatedRectangle.h"
 #include "utility/math/geometry/Circle.h"
@@ -37,12 +37,12 @@ namespace nubugger {
     
     using utility::math::geometry::Circle;
     using utility::math::matrix::Transform2D;
-    using message::support::nubugger::proto::DrawObject;
-    using message::support::nubugger::proto::DrawObjects;
+    using message::support::nubugger::DrawObject;
+    using message::support::nubugger::DrawObjects;
 
     namespace {
 
-        using message::support::nubugger::proto::DataPoint;
+        using message::support::nubugger::DataPoint;
         using utility::math::matrix::Rotation3D;
 
         constexpr float TIMEOUT = 2.5;
@@ -82,7 +82,7 @@ namespace nubugger {
     }
 
     template<typename... Values>
-    inline std::unique_ptr<message::support::nubugger::proto::DataPoint> graph(std::string label, Values... values) {
+    inline std::unique_ptr<message::support::nubugger::DataPoint> graph(std::string label, Values... values) {
         auto dataPoint = std::make_unique<DataPoint>();
         dataPoint->label = label;
         dataPoint->type = DataPoint::Type::Value::FLOAT_LIST;
@@ -90,7 +90,7 @@ namespace nubugger {
         return dataPoint;
     }
 
-    inline std::unique_ptr<message::support::nubugger::proto::DataPoint> graph(std::string label, Rotation3D rotation) {
+    inline std::unique_ptr<message::support::nubugger::DataPoint> graph(std::string label, Rotation3D rotation) {
         auto dataPoint = std::make_unique<DataPoint>();
         dataPoint->label = label;
         dataPoint->type = DataPoint::Type::Value::ROTATION_3D;
@@ -361,12 +361,12 @@ namespace nubugger {
         return utility::nubugger::drawPolyline(name, positions, line_width, colour, timeout);
     }
 
-    inline std::unique_ptr<std::vector<message::vision::proto::Line>> drawVisionLines(std::vector<std::tuple<arma::ivec2, arma::ivec2, arma::vec4>> lines) {
+    inline std::unique_ptr<std::vector<message::vision::Line>> drawVisionLines(std::vector<std::tuple<arma::ivec2, arma::ivec2, arma::vec4>> lines) {
 
-        auto msg = std::make_unique<std::vector<message::vision::proto::Line>>();
+        auto msg = std::make_unique<std::vector<message::vision::Line>>();
 
         for (const auto& line : lines) {
-            message::vision::proto::Line objLine;
+            message::vision::Line objLine;
             objLine.visObject.camera_id = 0;    // TODO
             objLine.start  = convert<int,    2>(std::get<0>(line));
             objLine.end    = convert<int,    2>(std::get<1>(line));
@@ -377,7 +377,7 @@ namespace nubugger {
         return std::move(msg);
     }
 
-    inline std::unique_ptr<std::vector<message::vision::proto::Line>> drawVisionLines(std::vector<std::pair<arma::ivec2, arma::ivec2>> lines, arma::vec4 colour = arma::vec4({1, 1, 1, 1})) {
+    inline std::unique_ptr<std::vector<message::vision::Line>> drawVisionLines(std::vector<std::pair<arma::ivec2, arma::ivec2>> lines, arma::vec4 colour = arma::vec4({1, 1, 1, 1})) {
 
         std::vector<std::tuple<arma::ivec2, arma::ivec2, arma::vec4>> colouredLines;
         colouredLines.reserve(lines.size());
@@ -389,7 +389,7 @@ namespace nubugger {
         return drawVisionLines(colouredLines);
     }
 
-    inline std::unique_ptr<std::vector<message::vision::proto::Line>> drawVisionLine(arma::ivec2 start, arma::ivec2 end, arma::vec4 colour = arma::vec4({1, 1, 1, 1})) {
+    inline std::unique_ptr<std::vector<message::vision::Line>> drawVisionLine(arma::ivec2 start, arma::ivec2 end, arma::vec4 colour = arma::vec4({1, 1, 1, 1})) {
         
         return drawVisionLines({std::make_tuple(start, end, colour)});
     }

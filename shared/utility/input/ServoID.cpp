@@ -22,7 +22,7 @@
 namespace utility {
     namespace input {
         
-        using ServoID = message::input::proto::Sensors::ServoID::Value;
+        using ServoID = message::input::Sensors::ServoID::Value;
 
         ServoID idFromString(const std::string& str) {
 

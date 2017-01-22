@@ -22,7 +22,7 @@
 #include <random>
 
 #include "message/platform/darwin/DarwinSensors.h"
-#include "message/input/proto/Sensors.h"
+#include "message/input/Sensors.h"
 #include "utility/nubugger/NUhelpers.h"
 #include "utility/input/ServoID.h"
 
@@ -35,9 +35,9 @@ namespace debug {
     using utility::nubugger::drawSphere;
     using message::platform::darwin::DarwinSensors;
     using std::chrono::milliseconds;
-    using message::input::proto::Sensors;
-    using ServoID = message::input::proto::Sensors::ServoID::Value;
-    using message::support::nubugger::proto::DrawObjects;
+    using message::input::Sensors;
+    using ServoID = message::input::Sensors::ServoID::Value;
+    using message::support::nubugger::DrawObjects;
 
     NUbugger::NUbugger(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
 

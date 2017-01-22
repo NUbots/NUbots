@@ -22,7 +22,7 @@
 
 #include <string>
 
-#include "message/input/proto/Sensors.h"
+#include "message/input/Sensors.h"
 
 namespace utility {
     namespace input {
@@ -32,9 +32,9 @@ namespace utility {
             LEFT = 1
         };
 
-        const std::string stringFromId(const message::input::proto::Sensors::ServoID::Value& id);
-        message::input::proto::Sensors::ServoID::Value idFromString(const std::string& str);
-        message::input::proto::Sensors::ServoID::Value idFromPartialString(const std::string& str, const ServoSide& side);
+        const std::string stringFromId(const message::input::Sensors::ServoID::Value& id);
+        message::input::Sensors::ServoID::Value idFromString(const std::string& str);
+        message::input::Sensors::ServoID::Value idFromPartialString(const std::string& str, const ServoSide& side);
     }
 }
 

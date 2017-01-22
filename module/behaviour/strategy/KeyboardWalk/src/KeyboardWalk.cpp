@@ -25,9 +25,9 @@
 #include <cppformat/format.h>
 
 #include "utility/behaviour/MotionCommand.h"
-#include "message/behaviour/proto/MotionCommand.h"
-#include "message/motion/proto/HeadCommand.h"
-#include "message/motion/proto/KickCommand.h"
+#include "message/behaviour/MotionCommand.h"
+#include "message/motion/HeadCommand.h"
+#include "message/motion/KickCommand.h"
 #include "utility/math/matrix/Transform2D.h"
 
 namespace module {
@@ -35,9 +35,9 @@ namespace behaviour {
 namespace strategy {
 
     using NUClear::message::LogMessage;
-    using message::behaviour::proto::MotionCommand;
-    using message::motion::proto::HeadCommand;
-    using message::motion::proto::KickCommand;
+    using message::behaviour::MotionCommand;
+    using message::motion::HeadCommand;
+    using message::motion::KickCommand;
     using utility::math::matrix::Transform2D;
 
     KeyboardWalk::KeyboardWalk(std::unique_ptr<NUClear::Environment> environment)

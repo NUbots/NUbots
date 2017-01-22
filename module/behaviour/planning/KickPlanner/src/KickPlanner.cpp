@@ -19,52 +19,54 @@
 
 #include "KickPlanner.h"
 
-#include "message/motion/WalkCommand.h"
-#include "message/localisation/FieldObject.h"
 #include "extension/Configuration.h"
-#include "message/behaviour/Action.h"
-#include "message/behaviour/ServoCommand.h"
+
 #include "message/behaviour/KickPlan.h"
-#include "message/vision/VisionObjects.h"
-#include "message/support/FieldDescription.h"
-#include "message/input/LimbID.h"
-
-#include "utility/support/yaml_armadillo.h"
-#include "utility/math/coordinates.h"
-#include "utility/localisation/transform.h"
-#include "utility/nubugger/NUhelpers.h"
-#include "utility/math/matrix/Transform3D.h"
+#include "message/behaviour/ServoCommand.h"
+#include "message/behaviour/Subsumption.h"
+#include "message/localisation/FieldObject.h"
 #include "message/motion/KinematicsModels.h"
+#include "message/motion/WalkCommand.h"
+#include "message/support/FieldDescription.h"
+#include "message/vision/VisionObjects.h"
+
+#include "utility/behaviour/Action.h"
+#include "utility/localisation/transform.h"
+#include "utility/math/coordinates.h"
+#include "utility/math/matrix/Transform3D.h"
 #include "utility/motion/InverseKinematics.h"
-
-
-using message::input::Sensors;
-using message::input::LimbID;
-using message::localisation::Ball;
-using message::localisation::Self;
-using message::motion::IKKickParams;
-using message::motion::KickCommand;
-using message::motion::KickCommandType;
-using message::motion::KickScriptCommand;
-using message::motion::KickPlannerConfig;
-using extension::Configuration;
-using message::input::LimbID;
-using message::behaviour::KickPlan;
-using message::behaviour::WantsToKick;
-using message::behaviour::KickType;
-using message::support::FieldDescription;
-
-using utility::math::matrix::Transform3D;
-using utility::motion::kinematics::legPoseValid;
-using utility::math::coordinates::sphericalToCartesian;
-using utility::localisation::transform::WorldToRobotTransform;
-using utility::localisation::transform::RobotToWorldTransform;
-using utility::nubugger::graph;
-using message::motion::kinematics::KinematicsModel;
+#include "utility/nubugger/NUhelpers.h"
+#include "utility/support/eigen_armadillo.h"
+#include "utility/support/yaml_armadillo.h"
 
 namespace module {
 namespace behaviour {
 namespace planning {
+
+    using extension::Configuration;
+
+    using LimbID  = message::behaviour::Subsumption::Limb::Value;
+    using ServoID = message::input::Sensors::ServoID::Value;
+    using message::behaviour::KickPlan;
+    using KickType = message::behaviour::KickPlan::KickType;
+    using message::behaviour::WantsToKick;
+    using message::localisation::Ball;
+    using message::localisation::Self;
+    using message::input::Sensors;
+    using message::motion::IKKickParams;
+    using message::motion::KickCommand;
+    using KickCommandType = message::motion::KickCommandType;
+    using message::motion::KickScriptCommand;
+    using message::motion::KickPlannerConfig;
+    using message::motion::KinematicsModel;
+    using message::support::FieldDescription;
+
+    using utility::localisation::transform::RobotToWorldTransform;
+    using utility::localisation::transform::WorldToRobotTransform;
+    using utility::math::matrix::Transform3D;
+    using utility::math::coordinates::sphericalToCartesian;
+    using utility::motion::kinematics::legPoseValid;
+    using utility::nubugger::graph;
 
     KickPlanner::KickPlanner(std::unique_ptr<NUClear::Environment> environment)
         : Reactor(std::move(environment)), cfg(), ball_last_measurement_time(NUClear::clock::now()),lastTimeValid(NUClear::clock::now()) {
@@ -101,7 +103,7 @@ namespace planning {
             // arma::vec2 kickTarget = WorldToRobotTransform(self.position, self.heading, kickPlan.target);
             arma::vec3 ballPosition = {100,0,0};//too far to kick
             if(ball.size()>0){
-                ballPosition = {ball[0].position[0], ball[0].position[1], fd.ball_radius};
+                ballPosition = {ball[0].locObject.position[0], ball[0].locObject.position[1], fd.ball_radius};
                 ball_last_measurement_time = now;
             }
 
@@ -122,31 +124,31 @@ namespace planning {
                 && kickIsValid
                 && KickAngle < cfg.kick_forward_angle_limit) {
 
-                switch (kickPlan.kickType) {
+                switch (kickPlan.kickType.value) {
                     case KickType::IK_KICK:
                         NUClear::log("ik_kick");
                         if(ballPosition[1] > 0){
-                            emit(std::make_unique<KickCommand>(KickCommand({0.1,0.04,0}, {1, 0, 0}, KickCommandType::NORMAL )));
+                            emit(std::make_unique<KickCommand>(KickCommand(Eigen::Vector3d(0.1, 0.04, 0), Eigen::Vector3d(1.0, 0.0, 0.0), KickCommandType::NORMAL)));
                             emit(std::make_unique<WantsToKick>(true));
                         } else {
-                            emit(std::make_unique<KickCommand>(KickCommand({0.1,-0.04,0}, {1, 0, 0}, KickCommandType::NORMAL )));
+                            emit(std::make_unique<KickCommand>(KickCommand(Eigen::Vector3d(0.1, -0.04, 0), Eigen::Vector3d(1.0, 0.0, 0.0), KickCommandType::NORMAL)));
                             emit(std::make_unique<WantsToKick>(true));
                         }
                         break;
                     case KickType::SCRIPTED:
                         NUClear::log("scripted");
                         if(ballPosition[1] > 0){
-                            emit(std::make_unique<KickScriptCommand>(KickScriptCommand({{1, 0, 0}, LimbID::LEFT_LEG})));
+                            emit(std::make_unique<KickScriptCommand>(KickScriptCommand(Eigen::Vector3d(1.0, 0.0, 0.0), LimbID::LEFT_LEG)));
                             emit(std::make_unique<WantsToKick>(true));;
                         } else {
-                            emit(std::make_unique<KickScriptCommand>(KickScriptCommand({{1, 0, 0}, LimbID::RIGHT_LEG})));
+                            emit(std::make_unique<KickScriptCommand>(KickScriptCommand(Eigen::Vector3d(1.0, 0.0, 0.0), LimbID::RIGHT_LEG)));
                             emit(std::make_unique<WantsToKick>(true));;
                         }
                         break;
                     default: throw new std::runtime_error("KickPlanner: Invalid KickType");
                 }
             } else if(secondsSinceLastSeen > cfg.seconds_not_seen_limit || timeSinceValid > cfg.seconds_not_seen_limit){
-                emit(std::make_unique<WantsToKick>(WantsToKick{false}));
+                emit(std::make_unique<WantsToKick>(WantsToKick(false)));
             }
 
         });

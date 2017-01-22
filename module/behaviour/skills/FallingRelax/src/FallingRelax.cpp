@@ -23,9 +23,9 @@
 
 #include "extension/Configuration.h"
 
-#include "message/behaviour/proto/ServoCommand.h"
-#include "message/behaviour/proto/Subsumption.h"
-#include "message/input/proto/Sensors.h"
+#include "message/behaviour/ServoCommand.h"
+#include "message/behaviour/Subsumption.h"
+#include "message/input/Sensors.h"
 
 #include "utility/behaviour/Action.h"
 #include "utility/motion/Script.h"
@@ -41,12 +41,12 @@ namespace module {
 
             using extension::Configuration;
 
-            using message::input::proto::Sensors;
-            using ServoID = message::input::proto::Sensors::ServoID::Value;
+            using message::input::Sensors;
+            using ServoID = message::input::Sensors::ServoID::Value;
             using utility::motion::ExecuteScriptByName;
             using utility::behaviour::RegisterAction;
             using utility::behaviour::ActionPriorites;
-            using LimbID = message::behaviour::proto::Subsumption::Limb::Value;
+            using LimbID = message::behaviour::Subsumption::Limb::Value;
 
             FallingRelax::FallingRelax(std::unique_ptr<NUClear::Environment> environment)
                 : Reactor(std::move(environment))

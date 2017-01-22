@@ -19,7 +19,7 @@
 #ifndef UTILITY_BEHAVIOUR_MOTIONCOMMAND_H
 #define UTILITY_BEHAVIOUR_MOTIONCOMMAND_H
 
-#include "message/behaviour/proto/MotionCommand.h"
+#include "message/behaviour/MotionCommand.h"
 
 #include "utility/math/matrix/Transform2D.h"
 #include "utility/support/eigen_armadillo.h"
@@ -28,7 +28,7 @@ namespace utility {
 namespace behaviour {
 
     using utility::math::matrix::Transform2D;
-    using message::behaviour::proto::MotionCommand;
+    using message::behaviour::MotionCommand;
 
     inline MotionCommand StandStill() {
         MotionCommand cmd;

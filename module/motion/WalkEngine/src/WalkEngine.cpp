@@ -34,8 +34,7 @@ namespace motion
 /*=======================================================================================================*/
 //      UTILIZATION REFERENCE(S)
 /*=======================================================================================================*/
-    using message::input::LimbID;
-    using message::input::ServoID;
+    using ServoID = message::input::Sensors::ServoID::Value;
     using message::input::Sensors;
 
     using message::behaviour::ServoCommand;
@@ -61,13 +60,14 @@ namespace motion
     using message::motion::EnableFootMotion;
     using message::motion::DisableFootMotion;
     using message::motion::ServoTarget;
-    using message::motion::Script;
-    using message::motion::kinematics::KinematicsModel;
+    using message::motion::KinematicsModel;
     using utility::motion::kinematics::calculateLegJointsTeamDarwin; //TODO: advised to change to calculateLegJoints (no TeamDarwin)
 
     using message::support::SaveConfiguration;
+
     using extension::Configuration;
 
+    using utility::motion::Script;
     using utility::support::Expression;
 
     using utility::math::matrix::Transform2D;
@@ -112,8 +112,8 @@ namespace motion
         on<Trigger<WalkCommand>>().then([this] (const WalkCommand& walkCommand)
         {            
             if(DEBUG) { log<NUClear::TRACE>("WalkEngine - Trigger WalkCommand(0)"); }
-                setVelocity(walkCommand.command);  
-                emit(std::make_unique<NewWalkCommand>(getVelocity()));
+                setVelocity(convert<double, 3>(walkCommand.command));
+                emit(std::make_unique<NewWalkCommand>(convert<double, 3>(getVelocity())));
                 // Notify behavioural modules of current standstill...
                 emit(std::make_unique<WalkStarted>());
             if(DEBUG) { log<NUClear::TRACE>("WalkEngine - Trigger WalkCommand(1)"); }           
@@ -124,7 +124,7 @@ namespace motion
         {
             if(DEBUG) { log<NUClear::TRACE>("WalkEngine - Trigger StopCommand(0)"); }
                 // Emit zero velocity command to trigger final adjustment step...
-                emit(std::make_unique<NewWalkCommand>(Transform2D({0, 0, 0})));
+                emit(std::make_unique<NewWalkCommand>(convert<double, 3>(Transform2D({0, 0, 0}))));
                 // Notify behavioural modules of current standstill...
                 emit(std::make_unique<WalkStopped>());
                 emit(std::make_unique<std::vector<ServoCommand>>());
@@ -135,10 +135,10 @@ namespace motion
         handleUpdate = on<Trigger<BalanceBodyUpdate>>().then("Walk Engine - Received update (Balanced Robot Posture) Info", [this](const BalanceBodyUpdate& info)
         {
             if(DEBUG) { log<NUClear::TRACE>("WalkEngine - Trigger BalanceBodyUpdate(0)"); }
-                setLeftFootPosition(info.leftFoot);
-                setRightFootPosition(info.rightFoot);
-                setLArmPosition(info.armLPosition);
-                setRArmPosition(info.armRPosition);
+                setLeftFootPosition(convert<double, 4, 4>(info.leftFoot));
+                setRightFootPosition(convert<double, 4, 4>(info.rightFoot));
+                setLArmPosition(convert<double, 3>(info.armLPosition));
+                setRArmPosition(convert<double, 3>(info.armRPosition));
 
                 emit(graph("WE: Left  Foot Joint Position",    getLeftFootPosition()));   
                 emit(graph("WE: Right Foot Joint Position",   getRightFootPosition()));                    
@@ -148,9 +148,10 @@ namespace motion
         }).disable();
 
         // Update walk configuration with optimiser parameters...
-        on<Trigger<WalkOptimiserCommand>>().then([this] (const WalkOptimiserCommand& command) 
+        on<Trigger<WalkOptimiserCommand>>().then([this] (const WalkOptimiserCommand& /*command*/) 
         {
-            configure(command.walkConfig);
+            // TODO: FIXME
+            //configure(command.walkConfig);
             emit(std::make_unique<WalkConfigSaved>());
         });
 
@@ -200,7 +201,7 @@ namespace motion
         standScript.frames.push_back(frame);
         auto saveScript = std::make_unique<SaveConfiguration>();
         saveScript->path = "scripts/Stand.yaml";
-        saveScript->config = standScript;
+        // TODO: saveScript->config = standScript;
         emit(std::move(saveScript));
     }      
 /*=======================================================================================================*/
@@ -374,18 +375,18 @@ namespace motion
         gainRLeg = servos_gain["right_leg"].as<Expression>();
         gainHead = servos_gain["head"].as<Expression>();
   
-        for(ServoID i = ServoID(0); i < ServoID::NUMBER_OF_SERVOS; i = ServoID(int(i)+1))
+        for(ServoID i = ServoID(0); i < ServoID::NUMBER_OF_SERVOS; i = ServoID(int(i) + 1))
         {
             if(int(i) < 6)
             {
                 jointGains[i]   = gainRArm;              
-                i = ServoID(int(i)+1);
+                i = ServoID(int(i) + 1);
                 jointGains[i]   = gainLArm;               
             } 
             else if(int(i) < 18)
             {
                 jointGains[i]   = gainRLeg;               
-                i = ServoID(int(i)+1);
+                i = ServoID(int(i) + 1);
                 jointGains[i]   = gainLLeg;            
             }
             else
@@ -397,8 +398,8 @@ namespace motion
         for(auto& gain : servos["gains"])
         {
             float p = gain["p"].as<Expression>();
-            ServoID sr = message::input::idFromPartialString(gain["id"].as<std::string>(),message::input::ServoSide::RIGHT);
-            ServoID sl = message::input::idFromPartialString(gain["id"].as<std::string>(),message::input::ServoSide::LEFT);
+            ServoID sr = utility::input::idFromPartialString(gain["id"].as<std::string>(), utility::input::ServoSide::RIGHT);
+            ServoID sl = utility::input::idFromPartialString(gain["id"].as<std::string>(), utility::input::ServoSide::LEFT);
             servoControlPGains[sr] = p;
             servoControlPGains[sl] = p;
         }       

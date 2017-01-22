@@ -67,7 +67,7 @@ namespace utility {
                 OptimiserEstimate currentValues;
 
             public:
-                OptimiserSet(const ptimiserParameters& params)
+                OptimiserSet(const OptimiserParameters& params)
                 : estimator(params)
                 , sampler(params)
                 , startValues(params.initial)

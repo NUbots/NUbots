@@ -19,37 +19,30 @@
 
 #include "LUTClassifier.h"
 
-#include "QuexClassifier.h"
-
-#include "Lexer.hpp"
-
 #include "extension/Configuration.h"
 
-#include "message/input/proto/CameraParameters.h"
-#include "message/support/proto/SaveConfiguration.h"
-#include "message/vision/proto/LookUpTable.h"
+#include "message/input/CameraParameters.h"
+#include "message/support/SaveConfiguration.h"
+#include "message/vision/LookUpTable.h"
 
 #include "utility/support/eigen_armadillo.h"
 #include "utility/support/yaml_expression.h"
-#include "utility/vision/fourcc.h"
-#include "utility/vision/LookUpTable.h"
-#include "utility/vision/Vision.h"
 
 namespace module {
     namespace vision {
 
         using extension::Configuration;
 
-        using message::input::proto::Image;
-        using message::input::proto::Sensors;
-        using message::input::proto::CameraParameters;
-        using message::vision::proto::LookUpTable;
-        using message::vision::proto::SaveLookUpTable;
-        using message::vision::proto::ClassifiedImage;
-        using message::support::proto::SaveConfiguration;
+        using message::input::Image;
+        using message::input::Sensors;
+        using message::input::CameraParameters;
+        using message::vision::LookUpTable;
+        using message::vision::SaveLookUpTable;
+        using message::vision::ClassifiedImage;
+        using message::support::SaveConfiguration;
         using utility::support::Expression;
 
-        using ServoID = message::input::proto::Sensors::ServoID::Value;
+        using ServoID = message::input::Sensors::ServoID::Value;
         using Colour  = utility::vision::Colour;
         using Pixel   = utility::vision::Pixel;
 

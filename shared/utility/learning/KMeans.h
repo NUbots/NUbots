@@ -17,6 +17,9 @@
  *
  * Copyright 2013 NUBots <nubots@nubots.net>
  */
+#ifndef UTILITY_LEARNING_KMEANS_H
+#define UTILITY_LEARNING_KMEANS_H
+
 #include <yaml-cpp/yaml.h>
 #include <armadillo>
 
@@ -68,9 +71,4 @@ namespace learning {
 }
 }
 
-
-
-
-
-
-
+#endif

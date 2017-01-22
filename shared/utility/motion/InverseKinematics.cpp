@@ -23,10 +23,10 @@ namespace utility {
 namespace motion {
 namespace kinematics {
 
-    using LimbID  = message::behaviour::proto::Subsumption::Limb::Value;
-    using ServoID = message::input::proto::Sensors::ServoID::Value;
-    using message::input::proto::Sensors;
-    using message::motion::proto::KinematicsModel;
+    using LimbID  = message::behaviour::Subsumption::Limb::Value;
+    using ServoID = message::input::Sensors::ServoID::Value;
+    using message::input::Sensors;
+    using message::motion::KinematicsModel;
 
     /*! @brief Calculates the leg joints for a given input ankle position.
             The robot coordinate system has origin a distance DISTANCE_FROM_BODY_TO_HIP_JOINT above the midpoint of the hips.
@@ -252,7 +252,7 @@ namespace kinematics {
         return lookVectorSpherical.rows(1,2);
     }
 
-    arma::vec2 headAnglesToSeeGroundPoint(const arma::vec2& gpos, const message::input::proto::Sensors& sensors){
+    arma::vec2 headAnglesToSeeGroundPoint(const arma::vec2& gpos, const message::input::Sensors& sensors){
         arma::vec3 groundPos_ground = {gpos[0],gpos[1],0};
         return calculateHeadJointsToLookAt(groundPos_ground, convert<double, 4, 4>(sensors.orientationCamToGround), convert<double, 4, 4>(sensors.orientationBodyToGround));
     }

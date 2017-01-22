@@ -22,8 +22,8 @@
 
 #include "extension/Configuration.h"
 
-#include "message/input/proto/Sensors.h"
-#include "message/motion/proto/ServoTarget.h"
+#include "message/input/Sensors.h"
+#include "message/motion/ServoTarget.h"
 #include "message/platform/darwin/DarwinSensors.h"
 
 #include "utility/math/angle.h"
@@ -35,9 +35,9 @@ namespace module {
 namespace platform {
 namespace darwin {
 
-    using ServoID = message::input::proto::Sensors::ServoID::Value;
+    using ServoID = message::input::Sensors::ServoID::Value;
     using message::platform::darwin::DarwinSensors;
-    using message::motion::proto::ServoTarget;
+    using message::motion::ServoTarget;
     using extension::Configuration;
     using utility::support::Expression;
 

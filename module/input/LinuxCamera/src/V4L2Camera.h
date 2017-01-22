@@ -24,7 +24,7 @@
 #include <memory>
 #include <string>
 
-#include "message/input/proto/Image.h"
+#include "message/input/Image.h"
 #include "utility/vision/fourcc.h"
 #include "V4L2CameraSetting.h"
 
@@ -98,7 +98,7 @@ namespace module {
              *
              * @return a pointer to the latest image from the camera
              */
-            message::input::proto::Image getImage();
+            message::input::Image getImage();
 
             /**
              * @brief Sets up the camera at a given resolution

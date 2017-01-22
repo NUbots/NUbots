@@ -21,9 +21,9 @@
 
 #include "extension/Configuration.h"
 
-#include "message/behaviour/proto/ServoCommand.h"
-#include "message/behaviour/proto/Subsumption.h"
-#include "message/input/proto/Sensors.h"
+#include "message/behaviour/ServoCommand.h"
+#include "message/behaviour/Subsumption.h"
+#include "message/input/Sensors.h"
 #include "message/platform/darwin/DarwinSensors.h"
 
 #include "utility/behaviour/Action.h"
@@ -35,8 +35,8 @@ namespace tools {
 
     using extension::Configuration;
 
-    using ServoID = message::input::proto::Sensors::ServoID::Value;
-    using LimbID  = message::behaviour::proto::Subsumption::Limb::Value;
+    using ServoID = message::input::Sensors::ServoID::Value;
+    using LimbID  = message::behaviour::Subsumption::Limb::Value;
     using message::platform::darwin::ButtonMiddleDown;
     using message::platform::darwin::ButtonLeftDown;
 

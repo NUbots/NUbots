@@ -23,10 +23,10 @@
 
 #include "RansacGoalModel.h"
 
-#include "message/input/proto/CameraParameters.h"
-#include "message/vision/proto/ClassifiedImage.h"
-#include "message/vision/proto/VisionObjects.h"
-#include "message/vision/proto/LookUpTable.h"
+#include "message/input/CameraParameters.h"
+#include "message/vision/ClassifiedImage.h"
+#include "message/vision/VisionObjects.h"
+#include "message/vision/LookUpTable.h"
 
 #include "utility/math/geometry/Quad.h"
 #include "utility/math/geometry/Line.h"
@@ -47,7 +47,7 @@ namespace vision {
 
     using extension::Configuration;
 
-    using message::input::proto::CameraParameters;
+    using message::input::CameraParameters;
 
     using utility::math::coordinates::cartesianToSpherical;
 
@@ -65,10 +65,10 @@ namespace vision {
     using utility::math::vision::projectCamSpaceToScreen;
     using utility::math::vision::distanceToVerticalObject;
 
-    using message::vision::proto::LookUpTable;
-    using message::vision::proto::ClassifiedImage;
-    using SegmentClass = message::vision::proto::ClassifiedImage::SegmentClass::Value;
-    using message::vision::proto::Goal;
+    using message::vision::LookUpTable;
+    using message::vision::ClassifiedImage;
+    using SegmentClass = message::vision::ClassifiedImage::SegmentClass::Value;
+    using message::vision::Goal;
 
     // TODO the system is too generous with adding segments above and below the goals and makes them too tall, stop it
     // TODO the system needs to throw out the kinematics and height based measurements when it cannot be sure it saw the tops and bottoms of the goals

@@ -19,7 +19,7 @@
 
 #include "NUbugger.h"
 
-#include "message/support/nubugger/proto/DataPoint.h"
+#include "message/support/nubugger/DataPoint.h"
 
 #include "utility/time/time.h"
 
@@ -27,7 +27,7 @@ namespace module {
 namespace support {
     using utility::time::getUtcTimestamp;
 
-    using message::support::nubugger::proto::DataPoint;
+    using message::support::nubugger::DataPoint;
 
     void NUbugger::provideDataPoints() {
 

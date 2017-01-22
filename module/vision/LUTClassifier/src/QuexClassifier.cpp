@@ -28,10 +28,10 @@
 
 namespace module {
     namespace vision {
-        using message::input::proto::Image;
-        using message::vision::proto::LookUpTable;
-        using message::vision::proto::ClassifiedImage;
-        using SegmentClass = message::vision::proto::ClassifiedImage::SegmentClass::Value;
+        using message::input::Image;
+        using message::vision::LookUpTable;
+        using message::vision::ClassifiedImage;
+        using SegmentClass = message::vision::ClassifiedImage::SegmentClass::Value;
         using quex::Token;
         using FOURCC = utility::vision::FOURCC;
 

@@ -445,4 +445,4 @@ namespace utility {
     }
 }
 
-#endif //COMPANION_FOURCC_H
+#endif //UTILITY_VISION_FOURCC_H

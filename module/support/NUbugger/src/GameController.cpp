@@ -21,19 +21,19 @@
 
 namespace module {
 namespace support {
-    using TeamColour     = message::input::proto::GameEvents::TeamColour;
-    using Score          = message::input::proto::GameEvents::Score;
-    using GoalScored     = message::input::proto::GameEvents::GoalScored;
-    using Penalisation   = message::input::proto::GameEvents::Penalisation;
-    using Unpenalisation = message::input::proto::GameEvents::Unpenalisation;
-    using CoachMessage   = message::input::proto::GameEvents::CoachMessage;
-    using HalfTime       = message::input::proto::GameEvents::HalfTime;
-    using BallKickedOut  = message::input::proto::GameEvents::BallKickedOut;
-    using KickOffTeam    = message::input::proto::GameEvents::KickOffTeam;
-    using GamePhase      = message::input::proto::GameEvents::GamePhase;
-    using GameMode       = message::input::proto::GameEvents::GameMode;
-    using GameState      = message::input::proto::GameState;
-    using GameStateData  = message::input::proto::GameState::Data;
+    using TeamColour     = message::input::GameEvents::TeamColour;
+    using Score          = message::input::GameEvents::Score;
+    using GoalScored     = message::input::GameEvents::GoalScored;
+    using Penalisation   = message::input::GameEvents::Penalisation;
+    using Unpenalisation = message::input::GameEvents::Unpenalisation;
+    using CoachMessage   = message::input::GameEvents::CoachMessage;
+    using HalfTime       = message::input::GameEvents::HalfTime;
+    using BallKickedOut  = message::input::GameEvents::BallKickedOut;
+    using KickOffTeam    = message::input::GameEvents::KickOffTeam;
+    using GamePhase      = message::input::GameEvents::GamePhase;
+    using GameMode       = message::input::GameEvents::GameMode;
+    using GameState      = message::input::GameState;
+    using GameStateData  = message::input::GameState::Data;
     using std::chrono::duration_cast;
     using std::chrono::milliseconds;
 
@@ -52,13 +52,13 @@ namespace support {
         handles["game_state"].push_back(on<Trigger<GoalScored>, With<GameState>>().then([this](const GoalScored& goalScored, const GameState& gameState) {
             switch (goalScored.context.value)
             {
-                case message::input::proto::GameEvents::Context::Value::TEAM:
+                case message::input::GameEvents::Context::Value::TEAM:
                 {
                     sendGameState("GoalScored<TEAM>", gameState);
                     break;
                 }
 
-                case message::input::proto::GameEvents::Context::Value::OPPONENT:
+                case message::input::GameEvents::Context::Value::OPPONENT:
                 {
                     sendGameState("GoalScored<OPPONENT>", gameState);
                     break;
@@ -75,19 +75,19 @@ namespace support {
         handles["game_state"].push_back(on<Trigger<Penalisation>, With<GameState>>().then([this](const Penalisation& penalisation, const GameState& gameState) {
             switch (penalisation.context.value)
             {
-                case message::input::proto::GameEvents::Context::Value::SELF:
+                case message::input::GameEvents::Context::Value::SELF:
                 {
                     sendGameState("Penalisation<SELF>", gameState);
                     break;
                 }
 
-                case message::input::proto::GameEvents::Context::Value::TEAM:
+                case message::input::GameEvents::Context::Value::TEAM:
                 {
                     sendGameState("Penalisation<TEAM>", gameState);
                     break;
                 }
 
-                case message::input::proto::GameEvents::Context::Value::OPPONENT:
+                case message::input::GameEvents::Context::Value::OPPONENT:
                 {
                     sendGameState("Penalisation<OPPONENT>", gameState);
                     break;
@@ -104,19 +104,19 @@ namespace support {
         handles["game_state"].push_back(on<Trigger<Unpenalisation>, With<GameState>>().then([this](const Unpenalisation& unpenalisation, const GameState& gameState) {
             switch (unpenalisation.context.value)
             {
-                case message::input::proto::GameEvents::Context::Value::SELF:
+                case message::input::GameEvents::Context::Value::SELF:
                 {
                     sendGameState("Unpenalisation<SELF>", gameState);
                     break;
                 }
 
-                case message::input::proto::GameEvents::Context::Value::TEAM:
+                case message::input::GameEvents::Context::Value::TEAM:
                 {
                     sendGameState("Unpenalisation<TEAM>", gameState);
                     break;
                 }
 
-                case message::input::proto::GameEvents::Context::Value::OPPONENT:
+                case message::input::GameEvents::Context::Value::OPPONENT:
                 {
                     sendGameState("Unpenalisation<OPPONENT>", gameState);
                     break;
@@ -133,13 +133,13 @@ namespace support {
         handles["game_state"].push_back(on<Trigger<CoachMessage>, With<GameState>>().then([this](const CoachMessage& message, const GameState& gameState) {
             switch (message.context.value)
             {
-                case message::input::proto::GameEvents::Context::Value::TEAM:
+                case message::input::GameEvents::Context::Value::TEAM:
                 {
                     sendGameState("CoachMessage<TEAM>", gameState);
                     break;
                 }
 
-                case message::input::proto::GameEvents::Context::Value::OPPONENT:
+                case message::input::GameEvents::Context::Value::OPPONENT:
                 {
                     sendGameState("CoachMessage<OPPONENT>", gameState);
                     break;
@@ -160,13 +160,13 @@ namespace support {
         handles["game_state"].push_back(on<Trigger<BallKickedOut>, With<GameState>>().then([this](const BallKickedOut& ballKickedOut, const GameState& gameState) {
             switch (ballKickedOut.context.value)
             {
-                case message::input::proto::GameEvents::Context::Value::TEAM:
+                case message::input::GameEvents::Context::Value::TEAM:
                 {
                     sendGameState("BallKickedOut<TEAM>", gameState);
                     break;
                 }
 
-                case message::input::proto::GameEvents::Context::Value::OPPONENT:
+                case message::input::GameEvents::Context::Value::OPPONENT:
                 {
                     sendGameState("BallKickedOut<OPPONENT>", gameState);
                     break;

@@ -21,8 +21,8 @@
 
 #include "extension/Configuration.h"
 
-#include "message/input/proto/Sensors.h"
-#include "message/input/proto/PushDetection.h"
+#include "message/input/Sensors.h"
+#include "message/input/PushDetection.h"
 
 #include "utility/nubugger/NUhelpers.h"
 #include "utility/support/eigen_armadillo.h"
@@ -35,8 +35,8 @@ namespace input
 
     using extension::Configuration;
 
-    using message::input::proto::Sensors;
-    using message::input::proto::PushDetection;
+    using message::input::Sensors;
+    using message::input::PushDetection;
     
     using utility::input::ServoLoadModel;
     using utility::math::filter::UKF;

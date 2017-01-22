@@ -35,16 +35,16 @@ namespace motion
 
     using extension::Configuration;
 
-    using LimbID = message::behaviour::proto::Subsumption::Limb::Value;
-    using message::motion::proto::NewStepTargetInfo;
-    using message::motion::proto::NewFootTargetInfo;
-    using message::motion::proto::TorsoMotionUpdate;
-    using message::motion::proto::EnableFootPlacement;
-    using message::motion::proto::DisableFootPlacement;
-    using message::motion::proto::FootStepRequested;
-    using message::motion::proto::NewWalkCommand;
-    using message::motion::proto::FootPlacementStopped;
-    using message::motion::proto::KinematicsModel;
+    using LimbID = message::behaviour::Subsumption::Limb::Value;
+    using message::motion::NewStepTargetInfo;
+    using message::motion::NewFootTargetInfo;
+    using message::motion::TorsoMotionUpdate;
+    using message::motion::EnableFootPlacement;
+    using message::motion::DisableFootPlacement;
+    using message::motion::FootStepRequested;
+    using message::motion::NewWalkCommand;
+    using message::motion::FootPlacementStopped;
+    using message::motion::KinematicsModel;
 
     using utility::support::Expression;
     using utility::math::matrix::Transform2D;

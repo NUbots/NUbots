@@ -18,7 +18,6 @@
  */
 
 #include "LUTClassifier.h"
-#include "QuexClassifier.h"
 
 #include "utility/math/ransac/NPartiteRansac.h"
 #include "utility/math/geometry/Line.h"
@@ -28,16 +27,19 @@
 namespace module {
     namespace vision {
 
-        using message::input::proto::Image;
-        using message::vision::proto::LookUpTable;
-        using message::vision::proto::ClassifiedImage;
-        using SegmentClass = message::vision::proto::ClassifiedImage::SegmentClass::Value;
+        using message::input::Image;
+        using message::vision::LookUpTable;
+        using message::vision::ClassifiedImage;
+        using SegmentClass = message::vision::ClassifiedImage::SegmentClass::Value;
         using utility::math::ransac::NPartiteRansac;
         using utility::math::geometry::Line;
 
         using utility::nubugger::drawVisionLines;
 
         struct GoalPOI {
+            GoalPOI() :  midpoint(), length() {}
+            GoalPOI(const arma::vec2 midpoint, uint length) :  midpoint(midpoint), length(length) {}
+
             arma::vec2 midpoint;
             uint length;
         };
@@ -50,7 +52,8 @@ namespace module {
             Line line;
             std::array<uint, 2> lengths;
 
-            GoalPOIModel() {}
+            GoalPOIModel() : line(), lengths() {}
+            GoalPOIModel(const Line& line, const std::array<uint, 2>& lengths) : line(line), lengths(lengths) {}
 
             bool regenerate(const std::array<DataPoint, REQUIRED_POINTS>& pts, const arma::vec2& horizonTangent, const double& maxAngle) {
                 line.setFromPoints(pts[0].midpoint, pts[1].midpoint);

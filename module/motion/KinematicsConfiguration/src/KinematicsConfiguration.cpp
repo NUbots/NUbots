@@ -25,13 +25,13 @@
 #include "utility/support/yaml_armadillo.h"
 #include "utility/support/yaml_expression.h"
 
-#include "message/motion/proto/KinematicsModels.h"
+#include "message/motion/KinematicsModels.h"
 
 namespace module {
 namespace motion {
 
     using extension::Configuration;
-    using message::motion::proto::KinematicsModel;
+    using message::motion::KinematicsModel;
     using utility::support::Expression;
 
 

@@ -19,17 +19,17 @@
 
 #include "Controller.h"
 
-#include "message/motion/proto/ServoTarget.h"
+#include "message/motion/ServoTarget.h"
 
 #include "utility/input/LimbID.h"
 
 namespace module {
     namespace behaviour {
 
-        using ServoID = message::input::proto::Sensors::ServoID::Value;
-        using LimbID  = message::behaviour::proto::Subsumption::Limb::Value;
-        using message::motion::proto::ServoTarget;
-        using message::behaviour::proto::ServoCommand;
+        using ServoID = message::input::Sensors::ServoID::Value;
+        using LimbID  = message::behaviour::Subsumption::Limb::Value;
+        using message::motion::ServoTarget;
+        using message::behaviour::ServoCommand;
         using utility::behaviour::RegisterAction;
         using utility::behaviour::ActionPriorites;
         using utility::behaviour::ActionStart;

@@ -27,7 +27,7 @@
 
 #include "extension/Configuration.h"
 
-#include "message/input/LimbID.h"
+#include "message/behaviour/Subsumption.h"
 #include "message/input/Sensors.h"
 
 #include "message/motion/KinematicsModels.h"
@@ -46,6 +46,7 @@
 #include "utility/motion/ForwardKinematics.h"
 
 #include "utility/nubugger/NUhelpers.h"
+#include "utility/support/eigen_armadillo.h"
 
 namespace module 
 {
@@ -68,7 +69,7 @@ namespace motion
         
         explicit FootMotionPlanner(std::unique_ptr<NUClear::Environment> environment);
     private:
-        using LimbID         = message::input::LimbID;
+        using LimbID         = message::behaviour::Subsumption::Limb::Value;
         using Sensors        = message::input::Sensors;
         using Transform2D    = utility::math::matrix::Transform2D;
         using Transform3D    = utility::math::matrix::Transform3D;
@@ -168,7 +169,7 @@ namespace motion
         /**
          * Balance & Kinematics module initialization...
          */
-        message::motion::kinematics::KinematicsModel kinematicsModel;   //
+        message::motion::KinematicsModel kinematicsModel;   //
 
         /**
          * @brief [brief description]

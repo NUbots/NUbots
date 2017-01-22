@@ -21,11 +21,11 @@
 
 #include "extension/Configuration.h"
 
-#include "message/behaviour/proto/ServoCommand.h"
-#include "message/behaviour/proto/Subsumption.h"
-#include "message/input/proto/Sensors.h"
-#include "message/motion/proto/HeadCommand.h"
-#include "message/motion/proto/KinematicsModels.h"
+#include "message/behaviour/ServoCommand.h"
+#include "message/behaviour/Subsumption.h"
+#include "message/input/Sensors.h"
+#include "message/motion/HeadCommand.h"
+#include "message/motion/KinematicsModels.h"
 
 #include "utility/behaviour/Action.h"
 #include "utility/math/coordinates.h"
@@ -41,19 +41,19 @@ namespace module
 namespace motion 
 {
         using utility::nubugger::graph;
-        using ServoID = message::input::proto::Sensors::ServoID::Value;
-        using LimbID = message::behaviour::proto::Subsumption::Limb::Value;
-        using message::input::proto::Sensors;
+        using ServoID = message::input::Sensors::ServoID::Value;
+        using LimbID = message::behaviour::Subsumption::Limb::Value;
+        using message::input::Sensors;
         using utility::behaviour::RegisterAction;
         using extension::Configuration;
-        using message::behaviour::proto::ServoCommand;
-        using message::motion::proto::HeadCommand;
+        using message::behaviour::ServoCommand;
+        using message::motion::HeadCommand;
         using utility::math::coordinates::sphericalToCartesian;
         using utility::math::coordinates::cartesianToSpherical;
         using utility::math::matrix::Transform3D;
         using utility::motion::kinematics::calculateCameraLookJoints;
         using utility::motion::kinematics::calculateHeadJoints;
-        using message::motion::proto::KinematicsModel;
+        using message::motion::KinematicsModel;
         using utility::support::Expression;
 
         //internal only callback messages to start and stop our action

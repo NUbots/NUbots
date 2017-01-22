@@ -20,29 +20,36 @@
 #include "SoccerSimulator.h"
 #include <nuclear>
 #include <sstream>
+
+#include "extension/Configuration.h"
+
+#include "message/vision/VisionObjects.h"
+#include "message/localisation/FieldObject.h"
+#include "message/input/Sensors.h"
+#include "message/input/CameraParameters.h"
+#include "message/motion/WalkCommand.h"
+#include "message/input/GameEvents.h"
+#include "message/input/GameState.h"
+
 #include "utility/math/angle.h"
 #include "utility/math/coordinates.h"
 #include "utility/nubugger/NUhelpers.h"
 #include "utility/localisation/transform.h"
 #include "utility/motion/ForwardKinematics.h"
 #include "utility/support/yaml_armadillo.h"
-#include "message/vision/VisionObjects.h"
-#include "extension/Configuration.h"
-#include "message/localisation/FieldObject.h"
-#include "message/input/ServoID.h"
-#include "message/input/CameraParameters.h"
-#include "message/motion/WalkCommand.h"
-#include "message/input/gameevents/GameEvents.h"
 
 
 namespace module {
 namespace support {
 
+    using extension::Configuration;
+
+    using ServoID = message::input::Sensors::ServoID::Value;
     using message::platform::darwin::ButtonMiddleDown;
     using message::input::Sensors;
-    using message::input::ServoID;
     using message::input::CameraParameters;
-    using extension::Configuration;
+    using message::input::GameState;
+    using message::input::GameEvents;
     using message::support::FieldDescription;
     using message::motion::WalkCommand;
     using message::motion::StopCommand;
@@ -51,10 +58,10 @@ namespace support {
     using message::motion::KickFinished;
     using message::motion::KickPlannerConfig;
     using message::platform::darwin::DarwinSensors;
-    using extension::Configuration;
     using message::support::GlobalConfig;
     using message::vision::Ball;
     using message::vision::Goal;
+
     using utility::nubugger::drawArrow;
     using utility::nubugger::drawSphere;
     using utility::math::angle::normalizeAngle;
@@ -67,7 +74,6 @@ namespace support {
     using utility::localisation::transform::RobotToWorldTransform;
     using utility::nubugger::graph;
     using utility::math::matrix::Transform2D;
-    using namespace message::input::gameevents;
     using utility::support::Expression;
 
     double triangle_wave(double t, double period) {
@@ -213,10 +219,10 @@ namespace support {
 
                 //Update based on walk engine
                     if(walking && walkCommand && !kicking) {
-                        world.robotVelocity.xy() = walkCommand->command.xy() * 0.15;
+                        world.robotVelocity.xy() = Transform2D(convert<double, 3>(walkCommand->command)).xy() * 0.15;
                         // world.robotVelocity.xy() = sensors.odometry;
                         //angle from command:
-                        world.robotVelocity.angle() = walkCommand->command.angle() * 1.0;
+                        world.robotVelocity.angle() = Transform2D(convert<double, 3>(walkCommand->command)).angle() * 1.0;
                     } else {
                         world.robotVelocity = utility::math::matrix::Transform2D({0,0,0});
                     }
@@ -247,7 +253,7 @@ namespace support {
                         //Check if kick worked:
                         Transform2D relativeBallPose = world.robotPose.worldToLocal(world.ball.position);
 
-                        world.ball.position.rows(0,1) += world.robotPose.rotation() * arma::normalise(lastKickCommand.direction.rows(0, 1));
+                        world.ball.position.rows(0, 1) += world.robotPose.rotation() * convert<double, 2>(lastKickCommand.direction.head<2>().normalized());
 
                     }
                     break;
@@ -268,7 +274,7 @@ namespace support {
         // Simulate Vision
         on<Every<30, Per<std::chrono::seconds>>, With<Sensors>, With<CameraParameters>, Optional<With<FieldDescription>>, Single>()
         .then("Vision Simulation",
-        [this](std::shared_ptr<const Sensors> sensors, const CameraParameters& camParams, const std::shared_ptr<const FieldDescription> fd) {
+        [this](const Sensors& sensors, const CameraParameters& camParams, const std::shared_ptr<const FieldDescription> fd) {
 
             if(!fd){
                 NUClear::log<NUClear::ERROR>(__FILE__, __LINE__, "Field Description must be available for vision simulation!");
@@ -293,9 +299,9 @@ namespace support {
                     // Detect the goal:
                     auto m = g.detect(camParams, world.robotPose, sensors, cfg_.vision_error, *fd);
 
-                    if (!m.measurements.empty()) {
+                    if (!m.measurement.empty()) {
                         if (!cfg_.distinguish_own_and_opponent_goals) {
-                            m.team = message::vision::Goal::Team::UNKNOWN;
+                            m.team = message::vision::Goal::Team::UNKNOWN_TEAM;
                         }
                         goals->push_back(m);
                     }
@@ -311,11 +317,11 @@ namespace support {
                 // Emit current self exactly
                 auto r = std::make_unique<std::vector<message::localisation::Self>>();
                 r->push_back(message::localisation::Self());
-                r->back().position = world.robotPose.xy();
-                r->back().heading = bearingToUnitVector(world.robotPose.angle());
-                r->back().velocity = world.robotVelocity.rows(0,1);
-                r->back().position_cov = 0.00001 * arma::eye(2,2);
-                r->back().last_measurement_time = NUClear::clock::now();
+                r->back().locObject.position = convert<double, 2>(world.robotPose.xy());
+                r->back().heading = convert<double, 2>(bearingToUnitVector(world.robotPose.angle()));
+                r->back().velocity = convert<double, 2>(world.robotVelocity.rows(0,1));
+                r->back().locObject.position_cov = convert<double, 2, 2>(0.00001 * arma::eye(2,2));
+                r->back().locObject.last_measurement_time = NUClear::clock::now();
                 emit(std::move(r));
             }
 
@@ -339,12 +345,12 @@ namespace support {
             } else {
                 // Emit current ball exactly
                 auto b = std::make_unique<message::localisation::Ball>();
-                b->position = world.robotPose.worldToLocal(world.ball.position).xy();
-                b->velocity = world.robotPose.rotation().t() * world.ball.velocity.rows(0,1);
-                b->position_cov = 0.00001 * arma::eye(2,2);
-                b->last_measurement_time = NUClear::clock::now();
+                b->locObject.position = convert<double, 2>(world.robotPose.worldToLocal(world.ball.position).xy());
+                b->velocity = convert<double, 2>(world.robotPose.rotation().t() * world.ball.velocity.rows(0,1));
+                b->locObject.position_cov = convert<double, 2, 2>(0.00001 * arma::eye(2,2));
+                b->locObject.last_measurement_time = NUClear::clock::now();
                 emit(std::make_unique<std::vector<message::localisation::Ball>>(
-                        std::vector<message::localisation::Ball>(1,*b)
+                        std::vector<message::localisation::Ball>(1, *b)
                     ));
                 emit(std::move(b));
             }
@@ -364,9 +370,9 @@ namespace support {
         on<Startup>().then("SoccerSimulator Startup", [this] {
             if (cfg_.auto_start_behaviour) {
                 auto time = NUClear::clock::now();
-                emit(std::make_unique<Unpenalisation<SELF>>(Unpenalisation<SELF>{PLAYER_ID}));
-                emit(std::make_unique<GamePhase<Phase::PLAYING>>(GamePhase<Phase::PLAYING>{time, time}));
-                emit(std::make_unique<Phase>(Phase::PLAYING));
+                emit(std::make_unique<GameEvents::Unpenalisation>(GameEvents::Unpenalisation(GameEvents::Context::SELF, PLAYER_ID)));
+                emit(std::make_unique<GameEvents::GamePhase>(GameEvents::GamePhase(GameState::Data::Phase::PLAYING, time, time)));
+                emit(std::make_unique<GameState::Data::Phase>(GameState::Data::Phase::PLAYING));
             }
 
         });
@@ -425,7 +431,7 @@ namespace support {
         // and remove left-right labels if so
         if(totalGoals != 2 || leftGoals != 1 || rightGoals != 1){
             for (auto& g : goals){
-                g.side = Goal::Side::UNKNOWN;
+                g.side = Goal::Side::UNKNOWN_SIDE;
             }
         }
     }

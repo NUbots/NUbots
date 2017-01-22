@@ -23,9 +23,10 @@
 
 #include "message/input/Image.h"
 #include "message/input/Sensors.h"
-#include "message/input/ServoID.h"
-#include "message/input/proto/ImageFragment.h"
+#include "message/input/ImageFragment.h"
+
 #include "utility/math/matrix/Transform3D.h"
+#include "utility/support/eigen_armadillo.h"
 #include "utility/support/yaml_armadillo.h"
 #include "utility/support/yaml_expression.h"
 
@@ -36,8 +37,9 @@ namespace behaviour {
 
     using message::input::Image;
     using message::input::Sensors;
-    using message::input::ServoID;
-    using message::input::proto::ImageFragment;
+    using ServoID = message::input::Sensors::ServoID::Value;
+    using message::input::ImageFragment;
+
     using utility::math::matrix::Transform3D;
     using utility::support::Expression;
 
@@ -73,22 +75,31 @@ namespace behaviour {
 
         	auto imageFragment = std::make_unique<ImageFragment>();
 
-            imageFragment->set_camera_id(0);
-            imageFragment->mutable_dimensions()->set_x(image.width);
-            imageFragment->mutable_dimensions()->set_y(image.height);
+            imageFragment->image = image;
 
-            imageFragment->set_format(message::input::proto::ImageFragment::YCbCr422);
+            imageFragment->start = 0;
+            imageFragment->end   = image.data.size();
 
-            // Reserve enough space in the image data to store the output
-            std::string* imageBytes = imageFragment->mutable_data();
-            imageBytes->reserve(image.source().size());
-            imageBytes->insert(imageBytes->begin(), std::begin(image.source()), std::end(image.source()));
+            Transform3D cam_to_right_foot, cam_to_left_foot, head_pitch;
+            for (const auto& entry : sensors.forwardKinematics)
+            {
+                if (entry.servoID == ServoID::L_ANKLE_ROLL)
+                {
+                    cam_to_left_foot = Transform3D(convert<double, 4, 4>(entry.kinematics)).i();
+                }
+                if (entry.servoID == ServoID::R_ANKLE_ROLL)
+                {
+                    cam_to_right_foot = Transform3D(convert<double, 4, 4>(entry.kinematics)).i();
+                }
+                if (entry.servoID == ServoID::HEAD_PITCH)
+                {
+                    head_pitch = Transform3D(convert<double, 4, 4>(entry.kinematics)).i();
+                }
+            }
 
-            imageFragment->set_start(0);
-            imageFragment->set_end(image.source().size());
+            cam_to_left_foot *= head_pitch;
+            cam_to_right_foot *= head_pitch;
 
-            Transform3D cam_to_right_foot = sensors.forwardKinematics.at(ServoID::R_ANKLE_ROLL).i() * sensors.forwardKinematics.at(ServoID::HEAD_PITCH);
-            Transform3D cam_to_left_foot = sensors.forwardKinematics.at(ServoID::L_ANKLE_ROLL).i() * sensors.forwardKinematics.at(ServoID::HEAD_PITCH);
             Transform3D cam_to_feet = cam_to_left_foot;
             cam_to_feet.translation() = 0.5 * (cam_to_left_foot.translation() + cam_to_right_foot.translation()) ;
             cam_to_feet = robot_to_head.i() * cam_to_feet;
@@ -101,25 +112,7 @@ namespace behaviour {
             cam_to_feet.translation() *= 0;
             // std::cout << "robot_to_head.i() \n" << robot_to_head.i();
             // std::cout << "cam_to_feet \n" << cam_to_feet;
-            imageFragment->mutable_cam_to_feet()->mutable_x()->set_x(cam_to_feet(0,0));
-            imageFragment->mutable_cam_to_feet()->mutable_x()->set_y(cam_to_feet(1,0));
-            imageFragment->mutable_cam_to_feet()->mutable_x()->set_z(cam_to_feet(2,0));
-            imageFragment->mutable_cam_to_feet()->mutable_x()->set_t(cam_to_feet(3,0));
-
-            imageFragment->mutable_cam_to_feet()->mutable_y()->set_x(cam_to_feet(0,1));
-            imageFragment->mutable_cam_to_feet()->mutable_y()->set_y(cam_to_feet(1,1));
-            imageFragment->mutable_cam_to_feet()->mutable_y()->set_z(cam_to_feet(2,1));
-            imageFragment->mutable_cam_to_feet()->mutable_y()->set_t(cam_to_feet(3,1));
-
-            imageFragment->mutable_cam_to_feet()->mutable_z()->set_x(cam_to_feet(0,2));
-            imageFragment->mutable_cam_to_feet()->mutable_z()->set_y(cam_to_feet(1,2));
-            imageFragment->mutable_cam_to_feet()->mutable_z()->set_z(cam_to_feet(2,2));
-            imageFragment->mutable_cam_to_feet()->mutable_z()->set_t(cam_to_feet(3,2));
-
-            imageFragment->mutable_cam_to_feet()->mutable_t()->set_x(cam_to_feet(0,3));
-            imageFragment->mutable_cam_to_feet()->mutable_t()->set_y(cam_to_feet(1,3));
-            imageFragment->mutable_cam_to_feet()->mutable_t()->set_z(cam_to_feet(2,3));
-            imageFragment->mutable_cam_to_feet()->mutable_t()->set_t(cam_to_feet(3,3));
+            imageFragment->cam_to_feet = convert<float, 4, 4>(arma::conv_to<arma::fmat>::from(cam_to_feet));
 
             emit<Scope::NETWORK>(imageFragment, "nupresenceclient", reliable);
 
