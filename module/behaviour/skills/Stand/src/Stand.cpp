@@ -20,17 +20,17 @@
 #include "Stand.h"
 
 #include "message/behaviour/Subsumption.h"
-#include "message/input/Sensors.h"
 #include "message/behaviour/ServoCommand.h"
 
 #include "utility/behaviour/Action.h"
+#include "utility/input/ServoID.h"
 #include "utility/motion/Script.h"
 
 namespace module {
     namespace behaviour {
         namespace skills {
 
-            using ServoID = message::input::Sensors::ServoID::Value;
+            using ServoID = utility::input::ServoID;
             using utility::motion::ExecuteScriptByName;
             using utility::behaviour::RegisterAction;
             using LimbID = message::behaviour::Subsumption::Limb::Value;

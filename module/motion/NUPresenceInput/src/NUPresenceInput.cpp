@@ -46,7 +46,7 @@ namespace motion {
     using message::input::MotionCapture;
     using message::input::PresenceUserState;
     using message::input::Sensors;
-    using ServoID = message::input::Sensors::ServoID::Value;
+    using ServoID = utility::input::ServoID;
     using message::motion::KinematicsModel;
     using message::motion::BodySide;
 
@@ -113,13 +113,13 @@ namespace motion {
 
             //Servo Limits:
             for(auto& servo : config["limits"]["servos"].config) {
-                ServoID id = utility::input::idFromString(servo[0].as<std::string>());
+                ServoID id(servo[0].as<std::string>());
                 float min = servo[1].as<Expression>();
                 float max = servo[2].as<Expression>();
                 jointLimiter.addLimit(id, min, max);
             }
             for(auto& servo : config["limits"]["smoothing"].config) {
-                ServoID id = utility::input::idFromString(servo[0].as<std::string>());
+                ServoID id(servo[0].as<std::string>());
                 float alpha = servo[1].as<Expression>();
                 jointLimiter.addSmoothing(id, alpha);
             }

@@ -20,17 +20,18 @@
 #define UTILITY_PLATFORM_DARWIN_DARWINSENSORS_H
 
 #include "message/platform/darwin/DarwinSensors.h"
-#include "message/input/Sensors.h"
+#include "utility/input/ServoID.h"
 
 namespace utility {
     namespace platform {
         namespace darwin {
-            using ServoID = message::input::Sensors::ServoID::Value;
+
+            using ServoID = utility::input::ServoID;
             using message::platform::darwin::DarwinSensors;
 
             const DarwinSensors::Servo& getDarwinServo(ServoID servoId, const DarwinSensors& sensors) {
 
-                switch (servoId) {
+                switch (servoId.value) {
                     case ServoID::R_SHOULDER_PITCH:   return sensors.servo.rShoulderPitch;
                     case ServoID::L_SHOULDER_PITCH:   return sensors.servo.lShoulderPitch;
                     case ServoID::R_SHOULDER_ROLL:    return sensors.servo.rShoulderRoll;
@@ -58,7 +59,7 @@ namespace utility {
 
             DarwinSensors::Servo& getDarwinServo(ServoID servoId, DarwinSensors& sensors) {
 
-                switch (servoId) {
+                switch (servoId.value) {
                     case ServoID::R_SHOULDER_PITCH:   return sensors.servo.rShoulderPitch;
                     case ServoID::L_SHOULDER_PITCH:   return sensors.servo.lShoulderPitch;
                     case ServoID::R_SHOULDER_ROLL:    return sensors.servo.rShoulderRoll;

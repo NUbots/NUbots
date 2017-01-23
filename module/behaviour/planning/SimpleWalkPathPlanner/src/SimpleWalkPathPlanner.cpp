@@ -34,6 +34,7 @@
 
 #include "utility/behaviour/Action.h"
 #include "utility/behaviour/MotionCommand.h"
+#include "utility/input/ServoID.h"
 #include "utility/localisation/transform.h"
 #include "utility/math/matrix/Transform2D.h"
 #include "utility/math/matrix/Transform3D.h"
@@ -47,7 +48,7 @@ namespace module {
             using extension::Configuration;
 
             using LimbID  = message::behaviour::Subsumption::Limb::Value;
-            using ServoID = message::input::Sensors::ServoID::Value;
+            using ServoID = utility::input::ServoID;
             using message::input::Sensors;
             
             using message::motion::WalkCommand;

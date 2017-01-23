@@ -4,6 +4,7 @@
 
 #include "message/input/Sensors.h"
 
+#include "utility/input/ServoID.h"
 #include "utility/math/matrix/Transform3D.h"
 #include "utility/support/eigen_armadillo.h"
 
@@ -14,7 +15,7 @@ namespace logging {
     using extension::Configuration;
 
     using message::input::Sensors;
-    using ServoID = message::input::Sensors::ServoID::Value;
+    using ServoID = utility::input::ServoID;
 
     using utility::math::matrix::Transform3D;
 
@@ -66,32 +67,32 @@ namespace logging {
             {
                 if (servo.id == ServoID::R_HIP_PITCH)
                 {
-                    RightHipPitchPresentVelocity = servo.present_velocity;
+                    RightHipPitchPresentVelocity = servo.presentVelocity;
                     RightHipPitchLoad            = servo.load;
                 }
                 if (servo.id == ServoID::L_HIP_PITCH)
                 {
-                    LeftHipPitchPresentVelocity = servo.present_velocity;
+                    LeftHipPitchPresentVelocity = servo.presentVelocity;
                     LeftHipPitchLoad            = servo.load;
                 }
                 if (servo.id == ServoID::R_KNEE)
                 {
-                    RightKneePresentVelocity = servo.present_velocity;
+                    RightKneePresentVelocity = servo.presentVelocity;
                     RightKneeLoad            = servo.load;
                 }
                 if (servo.id == ServoID::L_KNEE)
                 {
-                    LeftKneePresentVelocity = servo.present_velocity;
+                    LeftKneePresentVelocity = servo.presentVelocity;
                     LeftKneeLoad            = servo.load;
                 }
                 if (servo.id == ServoID::R_ANKLE_PITCH)
                 {
-                    RightAnklePitchPresentVelocity = servo.present_velocity;
+                    RightAnklePitchPresentVelocity = servo.presentVelocity;
                     RightAnklePitchLoad            = servo.load;
                 }
                 if (servo.id == ServoID::L_ANKLE_PITCH)
                 {
-                    LeftAnklePitchPresentVelocity = servo.present_velocity;
+                    LeftAnklePitchPresentVelocity = servo.presentVelocity;
                     LeftAnklePitchLoad            = servo.load;
                 }
             }

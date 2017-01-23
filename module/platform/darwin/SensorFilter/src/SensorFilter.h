@@ -22,8 +22,6 @@
 
 #include <nuclear>
 
-#include "message/input/Sensors.h"
-
 #include "utility/math/matrix/Transform3D.h"
 #include "utility/math/matrix/Rotation3D.h"
 #include "utility/math/filter/UKF.h"

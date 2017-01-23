@@ -21,7 +21,8 @@
 #define UTILITY_INPUT_LIMBID_H
 
 #include "message/behaviour/Subsumption.h"
-#include "message/input/Sensors.h"
+
+#include "utility/input/ServoID.h"
 
 namespace utility {
     namespace input {
@@ -29,7 +30,7 @@ namespace utility {
         //which contains all the constituent servos (e.g. An arm contains shoulder (pitch + roll)) and elbow.
 
         using LimbID  = message::behaviour::Subsumption::Limb::Value;
-        using ServoID = message::input::Sensors::ServoID::Value;
+        using ServoID = utility::input::ServoID;
 
         inline std::set<ServoID> servosForLimb(const LimbID& limb) {
             switch(limb) {
@@ -80,7 +81,7 @@ namespace utility {
         }
 
         inline LimbID limbForServo(const ServoID& servo) {
-            switch(servo) {
+            switch(servo.value) {
                 case ServoID::HEAD_PITCH:
                 case ServoID::HEAD_YAW:
                     return LimbID::HEAD;

@@ -28,7 +28,7 @@ namespace motion{
 
     using message::input::Sensors;
     using LimbID  = message::behaviour::Subsumption::Limb::Value;
-    using ServoID = message::input::Sensors::ServoID::Value;
+    using ServoID = utility::input::ServoID;
     using message::motion::KinematicsModel;
 
     using utility::math::matrix::Transform3D;
@@ -91,14 +91,14 @@ namespace motion{
         Transform3D currentKickFoot;
         for (const auto& entry : sensors.forwardKinematics)
         {
-            if ((supportFoot == message::behaviour::Subsumption::Limb::Value::LEFT_LEG) && 
-                (entry.servoID == message::input::Sensors::ServoID::Value::L_ANKLE_ROLL))
+            if ((supportFoot == LimbID::LEFT_LEG) && 
+                (entry.servoID == ServoID::L_ANKLE_ROLL))
             {
                 currentKickFoot = Transform3D(convert<double, 4, 4>(entry.kinematics));
                 break;
             }
-            if ((supportFoot == message::behaviour::Subsumption::Limb::Value::RIGHT_LEG) && 
-                (entry.servoID == message::input::Sensors::ServoID::Value::R_ANKLE_ROLL))
+            if ((supportFoot == LimbID::RIGHT_LEG) && 
+                (entry.servoID == ServoID::R_ANKLE_ROLL))
             {
                 currentKickFoot = Transform3D(convert<double, 4, 4>(entry.kinematics));
                 break;

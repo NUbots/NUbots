@@ -23,9 +23,9 @@
 
 #include "message/behaviour/Subsumption.h"
 #include "message/motion/WalkCommand.h"
-#include "message/input/Sensors.h"
 
 #include "utility/behaviour/Action.h"
+#include "utility/input/ServoID.h"
 
 namespace module {
 namespace behaviour {
@@ -34,7 +34,7 @@ namespace skills {
     using extension::Configuration;
 
     using LimbID  = message::behaviour::Subsumption::Limb::Value;
-    using ServoID = message::input::Sensors::ServoID::Value;
+    using ServoID = utility::input::ServoID;
 
     using message::motion::WalkCommand;
     using message::motion::StopCommand;

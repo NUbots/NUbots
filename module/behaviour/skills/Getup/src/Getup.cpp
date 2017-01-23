@@ -29,6 +29,7 @@
 #include "message/motion/GetupCommand.h"
 
 #include "utility/behaviour/Action.h"
+#include "utility/input/ServoID.h"
 #include "utility/motion/Script.h"
 
 namespace module {
@@ -38,14 +39,14 @@ namespace module {
             using extension::Configuration;
 
             using message::input::Sensors;
-            using ServoID = message::input::Sensors::ServoID::Value;
             using LimbID  = message::behaviour::Subsumption::Limb::Value;
             using message::motion::ExecuteGetup;
             using message::motion::KillGetup;
 
-            using utility::motion::ExecuteScriptByName;
             using utility::behaviour::RegisterAction;
             using utility::behaviour::ActionPriorites;
+            using ServoID = utility::input::ServoID;
+            using utility::motion::ExecuteScriptByName;
 
             Getup::Getup(std::unique_ptr<NUClear::Environment> environment)
                 : Reactor(std::move(environment))

@@ -22,7 +22,6 @@
 
 #include "extension/Configuration.h"
 
-#include "message/input/Sensors.h"
 #include "message/motion/ServoTarget.h"
 #include "message/platform/darwin/DarwinSensors.h"
 
@@ -35,7 +34,6 @@ namespace module {
 namespace platform {
 namespace darwin {
 
-    using ServoID = message::input::Sensors::ServoID::Value;
     using message::platform::darwin::DarwinSensors;
     using message::motion::ServoTarget;
     using extension::Configuration;
@@ -120,7 +118,7 @@ namespace darwin {
 
         for(int i = 0; i < 20; ++i) {
             // Get a reference to the servo we are populating
-            DarwinSensors::Servo& servo = utility::platform::darwin::getDarwinServo(ServoID(i), sensors);
+            DarwinSensors::Servo& servo = utility::platform::darwin::getDarwinServo(i, sensors);
 
             // Error code
             servo.errorFlags = data.servoErrorCodes[i] == 0xFF ? DarwinSensors::Error::TIMEOUT : DarwinSensors::Error(data.servoErrorCodes[i]).value;
@@ -271,12 +269,12 @@ namespace darwin {
             {
                 DarwinSensors::Servo currentServo;
 
-                float diff = utility::math::angle::difference(command.position, utility::platform::darwin::getDarwinServo(command.id.value, sensors).presentPosition);
+                float diff = utility::math::angle::difference(command.position, utility::platform::darwin::getDarwinServo(command.id, sensors).presentPosition);
                 NUClear::clock::duration duration = command.time - NUClear::clock::now();
 
                 //p = diff * pFactor;
-                //d = abs(diff - error[(int)command.id.value]) * dFactor;
-                //error[(int)command.id.value] = diff;                          
+                //d = abs(diff - error[(int)command.id]) * dFactor;
+                //error[(int)command.id] = diff;                          
 
                 float speed;
                 if(duration.count() > 0) 
@@ -289,23 +287,23 @@ namespace darwin {
                 }               
 
                 // Update our internal state
-                if(servoState[uint(command.id.value)].pGain != command.gain
-                || servoState[uint(command.id.value)].iGain != command.gain * 0
-                || servoState[uint(command.id.value)].dGain != command.gain * 0
-                || servoState[uint(command.id.value)].movingSpeed != speed
-                || servoState[uint(command.id.value)].goalPosition != command.position
-                || servoState[uint(command.id.value)].torque != command.torque) {
+                if(servoState[command.id].pGain != command.gain
+                || servoState[command.id].iGain != command.gain * 0
+                || servoState[command.id].dGain != command.gain * 0
+                || servoState[command.id].movingSpeed != speed
+                || servoState[command.id].goalPosition != command.position
+                || servoState[command.id].torque != command.torque) {
 
-                    servoState[uint(command.id.value)].dirty = true;
+                    servoState[command.id].dirty = true;
 
-                    servoState[uint(command.id.value)].pGain = 20;//pGain;//command.gain;
-                    servoState[uint(command.id.value)].iGain = 0;//iGain;//command.gain * 0;
-                    servoState[uint(command.id.value)].dGain = 5;//dGain;//command.gain * 0;
+                    servoState[command.id].pGain = 20;//pGain;//command.gain;
+                    servoState[command.id].iGain = 0;//iGain;//command.gain * 0;
+                    servoState[command.id].dGain = 5;//dGain;//command.gain * 0;
 
-                    servoState[uint(command.id.value)].movingSpeed = speed;
-                    servoState[uint(command.id.value)].goalPosition = command.position;
+                    servoState[command.id].movingSpeed = speed;
+                    servoState[command.id].goalPosition = command.position;
 
-                    servoState[uint(command.id.value)].torque = command.torque*0.7;
+                    servoState[command.id].torque = command.torque*0.7;
                 }
             }
         });

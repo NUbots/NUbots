@@ -22,7 +22,7 @@
 
 #include <nuclear>
 
-#include "message/input/Sensors.h"
+#include "utility/input/ServoID.h"
 
 #include "utility/math/matrix/Transform3D.h"
 #include "utility/math/matrix/Rotation3D.h"
@@ -69,7 +69,7 @@ namespace motion {
         utility::math::matrix::Transform3D currentCamPose;
 
         //Servo limiter
-        utility::support::Limiter<message::input::Sensors::ServoID::Value, float> jointLimiter;
+        utility::support::Limiter<utility::input::ServoID, float> jointLimiter;
 
         //Subsumption:
     	size_t id;

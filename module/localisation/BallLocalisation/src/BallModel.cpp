@@ -20,6 +20,7 @@
 
 #include "BallModel.h"
 
+#include "utility/input/ServoID.h"
 #include "utility/math/matrix/Rotation3D.h"
 #include "utility/math/matrix/Transform3D.h"
 #include "utility/math/matrix/Transform2D.h"
@@ -34,7 +35,7 @@ namespace module {
         using utility::math::matrix::Transform2D;
         using message::support::FieldDescription;
         using message::input::Sensors;
-        using ServoID = message::input::Sensors::ServoID::Value;
+        using ServoID = utility::input::ServoID;
 
         arma::vec::fixed<BallModel::size> BallModel::timeUpdate(const arma::vec::fixed<size>& state, double /*deltaT*/) {
             return state;

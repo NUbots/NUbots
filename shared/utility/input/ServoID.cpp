@@ -16,81 +16,100 @@
  *
  * Copyright 2013 NUBots <nubots@nubots.net>
  */
+#include <stdexcept>
 
 #include "ServoID.h"
 
 namespace utility {
     namespace input {
         
-        using ServoID = message::input::Sensors::ServoID::Value;
-
-        ServoID idFromString(const std::string& str) {
-
-            return    str == "R_SHOULDER_PITCH" ? ServoID::R_SHOULDER_PITCH
-                    : str == "L_SHOULDER_PITCH" ? ServoID::L_SHOULDER_PITCH
-                    : str == "R_SHOULDER_ROLL"  ? ServoID::R_SHOULDER_ROLL
-                    : str == "L_SHOULDER_ROLL"  ? ServoID::L_SHOULDER_ROLL
-                    : str == "R_ELBOW"          ? ServoID::R_ELBOW
-                    : str == "L_ELBOW"          ? ServoID::L_ELBOW
-                    : str == "R_HIP_YAW"        ? ServoID::R_HIP_YAW
-                    : str == "L_HIP_YAW"        ? ServoID::L_HIP_YAW
-                    : str == "R_HIP_ROLL"       ? ServoID::R_HIP_ROLL
-                    : str == "L_HIP_ROLL"       ? ServoID::L_HIP_ROLL
-                    : str == "R_HIP_PITCH"      ? ServoID::R_HIP_PITCH
-                    : str == "L_HIP_PITCH"      ? ServoID::L_HIP_PITCH
-                    : str == "R_KNEE"           ? ServoID::R_KNEE
-                    : str == "L_KNEE"           ? ServoID::L_KNEE
-                    : str == "R_ANKLE_PITCH"    ? ServoID::R_ANKLE_PITCH
-                    : str == "L_ANKLE_PITCH"    ? ServoID::L_ANKLE_PITCH
-                    : str == "R_ANKLE_ROLL"     ? ServoID::R_ANKLE_ROLL
-                    : str == "L_ANKLE_ROLL"     ? ServoID::L_ANKLE_ROLL
-                    : str == "HEAD_YAW"         ? ServoID::HEAD_YAW
-                    : str == "HEAD_PITCH"       ? ServoID::HEAD_PITCH
-                    : static_cast<ServoID>(-1);
+        ServoID::ServoID(std::string const& str) : value(Value::R_SHOULDER_PITCH) {
+            if (str == "R_SHOULDER_PITCH") value = Value::R_SHOULDER_PITCH;
+            if (str == "L_SHOULDER_PITCH") value = Value::L_SHOULDER_PITCH;
+            if (str == "R_SHOULDER_ROLL")  value = Value::R_SHOULDER_ROLL;
+            if (str == "L_SHOULDER_ROLL")  value = Value::L_SHOULDER_ROLL;
+            if (str == "R_ELBOW")          value = Value::R_ELBOW;
+            if (str == "L_ELBOW")          value = Value::L_ELBOW;
+            if (str == "R_HIP_YAW")        value = Value::R_HIP_YAW;
+            if (str == "L_HIP_YAW")        value = Value::L_HIP_YAW;
+            if (str == "R_HIP_ROLL")       value = Value::R_HIP_ROLL;
+            if (str == "L_HIP_ROLL")       value = Value::L_HIP_ROLL;
+            if (str == "R_HIP_PITCH")      value = Value::R_HIP_PITCH;
+            if (str == "L_HIP_PITCH")      value = Value::L_HIP_PITCH;
+            if (str == "R_KNEE")           value = Value::R_KNEE;
+            if (str == "L_KNEE")           value = Value::L_KNEE;
+            if (str == "R_ANKLE_PITCH")    value = Value::R_ANKLE_PITCH;
+            if (str == "L_ANKLE_PITCH")    value = Value::L_ANKLE_PITCH;
+            if (str == "R_ANKLE_ROLL")     value = Value::R_ANKLE_ROLL;
+            if (str == "L_ANKLE_ROLL")     value = Value::L_ANKLE_ROLL;
+            if (str == "HEAD_YAW")         value = Value::HEAD_YAW;
+            if (str == "HEAD_PITCH")       value = Value::HEAD_PITCH;
+            throw std::runtime_error("String did not match any enum for ServoID");
         }
 
-        ServoID idFromPartialString(const std::string& str, const ServoSide& side){
-            return   str == "SHOULDER_PITCH"    ? static_cast<ServoID>(int(ServoID::R_SHOULDER_PITCH) + int(side))
-                   : str == "SHOULDER_ROLL"     ? static_cast<ServoID>(int(ServoID::R_SHOULDER_ROLL) + int(side))
-                   : str == "ELBOW"             ? static_cast<ServoID>(int(ServoID::R_ELBOW) + int(side))
-                   : str == "HIP_YAW"           ? static_cast<ServoID>(int(ServoID::R_HIP_YAW) + int(side))
-                   : str == "HIP_ROLL"          ? static_cast<ServoID>(int(ServoID::R_HIP_ROLL) + int(side))
-                   : str == "HIP_PITCH"         ? static_cast<ServoID>(int(ServoID::R_HIP_PITCH) + int(side))
-                   : str == "KNEE"              ? static_cast<ServoID>(int(ServoID::R_KNEE) + int(side))
-                   : str == "ANKLE_PITCH"       ? static_cast<ServoID>(int(ServoID::R_ANKLE_PITCH) + int(side))
-                   : str == "ANKLE_ROLL"        ? static_cast<ServoID>(int(ServoID::R_ANKLE_ROLL) + int(side))
-                   : str == "HEAD_YAW"          ? ServoID::HEAD_YAW
-                   : str == "HEAD_PITCH"        ? ServoID::HEAD_PITCH
-                   : static_cast<ServoID>(-1);
+        ServoID::ServoID(std::string const& str, ServoSide const& side) : value(Value::R_SHOULDER_PITCH) {
+            if (str == "SHOULDER_PITCH") value = static_cast<Value>(static_cast<int>(Value::R_SHOULDER_PITCH) + static_cast<int>(side));
+            if (str == "SHOULDER_ROLL")  value = static_cast<Value>(static_cast<int>(Value::R_SHOULDER_ROLL)  + static_cast<int>(side));
+            if (str == "ELBOW")          value = static_cast<Value>(static_cast<int>(Value::R_ELBOW)          + static_cast<int>(side));
+            if (str == "HIP_YAW")        value = static_cast<Value>(static_cast<int>(Value::R_HIP_YAW)        + static_cast<int>(side));
+            if (str == "HIP_ROLL")       value = static_cast<Value>(static_cast<int>(Value::R_HIP_ROLL)       + static_cast<int>(side));
+            if (str == "HIP_PITCH")      value = static_cast<Value>(static_cast<int>(Value::R_HIP_PITCH)      + static_cast<int>(side));
+            if (str == "KNEE")           value = static_cast<Value>(static_cast<int>(Value::R_KNEE)           + static_cast<int>(side));
+            if (str == "ANKLE_PITCH")    value = static_cast<Value>(static_cast<int>(Value::R_ANKLE_PITCH)    + static_cast<int>(side));
+            if (str == "ANKLE_ROLL")     value = static_cast<Value>(static_cast<int>(Value::R_ANKLE_ROLL)     + static_cast<int>(side));
+            if (str == "HEAD_YAW")       value = static_cast<Value>(static_cast<int>(Value::HEAD_YAW)         + static_cast<int>(side));
+            if (str == "HEAD_PITCH")     value = static_cast<Value>(static_cast<int>(Value::HEAD_PITCH)       + static_cast<int>(side));
+            throw std::runtime_error("String did not match any enum for ServoID");
         }
 
-        const std::string stringFromId(const ServoID& id) {
-
-            switch(id) {
-                case ServoID::R_SHOULDER_PITCH:  return "R_SHOULDER_PITCH";
-                case ServoID::L_SHOULDER_PITCH:  return "L_SHOULDER_PITCH";
-                case ServoID::R_SHOULDER_ROLL:   return "R_SHOULDER_ROLL";
-                case ServoID::L_SHOULDER_ROLL:   return "L_SHOULDER_ROLL";
-                case ServoID::R_ELBOW:           return "R_ELBOW";
-                case ServoID::L_ELBOW:           return "L_ELBOW";
-                case ServoID::R_HIP_YAW:         return "R_HIP_YAW";
-                case ServoID::L_HIP_YAW:         return "L_HIP_YAW";
-                case ServoID::R_HIP_ROLL:        return "R_HIP_ROLL";
-                case ServoID::L_HIP_ROLL:        return "L_HIP_ROLL";
-                case ServoID::R_HIP_PITCH:       return "R_HIP_PITCH";
-                case ServoID::L_HIP_PITCH:       return "L_HIP_PITCH";
-                case ServoID::R_KNEE:            return "R_KNEE";
-                case ServoID::L_KNEE:            return "L_KNEE";
-                case ServoID::R_ANKLE_PITCH:     return "R_ANKLE_PITCH";
-                case ServoID::L_ANKLE_PITCH:     return "L_ANKLE_PITCH";
-                case ServoID::R_ANKLE_ROLL:      return "R_ANKLE_ROLL";
-                case ServoID::L_ANKLE_ROLL:      return "L_ANKLE_ROLL";
-                case ServoID::HEAD_YAW:          return "HEAD_YAW";
-                case ServoID::HEAD_PITCH:        return "HEAD_PITCH";
-                default:                         return "UNKNOWN";
+        ServoID::operator std::string() const {
+            switch(value) {
+                case Value::R_SHOULDER_PITCH: return "R_SHOULDER_PITCH";
+                case Value::L_SHOULDER_PITCH: return "L_SHOULDER_PITCH";
+                case Value::R_SHOULDER_ROLL:  return "R_SHOULDER_ROLL";
+                case Value::L_SHOULDER_ROLL:  return "L_SHOULDER_ROLL";
+                case Value::R_ELBOW:          return "R_ELBOW";
+                case Value::L_ELBOW:          return "L_ELBOW";
+                case Value::R_HIP_YAW:        return "R_HIP_YAW";
+                case Value::L_HIP_YAW:        return "L_HIP_YAW";
+                case Value::R_HIP_ROLL:       return "R_HIP_ROLL";
+                case Value::L_HIP_ROLL:       return "L_HIP_ROLL";
+                case Value::R_HIP_PITCH:      return "R_HIP_PITCH";
+                case Value::L_HIP_PITCH:      return "L_HIP_PITCH";
+                case Value::R_KNEE:           return "R_KNEE";
+                case Value::L_KNEE:           return "L_KNEE";
+                case Value::R_ANKLE_PITCH:    return "R_ANKLE_PITCH";
+                case Value::L_ANKLE_PITCH:    return "L_ANKLE_PITCH";
+                case Value::R_ANKLE_ROLL:     return "R_ANKLE_ROLL";
+                case Value::L_ANKLE_ROLL:     return "L_ANKLE_ROLL";
+                case Value::HEAD_YAW:         return "HEAD_YAW";
+                case Value::HEAD_PITCH:       return "HEAD_PITCH";
+                case Value::NUMBER_OF_SERVOS: return "NUMBER_OF_SERVOS";
+                default:
+                    throw std::runtime_error("enum ServoID's value is corrupt, unknown value stored");
             }
         }
 
+        const ServoID& ServoID::operator ++() { 
+            value = static_cast<Value>(static_cast<int>(value) + 1);
+            return *this;
+        }
 
+        const ServoID& ServoID::operator --() { 
+            value = static_cast<Value>(static_cast<int>(value) - 1);
+            return *this;
+        }
+
+        const ServoID ServoID::operator ++(int) { 
+            ServoID temp = *this;
+            value = static_cast<Value>(static_cast<int>(value) + 1);
+            return temp;
+        }
+
+        const ServoID ServoID::operator --(int) { 
+            ServoID temp = *this;
+            value = static_cast<Value>(static_cast<int>(value) - 1);
+            return temp;
+        }
     }
 }

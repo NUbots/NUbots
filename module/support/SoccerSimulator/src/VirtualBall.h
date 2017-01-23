@@ -23,9 +23,9 @@
 #include <random>
 #include <armadillo>
 
-#include "message/vision/VisionObjects.h"
 #include "message/input/CameraParameters.h"
 #include "message/input/Sensors.h"
+#include "message/vision/VisionObjects.h"
 
 #include "utility/math/matrix/Transform2D.h"
 

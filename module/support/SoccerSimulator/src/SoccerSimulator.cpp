@@ -44,7 +44,6 @@ namespace support {
 
     using extension::Configuration;
 
-    using ServoID = message::input::Sensors::ServoID::Value;
     using message::platform::darwin::ButtonMiddleDown;
     using message::input::Sensors;
     using message::input::CameraParameters;

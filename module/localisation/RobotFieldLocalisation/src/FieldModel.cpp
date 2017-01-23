@@ -19,6 +19,8 @@
  */
 
 #include "FieldModel.h"
+
+#include "utility/input/ServoID.h"
 #include "utility/math/matrix/Rotation3D.h"
 #include "utility/math/matrix/Transform3D.h"
 #include "utility/math/matrix/Transform2D.h"
@@ -34,7 +36,7 @@ namespace module {
         using utility::math::vision::cameraSpaceGoalProjection;
         using message::support::FieldDescription;
         using message::input::Sensors;
-        using ServoID             = message::input::Sensors::ServoID::Value;
+        using ServoID             = utility::input::ServoID;
         using GoalSide            = message::vision::Goal::Side::Value;
         using GoalTeam            = message::vision::Goal::Team::Value;
         using GoalMeasurementType = message::vision::Goal::MeasurementType;

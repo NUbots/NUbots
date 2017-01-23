@@ -33,6 +33,7 @@
 #include "message/input/Sensors.h"
 
 #include "utility/behaviour/Action.h"
+#include "utility/input/ServoID.h"
 
 namespace module {
     namespace behaviour {
@@ -53,7 +54,7 @@ namespace module {
             , kill()
             , completed() {}
 
-            Request(size_t id, std::string name, callback start, callback kill, std::function<void (std::set<message::input::Sensors::ServoID::Value>)> completed)
+            Request(size_t id, std::string name, callback start, callback kill, std::function<void (std::set<utility::input::ServoID>)> completed)
             : id(id)
             , name(name)
             , active(false)
@@ -85,7 +86,7 @@ namespace module {
             /// The callback to execute when a new limb is started
             callback start;
             callback kill;
-            std::function<void (std::set<message::input::Sensors::ServoID::Value>)> completed;
+            std::function<void (std::set<utility::input::ServoID>)> completed;
         };
 
         struct RequestItem {

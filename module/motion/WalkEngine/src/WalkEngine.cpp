@@ -34,7 +34,7 @@ namespace motion
 /*=======================================================================================================*/
 //      UTILIZATION REFERENCE(S)
 /*=======================================================================================================*/
-    using ServoID = message::input::Sensors::ServoID::Value;
+    using ServoID = utility::input::ServoID;
     using message::input::Sensors;
 
     using message::behaviour::ServoCommand;
@@ -375,31 +375,31 @@ namespace motion
         gainRLeg = servos_gain["right_leg"].as<Expression>();
         gainHead = servos_gain["head"].as<Expression>();
   
-        for(ServoID i = ServoID(0); i < ServoID::NUMBER_OF_SERVOS; i = ServoID(int(i) + 1))
+        for(ServoID i = 0; i < ServoID::NUMBER_OF_SERVOS; i++)
         {
             if(int(i) < 6)
             {
-                jointGains[i]   = gainRArm;              
-                i = ServoID(int(i) + 1);
-                jointGains[i]   = gainLArm;               
+                jointGains[i] = gainRArm;
+                i++;
+                jointGains[i] = gainLArm;
             } 
             else if(int(i) < 18)
             {
-                jointGains[i]   = gainRLeg;               
-                i = ServoID(int(i) + 1);
-                jointGains[i]   = gainLLeg;            
+                jointGains[i] = gainRLeg;
+                i++;
+                jointGains[i] = gainLLeg;
             }
             else
             {
-                jointGains[i]   = gainHead;               
+                jointGains[i] = gainHead;
             }
         }
 
         for(auto& gain : servos["gains"])
         {
             float p = gain["p"].as<Expression>();
-            ServoID sr = utility::input::idFromPartialString(gain["id"].as<std::string>(), utility::input::ServoSide::RIGHT);
-            ServoID sl = utility::input::idFromPartialString(gain["id"].as<std::string>(), utility::input::ServoSide::LEFT);
+            ServoID sr(gain["id"].as<std::string>(), utility::input::ServoSide::RIGHT);
+            ServoID sl(gain["id"].as<std::string>(), utility::input::ServoSide::LEFT);
             servoControlPGains[sr] = p;
             servoControlPGains[sl] = p;
         }       

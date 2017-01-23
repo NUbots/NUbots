@@ -32,6 +32,7 @@
 
 
 #include "utility/behaviour/Action.h"
+#include "utility/input/ServoID.h"
 #include "utility/math/matrix/Transform3D.h"
 #include "utility/motion/InverseKinematics.h"
 #include "utility/nubugger/NUhelpers.h"
@@ -45,7 +46,7 @@ namespace motion {
 
     using LimbID = message::behaviour::Subsumption::Limb::Value;
     using message::input::Sensors;
-    using ServoID = message::input::Sensors::ServoID::Value;
+    using ServoID = utility::input::ServoID;
     using message::motion::StopCommand;
     using message::motion::KickCommand;
     using message::motion::IKKickParams;

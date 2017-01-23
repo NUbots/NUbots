@@ -28,6 +28,7 @@
 #include "message/input/Sensors.h"
 
 #include "utility/behaviour/Action.h"
+#include "utility/input/ServoID.h"
 #include "utility/motion/Script.h"
 #include "utility/support/eigen_armadillo.h"
 
@@ -41,12 +42,13 @@ namespace module {
 
             using extension::Configuration;
 
+            using LimbID = message::behaviour::Subsumption::Limb::Value;
             using message::input::Sensors;
-            using ServoID = message::input::Sensors::ServoID::Value;
+
             using utility::motion::ExecuteScriptByName;
             using utility::behaviour::RegisterAction;
             using utility::behaviour::ActionPriorites;
-            using LimbID = message::behaviour::Subsumption::Limb::Value;
+            using ServoID = utility::input::ServoID;
 
             FallingRelax::FallingRelax(std::unique_ptr<NUClear::Environment> environment)
                 : Reactor(std::move(environment))

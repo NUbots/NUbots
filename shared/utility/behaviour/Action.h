@@ -22,13 +22,13 @@
 
 #include <nuclear>
 #include "message/behaviour/Subsumption.h"
-#include "message/input/Sensors.h"
+#include "utility/input/ServoID.h"
 
 namespace utility {
     namespace behaviour {
 
         using LimbID  = message::behaviour::Subsumption::Limb::Value;
-        using ServoID = message::input::Sensors::ServoID::Value;
+        using ServoID = utility::input::ServoID;
 
         struct RegisterAction {
 

@@ -21,13 +21,12 @@ syntax = "proto3";
 package message.behaviour;
 
 import "google/protobuf/timestamp.proto";
-import "message/input/Sensors.proto";
 
 message ServoCommand {
-    uint64                      source   = 1;
-    google.protobuf.Timestamp   time     = 2;
-    input.Sensors.ServoID id       = 3;
-    float                       position = 4;
-    float                       gain     = 5;
-    float                       torque   = 6;
+    uint64                    source   = 1;
+    google.protobuf.Timestamp time     = 2;
+    uint32                    id       = 3;
+    float                     position = 4;
+    float                     gain     = 5;
+    float                     torque   = 6;
 }

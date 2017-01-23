@@ -42,7 +42,7 @@ namespace module {
         using message::support::SaveConfiguration;
         using utility::support::Expression;
 
-        using ServoID = message::input::Sensors::ServoID::Value;
+        //using ServoID = utility::input::ServoID;
         using Colour  = utility::vision::Colour;
         using Pixel   = utility::vision::Pixel;
 

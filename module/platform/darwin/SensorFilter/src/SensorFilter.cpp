@@ -19,13 +19,15 @@
 
 #include "SensorFilter.h"
 
+#include "extension/Configuration.h"
+
+#include "message/input/CameraParameters.h"
+#include "message/input/Sensors.h"
+//#include "message/localisation/ResetRobotHypotheses.h"
 #include "message/platform/darwin/DarwinSensors.h"
+
 #include "utility/input/ServoID.h"
 #include "utility/input/LimbID.h"
-#include "message/input/CameraParameters.h"
-#include "extension/Configuration.h"
-//#include "message/localisation/ResetRobotHypotheses.h"
-
 #include "utility/math/geometry/UnitQuaternion.h"
 #include "utility/math/matrix/Rotation2D.h"
 #include "utility/motion/ForwardKinematics.h"
@@ -49,7 +51,7 @@ namespace module {
             using message::input::Sensors;
             using message::input::CameraParameters;
             using utility::input::ServoSide;
-            using ServoID = message::input::Sensors::ServoID::Value;
+            using ServoID = utility::input::ServoID;
             using utility::input::LimbID;
             //using message::localisation::ResetRobotHypotheses;
             using utility::nubugger::graph;
@@ -293,16 +295,16 @@ namespace module {
                     }
 
                     // Read through all of our sensors
-                    for(uint i = 0; i < 20; ++i) 
+                    for(uint32_t i = 0; i < 20; ++i) 
                     {
-                        auto& original = utility::platform::darwin::getDarwinServo(ServoID(i), input);
+                        auto& original = utility::platform::darwin::getDarwinServo(i, input);
                         auto& error = original.errorFlags;
 
                         // Check for an error on the servo and report it
                         while(error != DarwinSensors::Error::OK) 
                         {
                             std::stringstream s;
-                            s << "Error on Servo " << (i + 1) << " (" << utility::input::stringFromId(ServoID(i)) << "):";
+                            s << "Error on Servo " << (i + 1) << " (" << std::string(ServoID(i)) << "):";
 
                             if(error & DarwinSensors::Error::INPUT_VOLTAGE) {
                                 s << " Input Voltage - " << original.voltage;
@@ -338,15 +340,15 @@ namespace module {
                             // Add the sensor values to the system properly
                             sensors->servo.push_back({
                                 error,
-                                static_cast<ServoID>(i),
+                                i,
                                 original.torqueEnabled,
                                 original.pGain,
                                 original.iGain,
                                 original.dGain,
                                 original.goalPosition,
                                 original.movingSpeed,
-                                previousSensors->servo[i].present_position,
-                                previousSensors->servo[i].present_velocity,
+                                previousSensors->servo[i].presentPosition,
+                                previousSensors->servo[i].presentVelocity,
                                 previousSensors->servo[i].load,
                                 previousSensors->servo[i].voltage,
                                 previousSensors->servo[i].temperature
@@ -358,7 +360,7 @@ namespace module {
                             // Add the sensor values to the system properly
                             sensors->servo.push_back({
                                 error,
-                                static_cast<ServoID>(i),
+                                i,
                                 original.torqueEnabled,
                                 original.pGain,
                                 original.iGain,
@@ -440,28 +442,28 @@ namespace module {
                     {
                         // Use our virtual load sensor class to work out if our foot is down
                         arma::vec leftFootFeatureVec = {
-                              sensors->servo[size_t(ServoID::L_HIP_PITCH)].present_velocity
-                            , sensors->servo[size_t(ServoID::L_HIP_PITCH)].present_velocity - previousSensors->servo[size_t(ServoID::L_HIP_PITCH)].present_velocity
-                            , sensors->servo[size_t(ServoID::L_HIP_PITCH)].load
-                            , sensors->servo[size_t(ServoID::L_KNEE)].present_velocity
-                            , sensors->servo[size_t(ServoID::L_KNEE)].present_velocity - previousSensors->servo[size_t(ServoID::L_KNEE)].present_velocity
-                            , sensors->servo[size_t(ServoID::L_KNEE)].load
-                            , sensors->servo[size_t(ServoID::L_ANKLE_PITCH)].present_velocity
-                            , sensors->servo[size_t(ServoID::L_ANKLE_PITCH)].present_velocity - previousSensors->servo[size_t(ServoID::L_ANKLE_PITCH)].present_velocity
-                            , sensors->servo[size_t(ServoID::L_ANKLE_PITCH)].load
+                              sensors->servo[ServoID::L_HIP_PITCH].presentVelocity
+                            , sensors->servo[ServoID::L_HIP_PITCH].presentVelocity - previousSensors->servo[ServoID::L_HIP_PITCH].presentVelocity
+                            , sensors->servo[ServoID::L_HIP_PITCH].load
+                            , sensors->servo[ServoID::L_KNEE].presentVelocity
+                            , sensors->servo[ServoID::L_KNEE].presentVelocity - previousSensors->servo[ServoID::L_KNEE].presentVelocity
+                            , sensors->servo[ServoID::L_KNEE].load
+                            , sensors->servo[ServoID::L_ANKLE_PITCH].presentVelocity
+                            , sensors->servo[ServoID::L_ANKLE_PITCH].presentVelocity - previousSensors->servo[ServoID::L_ANKLE_PITCH].presentVelocity
+                            , sensors->servo[ServoID::L_ANKLE_PITCH].load
                         };
                         sensors->leftFootDown = leftFootDown.updateFoot(leftFootFeatureVec);
 
                         arma::vec rightFootFeatureVec = {
-                              sensors->servo[size_t(ServoID::R_HIP_PITCH)].present_velocity
-                            , sensors->servo[size_t(ServoID::R_HIP_PITCH)].present_velocity - previousSensors->servo[size_t(ServoID::R_HIP_PITCH)].present_velocity
-                            , sensors->servo[size_t(ServoID::R_HIP_PITCH)].load
-                            , sensors->servo[size_t(ServoID::R_KNEE)].present_velocity
-                            , sensors->servo[size_t(ServoID::R_KNEE)].present_velocity - previousSensors->servo[size_t(ServoID::R_KNEE)].present_velocity
-                            , sensors->servo[size_t(ServoID::R_KNEE)].load
-                            , sensors->servo[size_t(ServoID::R_ANKLE_PITCH)].present_velocity
-                            , sensors->servo[size_t(ServoID::R_ANKLE_PITCH)].present_velocity - previousSensors->servo[size_t(ServoID::R_ANKLE_PITCH)].present_velocity
-                            , sensors->servo[size_t(ServoID::R_ANKLE_PITCH)].load
+                              sensors->servo[ServoID::R_HIP_PITCH].presentVelocity
+                            , sensors->servo[ServoID::R_HIP_PITCH].presentVelocity - previousSensors->servo[ServoID::R_HIP_PITCH].presentVelocity
+                            , sensors->servo[ServoID::R_HIP_PITCH].load
+                            , sensors->servo[ServoID::R_KNEE].presentVelocity
+                            , sensors->servo[ServoID::R_KNEE].presentVelocity - previousSensors->servo[ServoID::R_KNEE].presentVelocity
+                            , sensors->servo[ServoID::R_KNEE].load
+                            , sensors->servo[ServoID::R_ANKLE_PITCH].presentVelocity
+                            , sensors->servo[ServoID::R_ANKLE_PITCH].presentVelocity - previousSensors->servo[ServoID::R_ANKLE_PITCH].presentVelocity
+                            , sensors->servo[ServoID::R_ANKLE_PITCH].load
                         };
                         sensors->rightFootDown = rightFootDown.updateFoot(rightFootFeatureVec);
                     }

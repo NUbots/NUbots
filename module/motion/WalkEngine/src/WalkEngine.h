@@ -34,7 +34,6 @@
 #include "message/behaviour/ServoCommand.h"
 #include "message/behaviour/Subsumption.h"
 
-#include "message/input/Sensors.h"
 #include "message/input/PushDetection.h"
 #include "message/input/PostureRecognition.h"
 
@@ -92,8 +91,7 @@ namespace motion
     private:
         using LimbID         = message::behaviour::Subsumption::Limb::Value;
         using ServoCommand   = message::behaviour::ServoCommand;
-        using Sensors        = message::input::Sensors;
-        using ServoID        = message::input::Sensors::ServoID::Value;
+        using ServoID        = utility::input::ServoID;
         using Transform2D    = utility::math::matrix::Transform2D;
         using Transform3D    = utility::math::matrix::Transform3D;
         using UnitQuaternion = utility::math::geometry::UnitQuaternion;

@@ -42,7 +42,7 @@ namespace motion {
 namespace kinematics {
 
     using LimbID  = message::behaviour::Subsumption::Limb::Value;
-    using ServoID = message::input::Sensors::ServoID::Value;
+    using ServoID = utility::input::ServoID;
     using message::input::Sensors;
     using message::motion::KinematicsModel;
     using BodySide = message::motion::BodySide::Value;
@@ -91,8 +91,8 @@ namespace kinematics {
 
     inline std::map<ServoID, utility::math::matrix::Transform3D> calculateHeadJointPosition(const KinematicsModel& model, const Sensors& sensors, ServoID servoID){
         return calculateHeadJointPosition(model, 
-                                          sensors.servo[static_cast<int>(ServoID::HEAD_PITCH)].present_position,
-                                          sensors.servo[static_cast<int>(ServoID::HEAD_YAW)  ].present_position,
+                                          sensors.servo[static_cast<int>(ServoID::HEAD_PITCH)].presentPosition,
+                                          sensors.servo[static_cast<int>(ServoID::HEAD_YAW)  ].presentPosition,
                                           servoID);
     }
     /*! @brief
@@ -109,19 +109,19 @@ namespace kinematics {
         int negativeIfRight = 1;
 
         if(static_cast<bool>(isLeft)){
-            HIP_YAW = ServoID::L_HIP_YAW;
-            HIP_ROLL = ServoID::L_HIP_ROLL;
-            HIP_PITCH = ServoID::L_HIP_PITCH;
-            KNEE = ServoID::L_KNEE;
+            HIP_YAW     = ServoID::L_HIP_YAW;
+            HIP_ROLL    = ServoID::L_HIP_ROLL;
+            HIP_PITCH   = ServoID::L_HIP_PITCH;
+            KNEE        = ServoID::L_KNEE;
             ANKLE_PITCH = ServoID::L_ANKLE_PITCH;
-            ANKLE_ROLL = ServoID::L_ANKLE_ROLL;
+            ANKLE_ROLL  = ServoID::L_ANKLE_ROLL;
         } else {
-            HIP_YAW = ServoID::R_HIP_YAW;
-            HIP_ROLL = ServoID::R_HIP_ROLL;
-            HIP_PITCH = ServoID::R_HIP_PITCH;
-            KNEE = ServoID::R_KNEE;
-            ANKLE_PITCH = ServoID::R_ANKLE_PITCH;
-            ANKLE_ROLL = ServoID::R_ANKLE_ROLL;
+            HIP_YAW         = ServoID::R_HIP_YAW;
+            HIP_ROLL        = ServoID::R_HIP_ROLL;
+            HIP_PITCH       = ServoID::R_HIP_PITCH;
+            KNEE            = ServoID::R_KNEE;
+            ANKLE_PITCH     = ServoID::R_ANKLE_PITCH;
+            ANKLE_ROLL      = ServoID::R_ANKLE_ROLL;
             negativeIfRight = -1;
         }
 
@@ -134,14 +134,14 @@ namespace kinematics {
         //Rotate to face down the leg (see above for definitions of terms, including 'facing')
         runningTransform = runningTransform.rotateY(M_PI_2);
         //Using right hand rule along global z gives positive direction of yaw:
-        runningTransform = runningTransform.rotateX(-sensors.servo[static_cast<int>(HIP_YAW)].present_position);
+        runningTransform = runningTransform.rotateX(-sensors.servo[static_cast<int>(HIP_YAW)].presentPosition);
         //Return basis facing from body to hip centre (down) with z aligned with the axis of the hip roll motor axis. Position at hip joint
         positions[HIP_YAW] = runningTransform;
         if(servoID == HIP_YAW) {
             return positions;
         }
 
-        runningTransform = runningTransform.rotateZ(sensors.servo[static_cast<int>(HIP_ROLL)].present_position);
+        runningTransform = runningTransform.rotateZ(sensors.servo[static_cast<int>(HIP_ROLL)].presentPosition);
         //Return basis facing down leg plane, with z oriented through axis of roll motor. Position still hip joint
         positions[HIP_ROLL] = runningTransform;
         if(servoID == HIP_ROLL) {
@@ -149,7 +149,7 @@ namespace kinematics {
         }
 
         //Rotate to face down upper leg
-        runningTransform = runningTransform.rotateY(sensors.servo[static_cast<int>(HIP_PITCH)].present_position);
+        runningTransform = runningTransform.rotateY(sensors.servo[static_cast<int>(HIP_PITCH)].presentPosition);
         //Translate down upper leg
         runningTransform = runningTransform.translateX(model.leg.UPPER_LEG_LENGTH);
         //Return basis faces down upper leg, with z out of front of thigh. Pos = knee axis centre
@@ -160,7 +160,7 @@ namespace kinematics {
 
 
         //Rotate to face down lower leg
-        runningTransform = runningTransform.rotateY(sensors.servo[static_cast<int>(KNEE)].present_position);
+        runningTransform = runningTransform.rotateY(sensors.servo[static_cast<int>(KNEE)].presentPosition);
         //Translate down lower leg
         runningTransform = runningTransform.translateX(model.leg.UPPER_LEG_LENGTH);
         //Return basis facing down lower leg, with z out of front of shin. Pos = ankle axis centre
@@ -171,7 +171,7 @@ namespace kinematics {
 
 
         //Rotate to face down foot (pitch)
-        runningTransform = runningTransform.rotateY(sensors.servo[static_cast<int>(ANKLE_PITCH)].present_position);
+        runningTransform = runningTransform.rotateY(sensors.servo[static_cast<int>(ANKLE_PITCH)].presentPosition);
         //Return basis facing pitch down to foot with z out the front of the foot. Pos = ankle axis centre
         positions[ANKLE_PITCH] = runningTransform;
         if(servoID == ANKLE_PITCH) {
@@ -179,7 +179,7 @@ namespace kinematics {
         }
 
         //Rotate to face down foot (roll)
-        runningTransform = runningTransform.rotateZ(sensors.servo[static_cast<int>(ANKLE_ROLL)].present_position);
+        runningTransform = runningTransform.rotateZ(sensors.servo[static_cast<int>(ANKLE_ROLL)].presentPosition);
         //Rotate so x faces toward toes
         runningTransform = runningTransform.rotateY(-M_PI_2);
         //Translate to ground
@@ -204,18 +204,18 @@ namespace kinematics {
 
         if(static_cast<bool>(isLeft)){
             SHOULDER_PITCH = ServoID::L_SHOULDER_PITCH;
-            SHOULDER_ROLL = ServoID::L_SHOULDER_ROLL;
-            ELBOW = ServoID::L_ELBOW;
+            SHOULDER_ROLL  = ServoID::L_SHOULDER_ROLL;
+            ELBOW          = ServoID::L_ELBOW;
         } else {
-            SHOULDER_PITCH = ServoID::R_SHOULDER_PITCH;
-            SHOULDER_ROLL = ServoID::R_SHOULDER_ROLL;
-            ELBOW = ServoID::R_ELBOW;
+            SHOULDER_PITCH  = ServoID::R_SHOULDER_PITCH;
+            SHOULDER_ROLL   = ServoID::R_SHOULDER_ROLL;
+            ELBOW           = ServoID::R_ELBOW;
             negativeIfRight = -1;
         }
 
-        float shoulder_pitch = sensors.servo[static_cast<int>(SHOULDER_PITCH)].present_position;
-        float shoulder_roll = sensors.servo[static_cast<int>(SHOULDER_ROLL)].present_position;
-        float elbow = sensors.servo[static_cast<int>(ELBOW)].present_position;
+        float shoulder_pitch = sensors.servo[static_cast<int>(SHOULDER_PITCH)].presentPosition;
+        float shoulder_roll = sensors.servo[static_cast<int>(SHOULDER_ROLL)].presentPosition;
+        float elbow = sensors.servo[static_cast<int>(ELBOW)].presentPosition;
 
         // std::cout << "shoulder_pitch = " << shoulder_pitch << std::endl;
         // std::cout << "shoulder_roll = " << shoulder_roll << std::endl;
@@ -272,7 +272,7 @@ namespace kinematics {
     /*! @brief
     */
     inline std::map<ServoID, utility::math::matrix::Transform3D> calculatePosition(const KinematicsModel& model, const Sensors& sensors, ServoID servoID) {
-        switch(servoID) {
+        switch(servoID.value) {
             case ServoID::HEAD_YAW:
             case ServoID::HEAD_PITCH:
                 return calculateHeadJointPosition(model,sensors, servoID);
@@ -305,11 +305,11 @@ namespace kinematics {
 
 
     inline std::map<ServoID, utility::math::matrix::Transform3D> calculateAllPositions(const KinematicsModel& model, const Sensors& sensors) {
-        std::map<ServoID, utility::math::matrix::Transform3D> result = calculatePosition(model,sensors, ServoID::L_ANKLE_ROLL);
+        std::map<ServoID, utility::math::matrix::Transform3D> result            = calculatePosition(model,sensors, ServoID::L_ANKLE_ROLL);
         std::map<ServoID, utility::math::matrix::Transform3D> rightLegPositions = calculatePosition(model,sensors, ServoID::R_ANKLE_ROLL);
-        std::map<ServoID, utility::math::matrix::Transform3D> headPositions = calculatePosition(model,sensors, ServoID::HEAD_PITCH);
-        std::map<ServoID, utility::math::matrix::Transform3D> leftArm = calculatePosition(model,sensors, ServoID::L_ELBOW);
-        std::map<ServoID, utility::math::matrix::Transform3D> rightArm = calculatePosition(model,sensors, ServoID::R_ELBOW);
+        std::map<ServoID, utility::math::matrix::Transform3D> headPositions     = calculatePosition(model,sensors, ServoID::HEAD_PITCH);
+        std::map<ServoID, utility::math::matrix::Transform3D> leftArm           = calculatePosition(model,sensors, ServoID::L_ELBOW);
+        std::map<ServoID, utility::math::matrix::Transform3D> rightArm          = calculatePosition(model,sensors, ServoID::R_ELBOW);
         result.insert(leftArm.begin(), leftArm.end());
         result.insert(rightArm.begin(), rightArm.end());
         result.insert(rightLegPositions.begin(), rightLegPositions.end());

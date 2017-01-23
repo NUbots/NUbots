@@ -28,6 +28,7 @@
 #include "message/motion/KinematicsModels.h"
 
 #include "utility/behaviour/Action.h"
+#include "utility/input/ServoID.h"
 #include "utility/math/coordinates.h"
 #include "utility/math/matrix/Transform3D.h"
 #include "utility/motion/InverseKinematics.h"
@@ -41,7 +42,7 @@ namespace module
 namespace motion 
 {
         using utility::nubugger::graph;
-        using ServoID = message::input::Sensors::ServoID::Value;
+        using ServoID = utility::input::ServoID;
         using LimbID = message::behaviour::Subsumption::Limb::Value;
         using message::input::Sensors;
         using utility::behaviour::RegisterAction;

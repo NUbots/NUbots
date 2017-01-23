@@ -22,19 +22,78 @@
 
 #include <string>
 
-#include "message/input/Sensors.h"
-
 namespace utility {
     namespace input {
 
         enum ServoSide {
             RIGHT = 0,
-            LEFT = 1
+            LEFT  = 1
         };
 
-        const std::string stringFromId(const message::input::Sensors::ServoID::Value& id);
-        message::input::Sensors::ServoID::Value idFromString(const std::string& str);
-        message::input::Sensors::ServoID::Value idFromPartialString(const std::string& str, const ServoSide& side);
+        struct ServoID {
+            enum Value {
+                R_SHOULDER_PITCH = 0,
+                L_SHOULDER_PITCH = 1,
+                R_SHOULDER_ROLL  = 2,
+                L_SHOULDER_ROLL  = 3,
+                R_ELBOW          = 4,
+                L_ELBOW          = 5,
+                R_HIP_YAW        = 6,
+                L_HIP_YAW        = 7,
+                R_HIP_ROLL       = 8,
+                L_HIP_ROLL       = 9,
+                R_HIP_PITCH      = 10,
+                L_HIP_PITCH      = 11,
+                R_KNEE           = 12,
+                L_KNEE           = 13,
+                R_ANKLE_PITCH    = 14,
+                L_ANKLE_PITCH    = 15,
+                R_ANKLE_ROLL     = 16,
+                L_ANKLE_ROLL     = 17,
+                HEAD_YAW         = 18,
+                HEAD_PITCH       = 19,
+                NUMBER_OF_SERVOS = 20
+            };
+            Value value;
+        
+            // Constructors
+	        ServoID()                   : value(Value::R_SHOULDER_PITCH) {}
+	        ServoID(uint8_t const& v)   : value(static_cast<Value>(v)) {}
+	        ServoID(uint32_t const& v)  : value(static_cast<Value>(v)) {}
+            ServoID(uint64_t const& v)  : value(static_cast<Value>(v)) {}
+	        ServoID(int const& v)       : value(static_cast<Value>(v)) {}
+	        ServoID(Value const& value) : value(value) {}
+            ServoID(std::string const& str);
+            ServoID(std::string const& str, ServoSide const& side);
+        
+            // Operators
+            bool operator <(ServoID const& other)         const { return value <  other.value; }
+            bool operator >(ServoID const& other)         const { return value >  other.value; }
+            bool operator <=(ServoID const& other)        const { return value <= other.value; }
+            bool operator >=(ServoID const& other)        const { return value >= other.value; }
+            bool operator ==(ServoID const& other)        const { return value == other.value; }
+            bool operator !=(ServoID const& other)        const { return value != other.value; }
+            bool operator <(ServoID::Value const& other)  const { return value <  other;       }
+            bool operator >(ServoID::Value const& other)  const { return value >  other;       }
+            bool operator <=(ServoID::Value const& other) const { return value <= other;       }
+            bool operator >=(ServoID::Value const& other) const { return value >= other;       }
+            bool operator ==(ServoID::Value const& other) const { return value == other;       }
+            bool operator !=(ServoID::Value const& other) const { return value != other;       }
+
+            // Prefix and postfix operators.
+            const ServoID& operator ++();
+            const ServoID& operator --();
+            const ServoID  operator ++(int);
+            const ServoID  operator --(int);
+        
+            // Conversions
+            operator Value()    const { return value; }
+            operator uint8_t()  const { return value; }
+            operator uint32_t() const { return value; }
+            operator uint64_t() const { return value; }
+            operator int()      const { return value; }
+            operator std::string() const;
+        };	
     }
 }
 

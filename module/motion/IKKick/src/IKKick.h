@@ -25,7 +25,6 @@
 #include "IKKickControllers.h"
 
 #include "message/behaviour/Subsumption.h"
-#include "message/input/Sensors.h"
 #include "message/motion/KickCommand.h"
 
 #include "utility/motion/Balance.h"

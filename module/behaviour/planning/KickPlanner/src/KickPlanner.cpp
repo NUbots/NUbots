@@ -46,7 +46,6 @@ namespace planning {
     using extension::Configuration;
 
     using LimbID  = message::behaviour::Subsumption::Limb::Value;
-    using ServoID = message::input::Sensors::ServoID::Value;
     using message::behaviour::KickPlan;
     using KickType = message::behaviour::KickPlan::KickType;
     using message::behaviour::WantsToKick;

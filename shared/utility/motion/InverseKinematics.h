@@ -32,6 +32,7 @@
 #include "utility/motion/ForwardKinematics.h"
 #include "message/behaviour/Subsumption.h"
 #include "message/input/Sensors.h"
+#include "utility/input/ServoID.h"
 #include "utility/math/angle.h"
 #include "utility/behaviour/Action.h"
 
@@ -42,7 +43,7 @@ namespace motion {
 namespace kinematics {
     
     using LimbID  = message::behaviour::Subsumption::Limb::Value;
-    using ServoID = message::input::Sensors::ServoID::Value;
+    using ServoID = utility::input::ServoID;
 
     /*! @brief Calculates the leg joints for a given input ankle position.
             The robot coordinate system has origin a distance DISTANCE_FROM_BODY_TO_HIP_JOINT above the midpoint of the hips.

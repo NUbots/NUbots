@@ -26,6 +26,7 @@
 #include "message/input/Sensors.h"
 #include "message/support/FieldDescription.h"
 
+#include "utility/input/ServoID.h"
 #include "utility/math/coordinates.h"
 #include "utility/math/geometry/Quad.h"
 #include "utility/localisation/transform.h"
@@ -39,7 +40,7 @@ namespace support {
     using message::vision::Goal;
     using message::input::CameraParameters;
     using message::support::FieldDescription;
-    using ServoID = message::input::Sensors::ServoID::Value;
+    using ServoID = utility::input::ServoID;
 
     using utility::math::vision::cameraSpaceGoalProjection;
     using utility::math::matrix::Transform2D;

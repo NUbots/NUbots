@@ -21,6 +21,7 @@
 
 #include <armadillo>
 
+#include "utility/input/ServoID.h"
 #include "utility/math/matrix/Rotation3D.h"
 #include "utility/math/coordinates.h"
 #include "utility/math/vision.h"
@@ -32,7 +33,7 @@ namespace support {
     using message::input::CameraParameters;
     using message::input::Sensors;
     using message::vision::Ball;
-    using ServoID = message::input::Sensors::ServoID::Value;
+    using ServoID = utility::input::ServoID;
 
     using utility::math::matrix::Transform2D;
     using utility::math::matrix::Transform3D;

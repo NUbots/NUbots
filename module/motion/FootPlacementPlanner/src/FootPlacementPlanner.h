@@ -40,6 +40,7 @@
 #include "message/motion/ServoTarget.h"
 
 #include "utility/behaviour/Action.h"
+
 #include "utility/math/angle.h"
 #include "utility/math/matrix/Rotation3D.h"
 #include "utility/math/geometry/UnitQuaternion.h"
@@ -81,7 +82,6 @@ namespace motion
     	using LimbID         = message::behaviour::Subsumption::Limb::Value;
         using ServoCommand   = message::behaviour::ServoCommand;
         using Sensors        = message::input::Sensors;
-        using ServoID        = message::input::Sensors::ServoID::Value;
         using Transform2D    = utility::math::matrix::Transform2D;
         using Transform3D    = utility::math::matrix::Transform3D;
         using UnitQuaternion = utility::math::geometry::UnitQuaternion;

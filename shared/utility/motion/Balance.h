@@ -29,7 +29,7 @@
 #include "message/input/Sensors.h"
 #include "message/motion/KinematicsModels.h"
 #include "utility/input/LimbID.h"
-#include "utility/input/ServoID.h"
+//#include "utility/input/ServoID.h"
 #include "extension/Configuration.h"
 #include <yaml-cpp/yaml.h>
 

@@ -24,10 +24,10 @@
 
 #include "message/behaviour/ServoCommand.h"
 #include "message/behaviour/Subsumption.h"
-#include "message/input/Sensors.h"
 #include "message/motion/WalkCommand.h"
 
 #include "utility/behaviour/Action.h"
+#include "utility/input/ServoID.h"
 #include "utility/motion/Script.h"
 
 namespace module {
@@ -40,7 +40,7 @@ namespace skills {
     using extension::Configuration;
 
     using LimbID  = message::behaviour::Subsumption::Limb::Value;
-    using ServoID = message::input::Sensors::ServoID::Value;
+    using ServoID = utility::input::ServoID;
 
     using message::motion::KickScriptCommand;
     using message::motion::KickFinished;

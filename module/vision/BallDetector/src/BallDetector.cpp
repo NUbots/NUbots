@@ -46,8 +46,6 @@ namespace vision {
     using extension::Configuration;
 
     using message::input::CameraParameters;
-    using message::input::Sensors;
-    using ServoID = message::input::Sensors::ServoID::Value;
 
     using message::vision::ClassifiedImage;
     using message::vision::Ball;
@@ -57,6 +55,7 @@ namespace vision {
 
     using Plane = utility::math::geometry::Plane<3>;
 
+    using ServoID = utility::input::ServoID;
     using utility::math::vision::widthBasedDistanceToCircle;
     using utility::math::vision::projectCamToPlane;
     using utility::math::vision::imageToScreen;

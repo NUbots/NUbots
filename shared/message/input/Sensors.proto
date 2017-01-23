@@ -27,98 +27,68 @@ import "Matrix.proto";
 
 message Sensors {
 
-    enum ServoID {
-        R_SHOULDER_PITCH    = 0;
-        L_SHOULDER_PITCH    = 1;
-        R_SHOULDER_ROLL     = 2;
-        L_SHOULDER_ROLL     = 3;
-        R_ELBOW             = 4;
-        L_ELBOW             = 5;
-        R_HIP_YAW           = 6;
-        L_HIP_YAW           = 7;
-        R_HIP_ROLL          = 8;
-        L_HIP_ROLL          = 9;
-        R_HIP_PITCH         = 10;
-        L_HIP_PITCH         = 11;
-        R_KNEE              = 12;
-        L_KNEE              = 13;
-        R_ANKLE_PITCH       = 14;
-        L_ANKLE_PITCH       = 15;
-        R_ANKLE_ROLL        = 16;
-        L_ANKLE_ROLL        = 17;
-        HEAD_YAW            = 18;
-        HEAD_PITCH          = 19;
-        NUMBER_OF_SERVOS    = 20;
-    }
-
     // Because you can't have a enum type as the key in a map.
     message ServoIDKinematicsMap {
-        ServoID servoID    = 1;
-        mat44   kinematics = 2;
+        uint32 servoID    = 1;
+        mat44  kinematics = 2;
     }
 
     message Servo {
-        uint32 error_flags = 1;
-
-        ServoID id = 2;
-
-        bool enabled = 3;
-
-        float p_gain = 4;
-        float i_gain = 5;
-        float d_gain = 6;
-
-        float goal_position = 7;
-        float goal_velocity = 8;
-
-        float present_position = 9;
-        float present_velocity = 10;
-
-        float load = 11;
-        float voltage = 12;
-        float temperature = 13;
+        uint32 errorFlags      = 1;
+        uint32 id              = 2;
+        bool   enabled         = 3;
+        float  pGain           = 4;
+        float  iGain           = 5;
+        float  dGain           = 6;
+        float  goalPosition    = 7;
+        float  goalVelocity    = 8;
+        float  presentPosition = 9;
+        float  presentVelocity = 10;
+        float  load            = 11;
+        float  voltage         = 12;
+        float  temperature     = 13;
     }
 
     message Button {
-        uint32 id = 1;
-        bool value = 2;
+        uint32 id    = 1;
+        bool   value = 2;
     }
 
     message LED {
-        uint32 id = 1;
+        uint32 id     = 1;
         uint32 colour = 2;
     }
 
     message FSR {
-        repeated float value = 1 [packed=true];
-        vec2 centre = 2;
+        repeated float value  = 1 [packed=true];
+        vec2           centre = 2;
     }
 
-    google.protobuf.Timestamp timestamp             = 1;
-    vec3 accelerometer                              = 2;
-    vec3 gyroscope                                  = 3;
+    google.protobuf.Timestamp     timestamp               = 1;
+    vec3                          accelerometer           = 2;
+    vec3                          gyroscope               = 3;
 
     /// This is the transform from the odometry (world) space to robot space (=Htw). It measures the world in robot space.
-    mat44 world                                     = 4;
-    repeated FSR fsr                                = 5;
-    repeated Servo servo                            = 6;
-    repeated Button button                          = 7;
-    repeated LED led                                = 8;
-    float voltage                                   = 9;
-    float battery                                   = 10;
-    vec3 centreOfPressure                           = 11;
-    mat22 robotToIMU                                = 12;
+    mat44                         world                   = 4;
+    repeated FSR                  fsr                     = 5;
+    repeated Servo                servo                   = 6;
+    repeated Button               button                  = 7;
+    repeated LED                  led                     = 8;
+    float                         voltage                 = 9;
+    float                         battery                 = 10;
+    vec3                          centreOfPressure        = 11;
+    mat22                         robotToIMU              = 12;
 
     /// Percentage of the left foot that's considered "down" i.e. if 3/4 FSR sensors have weight this is 0.75
-    bool leftFootDown                               = 13;
-    bool rightFootDown                              = 14;
+    bool                          leftFootDown            = 13;
+    bool                          rightFootDown           = 14;
 
     // Because you can't have a enum type as the key in a map.
-    repeated ServoIDKinematicsMap forwardKinematics = 15;
-    float bodyCentreHeight                          = 16;
-    vec4 centreOfMass                               = 17;
-    mat44 orientationBodyToGround                   = 18;
-    mat44 orientationCamToGround                    = 19;
-    mat44 kinematicsBodyToGround                    = 20;
-    mat44 kinematicsCamToGround                     = 21;
+    repeated ServoIDKinematicsMap forwardKinematics       = 15;
+    float                         bodyCentreHeight        = 16;
+    vec4                          centreOfMass            = 17;
+    mat44                         orientationBodyToGround = 18;
+    mat44                         orientationCamToGround  = 19;
+    mat44                         kinematicsBodyToGround  = 20;
+    mat44                         kinematicsCamToGround   = 21;
 }

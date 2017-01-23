@@ -24,6 +24,7 @@
 #include <nuclear>
 #include "message/localisation/FieldObject.h"
 #include "message/input/Sensors.h"
+#include "utility/input/ServoID.h"
 #include "utility/math/matrix/Transform3D.h"
 #include "utility/math/matrix/Transform2D.h"
 #include "utility/math/geometry/Plane.h"
@@ -37,7 +38,7 @@ namespace utility {
 namespace math {
 namespace vision {
 
-    using ServoID = message::input::Sensors::ServoID::Value;
+    using ServoID = utility::input::ServoID;
 
     /**************************************************************
      *SLAME STUFF: TO BE REMOVED FOR GOOD STUFF BELOW (DO NOT USE)*

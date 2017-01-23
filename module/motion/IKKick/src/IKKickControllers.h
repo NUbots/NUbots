@@ -29,6 +29,7 @@
 #include "message/input/Sensors.h"
 #include "message/motion/KinematicsModels.h"
 
+#include "utility/input/ServoID.h"
 #include "utility/math/matrix/Transform3D.h"
 #include "utility/support/eigen_armadillo.h"
 #include "utility/support/yaml_armadillo.h"
@@ -154,12 +155,12 @@ namespace motion{
 			        for (const auto& entry : sensors.forwardKinematics)
 			        {
 			        	if ((supportFoot == message::behaviour::Subsumption::Limb::Value::LEFT_LEG) && 
-			        		(entry.servoID == message::input::Sensors::ServoID::Value::L_ANKLE_ROLL))
+			        		(entry.servoID == utility::input::ServoID::L_ANKLE_ROLL))
 			        	{
 			        		return utility::math::matrix::Transform3D(convert<double, 4, 4>(entry.kinematics)).i();
 			        	}
 			        	if ((supportFoot == message::behaviour::Subsumption::Limb::Value::RIGHT_LEG) && 
-			        		(entry.servoID == message::input::Sensors::ServoID::Value::R_ANKLE_ROLL))
+			        		(entry.servoID == utility::input::ServoID::R_ANKLE_ROLL))
 			        	{
 			        		return utility::math::matrix::Transform3D(convert<double, 4, 4>(entry.kinematics)).i();
 			        	}
@@ -182,7 +183,7 @@ namespace motion{
 						for (auto& servo : sensors.servo){
 							if(    int(servo.id) >= 6    //R_HIP_YAW
 								&& int(servo.id) <= 17){ //L_ANKLE_ROLL
-								servosAtGoal = servosAtGoal && std::fabs(servo.goal_position - servo.present_position) < servo_angle_threshold;
+								servosAtGoal = servosAtGoal && std::fabs(servo.goalPosition - servo.presentPosition) < servo_angle_threshold;
 							}
 						}
 

@@ -27,9 +27,10 @@ namespace module {
     namespace vision {
 
         using message::input::Image;
-        using ServoID = message::input::Sensors::ServoID::Value;
         using message::vision::LookUpTable;
         using message::vision::ClassifiedImage;
+
+        using ServoID = utility::input::ServoID;
         using utility::math::matrix::Rotation3D;
         using utility::math::matrix::Transform3D;
 

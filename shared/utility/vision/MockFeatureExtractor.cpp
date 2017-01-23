@@ -31,8 +31,6 @@ namespace utility {
 	namespace vision {
 		bool operator==(const MockFeatureExtractor::ExtractedFeature& lhs, const MockFeatureExtractor::ExtractedFeature& rhs){return (lhs.featureID == rhs.featureID);}
 
-		using ServodID = message::input::Sensors::ServoID::Value;
-
 		MockFeatureExtractor::MockFeatureExtractor()
 			 : numberOfFalseFeaturesDetected(1), MAX_DISTINCT_FALSE_FEATURES(0), mockFeatures(), FOV_X(0.0), FOV_Y(0.0) {}
 

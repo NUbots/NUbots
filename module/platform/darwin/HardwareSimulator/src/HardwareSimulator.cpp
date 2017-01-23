@@ -29,6 +29,7 @@
 #include "message/platform/darwin/DarwinSensors.h"
 #include "message/input/Sensors.h"
 
+#include "utility/input/ServoID.h"
 #include "utility/math/angle.h"
 #include "utility/support/yaml_armadillo.h"
 #include "utility/nubugger/NUhelpers.h"
@@ -43,7 +44,7 @@ namespace darwin {
 
     using message::platform::darwin::DarwinSensors;
     using message::motion::ServoTarget;
-    using ServoID = message::input::Sensors::ServoID::Value;
+    using ServoID = utility::input::ServoID;
     using message::input::Sensors;
 
     using utility::math::matrix::Transform3D;
@@ -120,7 +121,7 @@ namespace darwin {
 
         for (int i = 0; i < 20; ++i) {
             // Get a reference to the servo we are populating
-            DarwinSensors::Servo& servo = utility::platform::darwin::getDarwinServo(static_cast<ServoID>(i), sensors);
+            DarwinSensors::Servo& servo = utility::platform::darwin::getDarwinServo(i, sensors);
 
             // Error code
             servo.errorFlags = 0;
@@ -207,7 +208,7 @@ namespace darwin {
 
             for (int i = 0; i < 20; ++i) {
 
-                auto& servo = utility::platform::darwin::getDarwinServo(static_cast<ServoID>(i), sensors);
+                auto& servo = utility::platform::darwin::getDarwinServo(i, sensors);
                 float movingSpeed = servo.movingSpeed == 0 ? 0.1 : servo.movingSpeed / UPDATE_FREQUENCY;
                 movingSpeed = movingSpeed > 0.1 ? 0.1 : movingSpeed;
 
@@ -275,7 +276,7 @@ namespace darwin {
             for (auto& command : commands) {
 
                 // Calculate our moving speed
-                float diff = utility::math::angle::difference(command.position, utility::platform::darwin::getDarwinServo(static_cast<ServoID>(command.id), sensors).presentPosition);
+                float diff = utility::math::angle::difference(command.position, utility::platform::darwin::getDarwinServo(command.id, sensors).presentPosition);
                 NUClear::clock::duration duration = command.time - NUClear::clock::now();
 
                 float speed;
@@ -287,7 +288,7 @@ namespace darwin {
                 }
 
                 // Set our variables
-                auto& servo = utility::platform::darwin::getDarwinServo(static_cast<ServoID>(command.id), sensors);
+                auto& servo = utility::platform::darwin::getDarwinServo(command.id, sensors);
                 servo.movingSpeed = speed;
                 servo.goalPosition = utility::math::angle::normalizeAngle(command.position);
                 // std::cout << __LINE__ << std::endl;

@@ -23,14 +23,12 @@
 #include <chrono>
 #include <yaml-cpp/yaml.h>
 
-#include "message/input/Sensors.h"
-
 #include "utility/input/ServoID.h"
 
 namespace utility {
     namespace motion {
 
-        using ServoID = message::input::Sensors::ServoID::Value;
+        using ServoID = utility::input::ServoID;
 
         /**
          * TODO document
@@ -109,17 +107,17 @@ namespace YAML {
         static inline Node encode(const utility::motion::Script::Frame::Target& rhs) {
             Node node;
 
-            node["id"] = utility::input::stringFromId(rhs.id);
+            node["id"]       = std::string(rhs.id);
             node["position"] = rhs.position;
-            node["gain"] = rhs.gain;
-            node["torque"] = rhs.torque;
+            node["gain"]     = rhs.gain;
+            node["torque"]   = rhs.torque;
 
             return node;
         }
 
         static inline bool decode(const Node& node, utility::motion::Script::Frame::Target& rhs) {
 
-            rhs = { utility::input::idFromString(node["id"].as<std::string>())
+            rhs = { node["id"].as<std::string>()
                   , node["position"].as<float>(), node["gain"].as<float>()
                   , node["torque"] ? node["torque"].as<float>() : 100
                    };
@@ -133,7 +131,7 @@ namespace YAML {
             Node node;
 
             node["duration"] = std::chrono::duration_cast<std::chrono::milliseconds>(rhs.duration).count();
-            node["targets"] = rhs.targets;
+            node["targets"]  = rhs.targets;
 
             return node;
         }

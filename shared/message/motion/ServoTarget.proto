@@ -21,7 +21,6 @@ syntax = "proto3";
 package message.motion;
 
 import "google/protobuf/timestamp.proto";
-import "message/input/Sensors.proto";
 
 /**
  * TODO document
@@ -29,9 +28,9 @@ import "message/input/Sensors.proto";
  * @author Trent Houliston
  */
 message ServoTarget {
-    google.protobuf.Timestamp   time     = 1;
-    input.Sensors.ServoID id       = 2;
-    float                       position = 3;
-    float                       gain     = 4;
-    float                       torque   = 5;
+    google.protobuf.Timestamp time     = 1;
+    uint32                    id       = 2;
+    float                     position = 3;
+    float                     gain     = 4;
+    float                     torque   = 5;
 }

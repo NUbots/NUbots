@@ -27,6 +27,7 @@
 #include "message/motion/HeadCommand.h"
 #include "message/motion/KinematicsModels.h"
 
+#include "utility/input/ServoID.h"
 #include "utility/math/coordinates.h"
 #include "utility/math/matrix/Rotation3D.h"
 #include "utility/math/matrix/Transform3D.h"
@@ -68,7 +69,7 @@ namespace module {
         using utility::math::vision::objectDirectionFromScreenAngular;
         using utility::math::vision::screenAngularFromObjectDirection;
 
-        using ServoID = message::input::Sensors::ServoID::Value;
+        using ServoID = utility::input::ServoID;
 
         using message::behaviour::SoccerObjectPriority;
         using SearchType = message::behaviour::SoccerObjectPriority::SearchType;
@@ -411,11 +412,11 @@ namespace module {
                 {
                     if (servo.id == ServoID::HEAD_YAW)
                     {
-                        currentPos[0] = servo.present_position;
+                        currentPos[0] = servo.presentPosition;
                     }
                     if (servo.id == ServoID::HEAD_PITCH)
                     {
-                        currentPos[1] = servo.present_position;
+                        currentPos[1] = servo.presentPosition;
                     }
                 }
 
@@ -457,11 +458,11 @@ namespace module {
                 {
                     if (servo.id == ServoID::HEAD_YAW)
                     {
-                        currentPos[0] = servo.present_position;
+                        currentPos[0] = servo.presentPosition;
                     }
                     if (servo.id == ServoID::HEAD_PITCH)
                     {
-                        currentPos[1] = servo.present_position;
+                        currentPos[1] = servo.presentPosition;
                     }
                 }
 

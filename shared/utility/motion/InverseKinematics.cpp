@@ -24,7 +24,7 @@ namespace motion {
 namespace kinematics {
 
     using LimbID  = message::behaviour::Subsumption::Limb::Value;
-    using ServoID = message::input::Sensors::ServoID::Value;
+    using ServoID = utility::input::ServoID;
     using message::input::Sensors;
     using message::motion::KinematicsModel;
 
@@ -188,20 +188,20 @@ namespace kinematics {
         hipYaw = (isHipYawPositive ? 1 : -1) * acos(arma::dot( hipXProjected,globalX));
 
         if (limb == LimbID::LEFT_LEG) {
-            positions.push_back(std::make_pair(ServoID::L_HIP_YAW, -hipYaw));
-            positions.push_back(std::make_pair(ServoID::L_HIP_ROLL, hipRoll));
-            positions.push_back(std::make_pair(ServoID::L_HIP_PITCH, -hipPitch));
-            positions.push_back(std::make_pair(ServoID::L_KNEE, M_PI - knee));
+            positions.push_back(std::make_pair(ServoID::L_HIP_YAW,     -hipYaw));
+            positions.push_back(std::make_pair(ServoID::L_HIP_ROLL,     hipRoll));
+            positions.push_back(std::make_pair(ServoID::L_HIP_PITCH,   -hipPitch));
+            positions.push_back(std::make_pair(ServoID::L_KNEE,         M_PI - knee));
             positions.push_back(std::make_pair(ServoID::L_ANKLE_PITCH, -anklePitch));
-            positions.push_back(std::make_pair(ServoID::L_ANKLE_ROLL, ankleRoll));
+            positions.push_back(std::make_pair(ServoID::L_ANKLE_ROLL,   ankleRoll));
         }
         else {
-            positions.push_back(std::make_pair(ServoID::R_HIP_YAW, (model.leg.LEFT_TO_RIGHT_HIP_YAW) * -hipYaw));
-            positions.push_back(std::make_pair(ServoID::R_HIP_ROLL, (model.leg.LEFT_TO_RIGHT_HIP_ROLL) * hipRoll));
-            positions.push_back(std::make_pair(ServoID::R_HIP_PITCH, (model.leg.LEFT_TO_RIGHT_HIP_PITCH) * -hipPitch));
-            positions.push_back(std::make_pair(ServoID::R_KNEE, (model.leg.LEFT_TO_RIGHT_KNEE) * (M_PI - knee) ));
+            positions.push_back(std::make_pair(ServoID::R_HIP_YAW,     (model.leg.LEFT_TO_RIGHT_HIP_YAW)     * -hipYaw));
+            positions.push_back(std::make_pair(ServoID::R_HIP_ROLL,    (model.leg.LEFT_TO_RIGHT_HIP_ROLL)    *  hipRoll));
+            positions.push_back(std::make_pair(ServoID::R_HIP_PITCH,   (model.leg.LEFT_TO_RIGHT_HIP_PITCH)   * -hipPitch));
+            positions.push_back(std::make_pair(ServoID::R_KNEE,        (model.leg.LEFT_TO_RIGHT_KNEE)        *  (M_PI - knee)));
             positions.push_back(std::make_pair(ServoID::R_ANKLE_PITCH, (model.leg.LEFT_TO_RIGHT_ANKLE_PITCH) * -anklePitch));
-            positions.push_back(std::make_pair(ServoID::R_ANKLE_ROLL, (model.leg.LEFT_TO_RIGHT_ANKLE_ROLL) * ankleRoll));
+            positions.push_back(std::make_pair(ServoID::R_ANKLE_ROLL,  (model.leg.LEFT_TO_RIGHT_ANKLE_ROLL)  *  ankleRoll));
         }
 
         return positions;
@@ -267,7 +267,7 @@ namespace kinematics {
         float headPitch = std::numeric_limits<float>::quiet_NaN();
         float headYaw = std::numeric_limits<float>::quiet_NaN();
         for(auto joint : headJoints){
-            switch(joint.first){
+            switch(joint.first.value){
                 case ServoID::HEAD_PITCH:
                     headPitch = joint.second;
                     break;
@@ -308,13 +308,13 @@ namespace kinematics {
 
         if(static_cast<bool>(left)){
             SHOULDER_PITCH = ServoID::L_SHOULDER_PITCH;
-            SHOULDER_ROLL = ServoID::L_SHOULDER_ROLL;
-            ELBOW = ServoID::L_ELBOW;
+            SHOULDER_ROLL  = ServoID::L_SHOULDER_ROLL;
+            ELBOW          = ServoID::L_ELBOW;
             //negativeIfRight = 1;
         } else {
             SHOULDER_PITCH = ServoID::R_SHOULDER_PITCH;
-            SHOULDER_ROLL = ServoID::R_SHOULDER_ROLL;
-            ELBOW = ServoID::R_ELBOW;
+            SHOULDER_ROLL  = ServoID::R_SHOULDER_ROLL;
+            ELBOW          = ServoID::R_ELBOW;
             //negativeIfRight = -1;
         }
 
@@ -350,9 +350,9 @@ namespace kinematics {
 
 
         std::vector<std::pair<ServoID, float> > joints;
-        joints.push_back(std::make_pair(SHOULDER_PITCH,utility::math::angle::normalizeAngle(angles[0])));
-        joints.push_back(std::make_pair(SHOULDER_ROLL,utility::math::angle::normalizeAngle(angles[1])));
-        joints.push_back(std::make_pair(ELBOW,utility::math::angle::normalizeAngle(angles[2])));
+        joints.push_back(std::make_pair(SHOULDER_PITCH, utility::math::angle::normalizeAngle(angles[0])));
+        joints.push_back(std::make_pair(SHOULDER_ROLL,  utility::math::angle::normalizeAngle(angles[1])));
+        joints.push_back(std::make_pair(ELBOW,          utility::math::angle::normalizeAngle(angles[2])));
         return joints;
     }
 
@@ -362,12 +362,12 @@ namespace kinematics {
         int negativeIfRight = 1;
         if(left){
             SHOULDER_PITCH = ServoID::L_SHOULDER_PITCH;
-            SHOULDER_ROLL = ServoID::L_SHOULDER_ROLL;
-            ELBOW = ServoID::L_ELBOW;
+            SHOULDER_ROLL  = ServoID::L_SHOULDER_ROLL;
+            ELBOW          = ServoID::L_ELBOW;
         } else {
-            SHOULDER_PITCH = ServoID::R_SHOULDER_PITCH;
-            SHOULDER_ROLL = ServoID::R_SHOULDER_ROLL;
-            ELBOW = ServoID::R_ELBOW;
+            SHOULDER_PITCH  = ServoID::R_SHOULDER_PITCH;
+            SHOULDER_ROLL   = ServoID::R_SHOULDER_ROLL;
+            ELBOW           = ServoID::R_ELBOW;
             negativeIfRight = -1;
         }
         //Compute Angles

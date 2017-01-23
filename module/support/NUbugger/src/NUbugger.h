@@ -23,12 +23,13 @@
 #include <nuclear>
 #include <fstream>
 
+#include "extension/Configuration.h"
+
+#include "message/behaviour/Subsumption.h"
 #include "message/localisation/FieldObject.h"
 #include "message/input/GameEvents.h"
 #include "message/input/GameState.h"
 #include "message/support/nubugger/Overview.h"
-#include "message/behaviour/Subsumption.h"
-#include "extension/Configuration.h"
 
 namespace module {
     namespace support {

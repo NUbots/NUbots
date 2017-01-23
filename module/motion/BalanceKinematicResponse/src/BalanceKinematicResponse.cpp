@@ -35,7 +35,7 @@ namespace motion
 /*=======================================================================================================*/
 //      UTILIZATION REFERENCE(S)
 /*=======================================================================================================*/
-    using ServoID = message::input::Sensors::ServoID::Value;
+    using ServoID = utility::input::ServoID;
     using LimbID  = message::behaviour::Subsumption::Limb::Value;
     using message::input::Sensors;
     using message::input::PushDetection;

@@ -30,10 +30,10 @@
 #include "QuexClassifier.h"
 
 #include "message/input/Image.h"
-#include "message/input/Sensors.h"
 #include "message/vision/ClassifiedImage.h"
 #include "message/vision/LookUpTable.h"
 
+#include "utility/input/ServoID.h"
 #include "utility/vision/ClassifiedImage.h"
 #include "utility/vision/fourcc.h"
 #include "utility/vision/LookUpTable.h"

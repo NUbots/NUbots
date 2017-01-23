@@ -25,6 +25,7 @@
 #include "message/input/Sensors.h"
 #include "message/input/ImageFragment.h"
 
+#include "utility/input/ServoID.h"
 #include "utility/math/matrix/Transform3D.h"
 #include "utility/support/eigen_armadillo.h"
 #include "utility/support/yaml_armadillo.h"
@@ -37,7 +38,7 @@ namespace behaviour {
 
     using message::input::Image;
     using message::input::Sensors;
-    using ServoID = message::input::Sensors::ServoID::Value;
+    using ServoID = utility::input::ServoID;
     using message::input::ImageFragment;
 
     using utility::math::matrix::Transform3D;

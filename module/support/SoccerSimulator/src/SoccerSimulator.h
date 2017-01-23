@@ -28,7 +28,6 @@
 #include "message/support/GlobalConfig.h"
 #include "message/support/FieldDescription.h"
 #include "message/platform/darwin/DarwinSensors.h"
-#include "message/input/Sensors.h"
 #include "message/input/CameraParameters.h"
 #include "message/motion/KickCommand.h"
 

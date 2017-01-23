@@ -23,12 +23,10 @@
 #include <thread>
 #include <algorithm>
 
-#include "message/input/Sensors.h"
 #include "utility/input/ServoID.h"
 
 namespace Darwin {
-    using ServoID = message::input::Sensors::ServoID::Value;
-    using utility::input::stringFromId;
+    using ServoID = utility::input::ServoID;
 
     // Initialize all of the sensor handler objects using the passed uart
     Darwin::Darwin(const char* name) : uart(name), bulkReadCommand()
@@ -83,7 +81,7 @@ namespace Darwin {
         for (int i = 0; i < 20; ++i) {
             auto result = std::make_pair(i + 1, (&rShoulderPitch)[i].ping());
             if (!result.second) {
-                NUClear::log<NUClear::WARN>("Servo failed self test:", stringFromId(static_cast<ServoID>(i)));
+                NUClear::log<NUClear::WARN>("Servo failed self test:", std::string(ServoID(i)));
             }
             results.push_back(result);
         }

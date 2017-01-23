@@ -26,7 +26,7 @@
 namespace module {
     namespace behaviour {
 
-        using ServoID = message::input::Sensors::ServoID::Value;
+        using ServoID = utility::input::ServoID;
         using LimbID  = message::behaviour::Subsumption::Limb::Value;
         using message::motion::ServoTarget;
         using message::behaviour::ServoCommand;
@@ -147,7 +147,7 @@ namespace module {
                     if (this->limbAccess[uint(utility::input::limbForServo(command.id))] == command.source) {
 
                         // Get our queue
-                        auto& queue = commandQueues[uint(command.id.value)];
+                        auto& queue = commandQueues[uint(command.id)];
 
                         // Clear commands until we get back one that we are after
                         while(!queue.empty() && queue.back().time > command.time) {
@@ -161,11 +161,11 @@ namespace module {
 
                         // If we don't have a source
                         if(source == requests.end()) {
-                            log<NUClear::WARN>("Motor command from unregistered source", command.source, "denied access: SERVO", int(command.id.value));
+                            log<NUClear::WARN>("Motor command from unregistered source", command.source, "denied access: SERVO", int(command.id));
                         }
                         else {
                             auto& name = requests.find(command.source)->second->name;
-                            log<NUClear::WARN>("Motor command (from ", name, ") denied access: SERVO ", int(command.id.value));
+                            log<NUClear::WARN>("Motor command (from ", name, ") denied access: SERVO ", int(command.id));
                         }
                     }
                 }
@@ -191,7 +191,7 @@ namespace module {
                         }
 
                         // Add to our waypoints
-                        waypoints->push_back({ command.time, command.id.value, command.position, command.gain, command.torque});
+                        waypoints->push_back({ command.time, command.id, command.position, command.gain, command.torque});
 
                         // Dirty hack the waypoint
                         command.source = 0;

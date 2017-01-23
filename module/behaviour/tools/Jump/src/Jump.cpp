@@ -23,10 +23,10 @@
 
 #include "message/behaviour/ServoCommand.h"
 #include "message/behaviour/Subsumption.h"
-#include "message/input/Sensors.h"
 #include "message/platform/darwin/DarwinSensors.h"
 
 #include "utility/behaviour/Action.h"
+#include "utility/input/ServoID.h"
 #include "utility/motion/Script.h"
 
 namespace module {
@@ -35,7 +35,6 @@ namespace tools {
 
     using extension::Configuration;
 
-    using ServoID = message::input::Sensors::ServoID::Value;
     using LimbID  = message::behaviour::Subsumption::Limb::Value;
     using message::platform::darwin::ButtonMiddleDown;
     using message::platform::darwin::ButtonLeftDown;
@@ -43,6 +42,7 @@ namespace tools {
     using utility::behaviour::RegisterAction;
     using utility::behaviour::ActionPriorites;
     using utility::motion::ExecuteScriptByName;
+    using ServoID = utility::input::ServoID;
 
     Jump::Jump(std::unique_ptr<NUClear::Environment> environment)
     : Reactor(std::move(environment)) {
