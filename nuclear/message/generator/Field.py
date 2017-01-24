@@ -83,6 +83,7 @@ class Field:
 
         # We are special unless we are not
         special = True
+        eigen_align = False
 
         vector_regex = re.compile(r'^\.([fiuc]?)vec([2-4]?)$')
         matrix_regex = re.compile(r'^\.([fiuc]?)mat([2-4]{0,2})$')
@@ -96,9 +97,11 @@ class Field:
 
         # Check for matrix and vector types
         elif vector_regex.match(t):
+            eigen_align = True
             r = vector_regex.match(t)
             t = '::message::conversion::math::{}vec{}'.format(r.group(1), r.group(2))
         elif matrix_regex.match(t):
+            eigen_align = True
             r = matrix_regex.match(t)
             t = '::message::conversion::math::{}mat{}'.format(r.group(1), r.group(2))
 
@@ -162,7 +165,7 @@ class Field:
             if self.array_size > 0:
                 t = '::std::array<{}, {}>'.format(t, self.array_size)
             else:
-                if vector_regex.match(t[1].type) or matrix_regex(t[1].type):
+                if eigen_align:
                     t = '::std::vector<{0}, Eigen::aligned_allocator<{0}>>'.format(t)
                 else:
                     t = '::std::vector<{}>'.format(t)
