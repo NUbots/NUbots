@@ -56,7 +56,7 @@ node nubotsvmbuild {
                        'prebuild'    => 'make distclean',
                        'postbuild'   => 'rm PREFIX/lib/libprotoc* && rm PREFIX/bin/protoc',
                        'method'      => 'autotools', },
-    'zlib'         => {'url'         => 'http://www.zlib.net/zlib-1.2.10.tar.gz',
+    'zlib'         => {'url'         => 'http://www.zlib.net/zlib-1.2.11.tar.gz',
                        'creates'     => 'lib/libz.a',
                        'method'      => 'cmake',},
     'bzip2'        => {'url'         => 'https://github.com/Bidski/bzip2/archive/v1.0.6.tar.gz',
@@ -270,7 +270,7 @@ node nubotsvmbuild {
   exec { "Spinnaker_amd64_Files":
     creates  => "/nubots/toolchain/NimbroOp/include/Spinnaker.h",
     command  => "cd include && cp -r ./* /nubots/toolchain/NimbroOp/include/ && cd .. &&
-                 cd lib && 
+                 cd lib &&
                  cp libGCBase_gcc540_v3_0.so* /nubots/toolchain/NimbroOp/lib/ &&
                  cp libGenApi_gcc540_v3_0.so* /nubots/toolchain/NimbroOp/lib/ &&
                  cp libLog_gcc540_v3_0.so* /nubots/toolchain/NimbroOp/lib/ &&
@@ -291,7 +291,7 @@ node nubotsvmbuild {
   exec { "Spinnaker_i386_Files":
     creates  => "/nubots/toolchain/NimbroOp/include/Spinnaker.h",
     command  => "cd include && cp -r ./* /nubots/toolchain/NimbroOp/include/ && cd .. &&
-                 cd lib && 
+                 cd lib &&
                  cp libGCBase_gcc540_v3_0.so* /nubots/toolchain/NimbroOp/lib/ &&
                  cp libGenApi_gcc540_v3_0.so* /nubots/toolchain/NimbroOp/lib/ &&
                  cp libLog_gcc540_v3_0.so* /nubots/toolchain/NimbroOp/lib/ &&
