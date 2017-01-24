@@ -28,6 +28,7 @@ class Field:
         self.pointer = f.options.Extensions[pointer]
         self.array_size = f.options.Extensions[array_size]
         self.bytes_type = f.type == f.TYPE_BYTES
+        self.eigen_align = False
         # Basic types are treated as primitives by the library
         self.basic = f.type not in [f.TYPE_MESSAGE, f.TYPE_GROUP, f.TYPE_BYTES]
 
@@ -83,25 +84,24 @@ class Field:
 
         # We are special unless we are not
         special = True
-        eigen_align = False
 
         vector_regex = re.compile(r'^\.([fiuc]?)vec([2-4]?)$')
         matrix_regex = re.compile(r'^\.([fiuc]?)mat([2-4]{0,2})$')
 
         # Check if it is a map field
         if self.map_type:
-            if vector_regex.match(t[1].type) or matrix_regex(t[1].type):
+            if t[1].eigen_align:
                 t = '::std::map<{0}, {1}, std::less<{0}>, Eigen::aligned_allocator<std::pair<{0}, {1}>>>'.format(t[0].cpp_type, t[1].cpp_type)
             else:
                 t = '::std::map<{}, {}>'.format(t[0].cpp_type, t[1].cpp_type)
 
         # Check for matrix and vector types
         elif vector_regex.match(t):
-            eigen_align = True
+            self.eigen_align = True
             r = vector_regex.match(t)
             t = '::message::conversion::math::{}vec{}'.format(r.group(1), r.group(2))
         elif matrix_regex.match(t):
-            eigen_align = True
+            self.eigen_align = True
             r = matrix_regex.match(t)
             t = '::message::conversion::math::{}mat{}'.format(r.group(1), r.group(2))
 
@@ -165,7 +165,7 @@ class Field:
             if self.array_size > 0:
                 t = '::std::array<{}, {}>'.format(t, self.array_size)
             else:
-                if eigen_align:
+                if self.eigen_align:
                     t = '::std::vector<{0}, Eigen::aligned_allocator<{0}>>'.format(t)
                 else:
                     t = '::std::vector<{}>'.format(t)
