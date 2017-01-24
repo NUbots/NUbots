@@ -5,6 +5,7 @@ from generator.textutil import indent, dedent
 
 class Enum:
     def __init__(self, e, context):
+        self.package = context.package
         self.name = e.name
         self.fqn = '{}.{}'.format(context.fqn, self.name)
         self.values = [(v.name, v.number) for v in e.value]
@@ -171,7 +172,7 @@ class Enum:
                 return static_cast<{protobuf_name}>(value);
             }}
 
-            std::ostream& operator<< (std::ostream& out, const {fqn}& val) {{
+            std::ostream& {namespace}::operator<< (std::ostream& out, const {fqn}& val) {{
                 return out << static_cast<std::string>(val);
             }}""")
 
@@ -215,7 +216,7 @@ class Enum:
             values=values
         ), impl_template.format(
             fqn='::'.join(self.fqn.split('.')),
-            namespace='::'.join(self.fqn.split('.')[:-1]),
+            namespace='::'.join(self.package.split('.')),
             name=self.name,
             protobuf_name='::'.join(('.protobuf' + self.fqn).split('.')),
             default_value=default_value,

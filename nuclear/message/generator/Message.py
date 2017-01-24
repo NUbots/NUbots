@@ -6,6 +6,7 @@ from generator.Enum import Enum
 
 class Message:
     def __init__(self, m, context):
+        self.package = context.package 
         self.name = m.name
         self.fqn = '{}.{}'.format(context.fqn, self.name)
         self.include_path = context.include_path
