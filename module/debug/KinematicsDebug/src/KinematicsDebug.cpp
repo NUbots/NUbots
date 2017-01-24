@@ -23,7 +23,6 @@
 
 #include "extension/Configuration.h"
 
-#include "message/behaviour/Subsumption.h"
 #include "message/input/Sensors.h"
 #include "message/motion/ServoTarget.h"
 #include "message/motion/KinematicsModels.h"
@@ -38,13 +37,13 @@ namespace module {
     namespace debug {
             using extension::Configuration;
 
-            using LimbID  = message::behaviour::Subsumption::Limb::Value;
-            using ServoID = utility::input::ServoID;
             using message::input::Sensors;
             using message::motion::ServoTarget;
             using message::motion::KinematicsModel;
             using message::motion::BodySide;
 
+            using LimbID  = utility::input::LimbID;
+            using ServoID = utility::input::ServoID;
             using utility::math::matrix::Transform3D;
             using utility::motion::kinematics::calculateLegJoints;
             using utility::motion::kinematics::calculatePosition;

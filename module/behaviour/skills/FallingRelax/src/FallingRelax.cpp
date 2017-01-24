@@ -24,10 +24,10 @@
 #include "extension/Configuration.h"
 
 #include "message/behaviour/ServoCommand.h"
-#include "message/behaviour/Subsumption.h"
 #include "message/input/Sensors.h"
 
 #include "utility/behaviour/Action.h"
+#include "utility/input/LimbID.h"
 #include "utility/input/ServoID.h"
 #include "utility/motion/Script.h"
 #include "utility/support/eigen_armadillo.h"
@@ -42,12 +42,12 @@ namespace module {
 
             using extension::Configuration;
 
-            using LimbID = message::behaviour::Subsumption::Limb::Value;
             using message::input::Sensors;
 
             using utility::motion::ExecuteScriptByName;
             using utility::behaviour::RegisterAction;
             using utility::behaviour::ActionPriorites;
+            using LimbID  = utility::input::LimbID;
             using ServoID = utility::input::ServoID;
 
             FallingRelax::FallingRelax(std::unique_ptr<NUClear::Environment> environment)

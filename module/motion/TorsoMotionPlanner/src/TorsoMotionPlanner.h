@@ -32,7 +32,6 @@
 
 #include "message/behaviour/FixedWalkCommand.h"
 #include "message/behaviour/ServoCommand.h"
-#include "message/behaviour/Subsumption.h"
 #include "message/localisation/FieldObject.h"
 #include "message/motion/FootMotionCommand.h" 
 #include "message/motion/FootPlacementCommand.h" 
@@ -43,6 +42,7 @@
 #include "message/support/SaveConfiguration.h"
 
 #include "utility/behaviour/Action.h"
+#include "utility/input/LimbID.h"
 #include "utility/math/angle.h"
 #include "utility/math/geometry/UnitQuaternion.h"
 #include "utility/math/matrix/Rotation3D.h"
@@ -78,8 +78,8 @@ namespace motion
 
         explicit TorsoMotionPlanner(std::unique_ptr<NUClear::Environment> environment);
     private:
-        using LimbID         = message::behaviour::Subsumption::Limb::Value;
         using ServoCommand   = message::behaviour::ServoCommand;
+        using LimbID         = utility::input::LimbID;
         using Transform2D    = utility::math::matrix::Transform2D;
         using Transform3D    = utility::math::matrix::Transform3D;
         using UnitQuaternion = utility::math::geometry::UnitQuaternion;

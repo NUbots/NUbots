@@ -29,7 +29,6 @@
 
 #include "message/behaviour/FixedWalkCommand.h"
 #include "message/behaviour/ServoCommand.h"
-#include "message/behaviour/Subsumption.h"
 
 #include "message/input/Sensors.h"
 #include "message/input/PushDetection.h"
@@ -47,6 +46,7 @@
 
 #include "utility/behaviour/Action.h"
 
+#include "utility/input/LimbID.h"
 #include "utility/input/ServoID.h"
 
 #include "utility/math/angle.h"
@@ -87,9 +87,9 @@ namespace motion
 
         explicit BalanceKinematicResponse(std::unique_ptr<NUClear::Environment> environment);
     private:
-        using LimbID         = message::behaviour::Subsumption::Limb::Value;
         using ServoCommand   = message::behaviour::ServoCommand;
         using Sensors        = message::input::Sensors;
+        using LimbID         = utility::input::LimbID;
         using ServoID        = utility::input::ServoID;
         using Transform2D    = utility::math::matrix::Transform2D;
         using Transform3D    = utility::math::matrix::Transform3D;

@@ -20,17 +20,20 @@
 #include "NUbugger.h"
 
 #include "message/behaviour/Subsumption.h"
+
 #include "utility/behaviour/Action.h"
+#include "utility/input/LimbID.h"
 
 namespace module {
 namespace support {
+
+    using message::behaviour::Subsumption;
 
     using utility::behaviour::ActionStart;
     using utility::behaviour::ActionKill;
     using utility::behaviour::RegisterAction;
     using utility::behaviour::ActionPriorites;
-    using message::behaviour::Subsumption;
-    using LimbID = Subsumption::Limb::Value;
+    using LimbID = utility::input::LimbID;
 
     void NUbugger::provideSubsumption() {
 
@@ -40,7 +43,7 @@ namespace support {
 
             Subsumption::ActionStateChange actionStateChange;
             actionStateChange.state = Subsumption::ActionStateChange::State::Value::START;
-            actionStateChange.name = actionStart.name;
+            actionStateChange.name  = actionStart.name;
 
             for (auto& limbID : actionStart.limbs) {
                 actionStateChange.limbs.push_back(limbID);
@@ -56,7 +59,7 @@ namespace support {
 
             Subsumption::ActionStateChange actionStateChange;
             actionStateChange.state = Subsumption::ActionStateChange::State::Value::KILL;
-            actionStateChange.name = actionKill.name;
+            actionStateChange.name  = actionKill.name;
 
             for (auto& limbID : actionKill.limbs) {
                 actionStateChange.limbs.push_back(limbID);
@@ -71,7 +74,7 @@ namespace support {
             Subsumption subsumption;
 
             Subsumption::ActionRegister actionRegister;
-            actionRegister.id = action.id;
+            actionRegister.id   = action.id;
             actionRegister.name = action.name;
 
             for (const auto& set : action.limbSet) {

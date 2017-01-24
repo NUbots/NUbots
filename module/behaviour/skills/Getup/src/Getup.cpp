@@ -24,11 +24,11 @@
 #include "extension/Configuration.h"
 
 #include "message/behaviour/ServoCommand.h"
-#include "message/behaviour/Subsumption.h"
 #include "message/input/Sensors.h"
 #include "message/motion/GetupCommand.h"
 
 #include "utility/behaviour/Action.h"
+#include "utility/input/LimbID.h"
 #include "utility/input/ServoID.h"
 #include "utility/motion/Script.h"
 
@@ -39,12 +39,12 @@ namespace module {
             using extension::Configuration;
 
             using message::input::Sensors;
-            using LimbID  = message::behaviour::Subsumption::Limb::Value;
             using message::motion::ExecuteGetup;
             using message::motion::KillGetup;
 
             using utility::behaviour::RegisterAction;
             using utility::behaviour::ActionPriorites;
+            using LimbID  = utility::input::LimbID;
             using ServoID = utility::input::ServoID;
             using utility::motion::ExecuteScriptByName;
 

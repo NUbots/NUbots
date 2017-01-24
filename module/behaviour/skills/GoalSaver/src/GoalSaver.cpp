@@ -21,15 +21,18 @@
 
 #include <armadillo>
 
-#include "message/motion/WalkCommand.h"
-#include "message/motion/DiveCommand.h"
-#include "message/localisation/FieldObject.h"
 #include "extension/Configuration.h"
-#include "message/input/ServoID.h"
-#include "message/behaviour/Action.h"
+
 #include "message/behaviour/ServoCommand.h"
+#include "message/localisation/FieldObject.h"
+#include "message/motion/DiveCommand.h"
+#include "message/motion/WalkCommand.h"
 #include "message/vision/VisionObjects.h"
-#include "message/motion/Script.h"
+
+#include "utility/behaviour/Action.h"
+#include "utility/input/LimbID.h"
+#include "utility/input/ServoID.h"
+#include "utility/motion/Script.h"
 
 namespace module {
 namespace behaviour {
@@ -38,17 +41,19 @@ namespace skills {
     struct ExecuteDive {};
     struct FinishDive {};
 
-    using message::motion::ExecuteScriptByName;
-    using message::behaviour::RegisterAction;
-    using message::behaviour::ActionPriorites;
+    using extension::Configuration;
+
     using message::localisation::Ball;
-    using message::input::ServoID;
     using message::localisation::Self;
     using message::motion::DiveCommand;
     using message::motion::DiveFinished;
-    using extension::Configuration;
     using message::motion::StopCommand;
-    using message::input::LimbID;
+
+    using LimbID  = utility::input::LimbID;
+    using ServoID = utility::input::ServoID;
+    using utility::motion::ExecuteScriptByName;
+    using utility::behaviour::RegisterAction;
+    using utility::behaviour::ActionPriorites;
 
     GoalSaver::GoalSaver(std::unique_ptr<NUClear::Environment> environment)
         : Reactor(std::move(environment))

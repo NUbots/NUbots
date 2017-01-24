@@ -21,12 +21,12 @@
 
 #include "extension/Configuration.h"
 
-#include "message/behaviour/Subsumption.h"
 #include "message/motion/ServoTarget.h"
 #include "message/platform/darwin/DarwinSensors.h"
 
 #include "utility/behaviour/Action.h"
 #include "utility/file/fileutil.h"
+#include "utility/input/LimbID.h"
 #include "utility/input/ServoID.h"
 #include "utility/math/angle.h"
 #include "utility/platform/darwin/DarwinSensors.h"
@@ -38,14 +38,17 @@
 namespace module {
     namespace behaviour {
         namespace tools {
+
             using NUClear::message::CommandLineArguments;
-            using utility::motion::Script;
-            using utility::motion::ExecuteScript;
+
             using message::motion::ServoTarget;
-            using utility::behaviour::RegisterAction;
-            using LimbID  = message::behaviour::Subsumption::Limb::Value;
-            using ServoID = utility::input::ServoID;
             using message::platform::darwin::DarwinSensors;
+
+            using utility::behaviour::RegisterAction;
+            using LimbID  = utility::input::LimbID;
+            using ServoID = utility::input::ServoID;
+            using utility::motion::ExecuteScript;
+            using utility::motion::Script;
 
             struct LockServo {};
 

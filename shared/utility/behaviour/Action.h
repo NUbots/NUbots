@@ -21,13 +21,14 @@
 #define UTILITY_BEHAVIOUR_ACTIONS_H
 
 #include <nuclear>
-#include "message/behaviour/Subsumption.h"
+
+#include "utility/input/LimbID.h"
 #include "utility/input/ServoID.h"
 
 namespace utility {
     namespace behaviour {
 
-        using LimbID  = message::behaviour::Subsumption::Limb::Value;
+        using LimbID  = utility::input::LimbID;
         using ServoID = utility::input::ServoID;
 
         struct RegisterAction {

@@ -32,7 +32,6 @@
 
 #include "message/behaviour/FixedWalkCommand.h"
 #include "message/behaviour/ServoCommand.h"
-#include "message/behaviour/Subsumption.h"
 
 #include "message/input/PushDetection.h"
 #include "message/input/PostureRecognition.h"
@@ -51,6 +50,7 @@
 
 #include "utility/behaviour/Action.h"
 
+#include "utility/input/LimbID.h"
 #include "utility/input/ServoID.h"
 
 #include "utility/motion/Script.h"
@@ -89,8 +89,8 @@ namespace motion
 
         explicit WalkEngine(std::unique_ptr<NUClear::Environment> environment);
     private:
-        using LimbID         = message::behaviour::Subsumption::Limb::Value;
         using ServoCommand   = message::behaviour::ServoCommand;
+        using LimbID         = utility::input::LimbID;
         using ServoID        = utility::input::ServoID;
         using Transform2D    = utility::math::matrix::Transform2D;
         using Transform3D    = utility::math::matrix::Transform3D;

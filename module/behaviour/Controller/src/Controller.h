@@ -29,7 +29,6 @@
 #include <list>
 
 #include "message/behaviour/ServoCommand.h"
-#include "message/behaviour/Subsumption.h"
 #include "message/input/Sensors.h"
 
 #include "utility/behaviour/Action.h"
@@ -41,7 +40,7 @@ namespace module {
         struct RequestItem;
 
         struct Request {
-            using callback = std::function<void (std::set<message::behaviour::Subsumption::Limb::Value>)>;
+            using callback = std::function<void (std::set<utility::input::LimbID>)>;
 
             Request()
             : id(0)
@@ -92,7 +91,7 @@ namespace module {
         struct RequestItem {
 
             //RequestItem() : group(Request()), index(0), active(false), priority(std::numeric_limits<float>::min()), limbSet() {}
-            RequestItem(Request& group, size_t index, float priority, const std::set<message::behaviour::Subsumption::Limb::Value>& limbSet)
+            RequestItem(Request& group, size_t index, float priority, const std::set<utility::input::LimbID>& limbSet)
             : group(group)
             , index(index)
             , active(false)
@@ -106,7 +105,7 @@ namespace module {
             bool active;
 
             float priority;
-            std::set<message::behaviour::Subsumption::Limb::Value> limbSet;
+            std::set<utility::input::LimbID> limbSet;
         };
 
         /**

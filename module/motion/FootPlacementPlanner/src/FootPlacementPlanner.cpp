@@ -35,7 +35,6 @@ namespace motion
 
     using extension::Configuration;
 
-    using LimbID = message::behaviour::Subsumption::Limb::Value;
     using message::motion::NewStepTargetInfo;
     using message::motion::NewFootTargetInfo;
     using message::motion::TorsoMotionUpdate;
@@ -46,10 +45,11 @@ namespace motion
     using message::motion::FootPlacementStopped;
     using message::motion::KinematicsModel;
 
-    using utility::support::Expression;
+    using LimbID = utility::input::LimbID;
     using utility::math::matrix::Transform2D;
     using utility::math::matrix::Transform3D;
     using utility::nubugger::graph;
+    using utility::support::Expression;
 
 /*=======================================================================================================*/
 //      NUCLEAR METHOD: FootPlacementPlanner

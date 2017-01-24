@@ -21,23 +21,23 @@
 
 #include "extension/Configuration.h"
 
-#include "message/localisation/FieldObject.h"
+#include "message/behaviour/KickPlan.h"
 #include "message/behaviour/MotionCommand.h"
 #include "message/behaviour/SoccerObjectPriority.h"
 #include "message/behaviour/WalkPath.h"
-#include "message/behaviour/Action.h"
-#include "message/behaviour/SoccerObjectPriority.h"
-#include "message/motion/WalkCommand.h"
+#include "message/localisation/FieldObject.h"
+#include "message/localisation/ResetRobotHypotheses.h"
+#include "message/localisation/SideChecker.h"
+#include "message/input/GameEvents.h"
 #include "message/motion/KickCommand.h"
-#include "message/behaviour/KickPlan.h"
-#include "message/input/LimbID.h"
-#include "message/input/gameevents/GameEvents.h"
-#include "message/input/ServoID.h"
+#include "message/motion/WalkCommand.h"
+
+#include "utility/behaviour/Action.h"
+#include "utility/input/LimbID.h"
+#include "utility/input/ServoID.h"
 #include "utility/nubugger/NUhelpers.h"
 #include "utility/math/geometry/RotatedRectangle.h"
 #include "utility/math/matrix/Transform2D.h"
-#include "message/localisation/ResetRobotHypotheses.h"
-#include "message/localisation/SideChecker.h"
 #include "utility/math/angle.h"
 #include "utility/math/coordinates.h"
 
@@ -45,6 +45,7 @@ namespace module {
 namespace localisation {
 
     using extension::Configuration;
+
     using message::support::FieldDescription;
     
     using Self = message::localisation::Self;
@@ -53,8 +54,6 @@ namespace localisation {
 
     using message::behaviour::MotionCommand;
     using message::behaviour::WalkPath;
-    using message::behaviour::RegisterAction;
-    using message::behaviour::ActionPriorites;
     using message::behaviour::SoccerObjectPriority;
     using message::behaviour::SearchType;
 
@@ -67,8 +66,10 @@ namespace localisation {
 	using message::vision::Goal;
 	using message::vision::VisionObject;
 
-    using message::input::LimbID;
-    using message::input::ServoID;
+    using utility::behaviour::ActionPriorites;
+    using utility::behaviour::RegisterAction;
+    using LimbID  = utility::input::LimbID;
+    using ServoID = utility::input::ServoID;
 
     using SelfPenalisation = message::input::gameevents::Penalisation<message::input::gameevents::SELF>;
     using SelfUnpenalisation = message::input::gameevents::Unpenalisation<message::input::gameevents::SELF>;

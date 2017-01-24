@@ -20,7 +20,7 @@
 #ifndef UTILITY_INPUT_LIMBID_H
 #define UTILITY_INPUT_LIMBID_H
 
-#include "message/behaviour/Subsumption.h"
+#include <set>
 
 #include "utility/input/ServoID.h"
 
@@ -28,94 +28,53 @@ namespace utility {
     namespace input {
         //LimbID is a higher level of ServoID (see ServoID.h),
         //which contains all the constituent servos (e.g. An arm contains shoulder (pitch + roll)) and elbow.
-
-        using LimbID  = message::behaviour::Subsumption::Limb::Value;
         using ServoID = utility::input::ServoID;
 
-        inline std::set<ServoID> servosForLimb(const LimbID& limb) {
-            switch(limb) {
-                case LimbID::HEAD:
-                    return {
-                        ServoID::HEAD_PITCH,
-                        ServoID::HEAD_YAW
-                    };
+        struct LimbID {
+            enum Value {
+                UNKNOWN   = 0,
+                LEFT_LEG  = 1,
+                RIGHT_LEG = 2,
+                LEFT_ARM  = 3,
+                RIGHT_ARM = 4,
+                HEAD      = 5
+            };
+            Value value;
+        
+            // Constructors
+            LimbID()                   : value(Value::UNKNOWN) {}
+            LimbID(uint8_t const& v)   : value(static_cast<Value>(v)) {}
+            LimbID(uint32_t const& v)  : value(static_cast<Value>(v)) {}
+            LimbID(uint64_t const& v)  : value(static_cast<Value>(v)) {}
+            LimbID(int const& v)       : value(static_cast<Value>(v)) {}
+            LimbID(Value const& value) : value(value) {}
+            LimbID(std::string const& str);
+        
+            // Operators
+            bool operator <(LimbID const& other)         const { return value <  other.value; }
+            bool operator >(LimbID const& other)         const { return value >  other.value; }
+            bool operator <=(LimbID const& other)        const { return value <= other.value; }
+            bool operator >=(LimbID const& other)        const { return value >= other.value; }
+            bool operator ==(LimbID const& other)        const { return value == other.value; }
+            bool operator !=(LimbID const& other)        const { return value != other.value; }
+            bool operator <(LimbID::Value const& other)  const { return value <  other;       }
+            bool operator >(LimbID::Value const& other)  const { return value >  other;       }
+            bool operator <=(LimbID::Value const& other) const { return value <= other;       }
+            bool operator >=(LimbID::Value const& other) const { return value >= other;       }
+            bool operator ==(LimbID::Value const& other) const { return value == other;       }
+            bool operator !=(LimbID::Value const& other) const { return value != other;       }
 
-                case LimbID::LEFT_LEG:
-                    return {
-                        ServoID::L_ANKLE_PITCH,
-                        ServoID::L_ANKLE_ROLL,
-                        ServoID::L_HIP_PITCH,
-                        ServoID::L_HIP_ROLL,
-                        ServoID::L_HIP_YAW,
-                        ServoID::L_KNEE
-                    };
+            // Conversions
+            operator Value()    const { return value; }
+            operator uint8_t()  const { return value; }
+            operator uint32_t() const { return value; }
+            operator uint64_t() const { return value; }
+            operator int()      const { return value; }
+            operator std::string() const;
 
-                case LimbID::RIGHT_LEG:
-                    return {
-                        ServoID::R_ANKLE_PITCH,
-                        ServoID::R_ANKLE_ROLL,
-                        ServoID::R_HIP_PITCH,
-                        ServoID::R_HIP_ROLL,
-                        ServoID::R_HIP_YAW,
-                        ServoID::R_KNEE
-                    };
-
-                case LimbID::LEFT_ARM:
-                    return {
-                        ServoID::L_SHOULDER_PITCH,
-                        ServoID::L_SHOULDER_ROLL,
-                        ServoID::L_ELBOW
-                    };
-
-                case LimbID::RIGHT_ARM:
-                    return {
-                        ServoID::R_SHOULDER_PITCH,
-                        ServoID::R_SHOULDER_ROLL,
-                        ServoID::R_ELBOW
-                    };
-
-                default: {
-                    return std::set<ServoID>{};
-                }
-            }
-        }
-
-        inline LimbID limbForServo(const ServoID& servo) {
-            switch(servo.value) {
-                case ServoID::HEAD_PITCH:
-                case ServoID::HEAD_YAW:
-                    return LimbID::HEAD;
-
-                case ServoID::L_ANKLE_PITCH:
-                case ServoID::L_ANKLE_ROLL:
-                case ServoID::L_HIP_PITCH:
-                case ServoID::L_HIP_ROLL:
-                case ServoID::L_HIP_YAW:
-                case ServoID::L_KNEE:
-                    return LimbID::LEFT_LEG;
-
-                case ServoID::R_ANKLE_PITCH:
-                case ServoID::R_ANKLE_ROLL:
-                case ServoID::R_HIP_PITCH:
-                case ServoID::R_HIP_ROLL:
-                case ServoID::R_HIP_YAW:
-                case ServoID::R_KNEE:
-                    return LimbID::RIGHT_LEG;
-
-                case ServoID::L_SHOULDER_PITCH:
-                case ServoID::L_SHOULDER_ROLL:
-                case ServoID::L_ELBOW:
-                    return LimbID::LEFT_ARM;
-
-                case ServoID::R_SHOULDER_PITCH:
-                case ServoID::R_SHOULDER_ROLL:
-                case ServoID::R_ELBOW:
-                    return LimbID::RIGHT_ARM;
-                default:
-                    // Can't really happen but in case it does make sure someone pays!
-                    return static_cast<LimbID>(-1);;
-            }
-        }
+            static std::set<ServoID> servosForLimb(const LimbID& limb);
+            static LimbID limbForServo(const ServoID& servo);
+        };
     }
 }
 

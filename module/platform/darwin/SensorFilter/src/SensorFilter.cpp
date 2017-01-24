@@ -26,8 +26,8 @@
 //#include "message/localisation/ResetRobotHypotheses.h"
 #include "message/platform/darwin/DarwinSensors.h"
 
-#include "utility/input/ServoID.h"
 #include "utility/input/LimbID.h"
+#include "utility/input/ServoID.h"
 #include "utility/math/geometry/UnitQuaternion.h"
 #include "utility/math/matrix/Rotation2D.h"
 #include "utility/motion/ForwardKinematics.h"
@@ -41,29 +41,31 @@ namespace module {
         namespace darwin {
 
             using extension::Configuration;
-            using utility::nubugger::drawArrow;
-            using utility::nubugger::drawSphere;
-            using message::platform::darwin::DarwinSensors;
+
+            using message::input::CameraParameters;
+            using message::input::Sensors;
+            using message::motion::BodySide;
             using message::platform::darwin::ButtonLeftDown;
             using message::platform::darwin::ButtonLeftUp;
             using message::platform::darwin::ButtonMiddleDown;
             using message::platform::darwin::ButtonMiddleUp;
-            using message::input::Sensors;
-            using message::input::CameraParameters;
+            using message::platform::darwin::DarwinSensors;
+
             using utility::input::ServoSide;
+            using LimbID  = utility::input::LimbID;
             using ServoID = utility::input::ServoID;
-            using utility::input::LimbID;
             //using message::localisation::ResetRobotHypotheses;
-            using utility::nubugger::graph;
             using utility::motion::kinematics::calculateAllPositions;
             using message::motion::KinematicsModel;
             using utility::motion::kinematics::calculateCentreOfMass;
-            using message::motion::BodySide;
             using utility::motion::kinematics::calculateRobotToIMU;
             using utility::math::matrix::Transform3D;
             using utility::math::matrix::Rotation3D;
             using utility::math::matrix::Rotation2D;
             using utility::math::geometry::UnitQuaternion;
+            using utility::nubugger::drawArrow;
+            using utility::nubugger::drawSphere;
+            using utility::nubugger::graph;
 
             std::string makeErrorString(const std::string& src, uint errorCode) {
                 std::stringstream s;

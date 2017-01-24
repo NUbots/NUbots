@@ -25,10 +25,10 @@
 
 #include "extension/Configuration.h"
 
-#include "message/behaviour/Subsumption.h"
 #include "message/input/Sensors.h"
 #include "message/motion/KinematicsModels.h"
 
+#include "utility/input/LimbID.h"
 #include "utility/input/ServoID.h"
 #include "utility/math/matrix/Transform3D.h"
 #include "utility/support/eigen_armadillo.h"
@@ -92,7 +92,7 @@ namespace motion{
 				bool stable = false;
 
 				//State variables
-				message::behaviour::Subsumption::Limb::Value supportFoot;
+				utility::input::LimbID supportFoot;
 
 				float forward_duration;
 				float return_duration;
@@ -143,7 +143,7 @@ namespace motion{
 				void reset()		{stage = MotionStage::READY; stable = false; anim.reset();}
 
 
-				void setKickParameters(message::behaviour::Subsumption::Limb::Value supportFoot_, arma::vec3 ballPosition_, arma::vec3 goalPosition_) {
+				void setKickParameters(utility::input::LimbID supportFoot_, arma::vec3 ballPosition_, arma::vec3 goalPosition_) {
 					supportFoot = supportFoot_;
 					ballPosition = ballPosition_;
 					goalPosition = goalPosition_;
@@ -154,12 +154,12 @@ namespace motion{
 			        // Find position vector from support foot to torso in support foot coordinates.
 			        for (const auto& entry : sensors.forwardKinematics)
 			        {
-			        	if ((supportFoot == message::behaviour::Subsumption::Limb::Value::LEFT_LEG) && 
+			        	if ((supportFoot == utility::input::LimbID::LEFT_LEG) && 
 			        		(entry.servoID == utility::input::ServoID::L_ANKLE_ROLL))
 			        	{
 			        		return utility::math::matrix::Transform3D(convert<double, 4, 4>(entry.kinematics)).i();
 			        	}
-			        	if ((supportFoot == message::behaviour::Subsumption::Limb::Value::RIGHT_LEG) && 
+			        	if ((supportFoot == utility::input::LimbID::RIGHT_LEG) && 
 			        		(entry.servoID == utility::input::ServoID::R_ANKLE_ROLL))
 			        	{
 			        		return utility::math::matrix::Transform3D(convert<double, 4, 4>(entry.kinematics)).i();

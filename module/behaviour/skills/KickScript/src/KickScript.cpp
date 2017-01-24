@@ -23,10 +23,10 @@
 #include "extension/Configuration.h"
 
 #include "message/behaviour/ServoCommand.h"
-#include "message/behaviour/Subsumption.h"
 #include "message/motion/WalkCommand.h"
 
 #include "utility/behaviour/Action.h"
+#include "utility/input/LimbID.h"
 #include "utility/input/ServoID.h"
 #include "utility/motion/Script.h"
 
@@ -39,7 +39,7 @@ namespace skills {
 
     using extension::Configuration;
 
-    using LimbID  = message::behaviour::Subsumption::Limb::Value;
+    using LimbID  = utility::input::LimbID;
     using ServoID = utility::input::ServoID;
 
     using message::motion::KickScriptCommand;
@@ -64,7 +64,7 @@ namespace skills {
 
         on<Trigger<KickScriptCommand>>().then([this] (const KickScriptCommand& kickCommand) {
             auto direction = kickCommand.direction;
-            auto leg = kickCommand.leg;
+            LimbID leg = kickCommand.leg;
 
             int quadrant = getDirectionalQuadrant(direction[0], direction[1]);
 
@@ -94,7 +94,7 @@ namespace skills {
 
         on<Trigger<ExecuteKick>>().then([this] {
             // auto direction = kickCommand.direction;
-            auto leg = kickCommand.leg;
+            LimbID leg = kickCommand.leg;
 
             if (leg == LimbID::RIGHT_LEG) {
                 emit(std::make_unique<ExecuteScriptByName>(id,  std::vector<std::string>({"Stand.yaml", "RightFootForwardKickNew.yaml", "Stand.yaml"})));

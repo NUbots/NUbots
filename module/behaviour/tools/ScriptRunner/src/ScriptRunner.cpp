@@ -19,9 +19,8 @@
 
 #include "ScriptRunner.h"
 
-#include "message/behaviour/Subsumption.h"
-
 #include "utility/behaviour/Action.h"
+#include "utility/input/LimbID.h"
 #include "utility/input/ServoID.h"
 #include "utility/motion/Script.h"
 
@@ -31,10 +30,10 @@ namespace module {
 
             using NUClear::message::CommandLineArguments;
 
-            using utility::motion::ExecuteScriptByName;
             using utility::behaviour::RegisterAction;
-            using LimbID  = message::behaviour::Subsumption::Limb::Value;
+            using LimbID  = utility::input::LimbID;
             using ServoID = utility::input::ServoID;
+            using utility::motion::ExecuteScriptByName;
 
             struct ExecuteNextScript {};
 

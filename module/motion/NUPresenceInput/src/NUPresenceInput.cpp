@@ -22,13 +22,13 @@
 #include "extension/Configuration.h"
 
 #include "message/behaviour/ServoCommand.h"
-#include "message/behaviour/Subsumption.h"
 #include "message/input/Sensors.h"
 #include "message/input/PresenceUserState.h"
 #include "message/input/MotionCapture.h"
 #include "message/motion/KinematicsModels.h"
 
 #include "utility/behaviour/Action.h"
+#include "utility/input/LimbID.h"
 #include "utility/input/ServoID.h"
 #include "utility/motion/InverseKinematics.h"
 #include "utility/motion/ForwardKinematics.h"
@@ -42,14 +42,14 @@ namespace motion {
     using extension::Configuration;
 
     using message::behaviour::ServoCommand;
-    using LimbID  = message::behaviour::Subsumption::Limb::Value;
     using message::input::MotionCapture;
     using message::input::PresenceUserState;
     using message::input::Sensors;
-    using ServoID = utility::input::ServoID;
     using message::motion::KinematicsModel;
     using message::motion::BodySide;
 
+    using LimbID  = utility::input::LimbID;
+    using ServoID = utility::input::ServoID;
     using utility::behaviour::RegisterAction;
     using utility::behaviour::ActionPriorites;
     using ServoSide = utility::input::ServoSide;

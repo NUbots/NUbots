@@ -27,7 +27,7 @@ namespace motion{
     using extension::Configuration;
 
     using message::input::Sensors;
-    using LimbID  = message::behaviour::Subsumption::Limb::Value;
+    using LimbID  = utility::input::LimbID;
     using ServoID = utility::input::ServoID;
     using message::motion::KinematicsModel;
 

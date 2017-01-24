@@ -21,13 +21,11 @@
 
 #include "message/motion/ServoTarget.h"
 
-#include "utility/input/LimbID.h"
-
 namespace module {
     namespace behaviour {
 
+        using LimbID  = utility::input::LimbID;
         using ServoID = utility::input::ServoID;
-        using LimbID  = message::behaviour::Subsumption::Limb::Value;
         using message::motion::ServoTarget;
         using message::behaviour::ServoCommand;
         using utility::behaviour::RegisterAction;
@@ -144,7 +142,7 @@ namespace module {
                 for (auto& command : commands) {
 
                     // Check if we have access
-                    if (this->limbAccess[uint(utility::input::limbForServo(command.id))] == command.source) {
+                    if (this->limbAccess[uint(utility::input::LimbID::limbForServo(command.id))] == command.source) {
 
                         // Get our queue
                         auto& queue = commandQueues[uint(command.id)];
@@ -224,7 +222,7 @@ namespace module {
                     for (auto& servo : emptiedQueues) {
 
                         // Get the lease holder on the limb this servo belongs to
-                        auto id = limbAccess[uint(utility::input::limbForServo(servo))];
+                        auto id = limbAccess[uint(utility::input::LimbID::limbForServo(servo))];
                         completeMap[id].insert(servo);
                     }
 
@@ -412,7 +410,7 @@ namespace module {
 
                 // Clear our queues for this limb
                 for(const auto& limb : k.second) {
-                    for (const auto& servo : utility::input::servosForLimb(limb)) {
+                    for (const auto& servo : utility::input::LimbID::servosForLimb(limb)) {
                         commandQueues[uint(servo)].clear();
                     }
                 }

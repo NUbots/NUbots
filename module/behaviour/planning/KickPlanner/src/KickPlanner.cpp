@@ -23,7 +23,6 @@
 
 #include "message/behaviour/KickPlan.h"
 #include "message/behaviour/ServoCommand.h"
-#include "message/behaviour/Subsumption.h"
 #include "message/localisation/FieldObject.h"
 #include "message/motion/KinematicsModels.h"
 #include "message/motion/WalkCommand.h"
@@ -31,6 +30,7 @@
 #include "message/vision/VisionObjects.h"
 
 #include "utility/behaviour/Action.h"
+#include "utility/input/LimbID.h"
 #include "utility/localisation/transform.h"
 #include "utility/math/coordinates.h"
 #include "utility/math/matrix/Transform3D.h"
@@ -45,7 +45,6 @@ namespace planning {
 
     using extension::Configuration;
 
-    using LimbID  = message::behaviour::Subsumption::Limb::Value;
     using message::behaviour::KickPlan;
     using KickType = message::behaviour::KickPlan::KickType;
     using message::behaviour::WantsToKick;
@@ -60,6 +59,7 @@ namespace planning {
     using message::motion::KinematicsModel;
     using message::support::FieldDescription;
 
+    using LimbID = utility::input::LimbID;
     using utility::localisation::transform::RobotToWorldTransform;
     using utility::localisation::transform::WorldToRobotTransform;
     using utility::math::matrix::Transform3D;

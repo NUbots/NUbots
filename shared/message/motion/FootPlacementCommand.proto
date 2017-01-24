@@ -21,14 +21,13 @@ syntax = "proto3";
 package message.motion;
 
 import "Vector.proto";
-import "message/behaviour/Subsumption.proto";
 
 message FootPlacementStopped {}
 
 message NewStepTargetInfo {
-    double                           targetTime        = 1;
-    vec3                             velocityCurrent   = 2;
-    behaviour.Subsumption.Limb activeForwardLimb = 3;
+    double targetTime        = 1;
+    vec3   velocityCurrent   = 2;
+    uint32 activeForwardLimb = 3;
 }
 
 message NewFootTargetInfo {

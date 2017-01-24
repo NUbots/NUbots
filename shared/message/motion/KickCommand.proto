@@ -21,7 +21,6 @@ syntax = "proto3";
 package message.motion;
 
 import "Vector.proto";
-import "message/behaviour/Subsumption.proto";
 
 /**
  * TODO document
@@ -47,8 +46,8 @@ message KickCommand {
  * @author Brendan Annable
  */
 message KickScriptCommand {
-    vec3                             direction = 1; // Direction to kick with magnitude determining force
-    behaviour.Subsumption.Limb leg       = 2; // Leg to kick with
+    vec3   direction = 1; // Direction to kick with magnitude determining force
+    uint32 leg       = 2; // Leg to kick with
 }
 
 message KickPlannerConfig {

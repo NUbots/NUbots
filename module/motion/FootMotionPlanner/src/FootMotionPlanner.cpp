@@ -34,7 +34,6 @@ namespace motion
 /*=======================================================================================================*/
     using extension::Configuration;
 
-    using LimbID = message::behaviour::Subsumption::Limb::Value;
     using NewStepTargetInfo  = message::motion::NewStepTargetInfo;
     using NewFootTargetInfo  = message::motion::NewFootTargetInfo;
     using NextFootTargetInfo = message::motion::NextFootTargetInfo;
@@ -45,10 +44,11 @@ namespace motion
     using message::motion::FootStepCompleted;
     using message::motion::KinematicsModel;
 
-    using utility::support::Expression;
+    using LimbID = utility::input::LimbID;
     using utility::math::matrix::Transform2D;
     using utility::math::matrix::Transform3D;
     using utility::nubugger::graph;
+    using utility::support::Expression;
 /*=======================================================================================================*/
 //      NUCLEAR METHOD: FootMotionPlanner
 /*=======================================================================================================*/

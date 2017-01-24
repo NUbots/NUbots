@@ -23,12 +23,12 @@
 
 #include "message/behaviour/MotionCommand.h"
 #include "message/behaviour/ServoCommand.h"
-#include "message/behaviour/Subsumption.h"
 #include "message/motion/HeadCommand.h"
 #include "message/motion/KickCommand.h"
 
 #include "utility/behaviour/Action.h"
 #include "utility/behaviour/MotionCommand.h"
+#include "utility/input/LimbID.h"
 #include "utility/math/matrix/Transform2D.h"
 #include "utility/support/eigen_armadillo.h"
 
@@ -39,8 +39,8 @@ namespace strategy {
     using message::motion::KickScriptCommand;
     using message::motion::HeadCommand;
     using message::behaviour::MotionCommand;
-    using LimbID = message::behaviour::Subsumption::Limb::Value;
 
+    using LimbID = utility::input::LimbID;
     using utility::math::matrix::Transform2D;
 
     PS3Walk::PS3Walk(std::unique_ptr<NUClear::Environment> environment)

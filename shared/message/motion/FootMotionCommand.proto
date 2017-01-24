@@ -22,17 +22,16 @@ package message.motion;
 
 import "Matrix.proto";
 import "Vector.proto";
-import "message/behaviour/Subsumption.proto";
 
 message FootMotionStopped {}
 
 message FootMotionUpdate {
-    double                           phase             = 1;
-    behaviour.Subsumption.Limb activeForwardLimb = 2;
-    vec3                             leftFoot2D        = 3;
-    vec3                             rightFoot2D       = 4;
-    mat44                            leftFoot3D        = 5;
-    mat44                            rightFoot3D       = 6;
+    double phase             = 1;
+    uint32 activeForwardLimb = 2;
+    vec3   leftFoot2D        = 3;
+    vec3   rightFoot2D       = 4;
+    mat44  leftFoot3D        = 5;
+    mat44  rightFoot3D       = 6;
 }
 
 message NextFootTargetInfo {

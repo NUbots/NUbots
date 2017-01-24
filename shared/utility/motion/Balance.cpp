@@ -25,7 +25,7 @@
 namespace utility {
 namespace motion {
 
-    using LimbID  = message::behaviour::Subsumption::Limb::Value;
+    using LimbID  = utility::input::LimbID;
     //using ServoID = utility::input::ServoID;
     using message::input::Sensors;
     using utility::math::matrix::Rotation3D;

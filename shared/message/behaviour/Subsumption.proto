@@ -23,44 +23,35 @@ package message.behaviour;
 
 message Subsumption {
 
-    enum Limb {
-        UNKNOWN   = 0;
-        LEFT_LEG  = 1;
-        RIGHT_LEG = 2;
-        LEFT_ARM  = 3;
-        RIGHT_ARM = 4;
-        HEAD      = 5;
-    }
-
     message LimbSet {
-        float priority = 1;
-        repeated Limb limbs = 2;
+        float           priority = 1;
+        repeated uint32 limbs    = 2;
     }
 
     message ActionRegister {
-        uint32 id = 1;
-        string name = 2;
+        uint32           id       = 1;
+        string           name     = 2;
         repeated LimbSet limb_set = 3;
     }
 
     message ActionStateChange {
         enum State {
             UNKNOWN = 0;
-            START = 1;
-            KILL = 2;
+            START   = 1;
+            KILL    = 2;
         }
 
-        State state = 1;
-        string name = 2;
-        repeated Limb limbs = 3;
+        State           state = 1;
+        string          name  = 2;
+        repeated uint32 limbs = 3;
     }
 
     message ActionPriorites {
-        uint32 id = 1;
+        uint32         id         = 1;
         repeated float priorities = 2;
     }
 
-    repeated ActionRegister action_register = 1;
-    repeated ActionStateChange action_state_change = 2;
-    repeated ActionPriorites action_priority_change = 3;
+    repeated ActionRegister    action_register        = 1;
+    repeated ActionStateChange action_state_change    = 2;
+    repeated ActionPriorites   action_priority_change = 3;
 }

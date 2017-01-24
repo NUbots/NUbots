@@ -20,21 +20,23 @@
 #include "BezierWalkPathPlanner.h"
 
 #include <cmath>
-#include "message/behaviour/KickPlan.h"
+
 #include "extension/Configuration.h"
-#include "message/input/Sensors.h"
-#include "message/localisation/FieldObject.h"
-#include "message/vision/VisionObjects.h"
-#include "message/motion/WalkCommand.h"
-#include "message/motion/KickCommand.h"
+
+#include "message/behaviour/KickPlan.h"
 #include "message/behaviour/MotionCommand.h"
+#include "message/localisation/FieldObject.h"
+#include "message/motion/KickCommand.h"
+#include "message/motion/WalkCommand.h"
+#include "message/vision/VisionObjects.h"
+
 #include "utility/nubugger/NUhelpers.h"
 #include "utility/localisation/transform.h"
 #include "utility/math/matrix/Transform2D.h"
 
-#include "message/behaviour/Action.h"
-#include "message/input/LimbID.h"
-#include "message/input/ServoID.h"
+#include "utility/behaviour/Action.h"
+#include "utility/input/LimbID.h"
+#include "utility/input/ServoID.h"
 
 
 namespace module {
@@ -42,33 +44,31 @@ namespace module {
         namespace planning {
 
             using extension::Configuration;
-            using message::input::Sensors;
+
             using message::motion::WalkCommand;
             using message::behaviour::KickPlan;
             using message::behaviour::KickType;
             using message::behaviour::MotionCommand;
-            using message::behaviour::RegisterAction;
-            using message::behaviour::ActionPriorites;
             using message::motion::WalkStopped;
             using message::motion::WalkCommand;
             using message::motion::StopCommand;
             using message::motion::EnableWalkEngineCommand;
             using message::motion::DisableWalkEngineCommand;
             using message::motion::KickFinished;
+            using LocalisationBall = message::localisation::Ball;
+            using Self             = message::localisation::Self;
+            using VisionBall       = message::vision::Ball;
+            using VisionObstacle   = message::vision::Obstacle;
 
-            using message::input::LimbID;
-            using message::input::ServoID;
-
-
+            using utility::behaviour::RegisterAction;
+            using utility::behaviour::ActionPriorites;
+            using LimbID  = utility::input::LimbID;
+            using ServoID = utility::input::ServoID;
             using utility::localisation::transform::RobotToWorldTransform;
             using utility::math::matrix::Transform2D;
             using utility::nubugger::graph;
             using utility::nubugger::drawSphere;
             using utility::nubugger::drawArrow;
-            using LocalisationBall = message::localisation::Ball;
-            using Self = message::localisation::Self;
-            using VisionBall = message::vision::Ball;
-            using VisionObstacle = message::vision::Obstacle;
 
             BezierWalkPathPlanner::BezierWalkPathPlanner(std::unique_ptr<NUClear::Environment> environment)
                 : Reactor(std::move(environment))

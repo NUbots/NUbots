@@ -33,7 +33,6 @@ namespace motion
 //      UTILIZATION REFERENCE(S)
 /*=======================================================================================================*/
 
-    using LimbID         = message::behaviour::Subsumption::Limb::Value;
     using ServoCommand   = message::behaviour::ServoCommand;
     using message::behaviour::WalkOptimiserCommand;
     using message::behaviour::WalkConfigSaved;
@@ -51,6 +50,7 @@ namespace motion
     using message::support::SaveConfiguration;
     using extension::Configuration;
 
+    using LimbID = utility::input::LimbID;
     using utility::motion::kinematics::calculateLegJoints;
     using utility::math::matrix::Transform2D;
     using utility::math::matrix::Transform3D;

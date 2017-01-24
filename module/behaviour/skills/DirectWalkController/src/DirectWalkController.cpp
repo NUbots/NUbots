@@ -22,10 +22,10 @@
 #include "extension/Configuration.h"
 
 #include "message/behaviour/MotionCommand.h"
-#include "message/behaviour/Subsumption.h"
 #include "message/motion/WalkCommand.h"
 
 #include "utility/behaviour/Action.h"
+#include "utility/input/LimbID.h"
 #include "utility/input/ServoID.h"
 
 namespace module {
@@ -40,7 +40,7 @@ namespace skills {
     using message::motion::WalkStopped;
     using message::motion::EnableWalkEngineCommand;
     using message::motion::DisableWalkEngineCommand;
-    using LimbID  = message::behaviour::Subsumption::Limb::Value;
+    using LimbID  = utility::input::LimbID;
     using ServoID = utility::input::ServoID;
 
     using utility::behaviour::RegisterAction;

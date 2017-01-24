@@ -27,22 +27,22 @@
 #include <nuclear>
 #include <limits>
 
+#include "message/input/Sensors.h"
+#include "message/motion/KinematicsModels.h"
+
+#include "utility/behaviour/Action.h"
+#include "utility/input/LimbID.h"
+#include "utility/input/ServoID.h"
 #include "utility/math/matrix/Transform3D.h"
 #include "utility/math/coordinates.h"
-#include "utility/motion/ForwardKinematics.h"
-#include "message/behaviour/Subsumption.h"
-#include "message/input/Sensors.h"
-#include "utility/input/ServoID.h"
 #include "utility/math/angle.h"
-#include "utility/behaviour/Action.h"
-
-#include "message/motion/KinematicsModels.h"
+#include "utility/motion/ForwardKinematics.h"
 
 namespace utility {
 namespace motion {
 namespace kinematics {
     
-    using LimbID  = message::behaviour::Subsumption::Limb::Value;
+    using LimbID  = utility::input::LimbID;
     using ServoID = utility::input::ServoID;
 
     /*! @brief Calculates the leg joints for a given input ankle position.

@@ -19,13 +19,13 @@
 
 #include "ArmVisionAvoidance.h"
 
-#include "message/input/ServoID.h"
-#include "message/input/LimbID.h"
 #include "message/behaviour/Action.h"
 #include "message/behaviour/ServoCommand.h"
 #include "message/input/Sensors.h"
 #include "extension/Configuration.h"
 
+#include "utility/input/LimbID.h"
+#include "utility/input/ServoID.h"
 #include "utility/math/coordinates.h"
 #include "utility/support/yaml_expression.h"
 
@@ -33,8 +33,8 @@ namespace module {
 namespace behaviour {
 namespace skills {
 
-    using message::input::LimbID;
-    using message::input::ServoID;
+    using LimbID  = utility::input::LimbID;
+    using ServoID = utility::input::ServoID;
     using message::input::Sensors;
     using message::behaviour::ServoCommand;
     using message::behaviour::RegisterAction;
@@ -73,12 +73,12 @@ namespace skills {
 //            auto headPitch = headSpherical[2];
 
             // Get the current position of the arm servos.
-            float leftShoulderRoll   = sensors.servos.at(static_cast<int>(ServoID::L_SHOULDER_ROLL)).presentPosition;
-            float leftShoulderPitch  = sensors.servos.at(static_cast<int>(ServoID::L_SHOULDER_PITCH)).presentPosition;
-            float leftElbowPitch     = sensors.servos.at(static_cast<int>(ServoID::L_ELBOW)).presentPosition;
-            float rightShoulderRoll  = sensors.servos.at(static_cast<int>(ServoID::R_SHOULDER_ROLL)).presentPosition;
-            float rightShoulderPitch = sensors.servos.at(static_cast<int>(ServoID::R_SHOULDER_PITCH)).presentPosition;
-            float rightElbowPitch    = sensors.servos.at(static_cast<int>(ServoID::R_ELBOW)).presentPosition;
+            float leftShoulderRoll   = sensors.servo.at(ServoID::L_SHOULDER_ROLL).presentPosition;
+            float leftShoulderPitch  = sensors.servo.at(ServoID::L_SHOULDER_PITCH).presentPosition;
+            float leftElbowPitch     = sensors.servo.at(ServoID::L_ELBOW).presentPosition;
+            float rightShoulderRoll  = sensors.servo.at(ServoID::R_SHOULDER_ROLL).presentPosition;
+            float rightShoulderPitch = sensors.servo.at(ServoID::R_SHOULDER_PITCH).presentPosition;
+            float rightElbowPitch    = sensors.servo.at(ServoID::R_ELBOW).presentPosition;
 
             if (headYaw > headYawLimit[1]) {        // Looking behind left shoulder.
                 leftShoulderPitch   =  headYaw - (M_PI / 2); // (headYawLimit[1] + (M_PI / 2)) - headYaw;

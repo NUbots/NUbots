@@ -23,7 +23,6 @@
 
 #include "message/behaviour/KickPlan.h"
 #include "message/behaviour/ServoCommand.h"
-#include "message/behaviour/Subsumption.h"
 #include "message/input/Sensors.h"
 #include "message/motion/KickCommand.h"
 #include "message/motion/KinematicsModels.h"
@@ -32,6 +31,7 @@
 
 
 #include "utility/behaviour/Action.h"
+#include "utility/input/LimbID.h"
 #include "utility/input/ServoID.h"
 #include "utility/math/matrix/Transform3D.h"
 #include "utility/motion/InverseKinematics.h"
@@ -44,8 +44,8 @@ namespace motion {
 
     using extension::Configuration;
 
-    using LimbID = message::behaviour::Subsumption::Limb::Value;
     using message::input::Sensors;
+    using LimbID  = utility::input::LimbID;
     using ServoID = utility::input::ServoID;
     using message::motion::StopCommand;
     using message::motion::KickCommand;

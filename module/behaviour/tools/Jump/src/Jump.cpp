@@ -22,10 +22,10 @@
 #include "extension/Configuration.h"
 
 #include "message/behaviour/ServoCommand.h"
-#include "message/behaviour/Subsumption.h"
 #include "message/platform/darwin/DarwinSensors.h"
 
 #include "utility/behaviour/Action.h"
+#include "utility/input/LimbID.h"
 #include "utility/input/ServoID.h"
 #include "utility/motion/Script.h"
 
@@ -35,14 +35,14 @@ namespace tools {
 
     using extension::Configuration;
 
-    using LimbID  = message::behaviour::Subsumption::Limb::Value;
     using message::platform::darwin::ButtonMiddleDown;
     using message::platform::darwin::ButtonLeftDown;
 
     using utility::behaviour::RegisterAction;
     using utility::behaviour::ActionPriorites;
-    using utility::motion::ExecuteScriptByName;
+    using LimbID  = utility::input::LimbID;
     using ServoID = utility::input::ServoID;
+    using utility::motion::ExecuteScriptByName;
 
     Jump::Jump(std::unique_ptr<NUClear::Environment> environment)
     : Reactor(std::move(environment)) {

@@ -23,10 +23,11 @@ namespace utility {
 namespace motion {
 namespace kinematics {
 
-    using LimbID  = message::behaviour::Subsumption::Limb::Value;
-    using ServoID = utility::input::ServoID;
     using message::input::Sensors;
     using message::motion::KinematicsModel;
+
+    using LimbID  = utility::input::LimbID;
+    using ServoID = utility::input::ServoID;
 
     /*! @brief Calculates the leg joints for a given input ankle position.
             The robot coordinate system has origin a distance DISTANCE_FROM_BODY_TO_HIP_JOINT above the midpoint of the hips.

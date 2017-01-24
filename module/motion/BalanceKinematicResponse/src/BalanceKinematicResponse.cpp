@@ -35,8 +35,6 @@ namespace motion
 /*=======================================================================================================*/
 //      UTILIZATION REFERENCE(S)
 /*=======================================================================================================*/
-    using ServoID = utility::input::ServoID;
-    using LimbID  = message::behaviour::Subsumption::Limb::Value;
     using message::input::Sensors;
     using message::input::PushDetection;
     using message::input::FallingDetected;
@@ -52,6 +50,9 @@ namespace motion
     using extension::Configuration;
     using utility::support::Expression;
 
+    using LimbID  = utility::input::LimbID;
+    using ServoID = utility::input::ServoID;
+    
     using utility::math::matrix::Transform2D;
     using utility::math::matrix::Transform3D;
     using utility::math::angle::normalizeAngle;

@@ -25,23 +25,22 @@
 #include <cmath>
 #include <nuclear>
 
+#include "message/input/Sensors.h"
+#include "message/motion/KinematicsModels.h"
+
+#include "utility/input/LimbID.h"
+#include "utility/input/ServoID.h"
 #include "utility/math/matrix/Transform3D.h"
 #include "utility/math/matrix/Rotation3D.h"
 #include "utility/math/angle.h"
 #include "utility/math/geometry/Line.h"
-#include "utility/input/LimbID.h"
-#include "utility/input/ServoID.h"
 #include "utility/support/eigen_armadillo.h"
-
-#include "message/input/Sensors.h"
-
-#include "message/motion/KinematicsModels.h"
 
 namespace utility {
 namespace motion {
 namespace kinematics {
 
-    using LimbID  = message::behaviour::Subsumption::Limb::Value;
+    using LimbID  = utility::input::LimbID;
     using ServoID = utility::input::ServoID;
     using message::input::Sensors;
     using message::motion::KinematicsModel;
