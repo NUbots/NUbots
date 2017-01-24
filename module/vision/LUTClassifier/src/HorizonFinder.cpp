@@ -40,14 +40,7 @@ namespace module {
 
                 // Get our transform to world coordinates
                 const Rotation3D& Rtw = Transform3D(convert<double, 4, 4>(sensors.world)).rotation();
-                Rotation3D Rtc;
-                for (const auto& entry : sensors.forwardKinematics)
-                {
-                    if (entry.servoID == ServoID::HEAD_PITCH)
-                    {
-                        Rtc = Transform3D(convert<double, 4, 4>(entry.kinematics)).rotation();
-                    }
-                }
+                const Rotation3D& Rtc = Transform3D(convert<double, 4, 4>(sensors.forwardKinematics.at(ServoID::HEAD_PITCH))).rotation();
                 Rotation3D Rcw =  Rtc.i() * Rtw;
 
                 // Rcw = Rotation3D::createRotationZ(-Rcw.yaw()) * Rcw;

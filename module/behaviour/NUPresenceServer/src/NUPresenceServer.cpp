@@ -81,25 +81,8 @@ namespace behaviour {
             imageFragment->start = 0;
             imageFragment->end   = image.data.size();
 
-            Transform3D cam_to_right_foot, cam_to_left_foot, head_pitch;
-            for (const auto& entry : sensors.forwardKinematics)
-            {
-                if (entry.servoID == ServoID::L_ANKLE_ROLL)
-                {
-                    cam_to_left_foot = Transform3D(convert<double, 4, 4>(entry.kinematics)).i();
-                }
-                if (entry.servoID == ServoID::R_ANKLE_ROLL)
-                {
-                    cam_to_right_foot = Transform3D(convert<double, 4, 4>(entry.kinematics)).i();
-                }
-                if (entry.servoID == ServoID::HEAD_PITCH)
-                {
-                    head_pitch = Transform3D(convert<double, 4, 4>(entry.kinematics)).i();
-                }
-            }
-
-            cam_to_left_foot *= head_pitch;
-            cam_to_right_foot *= head_pitch;
+            Transform3D cam_to_right_foot = convert<double, 4, 4>(sensors.forwardKinematics.at(ServoID::R_ANKLE_ROLL).inverse() * sensors.forwardKinematics.at(ServoID::HEAD_PITCH));
+            Transform3D cam_to_left_foot  = convert<double, 4, 4>(sensors.forwardKinematics.at(ServoID::L_ANKLE_ROLL).inverse() * sensors.forwardKinematics.at(ServoID::HEAD_PITCH));
 
             Transform3D cam_to_feet = cam_to_left_foot;
             cam_to_feet.translation() = 0.5 * (cam_to_left_foot.translation() + cam_to_right_foot.translation()) ;

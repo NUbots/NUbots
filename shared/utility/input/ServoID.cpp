@@ -111,5 +111,9 @@ namespace utility {
             value = static_cast<Value>(static_cast<int>(value) - 1);
             return temp;
         }
+
+        std::ostream& operator<< (std::ostream& out, const ServoID& val) {
+            return out << static_cast<std::string>(val);
+        }
     }
 }

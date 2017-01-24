@@ -221,38 +221,17 @@ namespace module {
                         //We need to transform our view points to orientation space
                         if (ballMaxPriority)
                         {
-                            for (const auto& entry : ballFixationObjects[0].visObject.sensors->forwardKinematics)
-                            {
-                                if (entry.servoID == ServoID::HEAD_PITCH)
-                                {
-                                    headToBodyRotation = Transform3D(convert<double, 4, 4>(entry.kinematics)).rotation();
-                                    break;
-                                }
-                            }
-                            orientation = Transform3D(convert<double, 4, 4>(ballFixationObjects[0].visObject.sensors->world)).rotation().i();
+                            headToBodyRotation = Transform3D(convert<double, 4, 4>(ballFixationObjects[0].visObject.sensors->forwardKinematics.at(ServoID::HEAD_PITCH))).rotation();
+                            orientation        = Transform3D(convert<double, 4, 4>(ballFixationObjects[0].visObject.sensors->world)).rotation().i();
                         }
                         else
                         {
-                            for (const auto& entry : goalFixationObjects[0].visObject.sensors->forwardKinematics)
-                            {
-                                if (entry.servoID == ServoID::HEAD_PITCH)
-                                {
-                                    headToBodyRotation = Transform3D(convert<double, 4, 4>(entry.kinematics)).rotation();
-                                    break;
-                                }
-                            }
-                            orientation = Transform3D(convert<double, 4, 4>(goalFixationObjects[0].visObject.sensors->world)).rotation().i();
+                            headToBodyRotation = Transform3D(convert<double, 4, 4>(goalFixationObjects[0].visObject.sensors->forwardKinematics.at(ServoID::HEAD_PITCH))).rotation();
+                            orientation        = Transform3D(convert<double, 4, 4>(goalFixationObjects[0].visObject.sensors->world)).rotation().i();
                         }
                     } else {
-                        for (const auto& entry : sensors.forwardKinematics)
-                        {
-                            if (entry.servoID == ServoID::HEAD_PITCH)
-                            {
-                                headToBodyRotation = Transform3D(convert<double, 4, 4>(entry.kinematics)).rotation();
-                                break;
-                            }
-                        }
-                        orientation = Transform3D(convert<double, 4, 4>(sensors.world)).rotation().i();
+                        headToBodyRotation = Transform3D(convert<double, 4, 4>(sensors.forwardKinematics.at(ServoID::HEAD_PITCH))).rotation();
+                        orientation        = Transform3D(convert<double, 4, 4>(sensors.world)).rotation().i();
                     }
                     Rotation3D headToIMUSpace = orientation * headToBodyRotation;
 
@@ -407,18 +386,7 @@ namespace module {
                 std::vector<arma::vec2> fixationPoints;
                 std::vector<arma::vec2> fixationSizes;
                 arma::vec centroid = {0,0};
-                arma::vec2 currentPos;
-                for (const auto& servo : sensors.servo)
-                {
-                    if (servo.id == ServoID::HEAD_YAW)
-                    {
-                        currentPos[0] = servo.presentPosition;
-                    }
-                    if (servo.id == ServoID::HEAD_PITCH)
-                    {
-                        currentPos[1] = servo.presentPosition;
-                    }
-                }
+                arma::vec2 currentPos = {sensors.servo.at(ServoID::HEAD_YAW).presentPosition, sensors.servo.at(ServoID::HEAD_PITCH).presentPosition};
 
                 for(uint i = 0; i < fixationObjects.size(); i++){
                     //TODO: fix arma meat errors here

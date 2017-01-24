@@ -55,61 +55,22 @@ namespace logging {
 
         on<Trigger<Sensors>>().then("Leg Loads Logger Sensor Update", [this] (const Sensors& sensors)
         {
-            float RightHipPitchPresentVelocity, LeftHipPitchPresentVelocity, RightKneePresentVelocity, 
-                  LeftKneePresentVelocity, RightAnklePitchPresentVelocity, LeftAnklePitchPresentVelocity;
-
-            float RightHipPitchLoad, LeftHipPitchLoad, RightKneeLoad, LeftKneeLoad, LeftAnklePitchLoad, 
-                  RightAnklePitchLoad;
-
             // RightFootDisplacement FK -> RightAnkleRoll -> inverse -> translation -> negate
             // LeftFootDisplacement  FK -> LeftAnkleRoll  -> inverse -> translation -> negate
-            for (const auto& servo : sensors.servo)
-            {
-                if (servo.id == ServoID::R_HIP_PITCH)
-                {
-                    RightHipPitchPresentVelocity = servo.presentVelocity;
-                    RightHipPitchLoad            = servo.load;
-                }
-                if (servo.id == ServoID::L_HIP_PITCH)
-                {
-                    LeftHipPitchPresentVelocity = servo.presentVelocity;
-                    LeftHipPitchLoad            = servo.load;
-                }
-                if (servo.id == ServoID::R_KNEE)
-                {
-                    RightKneePresentVelocity = servo.presentVelocity;
-                    RightKneeLoad            = servo.load;
-                }
-                if (servo.id == ServoID::L_KNEE)
-                {
-                    LeftKneePresentVelocity = servo.presentVelocity;
-                    LeftKneeLoad            = servo.load;
-                }
-                if (servo.id == ServoID::R_ANKLE_PITCH)
-                {
-                    RightAnklePitchPresentVelocity = servo.presentVelocity;
-                    RightAnklePitchLoad            = servo.load;
-                }
-                if (servo.id == ServoID::L_ANKLE_PITCH)
-                {
-                    LeftAnklePitchPresentVelocity = servo.presentVelocity;
-                    LeftAnklePitchLoad            = servo.load;
-                }
-            }
-
-            arma::vec3 RightFootDisplacement, LeftFootDisplacement;
-
-            for (const auto& entry : sensors.forwardKinematics)
-            {
-                if (entry.servoID == ServoID::R_ANKLE_ROLL)
-                {
-                    RightFootDisplacement = Transform3D(convert<double, 4, 4>(-entry.kinematics)).i().translation();
-                }
-                if (entry.servoID == ServoID::L_ANKLE_ROLL)
-                {
-                    LeftFootDisplacement = Transform3D(convert<double, 4, 4>(-entry.kinematics)).i().translation();
-                }
-            }
+            arma::vec3 RightFootDisplacement          = -Transform3D(convert<double, 4, 4>(sensors.forwardKinematics.at(ServoID::R_ANKLE_ROLL).inverse())).translation();
+            arma::vec3 LeftFootDisplacement           = -Transform3D(convert<double, 4, 4>(sensors.forwardKinematics.at(ServoID::L_ANKLE_ROLL).inverse())).translation();
+            float      RightHipPitchPresentVelocity   =  sensors.servo[ServoID::R_HIP_PITCH].presentVelocity;
+            float      RightHipPitchLoad              =  sensors.servo[ServoID::R_HIP_PITCH].load;
+            float      LeftHipPitchPresentVelocity    =  sensors.servo[ServoID::L_HIP_PITCH].presentVelocity;
+            float      LeftHipPitchLoad               =  sensors.servo[ServoID::L_HIP_PITCH].load;
+            float      RightKneePresentVelocity       =  sensors.servo[ServoID::R_KNEE].presentVelocity;
+            float      RightKneeLoad                  =  sensors.servo[ServoID::R_KNEE].load;
+            float      LeftKneePresentVelocity        =  sensors.servo[ServoID::L_KNEE].presentVelocity;
+            float      LeftKneeLoad                   =  sensors.servo[ServoID::L_KNEE].load;
+            float      RightAnklePitchPresentVelocity =  sensors.servo[ServoID::R_ANKLE_PITCH].presentVelocity;
+            float      RightAnklePitchLoad            =  sensors.servo[ServoID::R_ANKLE_PITCH].load;
+            float      LeftAnklePitchPresentVelocity  =  sensors.servo[ServoID::L_ANKLE_PITCH].presentVelocity;
+            float      LeftAnklePitchLoad             =  sensors.servo[ServoID::L_ANKLE_PITCH].load;
 
             if ((logFile.is_open() == true) && (logFile.good() == true))
             {

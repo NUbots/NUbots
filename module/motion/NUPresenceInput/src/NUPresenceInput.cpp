@@ -219,15 +219,7 @@ namespace motion {
 
 			//Adjust arm position
         	// int max_number_of_iterations = 20;
-            Transform3D camToBody;
-            for (const auto& entry : sensors.forwardKinematics)
-            {
-                if (entry.servoID == ServoID::HEAD_PITCH)
-                {
-                    camToBody = convert<double, 4, 4>(entry.kinematics);
-                    break;
-                }
-            }
+            Transform3D camToBody = convert<double, 4, 4>(sensors.forwardKinematics.at(ServoID::HEAD_PITCH)); 
             arma::vec3 kneckPos = { kinematicsModel.head.NECK_BASE_POS_FROM_ORIGIN_X,
                                     kinematicsModel.head.NECK_BASE_POS_FROM_ORIGIN_Y,
                                     kinematicsModel.head.NECK_BASE_POS_FROM_ORIGIN_Z};

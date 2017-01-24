@@ -306,7 +306,7 @@ namespace module {
                         while(error != DarwinSensors::Error::OK) 
                         {
                             std::stringstream s;
-                            s << "Error on Servo " << (i + 1) << " (" << std::string(ServoID(i)) << "):";
+                            s << "Error on Servo " << (i + 1) << " (" << static_cast<ServoID>(i) << "):";
 
                             if(error & DarwinSensors::Error::INPUT_VOLTAGE) {
                                 s << " Input Voltage - " << original.voltage;
@@ -431,10 +431,9 @@ namespace module {
                      ************************************************/
 
                     auto forwardKinematics = calculateAllPositions(kinematicsModel, *sensors);
-                    sensors->forwardKinematics.clear();
                     for (const auto& entry : forwardKinematics)
                     {
-                        sensors->forwardKinematics.push_back(Sensors::ServoIDKinematicsMap(entry.first, convert<double, 4, 4>(entry.second)));
+                        sensors->forwardKinematics[entry.first] = convert<double, 4, 4>(entry.second);
                     }
 
                     /************************************************
@@ -520,15 +519,7 @@ namespace module {
 
                             if (footDown) 
                             {
-                                Transform3D Htf;
-                                for (const auto& entry : sensors->forwardKinematics)
-                                {
-                                    if (entry.servoID == servoid)
-                                    {
-                                        Htf = convert<double, 4, 4>(entry.kinematics);
-                                        break;
-                                    }
-                                }
+                                Transform3D Htf = convert<double, 4, 4>(sensors->forwardKinematics.at(servoid)); 
                                 Transform3D Hft = Htf.i();
 
                                 Rotation3D Rtf = Htf.rotation();
@@ -622,44 +613,16 @@ namespace module {
                     // createRotationZ : Mat size [3x3] 
                     // Rwt : Mat size [3x3]
                     sensors->orientationBodyToGround = convert<double, 4, 4>(Transform3D(oBodyToGround));
-                    Eigen::Matrix4d headPitchKinematics;
-                    for (const auto& entry : sensors->forwardKinematics)
-                    {
-                        if (entry.servoID == ServoID::HEAD_PITCH)
-                        {
-                            sensors->orientationCamToGround = sensors->orientationBodyToGround * entry.kinematics;
-                            headPitchKinematics = entry.kinematics;
-                            break;
-                        }
-                    }
-                    
+                    auto headPitchKinematics         = sensors->forwardKinematics.at(ServoID::HEAD_PITCH); 
+                    sensors->orientationCamToGround  = sensors->orientationBodyToGround * headPitchKinematics;
+
                     if(sensors->leftFootDown) {
-                        arma::vec3 lAnkleRoll;
-
-                        for (const auto& entry : sensors->forwardKinematics)
-                        {
-                            if (entry.servoID == ServoID::L_ANKLE_ROLL)
-                            {
-                                lAnkleRoll = convert<double, 4, 4>(entry.kinematics).submat(0, 2, 2, 2);
-                                break;
-                            }
-                        }
-
+                        arma::vec3 lAnkleRoll           = convert<double, 4, 4>(sensors->forwardKinematics.at(ServoID::L_ANKLE_ROLL)).submat(0, 2, 2, 2);
                         sensors->kinematicsBodyToGround = convert<double, 4, 4>(utility::motion::kinematics::calculateBodyToGround(lAnkleRoll, sensors->bodyCentreHeight));
                     } 
 
                     else if (sensors->rightFootDown) {
-                        arma::vec3 rAnkleRoll;
-
-                        for (const auto& entry : sensors->forwardKinematics)
-                        {
-                            if (entry.servoID == ServoID::R_ANKLE_ROLL)
-                            {
-                                rAnkleRoll = convert<double, 4, 4>(entry.kinematics).submat(0, 2, 2, 2);
-                                break;
-                            }
-                        }
-
+                        arma::vec3 rAnkleRoll           = convert<double, 4, 4>(sensors->forwardKinematics.at(ServoID::R_ANKLE_ROLL)).submat(0, 2, 2, 2);
                         sensors->kinematicsBodyToGround = convert<double, 4, 4>(utility::motion::kinematics::calculateBodyToGround(rAnkleRoll, sensors->bodyCentreHeight));
                     }
 

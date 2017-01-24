@@ -48,15 +48,7 @@ namespace module {
 
             // Get our transform to world coordinates
             const Transform3D& Htw = convert<double, 4, 4>(sensors.world);
-            Transform3D Htc; 
-            for (const auto& entry : sensors.forwardKinematics)
-            {
-                if (entry.servoID == ServoID::HEAD_PITCH)
-                {
-                    Htc = convert<double, 4, 4>(entry.kinematics);
-                    break;
-                }
-            }
+            const Transform3D& Htc = convert<double, 4, 4>(sensors.forwardKinematics.at(ServoID::HEAD_PITCH)); 
             Transform3D Hcw = Htc.i() * Htw;
 
             arma::vec3 rBWw = { state[PX], state[PY], field.ball_radius };

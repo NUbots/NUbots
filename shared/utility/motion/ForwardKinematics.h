@@ -318,13 +318,13 @@ namespace kinematics {
     /*! @brief Adds up the mass vectors stored in the robot model and normalises the resulting position
         @return [x_com, y_com, z_com, total_mass] relative to the torso basis
     */
-    inline arma::vec4 calculateCentreOfMass(const KinematicsModel& model, const std::vector<message::input::Sensors::ServoIDKinematicsMap>& jointPositions, bool includeTorso){
+    inline arma::vec4 calculateCentreOfMass(const message::motion::KinematicsModel& model, const std::map<uint32_t, Eigen::Matrix4d>& jointPositions, bool includeTorso){
         arma::vec4 totalMassVector = arma::zeros(4);
 
         for(auto& joint : jointPositions){
             arma::vec4 massVector;
             for(size_t i = 0; i < 4; i++){
-                massVector[i] = model.massModel.masses[static_cast<int>(joint.servoID)][i];
+                massVector[i] = model.massModel.masses[joint.first][i];
             }
             //NUClear::log<NUClear::DEBUG>("calculateCentreOfMass - reading mass ", message::input::stringFromId(joint.first), massVector);
             double jointMass = massVector[3];
@@ -332,7 +332,7 @@ namespace kinematics {
             utility::math::matrix::Transform3D massScaler;
             massScaler.submat(0,0,2,2) *= jointMass;
 
-            totalMassVector +=  convert<double, 4, 4>(joint.kinematics) * massScaler * massVector; // = m * local centre of mass in global robot coords
+            totalMassVector +=  convert<double, 4, 4>(joint.second) * massScaler * massVector; // = m * local centre of mass in global robot coords
         }
 
         if(includeTorso){
@@ -413,22 +413,8 @@ namespace kinematics {
         arma::vec2 position = foot % arma::vec2({model.leg.FOOT_LENGTH / 2, model.leg.FOOT_WIDTH / 2});
         arma::vec4 centerFoot = arma::vec4({position[0], position[1] + negativeIfRight * model.leg.FOOT_CENTRE_TO_ANKLE_CENTRE, 0, 1});
 
-        for (const auto& entry : sensors.forwardKinematics)
-        {
-            if (left && entry.servoID == ServoID::L_ANKLE_ROLL)
-            {
-                return(convert<double, 4, 4>(entry.kinematics) * centerFoot);
-            }
-
-            if (!left && entry.servoID == ServoID::R_ANKLE_ROLL)
-            {
-                return(convert<double, 4, 4>(entry.kinematics) * centerFoot);
-            }
-        }
-
-        // To shut the compiler. We should always return via the for loop above.
-        // NaNs to ensure that if we ever do reach this point, we can figure out why.
-        return(arma::vec4({arma::datum::nan, arma::datum::nan, arma::datum::nan, arma::datum::nan}));
+        return((left) ? convert<double, 4, 4>(sensors.forwardKinematics.at(ServoID::L_ANKLE_ROLL)) * centerFoot
+                      : convert<double, 4, 4>(sensors.forwardKinematics.at(ServoID::R_ANKLE_ROLL)) * centerFoot);
     }
 
     inline arma::vec3 calculateCentreOfPressure(const KinematicsModel& model, const Sensors& sensors) {

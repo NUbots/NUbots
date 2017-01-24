@@ -59,16 +59,8 @@ namespace module {
             // Transform2D world = sensors.world.projectTo2D(arma::vec3({0,0,1}),arma::vec3({1,0,0}));
 
             //Transform2D world = sensors.world.projectTo2D(arma::vec3({0,0,1}),arma::vec3({1,0,0}));
-            Transform3D Htw = convert<double, 4, 4>(sensors.world);
-            Transform3D Htc;
-            for (const auto& entry : sensors.forwardKinematics)
-            {
-                if (entry.servoID == ServoID::HEAD_PITCH)
-                {
-                    Htc = convert<double, 4, 4>(entry.kinematics);
-                    break;
-                }
-            }
+            const Transform3D& Htw = convert<double, 4, 4>(sensors.world);
+            const Transform3D& Htc = convert<double, 4, 4>(sensors.forwardKinematics.at(ServoID::HEAD_PITCH)); 
             Transform3D Hwc = Htw.i() * Htc;
             //Get the x/y position for goals
             arma::vec prediction(3*measurements.size());

@@ -58,12 +58,8 @@ namespace debug {
 
         on<Trigger<Sensors>, Single, Priority::LOW>().then([this](const Sensors& sensors) {
 
-            for (const auto& servo : sensors.servo) {
-                if (servo.id == ServoID::L_HIP_ROLL){
-                    emit(graph("Servo " + std::string(ServoID(servo.id)), servo.presentPosition));
-                }
-            }
-
+            emit(graph("Servo " + static_cast<std::string>(static_cast<ServoID>(sensors.servo.at(ServoID::L_HIP_ROLL).id)), 
+                                    sensors.servo.at(ServoID::L_HIP_ROLL).presentPosition));
         });
 
         on<Every<1, std::chrono::seconds>>().then([this] {

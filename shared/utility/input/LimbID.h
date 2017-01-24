@@ -74,6 +74,8 @@ namespace utility {
 
             static std::set<ServoID> servosForLimb(const LimbID& limb);
             static LimbID limbForServo(const ServoID& servo);
+
+            friend std::ostream& operator<< (std::ostream& out, const LimbID& val);
         };
     }
 }

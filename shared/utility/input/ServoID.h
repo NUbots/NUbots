@@ -93,6 +93,8 @@ namespace utility {
             operator uint64_t() const { return value; }
             operator int()      const { return value; }
             operator std::string() const;
+
+            friend std::ostream& operator<< (std::ostream& out, const ServoID& val);
         };	
     }
 }

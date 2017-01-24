@@ -96,25 +96,10 @@ namespace support {
         Goal result;
 
         // t = torso; c = camera; g = ground; f = foot;
-        Transform3D Htc;
+        Transform3D Htc  = convert<double, 4, 4>(sensors.forwardKinematics.at(ServoID::HEAD_PITCH)); 
         //get the torso to foot transform
-        Transform3D Hgt;
-        Transform3D Hgt2;
-        for (const auto& entry : sensors.forwardKinematics)
-        {
-            if (entry.servoID == ServoID::HEAD_PITCH)
-            {
-                Htc = convert<double, 4, 4>(entry.kinematics);
-            }
-            if (entry.servoID == ServoID::R_ANKLE_ROLL)
-            {
-                Hgt = convert<double, 4, 4>(entry.kinematics);
-            }
-            if (entry.servoID == ServoID::L_ANKLE_ROLL)
-            {
-                Hgt2 = convert<double, 4, 4>(entry.kinematics);
-            }
-        }
+        Transform3D Hgt  = convert<double, 4, 4>(sensors.forwardKinematics.at(ServoID::R_ANKLE_ROLL)); 
+        Transform3D Hgt2 = convert<double, 4, 4>(sensors.forwardKinematics.at(ServoID::L_ANKLE_ROLL)); 
 
         if (Hgt2(3,2) < Hgt(3,2)) {
             Hgt = Hgt2;

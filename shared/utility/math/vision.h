@@ -53,15 +53,7 @@ namespace vision {
                            <<               0  <<                0  <<  1 <<  sensors.bodyCentreHeight   << arma::endr
                            <<               0  <<                0  <<  0 <<           1;
 
-        arma::mat44 cameraToBody_body;
-
-        for (const auto& entry : sensors.forwardKinematics)
-        {
-            if (entry.servoID == ServoID::HEAD_PITCH)
-            {
-                cameraToBody_body = convert<double, 4, 4>(entry.kinematics);
-            }
-        }
+        arma::mat44 cameraToBody_body = convert<double, 4, 4>(sensors.forwardKinematics.at(ServoID::HEAD_PITCH)); 
 
         arma::mat44 robotToBody_body = arma::eye(4,4);
         robotToBody_body.submat(0,0,2,2) = utility::math::matrix::Transform3D(convert<double, 4, 4>(sensors.world)).rotation();

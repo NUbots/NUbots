@@ -24,6 +24,7 @@
 
 #pragma GCC diagnostic ignored "-Weffc++"
 #include <Eigen/Core>
+#include <Eigen/Dense>
 #pragma GCC diagnostic pop
 
 template <typename Scalar, int elems>

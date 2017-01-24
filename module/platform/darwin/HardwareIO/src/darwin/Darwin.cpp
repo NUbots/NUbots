@@ -81,7 +81,7 @@ namespace Darwin {
         for (int i = 0; i < 20; ++i) {
             auto result = std::make_pair(i + 1, (&rShoulderPitch)[i].ping());
             if (!result.second) {
-                NUClear::log<NUClear::WARN>("Servo failed self test:", std::string(ServoID(i)));
+                NUClear::log<NUClear::WARN>("Servo failed self test:", static_cast<ServoID>(i));
             }
             results.push_back(result);
         }

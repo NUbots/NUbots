@@ -81,7 +81,7 @@ namespace skills {
                     valid = false;
                 }
             } else {
-                NUClear::log<NUClear::WARN>("Cannot kick with limb: ", std::string(leg));
+                NUClear::log<NUClear::WARN>("Cannot kick with limb: ", leg);
                 updatePriority(0);
                 valid = false;
             }

@@ -107,7 +107,7 @@ namespace YAML {
         static inline Node encode(const utility::motion::Script::Frame::Target& rhs) {
             Node node;
 
-            node["id"]       = std::string(rhs.id);
+            node["id"]       = static_cast<std::string>(rhs.id);
             node["position"] = rhs.position;
             node["gain"]     = rhs.gain;
             node["torque"]   = rhs.torque;

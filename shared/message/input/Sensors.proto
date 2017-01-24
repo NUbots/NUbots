@@ -27,12 +27,6 @@ import "Matrix.proto";
 
 message Sensors {
 
-    // Because you can't have a enum type as the key in a map.
-    message ServoIDKinematicsMap {
-        uint32 servoID    = 1;
-        mat44  kinematics = 2;
-    }
-
     message Servo {
         uint32 errorFlags      = 1;
         uint32 id              = 2;
@@ -84,7 +78,7 @@ message Sensors {
     bool                          rightFootDown           = 14;
 
     // Because you can't have a enum type as the key in a map.
-    repeated ServoIDKinematicsMap forwardKinematics       = 15;
+    map<uint32, mat44>            forwardKinematics       = 15;
     float                         bodyCentreHeight        = 16;
     vec4                          centreOfMass            = 17;
     mat44                         orientationBodyToGround = 18;

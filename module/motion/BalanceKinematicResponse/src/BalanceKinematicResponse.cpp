@@ -274,28 +274,12 @@ namespace motion
             //Rotate foot around hip by the given hip roll compensation...
             if (getActiveForwardLimb() == LimbID::LEFT_LEG)
             {
-                arma::mat44 rHipRoll;
-                for (const auto& entry : sensors.forwardKinematics)
-                {
-                    if (entry.servoID == ServoID::R_HIP_ROLL)
-                    {
-                        rHipRoll = convert<double, 4, 4>(entry.kinematics);
-                        break;
-                    }
-                }
+                arma::mat44 rHipRoll = convert<double, 4, 4>(sensors.forwardKinematics.at(ServoID::R_HIP_ROLL)); 
                 setRightFootPosition(getRightFootPosition().rotateZLocal(-hipRollParameter * yBoundedMinimumPhase, rHipRoll));
             }
             else 
             {
-                arma::mat44 lHipRoll;
-                for (const auto& entry : sensors.forwardKinematics)
-                {
-                    if (entry.servoID == ServoID::L_HIP_ROLL)
-                    {
-                        lHipRoll = convert<double, 4, 4>(entry.kinematics);
-                        break;
-                    }
-                }
+                arma::mat44 lHipRoll = convert<double, 4, 4>(sensors.forwardKinematics.at(ServoID::L_HIP_ROLL)); 
                 setLeftFootPosition(getLeftFootPosition().rotateZLocal( hipRollParameter  * yBoundedMinimumPhase, lHipRoll));
             }
         }

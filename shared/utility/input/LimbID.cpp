@@ -135,5 +135,9 @@ namespace utility {
                     return static_cast<LimbID>(-1);;
             }
         }
+
+        std::ostream& operator<< (std::ostream& out, const LimbID& val) {
+            return out << static_cast<std::string>(val);
+        }
     }
 }

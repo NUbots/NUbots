@@ -66,7 +66,7 @@ namespace support {
 
                 default:
                 {
-                    log("Unknown goal score context:", std::string(goalScored.context));
+                    log("Unknown goal score context:", goalScored.context);
                     break;
                 }
             }
@@ -95,7 +95,7 @@ namespace support {
 
                 default:
                 {
-                    log("Unknown penalisation context:", std::string(penalisation.context));
+                    log("Unknown penalisation context:", penalisation.context);
                     break;
                 }
             }
@@ -124,7 +124,7 @@ namespace support {
 
                 default:
                 {
-                    log("Unknown unpenalisation context:", std::string(unpenalisation.context));
+                    log("Unknown unpenalisation context:", unpenalisation.context);
                     break;
                 }
             }
@@ -147,7 +147,7 @@ namespace support {
 
                 default:
                 {
-                    log("Unknown coach message context:", std::string(message.context));
+                    log("Unknown coach message context:", message.context);
                     break;
                 }
             }
@@ -174,7 +174,7 @@ namespace support {
 
                 default:
                 {
-                    log("Unknown ball kicked out context:", std::string(ballKickedOut.context));
+                    log("Unknown ball kicked out context:", ballKickedOut.context);
                     break;
                 }
             }
@@ -225,7 +225,7 @@ namespace support {
 
                 default:
                 {
-                    log("Unknown game phase:", std::string(gamePhase.phase));
+                    log("Unknown game phase:", gamePhase.phase);
                     break;
                 }
             }
@@ -254,7 +254,7 @@ namespace support {
 
                 default:
                 {
-                    log("Unknown game mode:", std::string(gameMode.mode));
+                    log("Unknown game mode:", gameMode.mode);
                     break;
                 }
             }
