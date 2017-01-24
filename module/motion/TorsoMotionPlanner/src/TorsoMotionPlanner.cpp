@@ -38,8 +38,6 @@ namespace motion
     using message::behaviour::ServoCommand;
     using message::behaviour::WalkOptimiserCommand;
     using message::behaviour::WalkConfigSaved;
-    // using message::behaviour::RegisterAction;
-    // using message::behaviour::ActionPriorites;
     using message::motion::WalkCommand;
     using NewFootTargetInfo = message::motion::NewFootTargetInfo;
     using FootMotionUpdate   = message::motion::FootMotionUpdate;
@@ -152,9 +150,7 @@ namespace motion
     void TorsoMotionPlanner::updateTorsoPosition()
     {
         setTorsoPositionArms(zmpTorsoCompensation(getMotionPhase(), zmpTorsoCoefficients(), getZmpParams(), stepTime, zmpTime, phase1Single, phase2Single, getLeftFootSource(), getRightFootSource()));
-//std::cout << "\n\rTorso Position (Arms)\t[X= " << getTorsoPositionArms().x() << "]\t[Y= " << getTorsoPositionArms().y() << "]\n\r";         
         setTorsoPositionLegs(getTorsoPositionArms().localToWorld({-kinematicsModel.Leg.HIP_OFFSET_X, 0, 0}));
-//std::cout << "Torso Position (Legs)\t[X= " << getTorsoPositionLegs().x() << "]\t[Y= " << getTorsoPositionLegs().y() << "]\n\r";                 
         Transform2D uTorsoWorld = getTorsoPositionArms().localToWorld({-kinematicsModel.Leg.HIP_OFFSET_X, 0, 0});
         setTorsoPosition3D(arma::vec6({uTorsoWorld.x(), uTorsoWorld.y(), bodyHeight, 0, bodyTilt, uTorsoWorld.angle()}));
         emit(std::make_unique<TorsoMotionUpdate>(getTorsoPositionArms(), getTorsoPositionLegs(), getTorsoPosition3D(), getTorsoDestination()));

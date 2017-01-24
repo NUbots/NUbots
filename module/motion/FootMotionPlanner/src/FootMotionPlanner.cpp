@@ -86,13 +86,18 @@ namespace motion
         updateHandle = on<Every<UPDATE_FREQUENCY, Per<std::chrono::seconds>>, Single, Priority::HIGH>()
         .then("Foot Motion Planner - Update Foot Position", [this]
         {
-            double motionPhase = getMotionPhase();
-            if(DEBUG) { log<NUClear::TRACE>("Messaging: Foot Motion Planner - Update Foot Position(0)"); }                     
-                updateFootPosition(motionPhase, getActiveLimbSource(), getActiveForwardLimb(), getActiveLimbDestination());         
-            if(DEBUG) { log<NUClear::TRACE>("Messaging: Foot Motion Planner - Update Foot Position(1)"); }
 
-            //DEBUG: Printout of motion phase function...
-            emit(graph("FMP Synchronising Motion Phase", arma::vec({motionPhase, (getActiveForwardLimb() == LimbID::LEFT_LEG ? 1  : 0)})));   
+            if (getDestinationTime() + stepTime < getTime())
+            {
+                double motionPhase = getMotionPhase();
+                if(DEBUG) { log<NUClear::TRACE>("Messaging: Foot Motion Planner - Update Foot Position(0)"); }                     
+                    updateFootPosition(motionPhase, getActiveLimbSource(), getActiveForwardLimb(), getActiveLimbDestination());         
+                if(DEBUG) { log<NUClear::TRACE>("Messaging: Foot Motion Planner - Update Foot Position(1)"); }
+            
+
+                //DEBUG: Printout of motion phase function...
+                emit(graph("FMP Synchronising Motion Phase", arma::vec({motionPhase, (getActiveForwardLimb() == LimbID::LEFT_LEG ? 1  : 0)})));   
+            }
         }).disable();
 
         //In the event of a new foot step target specified by the foot placement planning module...
@@ -389,7 +394,7 @@ namespace motion
         // Bind phase value to range [0,1], emit status if step completed...
         if (motionPhase > 1)
         {
-            motionPhase = std::fmod(motionPhase, 1);
+            motionPhase = 0.99; //std::fmod(motionPhase, 1);
             // Consume completed step instructions, only once an entire new set has been received...
             // Increment relative step motionphase...
             setNewStepStartTime(getTime());   

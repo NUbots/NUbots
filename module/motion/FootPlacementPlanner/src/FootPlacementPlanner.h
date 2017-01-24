@@ -110,6 +110,7 @@ namespace motion
          * Decision abstractions and notify variables...
          */
         bool startFromStep;
+        bool stopping;
 
         /**
          * Anthropomorphic metrics for relevant humanoid joints & actuators...
