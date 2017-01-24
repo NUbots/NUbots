@@ -89,7 +89,10 @@ class Field:
 
         # Check if it is a map field
         if self.map_type:
-            t = '::std::map<{}, {}>'.format(t[0].cpp_type, t[1].cpp_type)
+            if vector_regex.match(t[1].type) or matrix_regex(t[1].type):
+                t = '::std::map<{0}, {1}, std::less<{0}>, Eigen::aligned_allocator<std::pair<{0}, {1}>>>'.format(t[0].cpp_type, t[1].cpp_type)
+            else:
+                t = '::std::map<{}, {}>'.format(t[0].cpp_type, t[1].cpp_type)
 
         # Check for matrix and vector types
         elif vector_regex.match(t):
@@ -159,7 +162,10 @@ class Field:
             if self.array_size > 0:
                 t = '::std::array<{}, {}>'.format(t, self.array_size)
             else:
-                t = '::std::vector<{}>'.format(t)
+                if vector_regex.match(t[1].type) or matrix_regex(t[1].type):
+                    t = '::std::vector<{0}, Eigen::aligned_allocator<{0}>>'.format(t)
+                else:
+                    t = '::std::vector<{}>'.format(t)
 
         return t, special
 
