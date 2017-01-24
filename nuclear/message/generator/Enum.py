@@ -83,6 +83,8 @@ class Enum:
                 operator std::string() const;
 
                 operator {protobuf_name}() const;
+
+                friend std::ostream& operator<< (std::ostream& out, const {name}& val);
             }};""")
 
         impl_template = dedent("""\
@@ -167,6 +169,10 @@ class Enum:
 
             {fqn}::operator {protobuf_name}() const {{
                 return static_cast<{protobuf_name}>(value);
+            }}
+
+            std::ostream& operator<< (std::ostream& out, const {fqn}& val) {{
+                return out << static_cast<std::string>(val);
             }}""")
 
         python_template = dedent("""\
@@ -209,6 +215,7 @@ class Enum:
             values=values
         ), impl_template.format(
             fqn='::'.join(self.fqn.split('.')),
+            namespace='::'.join(self.fqn.split('.')[:-1]),
             name=self.name,
             protobuf_name='::'.join(('.protobuf' + self.fqn).split('.')),
             default_value=default_value,
