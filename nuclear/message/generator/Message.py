@@ -6,7 +6,7 @@ from generator.Enum import Enum
 
 class Message:
     def __init__(self, m, context):
-        self.package = context.package 
+        self.package = context.package
         self.name = m.name
         self.fqn = '{}.{}'.format(context.fqn, self.name)
         self.include_path = context.include_path
@@ -250,7 +250,7 @@ class Message:
         converter_impl = '\n\n'.join([protobuf_converter[1]])
 
         header_template = dedent("""\
-            struct alignas(16) {name} : public ::message::MessageBase<{name}> {{
+            struct {name} : public ::message::MessageBase<{name}> {{
                 // Protobuf type
                 using protobuf_type = {protobuf_type};
 
