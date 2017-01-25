@@ -129,12 +129,30 @@ namespace NUClear {
 
             public:
                 template <typename DSL, typename TFunc>
-                static inline threading::ReactionHandle bind(Reactor& reactor, const std::string& label, TFunc&& callback, const std::string& path) {
-                    return DSLProxy<::extension::FileWatch>::bind<DSL>(reactor, label, callback, "config/" + path,
-                                                                         ::extension::FileWatch::ATTRIBUTE_MODIFIED
-                                                                       | ::extension::FileWatch::CREATED
-                                                                       | ::extension::FileWatch::UPDATED
-                                                                       | ::extension::FileWatch::MOVED_TO);
+                static inline std::tuple<threading::ReactionHandle, threading::ReactionHandle, threading::ReactionHandle>
+                    bind(Reactor& reactor, const std::string& label, TFunc&& callback, const std::string& path) {
+                    auto flags = ::extension::FileWatch::ATTRIBUTE_MODIFIED
+                               | ::extension::FileWatch::CREATED
+                               | ::extension::FileWatch::UPDATED
+                               | ::extension::FileWatch::MOVED_TO;
+
+                    char hostname[255];
+                    gethostname(hostname, 255);
+
+                    std::shared_ptr<const message::CommandLineArguments> args = store::DataStore<message::CommandLineArguments>::get();
+
+                    std::vector<char> data(argv[0].cbegin(), argv[0].cend());
+                    data.push_back('\0');
+                    const auto* base = basename(data.data());
+                    std::string base_str(base);
+
+                    auto defaultConfig = "config/" + path;
+                    auto robotConfig   = "config/" + hostname + "/" + path;
+                    auto binaryConfig  = "config/" + base + "/" + path;
+
+                    return std::make_tuple(DSLProxy<::extension::FileWatch>::bind<DSL>(reactor, label, callback, defaultConfig, flags),
+                                           DSLProxy<::extension::FileWatch>::bind<DSL>(reactor, label, callback, robotConfig,   flags),
+                                           DSLProxy<::extension::FileWatch>::bind<DSL>(reactor, label, callback, binaryConfig,  flags));
                 }
 
                 template <typename DSL>
@@ -142,6 +160,7 @@ namespace NUClear {
 
                     // Get the file watch event
                     ::extension::FileWatch watch = DSLProxy<::extension::FileWatch>::get<DSL>(t);
+
 
                     // Check if the watch is valid
                     if(watch && endsWith(watch.path, ".yaml")) {
