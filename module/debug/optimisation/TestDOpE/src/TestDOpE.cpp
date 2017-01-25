@@ -65,7 +65,7 @@ namespace optimisation {
             fitness.weight = 1.0;
 
             double f = 0;
-            for(uint i = 0; i < currentParameters.samples.col(0).size(); ++i) {
+            for(int i = 0; i < currentParameters.samples.col(0).size(); ++i) {
                 double v = currentParameters.samples(i, 0) + i;
                 v *= v;
                 f += -v;
