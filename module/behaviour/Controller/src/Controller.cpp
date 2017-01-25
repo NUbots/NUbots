@@ -272,11 +272,11 @@ namespace module {
             // Get iterators to each of the actions on the limbs
             std::map<LimbID, iterators> limbs =
             {
-                std::make_pair(LimbID::LEFT_LEG    , std::make_pair(std::begin(actions[uint(LimbID::LEFT_LEG)])  , std::end(actions[uint(LimbID::LEFT_LEG)])))
-                , std::make_pair(LimbID::RIGHT_LEG , std::make_pair(std::begin(actions[uint(LimbID::RIGHT_LEG)]) , std::end(actions[uint(LimbID::RIGHT_LEG)])))
-                , std::make_pair(LimbID::LEFT_ARM  , std::make_pair(std::begin(actions[uint(LimbID::LEFT_ARM)])  , std::end(actions[uint(LimbID::LEFT_ARM)])))
-                , std::make_pair(LimbID::RIGHT_ARM , std::make_pair(std::begin(actions[uint(LimbID::RIGHT_ARM)]) , std::end(actions[uint(LimbID::RIGHT_ARM)])))
-                , std::make_pair(LimbID::HEAD      , std::make_pair(std::begin(actions[uint(LimbID::HEAD)])      , std::end(actions[uint(LimbID::HEAD)])))
+                std::make_pair(LimbID::LEFT_LEG    , std::make_pair(std::begin(actions[LimbID::LEFT_LEG])  , std::end(actions[LimbID::LEFT_LEG])))
+                , std::make_pair(LimbID::RIGHT_LEG , std::make_pair(std::begin(actions[LimbID::RIGHT_LEG]) , std::end(actions[LimbID::RIGHT_LEG])))
+                , std::make_pair(LimbID::LEFT_ARM  , std::make_pair(std::begin(actions[LimbID::LEFT_ARM])  , std::end(actions[LimbID::LEFT_ARM])))
+                , std::make_pair(LimbID::RIGHT_ARM , std::make_pair(std::begin(actions[LimbID::RIGHT_ARM]) , std::end(actions[LimbID::RIGHT_ARM])))
+                , std::make_pair(LimbID::HEAD      , std::make_pair(std::begin(actions[LimbID::HEAD])      , std::end(actions[LimbID::HEAD])))
             };
 
             // Our new actions
