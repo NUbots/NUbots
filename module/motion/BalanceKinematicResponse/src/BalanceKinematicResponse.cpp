@@ -414,7 +414,7 @@ namespace motion
         auto localisation = std::make_unique<std::vector<message::localisation::Self>>();
         message::localisation::Self self;
         self.locObject.position = {position.x(), position.y()};
-        self.locObject.position_cov = Eigen::Matrix2d::Identity() * 0.1; // made up
+        self.locObject.position_cov = Eigen::Matrix<double, 2, 2, Eigen::DontAlign>::Identity() * 0.1; // made up
         self.heading  << std::cos(position.angle()), std::sin(position.angle()); // convert to cartesian coordinates
         self.velocity.setZero(); // not used
         self.robot_to_world_rotation.setZero(); // not used

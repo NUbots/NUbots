@@ -51,7 +51,7 @@ namespace module {
             auto& visualHorizon = classifiedImage.visualHorizon;
 
             // As this is a convex function, we just need to progress till the next point is lower
-            std::vector<Eigen::Vector2i>::iterator minHorizon;
+            std::vector<Eigen::Matrix<int, 2, 1, Eigen::DontAlign>>::iterator minHorizon;
             for(minHorizon = visualHorizon.begin();
                 minHorizon < visualHorizon.end() - 1
                 && minHorizon->y() > (minHorizon + 1)->y();
@@ -84,7 +84,7 @@ namespace module {
 
             auto movement = arma::normalise(xb) * dx;
 
-            auto hLeft = visualHorizon.begin();
+            auto hLeft  = visualHorizon.begin();
             auto hRight = visualHorizon.end() - 1;
 
 

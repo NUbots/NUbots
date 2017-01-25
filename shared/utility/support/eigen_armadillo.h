@@ -28,31 +28,31 @@
 #pragma GCC diagnostic pop
 
 template <typename Scalar, int elems>
-inline typename arma::Col<Scalar>::template fixed<elems> convert(const Eigen::Matrix<Scalar, elems, 1>& evec)
+inline typename arma::Col<Scalar>::template fixed<elems> convert(const Eigen::Matrix<Scalar, elems, 1, Eigen::DontAlign>& evec)
 {
     typename arma::Col<Scalar>::template fixed<elems> avec;
-    Eigen::Map<Eigen::Matrix<Scalar, elems, 1>>(avec.memptr(), elems) = evec;
+    Eigen::Map<Eigen::Matrix<Scalar, elems, 1, Eigen::DontAlign>>(avec.memptr(), elems) = evec;
     return(avec);
 }
 
 template <typename Scalar, int elems>
-inline Eigen::Matrix<Scalar, elems, 1> convert(const typename arma::Col<Scalar>::template fixed<elems>& avec)
+inline Eigen::Matrix<Scalar, elems, 1, Eigen::DontAlign> convert(const typename arma::Col<Scalar>::template fixed<elems>& avec)
 {
-    return(Eigen::Map<Eigen::Matrix<Scalar, elems, 1>>(const_cast<Scalar*>(avec.memptr()), elems));
+    return(Eigen::Map<Eigen::Matrix<Scalar, elems, 1, Eigen::DontAlign>>(const_cast<Scalar*>(avec.memptr()), elems));
 }
 
 template <typename Scalar, int rows, int cols>
-inline typename arma::Mat<Scalar>::template fixed<rows, cols> convert(const Eigen::Matrix<Scalar, rows, cols>& emat)
+inline typename arma::Mat<Scalar>::template fixed<rows, cols> convert(const Eigen::Matrix<Scalar, rows, cols, Eigen::DontAlign>& emat)
 {
     typename arma::Mat<Scalar>::template fixed<rows, cols> amat;
-    Eigen::Map<Eigen::Matrix<Scalar, rows, cols>>(amat.memptr(), rows, cols) = emat;
+    Eigen::Map<Eigen::Matrix<Scalar, rows, cols, Eigen::DontAlign>>(amat.memptr(), rows, cols) = emat;
     return(amat);
 }
 
 template <typename Scalar, int rows, int cols>
-inline Eigen::Matrix<Scalar, rows, cols> convert(const typename arma::Mat<Scalar>::template fixed<rows, cols>& amat)
+inline Eigen::Matrix<Scalar, rows, cols, Eigen::DontAlign> convert(const typename arma::Mat<Scalar>::template fixed<rows, cols>& amat)
 {
-    return(Eigen::Map<Eigen::Matrix<Scalar, rows, cols>>(const_cast<Scalar*>(amat.memptr()), rows, cols));
+    return(Eigen::Map<Eigen::Matrix<Scalar, rows, cols, Eigen::DontAlign>>(const_cast<Scalar*>(amat.memptr()), rows, cols));
 }
 
 template <typename Scalar>
@@ -94,14 +94,14 @@ inline Eigen::Matrix<Scalar, Eigen::Dynamic, Eigen::Dynamic> convert(const arma:
  * @return The original protocol buffer instance
  */
 template <typename Scalar, int elems>
-inline Eigen::Matrix<Scalar, elems, 1>& operator<< (Eigen::Matrix<Scalar, elems, 1>& evec, const typename arma::Col<Scalar>::template fixed<elems>& avec)
+inline Eigen::Matrix<Scalar, elems, 1>& operator<< (Eigen::Matrix<Scalar, elems, 1, Eigen::DontAlign>& evec, const typename arma::Col<Scalar>::template fixed<elems>& avec)
 {
     evec = convert(avec);
     return(evec);
 }
 
 template <typename Scalar, int elems>
-inline typename arma::Col<Scalar>::template fixed<elems>& operator<< (typename arma::Col<Scalar>::template fixed<elems>& avec, const Eigen::Matrix<Scalar, elems, 1>& evec)
+inline typename arma::Col<Scalar>::template fixed<elems>& operator<< (typename arma::Col<Scalar>::template fixed<elems>& avec, const Eigen::Matrix<Scalar, elems, 1, Eigen::DontAlign>& evec)
 {
     avec = convert(evec);
     return(avec);
@@ -132,14 +132,14 @@ inline arma::Col<Scalar>& operator<< (arma::Col<Scalar>& avec, const Eigen::Matr
  * @return The converted matrix instance
  */
 template <typename Scalar, int rows, int cols>
-inline Eigen::Matrix<Scalar, rows, cols>& operator<< (Eigen::Matrix<Scalar, rows, cols>& evec, const typename arma::Mat<Scalar>::template fixed<rows, cols>& avec)
+inline Eigen::Matrix<Scalar, rows, cols, Eigen::DontAlign>& operator<< (Eigen::Matrix<Scalar, rows, cols, Eigen::DontAlign>& evec, const typename arma::Mat<Scalar>::template fixed<rows, cols>& avec)
 {
     evec = convert(avec);
     return(evec);
 }
 
 template <typename Scalar, int rows, int cols>
-inline typename arma::Mat<Scalar>::template fixed<rows, cols>& operator<< (typename arma::Mat<Scalar>::template fixed<rows, cols>& avec, const Eigen::Matrix<Scalar, rows, cols>& evec)
+inline typename arma::Mat<Scalar>::template fixed<rows, cols>& operator<< (typename arma::Mat<Scalar>::template fixed<rows, cols>& avec, const Eigen::Matrix<Scalar, rows, cols, Eigen::DontAlign>& evec)
 {
     avec = convert(evec);
     return(avec);

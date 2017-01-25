@@ -318,7 +318,7 @@ namespace kinematics {
     /*! @brief Adds up the mass vectors stored in the robot model and normalises the resulting position
         @return [x_com, y_com, z_com, total_mass] relative to the torso basis
     */
-    inline arma::vec4 calculateCentreOfMass(const message::motion::KinematicsModel& model, const std::map<uint32_t, Eigen::Matrix4d>& jointPositions, bool includeTorso){
+    inline arma::vec4 calculateCentreOfMass(const message::motion::KinematicsModel& model, const std::map<uint32_t, Eigen::Matrix<double, 4, 4, Eigen::DontAlign>>& jointPositions, bool includeTorso){
         arma::vec4 totalMassVector = arma::zeros(4);
 
         for(auto& joint : jointPositions){
@@ -421,11 +421,11 @@ namespace kinematics {
         arma::vec4 CoP = {0,0,0,1};
         float number_of_feet_down = 0;
         if (sensors.leftFootDown) {
-            CoP += fsrCentreInBodyCoords(model, sensors, convert<double, 2>(sensors.fsr[int(LimbID::LEFT_LEG)].centre), true);
+            CoP += fsrCentreInBodyCoords(model, sensors, convert<double, 2>(sensors.fsr[LimbID::LEFT_LEG].centre), true);
             number_of_feet_down += 1.0f;
         }
         if(sensors.rightFootDown){
-            CoP += fsrCentreInBodyCoords(model, sensors, convert<double, 2>(sensors.fsr[int(LimbID::RIGHT_LEG)].centre), false);
+            CoP += fsrCentreInBodyCoords(model, sensors, convert<double, 2>(sensors.fsr[LimbID::RIGHT_LEG].centre), false);
             number_of_feet_down  += 1.0f;
         }
         if(number_of_feet_down == 2){

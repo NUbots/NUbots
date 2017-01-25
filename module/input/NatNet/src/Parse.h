@@ -60,19 +60,12 @@ namespace input {
 
     // Read Eigen vectors
     template <typename Scalar, int rows, int cols>
-    struct ReadData<Eigen::Matrix<Scalar, rows, cols>> {
-        static inline Eigen::Matrix<Scalar, rows, cols> read(const char*& ptr, const uint32_t /*version*/) {
+    struct ReadData<Eigen::Matrix<Scalar, rows, cols, Eigen::DontAlign>> {
+        static inline Eigen::Matrix<Scalar, rows, cols, Eigen::DontAlign> read(const char*& ptr, const uint32_t /*version*/) {
 
-            auto data = Eigen::Map<const Eigen::Matrix<Scalar, rows, cols>>(reinterpret_cast<const Scalar*>(ptr), rows, cols);
+            auto data = Eigen::Map<const Eigen::Matrix<Scalar, rows, cols, Eigen::DontAlign>>(reinterpret_cast<const Scalar*>(ptr), rows, cols);
             ptr += sizeof(Scalar) * rows * cols;
             return data;
-
-            //for (uint col = 0; col < cols; ++col) {
-            //    for (uint row = 0; row < rows; ++row) {
-            //        // Read the value
-            //        data(row, col) = ReadData<Scalar>::read(ptr, version);
-            //    }
-            //}
         }
     };
 
@@ -102,7 +95,7 @@ namespace input {
 
             // Read all the positions
             for (auto& marker : markers) {
-            marker.position = ReadData<Eigen::Matrix<float, 3, 1>>::read(ptr, version);
+            marker.position = ReadData<Eigen::Matrix<float, 3, 1, Eigen::DontAlign>>::read(ptr, version);
             }
 
             // If we are version 2 or greater we have additional information
@@ -133,7 +126,7 @@ namespace input {
             MarkerSet set;
 
             set.name = ReadData<std::string>::read(ptr, version);
-            auto markersPositions = ReadData<std::vector<Eigen::Matrix<float, 3, 1>>>::read(ptr, version);
+            auto markersPositions = ReadData<std::vector<Eigen::Matrix<float, 3, 1, Eigen::DontAlign>>>::read(ptr, version);
             set.markers.reserve(markersPositions.size());
 
             // Build markers
@@ -157,8 +150,8 @@ namespace input {
             RigidBody rigidBody;
 
             rigidBody.id            = ReadData<uint32_t>::read(ptr, version);
-            rigidBody.position      = ReadData<Eigen::Matrix<float, 3, 1>>::read(ptr, version);
-            rigidBody.rotation      = ReadData<Eigen::Matrix<float, 4, 1>>::read(ptr, version);
+            rigidBody.position      = ReadData<Eigen::Matrix<float, 3, 1, Eigen::DontAlign>>::read(ptr, version);
+            rigidBody.rotation      = ReadData<Eigen::Matrix<float, 4, 1, Eigen::DontAlign>>::read(ptr, version);
             rigidBody.markers       = ReadData<std::vector<Marker>>::read(ptr, version);
 
             // Version specific information
@@ -191,7 +184,7 @@ namespace input {
             LabeledMarker marker;
 
             marker.marker.id       = ReadData<uint32_t>::read(ptr, version);
-            marker.marker.position = ReadData<Eigen::Matrix<float, 3, 1>>::read(ptr, version);
+            marker.marker.position = ReadData<Eigen::Matrix<float, 3, 1, Eigen::DontAlign>>::read(ptr, version);
             marker.marker.size     = ReadData<float>::read(ptr, version);
 
             if (version >= 0x02060000) {
@@ -250,7 +243,7 @@ namespace input {
             m.name     = version >= 0x02000000 ? ReadData<std::string>::read(ptr, version) : "";
             m.id       = ReadData<uint32_t>::read(ptr, version);
             m.parentId = ReadData<uint32_t>::read(ptr, version);
-            m.offset   = ReadData<Eigen::Matrix<float, 3, 1>>::read(ptr, version);
+            m.offset   = ReadData<Eigen::Matrix<float, 3, 1, Eigen::DontAlign>>::read(ptr, version);
             return m;
         }
     };
