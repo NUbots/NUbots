@@ -403,28 +403,32 @@ namespace module {
                     sensors->fsr.emplace_back();
                     sensors->fsr.emplace_back();
 
-                    sensors->fsr[int(LimbID::LEFT_LEG)].centre = { input.fsr.left.centreX, input.fsr.left.centreY };
-                    sensors->fsr[int(LimbID::LEFT_LEG)].value.push_back(input.fsr.left.fsr1);
-                    sensors->fsr[int(LimbID::LEFT_LEG)].value.push_back(input.fsr.left.fsr2);
-                    sensors->fsr[int(LimbID::LEFT_LEG)].value.push_back(input.fsr.left.fsr3);
-                    sensors->fsr[int(LimbID::LEFT_LEG)].value.push_back(input.fsr.left.fsr4);
+                    sensors->fsr[LimbID::LEFT_LEG - 1].centre << input.fsr.left.centreX, input.fsr.left.centreY;
+                    sensors->fsr[LimbID::LEFT_LEG - 1].value.reserve(4);
+                    sensors->fsr[LimbID::LEFT_LEG - 1].value.push_back(input.fsr.left.fsr1);
+                    sensors->fsr[LimbID::LEFT_LEG - 1].value.push_back(input.fsr.left.fsr2);
+                    sensors->fsr[LimbID::LEFT_LEG - 1].value.push_back(input.fsr.left.fsr3);
+                    sensors->fsr[LimbID::LEFT_LEG - 1].value.push_back(input.fsr.left.fsr4);
 
-                    sensors->fsr[int(LimbID::RIGHT_LEG)].centre = { input.fsr.right.centreX, input.fsr.right.centreY };
-                    sensors->fsr[int(LimbID::RIGHT_LEG)].value.push_back(input.fsr.right.fsr1);
-                    sensors->fsr[int(LimbID::RIGHT_LEG)].value.push_back(input.fsr.right.fsr2);
-                    sensors->fsr[int(LimbID::RIGHT_LEG)].value.push_back(input.fsr.right.fsr3);
-                    sensors->fsr[int(LimbID::RIGHT_LEG)].value.push_back(input.fsr.right.fsr4);
+                    sensors->fsr[LimbID::RIGHT_LEG - 1].centre << input.fsr.right.centreX, input.fsr.right.centreY;
+                    sensors->fsr[LimbID::RIGHT_LEG - 1].value.reserve(4);
+                    sensors->fsr[LimbID::RIGHT_LEG - 1].value.push_back(input.fsr.right.fsr1);
+                    sensors->fsr[LimbID::RIGHT_LEG - 1].value.push_back(input.fsr.right.fsr2);
+                    sensors->fsr[LimbID::RIGHT_LEG - 1].value.push_back(input.fsr.right.fsr3);
+                    sensors->fsr[LimbID::RIGHT_LEG - 1].value.push_back(input.fsr.right.fsr4);
 
                     /************************************************
                      *               Buttons and LEDs               *
                      ************************************************/
-                    sensors->button.push_back({ 0, input.buttons.left });
-                    sensors->button.push_back({ 1, input.buttons.middle });
-                    sensors->led.push_back({ 0, uint32_t(input.ledPanel.led2 ? 0xFF0000 : 0) });
-                    sensors->led.push_back({ 1, uint32_t(input.ledPanel.led3 ? 0xFF0000 : 0) });
-                    sensors->led.push_back({ 2, uint32_t(input.ledPanel.led4 ? 0xFF0000 : 0) });
-                    sensors->led.push_back({ 3, uint32_t(input.headLED.RGB) }); // Head
-                    sensors->led.push_back({ 4, uint32_t(input.eyeLED.RGB)  }); // Eye
+                    sensors->button.reserve(2);
+                    sensors->button.push_back(Sensors::Button(0, input.buttons.left)          );
+                    sensors->button.push_back(Sensors::Button(1, input.buttons.middle)        );
+                    sensors->led.reserve(5);
+                    sensors->led.push_back(Sensors::LED(0, input.ledPanel.led2 ? 0xFF0000 : 0));
+                    sensors->led.push_back(Sensors::LED(1, input.ledPanel.led3 ? 0xFF0000 : 0));
+                    sensors->led.push_back(Sensors::LED(2, input.ledPanel.led4 ? 0xFF0000 : 0));
+                    sensors->led.push_back(Sensors::LED(3, input.headLED.RGB)                 ); // Head
+                    sensors->led.push_back(Sensors::LED(4, input.eyeLED.RGB)                  ); // Eye
 
                     /************************************************
                      *                  Kinematics                  *
