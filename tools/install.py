@@ -20,6 +20,10 @@ def register(command):
         , metavar='ip_addr'
         , help='the IP address of the target to install to')
 
+    command.add_argument('hostname'
+        , metavar='hostname'
+        , help='the hostname of the target to install to')
+
     command.add_argument('-c', '--config'
         , metavar='config'
         , choices=['', 'new', 'update', 'overwrite', 'pull', 'ignore']
@@ -31,14 +35,14 @@ def register(command):
         , default='hive'
         , help='the username to use when installing')
 
-def run(ip_addr, config, user, **kwargs):
+def run(ip_addr, hostname, config, user, **kwargs):
 
     # Target location to install to
-    target_dir = '{0}@{1}:/home/{0}/'.format(user, ip_addr)
-    build_dir = b.binary_dir
-    config_dir = os.path.join(build_dir, 'config')
+    target_dir   = '{0}@{1}:/home/{0}/'.format(user, ip_addr)
+    build_dir    = b.binary_dir
+    config_dir   = os.path.join(build_dir, 'config')
     platform_dir = '/nubots/toolchain/{0}'.format(b.cmake_cache["PLATFORM"])
-
+    roles        = b.cmake_cache["NUCLEAR_ROLES"].split(';')
 
     cprint('Installing binaries to ' + target_dir, 'blue', attrs=['bold'])
     files = glob.glob(os.path.join(build_dir, 'bin', '*'))
@@ -67,17 +71,22 @@ def run(ip_addr, config, user, **kwargs):
     call(['ssh', host, command], stdout=FNULL, stderr=STDOUT)
     FNULL.close()
 
+    # Get list of config files.
+    config_files = glob.glob('{0}/*.yaml'.format(config_dir))
+                 + glob.glob('{0}/{1}/*.yaml'.format(config_dir, hostname))
+                 + [glob.glob('{0}/{1}/*.yaml'.format(config_dir, role)) for role in roles]
+
     if config in ['overwrite', 'o']:
         cprint('Overwriting configuration files on target', 'blue', attrs=['bold'])
-        call(['rsync', '-avzPL', '--checksum', '-e ssh', config_dir, target_dir])
+        call(['rsync', '-avzPL', '--checksum', '-e ssh'] + config_files + [target_dir])
 
     if config in ['update', 'u']:
         cprint('Adding new configuration files to target', 'blue', attrs=['bold'])
-        call(['rsync', '-avzuPL', '--checksum', '-e ssh', config_dir, target_dir])
+        call(['rsync', '-avzuPL', '--checksum', '-e ssh'] + config_files + [target_dir])
 
     if not config or config in ['new', 'n']:
         cprint('Adding new configuration files to the target', 'blue', attrs=['bold'])
-        call(['rsync', '-avzPL', '--checksum', '--ignore-existing', '-e ssh', 'config', target_dir])
+        call(['rsync', '-avzPL', '--checksum', '--ignore-existing', '-e ssh'] + config_files + [target_dir])
 
     if config in ['ignore', 'i']:
         cprint('Ignoring configuration changes', 'blue', attrs=['bold'])

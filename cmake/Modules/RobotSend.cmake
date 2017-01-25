@@ -20,10 +20,12 @@ FOREACH(host ${KNOWN_HOSTS})
         ENDIF()
         
         # Make our installer
+        # The install script expects an IP address to install to and a hostname to determine config files to install.
+        # Our build host has defined hostname/IP addresses for install targets so we can just specify the host twice.
         ADD_CUSTOM_TARGET("${target}"
             USES_TERMINAL
             COMMAND ${PYTHON_EXECUTABLE}
-            "${CMAKE_SOURCE_DIR}/nuclear/b.py" "install" "${host}" "--config=${config}" "--user=${user}"
+            "${CMAKE_SOURCE_DIR}/nuclear/b.py" "install" "${host}" "${host}" "--config=${config}" "--user=${user}"
             DEPENDS ${NUCLEAR_ROLES} "${CMAKE_SOURCE_DIR}/tools/install.py")
 
         # Move our installer to an IDE group
