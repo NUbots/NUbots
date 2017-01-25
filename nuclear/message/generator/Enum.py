@@ -27,7 +27,7 @@ class Enum:
         switches = indent('\n'.join(['case Value::{}: return "{}";'.format(v[0], v[0]) for v in self.values]), 8)
 
         # Make our if chain
-        if_chain = indent('\n'.join(['if (str == "{}") value = Value::{};'.format(v[0], v[0]) for v in self.values]))
+        if_chain = indent('\nelse '.join(['if (str == "{}") value = Value::{};'.format(v[0], v[0]) for v in self.values]))
 
         # Get our default value
         default_value = dict([reversed(v) for v in self.values])[0]
@@ -97,7 +97,7 @@ class Enum:
 
             {fqn}::{name}(std::string const& str) {{
             {if_chain}
-                throw std::runtime_error("String did not match any enum for {name}");
+                else throw std::runtime_error("String " + str + " did not match any enum for {name}");
             }}
 
             {fqn}::{name}({protobuf_name} const& p) {{
