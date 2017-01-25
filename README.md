@@ -21,7 +21,7 @@ Vagrant
 
 2. Clone this git repository onto your machine. First, open a terminal. In Ubuntu, the default shortcut is `Ctrl+Alt+T`. In Windows you will need to open a Git Bash terminal (this is installed when you install Git; search for Git Bash in the Start Menu). (Todo: Terminal in OSX). Then enter the following:
 
-		$ git clone git@github.com:nubots/NUbots.git ~/NUbots
+		$ https://github.com/NUbots/NUbots.git
 		
 	**Note** We recommend [Sublime Text 3][] for editing the code. The file 'NUbots.sublime-project' can be opened with Sublime ('Project -> Open Project...', then browse to your NUbots repository). This provides a shortcut to compiling the code from sublime with `Ctrl+B`, but don't try this until you have finished the instructions in this readme. Installers for Windows/OSX can be found on the Sublime site, while ubuntu users will need to use an installer from the command line:
 		
@@ -37,6 +37,7 @@ Vagrant
 4. To set up vagrant and simulator
 
 		$ vagrant ssh
+		$ mkdir NUbots/build
 		$ cd NUbots/build
 		$ cmake .. -G Ninja
 		$ ninja
