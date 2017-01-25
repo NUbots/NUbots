@@ -142,44 +142,15 @@ namespace motion {
     }
 
     void KinematicsConfiguration::configureMassModel (KinematicsModel& model, const YAML::Node& objMassModel) {
-        // massModel.numberOfMasses = objMassModel["number_of_masses"].as<float>();
-     //    massModel.massRepresentationDimension = objMassModel["mass_representation_dimension"].as<float>();
-
-        // auto& masses = massModel.masses;
+        
         auto& objMasses = objMassModel["masses"];
 
-  //       masses.leftShoulderRoll = objMasses[3].as<arma::vec4>();
-  //       masses.rightShoulderRoll = objMasses[2].as<arma::vec4>();
-  //       masses.leftShoulderPitch = objMasses[1].as<arma::vec4>();
-  //       masses.rightShoulderPitch = objMasses[0].as<arma::vec4>();
-
-        // masses.leftElbow = objMasses[5].as<arma::vec4>();
-  //       masses.rightElbow = objMasses[4].as<arma::vec4>();
-
-  //       masses.leftHipRoll = objMasses[9].as<arma::vec4>();
-  //       masses.rightHipRoll = objMasses[8].as<arma::vec4>();
-  //       masses.leftHipPitch = objMasses[11].as<arma::vec4>();
-  //       masses.rightHipPitch = objMasses[10].as<arma::vec4>();
-  //       masses.leftHipYaw = objMasses[7].as<arma::vec4>();
-  //       masses.rightHipYaw = objMasses[6].as<arma::vec4>();
-
-  //       masses.leftKnee = objMasses[13].as<arma::vec4>();
-  //       masses.rightKnee = objMasses[12].as<arma::vec4>();
-
-  //       masses.leftAnkleRoll = objMasses[17].as<arma::vec4>();
-  //       masses.rightAnkleRoll = objMasses[16].as<arma::vec4>();
-  //       masses.leftAnklePitch = objMasses[15].as<arma::vec4>();
-  //       masses.rightAnklePitch = objMasses[14].as<arma::vec4>();
-
-  //       masses.headPitch = objMasses[19].as<arma::vec4>();
-  //       masses.headYaw = objMasses[18].as<arma::vec4>();
-
-        // masses.torso = objMasses[20].as<arma::vec4>();
-
         auto masses = objMasses.as<std::vector<arma::vec4>>();
-        std::transform(masses.begin(), masses.end(), model.massModel.masses.end(), [] (const arma::vec4& avec) {
-            return(convert<double, 4>(avec));
-        });
+        model.massModel.masses.reserve(masses.size());
+        for (const auto& mass : masses)
+        {
+            model.massModel.masses.push_back(convert<double, 4>(mass));
+        }
     }
 
 }
