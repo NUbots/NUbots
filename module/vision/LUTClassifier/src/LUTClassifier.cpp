@@ -108,7 +108,7 @@ namespace module {
                 greenCentroid[0] *= 2.0;
                 this->greenCentroid = greenCentroid;
 
-                LUT_PATH = config.path;
+                LUT_PATH = config.fileName;
 
                 emit(std::move(lut));
             });

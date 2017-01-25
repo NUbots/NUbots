@@ -40,7 +40,7 @@ namespace input {
 
             std::string serialNumber = config["device"]["serial"].as<std::string>();
 
-            log<NUClear::DEBUG>("Processing camera", config.path, "with serial number", serialNumber);
+            log<NUClear::DEBUG>("Processing camera", config.fileName, "with serial number", serialNumber);
 
             // See if we already have this camera
             auto camera = cameras.find(serialNumber);
@@ -59,20 +59,20 @@ namespace input {
 
                         // Add camera to list.
                         FOURCC fourcc = getFourCCFromDescription(config["format"]["pixel"].as<std::string>());
-                        camera = cameras.insert(std::make_pair(serialNumber, std::make_unique<ImageEvent>(config.path, serialNumber, std::move(newCamera), *this, fourcc))).first;
+                        camera = cameras.insert(std::make_pair(serialNumber, std::make_unique<ImageEvent>(config.fileName, serialNumber, std::move(newCamera), *this, fourcc))).first;
                         log<NUClear::DEBUG>("Camera ", serialNumber, " added to map.");
                     }
 
                     else
                     {
-                        log<NUClear::WARN>("Failed to find camera", config.path, " with serial number: ", serialNumber);
+                        log<NUClear::WARN>("Failed to find camera", config.fileName, " with serial number: ", serialNumber);
                         return;
                     }
                 }
 
                 catch(const Spinnaker::Exception& ex) 
                 {
-                    log<NUClear::WARN>("Failed to find camera", config.path, " with serial number: ", serialNumber);
+                    log<NUClear::WARN>("Failed to find camera", config.fileName, " with serial number: ", serialNumber);
                     return;
                 }
             }

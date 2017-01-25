@@ -24,6 +24,9 @@
 
 #include "FileWatch.h"
 
+#include "utility/file/fileutil.h"
+#include "utility/strutil/strutil.h"
+
 namespace extension {
 
     /**
@@ -32,42 +35,132 @@ namespace extension {
      * @author Trent Houliston
      */
     struct Configuration {
-        std::string path;
+        // Rules:
+        // 1) Default config file should define a value for every node.
+        // 2) Per-robot config overrides default config values. This file need only override the values that nee to be overriden.
+        // 3) Per-binary config overrides per-robot and default config values. This file need only override the values that nee to be overriden.
+        //
+        // Per-robot and per-binary files need not exist.
+        // Per-robot and per-binary files can add new nodes to the file, but this is probably unwise.
+        //
+        // We have to merge the YAML trees to account for situations where a sub-node is not defined in a higher priotity tree.
+
+        std::string fileName, hostname, binary;
         YAML::Node config;
 
-        Configuration() : path(""), config() {};
-        Configuration(const std::string& path, YAML::Node config) : path(path), config(config) {};
+        Configuration() : fileName(), hostname(), binary(), config() {};
+        Configuration(const std::string& fileName, const std::string& hostname, const std::string& binary, const YAML::Node& config) 
+            : fileName(fileName)
+            , hostname(hostname)
+            , binary(binary)
+            , config(config) {}
+
+        Configuration(const std::string& fileName, const std::string& hostname, const std::string& binary) : fileName(fileName), hostname(hostname), binary(binary), config()
+        {
+            // Load the default config file.
+            config = YAML::Load("config/" + fileName);
+
+            // If the same file exists in this robots per-robot config directory then load and merge.
+            if (utility::file::exists("config/" + hostname + "/" + fileName))
+            {
+                config = mergeYAML(config, YAML::Load("config/" + hostname + "/" + fileName));
+            }
+
+            // If the same file exists in this binary's per-binary config directory then load and merge.
+            if (utility::file::exists("config/" + binary + "/" + fileName))
+            {
+                config = mergeYAML(config, YAML::Load("config/" + binary + "/" + fileName));
+            }
+        }
+
+        YAML::Node mergeYAML(const YAML::Node& base, const YAML::Node& override)
+        {
+            YAML::Node ret(base);
+
+            for(auto it = override.begin(); it != override.end(); it++)
+            {
+                const std::string& key = it->first.as<std::string>();
+
+                // If the key doesn't exist in the base set then add it and move on.
+                if (!base[key])
+                {
+                    ret[key] = it->second;
+                }
+
+                // If the key does exist then we must go deeper.
+                else
+                {
+                    // The type dictates whether we need a recursive call or not.
+                    switch (it->second.Type())
+                    {
+                        // Just a raw value (int, double, etc)
+                        case YAML::NodeType::Scalar:
+                        {
+                            ret[key] = it->second;
+                            break;
+                        }
+
+                        // Essentially a vector.
+                        case YAML::NodeType::Sequence:
+                        {
+                            ret[key] = it->second;
+                            break;
+                        }
+
+                        // Recurse.
+                        case YAML::NodeType::Map:
+                        {
+                            ret[key] = mergeYAML(base[key], override[key]);
+                            break;
+                        }
+
+                        // Its nothing, so overwrite (unset) the value.
+                        // Is this really the intended behaviour?
+                        case YAML::NodeType::Null:
+                        case YAML::NodeType::Undefined:
+                        default:
+                        {
+                            std::cout << "Unsetting key '" << key << "' in YAML file 'Right.yaml'. Is this what you intended?" << std::endl;
+                            ret[key] = it->second;
+                            break;
+                        }
+                    }
+                }
+            }
+
+            return ret;
+        }
 
         Configuration operator [] (const std::string& key) {
-            return Configuration(path, config[key]);
+            return Configuration(fileName, hostname, binary, config[key]);
         }
 
         const Configuration operator [] (const std::string& key) const {
-            return Configuration(path, config[key]);
+            return Configuration(fileName, hostname, binary, config[key]);
         }
 
         Configuration operator [] (const char* key) {
-            return Configuration(path, config[key]);
+            return Configuration(fileName, hostname, binary, config[key]);
         }
 
         const Configuration operator [] (const char* key) const {
-            return Configuration(path, config[key]);
+            return Configuration(fileName, hostname, binary, config[key]);
         }
 
         Configuration operator [] (size_t index) {
-            return Configuration(path, config[index]);
+            return Configuration(fileName, hostname, binary, config[index]);
         }
 
         const Configuration operator [] (size_t index) const {
-            return Configuration(path, config[index]);
+            return Configuration(fileName, hostname, binary, config[index]);
         }
 
         Configuration operator [] (int index) {
-            return Configuration(path, config[index]);
+            return Configuration(fileName, hostname, binary, config[index]);
         }
 
         const Configuration operator [] (int index) const {
-            return Configuration(path, config[index]);
+            return Configuration(fileName, hostname, binary, config[index]);
         }
 
         template <typename T>
@@ -117,17 +210,6 @@ namespace NUClear {
         namespace operation {
             template <>
             struct DSLProxy<::extension::Configuration> {
-            private:
-                inline static bool endsWith(const std::string& str, const std::string& ending) {
-                    if (str.length() >= ending.length()) {
-                        return (0 == str.compare (str.length() - ending.length(), ending.length(), ending));
-                    }
-                    else {
-                        return false;
-                    }
-                }
-
-            public:
                 template <typename DSL, typename TFunc>
                 static inline std::tuple<threading::ReactionHandle, threading::ReactionHandle, threading::ReactionHandle>
                     bind(Reactor& reactor, const std::string& label, TFunc&& callback, const std::string& path) {
@@ -136,20 +218,23 @@ namespace NUClear {
                                | ::extension::FileWatch::UPDATED
                                | ::extension::FileWatch::MOVED_TO;
 
+                    // Get hostname so we can find the correct per-robot config directory.
                     char hostname[255];
                     gethostname(hostname, 255);
 
+                    // Get the command line arguments so we can find the current binary's name.
                     std::shared_ptr<const message::CommandLineArguments> args = store::DataStore<message::CommandLineArguments>::get();
 
-                    std::vector<char> data(argv[0].cbegin(), argv[0].cend());
+                    std::vector<char> data(args->at(0).cbegin(), args->at(0).cend());
                     data.push_back('\0');
-                    const auto* base = basename(data.data());
-                    std::string base_str(base);
+                    const auto* binary = basename(data.data());
 
+                    // Set paths to the config files.
                     auto defaultConfig = "config/" + path;
-                    auto robotConfig   = "config/" + hostname + "/" + path;
-                    auto binaryConfig  = "config/" + base + "/" + path;
+                    auto robotConfig   = "config/" + std::string(hostname) + "/" + path;
+                    auto binaryConfig  = "config/" + std::string(binary)   + "/" + path;
 
+                    // Set FileWatcher to monitor the requested files.
                     return std::make_tuple(DSLProxy<::extension::FileWatch>::bind<DSL>(reactor, label, callback, defaultConfig, flags),
                                            DSLProxy<::extension::FileWatch>::bind<DSL>(reactor, label, callback, robotConfig,   flags),
                                            DSLProxy<::extension::FileWatch>::bind<DSL>(reactor, label, callback, binaryConfig,  flags));
@@ -161,12 +246,25 @@ namespace NUClear {
                     // Get the file watch event
                     ::extension::FileWatch watch = DSLProxy<::extension::FileWatch>::get<DSL>(t);
 
-
                     // Check if the watch is valid
-                    if(watch && endsWith(watch.path, ".yaml")) {
+                    if(watch && utility::strutil::endsWith(watch.path, ".yaml")) {
                         // Return our yaml file
                         try {
-                            return std::make_shared<::extension::Configuration>(watch.path, YAML::LoadFile(watch.path));
+                            // Get hostname so we can find the correct per-robot config directory.
+                            char hostname[255];
+                            gethostname(hostname, 255);
+
+                            // Get the command line arguments so we can find the current binary's name.
+                            std::shared_ptr<const message::CommandLineArguments> args = store::DataStore<message::CommandLineArguments>::get();
+
+                            std::vector<char> data(args->at(0).cbegin(), args->at(0).cend());
+                            data.push_back('\0');
+                            const auto* binary = basename(data.data());
+
+                            // Grab the filename.
+                            auto split = utility::file::pathSplit(watch.path);
+
+                            return std::make_shared<::extension::Configuration>(split.second, hostname, binary);
                         } catch (const YAML::ParserException& e){
                             throw std::runtime_error(watch.path + " " + std::string(e.what()));
                         }

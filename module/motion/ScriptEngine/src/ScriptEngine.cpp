@@ -43,9 +43,9 @@ namespace module {
 
                 // Add this script to our list of scripts
                 try{
-                    scripts.insert(std::make_pair(utility::file::pathSplit(script.path).second, script.config.as<Script>()));
+                    scripts.insert(std::make_pair(utility::file::pathSplit(script.fileName).second, script.config.as<Script>()));
                 } catch(const std::exception& e){
-                    log<NUClear::ERROR>("Script is bad conversion:", script.path, e.what());
+                    log<NUClear::ERROR>("Script is bad conversion:", script.fileName, e.what());
                 }  
             });
 

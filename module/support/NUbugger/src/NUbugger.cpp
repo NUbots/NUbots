@@ -213,7 +213,7 @@ namespace support {
         });
 
         on<Trigger<SaveConfiguration>>().then("Save Config",[this](const SaveConfiguration& /*config*/){
-            // TODO: saveConfigurationFile(config.path,config.config);
+            // TODO: saveConfigurationFile(config.fileName,config.config);
         });
     }
 
