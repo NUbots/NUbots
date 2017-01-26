@@ -59,7 +59,10 @@ node nubotsvmbuild {
     'zlib'         => {'url'         => 'http://www.zlib.net/zlib-1.2.11.tar.gz',
                        'creates'     => 'lib/libz.a',
                        'method'      => 'cmake',},
-    'bzip2'        => {'url'         => 'https://github.com/Bidski/bzip2/archive/v1.0.6.tar.gz',
+    'bzip2'        => {'url'         => 'https://github.com/Bidski/bzip2/archive/v1.0.6.1.tar.gz',
+                       'args'        => { 'native'   => [ '', ],
+                                          'DarwinOp' => [ '', ],
+                                          'NimbroOp' => [ '', ], },
                        'creates'     => 'lib/libbz2.so',
                        'method'      => 'make',},
     'xml2'         => {'url'         => 'http://xmlsoft.org/sources/libxml2-2.9.3.tar.gz',
@@ -151,13 +154,6 @@ node nubotsvmbuild {
                                           'NimbroOp' => [ '--disable-doxygen-doc', '--disable-examples', ], },
                        'method'      => 'autotools',
                        'require'     => [ Installer['raw1394'], ],},
-    'pybind11'     => {'url'         => 'https://github.com/pybind/pybind11/archive/v2.0.1.tar.gz',
-                       'args'        => { 'native'   => [ '-DPYBIND11_TEST=OFF', '-DPYTHON_EXECUTABLE=PREFIX/pypy/bin/pypy' ],
-                                          'DarwinOp' => [ '-DPYBIND11_TEST=OFF', '-DPYTHON_EXECUTABLE=PREFIX/pypy/bin/pypy' ],
-                                          'NimbroOp' => [ '-DPYBIND11_TEST=OFF', '-DPYTHON_EXECUTABLE=PREFIX/pypy/bin/pypy' ], },
-                       'creates'     => 'lib/libpybind11.so',
-                       'require'     => [ Installer['eigen3'], Exec['PyPy_native_Files'], Exec['PyPy_NimbroOp_Files'], Exec['PyPy_DarwinOp_Files'], ],
-                       'method'      => 'cmake',},
     'fswatch'      => {'url'         => 'https://github.com/emcrisostomo/fswatch/archive/1.9.3.tar.gz',
                        'args'        => { 'native'   => [ '', ],
                                           'DarwinOp' => [ '--host=i686-linux-gnu', '--build=x86_64-unknown-linux-gnu', ],
@@ -310,100 +306,6 @@ node nubotsvmbuild {
     before   => Class['toolchain_deb'],
   }
 
-  archive { "PyPy_native":
-    url              => "https://bitbucket.org/squeaky/portable-pypy/downloads/pypy3.3-5.5-alpha-20161013-linux_x86_64-portable.tar.bz2",
-    target           => "/nubots/toolchain/native/src/pypy",
-    src_target       => "/nubots/toolchain/native/src",
-    purge_target     => false,
-    checksum         => false,
-    follow_redirects => true,
-    timeout          => 0,
-    extension        => "tar.bz2",
-    strip_components => 1,
-    root_dir         => '.',
-    require          => [ Class['installer::prerequisites'], Class['dev_tools'], ],
-  }
-  archive { "PyPy_NimbroOp":
-    url              => "https://bitbucket.org/squeaky/portable-pypy/downloads/pypy3.3-5.5-alpha-20161013-linux_x86_64-portable.tar.bz2",
-    target           => "/nubots/toolchain/NimbroOp/src/pypy",
-    src_target       => "/nubots/toolchain/NimbroOp/src",
-    purge_target     => false,
-    checksum         => false,
-    follow_redirects => true,
-    timeout          => 0,
-    extension        => "tar.bz2",
-    strip_components => 1,
-    root_dir         => '.',
-    require          => [ Class['installer::prerequisites'], Class['dev_tools'], ],
-  }
-  archive { "PyPy_DarwinOp":
-    url              => "https://bitbucket.org/squeaky/portable-pypy/downloads/pypy3.3-5.5-alpha-20161014-linux_i686-portable.tar.bz2",
-    target           => "/nubots/toolchain/DarwinOp/src/pypy",
-    src_target       => "/nubots/toolchain/DarwinOp/src",
-    purge_target     => false,
-    checksum         => false,
-    follow_redirects => true,
-    timeout          => 0,
-    extension        => "tar.bz2",
-    strip_components => 1,
-    root_dir         => '.',
-    require          => [ Class['installer::prerequisites'], Class['dev_tools'], ],
-  }
-  exec { "PyPy_NimbroOp_Files":
-    creates     => "/nubots/toolchain/NimbroOp/pypy/bin/pypy",
-    command     => "./bin/virtualenv-pypy --always-copy /nubots/toolchain/NimbroOp/pypy &&
-                    /nubots/toolchain/NimbroOp/pypy/bin/pip3 install pyparsing &&
-                    /nubots/toolchain/NimbroOp/pypy/bin/pip3 install pydotplus &&
-                    /nubots/toolchain/NimbroOp/pypy/bin/pip3 install pygments &&
-                    /nubots/toolchain/NimbroOp/pypy/bin/pip3 install termcolor &&
-                    /nubots/toolchain/NimbroOp/pypy/bin/pip3 install mmh3 &&
-                    /nubots/toolchain/NimbroOp/pypy/bin/pip3 install protobuf",
-    cwd         => "/nubots/toolchain/NimbroOp/src/pypy",
-    path        =>  [ "/nubots/toolchain/NimbroOp/bin", "/nubots/toolchain/bin",
-                      '/usr/local/bin', '/usr/local/sbin/', '/usr/bin/', '/usr/sbin/', '/bin/', '/sbin/' ],
-    environment => ["LD_LIBRARY_PATH=\"/nubots/toolchain/NimbroOp/lib:/nubots/toolchain/lib\""],
-    timeout     => 0,
-    provider    => 'shell',
-    require     => [ Archive["PyPy_NimbroOp"], Installer['bzip2'], ],
-    before      => Class['toolchain_deb'],
-  }
-  exec { "PyPy_native_Files":
-    creates     => "/nubots/toolchain/native/pypy/bin/pypy",
-    command     => "./bin/virtualenv-pypy --always-copy /nubots/toolchain/native/pypy &&
-                    /nubots/toolchain/native/pypy/bin/pip3 install pyparsing &&
-                    /nubots/toolchain/native/pypy/bin/pip3 install pydotplus &&
-                    /nubots/toolchain/native/pypy/bin/pip3 install pygments &&
-                    /nubots/toolchain/native/pypy/bin/pip3 install termcolor &&
-                    /nubots/toolchain/native/pypy/bin/pip3 install mmh3 &&
-                    /nubots/toolchain/native/pypy/bin/pip3 install protobuf",
-    cwd         => "/nubots/toolchain/native/src/pypy",
-    path        =>  [ "/nubots/toolchain/native/bin", "/nubots/toolchain/bin",
-                      '/usr/local/bin', '/usr/local/sbin/', '/usr/bin/', '/usr/sbin/', '/bin/', '/sbin/' ],
-    environment => ["LD_LIBRARY_PATH=\"/nubots/toolchain/native/lib:/nubots/toolchain/lib\""],
-    timeout     => 0,
-    provider    => 'shell',
-    require     => [ Archive["PyPy_native"], Installer['bzip2'], ],
-    before      => Class['toolchain_deb'],
-  }
-  exec { "PyPy_DarwinOp_Files":
-    creates     => "/nubots/toolchain/DarwinOp/pypy/bin/pypy",
-    command     => "LD_LIBRARY_PATH=\"/nubots/toolchain/DarwinOp/lib:/nubots/toolchain/lib\" ./bin/virtualenv-pypy --always-copy /nubots/toolchain/DarwinOp/pypy &&
-                    LD_LIBRARY_PATH=\"/nubots/toolchain/DarwinOp/lib:/nubots/toolchain/lib\" /nubots/toolchain/DarwinOp/pypy/bin/pip3 install pyparsing &&
-                    LD_LIBRARY_PATH=\"/nubots/toolchain/DarwinOp/lib:/nubots/toolchain/lib\" /nubots/toolchain/DarwinOp/pypy/bin/pip3 install pydotplus &&
-                    LD_LIBRARY_PATH=\"/nubots/toolchain/DarwinOp/lib:/nubots/toolchain/lib\" /nubots/toolchain/DarwinOp/pypy/bin/pip3 install pygments &&
-                    LD_LIBRARY_PATH=\"/nubots/toolchain/DarwinOp/lib:/nubots/toolchain/lib\" /nubots/toolchain/DarwinOp/pypy/bin/pip3 install termcolor &&
-                    LD_LIBRARY_PATH=\"/nubots/toolchain/DarwinOp/lib:/nubots/toolchain/lib\" /nubots/toolchain/DarwinOp/pypy/bin/pip3 install mmh3 &&
-                    LD_LIBRARY_PATH=\"/nubots/toolchain/DarwinOp/lib:/nubots/toolchain/lib\" /nubots/toolchain/DarwinOp/pypy/bin/pip3 install protobuf",
-    cwd         => "/nubots/toolchain/DarwinOp/src/pypy",
-    path        =>  [ "/nubots/toolchain/DarwinOp/bin", "/nubots/toolchain/bin",
-                      '/usr/local/bin', '/usr/local/sbin/', '/usr/bin/', '/usr/sbin/', '/bin/', '/sbin/' ],
-    environment => ["LD_LIBRARY_PATH=\"/nubots/toolchain/DarwinOp/lib:/nubots/toolchain/lib\""],
-    timeout     => 0,
-    provider    => 'shell',
-    require     => [ Archive["PyPy_DarwinOp"], Installer['bzip2'], ],
-    before      => Class['toolchain_deb'],
-  }
-
   # After we have installed, create the CMake toolchain files and then build our deb.
   Installer <| |> ~> class { 'toolchain_deb': }
 
@@ -438,8 +340,6 @@ set(CMAKE_C_FLAGS \"\${CMAKE_C_FLAGS} ${compile_params}\" CACHE STRING \"\" FORC
 set(CMAKE_CXX_FLAGS \"\${CMAKE_CXX_FLAGS} ${compile_params}\" CACHE STRING \"\" FORCE)
 
 set(PLATFORM \"${arch}\" CACHE STRING \"The platform to build for.\" FORCE)
-
-set(PYTHON_EXECUTABLE \"${prefix}/${arch}/pypy/bin/pypy\" CACHE STRING \"Path to the python interpreter to use.\" FORCE)
 ",
       ensure  => present,
       path    => "${prefix}/${arch}.cmake",
