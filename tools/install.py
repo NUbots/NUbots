@@ -40,9 +40,9 @@ def run(ip_addr, hostname, config, user, **kwargs):
     # Target location to install to
     target_dir   = '{0}@{1}:/home/{0}/'.format(user, ip_addr)
     build_dir    = b.binary_dir
-    config_dir   = os.path.join(build_dir, 'config')
+    config_dir   = os.path.join(build_dir, '.', 'config')
     platform_dir = '/nubots/toolchain/{0}'.format(b.cmake_cache["PLATFORM"])
-    roles        = b.cmake_cache["NUCLEAR_ROLES"].split(';')
+    roles        = b.cmake_cache["NUCLEAR_ROLES"]
 
     cprint('Installing binaries to ' + target_dir, 'blue', attrs=['bold'])
     files = glob.glob(os.path.join(build_dir, 'bin', '*'))
@@ -78,15 +78,15 @@ def run(ip_addr, hostname, config, user, **kwargs):
 
     if config in ['overwrite', 'o']:
         cprint('Overwriting configuration files on target', 'blue', attrs=['bold'])
-        call(['rsync', '-avzPL', '--checksum', '-e ssh'] + config_files + [target_dir])
+        call(['rsync', '-avzPLR', '--checksum', '-e ssh'] + config_files + [target_dir])
 
     if config in ['update', 'u']:
         cprint('Adding new configuration files to target', 'blue', attrs=['bold'])
-        call(['rsync', '-avzuPL', '--checksum', '-e ssh'] + config_files + [target_dir])
+        call(['rsync', '-avzuPLR', '--checksum', '-e ssh'] + config_files + [target_dir])
 
     if not config or config in ['new', 'n']:
         cprint('Adding new configuration files to the target', 'blue', attrs=['bold'])
-        call(['rsync', '-avzPL', '--checksum', '--ignore-existing', '-e ssh'] + config_files + [target_dir])
+        call(['rsync', '-avzPLR', '--checksum', '--ignore-existing', '-e ssh'] + config_files + [target_dir])
 
     if config in ['ignore', 'i']:
         cprint('Ignoring configuration changes', 'blue', attrs=['bold'])
