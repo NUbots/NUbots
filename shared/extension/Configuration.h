@@ -58,18 +58,18 @@ namespace extension {
         Configuration(const std::string& fileName, const std::string& hostname, const std::string& binary) : fileName(fileName), hostname(hostname), binary(binary), config()
         {
             // Load the default config file.
-            config = YAML::Load("config/" + fileName);
+            config = YAML::LoadFile("config/" + fileName);
 
             // If the same file exists in this robots per-robot config directory then load and merge.
             if (utility::file::exists("config/" + hostname + "/" + fileName))
             {
-                config = mergeYAML(config, YAML::Load("config/" + hostname + "/" + fileName));
+                config = mergeYAML(config, YAML::LoadFile("config/" + hostname + "/" + fileName));
             }
 
             // If the same file exists in this binary's per-binary config directory then load and merge.
             if (utility::file::exists("config/" + binary + "/" + fileName))
             {
-                config = mergeYAML(config, YAML::Load("config/" + binary + "/" + fileName));
+                config = mergeYAML(config, YAML::LoadFile("config/" + binary + "/" + fileName));
             }
         }
 
@@ -234,10 +234,21 @@ namespace NUClear {
                     auto robotConfig   = "config/" + std::string(hostname) + "/" + path;
                     auto binaryConfig  = "config/" + std::string(binary)   + "/" + path;
 
+                    if (!utility::file::exists(defaultConfig))
+                    {
+                        throw std::runtime_error("Configuration file '" + path + "' does not exist.");
+                    }
+
+                    auto defaultHandle = DSLProxy<::extension::FileWatch>::bind<DSL>(reactor, label, callback, defaultConfig, flags);
+                    auto robotHandle   = utility::file::exists(robotConfig)
+                                            ? DSLProxy<::extension::FileWatch>::bind<DSL>(reactor, label, callback, robotConfig, flags) 
+                                            : threading::ReactionHandle();
+                    auto binaryHandle  = utility::file::exists(binaryConfig)
+                                            ? DSLProxy<::extension::FileWatch>::bind<DSL>(reactor, label, callback, binaryConfig, flags) 
+                                            : threading::ReactionHandle();
+
                     // Set FileWatcher to monitor the requested files.
-                    return std::make_tuple(DSLProxy<::extension::FileWatch>::bind<DSL>(reactor, label, callback, defaultConfig, flags),
-                                           DSLProxy<::extension::FileWatch>::bind<DSL>(reactor, label, callback, robotConfig,   flags),
-                                           DSLProxy<::extension::FileWatch>::bind<DSL>(reactor, label, callback, binaryConfig,  flags));
+                    return std::make_tuple(defaultHandle, robotHandle, binaryHandle);
                 }
 
                 template <typename DSL>
