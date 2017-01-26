@@ -236,7 +236,7 @@ namespace NUClear {
 
                     if (!utility::file::exists(defaultConfig))
                     {
-                        throw std::runtime_error("Configuration file '" + path + "' does not exist.");
+                        throw std::runtime_error("Configuration file '" + defaultConfig + "' does not exist.");
                     }
 
                     auto defaultHandle = DSLProxy<::extension::FileWatch>::bind<DSL>(reactor, label, callback, defaultConfig, flags);
