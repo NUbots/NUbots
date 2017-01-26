@@ -73,6 +73,7 @@ def run(ip_addr, hostname, config, user, **kwargs):
 
     # Get list of config files.
     config_files = list(filter(None, glob.glob('{0}/*.yaml'.format(config_dir))
+                 + glob.glob('{0}/scripts/*.yaml'.format(config_dir))
                  + glob.glob('{0}/{1}/*.yaml'.format(config_dir, hostname))
                  + [glob.glob('{0}/{1}/*.yaml'.format(config_dir, role)) for role in roles]))
 
