@@ -21,8 +21,7 @@ Vagrant.configure("2") do |config|
     #override.vm.box = "ubuntu/xenial64"
     
     # Use custom box because official Ubuntu one is shit.
-    override.vm.box = "nubots_xenial64"
-    override.vm.box_url = "https://uoneduau-my.sharepoint.com/personal/c3124185_uon_edu_au/_layouts/15/guestaccess.aspx?guestaccesstoken=%2bndUQAG0OSfCUAOTNpjewJE%2bv0slyCCyfeEonMpJwpU%3d&docid=03ac69c7a811041dba5afe5247c253a59&rev=1"
+    override.vm.box = "bidski/xenial64"
 
     # See http://www.virtualbox.org/manual/ch08.html#vboxmanage-modifyvm
     v.memory = 8192
