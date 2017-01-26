@@ -17,9 +17,19 @@ namespace input {
         	// Each file MUST define a "driver", we use this driver to load the appropriate handler for the camera.
         	auto driver = config["driver"].as<std::string>();
 
-        	if (dirver == "V4L2")
+        	if (driver == "V4L2")
         	{
-		    	initiateV4L2Camera(config);
+                auto cam = V4L2Cameras.find(config["deviceID"].as<std::string>());
+
+                if (cam != V4L2Cameras.end())
+                {
+                    V4L2Cameras.insert(std::make_pair(config["deviceID"].as<std::string>(), initiateV4L2Camera(config)));
+                }
+
+                else
+                {
+                    cam->second.setConfig(config);
+                }
         	}
 
         	else if (driver == "Spinnaker")
@@ -32,6 +42,14 @@ namespace input {
         		log<NUClear::FATAL>("Unsupported camera driver:", driver);
         	}
         });
+
+        // When we shutdown, we must tell our camera class to close (stop streaming)
+        on<Shutdown>().then([this] {
+            ShutdownV4L2Camera();
+            
+            ShutdownSpinnakerCamera();
+        });
+
     }
 }
 }

@@ -1,0 +1,130 @@
+#include "Camera.h"
+
+namespace module
+{
+	namespace input
+	{
+		using extension::Configuration;
+
+        using message::input::CameraParameters;
+        using message::input::Image;
+
+        using FOURCC = utility::vision::FOURCC;
+
+		V4L2Camera Camera::initiateV4L2Camera(const Configuration& config)
+		{
+			// This trigger gets us as close as we can to the frame rate as possible (as high resolution as we can)
+            V4L2FrameRateHandle = on<Every<V4L2Camera::FRAMERATE, Per<std::chrono::seconds>>, Single>().then("Read V4L2Camera", [this] {
+
+				for (auto& camera : V4L2Cameras)
+				{
+	                // If the camera is ready, get an image and emit it
+	                if (camera.isStreaming())
+	                {
+	                    emit(std::make_unique<Image>(camera.getImage()));
+	                }
+				}
+            });
+
+            V4L2SettingsHandle = on<Every<1, std::chrono::seconds>>().then("V4L2 Camera Setting Applicator", [this] {
+				for (auto& camera : V4L2Cameras)
+				{
+		            if (camera.isStreaming())
+		            {
+	                    // Set all other camera settings
+	                    for (auto& setting : camera.getConfig())
+	                    {
+	                        auto& settings = camera.getSettings();
+	                        auto it = settings.find(setting.first.as<std::string>());
+
+	                        if (it != settings.end())
+	                        {
+	                            if (camera.setSetting(it->second, setting.second.as<int>()) == false)
+	                            {
+	                                NUClear::log<NUClear::DEBUG>("Failed to set " + it->first + " on camera");
+	                            }
+	                        }
+	                    }
+	                }
+				}
+
+            }); 
+
+			auto cameraParameters = std::make_unique<CameraParameters>();
+            double tanHalfFOV[2], imageCentre[2];
+
+            cameraParameters->imageSizePixels << config["imageWidth"].as<uint>(), config["imageHeight"].as<uint>();
+            cameraParameters->FOV << config["FOV_X"].as<double>(), config["FOV_Y"].as<double>();
+            cameraParameters->distortionFactor = config["DISTORTION_FACTOR"].as<double>();
+            tanHalfFOV[0]  = std::tan(cameraParameters->FOV[0] * 0.5);
+            tanHalfFOV[1]  = std::tan(cameraParameters->FOV[1] * 0.5);
+            imageCentre[0] = cameraParameters->imageSizePixels[0] * 0.5;
+            imageCentre[1] = cameraParameters->imageSizePixels[1] * 0.5;
+            cameraParameters->pixelsToTanThetaFactor << (tanHalfFOV[0] / imageCentre[0]), (tanHalfFOV[1] / imageCentre[1]);
+            cameraParameters->focalLengthPixels = imageCentre[0] / tanHalfFOV[0];
+
+            emit<Scope::DIRECT>(std::move(cameraParameters));
+
+            try 
+            {
+            	V4L2Camera camera;
+
+                // Recreate the camera device at the required resolution
+                int width  = config["imageWidth"].as<uint>();
+                int height = config["imageHeight"].as<uint>();
+                std::string deviceID = config["deviceID"].as<std::string>();
+                std::string format   = config["imageFormat"].as<std::string>();
+                FOURCC fourcc = utility::vision::getFourCCFromDescription(format);
+
+                if (camera.getWidth()    != static_cast<size_t>(width) ||
+                    camera.getHeight()   != static_cast<size_t>(height) ||
+                    camera.getFormat()   != format ||
+                    camera.getDeviceID() != deviceID)
+                {
+                    camera.resetCamera(deviceID, format, fourcc, width, height);
+                }
+
+                // Set all other camera settings
+                for(auto& setting : config.config)
+                {
+                    auto& settings = camera.getSettings();
+                    auto it = settings.find(setting.first.as<std::string>());
+
+                    if(it != settings.end())
+                    {
+                        if(it->second.set(setting.second.as<int>()) == false)
+                        {
+                            NUClear::log<NUClear::DEBUG>("Failed to set " + it->first + " on camera");
+                        }
+                    }
+                }
+
+                // Start the camera streaming video
+                camera.startStreaming();
+
+                V4L2SettingsHandle.enable();
+                V4L2FrameRateHandle.enable();
+
+                return(camera);
+            }
+
+            catch(const std::exception& e) 
+            {
+                NUClear::log<NUClear::DEBUG>(std::string("Exception while setting camera configuration: ") + e.what());
+                throw e;
+            }
+		}
+
+		void Camera::ShutdownV4L2Camera()
+		{
+			for (auto& camera : V4L2Cameras)
+			{
+				camera.closeCamera();
+			}
+
+            V4L2SettingsHandle.disable();
+            V4L2FrameRateHandle.disable();
+            V4L2Cameras.clear();
+		}
+	}
+}
