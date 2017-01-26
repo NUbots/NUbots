@@ -72,9 +72,9 @@ def run(ip_addr, hostname, config, user, **kwargs):
     FNULL.close()
 
     # Get list of config files.
-    config_files = glob.glob('{0}/*.yaml'.format(config_dir))
+    config_files = list(filter(None, glob.glob('{0}/*.yaml'.format(config_dir))
                  + glob.glob('{0}/{1}/*.yaml'.format(config_dir, hostname))
-                 + [glob.glob('{0}/{1}/*.yaml'.format(config_dir, role)) for role in roles]
+                 + [glob.glob('{0}/{1}/*.yaml'.format(config_dir, role)) for role in roles]))
 
     if config in ['overwrite', 'o']:
         cprint('Overwriting configuration files on target', 'blue', attrs=['bold'])
