@@ -19,9 +19,9 @@ namespace module
 				for (auto& camera : V4L2Cameras)
 				{
 	                // If the camera is ready, get an image and emit it
-	                if (camera.isStreaming())
+	                if (camera.second.isStreaming())
 	                {
-	                    emit(std::make_unique<Image>(camera.getImage()));
+	                    emit(std::make_unique<Image>(camera.second.getImage()));
 	                }
 				}
             });
@@ -29,19 +29,19 @@ namespace module
             V4L2SettingsHandle = on<Every<1, std::chrono::seconds>>().then("V4L2 Camera Setting Applicator", [this] {
 				for (auto& camera : V4L2Cameras)
 				{
-		            if (camera.isStreaming())
+		            if (camera.second.isStreaming())
 		            {
 	                    // Set all other camera settings
-	                    for (auto& setting : camera.getConfig())
+	                    for (auto& setting : camera.second.getConfig().config)
 	                    {
-	                        auto& settings = camera.getSettings();
+	                        auto& settings = camera.second.getSettings();
 	                        auto it = settings.find(setting.first.as<std::string>());
 
 	                        if (it != settings.end())
 	                        {
-	                            if (camera.setSetting(it->second, setting.second.as<int>()) == false)
+	                            if (camera.second.setSetting(it->second, setting.second.as<int>()) == false)
 	                            {
-	                                NUClear::log<NUClear::DEBUG>("Failed to set " + it->first + " on camera");
+	                                log<NUClear::DEBUG>("Failed to set", it->first, "on camera", camera.first);
 	                            }
 	                        }
 	                    }
@@ -67,8 +67,6 @@ namespace module
 
             try 
             {
-            	V4L2Camera camera;
-
                 // Recreate the camera device at the required resolution
                 int width  = config["imageWidth"].as<uint>();
                 int height = config["imageHeight"].as<uint>();
@@ -76,13 +74,9 @@ namespace module
                 std::string format   = config["imageFormat"].as<std::string>();
                 FOURCC fourcc = utility::vision::getFourCCFromDescription(format);
 
-                if (camera.getWidth()    != static_cast<size_t>(width) ||
-                    camera.getHeight()   != static_cast<size_t>(height) ||
-                    camera.getFormat()   != format ||
-                    camera.getDeviceID() != deviceID)
-                {
-                    camera.resetCamera(deviceID, format, fourcc, width, height);
-                }
+                V4L2Camera camera(config, deviceID, cameraCount);
+
+                camera.resetCamera(deviceID, format, fourcc, width, height);
 
                 // Set all other camera settings
                 for(auto& setting : config.config)
@@ -92,10 +86,10 @@ namespace module
 
                     if(it != settings.end())
                     {
-                        if(it->second.set(setting.second.as<int>()) == false)
+                        if (camera.setSetting(it->second, setting.second.as<int>()) == false)
                         {
-                            NUClear::log<NUClear::DEBUG>("Failed to set " + it->first + " on camera");
-                        }
+                            log<NUClear::DEBUG>("Failed to set", it->first, "on camera", deviceID);
+                        }                        
                     }
                 }
 
@@ -105,7 +99,7 @@ namespace module
                 V4L2SettingsHandle.enable();
                 V4L2FrameRateHandle.enable();
 
-                return(camera);
+                return(std::move(camera));
             }
 
             catch(const std::exception& e) 
@@ -119,7 +113,7 @@ namespace module
 		{
 			for (auto& camera : V4L2Cameras)
 			{
-				camera.closeCamera();
+				camera.second.closeCamera();
 			}
 
             V4L2SettingsHandle.disable();

@@ -3,12 +3,20 @@
 namespace module {
 namespace input {
 
+    uint Camera::cameraCount = 0;
+    
     using extension::Configuration;
 
     Camera::Camera(std::unique_ptr<NUClear::Environment> environment)
-    : Reactor(std::move(environment)) {
+    : Reactor(std::move(environment))
+    , V4L2FrameRateHandle()
+    , V4L2SettingsHandle()
+    , V4L2Cameras()
+    , SpinnakerSystem()
+    , SpinnakerCamList()
+    , SpinnakerCameras() {
 
-        on<Configuration>("Camera.yaml").then("Camera system configuration", [this] (const Configuration& config) {
+        on<Configuration>("Camera.yaml").then("Camera system configuration", [this] (const Configuration& /*config*/) {
             // Use configuration here from file Camera.yaml
         });
 
@@ -23,7 +31,8 @@ namespace input {
 
                 if (cam != V4L2Cameras.end())
                 {
-                    V4L2Cameras.insert(std::make_pair(config["deviceID"].as<std::string>(), initiateV4L2Camera(config)));
+                    V4L2Cameras.insert(std::make_pair(config["deviceID"].as<std::string>(), std::move(initiateV4L2Camera(config))));
+                    cameraCount++;
                 }
 
                 else
@@ -34,7 +43,18 @@ namespace input {
 
         	else if (driver == "Spinnaker")
         	{
-		    	initiateSpinnakerCamera(config);
+                auto cam = SpinnakerCameras.find(config["deviceID"].as<std::string>());
+
+                if (cam != SpinnakerCameras.end())
+                {
+                    initiateSpinnakerCamera(config);
+                    cameraCount++;
+                }
+
+                else
+                {
+                    resetSpinnakerCamera(cam, config);
+                }
         	}
 
         	else

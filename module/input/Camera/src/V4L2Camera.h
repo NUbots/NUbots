@@ -34,6 +34,11 @@ namespace module
 {
     namespace input 
     {
+        using message::input::Image;
+
+        using FOURCC = utility::vision::FOURCC;
+
+        constexpr size_t NUM_BUFFERS = 2;
 
         /**
          * @brief This struct encapsulates the physical camera device. It will setup a camera device and begin streaming
@@ -53,8 +58,6 @@ namespace module
         struct V4L2Camera 
         {
         private:
-            constexpr size_t NUM_BUFFERS = 2;
-
             /// @brief Our two arrays of data that will be populated
             std::array<std::vector<uint8_t>, NUM_BUFFERS> buffers;
 
@@ -75,7 +78,7 @@ namespace module
 
             /// @brief the format that we are reading in from the camera
             std::string format;
-            utility::vision::FOURCC fourcc;
+            FOURCC fourcc;
 
             /// @brief Whether the camera is currently in streaming mode
             bool streaming;
@@ -99,7 +102,7 @@ namespace module
              *
              * @param device the path to the video device to use (e.g. /dev/video0)
              */
-            V4L2Camera(const ::extension::Configuration& config, const std::string& deviceID) 
+            V4L2Camera(const ::extension::Configuration& config, const std::string& deviceID, int cameraID) 
                 : buffers()
                 , fd(-1)
                 , width(0)
@@ -109,7 +112,7 @@ namespace module
                 , format("")
                 , fourcc(FOURCC::UNKNOWN)
                 , streaming(false)
-                , cameraID(-1)
+                , cameraID(cameraID)
                 , config(config) {}
 
             /**
@@ -184,7 +187,7 @@ namespace module
              * @param h the image's height
              * @param f whether the camera is mounted upside down
              */
-            void resetCamera(const std::string& device, const std::string& fmt, const utility::vision::FOURCC& cc, size_t w, size_t h)
+            void resetCamera(const std::string& device, const std::string& fmt, const FOURCC& cc, size_t w, size_t h)
             {
                 // if the camera device is already open, close it
                 closeCamera();
@@ -288,7 +291,7 @@ namespace module
             /**
              * @brief Returns a map of all configurable settings
              */
-            std::map<std::string, V4L2CameraSetting>& getSettings() { return settings; }
+            std::map<std::string, unsigned int>& getSettings() { return settings; }
 
             /**
              * @brief Returns the horizontal resolution the camera is currently set to
@@ -373,7 +376,7 @@ namespace module
             /**
              * @brief Return configuration information for this camera.
              */
-            ::extension::Configuration getConfig() const { return config; }
+            const ::extension::Configuration& getConfig() const { return config; }
 
             /**
              * @brief Set configuration information for this camera.
@@ -386,7 +389,7 @@ namespace module
                 int h = config["imageHeight"].as<uint>();
                 std::string ID = config["deviceID"].as<std::string>();
                 std::string fmt   = config["imageFormat"].as<std::string>();
-                utility::vision::FOURCC cc = utility::vision::getFourCCFromDescription(format);
+                FOURCC cc = utility::vision::getFourCCFromDescription(format);
 
                 if (width    != static_cast<size_t>(w) ||
                     height   != static_cast<size_t>(h) ||
