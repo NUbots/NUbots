@@ -11,7 +11,7 @@ NUCLEAR_ROLE(
     support::NUbugger
 
     #Sensors
-    input::LinuxCamera
+    input::Camera
     platform::darwin::HardwareIO
     platform::darwin::SensorFilter
 
