@@ -45,6 +45,7 @@ class dev_tools {
   package { 'libusb-1.0-0-dev:i386': ensure => latest, }
   package { 'autopoint': ensure => latest, }
   package { 'gettext': ensure => latest, }
+  package { 'python3-pip': ensure => latest, }
 
   # System libraries
   package { 'libasound2-dev:amd64': ensure => latest, }
@@ -108,6 +109,16 @@ class dev_tools {
   file_line{ 'zshrc_numpad19': path => '/home/vagrant/.zshrc', line => 'bindkey -s "^[Om" "-"'} ->
   file_line{ 'zshrc_numpad20': path => '/home/vagrant/.zshrc', line => 'bindkey -s "^[Oj" "*"'} ->
   file_line{ 'zshrc_numpad21': path => '/home/vagrant/.zshrc', line => 'bindkey -s "^[Oo" "/"'}
+
+  # INSTALL PYTHON PACKAGES (we need python-pip to use the pip provider)
+  Package['python3-pip'] -> Package <| provider == 'pip3' |>
+  package { 'pyparsing': ensure => installed, provider => 'pip3' }
+  package { 'pydotplus': ensure => installed, provider => 'pip3' }
+  package { 'pygments':  ensure => installed, provider => 'pip3' }
+  package { 'termcolor': ensure => installed, provider => 'pip3' }
+  package { 'protobuf':  ensure => installed, provider => 'pip3' }
+  package { 'mmh3':      ensure => installed, provider => 'pip3' }
+  # python::pip { 'pybfd': ensure => latest }#, url => 'https://github.com/Groundworkstech/pybfd/archive/master.tar.gz' }
 
   # Enable the git module for zprezto
   file_line { 'zprezto_modules':
