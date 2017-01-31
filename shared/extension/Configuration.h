@@ -57,19 +57,42 @@ namespace extension {
 
         Configuration(const std::string& fileName, const std::string& hostname, const std::string& binary) : fileName(fileName), hostname(hostname), binary(binary), config()
         {
+            bool load = true;
+
             // Load the default config file.
-            config = YAML::LoadFile("config/" + fileName);
+            if (utility::file::exists("config/" + fileName))
+            {
+                config = YAML::LoadFile("config/" + fileName);
+                load = false;
+            }
 
             // If the same file exists in this robots per-robot config directory then load and merge.
             if (utility::file::exists("config/" + hostname + "/" + fileName))
             {
-                config = mergeYAML(config, YAML::LoadFile("config/" + hostname + "/" + fileName));
+                if (!load)
+                {
+                    config = mergeYAML(config, YAML::LoadFile("config/" + hostname + "/" + fileName));
+                }
+
+                else
+                {
+                    config = YAML::LoadFile("config/" + hostname + "/" + fileName);
+                    load = false;
+                }
             }
 
             // If the same file exists in this binary's per-binary config directory then load and merge.
             if (utility::file::exists("config/" + binary + "/" + fileName))
             {
-                config = mergeYAML(config, YAML::LoadFile("config/" + binary + "/" + fileName));
+                if (!load)
+                {
+                    config = mergeYAML(config, YAML::LoadFile("config/" + binary + "/" + fileName));
+                }
+
+                else
+                {
+                    config = YAML::LoadFile("config/" + binary + "/" + fileName);
+                }
             }
         }
 
@@ -272,10 +295,29 @@ namespace NUClear {
                             data.push_back('\0');
                             const auto* binary = basename(data.data());
 
-                            // Grab the filename.
-                            auto split = utility::file::pathSplit(watch.path);
+                            // Get relative path to config file.
+                            auto components = utility::strutil::split(watch.path, '/');
+                            std::string relativePath("");
+                            bool flag = false;
+                            for (const auto& component : components)
+                            {
+                                // Ignore the hostname/binary name if they are present.
+                                if (flag && (component.compare(hostname) != 0) && (component.compare(binary) != 0))
+                                {
+                                    relativePath.append(component + "/");
+                                }
 
-                            return std::make_shared<::extension::Configuration>(split.second, hostname, binary);
+                                // We want out paths relative to the config folder.
+                                if (component.compare("config") == 0)
+                                {
+                                    flag = true;
+                                }
+                            }
+
+                            // There will be a trailing / character.
+                            relativePath.pop_back();
+
+                            return std::make_shared<::extension::Configuration>(relativePath, hostname, binary);
                         } catch (const YAML::ParserException& e){
                             throw std::runtime_error(watch.path + " " + std::string(e.what()));
                         }

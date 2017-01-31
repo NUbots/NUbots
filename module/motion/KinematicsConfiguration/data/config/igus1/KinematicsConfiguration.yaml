@@ -5,7 +5,7 @@ leg:
     lower_leg_length: 0.2
     heel_length: 0.085 # measured
     foot_centre_to_ankle_centre: 0.02 # rough
-    # length_between_legs: hip_offset[1] * 2
+    length_between_legs: 0.20
     foot:
         width: 0.130 # rough
         height: 0.04

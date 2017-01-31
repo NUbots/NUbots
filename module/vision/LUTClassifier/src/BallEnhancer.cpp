@@ -149,10 +149,9 @@ namespace module {
                 int minY = int(std::max(3.0, horizon.y(point[0])));
                 for(int y = point[1]; y > minY; --y) {
 
-                    char c = static_cast<char>(utility::vision::getPixelColour(lut, 
-                            getPixel(point[0], y, image.dimensions[0], image.dimensions[1], image.data, static_cast<FOURCC>(image.format))));
+                    auto colour = utility::vision::getPixelColour(lut, getPixel(point[0], y, image.dimensions[0], image.dimensions[1], image.data, static_cast<FOURCC>(image.format)));
 
-                    if (c == static_cast<char>(Colour::GREEN)) {
+                    if (colour == Colour::GREEN) {
                         auto p = Eigen::Vector2i( point[0], y - 1 );
                         edges.push_back(p);
                         classifiedImage.ballSeedPoints[0].points.push_back(p);
@@ -167,10 +166,9 @@ namespace module {
 
                 for(int x = point[0]; x > 3; --x) {
 
-                    char c = static_cast<char>(utility::vision::getPixelColour(lut, 
-                             getPixel(x, point[1], image.dimensions[0], image.dimensions[1], image.data, static_cast<FOURCC>(image.format))));
+                    auto colour = utility::vision::getPixelColour(lut, getPixel(x, point[1], image.dimensions[0], image.dimensions[1], image.data, static_cast<FOURCC>(image.format)));
 
-                    if (c == static_cast<char>(Colour::GREEN)) {
+                    if (colour == Colour::GREEN) {
                         auto p = Eigen::Vector2i( x + 1, point[1] );
                         edges.push_back(p);
                         classifiedImage.ballSeedPoints[1].points.push_back(p);
@@ -185,10 +183,9 @@ namespace module {
 
                 for(int x = point[0]; x < int(image.dimensions[0]) - 3; ++x) {
 
-                    char c = static_cast<char>(utility::vision::getPixelColour(lut, 
-                             getPixel(x, point[1], image.dimensions[0], image.dimensions[1], image.data, static_cast<FOURCC>(image.format))));
+                    auto colour = utility::vision::getPixelColour(lut, getPixel(x, point[1], image.dimensions[0], image.dimensions[1], image.data, static_cast<FOURCC>(image.format)));
 
-                    if (c == static_cast<char>(Colour::GREEN)) {
+                    if (colour == Colour::GREEN) {
                         auto p = Eigen::Vector2i( x - 1, point[1] );
                         edges.push_back(p);
                         classifiedImage.ballSeedPoints[2].points.push_back(p);

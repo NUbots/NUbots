@@ -1,8 +1,7 @@
 driver: Spinnaker
-deviceID: "15211412" # "E81B94"
+deviceID: "16242412"        # 00F7D6EC
 
 buffer_count: 4             # The number of software buffers to use.
-device: 
 
 format:
   width: 1280

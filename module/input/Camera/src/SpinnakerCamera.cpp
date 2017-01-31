@@ -101,7 +101,7 @@ namespace module
             // Set the pixel format.
             if(!utility::vision::setEnumParam(nodeMap, "PixelFormat", config["format"]["pixel"].as<std::string>()))
             {
-                log("Failed to set pixel format for camera", camera->first, "to", config["format"]["pixel"].as<int64_t>());
+                log("Failed to set pixel format for camera", camera->first, "to", config["format"]["pixel"].as<std::string>());
             }
 
             // Set the width and height of the image.
@@ -317,17 +317,17 @@ namespace module
                 log("Failed to set acquisition mode for camera", camera->first, "to 'Continuous'.");
             }
 
-            log("Camera ", camera->first, " set to continuous acquisition mode.");
+            log("Camera", camera->first, "with local id", camera->second->cameraID, "set to continuous acquisition mode.");
 
             // Setup the event handler for image acquisition.
             camera->second->camera->RegisterEvent(*camera->second);
 
-            log("Camera ", camera->first, " image event handler registered.");
+            log("Camera", camera->first, "with local id", camera->second->cameraID, "image event handler registered.");
 
             // Begin acquisition.
             camera->second->camera->BeginAcquisition();
 
-            log("Camera ", camera->first, " image acquisition started.");
+            log("Camera", camera->first, "with local id", camera->second->cameraID, "image acquisition started.");
         }
 
         void Camera::ShutdownSpinnakerCamera()

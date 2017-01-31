@@ -23,15 +23,18 @@ namespace input {
         on<Configuration>("Cameras").then("Camera driver loader", [this] (const Configuration& config) {
         	// Monitor camera config directory for files.
         	// Each file MUST define a "driver", we use this driver to load the appropriate handler for the camera.
-        	auto driver = config["driver"].as<std::string>();
+        	auto driver   = config["driver"].as<std::string>();
+            auto deviceID = config["deviceID"].as<std::string>();
+
+            log("Found", driver, "camera with deviceID", deviceID);
 
         	if (driver == "V4L2")
         	{
-                auto cam = V4L2Cameras.find(config["deviceID"].as<std::string>());
+                auto cam = V4L2Cameras.find(deviceID);
 
-                if (cam != V4L2Cameras.end())
+                if (cam == V4L2Cameras.end())
                 {
-                    V4L2Cameras.insert(std::make_pair(config["deviceID"].as<std::string>(), std::move(initiateV4L2Camera(config))));
+                    V4L2Cameras.insert(std::make_pair(deviceID, std::move(initiateV4L2Camera(config))));
                     cameraCount++;
                 }
 
@@ -43,9 +46,9 @@ namespace input {
 
         	else if (driver == "Spinnaker")
         	{
-                auto cam = SpinnakerCameras.find(config["deviceID"].as<std::string>());
+                auto cam = SpinnakerCameras.find(deviceID);
 
-                if (cam != SpinnakerCameras.end())
+                if (cam == SpinnakerCameras.end())
                 {
                     initiateSpinnakerCamera(config);
                     cameraCount++;

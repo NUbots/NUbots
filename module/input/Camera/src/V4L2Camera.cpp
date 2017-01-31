@@ -27,6 +27,7 @@ namespace module
             });
 
             V4L2SettingsHandle = on<Every<1, std::chrono::seconds>>().then("V4L2 Camera Setting Applicator", [this] {
+
 				for (auto& camera : V4L2Cameras)
 				{
 		            if (camera.second.isStreaming())
@@ -47,7 +48,6 @@ namespace module
 	                    }
 	                }
 				}
-
             }); 
 
 			auto cameraParameters = std::make_unique<CameraParameters>();
@@ -65,6 +65,8 @@ namespace module
 
             emit<Scope::DIRECT>(std::move(cameraParameters));
 
+            log("Emitted camera parameters for camera", config["deviceID"].as<std::string>());
+
             try 
             {
                 // Recreate the camera device at the required resolution
@@ -74,9 +76,13 @@ namespace module
                 std::string format   = config["imageFormat"].as<std::string>();
                 FOURCC fourcc = utility::vision::getFourCCFromDescription(format);
 
+                log("Initialising driver for camera", deviceID);
+
                 V4L2Camera camera(config, deviceID, cameraCount);
 
                 camera.resetCamera(deviceID, format, fourcc, width, height);
+
+                log("Applying settings for camera", deviceID);
 
                 // Set all other camera settings
                 for(auto& setting : config.config)
@@ -95,6 +101,8 @@ namespace module
 
                 // Start the camera streaming video
                 camera.startStreaming();
+
+                log("Camera", deviceID, "is now streaming.");
 
                 V4L2SettingsHandle.enable();
                 V4L2FrameRateHandle.enable();
