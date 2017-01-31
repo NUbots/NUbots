@@ -299,7 +299,7 @@ namespace kinematics {
 
     std::vector<std::pair<message::input::ServoID, float>> setArm(const message::motion::kinematics::KinematicsModel& model, const arma::vec3& pos, bool left, int number_of_iterations, arma::vec3 angleHint) {
         message::input::ServoID SHOULDER_PITCH, SHOULDER_ROLL, ELBOW;
-        int negativeIfRight = 1;
+        //int negativeIfRight = 1; //TODO Variable not used?
 
         if(static_cast<bool>(left)){
             SHOULDER_PITCH = message::input::ServoID::L_SHOULDER_PITCH;
@@ -309,7 +309,7 @@ namespace kinematics {
             SHOULDER_PITCH = message::input::ServoID::R_SHOULDER_PITCH;
             SHOULDER_ROLL = message::input::ServoID::R_SHOULDER_ROLL;
             ELBOW = message::input::ServoID::R_ELBOW;
-            negativeIfRight = -1;
+            //negativeIfRight = -1;
         }
 
         auto start_compute = NUClear::clock::now();
