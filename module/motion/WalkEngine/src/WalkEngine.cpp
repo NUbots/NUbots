@@ -467,10 +467,9 @@ namespace motion {
 
         //Lift foot by amount depending on walk speed
         auto& limit = (velocityCurrent.x() > velocityHigh ? accelerationLimitsHigh : accelerationLimits); // TODO: use a function instead
-        float speed = std::min(1.0, std::max(std::abs(velocityCurrent.x() / limit[0]), std::abs(velocityCurrent.y() / limit[1])));
+        float speed = std::min(1.0, std::max(std::abs(velocityCurrent.x() / (limit[0]*10)), std::abs(velocityCurrent.y() / (limit[1]*10))));
         float scale = (step_height_fast_fraction - step_height_slow_fraction) * speed + step_height_slow_fraction;
         foot[2] *= scale;
-
 
         // don't lift foot at initial step, TODO: review
         if (initialStep > 0) {
