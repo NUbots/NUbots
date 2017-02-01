@@ -118,7 +118,7 @@ with open(role_name, 'w') as file:
 
     NUClear::PowerPlant::Configuration config;
     unsigned int nThreads = std::thread::hardware_concurrency() + 2;
-    config.threadCount = nThreads >= 4 ? nThreads : 4;
+    config.thread_count = nThreads >= 4 ? nThreads : 4;
 
     NUClear::PowerPlant plant(config, argc, const_cast<const char**>(argv));
 """

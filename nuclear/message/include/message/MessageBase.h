@@ -51,7 +51,7 @@ namespace NUClear {
                     std::string typeName = type.GetTypeName().substr(9);
 
                     // We base the hash on the name of the protocol buffer, removing the protobuf prefix on typeName
-                    return murmurHash3(typeName.c_str(), typeName.size());
+                    return murmurhash3(typeName.c_str(), typeName.size());
                 }
             };
 
