@@ -27,6 +27,7 @@
 
 #include "utility/support/eigen_armadillo.h"
 #include "utility/support/yaml_expression.h"
+#include "utility/vision/LookUpTable.h"
 
 namespace module {
     namespace vision {
@@ -47,25 +48,26 @@ namespace module {
         using Pixel   = utility::vision::Pixel;
 
         void LUTClassifier::insertSegments(ClassifiedImage& image, std::vector<ClassifiedImage::Segment>& segments, bool vertical) {
-            ClassifiedImage::Segment* previous = nullptr;
-            ClassifiedImage::Segment* current = nullptr;
+
+            int32_t previous = -1;
 
             auto& target = vertical ? image.verticalSegments : image.horizontalSegments;
 
             for (auto& segment : segments) {
 
                 // Move in the data
-                current = &(*target.insert(target.end(), std::move(segment)));
+                auto current = target.insert(target.end(), std::move(segment));
 
                 // Link up the results
                 current->previous = previous;
 
-                if (previous) {
-                    previous->next = current;
+                if (previous > -1)
+                {
+                    target[previous].next = std::distance(target.begin(), current);
                 }
 
                 // Get ready for our next one
-                previous = current;
+                previous = std::distance(target.begin(), current);
             }
         }
 
@@ -73,7 +75,8 @@ namespace module {
             : Reactor(std::move(environment))
             , quex(new QuexClassifier)
             , greenCentroid(Eigen::Vector3f::Zero())
-            , LUT_PATH("") {
+            , LUT_PATH("")
+            , LUT_HOST("") {
 
             on<Configuration>("LookUpTable.yaml").then([this] (const Configuration& config) {
 
@@ -109,12 +112,15 @@ namespace module {
                 this->greenCentroid = greenCentroid;
 
                 LUT_PATH = config.fileName;
+                LUT_HOST = config.hostname;
 
                 emit(std::move(lut));
             });
 
-            on<Trigger<SaveLookUpTable>, With<LookUpTable>>().then([this] (const LookUpTable& /*lut*/) {
-                // TODO: emit(std::make_unique<SaveConfiguration>(SaveConfiguration{ LUT_PATH, YAML::Node(lut) }));
+            on<Trigger<SaveLookUpTable>, With<LookUpTable>>().then([this] (const LookUpTable& lut) {
+                std::ofstream yaml("config/" + LUT_HOST + "/" + LUT_PATH, std::ios::trunc | std::ios::out);
+                yaml << YAML::convert<LookUpTable>::encode(lut);
+                yaml.close();
             });
 
             // Trigger the same function when either update

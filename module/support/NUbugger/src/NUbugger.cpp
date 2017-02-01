@@ -169,15 +169,10 @@ namespace support {
         on<Network<LookUpTable>>().then([this](const LookUpTable& lut) {
 
             log<NUClear::INFO>("Loading LUT");
-
             emit<Scope::DIRECT>(std::make_unique<LookUpTable>(lut));
 
-            /*
-            if (lut.save) {
-                log<NUClear::INFO>("Saving LUT to file");
-                emit<Scope::DIRECT>(std::make_unique<SaveLookUpTable>());
-            }
-            */
+            log<NUClear::INFO>("Saving LUT to file");
+            emit<Scope::DIRECT>(std::make_unique<SaveLookUpTable>());
         });
 
         on<Network<ReactionHandles>>().then([this](const NetworkSource& /*source*/, const ReactionHandles& /*command*/) {

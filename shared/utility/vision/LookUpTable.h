@@ -113,7 +113,14 @@ namespace YAML {
             uint8_t bitsCb = node["bits"]["cb"].as<uint>();
             uint8_t bitsCr = node["bits"]["cr"].as<uint>();
 
-            std::vector<uint8_t> data = node["lut"].as<std::vector<uint8_t>>();
+            std::string dataString = node["lut"].as<std::string>();
+            std::vector<uint8_t> data;
+            data.reserve(dataString.size());
+
+            for (auto& s : dataString)
+            {
+                data.push_back(static_cast<uint8_t>(s));
+            }
 
             rhs = message::vision::LookUpTable(std::move(data), bitsY, bitsCb, bitsCr);
 

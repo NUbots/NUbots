@@ -42,42 +42,27 @@ namespace vision {
             // Get all the segments that are relevant to finding an obstacle
             for(int i = 0; i < 6; ++i) 
             {
-                std::vector<ClassifiedImage::Segment> segments;
+                //std::vector<ClassifiedImage::Segment> segments;
                 const auto& sourceSegments = ((i % 2) == 0) ? image.horizontalSegments : image.verticalSegments;
 
-                std::copy_if(sourceSegments.begin(), sourceSegments.end(), segments.end(), [&] (const ClassifiedImage::Segment& segment) -> bool
+                for (const auto& segment : sourceSegments)
                 {
-                    if (((i == 0) || (i == 1)) && (segment.segmentClass.value == SegmentClass::UNKNOWN_CLASS))
+                    if ((((i == 0) || (i == 1)) && (segment.segmentClass.value == SegmentClass::UNKNOWN_CLASS)) ||
+                        (((i == 2) || (i == 3)) && (segment.segmentClass.value == SegmentClass::CYAN_TEAM)) ||
+                        (((i == 4) || (i == 5)) && (segment.segmentClass.value == SegmentClass::MAGENTA_TEAM)))
                     {
-                        return(true);
-                    }
-                    
-                    if (((i == 2) || (i == 3)) && (segment.segmentClass.value == SegmentClass::CYAN_TEAM))
-                    {
-                        return(true);
-                    }
-                    
-                    if (((i == 4) || (i == 5)) && (segment.segmentClass.value == SegmentClass::MAGENTA_TEAM))
-                    {
-                        return(true);
-                    }
+                        const auto& start = segment.start;
+                        const auto& end   = segment.end;
 
-                    return(false);
-                });
+                        // Check if we have a subsequent segment
+                        if((segment.previous > -1) && utility::vision::visualHorizonAtPoint(image, start[0]) < start[1]) {
+                            points.push_back(convert<int, 2>(start));
+                        }
 
-                for (const auto& segment : segments)
-                {
-                    const auto& start = segment.start;
-                    const auto& end   = segment.end;
-
-                    // Check if we have a subsequent segment
-                    if(segment.previous && utility::vision::visualHorizonAtPoint(image, start[0]) < start[1]) {
-                        points.push_back(convert<int, 2>(start));
-                    }
-
-                    // Check if we have a subsequent segment
-                    if(segment.next && utility::vision::visualHorizonAtPoint(image, end[0]) < end[1]) {
-                        points.push_back(convert<int, 2>(end));
+                        // Check if we have a subsequent segment
+                        if((segment.next > -1) && utility::vision::visualHorizonAtPoint(image, end[0]) < end[1]) {
+                            points.push_back(convert<int, 2>(end));
+                        }
                     }
                 }
             }

@@ -9,9 +9,7 @@ NUCLEAR_ROLE(
     support::configuration::GlobalConfig
     platform::darwin::HardwareIO
     platform::darwin::SensorFilter
-    input::SpinnakerCamera
-    #input::DC1394Camera
-    #input::LinuxCamera
+    input::Camera
     support::NUbugger
 
     support::configuration::SoccerConfig

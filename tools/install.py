@@ -49,9 +49,10 @@ def run(ip_addr, hostname, config, user, **kwargs):
     call(['rsync', '-avzPl', '--checksum', '-e ssh'] + files + [target_dir])
 
     # Get all of our required shared libraries in our toolchain and send them
+    # Only send toolchain files if ours are newer than the receivers.
     cprint('Installing toolchain library files', 'blue', attrs=['bold'])
     libs = glob.glob('{0}/lib/*.so*'.format(platform_dir))
-    call(['rsync', '-avzPl', '--checksum', '-e ssh'] + libs + [target_dir + 'toolchain'])
+    call(['rsync', '-avzuPl', '--checksum', '-e ssh'] + libs + [target_dir + 'toolchain'])
 
     # Find all data files and send them
     # Data files are located in the build directory (mixed in with the make files and CMake cache).
@@ -74,8 +75,8 @@ def run(ip_addr, hostname, config, user, **kwargs):
     # Get list of config files.
     config_files = list(filter(None, glob.glob('{0}/*.yaml'.format(config_dir))
                  + glob.glob('{0}/scripts/*.yaml'.format(config_dir))
-                 + glob.glob('{0}/{1}/*.yaml'.format(config_dir, hostname))
-                 + [glob.glob('{0}/{1}/*.yaml'.format(config_dir, role)) for role in roles]))
+                 + glob.glob('{0}/{1}/**/*.yaml'.format(config_dir, hostname), recursive=True)
+                 + [glob.glob('{0}/{1}/**/*.yaml'.format(config_dir, role), recursive=True) for role in roles]))
 
     if config in ['overwrite', 'o']:
         cprint('Overwriting configuration files on target', 'blue', attrs=['bold'])

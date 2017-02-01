@@ -15,7 +15,7 @@ NUCLEAR_ROLE(
     input::GameController
 
     #Sensors
-    input::LinuxCamera
+    input::Camera
     platform::darwin::HardwareIO
     platform::darwin::SensorFilter
 

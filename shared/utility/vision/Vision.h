@@ -45,27 +45,27 @@ namespace utility {
             Colour(uint32_t const& value)  : value(static_cast<Value>(value)) {}
             Colour(Value const& value)     : value(value) {}
             Colour(std::string const& str) : value(Value::UNCLASSIFIED) {
-                if (str == "UNCLASSIFIED") value = Value::UNCLASSIFIED;
-                if (str == "WHITE")        value = Value::WHITE;
-                if (str == "GREEN")        value = Value::GREEN;
-                if (str == "ORANGE")       value = Value::ORANGE;
-                if (str == "YELLOW")       value = Value::YELLOW;
-                if (str == "CYAN")         value = Value::CYAN;
-                if (str == "MAGENTA")      value = Value::MAGENTA;
-                if (str == "WHITE_GREEN")  value = Value::WHITE_GREEN;
-                throw std::runtime_error("String did not match any enum for Colour");
+                if      (str == "UNCLASSIFIED") value = Value::UNCLASSIFIED;
+                else if (str == "WHITE")        value = Value::WHITE;
+                else if (str == "GREEN")        value = Value::GREEN;
+                else if (str == "ORANGE")       value = Value::ORANGE;
+                else if (str == "YELLOW")       value = Value::YELLOW;
+                else if (str == "CYAN")         value = Value::CYAN;
+                else if (str == "MAGENTA")      value = Value::MAGENTA;
+                else if (str == "WHITE_GREEN")  value = Value::WHITE_GREEN;
+                else throw std::runtime_error("String " + str + " did not match any enum for Colour");
             }
         
             Colour(char const& c)         : value(Value::UNCLASSIFIED) {
-                if (c == 'u') value = Value::UNCLASSIFIED;
-                if (c == 'w') value = Value::WHITE;
-                if (c == 'g') value = Value::GREEN;
-                if (c == 'o') value = Value::ORANGE;
-                if (c == 'y') value = Value::YELLOW;
-                if (c == 'c') value = Value::CYAN;
-                if (c == 'm') value = Value::MAGENTA;
-                if (c == 'f') value = Value::WHITE_GREEN;
-                throw std::runtime_error("String did not match any enum for Colour");
+                if      (c == 'u') value = Value::UNCLASSIFIED;
+                else if (c == 'w') value = Value::WHITE;
+                else if (c == 'g') value = Value::GREEN;
+                else if (c == 'o') value = Value::ORANGE;
+                else if (c == 'y') value = Value::YELLOW;
+                else if (c == 'c') value = Value::CYAN;
+                else if (c == 'm') value = Value::MAGENTA;
+                else if (c == 'f') value = Value::WHITE_GREEN;
+                else throw std::runtime_error("String " + std::to_string(c) + " did not match any enum for Colour");
             }
         
             // Operators
@@ -99,7 +99,7 @@ namespace utility {
                     case Value::MAGENTA:      return "MAGENTA";
                     case Value::WHITE_GREEN:  return "WHITE_GREEN";
                     default:
-                        throw std::runtime_error("enum Colour's value is corrupt, unknown value stored");
+                        throw std::runtime_error("enum Colour's value is corrupt, unknown value stored" + std::to_string(static_cast<uint8_t>(value)));
                 }
             }
 
@@ -114,7 +114,7 @@ namespace utility {
                     case Value::MAGENTA:      return 'm';
                     case Value::WHITE_GREEN:  return 'f';
                     default:
-                        throw std::runtime_error("enum Colour's value is corrupt, unknown value stored");
+                        throw std::runtime_error("enum Colour's value is corrupt, unknown value stored" + std::to_string(static_cast<uint8_t>(value)));
                 }
             }
         };
