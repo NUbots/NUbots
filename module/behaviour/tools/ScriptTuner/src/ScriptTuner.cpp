@@ -19,8 +19,6 @@
 
 #include "ScriptTuner.h"
 
-#include "extension/Configuration.h"
-
 #include "message/motion/ServoTarget.h"
 #include "message/platform/darwin/DarwinSensors.h"
 
@@ -41,14 +39,15 @@ namespace module {
 
             using NUClear::message::CommandLineArguments;
 
+            using extension::ExecuteScript;
+            using extension::Script;
+
             using message::motion::ServoTarget;
             using message::platform::darwin::DarwinSensors;
 
             using utility::behaviour::RegisterAction;
             using LimbID  = utility::input::LimbID;
             using ServoID = utility::input::ServoID;
-            using utility::motion::ExecuteScript;
-            using utility::motion::Script;
 
             struct LockServo {};
 

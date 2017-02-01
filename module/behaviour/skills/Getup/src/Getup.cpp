@@ -22,6 +22,7 @@
 #include <cmath>
 
 #include "extension/Configuration.h"
+#include "extension/Script.h"
 
 #include "message/behaviour/ServoCommand.h"
 #include "message/input/Sensors.h"
@@ -29,14 +30,13 @@
 
 #include "utility/behaviour/Action.h"
 #include "utility/input/LimbID.h"
-#include "utility/input/ServoID.h"
-#include "utility/motion/Script.h"
 
 namespace module {
     namespace behaviour {
         namespace skills {
 
             using extension::Configuration;
+            using extension::ExecuteScriptByName;
 
             using message::input::Sensors;
             using message::motion::ExecuteGetup;
@@ -46,7 +46,6 @@ namespace module {
             using utility::behaviour::ActionPriorites;
             using LimbID  = utility::input::LimbID;
             using ServoID = utility::input::ServoID;
-            using utility::motion::ExecuteScriptByName;
 
             Getup::Getup(std::unique_ptr<NUClear::Environment> environment)
                 : Reactor(std::move(environment))

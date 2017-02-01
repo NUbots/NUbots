@@ -20,6 +20,7 @@
 #include "Jump.h"
 
 #include "extension/Configuration.h"
+#include "extension/Script.h"
 
 #include "message/behaviour/ServoCommand.h"
 #include "message/platform/darwin/DarwinSensors.h"
@@ -27,13 +28,13 @@
 #include "utility/behaviour/Action.h"
 #include "utility/input/LimbID.h"
 #include "utility/input/ServoID.h"
-#include "utility/motion/Script.h"
 
 namespace module {
 namespace behaviour {
 namespace tools {
 
     using extension::Configuration;
+    using extension::ExecuteScriptByName;
 
     using message::platform::darwin::ButtonMiddleDown;
     using message::platform::darwin::ButtonLeftDown;
@@ -42,7 +43,6 @@ namespace tools {
     using utility::behaviour::ActionPriorites;
     using LimbID  = utility::input::LimbID;
     using ServoID = utility::input::ServoID;
-    using utility::motion::ExecuteScriptByName;
 
     Jump::Jump(std::unique_ptr<NUClear::Environment> environment)
     : Reactor(std::move(environment)) {

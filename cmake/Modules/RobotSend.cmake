@@ -12,38 +12,46 @@ SEPARATE_ARGUMENTS(KNOWN_HOSTS UNIX_COMMAND "${HOSTS}")
 # Ninja code!
 FOREACH(host_pair ${KNOWN_HOSTS})
     FOREACH(config "" new update overwrite pull ignore)
-        # Get each element of the pair.
-        # host  = d1
-        # alias = darwin1
-        LIST(GET host_pair 0 host)
-        LIST(GET host_pair 1 alias)
-
-        IF ("${host}" MATCHES "i[0-9]+")
-            SET(user "nubots")
-        ELSE()
-            SET(user "darwin")
-        ENDIF()
-
         IF (config MATCHES "[a-z]+")
             SET(target "${host}-${config}")
         ELSE()
             SET(target "${host}")
         ENDIF()
         
-        # Make our installer
-        # The install script expects an IP address to install to and a hostname to determine config files to install.
-        # IP address is represented by the short-form hostname (e.g. d1)
-        # Hostname is represented by the long-form hostname (e.g. darwin1)
-        ADD_CUSTOM_TARGET("${target}"
-            USES_TERMINAL
-            COMMAND ${PYTHON_EXECUTABLE}
-            "${CMAKE_SOURCE_DIR}/nuclear/b.py" "install" "${host}" "${alias}" "--config=${config}" "--user=${user}"
-            DEPENDS ${NUCLEAR_ROLES} "${CMAKE_SOURCE_DIR}/tools/install.py")
+        FOREACH(scripts "" new update overwrite pull ignore)
+            # Get each element of the pair.
+            # host  = d1
+            # alias = darwin1
+            LIST(GET host_pair 0 host)
+            LIST(GET host_pair 1 alias)
 
-        # Move our installer to an IDE group
-        SET_PROPERTY(TARGET "${target}" PROPERTY FOLDER "installers")
+            IF ("${host}" MATCHES "i[0-9]+")
+                SET(user "nubots")
+            ELSE()
+                SET(user "darwin")
+            ENDIF()
+
+            IF (scripts MATCHES "[a-z]+")
+                SET(target "${target}-${scripts}")
+            ELSE()
+                SET(target "${target}")
+            ENDIF()
+            
+            # Make our installer
+            # The install script expects an IP address to install to and a hostname to determine config files to install.
+            # IP address is represented by the short-form hostname (e.g. d1)
+            # Hostname is represented by the long-form hostname (e.g. darwin1)
+            ADD_CUSTOM_TARGET("${target}"
+                USES_TERMINAL
+                COMMAND ${PYTHON_EXECUTABLE}
+                "${CMAKE_SOURCE_DIR}/nuclear/b.py" "install" "${host}" "${alias}" "--config=${config}" "--scripts=${scripts}" "--user=${user}"
+                DEPENDS ${NUCLEAR_ROLES} "${CMAKE_SOURCE_DIR}/tools/install.py")
+
+            # Move our installer to an IDE group
+            SET_PROPERTY(TARGET "${target}" PROPERTY FOLDER "installers")
+        ENDFOREACH(scripts)
     ENDFOREACH(config)
 ENDFOREACH(host_pair)
 
 ADD_CUSTOM_TARGET("dall"
-        DEPENDS d1e-overwrite d2e-overwrite d3e-overwrite d4e-overwrite d5e-overwrite d6e-overwrite i1e-overwrite)
+        DEPENDS d1-overwrite-overwrite d2-overwrite-overwrite d3-overwrite-overwrite d4-overwrite-overwrite d5-overwrite-overwrite d6-overwrite-overwrite i1-overwrite-overwrite)

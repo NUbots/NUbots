@@ -22,6 +22,7 @@
 #include <cmath>
 
 #include "extension/Configuration.h"
+#include "extension/Script.h"
 
 #include "message/behaviour/ServoCommand.h"
 #include "message/input/Sensors.h"
@@ -29,7 +30,6 @@
 #include "utility/behaviour/Action.h"
 #include "utility/input/LimbID.h"
 #include "utility/input/ServoID.h"
-#include "utility/motion/Script.h"
 #include "utility/support/eigen_armadillo.h"
 
 namespace module {
@@ -41,10 +41,10 @@ namespace module {
             struct KillFalling {};
 
             using extension::Configuration;
+            using extension::ExecuteScriptByName;
 
             using message::input::Sensors;
 
-            using utility::motion::ExecuteScriptByName;
             using utility::behaviour::RegisterAction;
             using utility::behaviour::ActionPriorites;
             using LimbID  = utility::input::LimbID;

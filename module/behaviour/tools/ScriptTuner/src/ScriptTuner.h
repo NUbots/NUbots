@@ -21,8 +21,8 @@
 #define MODULES_BEHAVIOUR_TOOLS_SCRIPTTUNER_H
 
 #include <nuclear>
-#include "utility/motion/Script.h"
 
+#include "extension/Script.h"
 
 namespace module {
     namespace behaviour {
@@ -39,7 +39,7 @@ namespace module {
                 /// The path to the script we are editing
                 std::string scriptPath;
                 /// The script object we are editing
-                utility::motion::Script script;
+                ::extension::Script script;
                 /// The index of the frame we are currently editing
                 size_t frame;
                 /// The index of the item we are selecting

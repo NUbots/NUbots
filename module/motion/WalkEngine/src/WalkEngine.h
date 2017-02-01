@@ -29,6 +29,7 @@
 #include <yaml-cpp/yaml.h>
 
 #include "extension/Configuration.h"
+#include "extension/Script.h"
 
 #include "message/behaviour/FixedWalkCommand.h"
 #include "message/behaviour/ServoCommand.h"
@@ -52,8 +53,6 @@
 
 #include "utility/input/LimbID.h"
 #include "utility/input/ServoID.h"
-
-#include "utility/motion/Script.h"
 
 #include "utility/support/yaml_armadillo.h"
 #include "utility/support/yaml_expression.h"

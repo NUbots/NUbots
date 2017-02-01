@@ -19,21 +19,23 @@
 
 #include "ScriptRunner.h"
 
+#include "extension/Script.h"
+
 #include "utility/behaviour/Action.h"
 #include "utility/input/LimbID.h"
 #include "utility/input/ServoID.h"
-#include "utility/motion/Script.h"
 
 namespace module {
     namespace behaviour {
         namespace tools {
+
+            using extension::ExecuteScriptByName;
 
             using NUClear::message::CommandLineArguments;
 
             using utility::behaviour::RegisterAction;
             using LimbID  = utility::input::LimbID;
             using ServoID = utility::input::ServoID;
-            using utility::motion::ExecuteScriptByName;
 
             struct ExecuteNextScript {};
 

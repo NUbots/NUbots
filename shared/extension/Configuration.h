@@ -59,10 +59,6 @@ namespace extension {
         {
             bool loaded = false;
 
-            // There is no sane way to merge a script given their current format.
-            // So overwrite rather than merge.
-            bool isScript = (fileName.find("scripts/") != std::string::npos);
-
             // Load the default config file.
             if (utility::file::exists("config/" + fileName))
             {
@@ -73,7 +69,7 @@ namespace extension {
             // If the same file exists in this robots per-robot config directory then load and merge.
             if (utility::file::exists("config/" + hostname + "/" + fileName))
             {
-                if (loaded && !isScript)
+                if (loaded)
                 {
                    config = mergeYAML(config, YAML::LoadFile("config/" + hostname + "/" + fileName));
                 }
@@ -88,7 +84,7 @@ namespace extension {
             // If the same file exists in this binary's per-binary config directory then load and merge.
             if (utility::file::exists("config/" + binary + "/" + fileName))
             {
-                if (loaded && !isScript)
+                if (loaded)
                 {
                     config = mergeYAML(config, YAML::LoadFile("config/" + binary + "/" + fileName));
                 }

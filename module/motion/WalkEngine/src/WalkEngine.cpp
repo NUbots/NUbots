@@ -66,8 +66,8 @@ namespace motion
     using message::support::SaveConfiguration;
 
     using extension::Configuration;
+    using extension::Script;
 
-    using utility::motion::Script;
     using utility::support::Expression;
 
     using utility::math::matrix::Transform2D;
@@ -199,10 +199,7 @@ namespace motion
             frame.targets.push_back(Script::Frame::Target({waypoint.id, waypoint.position, std::max(waypoint.gain, 60.0f), 100}));
         }
         standScript.frames.push_back(frame);
-        auto saveScript = std::make_unique<SaveConfiguration>();
-        saveScript->path = "scripts/Stand.yaml";
-        // TODO: saveScript->config = standScript;
-        emit(std::move(saveScript));
+        standScript.save("Stand.yaml");
     }      
 /*=======================================================================================================*/
 //      NAME: updateWaypoints

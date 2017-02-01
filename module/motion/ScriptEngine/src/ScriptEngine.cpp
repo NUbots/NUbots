@@ -19,7 +19,7 @@
 
 #include "ScriptEngine.h"
 
-#include "extension/Configuration.h"
+#include "extension/Script.h"
 
 #include "message/behaviour/ServoCommand.h"
 
@@ -28,22 +28,21 @@
 namespace module {
     namespace motion {
 
-        using extension::Configuration;
+        using extension::ExecuteScript;
+        using extension::ExecuteScriptByName;
+        using extension::Script;
         
         using message::behaviour::ServoCommand;
 
-        using utility::motion::Script;
-        using utility::motion::ExecuteScriptByName;
-        using utility::motion::ExecuteScript;
 
         ScriptEngine::ScriptEngine(std::unique_ptr<NUClear::Environment> environment)
             : Reactor(std::move(environment)), scripts() {
 
-            on<Configuration>("scripts/").then([this](const Configuration& script) {
+            on<Script>("").then([this](const Script& script) {
 
                 // Add this script to our list of scripts
                 try{
-                    scripts.insert(std::make_pair(utility::file::pathSplit(script.fileName).second, script.config.as<Script>()));
+                    scripts.insert(std::make_pair(utility::file::pathSplit(script.fileName).second, script));
                 } catch(const std::exception& e){
                     log<NUClear::ERROR>("Script is bad conversion:", script.fileName, e.what());
                 }  

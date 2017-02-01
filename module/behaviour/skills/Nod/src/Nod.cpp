@@ -21,13 +21,13 @@
 #include <nuclear>
 
 #include "extension/Configuration.h"
+#include "extension/Script.h"
 
 #include "message/behaviour/Nod.h"
 
 #include "utility/behaviour/Action.h"
 #include "utility/input/LimbID.h"
 #include "utility/input/ServoID.h"
-#include "utility/motion/Script.h"
 
 namespace module {
 namespace behaviour {
@@ -36,11 +36,11 @@ namespace skills {
     struct ExecuteNod {};
 
     using extension::Configuration;
+    using extension::ExecuteScriptByName;
 
     using LimbID  = utility::input::LimbID;
     using ServoID = utility::input::ServoID;
 
-    using utility::motion::ExecuteScriptByName;
     using utility::behaviour::RegisterAction;
     using utility::behaviour::ActionPriorites;
 

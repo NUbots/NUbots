@@ -19,13 +19,16 @@ Vagrant.configure("2") do |config|
   config.vm.provider "virtualbox" do |v, override|
     # Use the official ubuntu box
     #override.vm.box = "ubuntu/xenial64"
-    
+
     # Use custom box because official Ubuntu one is shit.
     override.vm.box = "bidski/xenial64"
 
     # See http://www.virtualbox.org/manual/ch08.html#vboxmanage-modifyvm
-    v.memory = 8192
-    v.cpus = 4
+    #v.memory = 8192
+    #v.cpus = 4
+    #awk '/MemTotal/{print $2}' /proc/meminfo | xargs -I {} echo "scale=0; {}/2048" | bc
+    v.customize ["modifyvm", :id, "--cpus", `echo "scale=0; $(awk "/^processor/ {++n} END {print n}" /proc/cpuinfo 2> /dev/null || sh -c 'sysctl hw.logicalcpu 2> /dev/null || echo ": 2"')/2" | bc `.chomp ]
+    v.customize ["modifyvm", :id, "--memory", `awk '/MemTotal/{print $2}' /proc/meminfo | xargs -I {} echo "scale=0; {}/2048" | bc `.chomp ]
     v.customize ["modifyvm", :id, "--vram", 128]
     v.customize ["modifyvm", :id, "--ioapic", "on"]
     v.customize ["modifyvm", :id, "--accelerate3d", "on"]

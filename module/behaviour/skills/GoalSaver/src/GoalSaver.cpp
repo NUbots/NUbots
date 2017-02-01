@@ -42,6 +42,7 @@ namespace skills {
     struct FinishDive {};
 
     using extension::Configuration;
+    using extension::ExecuteScriptByName;
 
     using message::localisation::Ball;
     using message::localisation::Self;
@@ -51,7 +52,6 @@ namespace skills {
 
     using LimbID  = utility::input::LimbID;
     using ServoID = utility::input::ServoID;
-    using utility::motion::ExecuteScriptByName;
     using utility::behaviour::RegisterAction;
     using utility::behaviour::ActionPriorites;
 

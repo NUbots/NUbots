@@ -30,17 +30,24 @@ def register(command):
         , default='new'
         , help='method to use for configuration files when installing')
 
+    command.add_argument('-s', '--scripts'
+        , metavar='scripts'
+        , choices=['', 'new', 'update', 'overwrite', 'pull', 'ignore']
+        , default='new'
+        , help='method to use for script files when installing')
+
     command.add_argument('-u', '--user'
         , metavar='username'
         , default='hive'
         , help='the username to use when installing')
 
-def run(ip_addr, hostname, config, user, **kwargs):
+def run(ip_addr, hostname, config, script, user, **kwargs):
 
     # Target location to install to
     target_dir   = '{0}@{1}:/home/{0}/'.format(user, ip_addr)
     build_dir    = b.binary_dir
     config_dir   = os.path.join(build_dir, '.', 'config')
+    script_dir   = os.path.join(build_dir, '.', 'scripts')
     platform_dir = '/nubots/toolchain/{0}'.format(b.cmake_cache["PLATFORM"])
     roles        = b.cmake_cache["NUCLEAR_ROLES"]
 
@@ -74,10 +81,10 @@ def run(ip_addr, hostname, config, user, **kwargs):
 
     # Get list of config files.
     config_files = list(filter(None, glob.glob('{0}/*.yaml'.format(config_dir))
-                 + glob.glob('{0}/scripts/*.yaml'.format(config_dir))
                  + glob.glob('{0}/{1}/**/*.yaml'.format(config_dir, hostname), recursive=True)
                  + [glob.glob('{0}/{1}/**/*.yaml'.format(config_dir, role), recursive=True) for role in roles]))
 
+    # Get list of config files.
     if config in ['overwrite', 'o']:
         cprint('Overwriting configuration files on target', 'blue', attrs=['bold'])
         call(['rsync', '-avzPLR', '--checksum', '-e ssh'] + config_files + [target_dir])
@@ -102,6 +109,59 @@ def run(ip_addr, hostname, config, user, **kwargs):
 
 
         cprint('Updating original configuraiton files', 'blue', attrs=['bold'])
+        # Copy the data over to the original files
+        for root, dirnames, filenames in os.walk(path):
+            for filename in fnmatch.filter(filenames, '*.yaml'):
+
+                src = os.path.join(root, filename)
+                dst = os.path.relpath(src, path)
+
+                if os.path.isfile(dst):
+                    # Check our hashes
+                    src_hash = hashlib.md5(open(src, 'rb').read()).hexdigest()
+                    dst_hash = hashlib.md5(open(dst, 'rb').read()).hexdigest()
+
+                    if src_hash != dst_hash:
+                        cprint('Pulling updated file ' + dst, 'green', attrs=['bold'])
+                        with open(dst, 'wb') as o:
+                            with open(src, 'rb') as i:
+                                o.write(i.read())
+
+                else:
+                    with open(dst, 'wb') as o:
+                            with open(src, 'rb') as i:
+                                o.write(i.read())
+
+                    cprint('File ' + dst + ' does not belong to any module, you will need to manually move it into place', 'red', attrs=['bold'])
+
+    script_files = list(filter(None, glob.glob('{0}/*.yaml'.format(script_dir))
+                 + glob.glob('{0}/{1}/**/*.yaml'.format(script_dir, hostname), recursive=True)
+                 + [glob.glob('{0}/{1}/**/*.yaml'.format(script_dir, role), recursive=True) for role in roles]))
+
+    if script in ['overwrite', 'o']:
+        cprint('Overwriting script files on target', 'blue', attrs=['bold'])
+        call(['rsync', '-avzPLR', '--checksum', '-e ssh'] + config_files + [target_dir])
+
+    if script in ['update', 'u']:
+        cprint('Adding new script files to target', 'blue', attrs=['bold'])
+        call(['rsync', '-avzuPLR', '--checksum', '-e ssh'] + config_files + [target_dir])
+
+    if not script or script in ['new', 'n']:
+        cprint('Adding new script files to the target', 'blue', attrs=['bold'])
+        call(['rsync', '-avzPLR', '--checksum', '--ignore-existing', '-e ssh'] + config_files + [target_dir])
+
+    if script in ['ignore', 'i']:
+        cprint('Ignoring script changes', 'blue', attrs=['bold'])
+
+    if script in ['pull', 'p']:
+        cprint('Pulling updated script files from the target to a temporary directory', 'blue', attrs=['bold'])
+
+        # Rsync to a local directory
+        path = tempfile.mkdtemp()
+        call(['rsync', '-avzuPL', '--checksum', '-e ssh', target_dir + 'scripts', path])
+
+
+        cprint('Updating original script files', 'blue', attrs=['bold'])
         # Copy the data over to the original files
         for root, dirnames, filenames in os.walk(path):
             for filename in fnmatch.filter(filenames, '*.yaml'):

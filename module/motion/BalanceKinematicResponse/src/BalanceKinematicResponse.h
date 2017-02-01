@@ -26,6 +26,7 @@
 #include <yaml-cpp/yaml.h>
 
 #include "extension/Configuration.h"
+#include "extension/Script.h"
 
 #include "message/behaviour/FixedWalkCommand.h"
 #include "message/behaviour/ServoCommand.h"
@@ -58,7 +59,6 @@
 #include "utility/motion/Balance.h"
 #include "utility/motion/InverseKinematics.h"
 #include "utility/motion/ForwardKinematics.h"
-#include "utility/motion/Script.h"
 
 #include "utility/nubugger/NUhelpers.h"
 

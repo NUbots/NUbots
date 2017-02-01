@@ -21,6 +21,7 @@
 #include "KickScript.h"
 
 #include "extension/Configuration.h"
+#include "extension/Script.h"
 
 #include "message/behaviour/ServoCommand.h"
 #include "message/motion/WalkCommand.h"
@@ -28,7 +29,6 @@
 #include "utility/behaviour/Action.h"
 #include "utility/input/LimbID.h"
 #include "utility/input/ServoID.h"
-#include "utility/motion/Script.h"
 
 namespace module {
 namespace behaviour {
@@ -38,6 +38,7 @@ namespace skills {
     struct FinishKick{};
 
     using extension::Configuration;
+    using extension::ExecuteScriptByName;
 
     using LimbID  = utility::input::LimbID;
     using ServoID = utility::input::ServoID;
@@ -47,7 +48,6 @@ namespace skills {
 
     using utility::behaviour::RegisterAction;
     using utility::behaviour::ActionPriorites;
-    using utility::motion::ExecuteScriptByName;
     
     KickScript::KickScript(std::unique_ptr<NUClear::Environment> environment)
         : Reactor(std::move(environment))

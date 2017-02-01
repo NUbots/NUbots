@@ -56,7 +56,6 @@ namespace motion
     using utility::math::matrix::Transform3D;
     using utility::math::matrix::Rotation3D;
     using utility::math::angle::normalizeAngle;
-    using utility::motion::Script;
     using utility::nubugger::graph;
     using utility::support::Expression;  
 /*=======================================================================================================*/
