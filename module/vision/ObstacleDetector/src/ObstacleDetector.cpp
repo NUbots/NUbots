@@ -55,12 +55,12 @@ namespace vision {
                         const auto& end   = segment.end;
 
                         // Check if we have a subsequent segment
-                        if(segment.previous && utility::vision::visualHorizonAtPoint(image, start[0]) < start[1]) {
+                        if((segment.previous > -1) && utility::vision::visualHorizonAtPoint(image, start[0]) < start[1]) {
                             points.push_back(convert<int, 2>(start));
                         }
 
                         // Check if we have a subsequent segment
-                        if(segment.next && utility::vision::visualHorizonAtPoint(image, end[0]) < end[1]) {
+                        if((segment.next > -1) && utility::vision::visualHorizonAtPoint(image, end[0]) < end[1]) {
                             points.push_back(convert<int, 2>(end));
                         }
                     }

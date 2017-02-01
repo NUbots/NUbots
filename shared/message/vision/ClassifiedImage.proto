@@ -45,8 +45,8 @@ message ClassifiedImage {
         ivec2        start        = 4;
         ivec2        end          = 5;
         ivec2        midpoint     = 6;
-        Segment      previous     = 7 [(pointer) = RAW];
-        Segment      next         = 8 [(pointer) = RAW];
+        int32        previous     = 7;
+        int32        next         = 8;
     }
 
     message SeedPoints {
@@ -54,10 +54,10 @@ message ClassifiedImage {
     }
 
     // The sensor frame that happened with this image
-    input.Sensors       sensors            = 1 [(pointer) = SHARED];
+    input.Sensors             sensors            = 1 [(pointer) = SHARED];
 
     // The image that was used to create this classified image
-    input.Image         image              = 2 [(pointer) = SHARED];
+    input.Image               image              = 2 [(pointer) = SHARED];
 
     // Our images dimensions
     uvec2                     dimensions         = 3;

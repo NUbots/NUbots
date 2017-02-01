@@ -88,7 +88,7 @@ namespace module {
             int MAXIMUM_LIGHTNING_BOLT_LENGTH = 10;
             int MINIMUM_LIGHTNING_BOLT_STRENGTH = 10;
 
-            std::string LUT_PATH;
+            std::string LUT_PATH, LUT_HOST;
 
             void insertSegments(message::vision::ClassifiedImage& image, std::vector<message::vision::ClassifiedImage::Segment>& segments, bool vertical);
 

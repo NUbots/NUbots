@@ -131,7 +131,7 @@ namespace vision {
                 // We throw out points if they are:
                 // Less the full quality (subsampled)
                 // Do not have a transition on the other side
-                if ((segment.segmentClass == SegmentClass::GOAL) && (segment.subsample == 1) && segment.previous && segment.next) {
+                if ((segment.segmentClass == SegmentClass::GOAL) && (segment.subsample == 1) && (segment.previous > -1) && (segment.next > -1)) {
                     segments.push_back({ { double(segment.start[0]), double(segment.start[1]) }, { double(segment.end[0]), double(segment.end[1]) } });
                 }
             }
