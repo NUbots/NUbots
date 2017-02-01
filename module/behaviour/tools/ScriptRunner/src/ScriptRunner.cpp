@@ -72,7 +72,7 @@ namespace module {
                     executeNextScript();
                 });
 
-                emit<Scope::INITIALIZE>(std::make_unique<RegisterAction>(RegisterAction {
+                emit<Scope::DIRECT>(std::make_unique<RegisterAction>(RegisterAction {
                     id,
                     "Script Runner",
                     { std::pair<float, std::set<LimbID>>(1, { LimbID::LEFT_LEG, LimbID::RIGHT_LEG, LimbID::LEFT_ARM, LimbID::RIGHT_ARM, LimbID::HEAD }) },
