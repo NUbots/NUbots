@@ -57,34 +57,38 @@ namespace extension {
 
         Configuration(const std::string& fileName, const std::string& hostname, const std::string& binary) : fileName(fileName), hostname(hostname), binary(binary), config()
         {
-            bool load = true;
+            bool loaded = false;
+
+            // There is no sane way to merge a script given their current format.
+            // So overwrite rather than merge.
+            bool isScript = (fileName.find("scripts/") != std::string::npos);
 
             // Load the default config file.
             if (utility::file::exists("config/" + fileName))
             {
                 config = YAML::LoadFile("config/" + fileName);
-                load = false;
+                loaded = true;
             }
 
             // If the same file exists in this robots per-robot config directory then load and merge.
             if (utility::file::exists("config/" + hostname + "/" + fileName))
             {
-                if (!load)
+                if (loaded && !isScript)
                 {
-                    config = mergeYAML(config, YAML::LoadFile("config/" + hostname + "/" + fileName));
+                   config = mergeYAML(config, YAML::LoadFile("config/" + hostname + "/" + fileName));
                 }
 
                 else
                 {
                     config = YAML::LoadFile("config/" + hostname + "/" + fileName);
-                    load = false;
+                    loaded = true;
                 }
             }
 
             // If the same file exists in this binary's per-binary config directory then load and merge.
             if (utility::file::exists("config/" + binary + "/" + fileName))
             {
-                if (!load)
+                if (loaded && !isScript)
                 {
                     config = mergeYAML(config, YAML::LoadFile("config/" + binary + "/" + fileName));
                 }
@@ -93,6 +97,7 @@ namespace extension {
                 {
                     config = YAML::LoadFile("config/" + binary + "/" + fileName);
                 }
+
             }
         }
 
