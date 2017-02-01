@@ -129,7 +129,7 @@ namespace optimisation {
 
         on<Trigger<NetworkJoin>, Sync<DOpE>>().then("Distrubute Initial Optimisation", [this] (const NetworkJoin& joiner) {
 
-            log<NUClear::INFO>(fmt::format("{} ({}) joined the optimisation network", joiner.name, joiner.udpPort));
+            log<NUClear::INFO>(fmt::format("{} ({}) joined the optimisation network", joiner.name, joiner.udp_port));
 
             for (auto& op : optimisations) {
                 // If this is a network optimisation

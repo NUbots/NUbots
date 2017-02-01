@@ -33,8 +33,8 @@ namespace configuration {
         on<Configuration>("NetworkConfiguration.yaml").then([this] (const Configuration& config) {
             auto netConfig = std::make_unique<NUClear::message::NetworkConfiguration>();
             netConfig->name = config["name"].as<std::string>();
-            netConfig->multicastGroup = config["address"].as<std::string>();
-            netConfig->multicastPort = config["port"].as<int>();
+            netConfig->multicast_group = config["address"].as<std::string>();
+            netConfig->multicast_port = config["port"].as<int>();
             emit<Scope::DIRECT>(netConfig);
         });
 

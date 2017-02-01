@@ -200,7 +200,7 @@ namespace NUClear {
                     auto name = "NUsight<" + type.GetTypeName().substr(9) + ">";
 
                     // We base the hash on the name of the protocol buffer
-                    return murmurHash3(name.c_str(), name.size());
+                    return murmurhash3(name.c_str(), name.size());
                 }
             };
         }
