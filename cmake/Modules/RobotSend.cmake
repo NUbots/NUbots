@@ -11,30 +11,24 @@ SEPARATE_ARGUMENTS(KNOWN_HOSTS UNIX_COMMAND "${HOSTS}")
 
 # Ninja code!
 FOREACH(host_pair ${KNOWN_HOSTS})
-    FOREACH(config "" new update overwrite pull ignore)
-        IF (config MATCHES "[a-z]+")
-            SET(target "${host}-${config}")
-        ELSE()
-            SET(target "${host}")
-        ENDIF()
-        
-        FOREACH(scripts "" new update overwrite pull ignore)
-            # Get each element of the pair.
-            # host  = d1
-            # alias = darwin1
-            LIST(GET host_pair 0 host)
-            LIST(GET host_pair 1 alias)
+    # Get each element of the pair.
+    # host  = d1
+    # alias = darwin1
+    LIST(GET host_pair 0 host)
+    LIST(GET host_pair 1 alias)
 
-            IF ("${host}" MATCHES "i[0-9]+")
-                SET(user "nubots")
-            ELSE()
-                SET(user "darwin")
-            ENDIF()
+    IF ("${host}" MATCHES "i[0-9]+")
+        SET(user "nubots")
+    ELSE()
+        SET(user "darwin")
+    ENDIF()
 
-            IF (scripts MATCHES "[a-z]+")
-                SET(target "${target}-${scripts}")
+    FOREACH(config "" n u o i p)
+        FOREACH(scripts "" n u o i p)
+            IF ((config STREQUAL "") AND (scripts STREQUAL ""))
+                SET(target "${host}")
             ELSE()
-                SET(target "${target}")
+                SET(target "${host}-c${config}-s${scripts}")
             ENDIF()
             
             # Make our installer
@@ -53,5 +47,4 @@ FOREACH(host_pair ${KNOWN_HOSTS})
     ENDFOREACH(config)
 ENDFOREACH(host_pair)
 
-ADD_CUSTOM_TARGET("dall"
-        DEPENDS d1-overwrite-overwrite d2-overwrite-overwrite d3-overwrite-overwrite d4-overwrite-overwrite d5-overwrite-overwrite d6-overwrite-overwrite i1-overwrite-overwrite)
+ADD_CUSTOM_TARGET("dall" DEPENDS d1-co-so d2-co-so d3-co-so d4-co-so d5-co-so d6-co-so i1-co-so)

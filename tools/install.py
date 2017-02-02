@@ -41,7 +41,7 @@ def register(command):
         , default='hive'
         , help='the username to use when installing')
 
-def run(ip_addr, hostname, config, script, user, **kwargs):
+def run(ip_addr, hostname, config, scripts, user, **kwargs):
 
     # Target location to install to
     target_dir   = '{0}@{1}:/home/{0}/'.format(user, ip_addr)
@@ -138,22 +138,22 @@ def run(ip_addr, hostname, config, script, user, **kwargs):
                  + glob.glob('{0}/{1}/**/*.yaml'.format(script_dir, hostname), recursive=True)
                  + [glob.glob('{0}/{1}/**/*.yaml'.format(script_dir, role), recursive=True) for role in roles]))
 
-    if script in ['overwrite', 'o']:
+    if scripts in ['overwrite', 'o']:
         cprint('Overwriting script files on target', 'blue', attrs=['bold'])
-        call(['rsync', '-avzPLR', '--checksum', '-e ssh'] + config_files + [target_dir])
+        call(['rsync', '-avzPLR', '--checksum', '-e ssh'] + script_files + [target_dir])
 
-    if script in ['update', 'u']:
+    if scripts in ['update', 'u']:
         cprint('Adding new script files to target', 'blue', attrs=['bold'])
-        call(['rsync', '-avzuPLR', '--checksum', '-e ssh'] + config_files + [target_dir])
+        call(['rsync', '-avzuPLR', '--checksum', '-e ssh'] + script_files + [target_dir])
 
-    if not script or script in ['new', 'n']:
+    if not scripts or scripts in ['new', 'n']:
         cprint('Adding new script files to the target', 'blue', attrs=['bold'])
-        call(['rsync', '-avzPLR', '--checksum', '--ignore-existing', '-e ssh'] + config_files + [target_dir])
+        call(['rsync', '-avzPLR', '--checksum', '--ignore-existing', '-e ssh'] + script_files + [target_dir])
 
-    if script in ['ignore', 'i']:
+    if scripts in ['ignore', 'i']:
         cprint('Ignoring script changes', 'blue', attrs=['bold'])
 
-    if script in ['pull', 'p']:
+    if scripts in ['pull', 'p']:
         cprint('Pulling updated script files from the target to a temporary directory', 'blue', attrs=['bold'])
 
         # Rsync to a local directory
