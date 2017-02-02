@@ -10,8 +10,8 @@ Vagrant.configure("2") do |config|
 
     # See http://www.virtualbox.org/manual/ch08.html#vboxmanage-modifyvm
     # and http://parallels.github.io/vagrant-parallels/docs/configuration.html
-    v.customize ["set", :id, "--cpus", `sysctl -n hw.physicalcpu_max`.chomp ]
-    v.customize ["set", :id, "--memsize", `echo "scale=0; $(sysctl -n hw.memsize)/2097152" | bc`.chomp ]
+    v.customize ["set", :id, "--cpus", `sysctl -n hw.physicalcpu_max 2> /dev/null`.chomp ]
+    v.customize ["set", :id, "--memsize", `echo "scale=0; $(sysctl -n hw.memsize 2> /dev/null || echo 0)/2097152" | bc`.chomp ]
     v.update_guest_tools = true
   end
 
