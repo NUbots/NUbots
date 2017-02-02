@@ -169,18 +169,28 @@ class dev_tools {
 
   # SETUP ROBOT HOSTS
   file { '/etc/hosts':
-    ensure => present,
-    mode => '644',
-    source => 'puppet:///modules/dev_tools/hosts', 
+    ensure  => present,
+    mode    => '644',
     replace => true,
-  }
+    content =>
+"
+127.0.0.1 $hostname.nubots.net  $hostname
+127.0.0.1 localhost
+127.0.1.1 vagrant
+::1     localhost ip6-localhost ip6-loopback
+ff02::1 ip6-allnodes
+ff02::2 ip6-allrouters
 
-  # INSTALL ROBOT HOST PARSER
-  file { '/nubots/toolchain/find_robot_hosts.sh':
-    ensure => present,
-    mode => '755',
-    source => 'puppet:///modules/dev_tools/find_robot_hosts.sh', 
-    replace => true,
+# Add robot hosts
+10.1.1.1 d1 darwin1
+10.1.1.2 d2 darwin2
+10.1.1.3 d3 darwin3
+10.1.1.4 d4 darwin4
+10.1.1.5 d5 darwin5
+10.1.1.6 d6 darwin6
+
+10.1.1.11 i1 igus1
+",
   }
 
   # SETUP OUR ALTERNATIVES SO WE USE THE CORRECT COMPILER

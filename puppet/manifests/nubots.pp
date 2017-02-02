@@ -9,16 +9,16 @@ node nubotsvm {
   class {'dev_tools': }
 
   # Get and install our toolchain
-  $toolchain_version = '1.1.6'
+  $toolchain_version = '2.0.0'
   wget::fetch { 'nubots_deb':
-    destination => "/root/nubots-toolchain${toolchain_version}.deb",
-    source => "http://nubots.net/debs/nubots-toolchain${toolchain_version}.deb",
-    timeout => 0,
+    destination => "/root/nubots-toolchain-${toolchain_version}.deb",
+    source      => "http://nubots.net/debs/nubots-toolchain-${toolchain_version}.deb",
+    timeout     => 0,
   } ->
   package { 'nubots-toolchain':
     provider => 'dpkg',
-    ensure => 'latest',
-    source => "/root/nubots-toolchain${toolchain_version}.deb",
+    ensure   => 'latest',
+    source   => "/root/nubots-toolchain-${toolchain_version}.deb",
   }
 }
 
@@ -224,6 +224,14 @@ node nubotsvmbuild {
       ensure  => present,
       require => [ Installer['armadillo'], ],
     }
+  }
+
+  # INSTALL ROBOT HOST PARSER
+  file { '/nubots/toolchain/find_robot_hosts.sh':
+    ensure => present,
+    mode => '755',
+    source => 'puppet:///modules/dev_tools/find_robot_hosts.sh', 
+    replace => true,
   }
 
   archive { "Spinnaker_NimbroOp":
