@@ -111,14 +111,16 @@ class dev_tools {
   file_line{ 'zshrc_numpad21': path => '/home/vagrant/.zshrc', line => 'bindkey -s "^[Oo" "/"'}
 
   # INSTALL PYTHON PACKAGES (we need python-pip to use the pip provider)
-  Package['python3-pip'] -> Package <| provider == 'pip3' |>
-  package { 'pyparsing': ensure => installed, provider => 'pip3' }
-  package { 'pydotplus': ensure => installed, provider => 'pip3' }
-  package { 'pygments':  ensure => installed, provider => 'pip3' }
-  package { 'termcolor': ensure => installed, provider => 'pip3' }
-  package { 'protobuf':  ensure => installed, provider => 'pip3' }
-  package { 'mmh3':      ensure => installed, provider => 'pip3' }
-  # python::pip { 'pybfd': ensure => latest }#, url => 'https://github.com/Groundworkstech/pybfd/archive/master.tar.gz' }
+  exec {'install_python_packages':
+    command => 'pip3 install pyparsing &&
+                pip3 install pydotplus &&
+                pip3 install pygments &&
+                pip3 install termcolor &&
+                pip3 install protobuf &&
+                pip3 install mmh3 &&
+                pip3 install numpy',
+    require => [ Package['python3-pip'], ]
+  }
 
   # Enable the git module for zprezto
   file_line { 'zprezto_modules':

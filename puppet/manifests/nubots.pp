@@ -226,7 +226,7 @@ node nubotsvmbuild {
     }
   }
 
-  archive { "Spinnaker_amd64":
+  archive { "Spinnaker_NimbroOp":
     url              => "http://nubots.net/tarballs/spinnaker_1_0_0_295_amd64.tar.gz",
     target           => "/nubots/toolchain/NimbroOp/src/Spinnaker",
     src_target       => "/nubots/toolchain/NimbroOp/src",
@@ -239,7 +239,20 @@ node nubotsvmbuild {
     root_dir         => '.',
     require          => [ Class['installer::prerequisites'], Class['dev_tools'], ],
   }
-  archive { "Spinnaker_i386":
+  archive { "Spinnaker_native":
+    url              => "http://nubots.net/tarballs/spinnaker_1_0_0_295_amd64.tar.gz",
+    target           => "/nubots/toolchain/native/src/Spinnaker",
+    src_target       => "/nubots/toolchain/native/src",
+    purge_target     => true,
+    checksum         => false,
+    follow_redirects => true,
+    timeout          => 0,
+    extension        => "tar.gz",
+    strip_components => 1,
+    root_dir         => '.',
+    require          => [ Class['installer::prerequisites'], Class['dev_tools'], ],
+  }
+  archive { "Spinnaker_DarwinOp":
     url              => "http://nubots.net/tarballs/spinnaker_1_0_0_295_i386.tar.gz",
     target           => "/nubots/toolchain/DarwinOp/src/Spinnaker",
     src_target       => "/nubots/toolchain/DarwinOp/src",
@@ -252,7 +265,7 @@ node nubotsvmbuild {
     root_dir         => '.',
     require          => [ Class['installer::prerequisites'], Class['dev_tools'], ],
   }
-  exec { "Spinnaker_amd64_Files":
+  exec { "Spinnaker_NimbroOp":
     creates  => "/nubots/toolchain/NimbroOp/include/Spinnaker.h",
     command  => "cd include && cp -r ./* /nubots/toolchain/NimbroOp/include/ && cd .. &&
                  cd lib &&
@@ -270,28 +283,49 @@ node nubotsvmbuild {
                    '/usr/local/bin', '/usr/local/sbin/', '/usr/bin/', '/usr/sbin/', '/bin/', '/sbin/' ],
     timeout  => 0,
     provider => 'shell',
-    require  => [ Archive["Spinnaker_amd64"], ],
+    require  => [ Archive["Spinnaker_NimbroOp"], ],
     before   => Class['toolchain_deb'],
   }
-  exec { "Spinnaker_i386_Files":
-    creates  => "/nubots/toolchain/NimbroOp/include/Spinnaker.h",
-    command  => "cd include && cp -r ./* /nubots/toolchain/NimbroOp/include/ && cd .. &&
+  exec { "Spinnaker_native":
+    creates  => "/nubots/toolchain/native/include/Spinnaker.h",
+    command  => "cd include && cp -r ./* /nubots/toolchain/native/include/ && cd .. &&
                  cd lib &&
-                 cp libGCBase_gcc540_v3_0.so* /nubots/toolchain/NimbroOp/lib/ &&
-                 cp libGenApi_gcc540_v3_0.so* /nubots/toolchain/NimbroOp/lib/ &&
-                 cp libLog_gcc540_v3_0.so* /nubots/toolchain/NimbroOp/lib/ &&
-                 cp libMathParser_gcc540_v3_0.so* /nubots/toolchain/NimbroOp/lib/ &&
-                 cp libNodeMapData_gcc540_v3_0.so* /nubots/toolchain/NimbroOp/lib/ &&
-                 cp libptgreyvideoencoder.so* /nubots/toolchain/NimbroOp/lib/ &&
-                 cp libSpinnaker.so* /nubots/toolchain/NimbroOp/lib/ &&
-                 cp libXmlParser_gcc540_v3_0.so* /nubots/toolchain/NimbroOp/lib/ &&
+                 cp libGCBase_gcc540_v3_0.so* /nubots/toolchain/native/lib/ &&
+                 cp libGenApi_gcc540_v3_0.so* /nubots/toolchain/native/lib/ &&
+                 cp libLog_gcc540_v3_0.so* /nubots/toolchain/native/lib/ &&
+                 cp libMathParser_gcc540_v3_0.so* /nubots/toolchain/native/lib/ &&
+                 cp libNodeMapData_gcc540_v3_0.so* /nubots/toolchain/native/lib/ &&
+                 cp libptgreyvideoencoder.so* /nubots/toolchain/native/lib/ &&
+                 cp libSpinnaker.so* /nubots/toolchain/native/lib/ &&
+                 cp libXmlParser_gcc540_v3_0.so* /nubots/toolchain/native/lib/ &&
+                 cd ..",
+    cwd      => "/nubots/toolchain/native/src/Spinnaker",
+    path     =>  [ "/nubots/toolchain/native/bin", "/nubots/toolchain/bin",
+                   '/usr/local/bin', '/usr/local/sbin/', '/usr/bin/', '/usr/sbin/', '/bin/', '/sbin/' ],
+    timeout  => 0,
+    provider => 'shell',
+    require  => [ Archive["Spinnaker_native"], ],
+    before   => Class['toolchain_deb'],
+  }
+  exec { "Spinnaker_DarwinOp":
+    creates  => "/nubots/toolchain/DarwinOp/include/Spinnaker.h",
+    command  => "cd include && cp -r ./* /nubots/toolchain/DarwinOp/include/ && cd .. &&
+                 cd lib &&
+                 cp libGCBase_gcc540_v3_0.so* /nubots/toolchain/DarwinOp/lib/ &&
+                 cp libGenApi_gcc540_v3_0.so* /nubots/toolchain/DarwinOp/lib/ &&
+                 cp libLog_gcc540_v3_0.so* /nubots/toolchain/DarwinOp/lib/ &&
+                 cp libMathParser_gcc540_v3_0.so* /nubots/toolchain/DarwinOp/lib/ &&
+                 cp libNodeMapData_gcc540_v3_0.so* /nubots/toolchain/DarwinOp/lib/ &&
+                 cp libptgreyvideoencoder.so* /nubots/toolchain/DarwinOp/lib/ &&
+                 cp libSpinnaker.so* /nubots/toolchain/DarwinOp/lib/ &&
+                 cp libXmlParser_gcc540_v3_0.so* /nubots/toolchain/DarwinOp/lib/ &&
                  cd ..",
     cwd      => "/nubots/toolchain/DarwinOp/src/Spinnaker",
     path     =>  [ "/nubots/toolchain/DarwinOp/bin", "/nubots/toolchain/bin",
                    '/usr/local/bin', '/usr/local/sbin/', '/usr/bin/', '/usr/sbin/', '/bin/', '/sbin/' ],
     timeout  => 0,
     provider => 'shell',
-    require  => [ Archive["Spinnaker_i386"], ],
+    require  => [ Archive["Spinnaker_DarwinOp"], ],
     before   => Class['toolchain_deb'],
   }
 
