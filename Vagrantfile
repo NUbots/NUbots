@@ -10,8 +10,8 @@ Vagrant.configure("2") do |config|
 
     # See http://www.virtualbox.org/manual/ch08.html#vboxmanage-modifyvm
     # and http://parallels.github.io/vagrant-parallels/docs/configuration.html
-    v.memory = 5120
-    v.cpus = 4
+    v.customize ["set", :id, "--cpus", `sysctl -n hw.physicalcpu_max`.chomp ]
+    v.customize ["set", :id, "--memsize", `echo "scale=0; $(sysctl -n hw.memsize)/2097152" | bc`.chomp ]
     v.update_guest_tools = true
   end
 
@@ -24,11 +24,8 @@ Vagrant.configure("2") do |config|
     override.vm.box = "bidski/xenial64"
 
     # See http://www.virtualbox.org/manual/ch08.html#vboxmanage-modifyvm
-    #v.memory = 8192
-    #v.cpus = 4
-    #awk '/MemTotal/{print $2}' /proc/meminfo | xargs -I {} echo "scale=0; {}/2048" | bc
-    v.customize ["modifyvm", :id, "--cpus", `echo "scale=0; $(awk "/^processor/ {++n} END {print n}" /proc/cpuinfo 2> /dev/null || sh -c 'sysctl hw.logicalcpu 2> /dev/null || echo ": 2"')/2" | bc `.chomp ]
-    v.customize ["modifyvm", :id, "--memory", `awk '/MemTotal/{print $2}' /proc/meminfo | xargs -I {} echo "scale=0; {}/2048" | bc `.chomp ]
+    v.customize ["modifyvm", :id, "--cpus", `lscpu -p | egrep -v '^#' | sort -u -t, -k 2,4 | wc -l`.chomp ]
+    v.customize ["modifyvm", :id, "--memory", `echo "scale=0; $(awk '/MemTotal/{print $2}' /proc/meminfo)/2048" | bc `.chomp ]
     v.customize ["modifyvm", :id, "--vram", 128]
     v.customize ["modifyvm", :id, "--ioapic", "on"]
     v.customize ["modifyvm", :id, "--accelerate3d", "on"]
