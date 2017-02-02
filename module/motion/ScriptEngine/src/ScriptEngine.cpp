@@ -42,7 +42,7 @@ namespace module {
 
                 // Add this script to our list of scripts
                 try{
-                    scripts.insert(std::make_pair(utility::file::pathSplit(script.fileName).second, script));
+                    scripts.insert(std::make_pair(utility::file::pathSplit(script.fileName).second, std::move(script)));
                 } catch(const std::exception& e){
                     log<NUClear::ERROR>("Script is bad conversion:", script.fileName, e.what());
                 }  

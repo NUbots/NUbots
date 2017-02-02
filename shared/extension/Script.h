@@ -119,6 +119,7 @@ namespace extension {
                 config = YAML::LoadFile("scripts/" + fileName);
             }
 
+            NUClear::log("Parsing script:", fileName);
             frames = config.as<std::vector<Frame>>();
         }
 
@@ -261,9 +262,9 @@ namespace NUClear {
                     const auto* binary = basename(data.data());
 
                     // Set paths to the script files.
-                    auto defaultConfig = "script/" + path;
-                    auto robotConfig   = "script/" + std::string(hostname) + "/" + path;
-                    auto binaryConfig  = "script/" + std::string(binary)   + "/" + path;
+                    auto defaultConfig = "scripts/" + path;
+                    auto robotConfig   = "scripts/" + std::string(hostname) + "/" + path;
+                    auto binaryConfig  = "scripts/" + std::string(binary)   + "/" + path;
 
                     if (!utility::file::exists(defaultConfig))
                     {
@@ -316,7 +317,7 @@ namespace NUClear {
                                 }
 
                                 // We want out paths relative to the script folder.
-                                if (component.compare("script") == 0)
+                                if (component.compare("scripts") == 0)
                                 {
                                     flag = true;
                                 }
@@ -362,10 +363,14 @@ namespace YAML {
 
         static inline bool decode(const Node& node, ::extension::Script::Frame::Target& rhs) {
 
+            try {
             rhs = { node["id"].as<std::string>()
                   , node["position"].as<float>(), node["gain"].as<float>()
                   , node["torque"] ? node["torque"].as<float>() : 100
                    };
+            } catch(const YAML::Exception& e){
+                NUClear::log<NUClear::ERROR>("Error parsing script -", "Line:", e.mark.line, "Column:", e.mark.column, "Pos:", e.mark.pos, "Message:", e.msg);
+            }
             return true;
         }
     };
