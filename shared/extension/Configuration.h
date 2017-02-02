@@ -260,7 +260,22 @@ namespace NUClear {
 
                     if (!utility::file::exists(defaultConfig))
                     {
-                        throw std::runtime_error("Configuration file '" + defaultConfig + "' does not exist.");
+                        NUClear::log<NUClear::WARN>("Configuration file '" + defaultConfig + "' does not exist. Creating it.");
+                        
+                        if (utility::file::isDir(defaultConfig))
+                        {
+                            utility::file::makeDir(defaultConfig);
+                        }
+
+                        else
+                        {
+                            std::ofstream ofs(defaultConfig);
+                            if (!ofs.is_open())
+                            {
+                                throw std::runtime_error("Failed creating file '" + path + "'.");
+                            }
+                            ofs.close();
+                        }
                     }
 
                     auto defaultHandle = DSLProxy<::extension::FileWatch>::bind<DSL>(reactor, label, callback, defaultConfig, flags);

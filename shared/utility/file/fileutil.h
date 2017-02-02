@@ -50,6 +50,7 @@ namespace utility {
         std::chrono::system_clock::time_point getModificationTime(const std::string& path);
 
         bool isDir(const std::string& path);
+        void makeDir(const std::string& path);
 
         std::vector<std::string> listDir(const std::string& path);
 
