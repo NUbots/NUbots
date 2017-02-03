@@ -228,9 +228,9 @@ node nubotsvmbuild {
 
   # INSTALL ROBOT HOST PARSER
   file { '/nubots/toolchain/find_robot_hosts.sh':
-    ensure => present,
-    mode => '755',
-    source => 'puppet:///modules/dev_tools/find_robot_hosts.sh', 
+    ensure  => present,
+    mode    => '755',
+    source  => 'puppet:///modules/dev_tools/find_robot_hosts.sh', 
     replace => true,
   }
 
