@@ -166,14 +166,6 @@ namespace darwin {
             }
         });
 
-        on<Configuration>("WalkEngine.yaml").then([this] (const Configuration& config) {
-            auto& gain = config["walk_engine"]["servos"]["gain"];
-            pGain = gain["p_gain"].as<float>();
-            dGain = gain["d_gain"].as<float>();
-            iGain = gain["i_gain"].as<float>();
-
-        });
-
         // This trigger gets the sensor data from the CM730
         on<Every<90, Per<std::chrono::seconds>>, Single, Priority::HIGH>().then("Hardware Loop", [this] {
 
@@ -296,14 +288,15 @@ namespace darwin {
 
                     servoState[command.id].dirty = true;
 
-                    servoState[command.id].pGain = 20;//pGain;//command.gain;
-                    servoState[command.id].iGain = 0;//iGain;//command.gain * 0;
-                    servoState[command.id].dGain = 5;//dGain;//command.gain * 0;
+                    servoState[command.id].pGain = command.gain;
+                    servoState[command.id].iGain = command.gain * 0;
+                    servoState[command.id].dGain = command.gain * 0;
 
                     servoState[command.id].movingSpeed = speed;
                     servoState[command.id].goalPosition = command.position;
 
-                    servoState[command.id].torque = command.torque*0.7;
+                    servoState[command.id].torque = command.torque;
+                    servoState[uint(command.id)].torque = command.torque;
                 }
             }
         });

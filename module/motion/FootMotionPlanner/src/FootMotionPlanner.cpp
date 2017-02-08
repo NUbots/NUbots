@@ -36,7 +36,6 @@ namespace motion
 
     using NewStepTargetInfo  = message::motion::NewStepTargetInfo;
     using NewFootTargetInfo  = message::motion::NewFootTargetInfo;
-    using NextFootTargetInfo = message::motion::NextFootTargetInfo;
     using message::motion::FootMotionUpdate;
     using message::motion::EnableFootMotion;
     using message::motion::DisableFootMotion;
@@ -59,7 +58,7 @@ namespace motion
         , updateHandle()
         , leftFootPositionTransform(), rightFootPositionTransform()
         , activeLimbSource(), activeLimbDestination()
-        , activeForwardLimb(), newStepInfoSets()
+        , activeForwardLimb()
         , activeLimbInitial(LimbID::LEFT_LEG)
         , stepTime(0.0), stepHeight(0.0)
         , step_height_slow_fraction(0.0f), step_height_fast_fraction(0.0f)
@@ -88,21 +87,17 @@ namespace motion
         updateHandle = on<Every<UPDATE_FREQUENCY, Per<std::chrono::seconds>>, Single, Priority::HIGH>()
         .then("Foot Motion Planner - Update Foot Position", [this]
         {
-            double motionPhase = getMotionPhase();
-            if(DEBUG) { log<NUClear::TRACE>("Messaging: Foot Motion Planner - Update Foot Position(0)"); }                     
-                updateFootPosition(motionPhase, getActiveLimbSource(), getActiveForwardLimb(), getActiveLimbDestination());         
-            if(DEBUG) { log<NUClear::TRACE>("Messaging: Foot Motion Planner - Update Foot Position(1)"); }
+            if (getDestinationTime() + stepTime < getTime())
+            {
+                double motionPhase = getMotionPhase();
+                if(DEBUG) { log<NUClear::TRACE>("Messaging: Foot Motion Planner - Update Foot Position(0)"); }                     
+                    updateFootPosition(motionPhase, getActiveLimbSource(), getActiveForwardLimb(), getActiveLimbDestination());         
+                if(DEBUG) { log<NUClear::TRACE>("Messaging: Foot Motion Planner - Update Foot Position(1)"); }
+            
 
-            //DEBUG: Printout of motion phase function...
-            emit(graph("FMP Synchronising Motion Phase", arma::vec({motionPhase, (getActiveForwardLimb() == LimbID::LEFT_LEG ? 1.0 : 0.0)})));
-            emit(graph("FMP Synchronising Data Queues", arma::Col<size_t>({
-                                                                        destinationTime.size(), 
-                                                                        velocityCurrent.size(), 
-                                                                        activeLimbSource.size(), 
-                                                                        activeForwardLimb.size(), 
-                                                                        activeLimbDestination.size(), 
-                                                                        newStepInfoSets.size()
-                                                                      })));   
+                //DEBUG: Printout of motion phase function...
+                emit(graph("FMP Synchronising Motion Phase", arma::vec({motionPhase, (getActiveForwardLimb() == LimbID::LEFT_LEG ? 1  : 0)})));   
+            }
         }).disable();
 
         //In the event of a new foot step target specified by the foot placement planning module...
@@ -131,6 +126,7 @@ namespace motion
                 setActiveForwardLimb(nst.activeForwardLimb);             //Queued    : FPP            
             if(DEBUG) { log<NUClear::TRACE>("Messaging: Foot Motion Planner - Received Target Foot Position(1)"); }
             
+<<<<<<< HEAD
             // Next step data queued forwarding...
             if(DEBUG) { log<NUClear::TRACE>("Messaging: Foot Motion Planner - Generate Foot Position Set(0)"); }
                 NewStepInfo nextStep = NewStepInfo();
@@ -141,6 +137,8 @@ namespace motion
                     nextStep.rFootDestination = convert<double, 3>(nft.rightFootDestination);
                 newStepInfoSets.push(nextStep);
             if(DEBUG) { log<NUClear::TRACE>("Messaging: Foot Motion Planner - Generate Foot Position Set(1)"); }
+=======
+>>>>>>> feature/ModularWalkEngine
         });
 
         //If foot motion is requested, enable updating...
@@ -191,7 +189,7 @@ namespace motion
 
         if(DEBUG) { log<NUClear::TRACE>("Messaging: Foot Motion Planner - Translate Z for support foot"); }
         // If the intended footstep is unchanged, cease z-translation to conserve energy and stop, otherwise proceed...
-        if(!isTargetStepUnchanged())
+        if(!isTargetStepUnchanged())  //TODO replace with intialstep like behaviour
         {
             // Manipulate(update) z component of foot position to action movement with a varying altitude locus...
             if (inActiveForwardLimb == LimbID::RIGHT_LEG) 
@@ -221,6 +219,7 @@ namespace motion
                                                 convert<double, 4, 4>(leftFootLocal),
                                                 convert<double, 4, 4>(rightFootLocal)));
         // Notify whenever a subsequent foot step is promoted...
+<<<<<<< HEAD
         emit(std::make_unique<NextFootTargetInfo>(  
                                                     convert<double, 3>(newStepInfoSets.front().lFootSource),
                                                     convert<double, 3>(newStepInfoSets.front().rFootSource),
@@ -228,6 +227,8 @@ namespace motion
                                                     convert<double, 3>(newStepInfoSets.front().lFootDestination),
                                                     convert<double, 3>(newStepInfoSets.front().rFootDestination)
                                                  ));
+=======
+>>>>>>> feature/ModularWalkEngine
     }
 /*=======================================================================================================*/
 //      METHOD: Foot Phase
@@ -298,7 +299,7 @@ namespace motion
     {
         return (newStepStartTime);
     }
-    void FootMotionPlanner::setNewStepStartTime(double inNewStartTime)
+    void FootMotionPlanner::setNewStepStartTime(double inNewStartTime) //TODO change to when foottarget recieved
     {
         newStepStartTime = inNewStartTime;
     }    
@@ -307,18 +308,11 @@ namespace motion
 /*=======================================================================================================*/
     double FootMotionPlanner::getDestinationTime()
     {
-        if(destinationTime.size() > 0)
-        {
-            return (destinationTime.front());
-        }
-        else
-        {            
-            return (stepTime); //DEBUGGING: blank value            
-        }
+        return destinationTime;
     }
-    void FootMotionPlanner::setDestinationTime(double inDestinationTime)
+    void FootMotionPlanner::setDestinationTime (double inDestinationTime)
     {
-        destinationTime.push(inDestinationTime);
+        destinationTime = inDestinationTime;
     }
 /*=======================================================================================================*/
 //      ENCAPSULATION METHOD: Foot Offset Coefficient
@@ -341,20 +335,13 @@ namespace motion
 /*=======================================================================================================*/
 //      ENCAPSULATION METHOD: Velocity
 /*=======================================================================================================*/
-    Transform2D FootMotionPlanner::getVelocityCurrent() 
+    Transform2D FootMotionPlanner::getVelocityCurrent() //REMOVE
     {
-        if(velocityCurrent.size() > 0)
-        {
-            return (velocityCurrent.front());
-        }
-        else
-        {          
-            return (Transform2D({0, 0, 0})); //DEBUGGING: blank value
-        }
-    }
+        return velocityCurrent;
+    }  
     void FootMotionPlanner::setVelocityCurrent(Transform2D inVelocityCurrent) 
     {
-        velocityCurrent.push(inVelocityCurrent);
+        velocityCurrent = inVelocityCurrent;
     }       
 /*=======================================================================================================*/
 //      ENCAPSULATION METHOD: Left Foot Position
@@ -381,44 +368,32 @@ namespace motion
 /*=======================================================================================================*/
 //      ENCAPSULATION METHOD: Active Limb Source
 /*=======================================================================================================*/
-    Transform2D FootMotionPlanner::getActiveLimbSource()
+    Transform2D FootMotionPlanner::getActiveLimbSource() //REMOVE
     {
-        if(activeLimbSource.size() > 0)
-        {
-            return (activeLimbSource.front());
-        }
-        else
-        {          
-            return (Transform2D({0, 0, 0})); //DEBUGGING: blank value
-        }
+        return activeLimbSource;
     }
+
     void FootMotionPlanner::setActiveLimbSource(const Transform2D& inActiveLimbSource)
     {
-        activeLimbSource.push(inActiveLimbSource);
+        activeLimbSource = inActiveLimbSource;
     }
 /*=======================================================================================================*/
 //      ENCAPSULATION METHOD: Active Limb Destination
 /*=======================================================================================================*/
-    Transform2D FootMotionPlanner::getActiveLimbDestination()
+    Transform2D FootMotionPlanner::getActiveLimbDestination() //REMOVE
     {
-        if(activeLimbDestination.size() > 0)
-        {
-            return (activeLimbDestination.front());
-        }
-        else
-        {
-            return (Transform2D({0, 0, 0})); //DEBUGGING: blank value
-        }
+        return activeLimbDestination;
     }
     void FootMotionPlanner::setActiveLimbDestination(const Transform2D& inActiveLimbDestination)
     {
-        activeLimbDestination.push(inActiveLimbDestination);
+        activeLimbDestination = inActiveLimbDestination;
     }
 /*=======================================================================================================*/
 //      ENCAPSULATION METHOD: Active Forward Limb
 /*=======================================================================================================*/
     LimbID FootMotionPlanner::getActiveForwardLimb()
     {
+<<<<<<< HEAD
         if(activeForwardLimb.size() > 0)
         {
             return (activeForwardLimb.front());
@@ -427,10 +402,13 @@ namespace motion
         {                   
             return (LimbID::UNKNOWN); //DEBUGGING: blank value
         }
+=======
+        return activeForwardLimb;
+>>>>>>> feature/ModularWalkEngine
     }
     void FootMotionPlanner::setActiveForwardLimb(const LimbID& inActiveForwardLimb)
     {
-        activeForwardLimb.push(inActiveForwardLimb);
+        activeForwardLimb = inActiveForwardLimb;
     }    
 /*=======================================================================================================*/
 //      ENCAPSULATION METHOD: Is New Step the Same as Previous
@@ -442,33 +420,7 @@ namespace motion
                     (getActiveLimbSource().y() == getActiveLimbDestination().y())       &&
                     (getActiveLimbSource().angle() == getActiveLimbDestination().angle())
                 );
-    }
-/*=======================================================================================================*/
-//      ENCAPSULATION METHOD: New Step Available
-/*=======================================================================================================*/
-    bool FootMotionPlanner::isNewStepAvailable()
-    {    
-        return (
-                    (destinationTime.size() > MIN_QUEUE_SIZE)        && 
-                    (velocityCurrent.size() > MIN_QUEUE_SIZE)        && 
-                    (activeLimbSource.size() > MIN_QUEUE_SIZE)       && 
-                    (activeForwardLimb.size() > MIN_QUEUE_SIZE)      &&
-                    (activeLimbDestination.size() > MIN_QUEUE_SIZE)                         
-               );
-    }    
-/*=======================================================================================================*/
-//      ENCAPSULATION METHOD: New Step Received
-/*=======================================================================================================*/
-    bool FootMotionPlanner::isNewStepReceived()
-    {         
-        return (
-                    (destinationTime.size() > MIN_QUEUE_SIZE)                   && 
-                    (destinationTime.size() == velocityCurrent.size())          && 
-                    (velocityCurrent.size() == activeLimbSource.size())         && 
-                    (activeLimbSource.size() == activeForwardLimb.size())       &&
-                    (activeForwardLimb.size() == activeLimbDestination.size())                         
-               );
-    }
+    }  
 /*=======================================================================================================*/
 //      ENCAPSULATION METHOD: Motion Phase
 /*=======================================================================================================*/
@@ -481,25 +433,16 @@ namespace motion
         // Bind phase value to range [0,1], emit status if step completed...
         if (motionPhase > 1)
         {
-            motionPhase = std::fmod(motionPhase, 1);
+            motionPhase = 0.99; //std::fmod(motionPhase, 1);
             // Consume completed step instructions, only once an entire new set has been received...
-            if(isNewStepReceived())
-            {                    
-                if (destinationTime.size() > MIN_QUEUE_SIZE)         { destinationTime.pop();        }
-                if (velocityCurrent.size() > MIN_QUEUE_SIZE)         { velocityCurrent.pop();        }
-                if (activeLimbSource.size() > MIN_QUEUE_SIZE)        { activeLimbSource.pop();       }
-                if (activeForwardLimb.size() > MIN_QUEUE_SIZE)       { activeForwardLimb.pop();      }
-                if (activeLimbDestination.size() > MIN_QUEUE_SIZE)   { activeLimbDestination.pop();  }
-            }
-            if (newStepInfoSets.size() > MIN_QUEUE_SIZE)   { newStepInfoSets.pop();  } // TODO
             // Increment relative step motionphase...
             setNewStepStartTime(getTime());   
             // If there has already been an updated instruction, then process before requesting new data...
-            if(!isNewStepAvailable()) 
-            {
-                // Notify helper modules of completed footstep (trigger request for new step instruction)...
-                emit(std::make_unique<FootStepRequested>(true)); 
-            }
+            
+            // Notify helper modules of completed footstep (trigger request for new step instruction)...
+            emit(std::make_unique<FootStepRequested>(true)); 
+            //std::cout << "REquest step\n\r";
+           
         }
         return (motionPhase);
     }

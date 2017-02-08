@@ -36,11 +36,9 @@ namespace motion
     using ServoCommand   = message::behaviour::ServoCommand;
     using message::behaviour::WalkOptimiserCommand;
     using message::behaviour::WalkConfigSaved;
-    // using message::behaviour::RegisterAction;
-    // using message::behaviour::ActionPriorites;
     using message::motion::WalkCommand;
-    using NextFootTargetInfo = message::motion::NextFootTargetInfo;
-    using FootMotionUpdate   = message::motion::FootMotionUpdate;
+    using NewFootTargetInfo = message::motion::NewFootTargetInfo;
+    using FootMotionUpdate  = message::motion::FootMotionUpdate;
     using message::motion::FootStepCompleted;
     using message::motion::TorsoMotionUpdate;
     using message::motion::EnableTorsoMotion;
@@ -98,17 +96,8 @@ namespace motion
             kinematicsModel = model;
         });
 
-        //In the process of actuating a foot step and emitting updated positional data...
-        //Transform analytical torso positions in accordance with the stipulated targets...
-        on<Trigger<NextFootTargetInfo>, With<FootMotionUpdate>>().then("Torso Motion Planner - Received Foot Motion Update", [this] (
-            const NextFootTargetInfo&   nft,
-            const FootMotionUpdate&     fmu)
-        {                 
-            // Motion Phase...
-            if(DEBUG) { log<NUClear::TRACE>("Messaging: Torso Motion Planner - Received Foot Motion Update(0)"); }
-                setMotionPhase(fmu.phase);                         //Real-time : FMP
-            if(DEBUG) { log<NUClear::TRACE>("Messaging: Torso Motion Planner - Received Foot Motion Update(1)"); }
-                             
+        on<Trigger<NewFootTargetInfo>>().then("Torso Motion Planner - Received Foot Motion Update", [this] (const NewFootTargetInfo&   nft)
+        {
             // Step Target Data queued evaluation...
             if(DEBUG) { log<NUClear::TRACE>("Messaging: Foot Motion Planner - Received Target Foot Position(0)"); }
                 setSupportMass(convert<double, 3>(nft.supportMass));                   //Queued    : FPP
@@ -121,8 +110,19 @@ namespace motion
                 setLeftFootDestination(convert<double, 3>(nft.leftFootDestination));   //Queued    : FPP                 
                 setRightFootDestination(convert<double, 3>(nft.rightFootDestination)); //Queued    : FPP               
             if(DEBUG) { log<NUClear::TRACE>("Messaging: Torso Motion Planner - Received Footstep Info(1)"); }
+        });
 
-             // Update Torso Positions...
+        //In the process of actuating a foot step and emitting updated positional data...
+        //Transform analytical torso positions in accordance with the stipulated targets...
+        on<Trigger<FootMotionUpdate>>().then("Torso Motion Planner - Received Foot Motion Update", [this] (
+            const FootMotionUpdate&     fmu)
+        {                 
+            // Motion Phase...
+            if(DEBUG) { log<NUClear::TRACE>("Messaging: Torso Motion Planner - Received Foot Motion Update(0)"); }
+                setMotionPhase(fmu.phase);                         //Real-time : FMP
+            if(DEBUG) { log<NUClear::TRACE>("Messaging: Torso Motion Planner - Received Foot Motion Update(1)"); }
+                             
+            // Update Torso Positions...
             if(DEBUG) { log<NUClear::TRACE>("Messaging: Torso Motion Planner - Update Torso Position(0)"); }  
                 updateTorsoPosition();            
             if(DEBUG) { log<NUClear::TRACE>("Messaging: Torso Motion Planner - Update Torso Position(1)"); }
@@ -148,10 +148,8 @@ namespace motion
     void TorsoMotionPlanner::updateTorsoPosition()
     {
         setTorsoPositionArms(zmpTorsoCompensation(getMotionPhase(), zmpTorsoCoefficients(), getZmpParams(), stepTime, zmpTime, phase1Single, phase2Single, getLeftFootSource(), getRightFootSource()));
-//std::cout << "\n\rTorso Position (Arms)\t[X= " << getTorsoPositionArms().x() << "]\t[Y= " << getTorsoPositionArms().y() << "]\n\r";         
-        setTorsoPositionLegs(getTorsoPositionArms().localToWorld({-kinematicsModel.leg.HIP_OFFSET_X, 0, 0}));
-//std::cout << "Torso Position (Legs)\t[X= " << getTorsoPositionLegs().x() << "]\t[Y= " << getTorsoPositionLegs().y() << "]\n\r";                 
-        Transform2D uTorsoWorld = getTorsoPositionArms().localToWorld({-kinematicsModel.leg.HIP_OFFSET_X, 0, 0});
+        setTorsoPositionLegs(getTorsoPositionArms().localToWorld({-kinematicsModel.Leg.HIP_OFFSET_X, 0, 0}));
+        Transform2D uTorsoWorld = getTorsoPositionArms().localToWorld({-kinematicsModel.Leg.HIP_OFFSET_X, 0, 0});
         setTorsoPosition3D(arma::vec6({uTorsoWorld.x(), uTorsoWorld.y(), bodyHeight, 0, bodyTilt, uTorsoWorld.angle()}));
         emit(std::make_unique<TorsoMotionUpdate>(convert<double, 3>(getTorsoPositionArms()), 
                                                  convert<double, 3>(getTorsoPositionLegs()), 

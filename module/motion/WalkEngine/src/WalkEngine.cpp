@@ -110,7 +110,11 @@ namespace motion
 
         // Broadcast constrained velocity vector parameter to actuator modules...
         on<Trigger<WalkCommand>>().then([this] (const WalkCommand& walkCommand)
-        {            
+        {
+            if (!handleUpdate.enabled())            
+            {
+                emit(std::make_unique<EnableWalkEngineCommand>(walkCommand.subsumptionId)); //TODO Subsumtion variable
+            }
             if(DEBUG) { log<NUClear::TRACE>("WalkEngine - Trigger WalkCommand(0)"); }
                 setVelocity(convert<double, 3>(walkCommand.command));
                 emit(std::make_unique<NewWalkCommand>(convert<double, 3>(getVelocity())));
@@ -142,8 +146,8 @@ namespace motion
 
                 emit(graph("WE: Left  Foot Joint Position",    getLeftFootPosition()));   
                 emit(graph("WE: Right Foot Joint Position",   getRightFootPosition()));                    
-                
-                emit(std::move(updateWaypoints(/*sensors*/)));       
+                emit(std::move(updateWaypoints()));       
+
             if(DEBUG) { log<NUClear::TRACE>("WalkEngine - Trigger BalanceBodyUpdate(1)"); }
         }).disable();
 
@@ -177,7 +181,7 @@ namespace motion
         // If WalkEngine no longer requested, cease updating...
         on<Trigger<DisableWalkEngineCommand>>().then([this]
         {
-            //If nobody needs the walk engine, stop updating dependancies...
+                    //If nobody needs the walk engine, stop updating dependancies...
             emit<Scope::DIRECT>(std::move(std::make_unique<DisableFootPlacement>()));
             emit<Scope::DIRECT>(std::move(std::make_unique<DisableFootMotion>()));
             emit<Scope::DIRECT>(std::move(std::make_unique<DisableTorsoMotion>()));

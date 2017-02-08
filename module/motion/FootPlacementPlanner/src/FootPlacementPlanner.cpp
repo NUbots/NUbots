@@ -35,6 +35,7 @@ namespace motion
 
     using extension::Configuration;
 
+    using message::motion::DisableWalkEngineCommand;
     using message::motion::NewStepTargetInfo;
     using message::motion::NewFootTargetInfo;
     using message::motion::TorsoMotionUpdate;
@@ -58,7 +59,7 @@ namespace motion
     : Reactor(std::move(environment)) 
         , DEBUG(false), DEBUG_ITER(0), EPSILON(1e-6)
         , updateHandle(), generateStandScriptReaction()
-        , startFromStep(false)
+        , startFromStep(false), stopping(true)
         , torsoPositionTransform(), torsoPositionSource(), torsoPositionDestination()
         , leftFootPositionTransform(), leftFootSource(), rightFootPositionTransform()
         , rightFootSource(), leftFootDestination(), rightFootDestination(), uSupportMass()
@@ -90,7 +91,7 @@ namespace motion
         // Upon the completion of queued footsteps, calculate and broadcast a new step target to helper modules...
         updateHandle = on<Trigger<FootStepRequested>, With<TorsoMotionUpdate>>().then("Foot Placement Planner - Calculate Target Foot Position", [this](
             const TorsoMotionUpdate& info)
-        {          
+        {    
             // When new torso destination is computed, inform FPP in preparation for next footstep...
             if(DEBUG) { log<NUClear::TRACE>("Messaging: Foot Placement Planner - Received Torso Destination Update(0)"); }    
                 setTorsoPosition(convert<double, 3>(info.frameArms));
@@ -99,17 +100,27 @@ namespace motion
 
             // Calculate a new footstep to facilitate walk progression...
             if(DEBUG) { log<NUClear::TRACE>("Messaging: Foot Placement Planner - Calculate Target Foot Position(0)"); }             
+            if (stopping)
+            {
+                emit(std::make_unique<DisableWalkEngineCommand>(50)); //TODO replace with subsumtion variable
+            }
+            else
+            {
                 calculateNewStep(getVelocityCurrent(), getTorsoDestination(), getTorsoPosition());
+            }
             if(DEBUG) { log<NUClear::TRACE>("Messaging: Foot Placement Planner - Calculate Target Foot Position(1)"); }
         }).disable();
 
         // Upon receiving a new walk command from the WalkEngine, broadcast to helper modules...
         on<Trigger<NewWalkCommand>>().then("Foot Placement Planner - Update Foot Target", [this] (const NewWalkCommand& command) 
         {
-            //
             if(DEBUG) { log<NUClear::TRACE>("Messaging: Foot Placement Planner - On New Walk Command(0)"); }          
                 setVelocityCommand(convert<double, 3>(command.velocityTarget));
-                calculateNewStep(getVelocityCurrent(), getTorsoDestination(), getTorsoPosition());          
+                if (stopping) //TODO add stoped flag in addtion to stopping. Case of new command during last step.
+                {
+                    calculateNewStep(getVelocityCurrent(), getTorsoDestination(), getTorsoPosition());          
+                    stopping = false;
+                }
             if(DEBUG) { log<NUClear::TRACE>("Messaging: Foot Placement Planner - On New Walk Command(1)"); }
         }).enable();
 
@@ -154,6 +165,7 @@ namespace motion
             {
                 setLeftFootDestination(getRightFootSource().localToWorld( 2 * uLRFootOffset));
             }
+            stopping = true;
         }
         else 
         {           
