@@ -96,7 +96,7 @@ namespace motion
             
 
                 //DEBUG: Printout of motion phase function...
-                emit(graph("FMP Synchronising Motion Phase", arma::vec({motionPhase, (getActiveForwardLimb() == LimbID::LEFT_LEG ? 1  : 0)})));   
+                emit(graph("FMP Synchronising Motion Phase", arma::vec({motionPhase, (getActiveForwardLimb() == LimbID::LEFT_LEG ? 1.0 : 0.0)})));   
             }
         }).disable();
 
@@ -125,20 +125,6 @@ namespace motion
                 }                         
                 setActiveForwardLimb(nst.activeForwardLimb);             //Queued    : FPP            
             if(DEBUG) { log<NUClear::TRACE>("Messaging: Foot Motion Planner - Received Target Foot Position(1)"); }
-            
-<<<<<<< HEAD
-            // Next step data queued forwarding...
-            if(DEBUG) { log<NUClear::TRACE>("Messaging: Foot Motion Planner - Generate Foot Position Set(0)"); }
-                NewStepInfo nextStep = NewStepInfo();
-                    nextStep.lFootSource      = convert<double, 3>(nft.leftFootSource);
-                    nextStep.rFootSource      = convert<double, 3>(nft.rightFootSource);
-                    nextStep.sMass            = convert<double, 3>(nft.supportMass);
-                    nextStep.lFootDestination = convert<double, 3>(nft.leftFootDestination);
-                    nextStep.rFootDestination = convert<double, 3>(nft.rightFootDestination);
-                newStepInfoSets.push(nextStep);
-            if(DEBUG) { log<NUClear::TRACE>("Messaging: Foot Motion Planner - Generate Foot Position Set(1)"); }
-=======
->>>>>>> feature/ModularWalkEngine
         });
 
         //If foot motion is requested, enable updating...
@@ -219,16 +205,6 @@ namespace motion
                                                 convert<double, 4, 4>(leftFootLocal),
                                                 convert<double, 4, 4>(rightFootLocal)));
         // Notify whenever a subsequent foot step is promoted...
-<<<<<<< HEAD
-        emit(std::make_unique<NextFootTargetInfo>(  
-                                                    convert<double, 3>(newStepInfoSets.front().lFootSource),
-                                                    convert<double, 3>(newStepInfoSets.front().rFootSource),
-                                                    convert<double, 3>(newStepInfoSets.front().sMass),
-                                                    convert<double, 3>(newStepInfoSets.front().lFootDestination),
-                                                    convert<double, 3>(newStepInfoSets.front().rFootDestination)
-                                                 ));
-=======
->>>>>>> feature/ModularWalkEngine
     }
 /*=======================================================================================================*/
 //      METHOD: Foot Phase
@@ -393,18 +369,7 @@ namespace motion
 /*=======================================================================================================*/
     LimbID FootMotionPlanner::getActiveForwardLimb()
     {
-<<<<<<< HEAD
-        if(activeForwardLimb.size() > 0)
-        {
-            return (activeForwardLimb.front());
-        }
-        else
-        {                   
-            return (LimbID::UNKNOWN); //DEBUGGING: blank value
-        }
-=======
         return activeForwardLimb;
->>>>>>> feature/ModularWalkEngine
     }
     void FootMotionPlanner::setActiveForwardLimb(const LimbID& inActiveForwardLimb)
     {
