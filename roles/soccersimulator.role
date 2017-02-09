@@ -44,7 +44,7 @@ NUCLEAR_ROLE(
     motion::FootPlacementPlanner
     motion::TorsoMotionPlanner
     motion::BalanceKinematicResponse
-    motion::WalkEngine
+    motion::OldWalkEngine
     motion::HeadController
     #motion::IKKick
 )
