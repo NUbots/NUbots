@@ -106,7 +106,7 @@ namespace module {
 
             void sendGameState(std::string event, const message::input::GameState& gameState);
 
-            void saveConfigurationFile(std::string path, const YAML::Node& root);
+            void saveConfigurationFile(std::string path, const std::string& root);
             void sendSubsumption();
 
             template <typename T>

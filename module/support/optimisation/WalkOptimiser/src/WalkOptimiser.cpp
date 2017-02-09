@@ -188,7 +188,7 @@ namespace module {
             void WalkOptimiser::saveConfig(const YAML::Node& config){
                 auto saveConfig = std::make_unique<SaveConfiguration>();
                 saveConfig->path = WalkOptimiserCommand::CONFIGURATION_PATH;
-                saveConfig->config = config;
+                saveConfig->config = config.as<std::string>();
                 emit(std::move(saveConfig));
             }
 

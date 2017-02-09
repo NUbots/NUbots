@@ -43,7 +43,7 @@ namespace support {
      * @param path The path to the configuration file.
      * @param root The root YAML node.
      */
-    void NUbugger::saveConfigurationFile(std::string path, const YAML::Node& root) {
+    void NUbugger::saveConfigurationFile(std::string path, const std::string& root) {
         std::string tempName = path + ".tmp";
         utility::file::writeToFile(tempName, root);
         rename(tempName.c_str(), path.c_str());

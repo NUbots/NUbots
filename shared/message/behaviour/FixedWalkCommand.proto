@@ -28,8 +28,7 @@ message WalkConfigSaved { }
 message CancelFixedWalk { }
 
 message WalkOptimiserCommand {
-    // FIXME: How to represent a YAML file in a proto message?
-    // YAML::Node walkConfig;
+    string walkConfig = 1;
 }
 
 message FixedWalkCommand {

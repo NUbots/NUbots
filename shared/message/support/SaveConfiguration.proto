@@ -21,8 +21,6 @@ syntax = "proto3";
 package message.support;
 
 message SaveConfiguration {
-    string path = 1;
-
-    // TODO: How to represent a YAML file?
-    //YAML::Node config;
+    string path   = 1;
+    string config = 2;
 }
