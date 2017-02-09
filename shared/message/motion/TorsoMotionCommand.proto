@@ -27,9 +27,12 @@ message TorsoMotionUpdate {
     vec3  frameArms        = 1;
     vec3  frameLegs        = 2;
     mat44 frame3D          = 3;
-    vec3  frameDestination = 4;
 }
 
+message TorsoPositionUpdate {
+    vec3 position    = 1;
+    vec3 destination = 2;
+}
 
 message EnableTorsoMotion  {}
 message DisableTorsoMotion {}
