@@ -46,15 +46,22 @@ namespace motion
         Transform2D frameArms;
         Transform2D frameLegs;
         Transform3D frame3D;
-        Transform2D frameDestination;
         TorsoMotionUpdate(const Transform2D& inFrameArms,
                           const Transform2D& inFrameLegs,
-                          const Transform3D& inFrame3D, 
-                          const Transform2D& inFrameDestination)
+                          const Transform3D& inFrame3D)
             : frameArms(inFrameArms) 
             , frameLegs(inFrameLegs)
-            , frame3D(inFrame3D) 
-            , frameDestination(inFrameDestination)  {}
+            , frame3D(inFrame3D)  {}
+    };
+
+    struct TorsoPositionUpdate
+    {
+        Transform2D position;
+        Transform2D destination;
+        TorsoPositionUpdate(const Transform2D& inPosition,
+                          const Transform2D& inDestination)
+            : position(inPosition) 
+            , destination(inDestination)  {}
     };
 
     struct EnableTorsoMotion 

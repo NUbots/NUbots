@@ -116,7 +116,7 @@ namespace motion
                 emit(std::make_unique<EnableWalkEngineCommand>(walkCommand.subsumptionId)); //TODO Subsumtion variable
             }
             if(DEBUG) { log<NUClear::TRACE>("WalkEngine - Trigger WalkCommand(0)"); }
-                setVelocity(walkCommand.command);  
+                setVelocity(walkCommand.command);
                 emit(std::make_unique<NewWalkCommand>(getVelocity()));
                 // Notify behavioural modules of current standstill...
                 emit(std::make_unique<WalkStarted>());
@@ -130,8 +130,8 @@ namespace motion
                 // Emit zero velocity command to trigger final adjustment step...
                 emit(std::make_unique<NewWalkCommand>(Transform2D({0, 0, 0})));
                 // Notify behavioural modules of current standstill...
-                emit(std::make_unique<WalkStopped>());
-                emit(std::make_unique<std::vector<ServoCommand>>());
+                // emit(std::make_unique<WalkStopped>()); //moved to fpp when walk actually stops
+                // emit(std::make_unique<std::vector<ServoCommand>>());
             if(DEBUG) { log<NUClear::TRACE>("WalkEngine - Trigger WalkCommand(1)"); }
         });
 
@@ -146,7 +146,7 @@ namespace motion
 
                 emit(graph("WE: Left  Foot Joint Position",    getLeftFootPosition()));   
                 emit(graph("WE: Right Foot Joint Position",   getRightFootPosition()));                    
-                emit(std::move(updateWaypoints()));       
+                emit(std::move(updateWaypoints()));                       
 
             if(DEBUG) { log<NUClear::TRACE>("WalkEngine - Trigger BalanceBodyUpdate(1)"); }
         }).disable();

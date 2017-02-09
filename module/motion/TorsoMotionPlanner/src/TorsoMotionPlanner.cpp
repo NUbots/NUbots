@@ -43,6 +43,7 @@ namespace motion
     using FootMotionUpdate   = message::motion::FootMotionUpdate;
     using message::motion::FootStepCompleted;
     using message::motion::TorsoMotionUpdate;
+    using message::motion::TorsoPositionUpdate;
     using message::motion::EnableTorsoMotion;
     using message::motion::DisableTorsoMotion;
     using message::motion::ServoTarget;
@@ -102,20 +103,21 @@ namespace motion
         {
             // Step Target Data queued evaluation...
             if(DEBUG) { log<NUClear::TRACE>("Messaging: Foot Motion Planner - Received Target Foot Position(0)"); }
-                setSupportMass(nft.supportMass);                   //Queued    : FPP
+                setSupportMass(nft.supportMass);                  
             if(DEBUG) { log<NUClear::TRACE>("Messaging: Foot Motion Planner - Received Target Foot Position(1)"); }
 
             // Foot Target Data queued evaluation...
             if(DEBUG) { log<NUClear::TRACE>("Messaging: Torso Motion Planner - Received Footstep Info(0)"); }          
-                setLeftFootSource(nft.leftFootSource);             //Queued    : FPP
-                setRightFootSource(nft.rightFootSource);           //Queued    : FPP
-                setLeftFootDestination(nft.leftFootDestination);   //Queued    : FPP                 
-                setRightFootDestination(nft.rightFootDestination); //Queued    : FPP               
+                setLeftFootSource(nft.leftFootSource);             
+                setRightFootSource(nft.rightFootSource);           
+                setLeftFootDestination(nft.leftFootDestination);                    
+                setRightFootDestination(nft.rightFootDestination);                
             if(DEBUG) { log<NUClear::TRACE>("Messaging: Torso Motion Planner - Received Footstep Info(1)"); }
         });
 
         //In the process of actuating a foot step and emitting updated positional data...
         //Transform analytical torso positions in accordance with the stipulated targets...
+        
         on<Trigger<FootMotionUpdate>>().then("Torso Motion Planner - Received Foot Motion Update", [this] (
             const FootMotionUpdate&     fmu)
         {                 
@@ -131,6 +133,14 @@ namespace motion
 
             //DEBUG: Printout of motion phase function...
             emit(graph("TMP Synchronising Motion Phase", fmu.phase));
+        });
+
+        on<Trigger<FootStepCompleted>>().then("Torso Motion Planner - Received Foot Step Completed", [this]
+        {                 
+            emit(std::make_unique<TorsoPositionUpdate>(getTorsoPositionArms(), getTorsoDestination()));
+            setTorsoSource(getTorsoDestination());
+            setTorsoDestination(stepTorso(getLeftFootDestination(), getRightFootDestination(), 0.5));
+
         });
 
         on<Trigger<EnableTorsoMotion>>().then([this]
@@ -153,7 +163,7 @@ namespace motion
         setTorsoPositionLegs(getTorsoPositionArms().localToWorld({-kinematicsModel.Leg.HIP_OFFSET_X, 0, 0}));
         Transform2D uTorsoWorld = getTorsoPositionArms().localToWorld({-kinematicsModel.Leg.HIP_OFFSET_X, 0, 0});
         setTorsoPosition3D(arma::vec6({uTorsoWorld.x(), uTorsoWorld.y(), bodyHeight, 0, bodyTilt, uTorsoWorld.angle()}));
-        emit(std::make_unique<TorsoMotionUpdate>(getTorsoPositionArms(), getTorsoPositionLegs(), getTorsoPosition3D(), getTorsoDestination()));
+        emit(std::make_unique<TorsoMotionUpdate>(getTorsoPositionArms(), getTorsoPositionLegs(), getTorsoPosition3D()));
     }
 /*=======================================================================================================*/
 //      METHOD: stepTorso
@@ -170,14 +180,13 @@ namespace motion
     arma::vec4 TorsoMotionPlanner::zmpTorsoCoefficients()
     {
         arma::vec4 zmpCoefficients;
-        setTorsoSource(getTorsoDestination());
-        setTorsoDestination(stepTorso(getLeftFootDestination(), getRightFootDestination(), 0.5));
         // Compute ZMP coefficients...
         zmpCoefficients.rows(0,1) = zmpSolve(getSupportMass().x(), getTorsoSource().x(), getTorsoDestination().x(), getTorsoSource().x(), getTorsoDestination().x(), phase1Single, phase2Single, stepTime, zmpTime);
         zmpCoefficients.rows(2,3) = zmpSolve(getSupportMass().y(), getTorsoSource().y(), getTorsoDestination().y(), getTorsoSource().y(), getTorsoDestination().y(), phase1Single, phase2Single, stepTime, zmpTime);
 
         return (zmpCoefficients);
     }
+
 /*=======================================================================================================*/
 //      METHOD: zmpSolve
 /*=======================================================================================================*/
@@ -207,10 +216,6 @@ namespace motion
 /*=======================================================================================================*/
     Transform2D TorsoMotionPlanner::zmpTorsoCompensation(double phase, arma::vec4 zmpTorsoCoefficients, arma::vec4 zmpParams, double stepTime, double zmpTime, double phase1Single, double phase2Single, Transform2D uLeftFootSource, Transform2D uRightFootSource) 
     {
-//std::cout << "\n\rPhase: " << phase << "\n\r";
-//std::cout << "zmpParameters  =\n\r\t[\n\r\t" << zmpParams[0] << ",\n\r\t" << zmpParams[1] << ",\n\r\t" << zmpParams[2] << ",\n\r\t" << zmpParams[3] << "\n\r\t]\n\r";
-//std::cout << "zmpCoefficients=\n\r\t[\n\r\t" << zmpTorsoCoefficients[0] << ",\n\r\t" << zmpTorsoCoefficients[1] << ",\n\r\t" << zmpTorsoCoefficients[2] << ",\n\r\t" << zmpTorsoCoefficients[3] << "\n\r\t]\n\n\r";
-
         //Note that phase is the only variable updated during a step
         Transform2D com = {0, 0, 0};
         double expT = std::exp(stepTime * phase / zmpTime);
