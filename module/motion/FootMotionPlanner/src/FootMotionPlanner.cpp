@@ -98,7 +98,7 @@ namespace motion
                 if(DEBUG) { log<NUClear::TRACE>("Messaging: Foot Motion Planner - Update Foot Position(1)"); }
             
                 //DEBUG: Printout of motion phase function...
-                emit(graph("FMP Synchronising Motion Phase", arma::vec({motionPhase, (getActiveForwardLimb() == LimbID::LEFT_LEG ? 1  : 0)}))); 
+                //emit(graph("FMP Synchronising Motion Phase", arma::vec({motionPhase, (getActiveForwardLimb() == LimbID::LEFT_LEG ? 1  : 0)}))); 
         }).disable();
 
         //In the event of a new foot step target specified by the foot placement planning module...
