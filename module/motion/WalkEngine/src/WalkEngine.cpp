@@ -63,8 +63,6 @@ namespace motion
     using message::motion::KinematicsModel;
     using utility::motion::kinematics::calculateLegJointsTeamDarwin; //TODO: advised to change to calculateLegJoints (no TeamDarwin)
 
-    using message::support::SaveConfiguration;
-
     using extension::Configuration;
     using extension::Script;
 
@@ -130,8 +128,8 @@ namespace motion
                 // Emit zero velocity command to trigger final adjustment step...
                 emit(std::make_unique<NewWalkCommand>(convert<double, 3>(Transform2D({0, 0, 0}))));
                 // Notify behavioural modules of current standstill...
-                emit(std::make_unique<WalkStopped>());
-                emit(std::make_unique<std::vector<ServoCommand>>());
+                // emit(std::make_unique<WalkStopped>()); //moved to fpp when walk actually stops
+                // emit(std::make_unique<std::vector<ServoCommand>>());
             if(DEBUG) { log<NUClear::TRACE>("WalkEngine - Trigger WalkCommand(1)"); }
         });
 
@@ -146,16 +144,15 @@ namespace motion
 
                 emit(graph("WE: Left  Foot Joint Position",    getLeftFootPosition()));   
                 emit(graph("WE: Right Foot Joint Position",   getRightFootPosition()));                    
-                emit(std::move(updateWaypoints()));       
+                emit(std::move(updateWaypoints()));                       
 
             if(DEBUG) { log<NUClear::TRACE>("WalkEngine - Trigger BalanceBodyUpdate(1)"); }
         }).disable();
 
         // Update walk configuration with optimiser parameters...
-        on<Trigger<WalkOptimiserCommand>>().then([this] (const WalkOptimiserCommand& /*command*/) 
+        on<Trigger<WalkOptimiserCommand>>().then([this] (const WalkOptimiserCommand& command) 
         {
-            // TODO: FIXME
-            //configure(command.walkConfig);
+            configure(YAML::Load(command.walkConfig));
             emit(std::make_unique<WalkConfigSaved>());
         });
 

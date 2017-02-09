@@ -87,17 +87,19 @@ namespace motion
         updateHandle = on<Every<UPDATE_FREQUENCY, Per<std::chrono::seconds>>, Single, Priority::HIGH>()
         .then("Foot Motion Planner - Update Foot Position", [this]
         {
-            if (getDestinationTime() + stepTime < getTime())
-            {
                 double motionPhase = getMotionPhase();
+                
                 if(DEBUG) { log<NUClear::TRACE>("Messaging: Foot Motion Planner - Update Foot Position(0)"); }                     
-                    updateFootPosition(motionPhase, getActiveLimbSource(), getActiveForwardLimb(), getActiveLimbDestination());         
+                
+                if (!isTargetStepUnchanged())  //TODO replace with intialstep like behaviour
+                {
+                    updateFootPosition(motionPhase, getActiveLimbSource(), getActiveForwardLimb(), getActiveLimbDestination());    
+                }     
+                
                 if(DEBUG) { log<NUClear::TRACE>("Messaging: Foot Motion Planner - Update Foot Position(1)"); }
             
-
                 //DEBUG: Printout of motion phase function...
-                emit(graph("FMP Synchronising Motion Phase", arma::vec({motionPhase, (getActiveForwardLimb() == LimbID::LEFT_LEG ? 1.0 : 0.0)})));   
-            }
+                //emit(graph("FMP Synchronising Motion Phase", arma::vec({motionPhase, (getActiveForwardLimb() == LimbID::LEFT_LEG ? 1  : 0)}))); 
         }).disable();
 
         //In the event of a new foot step target specified by the foot placement planning module...
@@ -105,25 +107,25 @@ namespace motion
             const NewFootTargetInfo& nft,
             const NewStepTargetInfo& nst) 
         {      
-            // Step Target Data queued evaluation...
+            // Step Target Data
             if(DEBUG) { log<NUClear::TRACE>("Messaging: Foot Motion Planner - Received Target Foot Position(0)"); }
-                setDestinationTime(nst.targetTime);                      //Queued    : FPP
-                setVelocityCurrent(convert<double, 3>(nst.velocityCurrent));                 //Queued    : FPP             
+                setDestinationTime(nst.targetTime);                
+                setVelocityCurrent(convert<double, 3>(nst.velocityCurrent));
             if(DEBUG) { log<NUClear::TRACE>("Messaging: Foot Motion Planner - Received Target Foot Position(1)"); }
 
-            // Foot Target Data queued evaluation...
+            // Foot Target Data
             if(DEBUG) { log<NUClear::TRACE>("Messaging: Foot Motion Planner - Received Target Foot Position(0)"); }                      
                 if(nst.activeForwardLimb == LimbID::LEFT_LEG)
                 {  
-                    setActiveLimbSource(convert<double, 3>(nft.leftFootSource));             //Queued    : FPP
-                    setActiveLimbDestination(convert<double, 3>(nft.leftFootDestination));   //Queued    : FPP          
+                    setActiveLimbSource(convert<double, 3>(nft.leftFootSource));
+                    setActiveLimbDestination(convert<double, 3>(nft.leftFootDestination));
                 }
                 else
                 {       
-                    setActiveLimbSource(convert<double, 3>(nft.rightFootSource));            //Queued    : FPP
-                    setActiveLimbDestination(convert<double, 3>(nft.rightFootDestination));  //Queued    : FPP      
+                    setActiveLimbSource(convert<double, 3>(nft.rightFootSource));
+                    setActiveLimbDestination(convert<double, 3>(nft.rightFootDestination));
                 }                         
-                setActiveForwardLimb(nst.activeForwardLimb);             //Queued    : FPP            
+                setActiveForwardLimb(nst.activeForwardLimb);                        
             if(DEBUG) { log<NUClear::TRACE>("Messaging: Foot Motion Planner - Received Target Foot Position(1)"); }
         });
 
@@ -405,9 +407,7 @@ namespace motion
             // If there has already been an updated instruction, then process before requesting new data...
             
             // Notify helper modules of completed footstep (trigger request for new step instruction)...
-            emit(std::make_unique<FootStepRequested>(true)); 
-            //std::cout << "REquest step\n\r";
-           
+            emit(std::make_unique<FootStepCompleted>(true));         
         }
         return (motionPhase);
     }

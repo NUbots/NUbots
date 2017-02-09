@@ -40,7 +40,6 @@
 #include "message/motion/ServoTarget.h"
 #include "message/motion/TorsoMotionCommand.h" 
 #include "message/motion/WalkCommand.h"
-#include "message/support/SaveConfiguration.h"
 
 #include "utility/behaviour/Action.h"
 #include "utility/input/LimbID.h"

@@ -9,7 +9,7 @@ walk_engine:
       left_leg:  30
       right_leg: 30
       head: 30
-      p_gain: 15
+      p_gain: 25
       d_gain: 5
       i_gain: 1
 

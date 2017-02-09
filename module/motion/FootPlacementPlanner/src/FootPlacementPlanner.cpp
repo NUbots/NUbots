@@ -35,16 +35,18 @@ namespace motion
 
     using extension::Configuration;
 
-    using message::motion::DisableWalkEngineCommand;
-    using message::motion::NewStepTargetInfo;
-    using message::motion::NewFootTargetInfo;
-    using message::motion::TorsoMotionUpdate;
-    using message::motion::EnableFootPlacement;
     using message::motion::DisableFootPlacement;
-    using message::motion::FootStepRequested;
-    using message::motion::NewWalkCommand;
+    using message::motion::DisableWalkEngineCommand;
+    using message::motion::EnableFootPlacement;
     using message::motion::FootPlacementStopped;
+    using message::motion::FootStepCompleted;
     using message::motion::KinematicsModel;
+    using message::motion::NewFootTargetInfo;
+    using message::motion::NewStepTargetInfo;
+    using message::motion::NewWalkCommand;
+    using message::motion::TorsoMotionUpdate;
+    using message::motion::TorsoPositionUpdate;
+    using message::motion::WalkStopped;
 
     using LimbID = utility::input::LimbID;
     using utility::math::matrix::Transform2D;
@@ -89,23 +91,27 @@ namespace motion
         });
 
         // Upon the completion of queued footsteps, calculate and broadcast a new step target to helper modules...
-        updateHandle = on<Trigger<FootStepRequested>, With<TorsoMotionUpdate>>().then("Foot Placement Planner - Calculate Target Foot Position", [this](
-            const TorsoMotionUpdate& info)
+        updateHandle = on<Trigger<FootStepCompleted>, With<TorsoPositionUpdate>>().then("Foot Placement Planner - Calculate Target Foot Position", [this](
+            const TorsoPositionUpdate& torso)
         {    
             // When new torso destination is computed, inform FPP in preparation for next footstep...
             if(DEBUG) { log<NUClear::TRACE>("Messaging: Foot Placement Planner - Received Torso Destination Update(0)"); }    
-                setTorsoPosition(convert<double, 3>(info.frameArms));
-                setTorsoDestination(convert<double, 3>(info.frameDestination));
+                setTorsoPosition(convert<double, 3>(torso.position));
+                setTorsoDestination(convert<double, 3>(torso.destination));
             if(DEBUG) { log<NUClear::TRACE>("Messaging: Foot Placement Planner - Received Torso Destination Update(1)"); }
 
             // Calculate a new footstep to facilitate walk progression...
             if(DEBUG) { log<NUClear::TRACE>("Messaging: Foot Placement Planner - Calculate Target Foot Position(0)"); }             
             if (stopping)
             {
-                emit(std::make_unique<DisableWalkEngineCommand>(50)); //TODO replace with subsumtion variable
+                calculateNewStep({0,0,0}, getTorsoDestination(), getTorsoPosition());
+                emit(std::make_unique<WalkStopped>());
+                emit(std::make_unique<std::vector<ServoCommand>>());
+                // emit(std::make_unique<DisableWalkEngineCommand>(50)); //TODO replace with subsumtion variable
             }
             else
             {
+                updateVelocity();         // Update current velocity, bounded by acceleration and physical limitations...
                 calculateNewStep(getVelocityCurrent(), getTorsoDestination(), getTorsoPosition());
             }
             if(DEBUG) { log<NUClear::TRACE>("Messaging: Foot Placement Planner - Calculate Target Foot Position(1)"); }
@@ -118,7 +124,7 @@ namespace motion
                 setVelocityCommand(convert<double, 3>(command.velocityTarget));
                 if (stopping) //TODO add stoped flag in addtion to stopping. Case of new command during last step.
                 {
-                    calculateNewStep(getVelocityCurrent(), getTorsoDestination(), getTorsoPosition());          
+                    calculateNewStep(getVelocityCurrent(), getTorsoDestination(), getTorsoPosition());
                     stopping = false;
                 }
             if(DEBUG) { log<NUClear::TRACE>("Messaging: Foot Placement Planner - On New Walk Command(1)"); }
@@ -141,8 +147,6 @@ namespace motion
 /*=======================================================================================================*/
     void FootPlacementPlanner::calculateNewStep(const Transform2D& inVelocityCurrent, const Transform2D& inTorsoDestination, const Transform2D& inTorsoPosition) 
     {      
-        // Update current velocity, bounded by acceleration and physical limitations...
-        updateVelocity();
 
         // Alternate active forward limb between left and right legs...
         setActiveForwardLimb((getActiveForwardLimb() == LimbID::LEFT_LEG) ? LimbID::RIGHT_LEG : LimbID::LEFT_LEG);
@@ -462,7 +466,6 @@ namespace motion
 /*=======================================================================================================*/
     Transform2D FootPlacementPlanner::getLeftFootSource()
     {
-//std::cout << "\n\rL Source: " << leftFootSource;
         return (leftFootSource);
     }
     void FootPlacementPlanner::setLeftFootSource(const Transform2D& inLeftFootSource)
@@ -474,7 +477,6 @@ namespace motion
 /*=======================================================================================================*/
     Transform2D FootPlacementPlanner::getRightFootSource()
     {
-//std::cout << "\n\rR Source: " << rightFootSource;      
         return (rightFootSource);
     }
     void FootPlacementPlanner::setRightFootSource(const Transform2D& inRightFootSource)
@@ -486,7 +488,6 @@ namespace motion
 /*=======================================================================================================*/
     Transform2D FootPlacementPlanner::getLeftFootDestination()
     {
-//std::cout << "\n\rL Destination: " << leftFootDestination;         
         return (leftFootDestination);   
     }
     void FootPlacementPlanner::setLeftFootDestination(const Transform2D& inLeftFootDestination)
@@ -498,7 +499,6 @@ namespace motion
 /*=======================================================================================================*/
     Transform2D FootPlacementPlanner::getRightFootDestination()
     {
-//std::cout << "\n\rR Destination: " << rightFootDestination;          
         return (rightFootDestination);
     }
     void FootPlacementPlanner::setRightFootDestination(const Transform2D& inRightFootDestination)
