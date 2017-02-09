@@ -42,7 +42,7 @@ namespace module {
             using message::motion::KillGetup;
 
             using message::support::SaveConfiguration;
-            using message::support::Configuration;
+            using extension::Configuration;
 
             WalkOptimiser::WalkOptimiser(std::unique_ptr<NUClear::Environment> environment)
                 : Reactor(std::move(environment)),
@@ -188,7 +188,7 @@ namespace module {
             void WalkOptimiser::saveConfig(const YAML::Node& config){
                 auto saveConfig = std::make_unique<SaveConfiguration>();
                 saveConfig->path = WalkOptimiserCommand::CONFIGURATION_PATH;
-                saveConfig->config = config;
+                saveConfig->config = config.as<std::string>();
                 emit(std::move(saveConfig));
             }
 

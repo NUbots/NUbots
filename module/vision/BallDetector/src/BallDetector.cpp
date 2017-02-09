@@ -19,40 +19,43 @@
 
 #include "BallDetector.h"
 
+#include "extension/Configuration.h"
+
+#include "message/input/CameraParameters.h"
+#include "message/support/FieldDescription.h"
 #include "message/vision/ClassifiedImage.h"
 #include "message/vision/VisionObjects.h"
 #include "message/vision/LookUpTable.h"
-#include "message/input/CameraParameters.h"
-#include "message/support/Configuration.h"
-#include "message/support/FieldDescription.h"
 
-#include "utility/support/yaml_expression.h"
-
+#include "utility/math/coordinates.h"
 #include "utility/math/geometry/Plane.h"
+#include "utility/math/geometry/Line.h"
 #include "utility/math/matrix/Transform3D.h"
-
 #include "utility/math/ransac/Ransac.h"
 #include "utility/math/ransac/RansacCircleModel.h"
 #include "utility/math/vision.h"
 #include "utility/nubugger/NUhelpers.h"
-#include "utility/math/coordinates.h"
+#include "utility/support/eigen_armadillo.h"
+#include "utility/support/yaml_expression.h"
+#include "utility/vision/fourcc.h"
+#include "utility/vision/Vision.h"
 
 namespace module {
 namespace vision {
 
-    using message::input::CameraParameters;
-    using message::input::Sensors;
-    using message::input::ServoID;
+    using extension::Configuration;
 
-    using message::vision::ObjectClass;
+    using message::input::CameraParameters;
+
     using message::vision::ClassifiedImage;
-    using message::vision::VisionObject;
     using message::vision::Ball;
     using message::vision::LookUpTable;
     using message::input::Image;
+    using message::support::FieldDescription;
 
     using Plane = utility::math::geometry::Plane<3>;
 
+    using ServoID = utility::input::ServoID;
     using utility::math::vision::widthBasedDistanceToCircle;
     using utility::math::vision::projectCamToPlane;
     using utility::math::vision::imageToScreen;
@@ -61,17 +64,18 @@ namespace vision {
     using utility::math::vision::projectCamSpaceToScreen;
     using utility::math::matrix::Transform3D;
     using utility::math::geometry::Circle;
+    using utility::math::geometry::Line;
 
     using utility::math::coordinates::cartesianToSpherical;
     using utility::nubugger::graph;
-
-    using message::support::Configuration;
-    using message::support::FieldDescription;
 
     using utility::math::ransac::Ransac;
     using utility::math::ransac::RansacCircleModel;
     using utility::nubugger::drawVisionLines;
     using utility::support::Expression;
+
+    using FOURCC = utility::vision::FOURCC;
+    using Colour = utility::vision::Colour;
 
     float BallDetector::approximateCircleGreenRatio(const Circle& circle, const Image& image, const LookUpTable& lut) {
         // TODO:
@@ -83,9 +87,11 @@ namespace vision {
             float theta = 0;
             if(r == 0){
                 arma::ivec2 ipos = arma::ivec({int(std::round(circle.centre[0])), int(std::round(circle.centre[1]))});
-                if(ipos[0] >= 0 && ipos[0] < int(image.width) && ipos[1] >= 0 && ipos[1] < int(image.height)){
+                if(ipos[0] >= 0 && ipos[0] < int(image.dimensions[0]) && ipos[1] >= 0 && ipos[1] < int(image.dimensions[1])){
                     // debug.push_back(std::make_tuple(ipos, ipos + arma::ivec2{1,1}, arma::vec4{1,1,1,1}));
-                    if(lut(image(ipos)) == 'g'){
+                    char c = static_cast<char>(utility::vision::getPixelColour(lut, 
+                            getPixel(ipos[0], ipos[1], image.dimensions[0], image.dimensions[1], image.data, static_cast<FOURCC>(image.format))));
+                    if (c == Colour::GREEN) {
                         numGreen++;
                     }
                     actualSamples++;
@@ -97,15 +103,17 @@ namespace vision {
                 float y = r * std::sin(theta);
                 arma::vec2 pos = circle.centre + arma::vec2({x,y});
                 arma::ivec2 ipos = arma::ivec2({int(std::round(pos[0])),int(std::round(pos[1]))});
-                if(ipos[0] >= 0 && ipos[0] < int(image.width) && ipos[1] >= 0 && ipos[1] < int(image.height)){
+                if(ipos[0] >= 0 && ipos[0] < int(image.dimensions[0]) && ipos[1] >= 0 && ipos[1] < int(image.dimensions[1])){
                     // debug.push_back(std::make_tuple(ipos, ipos + arma::ivec2{1,1}, arma::vec4{1,1,1,1}));
-                    if(lut(image(ipos)) == 'g'){
+                    char c = static_cast<char>(utility::vision::getPixelColour(lut, 
+                            getPixel(ipos[0], ipos[1], image.dimensions[0], image.dimensions[1], image.data, static_cast<FOURCC>(image.format))));
+                    if (c == Colour::GREEN) {
                         numGreen++;
                     }
                     actualSamples++;
                 }
             }
-            // sample point in lut and check if == 'g'
+            // sample point in lut and check if == Colour::GREEN
         }
 
         // emit(drawVisionLines(debug));
@@ -159,19 +167,20 @@ namespace vision {
             lastFrame.time = NUClear::clock::now();
         });
 
-        on<Trigger<ClassifiedImage<ObjectClass>>
+        on<Trigger<ClassifiedImage>
          , With<CameraParameters>
          , With<FieldDescription>
          , With<LookUpTable>
          , Single
          , Priority::LOW>().then("Ball Detector", [this](
-            std::shared_ptr<const ClassifiedImage<ObjectClass>> rawImage
+            std::shared_ptr<const ClassifiedImage> rawImage
             , const CameraParameters& cam
             , const FieldDescription& field
             , const LookUpTable& lut) {
 
             const auto& image = *rawImage;
             const auto& sensors = *image.sensors;
+            Line horizon(convert<double, 2>(image.horizon.normal), image.horizon.distance);
 
             // This holds our points that may be a part of the ball
             std::vector<arma::vec2> ballPoints;
@@ -193,10 +202,13 @@ namespace vision {
             balls->reserve(ransacResults.size());
 
             if(print_throwout_logs) log("Ransac : ", ransacResults.size(), "results");
+
+            arma::mat44 orientationCamToGround = convert<double, 4, 4>(sensors.orientationCamToGround);
+
             for (auto& result : ransacResults) {
 
                 // Transform our centre into kinematics coordinates
-                arma::vec2 centre = imageToScreen(result.model.centre, image.dimensions);
+                arma::vec2 centre = imageToScreen(result.model.centre, convert<uint, 2>(image.dimensions));
 
                 // Get the 4 points around our circle
                 arma::vec2 top   = centre + arma::vec2({ 0,  result.model.radius });
@@ -204,7 +216,7 @@ namespace vision {
                 arma::vec2 left  = centre + arma::vec2({  result.model.radius, 0 });
                 arma::vec2 right = centre + arma::vec2({ -result.model.radius, 0 });
 
-                double cameraHeight = sensors.orientationCamToGround(2, 3);
+                double cameraHeight = orientationCamToGround(2, 3);
 
                 // Get a unit vector pointing to the centre of the ball
                 arma::vec3 ballCentreRay = arma::normalise(arma::normalise(getCamFromScreen(top, cam.focalLengthPixels))
@@ -217,7 +229,7 @@ namespace vision {
                  *                  THROWOUTS                   *
                  ************************************************/
                 // CENTRE OF BALL IS ABOVE THE HORIZON
-                if(image.horizon.y(result.model.centre[0]) > result.model.centre[1]) {
+                if(horizon.y(result.model.centre[0]) > result.model.centre[1]) {
                     if(print_throwout_logs) log("Ball discarded: image.horizon.y(result.model.centre[0]) > result.model.centre[1]");
                     continue;
                 }
@@ -234,7 +246,7 @@ namespace vision {
 
                 // Loop through our seed points and find the minimum distance one
                 for(uint i = 0; i < 3; ++i) {
-                    for(auto& s : image.ballSeedPoints[i]) {
+                    for(auto& s : image.ballSeedPoints[i].points) {
                         double dist = std::fabs(result.model.radius - arma::norm(result.model.centre - arma::vec2({double(s[0]), double(s[1])})));
                         if(sDist[i] > dist) {
                             sDist[i] = dist;
@@ -257,7 +269,7 @@ namespace vision {
                 // IF THE DISAGREEMENT BETWEEN THE WIDTH AND PROJECTION BASED DISTANCES ARE TOO LARGE
                 // Project this vector to a plane midway through the ball
                 Plane ballBisectorPlane({ 0, 0, 1 }, { 0, 0, field.ball_radius });
-                arma::vec3 ballCentreGroundProj = projectCamToPlane(ballCentreRay, sensors.orientationCamToGround, ballBisectorPlane);
+                arma::vec3 ballCentreGroundProj = projectCamToPlane(ballCentreRay, orientationCamToGround, ballBisectorPlane);
                 double ballCentreGroundProjDistance = arma::norm(ballCentreGroundProj);
 
                 if(std::abs((widthDistance - ballCentreGroundProjDistance) / std::max(ballCentreGroundProjDistance, widthDistance)) > MAXIMUM_DISAGREEMENT_RATIO) {
@@ -270,10 +282,11 @@ namespace vision {
                  ************************************************/
 
                 Ball b;
+                b.visObject.sensors = image.sensors;
 
                 // Get our transform to world coordinates
-                const Transform3D& Htw = sensors.world;
-                const Transform3D& Htc = sensors.forwardKinematics.find(ServoID::HEAD_PITCH)->second;
+                const Transform3D& Htw = convert<double, 4, 4>(sensors.world);
+                const Transform3D& Htc = convert<double, 4, 4>(sensors.forwardKinematics.at(ServoID::HEAD_PITCH)); 
                 Transform3D Hcw = Htc.i() * Htw;
                 Transform3D Hwc = Hcw.i();
 
@@ -287,12 +300,12 @@ namespace vision {
                 arma::vec3 rBWw = (width_rBWw);
 
                 // Attach the position to the object
-                b.position = rBWw;
+                b.position = convert<double, 3>(rBWw);
 
-                Transform3D Hgc = sensors.orientationCamToGround;
+                Transform3D Hgc       = orientationCamToGround;
                 arma::vec3 width_rBGg = Hgc.transformPoint(ballCentreRay * widthDistance);
-                arma::vec3 proj_rBGg = Hgc.transformPoint(ballCentreGroundProj);
-                b.torsoSpacePosition = width_rBGg;
+                arma::vec3 proj_rBGg  = Hgc.transformPoint(ballCentreGroundProj);
+                b.torsoSpacePosition  = convert<double, 3>(width_rBGg);
                 // log("ball pos1 =", b.position);
                 // log("ball pos2 =", b.torsoSpacePosition.t());
                 // log("width_rBGg =", width_rBGg.t());
@@ -301,29 +314,29 @@ namespace vision {
 
                 // On screen visual shape
                 b.circle.radius = result.model.radius;
-                b.circle.centre = result.model.centre;
+                b.circle.centre = convert<double, 2>(result.model.centre);
 
                 // Angular positions from the camera
-                b.screenAngular = arma::atan(cam.pixelsToTanThetaFactor % ballCentreScreen);
-                b.angularSize = { getParallaxAngle(left, right, cam.focalLengthPixels), getParallaxAngle(top, base, cam.focalLengthPixels) };
+                b.visObject.screenAngular = convert<double, 2>(arma::atan(convert<double, 2>(cam.pixelsToTanThetaFactor) % ballCentreScreen));
+                b.visObject.angularSize   << getParallaxAngle(left, right, cam.focalLengthPixels), getParallaxAngle(top, base, cam.focalLengthPixels);
 
                 // Add our points
                 for (auto& point : result) {
-                    b.edgePoints.push_back(getCamFromScreen(imageToScreen(point, image.dimensions), cam.focalLengthPixels));
+                    b.edgePoints.push_back(convert<double, 3>(getCamFromScreen(imageToScreen(point, convert<uint, 2>(image.dimensions)), cam.focalLengthPixels)));
                 }
 
-                b.sensors = image.sensors;
-                b.classifiedImage = rawImage;
                 balls->push_back(std::move(b));
             }
 
             for(auto a = balls->begin(); a != balls->end(); ++a) {
+                Circle acircle(a->circle.radius, convert<double, 2>(a->circle.centre));
+
                 for(auto b = a + 1; b != balls->end();) {
 
                     // If our balls overlap
-                    if(a->circle.distanceToPoint(b->circle.centre) < b->circle.radius) {
+                    if(acircle.distanceToPoint(convert<double, 2>(b->circle.centre)) < b->circle.radius) {
                         // Pick the better ball
-                        if(a->circle.radius < b->circle.radius) {
+                        if(acircle.radius < b->circle.radius) {
                             // Throw-out b
                             b = balls->erase(b);
                         }

@@ -21,27 +21,29 @@
 
 #include <cstdlib>
 
-#include "message/behaviour/Action.h"
-#include "message/support/Configuration.h"
-#include "message/input/ServoID.h"
+#include "extension/Configuration.h"
+
 #include "message/input/Sensors.h"
 #include "message/motion/ServoTarget.h"
 #include "message/motion/KinematicsModels.h"
 
+#include "utility/behaviour/Action.h"
+#include "utility/input/ServoID.h"
 #include "utility/motion/InverseKinematics.h"
 #include "utility/motion/ForwardKinematics.h"
 #include "utility/math/matrix/Transform3D.h"
 
 namespace module {
     namespace debug {
-            using message::input::LimbID;
-            using message::support::Configuration;
-            using message::motion::ServoTarget;
-            using message::input::ServoID;
+            using extension::Configuration;
+
             using message::input::Sensors;
-            using message::motion::kinematics::KinematicsModel;
-            using message::motion::kinematics::BodySide;
-            using message::motion::kinematics::KinematicsModel;
+            using message::motion::ServoTarget;
+            using message::motion::KinematicsModel;
+            using message::motion::BodySide;
+
+            using LimbID  = utility::input::LimbID;
+            using ServoID = utility::input::ServoID;
             using utility::math::matrix::Transform3D;
             using utility::motion::kinematics::calculateLegJoints;
             using utility::motion::kinematics::calculatePosition;
@@ -52,16 +54,16 @@ namespace module {
                 on<Configuration, With<KinematicsModel>>("InverseKinematicsRequest.yaml").then([this](const Configuration& request, const KinematicsModel& kinematicsModel) {
                     return;//WTF is this?
                     Transform3D target;
-                    target = target.rotateY(request.config["yAngle"].as<double>());
                     target = target.rotateX(request.config["xAngle"].as<double>());
+                    target = target.rotateY(request.config["yAngle"].as<double>());
                     target = target.rotateZ(request.config["zAngle"].as<double>());
 
                     // translation
-                    target(0,3) = request.config["x"].as<double>(); // down/up
-                    target(1,3) = request.config["y"].as<double>(); // left/right
-                    target(2,3) = request.config["z"].as<double>(); // front/back
+                    target(0, 3) = request.config["x"].as<double>(); // down/up
+                    target(1, 3) = request.config["y"].as<double>(); // left/right
+                    target(2, 3) = request.config["z"].as<double>(); // front/back
 
-                    bool left = request.config["left"].as<bool>();
+                    bool left  = request.config["left"].as<bool>();
                     bool right = request.config["right"].as<bool>();
 
                     auto waypoints = std::make_unique<std::vector<ServoTarget> >();
@@ -141,7 +143,7 @@ namespace module {
                         bool right = request.config["right"].as<bool>();
 
                         std::unique_ptr<Sensors> sensors = std::make_unique<Sensors>();
-                        sensors->servos = std::vector<Sensors::Servo>(20);
+                        sensors->servo = std::vector<Sensors::Servo>(20);
 
                         if (left) {
                             std::vector<std::pair<ServoID, float> > legJoints = calculateLegJoints(kinematicsModel,ikRequest, LimbID::LEFT_LEG);
@@ -151,7 +153,7 @@ namespace module {
 
                                 std::tie(servoID, position) = legJoint;
 
-                                sensors->servos[static_cast<int>(servoID)].presentPosition = position;
+                                sensors->servo[servoID].presentPosition = position;
                             }
                         }
 
@@ -163,7 +165,7 @@ namespace module {
 
                                 std::tie(servoID, position) = legJoint;
 
-                                sensors->servos[static_cast<int>(servoID)].presentPosition = position;
+                                sensors->servo[servoID].presentPosition = position;
                             }
                         }
                         std::cout<< "KinematicsNULLTest -calculating forward kinematics." <<std::endl;
@@ -196,7 +198,7 @@ namespace module {
                         if(lmax_error >= ERROR_THRESHOLD or rmax_error >= ERROR_THRESHOLD){
                             numberOfFails++;
                         }
-                        sensors->world = arma::eye(4,4);
+                        sensors->world.setIdentity();
                         emit(std::move(sensors));
                     }
                     std::cout<< "IK Leg NULL Test : "<< numberOfFails << " Total Failures " <<std::endl;
@@ -224,9 +226,9 @@ namespace module {
                             cameraVec *= 1/arma::norm(cameraVec,2);
                         }
 
-                        std::vector< std::pair<message::input::ServoID, float> > angles = calculateCameraLookJoints(kinematicsModel,cameraVec);
+                        std::vector<std::pair<ServoID, float>> angles = calculateCameraLookJoints(kinematicsModel,cameraVec);
                         Sensors sensors;
-                        sensors.servos = std::vector<Sensors::Servo>(20);
+                        sensors.servo = std::vector<Sensors::Servo>(20);
 
                         for (auto& angle : angles) {
                                 ServoID servoID;
@@ -234,10 +236,10 @@ namespace module {
 
                                 std::tie(servoID, position) = angle;
 
-                                sensors.servos[static_cast<int>(servoID)].presentPosition = position;
+                                sensors.servo[servoID].presentPosition = position;
                         }
 
-                        Transform3D fKin = calculatePosition(kinematicsModel,sensors, ServoID::HEAD_PITCH)[ServoID::HEAD_PITCH];
+                        Transform3D fKin = calculatePosition(kinematicsModel, sensors, ServoID::HEAD_PITCH)[ServoID::HEAD_PITCH];
 
                         float max_error = 0;
                         for(int i = 0; i < 3 ; i++){

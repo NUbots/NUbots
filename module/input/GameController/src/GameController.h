@@ -23,7 +23,8 @@
 #include <nuclear>
 
 #include "GameControllerData.h"
-#include "message/input/gameevents/GameEvents.h"
+#include "message/input/GameEvents.h"
+#include "message/input/GameState.h"
 
 namespace module {
     namespace input {
@@ -55,11 +56,11 @@ namespace module {
                 gamecontroller::Mode mode;
 
                 void resetState();
-                void process(const message::input::gameevents::GameState& oldGameState, const gamecontroller::GameControllerPacket& oldPacket, const gamecontroller::GameControllerPacket& newPacket);
+                void process(const message::input::GameState& oldGameState, const gamecontroller::GameControllerPacket& oldPacket, const gamecontroller::GameControllerPacket& newPacket);
                 void sendReplyMessage(const gamecontroller::ReplyMessage& message);
                 const gamecontroller::Team& getOwnTeam(const gamecontroller::GameControllerPacket& packet) const;
                 const gamecontroller::Team& getOpponentTeam(const gamecontroller::GameControllerPacket& packet) const;
-                message::input::gameevents::PenaltyReason getPenaltyReason(const gamecontroller::PenaltyState& penaltyState) const;
+                message::input::GameState::Data::PenaltyReason getPenaltyReason(const gamecontroller::PenaltyState& penaltyState) const;
 
             public:
                 explicit GameController(std::unique_ptr<NUClear::Environment> environment);

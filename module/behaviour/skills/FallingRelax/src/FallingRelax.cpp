@@ -20,12 +20,17 @@
 #include "FallingRelax.h"
 
 #include <cmath>
-#include "message/input/ServoID.h"
-#include "message/motion/Script.h"
-#include "message/behaviour/Action.h"
+
+#include "extension/Configuration.h"
+#include "extension/Script.h"
+
 #include "message/behaviour/ServoCommand.h"
-#include "message/support/Configuration.h"
 #include "message/input/Sensors.h"
+
+#include "utility/behaviour/Action.h"
+#include "utility/input/LimbID.h"
+#include "utility/input/ServoID.h"
+#include "utility/support/eigen_armadillo.h"
 
 namespace module {
     namespace behaviour {
@@ -35,13 +40,15 @@ namespace module {
             struct Falling {};
             struct KillFalling {};
 
-            using message::support::Configuration;
+            using extension::Configuration;
+            using extension::ExecuteScriptByName;
+
             using message::input::Sensors;
-            using message::input::ServoID;
-            using message::motion::ExecuteScriptByName;
-            using message::behaviour::RegisterAction;
-            using message::behaviour::ActionPriorites;
-            using message::input::LimbID;
+
+            using utility::behaviour::RegisterAction;
+            using utility::behaviour::ActionPriorites;
+            using LimbID  = utility::input::LimbID;
+            using ServoID = utility::input::ServoID;
 
             FallingRelax::FallingRelax(std::unique_ptr<NUClear::Environment> environment)
                 : Reactor(std::move(environment))
@@ -78,7 +85,7 @@ namespace module {
                         double magnitude = 0;
 
                         for(const auto& sensor : sensors) {
-                            magnitude += arma::norm(sensor->accelerometer, 2);
+                            magnitude += arma::norm(convert<double, 3>(sensor->accelerometer), 2);
                         }
 
                         magnitude /= sensors.size();
@@ -94,7 +101,7 @@ namespace module {
                         double magnitude = 0;
 
                         for(const auto& sensor : sensors) {
-                            magnitude += arma::norm(sensor->accelerometer, 2);
+                            magnitude += arma::norm(convert<double, 3>(sensor->accelerometer), 2);
                         }
 
                         magnitude /= sensors.size();

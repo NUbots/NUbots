@@ -18,37 +18,40 @@
  */
 
 #include "LUTClassifier.h"
+
+#include "utility/math/matrix/Transform3D.h"
 #include "utility/motion/ForwardKinematics.h"
+#include "utility/support/eigen_armadillo.h"
 
 namespace module {
     namespace vision {
 
         using message::input::Image;
-        using message::input::ServoID;
-        using message::input::Sensors;
         using message::vision::LookUpTable;
-        using message::vision::ObjectClass;
         using message::vision::ClassifiedImage;
-        using utility::math::matrix::Rotation3D;
 
-        void LUTClassifier::findHorizon(const Image& image, const LookUpTable&, ClassifiedImage<ObjectClass>& classifiedImage) {
+        using ServoID = utility::input::ServoID;
+        using utility::math::matrix::Rotation3D;
+        using utility::math::matrix::Transform3D;
+
+        void LUTClassifier::findHorizon(const Image& image, const LookUpTable&, ClassifiedImage& classifiedImage) {
 
                 auto& sensors = *classifiedImage.sensors;
 
                 // Get our transform to world coordinates
-                const Rotation3D& Rtw = sensors.world.rotation();
-                const Rotation3D& Rtc = sensors.forwardKinematics.find(ServoID::HEAD_PITCH)->second.rotation();
+                const Rotation3D& Rtw = Transform3D(convert<double, 4, 4>(sensors.world)).rotation();
+                const Rotation3D& Rtc = Transform3D(convert<double, 4, 4>(sensors.forwardKinematics.at(ServoID::HEAD_PITCH))).rotation();
                 Rotation3D Rcw =  Rtc.i() * Rtw;
 
                 // Rcw = Rotation3D::createRotationZ(-Rcw.yaw()) * Rcw;
 
                 // Coordinate system: 0,0 is the centre of the screen. pos[0] is along the y axis of the
                 // camera transform, pos[1] is along the z axis (x points out of the camera)
-                classifiedImage.horizon = utility::motion::kinematics::calculateHorizon(Rcw, FOCAL_LENGTH_PIXELS);
-
+                auto horizon = utility::motion::kinematics::calculateHorizon(Rcw, FOCAL_LENGTH_PIXELS);
+                classifiedImage.horizon.normal = convert<double, 2>(horizon.normal);
 
                 // Move our axis to be at the top left of the screen
-                classifiedImage.horizon.distance = -classifiedImage.horizon.distanceToPoint({ -double(image.width) * 0.5, -double(image.height) * 0.5 });
+                classifiedImage.horizon.distance = -horizon.distanceToPoint({ -double(image.dimensions[0]) * 0.5, -double(image.dimensions[1]) * 0.5 });
         }
 
     }  // vision

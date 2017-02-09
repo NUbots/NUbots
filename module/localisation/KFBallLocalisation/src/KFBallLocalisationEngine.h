@@ -26,7 +26,7 @@
 
 #include "utility/math/filter/UKF.h"
 #include "utility/math/filter/ParticleFilter.h"
-#include "message/support/Configuration.h"
+#include "extension/Configuration.h"
 #include "message/vision/VisionObjects.h"
 #include "message/localisation/FieldObject.h"
 #include "BallModel.h"
@@ -53,7 +53,7 @@ namespace localisation {
 
         double MeasurementUpdate(const message::vision::VisionObject& observed_object);
 
-        void UpdateConfiguration(const message::support::Configuration& config);
+        void UpdateConfiguration(const extension::Configuration& config);
 
         bool CanEmitFieldObjects();
 

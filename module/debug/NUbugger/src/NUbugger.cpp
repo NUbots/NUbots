@@ -23,7 +23,9 @@
 
 #include "message/platform/darwin/DarwinSensors.h"
 #include "message/input/Sensors.h"
+
 #include "utility/nubugger/NUhelpers.h"
+#include "utility/input/ServoID.h"
 
 namespace module {
 namespace debug {
@@ -35,8 +37,8 @@ namespace debug {
     using message::platform::darwin::DarwinSensors;
     using std::chrono::milliseconds;
     using message::input::Sensors;
-    using message::input::ServoID;
-    using message::support::nubugger::proto::DrawObjects;
+    using ServoID = utility::input::ServoID;
+    using message::support::nubugger::DrawObjects;
 
     NUbugger::NUbugger(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
 
@@ -56,12 +58,8 @@ namespace debug {
 
         on<Trigger<Sensors>, Single, Priority::LOW>().then([this](const Sensors& sensors) {
 
-            for (const auto& s : sensors.servos) {
-                if (s.id == ServoID::L_HIP_ROLL){
-                    emit(graph("Servo " + message::input::stringFromId(s.id), s.presentPosition));
-                }
-            }
-
+            emit(graph("Servo " + static_cast<std::string>(static_cast<ServoID>(sensors.servo.at(ServoID::L_HIP_ROLL).id)), 
+                                    sensors.servo.at(ServoID::L_HIP_ROLL).presentPosition));
         });
 
         on<Every<1, std::chrono::seconds>>().then([this] {

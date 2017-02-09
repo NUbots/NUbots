@@ -19,16 +19,16 @@
 
 #include "TestDOpE.h"
 
-#include "message/support/Configuration.h"
+#include "extension/Configuration.h"
 #include "message/support/optimisation/DOpE.h"
-#include "message/support/optimisation/Episode.pb.h"
-#include "utility/support/proto_armadillo.h"
+#include "message/support/optimisation/Episode.h"
+#include "utility/support/eigen_armadillo.h"
 
 namespace module {
 namespace debug {
 namespace optimisation {
 
-    using message::support::Configuration;
+    using extension::Configuration;
     using message::support::optimisation::Episode;
     using message::support::optimisation::Parameters;
     using message::support::optimisation::RequestParameters;
@@ -56,21 +56,22 @@ namespace optimisation {
 
             auto e = std::make_unique<Episode>();
 
-            e->set_group("test_dope");
-            e->set_generation(currentParameters.generation);
-            *e->mutable_values() << currentParameters.samples.col(0);
-            *e->mutable_covariance() << currentParameters.covariance;
+            e->group = "test_dope";
+            e->generation = currentParameters.generation;
+            e->values = currentParameters.samples.col(0);
+            e->covariance = currentParameters.covariance;
 
-            auto* fitness = e->add_fitness();
-            fitness->set_weight(1);
+            Episode::Fitness fitness;
+            fitness.weight = 1.0;
 
             double f = 0;
-            for(uint i = 0; i < currentParameters.samples.col(0).n_elem; ++i) {
+            for(int i = 0; i < currentParameters.samples.col(0).size(); ++i) {
                 double v = currentParameters.samples(i, 0) + i;
                 v *= v;
                 f += -v;
             }
-            fitness->set_fitness(f);
+            fitness.fitness = f;
+            e->fitness.push_back(fitness);
 
             emit(e);
 
@@ -85,13 +86,11 @@ namespace optimisation {
         op->group = "test_dope";
         op->network = true;
         op->parameters.initial.generation = 0;
-        op->parameters.initial.estimate = arma::vec(5, arma::fill::randu);
-        op->parameters.initial.covariance = arma::diagmat(arma::vec({ 0.1, 0.1, 0.1, 0.1, 0.1 }));
-        op->parameters.upperBound = arma::vec(5);
-        op->parameters.upperBound.fill(std::numeric_limits<double>::max());
-        op->parameters.lowerBound = arma::vec(5);
-        op->parameters.lowerBound.fill(std::numeric_limits<double>::min());
-        op->parameters.batchSize = 10;
+        op->parameters.initial.estimate   = Eigen::VectorXd::Random(5);
+        op->parameters.initial.covariance = Eigen::VectorXd::Constant(5, 0.1).asDiagonal();
+        op->parameters.upperBound         = Eigen::VectorXd::Constant(5, std::numeric_limits<double>::max());
+        op->parameters.lowerBound         = Eigen::VectorXd::Constant(5, std::numeric_limits<double>::min());
+        op->parameters.batchSize          = 10;
 
         emit<Scope::INITIALIZE>(op);
 

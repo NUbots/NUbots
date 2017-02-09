@@ -28,9 +28,11 @@
 #include <set>
 #include <list>
 
-#include "message/behaviour/Action.h"
 #include "message/behaviour/ServoCommand.h"
-#include "message/input/ServoID.h"
+#include "message/input/Sensors.h"
+
+#include "utility/behaviour/Action.h"
+#include "utility/input/ServoID.h"
 
 namespace module {
     namespace behaviour {
@@ -38,7 +40,7 @@ namespace module {
         struct RequestItem;
 
         struct Request {
-            using callback = std::function<void (std::set<message::input::LimbID>)>;
+            using callback = std::function<void (std::set<utility::input::LimbID>)>;
 
             Request()
             : id(0)
@@ -51,7 +53,7 @@ namespace module {
             , kill()
             , completed() {}
 
-            Request(size_t id, std::string name, callback start, callback kill, std::function<void (std::set<message::input::ServoID>)> completed)
+            Request(size_t id, std::string name, callback start, callback kill, std::function<void (std::set<utility::input::ServoID>)> completed)
             : id(id)
             , name(name)
             , active(false)
@@ -83,13 +85,13 @@ namespace module {
             /// The callback to execute when a new limb is started
             callback start;
             callback kill;
-            std::function<void (std::set<message::input::ServoID>)> completed;
+            std::function<void (std::set<utility::input::ServoID>)> completed;
         };
 
         struct RequestItem {
 
             //RequestItem() : group(Request()), index(0), active(false), priority(std::numeric_limits<float>::min()), limbSet() {}
-            RequestItem(Request& group, size_t index, float priority, const std::set<message::input::LimbID>& limbSet)
+            RequestItem(Request& group, size_t index, float priority, const std::set<utility::input::LimbID>& limbSet)
             : group(group)
             , index(index)
             , active(false)
@@ -103,7 +105,7 @@ namespace module {
             bool active;
 
             float priority;
-            std::set<message::input::LimbID> limbSet;
+            std::set<utility::input::LimbID> limbSet;
         };
 
         /**

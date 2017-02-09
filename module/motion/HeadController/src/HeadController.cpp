@@ -19,35 +19,42 @@
 
 #include "HeadController.h"
 
-#include "message/input/ServoID.h"
-#include "message/behaviour/Action.h"
+#include "extension/Configuration.h"
+
 #include "message/behaviour/ServoCommand.h"
 #include "message/input/Sensors.h"
-#include "message/support/Configuration.h"
 #include "message/motion/HeadCommand.h"
-#include "utility/math/coordinates.h"
-#include "utility/motion/InverseKinematics.h"
 #include "message/motion/KinematicsModels.h"
-#include "utility/support/yaml_expression.h"
+
+#include "utility/behaviour/Action.h"
+#include "utility/input/LimbID.h"
+#include "utility/input/ServoID.h"
+#include "utility/math/coordinates.h"
+#include "utility/math/matrix/Transform3D.h"
+#include "utility/motion/InverseKinematics.h"
 #include "utility/nubugger/NUhelpers.h"
+#include "utility/support/eigen_armadillo.h"
+#include "utility/support/yaml_expression.h"
 
 
-namespace module {
-    namespace motion {
-
+namespace module 
+{    
+namespace motion 
+{
         using utility::nubugger::graph;
-        using message::input::ServoID;
+        using LimbID  = utility::input::LimbID;
+        using ServoID = utility::input::ServoID;
         using message::input::Sensors;
-        using message::behaviour::RegisterAction;
-        using message::input::LimbID;
-        using message::support::Configuration;
+        using utility::behaviour::RegisterAction;
+        using extension::Configuration;
         using message::behaviour::ServoCommand;
         using message::motion::HeadCommand;
         using utility::math::coordinates::sphericalToCartesian;
         using utility::math::coordinates::cartesianToSpherical;
+        using utility::math::matrix::Transform3D;
         using utility::motion::kinematics::calculateCameraLookJoints;
         using utility::motion::kinematics::calculateHeadJoints;
-        using message::motion::kinematics::KinematicsModel;
+        using message::motion::KinematicsModel;
         using utility::support::Expression;
 
         //internal only callback messages to start and stop our action
@@ -69,12 +76,10 @@ namespace module {
             , goalAngles(arma::fill::zeros) {
 
             //do a little configurating
-            on<Configuration>("HeadController.yaml").then("Head Controller - Config", [this] (const Configuration& config) {
+            on<Configuration>("HeadController.yaml").then("Head Controller - Configure", [this] (const Configuration& config) {
                 //Gains
                 head_motor_gain = config["head_motors"]["gain"].as<double>();
                 head_motor_torque = config["head_motors"]["torque"].as<double>();
-
-
 
                 emit(std::make_unique<HeadCommand>( HeadCommand {config["initial"]["yaw"].as<float>(),
                                                                  config["initial"]["pitch"].as<float>(), false}));
@@ -96,7 +101,6 @@ namespace module {
             .then("Head Controller - Update Head Position", [this] (const Sensors& sensors, const KinematicsModel& kinematicsModel) {
 
                 emit(graph("HeadController Goal Angles", goalAngles[0], goalAngles[1]));
-
                 //P controller
                 currentAngles = p_gain * goalAngles + (1 - p_gain) * currentAngles;
 
@@ -105,13 +109,8 @@ namespace module {
                 //The goal angles are for the neck directly, so we have to offset the camera declination again
                 arma::vec3 goalHeadUnitVector_world = sphericalToCartesian({1, currentAngles[0], currentAngles[1]});
                 //Convert to robot space
-                arma::vec3 headUnitVector = goalRobotSpace ? goalHeadUnitVector_world : sensors.world.rotation() * goalHeadUnitVector_world;
+                arma::vec3 headUnitVector = goalRobotSpace ? goalHeadUnitVector_world : Transform3D(convert<double, 4, 4>(sensors.world)).rotation() * goalHeadUnitVector_world;
                 //Compute inverse kinematics for head
-
-
-
-
-
                 //!!!!!!!!!!!!!!
                 //!!!!!!!!!!!!!!
                 //!!!!!!!!!!!!!!
@@ -122,15 +121,14 @@ namespace module {
                 //!!!!!!!!!!!!!!
                 //!!!!!!!!!!!!!!
                 //!!!!!!!!!!!!!!
-                std::vector< std::pair<message::input::ServoID, float> > goalAnglesList = calculateHeadJoints(headUnitVector);
+                std::vector< std::pair<ServoID, float> > goalAnglesList = calculateHeadJoints(headUnitVector);
                 // arma::vec2 goalAngles = cartesianToSpherical(headUnitVector).rows(1,2);
 
-
                 //head limits
-                max_yaw = kinematicsModel.Head.MAX_YAW;
-                min_yaw = kinematicsModel.Head.MIN_YAW;
-                max_pitch = kinematicsModel.Head.MAX_PITCH;
-                min_pitch = kinematicsModel.Head.MIN_PITCH;
+                max_yaw = kinematicsModel.head.MAX_YAW;
+                min_yaw = kinematicsModel.head.MIN_YAW;
+                max_pitch = kinematicsModel.head.MAX_PITCH;
+                min_pitch = kinematicsModel.head.MIN_PITCH;
 
                 //Clamp head angles
                 float pitch = 0;
@@ -174,7 +172,6 @@ namespace module {
                 },
                 [this] (const std::set<ServoID>& ) { } //Servos reached target
             }));
-
         }
 
     }  // motion

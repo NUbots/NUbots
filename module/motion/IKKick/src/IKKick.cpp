@@ -19,47 +19,48 @@
 
 #include "IKKick.h"
 
-#include "message/support/Configuration.h"
-#include "message/motion/KickCommand.h"
-#include "message/input/Sensors.h"
-#include "message/input/ServoID.h"
-#include "message/input/LimbID.h"
-#include "message/behaviour/ServoCommand.h"
-#include "message/behaviour/Action.h"
-#include "message/support/FieldDescription.h"
-#include "message/motion/WalkCommand.h"
+#include "extension/Configuration.h"
+
 #include "message/behaviour/KickPlan.h"
+#include "message/behaviour/ServoCommand.h"
+#include "message/input/Sensors.h"
+#include "message/motion/KickCommand.h"
 #include "message/motion/KinematicsModels.h"
+#include "message/motion/WalkCommand.h"
+#include "message/support/FieldDescription.h"
 
 
+#include "utility/behaviour/Action.h"
+#include "utility/input/LimbID.h"
+#include "utility/input/ServoID.h"
 #include "utility/math/matrix/Transform3D.h"
 #include "utility/motion/InverseKinematics.h"
-#include "utility/support/yaml_armadillo.h"
 #include "utility/nubugger/NUhelpers.h"
-
-
+#include "utility/support/eigen_armadillo.h"
+#include "utility/support/yaml_armadillo.h"
 
 namespace module {
 namespace motion {
 
-    using message::support::Configuration;
-    using message::motion::WalkStopCommand;
+    using extension::Configuration;
+
+    using message::input::Sensors;
+    using LimbID  = utility::input::LimbID;
+    using ServoID = utility::input::ServoID;
+    using message::motion::StopCommand;
     using message::motion::KickCommand;
     using message::motion::IKKickParams;
     using message::motion::KickFinished;
-    using message::input::Sensors;
-    using message::input::ServoID;
-    using message::input::LimbID;
     using message::behaviour::ServoCommand;
-    using message::behaviour::RegisterAction;
-    using message::behaviour::ActionPriorites;
     using message::behaviour::KickPlan;
-    using message::behaviour::KickType;
+    using KickType = message::behaviour::KickPlan::KickType;
     using message::support::FieldDescription;
-    using message::motion::kinematics::KinematicsModel;
+    using message::motion::KinematicsModel;
 
-    using utility::motion::kinematics::calculateLegJoints;
+    using utility::behaviour::RegisterAction;
+    using utility::behaviour::ActionPriorites;
     using utility::math::matrix::Transform3D;
+    using utility::motion::kinematics::calculateLegJoints;
     using utility::motion::kinematics::calculateLegJoints;
     using utility::nubugger::graph;
 
@@ -99,20 +100,20 @@ namespace motion {
             feedbackBalancer.configure(balanceConfig);
 
             //Emit useful info to KickPlanner
-            emit(std::make_unique<IKKickParams>(IKKickParams{config["balancer"]["stand_height"].as<float>()}));
-            emit(std::make_unique<KickPlan>(KickPlan{{4.5,0},KickType::IK_KICK}));
+            emit(std::make_unique<IKKickParams>(IKKickParams(config["balancer"]["stand_height"].as<float>())));
+            emit(std::make_unique<KickPlan>(KickPlan(Eigen::Vector2d(4.5, 0), KickPlan::KickType::IK_KICK)));
 
         });
 
         on<Startup>().then("IKKick Startup", [this] {
             //Default kick plan at enemy goals
-            emit(std::make_unique<KickPlan>(KickPlan{{4.5,0},KickType::IK_KICK}));
+            emit(std::make_unique<KickPlan>(KickPlan(Eigen::Vector2d(4.5, 0), KickPlan::KickType::IK_KICK)));
         });
 
         on<Trigger<KickCommand>>().then([this] {
             // We want to kick!
 
-            emit(std::make_unique<WalkStopCommand>(subsumptionId)); // Stop the walk
+            emit(std::make_unique<StopCommand>(subsumptionId)); // Stop the walk
 
             updatePriority(KICK_PRIORITY);
         });
@@ -125,8 +126,8 @@ namespace motion {
 
 
             // 4x4 homogeneous transform matrices for left foot and right foot relative to torso
-            Transform3D leftFoot = sensors.forwardKinematics.find(ServoID::L_ANKLE_ROLL)->second;
-            Transform3D rightFoot = sensors.forwardKinematics.find(ServoID::R_ANKLE_ROLL)->second;
+            Transform3D leftFoot  = convert<double, 4, 4>(sensors.forwardKinematics.at(ServoID::L_ANKLE_ROLL)); 
+            Transform3D rightFoot = convert<double, 4, 4>(sensors.forwardKinematics.at(ServoID::R_ANKLE_ROLL)); 
 
             // Work out which of our feet are going to be the support foot
             // Store the support foot and kick foot
@@ -136,15 +137,15 @@ namespace motion {
                 supportFoot = LimbID::RIGHT_LEG;
             }
 
-            Transform3D torsoPose = (supportFoot == message::input::LimbID::LEFT_LEG) ? leftFoot.i() : rightFoot.i();
+            Transform3D torsoPose = (supportFoot == LimbID::LEFT_LEG) ? leftFoot.i() : rightFoot.i();
 
             // Put the ball position from vision into torso coordinates
-            arma::vec3 targetTorso = sensors.kinematicsBodyToGround.i().transformPoint(command.target);
+            arma::vec3 targetTorso = Transform3D(convert<double, 4, 4>(sensors.kinematicsBodyToGround)).i().transformPoint(convert<double, 3>(command.target));
             // Put the ball position into support foot coordinates
             arma::vec3 targetSupportFoot = torsoPose.transformPoint(targetTorso);
 
             // Put the goal from vision into torso coordinates
-            arma::vec3 directionTorso = sensors.kinematicsBodyToGround.i().transformVector(command.direction);
+            arma::vec3 directionTorso = Transform3D(convert<double, 4, 4>(sensors.kinematicsBodyToGround)).i().transformVector(convert<double, 3>(command.direction));
             // Put the goal into support foot coordinates
             arma::vec3 directionSupportFoot = torsoPose.transformVector(directionTorso);
 
@@ -209,7 +210,7 @@ namespace motion {
             }
 
             //Calculate IK and send waypoints
-            std::vector<std::pair<message::input::ServoID, float>> joints;
+            std::vector<std::pair<ServoID, float>> joints;
 
             //IK
             auto kickJoints = calculateLegJoints(kinematicsModel, kickFootGoal, kickFoot);
@@ -228,7 +229,7 @@ namespace motion {
 
             //Push back each servo command
             for (auto& joint : joints) {
-                waypoints->push_back({ subsumptionId, time, joint.first, joint.second, gain_legs, torque});
+                waypoints->push_back(ServoCommand(subsumptionId, time, joint.first, joint.second, gain_legs, torque));
             }
 
             //Send message

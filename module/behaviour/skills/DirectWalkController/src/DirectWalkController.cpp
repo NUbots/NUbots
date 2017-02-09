@@ -19,38 +19,41 @@
 
 #include "DirectWalkController.h"
 
-#include "message/support/Configuration.h"
-#include "message/behaviour/Action.h"
+#include "extension/Configuration.h"
+
 #include "message/behaviour/MotionCommand.h"
 #include "message/motion/WalkCommand.h"
-#include "message/input/LimbID.h"
-#include "message/input/ServoID.h"
+
+#include "utility/behaviour/Action.h"
+#include "utility/input/LimbID.h"
+#include "utility/input/ServoID.h"
 
 namespace module {
 namespace behaviour {
 namespace skills {
 
-    using message::support::Configuration;
+    using extension::Configuration;
+
     using message::behaviour::MotionCommand;
-    using message::behaviour::RegisterAction;
-    using message::behaviour::ActionPriorites;
-    using message::motion::WalkStopped;
     using message::motion::WalkCommand;
-    using message::motion::WalkStartCommand;
-    using message::motion::WalkStopCommand;
+    using message::motion::StopCommand;
+    using message::motion::WalkStopped;
     using message::motion::EnableWalkEngineCommand;
     using message::motion::DisableWalkEngineCommand;
-    using message::input::LimbID;
-    using message::input::ServoID;
+    using LimbID  = utility::input::LimbID;
+    using ServoID = utility::input::ServoID;
+
+    using utility::behaviour::RegisterAction;
+    using utility::behaviour::ActionPriorites;
 
     DirectWalkController::DirectWalkController(std::unique_ptr<NUClear::Environment> environment)
     : Reactor(std::move(environment))
     , subsumptionId(size_t(this) * size_t(this) - size_t(this)) {
 
         // Register this module with the subsumption system:
-        emit<Scope::INITIALIZE>(std::make_unique<RegisterAction>(RegisterAction {
-            subsumptionId,
-            "DirectWalkController",
+        emit<Scope::INITIALIZE>(std::make_unique<RegisterAction>(RegisterAction 
+        {
+            subsumptionId, "DirectWalkController",
             {
                 // Limb sets required by the walk engine:
                 std::pair<double, std::set<LimbID>>(0, {LimbID::LEFT_LEG, LimbID::RIGHT_LEG}),
@@ -73,21 +76,28 @@ namespace skills {
             }
         }));
 
-        on<Trigger<MotionCommand>>().then([this] (const MotionCommand& command) {
-            if (command.type == MotionCommand::Type::DirectCommand) {
+        on<Trigger<MotionCommand>>().then([this] (const MotionCommand& command) 
+        {
+            if (command.type == MotionCommand::Type::DirectCommand) 
+            {
                 emit(std::make_unique<ActionPriorites>(ActionPriorites { subsumptionId, { 26, 11 }}));
-                emit(std::move(std::make_unique<WalkStartCommand>(subsumptionId)));
-                emit(std::move(std::make_unique<WalkCommand>(subsumptionId, command.walkCommand)));
-            } else if (command.type == MotionCommand::Type::StandStill) {
+                emit(std::move(std::make_unique<WalkCommand>(subsumptionId, command.walkCommand)));           
+            } 
+            else if (command.type == MotionCommand::Type::StandStill) 
+            {
                 emit(std::make_unique<ActionPriorites>(ActionPriorites { subsumptionId, { 26, 11 }}));
-                emit(std::move(std::make_unique<WalkStopCommand>(subsumptionId)));
-            } else {
+                emit(std::move(std::make_unique<StopCommand>(subsumptionId)));
+            } 
+            else 
+            {
                 emit(std::make_unique<ActionPriorites>(ActionPriorites { subsumptionId, { 0, 0 }}));
             }
         });
 
-        on<Trigger<WalkStopped>>().then([this] {
-            emit(std::make_unique<ActionPriorites>(ActionPriorites { subsumptionId, { 0, 0 }}));
+        on<Trigger<WalkStopped>>().then([this] 
+        {
+            // TODO : Right now, this causes the walk engine to become unaware of positions and negatively impact servo positions...
+            //emit(std::make_unique<ActionPriorites>(ActionPriorites { subsumptionId, { 0, 0 }}));
         });
     }
 }

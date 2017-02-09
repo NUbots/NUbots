@@ -18,17 +18,20 @@
  */
 
 #include "IKKickControllers.h"
-#include "message/motion/KinematicsModels.h"
 
-using message::input::Sensors;
-using message::input::LimbID;
-using message::input::ServoID;
-using message::support::Configuration;
-using utility::math::matrix::Transform3D;
-using message::motion::kinematics::KinematicsModel;
+#include "message/motion/KinematicsModels.h"
 
 namespace module{
 namespace motion{
+
+    using extension::Configuration;
+
+    using message::input::Sensors;
+    using LimbID  = utility::input::LimbID;
+    using ServoID = utility::input::ServoID;
+    using message::motion::KinematicsModel;
+
+    using utility::math::matrix::Transform3D;
 
 	void KickBalancer::configure(const Configuration& config){
         servo_angle_threshold = config["balancer"]["servo_angle_threshold"].as<float>();
@@ -40,14 +43,13 @@ namespace motion{
         return_duration = config["balancer"]["return_duration"].as<float>();
 	}
 
-
     void KickBalancer::computeStartMotion(const KinematicsModel& kinematicsModel, const Sensors& sensors) {
         Transform3D torsoToFoot = getTorsoPose(sensors);
         Transform3D startPose = torsoToFoot.i();
 
         int negativeIfRight = (supportFoot == LimbID::RIGHT_LEG) ? -1 : 1;
         Transform3D finishPose = torsoToFoot;
-        finishPose.translation() = arma::vec3({forward_lean, negativeIfRight * (adjustment + kinematicsModel.Leg.FOOT_CENTRE_TO_ANKLE_CENTRE), stand_height});
+        finishPose.translation() = arma::vec3({forward_lean, negativeIfRight * (adjustment + kinematicsModel.leg.FOOT_CENTRE_TO_ANKLE_CENTRE), stand_height});
         finishPose = finishPose.i();
 
         std::vector<SixDOFFrame> frames;
@@ -55,7 +57,6 @@ namespace motion{
         frames.push_back(SixDOFFrame{finishPose,forward_duration});
         anim = Animator(frames);
     }
-
 
     void KickBalancer::computeStopMotion(const Sensors&){
         //Play the reverse
@@ -66,9 +67,9 @@ namespace motion{
 
     void Kicker::configure(const Configuration& config) {
         servo_angle_threshold = config["kick_frames"]["servo_angle_threshold"].as<float>();
-        lift_foot = SixDOFFrame(config["kick_frames"]["lift_foot"]);
-        kick = SixDOFFrame(config["kick_frames"]["kick"]);
-        place_foot = SixDOFFrame(config["kick_frames"]["place_foot"]);
+        lift_foot = SixDOFFrame(config["kick_frames"]["lift_foot"].config);
+        kick = SixDOFFrame(config["kick_frames"]["kick"].config);
+        place_foot = SixDOFFrame(config["kick_frames"]["place_foot"].config);
 
         kick_velocity = config["kick"]["kick_velocity"].as<float>();
         follow_through = config["kick"]["follow_through"].as<float>();
@@ -87,8 +88,10 @@ namespace motion{
         // Convert torso to support foot
         Transform3D currentTorso = getTorsoPose(sensors);
         // Convert kick foot to torso
-        Transform3D currentKickFoot = supportFoot == LimbID::LEFT_LEG ? sensors.forwardKinematics.find(ServoID::R_ANKLE_ROLL)->second
-                                                                      : sensors.forwardKinematics.find(ServoID::L_ANKLE_ROLL)->second;
+        Transform3D currentKickFoot = (supportFoot == LimbID::LEFT_LEG) 
+                                    ? convert<double, 4, 4>(sensors.forwardKinematics.at(ServoID::L_ANKLE_ROLL))
+                                    : convert<double, 4, 4>(sensors.forwardKinematics.at(ServoID::R_ANKLE_ROLL)); 
+                                    
         // Convert support foot to kick foot coordinates = convert torso to kick foot * convert support foot to torso
         Transform3D supportToKickFoot = currentKickFoot.i() * currentTorso.i();
         // Convert ball position from support foot coordinates to kick foot coordinates
@@ -110,7 +113,7 @@ namespace motion{
         //constrain to prevent leg collision
         arma::vec3 supportFootPos = supportToKickFoot.translation();
         int signSupportFootPosY = supportFootPos[1] < 0 ? -1 : 1;
-        float clippingPlaneY = supportFootPos[1] - signSupportFootPosY * (foot_separation_margin + (kinematicsModel.Leg.FOOT_WIDTH / 2.0 - kinematicsModel.Leg.FOOT_CENTRE_TO_ANKLE_CENTRE));
+        float clippingPlaneY = supportFootPos[1] - signSupportFootPosY * (foot_separation_margin + (kinematicsModel.leg.FOOT_WIDTH / 2.0 - kinematicsModel.leg.FOOT_CENTRE_TO_ANKLE_CENTRE));
 
         float liftClipDistance = (liftGoal[1] - clippingPlaneY);
         if(signSupportFootPosY * liftClipDistance > 0){

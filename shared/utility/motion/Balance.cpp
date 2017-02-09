@@ -20,16 +20,18 @@
 
 #include "message/motion/KinematicsModels.h"
 
+#include "utility/support/eigen_armadillo.h"
+
 namespace utility {
 namespace motion {
 
-    using message::input::LimbID;
-    using message::input::ServoID;
+    using LimbID  = utility::input::LimbID;
+    //using ServoID = utility::input::ServoID;
     using message::input::Sensors;
     using utility::math::matrix::Rotation3D;
     using utility::math::matrix::Transform3D;
     using utility::math::geometry::UnitQuaternion;
-    using message::motion::kinematics::KinematicsModel;
+    using message::motion::KinematicsModel;
 
     void Balancer::configure(const YAML::Node& config) {
         rotationPGain = config["angle_gain"]["p"].as<float>();
@@ -62,7 +64,7 @@ namespace motion {
         //------------------------------------
 
         //Robot coords in world (:Robot -> World)
-        Rotation3D orientation = sensors.world.rotation().i();
+        Rotation3D orientation = Transform3D(convert<double, 4, 4>(sensors.world)).rotation().i();
         Rotation3D yawlessOrientation = Rotation3D::createRotationZ(-orientation.yaw()) * orientation;
 
         // Removes any yaw component
@@ -98,9 +100,9 @@ namespace motion {
         // Get the position of our hip to rotate around
         
         Transform3D hip = Transform3D(arma::vec3({
-            model.Leg.HIP_OFFSET_X,
-            model.Leg.HIP_OFFSET_Y * (leg == LimbID::RIGHT_LEG ? -1 : 1),
-            -model.Leg.HIP_OFFSET_Z
+            model.leg.HIP_OFFSET_X,
+            model.leg.HIP_OFFSET_Y * (leg == LimbID::RIGHT_LEG ? -1 : 1),
+            -model.leg.HIP_OFFSET_Z
         }));
 
         // Rotate around our hip to apply a balance
@@ -151,7 +153,7 @@ namespace motion {
                                                        - translationPGainZ * total - translationDGainY * dTotal});
 
         // //Rotate from world space to torso space
-        // Rotation3D yawLessOrientation = Rotation3D::createRotationZ(-sensors.world.rotation().yaw()) * sensors.world.rotation();
+        // Rotation3D yawLessOrientation = Rotation3D::createRotationZ(-Transform3D(convert<double, 4, 4>(sensors.world)).rotation()).yaw()) * Transform3D(convert<double, 4, 4>(sensors.world)).rotation();
 
         arma::vec3 torsoAdjustment_torso = torsoAdjustment_world;
 

@@ -19,16 +19,20 @@
 
 #include "KickCommander.h"
 
-#include "message/support/Configuration.h"
+#include "extension/Configuration.h"
+
 #include "message/motion/KickCommand.h"
 
+#include "utility/support/eigen_armadillo.h"
 #include "utility/support/yaml_armadillo.h"
 
 namespace module {
 namespace support {
 
-    using message::support::Configuration;
+    using extension::Configuration;
+
     using message::motion::KickCommand;
+    using KickCommandType = message::motion::KickCommandType;
 
     KickCommander::KickCommander(std::unique_ptr<NUClear::Environment> environment)
     : Reactor(std::move(environment)) {
@@ -38,10 +42,11 @@ namespace support {
             if(!doThings){
                 doThings = true;
             } else {
-    		    emit(std::make_unique<KickCommand>(KickCommand{
-    		        config["target"].as<arma::vec3>(),
-    		        config["direction"].as<arma::vec3>()
-    		    }));
+    		    emit(std::make_unique<KickCommand>(KickCommand(
+    	           convert<double, 3>(config["target"].as<arma::vec3>()),
+    	           convert<double, 3>(config["direction"].as<arma::vec3>()),
+                   KickCommandType::NORMAL
+    		    )));
             }
 
         });

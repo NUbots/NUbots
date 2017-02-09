@@ -1,7 +1,7 @@
 NUCLEAR_ROLE(
     # FileWatcher, ConsoleLogHandler and Signal Catcher Must Go First. KinematicsConfiguration usually goes after these and without it many roles do not run
     support::SignalCatcher
-    support::extension::FileWatcher
+    extension::FileWatcher
     support::logging::ConsoleLogHandler
 
     # This must come first as it emits config which many roles depend on (e.g. SensorFilter, WalkEngine)
@@ -15,12 +15,16 @@ NUCLEAR_ROLE(
     support::logging::LegLoadsLogger
 
     # Hardware Interface
-    input::LinuxCamera
+    input::Camera
     platform::darwin::HardwareIO
     platform::darwin::SensorFilter
 
     # Motion
-    motion::WalkEngine
+    motion::FootMotionPlanner
+    motion::FootPlacementPlanner
+    motion::TorsoMotionPlanner
+    motion::BalanceKinematicResponse
+    motion::OldWalkEngine
     motion::ScriptEngine
     motion::HeadController
     motion::IKKick

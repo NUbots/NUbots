@@ -19,13 +19,14 @@
 
 #include "GoalDetector.h"
 
+#include "extension/Configuration.h"
+
 #include "RansacGoalModel.h"
 
+#include "message/input/CameraParameters.h"
 #include "message/vision/ClassifiedImage.h"
 #include "message/vision/VisionObjects.h"
 #include "message/vision/LookUpTable.h"
-#include "message/support/Configuration.h"
-#include "message/support/FieldDescription.h"
 
 #include "utility/math/geometry/Quad.h"
 #include "utility/math/geometry/Line.h"
@@ -34,13 +35,19 @@
 #include "utility/math/ransac/NPartiteRansac.h"
 #include "utility/math/vision.h"
 #include "utility/math/coordinates.h"
-#include "message/input/CameraParameters.h"
+
+#include "utility/vision/ClassifiedImage.h"
+#include "utility/vision/fourcc.h"
+#include "utility/vision/LookUpTable.h"
+#include "utility/vision/Vision.h"
+
 
 namespace module {
 namespace vision {
 
+    using extension::Configuration;
+
     using message::input::CameraParameters;
-    using message::input::Sensors;
 
     using utility::math::coordinates::cartesianToSpherical;
 
@@ -58,14 +65,10 @@ namespace vision {
     using utility::math::vision::projectCamSpaceToScreen;
     using utility::math::vision::distanceToVerticalObject;
 
-    using message::vision::ObjectClass;
     using message::vision::LookUpTable;
     using message::vision::ClassifiedImage;
-    using message::vision::VisionObject;
+    using SegmentClass = message::vision::ClassifiedImage::SegmentClass::Value;
     using message::vision::Goal;
-
-    using message::support::Configuration;
-    using message::support::FieldDescription;
 
     // TODO the system is too generous with adding segments above and below the goals and makes them too tall, stop it
     // TODO the system needs to throw out the kinematics and height based measurements when it cannot be sure it saw the tops and bottoms of the goals
@@ -110,10 +113,10 @@ namespace vision {
             MEASUREMENT_LIMITS_BASE  = config["measurement_limits"]["base"].as<uint>();
         });
 
-        on<Trigger<ClassifiedImage<ObjectClass>>
+        on<Trigger<ClassifiedImage>
          , With<CameraParameters>
          , With<LookUpTable>
-         , Single>().then("Goal Detector", [this] (std::shared_ptr<const ClassifiedImage<ObjectClass>> rawImage
+         , Single>().then("Goal Detector", [this] (std::shared_ptr<const ClassifiedImage> rawImage
                           , const CameraParameters& cam
                           , const LookUpTable& lut) {
 
@@ -123,21 +126,21 @@ namespace vision {
             auto goals = std::make_unique<std::vector<Goal>>();
 
             // Get our goal segments
-            auto hSegments = image.horizontalSegments.equal_range(ObjectClass::GOAL);
-            for(auto it = hSegments.first; it != hSegments.second; ++it) {
+            for (const auto& segment : image.horizontalSegments) {
 
                 // We throw out points if they are:
                 // Less the full quality (subsampled)
                 // Do not have a transition on the other side
-                if(it->second.subsample == 1 && it->second.previous && it->second.next) {
-                    segments.push_back({ { double(it->second.start[0]), double(it->second.start[1]) }, { double(it->second.end[0]), double(it->second.end[1]) } });
+                if ((segment.segmentClass == SegmentClass::GOAL) && (segment.subsample == 1) && (segment.previous > -1) && (segment.next > -1)) {
+                    segments.push_back({ { double(segment.start[0]), double(segment.start[1]) }, { double(segment.end[0]), double(segment.end[1]) } });
                 }
             }
 
             // Partition our segments so that they are split between above and below the horizon
             auto split = std::partition(std::begin(segments), std::end(segments), [image] (const RansacGoalModel::GoalSegment& segment) {
                 // Is the midpoint above or below the horizon?
-                return image.horizon.distanceToPoint(segment.left + segment.right / 2) > 0;
+                utility::math::geometry::Line horizon(convert<double, 2>(image.horizon.normal), image.horizon.distance);
+                return horizon.distanceToPoint(segment.left + segment.right / 2) > 0;
             });
 
             // Make an array of our partitions
@@ -203,7 +206,9 @@ namespace vision {
                     (point[0] < image.dimensions[0]) && (point[0] > 0) && (point[1] < image.dimensions[1]);
                     point += direction) {
 
-                    char c = lut(image.image->operator()(int(point[0]), int(point[1])));
+                    char c = static_cast<char>(utility::vision::getPixelColour(lut, 
+                        utility::vision::getPixel(int(point[0]), int(point[1]), image.image->dimensions[0], image.image->dimensions[1], image.image->data, 
+                                                    static_cast<utility::vision::FOURCC>(image.image->format))));
 
                     if(c != 'y') {
                         ++notWhiteLen;
@@ -235,14 +240,15 @@ namespace vision {
                 arma::vec2 midP2 = mid.orthogonalProjection(basePoint);
 
                 // Project those points outward onto the quad
-                arma::vec2 p1 = midP1 - left.distanceToPoint(midP1) * arma::dot(left.normal, mid.normal) * mid.normal;
-                arma::vec2 p2 = midP2 - left.distanceToPoint(midP2) * arma::dot(left.normal, mid.normal) * mid.normal;
+                arma::vec2 p1 = midP1 - left.distanceToPoint(midP1)  * arma::dot(left.normal, mid.normal)  * mid.normal;
+                arma::vec2 p2 = midP2 - left.distanceToPoint(midP2)  * arma::dot(left.normal, mid.normal)  * mid.normal;
                 arma::vec2 p3 = midP1 - right.distanceToPoint(midP1) * arma::dot(right.normal, mid.normal) * mid.normal;
                 arma::vec2 p4 = midP2 - right.distanceToPoint(midP2) * arma::dot(right.normal, mid.normal) * mid.normal;
 
                 // Make a quad
-                Goal g;
-                g.side = Goal::Side::UNKNOWN;
+                Goal goal;
+                goal.visObject.sensors = image.sensors;
+                goal.side = Goal::Side::UNKNOWN_SIDE;
 
                 // Seperate tl and bl
                 arma::vec2 tl = p1[1] > p2[1] ? p2 : p1;
@@ -250,34 +256,46 @@ namespace vision {
                 arma::vec2 tr = p3[1] > p4[1] ? p4 : p3;
                 arma::vec2 br = p3[1] > p4[1] ? p3 : p4;
 
-                g.quad.set(bl, tl, tr, br);
+                goal.quad.bl = convert<double, 2>(bl);
+                goal.quad.tl = convert<double, 2>(tl);
+                goal.quad.tr = convert<double, 2>(tr);
+                goal.quad.br = convert<double, 2>(br);
 
-                g.sensors = image.sensors;
-                g.classifiedImage = rawImage;
-                goals->push_back(std::move(g));
+                goals->push_back(std::move(goal));
             }
+
+            utility::math::geometry::Line horizon(convert<double, 2>(image.horizon.normal), image.horizon.distance);
 
             // Throwout invalid quads
             for(auto it = goals->begin(); it != goals->end();) {
 
-                auto& quad = it->quad;
-                arma::vec2 lhs = arma::normalise(quad.getTopLeft() - quad.getBottomLeft());
+                utility::math::geometry::Quad quad(convert<double, 2>(it->quad.bl),
+                                                   convert<double, 2>(it->quad.tl),
+                                                   convert<double, 2>(it->quad.tr),
+                                                   convert<double, 2>(it->quad.br));
+
+                arma::vec2 lhs = arma::normalise(quad.getTopLeft()  - quad.getBottomLeft());
                 arma::vec2 rhs = arma::normalise(quad.getTopRight() - quad.getBottomRight());
 
                 // Check if we are within the aspect ratio range
                 bool valid = quad.aspectRatio() > MINIMUM_ASPECT_RATIO
                           && quad.aspectRatio() < MAXIMUM_ASPECT_RATIO
+
                 // Check if we are close enough to the visual horizon
-                          && (image.visualHorizonAtPoint(quad.getBottomLeft()[0]) < quad.getBottomLeft()[1] + VISUAL_HORIZON_BUFFER
-                              || image.visualHorizonAtPoint(quad.getBottomRight()[0]) < quad.getBottomRight()[1] + VISUAL_HORIZON_BUFFER)
+                          && (utility::vision::visualHorizonAtPoint(image, quad.getBottomLeft()[0]) < quad.getBottomLeft()[1] + VISUAL_HORIZON_BUFFER
+                              || utility::vision::visualHorizonAtPoint(image, quad.getBottomRight()[0]) < quad.getBottomRight()[1] + VISUAL_HORIZON_BUFFER)
+
                 // Check we finish above the kinematics horizon or or kinematics horizon is off the screen
-                          && (image.horizon.y(quad.getTopLeft()[0]) > quad.getTopLeft()[1] || image.horizon.y(quad.getTopLeft()[0]) < 0)
-                          && (image.horizon.y(quad.getTopRight()[0]) > quad.getTopRight()[1] || image.horizon.y(quad.getTopRight()[0]) < 0)
+                          && (horizon.y(quad.getTopLeft()[0])  > quad.getTopLeft()[1]  || horizon.y(quad.getTopLeft()[0])  < 0)
+                          && (horizon.y(quad.getTopRight()[0]) > quad.getTopRight()[1] || horizon.y(quad.getTopRight()[0]) < 0)
+
                 // Check that our two goal lines are perpendicular with the horizon must use greater than rather then less than because of the cos
-                          && std::abs(arma::dot(lhs, image.horizon.normal)) > MAXIMUM_GOAL_HORIZON_NORMAL_ANGLE
-                          && std::abs(arma::dot(rhs, image.horizon.normal)) > MAXIMUM_GOAL_HORIZON_NORMAL_ANGLE
+                          && std::abs(arma::dot(rhs, horizon.normal)) > MAXIMUM_GOAL_HORIZON_NORMAL_ANGLE
+                          && std::abs(arma::dot(lhs, horizon.normal)) > MAXIMUM_GOAL_HORIZON_NORMAL_ANGLE
+
                 // Check that our two goal lines are approximatly parallel
                           && std::abs(arma::dot(lhs, rhs)) > MAXIMUM_ANGLE_BETWEEN_GOALS;
+
                 // Check that our goals don't form too much of an upward cup (not really possible for us)
                           //&& lhs.at(0) * rhs.at(1) - lhs.at(1) * rhs.at(0) > MAXIMUM_VERTICAL_GOAL_PERSPECTIVE_ANGLE;
 
@@ -292,22 +310,34 @@ namespace vision {
 
             // Merge close goals
             for (auto a = goals->begin(); a != goals->end(); ++a) {
+                utility::math::geometry::Quad aquad(convert<double, 2>(a->quad.bl),
+                                                    convert<double, 2>(a->quad.tl),
+                                                    convert<double, 2>(a->quad.tr),
+                                                    convert<double, 2>(a->quad.br));
+
                 for (auto b = std::next(a); b != goals->end();) {
 
-                    if (a->quad.overlapsHorizontally(b->quad)) {
-                        // Get outer lines.
-                        arma::vec2 tl;
-                        arma::vec2 tr;
-                        arma::vec2 bl;
-                        arma::vec2 br;
+                    utility::math::geometry::Quad bquad(convert<double, 2>(b->quad.bl),
+                                                        convert<double, 2>(b->quad.tl),
+                                                        convert<double, 2>(b->quad.tr),
+                                                        convert<double, 2>(b->quad.br));
 
-                        tl = { std::min(a->quad.getTopLeft()[0],     b->quad.getTopLeft()[0]),     std::min(a->quad.getTopLeft()[1],     b->quad.getTopLeft()[1]) };
-                        tr = { std::max(a->quad.getTopRight()[0],    b->quad.getTopRight()[0]),    std::min(a->quad.getTopRight()[1],    b->quad.getTopRight()[1]) };
-                        bl = { std::min(a->quad.getBottomLeft()[0],  b->quad.getBottomLeft()[0]),  std::max(a->quad.getBottomLeft()[1],  b->quad.getBottomLeft()[1]) };
-                        br = { std::max(a->quad.getBottomRight()[0], b->quad.getBottomRight()[0]), std::max(a->quad.getBottomRight()[1], b->quad.getBottomRight()[1]) };
+
+                    if (aquad.overlapsHorizontally(bquad)) {
+                        // Get outer lines.
+                        arma::vec2 tl, tr, bl, br;
+
+                        tl = { std::min(aquad.getTopLeft()[0],     bquad.getTopLeft()[0]),     std::min(aquad.getTopLeft()[1],     bquad.getTopLeft()[1]) };
+                        tr = { std::max(aquad.getTopRight()[0],    bquad.getTopRight()[0]),    std::min(aquad.getTopRight()[1],    bquad.getTopRight()[1]) };
+                        bl = { std::min(aquad.getBottomLeft()[0],  bquad.getBottomLeft()[0]),  std::max(aquad.getBottomLeft()[1],  bquad.getBottomLeft()[1]) };
+                        br = { std::max(aquad.getBottomRight()[0], bquad.getBottomRight()[0]), std::max(aquad.getBottomRight()[1], bquad.getBottomRight()[1]) };
 
                         // Replace original two quads with the new one.
-                        a->quad.set(bl, tl, tr, br);
+                        aquad.set(bl, tl, tr, br);
+                        a->quad.bl = convert<double, 2>(bl);
+                        a->quad.tl = convert<double, 2>(tl);
+                        a->quad.tr = convert<double, 2>(tr);
+                        a->quad.br = convert<double, 2>(br);
                         b = goals->erase(b);
                     }
                     else {
@@ -318,28 +348,32 @@ namespace vision {
 
             // Store our measurements
             for(auto it = goals->begin(); it != goals->end(); ++it) {
+                utility::math::geometry::Quad quad(convert<double, 2>(it->quad.bl),
+                                                   convert<double, 2>(it->quad.tl),
+                                                   convert<double, 2>(it->quad.tr),
+                                                   convert<double, 2>(it->quad.br));
 
                 // Get the quad points in screen coords
-                arma::vec2 tl = imageToScreen(it->quad.getTopLeft(), image.dimensions);
-                arma::vec2 tr = imageToScreen(it->quad.getTopRight(), image.dimensions);
-                arma::vec2 bl = imageToScreen(it->quad.getBottomLeft(), image.dimensions);
-                arma::vec2 br = imageToScreen(it->quad.getBottomRight(), image.dimensions);
+                arma::vec2 tl = imageToScreen(quad.getTopLeft(),     convert<uint, 2>(image.dimensions));
+                arma::vec2 tr = imageToScreen(quad.getTopRight(),    convert<uint, 2>(image.dimensions));
+                arma::vec2 bl = imageToScreen(quad.getBottomLeft(),  convert<uint, 2>(image.dimensions));
+                arma::vec2 br = imageToScreen(quad.getBottomRight(), convert<uint, 2>(image.dimensions));
                 arma::vec2 screenGoalCentre = (tl + tr + bl + br) * 0.25;
 
                 // Get vectors for TL TR BL BR;
                 arma::vec3 ctl = getCamFromScreen(tl, cam.focalLengthPixels);
-                arma::vec3 ctr = getCamFromScreen(tr, cam.focalLengthPixels);;
-                arma::vec3 cbl = getCamFromScreen(bl, cam.focalLengthPixels);;
-                arma::vec3 cbr = getCamFromScreen(br, cam.focalLengthPixels);;
+                arma::vec3 ctr = getCamFromScreen(tr, cam.focalLengthPixels);
+                arma::vec3 cbl = getCamFromScreen(bl, cam.focalLengthPixels);
+                arma::vec3 cbr = getCamFromScreen(br, cam.focalLengthPixels);
 
                 // Get our four normals for each edge
                 // BL TL cross product gives left side
-                arma::vec3 left   = arma::normalise(arma::cross(cbl, ctl));
-                it->measurements.push_back(std::make_pair(Goal::MeasurementType::LEFT_NORMAL, left));
+                auto left   = convert<double, 3>(arma::normalise(arma::cross(cbl, ctl)));
+                it->measurement.push_back(Goal::Measurement(Goal::MeasurementType::LEFT_NORMAL, left));
 
                 // TR BL cross product gives right side
-                arma::vec3 right  = arma::normalise(arma::cross(ctr, cbl));
-                it->measurements.push_back(std::make_pair(Goal::MeasurementType::RIGHT_NORMAL, right));
+                auto right  = convert<double, 3>(arma::normalise(arma::cross(ctr, cbl)));
+                it->measurement.push_back(Goal::Measurement(Goal::MeasurementType::RIGHT_NORMAL, right));
 
                 // Check that the points are not too close to the edges of the screen
                 if(                         std::min(cbr[0], cbl[0]) > MEASUREMENT_LIMITS_LEFT
@@ -348,8 +382,8 @@ namespace vision {
                 && cam.imageSizePixels[1] - std::max(cbr[1], cbl[1]) < MEASUREMENT_LIMITS_BASE) {
 
                     // BR BL cross product gives the bottom side
-                    arma::vec3 bottom = arma::normalise(arma::cross(cbr, cbl));
-                    it->measurements.push_back(std::make_pair(Goal::MeasurementType::BASE_NORMAL, right));
+                    auto bottom = convert<double, 3>(arma::normalise(arma::cross(cbr, cbl)));
+                    it->measurement.push_back(Goal::Measurement(Goal::MeasurementType::BASE_NORMAL, bottom));
                 }
 
                 // Check that the points are not too close to the edges of the screen
@@ -359,27 +393,35 @@ namespace vision {
                 && cam.imageSizePixels[1] - std::max(ctr[1], ctl[1]) < MEASUREMENT_LIMITS_BASE) {
 
                     // TL TR cross product gives the top side
-                    arma::vec3 top    = arma::normalise(arma::cross(ctl, ctr));
-                    it->measurements.push_back(std::make_pair(Goal::MeasurementType::TOP_NORMAL, right));
+                    auto top    = convert<double, 3>(arma::normalise(arma::cross(ctl, ctr)));
+                    it->measurement.push_back(Goal::Measurement(Goal::MeasurementType::TOP_NORMAL, top));
                 }
 
-                // Attach our sensors
-                it->sensors = image.sensors;
-
                 // Angular positions from the camera
-                it->screenAngular = arma::atan(cam.pixelsToTanThetaFactor % screenGoalCentre);
-                arma::vec2 brAngular = arma::atan(cam.pixelsToTanThetaFactor % br);
-                arma::vec2 trAngular = arma::atan(cam.pixelsToTanThetaFactor % tr);
-                arma::vec2 blAngular = arma::atan(cam.pixelsToTanThetaFactor % bl);
-                arma::vec2 tlAngular = arma::atan(cam.pixelsToTanThetaFactor % tl);
+                arma::vec2 pixelsToTanThetaFactor = convert<double, 2>(cam.pixelsToTanThetaFactor);
+                it->visObject.screenAngular = convert<double, 2>(arma::atan(pixelsToTanThetaFactor % screenGoalCentre));
+                arma::vec2 brAngular = arma::atan(pixelsToTanThetaFactor % br);
+                arma::vec2 trAngular = arma::atan(pixelsToTanThetaFactor % tr);
+                arma::vec2 blAngular = arma::atan(pixelsToTanThetaFactor % bl);
+                arma::vec2 tlAngular = arma::atan(pixelsToTanThetaFactor % tl);
                 Quad angularQuad(blAngular,tlAngular,trAngular,brAngular);
-                it->angularSize = angularQuad.getSize();
+                it->visObject.angularSize = convert<double, 2>(angularQuad.getSize());
             }
 
 
             // Assign leftness and rightness to goals
             if (goals->size() == 2) {
-                if (goals->at(0).quad.getCentre()(0) < goals->at(1).quad.getCentre()(0)) {
+                utility::math::geometry::Quad quad0(convert<double, 2>(goals->at(0).quad.bl),
+                                                    convert<double, 2>(goals->at(0).quad.tl),
+                                                    convert<double, 2>(goals->at(0).quad.tr),
+                                                    convert<double, 2>(goals->at(0).quad.br));
+
+                utility::math::geometry::Quad quad1(convert<double, 2>(goals->at(1).quad.bl),
+                                                    convert<double, 2>(goals->at(1).quad.tl),
+                                                    convert<double, 2>(goals->at(1).quad.tr),
+                                                    convert<double, 2>(goals->at(1).quad.br));
+
+                if (quad0.getCentre()(0) < quad1.getCentre()(0)) {
                     goals->at(0).side = Goal::Side::LEFT;
                     goals->at(1).side = Goal::Side::RIGHT;
                 } else {

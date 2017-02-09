@@ -21,7 +21,10 @@
 #define MODULES_INPUT_NATNET_H
 
 #include <nuclear>
-#include <armadillo>
+
+#pragma GCC diagnostic ignored "-Weffc++"
+#include <Eigen/Core>
+#pragma GCC diagnostic pop
 
 namespace module {
 namespace input {
@@ -55,11 +58,11 @@ namespace input {
         };
 
         struct RigidBodyModel {
-            RigidBodyModel() : name(""), id(0), parentId(0), offset(arma::fill::zeros) {}
+            RigidBodyModel() : name(""), id(0), parentId(0), offset(Eigen::Vector3f::Zero()) {}
             std::string name;
             uint32_t id;
             uint32_t parentId;
-            arma::fvec3 offset;
+            Eigen::Vector3f offset;
         };
 
         struct SkeletonModel {

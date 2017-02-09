@@ -23,11 +23,11 @@
 #include <cppformat/format.h>
 #include <google/protobuf/util/message_differencer.h>
 
-#include "utility/support/proto_armadillo.h"
-#include "message/support/Configuration.h"
+#include "utility/support/eigen_armadillo.h"
+#include "extension/Configuration.h"
 #include "message/support/optimisation/DOpE.h"
-#include "message/support/optimisation/Episode.pb.h"
-#include "message/support/optimisation/Estimate.pb.h"
+#include "message/support/optimisation/Episode.h"
+#include "message/support/optimisation/Estimate.h"
 
 namespace module {
 namespace support {
@@ -40,7 +40,7 @@ namespace optimisation {
     using utility::math::optimisation::Optimiser;
     using utility::math::optimisation::OptimiserEstimate;
     using utility::math::optimisation::PGAOptimiser;
-    using message::support::Configuration;
+    using extension::Configuration;
     using message::support::optimisation::Episode;
     using message::support::optimisation::Estimate;
     using message::support::optimisation::RequestParameters;
@@ -54,24 +54,23 @@ namespace optimisation {
         auto e = std::make_unique<Estimate>();
 
         // Set our group
-        e->set_group(opt.group);
+        e->group = opt.group;
 
         // Add our generation
-        e->set_generation(current.generation);
+        e->generation = current.generation;
 
         // Add our values and covariance
-        *e->mutable_values() << current.estimate;
-        *e->mutable_covariance() << current.covariance;
+        e->values = current.estimate;
+        e->covariance = current.covariance;
 
-
-        log<NUClear::FATAL>("Current Estimate", current.estimate.t());
+        log<NUClear::FATAL>("Current Estimate", convert<double>(current.estimate).t());
 
         // Add our episodes
         for (auto& episode : opt.episodes) {
-            *e->add_episode() = episode;
+            e->episode.push_back(episode);
         }
         for (auto& episode : opt.estimateEpisodes) {
-            *e->add_estimate_episode() = episode;
+            e->estimate_episode.push_back(episode);
         }
 
         // Send it to the remote
@@ -84,18 +83,18 @@ namespace optimisation {
         log<NUClear::INFO>(fmt::format("Processing {}/{} episode batch for {}", opt.episodes.size(), opt.batchSize, opt.group));
 
         arma::vec fitnesses(opt.episodes.size());
-        arma::mat samples(opt.episodes.size(), opt.optimiser->estimate().estimate.n_rows);
+        arma::mat samples(opt.episodes.size(), opt.optimiser->estimate().estimate.rows());
 
         for (uint i = 0; i < opt.episodes.size(); ++i) {
 
             // Make our combined fitness
             fitnesses[i] = 0;
-            for(auto& f : opt.episodes[i].fitness()) {
-                fitnesses[i] += f.fitness() * f.weight();
+            for(auto& f : opt.episodes[i].fitness) {
+                fitnesses[i] += f.fitness * f.weight;
             }
 
             for (uint j = 0; j < samples.n_cols; ++j) {
-                samples(i, j) = opt.episodes[i].values().v(j);
+                samples(i, j) = opt.episodes[i].values[j];
             }
         }
 
@@ -130,7 +129,7 @@ namespace optimisation {
 
         on<Trigger<NetworkJoin>, Sync<DOpE>>().then("Distrubute Initial Optimisation", [this] (const NetworkJoin& joiner) {
 
-            log<NUClear::INFO>(fmt::format("{} ({}) joined the optimisation network", joiner.name, joiner.udpPort));
+            log<NUClear::INFO>(fmt::format("{} ({}) joined the optimisation network", joiner.name, joiner.udp_port));
 
             for (auto& op : optimisations) {
                 // If this is a network optimisation
@@ -143,9 +142,9 @@ namespace optimisation {
 
         on<Network<Estimate>, Sync<DOpE>>().then("Network Estimate", [this] (const NetworkSource& src, const Estimate& estimate) {
 
-            log<NUClear::INFO>(fmt::format("Estimate {} gen {} received from {}", estimate.group(), estimate.generation(), src.name));
+            log<NUClear::INFO>(fmt::format("Estimate {} gen {} received from {}", estimate.group, estimate.generation, src.name));
 
-            auto el = optimisations.find(estimate.group());
+            auto el = optimisations.find(estimate.group);
             if (el != optimisations.end()) {
                 auto& opt = el->second;
 
@@ -157,19 +156,19 @@ namespace optimisation {
 
                     // We use the network version if it has a newer generation
                     // or we are the same generation, we choose based on the bitwise xor of the estimate
-                    if(currentEstimate.generation < estimate.generation()) {
+                    if(currentEstimate.generation < estimate.generation) {
                         // || (opt.optimiser->estimate().generation == estimate.generation() && fitness < fitness) {
 
                         OptimiserEstimate e;
-                        e.generation = estimate.generation();
-                        e.estimate << estimate.values();
-                        e.covariance << estimate.covariance();
+                        e.generation = estimate.generation;
+                        e.estimate = estimate.values;
+                        e.covariance = estimate.covariance;
 
                         // Reset with these parameters
                         opt.optimiser->reset(e);
 
-                        std::vector<Episode> newEpisodes(estimate.episode().begin(), estimate.episode().end());
-                        std::vector<Episode> newEstimateEpisodes(estimate.estimate_episode().begin(), estimate.estimate_episode().end());
+                        std::vector<Episode> newEpisodes(estimate.episode.begin(), estimate.episode.end());
+                        std::vector<Episode> newEstimateEpisodes(estimate.estimate_episode.begin(), estimate.estimate_episode.end());
 
                         // Go through our episodes and throw out ones that are in either list
                         // or are no longer valid for this state
@@ -177,7 +176,7 @@ namespace optimisation {
 
                             // Work out if this episode is in either list
                             auto f = [&it] (const Episode& e) {
-                                return MessageDifferencer::Equals(e, *it);
+                                return e == *it;
                             };
                             auto newE = std::find_if(newEpisodes.begin(), newEpisodes.end(), f);
                             auto newPE = std::find_if(newEstimateEpisodes.begin(), newEstimateEpisodes.end(), f);
@@ -199,7 +198,7 @@ namespace optimisation {
                         // Save our optimisation state to the config file
                         saveOptimisationState(opt);
                     }
-                    else if (currentEstimate.generation == estimate.generation()) {
+                    else if (currentEstimate.generation == estimate.generation) {
                         // TODO some random selection of the two
 
                         // TODO we need to use this ones prevEpisodes
@@ -215,13 +214,13 @@ namespace optimisation {
         on<Network<Episode>, Sync<DOpE>>().then("Network Episode", [this] (const NetworkSource& src, const Episode& episode) {
 
             // If we have this optimisation
-            auto el = optimisations.find(episode.group());
+            auto el = optimisations.find(episode.group);
             if (el != optimisations.end()) {
                 auto& opt = el->second;
 
                 // If this optimiser works on the network
                 if (opt.network) {
-                    log<NUClear::DEBUG>(fmt::format("Network episode for {}({}) received from {}", episode.group(), episode.generation(), src.name));
+                    log<NUClear::DEBUG>(fmt::format("Network episode for {}({}) received from {}", episode.group, episode.generation, src.name));
 
                     // If we don't already have this episode and it is valid for our optimiser
                     if(//std::find(opt.episodes.begin(), opt.episodes.end(), episode) == opt.episodes.end()
@@ -245,11 +244,11 @@ namespace optimisation {
         on<Trigger<Episode>, Sync<DOpE>>().then("Local Episode", [this] (const Episode& episode) {
 
             // If we have this optimisation
-            auto el = optimisations.find(episode.group());
+            auto el = optimisations.find(episode.group);
             if (el != optimisations.end()) {
                 auto& opt = el->second;
 
-                log<NUClear::DEBUG>(fmt::format("Local episode for {}({})", episode.group(), episode.generation()));
+                log<NUClear::DEBUG>(fmt::format("Local episode for {}({})", episode.group, episode.generation));
 
                 // If this episode is valid for our optimiser
                 if(opt.optimiser->validSample(episode)) {
@@ -272,7 +271,7 @@ namespace optimisation {
             }
             else {
                 // If we don't have an optimiser for this, this is an error
-                log<NUClear::ERROR>(fmt::format("Episode for {} gen {} generated for unregistered optimisation", episode.group(), episode.generation()));
+                log<NUClear::ERROR>(fmt::format("Episode for {} gen {} generated for unregistered optimisation", episode.group, episode.generation));
             }
         });
 
@@ -312,7 +311,7 @@ namespace optimisation {
 
                 p->group = request.group;
                 p->generation = opt.optimiser->estimate().generation;
-                p->samples = opt.optimiser->getSamples(request.nSamples);
+                p->samples = convert<double>(opt.optimiser->getSamples(request.nSamples));
                 p->covariance = opt.optimiser->estimate().covariance;
 
                 log<NUClear::DEBUG>(fmt::format("Generating {} parameters for {}({})", request.nSamples, p->group, p->generation));

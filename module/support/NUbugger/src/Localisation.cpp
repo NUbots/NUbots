@@ -20,11 +20,12 @@
 #include "NUbugger.h"
 
 #include "message/localisation/FieldObject.h"
-#include "message/localisation/proto/Localisation.pb.h"
+#include "message/localisation/Localisation.h"
 
 #include "utility/time/time.h"
 #include "utility/localisation/transform.h"
 #include "utility/nubugger/NUhelpers.h"
+#include "utility/support/eigen_armadillo.h"
 
 namespace module {
 namespace support {
@@ -34,7 +35,8 @@ namespace support {
     using message::localisation::FieldObject;
     using message::localisation::Ball;
     using message::localisation::Self;
-    using message::localisation::proto::Localisation;
+    using message::localisation::Localisation;
+    using message::localisation::Model;
 
     void NUbugger::provideLocalisation() {
         handles["localisation"].push_back(
@@ -54,25 +56,24 @@ namespace support {
                 const auto& robots = *opt_robots;
 
                 // Robot message
-                std::vector<FieldObject::Model> robot_msg_models;
+                robot_msg->name = "self";
 
                 for (auto& model : robots) {
-                    FieldObject::Model robot_model;
-                    robot_msg->name = "self";
-                    robot_model.wm_x = model.position[0];
-                    robot_model.wm_y = model.position[1];
+                    Model robot_model;
+                    robot_model.wm_x    = model.locObject.position[0];
+                    robot_model.wm_y    = model.locObject.position[1];
                     robot_model.heading = std::atan2(model.heading[1], model.heading[0]);
-                    robot_model.sd_x = 1;
-                    robot_model.sd_y = 0.25;
-                    robot_model.sr_xx = model.position_cov(0,0);
-                    robot_model.sr_xy = model.position_cov(1,0);
-                    robot_model.sr_yy = model.position_cov(1,1);
-                    robot_model.lost = false;
-                    robot_msg_models.push_back(robot_model);
+                    robot_model.sd_x    = 1;
+                    robot_model.sd_y    = 0.25;
+                    robot_model.sr_xx   = model.locObject.position_cov(0,0);
+                    robot_model.sr_xy   = model.locObject.position_cov(1,0);
+                    robot_model.sr_yy   = model.locObject.position_cov(1,1);
+                    robot_model.lost    = false;
+                    robot_msg->models.push_back(robot_model);
 
                     // break; // Only output a single model
                 }
-                robot_msg->models = robot_msg_models;
+
                 robot_msg_set = true;
             }
 
@@ -81,18 +82,19 @@ namespace support {
                 const auto& robots = *opt_robots;
 
                 // Ball message
-                std::vector<FieldObject::Model> ball_msg_models;
+                ball_msg->name = "ball";
 
                 for (auto& model : balls) {
-                    arma::vec2 ball_pos = model.position;
+                    arma::vec2 ball_pos = convert<double, 2>(model.locObject.position);
 
                     if (!model.world_space) {
                         ball_pos = utility::localisation::transform::RobotToWorldTransform(
-                            robots[0].position, robots[0].heading, model.position);
+                            convert<double, 2>(robots[0].locObject.position),
+                            convert<double, 2>(robots[0].heading),
+                            convert<double, 2>(model.locObject.position));
                     }
 
-                    FieldObject::Model ball_model;
-                    ball_msg->name = "ball";
+                    Model ball_model;
                     ball_model.wm_x = ball_pos[0];
                     ball_model.wm_y = ball_pos[1];
                     ball_model.heading = 0;
@@ -100,17 +102,17 @@ namespace support {
                     ball_model.sd_y = 0.1;
 
                     //Do we need to rotate the variances?
-                    ball_model.sr_xx = model.position_cov(0,0);
-                    ball_model.sr_xy = model.position_cov(1,0);
-                    ball_model.sr_yy = model.position_cov(1,1);
+                    ball_model.sr_xx = model.locObject.position_cov(0, 0);
+                    ball_model.sr_xy = model.locObject.position_cov(1, 0);
+                    ball_model.sr_yy = model.locObject.position_cov(1, 1);
                     ball_model.lost = false;
-                    ball_msg_models.push_back(ball_model);
+                    ball_msg->models.push_back(ball_model);
 
                     emit(graph("NUbugger Localisation ball", ball_pos[0], ball_pos[1]));
 
                     // break; // Only output a single model
                 }
-                ball_msg->models = ball_msg_models;
+
                 ball_msg_set = true;
             }
 
@@ -123,40 +125,17 @@ namespace support {
 
         Localisation localisation;
 
-        auto* api_field_object = localisation.add_field_object();
-        api_field_object->set_name(robot_model->name);
+        message::localisation::LocalisationFieldObject robotFieldObject;
+        message::localisation::LocalisationFieldObject ballFieldObject;
 
-        for (FieldObject::Model model : robot_model->models) {
-            auto* api_model = api_field_object->add_models();
+        robotFieldObject.name   = robot_model->name;
+        robotFieldObject.models = robot_model->models;
 
-            api_model->set_wm_x(model.wm_x);
-            api_model->set_wm_y(model.wm_y);
-            api_model->set_heading(model.heading);
-            api_model->set_sd_x(model.sd_x);
-            api_model->set_sd_y(model.sd_y);
-            api_model->set_sr_xx(model.sr_xx);
-            api_model->set_sr_xy(model.sr_xy);
-            api_model->set_sr_yy(model.sr_yy);
-            api_model->set_lost(model.lost);
-        }
+        ballFieldObject.name   = ball_model->name;
+        ballFieldObject.models = ball_model->models;
 
-        api_field_object = localisation.add_field_object();
-        api_field_object->set_name(ball_model->name);
-
-        for (FieldObject::Model model : ball_model->models) {
-            auto* api_model = api_field_object->add_models();
-
-            api_model->set_wm_x(model.wm_x);
-            api_model->set_wm_y(model.wm_y);
-            api_model->set_heading(model.heading);
-            api_model->set_sd_x(model.sd_x);
-            api_model->set_sd_y(model.sd_y);
-            api_model->set_sr_xx(model.sr_xx);
-            api_model->set_sr_xy(model.sr_xy);
-            api_model->set_sr_yy(model.sr_yy);
-            api_model->set_lost(model.lost);
-        }
-
+        localisation.field_object.push_back(robotFieldObject);
+        localisation.field_object.push_back(ballFieldObject);
         send(localisation, 1);
     }
 }

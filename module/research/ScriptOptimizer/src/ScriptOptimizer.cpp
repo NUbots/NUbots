@@ -18,21 +18,24 @@
  */
 
 #include "ScriptOptimizer.h"
-#include "message/motion/Script.h"
+
+#include "extension/Script.h"
+
 #include "message/motion/ServoWaypoint.h"
-#include "message/research/scriptoptimizer/OptimizeScript.pb.h"
-#include "message/research/scriptoptimizer/OptimizeScriptResult.pb.h"
+#include "message/research/scriptoptimizer/OptimizeScript.h"
+#include "message/research/scriptoptimizer/OptimizeScriptResult.h"
 #include "message/platform/darwin/DarwinSensors.h"
 
 namespace module {
     namespace research {
 
+        using extension::ExecuteScript;
+        using extension::Script;
+
         using message::platform::darwin::DarwinSensors;
         using message::research::scriptoptimizer::OptimizeScript;
         using message::research::scriptoptimizer::OptimizeScriptResult;
-        using message::motion::ExecuteScript;
         using message::motion::AllServoWaypointsComplete;
-        using message::motion::Script;
 
         ScriptOptimizer::ScriptOptimizer(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)), recording(false) {
 
@@ -144,7 +147,7 @@ namespace module {
                             auto* servo = s->add_servo();
 
                             servo->set_error_flags(sensor->servo[i].errorFlags);
-                            servo->set_id(static_cast<message::input::proto::Sensors_ServoID>(i));
+                            servo->set_id(static_cast<message::input::Sensors_ServoID>(i));
                             servo->set_enabled(sensor->servo[i].torqueEnabled);
                             servo->set_p_gain(sensor->servo[i].pGain);
                             servo->set_i_gain(sensor->servo[i].iGain);

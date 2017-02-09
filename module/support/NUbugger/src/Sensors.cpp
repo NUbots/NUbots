@@ -20,90 +20,20 @@
 #include "NUbugger.h"
 
 #include "message/input/Sensors.h"
-#include "message/input/proto/Sensors.pb.h"
 
-#include "utility/support/proto_armadillo.h"
-#include "utility/time/time.h"
+#include "utility/support/eigen_armadillo.h"
 
 namespace module {
 namespace support {
-    using utility::time::getUtcTimestamp;
 
     using message::input::Sensors;
-    using ProtoSensors = message::input::proto::Sensors;
 
     void NUbugger::provideSensors() {
 
         // This trigger gets the output from the sensors (unfiltered)
         handles["sensor_data"].push_back(on<Trigger<Sensors>, Single, Priority::LOW>().then([this](const Sensors& sensors) {
 
-            ProtoSensors sensorData;
-
-            sensorData.set_timestamp(sensors.timestamp.time_since_epoch().count());
-            sensorData.set_voltage(sensors.voltage);
-            sensorData.set_battery(sensors.battery);
-
-            // Add each of the servos into the protocol buffer
-            for(const auto& s : sensors.servos) {
-
-                auto* servo = sensorData.add_servo();
-
-                servo->set_error_flags(s.errorFlags);
-
-                servo->set_id(static_cast<message::input::proto::Sensors_ServoID>(s.id));
-
-                servo->set_enabled(s.enabled);
-
-                servo->set_p_gain(s.pGain);
-                servo->set_i_gain(s.iGain);
-                servo->set_d_gain(s.dGain);
-
-                servo->set_goal_position(s.goalPosition);
-                servo->set_goal_velocity(s.goalVelocity);
-
-                servo->set_present_position(s.presentPosition);
-                servo->set_present_velocity(s.presentVelocity);
-
-                servo->set_load(s.load);
-                servo->set_voltage(s.voltage);
-                servo->set_temperature(s.temperature);
-            }
-
-            // The gyroscope values (x,y,z)
-            *sensorData.mutable_gyroscope() << arma::conv_to<arma::fvec>::from(sensors.gyroscope);
-
-            // The accelerometer values (x,y,z)
-            *sensorData.mutable_accelerometer() << arma::conv_to<arma::fvec>::from(sensors.accelerometer);
-
-            // The orientation matrix
-            *sensorData.mutable_world() << sensors.world;
-
-            // The FSR values
-            for (auto& fsr : sensors.fsrs) {
-                auto* proto = sensorData.add_fsr();
-
-                for (auto& v : fsr.values) {
-                    proto->add_value(v);
-                }
-
-                *proto->mutable_centre() << fsr.centre;
-            }
-
-            // The LEDs
-            for(auto& l : sensors.leds) {
-                auto* led = sensorData.add_led();
-                led->set_id(l.id);
-                led->set_colour(l.colour);
-            }
-
-            // The Buttons
-            for(auto& b : sensors.buttons) {
-                auto* button = sensorData.add_button();
-                button->set_id(b.id);
-                button->set_value(b.value);
-            }
-
-            send(sensorData, 1, false, sensors.timestamp);
+            send(sensors, 1, false, sensors.timestamp);
 
         }));
     }

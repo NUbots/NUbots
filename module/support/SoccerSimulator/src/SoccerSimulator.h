@@ -22,15 +22,17 @@
 
 #include <nuclear>
 #include <armadillo>
-#include "message/support/Configuration.h"
+
+#include "extension/Configuration.h"
+
 #include "message/support/GlobalConfig.h"
 #include "message/support/FieldDescription.h"
-#include "utility/math/matrix/Transform2D.h"
-#include "utility/math/angle.h"
 #include "message/platform/darwin/DarwinSensors.h"
-#include "message/input/Sensors.h"
 #include "message/input/CameraParameters.h"
 #include "message/motion/KickCommand.h"
+
+#include "utility/math/matrix/Transform2D.h"
+#include "utility/math/angle.h"
 
 #include "VirtualGoalPost.h"
 #include "VirtualBall.h"
@@ -147,7 +149,7 @@ namespace support {
         NUClear::clock::time_point lastNow;
 
         //Methods
-        void updateConfiguration(const message::support::Configuration& config, const message::support::GlobalConfig& globalConfig);
+        void updateConfiguration(const ::extension::Configuration& config, const message::support::GlobalConfig& globalConfig);
 
         std::unique_ptr<message::platform::darwin::DarwinSensors::Gyroscope> computeGyro(float heading, float oldHeading);
 

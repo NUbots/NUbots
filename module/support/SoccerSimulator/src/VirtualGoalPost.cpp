@@ -24,26 +24,29 @@
 #include "message/vision/VisionObjects.h"
 #include "message/input/CameraParameters.h"
 #include "message/input/Sensors.h"
+#include "message/support/FieldDescription.h"
+
+#include "utility/input/ServoID.h"
 #include "utility/math/coordinates.h"
 #include "utility/math/geometry/Quad.h"
 #include "utility/localisation/transform.h"
 #include "utility/math/matrix/Rotation3D.h"
 #include "utility/math/vision.h"
-#include "message/support/FieldDescription.h"
 
 namespace module {
 namespace support {
 
-    using message::vision::Goal;
-    using utility::math::vision::cameraSpaceGoalProjection;
     using message::input::Sensors;
+    using message::vision::Goal;
+    using message::input::CameraParameters;
+    using message::support::FieldDescription;
+    using ServoID = utility::input::ServoID;
+
+    using utility::math::vision::cameraSpaceGoalProjection;
     using utility::math::matrix::Transform2D;
     using utility::math::matrix::Transform3D;
     using utility::math::matrix::Rotation3D;
-    using message::input::CameraParameters;
     using utility::math::geometry::Quad;
-    using message::support::FieldDescription;
-        using message::input::ServoID;
 
     arma::vec2 VirtualGoalPost::getCamRay(const arma::vec3& norm1, const arma::vec3& norm2, double focalLength, arma::uvec2 imSize) {
         //Solve the vector intersection between two planes to get the camera ray of the quad corner
@@ -87,16 +90,17 @@ namespace support {
 
     Goal VirtualGoalPost::detect(const CameraParameters& camParams,
                 Transform2D& robotPose,
-                std::shared_ptr<const Sensors> sensors,
+                const Sensors& sensors,
                 arma::vec4& /*error*/,
                 const FieldDescription& field){
         Goal result;
 
         // t = torso; c = camera; g = ground; f = foot;
-        Transform3D Htc = sensors->forwardKinematics.find(ServoID::HEAD_PITCH)->second;
+        Transform3D Htc  = convert<double, 4, 4>(sensors.forwardKinematics.at(ServoID::HEAD_PITCH)); 
         //get the torso to foot transform
-        Transform3D Hgt = sensors->forwardKinematics.find(ServoID::R_ANKLE_ROLL)->second.i();
-        Transform3D Hgt2 = sensors->forwardKinematics.find(ServoID::L_ANKLE_ROLL)->second.i();
+        Transform3D Hgt  = convert<double, 4, 4>(sensors.forwardKinematics.at(ServoID::R_ANKLE_ROLL)); 
+        Transform3D Hgt2 = convert<double, 4, 4>(sensors.forwardKinematics.at(ServoID::L_ANKLE_ROLL)); 
+
         if (Hgt2(3,2) < Hgt(3,2)) {
             Hgt = Hgt2;
         }
@@ -110,37 +114,17 @@ namespace support {
 
         arma::mat::fixed<3,4> goalNormals = cameraSpaceGoalProjection(robotPose, this->position, field, Hgc);
         if (arma::any(arma::any(goalNormals > 0.0))) {
-            result.measurements.push_back(
-                std::make_pair<Goal::MeasurementType, arma::vec3>(
-                            Goal::MeasurementType::LEFT_NORMAL,
-                            goalNormals.col(0)
-                        )
-                );
-            result.measurements.push_back(
-                std::make_pair<Goal::MeasurementType, arma::vec3>(
-                            Goal::MeasurementType::RIGHT_NORMAL,
-                            goalNormals.col(1)
-                        )
-                );
-            result.measurements.push_back(
-                std::make_pair<Goal::MeasurementType, arma::vec3>(
-                            Goal::MeasurementType::TOP_NORMAL,
-                            goalNormals.col(2)
-                        )
-                );
-            result.measurements.push_back(
-                std::make_pair<Goal::MeasurementType, arma::vec3>(
-                            Goal::MeasurementType::BASE_NORMAL,
-                            goalNormals.col(3)
-                        )
-                );
+            result.measurement.push_back(Goal::Measurement(Goal::MeasurementType::LEFT_NORMAL,  convert<double, 3>(goalNormals.col(0))));
+            result.measurement.push_back(Goal::Measurement(Goal::MeasurementType::RIGHT_NORMAL, convert<double, 3>(goalNormals.col(1))));
+            result.measurement.push_back(Goal::Measurement(Goal::MeasurementType::TOP_NORMAL,   convert<double, 3>(goalNormals.col(2))));
+            result.measurement.push_back(Goal::Measurement(Goal::MeasurementType::BASE_NORMAL,  convert<double, 3>(goalNormals.col(3))));
 
             //build the predicted quad
             utility::math::geometry::Quad quad(
-                    getCamRay(goalNormals.col(0), goalNormals.col(3), camParams.focalLengthPixels, camParams.imageSizePixels),
-                    getCamRay(goalNormals.col(0), goalNormals.col(2), camParams.focalLengthPixels, camParams.imageSizePixels),
-                    getCamRay(goalNormals.col(1), goalNormals.col(2), camParams.focalLengthPixels, camParams.imageSizePixels),
-                    getCamRay(goalNormals.col(1), goalNormals.col(3), camParams.focalLengthPixels, camParams.imageSizePixels)
+                    getCamRay(goalNormals.col(0), goalNormals.col(3), camParams.focalLengthPixels, convert<uint, 2>(camParams.imageSizePixels)),
+                    getCamRay(goalNormals.col(0), goalNormals.col(2), camParams.focalLengthPixels, convert<uint, 2>(camParams.imageSizePixels)),
+                    getCamRay(goalNormals.col(1), goalNormals.col(2), camParams.focalLengthPixels, convert<uint, 2>(camParams.imageSizePixels)),
+                    getCamRay(goalNormals.col(1), goalNormals.col(3), camParams.focalLengthPixels, convert<uint, 2>(camParams.imageSizePixels))
                 );
 
             //goal base visibility check
@@ -149,7 +133,7 @@ namespace support {
                     && quad.getBottomRight()[0] > 0 && quad.getBottomRight()[0] < camParams.imageSizePixels[0]
                     && quad.getBottomLeft()[0] > 0 && quad.getBottomLeft()[0] < camParams.imageSizePixels[0]) ) {
 
-                result.measurements.erase(result.measurements.begin()+3);
+                result.measurement.erase(result.measurement.begin()+3);
             }
             //goal top visibility check
             if (not (quad.getTopRight()[1] > 0 && quad.getTopRight()[1] < camParams.imageSizePixels[1]
@@ -157,7 +141,7 @@ namespace support {
                     && quad.getTopRight()[0] > 0 && quad.getTopRight()[0] < camParams.imageSizePixels[0]
                     && quad.getTopLeft()[0] > 0 && quad.getTopLeft()[0] < camParams.imageSizePixels[0])  ) {
 
-                result.measurements.erase(result.measurements.begin()+2);
+                result.measurement.erase(result.measurement.begin()+2);
             }
             //goal sides visibility check
             if (
@@ -179,15 +163,18 @@ namespace support {
                     )
                 )
             ) {
-                result.measurements.erase(result.measurements.begin()+1);
-                result.measurements.erase(result.measurements.begin());
+                result.measurement.erase(result.measurement.begin()+1);
+                result.measurement.erase(result.measurement.begin());
             }
-            if (!result.measurements.empty()) {
-                result.quad = quad;
+            if (!result.measurement.empty()) {
+                result.quad.tl = convert<double, 2>(quad.getTopLeft());
+                result.quad.tr = convert<double, 2>(quad.getTopRight());
+                result.quad.br = convert<double, 2>(quad.getBottomRight());
+                result.quad.bl = convert<double, 2>(quad.getBottomLeft());
             }
         }
-        result.sensors = sensors;
-        result.timestamp = sensors->timestamp; // TODO: Eventually allow this to be different to sensors.
+        result.visObject.sensors = const_cast<Sensors*>(&sensors)->shared_from_this();
+        result.visObject.timestamp = sensors.timestamp; // TODO: Eventually allow this to be different to sensors.
         result.side = side;
         result.team = team;
 

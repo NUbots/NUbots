@@ -20,27 +20,32 @@
 #include "Getup.h"
 
 #include <cmath>
-#include "message/input/ServoID.h"
-#include "message/motion/Script.h"
-#include "message/behaviour/Action.h"
+
+#include "extension/Configuration.h"
+#include "extension/Script.h"
+
 #include "message/behaviour/ServoCommand.h"
-#include "message/support/Configuration.h"
 #include "message/input/Sensors.h"
 #include "message/motion/GetupCommand.h"
+
+#include "utility/behaviour/Action.h"
+#include "utility/input/LimbID.h"
 
 namespace module {
     namespace behaviour {
         namespace skills {
 
-            using message::support::Configuration;
+            using extension::Configuration;
+            using extension::ExecuteScriptByName;
+
             using message::input::Sensors;
-            using message::input::ServoID;
-            using message::motion::ExecuteScriptByName;
-            using message::behaviour::RegisterAction;
-            using message::behaviour::ActionPriorites;
-            using message::input::LimbID;
             using message::motion::ExecuteGetup;
             using message::motion::KillGetup;
+
+            using utility::behaviour::RegisterAction;
+            using utility::behaviour::ActionPriorites;
+            using LimbID  = utility::input::LimbID;
+            using ServoID = utility::input::ServoID;
 
             Getup::Getup(std::unique_ptr<NUClear::Environment> environment)
                 : Reactor(std::move(environment))
@@ -66,7 +71,7 @@ namespace module {
                 fallenCheck = on<Trigger<Sensors>, Single>().then("Getup Fallen Check", [this] (const Sensors& sensors) {
 
                     //check if the orientation is smaller than the cosine of our fallen angle
-                    if (!gettingUp && fabs(sensors.world(2,2)) < FALLEN_ANGLE) {
+                    if (!gettingUp && fabs(sensors.world(2, 2)) < FALLEN_ANGLE) {
                         updatePriority(GETUP_PRIORITY);
                         fallenCheck.disable();
                     }
@@ -77,7 +82,7 @@ namespace module {
                     gettingUp = true;
 
                     // Check with side we're getting up from
-                    if (sensors.world(0,2) < 0.0) {
+                    if (sensors.world(0, 2) < 0.0) {
                         emit(std::make_unique<ExecuteScriptByName>(id, std::vector<std::string>({"StandUpFront.yaml","Stand.yaml"})));
                     }
                     else {

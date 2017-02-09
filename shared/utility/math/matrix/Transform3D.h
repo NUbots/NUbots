@@ -81,7 +81,9 @@ namespace matrix {
              * @brief Convert from a vec6 representing [position_x, position_y, position_z, rotation_x, rotation_y, rotation_z]
              */
             Transform(const arma::vec6& in);
-
+            /**
+             * @brief Convert from a vec3 representing [..., ..., ...]
+             */
             Transform(const arma::vec3& in);
 
             /**
@@ -202,6 +204,9 @@ namespace matrix {
             arma::vec3 eulerAngles() const {
                 return rotation().eulerAngles();
             }
+
+            inline const arma::mat44 raw() const { return *this; }
+            inline arma::mat44 raw() { return *this; }
 
             /**
              * @brief Computes 'size' of the transform T

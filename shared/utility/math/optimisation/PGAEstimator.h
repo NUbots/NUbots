@@ -22,11 +22,14 @@
 
 #include <armadillo>
 #include <cmath>
-#include "OptimiserTypes.h"
+
+#include "message/support/optimisation/OptimiserTypes.h"
 
 namespace utility {
     namespace math {
         namespace optimisation {
+            using message::support::optimisation::OptimiserParameters;
+            using message::support::optimisation::OptimiserEstimate;
 
             /**
              * The PGAEstimator provides a steady-state solution to the PI2 path integral RL algorithm.
@@ -57,20 +60,20 @@ namespace utility {
                     //create a vector of normed fitnesses
                     const double min = arma::min(fitnesses);
                     const double max = arma::max(fitnesses);
-                    const arma::vec normedFitnesses = (max-fitnesses)/(max-min+std::numeric_limits<double>::epsilon());
+                    const arma::vec normedFitnesses = (max - fitnesses) / (max - min + std::numeric_limits<double>::epsilon());
 
                     //create a set of weights per sample which specifies the likelihood that they are near the best estimate
-                    const arma::vec sampleWeights = arma::exp(-c*normedFitnesses);
+                    const arma::vec sampleWeights = arma::exp(-c * normedFitnesses);
 
                     //calculate the probabilistically weighted result estimate
-                    arma::vec bestEstimate = arma::sum(samples % arma::repmat(sampleWeights/arma::accu(sampleWeights),1,samples.n_cols),0).t();
+                    arma::vec bestEstimate = arma::sum(samples % arma::repmat(sampleWeights / arma::accu(sampleWeights), 1, samples.n_cols), 0).t();
 
                     //calculate the covariance matrix
                     arma::mat s2 = samples;
                     s2.each_row() -= bestEstimate.t();
                     arma::mat covmat = s2 * s2.t();
 
-                    return {previousEstimate.generation+1, bestEstimate, previousEstimate.covariance};
+                    return OptimiserEstimate(previousEstimate.generation + 1, convert<double>(bestEstimate), previousEstimate.covariance);
                 }
             };
 

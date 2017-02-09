@@ -24,9 +24,7 @@
 #include <armadillo>
 #include <yaml-cpp/yaml.h>
 
-#include "message/input/Image.h"
 #include "message/input/Sensors.h"
-#include "message/input/Image.h"
 #include "message/localisation/FieldObject.h"
 
 namespace utility {

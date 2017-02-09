@@ -18,12 +18,16 @@
  */
 
 #include "ScriptTuner.h"
-#include "message/support/Configuration.h"
-#include "message/platform/darwin/DarwinSensors.h"
+
 #include "message/motion/ServoTarget.h"
-#include "utility/math/angle.h"
+#include "message/platform/darwin/DarwinSensors.h"
+
+#include "utility/behaviour/Action.h"
 #include "utility/file/fileutil.h"
-#include "message/behaviour/Action.h"
+#include "utility/input/LimbID.h"
+#include "utility/input/ServoID.h"
+#include "utility/math/angle.h"
+#include "utility/platform/darwin/DarwinSensors.h"
 
 #include <ncurses.h>
 #include <cstdio>
@@ -32,15 +36,18 @@
 namespace module {
     namespace behaviour {
         namespace tools {
+
             using NUClear::message::CommandLineArguments;
-            using message::motion::Script;
-            using message::motion::ExecuteScript;
-            using message::motion::Script;
-            using message::input::ServoID;
+
+            using extension::ExecuteScript;
+            using extension::Script;
+
             using message::motion::ServoTarget;
-            using message::behaviour::RegisterAction;
-            using message::input::LimbID;
             using message::platform::darwin::DarwinSensors;
+
+            using utility::behaviour::RegisterAction;
+            using LimbID  = utility::input::LimbID;
+            using ServoID = utility::input::ServoID;
 
             struct LockServo {};
 
@@ -81,8 +88,8 @@ namespace module {
 
                     Script::Frame::Target target;
 
-                    target.id = static_cast<message::input::ServoID>(id);
-                    target.position = sensors.servo[id].presentPosition;
+                    target.id = id;
+                    target.position = utility::platform::darwin::getDarwinServo(target.id, sensors).presentPosition;
                     target.gain = defaultGain;
                     target.torque = 100;
 
@@ -341,10 +348,10 @@ namespace module {
 
                 for(auto& target : script.frames[frame].targets) {
                     // Output that this frame is locked (we shuffle the head to the top of the list)
-                    mvprintw(((static_cast<int>(target.id) + 2) % 20) + 9, 2, "L");
+                    mvprintw(((static_cast<uint32_t>(target.id) + 2) % 20) + 9, 2, "L");
 
                     // Output this frames gain and angle
-                    mvprintw(((static_cast<int>(target.id) + 2) % 20) + 9, 26, "Angle: %+.3f Gain: %5.1f", target.position, target.gain);
+                    mvprintw(((static_cast<uint32_t>(target.id) + 2) % 20) + 9, 26, "Angle: %+.3f Gain: %5.1f", target.position, target.gain);
                 }
 
                 // Highlight our selected point
@@ -358,7 +365,7 @@ namespace module {
 
                 // This finds if we have this particular motor stored in the frame
                 auto targetFinder = [=](const Script::Frame::Target& target) {
-                                            return (static_cast<size_t>(target.id) + 2) % 20 == selection;
+                                            return (static_cast<uint32_t>(target.id) + 2) % 20 == selection;
                 };
 
                 // See if we have this target in our frame
@@ -378,7 +385,7 @@ namespace module {
                     // Emit a waypoint so that the motor will turn off gain (go limp)
                     auto waypoint = std::make_unique<ServoTarget>();
                     waypoint->time = NUClear::clock::now();
-                    waypoint->id = static_cast<message::input::ServoID>(selection < 2 ? 18 + selection : selection - 2);
+                    waypoint->id = selection < 2 ? 18 + selection : selection - 2;
                     waypoint->gain = 0;
                     waypoint->position = std::numeric_limits<float>::quiet_NaN();
                     waypoint->torque = 0;
@@ -480,7 +487,7 @@ namespace module {
 
                         // This finds if we have this particular motor stored in the frame
                         auto targetFinder = [=](const Script::Frame::Target& target) {
-                                                    return (static_cast<size_t>(target.id) + 2) % 20 == selection;
+                                                    return (static_cast<uint32_t>(target.id) + 2) % 20 == selection;
                         };
 
                         // See if we have this target in our frame
@@ -492,7 +499,7 @@ namespace module {
                         if(it == std::end(script.frames[frame].targets)) {
                             it = script.frames[frame].targets.emplace(std::end(script.frames[frame].targets));
                             auto id = selection < 2 ? 18 + selection : selection - 2;
-                            it->id = static_cast<message::input::ServoID>(id);
+                            it->id = id;
                             it->position = 0;
                             it->gain = defaultGain;
                         }
@@ -630,7 +637,7 @@ namespace module {
 
                     for(auto& target : f.targets) {
 
-                        switch(target.id) {
+                        switch(target.id.value) {
                             case ServoID::HEAD_YAW:
                                 newFrame.targets.push_back({ ServoID::HEAD_YAW, target.position, target.gain, target.torque});
                                 break;
@@ -692,6 +699,7 @@ namespace module {
                                 newFrame.targets.push_back({ ServoID::R_HIP_YAW, -target.position, target.gain, target.torque});
                                 break;
                             case ServoID::NUMBER_OF_SERVOS:
+                            default:
                                 break;
                         }//end switch(target.id)
                     }
@@ -873,7 +881,7 @@ namespace module {
                                 mvprintw(YPOSITION[i][j], XPOSITION[i][j], "     ");
                                 move(YPOSITION[i][j],XPOSITION[i][j]);
                                 newGain = userInputToGain();
-                                if(isnan(newGain)) {
+                                if(std::isnan(newGain)) {
                                     mvprintw(YPOSITION[i][j],XPOSITION[i][j],"---.-");
                                     upperGainS=-1;
                                     lowerGainS=-1;
@@ -975,7 +983,7 @@ namespace module {
                 std::cout << "Hello!" << std::endl;
                     for(auto& f : script.frames) {
                         for(auto& target : f.targets) {
-                            switch(target.id) {
+                            switch(target.id.value) {
                                 case ServoID::HEAD_YAW:
                                 case ServoID::HEAD_PITCH:
                                 case ServoID::R_SHOULDER_PITCH:
@@ -1005,6 +1013,7 @@ namespace module {
                                     }
                                     break;
                                 case ServoID::NUMBER_OF_SERVOS:
+                                default:
                                     break;
                             }
                         }
@@ -1014,7 +1023,7 @@ namespace module {
                 //edit gains for only specifc frame
                 if (editFrame) {
                     for(auto& target : script.frames[frame].targets) {
-                        switch(target.id) {
+                        switch(target.id.value) {
                             case ServoID::HEAD_YAW:
                             case ServoID::HEAD_PITCH:
                             case ServoID::R_SHOULDER_PITCH:
@@ -1044,6 +1053,7 @@ namespace module {
                                 }
                                 break;
                             case ServoID::NUMBER_OF_SERVOS:
+                            default:
                                 break;
                         }
                     }

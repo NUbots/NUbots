@@ -19,15 +19,16 @@
 
 #include "DisplayTest.h"
 #include "utility/nubugger/NUhelpers.h"
-#include "message/input/proto/MotionCapture.pb.h"
+#include "message/input/MotionCapture.h"
 #include "message/input/Sensors.h"
+#include "utility/support/eigen_armadillo.h"
 
 using utility::nubugger::graph;
 
 namespace module {
 namespace support {
 
-    using message::input::proto::MotionCapture;
+    using message::input::MotionCapture;
     using message::input::Sensors;
 
     DisplayTest::DisplayTest(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
@@ -46,7 +47,7 @@ namespace support {
 //         });
 
         on<Trigger<Sensors>, Single, Priority::HIGH>().then([this](const Sensors& sensors) {
-            emit(graph("world", sensors.world));
+            emit(graph("world", convert<double, 4, 4>(sensors.world)));
         });
     }
 }

@@ -21,48 +21,50 @@
 
 #include <limits>
 
-#include "message/support/Configuration.h"
-#include "message/localisation/FieldObject.h"
+#include "extension/Configuration.h"
+
+#include "message/behaviour/KickPlan.h"
 #include "message/behaviour/MotionCommand.h"
 #include "message/behaviour/WalkPath.h"
-#include "message/behaviour/Action.h"
-#include "message/motion/WalkCommand.h"
+#include "message/localisation/FieldObject.h"
 #include "message/motion/KickCommand.h"
-#include "message/behaviour/KickPlan.h"
-#include "message/input/LimbID.h"
-#include "message/input/ServoID.h"
-#include "utility/nubugger/NUhelpers.h"
+#include "message/motion/WalkCommand.h"
+
+#include "utility/behaviour/Action.h"
+#include "utility/input/LimbID.h"
+#include "utility/input/ServoID.h"
 #include "utility/math/geometry/RotatedRectangle.h"
 #include "utility/math/matrix/Transform2D.h"
 #include "utility/math/angle.h"
+#include "utility/nubugger/NUhelpers.h"
 
 namespace module {
 namespace behaviour {
 namespace skills {
 
-    using message::support::Configuration;
+    using extension::Configuration;
+
     using Self = message::localisation::Self;
     using Ball = message::localisation::Ball;
 
     using message::behaviour::MotionCommand;
     using message::behaviour::WalkPath;
-    using message::behaviour::RegisterAction;
-    using message::behaviour::ActionPriorites;
 
     using message::motion::KickFinished;
     using message::motion::WalkCommand;
-    using message::motion::WalkStartCommand;
-    using message::motion::WalkStopCommand;
+    using message::motion::StopCommand;
     using message::motion::EnableWalkEngineCommand;
     using message::motion::DisableWalkEngineCommand;
 
-    using message::input::LimbID;
-    using message::input::ServoID;
+    using utility::behaviour::RegisterAction;
+    using utility::behaviour::ActionPriorites;
+
+    using LimbID  = utility::input::LimbID;
+    using ServoID = utility::input::ServoID;
 
     using utility::math::geometry::RotatedRectangle;
     using utility::math::matrix::Transform2D;
     using utility::math::angle::vectorToBearing;
-
 
     WalkPathFollower::WalkPathFollower(std::unique_ptr<NUClear::Environment> environment)
     : Reactor(std::move(environment))
@@ -127,7 +129,7 @@ namespace skills {
 
         // // TODO: Review the interaction of the kick with the WalkPathFollower.
         // on<Trigger<KickFinished>>().then([this] (const KickFinished&) {
-        //     emit(std::move(std::make_unique<WalkStartCommand>(subsumptionId)));
+        //     Re-issue walk command with target velocity...
         // });
 
         updatePathReaction = on<Trigger<WalkPath>,
@@ -224,9 +226,6 @@ namespace skills {
 
             emit(std::move(walkCommand));
 
-
-            emit(std::move(std::make_unique<WalkStartCommand>(subsumptionId)));
-
             emit(utility::nubugger::drawRectangle("WPF_Closest", RotatedRectangle(targetState, {0.12, 0.17}), {0, 0, 0}));
 
             emit(utility::nubugger::drawArrow("WPF_Closest_Arrow", targetState, {1,0,1}, 1));
@@ -239,7 +238,6 @@ namespace skills {
             // }
 
             // // Emit a walk command to move towards the target state:
-            // emit(std::move(std::make_unique<WalkStartCommand>(subsumptionId)));
             // emit(std::move(walkToNextNode(currentState)));
         }).disable();
     }

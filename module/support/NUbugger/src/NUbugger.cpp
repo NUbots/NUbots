@@ -19,13 +19,13 @@
 
 #include "NUbugger.h"
 
+#include "extension/Configuration.h"
+
+#include "message/support/nubugger/Ping.h"
+#include "message/support/nubugger/ReactionHandles.h"
+#include "message/support/nubugger/Command.h"
+#include "message/support/SaveConfiguration.h"
 #include "message/vision/LookUpTable.h"
-#include "message/support/Configuration.h"
-#include "message/support/nubugger/proto/Ping.pb.h"
-#include "message/support/nubugger/proto/ReactionHandles.pb.h"
-#include "message/support/nubugger/proto/Command.pb.h"
-#include "message/support/nubugger/proto/ConfigurationState.pb.h"
-#include "message/vision/proto/LookUpTable.pb.h"
 
 #include "utility/nubugger/NUhelpers.h"
 #include "utility/time/time.h"
@@ -37,21 +37,16 @@ namespace support {
 
     using utility::nubugger::graph;
 
-    using message::support::Configuration;
-    using message::support::nubugger::proto::Ping;
-    using message::support::nubugger::proto::ReactionHandles;
-    using message::support::nubugger::proto::Command;
-    using message::support::nubugger::proto::ConfigurationState;
-
-    using LookUpTableProto = message::vision::proto::LookUpTable;
+    using extension::Configuration;
+    using message::support::nubugger::Ping;
+    using message::support::nubugger::ReactionHandles;
+    using message::support::nubugger::Command;
 
     using message::vision::LookUpTable;
     using message::vision::SaveLookUpTable;
-    using message::vision::Colour;
 
     using message::support::SaveConfiguration;
 
-    using utility::time::getUtcTimestamp;
     using utility::time::durationFromSeconds;
 
     // Flag struct to upload a lut
@@ -117,7 +112,7 @@ namespace support {
                 fileEnabled = false;
             }
 
-            for (auto& setting : config["reaction_handles"]) {
+            for (auto& setting : config["reaction_handles"].config) {
                 // Lowercase the name
                 std::string name = setting.first.as<std::string>();
                 std::transform(name.begin(), name.end(), name.begin(), ::tolower);
@@ -154,25 +149,16 @@ namespace support {
 
         on<Trigger<UploadLUT>, With<LookUpTable>>().then([this](const LookUpTable& lut) {
 
-            LookUpTableProto lutMessage;
-
-            lutMessage.set_table(lut.getData());
-            lutMessage.set_bits_y(lut.BITS_Y);
-            lutMessage.set_bits_cb(lut.BITS_CB);
-            lutMessage.set_bits_cr(lut.BITS_CR);
-
-            send(lutMessage);
+            send(lut);
         });
 
         on<Network<Command>>().then("Network Command", [this](const Command& message) {
-            std::string command = message.command();
+            std::string command = message.command;
             log<NUClear::INFO>("Received command:", command);
             if (command == "download_lut") {
 
                 // Emit something to make it upload the lut
                 emit<Scope::DIRECT>(std::make_unique<UploadLUT>());
-            } else if (command == "get_configuration_state") {
-                sendConfigurationState();
             } else if (command == "get_reaction_handles") {
                 sendReactionHandles();
             } else if (command == "get_subsumption") {
@@ -180,23 +166,13 @@ namespace support {
             }
         });
 
-        on<Network<LookUpTableProto>>().then([this](const LookUpTableProto& lookuptable) {
-
-            const std::string& lutData = lookuptable.table();
+        on<Network<LookUpTable>>().then([this](const LookUpTable& lut) {
 
             log<NUClear::INFO>("Loading LUT");
-            std::vector<message::vision::Colour> data;
-            data.reserve(lutData.size());
-            for (auto& s : lutData) {
-                data.push_back(message::vision::Colour(s));
-            }
-            auto lut = std::make_unique<LookUpTable>(lookuptable.bits_y(), lookuptable.bits_cb(), lookuptable.bits_cr(), std::move(data));
-            emit<Scope::DIRECT>(std::move(lut));
+            emit<Scope::DIRECT>(std::make_unique<LookUpTable>(lut));
 
-            if (lookuptable.save()) {
-                log<NUClear::INFO>("Saving LUT to file");
-                emit<Scope::DIRECT>(std::make_unique<SaveLookUpTable>());
-            }
+            log<NUClear::INFO>("Saving LUT to file");
+            emit<Scope::DIRECT>(std::make_unique<SaveLookUpTable>());
         });
 
         on<Network<ReactionHandles>>().then([this](const NetworkSource& /*source*/, const ReactionHandles& /*command*/) {
@@ -221,10 +197,6 @@ namespace support {
             // emit(std::move(config));
         });
 
-        on<Network<ConfigurationState>>().then([this](const ConfigurationState& state) {
-            recvConfigurationState(state);
-        });
-
         sendReactionHandles();
 
         // When we shutdown, close our publisher and our file if we have one
@@ -236,7 +208,7 @@ namespace support {
         });
 
         on<Trigger<SaveConfiguration>>().then("Save Config",[this](const SaveConfiguration& config){
-            saveConfigurationFile(config.path,config.config);
+            saveConfigurationFile(config.path, config.config);
         });
     }
 
@@ -245,10 +217,11 @@ namespace support {
         ReactionHandles reactionHandles;
 
         for (auto& handle : handles) {
-            auto* objHandles = reactionHandles.add_handles();
+            ReactionHandles::Handle objHandle;
+            objHandle.type = handle.first;
             auto& value = handle.second;
-            objHandles->set_type(handle.first);
-            objHandles->set_enabled(value.empty() ? true : value.front().enabled());
+            objHandle.enabled = (value.empty()) ? true : value.front().enabled();
+            reactionHandles.handles.push_back(objHandle);
         }
 
         send(reactionHandles, 0, true, NUClear::clock::now());

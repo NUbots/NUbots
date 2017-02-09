@@ -23,10 +23,21 @@
 #include <nuclear>
 #include <armadillo>
 
+#pragma GCC diagnostic ignored "-Weffc++"
+#include <Eigen/Core>
+#pragma GCC diagnostic pop
+
+#include "QuexClassifier.h"
+
 #include "message/input/Image.h"
-#include "message/input/Sensors.h"
 #include "message/vision/ClassifiedImage.h"
 #include "message/vision/LookUpTable.h"
+
+#include "utility/input/ServoID.h"
+#include "utility/vision/ClassifiedImage.h"
+#include "utility/vision/fourcc.h"
+#include "utility/vision/LookUpTable.h"
+#include "utility/vision/Vision.h"
 
 namespace module {
     namespace vision {
@@ -43,7 +54,7 @@ namespace module {
             // A pointer to our quex class (since it is generated it is not defined at this point)
             std::shared_ptr<QuexClassifier> quex;
 
-            arma::fvec3 greenCentroid;
+            Eigen::Vector3f greenCentroid;
 
             int VISUAL_HORIZON_SPACING = 100;
             int VISUAL_HORIZON_BUFFER = 0;
@@ -77,23 +88,21 @@ namespace module {
             int MAXIMUM_LIGHTNING_BOLT_LENGTH = 10;
             int MINIMUM_LIGHTNING_BOLT_STRENGTH = 10;
 
-            std::string LUT_PATH;
+            std::string LUT_PATH, LUT_HOST;
 
-            void insertSegments(message::vision::ClassifiedImage<message::vision::ObjectClass>& image
-                , std::vector<message::vision::ClassifiedImage<message::vision::ObjectClass>::Segment>& segments
-                , bool vertical);
+            void insertSegments(message::vision::ClassifiedImage& image, std::vector<message::vision::ClassifiedImage::Segment>& segments, bool vertical);
 
-            void findHorizon(const message::input::Image& image, const message::vision::LookUpTable& lut, message::vision::ClassifiedImage<message::vision::ObjectClass>& classifiedImage);
+            void findHorizon(const message::input::Image& image, const message::vision::LookUpTable& lut, message::vision::ClassifiedImage& classifiedImage);
 
-            void findVisualHorizon(const message::input::Image& image, const message::vision::LookUpTable& lut, message::vision::ClassifiedImage<message::vision::ObjectClass>& classifiedImage);
+            void findVisualHorizon(const message::input::Image& image, const message::vision::LookUpTable& lut, message::vision::ClassifiedImage& classifiedImage);
 
-            void findBall(const message::input::Image& image, const message::vision::LookUpTable& lut, message::vision::ClassifiedImage<message::vision::ObjectClass>& classifiedImage);
+            void findBall(const message::input::Image& image, const message::vision::LookUpTable& lut, message::vision::ClassifiedImage& classifiedImage);
 
-            void findGoals(const message::input::Image& image, const message::vision::LookUpTable& lut, message::vision::ClassifiedImage<message::vision::ObjectClass>& classifiedImage);
+            void findGoals(const message::input::Image& image, const message::vision::LookUpTable& lut, message::vision::ClassifiedImage& classifiedImage);
 
-            void enhanceBall(const message::input::Image& image, const message::vision::LookUpTable& lut, message::vision::ClassifiedImage<message::vision::ObjectClass>& classifiedImage);
+            void enhanceBall(const message::input::Image& image, const message::vision::LookUpTable& lut, message::vision::ClassifiedImage& classifiedImage);
 
-            void enhanceGoals(const message::input::Image& image, const message::vision::LookUpTable& lut, message::vision::ClassifiedImage<message::vision::ObjectClass>& classifiedImage);
+            void enhanceGoals(const message::input::Image& image, const message::vision::LookUpTable& lut, message::vision::ClassifiedImage& classifiedImage);
 
         public:
             explicit LUTClassifier(std::unique_ptr<NUClear::Environment> environment);

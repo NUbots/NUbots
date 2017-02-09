@@ -19,7 +19,7 @@
 
 #include "NUbugger.h"
 
-#include "message/support/nubugger/proto/DataPoint.pb.h"
+#include "message/support/nubugger/DataPoint.h"
 
 #include "utility/time/time.h"
 
@@ -27,15 +27,15 @@ namespace module {
 namespace support {
     using utility::time::getUtcTimestamp;
 
-    using message::support::nubugger::proto::DataPoint;
+    using message::support::nubugger::DataPoint;
 
     void NUbugger::provideDataPoints() {
 
         handles["data_point"].push_back(on<Trigger<DataPoint>>().then([this](const DataPoint& dataPoint) {
 
-            uint filterId = dataPointFilterIds.find(dataPoint.label()) == dataPointFilterIds.end()
-                ? dataPointFilterIds.insert(std::make_pair(dataPoint.label(), dataPointFilterId++)).first->second
-                : dataPointFilterIds[dataPoint.label()];
+            uint filterId = dataPointFilterIds.find(dataPoint.label) == dataPointFilterIds.end()
+                ? dataPointFilterIds.insert(std::make_pair(dataPoint.label, dataPointFilterId++)).first->second
+                : dataPointFilterIds[dataPoint.label];
 
             send(dataPoint, filterId);
         }));

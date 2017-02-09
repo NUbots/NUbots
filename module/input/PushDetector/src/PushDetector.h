@@ -23,47 +23,40 @@
 #include <nuclear>
 #include <armadillo>
 #include <chrono>
-#include "message/input/Sensors.h"
+#include <yaml-cpp/yaml.h>
+
+#include "utility/input/ServoLoadModel.h"
+
 #include "utility/math/filter/UKF.h"
 
-namespace module {
-namespace input {
-
-    class ServoLoadModel {
-       public:
-        static constexpr size_t size = 1;
-
-        ServoLoadModel() {} // empty constructor
-
-        arma::vec::fixed<size> timeUpdate(const arma::vec::fixed<size>& state, double /*deltaT*/) {
-            return state;
-        }
-
-        arma::vec::fixed<size> predictedObservation(const arma::vec::fixed<size>& state) {
-            return state;
-        }
-
-        arma::vec observationDifference(const arma::vec& a, const arma::vec& b) {
-            return a - b;
-        }
-
-        arma::vec::fixed<size> limitState(const arma::vec::fixed<size>& state) {
-            return state;
-        }
-
-        arma::mat::fixed<size, size> processNoise() {
-            return arma::eye(ServoLoadModel::size, ServoLoadModel::size) * 0.001;
-        }
-    };
-
-    class PushDetector : public NUClear::Reactor {
+namespace module 
+{
+namespace input 
+{
+    class PushDetector : public NUClear::Reactor 
+    {
 
     public:
         /// @brief Called by the powerplant to build and setup the PushDetector reactor.
         explicit PushDetector(std::unique_ptr<NUClear::Environment> environment);
 
-        std::vector<utility::math::filter::UKF<ServoLoadModel>> loadFilters;
+        std::vector<utility::math::filter::UKF<utility::input::ServoLoadModel>> loadFilters;
         NUClear::clock::time_point lastTimeUpdateTime;
+    private:
+
+        /**
+         * Temporary debugging variables for local output logging...
+         */ 
+        bool DEBUG;                 //
+        int  DEBUG_ITER;            //
+
+        /**
+         * @brief [brief description]
+         * @details [long description]
+         * 
+         * @param config [description]
+         */
+        void configure(const YAML::Node& config);
     };
 
 }

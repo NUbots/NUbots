@@ -19,19 +19,23 @@
 
 #include "ScriptRunner.h"
 
-#include "message/motion/Script.h"
-#include "message/behaviour/Action.h"
-#include "message/behaviour/ServoCommand.h"
+#include "extension/Script.h"
+
+#include "utility/behaviour/Action.h"
+#include "utility/input/LimbID.h"
+#include "utility/input/ServoID.h"
 
 namespace module {
     namespace behaviour {
         namespace tools {
 
+            using extension::ExecuteScriptByName;
+
             using NUClear::message::CommandLineArguments;
-            using message::motion::ExecuteScriptByName;
-            using message::behaviour::RegisterAction;
-            using message::input::LimbID;
-            using message::input::ServoID;
+
+            using utility::behaviour::RegisterAction;
+            using LimbID  = utility::input::LimbID;
+            using ServoID = utility::input::ServoID;
 
             struct ExecuteNextScript {};
 
@@ -70,7 +74,7 @@ namespace module {
                     executeNextScript();
                 });
 
-                emit<Scope::INITIALIZE>(std::make_unique<RegisterAction>(RegisterAction {
+                emit<Scope::DIRECT>(std::make_unique<RegisterAction>(RegisterAction {
                     id,
                     "Script Runner",
                     { std::pair<float, std::set<LimbID>>(1, { LimbID::LEFT_LEG, LimbID::RIGHT_LEG, LimbID::LEFT_ARM, LimbID::RIGHT_ARM, LimbID::HEAD }) },

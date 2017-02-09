@@ -6,30 +6,32 @@ Vagrant.configure("2") do |config|
   # Settings for a parallels provider
   config.vm.provider "parallels" do |v, override|
     # Use parallels virtualbox
-    override.vm.box = "parallels/ubuntu-14.04-i386"
+    override.vm.box = "parallels/ubuntu-16.04"
 
     # See http://www.virtualbox.org/manual/ch08.html#vboxmanage-modifyvm
     # and http://parallels.github.io/vagrant-parallels/docs/configuration.html
-    v.memory = 8192
-    v.cpus = 4
+    v.customize ["set", :id, "--cpus", `sysctl -n hw.physicalcpu_max 2> /dev/null`.chomp ]
+    v.customize ["set", :id, "--memsize", `echo "scale=0; $(sysctl -n hw.memsize 2> /dev/null || echo 0)/2097152" | bc`.chomp ]
     v.update_guest_tools = true
   end
 
   # Settings if using a virtualbox provider
   config.vm.provider "virtualbox" do |v, override|
     # Use the official ubuntu box
-    override.vm.box = "ubuntu/trusty32"
+    #override.vm.box = "ubuntu/xenial64"
+
+    # Use custom box because official Ubuntu one is shit.
+    override.vm.box = "bidski/xenial64"
 
     # See http://www.virtualbox.org/manual/ch08.html#vboxmanage-modifyvm
-    v.memory = 8192
-    v.cpus = 8
+    v.customize ["modifyvm", :id, "--cpus", `lscpu -p | egrep -v '^#' | sort -u -t, -k 2,4 | wc -l`.chomp ]
+    v.customize ["modifyvm", :id, "--memory", `echo "scale=0; $(awk '/MemTotal/{print $2}' /proc/meminfo)/2048" | bc `.chomp ]
     v.customize ["modifyvm", :id, "--vram", 128]
     v.customize ["modifyvm", :id, "--ioapic", "on"]
     v.customize ["modifyvm", :id, "--accelerate3d", "on"]
+    v.customize ["modifyvm", :id, "--cableconnected1", "on"]
+    v.customize ["modifyvm", :id, "--natdnshostresolver1", "on"]
   end
-
-  # Use Ubuntu 14.04 32bit VM
-  config.vm.box = "puphpet/ubuntu1404-x32"
 
   # Fix the no tty error when installing
   config.vm.provision "fix-no-tty", type: "shell" do |shell|
@@ -61,7 +63,8 @@ Vagrant.configure("2") do |config|
     puppet.options = [
       # See https://docs.puppetlabs.com/references/3.6.2/man/agent.html#OPTIONS
       "--verbose",
-      "--debug"
+      "--debug",
+      "--parser=future"
     ]
   end
 

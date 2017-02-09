@@ -17,14 +17,20 @@
  * Copyright 2013 NUBots <nubots@nubots.net>
  */
 
-#include "PS3Walk.h"
 #include <nuclear>
+
+#include "PS3Walk.h"
+
 #include "message/behaviour/MotionCommand.h"
+#include "message/behaviour/ServoCommand.h"
 #include "message/motion/HeadCommand.h"
 #include "message/motion/KickCommand.h"
-#include "message/behaviour/Action.h"
-#include "message/behaviour/ServoCommand.h"
+
+#include "utility/behaviour/Action.h"
+#include "utility/behaviour/MotionCommand.h"
+#include "utility/input/LimbID.h"
 #include "utility/math/matrix/Transform2D.h"
+#include "utility/support/eigen_armadillo.h"
 
 namespace module {
 namespace behaviour {
@@ -33,7 +39,8 @@ namespace strategy {
     using message::motion::KickScriptCommand;
     using message::motion::HeadCommand;
     using message::behaviour::MotionCommand;
-    using message::input::LimbID;
+
+    using LimbID = utility::input::LimbID;
     using utility::math::matrix::Transform2D;
 
     PS3Walk::PS3Walk(std::unique_ptr<NUClear::Environment> environment)
@@ -71,7 +78,7 @@ namespace strategy {
                             if (event.value > 0) { // button down
                                 if (moving) {
                                     NUClear::log("Stop walking");
-                                    emit(std::make_unique<MotionCommand>(MotionCommand::StandStill()));
+                                    emit(std::make_unique<MotionCommand>(utility::behaviour::StandStill()));
                                 } else {
                                     NUClear::log("Start walking");
                                 }
@@ -118,10 +125,10 @@ namespace strategy {
                         case BUTTON_R2:
                             if (event.value > 0) { // button down
                                 NUClear::log("Requesting Right Front Kick");
-                                emit(std::make_unique<KickScriptCommand>(KickScriptCommand{
-                                    {1, 0, 0}, // vector pointing forward relative to robot
+                                emit(std::make_unique<KickScriptCommand>(KickScriptCommand(
+                                    Eigen::Vector3d(1, 0, 0), // vector pointing forward relative to robot
                                     LimbID::RIGHT_LEG
-                                }));
+                                )));
                             }
                             break;
                     }
@@ -152,7 +159,7 @@ namespace strategy {
 
                 auto rotationalSpeedNorm = rotationalSpeed / std::numeric_limits<short>::max();
                 auto transform = Transform2D(strafeNorm, rotationalSpeedNorm);
-                emit(std::make_unique<MotionCommand>(MotionCommand::DirectCommand(transform)));
+                emit(std::make_unique<MotionCommand>(utility::behaviour::DirectCommand(transform)));
             }
         });
     }

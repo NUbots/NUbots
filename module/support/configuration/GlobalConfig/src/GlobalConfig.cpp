@@ -19,26 +19,25 @@
 
 #include "GlobalConfig.h"
 
-#include "message/support/Configuration.h"
+#include "extension/Configuration.h"
 #include "message/support/GlobalConfig.h"
 
 namespace module {
     namespace support {
         namespace configuration {
-            using message::support::Configuration;
+            using extension::Configuration;
 
             GlobalConfig::GlobalConfig(std::unique_ptr<NUClear::Environment> environment)
                 : Reactor(std::move(environment)) {
 
                 on<Configuration>("GlobalConfig.yaml").then([this] (const Configuration& config) {
-                    emit(std::make_unique<message::support::GlobalConfig>(message::support::GlobalConfig {
-                        config["playerId"].as<uint>(),
-                        config["teamId"].as<uint>()
-                    }));
+
+                    auto msg = std::make_unique<message::support::GlobalConfig>();
+                    msg->playerId = config["playerId"].as<uint32_t>();
+                    msg->teamId   = config["teamId"].as<uint32_t>();
+                    emit(msg);
                 });
-
             }
-
         }
     }
 }

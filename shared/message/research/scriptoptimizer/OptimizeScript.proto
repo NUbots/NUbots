@@ -21,23 +21,21 @@ syntax = "proto3";
 
 package message.research.scriptoptimizer;
 
-import "message/input/proto/Sensors.proto";
-
 message OptimizeScript {
 
     message Target {
-        input.proto.Sensors.ServoID id = 1;
-        float position = 2;
-        float gain = 3;
+        uint32 id       = 1;
+        float  position = 2;
+        float  gain     = 3;
     }
 
     message Frame {
-        uint32 duration = 1;
-        repeated Target targets = 2;
+        uint32          duration = 1;
+        repeated Target targets  = 2;
     }
 
-    string target = 1;
-    uint32 iteration = 2;
-    string metadata = 3;
-    repeated Frame frames = 4;
+    string         target    = 1;
+    uint32         iteration = 2;
+    string         metadata  = 3;
+    repeated Frame frames    = 4;
 }

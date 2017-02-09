@@ -19,25 +19,26 @@
 
 #include "DivePlanner.h"
 
-#include "utility/support/yaml_armadillo.h"
+#include "extension/Configuration.h"
+
+#include "message/behaviour/ServoCommand.h"
+#include "message/localisation/FieldObject.h"
 #include "message/motion/DiveCommand.h"
 #include "message/motion/WalkCommand.h"
-#include "message/localisation/FieldObject.h"
-#include "message/support/Configuration.h"
-#include "message/behaviour/Action.h"
-#include "message/behaviour/ServoCommand.h"
 #include "message/vision/VisionObjects.h"
+
+#include "utility/support/yaml_armadillo.h"
 
 namespace module {
 namespace behaviour {
 namespace planning {
 
+    using extension::Configuration;
+
     using LocalisationBall = message::localisation::Ball;
-    using VisionBall = message::vision::Ball;
+    using VisionBall       = message::vision::Ball;
     using message::motion::DiveCommand;
-    using message::support::Configuration;
-    using message::motion::WalkStopCommand;
-    using message::input::LimbID;
+    using message::motion::StopCommand;
 
     DivePlanner::DivePlanner(std::unique_ptr<NUClear::Environment> environment)
         : Reactor(std::move(environment)) {

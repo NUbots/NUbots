@@ -27,7 +27,7 @@
 
 using utility::math::coordinates::cartesianToSpherical;
 using utility::math::coordinates::sphericalToCartesian;
-using message::support::Configuration;
+using extension::Configuration;
 
 using message::vision::VisionObject;
 // using message::localisation::FakeOdometry;

@@ -19,30 +19,41 @@
 
 #include "RobotFieldLocalisation.h"
 
+#include "extension/Configuration.h"
+
 #include "message/input/Sensors.h"
-#include "message/vision/VisionObjects.h"
-#include "message/support/Configuration.h"
-#include "message/support/FieldDescription.h"
-#include "message/localisation/FieldObject.h"
 #include "message/localisation/ResetRobotHypotheses.h"
+#include "message/localisation/FieldObject.h"
+#include "message/support/FieldDescription.h"
+#include "message/vision/VisionObjects.h"
+
 #include "utility/math/matrix/Rotation2D.h"
 #include "utility/math/matrix/Rotation3D.h"
-#include "utility/support/yaml_armadillo.h"
-#include "utility/nubugger/NUhelpers.h"
+#include "utility/math/matrix/Transform2D.h"
+#include "utility/math/matrix/Transform3D.h"
 #include "utility/math/vision.h"
+#include "utility/nubugger/NUhelpers.h"
+#include "utility/support/eigen_armadillo.h"
+#include "utility/support/yaml_armadillo.h"
 
 namespace module {
 namespace localisation {
 
-    using message::support::Configuration;
+    using extension::Configuration;
     using message::input::Sensors;
     using message::vision::Goal;
+    using GoalSide = message::vision::Goal::Side::Value;
+    using GoalTeam = message::vision::Goal::Team::Value;
+    using MeasurementType = message::vision::Goal::MeasurementType;
     using message::support::FieldDescription;
     using message::localisation::ResetRobotHypotheses;
     using utility::math::filter::MMUKF;
     using utility::math::filter::UKF;
     using utility::nubugger::graph;
+    using utility::math::matrix::Rotation2D;
+    using utility::math::matrix::Rotation3D;
     using utility::math::matrix::Transform2D;
+    using utility::math::matrix::Transform3D;
 
     RobotFieldLocalisation::RobotFieldLocalisation(std::unique_ptr<NUClear::Environment> environment)
     : Reactor(std::move(environment))
@@ -81,26 +92,30 @@ namespace localisation {
                 const ResetRobotHypotheses& reset
               , const Sensors& sensors
             ) {
+
             //Reset the filter to use the new robot hypotheses
             filter.filters.resize(0);
+
             for (const auto& h : reset.hypotheses) {
-                arma::vec3 Tgr = arma::vec3{h.position[0],h.position[1],h.heading};
+                arma::vec3 Tgr = arma::vec3{h.position[0], h.position[1], h.heading};
+
                 if (!h.absoluteYaw) {
-                    Tgr[2] -= sensors.world.rotation().yaw();
+                    Tgr[2] -= Rotation3D(Transform3D(convert<double, 4, 4>(sensors.world)).rotation()).yaw();
                 }
 
                 arma::mat33 stateCov(arma::fill::eye);
-                stateCov.submat(0,0,1,1) = h.position_cov;
-                stateCov(2,2) = h.heading_var;
+                stateCov.submat(0, 0, 1, 1) = convert<double, 2, 2>(h.position_cov);
+                stateCov(2, 2) = h.heading_var;
                 filter.filters.emplace_back(0.0, UKF<FieldModel>(Tgr, stateCov));
             }
+
             filter.timeUpdate(0.0);
         });
 
         on<Trigger<Sensors>, Sync<RobotFieldLocalisation>, Single>().then("Localisation Field Space", [this] (const Sensors& sensors) {
 
             // Use the current world to field state we are holding to modify sensors.world and emit that
-            utility::math::matrix::Transform3D Htg = sensors.world;
+            utility::math::matrix::Transform3D Htg = convert<double, 4, 4>(sensors.world);
 
             //this actually gets Field to Torso???
             //g = odometry space
@@ -121,11 +136,11 @@ namespace localisation {
             //std::cerr << "internal Localisation state: " << std::endl << Tgr << std::endl;
             //std::cerr << "currentLocalisation: " << std::endl << currentLocalisation << std::endl;
             //set position, covariance, and rotation
-            robot.position = currentLocalisation.rows(0,1);
-            robot.robot_to_world_rotation = utility::math::matrix::Rotation2D::createRotation(currentLocalisation[2]);
-            robot.position_cov = robot.robot_to_world_rotation * filter.getCovariance().submat(0,0,1,1);
-            robot.heading = robot.robot_to_world_rotation.row(0).t();
-            emit(std::make_unique<std::vector<message::localisation::Self>>(std::vector<message::localisation::Self>(1,robot)));
+            robot.locObject.position      = convert<double, 2>(currentLocalisation.rows(0, 1));
+            robot.robot_to_world_rotation = convert<double, 2, 2>(Rotation2D::createRotation(currentLocalisation[2]));
+            robot.locObject.position_cov  = robot.robot_to_world_rotation * convert<double, 2, 2>(filter.getCovariance().submat(0, 0, 1, 1));
+            robot.heading                 = robot.robot_to_world_rotation.row(0).transpose();
+            emit(std::make_unique<std::vector<message::localisation::Self>>(std::vector<message::localisation::Self>(1, robot)));
         });
 
         on<Trigger<std::vector<Goal>>, With<FieldDescription>, Sync<RobotFieldLocalisation>>().then("Localisation Goal Update", [this] (const std::vector<Goal>& goals, const FieldDescription& field) {
@@ -140,19 +155,19 @@ namespace localisation {
                 std::vector<double> measurement;
 
                 // Build our measurement types list
-                std::vector<std::tuple<Goal::Team, Goal::Side, Goal::MeasurementType>> measurementTypesOwn;
-                std::vector<std::tuple<Goal::Team, Goal::Side, Goal::MeasurementType>> measurementTypesOpponent;
+                std::vector<std::tuple<GoalTeam, GoalSide, MeasurementType>> measurementTypesOwn;
+                std::vector<std::tuple<GoalTeam, GoalSide, MeasurementType>> measurementTypesOpponent;
 
                 for (auto& goal : goals) {
-                    for (auto& m : goal.measurements) {
+                    for (auto& m : goal.measurement) {
                         // Insert the measurements into our vector
-                        measurement.push_back(m.second[0]);
-                        measurement.push_back(m.second[1]);
-                        measurement.push_back(m.second[2]);
+                        measurement.push_back(m.position[0]);
+                        measurement.push_back(m.position[1]);
+                        measurement.push_back(m.position[2]);
 
                         // Insert the measurement type into our measurement type vector
-                        measurementTypesOwn.push_back(std::make_tuple(Goal::Team::OWN, goal.side, m.first));
-                        measurementTypesOpponent.push_back(std::make_tuple(Goal::Team::OPPONENT, goal.side, m.first));
+                        measurementTypesOwn.push_back(std::make_tuple(GoalTeam::OWN, goal.side, m.type));
+                        measurementTypesOpponent.push_back(std::make_tuple(GoalTeam::OPPONENT, goal.side, m.type));
                     }
                 }
 
@@ -166,8 +181,8 @@ namespace localisation {
                                         1)
                                     );
                 filter.measurementUpdate({
-                      std::make_tuple(armaMeas, covmat, measurementTypesOwn,      field, *goals[0].sensors, FieldModel::MeasurementType::GOAL())
-                    , std::make_tuple(armaMeas, covmat, measurementTypesOpponent, field, *goals[0].sensors, FieldModel::MeasurementType::GOAL())
+                      std::make_tuple(armaMeas, covmat, measurementTypesOwn,      field, *goals[0].visObject.sensors, FieldModel::MeasurementType::GOAL())
+                    , std::make_tuple(armaMeas, covmat, measurementTypesOpponent, field, *goals[0].visObject.sensors, FieldModel::MeasurementType::GOAL())
                 });
             }
 
@@ -179,20 +194,20 @@ namespace localisation {
                 measurement.reserve(3*goals.size());
 
                 // Build our measurement types list
-                std::vector<std::tuple<Goal::Team, Goal::Side, Goal::MeasurementType>> measurementTypes[4];
+                std::vector<std::tuple<GoalTeam, GoalSide, MeasurementType>> measurementTypes[4];
 
                 for (auto& goal : goals) {
-                    for (auto& m : goal.measurements) {
+                    for (auto& m : goal.measurement) {
                         // Insert the measurements into our vector
-                        measurement.push_back(m.second[0]);
-                        measurement.push_back(m.second[1]);
-                        measurement.push_back(m.second[2]);
+                        measurement.push_back(m.position[0]);
+                        measurement.push_back(m.position[1]);
+                        measurement.push_back(m.position[2]);
 
                         // Insert the measurement type into our measurement type vector
-                        measurementTypes[0].push_back(std::make_tuple(Goal::Team::OWN, Goal::Side::LEFT, m.first));
-                        measurementTypes[1].push_back(std::make_tuple(Goal::Team::OWN, Goal::Side::RIGHT, m.first));
-                        measurementTypes[2].push_back(std::make_tuple(Goal::Team::OPPONENT, Goal::Side::LEFT, m.first));
-                        measurementTypes[3].push_back(std::make_tuple(Goal::Team::OPPONENT, Goal::Side::RIGHT, m.first));
+                        measurementTypes[0].push_back(std::make_tuple(GoalTeam::OWN, GoalSide::LEFT, m.type));
+                        measurementTypes[1].push_back(std::make_tuple(GoalTeam::OWN, GoalSide::RIGHT, m.type));
+                        measurementTypes[2].push_back(std::make_tuple(GoalTeam::OPPONENT, GoalSide::LEFT, m.type));
+                        measurementTypes[3].push_back(std::make_tuple(GoalTeam::OPPONENT, GoalSide::RIGHT, m.type));
                     }
                 }
 
@@ -206,10 +221,10 @@ namespace localisation {
                                         1)
                                     );
                 filter.measurementUpdate({
-                      std::make_tuple(armaMeas, covmat, measurementTypes[0], field, *goals[0].sensors, FieldModel::MeasurementType::GOAL())
-                    , std::make_tuple(armaMeas, covmat, measurementTypes[1], field, *goals[0].sensors, FieldModel::MeasurementType::GOAL())
-                    , std::make_tuple(armaMeas, covmat, measurementTypes[2], field, *goals[0].sensors, FieldModel::MeasurementType::GOAL())
-                    , std::make_tuple(armaMeas, covmat, measurementTypes[3], field, *goals[0].sensors, FieldModel::MeasurementType::GOAL())
+                      std::make_tuple(armaMeas, covmat, measurementTypes[0], field, *goals[0].visObject.sensors, FieldModel::MeasurementType::GOAL())
+                    , std::make_tuple(armaMeas, covmat, measurementTypes[1], field, *goals[0].visObject.sensors, FieldModel::MeasurementType::GOAL())
+                    , std::make_tuple(armaMeas, covmat, measurementTypes[2], field, *goals[0].visObject.sensors, FieldModel::MeasurementType::GOAL())
+                    , std::make_tuple(armaMeas, covmat, measurementTypes[3], field, *goals[0].visObject.sensors, FieldModel::MeasurementType::GOAL())
                 });
             }
         });

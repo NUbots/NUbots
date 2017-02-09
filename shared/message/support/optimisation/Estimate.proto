@@ -21,8 +21,8 @@ syntax = "proto3";
 
 package message.support.optimisation;
 
-import "message/Vector.proto";
-import "message/Matrix.proto";
+import "Vector.proto";
+import "Matrix.proto";
 import "message/support/optimisation/Episode.proto";
 
 message Estimate {

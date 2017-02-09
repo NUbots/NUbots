@@ -21,8 +21,9 @@
 #define MODULES_BEHAVIOUR_PLANNING_KICKPLANNER_H
 
 #include <armadillo>
-#include "message/motion/KickCommand.h"
+
 #include "message/input/Sensors.h"
+#include "message/motion/KickCommand.h"
 
 #include <nuclear>
 namespace module {

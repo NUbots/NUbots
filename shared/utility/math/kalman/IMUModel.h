@@ -52,9 +52,7 @@ namespace utility {
 
                 static constexpr size_t size = 7;
 
-                IMUModel() 
-                : processNoiseDiagonal()
-                {} // empty constructor
+                IMUModel() : processNoiseDiagonal() {} // empty constructor
 
                 arma::vec::fixed<size> timeUpdate(const arma::vec::fixed<size>& state, double deltaT);
 

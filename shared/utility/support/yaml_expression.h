@@ -21,6 +21,7 @@
 #define UTILITY_SUPPORT_yaml_expression_H
 
 #include <iostream>
+#include <limits>
 #include <yaml-cpp/yaml.h>
 #include <mpParser.h>
 
@@ -57,6 +58,7 @@ namespace YAML {
             try {
                 // Parse the expression using muParser
                 mup::ParserX parser(mup::pckALL_NON_COMPLEX);
+                parser.DefineConst("auto", std::numeric_limits<double>::infinity());
                 parser.SetExpr(node.as<std::string>());
                 rhs = parser.Eval().GetFloat();
 

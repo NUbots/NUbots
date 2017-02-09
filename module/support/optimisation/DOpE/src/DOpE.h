@@ -24,7 +24,7 @@
 
 #include "message/support/optimisation/DOpE.h"
 #include "utility/math/optimisation/Optimiser.h"
-#include "message/support/optimisation/Episode.pb.h"
+#include "message/support/optimisation/Episode.h"
 
 namespace module {
 namespace support {

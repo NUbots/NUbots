@@ -19,10 +19,13 @@
  */
 
 #include "FieldModel.h"
+
+#include "utility/input/ServoID.h"
 #include "utility/math/matrix/Rotation3D.h"
 #include "utility/math/matrix/Transform3D.h"
 #include "utility/math/matrix/Transform2D.h"
 #include "utility/math/vision.h"
+#include "utility/support/eigen_armadillo.h"
 
 namespace module {
     namespace localisation {
@@ -31,17 +34,19 @@ namespace module {
         using utility::math::matrix::Transform3D;
         using utility::math::matrix::Transform2D;
         using utility::math::vision::cameraSpaceGoalProjection;
-        using message::vision::Goal;
         using message::support::FieldDescription;
         using message::input::Sensors;
-        using message::input::ServoID;
+        using ServoID             = utility::input::ServoID;
+        using GoalSide            = message::vision::Goal::Side::Value;
+        using GoalTeam            = message::vision::Goal::Team::Value;
+        using GoalMeasurementType = message::vision::Goal::MeasurementType;
 
         arma::vec::fixed<FieldModel::size> FieldModel::timeUpdate(const arma::vec::fixed<size>& state, double /*deltaT*/) {
             return state;
         }
 
         arma::vec FieldModel::predictedObservation(const arma::vec::fixed<size>& state
-            , const std::vector<std::tuple<Goal::Team, Goal::Side, Goal::MeasurementType>>& measurements
+            , const std::vector<std::tuple<GoalTeam, GoalSide, GoalMeasurementType>>& measurements
             , const FieldDescription& field
             , const Sensors& sensors
             , const MeasurementType::GOAL&) 
@@ -54,8 +59,8 @@ namespace module {
             // Transform2D world = sensors.world.projectTo2D(arma::vec3({0,0,1}),arma::vec3({1,0,0}));
 
             //Transform2D world = sensors.world.projectTo2D(arma::vec3({0,0,1}),arma::vec3({1,0,0}));
-            Transform3D Htw = sensors.world;
-            Transform3D Htc = sensors.forwardKinematics.find(ServoID::HEAD_PITCH)->second;
+            const Transform3D& Htw = convert<double, 4, 4>(sensors.world);
+            const Transform3D& Htc = convert<double, 4, 4>(sensors.forwardKinematics.at(ServoID::HEAD_PITCH)); 
             Transform3D Hwc = Htw.i() * Htc;
             //Get the x/y position for goals
             arma::vec prediction(3*measurements.size());
@@ -67,37 +72,37 @@ namespace module {
                 // Switch on Team
                 switch(std::get<0>(type)) {
                     // Switch on Side
-                    case Goal::Team::OWN:
+                    case GoalTeam::OWN:
                         //ans += " own";
                         switch(std::get<1>(type)) {
-                            case Goal::Side::LEFT:
-                                goalLocation.rows(0,1) = field.goalpost_own_l;
+                            case GoalSide::LEFT:
+                                goalLocation.rows(0,1) = convert<double, 2>(field.goalpost_own_l);
                                 //ans += " left";
                                 break;
-                            case Goal::Side::RIGHT:
-                                goalLocation.rows(0,1) = field.goalpost_own_r;
+                            case GoalSide::RIGHT:
+                                goalLocation.rows(0,1) = convert<double, 2>(field.goalpost_own_r);
                                 //ans += " right";
                                 break;
-                            case Goal::Side::UNKNOWN:
+                            case GoalSide::UNKNOWN_SIDE:
                                 break;
                         }
                         break;
-                    case Goal::Team::OPPONENT:
+                    case GoalTeam::OPPONENT:
                         //ans += " opponent";
                         switch(std::get<1>(type)) {
-                            case Goal::Side::LEFT:
+                            case GoalSide::LEFT:
                                 //ans += " left";
-                                goalLocation.rows(0,1) = field.goalpost_opp_l;
+                                goalLocation.rows(0,1) = convert<double, 2>(field.goalpost_opp_l);
                                 break;
-                            case Goal::Side::RIGHT:
+                            case GoalSide::RIGHT:
                                 //ans += " right";
-                                goalLocation.rows(0,1) = field.goalpost_opp_r;
+                                goalLocation.rows(0,1) = convert<double, 2>(field.goalpost_opp_r);
                                 break;
-                            case Goal::Side::UNKNOWN:
+                            case GoalSide::UNKNOWN_SIDE:
                                 break;
                         }
                         break;
-                    case Goal::Team::UNKNOWN:
+                    case GoalTeam::UNKNOWN_TEAM:
                         break;
                 }
                 //only update the goal data if we're looking at a different i
@@ -106,24 +111,24 @@ namespace module {
                     goalNormals = cameraSpaceGoalProjection(state,goalLocation,field,Hwc,false);
                 }
                 // Switch on normal type
-                switch(std::get<2>(type)) {
+                switch(std::get<2>(type).value) {
 
-                    case Goal::MeasurementType::LEFT_NORMAL: {
+                    case GoalMeasurementType::LEFT_NORMAL: {
                         prediction.rows(counter,counter+2) = goalNormals.col(0);
                     } break;
 
-                    case Goal::MeasurementType::RIGHT_NORMAL: {
+                    case GoalMeasurementType::RIGHT_NORMAL: {
                         prediction.rows(counter,counter+2) = goalNormals.col(1);
                     } break;
 
-                    case Goal::MeasurementType::TOP_NORMAL: {
+                    case GoalMeasurementType::TOP_NORMAL: {
                         prediction.rows(counter,counter+2) = goalNormals.col(2);
                     } break;
 
-                    case Goal::MeasurementType::BASE_NORMAL: {
+                    case GoalMeasurementType::BASE_NORMAL: {
                         prediction.rows(counter,counter+2) = goalNormals.col(3);
                     } break;
-
+                    default: break;
                 }
                 counter += 3;
             }

@@ -1,8 +1,9 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 
+import b
 import os
+import sys
 import textwrap
-import datetime
 
 def register(command):
 
@@ -17,41 +18,68 @@ def register(command):
     generate_command.add_argument('path', metavar='path', help='a path to the new module (from the module directory)')
 
 def run(path, **kwargs):
-    if os.path.exists('module/{}'.format(path)):
-        sys.stderr.write('The path provided already exists.\n')
-        sys.stderr.write('Module generation aborted.')
-        sys.exit(1)
+    # Try to get our actual module directory from the cmake cache
+    if 'NUCLEAR_MODULE_DIR' in b.cmake_cache:
+        module_path = os.path.join(b.source_dir, b.cmake_cache['NUCLEAR_MODULE_DIR'])
+    else:
+        sys.stderr.write('Warning: the system couldn\'t find the real module directory.')
+        sys.stderr.write('defaulting to module\n')
+        module_path = 'module'
 
     # Calculate all of our file paths
-    path = 'module/{}'.format(path)
-    src_path = '{}/src'.format(path)
-    tests_path = '{}/tests'.format(path)
-    config_path = '{}/data/config'.format(path)
-    module_name = path.split('/')[-1]
+    path = os.path.join(module_path, path)
+    src_path = os.path.join(path, 'src')
+    tests_path = os.path.join(path, 'tests')
+    config_path = os.path.join(path, 'data', 'config')
+    module_name = os.path.split(path)[-1]
+
+    # Check if the path already exists
+    if os.path.exists(path):
+        sys.stderr.write('The path provided already exists.\n')
+        sys.stderr.write('Module generation aborted.\n')
+        sys.exit(1)
+
+    print('Module directory', module_path)
+    print('Creating directories')
 
     # Create the required directories
     os.makedirs(path)
+    print('\t', path)
     os.makedirs(src_path)
+    print('\t', src_path)
     os.makedirs(tests_path)
+    print('\t', tests_path)
     os.makedirs(config_path)
+    print('\t', config_path)
 
     # Split our provided path
-    parts = path.split('/')
+    parts = ['module'] + os.path.relpath(path, module_path).split(os.sep)
+
+    print('Generating files')
 
     # Write all of our files
-    with open('{}/CMakeLists.txt'.format(path), "w") as output:
+    with open(os.path.join(path, 'CMakeLists.txt'), "w") as output:
         output.write(generate_cmake(parts))
-    with open('{}/README.md'.format(path), "w") as output:
-        output.write(generate_readme(parts))
-    with open('{0}/{1}.h'.format(src_path, module_name), "w") as output:
-        output.write(generate_header(parts))
-    with open('{0}/{1}.cpp'.format(src_path, module_name), "w") as output:
-        output.write(generate_cpp(parts))
-    with open('{0}/{1}Test.cpp'.format(tests_path, module_name), "w") as output:
-        output.write(generate_test(parts))
+        print('\t', os.path.join(path, 'CMakeLists.txt'))
 
-    with open('{0}/{1}.yaml'.format(config_path, module_name), 'a'):
-        pass
+    with open(os.path.join(path, 'README.md'), "w") as output:
+        output.write(generate_readme(parts))
+        print('\t', os.path.join(src_path, 'README.md'))
+
+    with open(os.path.join(src_path, '{}.h'.format(module_name)), "w") as output:
+        output.write(generate_header(parts))
+        print('\t', os.path.join(src_path, '{}.h'.format(module_name)))
+
+    with open(os.path.join(src_path, '{}.cpp'.format(module_name)), "w") as output:
+        output.write(generate_cpp(parts))
+        print('\t', os.path.join(src_path, '{}.cpp'.format(module_name)))
+
+    with open(os.path.join(tests_path, '{}.cpp'.format(module_name)), "w") as output:
+        output.write(generate_test(parts))
+        print('\t', os.path.join(tests_path, '{}.cpp'.format(module_name)))
+
+    with open(os.path.join(config_path, '{}.yaml'.format(module_name)), 'a'):
+        print('\t', os.path.join(config_path, '{}.yaml'.format(module_name)))
 
 
 def generate_cmake(parts):
@@ -131,7 +159,6 @@ def generate_readme(parts):
     return template.format(className=parts[-1]
                          , classNameTitle = len(parts[-1]) * '='
                          , closeNamespace = '\n'.join(['}' for x in parts[:-1]]))
-    pass
 
 def generate_test(parts):
     template = textwrap.dedent("""\

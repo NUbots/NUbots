@@ -78,6 +78,16 @@ namespace file {
         return S_ISDIR(st_buf.st_mode);
     }
 
+    void makeDir(const std::string& path)
+    {
+        int status;
+        status = mkdir(path.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
+
+        if (status != 0) {
+            throw std::system_error(errno, std::system_category(), "Error creating directory '" + path + "'.");
+        }
+    }
+
     // List the contents of a directory
     std::vector<std::string> listDir(const std::string& path) {
 

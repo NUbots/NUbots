@@ -20,10 +20,10 @@
 #include "NUcapLocalisation.h"
 #include "utility/nubugger/NUhelpers.h"
 #include "utility/math/matrix/Rotation3D.h"
-#include "message/input/proto/MotionCapture.pb.h"
+#include "message/input/MotionCapture.h"
 #include "message/input/Sensors.h"
 #include "utility/math/geometry/UnitQuaternion.h"
-#include "message/support/Configuration.h"
+#include "extension/Configuration.h"
 #include "message/localisation/FieldObject.h"
 #include "utility/math/angle.h"
 #include <armadillo>
@@ -31,10 +31,10 @@
 namespace module {
 namespace localisation {
 
-    using message::input::proto::MotionCapture;
+    using message::input::MotionCapture;
     using message::input::Sensors;
     using message::localisation::Self;
-    using message::support::Configuration;
+    using extension::Configuration;
     using utility::math::geometry::UnitQuaternion;
     using utility::math::matrix::Rotation3D;
     using utility::nubugger::graph;

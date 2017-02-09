@@ -19,19 +19,23 @@
 
 #include "Stand.h"
 
-#include "message/input/ServoID.h"
-#include "message/motion/Script.h"
-#include "message/behaviour/Action.h"
+#include "extension/Script.h"
+
 #include "message/behaviour/ServoCommand.h"
+
+#include "utility/behaviour/Action.h"
+#include "utility/input/LimbID.h"
+#include "utility/input/ServoID.h"
 
 namespace module {
     namespace behaviour {
         namespace skills {
 
-            using message::input::ServoID;
-            using message::motion::ExecuteScriptByName;
-            using message::behaviour::RegisterAction;
-            using message::input::LimbID;
+            using extension::ExecuteScriptByName;
+
+            using utility::behaviour::RegisterAction;
+            using LimbID  = utility::input::LimbID;
+            using ServoID = utility::input::ServoID;
 
             //internal only callback messages to start and stop our action
             struct ExecuteStand {};

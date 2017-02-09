@@ -20,56 +20,55 @@
 #include "BezierWalkPathPlanner.h"
 
 #include <cmath>
+
+#include "extension/Configuration.h"
+
 #include "message/behaviour/KickPlan.h"
-#include "message/support/Configuration.h"
-#include "message/input/Sensors.h"
-#include "message/localisation/FieldObject.h"
-#include "message/vision/VisionObjects.h"
-#include "message/motion/WalkCommand.h"
-#include "message/motion/KickCommand.h"
 #include "message/behaviour/MotionCommand.h"
+#include "message/localisation/FieldObject.h"
+#include "message/motion/KickCommand.h"
+#include "message/motion/WalkCommand.h"
+#include "message/vision/VisionObjects.h"
+
 #include "utility/nubugger/NUhelpers.h"
 #include "utility/localisation/transform.h"
 #include "utility/math/matrix/Transform2D.h"
 
-#include "message/behaviour/Action.h"
-#include "message/input/LimbID.h"
-#include "message/input/ServoID.h"
+#include "utility/behaviour/Action.h"
+#include "utility/input/LimbID.h"
+#include "utility/input/ServoID.h"
 
 
 namespace module {
     namespace behaviour {
         namespace planning {
 
-            using message::support::Configuration;
-            using message::input::Sensors;
+            using extension::Configuration;
+
             using message::motion::WalkCommand;
             using message::behaviour::KickPlan;
             using message::behaviour::KickType;
             using message::behaviour::MotionCommand;
-            using message::behaviour::RegisterAction;
-            using message::behaviour::ActionPriorites;
             using message::motion::WalkStopped;
             using message::motion::WalkCommand;
-            using message::motion::WalkStartCommand;
-            using message::motion::WalkStopCommand;
+            using message::motion::StopCommand;
             using message::motion::EnableWalkEngineCommand;
             using message::motion::DisableWalkEngineCommand;
             using message::motion::KickFinished;
+            using LocalisationBall = message::localisation::Ball;
+            using Self             = message::localisation::Self;
+            using VisionBall       = message::vision::Ball;
+            using VisionObstacle   = message::vision::Obstacle;
 
-            using message::input::LimbID;
-            using message::input::ServoID;
-
-
+            using utility::behaviour::RegisterAction;
+            using utility::behaviour::ActionPriorites;
+            using LimbID  = utility::input::LimbID;
+            using ServoID = utility::input::ServoID;
             using utility::localisation::transform::RobotToWorldTransform;
             using utility::math::matrix::Transform2D;
             using utility::nubugger::graph;
             using utility::nubugger::drawSphere;
             using utility::nubugger::drawArrow;
-            using LocalisationBall = message::localisation::Ball;
-            using Self = message::localisation::Self;
-            using VisionBall = message::vision::Ball;
-            using VisionObstacle = message::vision::Obstacle;
 
             BezierWalkPathPlanner::BezierWalkPathPlanner(std::unique_ptr<NUClear::Environment> environment)
                 : Reactor(std::move(environment))
@@ -129,8 +128,12 @@ namespace module {
                     }
                 }));
 
-                on<Trigger<KickFinished>>().then([this] (const KickFinished&) {
-                    emit(std::move(std::make_unique<WalkStartCommand>(1)));
+                on<Trigger<KickFinished>>().then([this] (const KickFinished&) 
+                {
+                    // May need to tweek this to resume walking after kick completed....
+                    std::unique_ptr<WalkCommand> command = std::make_unique<WalkCommand>(subsumptionId,latestCommand.walkCommand);
+                    emit(std::move(command));
+                    emit(std::make_unique<ActionPriorites>(ActionPriorites { subsumptionId, { 26, 11 }}));
                 });
 
                 on<Trigger<MotionCommand>, Sync<BezierWalkPathPlanner>>().then([this] (const MotionCommand& cmd) {
@@ -152,7 +155,7 @@ namespace module {
                     if (latestCommand.type == MotionCommand::Type::StandStill) {
                         // log("Stand still motion command");
 
-                        emit(std::make_unique<WalkStopCommand>(1));
+                        emit(std::make_unique<StopCommand>(subsumptionId));
                         emit(std::make_unique<ActionPriorites>(ActionPriorites { subsumptionId, { 26, 11 }}));
 
                         return;
@@ -164,7 +167,6 @@ namespace module {
 
                         std::unique_ptr<WalkCommand> command = std::make_unique<WalkCommand>(subsumptionId,latestCommand.walkCommand);
                         emit(std::move(command));
-                        emit(std::move(std::make_unique<WalkStartCommand>(1)));
                         emit(std::make_unique<ActionPriorites>(ActionPriorites { subsumptionId, { 26, 11 }}));
 
                     } else {
@@ -344,9 +346,6 @@ namespace module {
 
                         std::unique_ptr<WalkCommand> command = std::make_unique<WalkCommand>(subsumptionId, Transform2D({finalForwardSpeed, 0, angle}));
                         //command->command = Transform2D({bezXdash[1], bezYdash[1], angle});
-
-
-                        emit(std::move(std::make_unique<WalkStartCommand>(1)));
                         emit(std::move(command));
                         emit(std::make_unique<ActionPriorites>(ActionPriorites { subsumptionId, { 26, 11 }}));
                     }

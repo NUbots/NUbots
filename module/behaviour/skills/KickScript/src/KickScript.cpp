@@ -16,16 +16,19 @@
  *
  * Copyright 2013 NUBots <nubots@nubots.net>
  */
-
-#include "KickScript.h"
 #include <nuclear>
 
-#include "message/input/ServoID.h"
-#include "message/motion/Script.h"
-#include "message/behaviour/Action.h"
+#include "KickScript.h"
+
+#include "extension/Configuration.h"
+#include "extension/Script.h"
+
 #include "message/behaviour/ServoCommand.h"
-#include "message/support/Configuration.h"
 #include "message/motion/WalkCommand.h"
+
+#include "utility/behaviour/Action.h"
+#include "utility/input/LimbID.h"
+#include "utility/input/ServoID.h"
 
 namespace module {
 namespace behaviour {
@@ -34,16 +37,18 @@ namespace skills {
     struct ExecuteKick{};
     struct FinishKick{};
 
-    using message::support::Configuration;
-    using message::input::ServoID;
-    using message::motion::ExecuteScriptByName;
-    using message::behaviour::RegisterAction;
-    using message::behaviour::ActionPriorites;
-    using message::motion::WalkStartCommand;
-    using message::input::LimbID;
+    using extension::Configuration;
+    using extension::ExecuteScriptByName;
+
+    using LimbID  = utility::input::LimbID;
+    using ServoID = utility::input::ServoID;
+
     using message::motion::KickScriptCommand;
     using message::motion::KickFinished;
 
+    using utility::behaviour::RegisterAction;
+    using utility::behaviour::ActionPriorites;
+    
     KickScript::KickScript(std::unique_ptr<NUClear::Environment> environment)
         : Reactor(std::move(environment))
         , id(size_t(this) * size_t(this) - size_t(this))
@@ -59,7 +64,7 @@ namespace skills {
 
         on<Trigger<KickScriptCommand>>().then([this] (const KickScriptCommand& kickCommand) {
             auto direction = kickCommand.direction;
-            auto leg = kickCommand.leg;
+            LimbID leg = kickCommand.leg;
 
             int quadrant = getDirectionalQuadrant(direction[0], direction[1]);
 
@@ -76,7 +81,7 @@ namespace skills {
                     valid = false;
                 }
             } else {
-                NUClear::log<NUClear::WARN>("Cannot kick with limb: ", uint(leg));
+                NUClear::log<NUClear::WARN>("Cannot kick with limb: ", leg);
                 updatePriority(0);
                 valid = false;
             }
@@ -88,8 +93,8 @@ namespace skills {
         });
 
         on<Trigger<ExecuteKick>>().then([this] {
-            auto direction = kickCommand.direction;
-            auto leg = kickCommand.leg;
+            // auto direction = kickCommand.direction;
+            LimbID leg = kickCommand.leg;
 
             if (leg == LimbID::RIGHT_LEG) {
                 emit(std::make_unique<ExecuteScriptByName>(id,  std::vector<std::string>({"Stand.yaml", "RightFootForwardKickNew.yaml", "Stand.yaml"})));

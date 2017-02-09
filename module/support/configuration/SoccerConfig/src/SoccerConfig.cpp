@@ -21,10 +21,10 @@
 
 #include <armadillo>
 
-#include "message/support/Configuration.h"
+#include "extension/Configuration.h"
 #include "message/support/FieldDescription.h"
 
-using message::support::Configuration;
+using extension::Configuration;
 using message::support::FieldDescription;
 
 namespace module {

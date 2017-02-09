@@ -23,10 +23,11 @@
 #include <random>
 #include <armadillo>
 
-#include "utility/math/matrix/Transform2D.h"
-#include "message/vision/VisionObjects.h"
 #include "message/input/CameraParameters.h"
 #include "message/input/Sensors.h"
+#include "message/vision/VisionObjects.h"
+
+#include "utility/math/matrix/Transform2D.h"
 
 namespace module {
 namespace support {
@@ -45,7 +46,7 @@ namespace support {
         std::normal_distribution<> angularDistribution = std::normal_distribution<>(0, M_PI_2);
         std::normal_distribution<> radialDistribution = std::normal_distribution<>(0, 0.01);
 
-        message::vision::Ball detect(const message::input::CameraParameters& camParams, utility::math::matrix::Transform2D robotPose, std::shared_ptr<const message::input::Sensors> sensors, arma::vec4 error);
+        message::vision::Ball detect(const message::input::CameraParameters& camParams, utility::math::matrix::Transform2D robotPose, const message::input::Sensors& sensors, arma::vec4 error);
     };
 
 }

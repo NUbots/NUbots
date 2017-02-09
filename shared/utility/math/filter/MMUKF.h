@@ -46,7 +46,7 @@ namespace utility {
                 };
 
                 std::vector<Filter> filters;
-                uint maxModels = 2;
+                size_t maxModels = 2;
                 double mergeProbability = 0.9;
 
                 static double bhattacharyyaDistance(const UKF<Model>& a, const UKF<Model>& b) {
@@ -107,7 +107,7 @@ namespace utility {
 
             public:
 
-                MMUKF(uint maxModels = 2
+                MMUKF(size_t maxModels = 2
                     , double mergeProbability = 0.9)
                 : filters()
                 , maxModels(maxModels)

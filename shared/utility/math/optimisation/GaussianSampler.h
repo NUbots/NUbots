@@ -22,11 +22,17 @@
 
 #include <armadillo>
 #include <cmath>
-#include "OptimiserTypes.h"
+
+#include "message/support/optimisation/OptimiserTypes.h"
+
+#include "utility/support/eigen_armadillo.h"
 
 namespace utility {
     namespace math {
         namespace optimisation {
+            using message::support::optimisation::OptimiserParameters;
+            using message::support::optimisation::OptimiserEstimate;
+
             class GaussianSampler {
             private:
                 uint64_t batchSize;
@@ -39,8 +45,8 @@ namespace utility {
                 GaussianSampler(const OptimiserParameters& params)
                 : batchSize(params.batchSize)
                 , generation(params.initial.generation)
-                , upperBound(params.upperBound)
-                , lowerBound(params.lowerBound)
+                , upperBound(convert<double>(params.upperBound))
+                , lowerBound(convert<double>(params.lowerBound))
                 , samples() {}
 
                 void clear() {
@@ -54,10 +60,10 @@ namespace utility {
                         || samples.n_cols == 0) {
 
                         //generate initial data
-                        arma::vec weights = arma::diagvec(bestParams.covariance);
-                        samples = arma::randn(bestParams.estimate.n_elem,batchSize);
+                        arma::vec weights = arma::diagvec(convert<double>(bestParams.covariance));
+                        samples = arma::randn(convert<double>(bestParams.estimate).n_elem, batchSize);
                         samples.each_col() %= weights;
-                        samples.each_col() += bestParams.estimate;
+                        samples.each_col() += convert<double>(bestParams.estimate);
 
 
 
@@ -68,9 +74,9 @@ namespace utility {
                             samples = samples.cols(arma::find(outOfBounds == 0));
 
                             while (samples.n_cols < batchSize) {
-                                arma::mat samples2 = arma::randn(bestParams.estimate.n_elem,batchSize);
+                                arma::mat samples2 = arma::randn(convert<double>(bestParams.estimate).n_elem, batchSize);
                                 samples2.each_col() %= weights;
-                                samples2.each_col() += bestParams.estimate;
+                                samples2.each_col() += convert<double>(bestParams.estimate);
 
                                 outOfBounds = arma::sum(samples2 > arma::repmat(upperBound,1,samples2.n_cols),1);
                                 outOfBounds += arma::sum(samples2 < arma::repmat(lowerBound,1,samples2.n_cols),1);
@@ -88,7 +94,8 @@ namespace utility {
 
                         //reset required variables
                         sampleCount = 0;
-                        bestParams.covariance = arma::diagmat(weights);
+                        arma::mat covariance = arma::diagmat(weights);
+                        bestParams.covariance = convert<double>(covariance);
                     }
                     sampleCount += numSamples;
                     return samples.cols(sampleCount-numSamples,sampleCount-1);

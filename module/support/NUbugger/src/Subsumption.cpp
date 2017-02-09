@@ -19,40 +19,21 @@
 
 #include "NUbugger.h"
 
-#include "message/behaviour/proto/Subsumption.pb.h"
-#include "message/behaviour/Action.h"
-#include "message/input/LimbID.h"
+#include "message/behaviour/Subsumption.h"
 
-#include "utility/time/time.h"
+#include "utility/behaviour/Action.h"
+#include "utility/input/LimbID.h"
 
 namespace module {
 namespace support {
-    using utility::time::getUtcTimestamp;
 
-    using message::behaviour::ActionStart;
-    using message::behaviour::ActionKill;
-    using message::behaviour::RegisterAction;
-    using message::behaviour::ActionPriorites;
-    using message::behaviour::proto::Subsumption;
+    using message::behaviour::Subsumption;
 
-    using message::input::LimbID;
-
-    inline Subsumption::Limb getLimb(const LimbID& limb) {
-        switch (limb) {
-            case LimbID::LEFT_LEG:
-                return Subsumption::LEFT_LEG;
-            case LimbID::RIGHT_LEG:
-                return Subsumption::RIGHT_LEG;
-            case LimbID::LEFT_ARM:
-                return Subsumption::LEFT_ARM;
-            case LimbID::RIGHT_ARM:
-                return Subsumption::RIGHT_ARM;
-            case LimbID::HEAD:
-                return Subsumption::HEAD;
-            default:
-                throw std::runtime_error("Invalid Limb");
-        }
-    }
+    using utility::behaviour::ActionStart;
+    using utility::behaviour::ActionKill;
+    using utility::behaviour::RegisterAction;
+    using utility::behaviour::ActionPriorites;
+    using LimbID = utility::input::LimbID;
 
     void NUbugger::provideSubsumption() {
 
@@ -60,76 +41,78 @@ namespace support {
 
             Subsumption subsumption;
 
-            auto* actionStateChange = subsumption.add_action_state_change();
-            actionStateChange->set_state(Subsumption::ActionStateChange::START);
-            actionStateChange->set_name(actionStart.name);
+            Subsumption::ActionStateChange actionStateChange;
+            actionStateChange.state = Subsumption::ActionStateChange::State::Value::START;
+            actionStateChange.name  = actionStart.name;
 
             for (auto& limbID : actionStart.limbs) {
-                actionStateChange->add_limbs(getLimb(limbID));
+                actionStateChange.limbs.push_back(limbID);
             }
 
+            subsumption.action_state_change.push_back(actionStateChange);
             send(subsumption);
-
         }));
 
         handles["subsumption"].push_back(on<Trigger<ActionKill>>().then([this](const ActionKill& actionKill) {
 
             Subsumption subsumption;
 
-            auto* actionStateChange = subsumption.add_action_state_change();
-            actionStateChange->set_state(Subsumption::ActionStateChange::KILL);
-            actionStateChange->set_name(actionKill.name);
+            Subsumption::ActionStateChange actionStateChange;
+            actionStateChange.state = Subsumption::ActionStateChange::State::Value::KILL;
+            actionStateChange.name  = actionKill.name;
 
             for (auto& limbID : actionKill.limbs) {
-                actionStateChange->add_limbs(getLimb(limbID));
+                actionStateChange.limbs.push_back(limbID);
             }
 
+            subsumption.action_state_change.push_back(actionStateChange);
             send(subsumption);
-
         }));
 
         handles["subsumption"].push_back(on<Trigger<RegisterAction>>().then([this] (const RegisterAction& action) {
 
             Subsumption subsumption;
 
-            auto* actionRegister = subsumption.add_action_register();
-            uint id = action.id;
-            actionRegister->set_id(id);
-            actionRegister->set_name(action.name);
+            Subsumption::ActionRegister actionRegister;
+            actionRegister.id   = action.id;
+            actionRegister.name = action.name;
 
             for (const auto& set : action.limbSet) {
-                auto* limbSet = actionRegister->add_limb_set();
-                limbSet->set_priority(set.first);
+                Subsumption::LimbSet limbSet;
+
+                limbSet.priority = set.first;
+
                 for (auto& limbID : set.second) {
-                    limbSet->add_limbs(getLimb(limbID));
+                    limbSet.limbs.push_back(limbID);
                 }
+
+                actionRegister.limb_set.push_back(limbSet);
             }
 
-            actionRegisters.insert(std::make_pair(id, *actionRegister));
+            subsumption.action_register.push_back(actionRegister);
+            actionRegisters.insert(std::make_pair(action.id, actionRegister));
             send(subsumption);
-
         }));
 
         handles["subsumption"].push_back(on<Trigger<ActionPriorites>>().then([this] (const ActionPriorites& action) {
 
             Subsumption subsumption;
 
-            auto* actionPriorityChange = subsumption.add_action_priority_change();
-            uint id = action.id;
-            actionPriorityChange->set_id(id);
+            Subsumption::ActionPriorites actionPriorityChange;
+            actionPriorityChange.id = action.id;
 
-            Subsumption::ActionRegister actionRegister = actionRegisters.find(id)->second;
+            Subsumption::ActionRegister actionRegister = actionRegisters.find(action.id)->second;
 
             size_t index = 0;
             for (const auto& priority : action.priorities) {
-                Subsumption::LimbSet limbSet = actionRegister.limb_set(index);
-                actionPriorityChange->add_priorities(priority);
-                limbSet.set_priority(priority);
+                Subsumption::LimbSet limbSet = actionRegister.limb_set[index];
+                actionPriorityChange.priorities.push_back(priority);
+                limbSet.priority = priority;
                 index++;
             }
 
+            subsumption.action_priority_change.push_back(actionPriorityChange);
             send(subsumption);
-
         }));
     }
 
@@ -138,7 +121,7 @@ namespace support {
         Subsumption subsumption;
 
         for (const auto& actionRegister : actionRegisters) {
-            *subsumption.add_action_register() = actionRegister.second;
+            subsumption.action_register.push_back(actionRegister.second);
         }
 
         send(subsumption);

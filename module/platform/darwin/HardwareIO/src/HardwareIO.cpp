@@ -20,10 +20,14 @@
 #include "HardwareIO.h"
 #include "Convert.h"
 
-#include "utility/math/angle.h"
-#include "message/platform/darwin/DarwinSensors.h"
+#include "extension/Configuration.h"
+
 #include "message/motion/ServoTarget.h"
-#include "message/support/Configuration.h"
+#include "message/platform/darwin/DarwinSensors.h"
+
+#include "utility/math/angle.h"
+#include "utility/platform/darwin/DarwinSensors.h"
+#include "utility/support/yaml_expression.h"
 
 
 namespace module {
@@ -32,7 +36,8 @@ namespace darwin {
 
     using message::platform::darwin::DarwinSensors;
     using message::motion::ServoTarget;
-    using message::support::Configuration;
+    using extension::Configuration;
+    using utility::support::Expression;
 
     DarwinSensors HardwareIO::parseSensors(const Darwin::BulkReadResults& data) {
         DarwinSensors sensors;
@@ -45,7 +50,7 @@ namespace darwin {
          */
 
         // Read our Error code
-        sensors.cm730ErrorFlags = data.cm730ErrorCode == 0xFF ? DarwinSensors::Error::TIMEOUT : DarwinSensors::Error(data.cm730ErrorCode);
+        sensors.cm730ErrorFlags = data.cm730ErrorCode == 0xFF ? DarwinSensors::Error::TIMEOUT : DarwinSensors::Error(data.cm730ErrorCode).value;
 
         // LED Panel
         sensors.ledPanel = cm730State.ledPanel;
@@ -79,7 +84,7 @@ namespace darwin {
 
         // Right Sensor
         // Error
-        sensors.fsr.right.errorFlags = data.fsrErrorCodes[0] == 0xFF ? DarwinSensors::Error::TIMEOUT : DarwinSensors::Error(data.fsrErrorCodes[0]);
+        sensors.fsr.right.errorFlags = data.fsrErrorCodes[0] == 0xFF ? DarwinSensors::Error::TIMEOUT : DarwinSensors::Error(data.fsrErrorCodes[0]).value;
 
         // Sensors
         sensors.fsr.right.fsr1 = Convert::fsrForce(data.fsr[0].fsr1);
@@ -94,7 +99,7 @@ namespace darwin {
 
         // Left Sensor
         // Error
-        sensors.fsr.left.errorFlags = data.fsrErrorCodes[1] == 0xFF ? DarwinSensors::Error::TIMEOUT : DarwinSensors::Error(data.fsrErrorCodes[1]);
+        sensors.fsr.left.errorFlags = data.fsrErrorCodes[1] == 0xFF ? DarwinSensors::Error::TIMEOUT : DarwinSensors::Error(data.fsrErrorCodes[1]).value;
 
         // Sensors
         sensors.fsr.left.fsr1 = Convert::fsrForce(data.fsr[1].fsr1);
@@ -113,10 +118,10 @@ namespace darwin {
 
         for(int i = 0; i < 20; ++i) {
             // Get a reference to the servo we are populating
-            DarwinSensors::Servo& servo = sensors.servo[i];
+            DarwinSensors::Servo& servo = utility::platform::darwin::getDarwinServo(i, sensors);
 
             // Error code
-            servo.errorFlags = data.servoErrorCodes[i] == 0xFF ? DarwinSensors::Error::TIMEOUT : DarwinSensors::Error(data.servoErrorCodes[i]);
+            servo.errorFlags = data.servoErrorCodes[i] == 0xFF ? DarwinSensors::Error::TIMEOUT : DarwinSensors::Error(data.servoErrorCodes[i]).value;
 
             // Booleans
             servo.torqueEnabled = servoState[i].torqueEnabled;
@@ -151,6 +156,14 @@ namespace darwin {
 
         on<Configuration>("DarwinPlatform.yaml").then([this] (const Configuration& config) {
             darwin.setConfig(config);
+
+            for (size_t i = 0; i < config["servo_offset"].config.size(); i++) {
+                Convert::SERVO_OFFSET[i] = config["servo_offset"][i].as<Expression>();
+            }
+
+            for (size_t i = 0; i < config["servo_direction"].config.size(); i++) {
+                Convert::SERVO_DIRECTION[i] = config["servo_direction"][i].as<int>();
+            }
         });
 
         // This trigger gets the sensor data from the CM730
@@ -178,13 +191,13 @@ namespace darwin {
 
                     // If our torque should be disabled then we disable our torque
                     if(servoState[i].torqueEnabled &&
-                       (isnan(servoState[i].goalPosition) || servoState[i].torque == 0)) {
+                       (std::isnan(servoState[i].goalPosition) || servoState[i].torque == 0)) {
                         servoState[i].torqueEnabled = false;
                         darwin[i + 1].write(Darwin::MX28::Address::TORQUE_ENABLE, false);
                     }
                     else {
                         // If our torque was disabled but is now enabled
-                        if(!servoState[i].torqueEnabled && !isnan(servoState[i].goalPosition) && servoState[i].torque != 0) {
+                        if(!servoState[i].torqueEnabled && !std::isnan(servoState[i].goalPosition) && servoState[i].torque != 0) {
                             servoState[i].torqueEnabled = true;
                             darwin[i + 1].write(Darwin::MX28::Address::TORQUE_ENABLE, true);
                         }
@@ -241,35 +254,35 @@ namespace darwin {
             // Loop through each of our commands
             for (const auto& command : commands) {
 
-                float diff = utility::math::angle::difference(command.position, sensors.servo[command.id].presentPosition);
+                float diff = utility::math::angle::difference(command.position, utility::platform::darwin::getDarwinServo(command.id, sensors).presentPosition);
                 NUClear::clock::duration duration = command.time - NUClear::clock::now();
 
                 float speed;
                 if(duration.count() > 0) {
-                    speed = diff / (double(duration.count()) / double(NUClear::clock::period::den));
+                    speed = diff / (double(duration.count()) / double(NUClear::clock::period::den));             
                 }
                 else {
                     speed = 0;
-                }
-
+                }               
 
                 // Update our internal state
-                if(servoState[uint(command.id)].pGain != command.gain
-                || servoState[uint(command.id)].iGain != command.gain * 0
-                || servoState[uint(command.id)].dGain != command.gain * 0
-                || servoState[uint(command.id)].movingSpeed != speed
-                || servoState[uint(command.id)].goalPosition != command.position
-                || servoState[uint(command.id)].torque != command.torque) {
+                if(servoState[command.id].pGain != command.gain
+                || servoState[command.id].iGain != command.gain * 0
+                || servoState[command.id].dGain != command.gain * 0
+                || servoState[command.id].movingSpeed != speed
+                || servoState[command.id].goalPosition != command.position
+                || servoState[command.id].torque != command.torque) {
 
-                    servoState[uint(command.id)].dirty = true;
+                    servoState[command.id].dirty = true;
 
-                    servoState[uint(command.id)].pGain = command.gain;
-                    servoState[uint(command.id)].iGain = command.gain * 0;
-                    servoState[uint(command.id)].dGain = command.gain * 0;
+                    servoState[command.id].pGain = command.gain;
+                    servoState[command.id].iGain = command.gain * 0;
+                    servoState[command.id].dGain = command.gain * 0;
 
-                    servoState[uint(command.id)].movingSpeed = speed;
-                    servoState[uint(command.id)].goalPosition = command.position;
+                    servoState[command.id].movingSpeed = speed;
+                    servoState[command.id].goalPosition = command.position;
 
+                    servoState[command.id].torque = command.torque;
                     servoState[uint(command.id)].torque = command.torque;
                 }
             }
@@ -288,7 +301,9 @@ namespace darwin {
             // Update our internal state
             cm730State.headLED = led;
 
-            darwin.cm730.write(Darwin::CM730::Address::LED_HEAD_L, Convert::colourLEDInverse(led.r, led.g, led.b));
+            darwin.cm730.write(Darwin::CM730::Address::LED_HEAD_L, Convert::colourLEDInverse(static_cast<uint8_t>((led.RGB & 0x00FF0000) >> 24), 
+                                                                                             static_cast<uint8_t>((led.RGB & 0x0000FF00) >>  8), 
+                                                                                             static_cast<uint8_t>( led.RGB & 0x000000FF)));
         });
 
         // If we get a EyeLED command then write it
@@ -296,7 +311,9 @@ namespace darwin {
             // Update our internal state
             cm730State.eyeLED = led;
 
-            darwin.cm730.write(Darwin::CM730::Address::LED_EYE_L, Convert::colourLEDInverse(led.r, led.g, led.b));
+            darwin.cm730.write(Darwin::CM730::Address::LED_EYE_L, Convert::colourLEDInverse(static_cast<uint8_t>((led.RGB & 0x00FF0000) >> 24), 
+                                                                                            static_cast<uint8_t>((led.RGB & 0x0000FF00) >>  8), 
+                                                                                            static_cast<uint8_t>( led.RGB & 0x000000FF)));
         });
     }
 }

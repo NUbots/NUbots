@@ -22,11 +22,14 @@
 
 #include <armadillo>
 #include <cmath>
-#include "OptimiserTypes.h"
+
+#include "message/support/optimisation/OptimiserTypes.h"
 
 namespace utility {
     namespace math {
         namespace optimisation {
+            using message::support::optimisation::OptimiserParameters;
+            using message::support::optimisation::OptimiserEstimate;
 
             class PGPEEstimator {
             private:
@@ -64,8 +67,8 @@ namespace utility {
                  * @author Josiah Walker
                  */
                 OptimiserEstimate updateEstimate(const arma::mat& samples, const arma::vec& fitnesses, OptimiserEstimate& previousEstimate) {
-                    arma::vec bestEstimate = previousEstimate.estimate;
-                    arma::vec covEstimate = arma::diagvec(previousEstimate.covariance);
+                    arma::vec bestEstimate = convert<double>(previousEstimate.estimate);
+                    arma::vec covEstimate = arma::diagvec(convert<double>(previousEstimate.covariance));
 
                     if (firstRun) {
                         firstRun = false;
@@ -84,12 +87,12 @@ namespace utility {
                                      arma::sqrt(covEstimate);
                     }
 
-                    baseline = baseline * 0.9 + 0.1*arma::mean(fitnesses);
+                    baseline = baseline * 0.9 + 0.1 * arma::mean(fitnesses);
 
                     bestEstimate += update;
                     covEstimate += updateCov;
 
-                    return {previousEstimate.generation+1, bestEstimate, arma::mat(diagmat(covEstimate))};
+                    return OptimiserEstimate(previousEstimate.generation + 1, convert<double>(bestEstimate), convert<double>(arma::mat(diagmat(covEstimate))));
                 }
             };
 

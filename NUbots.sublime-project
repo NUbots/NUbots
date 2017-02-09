@@ -4,7 +4,7 @@
 		{
 			"folder_exclude_patterns":
 			[
-				"build"
+				"build*"
 			],
 			"path": "."
 		}

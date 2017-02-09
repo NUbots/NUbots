@@ -24,14 +24,14 @@
 namespace module {
     namespace behaviour {
 
-        using message::input::ServoID;
+        using LimbID  = utility::input::LimbID;
+        using ServoID = utility::input::ServoID;
         using message::motion::ServoTarget;
-        using message::behaviour::RegisterAction;
-        using message::behaviour::ActionPriorites;
         using message::behaviour::ServoCommand;
-        using message::input::LimbID;
-        using message::behaviour::ActionStart;
-        using message::behaviour::ActionKill;
+        using utility::behaviour::RegisterAction;
+        using utility::behaviour::ActionPriorites;
+        using utility::behaviour::ActionStart;
+        using utility::behaviour::ActionKill;
 
         // So we don't need a huge long type declaration everywhere...
         using iterators = std::pair<std::vector<std::reference_wrapper<RequestItem>>::iterator, std::vector<std::reference_wrapper<RequestItem>>::iterator>;
@@ -142,7 +142,7 @@ namespace module {
                 for (auto& command : commands) {
 
                     // Check if we have access
-                    if (this->limbAccess[uint(message::input::limbForServo(command.id))] == command.source) {
+                    if (this->limbAccess[uint(utility::input::LimbID::limbForServo(command.id))] == command.source) {
 
                         // Get our queue
                         auto& queue = commandQueues[uint(command.id)];
@@ -222,7 +222,7 @@ namespace module {
                     for (auto& servo : emptiedQueues) {
 
                         // Get the lease holder on the limb this servo belongs to
-                        auto id = limbAccess[uint(message::input::limbForServo(servo))];
+                        auto id = limbAccess[uint(utility::input::LimbID::limbForServo(servo))];
                         completeMap[id].insert(servo);
                     }
 
@@ -272,11 +272,11 @@ namespace module {
             // Get iterators to each of the actions on the limbs
             std::map<LimbID, iterators> limbs =
             {
-                std::make_pair(LimbID::LEFT_LEG    , std::make_pair(std::begin(actions[uint(LimbID::LEFT_LEG)])  , std::end(actions[uint(LimbID::LEFT_LEG)])))
-                , std::make_pair(LimbID::RIGHT_LEG , std::make_pair(std::begin(actions[uint(LimbID::RIGHT_LEG)]) , std::end(actions[uint(LimbID::RIGHT_LEG)])))
-                , std::make_pair(LimbID::LEFT_ARM  , std::make_pair(std::begin(actions[uint(LimbID::LEFT_ARM)])  , std::end(actions[uint(LimbID::LEFT_ARM)])))
-                , std::make_pair(LimbID::RIGHT_ARM , std::make_pair(std::begin(actions[uint(LimbID::RIGHT_ARM)]) , std::end(actions[uint(LimbID::RIGHT_ARM)])))
-                , std::make_pair(LimbID::HEAD      , std::make_pair(std::begin(actions[uint(LimbID::HEAD)])      , std::end(actions[uint(LimbID::HEAD)])))
+                std::make_pair(LimbID::LEFT_LEG    , std::make_pair(std::begin(actions[LimbID::LEFT_LEG])  , std::end(actions[LimbID::LEFT_LEG])))
+                , std::make_pair(LimbID::RIGHT_LEG , std::make_pair(std::begin(actions[LimbID::RIGHT_LEG]) , std::end(actions[LimbID::RIGHT_LEG])))
+                , std::make_pair(LimbID::LEFT_ARM  , std::make_pair(std::begin(actions[LimbID::LEFT_ARM])  , std::end(actions[LimbID::LEFT_ARM])))
+                , std::make_pair(LimbID::RIGHT_ARM , std::make_pair(std::begin(actions[LimbID::RIGHT_ARM]) , std::end(actions[LimbID::RIGHT_ARM])))
+                , std::make_pair(LimbID::HEAD      , std::make_pair(std::begin(actions[LimbID::HEAD])      , std::end(actions[LimbID::HEAD])))
             };
 
             // Our new actions
@@ -410,7 +410,7 @@ namespace module {
 
                 // Clear our queues for this limb
                 for(const auto& limb : k.second) {
-                    for (const auto& servo : message::input::servosForLimb(limb)) {
+                    for (const auto& servo : utility::input::LimbID::servosForLimb(limb)) {
                         commandQueues[uint(servo)].clear();
                     }
                 }

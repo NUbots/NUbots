@@ -22,10 +22,13 @@
 
 #include <nuclear>
 #include <armadillo>
-#include "utility/math/geometry/Circle.h"
+
 #include "message/vision/LookUpTable.h"
 #include "message/input/Image.h"
+
 #include "utility/learning/KMeans.h"
+#include "utility/math/geometry/Circle.h"
+#include "utility/vision/LookUpTable.h"
 
 namespace module {
 namespace vision {

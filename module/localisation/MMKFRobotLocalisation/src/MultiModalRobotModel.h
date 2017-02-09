@@ -25,7 +25,7 @@
 #include "utility/localisation/LocalisationFieldObject.h"
 #include "utility/math/filter/ParticleFilter.h"
 #include "utility/math/filter/UKF.h"
-#include "message/support/Configuration.h"
+#include "extension/Configuration.h"
 #include "message/vision/VisionObjects.h"
 #include "RobotModel.h"
 #include "message/input/Sensors.h"
@@ -107,7 +107,7 @@ namespace localisation {
             robot_models_.push_back(std::make_unique<RobotHypothesis>());
         }
 
-        void UpdateConfiguration( const message::support::Configuration& config) {
+        void UpdateConfiguration( const extension::Configuration& config) {
             cfg_.merging_enabled = config["MergingEnabled"].as<bool>();
             cfg_.max_models_after_merge = config["MaxModelsAfterMerge"].as<int>();
             cfg_.merge_min_translation_dist = config["MergeMinTranslationDist"].as<float>();
