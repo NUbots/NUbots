@@ -1,16 +1,16 @@
 #include "ServoTest.h"
 
-#include "message/support/Configuration.h"
-#include "message/input/ServoID.h"
+#include "extension/Configuration.h"
 
-
+#include "utility/input/ServoID.h"
 
 namespace module {
 namespace behaviour {
 namespace tools {
 
-    using message::support::Configuration;
-    using message::input::ServoID;
+    using extension::Configuration;
+
+    using ServoID = utility::input::ServoID;
 
 
     ServoTest::ServoTest(std::unique_ptr<NUClear::Environment> environment)

@@ -1,26 +1,26 @@
 #include "ServoHealth.h"
 
-#include "message/support/Configuration.h"
+#include "extension/Configuration.h"
+#include "extension/Script.h"
+
 #include "message/platform/darwin/DarwinSensors.h"
-#include "message/behaviour/Action.h"
-#include "message/input/ServoID.h"
-#include "message/motion/Script.h"
-#include "message/input/LimbID.h"
 
-
-
-
+#include "utility/behaviour/Action.h"
+#include "utility/input/LimbID.h"
+#include "utility/input/ServoID.h"
+#include "utility/platform/darwin/DarwinSensors.h"
 
 namespace module {
 namespace debug {
             
-    using message::support::Configuration;
-    using message::platform::darwin::DarwinSensors;
-    using message::input::ServoID;
-    using message::input::LimbID;   
-    using message::motion::ExecuteScriptByName;
-    using message::behaviour::RegisterAction;
+    using extension::Configuration;
+    using extension::ExecuteScriptByName;
 
+    using message::platform::darwin::DarwinSensors;
+
+    using utility::behaviour::RegisterAction;
+    using LimbID  = utility::input::LimbID;   
+    using ServoID = utility::input::ServoID;
 
 
     ServoHealth::ServoHealth(std::unique_ptr<NUClear::Environment> environment)
@@ -53,7 +53,10 @@ namespace debug {
                 return;
             }
         	for(ServoID i = ServoID(0); i < ServoID::NUMBER_OF_SERVOS; i = ServoID(int(i)+1)){
-        		loadHealth[i][((sensors[0]->servo[i].presentPosition + M_PI)/(2*M_PI))*4095] = abs(sensors[0]->servo[i].load - sensors[1]->servo[i].load);
+                auto firstServo  = utility::platform::darwin::getDarwinServo(i, *sensors[0]);
+                auto secondServo = utility::platform::darwin::getDarwinServo(i, *sensors[1]);
+
+        		loadHealth[i][((firstServo.presentPosition + M_PI) / (2.0 * M_PI)) * 4095] = abs(firstServo.load - secondServo.load);
         	}
         });
 
