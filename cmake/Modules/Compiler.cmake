@@ -7,7 +7,11 @@ ADD_COMPILE_OPTIONS(-Wall
                     -Werror
                     -fnon-call-exceptions)
 
-SET(CMAKE_INSTALL_RPATH ${CMAKE_INSTALL_RPATH} toolchain/)
+LIST(APPEND CMAKE_INSTALL_RPATH toolchain/)
+LIST(APPEND CMAKE_INSTALL_RPATH /home/darwin/toolchain/)
+LIST(APPEND CMAKE_INSTALL_RPATH /home/nubots/toolchain/)
+LIST(APPEND CMAKE_INSTALL_RPATH /nubots/toolchain/${PLATFORM}/lib/)
+LIST(APPEND CMAKE_INSTALL_RPATH /nubots/toolchain/lib/)
 
 # GNU Compiler
 IF(CMAKE_CXX_COMPILER_ID MATCHES GNU)
