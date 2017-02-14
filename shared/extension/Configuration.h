@@ -262,7 +262,9 @@ namespace NUClear {
                     {
                         NUClear::log<NUClear::WARN>("Configuration file '" + defaultConfig + "' does not exist. Creating it.");
                         
-                        if (utility::file::isDir(defaultConfig))
+                        // Check for a directory.
+                        // If the path ends in a /, or if the end of the string is not ".yaml" it is a directory.
+                        if ((defaultConfig.back() == '/') || (!utility::strutil::endsWith(defaultConfig, ".yaml")))
                         {
                             utility::file::makeDir(defaultConfig);
                         }
