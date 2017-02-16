@@ -9,6 +9,8 @@ EXECUTE_PROCESS(COMMAND "/nubots/toolchain/find_robot_hosts.sh" OUTPUT_VARIABLE 
 # Convert script output to a list of pairs.
 SEPARATE_ARGUMENTS(KNOWN_HOSTS UNIX_COMMAND "${HOSTS}")
 
+SET(user "nubots")
+
 # Ninja code!
 FOREACH(host_pair ${KNOWN_HOSTS})
     # Get each element of the pair.
@@ -16,12 +18,6 @@ FOREACH(host_pair ${KNOWN_HOSTS})
     # alias = darwin1
     LIST(GET host_pair 0 host)
     LIST(GET host_pair 1 alias)
-
-    IF ("${host}" MATCHES "i[0-9]+")
-        SET(user "nubots")
-    ELSE()
-        SET(user "darwin")
-    ENDIF()
 
     FOREACH(config "" n u o i p)
         FOREACH(scripts "" n u o i p)
