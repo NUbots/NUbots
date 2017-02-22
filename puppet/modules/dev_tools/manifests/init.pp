@@ -46,6 +46,7 @@ class dev_tools {
   package { 'autopoint': ensure => latest, }
   package { 'gettext': ensure => latest, }
   package { 'python3-pip': ensure => latest, }
+  package { 'icecc': ensure => latest, }
 
   # System libraries
   package { 'libasound2-dev:amd64': ensure => latest, }
