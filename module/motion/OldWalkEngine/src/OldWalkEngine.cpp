@@ -125,9 +125,10 @@ namespace motion {
         //     }
         // }));
 
-        on<Trigger<KinematicsModel>>().then("Update Kin Model", [this](const KinematicsModel& model){
+        on<Startup, Trigger<KinematicsModel>>().then("Update Kin Model", [this](const KinematicsModel& model){
             kinematicsModel = model;
         });
+
 
         on<Trigger<EnableWalkEngineCommand>>().then([this] (const EnableWalkEngineCommand& command) {
             subsumptionId = command.subsumptionId;

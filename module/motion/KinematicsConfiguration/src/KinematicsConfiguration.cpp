@@ -43,7 +43,6 @@ namespace motion {
             KinematicsModel model;
             configure(model, config);
             emit(std::make_unique<KinematicsModel>(model));
-
         });
         
     }

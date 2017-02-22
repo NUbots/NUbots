@@ -112,7 +112,7 @@ namespace motion
         });
 
         //Define kinematics model for physical calculations...
-        on<Trigger<KinematicsModel>>().then("WalkEngine - Update Kinematics Model", [this](const KinematicsModel& model)
+        on<Startup, Trigger<KinematicsModel>>().then("WalkEngine - Update Kinematics Model", [this](const KinematicsModel& model)
         {
             kinematicsModel = model;
         });
