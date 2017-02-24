@@ -50,7 +50,7 @@ namespace module {
                 }
                 else if(requests.find(action.id) != std::end(requests)) {
                     throw std::runtime_error("The passed action ID has already been registered");
-                };
+                }
 
                 // Make our request object
                 requests[action.id] = std::make_unique<Request>(action.id, action.name, action.start, action.kill, action.completed);
@@ -63,10 +63,12 @@ namespace module {
                 for(const auto& set : action.limbSet) {
                     request->items.emplace_back(*request, request->items.size(), set.first, set.second);
 
-
                     // Put our request in the correct queue
                     for(auto& l : request->items.back().limbSet) {
-                        actions[uint(l)].push_back(std::ref(request->items.back()));
+                        if (l == LimbID::UNKNOWN) {
+                            throw std::runtime_error(action.name + " registered an action for an unkown limb.");
+                        }
+                        actions[uint(l) - 1].push_back(std::ref(request->items.back()));
                     }
                 }
 
@@ -105,7 +107,6 @@ namespace module {
                 request->mainElement = mainElement;
                 request->maxPriority = *maxEl;
 
-
                 // Perform our update
                 for(uint i = 0; i < request->items.size(); ++i) {
 
@@ -125,7 +126,6 @@ namespace module {
                     // Select our new action
                     selectAction();
                 }
-
             });
 
             // For single waypoints
@@ -193,7 +193,6 @@ namespace module {
 
                         // Dirty hack the waypoint
                         command.source = 0;
-
                     }
 
                     while (!queue.empty() && queue.front().time < now) {
@@ -329,7 +328,6 @@ namespace module {
                         for(auto& limb : action.limbSet) {
                             limbs.erase(limbs.find(limb));
                         }
-
                     }
                     // This request isn't suitable, move to the next one
                     else {
@@ -346,7 +344,7 @@ namespace module {
             // Set the permissions for a limb according to our allocations
             for (auto& command : newActions) {
                 for(auto& l : command.get().limbSet) {
-                    limbAccess[uint(l)] = command.get().group.id;
+                    limbAccess[uint(l) - 1] = command.get().group.id;
                 }
             }
 
