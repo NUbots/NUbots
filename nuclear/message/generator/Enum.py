@@ -23,6 +23,9 @@ class Enum:
         values = indent('\n'.join(['{} = {}'.format(v[0], v[1]) for v in self.values]), 8)
         values = ',\n'.join([v for v in values.splitlines()])
 
+        scope_name='_'.join(self.fqn.split('.'))
+        set_values = ', '.join(['T{}::Value::{}'.format(scope_name, v[0]) for v in self.values])
+
         # Make our switch statement pairs
         switches = indent('\n'.join(['case Value::{}: return "{}";'.format(v[0], v[0]) for v in self.values]), 8)
 
@@ -85,10 +88,33 @@ class Enum:
 
                 operator {protobuf_name}() const;
 
+                // Iterators
+                static std::set<{name}>::const_iterator begin() {{
+                    return values.begin();
+                }}
+
+                static std::set<{name}>::const_iterator end() {{
+                    return values.end();
+                }}
+
+                static std::set<{name}>::const_iterator cbegin() {{
+                    return values.cbegin();
+                }}
+
+                static std::set<{name}>::const_iterator cend() {{
+                    return values.cend();
+                }}
+
                 friend std::ostream& operator<< (std::ostream& out, const {name}& val);
+
+                private:
+                    static const std::set<{name}> values;
             }};""")
 
         impl_template = dedent("""\
+            typedef {fqn} T{scope_name};
+            const std::set<T{scope_name}> T{scope_name}::values = {{ {set_values} }};
+
             {fqn}::{name}() : value(Value::{default_value}) {{}}
 
             {fqn}::{name}(int const& v) : value(static_cast<Value>(v)) {{}}
@@ -221,7 +247,9 @@ class Enum:
             protobuf_name='::'.join(('.protobuf' + self.fqn).split('.')),
             default_value=default_value,
             if_chain=if_chain,
-            switches=switches
+            switches=switches,
+            scope_name=scope_name,
+            set_values=set_values
         ), python_template.format(
             fqn='::'.join(self.fqn.split('.')),
             name=self.name,
