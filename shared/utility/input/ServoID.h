@@ -20,6 +20,7 @@
 #ifndef UTILITY_INPUT_SERVOID_H
 #define UTILITY_INPUT_SERVOID_H
 
+#include <set>
 #include <string>
 
 namespace utility {
@@ -80,12 +81,6 @@ namespace utility {
             bool operator ==(ServoID::Value const& other) const { return value == other;       }
             bool operator !=(ServoID::Value const& other) const { return value != other;       }
 
-            // Prefix and postfix operators.
-            const ServoID& operator ++();
-            const ServoID& operator --();
-            const ServoID  operator ++(int);
-            const ServoID  operator --(int);
-        
             // Conversions
             operator Value()    const { return value; }
             operator uint8_t()  const { return value; }
@@ -94,7 +89,27 @@ namespace utility {
             operator int()      const { return value; }
             operator std::string() const;
 
+            // Iterators
+            static std::set<ServoID>::const_iterator begin() {
+                return values.begin();
+            }
+        
+            static std::set<ServoID>::const_iterator end() {
+                return values.end();
+            }
+        
+            static std::set<ServoID>::const_iterator cbegin() {
+                return values.cbegin();
+            }
+        
+            static std::set<ServoID>::const_iterator cend() {
+                return values.cend();
+            } 
+
             friend std::ostream& operator<< (std::ostream& out, const ServoID& val);
+
+        private:
+            static const std::set<ServoID> values;
         };	
     }
 }
