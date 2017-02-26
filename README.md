@@ -88,7 +88,7 @@ TroubleShooting Vagrant
 		$ cd build_native/
 		$ nano config/NetworkConfiguration.yaml
 	
-	Modify the name propert.
+	Modify the name property.
 
 
 
