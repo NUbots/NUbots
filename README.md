@@ -81,6 +81,14 @@ TroubleShooting Vagrant
 		$ vagrant plugin install vagrant-vbguest
 	
 	on the host machine. You may need to restart the host machine for it to work.
+	
+####2   Having multiple nubotsvm in NUsight
+	Run
+		
+		$ cd build_native/
+		$ nano config/NetworkConfiguration.yaml
+	
+	Modify the name propert.
 
 
 
