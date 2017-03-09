@@ -142,7 +142,7 @@ namespace module {
                 for (auto& command : commands) {
 
                     // Check if we have access
-                    if (this->limbAccess[uint(utility::input::LimbID::limbForServo(command.id))] == command.source) {
+                    if (this->limbAccess[uint(utility::input::LimbID::limbForServo(command.id)) - 1] == command.source) {
 
                         // Get our queue
                         auto& queue = commandQueues[uint(command.id)];
@@ -221,7 +221,7 @@ namespace module {
                     for (auto& servo : emptiedQueues) {
 
                         // Get the lease holder on the limb this servo belongs to
-                        auto id = limbAccess[uint(utility::input::LimbID::limbForServo(servo))];
+                        auto id = limbAccess[uint(utility::input::LimbID::limbForServo(servo)) - 1];
                         completeMap[id].insert(servo);
                     }
 
