@@ -26,13 +26,13 @@ def register(command):
 
     command.add_argument('-c', '--config'
         , metavar='config'
-        , choices=['', 'new', 'update', 'overwrite', 'pull', 'ignore']
+        , choices=['', 'new', 'n', 'update', 'u', 'overwrite', 'o', 'pull', 'p', 'ignore', 'i']
         , default='new'
         , help='method to use for configuration files when installing')
 
     command.add_argument('-s', '--scripts'
         , metavar='scripts'
-        , choices=['', 'new', 'update', 'overwrite', 'pull', 'ignore']
+        , choices=['', 'new', 'n', 'update', 'u', 'overwrite', 'o', 'pull', 'p', 'ignore', 'i']
         , default='new'
         , help='method to use for script files when installing')
 
