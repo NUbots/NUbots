@@ -76,6 +76,14 @@ namespace motion {
         model.leg.TOE_LENGTH = objFoot["toe_length"].as<float>();
 
         model.leg.LENGTH_BETWEEN_LEGS = objLeg["length_between_legs"].as<float>();
+
+        auto& objLeftRight = objLeg["left_to_right"];
+        model.leg.LEFT_TO_RIGHT_HIP_YAW     = objLeftRight["hip_yaw"].as<int>();
+        model.leg.LEFT_TO_RIGHT_HIP_ROLL    = objLeftRight["hip_roll"].as<int>();
+        model.leg.LEFT_TO_RIGHT_HIP_PITCH   = objLeftRight["hip_pitch"].as<int>();
+        model.leg.LEFT_TO_RIGHT_KNEE        = objLeftRight["knee"].as<int>();
+        model.leg.LEFT_TO_RIGHT_ANKLE_PITCH = objLeftRight["ankle_pitch"].as<int>();
+        model.leg.LEFT_TO_RIGHT_ANKLE_ROLL  = objLeftRight["ankle_roll"].as<int>();
     }
 
     void KinematicsConfiguration::configureHead (KinematicsModel& model, const YAML::Node& objHead) {

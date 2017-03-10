@@ -11,6 +11,13 @@ leg:
         height: 0.0335
         length: 0.094 # rough
         toe_length: 0.0472 # measured
+    left_to_right:
+        hip_yaw:    -1
+        hip_roll:   -1
+        hip_pitch:   1
+        knee:        1
+        ankle_pitch: 1
+        ankle_roll: -1
 head:
     camera_declination_angle_offset: -0.0 # TODO - fix 1's head pitch motor offset
     neck_to_camera: [0.036, 0, 0.028] # [x, y, z]
