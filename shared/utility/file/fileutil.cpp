@@ -29,6 +29,7 @@ extern "C" {
 #include <stack>
 
 #include "utility/strutil/strutil.h"
+#include <iostream>
 
 namespace utility {
 namespace file {
@@ -202,7 +203,7 @@ namespace file {
             path.append(((element.front() != '/') ? "/" : "") + element);
 
             // If the current path doesn't exist, create it.
-            if (isDir(path) == false)
+            if (!exists(path))
             {
                 // Create the current path element with the following permissions.
                 // U = RWX
@@ -215,6 +216,11 @@ namespace file {
                 {
                     return(false);
                 }
+            }
+            else if (!isDir(path)) {
+                // THROW EXCEPTION!!!!
+                // OK
+                throw std::runtime_error("Cannot make a directory in a file for " + path);
             }
         }
 
