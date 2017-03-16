@@ -1,0 +1,45 @@
+/*
+ * This file is part of the NUbots Codebase.
+ *
+ * The NUbots Codebase is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * The NUbots Codebase is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with the NUbots Codebase.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ * Copyright 2017 NUbots <nubots@nubots.net>
+ */
+syntax = "proto3";
+
+package message.support;
+
+import "message/platform/darwin/DarwinSensors.proto";
+
+message ServoHealthTestData {
+
+    enum State {
+        INITIALISE = 0;
+        TEST_ARMS_PITCH = 1;
+        TEST_ARMS_ROLL  = 2;
+        TEST_HEAD  = 3;
+        LAY_DOWN_1  = 4;
+        TEST_HIP_ROLL = 5;
+        TEST_HIP_YAW  = 6;
+        TEST_ANKLES = 7;
+        MOVE_LEGS = 8;
+        TEST_KNEES = 9;
+        TEST_LEGS_PITCH = 10;
+        LAY_DOWN_2 = 11;
+        FINISHED = 12;
+    };
+
+    State state = 1;
+    platform.darwin.DarwinSensors sensors = 2;
+}
