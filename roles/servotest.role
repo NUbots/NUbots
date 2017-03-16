@@ -6,10 +6,13 @@ NUCLEAR_ROLE(
     motion::KinematicsConfiguration
     support::configuration::GlobalConfig
     support::configuration::NetworkConfiguration
+    support::NUbugger
+    support::logging::DataLogging
     platform::darwin::HardwareIO
+    platform::darwin::SensorFilter
     behaviour::Controller
     motion::ScriptEngine
     debug::ServoHealth
     behaviour::tools::ServoTest
-    support::NUbugger
+    
 )
