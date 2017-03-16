@@ -46,7 +46,7 @@ namespace module {
                 size_t selection;
                 /// If we are selecting the angle or gain for this item
                 bool angleOrGain;
-                const size_t defaultGain = 80;
+                const size_t defaultGain = 30;
                 const size_t defaultDuration = 1000;
 
                 std::string userInput();
