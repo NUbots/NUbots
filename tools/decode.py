@@ -8,7 +8,6 @@ import re
 import b
 import pkgutil
 import google.protobuf.message
-from PIL import Image
 from google.protobuf.json_format import MessageToJson
 
 def register(command):
@@ -53,12 +52,6 @@ def run(file, **kwargs):
     # Now open the passed file
     with open(file, 'rb') as f:
 
-        rH264 = open('r.h264', 'wb')
-        g1H264 = open('g1.h264', 'wb')
-        g2H264 = open('g2.h264', 'wb')
-        bH264 = open('b.h264', 'wb')
-
-        imgno = 0
         # While we can read a header
         while len(f.read(3)) == 3:
 
@@ -78,33 +71,11 @@ def run(file, **kwargs):
             if type_hash in parsers:
                 msg = parsers[type_hash][1].FromString(payload[24:])
 
-                if parsers[type_hash][0] == b'message.vision.Image':
+                if False:
+                    break;
+                # if parsers[type_hash][0] == b'message.support.ServoHealthTestData':
+                #     pass
 
-                    img = Image.new('RGB', (int(msg.dimensions.x / 2), int(msg.dimensions.y / 2)))
-                    pixels = img.load()
-
-                    for x in range(0, msg.dimensions.x, 2):
-                        for y in range(0, msg.dimensions.y, 2):
-                            red  = (x + 0, y + 0)
-                            green1 = (x + 1, y + 0)
-                            green2 = (x + 0, y + 1)
-                            blue  = (x + 1, y + 1)
-
-                            red  =   msg.payload.v[red [1] * msg.dimensions.x + red [0]]
-                            green1 = msg.payload.v[green1[1] * msg.dimensions.x + green1[0]]
-                            green2 = msg.payload.v[green2[1] * msg.dimensions.x + green2[0]]
-                            blue  =  msg.payload.v[blue [1] * msg.dimensions.x + blue [0]]
-
-                            pixels[int(x/2), int(y/2)] = (red, int((green1 + green2) / 2), blue)
-
-                    img.save('frame_{}.png'.format(imgno))
-                    imgno += 1
-
-                elif parsers[type_hash][0] == b'message.vision.CompressedImage':
-                    rH264.write(msg.payloads[0])
-                    g1H264.write(msg.payloads[1])
-                    g2H264.write(msg.payloads[2])
-                    bH264.write(msg.payloads[3])
 
                 else:
                     out = re.sub(r'\s+', ' ', MessageToJson(msg, True))

@@ -26,18 +26,30 @@ message ServoHealthTestData {
 
     enum State {
         INITIALISE = 0;
-        TEST_ARMS_PITCH = 1;
-        TEST_ARMS_ROLL  = 2;
-        TEST_HEAD  = 3;
-        LAY_DOWN_1  = 4;
-        TEST_HIP_ROLL = 5;
-        TEST_HIP_YAW  = 6;
-        TEST_ANKLES = 7;
-        MOVE_LEGS = 8;
-        TEST_KNEES = 9;
-        TEST_LEGS_PITCH = 10;
-        LAY_DOWN_2 = 11;
-        FINISHED = 12;
+        MOVE_1 = 1;
+        ELBOW = 2;
+        MOVE_2 = 3;
+        SHOULDER_PITCH = 4;
+        SHOULDER_MOVE_1 = 5;
+        SHOULDER_ROLL  = 6;
+        MOVE_3  = 7;
+        HEAD_PITCH  = 8;
+        MOVE_4 = 9;
+        HEAD_YAW  = 10;
+        LAYDOWN = 11;
+        HIP_ROLL = 12;
+        HIP_MOVE_1 = 13;
+        HIP_YAW = 14;
+        HIP_MOVE_2 = 15;
+        ANKLE_PITCH = 16;
+        ANKLE_MOVE = 17;
+        ANKLE_ROLL = 18;
+        KNEE_MOVE = 19;
+        KNEE = 20;
+        KNEE_MOVE_2 = 21;
+        HIP_PITCH = 22;
+        LAYDOWN_2 = 23;
+        FINISHED = 24;
     };
 
     State state = 1;

@@ -89,7 +89,6 @@ namespace logging {
             // Create a directory for our binary name
             utility::file::makeDirectory(std::string(output_dir) + "/" + base_str, true);
 
-
             // Create our log file full output path
             logfile << output_dir
                     << "/"
