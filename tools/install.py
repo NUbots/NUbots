@@ -41,7 +41,9 @@ def register(command):
         , default='hive'
         , help='the username to use when installing')
 
-def run(ip_addr, hostname, config, scripts, user, **kwargs):
+    command.add_argument('-t', '--toolchain', dest='toolchain', action='store_true')
+
+def run(ip_addr, hostname, config, scripts, user, toolchain, **kwargs):
 
     # Target location to install to
     target_dir   = '{0}@{1}:/home/{0}/'.format(user, ip_addr)
@@ -55,11 +57,21 @@ def run(ip_addr, hostname, config, scripts, user, **kwargs):
     files = glob.glob(os.path.join(build_dir, 'bin', '*'))
     call(['rsync', '-avzPl', '--checksum', '-e ssh'] + files + [target_dir])
 
-    # Get all of our required shared libraries in our toolchain and send them
-    # Only send toolchain files if ours are newer than the receivers.
-    cprint('Installing toolchain library files', 'blue', attrs=['bold'])
-    libs = glob.glob('{0}/lib/*.so*'.format(platform_dir))
-    call(['rsync', '-avzuPl', '--checksum', '-e ssh'] + libs + [target_dir + 'toolchain'])
+    if toolchain:
+        # Get all of our required shared libraries in our toolchain and send them
+        # Only send toolchain files if ours are newer than the receivers.
+        cprint('Installing toolchain library files', 'blue', attrs=['bold'])
+        libs = glob.glob('{0}/lib/*.so*'.format(platform_dir))
+        call(['rsync', '-avzuPl', '--checksum', '-e ssh'] + libs + [target_dir + 'toolchain'])
+
+        # Set rpath for all libs on the remote machine
+        cprint('Setting rpath for all toolchain libs to {0}'.format(target_dir + 'toolchain'), 'blue', attrs=['bold'])
+        command = 'for lib in /home/{0}/toolchain/*.so*; do patchelf --set-rpath /home/{0}/toolchain $lib; done'.format(user)
+        host = '{0}@{1}'.format(user, ip_addr)
+        cprint('Running {0} on {1}'.format(command, host), 'blue', attrs=['bold'])
+        FNULL = open(os.devnull, 'w')
+        call(['ssh', host, command], stdout=FNULL, stderr=STDOUT)
+        FNULL.close()
 
     # Find all data files and send them
     # Data files are located in the build directory (mixed in with the make files and CMake cache).
@@ -69,15 +81,6 @@ def run(ip_addr, hostname, config, scripts, user, **kwargs):
                 not os.path.basename(fn).lower().startswith('cmake') and 
                 not os.path.isdir(fn)]
     call(['rsync', '-avzPL', '--checksum', '-e ssh'] + files + [target_dir])
-
-    # Set rpath for all libs on the remote machine
-    cprint('Setting rpath for all toolchain libs to {0}'.format(target_dir + 'toolchain'), 'blue', attrs=['bold'])
-    command = 'for lib in /home/{0}/toolchain/*.so*; do patchelf --set-rpath /home/{0}/toolchain $lib; done'.format(user)
-    host = '{0}@{1}'.format(user, ip_addr)
-    cprint('Running {0} on {1}'.format(command, host), 'blue', attrs=['bold'])
-    FNULL = open(os.devnull, 'w')
-    call(['ssh', host, command], stdout=FNULL, stderr=STDOUT)
-    FNULL.close()
 
     # Get list of config files.
     config_files = list(filter(None, glob.glob('{0}/*.yaml'.format(config_dir))
