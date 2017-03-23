@@ -70,12 +70,21 @@ namespace debug {
         on<Trigger<DarwinSensors>>().then("Log Servo Data", [this] (const DarwinSensors& sensors) {
 
             // If this is a testing state
-            if (state != State::INITIALISE 
-                && state != State::LAY_DOWN_1
-                && state != State::MOVE_LEGS
-                && state != State::LAY_DOWN_2
+            if (state != State::INITIALISE
+                && state != State::MOVE_1
+                && state != State::MOVE_2
+                && state != State::SHOULDER_MOVE_1
+                && state != State::MOVE_3 
+                && state != State::MOVE_4
+                && state != State::LAYDOWN
+                && state != State::HIP_MOVE_1
+                && state != State::HIP_MOVE_2
+                && state != State::ANKLE_MOVE 
+                && state != State::KNEE_MOVE
+                && state != State::KNEE_MOVE_2
+                && state != State::LAYDOWN_2
                 && state != State::FINISHED) {
-
+                
                 auto data = std::make_unique<ServoHealthTestData>();
                 data->state = state;
                 data->sensors = sensors;
@@ -121,114 +130,196 @@ namespace debug {
             switch(State::Value(state)) {
                 case State::INITIALISE: {                    
                     counter = 0;
-                    state = State::TEST_ARMS_PITCH;
-                    emit(std::make_unique<ExecuteScriptByName>(id, "YogaSplit2.yaml", duration1));
+                    state = State::MOVE_1;
+                    emit(std::make_unique<ExecuteScriptByName>(id, "Yoga_Move_1.yaml", duration1));
                 } break;
 
-                case State::TEST_ARMS_PITCH: {
-                    if (++counter > test_loops) {
-                        state = State::TEST_ARMS_ROLL;
-                        counter = 0;
-                        emit(std::make_unique<ExecuteScriptByName>(id, "YogaSplit3.yaml", duration1));
-                    }
-                    else {
-                        emit(std::make_unique<ExecuteScriptByName>(id, "YogaSplit2.yaml", duration1));
-                    } 
-                } break;
-
-                case State::TEST_ARMS_ROLL: {
-                    if (++counter > test_loops) {
-                        state = State::TEST_HEAD;
-                        counter = 0;
-                        emit(std::make_unique<ExecuteScriptByName>(id, "YogaSplit4.yaml", duration1));
-                    }
-                    else {
-                        emit(std::make_unique<ExecuteScriptByName>(id, "YogaSplit3.yaml", duration1));
-                    } 
-                } break;
-                
-                case State::TEST_HEAD: {
-                    if (++counter > test_loops) {
-                        state = State::LAY_DOWN_1;
-                        counter = 0;
-                        emit(std::make_unique<ExecuteScriptByName>(id, "YogaSplit5.yaml", duration1));
-                    }
-                    else {
-                        emit(std::make_unique<ExecuteScriptByName>(id, "YogaSplit4.yaml", duration1));
-                    } 
-                } break;
-
-                case State::LAY_DOWN_1: {
+                case State::MOVE_1: {
                     counter = 0;
-                    state = State::TEST_HIP_ROLL;
-                    emit(std::make_unique<ExecuteScriptByName>(id, "YogaSplit6.yaml", duration1));
+                    state = State::ELBOW;
+                    emit(std::make_unique<ExecuteScriptByName>(id, "Yoga_Elbow.yaml", duration1));
                 } break;
 
-                case State::TEST_HIP_ROLL: {
+                case State::ELBOW: {
                     if (++counter > test_loops) {
-                        state = State::TEST_HIP_YAW;
+                        state = State::MOVE_2;
                         counter = 0;
-                        emit(std::make_unique<ExecuteScriptByName>(id, "YogaSplit12.yaml", duration1));
+                        emit(std::make_unique<ExecuteScriptByName>(id, "Yoga_Move_2.yaml", duration1));
                     }
                     else {
-                        emit(std::make_unique<ExecuteScriptByName>(id, "YogaSplit6.yaml", duration1));
+                        emit(std::make_unique<ExecuteScriptByName>(id, "Yoga_Elbow.yaml", duration1));
                     } 
                 } break;
-                
-                case State::TEST_HIP_YAW: {
-                    if (++counter > test_loops) {
-                        state = State::TEST_ANKLES;
-                        counter = 0;
-                        emit(std::make_unique<ExecuteScriptByName>(id, "YogaSplit7.yaml", duration1));
-                    }
-                    else {
-                        emit(std::make_unique<ExecuteScriptByName>(id, "YogaSplit12.yaml", duration1));
-                    } 
-                } break;
-                
-                case State::TEST_ANKLES: {
-                    if (++counter > test_loops) {
-                        state = State::MOVE_LEGS;
-                        counter = 0;
-                        emit(std::make_unique<ExecuteScriptByName>(id, "YogaSplit8.yaml", duration1));
-                    }
-                    else {
-                        emit(std::make_unique<ExecuteScriptByName>(id, "YogaSplit7.yaml", duration1));
-                    } 
-                } break;
-                
-                case State::MOVE_LEGS: {
+                case State::MOVE_2: {
                     counter = 0;
-                    state = State::TEST_KNEES;
-                    emit(std::make_unique<ExecuteScriptByName>(id, "YogaSplit13.yaml", duration1));
+                    state = State::SHOULDER_PITCH;
+                    emit(std::make_unique<ExecuteScriptByName>(id, "Yoga_Shoulder_Pitch.yaml", duration1));
                 } break;
 
-                case State::TEST_KNEES: {
+                case State::SHOULDER_PITCH: {
                     if (++counter > test_loops) {
-                        state = State::TEST_LEGS_PITCH;
+                        state = State::SHOULDER_MOVE_1;
                         counter = 0;
-                        emit(std::make_unique<ExecuteScriptByName>(id, "YogaSplit9.yaml", duration1));
+                        emit(std::make_unique<ExecuteScriptByName>(id, "Yoga_Shoulder_Move_1.yaml", duration1));
                     }
                     else {
-                        emit(std::make_unique<ExecuteScriptByName>(id, "YogaSplit13.yaml", duration1));
+                        emit(std::make_unique<ExecuteScriptByName>(id, "Yoga_Shoulder_Pitch.yaml", duration1));
+                    } 
+                } break;
+                case State::SHOULDER_MOVE_1: {
+                    counter = 0;
+                    state = State::SHOULDER_ROLL;
+                    emit(std::make_unique<ExecuteScriptByName>(id, "Yoga_Shoulder_Roll.yaml", duration1));
+                } break;
+                
+                case State::SHOULDER_ROLL: {
+                    if (++counter > test_loops) {
+                        state = State::MOVE_3;
+                        counter = 0;
+                        emit(std::make_unique<ExecuteScriptByName>(id, "Yoga_Move_3.yaml", duration1));
+                    }
+                    else {
+                        emit(std::make_unique<ExecuteScriptByName>(id, "Yoga_Shoulder_Roll.yaml", duration1));
+                    } 
+                } break;
+
+                case State::MOVE_3: {
+                    counter = 0;
+                    state = State::HEAD_PITCH;
+                    emit(std::make_unique<ExecuteScriptByName>(id, "Yoga_Head_Pitch.yaml", duration1));
+                } break;
+
+                case State::HEAD_PITCH: {
+                    if (++counter > test_loops) {
+                        state = State::MOVE_4;
+                        counter = 0;
+                        emit(std::make_unique<ExecuteScriptByName>(id, "Yoga_Move_4.yaml", duration1));
+                    }
+                    else {
+                        emit(std::make_unique<ExecuteScriptByName>(id, "Yoga_Head_Pitch.yaml", duration1));
+                    } 
+                } break;
+                case State::MOVE_4: {
+                    counter = 0;
+                    state = State::HEAD_YAW;
+                    emit(std::make_unique<ExecuteScriptByName>(id, "Yoga_Head_Yaw.yaml", duration1));
+                } break;
+                
+                case State::HEAD_YAW: {
+                    if (++counter > test_loops) {
+                        state = State::LAYDOWN;
+                        counter = 0;
+                        emit(std::make_unique<ExecuteScriptByName>(id, "Yoga_Laydown.yaml", duration1));
+                    }
+                    else {
+                        emit(std::make_unique<ExecuteScriptByName>(id, "Yoga_Head_Yaw.yaml", duration1));
+                    } 
+                } break;
+                case State::LAYDOWN: {
+                    counter = 0;
+                    state = State::HIP_ROLL;
+                    emit(std::make_unique<ExecuteScriptByName>(id, "Yoga_Hip_Roll.yaml", duration1));
+                } break;
+                
+                case State::HIP_ROLL: {
+                    if (++counter > test_loops) {
+                        state = State::HIP_MOVE_1;
+                        counter = 0;
+                        emit(std::make_unique<ExecuteScriptByName>(id, "Yoga_Hip_Move_1.yaml", duration1));
+                    }
+                    else {
+                        emit(std::make_unique<ExecuteScriptByName>(id, "Yoga_Hip_Roll.yaml", duration1));
                     } 
                 } break;
                 
-                case State::TEST_LEGS_PITCH: {
+                case State::HIP_MOVE_1: {
+                    counter = 0;
+                    state = State::HIP_YAW;
+                    emit(std::make_unique<ExecuteScriptByName>(id, "Yoga_Hip_Yaw.yaml", duration1));
+                } break;
+
+                case State::HIP_YAW: {
                     if (++counter > test_loops) {
-                        state = State::LAY_DOWN_2;
+                        state = State::HIP_MOVE_2;
                         counter = 0;
-                        emit(std::make_unique<ExecuteScriptByName>(id, "YogaSplit10.yaml", duration1));
+                        emit(std::make_unique<ExecuteScriptByName>(id, "Yoga_Hip_Move_2.yaml", duration1));
                     }
                     else {
-                        emit(std::make_unique<ExecuteScriptByName>(id, "YogaSplit9.yaml", duration1));
+                        emit(std::make_unique<ExecuteScriptByName>(id, "Yoga_Hip_Yaw.yaml", duration1));
+                    } 
+                } break;
+                case State::HIP_MOVE_2: {
+                    counter = 0;
+                    state = State::ANKLE_PITCH;
+                    emit(std::make_unique<ExecuteScriptByName>(id, "Yoga_Ankle_Pitch.yaml", duration1));
+                } break;
+                
+                case State::ANKLE_PITCH: {
+                    if (++counter > test_loops) {
+                        state = State::ANKLE_MOVE;
+                        counter = 0;
+                        emit(std::make_unique<ExecuteScriptByName>(id, "Yoga_Ankle_Move.yaml", duration1));
+                    }
+                    else {
+                        emit(std::make_unique<ExecuteScriptByName>(id, "Yoga_Ankle_Pitch.yaml", duration1));
                     } 
                 } break;
                 
-                case State::LAY_DOWN_2: {
+                case State::ANKLE_MOVE: {
+                    counter = 0;
+                    state = State::ANKLE_ROLL;
+                    emit(std::make_unique<ExecuteScriptByName>(id, "Yoga_Ankle_Roll.yaml", duration1));
+                } break;
+
+                case State::ANKLE_ROLL: {
+                    if (++counter > test_loops) {
+                        state = State::KNEE_MOVE;
+                        counter = 0;
+                        emit(std::make_unique<ExecuteScriptByName>(id, "Yoga_Knee_Move.yaml", duration1));
+                    }
+                    else {
+                        emit(std::make_unique<ExecuteScriptByName>(id, "Yoga_Ankle_Roll.yaml", duration1));
+                    } 
+                } break;
+                
+                case State::KNEE_MOVE: {
+                    counter = 0;
+                    state = State::KNEE;
+                    emit(std::make_unique<ExecuteScriptByName>(id, "Yoga_Knee.yaml", duration1));
+                } break;
+
+                case State::KNEE: {
+                    if (++counter > test_loops) {
+                        state = State::KNEE_MOVE_2;
+                        counter = 0;
+                        emit(std::make_unique<ExecuteScriptByName>(id, "Yoga_Knee_Move_2.yaml", duration1));
+                    }
+                    else {
+                        emit(std::make_unique<ExecuteScriptByName>(id, "Yoga_Knee.yaml", duration1));
+                    } 
+                } break;
+                
+                case State::KNEE_MOVE_2: {
+                    counter = 0;
+                    state = State::HIP_PITCH;
+                    emit(std::make_unique<ExecuteScriptByName>(id, "Yoga_Hip_Pitch.yaml", duration1));
+                } break;
+                case State::HIP_PITCH: {
+                    if (++counter > test_loops) {
+                        state = State::LAYDOWN_2;
+                        counter = 0;
+                        emit(std::make_unique<ExecuteScriptByName>(id, "Yoga_Laydown_2.yaml", duration1));
+                    }
+                    else {
+                        emit(std::make_unique<ExecuteScriptByName>(id, "Yoga_Hip_Pitch.yaml", duration1));
+                    } 
+                } break;
+                
+                case State::LAYDOWN_2: {
                     counter = 0;
                     state = State::FINISHED;
                     emit(std::make_unique<ExecuteScriptByName>(id, std::vector<std::string>({"StandUpFront.yaml","Stand.yaml"})));
+                    emit(std::make_unique<ExecuteScriptByName>(id, "Stand.yaml", duration1));
                 } break;
 
                 case State::FINISHED:
@@ -244,7 +335,7 @@ namespace debug {
                     //std::ofstream ofs("histogram" + std::string(hostname) + std::string(buf) + ".csv");
                     //if(!ofs.is_open()){
                     //    log("Failed to open histogram file");
-                    powerplant.shutdown();    
+                    //powerplant.shutdown();    
                 } break;
 
 
