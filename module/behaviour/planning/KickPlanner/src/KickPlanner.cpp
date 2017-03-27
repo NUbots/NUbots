@@ -157,7 +157,7 @@ namespace planning {
     bool KickPlanner::kickValid(const arma::vec3& ballPos, float /*standHeight*/, const Sensors& /*sensors*/){
         // IK check seems broken
         // Transform3D ballPose;
-        // Transform3D torsoToGround = sensors.orientationBodyToGround;
+        // Transform3D torsoToGround = sensors.bodyToGround;
         // torsoToGround.translation()[2] = standHeight;
         // ballPose.translation() = torsoToGround.i().transformPoint(ballPos);
         // ballPose.translate(arma::vec3({-DarwinModel::Leg::FOOT_LENGTH / 2,0,0}));

@@ -164,8 +164,8 @@ namespace input {
 
         auto initialState = std::make_unique<GameState>();
         // default to reasonable values for initial state
-        initialState->data.phase            = GameState::Data::Phase::Value::INITIAL;
-        initialState->data.mode             = GameState::Data::Mode::Value::NORMAL;
+        initialState->data.phase            = GameState::Data::Phase::INITIAL;
+        initialState->data.mode             = GameState::Data::Mode::NORMAL;
         initialState->data.first_half       = true;
         initialState->data.kicked_out_by_us = false;
         initialState->data.our_kick_off     = false;
@@ -174,7 +174,7 @@ namespace input {
         initialState->data.opponent.team_id = 0;
 
         emit(std::move(initialState));
-        emit(std::make_unique<GameState::Data::Phase::Value>(GameState::Data::Phase::Value::INITIAL));
+        emit(std::make_unique<GameState::Data::Phase>(GameState::Data::Phase::INITIAL));
     }
 
     void GameController::process(const GameState& oldGameState, const GameControllerPacket& oldPacket, const GameControllerPacket& newPacket) {

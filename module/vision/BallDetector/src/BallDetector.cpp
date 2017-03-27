@@ -203,7 +203,7 @@ namespace vision {
 
             if(print_throwout_logs) log("Ransac : ", ransacResults.size(), "results");
 
-            arma::mat44 orientationCamToGround = convert<double, 4, 4>(sensors.orientationCamToGround);
+            arma::mat44 camToGround = convert<double, 4, 4>(sensors.camToGround);
 
             for (auto& result : ransacResults) {
 
@@ -216,7 +216,7 @@ namespace vision {
                 arma::vec2 left  = centre + arma::vec2({  result.model.radius, 0 });
                 arma::vec2 right = centre + arma::vec2({ -result.model.radius, 0 });
 
-                double cameraHeight = orientationCamToGround(2, 3);
+                double cameraHeight = camToGround(2, 3);
 
                 // Get a unit vector pointing to the centre of the ball
                 arma::vec3 ballCentreRay = arma::normalise(arma::normalise(getCamFromScreen(top, cam.focalLengthPixels))
@@ -269,7 +269,7 @@ namespace vision {
                 // IF THE DISAGREEMENT BETWEEN THE WIDTH AND PROJECTION BASED DISTANCES ARE TOO LARGE
                 // Project this vector to a plane midway through the ball
                 Plane ballBisectorPlane({ 0, 0, 1 }, { 0, 0, field.ball_radius });
-                arma::vec3 ballCentreGroundProj = projectCamToPlane(ballCentreRay, orientationCamToGround, ballBisectorPlane);
+                arma::vec3 ballCentreGroundProj = projectCamToPlane(ballCentreRay, camToGround, ballBisectorPlane);
                 double ballCentreGroundProjDistance = arma::norm(ballCentreGroundProj);
 
                 if(std::abs((widthDistance - ballCentreGroundProjDistance) / std::max(ballCentreGroundProjDistance, widthDistance)) > MAXIMUM_DISAGREEMENT_RATIO) {
@@ -302,7 +302,7 @@ namespace vision {
                 // Attach the position to the object
                 b.position = convert<double, 3>(rBWw);
 
-                Transform3D Hgc       = orientationCamToGround;
+                Transform3D Hgc       = camToGround;
                 arma::vec3 width_rBGg = Hgc.transformPoint(ballCentreRay * widthDistance);
                 arma::vec3 proj_rBGg  = Hgc.transformPoint(ballCentreGroundProj);
                 b.torsoSpacePosition  = convert<double, 3>(width_rBGg);

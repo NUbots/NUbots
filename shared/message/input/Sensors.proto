@@ -81,8 +81,6 @@ message Sensors {
     map<uint32, mat44>            forwardKinematics       = 15;
     float                         bodyCentreHeight        = 16;
     vec4                          centreOfMass            = 17;
-    mat44                         orientationBodyToGround = 18;
-    mat44                         orientationCamToGround  = 19;
-    mat44                         kinematicsBodyToGround  = 20;
-    mat44                         kinematicsCamToGround   = 21;
+    mat44                         bodyToGround            = 18;
+    mat44                         camToGround             = 19;
 }

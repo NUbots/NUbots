@@ -61,7 +61,7 @@ namespace localisation {
                                                 rigidBody.rotation().z(),
                                                 rigidBody.rotation().t()});
 
-                    Rotation3D groundToWorldRotation = q;// * sensors.orientationCamToGround.submat(0,0,2,2).t();
+                    Rotation3D groundToWorldRotation = q;// * sensors.camToGround.submat(0,0,2,2).t();
 
                     double heading = utility::math::angle::acos_clamped(groundToWorldRotation(0,0));
 

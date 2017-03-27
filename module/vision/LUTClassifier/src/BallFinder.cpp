@@ -63,11 +63,11 @@ namespace module {
             topY[0] = 0;    //Choose centre of screen
 
             // Get the positions of the top of our green horizion, and the bottom of the screen
-            arma::mat44 orientationCamToGround = convert<double, 4, 4>(classifiedImage.sensors->orientationCamToGround);
-            auto xb = getGroundPointFromScreen({ 0, -double(image.dimensions[1] - 1) / 2}, orientationCamToGround, FOCAL_LENGTH_PIXELS);
-            auto xt = getGroundPointFromScreen(topY, orientationCamToGround, FOCAL_LENGTH_PIXELS);
+            arma::mat44 camToGround = convert<double, 4, 4>(classifiedImage.sensors->camToGround);
+            auto xb = getGroundPointFromScreen({ 0, -double(image.dimensions[1] - 1) / 2}, camToGround, FOCAL_LENGTH_PIXELS);
+            auto xt = getGroundPointFromScreen(topY, camToGround, FOCAL_LENGTH_PIXELS);
             double dx = 2 * BALL_RADIUS / BALL_MINIMUM_INTERSECTIONS_COARSE;
-            double cameraHeight = orientationCamToGround(2, 3);
+            double cameraHeight = camToGround(2, 3);
 
             // This describes the direction of travel
             arma::vec3 direction = arma::normalise(xb);
@@ -91,14 +91,14 @@ namespace module {
             // Do our inital calculation to get our first Y
             arma::vec4 worldPosition = arma::ones(4);
             worldPosition.rows(0, 2) = xStart * direction;
-            auto camPoint = projectWorldPointToScreen(worldPosition, orientationCamToGround, FOCAL_LENGTH_PIXELS);
+            auto camPoint = projectWorldPointToScreen(worldPosition, camToGround, FOCAL_LENGTH_PIXELS);
             int y = screenToImage(camPoint, convert<uint, 2>(classifiedImage.dimensions))[1];
 
             for(double x = xStart; x < xEnd && y >= 0; x += std::max(dx, (dx * x) / (cameraHeight - dx))) {
 
                 // Calculate our next Y
                 worldPosition.rows(0, 2) = (x + std::max(dx, (dx * x) / (cameraHeight - dx))) * direction;
-                camPoint = projectWorldPointToScreen(worldPosition, orientationCamToGround, FOCAL_LENGTH_PIXELS);
+                camPoint = projectWorldPointToScreen(worldPosition, camToGround, FOCAL_LENGTH_PIXELS);
                 int nextY = screenToImage(camPoint, convert<uint, 2>(classifiedImage.dimensions))[1];
 
                 // Work out our details

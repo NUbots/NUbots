@@ -67,7 +67,7 @@ namespace support {
 
         Ball result;
 
-        Transform3D Hcf = getFieldToCam(robotPose, convert<double, 4, 4>(sensors.orientationCamToGround));
+        Transform3D Hcf = getFieldToCam(robotPose, convert<double, 4, 4>(sensors.camToGround));
         Transform3D Hfc = Hcf.i();
 
         // Ball position in field

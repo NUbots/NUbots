@@ -406,7 +406,7 @@ namespace kinematics {
     }
 
     inline arma::vec4 fsrCentreInBodyCoords(const KinematicsModel& model, const Sensors& sensors, const arma::vec2& foot, bool left) {
-        //sensors.orientationBodyToGround
+        //sensors.bodyToGround
 
         int negativeIfRight = left ? 1 : -1;
 
@@ -433,7 +433,7 @@ namespace kinematics {
         }
         //reset homogeneous coordinate
         CoP(3) = 1;
-        arma::vec4 CoP_body = convert<double, 4, 4>(sensors.kinematicsBodyToGround) * CoP;
+        arma::vec4 CoP_body = convert<double, 4, 4>(sensors.bodyToGround) * CoP;
         return CoP_body.rows(0,2);
 
     }

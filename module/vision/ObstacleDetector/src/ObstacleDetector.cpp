@@ -79,9 +79,9 @@ namespace vision {
             //JAKE's Vision Kinematics for distance to obstacle:
             // arma::vec2 p1 = imageToScreen(obstacleBaseCentreImage, { double(image.dimensions[0]), double(image.dimensions[1]) });
 
-            // arma::vec3 obstacleBaseGroundProj = projectCamToGroundPlane(p1, sensors.orientationCamToGround);
+            // arma::vec3 obstacleBaseGroundProj = projectCamToGroundPlane(p1, sensors.camToGround);
             // //Testing (not done yet - TODO: TEST AND REMOVE THIS NOTE)
-            // std::cout << "orientationCamToGround\n" << sensors.orientationCamToGround << std::endl;
+            // std::cout << "camToGround\n" << sensors.camToGround << std::endl;
             // std::cout << "D2P obstacle: " << obstacleBaseGroundProj.t() << std::endl;
             // emit(graph("D2P Obstacle", obstacleBaseGroundProj[0], obstacleBaseGroundProj[1]));
 

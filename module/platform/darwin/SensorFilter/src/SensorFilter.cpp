@@ -591,7 +591,7 @@ namespace module {
                     // Gives us the quaternion representation
                     const auto& o = motionFilter.get();
 
-                    // Map from world to torso coordinates
+                    // Map from world to torso coordinates (Rtw)
                     Transform3D world;
                     world.eye();
                     world.rotation() = Rotation3D(UnitQuaternion(o.rows(MotionModel::QW, MotionModel::QZ)));
@@ -616,24 +616,9 @@ namespace module {
                     // sensors->orientationBodyToGround : Mat size [4x4] (default identity)
                     // createRotationZ : Mat size [3x3] 
                     // Rwt : Mat size [3x3]
-                    sensors->orientationBodyToGround = convert<double, 4, 4>(Transform3D(oBodyToGround));
-                    auto headPitchKinematics         = sensors->forwardKinematics.at(ServoID::HEAD_PITCH); 
-                    sensors->orientationCamToGround  = sensors->orientationBodyToGround * headPitchKinematics;
-
-                    if(sensors->leftFootDown) {
-                        arma::vec3 lAnkleRoll           = convert<double, 4, 4>(sensors->forwardKinematics.at(ServoID::L_ANKLE_ROLL)).submat(0, 2, 2, 2);
-                        sensors->kinematicsBodyToGround = convert<double, 4, 4>(utility::motion::kinematics::calculateBodyToGround(lAnkleRoll, sensors->bodyCentreHeight));
-                    } 
-
-                    else if (sensors->rightFootDown) {
-                        arma::vec3 rAnkleRoll           = convert<double, 4, 4>(sensors->forwardKinematics.at(ServoID::R_ANKLE_ROLL)).submat(0, 2, 2, 2);
-                        sensors->kinematicsBodyToGround = convert<double, 4, 4>(utility::motion::kinematics::calculateBodyToGround(rAnkleRoll, sensors->bodyCentreHeight));
-                    }
-
-                    else {
-                        sensors->kinematicsBodyToGround = sensors->orientationCamToGround;
-                    }
-                    sensors->kinematicsCamToGround = sensors->orientationBodyToGround * headPitchKinematics;
+                    sensors->bodyToGround = convert<double, 4, 4>(Transform3D(oBodyToGround));
+                    auto headPitchKinematics = sensors->forwardKinematics.at(ServoID::HEAD_PITCH);
+                    sensors->camToGround  = convert<double, 4, 4>(Transform3D(world.i() * convert<double, 4, 4>(headPitchKinematics))); // Rwt * Rth
 
                     /************************************************
                      *                  CENTRE OF PRESSURE          *

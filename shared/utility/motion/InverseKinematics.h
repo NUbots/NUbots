@@ -74,7 +74,7 @@ namespace kinematics {
 
     std::vector< std::pair<ServoID, float> > calculateHeadJoints(arma::vec3 cameraUnitVector);
 
-    arma::vec2 calculateHeadJointsToLookAt(arma::vec3 groundPoint, const utility::math::matrix::Transform3D& camToGround, const utility::math::matrix::Transform3D& orientationBodyToGround);
+    arma::vec2 calculateHeadJointsToLookAt(arma::vec3 groundPoint, const utility::math::matrix::Transform3D& camToGround, const utility::math::matrix::Transform3D& bodyToGround);
 
     arma::vec2 headAnglesToSeeGroundPoint(const arma::vec2& gpos, const message::input::Sensors& sensors);
 
