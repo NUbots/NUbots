@@ -4,14 +4,20 @@
 #include <nuclear>
 
 #include "utility/input/ServoID.h"
+#include "message/support/ServoHealthTestData.h"
 
 namespace module {
 namespace debug {
 
     class ServoHealth : public NUClear::Reactor {
     private:
-    	const size_t id;
-    	std::map<utility::input::ServoID, std::array<int, 4096>> loadHealth;
+        static constexpr size_t N_BUCKETS = 1024;
+
+        const size_t id;
+        message::support::ServoHealthTestData::State state;
+        double fallen_angle;
+        int counter = 0;
+        int test_loops = 5;
 
     public: 
         /// @brief Called by the powerplant to build and setup the ServoHealth reactor.

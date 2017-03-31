@@ -207,10 +207,24 @@ namespace extension {
      * @author Trent Houliston
      */
     struct ExecuteScriptByName {
-        ExecuteScriptByName(const size_t& id, const std::string script, NUClear::clock::time_point start = NUClear::clock::now()) : sourceId(id), scripts({script}), start(start) {};
-        ExecuteScriptByName(const size_t& id, const std::vector<std::string> scripts, NUClear::clock::time_point start = NUClear::clock::now()) : sourceId(id), scripts(scripts), start(start) {};
+        ExecuteScriptByName(const size_t& id, const std::string& script, const NUClear::clock::time_point& start = NUClear::clock::now()) 
+            : sourceId(id), scripts(1, script), duration_modifier(1, 1.0), start(start) {};
+        ExecuteScriptByName(const size_t& id, const std::string& script, const double& duration_mod, const NUClear::clock::time_point& start = NUClear::clock::now()) 
+            : sourceId(id), scripts(1, script), duration_modifier(1, duration_mod), start(start) {};
+        ExecuteScriptByName(const size_t& id, const std::vector<std::string>& scripts, const NUClear::clock::time_point& start = NUClear::clock::now()) 
+            : sourceId(id), scripts(scripts), duration_modifier(scripts.size(), 1.0), start(start) {};
+        ExecuteScriptByName(const size_t& id, const std::vector<std::string>& scripts, const std::vector<double>& duration_mod, const NUClear::clock::time_point& start = NUClear::clock::now()) 
+            : sourceId(id), scripts(scripts), duration_modifier(duration_mod), start(start) {
+                while (scripts.size() > duration_modifier.size()) {
+                    duration_modifier.push_back(1.0);
+                }
+                while (scripts.size() < duration_modifier.size()) {
+                    duration_modifier.pop_back();
+                }
+            };
         size_t sourceId;
         std::vector<std::string> scripts;
+        std::vector<double> duration_modifier;
         NUClear::clock::time_point start;
     };
 
@@ -220,10 +234,24 @@ namespace extension {
      * @author Trent Houliston
      */
     struct ExecuteScript {
-        ExecuteScript(const size_t& id, const Script& script, NUClear::clock::time_point start = NUClear::clock::now()) : sourceId(id), scripts({script}), start(start) {};
-        ExecuteScript(const size_t& id, const std::vector<Script>& scripts, NUClear::clock::time_point start = NUClear::clock::now()) : sourceId(id), scripts(scripts), start(start) {};
+        ExecuteScript(const size_t& id, const Script& script, NUClear::clock::time_point start = NUClear::clock::now())
+            : sourceId(id), scripts(1, script), duration_modifier(1, 1.0), start(start) {};
+        ExecuteScript(const size_t& id, const Script& script, double duration_mod = 1.0, NUClear::clock::time_point start = NUClear::clock::now())
+            : sourceId(id), scripts(1, script), duration_modifier(1, duration_mod), start(start) {};
+        ExecuteScript(const size_t& id, const std::vector<Script>& scripts, NUClear::clock::time_point start = NUClear::clock::now()) 
+            : sourceId(id), scripts(scripts), duration_modifier(scripts.size(), 1.0), start(start) {};
+        ExecuteScript(const size_t& id, const std::vector<Script>& scripts, const std::vector<double>& duration_mod, NUClear::clock::time_point start = NUClear::clock::now()) 
+            : sourceId(id), scripts(scripts), duration_modifier(duration_mod), start(start) {
+                while (scripts.size() > duration_modifier.size()) {
+                    duration_modifier.push_back(1.0);
+                }
+                while (scripts.size() < duration_modifier.size()) {
+                    duration_modifier.pop_back();
+                }
+            };
         size_t sourceId;
         std::vector<Script> scripts;
+        std::vector<double> duration_modifier;
         NUClear::clock::time_point start;
     };
 

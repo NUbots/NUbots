@@ -615,7 +615,7 @@ namespace module {
 
             //emits a message so motion can pick up the script
             void ScriptTuner::playScript() {
-                emit(std::make_unique<ExecuteScript>(id, script));
+                emit(std::make_unique<ExecuteScript>(id, script, NUClear::clock::now()));
             }
 
             //allows user to jump to a specific frame without engaging the motors

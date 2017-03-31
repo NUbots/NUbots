@@ -29,6 +29,7 @@ extern "C" {
 #include <stack>
 
 #include "utility/strutil/strutil.h"
+#include <iostream>
 
 namespace utility {
 namespace file {
@@ -178,32 +179,28 @@ namespace file {
         return files;
     }
 
-    bool makeDirectory(const std::string& directory, bool parent)
-    {
+    bool makeDirectory(const std::string& directory, bool parent) {
         std::vector<std::string> elements;
 
         // Get elements of the path to create.
-        if (parent == true)
-        {
+        if (parent == true) {
             elements = utility::strutil::split(directory, '/');
+            elements.front() = elements.front() == "" ? "/" : elements.front();
         }
-
-        else
-        {
+        else {
             elements.push_back(directory);
         }
 
         std::string path;
 
         // Traverse all elements of the path.
-        for (const auto& element : elements)
-        {
-            // Append the next path element. Add a / if the front of the element is missing it.
-            path.append(((element.front() != '/') ? "/" : "") + element);
+        for (const auto& element : elements) {
+
+
+            path.append(element);
 
             // If the current path doesn't exist, create it.
-            if (isDir(path) == false)
-            {
+            if (!exists(path)) {
                 // Create the current path element with the following permissions.
                 // U = RWX
                 // G = R_X
@@ -211,14 +208,20 @@ namespace file {
                 auto status = mkdir(path.c_str(), S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH);
 
                 // If we fail at any point then bail out.
-                if (status != 0)
-                {
-                    return(false);
+                if (status != 0) {
+                    return false;
                 }
             }
+            else if (!isDir(path)) {
+                // THROW EXCEPTION!!!!
+                // OK
+                throw std::runtime_error("Cannot create a directory " + path + " is an ordinary file");
+            }
+
+            path.append("/");
         }
 
-        return(true);
+        return true;
     }
 }
 }

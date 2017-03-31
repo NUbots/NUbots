@@ -46,11 +46,22 @@ namespace module {
 
 #ifndef NDEBUG // We have a cold hearted monstrosity that got built!
 
+                        std::string exception_what;
+                        try {
+                            std::rethrow_exception(stats.exception);
+                        }
+                        catch (const std::exception& ex) {
+                            exception_what = ex.what();
+                        }
+                        // We don't actually want to crash
+                        catch (...) {}
+
                         // Print our exception detals
                         std::cerr << reactor << " "
                                   << (stats.identifier[0].empty() ? "" : "- " + stats.identifier[0] + " ")
                                   << Colour::brightred << "Exception:" << " "
-                                  << Colour::brightred << utility::support::evil::exception_name
+                                  << Colour::brightred << utility::support::evil::exception_name << " "
+                                  << exception_what
                                   << std::endl;
 
                         // Print our stack trace

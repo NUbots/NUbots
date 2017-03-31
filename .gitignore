@@ -17,6 +17,7 @@
 
 # Build & CMake files
 /build*/
+/build
 /vagrantbuild/
 CMakeCache.txt
 CMakeFiles
