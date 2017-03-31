@@ -102,13 +102,12 @@ namespace YAML {
             node["bits"]["cb"] = uint(rhs.bits_cb);
             node["bits"]["cr"] = uint(rhs.bits_cr);
 
-            node["lut"] = rhs.table;
+            node["lut"] = std::string(rhs.table.begin(), rhs.table.end());
 
             return node;
         }
 
         static bool decode(const Node& node, message::vision::LookUpTable& rhs) {
-
             uint8_t bitsY  = node["bits"]["y"].as<uint>();
             uint8_t bitsCb = node["bits"]["cb"].as<uint>();
             uint8_t bitsCr = node["bits"]["cr"].as<uint>();
@@ -117,8 +116,7 @@ namespace YAML {
             std::vector<uint8_t> data;
             data.reserve(dataString.size());
 
-            for (auto& s : dataString)
-            {
+            for (auto& s : dataString) {
                 data.push_back(static_cast<uint8_t>(s));
             }
 

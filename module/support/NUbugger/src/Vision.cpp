@@ -24,7 +24,6 @@
 #include "message/vision/VisionObjects.h"
 #include "message/vision/LookUpTable.h"
 #include "message/vision/LookUpTableDiff.h"
-#include "message/vision/ClassifiedImage.h"
 
 #include "utility/time/time.h"
 #include "utility/support/eigen_armadillo.h"

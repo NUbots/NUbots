@@ -613,7 +613,7 @@ namespace module {
 
                     Rotation3D Rwt = world.rotation().t();     //remove translation components from the transform
                     Rotation3D oBodyToGround = Rotation3D::createRotationZ(-Rwt.yaw()) * Rwt;
-                    // sensors->orientationBodyToGround : Mat size [4x4] (default identity)
+                    // sensors->bodyToGround : Mat size [4x4] (default identity)
                     // createRotationZ : Mat size [3x3] 
                     // Rwt : Mat size [3x3]
                     sensors->bodyToGround = convert<double, 4, 4>(Transform3D(oBodyToGround));

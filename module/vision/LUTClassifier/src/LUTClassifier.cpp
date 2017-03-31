@@ -18,6 +18,7 @@
  */
 
 #include "LUTClassifier.h"
+#include <cppformat/format.h>
 
 #include "extension/Configuration.h"
 
@@ -79,6 +80,9 @@ namespace module {
             , LUT_HOST("") {
 
             on<Configuration>("LookUpTable.yaml").then([this] (const Configuration& config) {
+                
+                LUT_PATH = config.fileName;
+                LUT_HOST = config.hostname;
 
                 // Load our LUT
                 auto lut = std::make_unique<LookUpTable>(config.config.as<LookUpTable>());
@@ -111,16 +115,19 @@ namespace module {
                 greenCentroid[0] *= 2.0;
                 this->greenCentroid = greenCentroid;
 
-                LUT_PATH = config.fileName;
-                LUT_HOST = config.hostname;
-
                 emit(std::move(lut));
             });
 
             on<Trigger<SaveLookUpTable>, With<LookUpTable>>().then([this] (const LookUpTable& lut) {
-                std::ofstream yaml("config/" + LUT_HOST + "/" + LUT_PATH, std::ios::trunc | std::ios::out);
-                yaml << YAML::convert<LookUpTable>::encode(lut);
+                YAML::Node node = YAML::convert<LookUpTable>::encode(lut);
+
+                log(fmt::format("config/{}/{}", LUT_HOST, LUT_PATH));
+                std::ofstream yaml(fmt::format("config/{}/{}.tmp", LUT_HOST, LUT_PATH), std::ios::trunc | std::ios::out);
+                yaml << node;
+                yaml.flush();
                 yaml.close();
+                log("done saving");
+                std::rename(fmt::format("config/{}/{}.tmp", LUT_HOST, LUT_PATH).c_str(), fmt::format("config/{}/{}", LUT_HOST, LUT_PATH).c_str());
             });
 
             // Trigger the same function when either update
