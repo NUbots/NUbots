@@ -7,9 +7,10 @@ NUCLEAR_ROLE(
     motion::KinematicsConfiguration
     #Support
     support::configuration::GlobalConfig
+    support::configuration::SoccerConfig
     support::configuration::NetworkConfiguration
     support::NUbugger
-    support::configuration::SoccerConfig
+    
 
     #input
     input::GameController
@@ -26,8 +27,14 @@ NUCLEAR_ROLE(
     #vision::ObstacleDetector
 
     #Localisation
-    #localisation::RobotFieldLocalisation
+    localisation::RobotFieldLocalisation
     localisation::BallLocalisation
+
+    #Motion
+    motion::ScriptEngine
+    motion::OldWalkEngine
+    #motion::IKKick
+    motion::HeadController
 
     #Behaviour
     behaviour::Controller
@@ -42,15 +49,7 @@ NUCLEAR_ROLE(
     behaviour::strategy::SoccerStrategy
     behaviour::skills::Nod
 
-    #Motion
-    motion::ScriptEngine
-    motion::FootMotionPlanner
-    motion::FootPlacementPlanner
-    motion::TorsoMotionPlanner
-    motion::BalanceKinematicResponse
-    motion::OldWalkEngine
-    motion::IKKick
-    motion::HeadController
+    
 
     #Output
     #output::eSpeak

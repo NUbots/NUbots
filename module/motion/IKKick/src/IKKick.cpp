@@ -140,12 +140,12 @@ namespace motion {
             Transform3D torsoPose = (supportFoot == LimbID::LEFT_LEG) ? leftFoot.i() : rightFoot.i();
 
             // Put the ball position from vision into torso coordinates
-            arma::vec3 targetTorso = Transform3D(convert<double, 4, 4>(sensors.kinematicsBodyToGround)).i().transformPoint(convert<double, 3>(command.target));
+            arma::vec3 targetTorso;// = Transform3D(convert<double, 4, 4>(sensors.kinematicsBodyToGround)).i().transformPoint(convert<double, 3>(command.target)); //TODO fix
             // Put the ball position into support foot coordinates
             arma::vec3 targetSupportFoot = torsoPose.transformPoint(targetTorso);
 
             // Put the goal from vision into torso coordinates
-            arma::vec3 directionTorso = Transform3D(convert<double, 4, 4>(sensors.kinematicsBodyToGround)).i().transformVector(convert<double, 3>(command.direction));
+            arma::vec3 directionTorso;// = Transform3D(convert<double, 4, 4>(sensors.kinematicsBodyToGround)).i().transformVector(convert<double, 3>(command.direction)); //TODO fix
             // Put the goal into support foot coordinates
             arma::vec3 directionSupportFoot = torsoPose.transformVector(directionTorso);
 

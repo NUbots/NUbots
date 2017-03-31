@@ -77,6 +77,7 @@ namespace planning {
             cfg.seconds_not_seen_limit = config["seconds_not_seen_limit"].as<float>();
             cfg.kick_forward_angle_limit = config["kick_forward_angle_limit"].as<float>();
             emit(std::make_unique<KickPlannerConfig>(cfg));
+            emit(std::make_unique<WantsToKick>(false));
         });
 
         on<Trigger<std::vector<Ball>>,
