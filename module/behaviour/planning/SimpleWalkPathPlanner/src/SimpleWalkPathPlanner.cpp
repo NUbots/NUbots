@@ -156,6 +156,7 @@ namespace module {
                     }
                     else if (latestCommand.type == message::behaviour::MotionCommand::Type::DirectCommand) {
                         //TO DO, change to Bezier stuff
+                        log("direct command");
 
                         std::unique_ptr<WalkCommand> command = std::make_unique<WalkCommand>(subsumptionId,latestCommand.walkCommand);
                         emit(std::move(command));
@@ -209,6 +210,7 @@ namespace module {
                     //Euclidean distance to ball
                     float distanceToBall = arma::norm(position.rows(0,1));
                     float scale = 2.0 / (1.0 + std::exp(-a * distanceToBall + b)) - 1.0;
+                    //log(latestCommand.walkCommand.)
                     float scale2 = angle / M_PI;
                     float finalForwardSpeed = forwardSpeed * scale * (1.0 - scale2);
                     // log("forwardSpeed1", forwardSpeed);
@@ -220,11 +222,14 @@ namespace module {
                     command->command = convert<double, 3>(Transform2D({finalForwardSpeed, 0, angle}));
 
                     arma::vec2 ball_world_position = RobotToWorldTransform(convert<double, 2>(selfs.front().locObject.position), 
-                                                                           convert<double, 2>(selfs.front().heading), position);
+                                                                            convert<double, 2>(selfs.front().heading), position);
+                
+                    log ("vision ",ball_world_position);
                     arma::vec2 kick_target = 2 * ball_world_position - convert<double, 2>(selfs.front().locObject.position);
                     emit(drawSphere("kick_target", arma::vec3({kick_target[0], kick_target[1], 0.0}), 0.1, arma::vec3({1, 0, 0}), 0));
-                    // log("walkcommand",command->command[0],command->command[1]);
-                    // log("anglewalkcommand",command->command[2]);
+                    //log("walkcommand",command->command[0],command->command[1]);
+                    //log("anglewalkcommand",command->command[2]);
+                    //log("ballPos: ",position.t());
 
                     emit(std::make_unique<KickPlan>(KickPlan(convert<double, 2>(kick_target), KickPlan::KickType::SCRIPTED)));
                     
@@ -235,7 +240,7 @@ namespace module {
                 on<Trigger<MotionCommand>, Sync<SimpleWalkPathPlanner>>().then([this] (const MotionCommand& cmd) {
                     //save the plan
                     latestCommand = cmd;
-
+                    
                 });
 
             }

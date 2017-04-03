@@ -16,14 +16,19 @@ namespace module
 			// This trigger gets us as close as we can to the frame rate as possible (as high resolution as we can)
             V4L2FrameRateHandle = on<Every<V4L2Camera::FRAMERATE, Per<std::chrono::seconds>>, Single>().then("Read V4L2Camera", [this] {
 
-				for (auto& camera : V4L2Cameras)
-				{
-	                // If the camera is ready, get an image and emit it
-	                if (camera.second.isStreaming())
-	                {
-	                    emit(std::make_unique<Image>(camera.second.getImage()));
-	                }
-				}
+				try{
+                    for (auto& camera : V4L2Cameras)
+    				{
+    	                // If the camera is ready, get an image and emit it
+    	                if (camera.second.isStreaming())
+    	                {
+    	                    emit(std::make_unique<Image>(camera.second.getImage()));
+    	                }
+    				}
+                }
+                catch(const std::exception& e) {
+                    emit<Scope::DIRECT, ResetCamera>();
+                }
             });
 
             V4L2SettingsHandle = on<Every<1, std::chrono::seconds>>().then("V4L2 Camera Setting Applicator", [this] {
@@ -49,6 +54,15 @@ namespace module
 	                }
 				}
             }); 
+
+            on<Trigger<ResetCamera>>().then([this]{
+                V4L2Camera camera(config, deviceID, cameraCount);
+                while(!camera.resetCamera(deviceID, format, fourcc, width, height))
+                {
+                    V4L2Camera camera(config, deviceID, cameraCount);
+                }
+            
+            });
 
 			auto cameraParameters = std::make_unique<CameraParameters>();
             double tanHalfFOV[2], imageCentre[2];
@@ -78,10 +92,8 @@ namespace module
 
                 log("Initialising driver for camera", deviceID);
 
-                V4L2Camera camera(config, deviceID, cameraCount);
-
-                camera.resetCamera(deviceID, format, fourcc, width, height);
-
+                emit<Scope::DIRECT, ResetCamera>();
+                
                 log("Applying settings for camera", deviceID);
 
                 // Set all other camera settings
