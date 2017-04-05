@@ -156,8 +156,6 @@ namespace module {
                     }
                     else if (latestCommand.type == message::behaviour::MotionCommand::Type::DirectCommand) {
                         //TO DO, change to Bezier stuff
-                        log("direct command");
-
                         std::unique_ptr<WalkCommand> command = std::make_unique<WalkCommand>(subsumptionId,latestCommand.walkCommand);
                         emit(std::move(command));
                         emit(std::make_unique<ActionPriorites>(ActionPriorites { subsumptionId, { 40, 11 }}));
@@ -210,7 +208,6 @@ namespace module {
                     //Euclidean distance to ball
                     float distanceToBall = arma::norm(position.rows(0,1));
                     float scale = 2.0 / (1.0 + std::exp(-a * distanceToBall + b)) - 1.0;
-                    //log(latestCommand.walkCommand.)
                     float scale2 = angle / M_PI;
                     float finalForwardSpeed = forwardSpeed * scale * (1.0 - scale2);
                     // log("forwardSpeed1", forwardSpeed);
@@ -223,8 +220,6 @@ namespace module {
 
                     arma::vec2 ball_world_position = RobotToWorldTransform(convert<double, 2>(selfs.front().locObject.position), 
                                                                             convert<double, 2>(selfs.front().heading), position);
-                
-                    log ("vision ",ball_world_position);
                     arma::vec2 kick_target = 2 * ball_world_position - convert<double, 2>(selfs.front().locObject.position);
                     emit(drawSphere("kick_target", arma::vec3({kick_target[0], kick_target[1], 0.0}), 0.1, arma::vec3({1, 0, 0}), 0));
                     //log("walkcommand",command->command[0],command->command[1]);
