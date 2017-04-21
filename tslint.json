@@ -1,0 +1,35 @@
+{
+	"defaultSeverity": "error",
+	"extends": [
+		"tslint:recommended"
+	],
+	"rules": {
+		"semicolon": {
+			"options": ["never"]
+		},
+		"arrow-parens": false,
+		"object-literal-sort-keys": false,
+		"max-classes-per-file": false,
+		"interface-name": [true, "never-prefix"],
+		"quotemark": {
+			"options": [
+				"single",
+				"avoid-escape"
+			]
+		},
+		"member-ordering": [
+			true,
+			{
+				"order": [
+					"instance-field",
+					"constructor",
+					"static-method",
+					"public-instance-method",
+					"protected-instance-method",
+					"private-instance-method"
+				]
+			}
+		]
+	},
+	"rulesDirectory": []
+}

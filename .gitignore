@@ -1,0 +1,26 @@
+.DS_STORE
+node_modules
+.module-cache
+dist
+
+# IntelliJ IDEA
+.idea/.name
+.idea/artifacts/*
+.idea/compiler.xml
+.idea/dictionaries/*
+.idea/encodings.xml
+.idea/jsLibraryMappings.xml
+.idea/kotlinc.xml
+.idea/misc.xml
+.idea/modules.xml
+.idea/sqldialects.xml
+.idea/tasks.xml
+.idea/uiDesigner.xml
+.idea/workspace.xml
+.idea/libraries/*
+.idea/shelf/*
+.idea/deployment.xml
+.idea/watcherTasks.xml
+.idea/dataSources/*
+.idea/dataSources*
+*.iml
