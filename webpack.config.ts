@@ -12,7 +12,7 @@ export default {
   context: sourcePath,
   entry: {
     main: [
-      './index.ts',
+      './client/index.tsx',
     ].concat(isProduction ? [] : [
       'webpack-hot-middleware/client',
     ]),
