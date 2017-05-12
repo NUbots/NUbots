@@ -24,3 +24,6 @@ dist
 .idea/dataSources/*
 .idea/dataSources*
 *.iml
+
+# Jest coverage report
+/coverage
