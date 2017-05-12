@@ -1,5 +1,10 @@
 language: node_js
 node_js:
   - "7"
+branches:
+  only:
+    - "master"
 script:
-    - yarn test:ci
+    - yarn tslint
+    - yarn build
+    - yarn coverage:ci
