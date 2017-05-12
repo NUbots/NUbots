@@ -24,7 +24,6 @@ app.use(webpackDevMiddleware(compiler, {
 app.use(webpackHotMiddleware(compiler))
 const root = `${__dirname}/../../`
 app.use(favicon(`${__dirname}/../assets/favicon.ico`))
-// TODO (Annable): Fix this clobbering SourceMap URLs.
 app.use(fallback('dist/index.html', { root }))
 
 const port = process.env.PORT || 3000

@@ -10,6 +10,7 @@ const outPath = path.join(__dirname, './dist')
 
 export default {
   context: sourcePath,
+  devtool: isProduction ? false : 'inline-source-map',
   entry: {
     main: [
       './client/index.tsx',
