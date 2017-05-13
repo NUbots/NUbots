@@ -1,9 +1,11 @@
 language: node_js
 node_js:
-  - "7"
+  - '7'
 branches:
   only:
-    - "master"
+    - 'master'
+notifications:
+  email: false
 script:
     - yarn tslint
     - yarn build
