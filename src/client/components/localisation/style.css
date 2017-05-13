@@ -42,8 +42,15 @@
 	border: 1px solid rgba(0, 0, 0, 0.4);
 }
 
+.localisation__canvasContainer {
+  flex-grow: 1;
+  position: relative;
+}
+
 .localisation__canvas {
-	flex-grow: 1;
+  width: 100%;
+  height: 100%;
+  position: absolute;
 }
 
 .localisation__status {

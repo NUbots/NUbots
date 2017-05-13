@@ -1,4 +1,5 @@
 import { autorun, IReactionDisposer } from 'mobx'
+import { runInAction } from 'mobx'
 import { inject, observer } from 'mobx-react'
 import * as React from 'react'
 import { WebGLRenderer } from 'three'
@@ -6,7 +7,6 @@ import { LocalisationModel } from './model'
 import { ViewMode } from './model'
 import * as style from './style.css'
 import { LocalisationViewModel } from './view_model'
-import { runInAction } from 'mobx'
 
 @inject('localisationStore')
 @observer
@@ -51,9 +51,11 @@ export class LocalisationView extends React.Component<any, any> {
     return (
         <div className={style.localisation}>
           <MenuBar onHawkEyeClick={this.onHawkEyeClick}/>
-          <canvas className={style.localisation__canvas} ref={canvas => {
-            this.canvas = canvas
-          }}/>
+          <div className={style.localisation__canvasContainer}>
+            <canvas className={style.localisation__canvas} ref={canvas => {
+              this.canvas = canvas
+            }}/>
+          </div>
           <StatusBar model={model}/>
         </div>
     )
