@@ -353,7 +353,7 @@ namespace strategy {
         auto reset = std::make_unique<ResetRobotHypotheses>();
 
         ResetRobotHypotheses::Self selfSideBaseLine;
-        selfSideBaseLine.position << -fieldDescription.dimensions.field_length * 0.5, fieldDescription.dimensions.goal_area_length, 0;
+        selfSideBaseLine.position << -fieldDescription.dimensions.field_length * 0.5, fieldDescription.dimensions.goal_area_length;
         selfSideBaseLine.position_cov = Eigen::Vector2d::Constant(0.1).asDiagonal();
         selfSideBaseLine.heading = 0;
         selfSideBaseLine.heading_var = 0.005;
