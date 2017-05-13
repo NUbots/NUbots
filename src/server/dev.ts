@@ -16,6 +16,7 @@ sio(server)
 
 app.use(compression())
 app.use(webpackDevMiddleware(compiler, {
+  publicPath: '/',
   index: 'index.html',
   stats: {
     colors: true,

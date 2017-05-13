@@ -15,17 +15,17 @@ interface KeyModifiers {
 export class LocalisationPresenter {
   private model: LocalisationModel
 
-  constructor({ model }) {
-    this.model = model
+  constructor(opts: { model: LocalisationModel }) {
+    Object.assign(this, opts)
   }
 
-  public static of({ model }) {
-    return new LocalisationPresenter({ model })
+  public static of(opts: { model: LocalisationModel }) {
+    return new LocalisationPresenter(opts)
   }
 
   @action
-  public onAnimationFrame(time) {
-    this.model.time.setTime(time / 1000)
+  public onAnimationFrame(time: number) {
+    this.model.time.time = time / 1000
     this.updatePosition()
   }
 
@@ -34,29 +34,29 @@ export class LocalisationPresenter {
     if (!this.model.locked) {
       view.requestPointerLock()
     } else {
-      this.model.setTarget(this.getNextTarget())
+      this.model.target = this.getNextTarget()
     }
   }
 
   @action
   public onRightClick() {
     if (this.model.locked) {
-      this.model.setTarget(this.getPreviousTarget())
+      this.model.target = this.getPreviousTarget()
     }
   }
 
   @action
   public onHawkEyeClick() {
-    this.model.controls.setPitch(-Math.PI / 2)
-    this.model.controls.setYaw(0)
+    this.model.controls.pitch = -Math.PI / 2
+    this.model.controls.yaw = 0
     this.model.camera.position.set(0, 5, 0)
-    this.model.setViewMode(ViewMode.NO_CLIP)
+    this.model.viewMode = ViewMode.NO_CLIP
     this.updatePosition()
   }
 
   @action
   public onPointerLockChange(locked: boolean): void {
-    this.model.setLocked(locked)
+    this.model.locked = locked
   }
 
   @action
@@ -66,14 +66,14 @@ export class LocalisationPresenter {
     }
 
     const pitch = Math.max(-Math.PI / 2, Math.min(Math.PI / 2, this.model.controls.pitch - movementY / 200))
-    this.model.controls.setPitch(pitch)
-    this.model.controls.setYaw(this.model.controls.yaw - movementX / 200)
+    this.model.controls.pitch = pitch
+    this.model.controls.yaw = this.model.controls.yaw - movementX / 200
   }
 
   @action
   public onWheel(deltaY: number): void {
     const newDistance = this.model.camera.distance + deltaY / 200
-    this.model.camera.setDistance(Math.min(10, Math.max(0.1, newDistance)))
+    this.model.camera.distance = Math.min(10, Math.max(0.1, newDistance))
   }
 
   @action
@@ -81,42 +81,42 @@ export class LocalisationPresenter {
     if (this.model.locked) {
       switch (key) {
         case KeyCode.W:
-          this.model.controls.setForward(true)
+          this.model.controls.forward = true
           return
         case KeyCode.A:
-          this.model.controls.setLeft(true)
+          this.model.controls.left = true
           return
         case KeyCode.S:
-          this.model.controls.setBack(true)
+          this.model.controls.back = true
           return
         case KeyCode.D:
-          this.model.controls.setRight(true)
+          this.model.controls.right = true
           return
         case KeyCode.R:
-          this.model.controls.setUp(true)
+          this.model.controls.up = true
           return
         case KeyCode.F:
-          this.model.controls.setDown(true)
+          this.model.controls.down = true
           return
         case KeyCode.Space:
-          this.model.setViewMode(this.getNextViewMode())
+          this.model.viewMode = this.getNextViewMode()
 
           // TODO (Annable): move this somewhere.
           if (this.model.viewMode === ViewMode.NO_CLIP) {
-            this.model.controls.setPitch(this.model.camera.pitch)
-            this.model.controls.setYaw(this.model.camera.yaw)
+            this.model.controls.pitch = this.model.camera.pitch
+            this.model.controls.yaw = this.model.camera.yaw
           } else if (this.model.viewMode === ViewMode.FIRST_PERSON) {
-            this.model.controls.setPitch(0)
-            this.model.controls.setYaw(0)
+            this.model.controls.pitch = 0
+            this.model.controls.yaw = 0
           }
 
           this.updatePosition()
           return
         case KeyCode.Enter:
           if (modifiers.shiftKey) {
-            this.model.setTarget(this.getPreviousTarget())
+            this.model.target = this.getPreviousTarget()
           } else {
-            this.model.setTarget(this.getNextTarget())
+            this.model.target = this.getNextTarget()
           }
           return
       }
@@ -128,22 +128,22 @@ export class LocalisationPresenter {
     if (this.model.locked) {
       switch (key) {
         case KeyCode.W:
-          this.model.controls.setForward(false)
+          this.model.controls.forward = false
           return
         case KeyCode.A:
-          this.model.controls.setLeft(false)
+          this.model.controls.left = false
           return
         case KeyCode.S:
-          this.model.controls.setBack(false)
+          this.model.controls.back = false
           return
         case KeyCode.D:
-          this.model.controls.setRight(false)
+          this.model.controls.right = false
           return
         case KeyCode.R:
-          this.model.controls.setUp(false)
+          this.model.controls.up = false
           return
         case KeyCode.F:
-          this.model.controls.setDown(false)
+          this.model.controls.down = false
           return
       }
     }
@@ -172,19 +172,19 @@ export class LocalisationPresenter {
     const actualSpeed = delta * movementSpeed
 
     if (this.model.controls.forward) {
-      movement.setZ(movement.z - actualSpeed)
+      movement.z = movement.z - actualSpeed
     }
 
     if (this.model.controls.back) {
-      movement.setZ(movement.z + actualSpeed)
+      movement.z = movement.z + actualSpeed
     }
 
     if (this.model.controls.left) {
-      movement.setX(movement.x - actualSpeed)
+      movement.x = movement.x - actualSpeed
     }
 
     if (this.model.controls.right) {
-      movement.setX(movement.x + actualSpeed)
+      movement.x = movement.x + actualSpeed
     }
 
     // TODO (Annable): remove THREE dependency from presenter.
@@ -194,15 +194,15 @@ export class LocalisationPresenter {
 
     // Apply up/down after rotation to keep movement vertical.
     if (this.model.controls.up) {
-      movement.setY(movement.y + actualSpeed)
+      movement.y = movement.y + actualSpeed
     }
 
     if (this.model.controls.down) {
-      movement.setY(movement.y - actualSpeed)
+      movement.y = movement.y - actualSpeed
     }
 
-    this.model.camera.setPitch(this.model.controls.pitch)
-    this.model.camera.setYaw(this.model.controls.yaw)
+    this.model.camera.pitch = this.model.controls.pitch
+    this.model.camera.yaw = this.model.controls.yaw
 
     this.model.camera.position.add(movement)
   }
@@ -214,7 +214,7 @@ export class LocalisationPresenter {
 
     if (!this.model.target) {
       // TODO (Annable): Handle no robots.
-      this.model.setTarget(this.model.robots[0])
+      this.model.target = this.model.robots[0]
     }
 
     const target = this.model.target
@@ -222,8 +222,8 @@ export class LocalisationPresenter {
     // This camera position hack will not work with orientation/head movement.
     // TODO (Annable): Sync camera position/rotation properly using kinematic chain.
     this.model.camera.position.set(target.position.x - 0.001, target.position.y + 0.4, target.position.z)
-    this.model.camera.setYaw(target.heading + Math.PI) // TODO (Annable): Find why offset by PI is needed.
-    this.model.camera.setPitch(0)
+    this.model.camera.yaw = target.heading + Math.PI // TODO (Annable): Find why offset by PI is needed.
+    this.model.camera.pitch = 0
   }
 
   private updatePositionThirdPerson() {
@@ -233,7 +233,7 @@ export class LocalisationPresenter {
 
     if (!this.model.target) {
       // TODO: Handle no robots.
-      this.model.setTarget(this.model.robots[0])
+      this.model.target = this.model.robots[0]
     }
 
     const target = this.model.target
@@ -252,8 +252,8 @@ export class LocalisationPresenter {
     const cameraPosition = targetPosition.clone().add(offset)
 
     this.model.camera.position.copy(cameraPosition)
-    this.model.camera.setPitch(pitch - Math.PI / 2)
-    this.model.camera.setYaw(-yaw + Math.PI / 2)
+    this.model.camera.pitch = pitch - Math.PI / 2
+    this.model.camera.yaw = -yaw + Math.PI / 2
   }
 
   private getNextViewMode() {

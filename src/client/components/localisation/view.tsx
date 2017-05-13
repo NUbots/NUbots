@@ -6,6 +6,7 @@ import { LocalisationModel } from './model'
 import { ViewMode } from './model'
 import * as style from './style.css'
 import { LocalisationViewModel } from './view_model'
+import { runInAction } from 'mobx'
 
 @inject('localisationStore')
 @observer
@@ -62,7 +63,7 @@ export class LocalisationView extends React.Component<any, any> {
     this.canvas.requestPointerLock()
   }
 
-  private onAnimationFrame = (time) => {
+  private onAnimationFrame = (time: number) => {
     this.rafId = requestAnimationFrame(this.onAnimationFrame)
     this.props.presenter.onAnimationFrame(time)
   }
@@ -73,17 +74,17 @@ export class LocalisationView extends React.Component<any, any> {
 
     if (canvas.width !== canvas.clientWidth || canvas.height !== canvas.clientHeight) {
       this.renderer.setSize(canvas.clientWidth, canvas.clientHeight, false)
-      model.setAspect(canvas.clientWidth / canvas.clientHeight)
+      runInAction(() => model.aspect = canvas.clientWidth / canvas.clientHeight)
     }
 
     const viewModel = LocalisationViewModel.of(model)
 
     this.renderer.render(viewModel.scene, viewModel.camera)
 
-    model.time.setLastRenderTime(model.time.time)
+    runInAction(() => model.time.lastRenderTime = model.time.time)
   }
 
-  private onClick = e => {
+  private onClick = (e: MouseEvent) => {
     if (e.button === 0) {
       this.props.presenter.onLeftClick(this)
     } else if (e.button === 2) {
@@ -95,18 +96,18 @@ export class LocalisationView extends React.Component<any, any> {
     this.props.presenter.onPointerLockChange(document.pointerLockElement === this.canvas)
   }
 
-  private onMouseMove = e => {
+  private onMouseMove = (e: MouseEvent) => {
     this.props.presenter.onMouseMove(e.movementX, e.movementY)
   }
 
-  private onKeyDown = e => {
+  private onKeyDown = (e: KeyboardEvent) => {
     this.props.presenter.onKeyDown(e.keyCode, {
       shiftKey: e.shiftKey,
       ctrlKey: e.ctrlKey,
     })
   }
 
-  private onKeyUp = e => {
+  private onKeyUp = (e: KeyboardEvent) => {
     this.props.presenter.onKeyUp(e.keyCode)
   }
 
@@ -114,17 +115,17 @@ export class LocalisationView extends React.Component<any, any> {
     this.props.presenter.onHawkEyeClick()
   }
 
-  private onWheel = e => {
+  private onWheel = (e: WheelEvent) => {
     e.preventDefault()
     this.props.presenter.onWheel(e.deltaY)
   }
 }
 
-interface IMenuBarProps {
+interface MenuBarProps {
   onHawkEyeClick(): void
 }
 
-const MenuBar = observer((props: IMenuBarProps) => {
+const MenuBar = observer((props: MenuBarProps) => {
   return (
       <ul className={style.localisation__menu}>
         <li className={style.localisation__menuItem}>
@@ -134,11 +135,11 @@ const MenuBar = observer((props: IMenuBarProps) => {
   )
 })
 
-interface IStatusBarProps {
+interface StatusBarProps {
   model: LocalisationModel
 }
 
-const StatusBar = observer((props: IStatusBarProps) => {
+const StatusBar = observer((props: StatusBarProps) => {
   const hasTarget = props.model.viewMode !== ViewMode.NO_CLIP && props.model.target
   return (
       <div className={style.localisation__status}>
@@ -150,7 +151,7 @@ const StatusBar = observer((props: IStatusBarProps) => {
   )
 })
 
-function viewModeString(viewMode) {
+function viewModeString(viewMode: ViewMode) {
   switch (viewMode) {
     case ViewMode.NO_CLIP:
       return 'Free Camera'

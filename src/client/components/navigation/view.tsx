@@ -11,7 +11,14 @@ import ScatterIcon from './icons/scatter.svg'
 import SpeedometerIcon from './icons/speedometer.svg'
 import * as style from './style.css'
 
-const NavigationItemView = ({ url, Icon, children = undefined, Link = NormalLink }) => (
+interface NavigationItemViewProps {
+  url: string
+  Icon: any
+  children?: any
+  Link?: NormalLink | IndexLink
+}
+
+const NavigationItemView = ({ url, Icon, children = undefined, Link = NormalLink }: NavigationItemViewProps) => (
     <li className={style.header__item}>
       <Link className={style.header__link} to={url} activeClassName={style['header__link--active']}>
         <Icon className={style.header__icon}/>

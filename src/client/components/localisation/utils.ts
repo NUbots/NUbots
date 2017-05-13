@@ -2,6 +2,8 @@ import { createTransformer } from 'mobx'
 import { MeshLambertMaterial } from 'three'
 import { Color } from 'three'
 import { JSONLoader } from 'three'
+import { Geometry } from 'three'
+import { Material } from 'three'
 
 export function geometryAndMaterial(config: any, color: string) {
   const { geometry, materials } = parseConfig(config)
@@ -9,7 +11,7 @@ export function geometryAndMaterial(config: any, color: string) {
   return { geometry, materials: newMaterials }
 }
 
-const coloredMaterial = (material, color) => {
+const coloredMaterial = (material: Material, color: string) => {
   if (material instanceof MeshLambertMaterial && material.name === 'Plastic' && color) {
     const newMaterial = material.clone()
     newMaterial.color.lerp(new Color(color), 0.5)
@@ -31,8 +33,8 @@ const parseConfig = createTransformer((config: any) => {
  *
  * @author Drew Noakes http://drewnoakes.com
  */
-function computeVertexNormals(geometry, maxSmoothAngle) {
-  const faceIndicesPerVertex = []
+function computeVertexNormals(geometry: Geometry, maxSmoothAngle: number) {
+  const faceIndicesPerVertex: number[][] = []
   for (let v = 0, vl = geometry.vertices.length; v < vl; v++) {
     faceIndicesPerVertex.push([])
   }
@@ -43,8 +45,9 @@ function computeVertexNormals(geometry, maxSmoothAngle) {
     faceIndicesPerVertex[face.c].push(f)
   }
   for (const face of geometry.faces) {
+    const faces = [face.a, face.b, face.c]
     for (let fv = 0; fv < 3; fv++) {
-      const vertexIndex = face['abcd'.charAt(fv)]
+      const vertexIndex = faces[fv]
       const vertexFaces = faceIndicesPerVertex[vertexIndex]
       const vertexNormal = face.normal.clone()
       for (const neighbourFaceIndex of vertexFaces) {

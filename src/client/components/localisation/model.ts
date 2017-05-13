@@ -4,32 +4,18 @@ import { RobotModel } from './darwin_robot/model'
 import { FieldModel } from './field/model'
 
 export class TimeModel {
-  // seconds
-  @observable public time: number
+  @observable public time: number // seconds
+  @observable public lastRenderTime: number // seconds
 
-  // seconds
-  @observable public lastRenderTime: number
-
-  constructor({ time, lastTime }) {
-    this.time = time
-    this.lastRenderTime = lastTime
+  constructor(opts: Partial<TimeModel>) {
+    Object.assign(this, opts)
   }
 
   public static of() {
     return new TimeModel({
       time: 0,
-      lastTime: 0,
+      lastRenderTime: 0,
     })
-  }
-
-  @action
-  public setTime(time: number) {
-    this.time = time
-  }
-
-  @action
-  public setLastRenderTime(lastRenderTime: number) {
-    this.lastRenderTime = lastRenderTime
   }
 
   @computed get timeSinceLastRender() {
@@ -54,57 +40,22 @@ export class LocalisationModel {
   @observable public target?: RobotModel
   @observable public time: TimeModel
 
-  constructor({ aspect, field, camera, controls, viewMode, target, time }) {
-    this.aspect = aspect
-    this.field = field
-    this.camera = camera
-    this.robots = []
-    this.locked = false
-    this.controls = controls
-    this.viewMode = viewMode
-    this.target = target
-    this.time = time
+  constructor(opts: LocalisationModel) {
+    Object.assign(this, opts)
   }
 
   public static of(): LocalisationModel {
-    const aspect = 300 / 150
-    const field = FieldModel.of()
-    const camera = CameraModel.of()
-    const controls = ControlsModel.of()
-    const viewMode = ViewMode.NO_CLIP
-    const target = null
-    const time = TimeModel.of()
-    return new LocalisationModel({ aspect, field, camera, controls, viewMode, target, time })
-  }
-
-  @action
-  public setAspect(aspect): LocalisationModel {
-    this.aspect = aspect
-    return this
-  }
-
-  @action
-  public addRobot(robot: RobotModel): LocalisationModel {
-    this.robots.push(robot)
-    return this
-  }
-
-  @action
-  public setLocked(locked: boolean): LocalisationModel {
-    this.locked = locked
-    return this
-  }
-
-  @action
-  public setViewMode(viewMode: ViewMode): LocalisationModel {
-    this.viewMode = viewMode
-    return this
-  }
-
-  @action
-  public setTarget(target: RobotModel): LocalisationModel {
-    this.target = target
-    return this
+    return new LocalisationModel({
+      aspect: 300 / 150,
+      robots: [],
+      field: FieldModel.of(),
+      camera: CameraModel.of(),
+      locked: false,
+      controls: ControlsModel.of(),
+      viewMode: ViewMode.NO_CLIP,
+      target: null,
+      time: TimeModel.of(),
+    })
   }
 }
 
@@ -114,11 +65,8 @@ class CameraModel {
   @observable public pitch: number
   @observable public distance: number
 
-  constructor({ position, yaw, pitch, distance }) {
-    this.position = position
-    this.yaw = yaw
-    this.pitch = pitch
-    this.distance = distance
+  constructor(opts: CameraModel) {
+    Object.assign(this, opts)
   }
 
   public static of() {
@@ -128,24 +76,6 @@ class CameraModel {
       pitch: 0,
       distance: 0.5,
     })
-  }
-
-  @action
-  public setYaw(yaw): CameraModel {
-    this.yaw = yaw
-    return this
-  }
-
-  @action
-  public setPitch(pitch): CameraModel {
-    this.pitch = pitch
-    return this
-  }
-
-  @action
-  public setDistance(distance): CameraModel {
-    this.distance = distance
-    return this
   }
 }
 
@@ -159,15 +89,8 @@ export class ControlsModel {
   @observable public pitch: number
   @observable public yaw: number
 
-  constructor({ forward, left, right, back, up, down, pitch, yaw }) {
-    this.forward = forward
-    this.left = left
-    this.right = right
-    this.back = back
-    this.up = up
-    this.down = down
-    this.pitch = pitch
-    this.yaw = yaw
+  constructor(opts: ControlsModel) {
+    Object.assign(this, opts)
   }
 
   public static of() {
@@ -181,54 +104,6 @@ export class ControlsModel {
       pitch: 0,
       yaw: 0,
     })
-  }
-
-  @action
-  public setForward(forward: boolean): ControlsModel {
-    this.forward = forward
-    return this
-  }
-
-  @action
-  public setLeft(left: boolean): ControlsModel {
-    this.left = left
-    return this
-  }
-
-  @action
-  public setRight(right: boolean): ControlsModel {
-    this.right = right
-    return this
-  }
-
-  @action
-  public setBack(back: boolean): ControlsModel {
-    this.back = back
-    return this
-  }
-
-  @action
-  public setUp(up: boolean): ControlsModel {
-    this.up = up
-    return this
-  }
-
-  @action
-  public setDown(down: boolean): ControlsModel {
-    this.down = down
-    return this
-  }
-
-  @action
-  public setPitch(pitch: number): ControlsModel {
-    this.pitch = pitch
-    return this
-  }
-
-  @action
-  public setYaw(yaw: number): ControlsModel {
-    this.yaw = yaw
-    return this
   }
 }
 
@@ -252,7 +127,7 @@ export class Vector3 {
   }
 
   @action
-  public set(x, y, z): Vector3 {
+  public set(x: number, y: number, z: number): Vector3 {
     this.x = x
     this.y = y
     this.z = z
@@ -297,24 +172,6 @@ export class Vector3 {
       this.y = 0
       this.z = 0
     }
-    return this
-  }
-
-  @action
-  public setX(x): Vector3 {
-    this.x = x
-    return this
-  }
-
-  @action
-  public setY(y): Vector3 {
-    this.y = y
-    return this
-  }
-
-  @action
-  public setZ(z): Vector3 {
-    this.z = z
     return this
   }
 

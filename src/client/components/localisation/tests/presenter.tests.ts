@@ -3,8 +3,8 @@ import { ViewMode } from '../model'
 import { LocalisationPresenter } from '../presenter'
 
 describe('LocalisationPresenter', () => {
-  let presenter
-  let model
+  let presenter: LocalisationPresenter
+  let model: LocalisationModel
 
   beforeEach(() => {
     model = LocalisationModel.of()
