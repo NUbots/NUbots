@@ -50,9 +50,12 @@ export default {
               'awesome-typescript-loader',
             ],
       },
-      // css
+      // local css
       {
         test: /\.css$/,
+        exclude: [
+          path.resolve(__dirname, 'node_modules'),
+        ],
         use: ExtractTextPlugin.extract({
           fallback: 'style-loader',
           use: [
@@ -70,6 +73,17 @@ export default {
             },
           ],
         }),
+      },
+      /*
+      External libraries generally do not support css modules so the selector mangling will break external components.
+      This separate simplified loader is used for anything within the node_modules folder instead.
+      */
+      {
+        test: /\.css$/,
+        include: [
+          path.resolve(__dirname, 'node_modules'),
+        ],
+        use: [ 'style-loader', 'css-loader' ],
       },
       {
         test: /\.svg$/,
