@@ -187,7 +187,7 @@ namespace module
              * @param h the image's height
              * @param f whether the camera is mounted upside down
              */
-            bool resetCamera(const std::string& device, const std::string& fmt, const FOURCC& cc, size_t w, size_t h)
+            void resetCamera(const std::string& device, const std::string& fmt, const FOURCC& cc, size_t w, size_t h)
             {
                 // if the camera device is already open, close it
                 closeCamera();
@@ -203,29 +203,9 @@ namespace module
                 fd = open(deviceID.c_str(), O_RDWR);
 
                 // Check if we managed to open our file descriptor
-                uint8_t resetCount = 0;
-
-                while (fd < 0 && resetCount < 5)
-                {   
-                   
-                    
-                    std::ofstream gpio;
-                    gpio.open ("/sys/class/gpio/gpio8/value");
-                    gpio << "0";
-                    std::cout << "off" << "\n\r";
-                    std::this_thread::sleep_for(std::chrono::milliseconds(50));
-                    gpio << "1";
-                    std::cout << "on" << "\n\r";
-                    std::this_thread::sleep_for(std::chrono::milliseconds(50));
-                    gpio.close();
-                    resetCount++;
-                    fd = open(deviceID.c_str(), O_RDWR);
-                    std::cout << "open" << "\n\r";
-
-                    if (fd < 0) {
-                        return false;
-                         throw std::runtime_error(std::string("We were unable to access the camera device on ") + deviceID);
-                     }
+                if (fd < 0)
+                {
+                    throw std::runtime_error(std::string("We were unable to access the camera device on ") + deviceID);
                 }
 
                 // Here we set the "Format" of the device (the type of data we are getting)
@@ -306,7 +286,6 @@ namespace module
                 settings.insert(std::make_pair("absolute_pan",               V4L2_CID_PAN_ABSOLUTE));
                 settings.insert(std::make_pair("absolute_tilt",              V4L2_CID_TILT_ABSOLUTE));
                 settings.insert(std::make_pair("sharpness",                  V4L2_CID_SHARPNESS));
-                return true;
             }
 
             /**
@@ -533,4 +512,3 @@ namespace module
 }  // modules
 
 #endif  // MODULES_INPUT_V4L2CAMERA_H
-
