@@ -32,11 +32,12 @@ NUCLEAR_ROLE(
     behaviour::skills::FallingRelax
     behaviour::skills::Getup
     behaviour::skills::HeadBehaviourSoccer
+    behaviour::skills::KickScript
     #behaviour::skills::ArmVisionAvoidance
     behaviour::planning::KickPlanner
 
     #Motion
-    motion::IKKick
+    #motion::IKKick
     motion::ScriptEngine
     motion::HeadController
 )

@@ -231,8 +231,9 @@ namespace strategy {
 
                 //auto& phase = gameState.phase;
 
-                // TODO: unhack
-                kickType = mode == GameMode::PENALTY_SHOOTOUT || cfg_.alwaysPowerKick ? KickType::SCRIPTED : KickType::IK_KICK;
+                // TODO: fix ik kick
+                kickType = KickType::SCRIPTED;
+                // kickType = mode == GameMode::PENALTY_SHOOTOUT || cfg_.alwaysPowerKick ? KickType::SCRIPTED : KickType::IK_KICK;
 
                 if (cfg_.forcePlaying) {
                     play(selfs, balls, fieldDescription, mode);

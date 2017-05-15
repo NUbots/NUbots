@@ -26,7 +26,7 @@ namespace input {
         	auto driver   = config["driver"].as<std::string>();
             auto deviceID = config["deviceID"].as<std::string>();
 
-            log("Found", driver, "camera with deviceID", deviceID);
+            log("Searching for", driver, "camera with deviceID", deviceID);
 
         	if (driver == "V4L2")
         	{

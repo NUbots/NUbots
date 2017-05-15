@@ -219,7 +219,8 @@ namespace module {
                     command->command = convert<double, 3>(Transform2D({finalForwardSpeed, 0, angle}));
 
                     arma::vec2 ball_world_position = RobotToWorldTransform(convert<double, 2>(selfs.front().locObject.position), 
-                                                                            convert<double, 2>(selfs.front().heading), position);
+                                                                           convert<double, 2>(selfs.front().heading), 
+                                                                           position.rows(0,1));
                     arma::vec2 kick_target = 2 * ball_world_position - convert<double, 2>(selfs.front().locObject.position);
                     emit(drawSphere("kick_target", arma::vec3({kick_target[0], kick_target[1], 0.0}), 0.1, arma::vec3({1, 0, 0}), 0));
                     //log("walkcommand",command->command[0],command->command[1]);

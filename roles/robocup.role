@@ -33,7 +33,7 @@ NUCLEAR_ROLE(
     #Motion
     motion::ScriptEngine
     motion::OldWalkEngine
-    #motion::IKKick
+    ##motion::IKKick
     motion::HeadController
 
     #Behaviour
