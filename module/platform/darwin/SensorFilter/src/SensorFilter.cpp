@@ -618,7 +618,15 @@ namespace module {
                     // Rwt : Mat size [3x3]
                     sensors->bodyToGround = convert<double, 4, 4>(Transform3D(oBodyToGround));
                     auto headPitchKinematics = sensors->forwardKinematics.at(ServoID::HEAD_PITCH);
-                    sensors->camToGround  = convert<double, 4, 4>(Transform3D(world.i() * convert<double, 4, 4>(headPitchKinematics))); // Rwt * Rth
+                    
+                    //Get torso to world transform
+                    Transform3D worldInv = world.i();
+                    
+                    Rotation3D yawlessWorldInvR = Rotation3D::createRotationZ(-Rotation3D(worldInv.rotation()).yaw()) * worldInv.rotation();
+                    Transform3D torsoToGround = worldInv;
+                    torsoToGround.translation() = arma::vec3({0,0,torsoToGround.translation()[2]});
+                    torsoToGround.rotation() = yawlessWorldInvR;
+                    sensors->camToGround  = convert<double, 4, 4>(Transform3D(torsoToGround * convert<double, 4, 4>(headPitchKinematics))); // Rwt * Rth
 
                     /************************************************
                      *                  CENTRE OF PRESSURE          *
