@@ -156,7 +156,6 @@ namespace module {
                     }
                     else if (latestCommand.type == message::behaviour::MotionCommand::Type::DirectCommand) {
                         //TO DO, change to Bezier stuff
-
                         std::unique_ptr<WalkCommand> command = std::make_unique<WalkCommand>(subsumptionId,latestCommand.walkCommand);
                         emit(std::move(command));
                         emit(std::make_unique<ActionPriorites>(ActionPriorites { subsumptionId, { 40, 11 }}));
@@ -224,8 +223,9 @@ namespace module {
                                                                            position.rows(0,1));
                     arma::vec2 kick_target = 2 * ball_world_position - convert<double, 2>(selfs.front().locObject.position);
                     emit(drawSphere("kick_target", arma::vec3({kick_target[0], kick_target[1], 0.0}), 0.1, arma::vec3({1, 0, 0}), 0));
-                    // log("walkcommand",command->command[0],command->command[1]);
-                    // log("anglewalkcommand",command->command[2]);
+                    //log("walkcommand",command->command[0],command->command[1]);
+                    //log("anglewalkcommand",command->command[2]);
+                    //log("ballPos: ",position.t());
 
                     emit(std::make_unique<KickPlan>(KickPlan(convert<double, 2>(kick_target), KickPlan::KickType::SCRIPTED)));
                     
@@ -236,7 +236,7 @@ namespace module {
                 on<Trigger<MotionCommand>, Sync<SimpleWalkPathPlanner>>().then([this] (const MotionCommand& cmd) {
                     //save the plan
                     latestCommand = cmd;
-
+                    
                 });
 
             }

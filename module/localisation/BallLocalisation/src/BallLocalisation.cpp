@@ -19,19 +19,19 @@ namespace localisation {
     , filter() {
 
         on<Configuration>("BallLocalisation.yaml").then([this] (const Configuration&) {
-        	auto message = std::make_unique<std::vector<Ball>>();
-        	emit(message);
+            auto message = std::make_unique<std::vector<Ball>>();
+            emit(message);
             // Use configuration here from file BallLocalisation.yaml
         });
 
         on<Trigger<std::vector<message::vision::Ball>>>().then([this](const std::vector<message::vision::Ball>& balls){
-        	if(balls.size() > 0){
-	        	auto message = std::make_unique<std::vector<Ball>>();
-	        	message->push_back(Ball());
-	        	message->back().locObject.last_measurement_time = NUClear::clock::now();
-	        	message->back().locObject.position              = balls[0].torsoSpacePosition.head<2>();
-	        	emit(message);
-        	}
+            if(balls.size() > 0){  
+                auto message = std::make_unique<std::vector<Ball>>();
+                message->push_back(Ball());
+                message->back().locObject.last_measurement_time = NUClear::clock::now();
+                message->back().locObject.position              = balls[0].torsoSpacePosition.head<2>();
+                emit(message);
+            }
         });
     }
 }

@@ -3,4 +3,4 @@ turnSpeed : 0.3
 a: 7
 b: 0
 search_timeout: 3
-robot_ground_space: true
+robot_ground_space: false

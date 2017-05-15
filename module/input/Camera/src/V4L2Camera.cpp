@@ -2,55 +2,55 @@
 
 namespace module
 {
-	namespace input
-	{
-		using extension::Configuration;
+    namespace input
+    {
+        using extension::Configuration;
 
         using message::input::CameraParameters;
         using message::input::Image;
 
         using FOURCC = utility::vision::FOURCC;
 
-		V4L2Camera Camera::initiateV4L2Camera(const Configuration& config)
-		{
-			// This trigger gets us as close as we can to the frame rate as possible (as high resolution as we can)
+        V4L2Camera Camera::initiateV4L2Camera(const Configuration& config)
+        {
+            // This trigger gets us as close as we can to the frame rate as possible (as high resolution as we can)
             V4L2FrameRateHandle = on<Every<V4L2Camera::FRAMERATE, Per<std::chrono::seconds>>, Single>().then("Read V4L2Camera", [this] {
 
-				for (auto& camera : V4L2Cameras)
-				{
-	                // If the camera is ready, get an image and emit it
-	                if (camera.second.isStreaming())
-	                {
-	                    emit(std::make_unique<Image>(camera.second.getImage()));
-	                }
-				}
+                for (auto& camera : V4L2Cameras)
+                {
+                    // If the camera is ready, get an image and emit it
+                    if (camera.second.isStreaming())
+                    {
+                        emit(std::make_unique<Image>(camera.second.getImage()));
+                    }
+                }
             });
 
             V4L2SettingsHandle = on<Every<1, std::chrono::seconds>>().then("V4L2 Camera Setting Applicator", [this] {
 
-				for (auto& camera : V4L2Cameras)
-				{
-		            if (camera.second.isStreaming())
-		            {
-	                    // Set all other camera settings
-	                    for (auto& setting : camera.second.getConfig().config)
-	                    {
-	                        auto& settings = camera.second.getSettings();
-	                        auto it = settings.find(setting.first.as<std::string>());
+                for (auto& camera : V4L2Cameras)
+                {
+                    if (camera.second.isStreaming())
+                    {
+                        // Set all other camera settings
+                        for (auto& setting : camera.second.getConfig().config)
+                        {
+                            auto& settings = camera.second.getSettings();
+                            auto it = settings.find(setting.first.as<std::string>());
 
-	                        if (it != settings.end())
-	                        {
-	                            if (camera.second.setSetting(it->second, setting.second.as<int>()) == false)
-	                            {
-	                                log<NUClear::DEBUG>("Failed to set", it->first, "on camera", camera.first);
-	                            }
-	                        }
-	                    }
-	                }
-				}
+                            if (it != settings.end())
+                            {
+                                if (camera.second.setSetting(it->second, setting.second.as<int>()) == false)
+                                {
+                                    log<NUClear::DEBUG>("Failed to set", it->first, "on camera", camera.first);
+                                }
+                            }
+                        }
+                    }
+                }
             }); 
 
-			auto cameraParameters = std::make_unique<CameraParameters>();
+            auto cameraParameters = std::make_unique<CameraParameters>();
             double tanHalfFOV[2], imageCentre[2];
 
             cameraParameters->imageSizePixels << config["imageWidth"].as<uint>(), config["imageHeight"].as<uint>();
@@ -115,18 +115,18 @@ namespace module
                 NUClear::log<NUClear::DEBUG>(std::string("Exception while setting camera configuration: ") + e.what());
                 throw e;
             }
-		}
+        }
 
-		void Camera::ShutdownV4L2Camera()
-		{
-			for (auto& camera : V4L2Cameras)
-			{
-				camera.second.closeCamera();
-			}
+        void Camera::ShutdownV4L2Camera()
+        {
+            for (auto& camera : V4L2Cameras)
+            {
+                camera.second.closeCamera();
+            }
 
             V4L2SettingsHandle.disable();
             V4L2FrameRateHandle.disable();
             V4L2Cameras.clear();
-		}
-	}
+        }
+    }
 }
