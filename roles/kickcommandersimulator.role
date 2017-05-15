@@ -20,7 +20,7 @@ NUCLEAR_ROLE(
     behaviour::skills::Getup
 
     # Motion
-    motion::IKKick
+    #motion::IKKick
     motion::FootMotionPlanner
     motion::FootPlacementPlanner
     motion::TorsoMotionPlanner
