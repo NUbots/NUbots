@@ -45,7 +45,7 @@ Vagrant.configure("2") do |config|
     shell.inline = "apt-get install -y puppet;
                     mkdir -p /etc/puppet/modules;
                     puppet module list | grep -q 'puppetlabs-apt' \
-                         || puppet module install puppetlabs-apt --module_repository https://forge.puppet.com;
+                         || puppet module install puppetlabs-apt --module_repository https://forge.puppet.com --version 2.4.0;
                     puppet module list | grep -q 'puppetlabs-vcsrepo' \
                          || puppet module install puppetlabs-vcsrepo --module_repository https://forge.puppet.com;
                     puppet module list | grep -q 'camptocamp-archive' \
