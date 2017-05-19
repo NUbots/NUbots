@@ -1,0 +1,7 @@
+{
+  "verbose": true,
+  "ignore": ["*.tests.ts", "src/client"],
+  "execMap": {
+    "ts": "ts-node"
+  }
+}

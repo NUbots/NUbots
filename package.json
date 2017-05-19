@@ -11,7 +11,8 @@
     "coverage": "yarn test -- --coverage",
     "coverage:ci": "yarn test:ci -- --coverage",
     "tslint": "tslint -c tslint.json 'src/**/*.ts'",
-    "start": "nodemon --exec ts-node ./src/server/dev.ts",
+    "tslint:fix": "tslint -c tslint.json 'src/**/*.ts' --fix",
+    "start": "nodemon ./src/server/dev.ts",
     "prod": "ts-node -F ./src/server/prod.ts",
     "build": "webpack -p --progress --colors",
     "heroku-postbuild": "yarn build"
