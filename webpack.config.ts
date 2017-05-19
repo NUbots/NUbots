@@ -143,14 +143,6 @@ export default {
   ].concat(isProduction ? [] : [
     new webpack.HotModuleReplacementPlugin(),
   ]),
-  devServer: {
-    contentBase: sourcePath,
-    inline: true,
-    hot: true,
-    stats: {
-      warnings: false,
-    },
-  },
   node: {
     // workaround for webpack-dev-server issue
     // https://github.com/webpack/webpack-dev-server/issues/60#issuecomment-103411179
