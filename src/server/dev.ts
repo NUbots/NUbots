@@ -1,6 +1,6 @@
 import * as compression from 'compression'
+import * as history from 'connect-history-api-fallback'
 import * as express from 'express'
-import * as fallback from 'express-history-api-fallback'
 import * as http from 'http'
 import * as favicon from 'serve-favicon'
 import * as sio from 'socket.io'
@@ -14,18 +14,23 @@ const app = express()
 const server = http.createServer(app)
 sio(server)
 
-app.use(compression())
-app.use(webpackDevMiddleware(compiler, {
+const devMiddleware = webpackDevMiddleware(compiler, {
   publicPath: '/',
   index: 'index.html',
   stats: {
     colors: true,
   },
-}))
+})
+
+app.use(compression())
+// We need to wrap the fallback history API with two instances of the dev middleware to handle the initial raw request
+// and the following rewritten request.
+// Refer to: https://github.com/webpack/webpack-dev-middleware/pull/44#issuecomment-170462282
+app.use(devMiddleware)
+app.use(history())
+app.use(devMiddleware)
 app.use(webpackHotMiddleware(compiler))
-const root = `${__dirname}/../../`
 app.use(favicon(`${__dirname}/../assets/favicon.ico`))
-app.use(fallback('dist/index.html', { root }))
 
 const port = process.env.PORT || 3000
 server.listen(port, () => {
