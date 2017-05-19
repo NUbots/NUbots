@@ -6,7 +6,7 @@ import * as webpack from 'webpack'
 
 const isProduction = process.argv.indexOf('-p') >= 0
 const sourcePath = path.join(__dirname, './src')
-const outPath = path.join(__dirname, './dist')
+const outPath = path.join(__dirname, './build')
 
 export default {
   context: sourcePath,

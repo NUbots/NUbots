@@ -9,7 +9,7 @@ const app = express()
 const server = http.createServer(app)
 sio(server)
 
-const root = `${__dirname}/../../dist`
+const root = `${__dirname}/../../build`
 app.use(history())
 app.use(compression())
 app.use(express.static(root))
