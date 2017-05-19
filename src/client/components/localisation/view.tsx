@@ -142,12 +142,12 @@ interface StatusBarProps {
 }
 
 const StatusBar = observer((props: StatusBarProps) => {
-  const hasTarget = props.model.viewMode !== ViewMode.NO_CLIP && props.model.target
+  const target = props.model.viewMode !== ViewMode.NO_CLIP && props.model.target ? props.model.target.name : 'No Target'
   return (
       <div className={style.localisation__status}>
         <span className={style.localisation__info}>&#160;</span>
         <span
-            className={style.localisation__target}>{hasTarget && props.model.target.name || 'No Target'}</span>
+            className={style.localisation__target}>{target}</span>
         <span className={style.localisation__viewMode}>{viewModeString(props.model.viewMode)}</span>
       </div>
   )

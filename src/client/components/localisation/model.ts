@@ -53,7 +53,6 @@ export class LocalisationModel {
       locked: false,
       controls: ControlsModel.of(),
       viewMode: ViewMode.NO_CLIP,
-      target: null,
       time: TimeModel.of(),
     })
   }

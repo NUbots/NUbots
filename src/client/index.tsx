@@ -29,10 +29,10 @@ const stores = {
 runInAction(() => {
   stores.localisationStore.camera.position.set(0, 0.2, 0.5)
 
-  const colors = [null, 'magenta', null, 'blue', null, 'cyan', null, 'red']
+  const colors = [undefined, 'magenta', undefined, 'blue', undefined, 'cyan', undefined, 'red']
   const numRobots = 8
   new Array(numRobots).fill(0).map((_, id) => {
-    const robot = RobotModel.of({ id, name: `Robot ${id + 1}`, color: colors[id], heading: 0 })
+    const robot = RobotModel.of({ id, name: `Robot ${id + 1}`, color: colors[id] || undefined, heading: 0 })
     stores.localisationStore.robots.push(robot)
     return robot
   })

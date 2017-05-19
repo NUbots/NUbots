@@ -5,13 +5,17 @@ import { JSONLoader } from 'three'
 import { Geometry } from 'three'
 import { Material } from 'three'
 
-export function geometryAndMaterial(config: any, color: string) {
-  const { geometry, materials } = parseConfig(config)
-  const newMaterials = materials.map(material => coloredMaterial(material, color))
-  return { geometry, materials: newMaterials }
+export function geometryAndMaterial(config: any, color?: string) {
+  const geometryAndMaterial = parseConfig(config)
+  const geometry = geometryAndMaterial.geometry
+  let materials = geometryAndMaterial.materials
+  if (materials !== undefined) {
+    materials = materials.map(material => coloredMaterial(material, color))
+  }
+  return { geometry, materials }
 }
 
-const coloredMaterial = (material: Material, color: string) => {
+const coloredMaterial = (material: Material, color?: string) => {
   if (material instanceof MeshLambertMaterial && material.name === 'Plastic' && color) {
     const newMaterial = material.clone()
     newMaterial.color.lerp(new Color(color), 0.5)
