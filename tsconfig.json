@@ -19,9 +19,12 @@
       "dom"
     ]
   },
+  "include": [
+    "declarations",
+    "src"
+  ],
   "exclude": [
     "dist",
-    "build",
     "node_modules"
   ],
   "awesomeTypescriptLoaderOptions": {
