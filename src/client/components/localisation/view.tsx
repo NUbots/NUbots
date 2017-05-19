@@ -165,5 +165,3 @@ function viewModeString(viewMode: ViewMode) {
       throw new Error(`No string defined for view mode ${viewMode}`)
   }
 }
-
-export default LocalisationView

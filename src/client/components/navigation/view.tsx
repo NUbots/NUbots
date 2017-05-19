@@ -46,5 +46,3 @@ export const NavigationView = () => (
       </ul>
     </header>
 )
-
-export default NavigationView
