@@ -18,12 +18,15 @@ export default {
       'webpack-hot-middleware/client',
     ]),
     vendor: [
-      'react',
-      'react-dom',
-      'react-router',
+      'classnames',
       'mobx',
       'mobx-react',
       'mobx-react-router',
+      'react',
+      'react-dom',
+      'react-router',
+      'socket.io-client',
+      'three',
     ],
   },
   output: {
