@@ -57,7 +57,6 @@
     "identity-obj-proxy": "^3.0.0",
     "jest": "^20.0.1",
     "jest-css-modules": "^1.1.0",
-    "mobx-react-devtools": "^4.2.13",
     "nodemon": "^1.11.0",
     "postcss": "^5.2.15",
     "postcss-browser-reporter": "^0.5.0",
