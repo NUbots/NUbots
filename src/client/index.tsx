@@ -41,7 +41,7 @@ runInAction(() => {
 requestAnimationFrame(function update() {
   requestAnimationFrame(update)
   runInAction(() => {
-    const numRobots = stores.localisationStore.robots.length;
+    const numRobots = stores.localisationStore.robots.length
     stores.localisationStore.robots.forEach((robot, i) => {
 
       const angle = i * (2 * Math.PI) / numRobots + Date.now() / 4E3

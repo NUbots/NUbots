@@ -10,15 +10,16 @@
     "test:watch": "yarn test -- --watch",
     "coverage": "yarn test -- --coverage",
     "coverage:ci": "yarn test:ci -- --coverage",
-    "tslint": "tslint -c tslint.json 'src/**/*.ts'",
-    "tslint:fix": "tslint -c tslint.json 'src/**/*.ts' --fix",
+    "tslint": "tslint -c tslint.json 'src/**/*.ts{,x}'",
+    "tslint:fix": "tslint -c tslint.json 'src/**/*.ts{,x}' --fix",
     "start": "nodemon ./src/server/dev.ts",
     "prod": "ts-node -F ./src/server/prod.ts",
     "build": "yarn clean:build && webpack -p --progress --colors",
     "clean": "yarn clean:build && yarn clean:coverage",
     "clean:build": "rimraf build",
     "clean:coverage": "rimraf coverage",
-    "heroku-postbuild": "yarn build"
+    "heroku-postbuild": "yarn build",
+    "prepush": "yarn tslint"
   },
   "license": "MIT",
   "devDependencies": {
@@ -54,6 +55,7 @@
     "file-loader": "^0.10.0",
     "html-loader": "^0.4.4",
     "html-webpack-plugin": "^2.28.0",
+    "husky": "^0.13.3",
     "identity-obj-proxy": "^3.0.0",
     "jest": "^20.0.1",
     "jest-css-modules": "^1.1.0",
