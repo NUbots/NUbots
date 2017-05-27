@@ -12,7 +12,7 @@ interface KeyModifiers {
   ctrlKey: boolean
 }
 
-export class LocalisationPresenter {
+export class LocalisationController {
   private model: LocalisationModel
 
   constructor(opts: { model: LocalisationModel }) {
@@ -20,7 +20,7 @@ export class LocalisationPresenter {
   }
 
   public static of(opts: { model: LocalisationModel }) {
-    return new LocalisationPresenter(opts)
+    return new LocalisationController(opts)
   }
 
   @action

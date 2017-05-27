@@ -10,9 +10,9 @@ import { Chart } from './components/chart/view'
 import { Classifier } from './components/classifier/view'
 import { Dashboard } from './components/dashboard/view'
 import { GameState } from './components/game_state/view'
+import { LocalisationController } from './components/localisation/controller'
 import { RobotModel } from './components/localisation/darwin_robot/model'
 import { LocalisationModel } from './components/localisation/model'
-import { LocalisationPresenter } from './components/localisation/presenter'
 import { LocalisationView } from './components/localisation/view'
 import { NUClear } from './components/nuclear/view'
 import { Scatter } from './components/scatter_plot/view'
@@ -84,7 +84,7 @@ ReactDOM.render(
         <Route path='/' component={AppView}>
           <IndexRoute component={Dashboard}/>
           <Route path='/localisation' component={() => {
-            const presenter = LocalisationPresenter.of({
+            const presenter = LocalisationController.of({
               model: stores.localisationStore,
             })
             return <LocalisationView presenter={presenter} localisationStore={stores.localisationStore}/>

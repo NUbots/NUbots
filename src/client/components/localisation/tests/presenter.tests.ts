@@ -1,14 +1,14 @@
+import { LocalisationController } from '../controller'
 import { LocalisationModel } from '../model'
 import { ViewMode } from '../model'
-import { LocalisationPresenter } from '../presenter'
 
-describe('LocalisationPresenter', () => {
-  let presenter: LocalisationPresenter
+describe('LocalisationController', () => {
+  let presenter: LocalisationController
   let model: LocalisationModel
 
   beforeEach(() => {
     model = LocalisationModel.of()
-    presenter = new LocalisationPresenter({ model })
+    presenter = new LocalisationController({ model })
   })
 
   describe('clicking the hawk eye button', () => {
