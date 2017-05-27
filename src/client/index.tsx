@@ -88,7 +88,7 @@ ReactDOM.render(
         <Route path='/classifier' component={Classifier}/>
         <Route path='/subsumption' component={Subsumption}/>
         <Route path='/gamestate' component={GameState}/>
-      </Route>,
+      </Route>
     </Router>,
     document.getElementById('root'),
 )
