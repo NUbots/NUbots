@@ -1,10 +1,10 @@
 import { useStrict } from 'mobx'
 import { runInAction } from 'mobx'
-import { Provider } from 'mobx-react'
 import * as React from 'react'
 import * as ReactDOM from 'react-dom'
 import { browserHistory, IndexRoute, Route, Router } from 'react-router'
 import * as io from 'socket.io-client'
+import { container } from '../inversify.config'
 import { AppView } from './components/app/view'
 import { Chart } from './components/chart/view'
 import { Classifier } from './components/classifier/view'
@@ -21,18 +21,17 @@ import { Vision } from './components/vision/view'
 // enable MobX strict mode
 useStrict(true)
 
-const stores = {
-  localisationStore: LocalisationModel.of(),
-}
+// TODO (Annable): Replace all this code with real networking + simulator
+const localisationModel = container.get(LocalisationModel)
 
 runInAction(() => {
-  stores.localisationStore.camera.position.set(0, 0.2, 0.5)
+  localisationModel.camera.position.set(0, 0.2, 0.5)
 
   const colors = [undefined, 'magenta', undefined, 'blue', undefined, 'cyan', undefined, 'red']
   const numRobots = 8
   new Array(numRobots).fill(0).map((_, id) => {
     const robot = RobotModel.of({ id, name: `Robot ${id + 1}`, color: colors[id] || undefined, heading: 0 })
-    stores.localisationStore.robots.push(robot)
+    localisationModel.robots.push(robot)
     return robot
   })
 })
@@ -40,8 +39,8 @@ runInAction(() => {
 requestAnimationFrame(function update() {
   requestAnimationFrame(update)
   runInAction(() => {
-    const numRobots = stores.localisationStore.robots.length
-    stores.localisationStore.robots.forEach((robot, i) => {
+    const numRobots = localisationModel.robots.length
+    localisationModel.robots.forEach((robot, i) => {
 
       const angle = i * (2 * Math.PI) / numRobots + Date.now() / 4E3
       const distance = Math.cos(Date.now() / 1E3 + 4 * i) * 0.3 + 1
@@ -78,22 +77,18 @@ io.connect(document.location.origin)
 
 // render react DOM
 ReactDOM.render(
-    <Provider {...stores} >
-      <Router history={browserHistory}>
-        <Route path='/' component={AppView}>
-          <IndexRoute component={Dashboard}/>
-          <Route path='/localisation' component={() => {
-            return <LocalisationView model={stores.localisationStore}/>
-          }}/>
-          <Route path='/vision' component={Vision}/>
-          <Route path='/chart' component={Chart}/>
-          <Route path='/scatter' component={Scatter}/>
-          <Route path='/nuclear' component={NUClear}/>
-          <Route path='/classifier' component={Classifier}/>
-          <Route path='/subsumption' component={Subsumption}/>
-          <Route path='/gamestate' component={GameState}/>
-        </Route>
-      </Router>
-    </Provider >,
+    <Router history={browserHistory}>
+      <Route path='/' component={AppView}>
+        <IndexRoute component={Dashboard}/>
+        <Route path='/localisation' component={LocalisationView}/>
+        <Route path='/vision' component={Vision}/>
+        <Route path='/chart' component={Chart}/>
+        <Route path='/scatter' component={Scatter}/>
+        <Route path='/nuclear' component={NUClear}/>
+        <Route path='/classifier' component={Classifier}/>
+        <Route path='/subsumption' component={Subsumption}/>
+        <Route path='/gamestate' component={GameState}/>
+      </Route>,
+    </Router>,
     document.getElementById('root'),
 )
