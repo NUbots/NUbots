@@ -10,7 +10,6 @@ import { Chart } from './components/chart/view'
 import { Classifier } from './components/classifier/view'
 import { Dashboard } from './components/dashboard/view'
 import { GameState } from './components/game_state/view'
-import { LocalisationController } from './components/localisation/controller'
 import { RobotModel } from './components/localisation/darwin_robot/model'
 import { LocalisationModel } from './components/localisation/model'
 import { LocalisationView } from './components/localisation/view'
@@ -84,10 +83,7 @@ ReactDOM.render(
         <Route path='/' component={AppView}>
           <IndexRoute component={Dashboard}/>
           <Route path='/localisation' component={() => {
-            const presenter = LocalisationController.of({
-              model: stores.localisationStore,
-            })
-            return <LocalisationView presenter={presenter} localisationStore={stores.localisationStore}/>
+            return <LocalisationView model={stores.localisationStore}/>
           }}/>
           <Route path='/vision' component={Vision}/>
           <Route path='/chart' component={Chart}/>

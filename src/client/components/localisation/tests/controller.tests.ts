@@ -1,19 +1,20 @@
+import 'reflect-metadata'
 import { LocalisationController } from '../controller'
 import { LocalisationModel } from '../model'
 import { ViewMode } from '../model'
 
 describe('LocalisationController', () => {
-  let presenter: LocalisationController
+  let controller: LocalisationController
   let model: LocalisationModel
 
   beforeEach(() => {
     model = LocalisationModel.of()
-    presenter = new LocalisationController({ model })
+    controller = new LocalisationController()
   })
 
   describe('clicking the hawk eye button', () => {
     beforeEach(() => {
-      presenter.onHawkEyeClick()
+      controller.onHawkEyeClick(model)
     })
 
     it('resets yaw to 0', () => {
