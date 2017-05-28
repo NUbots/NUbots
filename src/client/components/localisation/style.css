@@ -10,7 +10,7 @@
 	list-style-type: none;
 	margin: 0;
 	padding: 0;
-	height: 60px;
+	height: inherit;
 	display: flex;
 	align-items: stretch;
 }
