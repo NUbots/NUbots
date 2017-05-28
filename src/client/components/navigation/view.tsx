@@ -29,10 +29,7 @@ const NavigationItemView = ({ url, Icon, children = undefined, Link = NormalLink
 
 export const NavigationView = () => (
     <header className={style.header}>
-      <div className={style.header__logoContainer}>
-        <img src='images/nusight.jpg' className={style.header__logo}/>
-        <h1 className={style.header__title}>NUsight2</h1>
-      </div>
+      <h1 className={style.header__title}>NUsight</h1>
       <ul className={style.header__list}>
         <NavigationItemView url='/' Icon={SpeedometerIcon} Link={IndexLink}>Dashboard</NavigationItemView>
         <NavigationItemView url='/localisation' Icon={MapIcon}>Localisation</NavigationItemView>
