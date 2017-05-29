@@ -108,9 +108,9 @@ class File:
                 // Go down to our submodule as required as context
                 pybind11::module context = module{submodules};
 
-            {messages}
-
             {enums}
+
+            {messages}
             }}
             """)
 

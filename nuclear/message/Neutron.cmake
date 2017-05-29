@@ -33,6 +33,10 @@ INCLUDE_DIRECTORIES(SYSTEM ${Protobuf_INCLUDE_DIRS})
 FIND_PACKAGE(Eigen3 REQUIRED)
 INCLUDE_DIRECTORIES(SYSTEM ${Eigen3_INCLUDE_DIRS})
 
+# We need Eigen3
+FIND_PACKAGE(Eigen3 REQUIRED)
+INCLUDE_DIRECTORIES(SYSTEM ${Eigen3_INCLUDE_DIRS})
+
 # If we found pybind11 include its directories
 IF(pybind11_FOUND)
     FIND_PACKAGE(PythonLibsNew 3 REQUIRED)
@@ -81,7 +85,7 @@ ENDFOREACH(proto)
 # Get our dependency files for our message class generator
 FILE(GLOB_RECURSE message_class_generator_depends "${CMAKE_CURRENT_SOURCE_DIR}/generator/**.py")
 
-UNSET(relative_messages)
+UNSET(message_dependencies)
 
 # Build all of our normal messages
 FILE(GLOB_RECURSE protobufs "${message_source_dir}/**.proto")
@@ -94,9 +98,6 @@ FOREACH(proto ${protobufs})
     FILE(RELATIVE_PATH message_rel_path ${message_source_dir} ${proto})
     GET_FILENAME_COMPONENT(outputpath ${message_rel_path} PATH)
     SET(outputpath "${message_binary_dir}/${outputpath}")
-
-    # Add our relative message path to our list (for later use in generation)
-    SET(relative_messages ${relative_messages} ${message_rel_path})
 
     # Create the output directory
     FILE(MAKE_DIRECTORY ${outputpath})
@@ -136,13 +137,18 @@ FOREACH(proto ${protobufs})
     # Extract the protocol buffer information so we can generate code off it
     ADD_CUSTOM_COMMAND(
         OUTPUT "${outputpath}/${file_we}.pb"
+               "${outputpath}/${file_we}.dep"
         COMMAND ${PROTOBUF_PROTOC_EXECUTABLE}
         ARGS --descriptor_set_out="${outputpath}/${file_we}.pb"
+             --dependency_out="${outputpath}/${file_we}.dep"
              -I${message_source_include_dir}
              -I${CMAKE_CURRENT_SOURCE_DIR}/proto
              ${proto}
         DEPENDS ${source_depends}
         COMMENT "Extracting protocol buffer information from ${proto}")
+
+    # Gather the dependencies for each message.
+    SET(message_dependencies ${message_dependencies} "${outputpath}/${file_we}.dep")
 
     # Repackage our protocol buffers so they don't collide with the actual classes
     # when we make our c++ protobuf classes by adding protobuf to the package
@@ -216,9 +222,10 @@ IF(pybind11_FOUND)
         COMMAND ${PYTHON_EXECUTABLE}
         ARGS "${CMAKE_CURRENT_SOURCE_DIR}/build_outer_python_binding.py"
              "${CMAKE_CURRENT_BINARY_DIR}/outer_python_binding.cpp"
-              ${relative_messages}
+             "${PROJECT_SOURCE_DIR}/${NUCLEAR_MESSAGE_DIR}"
+              ${message_dependencies}
         WORKING_DIRECTORY ${message_binary_dir}
-        DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/build_outer_python_binding.py"
+        DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/build_outer_python_binding.py" ${message_dependencies}
         COMMENT "Building outer python message binding")
 
     SET(src ${src} "${CMAKE_CURRENT_BINARY_DIR}/outer_python_binding.cpp")

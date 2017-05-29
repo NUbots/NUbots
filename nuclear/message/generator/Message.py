@@ -287,8 +287,10 @@ class Message:
 
                 // Shadow our context with our new context and declare our subclasses
                 auto& context = shadow;
-            {submessages}
+
             {enums}
+
+            {submessages}
 
                 // Declare the functions on our class (which may use the ones in the subclasses)
                 context
@@ -308,15 +310,21 @@ class Message:
                 }});
             }}""")
 
+
+        python_constructor_args = ['{}& self'.format(self.fqn.replace('.', '::'))]
+        python_constructor_args.extend(['{} const& _{}'.format(t.cpp_type, t.name) for t in self.fields])
         python_members = '\n'.join('.def_readwrite("{field}", &{fqn}::{field})'.format(field=f.name, fqn=self.fqn.replace('.', '::')) for f in self.fields)
+        python_constructor_default_args = ['']
+        python_constructor_default_args.extend(['pybind11::arg("{}") = {}'.format(t.name, t.default_value if t.default_value else '{}()'.format(t.cpp_type)) for t in self.fields])
+
         python_constructor = dedent("""\
-            .def("__init__", [] ({name}& self, {args}) {{
+            .def("__init__", [] ({args}) {{
                 new (&self) {name}({vars});
-            }}, {default_args})""").format(
+            }}{default_args})""").format(
             name=self.fqn.replace('.', '::'),
-            args=', '.join('{} const& {}'.format(t.cpp_type, t.name) for t in self.fields),
-            vars=', '.join(t.name for t in self.fields),
-            default_args=', '.join('pybind11::arg("{}") = {}'.format(t.name, t.default_value if t.default_value else '{}()'.format(t.cpp_type)) for t in self.fields)
+            args=', '.join(python_constructor_args),
+            vars=', '.join('_{}'.format(t.name) for t in self.fields),
+            default_args=', '.join(python_constructor_default_args)
         )
 
         return header_template.format(

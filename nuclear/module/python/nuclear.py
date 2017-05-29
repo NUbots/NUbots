@@ -245,7 +245,6 @@ def Reactor(reactor):
         open_namespace  = '\n'.join('namespace {} {{'.format(n) for n in reactor_namespace.split(os.path.sep))
         close_namespace = '\n'.join('}}  // namespace {}'.format(n) for n in reactor_namespace.split(os.path.sep))
 
-
         header_template = dedent("""\
             #ifndef {macro_guard}
             #define {macro_guard}
@@ -260,10 +259,15 @@ def Reactor(reactor):
                 public:
                     // Constructor
                     explicit {class_name}(std::unique_ptr<NUClear::Environment> environment);
+                    {class_name}(const {class_name}&) = default;
+                    {class_name}({class_name}&&) = default;
+                    ~{class_name}() = default;
+                    {class_name}& operator=(const {class_name}&) = default;
+                    {class_name}& operator=({class_name}&&) = default;
 
                 private:
                     // The subinterpreter for this module
-                    PyInterpreterState* interpreter = nullptr;
+                    PyInterpreterState* interpreter;
 
                     // The self object for this module
                     pybind11::object self;
@@ -299,7 +303,7 @@ def Reactor(reactor):
                 thread_local PyThreadState* {class_name}::thread_state = nullptr;
 
                 {class_name}::{class_name}(std::unique_ptr<NUClear::Environment> environment)
-                : Reactor(std::move(environment)) {{
+                : Reactor(std::move(environment)), interpreter(nullptr), self() {{
                     // If python hasn't been used in another module yet
                     if (!Py_IsInitialized()) {{
                         // Add our message to our initilsation
