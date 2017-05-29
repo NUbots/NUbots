@@ -98,7 +98,6 @@ FUNCTION(NUCLEAR_MODULE)
             ARGS -E env
                 PYTHONPATH="${PROJECT_BINARY_DIR}/python/nuclear/"
                 NUCLEAR_MODULE_DIR="${PROJECT_SOURCE_DIR}/${NUCLEAR_MODULE_DIR}"
-                LD_LIBRARY_PATH="/nubots/toolchain/lib"
                 ${PYTHON_EXECUTABLE} "${CMAKE_CURRENT_SOURCE_DIR}/src/${module_name}.py"
             WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/src"
             DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/src/${module_name}.py"

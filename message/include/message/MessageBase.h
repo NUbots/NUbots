@@ -42,7 +42,7 @@ namespace NUClear {
                     }
                 }
 
-                static inline std::array<uint64_t, 2> hash() {
+                static inline uint64_t hash() {
 
                     // We have to construct an instance to call the reflection functions
                     protobuf_type type;
@@ -51,7 +51,7 @@ namespace NUClear {
                     std::string typeName = type.GetTypeName().substr(9);
 
                     // We base the hash on the name of the protocol buffer, removing the protobuf prefix on typeName
-                    return murmurhash3(typeName.c_str(), typeName.size());
+                    return XXH64(typeName.c_str(), typeName.size(), 0x4e55436c);
                 }
             };
 
