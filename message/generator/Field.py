@@ -28,6 +28,7 @@ class Field:
         self.pointer = f.options.Extensions[pointer]
         self.array_size = f.options.Extensions[array_size]
         self.bytes_type = f.type == f.TYPE_BYTES
+
         # Basic types are treated as primitives by the library
         self.basic = f.type not in [f.TYPE_MESSAGE, f.TYPE_GROUP, f.TYPE_BYTES]
 
@@ -99,25 +100,11 @@ class Field:
             r = matrix_regex.match(t)
             t = '::message::conversion::math::{}mat{}'.format(r.group(1), r.group(2))
 
-        # Transform and rotation types map to the Transform classes
-        elif t == '.message.Transform2D':
-            t = '::message::conversion::math::Transform2D'
-        elif t == '.message.Transform3D':
-            t = '::message::conversion::math::Transform3D'
-        elif t == '.message.Rotation2D':
-            t = '::message::conversion::math::Rotation2D'
-        elif t == '.message.Rotation3D':
-            t = '::message::conversion::math::Rotation3D'
-
         # Timestamps and durations map to real time/duration classes
         elif t == '.google.protobuf.Timestamp':
             t = '::NUClear::clock::time_point'
         elif t == '.google.protobuf.Duration':
             t = '::NUClear::clock::duration'
-
-        # Struct types map to YAML nodes
-        elif t == '.google.protobuf.Struct':
-            t = '::YAML::Node'
 
         # Standard types get mapped to their appropriate type
         elif t in ['double', 'float', 'bool']:

@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
 
 from generator.textutil import indent, dedent
-from generator.Field import Field
+from generator.Field import Field, PointerType
 from generator.Enum import Enum
-
 
 class Message:
     def __init__(self, m, context):
+        self.package = context.package
         self.name = m.name
         self.fqn = '{}.{}'.format(context.fqn, self.name)
         self.include_path = context.include_path
@@ -49,6 +49,35 @@ class Message:
 
             return ('{}({});'.format(self.name, default_field_list),
                     '{}::{}({}) : {} {{}}'.format(cpp_fqn, self.name, field_list, field_set))
+
+    def generate_equality_operator(self):
+
+        # Fully qualified c++ name
+        cpp_fqn = '::'.join(self.fqn.split('.'));
+
+        # If we are empty it's easy
+        if not self.fields:
+            return ('bool operator== (const {}&) const;'.format(self.name),
+                    'bool {}::operator== (const {}&) const {{ return true; }}'.format(cpp_fqn, self.name))
+        else:
+            equality_test = ' && '.join(['{0} == other.{0}'.format(v.name) for v in self.fields])
+
+            return ('bool operator== (const {}& other) const;'.format(self.name),
+                    'bool {}::operator== (const {}& other) const {{ return {}; }}'.format(cpp_fqn, self.name, equality_test))
+
+    def generate_rule_of_five(self):
+
+        raw_pointer = [v.name for v in self.fields if v.pointer and v.pointer == PointerType['RAW']]
+        raw_pointer_warning = '#pragma message ( "WARNING: The following fields in {0} are raw pointers and copying or moving will copy the raw pointer address: {1}") \n'.format(self.name, ', '.join(raw_pointer))
+
+        rule_of_five = dedent("""{warning}\
+            {name}(const {name}&) = default;
+            {name}({name}&&) = default;
+            ~{name}() = default;
+            {name}& operator=(const {name}&) = default;
+            {name}& operator=({name}&&) = default;""")
+
+        return (rule_of_five.format(name=self.name, warning=raw_pointer_warning if raw_pointer else ''), '')
 
     def generate_protobuf_constructor(self):
 
@@ -150,11 +179,11 @@ class Message:
                     lines.append(indent('for (auto& _v : {}) {{'.format(v.name)))
 
                     if v.type[1].bytes_type:
-                        lines.append(indent('(*proto.mutable_{}())[_v.first].append(std::begin(_v.second), std::end(_v.second));'.format(v.name), 8))
+                        lines.append(indent('(*proto.mutable_{}())[_v.first].append(std::begin(_v.second), std::end(_v.second));'.format(v.name.lower()), 8))
                     elif v.type[1].special_cpp_type:
-                        lines.append(indent('message::conversion::convert((*proto.mutable_{}())[_v.first], _v.second);'.format(v.name), 8))
+                        lines.append(indent('message::conversion::convert((*proto.mutable_{}())[_v.first], _v.second);'.format(v.name.lower()), 8))
                     else: # Basic and others are handled the same
-                        lines.append(indent('(*proto.mutable_{}())[_v.first] = _v.second;'.format(v.name), 8))
+                        lines.append(indent('(*proto.mutable_{}())[_v.first] = _v.second;'.format(v.name.lower()), 8))
 
                     lines.append(indent('}'))
 
@@ -210,16 +239,18 @@ class Message:
 
         # Get our function code
         default_constructor = self.generate_default_constructor()
+        rule_of_five = self.generate_rule_of_five()
         protobuf_constructor = self.generate_protobuf_constructor()
         protobuf_converter = self.generate_protobuf_converter()
+        equality_operator = self.generate_equality_operator()
 
-        constructor_headers = indent('\n\n'.join([default_constructor[0], protobuf_constructor[0]]))
-        constructor_impl = '\n\n'.join([default_constructor[1], protobuf_constructor[1]])
+        constructor_headers = indent('\n\n'.join([default_constructor[0], rule_of_five[0], protobuf_constructor[0], equality_operator[0]]))
+        constructor_impl = '\n\n'.join([default_constructor[1], protobuf_constructor[1], equality_operator[1]])
         converter_headers = indent('\n\n'.join([protobuf_converter[0]]))
         converter_impl = '\n\n'.join([protobuf_converter[1]])
 
         header_template = dedent("""\
-            struct alignas(16) {name} : public ::message::MessageBase<{name}> {{
+            struct {name} : public ::message::MessageBase<{name}> {{
                 // Protobuf type
                 using protobuf_type = {protobuf_type};
 
@@ -256,8 +287,10 @@ class Message:
 
                 // Shadow our context with our new context and declare our subclasses
                 auto& context = shadow;
-            {submessages}
+
             {enums}
+
+            {submessages}
 
                 // Declare the functions on our class (which may use the ones in the subclasses)
                 context
@@ -266,17 +299,32 @@ class Message:
                 context.def_static("include_path", [] {{
                     return "{include_path}";
                 }});
+
+                // Build our emitter function that is used to emit this object
+                context.def("_emit", [] ({fqn}& msg, pybind11::capsule capsule) {{
+                    // Extract our reactor from the capsule
+                    NUClear::Reactor* reactor = capsule;
+
+                    // Do the emit
+                    reactor->powerplant.emit_shared<NUClear::dsl::word::emit::Local>(msg.shared_from_this());
+                }});
             }}""")
 
+
+        python_constructor_args = ['{}& self'.format(self.fqn.replace('.', '::'))]
+        python_constructor_args.extend(['{} const& _{}'.format(t.cpp_type, t.name) for t in self.fields])
         python_members = '\n'.join('.def_readwrite("{field}", &{fqn}::{field})'.format(field=f.name, fqn=self.fqn.replace('.', '::')) for f in self.fields)
+        python_constructor_default_args = ['']
+        python_constructor_default_args.extend(['pybind11::arg("{}") = {}'.format(t.name, t.default_value if t.default_value else '{}()'.format(t.cpp_type)) for t in self.fields])
+
         python_constructor = dedent("""\
-            .def("__init__", [] ({name}& self, {args}) {{
+            .def("__init__", [] ({args}) {{
                 new (&self) {name}({vars});
-            }}, {default_args})""").format(
+            }}{default_args})""").format(
             name=self.fqn.replace('.', '::'),
-            args=', '.join('{} const& {}'.format(t.cpp_type, t.name) for t in self.fields),
-            vars=', '.join(t.name for t in self.fields),
-            default_args=', '.join('pybind11::arg("{}") = {}'.format(t.name, t.default_value if t.default_value else '{}()'.format(t.cpp_type)) for t in self.fields)
+            args=', '.join(python_constructor_args),
+            vars=', '.join('_{}'.format(t.name) for t in self.fields),
+            default_args=', '.join(python_constructor_default_args)
         )
 
         return header_template.format(

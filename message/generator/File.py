@@ -59,8 +59,6 @@ class File:
                 pass # We don't need to do anything for these ones
             elif d in ['google/protobuf/timestamp.proto', 'google/protobuf/duration.proto']:
                 includes.add('4"message/conversion/proto_time.h"')
-            elif d in ['google/protobuf/struct.proto']:
-                includes.add('4"utility/include/proto_struct.h"')
             else:
                 includes.add('4"{}"'.format(d[:-6] + '.h'))
 
@@ -110,9 +108,9 @@ class File:
                 // Go down to our submodule as required as context
                 pybind11::module context = module{submodules};
 
-            {messages}
-
             {enums}
+
+            {messages}
             }}
             """)
 

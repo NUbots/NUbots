@@ -24,8 +24,14 @@ SET(message_binary_dir "${PROJECT_BINARY_DIR}/${NUCLEAR_MESSAGE_DIR}")
 FIND_PACKAGE(Protobuf REQUIRED)
 FIND_PACKAGE(PythonInterp 3 REQUIRED)
 
+INCLUDE_DIRECTORIES(SYSTEM ${Protobuf_INCLUDE_DIRS})
+
 # If we have the package pybind11 we can use to go generate python bindings
 FIND_PACKAGE(pybind11)
+
+# We need Eigen3
+FIND_PACKAGE(Eigen3 REQUIRED)
+INCLUDE_DIRECTORIES(SYSTEM ${Eigen3_INCLUDE_DIRS})
 
 # If we found pybind11 include its directories
 IF(pybind11_FOUND)
@@ -60,12 +66,22 @@ FOREACH(proto ${builtin})
             "${message_binary_include_dir}/${file_we}.pb.h"
             "${message_binary_include_dir}/${file_we}_pb2.py")
 
+    # Prevent Effective C++ and unused parameter error checks being performed on generated files.
+    SET_SOURCE_FILES_PROPERTIES("${message_binary_include_dir}/${file_we}.pb"
+                                "${message_binary_include_dir}/${file_we}.proto"
+                                "${message_binary_include_dir}/${file_we}.pb.cc"
+                                "${message_binary_include_dir}/${file_we}.pb.h"
+                                "${message_binary_include_dir}/${file_we}.cpp"
+                                "${message_binary_include_dir}/${file_we}.py.cpp"
+                                "${message_binary_include_dir}/${file_we}.h"
+                                 PROPERTIES COMPILE_FLAGS "-Wno-effc++ -Wno-error=unused-parameter -Wno-error")
+
 ENDFOREACH(proto)
 
 # Get our dependency files for our message class generator
 FILE(GLOB_RECURSE message_class_generator_depends "${CMAKE_CURRENT_SOURCE_DIR}/generator/**.py")
 
-UNSET(relative_messages)
+UNSET(message_dependencies)
 
 # Build all of our normal messages
 FILE(GLOB_RECURSE protobufs "${message_source_dir}/**.proto")
@@ -78,9 +94,6 @@ FOREACH(proto ${protobufs})
     FILE(RELATIVE_PATH message_rel_path ${message_source_dir} ${proto})
     GET_FILENAME_COMPONENT(outputpath ${message_rel_path} PATH)
     SET(outputpath "${message_binary_dir}/${outputpath}")
-
-    # Add our relative message path to our list (for later use in generation)
-    SET(relative_messages ${relative_messages} ${message_rel_path})
 
     # Create the output directory
     FILE(MAKE_DIRECTORY ${outputpath})
@@ -120,13 +133,18 @@ FOREACH(proto ${protobufs})
     # Extract the protocol buffer information so we can generate code off it
     ADD_CUSTOM_COMMAND(
         OUTPUT "${outputpath}/${file_we}.pb"
+               "${outputpath}/${file_we}.dep"
         COMMAND ${PROTOBUF_PROTOC_EXECUTABLE}
         ARGS --descriptor_set_out="${outputpath}/${file_we}.pb"
+             --dependency_out="${outputpath}/${file_we}.dep"
              -I${message_source_include_dir}
              -I${CMAKE_CURRENT_SOURCE_DIR}/proto
              ${proto}
         DEPENDS ${source_depends}
         COMMENT "Extracting protocol buffer information from ${proto}")
+
+    # Gather the dependencies for each message.
+    SET(message_dependencies ${message_dependencies} "${outputpath}/${file_we}.dep")
 
     # Repackage our protocol buffers so they don't collide with the actual classes
     # when we make our c++ protobuf classes by adding protobuf to the package
@@ -174,7 +192,9 @@ FOREACH(proto ${protobufs})
                                 "${outputpath}/${file_we}.cpp"
                                 "${outputpath}/${file_we}.py.cpp"
                                 "${outputpath}/${file_we}.h"
-                                 PROPERTIES GENERATED TRUE)
+                                 PROPERTIES GENERATED TRUE
+                                            # Prevent Effective C++ and unused parameter error checks being performed on generated files.
+                                            COMPILE_FLAGS "-Wno-effc++ -Wno-error=unused-parameter -Wno-error")
 
     # Add the generated files to our list
     SET(src ${src}
@@ -198,9 +218,10 @@ IF(pybind11_FOUND)
         COMMAND ${PYTHON_EXECUTABLE}
         ARGS "${CMAKE_CURRENT_SOURCE_DIR}/build_outer_python_binding.py"
              "${CMAKE_CURRENT_BINARY_DIR}/outer_python_binding.cpp"
-              ${relative_messages}
+             "${PROJECT_SOURCE_DIR}/${NUCLEAR_MESSAGE_DIR}"
+              ${message_dependencies}
         WORKING_DIRECTORY ${message_binary_dir}
-        DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/build_outer_python_binding.py"
+        DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/build_outer_python_binding.py" ${message_dependencies}
         COMMENT "Building outer python message binding")
 
     SET(src ${src} "${CMAKE_CURRENT_BINARY_DIR}/outer_python_binding.cpp")
@@ -213,6 +234,7 @@ IF(src)
 
     # The library uses protocol buffers
     TARGET_LINK_LIBRARIES(nuclear_message ${PROTOBUF_LIBRARIES})
+    TARGET_LINK_LIBRARIES(nuclear_message ${NUClear_LIBRARIES})
 
     # If we have pybind11 we need to make this a python library too
     IF(pybind11_FOUND)

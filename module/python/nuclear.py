@@ -1,4 +1,5 @@
 import inspect
+import message
 import re
 import os
 from textwrap import dedent
@@ -88,7 +89,14 @@ class Buffer(DSLWord):
         return "{}<{}>".format(self._name, self._k)
 
 class Every(DSLWord):
-    pass
+    def __init__(self, time):
+        self._name = self.__class__.__name__
+        self._time = time
+
+    def template_args(self):
+        ns = int(self._time * 1e9)
+        return "{}<{}, std::chrono::nanoseconds>".format(self._name, ns)
+
 
 class Priority(object):
     class REALTIME(DSLWord):
@@ -147,12 +155,16 @@ class DSLCallback(DSLWord):
 # Decorator for creating instance variables/setting up reactor
 def Reactor(reactor):
 
+    # Attach an emit method to the class
+    setattr(reactor, 'emit', lambda self, msg: msg._emit(self._reactor_ptr))
+
     try:
         # If we can import this we are running in nuclear, so run
         import nuclear_reactor
 
         # Bind an instance of this reactor into nuclear
-        nuclear_reactor.bind_self(reactor())
+        instance = reactor()
+        setattr(instance, '_reactor_ptr', nuclear_reactor.bind_self(instance))
 
         # Go through all of our DSL callbacks to bind them
         reactions = inspect.getmembers(reactor, predicate=lambda x: isinstance(x, DSLCallback))
@@ -197,15 +209,14 @@ def Reactor(reactor):
 
                     // Run the python function
                     try {{
-                        fn(self, {input_vars});
+                        fn({input_vars});
+                        PyEval_SaveThread();
                     }}
                     catch(...) {{
                         // Finished with python
                         PyEval_SaveThread();
                         std::rethrow_exception(std::current_exception());
                     }}
-
-                    PyEval_SaveThread();
                 }});
             }});""")
 
@@ -224,7 +235,7 @@ def Reactor(reactor):
                                            dsl=reaction[1].template_args(),
                                            input_args=', '.join(input_args),
                                            input_types=', '.join(input_types),
-                                           input_vars=', '.join(input_vars)))
+                                           input_vars=', '.join(['self'] + input_vars)))
 
             for include in reaction[1].include_paths():
                 includes.add('#include "{}"'.format(include))
@@ -233,7 +244,6 @@ def Reactor(reactor):
         header_file = "{}.h".format(reactor_name)
         open_namespace  = '\n'.join('namespace {} {{'.format(n) for n in reactor_namespace.split(os.path.sep))
         close_namespace = '\n'.join('}}  // namespace {}'.format(n) for n in reactor_namespace.split(os.path.sep))
-
 
         header_template = dedent("""\
             #ifndef {macro_guard}
@@ -249,10 +259,15 @@ def Reactor(reactor):
                 public:
                     // Constructor
                     explicit {class_name}(std::unique_ptr<NUClear::Environment> environment);
+                    {class_name}(const {class_name}&) = default;
+                    {class_name}({class_name}&&) = default;
+                    ~{class_name}() = default;
+                    {class_name}& operator=(const {class_name}&) = default;
+                    {class_name}& operator=({class_name}&&) = default;
 
                 private:
                     // The subinterpreter for this module
-                    PyInterpreterState* interpreter = nullptr;
+                    PyInterpreterState* interpreter;
 
                     // The self object for this module
                     pybind11::object self;
@@ -288,7 +303,7 @@ def Reactor(reactor):
                 thread_local PyThreadState* {class_name}::thread_state = nullptr;
 
                 {class_name}::{class_name}(std::unique_ptr<NUClear::Environment> environment)
-                : Reactor(std::move(environment)) {{
+                : Reactor(std::move(environment)), interpreter(nullptr), self() {{
                     // If python hasn't been used in another module yet
                     if (!Py_IsInitialized()) {{
                         // Add our message to our initilsation
@@ -317,7 +332,11 @@ def Reactor(reactor):
 
                     // Create a function that binds the self object for passing into callbacks
                     m.def("bind_self", [this] (pybind11::object obj) {{
+                        // Store the provided object
                         self = obj;
+
+                        // Return the reactor as an opaque object (for emitting)
+                        return pybind11::capsule(this);
                     }});
 
             {binders}

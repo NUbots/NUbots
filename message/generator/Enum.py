@@ -5,6 +5,7 @@ from generator.textutil import indent, dedent
 
 class Enum:
     def __init__(self, e, context):
+        self.package = context.package
         self.name = e.name
         self.fqn = '{}.{}'.format(context.fqn, self.name)
         self.values = [(v.name, v.number) for v in e.value]
@@ -26,7 +27,7 @@ class Enum:
         switches = indent('\n'.join(['case Value::{}: return "{}";'.format(v[0], v[0]) for v in self.values]), 8)
 
         # Make our if chain
-        if_chain = indent('\n'.join(['if (str == "{}") value = Value::{};'.format(v[0], v[0]) for v in self.values]))
+        if_chain = indent('\nelse '.join(['if (str == "{}") value = Value::{};'.format(v[0], v[0]) for v in self.values]))
 
         # Get our default value
         default_value = dict([reversed(v) for v in self.values])[0]
@@ -61,6 +62,8 @@ class Enum:
 
                 bool operator ==({name} const& other) const;
 
+                bool operator !=({name} const& other) const;
+
                 bool operator <({name}::Value const& other) const;
 
                 bool operator >({name}::Value const& other) const;
@@ -71,6 +74,8 @@ class Enum:
 
                 bool operator ==({name}::Value const& other) const;
 
+                bool operator !=({name}::Value const& other) const;
+
                 // Conversions
                 operator Value() const;
 
@@ -79,6 +84,8 @@ class Enum:
                 operator std::string() const;
 
                 operator {protobuf_name}() const;
+
+                friend std::ostream& operator<< (std::ostream& out, const {name}& val);
             }};""")
 
         impl_template = dedent("""\
@@ -90,7 +97,7 @@ class Enum:
 
             {fqn}::{name}(std::string const& str) {{
             {if_chain}
-                throw std::runtime_error("String did not match any enum for {name}");
+                else throw std::runtime_error("String " + str + " did not match any enum for {name}");
             }}
 
             {fqn}::{name}({protobuf_name} const& p) {{
@@ -117,6 +124,10 @@ class Enum:
                 return value == other.value;
             }}
 
+            bool {fqn}::operator !=({name} const& other) const {{
+                return value != other.value;
+            }}
+
             bool {fqn}::operator <({name}::Value const& other) const {{
                 return value < other;
             }}
@@ -137,6 +148,10 @@ class Enum:
                 return value == other;
             }}
 
+            bool {fqn}::operator !=({name}::Value const& other) const {{
+                return value != other;
+            }}
+
             {fqn}::operator Value() const {{
                 return value;
             }}
@@ -155,6 +170,10 @@ class Enum:
 
             {fqn}::operator {protobuf_name}() const {{
                 return static_cast<{protobuf_name}>(value);
+            }}
+
+            std::ostream& {namespace}::operator<< (std::ostream& out, const {fqn}& val) {{
+                return out << static_cast<std::string>(val);
             }}""")
 
         python_template = dedent("""\
@@ -177,6 +196,13 @@ class Enum:
                     .def(pybind11::self == {fqn}::Value())
                     .def_static("include_path", [] {{
                         return "{include_path}";
+                    }})
+                    .def("_emit", [] ({fqn}& msg, pybind11::capsule capsule) {{
+                        // Extract our reactor from the capsule
+                        NUClear::Reactor* reactor = capsule;
+
+                        // Do the emit
+                        reactor->powerplant.emit_shared<NUClear::dsl::word::emit::Local>(msg.shared_from_this());
                     }});
 
                 pybind11::enum_<{fqn}::Value>(enumclass, "Value")
@@ -190,6 +216,7 @@ class Enum:
             values=values
         ), impl_template.format(
             fqn='::'.join(self.fqn.split('.')),
+            namespace='::'.join(self.package.split('.')),
             name=self.name,
             protobuf_name='::'.join(('.protobuf' + self.fqn).split('.')),
             default_value=default_value,
