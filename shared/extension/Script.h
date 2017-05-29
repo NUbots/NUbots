@@ -79,8 +79,8 @@ namespace extension {
             binary = basename(data.data());
         }
 
-        
-        Script(const std::vector<Frame>& frames) : fileName(), hostname(), binary(), config(), frames(frames) 
+
+        Script(const std::vector<Frame>& frames) : fileName(), hostname(), binary(), config(), frames(frames)
         {
             // Get hostname so we can find the correct per-robot script directory.
             char host[255];
@@ -95,7 +95,7 @@ namespace extension {
             binary = basename(data.data());
         }
 
-        Script(const std::string& fileName, const std::string& hostname, const std::string& binary, const YAML::Node& config, const std::vector<Frame>& frames) 
+        Script(const std::string& fileName, const std::string& hostname, const std::string& binary, const YAML::Node& config, const std::vector<Frame>& frames)
             : fileName(fileName)
             , hostname(hostname)
             , binary(binary)
@@ -207,13 +207,13 @@ namespace extension {
      * @author Trent Houliston
      */
     struct ExecuteScriptByName {
-        ExecuteScriptByName(const size_t& id, const std::string& script, const NUClear::clock::time_point& start = NUClear::clock::now()) 
+        ExecuteScriptByName(const size_t& id, const std::string& script, const NUClear::clock::time_point& start = NUClear::clock::now())
             : sourceId(id), scripts(1, script), duration_modifier(1, 1.0), start(start) {};
-        ExecuteScriptByName(const size_t& id, const std::string& script, const double& duration_mod, const NUClear::clock::time_point& start = NUClear::clock::now()) 
+        ExecuteScriptByName(const size_t& id, const std::string& script, const double& duration_mod, const NUClear::clock::time_point& start = NUClear::clock::now())
             : sourceId(id), scripts(1, script), duration_modifier(1, duration_mod), start(start) {};
-        ExecuteScriptByName(const size_t& id, const std::vector<std::string>& scripts, const NUClear::clock::time_point& start = NUClear::clock::now()) 
+        ExecuteScriptByName(const size_t& id, const std::vector<std::string>& scripts, const NUClear::clock::time_point& start = NUClear::clock::now())
             : sourceId(id), scripts(scripts), duration_modifier(scripts.size(), 1.0), start(start) {};
-        ExecuteScriptByName(const size_t& id, const std::vector<std::string>& scripts, const std::vector<double>& duration_mod, const NUClear::clock::time_point& start = NUClear::clock::now()) 
+        ExecuteScriptByName(const size_t& id, const std::vector<std::string>& scripts, const std::vector<double>& duration_mod, const NUClear::clock::time_point& start = NUClear::clock::now())
             : sourceId(id), scripts(scripts), duration_modifier(duration_mod), start(start) {
                 while (scripts.size() > duration_modifier.size()) {
                     duration_modifier.push_back(1.0);
@@ -238,9 +238,9 @@ namespace extension {
             : sourceId(id), scripts(1, script), duration_modifier(1, 1.0), start(start) {};
         ExecuteScript(const size_t& id, const Script& script, double duration_mod = 1.0, NUClear::clock::time_point start = NUClear::clock::now())
             : sourceId(id), scripts(1, script), duration_modifier(1, duration_mod), start(start) {};
-        ExecuteScript(const size_t& id, const std::vector<Script>& scripts, NUClear::clock::time_point start = NUClear::clock::now()) 
+        ExecuteScript(const size_t& id, const std::vector<Script>& scripts, NUClear::clock::time_point start = NUClear::clock::now())
             : sourceId(id), scripts(scripts), duration_modifier(scripts.size(), 1.0), start(start) {};
-        ExecuteScript(const size_t& id, const std::vector<Script>& scripts, const std::vector<double>& duration_mod, NUClear::clock::time_point start = NUClear::clock::now()) 
+        ExecuteScript(const size_t& id, const std::vector<Script>& scripts, const std::vector<double>& duration_mod, NUClear::clock::time_point start = NUClear::clock::now())
             : sourceId(id), scripts(scripts), duration_modifier(duration_mod), start(start) {
                 while (scripts.size() > duration_modifier.size()) {
                     duration_modifier.push_back(1.0);
@@ -260,7 +260,7 @@ namespace extension {
         s.frames.insert(s.frames.end(), s1.frames.begin(), s1.frames.end());
         s.frames.insert(s.frames.end(), s2.frames.begin(), s2.frames.end());
         return s;
-    } 
+    }
 
 }  // extension
 
@@ -270,9 +270,8 @@ namespace NUClear {
         namespace operation {
             template <>
             struct DSLProxy<::extension::Script> {
-                template <typename DSL, typename TFunc>
-                static inline std::tuple<threading::ReactionHandle, threading::ReactionHandle, threading::ReactionHandle>
-                    bind(Reactor& reactor, const std::string& label, TFunc&& callback, const std::string& path) {
+                template <typename DSL>
+                static inline void bind(const std::shared_ptr<threading::Reaction>& reaction, const std::string& path) {
                     auto flags = ::extension::FileWatch::ATTRIBUTE_MODIFIED
                                | ::extension::FileWatch::CREATED
                                | ::extension::FileWatch::UPDATED
@@ -299,16 +298,18 @@ namespace NUClear {
                         throw std::runtime_error("Script file '" + defaultConfig + "' does not exist.");
                     }
 
-                    auto defaultHandle = DSLProxy<::extension::FileWatch>::bind<DSL>(reactor, label, callback, defaultConfig, flags);
-                    auto robotHandle   = utility::file::exists(robotConfig)
-                                            ? DSLProxy<::extension::FileWatch>::bind<DSL>(reactor, label, callback, robotConfig, flags) 
-                                            : threading::ReactionHandle();
-                    auto binaryHandle  = utility::file::exists(binaryConfig)
-                                            ? DSLProxy<::extension::FileWatch>::bind<DSL>(reactor, label, callback, binaryConfig, flags) 
-                                            : threading::ReactionHandle();
+                    // Bind our default path
+                    DSLProxy<::extension::FileWatch>::bind<DSL>(reaction, defaultConfig, flags);
 
-                    // Set FileWatcher to monitor the requested files.
-                    return std::make_tuple(defaultHandle, robotHandle, binaryHandle);
+                    // Bind our robot specific path if it exists
+                    if (utility::file::exists(robotConfig)) {
+                        DSLProxy<::extension::FileWatch>::bind<DSL>(reaction, robotConfig, flags);
+                    }
+
+                    // Bind our binary specific path if it exists
+                    if (utility::file::exists(binaryConfig)) {
+                        DSLProxy<::extension::FileWatch>::bind<DSL>(reaction, binaryConfig, flags);
+                    }
                 }
 
                 template <typename DSL>

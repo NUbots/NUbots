@@ -14,6 +14,6 @@
 
 INCLUDE(ToolchainLibraryFinder)
 ToolchainLibraryFinder(NAME muParserX
-                       HEADER mpParser.h
+                       HEADER muparserx/mpParser.h
                        LIBRARY muparserx
 )

@@ -23,9 +23,6 @@
 namespace extension {
 
     struct FileWatch {
-        FileWatch() : path(""), events(0) {}
-        FileWatch(const std::string& path, int events) : path(path), events(events) {}
-
         using FileWatchStore = NUClear::dsl::store::ThreadStore<FileWatch>;
 
         enum Event {
@@ -56,9 +53,6 @@ namespace extension {
     };
 
     struct FileWatchRequest {
-        FileWatchRequest() : path(""), events(0), reaction() {}
-        FileWatchRequest(const std::string& path, int events, const std::shared_ptr<NUClear::threading::Reaction>& reaction) : path(path), events(events), reaction(reaction) {}
-        
         std::string path;
         int events;
         std::shared_ptr<NUClear::threading::Reaction> reaction;
@@ -73,25 +67,22 @@ namespace NUClear {
             template <>
             struct DSLProxy<::extension::FileWatch> {
 
-                template <typename DSL, typename TFunc>
-                static inline threading::ReactionHandle bind(Reactor& reactor, const std::string& label, TFunc&& callback, const std::string& path, int events) {
+                template <typename DSL>
+                static inline void bind(const std::shared_ptr<threading::Reaction>& reaction, const std::string& path, int events) {
 
-                    // Generate our reaction
-                    auto reaction = util::generate_reaction<DSL, ::extension::FileWatch>(reactor, label, std::forward<TFunc>(callback));
+                    // Add our unbinder
+                    reaction->unbinders.emplace_back([](const threading::Reaction& r) {
+                        r.reactor.emit<word::emit::Direct>(std::make_unique<operation::Unbind<::extension::FileWatch>>(r.id));
+                    });
 
                     // Make a request to watch our file
                     auto fw = std::make_unique<::extension::FileWatchRequest>();
                     fw->path = path;
                     fw->events = events;
-                    fw->reaction = std::move(reaction);
-
-                    threading::ReactionHandle handle(fw->reaction);
+                    fw->reaction = reaction;
 
                     // Send our file watcher to the extension
-                    reactor.powerplant.emit<NUClear::dsl::word::emit::Direct>(fw);
-
-                    // Return our handles
-                    return handle;
+                    reaction->reactor.powerplant.emit<word::emit::Direct>(fw);
                 }
 
                 template <typename DSL>

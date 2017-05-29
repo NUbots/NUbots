@@ -72,7 +72,7 @@ Vagrant.configure("2") do |config|
   # Define the NUbots development VM, and make it the primary VM
   # (meaning that a plain `vagrant up` will only create this machine)
   # This VM will install all dependencies using the NUbots deb file (faster, generally recommended)
-  config.vm.define "nubotsvm", primary: true do |nubots|
+  config.vm.define "nubotsvm", autostart: false do |nubots|
     nubots.vm.hostname = "nubotsvm.nubots.net"
 
     # Note: Use NFS for more predictable shared folder support.
@@ -93,7 +93,7 @@ Vagrant.configure("2") do |config|
   end
 
   # This VM will build all dependencies by source (use this to update old dependencies, or to generate a new deb file)
-  config.vm.define "nubotsvmbuild", autostart: false do |nubots|
+  config.vm.define "nubotsvmbuild", primary: true do |nubots|
     nubots.vm.hostname = "nubotsvmbuild.nubots.net"
 
     # Note: Use NFS for more predictable shared folder support.

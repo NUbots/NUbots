@@ -78,7 +78,7 @@ FOREACH(proto ${builtin})
                                 "${message_binary_include_dir}/${file_we}.cpp"
                                 "${message_binary_include_dir}/${file_we}.py.cpp"
                                 "${message_binary_include_dir}/${file_we}.h"
-                                 PROPERTIES COMPILE_FLAGS "-Wno-effc++ -Wno-error=unused-parameter -Wno-error")
+                                 PROPERTIES COMPILE_FLAGS "-Wno-unused-parameter -Wno-error=unused-parameter -Wno-error")
 
 ENDFOREACH(proto)
 

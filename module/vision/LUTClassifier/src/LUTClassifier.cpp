@@ -18,7 +18,7 @@
  */
 
 #include "LUTClassifier.h"
-#include <cppformat/format.h>
+#include <fmt/format.h>
 
 #include "extension/Configuration.h"
 
@@ -80,7 +80,7 @@ namespace module {
             , LUT_HOST("") {
 
             on<Configuration>("LookUpTable.yaml").then([this] (const Configuration& config) {
-                
+
                 LUT_PATH = config.fileName;
                 LUT_HOST = config.hostname;
 

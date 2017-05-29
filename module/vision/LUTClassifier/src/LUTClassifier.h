@@ -23,10 +23,7 @@
 #include <nuclear>
 #include <armadillo>
 
-#pragma GCC diagnostic ignored "-Weffc++"
 #include <Eigen/Core>
-#pragma GCC diagnostic pop
-
 #include "QuexClassifier.h"
 
 #include "message/input/Image.h"

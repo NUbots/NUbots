@@ -49,7 +49,7 @@ namespace extension {
         YAML::Node config;
 
         Configuration() : fileName(), hostname(), binary(), config() {};
-        Configuration(const std::string& fileName, const std::string& hostname, const std::string& binary, const YAML::Node& config) 
+        Configuration(const std::string& fileName, const std::string& hostname, const std::string& binary, const YAML::Node& config)
             : fileName(fileName)
             , hostname(hostname)
             , binary(binary)
@@ -234,9 +234,8 @@ namespace NUClear {
         namespace operation {
             template <>
             struct DSLProxy<::extension::Configuration> {
-                template <typename DSL, typename TFunc>
-                static inline std::tuple<threading::ReactionHandle, threading::ReactionHandle, threading::ReactionHandle>
-                    bind(Reactor& reactor, const std::string& label, TFunc&& callback, const std::string& path) {
+                template <typename DSL>
+                static inline void bind(const std::shared_ptr<threading::Reaction>& reaction, const std::string& path) {
                     auto flags = ::extension::FileWatch::ATTRIBUTE_MODIFIED
                                | ::extension::FileWatch::CREATED
                                | ::extension::FileWatch::UPDATED
@@ -261,7 +260,7 @@ namespace NUClear {
                     if (!utility::file::exists(defaultConfig))
                     {
                         NUClear::log<NUClear::WARN>("Configuration file '" + defaultConfig + "' does not exist. Creating it.");
-                        
+
                         // Check for a directory.
                         // If the path ends in a /, or if the end of the string is not ".yaml" it is a directory.
                         if ((defaultConfig.back() == '/') || (!utility::strutil::endsWith(defaultConfig, ".yaml")))
@@ -280,16 +279,18 @@ namespace NUClear {
                         }
                     }
 
-                    auto defaultHandle = DSLProxy<::extension::FileWatch>::bind<DSL>(reactor, label, callback, defaultConfig, flags);
-                    auto robotHandle   = utility::file::exists(robotConfig)
-                                            ? DSLProxy<::extension::FileWatch>::bind<DSL>(reactor, label, callback, robotConfig, flags) 
-                                            : threading::ReactionHandle();
-                    auto binaryHandle  = utility::file::exists(binaryConfig)
-                                            ? DSLProxy<::extension::FileWatch>::bind<DSL>(reactor, label, callback, binaryConfig, flags) 
-                                            : threading::ReactionHandle();
+                    // Bind our default path
+                    DSLProxy<::extension::FileWatch>::bind<DSL>(reaction, defaultConfig, flags);
 
-                    // Set FileWatcher to monitor the requested files.
-                    return std::make_tuple(defaultHandle, robotHandle, binaryHandle);
+                    // Bind our robot specific path if it exists
+                    if (utility::file::exists(robotConfig)) {
+                        DSLProxy<::extension::FileWatch>::bind<DSL>(reaction, robotConfig, flags);
+                    }
+
+                    // Bind our binary specific path if it exists
+                    if (utility::file::exists(binaryConfig)) {
+                        DSLProxy<::extension::FileWatch>::bind<DSL>(reaction, binaryConfig, flags);
+                    }
                 }
 
                 template <typename DSL>

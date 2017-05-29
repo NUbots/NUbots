@@ -23,7 +23,7 @@
 #include <iostream>
 #include <limits>
 #include <yaml-cpp/yaml.h>
-#include <mpParser.h>
+#include <muparserx/mpParser.h>
 
 namespace utility {
 namespace support {

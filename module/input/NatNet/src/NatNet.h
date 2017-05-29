@@ -22,9 +22,7 @@
 
 #include <nuclear>
 
-#pragma GCC diagnostic ignored "-Weffc++"
 #include <Eigen/Core>
-#pragma GCC diagnostic pop
 
 namespace module {
 namespace input {

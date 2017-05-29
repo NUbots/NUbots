@@ -22,10 +22,8 @@
 
 #include <armadillo>
 
-#pragma GCC diagnostic ignored "-Weffc++"
 #include <Eigen/Core>
 #include <Eigen/Dense>
-#pragma GCC diagnostic pop
 
 template <typename Scalar, int elems>
 inline typename arma::Col<Scalar>::template fixed<elems> convert(const Eigen::Matrix<Scalar, elems, 1, Eigen::DontAlign>& evec)

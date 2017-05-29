@@ -49,7 +49,7 @@ SET_SOURCE_FILES_PROPERTIES(${outputpath}/Lexer-token_ids.hpp
                             ${outputpath}/Lexer.hpp
                             ${outputpath}/Lexer-token.hpp
                             ${outputpath}/Lexer-configuration.hpp
-                            PROPERTIES COMPILE_FLAGS "-Wno-effc++ -Wno-error=maybe-uninitialized")
+                            PROPERTIES COMPILE_FLAGS "-Wno-error=maybe-uninitialized")
 
 # Build our NUClear module
 NUCLEAR_MODULE(SOURCES

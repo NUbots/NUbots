@@ -65,8 +65,8 @@ namespace module {
 
             double calculateError(const DataPoint& p) const {
                 double dist = line.distanceToPoint(p.midpoint);
-                uint d1 = std::abs(lengths[0] - p.length);
-                uint d2 = std::abs(lengths[1] - p.length);
+                uint d1 = std::abs(int(lengths[0] - p.length));
+                uint d2 = std::abs(int(lengths[1] - p.length));
 
                 return dist * dist + d1 * d1 + d2 * d2;
             };
@@ -97,7 +97,7 @@ namespace module {
                 {
                     points.push_back({{double(segment.midpoint[0]), double(segment.midpoint[1])}, segment.length});
                 }
-            } 
+            }
 
             // Partition our segments so that they are split between above and below the horizon
             auto split = std::partition(std::begin(points), std::end(points), [&] (const GoalPOI& point) {

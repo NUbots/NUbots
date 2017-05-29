@@ -9,7 +9,7 @@ node nubotsvm {
   class {'dev_tools': }
 
   # Get and install our toolchain
-  $toolchain_version = '2.0.0'
+  $toolchain_version = '2.1.0'
   wget::fetch { 'nubots_deb':
     destination => "/root/nubots-toolchain-${toolchain_version}.deb",
     source      => "http://nubots.net/debs/nubots-toolchain-${toolchain_version}.deb",
@@ -24,18 +24,18 @@ node nubotsvm {
 
 node nubotsvmbuild {
   $archs = {
-    'native'   => {'flags'       => ['', ],
-                   'params'      => ['-m64', ],
-                   'environment' => {'USE_THREAD' => '1', 'BINARY' => '64', 'NUM_THREADS' => '2', 'AUDIO' => 'PORTAUDIO', 'LDFLAGS' => '-m64', },
-                  },
-    'DarwinOp' => {'flags'       => ['-march=bonnell', '-mtune=bonnell', '-mno-movbe', '-mfxsr', '-mmmx', '-msahf', '-msse', '-msse2', '-msse3', '-mssse3', ],
-                   'params'      => ['-m32', '--param l1-cache-size=24', '--param l1-cache-line-size=64', '--param l2-cache-size=512', ],
-                   'environment' => {'TARGET' => 'YONAH', 'USE_THREAD' => '1', 'BINARY' => '32', 'NUM_THREADS' => '2', 'AUDIO' => 'PORTAUDIO', 'LDFLAGS' => '-m32', },
+    'native'    => {'flags'       => ['', ],
+                    'params'      => ['-m64', ],
+                    'environment' => {'USE_THREAD' => '1', 'BINARY' => '64', 'NUM_THREADS' => '2', 'AUDIO' => 'PORTAUDIO', 'LDFLAGS' => '-m64', },
                    },
-    'NimbroOp' => {'flags'       => ['-march=broadwell', '-mtune=broadwell', '-mabm', '-madx', '-maes', '-mavx', '-mavx2', '-mbmi', '-mbmi2', '-mcx16', '-mf16c', '-mfma', '-mfsgsbase', '-mfxsr', '-mlzcnt', '-mmmx', '-mmovbe', '-mpclmul', '-mpopcnt', '-mprfchw', '-mrdrnd', '-mrdseed', '-msahf', '-msse', '-msse2', '-msse3', '-msse4', '-msse4.1', '-msse4.2', '-mssse3', '-mxsave', '-mxsaveopt', ],
-                   'params'      => ['-m64', '--param l1-cache-size=32', '--param l1-cache-line-size=64', '--param l2-cache-size=4096', ],
-                   'environment' => {'TARGET' => 'HASWELL', 'USE_THREAD' => '1', 'BINARY' => '64', 'NUM_THREADS' => '2', 'AUDIO' => 'PORTAUDIO', 'LDFLAGS' => '-m64', },
-                  },
+    'fitpc2i'   => {'flags'       => ['-march=bonnell', '-mtune=bonnell', '-mno-movbe', '-mfxsr', '-mmmx', '-msahf', '-msse', '-msse2', '-msse3', '-mssse3', ],
+                    'params'      => ['-m32', '--param l1-cache-size=24', '--param l1-cache-line-size=64', '--param l2-cache-size=512', ],
+                    'environment' => {'TARGET' => 'YONAH', 'USE_THREAD' => '1', 'BINARY' => '32', 'NUM_THREADS' => '2', 'AUDIO' => 'PORTAUDIO', 'LDFLAGS' => '-m32', },
+                   },
+    'nuc7i7bnh' => {'flags'       => ['-march=broadwell', '-mtune=broadwell', '-mmmx', '-mno-3dnow', '-msse', '-msse2', '-msse3', '-mssse3', '-mno-sse4a', '-mcx16', '-msahf', '-mmovbe', '-maes', '-mno-sha', '-mpclmul', '-mpopcnt', '-mabm', '-mno-lwp', '-mfma', '-mno-fma4', '-mno-xop', '-mbmi', '-mbmi2', '-mno-tbm', '-mavx', '-mavx2', '-msse4.2', '-msse4.1', '-mlzcnt', '-mno-rtm', '-mno-hle', '-mrdrnd', '-mf16c', '-mfsgsbase', '-mrdseed', '-mprfchw', '-madx', '-mfxsr', '-mxsave', '-mxsaveopt', '-mno-avx512f', '-mno-avx512er', '-mno-avx512cd', '-mno-avx512pf', '-mno-prefetchwt1', '-mclflushopt', '-mxsavec', '-mxsaves', '-mno-avx512dq', '-mno-avx512bw', '-mno-avx512vl', '-mno-avx512ifma', '-mno-avx512vbmi', '-mno-clwb', '-mno-pcommit', '-mno-mwaitx', ],
+                    'params'      => ['-m64', '--param l1-cache-size=32', '--param l1-cache-line-size=64', '--param l2-cache-size=4096', ],
+                    'environment' => {'TARGET' => 'HASWELL', 'USE_THREAD' => '1', 'BINARY' => '64', 'NUM_THREADS' => '2', 'AUDIO' => 'PORTAUDIO', 'LDFLAGS' => '-m64', },
+                   },
   }
 
   # Make sure the necessary installer prerequisites are satisfied.
@@ -48,10 +48,10 @@ node nubotsvmbuild {
 
   # List all of the archives that need to be downloaded along with any other associated parameters (creates, requires, etc).
   $archives = {
-    'protobuf'     => {'url'         => 'https://github.com/google/protobuf/releases/download/v3.0.2/protobuf-python-3.0.2.tar.gz',
+    'protobuf'     => {'url'         => 'https://github.com/google/protobuf/releases/download/v3.3.0/protobuf-cpp-3.3.0.tar.gz',
                        'args'        => { 'native'   => [ '--with-zlib', '--with-protoc=PROTOC_PATH', ],
-                                          'DarwinOp' => [ '--host=i686-linux-gnu', '--build=x86_64-unknown-linux-gnu', '--with-zlib', '--with-protoc=PROTOC_PATH', ],
-                                          'NimbroOp' => [ '--with-zlib', '--with-protoc=PROTOC_PATH', ], },
+                                          'fitpc2i' => [ '--host=i686-linux-gnu', '--build=x86_64-unknown-linux-gnu', '--with-zlib', '--with-protoc=PROTOC_PATH', ],
+                                          'nuc7i7bnh' => [ '--with-zlib', '--with-protoc=PROTOC_PATH', ], },
                        'require'     => [ Class['protobuf'], Installer['zlib'], ],
                        'prebuild'    => 'make distclean',
                        'postbuild'   => 'rm PREFIX/lib/libprotoc* && rm PREFIX/bin/protoc',
@@ -61,22 +61,22 @@ node nubotsvmbuild {
                        'method'      => 'cmake',},
     'bzip2'        => {'url'         => 'https://github.com/Bidski/bzip2/archive/v1.0.6.1.tar.gz',
                        'args'        => { 'native'   => [ '', ],
-                                          'DarwinOp' => [ '', ],
-                                          'NimbroOp' => [ '', ], },
+                                          'fitpc2i' => [ '', ],
+                                          'nuc7i7bnh' => [ '', ], },
                        'creates'     => 'lib/libbz2.so',
                        'method'      => 'make',},
     'xml2'         => {'url'         => 'http://xmlsoft.org/sources/libxml2-2.9.3.tar.gz',
                        'args'        => { 'native'   => [ '--with-zlib=ZLIB_PATH', '--without-python', ],
-                                          'DarwinOp' => [ '--host=i686-linux-gnu', '--build=x86_64-unknown-linux-gnu', '--with-zlib=ZLIB_PATH', '--without-python', ],
-                                          'NimbroOp' => [ '--with-zlib=ZLIB_PATH', '--without-python', ], },
+                                          'fitpc2i' => [ '--host=i686-linux-gnu', '--build=x86_64-unknown-linux-gnu', '--with-zlib=ZLIB_PATH', '--without-python', ],
+                                          'nuc7i7bnh' => [ '--with-zlib=ZLIB_PATH', '--without-python', ], },
                        'method'      => 'autotools',},
     'nuclear'      => {'url'         => 'https://github.com/Fastcode/NUClear/archive/release/1.0.tar.gz',
                        'args'        => { 'native'   => [ '-DBUILD_TESTS=OFF', ],
-                                          'DarwinOp' => [ '-DBUILD_TESTS=OFF', ],
-                                          'NimbroOp' => [ '-DBUILD_TESTS=OFF', ], },
+                                          'fitpc2i' => [ '-DBUILD_TESTS=OFF', ],
+                                          'nuc7i7bnh' => [ '-DBUILD_TESTS=OFF', ], },
                        'method'      => 'cmake',},
     # NOTE: OpenBLAS CMake support is experimental and only supports x86 at the moment.
-    'openblas'     => {'url'         => 'https://github.com/xianyi/OpenBLAS/archive/v0.2.18.tar.gz',
+    'openblas'     => {'url'         => 'https://github.com/xianyi/OpenBLAS/archive/v0.2.19.tar.gz',
                        'method'      => 'make',},
     'libsvm'       => {'url'         => 'https://github.com/Bidski/libsvm/archive/v322.tar.gz',
                        'creates'     =>'lib/svm.o',
@@ -85,56 +85,51 @@ node nubotsvmbuild {
                        'method'      => 'cmake',
                        'creates'     => 'lib/libarmadillo.so',
                        'require'     => [ Installer['openblas'], ],},
-    'tcmalloc'     => {'url'         => 'https://github.com/gperftools/gperftools/releases/download/gperftools-2.5/gperftools-2.5.tar.gz',
+    'tcmalloc'     => {'url'         => 'https://github.com/gperftools/gperftools/releases/download/gperftools-2.5.93/gperftools-2.5.93.tar.gz',
                        'args'        => { 'native'   => [ '--with-tcmalloc-pagesize=64', '--enable-minimal', ],
-                                          'DarwinOp' => [ '--host=i686-linux-gnu', '--build=x86_64-unknown-linux-gnu', '--with-tcmalloc-pagesize=64', '--enable-minimal', ],
-                                          'NimbroOp' => [ '--with-tcmalloc-pagesize=64', '--enable-minimal', ], },
+                                          'fitpc2i' => [ '--host=i686-linux-gnu', '--build=x86_64-unknown-linux-gnu', '--with-tcmalloc-pagesize=64', '--enable-minimal', ],
+                                          'nuc7i7bnh' => [ '--with-tcmalloc-pagesize=64', '--enable-minimal', ], },
                        'creates'     => 'lib/libtcmalloc_minimal.a',
                        'method'      => 'autotools',},
     'yaml-cpp'     => {'url'         => 'https://github.com/jbeder/yaml-cpp/archive/master.tar.gz',
                        'args'        => { 'native'   => [ '-DYAML_CPP_BUILD_CONTRIB=OFF', '-DYAML_CPP_BUILD_TOOLS=OFF', ],
-                                          'DarwinOp' => [ '-DYAML_CPP_BUILD_CONTRIB=OFF', '-DYAML_CPP_BUILD_TOOLS=OFF', ],
-                                          'NimbroOp' => [ '-DYAML_CPP_BUILD_CONTRIB=OFF', '-DYAML_CPP_BUILD_TOOLS=OFF', ], },
+                                          'fitpc2i' => [ '-DYAML_CPP_BUILD_CONTRIB=OFF', '-DYAML_CPP_BUILD_TOOLS=OFF', ],
+                                          'nuc7i7bnh' => [ '-DYAML_CPP_BUILD_CONTRIB=OFF', '-DYAML_CPP_BUILD_TOOLS=OFF', ], },
                        'method'      => 'cmake',},
-    'fftw3'        => {'url'         => 'http://www.fftw.org/fftw-3.3.4.tar.gz',
+    'fftw3'        => {'url'         => 'http://www.fftw.org/fftw-3.3.6-pl2.tar.gz',
                        'args'        => { 'native'   => [ '--disable-fortran', '--enable-shared', ],
-                                          'DarwinOp' => [ '--host=i686-linux-gnu', '--build=x86_64-unknown-linux-gnu', '--disable-fortran', '--enable-shared', ],
-                                          'NimbroOp' => [ '--disable-fortran', '--enable-shared', ], },
+                                          'fitpc2i' => [ '--host=i686-linux-gnu', '--build=x86_64-unknown-linux-gnu', '--disable-fortran', '--enable-shared', ],
+                                          'nuc7i7bnh' => [ '--disable-fortran', '--enable-shared', ], },
                        'method'      => 'autotools',},
-    'jpeg'         => {'url'         => 'http://downloads.sourceforge.net/project/libjpeg-turbo/1.4.2/libjpeg-turbo-1.4.2.tar.gz',
+    'jpeg'         => {'url'         => 'http://downloads.sourceforge.net/project/libjpeg-turbo/1.5.1/libjpeg-turbo-1.5.1.tar.gz',
                        'args'        => { 'native'   => [ 'CCASFLAGS="-f elf64"', ],
-                                          'DarwinOp' => [ '--host=i686-linux-gnu', '--build=x86_64-unknown-linux-gnu', 'CCASFLAGS="-f elf32"', ],
-                                          'NimbroOp' => [ 'CCASFLAGS="-f elf64"', ], },
+                                          'fitpc2i' => [ '--host=i686-linux-gnu', '--build=x86_64-unknown-linux-gnu', 'CCASFLAGS="-f elf32"', ],
+                                          'nuc7i7bnh' => [ 'CCASFLAGS="-f elf64"', ], },
                        'method'      => 'autotools',},
-    'cppformat'    => {'url'         => 'https://github.com/cppformat/cppformat/archive/2.0.0.tar.gz',
+    'cppformat'    => {'url'         => 'https://github.com/fmtlib/fmt/archive/3.0.1.tar.gz',
                        'method'      => 'cmake',},
     'portaudio'    => {'url'         => 'http://www.portaudio.com/archives/pa_stable_v19_20140130.tgz',
                        'args'        => { 'native'   => [ '', ],
-                                          'DarwinOp' => [ '--host=i686-linux-gnu', '--build=x86_64-unknown-linux-gnu', ],
-                                          'NimbroOp' => [ '', ], },
+                                          'fitpc2i' => [ '--host=i686-linux-gnu', '--build=x86_64-unknown-linux-gnu', ],
+                                          'nuc7i7bnh' => [ '', ], },
                        'method'      => 'autotools',},
-    'rtaudio'      => {'url'         => 'http://www.music.mcgill.ca/~gary/rtaudio/release/rtaudio-4.1.1.tar.gz',
-                       'args'        => { 'native'   => [ '', ],
-                                          'DarwinOp' => [ '--host=i686-linux-gnu', '--build=x86_64-unknown-linux-gnu', ],
-                                          'NimbroOp' => [ '', ], },
-                       'method'      => 'autotools',},
-    'muparserx'    => {'url'         => 'https://github.com/beltoforion/muparserx/archive/v4.0.4.tar.gz',
+    'muparserx'    => {'url'         => 'https://github.com/beltoforion/muparserx/archive/v4.0.7.tar.gz',
                        'method'      => 'cmake',},
-    'eigen3'       => {'url'         => 'http://bitbucket.org/eigen/eigen/get/3.3.2.tar.gz',
+    'eigen3'       => {'url'         => 'http://bitbucket.org/eigen/eigen/get/3.3.3.tar.gz',
                        'creates'     => 'include/eigen3/Eigen/Eigen',
                        'method'      => 'cmake',},
-    'boost'        => {'url'         => 'http://downloads.sourceforge.net/project/boost/boost/1.59.0/boost_1_59_0.tar.gz',
+    'boost'        => {'url'         => 'https://dl.bintray.com/boostorg/release/1.64.0/source/boost_1_64_0.tar.gz',
                        'args'        => { 'native'   => [ 'address-model=64', 'architecture=x86', 'link=static', ],
-                                          'DarwinOp' => [ 'address-model=32', 'architecture=x86', 'link=static', ],
-                                          'NimbroOp' => [ 'address-model=64', 'architecture=x86', 'link=static', ], },
+                                          'fitpc2i' => [ 'address-model=32', 'architecture=x86', 'link=static', ],
+                                          'nuc7i7bnh' => [ 'address-model=64', 'architecture=x86', 'link=static', ], },
                        'method'      => 'boost',
                        'creates'     => 'src/boost/build_complete',
                        'postbuild'   => 'touch build_complete',
                        'require'     => [ Installer['zlib'], Installer['bzip2'], ],},
-    'mlpack'       => {'url'         => 'https://github.com/mlpack/mlpack/archive/mlpack-2.1.0.tar.gz',
+    'mlpack'       => {'url'         => 'http://www.mlpack.org/files/mlpack-2.2.2.tar.gz',
                        'args'        => { 'native'   => [ '-DBUILD_TESTS=OFF', '-DLAPACK_LIBRARY=PREFIX/lib/libopenblas.so', '-DBLAS_LIBRARY=PREFIX/lib/libopenblas.so', ],
-                                          'DarwinOp' => [ '-DBUILD_TESTS=OFF', '-DLAPACK_LIBRARY=PREFIX/lib/libopenblas.so', '-DBLAS_LIBRARY=PREFIX/lib/libopenblas.so', ],
-                                          'NimbroOp' => [ '-DBUILD_TESTS=OFF', '-DLAPACK_LIBRARY=PREFIX/lib/libopenblas.so', '-DBLAS_LIBRARY=PREFIX/lib/libopenblas.so', ], },
+                                          'fitpc2i' => [ '-DBUILD_TESTS=OFF', '-DLAPACK_LIBRARY=PREFIX/lib/libopenblas.so', '-DBLAS_LIBRARY=PREFIX/lib/libopenblas.so', ],
+                                          'nuc7i7bnh' => [ '-DBUILD_TESTS=OFF', '-DLAPACK_LIBRARY=PREFIX/lib/libopenblas.so', '-DBLAS_LIBRARY=PREFIX/lib/libopenblas.so', ], },
                        'require'     => [ Installer['armadillo'], Installer['boost'], Installer['xml2'], ],
                        'creates'     => 'lib/libmlpack.so',
                        'method'      => 'cmake',},
@@ -145,8 +140,8 @@ node nubotsvmbuild {
                        'require'     => [ Installer['portaudio'], ],},
     'fswatch'      => {'url'         => 'https://github.com/emcrisostomo/fswatch/archive/1.9.3.tar.gz',
                        'args'        => { 'native'   => [ '', ],
-                                          'DarwinOp' => [ '--host=i686-linux-gnu', '--build=x86_64-unknown-linux-gnu', ],
-                                          'NimbroOp' => [ '', ], },
+                                          'fitpc2i' => [ '--host=i686-linux-gnu', '--build=x86_64-unknown-linux-gnu', ],
+                                          'nuc7i7bnh' => [ '', ], },
                        'method'      => 'autotools', },
   }
 
@@ -230,14 +225,14 @@ node nubotsvmbuild {
   file { '/nubots/toolchain/find_robot_hosts.sh':
     ensure  => present,
     mode    => '755',
-    source  => 'puppet:///modules/dev_tools/find_robot_hosts.sh', 
+    source  => 'puppet:///modules/dev_tools/find_robot_hosts.sh',
     replace => true,
   }
 
-  archive { "Spinnaker_NimbroOp":
+  archive { "Spinnaker_nuc7i7bnh":
     url              => "http://nubots.net/tarballs/spinnaker_1_0_0_295_amd64.tar.gz",
-    target           => "/nubots/toolchain/NimbroOp/src/Spinnaker",
-    src_target       => "/nubots/toolchain/NimbroOp/src",
+    target           => "/nubots/toolchain/nuc7i7bnh/src/Spinnaker",
+    src_target       => "/nubots/toolchain/nuc7i7bnh/src",
     purge_target     => true,
     checksum         => false,
     follow_redirects => true,
@@ -260,10 +255,10 @@ node nubotsvmbuild {
     root_dir         => '.',
     require          => [ Class['installer::prerequisites'], Class['dev_tools'], ],
   }
-  archive { "Spinnaker_DarwinOp":
+  archive { "Spinnaker_fitpc2i":
     url              => "http://nubots.net/tarballs/spinnaker_1_0_0_295_i386.tar.gz",
-    target           => "/nubots/toolchain/DarwinOp/src/Spinnaker",
-    src_target       => "/nubots/toolchain/DarwinOp/src",
+    target           => "/nubots/toolchain/fitpc2i/src/Spinnaker",
+    src_target       => "/nubots/toolchain/fitpc2i/src",
     purge_target     => true,
     checksum         => false,
     follow_redirects => true,
@@ -273,25 +268,25 @@ node nubotsvmbuild {
     root_dir         => '.',
     require          => [ Class['installer::prerequisites'], Class['dev_tools'], ],
   }
-  exec { "Spinnaker_NimbroOp":
-    creates  => "/nubots/toolchain/NimbroOp/include/Spinnaker.h",
-    command  => "cd include && cp -r ./* /nubots/toolchain/NimbroOp/include/ && cd .. &&
+  exec { "Spinnaker_nuc7i7bnh":
+    creates  => "/nubots/toolchain/nuc7i7bnh/include/Spinnaker.h",
+    command  => "cd include && cp -r ./* /nubots/toolchain/nuc7i7bnh/include/ && cd .. &&
                  cd lib &&
-                 cp libGCBase_gcc540_v3_0.so* /nubots/toolchain/NimbroOp/lib/ &&
-                 cp libGenApi_gcc540_v3_0.so* /nubots/toolchain/NimbroOp/lib/ &&
-                 cp libLog_gcc540_v3_0.so* /nubots/toolchain/NimbroOp/lib/ &&
-                 cp libMathParser_gcc540_v3_0.so* /nubots/toolchain/NimbroOp/lib/ &&
-                 cp libNodeMapData_gcc540_v3_0.so* /nubots/toolchain/NimbroOp/lib/ &&
-                 cp libptgreyvideoencoder.so* /nubots/toolchain/NimbroOp/lib/ &&
-                 cp libSpinnaker.so* /nubots/toolchain/NimbroOp/lib/ &&
-                 cp libXmlParser_gcc540_v3_0.so* /nubots/toolchain/NimbroOp/lib/ &&
+                 cp libGCBase_gcc540_v3_0.so* /nubots/toolchain/nuc7i7bnh/lib/ &&
+                 cp libGenApi_gcc540_v3_0.so* /nubots/toolchain/nuc7i7bnh/lib/ &&
+                 cp libLog_gcc540_v3_0.so* /nubots/toolchain/nuc7i7bnh/lib/ &&
+                 cp libMathParser_gcc540_v3_0.so* /nubots/toolchain/nuc7i7bnh/lib/ &&
+                 cp libNodeMapData_gcc540_v3_0.so* /nubots/toolchain/nuc7i7bnh/lib/ &&
+                 cp libptgreyvideoencoder.so* /nubots/toolchain/nuc7i7bnh/lib/ &&
+                 cp libSpinnaker.so* /nubots/toolchain/nuc7i7bnh/lib/ &&
+                 cp libXmlParser_gcc540_v3_0.so* /nubots/toolchain/nuc7i7bnh/lib/ &&
                  cd ..",
-    cwd      => "/nubots/toolchain/NimbroOp/src/Spinnaker",
-    path     =>  [ "/nubots/toolchain/NimbroOp/bin", "/nubots/toolchain/bin",
+    cwd      => "/nubots/toolchain/nuc7i7bnh/src/Spinnaker",
+    path     =>  [ "/nubots/toolchain/nuc7i7bnh/bin", "/nubots/toolchain/bin",
                    '/usr/local/bin', '/usr/local/sbin/', '/usr/bin/', '/usr/sbin/', '/bin/', '/sbin/' ],
     timeout  => 0,
     provider => 'shell',
-    require  => [ Archive["Spinnaker_NimbroOp"], ],
+    require  => [ Archive["Spinnaker_nuc7i7bnh"], ],
     before   => Class['toolchain_deb'],
   }
   exec { "Spinnaker_native":
@@ -315,25 +310,25 @@ node nubotsvmbuild {
     require  => [ Archive["Spinnaker_native"], ],
     before   => Class['toolchain_deb'],
   }
-  exec { "Spinnaker_DarwinOp":
-    creates  => "/nubots/toolchain/DarwinOp/include/Spinnaker.h",
-    command  => "cd include && cp -r ./* /nubots/toolchain/DarwinOp/include/ && cd .. &&
+  exec { "Spinnaker_fitpc2i":
+    creates  => "/nubots/toolchain/fitpc2i/include/Spinnaker.h",
+    command  => "cd include && cp -r ./* /nubots/toolchain/fitpc2i/include/ && cd .. &&
                  cd lib &&
-                 cp libGCBase_gcc540_v3_0.so* /nubots/toolchain/DarwinOp/lib/ &&
-                 cp libGenApi_gcc540_v3_0.so* /nubots/toolchain/DarwinOp/lib/ &&
-                 cp libLog_gcc540_v3_0.so* /nubots/toolchain/DarwinOp/lib/ &&
-                 cp libMathParser_gcc540_v3_0.so* /nubots/toolchain/DarwinOp/lib/ &&
-                 cp libNodeMapData_gcc540_v3_0.so* /nubots/toolchain/DarwinOp/lib/ &&
-                 cp libptgreyvideoencoder.so* /nubots/toolchain/DarwinOp/lib/ &&
-                 cp libSpinnaker.so* /nubots/toolchain/DarwinOp/lib/ &&
-                 cp libXmlParser_gcc540_v3_0.so* /nubots/toolchain/DarwinOp/lib/ &&
+                 cp libGCBase_gcc540_v3_0.so* /nubots/toolchain/fitpc2i/lib/ &&
+                 cp libGenApi_gcc540_v3_0.so* /nubots/toolchain/fitpc2i/lib/ &&
+                 cp libLog_gcc540_v3_0.so* /nubots/toolchain/fitpc2i/lib/ &&
+                 cp libMathParser_gcc540_v3_0.so* /nubots/toolchain/fitpc2i/lib/ &&
+                 cp libNodeMapData_gcc540_v3_0.so* /nubots/toolchain/fitpc2i/lib/ &&
+                 cp libptgreyvideoencoder.so* /nubots/toolchain/fitpc2i/lib/ &&
+                 cp libSpinnaker.so* /nubots/toolchain/fitpc2i/lib/ &&
+                 cp libXmlParser_gcc540_v3_0.so* /nubots/toolchain/fitpc2i/lib/ &&
                  cd ..",
-    cwd      => "/nubots/toolchain/DarwinOp/src/Spinnaker",
-    path     =>  [ "/nubots/toolchain/DarwinOp/bin", "/nubots/toolchain/bin",
+    cwd      => "/nubots/toolchain/fitpc2i/src/Spinnaker",
+    path     =>  [ "/nubots/toolchain/fitpc2i/bin", "/nubots/toolchain/bin",
                    '/usr/local/bin', '/usr/local/sbin/', '/usr/bin/', '/usr/sbin/', '/bin/', '/sbin/' ],
     timeout  => 0,
     provider => 'shell',
-    require  => [ Archive["Spinnaker_DarwinOp"], ],
+    require  => [ Archive["Spinnaker_fitpc2i"], ],
     before   => Class['toolchain_deb'],
   }
 

@@ -29,9 +29,7 @@
 #define QUEX_OPTION_COMPUTED_GOTOS
 #define QUEX_OPTION_TERMINATION_ZERO_DISABLED
 
-#pragma GCC diagnostic ignored "-Weffc++"
 #include "Lexer.hpp"
-#pragma GCC diagnostic pop
 
 #include "message/input/Image.h"
 #include "message/vision/LookUpTable.h"

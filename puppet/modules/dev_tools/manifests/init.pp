@@ -32,9 +32,9 @@ class dev_tools {
   package { 'build-essential': ensure => latest, }
   package { 'libncurses5-dev:amd64': ensure => latest, }
   package { 'libncurses5-dev:i386': ensure => latest, }
-  package { 'gcc-6': name => 'gcc-6-multilib', ensure => latest, require => Apt::Ppa['ppa:ubuntu-toolchain-r/test'] }
-  package { 'g++-6': name => 'g++-6-multilib', ensure => latest, require => Apt::Ppa['ppa:ubuntu-toolchain-r/test'] }
-  package { 'gfortran-6': name => 'gfortran-6-multilib', ensure => latest, require => Apt::Ppa['ppa:ubuntu-toolchain-r/test'] }
+  package { 'gcc-7': name => 'gcc-7-multilib', ensure => latest, require => Apt::Ppa['ppa:ubuntu-toolchain-r/test'] }
+  package { 'g++-7': name => 'g++-7-multilib', ensure => latest, require => Apt::Ppa['ppa:ubuntu-toolchain-r/test'] }
+  package { 'gfortran-7': name => 'gfortran-7-multilib', ensure => latest, require => Apt::Ppa['ppa:ubuntu-toolchain-r/test'] }
   package { 'binutils': name => 'binutils-multiarch', ensure => latest, require => Apt::Ppa['ppa:ubuntu-toolchain-r/test'] }
   package { 'binutils-dev': name => 'binutils-multiarch-dev', ensure => latest, require => Apt::Ppa['ppa:ubuntu-toolchain-r/test'] }
   package { 'ninja-build': ensure => latest, }
@@ -137,7 +137,7 @@ class dev_tools {
     ensure => present,
     source => 'puppet:///modules/dev_tools/id_rsa',
     owner => 'vagrant',
-    mode => '600', 
+    mode => '600',
     replace => true,
   }
 
@@ -145,7 +145,7 @@ class dev_tools {
     path => '/home/vagrant/.ssh/id_rsa.pub',
     ensure => present,
     source => 'puppet:///modules/dev_tools/id_rsa.pub',
-    owner => 'vagrant', 
+    owner => 'vagrant',
     replace => true,
   }
 
@@ -155,7 +155,7 @@ class dev_tools {
     ensure => present,
     source => 'puppet:///modules/dev_tools/ssh_config',
     owner => 'vagrant',
-    mode => '600', 
+    mode => '600',
     replace => true,
   }
 
@@ -164,7 +164,7 @@ class dev_tools {
   file { '/etc/profile.d/toolchain_init.sh':
     ensure => present,
     mode => '644',
-    source => 'puppet:///modules/dev_tools/toolchain_init.sh', 
+    source => 'puppet:///modules/dev_tools/toolchain_init.sh',
     replace => true,
   }
 
@@ -201,9 +201,9 @@ ff02::2 ip6-allrouters
              ;  update-alternatives --remove-all gfortan \
              ;  update-alternatives --install /usr/bin/ld ld /usr/bin/ld.bfd 10 \
              && update-alternatives --install /usr/bin/ld ld /usr/bin/ld.gold 20 \
-             && update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-6 100 \
-                                    --slave /usr/bin/g++ g++ /usr/bin/g++-6 \
-                                    --slave /usr/bin/gfortran gfortran /usr/bin/gfortran-6',
-    require => [ Package['gcc-6'], Package['g++-6'], Package['gfortran-6'], Package['build-essential'], Package['binutils'], ]
+             && update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-7 100 \
+                                    --slave /usr/bin/g++ g++ /usr/bin/g++-7 \
+                                    --slave /usr/bin/gfortran gfortran /usr/bin/gfortran-7',
+    require => [ Package['gcc-7'], Package['g++-7'], Package['gfortran-7'], Package['build-essential'], Package['binutils'], ]
   }
 }

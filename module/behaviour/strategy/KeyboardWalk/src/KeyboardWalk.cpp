@@ -22,7 +22,7 @@
 #include <ncurses.h>
 #include <csignal>
 #include <cstdio>
-#include <cppformat/format.h>
+#include <fmt/format.h>
 
 #include "utility/behaviour/MotionCommand.h"
 #include "message/behaviour/MotionCommand.h"

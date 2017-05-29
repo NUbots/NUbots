@@ -16,7 +16,7 @@ namespace logging {
 
         struct DataLog {
             NUClear::clock::time_point timestamp;
-            std::array<uint64_t, 2> hash;
+            uint64_t hash;
             std::vector<char> data;
 
             DataLog()

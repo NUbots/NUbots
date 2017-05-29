@@ -114,7 +114,7 @@ namespace module {
                 using ProtobufType = std::remove_reference_t<T>;
 
                 // Wrap our protobuf in a message with filter information
-                auto msg = std::make_unique<NUsightMessage<ProtobufType>>(std::forward<T>(proto), 
+                auto msg = std::make_unique<NUsightMessage<ProtobufType>>(std::forward<T>(proto),
                                             filterId, std::chrono::duration_cast<std::chrono::milliseconds>(time.time_since_epoch()).count());
 
                 // Send the message over the network
@@ -192,7 +192,7 @@ namespace NUClear {
                     }
                 }
 
-                static inline std::array<uint64_t, 2> hash() {
+                static inline uint64_t hash() {
 
                     // We have to construct an instance to call the reflection functions
                     protobuf_type type;
@@ -200,7 +200,7 @@ namespace NUClear {
                     auto name = "NUsight<" + type.GetTypeName().substr(9) + ">";
 
                     // We base the hash on the name of the protocol buffer
-                    return murmurhash3(name.c_str(), name.size());
+                    return XXH64(name.c_str(), name.size(), 0x4e55436c);
                 }
             };
         }

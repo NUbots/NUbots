@@ -20,9 +20,7 @@
 #ifndef UTILITY_VISION_CLASSIFIEDIMAGE_H
 #define UTILITY_VISION_CLASSIFIEDIMAGE_H
 
-#pragma GCC diagnostic ignored "-Weffc++"
 #include <Eigen/Core>
-#pragma GCC diagnostic pop
 
 #include "message/vision/ClassifiedImage.h"
 

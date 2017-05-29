@@ -20,7 +20,7 @@
 #include "DOpE.h"
 
 #include <armadillo>
-#include <cppformat/format.h>
+#include <fmt/format.h>
 #include <google/protobuf/util/message_differencer.h>
 
 #include "utility/support/eigen_armadillo.h"
@@ -129,7 +129,7 @@ namespace optimisation {
 
         on<Trigger<NetworkJoin>, Sync<DOpE>>().then("Distrubute Initial Optimisation", [this] (const NetworkJoin& joiner) {
 
-            log<NUClear::INFO>(fmt::format("{} ({}) joined the optimisation network", joiner.name, joiner.udp_port));
+            log<NUClear::INFO>(fmt::format("{} joined the optimisation network", joiner.name));
 
             for (auto& op : optimisations) {
                 // If this is a network optimisation

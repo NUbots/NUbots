@@ -3,8 +3,7 @@
 ADD_COMPILE_OPTIONS(-Wall
                     -Wpedantic
                     -Wextra
-                    -Weffc++
-                    -Werror
+                    # -Werror
                     -fnon-call-exceptions)
 
 LIST(APPEND CMAKE_INSTALL_RPATH toolchain/)
