@@ -80,7 +80,6 @@ namespace strategy {
         bool isGettingUp = false;
         bool isDiving = false;
         bool selfPenalised = false;
-        bool isSideChecking = false;
         bool manualOrientationReset = false;
         double manualOrientation = 0.0;
         message::behaviour::KickPlan::KickType kickType;

@@ -1,5 +1,5 @@
 /*
- * This file is part of the NUbots Codebase.
+ * This file is part of NUbots Codebase.
  *
  * The NUbots Codebase is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,21 +16,24 @@
  *
  * Copyright 2013 NUBots <nubots@nubots.net>
  */
-syntax = "proto3";
 
-package message.localisation;
+#include <nuclear>
 
-import "Matrix.proto";
-import "Vector.proto";
+#include "message/output/Say.h"
 
-message ResetRobotHypotheses {
-    message Self {
-        vec2   position     = 1;
-        mat22  position_cov = 2;
-        double heading      = 3;
-        double heading_var  = 4;
-        bool   absoluteYaw  = 5;
-    }
+#include "SpeakTest.h"
 
-    repeated Self hypotheses = 1;
+namespace module {
+namespace behaviour {
+namespace tools {
+
+        SpeakTest::SpeakTest(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
+
+            on<Every<30, std::chrono::seconds>>().then([this] {
+                emit(std::make_unique<message::output::Say>("Bite Me"));
+            });
+        }
+
+}
+}
 }

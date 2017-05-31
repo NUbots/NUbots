@@ -1,5 +1,5 @@
 /*
- * This file is part of the NUbots Codebase.
+ * This file is part of NUbots Codebase.
  *
  * The NUbots Codebase is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,21 +16,25 @@
  *
  * Copyright 2013 NUBots <nubots@nubots.net>
  */
-syntax = "proto3";
 
-package message.localisation;
+#ifndef MODULES_OUTPUT_SPEAKTEST_H
+#define MODULES_OUTPUT_SPEAKTEST_H
 
-import "Matrix.proto";
-import "Vector.proto";
 
-message ResetRobotHypotheses {
-    message Self {
-        vec2   position     = 1;
-        mat22  position_cov = 2;
-        double heading      = 3;
-        double heading_var  = 4;
-        bool   absoluteYaw  = 5;
-    }
+#include <nuclear>
+namespace module {
+namespace behaviour {
+namespace tools {
 
-    repeated Self hypotheses = 1;
+    class SpeakTest : public NUClear::Reactor {
+    public:
+        /// @brief Called by the powerplant to build and setup the SpeakTest reactor.
+        explicit SpeakTest(std::unique_ptr<NUClear::Environment> environment);
+    };
+
 }
+}
+}
+
+
+#endif

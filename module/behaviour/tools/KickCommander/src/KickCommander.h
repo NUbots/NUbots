@@ -1,5 +1,5 @@
 /*
- * This file is part of the NUbots Codebase.
+ * This file is part of NUbots Codebase.
  *
  * The NUbots Codebase is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,23 +14,28 @@
  * You should have received a copy of the GNU General Public License
  * along with the NUbots Codebase.  If not, see <http://www.gnu.org/licenses/>.
  *
- * Copyright 2013 NUBots <nubots@nubots.net>
+ * Copyright 2015 NUbots <nubots@nubots.net>
  */
-syntax = "proto3";
 
-package message.localisation;
+#ifndef MODULES_SUPPORT_KICKCOMMANDER_H
+#define MODULES_SUPPORT_KICKCOMMANDER_H
 
-import "Matrix.proto";
-import "Vector.proto";
+#include <nuclear>
 
-message ResetRobotHypotheses {
-    message Self {
-        vec2   position     = 1;
-        mat22  position_cov = 2;
-        double heading      = 3;
-        double heading_var  = 4;
-        bool   absoluteYaw  = 5;
-    }
+namespace module {
+namespace behaviour {
+namespace tools {
 
-    repeated Self hypotheses = 1;
+    class KickCommander : public NUClear::Reactor {
+
+    public:
+        /// @brief Called by the powerplant to build and setup the KickCommander reactor.
+        explicit KickCommander(std::unique_ptr<NUClear::Environment> environment);
+        bool doThings = false;
+    };
+
 }
+}
+}
+
+#endif  // MODULES_SUPPORT_KICKCOMMANDER_H

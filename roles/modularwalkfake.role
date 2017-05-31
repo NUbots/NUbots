@@ -3,7 +3,7 @@ NUCLEAR_ROLE(
 
     # This must come first as it emits config which many roles depend on (e.g. SensorFilter, WalkEngine)
     motion::KinematicsConfiguration
-  
+
     # Support and Configuration
     support::SignalCatcher
 
@@ -17,7 +17,6 @@ NUCLEAR_ROLE(
     platform::darwin::SensorFilter
 
     # Input
-    input::PushDetector
     input::PostureRecogniser
 
     # Motion
@@ -34,7 +33,6 @@ NUCLEAR_ROLE(
     #vision::LUTClassifier
     #vision::GoalDetector
     #vision::BallDetector
-    #vision::ObstacleDetector
 
     # Behaviour
     behaviour::Controller

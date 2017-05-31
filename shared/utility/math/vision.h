@@ -40,57 +40,6 @@ namespace vision {
 
     using ServoID = utility::input::ServoID;
 
-    /**************************************************************
-     *SLAME STUFF: TO BE REMOVED FOR GOOD STUFF BELOW (DO NOT USE)*
-     **************************************************************/
-    /*! @brief Calculates the transformation for taking homogeneous points from world coordinates to camera coordinates
-    */
-    inline arma::mat44 calculateWorldToCameraTransform(const message::input::Sensors& sensors, const message::localisation::Self& self){
-        arma::vec2 selfHeading = arma::normalise(convert<double, 2>(self.heading));
-        arma::mat44 robotToWorld_world;
-        robotToWorld_world <<  selfHeading[0]  <<  -selfHeading[1]  <<  0 <<  self.locObject.position[0] << arma::endr
-                           <<  selfHeading[1]  <<   selfHeading[0]  <<  0 <<  self.locObject.position[1] << arma::endr
-                           <<               0  <<                0  <<  1 <<  sensors.bodyCentreHeight   << arma::endr
-                           <<               0  <<                0  <<  0 <<           1;
-
-        arma::mat44 cameraToBody_body = convert<double, 4, 4>(sensors.forwardKinematics.at(ServoID::HEAD_PITCH)); 
-
-        arma::mat44 robotToBody_body = arma::eye(4,4);
-        robotToBody_body.submat(0,0,2,2) = utility::math::matrix::Transform3D(convert<double, 4, 4>(sensors.world)).rotation();
-
-        arma::mat44 worldToCamera_camera = cameraToBody_body.i() * robotToBody_body * robotToWorld_world.i();
-        //Confirmed to be correct by Jake Fountain 2014
-        return worldToCamera_camera;
-    }
-
-
-    inline arma::vec directionVectorFromScreenAngular(const arma::vec& screenAngular){
-        double theta = screenAngular[0];
-        double phi = screenAngular[1];
-        return {std::cos(theta) * std::cos(phi), std::sin(theta) * std::cos(phi), std::sin(phi), 0};
-    }
-    /*! Uses vec for backwards compatibility with 3d homogeneous coordinates
-    */
-    inline arma::vec screenAngularFromDirectionVector(const arma::vec& direction){
-        return { std::atan2(direction[1], direction[0]) , std::atan2(direction[2], arma::norm(arma::vec({direction[0], direction[1]})))};
-    }
-
-    inline arma::vec rotateAngularDirection(const arma::vec& screenAngular, const arma::mat& R){
-        return screenAngularFromDirectionVector(R*directionVectorFromScreenAngular(screenAngular));
-    }
-
-    inline arma::vec screenPositionFromDirectionVector(const arma::vec& directionVector){
-        return {directionVector[1] / directionVector[0], directionVector[2] / directionVector[0]};
-    }
-
-    inline arma::vec screenPositionFromScreenAngular(const arma::vec& screenAngular){
-        return screenPositionFromDirectionVector(directionVectorFromScreenAngular(screenAngular));
-    }
-
-    /************************************************
-     *                 GOOD STUFF                   *
-     ************************************************/
-
     inline double getParallaxAngle(const arma::vec2& screen1, const arma::vec2& screen2, const double& camFocalLengthPixels){
         arma::vec3 camSpaceP1 = {camFocalLengthPixels, screen1[0], screen1[1]};
         arma::vec3 camSpaceP2 = {camFocalLengthPixels, screen2[0], screen2[1]};
@@ -224,7 +173,7 @@ namespace vision {
         // rWFf.rows(0,1) = -Twf.rows(0,1);
         // rWFf[2] = 0.0;
         // // Hwf = rWFw * Rwf
-        // utility::math::matrix::Transform3D Hwf = 
+        // utility::math::matrix::Transform3D Hwf =
         //     utility::math::matrix::Transform3D::createRotationZ(-Twf[2])
         //     * utility::math::matrix::Transform3D::createTranslation(rWFf);
 
@@ -236,7 +185,7 @@ namespace vision {
     inline arma::mat::fixed<3,4> cameraSpaceGoalProjection(
             const arma::vec3& robotPose,
             const arma::vec3& goalLocation,
-            const message::support::FieldDescription& field, 
+            const message::support::FieldDescription& field,
             const utility::math::matrix::Transform3D& camToGround,
             const bool& failIfNegative = true) //camtoground is either camera to ground or camera to world, depending on application
     {
@@ -251,13 +200,13 @@ namespace vision {
         goalBaseCorners.submat(1,1,2,1) += field.dimensions.goalpost_diameter;
         //make the top corner points
         arma::mat goalTopCorners = goalBaseCorners;
-        
+
 
         //We create camera world by using camera-torso -> torso-world -> world->field
         //transform the goals from field to camera
         goalBaseCorners = arma::mat(Hcf * goalBaseCorners).rows(0,2);
 
-        
+
 
         //if the goals are not in front of us, do not return valid normals
         arma::mat::fixed<3,4> prediction;
@@ -287,7 +236,7 @@ namespace vision {
 
 
         //Create the quad normal predictions. Order is Left, Right, Top, Bottom
-        
+
         prediction.col(0) = arma::normalise(
                                     arma::cross(
                                         goalBaseCorners.col(cornerIndices[2]),

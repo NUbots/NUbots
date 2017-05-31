@@ -29,7 +29,6 @@
 
 #include "message/behaviour/FixedWalkCommand.h"
 #include "message/behaviour/ServoCommand.h"
-#include "message/input/PushDetection.h"
 #include "message/localisation/FieldObject.h"
 #include "message/motion/KinematicsModels.h"
 #include "message/motion/ServoTarget.h"
@@ -51,7 +50,6 @@ namespace motion {
     using extension::Configuration;
     using extension::Script;
 
-    using message::input::PushDetection;
     using message::input::Sensors;
     using message::behaviour::ServoCommand;
     using message::behaviour::WalkOptimiserCommand;
@@ -318,7 +316,7 @@ namespace motion {
         }
         standScript.frames.push_back(frame);
         standScript.save("Stand.yaml");
-        
+
         //Try update(); ?
         reset();
         stanceReset();

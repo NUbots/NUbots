@@ -9,7 +9,6 @@ NUCLEAR_ROLE(
     vision::LUTClassifier
     vision::GoalDetector
     vision::BallDetector
-    vision::ObstacleDetector
     support::configuration::NetworkConfiguration
     support::NUbugger
     platform::darwin::HardwareIO

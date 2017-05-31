@@ -28,7 +28,6 @@
 #include "message/input/Sensors.h"
 #include "message/localisation/FieldObject.h"
 #include "message/localisation/ResetRobotHypotheses.h"
-#include "message/localisation/SideChecker.h"
 #include "message/motion/DiveCommand.h"
 #include "message/motion/GetupCommand.h"
 #include "message/platform/darwin/DarwinSensors.h"
@@ -70,7 +69,6 @@ namespace strategy {
     using message::localisation::Ball;
     using message::localisation::Self;
     using message::localisation::ResetRobotHypotheses;
-    using message::localisation::SideCheckingComplete;
     using message::motion::DiveCommand;
     using message::motion::DiveFinished;
     using message::motion::ExecuteGetup;
@@ -180,9 +178,6 @@ namespace strategy {
             }
         });
 
-        on<Trigger<SideCheckingComplete>>().then([this] {
-            isSideChecking = false;
-        });
 
         on<Trigger<ButtonMiddleDown>, Single>().then([this] {
 
@@ -312,38 +307,36 @@ namespace strategy {
             find({FieldTarget(FieldTarget::Target::SELF)});
             currentState = Behaviour::State::PENALISED;
         }
-        else if (!isSideChecking) { // not penalised
-            if (cfg_.is_goalie) { // goalie
+        else if (cfg_.is_goalie) { // goalie
+            find({FieldTarget(FieldTarget::Target::BALL)});
+            goalieWalk(selfs, balls);
+            currentState = Behaviour::State::GOALIE_WALK;
+        } else {
+            /*if (NUClear::clock::now() - lastLocalised > cfg_.localisation_interval) {
+                standStill();
                 find({FieldTarget(FieldTarget::Target::BALL)});
-                goalieWalk(selfs, balls);
-                currentState = Behaviour::State::GOALIE_WALK;
-            } else {
-                /*if (NUClear::clock::now() - lastLocalised > cfg_.localisation_interval) {
-                    standStill();
-                    find({FieldTarget(FieldTarget::Target::BALL)});
-                    if (NUClear::clock::now() - lastLocalised > cfg_.localisation_interval + cfg_.localisation_duration) {
-                        lastLocalised = NUClear::clock::now();
-                    }
-                    currentState = Behaviour::State::LOCALISING;
+                if (NUClear::clock::now() - lastLocalised > cfg_.localisation_interval + cfg_.localisation_duration) {
+                    lastLocalised = NUClear::clock::now();
                 }
-                else*/ if (NUClear::clock::now() - ballLastMeasured < cfg_.ball_last_seen_max_time) { // ball has been seen recently
+                currentState = Behaviour::State::LOCALISING;
+            }
+            else*/ if (NUClear::clock::now() - ballLastMeasured < cfg_.ball_last_seen_max_time) { // ball has been seen recently
+                find({FieldTarget(FieldTarget::Target::BALL)});
+                walkTo(fieldDescription, FieldTarget::Target::BALL);
+                currentState = Behaviour::State::WALK_TO_BALL;
+            }
+            else { // ball has not been seen recently
+                if (mode != GameMode::PENALTY_SHOOTOUT && (selfs[0].locObject.position.norm() > 1)) { // a long way away from centre
+                    // walk to centre of field
+                    find({FieldTarget(FieldTarget::Target::BALL)});
+                    walkTo(fieldDescription, arma::vec2({0, 0}));
+                    currentState = Behaviour::State::MOVE_TO_CENTRE;
+                } else {
                     find({FieldTarget(FieldTarget::Target::BALL)});
                     walkTo(fieldDescription, FieldTarget::Target::BALL);
-                    currentState = Behaviour::State::WALK_TO_BALL;
-                }
-                else { // ball has not been seen recently
-                    if (mode != GameMode::PENALTY_SHOOTOUT && (selfs[0].locObject.position.norm() > 1)) { // a long way away from centre
-                        // walk to centre of field
-                        find({FieldTarget(FieldTarget::Target::BALL)});
-                        walkTo(fieldDescription, arma::vec2({0, 0}));
-                        currentState = Behaviour::State::MOVE_TO_CENTRE;
-                    } else {
-                        find({FieldTarget(FieldTarget::Target::BALL)});
-                        walkTo(fieldDescription, FieldTarget::Target::BALL);
-                        // spinWalk();
+                    // spinWalk();
 
-                        currentState = Behaviour::State::SEARCH_FOR_BALL;
-                    }
+                    currentState = Behaviour::State::SEARCH_FOR_BALL;
                 }
             }
         }

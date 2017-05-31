@@ -29,7 +29,6 @@ NUCLEAR_ROLE(
     vision::LUTClassifier
     vision::GoalDetector
     vision::BallDetector
-    vision::ObstacleDetector
 
     # Behaviour
     behaviour::Controller

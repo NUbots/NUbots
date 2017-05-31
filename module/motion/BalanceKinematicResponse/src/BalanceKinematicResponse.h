@@ -32,15 +32,14 @@
 #include "message/behaviour/ServoCommand.h"
 
 #include "message/input/Sensors.h"
-#include "message/input/PushDetection.h"
 #include "message/input/PostureRecognition.h"
 
 #include "message/motion/KinematicsModels.h"
 #include "message/motion/WalkCommand.h"
-#include "message/motion/FootMotionCommand.h" 
-#include "message/motion/TorsoMotionCommand.h"  
-#include "message/motion/BalanceCommand.h" 
-#include "message/motion/HeadCommand.h" 
+#include "message/motion/FootMotionCommand.h"
+#include "message/motion/TorsoMotionCommand.h"
+#include "message/motion/BalanceCommand.h"
+#include "message/motion/HeadCommand.h"
 #include "message/motion/ServoTarget.h"
 
 #include "message/localisation/FieldObject.h"
@@ -65,11 +64,11 @@
 #include "utility/support/yaml_armadillo.h"
 #include "utility/support/yaml_expression.h"
 
-namespace module 
+namespace module
 {
-namespace motion 
+namespace motion
 {
-    class BalanceKinematicResponse : public NUClear::Reactor 
+    class BalanceKinematicResponse : public NUClear::Reactor
     {
     public:
     	/**
@@ -97,7 +96,7 @@ namespace motion
 
         /**
          * Temporary debugging variables for local output logging...
-         */ 
+         */
         bool DEBUG;                         //
         int  DEBUG_ITER;                    //
         int  initialStep;                   // TODO: How to many 'steps' to take before lifting a foot when starting to walk
@@ -129,7 +128,7 @@ namespace motion
          */
         struct TorsoPositions                           // Active torso relative positions struct
         {
-            TorsoPositions() 
+            TorsoPositions()
             : FrameArms()
             , FrameLegs()
             , Frame3D()
@@ -145,9 +144,9 @@ namespace motion
             Transform3D Frame3D;
         };
         TorsoPositions torsoPositionsTransform;         // Active torso position
-        Transform2D leftFootPosition2D;                 // Transform2D state of left foot position    
+        Transform2D leftFootPosition2D;                 // Transform2D state of left foot position
         Transform2D rightFootPosition2D;                // Transform2D state of right foot position
-        Transform3D leftFootPositionTransform;          // Active left foot position    
+        Transform3D leftFootPositionTransform;          // Active left foot position
         Transform3D rightFootPositionTransform;         // Active right foot position
         Transform2D uSupportMass;                       // Appears to be support foot pre-step position
         LimbID activeForwardLimb;                       // The leg that is 'swinging' in the step, opposite of the support foot
@@ -156,32 +155,32 @@ namespace motion
         /**
          * Anthropomorphic metrics initialized from configuration script, see config file for documentation...
          */
-        double bodyTilt;                                // 
+        double bodyTilt;                                //
         double bodyHeight;                              //
         double supportFront;                            //
         double supportFront2;                           //
         double supportBack;                             //
         double supportSideX;                            //
         double supportSideY;                            //
-        double supportTurn;                             //    
+        double supportTurn;                             //
         double stanceLimitY2;                           //
         double stepTime;                                //
         double stepHeight;                              //
         float  step_height_slow_fraction;               //
         float  step_height_fast_fraction;               //
-        arma::mat::fixed<3,2> stepLimits;               //              
+        arma::mat::fixed<3,2> stepLimits;               //
         arma::vec2 footOffsetCoefficient;               //
         Transform2D uLRFootOffset;                      // standard offset
 
         /**
          * Arm Position vectors initialized from configuration script, see config file for documentation...
          */
-        arma::vec3 armLPostureTransform;                // 
-        arma::vec3 armLPostureSource;                   //  
-        arma::vec3 armLPostureDestination;              //  
-        arma::vec3 armRPostureTransform;                //  
-        arma::vec3 armRPostureSource;                   //  
-        arma::vec3 armRPostureDestination;              //  
+        arma::vec3 armLPostureTransform;                //
+        arma::vec3 armLPostureSource;                   //
+        arma::vec3 armLPostureDestination;              //
+        arma::vec3 armRPostureTransform;                //
+        arma::vec3 armRPostureSource;                   //
+        arma::vec3 armRPostureDestination;              //
 
         /**
          * Ankle Position vectors initialized from configuration script, see config file for documentation...
@@ -199,13 +198,12 @@ namespace motion
         double beginStepTime;                                   // The time when the current step begun
         double footMotionPhase;                                 // Phase representation of foot motion state
         double STAND_SCRIPT_DURATION;                           //
-        NUClear::clock::time_point pushTime;                    //
         NUClear::clock::time_point lastVeloctiyUpdateTime;      //
 
         /**
          * Motion data for relevant humanoid actuators...
          */
-        double velocityHigh;                            // 
+        double velocityHigh;                            //
         double accelerationTurningFactor;               //
         arma::mat::fixed<3,2> velocityLimits;           //
         arma::vec3 accelerationLimits;                  //
@@ -217,8 +215,8 @@ namespace motion
          * Motion data initialized from configuration script, see config file for documentation...
          */
         double velFastForward;                          //
-        double velFastTurn;                             //   
-        
+        double velFastTurn;                             //
+
         /**
          * Dynamic analysis parameters for relevant motion planning...
          */
@@ -235,7 +233,7 @@ namespace motion
 
         double rollParameter;                //
         double pitchParameter;               //
-        double yawParameter;                 // 
+        double yawParameter;                 //
         double toeTipParameter;              //
         double hipRollParameter;             //
         double armRollParameter;             //
@@ -276,17 +274,17 @@ namespace motion
         /**
          * @brief [brief description]
          * @details [long description]
-         * 
+         *
          * @param config [description]
          */
         void configure(const YAML::Node& config);
                 /**
          * @brief [brief description]
          * @details [long description]
-         * 
+         *
          * @param inTorsoPosition [description]
          */
-        void localise(Transform2D position); 
+        void localise(Transform2D position);
         /**
          * @brief [brief description]
          * @details [long description]
@@ -355,7 +353,7 @@ namespace motion
          * @brief [brief description]
          * @details [long description]
          */
-        void postureInitialize();  
+        void postureInitialize();
         /**
          * @brief [brief description]
          * @details [get a unix timestamp (in decimal seconds that are accurate to the microsecond)]
@@ -364,7 +362,7 @@ namespace motion
         /**
          * @brief [brief description]
          * @details [long description]
-         * 
+         *
          * @param index [description]
          * @return [description]
          */
@@ -372,14 +370,14 @@ namespace motion
         /**
          * @brief [brief description]
          * @details [long description]
-         * 
+         *
          * @param inFootOffsetCoefficient [description]
          */
         void setFootOffsetCoefficient(const arma::vec2& inFootOffsetCoefficient);
         /**
          * @brief [brief description]
          * @details [long description]
-         * 
+         *
          * @param index [description]
          * @param inValue [description]
          */
@@ -430,7 +428,7 @@ namespace motion
         /**
          * @brief [brief description]
          * @details [long description]
-         * 
+         *
          * @param inTorsoPosition [description]
          */
         double getYawParameter();
@@ -442,7 +440,7 @@ namespace motion
         /**
          * @brief [brief description]
          * @details [long description]
-         * 
+         *
          * @param inTorsoPosition [description]
          */
         double getHipCompensationScale();
@@ -452,7 +450,7 @@ namespace motion
         double getToeCompensationScale();
 
         double getArmCompensationScale();
-        
+
         double getSupportCompensationScale();
 
         double getHipCompensationMax();
@@ -462,7 +460,7 @@ namespace motion
         double getToeCompensationMax();
 
         double getArmCompensationMax();
-        
+
         double getSupportCompensationMax();
 
 
@@ -470,133 +468,133 @@ namespace motion
         /**
          * @brief [brief description]
          * @details [long description]
-         * 
+         *
          * @param inTorsoPosition [description]
          */
         std::unique_ptr<std::vector<ServoCommand>> motionArms();
         /**
          * @brief [brief description]
          * @details [long description]
-         * 
+         *
          * @param inTorsoPosition [description]
          */
         arma::vec3 getLArmPosition();
         /**
          * @brief [brief description]
          * @details [long description]
-         * 
+         *
          * @param inTorsoPosition [description]
          */
         void setLArmPosition(arma::vec3 inLArm);
         /**
          * @brief [brief description]
          * @details [long description]
-         * 
+         *
          * @param inTorsoPosition [description]
          */
         arma::vec3 getLArmSource();
         /**
          * @brief [brief description]
          * @details [long description]
-         * 
+         *
          * @param inTorsoPosition [description]
          */
         void setLArmSource(arma::vec3 inLArm);
         /**
          * @brief [brief description]
          * @details [long description]
-         * 
+         *
          * @param inTorsoPosition [description]
          */
         arma::vec3 getLArmDestination();
         /**
          * @brief [brief description]
          * @details [long description]
-         * 
+         *
          * @param inTorsoPosition [description]
          */
         void setLArmDestination(arma::vec3 inLArm);
         /**
          * @brief [brief description]
          * @details [long description]
-         * 
+         *
          * @param inTorsoPosition [description]
          */
         arma::vec3 getRArmPosition();
         /**
          * @brief [brief description]
          * @details [long description]
-         * 
+         *
          * @param inTorsoPosition [description]
          */
         void setRArmPosition(arma::vec3 inRArm);
         /**
          * @brief [brief description]
          * @details [long description]
-         * 
+         *
          * @param inTorsoPosition [description]
          */
         arma::vec3 getRArmSource();
         /**
          * @brief [brief description]
          * @details [long description]
-         * 
+         *
          * @param inTorsoPosition [description]
          */
         void setRArmSource(arma::vec3 inRArm);
         /**
          * @brief [brief description]
          * @details [long description]
-         * 
+         *
          * @param inTorsoPosition [description]
          */
         arma::vec3 getRArmDestination();
         /**
          * @brief [brief description]
          * @details [long description]
-         * 
+         *
          * @param inTorsoPosition [description]
          */
         void setRArmDestination(arma::vec3 inRArm);
         /**
          * @brief [brief description]
          * @details [long description]
-         * 
+         *
          * @param inTorsoPosition [description]
          */
         Transform2D getTorsoPositionArms();
         /**
          * @brief [brief description]
          * @details [long description]
-         * 
+         *
          * @param inTorsoPosition [description]
          */
         Transform2D getTorsoPositionLegs();
         /**
          * @brief [brief description]
          * @details [long description]
-         * 
+         *
          * @param inTorsoPosition [description]
          */
         Transform3D getTorsoPosition3D();
         /**
          * @brief [brief description]
          * @details [long description]
-         * 
+         *
          * @param inTorsoPosition [description]
          */
         void setTorsoPositionArms(const Transform2D& inTorsoPosition);
         /**
          * @brief [brief description]
          * @details [long description]
-         * 
+         *
          * @param inTorsoPosition [description]
          */
         void setTorsoPositionLegs(const Transform2D& inTorsoPosition);
         /**
          * @brief [brief description]
          * @details [long description]
-         * 
+         *
          * @param inTorsoPosition [description]
          */
         void setTorsoPosition3D(const Transform3D& inTorsoPosition);
@@ -621,7 +619,7 @@ namespace motion
         /**
          * @brief [brief description]
          * @details [long description]
-         * 
+         *
          * @param inSupportMass [description]
          */
         void setSupportMass(const Transform2D& inSupportMass);
@@ -634,7 +632,7 @@ namespace motion
         /**
          * @brief [brief description]
          * @details [long description]
-         * 
+         *
          * @param inLeftFootPosition [description]
          */
         void setLeftFootPosition2D(const Transform2D& inLeftFootPosition);
@@ -647,7 +645,7 @@ namespace motion
         /**
          * @brief [brief description]
          * @details [long description]
-         * 
+         *
          * @param inRightFootPosition [description]
          */
         void setRightFootPosition2D(const Transform2D& inRightFootPosition);
@@ -660,7 +658,7 @@ namespace motion
         /**
          * @brief [brief description]
          * @details [long description]
-         * 
+         *
          * @param inLeftFootPosition [description]
          */
         void setLeftFootPosition(const Transform3D& inLeftFootPosition);
@@ -673,12 +671,12 @@ namespace motion
         /**
          * @brief [brief description]
          * @details [long description]
-         * 
+         *
          * @param inRightFootPosition [description]
          */
         void setRightFootPosition(const Transform3D& inRightFootPosition);
     };
 }  // motion
-}  // modules   
+}  // modules
 
 #endif  // MODULE_MOTION_BALANCEKINEMATICRESPONSE_H

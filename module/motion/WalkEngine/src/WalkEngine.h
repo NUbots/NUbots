@@ -34,15 +34,14 @@
 #include "message/behaviour/FixedWalkCommand.h"
 #include "message/behaviour/ServoCommand.h"
 
-#include "message/input/PushDetection.h"
 #include "message/input/PostureRecognition.h"
 
 #include "message/motion/KinematicsModels.h"
 #include "message/motion/WalkCommand.h"
 #include "message/motion/BalanceCommand.h"
 #include "message/motion/TorsoMotionCommand.h"
-#include "message/motion/FootPlacementCommand.h" 
-#include "message/motion/FootMotionCommand.h" 
+#include "message/motion/FootPlacementCommand.h"
+#include "message/motion/FootMotionCommand.h"
 #include "message/motion/ServoTarget.h"
 
 #include "message/localisation/FieldObject.h"
@@ -67,11 +66,11 @@
 
 #include "utility/nubugger/NUhelpers.h"
 
-namespace module 
+namespace module
 {
-namespace motion 
+namespace motion
 {
-    class WalkEngine : public NUClear::Reactor 
+    class WalkEngine : public NUClear::Reactor
     {
     public:
         /**
@@ -95,7 +94,7 @@ namespace motion
 
         /**
          * Temporary debugging variables for local output logging...
-         */ 
+         */
         bool DEBUG;                 //
         int  DEBUG_ITER;            //
 
@@ -110,7 +109,7 @@ namespace motion
         ReactionHandle handleUpdate;                    // handle(updateWaypoints), disabling when not moving will save unnecessary CPU resources
         ReactionHandle handleStandScript;               // handle(generateStandAndSaveScript), disabling when not required for capturing standing phase
         size_t subsumptionId;                           // subsumption ID key to access motors
-        
+
         /**
          * Anthropomorphic metrics for relevant humanoid joints & actuators...
          */
@@ -124,7 +123,7 @@ namespace motion
         float  gainRLeg;                                //
         float  gainLArm;                                //
         float  gainLLeg;                                //
-        float  gainHead;                                //           
+        float  gainHead;                                //
 
         /**
          * Arm Position vectors initialized from configuration script, see config file for documentation...
@@ -140,7 +139,7 @@ namespace motion
         /**
          * Motion data for relevant humanoid actuators...
          */
-        double velocityHigh;                            // 
+        double velocityHigh;                            //
         double accelerationTurningFactor;               //
         arma::mat::fixed<3,2> velocityLimits;           //
         arma::vec3 accelerationLimits;                  //
@@ -152,7 +151,7 @@ namespace motion
          * Motion data initialized from configuration script, see config file for documentation...
          */
         double velFastForward;                          //
-        double velFastTurn;                             //        
+        double velFastTurn;                             //
         /**
          * Balance & Kinematics module initialization...
          */
@@ -163,7 +162,7 @@ namespace motion
          */
         std::map<ServoID, float> jointGains;            // current gains sent to the servos
         std::map<ServoID, float> servoControlPGains;    // proportionality constants relating jointGains to humanoid stability
-        
+
         /**
          * The last foot goal rotation...
          */
@@ -173,35 +172,35 @@ namespace motion
         /**
          * @brief [brief description]
          * @details [long description]
-         * 
+         *
          * @param inTorsoPosition [description]
          */
         void scriptStandAndSave();
         /**
          * @brief [brief description]
          * @details [long description]
-         * 
+         *
          * @param inTorsoPosition [description]
          */
         void reset();
         /**
          * @brief [brief description]
          * @details [long description]
-         * 
+         *
          * @param inTorsoPosition [description]
          */
         std::unique_ptr<std::vector<ServoCommand>> updateWaypoints();
         /**
          * @brief [brief description]
          * @details [long description]
-         * 
+         *
          * @param inTorsoPosition [description]
          */
         std::unique_ptr<std::vector<ServoCommand>> motionLegs(std::vector<std::pair<ServoID, float>> joints);
         /**
          * @brief [brief description]
          * @details [long description]
-         * 
+         *
          * @param inTorsoPosition [description]
          */
         std::unique_ptr<std::vector<ServoCommand>> motionArms();
@@ -209,14 +208,14 @@ namespace motion
          * @brief [brief description]
          * @details [long description]
          * @return A clamped between 0 and maxvalue, offset by deadband
-         * 
+         *
          * @param inTorsoPosition [description]
          */
         void updateVelocity();
         /**
          * @brief [brief description]
          * @details [long description]
-         * 
+         *
          * @param inTorsoPosition [description]
          */
         void configure(const YAML::Node& config);
@@ -224,7 +223,7 @@ namespace motion
          * @brief [brief description]
          * @details [long description]
          * @return get a unix timestamp (in decimal seconds that are accurate to the microsecond)
-         * 
+         *
          * @param inTorsoPosition [description]
          */
         double getTime();
@@ -237,7 +236,7 @@ namespace motion
         /**
          * @brief [brief description]
          * @details [long description]
-         * 
+         *
          * @param inNewPostureReceived [description]
          */
         void setNewPostureReceived(bool inNewPostureReceived);
@@ -245,84 +244,84 @@ namespace motion
          * @brief [brief description]
          * @details [long description]
          * @return Current velocity
-         * 
+         *
          * @param inTorsoPosition [description]
          */
         Transform2D getVelocity();
         /**
          * @brief [brief description]
          * @details [long description]
-         * 
+         *
          * @param inTorsoPosition [description]
          */
         void setVelocity(Transform2D velocity);
         /**
          * @brief [brief description]
          * @details [long description]
-         * 
+         *
          * @param inTorsoPosition [description]
          */
         arma::vec3 getLArmPosition();
         /**
          * @brief [brief description]
          * @details [long description]
-         * 
+         *
          * @param inTorsoPosition [description]
          */
         void setLArmPosition(arma::vec3 inLArm);
         /**
          * @brief [brief description]
          * @details [long description]
-         * 
+         *
          * @param inTorsoPosition [description]
          */
         arma::vec3 getRArmPosition();
         /**
          * @brief [brief description]
          * @details [long description]
-         * 
+         *
          * @param inTorsoPosition [description]
          */
         void setRArmPosition(arma::vec3 inRArm);
         /**
          * @brief [brief description]
          * @details [long description]
-         * 
+         *
          * @param inTorsoPosition [description]
          */
         Transform2D getTorsoPositionArms();
         /**
          * @brief [brief description]
          * @details [long description]
-         * 
+         *
          * @param inTorsoPosition [description]
          */
         Transform2D getTorsoPositionLegs();
         /**
          * @brief [brief description]
          * @details [long description]
-         * 
+         *
          * @param inTorsoPosition [description]
          */
         Transform3D getTorsoPosition3D();
         /**
          * @brief [brief description]
          * @details [long description]
-         * 
+         *
          * @param inTorsoPosition [description]
          */
         void setTorsoPositionArms(const Transform2D& inTorsoPosition);
         /**
          * @brief [brief description]
          * @details [long description]
-         * 
+         *
          * @param inTorsoPosition [description]
          */
         void setTorsoPositionLegs(const Transform2D& inTorsoPosition);
         /**
          * @brief [brief description]
          * @details [long description]
-         * 
+         *
          * @param inTorsoPosition [description]
          */
         void setTorsoPosition3D(const Transform3D& inTorsoPosition);
@@ -335,7 +334,7 @@ namespace motion
         /**
          * @brief [brief description]
          * @details [long description]
-         * 
+         *
          * @param inSupportMass [description]
          */
         void setSupportMass(const Transform2D& inSupportMass);
@@ -348,7 +347,7 @@ namespace motion
         /**
          * @brief [brief description]
          * @details [long description]
-         * 
+         *
          * @param inLeftFootPosition [description]
          */
         void setLeftFootPosition(const Transform3D& inLeftFootPosition);
@@ -361,7 +360,7 @@ namespace motion
         /**
          * @brief [brief description]
          * @details [long description]
-         * 
+         *
          * @param inRightFootPosition [description]
          */
         void setRightFootPosition(const Transform3D& inRightFootPosition);

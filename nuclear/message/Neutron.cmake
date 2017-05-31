@@ -198,7 +198,7 @@ FOREACH(proto ${protobufs})
                                 "${outputpath}/${file_we}.h"
                                 PROPERTIES GENERATED TRUE
                                 # Prevent Effective C++ and unused parameter error checks being performed on generated files.
-                                COMPILE_FLAGS "-Wno-effc++ -Wno-error=unused-parameter -Wno-error")
+                                COMPILE_FLAGS "-Wno-unused-parameter -Wno-error=unused-parameter -Wno-error")
 
     # Add the generated files to our list
     SET(src ${src}

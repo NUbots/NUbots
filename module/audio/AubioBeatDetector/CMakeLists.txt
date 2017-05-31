@@ -1,6 +1,0 @@
-# Find the AUBIO Library
-FIND_PACKAGE(Aubio REQUIRED)
-
-# Build our NUClear module
-NUCLEAR_MODULE(INCLUDES ${AUBIO_INCLUDE_DIRS}
-               LIBRARIES ${AUBIO_LIBRARIES})

@@ -19,7 +19,6 @@ NUCLEAR_ROLE(
     vision::LUTClassifier
     vision::GoalDetector
     vision::BallDetector
-    vision::ObstacleDetector
 
     #Localisation
     localisation::RobotFieldLocalisation
