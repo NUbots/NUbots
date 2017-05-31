@@ -28,7 +28,7 @@ namespace support {
     template <typename T>
     struct LazyEvaluation {
 
-        std::function<double()> lazy;
+        std::function<T()> lazy;
 
         LazyEvaluation(std::function<T()> lazy)
         : lazy(lazy) {}
