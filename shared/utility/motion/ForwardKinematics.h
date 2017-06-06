@@ -34,7 +34,7 @@
 #include "utility/math/matrix/Rotation3D.h"
 #include "utility/math/angle.h"
 #include "utility/math/geometry/Line.h"
-#include "utility/support/eigen_armadillo.h"
+#include "utility/support/eigen.h"
 
 namespace utility {
 namespace motion {

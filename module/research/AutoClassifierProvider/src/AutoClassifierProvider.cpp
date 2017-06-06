@@ -26,7 +26,7 @@
 
 #include "utility/math/geometry/Circle.h"
 #include "utility/math/geometry/Quad.h"
-#include "utility/support/eigen_armadillo.h"
+#include "utility/support/eigen.h"
 #include "utility/vision/ClassifiedImage.h"
 #include "utility/vision/fourcc.h"
 #include "utility/vision/Vision.h"

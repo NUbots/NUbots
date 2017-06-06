@@ -28,7 +28,7 @@
 
 #include "utility/time/time.h"
 #include "utility/localisation/transform.h"
-#include "utility/support/eigen_armadillo.h"
+#include "utility/support/eigen.h"
 
 /**
  * @author Monica Olejniczak

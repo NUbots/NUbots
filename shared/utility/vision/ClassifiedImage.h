@@ -20,7 +20,7 @@
 #ifndef UTILITY_VISION_CLASSIFIEDIMAGE_H
 #define UTILITY_VISION_CLASSIFIEDIMAGE_H
 
-#include <Eigen/Core>
+#include "utility/support/eigen.h"
 
 #include "message/vision/ClassifiedImage.h"
 

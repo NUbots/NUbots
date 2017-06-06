@@ -33,7 +33,7 @@
 #include "utility/math/matrix/Transform3D.h"
 #include "utility/motion/InverseKinematics.h"
 #include "utility/nubugger/NUhelpers.h"
-#include "utility/support/eigen_armadillo.h"
+#include "utility/support/eigen.h"
 #include "utility/support/yaml_expression.h"
 
 

@@ -22,7 +22,7 @@
 
 #include <nuclear>
 
-#include <Eigen/Core>
+#include "utility/support/eigen.h"
 
 namespace module {
 namespace input {

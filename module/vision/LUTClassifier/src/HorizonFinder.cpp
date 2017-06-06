@@ -21,7 +21,7 @@
 
 #include "utility/math/matrix/Transform3D.h"
 #include "utility/motion/ForwardKinematics.h"
-#include "utility/support/eigen_armadillo.h"
+#include "utility/support/eigen.h"
 
 namespace module {
     namespace vision {

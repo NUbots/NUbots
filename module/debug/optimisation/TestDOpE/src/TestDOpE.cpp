@@ -22,7 +22,7 @@
 #include "extension/Configuration.h"
 #include "message/support/optimisation/DOpE.h"
 #include "message/support/optimisation/Episode.h"
-#include "utility/support/eigen_armadillo.h"
+#include "utility/support/eigen.h"
 
 namespace module {
 namespace debug {

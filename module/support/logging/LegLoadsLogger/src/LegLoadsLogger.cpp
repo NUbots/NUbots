@@ -6,7 +6,7 @@
 
 #include "utility/input/ServoID.h"
 #include "utility/math/matrix/Transform3D.h"
-#include "utility/support/eigen_armadillo.h"
+#include "utility/support/eigen.h"
 
 namespace module {
 namespace support {

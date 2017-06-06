@@ -33,7 +33,7 @@
 #include "utility/motion/ForwardKinematics.h"
 #include "utility/nubugger/NUhelpers.h"
 #include "utility/platform/darwin/DarwinSensors.h"
-#include "utility/support/eigen_armadillo.h"
+#include "utility/support/eigen.h"
 #include "utility/support/yaml_armadillo.h"
 
 namespace module {

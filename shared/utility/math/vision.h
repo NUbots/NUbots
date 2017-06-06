@@ -30,7 +30,7 @@
 #include "utility/math/geometry/Plane.h"
 #include "utility/math/geometry/ParametricLine.h"
 #include "utility/math/angle.h"
-#include "utility/support/eigen_armadillo.h"
+#include "utility/support/eigen.h"
 #include "message/support/FieldDescription.h"
 
 

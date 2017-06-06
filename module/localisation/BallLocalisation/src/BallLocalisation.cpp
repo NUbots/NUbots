@@ -5,7 +5,7 @@
 #include "message/localisation/FieldObject.h"
 #include "message/vision/VisionObjects.h"
 
-#include "utility/support/eigen_armadillo.h"
+#include "utility/support/eigen.h"
 
 namespace module {
 namespace localisation {

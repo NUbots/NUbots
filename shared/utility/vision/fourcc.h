@@ -4,7 +4,7 @@
 #include <vector>
 #include <string>
 
-#include <Eigen/Core>
+#include "utility/support/eigen.h"
 
 #include "Vision.h"
 

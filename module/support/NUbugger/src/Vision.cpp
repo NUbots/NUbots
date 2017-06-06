@@ -26,7 +26,7 @@
 #include "message/vision/LookUpTableDiff.h"
 
 #include "utility/time/time.h"
-#include "utility/support/eigen_armadillo.h"
+#include "utility/support/eigen.h"
 
 namespace module {
 namespace support {

@@ -20,7 +20,7 @@
 
 #include "message/motion/KinematicsModels.h"
 
-#include "utility/support/eigen_armadillo.h"
+#include "utility/support/eigen.h"
 
 namespace utility {
 namespace motion {

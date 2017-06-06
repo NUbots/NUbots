@@ -21,7 +21,7 @@
 
 #include <iostream>
 
-#include "utility/support/eigen_armadillo.h"
+#include "utility/support/eigen.h"
 #include "utility/vision/fourcc.h"
 #include "utility/vision/LookUpTable.h"
 #include "utility/vision/Vision.h"

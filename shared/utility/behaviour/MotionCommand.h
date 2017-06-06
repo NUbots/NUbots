@@ -22,7 +22,7 @@
 #include "message/behaviour/MotionCommand.h"
 
 #include "utility/math/matrix/Transform2D.h"
-#include "utility/support/eigen_armadillo.h"
+#include "utility/support/eigen.h"
 
 namespace utility {
 namespace behaviour {

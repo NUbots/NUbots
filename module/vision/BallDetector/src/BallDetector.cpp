@@ -35,7 +35,7 @@
 #include "utility/math/ransac/RansacCircleModel.h"
 #include "utility/math/vision.h"
 #include "utility/nubugger/NUhelpers.h"
-#include "utility/support/eigen_armadillo.h"
+#include "utility/support/eigen.h"
 #include "utility/support/yaml_expression.h"
 #include "utility/vision/fourcc.h"
 #include "utility/vision/Vision.h"

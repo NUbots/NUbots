@@ -25,7 +25,7 @@
 #include "utility/math/matrix/Rotation3D.h"
 #include "utility/math/coordinates.h"
 #include "utility/math/vision.h"
-#include "utility/support/eigen_armadillo.h"
+#include "utility/support/eigen.h"
 
 namespace module {
 namespace support {

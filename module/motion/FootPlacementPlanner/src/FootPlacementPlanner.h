@@ -55,7 +55,7 @@
 
 #include "utility/nubugger/NUhelpers.h"
 
-#include "utility/support/eigen_armadillo.h"
+#include "utility/support/eigen.h"
 #include "utility/support/yaml_armadillo.h"
 #include "utility/support/yaml_expression.h"
 
