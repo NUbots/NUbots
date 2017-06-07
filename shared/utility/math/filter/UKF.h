@@ -43,7 +43,7 @@ namespace utility {
                 static constexpr uint NUM_SIGMA_POINTS = (Model::size * 2) + 1;
 
                 using SigmaVec = Eigen::Matrix<double, NUM_SIGMA_POINTS, 1>;
-                using SigmaRowVec = arma::rowvec::fixed<NUM_SIGMA_POINTS>;
+                using SigmaRowVec = Eigen::Matrix<double, NUM_SIGMA_POINTS, Eigen::Dynamic>;
                 using SigmaMat = arma::mat::fixed<Model::size, NUM_SIGMA_POINTS>;
                 using SigmaSquareMat = arma::mat::fixed<NUM_SIGMA_POINTS, NUM_SIGMA_POINTS>;
 
