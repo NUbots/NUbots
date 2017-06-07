@@ -123,7 +123,7 @@ double RobotHypothesis::MeasurementUpdate(
     // double heading_diff = utility::math::angle::acos_clamped(arma::dot(arma::vec(unit_a), arma::vec(unit_b)));
 
     // Eigen::VectorXd measurement = { std::abs(heading_diff) };
-    // arma::mat cov = arma::eye(1, 1) * 0.1; // TODO: Calculate correct covariance
+    // arma::mat cov = Eigen::Matrix<double, 1, 1>::Identity() * 0.1; // TODO: Calculate correct covariance
 
     // double quality = filter_.measurementUpdate(measurement, cov, actual_positions, *(obv_a.sensors));
 

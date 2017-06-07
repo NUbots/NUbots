@@ -106,7 +106,7 @@ namespace robot {
     }
 
     arma::mat::fixed<RobotModel::size, RobotModel::size> RobotModel::processNoise(){
-        arma::mat noise = arma::eye(RobotModel::size, RobotModel::size);
+        arma::mat noise = Eigen::Matrix<double, RobotModel::size, RobotModel::size>::Identity();
         noise(kX, kX) *= cfg_.processNoisePositionFactor;
         noise(kY, kY) *= cfg_.processNoisePositionFactor;
         noise(kImuOffset, kImuOffset) *= cfg_.processNoiseHeadingFactor;

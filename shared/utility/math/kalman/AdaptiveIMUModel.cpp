@@ -95,7 +95,7 @@ namespace utility {
             }
 
             arma::mat::fixed<AdaptiveIMUModel::size, AdaptiveIMUModel::size> AdaptiveIMUModel::processNoise() {
-                return arma::eye(size, size) * processNoiseFactor; //std::numeric_limits<double>::epsilon();
+                return Eigen::Matrix<double, size, size>::Identity() * processNoiseFactor; //std::numeric_limits<double>::epsilon();
             }
 
         }

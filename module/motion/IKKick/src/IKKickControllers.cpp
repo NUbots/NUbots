@@ -83,7 +83,7 @@ namespace motion{
 	}
 
     void Kicker::computeStartMotion(const KinematicsModel& kinematicsModel, const Sensors& sensors) {
-        Transform3D startPose = arma::eye(4,4);
+        Transform3D startPose = Eigen::Matrix<double, 4, 4>::Identity();
 
         // Convert torso to support foot
         Transform3D currentTorso = getTorsoPose(sensors);

@@ -52,7 +52,7 @@ namespace input
         }
 
         arma::mat::fixed<size, size> processNoise() {
-            return arma::eye(ServoLoadModel::size, ServoLoadModel::size) * 0.001;
+            return Eigen::Matrix<double, ServoLoadModel::size, ServoLoadModel::size>::Identity() * 0.001;
         }
     };
 }

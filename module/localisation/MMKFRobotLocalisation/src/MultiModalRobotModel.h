@@ -49,11 +49,11 @@ namespace localisation {
         RobotHypothesis()
             : filter_(
                 {-4.5, 0, 0}, // mean
-                arma::eye(robot::RobotModel::size, robot::RobotModel::size) * 0.1, // cov
+                Eigen::Matrix<double, robot::RobotModel::size, robot::RobotModel::size>::Identity() * 0.1, // cov
                 0.1) // alpha
             , weight_(1)
             , obs_count_(0) {
-                arma::mat cov = arma::eye(robot::RobotModel::size, robot::RobotModel::size) * 0.1;
+                arma::mat cov = Eigen::Matrix<double, robot::RobotModel::size, robot::RobotModel::size>::Identity() * 0.1;
                 cov(2,2) = 1;
                 filter_.setState(Eigen::Matrix<double, robot::RobotModel::size, 1>({-4.5, 0, 0}), cov);
             }
@@ -66,7 +66,7 @@ namespace localisation {
 
             // Eigen::Vector3d mean = arma::join_rows(reset_self.position, arma::vec(imuOffset));
             Eigen::Matrix<double, robot::RobotModel::size, 1> mean = Eigen::Matrix<double, robot::RobotModel::size, 1>({reset_self.position(0), reset_self.position(1), imuOffset});
-            arma::mat::fixed<robot::RobotModel::size, robot::RobotModel::size> cov = arma::eye(robot::RobotModel::size,robot::RobotModel::size) * 0.1;
+            arma::mat::fixed<robot::RobotModel::size, robot::RobotModel::size> cov = Eigen::Matrix<double, robot::RobotModel::size, robot::RobotModel::size>::Identity() * 0.1;
             cov.submat(0,0,1,1) = reset_self.position_cov;
             cov(2,2) = reset_self.heading_var;
             filter_.setState(mean, cov);

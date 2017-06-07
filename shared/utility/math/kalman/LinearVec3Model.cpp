@@ -46,7 +46,7 @@ namespace utility {
             }
 
             arma::mat::fixed<LinearVec3Model::size, LinearVec3Model::size> LinearVec3Model::processNoise() {
-                return arma::eye(size, size) * processNoiseFactor; //std::numeric_limits<double>::epsilon();
+                return Eigen::Matrix<double, size, size>::Identity() * processNoiseFactor; //std::numeric_limits<double>::epsilon();
             }
 
         }

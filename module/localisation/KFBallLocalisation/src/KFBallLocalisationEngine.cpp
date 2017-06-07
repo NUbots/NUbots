@@ -78,7 +78,7 @@ double KFBallLocalisationEngine::MeasurementUpdate(const VisionObject& observed_
         //new measurement
         //add velocity before measurement:
         Eigen::VectorXd posVel = arma::join_cols(sphericalImuObservation, measurement.velocity.rows(0,1));
-        arma::mat posVelCov = arma::eye(5,5);
+        arma::mat posVelCov = Eigen::Matrix<double, 5, 5>::Identity();
         posVelCov.submat(0,0,2,2) = cov;
         posVelCov.submat(3,3,4,4) = measurement.velCov.submat(0,0,1,1);
         quality *= ball_filter_.measurementUpdate(posVel, posVelCov, ballAngle);

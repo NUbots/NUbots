@@ -46,7 +46,7 @@ namespace utility {
 
             public:
                 EKF(StateVec initialMean = Eigen::Matrix<double, Model::size, 1>::Zero(),
-                    StateMat initialCovariance = arma::eye(Model::size, Model::size) * 0.1
+                    StateMat initialCovariance = Eigen::Matrix<double, Model::size, Model::size>::Identity() * 0.1
                     StateMat initialJacobian = model.timeUpdateJacobian(0.)) {
                     //strictly speaking, a time update should be called straight away with a non-zero timedelta
                     //but.... we don't know what the delta is so we must trust the user to do this
@@ -59,8 +59,8 @@ namespace utility {
                     jacobian = initialJacobian;
 
                     //re-initialize covariance
-                    processNoise = arma::eye(Model::size, Model::size);
-                    processNoisePartial = arma::eye(Model::size, Model::size);
+                    processNoise = Eigen::Matrix<double, Model::size, Model::size>::Identity();
+                    processNoisePartial = Eigen::Matrix<double, Model::size, Model::size>::Identity();
                 }
 
                 void setState(StateVec initialMean) {
@@ -82,7 +82,7 @@ namespace utility {
                     //this is steve's out-of-order update (backported from UKF)
                     processNoise = jacobian * (processNoisePartial * processNoise) * jacobian.t() + model.processNoise();
 
-                    processNoisePartial = arma::eye(Model::size, Model::size);
+                    processNoisePartial = Eigen::Matrix<double, Model::size, Model::size>::Identity();
                 }
 
                 template <typename TMeasurement, typename... TMeasurementArgs>
@@ -97,7 +97,7 @@ namespace utility {
                     state += kalmanGain * (measurement - measurementTransform * state);
 
                     //original
-                    //processNoise = (arma::eye(Model::size, Model::size) - kalmanGain * H) * processNoise;
+                    //processNoise = (Eigen::Matrix<double, Model::size, Model::size>::Identity() - kalmanGain * H) * processNoise;
 
                     //steve's backported out-of-order update
                     processNoisePartial -= kalmanGain * measurementTransform;

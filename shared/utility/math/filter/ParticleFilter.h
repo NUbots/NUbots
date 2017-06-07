@@ -51,7 +51,7 @@ namespace utility {
 
             public:
                 ParticleFilter(StateVec initialMean = Eigen::Matrix<double, Model::size, 1>::Zero(),
-                               StateMat initialCovariance = arma::eye(Model::size, Model::size) * 0.1,
+                               StateMat initialCovariance = Eigen::Matrix<double, Model::size, Model::size>::Identity() * 0.1,
                                int number_of_particles_ = 100,
                                StateVec sigma_sq_ = 0.1 * arma::ones(Model::size))
                 {

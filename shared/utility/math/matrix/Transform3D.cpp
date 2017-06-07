@@ -140,7 +140,7 @@ namespace matrix {
         // Multiply translation vector (top-right column vector) by the negated inverse rotation matrix
 
         inverseTransform3D.submat(0,3,2,3) = -inverseTransform3D.submat(0,0,2,2) * submat(0,3,2,3);
-        /*if (arma::norm(inverseTransform3D * (*this) - arma::eye(4,4)) > 1e-10){
+        /*if (arma::norm(inverseTransform3D * (*this) - Eigen::Matrix<double, 4, 4>::Identity()) > 1e-10){
             NUClear::log<NUClear::WARN>("Inverse failed! Matrix is singular");
         }*/
         return inverseTransform3D;

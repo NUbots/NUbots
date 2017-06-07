@@ -305,7 +305,7 @@ namespace autocal {
 
 				if(simWorldTransform.count(key) == 0){
 					simWorldTransform[key] = Transform3D::getRandomU(1,0.1);
-					// simWorldTransform[key] = arma::eye(4,4);
+					// simWorldTransform[key] = Eigen::Matrix<double, 4, 4>::Identity();
 					//  Transform3D({ 0.1040,  -0.0023,  -0.9946,  -0.3540,
 					// 								      -0.1147,   0.9933,  -0.0143,  -0.9437,
 					// 								       0.9879,   0.1156,   0.1030,   1.2106,
