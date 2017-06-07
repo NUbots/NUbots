@@ -114,13 +114,19 @@ namespace matrix {
 
 
     Eigen::Vector3d Transform3D::transformPoint(const Eigen::Vector3d& p){
-        Eigen::Vector4d p4 = arma::join_cols(p,arma::vec({1}));
+        Eigen::Vector4d p4;
+        p4.xyz() = p;
+        p4[3] = 1;
+
         Eigen::Vector4d result4 = *this * p4;
         return result4.rows(0,2);
     }
 
     Eigen::Vector3d Transform3D::transformVector(const Eigen::Vector3d& p){
-        Eigen::Vector4d p4 = arma::join_cols(p,arma::vec({0}));
+        Eigen::Vector4d p4;
+        p4.xyz() = p;
+        p4[3] = 0;
+
         Eigen::Vector4d result4 = *this * p4;
         return result4.rows(0,2);
     }

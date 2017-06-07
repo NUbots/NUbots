@@ -92,7 +92,7 @@ arma::vec BallModel::observationDifference(const arma::vec& a,
 Eigen::Matrix<double, BallModel::size, 1> BallModel::limitState(
     const Eigen::Matrix<double, BallModel::size, 1>& state) {
     auto new_state = state;
-    new_state.rows(kVx,kVy) = arma::vec({0,0});
+    new_state.rows(kVx,kVy) = Eigen::Vector2d(0,0);
     return new_state;
 }
 

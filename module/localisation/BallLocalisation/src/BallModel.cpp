@@ -57,7 +57,7 @@ namespace module {
             return Hcw.transformPoint(rBWw);
         }
 
-        arma::vec BallModel::observationDifference(const arma::vec& measurement
+        Eigen::Matrix<double, 1, 1> BallModel::observationDifference(const arma::vec& measurement
             , const Eigen::Vector3d& rBCc
             , const FieldDescription& field
             , const Sensors& /*sensors*/
@@ -69,7 +69,9 @@ namespace module {
 
             double actualAngle = std::acos(arma::dot(measurement, rBCc / len));
 
-            return arma::vec({actualAngle - expectedAngle});
+            Eigen::Matrix<double, 1, 1> ret;
+            ret(0,0) = actualAngle - expectedAngle;
+            return ret;
         }
 
         Eigen::Matrix<double, BallModel::size, 1> BallModel::limitState(const Eigen::Matrix<double, size, 1>& state) const {

@@ -390,8 +390,8 @@ namespace module {
                 for(uint i = 0; i < fixationObjects.size(); i++){
                     //TODO: fix arma meat errors here
                     //Should be vec2 (yaw,pitch)
-                    fixationPoints.push_back(arma::vec({fixationObjects[i].visObject.screenAngular[0],fixationObjects[i].visObject.screenAngular[1]}));
-                    fixationSizes.push_back(arma::vec({fixationObjects[i].visObject.angularSize[0],fixationObjects[i].visObject.angularSize[1]}));
+                    fixationPoints.push_back(Eigen::Vector2d(fixationObjects[i].visObject.screenAngular[0],fixationObjects[i].visObject.screenAngular[1]));
+                    fixationSizes.push_back(Eigen::Vector2d(fixationObjects[i].visObject.angularSize[0],fixationObjects[i].visObject.angularSize[1]));
                     //Average here as it is more elegant than an if statement checking if size==0 at the end
                     centroid += arma::vec(convert<double, 2>(fixationObjects[i].visObject.screenAngular)) / (fixationObjects.size());
                 }
@@ -436,8 +436,8 @@ namespace module {
                 for(uint i = 0; i < fixationObjects.size(); i++){
                     //TODO: fix arma meat errors here
                     //Should be vec2 (yaw,pitch)
-                    fixationPoints.push_back(arma::vec({fixationObjects[i].visObject.screenAngular[0],fixationObjects[i].visObject.screenAngular[1]}));
-                    fixationSizes.push_back(arma::vec({fixationObjects[i].visObject.angularSize[0],fixationObjects[i].visObject.angularSize[1]}));
+                    fixationPoints.push_back(Eigen::Vector2d(fixationObjects[i].visObject.screenAngular[0],fixationObjects[i].visObject.screenAngular[1]));
+                    fixationSizes.push_back(Eigen::Vector2d(fixationObjects[i].visObject.angularSize[0],fixationObjects[i].visObject.angularSize[1]));
                     //Average here as it is more elegant than an if statement checking if size==0 at the end
                     centroid += arma::vec(convert<double, 2>(fixationObjects[i].visObject.screenAngular)) / (fixationObjects.size());
                 }
@@ -546,13 +546,13 @@ namespace module {
                     Eigen::Vector2d tr = boundingBox.getBottomLeft() - padding + convert<double, 2>(cam.FOV) / 2.0;
                     //2
                     padding = {view_padding_radians,-view_padding_radians};
-                    Eigen::Vector2d br = boundingBox.getTopLeft() - padding + arma::vec({cam.FOV[0],-cam.FOV[1]}) / 2.0;
+                    Eigen::Vector2d br = boundingBox.getTopLeft() - padding + Eigen::Vector2d(cam.FOV[0],-cam.FOV[1]) / 2.0;
                     //3
                     padding = {-view_padding_radians,-view_padding_radians};
                     Eigen::Vector2d bl = boundingBox.getTopRight() - padding - convert<double, 2>(cam.FOV) / 2.0;
                     //4
                     padding = {-view_padding_radians,view_padding_radians};
-                    Eigen::Vector2d tl = boundingBox.getBottomRight() - padding + arma::vec({-cam.FOV[0],cam.FOV[1]}) / 2.0;
+                    Eigen::Vector2d tl = boundingBox.getBottomRight() - padding + Eigen::Vector2d(-cam.FOV[0],cam.FOV[1]) / 2.0;
 
                     //Interpolate between max and min allowed angles with -1 = min and 1 = max
                     std::vector<Eigen::Vector2d> searchPoints;
@@ -628,13 +628,13 @@ namespace module {
                     Eigen::Vector2d tr = boundingBox.getBottomLeft() - padding + convert<double, 2>(cam.FOV) / 2.0;
                     //2
                     padding = {view_padding_radians,-view_padding_radians};
-                    Eigen::Vector2d br = boundingBox.getTopLeft() - padding + arma::vec({cam.FOV[0],-cam.FOV[1]}) / 2.0;
+                    Eigen::Vector2d br = boundingBox.getTopLeft() - padding + Eigen::Vector2d(cam.FOV[0],-cam.FOV[1]) / 2.0;
                     //3
                     padding = {-view_padding_radians,-view_padding_radians};
                     Eigen::Vector2d bl = boundingBox.getTopRight() - padding - convert<double, 2>(cam.FOV) / 2.0;
                     //4
                     padding = {-view_padding_radians,view_padding_radians};
-                    Eigen::Vector2d tl = boundingBox.getBottomRight() - padding + arma::vec({-cam.FOV[0],cam.FOV[1]}) / 2.0;
+                    Eigen::Vector2d tl = boundingBox.getBottomRight() - padding + Eigen::Vector2d(-cam.FOV[0],cam.FOV[1]) / 2.0;
 
                     //Interpolate between max and min allowed angles with -1 = min and 1 = max
                     std::vector<Eigen::Vector2d> searchPoints;

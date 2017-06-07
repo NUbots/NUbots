@@ -165,7 +165,7 @@ namespace motion {
                 float x = rigidBody.position[0];
                 float y = rigidBody.position[1];
                 float z = rigidBody.position[2];
-                // std::cout << "Rigid body " << id << " " << arma::vec({x,y,z}).t();
+                // std::cout << "Rigid body " << id << " " << Eigen::Vector3d(x,y,z).t();
                 if(id == head_id){
                         mocap_head_pos = oculus_to_robot_scale * mocap_to_robot * Eigen::Vector3d(x,y,z);
                         marker_count++;
