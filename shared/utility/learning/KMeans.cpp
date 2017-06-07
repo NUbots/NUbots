@@ -44,16 +44,16 @@ namespace learning {
             Eigen::Vector2d dcov = clusterModel.dcovs.col(i);
             //float weight = clusterModel.hefts(i);
 
-            Eigen::Vector2i imean = arma::ivec({int(std::round(mean[0])),int(std::round(mean[1]))});
-            Eigen::Vector2i idcov = arma::ivec({int(std::round(dcov[0] * 0.1)),int(std::round(dcov[1] * 0.1))});
-            Eigen::Vector2i idcov_rotated = arma::ivec({int(std::round(dcov[0] * 0.1)),-int(std::round(dcov[1] * 0.1))});
+            Eigen::Vector2i imean = Eigen::VectorXi({int(std::round(mean[0])),int(std::round(mean[1]))});
+            Eigen::Vector2i idcov = Eigen::VectorXi({int(std::round(dcov[0] * 0.1)),int(std::round(dcov[1] * 0.1))});
+            Eigen::Vector2i idcov_rotated = Eigen::VectorXi({int(std::round(dcov[0] * 0.1)),-int(std::round(dcov[1] * 0.1))});
 
             debug.push_back(std::make_tuple(imean + idcov, imean + idcov_rotated, Eigen::Vector4d{1,1,1,1}));
             debug.push_back(std::make_tuple(imean - idcov, imean + idcov_rotated, Eigen::Vector4d{1,1,1,1}));
             debug.push_back(std::make_tuple(imean + idcov, imean - idcov_rotated, Eigen::Vector4d{1,1,1,1}));
             debug.push_back(std::make_tuple(imean - idcov, imean - idcov_rotated, Eigen::Vector4d{1,1,1,1}));
-            debug.push_back(std::make_tuple(imean + arma::ivec{0,5}, imean - arma::ivec{0,5}, Eigen::Vector4d{1,1,1,1}));
-            debug.push_back(std::make_tuple(imean + arma::ivec{5,0}, imean - arma::ivec{5,0}, Eigen::Vector4d{1,1,1,1}));
+            debug.push_back(std::make_tuple(imean + Eigen::VectorXi{0,5}, imean - Eigen::VectorXi{0,5}, Eigen::Vector4d{1,1,1,1}));
+            debug.push_back(std::make_tuple(imean + Eigen::VectorXi{5,0}, imean - Eigen::VectorXi{5,0}, Eigen::Vector4d{1,1,1,1}));
         }
         return debug;
     }

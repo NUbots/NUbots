@@ -87,7 +87,7 @@ namespace vision {
         for(int i = 0; i < green_radial_samples; r = (++i) * circle.radius / float(green_radial_samples)) {
             float theta = 0;
             if(r == 0){
-                Eigen::Vector2i ipos = arma::ivec({int(std::round(circle.centre[0])), int(std::round(circle.centre[1]))});
+                Eigen::Vector2i ipos = Eigen::VectorXi({int(std::round(circle.centre[0])), int(std::round(circle.centre[1]))});
                 if(ipos[0] >= 0 && ipos[0] < int(image.dimensions[0]) && ipos[1] >= 0 && ipos[1] < int(image.dimensions[1])){
                     // debug.push_back(std::make_tuple(ipos, ipos + Eigen::Vector2i{1,1}, Eigen::Vector4d{1,1,1,1}));
                     char c = static_cast<char>(utility::vision::getPixelColour(lut,
