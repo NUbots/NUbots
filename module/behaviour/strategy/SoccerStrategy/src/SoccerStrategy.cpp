@@ -196,7 +196,7 @@ namespace strategy {
             NUClear::log("Localisation Orientation reset. Localisation resets will now orient this as forwards.");
             manualOrientationReset = true;
             emit(std::make_unique<Nod>(true));
-            manualOrientation  = Rotation3D(Transform3D(convert<double, 4, 4>(-sensors.world)).rotation()).yaw();
+            manualOrientation  = Rotation3D(Transform3D(-sensors.world).rotation()).yaw();
 
 
         });

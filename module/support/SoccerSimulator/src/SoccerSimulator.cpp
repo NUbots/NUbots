@@ -318,7 +318,7 @@ namespace support {
                 r->back().locObject.position = world.robotPose.xy();
                 r->back().heading = bearingToUnitVector(world.robotPose.angle());
                 r->back().velocity = world.robotVelocity.rows(0,1);
-                r->back().locObject.position_cov = convert<double, 2, 2>(0.00001 * Eigen::Matrix<double, 2, 2>::Identity());
+                r->back().locObject.position_cov = 0.00001 * Eigen::Matrix<double, 2, 2>::Identity();
                 r->back().locObject.last_measurement_time = NUClear::clock::now();
                 emit(std::move(r));
             }
@@ -345,7 +345,7 @@ namespace support {
                 auto b = std::make_unique<message::localisation::Ball>();
                 b->locObject.position = world.robotPose.worldToLocal(world.ball.position).xy();
                 b->velocity = world.robotPose.rotation().t() * world.ball.velocity.rows(0,1);
-                b->locObject.position_cov = convert<double, 2, 2>(0.00001 * Eigen::Matrix<double, 2, 2>::Identity());
+                b->locObject.position_cov = 0.00001 * Eigen::Matrix<double, 2, 2>::Identity();
                 b->locObject.last_measurement_time = NUClear::clock::now();
                 emit(std::make_unique<std::vector<message::localisation::Ball>>(
                         std::vector<message::localisation::Ball>(1, *b)

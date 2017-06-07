@@ -437,7 +437,7 @@ namespace module {
                     auto forwardKinematics = calculateAllPositions(kinematicsModel, *sensors);
                     for (const auto& entry : forwardKinematics)
                     {
-                        sensors->forwardKinematics[entry.first] = convert<double, 4, 4>(entry.second);
+                        sensors->forwardKinematics[entry.first] = entry.second;
                     }
 
                     /************************************************
@@ -523,7 +523,7 @@ namespace module {
 
                             if (footDown)
                             {
-                                Transform3D Htf = convert<double, 4, 4>(sensors->forwardKinematics.at(servoid));
+                                Transform3D Htf = sensors->forwardKinematics.at(servoid);
                                 Transform3D Hft = Htf.i();
 
                                 Rotation3D Rtf = Htf.rotation();
@@ -597,9 +597,9 @@ namespace module {
                     world.rotation() = Rotation3D(UnitQuaternion(o.rows(MotionModel::QW, MotionModel::QZ)));
                     world.translation() = -(world.rotation() * o.rows(MotionModel::PX, MotionModel::PZ));
                     // world.translation() = (o.rows(MotionModel::PX, MotionModel::PZ));
-                    sensors->world = convert<double, 4, 4>(world);
+                    sensors->world = world;
 
-                    sensors->robotToIMU = convert<double, 2, 2>(calculateRobotToIMU(world.rotation()));
+                    sensors->robotToIMU = calculateRobotToIMU(world.rotation());
 
                     /************************************************
                      *                  Mass Model                  *
@@ -616,7 +616,7 @@ namespace module {
                     // sensors->bodyToGround : Mat size [4x4] (default identity)
                     // createRotationZ : Mat size [3x3]
                     // Rwt : Mat size [3x3]
-                    sensors->bodyToGround = convert<double, 4, 4>(Transform3D(oBodyToGround));
+                    sensors->bodyToGround = Transform3D(oBodyToGround);
                     auto headPitchKinematics = sensors->forwardKinematics.at(ServoID::HEAD_PITCH);
 
                     //Get torso to world transform
@@ -626,7 +626,7 @@ namespace module {
                     Transform3D torsoToGround = worldInv;
                     torsoToGround.translation() = Eigen::Vector3d(0,0,torsoToGround.translation()[2]);
                     torsoToGround.rotation() = yawlessWorldInvR;
-                    sensors->camToGround  = convert<double, 4, 4>(Transform3D(torsoToGround * convert<double, 4, 4>(headPitchKinematics))); // Rwt * Rth
+                    sensors->camToGround  = Transform3D(torsoToGround * convert<double, 4, 4>(headPitchKinematics)); // Rwt * Rth
 
                     /************************************************
                      *                  CENTRE OF PRESSURE          *

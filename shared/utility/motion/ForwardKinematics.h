@@ -331,7 +331,7 @@ namespace kinematics {
             utility::math::matrix::Transform3D massScaler;
             massScaler.submat(0,0,2,2) *= jointMass;
 
-            totalMassVector +=  convert<double, 4, 4>(joint.second) * massScaler * massVector; // = m * local centre of mass in global robot coords
+            totalMassVector +=  joint.second * massScaler * massVector; // = m * local centre of mass in global robot coords
         }
 
         if(includeTorso){
@@ -412,8 +412,8 @@ namespace kinematics {
         Eigen::Vector2d position = foot % Eigen::Vector2d(model.leg.FOOT_LENGTH / 2, model.leg.FOOT_WIDTH / 2);
         Eigen::Vector4d centerFoot = Eigen::Vector4d(position[0], position[1] + negativeIfRight * model.leg.FOOT_CENTRE_TO_ANKLE_CENTRE, 0, 1);
 
-        return((left) ? convert<double, 4, 4>(sensors.forwardKinematics.at(ServoID::L_ANKLE_ROLL)) * centerFoot
-                      : convert<double, 4, 4>(sensors.forwardKinematics.at(ServoID::R_ANKLE_ROLL)) * centerFoot);
+        return((left) ? sensors.forwardKinematics.at(ServoID::L_ANKLE_ROLL) * centerFoot
+                      : sensors.forwardKinematics.at(ServoID::R_ANKLE_ROLL) * centerFoot);
     }
 
     inline Eigen::Vector3d calculateCentreOfPressure(const KinematicsModel& model, const Sensors& sensors) {
@@ -432,7 +432,7 @@ namespace kinematics {
         }
         //reset homogeneous coordinate
         CoP(3) = 1;
-        Eigen::Vector4d CoP_body = convert<double, 4, 4>(sensors.bodyToGround) * CoP;
+        Eigen::Vector4d CoP_body = sensors.bodyToGround * CoP;
         return CoP_body.rows(0,2);
 
     }

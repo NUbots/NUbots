@@ -220,17 +220,17 @@ namespace module {
                         //We need to transform our view points to orientation space
                         if (ballMaxPriority)
                         {
-                            headToBodyRotation = Transform3D(convert<double, 4, 4>(ballFixationObjects[0].visObject.sensors->forwardKinematics.at(ServoID::HEAD_PITCH))).rotation();
-                            orientation        = Transform3D(convert<double, 4, 4>(ballFixationObjects[0].visObject.sensors->world)).rotation().i();
+                            headToBodyRotation = Transform3D(ballFixationObjects[0].visObject.sensors->forwardKinematics.at(ServoID::HEAD_PITCH)).rotation();
+                            orientation        = Transform3D(ballFixationObjects[0].visObject.sensors->world).rotation().i();
                         }
                         else
                         {
-                            headToBodyRotation = Transform3D(convert<double, 4, 4>(goalFixationObjects[0].visObject.sensors->forwardKinematics.at(ServoID::HEAD_PITCH))).rotation();
-                            orientation        = Transform3D(convert<double, 4, 4>(goalFixationObjects[0].visObject.sensors->world)).rotation().i();
+                            headToBodyRotation = Transform3D(goalFixationObjects[0].visObject.sensors->forwardKinematics.at(ServoID::HEAD_PITCH)).rotation();
+                            orientation        = Transform3D(goalFixationObjects[0].visObject.sensors->world).rotation().i();
                         }
                     } else {
-                        headToBodyRotation = Transform3D(convert<double, 4, 4>(sensors.forwardKinematics.at(ServoID::HEAD_PITCH))).rotation();
-                        orientation        = Transform3D(convert<double, 4, 4>(sensors.world)).rotation().i();
+                        headToBodyRotation = Transform3D(sensors.forwardKinematics.at(ServoID::HEAD_PITCH)).rotation();
+                        orientation        = Transform3D(sensors.world).rotation().i();
                     }
                     Rotation3D headToIMUSpace = orientation * headToBodyRotation;
 
@@ -289,7 +289,7 @@ namespace module {
                     //If we arent getting up, then we can update the plan if necessary
                     if(updatePlan){
                         if(lost){
-                            lastPlanOrientation = Transform3D(convert<double, 4, 4>(sensors.world)).rotation();
+                            lastPlanOrientation = Transform3D(sensors.world).rotation();
                         }
                         if (ballMaxPriority)
                         {
@@ -696,7 +696,7 @@ namespace module {
 
 
             bool HeadBehaviourSoccer::orientationHasChanged(const message::input::Sensors& sensors){
-                Rotation3D diff = Transform3D(convert<double, 4, 4>(sensors.world)).rotation().i() * lastPlanOrientation;
+                Rotation3D diff = Transform3D(sensors.world).rotation().i() * lastPlanOrientation;
                 UnitQuaternion quat = UnitQuaternion(diff);
                 float angle = quat.getAngle();
                 return std::fabs(angle) > replan_angle_threshold;

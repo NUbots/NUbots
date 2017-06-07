@@ -66,7 +66,7 @@ namespace support {
 
         Ball result;
 
-        Transform3D Hcf = getFieldToCam(robotPose, convert<double, 4, 4>(sensors.camToGround));
+        Transform3D Hcf = getFieldToCam(robotPose, sensors.camToGround);
         Transform3D Hfc = Hcf.i();
 
         // Ball position in field
@@ -103,8 +103,8 @@ namespace support {
             result.circle.radius = radius;
 
             // Get our transform to world coordinates
-            const Transform3D& Htw = convert<double, 4, 4>(sensors.world);
-            const Transform3D& Htc = convert<double, 4, 4>(sensors.forwardKinematics.at(ServoID::HEAD_PITCH));
+            const Transform3D& Htw = sensors.world;
+            const Transform3D& Htc = sensors.forwardKinematics.at(ServoID::HEAD_PITCH);
             Transform3D Hcw = Htc.i() * Htw;
             Transform3D Hwc = Hcw.i();
 

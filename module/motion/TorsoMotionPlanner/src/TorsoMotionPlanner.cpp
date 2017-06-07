@@ -161,7 +161,7 @@ namespace motion
         setTorsoPosition3D(arma::vec6({uTorsoWorld.x(), uTorsoWorld.y(), bodyHeight, 0, bodyTilt, uTorsoWorld.angle()}));
         emit(std::make_unique<TorsoMotionUpdate>(getTorsoPositionArms(),
                                                  getTorsoPositionLegs(),
-                                                 convert<double, 4, 4>(getTorsoPosition3D())));
+                                                 getTorsoPosition3D()));
     }
 /*=======================================================================================================*/
 //      METHOD: stepTorso

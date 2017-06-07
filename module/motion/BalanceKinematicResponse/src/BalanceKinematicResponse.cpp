@@ -139,7 +139,7 @@ namespace motion
             if(DEBUG) { log<NUClear::TRACE>("Messaging: Balance Kinematic Response - Received Update (Active Torso Position) Info(0)"); }
                 setTorsoPositionLegs(tmu.frameArms);
                 setTorsoPositionArms(tmu.frameLegs);
-                setTorsoPosition3D(convert<double, 4, 4>(tmu.frame3D));
+                setTorsoPosition3D(tmu.frame3D);
             if(DEBUG) { log<NUClear::TRACE>("Messaging: Balance Kinematic Response - Received Update (Active Torso Position) Info(1)"); }
 
             // Foot Position is a queued, continuous evaluation...
@@ -149,8 +149,8 @@ namespace motion
                 setLeftFootPosition2D(fmu.leftFoot2D);
                 setRightFootPosition2D(fmu.rightFoot2D);
                 // Transform feet positions to be relative to the robot torso...
-                setLeftFootPosition(Transform3D(convert<double, 4, 4>(fmu.leftFoot3D)).worldToLocal(getTorsoPosition3D()));
-                setRightFootPosition(Transform3D(convert<double, 4, 4>(fmu.rightFoot3D)).worldToLocal(getTorsoPosition3D()));
+                setLeftFootPosition(Transform3D(fmu.leftFoot3D).worldToLocal(getTorsoPosition3D()));
+                setRightFootPosition(Transform3D(fmu.rightFoot3D).worldToLocal(getTorsoPosition3D()));
             if(DEBUG) { log<NUClear::TRACE>("Messaging: Balance Kinematic Response - Received Update (Active Foot Position) Info(1)"); }
 
             // With a set of valid anthopomorphic data, balance posture and update WalkEngine...
@@ -264,12 +264,12 @@ namespace motion
             //Rotate foot around hip by the given hip roll compensation...
             if (getActiveForwardLimb() == LimbID::LEFT_LEG)
             {
-                Eigen::Matrix4d rHipRoll = convert<double, 4, 4>(sensors.forwardKinematics.at(ServoID::R_HIP_ROLL));
+                Eigen::Matrix4d rHipRoll = sensors.forwardKinematics.at(ServoID::R_HIP_ROLL);
                 setRightFootPosition(getRightFootPosition().rotateZLocal(-hipRollParameter * yBoundedMinimumPhase, rHipRoll));
             }
             else
             {
-                Eigen::Matrix4d lHipRoll = convert<double, 4, 4>(sensors.forwardKinematics.at(ServoID::L_HIP_ROLL));
+                Eigen::Matrix4d lHipRoll = sensors.forwardKinematics.at(ServoID::L_HIP_ROLL);
                 setLeftFootPosition(getLeftFootPosition().rotateZLocal( hipRollParameter  * yBoundedMinimumPhase, lHipRoll));
             }
         }
@@ -337,8 +337,8 @@ namespace motion
 
         // Emit new robot posture once there has been valid data set in all relevant variables...
         emit(std::make_unique<BalanceBodyUpdate>(getMotionPhase(),
-                                                 convert<double, 4, 4>(getLeftFootPosition()),
-                                                 convert<double, 4, 4>(getRightFootPosition()),
+                                                 getLeftFootPosition(),
+                                                 getRightFootPosition(),
                                                  getLArmPosition(),
                                                  getRArmPosition()));
     }

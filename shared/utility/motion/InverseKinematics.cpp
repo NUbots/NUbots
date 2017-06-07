@@ -255,7 +255,7 @@ namespace kinematics {
 
     Eigen::Vector2d headAnglesToSeeGroundPoint(const Eigen::Vector2d& gpos, const message::input::Sensors& sensors){
         Eigen::Vector3d groundPos_ground = {gpos[0],gpos[1],0};
-        return calculateHeadJointsToLookAt(groundPos_ground, convert<double, 4, 4>(sensors.camToGround), convert<double, 4, 4>(sensors.bodyToGround));
+        return calculateHeadJointsToLookAt(groundPos_ground, sensors.camToGround, sensors.bodyToGround);
     }
 
     std::vector<std::pair<ServoID, float>> setHeadPoseFromFeet(const KinematicsModel& model, const utility::math::matrix::Transform3D& cameraToFeet, const float& footSeparation) {

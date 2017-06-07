@@ -64,7 +64,7 @@ namespace motion {
         //------------------------------------
 
         //Robot coords in world (:Robot -> World)
-        Rotation3D orientation = Transform3D(convert<double, 4, 4>(sensors.world)).rotation().i();
+        Rotation3D orientation = Transform3D(sensors.world).rotation().i();
         Rotation3D yawlessOrientation = Rotation3D::createRotationZ(-orientation.yaw()) * orientation;
 
         // Removes any yaw component
@@ -153,7 +153,7 @@ namespace motion {
                                                        - translationPGainZ * total - translationDGainY * dTotal);
 
         // //Rotate from world space to torso space
-        // Rotation3D yawLessOrientation = Rotation3D::createRotationZ(-Transform3D(convert<double, 4, 4>(sensors.world)).rotation()).yaw()) * Transform3D(convert<double, 4, 4>(sensors.world)).rotation();
+        // Rotation3D yawLessOrientation = Rotation3D::createRotationZ(-Transform3D(sensors.world).rotation()).yaw()) * Transform3D(sensors.world).rotation();
 
         Eigen::Vector3d torsoAdjustment_torso = torsoAdjustment_world;
 

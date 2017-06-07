@@ -63,7 +63,7 @@ namespace module {
             topY[0] = 0;    //Choose centre of screen
 
             // Get the positions of the top of our green horizion, and the bottom of the screen
-            Eigen::Matrix4d camToGround = convert<double, 4, 4>(classifiedImage.sensors->camToGround);
+            Eigen::Matrix4d camToGround = classifiedImage.sensors->camToGround;
             auto xb = getGroundPointFromScreen({ 0, -double(image.dimensions[1] - 1) / 2}, camToGround, FOCAL_LENGTH_PIXELS);
             auto xt = getGroundPointFromScreen(topY, camToGround, FOCAL_LENGTH_PIXELS);
             double dx = 2 * BALL_RADIUS / BALL_MINIMUM_INTERSECTIONS_COARSE;

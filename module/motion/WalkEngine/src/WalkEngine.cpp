@@ -137,8 +137,8 @@ namespace motion
         handleUpdate = on<Trigger<BalanceBodyUpdate>>().then("Walk Engine - Received update (Balanced Robot Posture) Info", [this](const BalanceBodyUpdate& info)
         {
             if(DEBUG) { log<NUClear::TRACE>("WalkEngine - Trigger BalanceBodyUpdate(0)"); }
-                setLeftFootPosition(convert<double, 4, 4>(info.leftFoot));
-                setRightFootPosition(convert<double, 4, 4>(info.rightFoot));
+                setLeftFootPosition(info.leftFoot);
+                setRightFootPosition(info.rightFoot);
                 setLArmPosition(info.armLPosition);
                 setRArmPosition(info.armRPosition);
 

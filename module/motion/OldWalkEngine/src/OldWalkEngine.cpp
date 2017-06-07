@@ -503,10 +503,10 @@ namespace motion {
 
         // Rotate foot around hip by the given hip roll compensation
         if (swingLeg == LimbID::LEFT_LEG) {
-            rightFootTorso = rightFootTorso.rotateZLocal(-hipRollCompensation * phaseComp, convert<double, 4, 4>(sensors.forwardKinematics.find(ServoID::R_HIP_ROLL)->second));
+            rightFootTorso = rightFootTorso.rotateZLocal(-hipRollCompensation * phaseComp, sensors.forwardKinematics.find(ServoID::R_HIP_ROLL->second));
         }
         else {
-            leftFootTorso = leftFootTorso.rotateZLocal(hipRollCompensation * phaseComp, convert<double, 4, 4>(sensors.forwardKinematics.find(ServoID::L_HIP_ROLL)->second));
+            leftFootTorso = leftFootTorso.rotateZLocal(hipRollCompensation * phaseComp, sensors.forwardKinematics.find(ServoID::L_HIP_ROLL->second));
         }
 
         //TODO:is this a Debug?

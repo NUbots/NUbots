@@ -127,8 +127,8 @@ namespace motion {
 
 
             // 4x4 homogeneous transform matrices for left foot and right foot relative to torso
-            Transform3D leftFoot  = convert<double, 4, 4>(sensors.forwardKinematics.at(ServoID::L_ANKLE_ROLL));
-            Transform3D rightFoot = convert<double, 4, 4>(sensors.forwardKinematics.at(ServoID::R_ANKLE_ROLL));
+            Transform3D leftFoot  = sensors.forwardKinematics.at(ServoID::L_ANKLE_ROLL);
+            Transform3D rightFoot = sensors.forwardKinematics.at(ServoID::R_ANKLE_ROLL);
 
             // Work out which of our feet are going to be the support foot
             // Store the support foot and kick foot

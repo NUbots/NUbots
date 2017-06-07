@@ -176,8 +176,8 @@ namespace darwin {
         on<Every<UPDATE_FREQUENCY, Per<std::chrono::seconds>>, Optional<With<Sensors>>, Single>()
         .then([this] (std::shared_ptr<const Sensors> previousSensors) {
             if (previousSensors) {
-                Transform3D rightFootPose = convert<double, 4, 4>(previousSensors->forwardKinematics.at(ServoID::R_ANKLE_ROLL));
-                Transform3D leftFootPose  = convert<double, 4, 4>(previousSensors->forwardKinematics.at(ServoID::L_ANKLE_ROLL));
+                Transform3D rightFootPose = previousSensors->forwardKinematics.at(ServoID::R_ANKLE_ROLL);
+                Transform3D leftFootPose  = previousSensors->forwardKinematics.at(ServoID::L_ANKLE_ROLL);
                 Eigen::Vector3d torsoFromRightFoot = -rightFootPose.rotation().i() * rightFootPose.translation();
                 Eigen::Vector3d torsoFromLeftFoot = -leftFootPose.rotation().i() * leftFootPose.translation();
                 // emit(graph("torsoFromRightFoot", torsoFromRightFoot));

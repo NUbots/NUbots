@@ -48,8 +48,8 @@ namespace module {
             , const MeasurementType::BALL&) const {
 
             // Get our transform to world coordinates
-            const Transform3D& Htw = convert<double, 4, 4>(sensors.world);
-            const Transform3D& Htc = convert<double, 4, 4>(sensors.forwardKinematics.at(ServoID::HEAD_PITCH));
+            const Transform3D& Htw = sensors.world;
+            const Transform3D& Htc = sensors.forwardKinematics.at(ServoID::HEAD_PITCH);
             Transform3D Hcw = Htc.i() * Htw;
 
             Eigen::Vector3d rBWw = { state[PX], state[PY], field.ball_radius };

@@ -204,8 +204,8 @@ namespace motion
                                                 inActiveForwardLimb,
                                                 getLeftFootPosition(),
                                                 getRightFootPosition(),
-                                                convert<double, 4, 4>(leftFootLocal),
-                                                convert<double, 4, 4>(rightFootLocal)));
+                                                leftFootLocal,
+                                                rightFootLocal));
         // Notify whenever a subsequent foot step is promoted...
     }
 /*=======================================================================================================*/

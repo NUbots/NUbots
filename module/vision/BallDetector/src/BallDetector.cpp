@@ -204,7 +204,7 @@ namespace vision {
 
             if(print_throwout_logs) log("Ransac : ", ransacResults.size(), "results");
 
-            Eigen::Matrix4d camToGround = convert<double, 4, 4>(sensors.camToGround);
+            Eigen::Matrix4d camToGround = sensors.camToGround;
 
             for (auto& result : ransacResults) {
 
@@ -286,8 +286,8 @@ namespace vision {
                 b.visObject.sensors = image.sensors;
 
                 // Get our transform to world coordinates
-                const Transform3D& Htw = convert<double, 4, 4>(sensors.world);
-                const Transform3D& Htc = convert<double, 4, 4>(sensors.forwardKinematics.at(ServoID::HEAD_PITCH));
+                const Transform3D& Htw = sensors.world;
+                const Transform3D& Htc = sensors.forwardKinematics.at(ServoID::HEAD_PITCH);
                 Transform3D Hcw = Htc.i() * Htw;
                 Transform3D Hwc = Hcw.i();
 
@@ -319,7 +319,7 @@ namespace vision {
                 b.circle.centre = result.model.centre;
 
                 // Angular positions from the camera
-                b.visObject.screenAngular = arma::atan(convert<double, 2>(cam.pixelsToTanThetaFactor % ballCentreScreen));
+                b.visObject.screenAngular = arma::atan(cam.pixelsToTanThetaFactor % ballCentreScreen);
                 b.visObject.angularSize   << getParallaxAngle(left, right, cam.focalLengthPixels), getParallaxAngle(top, base, cam.focalLengthPixels);
 
                 // Add our points

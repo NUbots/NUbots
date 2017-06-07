@@ -164,7 +164,7 @@ namespace module {
 
                     }
 
-                    Transform3D Htw = convert<double, 4, 4>(sensors.world);
+                    Transform3D Htw = sensors.world;
                     auto now = NUClear::clock::now();
                     float timeSinceBallSeen = std::chrono::duration_cast<std::chrono::nanoseconds>(now - timeBallLastSeen).count() * (1 / std::nano::den);
 

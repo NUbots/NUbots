@@ -101,11 +101,11 @@ namespace localisation {
                 Eigen::Vector3d Tgr = Eigen::Vector3d{h.position[0], h.position[1], h.heading};
 
                 if (!h.absoluteYaw) {
-                    Tgr[2] -= Rotation3D(Transform3D(convert<double, 4, 4>(sensors.world)).rotation()).yaw();
+                    Tgr[2] -= Rotation3D(Transform3D(sensors.world).rotation()).yaw();
                 }
 
                 Eigen::Matrix3d stateCov(arma::fill::eye);
-                stateCov.submat(0, 0, 1, 1) = convert<double, 2, 2>(h.position_cov);
+                stateCov.submat(0, 0, 1, 1) = h.position_cov;
                 stateCov(2, 2) = h.heading_var;
                 filter.filters.emplace_back(0.0, UKF<FieldModel>(Tgr, stateCov));
             }
@@ -116,7 +116,7 @@ namespace localisation {
         on<Trigger<Sensors>, Sync<RobotFieldLocalisation>, Single>().then("Localisation Field Space", [this] (const Sensors& sensors) {
 
             // Use the current world to field state we are holding to modify sensors.world and emit that
-            utility::math::matrix::Transform3D Htg = convert<double, 4, 4>(sensors.world);
+            utility::math::matrix::Transform3D Htg = sensors.world;
 
             //this actually gets Field to Torso???
             //g = odometry space
@@ -138,8 +138,8 @@ namespace localisation {
             //std::cerr << "currentLocalisation: " << std::endl << currentLocalisation << std::endl;
             //set position, covariance, and rotation
             robot.locObject.position      = currentLocalisation.rows(0, 1);
-            robot.robot_to_world_rotation = convert<double, 2, 2>(Rotation2D::createRotation(currentLocalisation[2]));
-            robot.locObject.position_cov  = robot.robot_to_world_rotation * convert<double, 2, 2>(filter.getCovariance().submat(0, 0, 1, 1));
+            robot.robot_to_world_rotation = Rotation2D::createRotation(currentLocalisation[2]);
+            robot.locObject.position_cov  = robot.robot_to_world_rotation * filter.getCovariance().submat(0, 0, 1, 1);
             robot.heading                 = robot.robot_to_world_rotation.row(0).transpose();
             emit(std::make_unique<std::vector<message::localisation::Self>>(std::vector<message::localisation::Self>(1, robot)));
         });

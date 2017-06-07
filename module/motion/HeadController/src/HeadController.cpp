@@ -110,7 +110,7 @@ namespace motion
                 //The goal angles are for the neck directly, so we have to offset the camera declination again
                 Eigen::Vector3d goalHeadUnitVector_world = sphericalToCartesian({1, currentAngles[0], currentAngles[1]});
                 //Convert to robot space
-                Eigen::Vector3d headUnitVector = goalRobotSpace ? goalHeadUnitVector_world : Transform3D(convert<double, 4, 4>(sensors.world)).rotation() * goalHeadUnitVector_world;
+                Eigen::Vector3d headUnitVector = goalRobotSpace ? goalHeadUnitVector_world : Transform3D(sensors.world).rotation() * goalHeadUnitVector_world;
                 //Compute inverse kinematics for head
                 //!!!!!!!!!!!!!!
                 //!!!!!!!!!!!!!!
