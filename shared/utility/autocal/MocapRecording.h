@@ -1,7 +1,6 @@
 /*
 author Jake Fountain
 This code is part of mocap-kinect experiments*/
-#include <armadillo>
 #include <chrono>
 #include <dirent.h>
 #include <map>
@@ -18,7 +17,7 @@ namespace autocal {
 	class MocapRecording {
 	public:
 		std::map<std::string, MocapStream> streams;
-	
+
 		MocapStream& getStream(std::string stream_name){
 			return streams[stream_name];
 		}
@@ -28,7 +27,7 @@ namespace autocal {
 		}
 
 		void addMeasurement(const std::string& name, const TimeStamp& timeStamp, const MocapStream::RigidBodyID& rigidBodyId, const utility::math::matrix::Transform3D& pose, bool correctCoordinateSystem = false);
-		
+
 		void markStartOfStreams(TimeStamp now);
 
 		void addStats(const std::string& name, const MocapStream::RigidBodyID& rigidBodyId, const utility::math::matrix::Transform3D& pose);

@@ -22,7 +22,6 @@
 
 #include <vector>
 
-#include <armadillo>
 
 #define QUEX_SETTING_BUFFER_MIN_FALLBACK_N 0
 #define QUEX_OPTION_ASSERTS_DISABLED

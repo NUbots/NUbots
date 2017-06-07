@@ -21,7 +21,6 @@
 #define MODULES_KFBALLLOCALISATIONENGINE_H
 
 #include <nuclear>
-#include <armadillo>
 #include <chrono>
 
 #include "utility/math/filter/UKF.h"

@@ -21,7 +21,6 @@
 #define UTILITY_LEARNING_KMEANS_H
 
 #include <yaml-cpp/yaml.h>
-#include <armadillo>
 
 namespace utility {
 namespace learning {

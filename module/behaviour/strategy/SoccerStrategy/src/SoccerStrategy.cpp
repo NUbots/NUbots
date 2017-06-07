@@ -42,7 +42,7 @@
 #include "utility/math/matrix/Transform2D.h"
 #include "utility/math/matrix/Transform3D.h"
 #include "utility/nubugger/NUhelpers.h"
-#include "utility/support/yaml_armadillo.h"
+#include "utility/support/yaml_expression.h"
 #include "utility/time/time.h"
 
 namespace module {

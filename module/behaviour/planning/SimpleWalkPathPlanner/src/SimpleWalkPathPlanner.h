@@ -21,7 +21,6 @@
 #define MODULES_BEHAVIOUR_PLANNERS_SIMPLEWALKPATHPLANNER_H
 
 #include <nuclear>
-#include <armadillo>
 #include <cmath>
 
 #include "extension/Configuration.h"
@@ -58,8 +57,8 @@ namespace module {
                     arma::vec2 currentTargetPosition;
                     arma::vec2 currentTargetHeading;
                     message::behaviour::KickPlan targetHeading;
-                    arma::vec2 targetPosition = {0, 0}; 
-                    
+                    arma::vec2 targetPosition = {0, 0};
+
                     NUClear::clock::time_point timeBallLastSeen;
                     arma::vec3 rBWw = {10,0,0};
                     bool robot_ground_space = true;

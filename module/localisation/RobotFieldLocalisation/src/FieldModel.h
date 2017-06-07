@@ -20,7 +20,6 @@
 #ifndef MODULE_LOCALISATION_FIELDMODEL_H
 #define MODULE_LOCALISATION_FIELDMODEL_H
 
-#include <armadillo>
 
 #include "message/input/Sensors.h"
 #include "message/vision/VisionObjects.h"
@@ -51,8 +50,8 @@ namespace module {
             arma::vec::fixed<size> timeUpdate(const arma::vec::fixed<size>& state, double deltaT);
 
             arma::vec predictedObservation(const arma::vec::fixed<size>& state
-                , const std::vector<std::tuple<message::vision::Goal::Team::Value, 
-                                               message::vision::Goal::Side::Value, 
+                , const std::vector<std::tuple<message::vision::Goal::Team::Value,
+                                               message::vision::Goal::Side::Value,
                                                message::vision::Goal::MeasurementType>>& measurements
                 , const message::support::FieldDescription& field
                 , const message::input::Sensors& sensors

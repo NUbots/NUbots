@@ -20,7 +20,6 @@
 #define UTILITY_MATH_VISION_H
 
 #include <cmath>
-#include <armadillo>
 #include <nuclear>
 #include <Eigen/Core>
 

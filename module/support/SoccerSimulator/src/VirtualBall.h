@@ -21,7 +21,6 @@
 #define MODULE_SUPPORT_VIRTUALBALL
 
 #include <random>
-#include <armadillo>
 
 #include "message/input/CameraParameters.h"
 #include "message/input/Sensors.h"

@@ -20,7 +20,6 @@
 #ifndef MODULES_BEHAVIOUR_PLANNING_KICKPLANNER_H
 #define MODULES_BEHAVIOUR_PLANNING_KICKPLANNER_H
 
-#include <armadillo>
 
 #include "message/input/Sensors.h"
 #include "message/motion/KickCommand.h"

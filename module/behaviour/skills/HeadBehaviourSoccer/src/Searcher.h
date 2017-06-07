@@ -21,7 +21,6 @@
 #define MODULES_BEHAVIOUR_SKILLS_SEARCHER_H
 
 #include <nuclear>
-#include <armadillo>
 
 
 namespace module {

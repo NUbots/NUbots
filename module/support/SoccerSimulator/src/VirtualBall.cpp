@@ -19,7 +19,6 @@
 
 #include "VirtualBall.h"
 
-#include <armadillo>
 #include <Eigen/Core>
 
 #include "utility/input/ServoID.h"

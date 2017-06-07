@@ -20,7 +20,6 @@
 #ifndef UTILITY_MATH_OPTIMISATION_GAUSSIANSAMPLER_H
 #define UTILITY_MATH_OPTIMISATION_GAUSSIANSAMPLER_H
 
-#include <armadillo>
 #include <Eigen/Core>
 #include <cmath>
 

@@ -20,7 +20,6 @@
 #ifndef UTILITY_TIME_TIME_H
 #define UTILITY_TIME_TIME_H
 
-#include <armadillo>
 #include <chrono>
 #include <nuclear>
 

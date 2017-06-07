@@ -25,7 +25,7 @@
 
 #include "message/motion/KickCommand.h"
 
-#include "utility/support/yaml_armadillo.h"
+#include "utility/support/yaml_expression.h"
 
 namespace module {
 namespace behaviour {

@@ -20,7 +20,6 @@
 #ifndef UTILITY_MATH_MATRIX_TRANSFORM2D_H
 #define UTILITY_MATH_MATRIX_TRANSFORM2D_H
 
-#include <armadillo>
 #include "Rotation2D.h"
 
 namespace utility {

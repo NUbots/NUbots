@@ -18,7 +18,6 @@
  */
 
 #include "KickAtGoal.h"
-#include <armadillo>
 
 #include "message/behaviour/KickPlan.h"
 #include "message/behaviour/MotionCommand.h"

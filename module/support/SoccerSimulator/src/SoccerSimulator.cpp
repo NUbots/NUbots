@@ -36,8 +36,7 @@
 #include "utility/nubugger/NUhelpers.h"
 #include "utility/localisation/transform.h"
 #include "utility/motion/ForwardKinematics.h"
-#include "utility/support/yaml_armadillo.h"
-
+#include "utility/support/yaml_expression.h"
 
 namespace module {
 namespace support {

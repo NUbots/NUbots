@@ -21,7 +21,6 @@
 #define UTILITY_MATH_KALMAN_LINEARVEC3MODEL_H
 
 /* Inertial Motion Unit*/
-#include <armadillo>
 namespace utility {
     namespace math {
         namespace kalman {

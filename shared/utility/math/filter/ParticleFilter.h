@@ -23,7 +23,6 @@
 #define UTILITY_MATH_FILTER_PARTICLEFILTER_H
 
 #include <nuclear>
-#include <armadillo>
 #include <random>
 #include <vector>
 

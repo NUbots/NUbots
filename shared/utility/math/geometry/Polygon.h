@@ -20,7 +20,6 @@
 #ifndef UTILITY_MATH_GEOMETRY_POLYGON_H
 #define UTILITY_MATH_GEOMETRY_POLYGON_H
 
-#include <armadillo>
 #include "ParametricLine.h"
 
 namespace utility {

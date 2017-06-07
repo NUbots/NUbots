@@ -21,7 +21,6 @@
 #ifndef UTILITY_MATH_GEOMETRY_LINE_H
 #define UTILITY_MATH_GEOMETRY_LINE_H
 
-#include <armadillo>
 #include <iostream>
 #include <vector>
 #include <limits>

@@ -20,7 +20,6 @@
 #ifndef UTILITY_MATH_MATRIX_TRANSFORM3D_H
 #define UTILITY_MATH_MATRIX_TRANSFORM3D_H
 
-#include <armadillo>
 
 #include "utility/math/matrix/Rotation3D.h"
 #include "utility/math/matrix/Transform2D.h"
@@ -70,7 +69,7 @@ namespace matrix {
              * @brief Convert from a Rotation3D matrix
              */
 
-            Transform(const Rotation3D& rotation); 
+            Transform(const Rotation3D& rotation);
 
             /**
              * @brief Convert from a Rotation3D matrix
@@ -256,9 +255,9 @@ namespace matrix {
              * @return The rotation transform
              */
             static Transform3D createRotationZ(double radians);
-            
+
             static Transform3D createScale(const arma::vec3& v);
-            
+
             /**
              * @brief Interpolates between two transforms
              *
@@ -268,7 +267,7 @@ namespace matrix {
             static Transform3D interpolate(Transform3D T1, Transform3D T2, float alpha);
 
             /**
-             * @brief Construct transform from a transform 3D assuming the angle is around the yawAxis 
+             * @brief Construct transform from a transform 3D assuming the angle is around the yawAxis
              * and the translation is projected onto the plane normal to yawAxis
              */
             Transform2D projectTo2D(const arma::vec3& yawAxis, const arma::vec3& forwardAxis) const;

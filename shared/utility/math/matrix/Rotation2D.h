@@ -20,7 +20,6 @@
 #ifndef UTILITY_MATH_MATRIX_ROTATION2D_H
 #define UTILITY_MATH_MATRIX_ROTATION2D_H
 
-#include <armadillo>
 
 namespace utility {
 namespace math {

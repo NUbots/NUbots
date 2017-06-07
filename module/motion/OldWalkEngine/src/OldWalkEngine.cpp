@@ -20,7 +20,6 @@
 #include "OldWalkEngine.h"
 
 #include <algorithm>
-#include <armadillo>
 #include <chrono>
 #include <cmath>
 
@@ -41,7 +40,6 @@
 #include "utility/math/angle.h"
 #include "utility/math/matrix/Rotation3D.h"
 #include "utility/nubugger/NUhelpers.h"
-#include "utility/support/yaml_armadillo.h"
 #include "utility/support/yaml_expression.h"
 
 namespace module {

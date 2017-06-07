@@ -27,7 +27,7 @@
 #include "message/motion/WalkCommand.h"
 #include "message/vision/VisionObjects.h"
 
-#include "utility/support/yaml_armadillo.h"
+#include "utility/support/yaml_expression.h"
 
 namespace module {
 namespace behaviour {

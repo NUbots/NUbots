@@ -21,7 +21,6 @@
 #define UTILITY_MATH_RANSAC_RANSACCIRCLEMODEL_H
 
 #include <array>
-#include <armadillo>
 #include "utility/math/geometry/Circle.h"
 
 namespace utility {

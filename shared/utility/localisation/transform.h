@@ -20,7 +20,6 @@
 #ifndef UTILITY_LOCALISATION_TRANSFORM_H
 #define UTILITY_LOCALISATION_TRANSFORM_H
 
-#include <armadillo>
 #include "utility/math/matrix/Rotation2D.h"
 #include "utility/math/matrix/Rotation3D.h"
 #include "utility/math/coordinates.h"

@@ -22,7 +22,6 @@
 #define MODULES_BEHAVIOUR_PLANNERS_FIXEDWALK_H
 
 #include <nuclear>
-#include <armadillo>
 #include <list>
 
 #include "message/input/Sensors.h"

@@ -35,8 +35,7 @@
 #include "utility/math/vision.h"
 #include "utility/motion/InverseKinematics.h"
 #include "utility/nubugger/NUhelpers.h"
-#include "utility/support/yaml_armadillo.h"
-
+#include "utility/support/yaml_expression.h"
 
 namespace module {
     namespace behaviour{

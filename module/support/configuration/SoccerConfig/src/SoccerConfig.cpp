@@ -19,7 +19,6 @@
 
 #include "SoccerConfig.h"
 
-#include <armadillo>
 
 #include "extension/Configuration.h"
 #include "message/support/FieldDescription.h"

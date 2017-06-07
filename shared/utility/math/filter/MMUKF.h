@@ -21,7 +21,6 @@
 #define UTILITY_MATH_FILTER_MMUKF_H
 
 #include <nuclear>
-#include <armadillo>
 
 #include "UKF.h"
 

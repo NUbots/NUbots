@@ -21,7 +21,6 @@
 #define NUHELPERS_H
 
 #include <nuclear>
-#include <armadillo>
 #include <Eigen/Core>
 
 #include "message/support/nubugger/DataPoint.h"

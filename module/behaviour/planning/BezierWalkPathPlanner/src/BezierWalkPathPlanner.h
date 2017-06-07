@@ -21,7 +21,6 @@
 #define MODULES_BEHAVIOUR_PLANNERS_BEZIERWALKPATHPLANNER_H
 
 #include <nuclear>
-#include <armadillo>
 #include <cmath>
 
 #include "extension/Configuration.h"
@@ -68,7 +67,7 @@ namespace module {
                     // arma::vec2 currentTargetHeading;
                     // message::behaviour::MotionCommand::Type planType;
                     // message::behaviour::KickPlan targetHeading;
-                    // arma::vec2 targetPosition = {0, 0}; 
+                    // arma::vec2 targetPosition = {0, 0};
 
                 public:
                     explicit BezierWalkPathPlanner(std::unique_ptr<NUClear::Environment> environment);

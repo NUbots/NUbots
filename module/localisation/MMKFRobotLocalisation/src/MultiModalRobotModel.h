@@ -20,7 +20,6 @@
 #ifndef MODULES_MULTIMODALROBOTMODEL_H
 #define MODULES_MULTIMODALROBOTMODEL_H
 
-#include <armadillo>
 #include <nuclear>
 #include "utility/localisation/LocalisationFieldObject.h"
 #include "utility/math/filter/ParticleFilter.h"

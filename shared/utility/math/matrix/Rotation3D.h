@@ -20,7 +20,6 @@
 #ifndef UTILITY_MATH_MATRIX_ROTATION3D_H
 #define UTILITY_MATH_MATRIX_ROTATION3D_H
 
-#include <armadillo>
 
 #include "utility/math/geometry/UnitQuaternion.h"
 

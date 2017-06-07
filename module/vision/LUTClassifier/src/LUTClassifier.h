@@ -21,7 +21,6 @@
 #define MODULES_VISION_LUTCLASSIFIER_H
 
 #include <nuclear>
-#include <armadillo>
 #include <Eigen/Core>
 
 #include "QuexClassifier.h"

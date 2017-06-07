@@ -20,7 +20,6 @@
 #include "HardwareSimulator.h"
 
 #include <limits>
-#include <armadillo>
 #include <mutex>
 
 #include "extension/Configuration.h"
@@ -31,7 +30,7 @@
 
 #include "utility/input/ServoID.h"
 #include "utility/math/angle.h"
-#include "utility/support/yaml_armadillo.h"
+#include "utility/support/yaml_expression.h"
 #include "utility/nubugger/NUhelpers.h"
 #include "utility/platform/darwin/DarwinSensors.h"
 #include "utility/math/matrix/Transform3D.h"
@@ -177,8 +176,8 @@ namespace darwin {
         on<Every<UPDATE_FREQUENCY, Per<std::chrono::seconds>>, Optional<With<Sensors>>, Single>()
         .then([this] (std::shared_ptr<const Sensors> previousSensors) {
             if (previousSensors) {
-                Transform3D rightFootPose = convert<double, 4, 4>(previousSensors->forwardKinematics.at(ServoID::R_ANKLE_ROLL)); 
-                Transform3D leftFootPose  = convert<double, 4, 4>(previousSensors->forwardKinematics.at(ServoID::L_ANKLE_ROLL)); 
+                Transform3D rightFootPose = convert<double, 4, 4>(previousSensors->forwardKinematics.at(ServoID::R_ANKLE_ROLL));
+                Transform3D leftFootPose  = convert<double, 4, 4>(previousSensors->forwardKinematics.at(ServoID::L_ANKLE_ROLL));
                 arma::vec3 torsoFromRightFoot = -rightFootPose.rotation().i() * rightFootPose.translation();
                 arma::vec3 torsoFromLeftFoot = -leftFootPose.rotation().i() * leftFootPose.translation();
                 // emit(graph("torsoFromRightFoot", torsoFromRightFoot));

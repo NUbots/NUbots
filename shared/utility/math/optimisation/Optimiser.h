@@ -20,7 +20,6 @@
 #ifndef UTILITY_MATH_OPTIMISER_H
 #define UTILITY_MATH_OPTIMISER_H
 
-#include <armadillo>
 #include <cmath>
 
 #include "message/support/optimisation/OptimiserTypes.h"

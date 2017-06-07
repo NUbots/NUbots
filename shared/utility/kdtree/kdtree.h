@@ -26,7 +26,6 @@
 #ifndef KDTREE_H
 #define KDTREE_H
 
-#include <armadillo>
 #include <vector>
 #include <utility>
 #include <algorithm>

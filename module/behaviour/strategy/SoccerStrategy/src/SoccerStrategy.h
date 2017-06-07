@@ -21,7 +21,6 @@
 #define MODULES_BEHAVIOUR_STRATEGY_SOCCERSTRATEGGY_H
 
 #include <nuclear>
-#include <armadillo>
 
 #include "message/behaviour/KickPlan.h"
 #include "message/behaviour/FieldTarget.h"

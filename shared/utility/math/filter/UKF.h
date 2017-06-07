@@ -21,7 +21,6 @@
 #define UTILITY_MATH_FILTER_UKF_H
 
 #include <nuclear>
-#include <armadillo>
 
 #include "utility/support/LazyEvaluation.h"
 

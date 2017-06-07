@@ -19,7 +19,6 @@
 
 #include "BallModel.h"
 
-#include <armadillo>
 
 #include "utility/math/angle.h"
 #include "utility/math/coordinates.h"

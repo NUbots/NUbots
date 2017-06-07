@@ -21,7 +21,6 @@
 #define MODULES_BEHAVIOUR_REFLEX_HEADBEHAVIOURSOCCER_H
 
 #include <nuclear>
-#include <armadillo>
 #include <set>
 
 #include "Searcher.h"

@@ -20,7 +20,6 @@
 #ifndef UTILITY_MATH_GEOMETRY_UNITQUATERNION_H
 #define UTILITY_MATH_GEOMETRY_UNITQUATERNION_H
 
-#include <armadillo>
 
 #include "utility/math/matrix/Rotation3D.h"
 
@@ -60,7 +59,7 @@ namespace geometry {
             /*! @brief Creates quaternion which rotates about 3D axis by angle radians
             */
             UnitQuaternion(const arma::vec3& axis, double angle);
-            
+
             /*! @brief Swaps quat to -quat if kW < 0
             */
             void rectify();

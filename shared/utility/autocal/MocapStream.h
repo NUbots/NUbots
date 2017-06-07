@@ -1,7 +1,6 @@
 /*
 author Jake Fountain
 This code is part of mocap-kinect experiments*/
-#include <armadillo>
 #include <chrono>
 #include <dirent.h>
 #include <map>
@@ -15,7 +14,7 @@ This code is part of mocap-kinect experiments*/
 #define AUTOCAL_MOCAP_STREAM
 
 namespace autocal {
-	
+
 	typedef long long int TimeStamp;
 
 	class MocapStream {
@@ -67,10 +66,10 @@ namespace autocal {
 
 		bool correctForAutocalibrationCoordinateSystem;
 
-		//If we are loading sensor stream from a left hand coordinate system, 
+		//If we are loading sensor stream from a left hand coordinate system,
 		//we must carefully transform it to be compatible with the calibration system
 		bool LHInput;
-		
+
 		TimeStamp getTimeStamp(const std::chrono::system_clock::time_point& t){
 			return std::chrono::duration_cast<std::chrono::microseconds>(t.time_since_epoch()).count();
 		}
@@ -82,8 +81,8 @@ namespace autocal {
 		std::shared_ptr<std::map<TimeStamp, Frame>> stream;
 	public:
 		//Constructor
-		MocapStream(std::string name = "", bool LHInput_ = false, bool correction = false) 
-		: stream_name(name), 
+		MocapStream(std::string name = "", bool LHInput_ = false, bool correction = false)
+		: stream_name(name),
 		  correctForAutocalibrationCoordinateSystem(correction),
 		  LHInput(LHInput_)
 		{
@@ -98,16 +97,16 @@ namespace autocal {
 		int size() const {return stream->size();}
 
 		bool isEmpty() const {return stream->empty();}
-		
+
 		std::string name() const {return stream_name;}
 
 		std::string toString();
 
 		void transform(utility::math::matrix::Transform3D T);
-		
+
 		std::map<TimeStamp,Frame>::iterator begin(){return stream->begin();}
 		std::map<TimeStamp,Frame>::iterator end(){return stream->end();}
-		
+
 		//Frame retrieval
 		Frame getFrame(const std::chrono::system_clock::time_point& t);
 		Frame getInterpolatedFrame(const TimeStamp& t);
@@ -118,14 +117,14 @@ namespace autocal {
 		//Iterator accessor
 		std::map<TimeStamp,Frame>::iterator getUpperBoundIter(const TimeStamp& t);
 		std::map<TimeStamp,Frame>::iterator getLowerBoundIter(const TimeStamp& t);
-		
+
 		//Load data from files
 		bool loadMocapData(std::string folder_path, const TimeStamp& start_time, const std::chrono::system_clock::time_point& end_time, const std::set<int>& allowedIDs = std::set<int>());
 
 		//set data using different time indicators
 		bool setRigidBodyInFrame(const std::chrono::system_clock::time_point& frame_time, const unsigned int& id, const utility::math::matrix::Transform3D& pose, bool correctCoordinateSystem);
 		bool setRigidBodyInFrame(const TimeStamp& frame_time, const unsigned int& id, const utility::math::matrix::Transform3D& pose, bool correctCoordinateSystem);
-		
+
 		//Get the latest poses of the recorded data
 		std::map<RigidBodyID, utility::math::matrix::Transform3D> getCompleteStates(TimeStamp now);
 
@@ -136,7 +135,7 @@ namespace autocal {
 
 		Frame getSimulatedFrame(TimeStamp now);
 
-		
+
 	};
 
 }

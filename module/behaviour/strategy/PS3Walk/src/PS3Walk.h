@@ -22,7 +22,6 @@
 
 
 #include <nuclear>
-#include <armadillo>
 #include "Joystick.h"
 
 namespace module {

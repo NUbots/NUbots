@@ -21,7 +21,6 @@
 #define MODULES_PLATFORM_DARWIN_HARDWARESIMULATOR_H
 
 #include <nuclear>
-#include <armadillo>
 #include <mutex>
 
 #include "message/platform/darwin/DarwinSensors.h"

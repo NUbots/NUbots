@@ -35,7 +35,7 @@
 #include "utility/math/matrix/Transform3D.h"
 #include "utility/math/vision.h"
 #include "utility/nubugger/NUhelpers.h"
-#include "utility/support/yaml_armadillo.h"
+#include "utility/support/yaml_expression.h"
 
 namespace module {
 namespace localisation {

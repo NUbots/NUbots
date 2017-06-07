@@ -19,7 +19,6 @@
 
 #include "DOpE.h"
 
-#include <armadillo>
 #include <Eigen/Core>
 #include <fmt/format.h>
 #include <google/protobuf/util/message_differencer.h>

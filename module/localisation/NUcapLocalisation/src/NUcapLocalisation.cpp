@@ -26,7 +26,6 @@
 #include "extension/Configuration.h"
 #include "message/localisation/FieldObject.h"
 #include "utility/math/angle.h"
-#include <armadillo>
 
 namespace module {
 namespace localisation {

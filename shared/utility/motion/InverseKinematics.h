@@ -21,7 +21,6 @@
 #define UTILITY_MOTION_INVERSEKINEMATICS_H
 
 #include <vector>
-#include <armadillo>
 #include <cmath>
 #include <chrono>
 #include <nuclear>
@@ -41,7 +40,7 @@
 namespace utility {
 namespace motion {
 namespace kinematics {
-    
+
     using LimbID  = utility::input::LimbID;
     using ServoID = utility::input::ServoID;
 

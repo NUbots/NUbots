@@ -19,7 +19,6 @@
 
 #include "GoalSaver.h"
 
-#include <armadillo>
 
 #include "extension/Configuration.h"
 

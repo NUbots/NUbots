@@ -21,7 +21,6 @@
 #define MODULES_LOCALISATION_MMKFROBOTLOCALISATION_H
 
 #include <nuclear>
-#include <armadillo>
 #include "MMKFRobotLocalisationEngine.h"
 
 namespace module {

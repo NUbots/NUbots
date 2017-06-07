@@ -3,7 +3,6 @@
 
 #include <cmath>
 #include <vector>
-#include <armadillo>
 
 namespace utility
 {

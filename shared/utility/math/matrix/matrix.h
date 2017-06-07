@@ -20,7 +20,6 @@
 #ifndef UTILITY_MATH_MATRIX_H
 #define UTILITY_MATH_MATRIX_H
 
-#include <armadillo>
 
 /**
  * Matrix related helper methods

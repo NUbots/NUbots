@@ -21,7 +21,6 @@
 #define MODULE_MOTION_FOOTPLACEMENTPLANNER_H
 
 #include <nuclear>
-#include <armadillo>
 #include <Eigen/Core>
 
 #include <yaml-cpp/yaml.h>
@@ -56,7 +55,6 @@
 
 #include "utility/nubugger/NUhelpers.h"
 
-#include "utility/support/yaml_armadillo.h"
 #include "utility/support/yaml_expression.h"
 
 namespace module

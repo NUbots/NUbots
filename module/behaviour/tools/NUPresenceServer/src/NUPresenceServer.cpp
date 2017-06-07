@@ -29,7 +29,6 @@
 
 #include "utility/input/ServoID.h"
 #include "utility/math/matrix/Transform3D.h"
-#include "utility/support/yaml_armadillo.h"
 #include "utility/support/yaml_expression.h"
 
 namespace module {

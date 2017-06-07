@@ -21,7 +21,6 @@
 #define MODULES_BEHAVIOUR_REFLEX_HEADCONTROLLER_H
 
 #include <nuclear>
-#include <armadillo>
 
 namespace module {
     namespace motion {
@@ -45,7 +44,7 @@ namespace module {
                 static constexpr const char* ONTRIGGER_HEAD_POS = "Head Controller - Update Head Position";
 
                 explicit HeadController(std::unique_ptr<NUClear::Environment> environment);
-                
+
                 arma::vec2 currentAngles;
                 arma::vec2 goalAngles;
                 bool goalRobotSpace = true;

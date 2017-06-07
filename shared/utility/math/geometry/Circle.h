@@ -20,7 +20,6 @@
 #ifndef UTILITY_MATH_GEOMETRY_CIRCLE_H
 #define UTILITY_MATH_GEOMETRY_CIRCLE_H
 
-#include <armadillo>
 
 namespace utility {
 namespace math {

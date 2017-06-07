@@ -1,7 +1,6 @@
 /*
 author Jake Fountain
 This code is part of mocap-kinect experiments*/
-#include <armadillo>
 #include <chrono>
 #include <dirent.h>
 #include <map>
@@ -22,14 +21,14 @@ namespace autocal {
 	public:
 		Correlator();
 		~Correlator(){};
-		
+
 	private:
 		//CONFIG
 		int number_of_samples;
 
 		float difference_threshold;
 
-		float elimination_score_threshold; 
+		float elimination_score_threshold;
 
 		float score_inclusion_threshold;
 		//STATE
@@ -44,23 +43,23 @@ namespace autocal {
 		std::map<Hypothesis, float> scores;
 		//Stores the matches which have been deduced incorrect
 		std::set<Hypothesis> eliminatedHypotheses;
-		
+
 		std::set<Hypothesis> computableStreams;
 
 		//For rotation scoring:
 		std::map<Hypothesis, std::pair<utility::math::matrix::Rotation3D,utility::math::matrix::Rotation3D> >
 				 firstRotationReadings;
-		
-		float getSylvesterScore(const Stream& states1, const Stream& states2, 
+
+		float getSylvesterScore(const Stream& states1, const Stream& states2,
 								Hypothesis key);
 
-		float getRotationScore(const Stream& states1, const Stream& states2, 
+		float getRotationScore(const Stream& states1, const Stream& states2,
 								Hypothesis key);
-		
+
 		void resetRecordedStates();
 
 		bool stateIsNew(const utility::math::matrix::Transform3D& T, const Stream& states);
-		
+
 	public:
 
 		void addData(MocapStream::RigidBodyID id1, utility::math::matrix::Transform3D T1, MocapStream::RigidBodyID id2, utility::math::matrix::Transform3D T2);

@@ -19,7 +19,6 @@
 
 #include "RobotModel.h"
 
-#include <armadillo>
 #include <nuclear>
 #include <iostream>
 

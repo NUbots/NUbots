@@ -35,7 +35,6 @@
 #include "utility/motion/InverseKinematics.h"
 #include "utility/motion/ForwardKinematics.h"
 #include "utility/support/yaml_expression.h"
-#include "utility/support/yaml_armadillo.h"
 
 namespace module {
 namespace motion {

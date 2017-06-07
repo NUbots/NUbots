@@ -21,7 +21,6 @@
 #define MODULES_BEHAVIOUR_STRATEGY_CONTROLLABLEDARWIN_H
 
 #include <nuclear>
-#include <armadillo>
 
 namespace module {
 namespace behaviour {

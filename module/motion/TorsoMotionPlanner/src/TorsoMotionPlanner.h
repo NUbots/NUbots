@@ -21,7 +21,6 @@
 #define MODULE_MOTION_TORSOMOTIONPLANNER_H
 
 #include <nuclear>
-#include <armadillo>
 #include <algorithm>
 #include <chrono>
 #include <cmath>
@@ -34,11 +33,11 @@
 #include "message/behaviour/FixedWalkCommand.h"
 #include "message/behaviour/ServoCommand.h"
 #include "message/localisation/FieldObject.h"
-#include "message/motion/FootMotionCommand.h" 
-#include "message/motion/FootPlacementCommand.h" 
+#include "message/motion/FootMotionCommand.h"
+#include "message/motion/FootPlacementCommand.h"
 #include "message/motion/KinematicsModels.h"
 #include "message/motion/ServoTarget.h"
-#include "message/motion/TorsoMotionCommand.h" 
+#include "message/motion/TorsoMotionCommand.h"
 #include "message/motion/WalkCommand.h"
 
 #include "utility/behaviour/Action.h"
@@ -51,16 +50,15 @@
 #include "utility/motion/Balance.h"
 #include "utility/motion/ForwardKinematics.h"
 #include "utility/motion/InverseKinematics.h"
-#include "utility/nubugger/NUhelpers.h" 
-#include "utility/support/yaml_armadillo.h"
+#include "utility/nubugger/NUhelpers.h"
 #include "utility/support/yaml_expression.h"
 
-namespace module 
+namespace module
 {
-namespace motion 
+namespace motion
 {
 
-    class TorsoMotionPlanner : public NUClear::Reactor 
+    class TorsoMotionPlanner : public NUClear::Reactor
     {
     public:
         /**
@@ -85,7 +83,7 @@ namespace motion
 
          /**
          * Temporary debugging variables for local output logging...
-         */ 
+         */
         bool DEBUG;                 //
         int  DEBUG_ITER;            //
 
@@ -102,14 +100,14 @@ namespace motion
         /**
          * Decision abstractions and notify variables...
          */
-        bool updateStepInstruction;     // Update to step is received 
+        bool updateStepInstruction;     // Update to step is received
 
         /**
          * Anthropomorphic metrics for relevant humanoid joints & actuators...
          */
         struct TorsoPositions                           // Active torso relative positions struct
         {
-            TorsoPositions() 
+            TorsoPositions()
             : FrameArms()
             , FrameLegs()
             , Frame3D()
@@ -140,26 +138,26 @@ namespace motion
         /**
          * Anthropomorphic metrics initialized from configuration script, see config file for documentation...
          */
-        double bodyTilt;                                // 
-        double bodyHeight;                              //   
+        double bodyTilt;                                //
+        double bodyHeight;                              //
         double stanceLimitY2;                           //
         double stepTime;                                //
         double stepHeight;                              //
         float  step_height_slow_fraction;               //
         float  step_height_fast_fraction;               //
-        arma::mat::fixed<3,2> stepLimits;               //              
+        arma::mat::fixed<3,2> stepLimits;               //
         arma::vec2 footOffsetCoefficient;               //
         Transform2D uLRFootOffset;                      // standard offset
 
         /**
          * Arm Position vectors initialized from configuration script, see config file for documentation...
          */
-        arma::vec3 armLPostureTransform;                // 
-        arma::vec3 armLPostureSource;                   //  
-        arma::vec3 armLPostureDestination;              //  
-        arma::vec3 armRPostureTransform;                //  
-        arma::vec3 armRPostureSource;                   //  
-        arma::vec3 armRPostureDestination;              //  
+        arma::vec3 armLPostureTransform;                //
+        arma::vec3 armLPostureSource;                   //
+        arma::vec3 armLPostureDestination;              //
+        arma::vec3 armRPostureTransform;                //
+        arma::vec3 armRPostureSource;                   //
+        arma::vec3 armRPostureDestination;              //
 
         /**
          * Internal timing reference variables...
@@ -173,7 +171,7 @@ namespace motion
         /**
          * Motion data for relevant humanoid actuators...
          */
-        double velocityHigh;                            // 
+        double velocityHigh;                            //
         double accelerationTurningFactor;               //
         arma::mat::fixed<3,2> velocityLimits;           //
         arma::vec3 accelerationLimits;                  //
@@ -186,7 +184,7 @@ namespace motion
          */
     //  double velFastForward;                          //
     //  double velFastTurn;                             //
-        
+
         /**
          * Dynamic analysis parameters for relevant motion planning...
          */
@@ -196,7 +194,7 @@ namespace motion
         /**
          * Dynamic analysis parameters initialized from configuration script, see config file for documentation...
          */
-        double zmpTime;                                 // 
+        double zmpTime;                                 //
         double phase1Single;                            //
         double phase2Single;                            //
 
@@ -210,7 +208,7 @@ namespace motion
          */
         UnitQuaternion lastFootGoalRotation;            //
         UnitQuaternion footGoalErrorSum;                //
-       
+
         /**
          * @brief [brief description]
          * @details [long description]
@@ -244,7 +242,7 @@ namespace motion
         /**
          * @brief [brief description]
          * @details [long description]
-         * 
+         *
          * @param config [description]
          */
         void configure(const YAML::Node& config);
@@ -271,19 +269,19 @@ namespace motion
          * @details [long description]
          * @return [description]
          */
-        void setZmpParams(arma::vec4 inZmpParams);   
+        void setZmpParams(arma::vec4 inZmpParams);
          /**
          * @brief [brief description]
          * @details [long description]
          * @return Current velocity
-         * 
+         *
          * @param inTorsoPosition [description]
          */
         Transform2D getVelocity();
         /**
          * @brief [brief description]
          * @details [long description]
-         * 
+         *
          * @param inTorsoPosition [description]
          */
         void setVelocity(Transform2D velocity);
@@ -302,42 +300,42 @@ namespace motion
         /**
          * @brief [brief description]
          * @details [long description]
-         * 
+         *
          * @param inTorsoPosition [description]
          */
         Transform2D getTorsoPositionArms();
         /**
          * @brief [brief description]
          * @details [long description]
-         * 
+         *
          * @param inTorsoPosition [description]
          */
         Transform2D getTorsoPositionLegs();
         /**
          * @brief [brief description]
          * @details [long description]
-         * 
+         *
          * @param inTorsoPosition [description]
          */
         Transform3D getTorsoPosition3D();
         /**
          * @brief [brief description]
          * @details [long description]
-         * 
+         *
          * @param inTorsoPosition [description]
          */
         void setTorsoPositionArms(const Transform2D& inTorsoPosition);
         /**
          * @brief [brief description]
          * @details [long description]
-         * 
+         *
          * @param inTorsoPosition [description]
          */
         void setTorsoPositionLegs(const Transform2D& inTorsoPosition);
         /**
          * @brief [brief description]
          * @details [long description]
-         * 
+         *
          * @param inTorsoPosition [description]
          */
         void setTorsoPosition3D(const Transform3D& inTorsoPosition);
@@ -350,7 +348,7 @@ namespace motion
         /**
          * @brief [brief description]
          * @details [long description]
-         * 
+         *
          * @param inTorsoPosition [description]
          */
         void setTorsoSource(const Transform2D& inTorsoPosition);
@@ -363,7 +361,7 @@ namespace motion
         /**
          * @brief [brief description]
          * @details [long description]
-         * 
+         *
          * @param inTorsoPosition [description]
          */
         void setTorsoDestination(const Transform2D& inTorsoPosition);
@@ -376,14 +374,14 @@ namespace motion
         /**
          * @brief [brief description]
          * @details [long description]
-         * 
+         *
          * @param inSupportMass [description]
          */
         void setSupportMass(const Transform2D& inSupportMass);
         /**
          * @brief [brief description]
          * @details [long description]
-         * 
+         *
          * @param index [description]
          * @return [description]
          */
@@ -391,14 +389,14 @@ namespace motion
         /**
          * @brief [brief description]
          * @details [long description]
-         * 
+         *
          * @param inFootOffsetCoefficient [description]
          */
         void setFootOffsetCoefficient(const arma::vec2& inFootOffsetCoefficient);
         /**
          * @brief [brief description]
          * @details [long description]
-         * 
+         *
          * @param index [description]
          * @param inValue [description]
          */
@@ -412,7 +410,7 @@ namespace motion
         /**
          * @brief [brief description]
          * @details [long description]
-         * 
+         *
          * @param inLeftFootPosition [description]
          */
         void setLeftFootPosition(const Transform2D& inLeftFootPosition);
@@ -425,7 +423,7 @@ namespace motion
         /**
          * @brief [brief description]
          * @details [long description]
-         * 
+         *
          * @param inRightFootPosition [description]
          */
         void setRightFootPosition(const Transform2D& inRightFootPosition);
@@ -438,7 +436,7 @@ namespace motion
         /**
          * @brief [brief description]
          * @details [long description]
-         * 
+         *
          * @param inLeftFootSource [description]
          */
         void setLeftFootSource(const Transform2D& inLeftFootSource);
@@ -451,7 +449,7 @@ namespace motion
         /**
          * @brief [brief description]
          * @details [long description]
-         * 
+         *
          * @param inRightFootSource [description]
          */
         void setRightFootSource(const Transform2D& inRightFootSource);
@@ -464,7 +462,7 @@ namespace motion
         /**
          * @brief [brief description]
          * @details [long description]
-         * 
+         *
          * @param inLeftFootDestination [description]
          */
         void setLeftFootDestination(const Transform2D& inLeftFootDestination);
@@ -477,7 +475,7 @@ namespace motion
         /**
          * @brief [brief description]
          * @details [long description]
-         * 
+         *
          * @param inRightFootDestination [description]
          */
         void setRightFootDestination(const Transform2D& inRightFootDestination);

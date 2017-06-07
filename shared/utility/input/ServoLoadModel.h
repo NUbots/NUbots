@@ -21,15 +21,14 @@
 #define MODULES_INPUT_SERVOLOADMODEL_H
 
 #include <nuclear>
-#include <armadillo>
 #include <chrono>
 #include <yaml-cpp/yaml.h>
 
-namespace utility 
+namespace utility
 {
-namespace input 
+namespace input
 {
-    class ServoLoadModel 
+    class ServoLoadModel
     {
        public:
         static constexpr size_t size = 1;

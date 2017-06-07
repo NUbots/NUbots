@@ -20,11 +20,9 @@
 #ifndef MODULES_LOCALISATION_ROBOTMODEL_H
 #define MODULES_LOCALISATION_ROBOTMODEL_H
 
-#include <armadillo>
 #include "message/localisation/FieldObject.h"
 #include "message/input/Sensors.h"
 #include "utility/math/matrix/Rotation3D.h"
-
 
 namespace module {
 namespace localisation {

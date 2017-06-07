@@ -20,7 +20,6 @@
 #ifndef UTILITY_MATH_GEOMETRY_ROTATEDRECTANGLE_H
 #define UTILITY_MATH_GEOMETRY_ROTATEDRECTANGLE_H
 
-#include <armadillo>
 #include <ostream>
 #include <vector>
 

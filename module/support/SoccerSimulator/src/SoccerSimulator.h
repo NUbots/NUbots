@@ -21,7 +21,6 @@
 #define MODULES_LOCALISATION_SOCCERSIMULATOR_H
 
 #include <nuclear>
-#include <armadillo>
 
 #include "extension/Configuration.h"
 

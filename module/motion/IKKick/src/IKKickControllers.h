@@ -21,7 +21,6 @@
 #define MODULES_MOTION_IKKICKCONTROLLERS_H
 
 #include <nuclear>
-#include <armadillo>
 #include <Eigen/Core>
 
 #include "extension/Configuration.h"
@@ -32,7 +31,7 @@
 #include "utility/input/LimbID.h"
 #include "utility/input/ServoID.h"
 #include "utility/math/matrix/Transform3D.h"
-#include "utility/support/yaml_armadillo.h"
+#include "utility/support/yaml_expression.h"
 
 namespace module{
 namespace motion{

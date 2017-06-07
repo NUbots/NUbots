@@ -19,7 +19,6 @@
 #ifndef UTILITY_MATH_GEOMETRY_PARAMETRICLINE_H
 #define UTILITY_MATH_GEOMETRY_PARAMETRICLINE_H
 
-#include <armadillo>
 
 namespace utility {
 namespace math {

@@ -21,7 +21,6 @@
 #define MODULES_LOCALISATION_KFBALLLOCALISATION_H
 
 #include <nuclear>
-#include <armadillo>
 #include "KFBallLocalisationEngine.h"
 
 namespace module {

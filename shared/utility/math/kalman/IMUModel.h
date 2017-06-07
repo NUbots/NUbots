@@ -21,7 +21,6 @@
 #define UTILITY_MATH_KALMAN_IMUMODEL_H
 
 /* Inertial Motion Unit*/
-#include <armadillo>
 
 namespace utility {
     namespace math {

@@ -21,7 +21,6 @@
 #define MODULE_MOTION_KINEMATICSCONFIGURATION_H
 
 #include <nuclear>
-#include <armadillo>
 #include <yaml-cpp/yaml.h>
 
 #include "extension/Configuration.h"

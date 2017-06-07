@@ -21,7 +21,6 @@
 #define MODULES_MOTION_WALKENGINE_H
 
 #include <nuclear>
-#include <armadillo>
 #include <algorithm>
 #include <chrono>
 #include <cmath>
@@ -51,7 +50,6 @@
 #include "utility/input/LimbID.h"
 #include "utility/input/ServoID.h"
 
-#include "utility/support/yaml_armadillo.h"
 #include "utility/support/yaml_expression.h"
 
 #include "utility/math/angle.h"

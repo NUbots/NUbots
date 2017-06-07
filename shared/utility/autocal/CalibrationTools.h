@@ -1,13 +1,12 @@
 //////////////////////////////////////////////////////////////////////////////
 //	  Author: Jake Fountain 2015
-//    
+//
 //
 //////////////////////////////////////////////////////////////////////////////
 
 #ifndef AUTOCAL_CALIBRATION_TOOLS_H
 #define AUTOCAL_CALIBRATION_TOOLS_H
 
-#include <armadillo>
 #include <math.h>
 #include "utility/math/matrix/Rotation3D.h"
 #include "utility/math/matrix/Transform3D.h"

@@ -21,7 +21,6 @@
 #define UTILITY_LOCALISATION_LOCALISATIONFIELDOBJECT_H
 
 #include <iomanip>
-#include <armadillo>
 
 namespace utility {
     namespace localisation {

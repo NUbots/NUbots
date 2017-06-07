@@ -20,7 +20,6 @@
 #ifndef MODULE_SUPPORT_VIRTUALGOALPOST
 #define MODULE_SUPPORT_VIRTUALGOALPOST
 
-#include <armadillo>
 
 #include "message/vision/VisionObjects.h"
 #include "message/input/CameraParameters.h"

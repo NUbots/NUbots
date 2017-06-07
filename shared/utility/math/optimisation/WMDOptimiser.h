@@ -20,7 +20,6 @@
 #ifndef UTILITY_MATH_OPTIMISATION_WMD_H
 #define UTILITY_MATH_OPTIMISATION_WMD_H
 
-#include <armadillo>
 #include <cmath>
 
 namespace utility {

@@ -1,7 +1,6 @@
 #ifndef UTILITY_MATH_GEOMETRY_TRIANGLE_H
 #define UTILITY_MATH_GEOMETRY_TRIANGLE_H
 
-#include <armadillo>
 
 #include "ros/ros.h"
 

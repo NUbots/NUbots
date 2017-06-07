@@ -21,7 +21,6 @@
 #define MODULES_VISION_BALLDETECTOR_H
 
 #include <nuclear>
-#include <armadillo>
 
 #include "message/vision/LookUpTable.h"
 #include "message/input/Image.h"

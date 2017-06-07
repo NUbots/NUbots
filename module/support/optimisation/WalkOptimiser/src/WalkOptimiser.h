@@ -21,7 +21,6 @@
 #define MODULES_SUPPORT_OPTIMISATION_WALK_OPTIMISER_H
 
 #include <nuclear>
-#include <armadillo>
 
 #include "message/input/Sensors.h"
 #include "message/motion/GetupCommand.h"

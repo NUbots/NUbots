@@ -19,10 +19,10 @@
 
 #include "WalkOptimiser.h"
 
-
-#include "utility/support/yaml_armadillo.h"
-#include "utility/math/optimisation/PGAoptimiser.h"
 #include "message/input/ServoID.h"
+
+#include "utility/support/yaml_expression.h"
+#include "utility/math/optimisation/PGAoptimiser.h"
 #include "utility/math/angle.h"
 
 namespace module {

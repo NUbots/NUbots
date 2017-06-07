@@ -20,7 +20,6 @@
 #ifndef MODULES_LOCALISATION_BALLMODEL_H
 #define MODULES_LOCALISATION_BALLMODEL_H
 
-#include <armadillo>
 #include "message/localisation/FieldObject.h"
 
 namespace module {

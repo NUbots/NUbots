@@ -20,7 +20,6 @@
 #ifndef MODULE_LOCALISATION_BALLMODEL_H
 #define MODULE_LOCALISATION_BALLMODEL_H
 
-#include <armadillo>
 
 #include "message/input/Sensors.h"
 #include "message/support/FieldDescription.h"

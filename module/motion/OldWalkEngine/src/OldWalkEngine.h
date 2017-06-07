@@ -21,7 +21,6 @@
 #define MODULES_MOTION_OLDWALKENGINE_H
 
 #include <nuclear>
-#include <armadillo>
 
 #include <yaml-cpp/yaml.h>
 

@@ -21,7 +21,6 @@
 #define MODULES_INPUT_POSTURERECOGNISER_H
 
 #include <nuclear>
-#include <armadillo>
 #include <chrono>
 #include <yaml-cpp/yaml.h>
 
@@ -38,11 +37,11 @@
 
 #include "utility/nubugger/NUhelpers.h"
 
-namespace module 
+namespace module
 {
-namespace input 
+namespace input
 {
-    class PostureRecogniser : public NUClear::Reactor 
+    class PostureRecogniser : public NUClear::Reactor
     {
 
     public:
@@ -55,7 +54,7 @@ namespace input
     private:
         /**
          * Temporary debugging variables for local output logging...
-         */ 
+         */
         bool DEBUG;                 //
         int  DEBUG_ITER;            //
 
@@ -69,7 +68,7 @@ namespace input
         /**
          * @brief [brief description]
          * @details [long description]
-         * 
+         *
          * @param inTorsoPosition [description]
          */
         void configure(const YAML::Node& config);

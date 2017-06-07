@@ -21,7 +21,6 @@
 #define UTILITY_MOTION_FORWARDKINEMATICS_H
 
 #include <vector>
-#include <armadillo>
 #include <cmath>
 #include <nuclear>
 #include <Eigen/Core>

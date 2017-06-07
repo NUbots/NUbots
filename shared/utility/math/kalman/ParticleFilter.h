@@ -22,7 +22,6 @@
 #ifndef UTILITY_MATH_KALMAN_PARTICLEFILTER_H
 #define UTILITY_MATH_KALMAN_PARTICLEFILTER_H
 
-#include <armadillo>
 #include <random>
 #include <vector>
 
@@ -59,7 +58,7 @@ namespace utility {
                     reset(initialMean, initialCovariance, number_of_particles_);
                 }
 
-                void reset(StateVec initialMean, StateMat initialCovariance, int number_of_particles_) 
+                void reset(StateVec initialMean, StateMat initialCovariance, int number_of_particles_)
                 {
                     particles = arma::zeros(number_of_particles_,Model::size);
                     setState(initialMean, initialCovariance);
@@ -71,12 +70,12 @@ namespace utility {
                     gaussian.set_params(arma::mat(initialMean), arma::mat(initialCovariance.diag()),arma::ones(1));
                     for(unsigned int i = 0; i < particles.n_rows; ++i) {
                         particles.row(i) = gaussian.generate().t();
-                    }                    
+                    }
                 }
 
                 template <typename... TAdditionalParameters>
-                void timeUpdate(double deltaT, const TAdditionalParameters&... additionalParameters) 
-                {   
+                void timeUpdate(double deltaT, const TAdditionalParameters&... additionalParameters)
+                {
                     //Sample single zero mean gaussian with process noise (represented by a gaussian mixture model of size 1)
                     arma::gmm_diag gaussian;
                     gaussian.set_params(arma::mat(arma::zeros(Model::size)), arma::mat(model.processNoise().diag()),arma::ones(1));
@@ -90,7 +89,7 @@ namespace utility {
                 template <typename TMeasurement, typename... TMeasurementType>
                 double measurementUpdate(const TMeasurement& measurement,
                                          const arma::mat& measurement_variance,
-                                         const TMeasurementType&... measurementArgs) 
+                                         const TMeasurementType&... measurementArgs)
                 {
                     arma::vec weights = arma::zeros(particles.n_rows);
 
@@ -112,12 +111,12 @@ namespace utility {
                     return arma::mean(weights);
                 }
 
-                StateVec get() const 
+                StateVec get() const
                 {
                     return arma::mean(particles, 0).t();
                 }
 
-                StateMat getCovariance() const 
+                StateMat getCovariance() const
                 {
                     return arma::cov(particles, 0);
                 }

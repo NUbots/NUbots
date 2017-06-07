@@ -21,7 +21,6 @@
 #define MODULE_PLATFORM_DARWIN_MOTIONMODEL_H
 
 /* Motion model Motion Unit*/
-#include <armadillo>
 
 namespace module {
     namespace platform {
