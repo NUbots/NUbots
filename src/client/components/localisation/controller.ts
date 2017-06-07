@@ -236,9 +236,9 @@ export class LocalisationController {
     const yaw = model.controls.yaw
     const pitch = -model.controls.pitch + Math.PI / 2
     const offset = new Vector3(
-        Math.sin(pitch) * Math.cos(yaw),
-        Math.cos(pitch),
-        Math.sin(pitch) * Math.sin(yaw),
+      Math.sin(pitch) * Math.cos(yaw),
+      Math.cos(pitch),
+      Math.sin(pitch) * Math.sin(yaw),
     ).multiplyScalar(distance)
     const cameraPosition = targetPosition.clone().add(offset)
 

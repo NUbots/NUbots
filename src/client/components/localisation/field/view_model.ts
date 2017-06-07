@@ -33,8 +33,8 @@ export class FieldViewModel {
   @computed
   private get groundGeometry() {
     const geometry = new PlaneGeometry(
-        this.model.dimensions.fieldLength + this.model.dimensions.borderStripMinWidth * 2,
-        this.model.dimensions.fieldWidth + this.model.dimensions.borderStripMinWidth * 2,
+      this.model.dimensions.fieldLength + this.model.dimensions.borderStripMinWidth * 2,
+      this.model.dimensions.fieldWidth + this.model.dimensions.borderStripMinWidth * 2,
     )
     geometry.applyMatrix(new Matrix4().makeRotationX(-Math.PI / 2))
     return geometry
@@ -80,9 +80,9 @@ export class FieldViewModel {
   @computed
   private get centerCircle() {
     return new RingGeometry(
-        (this.model.dimensions.centerCircleDiameter - this.model.dimensions.lineWidth) * 0.5,
-        (this.model.dimensions.centerCircleDiameter + this.model.dimensions.lineWidth) * 0.5,
-        128,
+      (this.model.dimensions.centerCircleDiameter - this.model.dimensions.lineWidth) * 0.5,
+      (this.model.dimensions.centerCircleDiameter + this.model.dimensions.lineWidth) * 0.5,
+      128,
     )
   }
 

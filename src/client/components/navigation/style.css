@@ -26,7 +26,8 @@
   padding: 0;
 }
 
-.header__item {}
+.header__item {
+}
 
 .header__link {
   padding: 1rem;

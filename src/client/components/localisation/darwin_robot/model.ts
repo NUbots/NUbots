@@ -13,7 +13,7 @@ export class RobotModel {
     Object.assign(this, opts)
   }
 
-  public static of(opts: { id: number, name: string, color?: string, heading: number}) {
+  public static of(opts: { id: number, name: string, color?: string, heading: number }) {
     return new RobotModel({
       ...opts,
       position: Vector3.of(),

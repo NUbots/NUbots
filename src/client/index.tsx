@@ -77,18 +77,18 @@ io.connect(document.location.origin)
 
 // render react DOM
 ReactDOM.render(
-    <Router history={browserHistory}>
-      <Route path='/' component={AppView}>
-        <IndexRoute component={Dashboard}/>
-        <Route path='/localisation' component={LocalisationView}/>
-        <Route path='/vision' component={Vision}/>
-        <Route path='/chart' component={Chart}/>
-        <Route path='/scatter' component={Scatter}/>
-        <Route path='/nuclear' component={NUClear}/>
-        <Route path='/classifier' component={Classifier}/>
-        <Route path='/subsumption' component={Subsumption}/>
-        <Route path='/gamestate' component={GameState}/>
-      </Route>
-    </Router>,
-    document.getElementById('root'),
+  <Router history={browserHistory}>
+    <Route path='/' component={AppView}>
+      <IndexRoute component={Dashboard}/>
+      <Route path='/localisation' component={LocalisationView}/>
+      <Route path='/vision' component={Vision}/>
+      <Route path='/chart' component={Chart}/>
+      <Route path='/scatter' component={Scatter}/>
+      <Route path='/nuclear' component={NUClear}/>
+      <Route path='/classifier' component={Classifier}/>
+      <Route path='/subsumption' component={Subsumption}/>
+      <Route path='/gamestate' component={GameState}/>
+    </Route>
+  </Router>,
+  document.getElementById('root'),
 )
