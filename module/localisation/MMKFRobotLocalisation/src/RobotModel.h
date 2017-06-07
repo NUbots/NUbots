@@ -91,8 +91,8 @@ namespace robot {
 
         utility::math::matrix::Rotation3D currentImuOrientation;
 
-        // arma::mat33 getRobotToWorldTransform(const Eigen::Matrix<double, RobotModel::size, 1>& state);
-        // arma::mat33 getWorldToRobotTransform(const Eigen::Matrix<double, RobotModel::size, 1>& state);
+        // Eigen::Matrix3d getRobotToWorldTransform(const Eigen::Matrix<double, RobotModel::size, 1>& state);
+        // Eigen::Matrix3d getWorldToRobotTransform(const Eigen::Matrix<double, RobotModel::size, 1>& state);
     };
 }
 }

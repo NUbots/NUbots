@@ -18,7 +18,7 @@ namespace autocal{
 	public:
 		static int kroneckerDelta(int i, int j);
 
-		static arma::mat33 crossMatrix(const Eigen::Vector3d& v);
+		static Eigen::Matrix3d crossMatrix(const Eigen::Vector3d& v);
 
 		static bool solveWithSVD(const arma::mat& A, const arma::vec& b, arma::mat& x);
 

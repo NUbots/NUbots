@@ -30,8 +30,8 @@ namespace autocal{
 	/*
 	Returns matrix M(v) such that for any vector x, cross(v,x) = dot(M(v),x)
 	*/
-	arma::mat33 CalibrationTools::crossMatrix(const Eigen::Vector3d& v){
-		arma::mat33 omega;
+	Eigen::Matrix3d CalibrationTools::crossMatrix(const Eigen::Vector3d& v){
+		Eigen::Matrix3d omega;
 		omega <<  0 <<    -v[2] <<  v[1] << arma::endr
 			  << v[2] <<     0  << -v[0] << arma::endr
 			  << -v[1]<<   v[0] <<    0  << arma::endr;
@@ -349,7 +349,7 @@ namespace autocal{
 
 		//Create kronecker matrix K
 		int n = samplesA.size();
-		arma::mat44 C = Eigen::Matrix<double, 4, 4>::Zero();
+		Eigen::Matrix4d C = Eigen::Matrix<double, 4, 4>::Zero();
 		for(int i = 0; i < n; i++){
 			const Transform3D& A = samplesA[i];
 			const Transform3D& B = samplesB[i];
@@ -357,13 +357,13 @@ namespace autocal{
 			const UnitQuaternion qA(Rotation3D(A.rotation()));
 			const UnitQuaternion qB(Rotation3D(B.rotation()));
 
-			arma::mat44 C_i = -qA.getLeftQuatMultMatrix().t() * qB.getRightQuatMultMatrix();
+			Eigen::Matrix4d C_i = -qA.getLeftQuatMultMatrix().t() * qB.getRightQuatMultMatrix();
 
 			C += C_i;
 
 		}
 
-		arma::mat44 CTC = C.t() * C;
+		Eigen::Matrix4d CTC = C.t() * C;
 
 		Eigen::VectorXd eigval;
 		arma::mat eigvec;

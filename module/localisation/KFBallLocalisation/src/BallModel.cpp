@@ -62,7 +62,7 @@ Eigen::Matrix<double, BallModel::size, 1> BallModel::timeUpdate(
 //     result.rows(kX, kY) -= odom.torso_displacement;
 
 //     // Rotate ball_pos by -torso_rotation.
-//     arma::mat22 rot = rotationMatrix(-odom.torso_rotation);
+//     Eigen::Matrix2d rot = rotationMatrix(-odom.torso_rotation);
 //     result.rows(kX, kY) = rot * result.rows(kX, kY);
 //     result.rows(kVx, kVy) = rot * result.rows(kVx, kVy);
 

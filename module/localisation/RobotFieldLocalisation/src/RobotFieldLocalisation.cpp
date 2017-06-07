@@ -104,7 +104,7 @@ namespace localisation {
                     Tgr[2] -= Rotation3D(Transform3D(convert<double, 4, 4>(sensors.world)).rotation()).yaw();
                 }
 
-                arma::mat33 stateCov(arma::fill::eye);
+                Eigen::Matrix3d stateCov(arma::fill::eye);
                 stateCov.submat(0, 0, 1, 1) = convert<double, 2, 2>(h.position_cov);
                 stateCov(2, 2) = h.heading_var;
                 filter.filters.emplace_back(0.0, UKF<FieldModel>(Tgr, stateCov));

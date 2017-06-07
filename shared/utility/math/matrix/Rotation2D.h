@@ -31,8 +31,8 @@ namespace matrix {
     using Rotation2D = Rotation<2>;
 
     template <>
-    class Rotation<2> : public arma::mat22 {
-        using arma::mat22::mat22; // inherit constructors
+    class Rotation<2> : public Eigen::Matrix2d {
+        using Eigen::Matrix2d::mat22; // inherit constructors
 
         public:
             /**

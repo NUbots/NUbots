@@ -43,8 +43,8 @@ namespace matrix {
     using AxisAngle = std::pair<Axis, double>;
 
     template <>
-    class Rotation<3> : public arma::mat33 {
-        using arma::mat33::mat33; // inherit constructors
+    class Rotation<3> : public Eigen::Matrix3d {
+        using Eigen::Matrix3d::mat33; // inherit constructors
         public:
             /**
              * @brief Default constructor creates an identity matrix

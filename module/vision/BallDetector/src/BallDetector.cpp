@@ -204,7 +204,7 @@ namespace vision {
 
             if(print_throwout_logs) log("Ransac : ", ransacResults.size(), "results");
 
-            arma::mat44 camToGround = convert<double, 4, 4>(sensors.camToGround);
+            Eigen::Matrix4d camToGround = convert<double, 4, 4>(sensors.camToGround);
 
             for (auto& result : ransacResults) {
 

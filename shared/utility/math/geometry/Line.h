@@ -67,7 +67,7 @@ namespace geometry {
                                 const double& candidateThreshold = std::numeric_limits<double>::max()) {
 
             Eigen::Vector2d average({ 0.0, 0.0 });
-            arma::mat22 covmat({ 0.0, 0.0, 0.0, 0.0 });
+            Eigen::Matrix2d covmat({ 0.0, 0.0, 0.0, 0.0 });
             size_t ctr = 0;
             //step 1: calculate means and grab candidates
             for (auto it = first; it != last; ++it) {

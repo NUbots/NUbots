@@ -46,8 +46,8 @@ namespace matrix {
      * @author Brendan Annable
      */
     template <>
-    class Transform<3> : public arma::mat44 {
-        using arma::mat44::mat44; // inherit constructors
+    class Transform<3> : public Eigen::Matrix4d {
+        using Eigen::Matrix4d::mat44; // inherit constructors
 
         public:
             /**
@@ -204,8 +204,8 @@ namespace matrix {
                 return rotation().eulerAngles();
             }
 
-            inline const arma::mat44 raw() const { return *this; }
-            inline arma::mat44 raw() { return *this; }
+            inline const Eigen::Matrix4d raw() const { return *this; }
+            inline Eigen::Matrix4d raw() { return *this; }
 
             /**
              * @brief Computes 'size' of the transform T

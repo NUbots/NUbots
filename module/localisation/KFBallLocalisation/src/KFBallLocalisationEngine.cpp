@@ -70,7 +70,7 @@ double KFBallLocalisationEngine::MeasurementUpdate(const VisionObject& observed_
                                                          measuredPosCartesian(2));
         Eigen::Vector3d sphericalImuObservation = cartesianToSpherical(cartesianImuObservation);
         sphericalImuObservation(1) -= ballAngle;
-        arma::mat33 cov = measurement.error;
+        Eigen::Matrix3d cov = measurement.error;
 
         //Old measurement
         // quality *= ball_filter_.measurementUpdate(sphericalImuObservation, cov, ballAngle);

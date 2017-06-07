@@ -89,7 +89,7 @@ double RobotHypothesis::MeasurementUpdate(
     for (auto& measurement : observed_object.measurements) {
         // Spherical from ground:
         Eigen::Vector3d measured_pos = measurement.position;
-        arma::mat33 cov = measurement.error;
+        Eigen::Matrix3d cov = measurement.error;
 
         Eigen::Vector2d actual_2d = actual_object.location();
         Eigen::Vector3d actual_pos = Eigen::Vector3d(actual_2d(0), actual_2d(1), 0);

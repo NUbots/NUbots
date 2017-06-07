@@ -99,7 +99,7 @@ namespace motion {
             Eigen::VectorXd oculus_y_axis = config["oculus"]["y_axis"].as<Expression>();
             Eigen::VectorXd oculus_z_axis = config["oculus"]["z_axis"].as<Expression>();
 
-            arma::mat33 camera_to_robot_rot = arma::join_rows(oculus_x_axis,arma::join_rows(oculus_y_axis,oculus_z_axis));
+            Eigen::Matrix3d camera_to_robot_rot = arma::join_rows(oculus_x_axis,arma::join_rows(oculus_y_axis,oculus_z_axis));
             camera_to_robot.rotation() = camera_to_robot_rot;
 
             //Kinematic limits:

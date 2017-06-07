@@ -98,7 +98,7 @@ namespace kinematics {
 
         //swap legs if needed
         if (limb != LimbID::LEFT_LEG) {
-            target.submat(0,0,2,2) = arma::mat33{-1,0,0, 0,1,0, 0,0,1} * target.submat(0,0,2,2);
+            target.submat(0,0,2,2) = Eigen::Matrix3d{-1,0,0, 0,1,0, 0,0,1} * target.submat(0,0,2,2);
             target.submat(0,0,2,0) *= -1;
             target(0,3) *= -1;
         }
@@ -329,7 +329,7 @@ namespace kinematics {
             X = calculateArmPosition(model, angles, left);
             Eigen::Vector3d dX = pos - X;
 
-            arma::mat33 J = calculateArmJacobian(model, angles, left);
+            Eigen::Matrix3d J = calculateArmJacobian(model, angles, left);
             // std::cout << "pos = " << pos.t() << std::endl;
             // std::cout << "X = " << X.t() << std::endl;
             // std::cout << "dX = " << dX.t() << std::endl;

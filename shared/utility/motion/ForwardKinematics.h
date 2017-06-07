@@ -392,12 +392,12 @@ namespace kinematics {
         return groundToBody.i();
     }
 
-    inline arma::mat22 calculateRobotToIMU(math::matrix::Rotation3D orientation) {
+    inline Eigen::Matrix2d calculateRobotToIMU(math::matrix::Rotation3D orientation) {
         Eigen::Vector3d xRobotImu = orientation.i().col(0);
         Eigen::Vector2d projXRobot = arma::normalise(xRobotImu.rows(0,1));
         Eigen::Vector2d projYRobot = Eigen::Vector2d(-projXRobot(1), projXRobot(0));
 
-        arma::mat22 robotToImu;
+        Eigen::Matrix2d robotToImu;
         robotToImu.col(0) = projXRobot;
         robotToImu.col(1) = projYRobot;
 
@@ -439,7 +439,7 @@ namespace kinematics {
 
     /*! @return matrix J such that \overdot{X} = J * \overdot{theta}
     */
-    inline arma::mat33 calculateArmJacobian(const KinematicsModel& model, const Eigen::Vector3d& a, bool isLeft){
+    inline Eigen::Matrix3d calculateArmJacobian(const KinematicsModel& model, const Eigen::Vector3d& a, bool isLeft){
         int negativeIfRight = isLeft ? 1 : -1;
 
         const Eigen::Vector3d t1 =
@@ -461,15 +461,15 @@ namespace kinematics {
             -model.arm.LOWER_ARM_Z_OFFSET
         };
 
-        arma::mat33 jRY1 = utility::math::matrix::Rotation3D::createRotationYJacobian(a[0]-M_PI_2);
-        arma::mat33 jRX2 = utility::math::matrix::Rotation3D::createRotationXJacobian(a[1]);
-        arma::mat33 jRY3 = utility::math::matrix::Rotation3D::createRotationXJacobian(a[2]);
+        Eigen::Matrix3d jRY1 = utility::math::matrix::Rotation3D::createRotationYJacobian(a[0]-M_PI_2);
+        Eigen::Matrix3d jRX2 = utility::math::matrix::Rotation3D::createRotationXJacobian(a[1]);
+        Eigen::Matrix3d jRY3 = utility::math::matrix::Rotation3D::createRotationXJacobian(a[2]);
 
-        arma::mat33 RY1 = utility::math::matrix::Rotation3D::createRotationY(a[0]-M_PI_2);
-        arma::mat33 RX2 = utility::math::matrix::Rotation3D::createRotationX(a[1]);
-        arma::mat33 RY3 = utility::math::matrix::Rotation3D::createRotationY(a[2]);
+        Eigen::Matrix3d RY1 = utility::math::matrix::Rotation3D::createRotationY(a[0]-M_PI_2);
+        Eigen::Matrix3d RX2 = utility::math::matrix::Rotation3D::createRotationX(a[1]);
+        Eigen::Matrix3d RY3 = utility::math::matrix::Rotation3D::createRotationY(a[2]);
 
-        arma::mat33 RY_PI_2 = utility::math::matrix::Rotation3D::createRotationY(M_PI_2);
+        Eigen::Matrix3d RY_PI_2 = utility::math::matrix::Rotation3D::createRotationY(M_PI_2);
 
         Eigen::Vector3d col1 = jRY1 * RX2 * RY_PI_2 * RY3 * t3
                         + jRY1 * RX2 * t2
@@ -513,11 +513,11 @@ namespace kinematics {
             -model.arm.LOWER_ARM_Z_OFFSET
         };
 
-        arma::mat33 RY_PI_2 = utility::math::matrix::Rotation3D::createRotationY(M_PI_2);
+        Eigen::Matrix3d RY_PI_2 = utility::math::matrix::Rotation3D::createRotationY(M_PI_2);
 
-        arma::mat33 RY1 = utility::math::matrix::Rotation3D::createRotationY(a[0]-M_PI_2);
-        arma::mat33 RX2 = utility::math::matrix::Rotation3D::createRotationX(a[1]);
-        arma::mat33 RY3 = utility::math::matrix::Rotation3D::createRotationY(a[2]);
+        Eigen::Matrix3d RY1 = utility::math::matrix::Rotation3D::createRotationY(a[0]-M_PI_2);
+        Eigen::Matrix3d RX2 = utility::math::matrix::Rotation3D::createRotationX(a[1]);
+        Eigen::Matrix3d RY3 = utility::math::matrix::Rotation3D::createRotationY(a[2]);
 
         Eigen::Vector3d pos =  RY1 * RX2 * RY_PI_2 * RY3 * t3
                         + RY1 * RX2 * t2

@@ -89,7 +89,7 @@ namespace utility
                     return(P2);
                 }
 
-                void applyTransform(const arma::mat44& transform)
+                void applyTransform(const Eigen::Matrix4d& transform)
                 {
                     Eigen::Vector4d norm(arma::fill::zeros), R0(arma::fill::ones), R1(arma::fill::ones), R2(arma::fill::ones);
                     norm.head(3) = normal;
@@ -122,7 +122,7 @@ namespace utility
 
                     Eigen::Vector3d scale = {(1 - sqrtT), ((1 - s) * sqrtT), (s * sqrtT)};
 
-                    arma::mat33 points;
+                    Eigen::Matrix3d points;
                     points.col(0) = P0;
                     points.col(1) = P2;
                     points.col(2) = P2;
@@ -137,7 +137,7 @@ namespace utility
                     return(rayIntersect(orig, dir, P0, P1, P2, epsilon));
                 }
 
-                static bool rayIntersect(const Eigen::Vector3d& orig, const Eigen::Vector3d& dir, const arma::mat33& points,
+                static bool rayIntersect(const Eigen::Vector3d& orig, const Eigen::Vector3d& dir, const Eigen::Matrix3d& points,
                                          double epsilon = 1e-6)
                 {
                     return(rayIntersect(orig, dir, points.col(0), points.col(1), points.col(2), epsilon));

@@ -71,7 +71,7 @@ namespace localisation {
             Eigen::VectorXd model_state = engine_.ball_filter_.get();
             arma::mat model_cov = engine_.ball_filter_.getCovariance();
 
-            arma::mat22 imu_to_robot = sensors.robotToIMU.t();
+            Eigen::Matrix2d imu_to_robot = sensors.robotToIMU.t();
             Eigen::Vector2d robot_space_ball_pos = imu_to_robot * model_state.rows(0, 1);
             Eigen::Vector2d robot_space_ball_vel = imu_to_robot * model_state.rows(2, 3);
 

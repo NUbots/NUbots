@@ -83,12 +83,12 @@ namespace geometry {
             /* @return Matrix Q(q) such that given another quaternion q', then
              * Q(q) * q' = q * q'
             */
-            arma::mat44 getLeftQuatMultMatrix() const;
+            Eigen::Matrix4d getLeftQuatMultMatrix() const;
 
             /* @return Matrix W(q) such that given another quaternion q', then
              * W(q) * q' = q' * q
             */
-            arma::mat44 getRightQuatMultMatrix() const;
+            Eigen::Matrix4d getRightQuatMultMatrix() const;
 
             static float random(float a, float b);
             static UnitQuaternion getRandomU(float max_angle);
