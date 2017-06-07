@@ -47,7 +47,7 @@ namespace support {
     using utility::math::matrix::Rotation3D;
     using utility::math::geometry::Quad;
 
-    Eigen::Vector2d VirtualGoalPost::getCamRay(const Eigen::Vector3d& norm1, const Eigen::Vector3d& norm2, double focalLength, arma::uvec2 imSize) {
+    Eigen::Vector2d VirtualGoalPost::getCamRay(const Eigen::Vector3d& norm1, const Eigen::Vector3d& norm2, double focalLength, Eigen::Matrix<unsigned int, 2, 1> imSize) {
         //Solve the vector intersection between two planes to get the camera ray of the quad corner
         Eigen::Vector3d result;
         const double zdiff = norm2[2]*norm1[1] - norm1[2] * norm2[1];

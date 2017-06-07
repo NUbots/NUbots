@@ -67,14 +67,14 @@ namespace vision {
         @param cam - coordinates in camera space of the pixel (cam[0] = y coordinate pixels, cam[1] = z coordinate pixels)
         @return im - coordinates on the screen in image space measured x across, y down, zero at top left
     */
-    inline Eigen::Vector2i screenToImage(const Eigen::Vector2d& screen, const arma::uvec2& imageSize){
+    inline Eigen::Vector2i screenToImage(const Eigen::Vector2d& screen, const Eigen::Matrix<unsigned int, 2, 1>& imageSize){
         Eigen::Vector2d v = Eigen::Vector2d( double(imageSize[0] - 1) * 0.5, double(imageSize[1] - 1) * 0.5 ) - screen;
         return Eigen::Vector2i({ int(lround(v[0])), int(lround(v[1])) });
     }
-    inline Eigen::Vector2d imageToScreen(const Eigen::Vector2i& im, const arma::uvec2& imageSize){
+    inline Eigen::Vector2d imageToScreen(const Eigen::Vector2i& im, const Eigen::Matrix<unsigned int, 2, 1>& imageSize){
         return Eigen::Vector2d( double(imageSize[0] - 1) * 0.5, double(imageSize[1] - 1) * 0.5 ) - im;
     }
-    inline Eigen::Vector2d imageToScreen(const Eigen::Vector2d& im, const arma::uvec2& imageSize){
+    inline Eigen::Vector2d imageToScreen(const Eigen::Vector2d& im, const Eigen::Matrix<unsigned int, 2, 1>& imageSize){
         return Eigen::Vector2d( double(imageSize[0] - 1) * 0.5, double(imageSize[1] - 1) * 0.5 ) - im;
     }
 

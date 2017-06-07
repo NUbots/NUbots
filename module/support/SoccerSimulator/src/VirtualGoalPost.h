@@ -33,7 +33,7 @@ namespace support {
 
     class VirtualGoalPost {
     private:
-        Eigen::Vector2d getCamRay(const Eigen::Vector3d& norm1, const Eigen::Vector3d& norm2, double focalLength, arma::uvec2 imSize);
+        Eigen::Vector2d getCamRay(const Eigen::Vector3d& norm1, const Eigen::Vector3d& norm2, double focalLength, Eigen::Matrix<unsigned int, 2, 1> imSize);
 
     public:
         VirtualGoalPost(Eigen::Vector3d position_, float height_, message::vision::Goal::Side side_, message::vision::Goal::Team team_);
