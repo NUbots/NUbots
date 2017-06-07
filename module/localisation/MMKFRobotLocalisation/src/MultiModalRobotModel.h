@@ -60,11 +60,11 @@ namespace localisation {
 
         RobotHypothesis(const message::localisation::ResetRobotHypotheses::Self& reset_self, const message::input::Sensors& sensors)
             : RobotHypothesis() {
-            arma::vec2 imuDirection = arma::normalise(sensors.world.col(0).rows(0,1));
+            Eigen::Vector2d imuDirection = arma::normalise(sensors.world.col(0).rows(0,1));
             double imuHeading = std::atan2(imuDirection(1), imuDirection(0));
             double imuOffset = reset_self.heading + imuHeading;
 
-            // arma::vec3 mean = arma::join_rows(reset_self.position, arma::vec(imuOffset));
+            // Eigen::Vector3d mean = arma::join_rows(reset_self.position, arma::vec(imuOffset));
             arma::vec::fixed<robot::RobotModel::size> mean = arma::vec::fixed<robot::RobotModel::size>({reset_self.position(0), reset_self.position(1), imuOffset});
             arma::mat::fixed<robot::RobotModel::size, robot::RobotModel::size> cov = arma::eye(robot::RobotModel::size,robot::RobotModel::size) * 0.1;
             cov.submat(0,0,1,1) = reset_self.position_cov;

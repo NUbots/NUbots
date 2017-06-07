@@ -12,7 +12,7 @@ protobuf::message::Transform2D& operator<< (protobuf::message::Transform2D& prot
 }
 
 utility::math::matrix::Transform2D& operator<< (utility::math::matrix::Transform2D& transform, const protobuf::message::Transform2D& proto) {
-    arma::vec3 t;
+    Eigen::Vector3d t;
     t << proto.transform();
     transform = t;
     return transform;

@@ -101,8 +101,8 @@ namespace planning {
 
     std::unique_ptr<WalkCommand> FixedWalk::getWalkCommand(const FixedWalkCommand::WalkSegment& segment, NUClear::clock::duration t, const Sensors&){
      	double timeSeconds = std::chrono::duration_cast<std::chrono::seconds>(t).count();
-    	arma::vec2 directionInOriginalCoords = (segment.curvePeriod != 0 ? Rotation2D::createRotation(2 * M_PI * timeSeconds / segment.curvePeriod) : arma::eye(2,2) ) * segment.direction;
-    	arma::vec2 direction =  arma::normalise(directionInOriginalCoords);
+    	Eigen::Vector2d directionInOriginalCoords = (segment.curvePeriod != 0 ? Rotation2D::createRotation(2 * M_PI * timeSeconds / segment.curvePeriod) : arma::eye(2,2) ) * segment.direction;
+    	Eigen::Vector2d direction =  arma::normalise(directionInOriginalCoords);
     	auto result = std::make_unique<WalkCommand>();
         result->command.xy() = segment.normalisedVelocity * direction;
     	result->command.angle() = segment.normalisedAngularVelocity;

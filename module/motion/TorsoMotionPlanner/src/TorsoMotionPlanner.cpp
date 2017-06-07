@@ -175,9 +175,9 @@ namespace motion
 /*=======================================================================================================*/
 //      METHOD: zmpTorsoCoefficients
 /*=======================================================================================================*/
-    arma::vec4 TorsoMotionPlanner::zmpTorsoCoefficients()
+    Eigen::Vector4d TorsoMotionPlanner::zmpTorsoCoefficients()
     {
-        arma::vec4 zmpCoefficients;
+        Eigen::Vector4d zmpCoefficients;
         // Compute ZMP coefficients...
         zmpCoefficients.rows(0,1) = zmpSolve(getSupportMass().x(), getTorsoSource().x(), getTorsoDestination().x(), getTorsoSource().x(), getTorsoDestination().x(), phase1Single, phase2Single, stepTime, zmpTime);
         zmpCoefficients.rows(2,3) = zmpSolve(getSupportMass().y(), getTorsoSource().y(), getTorsoDestination().y(), getTorsoSource().y(), getTorsoDestination().y(), phase1Single, phase2Single, stepTime, zmpTime);
@@ -188,7 +188,7 @@ namespace motion
 /*=======================================================================================================*/
 //      METHOD: zmpSolve
 /*=======================================================================================================*/
-    arma::vec2 TorsoMotionPlanner::zmpSolve(double zs, double z1, double z2, double x1, double x2, double phase1Single, double phase2Single, double stepTime, double zmpTime)
+    Eigen::Vector2d TorsoMotionPlanner::zmpSolve(double zs, double z1, double z2, double x1, double x2, double phase1Single, double phase2Single, double stepTime, double zmpTime)
     {
         /*
         Solves ZMP equations.
@@ -212,7 +212,7 @@ namespace motion
 /*=======================================================================================================*/
 //      METHOD: zmpTorsoCompensation
 /*=======================================================================================================*/
-    Transform2D TorsoMotionPlanner::zmpTorsoCompensation(double phase, arma::vec4 zmpTorsoCoefficients, arma::vec4 zmpParams, double stepTime, double zmpTime, double phase1Single, double phase2Single, Transform2D uLeftFootSource, Transform2D uRightFootSource)
+    Transform2D TorsoMotionPlanner::zmpTorsoCompensation(double phase, Eigen::Vector4d zmpTorsoCoefficients, Eigen::Vector4d zmpParams, double stepTime, double zmpTime, double phase1Single, double phase2Single, Transform2D uLeftFootSource, Transform2D uRightFootSource)
     {
         //Note that phase is the only variable updated during a step
         Transform2D com = {0, 0, 0};
@@ -248,7 +248,7 @@ namespace motion
 /*=======================================================================================================*/
 //      ENCAPSULATION METHOD: ZMP Parameters
 /*=======================================================================================================*/
-    arma::vec4 TorsoMotionPlanner::getZmpParams()
+    Eigen::Vector4d TorsoMotionPlanner::getZmpParams()
     {
         setZmpParams
         ({
@@ -259,7 +259,7 @@ namespace motion
         });
         return (zmpParameters);
     }
-    void TorsoMotionPlanner::setZmpParams(arma::vec4 inZmpParams)
+    void TorsoMotionPlanner::setZmpParams(Eigen::Vector4d inZmpParams)
     {
         zmpParameters = inZmpParams;
     }
@@ -348,7 +348,7 @@ namespace motion
     {
         return (footOffsetCoefficient[index]);
     }
-    void TorsoMotionPlanner::setFootOffsetCoefficient(const arma::vec2& inFootOffsetCoefficient)
+    void TorsoMotionPlanner::setFootOffsetCoefficient(const Eigen::Vector2d& inFootOffsetCoefficient)
     {
         footOffsetCoefficient = inFootOffsetCoefficient;
     }

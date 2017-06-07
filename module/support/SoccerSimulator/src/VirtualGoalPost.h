@@ -33,12 +33,12 @@ namespace support {
 
     class VirtualGoalPost {
     private:
-        arma::vec2 getCamRay(const arma::vec3& norm1, const arma::vec3& norm2, double focalLength, arma::uvec2 imSize);
+        Eigen::Vector2d getCamRay(const Eigen::Vector3d& norm1, const Eigen::Vector3d& norm2, double focalLength, arma::uvec2 imSize);
 
     public:
-        VirtualGoalPost(arma::vec3 position_, float height_, message::vision::Goal::Side side_, message::vision::Goal::Team team_);
+        VirtualGoalPost(Eigen::Vector3d position_, float height_, message::vision::Goal::Side side_, message::vision::Goal::Team team_);
 
-        arma::vec3 position = {0, 0, 0};
+        Eigen::Vector3d position = {0, 0, 0};
         float height = 1.1;
         message::vision::Goal::Side side = message::vision::Goal::Side::UNKNOWN_SIDE; // LEFT, RIGHT, or UNKNOWN
         message::vision::Goal::Team team = message::vision::Goal::Team::UNKNOWN_TEAM; // OWN, OPPONENT, or UNKNOWN
@@ -46,7 +46,7 @@ namespace support {
         message::vision::Goal detect(const message::input::CameraParameters& camParams,
                     utility::math::matrix::Transform2D& robotPose,
                     const message::input::Sensors& sensors,
-                    arma::vec4& /*error*/,
+                    Eigen::Vector4d& /*error*/,
                     const message::support::FieldDescription& field);
     };
 }

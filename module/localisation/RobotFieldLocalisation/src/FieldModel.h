@@ -42,7 +42,7 @@ namespace module {
                 struct GOAL {};
             };
 
-            arma::vec3 processNoiseDiagonal;
+            Eigen::Vector3d processNoiseDiagonal;
 
 
             FieldModel() : processNoiseDiagonal(arma::fill::eye) {} // empty constructor

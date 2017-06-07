@@ -61,9 +61,9 @@ TEST_CASE("RobotToWorldTransform should be inverse of WorldToRobotTransform") {
 
     // INFO("Testing the FSR centre conversions");
 
-    arma::vec2 robot_pos = { 3, 2 };
-    arma::vec2 robot_heading = arma::normalise(arma::vec({ 1, 5 }));
-    arma::vec2 field_ball = { -3, -1 };
+    Eigen::Vector2d robot_pos = { 3, 2 };
+    Eigen::Vector2d robot_heading = arma::normalise(arma::vec({ 1, 5 }));
+    Eigen::Vector2d field_ball = { -3, -1 };
 
     auto robot_ball = WorldToRobotTransform(robot_pos, robot_heading, field_ball);
     auto result_ball = RobotToWorldTransform(robot_pos, robot_heading, robot_ball);

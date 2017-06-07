@@ -30,7 +30,7 @@ namespace ransac {
     class RansacLineModel : public utility::math::geometry::Line {
     public:
         static constexpr size_t REQUIRED_POINTS = 2;
-        using DataPoint = arma::vec2;
+        using DataPoint = Eigen::Vector2d;
 
         RansacLineModel() {}
 

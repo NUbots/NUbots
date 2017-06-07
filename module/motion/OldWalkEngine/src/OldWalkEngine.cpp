@@ -459,7 +459,7 @@ namespace motion {
 
     void OldWalkEngine::updateStep(double phase, const Sensors& sensors) {
         //Get unitless phases for x and z motion
-        arma::vec3 foot = footPhase(phase, phase1Single, phase2Single);
+        Eigen::Vector3d foot = footPhase(phase, phase1Single, phase2Single);
 
         //Lift foot by amount depending on walk speed
         auto& limit = (velocityCurrent.x() > velocityHigh ? accelerationLimitsHigh : accelerationLimits); // TODO: use a function instead
@@ -589,8 +589,8 @@ namespace motion {
         }
 
         // Linearly interpolate between the start and end positions using the easing parameter
-        arma::vec3 qLArmActual = easing * qLArmStart + (1.0 - easing) * qLArmEnd;
-        arma::vec3 qRArmActual = (1.0 - easing) * qRArmStart + easing * qRArmEnd;
+        Eigen::Vector3d qLArmActual = easing * qLArmStart + (1.0 - easing) * qLArmEnd;
+        Eigen::Vector3d qRArmActual = (1.0 - easing) * qRArmStart + easing * qRArmEnd;
 
         // Start arm/leg collision/prevention
         double rotLeftA = normalizeAngle(uLeftFoot.angle() - uTorso.angle());
@@ -649,7 +649,7 @@ namespace motion {
         return velocityCurrent;
     }
 
-    arma::vec2 OldWalkEngine::zmpSolve(double zs, double z1, double z2, double x1, double x2, double phase1Single, double phase2Single, double stepTime, double zmpTime) {
+    Eigen::Vector2d OldWalkEngine::zmpSolve(double zs, double z1, double z2, double x1, double x2, double phase1Single, double phase2Single, double stepTime, double zmpTime) {
         /*
         Solves ZMP equations.
         The resulting form of x is
@@ -670,7 +670,7 @@ namespace motion {
         return {aP, aN};
     }
 
-    Transform2D OldWalkEngine::zmpCom(double phase, arma::vec4 zmpCoefficients, arma::vec4 zmpParams, double stepTime, double zmpTime, double phase1Single, double phase2Single, Transform2D uSupport, Transform2D uLeftFootDestination, Transform2D uLeftFootSource, Transform2D uRightFootDestination, Transform2D uRightFootSource) {
+    Transform2D OldWalkEngine::zmpCom(double phase, Eigen::Vector4d zmpCoefficients, Eigen::Vector4d zmpParams, double stepTime, double zmpTime, double phase1Single, double phase2Single, Transform2D uSupport, Transform2D uLeftFootDestination, Transform2D uLeftFootSource, Transform2D uRightFootDestination, Transform2D uRightFootSource) {
         Transform2D com = {0, 0, 0};
         double expT = std::exp(stepTime * phase / zmpTime);
         com.x() = uSupport.x() + zmpCoefficients[0] * expT + zmpCoefficients[1] / expT;

@@ -85,11 +85,11 @@ namespace math {
             return d;
         }
 
-        inline double vectorToBearing(arma::vec2 dirVec) {
+        inline double vectorToBearing(Eigen::Vector2d dirVec) {
             return std::atan2(dirVec(1), dirVec(0));
         }
 
-        inline arma::vec2 bearingToUnitVector(double angle) {
+        inline Eigen::Vector2d bearingToUnitVector(double angle) {
             return Eigen::Vector2d(std::cos(angle), std::sin(angle));
         }
 

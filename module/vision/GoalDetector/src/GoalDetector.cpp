@@ -177,7 +177,7 @@ namespace vision {
                 }
 
                 // Find a point that should work to start searching down
-                arma::vec2 midpoint({0, 0});
+                Eigen::Vector2d midpoint({0, 0});
                 int i = 0;
                 for(auto& m : result) {
                     midpoint += m.left;
@@ -187,7 +187,7 @@ namespace vision {
                 midpoint /= i;
 
                 // Work out which direction to go
-                arma::vec2 direction = mid.tangent();
+                Eigen::Vector2d direction = mid.tangent();
                 direction *= direction[1] > 0 ? 1 : -1;
                 double theta = std::acos(direction[0]);
                 if (std::abs(theta) < M_PI_4) {
@@ -200,14 +200,14 @@ namespace vision {
                 }
 
                 // Classify until we reach green
-                arma::vec2 basePoint({0, 0});
+                Eigen::Vector2d basePoint({0, 0});
                 int notWhiteLen = 0;
-                for(arma::vec2 point = mid.orthogonalProjection(midpoint);
+                for(Eigen::Vector2d point = mid.orthogonalProjection(midpoint);
                     (point[0] < image.dimensions[0]) && (point[0] > 0) && (point[1] < image.dimensions[1]);
                     point += direction) {
 
-                    char c = static_cast<char>(utility::vision::getPixelColour(lut, 
-                        utility::vision::getPixel(int(point[0]), int(point[1]), image.image->dimensions[0], image.image->dimensions[1], image.image->data, 
+                    char c = static_cast<char>(utility::vision::getPixelColour(lut,
+                        utility::vision::getPixel(int(point[0]), int(point[1]), image.image->dimensions[0], image.image->dimensions[1], image.image->data,
                                                     static_cast<utility::vision::FOURCC>(image.image->format))));
 
                     if(c != 'y') {
@@ -236,14 +236,14 @@ namespace vision {
                 }
 
                 // Get our endpoints from the min and max points on the line
-                arma::vec2 midP1 = mid.pointFromTangentialDistance(stat.min());
-                arma::vec2 midP2 = mid.orthogonalProjection(basePoint);
+                Eigen::Vector2d midP1 = mid.pointFromTangentialDistance(stat.min());
+                Eigen::Vector2d midP2 = mid.orthogonalProjection(basePoint);
 
                 // Project those points outward onto the quad
-                arma::vec2 p1 = midP1 - left.distanceToPoint(midP1)  * arma::dot(left.normal, mid.normal)  * mid.normal;
-                arma::vec2 p2 = midP2 - left.distanceToPoint(midP2)  * arma::dot(left.normal, mid.normal)  * mid.normal;
-                arma::vec2 p3 = midP1 - right.distanceToPoint(midP1) * arma::dot(right.normal, mid.normal) * mid.normal;
-                arma::vec2 p4 = midP2 - right.distanceToPoint(midP2) * arma::dot(right.normal, mid.normal) * mid.normal;
+                Eigen::Vector2d p1 = midP1 - left.distanceToPoint(midP1)  * arma::dot(left.normal, mid.normal)  * mid.normal;
+                Eigen::Vector2d p2 = midP2 - left.distanceToPoint(midP2)  * arma::dot(left.normal, mid.normal)  * mid.normal;
+                Eigen::Vector2d p3 = midP1 - right.distanceToPoint(midP1) * arma::dot(right.normal, mid.normal) * mid.normal;
+                Eigen::Vector2d p4 = midP2 - right.distanceToPoint(midP2) * arma::dot(right.normal, mid.normal) * mid.normal;
 
                 // Make a quad
                 Goal goal;
@@ -251,10 +251,10 @@ namespace vision {
                 goal.side = Goal::Side::UNKNOWN_SIDE;
 
                 // Seperate tl and bl
-                arma::vec2 tl = p1[1] > p2[1] ? p2 : p1;
-                arma::vec2 bl = p1[1] > p2[1] ? p1 : p2;
-                arma::vec2 tr = p3[1] > p4[1] ? p4 : p3;
-                arma::vec2 br = p3[1] > p4[1] ? p3 : p4;
+                Eigen::Vector2d tl = p1[1] > p2[1] ? p2 : p1;
+                Eigen::Vector2d bl = p1[1] > p2[1] ? p1 : p2;
+                Eigen::Vector2d tr = p3[1] > p4[1] ? p4 : p3;
+                Eigen::Vector2d br = p3[1] > p4[1] ? p3 : p4;
 
                 goal.quad.bl = convert<double, 2>(bl);
                 goal.quad.tl = convert<double, 2>(tl);
@@ -274,8 +274,8 @@ namespace vision {
                                                    convert<double, 2>(it->quad.tr),
                                                    convert<double, 2>(it->quad.br));
 
-                arma::vec2 lhs = arma::normalise(quad.getTopLeft()  - quad.getBottomLeft());
-                arma::vec2 rhs = arma::normalise(quad.getTopRight() - quad.getBottomRight());
+                Eigen::Vector2d lhs = arma::normalise(quad.getTopLeft()  - quad.getBottomLeft());
+                Eigen::Vector2d rhs = arma::normalise(quad.getTopRight() - quad.getBottomRight());
 
                 // Check if we are within the aspect ratio range
                 bool valid = quad.aspectRatio() > MINIMUM_ASPECT_RATIO
@@ -325,7 +325,7 @@ namespace vision {
 
                     if (aquad.overlapsHorizontally(bquad)) {
                         // Get outer lines.
-                        arma::vec2 tl, tr, bl, br;
+                        Eigen::Vector2d tl, tr, bl, br;
 
                         tl = { std::min(aquad.getTopLeft()[0],     bquad.getTopLeft()[0]),     std::min(aquad.getTopLeft()[1],     bquad.getTopLeft()[1]) };
                         tr = { std::max(aquad.getTopRight()[0],    bquad.getTopRight()[0]),    std::min(aquad.getTopRight()[1],    bquad.getTopRight()[1]) };
@@ -354,17 +354,17 @@ namespace vision {
                                                    convert<double, 2>(it->quad.br));
 
                 // Get the quad points in screen coords
-                arma::vec2 tl = imageToScreen(quad.getTopLeft(),     convert<uint, 2>(image.dimensions));
-                arma::vec2 tr = imageToScreen(quad.getTopRight(),    convert<uint, 2>(image.dimensions));
-                arma::vec2 bl = imageToScreen(quad.getBottomLeft(),  convert<uint, 2>(image.dimensions));
-                arma::vec2 br = imageToScreen(quad.getBottomRight(), convert<uint, 2>(image.dimensions));
-                arma::vec2 screenGoalCentre = (tl + tr + bl + br) * 0.25;
+                Eigen::Vector2d tl = imageToScreen(quad.getTopLeft(),     convert<uint, 2>(image.dimensions));
+                Eigen::Vector2d tr = imageToScreen(quad.getTopRight(),    convert<uint, 2>(image.dimensions));
+                Eigen::Vector2d bl = imageToScreen(quad.getBottomLeft(),  convert<uint, 2>(image.dimensions));
+                Eigen::Vector2d br = imageToScreen(quad.getBottomRight(), convert<uint, 2>(image.dimensions));
+                Eigen::Vector2d screenGoalCentre = (tl + tr + bl + br) * 0.25;
 
                 // Get vectors for TL TR BL BR;
-                arma::vec3 ctl = getCamFromScreen(tl, cam.focalLengthPixels);
-                arma::vec3 ctr = getCamFromScreen(tr, cam.focalLengthPixels);
-                arma::vec3 cbl = getCamFromScreen(bl, cam.focalLengthPixels);
-                arma::vec3 cbr = getCamFromScreen(br, cam.focalLengthPixels);
+                Eigen::Vector3d ctl = getCamFromScreen(tl, cam.focalLengthPixels);
+                Eigen::Vector3d ctr = getCamFromScreen(tr, cam.focalLengthPixels);
+                Eigen::Vector3d cbl = getCamFromScreen(bl, cam.focalLengthPixels);
+                Eigen::Vector3d cbr = getCamFromScreen(br, cam.focalLengthPixels);
 
                 // Get our four normals for each edge
                 // BL TL cross product gives left side
@@ -398,12 +398,12 @@ namespace vision {
                 }
 
                 // Angular positions from the camera
-                arma::vec2 pixelsToTanThetaFactor = convert<double, 2>(cam.pixelsToTanThetaFactor);
+                Eigen::Vector2d pixelsToTanThetaFactor = convert<double, 2>(cam.pixelsToTanThetaFactor);
                 it->visObject.screenAngular = convert<double, 2>(arma::atan(pixelsToTanThetaFactor % screenGoalCentre));
-                arma::vec2 brAngular = arma::atan(pixelsToTanThetaFactor % br);
-                arma::vec2 trAngular = arma::atan(pixelsToTanThetaFactor % tr);
-                arma::vec2 blAngular = arma::atan(pixelsToTanThetaFactor % bl);
-                arma::vec2 tlAngular = arma::atan(pixelsToTanThetaFactor % tl);
+                Eigen::Vector2d brAngular = arma::atan(pixelsToTanThetaFactor % br);
+                Eigen::Vector2d trAngular = arma::atan(pixelsToTanThetaFactor % tr);
+                Eigen::Vector2d blAngular = arma::atan(pixelsToTanThetaFactor % bl);
+                Eigen::Vector2d tlAngular = arma::atan(pixelsToTanThetaFactor % tl);
                 Quad angularQuad(blAngular,tlAngular,trAngular,brAngular);
                 it->visObject.angularSize = convert<double, 2>(angularQuad.getSize());
             }

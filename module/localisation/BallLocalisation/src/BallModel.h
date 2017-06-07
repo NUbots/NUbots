@@ -40,20 +40,20 @@ namespace module {
                 struct BALL {};
             };
 
-            arma::vec2 processNoiseDiagonal;
+            Eigen::Vector2d processNoiseDiagonal;
 
 
             BallModel() : processNoiseDiagonal(arma::fill::eye) {} // empty constructor
 
             arma::vec::fixed<size> timeUpdate(const arma::vec::fixed<size>& state, double deltaT);
 
-            arma::vec3 predictedObservation(const arma::vec::fixed<size>& state
+            Eigen::Vector3d predictedObservation(const arma::vec::fixed<size>& state
                 , const message::support::FieldDescription& field
                 , const message::input::Sensors& sensors
                 , const MeasurementType::BALL&) const;
 
             arma::vec observationDifference(const arma::vec& measurement
-                , const arma::vec3& rBCc
+                , const Eigen::Vector3d& rBCc
                 , const message::support::FieldDescription& field
                 , const message::input::Sensors& sensors
                 , const MeasurementType::BALL&) const;

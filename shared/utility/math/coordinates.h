@@ -32,13 +32,13 @@ namespace utility {
          * @author Alex Biddulph
          */
         namespace coordinates {
-            inline arma::vec3 sphericalToCartesian(const arma::vec3& sphericalCoordinates) {
+            inline Eigen::Vector3d sphericalToCartesian(const Eigen::Vector3d& sphericalCoordinates) {
                 double distance = sphericalCoordinates[0];
                 double cos_theta = cos(sphericalCoordinates[1]);
                 double sin_theta = sin(sphericalCoordinates[1]);
                 double cos_phi = cos(sphericalCoordinates[2]);
                 double sin_phi = sin(sphericalCoordinates[2]);
-                arma::vec3 result;
+                Eigen::Vector3d result;
 
                 result[0] = distance * cos_theta * cos_phi;
                 result[1] = distance * sin_theta * cos_phi;
@@ -47,11 +47,11 @@ namespace utility {
                 return result;
             }
 
-            inline arma::vec3 cartesianToSpherical(const arma::vec3& cartesianCoordinates)  {
+            inline Eigen::Vector3d cartesianToSpherical(const Eigen::Vector3d& cartesianCoordinates)  {
                 double x = cartesianCoordinates[0];
                 double y = cartesianCoordinates[1];
                 double z = cartesianCoordinates[2];
-                arma::vec3 result;
+                Eigen::Vector3d result;
 
                 result[0] = sqrt(x*x + y*y + z*z);  //r
                 result[1] = atan2(y, x);            //theta
@@ -64,30 +64,30 @@ namespace utility {
                 return result;
             }
 
-            inline arma::vec4 sphericalToCartesian4(const arma::vec3& sphericalCoordinates) {
-                arma::vec3 p = sphericalToCartesian(sphericalCoordinates);
+            inline Eigen::Vector4d sphericalToCartesian4(const Eigen::Vector3d& sphericalCoordinates) {
+                Eigen::Vector3d p = sphericalToCartesian(sphericalCoordinates);
                 return Eigen::Vector4d(p[0],p[1],p[2],1);
             }
 
-            inline arma::vec4 cartesianToSpherical4(const arma::vec3& cartesianCoordinates)  {
-                arma::vec3 p = cartesianToSpherical(cartesianCoordinates);
+            inline Eigen::Vector4d cartesianToSpherical4(const Eigen::Vector3d& cartesianCoordinates)  {
+                Eigen::Vector3d p = cartesianToSpherical(cartesianCoordinates);
                 return Eigen::Vector4d(p[0],p[1],p[2],1);
             }
 
 
-            inline arma::vec2 cartesianToRadial(const arma::vec2& cartesianCoordinates)  {
+            inline Eigen::Vector2d cartesianToRadial(const Eigen::Vector2d& cartesianCoordinates)  {
                 double x = cartesianCoordinates[0];
                 double y = cartesianCoordinates[1];
 
                 return { sqrt(x*x + y*y), atan2(y, x) };
             }
 
-            inline arma::vec2 spherical2Radial(const arma::vec3& sphericalCoordinates) {
+            inline Eigen::Vector2d spherical2Radial(const Eigen::Vector3d& sphericalCoordinates) {
                 double dist = sphericalCoordinates(0);
                 double declination = sphericalCoordinates(2);
                 double flat_distance = dist * std::cos(declination);
 
-                arma::vec2 result;
+                Eigen::Vector2d result;
                 result[0] = flat_distance;
                 result[1] = sphericalCoordinates(1);
 

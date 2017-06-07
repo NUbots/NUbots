@@ -53,12 +53,12 @@ namespace robot {
     /// Return the predicted observation of an object at the given position
     arma::vec RobotModel::predictedObservation(
         const arma::vec::fixed<RobotModel::size>& state,
-        const arma::vec3& actual_position,
+        const Eigen::Vector3d& actual_position,
         const Sensors& sensors) {
 
         //Rewrite:
         double rmHeading = sensors.world.rotation().yaw() - state(robot::kImuOffset);
-        arma::vec2 robotModelHeading = {std::cos(-rmHeading),std::sin(-rmHeading)};
+        Eigen::Vector2d robotModelHeading = {std::cos(-rmHeading),std::sin(-rmHeading)};
 
         auto obs = SphericalRobotObservation(sensors.world.translation().rows(0,1) - state.rows(kX, kY),
                                              robotModelHeading,
@@ -91,7 +91,7 @@ namespace robot {
             return a - b;
         } else {
             // Spherical coordinates
-            arma::vec3 result = a - b;
+            Eigen::Vector3d result = a - b;
             result(1) = /*utility::math::angle::normalizeAngle*/(result(1)) * cfg_.observationDifferenceBearingFactor;
             result(2) = /*utility::math::angle::normalizeAngle*/(result(2)) * cfg_.observationDifferenceElevationFactor;
             return result;

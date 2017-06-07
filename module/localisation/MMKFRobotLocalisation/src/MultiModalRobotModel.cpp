@@ -88,11 +88,11 @@ double RobotHypothesis::MeasurementUpdate(
 
     for (auto& measurement : observed_object.measurements) {
         // Spherical from ground:
-        arma::vec3 measured_pos = measurement.position;
+        Eigen::Vector3d measured_pos = measurement.position;
         arma::mat33 cov = measurement.error;
 
-        arma::vec2 actual_2d = actual_object.location();
-        arma::vec3 actual_pos = Eigen::Vector3d(actual_2d(0), actual_2d(1), 0);
+        Eigen::Vector2d actual_2d = actual_object.location();
+        Eigen::Vector3d actual_pos = Eigen::Vector3d(actual_2d(0), actual_2d(1), 0);
 
 
         quality *= filter_.measurementUpdate(measured_pos, cov, actual_pos, *(observed_object.sensors));

@@ -48,7 +48,7 @@ namespace matrix {
               << 2     * q.kX() * q.kZ() - 2 * q.kY() * q.kW() << 2     * q.kY() * q.kZ() + 2 * q.kX() * q.kW() << 1 - 2 * q.kX() * q.kX() - 2 * q.kY() * q.kY();
     }
 
-    Rotation3D::Rotation(const arma::vec3& axis) {
+    Rotation3D::Rotation(const Eigen::Vector3d& axis) {
         double normAxis = arma::norm(axis, 2);
 
         if (normAxis == 0) {
@@ -64,7 +64,7 @@ namespace matrix {
         col(2) = arma::cross(col(0), col(1)); // third othogonal vector
     }
 
-    Rotation3D::Rotation(const arma::vec3& axis, double angle) : Rotation(axis) {
+    Rotation3D::Rotation(const Eigen::Vector3d& axis, double angle) : Rotation(axis) {
         // Rotate by angle
 
         *this *= Rotation3D::createRotationX(angle) * i();
@@ -126,10 +126,10 @@ namespace matrix {
         }
 
         // Construct an ONB
-        arma::vec3 s = orthonormal(axis);
-        arma::vec3 t = arma::cross(axis, s);
+        Eigen::Vector3d s = orthonormal(axis);
+        Eigen::Vector3d t = arma::cross(axis, s);
         // Rotate s to calculate angle of rotation
-        arma::vec3 rs = *this * s;
+        Eigen::Vector3d rs = *this * s;
 
         return {
             axis,
@@ -137,7 +137,7 @@ namespace matrix {
         };
     }
 
-    arma::vec3 Rotation3D::eulerAngles() const {
+    Eigen::Vector3d Rotation3D::eulerAngles() const {
         // See: http://staff.city.ac.uk/~sbbh653/publications/euler.pdf
         // Computing Euler angles from a rotation matrix
         // Gregory G. Slabaugh
@@ -239,11 +239,11 @@ namespace matrix {
     }
 
 
-    Rotation3D Rotation3D::createFromEulerAngles(const arma::vec3& a){
+    Rotation3D Rotation3D::createFromEulerAngles(const Eigen::Vector3d& a){
         // double roll = a[0];
         // double pitch = a[1];
         // double yaw = a[2];
-        return Rotation3D::createRotationZ(a[2]) * Rotation3D::createRotationY(a[1]) * Rotation3D::createRotationX(a[0]); 
+        return Rotation3D::createRotationZ(a[2]) * Rotation3D::createRotationY(a[1]) * Rotation3D::createRotationX(a[0]);
     }
 
 }

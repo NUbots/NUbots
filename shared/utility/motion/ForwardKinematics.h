@@ -50,11 +50,11 @@ namespace kinematics {
         std::map<ServoID, utility::math::matrix::Transform3D> positions;
 
         utility::math::matrix::Transform3D runningTransform;
-        arma::vec3 NECK_POS = {model.head.NECK_BASE_POS_FROM_ORIGIN_X,
+        Eigen::Vector3d NECK_POS = {model.head.NECK_BASE_POS_FROM_ORIGIN_X,
                                model.head.NECK_BASE_POS_FROM_ORIGIN_Y,
                                model.head.NECK_BASE_POS_FROM_ORIGIN_Z};
         float NECK_LENGTH = model.head.NECK_LENGTH;
-        arma::vec3 NECK_TO_CAMERA = {model.head.NECK_TO_CAMERA_X,
+        Eigen::Vector3d NECK_TO_CAMERA = {model.head.NECK_TO_CAMERA_X,
                                      model.head.NECK_TO_CAMERA_Y,
                                      model.head.NECK_TO_CAMERA_Z};
 
@@ -317,11 +317,11 @@ namespace kinematics {
     /*! @brief Adds up the mass vectors stored in the robot model and normalises the resulting position
         @return [x_com, y_com, z_com, total_mass] relative to the torso basis
     */
-    inline arma::vec4 calculateCentreOfMass(const message::motion::KinematicsModel& model, const std::map<uint32_t, Eigen::Matrix<double, 4, 4, Eigen::DontAlign>>& jointPositions, bool includeTorso){
-        arma::vec4 totalMassVector = arma::zeros(4);
+    inline Eigen::Vector4d calculateCentreOfMass(const message::motion::KinematicsModel& model, const std::map<uint32_t, Eigen::Matrix<double, 4, 4, Eigen::DontAlign>>& jointPositions, bool includeTorso){
+        Eigen::Vector4d totalMassVector = arma::zeros(4);
 
         for(auto& joint : jointPositions){
-            arma::vec4 massVector;
+            Eigen::Vector4d massVector;
             for(size_t i = 0; i < 4; i++){
                 massVector[i] = model.massModel.masses[joint.first][i];
             }
@@ -335,7 +335,7 @@ namespace kinematics {
         }
 
         if(includeTorso){
-            arma::vec4 massVector;
+            Eigen::Vector4d massVector;
              for(size_t i = 0; i < 4; i++){
                 massVector[i] = model.massModel.masses[20][i];
             }
@@ -352,30 +352,30 @@ namespace kinematics {
             return normaliser * totalMassVector;
         } else {
             NUClear::log<NUClear::ERROR>("ForwardKinematics::calculateCentreOfMass - Empty centre of mass request or no mass in mass model.");
-            return arma::vec4();
+            return Eigen::Vector4d();
         }
     }
 
     inline utility::math::geometry::Line calculateHorizon(const math::matrix::Rotation3D Rcw, double cameraDistancePixels) {
 
         // Normal of the line is the y and z of the z axis, however in the image the y axis is negated
-        arma::vec2 normal = -arma::normalise(Rcw.submat(1,2,2,2));
+        Eigen::Vector2d normal = -arma::normalise(Rcw.submat(1,2,2,2));
         double distance = cameraDistancePixels * std::tan(utility::math::angle::acos_clamped(Rcw(0,2)) - M_PI_2);
 
         return utility::math::geometry::Line(normal, distance);
     }
 
-    inline utility::math::matrix::Transform3D calculateBodyToGround(arma::vec3 groundNormal_body, double bodyHeight){
-        arma::vec3 X = arma::vec{1,0,0};
+    inline utility::math::matrix::Transform3D calculateBodyToGround(Eigen::Vector3d groundNormal_body, double bodyHeight){
+        Eigen::Vector3d X = arma::vec{1,0,0};
         double projectXOnNormal = groundNormal_body[0];
 
-        arma::vec3 groundMatrixX;
-        arma::vec3 groundMatrixY;
+        Eigen::Vector3d groundMatrixX;
+        Eigen::Vector3d groundMatrixY;
 
         if(std::fabs(projectXOnNormal) == 1){
             //Then x is parallel to the ground normal and we need to use projection onto +/-z instead
             //If x parallel to normal, then use -z, if x antiparallel use z
-            arma::vec3 Z =  arma::vec3{0, 0, (projectXOnNormal > 0 ? -1.0 : 1.0 )};
+            Eigen::Vector3d Z =  Eigen::Vector3d{0, 0, (projectXOnNormal > 0 ? -1.0 : 1.0 )};
             double projectZOnNormal = arma::dot(Z, groundNormal_body);
             groundMatrixX = arma::normalise(Z - projectZOnNormal * groundNormal_body);
             groundMatrixY = arma::cross(groundNormal_body, groundMatrixX);
@@ -393,9 +393,9 @@ namespace kinematics {
     }
 
     inline arma::mat22 calculateRobotToIMU(math::matrix::Rotation3D orientation) {
-        arma::vec3 xRobotImu = orientation.i().col(0);
-        arma::vec2 projXRobot = arma::normalise(xRobotImu.rows(0,1));
-        arma::vec2 projYRobot = Eigen::Vector2d(-projXRobot(1), projXRobot(0));
+        Eigen::Vector3d xRobotImu = orientation.i().col(0);
+        Eigen::Vector2d projXRobot = arma::normalise(xRobotImu.rows(0,1));
+        Eigen::Vector2d projYRobot = Eigen::Vector2d(-projXRobot(1), projXRobot(0));
 
         arma::mat22 robotToImu;
         robotToImu.col(0) = projXRobot;
@@ -404,20 +404,20 @@ namespace kinematics {
         return robotToImu;
     }
 
-    inline arma::vec4 fsrCentreInBodyCoords(const KinematicsModel& model, const Sensors& sensors, const arma::vec2& foot, bool left) {
+    inline Eigen::Vector4d fsrCentreInBodyCoords(const KinematicsModel& model, const Sensors& sensors, const Eigen::Vector2d& foot, bool left) {
         //sensors.bodyToGround
 
         int negativeIfRight = left ? 1 : -1;
 
-        arma::vec2 position = foot % Eigen::Vector2d(model.leg.FOOT_LENGTH / 2, model.leg.FOOT_WIDTH / 2);
-        arma::vec4 centerFoot = Eigen::Vector4d(position[0], position[1] + negativeIfRight * model.leg.FOOT_CENTRE_TO_ANKLE_CENTRE, 0, 1);
+        Eigen::Vector2d position = foot % Eigen::Vector2d(model.leg.FOOT_LENGTH / 2, model.leg.FOOT_WIDTH / 2);
+        Eigen::Vector4d centerFoot = Eigen::Vector4d(position[0], position[1] + negativeIfRight * model.leg.FOOT_CENTRE_TO_ANKLE_CENTRE, 0, 1);
 
         return((left) ? convert<double, 4, 4>(sensors.forwardKinematics.at(ServoID::L_ANKLE_ROLL)) * centerFoot
                       : convert<double, 4, 4>(sensors.forwardKinematics.at(ServoID::R_ANKLE_ROLL)) * centerFoot);
     }
 
-    inline arma::vec3 calculateCentreOfPressure(const KinematicsModel& model, const Sensors& sensors) {
-        arma::vec4 CoP = {0,0,0,1};
+    inline Eigen::Vector3d calculateCentreOfPressure(const KinematicsModel& model, const Sensors& sensors) {
+        Eigen::Vector4d CoP = {0,0,0,1};
         float number_of_feet_down = 0;
         if (sensors.leftFootDown) {
             CoP += fsrCentreInBodyCoords(model, sensors, convert<double, 2>(sensors.fsr[LimbID::LEFT_LEG].centre), true);
@@ -432,29 +432,29 @@ namespace kinematics {
         }
         //reset homogeneous coordinate
         CoP(3) = 1;
-        arma::vec4 CoP_body = convert<double, 4, 4>(sensors.bodyToGround) * CoP;
+        Eigen::Vector4d CoP_body = convert<double, 4, 4>(sensors.bodyToGround) * CoP;
         return CoP_body.rows(0,2);
 
     }
 
     /*! @return matrix J such that \overdot{X} = J * \overdot{theta}
     */
-    inline arma::mat33 calculateArmJacobian(const KinematicsModel& model, const arma::vec3& a, bool isLeft){
+    inline arma::mat33 calculateArmJacobian(const KinematicsModel& model, const Eigen::Vector3d& a, bool isLeft){
         int negativeIfRight = isLeft ? 1 : -1;
 
-        const arma::vec3 t1 =
+        const Eigen::Vector3d t1 =
         {
             model.arm.SHOULDER_LENGTH,
             negativeIfRight * model.arm.SHOULDER_WIDTH,
             -model.arm.SHOULDER_HEIGHT
         };
-        const arma::vec3 t2 =
+        const Eigen::Vector3d t2 =
         {
             model.arm.UPPER_ARM_X_OFFSET,
             negativeIfRight * model.arm.UPPER_ARM_Y_OFFSET,
             -model.arm.UPPER_ARM_LENGTH
         };
-        const arma::vec3 t3 =
+        const Eigen::Vector3d t3 =
         {
             model.arm.LOWER_ARM_LENGTH,
             negativeIfRight * model.arm.LOWER_ARM_Y_OFFSET,
@@ -471,42 +471,42 @@ namespace kinematics {
 
         arma::mat33 RY_PI_2 = utility::math::matrix::Rotation3D::createRotationY(M_PI_2);
 
-        arma::vec3 col1 = jRY1 * RX2 * RY_PI_2 * RY3 * t3
+        Eigen::Vector3d col1 = jRY1 * RX2 * RY_PI_2 * RY3 * t3
                         + jRY1 * RX2 * t2
                         + jRY1 * t1;
 
-        arma::vec3 col2 = RY1 * jRX2 * RY_PI_2 * RY3 * t3
+        Eigen::Vector3d col2 = RY1 * jRX2 * RY_PI_2 * RY3 * t3
                         + RY1 * jRX2 * t2;
 
-        arma::vec3 col3 = RY1 * RX2 * RY_PI_2 * jRY3 * t3;
+        Eigen::Vector3d col3 = RY1 * RX2 * RY_PI_2 * jRY3 * t3;
 
         return arma::join_rows(col1,arma::join_rows(col2,col3));
     }
     /*! @return matrix J such that \overdot{X} = J * \overdot{theta}
     */
-    inline arma::vec3 calculateArmPosition(const KinematicsModel& model, const arma::vec3& a, bool isLeft){
+    inline Eigen::Vector3d calculateArmPosition(const KinematicsModel& model, const Eigen::Vector3d& a, bool isLeft){
         int negativeIfRight = isLeft ? 1 : -1;
 
-        const arma::vec3 t0 =
+        const Eigen::Vector3d t0 =
         {
             model.arm.SHOULDER_X_OFFSET,
             negativeIfRight * model.arm.DISTANCE_BETWEEN_SHOULDERS / 2.0,
             model.arm.SHOULDER_Z_OFFSET
         };
 
-        const arma::vec3 t1 =
+        const Eigen::Vector3d t1 =
         {
             model.arm.SHOULDER_LENGTH,
             negativeIfRight * model.arm.SHOULDER_WIDTH,
             -model.arm.SHOULDER_HEIGHT
         };
-        const arma::vec3 t2 =
+        const Eigen::Vector3d t2 =
         {
             model.arm.UPPER_ARM_X_OFFSET,
             negativeIfRight * model.arm.UPPER_ARM_Y_OFFSET,
             -model.arm.UPPER_ARM_LENGTH
         };
-        const arma::vec3 t3 =
+        const Eigen::Vector3d t3 =
         {
             model.arm.LOWER_ARM_LENGTH,
             negativeIfRight * model.arm.LOWER_ARM_Y_OFFSET,
@@ -519,7 +519,7 @@ namespace kinematics {
         arma::mat33 RX2 = utility::math::matrix::Rotation3D::createRotationX(a[1]);
         arma::mat33 RY3 = utility::math::matrix::Rotation3D::createRotationY(a[2]);
 
-        arma::vec3 pos =  RY1 * RX2 * RY_PI_2 * RY3 * t3
+        Eigen::Vector3d pos =  RY1 * RX2 * RY_PI_2 * RY3 * t3
                         + RY1 * RX2 * t2
                         + RY1 * t1
                         + t0;

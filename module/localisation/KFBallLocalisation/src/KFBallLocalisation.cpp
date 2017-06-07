@@ -72,8 +72,8 @@ namespace localisation {
             arma::mat model_cov = engine_.ball_filter_.getCovariance();
 
             arma::mat22 imu_to_robot = sensors.robotToIMU.t();
-            arma::vec2 robot_space_ball_pos = imu_to_robot * model_state.rows(0, 1);
-            arma::vec2 robot_space_ball_vel = imu_to_robot * model_state.rows(2, 3);
+            Eigen::Vector2d robot_space_ball_pos = imu_to_robot * model_state.rows(0, 1);
+            Eigen::Vector2d robot_space_ball_vel = imu_to_robot * model_state.rows(2, 3);
 
             message::localisation::Ball ball;
             ball.position = robot_space_ball_pos;
@@ -89,9 +89,9 @@ namespace localisation {
             emit(std::move(ball_msg));
             emit(std::move(ball_vec_msg));
 
-            arma::vec3 worldSpaceBallPos = arma::zeros(3);
+            Eigen::Vector3d worldSpaceBallPos = arma::zeros(3);
             worldSpaceBallPos.rows(0,1) = utility::localisation::transform::RobotToWorldTransform(robots[0].position, robots[0].heading, robot_space_ball_pos);
-            arma::vec3 worldSpaceBallVel = arma::zeros(3);
+            Eigen::Vector3d worldSpaceBallVel = arma::zeros(3);
             worldSpaceBallVel.rows(0,1) = utility::localisation::transform::RobotToWorldTransform(arma::zeros(2), robots[0].heading, robot_space_ball_vel);
 
             emit(drawArrow("ballvel", worldSpaceBallPos, worldSpaceBallVel, arma::norm(worldSpaceBallVel)));

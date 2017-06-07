@@ -55,10 +55,10 @@ namespace utility {
 
                 arma::vec::fixed<size> timeUpdate(const arma::vec::fixed<size>& state, double deltaT);
 
-                arma::vec3 predictedObservation(const arma::vec::fixed<size>& state);
-                arma::vec3 predictedObservation(const arma::vec::fixed<size>& state, const MeasurementType::UP&);
-                arma::vec3 predictedObservation(const arma::vec::fixed<size>& state, const MeasurementType::ACCELEROMETER&);
-                arma::vec3 predictedObservation(const arma::vec::fixed<size>& state, const MeasurementType::GYROSCOPE&);
+                Eigen::Vector3d predictedObservation(const arma::vec::fixed<size>& state);
+                Eigen::Vector3d predictedObservation(const arma::vec::fixed<size>& state, const MeasurementType::UP&);
+                Eigen::Vector3d predictedObservation(const arma::vec::fixed<size>& state, const MeasurementType::ACCELEROMETER&);
+                Eigen::Vector3d predictedObservation(const arma::vec::fixed<size>& state, const MeasurementType::GYROSCOPE&);
 
                 arma::vec observationDifference(const arma::vec& a, const arma::vec& b);
 

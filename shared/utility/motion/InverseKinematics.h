@@ -69,19 +69,19 @@ namespace kinematics {
 
     std::vector<std::pair<ServoID, float>> calculateLegJointsTeamDarwin(const message::motion::KinematicsModel& model, utility::math::matrix::Transform3D leftTarget, utility::math::matrix::Transform3D rightTarget);
 
-    std::vector< std::pair<ServoID, float> > calculateCameraLookJoints(const message::motion::KinematicsModel& model, arma::vec3 cameraUnitVector);
+    std::vector< std::pair<ServoID, float> > calculateCameraLookJoints(const message::motion::KinematicsModel& model, Eigen::Vector3d cameraUnitVector);
 
-    std::vector< std::pair<ServoID, float> > calculateHeadJoints(arma::vec3 cameraUnitVector);
+    std::vector< std::pair<ServoID, float> > calculateHeadJoints(Eigen::Vector3d cameraUnitVector);
 
-    arma::vec2 calculateHeadJointsToLookAt(arma::vec3 groundPoint, const utility::math::matrix::Transform3D& camToGround, const utility::math::matrix::Transform3D& bodyToGround);
+    Eigen::Vector2d calculateHeadJointsToLookAt(Eigen::Vector3d groundPoint, const utility::math::matrix::Transform3D& camToGround, const utility::math::matrix::Transform3D& bodyToGround);
 
-    arma::vec2 headAnglesToSeeGroundPoint(const arma::vec2& gpos, const message::input::Sensors& sensors);
+    Eigen::Vector2d headAnglesToSeeGroundPoint(const Eigen::Vector2d& gpos, const message::input::Sensors& sensors);
 
     std::vector<std::pair<ServoID, float>> setHeadPoseFromFeet(const message::motion::KinematicsModel& model, const utility::math::matrix::Transform3D& cameraToFeet, const float& footSeparation);
 
-    std::vector<std::pair<ServoID, float>> setArm(const message::motion::KinematicsModel& model, const arma::vec3& pos, bool left, int number_of_iterations = 300, arma::vec3 angleHint = arma::zeros(3));
+    std::vector<std::pair<ServoID, float>> setArm(const message::motion::KinematicsModel& model, const Eigen::Vector3d& pos, bool left, int number_of_iterations = 300, Eigen::Vector3d angleHint = arma::zeros(3));
 
-    std::vector<std::pair<ServoID, float>> setArmApprox(const message::motion::KinematicsModel& model, const arma::vec3& pos, bool left);
+    std::vector<std::pair<ServoID, float>> setArmApprox(const message::motion::KinematicsModel& model, const Eigen::Vector3d& pos, bool left);
 
 
 } // kinematics

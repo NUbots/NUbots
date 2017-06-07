@@ -212,8 +212,8 @@ namespace module {
             }
             void FitnessData::update(const message::input::Sensors& sensors){
                 if(recording){
-                    arma::vec3 verticalKinematics = sensors.camToGround.submat(0,2,2,2);
-                    arma::vec3 verticalOrientation = sensors.kinematicsCamToGround.submat(0,2,2,2);
+                    Eigen::Vector3d verticalKinematics = sensors.camToGround.submat(0,2,2,2);
+                    Eigen::Vector3d verticalOrientation = sensors.kinematicsCamToGround.submat(0,2,2,2);
                     double tiltMag = utility::math::angle::acos_clamped(arma::dot(verticalOrientation, verticalKinematics));
                     if(std::fabs(tiltMag) < M_PI_4){
                         tilt(tiltMag);

@@ -55,7 +55,7 @@ namespace localisation {
                     float x = rigidBody.position().x();
                     float y = rigidBody.position().y();
                     float z = rigidBody.position().z();
-                    UnitQuaternion q(arma::vec4{rigidBody.rotation().x(),
+                    UnitQuaternion q(Eigen::Vector4d{rigidBody.rotation().x(),
                                                 rigidBody.rotation().y(),
                                                 rigidBody.rotation().z(),
                                                 rigidBody.rotation().t()});
@@ -68,7 +68,7 @@ namespace localisation {
                     auto selfs = std::make_unique<std::vector<Self>>();
                     selfs->push_back(Self());
                     selfs->back().heading = arma::normalise(groundToWorldRotation.submat(0,0,1,0));
-                    selfs->back().position = arma::vec2{x,y};
+                    selfs->back().position = Eigen::Vector2d{x,y};
                     emit(std::move(selfs));
 
                     emit(graph("NUcap pos", x, y, z));

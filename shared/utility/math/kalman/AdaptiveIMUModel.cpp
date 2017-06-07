@@ -64,16 +64,16 @@ namespace utility {
             // @param deltaT The amount of time that has passed since the previous update, in seconds.
             // @param measurement The reading from the rate gyroscope in rad/s used to update the orientation.
             // @return The new estimated system state.
-            arma::vec::fixed<AdaptiveIMUModel::size> AdaptiveIMUModel::timeUpdate(const arma::vec::fixed<size>& state, double deltaT, const arma::vec3& measurement) {
+            arma::vec::fixed<AdaptiveIMUModel::size> AdaptiveIMUModel::timeUpdate(const arma::vec::fixed<size>& state, double deltaT, const Eigen::Vector3d& measurement) {
                 //new universal rotation code for gyro (SORA)
                 //See: http://en.wikipedia.org/wiki/Axis%E2%80%93angle_representation#Simultaneous_orthogonal_rotation_angle
                 arma::mat stateMatrix = arma::reshape(state,3,2);
-                arma::vec3 omega = measurement * deltaT;    //Offset applied
+                Eigen::Vector3d omega = measurement * deltaT;    //Offset applied
                 double phi = arma::norm(omega, 2);
                 if (phi == 0) {
                     return state;
                 }
-                arma::vec3 unitOmega = omega / phi;
+                Eigen::Vector3d unitOmega = omega / phi;
 
                 const auto omegaCrossStateDown = arma::cross(unitOmega,stateMatrix.col(0));
                 stateMatrix.col(0) = stateMatrix.col(0) * cos(phi) + omegaCrossStateDown * sin(phi) + unitOmega * arma::dot(unitOmega, stateMatrix.col(0)) * (1.0 - cos(phi));

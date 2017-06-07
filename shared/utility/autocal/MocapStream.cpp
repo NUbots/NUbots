@@ -39,7 +39,7 @@ namespace autocal {
 
 			RigidBody r;
 
-			arma::vec3 pos = data.rows(1,3);
+			Eigen::Vector3d pos = data.rows(1,3);
 			Rotation3D rot;
 			int start = 4;
 			for(int i = 0; i < 3; i++){
@@ -47,7 +47,7 @@ namespace autocal {
 			}
 			//Change back to mocap coords from nubots coords (sigh...)
 			if(correctForAutocalibrationCoordinateSystem){
-				r.pose.translation() = arma::vec3{-pos[1],pos[2],-pos[0]};
+				r.pose.translation() = Eigen::Vector3d{-pos[1],pos[2],-pos[0]};
 			} else {
 				r.pose.translation() = pos;
 			}
@@ -55,7 +55,7 @@ namespace autocal {
 			if(correctForAutocalibrationCoordinateSystem){
 				UnitQuaternion q(rot);
 				//Change back to mocap coords from nubots coords (sigh...)
-				UnitQuaternion q_(arma::vec4{
+				UnitQuaternion q_(Eigen::Vector4d{
 					 q.kX(),
 					-q.kZ(),
 					 q.kW(),
@@ -229,13 +229,13 @@ namespace autocal {
 		(*stream)[t].rigidBodies[id] = RigidBody({pose});
 		RigidBody& r = (*stream)[t].rigidBodies[id];
 
-		arma::vec3 pos = r.pose.translation();
+		Eigen::Vector3d pos = r.pose.translation();
 		Rotation3D rot = r.pose.rotation();
 		//Change back to mocap coords from nubots coords (sigh...)
 		if(correctCoordinateSystem){
 			UnitQuaternion q(rot);
 			//Change back to mocap coords from nubots coords (sigh...)
-			UnitQuaternion q_(arma::vec4{
+			UnitQuaternion q_(Eigen::Vector4d{
 				 q.kX(),
 				-q.kZ(),
 				 q.kW(),
@@ -243,7 +243,7 @@ namespace autocal {
 				});
 			//Turn back into rotation
 			r.pose.rotation() = Rotation3D(q_);
-			r.pose.translation() = arma::vec3{-pos[1],pos[2],-pos[0]};
+			r.pose.translation() = Eigen::Vector3d{-pos[1],pos[2],-pos[0]};
 		}
 
 		if(LHInput){
@@ -320,7 +320,7 @@ namespace autocal {
 
 				//Noise:
 				Transform3D localNoise = Transform3D::getRandomN(simulationParameters.noise.angle_stddev ,simulationParameters.noise.disp_stddev);
-				// std::cout << "noise = " << arma::vec4(localNoise * Eigen::Vector4d(0,0,0,1)).t() << std::endl;
+				// std::cout << "noise = " << Eigen::Vector4d(localNoise * Eigen::Vector4d(0,0,0,1)).t() << std::endl;
 				Transform3D globalNoise = Transform3D::getRandomN(simulationParameters.noise.angle_stddev ,simulationParameters.noise.disp_stddev);
 				// Transform3D globalNoise = Transform3D::getRandomN(0.310524198 ,0.052928682);
 

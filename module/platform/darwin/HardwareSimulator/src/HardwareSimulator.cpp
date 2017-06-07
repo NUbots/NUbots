@@ -178,8 +178,8 @@ namespace darwin {
             if (previousSensors) {
                 Transform3D rightFootPose = convert<double, 4, 4>(previousSensors->forwardKinematics.at(ServoID::R_ANKLE_ROLL));
                 Transform3D leftFootPose  = convert<double, 4, 4>(previousSensors->forwardKinematics.at(ServoID::L_ANKLE_ROLL));
-                arma::vec3 torsoFromRightFoot = -rightFootPose.rotation().i() * rightFootPose.translation();
-                arma::vec3 torsoFromLeftFoot = -leftFootPose.rotation().i() * leftFootPose.translation();
+                Eigen::Vector3d torsoFromRightFoot = -rightFootPose.rotation().i() * rightFootPose.translation();
+                Eigen::Vector3d torsoFromLeftFoot = -leftFootPose.rotation().i() * leftFootPose.translation();
                 // emit(graph("torsoFromRightFoot", torsoFromRightFoot));
                 // emit(graph("torsoFromLeftFoot", torsoFromLeftFoot));
                 if(torsoFromRightFoot(2) > torsoFromLeftFoot(2)){
@@ -208,10 +208,10 @@ namespace darwin {
                 else {
                     // std::cout << "Second: movingSpeed = " << movingSpeed << " servo.goalPosition = "<< servo.goalPosition << " servo.presentPosition = "<< servo.presentPosition << std::endl;
 
-                    arma::vec3 present = { cos(servo.presentPosition), sin(servo.presentPosition), 0 };
-                    arma::vec3 goal = { cos(servo.goalPosition), sin(servo.goalPosition), 0 };
+                    Eigen::Vector3d present = { cos(servo.presentPosition), sin(servo.presentPosition), 0 };
+                    Eigen::Vector3d goal = { cos(servo.goalPosition), sin(servo.goalPosition), 0 };
 
-                    arma::vec3 cross = arma::cross(present, goal);
+                    Eigen::Vector3d cross = arma::cross(present, goal);
                     if(cross[2] > 0) {
                         servo.presentPosition = utility::math::angle::normalizeAngle(servo.presentPosition + movingSpeed);
                     }
@@ -225,7 +225,7 @@ namespace darwin {
             // Note: This reaction is not (and should not be) synced with the
             // 'Receive Simulated Gyroscope' reaction above, so we can't
             // reliably query the size of the gyroQueue.
-            arma::vec3 sumGyro = {0,0,0};
+            Eigen::Vector3d sumGyro = {0,0,0};
             {
                 // std::lock_guard<std::mutex> lock(gyroQueueMutex);
                 while (!gyroQueue.empty()){

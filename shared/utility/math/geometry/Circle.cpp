@@ -27,19 +27,19 @@ namespace geometry {
     }
 
 
-    Circle::Circle(const double& radius, const arma::vec2& centre)
+    Circle::Circle(const double& radius, const Eigen::Vector2d& centre)
             : radius(radius), radiusSq(radius * radius), centre(centre) {
     }
 
-    Circle::Circle(const arma::vec2& a, const arma::vec2& b, const arma::vec2& c, const double tolerance)
+    Circle::Circle(const Eigen::Vector2d& a, const Eigen::Vector2d& b, const Eigen::Vector2d& c, const double tolerance)
             : radius(0.0), radiusSq(0.0), centre(arma::fill::zeros) {
-        setFromPoints(std::forward<const arma::vec2&>(a), std::forward<const arma::vec2&>(b), std::forward<const arma::vec2&>(c),tolerance);
+        setFromPoints(std::forward<const Eigen::Vector2d&>(a), std::forward<const Eigen::Vector2d&>(b), std::forward<const Eigen::Vector2d&>(c),tolerance);
     }
 
-    bool Circle::setFromPoints(const arma::vec2& a, const arma::vec2& b, const arma::vec2& c, const double tolerance) {
+    bool Circle::setFromPoints(const Eigen::Vector2d& a, const Eigen::Vector2d& b, const Eigen::Vector2d& c, const double tolerance) {
 
-        const arma::vec2 ab = a - b;
-        const arma::vec2 bc = b - c;
+        const Eigen::Vector2d ab = a - b;
+        const Eigen::Vector2d bc = b - c;
         double det = ((ab[0] * bc[1]) - (bc[0] * ab[1]));
 
         if (std::abs(det) < tolerance) {
@@ -62,19 +62,19 @@ namespace geometry {
         return true;
     }
 
-    double Circle::distanceToPoint(const arma::vec2& point) const {
+    double Circle::distanceToPoint(const Eigen::Vector2d& point) const {
         return arma::norm(point - centre) - radius;
     }
 
-    double Circle::squaresDifference(const arma::vec2& point) const {
+    double Circle::squaresDifference(const Eigen::Vector2d& point) const {
         return arma::accu(arma::square(point - centre)) - radiusSq;
     }
 
-    arma::vec2 Circle::orthogonalProjection(const arma::vec2& point) const {
+    Eigen::Vector2d Circle::orthogonalProjection(const Eigen::Vector2d& point) const {
         return arma::normalise(point - centre) * radius + centre;
     }
 
-    arma::vec2 Circle::getEdgePoints(uint y) const {
+    Eigen::Vector2d Circle::getEdgePoints(uint y) const {
         auto edgePoints = getEdgePoints(double(y));
         return {
             std::round(edgePoints[0]),
@@ -82,7 +82,7 @@ namespace geometry {
         };
     }
 
-    arma::vec2 Circle::getEdgePoints(double y) const {
+    Eigen::Vector2d Circle::getEdgePoints(double y) const {
         // find the min and max x points on the circle for each given y
         // uses the general equation of a circle and solves for x
         double a = y - centre[1];

@@ -156,7 +156,7 @@ namespace motion
         setRightFootSource(getRightFootDestination());
         setTorsoSource(inTorsoDestination);
 
-        arma::vec2 supportMod = arma::zeros(2); // support point modulation for wallkick
+        Eigen::Vector2d supportMod = arma::zeros(2); // support point modulation for wallkick
 
         if(isZeroVelocityRequired())
         {
@@ -428,7 +428,7 @@ namespace motion
     {
         return (footOffsetCoefficient[index]);
     }
-    void FootPlacementPlanner::setFootOffsetCoefficient(const arma::vec2& inFootOffsetCoefficient)
+    void FootPlacementPlanner::setFootOffsetCoefficient(const Eigen::Vector2d& inFootOffsetCoefficient)
     {
         footOffsetCoefficient = inFootOffsetCoefficient;
     }

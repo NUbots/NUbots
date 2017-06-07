@@ -63,12 +63,12 @@ double KFBallLocalisationEngine::MeasurementUpdate(const VisionObject& observed_
             ballAngle = std::atan2(currentState(1), currentState(0));
         }
 
-        arma::vec3 measuredPosCartesian = sphericalToCartesian(measurement.position);
-        arma::vec2 cartesianImuObservation2d = observed_object.sensors->robotToIMU * measuredPosCartesian.rows(0,1);
-        arma::vec3 cartesianImuObservation = Eigen::Vector3d(cartesianImuObservation2d(0),
+        Eigen::Vector3d measuredPosCartesian = sphericalToCartesian(measurement.position);
+        Eigen::Vector2d cartesianImuObservation2d = observed_object.sensors->robotToIMU * measuredPosCartesian.rows(0,1);
+        Eigen::Vector3d cartesianImuObservation = Eigen::Vector3d(cartesianImuObservation2d(0),
                                                          cartesianImuObservation2d(1),
                                                          measuredPosCartesian(2));
-        arma::vec3 sphericalImuObservation = cartesianToSpherical(cartesianImuObservation);
+        Eigen::Vector3d sphericalImuObservation = cartesianToSpherical(cartesianImuObservation);
         sphericalImuObservation(1) -= ballAngle;
         arma::mat33 cov = measurement.error;
 

@@ -56,7 +56,7 @@ namespace darwin {
             Vec3Noise gyroscope;
         } noise;
         double bodyTilt = 0;
-        arma::vec3 integrated_gyroscope = {0, 0, 0};
+        Eigen::Vector3d integrated_gyroscope = {0, 0, 0};
         void setRightFootDown(bool down);
         void setLeftFootDown(bool down);
     public:

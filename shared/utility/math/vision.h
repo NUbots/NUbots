@@ -40,14 +40,14 @@ namespace vision {
 
     using ServoID = utility::input::ServoID;
 
-    inline double getParallaxAngle(const arma::vec2& screen1, const arma::vec2& screen2, const double& camFocalLengthPixels){
-        arma::vec3 camSpaceP1 = {camFocalLengthPixels, screen1[0], screen1[1]};
-        arma::vec3 camSpaceP2 = {camFocalLengthPixels, screen2[0], screen2[1]};
+    inline double getParallaxAngle(const Eigen::Vector2d& screen1, const Eigen::Vector2d& screen2, const double& camFocalLengthPixels){
+        Eigen::Vector3d camSpaceP1 = {camFocalLengthPixels, screen1[0], screen1[1]};
+        Eigen::Vector3d camSpaceP2 = {camFocalLengthPixels, screen2[0], screen2[1]};
 
         return utility::math::angle::acos_clamped(arma::dot(camSpaceP1,camSpaceP2) / (arma::norm(camSpaceP1) * arma::norm(camSpaceP2)));
     }
 
-    inline double widthBasedDistanceToCircle(const double& radius, const arma::vec2& s1, const arma::vec2& s2, const double& camFocalLengthPixels){
+    inline double widthBasedDistanceToCircle(const double& radius, const Eigen::Vector2d& s1, const Eigen::Vector2d& s2, const double& camFocalLengthPixels){
         double parallaxAngle = getParallaxAngle(s1, s2, camFocalLengthPixels);
         double correctionForClosenessEffect = radius * std::sin(parallaxAngle / 2.0);
 
@@ -58,7 +58,7 @@ namespace vision {
         @param s1,s2 - Measured screen coordinates in pixels of points
         @param camFocalLengthPixels - Distance to the virtual camera screen in pixels
     */
-    inline double distanceToEquidistantPoints(const double& separation, const arma::vec2& s1, const arma::vec2& s2, const double& camFocalLengthPixels){
+    inline double distanceToEquidistantPoints(const double& separation, const Eigen::Vector2d& s1, const Eigen::Vector2d& s2, const double& camFocalLengthPixels){
         double parallaxAngle = getParallaxAngle(s1, s2, camFocalLengthPixels);
         return (separation / 2) / std::tan(parallaxAngle / 2);
     }
@@ -67,41 +67,41 @@ namespace vision {
         @param cam - coordinates in camera space of the pixel (cam[0] = y coordinate pixels, cam[1] = z coordinate pixels)
         @return im - coordinates on the screen in image space measured x across, y down, zero at top left
     */
-    inline arma::ivec2 screenToImage(const arma::vec2& screen, const arma::uvec2& imageSize){
-        arma::vec2 v = Eigen::Vector2d( double(imageSize[0] - 1) * 0.5, double(imageSize[1] - 1) * 0.5 ) - screen;
+    inline arma::ivec2 screenToImage(const Eigen::Vector2d& screen, const arma::uvec2& imageSize){
+        Eigen::Vector2d v = Eigen::Vector2d( double(imageSize[0] - 1) * 0.5, double(imageSize[1] - 1) * 0.5 ) - screen;
         return arma::ivec2({ int(lround(v[0])), int(lround(v[1])) });
     }
-    inline arma::vec2 imageToScreen(const arma::ivec2& im, const arma::uvec2& imageSize){
+    inline Eigen::Vector2d imageToScreen(const arma::ivec2& im, const arma::uvec2& imageSize){
         return Eigen::Vector2d( double(imageSize[0] - 1) * 0.5, double(imageSize[1] - 1) * 0.5 ) - im;
     }
-    inline arma::vec2 imageToScreen(const arma::vec2& im, const arma::uvec2& imageSize){
+    inline Eigen::Vector2d imageToScreen(const Eigen::Vector2d& im, const arma::uvec2& imageSize){
         return Eigen::Vector2d( double(imageSize[0] - 1) * 0.5, double(imageSize[1] - 1) * 0.5 ) - im;
     }
 
     /*! @brief uses pinhole cam model
         @param point - Point in camera space (x along view axis, y to left of screen, z up along screen)
     */
-    inline arma::vec2 projectCamSpaceToScreen(const arma::vec3& point, const double& camFocalLengthPixels){
+    inline Eigen::Vector2d projectCamSpaceToScreen(const Eigen::Vector3d& point, const double& camFocalLengthPixels){
         return {camFocalLengthPixels * point[1] / point[0], camFocalLengthPixels * point[2] / point[0]};
     }
 
-    inline arma::vec2 projectWorldPointToScreen(const arma::vec4& point, const utility::math::matrix::Transform3D& camToGround, const double& camFocalLengthPixels){
-        arma::vec4 camSpacePoint = camToGround.i() * point;
+    inline Eigen::Vector2d projectWorldPointToScreen(const Eigen::Vector4d& point, const utility::math::matrix::Transform3D& camToGround, const double& camFocalLengthPixels){
+        Eigen::Vector4d camSpacePoint = camToGround.i() * point;
         return projectCamSpaceToScreen(camSpacePoint.rows(0,2), camFocalLengthPixels);
     }
-    inline arma::vec2 projectWorldPointToScreen(const arma::vec3& point, const utility::math::matrix::Transform3D& camToGround, const double& camFocalLengthPixels){
-        arma::vec4 point_ = arma::ones(4);
+    inline Eigen::Vector2d projectWorldPointToScreen(const Eigen::Vector3d& point, const utility::math::matrix::Transform3D& camToGround, const double& camFocalLengthPixels){
+        Eigen::Vector4d point_ = arma::ones(4);
         point_.rows(0,2) = point;
         return projectWorldPointToScreen(point_, camToGround, camFocalLengthPixels);
     }
 
-    inline arma::vec3 getCamFromScreen(const arma::vec2& screen, const double& camFocalLengthPixels){
-        return arma::vec3{camFocalLengthPixels, screen[0], screen[1]};
+    inline Eigen::Vector3d getCamFromScreen(const Eigen::Vector2d& screen, const double& camFocalLengthPixels){
+        return Eigen::Vector3d{camFocalLengthPixels, screen[0], screen[1]};
     }
 
-    inline arma::vec3 projectCamToPlane(const arma::vec3& cam, const utility::math::matrix::Transform3D& camToGround, const utility::math::geometry::Plane<3>& plane){
-        arma::vec3 lineDirection = camToGround.submat(0,0,2,2) * cam;
-        arma::vec3 linePosition = camToGround.submat(0,3,2,3);
+    inline Eigen::Vector3d projectCamToPlane(const Eigen::Vector3d& cam, const utility::math::matrix::Transform3D& camToGround, const utility::math::geometry::Plane<3>& plane){
+        Eigen::Vector3d lineDirection = camToGround.submat(0,0,2,2) * cam;
+        Eigen::Vector3d linePosition = camToGround.submat(0,3,2,3);
 
         utility::math::geometry::ParametricLine<3> line;
         line.setFromDirection(lineDirection, linePosition);
@@ -109,11 +109,11 @@ namespace vision {
         return plane.intersect(line);
     }
 
-    inline arma::vec3 getGroundPointFromScreen(const arma::vec2& screenPos, const utility::math::matrix::Transform3D& camToGround, const double& camFocalLengthPixels){
+    inline Eigen::Vector3d getGroundPointFromScreen(const Eigen::Vector2d& screenPos, const utility::math::matrix::Transform3D& camToGround, const double& camFocalLengthPixels){
         return projectCamToPlane(getCamFromScreen(screenPos, camFocalLengthPixels), camToGround, utility::math::geometry::Plane<3>({ 0, 0, 1 }, { 0, 0, 0 }));
     }
 
-    inline double distanceToVerticalObject(const arma::vec2& top, const arma::vec2& base, const double& objectHeight, const double& robotHeight, const double& camFocalLengthPixels) {
+    inline double distanceToVerticalObject(const Eigen::Vector2d& top, const Eigen::Vector2d& base, const double& objectHeight, const double& robotHeight, const double& camFocalLengthPixels) {
 
         // Parallax from top to base
         double theta = getParallaxAngle(top, base, camFocalLengthPixels);
@@ -169,7 +169,7 @@ namespace vision {
 
                 ) {
 
-        // arma::vec3 rWFf;
+        // Eigen::Vector3d rWFf;
         // rWFf.rows(0,1) = -Twf.rows(0,1);
         // rWFf[2] = 0.0;
         // // Hwf = rWFw * Rwf
@@ -183,8 +183,8 @@ namespace vision {
     }
 
     inline arma::mat::fixed<3,4> cameraSpaceGoalProjection(
-            const arma::vec3& robotPose,
-            const arma::vec3& goalLocation,
+            const Eigen::Vector3d& robotPose,
+            const Eigen::Vector3d& goalLocation,
             const message::support::FieldDescription& field,
             const utility::math::matrix::Transform3D& camToGround,
             const bool& failIfNegative = true) //camtoground is either camera to ground or camera to world, depending on application

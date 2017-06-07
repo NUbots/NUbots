@@ -102,8 +102,8 @@ namespace strategy {
             cfg_.localisation_interval = durationFromSeconds(config["localisation_interval"].as<double>());
             cfg_.localisation_duration = durationFromSeconds(config["localisation_duration"].as<double>());
 
-            cfg_.start_position_offensive = config["start_position_offensive"].as<arma::vec2>();
-            cfg_.start_position_defensive = config["start_position_defensive"].as<arma::vec2>();
+            cfg_.start_position_offensive = config["start_position_offensive"].as<Eigen::Vector2d>();
+            cfg_.start_position_defensive = config["start_position_defensive"].as<Eigen::Vector2d>();
 
             cfg_.is_goalie = config["goalie"].as<bool>();
 
@@ -439,14 +439,14 @@ namespace strategy {
             throw std::runtime_error("SoccerStrategy::walkTo: Only FieldTarget::Target::BALL is supported.");
         }
 
-        arma::vec2 enemyGoal = {fieldDescription.dimensions.field_length * 0.5, 0};
+        Eigen::Vector2d enemyGoal = {fieldDescription.dimensions.field_length * 0.5, 0};
 
         emit(std::make_unique<MotionCommand>(utility::behaviour::BallApproach(enemyGoal)));
     }
 
     void SoccerStrategy::walkTo(const FieldDescription& fieldDescription, arma::vec position) {
 
-        arma::vec2 enemyGoal = {fieldDescription.dimensions.field_length * 0.5, 0};
+        Eigen::Vector2d enemyGoal = {fieldDescription.dimensions.field_length * 0.5, 0};
 
         auto goalState = Transform2D::lookAt(position, enemyGoal);
         emit(std::make_unique<MotionCommand>(utility::behaviour::WalkToState(goalState)));
@@ -504,7 +504,7 @@ namespace strategy {
         emit(std::make_unique<MotionCommand>(utility::behaviour::DirectCommand({0, 0, 1})));
     }
 
-    arma::vec2 SoccerStrategy::getKickPlan(const std::vector<Self>& selfs, const message::support::FieldDescription& fieldDescription) {
+    Eigen::Vector2d SoccerStrategy::getKickPlan(const std::vector<Self>& selfs, const message::support::FieldDescription& fieldDescription) {
 
         // Defines the box within in which the kick target is changed from the centre
         // of the oppposition goal to the perpendicular distance from the robot to the goal
@@ -516,7 +516,7 @@ namespace strategy {
         float yTakeOverBox = fieldDescription.dimensions.goal_width/2 - buffer; // 90-15 = 75cm
         float xRobot = selfs.front().locObject.position[0];
         float yRobot = selfs.front().locObject.position[1];
-        arma::vec2 newTarget;
+        Eigen::Vector2d newTarget;
 
         if(!selfs.empty()) {
 

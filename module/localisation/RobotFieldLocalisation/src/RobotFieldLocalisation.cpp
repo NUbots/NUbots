@@ -64,21 +64,21 @@ namespace localisation {
 
         on<Configuration>("RobotFieldLocalisation.yaml").then([this] (const Configuration& config) {
             // Use configuration here from file RobotFieldLocalisation.yaml
-            defaultMeasurementCovariance = config["measurement_noise"].as<arma::vec3>();
+            defaultMeasurementCovariance = config["measurement_noise"].as<Eigen::Vector3d>();
             if (filter.filters.empty()) {
                 filter.filters.push_back(
                         MMUKF<FieldModel>::Filter{
                             1.0,
                             UKF<FieldModel>(
-                                config["initial_mean"].as<arma::vec3>()
-                                , arma::diagmat(config["initial_covariance"].as<arma::vec3>())
+                                config["initial_mean"].as<Eigen::Vector3d>()
+                                , arma::diagmat(config["initial_covariance"].as<Eigen::Vector3d>())
                                 )
                             }
                         );
             }
 
             for (auto& f : filter.filters) {
-                f.filter.model.processNoiseDiagonal = config["process_noise"].as<arma::vec3>();
+                f.filter.model.processNoiseDiagonal = config["process_noise"].as<Eigen::Vector3d>();
             }
 
             lastUpdateTime = NUClear::clock::now();
@@ -98,7 +98,7 @@ namespace localisation {
             filter.filters.resize(0);
 
             for (const auto& h : reset.hypotheses) {
-                arma::vec3 Tgr = arma::vec3{h.position[0], h.position[1], h.heading};
+                Eigen::Vector3d Tgr = Eigen::Vector3d{h.position[0], h.position[1], h.heading};
 
                 if (!h.absoluteYaw) {
                     Tgr[2] -= Rotation3D(Transform3D(convert<double, 4, 4>(sensors.world)).rotation()).yaw();

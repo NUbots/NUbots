@@ -57,8 +57,8 @@ namespace motion{
 			SixDOFFrame(utility::math::matrix::Transform3D pose_, float duration_) : pose(pose_), duration(duration_){}
 			SixDOFFrame(const YAML::Node& config) : SixDOFFrame() {
 				duration = config["duration"].as<float>();
-				arma::vec3 pos = config["pos"].as<Expression>();
-				arma::vec3 orientation = (180.0 / M_PI ) * config["orientation"].as<Expression>();
+				Eigen::Vector3d pos = config["pos"].as<Expression>();
+				Eigen::Vector3d orientation = (180.0 / M_PI ) * config["orientation"].as<Expression>();
 				pose = utility::math::matrix::Transform3D();
 				pose.rotateX(orientation[0]);
 				pose.rotateY(orientation[1]);
@@ -98,8 +98,8 @@ namespace motion{
 				Animator anim;
 				float servo_angle_threshold = 0.1;
 
-				arma::vec3 ballPosition;
-				arma::vec3 goalPosition;
+				Eigen::Vector3d ballPosition;
+				Eigen::Vector3d goalPosition;
 
 				NUClear::clock::time_point motionStartTime;
 			public:
@@ -142,7 +142,7 @@ namespace motion{
 				void reset()		{stage = MotionStage::READY; stable = false; anim.reset();}
 
 
-				void setKickParameters(utility::input::LimbID supportFoot_, arma::vec3 ballPosition_, arma::vec3 goalPosition_) {
+				void setKickParameters(utility::input::LimbID supportFoot_, Eigen::Vector3d ballPosition_, Eigen::Vector3d goalPosition_) {
 					supportFoot = supportFoot_;
 					ballPosition = ballPosition_;
 					goalPosition = goalPosition_;

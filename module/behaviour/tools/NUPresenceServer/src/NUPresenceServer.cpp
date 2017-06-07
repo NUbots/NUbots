@@ -61,7 +61,7 @@ namespace tools {
             //Todo: make this a global config struct message
             float yaw = config["robot_to_head"]["yaw"].as<Expression>();
             float pitch = config["robot_to_head"]["pitch"].as<Expression>();
-            arma::vec3 pos = config["robot_to_head"]["pos"].as<Expression>();
+            Eigen::Vector3d pos = config["robot_to_head"]["pos"].as<Expression>();
 
             robot_to_head_scale = config["robot_to_head"]["scale"].as<Expression>();
             robot_to_head = Transform3D::createTranslation(pos) * Transform3D::createRotationZ(yaw) * Transform3D::createRotationY(pitch);

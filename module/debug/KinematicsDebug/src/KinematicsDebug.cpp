@@ -213,7 +213,7 @@ namespace module {
                     float pitch = request.config["pitch"].as<float>();
                     bool RANDOMIZE = request.config["RANDOMIZE"].as<bool>();
 
-                    arma::vec3 cameraVec = {cos(yaw)*cos(pitch), sin(yaw)*cos(pitch), -sin(pitch)};
+                    Eigen::Vector3d cameraVec = {cos(yaw)*cos(pitch), sin(yaw)*cos(pitch), -sin(pitch)};
                     if(RANDOMIZE){
                         iterations = request.config["RANDOM_ITERATIONS"].as<int>();
                     }

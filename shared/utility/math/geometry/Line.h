@@ -31,33 +31,33 @@ namespace geometry {
 
     class Line {
     public:
-        arma::vec2 normal;
+        Eigen::Vector2d normal;
         double distance;
 
         Line();
 
-        Line(const arma::vec2& n, const double& d);
+        Line(const Eigen::Vector2d& n, const double& d);
 
-        Line(const arma::vec2& a, const arma::vec2& b);
+        Line(const Eigen::Vector2d& a, const Eigen::Vector2d& b);
 
-        void setFromPoints(const arma::vec2& a, const arma::vec2& b);
+        void setFromPoints(const Eigen::Vector2d& a, const Eigen::Vector2d& b);
 
         double x(const double& y) const;
         double y(const double& x) const;
 
-        double distanceToPoint(const arma::vec2& point) const;
-        double tangentialDistanceToPoint(const arma::vec2& x) const;
-        arma::vec2 pointFromTangentialDistance(const double& x) const;
+        double distanceToPoint(const Eigen::Vector2d& point) const;
+        double tangentialDistanceToPoint(const Eigen::Vector2d& x) const;
+        Eigen::Vector2d pointFromTangentialDistance(const double& x) const;
 
         bool isHorizontal() const;
         bool isVertical() const;
 
-        arma::vec2 orthogonalProjection(const arma::vec2& x) const;
+        Eigen::Vector2d orthogonalProjection(const Eigen::Vector2d& x) const;
 
-        Line getParallelLineThrough(const arma::vec2& x) const;
+        Line getParallelLineThrough(const Eigen::Vector2d& x) const;
 
-        arma::vec2 tangent() const;
-        arma::vec2 intersect(const Line& line) const;
+        Eigen::Vector2d tangent() const;
+        Eigen::Vector2d intersect(const Line& line) const;
 
         //Perform a least squares fit on a line, optionally using a distance
         //squared threshold away from the current model to filter candidates
@@ -66,7 +66,7 @@ namespace geometry {
                                 const Iterator& last,
                                 const double& candidateThreshold = std::numeric_limits<double>::max()) {
 
-            arma::vec2 average({ 0.0, 0.0 });
+            Eigen::Vector2d average({ 0.0, 0.0 });
             arma::mat22 covmat({ 0.0, 0.0, 0.0, 0.0 });
             size_t ctr = 0;
             //step 1: calculate means and grab candidates

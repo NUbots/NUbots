@@ -34,14 +34,14 @@ namespace geometry {
     class RotatedRectangle {
     private:
         Transform2D transform;
-        arma::vec2 size;
+        Eigen::Vector2d size;
 
     public:
-        RotatedRectangle(const Transform2D& trans, const arma::vec2& size);
+        RotatedRectangle(const Transform2D& trans, const Eigen::Vector2d& size);
 
         Transform2D getTransform() const;
-        arma::vec2 getSize()       const;
-        arma::vec2 getPosition()   const;
+        Eigen::Vector2d getSize()       const;
+        Eigen::Vector2d getPosition()   const;
         double getRotation()       const;
     };
 }

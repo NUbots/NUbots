@@ -37,9 +37,9 @@ namespace vision {
 
         struct GoalSegment {
             GoalSegment() : left(arma::fill::zeros), right(arma::fill::zeros) {}
-            GoalSegment(const arma::vec2& l, const arma::vec2& r) : left(l), right(r) {}
-            arma::vec2 left;
-            arma::vec2 right;
+            GoalSegment(const Eigen::Vector2d& l, const Eigen::Vector2d& r) : left(l), right(r) {}
+            Eigen::Vector2d left;
+            Eigen::Vector2d right;
         };
 
         using DataPoint = GoalSegment;
@@ -58,7 +58,7 @@ namespace vision {
                 Iterator state;
                 LIt(Iterator state) : state(state) {}
                 LIt& operator++() { ++state; return *this; }
-                const arma::vec2& operator*() { return state->left; }
+                const Eigen::Vector2d& operator*() { return state->left; }
                 bool operator!=(const LIt& other) { return state != other.state; }
             };
 
@@ -67,7 +67,7 @@ namespace vision {
                 Iterator state;
                 RIt(Iterator state) : state(state) {}
                 RIt& operator++() { ++state; return *this; }
-                const arma::vec2& operator*() { return state->right; }
+                const Eigen::Vector2d& operator*() { return state->right; }
                 bool operator!=(const RIt& other) { return state != other.state; }
             };
 

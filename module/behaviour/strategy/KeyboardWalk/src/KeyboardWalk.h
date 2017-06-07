@@ -34,7 +34,7 @@ namespace strategy {
         static constexpr const double HEAD_DIFF = 1 * M_PI / 180;
 
         bool moving = false;
-        arma::vec2 velocity;
+        Eigen::Vector2d velocity;
         float rotation = 0;
 
         float headYaw = 0;

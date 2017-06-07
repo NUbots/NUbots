@@ -26,15 +26,15 @@ namespace geometry {
     Line::Line() : normal(arma::fill::zeros), distance(0.0) {
     }
 
-    Line::Line(const arma::vec2& n, const double& d) : normal(n), distance(d) {
+    Line::Line(const Eigen::Vector2d& n, const double& d) : normal(n), distance(d) {
     }
 
-    Line::Line(const arma::vec2& a, const arma::vec2& b) : normal(arma::fill::zeros), distance(0.0) {
-        setFromPoints(std::forward<const arma::vec2&>(a), std::forward<const arma::vec2&>(b));
+    Line::Line(const Eigen::Vector2d& a, const Eigen::Vector2d& b) : normal(arma::fill::zeros), distance(0.0) {
+        setFromPoints(std::forward<const Eigen::Vector2d&>(a), std::forward<const Eigen::Vector2d&>(b));
     }
 
-    void Line::setFromPoints(const arma::vec2& a, const arma::vec2& b) {
-        arma::vec2 l = arma::normalise(a - b);
+    void Line::setFromPoints(const Eigen::Vector2d& a, const Eigen::Vector2d& b) {
+        Eigen::Vector2d l = arma::normalise(a - b);
 
         normal = Eigen::Vector2d( -l[1], l[0] );
         distance = arma::dot(normal, a);
@@ -48,15 +48,15 @@ namespace geometry {
         return (distance - x * normal[0]) / normal[1];
     }
 
-    double Line::distanceToPoint(const arma::vec2& point) const {
+    double Line::distanceToPoint(const Eigen::Vector2d& point) const {
         return arma::dot(point, normal) - distance;
     }
 
-    double Line::tangentialDistanceToPoint(const arma::vec2& x) const {
+    double Line::tangentialDistanceToPoint(const Eigen::Vector2d& x) const {
         return arma::dot(tangent(), x);
     }
 
-    arma::vec2 Line::pointFromTangentialDistance(const double& x) const {
+    Eigen::Vector2d Line::pointFromTangentialDistance(const double& x) const {
         return normal * distance + tangent() * x;
     }
 
@@ -68,28 +68,28 @@ namespace geometry {
         return normal[1] == 0;
     }
 
-    arma::vec2 Line::orthogonalProjection(const arma::vec2& x) const {
+    Eigen::Vector2d Line::orthogonalProjection(const Eigen::Vector2d& x) const {
         return x - (arma::dot(x, normal) - distance) * normal;
     }
 
 
-    Line Line::getParallelLineThrough(const arma::vec2& x) const {
+    Line Line::getParallelLineThrough(const Eigen::Vector2d& x) const {
         Line result;
         result.normal = normal;
         result.distance = arma::dot(x, normal);
         return result;
     }
 
-    arma::vec2 Line::tangent() const {
+    Eigen::Vector2d Line::tangent() const {
         return {-normal[1], normal[0]};
     }
 
-    arma::vec2 Line::intersect(const Line& line) const {
+    Eigen::Vector2d Line::intersect(const Line& line) const {
 
-        arma::vec2 direction1 = tangent();
-        arma::vec2 direction2 = line.tangent();
-        arma::vec2 point1 = pointFromTangentialDistance(0);
-        arma::vec2 point2 = line.pointFromTangentialDistance(0);
+        Eigen::Vector2d direction1 = tangent();
+        Eigen::Vector2d direction2 = line.tangent();
+        Eigen::Vector2d point1 = pointFromTangentialDistance(0);
+        Eigen::Vector2d point2 = line.pointFromTangentialDistance(0);
 
         //Setup linear equations:
         arma::mat Ainverse;

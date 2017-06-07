@@ -256,7 +256,7 @@ namespace motion
         if (hipRollCompensationEnabled)
         {
             //Instantiate unitless phases for x(=0), y(=1) and z(=2) foot motion...
-            arma::vec3 getFootPhases = getFootPhase(getMotionPhase(), phase1Single, phase2Single);
+            Eigen::Vector3d getFootPhases = getFootPhase(getMotionPhase(), phase1Single, phase2Single);
 
             //Evaluate scaled minimum distance of y(=1) phase position to the range [0,1] for hip roll parameter compensation...
             double yBoundedMinimumPhase = std::min({1.0, getFootPhases[1] / 0.1, (1 - getFootPhases[1]) / 0.1});
@@ -414,7 +414,7 @@ namespace motion
 /*=======================================================================================================*/
 //      METHOD: getFootPhase
 /*=======================================================================================================*/
-    arma::vec3 BalanceKinematicResponse::getFootPhase(double phase, double phase1Single, double phase2Single)
+    Eigen::Vector3d BalanceKinematicResponse::getFootPhase(double phase, double phase1Single, double phase2Single)
     {
         // Computes relative x,z motion of foot during single support phase
         // phSingle = 0: x=0, z=0, phSingle = 1: x=1,z=0
@@ -457,7 +457,7 @@ namespace motion
     {
         return (footOffsetCoefficient[index]);
     }
-    void BalanceKinematicResponse::setFootOffsetCoefficient(const arma::vec2& inFootOffsetCoefficient)
+    void BalanceKinematicResponse::setFootOffsetCoefficient(const Eigen::Vector2d& inFootOffsetCoefficient)
     {
         footOffsetCoefficient = inFootOffsetCoefficient;
     }
@@ -520,66 +520,66 @@ namespace motion
 /*=======================================================================================================*/
 //      ENCAPSULATION METHOD: Left Arm Position
 /*=======================================================================================================*/
-    arma::vec3 BalanceKinematicResponse::getLArmPosition()
+    Eigen::Vector3d BalanceKinematicResponse::getLArmPosition()
     {
         return (armLPostureTransform);
     }
-    void BalanceKinematicResponse::setLArmPosition(arma::vec3 inLArm)
+    void BalanceKinematicResponse::setLArmPosition(Eigen::Vector3d inLArm)
     {
         armLPostureTransform = inLArm;
     }
 /*=======================================================================================================*/
 //      ENCAPSULATION METHOD: Left Arm Source
 /*=======================================================================================================*/
-    arma::vec3 BalanceKinematicResponse::getLArmSource()
+    Eigen::Vector3d BalanceKinematicResponse::getLArmSource()
     {
         return (armLPostureSource);
     }
-    void BalanceKinematicResponse::setLArmSource(arma::vec3 inLArm)
+    void BalanceKinematicResponse::setLArmSource(Eigen::Vector3d inLArm)
     {
         armLPostureSource = inLArm;
     }
 /*=======================================================================================================*/
 //      ENCAPSULATION METHOD: Left Arm Destination
 /*=======================================================================================================*/
-    arma::vec3 BalanceKinematicResponse::getLArmDestination()
+    Eigen::Vector3d BalanceKinematicResponse::getLArmDestination()
     {
         return (armLPostureDestination);
     }
-    void BalanceKinematicResponse::setLArmDestination(arma::vec3 inLArm)
+    void BalanceKinematicResponse::setLArmDestination(Eigen::Vector3d inLArm)
     {
         armLPostureDestination = inLArm;
     }
 /*=======================================================================================================*/
 //      ENCAPSULATION METHOD: Right Arm Position
 /*=======================================================================================================*/
-    arma::vec3 BalanceKinematicResponse::getRArmPosition()
+    Eigen::Vector3d BalanceKinematicResponse::getRArmPosition()
     {
         return (armRPostureTransform);
     }
-    void BalanceKinematicResponse::setRArmPosition(arma::vec3 inRArm)
+    void BalanceKinematicResponse::setRArmPosition(Eigen::Vector3d inRArm)
     {
         armRPostureTransform = inRArm;
     }
 /*=======================================================================================================*/
 //      ENCAPSULATION METHOD: Right Arm Source
 /*=======================================================================================================*/
-    arma::vec3 BalanceKinematicResponse::getRArmSource()
+    Eigen::Vector3d BalanceKinematicResponse::getRArmSource()
     {
         return (armRPostureSource);
     }
-    void BalanceKinematicResponse::setRArmSource(arma::vec3 inRArm)
+    void BalanceKinematicResponse::setRArmSource(Eigen::Vector3d inRArm)
     {
         armRPostureSource = inRArm;
     }
 /*=======================================================================================================*/
 //      ENCAPSULATION METHOD: Right Arm Destination
 /*=======================================================================================================*/
-    arma::vec3 BalanceKinematicResponse::getRArmDestination()
+    Eigen::Vector3d BalanceKinematicResponse::getRArmDestination()
     {
         return (armRPostureDestination);
     }
-    void BalanceKinematicResponse::setRArmDestination(arma::vec3 inRArm)
+    void BalanceKinematicResponse::setRArmDestination(Eigen::Vector3d inRArm)
     {
         armRPostureDestination = inRArm;
     }

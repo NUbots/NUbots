@@ -23,14 +23,14 @@ namespace utility {
 namespace math {
 namespace geometry {
 
-    RotatedRectangle::RotatedRectangle(const Transform2D& transform_, const arma::vec2& size_)
+    RotatedRectangle::RotatedRectangle(const Transform2D& transform_, const Eigen::Vector2d& size_)
         : transform(transform_), size(size_) { }
 
     Transform2D RotatedRectangle::getTransform() const {
         return transform;
     }
 
-    arma::vec2 RotatedRectangle::getPosition()   const {
+    Eigen::Vector2d RotatedRectangle::getPosition()   const {
         return arma::vec(transform.xy());
     }
 
@@ -38,7 +38,7 @@ namespace geometry {
         return transform.angle();
     }
 
-    arma::vec2 RotatedRectangle::getSize()       const {
+    Eigen::Vector2d RotatedRectangle::getSize()       const {
         return size;
     }
 

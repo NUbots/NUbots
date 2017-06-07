@@ -32,21 +32,21 @@ namespace geometry {
     public:
         Vector direction;
         Vector point;
-        arma::vec2 tLimits = {-std::numeric_limits<double>::infinity(), std::numeric_limits<double>::infinity()};
+        Eigen::Vector2d tLimits = {-std::numeric_limits<double>::infinity(), std::numeric_limits<double>::infinity()};
         ParametricLine() : direction(arma::fill::zeros), point(arma::fill::zeros) {}
         ParametricLine(const Vector& p1, const Vector& p2, bool segment = false) : direction(arma::fill::zeros), point(arma::fill::zeros) {
             setFromTwoPoints(p1, p2, segment);
         };
 
 
-        arma::vec2 start() const{
+        Eigen::Vector2d start() const{
             return point + tLimits[0] * direction;
         }
-        arma::vec2 end() const{
+        Eigen::Vector2d end() const{
             return point + tLimits[1] * direction;
         }
 
-        void setFromDirection(const Vector& direction_, const Vector& point_, const arma::vec2& tLimits_ = {-std::numeric_limits<double>::infinity(), std::numeric_limits<double>::infinity()}){
+        void setFromDirection(const Vector& direction_, const Vector& point_, const Eigen::Vector2d& tLimits_ = {-std::numeric_limits<double>::infinity(), std::numeric_limits<double>::infinity()}){
             if(arma::norm(direction_,1) <= 0){
                 throw std::domain_error("ParametricLine::setFromDirection - Direction is zero vector!");
             }

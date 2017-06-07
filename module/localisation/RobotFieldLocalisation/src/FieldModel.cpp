@@ -54,7 +54,7 @@ namespace module {
         {
 
             //make a storage for our goal locations
-            arma::vec3 goalLocation;
+            Eigen::Vector3d goalLocation;
             goalLocation.fill(0.0);
             arma::mat::fixed<3,4> goalNormals;
             // Transform2D world = sensors.world.projectTo2D(Eigen::Vector3d(0,0,1),Eigen::Vector3d(1,0,0));
@@ -68,7 +68,7 @@ namespace module {
             int counter = 0;
             //std::string ans = "";
             for(auto& type : measurements) {
-                arma::vec3 lastGoalLocation = goalLocation;
+                Eigen::Vector3d lastGoalLocation = goalLocation;
                 //choose which goalpost we are looking at
                 // Switch on Team
                 switch(std::get<0>(type)) {

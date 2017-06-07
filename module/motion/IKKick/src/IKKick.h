@@ -41,9 +41,9 @@ namespace motion {
         // NEED the vector from the point on the surface of the ball where we want to kick to the front of the kick foot which is rightFootFront
         // KickPlanner has to add the radius of the all to get the location of the centre of the ball
         // point position of ball
-        arma::vec3 ballPosition;
+        Eigen::Vector3d ballPosition;
         // direction we want to kick the ball
-        arma::vec3 goalPosition;
+        Eigen::Vector3d goalPosition;
 
         /// Subsumption ID key to access motors
         const size_t subsumptionId;

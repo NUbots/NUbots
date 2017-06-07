@@ -55,12 +55,12 @@ namespace vision {
 
         struct Frame{
             Frame() : time(), widthBall(arma::fill::zeros), projBall(arma::fill::zeros) {}
-            Frame(const NUClear::clock::time_point& time, const arma::vec3& width, const arma::vec3& proj)
+            Frame(const NUClear::clock::time_point& time, const Eigen::Vector3d& width, const Eigen::Vector3d& proj)
                 : time(time), widthBall(width), projBall(proj) {}
 
             NUClear::clock::time_point time;
-            arma::vec3 widthBall;
-            arma::vec3 projBall;
+            Eigen::Vector3d widthBall;
+            Eigen::Vector3d projBall;
         };
         Frame lastFrame;
 

@@ -32,14 +32,14 @@ namespace matrix {
 }
 namespace geometry {
 
-    class UnitQuaternion : public arma::vec4 {
-        using arma::vec4::vec4; // inherit constructors
+    class UnitQuaternion : public Eigen::Vector4d {
+        using Eigen::Vector4d::vec4; // inherit constructors
 
         private:
 
             /* @brief Constructor for non-unit quaternion for purpose of point representation
             */
-            UnitQuaternion(const arma::vec3& v);
+            UnitQuaternion(const Eigen::Vector3d& v);
 
         public:
             UnitQuaternion();
@@ -48,17 +48,17 @@ namespace geometry {
 
             UnitQuaternion(double W, double X, double Y, double Z);
 
-            UnitQuaternion(const arma::vec3& vec1, const arma::vec3& vec2);
+            UnitQuaternion(const Eigen::Vector3d& vec1, const Eigen::Vector3d& vec2);
 
             UnitQuaternion operator - (const UnitQuaternion& p) const;
 
             UnitQuaternion operator * (const UnitQuaternion& p) const;
 
-            UnitQuaternion(double realPart, const arma::vec3& imaginaryPart);
+            UnitQuaternion(double realPart, const Eigen::Vector3d& imaginaryPart);
 
             /*! @brief Creates quaternion which rotates about 3D axis by angle radians
             */
-            UnitQuaternion(const arma::vec3& axis, double angle);
+            UnitQuaternion(const Eigen::Vector3d& axis, double angle);
 
             /*! @brief Swaps quat to -quat if kW < 0
             */
@@ -68,9 +68,9 @@ namespace geometry {
             */
             UnitQuaternion i() const;
 
-            arma::vec3 rotateVector(const arma::vec3& v) const;
+            Eigen::Vector3d rotateVector(const Eigen::Vector3d& v) const;
 
-            arma::vec3 getAxis() const;
+            Eigen::Vector3d getAxis() const;
 
             double getAngle() const;
 

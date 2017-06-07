@@ -148,7 +148,7 @@ namespace motion
     void FootMotionPlanner::updateFootPosition(double inPhase, const Transform2D& inActiveLimbSource, const LimbID& inActiveForwardLimb, const Transform2D& inActiveLimbDestination)
     {
         //Instantiate unitless phases for x(=0), y(=1) and z(=2) foot motion...
-        arma::vec3 getFootPhases = getFootPhase(inPhase, phase1Single, phase2Single);
+        Eigen::Vector3d getFootPhases = getFootPhase(inPhase, phase1Single, phase2Single);
 
         //Lift foot by amount depending on walk speed
         if(DEBUG) { log<NUClear::TRACE>("Messaging: Foot Motion Planner - getFootPhase limits and calculations"); }
@@ -211,7 +211,7 @@ namespace motion
 /*=======================================================================================================*/
 //      METHOD: Foot Phase
 /*=======================================================================================================*/
-    arma::vec3 FootMotionPlanner::getFootPhase(double phase, double phase1Single, double phase2Single)
+    Eigen::Vector3d FootMotionPlanner::getFootPhase(double phase, double phase1Single, double phase2Single)
     {
         // Computes relative x,z motion of foot during single support phase
         // phSingle = 0: x=0, z=0, phSingle = 1: x=1,z=0
@@ -299,7 +299,7 @@ namespace motion
     {
         return (footOffsetCoefficient[index]);
     }
-    void FootMotionPlanner::setFootOffsetCoefficient(const arma::vec2& inFootOffsetCoefficient)
+    void FootMotionPlanner::setFootOffsetCoefficient(const Eigen::Vector2d& inFootOffsetCoefficient)
     {
         footOffsetCoefficient = inFootOffsetCoefficient;
     }

@@ -33,7 +33,7 @@ namespace geometry {
     public:
         Quad();
         Quad(const Quad& other);
-        Quad(arma::vec2 bottomLeft, arma::vec2 topLeft, arma::vec2 topRight, arma::vec2 bottomRight);
+        Quad(Eigen::Vector2d bottomLeft, Eigen::Vector2d topLeft, Eigen::Vector2d topRight, Eigen::Vector2d bottomRight);
         Quad(arma::ivec2 bottomLeft, arma::ivec2 topLeft, arma::ivec2 topRight, arma::ivec2 bottomRight);
         Quad(double left, double top, double right, double bottom);
 
@@ -53,21 +53,21 @@ namespace geometry {
          * @param topRight    The top right corner.
          * @param bottomRight The bottom right corner.
          */
-        void set(arma::vec2 bottomLeft, arma::vec2 topLeft, arma::vec2 topRight, arma::vec2 bottomRight);
+        void set(Eigen::Vector2d bottomLeft, Eigen::Vector2d topLeft, Eigen::Vector2d topRight, Eigen::Vector2d bottomRight);
 
-        arma::vec2 getTopCentre() const;                                //! Returns the bottom centre pixel location of the Quad.
-        arma::vec2 getBottomCentre() const;                             //! Returns the bottom centre pixel location of the Quad.
-        arma::vec2 getRightCentre() const;
-        arma::vec2 getLeftCentre() const;
+        Eigen::Vector2d getTopCentre() const;                                //! Returns the bottom centre pixel location of the Quad.
+        Eigen::Vector2d getBottomCentre() const;                             //! Returns the bottom centre pixel location of the Quad.
+        Eigen::Vector2d getRightCentre() const;
+        Eigen::Vector2d getLeftCentre() const;
 
-        arma::vec2 getCentre() const;                                   //! Returns the centre pixel location  of the Quad.
+        Eigen::Vector2d getCentre() const;                                   //! Returns the centre pixel location  of the Quad.
 
-        arma::vec2 getBottomLeft() const;                               //! Returns the bottom left pixel location  of the Quad.
-        arma::vec2 getBottomRight() const;                              //! Returns the bottom right pixel location  of the Quad.
-        arma::vec2 getTopLeft() const;                                  //! Returns the top left pixel location  of the Quad.
-        arma::vec2 getTopRight() const;                                 //! Returns the top right pixel location  of the Quad.
+        Eigen::Vector2d getBottomLeft() const;                               //! Returns the bottom left pixel location  of the Quad.
+        Eigen::Vector2d getBottomRight() const;                              //! Returns the bottom right pixel location  of the Quad.
+        Eigen::Vector2d getTopLeft() const;                                  //! Returns the top left pixel location  of the Quad.
+        Eigen::Vector2d getTopRight() const;                                 //! Returns the top right pixel location  of the Quad.
 
-        arma::vec2 getSize() const;                                     //Returns the bounding box width and height
+        Eigen::Vector2d getSize() const;                                     //Returns the bounding box width and height
 
         double getLeft() const;
         double getRight() const;
@@ -86,7 +86,7 @@ namespace geometry {
         double area() const;
         double aspectRatio() const;
 
-        std::vector<arma::vec2> getVertices() const;
+        std::vector<Eigen::Vector2d> getVertices() const;
 
         bool overlapsHorizontally(const Quad& other) const;
 
@@ -97,24 +97,24 @@ namespace geometry {
          * @param y The horizonal line to solve the 2 x-axis intersections with
          * @return The minX and maxX rounded that intersect given y
          */
-        arma::vec2 getEdgePoints(uint y) const;
+        Eigen::Vector2d getEdgePoints(uint y) const;
 
-        std::pair<arma::vec2, arma::vec2> getIntersectionPoints(Line line) const;
+        std::pair<Eigen::Vector2d, Eigen::Vector2d> getIntersectionPoints(Line line) const;
 
         /**
          * Finds and returns the two intersections points on x given a y
          * @param y The horizonal line to solve the 2 x-axis intersections with
          * @return The minX and maxX that intersect given y
          */
-        arma::vec2 getEdgePoints(double y) const;
+        Eigen::Vector2d getEdgePoints(double y) const;
 
-        static Quad getBoundingBox(const std::vector<arma::vec2>& points);
+        static Quad getBoundingBox(const std::vector<Eigen::Vector2d>& points);
 
     private:
-        arma::vec2 bl;                                                  //! @variable The bottom-left of the Quad.
-        arma::vec2 br;                                                  //! @variable The bottom-right of the Quad.
-        arma::vec2 tr;                                                  //! @variable The top-right of the Quad.
-        arma::vec2 tl;                                                  //! @variable The top-left of the Quad.
+        Eigen::Vector2d bl;                                                  //! @variable The bottom-left of the Quad.
+        Eigen::Vector2d br;                                                  //! @variable The bottom-right of the Quad.
+        Eigen::Vector2d tr;                                                  //! @variable The top-right of the Quad.
+        Eigen::Vector2d tl;                                                  //! @variable The top-left of the Quad.
 
         //! @brief output stream operator.
     friend std::ostream& operator<< (std::ostream& output, const Quad& quad);

@@ -219,10 +219,10 @@ namespace module {
                     std::unique_ptr<WalkCommand> command = std::make_unique<WalkCommand>(subsumptionId, convert<double, 3>(Transform2D({0, 0, 0})));
                     command->command = convert<double, 3>(Transform2D({finalForwardSpeed, 0, angle}));
 
-                    arma::vec2 ball_world_position = RobotToWorldTransform(convert<double, 2>(selfs.front().locObject.position),
+                    Eigen::Vector2d ball_world_position = RobotToWorldTransform(convert<double, 2>(selfs.front().locObject.position),
                                                                            convert<double, 2>(selfs.front().heading),
                                                                            position.rows(0,1));
-                    arma::vec2 kick_target = 2 * ball_world_position - convert<double, 2>(selfs.front().locObject.position);
+                    Eigen::Vector2d kick_target = 2 * ball_world_position - convert<double, 2>(selfs.front().locObject.position);
                     emit(drawSphere("kick_target", Eigen::Vector3d(kick_target[0], kick_target[1], 0.0), 0.1, Eigen::Vector3d(1, 0, 0), 0));
                     //log("walkcommand",command->command[0],command->command[1]);
                     //log("anglewalkcommand",command->command[2]);

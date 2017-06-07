@@ -114,7 +114,7 @@ namespace support {
             bool blind_robot = false;
             bool auto_start_behaviour = true;
 
-            arma::vec4 vision_error = {0.01,0.017,0.017};
+            Eigen::Vector4d vision_error = {0.01,0.017,0.017};
 
         } cfg_;
 
@@ -152,7 +152,7 @@ namespace support {
 
         std::unique_ptr<message::platform::darwin::DarwinSensors::Gyroscope> computeGyro(float heading, float oldHeading);
 
-        arma::vec2 getPath(Config::Motion::Path p);
+        Eigen::Vector2d getPath(Config::Motion::Path p);
 
         void setGoalLeftRightKnowledge(std::vector<message::vision::Goal>& goals);
 

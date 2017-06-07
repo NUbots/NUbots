@@ -69,7 +69,7 @@ namespace transform {
     inline arma::vec SphericalRobotObservation(
             const arma::vec& robot_pos,
             const double& robot_heading,
-            const arma::vec3& actual_position) {
+            const Eigen::Vector3d& actual_position) {
         auto actual_pos_robot_2d = WorldToRobotTransform(robot_pos,
                                                      robot_heading,
                                                      actual_position.rows(0, 1));
@@ -82,16 +82,16 @@ namespace transform {
         return obs;
     }
 
-    inline arma::vec2 ImuToWorldHeadingTransform(double imuOffset, math::matrix::Rotation3D orientation) {
+    inline Eigen::Vector2d ImuToWorldHeadingTransform(double imuOffset, math::matrix::Rotation3D orientation) {
         math::matrix::Rotation3D imuRotation = math::matrix::Rotation3D::createRotationZ(imuOffset);
-        arma::vec3 worldRobotHeading = imuRotation * arma::mat(orientation.i()).col(0);
+        Eigen::Vector3d worldRobotHeading = imuRotation * arma::mat(orientation.i()).col(0);
         return arma::normalise(worldRobotHeading.rows(0,1));
     }
 
     inline arma::vec SphericalRobotObservation(
             const arma::vec& robot_pos,
-            const arma::vec2& robot_heading,
-            const arma::vec3& actual_position) {
+            const Eigen::Vector2d& robot_heading,
+            const Eigen::Vector3d& actual_position) {
         auto actual_pos_robot_2d = WorldToRobotTransform(robot_pos,
                                                      robot_heading,
                                                      actual_position.rows(0, 1));

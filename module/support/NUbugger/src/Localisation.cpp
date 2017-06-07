@@ -86,7 +86,7 @@ namespace support {
                 ball_msg->name = "ball";
 
                 for (auto& model : balls) {
-                    arma::vec2 ball_pos = convert<double, 2>(model.locObject.position);
+                    Eigen::Vector2d ball_pos = convert<double, 2>(model.locObject.position);
 
                     if (!model.world_space) {
                         ball_pos = utility::localisation::transform::RobotToWorldTransform(

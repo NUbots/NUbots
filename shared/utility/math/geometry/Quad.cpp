@@ -33,7 +33,7 @@ namespace geometry {
         : bl(other.bl), br(other.br), tr(other.tr), tl(other.tl) {
     }
 
-    Quad::Quad(arma::vec2 bottomLeft, arma::vec2 topLeft, arma::vec2 topRight, arma::vec2 bottomRight)
+    Quad::Quad(Eigen::Vector2d bottomLeft, Eigen::Vector2d topLeft, Eigen::Vector2d topRight, Eigen::Vector2d bottomRight)
         : bl(bottomLeft), br(bottomRight), tr(topRight), tl(topLeft) {
     }
 
@@ -55,14 +55,14 @@ namespace geometry {
         tr[0] = right;          tr[1] = top;
     }
 
-    void Quad::set(arma::vec2 bottomLeft, arma::vec2 topLeft, arma::vec2 topRight, arma::vec2 bottomRight) {
+    void Quad::set(Eigen::Vector2d bottomLeft, Eigen::Vector2d topLeft, Eigen::Vector2d topRight, Eigen::Vector2d bottomRight) {
         bl = bottomLeft;
         tl = topLeft;
         tr = topRight;
         br = bottomRight;
     }
 
-    arma::vec2 Quad::getCentre() const {
+    Eigen::Vector2d Quad::getCentre() const {
         return ((bl + tl + tr + br) * 0.25);
     }
 
@@ -78,8 +78,8 @@ namespace geometry {
         // Area of a quadrilateral: A = 0.5 * |diag1 X diag2|
         // In two dimensions, this equates to: A = 0.5 * |(diag1.x)(diag2.y) - (diag2.x)(diag2.y)|
 
-        arma::vec2 diag1 = bl - tr;
-        arma::vec2 diag2 = tl - br;
+        Eigen::Vector2d diag1 = bl - tr;
+        Eigen::Vector2d diag2 = tl - br;
         return abs(0.5 * ((diag1[0] * diag2[1]) - (diag1[1] * diag2[0])));
     }
 
@@ -97,39 +97,39 @@ namespace geometry {
         return !((farRight < o_farLeft) || (o_farRight < farLeft));
     }
 
-    arma::vec2 Quad::getTopCentre() const {
+    Eigen::Vector2d Quad::getTopCentre() const {
         return ((tl + tr) * 0.5);
     }
 
-    arma::vec2 Quad::getBottomCentre() const {
+    Eigen::Vector2d Quad::getBottomCentre() const {
         return ((bl + br) * 0.5);
     }
 
-    arma::vec2 Quad::getRightCentre() const {
+    Eigen::Vector2d Quad::getRightCentre() const {
         return ((br + tr) * 0.5);
     }
 
-    arma::vec2 Quad::getLeftCentre() const {
+    Eigen::Vector2d Quad::getLeftCentre() const {
         return ((bl + tl) * 0.5);
     }
 
-    arma::vec2 Quad::getBottomLeft() const {
+    Eigen::Vector2d Quad::getBottomLeft() const {
         return bl;
     }
 
-    arma::vec2 Quad::getBottomRight() const {
+    Eigen::Vector2d Quad::getBottomRight() const {
         return br;
     }
 
-    arma::vec2 Quad::getTopLeft() const {
+    Eigen::Vector2d Quad::getTopLeft() const {
         return tl;
     }
 
-    arma::vec2 Quad::getTopRight() const {
+    Eigen::Vector2d Quad::getTopRight() const {
         return tr;
     }
 
-    arma::vec2 Quad::getSize() const{
+    Eigen::Vector2d Quad::getSize() const{
         Quad boundingBox = getBoundingBox(getVertices());
         return {boundingBox.getAverageWidth(),boundingBox.getAverageHeight()};
     }
@@ -175,8 +175,8 @@ namespace geometry {
         return output;
     }
 
-    std::vector<arma::vec2> Quad::getVertices() const {
-        std::vector<arma::vec2> vert(4);
+    std::vector<Eigen::Vector2d> Quad::getVertices() const {
+        std::vector<Eigen::Vector2d> vert(4);
 
         vert[0] = tr;
         vert[1] = br;
@@ -190,7 +190,7 @@ namespace geometry {
         return br.size()==2  && bl.size()==2 && tr.size()==2 && tl.size()==2;
     }
 
-    arma::vec2 Quad::getEdgePoints(uint y) const {
+    Eigen::Vector2d Quad::getEdgePoints(uint y) const {
         auto edgePoints = getEdgePoints(double(y));
         return {
             std::round(edgePoints[0]),
@@ -198,7 +198,7 @@ namespace geometry {
         };
     }
 
-    arma::vec2 Quad::getEdgePoints(double y) const {
+    Eigen::Vector2d Quad::getEdgePoints(double y) const {
         // create the horizontal intersection line
         ParametricLine<> scanLine;
         scanLine.setFromDirection({1, 0}, {0, y});
@@ -234,9 +234,9 @@ namespace geometry {
 
     }
 
-    std::pair<arma::vec2, arma::vec2> Quad::getIntersectionPoints(Line line) const {
+    std::pair<Eigen::Vector2d, Eigen::Vector2d> Quad::getIntersectionPoints(Line line) const {
 
-        std::pair<arma::vec2, arma::vec2> points;
+        std::pair<Eigen::Vector2d, Eigen::Vector2d> points;
 
         std::vector<ParametricLine<>> quadLines = {
             ParametricLine<>(tl, tr, true),
@@ -269,7 +269,7 @@ namespace geometry {
 
     }
 
-    Quad Quad::getBoundingBox(const std::vector<arma::vec2>& points){
+    Quad Quad::getBoundingBox(const std::vector<Eigen::Vector2d>& points){
         //Check for
         if(points.size() <= 0){
             throw std::domain_error("Request made for bounding box for empty list of points!");

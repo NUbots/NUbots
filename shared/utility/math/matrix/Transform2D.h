@@ -40,8 +40,8 @@ namespace matrix {
      * @author Brendan Annable
      */
     template <>
-    class Transform<2> : public arma::vec3 {
-        using arma::vec3::vec3; // inherit constructors
+    class Transform<2> : public Eigen::Vector3d {
+        using Eigen::Vector3d::vec3; // inherit constructors
 
         public:
             /**
@@ -52,14 +52,14 @@ namespace matrix {
             /**
              * @brief Construct transform from a position and an angle.
              */
-            Transform(const arma::vec2 xy_, double angle_);
+            Transform(const Eigen::Vector2d xy_, double angle_);
 
             /**
              * Construct a transform that represents the position and
              * orientation of a camera positioned at 'from' and facing toward
              * 'to'.
              */
-            static Transform2D lookAt(const arma::vec2 from, arma::vec2 to);
+            static Transform2D lookAt(const Eigen::Vector2d from, Eigen::Vector2d to);
 
             /**
              * @brief Transforms position from local coordinates relative to 'reference', to world coordinates

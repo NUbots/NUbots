@@ -36,18 +36,18 @@ namespace utility {
 
     class LocalisationFieldObject {
         private:
-            arma::vec2 location_;
+            Eigen::Vector2d location_;
             LFOId id_;
             std::string name_;
 
         public:
             LocalisationFieldObject() : location_(arma::fill::zeros), id_(LFOId::kInvalid), name_("") { }
 
-            LocalisationFieldObject(arma::vec2 location, LFOId id, const std::string& name)
+            LocalisationFieldObject(Eigen::Vector2d location, LFOId id, const std::string& name)
                 : location_(location), id_(id), name_(name) { }
 
             LFOId id() const { return id_; }
-            arma::vec2 location() const { return location_; }
+            Eigen::Vector2d location() const { return location_; }
             std::string name() const { return name_; }
 
             friend std::ostream& operator<<(std::ostream &os, const LocalisationFieldObject& o) {

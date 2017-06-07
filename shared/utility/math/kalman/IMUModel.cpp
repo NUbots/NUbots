@@ -40,10 +40,10 @@ namespace utility {
                 arma::vec::fixed<IMUModel::size> newState;
 
                 newState = state;
-                
+
                 //make a rotation quaternion
                 const double omega = arma::norm(state.rows(VX, VZ)) + 0.00000000001;
-                //Negate to compensate for some later mistake. 
+                //Negate to compensate for some later mistake.
                 //deltaT has been negative for a while and has masked an incorrect hack below
                 const double theta = -omega*deltaT*0.5;
                 const double sinTheta = sin(theta);
@@ -62,9 +62,9 @@ namespace utility {
             }
 
             // Up vector
-            arma::vec3 IMUModel::predictedObservation(const arma::vec::fixed<size>& state, const MeasurementType::UP&) {
+            Eigen::Vector3d IMUModel::predictedObservation(const arma::vec::fixed<size>& state, const MeasurementType::UP&) {
 
-                arma::vec3 up = { 2 * state[QX] * state[QZ] + 2 * state[QY] * state[QW]
+                Eigen::Vector3d up = { 2 * state[QX] * state[QZ] + 2 * state[QY] * state[QW]
                                   , 2 * state[QY] * state[QZ] - 2 * state[QX] * state[QW]
                                   , 1 - 2 * state[QX] * state[QX] - 2 * state[QY] * state[QY] };
 
@@ -72,9 +72,9 @@ namespace utility {
             }
 
             // Accelerometer
-            arma::vec3 IMUModel::predictedObservation(const arma::vec::fixed<size>& state, const MeasurementType::ACCELEROMETER&) {
+            Eigen::Vector3d IMUModel::predictedObservation(const arma::vec::fixed<size>& state, const MeasurementType::ACCELEROMETER&) {
 
-                arma::vec3 down = { 2 * state[QX] * state[QZ] + 2 * state[QY] * state[QW]
+                Eigen::Vector3d down = { 2 * state[QX] * state[QZ] + 2 * state[QY] * state[QW]
                                   , 2 * state[QY] * state[QZ] - 2 * state[QX] * state[QW]
                                   , 1 - 2 * state[QX] * state[QX] - 2 * state[QY] * state[QY] };
 
@@ -84,13 +84,13 @@ namespace utility {
             }
 
             // Gyroscope
-            arma::vec3 IMUModel::predictedObservation(const arma::vec::fixed<size>& state, const MeasurementType::GYROSCOPE&) {
+            Eigen::Vector3d IMUModel::predictedObservation(const arma::vec::fixed<size>& state, const MeasurementType::GYROSCOPE&) {
                 return state.rows(VX, VZ);
             }
 
 
             // Forward Vector
-            arma::vec3 IMUModel::predictedObservation(const arma::vec::fixed<size>& state) {
+            Eigen::Vector3d IMUModel::predictedObservation(const arma::vec::fixed<size>& state) {
 
                 return { 1 - 2 * state[QY] * state[QY] - 2 * state[QZ] * state[QZ]
                        , 2 * state[QX] * state[QY] + 2 * state[QZ] * state[QW]

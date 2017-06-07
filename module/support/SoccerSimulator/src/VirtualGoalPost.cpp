@@ -47,9 +47,9 @@ namespace support {
     using utility::math::matrix::Rotation3D;
     using utility::math::geometry::Quad;
 
-    arma::vec2 VirtualGoalPost::getCamRay(const arma::vec3& norm1, const arma::vec3& norm2, double focalLength, arma::uvec2 imSize) {
+    Eigen::Vector2d VirtualGoalPost::getCamRay(const Eigen::Vector3d& norm1, const Eigen::Vector3d& norm2, double focalLength, arma::uvec2 imSize) {
         //Solve the vector intersection between two planes to get the camera ray of the quad corner
-        arma::vec3 result;
+        Eigen::Vector3d result;
         const double zdiff = norm2[2]*norm1[1] - norm1[2] * norm2[1];
         const double ydiff = norm2[1]*norm1[2] - norm1[1] * norm2[2];
         if (std::abs(zdiff) > std::numeric_limits<double>::epsilon()) {
@@ -80,7 +80,7 @@ namespace support {
                 );
     }
 
-    VirtualGoalPost::VirtualGoalPost(arma::vec3 position_, float height_, Goal::Side side_, Goal::Team team_){
+    VirtualGoalPost::VirtualGoalPost(Eigen::Vector3d position_, float height_, Goal::Side side_, Goal::Team team_){
         position = position_;
         height = height_;
         side = side_;
@@ -90,7 +90,7 @@ namespace support {
     Goal VirtualGoalPost::detect(const CameraParameters& camParams,
                 Transform2D& robotPose,
                 const Sensors& sensors,
-                arma::vec4& /*error*/,
+                Eigen::Vector4d& /*error*/,
                 const FieldDescription& field){
         Goal result;
 

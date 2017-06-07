@@ -67,7 +67,7 @@ namespace module {
             }
 
             // Accelerometer
-            arma::vec3 MotionModel::predictedObservation(const arma::vec::fixed<size>& state, const MeasurementType::ACCELEROMETER&) {
+            Eigen::Vector3d MotionModel::predictedObservation(const arma::vec::fixed<size>& state, const MeasurementType::ACCELEROMETER&) {
 
                 // Extract our rotation quaternion
                 UnitQuaternion rotation(state.rows(QW, QZ));
@@ -77,14 +77,14 @@ namespace module {
             }
 
             // Gyroscope
-            arma::vec3 MotionModel::predictedObservation(const arma::vec::fixed<size>& state, const MeasurementType::GYROSCOPE&) {
+            Eigen::Vector3d MotionModel::predictedObservation(const arma::vec::fixed<size>& state, const MeasurementType::GYROSCOPE&) {
                 return state.rows(WX, WZ);
             }
 
             // Foot up with z
-            arma::vec4 MotionModel::predictedObservation(const arma::vec::fixed<size>& state, const MeasurementType::FOOT_UP_WITH_Z&) {
+            Eigen::Vector4d MotionModel::predictedObservation(const arma::vec::fixed<size>& state, const MeasurementType::FOOT_UP_WITH_Z&) {
 
-                arma::vec4 prediction;
+                Eigen::Vector4d prediction;
 
                 // Extract our rotation quaternion
                 UnitQuaternion rotation(state.rows(QW, QZ));
@@ -98,12 +98,12 @@ namespace module {
                 return prediction;
             }
 
-            arma::vec3 MotionModel::predictedObservation(const arma::vec::fixed<size>& state, const MeasurementType::FLAT_FOOT_ODOMETRY&) {
+            Eigen::Vector3d MotionModel::predictedObservation(const arma::vec::fixed<size>& state, const MeasurementType::FLAT_FOOT_ODOMETRY&) {
 
                 return state.rows(PX, PZ);
             }
 
-            arma::vec4 MotionModel::predictedObservation(const arma::vec::fixed<size>& state, const MeasurementType::FLAT_FOOT_ORIENTATION&) {
+            Eigen::Vector4d MotionModel::predictedObservation(const arma::vec::fixed<size>& state, const MeasurementType::FLAT_FOOT_ORIENTATION&) {
 
                 return state.rows(QW, QZ);
             }

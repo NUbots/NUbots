@@ -42,7 +42,7 @@ namespace module {
             return state;
         }
 
-        arma::vec3 BallModel::predictedObservation(const arma::vec::fixed<size>& state
+        Eigen::Vector3d BallModel::predictedObservation(const arma::vec::fixed<size>& state
             , const FieldDescription& field
             , const Sensors& sensors
             , const MeasurementType::BALL&) const {
@@ -52,13 +52,13 @@ namespace module {
             const Transform3D& Htc = convert<double, 4, 4>(sensors.forwardKinematics.at(ServoID::HEAD_PITCH));
             Transform3D Hcw = Htc.i() * Htw;
 
-            arma::vec3 rBWw = { state[PX], state[PY], field.ball_radius };
+            Eigen::Vector3d rBWw = { state[PX], state[PY], field.ball_radius };
 
             return Hcw.transformPoint(rBWw);
         }
 
         arma::vec BallModel::observationDifference(const arma::vec& measurement
-            , const arma::vec3& rBCc
+            , const Eigen::Vector3d& rBCc
             , const FieldDescription& field
             , const Sensors& /*sensors*/
             , const MeasurementType::BALL&) const {

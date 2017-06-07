@@ -37,7 +37,7 @@ namespace matrix {
         submat(0,0,2,2) = rotation;
     }
 
-    Transform3D::Transform(const Rotation3D& rotation, const arma::vec3& translation) : Transform() {
+    Transform3D::Transform(const Rotation3D& rotation, const Eigen::Vector3d& translation) : Transform() {
         submat(0,0,2,2) = rotation;
         this->translation() = translation;
     }
@@ -50,11 +50,11 @@ namespace matrix {
 
     }
 
-    Transform3D::Transform(const arma::vec3& in) : Transform(Transform3D().translate(in)) {
+    Transform3D::Transform(const Eigen::Vector3d& in) : Transform(Transform3D().translate(in)) {
 
     }
 
-    Transform3D Transform3D::translate(const arma::vec3& translation) const {
+    Transform3D Transform3D::translate(const Eigen::Vector3d& translation) const {
         return *this * createTranslation(translation);
     }
 
@@ -82,7 +82,7 @@ namespace matrix {
         return *this * createRotationZ(radians);
     }
 
-    Transform3D Transform3D::scale(const arma::vec3& v) const{
+    Transform3D Transform3D::scale(const Eigen::Vector3d& v) const{
         return *this * createScale(v);
     }
 
@@ -113,15 +113,15 @@ namespace matrix {
     }
 
 
-    arma::vec3 Transform3D::transformPoint(const arma::vec3& p){
-        arma::vec4 p4 = arma::join_cols(p,arma::vec({1}));
-        arma::vec4 result4 = *this * p4;
+    Eigen::Vector3d Transform3D::transformPoint(const Eigen::Vector3d& p){
+        Eigen::Vector4d p4 = arma::join_cols(p,arma::vec({1}));
+        Eigen::Vector4d result4 = *this * p4;
         return result4.rows(0,2);
     }
 
-    arma::vec3 Transform3D::transformVector(const arma::vec3& p){
-        arma::vec4 p4 = arma::join_cols(p,arma::vec({0}));
-        arma::vec4 result4 = *this * p4;
+    Eigen::Vector3d Transform3D::transformVector(const Eigen::Vector3d& p){
+        Eigen::Vector4d p4 = arma::join_cols(p,arma::vec({0}));
+        Eigen::Vector4d result4 = *this * p4;
         return result4.rows(0,2);
     }
 
@@ -177,12 +177,12 @@ namespace matrix {
         Rotation3D R(q);
 
         //Get displacement:
-        arma::vec3 displacement = stddev_disp * arma::randn(3);
+        Eigen::Vector3d displacement = stddev_disp * arma::randn(3);
 
         return Transform3D(R, displacement);
     }
 
-    Transform3D Transform3D::createTranslation(const arma::vec3& translation) {
+    Transform3D Transform3D::createTranslation(const Eigen::Vector3d& translation) {
         Transform3D transform;
         transform.col(3).rows(0,2) = translation;
         return transform;
@@ -206,7 +206,7 @@ namespace matrix {
         return transform;
     }
 
-    Transform3D Transform3D::createScale(const arma::vec3& v){
+    Transform3D Transform3D::createScale(const Eigen::Vector3d& v){
         Transform3D transform;
         transform.rotation() = arma::diagmat(v);
         return transform;
@@ -218,11 +218,11 @@ namespace matrix {
         Rotation3D r2 = T2.rotation();
         UnitQuaternion q2 = UnitQuaternion(r2);
 
-        arma::vec3 t1 = T1.translation();
-        arma::vec3 t2 = T2.translation();
+        Eigen::Vector3d t1 = T1.translation();
+        Eigen::Vector3d t2 = T2.translation();
 
         UnitQuaternion qResult = q1.slerp(q2,alpha);
-        arma::vec3 tResult = alpha * (t2 - t1) + t1;
+        Eigen::Vector3d tResult = alpha * (t2 - t1) + t1;
 
         Transform3D TResult = Transform3D(Rotation3D(qResult));
         TResult.translation() = tResult;
@@ -231,24 +231,24 @@ namespace matrix {
     }
 
 
-    Transform2D Transform3D::projectTo2D(const arma::vec3& yawAxis, const arma::vec3& forwardAxis) const{
+    Transform2D Transform3D::projectTo2D(const Eigen::Vector3d& yawAxis, const Eigen::Vector3d& forwardAxis) const{
         Transform2D result;
 
         //Translation
-        arma::vec3 orthoForwardAxis = arma::normalise(arma::cross(yawAxis,arma::cross(forwardAxis,yawAxis)));
-        arma::vec3 r = translation();
+        Eigen::Vector3d orthoForwardAxis = arma::normalise(arma::cross(yawAxis,arma::cross(forwardAxis,yawAxis)));
+        Eigen::Vector3d r = translation();
         Rotation3D newSpaceToWorld;
         newSpaceToWorld.x() = orthoForwardAxis;
         newSpaceToWorld.y() = arma::cross(yawAxis,orthoForwardAxis);
         newSpaceToWorld.z() = yawAxis;
         Rotation3D worldToNewSpace = newSpaceToWorld.i();
-        arma::vec3 rNewSpace =  worldToNewSpace * r;
+        Eigen::Vector3d rNewSpace =  worldToNewSpace * r;
         result.xy() = rNewSpace.rows(0,1);
 
         //Rotation
         Rotation3D rot = rotation();
-        arma::vec3 x = rot.x();
-        arma::vec3 xNew = worldToNewSpace * x;
+        Eigen::Vector3d x = rot.x();
+        Eigen::Vector3d xNew = worldToNewSpace * x;
         float theta_x_from_f = std::atan2(xNew[1],xNew[0]);//sin/cos
         result.angle() = theta_x_from_f;
 

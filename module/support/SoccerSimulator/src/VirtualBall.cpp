@@ -48,7 +48,7 @@ namespace support {
     , rd(rand()) {
     }
 
-    VirtualBall::VirtualBall(arma::vec2 position, float diameter)
+    VirtualBall::VirtualBall(Eigen::Vector2d position, float diameter)
     : position({position[0], position[1], diameter * 0.5})
     , velocity(arma::fill::zeros)
     , diameter(diameter)
@@ -56,13 +56,13 @@ namespace support {
     }
 
     // utility::math::matrix::Transform2D ballPose;
-    arma::vec3 position;
-    arma::vec3 velocity;
+    Eigen::Vector3d position;
+    Eigen::Vector3d velocity;
 
-    // arma::vec2 position;
+    // Eigen::Vector2d position;
     float diameter;
 
-    Ball VirtualBall::detect(const CameraParameters& cam, Transform2D robotPose, const Sensors& sensors, arma::vec4 /*error*/){
+    Ball VirtualBall::detect(const CameraParameters& cam, Transform2D robotPose, const Sensors& sensors, Eigen::Vector4d /*error*/){
 
         Ball result;
 
@@ -70,13 +70,13 @@ namespace support {
         Transform3D Hfc = Hcf.i();
 
         // Ball position in field
-        arma::vec3 rBFf = position;
+        Eigen::Vector3d rBFf = position;
 
         // Camera position in field
-        arma::vec3 rCFf = Hfc.translation();
+        Eigen::Vector3d rCFf = Hfc.translation();
 
         // Get our ball position in camera
-        arma::vec3 rBCc = Hcf.rotation() * arma::vec3(rBFf - rCFf);
+        Eigen::Vector3d rBCc = Hcf.rotation() * Eigen::Vector3d(rBFf - rCFf);
         if (rBCc[0] < 0.0) {
             result.edgePoints.clear();
             return result;
@@ -111,7 +111,7 @@ namespace support {
             result.position = convert<double, 3>(Hwc.transformPoint(rBCc));
 
             // Measure points around the ball as a normal distribution
-            arma::vec3 rEBc;
+            Eigen::Vector3d rEBc;
             if (rBCc[0] == 0.0 && rBCc[1] == 0.0 ) {
                 if (rBCc[2] > 0.0) {
                     rEBc = { 1, 0, 0};
@@ -133,7 +133,7 @@ namespace support {
                 double angleOffset = angularDistribution(rd);
 
                 // Get a random number for which direciton the measurement is
-                arma::vec3 rEBc = rEBc * std::tan(angle + radialJitter / 2.0);
+                Eigen::Vector3d rEBc = rEBc * std::tan(angle + radialJitter / 2.0);
 
                 // Make a rotation matrix to rotate our vector to our target
                 result.edgePoints.push_back(convert<double, 3>(arma::normalise(Rotation3D(arma::normalise(rBCc), angle + angleOffset) * rEBc)));

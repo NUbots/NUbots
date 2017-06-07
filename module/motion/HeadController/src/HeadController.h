@@ -45,8 +45,8 @@ namespace module {
 
                 explicit HeadController(std::unique_ptr<NUClear::Environment> environment);
 
-                arma::vec2 currentAngles;
-                arma::vec2 goalAngles;
+                Eigen::Vector2d currentAngles;
+                Eigen::Vector2d goalAngles;
                 bool goalRobotSpace = true;
             };
 

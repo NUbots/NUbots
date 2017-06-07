@@ -38,7 +38,7 @@ namespace matrix {
  * Efficient Construction of Perpendicular Vectors without Branching
  * Michael M. Stark
  */
-arma::vec3 orthogonal(const arma::vec3& v) {
+Eigen::Vector3d orthogonal(const Eigen::Vector3d& v) {
     const unsigned int uyx = std::signbit(std::abs(v[0]) - std::abs(v[1]));
     const unsigned int uzx = std::signbit(std::abs(v[0]) - std::abs(v[2]));
     const unsigned int uzy = std::signbit(std::abs(v[1]) - std::abs(v[2]));
@@ -56,7 +56,7 @@ arma::vec3 orthogonal(const arma::vec3& v) {
  * @brief An alternative method for returning a orthogonal vec3 to a given vec3
  * See: http://lolengine.net/blog/2013/09/21/picking-orthogonal-vector-combing-coconuts
  */
-arma::vec3 orthogonal2(const arma::vec3& v) {
+Eigen::Vector3d orthogonal2(const Eigen::Vector3d& v) {
     return std::abs(v[0]) > std::abs(v[2]) ? Eigen::Vector3d(-v[1], v[0],    0)
                                            : Eigen::Vector3d(0,    -v[2], v[1]);
 }
@@ -64,7 +64,7 @@ arma::vec3 orthogonal2(const arma::vec3& v) {
 /**
  * @brief Returns an arbitary orthonormal vec3 to the given vec3
  */
-arma::vec3 orthonormal(const arma::vec3& v) {
+Eigen::Vector3d orthonormal(const Eigen::Vector3d& v) {
     auto u = orthogonal(v);
     return arma::normalise(u);
 }

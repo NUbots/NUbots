@@ -59,7 +59,7 @@ namespace module {
 
             const auto& maxVisualHorizon = visualHorizon.front()[1] > visualHorizon.back()[1] ? visualHorizon.begin() : visualHorizon.end() - 1;
 
-            arma::vec2 topY = imageToScreen(arma::ivec2({ maxVisualHorizon->x(), int(maxVisualHorizon->y()) }), convert<uint, 2>(classifiedImage.dimensions));
+            Eigen::Vector2d topY = imageToScreen(arma::ivec2({ maxVisualHorizon->x(), int(maxVisualHorizon->y()) }), convert<uint, 2>(classifiedImage.dimensions));
             topY[0] = 0;    //Choose centre of screen
 
             // Get the positions of the top of our green horizion, and the bottom of the screen
@@ -70,7 +70,7 @@ namespace module {
             double cameraHeight = camToGround(2, 3);
 
             // This describes the direction of travel
-            arma::vec3 direction = arma::normalise(xb);
+            Eigen::Vector3d direction = arma::normalise(xb);
 
             // Don't bother drawing lines if we know it's going to fail
             if(direction[0] < 0) {
@@ -89,7 +89,7 @@ namespace module {
 
 
             // Do our inital calculation to get our first Y
-            arma::vec4 worldPosition = arma::ones(4);
+            Eigen::Vector4d worldPosition = arma::ones(4);
             worldPosition.rows(0, 2) = xStart * direction;
             auto camPoint = projectWorldPointToScreen(worldPosition, camToGround, FOCAL_LENGTH_PIXELS);
             int y = screenToImage(camPoint, convert<uint, 2>(classifiedImage.dimensions))[1];

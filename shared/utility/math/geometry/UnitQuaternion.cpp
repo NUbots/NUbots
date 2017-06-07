@@ -41,17 +41,17 @@ namespace geometry {
         );
     }
 
-    UnitQuaternion::UnitQuaternion(double realPart, const arma::vec3& imaginaryPart) {
+    UnitQuaternion::UnitQuaternion(double realPart, const Eigen::Vector3d& imaginaryPart) {
         real() = realPart;
         imaginary() = imaginaryPart;
     }
 
-    UnitQuaternion::UnitQuaternion(const arma::vec3& v) {
+    UnitQuaternion::UnitQuaternion(const Eigen::Vector3d& v) {
         real() = 0;
         imaginary() = v;
     }
 
-    UnitQuaternion::UnitQuaternion(const arma::vec3& axis, double angle) {
+    UnitQuaternion::UnitQuaternion(const Eigen::Vector3d& axis, double angle) {
         real() = std::cos(angle / 2.0);
         imaginary() = std::sin(angle / 2.0) * arma::normalise(axis);
     }
@@ -62,7 +62,7 @@ namespace geometry {
         imaginary() = Eigen::Vector3d(X, Y, Z);
     }
 
-    UnitQuaternion::UnitQuaternion(const arma::vec3& vec1, const arma::vec3& vec2)
+    UnitQuaternion::UnitQuaternion(const Eigen::Vector3d& vec1, const Eigen::Vector3d& vec2)
     {
         double norm     = arma::norm(vec1) * arma::norm(vec2);
         double half_cos = std::sqrt(0.5 + arma::dot(vec1, vec2) / (2.0 * norm));
@@ -86,13 +86,13 @@ namespace geometry {
         return qi;
     }
 
-    arma::vec3 UnitQuaternion::rotateVector(const arma::vec3& v) const {
+    Eigen::Vector3d UnitQuaternion::rotateVector(const Eigen::Vector3d& v) const {
         // Do the math
-        const arma::vec3 t = 2*arma::cross(imaginary(),v);
+        const Eigen::Vector3d t = 2*arma::cross(imaginary(),v);
         return v + real() * t + arma::cross(imaginary(),t);
     }
 
-    arma::vec3 UnitQuaternion::getAxis() const {
+    Eigen::Vector3d UnitQuaternion::getAxis() const {
         double angle = getAngle();
         double sinThetaOnTwo = std::sin(angle / 2.0);
         return imaginary() / sinThetaOnTwo;
@@ -154,7 +154,7 @@ namespace geometry {
         float x = r * sin( theta) * cos( phi );
         float y = r * sin( theta) * sin( phi );
         float z = r * cos( theta );
-        arma::vec3 axis = {x,y,z};
+        Eigen::Vector3d axis = {x,y,z};
 
         return UnitQuaternion(axis, angle);
     }
@@ -173,7 +173,7 @@ namespace geometry {
         float x = r * sin( theta) * cos( phi );
         float y = r * sin( theta) * sin( phi );
         float z = r * cos( theta );
-        arma::vec3 axis = {x,y,z};
+        Eigen::Vector3d axis = {x,y,z};
 
         return UnitQuaternion(axis, angle);
     }
@@ -190,7 +190,7 @@ namespace geometry {
         //From http://en.wikipedia.org/wiki/Quaternion#Quaternions_and_the_geometry_of_R3
         double realPart = real() * p.real() - arma::dot(imaginary(), p.imaginary());
 
-        arma::vec3 imaginaryPart = arma::cross(imaginary(), p.imaginary())
+        Eigen::Vector3d imaginaryPart = arma::cross(imaginary(), p.imaginary())
                                  + p.real() *   imaginary()
                                  +   real() * p.imaginary();
 

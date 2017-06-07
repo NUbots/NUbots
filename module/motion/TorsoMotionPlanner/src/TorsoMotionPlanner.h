@@ -146,18 +146,18 @@ namespace motion
         float  step_height_slow_fraction;               //
         float  step_height_fast_fraction;               //
         arma::mat::fixed<3,2> stepLimits;               //
-        arma::vec2 footOffsetCoefficient;               //
+        Eigen::Vector2d footOffsetCoefficient;               //
         Transform2D uLRFootOffset;                      // standard offset
 
         /**
          * Arm Position vectors initialized from configuration script, see config file for documentation...
          */
-        arma::vec3 armLPostureTransform;                //
-        arma::vec3 armLPostureSource;                   //
-        arma::vec3 armLPostureDestination;              //
-        arma::vec3 armRPostureTransform;                //
-        arma::vec3 armRPostureSource;                   //
-        arma::vec3 armRPostureDestination;              //
+        Eigen::Vector3d armLPostureTransform;                //
+        Eigen::Vector3d armLPostureSource;                   //
+        Eigen::Vector3d armLPostureDestination;              //
+        Eigen::Vector3d armRPostureTransform;                //
+        Eigen::Vector3d armRPostureSource;                   //
+        Eigen::Vector3d armRPostureDestination;              //
 
         /**
          * Internal timing reference variables...
@@ -174,8 +174,8 @@ namespace motion
         double velocityHigh;                            //
         double accelerationTurningFactor;               //
         arma::mat::fixed<3,2> velocityLimits;           //
-        arma::vec3 accelerationLimits;                  //
-        arma::vec3 accelerationLimitsHigh;              //
+        Eigen::Vector3d accelerationLimits;                  //
+        Eigen::Vector3d accelerationLimitsHigh;              //
         Transform2D velocityCurrent;                    // Current robot velocity
         Transform2D velocityCommand;                    // Current velocity command
 
@@ -188,8 +188,8 @@ namespace motion
         /**
          * Dynamic analysis parameters for relevant motion planning...
          */
-        arma::vec4 zmpCoefficients;                     // zmp expoential coefficients aXP aXN aYP aYN
-        arma::vec4 zmpParameters;                       // zmp params m1X, m2X, m1Y, m2Y
+        Eigen::Vector4d zmpCoefficients;                     // zmp expoential coefficients aXP aXN aYP aYN
+        Eigen::Vector4d zmpParameters;                       // zmp params m1X, m2X, m1Y, m2Y
 
         /**
          * Dynamic analysis parameters initialized from configuration script, see config file for documentation...
@@ -226,19 +226,19 @@ namespace motion
          * @details [long description]
          * @return [description]
          */
-        arma::vec2 zmpSolve(double zs, double z1, double z2, double x1, double x2, double phase1Single, double phase2Single, double stepTime, double zmpTime);
+        Eigen::Vector2d zmpSolve(double zs, double z1, double z2, double x1, double x2, double phase1Single, double phase2Single, double stepTime, double zmpTime);
         /**
          * @brief [brief description]
          * @details [long description]
          * @return [description]
          */
-        arma::vec4 zmpTorsoCoefficients();
+        Eigen::Vector4d zmpTorsoCoefficients();
         /**
          * Uses ZMP to determine the torso position
          *
          * @return The torso position in Transform2D
          */
-        Transform2D zmpTorsoCompensation(double phase, arma::vec4 zmpCoefficients, arma::vec4 zmpParams, double stepTime, double zmpTime, double phase1Zmp, double phase2Zmp, Transform2D uLeftFootSource, Transform2D uRightFootSource);
+        Transform2D zmpTorsoCompensation(double phase, Eigen::Vector4d zmpCoefficients, Eigen::Vector4d zmpParams, double stepTime, double zmpTime, double phase1Zmp, double phase2Zmp, Transform2D uLeftFootSource, Transform2D uRightFootSource);
         /**
          * @brief [brief description]
          * @details [long description]
@@ -263,13 +263,13 @@ namespace motion
          * @details [long description]
          * @return [description]
          */
-        arma::vec4 getZmpParams();
+        Eigen::Vector4d getZmpParams();
         /**
          * @brief [brief description]
          * @details [long description]
          * @return [description]
          */
-        void setZmpParams(arma::vec4 inZmpParams);
+        void setZmpParams(Eigen::Vector4d inZmpParams);
          /**
          * @brief [brief description]
          * @details [long description]
@@ -392,7 +392,7 @@ namespace motion
          *
          * @param inFootOffsetCoefficient [description]
          */
-        void setFootOffsetCoefficient(const arma::vec2& inFootOffsetCoefficient);
+        void setFootOffsetCoefficient(const Eigen::Vector2d& inFootOffsetCoefficient);
         /**
          * @brief [brief description]
          * @details [long description]

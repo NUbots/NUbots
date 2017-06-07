@@ -15,7 +15,7 @@ namespace utility
             class Triangle
             {
             private:
-                arma::vec3 P0, P1, P2, normal;
+                Eigen::Vector3d P0, P1, P2, normal;
                 double     epsilon, area;
 
             public:
@@ -23,7 +23,7 @@ namespace utility
                 {
                 }
 
-                Triangle(const arma::vec3& P0, const arma::vec3& P1, const arma::vec3& P2, double epsilon = 1e-6)
+                Triangle(const Eigen::Vector3d& P0, const Eigen::Vector3d& P1, const Eigen::Vector3d& P2, double epsilon = 1e-6)
                 {
                     this->P0      = P0;
                     this->P1      = P1;
@@ -33,7 +33,7 @@ namespace utility
                     calculateArea();
                 }
 
-                Triangle(const arma::vec3& normal, const arma::vec3& P0, const arma::vec3& P1, const arma::vec3& P2, double epsilon = 1e-6)
+                Triangle(const Eigen::Vector3d& normal, const Eigen::Vector3d& P0, const Eigen::Vector3d& P1, const Eigen::Vector3d& P2, double epsilon = 1e-6)
                 {
                     this->normal  = normal;
                     this->P0      = P0;
@@ -43,7 +43,7 @@ namespace utility
                     calculateArea();
                 }
 
-                arma::vec3 calculateNormal(bool CCW = true)
+                Eigen::Vector3d calculateNormal(bool CCW = true)
                 {
                     if (CCW == true)
                     {
@@ -69,29 +69,29 @@ namespace utility
                     return(area);
                 }
 
-                arma::vec3 getNormal() const
+                Eigen::Vector3d getNormal() const
                 {
                     return(normal);
                 }
 
-                arma::vec3 getP0() const
+                Eigen::Vector3d getP0() const
                 {
                     return(P0);
                 }
 
-                arma::vec3 getP1() const
+                Eigen::Vector3d getP1() const
                 {
                     return(P1);
                 }
 
-                arma::vec3 getP2() const
+                Eigen::Vector3d getP2() const
                 {
                     return(P2);
                 }
 
                 void applyTransform(const arma::mat44& transform)
                 {
-                    arma::vec4 norm(arma::fill::zeros), R0(arma::fill::ones), R1(arma::fill::ones), R2(arma::fill::ones);
+                    Eigen::Vector4d norm(arma::fill::zeros), R0(arma::fill::ones), R1(arma::fill::ones), R2(arma::fill::ones);
                     norm.head(3) = normal;
                     R0.head(3)   = P0;
                     R1.head(3)   = P1;
@@ -108,7 +108,7 @@ namespace utility
                     P2     = R2.head(3);
                 }
 
-                arma::vec3 getRandomPoint() const
+                Eigen::Vector3d getRandomPoint() const
                 {
                     // Randomly select a point from inside a triangle.
                     // https://wiki.csiro.au/display/AutonomousSystems/Fitting+CAD+models+in+a+Point+Cloud
@@ -120,7 +120,7 @@ namespace utility
                     double sqrtT = std::sqrt(rand() * SCALE);
                     double s     = rand() * SCALE;
 
-                    arma::vec3 scale = {(1 - sqrtT), ((1 - s) * sqrtT), (s * sqrtT)};
+                    Eigen::Vector3d scale = {(1 - sqrtT), ((1 - s) * sqrtT), (s * sqrtT)};
 
                     arma::mat33 points;
                     points.col(0) = P0;
@@ -132,12 +132,12 @@ namespace utility
 
                 // Taken from
                 // https://github.com/erich666/jgt-code/blob/master/Volume_02/Number_1/Moller1997a/raytri.cm
-                bool rayIntersect(const arma::vec3& orig, const arma::vec3& dir)
+                bool rayIntersect(const Eigen::Vector3d& orig, const Eigen::Vector3d& dir)
                 {
                     return(rayIntersect(orig, dir, P0, P1, P2, epsilon));
                 }
 
-                static bool rayIntersect(const arma::vec3& orig, const arma::vec3& dir, const arma::mat33& points,
+                static bool rayIntersect(const Eigen::Vector3d& orig, const Eigen::Vector3d& dir, const arma::mat33& points,
                                          double epsilon = 1e-6)
                 {
                     return(rayIntersect(orig, dir, points.col(0), points.col(1), points.col(2), epsilon));
@@ -145,16 +145,16 @@ namespace utility
 
                 // Taken from
                 // https://github.com/erich666/jgt-code/blob/master/Volume_02/Number_1/Moller1997a/raytri.cm
-                static bool rayIntersect(const arma::vec3& orig, const arma::vec3& dir,
-                                         const arma::vec3& P0, const arma::vec3& P1, const arma::vec3& P2,
+                static bool rayIntersect(const Eigen::Vector3d& orig, const Eigen::Vector3d& dir,
+                                         const Eigen::Vector3d& P0, const Eigen::Vector3d& P1, const Eigen::Vector3d& P2,
                                          double epsilon = 1e-6)
                 {
                     /* find vectors for two edges sharing vert0 */
-                    arma::vec3 edge1 = P1 - P0;
-                    arma::vec3 edge2 = P2 - P0;
+                    Eigen::Vector3d edge1 = P1 - P0;
+                    Eigen::Vector3d edge2 = P2 - P0;
 
                     /* begin calculating determinant - also used to calculate U parameter */
-                    arma::vec3 pvec = arma::cross(dir, edge2);
+                    Eigen::Vector3d pvec = arma::cross(dir, edge2);
 
                     /* if determinant is near zero, ray lies in plane of triangle */
                     double det = arma::dot(edge1, pvec);
@@ -167,7 +167,7 @@ namespace utility
                     double inv_det = 1.0 / det;
 
                     /* calculate distance from vert0 to ray origin */
-                    arma::vec3 tvec = orig - P0;
+                    Eigen::Vector3d tvec = orig - P0;
 
                     /* calculate U parameter and test bounds */
                     double u = arma::dot(tvec, pvec) * inv_det;
@@ -178,7 +178,7 @@ namespace utility
                     }
 
                     /* prepare to test V parameter */
-                    arma::vec3 qvec = arma::cross(tvec, edge1);
+                    Eigen::Vector3d qvec = arma::cross(tvec, edge1);
 
                     /* calculate V parameter and test bounds */
                     double v = arma::dot(dir, qvec) * inv_det;

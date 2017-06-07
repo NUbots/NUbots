@@ -82,7 +82,7 @@ namespace motion {
 
 			float yaw = config["robot_to_head"]["yaw"].as<Expression>();
 			float pitch = config["robot_to_head"]["pitch"].as<Expression>();
-			arma::vec3 pos = config["robot_to_head"]["pos"].as<Expression>();
+			Eigen::Vector3d pos = config["robot_to_head"]["pos"].as<Expression>();
 
             oculus_to_robot_scale = config["robot_to_head"]["scale"].as<Expression>();
 			robot_to_head = Transform3D::createTranslation(pos) * Transform3D::createRotationZ(yaw) * Transform3D::createRotationY(pitch);
@@ -157,7 +157,7 @@ namespace motion {
         });
 
         on<Trigger<MotionCapture>, Sync<NUPresenceInput>>().then([this](const MotionCapture& mocap){
-            arma::vec3 l_arm_raw, r_arm_raw;
+            Eigen::Vector3d l_arm_raw, r_arm_raw;
             int marker_count = 0;
             for (auto& rigidBody : mocap.rigidBodies) {
 
@@ -189,12 +189,12 @@ namespace motion {
         >().then([this](const Sensors& sensors, const KinematicsModel& kinematicsModel){
 
         	//Record current arm position:
-        	// arma::vec3 prevArmJointsL = {
+        	// Eigen::Vector3d prevArmJointsL = {
         	// 							sensors.servos[int(ServoID::L_SHOULDER_PITCH)].presentPosition,
         	// 							sensors.servos[int(ServoID::L_SHOULDER_ROLL)].presentPosition,
         	// 							sensors.servos[int(ServoID::L_ELBOW)].presentPosition,
         	// 							};
-        	// arma::vec3 prevArmJointsR = {
+        	// Eigen::Vector3d prevArmJointsR = {
         	// 							sensors.servos[int(ServoID::R_SHOULDER_PITCH)].presentPosition,
         	// 							sensors.servos[int(ServoID::R_SHOULDER_ROLL)].presentPosition,
         	// 							sensors.servos[int(ServoID::R_ELBOW)].presentPosition,
@@ -205,7 +205,7 @@ namespace motion {
             // currentCamPose.rotation() = Rotation3D();
 
             //3DoF
-            arma::vec3 gaze = currentCamPose.rotation().col(0);
+            Eigen::Vector3d gaze = currentCamPose.rotation().col(0);
             Rotation3D yawlessOrientation = Rotation3D::createRotationZ(Rotation3D(Transform3D(convert<double, 4, 4>(-sensors.world)).rotation()).yaw()) *
                                                                         Transform3D(convert<double, 4, 4>( sensors.world)).rotation();
 
@@ -220,7 +220,7 @@ namespace motion {
 			//Adjust arm position
         	// int max_number_of_iterations = 20;
             Transform3D camToBody = convert<double, 4, 4>(sensors.forwardKinematics.at(ServoID::HEAD_PITCH));
-            arma::vec3 kneckPos = { kinematicsModel.head.NECK_BASE_POS_FROM_ORIGIN_X,
+            Eigen::Vector3d kneckPos = { kinematicsModel.head.NECK_BASE_POS_FROM_ORIGIN_X,
                                     kinematicsModel.head.NECK_BASE_POS_FROM_ORIGIN_Y,
                                     kinematicsModel.head.NECK_BASE_POS_FROM_ORIGIN_Z};
         	auto arm_jointsL = utility::motion::kinematics::setArmApprox(kinematicsModel, kneckPos + l_arm, true);
@@ -245,8 +245,8 @@ namespace motion {
         	// Transform3D L_shoulder_roll = sensors.forwardKinematics.at(ServoID::L_SHOULDER_ROLL);
         	// Transform3D L_arm = sensors.forwardKinematics.at(ServoID::L_ELBOW);
 
-        	// arma::vec3 zeros = arma::zeros(3);
-        	// arma::vec3 zero_pos = utility::motion::kinematics::calculateArmPosition(kinematicsModel, zeros, true);
+        	// Eigen::Vector3d zeros = arma::zeros(3);
+        	// Eigen::Vector3d zero_pos = utility::motion::kinematics::calculateArmPosition(kinematicsModel, zeros, true);
 
         	// std::cout << "New zero pos = \n" << zero_pos << std::endl;
         	// std::cout << "Traditional FK R_shoulder_pitch = \n" << R_shoulder_pitch << std::endl;
@@ -289,7 +289,7 @@ namespace motion {
             pose.translation() = distance_limit * pose.translation() / norm;
         }
 
-        arma::vec3 eulerAngles = pose.eulerAngles();
+        Eigen::Vector3d eulerAngles = pose.eulerAngles();
         // std::cout << "eulerAngles = " << eulerAngles.t();
         // std::cout << "eulerLimits = " << ", " << eulerLimits.roll.max << ", " << eulerLimits.roll.min << "; " << eulerLimits.pitch.max << ", " << eulerLimits.pitch.min << "; " << eulerLimits.yaw.max << ", " << eulerLimits.yaw.min << std::endl;
         eulerAngles[0] = std::fmax(std::fmin(eulerAngles[0],eulerLimits.roll.max),eulerLimits.roll.min);

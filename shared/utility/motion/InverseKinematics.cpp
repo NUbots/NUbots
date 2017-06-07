@@ -56,7 +56,7 @@ namespace kinematics {
 
         //Remove hip offset
         int negativeIfRight = (limb == LimbID::RIGHT_LEG) ? -1 : 1;
-        arma::vec3 hipOffset = { HIP_OFFSET_X, negativeIfRight * HIP_OFFSET_Y, -HIP_OFFSET_Z};
+        Eigen::Vector3d hipOffset = { HIP_OFFSET_X, negativeIfRight * HIP_OFFSET_Y, -HIP_OFFSET_Z};
         targetLeg.translation() -= hipOffset;
 
         float length = arma::norm(targetLeg.translation());
@@ -91,7 +91,7 @@ namespace kinematics {
                                           << 0<< 0<< 0<< 1;
         //Rotate input position from standard robot coords to foot coords
         // NUClear::log<NUClear::DEBUG>("Target Original\n", target);
-        arma::vec4 fourthColumn = inputCoordinatesToCalcCoordinates * target.col(3);
+        Eigen::Vector4d fourthColumn = inputCoordinatesToCalcCoordinates * target.col(3);
         target = inputCoordinatesToCalcCoordinates * target * inputCoordinatesToCalcCoordinates.t();
         target.col(3) = fourthColumn;
         // NUClear::log<NUClear::DEBUG>("Target Final\n", target);
@@ -103,15 +103,15 @@ namespace kinematics {
             target(0,3) *= -1;
         }
 
-        arma::vec3 ankleX = target.submat(0,0,2,0);
-        arma::vec3 ankleY = target.submat(0,1,2,1);
-        arma::vec3 ankleZ = target.submat(0,2,2,2);
+        Eigen::Vector3d ankleX = target.submat(0,0,2,0);
+        Eigen::Vector3d ankleY = target.submat(0,1,2,1);
+        Eigen::Vector3d ankleZ = target.submat(0,2,2,2);
 
-        arma::vec3 anklePos = target.submat(0,3,2,3);
+        Eigen::Vector3d anklePos = target.submat(0,3,2,3);
 
-        arma::vec3 hipOffset = {LENGTH_BETWEEN_LEGS / 2.0, HIP_OFFSET_X, DISTANCE_FROM_BODY_TO_HIP_JOINT};
+        Eigen::Vector3d hipOffset = {LENGTH_BETWEEN_LEGS / 2.0, HIP_OFFSET_X, DISTANCE_FROM_BODY_TO_HIP_JOINT};
 
-        arma::vec3 targetLeg = anklePos - hipOffset;
+        Eigen::Vector3d targetLeg = anklePos - hipOffset;
 
         float length = arma::norm(targetLeg);
         float maxLegLength = UPPER_LEG_LENGTH + LOWER_LEG_LENGTH;
@@ -139,9 +139,9 @@ namespace kinematics {
 
         anklePitch = lowerLeg + phi2 - M_PI_2;
 
-        arma::vec3 unitTargetLeg = targetLeg / length;
+        Eigen::Vector3d unitTargetLeg = targetLeg / length;
 
-        arma::vec3 hipX = arma::cross(ankleY, unitTargetLeg);
+        Eigen::Vector3d hipX = arma::cross(ankleY, unitTargetLeg);
         float hipXLength = arma::norm(hipX,2);
         if (hipXLength>0){
             hipX /= hipXLength;
@@ -150,19 +150,19 @@ namespace kinematics {
             NUClear::log<NUClear::DEBUG>("InverseKinematics::calculateLegJoints : targetLeg and ankleY parallel. This is unhandled at the moment. requested pose = \n", target);
             return positions;
         }
-        arma::vec3 legPlaneTangent = arma::cross(ankleY, hipX); //Will be unit as ankleY and hipX are normal and unit
+        Eigen::Vector3d legPlaneTangent = arma::cross(ankleY, hipX); //Will be unit as ankleY and hipX are normal and unit
 
         ankleRoll = atan2(arma::dot(ankleX, legPlaneTangent),arma::dot(ankleX, hipX));
 
-        arma::vec3 globalX = {1,0,0};
-        arma::vec3 globalY = {0,1,0};
-        arma::vec3 globalZ = {0,0,1};
+        Eigen::Vector3d globalX = {1,0,0};
+        Eigen::Vector3d globalY = {0,1,0};
+        Eigen::Vector3d globalZ = {0,0,1};
 
         bool isAnkleAboveWaist = arma::dot(unitTargetLeg,globalZ)<0;
 
         float cosZandHipX = arma::dot(globalZ, hipX);
         bool hipRollPositive = cosZandHipX <= 0;
-        arma::vec3 legPlaneGlobalZ = (isAnkleAboveWaist ? -1 : 1 ) * (globalZ - ( cosZandHipX * hipX));
+        Eigen::Vector3d legPlaneGlobalZ = (isAnkleAboveWaist ? -1 : 1 ) * (globalZ - ( cosZandHipX * hipX));
         float legPlaneGlobalZLength = arma::norm(legPlaneGlobalZ, 2);
         if (legPlaneGlobalZLength>0){
            legPlaneGlobalZ /= legPlaneGlobalZLength;
@@ -176,12 +176,12 @@ namespace kinematics {
         float phi4 = M_PI - knee - lowerLeg;
         //Superposition values:
         float sinPIminusPhi2 = std::sin(M_PI - phi2);
-        arma::vec3 unitUpperLeg = unitTargetLeg * (std::sin(phi2 - phi4) / sinPIminusPhi2) + ankleY * (std::sin(phi4) / sinPIminusPhi2);
+        Eigen::Vector3d unitUpperLeg = unitTargetLeg * (std::sin(phi2 - phi4) / sinPIminusPhi2) + ankleY * (std::sin(phi4) / sinPIminusPhi2);
         bool isHipPitchPositive = dot(hipX,cross(unitUpperLeg, legPlaneGlobalZ))>=0;
 
         hipPitch = (isHipPitchPositive ? 1 : -1) * acos(arma::dot(legPlaneGlobalZ, unitUpperLeg));
 
-        arma::vec3 hipXProjected = (isAnkleAboveWaist ? -1 : 1) * hipX;  //If leg is above waist then hipX is pointing in the wrong direction in the xy plane
+        Eigen::Vector3d hipXProjected = (isAnkleAboveWaist ? -1 : 1) * hipX;  //If leg is above waist then hipX is pointing in the wrong direction in the xy plane
         hipXProjected[2] = 0;
         hipXProjected /= arma::norm(hipXProjected, 2);
         bool isHipYawPositive = arma::dot(hipXProjected,globalY)>=0;
@@ -229,41 +229,41 @@ namespace kinematics {
     }
 
 
-    std::vector< std::pair<ServoID, float> > calculateCameraLookJoints(const KinematicsModel& model, arma::vec3 cameraUnitVector) {
+    std::vector< std::pair<ServoID, float> > calculateCameraLookJoints(const KinematicsModel& model, Eigen::Vector3d cameraUnitVector) {
         std::vector< std::pair<ServoID, float> > positions;
         positions.push_back(std::make_pair(ServoID::HEAD_YAW, atan2(cameraUnitVector[1],cameraUnitVector[0]) ));
         positions.push_back(std::make_pair(ServoID::HEAD_PITCH, atan2(-cameraUnitVector[2], std::sqrt(cameraUnitVector[0]*cameraUnitVector[0]+cameraUnitVector[1]*cameraUnitVector[1])) - model.head.CAMERA_DECLINATION_ANGLE_OFFSET ));
         return positions;
     }
 
-    std::vector< std::pair<ServoID, float> > calculateHeadJoints(arma::vec3 cameraUnitVector) {
+    std::vector< std::pair<ServoID, float> > calculateHeadJoints(Eigen::Vector3d cameraUnitVector) {
         std::vector< std::pair<ServoID, float> > positions;
         positions.push_back(std::make_pair(ServoID::HEAD_YAW, atan2(cameraUnitVector[1],cameraUnitVector[0]) ));
         positions.push_back(std::make_pair(ServoID::HEAD_PITCH, atan2(-cameraUnitVector[2], std::sqrt(cameraUnitVector[0]*cameraUnitVector[0]+cameraUnitVector[1]*cameraUnitVector[1]))));
         return positions;
     }
 
-    arma::vec2 calculateHeadJointsToLookAt(arma::vec3 groundPoint, const utility::math::matrix::Transform3D& camToGround, const utility::math::matrix::Transform3D& bodyToGround) {
+    Eigen::Vector2d calculateHeadJointsToLookAt(Eigen::Vector3d groundPoint, const utility::math::matrix::Transform3D& camToGround, const utility::math::matrix::Transform3D& bodyToGround) {
     // TODO: Find point that is invariant under head position.
-        arma::vec3 cameraPosition = camToGround.submat(0,3,2,3);
-        arma::vec3 groundSpaceLookVector = groundPoint - cameraPosition;
-        arma::vec3 lookVector = bodyToGround.submat(0,0,2,2).t() * groundSpaceLookVector;
-        arma::vec3 lookVectorSpherical = utility::math::coordinates::cartesianToSpherical(lookVector);
+        Eigen::Vector3d cameraPosition = camToGround.submat(0,3,2,3);
+        Eigen::Vector3d groundSpaceLookVector = groundPoint - cameraPosition;
+        Eigen::Vector3d lookVector = bodyToGround.submat(0,0,2,2).t() * groundSpaceLookVector;
+        Eigen::Vector3d lookVectorSpherical = utility::math::coordinates::cartesianToSpherical(lookVector);
 
         return lookVectorSpherical.rows(1,2);
     }
 
-    arma::vec2 headAnglesToSeeGroundPoint(const arma::vec2& gpos, const message::input::Sensors& sensors){
-        arma::vec3 groundPos_ground = {gpos[0],gpos[1],0};
+    Eigen::Vector2d headAnglesToSeeGroundPoint(const Eigen::Vector2d& gpos, const message::input::Sensors& sensors){
+        Eigen::Vector3d groundPos_ground = {gpos[0],gpos[1],0};
         return calculateHeadJointsToLookAt(groundPos_ground, convert<double, 4, 4>(sensors.camToGround), convert<double, 4, 4>(sensors.bodyToGround));
     }
 
     std::vector<std::pair<ServoID, float>> setHeadPoseFromFeet(const KinematicsModel& model, const utility::math::matrix::Transform3D& cameraToFeet, const float& footSeparation) {
         //Get camera pose relative to body
-        // arma::vec3 euler = cameraToFeet.rotation().eulerAngles();
+        // Eigen::Vector3d euler = cameraToFeet.rotation().eulerAngles();
         // float headPitch = euler[1] - bodyAngle;
         // float headYaw = euler[2];
-        arma::vec3 gaze = cameraToFeet.rotation().col(0);
+        Eigen::Vector3d gaze = cameraToFeet.rotation().col(0);
         auto headJoints = utility::motion::kinematics::calculateCameraLookJoints(model, gaze);
         float headPitch = std::numeric_limits<float>::quiet_NaN();
         float headYaw = std::numeric_limits<float>::quiet_NaN();
@@ -303,7 +303,7 @@ namespace kinematics {
         return headJoints;
     }
 
-    std::vector<std::pair<ServoID, float>> setArm(const KinematicsModel& model, const arma::vec3& pos, bool left, int number_of_iterations, arma::vec3 angleHint) {
+    std::vector<std::pair<ServoID, float>> setArm(const KinematicsModel& model, const Eigen::Vector3d& pos, bool left, int number_of_iterations, Eigen::Vector3d angleHint) {
         ServoID SHOULDER_PITCH, SHOULDER_ROLL, ELBOW;
         //int negativeIfRight;
 
@@ -322,12 +322,12 @@ namespace kinematics {
         auto start_compute = NUClear::clock::now();
 
         //Initial guess for angles
-        arma::vec3 angles = angleHint;
-        arma::vec3 X = {0,0,0};
+        Eigen::Vector3d angles = angleHint;
+        Eigen::Vector3d X = {0,0,0};
         int i = 0;
         for(; i < number_of_iterations; i++){
             X = calculateArmPosition(model, angles, left);
-            arma::vec3 dX = pos - X;
+            Eigen::Vector3d dX = pos - X;
 
             arma::mat33 J = calculateArmJacobian(model, angles, left);
             // std::cout << "pos = " << pos.t() << std::endl;
@@ -338,7 +338,7 @@ namespace kinematics {
             if(arma::norm(dX) < 0.001){
                 break;
             }
-            arma::vec3 dAngles = J.t() * dX;// * std::max((100 - i),1);
+            Eigen::Vector3d dAngles = J.t() * dX;// * std::max((100 - i),1);
             angles = dAngles + angles;
         }
         auto end_compute = NUClear::clock::now();
@@ -357,7 +357,7 @@ namespace kinematics {
         return joints;
     }
 
-    std::vector<std::pair<ServoID, float>> setArmApprox(const KinematicsModel& model, const arma::vec3& pos, bool left) {
+    std::vector<std::pair<ServoID, float>> setArmApprox(const KinematicsModel& model, const Eigen::Vector3d& pos, bool left) {
         //Setup variables
         ServoID SHOULDER_PITCH, SHOULDER_ROLL, ELBOW;
         int negativeIfRight = 1;
@@ -374,13 +374,13 @@ namespace kinematics {
         //Compute Angles
         float pitch,roll,elbow = 0;
 
-        arma::vec3 shoulderPos = {
+        Eigen::Vector3d shoulderPos = {
             model.arm.SHOULDER_X_OFFSET,
             negativeIfRight * model.arm.DISTANCE_BETWEEN_SHOULDERS / 2,
             model.arm.SHOULDER_Z_OFFSET
         };
 
-        arma::vec3 handFromShoulder = pos - shoulderPos;
+        Eigen::Vector3d handFromShoulder = pos - shoulderPos;
         // std::cout << (left ? "left" : "right" ) << " shoulderPos = " << shoulderPos.t();
         // std::cout << (left ? "right" : "left" ) << " pos = " << pos.t();
         // std::cout << (left ? "left" : "right" ) << " handFromShoulder = " << handFromShoulder.t();
@@ -399,7 +399,7 @@ namespace kinematics {
         float cosPitAngle = (sqrUpperArmLength + sqrExtensionLength - sqrLowerArmLength) / (2 * upperArmLength * extensionLength);
         pitch = std::acos(std::fmax(std::fmin(cosPitAngle,1),-1)) + std::atan2(-handFromShoulder[2],handFromShoulder[0]);
         //SHOULDER ROLL
-        arma::vec3 pitchlessHandFromShoulder = utility::math::matrix::Rotation3D::createRotationY(-pitch) * handFromShoulder;
+        Eigen::Vector3d pitchlessHandFromShoulder = utility::math::matrix::Rotation3D::createRotationY(-pitch) * handFromShoulder;
         roll = std::atan2(pitchlessHandFromShoulder[1],pitchlessHandFromShoulder[0]);
 
         //Write to servo list

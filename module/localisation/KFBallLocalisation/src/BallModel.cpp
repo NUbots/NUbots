@@ -73,7 +73,7 @@ arma::vec::fixed<BallModel::size> BallModel::timeUpdate(
 arma::vec BallModel::predictedObservation(
     const arma::vec::fixed<BallModel::size>& state, double ballAngle) {
 
-    arma::vec3 ball_pos = Eigen::Vector3d(state(kX), state(kY), cfg_.ballHeight);
+    Eigen::Vector3d ball_pos = Eigen::Vector3d(state(kX), state(kY), cfg_.ballHeight);
     auto obs = SphericalRobotObservation({0, 0}, 0, ball_pos);
     obs(1) -= ballAngle;
 

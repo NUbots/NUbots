@@ -131,7 +131,7 @@ namespace motion
         float  ankle_pitch_lift;
         float  ankle_pitch_fall;
         arma::mat::fixed<3,2> stepLimits;               //
-        arma::vec2 footOffsetCoefficient;               //
+        Eigen::Vector2d footOffsetCoefficient;               //
 
         /**
          * Internal timing reference variables...
@@ -147,8 +147,8 @@ namespace motion
         double velocityHigh;                            //
         double accelerationTurningFactor;               //
         arma::mat::fixed<3,2> velocityLimits;           //
-        arma::vec3 accelerationLimits;                  //
-        arma::vec3 accelerationLimitsHigh;              //
+        Eigen::Vector3d accelerationLimits;                  //
+        Eigen::Vector3d accelerationLimitsHigh;              //
         Transform2D velocityCurrent;        // Current robot velocity
 
         /**
@@ -185,7 +185,7 @@ namespace motion
          * @param phase1Single The phase time between [0,1] to start the step. A value of 0.1 means the step will not start until phase is >= 0.1
          * @param phase2Single The phase time between [0,1] to end the step. A value of 0.9 means the step will end when phase >= 0.9
          */
-        arma::vec3 getFootPhase(double phase, double phase1Single, double phase2Single);
+        Eigen::Vector3d getFootPhase(double phase, double phase1Single, double phase2Single);
         /**
          * @brief [brief description]
          * @details [long description]
@@ -228,7 +228,7 @@ namespace motion
          *
          * @param inFootOffsetCoefficient [description]
          */
-        void setFootOffsetCoefficient(const arma::vec2& inFootOffsetCoefficient);
+        void setFootOffsetCoefficient(const Eigen::Vector2d& inFootOffsetCoefficient);
         /**
          * @brief [brief description]
          * @details [long description]

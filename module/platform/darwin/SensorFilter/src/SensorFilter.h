@@ -60,7 +60,7 @@ namespace module {
                     struct MotionFilter {
                         MotionFilter() : velocityDecay(arma::fill::zeros), noise(), initial() {}
 
-                        arma::vec3 velocityDecay;
+                        Eigen::Vector3d velocityDecay;
 
                         struct Noise {
                             Noise() : measurement(), process() {}
@@ -78,10 +78,10 @@ namespace module {
                             struct Process {
                                 Process() : position(arma::fill::ones), velocity(arma::fill::ones),
                                             rotation(arma::fill::ones), rotationalVelocity(arma::fill::ones) {}
-                                arma::vec3 position;
-                                arma::vec3 velocity;
-                                arma::vec4 rotation;
-                                arma::vec3 rotationalVelocity;
+                                Eigen::Vector3d position;
+                                Eigen::Vector3d velocity;
+                                Eigen::Vector4d rotation;
+                                Eigen::Vector3d rotationalVelocity;
                             } process;
                         } noise;
                         struct Initial {
@@ -89,18 +89,18 @@ namespace module {
                             struct Mean {
                                 Mean() : position(arma::fill::ones), velocity(arma::fill::ones),
                                          rotation(arma::fill::ones), rotationalVelocity(arma::fill::ones) {}
-                                arma::vec3 position;
-                                arma::vec3 velocity;
-                                arma::vec4 rotation;
-                                arma::vec3 rotationalVelocity;
+                                Eigen::Vector3d position;
+                                Eigen::Vector3d velocity;
+                                Eigen::Vector4d rotation;
+                                Eigen::Vector3d rotationalVelocity;
                             } mean;
                             struct Covariance {
                                 Covariance() : position(arma::fill::ones), velocity(arma::fill::ones),
                                                rotation(arma::fill::ones), rotationalVelocity(arma::fill::ones) {}
-                                arma::vec3 position;
-                                arma::vec3 velocity;
-                                arma::vec4 rotation;
-                                arma::vec3 rotationalVelocity;
+                                Eigen::Vector3d position;
+                                Eigen::Vector3d velocity;
+                                Eigen::Vector4d rotation;
+                                Eigen::Vector3d rotationalVelocity;
                             } covariance;
                         } initial;
                     } motionFilter;
@@ -122,7 +122,7 @@ namespace module {
                 DarwinVirtualLoadSensor rightFootDown;
 
                 //World to foot in world rotation when the foot landed
-                std::array<arma::vec3, 2> footlanding_rFWw;
+                std::array<Eigen::Vector3d, 2> footlanding_rFWw;
 
                 //Foot to world in foot-flat rotation when the foot landed
                 std::array<utility::math::matrix::Rotation3D, 2> footlanding_Rfw;

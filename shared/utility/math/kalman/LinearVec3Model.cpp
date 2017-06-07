@@ -31,7 +31,7 @@ namespace utility {
             }
 
 
-            arma::vec::fixed<LinearVec3Model::size> LinearVec3Model::timeUpdate(const arma::vec::fixed<size>& state, double deltaT, const arma::vec3& dState) {
+            arma::vec::fixed<LinearVec3Model::size> LinearVec3Model::timeUpdate(const arma::vec::fixed<size>& state, double deltaT, const Eigen::Vector3d& dState) {
                 return state + deltaT * dState;
             }
 

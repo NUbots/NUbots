@@ -40,7 +40,7 @@ namespace utility {
 
                 AdaptiveIMUModel() {} // empty constructor
 
-                arma::vec::fixed<size> timeUpdate(const arma::vec::fixed<size>& state, double deltaT, const arma::vec3& measurement);
+                arma::vec::fixed<size> timeUpdate(const arma::vec::fixed<size>& state, double deltaT, const Eigen::Vector3d& measurement);
 
                 arma::vec predictedObservation(const arma::vec::fixed<size>& state);
 

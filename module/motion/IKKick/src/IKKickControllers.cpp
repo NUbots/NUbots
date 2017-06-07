@@ -95,23 +95,23 @@ namespace motion{
         // Convert support foot to kick foot coordinates = convert torso to kick foot * convert support foot to torso
         Transform3D supportToKickFoot = currentKickFoot.i() * currentTorso.i();
         // Convert ball position from support foot coordinates to kick foot coordinates
-        arma::vec3 ballFromKickFoot = supportToKickFoot.transformPoint(ballPosition);
-        arma::vec3 goalFromKickFoot = supportToKickFoot.transformPoint(goalPosition);
+        Eigen::Vector3d ballFromKickFoot = supportToKickFoot.transformPoint(ballPosition);
+        Eigen::Vector3d goalFromKickFoot = supportToKickFoot.transformPoint(goalPosition);
 
         //Compute follow through:
-        arma::vec3 ballToGoalUnit = arma::normalise(goalFromKickFoot - ballFromKickFoot);
-        arma::vec3 followThrough = follow_through * ballToGoalUnit;
-        arma::vec3 windUp = - wind_up * ballToGoalUnit;
+        Eigen::Vector3d ballToGoalUnit = arma::normalise(goalFromKickFoot - ballFromKickFoot);
+        Eigen::Vector3d followThrough = follow_through * ballToGoalUnit;
+        Eigen::Vector3d windUp = - wind_up * ballToGoalUnit;
 
         //Get kick and lift goals
-        arma::vec3 kickGoal = followThrough;
-        arma::vec3 liftGoal = windUp;
+        Eigen::Vector3d kickGoal = followThrough;
+        Eigen::Vector3d liftGoal = windUp;
 
         kickGoal[2] = kick_height;
         liftGoal[2] = kick_height;
 
         //constrain to prevent leg collision
-        arma::vec3 supportFootPos = supportToKickFoot.translation();
+        Eigen::Vector3d supportFootPos = supportToKickFoot.translation();
         int signSupportFootPosY = supportFootPos[1] < 0 ? -1 : 1;
         float clippingPlaneY = supportFootPos[1] - signSupportFootPosY * (foot_separation_margin + (kinematicsModel.leg.FOOT_WIDTH / 2.0 - kinematicsModel.leg.FOOT_CENTRE_TO_ANKLE_CENTRE));
 
@@ -135,7 +135,7 @@ namespace motion{
         //Robocup code / hacks
         auto startFrame = SixDOFFrame{startPose,0};
         auto liftBeforeWindUp = startFrame;
-        liftBeforeWindUp.pose.translation() = arma::vec3{0,0,lift_foot.pose.translation()[2]};
+        liftBeforeWindUp.pose.translation() = Eigen::Vector3d{0,0,lift_foot.pose.translation()[2]};
         liftBeforeWindUp.duration = lift_before_windup_duration;
         auto returnBeforePlace = liftBeforeWindUp;
         returnBeforePlace.duration = return_before_place_duration;

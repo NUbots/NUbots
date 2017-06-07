@@ -36,7 +36,7 @@ namespace motion {
     	float body_angle = 0.0;
         float smoothing_alpha = 0.1;
 
-        arma::vec3 l_arm,r_arm,mocap_head_pos;
+        Eigen::Vector3d l_arm,r_arm,mocap_head_pos;
         int head_id, l_arm_id, r_arm_id;
 
         utility::math::matrix::Transform3D camera_to_robot;

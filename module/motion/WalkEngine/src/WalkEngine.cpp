@@ -313,22 +313,22 @@ namespace motion
 /*=======================================================================================================*/
 //      ENCAPSULATION METHOD: Left Arm Position
 /*=======================================================================================================*/
-    arma::vec3 WalkEngine::getLArmPosition()
+    Eigen::Vector3d WalkEngine::getLArmPosition()
     {
         return (armLPostureTransform);
     }
-    void WalkEngine::setLArmPosition(arma::vec3 inLArm)
+    void WalkEngine::setLArmPosition(Eigen::Vector3d inLArm)
     {
         armLPostureTransform = inLArm;
     }
 /*=======================================================================================================*/
 //      ENCAPSULATION METHOD: Right Arm Position
 /*=======================================================================================================*/
-    arma::vec3 WalkEngine::getRArmPosition()
+    Eigen::Vector3d WalkEngine::getRArmPosition()
     {
         return (armRPostureTransform);
     }
-    void WalkEngine::setRArmPosition(arma::vec3 inRArm)
+    void WalkEngine::setRArmPosition(Eigen::Vector3d inRArm)
     {
         armRPostureTransform = inRArm;
     }

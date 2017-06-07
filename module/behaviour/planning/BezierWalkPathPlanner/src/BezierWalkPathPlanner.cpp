@@ -174,8 +174,8 @@ namespace module {
 
                         //TODO:use vision ball
 
-                        arma::vec2 ball_world_position = RobotToWorldTransform(selfs.front().position, selfs.front().heading, ball.position);
-                        arma::vec2 kick_target = latestCommand.kickTarget;//2 * ball_world_position - selfs.front().position;
+                        Eigen::Vector2d ball_world_position = RobotToWorldTransform(selfs.front().position, selfs.front().heading, ball.position);
+                        Eigen::Vector2d kick_target = latestCommand.kickTarget;//2 * ball_world_position - selfs.front().position;
                         emit(drawSphere("kick_target", Eigen::Vector3d(kick_target[0], kick_target[1], 0.0), 0.1, Eigen::Vector3d(1, 0, 0), 0));
 
                         // log("Kick Target = ",kick_target);

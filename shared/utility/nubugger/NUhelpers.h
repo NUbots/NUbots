@@ -100,7 +100,7 @@ namespace nubugger {
         return dataPoint;
     }
 
-    inline std::unique_ptr<DrawObjects> drawArrow(std::string name, arma::vec3 position, float length, arma::vec3 direction, float timeout = TIMEOUT) {
+    inline std::unique_ptr<DrawObjects> drawArrow(std::string name, Eigen::Vector3d position, float length, Eigen::Vector3d direction, float timeout = TIMEOUT) {
 
         DrawObject object;
         object.name = name;
@@ -116,7 +116,7 @@ namespace nubugger {
         return std::move(drawObjects);
     }
 
-    inline std::unique_ptr<DrawObjects> drawArrow(std::string name, arma::vec3 position, arma::vec3 target, float timeout = TIMEOUT) {
+    inline std::unique_ptr<DrawObjects> drawArrow(std::string name, Eigen::Vector3d position, Eigen::Vector3d target, float timeout = TIMEOUT) {
 
         DrawObject object;
         object.name = name;
@@ -132,7 +132,7 @@ namespace nubugger {
     }
 
 
-    inline std::unique_ptr<DrawObjects> drawArrow(std::string name, arma::vec2 position, arma::vec2 target, float timeout = TIMEOUT) {
+    inline std::unique_ptr<DrawObjects> drawArrow(std::string name, Eigen::Vector2d position, Eigen::Vector2d target, float timeout = TIMEOUT) {
 
         DrawObject object;
         object.name = name;
@@ -147,7 +147,7 @@ namespace nubugger {
         return std::move(drawObjects);
     }
 
-    inline std::unique_ptr<DrawObjects> drawArrow(std::string name, Transform2D position, arma::vec3 colour, float length, float timeout = TIMEOUT) {
+    inline std::unique_ptr<DrawObjects> drawArrow(std::string name, Transform2D position, Eigen::Vector3d colour, float length, float timeout = TIMEOUT) {
 
         DrawObject object;
         object.name = name;
@@ -164,7 +164,7 @@ namespace nubugger {
         return std::move(drawObjects);
     }
 
-    inline std::unique_ptr<DrawObjects> drawBox(std::string name, arma::vec3 position, float width, float height, float depth, float timeout = TIMEOUT) {
+    inline std::unique_ptr<DrawObjects> drawBox(std::string name, Eigen::Vector3d position, float width, float height, float depth, float timeout = TIMEOUT) {
 
         DrawObject object;
         object.name = name;
@@ -181,7 +181,7 @@ namespace nubugger {
         return std::move(drawObjects);
     }
 
-    inline std::unique_ptr<DrawObjects> drawCircle(std::string name, arma::vec3 position, arma::vec3 rotation, float width, float height, float timeout = TIMEOUT) {
+    inline std::unique_ptr<DrawObjects> drawCircle(std::string name, Eigen::Vector3d position, Eigen::Vector3d rotation, float width, float height, float timeout = TIMEOUT) {
 
         DrawObject object;
         object.name = name;
@@ -198,7 +198,7 @@ namespace nubugger {
         return std::move(drawObjects);
     }
 
-    inline std::unique_ptr<DrawObjects> drawCircle(std::string name, Circle circle, float z = 0, arma::vec3 colour = {1,1,0}, float timeout = TIMEOUT) {
+    inline std::unique_ptr<DrawObjects> drawCircle(std::string name, Circle circle, float z = 0, Eigen::Vector3d colour = {1,1,0}, float timeout = TIMEOUT) {
 
         DrawObject object;
         object.name = name;
@@ -216,7 +216,7 @@ namespace nubugger {
         return std::move(drawObjects);
     }
 
-    inline std::unique_ptr<DrawObjects> drawCylinder(std::string name, arma::vec3 position, arma::vec3 rotation, float topRadius, float bottomRadius, float height, float timeout = TIMEOUT) {
+    inline std::unique_ptr<DrawObjects> drawCylinder(std::string name, Eigen::Vector3d position, Eigen::Vector3d rotation, float topRadius, float bottomRadius, float height, float timeout = TIMEOUT) {
 
         DrawObject object;
         object.name = name;
@@ -234,7 +234,7 @@ namespace nubugger {
         return std::move(drawObjects);
     }
 
-    inline std::unique_ptr<DrawObjects> drawPyramid(std::string name, arma::vec3 position, arma::vec3 rotation, float height, float faces, float timeout = TIMEOUT) {
+    inline std::unique_ptr<DrawObjects> drawPyramid(std::string name, Eigen::Vector3d position, Eigen::Vector3d rotation, float height, float faces, float timeout = TIMEOUT) {
 
         DrawObject object;
         object.name = name;
@@ -251,7 +251,7 @@ namespace nubugger {
         return std::move(drawObjects);
     }
 
-    inline std::unique_ptr<DrawObjects> drawRectangle(std::string name, arma::vec3 position, float height, float length, float timeout = TIMEOUT) {
+    inline std::unique_ptr<DrawObjects> drawRectangle(std::string name, Eigen::Vector3d position, float height, float length, float timeout = TIMEOUT) {
 
         DrawObject object;
         object.name = name;
@@ -284,7 +284,7 @@ namespace nubugger {
         return std::move(drawObjects);
     }
 
-    inline std::unique_ptr<DrawObjects> drawRectangle(std::string name, RotatedRectangle rect, arma::vec3 colour, float z = 0.08, float timeout = TIMEOUT) {
+    inline std::unique_ptr<DrawObjects> drawRectangle(std::string name, RotatedRectangle rect, Eigen::Vector3d colour, float z = 0.08, float timeout = TIMEOUT) {
 
         auto drawObjects = drawRectangle(name, rect, z, timeout);
         drawObjects->objects[0].colour = convert<double, 3>(colour);
@@ -292,7 +292,7 @@ namespace nubugger {
         return std::move(drawObjects);
     }
 
-    inline std::unique_ptr<DrawObjects> drawSphere(std::string name, arma::vec3 position, float radius, float timeout = TIMEOUT) {
+    inline std::unique_ptr<DrawObjects> drawSphere(std::string name, Eigen::Vector3d position, float radius, float timeout = TIMEOUT) {
 
         DrawObject object;
         object.name = name;
@@ -307,7 +307,7 @@ namespace nubugger {
         return std::move(drawObjects);
     }
 
-    inline std::unique_ptr<DrawObjects> drawSphere(std::string name, arma::vec3 position, float radius, arma::vec3 colour, float timeout = TIMEOUT) {
+    inline std::unique_ptr<DrawObjects> drawSphere(std::string name, Eigen::Vector3d position, float radius, Eigen::Vector3d colour, float timeout = TIMEOUT) {
 
         auto drawObjects = drawSphere(name, position, radius, timeout);
         drawObjects->objects[0].colour = convert<double, 3>(colour);
@@ -315,7 +315,7 @@ namespace nubugger {
         return std::move(drawObjects);
     }
 
-    inline std::unique_ptr<DrawObjects> drawTree(std::string name, std::vector<arma::vec2> positions, std::vector<uint> parentIndices, float line_width, arma::vec3 colour, float timeout = TIMEOUT) {
+    inline std::unique_ptr<DrawObjects> drawTree(std::string name, std::vector<Eigen::Vector2d> positions, std::vector<uint> parentIndices, float line_width, Eigen::Vector3d colour, float timeout = TIMEOUT) {
 
         DrawObject object;
         object.name = name;
@@ -338,7 +338,7 @@ namespace nubugger {
         return std::move(drawObjects);
     }
 
-    inline std::unique_ptr<DrawObjects> drawPolyline(std::string name, std::vector<arma::vec2> positions, float line_width, arma::vec3 colour, float timeout = TIMEOUT) {
+    inline std::unique_ptr<DrawObjects> drawPolyline(std::string name, std::vector<Eigen::Vector2d> positions, float line_width, Eigen::Vector3d colour, float timeout = TIMEOUT) {
 
         std::vector<uint> parentIndices;
         parentIndices.reserve(positions.size());
@@ -350,9 +350,9 @@ namespace nubugger {
         return drawTree(name, positions, parentIndices, line_width, colour, timeout);
     }
 
-    inline std::unique_ptr<DrawObjects> drawPath(std::string name, std::vector<Transform2D> states, float line_width, arma::vec3 colour, float timeout = TIMEOUT) {
+    inline std::unique_ptr<DrawObjects> drawPath(std::string name, std::vector<Transform2D> states, float line_width, Eigen::Vector3d colour, float timeout = TIMEOUT) {
 
-        std::vector<arma::vec2> positions;
+        std::vector<Eigen::Vector2d> positions;
 
         for (auto state : states) {
             positions.push_back(state.xy());

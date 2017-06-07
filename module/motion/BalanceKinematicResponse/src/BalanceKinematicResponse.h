@@ -167,28 +167,28 @@ namespace motion
         float  step_height_slow_fraction;               //
         float  step_height_fast_fraction;               //
         arma::mat::fixed<3,2> stepLimits;               //
-        arma::vec2 footOffsetCoefficient;               //
+        Eigen::Vector2d footOffsetCoefficient;               //
         Transform2D uLRFootOffset;                      // standard offset
 
         /**
          * Arm Position vectors initialized from configuration script, see config file for documentation...
          */
-        arma::vec3 armLPostureTransform;                //
-        arma::vec3 armLPostureSource;                   //
-        arma::vec3 armLPostureDestination;              //
-        arma::vec3 armRPostureTransform;                //
-        arma::vec3 armRPostureSource;                   //
-        arma::vec3 armRPostureDestination;              //
+        Eigen::Vector3d armLPostureTransform;                //
+        Eigen::Vector3d armLPostureSource;                   //
+        Eigen::Vector3d armLPostureDestination;              //
+        Eigen::Vector3d armRPostureTransform;                //
+        Eigen::Vector3d armRPostureSource;                   //
+        Eigen::Vector3d armRPostureDestination;              //
 
         /**
          * Ankle Position vectors initialized from configuration script, see config file for documentation...
          */
-        arma::vec4 ankleImuParamX;                      //
-        arma::vec4 ankleImuParamY;                      //
-        arma::vec4 kneeImuParamX;                       //
-        arma::vec4 hipImuParamY;                        //
-        arma::vec4 armImuParamX;                        //
-        arma::vec4 armImuParamY;                        //
+        Eigen::Vector4d ankleImuParamX;                      //
+        Eigen::Vector4d ankleImuParamY;                      //
+        Eigen::Vector4d kneeImuParamX;                       //
+        Eigen::Vector4d hipImuParamY;                        //
+        Eigen::Vector4d armImuParamX;                        //
+        Eigen::Vector4d armImuParamY;                        //
 
         /**
          * Internal timing reference variables...
@@ -204,8 +204,8 @@ namespace motion
         double velocityHigh;                            //
         double accelerationTurningFactor;               //
         arma::mat::fixed<3,2> velocityLimits;           //
-        arma::vec3 accelerationLimits;                  //
-        arma::vec3 accelerationLimitsHigh;              //
+        Eigen::Vector3d accelerationLimits;                  //
+        Eigen::Vector3d accelerationLimitsHigh;              //
         Transform2D velocityCurrent;                    // Current robot velocity
         Transform2D velocityCommand;                    // Current velocity command
 
@@ -371,7 +371,7 @@ namespace motion
          *
          * @param inFootOffsetCoefficient [description]
          */
-        void setFootOffsetCoefficient(const arma::vec2& inFootOffsetCoefficient);
+        void setFootOffsetCoefficient(const Eigen::Vector2d& inFootOffsetCoefficient);
         /**
          * @brief [brief description]
          * @details [long description]
@@ -396,7 +396,7 @@ namespace motion
          * @param phase1Single The phase time between [0,1] to start the step. A value of 0.1 means the step will not start until phase is >= 0.1
          * @param phase2Single The phase time between [0,1] to end the step. A value of 0.9 means the step will end when phase >= 0.9
          */
-        arma::vec3 getFootPhase(double phase, double phase1Single, double phase2Single);
+        Eigen::Vector3d getFootPhase(double phase, double phase1Single, double phase2Single);
         /**
          * @brief [brief description]
          * @details [get a unix timestamp (in decimal seconds that are accurate to the microsecond)]
@@ -476,84 +476,84 @@ namespace motion
          *
          * @param inTorsoPosition [description]
          */
-        arma::vec3 getLArmPosition();
+        Eigen::Vector3d getLArmPosition();
         /**
          * @brief [brief description]
          * @details [long description]
          *
          * @param inTorsoPosition [description]
          */
-        void setLArmPosition(arma::vec3 inLArm);
+        void setLArmPosition(Eigen::Vector3d inLArm);
         /**
          * @brief [brief description]
          * @details [long description]
          *
          * @param inTorsoPosition [description]
          */
-        arma::vec3 getLArmSource();
+        Eigen::Vector3d getLArmSource();
         /**
          * @brief [brief description]
          * @details [long description]
          *
          * @param inTorsoPosition [description]
          */
-        void setLArmSource(arma::vec3 inLArm);
+        void setLArmSource(Eigen::Vector3d inLArm);
         /**
          * @brief [brief description]
          * @details [long description]
          *
          * @param inTorsoPosition [description]
          */
-        arma::vec3 getLArmDestination();
+        Eigen::Vector3d getLArmDestination();
         /**
          * @brief [brief description]
          * @details [long description]
          *
          * @param inTorsoPosition [description]
          */
-        void setLArmDestination(arma::vec3 inLArm);
+        void setLArmDestination(Eigen::Vector3d inLArm);
         /**
          * @brief [brief description]
          * @details [long description]
          *
          * @param inTorsoPosition [description]
          */
-        arma::vec3 getRArmPosition();
+        Eigen::Vector3d getRArmPosition();
         /**
          * @brief [brief description]
          * @details [long description]
          *
          * @param inTorsoPosition [description]
          */
-        void setRArmPosition(arma::vec3 inRArm);
+        void setRArmPosition(Eigen::Vector3d inRArm);
         /**
          * @brief [brief description]
          * @details [long description]
          *
          * @param inTorsoPosition [description]
          */
-        arma::vec3 getRArmSource();
+        Eigen::Vector3d getRArmSource();
         /**
          * @brief [brief description]
          * @details [long description]
          *
          * @param inTorsoPosition [description]
          */
-        void setRArmSource(arma::vec3 inRArm);
+        void setRArmSource(Eigen::Vector3d inRArm);
         /**
          * @brief [brief description]
          * @details [long description]
          *
          * @param inTorsoPosition [description]
          */
-        arma::vec3 getRArmDestination();
+        Eigen::Vector3d getRArmDestination();
         /**
          * @brief [brief description]
          * @details [long description]
          *
          * @param inTorsoPosition [description]
          */
-        void setRArmDestination(arma::vec3 inRArm);
+        void setRArmDestination(Eigen::Vector3d inRArm);
         /**
          * @brief [brief description]
          * @details [long description]

@@ -32,13 +32,13 @@ namespace matrix {
         zeros();
     }
 
-    Transform2D::Transform(const arma::vec2 xy_, double angle_) {
+    Transform2D::Transform(const Eigen::Vector2d xy_, double angle_) {
         xy() = xy_;
         angle() = angle_;
     }
 
-    Transform2D Transform2D::lookAt(const arma::vec2 from, arma::vec2 to) {
-        arma::vec2 vecHeading = to - from;
+    Transform2D Transform2D::lookAt(const Eigen::Vector2d from, Eigen::Vector2d to) {
+        Eigen::Vector2d vecHeading = to - from;
         double angle = vectorToBearing(vecHeading);
         return {from, angle};
     }
@@ -74,9 +74,9 @@ namespace matrix {
     }
 
     Transform2D Transform2D::i() const {
-        arma::vec2 newDisplacement = -worldToLocal(*this).xy();
+        Eigen::Vector2d newDisplacement = -worldToLocal(*this).xy();
         return Transform2D(newDisplacement,-this->angle());
-    } 
+    }
 
 
 }

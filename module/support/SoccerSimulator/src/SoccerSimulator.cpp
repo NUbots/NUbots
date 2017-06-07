@@ -117,9 +117,9 @@ namespace support {
         cfg_.ball.path.y_amp = config["ball"]["path"]["y_amp"].as<Expression>();
         cfg_.ball.path.type = pathTypeFromString(config["ball"]["path"]["type"].as<std::string>());
 
-        world.robotPose = config["initial"]["robot_pose"].as<arma::vec3>();
+        world.robotPose = config["initial"]["robot_pose"].as<Eigen::Vector3d>();
         world.ball = VirtualBall(
-            config["initial"]["ball"]["position"].as<arma::vec2>(),
+            config["initial"]["ball"]["position"].as<Eigen::Vector2d>(),
             config["initial"]["ball"]["diameter"].as<Expression>()
         );
 
@@ -358,8 +358,8 @@ namespace support {
 
         // Emit exact position to NUbugger
         on<Every<100, std::chrono::milliseconds>>().then("Emit True Robot Position", [this] {
-            arma::vec2 bearingVector = world.robotPose.rotation() * Eigen::Vector2d(1,0);
-            arma::vec3 robotHeadingVector = {bearingVector[0], bearingVector[1], 0};
+            Eigen::Vector2d bearingVector = world.robotPose.rotation() * Eigen::Vector2d(1,0);
+            Eigen::Vector3d robotHeadingVector = {bearingVector[0], bearingVector[1], 0};
             emit(drawArrow("robot", {world.robotPose.x(), world.robotPose.y(), 0}, 1, robotHeadingVector, 0));
 
             emit(drawSphere("ball", {world.ball.position(0), world.ball.position(1), 0}, 0.1, 0));
@@ -387,7 +387,7 @@ namespace support {
         return std::move(g);
     }
 
-    arma::vec2 SoccerSimulator::getPath(SoccerSimulator::Config::Motion::Path p){
+    Eigen::Vector2d SoccerSimulator::getPath(SoccerSimulator::Config::Motion::Path p){
         auto t = absolute_time();
         float wave1,wave2;
         switch(p.type){
@@ -438,16 +438,16 @@ namespace support {
             //Load goal posts
             goalPosts.clear();
 
-            arma::vec3 goal_opp_r = {fd->goalpost_opp_r[0],fd->goalpost_opp_r[1],0};
+            Eigen::Vector3d goal_opp_r = {fd->goalpost_opp_r[0],fd->goalpost_opp_r[1],0};
             goalPosts.push_back(VirtualGoalPost(goal_opp_r, 1.1, Goal::Side::RIGHT, Goal::Team::OPPONENT));
 
-            arma::vec3 goal_opp_l = {fd->goalpost_opp_l[0],fd->goalpost_opp_l[1],0};
+            Eigen::Vector3d goal_opp_l = {fd->goalpost_opp_l[0],fd->goalpost_opp_l[1],0};
             goalPosts.push_back(VirtualGoalPost(goal_opp_l, 1.1, Goal::Side::LEFT, Goal::Team::OPPONENT));
 
-            arma::vec3 goal_own_r = {fd->goalpost_own_r[0],fd->goalpost_own_r[1],0};
+            Eigen::Vector3d goal_own_r = {fd->goalpost_own_r[0],fd->goalpost_own_r[1],0};
             goalPosts.push_back(VirtualGoalPost(goal_own_r, 1.1, Goal::Side::RIGHT, Goal::Team::OWN));
 
-            arma::vec3 goal_own_l = {fd->goalpost_own_l[0],fd->goalpost_own_l[1],0};
+            Eigen::Vector3d goal_own_l = {fd->goalpost_own_l[0],fd->goalpost_own_l[1],0};
             goalPosts.push_back(VirtualGoalPost(goal_own_l, 1.1, Goal::Side::LEFT, Goal::Team::OWN));
     }
 

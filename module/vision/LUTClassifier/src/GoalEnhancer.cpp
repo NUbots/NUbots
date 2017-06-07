@@ -39,9 +39,9 @@ namespace module {
 
         struct GoalPOI {
             GoalPOI() :  midpoint(), length() {}
-            GoalPOI(const arma::vec2 midpoint, uint length) :  midpoint(midpoint), length(length) {}
+            GoalPOI(const Eigen::Vector2d midpoint, uint length) :  midpoint(midpoint), length(length) {}
 
-            arma::vec2 midpoint;
+            Eigen::Vector2d midpoint;
             uint length;
         };
 
@@ -56,7 +56,7 @@ namespace module {
             GoalPOIModel() : line(), lengths() {}
             GoalPOIModel(const Line& line, const std::array<uint, 2>& lengths) : line(line), lengths(lengths) {}
 
-            bool regenerate(const std::array<DataPoint, REQUIRED_POINTS>& pts, const arma::vec2& horizonTangent, const double& maxAngle) {
+            bool regenerate(const std::array<DataPoint, REQUIRED_POINTS>& pts, const Eigen::Vector2d& horizonTangent, const double& maxAngle) {
                 line.setFromPoints(pts[0].midpoint, pts[1].midpoint);
                 lengths[0] = pts[0].length;
                 lengths[1] = pts[1].length;
@@ -156,7 +156,7 @@ namespace module {
                 for(auto d = minTangent; d <= maxTangent; d += jump) {
 
                     // Get our centre point
-                    arma::vec2 p = model.model.line.pointFromTangentialDistance(d);
+                    Eigen::Vector2d p = model.model.line.pointFromTangentialDistance(d);
 
                     if((p[1] > int(image.dimensions[1]) - 1) || (p[1] < 0)) {
                         continue;
