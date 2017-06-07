@@ -45,7 +45,7 @@ namespace utility {
 
 
             public:
-                EKF(StateVec initialMean = arma::zeros(Model::size),
+                EKF(StateVec initialMean = Eigen::Matrix<double, Model::size, 1>::Zero(),
                     StateMat initialCovariance = arma::eye(Model::size, Model::size) * 0.1
                     StateMat initialJacobian = model.timeUpdateJacobian(0.)) {
                     //strictly speaking, a time update should be called straight away with a non-zero timedelta

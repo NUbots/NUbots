@@ -41,13 +41,13 @@ namespace motion {
         uRightFootSource = uRightFootDestination;
         uTorsoSource = uTorsoDestination;
 
-        Eigen::Vector2d supportMod = arma::zeros(2); // support point modulation for wallkick
+        Eigen::Vector2d supportMod = Eigen::Matrix<double, 2, 1>::Zero(); // support point modulation for wallkick
 
         if (state == State::STOP_REQUEST) {
             log<NUClear::TRACE>("Walk Engine:: Stop requested");
             state = State::LAST_STEP;
-            velocityCurrent = arma::zeros(3);
-            velocityCommand = arma::zeros(3);
+            velocityCurrent = Eigen::Matrix<double, 3, 1>::Zero();
+            velocityCommand = Eigen::Matrix<double, 3, 1>::Zero();
 
             // Stop with feet together by targetting swing leg next to support leg
             if (swingLeg == LimbID::RIGHT_LEG) {
@@ -132,7 +132,7 @@ namespace motion {
         velocityCurrent.angle() += velocityDifference.angle();
 
         if (initialStep > 0) {
-            velocityCurrent = arma::zeros(3);
+            velocityCurrent = Eigen::Matrix<double, 3, 1>::Zero();
             initialStep--;
         }
     }

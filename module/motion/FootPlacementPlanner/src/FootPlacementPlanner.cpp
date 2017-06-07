@@ -156,7 +156,7 @@ namespace motion
         setRightFootSource(getRightFootDestination());
         setTorsoSource(inTorsoDestination);
 
-        Eigen::Vector2d supportMod = arma::zeros(2); // support point modulation for wallkick
+        Eigen::Vector2d supportMod = Eigen::Matrix<double, 2, 1>::Zero(); // support point modulation for wallkick
 
         if(isZeroVelocityRequired())
         {
@@ -260,7 +260,7 @@ namespace motion
 
         auto& limit = (getVelocityCurrent().x() > velocityHigh ? accelerationLimitsHigh : accelerationLimits) * deltaT;
 
-        Transform2D velocityDifference = arma::zeros(3); // Current velocity differential
+        Transform2D velocityDifference = Eigen::Matrix<double, 3, 1>::Zero(); // Current velocity differential
         velocityDifference.x()     = std::min(std::max(getVelocityCommand().x()     - getVelocityCurrent().x(),     -limit[0]), limit[0]);
         velocityDifference.y()     = std::min(std::max(getVelocityCommand().y()     - getVelocityCurrent().y(),     -limit[1]), limit[1]);
         velocityDifference.angle() = std::min(std::max(getVelocityCommand().angle() - getVelocityCurrent().angle(), -limit[2]), limit[2]);
@@ -307,15 +307,15 @@ namespace motion
         setLeftFootPosition({0, kinematicsModel.leg.HIP_OFFSET_Y, 0});
         setRightFootPosition({0, -kinematicsModel.leg.HIP_OFFSET_Y, 0});
 
-        setTorsoSource(arma::zeros(3));
-        setTorsoDestination(arma::zeros(3));
-        setLeftFootSource(arma::zeros(3));
-        setLeftFootDestination(arma::zeros(3));
-        setRightFootSource(arma::zeros(3));
-        setRightFootDestination(arma::zeros(3));
+        setTorsoSource(Eigen::Matrix<double, 3, 1>::Zero());
+        setTorsoDestination(Eigen::Matrix<double, 3, 1>::Zero());
+        setLeftFootSource(Eigen::Matrix<double, 3, 1>::Zero());
+        setLeftFootDestination(Eigen::Matrix<double, 3, 1>::Zero());
+        setRightFootSource(Eigen::Matrix<double, 3, 1>::Zero());
+        setRightFootDestination(Eigen::Matrix<double, 3, 1>::Zero());
 
-        setVelocityCurrent(arma::zeros(3));
-        setVelocityCommand(arma::zeros(3));
+        setVelocityCurrent(Eigen::Matrix<double, 3, 1>::Zero());
+        setVelocityCommand(Eigen::Matrix<double, 3, 1>::Zero());
 
         // gGyro stabilization variables
         setActiveForwardLimb(activeLimbInitial);

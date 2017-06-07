@@ -79,7 +79,7 @@ namespace kinematics {
 
     std::vector<std::pair<ServoID, float>> setHeadPoseFromFeet(const message::motion::KinematicsModel& model, const utility::math::matrix::Transform3D& cameraToFeet, const float& footSeparation);
 
-    std::vector<std::pair<ServoID, float>> setArm(const message::motion::KinematicsModel& model, const Eigen::Vector3d& pos, bool left, int number_of_iterations = 300, Eigen::Vector3d angleHint = arma::zeros(3));
+    std::vector<std::pair<ServoID, float>> setArm(const message::motion::KinematicsModel& model, const Eigen::Vector3d& pos, bool left, int number_of_iterations = 300, Eigen::Vector3d angleHint = Eigen::Matrix<double, 3, 1>::Zero());
 
     std::vector<std::pair<ServoID, float>> setArmApprox(const message::motion::KinematicsModel& model, const Eigen::Vector3d& pos, bool left);
 

@@ -49,7 +49,7 @@ namespace utility {
                 StateVec sigma_sq;
 
             public:
-                ParticleFilter(StateVec initialMean = arma::zeros(Model::size),
+                ParticleFilter(StateVec initialMean = Eigen::Matrix<double, Model::size, 1>::Zero(),
                                StateMat initialCovariance = arma::eye(Model::size, Model::size) * 0.1,
                                int number_of_particles_ = 100,
                                StateVec sigma_sq_ = 0.1 * arma::ones(Model::size))
@@ -78,7 +78,7 @@ namespace utility {
                 {
                     //Sample single zero mean gaussian with process noise (represented by a gaussian mixture model of size 1)
                     arma::gmm_diag gaussian;
-                    gaussian.set_params(arma::mat(arma::zeros(Model::size)), arma::mat(model.processNoise().diag()),arma::ones(1));
+                    gaussian.set_params(arma::mat(Eigen::Matrix<double, Model::size, 1>::Zero()), arma::mat(model.processNoise().diag()),arma::ones(1));
                     for(unsigned int i = 0; i < particles.n_rows; ++i) {
                         //TODO: add noise?
                         StateVec newpcle = model.timeUpdate(particles.row(i).t(), deltaT, additionalParameters...) + gaussian.generate();
@@ -91,7 +91,7 @@ namespace utility {
                                          const arma::mat& measurement_variance,
                                          const TMeasurementType&... measurementArgs)
                 {
-                    arma::vec weights = arma::zeros(particles.n_rows);
+                    arma::vec weights = Eigen::Matrix<double, particles.n_rows, 1>::Zero();
 
                     for (unsigned int i = 0; i < particles.n_rows; i++){
                         arma::vec predictedObservation = model.predictedObservation(particles.row(i).t(), measurementArgs...);

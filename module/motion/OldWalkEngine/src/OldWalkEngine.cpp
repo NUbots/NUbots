@@ -323,9 +323,9 @@ namespace motion {
     void OldWalkEngine::stanceReset() {
         // standup/sitdown/falldown handling
         if (startFromStep) {
-            uLeftFoot = arma::zeros(3);
-            uRightFoot = arma::zeros(3);
-            uTorso = arma::zeros(3);
+            uLeftFoot = Eigen::Matrix<double, 3, 1>::Zero();
+            uRightFoot = Eigen::Matrix<double, 3, 1>::Zero();
+            uTorso = Eigen::Matrix<double, 3, 1>::Zero();
 
             // start walking asap
             initialStep = 1;
@@ -357,20 +357,20 @@ namespace motion {
         uLeftFoot = {0, kinematicsModel.leg.HIP_OFFSET_Y, 0};
         uRightFoot = {0, -kinematicsModel.leg.HIP_OFFSET_Y, 0};
 
-        uTorsoSource = arma::zeros(3);
-        uTorsoDestination = arma::zeros(3);
-        uLeftFootSource = arma::zeros(3);
-        uLeftFootDestination = arma::zeros(3);
-        uRightFootSource = arma::zeros(3);
-        uRightFootDestination = arma::zeros(3);
+        uTorsoSource = Eigen::Matrix<double, 3, 1>::Zero();
+        uTorsoDestination = Eigen::Matrix<double, 3, 1>::Zero();
+        uLeftFootSource = Eigen::Matrix<double, 3, 1>::Zero();
+        uLeftFootDestination = Eigen::Matrix<double, 3, 1>::Zero();
+        uRightFootSource = Eigen::Matrix<double, 3, 1>::Zero();
+        uRightFootDestination = Eigen::Matrix<double, 3, 1>::Zero();
 
-        velocityCurrent = arma::zeros(3);
-        velocityCommand = arma::zeros(3);
-        velocityDifference = arma::zeros(3);
+        velocityCurrent = Eigen::Matrix<double, 3, 1>::Zero();
+        velocityCommand = Eigen::Matrix<double, 3, 1>::Zero();
+        velocityDifference = Eigen::Matrix<double, 3, 1>::Zero();
 
         // gZMP exponential coefficients:
-        zmpCoefficients = arma::zeros(4);
-        zmpParams = arma::zeros(4);
+        zmpCoefficients = Eigen::Matrix<double, 4, 1>::Zero();
+        zmpParams = Eigen::Matrix<double, 4, 1>::Zero();
 
         // gGyro stabilization variables
         swingLeg = swingLegInitial;

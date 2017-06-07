@@ -245,7 +245,7 @@ namespace motion {
         	// Transform3D L_shoulder_roll = sensors.forwardKinematics.at(ServoID::L_SHOULDER_ROLL);
         	// Transform3D L_arm = sensors.forwardKinematics.at(ServoID::L_ELBOW);
 
-        	// Eigen::Vector3d zeros = arma::zeros(3);
+        	// Eigen::Vector3d zeros = Eigen::Matrix<double, 3, 1>::Zero();
         	// Eigen::Vector3d zero_pos = utility::motion::kinematics::calculateArmPosition(kinematicsModel, zeros, true);
 
         	// std::cout << "New zero pos = \n" << zero_pos << std::endl;
