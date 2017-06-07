@@ -41,8 +41,8 @@ namespace utility
         {
             int          splitDim;
             double       splitVal;
-            arma::Col<T> LowerBounds;
-            arma::Col<T> UpperBounds;
+            Eigen::Matrix<T, Eigen::Dynamic, 1> LowerBounds;
+            Eigen::Matrix<T, Eigen::Dynamic, 1> UpperBounds;
             Eigen::Matrix<unsigned int, Eigen::Dynamic, 1>   dataIndices;
             Eigen::Matrix<unsigned int, Eigen::Dynamic, 1>   spillDataIndices;
             uint32_t     leftChild; //std::reference_wrapper<KDTreeNode> leftChild;
@@ -57,7 +57,7 @@ namespace utility
             std::vector<KDTreeNode<T> > nodes;
             arma::Mat<T> data;
 
-            double getDistSq(const uint32_t& i, const arma::Col<T>& v)
+            double getDistSq(const uint32_t& i, const Eigen::Matrix<T, Eigen::Dynamic, 1>& v)
             {
                 return arma::accu(arma::square(data.col(i) - v));
             }
@@ -76,12 +76,12 @@ namespace utility
                 }
             }
 
-            uint32_t mkNodeRecursive(const Eigen::Matrix<unsigned int, Eigen::Dynamic, 1> dataIndices, const Eigen::Matrix<unsigned int, Eigen::Dynamic, 1> spillDataIndices, const arma::Col<T>& LowerBounds,
-                                       const arma::Col<T>& UpperBounds, const uint& minLeafSize, const double& epsilon)
+            uint32_t mkNodeRecursive(const Eigen::Matrix<unsigned int, Eigen::Dynamic, 1> dataIndices, const Eigen::Matrix<unsigned int, Eigen::Dynamic, 1> spillDataIndices, const Eigen::Matrix<T, Eigen::Dynamic, 1>& LowerBounds,
+                                       const Eigen::Matrix<T, Eigen::Dynamic, 1>& UpperBounds, const uint& minLeafSize, const double& epsilon)
             {
                 //we need to determine the split point first, because if the data is unsplittable we should put it in a leaf
                 int splitDim = 0;
-                const arma::Col<T> boundGap = UpperBounds - LowerBounds;
+                const Eigen::Matrix<T, Eigen::Dynamic, 1> boundGap = UpperBounds - LowerBounds;
 
                 for (uint i = 0; i < boundGap.n_elem; ++i)
                 {
@@ -118,7 +118,7 @@ namespace utility
 
                     KDTreeNode<T> node =
                     {
-                        -1, 0.0f, arma::Col<T>(), arma::Col<T>(), dataIndices, spillDataIndices, empty, empty
+                        -1, 0.0f, Eigen::Matrix<T, Eigen::Dynamic, 1>(), Eigen::Matrix<T, Eigen::Dynamic, 1>(), dataIndices, spillDataIndices, empty, empty
                     };
                     nodes.push_back(node);
                 }
@@ -134,7 +134,7 @@ namespace utility
 
                     if (epsilon > 0.0f)
                     {
-                        arma::Col<T> spillDists = arma::Mat<T>(data.cols(spillDataIndices)).row(splitDim).t();
+                        Eigen::Matrix<T, Eigen::Dynamic, 1> spillDists = arma::Mat<T>(data.cols(spillDataIndices)).row(splitDim).t();
 
                         leftSpillData = arma::join_cols(
                                             spillDataIndices(arma::find(spillDists <= splitVal+epsilon)),
@@ -147,9 +147,9 @@ namespace utility
                     }
 
                     //create the child bounds
-                    arma::Col<T> leftBounds  = UpperBounds;
+                    Eigen::Matrix<T, Eigen::Dynamic, 1> leftBounds  = UpperBounds;
                     leftBounds[splitDim]     = splitVal;
-                    arma::Col<T> rightBounds = LowerBounds;
+                    Eigen::Matrix<T, Eigen::Dynamic, 1> rightBounds = LowerBounds;
                     rightBounds[splitDim]    = splitVal;
 
                     //make a new node with children
@@ -175,7 +175,7 @@ namespace utility
                 root = mkNodeRecursive(inds, Eigen::Matrix<unsigned int, Eigen::Dynamic, 1>(), arma::min(data, 1), arma::max(data, 1), minLeafSize, epsilon);
             }
 
-            std::vector<std::pair<double, uint64_t> > query(const arma::Col<T>& val, const int& kneighbours,
+            std::vector<std::pair<double, uint64_t> > query(const Eigen::Matrix<T, Eigen::Dynamic, 1>& val, const int& kneighbours,
                                                           const uint64_t& maxLeaves = 10000000,
                                                           const double lowDimProjError = 0.0f)
             {

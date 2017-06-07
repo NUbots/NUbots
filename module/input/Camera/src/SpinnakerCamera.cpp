@@ -257,7 +257,7 @@ namespace module
 
             // Set white balance.
             // int64_t to be (trivially) type compatible with Spinnaker libray.
-            arma::Col<int64_t> whiteBalance = config["settings"]["white_balance"].as<arma::Col<int64_t>>();
+            Eigen::Matrix<int64_t, Eigen::Dynamic, 1> whiteBalance = config["settings"]["white_balance"].as<Eigen::Matrix<int64_t, Eigen::Dynamic, 1>>();
 
             if (!utility::vision::setEnumParam(nodeMap, "BalanceWhiteAuto", (arma::all(whiteBalance) ? "Off" : "Continuous")))
             {
