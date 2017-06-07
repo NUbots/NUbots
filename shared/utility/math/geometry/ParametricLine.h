@@ -63,7 +63,7 @@ namespace geometry {
             direction = (p2 - p1) / norm;
             point = p1;
             if(segment){
-                tLimits = arma::vec2({0, norm});
+                tLimits = Eigen::Vector2d(0, norm);
             }
         }
 

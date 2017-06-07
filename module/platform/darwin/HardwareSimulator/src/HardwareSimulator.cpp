@@ -230,13 +230,13 @@ namespace darwin {
                 // std::lock_guard<std::mutex> lock(gyroQueueMutex);
                 while (!gyroQueue.empty()){
                     DarwinSensors::Gyroscope g = gyroQueue.front();
-                    sumGyro += arma::vec3({g.x,g.y,g.z});
+                    sumGyro += Eigen::Vector3d(g.x,g.y,g.z);
 
                     std::lock_guard<std::mutex> lock(gyroQueueMutex);
                     gyroQueue.pop();
                 }
             }
-            sumGyro = (sumGyro * UPDATE_FREQUENCY + arma::vec3({0,0,imu_drift_rate}));
+            sumGyro = (sumGyro * UPDATE_FREQUENCY + Eigen::Vector3d(0,0,imu_drift_rate));
             sensors.gyroscope.x = sumGyro[0];
             sensors.gyroscope.y = sumGyro[1];
             sensors.gyroscope.z = sumGyro[2];
@@ -248,7 +248,7 @@ namespace darwin {
             sensors.timestamp = NUClear::clock::now();
 
             // //Debug:
-            // integrated_gyroscope += sumGyro + arma::vec3({0,0,imu_drift_rate});
+            // integrated_gyroscope += sumGyro + Eigen::Vector3d(0,0,imu_drift_rate);
             // std::cout << "HardwareSimulator gyroscope = " << sensors.gyroscope.x << ", " << sensors.gyroscope.y << ", " << sensors.gyroscope.z << std::endl;
             // std::cout << "HardwareSimulator integrated_gyroscope = " << integrated_gyroscope.t() << std::endl;
 

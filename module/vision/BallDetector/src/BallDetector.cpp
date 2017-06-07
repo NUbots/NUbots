@@ -102,7 +102,7 @@ namespace vision {
             for(int j = 0; j < green_angular_samples; theta = (++j) * 2 * M_PI / float(green_angular_samples)) {
                 float x = r * std::cos(theta);
                 float y = r * std::sin(theta);
-                arma::vec2 pos = circle.centre + arma::vec2({x,y});
+                arma::vec2 pos = circle.centre + Eigen::Vector2d(x,y);
                 arma::ivec2 ipos = arma::ivec2({int(std::round(pos[0])),int(std::round(pos[1]))});
                 if(ipos[0] >= 0 && ipos[0] < int(image.dimensions[0]) && ipos[1] >= 0 && ipos[1] < int(image.dimensions[1])){
                     // debug.push_back(std::make_tuple(ipos, ipos + arma::ivec2{1,1}, arma::vec4{1,1,1,1}));
@@ -188,7 +188,7 @@ namespace vision {
             ballPoints.reserve(image.ballPoints.size());
 
             for (const auto& point : image.ballPoints) {
-                ballPoints.push_back(arma::vec2({double(point[0]), double(point[1])}));
+                ballPoints.push_back(Eigen::Vector2d(double(point[0]), double(point[1])));
             }
 
             // Use ransac to find the ball
@@ -212,10 +212,10 @@ namespace vision {
                 arma::vec2 centre = imageToScreen(result.model.centre, convert<uint, 2>(image.dimensions));
 
                 // Get the 4 points around our circle
-                arma::vec2 top   = centre + arma::vec2({ 0,  result.model.radius });
-                arma::vec2 base  = centre + arma::vec2({ 0, -result.model.radius });
-                arma::vec2 left  = centre + arma::vec2({  result.model.radius, 0 });
-                arma::vec2 right = centre + arma::vec2({ -result.model.radius, 0 });
+                arma::vec2 top   = centre + Eigen::Vector2d( 0,  result.model.radius );
+                arma::vec2 base  = centre + Eigen::Vector2d( 0, -result.model.radius );
+                arma::vec2 left  = centre + Eigen::Vector2d(  result.model.radius, 0 );
+                arma::vec2 right = centre + Eigen::Vector2d( -result.model.radius, 0 );
 
                 double cameraHeight = camToGround(2, 3);
 
@@ -248,7 +248,7 @@ namespace vision {
                 // Loop through our seed points and find the minimum distance one
                 for(uint i = 0; i < 3; ++i) {
                     for(auto& s : image.ballSeedPoints[i].points) {
-                        double dist = std::fabs(result.model.radius - arma::norm(result.model.centre - arma::vec2({double(s[0]), double(s[1])})));
+                        double dist = std::fabs(result.model.radius - arma::norm(result.model.centre - Eigen::Vector2d(double(s[0]), double(s[1]))));
                         if(sDist[i] > dist) {
                             sDist[i] = dist;
                         }

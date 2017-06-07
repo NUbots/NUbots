@@ -89,11 +89,11 @@ namespace geometry {
                 if (std::abs(normal[0]) > std::abs(normal[1])) { //check whether to use y=mx+b or x=my+b
                     //make a unit vector at right angles to the direction of slope
                     normal = arma::normalise(
-                                arma::vec2({ -1.0, m / (covmat[0] - average[0] * average[0])}));
+                                Eigen::Vector2d( -1.0, m / (covmat[0] - average[0] * average[0])));
                 } else {
                     //make a unit vector at right angles to the direction of slope
                     normal = arma::normalise(
-                                arma::vec2({ 1.0, -m / (covmat[3] - average[1] * average[1]) }));
+                                Eigen::Vector2d( 1.0, -m / (covmat[3] - average[1] * average[1]) ));
 
                 }
 

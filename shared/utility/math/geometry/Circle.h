@@ -70,7 +70,7 @@ namespace geometry {
             }
             if (i != 0) {
                 arma::vec3 results = arma::solve(linearEq1.rows(0, i - 1), linearEq2.rows(0, i - 1));
-                centre = arma::abs(arma::vec2({ results[0] * 0.5, results[1] * 0.5 })) % arma::sign(centre);
+                centre = arma::abs(Eigen::Vector2d( results[0] * 0.5, results[1] * 0.5 )) % arma::sign(centre);
                 radiusSq = arma::dot(centre, centre) - results[2];
                 radius = std::sqrt(radiusSq);
             }

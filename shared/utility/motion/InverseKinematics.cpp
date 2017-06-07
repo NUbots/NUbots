@@ -52,7 +52,7 @@ namespace kinematics {
         const float LOWER_LEG_LENGTH = model.leg.LOWER_LEG_LENGTH;
 
         //Translate up foot
-        auto targetLeg = target.translate(arma::vec3({0,0,model.leg.FOOT_HEIGHT}));
+        auto targetLeg = target.translate(Eigen::Vector3d(0,0,model.leg.FOOT_HEIGHT));
 
         //Remove hip offset
         int negativeIfRight = (limb == LimbID::RIGHT_LEG) ? -1 : 1;
@@ -81,7 +81,7 @@ namespace kinematics {
         float ankleRoll = 0;
 
         //Correct for input referencing the bottom of the foot
-        target = target.translate(arma::vec3({0,0,model.leg.FOOT_HEIGHT}));
+        target = target.translate(Eigen::Vector3d(0,0,model.leg.FOOT_HEIGHT));
 
         //TODO remove this. It was due to wrong convention use
         utility::math::matrix::Transform3D inputCoordinatesToCalcCoordinates;

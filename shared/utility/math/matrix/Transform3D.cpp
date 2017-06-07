@@ -169,7 +169,7 @@ namespace matrix {
         float y = r * sin( theta) * sin( phi );
         float z = r * cos( theta );
 
-        return Transform3D(R, arma::vec3({x,y,z}));
+        return Transform3D(R, Eigen::Vector3d(x,y,z));
     }
 
     Transform3D Transform3D::getRandomN(float stddev_angle, float stddev_disp){
@@ -244,13 +244,13 @@ namespace matrix {
         Rotation3D worldToNewSpace = newSpaceToWorld.i();
         arma::vec3 rNewSpace =  worldToNewSpace * r;
         result.xy() = rNewSpace.rows(0,1);
-        
+
         //Rotation
         Rotation3D rot = rotation();
         arma::vec3 x = rot.x();
-        arma::vec3 xNew = worldToNewSpace * x; 
+        arma::vec3 xNew = worldToNewSpace * x;
         float theta_x_from_f = std::atan2(xNew[1],xNew[0]);//sin/cos
-        result.angle() = theta_x_from_f; 
+        result.angle() = theta_x_from_f;
 
         // std::cerr << "in = \n" << *this << std::endl;
         // std::cerr << "out = \n" << result << std::endl;

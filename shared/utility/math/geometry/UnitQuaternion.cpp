@@ -34,11 +34,11 @@ namespace geometry {
     UnitQuaternion::UnitQuaternion(const Rotation3D& rotation) {
         real() = std::sqrt(1.0 + rotation(0,0) + rotation(1,1) + rotation(2,2)) / 2;
         double w4 = 4.0 * real();
-        imaginary() = arma::vec3({
+        imaginary() = Eigen::Vector3d(
             (rotation(2,1) - rotation(1,2)) / w4,
             (rotation(0,2) - rotation(2,0)) / w4,
             (rotation(1,0) - rotation(0,1)) / w4
-        });
+        );
     }
 
     UnitQuaternion::UnitQuaternion(double realPart, const arma::vec3& imaginaryPart) {
@@ -59,7 +59,7 @@ namespace geometry {
    UnitQuaternion::UnitQuaternion(double W, double X, double Y, double Z)
     {
         real()      = W;
-        imaginary() = arma::vec3({X, Y, Z});
+        imaginary() = Eigen::Vector3d(X, Y, Z);
     }
 
     UnitQuaternion::UnitQuaternion(const arma::vec3& vec1, const arma::vec3& vec2)

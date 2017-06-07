@@ -287,10 +287,10 @@ namespace geometry {
             min_y = std::min(min_y,p[1]);
         }
         return Quad(
-                    arma::vec2({min_x,min_y}),
-                    arma::vec2({min_x,max_y}),
-                    arma::vec2({max_x,max_y}),
-                    arma::vec2({max_x,min_y})
+                    Eigen::Vector2d(min_x,min_y),
+                    Eigen::Vector2d(min_x,max_y),
+                    Eigen::Vector2d(max_x,max_y),
+                    Eigen::Vector2d(max_x,min_y)
                     );
     }
 

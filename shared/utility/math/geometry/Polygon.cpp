@@ -41,7 +41,7 @@ namespace geometry {
 	bool Polygon::pointContained(const arma::vec2& p) const{
 		ParametricLine<2> ray;
 		int intersectionCount = 0;
-		ray.setFromDirection(arma::vec2{1,0}, p, arma::vec2({0,std::numeric_limits<double>::infinity()}));
+		ray.setFromDirection(arma::vec2{1,0}, p, Eigen::Vector2d(0,std::numeric_limits<double>::infinity()));
 		arma::vec2 lastIntersection = {0,0};
 		bool hadPreviousIntersection = false;
 		for(auto& edge : edges){

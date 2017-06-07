@@ -330,7 +330,7 @@ namespace strategy {
                 if (mode != GameMode::PENALTY_SHOOTOUT && (selfs[0].locObject.position.norm() > 1)) { // a long way away from centre
                     // walk to centre of field
                     find({FieldTarget(FieldTarget::Target::BALL)});
-                    walkTo(fieldDescription, arma::vec2({0, 0}));
+                    walkTo(fieldDescription, Eigen::Vector2d(0, 0));
                     currentState = Behaviour::State::MOVE_TO_CENTRE;
                 } else {
                     find({FieldTarget(FieldTarget::Target::BALL)});

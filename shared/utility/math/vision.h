@@ -68,14 +68,14 @@ namespace vision {
         @return im - coordinates on the screen in image space measured x across, y down, zero at top left
     */
     inline arma::ivec2 screenToImage(const arma::vec2& screen, const arma::uvec2& imageSize){
-        arma::vec2 v = arma::vec2({ double(imageSize[0] - 1) * 0.5, double(imageSize[1] - 1) * 0.5 }) - screen;
+        arma::vec2 v = Eigen::Vector2d( double(imageSize[0] - 1) * 0.5, double(imageSize[1] - 1) * 0.5 ) - screen;
         return arma::ivec2({ int(lround(v[0])), int(lround(v[1])) });
     }
     inline arma::vec2 imageToScreen(const arma::ivec2& im, const arma::uvec2& imageSize){
-        return arma::vec2({ double(imageSize[0] - 1) * 0.5, double(imageSize[1] - 1) * 0.5 }) - im;
+        return Eigen::Vector2d( double(imageSize[0] - 1) * 0.5, double(imageSize[1] - 1) * 0.5 ) - im;
     }
     inline arma::vec2 imageToScreen(const arma::vec2& im, const arma::uvec2& imageSize){
-        return arma::vec2({ double(imageSize[0] - 1) * 0.5, double(imageSize[1] - 1) * 0.5 }) - im;
+        return Eigen::Vector2d( double(imageSize[0] - 1) * 0.5, double(imageSize[1] - 1) * 0.5 ) - im;
     }
 
     /*! @brief uses pinhole cam model

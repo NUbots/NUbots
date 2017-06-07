@@ -49,7 +49,7 @@ namespace motion{
 
         int negativeIfRight = (supportFoot == LimbID::RIGHT_LEG) ? -1 : 1;
         Transform3D finishPose = torsoToFoot;
-        finishPose.translation() = arma::vec3({forward_lean, negativeIfRight * (adjustment + kinematicsModel.leg.FOOT_CENTRE_TO_ANKLE_CENTRE), stand_height});
+        finishPose.translation() = Eigen::Vector3d(forward_lean, negativeIfRight * (adjustment + kinematicsModel.leg.FOOT_CENTRE_TO_ANKLE_CENTRE), stand_height);
         finishPose = finishPose.i();
 
         std::vector<SixDOFFrame> frames;
@@ -88,10 +88,10 @@ namespace motion{
         // Convert torso to support foot
         Transform3D currentTorso = getTorsoPose(sensors);
         // Convert kick foot to torso
-        Transform3D currentKickFoot = (supportFoot == LimbID::LEFT_LEG) 
+        Transform3D currentKickFoot = (supportFoot == LimbID::LEFT_LEG)
                                     ? convert<double, 4, 4>(sensors.forwardKinematics.at(ServoID::L_ANKLE_ROLL))
-                                    : convert<double, 4, 4>(sensors.forwardKinematics.at(ServoID::R_ANKLE_ROLL)); 
-                                    
+                                    : convert<double, 4, 4>(sensors.forwardKinematics.at(ServoID::R_ANKLE_ROLL));
+
         // Convert support foot to kick foot coordinates = convert torso to kick foot * convert support foot to torso
         Transform3D supportToKickFoot = currentKickFoot.i() * currentTorso.i();
         // Convert ball position from support foot coordinates to kick foot coordinates

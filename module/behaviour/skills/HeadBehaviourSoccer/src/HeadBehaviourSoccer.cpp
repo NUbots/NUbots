@@ -236,7 +236,7 @@ namespace module {
 
                     //If objects visible, check current centroid to see if it moved
                     if(!lost){
-                        arma::vec2 currentCentroid = arma::vec2({0,0});
+                        arma::vec2 currentCentroid = Eigen::Vector2d(0,0);
                         if (ballMaxPriority)
                         {
                             for(auto& ob : ballFixationObjects){
@@ -499,8 +499,8 @@ namespace module {
                             // log("adding search point", p.t());
                             //old angles thing
                             //Interpolate between max and min allowed angles with -1 = min and 1 = max
-                            //auto angles = arma::vec2({((max_yaw - min_yaw) * p[0] + max_yaw + min_yaw) / 2,
-                            //                                    ((max_pitch - min_pitch) * p[1] + max_pitch + min_pitch) / 2});
+                            //auto angles = Eigen::Vector2d(((max_yaw - min_yaw) * p[0] + max_yaw + min_yaw) / 2,
+                            //                                    ((max_pitch - min_pitch) * p[1] + max_pitch + min_pitch) / 2);
 
                             //New absolute referencing
                             arma::vec2 angles = p * M_PI / 180;
@@ -581,8 +581,8 @@ namespace module {
                             // log("adding search point", p.t());
                             //old angles thing
                             //Interpolate between max and min allowed angles with -1 = min and 1 = max
-                            //auto angles = arma::vec2({((max_yaw - min_yaw) * p[0] + max_yaw + min_yaw) / 2,
-                            //                                    ((max_pitch - min_pitch) * p[1] + max_pitch + min_pitch) / 2});
+                            //auto angles = Eigen::Vector2d(((max_yaw - min_yaw) * p[0] + max_yaw + min_yaw) / 2,
+                            //                                    ((max_pitch - min_pitch) * p[1] + max_pitch + min_pitch) / 2);
 
                             //New absolute referencing
                             arma::vec2 angles = p * M_PI / 180;

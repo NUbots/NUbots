@@ -358,7 +358,7 @@ namespace support {
 
         // Emit exact position to NUbugger
         on<Every<100, std::chrono::milliseconds>>().then("Emit True Robot Position", [this] {
-            arma::vec2 bearingVector = world.robotPose.rotation() * arma::vec2({1,0});
+            arma::vec2 bearingVector = world.robotPose.rotation() * Eigen::Vector2d(1,0);
             arma::vec3 robotHeadingVector = {bearingVector[0], bearingVector[1], 0};
             emit(drawArrow("robot", {world.robotPose.x(), world.robotPose.y(), 0}, 1, robotHeadingVector, 0));
 
@@ -404,7 +404,7 @@ namespace support {
                 str << __FILE__ << ", " << __LINE__ << ": " << __func__ << ": unknown p.type.";
                 throw std::runtime_error(str.str());
         }
-        return arma::vec2({wave1,wave2});
+        return Eigen::Vector2d(wave1,wave2);
     }
 
     void SoccerSimulator::setGoalLeftRightKnowledge(std::vector<message::vision::Goal>& goals){

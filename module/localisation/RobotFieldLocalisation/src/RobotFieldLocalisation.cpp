@@ -130,8 +130,8 @@ namespace localisation {
 
             //make a localisation object
             message::localisation::Self robot;
-            Transform2D currentLocalisation = Hcf.i().projectTo2D(arma::vec3({0,0,1}),arma::vec3({1,0,0}));
-            Transform2D currentOdometry = Htg.i().projectTo2D(arma::vec3({0,0,1}),arma::vec3({1,0,0}));
+            Transform2D currentLocalisation = Hcf.i().projectTo2D(Eigen::Vector3d(0,0,1),Eigen::Vector3d(1,0,0));
+            Transform2D currentOdometry = Htg.i().projectTo2D(Eigen::Vector3d(0,0,1),Eigen::Vector3d(1,0,0));
             // std::cerr << "Hcf : " << std::endl << Hcf << std::endl;
             // std::cerr << "currentOdometry : " << std::endl << currentOdometry << std::endl;
             //std::cerr << "internal Localisation state: " << std::endl << Tgr << std::endl;

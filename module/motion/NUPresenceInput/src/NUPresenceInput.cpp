@@ -167,13 +167,13 @@ namespace motion {
                 float z = rigidBody.position[2];
                 // std::cout << "Rigid body " << id << " " << arma::vec({x,y,z}).t();
                 if(id == head_id){
-                        mocap_head_pos = oculus_to_robot_scale * mocap_to_robot * arma::vec3({x,y,z});
+                        mocap_head_pos = oculus_to_robot_scale * mocap_to_robot * Eigen::Vector3d(x,y,z);
                         marker_count++;
                 } else if(id == l_arm_id){
-                        l_arm_raw = oculus_to_robot_scale * mocap_to_robot * arma::vec3({x,y,z});
+                        l_arm_raw = oculus_to_robot_scale * mocap_to_robot * Eigen::Vector3d(x,y,z);
                         marker_count++;
                 } else if(id == r_arm_id){
-                        r_arm_raw = oculus_to_robot_scale * mocap_to_robot * arma::vec3({x,y,z});
+                        r_arm_raw = oculus_to_robot_scale * mocap_to_robot * Eigen::Vector3d(x,y,z);
                         marker_count++;
                 }
 

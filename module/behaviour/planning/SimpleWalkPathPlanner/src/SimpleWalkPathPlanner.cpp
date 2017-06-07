@@ -188,7 +188,7 @@ namespace module {
                         } else {
                             position = timeSinceBallSeen < search_timeout ?
                                    position : // Place last seen
-                                   arma::vec3({1,0,0}); //In front of the robot
+                                   Eigen::Vector3d(1,0,0); //In front of the robot
                         }
                     }
 
@@ -223,7 +223,7 @@ namespace module {
                                                                            convert<double, 2>(selfs.front().heading),
                                                                            position.rows(0,1));
                     arma::vec2 kick_target = 2 * ball_world_position - convert<double, 2>(selfs.front().locObject.position);
-                    emit(drawSphere("kick_target", arma::vec3({kick_target[0], kick_target[1], 0.0}), 0.1, arma::vec3({1, 0, 0}), 0));
+                    emit(drawSphere("kick_target", Eigen::Vector3d(kick_target[0], kick_target[1], 0.0), 0.1, Eigen::Vector3d(1, 0, 0), 0));
                     //log("walkcommand",command->command[0],command->command[1]);
                     //log("anglewalkcommand",command->command[2]);
                     //log("ballPos: ",position.t());

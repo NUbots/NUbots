@@ -57,9 +57,9 @@ namespace module {
             arma::vec3 goalLocation;
             goalLocation.fill(0.0);
             arma::mat::fixed<3,4> goalNormals;
-            // Transform2D world = sensors.world.projectTo2D(arma::vec3({0,0,1}),arma::vec3({1,0,0}));
+            // Transform2D world = sensors.world.projectTo2D(Eigen::Vector3d(0,0,1),Eigen::Vector3d(1,0,0));
 
-            //Transform2D world = sensors.world.projectTo2D(arma::vec3({0,0,1}),arma::vec3({1,0,0}));
+            //Transform2D world = sensors.world.projectTo2D(Eigen::Vector3d(0,0,1),Eigen::Vector3d(1,0,0));
             const Transform3D& Htw = convert<double, 4, 4>(sensors.world);
             const Transform3D& Htc = convert<double, 4, 4>(sensors.forwardKinematics.at(ServoID::HEAD_PITCH));
             Transform3D Hwc = Htw.i() * Htc;

@@ -36,7 +36,7 @@ namespace geometry {
     void Line::setFromPoints(const arma::vec2& a, const arma::vec2& b) {
         arma::vec2 l = arma::normalise(a - b);
 
-        normal = arma::vec2({ -l[1], l[0] });
+        normal = Eigen::Vector2d( -l[1], l[0] );
         distance = arma::dot(normal, a);
     }
 

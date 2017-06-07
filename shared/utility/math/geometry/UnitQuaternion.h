@@ -116,7 +116,7 @@ namespace geometry {
             inline arma::subview_col<double> imaginary() { return rows(1,3); }
 
             UnitQuaternion slerp(const UnitQuaternion& p, const double& t);
-            static inline UnitQuaternion Identity() { return(arma::vec4({1.0, 0.0, 0.0, 0.0})); }
+            static inline UnitQuaternion Identity() { return(Eigen::Vector4d(1.0, 0.0, 0.0, 0.0)); }
     };
 
 }

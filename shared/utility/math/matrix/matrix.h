@@ -57,8 +57,8 @@ arma::vec3 orthogonal(const arma::vec3& v) {
  * See: http://lolengine.net/blog/2013/09/21/picking-orthogonal-vector-combing-coconuts
  */
 arma::vec3 orthogonal2(const arma::vec3& v) {
-    return std::abs(v[0]) > std::abs(v[2]) ? arma::vec3({-v[1], v[0],    0})
-                                           : arma::vec3({0,    -v[2], v[1]});
+    return std::abs(v[0]) > std::abs(v[2]) ? Eigen::Vector3d(-v[1], v[0],    0)
+                                           : Eigen::Vector3d(0,    -v[2], v[1]);
 }
 
 /**

@@ -196,7 +196,7 @@ namespace motion {
             if(balancer.isRunning()){
                 Transform3D supportFootPose = balancer.getFootPose(sensors);
                 supportFootGoal = supportFootPose;
-                kickFootGoal = supportFootPose.translate(arma::vec3({0, negativeIfKickRight * foot_separation, 0}));
+                kickFootGoal = supportFootPose.translate(Eigen::Vector3d(0, negativeIfKickRight * foot_separation, 0));
             }
 
             //Move foot to ball to kick

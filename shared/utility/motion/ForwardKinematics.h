@@ -395,7 +395,7 @@ namespace kinematics {
     inline arma::mat22 calculateRobotToIMU(math::matrix::Rotation3D orientation) {
         arma::vec3 xRobotImu = orientation.i().col(0);
         arma::vec2 projXRobot = arma::normalise(xRobotImu.rows(0,1));
-        arma::vec2 projYRobot = arma::vec2({-projXRobot(1), projXRobot(0)});
+        arma::vec2 projYRobot = Eigen::Vector2d(-projXRobot(1), projXRobot(0));
 
         arma::mat22 robotToImu;
         robotToImu.col(0) = projXRobot;
@@ -409,8 +409,8 @@ namespace kinematics {
 
         int negativeIfRight = left ? 1 : -1;
 
-        arma::vec2 position = foot % arma::vec2({model.leg.FOOT_LENGTH / 2, model.leg.FOOT_WIDTH / 2});
-        arma::vec4 centerFoot = arma::vec4({position[0], position[1] + negativeIfRight * model.leg.FOOT_CENTRE_TO_ANKLE_CENTRE, 0, 1});
+        arma::vec2 position = foot % Eigen::Vector2d(model.leg.FOOT_LENGTH / 2, model.leg.FOOT_WIDTH / 2);
+        arma::vec4 centerFoot = Eigen::Vector4d(position[0], position[1] + negativeIfRight * model.leg.FOOT_CENTRE_TO_ANKLE_CENTRE, 0, 1);
 
         return((left) ? convert<double, 4, 4>(sensors.forwardKinematics.at(ServoID::L_ANKLE_ROLL)) * centerFoot
                       : convert<double, 4, 4>(sensors.forwardKinematics.at(ServoID::R_ANKLE_ROLL)) * centerFoot);

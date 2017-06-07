@@ -128,7 +128,7 @@ namespace module {
                     }
                 }));
 
-                on<Trigger<KickFinished>>().then([this] (const KickFinished&) 
+                on<Trigger<KickFinished>>().then([this] (const KickFinished&)
                 {
                     // May need to tweek this to resume walking after kick completed....
                     std::unique_ptr<WalkCommand> command = std::make_unique<WalkCommand>(subsumptionId,latestCommand.walkCommand);
@@ -176,7 +176,7 @@ namespace module {
 
                         arma::vec2 ball_world_position = RobotToWorldTransform(selfs.front().position, selfs.front().heading, ball.position);
                         arma::vec2 kick_target = latestCommand.kickTarget;//2 * ball_world_position - selfs.front().position;
-                        emit(drawSphere("kick_target", arma::vec3({kick_target[0], kick_target[1], 0.0}), 0.1, arma::vec3({1, 0, 0}), 0));
+                        emit(drawSphere("kick_target", Eigen::Vector3d(kick_target[0], kick_target[1], 0.0), 0.1, Eigen::Vector3d(1, 0, 0), 0));
 
                         // log("Kick Target = ",kick_target);
 
@@ -261,8 +261,8 @@ namespace module {
                         float A2 = A3 +d2 * std::cos(M_PI +theta2);
                         float B2 = B3 +d2 *std::sin(M_PI + theta2);
 
-                        emit(drawSphere("Tangent 1", arma::vec3({B1, A1, 0.0}), 0.1, arma::vec3({0, 1, 0}), 0 ));
-                        emit(drawSphere("Tangent 2", arma::vec3({B2, A2, 0.0}), 0.1, arma::vec3({0, 0, 1}), 0 ));
+                        emit(drawSphere("Tangent 1", Eigen::Vector3d(B1, A1, 0.0), 0.1, Eigen::Vector3d(0, 1, 0), 0 ));
+                        emit(drawSphere("Tangent 2", Eigen::Vector3d(B2, A2, 0.0), 0.1, Eigen::Vector3d(0, 0, 1), 0 ));
 
                         // log("A1 = ", A1, "\n B1 = ", B1, "\n A2 = ", A2 , "\n B2 = ", B2);
 

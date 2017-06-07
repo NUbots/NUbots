@@ -90,7 +90,7 @@ namespace math {
         }
 
         inline arma::vec2 bearingToUnitVector(double angle) {
-            return arma::vec2({std::cos(angle), std::sin(angle)});
+            return Eigen::Vector2d(std::cos(angle), std::sin(angle));
         }
 
         /*! @brief Solves for x in $a \sin(x) + b \cos(x) = c ; x \in [0,\pi]$

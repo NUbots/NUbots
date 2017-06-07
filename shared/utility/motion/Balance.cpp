@@ -99,11 +99,11 @@ namespace motion {
 
         // Get the position of our hip to rotate around
 
-        Transform3D hip = Transform3D(arma::vec3({
+        Transform3D hip = Transform3D(Eigen::Vector3d(
             model.leg.HIP_OFFSET_X,
             model.leg.HIP_OFFSET_Y * (leg == LimbID::RIGHT_LEG ? -1 : 1),
             -model.leg.HIP_OFFSET_Z
-        }));
+        ));
 
         // Rotate around our hip to apply a balance
         footToTorso = footToTorso.rotateLocal(Rotation3D(hipRotation), hip); // Lean against the motion
@@ -148,9 +148,9 @@ namespace motion {
         // emit(graph("pd translation", translationPGainX * sensors.bodyCentreHeight * pitch, translationDGainX * sensors.bodyCentreHeight * dPitch));
 
         //Compute torso position adjustment
-        arma::vec3 torsoAdjustment_world = arma::vec3({- translationPGainX * sensors.bodyCentreHeight * pitch - translationDGainX * sensors.bodyCentreHeight * dPitch,
+        arma::vec3 torsoAdjustment_world = Eigen::Vector3d(- translationPGainX * sensors.bodyCentreHeight * pitch - translationDGainX * sensors.bodyCentreHeight * dPitch,
                                                          translationPGainY * sensors.bodyCentreHeight * roll + translationDGainY * sensors.bodyCentreHeight * dRoll,
-                                                       - translationPGainZ * total - translationDGainY * dTotal});
+                                                       - translationPGainZ * total - translationDGainY * dTotal);
 
         // //Rotate from world space to torso space
         // Rotation3D yawLessOrientation = Rotation3D::createRotationZ(-Transform3D(convert<double, 4, 4>(sensors.world)).rotation()).yaw()) * Transform3D(convert<double, 4, 4>(sensors.world)).rotation();

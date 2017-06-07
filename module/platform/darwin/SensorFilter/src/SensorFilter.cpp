@@ -624,7 +624,7 @@ namespace module {
 
                     Rotation3D yawlessWorldInvR = Rotation3D::createRotationZ(-Rotation3D(worldInv.rotation()).yaw()) * worldInv.rotation();
                     Transform3D torsoToGround = worldInv;
-                    torsoToGround.translation() = arma::vec3({0,0,torsoToGround.translation()[2]});
+                    torsoToGround.translation() = Eigen::Vector3d(0,0,torsoToGround.translation()[2]);
                     torsoToGround.rotation() = yawlessWorldInvR;
                     sensors->camToGround  = convert<double, 4, 4>(Transform3D(torsoToGround * convert<double, 4, 4>(headPitchKinematics))); // Rwt * Rth
 

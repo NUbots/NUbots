@@ -66,12 +66,12 @@ namespace utility {
 
             inline arma::vec4 sphericalToCartesian4(const arma::vec3& sphericalCoordinates) {
                 arma::vec3 p = sphericalToCartesian(sphericalCoordinates);
-                return arma::vec4({p[0],p[1],p[2],1});
+                return Eigen::Vector4d(p[0],p[1],p[2],1);
             }
 
             inline arma::vec4 cartesianToSpherical4(const arma::vec3& cartesianCoordinates)  {
                 arma::vec3 p = cartesianToSpherical(cartesianCoordinates);
-                return arma::vec4({p[0],p[1],p[2],1});
+                return Eigen::Vector4d(p[0],p[1],p[2],1);
             }
 
 

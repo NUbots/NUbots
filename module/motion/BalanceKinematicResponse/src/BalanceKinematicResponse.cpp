@@ -206,8 +206,8 @@ namespace motion
         if (armRollCompensationEnabled)
         {
             double shiftShoulder = ((getRollParameter() * getArmCompensationScale()) * armRollParameter);
-            setLArmPosition(arma::vec3({getLArmPosition()[0], getLArmPosition()[1] + (shiftShoulder > 0 ?  shiftShoulder : 0), getLArmPosition()[2]}));
-            setRArmPosition(arma::vec3({getRArmPosition()[0], getRArmPosition()[1] - (shiftShoulder < 0 ? -shiftShoulder : 0), getRArmPosition()[2]}));
+            setLArmPosition(Eigen::Vector3d(getLArmPosition()[0], getLArmPosition()[1] + (shiftShoulder > 0 ?  shiftShoulder : 0), getLArmPosition()[2]));
+            setRArmPosition(Eigen::Vector3d(getRArmPosition()[0], getRArmPosition()[1] - (shiftShoulder < 0 ? -shiftShoulder : 0), getRArmPosition()[2]));
         }
         //std::min(/*Maxium Roll*/0.0, std::max(/*Minimum Roll*/1.0,/*Calculated Roll Offset * 45° Base roll? */0.5));
     }
@@ -392,8 +392,8 @@ namespace motion
 
         // Update shoulder pitch to move arm away from body
         // TODO min of max of values... for arm compensation...
-        setLArmPosition(arma::vec3({getLArmPosition()[0], std::max(leftMinValue,  getLArmPosition()[1]), getLArmPosition()[2]}));
-        setRArmPosition(arma::vec3({getRArmPosition()[0], std::min(rightMinValue, getRArmPosition()[1]), getRArmPosition()[2]}));
+        setLArmPosition(Eigen::Vector3d(getLArmPosition()[0], std::max(leftMinValue,  getLArmPosition()[1]), getLArmPosition()[2]));
+        setRArmPosition(Eigen::Vector3d(getRArmPosition()[0], std::min(rightMinValue, getRArmPosition()[1]), getRArmPosition()[2]));
     }
 /*=======================================================================================================*/
 //      NAME: localise

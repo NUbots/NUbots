@@ -92,7 +92,7 @@ double RobotHypothesis::MeasurementUpdate(
         arma::mat33 cov = measurement.error;
 
         arma::vec2 actual_2d = actual_object.location();
-        arma::vec3 actual_pos = arma::vec3({actual_2d(0), actual_2d(1), 0});
+        arma::vec3 actual_pos = Eigen::Vector3d(actual_2d(0), actual_2d(1), 0);
 
 
         quality *= filter_.measurementUpdate(measured_pos, cov, actual_pos, *(observed_object.sensors));

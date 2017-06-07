@@ -73,9 +73,9 @@ namespace transform {
         auto actual_pos_robot_2d = WorldToRobotTransform(robot_pos,
                                                      robot_heading,
                                                      actual_position.rows(0, 1));
-        auto actual_pos_robot_3d = arma::vec3({actual_pos_robot_2d(0),
+        auto actual_pos_robot_3d = Eigen::Vector3d(actual_pos_robot_2d(0),
                                            actual_pos_robot_2d(1),
-                                           actual_position(2)});
+                                           actual_position(2));
 
         auto obs = utility::math::coordinates::cartesianToSpherical(actual_pos_robot_3d);
 
@@ -95,9 +95,9 @@ namespace transform {
         auto actual_pos_robot_2d = WorldToRobotTransform(robot_pos,
                                                      robot_heading,
                                                      actual_position.rows(0, 1));
-        auto actual_pos_robot_3d = arma::vec3({actual_pos_robot_2d(0),
+        auto actual_pos_robot_3d = Eigen::Vector3d(actual_pos_robot_2d(0),
                                            actual_pos_robot_2d(1),
-                                           actual_position(2)});
+                                           actual_position(2));
 
         auto obs = utility::math::coordinates::cartesianToSpherical(actual_pos_robot_3d);
 
