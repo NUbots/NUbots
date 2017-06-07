@@ -276,7 +276,7 @@ namespace autocal{
 
 		//Create kronecker matrix K
 		int n = samplesA.size();
-		arma::mat K = arma::zeros(9,9);
+		arma::mat K = Eigen::Matrix<double, 9, 9>::Zero();
 		for(int i = 0; i < n; i++){
 			const Transform3D& A = samplesA[i];
 			const Transform3D& B = samplesB[i];
@@ -349,7 +349,7 @@ namespace autocal{
 
 		//Create kronecker matrix K
 		int n = samplesA.size();
-		arma::mat44 C = arma::zeros(4,4);
+		arma::mat44 C = Eigen::Matrix<double, 4, 4>::Zero();
 		for(int i = 0; i < n; i++){
 			const Transform3D& A = samplesA[i];
 			const Transform3D& B = samplesB[i];

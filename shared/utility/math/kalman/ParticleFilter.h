@@ -60,7 +60,7 @@ namespace utility {
 
                 void reset(StateVec initialMean, StateMat initialCovariance, int number_of_particles_)
                 {
-                    particles = arma::zeros(number_of_particles_,Model::size);
+                    particles = Eigen::Matrix<double, number_of_particles_, Model::size>::Zero();
                     setState(initialMean, initialCovariance);
                 }
 
