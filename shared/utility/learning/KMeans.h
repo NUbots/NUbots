@@ -60,7 +60,7 @@ namespace learning {
              * random_spread        a maximally spread subset of training samples (random start)
              */
         };
-        std::vector<std::tuple<arma::ivec2, arma::ivec2, Eigen::Vector4d>> getDebugRectangles();
+        std::vector<std::tuple<Eigen::Vector2i, Eigen::Vector2i, Eigen::Vector4d>> getDebugRectangles();
         void configure(const YAML::Node& conf);
         bool learn(arma::mat data);
     private:

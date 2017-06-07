@@ -37,7 +37,7 @@ namespace geometry {
         : bl(bottomLeft), br(bottomRight), tr(topRight), tl(topLeft) {
     }
 
-    Quad::Quad(arma::ivec2 bottomLeft, arma::ivec2 topLeft, arma::ivec2 topRight, arma::ivec2 bottomRight)
+    Quad::Quad(Eigen::Vector2i bottomLeft, Eigen::Vector2i topLeft, Eigen::Vector2i topRight, Eigen::Vector2i bottomRight)
         : bl(arma::conv_to<arma::vec>::from(bottomLeft))
         , br(arma::conv_to<arma::vec>::from(bottomRight))
         , tr(arma::conv_to<arma::vec>::from(topRight))

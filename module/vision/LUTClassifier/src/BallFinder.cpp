@@ -59,7 +59,7 @@ namespace module {
 
             const auto& maxVisualHorizon = visualHorizon.front()[1] > visualHorizon.back()[1] ? visualHorizon.begin() : visualHorizon.end() - 1;
 
-            Eigen::Vector2d topY = imageToScreen(arma::ivec2({ maxVisualHorizon->x(), int(maxVisualHorizon->y()) }), convert<uint, 2>(classifiedImage.dimensions));
+            Eigen::Vector2d topY = imageToScreen(Eigen::Vector2i({ maxVisualHorizon->x(), int(maxVisualHorizon->y()) }), convert<uint, 2>(classifiedImage.dimensions));
             topY[0] = 0;    //Choose centre of screen
 
             // Get the positions of the top of our green horizion, and the bottom of the screen
@@ -102,8 +102,8 @@ namespace module {
                 int nextY = screenToImage(camPoint, convert<uint, 2>(classifiedImage.dimensions))[1];
 
                 // Work out our details
-                arma::ivec2 start = { 0, y };
-                arma::ivec2 end = { int(image.dimensions[0] - 1), y };
+                Eigen::Vector2i start = { 0, y };
+                Eigen::Vector2i end = { int(image.dimensions[0] - 1), y };
                 int subsample = std::max(1, int(lround((y - nextY) * BALL_HORIZONTAL_SUBSAMPLE_FACTOR)));
 
                 // If our left hand side is in range, or we are over the top

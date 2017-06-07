@@ -34,7 +34,7 @@ namespace geometry {
         Quad();
         Quad(const Quad& other);
         Quad(Eigen::Vector2d bottomLeft, Eigen::Vector2d topLeft, Eigen::Vector2d topRight, Eigen::Vector2d bottomRight);
-        Quad(arma::ivec2 bottomLeft, arma::ivec2 topLeft, arma::ivec2 topRight, arma::ivec2 bottomRight);
+        Quad(Eigen::Vector2i bottomLeft, Eigen::Vector2i topLeft, Eigen::Vector2i topRight, Eigen::Vector2i bottomRight);
         Quad(double left, double top, double right, double bottom);
 
         /**

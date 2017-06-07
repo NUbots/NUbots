@@ -125,7 +125,7 @@ namespace module {
 
             std::vector<ClassifiedImage::Segment> newSegments;
 
-            std::vector<std::pair<arma::ivec2, arma::ivec2>> goalLines;
+            std::vector<std::pair<Eigen::Vector2i, Eigen::Vector2i>> goalLines;
             for(auto& model : models) {
 
                 double lineMid = 0;
@@ -163,8 +163,8 @@ namespace module {
                     }
 
                     // Start and end
-                    arma::ivec2 s({ std::max(0, int(std::round(p[0] - lineHalfWidth))), int(std::round(p[1]))});
-                    arma::ivec2 e({ std::min(int(image.dimensions[0]) - 1, int(std::round(p[0] + lineHalfWidth))), int(std::round(p[1]))});
+                    Eigen::Vector2i s({ std::max(0, int(std::round(p[0] - lineHalfWidth))), int(std::round(p[1]))});
+                    Eigen::Vector2i e({ std::min(int(image.dimensions[0]) - 1, int(std::round(p[0] + lineHalfWidth))), int(std::round(p[1]))});
 
                     if(e[0] > 0) {
                         auto segments = quex->classify(image, lut, s, e);

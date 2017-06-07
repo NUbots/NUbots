@@ -289,7 +289,7 @@ namespace module {
 
 
 
-                        arma::fvec2 next_robot_position = arma::mean(bez_matrix).t();
+                        Eigen::Vector2f next_robot_position = arma::mean(bez_matrix).t();
 
 
                         // log("Robot next position = ", next_robot_position);

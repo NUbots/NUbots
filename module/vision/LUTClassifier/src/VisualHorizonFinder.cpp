@@ -54,7 +54,7 @@ namespace module {
                 auto segments = quex->classify(image, lut, { int(x), top }, { int(x), int(image.dimensions[1] - 1) }, VISUAL_HORIZON_SUBSAMPLING);
 
                 // Our default green point is the bottom of the screen
-                arma::ivec2 greenPoint = { int(x), int(image.dimensions[1]) };
+                Eigen::Vector2i greenPoint = { int(x), int(image.dimensions[1]) };
 
                 // Loop through our segments to find our first green segment
                 for (auto it = segments.begin(); it != segments.end(); ++it) {
@@ -86,14 +86,14 @@ namespace module {
                 int top = std::max(int(lround(horizon.y(image.dimensions[0] - 1)) - VISUAL_HORIZON_BUFFER), int(0));
                 top = std::min(top, int(image.dimensions[1] - 1));
 
-                arma::ivec2 start = { int(image.dimensions[0] - 1), top };
-                arma::ivec2 end = { int(image.dimensions[0] - 1), int(image.dimensions[1] - 1) };
+                Eigen::Vector2i start = { int(image.dimensions[0] - 1), top };
+                Eigen::Vector2i end = { int(image.dimensions[0] - 1), int(image.dimensions[1] - 1) };
 
                 // Classify our segments
                 auto segments = quex->classify(image, lut, start, end, VISUAL_HORIZON_SUBSAMPLING);
 
                 // Our default green point is the bottom of the screen
-                arma::ivec2 greenPoint = { int(image.dimensions[0] - 1), int(image.dimensions[1]) };
+                Eigen::Vector2i greenPoint = { int(image.dimensions[0] - 1), int(image.dimensions[1]) };
 
                 // Loop through our segments to find our first green segment
                 for (auto it = segments.begin(); it != segments.end(); ++it) {
