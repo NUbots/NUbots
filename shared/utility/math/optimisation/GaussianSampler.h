@@ -21,11 +21,10 @@
 #define UTILITY_MATH_OPTIMISATION_GAUSSIANSAMPLER_H
 
 #include <armadillo>
+#include <Eigen/Core>
 #include <cmath>
 
 #include "message/support/optimisation/OptimiserTypes.h"
-
-#include "utility/support/eigen.h"
 
 namespace utility {
     namespace math {

@@ -18,7 +18,9 @@
  */
 
 #include "LUTClassifier.h"
+
 #include <fmt/format.h>
+#include <Eigen/Core>
 
 #include "extension/Configuration.h"
 
@@ -26,7 +28,6 @@
 #include "message/support/SaveConfiguration.h"
 #include "message/vision/LookUpTable.h"
 
-#include "utility/support/eigen.h"
 #include "utility/support/yaml_expression.h"
 #include "utility/vision/LookUpTable.h"
 

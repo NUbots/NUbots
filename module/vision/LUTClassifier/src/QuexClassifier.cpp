@@ -19,9 +19,8 @@
 
 #include "QuexClassifier.h"
 
-#include <iostream>
+#include <Eigen/Core>
 
-#include "utility/support/eigen.h"
 #include "utility/vision/fourcc.h"
 #include "utility/vision/LookUpTable.h"
 #include "utility/vision/Vision.h"
@@ -51,7 +50,7 @@ namespace module {
                 size_t length = end[1] - start[1] + 1;
 
                 for(uint i = 0; i < length / subsample; ++i) {
-                    buffer[i + 1] = utility::vision::getPixelColour(lut, 
+                    buffer[i + 1] = utility::vision::getPixelColour(lut,
                         utility::vision::getPixel(start[0], start[1] + (i * subsample), image.dimensions[0], image.dimensions[1], image.data, static_cast<FOURCC>(image.format)));
                 }
 
@@ -64,7 +63,7 @@ namespace module {
                 size_t length = end[0] - start[0] + 1;
 
                 for(uint i = 0; i < length / subsample; ++i) {
-                    buffer[i + 1] = utility::vision::getPixelColour(lut, 
+                    buffer[i + 1] = utility::vision::getPixelColour(lut,
                         utility::vision::getPixel(start[0] + (i * subsample), start[1], image.dimensions[0], image.dimensions[1], image.data, static_cast<FOURCC>(image.format)));
                 }
 

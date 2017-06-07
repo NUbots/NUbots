@@ -20,10 +20,10 @@
 #include "DOpE.h"
 
 #include <armadillo>
+#include <Eigen/Core>
 #include <fmt/format.h>
 #include <google/protobuf/util/message_differencer.h>
 
-#include "utility/support/eigen.h"
 #include "extension/Configuration.h"
 #include "message/support/optimisation/DOpE.h"
 #include "message/support/optimisation/Episode.h"

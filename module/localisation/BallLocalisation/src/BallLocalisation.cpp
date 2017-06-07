@@ -1,11 +1,12 @@
 #include "BallLocalisation.h"
 
+#include <Eigen/Core>
+
 #include "extension/Configuration.h"
 
 #include "message/localisation/FieldObject.h"
 #include "message/vision/VisionObjects.h"
 
-#include "utility/support/eigen.h"
 
 namespace module {
 namespace localisation {
@@ -25,7 +26,7 @@ namespace localisation {
         });
 
         on<Trigger<std::vector<message::vision::Ball>>>().then([this](const std::vector<message::vision::Ball>& balls){
-            if(balls.size() > 0){  
+            if(balls.size() > 0){
                 auto message = std::make_unique<std::vector<Ball>>();
                 message->push_back(Ball());
                 message->back().locObject.last_measurement_time = NUClear::clock::now();

@@ -19,6 +19,8 @@
 
 #include "NUPresenceServer.h"
 
+#include <Eigen/Core>
+
 #include "extension/Configuration.h"
 
 #include "message/input/Image.h"
@@ -27,7 +29,6 @@
 
 #include "utility/input/ServoID.h"
 #include "utility/math/matrix/Transform3D.h"
-#include "utility/support/eigen.h"
 #include "utility/support/yaml_armadillo.h"
 #include "utility/support/yaml_expression.h"
 

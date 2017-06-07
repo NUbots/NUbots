@@ -21,8 +21,7 @@
 #define MODULES_INPUT_NATNET_H
 
 #include <nuclear>
-
-#include "utility/support/eigen.h"
+#include <Eigen/Core>
 
 namespace module {
 namespace input {

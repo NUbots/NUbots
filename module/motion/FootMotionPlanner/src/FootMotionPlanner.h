@@ -22,7 +22,7 @@
 
 #include <nuclear>
 #include <armadillo>
-
+#include <Eigen/Core>
 #include <yaml-cpp/yaml.h>
 
 #include "extension/Configuration.h"
@@ -30,7 +30,7 @@
 #include "message/input/Sensors.h"
 
 #include "message/motion/KinematicsModels.h"
-#include "message/motion/FootMotionCommand.h" 
+#include "message/motion/FootMotionCommand.h"
 #include "message/motion/FootPlacementCommand.h"
 
 #include "utility/input/LimbID.h"
@@ -47,13 +47,12 @@
 #include "utility/motion/ForwardKinematics.h"
 
 #include "utility/nubugger/NUhelpers.h"
-#include "utility/support/eigen.h"
 
-namespace module 
+namespace module
 {
-namespace motion 
+namespace motion
 {
-    class FootMotionPlanner : public NUClear::Reactor 
+    class FootMotionPlanner : public NUClear::Reactor
     {
     public:
        /**
@@ -67,7 +66,7 @@ namespace motion
         static constexpr const char* CONFIGURATION_MSSG = "Foot Motion Planner - Configure";
         static constexpr const char* ONTRIGGER_FOOT_CMD = "Foot Motion Planner - Update Foot Position";
         static constexpr const char* ONTRIGGER_FOOT_TGT = "Foot Motion Planner - Received Target Foot Position";
-        
+
         explicit FootMotionPlanner(std::unique_ptr<NUClear::Environment> environment);
     private:
         using Sensors        = message::input::Sensors;
@@ -77,7 +76,7 @@ namespace motion
 
         /**
          * Temporary debugging variables for local output logging...
-         */ 
+         */
         bool DEBUG;                 //
         int  DEBUG_ITER;            //
 
@@ -90,13 +89,13 @@ namespace motion
          * Resource abstractions for id and handler instances...
          */
         ReactionHandle updateHandle;                    // handle(updateWaypoints), disabling when not moving will save unnecessary CPU resources
-        
+
         /**
          * Anthropomorphic metrics for relevant humanoid joints & actuators...
          */
         struct NewStepInfo                              // Capture Next Step Data
         {
-            NewStepInfo() 
+            NewStepInfo()
             : lFootSource()
             , rFootSource()
             , sMass()
@@ -131,9 +130,9 @@ namespace motion
         double stepHeight;                              //
         float  step_height_slow_fraction;               //
         float  step_height_fast_fraction;               //
-        float  ankle_pitch_lift; 
-        float  ankle_pitch_fall; 
-        arma::mat::fixed<3,2> stepLimits;               //              
+        float  ankle_pitch_lift;
+        float  ankle_pitch_fall;
+        arma::mat::fixed<3,2> stepLimits;               //
         arma::vec2 footOffsetCoefficient;               //
 
         /**
@@ -147,7 +146,7 @@ namespace motion
         /**
          * Motion data for relevant humanoid actuators...
          */
-        double velocityHigh;                            // 
+        double velocityHigh;                            //
         double accelerationTurningFactor;               //
         arma::mat::fixed<3,2> velocityLimits;           //
         arma::vec3 accelerationLimits;                  //
@@ -198,7 +197,7 @@ namespace motion
         /**
          * @brief [brief description]
          * @details [long description]
-         * 
+         *
          * @param inTorsoPosition [description]
          */
         void configure(const YAML::Node& config);
@@ -206,7 +205,7 @@ namespace motion
          * @brief [brief description]
          * @details [long description]
          */
-        void postureInitialize();  
+        void postureInitialize();
         /**
          * @brief [brief description]
          * @details [long description]
@@ -220,7 +219,7 @@ namespace motion
         /**
          * @brief [brief description]
          * @details [long description]
-         * 
+         *
          * @param index [description]
          * @return [description]
          */
@@ -228,14 +227,14 @@ namespace motion
         /**
          * @brief [brief description]
          * @details [long description]
-         * 
+         *
          * @param inFootOffsetCoefficient [description]
          */
         void setFootOffsetCoefficient(const arma::vec2& inFootOffsetCoefficient);
         /**
          * @brief [brief description]
          * @details [long description]
-         * 
+         *
          * @param index [description]
          * @param inValue [description]
          */
@@ -309,7 +308,7 @@ namespace motion
         /**
          * @brief [brief description]
          * @details [long description]
-         * 
+         *
          * @param velocity [description]
          */
         void setVelocityCurrent(Transform2D inVelocityCommand);
@@ -322,7 +321,7 @@ namespace motion
         /**
          * @brief [brief description]
          * @details [long description]
-         * 
+         *
          * @param inLeftFootPosition [description]
          */
         void setLeftFootPosition(const Transform2D& inLeftFootPosition);
@@ -335,7 +334,7 @@ namespace motion
         /**
          * @brief [brief description]
          * @details [long description]
-         * 
+         *
          * @param inRightFootPosition [description]
          */
         void setRightFootPosition(const Transform2D& inRightFootPosition);
@@ -348,7 +347,7 @@ namespace motion
         /**
          * @brief [brief description]
          * @details [long description]
-         * 
+         *
          * @param inRightFootSource [description]
          */
         void setActiveLimbSource(const Transform2D& inActiveLimbSource);
@@ -361,7 +360,7 @@ namespace motion
         /**
          * @brief [brief description]
          * @details [long description]
-         * 
+         *
          * @param inLeftFootDestination [description]
          */
         void setActiveLimbDestination(const Transform2D& inActiveLimbDestination);

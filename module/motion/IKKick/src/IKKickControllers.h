@@ -22,6 +22,7 @@
 
 #include <nuclear>
 #include <armadillo>
+#include <Eigen/Core>
 
 #include "extension/Configuration.h"
 
@@ -31,7 +32,6 @@
 #include "utility/input/LimbID.h"
 #include "utility/input/ServoID.h"
 #include "utility/math/matrix/Transform3D.h"
-#include "utility/support/eigen.h"
 #include "utility/support/yaml_armadillo.h"
 
 namespace module{
@@ -152,7 +152,7 @@ namespace motion{
 
 				utility::math::matrix::Transform3D getTorsoPose(const message::input::Sensors& sensors) {
 			        // Find position vector from support foot to torso in support foot coordinates.
-			        return((supportFoot == utility::input::LimbID::LEFT_LEG) 
+			        return((supportFoot == utility::input::LimbID::LEFT_LEG)
 			                   ? convert<double, 4, 4>(sensors.forwardKinematics.at(utility::input::ServoID::L_ANKLE_ROLL))
 			                   : convert<double, 4, 4>(sensors.forwardKinematics.at(utility::input::ServoID::R_ANKLE_ROLL)));
 		        }

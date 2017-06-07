@@ -19,10 +19,11 @@
 
 #include "LUTClassifier.h"
 
+#include <Eigen/Core>
+
 #include "utility/math/ransac/NPartiteRansac.h"
 #include "utility/math/geometry/Line.h"
 #include "utility/nubugger/NUhelpers.h"
-#include "utility/support/eigen.h"
 
 namespace module {
     namespace vision {

@@ -22,8 +22,8 @@
 
 #include <nuclear>
 #include <armadillo>
+#include <Eigen/Core>
 
-#include "utility/support/eigen.h"
 #include "QuexClassifier.h"
 
 #include "message/input/Image.h"

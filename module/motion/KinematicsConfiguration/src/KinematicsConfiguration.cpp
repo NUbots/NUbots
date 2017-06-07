@@ -19,9 +19,10 @@
 
 #include "KinematicsConfiguration.h"
 
+#include <Eigen/Core>
+
 #include "extension/Configuration.h"
 
-#include "utility/support/eigen.h"
 #include "utility/support/yaml_armadillo.h"
 #include "utility/support/yaml_expression.h"
 
@@ -39,12 +40,12 @@ namespace motion {
     : Reactor(std::move(environment)) {
 
         on<Configuration>("KinematicsConfiguration.yaml").then([this] (const Configuration& config) {
-           
+
             KinematicsModel model;
             configure(model, config);
             emit(std::make_unique<KinematicsModel>(model));
         });
-        
+
     }
 
     void KinematicsConfiguration::configure (KinematicsModel& model, const Configuration& objDarwinModel) {
@@ -149,7 +150,7 @@ namespace motion {
     }
 
     void KinematicsConfiguration::configureMassModel (KinematicsModel& model, const YAML::Node& objMassModel) {
-        
+
         auto& objMasses = objMassModel["masses"];
 
         auto masses = objMasses.as<std::vector<arma::vec4>>();

@@ -19,13 +19,14 @@
 
 #include "NUbugger.h"
 
+#include <Eigen/Core>
+
 #include "message/localisation/FieldObject.h"
 #include "message/localisation/Localisation.h"
 
 #include "utility/time/time.h"
 #include "utility/localisation/transform.h"
 #include "utility/nubugger/NUhelpers.h"
-#include "utility/support/eigen.h"
 
 namespace module {
 namespace support {

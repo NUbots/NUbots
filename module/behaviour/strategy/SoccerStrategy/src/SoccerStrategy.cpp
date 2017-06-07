@@ -19,6 +19,8 @@
 
 #include "SoccerStrategy.h"
 
+#include <Eigen/Core>
+
 #include "extension/Configuration.h"
 
 #include "message/behaviour/Look.h"
@@ -40,7 +42,6 @@
 #include "utility/math/matrix/Transform2D.h"
 #include "utility/math/matrix/Transform3D.h"
 #include "utility/nubugger/NUhelpers.h"
-#include "utility/support/eigen.h"
 #include "utility/support/yaml_armadillo.h"
 #include "utility/time/time.h"
 

@@ -1,7 +1,7 @@
 #ifndef MESSAGE_CONVERSION_MATRIX_TYPES_H
 #define MESSAGE_CONVERSION_MATRIX_TYPES_H
 
-#include <eigen3/Eigen/Core>
+#include <Eigen/Core>
 
 namespace message {
     namespace conversion {

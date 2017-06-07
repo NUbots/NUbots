@@ -19,6 +19,8 @@
 
 #include "HeadController.h"
 
+#include <Eigen/Core>
+
 #include "extension/Configuration.h"
 
 #include "message/behaviour/ServoCommand.h"
@@ -33,13 +35,12 @@
 #include "utility/math/matrix/Transform3D.h"
 #include "utility/motion/InverseKinematics.h"
 #include "utility/nubugger/NUhelpers.h"
-#include "utility/support/eigen.h"
 #include "utility/support/yaml_expression.h"
 
 
-namespace module 
-{    
-namespace motion 
+namespace module
+{
+namespace motion
 {
         using utility::nubugger::graph;
         using LimbID  = utility::input::LimbID;

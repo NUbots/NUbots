@@ -19,6 +19,8 @@
 
 #include "NUbugger.h"
 
+#include <Eigen/Core>
+
 #include "message/behaviour/WalkPath.h"
 #include "message/behaviour/KickPlan.h"
 #include "message/input/Image.h"
@@ -28,7 +30,6 @@
 
 #include "utility/time/time.h"
 #include "utility/localisation/transform.h"
-#include "utility/support/eigen.h"
 
 /**
  * @author Monica Olejniczak
@@ -120,8 +121,8 @@ namespace support {
             overview.ball_position = ball.locObject.position;
 
             // Set world ball position.
-            overview.ball_world_position = convert<double, 2>(RobotToWorldTransform(convert<double, 2>(self.locObject.position), 
-                                                                                    convert<double, 2>(self.heading), 
+            overview.ball_world_position = convert<double, 2>(RobotToWorldTransform(convert<double, 2>(self.locObject.position),
+                                                                                    convert<double, 2>(self.heading),
                                                                                     convert<double, 2>(ball.locObject.position)));
         }));
 

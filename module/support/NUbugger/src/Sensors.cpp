@@ -19,9 +19,9 @@
 
 #include "NUbugger.h"
 
-#include "message/input/Sensors.h"
+#include <Eigen/Core>
 
-#include "utility/support/eigen.h"
+#include "message/input/Sensors.h"
 
 namespace module {
 namespace support {

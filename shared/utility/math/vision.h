@@ -22,17 +22,18 @@
 #include <cmath>
 #include <armadillo>
 #include <nuclear>
+#include <Eigen/Core>
+
+#include "message/support/FieldDescription.h"
 #include "message/localisation/FieldObject.h"
 #include "message/input/Sensors.h"
+
 #include "utility/input/ServoID.h"
 #include "utility/math/matrix/Transform3D.h"
 #include "utility/math/matrix/Transform2D.h"
 #include "utility/math/geometry/Plane.h"
 #include "utility/math/geometry/ParametricLine.h"
 #include "utility/math/angle.h"
-#include "utility/support/eigen.h"
-#include "message/support/FieldDescription.h"
-
 
 namespace utility {
 namespace math {

@@ -20,12 +20,13 @@
 
 #include "FieldModel.h"
 
+#include <Eigen/Core>
+
 #include "utility/input/ServoID.h"
 #include "utility/math/matrix/Rotation3D.h"
 #include "utility/math/matrix/Transform3D.h"
 #include "utility/math/matrix/Transform2D.h"
 #include "utility/math/vision.h"
-#include "utility/support/eigen.h"
 
 namespace module {
     namespace localisation {
@@ -49,7 +50,7 @@ namespace module {
             , const std::vector<std::tuple<GoalTeam, GoalSide, GoalMeasurementType>>& measurements
             , const FieldDescription& field
             , const Sensors& sensors
-            , const MeasurementType::GOAL&) 
+            , const MeasurementType::GOAL&)
         {
 
             //make a storage for our goal locations
@@ -60,7 +61,7 @@ namespace module {
 
             //Transform2D world = sensors.world.projectTo2D(arma::vec3({0,0,1}),arma::vec3({1,0,0}));
             const Transform3D& Htw = convert<double, 4, 4>(sensors.world);
-            const Transform3D& Htc = convert<double, 4, 4>(sensors.forwardKinematics.at(ServoID::HEAD_PITCH)); 
+            const Transform3D& Htc = convert<double, 4, 4>(sensors.forwardKinematics.at(ServoID::HEAD_PITCH));
             Transform3D Hwc = Htw.i() * Htc;
             //Get the x/y position for goals
             arma::vec prediction(3*measurements.size());

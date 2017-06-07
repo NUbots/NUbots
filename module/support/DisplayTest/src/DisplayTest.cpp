@@ -18,10 +18,13 @@
  */
 
 #include "DisplayTest.h"
+
+#include <Eigen/Core>
+
 #include "utility/nubugger/NUhelpers.h"
+
 #include "message/input/MotionCapture.h"
 #include "message/input/Sensors.h"
-#include "utility/support/eigen.h"
 
 using utility::nubugger::graph;
 

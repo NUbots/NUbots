@@ -19,11 +19,12 @@
 
 #include "SensorFilter.h"
 
+#include <Eigen/Core>
+
 #include "extension/Configuration.h"
 
 #include "message/input/CameraParameters.h"
 #include "message/input/Sensors.h"
-//#include "message/localisation/ResetRobotHypotheses.h"
 #include "message/platform/darwin/DarwinSensors.h"
 
 #include "utility/input/LimbID.h"
@@ -33,7 +34,6 @@
 #include "utility/motion/ForwardKinematics.h"
 #include "utility/nubugger/NUhelpers.h"
 #include "utility/platform/darwin/DarwinSensors.h"
-#include "utility/support/eigen.h"
 #include "utility/support/yaml_armadillo.h"
 
 namespace module {
@@ -208,13 +208,13 @@ namespace module {
                 //     motionFilter.setState(newFilter, arma::diagmat(covariance));
                 // });
 
-                on<Last<20, Trigger<DarwinSensors>>, Single>().then([this](const std::list<std::shared_ptr<const DarwinSensors>>& sensors) 
+                on<Last<20, Trigger<DarwinSensors>>, Single>().then([this](const std::list<std::shared_ptr<const DarwinSensors>>& sensors)
                 {
                     int leftCount = 0;
                     int middleCount = 0;
 
                     // If we have any downs in the last 20 frames then we are button pushed
-                    for (const auto& s : sensors) 
+                    for (const auto& s : sensors)
                     {
                         if(s->buttons.left && !s->cm730ErrorFlags) {
                             ++leftCount;
@@ -227,7 +227,7 @@ namespace module {
                     bool newLeftDown = leftCount > config.buttons.debounceThreshold;
                     bool newMiddleDown = middleCount > config.buttons.debounceThreshold;
 
-                    if(newLeftDown != leftDown) 
+                    if(newLeftDown != leftDown)
                     {
 
                         leftDown = newLeftDown;
@@ -241,7 +241,7 @@ namespace module {
                             emit(std::make_unique<ButtonLeftUp>());
                         }
                     }
-                    if(newMiddleDown != middleDown) 
+                    if(newMiddleDown != middleDown)
                     {
 
                         middleDown = newMiddleDown;
@@ -254,7 +254,7 @@ namespace module {
                             log("Middle Button Up");
                             emit(std::make_unique<ButtonMiddleUp>());
                         }
-                    }                
+                    }
                 });
 
                 on<Trigger<DarwinSensors>
@@ -262,10 +262,10 @@ namespace module {
                   , With<KinematicsModel>
                   , Single
                   , Priority::HIGH>().then("Main Sensors Loop", [this](
-                                                                            const DarwinSensors& input, 
+                                                                            const DarwinSensors& input,
                                                                             std::shared_ptr<const Sensors> previousSensors,
                                                                             const KinematicsModel& kinematicsModel
-                                                                      ) 
+                                                                      )
                 {
                     auto sensors = std::make_unique<Sensors>();
 
@@ -297,13 +297,13 @@ namespace module {
                     }
 
                     // Read through all of our sensors
-                    for(uint32_t i = 0; i < 20; ++i) 
+                    for(uint32_t i = 0; i < 20; ++i)
                     {
                         auto& original = utility::platform::darwin::getDarwinServo(i, input);
                         auto& error = original.errorFlags;
 
                         // Check for an error on the servo and report it
-                        while(error != DarwinSensors::Error::OK) 
+                        while(error != DarwinSensors::Error::OK)
                         {
                             std::stringstream s;
                             s << "Error on Servo " << (i + 1) << " (" << static_cast<ServoID>(i) << "):";
@@ -337,7 +337,7 @@ namespace module {
 
                         // If we have previous sensors and our current sensors have an error
                         // we then use our previous sensor values with some updates
-                        if(previousSensors && error != DarwinSensors::Error::OK) 
+                        if(previousSensors && error != DarwinSensors::Error::OK)
                         {
                             // Add the sensor values to the system properly
                             sensors->servo.push_back({
@@ -357,7 +357,7 @@ namespace module {
                             });
                         }
                         // Otherwise we can just use the new values as is
-                        else 
+                        else
                         {
                             // Add the sensor values to the system properly
                             sensors->servo.push_back({
@@ -376,25 +376,25 @@ namespace module {
                                 float(original.temperature)
                             });
                         }
-                    }       
+                    }
 
                     // If we have a previous sensors and our cm730 has errors then reuse our last sensor value
-                    if(previousSensors && (input.cm730ErrorFlags)) 
+                    if(previousSensors && (input.cm730ErrorFlags))
                     {
                         sensors->accelerometer = previousSensors->accelerometer;
                     }
-                    else 
+                    else
                     {
                         sensors->accelerometer = {-input.accelerometer.y, input.accelerometer.x, -input.accelerometer.z};
                     }
 
                     // If we have a previous sensors and our cm730 has errors then reuse our last sensor value
-                    if(previousSensors && (input.cm730ErrorFlags || arma::norm(arma::vec({input.gyroscope.x, input.gyroscope.y, input.gyroscope.z}), 2) > 4 * M_PI)) 
+                    if(previousSensors && (input.cm730ErrorFlags || arma::norm(arma::vec({input.gyroscope.x, input.gyroscope.y, input.gyroscope.z}), 2) > 4 * M_PI))
                     {
                         NUClear::log<NUClear::WARN>("Bad gyroscope value", arma::norm(arma::vec({input.gyroscope.x, input.gyroscope.y, input.gyroscope.z}), 2));
                         sensors->gyroscope = previousSensors->gyroscope;
                     }
-                    else 
+                    else
                     {
                         sensors->gyroscope = {input.gyroscope.x, input.gyroscope.y, -input.gyroscope.z};
                     }
@@ -443,7 +443,7 @@ namespace module {
                     /************************************************
                      *            Foot down information             *
                      ************************************************/
-                    if(previousSensors) 
+                    if(previousSensors)
                     {
                         // Use our virtual load sensor class to work out if our foot is down
                         arma::vec leftFootFeatureVec = {
@@ -472,7 +472,7 @@ namespace module {
                         };
                         sensors->rightFootDown = rightFootDown.updateFoot(rightFootFeatureVec);
                     }
-                    else 
+                    else
                     {
                         sensors->leftFootDown = false;
                         sensors->rightFootDown = false;
@@ -489,15 +489,15 @@ namespace module {
                     motionFilter.timeUpdate(deltaT);
 
                     // Accelerometer measurment update
-                    motionFilter.measurementUpdate(convert<double, 3>(sensors->accelerometer), 
-                                                    config.motionFilter.noise.measurement.accelerometer + 
-                                                    arma::norm(convert<double, 3>(sensors->accelerometer)) * config.motionFilter.noise.measurement.accelerometerMagnitude, 
+                    motionFilter.measurementUpdate(convert<double, 3>(sensors->accelerometer),
+                                                    config.motionFilter.noise.measurement.accelerometer +
+                                                    arma::norm(convert<double, 3>(sensors->accelerometer)) * config.motionFilter.noise.measurement.accelerometerMagnitude,
                                                     MotionModel::MeasurementType::ACCELEROMETER());
 
                     // Gyroscope measurement update
                     motionFilter.measurementUpdate(convert<double, 3>(sensors->gyroscope), config.motionFilter.noise.measurement.gyroscope, MotionModel::MeasurementType::GYROSCOPE());
 
-                    if (sensors->leftFootDown or sensors->rightFootDown) 
+                    if (sensors->leftFootDown or sensors->rightFootDown)
                     {
                         //pre-calculate common foot-down variables - these are the torso to world transforms.
                         arma::vec3 rTWw = motionFilter.get().rows(MotionModel::PX, MotionModel::PZ);
@@ -506,7 +506,7 @@ namespace module {
                         // 3 points on the ground mean that we can assume this foot is flat
                         // We also have to ensure that the previous foot was also down for this to be valid
                         // Check if our foot is flat on the ground
-                        for (auto& side : { ServoSide::LEFT, ServoSide::RIGHT} ) 
+                        for (auto& side : { ServoSide::LEFT, ServoSide::RIGHT} )
                         {
 
                             auto servoid = side == ServoSide::LEFT ? ServoID::L_ANKLE_ROLL : ServoID::R_ANKLE_ROLL;
@@ -521,9 +521,9 @@ namespace module {
                                     : previousSensors->rightFootDown
                                 : false;
 
-                            if (footDown) 
+                            if (footDown)
                             {
-                                Transform3D Htf = convert<double, 4, 4>(sensors->forwardKinematics.at(servoid)); 
+                                Transform3D Htf = convert<double, 4, 4>(sensors->forwardKinematics.at(servoid));
                                 Transform3D Hft = Htf.i();
 
                                 Rotation3D Rtf = Htf.rotation();
@@ -533,7 +533,7 @@ namespace module {
                                 arma::vec3 rTFf = Hft.translation();
 
 
-                                if (!prevFootDown) 
+                                if (!prevFootDown)
                                 {
                                     //NOTE: footflat measurements assume the foot is flat on the ground. These decorrelate the accelerometer and gyro from translation.
                                     Rotation3D footflat_Rwt = Rotation3D::createRotationZ(Rtw.i().yaw());
@@ -550,8 +550,8 @@ namespace module {
 
                                     //NOTE: an optional foot up with Z calculation can be done here
 
-                                } 
-                                else 
+                                }
+                                else
                                 {
                                     //NOTE: translation and rotation updates are performed separately so that they can be turned off independently for debugging
 
@@ -608,20 +608,20 @@ namespace module {
 
                     /************************************************
                      *                  Kinematics Horizon          *
-                     ************************************************/         
+                     ************************************************/
                     sensors->bodyCentreHeight = motionFilter.get()[MotionModel::PZ];
 
                     Rotation3D Rwt = world.rotation().t();     //remove translation components from the transform
                     Rotation3D oBodyToGround = Rotation3D::createRotationZ(-Rwt.yaw()) * Rwt;
                     // sensors->bodyToGround : Mat size [4x4] (default identity)
-                    // createRotationZ : Mat size [3x3] 
+                    // createRotationZ : Mat size [3x3]
                     // Rwt : Mat size [3x3]
                     sensors->bodyToGround = convert<double, 4, 4>(Transform3D(oBodyToGround));
                     auto headPitchKinematics = sensors->forwardKinematics.at(ServoID::HEAD_PITCH);
-                    
+
                     //Get torso to world transform
                     Transform3D worldInv = world.i();
-                    
+
                     Rotation3D yawlessWorldInvR = Rotation3D::createRotationZ(-Rotation3D(worldInv.rotation()).yaw()) * worldInv.rotation();
                     Transform3D torsoToGround = worldInv;
                     torsoToGround.translation() = arma::vec3({0,0,torsoToGround.translation()[2]});
@@ -633,7 +633,7 @@ namespace module {
                      ************************************************/
                     sensors->centreOfPressure = convert<double, 3>(utility::motion::kinematics::calculateCentreOfPressure(kinematicsModel, *sensors));
 
-                    emit(std::move(sensors));                  
+                    emit(std::move(sensors));
                 });
             }
         }  // darwin

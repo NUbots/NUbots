@@ -18,9 +18,9 @@
  */
 #include "Balance.h"
 
-#include "message/motion/KinematicsModels.h"
+#include <Eigen/Core>
 
-#include "utility/support/eigen.h"
+#include "message/motion/KinematicsModels.h"
 
 namespace utility {
 namespace motion {
@@ -98,7 +98,7 @@ namespace motion {
         footToTorso.rotation() = Rotation3D(ankleRotation) * footToTorso.rotation();
 
         // Get the position of our hip to rotate around
-        
+
         Transform3D hip = Transform3D(arma::vec3({
             model.leg.HIP_OFFSET_X,
             model.leg.HIP_OFFSET_Y * (leg == LimbID::RIGHT_LEG ? -1 : 1),
@@ -121,7 +121,7 @@ namespace motion {
         // }
         // // float anklePitchTorque = sensors.servos[int(balanceServo)].load;
 
-        //Get error signal        
+        //Get error signal
         double pitch_gyro = Rotation3D(errorQuaternion).pitch();
         double pitch = pitch_gyro; //anklePitchTorque;
         double roll = Rotation3D(errorQuaternion).roll();

@@ -3,8 +3,7 @@
 
 #include <vector>
 #include <string>
-
-#include "utility/support/eigen.h"
+#include <Eigen/Core>
 
 #include "Vision.h"
 
@@ -57,7 +56,7 @@ namespace utility {
         const Eigen::Matrix<int8_t, 5, 5> GREEN_AXIAL = Eigen::Map<const Eigen::Matrix<int8_t, 5, 5>>(GREEN_AXIAL_ARR, 5, 5);
 
         // Red at blue locations and blue at red locations
-        constexpr int8_t RED_AT_BLUE_ARR[25] = {  0,  0, -12,  0,   0, 
+        constexpr int8_t RED_AT_BLUE_ARR[25] = {  0,  0, -12,  0,   0,
                                                   0, 16,   0, 16,   0,
                                                 -12,  0,  48,  0, -12,
                                                   0, 16,   0, 16,   0,
@@ -66,7 +65,7 @@ namespace utility {
 
         // Red at green locations and blue at green locations, on red rows
         // Red at green locations and blue at green locations, on blue rows are the transpose of this mask.
-        constexpr int8_t RED_AT_GREEN_ARR[25] = { 0,  0, -4,  0,  0, 
+        constexpr int8_t RED_AT_GREEN_ARR[25] = { 0,  0, -4,  0,  0,
                                                   0, -8,  0, -8,  0,
                                                  -8, 32, 40, 32, -8,
                                                   0, -8,  0, -8,  0,
@@ -75,7 +74,7 @@ namespace utility {
 
         inline Eigen::Matrix<uint8_t, 5, 5> getSubImage(uint x, uint y, uint width, uint height, const std::vector<uint8_t>& data)
         {
-            // Extract the 5x5 matrix centered at (x, y). 
+            // Extract the 5x5 matrix centered at (x, y).
             // Zero pad the borders.
             Eigen::Matrix<uint8_t, 5, 5> I = Eigen::Matrix<uint8_t, 5, 5>::Zero();
 
@@ -99,7 +98,7 @@ namespace utility {
         inline uint8_t conv2d(const Eigen::Matrix<uint8_t, 5, 5>& I, const Eigen::Matrix<int8_t, 5, 5> &kernel, uint8_t normalisation = BAYER_SCALE)
         {
             int16_t value = I.cast<int16_t>().cwiseProduct(kernel.cast<int16_t>()).sum();
-           
+
             if (normalisation == 0)
             {
                 normalisation = 1;
@@ -115,7 +114,7 @@ namespace utility {
             int origin = (y * width + x);
 
             return {
-                0, 0, 
+                0, 0,
                 data[origin]
             };
         }
@@ -141,11 +140,11 @@ namespace utility {
             const bool redRow     = (row == 0);
 
             // Determine which kernels we need.
-            const auto& redKernel   = (greenPixel) 
+            const auto& redKernel   = (greenPixel)
                                     ? ((redRow) ? RED_AT_GREEN : RED_AT_GREEN.transpose())
                                     : ((bluePixel) ? RED_AT_BLUE : IDENTITY);
             const auto& greenKernel = (greenPixel) ? IDENTITY : GREEN_AXIAL;
-            const auto& blueKernel  = (greenPixel) 
+            const auto& blueKernel  = (greenPixel)
                                     ? ((redRow) ? RED_AT_GREEN : RED_AT_GREEN.transpose())
                                     : ((redPixel) ? RED_AT_BLUE : IDENTITY);
 
@@ -177,11 +176,11 @@ namespace utility {
             const bool redRow     = (row == 0);
 
             // Determine which kernels we need.
-            const auto& redKernel   = (greenPixel) 
+            const auto& redKernel   = (greenPixel)
                                     ? ((redRow) ? RED_AT_GREEN : RED_AT_GREEN.transpose())
                                     : ((bluePixel) ? RED_AT_BLUE : IDENTITY);
             const auto& greenKernel = (greenPixel) ? IDENTITY : GREEN_AXIAL;
-            const auto& blueKernel  = (greenPixel) 
+            const auto& blueKernel  = (greenPixel)
                                     ? ((redRow) ? RED_AT_GREEN : RED_AT_GREEN.transpose())
                                     : ((redPixel) ? RED_AT_BLUE : IDENTITY);
 
@@ -189,7 +188,7 @@ namespace utility {
                 conv2d(I, redKernel),
                 conv2d(I, greenKernel),
                 conv2d(I, blueKernel)
-            };            
+            };
         }
 
         inline Pixel getGBRGPixel(uint x, uint y, int width, int height, const std::vector<uint8_t>& data)
@@ -213,11 +212,11 @@ namespace utility {
             const bool redRow     = (row == 1);
 
             // Determine which kernels we need.
-            const auto& redKernel   = (greenPixel) 
+            const auto& redKernel   = (greenPixel)
                                     ? ((redRow) ? RED_AT_GREEN : RED_AT_GREEN.transpose())
                                     : ((bluePixel) ? RED_AT_BLUE : IDENTITY);
             const auto& greenKernel = (greenPixel) ? IDENTITY : GREEN_AXIAL;
-            const auto& blueKernel  = (greenPixel) 
+            const auto& blueKernel  = (greenPixel)
                                     ? ((redRow) ? RED_AT_GREEN : RED_AT_GREEN.transpose())
                                     : ((redPixel) ? RED_AT_BLUE : IDENTITY);
 
@@ -225,7 +224,7 @@ namespace utility {
                 conv2d(I, redKernel),
                 conv2d(I, greenKernel),
                 conv2d(I, blueKernel)
-            };    
+            };
         }
 
         inline Pixel getBGGRPixel(uint x, uint y, int width, int height, const std::vector<uint8_t>& data)
@@ -249,11 +248,11 @@ namespace utility {
             const bool redRow     = (row == 1);
 
             // Determine which kernels we need.
-            const auto& redKernel   = (greenPixel) 
+            const auto& redKernel   = (greenPixel)
                                     ? ((redRow) ? RED_AT_GREEN : RED_AT_GREEN.transpose())
                                     : ((bluePixel) ? RED_AT_BLUE : IDENTITY);
             const auto& greenKernel = (greenPixel) ? IDENTITY : GREEN_AXIAL;
-            const auto& blueKernel  = (greenPixel) 
+            const auto& blueKernel  = (greenPixel)
                                     ? ((redRow) ? RED_AT_GREEN : RED_AT_GREEN.transpose())
                                     : ((redPixel) ? RED_AT_BLUE : IDENTITY);
 
@@ -261,7 +260,7 @@ namespace utility {
                 conv2d(I, redKernel),
                 conv2d(I, greenKernel),
                 conv2d(I, blueKernel)
-            };   
+            };
         }
 
         inline Pixel getGrey16Pixel(uint x, uint y, int width, int /*height*/, const std::vector<uint8_t>& data)

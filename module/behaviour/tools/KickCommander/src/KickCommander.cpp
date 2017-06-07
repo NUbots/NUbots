@@ -19,11 +19,12 @@
 
 #include "KickCommander.h"
 
+#include <Eigen/Core>
+
 #include "extension/Configuration.h"
 
 #include "message/motion/KickCommand.h"
 
-#include "utility/support/eigen.h"
 #include "utility/support/yaml_armadillo.h"
 
 namespace module {

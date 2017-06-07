@@ -19,12 +19,13 @@
 
 #include "LUTClassifier.h"
 
+#include <Eigen/Core>
+
 #include "QuexClassifier.h"
 
 #include "utility/math/geometry/ParametricLine.h"
 #include "utility/math/geometry/Quad.h"
 #include "utility/nubugger/NUhelpers.h"
-#include "utility/support/eigen.h"
 
 namespace module {
     namespace vision {

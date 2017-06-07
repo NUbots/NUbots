@@ -19,6 +19,8 @@
 
 #include "NUbugger.h"
 
+#include <Eigen/Core>
+
 #include "message/input/Image.h"
 #include "message/vision/ClassifiedImage.h"
 #include "message/vision/VisionObjects.h"
@@ -26,7 +28,6 @@
 #include "message/vision/LookUpTableDiff.h"
 
 #include "utility/time/time.h"
-#include "utility/support/eigen.h"
 
 namespace module {
 namespace support {

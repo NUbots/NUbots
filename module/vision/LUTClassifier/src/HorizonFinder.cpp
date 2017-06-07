@@ -19,9 +19,10 @@
 
 #include "LUTClassifier.h"
 
+#include <Eigen/Core>
+
 #include "utility/math/matrix/Transform3D.h"
 #include "utility/motion/ForwardKinematics.h"
-#include "utility/support/eigen.h"
 
 namespace module {
     namespace vision {

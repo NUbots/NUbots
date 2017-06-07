@@ -22,6 +22,8 @@
 
 #include <nuclear>
 #include <armadillo>
+#include <Eigen/Core>
+
 #include "message/support/nubugger/DataPoint.h"
 #include "message/support/nubugger/DrawObjects.h"
 #include "message/vision/VisionObjects.h"
@@ -29,12 +31,11 @@
 #include "utility/math/geometry/RotatedRectangle.h"
 #include "utility/math/geometry/Circle.h"
 #include "utility/math/matrix/Transform2D.h"
-#include "utility/support/eigen.h"
 
 namespace utility {
 namespace nubugger {
     using utility::math::geometry::RotatedRectangle;
-    
+
     using utility::math::geometry::Circle;
     using utility::math::matrix::Transform2D;
     using message::support::nubugger::DrawObject;
@@ -390,7 +391,7 @@ namespace nubugger {
     }
 
     inline std::unique_ptr<std::vector<message::vision::Line>> drawVisionLine(Eigen::Vector2i start, Eigen::Vector2i end, Eigen::Vector4d colour = Eigen::Vector4d({1, 1, 1, 1})) {
-        
+
         return drawVisionLines({std::make_tuple(start, end, colour)});
     }
 

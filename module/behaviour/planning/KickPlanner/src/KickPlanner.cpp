@@ -19,6 +19,8 @@
 
 #include "KickPlanner.h"
 
+#include <Eigen/Core>
+
 #include "extension/Configuration.h"
 
 #include "message/behaviour/KickPlan.h"
@@ -36,7 +38,6 @@
 #include "utility/math/matrix/Transform3D.h"
 #include "utility/motion/InverseKinematics.h"
 #include "utility/nubugger/NUhelpers.h"
-#include "utility/support/eigen.h"
 #include "utility/support/yaml_armadillo.h"
 
 namespace module {

@@ -24,6 +24,7 @@
 #include <armadillo>
 #include <cmath>
 #include <nuclear>
+#include <Eigen/Core>
 
 #include "message/input/Sensors.h"
 #include "message/motion/KinematicsModels.h"
@@ -34,7 +35,6 @@
 #include "utility/math/matrix/Rotation3D.h"
 #include "utility/math/angle.h"
 #include "utility/math/geometry/Line.h"
-#include "utility/support/eigen.h"
 
 namespace utility {
 namespace motion {
@@ -45,7 +45,7 @@ namespace kinematics {
     using message::input::Sensors;
     using message::motion::KinematicsModel;
     using BodySide = message::motion::BodySide::Value;
- 
+
 
     inline std::map<ServoID, utility::math::matrix::Transform3D> calculateHeadJointPosition(const KinematicsModel& model, const float& HEAD_PITCH, const float& HEAD_YAW, ServoID servoID){
         std::map<ServoID, utility::math::matrix::Transform3D> positions;
@@ -89,7 +89,7 @@ namespace kinematics {
     }
 
     inline std::map<ServoID, utility::math::matrix::Transform3D> calculateHeadJointPosition(const KinematicsModel& model, const Sensors& sensors, ServoID servoID){
-        return calculateHeadJointPosition(model, 
+        return calculateHeadJointPosition(model,
                                           sensors.servo[static_cast<int>(ServoID::HEAD_PITCH)].presentPosition,
                                           sensors.servo[static_cast<int>(ServoID::HEAD_YAW)  ].presentPosition,
                                           servoID);

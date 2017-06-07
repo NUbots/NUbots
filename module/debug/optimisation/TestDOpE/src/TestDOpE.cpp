@@ -19,10 +19,11 @@
 
 #include "TestDOpE.h"
 
+#include <Eigen/Core>
+
 #include "extension/Configuration.h"
 #include "message/support/optimisation/DOpE.h"
 #include "message/support/optimisation/Episode.h"
-#include "utility/support/eigen.h"
 
 namespace module {
 namespace debug {

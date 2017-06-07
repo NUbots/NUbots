@@ -19,6 +19,8 @@
 
 #include "BallDetector.h"
 
+#include <Eigen/Core>
+
 #include "extension/Configuration.h"
 
 #include "message/input/CameraParameters.h"
@@ -35,7 +37,6 @@
 #include "utility/math/ransac/RansacCircleModel.h"
 #include "utility/math/vision.h"
 #include "utility/nubugger/NUhelpers.h"
-#include "utility/support/eigen.h"
 #include "utility/support/yaml_expression.h"
 #include "utility/vision/fourcc.h"
 #include "utility/vision/Vision.h"
@@ -89,7 +90,7 @@ namespace vision {
                 arma::ivec2 ipos = arma::ivec({int(std::round(circle.centre[0])), int(std::round(circle.centre[1]))});
                 if(ipos[0] >= 0 && ipos[0] < int(image.dimensions[0]) && ipos[1] >= 0 && ipos[1] < int(image.dimensions[1])){
                     // debug.push_back(std::make_tuple(ipos, ipos + arma::ivec2{1,1}, arma::vec4{1,1,1,1}));
-                    char c = static_cast<char>(utility::vision::getPixelColour(lut, 
+                    char c = static_cast<char>(utility::vision::getPixelColour(lut,
                             getPixel(ipos[0], ipos[1], image.dimensions[0], image.dimensions[1], image.data, static_cast<FOURCC>(image.format))));
                     if (c == Colour::GREEN) {
                         numGreen++;
@@ -105,7 +106,7 @@ namespace vision {
                 arma::ivec2 ipos = arma::ivec2({int(std::round(pos[0])),int(std::round(pos[1]))});
                 if(ipos[0] >= 0 && ipos[0] < int(image.dimensions[0]) && ipos[1] >= 0 && ipos[1] < int(image.dimensions[1])){
                     // debug.push_back(std::make_tuple(ipos, ipos + arma::ivec2{1,1}, arma::vec4{1,1,1,1}));
-                    char c = static_cast<char>(utility::vision::getPixelColour(lut, 
+                    char c = static_cast<char>(utility::vision::getPixelColour(lut,
                             getPixel(ipos[0], ipos[1], image.dimensions[0], image.dimensions[1], image.data, static_cast<FOURCC>(image.format))));
                     if (c == Colour::GREEN) {
                         numGreen++;
@@ -286,7 +287,7 @@ namespace vision {
 
                 // Get our transform to world coordinates
                 const Transform3D& Htw = convert<double, 4, 4>(sensors.world);
-                const Transform3D& Htc = convert<double, 4, 4>(sensors.forwardKinematics.at(ServoID::HEAD_PITCH)); 
+                const Transform3D& Htc = convert<double, 4, 4>(sensors.forwardKinematics.at(ServoID::HEAD_PITCH));
                 Transform3D Hcw = Htc.i() * Htw;
                 Transform3D Hwc = Hcw.i();
 
