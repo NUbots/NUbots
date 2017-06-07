@@ -25,7 +25,7 @@ namespace math {
 namespace geometry {
 
     Quad::Quad()
-        : bl(arma::zeros<arma::vec>(2)), br(arma::zeros<arma::vec>(2)), tr(arma::zeros<arma::vec>(2)), tl(arma::zeros<arma::vec>(2)) {
+        : bl(Eigen::Matrix<double, 2, 1>::Zero()), br(Eigen::Matrix<double, 2, 1>::Zero()), tr(Eigen::Matrix<double, 2, 1>::Zero()), tl(Eigen::Matrix<double, 2, 1>::Zero()) {
         // Empty constructor.
     }
 
