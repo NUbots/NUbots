@@ -172,7 +172,7 @@ namespace module {
                     // TODO: support non-ball targets
                     if(!robot_ground_space){
                         if(ball.size() > 0){
-                            rBWw = convert<double, 2>(ball[0].position.head<2>());
+                            rBWw = ball[0].position.head<2>();
                             timeBallLastSeen = now;
                             // log("ball seen");
                         } else {
@@ -183,7 +183,7 @@ namespace module {
                         position = Htw.transformPoint(rBWw);
                     } else {
                         if(ball.size() > 0){
-                            position =  convert<double, 3>(ball[0].torsoSpacePosition);
+                            position =  ball[0].torsoSpacePosition;
                             timeBallLastSeen = now;
                         } else {
                             position = timeSinceBallSeen < search_timeout ?
@@ -216,19 +216,19 @@ namespace module {
                     // log("distanceToBall", distanceToBall);
                     // log("forwardSpeed2", finalForwardSpeed);
 
-                    std::unique_ptr<WalkCommand> command = std::make_unique<WalkCommand>(subsumptionId, convert<double, 3>(Transform2D({0, 0, 0})));
-                    command->command = convert<double, 3>(Transform2D({finalForwardSpeed, 0, angle}));
+                    std::unique_ptr<WalkCommand> command = std::make_unique<WalkCommand>(subsumptionId, Transform2D({0, 0, 0}));
+                    command->command = Transform2D({finalForwardSpeed, 0, angle});
 
-                    Eigen::Vector2d ball_world_position = RobotToWorldTransform(convert<double, 2>(selfs.front().locObject.position),
-                                                                           convert<double, 2>(selfs.front().heading),
+                    Eigen::Vector2d ball_world_position = RobotToWorldTransform(selfs.front().locObject.position,
+                                                                           selfs.front().heading,
                                                                            position.rows(0,1));
-                    Eigen::Vector2d kick_target = 2 * ball_world_position - convert<double, 2>(selfs.front().locObject.position);
+                    Eigen::Vector2d kick_target = 2 * ball_world_position - selfs.front().locObject.position;
                     emit(drawSphere("kick_target", Eigen::Vector3d(kick_target[0], kick_target[1], 0.0), 0.1, Eigen::Vector3d(1, 0, 0), 0));
                     //log("walkcommand",command->command[0],command->command[1]);
                     //log("anglewalkcommand",command->command[2]);
                     //log("ballPos: ",position.t());
 
-                    emit(std::make_unique<KickPlan>(KickPlan(convert<double, 2>(kick_target), KickPlan::KickType::SCRIPTED)));
+                    emit(std::make_unique<KickPlan>(KickPlan(kick_target, KickPlan::KickType::SCRIPTED)));
 
                     emit(std::move(command));
                     emit(std::make_unique<ActionPriorites>(ActionPriorites { subsumptionId, { 40, 11 }}));

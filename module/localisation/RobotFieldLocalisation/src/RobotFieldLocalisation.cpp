@@ -137,7 +137,7 @@ namespace localisation {
             //std::cerr << "internal Localisation state: " << std::endl << Tgr << std::endl;
             //std::cerr << "currentLocalisation: " << std::endl << currentLocalisation << std::endl;
             //set position, covariance, and rotation
-            robot.locObject.position      = convert<double, 2>(currentLocalisation.rows(0, 1));
+            robot.locObject.position      = currentLocalisation.rows(0, 1);
             robot.robot_to_world_rotation = convert<double, 2, 2>(Rotation2D::createRotation(currentLocalisation[2]));
             robot.locObject.position_cov  = robot.robot_to_world_rotation * convert<double, 2, 2>(filter.getCovariance().submat(0, 0, 1, 1));
             robot.heading                 = robot.robot_to_world_rotation.row(0).transpose();

@@ -77,11 +77,11 @@ namespace module {
                         //ans += " own";
                         switch(std::get<1>(type)) {
                             case GoalSide::LEFT:
-                                goalLocation.rows(0,1) = convert<double, 2>(field.goalpost_own_l);
+                                goalLocation.rows(0,1) = field.goalpost_own_l;
                                 //ans += " left";
                                 break;
                             case GoalSide::RIGHT:
-                                goalLocation.rows(0,1) = convert<double, 2>(field.goalpost_own_r);
+                                goalLocation.rows(0,1) = field.goalpost_own_r;
                                 //ans += " right";
                                 break;
                             case GoalSide::UNKNOWN_SIDE:
@@ -93,11 +93,11 @@ namespace module {
                         switch(std::get<1>(type)) {
                             case GoalSide::LEFT:
                                 //ans += " left";
-                                goalLocation.rows(0,1) = convert<double, 2>(field.goalpost_opp_l);
+                                goalLocation.rows(0,1) = field.goalpost_opp_l;
                                 break;
                             case GoalSide::RIGHT:
                                 //ans += " right";
-                                goalLocation.rows(0,1) = convert<double, 2>(field.goalpost_opp_r);
+                                goalLocation.rows(0,1) = field.goalpost_opp_r;
                                 break;
                             case GoalSide::UNKNOWN_SIDE:
                                 break;

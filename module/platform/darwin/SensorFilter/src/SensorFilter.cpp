@@ -489,13 +489,13 @@ namespace module {
                     motionFilter.timeUpdate(deltaT);
 
                     // Accelerometer measurment update
-                    motionFilter.measurementUpdate(convert<double, 3>(sensors->accelerometer),
+                    motionFilter.measurementUpdate(sensors->accelerometer,
                                                     config.motionFilter.noise.measurement.accelerometer +
-                                                    arma::norm(convert<double, 3>(sensors->accelerometer)) * config.motionFilter.noise.measurement.accelerometerMagnitude,
+                                                    arma::norm(sensors->accelerometer) * config.motionFilter.noise.measurement.accelerometerMagnitude,
                                                     MotionModel::MeasurementType::ACCELEROMETER());
 
                     // Gyroscope measurement update
-                    motionFilter.measurementUpdate(convert<double, 3>(sensors->gyroscope), config.motionFilter.noise.measurement.gyroscope, MotionModel::MeasurementType::GYROSCOPE());
+                    motionFilter.measurementUpdate(sensors->gyroscope, config.motionFilter.noise.measurement.gyroscope, MotionModel::MeasurementType::GYROSCOPE());
 
                     if (sensors->leftFootDown or sensors->rightFootDown)
                     {
@@ -604,7 +604,7 @@ namespace module {
                     /************************************************
                      *                  Mass Model                  *
                      ************************************************/
-                    sensors->centreOfMass = convert<double, 4>(calculateCentreOfMass(kinematicsModel, sensors->forwardKinematics, true));
+                    sensors->centreOfMass = calculateCentreOfMass(kinematicsModel, sensors->forwardKinematics, true);
 
                     /************************************************
                      *                  Kinematics Horizon          *
@@ -631,7 +631,7 @@ namespace module {
                     /************************************************
                      *                  CENTRE OF PRESSURE          *
                      ************************************************/
-                    sensors->centreOfPressure = convert<double, 3>(utility::motion::kinematics::calculateCentreOfPressure(kinematicsModel, *sensors));
+                    sensors->centreOfPressure = utility::motion::kinematics::calculateCentreOfPressure(kinematicsModel, *sensors);
 
                     emit(std::move(sensors));
                 });

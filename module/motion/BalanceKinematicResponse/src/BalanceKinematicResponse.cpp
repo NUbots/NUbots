@@ -137,8 +137,8 @@ namespace motion
         {
             // Torso Position is a queued evaluation...
             if(DEBUG) { log<NUClear::TRACE>("Messaging: Balance Kinematic Response - Received Update (Active Torso Position) Info(0)"); }
-                setTorsoPositionLegs(convert<double, 3>(tmu.frameArms));
-                setTorsoPositionArms(convert<double, 3>(tmu.frameLegs));
+                setTorsoPositionLegs(tmu.frameArms);
+                setTorsoPositionArms(tmu.frameLegs);
                 setTorsoPosition3D(convert<double, 4, 4>(tmu.frame3D));
             if(DEBUG) { log<NUClear::TRACE>("Messaging: Balance Kinematic Response - Received Update (Active Torso Position) Info(1)"); }
 
@@ -146,8 +146,8 @@ namespace motion
             if(DEBUG) { log<NUClear::TRACE>("Messaging: Balance Kinematic Response - Received Update (Active Foot Position) Info(0)"); }
                 setMotionPhase(fmu.phase);
                 setActiveForwardLimb(fmu.activeForwardLimb);
-                setLeftFootPosition2D(convert<double, 3>(fmu.leftFoot2D));
-                setRightFootPosition2D(convert<double, 3>(fmu.rightFoot2D));
+                setLeftFootPosition2D(fmu.leftFoot2D);
+                setRightFootPosition2D(fmu.rightFoot2D);
                 // Transform feet positions to be relative to the robot torso...
                 setLeftFootPosition(Transform3D(convert<double, 4, 4>(fmu.leftFoot3D)).worldToLocal(getTorsoPosition3D()));
                 setRightFootPosition(Transform3D(convert<double, 4, 4>(fmu.rightFoot3D)).worldToLocal(getTorsoPosition3D()));
@@ -339,8 +339,8 @@ namespace motion
         emit(std::make_unique<BalanceBodyUpdate>(getMotionPhase(),
                                                  convert<double, 4, 4>(getLeftFootPosition()),
                                                  convert<double, 4, 4>(getRightFootPosition()),
-                                                 convert<double, 3>(getLArmPosition()),
-                                                 convert<double, 3>(getRArmPosition())));
+                                                 getLArmPosition(),
+                                                 getRArmPosition()));
     }
 /*=======================================================================================================*/
 //      METHOD: updateLowerBody

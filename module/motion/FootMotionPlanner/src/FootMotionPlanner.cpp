@@ -110,20 +110,20 @@ namespace motion
             // Step Target Data
             if(DEBUG) { log<NUClear::TRACE>("Messaging: Foot Motion Planner - Received Target Foot Position(0)"); }
                 setDestinationTime(nst.targetTime);
-                setVelocityCurrent(convert<double, 3>(nst.velocityCurrent));
+                setVelocityCurrent(nst.velocityCurrent);
             if(DEBUG) { log<NUClear::TRACE>("Messaging: Foot Motion Planner - Received Target Foot Position(1)"); }
 
             // Foot Target Data
             if(DEBUG) { log<NUClear::TRACE>("Messaging: Foot Motion Planner - Received Target Foot Position(0)"); }
                 if(nst.activeForwardLimb == LimbID::LEFT_LEG)
                 {
-                    setActiveLimbSource(convert<double, 3>(nft.leftFootSource));
-                    setActiveLimbDestination(convert<double, 3>(nft.leftFootDestination));
+                    setActiveLimbSource(nft.leftFootSource);
+                    setActiveLimbDestination(nft.leftFootDestination);
                 }
                 else
                 {
-                    setActiveLimbSource(convert<double, 3>(nft.rightFootSource));
-                    setActiveLimbDestination(convert<double, 3>(nft.rightFootDestination));
+                    setActiveLimbSource(nft.rightFootSource);
+                    setActiveLimbDestination(nft.rightFootDestination);
                 }
                 setActiveForwardLimb(nst.activeForwardLimb);
             if(DEBUG) { log<NUClear::TRACE>("Messaging: Foot Motion Planner - Received Target Foot Position(1)"); }
@@ -202,8 +202,8 @@ namespace motion
         //Broadcast struct of updated foot motion data at corresponding phase identity...
         emit(std::make_unique<FootMotionUpdate>(inPhase,
                                                 inActiveForwardLimb,
-                                                convert<double, 3>(getLeftFootPosition()),
-                                                convert<double, 3>(getRightFootPosition()),
+                                                getLeftFootPosition(),
+                                                getRightFootPosition(),
                                                 convert<double, 4, 4>(leftFootLocal),
                                                 convert<double, 4, 4>(rightFootLocal)));
         // Notify whenever a subsequent foot step is promoted...

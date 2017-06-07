@@ -96,8 +96,8 @@ namespace motion
         {
             // When new torso destination is computed, inform FPP in preparation for next footstep...
             if(DEBUG) { log<NUClear::TRACE>("Messaging: Foot Placement Planner - Received Torso Destination Update(0)"); }
-                setTorsoPosition(convert<double, 3>(torso.position));
-                setTorsoDestination(convert<double, 3>(torso.destination));
+                setTorsoPosition(torso.position);
+                setTorsoDestination(torso.destination);
             if(DEBUG) { log<NUClear::TRACE>("Messaging: Foot Placement Planner - Received Torso Destination Update(1)"); }
 
             // Calculate a new footstep to facilitate walk progression...
@@ -121,7 +121,7 @@ namespace motion
         on<Trigger<NewWalkCommand>>().then("Foot Placement Planner - Update Foot Target", [this] (const NewWalkCommand& command)
         {
             if(DEBUG) { log<NUClear::TRACE>("Messaging: Foot Placement Planner - On New Walk Command(0)"); }
-                setVelocityCommand(convert<double, 3>(command.velocityTarget));
+                setVelocityCommand(command.velocityTarget);
                 if (stopping) //TODO add stoped flag in addtion to stopping. Case of new command during last step.
                 {
                     calculateNewStep(getVelocityCurrent(), getTorsoDestination(), getTorsoPosition());
@@ -198,12 +198,12 @@ namespace motion
             Transform2D uRightFootModded = uTorsoModded.localToWorld(uRightFootTorso);
             setSupportMass(uRightFootModded.localToWorld({-getFootOffsetCoefficient(0), getFootOffsetCoefficient(1), 0}));
         }
-        emit(std::make_unique<NewStepTargetInfo>(stepTime, convert<double, 3>(inVelocityCurrent), getActiveForwardLimb())); //New Step Target Information
-        emit(std::make_unique<NewFootTargetInfo>(convert<double, 3>(getLeftFootSource()),
-                                                 convert<double, 3>(getRightFootSource()),
-                                                 convert<double, 3>(getSupportMass()),
-                                                 convert<double, 3>(getLeftFootDestination()),
-                                                 convert<double, 3>(getRightFootDestination())));  //New Foot Target Information
+        emit(std::make_unique<NewStepTargetInfo>(stepTime, inVelocityCurrent, getActiveForwardLimb())); //New Step Target Information
+        emit(std::make_unique<NewFootTargetInfo>(getLeftFootSource(),
+                                                 getRightFootSource(),
+                                                 getSupportMass(),
+                                                 getLeftFootDestination(),
+                                                 getRightFootDestination()));  //New Foot Target Information
     }
 /*=======================================================================================================*/
 //      METHOD: getNewFootTarget

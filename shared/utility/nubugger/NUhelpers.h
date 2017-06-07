@@ -106,8 +106,8 @@ namespace nubugger {
         object.name = name;
         object.shape = DrawObject::Shape::ARROW;
         object.timeout = timeout;
-        object.position = convert<double, 3>(position);
-        object.direction = convert<double, 3>(direction);
+        object.position = position;
+        object.direction = direction;
         object.length = length;
 
         auto drawObjects = std::make_unique<DrawObjects>();
@@ -122,8 +122,8 @@ namespace nubugger {
         object.name = name;
         object.shape = DrawObject::Shape::ARROW;
         object.timeout = timeout;
-        object.position = convert<double, 3>(position);
-        object.target = convert<double, 3>(target);
+        object.position = position;
+        object.target = target;
 
         auto drawObjects = std::make_unique<DrawObjects>();
         drawObjects->objects.push_back(object);
@@ -155,7 +155,7 @@ namespace nubugger {
         object.timeout = timeout;
         object.position = Eigen::Vector3d(position.x(), position.y(), 0);
         object.direction = Eigen::Vector3d(std::cos(position.angle()), std::sin(position.angle()), 0);
-        object.colour = convert<double, 3>(colour);
+        object.colour = colour;
         object.length = length;
 
         auto drawObjects = std::make_unique<DrawObjects>();
@@ -170,7 +170,7 @@ namespace nubugger {
         object.name = name;
         object.shape = DrawObject::Shape::BOX;
         object.timeout = timeout;
-        object.position = convert<double, 3>(position);
+        object.position = position;
         object.width = width;
         object.height = height;
         object.depth = depth;
@@ -187,8 +187,8 @@ namespace nubugger {
         object.name = name;
         object.shape = DrawObject::Shape::CIRCLE;
         object.timeout = timeout;
-        object.position = convert<double, 3>(position);
-        object.rotation = convert<double, 3>(rotation);
+        object.position = position;
+        object.rotation = rotation;
         object.width = width;
         object.height = height;
 
@@ -206,7 +206,7 @@ namespace nubugger {
         object.timeout = timeout;
         object.position = Eigen::Vector3d(circle.centre(0), circle.centre(1), z);
         object.rotation = Eigen::Vector3d(0.0, 0.0, 0.0);
-        object.colour = convert<double, 3>(colour);
+        object.colour = colour;
         object.width = circle.radius * 2.0f;
         object.height = circle.radius * 2.0f;
 
@@ -222,8 +222,8 @@ namespace nubugger {
         object.name = name;
         object.shape = DrawObject::Shape::CYLINDER;
         object.timeout = timeout;
-        object.position = convert<double, 3>(position);
-        object.rotation = convert<double, 3>(rotation);
+        object.position = position;
+        object.rotation = rotation;
         object.height = height;
         object.top_radius = topRadius;
         object.bottom_radius = bottomRadius;
@@ -240,8 +240,8 @@ namespace nubugger {
         object.name = name;
         object.shape = DrawObject::Shape::PYRAMID;
         object.timeout = timeout;
-        object.position = convert<double, 3>(position);
-        object.rotation = convert<double, 3>(rotation);
+        object.position = position;
+        object.rotation = rotation;
         object.height = height;
         object.faces = faces;
 
@@ -257,7 +257,7 @@ namespace nubugger {
         object.name = name;
         object.shape = DrawObject::Shape::RECTANGLE;
         object.timeout = timeout;
-        object.position = convert<double, 3>(position);
+        object.position = position;
         object.height = height;
         object.length = length;
 
@@ -287,7 +287,7 @@ namespace nubugger {
     inline std::unique_ptr<DrawObjects> drawRectangle(std::string name, RotatedRectangle rect, Eigen::Vector3d colour, float z = 0.08, float timeout = TIMEOUT) {
 
         auto drawObjects = drawRectangle(name, rect, z, timeout);
-        drawObjects->objects[0].colour = convert<double, 3>(colour);
+        drawObjects->objects[0].colour = colour;
 
         return std::move(drawObjects);
     }
@@ -298,7 +298,7 @@ namespace nubugger {
         object.name = name;
         object.shape = DrawObject::Shape::SPHERE;
         object.timeout = timeout;
-        object.position = convert<double, 3>(position);
+        object.position = position;
         object.radius = radius;
 
         auto drawObjects = std::make_unique<DrawObjects>();
@@ -310,7 +310,7 @@ namespace nubugger {
     inline std::unique_ptr<DrawObjects> drawSphere(std::string name, Eigen::Vector3d position, float radius, Eigen::Vector3d colour, float timeout = TIMEOUT) {
 
         auto drawObjects = drawSphere(name, position, radius, timeout);
-        drawObjects->objects[0].colour = convert<double, 3>(colour);
+        drawObjects->objects[0].colour = colour;
 
         return std::move(drawObjects);
     }
@@ -322,12 +322,12 @@ namespace nubugger {
         object.shape = DrawObject::Shape::POLYLINE;
         object.timeout = timeout;
         object.width = line_width;
-        object.colour = convert<double, 3>(colour);
+        object.colour = colour;
 
         for (uint i = 0; i < positions.size(); i++) {
 
             DrawObject::Path node;
-            node.position = convert<double, 2>(positions[i]);
+            node.position = positions[i];
             node.parent_index = parentIndices[i];
             object.path.push_back(node);
         }

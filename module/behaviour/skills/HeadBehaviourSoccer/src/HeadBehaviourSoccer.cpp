@@ -240,13 +240,13 @@ namespace module {
                         if (ballMaxPriority)
                         {
                             for(auto& ob : ballFixationObjects){
-                                currentCentroid += convert<double, 2>(ob.visObject.screenAngular) / float(ballFixationObjects.size());
+                                currentCentroid += ob.visObject.screenAngular / float(ballFixationObjects.size());
                             }
                         }
                         else
                         {
                             for(auto& ob : goalFixationObjects){
-                                currentCentroid += convert<double, 2>(ob.visObject.screenAngular) / float(goalFixationObjects.size());
+                                currentCentroid += ob.visObject.screenAngular / float(goalFixationObjects.size());
                             }
                         }
                         Eigen::Vector2d currentCentroid_world = getIMUSpaceDirection(kinematicsModel,currentCentroid,headToIMUSpace);
@@ -393,7 +393,7 @@ namespace module {
                     fixationPoints.push_back(Eigen::Vector2d(fixationObjects[i].visObject.screenAngular[0],fixationObjects[i].visObject.screenAngular[1]));
                     fixationSizes.push_back(Eigen::Vector2d(fixationObjects[i].visObject.angularSize[0],fixationObjects[i].visObject.angularSize[1]));
                     //Average here as it is more elegant than an if statement checking if size==0 at the end
-                    centroid += arma::vec(convert<double, 2>(fixationObjects[i].visObject.screenAngular)) / (fixationObjects.size());
+                    centroid += arma::vec(fixationObjects[i].visObject.screenAngular) / (fixationObjects.size());
                 }
 
                 //If there are objects to find
@@ -439,7 +439,7 @@ namespace module {
                     fixationPoints.push_back(Eigen::Vector2d(fixationObjects[i].visObject.screenAngular[0],fixationObjects[i].visObject.screenAngular[1]));
                     fixationSizes.push_back(Eigen::Vector2d(fixationObjects[i].visObject.angularSize[0],fixationObjects[i].visObject.angularSize[1]));
                     //Average here as it is more elegant than an if statement checking if size==0 at the end
-                    centroid += arma::vec(convert<double, 2>(fixationObjects[i].visObject.screenAngular)) / (fixationObjects.size());
+                    centroid += arma::vec(fixationObjects[i].visObject.screenAngular) / (fixationObjects.size());
                 }
 
                 //If there are objects to find
@@ -543,13 +543,13 @@ namespace module {
                     float view_padding_radians = fractional_view_padding * std::fmax(cam.FOV[0],cam.FOV[1]);
                     //1
                     Eigen::Vector2d padding = {view_padding_radians,view_padding_radians};
-                    Eigen::Vector2d tr = boundingBox.getBottomLeft() - padding + convert<double, 2>(cam.FOV) / 2.0;
+                    Eigen::Vector2d tr = boundingBox.getBottomLeft() - padding + cam.FOV / 2.0;
                     //2
                     padding = {view_padding_radians,-view_padding_radians};
                     Eigen::Vector2d br = boundingBox.getTopLeft() - padding + Eigen::Vector2d(cam.FOV[0],-cam.FOV[1]) / 2.0;
                     //3
                     padding = {-view_padding_radians,-view_padding_radians};
-                    Eigen::Vector2d bl = boundingBox.getTopRight() - padding - convert<double, 2>(cam.FOV) / 2.0;
+                    Eigen::Vector2d bl = boundingBox.getTopRight() - padding - cam.FOV / 2.0;
                     //4
                     padding = {-view_padding_radians,view_padding_radians};
                     Eigen::Vector2d tl = boundingBox.getBottomRight() - padding + Eigen::Vector2d(-cam.FOV[0],cam.FOV[1]) / 2.0;
@@ -625,13 +625,13 @@ namespace module {
                     float view_padding_radians = fractional_view_padding * std::fmax(cam.FOV[0],cam.FOV[1]);
                     //1
                     Eigen::Vector2d padding = {view_padding_radians,view_padding_radians};
-                    Eigen::Vector2d tr = boundingBox.getBottomLeft() - padding + convert<double, 2>(cam.FOV) / 2.0;
+                    Eigen::Vector2d tr = boundingBox.getBottomLeft() - padding + cam.FOV / 2.0;
                     //2
                     padding = {view_padding_radians,-view_padding_radians};
                     Eigen::Vector2d br = boundingBox.getTopLeft() - padding + Eigen::Vector2d(cam.FOV[0],-cam.FOV[1]) / 2.0;
                     //3
                     padding = {-view_padding_radians,-view_padding_radians};
-                    Eigen::Vector2d bl = boundingBox.getTopRight() - padding - convert<double, 2>(cam.FOV) / 2.0;
+                    Eigen::Vector2d bl = boundingBox.getTopRight() - padding - cam.FOV / 2.0;
                     //4
                     padding = {-view_padding_radians,view_padding_radians};
                     Eigen::Vector2d tl = boundingBox.getBottomRight() - padding + Eigen::Vector2d(-cam.FOV[0],cam.FOV[1]) / 2.0;
@@ -658,16 +658,16 @@ namespace module {
                 }
                 Quad q = getScreenAngularBoundingBox(ob);
                 Ball v = ob[0];
-                v.visObject.screenAngular = convert<double, 2>(q.getCentre());
-                v.visObject.angularSize = convert<double, 2>(q.getSize());
+                v.visObject.screenAngular = q.getCentre();
+                v.visObject.angularSize = q.getSize();
                 return v;
             }
 
             Quad HeadBehaviourSoccer::getScreenAngularBoundingBox(const std::vector<Ball>& ob){
                 std::vector<Eigen::Vector2d> boundingPoints;
                 for(uint i = 0; i< ob.size(); i++){
-                    boundingPoints.push_back(convert<double, 2>(ob[i].visObject.screenAngular+ob[i].visObject.angularSize / 2));
-                    boundingPoints.push_back(convert<double, 2>(ob[i].visObject.screenAngular-ob[i].visObject.angularSize / 2));
+                    boundingPoints.push_back(ob[i].visObject.screenAngular+ob[i].visObject.angularSize / 2);
+                    boundingPoints.push_back(ob[i].visObject.screenAngular-ob[i].visObject.angularSize / 2);
                 }
                 return Quad::getBoundingBox(boundingPoints);
             }
@@ -680,16 +680,16 @@ namespace module {
                 }
                 Quad q = getScreenAngularBoundingBox(ob);
                 Goal v = ob[0];
-                v.visObject.screenAngular = convert<double, 2>(q.getCentre());
-                v.visObject.angularSize = convert<double, 2>(q.getSize());
+                v.visObject.screenAngular = q.getCentre();
+                v.visObject.angularSize = q.getSize();
                 return v;
             }
 
             Quad HeadBehaviourSoccer::getScreenAngularBoundingBox(const std::vector<Goal>& ob){
                 std::vector<Eigen::Vector2d> boundingPoints;
                 for(uint i = 0; i< ob.size(); i++){
-                    boundingPoints.push_back(convert<double, 2>(ob[i].visObject.screenAngular+ob[i].visObject.angularSize / 2));
-                    boundingPoints.push_back(convert<double, 2>(ob[i].visObject.screenAngular-ob[i].visObject.angularSize / 2));
+                    boundingPoints.push_back(ob[i].visObject.screenAngular+ob[i].visObject.angularSize / 2);
+                    boundingPoints.push_back(ob[i].visObject.screenAngular-ob[i].visObject.angularSize / 2);
                 }
                 return Quad::getBoundingBox(boundingPoints);
             }

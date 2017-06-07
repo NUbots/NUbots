@@ -181,7 +181,7 @@ namespace vision {
 
             const auto& image = *rawImage;
             const auto& sensors = *image.sensors;
-            Line horizon(convert<double, 2>(image.horizon.normal), image.horizon.distance);
+            Line horizon(image.horizon.normal, image.horizon.distance);
 
             // This holds our points that may be a part of the ball
             std::vector<Eigen::Vector2d> ballPoints;
@@ -301,12 +301,12 @@ namespace vision {
                 Eigen::Vector3d rBWw = (width_rBWw);
 
                 // Attach the position to the object
-                b.position = convert<double, 3>(rBWw);
+                b.position = rBWw;
 
                 Transform3D Hgc       = camToGround;
                 Eigen::Vector3d width_rBGg = Hgc.transformPoint(ballCentreRay * widthDistance);
                 Eigen::Vector3d proj_rBGg  = Hgc.transformPoint(ballCentreGroundProj);
-                b.torsoSpacePosition  = convert<double, 3>(width_rBGg);
+                b.torsoSpacePosition  = width_rBGg;
                 // log("ball pos1 =", b.position);
                 // log("ball pos2 =", b.torsoSpacePosition);
                 // log("width_rBGg =", width_rBGg.t());
@@ -316,27 +316,27 @@ namespace vision {
 
                 // On screen visual shape
                 b.circle.radius = result.model.radius;
-                b.circle.centre = convert<double, 2>(result.model.centre);
+                b.circle.centre = result.model.centre;
 
                 // Angular positions from the camera
-                b.visObject.screenAngular = convert<double, 2>(arma::atan(convert<double, 2>(cam.pixelsToTanThetaFactor) % ballCentreScreen));
+                b.visObject.screenAngular = arma::atan(convert<double, 2>(cam.pixelsToTanThetaFactor % ballCentreScreen));
                 b.visObject.angularSize   << getParallaxAngle(left, right, cam.focalLengthPixels), getParallaxAngle(top, base, cam.focalLengthPixels);
 
                 // Add our points
                 for (auto& point : result) {
-                    b.edgePoints.push_back(convert<double, 3>(getCamFromScreen(imageToScreen(point, convert<uint, 2>(image.dimensions)), cam.focalLengthPixels)));
+                    b.edgePoints.push_back(getCamFromScreen(imageToScreen(point, convert<uint, 2>(image.dimensions), cam.focalLengthPixels)));
                 }
 
                 balls->push_back(std::move(b));
             }
 
             for(auto a = balls->begin(); a != balls->end(); ++a) {
-                Circle acircle(a->circle.radius, convert<double, 2>(a->circle.centre));
+                Circle acircle(a->circle.radius, a->circle.centre);
 
                 for(auto b = a + 1; b != balls->end();) {
 
                     // If our balls overlap
-                    if(acircle.distanceToPoint(convert<double, 2>(b->circle.centre)) < b->circle.radius) {
+                    if(acircle.distanceToPoint(b->circle.centre) < b->circle.radius) {
                         // Pick the better ball
                         if(acircle.radius < b->circle.radius) {
                             // Throw-out b

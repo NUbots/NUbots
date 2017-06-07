@@ -217,10 +217,10 @@ namespace support {
 
                 //Update based on walk engine
                     if(walking && walkCommand && !kicking) {
-                        world.robotVelocity.xy() = Transform2D(convert<double, 3>(walkCommand->command)).xy() * 0.15;
+                        world.robotVelocity.xy() = Transform2D(walkCommand->command).xy() * 0.15;
                         // world.robotVelocity.xy() = sensors.odometry;
                         //angle from command:
-                        world.robotVelocity.angle() = Transform2D(convert<double, 3>(walkCommand->command)).angle() * 1.0;
+                        world.robotVelocity.angle() = Transform2D(walkCommand->command).angle() * 1.0;
                     } else {
                         world.robotVelocity = utility::math::matrix::Transform2D({0,0,0});
                     }
@@ -251,7 +251,7 @@ namespace support {
                         //Check if kick worked:
                         Transform2D relativeBallPose = world.robotPose.worldToLocal(world.ball.position);
 
-                        world.ball.position.rows(0, 1) += world.robotPose.rotation() * convert<double, 2>(lastKickCommand.direction.head<2>().normalized());
+                        world.ball.position.rows(0, 1) += world.robotPose.rotation() * lastKickCommand.direction.head<2>().normalized();
 
                     }
                     break;
@@ -315,9 +315,9 @@ namespace support {
                 // Emit current self exactly
                 auto r = std::make_unique<std::vector<message::localisation::Self>>();
                 r->push_back(message::localisation::Self());
-                r->back().locObject.position = convert<double, 2>(world.robotPose.xy());
-                r->back().heading = convert<double, 2>(bearingToUnitVector(world.robotPose.angle()));
-                r->back().velocity = convert<double, 2>(world.robotVelocity.rows(0,1));
+                r->back().locObject.position = world.robotPose.xy();
+                r->back().heading = bearingToUnitVector(world.robotPose.angle());
+                r->back().velocity = world.robotVelocity.rows(0,1);
                 r->back().locObject.position_cov = convert<double, 2, 2>(0.00001 * Eigen::Matrix<double, 2, 2>::Identity());
                 r->back().locObject.last_measurement_time = NUClear::clock::now();
                 emit(std::move(r));
@@ -343,8 +343,8 @@ namespace support {
             } else {
                 // Emit current ball exactly
                 auto b = std::make_unique<message::localisation::Ball>();
-                b->locObject.position = convert<double, 2>(world.robotPose.worldToLocal(world.ball.position).xy());
-                b->velocity = convert<double, 2>(world.robotPose.rotation().t() * world.ball.velocity.rows(0,1));
+                b->locObject.position = world.robotPose.worldToLocal(world.ball.position).xy();
+                b->velocity = world.robotPose.rotation().t() * world.ball.velocity.rows(0,1);
                 b->locObject.position_cov = convert<double, 2, 2>(0.00001 * Eigen::Matrix<double, 2, 2>::Identity());
                 b->locObject.last_measurement_time = NUClear::clock::now();
                 emit(std::make_unique<std::vector<message::localisation::Ball>>(

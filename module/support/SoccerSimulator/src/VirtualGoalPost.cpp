@@ -113,10 +113,10 @@ namespace support {
 
         Eigen::Matrix<double, 3, 4> goalNormals = cameraSpaceGoalProjection(robotPose, this->position, field, Hgc);
         if (arma::any(arma::any(goalNormals > 0.0))) {
-            result.measurement.push_back(Goal::Measurement(Goal::MeasurementType::LEFT_NORMAL,  convert<double, 3>(goalNormals.col(0))));
-            result.measurement.push_back(Goal::Measurement(Goal::MeasurementType::RIGHT_NORMAL, convert<double, 3>(goalNormals.col(1))));
-            result.measurement.push_back(Goal::Measurement(Goal::MeasurementType::TOP_NORMAL,   convert<double, 3>(goalNormals.col(2))));
-            result.measurement.push_back(Goal::Measurement(Goal::MeasurementType::BASE_NORMAL,  convert<double, 3>(goalNormals.col(3))));
+            result.measurement.push_back(Goal::Measurement(Goal::MeasurementType::LEFT_NORMAL,  goalNormals.col(0)));
+            result.measurement.push_back(Goal::Measurement(Goal::MeasurementType::RIGHT_NORMAL, goalNormals.col(1)));
+            result.measurement.push_back(Goal::Measurement(Goal::MeasurementType::TOP_NORMAL,   goalNormals.col(2)));
+            result.measurement.push_back(Goal::Measurement(Goal::MeasurementType::BASE_NORMAL,  goalNormals.col(3)));
 
             //build the predicted quad
             utility::math::geometry::Quad quad(
@@ -166,10 +166,10 @@ namespace support {
                 result.measurement.erase(result.measurement.begin());
             }
             if (!result.measurement.empty()) {
-                result.quad.tl = convert<double, 2>(quad.getTopLeft());
-                result.quad.tr = convert<double, 2>(quad.getTopRight());
-                result.quad.br = convert<double, 2>(quad.getBottomRight());
-                result.quad.bl = convert<double, 2>(quad.getBottomLeft());
+                result.quad.tl = quad.getTopLeft();
+                result.quad.tr = quad.getTopRight();
+                result.quad.br = quad.getBottomRight();
+                result.quad.bl = quad.getBottomLeft();
             }
         }
         result.visObject.sensors = const_cast<Sensors*>(&sensors)->shared_from_this();

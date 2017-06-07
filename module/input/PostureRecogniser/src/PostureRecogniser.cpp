@@ -74,7 +74,7 @@ namespace input
 
             // Gyroscope (in radians/second)
             // Capture axis differences in gyroscope data...
-            Eigen::Vector3d gyroDiff = convert<double, 3>(sensors[0]->gyroscope - sensors[1]->gyroscope);
+            Eigen::Vector3d gyroDiff = sensors[0]->gyroscope - sensors[1]->gyroscope;
             Eigen::Vector2d xzGyroDiff = { gyroDiff(0), gyroDiff(2) };
             Eigen::Vector2d yzGyroDiff = { gyroDiff(1), gyroDiff(2) };
             Eigen::Vector2d xyGyroDiff = { gyroDiff(0), gyroDiff(1) };
@@ -89,7 +89,7 @@ namespace input
 
             // Accelerometer (in m/s^2)
             // Capture axis differences in accelerometer data...
-            Eigen::Vector3d accelDiff = convert<double, 3>(sensors[0]->accelerometer - sensors[1]->accelerometer);
+            Eigen::Vector3d accelDiff = sensors[0]->accelerometer - sensors[1]->accelerometer;
             Eigen::Vector2d xzAccelDiff = { accelDiff(0), accelDiff(2) };
             Eigen::Vector2d yzAccelDiff = { accelDiff(1), accelDiff(2) };
             Eigen::Vector2d xyAccelDiff = { accelDiff(0), accelDiff(1) };

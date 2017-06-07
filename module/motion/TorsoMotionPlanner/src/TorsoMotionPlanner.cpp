@@ -99,15 +99,15 @@ namespace motion
         {
             // Step Target Data queued evaluation...
             if(DEBUG) { log<NUClear::TRACE>("Messaging: Foot Motion Planner - Received Target Foot Position(0)"); }
-                setSupportMass(convert<double, 3>(nft.supportMass));
+                setSupportMass(nft.supportMass);
             if(DEBUG) { log<NUClear::TRACE>("Messaging: Foot Motion Planner - Received Target Foot Position(1)"); }
 
             // Foot Target Data queued evaluation...
             if(DEBUG) { log<NUClear::TRACE>("Messaging: Torso Motion Planner - Received Footstep Info(0)"); }
-                setLeftFootSource(convert<double, 3>(nft.leftFootSource));
-                setRightFootSource(convert<double, 3>(nft.rightFootSource));
-                setLeftFootDestination(convert<double, 3>(nft.leftFootDestination));
-                setRightFootDestination(convert<double, 3>(nft.rightFootDestination));
+                setLeftFootSource(nft.leftFootSource);
+                setRightFootSource(nft.rightFootSource);
+                setLeftFootDestination(nft.leftFootDestination);
+                setRightFootDestination(nft.rightFootDestination);
             if(DEBUG) { log<NUClear::TRACE>("Messaging: Torso Motion Planner - Received Footstep Info(1)"); }
         });
 
@@ -133,7 +133,7 @@ namespace motion
 
         on<Trigger<FootStepCompleted>>().then("Torso Motion Planner - Received Foot Step Completed", [this]
         {
-            emit(std::make_unique<TorsoPositionUpdate>(convert<double, 3>(getTorsoPositionArms()), convert<double, 3>(getTorsoDestination())));
+            emit(std::make_unique<TorsoPositionUpdate>(getTorsoPositionArms(), getTorsoDestination()));
             setTorsoSource(getTorsoDestination());
             setTorsoDestination(stepTorso(getLeftFootDestination(), getRightFootDestination(), 0.5));
 
@@ -159,8 +159,8 @@ namespace motion
         setTorsoPositionLegs(getTorsoPositionArms().localToWorld({-kinematicsModel.leg.HIP_OFFSET_X, 0, 0}));
         Transform2D uTorsoWorld = getTorsoPositionArms().localToWorld({-kinematicsModel.leg.HIP_OFFSET_X, 0, 0});
         setTorsoPosition3D(arma::vec6({uTorsoWorld.x(), uTorsoWorld.y(), bodyHeight, 0, bodyTilt, uTorsoWorld.angle()}));
-        emit(std::make_unique<TorsoMotionUpdate>(convert<double, 3>(getTorsoPositionArms()),
-                                                 convert<double, 3>(getTorsoPositionLegs()),
+        emit(std::make_unique<TorsoMotionUpdate>(getTorsoPositionArms(),
+                                                 getTorsoPositionLegs(),
                                                  convert<double, 4, 4>(getTorsoPosition3D())));
     }
 /*=======================================================================================================*/

@@ -99,7 +99,7 @@ namespace support {
            && centre[1] < int(cam.imageSizePixels[1])) {
 
             // Set our circle parameters for simulating the ball
-            result.circle.centre = convert<double, 2>(arma::conv_to<arma::vec>::from(centre));
+            result.circle.centre = arma::conv_to<arma::vec>::from(centre);
             result.circle.radius = radius;
 
             // Get our transform to world coordinates
@@ -108,7 +108,7 @@ namespace support {
             Transform3D Hcw = Htc.i() * Htw;
             Transform3D Hwc = Hcw.i();
 
-            result.position = convert<double, 3>(Hwc.transformPoint(rBCc));
+            result.position = Hwc.transformPoint(rBCc);
 
             // Measure points around the ball as a normal distribution
             Eigen::Vector3d rEBc;
@@ -136,7 +136,7 @@ namespace support {
                 Eigen::Vector3d rEBc = rEBc * std::tan(angle + radialJitter / 2.0);
 
                 // Make a rotation matrix to rotate our vector to our target
-                result.edgePoints.push_back(convert<double, 3>(arma::normalise(Rotation3D(arma::normalise(rBCc), angle + angleOffset) * rEBc)));
+                result.edgePoints.push_back(arma::normalise(Rotation3D(arma::normalise(rBCc, angle + angleOffset) * rEBc)));
             }
         }
 

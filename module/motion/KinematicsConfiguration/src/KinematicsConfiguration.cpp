@@ -156,7 +156,7 @@ namespace motion {
         model.massModel.masses.reserve(masses.size());
         for (const auto& mass : masses)
         {
-            model.massModel.masses.push_back(convert<double, 4>(mass));
+            model.massModel.masses.push_back(mass);
         }
     }
 

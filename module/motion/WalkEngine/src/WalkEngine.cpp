@@ -114,8 +114,8 @@ namespace motion
                 emit(std::make_unique<EnableWalkEngineCommand>(walkCommand.subsumptionId)); //TODO Subsumtion variable
             }
             if(DEBUG) { log<NUClear::TRACE>("WalkEngine - Trigger WalkCommand(0)"); }
-                setVelocity(convert<double, 3>(walkCommand.command));
-                emit(std::make_unique<NewWalkCommand>(convert<double, 3>(getVelocity())));
+                setVelocity(walkCommand.command);
+                emit(std::make_unique<NewWalkCommand>(getVelocity()));
                 // Notify behavioural modules of current standstill...
                 emit(std::make_unique<WalkStarted>());
             if(DEBUG) { log<NUClear::TRACE>("WalkEngine - Trigger WalkCommand(1)"); }
@@ -126,7 +126,7 @@ namespace motion
         {
             if(DEBUG) { log<NUClear::TRACE>("WalkEngine - Trigger StopCommand(0)"); }
                 // Emit zero velocity command to trigger final adjustment step...
-                emit(std::make_unique<NewWalkCommand>(convert<double, 3>(Transform2D({0, 0, 0}))));
+                emit(std::make_unique<NewWalkCommand>(Transform2D({0, 0, 0})));
                 // Notify behavioural modules of current standstill...
                 // emit(std::make_unique<WalkStopped>()); //moved to fpp when walk actually stops
                 // emit(std::make_unique<std::vector<ServoCommand>>());
@@ -139,8 +139,8 @@ namespace motion
             if(DEBUG) { log<NUClear::TRACE>("WalkEngine - Trigger BalanceBodyUpdate(0)"); }
                 setLeftFootPosition(convert<double, 4, 4>(info.leftFoot));
                 setRightFootPosition(convert<double, 4, 4>(info.rightFoot));
-                setLArmPosition(convert<double, 3>(info.armLPosition));
-                setRArmPosition(convert<double, 3>(info.armRPosition));
+                setLArmPosition(info.armLPosition);
+                setRArmPosition(info.armRPosition);
 
                 emit(graph("WE: Left  Foot Joint Position",    getLeftFootPosition()));
                 emit(graph("WE: Right Foot Joint Position",   getRightFootPosition()));

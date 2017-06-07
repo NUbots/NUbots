@@ -49,7 +49,7 @@ namespace module {
                 // Coordinate system: 0,0 is the centre of the screen. pos[0] is along the y axis of the
                 // camera transform, pos[1] is along the z axis (x points out of the camera)
                 auto horizon = utility::motion::kinematics::calculateHorizon(Rcw, FOCAL_LENGTH_PIXELS);
-                classifiedImage.horizon.normal = convert<double, 2>(horizon.normal);
+                classifiedImage.horizon.normal = horizon.normal;
 
                 // Move our axis to be at the top left of the screen
                 classifiedImage.horizon.distance = -horizon.distanceToPoint({ -double(image.dimensions[0]) * 0.5, -double(image.dimensions[1]) * 0.5 });

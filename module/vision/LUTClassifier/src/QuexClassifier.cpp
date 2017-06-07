@@ -95,31 +95,31 @@ namespace module {
 
                 switch(typeID) {
                     case QUEX_TKN_FIELD:
-                        output.push_back(ClassifiedImage::Segment(SegmentClass::FIELD, len, subsample, convert<int, 2>(s), convert<int, 2>(position), convert<int, 2>(m), -1, -1));
+                        output.push_back(ClassifiedImage::Segment(SegmentClass::FIELD, len, subsample, s, position, m, -1, -1));
                         break;
 
                     case QUEX_TKN_BALL:
-                        output.push_back(ClassifiedImage::Segment(SegmentClass::BALL, len, subsample, convert<int, 2>(s), convert<int, 2>(position), convert<int, 2>(m), -1, -1));
+                        output.push_back(ClassifiedImage::Segment(SegmentClass::BALL, len, subsample, s, position, m, -1, -1));
                         break;
 
                     case QUEX_TKN_GOAL:
-                        output.push_back(ClassifiedImage::Segment(SegmentClass::GOAL, len, subsample, convert<int, 2>(s), convert<int, 2>(position), convert<int, 2>(m), -1, -1));
+                        output.push_back(ClassifiedImage::Segment(SegmentClass::GOAL, len, subsample, s, position, m, -1, -1));
                         break;
 
                     case QUEX_TKN_LINE:
-                        output.push_back(ClassifiedImage::Segment(SegmentClass::LINE, len, subsample, convert<int, 2>(s), convert<int, 2>(position), convert<int, 2>(m), -1, -1));
+                        output.push_back(ClassifiedImage::Segment(SegmentClass::LINE, len, subsample, s, position, m, -1, -1));
                         break;
 
                     case QUEX_TKN_CYAN_TEAM:
-                        output.push_back(ClassifiedImage::Segment(SegmentClass::CYAN_TEAM, len, subsample, convert<int, 2>(s), convert<int, 2>(position), convert<int, 2>(m), -1, -1));
+                        output.push_back(ClassifiedImage::Segment(SegmentClass::CYAN_TEAM, len, subsample, s, position, m, -1, -1));
                         break;
 
                     case QUEX_TKN_MAGENTA_TEAM:
-                        output.push_back(ClassifiedImage::Segment(SegmentClass::MAGENTA_TEAM, len, subsample, convert<int, 2>(s), convert<int, 2>(position), convert<int, 2>(m), -1, -1));
+                        output.push_back(ClassifiedImage::Segment(SegmentClass::MAGENTA_TEAM, len, subsample, s, position, m, -1, -1));
                         break;
 
                     case QUEX_TKN_UNCLASSIFIED:
-                        output.push_back(ClassifiedImage::Segment(SegmentClass::UNKNOWN_CLASS, len, subsample, convert<int, 2>(s), convert<int, 2>(position), convert<int, 2>(m), -1, -1));
+                        output.push_back(ClassifiedImage::Segment(SegmentClass::UNKNOWN_CLASS, len, subsample, s, position, m, -1, -1));
                         break;
                 }
             }

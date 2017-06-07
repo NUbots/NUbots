@@ -86,7 +86,7 @@ namespace module {
                 We first generate segments above and below that are 2x the width of the segment
              */
 
-            Line horizon(convert<double, 2>(classifiedImage.horizon.normal), classifiedImage.horizon.distance);
+            Line horizon(classifiedImage.horizon.normal, classifiedImage.horizon.distance);
 
             // Get our goal segments
             std::vector<GoalPOI> points;
