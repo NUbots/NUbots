@@ -61,14 +61,14 @@ namespace tools {
             //Todo: make this a global config struct message
             float yaw = config["robot_to_head"]["yaw"].as<Expression>();
             float pitch = config["robot_to_head"]["pitch"].as<Expression>();
-            arma::vec3 pos = config["robot_to_head"]["pos"].as<arma::vec>();
+            arma::vec3 pos = config["robot_to_head"]["pos"].as<Expression>();
 
             robot_to_head_scale = config["robot_to_head"]["scale"].as<Expression>();
             robot_to_head = Transform3D::createTranslation(pos) * Transform3D::createRotationZ(yaw) * Transform3D::createRotationY(pitch);
 
-            arma::vec oculus_x_axis = config["oculus"]["x_axis"].as<arma::vec>();
-            arma::vec oculus_y_axis = config["oculus"]["y_axis"].as<arma::vec>();
-            arma::vec oculus_z_axis = config["oculus"]["z_axis"].as<arma::vec>();
+            arma::vec oculus_x_axis = config["oculus"]["x_axis"].as<Expression>();
+            arma::vec oculus_y_axis = config["oculus"]["y_axis"].as<Expression>();
+            arma::vec oculus_z_axis = config["oculus"]["z_axis"].as<Expression>();
 
             camera_to_robot.rotation() = arma::join_rows(oculus_x_axis,arma::join_rows(oculus_y_axis,oculus_z_axis));
         });

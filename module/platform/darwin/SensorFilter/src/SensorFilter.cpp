@@ -120,20 +120,20 @@ namespace module {
 
                     // Foot load sensor config
                     leftFootDown = DarwinVirtualLoadSensor(
-                        config["foot_load_sensor"]["hidden_layer"]["weights"].as<arma::mat>()
-                      , config["foot_load_sensor"]["hidden_layer"]["bias"].as<arma::vec>()
-                      , config["foot_load_sensor"]["output_layer"]["weights"].as<arma::mat>()
-                      , config["foot_load_sensor"]["output_layer"]["bias"].as<arma::vec>()
+                        config["foot_load_sensor"]["hidden_layer"]["weights"].as<Expression>()
+                      , config["foot_load_sensor"]["hidden_layer"]["bias"].as<Expression>()
+                      , config["foot_load_sensor"]["output_layer"]["weights"].as<Expression>()
+                      , config["foot_load_sensor"]["output_layer"]["bias"].as<Expression>()
                       , config["foot_load_sensor"]["noise_factor"].as<double>()
                       , config["foot_load_sensor"]["certainty_threshold"].as<double>()
                       , config["foot_load_sensor"]["uncertainty_threshold"].as<double>()
                     );
 
                     rightFootDown = DarwinVirtualLoadSensor(
-                        config["foot_load_sensor"]["hidden_layer"]["weights"].as<arma::mat>()
-                      , config["foot_load_sensor"]["hidden_layer"]["bias"].as<arma::vec>()
-                      , config["foot_load_sensor"]["output_layer"]["weights"].as<arma::mat>()
-                      , config["foot_load_sensor"]["output_layer"]["bias"].as<arma::vec>()
+                        config["foot_load_sensor"]["hidden_layer"]["weights"].as<Expression>()
+                      , config["foot_load_sensor"]["hidden_layer"]["bias"].as<Expression>()
+                      , config["foot_load_sensor"]["output_layer"]["weights"].as<Expression>()
+                      , config["foot_load_sensor"]["output_layer"]["bias"].as<Expression>()
                       , config["foot_load_sensor"]["noise_factor"].as<double>()
                       , config["foot_load_sensor"]["certainty_threshold"].as<double>()
                       , config["foot_load_sensor"]["uncertainty_threshold"].as<double>()

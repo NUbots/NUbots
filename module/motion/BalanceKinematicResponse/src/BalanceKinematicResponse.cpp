@@ -731,19 +731,19 @@ namespace motion
         auto& sensors_gyro = sensors["gyro"];
 
         auto& sensors_imu  = sensors["imu"];
-        ankleImuParamX  = sensors_imu["ankleImuParamX"].as<arma::vec>();
-        ankleImuParamY  = sensors_imu["ankleImuParamY"].as<arma::vec>();
-        kneeImuParamX   = sensors_imu["kneeImuParamX"].as<arma::vec>();
-        hipImuParamY    = sensors_imu["hipImuParamY"].as<arma::vec>();
-        armImuParamX    = sensors_imu["armImuParamX"].as<arma::vec>();
-        armImuParamY    = sensors_imu["armImuParamY"].as<arma::vec>();
+        ankleImuParamX  = sensors_imu["ankleImuParamX"].as<Expression>();
+        ankleImuParamY  = sensors_imu["ankleImuParamY"].as<Expression>();
+        kneeImuParamX   = sensors_imu["kneeImuParamX"].as<Expression>();
+        hipImuParamY    = sensors_imu["hipImuParamY"].as<Expression>();
+        armImuParamX    = sensors_imu["armImuParamX"].as<Expression>();
+        armImuParamY    = sensors_imu["armImuParamY"].as<Expression>();
 
         auto& bkr_stance = bkr["stance"];
         auto& arms   = bkr_stance["arms"];
-        setLArmSource(arms["left"]["start"].as<arma::vec>());
-        setLArmDestination(arms["left"]["end"].as<arma::vec>());
-        setRArmSource(arms["right"]["start"].as<arma::vec>());
-        setRArmDestination(arms["right"]["end"].as<arma::vec>());
+        setLArmSource(arms["left"]["start"].as<Expression>());
+        setLArmDestination(arms["left"]["end"].as<Expression>());
+        setRArmSource(arms["right"]["start"].as<Expression>());
+        setRArmDestination(arms["right"]["end"].as<Expression>());
         armMotionEnabled = bkr_stance["moving_enabled"].as<bool>();
 
 
@@ -751,7 +751,7 @@ namespace motion
         auto& body   = wlk_stance["body"];
         bodyHeight   = body["height"].as<Expression>();
         bodyTilt     = body["tilt"].as<Expression>();
-        setFootOffsetCoefficient(wlk_stance["foot_offset"].as<arma::vec>());
+        setFootOffsetCoefficient(wlk_stance["foot_offset"].as<Expression>());
         stanceLimitY2 = kinematicsModel.leg.LENGTH_BETWEEN_LEGS - wlk_stance["limit_margin_y"].as<Expression>();
         STAND_SCRIPT_DURATION = wlk_stance["STAND_SCRIPT_DURATION"].as<Expression>();
 
@@ -768,8 +768,8 @@ namespace motion
         velocityHigh   = velocity["high_speed"].as<Expression>();
 
         auto& acceleration = walkCycle["acceleration"];
-        accelerationLimits          = acceleration["limits"].as<arma::vec>();
-        accelerationLimitsHigh      = acceleration["limits_high"].as<arma::vec>();
+        accelerationLimits          = acceleration["limits"].as<Expression>();
+        accelerationLimitsHigh      = acceleration["limits_high"].as<Expression>();
         accelerationTurningFactor   = acceleration["turning_factor"].as<Expression>();
 
         phase1Single = walkCycle["single_support_phase"]["start"].as<Expression>();

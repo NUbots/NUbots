@@ -217,11 +217,11 @@ namespace motion {
         auto& stance = config["stance"];
         bodyHeight = stance["body_height"].as<Expression>();
         bodyTilt = stance["body_tilt"].as<Expression>();
-        qLArmStart = stance["arms"]["left"]["start"].as<arma::vec>();
-        qLArmEnd = stance["arms"]["left"]["end"].as<arma::vec>();
-        qRArmStart = stance["arms"]["right"]["start"].as<arma::vec>();
-        qRArmEnd = stance["arms"]["right"]["end"].as<arma::vec>();
-        footOffset = stance["foot_offset"].as<arma::vec>();
+        qLArmStart = stance["arms"]["left"]["start"].as<Expression>();
+        qLArmEnd = stance["arms"]["left"]["end"].as<Expression>();
+        qRArmStart = stance["arms"]["right"]["start"].as<Expression>();
+        qRArmEnd = stance["arms"]["right"]["end"].as<Expression>();
+        footOffset = stance["foot_offset"].as<Expression>();
         // gToe/heel overlap checking values
         stanceLimitY2 = kinematicsModel.leg.LENGTH_BETWEEN_LEGS - stance["limit_margin_y"].as<Expression>();
 
@@ -252,8 +252,8 @@ namespace motion {
         velocityHigh = velocity["high_speed"].as<Expression>();
 
         auto& acceleration = walkCycle["acceleration"];
-        accelerationLimits = acceleration["limits"].as<arma::vec>();
-        accelerationLimitsHigh = acceleration["limits_high"].as<arma::vec>();
+        accelerationLimits = acceleration["limits"].as<Expression>();
+        accelerationLimitsHigh = acceleration["limits_high"].as<Expression>();
         accelerationTurningFactor = acceleration["turning_factor"].as<Expression>();
 
         phase1Single = walkCycle["single_support_phase"]["start"].as<Expression>();
@@ -280,12 +280,12 @@ namespace motion {
         ankleMod = {-toeTipCompensation, 0};
 
         // gGyro stabilization parameters
-        ankleImuParamX = config["ankleImuParamX"].as<arma::vec>();
-        ankleImuParamY = config["ankleImuParamY"].as<arma::vec>();
-        kneeImuParamX = config["kneeImuParamX"].as<arma::vec>();
-        hipImuParamY = config["hipImuParamY"].as<arma::vec>();
-        armImuParamX = config["armImuParamX"].as<arma::vec>();
-        armImuParamY = config["armImuParamY"].as<arma::vec>();
+        ankleImuParamX = config["ankleImuParamX"].as<Expression>();
+        ankleImuParamY = config["ankleImuParamY"].as<Expression>();
+        kneeImuParamX = config["kneeImuParamX"].as<Expression>();
+        hipImuParamY = config["hipImuParamY"].as<Expression>();
+        armImuParamX = config["armImuParamX"].as<Expression>();
+        armImuParamY = config["armImuParamY"].as<Expression>();
 
         // gSupport bias parameters to reduce backlash-based instability
         velFastForward = config["velFastForward"].as<Expression>();

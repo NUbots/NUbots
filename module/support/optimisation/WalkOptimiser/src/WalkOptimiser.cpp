@@ -67,7 +67,7 @@ namespace module {
                     for(auto& segment : config["segments"]){
 
                         walk_command.segments.push_back(FixedWalkCommand::WalkSegment());
-                        walk_command.segments.back().direction = segment["direction"].as<arma::vec>();
+                        walk_command.segments.back().direction = segment["direction"].as<Expression>();
                         walk_command.segments.back().curvePeriod = segment["curvePeriod"].as<double>();
 
                         walk_command.segments.back().normalisedVelocity = segment["normalisedVelocity"].as<double>();

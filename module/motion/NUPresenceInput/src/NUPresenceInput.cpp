@@ -82,7 +82,7 @@ namespace motion {
 
 			float yaw = config["robot_to_head"]["yaw"].as<Expression>();
 			float pitch = config["robot_to_head"]["pitch"].as<Expression>();
-			arma::vec3 pos = config["robot_to_head"]["pos"].as<arma::vec>();
+			arma::vec3 pos = config["robot_to_head"]["pos"].as<Expression>();
 
             oculus_to_robot_scale = config["robot_to_head"]["scale"].as<Expression>();
 			robot_to_head = Transform3D::createTranslation(pos) * Transform3D::createRotationZ(yaw) * Transform3D::createRotationY(pitch);
@@ -92,12 +92,12 @@ namespace motion {
 
             smoothing_alpha = config["smoothing_alpha"].as<Expression>();
 
-			l_arm = config["l_arm"].as<arma::vec>();
-			r_arm = config["r_arm"].as<arma::vec>();
+			l_arm = config["l_arm"].as<Expression>();
+			r_arm = config["r_arm"].as<Expression>();
 
-            arma::vec oculus_x_axis = config["oculus"]["x_axis"].as<arma::vec>();
-            arma::vec oculus_y_axis = config["oculus"]["y_axis"].as<arma::vec>();
-            arma::vec oculus_z_axis = config["oculus"]["z_axis"].as<arma::vec>();
+            arma::vec oculus_x_axis = config["oculus"]["x_axis"].as<Expression>();
+            arma::vec oculus_y_axis = config["oculus"]["y_axis"].as<Expression>();
+            arma::vec oculus_z_axis = config["oculus"]["z_axis"].as<Expression>();
 
             arma::mat33 camera_to_robot_rot = arma::join_rows(oculus_x_axis,arma::join_rows(oculus_y_axis,oculus_z_axis));
             camera_to_robot.rotation() = camera_to_robot_rot;
@@ -131,9 +131,9 @@ namespace motion {
             l_arm_id = config["mocap_rigidbody_ids"]["l_arm"].as<int>();
             r_arm_id = config["mocap_rigidbody_ids"]["r_arm"].as<int>();
 
-            arma::vec mocap_x_axis = config["mocap"]["x_axis"].as<arma::vec>();
-            arma::vec mocap_y_axis = config["mocap"]["y_axis"].as<arma::vec>();
-            arma::vec mocap_z_axis = config["mocap"]["z_axis"].as<arma::vec>();
+            arma::vec mocap_x_axis = config["mocap"]["x_axis"].as<Expression>();
+            arma::vec mocap_y_axis = config["mocap"]["y_axis"].as<Expression>();
+            arma::vec mocap_z_axis = config["mocap"]["z_axis"].as<Expression>();
             mocap_to_robot = arma::join_rows(mocap_x_axis,arma::join_rows(mocap_y_axis,mocap_z_axis));
 
             gyro_compensation = config["gyro_compensation"].as<bool>();

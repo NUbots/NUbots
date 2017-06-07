@@ -57,8 +57,8 @@ namespace motion{
 			SixDOFFrame(utility::math::matrix::Transform3D pose_, float duration_) : pose(pose_), duration(duration_){}
 			SixDOFFrame(const YAML::Node& config) : SixDOFFrame() {
 				duration = config["duration"].as<float>();
-				arma::vec3 pos = config["pos"].as<arma::vec>();
-				arma::vec3 orientation = (180.0 / M_PI ) * config["orientation"].as<arma::vec>();
+				arma::vec3 pos = config["pos"].as<Expression>();
+				arma::vec3 orientation = (180.0 / M_PI ) * config["orientation"].as<Expression>();
 				pose = utility::math::matrix::Transform3D();
 				pose.rotateX(orientation[0]);
 				pose.rotateY(orientation[1]);
