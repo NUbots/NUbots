@@ -30,7 +30,7 @@ describe('LocalisationController', () => {
     })
 
     it('resets viewing mode to no clip', () => {
-      expect(model.viewMode).toEqual(ViewMode.NO_CLIP)
+      expect(model.viewMode).toEqual(ViewMode.FreeCamera)
     })
   })
 })

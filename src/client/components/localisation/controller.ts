@@ -41,7 +41,7 @@ export class LocalisationController {
     model.controls.pitch = -Math.PI / 2
     model.controls.yaw = 0
     model.camera.position.set(0, 5, 0)
-    model.viewMode = ViewMode.NO_CLIP
+    model.viewMode = ViewMode.FreeCamera
     this.updatePosition(model)
   }
 
@@ -52,7 +52,7 @@ export class LocalisationController {
 
   @action
   public onMouseMove(model: LocalisationModel, movementX: number, movementY: number): void {
-    if (!model.locked || model.viewMode === ViewMode.FIRST_PERSON) {
+    if (!model.locked || model.viewMode === ViewMode.FirstPerson) {
       return
     }
 
@@ -93,10 +93,10 @@ export class LocalisationController {
           model.viewMode = this.getNextViewMode(model)
 
           // TODO (Annable): move this somewhere.
-          if (model.viewMode === ViewMode.NO_CLIP) {
+          if (model.viewMode === ViewMode.FreeCamera) {
             model.controls.pitch = model.camera.pitch
             model.controls.yaw = model.camera.yaw
-          } else if (model.viewMode === ViewMode.FIRST_PERSON) {
+          } else if (model.viewMode === ViewMode.FirstPerson) {
             model.controls.pitch = 0
             model.controls.yaw = 0
           }
@@ -142,13 +142,13 @@ export class LocalisationController {
 
   private updatePosition(model: LocalisationModel) {
     switch (model.viewMode) {
-      case ViewMode.NO_CLIP:
+      case ViewMode.FreeCamera:
         this.updatePositionNoClip(model)
         return
-      case ViewMode.FIRST_PERSON:
+      case ViewMode.FirstPerson:
         this.updatePositionFirstPerson(model)
         return
-      case ViewMode.THIRD_PERSON:
+      case ViewMode.ThirdPerson:
         this.updatePositionThirdPerson(model)
         return
       default:
@@ -249,12 +249,12 @@ export class LocalisationController {
 
   private getNextViewMode(model: LocalisationModel) {
     switch (model.viewMode) {
-      case ViewMode.NO_CLIP:
-        return ViewMode.FIRST_PERSON
-      case ViewMode.FIRST_PERSON:
-        return ViewMode.THIRD_PERSON
-      case ViewMode.THIRD_PERSON:
-        return ViewMode.NO_CLIP
+      case ViewMode.FreeCamera:
+        return ViewMode.FirstPerson
+      case ViewMode.FirstPerson:
+        return ViewMode.ThirdPerson
+      case ViewMode.ThirdPerson:
+        return ViewMode.FreeCamera
       default:
         throw new Error(`No next view mode defined for ${model.viewMode}`)
     }

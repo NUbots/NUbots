@@ -24,9 +24,9 @@ export class TimeModel {
 }
 
 export enum ViewMode {
-  NO_CLIP,
-  FIRST_PERSON,
-  THIRD_PERSON,
+  FreeCamera,
+  FirstPerson,
+  ThirdPerson,
 }
 
 export class LocalisationModel {
@@ -52,7 +52,7 @@ export class LocalisationModel {
       camera: CameraModel.of(),
       locked: false,
       controls: ControlsModel.of(),
-      viewMode: ViewMode.NO_CLIP,
+      viewMode: ViewMode.FreeCamera,
       time: TimeModel.of(),
     })
   }

@@ -147,7 +147,9 @@ interface StatusBarProps {
 }
 
 const StatusBar = observer((props: StatusBarProps) => {
-  const target = props.model.viewMode !== ViewMode.NO_CLIP && props.model.target ? props.model.target.name : 'No Target'
+  const target = props.model.viewMode !== ViewMode.FreeCamera && props.model.target
+    ? props.model.target.name
+    : 'No Target'
   return (
       <div className={style.localisation__status}>
         <span className={style.localisation__info}>&#160;</span>
@@ -160,11 +162,11 @@ const StatusBar = observer((props: StatusBarProps) => {
 
 function viewModeString(viewMode: ViewMode) {
   switch (viewMode) {
-    case ViewMode.NO_CLIP:
+    case ViewMode.FreeCamera:
       return 'Free Camera'
-    case ViewMode.FIRST_PERSON:
+    case ViewMode.FirstPerson:
       return 'First Person'
-    case ViewMode.THIRD_PERSON:
+    case ViewMode.ThirdPerson:
       return 'Third Person'
     default:
       throw new Error(`No string defined for view mode ${viewMode}`)
