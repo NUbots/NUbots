@@ -58,7 +58,7 @@ namespace utility {
 
                         //out of bounds check
                         if (lowerBound.n_elem > 0 and upperBound.n_elem > 0) {
-                            arma::uvec outOfBounds = arma::sum(samples > arma::repmat(upperBound, samples.n_cols, 1), 1);
+                            Eigen::Matrix<unsigned int, Eigen::Dynamic, 1> outOfBounds = arma::sum(samples > arma::repmat(upperBound, samples.n_cols, 1), 1);
                             outOfBounds += arma::sum(samples < arma::repmat(lowerBound, samples.n_cols, 1), 1);
                             samples = samples.rows(arma::find(outOfBounds == 0));
 

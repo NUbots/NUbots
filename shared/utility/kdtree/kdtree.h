@@ -43,8 +43,8 @@ namespace utility
             double       splitVal;
             arma::Col<T> LowerBounds;
             arma::Col<T> UpperBounds;
-            arma::uvec   dataIndices;
-            arma::uvec   spillDataIndices;
+            Eigen::Matrix<unsigned int, Eigen::Dynamic, 1>   dataIndices;
+            Eigen::Matrix<unsigned int, Eigen::Dynamic, 1>   spillDataIndices;
             uint32_t     leftChild; //std::reference_wrapper<KDTreeNode> leftChild;
             uint32_t     rightChild; //std::reference_wrapper<KDTreeNode> rightChild;
         };
@@ -76,7 +76,7 @@ namespace utility
                 }
             }
 
-            uint32_t mkNodeRecursive(const arma::uvec dataIndices, const arma::uvec spillDataIndices, const arma::Col<T>& LowerBounds,
+            uint32_t mkNodeRecursive(const Eigen::Matrix<unsigned int, Eigen::Dynamic, 1> dataIndices, const Eigen::Matrix<unsigned int, Eigen::Dynamic, 1> spillDataIndices, const arma::Col<T>& LowerBounds,
                                        const arma::Col<T>& UpperBounds, const uint& minLeafSize, const double& epsilon)
             {
                 //we need to determine the split point first, because if the data is unsplittable we should put it in a leaf
@@ -108,8 +108,8 @@ namespace utility
                     splitVal = minv;
                 }
 
-                arma::uvec leftInds  = arma::find(vals <= splitVal + epsilon);
-                arma::uvec rightInds = arma::find(vals >  splitVal + epsilon);
+                Eigen::Matrix<unsigned int, Eigen::Dynamic, 1> leftInds  = arma::find(vals <= splitVal + epsilon);
+                Eigen::Matrix<unsigned int, Eigen::Dynamic, 1> rightInds = arma::find(vals >  splitVal + epsilon);
 
                 if ((dataIndices.n_elem <= minLeafSize) || (leftInds.n_elem == 0) || (rightInds.n_elem == 0))
                 {
@@ -126,11 +126,11 @@ namespace utility
                 else
                 {
                     //separate the child data
-                    arma::uvec leftDataIndices  = dataIndices(leftInds);
-                    arma::uvec rightDataIndices = dataIndices(rightInds);
+                    Eigen::Matrix<unsigned int, Eigen::Dynamic, 1> leftDataIndices  = dataIndices(leftInds);
+                    Eigen::Matrix<unsigned int, Eigen::Dynamic, 1> rightDataIndices = dataIndices(rightInds);
 
                     //separate the spill data
-                    arma::uvec leftSpillData, rightSpillData;
+                    Eigen::Matrix<unsigned int, Eigen::Dynamic, 1> leftSpillData, rightSpillData;
 
                     if (epsilon > 0.0f)
                     {
@@ -155,7 +155,7 @@ namespace utility
                     //make a new node with children
                     KDTreeNode<T> node =
                     {
-                        splitDim, splitVal, LowerBounds, UpperBounds, arma::uvec(), arma::uvec(),
+                        splitDim, splitVal, LowerBounds, UpperBounds, Eigen::Matrix<unsigned int, Eigen::Dynamic, 1>(), Eigen::Matrix<unsigned int, Eigen::Dynamic, 1>(),
                         mkNodeRecursive(leftDataIndices, leftSpillData, LowerBounds, leftBounds, minLeafSize, epsilon),
                         mkNodeRecursive(rightDataIndices, rightSpillData, rightBounds, UpperBounds, minLeafSize, epsilon)
                     };
@@ -171,8 +171,8 @@ namespace utility
             {
                 nodes.push_back(KDTreeNode<T>());
                 data = d;
-                arma::uvec inds = arma::linspace<arma::uvec>(0, data.n_cols - 1, data.n_cols);
-                root = mkNodeRecursive(inds, arma::uvec(), arma::min(data, 1), arma::max(data, 1), minLeafSize, epsilon);
+                Eigen::Matrix<unsigned int, Eigen::Dynamic, 1> inds = arma::linspace<Eigen::Matrix<unsigned int, Eigen::Dynamic, 1>>(0, data.n_cols - 1, data.n_cols);
+                root = mkNodeRecursive(inds, Eigen::Matrix<unsigned int, Eigen::Dynamic, 1>(), arma::min(data, 1), arma::max(data, 1), minLeafSize, epsilon);
             }
 
             std::vector<std::pair<double, uint64_t> > query(const arma::Col<T>& val, const int& kneighbours,
