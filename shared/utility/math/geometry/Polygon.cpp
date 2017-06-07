@@ -64,7 +64,7 @@ namespace geometry {
 		return (intersectionCount % 2) == 1;
 	}
 
-	Eigen::Vector2d Polygon::projectPointToPolygon(const arma::vec::fixed<2>& p) const{
+	Eigen::Vector2d Polygon::projectPointToPolygon(const Eigen::Matrix<double, 2, 1>& p) const{
 		if(pointContained(p)){
 			return p;
 		}

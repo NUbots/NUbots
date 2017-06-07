@@ -56,7 +56,7 @@ namespace localisation {
 
         int model_num = 0;
         for (auto& model : hypotheses) {
-            // arma::vec::fixed<localisation::robot::RobotModel::size> model_state = model->GetEstimate();
+            // Eigen::Matrix<double, localisation::robot::RobotModel::size, 1> model_state = model->GetEstimate();
             auto model_state = model->GetEstimate();
             auto model_cov = model->GetCovariance();
 

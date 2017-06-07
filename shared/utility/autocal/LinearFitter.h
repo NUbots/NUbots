@@ -9,7 +9,7 @@ namespace autocal {
 	template <int N>
 	class LinearFitter {
 	private:
-        using Vec = arma::vec::fixed<N>;
+        using Vec = Eigen::Matrix<double, N, 1>;
 
 		arma::mat data;
 		arma::mat times;

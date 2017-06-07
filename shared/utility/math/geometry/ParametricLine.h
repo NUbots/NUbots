@@ -27,7 +27,7 @@ namespace geometry {
     template<int n=2>
     class ParametricLine {
     private:
-        using Vector = arma::vec::fixed<n>;
+        using Vector = Eigen::Matrix<double, n, 1>;
 
     public:
         Vector direction;

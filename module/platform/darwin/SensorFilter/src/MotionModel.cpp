@@ -30,8 +30,8 @@ namespace module {
             using utility::math::geometry::UnitQuaternion;
             using utility::math::matrix::Rotation3D;
 
-            arma::vec::fixed<MotionModel::size> MotionModel::limitState(const arma::vec::fixed<size>& state) {
-                arma::vec::fixed<size> newState = state;
+            Eigen::Matrix<double, MotionModel::size, 1> MotionModel::limitState(const Eigen::Matrix<double, size, 1>& state) {
+                Eigen::Matrix<double, size, 1> newState = state;
                 newState.rows(QW, QZ) = arma::normalise(newState.rows(QW, QZ));
                 return newState;
             }
@@ -41,10 +41,10 @@ namespace module {
             // @param deltaT The amount of time that has passed since the previous update, in seconds.
             // @param measurement The reading from the rate gyroscope in rad/s used to update the orientation.
             // @return The new estimated system state.
-            arma::vec::fixed<MotionModel::size> MotionModel::timeUpdate(const arma::vec::fixed<size>& state, double deltaT) {
+            Eigen::Matrix<double, MotionModel::size, 1> MotionModel::timeUpdate(const Eigen::Matrix<double, size, 1>& state, double deltaT) {
 
                 // Prepare our new state
-                arma::vec::fixed<MotionModel::size> newState = state;
+                Eigen::Matrix<double, MotionModel::size, 1> newState = state;
 
                 // Extract our unit quaternion rotation
                 UnitQuaternion rotation(state.rows(QW, QZ));
@@ -67,7 +67,7 @@ namespace module {
             }
 
             // Accelerometer
-            Eigen::Vector3d MotionModel::predictedObservation(const arma::vec::fixed<size>& state, const MeasurementType::ACCELEROMETER&) {
+            Eigen::Vector3d MotionModel::predictedObservation(const Eigen::Matrix<double, size, 1>& state, const MeasurementType::ACCELEROMETER&) {
 
                 // Extract our rotation quaternion
                 UnitQuaternion rotation(state.rows(QW, QZ));
@@ -77,12 +77,12 @@ namespace module {
             }
 
             // Gyroscope
-            Eigen::Vector3d MotionModel::predictedObservation(const arma::vec::fixed<size>& state, const MeasurementType::GYROSCOPE&) {
+            Eigen::Vector3d MotionModel::predictedObservation(const Eigen::Matrix<double, size, 1>& state, const MeasurementType::GYROSCOPE&) {
                 return state.rows(WX, WZ);
             }
 
             // Foot up with z
-            Eigen::Vector4d MotionModel::predictedObservation(const arma::vec::fixed<size>& state, const MeasurementType::FOOT_UP_WITH_Z&) {
+            Eigen::Vector4d MotionModel::predictedObservation(const Eigen::Matrix<double, size, 1>& state, const MeasurementType::FOOT_UP_WITH_Z&) {
 
                 Eigen::Vector4d prediction;
 
@@ -98,12 +98,12 @@ namespace module {
                 return prediction;
             }
 
-            Eigen::Vector3d MotionModel::predictedObservation(const arma::vec::fixed<size>& state, const MeasurementType::FLAT_FOOT_ODOMETRY&) {
+            Eigen::Vector3d MotionModel::predictedObservation(const Eigen::Matrix<double, size, 1>& state, const MeasurementType::FLAT_FOOT_ODOMETRY&) {
 
                 return state.rows(PX, PZ);
             }
 
-            Eigen::Vector4d MotionModel::predictedObservation(const arma::vec::fixed<size>& state, const MeasurementType::FLAT_FOOT_ORIENTATION&) {
+            Eigen::Vector4d MotionModel::predictedObservation(const Eigen::Matrix<double, size, 1>& state, const MeasurementType::FLAT_FOOT_ORIENTATION&) {
 
                 return state.rows(QW, QZ);
             }

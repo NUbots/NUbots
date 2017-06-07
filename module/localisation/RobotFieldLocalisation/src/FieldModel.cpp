@@ -42,11 +42,11 @@ namespace module {
         using GoalTeam            = message::vision::Goal::Team::Value;
         using GoalMeasurementType = message::vision::Goal::MeasurementType;
 
-        arma::vec::fixed<FieldModel::size> FieldModel::timeUpdate(const arma::vec::fixed<size>& state, double /*deltaT*/) {
+        Eigen::Matrix<double, FieldModel::size, 1> FieldModel::timeUpdate(const Eigen::Matrix<double, size, 1>& state, double /*deltaT*/) {
             return state;
         }
 
-        arma::vec FieldModel::predictedObservation(const arma::vec::fixed<size>& state
+        arma::vec FieldModel::predictedObservation(const Eigen::Matrix<double, size, 1>& state
             , const std::vector<std::tuple<GoalTeam, GoalSide, GoalMeasurementType>>& measurements
             , const FieldDescription& field
             , const Sensors& sensors
@@ -141,7 +141,7 @@ namespace module {
             return (a - b);
         }
 
-        arma::vec::fixed<FieldModel::size> FieldModel::limitState(const arma::vec::fixed<size>& state) const {
+        Eigen::Matrix<double, FieldModel::size, 1> FieldModel::limitState(const Eigen::Matrix<double, size, 1>& state) const {
             return state;
         }
 

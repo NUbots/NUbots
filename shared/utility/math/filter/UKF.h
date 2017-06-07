@@ -35,14 +35,14 @@ namespace utility {
                 Model model;
 
                 // Dimension types for vectors and square matricies
-                using StateVec = arma::vec::fixed<Model::size>;
+                using StateVec = Eigen::Matrix<double, Model::size, 1>;
                 using StateMat = arma::mat::fixed<Model::size, Model::size>;
 
             private:
                 // The number of sigma points
                 static constexpr uint NUM_SIGMA_POINTS = (Model::size * 2) + 1;
 
-                using SigmaVec = arma::vec::fixed<NUM_SIGMA_POINTS>;
+                using SigmaVec = Eigen::Matrix<double, NUM_SIGMA_POINTS, 1>;
                 using SigmaRowVec = arma::rowvec::fixed<NUM_SIGMA_POINTS>;
                 using SigmaMat = arma::mat::fixed<Model::size, NUM_SIGMA_POINTS>;
                 using SigmaSquareMat = arma::mat::fixed<NUM_SIGMA_POINTS, NUM_SIGMA_POINTS>;

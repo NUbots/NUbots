@@ -34,7 +34,7 @@ namespace utility {
 
             private:
 
-                using StateVec = arma::vec::fixed<Model::size>;
+                using StateVec = Eigen::Matrix<double, Model::size, 1>;
                 using StateMat = arma::mat::fixed<Model::size, Model::size>;
 
                 //the internal UKF variables

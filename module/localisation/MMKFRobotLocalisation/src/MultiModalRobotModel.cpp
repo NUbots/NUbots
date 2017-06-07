@@ -37,7 +37,7 @@ namespace module {
 namespace localisation {
 
 std::ostream & operator<<(std::ostream &os, const RobotHypothesis& h) {
-    arma::vec::fixed<robot::RobotModel::size> est = h.filter_.get();
+    Eigen::Matrix<double, robot::RobotModel::size, 1> est = h.filter_.get();
 
     return os
         << "{ "
@@ -290,7 +290,7 @@ void MultiModalRobotModel::PruneModels() {
 bool MultiModalRobotModel::ModelsAreSimilar(
     const std::unique_ptr<RobotHypothesis> &model_a,
     const std::unique_ptr<RobotHypothesis> &model_b) {
-    arma::vec::fixed<robot::RobotModel::size> diff = model_a->GetEstimate() - model_b->GetEstimate();
+    Eigen::Matrix<double, robot::RobotModel::size, 1> diff = model_a->GetEstimate() - model_b->GetEstimate();
 
     double translation_dist = arma::norm(diff.rows(0, 1), 2);
 

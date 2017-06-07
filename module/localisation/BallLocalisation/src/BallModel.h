@@ -45,9 +45,9 @@ namespace module {
 
             BallModel() : processNoiseDiagonal(arma::fill::eye) {} // empty constructor
 
-            arma::vec::fixed<size> timeUpdate(const arma::vec::fixed<size>& state, double deltaT);
+            Eigen::Matrix<double, size, 1> timeUpdate(const Eigen::Matrix<double, size, 1>& state, double deltaT);
 
-            Eigen::Vector3d predictedObservation(const arma::vec::fixed<size>& state
+            Eigen::Vector3d predictedObservation(const Eigen::Matrix<double, size, 1>& state
                 , const message::support::FieldDescription& field
                 , const message::input::Sensors& sensors
                 , const MeasurementType::BALL&) const;
@@ -58,7 +58,7 @@ namespace module {
                 , const message::input::Sensors& sensors
                 , const MeasurementType::BALL&) const;
 
-            arma::vec::fixed<size> limitState(const arma::vec::fixed<size>& state) const;
+            Eigen::Matrix<double, size, 1> limitState(const Eigen::Matrix<double, size, 1>& state) const;
 
             arma::mat::fixed<size, size> processNoise() const;
         };

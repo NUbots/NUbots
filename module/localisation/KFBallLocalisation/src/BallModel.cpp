@@ -33,8 +33,8 @@ namespace module {
 namespace localisation {
 namespace ball {
 
-arma::vec::fixed<BallModel::size> BallModel::ApplyVelocity(
-    const arma::vec::fixed<BallModel::size>& state, double deltaT) {
+Eigen::Matrix<double, BallModel::size, 1> BallModel::ApplyVelocity(
+    const Eigen::Matrix<double, BallModel::size, 1>& state, double deltaT) {
     auto result = state;
 
     // Apply ball velocity
@@ -46,14 +46,14 @@ arma::vec::fixed<BallModel::size> BallModel::ApplyVelocity(
     return result;
 }
 
-arma::vec::fixed<BallModel::size> BallModel::timeUpdate(
-    const arma::vec::fixed<BallModel::size>& state, double deltaT) {
+Eigen::Matrix<double, BallModel::size, 1> BallModel::timeUpdate(
+    const Eigen::Matrix<double, BallModel::size, 1>& state, double deltaT) {
 
     return ApplyVelocity(state, deltaT);
 }
 
-// arma::vec::fixed<BallModel::size> BallModel::timeUpdate(
-//     const arma::vec::fixed<BallModel::size>& state, double deltaT,
+// Eigen::Matrix<double, BallModel::size, 1> BallModel::timeUpdate(
+//     const Eigen::Matrix<double, BallModel::size, 1>& state, double deltaT,
 //     const FakeOdometry& odom) {
 
 //     auto result = ApplyVelocity(state, deltaT);
@@ -71,7 +71,7 @@ arma::vec::fixed<BallModel::size> BallModel::timeUpdate(
 
 /// Return the predicted observation of an object at the given position
 arma::vec BallModel::predictedObservation(
-    const arma::vec::fixed<BallModel::size>& state, double ballAngle) {
+    const Eigen::Matrix<double, BallModel::size, 1>& state, double ballAngle) {
 
     Eigen::Vector3d ball_pos = Eigen::Vector3d(state(kX), state(kY), cfg_.ballHeight);
     auto obs = SphericalRobotObservation({0, 0}, 0, ball_pos);
@@ -89,8 +89,8 @@ arma::vec BallModel::observationDifference(const arma::vec& a,
     return result;
 }
 
-arma::vec::fixed<BallModel::size> BallModel::limitState(
-    const arma::vec::fixed<BallModel::size>& state) {
+Eigen::Matrix<double, BallModel::size, 1> BallModel::limitState(
+    const Eigen::Matrix<double, BallModel::size, 1>& state) {
     auto new_state = state;
     new_state.rows(kVx,kVy) = arma::vec({0,0});
     return new_state;

@@ -37,7 +37,7 @@ namespace utility {
 
             private:
                 // Dimension types for vectors and square matricies
-                using StateVec = arma::vec::fixed<Model::size>;
+                using StateVec = Eigen::Matrix<double, Model::size, 1>;
                 using ParticleList = arma::mat;
                 using StateMat = arma::mat::fixed<Model::size, Model::size>;
 

@@ -47,9 +47,9 @@ namespace module {
 
             FieldModel() : processNoiseDiagonal(arma::fill::eye) {} // empty constructor
 
-            arma::vec::fixed<size> timeUpdate(const arma::vec::fixed<size>& state, double deltaT);
+            Eigen::Matrix<double, size, 1> timeUpdate(const Eigen::Matrix<double, size, 1>& state, double deltaT);
 
-            arma::vec predictedObservation(const arma::vec::fixed<size>& state
+            arma::vec predictedObservation(const Eigen::Matrix<double, size, 1>& state
                 , const std::vector<std::tuple<message::vision::Goal::Team::Value,
                                                message::vision::Goal::Side::Value,
                                                message::vision::Goal::MeasurementType>>& measurements
@@ -59,7 +59,7 @@ namespace module {
 
             arma::vec observationDifference(const arma::vec& a, const arma::vec& b) const;
 
-            arma::vec::fixed<size> limitState(const arma::vec::fixed<size>& state) const;
+            Eigen::Matrix<double, size, 1> limitState(const Eigen::Matrix<double, size, 1>& state) const;
 
             arma::mat::fixed<size, size> processNoise() const;
         };

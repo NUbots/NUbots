@@ -159,7 +159,7 @@ namespace module {
                     this->config.motionFilter.noise.process.rotationalVelocity = config["motion_filter"]["noise"]["process"]["rotational_velocity"].as<Eigen::Vector3d>();
 
                     // Set our process noise in our filter
-                    arma::vec::fixed<MotionModel::size> processNoise;
+                    Eigen::Matrix<double, MotionModel::size, 1> processNoise;
                     processNoise.rows(MotionModel::PX, MotionModel::PZ) = this->config.motionFilter.noise.process.position;
                     processNoise.rows(MotionModel::VX, MotionModel::VZ) = this->config.motionFilter.noise.process.velocity;
                     processNoise.rows(MotionModel::QW, MotionModel::QZ) = this->config.motionFilter.noise.process.rotation;
@@ -178,13 +178,13 @@ namespace module {
                     this->config.motionFilter.initial.covariance.rotationalVelocity = config["motion_filter"]["initial"]["covariance"]["rotational_velocity"].as<Eigen::Vector3d>();
 
                     // Calculate our mean and covariance
-                    arma::vec::fixed<MotionModel::size> mean;
+                    Eigen::Matrix<double, MotionModel::size, 1> mean;
                     mean.rows(MotionModel::PX, MotionModel::PZ) = this->config.motionFilter.initial.mean.position;
                     mean.rows(MotionModel::VX, MotionModel::VZ) = this->config.motionFilter.initial.mean.velocity;
                     mean.rows(MotionModel::QW, MotionModel::QZ) = this->config.motionFilter.initial.mean.rotation;
                     mean.rows(MotionModel::WX, MotionModel::WZ) = this->config.motionFilter.initial.mean.rotationalVelocity;
 
-                    arma::vec::fixed<MotionModel::size> covariance;
+                    Eigen::Matrix<double, MotionModel::size, 1> covariance;
                     covariance.rows(MotionModel::PX, MotionModel::PZ) = this->config.motionFilter.initial.covariance.position;
                     covariance.rows(MotionModel::VX, MotionModel::VZ) = this->config.motionFilter.initial.covariance.velocity;
                     covariance.rows(MotionModel::QW, MotionModel::QZ) = this->config.motionFilter.initial.covariance.rotation;
@@ -197,13 +197,13 @@ namespace module {
                 // on<Trigger<ResetRobotHypotheses>>()
                 //  .then("Localisation ResetRobotHypotheses", [this] {
                 //     //this reset's the odometry position when localisation does a reset so that we don't have an odometry offset form our new position
-                //     arma::vec::fixed<MotionModel::size> covariance;
+                //     Eigen::Matrix<double, MotionModel::size, 1> covariance;
                 //     covariance.rows(MotionModel::PX, MotionModel::PZ) = this->config.motionFilter.initial.covariance.position;
                 //     covariance.rows(MotionModel::VX, MotionModel::VZ) = this->config.motionFilter.initial.covariance.velocity;
                 //     covariance.rows(MotionModel::QW, MotionModel::QZ) = this->config.motionFilter.initial.covariance.rotation;
                 //     covariance.rows(MotionModel::WX, MotionModel::WZ) = this->config.motionFilter.initial.covariance.rotationalVelocity;
 
-                //     arma::vec::fixed<MotionModel::size>  newFilter = motionFilter.get();
+                //     Eigen::Matrix<double, MotionModel::size, 1>  newFilter = motionFilter.get();
                 //     newFilter.rows(MotionModel::PX, MotionModel::PY) *= 0.;
                 //     motionFilter.setState(newFilter, arma::diagmat(covariance));
                 // });

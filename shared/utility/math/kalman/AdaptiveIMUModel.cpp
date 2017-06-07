@@ -27,7 +27,7 @@
 namespace utility {
     namespace math {
         namespace kalman {
-            arma::vec::fixed<AdaptiveIMUModel::size> AdaptiveIMUModel::limitState(const arma::vec::fixed<size>& state) {
+            Eigen::Matrix<double, AdaptiveIMUModel::size, 1> AdaptiveIMUModel::limitState(const Eigen::Matrix<double, size, 1>& state) {
 
                 arma::mat stateMatrix = arma::reshape(state,3,2);
                 double normDown = arma::norm(stateMatrix.col(0),2);
@@ -56,7 +56,7 @@ namespace utility {
                 stateMatrix.col(1) = stateMatrix.col(1) / normForward;
 
 
-                return static_cast<arma::vec::fixed<size>>(arma::vectorise(stateMatrix));
+                return static_cast<Eigen::Matrix<double, size, 1>>(arma::vectorise(stateMatrix));
             }
 
             // @brief The process equation is used to update the systems state using the process euquations of the system.
@@ -64,7 +64,7 @@ namespace utility {
             // @param deltaT The amount of time that has passed since the previous update, in seconds.
             // @param measurement The reading from the rate gyroscope in rad/s used to update the orientation.
             // @return The new estimated system state.
-            arma::vec::fixed<AdaptiveIMUModel::size> AdaptiveIMUModel::timeUpdate(const arma::vec::fixed<size>& state, double deltaT, const Eigen::Vector3d& measurement) {
+            Eigen::Matrix<double, AdaptiveIMUModel::size, 1> AdaptiveIMUModel::timeUpdate(const Eigen::Matrix<double, size, 1>& state, double deltaT, const Eigen::Vector3d& measurement) {
                 //new universal rotation code for gyro (SORA)
                 //See: http://en.wikipedia.org/wiki/Axis%E2%80%93angle_representation#Simultaneous_orthogonal_rotation_angle
                 arma::mat stateMatrix = arma::reshape(state,3,2);
@@ -81,11 +81,11 @@ namespace utility {
                 const auto omegaCrossStateForward = arma::cross(unitOmega,stateMatrix.col(1));
                 stateMatrix.col(1) = stateMatrix.col(1) * cos(phi) + omegaCrossStateForward * sin(phi) + unitOmega * arma::dot(unitOmega, stateMatrix.col(1)) * (1.0 - cos(phi));
 
-                return static_cast<arma::vec::fixed<size>>(arma::vectorise(stateMatrix));
+                return static_cast<Eigen::Matrix<double, size, 1>>(arma::vectorise(stateMatrix));
             }
 
 
-            arma::vec AdaptiveIMUModel::predictedObservation(const arma::vec::fixed<size>& state) {
+            arma::vec AdaptiveIMUModel::predictedObservation(const Eigen::Matrix<double, size, 1>& state) {
                 return state.rows(0,2) * 9.807;
             }
 

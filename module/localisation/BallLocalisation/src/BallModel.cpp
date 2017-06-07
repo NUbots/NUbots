@@ -38,11 +38,11 @@ namespace module {
         using message::input::Sensors;
         using ServoID = utility::input::ServoID;
 
-        arma::vec::fixed<BallModel::size> BallModel::timeUpdate(const arma::vec::fixed<size>& state, double /*deltaT*/) {
+        Eigen::Matrix<double, BallModel::size, 1> BallModel::timeUpdate(const Eigen::Matrix<double, size, 1>& state, double /*deltaT*/) {
             return state;
         }
 
-        Eigen::Vector3d BallModel::predictedObservation(const arma::vec::fixed<size>& state
+        Eigen::Vector3d BallModel::predictedObservation(const Eigen::Matrix<double, size, 1>& state
             , const FieldDescription& field
             , const Sensors& sensors
             , const MeasurementType::BALL&) const {
@@ -72,7 +72,7 @@ namespace module {
             return arma::vec({actualAngle - expectedAngle});
         }
 
-        arma::vec::fixed<BallModel::size> BallModel::limitState(const arma::vec::fixed<size>& state) const {
+        Eigen::Matrix<double, BallModel::size, 1> BallModel::limitState(const Eigen::Matrix<double, size, 1>& state) const {
             return state;
         }
 

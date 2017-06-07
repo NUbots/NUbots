@@ -34,13 +34,13 @@ namespace utility {
 
                 LinearVec3Model() {} // empty constructor
 
-                arma::vec::fixed<size> timeUpdate(const arma::vec::fixed<size>& state, double deltaT, const Eigen::Vector3d& measurement);
+                Eigen::Matrix<double, size, 1> timeUpdate(const Eigen::Matrix<double, size, 1>& state, double deltaT, const Eigen::Vector3d& measurement);
 
-                arma::vec predictedObservation(const arma::vec::fixed<size>& state, std::nullptr_t);
+                arma::vec predictedObservation(const Eigen::Matrix<double, size, 1>& state, std::nullptr_t);
 
                 arma::vec observationDifference(const arma::vec& a, const arma::vec& b);
 
-                arma::vec::fixed<size> limitState(const arma::vec::fixed<size>& state);
+                Eigen::Matrix<double, size, 1> limitState(const Eigen::Matrix<double, size, 1>& state);
 
                 arma::mat::fixed<size, size> processNoise();
 

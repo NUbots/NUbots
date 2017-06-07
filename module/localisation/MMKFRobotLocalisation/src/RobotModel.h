@@ -57,27 +57,27 @@ namespace robot {
         RobotModel() : cfg_(), currentImuOrientation() {
         }
 
-        arma::vec::fixed<RobotModel::size> timeUpdate(
-            const arma::vec::fixed<RobotModel::size>& state, double deltaT,
+        Eigen::Matrix<double, RobotModel::size, 1> timeUpdate(
+            const Eigen::Matrix<double, RobotModel::size, 1>& state, double deltaT,
             const message::input::Sensors& sensors);
 
         arma::vec predictedObservation(
-            const arma::vec::fixed<RobotModel::size>& state,
+            const Eigen::Matrix<double, RobotModel::size, 1>& state,
             const Eigen::Vector3d& actual_position,
             const message::input::Sensors& sensors);
 
         //arma::vec predictedObservation(
-        //    const arma::vec::fixed<RobotModel::size>& state,
+        //    const Eigen::Matrix<double, RobotModel::size, 1>& state,
         //    const message::input::Sensors& sensors);
 
         arma::vec predictedObservation(
-            const arma::vec::fixed<RobotModel::size>& state,
+            const Eigen::Matrix<double, RobotModel::size, 1>& state,
             const std::vector<arma::vec>& actual_positions,
             const message::input::Sensors& sensors);
 
         arma::vec observationDifference(const arma::vec& a, const arma::vec& b);
 
-        arma::vec::fixed<size> limitState(const arma::vec::fixed<size>& state);
+        Eigen::Matrix<double, size, 1> limitState(const Eigen::Matrix<double, size, 1>& state);
 
         arma::mat::fixed<size, size> processNoise();
 
@@ -91,8 +91,8 @@ namespace robot {
 
         utility::math::matrix::Rotation3D currentImuOrientation;
 
-        // arma::mat33 getRobotToWorldTransform(const arma::vec::fixed<RobotModel::size>& state);
-        // arma::mat33 getWorldToRobotTransform(const arma::vec::fixed<RobotModel::size>& state);
+        // arma::mat33 getRobotToWorldTransform(const Eigen::Matrix<double, RobotModel::size, 1>& state);
+        // arma::mat33 getWorldToRobotTransform(const Eigen::Matrix<double, RobotModel::size, 1>& state);
     };
 }
 }

@@ -72,17 +72,17 @@ namespace module {
 
                 MotionModel() : processNoiseMatrix(arma::fill::eye) {} // empty constructor
 
-                arma::vec::fixed<size> timeUpdate(const arma::vec::fixed<size>& state, double deltaT);
+                Eigen::Matrix<double, size, 1> timeUpdate(const Eigen::Matrix<double, size, 1>& state, double deltaT);
 
-                Eigen::Vector3d predictedObservation(const arma::vec::fixed<size>& state, const MeasurementType::ACCELEROMETER&);
-                Eigen::Vector3d predictedObservation(const arma::vec::fixed<size>& state, const MeasurementType::GYROSCOPE&);
-                Eigen::Vector4d predictedObservation(const arma::vec::fixed<size>& state, const MeasurementType::FOOT_UP_WITH_Z&);
-                Eigen::Vector3d predictedObservation(const arma::vec::fixed<size>& state, const MeasurementType::FLAT_FOOT_ODOMETRY&);
-                Eigen::Vector4d predictedObservation(const arma::vec::fixed<size>& state, const MeasurementType::FLAT_FOOT_ORIENTATION&);
+                Eigen::Vector3d predictedObservation(const Eigen::Matrix<double, size, 1>& state, const MeasurementType::ACCELEROMETER&);
+                Eigen::Vector3d predictedObservation(const Eigen::Matrix<double, size, 1>& state, const MeasurementType::GYROSCOPE&);
+                Eigen::Vector4d predictedObservation(const Eigen::Matrix<double, size, 1>& state, const MeasurementType::FOOT_UP_WITH_Z&);
+                Eigen::Vector3d predictedObservation(const Eigen::Matrix<double, size, 1>& state, const MeasurementType::FLAT_FOOT_ODOMETRY&);
+                Eigen::Vector4d predictedObservation(const Eigen::Matrix<double, size, 1>& state, const MeasurementType::FLAT_FOOT_ORIENTATION&);
 
                 arma::vec observationDifference(const arma::vec& a, const arma::vec& b);
 
-                arma::vec::fixed<size> limitState(const arma::vec::fixed<size>& state);
+                Eigen::Matrix<double, size, 1> limitState(const Eigen::Matrix<double, size, 1>& state);
 
                 const arma::mat::fixed<size, size>& processNoise();
             };

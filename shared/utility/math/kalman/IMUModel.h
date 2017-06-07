@@ -53,16 +53,16 @@ namespace utility {
 
                 IMUModel() : processNoiseDiagonal() {} // empty constructor
 
-                arma::vec::fixed<size> timeUpdate(const arma::vec::fixed<size>& state, double deltaT);
+                Eigen::Matrix<double, size, 1> timeUpdate(const Eigen::Matrix<double, size, 1>& state, double deltaT);
 
-                Eigen::Vector3d predictedObservation(const arma::vec::fixed<size>& state);
-                Eigen::Vector3d predictedObservation(const arma::vec::fixed<size>& state, const MeasurementType::UP&);
-                Eigen::Vector3d predictedObservation(const arma::vec::fixed<size>& state, const MeasurementType::ACCELEROMETER&);
-                Eigen::Vector3d predictedObservation(const arma::vec::fixed<size>& state, const MeasurementType::GYROSCOPE&);
+                Eigen::Vector3d predictedObservation(const Eigen::Matrix<double, size, 1>& state);
+                Eigen::Vector3d predictedObservation(const Eigen::Matrix<double, size, 1>& state, const MeasurementType::UP&);
+                Eigen::Vector3d predictedObservation(const Eigen::Matrix<double, size, 1>& state, const MeasurementType::ACCELEROMETER&);
+                Eigen::Vector3d predictedObservation(const Eigen::Matrix<double, size, 1>& state, const MeasurementType::GYROSCOPE&);
 
                 arma::vec observationDifference(const arma::vec& a, const arma::vec& b);
 
-                arma::vec::fixed<size> limitState(const arma::vec::fixed<size>& state);
+                Eigen::Matrix<double, size, 1> limitState(const Eigen::Matrix<double, size, 1>& state);
 
                 arma::mat::fixed<size, size> processNoise();
             };

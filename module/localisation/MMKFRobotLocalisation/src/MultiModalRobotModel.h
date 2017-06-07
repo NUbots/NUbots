@@ -55,7 +55,7 @@ namespace localisation {
             , obs_count_(0) {
                 arma::mat cov = arma::eye(robot::RobotModel::size, robot::RobotModel::size) * 0.1;
                 cov(2,2) = 1;
-                filter_.setState(arma::vec::fixed<robot::RobotModel::size>({-4.5, 0, 0}), cov);
+                filter_.setState(Eigen::Matrix<double, robot::RobotModel::size, 1>({-4.5, 0, 0}), cov);
             }
 
         RobotHypothesis(const message::localisation::ResetRobotHypotheses::Self& reset_self, const message::input::Sensors& sensors)
@@ -65,7 +65,7 @@ namespace localisation {
             double imuOffset = reset_self.heading + imuHeading;
 
             // Eigen::Vector3d mean = arma::join_rows(reset_self.position, arma::vec(imuOffset));
-            arma::vec::fixed<robot::RobotModel::size> mean = arma::vec::fixed<robot::RobotModel::size>({reset_self.position(0), reset_self.position(1), imuOffset});
+            Eigen::Matrix<double, robot::RobotModel::size, 1> mean = Eigen::Matrix<double, robot::RobotModel::size, 1>({reset_self.position(0), reset_self.position(1), imuOffset});
             arma::mat::fixed<robot::RobotModel::size, robot::RobotModel::size> cov = arma::eye(robot::RobotModel::size,robot::RobotModel::size) * 0.1;
             cov.submat(0,0,1,1) = reset_self.position_cov;
             cov(2,2) = reset_self.heading_var;
@@ -79,7 +79,7 @@ namespace localisation {
         float GetFilterWeight() const { return weight_; }
         void SetFilterWeight(float weight) { weight_ = weight; }
 
-        arma::vec::fixed<robot::RobotModel::size> GetEstimate() const {
+        Eigen::Matrix<double, robot::RobotModel::size, 1> GetEstimate() const {
             return filter_.get();
         }
 
@@ -162,7 +162,7 @@ namespace localisation {
             const std::vector<message::vision::Goal>& ambiguous_objects,
             const std::vector<std::vector<utility::localisation::LocalisationFieldObject>>& possible_object_sets);
 
-        arma::vec::fixed<robot::RobotModel::size> GetEstimate() {
+        Eigen::Matrix<double, robot::RobotModel::size, 1> GetEstimate() {
             return robot_models_[0]->GetEstimate();
         }
 

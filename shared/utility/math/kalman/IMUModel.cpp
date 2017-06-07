@@ -24,8 +24,8 @@ namespace utility {
     namespace math {
         namespace kalman {
 
-            arma::vec::fixed<IMUModel::size> IMUModel::limitState(const arma::vec::fixed<size>& state) {
-                arma::vec::fixed<size> newState = state;
+            Eigen::Matrix<double, IMUModel::size, 1> IMUModel::limitState(const Eigen::Matrix<double, size, 1>& state) {
+                Eigen::Matrix<double, size, 1> newState = state;
                 newState.rows(QW, QZ) = arma::normalise(newState.rows(QW, QZ));
                 return newState;
             }
@@ -35,9 +35,9 @@ namespace utility {
             // @param deltaT The amount of time that has passed since the previous update, in seconds.
             // @param measurement The reading from the rate gyroscope in rad/s used to update the orientation.
             // @return The new estimated system state.
-            arma::vec::fixed<IMUModel::size> IMUModel::timeUpdate(const arma::vec::fixed<size>& state, double deltaT) {
+            Eigen::Matrix<double, IMUModel::size, 1> IMUModel::timeUpdate(const Eigen::Matrix<double, size, 1>& state, double deltaT) {
 
-                arma::vec::fixed<IMUModel::size> newState;
+                Eigen::Matrix<double, IMUModel::size, 1> newState;
 
                 newState = state;
 
@@ -62,7 +62,7 @@ namespace utility {
             }
 
             // Up vector
-            Eigen::Vector3d IMUModel::predictedObservation(const arma::vec::fixed<size>& state, const MeasurementType::UP&) {
+            Eigen::Vector3d IMUModel::predictedObservation(const Eigen::Matrix<double, size, 1>& state, const MeasurementType::UP&) {
 
                 Eigen::Vector3d up = { 2 * state[QX] * state[QZ] + 2 * state[QY] * state[QW]
                                   , 2 * state[QY] * state[QZ] - 2 * state[QX] * state[QW]
@@ -72,7 +72,7 @@ namespace utility {
             }
 
             // Accelerometer
-            Eigen::Vector3d IMUModel::predictedObservation(const arma::vec::fixed<size>& state, const MeasurementType::ACCELEROMETER&) {
+            Eigen::Vector3d IMUModel::predictedObservation(const Eigen::Matrix<double, size, 1>& state, const MeasurementType::ACCELEROMETER&) {
 
                 Eigen::Vector3d down = { 2 * state[QX] * state[QZ] + 2 * state[QY] * state[QW]
                                   , 2 * state[QY] * state[QZ] - 2 * state[QX] * state[QW]
@@ -84,13 +84,13 @@ namespace utility {
             }
 
             // Gyroscope
-            Eigen::Vector3d IMUModel::predictedObservation(const arma::vec::fixed<size>& state, const MeasurementType::GYROSCOPE&) {
+            Eigen::Vector3d IMUModel::predictedObservation(const Eigen::Matrix<double, size, 1>& state, const MeasurementType::GYROSCOPE&) {
                 return state.rows(VX, VZ);
             }
 
 
             // Forward Vector
-            Eigen::Vector3d IMUModel::predictedObservation(const arma::vec::fixed<size>& state) {
+            Eigen::Vector3d IMUModel::predictedObservation(const Eigen::Matrix<double, size, 1>& state) {
 
                 return { 1 - 2 * state[QY] * state[QY] - 2 * state[QZ] * state[QZ]
                        , 2 * state[QX] * state[QY] + 2 * state[QZ] * state[QW]

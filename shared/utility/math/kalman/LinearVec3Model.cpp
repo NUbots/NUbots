@@ -26,17 +26,17 @@
 namespace utility {
     namespace math {
         namespace kalman {
-            arma::vec::fixed<LinearVec3Model::size> LinearVec3Model::limitState(const arma::vec::fixed<size>& state) {
+            Eigen::Matrix<double, LinearVec3Model::size, 1> LinearVec3Model::limitState(const Eigen::Matrix<double, size, 1>& state) {
                 return state;
             }
 
 
-            arma::vec::fixed<LinearVec3Model::size> LinearVec3Model::timeUpdate(const arma::vec::fixed<size>& state, double deltaT, const Eigen::Vector3d& dState) {
+            Eigen::Matrix<double, LinearVec3Model::size, 1> LinearVec3Model::timeUpdate(const Eigen::Matrix<double, size, 1>& state, double deltaT, const Eigen::Vector3d& dState) {
                 return state + deltaT * dState;
             }
 
 
-            arma::vec LinearVec3Model::predictedObservation(const arma::vec::fixed<size>& state, std::nullptr_t) {
+            arma::vec LinearVec3Model::predictedObservation(const Eigen::Matrix<double, size, 1>& state, std::nullptr_t) {
                 return state;
             }
 

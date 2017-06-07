@@ -42,9 +42,9 @@ namespace robot {
     using utility::math::coordinates::cartesianToRadial;
     using utility::math::coordinates::cartesianToSpherical;
 
-    arma::vec::fixed<RobotModel::size> RobotModel::timeUpdate(
-        const arma::vec::fixed<RobotModel::size>& state, double /*deltaT*/, const Sensors& /*sensors*/) {
-        arma::vec::fixed<RobotModel::size> new_state = state;
+    Eigen::Matrix<double, RobotModel::size, 1> RobotModel::timeUpdate(
+        const Eigen::Matrix<double, RobotModel::size, 1>& state, double /*deltaT*/, const Sensors& /*sensors*/) {
+        Eigen::Matrix<double, RobotModel::size, 1> new_state = state;
 
         return new_state;
     }
@@ -52,7 +52,7 @@ namespace robot {
 
     /// Return the predicted observation of an object at the given position
     arma::vec RobotModel::predictedObservation(
-        const arma::vec::fixed<RobotModel::size>& state,
+        const Eigen::Matrix<double, RobotModel::size, 1>& state,
         const Eigen::Vector3d& actual_position,
         const Sensors& sensors) {
 
@@ -68,7 +68,7 @@ namespace robot {
 
     // Angle between goals - NOTE: CURRENTLY UNUSED
     arma::vec RobotModel::predictedObservation(
-        const arma::vec::fixed<RobotModel::size>& state,
+        const Eigen::Matrix<double, RobotModel::size, 1>& state,
         const std::vector<arma::vec>& actual_positions,
         const Sensors& /*sensors*/) {
 
@@ -98,8 +98,8 @@ namespace robot {
         }
     }
 
-    arma::vec::fixed<RobotModel::size> RobotModel::limitState(
-        const arma::vec::fixed<RobotModel::size>& state) {
+    Eigen::Matrix<double, RobotModel::size, 1> RobotModel::limitState(
+        const Eigen::Matrix<double, RobotModel::size, 1>& state) {
 
         // TODO: Clip robot's state to the field.
         return state;
