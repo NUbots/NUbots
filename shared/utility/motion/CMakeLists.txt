@@ -1,5 +1,5 @@
-SET(dependencies 
-	ARMADILLO
+SET(dependencies
+	Eigen3
 	NUBOTS_PROJECT
 	)
 

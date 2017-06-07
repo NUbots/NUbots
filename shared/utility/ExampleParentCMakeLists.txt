@@ -4,15 +4,15 @@ cmake_minimum_required(VERSION 3.4)
 
 IF(NOT MSVC)
 	# Compilation must be done with c++14 for NUClear to work
-    ADD_COMPILE_OPTIONS(-std=c++14 -fPIC -Xclang -fcolor-diagnostics)
+    ADD_COMPILE_OPTIONS(-std=c++17 -fPIC -Xclang -fcolor-diagnostics)
 ENDIF()
 
-FIND_PACKAGE(ARMADILLO REQUIRED)
+FIND_PACKAGE(Eigen3 REQUIRED)
 FIND_PACKAGE(YAML-CPP REQUIRED)
-    
+
 INCLUDE_DIRECTORIES(
 	${CMAKE_SOURCE_DIR}
-	${ARMADILLO_INCLUDE_DIR}
+	${Eigen3_INCLUDE_DIR}
 	${YAML-CPP_INCLUDE_DIRS})
 
 add_subdirectory(utility)
