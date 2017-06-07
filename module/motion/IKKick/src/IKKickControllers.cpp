@@ -130,7 +130,7 @@ namespace motion{
         kick.pose.translation() = kickGoal;
         lift_foot.pose.translation() = liftGoal;
 
-        kick.duration = arma::norm(kickGoal - liftGoal) / kick_velocity;
+        kick.duration = (kickGoal - liftGoal).norm() / kick_velocity;
 
         //Robocup code / hacks
         auto startFrame = SixDOFFrame{startPose,0};

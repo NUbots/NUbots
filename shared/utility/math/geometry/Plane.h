@@ -40,7 +40,7 @@ namespace geometry {
 		}
 
 		void setFromNormal(Vector normal_, Vector point_){
-			if(arma::norm(normal_, 1) <= 0){
+			if(normal_.lpNorm<1>() <= 0){
 				throw std::domain_error("Plane::setFromNormal - Normal is zero vector. Normal to plane must be non-zero!");
 			}
 			normal = arma::normalise(normal_);
@@ -50,7 +50,7 @@ namespace geometry {
 		void setFrom3Points(Vector p1, Vector p2, Vector p3){
 			point = p1;
 			normal = arma::normalise(arma::cross(p2-p1,p3-p1));// Positive if p3 palmside (RHR) relative to p2
-			if(arma::norm(normal, 1) <= 0){
+			if(normal.lpNorm<1>() <= 0){
 				throw std::domain_error("Plane::setFrom3Points - 3 Points are colinear!");
 			}
 		}

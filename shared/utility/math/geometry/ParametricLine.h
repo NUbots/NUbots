@@ -47,7 +47,7 @@ namespace geometry {
         }
 
         void setFromDirection(const Vector& direction_, const Vector& point_, const Eigen::Vector2d& tLimits_ = {-std::numeric_limits<double>::infinity(), std::numeric_limits<double>::infinity()}){
-            if(arma::norm(direction_,1) <= 0){
+            if(direction_.lpNorm<1>() <= 0){
                 throw std::domain_error("ParametricLine::setFromDirection - Direction is zero vector!");
             }
             direction = arma::normalise(direction_);
@@ -56,7 +56,7 @@ namespace geometry {
         }
 
         void setFromTwoPoints(const Vector& p1, const Vector& p2, bool segment = false) {
-            double norm = arma::norm(p2 - p1);
+            double norm = (p2 - p1).norm();
             if(norm <= 0){
                 throw std::domain_error("ParametricLine::setFromTwoPoints - Two points are identical!");
             }
@@ -79,7 +79,7 @@ namespace geometry {
 
         double distanceToPoint(const Vector& p) const {
             //TODO: optimise
-            return arma::norm(vectorToLineFromPoint(p));
+            return vectorToLineFromPoint(p.norm());
         }
 
         Vector intersect(const ParametricLine<n>& l) const{

@@ -49,7 +49,7 @@ namespace matrix {
     }
 
     Rotation3D::Rotation(const Eigen::Vector3d& axis) {
-        double normAxis = arma::norm(axis, 2);
+        double normAxis = axis.norm();
 
         if (normAxis == 0) {
             // Axis has zero length
@@ -121,7 +121,7 @@ namespace matrix {
             }
         }
 
-        if (arma::norm(axis, 2) == 0 || !axisFound) {
+        if (axis.norm() == 0 || !axisFound) {
             throw std::domain_error("utility::math::matrix::Rotation3D::axisAngle: No rotation found");
         }
 

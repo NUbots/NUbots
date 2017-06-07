@@ -78,9 +78,9 @@ namespace module {
             }
 
             // Our start and end points
-            double xStart = arma::norm(xb);
+            double xStart = xb.norm();
             xStart += dx - fmod(xStart, dx);
-            double xEnd = arma::norm(xt);
+            double xEnd = xt.norm();
 
             auto movement = arma::normalise(xb) * dx;
 

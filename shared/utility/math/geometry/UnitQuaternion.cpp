@@ -64,7 +64,7 @@ namespace geometry {
 
     UnitQuaternion::UnitQuaternion(const Eigen::Vector3d& vec1, const Eigen::Vector3d& vec2)
     {
-        double norm     = arma::norm(vec1) * arma::norm(vec2);
+        double norm     = vec1.norm() * vec2.norm();
         double half_cos = std::sqrt(0.5 + arma::dot(vec1, vec2) / (2.0 * norm));
 
         real()      = half_cos;

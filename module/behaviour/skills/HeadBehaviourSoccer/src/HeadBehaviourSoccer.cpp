@@ -251,7 +251,7 @@ namespace module {
                         }
                         Eigen::Vector2d currentCentroid_world = getIMUSpaceDirection(kinematicsModel,currentCentroid,headToIMUSpace);
                         //If our objects have moved, we need to replan
-                        if(arma::norm(currentCentroid_world - lastCentroid) >= fractional_angular_update_threshold * std::fmax(cam.FOV[0],cam.FOV[1]) / 2.0){
+                        if((currentCentroid_world - lastCentroid).norm() >= fractional_angular_update_threshold * std::fmax(cam.FOV[0],cam.FOV[1]) / 2.0){
                             objectMoved = true;
                             lastCentroid = currentCentroid_world;
                         }

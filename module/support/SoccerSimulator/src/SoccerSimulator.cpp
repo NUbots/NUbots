@@ -210,7 +210,7 @@ namespace support {
                     //Face along direction of movement
                     world.robotPose.angle() = vectorToBearing(diff.xy());
 
-                    world.robotVelocity = Transform2D({arma::norm(diff) / deltaT, 0, 0}); //Robot coordinates
+                    world.robotVelocity = Transform2D({diff.norm() / deltaT, 0, 0}); //Robot coordinates
                     break;
 
                 case MotionType::MOTION:

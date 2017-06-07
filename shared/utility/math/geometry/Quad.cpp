@@ -67,11 +67,11 @@ namespace geometry {
     }
 
     double Quad::getAverageWidth() const {
-        return ((0.5 * (arma::norm(br - bl, 2) + arma::norm(tr - tl, 2))));
+        return ((0.5 * ((br - bl).norm() + (tr - tl).norm())));
     }
 
     double Quad::getAverageHeight() const {
-        return ((0.5 * (arma::norm(br - tr, 2) + arma::norm(bl - tl, 2))));
+        return ((0.5 * ((br - tr).norm() + (bl - tl).norm())));
     }
 
     double Quad::area() const {
@@ -84,7 +84,7 @@ namespace geometry {
     }
 
     double Quad::aspectRatio() const {
-        return ((arma::norm(br - tr, 2) + arma::norm(bl - tl, 2) + 2) / (arma::norm(br - bl, 2) + arma::norm(tr - tl, 2) + 2));
+        return (((br - tr).norm() + (bl - tl).norm() + 2) / ((br - bl).norm() + (tr - tl).norm() + 2));
     }
 
     bool Quad::overlapsHorizontally(const Quad &other) const {

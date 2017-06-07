@@ -207,7 +207,7 @@ namespace module {
                     // log("loc heading", selfs.front().heading);
 
                     //Euclidean distance to ball
-                    float distanceToBall = arma::norm(position.rows(0,1));
+                    float distanceToBall = position.rows(0,1).norm();
                     float scale = 2.0 / (1.0 + std::exp(-a * distanceToBall + b)) - 1.0;
                     float scale2 = angle / M_PI;
                     float finalForwardSpeed = forwardSpeed * scale * (1.0 - scale2);

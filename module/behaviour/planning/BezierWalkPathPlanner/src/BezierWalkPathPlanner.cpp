@@ -330,7 +330,7 @@ namespace module {
 
                         //Euclidean distance to ball
 
-                        float distanceToPoint = arma::norm(next_robot_position);
+                        float distanceToPoint = next_robot_position.norm();
                         float scale = 2.0 / (1.0 + std::exp(-a * distanceToPoint + b)) - 1.0;
                         float scale2 = angle / M_PI;
                         float finalForwardSpeed = forwardSpeed * scale * (1.0 - scale2);

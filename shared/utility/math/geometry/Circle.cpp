@@ -63,7 +63,7 @@ namespace geometry {
     }
 
     double Circle::distanceToPoint(const Eigen::Vector2d& point) const {
-        return arma::norm(point - centre) - radius;
+        return (point - centre).norm() - radius;
     }
 
     double Circle::squaresDifference(const Eigen::Vector2d& point) const {

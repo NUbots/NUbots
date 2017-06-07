@@ -59,7 +59,7 @@ namespace kinematics {
         Eigen::Vector3d hipOffset = { HIP_OFFSET_X, negativeIfRight * HIP_OFFSET_Y, -HIP_OFFSET_Z};
         targetLeg.translation() -= hipOffset;
 
-        float length = arma::norm(targetLeg.translation());
+        float length = targetLeg.translation().norm();
         float maxLegLength = UPPER_LEG_LENGTH + LOWER_LEG_LENGTH;
         return (length < maxLegLength);
     }
@@ -113,12 +113,12 @@ namespace kinematics {
 
         Eigen::Vector3d targetLeg = anklePos - hipOffset;
 
-        float length = arma::norm(targetLeg);
+        float length = targetLeg.norm();
         float maxLegLength = UPPER_LEG_LENGTH + LOWER_LEG_LENGTH;
         if (length > maxLegLength){
             // NUClear::log<NUClear::WARN>("InverseKinematics::calculateLegJoints : !!! WARNING !!! Requested position beyond leg reach.\n Scaling back requested vector from length ",length, " to ", maxLegLength);
             targetLeg = targetLeg * (maxLegLength)/length;
-            length = arma::norm(targetLeg);
+            length = targetLeg.norm();
         }
         // NUClear::log<NUClear::DEBUG>("Length: ", length);
         float sqrLength = length * length;
@@ -142,7 +142,7 @@ namespace kinematics {
         Eigen::Vector3d unitTargetLeg = targetLeg / length;
 
         Eigen::Vector3d hipX = arma::cross(ankleY, unitTargetLeg);
-        float hipXLength = arma::norm(hipX,2);
+        float hipXLength = hipX.norm();
         if (hipXLength>0){
             hipX /= hipXLength;
         }
@@ -163,7 +163,7 @@ namespace kinematics {
         float cosZandHipX = arma::dot(globalZ, hipX);
         bool hipRollPositive = cosZandHipX <= 0;
         Eigen::Vector3d legPlaneGlobalZ = (isAnkleAboveWaist ? -1 : 1 ) * (globalZ - ( cosZandHipX * hipX));
-        float legPlaneGlobalZLength = arma::norm(legPlaneGlobalZ, 2);
+        float legPlaneGlobalZLength = legPlaneGlobalZ.norm();
         if (legPlaneGlobalZLength>0){
            legPlaneGlobalZ /= legPlaneGlobalZLength;
         }
@@ -183,7 +183,7 @@ namespace kinematics {
 
         Eigen::Vector3d hipXProjected = (isAnkleAboveWaist ? -1 : 1) * hipX;  //If leg is above waist then hipX is pointing in the wrong direction in the xy plane
         hipXProjected[2] = 0;
-        hipXProjected /= arma::norm(hipXProjected, 2);
+        hipXProjected /= hipXProjected.norm();
         bool isHipYawPositive = arma::dot(hipXProjected,globalY)>=0;
 
         hipYaw = (isHipYawPositive ? 1 : -1) * acos(arma::dot( hipXProjected,globalX));
@@ -334,8 +334,8 @@ namespace kinematics {
             // std::cout << "X = " << X.t() << std::endl;
             // std::cout << "dX = " << dX.t() << std::endl;
             // std::cout << "angles = " << angles.t() << std::endl;
-            // std::cout << "error = " << arma::norm(dX) << std::endl;
-            if(arma::norm(dX) < 0.001){
+            // std::cout << "error = " << dX.norm() << std::endl;
+            if(dX.norm() < 0.001){
                 break;
             }
             Eigen::Vector3d dAngles = J.t() * dX;// * std::max((100 - i),1);
@@ -346,7 +346,7 @@ namespace kinematics {
         // std::cout << "Final angles = " << angles.t() << std::endl;
         // std::cout << "Final position = " << X.t() << std::endl;
         // std::cout << "Goal position = " << pos.t() << std::endl;
-        std::cout << "Final error = " << arma::norm(pos-X) << std::endl;
+        std::cout << "Final error = " << (pos-X).norm() << std::endl;
         // std::cout << "Iterations = " << i << std::endl;
 
 
@@ -386,7 +386,7 @@ namespace kinematics {
         // std::cout << (left ? "left" : "right" ) << " handFromShoulder = " << handFromShoulder.t();
 
         //ELBOW
-        float extensionLength = arma::norm(handFromShoulder);
+        float extensionLength = handFromShoulder.norm();
         float upperArmLength = model.arm.UPPER_ARM_LENGTH;
         float lowerArmLength = model.arm.LOWER_ARM_LENGTH;
         float sqrUpperArmLength = upperArmLength * upperArmLength;

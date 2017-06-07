@@ -3,13 +3,13 @@
 
 #ifdef __APPLE__
     // #include <OpenGL/gl.h>
-    #include <GL/glew.h>  
+    #include <GL/glew.h>
 
     #include <GLUT/glut.h>
 #else
   #include <GL/gl.h>
   #include <GL/glut.h>
-#endif 
+#endif
 
 #include "glm/glm.hpp"
 #include "glm/gtc/matrix_transform.hpp"
@@ -25,61 +25,61 @@
 static void checkGLError(){
 
     GLenum error;
-    while((error = glGetError()) != GL_NO_ERROR){  
-        std::cout << "GL Error = " << std::endl;  
+    while((error = glGetError()) != GL_NO_ERROR){
+        std::cout << "GL Error = " << std::endl;
         switch(error)
         {
             case 0:
                 std::cout <<"Internal error in glGetError()" << std::endl;
                 break;
-            
+
             case GL_INVALID_ENUM:
                 std::cout <<"Invalid enum" << std::endl;
                 break;
-            
+
             case GL_INVALID_VALUE:
                 std::cout <<"Invalid value" << std::endl;
                 break;
-            
+
             case GL_INVALID_OPERATION:
                 std::cout <<"Invalid operation" << std::endl;
                 break;
-            
+
             case GL_STACK_OVERFLOW:
                 std::cout <<"Stack overflow" << std::endl;
                 break;
-            
+
             case GL_STACK_UNDERFLOW:
                 std::cout <<"Stack underflow" << std::endl;
                 break;
-            
+
             case GL_OUT_OF_MEMORY:
                 std::cout <<"Out of memory" << std::endl;
                 break;
-            
+
             case GL_TABLE_TOO_LARGE:
                 std::cout <<"Table too large" << std::endl;
                 break;
-            
+
             default:
                 std::cout << "Unknown error "<< error << std::endl;
         }
     }
-    
+
 }
 
-  
-static bool setUpGLEW()  
-{  
-    //Initialize GLEW  
+
+static bool setUpGLEW()
+{
+    //Initialize GLEW
     glewExperimental = GL_TRUE;
-    GLenum err = glewInit();  
-  
-    //If GLEW hasn't initialized  
-    if (err != GLEW_OK)   
-    {  
-        std::cout << "GLEW Error: " << glewGetErrorString(err) <<  std::endl;  
-        return false;  
+    GLenum err = glewInit();
+
+    //If GLEW hasn't initialized
+    if (err != GLEW_OK)
+    {
+        std::cout << "GLEW Error: " << glewGetErrorString(err) <<  std::endl;
+        return false;
     }
 
     return true;
@@ -88,31 +88,31 @@ static bool setUpGLEW()
 static bool setUpOpenGL(){
     bool success = setUpGLEW();
     if(!success) return success;
-    
-    //Set a background color  
-    glClearColor(0.0f, 0.0f, 1.0f, 0.0f);  
+
+    //Set a background color
+    glClearColor(0.0f, 0.0f, 1.0f, 0.0f);
     glEnable(GL_LIGHT0);
     glEnable(GL_DEPTH_TEST);
     glClear(GL_COLOR_BUFFER_BIT);
 
     return success;
 }
- 
+
 static void drawBasis(float scale){
     GLUquadricObj *quadratic;
     quadratic = gluNewQuadric();
     float coneRadius = 0.2 * scale;
     float coneHeight = 0.6 * scale;
     int numberOfConeSegments = 10;
-    
+
     glDisable(GL_TEXTURE_2D);
-    
+
     glEnable(GL_LIGHTING);
     // glLightf(GL_LIGHT0, GL_CONSTANT_ATTENUATION, 0.0f);
     // glLightf(GL_LIGHT0, GL_LINEAR_ATTENUATION, 0.0f);
     // glLightf(GL_LIGHT0, GL_QUADRATIC_ATTENUATION, 0.0f);
     GLfloat diff[4] = {1.0, 1.0, 1.0, 1.0};
-    glLightfv(GL_LIGHT0, GL_DIFFUSE, diff);    
+    glLightfv(GL_LIGHT0, GL_DIFFUSE, diff);
     // glLightfv(GL_LIGHT0, GL_AMBIENT, diff);
     // glLightfv(GL_LIGHT0, GL_SPECULAR, diff);
     //mat x
@@ -132,7 +132,7 @@ static void drawBasis(float scale){
     //Material y
     GLfloat y_diff[4] = {0.0, 1.0, 0.0, 1.0};
     glMaterialfv(GL_FRONT, GL_DIFFUSE, y_diff);
-    
+
     //cylinder y
     glRotatef(-90,1,0,0);
     gluCylinder(quadratic,coneRadius / 2, coneRadius / 2, scale, numberOfConeSegments,1);
@@ -144,13 +144,13 @@ static void drawBasis(float scale){
     glutSolidCone(coneRadius, coneHeight, numberOfConeSegments, 1);
     glRotatef(90,1,0,0);
     glTranslatef(0,-scale,0);
-    
+
     //mat z
     GLfloat z_diff[4] = {0.0, 0.0, 1.0, 1.0};
     glMaterialfv(GL_FRONT, GL_DIFFUSE, z_diff);
     //cylinder z
     gluCylinder(quadratic,coneRadius / 2, coneRadius / 2, scale, numberOfConeSegments,1);
-    
+
     //cone z
     glTranslatef(0,0,scale);
     glutSolidCone(coneRadius, coneHeight, numberOfConeSegments, 1);
@@ -168,7 +168,7 @@ static void drawCrossHair(){
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
 
-    glLineWidth(2.5); 
+    glLineWidth(2.5);
     glColor3f(1.0, 0.0, 0.0);
     glBegin(GL_LINES);
 
@@ -178,35 +178,35 @@ static void drawCrossHair(){
 
     glVertex2f(-w, w);
     glVertex2f(w, -w);
-    
+
     //Top right
     glVertex2f(w, w);
     glVertex2f(w, g);
-    
+
     glVertex2f(g, w);
     glVertex2f(w, w);
-    
+
     //bottom right
     glVertex2f(w, -w);
     glVertex2f(w, -g);
-    
+
     glVertex2f(g, -w);
     glVertex2f(w, -w);
 
     //Bottom left
     glVertex2f(-w, -w);
     glVertex2f(-w, -g);
-    
+
     glVertex2f(-g, -w);
     glVertex2f(-w, -w);
 
     //top left
     glVertex2f(-w, w);
     glVertex2f(-w, g);
-    
+
     glVertex2f(-g, w);
     glVertex2f(-w, w);
- 
+
 
     glEnd();
 }
@@ -217,7 +217,7 @@ bool drawCamera(CvCapture* video, float verticalFOV){
         std::cout << "no images left in video file" << std::endl;
         return false;
     }
-  
+
     GLenum format;
     switch(image->nChannels) {
         case 1:
@@ -257,7 +257,7 @@ bool drawCamera(CvCapture* video, float verticalFOV){
     glTexCoord2f(1., 0.);
     glVertex2f(-1., 1.);
     glEnd();
-    
+
     //setup to draw on top of image
     glClear(GL_DEPTH_BUFFER_BIT);
 
@@ -288,7 +288,7 @@ struct ResultsFrame{
 void drawSensorStreams(autocal::SensorPlant& sensorPlant, std::string referenceFrame, std::string matchStreamRange, autocal::TimeStamp t, const std::vector<std::pair<int,int>>& matches = std::vector<std::pair<int,int>>()){
     float basisScale = 0.05;
     autocal::MocapRecording& recording = sensorPlant.mocapRecording;
-    
+
     //record timeseries results for this frame:
     std::map<int,ResultsFrame> results;
     auto refFrame = sensorPlant.getGroundTruth(referenceFrame, referenceFrame, t);
@@ -301,7 +301,7 @@ void drawSensorStreams(autocal::SensorPlant& sensorPlant, std::string referenceF
             auto& rigidBodyID = rb.first;
             Transform3D pose = rb.second.pose;
 
-            res.distance = arma::norm(pose.translation() - refPose.translation());
+            res.distance = (pose.translation() - refPose.translation()).norm();
             res.groundMatched = int(res.distance < 0.2);
             bool drawMatch = false;
             for(auto& m : matches){
@@ -327,7 +327,7 @@ void drawSensorStreams(autocal::SensorPlant& sensorPlant, std::string referenceF
             // std::cout << "pose " << rigidBodyID << " = \n" << pose << std::endl;
             //Load pose into opengl as view matrix
             glMatrixMode(GL_MODELVIEW);
-            glLoadMatrixd(pose.memptr());  
+            glLoadMatrixd(pose.memptr());
             //Draw a sphere if it matches
             //TODO:recode this garbage!
             bool drawMatch = false;

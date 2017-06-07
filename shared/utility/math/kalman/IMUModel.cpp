@@ -42,7 +42,7 @@ namespace utility {
                 newState = state;
 
                 //make a rotation quaternion
-                const double omega = arma::norm(state.rows(VX, VZ)) + 0.00000000001;
+                const double omega = state.rows(VX, VZ).norm() + 0.00000000001;
                 //Negate to compensate for some later mistake.
                 //deltaT has been negative for a while and has masked an incorrect hack below
                 const double theta = -omega*deltaT*0.5;

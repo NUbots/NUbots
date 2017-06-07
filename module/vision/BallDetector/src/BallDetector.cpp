@@ -248,7 +248,7 @@ namespace vision {
                 // Loop through our seed points and find the minimum distance one
                 for(uint i = 0; i < 3; ++i) {
                     for(auto& s : image.ballSeedPoints[i].points) {
-                        double dist = std::fabs(result.model.radius - arma::norm(result.model.centre - Eigen::Vector2d(double(s[0]), double(s[1]))));
+                        double dist = std::fabs(result.model.radius - (result.model.centre - Eigen::Vector2d(double(s[0]), double(s[1]))).norm());
                         if(sDist[i] > dist) {
                             sDist[i] = dist;
                         }
@@ -271,7 +271,7 @@ namespace vision {
                 // Project this vector to a plane midway through the ball
                 Plane ballBisectorPlane({ 0, 0, 1 }, { 0, 0, field.ball_radius });
                 Eigen::Vector3d ballCentreGroundProj = projectCamToPlane(ballCentreRay, camToGround, ballBisectorPlane);
-                double ballCentreGroundProjDistance = arma::norm(ballCentreGroundProj);
+                double ballCentreGroundProjDistance = ballCentreGroundProj.norm();
 
                 if(std::abs((widthDistance - ballCentreGroundProjDistance) / std::max(ballCentreGroundProjDistance, widthDistance)) > MAXIMUM_DISAGREEMENT_RATIO) {
                     if(print_throwout_logs) log("Ball discarded: Width and proj distance disagree too much: width =", widthDistance, "proj =", ballCentreGroundProjDistance);

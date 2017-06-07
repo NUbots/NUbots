@@ -48,7 +48,7 @@ namespace geometry {
 			try {
 				Eigen::Vector2d intersection = ray.intersect(edge);
 				if(hadPreviousIntersection){
-					if(arma::norm(intersection - lastIntersection) > 1e-6){
+					if((intersection - lastIntersection).norm() > 1e-6){
 						intersectionCount++;
 					}
 				} else {
@@ -73,7 +73,7 @@ namespace geometry {
 		for(auto& edge : edges){
 			//Get projection
 			Eigen::Vector2d proj = edge.projectPointToLine(p);
-			double dist = arma::norm(proj - p);
+			double dist = (proj - p).norm();
 			//If this is closer then update
 			if(dist < minDistance){
 				minDistance = dist;

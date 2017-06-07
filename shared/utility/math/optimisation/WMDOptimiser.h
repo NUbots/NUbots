@@ -83,7 +83,7 @@ namespace utility {
                         Eigen::VectorXd update(bestEstimate.n_elem,arma::fill::zeros);
                         double div = 0.0;
                         for (uint64_t i = 0; i < samples.n_rows; ++i) {
-                            const double scale = sampleWeights[i]/(arma::norm(bestEstimate-samples.row(i).t()) + 0.01);
+                            const double scale = sampleWeights[i]/(bestEstimate-samples.row(i).t().norm() + 0.01);
                             update += scale*samples.row(i).t();
                             div += scale;
                         }

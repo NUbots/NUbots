@@ -44,7 +44,7 @@ namespace vision {
         Eigen::Vector3d camSpaceP1 = {camFocalLengthPixels, screen1[0], screen1[1]};
         Eigen::Vector3d camSpaceP2 = {camFocalLengthPixels, screen2[0], screen2[1]};
 
-        return utility::math::angle::acos_clamped(arma::dot(camSpaceP1,camSpaceP2) / (arma::norm(camSpaceP1) * arma::norm(camSpaceP2)));
+        return utility::math::angle::acos_clamped(arma::dot(camSpaceP1,camSpaceP2) / (camSpaceP1.norm() * camSpaceP2.norm()));
     }
 
     inline double widthBasedDistanceToCircle(const double& radius, const Eigen::Vector2d& s1, const Eigen::Vector2d& s2, const double& camFocalLengthPixels){

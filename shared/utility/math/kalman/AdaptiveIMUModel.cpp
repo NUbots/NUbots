@@ -30,7 +30,7 @@ namespace utility {
             Eigen::Matrix<double, AdaptiveIMUModel::size, 1> AdaptiveIMUModel::limitState(const Eigen::Matrix<double, size, 1>& state) {
 
                 arma::mat stateMatrix = arma::reshape(state,3,2);
-                double normDown = arma::norm(stateMatrix.col(0),2);
+                double normDown = stateMatrix.col(0).norm();
                 if(normDown == 0){
                     //TODO: RESTART FILTER
                     // NUClear::log<NUClear::WARN>("AdaptiveIMUModel::limitState - Down vector has zero length!!!");
@@ -47,7 +47,7 @@ namespace utility {
                 }
                 stateMatrix.col(1) = stateMatrix.col(1) - stateMatrix.col(0)*dotProd;       //Orthogonalise forward and down
 
-                double normForward = arma::norm(stateMatrix.col(1),2);     //Normalise forward
+                double normForward = stateMatrix.col(1).norm();     //Normalise forward
                 if(normForward == 0){
                     //TODO: RESTART FILTER
                     // NUClear::log<NUClear::WARN>("AdaptiveIMUModel::limitState - Projected forward vector has zero length!!!");
@@ -69,7 +69,7 @@ namespace utility {
                 //See: http://en.wikipedia.org/wiki/Axis%E2%80%93angle_representation#Simultaneous_orthogonal_rotation_angle
                 arma::mat stateMatrix = arma::reshape(state,3,2);
                 Eigen::Vector3d omega = measurement * deltaT;    //Offset applied
-                double phi = arma::norm(omega, 2);
+                double phi = omega.norm();
                 if (phi == 0) {
                     return state;
                 }

@@ -60,7 +60,7 @@ namespace utility
 
                 double calculateArea()
                 {
-                    area = 0.5 * std::abs(arma::norm(arma::cross(P1 - P0, P2 - P0)));
+                    area = 0.5 * std::abs((arma::cross(P1 - P0, P2 - P0)).norm());
                     return(area);
                 }
 

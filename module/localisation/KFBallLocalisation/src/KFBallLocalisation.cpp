@@ -94,7 +94,7 @@ namespace localisation {
             Eigen::Vector3d worldSpaceBallVel = Eigen::Matrix<double, 3, 1>::Zero();
             worldSpaceBallVel.rows(0,1) = utility::localisation::transform::RobotToWorldTransform(Eigen::Matrix<double, 2, 1>::Zero(), robots[0].heading, robot_space_ball_vel);
 
-            emit(drawArrow("ballvel", worldSpaceBallPos, worldSpaceBallVel, arma::norm(worldSpaceBallVel)));
+            emit(drawArrow("ballvel", worldSpaceBallPos, worldSpaceBallVel, worldSpaceBallVel.norm()));
 
             emit(graph("Localisation Ball", model_state(0), model_state(1)));
             emit(graph("Localisation Ball Velocity", model_state(2), model_state(3)));

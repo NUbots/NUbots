@@ -70,7 +70,7 @@ bool test(const Circle& circle, const RotatedRectangle& rect) {
 
 	// if (x > hw && y > hh) { // C
 		Eigen::Vector2d cornerDiff = { hw - x, hh - y };
-		return arma::norm(cornerDiff) < r;
+		return cornerDiff.norm() < r;
 	// }
 }
 

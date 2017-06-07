@@ -83,10 +83,10 @@ namespace support {
         }
 
 
-        double rBCcLength = arma::norm(rBCc);
+        double rBCcLength = rBCc.norm();
 
         // The angular width of the cone we are drawing
-        double angle = 2.0 * std::asin((diameter * 0.5) / arma::norm(rBCc));
+        double angle = 2.0 * std::asin((diameter * 0.5) / rBCc.norm());
 
         // Project the centre to the screen and work out the radius as if it was in the centre
         Eigen::Vector2i centre = screenToImage(projectCamSpaceToScreen(rBCc, cam.focalLengthPixels), convert<uint, 2>(cam.imageSizePixels));

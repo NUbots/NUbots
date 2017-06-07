@@ -140,14 +140,12 @@ namespace matrix {
         // Multiply translation vector (top-right column vector) by the negated inverse rotation matrix
 
         inverseTransform3D.submat(0,3,2,3) = -inverseTransform3D.submat(0,0,2,2) * submat(0,3,2,3);
-        /*if (arma::norm(inverseTransform3D * (*this) - Eigen::Matrix<double, 4, 4>::Identity()) > 1e-10){
-            NUClear::log<NUClear::WARN>("Inverse failed! Matrix is singular");
-        }*/
+
         return inverseTransform3D;
     }
 
     float Transform3D::norm(Transform3D T){
-        float pos_norm = arma::norm(T.translation());
+        float pos_norm = T.translation().norm();
         // return Rotation3D::norm(T.rotation());
         //TODO: how to weight these two?
         return pos_norm + Rotation3D::norm(T.rotation());

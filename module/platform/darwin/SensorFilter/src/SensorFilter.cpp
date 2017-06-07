@@ -389,9 +389,9 @@ namespace module {
                     }
 
                     // If we have a previous sensors and our cm730 has errors then reuse our last sensor value
-                    if(previousSensors && (input.cm730ErrorFlags || arma::norm(Eigen::Vector3d(input.gyroscope.x, input.gyroscope.y, input.gyroscope.z), 2) > 4 * M_PI))
+                    if(previousSensors && (input.cm730ErrorFlags || Eigen::Vector3d(input.gyroscope.x, input.gyroscope.y, input.gyroscope.z).norm() > 4 * M_PI))
                     {
-                        NUClear::log<NUClear::WARN>("Bad gyroscope value", arma::norm(Eigen::Vector3d(input.gyroscope.x, input.gyroscope.y, input.gyroscope.z), 2));
+                        NUClear::log<NUClear::WARN>("Bad gyroscope value", Eigen::Vector3d(input.gyroscope.x, input.gyroscope.y, input.gyroscope.z).norm());
                         sensors->gyroscope = previousSensors->gyroscope;
                     }
                     else
@@ -491,7 +491,7 @@ namespace module {
                     // Accelerometer measurment update
                     motionFilter.measurementUpdate(sensors->accelerometer,
                                                     config.motionFilter.noise.measurement.accelerometer +
-                                                    arma::norm(sensors->accelerometer) * config.motionFilter.noise.measurement.accelerometerMagnitude,
+                                                    sensors->accelerometer.norm() * config.motionFilter.noise.measurement.accelerometerMagnitude,
                                                     MotionModel::MeasurementType::ACCELEROMETER());
 
                     // Gyroscope measurement update
@@ -559,7 +559,7 @@ namespace module {
                                     UnitQuaternion Rtw_new( Rotation3D(Rtf * footlanding_Rfw[side]) );
 
                                     //check if we need to reverse our quaternion
-                                    if (arma::norm(Rtw_new + motionFilter.get().rows(MotionModel::QW, MotionModel::QZ)) < 1.) {
+                                    if ((Rtw_new + motionFilter.get().rows(MotionModel::QW, MotionModel::QZ)).norm() < 1.0) {
                                         Rtw_new *= -1;
                                     }
 

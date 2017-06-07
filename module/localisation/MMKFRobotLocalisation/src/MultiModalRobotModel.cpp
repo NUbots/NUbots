@@ -292,7 +292,7 @@ bool MultiModalRobotModel::ModelsAreSimilar(
     const std::unique_ptr<RobotHypothesis> &model_b) {
     Eigen::Matrix<double, robot::RobotModel::size, 1> diff = model_a->GetEstimate() - model_b->GetEstimate();
 
-    double translation_dist = arma::norm(diff.rows(0, 1), 2);
+    double translation_dist = diff.rows(0, 1).norm();
 
     // // Radial coords
     // auto heading_dist = std::abs(utility::math::angle::normalizeAngle(diff[kHeading]));

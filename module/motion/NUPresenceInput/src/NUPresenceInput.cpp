@@ -284,7 +284,7 @@ namespace motion {
     }
 
     void NUPresenceInput::limitPose(Transform3D& pose){
-        float norm = arma::norm(pose.translation());
+        float norm = pose.translation().norm();
         if( norm > distance_limit){
             pose.translation() = distance_limit * pose.translation() / norm;
         }

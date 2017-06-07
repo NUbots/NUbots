@@ -223,7 +223,7 @@ namespace module {
                             cameraVec[0] = rand()/static_cast<double>(RAND_MAX);
                             cameraVec[1] = rand()/static_cast<double>(RAND_MAX);
                             cameraVec[2] = rand()/static_cast<double>(RAND_MAX);
-                            cameraVec *= 1/arma::norm(cameraVec,2);
+                            cameraVec *= 1 / cameraVec.norm();
                         }
 
                         std::vector<std::pair<ServoID, float>> angles = calculateCameraLookJoints(kinematicsModel,cameraVec);

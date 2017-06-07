@@ -82,7 +82,7 @@ namespace autocal{
 		if(success) x = pinvA * b;
 
 		auto error = A*x-b;
-		// std::cout << "SVD error: A*x - b = \n" << error.t() << " size = " << arma::norm(error) << std::endl;
+		// std::cout << "SVD error: A*x - b = \n" << error.t() << " size = " << error.norm() << std::endl;
 
 		//Return whether or not the SVD was performed correctly
 		return success;

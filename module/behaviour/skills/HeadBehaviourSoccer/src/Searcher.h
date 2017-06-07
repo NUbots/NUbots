@@ -32,7 +32,7 @@ namespace module {
              *
              * @author Jake Fountain
 
-             Template argument T must be a normed linear space using arma::norm();
+             Template argument T must be a normed linear space using norm;
              */
             template<class T>
             class Searcher {
@@ -91,11 +91,11 @@ namespace module {
 	        	}
 
         		static bool pair_comparator(const std::pair<int, T>& a, const std::pair<int, T>& b){
-	        		return arma::norm(a.second) <  arma::norm(b.second);
+	        		return a.second.norm() < b.second.norm();
 	        	}
 
 				static bool comparator(const T& a, const T& b){
-	        		return arma::norm(a) <  arma::norm(b);
+	        		return a.norm() <  b.norm();
 	        	}
 
         		void setSwitchTime(float dt){

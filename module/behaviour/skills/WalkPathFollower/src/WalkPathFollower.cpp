@@ -267,13 +267,13 @@ namespace skills {
 
     bool WalkPathFollower::isVisited(const Transform2D& currentState, const Transform2D& visitState) {
         // TODO: Abstract away the distance metric used between states.
-        double dist = arma::norm(visitState.xy() - currentState.xy());
+        double dist = (visitState.xy() - currentState.xy()).norm();
         return dist < cfg_.waypoint_visit_distance;
     }
 
     bool WalkPathFollower::isGoalClose(const Transform2D& currentState, const Transform2D& visitState) {
         // TODO: Abstract away the distance metric used between states.
-        double dist = arma::norm(visitState.xy() - currentState.xy());
+        double dist = (visitState.xy() - currentState.xy()).norm();
         return dist < cfg_.goal_close_distance;
     }
 
@@ -283,7 +283,7 @@ namespace skills {
         double closestDist = std::numeric_limits<double>::infinity();
         for (int i = 0; i < numStates; i++) {
             // TODO: Abstract away the distance metric used between states.
-            double dist = arma::norm(walkPath.states[i].xy() - currentState.xy());
+            double dist = (walkPath.states[i].xy() - currentState.xy()).norm();
             if (dist < closestDist) {
                 closestDist = dist;
                 closestIndex = i;
@@ -355,7 +355,7 @@ namespace skills {
         // } else {
         //     Eigen::Vector2d strafe = { std::max(cfg_.walk_about_x_strafe, 0.0), -angleSign * cfg_.walk_about_y_strafe };
 
-        //     Eigen::Vector2d strafeClipped = arma::normalise(strafe) * std::min(1.0, arma::norm(strafe));
+        //     Eigen::Vector2d strafeClipped = arma::normalise(strafe) * std::min(1.0, strafe.norm());
 
         //     Transform2D velocity = {strafeClipped, rotationSpeed}; //TODO make 20 seconds the variable update_frequency
         //     WalkCommand command(subsumptionId, velocity);

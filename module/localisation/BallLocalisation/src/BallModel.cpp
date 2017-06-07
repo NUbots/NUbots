@@ -63,7 +63,7 @@ namespace module {
             , const Sensors& /*sensors*/
             , const MeasurementType::BALL&) const {
 
-            double len = arma::norm(rBCc);
+            double len = rBCc.norm();
 
             double expectedAngle = 2.0 * std::asin((field.ball_radius) / len);
 
