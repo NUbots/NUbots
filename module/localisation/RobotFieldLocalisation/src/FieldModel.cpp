@@ -56,7 +56,7 @@ namespace module {
             //make a storage for our goal locations
             Eigen::Vector3d goalLocation;
             goalLocation.fill(0.0);
-            arma::mat::fixed<3,4> goalNormals;
+            Eigen::Matrix<double, 3, 4> goalNormals;
             // Transform2D world = sensors.world.projectTo2D(Eigen::Vector3d(0,0,1),Eigen::Vector3d(1,0,0));
 
             //Transform2D world = sensors.world.projectTo2D(Eigen::Vector3d(0,0,1),Eigen::Vector3d(1,0,0));

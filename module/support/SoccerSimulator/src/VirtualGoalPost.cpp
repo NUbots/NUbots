@@ -111,7 +111,7 @@ namespace support {
 
         //push the new measurement types
 
-        arma::mat::fixed<3,4> goalNormals = cameraSpaceGoalProjection(robotPose, this->position, field, Hgc);
+        Eigen::Matrix<double, 3, 4> goalNormals = cameraSpaceGoalProjection(robotPose, this->position, field, Hgc);
         if (arma::any(arma::any(goalNormals > 0.0))) {
             result.measurement.push_back(Goal::Measurement(Goal::MeasurementType::LEFT_NORMAL,  convert<double, 3>(goalNormals.col(0))));
             result.measurement.push_back(Goal::Measurement(Goal::MeasurementType::RIGHT_NORMAL, convert<double, 3>(goalNormals.col(1))));

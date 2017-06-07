@@ -28,9 +28,9 @@ namespace utility
             // Create a covariance matrix for all points in the window.
             // https://en.wikipedia.org/wiki/Covariance_matrix#Generalization_of_the_variance
             template<int n=2>
-            arma::mat::fixed<n, n> calculateCovarianceMatrix(const std::vector<Eigen::Matrix<double, n, 1> >& points, const Eigen::Matrix<double, n, 1>& mean)
+            Eigen::Matrix<double, n, n> calculateCovarianceMatrix(const std::vector<Eigen::Matrix<double, n, 1> >& points, const Eigen::Matrix<double, n, 1>& mean)
             {
-                arma::mat::fixed<n, n> covariance;
+                Eigen::Matrix<double, n, n> covariance;
                 covariance.zeros();
 
                 for (const auto& point : points)
@@ -45,9 +45,9 @@ namespace utility
             // Create a correlation matrix for all points in the window.
             // https://en.wikipedia.org/wiki/Covariance_matrix#Correlation_matrix
             template<int n=2>
-            arma::mat::fixed<n, n> calculateCorrelationMatrix(const arma::mat::fixed<n, n>& covariance)
+            Eigen::Matrix<double, n, n> calculateCorrelationMatrix(const Eigen::Matrix<double, n, n>& covariance)
             {
-                arma::mat::fixed<n, n> diag = arma::diagmat(covariance);
+                Eigen::Matrix<double, n, n> diag = arma::diagmat(covariance);
                 diag.for_each(
                     [] (arma::mat::elem_type& val) -> void
                     {

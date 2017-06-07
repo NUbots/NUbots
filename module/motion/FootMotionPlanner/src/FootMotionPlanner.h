@@ -130,7 +130,7 @@ namespace motion
         float  step_height_fast_fraction;               //
         float  ankle_pitch_lift;
         float  ankle_pitch_fall;
-        arma::mat::fixed<3,2> stepLimits;               //
+        Eigen::Matrix<double, 3, 2> stepLimits;               //
         Eigen::Vector2d footOffsetCoefficient;               //
 
         /**
@@ -146,7 +146,7 @@ namespace motion
          */
         double velocityHigh;                            //
         double accelerationTurningFactor;               //
-        arma::mat::fixed<3,2> velocityLimits;           //
+        Eigen::Matrix<double, 3, 2> velocityLimits;           //
         Eigen::Vector3d accelerationLimits;                  //
         Eigen::Vector3d accelerationLimitsHigh;              //
         Transform2D velocityCurrent;        // Current robot velocity

@@ -528,13 +528,13 @@ namespace motion
         auto& walkCycle = wlk["walk_cycle"];
         stepTime    = walkCycle["step_time"].as<Expression>();
         stepHeight  = walkCycle["step"]["height"].as<Expression>();
-        stepLimits  = walkCycle["step"]["limits"].as<arma::mat::fixed<3,2>>();
+        stepLimits  = walkCycle["step"]["limits"].as<Eigen::Matrix<double, 3, 2>>();
 
         step_height_slow_fraction = walkCycle["step"]["height_slow_fraction"].as<float>();
         step_height_fast_fraction = walkCycle["step"]["height_fast_fraction"].as<float>();
 
         auto& velocity = walkCycle["velocity"];
-        velocityLimits = velocity["limits"].as<arma::mat::fixed<3,2>>();
+        velocityLimits = velocity["limits"].as<Eigen::Matrix<double, 3, 2>>();
         velocityHigh   = velocity["high_speed"].as<Expression>();
 
         auto& acceleration = walkCycle["acceleration"];

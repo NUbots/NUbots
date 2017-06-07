@@ -182,7 +182,7 @@ namespace vision {
         return Htc.i() * Htf;
     }
 
-    inline arma::mat::fixed<3,4> cameraSpaceGoalProjection(
+    inline Eigen::Matrix<double, 3, 4> cameraSpaceGoalProjection(
             const Eigen::Vector3d& robotPose,
             const Eigen::Vector3d& goalLocation,
             const message::support::FieldDescription& field,
@@ -209,7 +209,7 @@ namespace vision {
 
 
         //if the goals are not in front of us, do not return valid normals
-        arma::mat::fixed<3,4> prediction;
+        Eigen::Matrix<double, 3, 4> prediction;
         if (failIfNegative and arma::any(goalBaseCorners.row(0) < 0.0)) {
             prediction.fill(0);
             return prediction;

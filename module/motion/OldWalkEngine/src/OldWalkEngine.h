@@ -148,8 +148,8 @@ namespace motion {
         bool emitLocalisation;
 
         double stanceLimitY2;
-        arma::mat::fixed<3,2> stepLimits;
-        arma::mat::fixed<3,2> velocityLimits;
+        Eigen::Matrix<double, 3, 2> stepLimits;
+        Eigen::Matrix<double, 3, 2> velocityLimits;
         Eigen::Vector3d accelerationLimits;
         Eigen::Vector3d accelerationLimitsHigh;
         double velocityHigh;
