@@ -85,12 +85,12 @@ namespace utility {
             }
 
 
-            arma::vec AdaptiveIMUModel::predictedObservation(const Eigen::Matrix<double, size, 1>& state) {
+            Eigen::VectorXd AdaptiveIMUModel::predictedObservation(const Eigen::Matrix<double, size, 1>& state) {
                 return state.rows(0,2) * 9.807;
             }
 
 
-            arma::vec AdaptiveIMUModel::observationDifference(const arma::vec& a, const arma::vec& b) {
+            Eigen::VectorXd AdaptiveIMUModel::observationDifference(const arma::vec& a, const arma::vec& b) {
                 return a - b;
             }
 

@@ -50,7 +50,7 @@ namespace utility {
 
                 static double bhattacharyyaDistance(const UKF<Model>& a, const UKF<Model>& b) {
                     // Get our state difference
-                    const arma::vec ud = a.model.observationDifference(a.get(), b.get());
+                    const Eigen::VectorXd ud = a.model.observationDifference(a.get(), b.get());
 
                     // Get our 3 covariance matricies we need
                     const auto& s1 = a.getCovariance();

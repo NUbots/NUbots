@@ -106,7 +106,7 @@ namespace utility {
                     return (arma::repmat(covarianceWeights, Model::size, 1) % meanCentered) * meanCentered.t();
                 }
 
-                arma::vec meanFromSigmas(const arma::mat& sigmaPoints) const {
+                Eigen::VectorXd meanFromSigmas(const arma::mat& sigmaPoints) const {
                     return sigmaPoints * meanWeights;
                 }
 
@@ -204,7 +204,7 @@ namespace utility {
                     //     std::cout << "measured = \n" << measurement << std::endl;
                     // }
                     // Now calculate the mean of these measurement sigmas.
-                    arma::vec predictedMean = meanFromSigmas(predictedObservations);
+                    Eigen::VectorXd predictedMean = meanFromSigmas(predictedObservations);
 
                     auto centredObservations = predictedObservations - arma::repmat(predictedMean, 1, NUM_SIGMA_POINTS);
 
@@ -240,7 +240,7 @@ namespace utility {
                     // prior probability density of the measurement):
 
                     //DEBUG: why do we occasionally get negative eigenvalues
-                    // arma::vec eValues = arma::eig_sym(predictedCovariance);
+                    // Eigen::VectorXd eValues = arma::eig_sym(predictedCovariance);
                     // std::cout << "UKF - eValues = " << eValues.t() << std::endl;
                     // if(arma::any(eValues < 0*eValues)){
                     //     std::cout << "UKF - sigma covariance has negative eigenvalues!!!!!!!!!!!!!!!!!!!!!!!" << std::endl;

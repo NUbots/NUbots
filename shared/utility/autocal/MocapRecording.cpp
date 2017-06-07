@@ -47,12 +47,12 @@ namespace autocal {
 		UnitQuaternion q(rot);
 		float rotNorm = Rotation3D::norm(rot);
 		float quatAngle = q.getAngle();
-		arma::vec rotMeas = {rotNorm, quatAngle};
+		Eigen::VectorXd rotMeas = {rotNorm, quatAngle};
 
 		//Position measurement
 		Eigen::Vector3d pos = pose.translation();
 
-		arma::vec measurement = arma::join_cols(rotMeas,pos);
+		Eigen::VectorXd measurement = arma::join_cols(rotMeas,pos);
 		stats[name][rigidBodyId](measurement);
 
 	}

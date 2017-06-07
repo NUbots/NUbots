@@ -47,7 +47,7 @@ namespace utility {
                     struct UP {};
                 };
 
-                arma::vec processNoiseDiagonal;
+                Eigen::VectorXd processNoiseDiagonal;
 
                 static constexpr size_t size = 7;
 
@@ -60,7 +60,7 @@ namespace utility {
                 Eigen::Vector3d predictedObservation(const Eigen::Matrix<double, size, 1>& state, const MeasurementType::ACCELEROMETER&);
                 Eigen::Vector3d predictedObservation(const Eigen::Matrix<double, size, 1>& state, const MeasurementType::GYROSCOPE&);
 
-                arma::vec observationDifference(const arma::vec& a, const arma::vec& b);
+                Eigen::VectorXd observationDifference(const arma::vec& a, const arma::vec& b);
 
                 Eigen::Matrix<double, size, 1> limitState(const Eigen::Matrix<double, size, 1>& state);
 

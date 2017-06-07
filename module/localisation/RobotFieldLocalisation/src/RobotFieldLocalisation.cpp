@@ -172,7 +172,7 @@ namespace localisation {
                     }
                 }
 
-                arma::vec armaMeas = measurement;
+                Eigen::VectorXd armaMeas = measurement;
 
                 // Apply our multiple measurement updates
                 arma::mat covmat = arma::diagmat(
@@ -212,7 +212,7 @@ namespace localisation {
                     }
                 }
 
-                arma::vec armaMeas = measurement;
+                Eigen::VectorXd armaMeas = measurement;
 
                 // Apply our multiple measurement updates
                 arma::mat covmat = arma::diagmat(

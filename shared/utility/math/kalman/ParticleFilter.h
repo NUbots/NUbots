@@ -91,12 +91,12 @@ namespace utility {
                                          const arma::mat& measurement_variance,
                                          const TMeasurementType&... measurementArgs)
                 {
-                    arma::vec weights = Eigen::Matrix<double, particles.n_rows, 1>::Zero();
+                    Eigen::VectorXd weights = Eigen::Matrix<double, particles.n_rows, 1>::Zero();
 
                     for (unsigned int i = 0; i < particles.n_rows; i++){
-                        arma::vec predictedObservation = model.predictedObservation(particles.row(i).t(), measurementArgs...);
+                        Eigen::VectorXd predictedObservation = model.predictedObservation(particles.row(i).t(), measurementArgs...);
                         assert(predictedObservation.size() == measurement.size());
-                        arma::vec difference = predictedObservation-measurement;
+                        Eigen::VectorXd difference = predictedObservation-measurement;
                         weights[i] = std::exp(- arma::dot(difference, (measurement_variance.i() * difference)));
                     }
                     // std::cout << "weights = \n" << weights << std::endl;

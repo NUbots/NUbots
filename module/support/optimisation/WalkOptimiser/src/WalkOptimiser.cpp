@@ -148,7 +148,7 @@ namespace module {
 
                 on<Trigger<OptimisationComplete>, Sync<WalkOptimiser>>().then("Record Results", [this] {
                     //Combine samples
-                    arma::vec result = utility::math::optimisation::PGA::updateEstimate(samples, fitnesses);
+                    Eigen::VectorXd result = utility::math::optimisation::PGA::updateEstimate(samples, fitnesses);
 
                     std::cerr << "Final Result:" <<std::endl;
                     auto cfg = getWalkConfig(result);
@@ -156,8 +156,8 @@ namespace module {
                 });
             }
 
-            arma::vec WalkOptimiser::getState(const Configuration& walkConfig){
-                arma::vec state(parameter_names.size());
+            Eigen::VectorXd WalkOptimiser::getState(const Configuration& walkConfig){
+                Eigen::VectorXd state(parameter_names.size());
                 std::cerr << "walkConfig.size() = " << walkConfig.config.size() << "\nLoading state:"<< std::endl;
                 int i = 0;
                 for(const std::string& name : parameter_names){

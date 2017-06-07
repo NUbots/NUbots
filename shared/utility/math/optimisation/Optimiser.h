@@ -41,7 +41,7 @@ namespace utility {
             class Optimiser {
             public:
                 virtual const OptimiserEstimate& estimate() = 0;
-                virtual OptimiserEstimate updateEstimate(arma::mat samples, arma::vec fitnesses) = 0;
+                virtual OptimiserEstimate updateEstimate(arma::mat samples, Eigen::VectorXd fitnesses) = 0;
                 virtual arma::mat getSamples(const uint& numSamples = 7) = 0;
                 virtual bool validSample(...) = 0;
                 virtual void reset() = 0;
@@ -83,7 +83,7 @@ namespace utility {
                  *
                  * @author Josiah Walker
                  */
-                virtual OptimiserEstimate updateEstimate(arma::mat samples, arma::vec fitnesses) {
+                virtual OptimiserEstimate updateEstimate(arma::mat samples, Eigen::VectorXd fitnesses) {
 
                     currentValues = estimator.updateEstimate(samples,fitnesses,currentValues);
                     return currentValues;

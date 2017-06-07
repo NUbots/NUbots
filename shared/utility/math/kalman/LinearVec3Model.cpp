@@ -36,12 +36,12 @@ namespace utility {
             }
 
 
-            arma::vec LinearVec3Model::predictedObservation(const Eigen::Matrix<double, size, 1>& state, std::nullptr_t) {
+            Eigen::VectorXd LinearVec3Model::predictedObservation(const Eigen::Matrix<double, size, 1>& state, std::nullptr_t) {
                 return state;
             }
 
 
-            arma::vec LinearVec3Model::observationDifference(const arma::vec& a, const arma::vec& b) {
+            Eigen::VectorXd LinearVec3Model::observationDifference(const arma::vec& a, const arma::vec& b) {
                 return a - b;
             }
 

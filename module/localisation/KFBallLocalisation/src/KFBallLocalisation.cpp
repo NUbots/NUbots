@@ -68,7 +68,7 @@ namespace localisation {
            With<std::vector<Self>>,
            Sync<KFBallLocalisation>>().then("NUbugger Output", [this](const Sensors& sensors, const std::vector<Self>& robots) {
 
-            arma::vec model_state = engine_.ball_filter_.get();
+            Eigen::VectorXd model_state = engine_.ball_filter_.get();
             arma::mat model_cov = engine_.ball_filter_.getCovariance();
 
             arma::mat22 imu_to_robot = sensors.robotToIMU.t();

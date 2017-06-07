@@ -95,9 +95,9 @@ namespace motion {
 			l_arm = config["l_arm"].as<Expression>();
 			r_arm = config["r_arm"].as<Expression>();
 
-            arma::vec oculus_x_axis = config["oculus"]["x_axis"].as<Expression>();
-            arma::vec oculus_y_axis = config["oculus"]["y_axis"].as<Expression>();
-            arma::vec oculus_z_axis = config["oculus"]["z_axis"].as<Expression>();
+            Eigen::VectorXd oculus_x_axis = config["oculus"]["x_axis"].as<Expression>();
+            Eigen::VectorXd oculus_y_axis = config["oculus"]["y_axis"].as<Expression>();
+            Eigen::VectorXd oculus_z_axis = config["oculus"]["z_axis"].as<Expression>();
 
             arma::mat33 camera_to_robot_rot = arma::join_rows(oculus_x_axis,arma::join_rows(oculus_y_axis,oculus_z_axis));
             camera_to_robot.rotation() = camera_to_robot_rot;
@@ -131,9 +131,9 @@ namespace motion {
             l_arm_id = config["mocap_rigidbody_ids"]["l_arm"].as<int>();
             r_arm_id = config["mocap_rigidbody_ids"]["r_arm"].as<int>();
 
-            arma::vec mocap_x_axis = config["mocap"]["x_axis"].as<Expression>();
-            arma::vec mocap_y_axis = config["mocap"]["y_axis"].as<Expression>();
-            arma::vec mocap_z_axis = config["mocap"]["z_axis"].as<Expression>();
+            Eigen::VectorXd mocap_x_axis = config["mocap"]["x_axis"].as<Expression>();
+            Eigen::VectorXd mocap_y_axis = config["mocap"]["y_axis"].as<Expression>();
+            Eigen::VectorXd mocap_z_axis = config["mocap"]["z_axis"].as<Expression>();
             mocap_to_robot = arma::join_rows(mocap_x_axis,arma::join_rows(mocap_y_axis,mocap_z_axis));
 
             gyro_compensation = config["gyro_compensation"].as<bool>();

@@ -70,20 +70,20 @@ Eigen::Matrix<double, BallModel::size, 1> BallModel::timeUpdate(
 // }
 
 /// Return the predicted observation of an object at the given position
-arma::vec BallModel::predictedObservation(
+Eigen::VectorXd BallModel::predictedObservation(
     const Eigen::Matrix<double, BallModel::size, 1>& state, double ballAngle) {
 
     Eigen::Vector3d ball_pos = Eigen::Vector3d(state(kX), state(kY), cfg_.ballHeight);
     auto obs = SphericalRobotObservation({0, 0}, 0, ball_pos);
     obs(1) -= ballAngle;
 
-    arma::vec obsVel = arma::join_cols(obs,state.rows(kVx,kVy));
+    Eigen::VectorXd obsVel = arma::join_cols(obs,state.rows(kVx,kVy));
     return obsVel;
 }
 
-arma::vec BallModel::observationDifference(const arma::vec& a,
+Eigen::VectorXd BallModel::observationDifference(const arma::vec& a,
                                            const arma::vec& b){
-    arma::vec result = a - b;
+    Eigen::VectorXd result = a - b;
     // result(1) = utility::math::angle::normalizeAngle(result(1));
     // result(2) = utility::math::angle::normalizeAngle(result(2));
     return result;

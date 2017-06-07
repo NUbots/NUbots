@@ -81,7 +81,7 @@ namespace optimisation {
         // We are updating our batch
         log<NUClear::INFO>(fmt::format("Processing {}/{} episode batch for {}", opt.episodes.size(), opt.batchSize, opt.group));
 
-        arma::vec fitnesses(opt.episodes.size());
+        Eigen::VectorXd fitnesses(opt.episodes.size());
         arma::mat samples(opt.episodes.size(), opt.optimiser->estimate().estimate.rows());
 
         for (uint i = 0; i < opt.episodes.size(); ++i) {

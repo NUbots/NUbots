@@ -48,10 +48,10 @@ namespace utility {
                 const double theta = -omega*deltaT*0.5;
                 const double sinTheta = sin(theta);
                 const double cosTheta = cos(theta);
-                arma::vec vq({cosTheta,state(VX)*sinTheta/omega,state(VY)*sinTheta/omega,state(VZ)*sinTheta/omega});
+                Eigen::VectorXd vq({cosTheta,state(VX)*sinTheta/omega,state(VY)*sinTheta/omega,state(VZ)*sinTheta/omega});
                 //calculate quaternion multiplication
                 //TODO replace with quaternion class
-                arma::vec qcross = arma::cross( vq.rows(1,3), state.rows(QX,QZ) );
+                Eigen::VectorXd qcross = arma::cross( vq.rows(1,3), state.rows(QX,QZ) );
                 newState(QW) = vq(0)*state(QW) - arma::dot(vq.rows(1,3), state.rows(QX,QZ));
                 newState(QX) = vq(0)*state(QX) + state(QW)*vq(1) + qcross(0);
                 newState(QY) = vq(0)*state(QY) + state(QW)*vq(2) + qcross(1);
@@ -97,7 +97,7 @@ namespace utility {
                        , 2 * state[QX] * state[QZ] - 2 * state[QY] * state[QW] };
             }
 
-            arma::vec IMUModel::observationDifference(const arma::vec& a, const arma::vec& b) {
+            Eigen::VectorXd IMUModel::observationDifference(const arma::vec& a, const arma::vec& b) {
                 return a - b;
 
             }

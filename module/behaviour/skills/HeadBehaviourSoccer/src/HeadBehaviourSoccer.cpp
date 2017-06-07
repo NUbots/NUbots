@@ -384,7 +384,7 @@ namespace module {
             void HeadBehaviourSoccer::updateHeadPlan(const KinematicsModel& kinematicsModel, const std::vector<Ball>& fixationObjects, const bool& search, const Sensors& sensors, const Rotation3D& headToIMUSpace){
                 std::vector<Eigen::Vector2d> fixationPoints;
                 std::vector<Eigen::Vector2d> fixationSizes;
-                arma::vec centroid = {0,0};
+                Eigen::VectorXd centroid = {0,0};
                 Eigen::Vector2d currentPos = {sensors.servo.at(ServoID::HEAD_YAW).presentPosition, sensors.servo.at(ServoID::HEAD_PITCH).presentPosition};
 
                 for(uint i = 0; i < fixationObjects.size(); i++){
@@ -419,7 +419,7 @@ namespace module {
             void HeadBehaviourSoccer::updateHeadPlan(const KinematicsModel& kinematicsModel, const std::vector<Goal>& fixationObjects, const bool& search, const Sensors& sensors, const Rotation3D& headToIMUSpace){
                 std::vector<Eigen::Vector2d> fixationPoints;
                 std::vector<Eigen::Vector2d> fixationSizes;
-                arma::vec centroid = {0,0};
+                Eigen::VectorXd centroid = {0,0};
                 Eigen::Vector2d currentPos;
                 for (const auto& servo : sensors.servo)
                 {

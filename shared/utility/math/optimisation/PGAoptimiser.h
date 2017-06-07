@@ -38,15 +38,15 @@ namespace utility {
                  * Takes a row-wise list of sample parameters, a corresponding vector of fitnesses, and a selectivity constant c (don't change c unless you know what it does)
                  * @author Josiah Walker
                  */
-                inline arma::vec updateEstimate(const arma::mat& samples, const arma::vec& fitnesses, const double c = 7.0) {
+                inline Eigen::VectorXd updateEstimate(const arma::mat& samples, const arma::vec& fitnesses, const double c = 7.0) {
 
                     //create a vector of normed fitnesses
                     const double min = arma::min(fitnesses);
                     const double max = arma::max(fitnesses);
-                    const arma::vec normedFitnesses = (max-fitnesses)/(max-min+std::numeric_limits<double>::epsilon());
+                    const Eigen::VectorXd normedFitnesses = (max-fitnesses)/(max-min+std::numeric_limits<double>::epsilon());
 
                     //create a set of weights per sample which specifies the likelihood that they are near the best estimate
-                    const arma::vec sampleWeights = arma::exp(-c*normedFitnesses);
+                    const Eigen::VectorXd sampleWeights = arma::exp(-c*normedFitnesses);
 
                     //return the probabilistically weighted result estimate
                     return arma::sum(samples % arma::repmat(sampleWeights/arma::accu(sampleWeights),1,samples.n_cols),0).t();

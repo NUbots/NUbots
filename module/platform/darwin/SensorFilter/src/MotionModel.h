@@ -80,7 +80,7 @@ namespace module {
                 Eigen::Vector3d predictedObservation(const Eigen::Matrix<double, size, 1>& state, const MeasurementType::FLAT_FOOT_ODOMETRY&);
                 Eigen::Vector4d predictedObservation(const Eigen::Matrix<double, size, 1>& state, const MeasurementType::FLAT_FOOT_ORIENTATION&);
 
-                arma::vec observationDifference(const arma::vec& a, const arma::vec& b);
+                Eigen::VectorXd observationDifference(const arma::vec& a, const arma::vec& b);
 
                 Eigen::Matrix<double, size, 1> limitState(const Eigen::Matrix<double, size, 1>& state);
 

@@ -46,7 +46,7 @@ namespace module {
             return state;
         }
 
-        arma::vec FieldModel::predictedObservation(const Eigen::Matrix<double, size, 1>& state
+        Eigen::VectorXd FieldModel::predictedObservation(const Eigen::Matrix<double, size, 1>& state
             , const std::vector<std::tuple<GoalTeam, GoalSide, GoalMeasurementType>>& measurements
             , const FieldDescription& field
             , const Sensors& sensors
@@ -64,7 +64,7 @@ namespace module {
             const Transform3D& Htc = convert<double, 4, 4>(sensors.forwardKinematics.at(ServoID::HEAD_PITCH));
             Transform3D Hwc = Htw.i() * Htc;
             //Get the x/y position for goals
-            arma::vec prediction(3*measurements.size());
+            Eigen::VectorXd prediction(3*measurements.size());
             int counter = 0;
             //std::string ans = "";
             for(auto& type : measurements) {
@@ -136,7 +136,7 @@ namespace module {
             return prediction;
         }
 
-        arma::vec FieldModel::observationDifference(const arma::vec& a, const arma::vec& b) const {
+        Eigen::VectorXd FieldModel::observationDifference(const arma::vec& a, const arma::vec& b) const {
             //std::cerr << (a-b) << std::endl << a << std::endl << b << std::endl << std::endl;
             return (a - b);
         }

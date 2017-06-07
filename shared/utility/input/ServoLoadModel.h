@@ -43,7 +43,7 @@ namespace input
             return state;
         }
 
-        arma::vec observationDifference(const arma::vec& a, const arma::vec& b) {
+        Eigen::VectorXd observationDifference(const arma::vec& a, const arma::vec& b) {
             return a - b;
         }
 

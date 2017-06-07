@@ -96,7 +96,7 @@ namespace strategy {
         void standStill();
         void searchWalk();
         void walkTo(const message::support::FieldDescription& fieldDescription, const message::behaviour::FieldTarget::Target& object);
-        void walkTo(const message::support::FieldDescription& fieldDescription, arma::vec position);
+        void walkTo(const message::support::FieldDescription& fieldDescription, Eigen::VectorXd position);
         void find(const std::vector<message::behaviour::FieldTarget>& objects);
         void spinWalk();
         bool pickedUp(const message::input::Sensors& sensors);

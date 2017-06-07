@@ -35,7 +35,7 @@ namespace autocal {
 		// std::cout << "Loading " << m.n_cols << " rigid bodies" << std::endl;
 		// std::cout << m << std::endl;
 		for(int n = 0; n < m.n_cols; n++){
-			arma::vec data = m.col(n);
+			Eigen::VectorXd data = m.col(n);
 
 			RigidBody r;
 

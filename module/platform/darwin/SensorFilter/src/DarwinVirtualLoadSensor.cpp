@@ -35,9 +35,9 @@ namespace module {
             }
 
             DarwinVirtualLoadSensor::DarwinVirtualLoadSensor(arma::mat hiddenWeights,
-                                    arma::vec hiddenBias,
+                                    Eigen::VectorXd hiddenBias,
                                     arma::mat outputWeights,
-                                    arma::vec outputBias,
+                                    Eigen::VectorXd outputBias,
                                     double noiseFactor,
                                     double certaintyThreshold,
                                     double uncertaintyThreshold)

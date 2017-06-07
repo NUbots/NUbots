@@ -108,7 +108,7 @@ namespace module {
                 return state.rows(QW, QZ);
             }
 
-            arma::vec MotionModel::observationDifference(const arma::vec& a, const arma::vec& b) {
+            Eigen::VectorXd MotionModel::observationDifference(const arma::vec& a, const arma::vec& b) {
                 return a - b;
             }
 

@@ -49,7 +49,7 @@ namespace module {
 
             Eigen::Matrix<double, size, 1> timeUpdate(const Eigen::Matrix<double, size, 1>& state, double deltaT);
 
-            arma::vec predictedObservation(const Eigen::Matrix<double, size, 1>& state
+            Eigen::VectorXd predictedObservation(const Eigen::Matrix<double, size, 1>& state
                 , const std::vector<std::tuple<message::vision::Goal::Team::Value,
                                                message::vision::Goal::Side::Value,
                                                message::vision::Goal::MeasurementType>>& measurements
@@ -57,7 +57,7 @@ namespace module {
                 , const message::input::Sensors& sensors
                 , const MeasurementType::GOAL&);
 
-            arma::vec observationDifference(const arma::vec& a, const arma::vec& b) const;
+            Eigen::VectorXd observationDifference(const arma::vec& a, const arma::vec& b) const;
 
             Eigen::Matrix<double, size, 1> limitState(const Eigen::Matrix<double, size, 1>& state) const;
 

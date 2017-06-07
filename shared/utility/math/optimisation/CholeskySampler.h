@@ -35,8 +35,8 @@ namespace utility {
                 uint64_t batchSize;
                 uint64_t sampleCount = 0;
                 int generation = -1;
-                arma::vec upperBound;
-                arma::vec lowerBound;
+                Eigen::VectorXd upperBound;
+                Eigen::VectorXd lowerBound;
                 arma::mat samples;
             public:
                 CholeskySampler(const OptimiserParameters& params)

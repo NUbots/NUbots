@@ -446,7 +446,7 @@ namespace module {
                     if(previousSensors)
                     {
                         // Use our virtual load sensor class to work out if our foot is down
-                        arma::vec leftFootFeatureVec = {
+                        Eigen::VectorXd leftFootFeatureVec = {
                               sensors->servo[ServoID::L_HIP_PITCH].presentVelocity
                             , sensors->servo[ServoID::L_HIP_PITCH].presentVelocity - previousSensors->servo[ServoID::L_HIP_PITCH].presentVelocity
                             , sensors->servo[ServoID::L_HIP_PITCH].load
@@ -459,7 +459,7 @@ namespace module {
                         };
                         sensors->leftFootDown = leftFootDown.updateFoot(leftFootFeatureVec);
 
-                        arma::vec rightFootFeatureVec = {
+                        Eigen::VectorXd rightFootFeatureVec = {
                               sensors->servo[ServoID::R_HIP_PITCH].presentVelocity
                             , sensors->servo[ServoID::R_HIP_PITCH].presentVelocity - previousSensors->servo[ServoID::R_HIP_PITCH].presentVelocity
                             , sensors->servo[ServoID::R_HIP_PITCH].load

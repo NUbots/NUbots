@@ -31,8 +31,8 @@ namespace utility {
              */
             class WMDEstimator {
             private:
-                arma::vec bestEstimate;
-                arma::vec startPoint;
+                Eigen::VectorXd bestEstimate;
+                Eigen::VectorXd startPoint;
                 const double c = 7.0;
 
             public:
@@ -51,7 +51,7 @@ namespace utility {
                     bestEstimate = startPoint * 1.0;
                 }
 
-                arma::vec currentEstimate() {
+                Eigen::VectorXd currentEstimate() {
                     return bestEstimate;
                 }
 
@@ -66,21 +66,21 @@ namespace utility {
                  *
                  * @author Josiah Walker
                  */
-                arma::vec updateEstimate(const arma::mat& samples, const arma::vec& fitnesses, const arma::vec& unused) {
+                Eigen::VectorXd updateEstimate(const arma::mat& samples, const arma::vec& fitnesses, const arma::vec& unused) {
 
                     //create a vector of normed fitnesses
                     const double min = arma::min(fitnesses);
                     const double max = arma::max(fitnesses);
-                    const arma::vec normedFitnesses = (max-fitnesses)/(max-min+std::numeric_limits<double>::epsilon());
+                    const Eigen::VectorXd normedFitnesses = (max-fitnesses)/(max-min+std::numeric_limits<double>::epsilon());
 
                     //create a set of weights per sample which specifies the likelihood that they are near the best estimate
-                    const arma::vec sampleWeights = arma::exp(-c*normedFitnesses);
+                    const Eigen::VectorXd sampleWeights = arma::exp(-c*normedFitnesses);
 
                     //NOTE: here we deviate from PGA: use the geometric median
                     //this is the iterative least squares solution to the
                     //Weber problem, modified slightly to behave around 0.
                     for (uint64_t j = 0; j < 50; ++j) {
-                        arma::vec update(bestEstimate.n_elem,arma::fill::zeros);
+                        Eigen::VectorXd update(bestEstimate.n_elem,arma::fill::zeros);
                         double div = 0.0;
                         for (uint64_t i = 0; i < samples.n_rows; ++i) {
                             const double scale = sampleWeights[i]/(arma::norm(bestEstimate-samples.row(i).t()) + 0.01);
@@ -98,7 +98,7 @@ namespace utility {
             class WMDSampler {
             //NOTE: thise is identical to PGASampler
             private:
-                arma::vec sigmaWeights;
+                Eigen::VectorXd sigmaWeights;
 
             public:
                 /**
@@ -115,7 +115,7 @@ namespace utility {
                 void reset() {
                 }
 
-                arma::vec getVariances() {
+                Eigen::VectorXd getVariances() {
                     return arma::square(sigmaWeights);
                 }
 

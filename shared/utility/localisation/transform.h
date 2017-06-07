@@ -28,10 +28,10 @@ namespace utility {
 namespace localisation {
 namespace transform {
 
-    inline arma::vec RobotToWorldTransform(const arma::vec& robot_pos,
+    inline Eigen::VectorXd RobotToWorldTransform(const arma::vec& robot_pos,
                                            const arma::vec& robot_heading,
                                            const arma::vec& relative_ball_pos) {
-        arma::vec u = arma::normalise(robot_heading);
+        Eigen::VectorXd u = arma::normalise(robot_heading);
         arma::mat rot;
         rot <<  u[0] << -u[1] << arma::endr
             <<  u[1] <<  u[0];
@@ -39,10 +39,10 @@ namespace transform {
         return rot * relative_ball_pos + robot_pos;
     }
 
-    inline arma::vec WorldToRobotTransform(const arma::vec& robot_pos,
+    inline Eigen::VectorXd WorldToRobotTransform(const arma::vec& robot_pos,
                                            const arma::vec& robot_heading,
                                            const arma::vec& field_ball_pos) {
-        arma::vec u = arma::normalise(robot_heading);
+        Eigen::VectorXd u = arma::normalise(robot_heading);
         arma::mat rot;
         rot <<  u[0] <<  u[1] << arma::endr
             << -u[1] <<  u[0];
@@ -50,7 +50,7 @@ namespace transform {
         return rot * (field_ball_pos - robot_pos);
     }
 
-    inline arma::vec RobotToWorldTransform(const arma::vec& robot_pos,
+    inline Eigen::VectorXd RobotToWorldTransform(const arma::vec& robot_pos,
                                            const double& robot_heading,
                                            const arma::vec& relative_ball_pos) {
         arma::mat rot = math::matrix::Rotation2D::createRotation(robot_heading);
@@ -58,7 +58,7 @@ namespace transform {
         return rot * relative_ball_pos + robot_pos;
     }
 
-    inline arma::vec WorldToRobotTransform(const arma::vec& robot_pos,
+    inline Eigen::VectorXd WorldToRobotTransform(const arma::vec& robot_pos,
                                            const double& robot_heading,
                                            const arma::vec& field_ball_pos) {
         arma::mat rot = math::matrix::Rotation2D::createRotation(-robot_heading);
@@ -66,7 +66,7 @@ namespace transform {
         return rot * (field_ball_pos - robot_pos);
     }
 
-    inline arma::vec SphericalRobotObservation(
+    inline Eigen::VectorXd SphericalRobotObservation(
             const arma::vec& robot_pos,
             const double& robot_heading,
             const Eigen::Vector3d& actual_position) {
@@ -88,7 +88,7 @@ namespace transform {
         return arma::normalise(worldRobotHeading.rows(0,1));
     }
 
-    inline arma::vec SphericalRobotObservation(
+    inline Eigen::VectorXd SphericalRobotObservation(
             const arma::vec& robot_pos,
             const Eigen::Vector2d& robot_heading,
             const Eigen::Vector3d& actual_position) {

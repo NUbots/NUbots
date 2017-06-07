@@ -90,7 +90,7 @@ namespace autocal{
 
 	std::pair<Eigen::Vector3d,Eigen::Vector3d> CalibrationTools::getTranslationComponent(const std::vector<Transform3D>& samplesA, const std::vector<Transform3D>& samplesB,const Rotation3D& Ry, bool& success){
 		arma::mat combinedF;
-		arma::vec combinedD;
+		Eigen::VectorXd combinedD;
 
 		for (int i = 0; i < samplesA.size(); i++){
 			Rotation3D RA = samplesA[i].rotation();
@@ -99,7 +99,7 @@ namespace autocal{
 
 			arma::mat F = arma::join_rows(RA,-arma::eye(3,3));
 
-			arma::vec D = Ry * pB - pA;
+			Eigen::VectorXd D = Ry * pB - pA;
 
 			if (i == 0){
 				combinedF = F;
@@ -109,7 +109,7 @@ namespace autocal{
 				combinedD = arma::join_cols(combinedD,D);
 			}
 		}
-		arma::vec pxpy;
+		Eigen::VectorXd pxpy;
 		bool pxpySuccess = solveWithSVD(combinedF,combinedD,pxpy);
 
 		if(!pxpySuccess){
@@ -147,7 +147,7 @@ namespace autocal{
 		Transform3D X,Y;
 
 		arma::mat combinedG;
-		arma::vec combinedC;
+		Eigen::VectorXd combinedC;
 
 		float a0 = 0;
 		float b0 = 0;
@@ -184,7 +184,7 @@ namespace autocal{
 			arma::mat G = arma::join_rows(G1,G2);
 
 			//Compute C in Gw = C
-			arma::vec C = b - (b0/a0) * a;
+			Eigen::VectorXd C = b - (b0/a0) * a;
 
 			if (i == 0){
 				combinedG = G;
@@ -195,7 +195,7 @@ namespace autocal{
 			}
 		}
 
-		arma::vec w;
+		Eigen::VectorXd w;
 		bool wSuccess = solveWithSVD(combinedG,combinedC, w);
 		if(!wSuccess){
 			//If SVD fails, return identity
@@ -287,7 +287,7 @@ namespace autocal{
 
 		//Take singular value decomposition of K
 		arma::mat U,V;
-		arma::vec s;
+		Eigen::VectorXd s;
 		arma::svd(U,s,V,K);
 
 		// std::cout << "U = \n" << U << std::endl;
@@ -295,14 +295,14 @@ namespace autocal{
 		// std::cout << "V = \n" << V << std::endl;
 
 		//Get index of singular values closest to n
-		// arma::vec sMinusN = arma::abs(s-double(n));
+		// Eigen::VectorXd sMinusN = arma::abs(s-double(n));
 		// sMinusN.min(index);
 
 		//Use largest singular value
 		arma::uword index = 0;
 
-		arma::vec u = U.col(index);
-		arma::vec v = V.col(index);
+		Eigen::VectorXd u = U.col(index);
+		Eigen::VectorXd v = V.col(index);
 
 		// std::cout << "u = \n" << u << std::endl;
 		// std::cout << "s(index)  = \n" << s(index) << std::endl;
@@ -365,15 +365,15 @@ namespace autocal{
 
 		arma::mat44 CTC = C.t() * C;
 
-		arma::vec eigval;
+		Eigen::VectorXd eigval;
 		arma::mat eigvec;
 		arma::eig_sym( eigval, eigvec, CTC );
 		std::cout << "eigval = " << eigval << std::endl;
 		std::cout << "eigvec = " << eigvec << std::endl;
 
-		arma::vec lamda1 = n + arma::sqrt(eigval);
-		arma::vec lamda2 = n - arma::sqrt(eigval);
-		arma::vec lamda = arma::join_cols(lamda1,lamda2);
+		Eigen::VectorXd lamda1 = n + arma::sqrt(eigval);
+		Eigen::VectorXd lamda2 = n - arma::sqrt(eigval);
+		Eigen::VectorXd lamda = arma::join_cols(lamda1,lamda2);
 		std::cout << "lamda1 = " << lamda1 << std::endl;
 		std::cout << "lamda2 = " << lamda2 << std::endl;
 		std::cout << "lamda = " << lamda << std::endl;

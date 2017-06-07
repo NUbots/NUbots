@@ -66,18 +66,18 @@ namespace utility {
                  * @author Josiah Walker
                  */
                 OptimiserEstimate updateEstimate(const arma::mat& samples, const arma::vec& fitnesses, OptimiserEstimate& previousEstimate) {
-                    arma::vec bestEstimate = convert<double>(previousEstimate.estimate);
-                    arma::vec covEstimate = arma::diagvec(convert<double>(previousEstimate.covariance));
+                    Eigen::VectorXd bestEstimate = convert<double>(previousEstimate.estimate);
+                    Eigen::VectorXd covEstimate = arma::diagvec(convert<double>(previousEstimate.covariance));
 
                     if (firstRun) {
                         firstRun = false;
                         baseline = arma::mean(fitnesses);
                     }
 
-                    arma::vec alpha = covEstimate * learningRate;
-                    arma::vec alphaCov = covEstimate * sigmaLearningRate;
-                    arma::vec update(covEstimate.n_elem,arma::fill::zeros);
-                    arma::vec updateCov(covEstimate.n_elem,arma::fill::zeros);
+                    Eigen::VectorXd alpha = covEstimate * learningRate;
+                    Eigen::VectorXd alphaCov = covEstimate * sigmaLearningRate;
+                    Eigen::VectorXd update(covEstimate.n_elem,arma::fill::zeros);
+                    Eigen::VectorXd updateCov(covEstimate.n_elem,arma::fill::zeros);
                     for(uint64_t i = 0; i < fitnesses.n_elem; ++i) {
                         update += alpha * (fitnesses[i]-baseline) % (samples.row(i).t() - bestEstimate);
                         updateCov += alphaCov *

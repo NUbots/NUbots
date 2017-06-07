@@ -52,7 +52,7 @@ namespace module {
                 , const message::input::Sensors& sensors
                 , const MeasurementType::BALL&) const;
 
-            arma::vec observationDifference(const arma::vec& measurement
+            Eigen::VectorXd observationDifference(const arma::vec& measurement
                 , const Eigen::Vector3d& rBCc
                 , const message::support::FieldDescription& field
                 , const message::input::Sensors& sensors

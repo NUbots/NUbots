@@ -138,7 +138,7 @@ namespace vision {
 
     }
 
-    inline arma::vec objectDirectionFromScreenAngular(const arma::vec& screenAngular){
+    inline Eigen::VectorXd objectDirectionFromScreenAngular(const arma::vec& screenAngular){
         if(std::fmod(std::fabs(screenAngular[0]),M_PI) == M_PI_2 || std::fmod(std::fabs(screenAngular[1]),M_PI) == M_PI_2){
             return {0,0,0};
         }
@@ -156,7 +156,7 @@ namespace vision {
         return {x,y,z};
     }
 
-    inline arma::vec screenAngularFromObjectDirection(const arma::vec& v){
+    inline Eigen::VectorXd screenAngularFromObjectDirection(const arma::vec& v){
         return {std::atan2(v[1],v[0]),std::atan2(v[2],v[0])};
     }
 
@@ -223,7 +223,7 @@ namespace vision {
         cornerIndices.fill(0);
 
 
-        arma::vec pvals = goalBaseCorners.t() * arma::cross(goalBaseCorners.col(0), goalTopCorners.col(0));
+        Eigen::VectorXd pvals = goalBaseCorners.t() * arma::cross(goalBaseCorners.col(0), goalTopCorners.col(0));
         arma::uvec baseIndices = arma::sort_index(pvals);
         cornerIndices[2] = baseIndices[0];
         cornerIndices[3] = baseIndices[3];

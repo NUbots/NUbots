@@ -444,7 +444,7 @@ namespace strategy {
         emit(std::make_unique<MotionCommand>(utility::behaviour::BallApproach(enemyGoal)));
     }
 
-    void SoccerStrategy::walkTo(const FieldDescription& fieldDescription, arma::vec position) {
+    void SoccerStrategy::walkTo(const FieldDescription& fieldDescription, Eigen::VectorXd position) {
 
         Eigen::Vector2d enemyGoal = {fieldDescription.dimensions.field_length * 0.5, 0};
 

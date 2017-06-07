@@ -77,7 +77,7 @@ double KFBallLocalisationEngine::MeasurementUpdate(const VisionObject& observed_
 
         //new measurement
         //add velocity before measurement:
-        arma::vec posVel = arma::join_cols(sphericalImuObservation, measurement.velocity.rows(0,1));
+        Eigen::VectorXd posVel = arma::join_cols(sphericalImuObservation, measurement.velocity.rows(0,1));
         arma::mat posVelCov = arma::eye(5,5);
         posVelCov.submat(0,0,2,2) = cov;
         posVelCov.submat(3,3,4,4) = measurement.velCov.submat(0,0,1,1);

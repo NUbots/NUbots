@@ -202,7 +202,7 @@ namespace utility {
                     }
 
                     // Now calculate the mean of these measurement sigmas.
-                    arma::vec predictedMean;
+                    Eigen::VectorXd predictedMean;
                     meanFromSigmas(predictedMean, predictedObservations);
                     auto centredObservations = predictedObservations - arma::repmat(predictedMean, 1, NUM_SIGMA_POINTS);
 

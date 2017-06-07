@@ -61,21 +61,21 @@ namespace robot {
             const Eigen::Matrix<double, RobotModel::size, 1>& state, double deltaT,
             const message::input::Sensors& sensors);
 
-        arma::vec predictedObservation(
+        Eigen::VectorXd predictedObservation(
             const Eigen::Matrix<double, RobotModel::size, 1>& state,
             const Eigen::Vector3d& actual_position,
             const message::input::Sensors& sensors);
 
-        //arma::vec predictedObservation(
+        //Eigen::VectorXd predictedObservation(
         //    const Eigen::Matrix<double, RobotModel::size, 1>& state,
         //    const message::input::Sensors& sensors);
 
-        arma::vec predictedObservation(
+        Eigen::VectorXd predictedObservation(
             const Eigen::Matrix<double, RobotModel::size, 1>& state,
             const std::vector<arma::vec>& actual_positions,
             const message::input::Sensors& sensors);
 
-        arma::vec observationDifference(const arma::vec& a, const arma::vec& b);
+        Eigen::VectorXd observationDifference(const arma::vec& a, const arma::vec& b);
 
         Eigen::Matrix<double, size, 1> limitState(const Eigen::Matrix<double, size, 1>& state);
 

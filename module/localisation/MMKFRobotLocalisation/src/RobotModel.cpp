@@ -51,7 +51,7 @@ namespace robot {
 
 
     /// Return the predicted observation of an object at the given position
-    arma::vec RobotModel::predictedObservation(
+    Eigen::VectorXd RobotModel::predictedObservation(
         const Eigen::Matrix<double, RobotModel::size, 1>& state,
         const Eigen::Vector3d& actual_position,
         const Sensors& sensors) {
@@ -67,23 +67,23 @@ namespace robot {
     }
 
     // Angle between goals - NOTE: CURRENTLY UNUSED
-    arma::vec RobotModel::predictedObservation(
+    Eigen::VectorXd RobotModel::predictedObservation(
         const Eigen::Matrix<double, RobotModel::size, 1>& state,
         const std::vector<arma::vec>& actual_positions,
         const Sensors& /*sensors*/) {
 
         //TODO: needs to incorporate new motion model position data
-        arma::vec diff_1 = actual_positions[0].rows(0, 1) - state.rows(kX, kY);
-        arma::vec diff_2 = actual_positions[1].rows(0, 1) - state.rows(kX, kY);
-        arma::vec radial_1 = cartesianToRadial(diff_1);
-        arma::vec radial_2 = cartesianToRadial(diff_2);
+        Eigen::VectorXd diff_1 = actual_positions[0].rows(0, 1) - state.rows(kX, kY);
+        Eigen::VectorXd diff_2 = actual_positions[1].rows(0, 1) - state.rows(kX, kY);
+        Eigen::VectorXd radial_1 = cartesianToRadial(diff_1);
+        Eigen::VectorXd radial_2 = cartesianToRadial(diff_2);
 
         auto angle_diff = utility::math::angle::difference(radial_1[1], radial_2[1]);
 
         return { std::abs(angle_diff) };
     }
 
-    arma::vec RobotModel::observationDifference(const arma::vec& a,
+    Eigen::VectorXd RobotModel::observationDifference(const arma::vec& a,
                                                 const arma::vec& b) {
         if (a.n_elem == 1) {
             return a - b;
