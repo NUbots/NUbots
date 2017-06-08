@@ -39,7 +39,7 @@ namespace utility {
 
                 stateMatrix.col(0) = stateMatrix.col(0) / normDown;     //Normalise down
 
-                double dotProd = arma::dot(stateMatrix.col(0), stateMatrix.col(1));
+                double dotProd = stateMatrix.col(0).dot(stateMatrix.col(1));
                 //Angle for checking:
                 double angle = acos(dotProd) * 180 / M_PI;
                 if(angle < 45 || angle > 135){
@@ -75,11 +75,11 @@ namespace utility {
                 }
                 Eigen::Vector3d unitOmega = omega / phi;
 
-                const auto omegaCrossStateDown = arma::cross(unitOmega,stateMatrix.col(0));
-                stateMatrix.col(0) = stateMatrix.col(0) * cos(phi) + omegaCrossStateDown * sin(phi) + unitOmega * arma::dot(unitOmega, stateMatrix.col(0)) * (1.0 - cos(phi));
+                const Eigen::Vector3d omegaCrossStateDown = unitOmega.cross(stateMatrix.col(0));
+                stateMatrix.col(0) = stateMatrix.col(0) * cos(phi) + omegaCrossStateDown * sin(phi) + unitOmega * unitOmega.dot(stateMatrix.col(0)) * (1.0 - cos(phi));
 
-                const auto omegaCrossStateForward = arma::cross(unitOmega,stateMatrix.col(1));
-                stateMatrix.col(1) = stateMatrix.col(1) * cos(phi) + omegaCrossStateForward * sin(phi) + unitOmega * arma::dot(unitOmega, stateMatrix.col(1)) * (1.0 - cos(phi));
+                const Eigen::Vector3d omegaCrossStateForward = unitOmega.cross(stateMatrix.col(1));
+                stateMatrix.col(1) = stateMatrix.col(1) * cos(phi) + omegaCrossStateForward * sin(phi) + unitOmega * unitOmega.dot(stateMatrix.col(1)) * (1.0 - cos(phi));
 
                 return static_cast<Eigen::Matrix<double, size, 1>>(arma::vectorise(stateMatrix));
             }

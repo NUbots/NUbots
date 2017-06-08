@@ -220,8 +220,8 @@ namespace vision {
                 double cameraHeight = camToGround(2, 3);
 
                 // Get a unit vector pointing to the centre of the ball
-                Eigen::Vector3d ballCentreRay = arma::normalise(arma::normalise(getCamFromScreen(top, cam.focalLengthPixels))
-                                                           + arma::normalise(getCamFromScreen(base, cam.focalLengthPixels)));
+                Eigen::Vector3d ballCentreRay = (getCamFromScreen(top, cam.focalLengthPixels).normalize()
+                                                           + getCamFromScreen(base, cam.focalLengthPixels).normalize()).normalize();
 
                 // Get the centre of our ball in screen space
                 Eigen::Vector2d ballCentreScreen = projectCamSpaceToScreen(ballCentreRay, cam.focalLengthPixels);
@@ -319,7 +319,7 @@ namespace vision {
                 b.circle.centre = result.model.centre;
 
                 // Angular positions from the camera
-                b.visObject.screenAngular = arma::atan(cam.pixelsToTanThetaFactor % ballCentreScreen);
+                b.visObject.screenAngular = Eigen::atan(cam.pixelsToTanThetaFactor.cwiseProduct(ballCentreScreen).array()).matrix();
                 b.visObject.angularSize   << getParallaxAngle(left, right, cam.focalLengthPixels), getParallaxAngle(top, base, cam.focalLengthPixels);
 
                 // Add our points

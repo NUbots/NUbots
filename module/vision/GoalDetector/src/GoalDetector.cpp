@@ -166,14 +166,14 @@ namespace vision {
                 Line mid;
 
                 // Normals in same direction
-                if(arma::dot(left.normal, right.normal) > 0) {
-                    mid.normal = arma::normalise(right.normal + left.normal);
-                    mid.distance = ((right.distance / arma::dot(right.normal, mid.normal)) + (left.distance / arma::dot(left.normal, mid.normal))) * 0.5;
+                if(left.normal.dot(right.normal) > 0) {
+                    mid.normal = (right.normal + left.normal).normalize();
+                    mid.distance = ((right.distance / right.normal.dot(mid.normal)) + (left.distance / left.normal.dot(mid.normal))) * 0.5;
                 }
                 // Normals opposed
                 else {
-                    mid.normal = arma::normalise(right.normal - left.normal);
-                    mid.distance = ((right.distance / arma::dot(right.normal, mid.normal)) - (left.distance / arma::dot(left.normal, mid.normal))) * 0.5;
+                    mid.normal = (right.normal - left.normal).normalize();
+                    mid.distance = ((right.distance / right.normal.dot(mid.normal)) - (left.distance / left.normal.dot(mid.normal))) * 0.5;
                 }
 
                 // Find a point that should work to start searching down
@@ -240,10 +240,10 @@ namespace vision {
                 Eigen::Vector2d midP2 = mid.orthogonalProjection(basePoint);
 
                 // Project those points outward onto the quad
-                Eigen::Vector2d p1 = midP1 - left.distanceToPoint(midP1)  * arma::dot(left.normal, mid.normal)  * mid.normal;
-                Eigen::Vector2d p2 = midP2 - left.distanceToPoint(midP2)  * arma::dot(left.normal, mid.normal)  * mid.normal;
-                Eigen::Vector2d p3 = midP1 - right.distanceToPoint(midP1) * arma::dot(right.normal, mid.normal) * mid.normal;
-                Eigen::Vector2d p4 = midP2 - right.distanceToPoint(midP2) * arma::dot(right.normal, mid.normal) * mid.normal;
+                Eigen::Vector2d p1 = midP1 - left.distanceToPoint(midP1)  * left.normal.dot(mid.normal)  * mid.normal;
+                Eigen::Vector2d p2 = midP2 - left.distanceToPoint(midP2)  * left.normal.dot(mid.normal)  * mid.normal;
+                Eigen::Vector2d p3 = midP1 - right.distanceToPoint(midP1) * right.normal.dot(mid.normal) * mid.normal;
+                Eigen::Vector2d p4 = midP2 - right.distanceToPoint(midP2) * right.normal.dot(mid.normal) * mid.normal;
 
                 // Make a quad
                 Goal goal;
@@ -274,8 +274,8 @@ namespace vision {
                                                    it->quad.tr,
                                                    it->quad.br);
 
-                Eigen::Vector2d lhs = arma::normalise(quad.getTopLeft()  - quad.getBottomLeft());
-                Eigen::Vector2d rhs = arma::normalise(quad.getTopRight() - quad.getBottomRight());
+                Eigen::Vector2d lhs = (quad.getTopLeft()  - quad.getBottomLeft()).normalize();
+                Eigen::Vector2d rhs = (quad.getTopRight() - quad.getBottomRight()).normalize();
 
                 // Check if we are within the aspect ratio range
                 bool valid = quad.aspectRatio() > MINIMUM_ASPECT_RATIO
@@ -290,11 +290,11 @@ namespace vision {
                           && (horizon.y(quad.getTopRight()[0]) > quad.getTopRight()[1] || horizon.y(quad.getTopRight()[0]) < 0)
 
                 // Check that our two goal lines are perpendicular with the horizon must use greater than rather then less than because of the cos
-                          && std::abs(arma::dot(rhs, horizon.normal)) > MAXIMUM_GOAL_HORIZON_NORMAL_ANGLE
-                          && std::abs(arma::dot(lhs, horizon.normal)) > MAXIMUM_GOAL_HORIZON_NORMAL_ANGLE
+                          && std::abs(rhs.dot(horizon.normal)) > MAXIMUM_GOAL_HORIZON_NORMAL_ANGLE
+                          && std::abs(lhs.dot(horizon.normal)) > MAXIMUM_GOAL_HORIZON_NORMAL_ANGLE
 
                 // Check that our two goal lines are approximatly parallel
-                          && std::abs(arma::dot(lhs, rhs)) > MAXIMUM_ANGLE_BETWEEN_GOALS;
+                          && std::abs(lhs.dot(rhs)) > MAXIMUM_ANGLE_BETWEEN_GOALS;
 
                 // Check that our goals don't form too much of an upward cup (not really possible for us)
                           //&& lhs.at(0) * rhs.at(1) - lhs.at(1) * rhs.at(0) > MAXIMUM_VERTICAL_GOAL_PERSPECTIVE_ANGLE;
@@ -368,11 +368,11 @@ namespace vision {
 
                 // Get our four normals for each edge
                 // BL TL cross product gives left side
-                auto left   = arma::normalise(arma::cross(cbl, ctl));
+                auto left   = cbl.cross(ctl).normalize();
                 it->measurement.push_back(Goal::Measurement(Goal::MeasurementType::LEFT_NORMAL, left));
 
                 // TR BL cross product gives right side
-                auto right  = arma::normalise(arma::cross(ctr, cbl));
+                auto right  = ctr.cross(cbl).normalize();
                 it->measurement.push_back(Goal::Measurement(Goal::MeasurementType::RIGHT_NORMAL, right));
 
                 // Check that the points are not too close to the edges of the screen
@@ -382,7 +382,7 @@ namespace vision {
                 && cam.imageSizePixels[1] - std::max(cbr[1], cbl[1]) < MEASUREMENT_LIMITS_BASE) {
 
                     // BR BL cross product gives the bottom side
-                    auto bottom = arma::normalise(arma::cross(cbr, cbl));
+                    auto bottom = cbr.cross(cbl).normalize();
                     it->measurement.push_back(Goal::Measurement(Goal::MeasurementType::BASE_NORMAL, bottom));
                 }
 
@@ -393,17 +393,17 @@ namespace vision {
                 && cam.imageSizePixels[1] - std::max(ctr[1], ctl[1]) < MEASUREMENT_LIMITS_BASE) {
 
                     // TL TR cross product gives the top side
-                    auto top    = arma::normalise(arma::cross(ctl, ctr));
+                    auto top    = ctl.cross(ctr).normalize();
                     it->measurement.push_back(Goal::Measurement(Goal::MeasurementType::TOP_NORMAL, top));
                 }
 
                 // Angular positions from the camera
                 Eigen::Vector2d pixelsToTanThetaFactor = cam.pixelsToTanThetaFactor;
-                it->visObject.screenAngular = arma::atan(pixelsToTanThetaFactor % screenGoalCentre);
-                Eigen::Vector2d brAngular = arma::atan(pixelsToTanThetaFactor % br);
-                Eigen::Vector2d trAngular = arma::atan(pixelsToTanThetaFactor % tr);
-                Eigen::Vector2d blAngular = arma::atan(pixelsToTanThetaFactor % bl);
-                Eigen::Vector2d tlAngular = arma::atan(pixelsToTanThetaFactor % tl);
+                it->visObject.screenAngular = Eigen::atan(pixelsToTanThetaFactor.cwiseProduct(screenGoalCentre).array()).matrix();
+                Eigen::Vector2d brAngular   = Eigen::atan(pixelsToTanThetaFactor.cwiseProduct(br).array()).matrix();
+                Eigen::Vector2d trAngular   = Eigen::atan(pixelsToTanThetaFactor.cwiseProduct(tr).array()).matrix();
+                Eigen::Vector2d blAngular   = Eigen::atan(pixelsToTanThetaFactor.cwiseProduct(bl).array()).matrix();
+                Eigen::Vector2d tlAngular   = Eigen::atan(pixelsToTanThetaFactor.cwiseProduct(tl).array()).matrix();
                 Quad angularQuad(blAngular,tlAngular,trAngular,brAngular);
                 it->visObject.angularSize = angularQuad.getSize();
             }

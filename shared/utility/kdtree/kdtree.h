@@ -55,11 +55,11 @@ namespace utility
         private:
             uint32_t root;
             std::vector<KDTreeNode<T> > nodes;
-            arma::Mat<T> data;
+            Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic> data;
 
             double getDistSq(const uint32_t& i, const Eigen::Matrix<T, Eigen::Dynamic, 1>& v)
             {
-                return arma::accu(arma::square(data.col(i) - v));
+                return (data.col(i) - v).squaredNorm();
             }
 
             void addNeighbour(std::vector<std::pair<double, uint64_t> >& nHeap, double dist, uint64_t ind)
@@ -94,7 +94,7 @@ namespace utility
                 double splitVal = (UpperBounds[splitDim] + LowerBounds[splitDim]) / 2.0f;
 
                 //slide the split point if one child is empty
-                arma::Row<T> vals = arma::Mat<T>(data.cols(dataIndices)).row(splitDim);
+                Eigen::Matrix<T, 1, Eigen::Dynamic> vals = Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic>(data.cols(dataIndices)).row(splitDim);
                 double maxv = arma::max(vals);
                 double minv = arma::min(vals);
 
@@ -134,7 +134,7 @@ namespace utility
 
                     if (epsilon > 0.0f)
                     {
-                        Eigen::Matrix<T, Eigen::Dynamic, 1> spillDists = arma::Mat<T>(data.cols(spillDataIndices)).row(splitDim).t();
+                        Eigen::Matrix<T, Eigen::Dynamic, 1> spillDists = Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic>(data.cols(spillDataIndices)).row(splitDim).t();
 
                         leftSpillData = arma::join_cols(
                                             spillDataIndices(arma::find(spillDists <= splitVal+epsilon)),
@@ -167,7 +167,7 @@ namespace utility
             }
 
         public:
-            KDTree(const arma::Mat<T>& d, const uint& minLeafSize, const double epsilon = 0.0f)
+            KDTree(const Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic>& d, const uint& minLeafSize, const double epsilon = 0.0f)
             {
                 nodes.push_back(KDTreeNode<T>());
                 data = d;
@@ -256,7 +256,7 @@ namespace utility
                 return(total);
             }
 
-            void replaceData(const arma::Mat<T>& d)
+            void replaceData(const Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic>& d)
             {
                 /*
                 Replaces the internal data store with d.

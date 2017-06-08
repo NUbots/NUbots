@@ -225,7 +225,7 @@ namespace autocal{
 		y.imaginary() = y.real() * w.rows(3,5);
 		x.imaginary() = y.real() * w.rows(0,2);
 
-		float x0 = arma::dot((a/a0), x.rows(1,3)) + (b0/a0) * y.real() - arma::dot((b/a0) , y.rows(1,3));
+		float x0 = (a/a0).dot(x.rows(1,3)) + (b0/a0) * y.real() - (b/a0).dot(y.rows(1,3));
 		int x_sign = x0 > 0 ? 1 : -1;
 		//TODO: figure out how to handle when x is nan
 		x.real() = x_sign * std::sqrt(1 - std::fmin(1, x[1]*x[1] + x[2]*x[2] + x[3]*x[3]) );
@@ -371,8 +371,8 @@ namespace autocal{
 		std::cout << "eigval = " << eigval << std::endl;
 		std::cout << "eigvec = " << eigvec << std::endl;
 
-		Eigen::VectorXd lamda1 = n + arma::sqrt(eigval);
-		Eigen::VectorXd lamda2 = n - arma::sqrt(eigval);
+		Eigen::VectorXd lamda1 = n + Eigen::sqrt(eigval.array()).matrix();
+		Eigen::VectorXd lamda2 = n - Eigen::sqrt(eigval.array()).matrix();
 		Eigen::VectorXd lamda = arma::join_cols(lamda1,lamda2);
 		std::cout << "lamda1 = " << lamda1 << std::endl;
 		std::cout << "lamda2 = " << lamda2 << std::endl;

@@ -50,7 +50,7 @@ namespace geometry {
             if(direction_.lpNorm<1>() <= 0){
                 throw std::domain_error("ParametricLine::setFromDirection - Direction is zero vector!");
             }
-            direction = arma::normalise(direction_);
+            direction = direction_.normalize();
             point = point_;
             tLimits = tLimits_;
         }
@@ -69,7 +69,7 @@ namespace geometry {
 
         Vector projectPointToLine(const Vector& p) const {
             Vector x = p - point;
-            double tProjection = arma::dot(x,direction);
+            double tProjection = x.dot(direction);
             return std::min(std::max(tProjection, tLimits[0]),tLimits[1]) * direction + point;
         }
 

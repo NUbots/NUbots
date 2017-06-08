@@ -66,7 +66,7 @@ Eigen::Vector3d orthogonal2(const Eigen::Vector3d& v) {
  */
 Eigen::Vector3d orthonormal(const Eigen::Vector3d& v) {
     auto u = orthogonal(v);
-    return arma::normalise(u);
+    return u.normalize();
 }
 
 }

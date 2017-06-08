@@ -327,7 +327,7 @@ namespace skills {
         int angleSign = (localTarget.angle() < 0) ? -1 : 1; // angle must be normalised.
 
         double rotationSpeed = angleSign * cfg_.walk_about_rotational_speed;
-        Eigen::Vector2d translationVec = arma::normalise(localTarget.xy());
+        Eigen::Vector2d translationVec = localTarget.xy().normalize();
 
         double translationAngle = utility::math::angle::vectorToBearing(translationVec);
 
@@ -349,13 +349,13 @@ namespace skills {
         /// double rotationSpeed = angleSign * cfg_.walk_about_rotational_speed;
 
         // if (std::abs(walkAboutAngle) < M_PI*0.125) {
-        ///     Transform2D velocity = {cfg_.walk_to_near_speed * arma::normalise(targetState.xy() - currentState.xy()), rotationSpeed}; //TODO make 20 seconds the variable update_frequency
+        ///     Transform2D velocity = {cfg_.walk_to_near_speed * (targetState.xy() - currentState.xy()).normalize(), rotationSpeed}; //TODO make 20 seconds the variable update_frequency
         ///     WalkCommand command(subsumptionId, velocity);
         ///     return command;
         // } else {
         //     Eigen::Vector2d strafe = { std::max(cfg_.walk_about_x_strafe, 0.0), -angleSign * cfg_.walk_about_y_strafe };
 
-        //     Eigen::Vector2d strafeClipped = arma::normalise(strafe) * std::min(1.0, strafe.norm());
+        //     Eigen::Vector2d strafeClipped = strafe.normalize() * std::min(1.0, strafe.norm());
 
         //     Transform2D velocity = {strafeClipped, rotationSpeed}; //TODO make 20 seconds the variable update_frequency
         //     WalkCommand command(subsumptionId, velocity);

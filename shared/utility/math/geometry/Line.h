@@ -88,17 +88,15 @@ namespace geometry {
                 double m = (covmat[1] - average[0] * average[1]);
                 if (std::abs(normal[0]) > std::abs(normal[1])) { //check whether to use y=mx+b or x=my+b
                     //make a unit vector at right angles to the direction of slope
-                    normal = arma::normalise(
-                                Eigen::Vector2d( -1.0, m / (covmat[0] - average[0] * average[0])));
+                    normal = Eigen::Vector2d(-1.0,  m / (covmat[0] - average[0] * average[0])).normalize();
                 } else {
                     //make a unit vector at right angles to the direction of slope
-                    normal = arma::normalise(
-                                Eigen::Vector2d( 1.0, -m / (covmat[3] - average[1] * average[1]) ));
+                    normal = Eigen::Vector2d( 1.0, -m / (covmat[3] - average[1] * average[1])).normalize();
 
                 }
 
                 //find distance the usual way
-                distance = arma::dot(average,normal);
+                distance = average.dot(normal);
             }
         }
     };

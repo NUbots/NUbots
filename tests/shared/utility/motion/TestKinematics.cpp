@@ -41,7 +41,7 @@ TEST_CASE("Test the Head kinematics", "[utility][motion][kinematics][head]") {
 
         // Make a random camera vector
         Eigen::Vector3d camVec = { double(rand()), double(rand()), double(rand()) };
-        camVec = arma::normalise(camVec);
+        camVec = camVec.normalize();
 
         INFO("Testing with the random vector, " << camVec.t());
 

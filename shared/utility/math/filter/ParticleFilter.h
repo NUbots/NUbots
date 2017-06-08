@@ -38,9 +38,9 @@ namespace utility {
 
             private:
                 // Dimension types for vectors and square matricies
-                using StateVec = Eigen::Matrix<double, Model::size, 1>;
-                using ParticleList = arma::mat;
-                using StateMat = arma::mat::fixed<Model::size, Model::size>;
+                using StateVec     = Eigen::Matrix<double, Model::size, 1>;
+                using ParticleList = Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>;
+                using StateMat     = Eigen::Matrix<double, Model::size, Model::size>;
 
                 /* particles.n_rows = number of particles
                    particle.row(i) = particle i
@@ -98,7 +98,7 @@ namespace utility {
                         Eigen::VectorXd predictedObservation = model.predictedObservation(particles.row(i).t(), measurementArgs...);
                         assert(predictedObservation.size() == measurement.size());
                         Eigen::VectorXd difference = predictedObservation-measurement;
-                        weights[i] = std::exp(- arma::dot(difference, (measurement_variance.i() * difference)));
+                        weights[i] = std::exp(-difference.dot((measurement_variance.i() * difference)));
                     }
                     // std::cout << "weights = \n" << weights << std::endl;
                     //Resample
@@ -109,12 +109,12 @@ namespace utility {
                     for (unsigned int i = 0; i < particles.n_rows; i++){
                         particles.row(i) = candidateParticles.row(multinomial(gen));
                     }
-                    return arma::mean(weights);
+                    return weights.mean();
                 }
 
                 StateVec get() const
                 {
-                    return arma::mean(particles, 0).t();
+                    return particles.colwise().mean().t();
                 }
 
                 StateMat getCovariance() const

@@ -99,7 +99,7 @@ namespace motion{
         Eigen::Vector3d goalFromKickFoot = supportToKickFoot.transformPoint(goalPosition);
 
         //Compute follow through:
-        Eigen::Vector3d ballToGoalUnit = arma::normalise(goalFromKickFoot - ballFromKickFoot);
+        Eigen::Vector3d ballToGoalUnit = (goalFromKickFoot - ballFromKickFoot).normalize();
         Eigen::Vector3d followThrough = follow_through * ballToGoalUnit;
         Eigen::Vector3d windUp = - wind_up * ballToGoalUnit;
 

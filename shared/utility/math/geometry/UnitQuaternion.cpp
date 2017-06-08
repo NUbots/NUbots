@@ -53,7 +53,7 @@ namespace geometry {
 
     UnitQuaternion::UnitQuaternion(const Eigen::Vector3d& axis, double angle) {
         real() = std::cos(angle / 2.0);
-        imaginary() = std::sin(angle / 2.0) * arma::normalise(axis);
+        imaginary() = std::sin(angle / 2.0) * axis.normalize();
     }
 
    UnitQuaternion::UnitQuaternion(double W, double X, double Y, double Z)
@@ -65,10 +65,10 @@ namespace geometry {
     UnitQuaternion::UnitQuaternion(const Eigen::Vector3d& vec1, const Eigen::Vector3d& vec2)
     {
         double norm     = vec1.norm() * vec2.norm();
-        double half_cos = std::sqrt(0.5 + arma::dot(vec1, vec2) / (2.0 * norm));
+        double half_cos = std::sqrt(0.5 + vec1.dot(vec2) / (2.0 * norm));
 
         real()      = half_cos;
-        imaginary() = arma::cross(vec1, vec2) / (2.0 * half_cos * norm);
+        imaginary() = vec1.cross(vec2) / (2.0 * half_cos * norm);
 
         this->normalise();
     }
@@ -88,8 +88,8 @@ namespace geometry {
 
     Eigen::Vector3d UnitQuaternion::rotateVector(const Eigen::Vector3d& v) const {
         // Do the math
-        const Eigen::Vector3d t = 2*arma::cross(imaginary(),v);
-        return v + real() * t + arma::cross(imaginary(),t);
+        const Eigen::Vector3d t = 2*imaginary().cross(v);
+        return v + real() * t + imaginary().cross(t);
     }
 
     Eigen::Vector3d UnitQuaternion::getAxis() const {
@@ -105,7 +105,7 @@ namespace geometry {
 
     void UnitQuaternion::setAngle(double angle) {
         real() = std::cos(angle / 2.0);
-        imaginary() = std::sin(angle / 2.0) * arma::normalise(imaginary());
+        imaginary() = std::sin(angle / 2.0) * imaginary().normalize();
     }
 
     void UnitQuaternion::scaleAngle(double scale) {
@@ -113,7 +113,7 @@ namespace geometry {
     }
 
     void UnitQuaternion::normalise() {
-        *this = arma::normalise(*this);
+        *this = (*this).normalize();
     }
 
     Eigen::Matrix4d UnitQuaternion::getLeftQuatMultMatrix() const{
@@ -188,9 +188,9 @@ namespace geometry {
 
     UnitQuaternion UnitQuaternion::operator * (const UnitQuaternion& p) const {
         //From http://en.wikipedia.org/wiki/Quaternion#Quaternions_and_the_geometry_of_R3
-        double realPart = real() * p.real() - arma::dot(imaginary(), p.imaginary());
+        double realPart = real() * p.real() - imaginary().dot(p.imaginary());
 
-        Eigen::Vector3d imaginaryPart = arma::cross(imaginary(), p.imaginary())
+        Eigen::Vector3d imaginaryPart = imaginary().cross(p.imaginary())
                                  + p.real() *   imaginary()
                                  +   real() * p.imaginary();
 

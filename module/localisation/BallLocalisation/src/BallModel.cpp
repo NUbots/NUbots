@@ -67,7 +67,7 @@ namespace module {
 
             double expectedAngle = 2.0 * std::asin((field.ball_radius) / len);
 
-            double actualAngle = std::acos(arma::dot(measurement, rBCc / len));
+            double actualAngle = std::acos(measurement.dot(rBCc / len));
 
             Eigen::Matrix<double, 1, 1> ret;
             ret(0,0) = actualAngle - expectedAngle;

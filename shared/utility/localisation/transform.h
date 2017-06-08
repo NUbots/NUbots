@@ -31,7 +31,7 @@ namespace transform {
     inline Eigen::VectorXd RobotToWorldTransform(const arma::vec& robot_pos,
                                            const arma::vec& robot_heading,
                                            const arma::vec& relative_ball_pos) {
-        Eigen::VectorXd u = arma::normalise(robot_heading);
+        Eigen::VectorXd u = robot_heading.normalize();
         arma::mat rot;
         rot <<  u[0] << -u[1] << arma::endr
             <<  u[1] <<  u[0];
@@ -42,7 +42,7 @@ namespace transform {
     inline Eigen::VectorXd WorldToRobotTransform(const arma::vec& robot_pos,
                                            const arma::vec& robot_heading,
                                            const arma::vec& field_ball_pos) {
-        Eigen::VectorXd u = arma::normalise(robot_heading);
+        Eigen::VectorXd u = robot_heading.normalize();
         arma::mat rot;
         rot <<  u[0] <<  u[1] << arma::endr
             << -u[1] <<  u[0];
@@ -85,7 +85,7 @@ namespace transform {
     inline Eigen::Vector2d ImuToWorldHeadingTransform(double imuOffset, math::matrix::Rotation3D orientation) {
         math::matrix::Rotation3D imuRotation = math::matrix::Rotation3D::createRotationZ(imuOffset);
         Eigen::Vector3d worldRobotHeading = imuRotation * arma::mat(orientation.i()).col(0);
-        return arma::normalise(worldRobotHeading.rows(0,1));
+        return worldRobotHeading.rows(0, 1).normalize();
     }
 
     inline Eigen::VectorXd SphericalRobotObservation(

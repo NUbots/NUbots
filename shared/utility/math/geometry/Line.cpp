@@ -34,10 +34,10 @@ namespace geometry {
     }
 
     void Line::setFromPoints(const Eigen::Vector2d& a, const Eigen::Vector2d& b) {
-        Eigen::Vector2d l = arma::normalise(a - b);
+        Eigen::Vector2d l = (a - b).normalize();
 
         normal = Eigen::Vector2d( -l[1], l[0] );
-        distance = arma::dot(normal, a);
+        distance = normal.dot(a);
     }
 
     double Line::x(const double& y) const {
@@ -49,11 +49,11 @@ namespace geometry {
     }
 
     double Line::distanceToPoint(const Eigen::Vector2d& point) const {
-        return arma::dot(point, normal) - distance;
+        return point.dot(normal) - distance;
     }
 
     double Line::tangentialDistanceToPoint(const Eigen::Vector2d& x) const {
-        return arma::dot(tangent(), x);
+        return tangent().dot(x);
     }
 
     Eigen::Vector2d Line::pointFromTangentialDistance(const double& x) const {
@@ -69,14 +69,14 @@ namespace geometry {
     }
 
     Eigen::Vector2d Line::orthogonalProjection(const Eigen::Vector2d& x) const {
-        return x - (arma::dot(x, normal) - distance) * normal;
+        return x - (x.dot(normal) - distance) * normal;
     }
 
 
     Line Line::getParallelLineThrough(const Eigen::Vector2d& x) const {
         Line result;
         result.normal = normal;
-        result.distance = arma::dot(x, normal);
+        result.distance = x.dot(normal);
         return result;
     }
 

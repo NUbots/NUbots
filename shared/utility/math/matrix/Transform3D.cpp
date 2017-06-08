@@ -239,11 +239,11 @@ namespace matrix {
         Transform2D result;
 
         //Translation
-        Eigen::Vector3d orthoForwardAxis = arma::normalise(arma::cross(yawAxis,arma::cross(forwardAxis,yawAxis)));
+        Eigen::Vector3d orthoForwardAxis = yawAxis.cross(forwardAxis.cross(yawAxis)).normalize();
         Eigen::Vector3d r = translation();
         Rotation3D newSpaceToWorld;
         newSpaceToWorld.x() = orthoForwardAxis;
-        newSpaceToWorld.y() = arma::cross(yawAxis,orthoForwardAxis);
+        newSpaceToWorld.y() = yawAxis.cross(orthoForwardAxis);
         newSpaceToWorld.z() = yawAxis;
         Rotation3D worldToNewSpace = newSpaceToWorld.i();
         Eigen::Vector3d rNewSpace =  worldToNewSpace * r;

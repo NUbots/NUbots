@@ -118,9 +118,9 @@ double RobotHypothesis::MeasurementUpdate(
     // };
 
     // // Use a dot product to calculate heading distance:
-    // Eigen::VectorXd unit_a = arma::normalise(obv_a.measurements[0].position.rows(0, 1));
-    // Eigen::VectorXd unit_b = arma::normalise(obv_b.measurements[0].position.rows(0, 1));
-    // double heading_diff = utility::math::angle::acos_clamped(arma::dot(arma::vec(unit_a), arma::vec(unit_b)));
+    // Eigen::VectorXd unit_a = obv_a.measurements[0].position.rows(0, 1).normalize();
+    // Eigen::VectorXd unit_b = obv_b.measurements[0].position.rows(0, 1).normalize();
+    // double heading_diff = utility::math::angle::acos_clamped(unit_a.dot(unit_b));
 
     // Eigen::VectorXd measurement = { std::abs(heading_diff) };
     // arma::mat cov = Eigen::Matrix<double, 1, 1>::Identity() * 0.1; // TODO: Calculate correct covariance

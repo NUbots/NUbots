@@ -44,7 +44,7 @@ namespace vision {
         Eigen::Vector3d camSpaceP1 = {camFocalLengthPixels, screen1[0], screen1[1]};
         Eigen::Vector3d camSpaceP2 = {camFocalLengthPixels, screen2[0], screen2[1]};
 
-        return utility::math::angle::acos_clamped(arma::dot(camSpaceP1,camSpaceP2) / (camSpaceP1.norm() * camSpaceP2.norm()));
+        return utility::math::angle::acos_clamped(camSpaceP1.dot(camSpaceP2) / (camSpaceP1.norm() * camSpaceP2.norm()));
     }
 
     inline double widthBasedDistanceToCircle(const double& radius, const Eigen::Vector2d& s1, const Eigen::Vector2d& s2, const double& camFocalLengthPixels){
@@ -223,13 +223,13 @@ namespace vision {
         cornerIndices.fill(0);
 
 
-        Eigen::VectorXd pvals = goalBaseCorners.t() * arma::cross(goalBaseCorners.col(0), goalTopCorners.col(0));
+        Eigen::VectorXd pvals = goalBaseCorners.t() * goalBaseCorners.col(0).cross(goalTopCorners.col(0));
         Eigen::Matrix<unsigned int, Eigen::Dynamic, 1> baseIndices = arma::sort_index(pvals);
         cornerIndices[2] = baseIndices[0];
         cornerIndices[3] = baseIndices[3];
 
 
-        pvals = goalTopCorners.t() * arma::cross(goalBaseCorners.col(0), goalTopCorners.col(0));
+        pvals = goalTopCorners.t() * goalBaseCorners.col(0).cross(goalTopCorners.col(0));
         Eigen::Matrix<unsigned int, Eigen::Dynamic, 1> topIndices = arma::sort_index(pvals);
         cornerIndices[0] = topIndices[0];
         cornerIndices[1] = topIndices[3];
@@ -237,18 +237,8 @@ namespace vision {
 
         //Create the quad normal predictions. Order is Left, Right, Top, Bottom
 
-        prediction.col(0) = arma::normalise(
-                                    arma::cross(
-                                        goalBaseCorners.col(cornerIndices[2]),
-                                        goalTopCorners.col(cornerIndices[0])
-                                        )
-                                );
-        prediction.col(1) = arma::normalise(
-                                    arma::cross(
-                                        goalBaseCorners.col(cornerIndices[1]),
-                                        goalTopCorners.col(cornerIndices[3])
-                                        )
-                                );
+        prediction.col(0) = goalBaseCorners.col(cornerIndices[2]).cross(goalTopCorners.col(cornerIndices[0])).normalize();
+        prediction.col(1) = goalBaseCorners.col(cornerIndices[1]).cross(goalTopCorners.col(cornerIndices[3])).normalize();
 
         //for the top and bottom, we check the inner lines in case they are a better match (this stabilizes observations and reflects real world)
         if (goalBaseCorners(2,baseIndices[0]) > goalBaseCorners(2,baseIndices[1])) {
@@ -265,18 +255,8 @@ namespace vision {
         }
 
 
-        prediction.col(2) = arma::normalise(
-                                    arma::cross(
-                                        goalTopCorners.col(cornerIndices[0]),
-                                        goalTopCorners.col(cornerIndices[1])
-                                        )
-                                );
-        prediction.col(3) = arma::normalise(
-                                    arma::cross(
-                                        goalBaseCorners.col(cornerIndices[3]),
-                                        goalBaseCorners.col(cornerIndices[2])
-                                        )
-                                );
+        prediction.col(2) = goalTopCorners.col(cornerIndices[0]).cross(goalTopCorners.col(cornerIndices[1])).normalize();
+        prediction.col(3) = goalBaseCorners.col(cornerIndices[3]).cross(goalBaseCorners.col(cornerIndices[2])).normalize();
 
         return prediction;
 

@@ -47,16 +47,16 @@ namespace geometry {
         }
         det = 1.0 / det;
 
-        double b_len_sqr = arma::dot(b, b);
+        double b_len_sqr = b.dot(b);
 
-        double ab_norm = (arma::dot(a, a) - b_len_sqr) * 0.5;
-        double bc_norm = (b_len_sqr - arma::dot(c, c)) * 0.5;
+        double ab_norm = (a.dot(a) - b_len_sqr) * 0.5;
+        double bc_norm = (b_len_sqr - c.dot(c)) * 0.5;
 
 
         centre[0] = ((ab_norm * bc[1]) - (bc_norm * ab[1])) * det;
         centre[1] = ((ab[0] * bc_norm) - (bc[0] * ab_norm)) * det;
 
-        radiusSq = arma::accu(arma::square(a - centre));
+        radiusSq = (a - centre).squaredNorm();
         radius = std::sqrt(radiusSq);
 
         return true;
@@ -67,11 +67,11 @@ namespace geometry {
     }
 
     double Circle::squaresDifference(const Eigen::Vector2d& point) const {
-        return arma::accu(arma::square(point - centre)) - radiusSq;
+        return (point - centre).squaredNorm() - radiusSq;
     }
 
     Eigen::Vector2d Circle::orthogonalProjection(const Eigen::Vector2d& point) const {
-        return arma::normalise(point - centre) * radius + centre;
+        return (point - centre).normalize() * radius + centre;
     }
 
     Eigen::Vector2d Circle::getEdgePoints(uint y) const {

@@ -211,7 +211,7 @@ namespace darwin {
                     Eigen::Vector3d present = { cos(servo.presentPosition), sin(servo.presentPosition), 0 };
                     Eigen::Vector3d goal = { cos(servo.goalPosition), sin(servo.goalPosition), 0 };
 
-                    Eigen::Vector3d cross = arma::cross(present, goal);
+                    Eigen::Vector3d cross = present.cross(goal);
                     if(cross[2] > 0) {
                         servo.presentPosition = utility::math::angle::normalizeAngle(servo.presentPosition + movingSpeed);
                     }

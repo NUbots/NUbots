@@ -64,14 +64,14 @@ namespace geometry {
                 if (diff * diff < candidateThreshold) {
                     linearEq1.row(i).cols(0,1) = (*it).t();
                     linearEq1(i, 2) = 1.0;
-                    linearEq2(i) = -arma::dot((*it),(*it));
+                    linearEq2(i) = -(*it).dot((*it));
                     ++i;
                 }
             }
             if (i != 0) {
                 Eigen::Vector3d results = arma::solve(linearEq1.rows(0, i - 1), linearEq2.rows(0, i - 1));
                 centre = arma::abs(Eigen::Vector2d( results[0] * 0.5, results[1] * 0.5 )) % arma::sign(centre);
-                radiusSq = arma::dot(centre, centre) - results[2];
+                radiusSq = centre.dot(centre) - results[2];
                 radius = std::sqrt(radiusSq);
             }
         }

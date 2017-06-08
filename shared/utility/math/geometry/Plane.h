@@ -43,24 +43,24 @@ namespace geometry {
 			if(normal_.lpNorm<1>() <= 0){
 				throw std::domain_error("Plane::setFromNormal - Normal is zero vector. Normal to plane must be non-zero!");
 			}
-			normal = arma::normalise(normal_);
+			normal = normal_.normalize();
 			point = point_;
 		}
 
 		void setFrom3Points(Vector p1, Vector p2, Vector p3){
 			point = p1;
-			normal = arma::normalise(arma::cross(p2-p1,p3-p1));// Positive if p3 palmside (RHR) relative to p2
+			normal = (p2 - p1).cross(p3 - p1).normalize();// Positive if p3 palmside (RHR) relative to p2
 			if(normal.lpNorm<1>() <= 0){
 				throw std::domain_error("Plane::setFrom3Points - 3 Points are colinear!");
 			}
 		}
 
 		Vector intersect(ParametricLine<n> l) const {
-			double lDotN = arma::dot(l.direction, normal);
+			double lDotN = l.direction.dot(normal);
 			if(lDotN == 0){
 				throw std::domain_error("Plane::intersect - Plane does not meet line!");
 			}
-			double tIntersection = arma::dot(point - l.point, normal) / lDotN;
+			double tIntersection = (point - l.point).dot(normal) / lDotN;
 			if(tIntersection < l.tLimits[0] || tIntersection > l.tLimits[1]){
 				throw std::domain_error("Plane::intersect - Plane does not meet line segment (intersection falls off segment)!");
 			}

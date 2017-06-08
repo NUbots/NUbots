@@ -67,7 +67,7 @@ namespace localisation {
                     // TODO: transform from head to field
                     auto selfs = std::make_unique<std::vector<Self>>();
                     selfs->push_back(Self());
-                    selfs->back().heading = arma::normalise(groundToWorldRotation.submat(0,0,1,0));
+                    selfs->back().heading = groundToWorldRotation.submat(0, 0, 1, 0).normalize();
                     selfs->back().position = Eigen::Vector2d{x,y};
                     emit(std::move(selfs));
 

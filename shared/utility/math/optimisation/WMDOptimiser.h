@@ -116,7 +116,7 @@ namespace utility {
                 }
 
                 Eigen::VectorXd getVariances() {
-                    return arma::square(sigmaWeights);
+                    return Eigen::square(sigmaWeights.array()).matrix();
                 }
 
                 updateEstimate(const arma::mat& samples, const arma::vec& fitnesses, const arma::vec& currentEstimate) {

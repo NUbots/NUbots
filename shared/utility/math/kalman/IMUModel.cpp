@@ -26,7 +26,7 @@ namespace utility {
 
             Eigen::Matrix<double, IMUModel::size, 1> IMUModel::limitState(const Eigen::Matrix<double, size, 1>& state) {
                 Eigen::Matrix<double, size, 1> newState = state;
-                newState.rows(QW, QZ) = arma::normalise(newState.rows(QW, QZ));
+                newState.rows(QW, QZ) = newState.rows(QW, QZ).normalize();
                 return newState;
             }
 
@@ -51,8 +51,8 @@ namespace utility {
                 Eigen::VectorXd vq({cosTheta,state(VX)*sinTheta/omega,state(VY)*sinTheta/omega,state(VZ)*sinTheta/omega});
                 //calculate quaternion multiplication
                 //TODO replace with quaternion class
-                Eigen::VectorXd qcross = arma::cross( vq.rows(1,3), state.rows(QX,QZ) );
-                newState(QW) = vq(0)*state(QW) - arma::dot(vq.rows(1,3), state.rows(QX,QZ));
+                Eigen::VectorXd qcross = vq.rows(1,3).cross(state.rows(QX,QZ));
+                newState(QW) = vq(0)*state(QW) - vq.rows(1,3).dot(state.rows(QX,QZ));
                 newState(QX) = vq(0)*state(QX) + state(QW)*vq(1) + qcross(0);
                 newState(QY) = vq(0)*state(QY) + state(QW)*vq(2) + qcross(1);
                 newState(QZ) = vq(0)*state(QZ) + state(QW)*vq(3) + qcross(2);

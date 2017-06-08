@@ -60,7 +60,7 @@ namespace localisation {
 
         RobotHypothesis(const message::localisation::ResetRobotHypotheses::Self& reset_self, const message::input::Sensors& sensors)
             : RobotHypothesis() {
-            Eigen::Vector2d imuDirection = arma::normalise(sensors.world.col(0).rows(0,1));
+            Eigen::Vector2d imuDirection = sensors.world.col(0).rows(0, 1).normalize();
             double imuHeading = std::atan2(imuDirection(1), imuDirection(0));
             double imuOffset = reset_self.heading + imuHeading;
 

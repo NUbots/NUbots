@@ -32,7 +32,7 @@ namespace module {
 
             Eigen::Matrix<double, MotionModel::size, 1> MotionModel::limitState(const Eigen::Matrix<double, size, 1>& state) {
                 Eigen::Matrix<double, size, 1> newState = state;
-                newState.rows(QW, QZ) = arma::normalise(newState.rows(QW, QZ));
+                newState.rows(QW, QZ) = newState.rows(QW, QZ).normalize();
                 return newState;
             }
 
@@ -56,7 +56,7 @@ namespace module {
                 double t_2 = deltaT * 0.5;
                 UnitQuaternion qGyro;
                 qGyro.imaginary() = state.rows(WX, WZ) * t_2;
-                qGyro.real() = 1.0 - 0.5 * arma::sum(arma::square(qGyro.imaginary()));
+                qGyro.real() = 1.0 - 0.5 * qGyro.imaginary().squaredNorm();
 
                 newState.rows(QW, QZ) = qGyro * rotation;
 

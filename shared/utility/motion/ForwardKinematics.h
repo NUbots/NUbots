@@ -359,7 +359,7 @@ namespace kinematics {
     inline utility::math::geometry::Line calculateHorizon(const math::matrix::Rotation3D Rcw, double cameraDistancePixels) {
 
         // Normal of the line is the y and z of the z axis, however in the image the y axis is negated
-        Eigen::Vector2d normal = -arma::normalise(Rcw.submat(1,2,2,2));
+        Eigen::Vector2d normal = -Rcw.bottomRightCorner<2, 1>().normalize();
         double distance = cameraDistancePixels * std::tan(utility::math::angle::acos_clamped(Rcw(0,2)) - M_PI_2);
 
         return utility::math::geometry::Line(normal, distance);
@@ -376,12 +376,12 @@ namespace kinematics {
             //Then x is parallel to the ground normal and we need to use projection onto +/-z instead
             //If x parallel to normal, then use -z, if x antiparallel use z
             Eigen::Vector3d Z =  Eigen::Vector3d{0, 0, (projectXOnNormal > 0 ? -1.0 : 1.0 )};
-            double projectZOnNormal = arma::dot(Z, groundNormal_body);
-            groundMatrixX = arma::normalise(Z - projectZOnNormal * groundNormal_body);
-            groundMatrixY = arma::cross(groundNormal_body, groundMatrixX);
+            double projectZOnNormal = Z.dot(groundNormal_body);
+            groundMatrixX = (Z - projectZOnNormal * groundNormal_body).normalize();
+            groundMatrixY = groundNormal_body.cross(groundMatrixX);
         } else {
-            groundMatrixX = arma::normalise(X - projectXOnNormal * groundNormal_body);
-            groundMatrixY = arma::cross(groundNormal_body, groundMatrixX);
+            groundMatrixX = (X - projectXOnNormal * groundNormal_body).normalize();
+            groundMatrixY = groundNormal_body.cross(groundMatrixX);
         }
 
         utility::math::matrix::Transform3D groundToBody;
@@ -394,7 +394,7 @@ namespace kinematics {
 
     inline Eigen::Matrix2d calculateRobotToIMU(math::matrix::Rotation3D orientation) {
         Eigen::Vector3d xRobotImu = orientation.i().col(0);
-        Eigen::Vector2d projXRobot = arma::normalise(xRobotImu.rows(0,1));
+        Eigen::Vector2d projXRobot = (xRobotImu.rows(0,1).normalize());
         Eigen::Vector2d projYRobot = Eigen::Vector2d(-projXRobot(1), projXRobot(0));
 
         Eigen::Matrix2d robotToImu;

@@ -47,12 +47,12 @@ namespace utility
                 {
                     if (CCW == true)
                     {
-                        normal = arma::normalise(arma::cross(P1 - P0, P2 - P0));
+                        normal = (P1 - P0).cross(P2 - P0).normalize();
                     }
 
                     else
                     {
-                        normal = arma::normalise(arma::cross(P2 - P0, P1 - P0));
+                        normal = (P2 - P0).cross(P1 - P0).normalize();
                     }
 
                     return(normal);
@@ -60,7 +60,7 @@ namespace utility
 
                 double calculateArea()
                 {
-                    area = 0.5 * std::abs((arma::cross(P1 - P0, P2 - P0)).norm());
+                    area = 0.5 * std::abs((P1 - P0).cross(P2 - P0).norm());
                     return(area);
                 }
 
@@ -97,7 +97,7 @@ namespace utility
                     R1.head(3)   = P1;
                     R2.head(3)   = P2;
 
-                    norm = arma::normalise(transform * norm);
+                    norm = (transform * norm).normalize();
                     R0   = transform * R0;
                     R1   = transform * R1;
                     R2   = transform * R2;
@@ -154,10 +154,10 @@ namespace utility
                     Eigen::Vector3d edge2 = P2 - P0;
 
                     /* begin calculating determinant - also used to calculate U parameter */
-                    Eigen::Vector3d pvec = arma::cross(dir, edge2);
+                    Eigen::Vector3d pvec = dir.cross(edge2);
 
                     /* if determinant is near zero, ray lies in plane of triangle */
-                    double det = arma::dot(edge1, pvec);
+                    double det = edge1.dot(pvec);
 
                     if (std::abs(det) < epsilon)
                     {
@@ -170,7 +170,7 @@ namespace utility
                     Eigen::Vector3d tvec = orig - P0;
 
                     /* calculate U parameter and test bounds */
-                    double u = arma::dot(tvec, pvec) * inv_det;
+                    double u = tvec.dot(pvec) * inv_det;
 
                     if ((u < 0.0) || (u > 1.0))
                     {
@@ -178,17 +178,17 @@ namespace utility
                     }
 
                     /* prepare to test V parameter */
-                    Eigen::Vector3d qvec = arma::cross(tvec, edge1);
+                    Eigen::Vector3d qvec = tvec.cross(edge1);
 
                     /* calculate V parameter and test bounds */
-                    double v = arma::dot(dir, qvec) * inv_det;
+                    double v = dir.dot(qvec) * inv_det;
 
                     if ((v < 0.0) || ((u + v) > 1.0))
                     {
                         return(false);
                     }
 
-                    double t = arma::dot(edge2, qvec) * inv_det;
+                    double t = edge2.dot(qvec) * inv_det;
 
                     return(t > epsilon);
                 }

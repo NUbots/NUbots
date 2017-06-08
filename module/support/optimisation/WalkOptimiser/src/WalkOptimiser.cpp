@@ -214,7 +214,7 @@ namespace module {
                 if(recording){
                     Eigen::Vector3d verticalKinematics = sensors.camToGround.submat(0,2,2,2);
                     Eigen::Vector3d verticalOrientation = sensors.kinematicsCamToGround.submat(0,2,2,2);
-                    double tiltMag = utility::math::angle::acos_clamped(arma::dot(verticalOrientation, verticalKinematics));
+                    double tiltMag = utility::math::angle::acos_clamped(verticalOrientation.dot(verticalKinematics));
                     if(std::fabs(tiltMag) < M_PI_4){
                         tilt(tiltMag);
                     }

@@ -124,7 +124,7 @@ namespace support {
                 rEBc = { M_SQRT1_2, 0, M_SQRT1_2 };
             }
             //set rEBC to be a properly sized radius vector facing from the ball centre towards the (top or inner int he case of extreme values) ball edge
-            rEBc = rBCcLength * arma::normalise(rEBc - rEBc * arma::dot(rEBc, rBCc) / rBCcLength);
+            rEBc = rBCcLength * (rEBc - rEBc * rEBc.dot(rBCc) / rBCcLength).normalize();
 
 
             for (int i = 0; i < 50; ++i) {
@@ -136,7 +136,10 @@ namespace support {
                 Eigen::Vector3d rEBc = rEBc * std::tan(angle + radialJitter / 2.0);
 
                 // Make a rotation matrix to rotate our vector to our target
-                result.edgePoints.push_back(arma::normalise(Rotation3D(arma::normalise(rBCc, angle + angleOffset) * rEBc)));
+                // Eigen lpNorm<p> is templated on p ... so p must be known at compile time.
+                // Introducing the fucked-up hack!!
+                //result.edgePoints.push_back(Rotation3D(arma::normalise(rBCc, angle + angleOffset) * rEBc).normalize());
+                result.edgePoints.push_back(Rotation3D(std::pow(rBCc.pow(angle + angleOffset).sum(), 1 / (angle + angleOffset)) * rEBc).normalize());
             }
         }
 

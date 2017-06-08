@@ -61,7 +61,7 @@ namespace module {
                 lengths[0] = pts[0].length;
                 lengths[1] = pts[1].length;
 
-                return arma::dot(line.normal, horizonTangent) > maxAngle;
+                return line.normal.dot(horizonTangent) > maxAngle;
             };
 
             double calculateError(const DataPoint& p) const {

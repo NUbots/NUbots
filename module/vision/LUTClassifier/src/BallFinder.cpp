@@ -70,7 +70,7 @@ namespace module {
             double cameraHeight = camToGround(2, 3);
 
             // This describes the direction of travel
-            Eigen::Vector3d direction = arma::normalise(xb);
+            Eigen::Vector3d direction = xb.normalize();
 
             // Don't bother drawing lines if we know it's going to fail
             if(direction[0] < 0) {
@@ -82,7 +82,7 @@ namespace module {
             xStart += dx - fmod(xStart, dx);
             double xEnd = xt.norm();
 
-            auto movement = arma::normalise(xb) * dx;
+            auto movement = xb.normalize() * dx;
 
             auto hLeft  = visualHorizon.begin();
             auto hRight = visualHorizon.end() - 1;

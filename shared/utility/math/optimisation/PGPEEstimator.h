@@ -71,7 +71,7 @@ namespace utility {
 
                     if (firstRun) {
                         firstRun = false;
-                        baseline = arma::mean(fitnesses);
+                        baseline = fitnesses.mean();
                     }
 
                     Eigen::VectorXd alpha = covEstimate * learningRate;
@@ -80,18 +80,16 @@ namespace utility {
                     Eigen::VectorXd updateCov(covEstimate.n_elem,arma::fill::zeros);
                     for(uint64_t i = 0; i < fitnesses.n_elem; ++i) {
                         update += alpha * (fitnesses[i]-baseline) % (samples.row(i).t() - bestEstimate);
-                        updateCov += alphaCov *
-                                     (fitnesses[i]-baseline) %
-                                     (arma::square(samples.row(i).t() - bestEstimate) - covEstimate) /
-                                     arma::sqrt(covEstimate);
+                        Eigen::VectorXd x = Eigen::square((samples.row(i).t() - bestEstimate).array()).matrix() - covEstimate;
+                        updateCov += alphaCov * (fitnesses[i] - baseline).cwiseProduct(x).cwiseQuotient(Eigen::sqrt(covEstimate.array()).matrix());
                     }
 
-                    baseline = baseline * 0.9 + 0.1 * arma::mean(fitnesses);
+                    baseline = baseline * 0.9 + 0.1 * fitnesses.mean();
 
                     bestEstimate += update;
                     covEstimate += updateCov;
 
-                    return OptimiserEstimate(previousEstimate.generation + 1, convert<double>(bestEstimate), convert<double>(arma::mat(diagmat(covEstimate))));
+                    return OptimiserEstimate(previousEstimate.generation + 1, bestEstimate, arma::mat(diagmat(covEstimate)));
                 }
             };
 

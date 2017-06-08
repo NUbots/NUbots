@@ -61,7 +61,7 @@ namespace matrix {
         // Construct an othonormal basis
         col(0) = axis / normAxis; // x axis
         col(1) = orthonormal(col(0)); // arbitary orthonormal vector
-        col(2) = arma::cross(col(0), col(1)); // third othogonal vector
+        col(2) = col(0).cross(col(1)); // third othogonal vector
     }
 
     Rotation3D::Rotation(const Eigen::Vector3d& axis, double angle) : Rotation(axis) {
@@ -73,8 +73,8 @@ namespace matrix {
     Rotation3D Rotation3D::orthogonalise() const{
         Rotation3D R;
         R.x() = this->x();
-        R.z() = arma::cross(this->x(),this->y());
-        R.y() = arma::cross(R.z(),R.x());
+        R.z() = this->x().cross(this->y());
+        R.y() = R.z().cross(R.x());
         return R;
     }
 
@@ -127,13 +127,13 @@ namespace matrix {
 
         // Construct an ONB
         Eigen::Vector3d s = orthonormal(axis);
-        Eigen::Vector3d t = arma::cross(axis, s);
+        Eigen::Vector3d t = axis.cross(s);
         // Rotate s to calculate angle of rotation
         Eigen::Vector3d rs = *this * s;
 
         return {
             axis,
-            std::atan2(arma::dot(rs, t), arma::dot(rs, s)) // Angle of rotation
+            std::atan2(rs.dot(t), rs.dot(s)) // Angle of rotation
         };
     }
 
