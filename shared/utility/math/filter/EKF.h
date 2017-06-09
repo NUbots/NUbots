@@ -92,7 +92,7 @@ namespace utility {
                     arma::mat measurementTransform = model.StateToMeasurementTransform(measurement, measurementArgs...);
 
                     arma::mat kalmanGain = processNoise * measurementTransform *
-                                            (arma::trimatu(measurementTransform * processNoisePartial * processNoise * measurementTransform.t() + measurementVariance)).i();
+                                            (arma::trimatu(measurementTransform * processNoisePartial * processNoise * measurementTransform.t() + measurementVariance)).inverse();
 
                     state += kalmanGain * (measurement - measurementTransform * state);
 

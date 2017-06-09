@@ -524,7 +524,7 @@ namespace module {
                             if (footDown)
                             {
                                 Transform3D Htf = sensors->forwardKinematics.at(servoid);
-                                Transform3D Hft = Htf.i();
+                                Transform3D Hft = Htf.inverse();
 
                                 Rotation3D Rtf = Htf.rotation();
                                 Eigen::Vector3d rFTt = Htf.translation();
@@ -536,11 +536,11 @@ namespace module {
                                 if (!prevFootDown)
                                 {
                                     //NOTE: footflat measurements assume the foot is flat on the ground. These decorrelate the accelerometer and gyro from translation.
-                                    Rotation3D footflat_Rwt = Rotation3D::createRotationZ(Rtw.i().yaw());
+                                    Rotation3D footflat_Rwt = Rotation3D::createRotationZ(Rtw.inverse().yaw());
                                     Rotation3D footflat_Rtf = Rotation3D::createRotationZ(Rtf.yaw());
 
                                     //Store the robot foot to world transform
-                                    footlanding_Rfw[side] = footflat_Rtf.i() * footflat_Rwt.i();
+                                    footlanding_Rfw[side] = footflat_Rtf.inverse() * footflat_Rwt.inverse();
                                     //Store robot foot in world-delta coordinates
                                     footlanding_Rwf[side] = footflat_Rwt * footflat_Rtf;
                                     footlanding_rFWw[side] = footlanding_Rwf[side] * rTFf - rTWw;
@@ -620,7 +620,7 @@ namespace module {
                     auto headPitchKinematics = sensors->forwardKinematics.at(ServoID::HEAD_PITCH);
 
                     //Get torso to world transform
-                    Transform3D worldInv = world.i();
+                    Transform3D worldInv = world.inverse();
 
                     Rotation3D yawlessWorldInvR = Rotation3D::createRotationZ(-Rotation3D(worldInv.rotation()).yaw()) * worldInv.rotation();
                     Transform3D torsoToGround = worldInv;

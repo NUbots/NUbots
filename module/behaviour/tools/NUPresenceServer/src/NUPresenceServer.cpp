@@ -87,7 +87,7 @@ namespace tools {
 
             Transform3D cam_to_feet = cam_to_left_foot;
             cam_to_feet.translation() = 0.5 * (cam_to_left_foot.translation() + cam_to_right_foot.translation()) ;
-            cam_to_feet = robot_to_head.i() * cam_to_feet;
+            cam_to_feet = robot_to_head.inverse() * cam_to_feet;
             cam_to_feet.translation() /= robot_to_head_scale;
 
             cam_to_feet = camera_to_robot.t() * cam_to_feet * camera_to_robot;
@@ -95,7 +95,7 @@ namespace tools {
             //hack out translation
             //TODO: fix translation
             cam_to_feet.translation() *= 0;
-            // std::cout << "robot_to_head.i() \n" << robot_to_head.i();
+            // std::cout << "robot_to_head.inverse() \n" << robot_to_head.inverse();
             // std::cout << "cam_to_feet \n" << cam_to_feet;
             imageFragment->cam_to_feet = arma::conv_to<arma::fmat>::from(cam_to_feet);
 

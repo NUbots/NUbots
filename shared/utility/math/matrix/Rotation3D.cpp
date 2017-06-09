@@ -92,7 +92,7 @@ namespace matrix {
 
     Rotation3D Rotation3D::worldToLocal(const Rotation3D& reference) const {
         // http://en.wikipedia.org/wiki/Change_of_basis
-        return reference.i() * (*this);
+        return reference.inverse() * (*this);
     }
 
     Rotation3D Rotation3D::localToWorld(const Rotation3D& reference) const {

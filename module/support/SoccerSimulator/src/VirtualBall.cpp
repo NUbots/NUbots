@@ -67,7 +67,7 @@ namespace support {
         Ball result;
 
         Transform3D Hcf = getFieldToCam(robotPose, sensors.camToGround);
-        Transform3D Hfc = Hcf.i();
+        Transform3D Hfc = Hcf.inverse();
 
         // Ball position in field
         Eigen::Vector3d rBFf = position;
@@ -105,8 +105,8 @@ namespace support {
             // Get our transform to world coordinates
             const Transform3D& Htw = sensors.world;
             const Transform3D& Htc = sensors.forwardKinematics.at(ServoID::HEAD_PITCH);
-            Transform3D Hcw = Htc.i() * Htw;
-            Transform3D Hwc = Hcw.i();
+            Transform3D Hcw = Htc.inverse() * Htw;
+            Transform3D Hwc = Hcw.inverse();
 
             result.position = Hwc.transformPoint(rBCc);
 

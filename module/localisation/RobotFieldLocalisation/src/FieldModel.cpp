@@ -62,7 +62,7 @@ namespace module {
             //Transform2D world = sensors.world.projectTo2D(Eigen::Vector3d(0,0,1),Eigen::Vector3d(1,0,0));
             const Transform3D& Htw = sensors.world;
             const Transform3D& Htc = sensors.forwardKinematics.at(ServoID::HEAD_PITCH);
-            Transform3D Hwc = Htw.i() * Htc;
+            Transform3D Hwc = Htw.inverse() * Htc;
             //Get the x/y position for goals
             Eigen::VectorXd prediction(3*measurements.size());
             int counter = 0;

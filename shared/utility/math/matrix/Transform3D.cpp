@@ -104,7 +104,7 @@ namespace matrix {
 
     Transform3D Transform3D::worldToLocal(const Transform3D& reference) const {
         // http://en.wikipedia.org/wiki/Change_of_basis
-        return reference.i() * (*this);
+        return reference.inverse() * (*this);
     }
 
     Transform3D Transform3D::localToWorld(const Transform3D& reference) const {
@@ -245,7 +245,7 @@ namespace matrix {
         newSpaceToWorld.x() = orthoForwardAxis;
         newSpaceToWorld.y() = yawAxis.cross(orthoForwardAxis);
         newSpaceToWorld.z() = yawAxis;
-        Rotation3D worldToNewSpace = newSpaceToWorld.i();
+        Rotation3D worldToNewSpace = newSpaceToWorld.inverse();
         Eigen::Vector3d rNewSpace =  worldToNewSpace * r;
         result.xy() = rNewSpace.rows(0,1);
 

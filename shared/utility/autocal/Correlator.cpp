@@ -176,7 +176,7 @@ namespace autocal {
 
 			//OLD METHOD
 			//Add current stats to the vector
-			const Transform3D& lastTransform = states.back().i();
+			const Transform3D& lastTransform = states.back().inverse();
 			float diff = Transform3D::norm(lastTransform * T);
 			return diff > difference_threshold;
 
@@ -214,11 +214,11 @@ namespace autocal {
 			// note that the equation for the system is
 			// M Ai = Bi N
 			// and so by putting the samples in order A,B we are actually solving
-			// Ai N.i() = M.i() Bi
+			// Ai N.inverse() = M.inverse() Bi
 			// so
-			// X = N.i()
+			// X = N.inverse()
 			// and
-			// Y = M.i()
+			// Y = M.inverse()
 			/////////////////////
 			/////////////////////
 			/////////////////////
@@ -232,7 +232,7 @@ namespace autocal {
 			for(int i = 0; i < states1.size(); i++){
 				const Transform3D& A = states1[i];
 				const Transform3D& B = states2[i];
-				Transform3D errorMat = (A * X).i() * (Y * B);
+				Transform3D errorMat = (A * X).inverse() * (Y * B);
 				float error = Transform3D::norm(errorMat);
 				totalError += error;
 				UnitQuaternion rotA(Rotation3D(A.rotation()));

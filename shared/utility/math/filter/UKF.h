@@ -212,7 +212,7 @@ namespace utility {
                                         centredObservations * covarianceUpdate;
 
                     const arma::mat innovation = model.observationDifference(measurement, predictedMean);
-                    d += (centredObservations.t()) * measurementVariance.i() * innovation;
+                    d += (centredObservations.t()) * measurementVariance.inverse() * innovation;
 
                     // Update our mean and covariance
                     mean = sigmaMean + centredSigmaPoints * covarianceUpdate * d;
@@ -226,7 +226,7 @@ namespace utility {
                         arma::mat predictedCovariance;
                         covarianceFromSigmas(predictedCovariance, predictedObservations, predictedMean);
                         arma::mat innovationVariance = predictedCovariance + measurementVariance;
-                        arma::mat scalarlikelihoodExponent = ((innovation.t() * innovationVariance.i()) * innovation);
+                        arma::mat scalarlikelihoodExponent = ((innovation.t() * innovationVariance.inverse()) * innovation);
                         double loglikelihood = 0.5 * (std::log(arma::det(innovationVariance)) + std::abs(scalarlikelihoodExponent[0]) + innovation.n_elem * std::log(2 * M_PI));
                         return -loglikelihood;
                     });

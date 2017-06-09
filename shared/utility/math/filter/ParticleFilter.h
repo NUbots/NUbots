@@ -98,7 +98,7 @@ namespace utility {
                         Eigen::VectorXd predictedObservation = model.predictedObservation(particles.row(i).t(), measurementArgs...);
                         assert(predictedObservation.size() == measurement.size());
                         Eigen::VectorXd difference = predictedObservation-measurement;
-                        weights[i] = std::exp(-difference.dot((measurement_variance.i() * difference)));
+                        weights[i] = std::exp(-difference.dot((measurement_variance.inverse() * difference)));
                     }
                     // std::cout << "weights = \n" << weights << std::endl;
                     //Resample

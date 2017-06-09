@@ -42,7 +42,7 @@ namespace module {
                 // Get our transform to world coordinates
                 const Rotation3D& Rtw = Transform3D(sensors.world).rotation();
                 const Rotation3D& Rtc = Transform3D(sensors.forwardKinematics.at(ServoID::HEAD_PITCH)).rotation();
-                Rotation3D Rcw =  Rtc.i() * Rtw;
+                Rotation3D Rcw =  Rtc.inverse() * Rtw;
 
                 // Rcw = Rotation3D::createRotationZ(-Rcw.yaw()) * Rcw;
 

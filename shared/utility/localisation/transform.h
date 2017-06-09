@@ -84,7 +84,7 @@ namespace transform {
 
     inline Eigen::Vector2d ImuToWorldHeadingTransform(double imuOffset, math::matrix::Rotation3D orientation) {
         math::matrix::Rotation3D imuRotation = math::matrix::Rotation3D::createRotationZ(imuOffset);
-        Eigen::Vector3d worldRobotHeading = imuRotation * arma::mat(orientation.i()).col(0);
+        Eigen::Vector3d worldRobotHeading = imuRotation * arma::mat(orientation.inverse()).col(0);
         return worldRobotHeading.rows(0, 1).normalize();
     }
 

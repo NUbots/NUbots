@@ -144,7 +144,7 @@ namespace motion {
 
             //Rotate to robot coordinate system
             goalCamPose = arma::conv_to<arma::mat>::from(user.head_pose);
-            goalCamPose = camera_to_robot * goalCamPose.i() * camera_to_robot.t();
+            goalCamPose = camera_to_robot * goalCamPose.inverse() * camera_to_robot.t();
             goalCamPose.translation() *= oculus_to_robot_scale;
 
             limitPose(goalCamPose);

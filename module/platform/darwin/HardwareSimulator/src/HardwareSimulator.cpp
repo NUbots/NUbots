@@ -178,8 +178,8 @@ namespace darwin {
             if (previousSensors) {
                 Transform3D rightFootPose = previousSensors->forwardKinematics.at(ServoID::R_ANKLE_ROLL);
                 Transform3D leftFootPose  = previousSensors->forwardKinematics.at(ServoID::L_ANKLE_ROLL);
-                Eigen::Vector3d torsoFromRightFoot = -rightFootPose.rotation().i() * rightFootPose.translation();
-                Eigen::Vector3d torsoFromLeftFoot = -leftFootPose.rotation().i() * leftFootPose.translation();
+                Eigen::Vector3d torsoFromRightFoot = -rightFootPose.rotation().inverse() * rightFootPose.translation();
+                Eigen::Vector3d torsoFromLeftFoot = -leftFootPose.rotation().inverse() * leftFootPose.translation();
                 // emit(graph("torsoFromRightFoot", torsoFromRightFoot));
                 // emit(graph("torsoFromLeftFoot", torsoFromLeftFoot));
                 if(torsoFromRightFoot(2) > torsoFromLeftFoot(2)){

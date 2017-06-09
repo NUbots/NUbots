@@ -172,7 +172,7 @@ namespace autocal{
 			if(std::fabs(a0) < 1e-10){
 				std::cout << __FILE__ << " : " << __LINE__ << " - WARNING: BAD SAMPLED ROTATION - RETURNING IDENTITY" << std::endl;
 				// std::cout << " A = \n" << A <<  std::endl;
-				// std::cout << " A * A.i() = \n" << A * A.i() <<  std::endl;
+				// std::cout << " A * A.inverse() = \n" << A * A.inverse() <<  std::endl;
 				// std::cout << " quat_a = \n" << quat_a <<  std::endl;
 				success = false;
 				return std::pair<Transform3D, Transform3D>();

@@ -289,7 +289,7 @@ namespace kinematics {
         auto cameraToBody = headPoses[ServoID::HEAD_PITCH];
 
         //Compute foot poses
-        utility::math::matrix::Transform3D F_c = cameraToBody * cameraToFeet.i();
+        utility::math::matrix::Transform3D F_c = cameraToBody * cameraToFeet.inverse();
         utility::math::matrix::Transform3D F_l = F_c.translateY(footSeparation / 2.0);
         utility::math::matrix::Transform3D F_r = F_c.translateY(-footSeparation / 2.0);
 

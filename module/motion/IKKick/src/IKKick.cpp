@@ -138,15 +138,15 @@ namespace motion {
                 supportFoot = LimbID::RIGHT_LEG;
             }
 
-            Transform3D torsoPose = (supportFoot == LimbID::LEFT_LEG) ? leftFoot.i() : rightFoot.i();
+            Transform3D torsoPose = (supportFoot == LimbID::LEFT_LEG) ? leftFoot.inverse() : rightFoot.inverse();
 
             // Put the ball position from vision into torso coordinates
-            Eigen::Vector3d targetTorso;// = Transform3D(sensors.kinematicsBodyToGround).i().transformPoint(command.target); //TODO fix
+            Eigen::Vector3d targetTorso;// = Transform3D(sensors.kinematicsBodyToGround).inverse().transformPoint(command.target); //TODO fix
             // Put the ball position into support foot coordinates
             Eigen::Vector3d targetSupportFoot = torsoPose.transformPoint(targetTorso);
 
             // Put the goal from vision into torso coordinates
-            Eigen::Vector3d directionTorso;// = Transform3D(sensors.kinematicsBodyToGround).i().transformVector(command.direction); //TODO fix
+            Eigen::Vector3d directionTorso;// = Transform3D(sensors.kinematicsBodyToGround).inverse().transformVector(command.direction); //TODO fix
             // Put the goal into support foot coordinates
             Eigen::Vector3d directionSupportFoot = torsoPose.transformVector(directionTorso);
 

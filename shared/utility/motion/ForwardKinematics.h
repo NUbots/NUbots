@@ -389,11 +389,11 @@ namespace kinematics {
         groundToBody.submat(0,1,2,1) = groundMatrixY;
         groundToBody.submat(0,2,2,2) = groundNormal_body;
         groundToBody.submat(0,3,2,3) = arma::vec{0, 0, -bodyHeight};
-        return groundToBody.i();
+        return groundToBody.inverse();
     }
 
     inline Eigen::Matrix2d calculateRobotToIMU(math::matrix::Rotation3D orientation) {
-        Eigen::Vector3d xRobotImu = orientation.i().col(0);
+        Eigen::Vector3d xRobotImu = orientation.inverse().col(0);
         Eigen::Vector2d projXRobot = (xRobotImu.rows(0,1).normalize());
         Eigen::Vector2d projYRobot = Eigen::Vector2d(-projXRobot(1), projXRobot(0));
 

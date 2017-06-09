@@ -183,7 +183,7 @@ namespace geometry {
     }
 
     UnitQuaternion UnitQuaternion::operator - (const UnitQuaternion& p) const {
-        return *this * p.i();
+        return *this * p.inverse();
     }
 
     UnitQuaternion UnitQuaternion::operator * (const UnitQuaternion& p) const {

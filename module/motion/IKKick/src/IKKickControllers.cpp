@@ -45,12 +45,12 @@ namespace motion{
 
     void KickBalancer::computeStartMotion(const KinematicsModel& kinematicsModel, const Sensors& sensors) {
         Transform3D torsoToFoot = getTorsoPose(sensors);
-        Transform3D startPose = torsoToFoot.i();
+        Transform3D startPose = torsoToFoot.inverse();
 
         int negativeIfRight = (supportFoot == LimbID::RIGHT_LEG) ? -1 : 1;
         Transform3D finishPose = torsoToFoot;
         finishPose.translation() = Eigen::Vector3d(forward_lean, negativeIfRight * (adjustment + kinematicsModel.leg.FOOT_CENTRE_TO_ANKLE_CENTRE), stand_height);
-        finishPose = finishPose.i();
+        finishPose = finishPose.inverse();
 
         std::vector<SixDOFFrame> frames;
         frames.push_back(SixDOFFrame{startPose,0});
@@ -93,7 +93,7 @@ namespace motion{
                                     : sensors.forwardKinematics.at(ServoID::R_ANKLE_ROLL);
 
         // Convert support foot to kick foot coordinates = convert torso to kick foot * convert support foot to torso
-        Transform3D supportToKickFoot = currentKickFoot.i() * currentTorso.i();
+        Transform3D supportToKickFoot = currentKickFoot.inverse() * currentTorso.inverse();
         // Convert ball position from support foot coordinates to kick foot coordinates
         Eigen::Vector3d ballFromKickFoot = supportToKickFoot.transformPoint(ballPosition);
         Eigen::Vector3d goalFromKickFoot = supportToKickFoot.transformPoint(goalPosition);

@@ -57,27 +57,27 @@ namespace motion {
     void Balancer::balance(const KinematicsModel& model, Transform3D& footToTorso, const LimbID& leg, const Sensors& sensors) {
 
         //Goal is based on the support foot rotation.
-        Rotation3D goalTorsoOrientation = footToTorso.rotation().i();
+        Rotation3D goalTorsoOrientation = footToTorso.rotation().inverse();
 
         //------------------------------------
         // Rotation
         //------------------------------------
 
         //Robot coords in world (:Robot -> World)
-        Rotation3D orientation = Transform3D(sensors.world).rotation().i();
+        Rotation3D orientation = Transform3D(sensors.world).rotation().inverse();
         Rotation3D yawlessOrientation = Rotation3D::createRotationZ(-orientation.yaw()) * orientation;
 
         // Removes any yaw component
         Rotation3D yawlessGoalOrientation = Rotation3D::createRotationZ(-goalTorsoOrientation.yaw()) * goalTorsoOrientation;
 
         //Error orientation maps: Goal -> Current
-        Rotation3D errorOrientation = yawlessOrientation * yawlessGoalOrientation.i();
+        Rotation3D errorOrientation = yawlessOrientation * yawlessGoalOrientation.inverse();
 
         // Our goal position as a quaternions
         UnitQuaternion errorQuaternion(errorOrientation);
 
         // Calculate our D error and I error
-        UnitQuaternion differential = lastErrorQuaternion.i() * errorQuaternion;
+        UnitQuaternion differential = lastErrorQuaternion.inverse() * errorQuaternion;
 
         //TODO: LEARN HOW TO COMPUTE THE INTEGRAL TERM CORRECTLY
         // footGoalErrorSum = footGoalErrorSum.slerp(goalQuaternion * footGoalErrorSum, 1.0/90.0);

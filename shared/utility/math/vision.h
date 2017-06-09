@@ -86,7 +86,7 @@ namespace vision {
     }
 
     inline Eigen::Vector2d projectWorldPointToScreen(const Eigen::Vector4d& point, const utility::math::matrix::Transform3D& camToGround, const double& camFocalLengthPixels){
-        Eigen::Vector4d camSpacePoint = camToGround.i() * point;
+        Eigen::Vector4d camSpacePoint = camToGround.inverse() * point;
         return projectCamSpaceToScreen(camSpacePoint.rows(0,2), camFocalLengthPixels);
     }
     inline Eigen::Vector2d projectWorldPointToScreen(const Eigen::Vector3d& point, const utility::math::matrix::Transform3D& camToGround, const double& camFocalLengthPixels){
@@ -177,9 +177,9 @@ namespace vision {
         //     utility::math::matrix::Transform3D::createRotationZ(-Twf[2])
         //     * utility::math::matrix::Transform3D::createTranslation(rWFf);
 
-        utility::math::matrix::Transform3D Htf = utility::math::matrix::Transform3D(Tft).i();
+        utility::math::matrix::Transform3D Htf = utility::math::matrix::Transform3D(Tft).inverse();
 
-        return Htc.i() * Htf;
+        return Htc.inverse() * Htf;
     }
 
     inline Eigen::Matrix<double, 3, 4> cameraSpaceGoalProjection(

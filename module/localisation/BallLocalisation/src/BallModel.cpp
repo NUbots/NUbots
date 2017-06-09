@@ -50,7 +50,7 @@ namespace module {
             // Get our transform to world coordinates
             const Transform3D& Htw = sensors.world;
             const Transform3D& Htc = sensors.forwardKinematics.at(ServoID::HEAD_PITCH);
-            Transform3D Hcw = Htc.i() * Htw;
+            Transform3D Hcw = Htc.inverse() * Htw;
 
             Eigen::Vector3d rBWw = { state[PX], state[PY], field.ball_radius };
 

@@ -221,16 +221,16 @@ namespace module {
                         if (ballMaxPriority)
                         {
                             headToBodyRotation = Transform3D(ballFixationObjects[0].visObject.sensors->forwardKinematics.at(ServoID::HEAD_PITCH)).rotation();
-                            orientation        = Transform3D(ballFixationObjects[0].visObject.sensors->world).rotation().i();
+                            orientation        = Transform3D(ballFixationObjects[0].visObject.sensors->world).rotation().inverse();
                         }
                         else
                         {
                             headToBodyRotation = Transform3D(goalFixationObjects[0].visObject.sensors->forwardKinematics.at(ServoID::HEAD_PITCH)).rotation();
-                            orientation        = Transform3D(goalFixationObjects[0].visObject.sensors->world).rotation().i();
+                            orientation        = Transform3D(goalFixationObjects[0].visObject.sensors->world).rotation().inverse();
                         }
                     } else {
                         headToBodyRotation = Transform3D(sensors.forwardKinematics.at(ServoID::HEAD_PITCH)).rotation();
-                        orientation        = Transform3D(sensors.world).rotation().i();
+                        orientation        = Transform3D(sensors.world).rotation().inverse();
                     }
                     Rotation3D headToIMUSpace = orientation * headToBodyRotation;
 
@@ -696,7 +696,7 @@ namespace module {
 
 
             bool HeadBehaviourSoccer::orientationHasChanged(const message::input::Sensors& sensors){
-                Rotation3D diff = Transform3D(sensors.world).rotation().i() * lastPlanOrientation;
+                Rotation3D diff = Transform3D(sensors.world).rotation().inverse() * lastPlanOrientation;
                 UnitQuaternion quat = UnitQuaternion(diff);
                 float angle = quat.getAngle();
                 return std::fabs(angle) > replan_angle_threshold;

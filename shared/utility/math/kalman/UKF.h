@@ -211,7 +211,7 @@ namespace utility {
 
                     // Update our state
                     covarianceUpdate -= covarianceUpdate.t() * centredObservations.t() *
-                                        (measurement_variance + centredObservations * covarianceUpdate * centredObservations.t()).i() *
+                                        (measurement_variance + centredObservations * covarianceUpdate * centredObservations.t()).inverse() *
                                         centredObservations * covarianceUpdate;
 
 
@@ -219,7 +219,7 @@ namespace utility {
                     const arma::mat innovation = model.observationDifference(measurement, predictedMean);
 
 
-                    d += (centredObservations.t()) * measurement_variance.i() * innovation;
+                    d += (centredObservations.t()) * measurement_variance.inverse() * innovation;
 
                     //DEBUG
                     // if(model.size == 5){
@@ -249,7 +249,7 @@ namespace utility {
                     // }
                     arma::mat predictedCovariance = covarianceFromSigmas(predictedObservations, predictedMean);
                     arma::mat innovationVariance = predictedCovariance + measurement_variance;
-                    arma::mat scalarlikelihoodExponent = ((innovation.t() * innovationVariance.i()) * innovation);
+                    arma::mat scalarlikelihoodExponent = ((innovation.t() * innovationVariance.inverse()) * innovation);
 
                     double expTerm = -0.5 * scalarlikelihoodExponent(0, 0);
                     double normalisationFactor = pow(2 * M_PI, measurement_variance.n_rows) * arma::det(innovationVariance);

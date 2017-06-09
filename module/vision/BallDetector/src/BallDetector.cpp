@@ -288,8 +288,8 @@ namespace vision {
                 // Get our transform to world coordinates
                 const Transform3D& Htw = sensors.world;
                 const Transform3D& Htc = sensors.forwardKinematics.at(ServoID::HEAD_PITCH);
-                Transform3D Hcw = Htc.i() * Htw;
-                Transform3D Hwc = Hcw.i();
+                Transform3D Hcw = Htc.inverse() * Htw;
+                Transform3D Hwc = Hcw.inverse();
 
                 // Work out how far away the ball must be to be at the distance it is from the camera
                 Eigen::Vector3d width_rBWw = Hwc.transformPoint(ballCentreRay * widthDistance);

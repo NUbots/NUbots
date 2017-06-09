@@ -344,7 +344,7 @@ namespace autocal {
 	void MocapStream::transformLHtoRH(Transform3D& T){
 		if(LHInput){
 			Transform3D L = Transform3D::createScale(Eigen::Vector3d(-1,1,1));
-			T = L * T * L;//last L is actually L.i() = L;
+			T = L * T * L;//last L is actually L.inverse() = L;
 		}
 	}
 
