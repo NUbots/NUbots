@@ -283,10 +283,9 @@ namespace module {
                         //bezXdashdash[i] = 6*(A0*(-u)+A0+3*A1*u-2*A1-3*A2 u+A2+A3*u);
                         //bezYdashdash[i] = 6*(B0*(-u)+B0+3*B1*u-2*A1-3*B2 u+B2+B3*u);
 
-                        arma::fmat bez_matrix;
-                        bez_matrix << bezier_X_point << bezier_Y_point << arma::endr
-                                   << A0 << B0;
-
+                        Eigen::Matrix2f bez_matrix;
+                        bez_matrix << bezier_X_point, bezier_Y_point,
+                                      A0,             B0;
 
 
                         Eigen::Vector2f next_robot_position = bez_matrix.colwise().mean().t();
