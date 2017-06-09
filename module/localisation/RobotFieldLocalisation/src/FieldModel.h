@@ -61,7 +61,7 @@ namespace module {
 
             Eigen::Matrix<double, size, 1> limitState(const Eigen::Matrix<double, size, 1>& state) const;
 
-            arma::mat::fixed<size, size> processNoise() const;
+            Eigen::Matrix<double, size, size> processNoise() const;
         };
 
     }

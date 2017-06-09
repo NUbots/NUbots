@@ -51,7 +51,7 @@ namespace input
             return state;
         }
 
-        arma::mat::fixed<size, size> processNoise() {
+        Eigen::Matrix<double, size, size> processNoise() {
             return Eigen::Matrix<double, ServoLoadModel::size, ServoLoadModel::size>::Identity() * 0.001;
         }
     };

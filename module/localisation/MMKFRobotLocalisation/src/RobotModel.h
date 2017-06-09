@@ -79,7 +79,7 @@ namespace robot {
 
         Eigen::Matrix<double, size, 1> limitState(const Eigen::Matrix<double, size, 1>& state);
 
-        arma::mat::fixed<size, size> processNoise();
+        Eigen::Matrix<double, size, size> processNoise();
 
         struct Config {
             double processNoisePositionFactor = 1e-3;

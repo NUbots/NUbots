@@ -45,7 +45,7 @@ namespace utility {
                 return a - b;
             }
 
-            arma::mat::fixed<LinearVec3Model::size, LinearVec3Model::size> LinearVec3Model::processNoise() {
+            Eigen::Matrix<double, LinearVec3Model::size, LinearVec3Model::size> LinearVec3Model::processNoise() {
                 return Eigen::Matrix<double, size, size>::Identity() * processNoiseFactor; //std::numeric_limits<double>::epsilon();
             }
 

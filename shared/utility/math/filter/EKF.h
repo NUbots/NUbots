@@ -35,7 +35,7 @@ namespace utility {
             private:
 
                 using StateVec = Eigen::Matrix<double, Model::size, 1>;
-                using StateMat = arma::mat::fixed<Model::size, Model::size>;
+                using StateMat = Eigen::Matrix<double, Model::size, Model::size>;
 
                 //the internal UKF variables
                 StateMat processNoise, processNoisePartial;

@@ -66,7 +66,7 @@ namespace localisation {
 
             // Eigen::Vector3d mean = arma::join_rows(reset_self.position, arma::vec(imuOffset));
             Eigen::Matrix<double, robot::RobotModel::size, 1> mean = Eigen::Matrix<double, robot::RobotModel::size, 1>({reset_self.position(0), reset_self.position(1), imuOffset});
-            arma::mat::fixed<robot::RobotModel::size, robot::RobotModel::size> cov = Eigen::Matrix<double, robot::RobotModel::size, robot::RobotModel::size>::Identity() * 0.1;
+            Eigen::Matrix<double, robot::RobotModel::size, robot::RobotModel::size> cov = Eigen::Matrix<double, robot::RobotModel::size, robot::RobotModel::size>::Identity() * 0.1;
             cov.submat(0,0,1,1) = reset_self.position_cov;
             cov(2,2) = reset_self.heading_var;
             filter_.setState(mean, cov);
@@ -83,7 +83,7 @@ namespace localisation {
             return filter_.get();
         }
 
-        arma::mat::fixed<robot::RobotModel::size, robot::RobotModel::size> GetCovariance() const {
+        Eigen::Matrix<double, robot::RobotModel::size, robot::RobotModel::size> GetCovariance() const {
             return filter_.getCovariance();
         }
 
@@ -166,7 +166,7 @@ namespace localisation {
             return robot_models_[0]->GetEstimate();
         }
 
-        arma::mat::fixed<robot::RobotModel::size, robot::RobotModel::size> GetCovariance() {
+        Eigen::Matrix<double, robot::RobotModel::size, robot::RobotModel::size> GetCovariance() {
             return robot_models_[0]->GetCovariance();
         }
 

@@ -99,10 +99,9 @@ namespace utility {
 
             Eigen::VectorXd IMUModel::observationDifference(const arma::vec& a, const arma::vec& b) {
                 return a - b;
-
             }
 
-            arma::mat::fixed<IMUModel::size, IMUModel::size> IMUModel::processNoise() {
+            Eigen::Matrix<double, IMUModel::size, IMUModel::size> IMUModel::processNoise() {
                 return arma::diagmat(processNoiseDiagonal);
             }
 

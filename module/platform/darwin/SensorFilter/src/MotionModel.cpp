@@ -112,7 +112,7 @@ namespace module {
                 return a - b;
             }
 
-            const arma::mat::fixed<MotionModel::size, MotionModel::size>& MotionModel::processNoise() {
+            const Eigen::Matrix<double, MotionModel::size, MotionModel::size>& MotionModel::processNoise() {
                 // Return our process noise matrix
                 return processNoiseMatrix;
             }

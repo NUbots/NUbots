@@ -57,7 +57,7 @@ namespace module {
                 static constexpr size_t size = 13;
 
                 // Our static process noise matrix
-                arma::mat::fixed<size, size> processNoiseMatrix;
+                Eigen::Matrix<double, size, size> processNoiseMatrix;
 
                 // The velocity decay for x/y/z velocities (1.0 = no decay)
                 Eigen::Vector3d timeUpdateVelocityDecay = {1,1,1};
@@ -84,7 +84,7 @@ namespace module {
 
                 Eigen::Matrix<double, size, 1> limitState(const Eigen::Matrix<double, size, 1>& state);
 
-                const arma::mat::fixed<size, size>& processNoise();
+                const Eigen::Matrix<double, size, size>& processNoise();
             };
 
         }

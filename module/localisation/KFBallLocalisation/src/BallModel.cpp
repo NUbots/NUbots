@@ -96,8 +96,8 @@ Eigen::Matrix<double, BallModel::size, 1> BallModel::limitState(
     return new_state;
 }
 
-arma::mat::fixed<BallModel::size, BallModel::size> BallModel::processNoise() {
-    arma::mat noise = Eigen::Matrix<double, BallModel::size, BallModel::size>::Identity();
+Eigen::Matrix<double, BallModel::size, BallModel::size> BallModel::processNoise() {
+    Eigen::Matrix<double, BallModel::size, BallModel::size> noise = Eigen::Matrix<double, BallModel::size, BallModel::size>::Identity();
 
     noise(kX, kX) *= cfg_.processNoisePositionFactor;
     noise(kY, kY) *= cfg_.processNoisePositionFactor;

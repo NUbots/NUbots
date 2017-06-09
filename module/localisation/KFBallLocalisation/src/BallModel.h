@@ -57,7 +57,7 @@ namespace ball {
 
         Eigen::Matrix<double, size, 1> limitState(const Eigen::Matrix<double, size, 1>& state);
 
-        arma::mat::fixed<size, size> processNoise();
+        Eigen::Matrix<double, size, size> processNoise();
 
         Eigen::Matrix<double, BallModel::size, 1> ApplyVelocity(
             const Eigen::Matrix<double, BallModel::size, 1>& state,

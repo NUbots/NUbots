@@ -78,7 +78,7 @@ namespace module {
             return state;
         }
 
-        arma::mat::fixed<BallModel::size, BallModel::size> BallModel::processNoise() const {
+        Eigen::Matrix<double, BallModel::size, BallModel::size> BallModel::processNoise() const {
             return arma::diagmat(processNoiseDiagonal);
         }
 

@@ -37,12 +37,12 @@ namespace utility {
 
                 // Dimension types for vectors and square matricies
                 using StateVec = Eigen::Matrix<double, Model::size, 1>;
-                using StateMat = arma::mat::fixed<Model::size, Model::size>;
+                using StateMat = Eigen::Matrix<double, Model::size, Model::size>;
 
                 using SigmaVec = Eigen::Matrix<double, NUM_SIGMA_POINTS, 1>;
                 using SigmaRowVec = Eigen::Matrix<double, NUM_SIGMA_POINTS, Eigen::Dynamic>;
-                using SigmaMat = arma::mat::fixed<Model::size, NUM_SIGMA_POINTS>;
-                using SigmaSquareMat = arma::mat::fixed<NUM_SIGMA_POINTS, NUM_SIGMA_POINTS>;
+                using SigmaMat = Eigen::Matrix<double, Model::size, NUM_SIGMA_POINTS>;
+                using SigmaSquareMat = Eigen::Matrix<double, NUM_SIGMA_POINTS, NUM_SIGMA_POINTS>;
 
                 // Our estimate and covariance
                 StateVec mean;

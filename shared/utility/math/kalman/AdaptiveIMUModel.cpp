@@ -94,7 +94,7 @@ namespace utility {
                 return a - b;
             }
 
-            arma::mat::fixed<AdaptiveIMUModel::size, AdaptiveIMUModel::size> AdaptiveIMUModel::processNoise() {
+            Eigen::Matrix<double, AdaptiveIMUModel::size, AdaptiveIMUModel::size> AdaptiveIMUModel::processNoise() {
                 return Eigen::Matrix<double, size, size>::Identity() * processNoiseFactor; //std::numeric_limits<double>::epsilon();
             }
 
