@@ -123,7 +123,7 @@ namespace module {
                         SearchType s(search["search_type"].as<std::string>());
                         searches[s] = std::vector<Eigen::Vector2d>();
                         for (auto& p : search["points"]){
-                            searches[s].push_back(p.as<Eigen::Vector2d>());
+                            searches[s].push_back(p.as<Expression>());
                         }
                     }
 

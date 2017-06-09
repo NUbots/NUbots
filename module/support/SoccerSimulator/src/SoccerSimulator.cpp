@@ -117,9 +117,9 @@ namespace support {
         cfg_.ball.path.y_amp = config["ball"]["path"]["y_amp"].as<Expression>();
         cfg_.ball.path.type = pathTypeFromString(config["ball"]["path"]["type"].as<std::string>());
 
-        world.robotPose = config["initial"]["robot_pose"].as<Eigen::Vector3d>();
+        world.robotPose = config["initial"]["robot_pose"].as<Expression>();
         world.ball = VirtualBall(
-            config["initial"]["ball"]["position"].as<Eigen::Vector2d>(),
+            config["initial"]["ball"]["position"].as<Expression>(),
             config["initial"]["ball"]["diameter"].as<Expression>()
         );
 

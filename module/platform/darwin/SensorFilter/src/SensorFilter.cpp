@@ -141,22 +141,22 @@ namespace module {
 
                     // Motion filter config
                     // Update our velocity timestep dekay
-                    this->config.motionFilter.velocityDecay    = config["motion_filter"]["update"]["velocity_decay"].as<Eigen::Vector3d>();
+                    this->config.motionFilter.velocityDecay    = config["motion_filter"]["update"]["velocity_decay"].as<Expression>();
                     motionFilter.model.timeUpdateVelocityDecay = this->config.motionFilter.velocityDecay;
 
                     // Update our measurement noises
-                    this->config.motionFilter.noise.measurement.accelerometer    = arma::diagmat(config["motion_filter"]["noise"]["measurement"]["accelerometer"].as<Eigen::Vector3d>());
-                    this->config.motionFilter.noise.measurement.accelerometerMagnitude    = arma::diagmat(config["motion_filter"]["noise"]["measurement"]["accelerometer_magnitude"].as<Eigen::Vector3d>());
-                    this->config.motionFilter.noise.measurement.gyroscope        = arma::diagmat(config["motion_filter"]["noise"]["measurement"]["gyroscope"].as<Eigen::Vector3d>());
-                    this->config.motionFilter.noise.measurement.footUpWithZ      = arma::diagmat(config["motion_filter"]["noise"]["measurement"]["foot_up_with_z"].as<Eigen::Vector4d>());
-                    this->config.motionFilter.noise.measurement.flatFootOdometry = arma::diagmat(config["motion_filter"]["noise"]["measurement"]["flat_foot_odometry"].as<Eigen::Vector3d>());
-                    this->config.motionFilter.noise.measurement.flatFootOrientation = arma::diagmat(config["motion_filter"]["noise"]["measurement"]["flat_foot_orientation"].as<Eigen::Vector4d>());
+                    this->config.motionFilter.noise.measurement.accelerometer    = arma::diagmat(config["motion_filter"]["noise"]["measurement"]["accelerometer"].as<Expression>());
+                    this->config.motionFilter.noise.measurement.accelerometerMagnitude    = arma::diagmat(config["motion_filter"]["noise"]["measurement"]["accelerometer_magnitude"].as<Expression>());
+                    this->config.motionFilter.noise.measurement.gyroscope        = arma::diagmat(config["motion_filter"]["noise"]["measurement"]["gyroscope"].as<Expression>());
+                    this->config.motionFilter.noise.measurement.footUpWithZ      = arma::diagmat(config["motion_filter"]["noise"]["measurement"]["foot_up_with_z"].as<Expression>());
+                    this->config.motionFilter.noise.measurement.flatFootOdometry = arma::diagmat(config["motion_filter"]["noise"]["measurement"]["flat_foot_odometry"].as<Expression>());
+                    this->config.motionFilter.noise.measurement.flatFootOrientation = arma::diagmat(config["motion_filter"]["noise"]["measurement"]["flat_foot_orientation"].as<Expression>());
 
                     // Update our process noises
-                    this->config.motionFilter.noise.process.position           = config["motion_filter"]["noise"]["process"]["position"].as<Eigen::Vector3d>();
-                    this->config.motionFilter.noise.process.velocity           = config["motion_filter"]["noise"]["process"]["velocity"].as<Eigen::Vector3d>();
-                    this->config.motionFilter.noise.process.rotation           = config["motion_filter"]["noise"]["process"]["rotation"].as<Eigen::Vector4d>();
-                    this->config.motionFilter.noise.process.rotationalVelocity = config["motion_filter"]["noise"]["process"]["rotational_velocity"].as<Eigen::Vector3d>();
+                    this->config.motionFilter.noise.process.position           = config["motion_filter"]["noise"]["process"]["position"].as<Expression>();
+                    this->config.motionFilter.noise.process.velocity           = config["motion_filter"]["noise"]["process"]["velocity"].as<Expression>();
+                    this->config.motionFilter.noise.process.rotation           = config["motion_filter"]["noise"]["process"]["rotation"].as<Expression>();
+                    this->config.motionFilter.noise.process.rotationalVelocity = config["motion_filter"]["noise"]["process"]["rotational_velocity"].as<Expression>();
 
                     // Set our process noise in our filter
                     Eigen::Matrix<double, MotionModel::size, 1> processNoise;
@@ -167,15 +167,15 @@ namespace module {
                     motionFilter.model.processNoiseMatrix = arma::diagmat(processNoise);
 
                     // Update our mean configs and if it changed, reset the filter
-                    this->config.motionFilter.initial.mean.position                 = config["motion_filter"]["initial"]["mean"]["position"].as<Eigen::Vector3d>();
-                    this->config.motionFilter.initial.mean.velocity                 = config["motion_filter"]["initial"]["mean"]["velocity"].as<Eigen::Vector3d>();
-                    this->config.motionFilter.initial.mean.rotation                 = config["motion_filter"]["initial"]["mean"]["rotation"].as<Eigen::Vector4d>();
-                    this->config.motionFilter.initial.mean.rotationalVelocity       = config["motion_filter"]["initial"]["mean"]["rotational_velocity"].as<Eigen::Vector3d>();
+                    this->config.motionFilter.initial.mean.position                 = config["motion_filter"]["initial"]["mean"]["position"].as<Expression>();
+                    this->config.motionFilter.initial.mean.velocity                 = config["motion_filter"]["initial"]["mean"]["velocity"].as<Expression>();
+                    this->config.motionFilter.initial.mean.rotation                 = config["motion_filter"]["initial"]["mean"]["rotation"].as<Expression>();
+                    this->config.motionFilter.initial.mean.rotationalVelocity       = config["motion_filter"]["initial"]["mean"]["rotational_velocity"].as<Expression>();
 
-                    this->config.motionFilter.initial.covariance.position           = config["motion_filter"]["initial"]["covariance"]["position"].as<Eigen::Vector3d>();
-                    this->config.motionFilter.initial.covariance.velocity           = config["motion_filter"]["initial"]["covariance"]["velocity"].as<Eigen::Vector3d>();
-                    this->config.motionFilter.initial.covariance.rotation           = config["motion_filter"]["initial"]["covariance"]["rotation"].as<Eigen::Vector4d>();
-                    this->config.motionFilter.initial.covariance.rotationalVelocity = config["motion_filter"]["initial"]["covariance"]["rotational_velocity"].as<Eigen::Vector3d>();
+                    this->config.motionFilter.initial.covariance.position           = config["motion_filter"]["initial"]["covariance"]["position"].as<Expression>();
+                    this->config.motionFilter.initial.covariance.velocity           = config["motion_filter"]["initial"]["covariance"]["velocity"].as<Expression>();
+                    this->config.motionFilter.initial.covariance.rotation           = config["motion_filter"]["initial"]["covariance"]["rotation"].as<Expression>();
+                    this->config.motionFilter.initial.covariance.rotationalVelocity = config["motion_filter"]["initial"]["covariance"]["rotational_velocity"].as<Expression>();
 
                     // Calculate our mean and covariance
                     Eigen::Matrix<double, MotionModel::size, 1> mean;

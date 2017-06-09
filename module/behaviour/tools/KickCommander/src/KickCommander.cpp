@@ -45,8 +45,8 @@ namespace tools {
                 doThings = true;
             } else {
                 emit(std::make_unique<KickCommand>(KickCommand(
-                   config["target"].as<Eigen::Vector3d>(),
-                   config["direction"].as<Eigen::Vector3d>(),
+                   config["target"].as<Expression>(),
+                   config["direction"].as<Expression>(),
                    KickCommandType::NORMAL
                 )));
             }

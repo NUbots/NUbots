@@ -64,21 +64,21 @@ namespace localisation {
 
         on<Configuration>("RobotFieldLocalisation.yaml").then([this] (const Configuration& config) {
             // Use configuration here from file RobotFieldLocalisation.yaml
-            defaultMeasurementCovariance = config["measurement_noise"].as<Eigen::Vector3d>();
+            defaultMeasurementCovariance = config["measurement_noise"].as<Expression>();
             if (filter.filters.empty()) {
                 filter.filters.push_back(
                         MMUKF<FieldModel>::Filter{
                             1.0,
                             UKF<FieldModel>(
-                                config["initial_mean"].as<Eigen::Vector3d>()
-                                , arma::diagmat(config["initial_covariance"].as<Eigen::Vector3d>())
+                                config["initial_mean"].as<Expression>()
+                                , arma::diagmat(config["initial_covariance"].as<Expression>())
                                 )
                             }
                         );
             }
 
             for (auto& f : filter.filters) {
-                f.filter.model.processNoiseDiagonal = config["process_noise"].as<Eigen::Vector3d>();
+                f.filter.model.processNoiseDiagonal = config["process_noise"].as<Expression>();
             }
 
             lastUpdateTime = NUClear::clock::now();

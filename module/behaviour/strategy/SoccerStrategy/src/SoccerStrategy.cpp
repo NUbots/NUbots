@@ -102,8 +102,8 @@ namespace strategy {
             cfg_.localisation_interval = durationFromSeconds(config["localisation_interval"].as<double>());
             cfg_.localisation_duration = durationFromSeconds(config["localisation_duration"].as<double>());
 
-            cfg_.start_position_offensive = config["start_position_offensive"].as<Eigen::Vector2d>();
-            cfg_.start_position_defensive = config["start_position_defensive"].as<Eigen::Vector2d>();
+            cfg_.start_position_offensive = config["start_position_offensive"].as<Expression>();
+            cfg_.start_position_defensive = config["start_position_defensive"].as<Expression>();
 
             cfg_.is_goalie = config["goalie"].as<bool>();
 

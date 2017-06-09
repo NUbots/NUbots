@@ -407,7 +407,7 @@ namespace motion
 
         auto& walkCycle = wlk["walk_cycle"];
         auto& velocity = walkCycle["velocity"];
-        velocityLimits = velocity["limits"].as<Eigen::Matrix<double, 3, 2>>();
+        velocityLimits = velocity["limits"].as<Expression>();
         velocityHigh   = velocity["high_speed"].as<Expression>();
 
         auto& acceleration = walkCycle["acceleration"];

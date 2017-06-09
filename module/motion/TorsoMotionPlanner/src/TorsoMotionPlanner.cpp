@@ -426,13 +426,13 @@ namespace motion
         auto& wlk_walkCycle = wlk["walk_cycle"];
         stepTime    = wlk_walkCycle["step_time"].as<Expression>();
         stepHeight  = wlk_walkCycle["step"]["height"].as<Expression>();
-        stepLimits  = wlk_walkCycle["step"]["limits"].as<Eigen::Matrix<double, 3, 2>>();
+        stepLimits  = wlk_walkCycle["step"]["limits"].as<Expression>();
 
         step_height_slow_fraction = wlk_walkCycle["step"]["height_slow_fraction"].as<float>();
         step_height_fast_fraction = wlk_walkCycle["step"]["height_fast_fraction"].as<float>();
 
         auto& velocity = wlk_walkCycle["velocity"];
-        velocityLimits = velocity["limits"].as<Eigen::Matrix<double, 3, 2>>();
+        velocityLimits = velocity["limits"].as<Expression>();
         velocityHigh   = velocity["high_speed"].as<Expression>();
 
         auto& acceleration = wlk_walkCycle["acceleration"];
