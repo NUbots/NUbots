@@ -52,7 +52,7 @@ namespace module {
 
             public:
 	           	Searcher()
-                    : points(std::vector<T>(1, Eigen::Matrix<double, 2, 1>::Zero()))
+                    : points(std::vector<T>(1, Eigen::Vector2d::Zero()))
                     , current(0)
                     , refPoint()
                     , new_goal(false)

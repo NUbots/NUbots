@@ -97,7 +97,7 @@ namespace autocal{
 			Eigen::Vector3d pA = samplesA[i].translation();
 			Eigen::Vector3d pB = samplesB[i].translation();
 
-			arma::mat F = arma::join_rows(RA,-Eigen::Matrix<double, 3, 3>::Identity());
+			arma::mat F = arma::join_rows(RA,-Eigen::Matrix3d::Identity());
 
 			Eigen::VectorXd D = Ry * pB - pA;
 
@@ -178,8 +178,8 @@ namespace autocal{
 				return std::pair<Transform3D, Transform3D>();
 			}
 
-			arma::mat G1 = a0 * Eigen::Matrix<double, 3, 3>::Identity() + crossMatrix(a) + a*a.t() / a0;
-			arma::mat G2 = -b0 * Eigen::Matrix<double, 3, 3>::Identity() + crossMatrix(b) - a*b.t() / a0;
+			arma::mat G1 = a0 * Eigen::Matrix3d::Identity() + crossMatrix(a) + a*a.t() / a0;
+			arma::mat G2 = -b0 * Eigen::Matrix3d::Identity() + crossMatrix(b) - a*b.t() / a0;
 
 			arma::mat G = arma::join_rows(G1,G2);
 
@@ -349,7 +349,7 @@ namespace autocal{
 
 		//Create kronecker matrix K
 		int n = samplesA.size();
-		Eigen::Matrix4d C = Eigen::Matrix<double, 4, 4>::Zero();
+		Eigen::Matrix4d C = Eigen::Matrix4d::Zero();
 		for(int i = 0; i < n; i++){
 			const Transform3D& A = samplesA[i];
 			const Transform3D& B = samplesB[i];

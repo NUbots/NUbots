@@ -318,7 +318,7 @@ namespace kinematics {
         @return [x_com, y_com, z_com, total_mass] relative to the torso basis
     */
     inline Eigen::Vector4d calculateCentreOfMass(const message::motion::KinematicsModel& model, const std::map<uint32_t, Eigen::Matrix<double, 4, 4, Eigen::DontAlign>>& jointPositions, bool includeTorso){
-        Eigen::Vector4d totalMassVector = Eigen::Matrix<double, 4, 1>::Zero();
+        Eigen::Vector4d totalMassVector = Eigen::Vector4d::Zero();
 
         for(auto& joint : jointPositions){
             Eigen::Vector4d massVector;

@@ -323,9 +323,9 @@ namespace motion {
     void OldWalkEngine::stanceReset() {
         // standup/sitdown/falldown handling
         if (startFromStep) {
-            uLeftFoot = Eigen::Matrix<double, 3, 1>::Zero();
-            uRightFoot = Eigen::Matrix<double, 3, 1>::Zero();
-            uTorso = Eigen::Matrix<double, 3, 1>::Zero();
+            uLeftFoot = Eigen::Vector3d::Zero();
+            uRightFoot = Eigen::Vector3d::Zero();
+            uTorso = Eigen::Vector3d::Zero();
 
             // start walking asap
             initialStep = 1;
@@ -357,20 +357,20 @@ namespace motion {
         uLeftFoot = {0, kinematicsModel.leg.HIP_OFFSET_Y, 0};
         uRightFoot = {0, -kinematicsModel.leg.HIP_OFFSET_Y, 0};
 
-        uTorsoSource = Eigen::Matrix<double, 3, 1>::Zero();
-        uTorsoDestination = Eigen::Matrix<double, 3, 1>::Zero();
-        uLeftFootSource = Eigen::Matrix<double, 3, 1>::Zero();
-        uLeftFootDestination = Eigen::Matrix<double, 3, 1>::Zero();
-        uRightFootSource = Eigen::Matrix<double, 3, 1>::Zero();
-        uRightFootDestination = Eigen::Matrix<double, 3, 1>::Zero();
+        uTorsoSource = Eigen::Vector3d::Zero();
+        uTorsoDestination = Eigen::Vector3d::Zero();
+        uLeftFootSource = Eigen::Vector3d::Zero();
+        uLeftFootDestination = Eigen::Vector3d::Zero();
+        uRightFootSource = Eigen::Vector3d::Zero();
+        uRightFootDestination = Eigen::Vector3d::Zero();
 
-        velocityCurrent = Eigen::Matrix<double, 3, 1>::Zero();
-        velocityCommand = Eigen::Matrix<double, 3, 1>::Zero();
-        velocityDifference = Eigen::Matrix<double, 3, 1>::Zero();
+        velocityCurrent = Eigen::Vector3d::Zero();
+        velocityCommand = Eigen::Vector3d::Zero();
+        velocityDifference = Eigen::Vector3d::Zero();
 
         // gZMP exponential coefficients:
-        zmpCoefficients = Eigen::Matrix<double, 4, 1>::Zero();
-        zmpParams = Eigen::Matrix<double, 4, 1>::Zero();
+        zmpCoefficients = Eigen::Vector4d::Zero();
+        zmpParams = Eigen::Vector4d::Zero();
 
         // gGyro stabilization variables
         swingLeg = swingLegInitial;

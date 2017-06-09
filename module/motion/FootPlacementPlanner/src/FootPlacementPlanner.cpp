@@ -156,7 +156,7 @@ namespace motion
         setRightFootSource(getRightFootDestination());
         setTorsoSource(inTorsoDestination);
 
-        Eigen::Vector2d supportMod = Eigen::Matrix<double, 2, 1>::Zero(); // support point modulation for wallkick
+        Eigen::Vector2d supportMod = Eigen::Vector2d::Zero(); // support point modulation for wallkick
 
         if(isZeroVelocityRequired())
         {
@@ -260,7 +260,7 @@ namespace motion
 
         auto& limit = (getVelocityCurrent().x() > velocityHigh ? accelerationLimitsHigh : accelerationLimits) * deltaT;
 
-        Transform2D velocityDifference = Eigen::Matrix<double, 3, 1>::Zero(); // Current velocity differential
+        Transform2D velocityDifference = Eigen::Vector3d::Zero(); // Current velocity differential
         velocityDifference.x()     = std::min(std::max(getVelocityCommand().x()     - getVelocityCurrent().x(),     -limit[0]), limit[0]);
         velocityDifference.y()     = std::min(std::max(getVelocityCommand().y()     - getVelocityCurrent().y(),     -limit[1]), limit[1]);
         velocityDifference.angle() = std::min(std::max(getVelocityCommand().angle() - getVelocityCurrent().angle(), -limit[2]), limit[2]);
@@ -307,15 +307,15 @@ namespace motion
         setLeftFootPosition({0, kinematicsModel.leg.HIP_OFFSET_Y, 0});
         setRightFootPosition({0, -kinematicsModel.leg.HIP_OFFSET_Y, 0});
 
-        setTorsoSource(Eigen::Matrix<double, 3, 1>::Zero());
-        setTorsoDestination(Eigen::Matrix<double, 3, 1>::Zero());
-        setLeftFootSource(Eigen::Matrix<double, 3, 1>::Zero());
-        setLeftFootDestination(Eigen::Matrix<double, 3, 1>::Zero());
-        setRightFootSource(Eigen::Matrix<double, 3, 1>::Zero());
-        setRightFootDestination(Eigen::Matrix<double, 3, 1>::Zero());
+        setTorsoSource(Eigen::Vector3d::Zero());
+        setTorsoDestination(Eigen::Vector3d::Zero());
+        setLeftFootSource(Eigen::Vector3d::Zero());
+        setLeftFootDestination(Eigen::Vector3d::Zero());
+        setRightFootSource(Eigen::Vector3d::Zero());
+        setRightFootDestination(Eigen::Vector3d::Zero());
 
-        setVelocityCurrent(Eigen::Matrix<double, 3, 1>::Zero());
-        setVelocityCommand(Eigen::Matrix<double, 3, 1>::Zero());
+        setVelocityCurrent(Eigen::Vector3d::Zero());
+        setVelocityCommand(Eigen::Vector3d::Zero());
 
         // gGyro stabilization variables
         setActiveForwardLimb(activeLimbInitial);

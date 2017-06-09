@@ -89,10 +89,10 @@ namespace localisation {
             emit(std::move(ball_msg));
             emit(std::move(ball_vec_msg));
 
-            Eigen::Vector3d worldSpaceBallPos = Eigen::Matrix<double, 3, 1>::Zero();
+            Eigen::Vector3d worldSpaceBallPos = Eigen::Vector3d::Zero();
             worldSpaceBallPos.rows(0,1) = utility::localisation::transform::RobotToWorldTransform(robots[0].position, robots[0].heading, robot_space_ball_pos);
-            Eigen::Vector3d worldSpaceBallVel = Eigen::Matrix<double, 3, 1>::Zero();
-            worldSpaceBallVel.rows(0,1) = utility::localisation::transform::RobotToWorldTransform(Eigen::Matrix<double, 2, 1>::Zero(), robots[0].heading, robot_space_ball_vel);
+            Eigen::Vector3d worldSpaceBallVel = Eigen::Vector3d::Zero();
+            worldSpaceBallVel.rows(0,1) = utility::localisation::transform::RobotToWorldTransform(Eigen::Vector2d::Zero(), robots[0].heading, robot_space_ball_vel);
 
             emit(drawArrow("ballvel", worldSpaceBallPos, worldSpaceBallVel, worldSpaceBallVel.norm()));
 
