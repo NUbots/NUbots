@@ -354,10 +354,10 @@ namespace vision {
                                                    it->quad.br);
 
                 // Get the quad points in screen coords
-                Eigen::Vector2d tl = imageToScreen(quad.getTopLeft(),     convert<uint, 2>(image.dimensions));
-                Eigen::Vector2d tr = imageToScreen(quad.getTopRight(),    convert<uint, 2>(image.dimensions));
-                Eigen::Vector2d bl = imageToScreen(quad.getBottomLeft(),  convert<uint, 2>(image.dimensions));
-                Eigen::Vector2d br = imageToScreen(quad.getBottomRight(), convert<uint, 2>(image.dimensions));
+                Eigen::Vector2d tl = imageToScreen(quad.getTopLeft(),     image.dimensions);
+                Eigen::Vector2d tr = imageToScreen(quad.getTopRight(),    image.dimensions);
+                Eigen::Vector2d bl = imageToScreen(quad.getBottomLeft(),  image.dimensions);
+                Eigen::Vector2d br = imageToScreen(quad.getBottomRight(), image.dimensions);
                 Eigen::Vector2d screenGoalCentre = (tl + tr + bl + br) * 0.25;
 
                 // Get vectors for TL TR BL BR;

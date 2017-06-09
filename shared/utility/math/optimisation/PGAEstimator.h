@@ -72,7 +72,7 @@ namespace utility {
                     s2.each_row() -= bestEstimate.t();
                     arma::mat covmat = s2 * s2.t();
 
-                    return OptimiserEstimate(previousEstimate.generation + 1, convert<double>(bestEstimate), previousEstimate.covariance);
+                    return OptimiserEstimate(previousEstimate.generation + 1, bestEstimate, previousEstimate.covariance);
                 }
             };
 

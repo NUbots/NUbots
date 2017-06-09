@@ -66,8 +66,8 @@ namespace utility {
                  * @author Josiah Walker
                  */
                 OptimiserEstimate updateEstimate(const arma::mat& samples, const arma::vec& fitnesses, OptimiserEstimate& previousEstimate) {
-                    Eigen::VectorXd bestEstimate = convert<double>(previousEstimate.estimate);
-                    Eigen::VectorXd covEstimate = arma::diagvec(convert<double>(previousEstimate.covariance));
+                    Eigen::VectorXd bestEstimate = previousEstimate.estimate;
+                    Eigen::VectorXd covEstimate = arma::diagvec(previousEstimate.covariance);
 
                     if (firstRun) {
                         firstRun = false;

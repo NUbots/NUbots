@@ -209,7 +209,7 @@ namespace vision {
             for (auto& result : ransacResults) {
 
                 // Transform our centre into kinematics coordinates
-                Eigen::Vector2d centre = imageToScreen(result.model.centre, convert<uint, 2>(image.dimensions));
+                Eigen::Vector2d centre = imageToScreen(result.model.centre, image.dimensions);
 
                 // Get the 4 points around our circle
                 Eigen::Vector2d top   = centre + Eigen::Vector2d( 0,  result.model.radius );
@@ -324,7 +324,7 @@ namespace vision {
 
                 // Add our points
                 for (auto& point : result) {
-                    b.edgePoints.push_back(getCamFromScreen(imageToScreen(point, convert<uint, 2>(image.dimensions), cam.focalLengthPixels)));
+                    b.edgePoints.push_back(getCamFromScreen(imageToScreen(point, image.dimensions, cam.focalLengthPixels)));
                 }
 
                 balls->push_back(std::move(b));

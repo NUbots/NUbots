@@ -120,10 +120,10 @@ namespace support {
 
             //build the predicted quad
             utility::math::geometry::Quad quad(
-                    getCamRay(goalNormals.col(0), goalNormals.col(3), camParams.focalLengthPixels, convert<uint, 2>(camParams.imageSizePixels)),
-                    getCamRay(goalNormals.col(0), goalNormals.col(2), camParams.focalLengthPixels, convert<uint, 2>(camParams.imageSizePixels)),
-                    getCamRay(goalNormals.col(1), goalNormals.col(2), camParams.focalLengthPixels, convert<uint, 2>(camParams.imageSizePixels)),
-                    getCamRay(goalNormals.col(1), goalNormals.col(3), camParams.focalLengthPixels, convert<uint, 2>(camParams.imageSizePixels))
+                    getCamRay(goalNormals.col(0), goalNormals.col(3), camParams.focalLengthPixels, camParams.imageSizePixels),
+                    getCamRay(goalNormals.col(0), goalNormals.col(2), camParams.focalLengthPixels, camParams.imageSizePixels),
+                    getCamRay(goalNormals.col(1), goalNormals.col(2), camParams.focalLengthPixels, camParams.imageSizePixels),
+                    getCamRay(goalNormals.col(1), goalNormals.col(3), camParams.focalLengthPixels, camParams.imageSizePixels)
                 );
 
             //goal base visibility check

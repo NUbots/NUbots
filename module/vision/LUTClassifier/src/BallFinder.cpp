@@ -59,7 +59,7 @@ namespace module {
 
             const auto& maxVisualHorizon = visualHorizon.front()[1] > visualHorizon.back()[1] ? visualHorizon.begin() : visualHorizon.end() - 1;
 
-            Eigen::Vector2d topY = imageToScreen(Eigen::Vector2i({ maxVisualHorizon->x(), int(maxVisualHorizon->y()) }), convert<uint, 2>(classifiedImage.dimensions));
+            Eigen::Vector2d topY = imageToScreen(Eigen::Vector2i({ maxVisualHorizon->x(), int(maxVisualHorizon->y()) }), classifiedImage.dimensions);
             topY[0] = 0;    //Choose centre of screen
 
             // Get the positions of the top of our green horizion, and the bottom of the screen
@@ -92,14 +92,14 @@ namespace module {
             Eigen::Vector4d worldPosition = arma::ones(4);
             worldPosition.rows(0, 2) = xStart * direction;
             auto camPoint = projectWorldPointToScreen(worldPosition, camToGround, FOCAL_LENGTH_PIXELS);
-            int y = screenToImage(camPoint, convert<uint, 2>(classifiedImage.dimensions))[1];
+            int y = screenToImage(camPoint, classifiedImage.dimensions)[1];
 
             for(double x = xStart; x < xEnd && y >= 0; x += std::max(dx, (dx * x) / (cameraHeight - dx))) {
 
                 // Calculate our next Y
                 worldPosition.rows(0, 2) = (x + std::max(dx, (dx * x) / (cameraHeight - dx))) * direction;
                 camPoint = projectWorldPointToScreen(worldPosition, camToGround, FOCAL_LENGTH_PIXELS);
-                int nextY = screenToImage(camPoint, convert<uint, 2>(classifiedImage.dimensions))[1];
+                int nextY = screenToImage(camPoint, classifiedImage.dimensions)[1];
 
                 // Work out our details
                 Eigen::Vector2i start = { 0, y };

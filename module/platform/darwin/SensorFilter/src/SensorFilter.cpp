@@ -626,7 +626,7 @@ namespace module {
                     Transform3D torsoToGround = worldInv;
                     torsoToGround.translation() = Eigen::Vector3d(0,0,torsoToGround.translation()[2]);
                     torsoToGround.rotation() = yawlessWorldInvR;
-                    sensors->camToGround  = Transform3D(torsoToGround * convert<double, 4, 4>(headPitchKinematics)); // Rwt * Rth
+                    sensors->camToGround  = Transform3D(torsoToGround * headPitchKinematics); // Rwt * Rth
 
                     /************************************************
                      *                  CENTRE OF PRESSURE          *
