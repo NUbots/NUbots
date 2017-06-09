@@ -59,7 +59,7 @@ namespace module {
                             arma::clamp(
                                 hiddenWeights * features + hiddenBias, 0.0, std::numeric_limits<double>::max()
                             )
-                        ).t() * outputWeights + outputBias
+                        ).transpose() * outputWeights + outputBias
                     )[0];
 
                 linResult = std::tanh(linResult * 0.5) * 0.5 + 0.5;

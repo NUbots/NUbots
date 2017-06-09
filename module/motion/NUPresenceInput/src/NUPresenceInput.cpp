@@ -144,7 +144,7 @@ namespace motion {
 
             //Rotate to robot coordinate system
             goalCamPose = arma::conv_to<arma::mat>::from(user.head_pose);
-            goalCamPose = camera_to_robot * goalCamPose.inverse() * camera_to_robot.t();
+            goalCamPose = camera_to_robot * goalCamPose.inverse() * camera_to_robot.transpose();
             goalCamPose.translation() *= oculus_to_robot_scale;
 
             limitPose(goalCamPose);
@@ -152,7 +152,7 @@ namespace motion {
             // pose << user.head_pose();
             // goalCamPose = Transform3D(arma::conv_to<arma::mat>::from(pose));
             // std::cout << "goalCamPose = \n" << goalCamPose << std::endl;
-            // std::cout << "robotCamPos = " << user.head_pose().t().x() << " "<<  user.head_pose().t().y() << " "<<  user.head_pose().t().z() << std::endl;
+            // std::cout << "robotCamPos = " << user.head_pose().transpose().x() << " "<<  user.head_pose().transpose().y() << " "<<  user.head_pose().transpose().z() << std::endl;
 
         });
 
@@ -165,7 +165,7 @@ namespace motion {
                 float x = rigidBody.position[0];
                 float y = rigidBody.position[1];
                 float z = rigidBody.position[2];
-                // std::cout << "Rigid body " << id << " " << Eigen::Vector3d(x,y,z).t();
+                // std::cout << "Rigid body " << id << " " << Eigen::Vector3d(x,y,z).transpose();
                 if(id == head_id){
                         mocap_head_pos = oculus_to_robot_scale * mocap_to_robot * Eigen::Vector3d(x,y,z);
                         marker_count++;
@@ -290,12 +290,12 @@ namespace motion {
         }
 
         Eigen::Vector3d eulerAngles = pose.eulerAngles();
-        // std::cout << "eulerAngles = " << eulerAngles.t();
+        // std::cout << "eulerAngles = " << eulerAngles.transpose();
         // std::cout << "eulerLimits = " << ", " << eulerLimits.roll.max << ", " << eulerLimits.roll.min << "; " << eulerLimits.pitch.max << ", " << eulerLimits.pitch.min << "; " << eulerLimits.yaw.max << ", " << eulerLimits.yaw.min << std::endl;
         eulerAngles[0] = std::fmax(std::fmin(eulerAngles[0],eulerLimits.roll.max),eulerLimits.roll.min);
         eulerAngles[1] = std::fmax(std::fmin(eulerAngles[1],eulerLimits.pitch.max),eulerLimits.pitch.min);
         eulerAngles[2] = std::fmax(std::fmin(eulerAngles[2],eulerLimits.yaw.max),eulerLimits.yaw.min);
-        // std::cout << "eulerAngles = " << eulerAngles.t();
+        // std::cout << "eulerAngles = " << eulerAngles.transpose();
         pose.rotation() = Rotation3D::createFromEulerAngles(eulerAngles);
         // std::cout << "check = " << pose.rotation() - R << std::endl;
 

@@ -134,7 +134,7 @@ namespace utility
 
                     if (epsilon > 0.0f)
                     {
-                        Eigen::Matrix<T, Eigen::Dynamic, 1> spillDists = Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic>(data.cols(spillDataIndices)).row(splitDim).t();
+                        Eigen::Matrix<T, Eigen::Dynamic, 1> spillDists = Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic>(data.cols(spillDataIndices)).row(splitDim).transpose();
 
                         leftSpillData = arma::join_cols(
                                             spillDataIndices(arma::find(spillDists <= splitVal+epsilon)),

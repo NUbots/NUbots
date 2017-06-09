@@ -36,7 +36,7 @@ namespace utility
                 for (const auto& point : points)
                 {
                     Eigen::Matrix<double, n, 1> offset = point - mean;
-                    covariance += offset * offset.t();
+                    covariance += offset * offset.transpose();
                 }
 
                 return(covariance / (points.size() - 1));

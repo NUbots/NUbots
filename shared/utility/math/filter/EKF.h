@@ -77,10 +77,10 @@ namespace utility {
                     StateMat jacobian = model.timeUpdateJacobian(state, additionalParameters...);
 
                     //this is the original
-                    //processNoise = jacobian * processNoise * jacobian.t() + model.processNoise();
+                    //processNoise = jacobian * processNoise * jacobian.transpose() + model.processNoise();
 
                     //this is steve's out-of-order update (backported from UKF)
-                    processNoise = jacobian * (processNoisePartial * processNoise) * jacobian.t() + model.processNoise();
+                    processNoise = jacobian * (processNoisePartial * processNoise) * jacobian.transpose() + model.processNoise();
 
                     processNoisePartial = Eigen::Matrix<double, Model::size, Model::size>::Identity();
                 }
@@ -92,7 +92,7 @@ namespace utility {
                     arma::mat measurementTransform = model.StateToMeasurementTransform(measurement, measurementArgs...);
 
                     arma::mat kalmanGain = processNoise * measurementTransform *
-                                            (arma::trimatu(measurementTransform * processNoisePartial * processNoise * measurementTransform.t() + measurementVariance)).inverse();
+                                            (arma::trimatu(measurementTransform * processNoisePartial * processNoise * measurementTransform.transpose() + measurementVariance)).inverse();
 
                     state += kalmanGain * (measurement - measurementTransform * state);
 

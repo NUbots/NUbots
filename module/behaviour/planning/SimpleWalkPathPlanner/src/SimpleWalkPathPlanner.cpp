@@ -192,7 +192,7 @@ namespace module {
                         }
                     }
 
-                    // log("rBWw",rBWw.t());
+                    // log("rBWw",rBWw.transpose());
                     // log("Htw\n",Htw);
 
 
@@ -203,7 +203,7 @@ namespace module {
                     // log("turnSpeed", turnSpeed);
                     // log("ball bearing", angle);
                     // log("ball position", position);
-                    // log("loc position", selfs.front().position.t());
+                    // log("loc position", selfs.front().position.transpose());
                     // log("loc heading", selfs.front().heading);
 
                     //Euclidean distance to ball
@@ -226,7 +226,7 @@ namespace module {
                     emit(drawSphere("kick_target", Eigen::Vector3d(kick_target[0], kick_target[1], 0.0), 0.1, Eigen::Vector3d(1, 0, 0), 0));
                     //log("walkcommand",command->command[0],command->command[1]);
                     //log("anglewalkcommand",command->command[2]);
-                    //log("ballPos: ",position.t());
+                    //log("ballPos: ",position.transpose());
 
                     emit(std::make_unique<KickPlan>(KickPlan(kick_target, KickPlan::KickType::SCRIPTED)));
 

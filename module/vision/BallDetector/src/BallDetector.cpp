@@ -309,9 +309,9 @@ namespace vision {
                 b.torsoSpacePosition  = width_rBGg;
                 // log("ball pos1 =", b.position);
                 // log("ball pos2 =", b.torsoSpacePosition);
-                // log("width_rBGg =", width_rBGg.t());
-                // log("proj_rBGg =", proj_rBGg.t());
-                // log("ballCentreRay =",ballCentreRay.t());
+                // log("width_rBGg =", width_rBGg.transpose());
+                // log("proj_rBGg =", proj_rBGg.transpose());
+                // log("ballCentreRay =",ballCentreRay.transpose());
                 // log("camToGround =\n",camToGround);
 
                 // On screen visual shape

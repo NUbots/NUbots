@@ -74,7 +74,7 @@ namespace geometry {
                 const double diff = distanceToPoint(*it);
                 if ( diff*diff < candidateThreshold ) {
                     average += *it;
-                    covmat += *it * (*it).t();
+                    covmat += *it * (*it).transpose();
                     ++ctr;
                 }
             }

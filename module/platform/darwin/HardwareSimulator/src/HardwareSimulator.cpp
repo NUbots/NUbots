@@ -250,7 +250,7 @@ namespace darwin {
             // //Debug:
             // integrated_gyroscope += sumGyro + Eigen::Vector3d(0,0,imu_drift_rate);
             // std::cout << "HardwareSimulator gyroscope = " << sensors.gyroscope.x << ", " << sensors.gyroscope.y << ", " << sensors.gyroscope.z << std::endl;
-            // std::cout << "HardwareSimulator integrated_gyroscope = " << integrated_gyroscope.t() << std::endl;
+            // std::cout << "HardwareSimulator integrated_gyroscope = " << integrated_gyroscope.transpose() << std::endl;
 
             //Add some noise so that sensor fusion doesnt converge to a singularity
             auto sensors_message = std::make_unique<DarwinSensors>(sensors);

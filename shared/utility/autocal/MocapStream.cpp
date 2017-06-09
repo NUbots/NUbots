@@ -43,7 +43,7 @@ namespace autocal {
 			Rotation3D rot;
 			int start = 4;
 			for(int i = 0; i < 3; i++){
-				rot.row(i) = data.rows(start + 3 * i, start + 3 * i + 2).t();
+				rot.row(i) = data.rows(start + 3 * i, start + 3 * i + 2).transpose();
 			}
 			//Change back to mocap coords from nubots coords (sigh...)
 			if(correctForAutocalibrationCoordinateSystem){
@@ -309,7 +309,7 @@ namespace autocal {
 					//  Transform3D({ 0.1040,  -0.0023,  -0.9946,  -0.3540,
 					// 								      -0.1147,   0.9933,  -0.0143,  -0.9437,
 					// 								       0.9879,   0.1156,   0.1030,   1.2106,
-					// 								            0,        0,        0,   1.0000}).t();//transpose because column major reading
+					// 								            0,        0,        0,   1.0000}).transpose();//transpose because column major reading
 					std::cout << "simWorldTransform = \n" << simWorldTransform[key] << std::endl;
 				}
 				if(simLocalTransform.count(key) == 0){
@@ -320,14 +320,14 @@ namespace autocal {
 
 				//Noise:
 				Transform3D localNoise = Transform3D::getRandomN(simulationParameters.noise.angle_stddev ,simulationParameters.noise.disp_stddev);
-				// std::cout << "noise = " << Eigen::Vector4d(localNoise * Eigen::Vector4d(0,0,0,1)).t() << std::endl;
+				// std::cout << "noise = " << Eigen::Vector4d(localNoise * Eigen::Vector4d(0,0,0,1)).transpose() << std::endl;
 				Transform3D globalNoise = Transform3D::getRandomN(simulationParameters.noise.angle_stddev ,simulationParameters.noise.disp_stddev);
 				// Transform3D globalNoise = Transform3D::getRandomN(0.310524198 ,0.052928682);
 
 				Transform3D transform = simWorldTransform[key] * latestFrame.rigidBodies[derivedID].pose * globalNoise * simLocalTransform[key] * localNoise;
 
 				//Debugging
-				// std::cout << "transform = " << transform.translation().t() << std::endl;
+				// std::cout << "transform = " << transform.translation().transpose() << std::endl;
 				// transform.translation() = arma::vec{0,0,-1};
 
 				frame.rigidBodies[artificialID] = RigidBody();

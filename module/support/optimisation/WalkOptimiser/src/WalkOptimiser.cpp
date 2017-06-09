@@ -99,7 +99,7 @@ namespace module {
 
                     std::cerr << "Sample: " << currentSample <<std::endl;
                     //Apply the parameters to the walk engine
-                    setWalkParameters(getWalkConfig(samples.row(currentSample).t()));
+                    setWalkParameters(getWalkConfig(samples.row(currentSample).transpose()));
                     //Now wait for WalkConfigSaved
 
                 });
@@ -141,7 +141,7 @@ namespace module {
                     } else {
                         //Setup new parameters
                         std::cerr << "Sample:" << ++currentSample <<std::endl;
-                        setWalkParameters(getWalkConfig(samples.row(currentSample).t()));
+                        setWalkParameters(getWalkConfig(samples.row(currentSample).transpose()));
                         //Now wait for WalkConfigSaved
                     }
                 });

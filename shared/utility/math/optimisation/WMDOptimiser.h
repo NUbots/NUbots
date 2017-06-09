@@ -83,8 +83,8 @@ namespace utility {
                         Eigen::VectorXd update(bestEstimate.n_elem,arma::fill::zeros);
                         double div = 0.0;
                         for (uint64_t i = 0; i < samples.n_rows; ++i) {
-                            const double scale = sampleWeights[i]/(bestEstimate-samples.row(i).t().norm() + 0.01);
-                            update += scale*samples.row(i).t();
+                            const double scale = sampleWeights[i]/(bestEstimate-samples.row(i).transpose().norm() + 0.01);
+                            update += scale*samples.row(i).transpose();
                             div += scale;
                         }
                         bestEstimate = update/div;
@@ -136,8 +136,8 @@ namespace utility {
                  */
                 arma::mat getSamples(const arma::vec& bestEstimate, const size_t& numSamples) {
                     return   arma::randn<arma::mat>(numSamples,bestEstimate.n_elem)
-                           % arma::repmat(sigmaWeights, 1, numSamples).t()
-                           + arma::repmat(bestEstimate, 1, numSamples).t();
+                           % arma::repmat(sigmaWeights, 1, numSamples).transpose()
+                           + arma::repmat(bestEstimate, 1, numSamples).transpose();
                 }
             };
         }

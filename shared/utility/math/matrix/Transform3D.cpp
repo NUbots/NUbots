@@ -136,7 +136,7 @@ namespace matrix {
         // Create a new transform
         Transform3D inverseTransform3D;
         // Transpose the rotation submatrix (top-left 3x3), this is equivalent to taking the inverse of the rotation matrix
-        inverseTransform3D.submat(0,0,2,2) = submat(0,0,2,2).t();
+        inverseTransform3D.submat(0,0,2,2) = submat(0,0,2,2).transpose();
         // Multiply translation vector (top-right column vector) by the negated inverse rotation matrix
 
         inverseTransform3D.submat(0,3,2,3) = -inverseTransform3D.submat(0,0,2,2) * submat(0,3,2,3);

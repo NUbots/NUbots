@@ -82,7 +82,7 @@ namespace autocal{
 		if(success) x = pinvA * b;
 
 		auto error = A*x-b;
-		// std::cout << "SVD error: A*x - b = \n" << error.t() << " size = " << error.norm() << std::endl;
+		// std::cout << "SVD error: A*x - b = \n" << error.transpose() << " size = " << error.norm() << std::endl;
 
 		//Return whether or not the SVD was performed correctly
 		return success;
@@ -178,8 +178,8 @@ namespace autocal{
 				return std::pair<Transform3D, Transform3D>();
 			}
 
-			arma::mat G1 = a0 * Eigen::Matrix3d::Identity() + crossMatrix(a) + a*a.t() / a0;
-			arma::mat G2 = -b0 * Eigen::Matrix3d::Identity() + crossMatrix(b) - a*b.t() / a0;
+			arma::mat G1 = a0 * Eigen::Matrix3d::Identity() + crossMatrix(a) + a*a.transpose() / a0;
+			arma::mat G2 = -b0 * Eigen::Matrix3d::Identity() + crossMatrix(b) - a*b.transpose() / a0;
 
 			arma::mat G = arma::join_rows(G1,G2);
 
@@ -357,13 +357,13 @@ namespace autocal{
 			const UnitQuaternion qA(Rotation3D(A.rotation()));
 			const UnitQuaternion qB(Rotation3D(B.rotation()));
 
-			Eigen::Matrix4d C_i = -qA.getLeftQuatMultMatrix().t() * qB.getRightQuatMultMatrix();
+			Eigen::Matrix4d C_i = -qA.getLeftQuatMultMatrix().transpose() * qB.getRightQuatMultMatrix();
 
 			C += C_i;
 
 		}
 
-		Eigen::Matrix4d CTC = C.t() * C;
+		Eigen::Matrix4d CTC = C.transpose() * C;
 
 		Eigen::VectorXd eigval;
 		arma::mat eigvec;

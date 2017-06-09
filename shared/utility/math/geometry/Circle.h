@@ -62,7 +62,7 @@ namespace geometry {
             for (auto it = first; it != last; ++it) {
                 const double diff = distanceToPoint(*it);
                 if (diff * diff < candidateThreshold) {
-                    linearEq1.row(i).cols(0,1) = (*it).t();
+                    linearEq1.row(i).cols(0,1) = (*it).transpose();
                     linearEq1(i, 2) = 1.0;
                     linearEq2(i) = -(*it).dot((*it));
                     ++i;

@@ -103,7 +103,7 @@ namespace utility {
                 StateMat covarianceFromSigmas(const SigmaMat& sigmaPoints, const StateVec& mean) const {
 
                     auto meanCentered = sigmaPoints - arma::repmat(mean, 1, NUM_SIGMA_POINTS);
-                    return (arma::repmat(covarianceWeights, Model::size, 1) % meanCentered) * meanCentered.t();
+                    return (arma::repmat(covarianceWeights, Model::size, 1) % meanCentered) * meanCentered.transpose();
                 }
 
                 Eigen::VectorXd meanFromSigmas(const arma::mat& sigmaPoints) const {
@@ -113,7 +113,7 @@ namespace utility {
                 arma::mat covarianceFromSigmas(const arma::mat& sigmaPoints, const arma::vec& mean) const {
 
                     auto meanCentered = sigmaPoints - arma::repmat(mean, 1, NUM_SIGMA_POINTS);
-                    return (arma::repmat(covarianceWeights, mean.size() , 1) % meanCentered) * meanCentered.t();
+                    return (arma::repmat(covarianceWeights, mean.size() , 1) % meanCentered) * meanCentered.transpose();
                 }
 
             public:
@@ -210,8 +210,8 @@ namespace utility {
 
 
                     // Update our state
-                    covarianceUpdate -= covarianceUpdate.t() * centredObservations.t() *
-                                        (measurement_variance + centredObservations * covarianceUpdate * centredObservations.t()).inverse() *
+                    covarianceUpdate -= covarianceUpdate.transpose() * centredObservations.transpose() *
+                                        (measurement_variance + centredObservations * covarianceUpdate * centredObservations.transpose()).inverse() *
                                         centredObservations * covarianceUpdate;
 
 
@@ -219,7 +219,7 @@ namespace utility {
                     const arma::mat innovation = model.observationDifference(measurement, predictedMean);
 
 
-                    d += (centredObservations.t()) * measurement_variance.inverse() * innovation;
+                    d += (centredObservations.transpose()) * measurement_variance.inverse() * innovation;
 
                     //DEBUG
                     // if(model.size == 5){
@@ -232,7 +232,7 @@ namespace utility {
                     // Update our mean and covariance
                     mean = sigmaMean + centredSigmaPoints * covarianceUpdate * d;
                     mean = model.limitState(mean);
-                    covariance = centredSigmaPoints * covarianceUpdate * centredSigmaPoints.t();
+                    covariance = centredSigmaPoints * covarianceUpdate * centredSigmaPoints.transpose();
 
 
                     // Calculate and return the likelihood of the prior mean
@@ -241,15 +241,15 @@ namespace utility {
 
                     //DEBUG: why do we occasionally get negative eigenvalues
                     // Eigen::VectorXd eValues = arma::eig_sym(predictedCovariance);
-                    // std::cout << "UKF - eValues = " << eValues.t() << std::endl;
+                    // std::cout << "UKF - eValues = " << eValues.transpose() << std::endl;
                     // if(arma::any(eValues < 0*eValues)){
                     //     std::cout << "UKF - sigma covariance has negative eigenvalues!!!!!!!!!!!!!!!!!!!!!!!" << std::endl;
                     //     std::cout << "UKF - centredObservations = \n" << centredObservations << std::endl;
-                    //     std::cout << "UKF - predictedMean = " << predictedMean.t() << std::endl;
+                    //     std::cout << "UKF - predictedMean = " << predictedMean.transpose() << std::endl;
                     // }
                     arma::mat predictedCovariance = covarianceFromSigmas(predictedObservations, predictedMean);
                     arma::mat innovationVariance = predictedCovariance + measurement_variance;
-                    arma::mat scalarlikelihoodExponent = ((innovation.t() * innovationVariance.inverse()) * innovation);
+                    arma::mat scalarlikelihoodExponent = ((innovation.transpose() * innovationVariance.inverse()) * innovation);
 
                     double expTerm = -0.5 * scalarlikelihoodExponent(0, 0);
                     double normalisationFactor = pow(2 * M_PI, measurement_variance.n_rows) * arma::det(innovationVariance);

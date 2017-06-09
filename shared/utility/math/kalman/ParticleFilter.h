@@ -69,7 +69,7 @@ namespace utility {
                     arma::gmm_diag gaussian;
                     gaussian.set_params(arma::mat(initialMean), arma::mat(initialCovariance.diag()),arma::ones(1));
                     for(unsigned int i = 0; i < particles.n_rows; ++i) {
-                        particles.row(i) = gaussian.generate().t();
+                        particles.row(i) = gaussian.generate().transpose();
                     }
                 }
 
@@ -81,8 +81,8 @@ namespace utility {
                     gaussian.set_params(arma::mat(Eigen::Matrix<double, Model::size, 1>::Zero()), arma::mat(model.processNoise().diag()),arma::ones(1));
                     for(unsigned int i = 0; i < particles.n_rows; ++i) {
                         //TODO: add noise?
-                        StateVec newpcle = model.timeUpdate(particles.row(i).t(), deltaT, additionalParameters...) + gaussian.generate();
-                        particles.row(i) = newpcle.t();
+                        StateVec newpcle = model.timeUpdate(particles.row(i).transpose(), deltaT, additionalParameters...) + gaussian.generate();
+                        particles.row(i) = newpcle.transpose();
                     }
                 }
 
@@ -94,7 +94,7 @@ namespace utility {
                     Eigen::VectorXd weights = Eigen::Matrix<double, particles.n_rows, 1>::Zero();
 
                     for (unsigned int i = 0; i < particles.n_rows; i++){
-                        Eigen::VectorXd predictedObservation = model.predictedObservation(particles.row(i).t(), measurementArgs...);
+                        Eigen::VectorXd predictedObservation = model.predictedObservation(particles.row(i).transpose(), measurementArgs...);
                         assert(predictedObservation.size() == measurement.size());
                         Eigen::VectorXd difference = predictedObservation-measurement;
                         weights[i] = std::exp(-difference.dot(measurement_variance.inverse() * difference));
@@ -113,7 +113,7 @@ namespace utility {
 
                 StateVec get() const
                 {
-                    return particles.colwise().mean().t();
+                    return particles.colwise().mean().transpose();
                 }
 
                 StateMat getCovariance() const

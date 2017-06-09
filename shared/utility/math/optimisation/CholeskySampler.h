@@ -53,7 +53,7 @@ namespace utility {
                 arma::mat getSamples(const OptimiserEstimate& bestParams, uint64_t numSamples) {
                     if (bestParams.generation != generation || sampleCount+numSamples > batchSize) {
                         arma::mat projection = arma::chol(bestParams.covariance);
-                        samples = (arma::randn(bestParams.estimate.n_elem, batchSize) * projection).t();
+                        samples = (arma::randn(bestParams.estimate.n_elem, batchSize) * projection).transpose();
                         samples.each_col() += bestParams.estimate;
 
                         //out of bounds check
@@ -64,7 +64,7 @@ namespace utility {
 
                             while (samples.n_rows < batchSize) {
                                 arma::mat samples2 = arma::randn(bestParams.estimate.n_elem, batchSize);
-                                samples2 = (arma::randn(bestParams.estimate.n_elem, batchSize) * projection).t();
+                                samples2 = (arma::randn(bestParams.estimate.n_elem, batchSize) * projection).transpose();
                                 samples2.each_col() += bestParams.estimate;
 
                                 outOfBounds = arma::sum(samples2 > arma::repmat(upperBound, samples2.n_cols, 1), 1);

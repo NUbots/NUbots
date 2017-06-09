@@ -92,7 +92,7 @@ namespace kinematics {
         //Rotate input position from standard robot coords to foot coords
         // NUClear::log<NUClear::DEBUG>("Target Original\n", target);
         Eigen::Vector4d fourthColumn = inputCoordinatesToCalcCoordinates * target.col(3);
-        target = inputCoordinatesToCalcCoordinates * target * inputCoordinatesToCalcCoordinates.t();
+        target = inputCoordinatesToCalcCoordinates * target * inputCoordinatesToCalcCoordinates.transpose();
         target.col(3) = fourthColumn;
         // NUClear::log<NUClear::DEBUG>("Target Final\n", target);
 
@@ -247,7 +247,7 @@ namespace kinematics {
     // TODO: Find point that is invariant under head position.
         Eigen::Vector3d cameraPosition = camToGround.submat(0,3,2,3);
         Eigen::Vector3d groundSpaceLookVector = groundPoint - cameraPosition;
-        Eigen::Vector3d lookVector = bodyToGround.submat(0,0,2,2).t() * groundSpaceLookVector;
+        Eigen::Vector3d lookVector = bodyToGround.submat(0,0,2,2).transpose() * groundSpaceLookVector;
         Eigen::Vector3d lookVectorSpherical = utility::math::coordinates::cartesianToSpherical(lookVector);
 
         return lookVectorSpherical.rows(1,2);
@@ -330,22 +330,22 @@ namespace kinematics {
             Eigen::Vector3d dX = pos - X;
 
             Eigen::Matrix3d J = calculateArmJacobian(model, angles, left);
-            // std::cout << "pos = " << pos.t() << std::endl;
-            // std::cout << "X = " << X.t() << std::endl;
-            // std::cout << "dX = " << dX.t() << std::endl;
-            // std::cout << "angles = " << angles.t() << std::endl;
+            // std::cout << "pos = " << pos.transpose() << std::endl;
+            // std::cout << "X = " << X.transpose() << std::endl;
+            // std::cout << "dX = " << dX.transpose() << std::endl;
+            // std::cout << "angles = " << angles.transpose() << std::endl;
             // std::cout << "error = " << dX.norm() << std::endl;
             if(dX.norm() < 0.001){
                 break;
             }
-            Eigen::Vector3d dAngles = J.t() * dX;// * std::max((100 - i),1);
+            Eigen::Vector3d dAngles = J.transpose() * dX;// * std::max((100 - i),1);
             angles = dAngles + angles;
         }
         auto end_compute = NUClear::clock::now();
         std::cout << "Computation Time (ms) = " << std::chrono::duration_cast<std::chrono::microseconds>(end_compute - start_compute).count() * 1e-3 << std::endl;
-        // std::cout << "Final angles = " << angles.t() << std::endl;
-        // std::cout << "Final position = " << X.t() << std::endl;
-        // std::cout << "Goal position = " << pos.t() << std::endl;
+        // std::cout << "Final angles = " << angles.transpose() << std::endl;
+        // std::cout << "Final position = " << X.transpose() << std::endl;
+        // std::cout << "Goal position = " << pos.transpose() << std::endl;
         std::cout << "Final error = " << (pos-X).norm() << std::endl;
         // std::cout << "Iterations = " << i << std::endl;
 
@@ -381,9 +381,9 @@ namespace kinematics {
         };
 
         Eigen::Vector3d handFromShoulder = pos - shoulderPos;
-        // std::cout << (left ? "left" : "right" ) << " shoulderPos = " << shoulderPos.t();
-        // std::cout << (left ? "right" : "left" ) << " pos = " << pos.t();
-        // std::cout << (left ? "left" : "right" ) << " handFromShoulder = " << handFromShoulder.t();
+        // std::cout << (left ? "left" : "right" ) << " shoulderPos = " << shoulderPos.transpose();
+        // std::cout << (left ? "right" : "left" ) << " pos = " << pos.transpose();
+        // std::cout << (left ? "left" : "right" ) << " handFromShoulder = " << handFromShoulder.transpose();
 
         //ELBOW
         float extensionLength = handFromShoulder.norm();

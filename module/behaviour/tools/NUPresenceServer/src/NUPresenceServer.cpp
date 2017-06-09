@@ -90,7 +90,7 @@ namespace tools {
             cam_to_feet = robot_to_head.inverse() * cam_to_feet;
             cam_to_feet.translation() /= robot_to_head_scale;
 
-            cam_to_feet = camera_to_robot.t() * cam_to_feet * camera_to_robot;
+            cam_to_feet = camera_to_robot.transpose() * cam_to_feet * camera_to_robot;
 
             //hack out translation
             //TODO: fix translation

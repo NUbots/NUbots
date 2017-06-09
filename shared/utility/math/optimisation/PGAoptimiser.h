@@ -49,7 +49,7 @@ namespace utility {
                     const Eigen::VectorXd sampleWeights = arma::exp(-c*normedFitnesses);
 
                     //return the probabilistically weighted result estimate
-                    return arma::sum(samples % arma::repmat(sampleWeights/arma::accu(sampleWeights),1,samples.n_cols),0).t();
+                    return arma::sum(samples % arma::repmat(sampleWeights/arma::accu(sampleWeights),1,samples.n_cols),0).transpose();
                 }
 
                 /**
@@ -66,8 +66,8 @@ namespace utility {
                  */
                 inline arma::mat getSamples(const arma::vec& bestEstimate, const arma::vec& sigmaWeights, const size_t& numSamples) {
                     return   arma::randn<arma::mat>(numSamples,bestEstimate.n_elem)
-                           % arma::repmat(sigmaWeights, 1, numSamples).t()
-                           + arma::repmat(bestEstimate, 1, numSamples).t();
+                           % arma::repmat(sigmaWeights, 1, numSamples).transpose()
+                           + arma::repmat(bestEstimate, 1, numSamples).transpose();
                 }
             }
         }

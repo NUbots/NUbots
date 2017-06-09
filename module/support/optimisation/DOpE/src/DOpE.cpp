@@ -62,7 +62,7 @@ namespace optimisation {
         e->values = current.estimate;
         e->covariance = current.covariance;
 
-        log<NUClear::FATAL>("Current Estimate", current.estimate.t());
+        log<NUClear::FATAL>("Current Estimate", current.estimate.transpose());
 
         // Add our episodes
         for (auto& episode : opt.episodes) {

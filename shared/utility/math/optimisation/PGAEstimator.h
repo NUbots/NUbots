@@ -65,12 +65,12 @@ namespace utility {
                     const Eigen::VectorXd sampleWeights = arma::exp(-c * normedFitnesses);
 
                     //calculate the probabilistically weighted result estimate
-                    Eigen::VectorXd bestEstimate = arma::sum(samples % arma::repmat(sampleWeights / arma::accu(sampleWeights), 1, samples.n_cols), 0).t();
+                    Eigen::VectorXd bestEstimate = arma::sum(samples % arma::repmat(sampleWeights / arma::accu(sampleWeights), 1, samples.n_cols), 0).transpose();
 
                     //calculate the covariance matrix
                     arma::mat s2 = samples;
-                    s2.each_row() -= bestEstimate.t();
-                    arma::mat covmat = s2 * s2.t();
+                    s2.each_row() -= bestEstimate.transpose();
+                    arma::mat covmat = s2 * s2.transpose();
 
                     return OptimiserEstimate(previousEstimate.generation + 1, bestEstimate, previousEstimate.covariance);
                 }

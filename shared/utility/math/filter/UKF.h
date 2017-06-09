@@ -94,7 +94,7 @@ namespace utility {
                 void covarianceFromSigmas(StateMat& covariance, const SigmaMat& sigmaPoints, const StateVec& mean) const {
 
                     SigmaMat meanCentered = sigmaPoints - arma::repmat(mean, 1, NUM_SIGMA_POINTS);
-                    covariance = (arma::repmat(covarianceWeights, Model::size, 1) % meanCentered) * meanCentered.t();
+                    covariance = (arma::repmat(covarianceWeights, Model::size, 1) % meanCentered) * meanCentered.transpose();
                 }
 
                 void meanFromSigmas(arma::vec& mean, const arma::mat& sigmaPoints) const {
@@ -104,7 +104,7 @@ namespace utility {
                 void covarianceFromSigmas(arma::mat& covariance, const arma::mat& sigmaPoints, const arma::vec& mean) const {
 
                     arma::mat meanCentered = sigmaPoints - arma::repmat(mean, 1, NUM_SIGMA_POINTS);
-                    covariance = (arma::repmat(covarianceWeights, mean.size() , 1) % meanCentered) * meanCentered.t();
+                    covariance = (arma::repmat(covarianceWeights, mean.size() , 1) % meanCentered) * meanCentered.transpose();
                 }
 
             public:
@@ -207,17 +207,17 @@ namespace utility {
                     auto centredObservations = predictedObservations - arma::repmat(predictedMean, 1, NUM_SIGMA_POINTS);
 
                     // Update our state
-                    covarianceUpdate -= covarianceUpdate.t() * centredObservations.t() *
-                                        arma::inv_sympd(measurementVariance + centredObservations * covarianceUpdate * centredObservations.t()) *
+                    covarianceUpdate -= covarianceUpdate.transpose() * centredObservations.transpose() *
+                                        arma::inv_sympd(measurementVariance + centredObservations * covarianceUpdate * centredObservations.transpose()) *
                                         centredObservations * covarianceUpdate;
 
                     const arma::mat innovation = model.observationDifference(measurement, predictedMean);
-                    d += (centredObservations.t()) * measurementVariance.inverse() * innovation;
+                    d += (centredObservations.transpose()) * measurementVariance.inverse() * innovation;
 
                     // Update our mean and covariance
                     mean = sigmaMean + centredSigmaPoints * covarianceUpdate * d;
                     mean = model.limitState(mean);
-                    covariance = centredSigmaPoints * covarianceUpdate * centredSigmaPoints.t();
+                    covariance = centredSigmaPoints * covarianceUpdate * centredSigmaPoints.transpose();
 
                     // Calculate and return the likelihood of the prior mean
                     // and covariance given the new measurement (i.e. the
@@ -226,7 +226,7 @@ namespace utility {
                         arma::mat predictedCovariance;
                         covarianceFromSigmas(predictedCovariance, predictedObservations, predictedMean);
                         arma::mat innovationVariance = predictedCovariance + measurementVariance;
-                        arma::mat scalarlikelihoodExponent = ((innovation.t() * innovationVariance.inverse()) * innovation);
+                        arma::mat scalarlikelihoodExponent = ((innovation.transpose() * innovationVariance.inverse()) * innovation);
                         double loglikelihood = 0.5 * (std::log(arma::det(innovationVariance)) + std::abs(scalarlikelihoodExponent[0]) + innovation.n_elem * std::log(2 * M_PI));
                         return -loglikelihood;
                     });

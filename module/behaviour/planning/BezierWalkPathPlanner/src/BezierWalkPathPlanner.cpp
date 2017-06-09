@@ -288,7 +288,7 @@ namespace module {
                                       A0,             B0;
 
 
-                        Eigen::Vector2f next_robot_position = bez_matrix.colwise().mean().t();
+                        Eigen::Vector2f next_robot_position = bez_matrix.colwise().mean().transpose();
 
 
                         // log("Robot next position = ", next_robot_position);

@@ -223,13 +223,13 @@ namespace vision {
         cornerIndices.fill(0);
 
 
-        Eigen::VectorXd pvals = goalBaseCorners.t() * goalBaseCorners.col(0).cross(goalTopCorners.col(0));
+        Eigen::VectorXd pvals = goalBaseCorners.transpose() * goalBaseCorners.col(0).cross(goalTopCorners.col(0));
         Eigen::Matrix<unsigned int, Eigen::Dynamic, 1> baseIndices = arma::sort_index(pvals);
         cornerIndices[2] = baseIndices[0];
         cornerIndices[3] = baseIndices[3];
 
 
-        pvals = goalTopCorners.t() * goalBaseCorners.col(0).cross(goalTopCorners.col(0));
+        pvals = goalTopCorners.transpose() * goalBaseCorners.col(0).cross(goalTopCorners.col(0));
         Eigen::Matrix<unsigned int, Eigen::Dynamic, 1> topIndices = arma::sort_index(pvals);
         cornerIndices[0] = topIndices[0];
         cornerIndices[1] = topIndices[3];

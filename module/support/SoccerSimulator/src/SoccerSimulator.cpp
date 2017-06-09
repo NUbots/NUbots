@@ -344,7 +344,7 @@ namespace support {
                 // Emit current ball exactly
                 auto b = std::make_unique<message::localisation::Ball>();
                 b->locObject.position = world.robotPose.worldToLocal(world.ball.position).xy();
-                b->velocity = world.robotPose.rotation().t() * world.ball.velocity.rows(0,1);
+                b->velocity = world.robotPose.rotation().transpose() * world.ball.velocity.rows(0,1);
                 b->locObject.position_cov = 0.00001 * Eigen::Matrix2d::Identity();
                 b->locObject.last_measurement_time = NUClear::clock::now();
                 emit(std::make_unique<std::vector<message::localisation::Ball>>(

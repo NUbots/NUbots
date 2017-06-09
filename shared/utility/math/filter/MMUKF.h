@@ -57,7 +57,7 @@ namespace utility {
                     const auto& s2 = b.getCovariance();
                     arma::mat s = (s1 + s2) * 0.5;
 
-                    double d = arma::as_scalar((0.125 * ud).t() * arma::inv_sympd(s) * ud) + 0.5 * std::log(arma::det(s) / std::sqrt(arma::det(s1) * arma::det(s2)));
+                    double d = arma::as_scalar((0.125 * ud).transpose() * arma::inv_sympd(s) * ud) + 0.5 * std::log(arma::det(s) / std::sqrt(arma::det(s1) * arma::det(s2)));
                     return d;
                 }
 

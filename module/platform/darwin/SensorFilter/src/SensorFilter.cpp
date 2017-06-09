@@ -611,7 +611,7 @@ namespace module {
                      ************************************************/
                     sensors->bodyCentreHeight = motionFilter.get()[MotionModel::PZ];
 
-                    Rotation3D Rwt = world.rotation().t();     //remove translation components from the transform
+                    Rotation3D Rwt = world.rotation().transpose();     //remove translation components from the transform
                     Rotation3D oBodyToGround = Rotation3D::createRotationZ(-Rwt.yaw()) * Rwt;
                     // sensors->bodyToGround : Mat size [4x4] (default identity)
                     // createRotationZ : Mat size [3x3]

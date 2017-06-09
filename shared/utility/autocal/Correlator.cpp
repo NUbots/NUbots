@@ -184,7 +184,7 @@ namespace autocal {
 			// float minDiffAngle = std::numeric_limits<float>::max();
 			// float minDiffPos = std::numeric_limits<float>::max();
 			// for(auto& S : states){
-			// 	float diffAngle = Rotation3D::norm(S.rotation().t() * T.rotation());
+			// 	float diffAngle = Rotation3D::norm(S.rotation().transpose() * T.rotation());
 			// 	float diffPos = (T.translation() - S.translation().norm());
 			// 	if(diffAngle < minDiffAngle && diffPos < minDiffPos ){
 			// 		minDiffAngle = diffAngle;
@@ -238,8 +238,8 @@ namespace autocal {
 				UnitQuaternion rotA(Rotation3D(A.rotation()));
 				UnitQuaternion rotB(Rotation3D(B.rotation()));
 				// std::cout << "Error = " << error << std::endl
-				// 		  << " A = " << rotA.getAngle() << " rads about axis " << rotA.getAxis().t()
-				// 		  << " B = " << rotB.getAngle() << " rads about axis " << rotB.getAxis().t()
+				// 		  << " A = " << rotA.getAngle() << " rads about axis " << rotA.getAxis().transpose()
+				// 		  << " B = " << rotB.getAngle() << " rads about axis " << rotB.getAxis().transpose()
 				// 		  << std::endl;
 				// std::cout << "det(A.rotation()) = " << arma::det(A.rotation()) << std::endl;
 				// std::cout << "det(B.rotation()) = " << arma::det(B.rotation()) << std::endl;
@@ -260,8 +260,8 @@ namespace autocal {
 			}
 
 			//Fit data
-			Rotation3D R1 = states1.back().rotation().t() * states1.front().rotation();
-			Rotation3D R2 = states2.back().rotation().t() * states2.front().rotation();
+			Rotation3D R1 = states1.back().rotation().transpose() * states1.front().rotation();
+			Rotation3D R2 = states2.back().rotation().transpose() * states2.front().rotation();
 
 			float angle1 = Rotation3D::norm(R1);
 			float angle2 = Rotation3D::norm(R2);

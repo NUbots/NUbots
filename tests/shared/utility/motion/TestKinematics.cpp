@@ -43,7 +43,7 @@ TEST_CASE("Test the Head kinematics", "[utility][motion][kinematics][head]") {
         Eigen::Vector3d camVec = { double(rand()), double(rand()), double(rand()) };
         camVec = camVec.normalize();
 
-        INFO("Testing with the random vector, " << camVec.t());
+        INFO("Testing with the random vector, " << camVec.transpose());
 
         std::vector<std::pair<message::input::ServoID, float>> angles = utility::motion::kinematics::calculateCameraLookJoints(kinematicsModel,camVec);
 

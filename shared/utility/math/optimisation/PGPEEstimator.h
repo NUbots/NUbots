@@ -79,8 +79,8 @@ namespace utility {
                     Eigen::VectorXd update(covEstimate.n_elem,arma::fill::zeros);
                     Eigen::VectorXd updateCov(covEstimate.n_elem,arma::fill::zeros);
                     for(uint64_t i = 0; i < fitnesses.n_elem; ++i) {
-                        update += alpha * (fitnesses[i]-baseline) % (samples.row(i).t() - bestEstimate);
-                        Eigen::VectorXd x = Eigen::square((samples.row(i).t() - bestEstimate).array()).matrix() - covEstimate;
+                        update += alpha * (fitnesses[i]-baseline) % (samples.row(i).transpose() - bestEstimate);
+                        Eigen::VectorXd x = Eigen::square((samples.row(i).transpose() - bestEstimate).array()).matrix() - covEstimate;
                         updateCov += alphaCov * (fitnesses[i] - baseline).cwiseProduct(x).cwiseQuotient(Eigen::sqrt(covEstimate.array()).matrix());
                     }
 

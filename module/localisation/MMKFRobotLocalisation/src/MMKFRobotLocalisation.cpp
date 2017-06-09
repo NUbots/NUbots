@@ -211,7 +211,7 @@ namespace localisation {
                     // std::cout << "  measurement: " << num++ << std::endl;
                     // std::cout << "    error:" << measurement.error << std::endl;
                 }
-                //std::cout << "    position:" << goal.measurements[0].position.t() << std::endl;
+                //std::cout << "    position:" << goal.measurements[0].position.transpose() << std::endl;
             }
 
             auto curr_time = NUClear::clock::now();

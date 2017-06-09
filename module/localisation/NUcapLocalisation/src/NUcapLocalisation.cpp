@@ -58,9 +58,9 @@ namespace localisation {
                     UnitQuaternion q(Eigen::Vector4d{rigidBody.rotation().x(),
                                                 rigidBody.rotation().y(),
                                                 rigidBody.rotation().z(),
-                                                rigidBody.rotation().t()});
+                                                rigidBody.rotation().transpose()});
 
-                    Rotation3D groundToWorldRotation = q;// * sensors.camToGround.submat(0,0,2,2).t();
+                    Rotation3D groundToWorldRotation = q;// * sensors.camToGround.submat(0,0,2,2).transpose();
 
                     double heading = utility::math::angle::acos_clamped(groundToWorldRotation(0,0));
 

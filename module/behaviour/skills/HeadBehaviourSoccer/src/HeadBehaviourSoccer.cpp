@@ -496,7 +496,7 @@ namespace module {
                         std::vector<Eigen::Vector2d> scaledResults;
                         //scaledResults.push_back(utility::motion::kinematics::headAnglesToSeeGroundPoint(kinematicsModel, lastLocBall.position,sensors));
                         for(auto& p : searches[sType]){
-                            // log("adding search point", p.t());
+                            // log("adding search point", p.transpose());
                             //old angles thing
                             //Interpolate between max and min allowed angles with -1 = min and 1 = max
                             //auto angles = Eigen::Vector2d(((max_yaw - min_yaw) * p[0] + max_yaw + min_yaw) / 2,
@@ -524,7 +524,7 @@ namespace module {
                                 //         angles[0] = angle.second;
                                 //     }
                                 // }
-                                // log("goalAngles",angles.t());
+                                // log("goalAngles",angles.transpose());
                             // }
                             // emit(graph("IMUSpace Head Lost Angles", angles));
 
@@ -578,7 +578,7 @@ namespace module {
                         std::vector<Eigen::Vector2d> scaledResults;
                         //scaledResults.push_back(utility::motion::kinematics::headAnglesToSeeGroundPoint(kinematicsModel, lastLocBall.position,sensors));
                         for(auto& p : searches[sType]){
-                            // log("adding search point", p.t());
+                            // log("adding search point", p.transpose());
                             //old angles thing
                             //Interpolate between max and min allowed angles with -1 = min and 1 = max
                             //auto angles = Eigen::Vector2d(((max_yaw - min_yaw) * p[0] + max_yaw + min_yaw) / 2,
@@ -606,7 +606,7 @@ namespace module {
                                 //         angles[0] = angle.second;
                                 //     }
                                 // }
-                                // log("goalAngles",angles.t());
+                                // log("goalAngles",angles.transpose());
                             // }
                             // emit(graph("IMUSpace Head Lost Angles", angles));
 
