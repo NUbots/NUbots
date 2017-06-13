@@ -91,6 +91,7 @@ namespace Darwin {
         inline void setConfig(const extension::Configuration& config){
             uart.setConfig(config);
         }
+
         /// The CM730
         CM730 cm730;
         /// The Right Shoulder Pitch MX28

@@ -24,6 +24,7 @@
 
 #include "message/motion/ServoTarget.h"
 #include "message/platform/darwin/DarwinSensors.h"
+#include "message/platform/darwin/Firmware.h"
 
 #include "utility/math/angle.h"
 #include "utility/platform/darwin/DarwinSensors.h"
@@ -35,6 +36,7 @@ namespace platform {
 namespace darwin {
 
     using message::platform::darwin::DarwinSensors;
+    using message::platform::darwin::FlashCM730Firmware;
     using message::motion::ServoTarget;
     using extension::Configuration;
     using utility::support::Expression;
@@ -152,7 +154,7 @@ namespace darwin {
     }
 
     HardwareIO::HardwareIO(std::unique_ptr<NUClear::Environment> environment)
-         : Reactor(std::move(environment)), darwin("/dev/CM730"), cm730State(), servoState() {
+         : Reactor(std::move(environment)), darwin("/dev/CM730"), cm730State(), servoState(), hardwareLoop() {
 
         on<Configuration>("DarwinPlatform.yaml").then([this] (const Configuration& config) {
             darwin.setConfig(config);
@@ -167,7 +169,7 @@ namespace darwin {
         });
 
         // This trigger gets the sensor data from the CM730
-        on<Every<90, Per<std::chrono::seconds>>, Single, Priority::HIGH>().then("Hardware Loop", [this] {
+        hardwareLoop = on<Every<90, Per<std::chrono::seconds>>, Single, Priority::HIGH>().then("Hardware Loop", [this] {
 
             // Our final sensor output
             auto sensors = std::make_unique<DarwinSensors>();
@@ -259,11 +261,11 @@ namespace darwin {
 
                 float speed;
                 if(duration.count() > 0) {
-                    speed = diff / (double(duration.count()) / double(NUClear::clock::period::den));             
+                    speed = diff / (double(duration.count()) / double(NUClear::clock::period::den));
                 }
                 else {
                     speed = 0;
-                }               
+                }
 
                 // Update our internal state
                 if(servoState[command.id].pGain != command.gain
@@ -301,8 +303,8 @@ namespace darwin {
             // Update our internal state
             cm730State.headLED = led;
 
-            darwin.cm730.write(Darwin::CM730::Address::LED_HEAD_L, Convert::colourLEDInverse(static_cast<uint8_t>((led.RGB & 0x00FF0000) >> 24), 
-                                                                                             static_cast<uint8_t>((led.RGB & 0x0000FF00) >>  8), 
+            darwin.cm730.write(Darwin::CM730::Address::LED_HEAD_L, Convert::colourLEDInverse(static_cast<uint8_t>((led.RGB & 0x00FF0000) >> 24),
+                                                                                             static_cast<uint8_t>((led.RGB & 0x0000FF00) >>  8),
                                                                                              static_cast<uint8_t>( led.RGB & 0x000000FF)));
         });
 
@@ -311,9 +313,139 @@ namespace darwin {
             // Update our internal state
             cm730State.eyeLED = led;
 
-            darwin.cm730.write(Darwin::CM730::Address::LED_EYE_L, Convert::colourLEDInverse(static_cast<uint8_t>((led.RGB & 0x00FF0000) >> 24), 
-                                                                                            static_cast<uint8_t>((led.RGB & 0x0000FF00) >>  8), 
+            darwin.cm730.write(Darwin::CM730::Address::LED_EYE_L, Convert::colourLEDInverse(static_cast<uint8_t>((led.RGB & 0x00FF0000) >> 24),
+                                                                                            static_cast<uint8_t>((led.RGB & 0x0000FF00) >>  8),
                                                                                             static_cast<uint8_t>( led.RGB & 0x000000FF)));
+        });
+
+        on<Trigger<FlashCM730Firmware>>().then([this](const FlashCM730Firmware& fw) {
+            // Disable the hardware loop reaction. We don't want to be interrupted.
+            hardwareLoop.disable();
+
+            log<NUClear::INFO>("Press DARwIn-OP's Reset button to start...");
+
+            std::vector<uint8_t> buf;
+
+            for (size_t retries = 0; retries < 100; retries++) {
+                darwin.cm730.writeBytes(std::vector<uint8_t>{'#'});
+
+                std::this_thread::sleep_for(std::chrono::milliseconds(20));
+
+                if (darwin.cm730.readBytes(buf, 1) > 0) {
+                    if (buf.front() == '#') {
+                        darwin.cm730.writeBytes(std::vector<uint8_t>{'\r'});
+                        break;
+                    }
+                }
+            }
+
+            /*+++ start download +++*/
+            darwin.cm730.writeBytes(std::vector<uint8_t>{'l', '\r'});
+
+            for (size_t retries = 0; retries < 100; retries++) {
+                std::this_thread::sleep_for(std::chrono::milliseconds(135));
+
+                size_t count = 0;
+
+                if ((count = darwin.cm730.readBytes(buf, 256)) > 0) {
+                    if (count == 256) {
+                        buf.push_back(0);
+                    }
+
+                    else {
+                        buf[count] = 0;
+                    }
+
+                    std::stringstream data;
+                    std::copy(buf.begin(), buf.end(), std::ostream_iterator<uint8_t>(data, ""));
+                    log<NUClear::INFO>(data.str());
+                }
+
+                else {
+                    log<NUClear::INFO>("Erase block complete...");
+                    break;
+                }
+            }
+
+            std::this_thread::sleep_for(std::chrono::milliseconds(100));
+
+            // Calculate checksum.
+            uint8_t byteSum = 0x00;
+
+            std::for_each(fw.firmware.begin() + fw.startAddress, fw.firmware.begin() + (fw.startAddress + (128 * 1024)),
+                            [&] (const uint8_t& byte) {
+                                byteSum += byte;
+                            });
+
+            const size_t MAX_UNIT = 64;
+            size_t size = 0;
+
+            while (size < fw.binSize) {
+                size_t unit = fw.binSize - size;
+
+                if (unit > MAX_UNIT) {
+                    unit = MAX_UNIT;
+                }
+
+                size_t offset = fw.startAddress + size;
+
+                size_t count = darwin.cm730.writeBytes(std::vector<uint8_t>{fw.firmware.begin() + offset, fw.firmware.begin() + offset + unit});
+
+                if (count > 0) {
+                    size += count;
+                    log<NUClear::INFO>("Downloading Firmware:", size, "bytes out of", fw.binSize, "bytes written.");
+                }
+            }
+
+            darwin.cm730.writeBytes(std::vector<uint8_t>{byteSum});
+            log<NUClear::INFO>("Downloading Bytesum:", byteSum);
+
+            for (int x = 0; x < 100; x++) {
+                std::this_thread::sleep_for(std::chrono::milliseconds(10));
+
+                size_t count = 0;
+
+                if ((count = darwin.cm730.readBytes(buf, 256)) > 0) {
+                    if (count == 256) {
+                        buf.push_back(0);
+                    }
+
+                    else {
+                        buf[count] = 0;
+                    }
+
+                    std::stringstream data;
+                    std::copy(buf.begin(), buf.end(), std::ostream_iterator<uint8_t>(data, ""));
+                    log<NUClear::INFO>(data.str());
+                }
+            }
+            /*--- end download ---*/
+
+            std::this_thread::sleep_for(std::chrono::milliseconds(10));
+
+            // Exit bootloader
+            darwin.cm730.writeBytes(std::vector<uint8_t>{'\r', 'g', 'o', '\r'});
+
+            std::this_thread::sleep_for(std::chrono::milliseconds(50));
+
+            size_t count = 0;
+
+            if ((count = darwin.cm730.readBytes(buf, 256)) > 0) {
+                if (count == 256) {
+                    buf.push_back(0);
+                }
+
+                else {
+                    buf[count] = 0;
+                }
+
+                std::stringstream data;
+                std::copy(buf.begin(), buf.end(), std::ostream_iterator<uint8_t>(data, ""));
+                log<NUClear::INFO>(data.str());
+            }
+
+            // Reenable hardware loop.
+            hardwareLoop.enable();
         });
     }
 }

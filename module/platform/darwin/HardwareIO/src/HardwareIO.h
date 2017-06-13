@@ -74,6 +74,8 @@ namespace darwin {
         /// @brief Our state for or MX28s for variables we send to it
         std::array<ServoState, 20> servoState;
 
+        ReactionHandle hardwareLoop;
+
     public:
         /// @brief called by a Powerplant to construct this reactor
         explicit HardwareIO(std::unique_ptr<NUClear::Environment> environment);

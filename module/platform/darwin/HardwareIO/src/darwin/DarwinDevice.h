@@ -227,6 +227,35 @@ namespace Darwin {
         }
 
         /**
+         * @brief Reads a specified number of bytes from this device.
+         *
+         * @param data Vector to store the read data in. Vector will be resized to hold the requested data.
+         *       Contents of the vector will be overwritten.
+         *
+         * @param count Number of bytes to read from this device.
+         *
+         * @return the number of bytes.
+         */
+        size_t readBytes(std::vector<uint8_t>& data, size_t count) {
+
+            // Make sure the vector has enough space in it.
+            data.resize(count);
+            return coms.readBytes(data.data(), count);
+        }
+
+        /**
+         * @brief Writes a specified number of bytes to this device.
+         *
+         * @param data Vector of bytes to send.
+         *
+         * @return the number of bytes.
+         */
+        size_t writeBytes(const std::vector<uint8_t>& data) {
+
+            return coms.writeBytes(data.data(), data.size());
+        }
+
+        /**
          * @brief This will send a ping request to the device.
          *
          * @return true if the device is working, false if the device is not working
