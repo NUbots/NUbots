@@ -303,7 +303,7 @@ namespace kinematics {
         return headJoints;
     }
 
-    std::vector<std::pair<ServoID, float>> setArm(const KinematicsModel& model, const Eigen::Vector3d& pos, bool left, int number_of_iterations, Eigen::Vector3d angleHint) {
+    std::vector<std::pair<ServoID, float>> setArm(const KinematicsModel& model, const Eigen::Vector3d& pos, bool left, int number_of_iterations, const Eigen::Vector3d& angleHint) {
         ServoID SHOULDER_PITCH, SHOULDER_ROLL, ELBOW;
         //int negativeIfRight;
 
