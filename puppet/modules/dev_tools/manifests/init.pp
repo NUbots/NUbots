@@ -48,6 +48,12 @@ class dev_tools {
   package { 'python3-pip': ensure => latest, }
   package { 'icecc': ensure => latest, }
 
+  # CM730 firmware compilation.
+  package { 'gcc-arm-none-eabi': ensure => latest, }
+  package { 'libstdc++-arm-none-eabi-newlib': ensure => latest, }
+  package { 'libnewlib-arm-none-eabi': ensure => latest, }
+  package { 'gdb-arm-none-eabi': ensure => latest, }
+
   # System libraries
   package { 'libasound2-dev:amd64': ensure => latest, }
   package { 'libasound2-dev:i386': ensure => latest, }

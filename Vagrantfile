@@ -90,6 +90,9 @@ Vagrant.configure("2") do |config|
     if File.directory?("../NUClear")
       nubots.vm.synced_folder "../NUClear", "/home/vagrant/NUClear"
     end
+    if File.directory?("../CM730")
+      nubots.vm.synced_folder "../CM730", "/home/vagrant/CM730"
+    end
   end
 
   # This VM will build all dependencies by source (use this to update old dependencies, or to generate a new deb file)
@@ -107,6 +110,9 @@ Vagrant.configure("2") do |config|
     end
     if File.directory?("../NUClear")
       nubots.vm.synced_folder "../NUClear", "/home/vagrant/NUClear"
+    end
+    if File.directory?("../CM730")
+      nubots.vm.synced_folder "../CM730", "/home/vagrant/CM730"
     end
   end
 end
