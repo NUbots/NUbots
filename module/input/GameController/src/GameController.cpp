@@ -33,19 +33,19 @@ namespace input {
     using gamecontroller::ReplyMessage;
     using gamecontroller::Team;
     using message::input::GameEvents;
-    using TeamColour = message::input::GameEvents::TeamColour::Value;
-    using Score          = GameEvents::Score;
-    using GoalScored     = GameEvents::GoalScored;
-    using Penalisation   = GameEvents::Penalisation;
-    using Unpenalisation = GameEvents::Unpenalisation;
-    using CoachMessage   = GameEvents::CoachMessage;
-    using HalfTime       = GameEvents::HalfTime;
-    using BallKickedOut  = GameEvents::BallKickedOut;
-    using KickOffTeam    = GameEvents::KickOffTeam;
-    using GamePhase      = GameEvents::GamePhase;
-    using GameMode       = GameEvents::GameMode;
     using message::input::GameState;
-    using PenaltyReason  = GameState::Data::PenaltyReason;
+    using TeamColour      = message::input::GameEvents::TeamColour::Value;
+    using Score           = GameEvents::Score;
+    using GoalScored      = GameEvents::GoalScored;
+    using Penalisation    = GameEvents::Penalisation;
+    using Unpenalisation  = GameEvents::Unpenalisation;
+    using CoachMessage    = GameEvents::CoachMessage;
+    using HalfTime        = GameEvents::HalfTime;
+    using BallKickedOut   = GameEvents::BallKickedOut;
+    using KickOffTeam     = GameEvents::KickOffTeam;
+    using GamePhase       = GameEvents::GamePhase;
+    using GameMode        = GameEvents::GameMode;
+    using PenaltyReason   = GameState::Data::PenaltyReason;
     using TeamColourEvent = message::input::GameEvents::TeamColour;
     using message::platform::darwin::ButtonLeftDown;
     using message::platform::darwin::ButtonMiddleDown;
@@ -63,7 +63,7 @@ namespace input {
         on<Configuration, Trigger<GlobalConfig>>("GameController.yaml").then("GameController Configuration", [this] (const Configuration& config, const GlobalConfig& globalConfig) {
 
             PLAYER_ID = globalConfig.playerId;
-            TEAM_ID = globalConfig.teamId;
+            TEAM_ID   = globalConfig.teamId;
 
             // If we are changing ports (the port starts at 0 so this should start it the first time)
             if(config["port"].as<uint>() != port) {
@@ -449,7 +449,7 @@ namespace input {
 
             stateChanges.push_back([this, time] {
                 auto msg = std::make_unique<GamePhase>();
-                msg->phase = GameState::Data::Phase::Value::TIMEOUT; 
+                msg->phase = GameState::Data::Phase::Value::TIMEOUT;
                 msg->ends  = time;
                 emit(msg);
             });
@@ -465,7 +465,7 @@ namespace input {
 
                     stateChanges.push_back([this] {
                         auto msg = std::make_unique<GamePhase>();
-                        msg->phase = GameState::Data::Phase::Value::INITIAL; 
+                        msg->phase = GameState::Data::Phase::Value::INITIAL;
                         emit(msg);
                     });
                     break;
@@ -485,7 +485,7 @@ namespace input {
 
                     stateChanges.push_back([this, time] {
                         auto msg = std::make_unique<GamePhase>();
-                        msg->phase     = GameState::Data::Phase::Value::READY; 
+                        msg->phase     = GameState::Data::Phase::Value::READY;
                         msg->readyTime = time;
                         emit(msg);
                     });
@@ -497,7 +497,7 @@ namespace input {
 
                     stateChanges.push_back([this] {
                         auto msg = std::make_unique<GamePhase>();
-                        msg->phase = GameState::Data::Phase::Value::SET; 
+                        msg->phase = GameState::Data::Phase::Value::SET;
                         emit(msg);
                     });
                     break;
@@ -512,7 +512,7 @@ namespace input {
 
                     stateChanges.push_back([this, endHalf, ballFree] {
                         auto msg = std::make_unique<GamePhase>();
-                        msg->phase    = GameState::Data::Phase::Value::PLAYING; 
+                        msg->phase    = GameState::Data::Phase::Value::PLAYING;
                         msg->endHalf  = endHalf;
                         msg->ballFree = ballFree;
                         emit(msg);
@@ -528,7 +528,7 @@ namespace input {
 
                     stateChanges.push_back([this, nextHalf] {
                         auto msg = std::make_unique<GamePhase>();
-                        msg->phase    = GameState::Data::Phase::Value::FINISHED; 
+                        msg->phase    = GameState::Data::Phase::Value::FINISHED;
                         msg->nextHalf = nextHalf;
                         emit(msg);
                     });
@@ -568,8 +568,6 @@ namespace input {
                 return PenaltyReason::REQUEST_FOR_PICKUP;
             case gamecontroller::PenaltyState::REQUEST_FOR_SERVICE:
                 return PenaltyReason::REQUEST_FOR_SERVICE;
-            case gamecontroller::PenaltyState::REQUEST_FOR_PICKUP_TO_SERVICE:
-                return PenaltyReason::REQUEST_FOR_PICKUP_TO_SERVICE;
             case gamecontroller::PenaltyState::SUBSTITUTE:
                 return PenaltyReason::SUBSTITUTE;
             case gamecontroller::PenaltyState::MANUAL:

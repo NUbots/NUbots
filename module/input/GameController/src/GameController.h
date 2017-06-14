@@ -38,10 +38,10 @@ namespace module {
          */
         class GameController : public NUClear::Reactor {
             private:
-                static constexpr const uint SUPPORTED_VERSION = 8;
-                static constexpr const uint PLAYERS_PER_TEAM = 6;
+                static constexpr const uint SUPPORTED_VERSION       = 12;
+                static constexpr const uint PLAYERS_PER_TEAM        = 6;
                 static constexpr const uint ACTIVE_PLAYERS_PER_TEAM = 4;
-                static constexpr const uint NUM_TEAMS = 2;
+                static constexpr const uint NUM_TEAMS               = 2;
 
                 uint port;
                 uint TEAM_ID;
