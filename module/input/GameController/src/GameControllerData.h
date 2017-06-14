@@ -127,7 +127,7 @@ namespace gamecontroller {
         Mode                mode;                // extra state information - (STATE2_NORMAL, STATE2_PENALTYSHOOT, etc)
         std::array<char, 4> secondaryStateInfo;  // Extra info on the secondary state
         TeamColour          dropInTeam;          // number of team that caused last drop in
-        uint16_t            dropInTime;          // number of seconds passed since the last drop in. -1 (0xffff) before first dropin
+        int16_t             dropInTime;          // number of seconds passed since the last drop in. -1 (0xffff) before first dropin
         uint16_t            secsRemaining;       // estimate of number of seconds remaining in the half
         uint16_t            secondaryTime;       // number of seconds shown as secondary time (remaining ready, until free ball, etc)
         std::array<Team, 2> teams;
