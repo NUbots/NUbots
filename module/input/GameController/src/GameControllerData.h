@@ -42,7 +42,9 @@ namespace gamecontroller {
         NORMAL           = 0,
         PENALTY_SHOOTOUT = 1,
         OVERTIME         = 2,
-        TIMEOUT          = 3
+        TIMEOUT          = 3,
+        FREEKICK         = 4,
+        PENALTYKICK      = 5
     };
 
     enum class GameType : uint8_t {
@@ -52,8 +54,9 @@ namespace gamecontroller {
     };
 
     enum class TeamColour : uint8_t {
-        CYAN    = 0,
-        MAGENTA = 1
+        CYAN     = 0,
+        MAGENTA  = 1,
+        DROPBALL = 255
     };
 
     enum class ReplyMessage : uint8_t {
