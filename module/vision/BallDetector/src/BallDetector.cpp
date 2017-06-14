@@ -137,7 +137,6 @@ namespace vision {
         , green_ratio_threshold(0.0)
         , green_radial_samples(0.0)
         , green_angular_samples(0.0)
-        , kmeansClusterer()
         , lastFrame(),
         print_throwout_logs(false) {
 
@@ -160,8 +159,6 @@ namespace vision {
             green_ratio_threshold = config["green_ratio_threshold"].as<Expression>();
             green_radial_samples = config["green_radial_samples"].as<Expression>();
             green_angular_samples = config["green_angular_samples"].as<Expression>();
-
-            kmeansClusterer.configure(config["clustering"]);
 
             print_throwout_logs = config["print_throwout_logs"].as<bool>();
 
