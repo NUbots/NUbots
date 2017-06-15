@@ -1,7 +1,7 @@
 NUCLEAR_ROLE(
     # FileWatcher, ConsoleLogHandler and Signal Catcher Must Go First. KinematicsConfiguration usually goes after these and without it many roles do not run
     support::extension::FileWatcher
-    #support::SignalCatcher
+    support::SignalCatcher
     support::logging::ConsoleLogHandler
     # This must come first as it emits config which many roles depend on (e.g. SensorFilter, WalkEngine)
     motion::KinematicsConfiguration
@@ -14,16 +14,13 @@ NUCLEAR_ROLE(
     #input
     input::GameController
 
-    #Sensors
-    input::LinuxCamera
-    platform::darwin::HardwareIO
-    platform::darwin::SensorFilter
+    #Simulation
+    platform::darwin::HardwareSimulator
+    support::SoccerSimulator
+    support::VirtualCamera
 
-    #Vision
-    vision::LUTClassifier
-    #vision::GoalDetector
-    vision::BallDetector
-    #vision::ObstacleDetector
+    #Sensors
+    platform::darwin::SensorFilter
 
     #Localisation
     localisation::OdometryLocalisation
@@ -31,23 +28,20 @@ NUCLEAR_ROLE(
 
     #Behaviour
     behaviour::Controller
-    behaviour::skills::WalkEngineStand
+    behaviour::skills::Stand
     behaviour::skills::FallingRelax
+    behaviour::skills::HeadBehaviourSoccer
     behaviour::skills::Getup
     behaviour::skills::KickScript
-    behaviour::skills::HeadBehaviourSoccer
     behaviour::planning::KickPlanner
-    behaviour::planning::SimpleWalkPathPlanner  # Creates WalkPaths.
-    #behaviour::planning::BezierWalkPathPlanner  # Creates WalkPaths.
+    behaviour::planning::SimpleWalkPathPlanner 
+    #behaviour::planning::BezierWalkPathPlanner 
     behaviour::strategy::SoccerStrategy
-    behaviour::skills::Nod
 
     #Motion
     motion::ScriptEngine
     motion::WalkEngine
-    motion::IKKick
     motion::HeadController
-
-    #Output
-    #output::eSpeak
+    #motion::IKKick
 )
+

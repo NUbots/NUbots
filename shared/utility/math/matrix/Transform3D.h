@@ -271,7 +271,7 @@ namespace matrix {
              * @brief Construct transform from a transform 3D assuming the angle is around the yawAxis 
              * and the translation is projected onto the plane normal to yawAxis
              */
-            Transform2D projectTo2D(const arma::vec3& yawAxis, const arma::vec3& forwardAxis) const;
+            Transform2D projectTo2D(const arma::vec3& yawAxis = arma::vec3({0,0,1}), const arma::vec3& forwardAxis = arma::vec3({1,0,0})) const;
 
     };
 
