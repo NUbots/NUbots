@@ -20,6 +20,8 @@
 #ifndef MODULES_MOTION_WALKENGINE_H
 #define MODULES_MOTION_WALKENGINE_H
 
+#error "DONT USE ME I AM NOT FINISHED"
+
 #include <nuclear>
 #include <armadillo>
 #include <algorithm>

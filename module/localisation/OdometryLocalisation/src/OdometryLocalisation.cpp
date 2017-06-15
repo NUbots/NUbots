@@ -1,22 +1,23 @@
 #include "OdometryLocalisation.h"
 
 #include "message/input/Sensors.h"
-#include "message/support/Configuration.h"
+#include "extension/Configuration.h"
 #include "message/localisation/FieldObject.h"
 
 #include "message/platform/darwin/DarwinSensors.h"
 #include "message/behaviour/Nod.h"
-
+#include "utility/support/eigen_armadillo.h"
+#include "utility/math/matrix/Transform3D.h"
 #include "utility/support/yaml_armadillo.h"
-#include "utility/support/yaml_expression.h"
 
 namespace module {
 namespace localisation {
 
-	using message::support::Configuration;
+	using extension::Configuration;
     using message::input::Sensors;
     using message::localisation::Self;
     using utility::math::matrix::Transform2D;
+    using utility::math::matrix::Transform3D;
     using message::platform::darwin::ButtonLeftDown;
     using message::behaviour::Nod;
 
@@ -33,14 +34,14 @@ namespace localisation {
                 ) {
             NUClear::log("Localisation Orientation reset. This direction is now forward.");
             emit(std::make_unique<Nod>(true));
-            Transform2D Trw = sensors.world.projectTo2D();
+            Transform2D Trw = Transform3D(convert<double, 4, 4>(sensors.world)).projectTo2D();
             localisationOffset = Trw;
         });
 
 
         on<Trigger<Sensors>, Sync<OdometryLocalisation>, Single>().then("Odometry Loc", [this](const Sensors& sensors){
         	
-        	Transform2D Trw = sensors.world.projectTo2D();
+        	Transform2D Trw = Transform3D(convert<double, 4, 4>(sensors.world)).projectTo2D();
         	Transform2D Twr = Trw.i();
         	
             if(arma::norm(Twr.localToWorld(Trw)) > 0.00001){
@@ -54,8 +55,8 @@ namespace localisation {
 
             auto selfs = std::make_unique<std::vector<Self>>();
             selfs->push_back(Self());
-            selfs->back().position = state.xy();
-            selfs->back().heading = arma::vec2({std::cos(state.angle()),std::sin(state.angle())});
+            selfs->back().locObject.position = convert<double, 2, 1>(state.xy());
+            selfs->back().heading = Eigen::Vector2d(std::cos(state.angle()),std::sin(state.angle()));
             // log("sensors world", state.t());
             // log("offset", localisationOffset.t());
             // log("world", Twr.t());

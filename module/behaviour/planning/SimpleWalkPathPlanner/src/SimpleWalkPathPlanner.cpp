@@ -46,9 +46,9 @@
 #include "utility/nubugger/NUhelpers.h"
 #include "utility/support/eigen_armadillo.h"
 
-#include "message/behaviour/Action.h"
-#include "message/input/LimbID.h"
-#include "message/input/ServoID.h"
+#include "utility/behaviour/Action.h"
+#include "utility/input/LimbID.h"
+#include "utility/input/ServoID.h"
 
 
 namespace module {
@@ -63,11 +63,9 @@ namespace module {
 
             using message::motion::WalkCommand;
             using message::behaviour::KickPlan;
-            using message::behaviour::KickType;
             using message::behaviour::MotionCommand;
-            using message::motion::WalkStartCommand;
-            using message::motion::WalkStopCommand;
             using message::motion::KickFinished;
+            using message::motion::StopCommand;
             using message::behaviour::WantsToKick;
             using utility::localisation::transform::RobotToWorldTransform;
             using utility::localisation::transform::WorldToRobotTransform;
@@ -76,8 +74,8 @@ namespace module {
             using utility::nubugger::graph;
             using utility::nubugger::drawSphere;
 
-            using message::behaviour::RegisterAction;
-            using message::behaviour::ActionPriorites;
+            using utility::behaviour::RegisterAction;
+            using utility::behaviour::ActionPriorites;
 
             using message::motion::WalkStopped;
             using message::motion::EnableWalkEngineCommand;
@@ -93,7 +91,7 @@ namespace module {
              subsumptionId(size_t(this) * size_t(this) - size_t(this)),
              currentTargetPosition(arma::fill::zeros),
              currentTargetHeading(arma::fill::zeros),
-             targetHeading(Eigen::Vector2d::Zero(), KickType::SCRIPTED),
+             targetHeading(Eigen::Vector2d::Zero(), KickPlan::KickType::SCRIPTED),
              timeBallLastSeen(NUClear::clock::now())
              {
 
@@ -228,7 +226,7 @@ namespace module {
                     float sideStep = 0;
                     float speedFactor = 1;
                     if(useLocalisation){
-                        arma::vec2 kick_target = WorldToRobotTransform(selfs.front().position, selfs.front().heading, kickPlan.target);
+                        arma::vec2 kick_target = WorldToRobotTransform(convert<double,2>(selfs.front().locObject.position), convert<double,2>(selfs.front().heading), convert<double,2>(kickPlan.target));
                         // //approach point:
                         arma::vec2 ballToTarget = arma::normalise(kick_target - position);
                         arma::vec2 kick_point = position - ballToTarget * ball_approach_dist;
@@ -271,12 +269,12 @@ namespace module {
                     command->command = convert<double, 3>(Transform2D({finalForwardSpeed, finalSideSpeed, angle}));
 
                     //TODO: delete this?!?!?
-                    // arma::vec2 ball_world_position = RobotToWorldTransform(convert<double, 2>(selfs.front().locObject.position),
-                    //                                                        convert<double, 2>(selfs.front().heading),
-                    //                                                        position.rows(0,1));
-                    // arma::vec2 kick_target = 2 * ball_world_position - convert<double, 2>(selfs.front().locObject.position);
-                    // emit(drawSphere("kick_target", arma::vec3({kick_target[0], kick_target[1], 0.0}), 0.1, arma::vec3({1, 0, 0}), 0));
-
+                    arma::vec2 ball_world_position = RobotToWorldTransform(convert<double, 2>(selfs.front().locObject.position),
+                                                                           convert<double, 2>(selfs.front().heading),
+                                                                           position.rows(0,1));
+                    arma::vec2 kick_target = 2 * ball_world_position - convert<double, 2>(selfs.front().locObject.position);
+                    emit(drawSphere("kick_target", arma::vec3({kick_target[0], kick_target[1], 0.0}), 0.1, arma::vec3({1, 0, 0}), 0));
+                    log("kick_target", kick_target[0], kick_target[1]);
 
                     emit(std::make_unique<KickPlan>(KickPlan(convert<double, 2>(kick_target), KickPlan::KickType::SCRIPTED)));
 
