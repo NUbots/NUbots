@@ -106,10 +106,10 @@ namespace planning {
             float KickAngle = std::fabs(std::atan2(kickTarget[1], kickTarget[0]));
 
             //Check whether to kick
-            log("kickTarget",kickTarget.t());
-            log("KickAngle",KickAngle);
-            log("ballPosition",ballPosition);
-            log("secondsSinceLastSeen",secondsSinceLastSeen);
+            // log("kickTarget",kickTarget.t());
+            // log("KickAngle",KickAngle);
+            // log("ballPosition",ballPosition);
+            // log("secondsSinceLastSeen",secondsSinceLastSeen);
             bool kickIsValid = kickValid(ballPosition);
             if(kickIsValid){
                 lastTimeValid = now;
@@ -125,7 +125,7 @@ namespace planning {
 
                 switch (kickPlan.kickType.value) {
                     case KickType::IK_KICK:
-                        NUClear::log("ik_kick");
+                        // NUClear::log("ik_kick");
                         if(ballPosition[1] > 0){
                             emit(std::make_unique<KickCommand>(KickCommand(Eigen::Vector3d(0.1, 0.04, 0), Eigen::Vector3d(1.0, 0.0, 0.0), KickCommandType::NORMAL)));
                             emit(std::make_unique<WantsToKick>(true));
@@ -135,7 +135,7 @@ namespace planning {
                         }
                         break;
                     case KickType::SCRIPTED:
-                        NUClear::log("scripted");
+                        // NUClear::log("scripted");
                         if(ballPosition[1] > 0){
                             emit(std::make_unique<KickScriptCommand>(KickScriptCommand(Eigen::Vector3d(1.0, 0.0, 0.0), LimbID::LEFT_LEG)));
                             emit(std::make_unique<WantsToKick>(true));;
