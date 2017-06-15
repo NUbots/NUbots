@@ -43,6 +43,7 @@ def register(command):
 
     command.add_argument('-t', '--toolchain', dest='toolchain', action='store_true')
 
+
 def run(ip_addr, hostname, config, scripts, user, toolchain, **kwargs):
 
     # Target location to install to
@@ -73,19 +74,8 @@ def run(ip_addr, hostname, config, scripts, user, toolchain, **kwargs):
         call(['ssh', host, command], stdout=FNULL, stderr=STDOUT)
         FNULL.close()
 
-    # Find all data files and send them
-    # Data files are located in the build directory (mixed in with the make files and CMake cache).
-    cprint('Installing data files to ' + target_dir, 'blue', attrs=['bold'])
-    files = [fn for fn in glob.glob(os.path.join(build_dir, '*'))
-             if not os.path.basename(fn).endswith('ninja') and 
-                not os.path.basename(fn).lower().startswith('cmake') and 
-                not os.path.isdir(fn)]
-    call(['rsync', '-avzPL', '--checksum', '-e ssh'] + files + [target_dir])
-
     # Get list of config files.
-    config_files = list(filter(None, glob.glob('{0}/*.yaml'.format(config_dir))
-                 + glob.glob('{0}/{1}/**/*.yaml'.format(config_dir, hostname), recursive=True)
-                 + [glob.glob('{0}/{1}/**/*.yaml'.format(config_dir, role), recursive=True) for role in roles]))
+    config_files = [os.path.relpath(c, build_dir) for c in b.cmake_cache['NUCLEAR_MODULE_DATA_FILES']]
 
     # Get list of config files.
     if config in ['overwrite', 'o']:
@@ -102,90 +92,3 @@ def run(ip_addr, hostname, config, scripts, user, toolchain, **kwargs):
 
     if config in ['ignore', 'i']:
         cprint('Ignoring configuration changes', 'blue', attrs=['bold'])
-
-    if config in ['pull', 'p']:
-        cprint('Pulling updated configuration files from the target to a temporary directory', 'blue', attrs=['bold'])
-
-        # Rsync to a local directory
-        path = tempfile.mkdtemp()
-        call(['rsync', '-avzuPL', '--checksum', '-e ssh', target_dir + 'config', path])
-
-
-        cprint('Updating original configuraiton files', 'blue', attrs=['bold'])
-        # Copy the data over to the original files
-        for root, dirnames, filenames in os.walk(path):
-            for filename in fnmatch.filter(filenames, '*.yaml'):
-
-                src = os.path.join(root, filename)
-                dst = os.path.relpath(src, path)
-
-                if os.path.isfile(dst):
-                    # Check our hashes
-                    src_hash = hashlib.md5(open(src, 'rb').read()).hexdigest()
-                    dst_hash = hashlib.md5(open(dst, 'rb').read()).hexdigest()
-
-                    if src_hash != dst_hash:
-                        cprint('Pulling updated file ' + dst, 'green', attrs=['bold'])
-                        with open(dst, 'wb') as o:
-                            with open(src, 'rb') as i:
-                                o.write(i.read())
-
-                else:
-                    with open(dst, 'wb') as o:
-                            with open(src, 'rb') as i:
-                                o.write(i.read())
-
-                    cprint('File ' + dst + ' does not belong to any module, you will need to manually move it into place', 'red', attrs=['bold'])
-
-    script_files = list(filter(None, glob.glob('{0}/*.yaml'.format(script_dir))
-                 + glob.glob('{0}/{1}/**/*.yaml'.format(script_dir, hostname), recursive=True)
-                 + [glob.glob('{0}/{1}/**/*.yaml'.format(script_dir, role), recursive=True) for role in roles]))
-
-    if scripts in ['overwrite', 'o']:
-        cprint('Overwriting script files on target', 'blue', attrs=['bold'])
-        call(['rsync', '-avzPLR', '--checksum', '-e ssh'] + script_files + [target_dir])
-
-    if scripts in ['update', 'u']:
-        cprint('Adding new script files to target', 'blue', attrs=['bold'])
-        call(['rsync', '-avzuPLR', '--checksum', '-e ssh'] + script_files + [target_dir])
-
-    if not scripts or scripts in ['new', 'n']:
-        cprint('Adding new script files to the target', 'blue', attrs=['bold'])
-        call(['rsync', '-avzPLR', '--checksum', '--ignore-existing', '-e ssh'] + script_files + [target_dir])
-
-    if scripts in ['ignore', 'i']:
-        cprint('Ignoring script changes', 'blue', attrs=['bold'])
-
-    if scripts in ['pull', 'p']:
-        cprint('Pulling updated script files from the target to a temporary directory', 'blue', attrs=['bold'])
-
-        # Rsync to a local directory
-        path = tempfile.mkdtemp()
-        call(['rsync', '-avzuPL', '--checksum', '-e ssh', target_dir + 'scripts', path])
-
-
-        cprint('Updating original script files', 'blue', attrs=['bold'])
-        # Copy the data over to the original files
-        for root, dirnames, filenames in os.walk(path):
-            for filename in fnmatch.filter(filenames, '*.yaml'):
-
-                src = os.path.join(root, filename)
-                dst = os.path.relpath(src, path)
-
-                if os.path.isfile(dst):
-                    # Check our hashes
-                    src_hash = hashlib.md5(open(src, 'rb').read()).hexdigest()
-                    dst_hash = hashlib.md5(open(dst, 'rb').read()).hexdigest()
-
-                    if src_hash != dst_hash:
-                        cprint('Pulling updated file ' + dst, 'green', attrs=['bold'])
-                        with open(dst, 'wb') as o:
-                            with open(src, 'rb') as i:
-                                o.write(i.read())
-
-                else:
-                    with open(dst, 'wb') as o:
-                            with open(src, 'rb') as i:
-                                o.write(i.read())
-
-                    cprint('File ' + dst + ' does not belong to any module, you will need to manually move it into place', 'red', attrs=['bold'])

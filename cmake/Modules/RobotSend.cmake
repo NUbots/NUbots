@@ -19,28 +19,32 @@ FOREACH(host_pair ${KNOWN_HOSTS})
     LIST(GET host_pair 0 host)
     LIST(GET host_pair 1 alias)
 
-    FOREACH(config "" n u o i p)
-        FOREACH(scripts "" n u o i p)
-            IF ((config STREQUAL "") AND (scripts STREQUAL ""))
-                SET(target "${host}")
-            ELSE()
-                SET(target "${host}-c${config}-s${scripts}")
-            ENDIF()
-            
-            # Make our installer
-            # The install script expects an IP address to install to and a hostname to determine config files to install.
-            # IP address is represented by the short-form hostname (e.g. d1)
-            # Hostname is represented by the long-form hostname (e.g. darwin1)
+    FOREACH(config "" n u o i t)
+        IF (config STREQUAL "")
+            SET(target "${host}")
+        ELSE()
+            SET(target "${host}${config}")
+        ENDIF()
+        
+        # Make our installer
+        # The install script expects an IP address to install to and a hostname to determine config files to install.
+        # IP address is represented by the short-form hostname (e.g. d1)
+        # Hostname is represented by the long-form hostname (e.g. darwin1)
+        IF (config STREQUAL "t")
             ADD_CUSTOM_TARGET("${target}"
                 USES_TERMINAL
                 COMMAND ${PYTHON_EXECUTABLE}
-                "${CMAKE_SOURCE_DIR}/nuclear/b.py" "install" "${host}" "${alias}" "--config=${config}" "--scripts=${scripts}" "--user=${user}"
+                "${CMAKE_SOURCE_DIR}/nuclear/b.py" "install" "${host}" "${alias}" "--user=${user}" "--toolchain"
                 DEPENDS ${NUCLEAR_ROLES} "${CMAKE_SOURCE_DIR}/tools/install.py")
+        ELSE()
+            ADD_CUSTOM_TARGET("${target}"
+                USES_TERMINAL
+                COMMAND ${PYTHON_EXECUTABLE}
+                "${CMAKE_SOURCE_DIR}/nuclear/b.py" "install" "${host}" "${alias}" "--config=${config}" "--user=${user}"
+                DEPENDS ${NUCLEAR_ROLES} "${CMAKE_SOURCE_DIR}/tools/install.py")
+        ENDIF()
 
-            # Move our installer to an IDE group
-            SET_PROPERTY(TARGET "${target}" PROPERTY FOLDER "installers")
-        ENDFOREACH(scripts)
+        # Move our installer to an IDE group
+        SET_PROPERTY(TARGET "${target}" PROPERTY FOLDER "installers")
     ENDFOREACH(config)
 ENDFOREACH(host_pair)
-
-ADD_CUSTOM_TARGET("dall" DEPENDS d1-co-so d2-co-so d3-co-so d4-co-so d5-co-so d6-co-so i1-co-so)
