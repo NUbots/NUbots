@@ -214,14 +214,14 @@ ff02::2 ip6-allrouters
 
   # SETUP OUR ALTERNATIVES SO WE USE THE CORRECT COMPILER
   exec {'fix_compiler_environment':
-    command => '/usr/sbin/update-alternatives --remove-all gcc \
-             ;  /usr/sbin/update-alternatives --remove-all g++ \
-             ;  /usr/sbin/update-alternatives --remove-all gfortan \
-             ;  /usr/sbin/update-alternatives --install /usr/bin/ld ld /usr/bin/ld.bfd 10 \
-             && /usr/sbin/update-alternatives --install /usr/bin/ld ld /usr/bin/ld.gold 20 \
-             && /usr/sbin/update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-7 100 \
-                                              --slave /usr/bin/g++ g++ /usr/bin/g++-7 \
-                                              --slave /usr/bin/gfortran gfortran /usr/bin/gfortran-7',
+    command => '/usr/bin/update-alternatives --remove-all gcc \
+             ;  /usr/bin/update-alternatives --remove-all g++ \
+             ;  /usr/bin/update-alternatives --remove-all gfortan \
+             ;  /usr/bin/update-alternatives --install /usr/bin/ld ld /usr/bin/ld.bfd 10 \
+             && /usr/bin/update-alternatives --install /usr/bin/ld ld /usr/bin/ld.gold 20 \
+             && /usr/bin/update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-7 100 \
+                                             --slave /usr/bin/g++ g++ /usr/bin/g++-7 \
+                                             --slave /usr/bin/gfortran gfortran /usr/bin/gfortran-7',
     require => [ Package['gcc-7'], Package['g++-7'], Package['gfortran-7'], Package['build-essential'], Package['binutils'], ]
   }
 }
