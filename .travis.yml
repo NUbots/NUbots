@@ -27,6 +27,6 @@ before_install:
 
 script:
   - sudo puppet apply --parser=future --verbose --debug --modulepath=puppet/modules:/etc/puppet/modules puppet/manifests/travis.pp
-  - ./b platform select native
+  - /usr/bin/python3 ./b platform select native
   - cd build
   - ninja
