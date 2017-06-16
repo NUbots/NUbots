@@ -1,3 +1,5 @@
+include apt
+
 node default {
 
   # We need dev tools
