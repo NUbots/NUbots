@@ -6,11 +6,6 @@ language: cpp
 os: linux
 dist: trusty
 
-# Only do branch builds on master
-branches:
-  only:
-    - 'master'
-
 # Setup using puppet
 before_install:
   - rvm install ruby --latest
