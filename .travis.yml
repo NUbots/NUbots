@@ -9,6 +9,12 @@ before_install:
   - rvm install ruby --latest
   - sudo apt-get install puppet
 
+  - sudo mkdir -p /etc/puppet/modules;
+  - sudo puppet module list | grep -q 'puppetlabs-apt' || sudo puppet module install puppetlabs-apt --module_repository https://forge.puppet.com --version 2.4.0;
+  - sudo puppet module list | grep -q 'puppetlabs-vcsrepo' || sudo puppet module install puppetlabs-vcsrepo --module_repository https://forge.puppet.com --version 2.4.0;
+  - sudo puppet module list | grep -q 'camptocamp-archive' || sudo puppet module install camptocamp-archive --module_repository https://forge.puppet.com --version 2.4.0;
+  - sudo puppet module list | grep -q 'maestrodev-wget' || sudo puppet module install maestrodev-wget --module_repository https://forge.puppet.com --version 2.4.0;
+
 script:
   - sudo puppet apply --modulepath=puppet/modules puppet/manifests/nubots.pp
   - ./b platform select native
