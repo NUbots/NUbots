@@ -19,7 +19,7 @@ before_install:
   - sudo puppet module install maestrodev-wget --module_repository https://forge.puppet.com
 
 script:
-  - sudo puppet apply --modulepath=puppet/modules puppet/manifests/nubots.pp
+  - sudo puppet apply --modulepath=puppet/modules puppet/manifests/travis.pp
   - ./b platform select native
   - cd build
   - ninja
