@@ -1,4 +1,6 @@
+# Need sudo to use the puppet installs
 sudo: required
+
 language: cpp
 os: linux
 dist: trusty
