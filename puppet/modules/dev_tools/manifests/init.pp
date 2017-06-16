@@ -120,25 +120,25 @@ class dev_tools {
 
   # INSTALL PYTHON PACKAGES (we need python-pip to use the pip provider)
   exec {'install_python3_packages':
-    command => 'pip3 install pyparsing &&
-                pip3 install pydotplus &&
-                pip3 install pygments &&
-                pip3 install termcolor &&
-                pip3 install protobuf &&
-                pip3 install mmh3 &&
-                pip3 install numpy',
+    command => '/usr/bin/pip3 install pyparsing &&
+                /usr/bin/pip3 install pydotplus &&
+                /usr/bin/pip3 install pygments &&
+                /usr/bin/pip3 install termcolor &&
+                /usr/bin/pip3 install protobuf &&
+                /usr/bin/pip3 install mmh3 &&
+                /usr/bin/pip3 install numpy',
     require => [ Package['python3-pip'], ]
   }
 
     # INSTALL PYTHON PACKAGES (we need python-pip to use the pip provider)
   exec {'install_python_packages':
-    command => 'pip install pyparsing &&
-                pip install pydotplus &&
-                pip install pygments &&
-                pip install termcolor &&
-                pip install protobuf &&
-                pip install mmh3 &&
-                pip install numpy',
+    command => '/usr/bin/pip install pyparsing &&
+                /usr/bin/pip install pydotplus &&
+                /usr/bin/pip install pygments &&
+                /usr/bin/pip install termcolor &&
+                /usr/bin/pip install protobuf &&
+                /usr/bin/pip install mmh3 &&
+                /usr/bin/pip install numpy',
     require => [ Package['python-pip'], ]
   }
 
@@ -215,14 +215,14 @@ ff02::2 ip6-allrouters
 
   # SETUP OUR ALTERNATIVES SO WE USE THE CORRECT COMPILER
   exec {'fix_compiler_environment':
-    command => 'update-alternatives --remove-all gcc \
-             ;  update-alternatives --remove-all g++ \
-             ;  update-alternatives --remove-all gfortan \
-             ;  update-alternatives --install /usr/bin/ld ld /usr/bin/ld.bfd 10 \
-             && update-alternatives --install /usr/bin/ld ld /usr/bin/ld.gold 20 \
-             && update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-7 100 \
-                                    --slave /usr/bin/g++ g++ /usr/bin/g++-7 \
-                                    --slave /usr/bin/gfortran gfortran /usr/bin/gfortran-7',
+    command => '/usr/sbin/update-alternatives --remove-all gcc \
+             ;  /usr/sbin/update-alternatives --remove-all g++ \
+             ;  /usr/sbin/update-alternatives --remove-all gfortan \
+             ;  /usr/sbin/update-alternatives --install /usr/bin/ld ld /usr/bin/ld.bfd 10 \
+             && /usr/sbin/update-alternatives --install /usr/bin/ld ld /usr/bin/ld.gold 20 \
+             && /usr/sbin/update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-7 100 \
+                                              --slave /usr/bin/g++ g++ /usr/bin/g++-7 \
+                                              --slave /usr/bin/gfortran gfortran /usr/bin/gfortran-7',
     require => [ Package['gcc-7'], Package['g++-7'], Package['gfortran-7'], Package['build-essential'], Package['binutils'], ]
   }
 }
