@@ -118,7 +118,7 @@ class dev_tools {
   file_line{ 'zshrc_numpad21': path => '/home/vagrant/.zshrc', line => 'bindkey -s "^[Oo" "/"'}
 
   # INSTALL PYTHON PACKAGES (we need python-pip to use the pip provider)
-  exec {'install_python_packages':
+  exec {'install_python3_packages':
     command => 'pip3 install pyparsing &&
                 pip3 install pydotplus &&
                 pip3 install pygments &&
