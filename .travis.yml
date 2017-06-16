@@ -6,6 +6,7 @@ os: linux
 dist: trusty
 
 before_install:
+  - rvm install ruby --latest
   - sudo apt-get install puppet
 
 script:
