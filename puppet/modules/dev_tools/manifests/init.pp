@@ -52,7 +52,7 @@ class dev_tools (String $user) {
   # CM730 firmware compilation.
   package { 'gcc-arm-none-eabi': ensure => latest, }
   package { 'libnewlib-arm-none-eabi': ensure => latest, }
-  package { 'gdb-arm-none-eabi': ensure => latest, install_options => [ '-o Dpkg::Options::="--force-overwrite"', ], }
+  package { 'gdb-arm-none-eabi': ensure => latest, install_options => [ {'-o' => 'Dpkg::Options::=--force-overwrite'}, ], }
 
   # System libraries
   package { 'libasound2-dev:amd64': ensure => latest, }
