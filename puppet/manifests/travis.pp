@@ -6,7 +6,9 @@ Exec { path => [ "/bin/", "/sbin/" , "/usr/bin/", "/usr/sbin/" ] }
 node default {
 
   # We need dev tools
-  class {'dev_tools': }
+  class {'dev_tools':
+    user => 'travis',
+  }
 
   # Get and install our toolchain
   $toolchain_version = '2.1.0'

@@ -6,7 +6,9 @@ Exec { path => [ "/bin/", "/sbin/" , "/usr/bin/", "/usr/sbin/" ] }
 node default {
 
   # We need dev tools
-  class {'dev_tools': }
+  class {'dev_tools':
+    user => 'vagrant',
+  }
 
   # Get and install our toolchain
   $toolchain_version = '2.1.0'
@@ -44,7 +46,9 @@ node nubotsvmbuild {
   }
 
   # We need dev tools to use the installer
-  class {'dev_tools': } -> Installer <| |>
+  class {'dev_tools':
+    user => 'vagrant',
+  } -> Installer <| |>
 
   # List all of the archives that need to be downloaded along with any other associated parameters (creates, requires, etc).
   $archives = {

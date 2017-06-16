@@ -1,4 +1,4 @@
-class dev_tools {
+class dev_tools (String $user) {
 
   # Update apt before getting any packages (if we need to)
   exec { "apt-update":
@@ -51,9 +51,8 @@ class dev_tools {
 
   # CM730 firmware compilation.
   package { 'gcc-arm-none-eabi': ensure => latest, }
-  package { 'libstdc++-arm-none-eabi-newlib': ensure => latest, }
   package { 'libnewlib-arm-none-eabi': ensure => latest, }
-  package { 'gdb-arm-none-eabi': ensure => latest, }
+  package { 'gdb-arm-none-eabi': ensure => latest, install_options => [ '-o Dpkg::Options::="--force-overwrite"', ], }
 
   # System libraries
   package { 'libasound2-dev:amd64': ensure => latest, }
@@ -70,53 +69,53 @@ class dev_tools {
   package { 'libglib2.0-dev': ensure => latest, }
 
   # Set the vagrant shell to zsh
-  user { 'vagrant': shell => '/bin/zsh', require => Package['zsh'], }
+  user { "${user}": shell => '/bin/zsh', require => Package['zsh'], }
 
   # Setup prezto for a richer zsh experience
   vcsrepo { 'zprezto':
     ensure   => present,
-    path     => '/home/vagrant/.zprezto',
+    path     => "/home/${user}/.zprezto",
     provider => git,
-    owner    => 'vagrant',
-    group    => 'vagrant',
+    owner    => "${user}",
+    group    => "${user}",
     source   => 'https://github.com/sorin-ionescu/prezto.git',
     require  => Package['git'],
   }
 
   # Create the required links for zprezto
-  file { '/home/vagrant/.zlogin':    ensure => link, target => '/home/vagrant/.zprezto/runcoms/zlogin',    require => Vcsrepo['zprezto'], }
-  file { '/home/vagrant/.zlogout':   ensure => link, target => '/home/vagrant/.zprezto/runcoms/zlogout',   require => Vcsrepo['zprezto'], }
-  file { '/home/vagrant/.zpreztorc': ensure => link, target => '/home/vagrant/.zprezto/runcoms/zpreztorc', require => Vcsrepo['zprezto'], }
-  file { '/home/vagrant/.zprofile':  ensure => link, target => '/home/vagrant/.zprezto/runcoms/zprofile',  require => Vcsrepo['zprezto'], }
-  file { '/home/vagrant/.zshenv':    ensure => link, target => '/home/vagrant/.zprezto/runcoms/zshenv',    require => Vcsrepo['zprezto'], }
+  file { "/home/${user}/.zlogin":    ensure => link, target => "/home/${user}/.zprezto/runcoms/zlogin",    require => Vcsrepo['zprezto'], }
+  file { "/home/${user}/.zlogout":   ensure => link, target => "/home/${user}/.zprezto/runcoms/zlogout",   require => Vcsrepo['zprezto'], }
+  file { "/home/${user}/.zpreztorc": ensure => link, target => "/home/${user}/.zprezto/runcoms/zpreztorc", require => Vcsrepo['zprezto'], }
+  file { "/home/${user}/.zprofile":  ensure => link, target => "/home/${user}/.zprezto/runcoms/zprofile",  require => Vcsrepo['zprezto'], }
+  file { "/home/${user}/.zshenv":    ensure => link, target => "/home/${user}/.zprezto/runcoms/zshenv",    require => Vcsrepo['zprezto'], }
 
   # Make sure .zshrc has key bindings for the numpad.
   # One at a time so puppet can only append the line if it is not already in the file.
   # Confirm key codes by pressing <ctrl>+v followed by the key in question
   # http://superuser.com/questions/742171/zsh-z-shell-numpad-numlock-doesnt-work
-  file { '/home/vagrant/.zshrc':     ensure => link, target => '/home/vagrant/.zprezto/runcoms/zshrc',     require => Vcsrepo['zprezto'], } ->
-  file_line{ 'zshrc_numpad00': path => '/home/vagrant/.zshrc', line => '# Keypad'} ->
-  file_line{ 'zshrc_numpad01': path => '/home/vagrant/.zshrc', line => '# 0 . Enter'} ->
-  file_line{ 'zshrc_numpad02': path => '/home/vagrant/.zshrc', line => 'bindkey -s "^[[2~" "0"'} ->
-  file_line{ 'zshrc_numpad03': path => '/home/vagrant/.zshrc', line => '#bindkey -s "^[[3~" "."'} ->
-  file_line{ 'zshrc_numpad04': path => '/home/vagrant/.zshrc', line => 'bindkey -s "^[OM" "^M"'} ->
-  file_line{ 'zshrc_numpad05': path => '/home/vagrant/.zshrc', line => '# 1 2 3'} ->
-  file_line{ 'zshrc_numpad06': path => '/home/vagrant/.zshrc', line => '#bindkey -s "^[OF" "1"'} ->
-  file_line{ 'zshrc_numpad07': path => '/home/vagrant/.zshrc', line => '#bindkey -s "^[OB" "2"'} ->
-  file_line{ 'zshrc_numpad08': path => '/home/vagrant/.zshrc', line => '#bindkey -s "^[[6~" "3"'} ->
-  file_line{ 'zshrc_numpad09': path => '/home/vagrant/.zshrc', line => '# 4 5 6'} ->
-  file_line{ 'zshrc_numpad10': path => '/home/vagrant/.zshrc', line => '#bindkey -s "^[OD" "4"'} ->
-  file_line{ 'zshrc_numpad11': path => '/home/vagrant/.zshrc', line => '#bindkey -s "^[OE" "5"'} ->
-  file_line{ 'zshrc_numpad12': path => '/home/vagrant/.zshrc', line => '#bindkey -s "^[OC" "6"'} ->
-  file_line{ 'zshrc_numpad13': path => '/home/vagrant/.zshrc', line => '# 7 8 9'} ->
-  file_line{ 'zshrc_numpad14': path => '/home/vagrant/.zshrc', line => '#bindkey -s "^[OH" "7"'} ->
-  file_line{ 'zshrc_numpad15': path => '/home/vagrant/.zshrc', line => '#bindkey -s "^[OA" "8"'} ->
-  file_line{ 'zshrc_numpad16': path => '/home/vagrant/.zshrc', line => '#bindkey -s "^[[5~" "9"'} ->
-  file_line{ 'zshrc_numpad17': path => '/home/vagrant/.zshrc', line => '# + - * /'} ->
-  file_line{ 'zshrc_numpad18': path => '/home/vagrant/.zshrc', line => 'bindkey -s "^[Ok" "+"'} ->
-  file_line{ 'zshrc_numpad19': path => '/home/vagrant/.zshrc', line => 'bindkey -s "^[Om" "-"'} ->
-  file_line{ 'zshrc_numpad20': path => '/home/vagrant/.zshrc', line => 'bindkey -s "^[Oj" "*"'} ->
-  file_line{ 'zshrc_numpad21': path => '/home/vagrant/.zshrc', line => 'bindkey -s "^[Oo" "/"'}
+  file { "/home/${user}/.zshrc":     ensure => link, target => "/home/${user}/.zprezto/runcoms/zshrc",     require => Vcsrepo['zprezto'], } ->
+  file_line{ 'zshrc_numpad00': path => "/home/${user}/.zshrc", line => '# Keypad'} ->
+  file_line{ 'zshrc_numpad01': path => "/home/${user}/.zshrc", line => '# 0 . Enter'} ->
+  file_line{ 'zshrc_numpad02': path => "/home/${user}/.zshrc", line => 'bindkey -s "^[[2~" "0"'} ->
+  file_line{ 'zshrc_numpad03': path => "/home/${user}/.zshrc", line => '#bindkey -s "^[[3~" "."'} ->
+  file_line{ 'zshrc_numpad04': path => "/home/${user}/.zshrc", line => 'bindkey -s "^[OM" "^M"'} ->
+  file_line{ 'zshrc_numpad05': path => "/home/${user}/.zshrc", line => '# 1 2 3'} ->
+  file_line{ 'zshrc_numpad06': path => "/home/${user}/.zshrc", line => '#bindkey -s "^[OF" "1"'} ->
+  file_line{ 'zshrc_numpad07': path => "/home/${user}/.zshrc", line => '#bindkey -s "^[OB" "2"'} ->
+  file_line{ 'zshrc_numpad08': path => "/home/${user}/.zshrc", line => '#bindkey -s "^[[6~" "3"'} ->
+  file_line{ 'zshrc_numpad09': path => "/home/${user}/.zshrc", line => '# 4 5 6'} ->
+  file_line{ 'zshrc_numpad10': path => "/home/${user}/.zshrc", line => '#bindkey -s "^[OD" "4"'} ->
+  file_line{ 'zshrc_numpad11': path => "/home/${user}/.zshrc", line => '#bindkey -s "^[OE" "5"'} ->
+  file_line{ 'zshrc_numpad12': path => "/home/${user}/.zshrc", line => '#bindkey -s "^[OC" "6"'} ->
+  file_line{ 'zshrc_numpad13': path => "/home/${user}/.zshrc", line => '# 7 8 9'} ->
+  file_line{ 'zshrc_numpad14': path => "/home/${user}/.zshrc", line => '#bindkey -s "^[OH" "7"'} ->
+  file_line{ 'zshrc_numpad15': path => "/home/${user}/.zshrc", line => '#bindkey -s "^[OA" "8"'} ->
+  file_line{ 'zshrc_numpad16': path => "/home/${user}/.zshrc", line => '#bindkey -s "^[[5~" "9"'} ->
+  file_line{ 'zshrc_numpad17': path => "/home/${user}/.zshrc", line => '# + - * /'} ->
+  file_line{ 'zshrc_numpad18': path => "/home/${user}/.zshrc", line => 'bindkey -s "^[Ok" "+"'} ->
+  file_line{ 'zshrc_numpad19': path => "/home/${user}/.zshrc", line => 'bindkey -s "^[Om" "-"'} ->
+  file_line{ 'zshrc_numpad20': path => "/home/${user}/.zshrc", line => 'bindkey -s "^[Oj" "*"'} ->
+  file_line{ 'zshrc_numpad21': path => "/home/${user}/.zshrc", line => 'bindkey -s "^[Oo" "/"'}
 
   # INSTALL PYTHON PACKAGES (we need python-pip to use the pip provider)
   exec {'install_python3_packages':
@@ -145,35 +144,35 @@ class dev_tools {
   # Enable the git module for zprezto
   file_line { 'zprezto_modules':
     ensure => present,
-    path   => '/home/vagrant/.zpreztorc',
+    path   => "/home/${user}/.zpreztorc",
     match  => '  \'prompt\'',
     line   => "  \'git\' \'command-not-found\' \'prompt\'",
   }
 
   # SSH KEYS FOR THE VM
   file { 'vm_private_key':
-    path => '/home/vagrant/.ssh/id_rsa',
+    path => "/home/${user}/.ssh/id_rsa",
     ensure => present,
     source => 'puppet:///modules/dev_tools/id_rsa',
-    owner => 'vagrant',
+    owner => "${user}",
     mode => '600',
     replace => true,
   }
 
   file { 'vm_public_key':
-    path => '/home/vagrant/.ssh/id_rsa.pub',
+    path => "/home/${user}/.ssh/id_rsa.pub",
     ensure => present,
     source => 'puppet:///modules/dev_tools/id_rsa.pub',
-    owner => 'vagrant',
+    owner => "${user}",
     replace => true,
   }
 
   # SSH CONFIG FOR THE VM
   file { 'ssh_config':
-    path => '/home/vagrant/.ssh/config',
+    path => "/home/${user}/.ssh/config",
     ensure => present,
     source => 'puppet:///modules/dev_tools/ssh_config',
-    owner => 'vagrant',
+    owner => "${user}",
     mode => '600',
     replace => true,
   }
@@ -196,7 +195,7 @@ class dev_tools {
 "
 127.0.0.1 $hostname.nubots.net  $hostname
 127.0.0.1 localhost
-127.0.1.1 vagrant
+127.0.1.1 ${user}
 ::1     localhost ip6-localhost ip6-loopback
 ff02::1 ip6-allnodes
 ff02::2 ip6-allrouters
