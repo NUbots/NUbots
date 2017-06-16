@@ -129,6 +129,18 @@ class dev_tools {
     require => [ Package['python3-pip'], ]
   }
 
+    # INSTALL PYTHON PACKAGES (we need python-pip to use the pip provider)
+  exec {'install_python_packages':
+    command => 'pip install pyparsing &&
+                pip install pydotplus &&
+                pip install pygments &&
+                pip install termcolor &&
+                pip install protobuf &&
+                pip install mmh3 &&
+                pip install numpy',
+    require => [ Package['python-pip'], ]
+  }
+
   # Enable the git module for zprezto
   file_line { 'zprezto_modules':
     ensure => present,
