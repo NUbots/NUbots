@@ -1,0 +1,24 @@
+ball_last_seen_max_time: 10
+goal_last_seen_max_time: 10
+start_position_offensive: [-0.2, 0]
+start_position_defensive: [1.5, 0]
+goalie: false
+
+ball_search_walk_start_speed: 0.5
+ball_search_walk_stop_speed: 0.1
+ball_search_walk_slow_time: 10
+
+goalie_command_timeout: 1
+goalie_rotation_speed_factor: 0.1
+goalie_max_rotation_speed: 0.1
+goalie_translation_speed_factor: 0.1
+goalie_max_translation_speed: 0.1
+goalie_side_walk_angle_threshold: 0.1
+
+localisation_interval: 30
+localisation_duration: 5
+
+force_playing: false
+force_penalty_shootout: false
+
+always_power_kick: true

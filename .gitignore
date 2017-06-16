@@ -12,8 +12,13 @@
 *.la
 *.a
 
+# Compiled python
+*.pyc
+
 # Build & CMake files
-build/
+/build*/
+/build
+/vagrantbuild/
 CMakeCache.txt
 CMakeFiles
 Makefile
@@ -31,7 +36,7 @@ packer/build.pwi
 
 # LaTeX stuff
 *.aux
-*.pdf
+
 *.out
 *.glo
 *.idx
@@ -62,9 +67,10 @@ packer/build.pwi
 *TSWLatexianTemp*
 
 # Misc
-*.exe
 tags
 *.swp
 /nbproject/
 *~
 .DS_Store
+.idea
+*.sublime-workspace

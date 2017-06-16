@@ -1,36 +1,42 @@
-ADD_ROLE(
-    NAME kicktest
-    MODULES
-        #Support
-        support::SignalCatcher
-        support::logging::ConsoleLogHandler
-        support::configuration::ConfigSystem
-        support::configuration::GlobalConfig
-        support::configuration::SoccerConfig
-        support::NUbugger
+NUCLEAR_ROLE(
+    # FileWatcher, ConsoleLogHandler and Signal Catcher Must Go First. KinematicsConfiguration usually goes after these and without it many roles do not run
+    extension::FileWatcher
+    support::SignalCatcher
+    support::logging::ConsoleLogHandler
+    # This must come first as it emits config which many roles depend on (e.g. SensorFilter, WalkEngine)
+    motion::KinematicsConfiguration
+    #Support
+    support::configuration::GlobalConfig
+    support::configuration::SoccerConfig
+    support::configuration::NetworkConfiguration
+    support::NUbugger
 
-        #Sensors
-        input::LinuxCamera
-        platform::darwin::HardwareIO
-        platform::darwin::SensorFilter
+    #Sensors
+    input::Camera
+    platform::darwin::HardwareIO
+    platform::darwin::SensorFilter
 
-        #Vision
-        vision::LUTClassifier
-        #vision::FeatureDetector
+    #Vision
+    vision::LUTClassifier
+    vision::BallDetector
+    vision::GoalDetector
 
-        #Localisation
-        localisation::MMKFRobotLocalisation
-        localisation::KFBallLocalisation
+    #Localisation
+    localisation::RobotFieldLocalisation
+    localisation::BallLocalisation
 
-        #Behaviour
-        behaviour::Controller
-        behaviour::skills::Stand
-        behaviour::skills::FallingRelax
-        behaviour::skills::Getup
-        behaviour::skills::LookAt
-        behaviour::skills::KickScript
-        behaviour::planning::KickPlanner
+    #Behaviour
+    behaviour::Controller
+    behaviour::skills::Stand
+    behaviour::skills::FallingRelax
+    behaviour::skills::Getup
+    behaviour::skills::HeadBehaviourSoccer
+    behaviour::skills::KickScript
+    #behaviour::skills::ArmVisionAvoidance
+    behaviour::planning::KickPlanner
 
-        #Motion
-        motion::ScriptEngine
+    #Motion
+    #motion::IKKick
+    motion::ScriptEngine
+    motion::HeadController
 )

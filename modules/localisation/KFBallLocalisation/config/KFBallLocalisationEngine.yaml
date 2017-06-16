@@ -1,8 +1,0 @@
-# KFBallLocalisationEngine
-EmitBallFieldobjects: true
-
-# BallModel
-BallDragCoefficient: 0.1
-ProcessNoisePositionFactor: 1e-4
-ProcessNoiseVelocityFactor: 5e-3
-BallHeight: 0.0478

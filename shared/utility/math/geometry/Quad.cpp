@@ -18,35 +18,44 @@
  */
 
 #include "Quad.h"
+#include "utility/math/geometry/ParametricLine.h"
 
 namespace utility {
 namespace math {
 namespace geometry {
 
-    Quad::Quad() : bl(arma::zeros<arma::vec>(2)), br(arma::zeros<arma::vec>(2)), tr(arma::zeros<arma::vec>(2)), tl(arma::zeros<arma::vec>(2)) {
+    Quad::Quad()
+        : bl(arma::zeros<arma::vec>(2)), br(arma::zeros<arma::vec>(2)), tr(arma::zeros<arma::vec>(2)), tl(arma::zeros<arma::vec>(2)) {
         // Empty constructor.
     }
 
-    Quad::Quad(const Quad& other) {
-        set(other.bl, other.tl, other.tr, other.br);
+    Quad::Quad(const Quad& other)
+        : bl(other.bl), br(other.br), tr(other.tr), tl(other.tl) {
     }
 
-    Quad::Quad(const arma::vec2& bottomLeft, const arma::vec2& topLeft, const arma::vec2& topRight, const arma::vec2& bottomRight) {
-        set(bottomLeft, topLeft, topRight, bottomRight);
+    Quad::Quad(arma::vec2 bottomLeft, arma::vec2 topLeft, arma::vec2 topRight, arma::vec2 bottomRight)
+        : bl(bottomLeft), br(bottomRight), tr(topRight), tl(topLeft) {
     }
 
-    Quad::Quad(int left, int top, int right, int bottom) {
-        set(left, top, right, bottom);
+    Quad::Quad(arma::ivec2 bottomLeft, arma::ivec2 topLeft, arma::ivec2 topRight, arma::ivec2 bottomRight)
+        : bl(arma::conv_to<arma::vec>::from(bottomLeft))
+        , br(arma::conv_to<arma::vec>::from(bottomRight))
+        , tr(arma::conv_to<arma::vec>::from(topRight))
+        , tl(arma::conv_to<arma::vec>::from(topLeft)) {
     }
 
-    void Quad::set(int left, int top, int right, int bottom) {
+    Quad::Quad(double left, double top, double right, double bottom)
+        : bl({left, bottom}), br({right, bottom}), tr({right, top}), tl({left, top}) {
+    }
+
+    void Quad::set(double left, double top, double right, double bottom) {
         bl[0] = left;           bl[1] = bottom;
         br[0] = right;          br[1] = bottom;
         tl[0] = left;           tl[1] = top;
         tr[0] = right;          tr[1] = top;
     }
 
-    void Quad::set(const arma::vec2& bottomLeft, const arma::vec2& topLeft, const arma::vec2& topRight, const arma::vec2& bottomRight) {
+    void Quad::set(arma::vec2 bottomLeft, arma::vec2 topLeft, arma::vec2 topRight, arma::vec2 bottomRight) {
         bl = bottomLeft;
         tl = topLeft;
         tr = topRight;
@@ -58,11 +67,11 @@ namespace geometry {
     }
 
     double Quad::getAverageWidth() const {
-        return ((0.5 * (arma::norm(br - bl, 2) + arma::norm(tr - tl, 2))) + 1);
+        return ((0.5 * (arma::norm(br - bl, 2) + arma::norm(tr - tl, 2))));
     }
 
     double Quad::getAverageHeight() const {
-        return ((0.5 * (arma::norm(br - tr, 2) + arma::norm(bl - tl, 2))) + 1);
+        return ((0.5 * (arma::norm(br - tr, 2) + arma::norm(bl - tl, 2))));
     }
 
     double Quad::area() const {
@@ -120,6 +129,12 @@ namespace geometry {
         return tr;
     }
 
+    arma::vec2 Quad::getSize() const{
+        Quad boundingBox = getBoundingBox(getVertices());
+        return {boundingBox.getAverageWidth(),boundingBox.getAverageHeight()};
+    }
+
+
     double Quad::getLeft() const {
         return (0.5 * (bl[0] + tl[0]));
     }
@@ -160,7 +175,7 @@ namespace geometry {
         return output;
     }
 
-    std::vector<arma::vec2> Quad::getVertices() const{
+    std::vector<arma::vec2> Quad::getVertices() const {
         std::vector<arma::vec2> vert(4);
 
         vert[0] = tr;
@@ -171,9 +186,115 @@ namespace geometry {
         return vert;
     }
 
-    bool Quad::checkCornersValid() const{
+    bool Quad::checkCornersValid() const {
         return br.size()==2  && bl.size()==2 && tr.size()==2 && tl.size()==2;
     }
+
+    arma::vec2 Quad::getEdgePoints(uint y) const {
+        auto edgePoints = getEdgePoints(double(y));
+        return {
+            std::round(edgePoints[0]),
+            std::round(edgePoints[1])
+        };
+    }
+
+    arma::vec2 Quad::getEdgePoints(double y) const {
+        // create the horizontal intersection line
+        ParametricLine<> scanLine;
+        scanLine.setFromDirection({1, 0}, {0, y});
+
+        // create a line-segment for each side of the quad
+        std::vector<ParametricLine<>> lines = {
+            ParametricLine<>(tl, tr, true),
+            ParametricLine<>(tr, br, true),
+            ParametricLine<>(bl, br, true),
+            ParametricLine<>(bl, tl, true)
+        };
+
+        // loop through lines and intersect it with the horizontal scan line
+        std::vector<double> values;
+        for (auto& line : lines) {
+            try {
+                values.push_back(scanLine.intersect(line)[0]);
+            } catch (std::domain_error&) {
+                // did not intersect, ignore
+            }
+        }
+
+        // only two should intersect if there is a solution
+        if (values.size() != 2) {
+            throw std::domain_error("Could not find the edges points");
+        }
+
+        // return the minX and maxX
+        return {
+            std::min(values[0], values[1]),
+            std::max(values[0], values[1])
+        };
+
+    }
+
+    std::pair<arma::vec2, arma::vec2> Quad::getIntersectionPoints(Line line) const {
+
+        std::pair<arma::vec2, arma::vec2> points;
+
+        std::vector<ParametricLine<>> quadLines = {
+            ParametricLine<>(tl, tr, true),
+            ParametricLine<>(tr, br, true),
+            ParametricLine<>(bl, br, true),
+            ParametricLine<>(bl, tl, true)
+        };
+
+        int counter = 0;
+        ParametricLine<> pLine(line.pointFromTangentialDistance(0), line.pointFromTangentialDistance(1));
+        for (auto& quadLine : quadLines) {
+            try {
+                if (counter == 0) {
+                    points.first = pLine.intersect(quadLine);
+                    counter++;
+                } else {
+                    points.second = pLine.intersect(quadLine);
+                    counter++;
+                    break;
+                }
+            } catch (std::domain_error&) {
+                // did not intersect, ignore
+            }
+        }
+        if (counter < 2) {
+            throw std::domain_error("Quad::intersect - Line does not not intersect quad");
+        }
+
+        return points;
+
+    }
+
+    Quad Quad::getBoundingBox(const std::vector<arma::vec2>& points){
+        //Check for
+        if(points.size() <= 0){
+            throw std::domain_error("Request made for bounding box for empty list of points!");
+        }
+
+        double min_x = points[0][0];
+        double max_x = points[0][0];
+        double min_y = points[0][1];
+        double max_y = points[0][1];
+        for(uint i = 1; i < points.size(); i++){
+            auto& p = points[i];
+            max_x = std::max(max_x,p[0]);
+            min_x = std::min(min_x,p[0]);
+            max_y = std::max(max_y,p[1]);
+            min_y = std::min(min_y,p[1]);
+        }
+        return Quad(
+                    arma::vec2({min_x,min_y}),
+                    arma::vec2({min_x,max_y}),
+                    arma::vec2({max_x,max_y}),
+                    arma::vec2({max_x,min_y})
+                    );
+    }
+
+
 
 }
 }

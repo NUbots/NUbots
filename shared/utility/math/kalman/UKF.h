@@ -1,18 +1,18 @@
 /*
- * This file is part of the NUbots Codebase.
+ * This file is part of the Autocalibration Codebase.
  *
- * The NUbots Codebase is free software: you can redistribute it and/or modify
+ * The Autocalibration Codebase is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * The NUbots Codebase is distributed in the hope that it will be useful,
+ * The Autocalibration Codebase is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with the NUbots Codebase.  If not, see <http://www.gnu.org/licenses/>.
+ * along with the Autocalibration Codebase.  If not, see <http://www.gnu.org/licenses/>.
  *
  * Copyright 2013 NUBots <nubots@nubots.net>
  */
@@ -20,7 +20,6 @@
 #ifndef UTILITY_MATH_KALMAN_UKF_H
 #define UTILITY_MATH_KALMAN_UKF_H
 
-#include <nuclear>
 #include <armadillo>
 
 namespace utility {
@@ -76,15 +75,14 @@ namespace utility {
                     points.col(0) = mean;
 
                     // Get our cholskey decomposition
-
                     arma::mat chol;
                     try {
                         chol = arma::chol(covarianceSigmaWeights * covariance);
-                    } catch (std::exception& e) {
-                        if (Model::size == 3) std::cerr << __FILE__ << " " << __LINE__ << " : covarianceSigmaWeights * covariance was NOT positive-definite and the cholskey "
+                    } catch (...) {
+                        std::cerr << __FILE__ << " " << __LINE__ << " : covarianceSigmaWeights * covariance was NOT positive-definite and the cholskey "
                                   << "decomposition failed.\ncovarianceSigmaWeights * covariance = \n" << std::endl
                                   << covarianceSigmaWeights * covariance << std::endl;
-                        throw e;
+                        throw std::exception();
                     }
 
                     // Put our values in either end of the matrix
@@ -173,7 +171,8 @@ namespace utility {
                     // Calculate the new mean and covariance values.
                     mean = meanFromSigmas(sigmaPoints);
                     mean = model.limitState(mean);
-                    covariance = covarianceFromSigmas(sigmaPoints, mean) + model.processNoise();
+                    covariance = covarianceFromSigmas(sigmaPoints, mean);
+                    covariance += model.processNoise();
 
                     // Re calculate our sigma points
                     sigmaMean = mean;
@@ -198,39 +197,74 @@ namespace utility {
                         predictedObservations.col(i) = model.predictedObservation(sigmaPoints.col(i), measurementArgs...);
                     }
 
+                    //DEBUG
+                    // if(model.size == 5){
+                    //     std::cout << "model size = \n" << model.size << std::endl;
+                    //     std::cout << "sigmaPoints = \n" << sigmaPoints << std::endl;
+                    //     std::cout << "predicted = \n" << predictedObservations << std::endl;
+                    //     std::cout << "measured = \n" << measurement << std::endl;
+                    // }
                     // Now calculate the mean of these measurement sigmas.
                     arma::vec predictedMean = meanFromSigmas(predictedObservations);
-                    predictedObservations.each_col() -= predictedMean;
+                    
+                    auto centredObservations = predictedObservations - arma::repmat(predictedMean, 1, NUM_SIGMA_POINTS);
 
+                    
+                    // Update our state
+                    covarianceUpdate -= covarianceUpdate.t() * centredObservations.t() *
+                                        (measurement_variance + centredObservations * covarianceUpdate * centredObservations.t()).i() *
+                                        centredObservations * covarianceUpdate;
 
-                    arma::mat predictedCovariance = covarianceFromSigmas(predictedObservations, predictedMean);
+                    
 
                     const arma::mat innovation = model.observationDifference(measurement, predictedMean);
 
-                    // Update our state
-                    covarianceUpdate -= covarianceUpdate.t() * predictedObservations.t() *
-                                        (measurement_variance + predictedObservations * covarianceUpdate * predictedObservations.t()).i() *
-                                        predictedObservations * covarianceUpdate;
 
-                    d += (predictedObservations.t()) * measurement_variance.i() * innovation;
+                    d += (centredObservations.t()) * measurement_variance.i() * innovation;
+
+                    //DEBUG
+                    // if(model.size == 5){
+                    //     std::cout << "innovation = \n" << innovation << std::endl;
+                    //     std::cout << "predictedMean = \n" << predictedMean << std::endl;
+                    //     std::cout << "centredSigmaPoints * covarianceUpdate * d = \n" << centredSigmaPoints * covarianceUpdate * d << std::endl;
+                    //     std::cout << "mean = \n" << mean << std::endl;
+                    // }
 
                     // Update our mean and covariance
                     mean = sigmaMean + centredSigmaPoints * covarianceUpdate * d;
                     mean = model.limitState(mean);
                     covariance = centredSigmaPoints * covarianceUpdate * centredSigmaPoints.t();
 
-                    // Magical quality calculation
-                    arma::mat innovationVariance = predictedCovariance + measurement_variance;
-                    arma::mat innovationCovariance = ((innovation.t() * innovationVariance.i()) * innovation);
+                    
+                    // Calculate and return the likelihood of the prior mean
+                    // and covariance given the new measurement (i.e. the
+                    // prior probability density of the measurement):
 
-                    double expTerm = -0.5 * innovationCovariance(0, 0);
-                    double fract = 1 / sqrt(pow(2 * M_PI, measurement_variance.n_rows) * arma::det(innovationVariance));
+                    //DEBUG: why do we occasionally get negative eigenvalues
+                    // arma::vec eValues = arma::eig_sym(predictedCovariance);
+                    // std::cout << "UKF - eValues = " << eValues.t() << std::endl;
+                    // if(arma::any(eValues < 0*eValues)){
+                    //     std::cout << "UKF - sigma covariance has negative eigenvalues!!!!!!!!!!!!!!!!!!!!!!!" << std::endl;
+                    //     std::cout << "UKF - centredObservations = \n" << centredObservations << std::endl;
+                    //     std::cout << "UKF - predictedMean = " << predictedMean.t() << std::endl;
+                    // }
+                    arma::mat predictedCovariance = covarianceFromSigmas(predictedObservations, predictedMean);
+                    arma::mat innovationVariance = predictedCovariance + measurement_variance;
+                    arma::mat scalarlikelihoodExponent = ((innovation.t() * innovationVariance.i()) * innovation);
+
+                    double expTerm = -0.5 * scalarlikelihoodExponent(0, 0);
+                    double normalisationFactor = pow(2 * M_PI, measurement_variance.n_rows) * arma::det(innovationVariance);
+                    // DEBUG
+                    // if(normalisationFactor <= 0){
+                    //     std::cout << "arma::det(innovationVariance) == 0. innovationVariance = \n" << innovationVariance << std::endl;
+                    // }
+                    double fract = 1 / sqrt(normalisationFactor);
                     const float outlierProbability = 0.05;
 
                     return (1.0 - outlierProbability) * fract * exp(expTerm) + outlierProbability;
                 }
 
-                StateVec get() const {
+                StateVec get() const {           
                     return mean;
                 }
 

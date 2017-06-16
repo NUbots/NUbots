@@ -21,7 +21,8 @@
 #define UTILITY_LOCALISATION_TRANSFORM_H
 
 #include <armadillo>
-#include "utility/math/matrix.h"
+#include "utility/math/matrix/Rotation2D.h"
+#include "utility/math/matrix/Rotation3D.h"
 #include "utility/math/coordinates.h"
 
 namespace utility {
@@ -53,7 +54,7 @@ namespace transform {
     inline arma::vec RobotToWorldTransform(const arma::vec& robot_pos,
                                            const double& robot_heading,
                                            const arma::vec& relative_ball_pos) {
-        arma::mat rot = utility::math::matrix::rotationMatrix(robot_heading);
+        arma::mat rot = math::matrix::Rotation2D::createRotation(robot_heading);
         // Rotate relative_ball_pos by robot_heading, then add robot_pos.
         return rot * relative_ball_pos + robot_pos;
     }
@@ -61,7 +62,7 @@ namespace transform {
     inline arma::vec WorldToRobotTransform(const arma::vec& robot_pos,
                                            const double& robot_heading,
                                            const arma::vec& field_ball_pos) {
-        arma::mat rot = utility::math::matrix::rotationMatrix(-robot_heading);
+        arma::mat rot = math::matrix::Rotation2D::createRotation(-robot_heading);
         // Subtract robot_pos, then rotate relative_ball_pos by -robot_heading.
         return rot * (field_ball_pos - robot_pos);
     }
@@ -82,12 +83,9 @@ namespace transform {
         return obs;
     }
 
-    // inline arma::vec ImuToWorldHeadingTransform(double imuOffset, arma::mat22 robotToImu) {
-    inline arma::vec2 ImuToWorldHeadingTransform(double imuOffset, arma::mat33 orientation) {
-        // arma::mat22 imuRotation = utility::math::matrix::zRotationMatrix(imuOffset, 2);
-        // arma::vec2 worldRobotHeading = imuRotation * robotToImu.col(0);
-        arma::mat33 imuRotation = utility::math::matrix::zRotationMatrix(imuOffset);
-        arma::vec3 worldRobotHeading = imuRotation * arma::mat(orientation.t()).col(0);
+    inline arma::vec2 ImuToWorldHeadingTransform(double imuOffset, math::matrix::Rotation3D orientation) {
+        math::matrix::Rotation3D imuRotation = math::matrix::Rotation3D::createRotationZ(imuOffset);
+        arma::vec3 worldRobotHeading = imuRotation * arma::mat(orientation.i()).col(0);
         return arma::normalise(worldRobotHeading.rows(0,1));
     }
 

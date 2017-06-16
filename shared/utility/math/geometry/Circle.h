@@ -41,16 +41,16 @@ namespace geometry {
         bool setFromPoints(const arma::vec2& a, const arma::vec2& b, const arma::vec2& c, const double tolerance = std::numeric_limits<double>::min());
 
         double distanceToPoint(const arma::vec2& point) const;
-        
+
         double squaresDifference(const arma::vec2& point) const;
 
-        arma::vec2 orthogonalProjection(const arma::vec2& x);
+        arma::vec2 orthogonalProjection(const arma::vec2& x) const;
 
         //Perform a least squares fit on a line, optionally using a distance
         //squared threshold away from the current model to filter candidates
         template <typename Iterator>
         void leastSquaresUpdate(Iterator& first, Iterator& last, const double& candidateThreshold = std::numeric_limits<double>::max()) {
-               
+
             //Perform a least squares fit on a circle, optionally using a distance
             //squared threshold away from the current model to filter candidates
 
@@ -76,6 +76,9 @@ namespace geometry {
                 radius = std::sqrt(radiusSq);
             }
         }
+
+        arma::vec2 getEdgePoints(uint y) const;
+        arma::vec2 getEdgePoints(double y) const;
     };
 
 }

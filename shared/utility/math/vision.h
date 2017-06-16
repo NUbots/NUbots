@@ -22,78 +22,36 @@
 #include <cmath>
 #include <armadillo>
 #include <nuclear>
-#include "messages/localisation/FieldObject.h"
-#include "messages/input/Sensors.h"
-#include "utility/math/matrix.h"
+#include "message/localisation/FieldObject.h"
+#include "message/input/Sensors.h"
+#include "utility/input/ServoID.h"
+#include "utility/math/matrix/Transform3D.h"
+#include "utility/math/matrix/Transform2D.h"
 #include "utility/math/geometry/Plane.h"
 #include "utility/math/geometry/ParametricLine.h"
+#include "utility/math/angle.h"
+#include "utility/support/eigen_armadillo.h"
+#include "message/support/FieldDescription.h"
+
 
 namespace utility {
 namespace math {
 namespace vision {
 
-    /**************************************************************
-     *SLAME STUFF: TO BE REMOVED FOR GOOD STUFF BELOW (DO NOT USE)*
-     **************************************************************/
-    /*! @brief Calculates the transformation for taking homogeneous points from world coordinates to camera coordinates
-    */
-    inline arma::mat calculateWorldToCameraTransform(const messages::input::Sensors& sensors, const messages::localisation::Self& self){
-        arma::vec selfHeading = arma::normalise(self.heading);
-        arma::mat robotToWorld_world;
-        robotToWorld_world <<  selfHeading[0]  <<  -selfHeading[1]  <<  0 <<      self.position[0] << arma::endr
-                           <<  selfHeading[1]  <<   selfHeading[0]  <<  0 <<      self.position[1] << arma::endr
-                           <<               0  <<                0  <<  1 <<  sensors.bodyCentreHeight << arma::endr
-                           <<               0  <<                0  <<  0 <<                                 1;
-
-        arma::mat cameraToBody_body = sensors.forwardKinematics.at(messages::input::ServoID::HEAD_PITCH);
-        arma::mat robotToBody_body = arma::eye(4,4);
-        robotToBody_body.submat(0,0,2,2) = sensors.orientation;
-
-        auto worldToCamera_camera = utility::math::matrix::orthonormal44Inverse(cameraToBody_body) * robotToBody_body * utility::math::matrix::orthonormal44Inverse(robotToWorld_world);
-        //Confirmed to be correct by Jake Fountain 2014
-        return worldToCamera_camera;
-    }
-
-
-    inline arma::vec directionVectorFromScreenAngular(const arma::vec& screenAngular){
-        double theta = screenAngular[0];
-        double phi = screenAngular[1];
-        return {std::cos(theta) * std::cos(phi), std::sin(theta) * std::cos(phi), std::sin(phi), 0};
-    }
-    /*! Uses vec for backwards compatibility with 3d homogeneous coordinates
-    */
-    inline arma::vec screenAngularFromDirectionVector(const arma::vec& direction){
-        return { std::atan2(direction[1], direction[0]) , std::atan2(direction[2], arma::norm(arma::vec({direction[0], direction[1]})))};
-    }
-
-    inline arma::vec rotateAngularDirection(const arma::vec& screenAngular, const arma::mat& R){
-        return screenAngularFromDirectionVector(R*directionVectorFromScreenAngular(screenAngular));
-    }
-
-    inline arma::vec screenPositionFromDirectionVector(const arma::vec& directionVector){
-        return {directionVector[1] / directionVector[0], directionVector[2] / directionVector[0]};
-    }
-
-    inline arma::vec screenPositionFromScreenAngular(const arma::vec& screenAngular){
-        return screenPositionFromDirectionVector(directionVectorFromScreenAngular(screenAngular));
-    }
-
-    /************************************************
-     *                 GOOD STUFF                   *
-     ************************************************/
+    using ServoID = utility::input::ServoID;
 
     inline double getParallaxAngle(const arma::vec2& screen1, const arma::vec2& screen2, const double& camFocalLengthPixels){
         arma::vec3 camSpaceP1 = {camFocalLengthPixels, screen1[0], screen1[1]};
         arma::vec3 camSpaceP2 = {camFocalLengthPixels, screen2[0], screen2[1]};
 
-        return std::acos(arma::dot(camSpaceP1,camSpaceP2) / (arma::norm(camSpaceP1) * arma::norm(camSpaceP2)));
+        return utility::math::angle::acos_clamped(arma::dot(camSpaceP1,camSpaceP2) / (arma::norm(camSpaceP1) * arma::norm(camSpaceP2)));
     }
 
-    inline double widthBasedDistanceToCircle(const double& circleDiameter, const arma::vec2& s1, const arma::vec2& s2, const double& camFocalLengthPixels){
+    inline double widthBasedDistanceToCircle(const double& radius, const arma::vec2& s1, const arma::vec2& s2, const double& camFocalLengthPixels){
         double parallaxAngle = getParallaxAngle(s1, s2, camFocalLengthPixels);
-        double correctionForClosenessEffect = 0.5 * circleDiameter * std::cos((M_PI - parallaxAngle) / 2.0);
+        double correctionForClosenessEffect = radius * std::sin(parallaxAngle / 2.0);
 
-        return (circleDiameter / 2) / std::tan(parallaxAngle / 2) + correctionForClosenessEffect;
+        return radius / std::tan(parallaxAngle / 2.0) + correctionForClosenessEffect;
     }
 
     /*! @param separation - Known distance between points in camera space
@@ -127,11 +85,11 @@ namespace vision {
         return {camFocalLengthPixels * point[1] / point[0], camFocalLengthPixels * point[2] / point[0]};
     }
 
-    inline arma::vec2 projectWorldPointToScreen(const arma::vec4& point, const arma::mat44& camToGround, const double& camFocalLengthPixels){
-        arma::vec4 camSpacePoint = utility::math::matrix::orthonormal44Inverse(camToGround) * point;
+    inline arma::vec2 projectWorldPointToScreen(const arma::vec4& point, const utility::math::matrix::Transform3D& camToGround, const double& camFocalLengthPixels){
+        arma::vec4 camSpacePoint = camToGround.i() * point;
         return projectCamSpaceToScreen(camSpacePoint.rows(0,2), camFocalLengthPixels);
     }
-    inline arma::vec2 projectWorldPointToScreen(const arma::vec3& point, const arma::mat44& camToGround, const double& camFocalLengthPixels){
+    inline arma::vec2 projectWorldPointToScreen(const arma::vec3& point, const utility::math::matrix::Transform3D& camToGround, const double& camFocalLengthPixels){
         arma::vec4 point_ = arma::ones(4);
         point_.rows(0,2) = point;
         return projectWorldPointToScreen(point_, camToGround, camFocalLengthPixels);
@@ -141,7 +99,7 @@ namespace vision {
         return arma::vec3{camFocalLengthPixels, screen[0], screen[1]};
     }
 
-    inline arma::vec3 projectCamToPlane(const arma::vec3& cam, const arma::mat44& camToGround, const utility::math::geometry::Plane<3>& plane){
+    inline arma::vec3 projectCamToPlane(const arma::vec3& cam, const utility::math::matrix::Transform3D& camToGround, const utility::math::geometry::Plane<3>& plane){
         arma::vec3 lineDirection = camToGround.submat(0,0,2,2) * cam;
         arma::vec3 linePosition = camToGround.submat(0,3,2,3);
 
@@ -151,7 +109,7 @@ namespace vision {
         return plane.intersect(line);
     }
 
-    inline arma::vec3 getGroundPointFromScreen(const arma::vec2& screenPos, const arma::mat44& camToGround, const double& camFocalLengthPixels){
+    inline arma::vec3 getGroundPointFromScreen(const arma::vec2& screenPos, const utility::math::matrix::Transform3D& camToGround, const double& camFocalLengthPixels){
         return projectCamToPlane(getCamFromScreen(screenPos, camFocalLengthPixels), camToGround, utility::math::geometry::Plane<3>({ 0, 0, 1 }, { 0, 0, 0 }));
     }
 
@@ -179,6 +137,151 @@ namespace vision {
         return M_SQRT2*sqrt(2.0*H*h + H2*c2 + 2.0*h2*c2 + innerExpr - 2.0*h2 - 2.0*H*h*c2)/divisor;
 
     }
+
+    inline arma::vec objectDirectionFromScreenAngular(const arma::vec& screenAngular){
+        if(std::fmod(std::fabs(screenAngular[0]),M_PI) == M_PI_2 || std::fmod(std::fabs(screenAngular[1]),M_PI) == M_PI_2){
+            return {0,0,0};
+        }
+        double tanTheta = std::tan(screenAngular[0]);
+        double tanPhi = std::tan(screenAngular[1]);
+        double x = 0;
+        double y = 0;
+        double z = 0;
+        double denominator_sqr = 1+tanTheta*tanTheta+tanPhi*tanPhi;
+        //Assume facing forward st x>0 (which is fine for screen angular)
+        x = 1 / std::sqrt(denominator_sqr);
+        y = x * tanTheta;
+        z = x * tanPhi;
+
+        return {x,y,z};
+    }
+
+    inline arma::vec screenAngularFromObjectDirection(const arma::vec& v){
+        return {std::atan2(v[1],v[0]),std::atan2(v[2],v[0])};
+    }
+
+    inline utility::math::matrix::Transform3D getFieldToCam (
+                    const utility::math::matrix::Transform2D& Tft,
+                    //f = field
+                    //t = torso
+                    //c = camera
+                    const utility::math::matrix::Transform3D& Htc
+
+                ) {
+
+        // arma::vec3 rWFf;
+        // rWFf.rows(0,1) = -Twf.rows(0,1);
+        // rWFf[2] = 0.0;
+        // // Hwf = rWFw * Rwf
+        // utility::math::matrix::Transform3D Hwf =
+        //     utility::math::matrix::Transform3D::createRotationZ(-Twf[2])
+        //     * utility::math::matrix::Transform3D::createTranslation(rWFf);
+
+        utility::math::matrix::Transform3D Htf = utility::math::matrix::Transform3D(Tft).i();
+
+        return Htc.i() * Htf;
+    }
+
+    inline arma::mat::fixed<3,4> cameraSpaceGoalProjection(
+            const arma::vec3& robotPose,
+            const arma::vec3& goalLocation,
+            const message::support::FieldDescription& field,
+            const utility::math::matrix::Transform3D& camToGround,
+            const bool& failIfNegative = true) //camtoground is either camera to ground or camera to world, depending on application
+    {
+        utility::math::matrix::Transform3D Hcf = getFieldToCam(robotPose,camToGround);
+        //NOTE: this code assumes that goalposts are boxes with width and high of goalpost_diameter
+        //make the base goal corners
+        arma::mat goalBaseCorners(4,4);
+        goalBaseCorners.row(3).fill(1.0);
+        goalBaseCorners.submat(0,0,2,3).each_col() = goalLocation;
+        goalBaseCorners.submat(0,0,1,3) -= 0.5*field.dimensions.goalpost_diameter;
+        goalBaseCorners.submat(0,0,1,0) += field.dimensions.goalpost_diameter;
+        goalBaseCorners.submat(1,1,2,1) += field.dimensions.goalpost_diameter;
+        //make the top corner points
+        arma::mat goalTopCorners = goalBaseCorners;
+
+
+        //We create camera world by using camera-torso -> torso-world -> world->field
+        //transform the goals from field to camera
+        goalBaseCorners = arma::mat(Hcf * goalBaseCorners).rows(0,2);
+
+
+
+        //if the goals are not in front of us, do not return valid normals
+        arma::mat::fixed<3,4> prediction;
+        if (failIfNegative and arma::any(goalBaseCorners.row(0) < 0.0)) {
+            prediction.fill(0);
+            return prediction;
+        }
+
+        goalTopCorners.row(2).fill(field.goalpost_top_height);
+        goalTopCorners = arma::mat(Hcf * goalTopCorners).rows(0,2);
+
+        //Select the (tl, tr, bl, br) corner points for normals
+        arma::ivec4 cornerIndices;
+        cornerIndices.fill(0);
+
+
+        arma::vec pvals = goalBaseCorners.t() * arma::cross(goalBaseCorners.col(0), goalTopCorners.col(0));
+        arma::uvec baseIndices = arma::sort_index(pvals);
+        cornerIndices[2] = baseIndices[0];
+        cornerIndices[3] = baseIndices[3];
+
+
+        pvals = goalTopCorners.t() * arma::cross(goalBaseCorners.col(0), goalTopCorners.col(0));
+        arma::uvec topIndices = arma::sort_index(pvals);
+        cornerIndices[0] = topIndices[0];
+        cornerIndices[1] = topIndices[3];
+
+
+        //Create the quad normal predictions. Order is Left, Right, Top, Bottom
+
+        prediction.col(0) = arma::normalise(
+                                    arma::cross(
+                                        goalBaseCorners.col(cornerIndices[2]),
+                                        goalTopCorners.col(cornerIndices[0])
+                                        )
+                                );
+        prediction.col(1) = arma::normalise(
+                                    arma::cross(
+                                        goalBaseCorners.col(cornerIndices[1]),
+                                        goalTopCorners.col(cornerIndices[3])
+                                        )
+                                );
+
+        //for the top and bottom, we check the inner lines in case they are a better match (this stabilizes observations and reflects real world)
+        if (goalBaseCorners(2,baseIndices[0]) > goalBaseCorners(2,baseIndices[1])) {
+            cornerIndices[2] = baseIndices[1];
+        }
+        if (goalBaseCorners(2,baseIndices[3]) > goalBaseCorners(2,baseIndices[2])) {
+            cornerIndices[3] = baseIndices[2];
+        }
+        if (goalTopCorners(2,topIndices[0]) > goalTopCorners(2,topIndices[1])) {
+            cornerIndices[0] = topIndices[1];
+        }
+        if (goalTopCorners(2,topIndices[3]) > goalTopCorners(2,topIndices[2])) {
+            cornerIndices[1] = topIndices[2];
+        }
+
+
+        prediction.col(2) = arma::normalise(
+                                    arma::cross(
+                                        goalTopCorners.col(cornerIndices[0]),
+                                        goalTopCorners.col(cornerIndices[1])
+                                        )
+                                );
+        prediction.col(3) = arma::normalise(
+                                    arma::cross(
+                                        goalBaseCorners.col(cornerIndices[3]),
+                                        goalBaseCorners.col(cornerIndices[2])
+                                        )
+                                );
+
+        return prediction;
+
+    }
+
 
 }
 }

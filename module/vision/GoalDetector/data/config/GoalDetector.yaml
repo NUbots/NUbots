@@ -1,0 +1,17 @@
+ransac:
+  minimum_points_for_consensus: 10
+  maximum_iterations_per_fitting: 30
+  maximum_fitted_models: 3
+  consensus_error_threshold: 10
+
+measurement_limits:
+  left:   10
+  right:  10
+  top:    10
+  base:   10
+
+aspect_ratio_range: [ 2, 20 ]
+visual_horizon_buffer: 0.02
+minimum_goal_horizon_angle: 1.3
+maximum_angle_between_goals: 0.3
+maximum_vertical_goal_perspective_angle: 0.1

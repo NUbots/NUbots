@@ -24,6 +24,8 @@
 #include <ostream>
 #include <vector>
 
+#include "Line.h"
+
 namespace utility {
 namespace math {
 namespace geometry {
@@ -32,8 +34,9 @@ namespace geometry {
     public:
         Quad();
         Quad(const Quad& other);
-        Quad(const arma::vec2& bottomLeft, const arma::vec2& topLeft, const arma::vec2& topRight, const arma::vec2& bottomRight);
-        Quad(int left, int top, int right, int bottom);
+        Quad(arma::vec2 bottomLeft, arma::vec2 topLeft, arma::vec2 topRight, arma::vec2 bottomRight);
+        Quad(arma::ivec2 bottomLeft, arma::ivec2 topLeft, arma::ivec2 topRight, arma::ivec2 bottomRight);
+        Quad(double left, double top, double right, double bottom);
 
         /**
          * Sets the Quad as a screen aligned rectangle given the specified positions.
@@ -42,7 +45,7 @@ namespace geometry {
          * @param right    The right x pixel value.
          * @param bottom   The bottom y pixel value.
          */
-        void set(int left, int top, int right, int bottom);
+        void set(double left, double top, double right, double bottom);
 
         /**
          * Sets the Quad given the specified corners.
@@ -51,7 +54,7 @@ namespace geometry {
          * @param topRight    The top right corner.
          * @param bottomRight The bottom right corner.
          */
-        void set(const arma::vec2& bottomLeft, const arma::vec2& topLeft, const arma::vec2& topRight, const arma::vec2& bottomRight);
+        void set(arma::vec2 bottomLeft, arma::vec2 topLeft, arma::vec2 topRight, arma::vec2 bottomRight);
 
         arma::vec2 getTopCentre() const;                                //! Returns the bottom centre pixel location of the Quad.
         arma::vec2 getBottomCentre() const;                             //! Returns the bottom centre pixel location of the Quad.
@@ -64,6 +67,8 @@ namespace geometry {
         arma::vec2 getBottomRight() const;                              //! Returns the bottom right pixel location  of the Quad.
         arma::vec2 getTopLeft() const;                                  //! Returns the top left pixel location  of the Quad.
         arma::vec2 getTopRight() const;                                 //! Returns the top right pixel location  of the Quad.
+
+        arma::vec2 getSize() const;                                     //Returns the bounding box width and height
 
         double getLeft() const;
         double getRight() const;
@@ -87,6 +92,24 @@ namespace geometry {
         bool overlapsHorizontally(const Quad& other) const;
 
         bool checkCornersValid() const;
+
+        /**
+         * Finds and returns the two rounded intersections points on x given a y
+         * @param y The horizonal line to solve the 2 x-axis intersections with
+         * @return The minX and maxX rounded that intersect given y
+         */
+        arma::vec2 getEdgePoints(uint y) const;
+
+        std::pair<arma::vec2, arma::vec2> getIntersectionPoints(Line line) const;
+
+        /**
+         * Finds and returns the two intersections points on x given a y
+         * @param y The horizonal line to solve the 2 x-axis intersections with
+         * @return The minX and maxX that intersect given y
+         */
+        arma::vec2 getEdgePoints(double y) const;
+
+        static Quad getBoundingBox(const std::vector<arma::vec2>& points);
 
     private:
         arma::vec2 bl;                                                  //! @variable The bottom-left of the Quad.

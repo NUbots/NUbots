@@ -1,37 +1,51 @@
-ADD_ROLE(
-    NAME robotlocalisation
-    MODULES
-        #Support
-        # support::SignalCatcher
-        support::logging::ConsoleLogHandler
-        support::configuration::ConfigSystem
-        support::configuration::GlobalConfig
-        support::configuration::SoccerConfig
-        support::NUbugger
+NUCLEAR_ROLE(
+    # FileWatcher, ConsoleLogHandler and Signal Catcher Must Go First. KinematicsConfiguration usually goes after these and without it many roles do not run
+    extension::FileWatcher
+    # support::SignalCatcher
+    support::logging::ConsoleLogHandler
+    # This must come first as it emits config which many roles depend on (e.g. SensorFilter, WalkEngine)
+    motion::KinematicsConfiguration
+    # Support
+    support::configuration::GlobalConfig
+    support::configuration::SoccerConfig
+    support::configuration::NetworkConfiguration
+    support::NUbugger
 
-        #Sensors
-        input::LinuxCamera
-        platform::darwin::HardwareIO
-        platform::darwin::SensorFilter
+    #input
+    input::GameController
 
-        #Vision
-        #vision::FeatureDetector
-        vision::LUTClassifier
-        vision::BallDetector
-        vision::GoalDetector
-        vision::ObstacleDetector
+    # Sensors
+    input::Camera
+    platform::darwin::HardwareIO
+    platform::darwin::SensorFilter
 
-        #Localisation
-        localisation::MMKFRobotLocalisation
-        localisation::KFBallLocalisation
+    # Vision
+    vision::LUTClassifier
+    vision::BallDetector
+    vision::GoalDetector
 
-        #Behaviour
-        behaviour::Controller
-        behaviour::skills::Stand
-        # behaviour::skills::FallingRelax
-        # behaviour::skills::Getup
+    # Localisation
+    localisation::RobotFieldLocalisation
+    localisation::BallLocalisation
 
-		#Motion
-        motion::ScriptEngine
+    # Behaviour
+    behaviour::Controller
+    behaviour::skills::Stand
+    behaviour::skills::FallingRelax
+    # behaviour::strategy::KeyboardWalk
+    behaviour::skills::Getup
+    behaviour::strategy::SoccerStrategy
+    # behaviour::skills::HeadBehaviourSoccer
+
+    # Motion
+    # motion::FootMotionPlanner
+    # motion::FootPlacementPlanner
+    # motion::TorsoMotionPlanner
+    # motion::BalanceKinematicResponse
+    # motion::OldWalkEngine
+    motion::ScriptEngine
+    motion::HeadController
+    #motion::IKKick
+
 )
 

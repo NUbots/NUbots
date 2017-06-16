@@ -1,18 +1,18 @@
 /*
- * This file is part of the NUbots Codebase.
+ * This file is part of the Autocalibration Codebase.
  *
- * The NUbots Codebase is free software: you can redistribute it and/or modify
+ * The Autocalibration Codebase is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * The NUbots Codebase is distributed in the hope that it will be useful,
+ * The Autocalibration Codebase is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with the NUbots Codebase.  If not, see <http://www.gnu.org/licenses/>.
+ * along with the Autocalibration Codebase.  If not, see <http://www.gnu.org/licenses/>.
  *
  * Copyright 2013 NUBots <nubots@nubots.net>
  */
@@ -22,7 +22,7 @@
 #include "AdaptiveIMUModel.h" //includes armadillo
 
 #include <iostream>
-#include <nuclear>
+// #include <nuclear>
 
 namespace utility {
     namespace math {
@@ -33,7 +33,7 @@ namespace utility {
                 double normDown = arma::norm(stateMatrix.col(0),2);
                 if(normDown == 0){
                     //TODO: RESTART FILTER
-                    NUClear::log<NUClear::WARN>("AdaptiveIMUModel::limitState - Down vector has zero length!!!");
+                    // NUClear::log<NUClear::WARN>("AdaptiveIMUModel::limitState - Down vector has zero length!!!");
                     return state;
                 }
 
@@ -43,14 +43,14 @@ namespace utility {
                 //Angle for checking:
                 double angle = acos(dotProd) * 180 / M_PI;
                 if(angle < 45 || angle > 135){
-                    NUClear::log<NUClear::WARN>("AdaptiveIMUModel::limitState - New forward and down vectors are close: angle =", angle, "(degrees) ", angle < 45 ? "( < 45 degrees)" : "( > 135 degrees)");
+                    // NUClear::log<NUClear::WARN>("AdaptiveIMUModel::limitState - New forward and down vectors are close: angle =", angle, "(degrees) ", angle < 45 ? "( < 45 degrees)" : "( > 135 degrees)");
                 }
                 stateMatrix.col(1) = stateMatrix.col(1) - stateMatrix.col(0)*dotProd;       //Orthogonalise forward and down
 
                 double normForward = arma::norm(stateMatrix.col(1),2);     //Normalise forward
                 if(normForward == 0){
                     //TODO: RESTART FILTER
-                    NUClear::log<NUClear::WARN>("AdaptiveIMUModel::limitState - Projected forward vector has zero length!!!");
+                    // NUClear::log<NUClear::WARN>("AdaptiveIMUModel::limitState - Projected forward vector has zero length!!!");
                     return state;
                 }
                 stateMatrix.col(1) = stateMatrix.col(1) / normForward;

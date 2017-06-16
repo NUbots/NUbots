@@ -1,6 +1,0 @@
-# Find the eSpeak Library
-FIND_PACKAGE(eSpeak REQUIRED)
-
-# Build our NUClear module
-NUCLEAR_MODULE(INCLUDES ${ESPEAK_INCLUDE_DIRS}
-               LIBRARIES ${ESPEAK_LIBRARIES})

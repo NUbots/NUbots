@@ -23,14 +23,16 @@ namespace utility {
 namespace math {
 namespace geometry {
 
-    Circle::Circle() {
+    Circle::Circle() : radius(0.0), radiusSq(0.0), centre(arma::fill::zeros) {
     }
 
 
-    Circle::Circle(const double& radius, const arma::vec2& centre) : radius(radius), centre(centre) {
+    Circle::Circle(const double& radius, const arma::vec2& centre)
+            : radius(radius), radiusSq(radius * radius), centre(centre) {
     }
 
-    Circle::Circle(const arma::vec2& a, const arma::vec2& b, const arma::vec2& c, const double tolerance) {
+    Circle::Circle(const arma::vec2& a, const arma::vec2& b, const arma::vec2& c, const double tolerance)
+            : radius(0.0), radiusSq(0.0), centre(arma::fill::zeros) {
         setFromPoints(std::forward<const arma::vec2&>(a), std::forward<const arma::vec2&>(b), std::forward<const arma::vec2&>(c),tolerance);
     }
 
@@ -53,7 +55,7 @@ namespace geometry {
 
         centre[0] = ((ab_norm * bc[1]) - (bc_norm * ab[1])) * det;
         centre[1] = ((ab[0] * bc_norm) - (bc[0] * ab_norm)) * det;
-        
+
         radiusSq = arma::accu(arma::square(a - centre));
         radius = std::sqrt(radiusSq);
 
@@ -63,13 +65,32 @@ namespace geometry {
     double Circle::distanceToPoint(const arma::vec2& point) const {
         return arma::norm(point - centre) - radius;
     }
-    
+
     double Circle::squaresDifference(const arma::vec2& point) const {
         return arma::accu(arma::square(point - centre)) - radiusSq;
     }
-    
-    arma::vec2 Circle::orthogonalProjection(const arma::vec2& point) {
+
+    arma::vec2 Circle::orthogonalProjection(const arma::vec2& point) const {
         return arma::normalise(point - centre) * radius + centre;
+    }
+
+    arma::vec2 Circle::getEdgePoints(uint y) const {
+        auto edgePoints = getEdgePoints(double(y));
+        return {
+            std::round(edgePoints[0]),
+            std::round(edgePoints[1])
+        };
+    }
+
+    arma::vec2 Circle::getEdgePoints(double y) const {
+        // find the min and max x points on the circle for each given y
+        // uses the general equation of a circle and solves for x
+        double a = y - centre[1];
+        double b = std::sqrt(radius * radius - a * a);
+        return {
+            centre[0] - b,
+            centre[0] + b
+        };
     }
 }
 }

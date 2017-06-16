@@ -1,0 +1,69 @@
+
+kick_priority: 30
+execution_priority: 40
+
+servo:
+  gain: 30
+  torque: 100
+
+balancer:
+  servo_angle_threshold: 0.1
+  foot_separation: 0.080 # 0.074 = hip separation
+  adjustment: -0.0000 #default value is 0.
+  stand_height: 0.23 #m
+  forward_lean: 0.0 #m
+
+  forward_duration: 1.5 #m/s
+  return_duration: 0.5 #m/s
+
+active_balance:
+  enabled: true
+  hip_rotation_scale: 2.0
+  ankle_rotation_scale: 0.5
+  angle_gain:
+    p: 0.1
+    i: 0.0
+    d: 0.0
+  translation_gain:
+    X:
+      p: 0.25
+      d: -0.0
+    Y:
+      p: 0.185
+      d: 0
+    Z:
+      p: 0.0
+      d: 0
+
+kick:
+  kick_velocity: 2 #m/s
+  follow_through: 0.10 #m
+  kick_height: 0.07 #m
+  wind_up: 0.1 #m
+  foot_separation_margin: 0.02 #m
+
+  lift_before_windup_duration: 0.5
+  return_before_place_duration: 0.1
+
+kick_frames:
+  servo_angle_threshold: 0.1
+# note that some of the following config is overwritten by planning processes
+  lift_foot:
+  #Note: pos does nothing
+    pos: [-0.05,0,0.05]
+    orientation: [0,0,0]
+    duration: 0.1
+
+  kick:
+    #Note: pos and duration do nothing
+    pos: [0,0,0]
+    orientation: [0,0,0]
+    duration: 0.1
+
+  place_foot:
+  #This transform WILL entirely define the foot placement after kicking
+    pos: [0,0.02,0.02]
+    orientation: [0,0,0]
+    duration: 0.3
+
+

@@ -1,19 +1,19 @@
 /*
  * Should produce world to robot coordinate transform
- * This file is part of the NUbots Codebase.
+ * This file is part of the Autocalibration Codebase.
  *
- * The NUbots Codebase is free software: you can redistribute it and/or modify
+ * The Autocalibration Codebase is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * The NUbots Codebase is distributed in the hope that it will be useful,
+ * The Autocalibration Codebase is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with the NUbots Codebase.  If not, see <http://www.gnu.org/licenses/>.
+ * along with the Autocalibration Codebase.  If not, see <http://www.gnu.org/licenses/>.
  *
  * Copyright 2013 NUBots <nubots@nubots.net>
  */
@@ -40,15 +40,17 @@ namespace utility {
                 arma::vec::fixed<IMUModel::size> newState;
 
                 newState = state;
-
+                
                 //make a rotation quaternion
                 const double omega = arma::norm(state.rows(VX, VZ)) + 0.00000000001;
-                const double theta = omega*deltaT*0.5;
+                //Negate to compensate for some later mistake. 
+                //deltaT has been negative for a while and has masked an incorrect hack below
+                const double theta = -omega*deltaT*0.5;
                 const double sinTheta = sin(theta);
                 const double cosTheta = cos(theta);
                 arma::vec vq({cosTheta,state(VX)*sinTheta/omega,state(VY)*sinTheta/omega,state(VZ)*sinTheta/omega});
-
                 //calculate quaternion multiplication
+                //TODO replace with quaternion class
                 arma::vec qcross = arma::cross( vq.rows(1,3), state.rows(QX,QZ) );
                 newState(QW) = vq(0)*state(QW) - arma::dot(vq.rows(1,3), state.rows(QX,QZ));
                 newState(QX) = vq(0)*state(QX) + state(QW)*vq(1) + qcross(0);
@@ -59,6 +61,15 @@ namespace utility {
 
             }
 
+            // Up vector
+            arma::vec3 IMUModel::predictedObservation(const arma::vec::fixed<size>& state, const MeasurementType::UP&) {
+
+                arma::vec3 up = { 2 * state[QX] * state[QZ] + 2 * state[QY] * state[QW]
+                                  , 2 * state[QY] * state[QZ] - 2 * state[QX] * state[QW]
+                                  , 1 - 2 * state[QX] * state[QX] - 2 * state[QY] * state[QY] };
+
+                return up;
+            }
 
             // Accelerometer
             arma::vec3 IMUModel::predictedObservation(const arma::vec::fixed<size>& state, const MeasurementType::ACCELEROMETER&) {

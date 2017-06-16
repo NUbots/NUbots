@@ -1,18 +1,18 @@
-ADD_ROLE(
-    NAME featuredetectortester
-    MODULES
-        support::configuration::ConfigSystem
-        support::configuration::GlobalConfig
-        input::LinuxCamera
-        vision::LUTClassifier
-        vision::GoalDetector
-        vision::BallDetector
-        vision::ObstacleDetector
-        support::NUbugger
-        support::logging::ConsoleLogHandler
-        platform::darwin::HardwareIO
-        platform::darwin::SensorFilter
+NUCLEAR_ROLE(
+    # FileWatcher, ConsoleLogHandler and Signal Catcher Must Go First. KinematicsConfiguration usually goes after these and without it many roles do not run
+    extension::FileWatcher
+    support::logging::ConsoleLogHandler
+    # This must come first as it emits config which many roles depend on (e.g. SensorFilter, WalkEngine)
+    motion::KinematicsConfiguration
+    support::configuration::GlobalConfig
+    input::Camera
+    vision::LUTClassifier
+    vision::GoalDetector
+    vision::BallDetector
+    support::configuration::NetworkConfiguration
+    support::NUbugger
+    platform::darwin::HardwareIO
+    platform::darwin::SensorFilter
 
-        support::configuration::SoccerConfig
+    support::configuration::SoccerConfig
 )
-

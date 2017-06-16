@@ -1,0 +1,9 @@
+Package: nubots-toolchain
+Version: 2.1.0
+Section: base
+Priority: optional
+Architecture: amd64
+Multi-Arch: foreign
+Maintainer: NUbots <nubots@nubots.net>
+Description: NUbots toolchain
+ All of the libraries built for the NUbots toolchain

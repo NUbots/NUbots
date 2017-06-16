@@ -1,0 +1,4 @@
+directory: log
+
+messages:
+  message.support.ServoHealthTestData: true

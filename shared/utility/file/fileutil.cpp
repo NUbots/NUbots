@@ -26,6 +26,10 @@ extern "C" {
 
 #include <sstream>
 #include <system_error>
+#include <stack>
+
+#include "utility/strutil/strutil.h"
+#include <iostream>
 
 namespace utility {
 namespace file {
@@ -46,6 +50,19 @@ namespace file {
         return (stat (path.c_str(), &buffer) == 0);
     }
 
+    std::chrono::system_clock::time_point getModificationTime(const std::string& path) {
+        int status;
+        struct stat st_buf;
+
+        // Get the status of the file system object.
+        status = stat(path.c_str(), &st_buf);
+        if (status != 0) {
+            throw std::system_error(errno, std::system_category(), "Error checking if path is file or directory");
+        }
+
+        return(std::chrono::system_clock::from_time_t(st_buf.st_mtime));
+    }
+
     // Test if a passed path is a directory
     bool isDir(const std::string& path) {
 
@@ -60,6 +77,16 @@ namespace file {
 
         // Return if our varible is a directory
         return S_ISDIR(st_buf.st_mode);
+    }
+
+    void makeDir(const std::string& path)
+    {
+        int status;
+        status = mkdir(path.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
+
+        if (status != 0) {
+            throw std::system_error(errno, std::system_category(), "Error creating directory '" + path + "'.");
+        }
     }
 
     // List the contents of a directory
@@ -92,6 +119,109 @@ namespace file {
         }
 
         return result;
+    }
+
+    std::pair<std::string, std::string> pathSplit(const std::string& input) {
+
+        size_t lastSlash = input.rfind('/');
+
+        // There was no slash
+        if(lastSlash == std::string::npos) {
+            return { ".", input };
+        }
+        // The slash was the last character
+        if(lastSlash + 1 == input.size()) {
+            // If all we had was a slash
+            if(input.size() == 1) {
+                return { "/", "/" };
+            }
+            // Otherwise remove the slash and call recursivly
+            else {
+                return pathSplit(input.substr(0, input.size() - 1));
+            }
+        }
+        else {
+            return { input.substr(0, lastSlash), input.substr(lastSlash + 1, input.size()) };
+        }
+    }
+
+    std::vector<std::string> listFiles(const std::string& directory, bool recursive) {
+        // create a vector to store the files
+        std::vector<std::string> files;
+        // create a vector to store the directories
+        std::stack<std::string> directories;
+        // adds the specified directory to the vector
+        directories.push(directory);
+        // loop through all the directories using a depth-first search
+        while (!directories.empty()) {
+            // retrieve the last directory in the vector, beginning with the initial directory
+            auto directory = directories.top();
+            // immediately remove the directory that was found
+            directories.pop();
+            // loop through every file within the directory
+            for (auto&& file : listDir(directory)) {
+                // specify the correct path within the directory
+                auto path = directory + "/" + file;
+                // check if the given path is a directory
+                if (isDir(path)) {
+                    // check if the function is recursive
+                    if (recursive) {
+                        // append the path to the directories vector
+                        directories.push(path);
+                    }
+                } else {
+                    // append the path to the paths vector
+                    files.push_back(path);
+                }
+            }
+        }
+        // return the list of files
+        return files;
+    }
+
+    bool makeDirectory(const std::string& directory, bool parent) {
+        std::vector<std::string> elements;
+
+        // Get elements of the path to create.
+        if (parent == true) {
+            elements = utility::strutil::split(directory, '/');
+            elements.front() = elements.front() == "" ? "/" : elements.front();
+        }
+        else {
+            elements.push_back(directory);
+        }
+
+        std::string path;
+
+        // Traverse all elements of the path.
+        for (const auto& element : elements) {
+
+
+            path.append(element);
+
+            // If the current path doesn't exist, create it.
+            if (!exists(path)) {
+                // Create the current path element with the following permissions.
+                // U = RWX
+                // G = R_X
+                // O = R_X
+                auto status = mkdir(path.c_str(), S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH);
+
+                // If we fail at any point then bail out.
+                if (status != 0) {
+                    return false;
+                }
+            }
+            else if (!isDir(path)) {
+                // THROW EXCEPTION!!!!
+                // OK
+                throw std::runtime_error("Cannot create a directory " + path + " is an ordinary file");
+            }
+
+            path.append("/");
+        }
+
+        return true;
     }
 }
 }

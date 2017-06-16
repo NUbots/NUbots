@@ -1,0 +1,7 @@
+imageWidth: 320
+imageHeight: 240
+FOV_X: 1.0472
+FOV_Y: 0.785398
+DISTORTION_FACTOR: -0.000018
+
+emit_images: true

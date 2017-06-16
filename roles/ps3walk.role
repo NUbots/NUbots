@@ -1,48 +1,44 @@
-ADD_ROLE(
-    NAME ps3walk
-    MODULES
+NUCLEAR_ROLE(
+    # FileWatcher, ConsoleLogHandler and Signal Catcher Must Go First. KinematicsConfiguration usually goes after these and without it many roles do not run
+    extension::FileWatcher
+    support::SignalCatcher
+    support::logging::ConsoleLogHandler
+    # This must come first as it emits config which many roles depend on (e.g. SensorFilter, WalkEngine)
+    motion::KinematicsConfiguration
+    # Support and Configuration
+    support::configuration::GlobalConfig
+    support::configuration::SoccerConfig
+    support::configuration::NetworkConfiguration
+    support::NUbugger
 
-        # Support and Configuration
-        #support::SignalCatcher
-        support::logging::ConsoleLogHandler
-        support::configuration::ConfigSystem
-        support::configuration::GlobalConfig
-        # support::configuration::NetworkingConfiguration
-        support::NUbugger
-        support::configuration::SoccerConfig
+    # Hardware Interface
+    input::Camera
+    platform::darwin::HardwareIO
+    platform::darwin::SensorFilter
 
-        # Hardware Interface
-        platform::darwin::HardwareIO
-        #platform::fakedarwin::HardwareIO
-        platform::darwin::SensorFilter
-        input::LinuxCamera
+    # Motion
+    motion::FootMotionPlanner
+    motion::FootPlacementPlanner
+    motion::TorsoMotionPlanner
+    motion::BalanceKinematicResponse
+    motion::OldWalkEngine
+    motion::ScriptEngine
 
-        # Vision
-        vision::LUTClassifier
-        vision::GoalDetector
-        vision::BallDetector
-        vision::ObstacleDetector
+    # Vision
+    vision::LUTClassifier
+    vision::GoalDetector
+    vision::BallDetector
 
-        # Motion
-        motion::WalkEngine
-        motion::ScriptEngine
+    # Behaviour
+    behaviour::Controller
+    behaviour::skills::Stand
+    behaviour::skills::FallingRelax
+    behaviour::skills::Getup
+    behaviour::skills::DirectWalkController
+    behaviour::strategy::PS3Walk
+    behaviour::skills::KickScript
 
-        # Behaviour
-        behaviour::Controller
-        behaviour::planning::PS3Walk
-        behaviour::skills::Stand
-        behaviour::skills::FallingRelax
-        behaviour::skills::Getup
-        behaviour::skills::KickScript
+    # Motion
+    motion::HeadController
 
-        # Lookat ball
-        behaviour::skills::LookAt
-
-        # Localisation
-        #localisation::MMKFRobotLocalisation
-        #localisation::KFBallLocalisation
-        localisation::NUcapLocalisation
-
-        # Debug
-        # debug::NUcap
 )
