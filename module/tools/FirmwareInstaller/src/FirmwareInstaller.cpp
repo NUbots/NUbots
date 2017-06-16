@@ -1,11 +1,9 @@
 #include "FirmwareInstaller.h"
 
 #include <algorithm>
-#include <cctype>
 #include <fstream>
-#include <iomanip>
+#include <iostream>
 #include <numeric>
-#include <sstream>
 
 #include "extension/Configuration.h"
 
@@ -21,7 +19,7 @@ struct FlashCM730 {};
 
 FirmwareInstaller::FirmwareInstaller(
     std::unique_ptr<NUClear::Environment> environment)
-    : Reactor(std::move(environment)), device("UNKNOWN") {
+    : Reactor(std::move(environment)), device("UNKNOWN"), ignore_inputs(false) {
   on<Configuration>("FirmwareInstaller.yaml")
       .then([this](const Configuration& config) {
         device = config["device"].as<std::string>();
@@ -49,15 +47,53 @@ FirmwareInstaller::FirmwareInstaller(
         }
       });
 
-  on<IO>(STDIN_FILENO, IO::READ).then([this] {
+  auto showMenu = [this]() -> void {
+    std::cout << "\n\n" << std::endl;
+    std::cout << "***********************************" << std::endl;
+    std::cout << "* Welcome to NUfirmware Installer *" << std::endl;
+    std::cout << "***********************************" << std::endl;
+    std::cout << "\tType \"CM730\" to flash CM730 firmware." << std::endl;
+    std::cout << "\tType \"DYNXL\" to flash Dynamixel firmware." << std::endl;
+    std::cout << "\tType \"QUIT\" to quit." << std::endl;
+  };
 
-    // TODO make this a robust and beautiful user interface
-    std::string kgo;
-    std::cin >> kgo;
-    emit(std::make_unique<FlashCM730>());
+  showMenu();
+
+  on<IO>(STDIN_FILENO, IO::READ).then([this, &showMenu] {
+
+    if (!ignore_inputs) {
+      std::string input;
+      std::cin >> input;
+
+      // Convert input to uppercase.
+      std::transform(input.begin(), input.end(), input.begin(),
+                     [](const char& c) -> char { return std::toupper(c); });
+
+      if (input.compare("CM730") == 0) {
+        emit(std::make_unique<FlashCM730>());
+      }
+
+      else if (input.compare("DYNXL") == 0) {
+        std::cout << "Too bad. We haven't implemented this yet." << std::endl;
+      }
+
+      else if (input.compare("QUIT") == 0) {
+        std::cout << "Bye." << std::endl;
+        powerplant.shutdown();
+      }
+
+      else {
+        std::cout << "Unknown input. Try again." << std::endl;
+      }
+
+      showMenu();
+    }
   });
 
   on<Trigger<FlashCM730>, Sync<FirmwareInstaller>>().then([this] {
+
+    // Make sure the user can't quit part way through the process.
+    ignore_inputs = true;
 
     const auto& it = firmwares.find("CM730");
 
@@ -130,6 +166,8 @@ FirmwareInstaller::FirmwareInstaller(
         uart.close();
       }
     }
+
+    ignore_inputs = false;
   });
 }
 
