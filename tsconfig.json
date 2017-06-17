@@ -12,6 +12,7 @@
     "noImplicitReturns": false,
     "removeComments": true,
     "strictNullChecks": true,
+    "downlevelIteration": true,
     "outDir": "build",
     "lib": [
       "es6",

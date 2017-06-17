@@ -1,5 +1,6 @@
 {
   "verbose": true,
+  "watch": "src",
   "ignore": ["*.tests.ts", "src/client"],
   "execMap": {
     "ts": "ts-node"
