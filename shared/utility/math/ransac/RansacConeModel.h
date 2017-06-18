@@ -32,7 +32,7 @@ namespace ransac {
     public:
 
         static constexpr size_t REQUIRED_POINTS = 3;
-        using DataPoint = arma::vec3;
+        using DataPoint = Eigen::Vector3f;
 
         bool regenerate(const std::array<DataPoint, REQUIRED_POINTS>& points);
 
