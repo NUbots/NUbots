@@ -5,13 +5,16 @@ Exec { path => [ "/bin/", "/sbin/" , "/usr/bin/", "/usr/sbin/" ] }
 
 node default {
 
-  # We need dev tools
-  class {'dev_tools':
+  # We need build tools to compile
+  class {'build_tools': }
+
+  # These user tools make the shell much easier
+  class {'user_tools':
     user => 'vagrant',
   }
 
   # Get and install our toolchain
-  $toolchain_version = '2.1.0'
+  $toolchain_version = '2.1.1'
   wget::fetch { 'nubots_deb':
     destination => "/root/nubots-toolchain-${toolchain_version}.deb",
     source      => "http://nubots.net/debs/nubots-toolchain-${toolchain_version}.deb",
@@ -45,8 +48,11 @@ node nubotsvmbuild {
     archs => $archs,
   }
 
-  # We need dev tools to use the installer
-  class {'dev_tools':
+  # We need build tools to compile and we need it done before the installer
+  class {'build_tools': } -> Installer <| |>
+
+  # These user tools make the shell much easier and these also should be done before installing
+  class {'user_tools':
     user => 'vagrant',
   } -> Installer <| |>
 
@@ -366,8 +372,8 @@ ${compile_options}
 include_directories(SYSTEM \"${prefix}/${arch}/include\")
 include_directories(SYSTEM \"${prefix}/include\")
 
-set(CMAKE_C_FLAGS \"\${CMAKE_C_FLAGS} ${compile_params}\" CACHE STRING \"\" FORCE)
-set(CMAKE_CXX_FLAGS \"\${CMAKE_CXX_FLAGS} ${compile_params}\" CACHE STRING \"\" FORCE)
+set(CMAKE_C_FLAGS \"\${CMAKE_C_FLAGS} ${compile_params}\")
+set(CMAKE_CXX_FLAGS \"\${CMAKE_CXX_FLAGS} ${compile_params}\")
 
 set(PLATFORM \"${arch}\" CACHE STRING \"The platform to build for.\" FORCE)
 ",
