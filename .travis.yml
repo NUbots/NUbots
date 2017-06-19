@@ -6,10 +6,11 @@ language: cpp
 os: linux
 dist: trusty
 
-# Cache our /nubots directory to speed up the build
+# Cache our toolchain directory to speed up the build
+# This dir will get symlinked into place later
 cache:
   directories:
-    - /nubots
+    - toolchain
 
 # Only do branch builds on master
 branches:
@@ -21,6 +22,7 @@ before_install:
   # Setup ruby and get the latest version of puppet
   - rvm install ruby --latest
   - wget http://apt.puppetlabs.com/puppetlabs-release-trusty.deb
+  - sudo ln -s toolchain /nubots
   - sudo dpkg -i puppetlabs-release-trusty.deb
   - sudo apt-get update
   - sudo apt-get install puppet
