@@ -191,12 +191,12 @@ node nubotsvmbuild {
           extension        => $extension,
           strip_components => 1,
           root_dir         => '.',
-          require          => [ Class['installer::prerequisites'], Class['dev_tools'], ],
+          require          => [ Class['installer::prerequisites'], Class['build_tools'], ],
         }
         installer { "${archive}":
           archs       => $archs,
           creates     => $params['creates'],
-          require     => delete_undef_values(flatten([ Archive["${archive}"], $params['require'], Class['installer::prerequisites'], Class['dev_tools'], ])),
+          require     => delete_undef_values(flatten([ Archive["${archive}"], $params['require'], Class['installer::prerequisites'], Class['build_tools'], ])),
           args        => $params['args'],
           src_dir     => $params['src_dir'],
           prebuild    => $params['prebuild'],
@@ -231,14 +231,6 @@ node nubotsvmbuild {
     }
   }
 
-  # INSTALL ROBOT HOST PARSER
-  file { '/nubots/toolchain/find_robot_hosts.sh':
-    ensure  => present,
-    mode    => '755',
-    source  => 'puppet:///modules/dev_tools/find_robot_hosts.sh',
-    replace => true,
-  }
-
   archive { "Spinnaker_nuc7i7bnh":
     url              => "http://nubots.net/tarballs/spinnaker_1_0_0_295_amd64.tar.gz",
     target           => "/nubots/toolchain/nuc7i7bnh/src/Spinnaker",
@@ -250,7 +242,7 @@ node nubotsvmbuild {
     extension        => "tar.gz",
     strip_components => 1,
     root_dir         => '.',
-    require          => [ Class['installer::prerequisites'], Class['dev_tools'], ],
+    require          => [ Class['installer::prerequisites'], Class['build_tools'], ],
   }
   archive { "Spinnaker_native":
     url              => "http://nubots.net/tarballs/spinnaker_1_0_0_295_amd64.tar.gz",
@@ -263,7 +255,7 @@ node nubotsvmbuild {
     extension        => "tar.gz",
     strip_components => 1,
     root_dir         => '.',
-    require          => [ Class['installer::prerequisites'], Class['dev_tools'], ],
+    require          => [ Class['installer::prerequisites'], Class['build_tools'], ],
   }
   archive { "Spinnaker_fitpc2i":
     url              => "http://nubots.net/tarballs/spinnaker_1_0_0_295_i386.tar.gz",
@@ -276,7 +268,7 @@ node nubotsvmbuild {
     extension        => "tar.gz",
     strip_components => 1,
     root_dir         => '.',
-    require          => [ Class['installer::prerequisites'], Class['dev_tools'], ],
+    require          => [ Class['installer::prerequisites'], Class['build_tools'], ],
   }
   exec { "Spinnaker_nuc7i7bnh":
     creates  => "/nubots/toolchain/nuc7i7bnh/include/Spinnaker.h",

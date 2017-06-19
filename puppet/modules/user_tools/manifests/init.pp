@@ -1,6 +1,6 @@
 class user_tools (String $user) {
 
-  class {'build_tools': }
+  require build_tools
 
   # User tools
   package { 'vim': ensure => latest, }
@@ -11,12 +11,15 @@ class user_tools (String $user) {
   package { 'cmake-curses-gui': ensure => latest, }
   package { 'dos2unix': ensure => latest, }
   package { 'unzip': ensure => latest, }
-  package { 'rsync': ensure => latest, }
-  package { 'git': ensure => latest, }
   package { 'graphviz': ensure => latest, }
-  package { 'autopoint': ensure => latest, }
-  package { 'gettext': ensure => latest, }
-  package { 'libasound2-dev:i386': ensure => latest, }
+
+  # INSTALL ROBOT HOST PARSER
+  file { '/nubots/toolchain/find_robot_hosts.sh':
+    ensure  => present,
+    mode    => '755',
+    source  => 'puppet:///modules/user_tools/find_robot_hosts.sh',
+    replace => true,
+  }
 
   # Set the users default shell to zsh
   user { "${user}": shell => '/bin/zsh', require => Package['zsh'], }
@@ -79,7 +82,7 @@ class user_tools (String $user) {
   file { 'vm_private_key':
     path => "/home/${user}/.ssh/id_rsa",
     ensure => present,
-    source => 'puppet:///modules/dev_tools/id_rsa',
+    source => 'puppet:///modules/user_tools/id_rsa',
     owner => "${user}",
     mode => '600',
     replace => true,
@@ -88,7 +91,7 @@ class user_tools (String $user) {
   file { 'vm_public_key':
     path => "/home/${user}/.ssh/id_rsa.pub",
     ensure => present,
-    source => 'puppet:///modules/dev_tools/id_rsa.pub',
+    source => 'puppet:///modules/user_tools/id_rsa.pub',
     owner => "${user}",
     replace => true,
   }
@@ -97,7 +100,7 @@ class user_tools (String $user) {
   file { 'ssh_config':
     path => "/home/${user}/.ssh/config",
     ensure => present,
-    source => 'puppet:///modules/dev_tools/ssh_config',
+    source => 'puppet:///modules/user_tools/ssh_config',
     owner => "${user}",
     mode => '600',
     replace => true,
@@ -108,7 +111,7 @@ class user_tools (String $user) {
   file { '/etc/profile.d/toolchain_init.sh':
     ensure => present,
     mode => '644',
-    source => 'puppet:///modules/dev_tools/toolchain_init.sh',
+    source => 'puppet:///modules/user_tools/toolchain_init.sh',
     replace => true,
   }
 
