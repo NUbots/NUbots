@@ -25,6 +25,9 @@ before_install:
   - sudo puppet module install camptocamp-archive --module_repository https://forge.puppet.com
   - sudo puppet module install maestrodev-wget --module_repository https://forge.puppet.com
 
+  # Run some code to output some information for debugging
+  - ls -lah /usr/bin
+
 script:
   - sudo puppet apply --parser=future --verbose --debug --modulepath=puppet/modules:/etc/puppet/modules puppet/manifests/travis.pp
   - /usr/bin/python3 ./b platform select native
