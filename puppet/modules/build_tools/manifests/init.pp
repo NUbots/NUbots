@@ -19,6 +19,10 @@ class build_tools {
 
   # Tools
   package { 'cmake': ensure => latest, }
+  package { 'automake': ensure => latest, }
+  package { 'autoconf': ensure => latest, }
+  package { 'libtool': ensure => latest, }
+  package { 'pkg-config': ensure => latest, }
   package { 'linux-headers-generic': ensure => latest, }
   package { 'rsync': ensure => latest, }
   package { 'git': ensure => latest, }
