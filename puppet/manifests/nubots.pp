@@ -91,7 +91,7 @@ node nubotsvmbuild {
     'libsvm'       => {'url'         => 'https://github.com/Bidski/libsvm/archive/v322.tar.gz',
                        'creates'     =>'lib/svm.o',
                        'method'      => 'make', },
-    'armadillo'    => {'url'         => 'https://downloads.sourceforge.net/project/arma/armadillo-7.900.1.tar.xz',
+    'armadillo'    => {'url'         => 'https://downloads.sourceforge.net/project/arma/armadillo-7.950.1.tar.xz',
                        'method'      => 'cmake',
                        'creates'     => 'lib/libarmadillo.so',
                        'require'     => [ Installer['openblas'], ],},
