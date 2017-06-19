@@ -41,6 +41,6 @@ export class SensorDataSimulator implements Simulator {
 
     const message = { messageType, buffer }
 
-    return [ message ]
+    return [message]
   }
 }

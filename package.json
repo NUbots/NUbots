@@ -80,6 +80,7 @@
     "ts-jest": "^20.0.3",
     "ts-node": "^3.0.2",
     "tslint": "^5.2.0",
+    "tslint-eslint-rules": "^4.1.1",
     "typescript": "^2.2.1",
     "url-loader": "^0.5.7",
     "webpack": "^2.2.1",

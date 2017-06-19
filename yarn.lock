@@ -1913,6 +1913,13 @@ directory-encoder@^0.7.2:
     handlebars "^1.3.0"
     img-stats "^0.5.2"
 
+doctrine@^0.7.2:
+  version "0.7.2"
+  resolved "https://registry.yarnpkg.com/doctrine/-/doctrine-0.7.2.tgz#7cb860359ba3be90e040b26b729ce4bfa654c523"
+  dependencies:
+    esutils "^1.1.6"
+    isarray "0.0.1"
+
 dom-converter@~0.1:
   version "0.1.4"
   resolved "https://registry.yarnpkg.com/dom-converter/-/dom-converter-0.1.4.tgz#a45ef5727b890c9bffe6d7c876e7b19cb0e17f3b"
@@ -2121,6 +2128,10 @@ esprima@~3.1.0:
 estraverse@^1.9.1:
   version "1.9.3"
   resolved "https://registry.yarnpkg.com/estraverse/-/estraverse-1.9.3.tgz#af67f2dc922582415950926091a4005d29c9bb44"
+
+esutils@^1.1.6:
+  version "1.1.6"
+  resolved "https://registry.yarnpkg.com/esutils/-/esutils-1.1.6.tgz#c01ccaa9ae4b897c6d0c3e210ae52f3c7a844375"
 
 esutils@^2.0.0, esutils@^2.0.2:
   version "2.0.2"
@@ -6027,9 +6038,17 @@ tsconfig@^6.0.0:
     strip-bom "^3.0.0"
     strip-json-comments "^2.0.0"
 
-tslib@^1.6.0:
+tslib@^1.0.0, tslib@^1.6.0:
   version "1.7.0"
   resolved "https://registry.yarnpkg.com/tslib/-/tslib-1.7.0.tgz#6e8366695f72961252b35167b0dd4fbeeafba491"
+
+tslint-eslint-rules@^4.1.1:
+  version "4.1.1"
+  resolved "https://registry.yarnpkg.com/tslint-eslint-rules/-/tslint-eslint-rules-4.1.1.tgz#7c30e7882f26bc276bff91d2384975c69daf88ba"
+  dependencies:
+    doctrine "^0.7.2"
+    tslib "^1.0.0"
+    tsutils "^1.4.0"
 
 tslint@^5.2.0:
   version "5.2.0"
@@ -6046,7 +6065,7 @@ tslint@^5.2.0:
     tslib "^1.6.0"
     tsutils "^1.8.0"
 
-tsutils@^1.8.0:
+tsutils@^1.4.0, tsutils@^1.8.0:
   version "1.8.0"
   resolved "https://registry.yarnpkg.com/tsutils/-/tsutils-1.8.0.tgz#bf8118ed8e80cd5c9fc7d75728c7963d44ed2f52"
 

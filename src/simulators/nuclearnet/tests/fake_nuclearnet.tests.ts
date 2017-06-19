@@ -28,7 +28,7 @@ describe('FakeNUClearNet', () => {
     const bobOnJoin = jest.fn()
     bob.on('nuclear_join', bobOnJoin)
 
-    bob.connect({ name: 'bob'})
+    bob.connect({ name: 'bob' })
 
     const expectedPeer = { name: 'bob', address: '127.0.0.1', port: 7447 }
 
@@ -50,7 +50,7 @@ describe('FakeNUClearNet', () => {
     const bobOnLeave = jest.fn()
     bob.on('nuclear_leave', bobOnLeave)
 
-    bob.connect({ name: 'bob'})
+    bob.connect({ name: 'bob' })
 
     const expectedPeer = { name: 'bob', address: '127.0.0.1', port: 7447 }
 

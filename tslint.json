@@ -1,7 +1,7 @@
 {
   "defaultSeverity": "error",
   "extends": [
-    "tslint:recommended"
+    "tslint-eslint-rules"
   ],
   "rules": {
     "semicolon": {
@@ -9,6 +9,43 @@
         "never"
       ]
     },
+    "curly": true,
+    "eofline": true,
+    "block-spacing": [
+      true,
+      "never"
+    ],
+    "array-bracket-spacing": [
+      true,
+      "never"
+    ],
+    "new-parens": true,
+    "ter-max-len": [
+      true,
+      120
+    ],
+    "ter-arrow-spacing": [
+      true,
+      {
+        "before": true,
+        "after": true
+      }
+    ],
+    "space-in-parens": [
+      true,
+      "never"
+    ],
+    "ter-indent": [
+      true,
+      2,
+      {
+        "SwitchCase": 1
+      }
+    ],
+    "object-literal-shorthand": true,
+    "ter-prefer-arrow-callback": true,
+    "linebreak-style": "unix",
+    "object-curly-spacing": true,
     "arrow-parens": false,
     "object-literal-sort-keys": false,
     "max-classes-per-file": false,

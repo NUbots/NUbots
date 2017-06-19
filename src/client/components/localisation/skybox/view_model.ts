@@ -88,8 +88,8 @@ export class SkyboxViewModel {
   private get sunPosition(): Vector3 {
     const position = new Vector3()
     const distance = 40
-    const theta = Math.PI * ( this.model.inclination - 0.5 )
-    const phi = 2 * Math.PI * ( this.model.azimuth - 0.5 )
+    const theta = Math.PI * (this.model.inclination - 0.5)
+    const phi = 2 * Math.PI * (this.model.azimuth - 0.5)
 
     position.x = distance * Math.cos(phi)
     position.y = distance * Math.sin(phi) * Math.sin(theta)
