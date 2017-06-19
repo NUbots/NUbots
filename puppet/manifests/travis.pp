@@ -15,7 +15,7 @@ node default {
     destination => "/nubots/nubots-toolchain-${toolchain_version}.deb",
     source      => "http://nubots.net/debs/nubots-toolchain-${toolchain_version}.deb",
     timeout     => 0,
-  } ~>
+  } ->
   package { 'nubots-toolchain':
     provider => 'dpkg',
     ensure   => 'latest',
