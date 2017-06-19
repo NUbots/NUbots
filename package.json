@@ -2,6 +2,9 @@
   "name": "NUsight",
   "version": "2.0.0",
   "private": true,
+  "engines": {
+    "node": ">=4.X.X"
+  },
   "description": "",
   "scripts": {
     "test": "jest",

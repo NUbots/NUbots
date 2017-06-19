@@ -1,4 +1,5 @@
 import { NUClearNet } from 'nuclearnet.js'
+import 'reflect-metadata'
 import { FakeNUClearNet } from '../fake_nuclearnet'
 import { FakeNUClearNetServer } from '../fake_nuclearnet_server'
 
@@ -59,5 +60,32 @@ describe('FakeNUClearNet', () => {
     expect(aliceOnLeave).toHaveBeenCalledWith(expectedPeer)
     expect(eveOnLeave).toHaveBeenCalledWith(expectedPeer)
     expect(bobOnLeave).not.toHaveBeenCalled()
+  })
+
+  it('sends messages to others', () => {
+    alice.connect({ name: 'alice' })
+    eve.connect({ name: 'eve' })
+    bob.connect({ name: 'bob' })
+
+    const aliceOnFoo = jest.fn()
+    alice.on('foo', aliceOnFoo)
+
+    const eveOnFoo = jest.fn()
+    eve.on('foo', eveOnFoo)
+
+    const bobOnFoo = jest.fn()
+    bob.on('foo', bobOnFoo)
+
+    const payload = new Buffer(8)
+    bob.send({ type: 'foo', payload })
+
+    const expectedPacket = {
+      payload,
+      peer: { name: 'bob', address: '127.0.0.1', port: 7447 },
+    }
+
+    expect(aliceOnFoo).toHaveBeenCalledWith(expectedPacket)
+    expect(eveOnFoo).toHaveBeenCalledWith(expectedPacket)
+    expect(bobOnFoo).toHaveBeenCalledWith(expectedPacket)
   })
 })

@@ -18,7 +18,7 @@ export class SensorDataSimulator implements Simulator {
       servo: [
         { presentPosition: 3 * Math.PI / 4 + 0.5 * Math.cos(t - Math.PI) },
         { presentPosition: 3 * Math.PI / 4 + 0.5 * Math.cos(t) },
-        { presentPosition: Math.PI / 8 },
+        { presentPosition: -Math.PI / 8 },
         { presentPosition: Math.PI / 8 },
         { presentPosition: -3 * Math.PI / 4 },
         { presentPosition: -3 * Math.PI / 4 },

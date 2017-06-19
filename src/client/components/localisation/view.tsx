@@ -1,25 +1,26 @@
-import { autorun, IReactionDisposer } from 'mobx'
+import { autorun } from 'mobx'
 import { runInAction } from 'mobx'
+import { IReactionDisposer } from 'mobx'
 import { observer } from 'mobx-react'
 import * as React from 'react'
 import { HTMLProps } from 'react'
 import { WebGLRenderer } from 'three'
-import { inject } from '../../../inversify.config'
 import { MenuBar } from '../menu_bar/view'
 import { LocalisationController } from './controller'
 import { LocalisationModel } from './model'
 import { ViewMode } from './model'
+import { LocalisationNetwork } from './network'
 import * as style from './style.css'
 import { LocalisationViewModel } from './view_model'
 
+interface LocalisationViewProps extends HTMLProps<JSX.Element> {
+  controller: LocalisationController
+  model: LocalisationModel
+  network: LocalisationNetwork
+}
+
 @observer
-export class LocalisationView extends React.Component<HTMLProps<JSX.Element>, void> {
-  @inject(LocalisationController)
-  private controller: LocalisationController
-
-  @inject(LocalisationModel)
-  private model: LocalisationModel
-
+export class LocalisationView extends React.Component<LocalisationViewProps, void> {
   private canvas: HTMLCanvasElement
   private renderer: WebGLRenderer
   private stopAutorun: IReactionDisposer
@@ -49,6 +50,7 @@ export class LocalisationView extends React.Component<HTMLProps<JSX.Element>, vo
     document.removeEventListener('keyup', this.onKeyUp, false)
     document.removeEventListener('wheel', this.onWheel, false)
     cancelAnimationFrame(this.rafId)
+    this.props.network.destroy()
   }
 
   public render(): JSX.Element {
@@ -60,7 +62,7 @@ export class LocalisationView extends React.Component<HTMLProps<JSX.Element>, vo
             this.canvas = canvas
           }}/>
         </div>
-        <StatusBar model={this.model}/>
+        <StatusBar model={this.props.model}/>
       </div>
     )
   }
@@ -71,7 +73,7 @@ export class LocalisationView extends React.Component<HTMLProps<JSX.Element>, vo
 
   private onAnimationFrame = (time: number) => {
     this.rafId = requestAnimationFrame(this.onAnimationFrame)
-    this.controller.onAnimationFrame(this.model, time)
+    this.props.controller.onAnimationFrame(this.props.model, time)
   }
 
   private renderScene(): void {
@@ -79,50 +81,50 @@ export class LocalisationView extends React.Component<HTMLProps<JSX.Element>, vo
 
     if (canvas.width !== canvas.clientWidth || canvas.height !== canvas.clientHeight) {
       this.renderer.setSize(canvas.clientWidth, canvas.clientHeight, false)
-      runInAction(() => this.model.aspect = canvas.clientWidth / canvas.clientHeight)
+      runInAction(() => this.props.model.aspect = canvas.clientWidth / canvas.clientHeight)
     }
 
-    const viewModel = LocalisationViewModel.of(this.model)
+    const viewModel = LocalisationViewModel.of(this.props.model)
 
     this.renderer.render(viewModel.scene, viewModel.camera)
 
-    runInAction(() => this.model.time.lastRenderTime = this.model.time.time)
+    runInAction(() => this.props.model.time.lastRenderTime = this.props.model.time.time)
   }
 
   private onClick = (e: MouseEvent) => {
     if (e.button === 0) {
-      this.controller.onLeftClick(this.model, () => this.requestPointerLock())
+      this.props.controller.onLeftClick(this.props.model, () => this.requestPointerLock())
     } else if (e.button === 2) {
-      this.controller.onRightClick(this.model)
+      this.props.controller.onRightClick(this.props.model)
     }
   }
 
   private onPointerLockChange = () => {
-    this.controller.onPointerLockChange(this.model, document.pointerLockElement === this.canvas)
+    this.props.controller.onPointerLockChange(this.props.model, document.pointerLockElement === this.canvas)
   }
 
   private onMouseMove = (e: MouseEvent) => {
-    this.controller.onMouseMove(this.model, e.movementX, e.movementY)
+    this.props.controller.onMouseMove(this.props.model, e.movementX, e.movementY)
   }
 
   private onKeyDown = (e: KeyboardEvent) => {
-    this.controller.onKeyDown(this.model, e.keyCode, {
+    this.props.controller.onKeyDown(this.props.model, e.keyCode, {
       shiftKey: e.shiftKey,
       ctrlKey: e.ctrlKey,
     })
   }
 
   private onKeyUp = (e: KeyboardEvent) => {
-    this.controller.onKeyUp(this.model, e.keyCode)
+    this.props.controller.onKeyUp(this.props.model, e.keyCode)
   }
 
   private onHawkEyeClick = () => {
-    this.controller.onHawkEyeClick(this.model)
+    this.props.controller.onHawkEyeClick(this.props.model)
   }
 
   private onWheel = (e: WheelEvent) => {
     e.preventDefault()
-    this.controller.onWheel(this.model, e.deltaY)
+    this.props.controller.onWheel(this.props.model, e.deltaY)
   }
 }
 
