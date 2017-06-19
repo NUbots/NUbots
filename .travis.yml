@@ -25,6 +25,7 @@ before_install:
   - sudo puppet module install camptocamp-archive --module_repository https://forge.puppet.com
   - sudo puppet module install maestrodev-wget --module_repository https://forge.puppet.com
 
+install:
   # Run some code to output some information for debugging
   - ls -lah /usr/bin
 
