@@ -2,6 +2,7 @@ import { action, observable } from 'mobx'
 import { computed } from 'mobx'
 import { RobotModel } from './darwin_robot/model'
 import { FieldModel } from './field/model'
+import { SkyboxModel } from './skybox/model'
 
 export class TimeModel {
   @observable public time: number // seconds
@@ -33,6 +34,7 @@ export class LocalisationModel {
   @observable public aspect: number
   @observable public robots: RobotModel[]
   @observable public field: FieldModel
+  @observable public skybox: SkyboxModel
   @observable public camera: CameraModel
   @observable public locked: boolean
   @observable public controls: ControlsModel
@@ -49,6 +51,7 @@ export class LocalisationModel {
       aspect: 300 / 150,
       robots: [],
       field: FieldModel.of(),
+      skybox: SkyboxModel.of(),
       camera: CameraModel.of(),
       locked: false,
       controls: ControlsModel.of(),

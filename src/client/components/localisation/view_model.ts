@@ -8,6 +8,7 @@ import { Object3D } from 'three'
 import { RobotViewModel } from './darwin_robot/view_model'
 import { FieldViewModel } from './field/view_model'
 import { LocalisationModel } from './model'
+import { SkyboxViewModel } from './skybox/view_model'
 
 export class LocalisationViewModel {
   public constructor(private model: LocalisationModel) {
@@ -21,7 +22,9 @@ export class LocalisationViewModel {
   public get scene(): Scene {
     const scene = new Scene()
     this.robots.forEach(robot => scene.add(robot))
+
     scene.add(this.field)
+    scene.add(this.skybox)
     scene.add(this.hemisphereLight)
     scene.add(this.pointLight)
     return scene
@@ -48,6 +51,11 @@ export class LocalisationViewModel {
   @computed
   private get hemisphereLight(): HemisphereLight {
     return new HemisphereLight('#fff', '#fff', 0.6)
+  }
+
+  @computed
+  private get skybox() {
+    return SkyboxViewModel.of(this.model.skybox).skybox
   }
 
   @computed

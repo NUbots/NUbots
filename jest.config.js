@@ -21,7 +21,9 @@ module.exports = {
     'tsx'
   ],
   moduleNameMapper: {
-    '\\.(css)$': 'identity-obj-proxy'
+    '\\.(css)$': 'identity-obj-proxy',
+    '\\.(vert)$': '<rootDir>/__mocks__/mock.vert',
+    '\\.(frag)$': '<rootDir>/__mocks__/mock.frag'
   },
   roots: [
     '<rootDir>/src'

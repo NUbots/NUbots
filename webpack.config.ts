@@ -117,6 +117,8 @@ export default {
       { test: /\.html$/, use: 'html-loader' },
       { test: /\.png$/, use: 'url-loader?limit=10000' },
       { test: /\.jpg$/, use: 'file-loader' },
+      { test: /\.vert$/, use: 'raw-loader' },
+      { test: /\.frag$/, use: 'raw-loader' },
     ],
   },
   plugins: [
