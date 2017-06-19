@@ -15,10 +15,10 @@ node default {
 
   # Get and install our toolchain
   $toolchain_version = '2.1.1'
-  wget::fetch { 'nubots_deb':
-    destination => "/root/nubots-toolchain-${toolchain_version}.deb",
-    source      => "http://nubots.net/debs/nubots-toolchain-${toolchain_version}.deb",
-    timeout     => 0,
+  file { 'nubots_deb':
+    path   => "/root/nubots-toolchain-${toolchain_version}.deb",
+    ensure => present,
+    source => "http://nubots.net/debs/nubots-toolchain-${toolchain_version}.deb",
   } ->
   package { 'nubots-toolchain':
     provider => 'dpkg',

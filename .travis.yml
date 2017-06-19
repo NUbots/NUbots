@@ -13,12 +13,14 @@ branches:
 
 # Setup using puppet
 before_install:
+  # Setup ruby and get the latest version of puppet
   - rvm install ruby --latest
   - wget http://apt.puppetlabs.com/puppetlabs-release-trusty.deb
   - sudo dpkg -i puppetlabs-release-trusty.deb
   - sudo apt-get update
   - sudo apt-get install puppet
 
+  # Install the puppet modules that are required for this install
   - sudo mkdir -p /etc/puppet/modules;
   - sudo puppet module install puppetlabs-apt --module_repository https://forge.puppet.com --version 2.4.0
   - sudo puppet module install puppetlabs-vcsrepo --module_repository https://forge.puppet.com
@@ -28,6 +30,12 @@ before_install:
 install:
   # Run some code to output some information for debugging
   - sudo puppet apply --parser=future --verbose --debug --modulepath=puppet/modules:/etc/puppet/modules puppet/manifests/travis.pp
+
+  # For some reason it looks like we have to run update-alternative again on travis
+  - sudo /usr/bin/update-alternatives --remove-all gcc
+  - sudo /usr/bin/update-alternatives --remove-all g++
+  - sudo /usr/bin/update-alternatives --remove-all gfortan
+  - sudo /usr/bin/update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-7 100 --slave /usr/bin/g++ g++ /usr/bin/g++-7 --slave /usr/bin/gfortran gfortran /usr/bin/gfortran-7
 
 script:
   - ls -lah /usr/bin
