@@ -22,13 +22,13 @@ branches:
 
 # Setup using puppet
 before_install:
+  # Make a symlink from our toolchain cache to /nubots
+  - sudo ln -s $TRAVIS_BUILD_DIR/toolchain /nubots
+
   # Setup ruby and get the latest version of puppet
   - rvm install ruby --latest
-  - sudo ln -s $TRAVIS_BUILD_DIR/toolchain /nubots
-  - ls -lah /
-  - ls -lah $TRAVIS_BUILD_DIR
-  - sudo wget -N http://apt.puppetlabs.com/puppetlabs-release-trusty.deb -O toolchain/puppetlabs-release-trusty.deb
-  - sudo dpkg -i toolchain/puppetlabs-release-trusty.deb
+  - sudo wget -N http://apt.puppetlabs.com/puppetlabs-release-trusty.deb -O $TRAVIS_BUILD_DIR/toolchain/puppetlabs-release-trusty.deb
+  - sudo dpkg -i $TRAVIS_BUILD_DIR/toolchain/puppetlabs-release-trusty.deb
   - sudo apt-get update
   - sudo apt-get install puppet
 
@@ -40,7 +40,7 @@ before_install:
   - sudo puppet module install maestrodev-wget --module_repository https://forge.puppet.com
 
 install:
-  # Run some code to output some information for debugging
+  # Apply the puppet file to the vm
   - sudo puppet apply --parser=future --verbose --debug --modulepath=puppet/modules:/etc/puppet/modules puppet/manifests/travis.pp
 
   # For some reason it looks like we have to run update-alternative again on travis
@@ -48,6 +48,11 @@ install:
   - sudo update-alternatives --remove-all g++ || true
   - sudo update-alternatives --remove-all gfortan || true
   - sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-7 100 --slave /usr/bin/g++ g++ /usr/bin/g++-7 --slave /usr/bin/gfortran gfortran /usr/bin/gfortran-7
+
+  # This is dumb... but otherwise we get weird errors
+  # One day when travis supports 16.04 we can remove this
+  - sudo wget -N https://launchpad.net/~ubuntu-toolchain-r/+archive/ubuntu/test/+build/12615675/+files/libstdc++6_7.1.0-5ubuntu2~16.04_amd64.deb -O $TRAVIS_BUILD_DIR/toolchain/libstdc++6_7.1.0-5ubuntu2-16.04_amd64.deb
+  - sudo dpkg -i $TRAVIS_BUILD_DIR/toolchain/libstdc++6_7.1.0-5ubuntu2-16.04_amd64.deb
 
 script:
   - /usr/bin/python3 ./b platform select native
