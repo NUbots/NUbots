@@ -6,6 +6,11 @@ language: cpp
 os: linux
 dist: trusty
 
+# Cache our /nubots directory to speed up the build
+cache:
+  directories:
+    - /nubots
+
 # Only do branch builds on master
 branches:
   only:
