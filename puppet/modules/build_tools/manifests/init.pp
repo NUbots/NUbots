@@ -29,6 +29,7 @@ class build_tools {
   package { 'build-essential': ensure => latest, }
   package { 'libncurses5-dev:amd64': ensure => latest, require => [ Package['gcc-7'], Package['g++-7'], ], }
   package { 'libncurses5-dev:i386': ensure => latest, require => [ Package['gcc-7'], Package['g++-7'], ], }
+  package { 'libstdc++6': ensure => latest, require => Apt::Ppa['ppa:ubuntu-toolchain-r/test'] }
   package { 'gcc-7': name => 'gcc-7-multilib', ensure => latest, require => Apt::Ppa['ppa:ubuntu-toolchain-r/test'] }
   package { 'g++-7': name => 'g++-7-multilib', ensure => latest, require => Apt::Ppa['ppa:ubuntu-toolchain-r/test'] }
   package { 'gfortran-7': name => 'gfortran-7-multilib', ensure => latest, require => Apt::Ppa['ppa:ubuntu-toolchain-r/test'] }
