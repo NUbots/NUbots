@@ -43,7 +43,6 @@ install:
   - sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-7 100 --slave /usr/bin/g++ g++ /usr/bin/g++-7 --slave /usr/bin/gfortran gfortran /usr/bin/gfortran-7
 
 script:
-  - ls -lah /usr/bin
   - /usr/bin/python3 ./b platform select native
   - cd build
   - ninja
