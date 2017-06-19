@@ -27,10 +27,10 @@ before_install:
 
 install:
   # Run some code to output some information for debugging
-  - ls -lah /usr/bin
+  - sudo puppet apply --parser=future --verbose --debug --modulepath=puppet/modules:/etc/puppet/modules puppet/manifests/travis.pp
 
 script:
-  - sudo puppet apply --parser=future --verbose --debug --modulepath=puppet/modules:/etc/puppet/modules puppet/manifests/travis.pp
+  - ls -lah /usr/bin
   - /usr/bin/python3 ./b platform select native
   - cd build
   - ninja
