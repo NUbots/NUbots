@@ -66,18 +66,6 @@ class build_tools {
     require => [ Package['python3-pip'], ]
   }
 
-    # INSTALL PYTHON PACKAGES (we need python-pip to use the pip provider)
-  exec {'install_python_packages':
-    command => '/usr/bin/pip install pyparsing &&
-                /usr/bin/pip install pydotplus &&
-                /usr/bin/pip install pygments &&
-                /usr/bin/pip install termcolor &&
-                /usr/bin/pip install protobuf &&
-                /usr/bin/pip install mmh3 &&
-                /usr/bin/pip install numpy',
-    require => [ Package['python-pip'], ]
-  }
-
   # SETUP OUR ALTERNATIVES SO WE USE THE CORRECT COMPILER
   exec {'fix_compiler_environment':
     command => '/usr/bin/update-alternatives --remove-all gcc \
