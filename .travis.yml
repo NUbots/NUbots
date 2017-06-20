@@ -51,8 +51,8 @@ install:
 
   # This is dumb... but otherwise we get weird errors
   # One day when travis supports 16.04 we can remove this
-  - sudo wget -N https://launchpad.net/~ubuntu-toolchain-r/+archive/ubuntu/test/+files/libstdc++6_7.1.0-5ubuntu2~14.04_amd64.deb -O $TRAVIS_BUILD_DIR/toolchain/libstdc++6_7.1.0-5ubuntu2-14.04_amd64.deb
-  - sudo dpkg -i $TRAVIS_BUILD_DIR/toolchain/libstdc++6_7.1.0-5ubuntu2-14.04_amd64.deb
+  - sudo wget -N https://launchpad.net/~ubuntu-toolchain-r/+archive/ubuntu/test/+build/12615675/+files/libstdc++6_7.1.0-5ubuntu2~16.04_amd64.deb -O $TRAVIS_BUILD_DIR/toolchain/libstdc++6_7.1.0-5ubuntu2-16.04_amd64.deb
+  - sudo dpkg -i --force-all $TRAVIS_BUILD_DIR/toolchain/libstdc++6_7.1.0-5ubuntu2-16.04_amd64.deb
 
 script:
   - /usr/bin/python3 ./b platform select native
