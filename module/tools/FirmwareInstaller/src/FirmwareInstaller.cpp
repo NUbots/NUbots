@@ -163,7 +163,7 @@ namespace tools {
                     for (count = 0; static_cast<size_t>(count) < cm730.firmware.size();) {
                         ssize_t writeSize = 64;
 
-                        if ((count + 64) > cm730.firmware.size()) {
+                        if ((static_cast<size_t>(count) + 64) > cm730.firmware.size()) {
                             writeSize = cm730.firmware.size() - count;
                         }
 
