@@ -153,10 +153,10 @@ namespace io {
             if (ioctl(fd, TIOCSSERIAL, &serinfo) < 0) {
                 throw std::runtime_error("There was an error setting the baud rate for " + device);
             }
-
-            // Flush our connection to remove all existing data
-            tcflush(fd, TCIFLUSH);
         }
+
+        // Flush our connection to remove all existing data
+        tcflush(fd, TCIFLUSH);
     }
 
     bool uart::connected() const {
