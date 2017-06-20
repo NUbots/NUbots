@@ -10,7 +10,7 @@ const outPath = path.join(__dirname, './build')
 
 export default {
   context: sourcePath,
-  devtool: isProduction ? false : 'inline-source-map',
+  devtool: isProduction ? 'source-map' : 'inline-source-map',
   entry: {
     main: [
       'reflect-metadata',
