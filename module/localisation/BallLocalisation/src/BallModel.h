@@ -50,14 +50,10 @@ namespace module {
 
             arma::vec3 predictedObservation(const arma::vec::fixed<size>& state
                 , const message::support::FieldDescription& field
-                , const message::input::Sensors& sensors
-                , const MeasurementType::BALL&) const;
+                , const message::input::Sensors& sensors) const;
 
             arma::vec observationDifference(const arma::vec& measurement
-                , const arma::vec3& rBCc
-                , const message::support::FieldDescription& field
-                , const message::input::Sensors& sensors
-                , const MeasurementType::BALL&) const;
+                , const arma::vec3& rBCc) const;
 
             arma::vec::fixed<size> limitState(const arma::vec::fixed<size>& state) const;
 
