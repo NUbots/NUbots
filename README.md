@@ -85,7 +85,9 @@ TroubleShooting Vagrant
         $ nano config/NetworkConfiguration.yaml
 
 3. If dpkg is locked during vagrant provision:
-      
+   This procedure should resolve most issues that may cause the dpkg to be locked (the lock file is like a mutex).
+   Pay attention to the output of the apt-get commands and look for any further errors.
+
       $ vagrant ssh
       $ sudo rm /var/lib/dpkg/lock
       $ sudo apt-get install -f
@@ -93,7 +95,12 @@ TroubleShooting Vagrant
       $ sudo apt-get upgrade
       $ exit
       $ vagrant provision
-    
+
+   Optional step:
+   Run this after the "apt-get upgrade" command.
+   This isn't necessary to resolve any problems, it will just free up some hard drive space.
+      $ sudo apt-get autoremove --purge
+
 
 
 [NUbots]:                 http://nubots.net/                                      "NUbots"
