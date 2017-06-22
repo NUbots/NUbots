@@ -26,14 +26,28 @@ namespace localisation {
             // Use configuration here from file BallLocalisation.yaml
         });
 
+        /* To run at something like 100Hz that will call Time Update */
+        on<Every<100, Per<std::chrono::seconds>>, Sync<BallLocalisation>>().then("BallLocalisation Time", [this] {
+            auto curr_time = NUClear::clock::now();
+            double seconds = curr_time - last_time_update_time;
+            last_time_update_time = curr_time;
+            filter.timeUpdate(seconds);
+        });
+
+        /* To run whenever a ball has been detected */
         on<Trigger<std::vector<message::vision::Ball>>>().then([this](const std::vector<message::vision::Ball>& balls){
-            if(balls.size() > 0){  
-                auto message = std::make_unique<std::vector<Ball>>();
-                message->push_back(Ball());
-                message->back().locObject.last_measurement_time = NUClear::clock::now();
-                message->back().locObject.position              = balls[0].torsoSpacePosition.head<2>();
-                emit(std::make_unique<Ball>(message->back()));
-                emit(message);
+            double quality = 1.0;   // I don't know what quality should be used for
+            if(balls.size() > 0){
+                /* Call Time Update first */
+                auto curr_time = NUClear::clock::now();
+                double seconds = curr_time - last_time_update_time;
+                last_time_update_time = curr_time;
+                filter.timeUpdate(seconds);
+
+                /* Now call Measurement Update. Supports multiple measurement methods and will treat them as separate measurements */
+                for (auto& measurement : balls[0].measurements) {
+                    quality *= ball_filter_.measurementUpdate(measurement.rBCc,measurement.covariance);
+                }
             }
         });
     }
