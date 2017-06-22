@@ -36,7 +36,7 @@ namespace tools {
                     fw.checksum = std::accumulate(fw.firmware.begin(), fw.firmware.end(), uint8_t(0));
 
                     // Because Robotis really dont get the point of a checksum.
-                    fw.checksum -= ((128 * 1024) - fw.firmware.size() + 1);
+                    fw.checksum -= ((128 * 1024) - fw.firmware.size());
 
                     firmwares.insert(std::make_pair(name, fw));
                 }
