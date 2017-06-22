@@ -36,12 +36,6 @@ before_install:
   - sudo apt-get update
   - sudo apt-get install puppet
 
-    wget::fetch { 'nubots_deb':
-    destination => "/nubots/nubots-toolchain-${toolchain_version}-travis.deb",
-    source      => "",
-    timeout     => 0,
-  } ->
-
   # Install the puppet modules that are required for this install
   - sudo mkdir -p /etc/puppet/modules;
   - sudo puppet module install puppetlabs-apt --module_repository https://forge.puppet.com --version 2.4.0
