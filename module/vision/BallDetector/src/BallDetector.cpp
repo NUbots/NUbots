@@ -300,7 +300,8 @@ namespace vision {
                 arma::vec3 rBWw = (width_rBWw);
 
                 // Attach the position to the object
-                b.measurement.rBCc = convert<double, 3>(rBWw);  // TODO: This needs updating to actually provide rBCc
+                b.measurements.push_back();
+                b.measurements.back().rBCc = rBWw;  // TODO: This needs updating to actually provide rBCc
 
                 Transform3D Hgc       = camToGround;
                 arma::vec3 width_rBGg = Hgc.transformPoint(ballCentreRay * widthDistance);

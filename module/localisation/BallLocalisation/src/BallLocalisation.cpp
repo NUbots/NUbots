@@ -46,7 +46,7 @@ namespace localisation {
 
                 /* Now call Measurement Update. Supports multiple measurement methods and will treat them as separate measurements */
                 for (auto& measurement : balls[0].measurements) {
-                    quality *= ball_filter_.measurementUpdate(measurement.rBCc,measurement.covariance);
+                    quality *= filter.measurementUpdate(measurement.rBCc,measurement.covariance);
                 }
             }
         });
