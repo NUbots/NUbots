@@ -31,7 +31,7 @@ node nubotsvmbuild {
   $archs = {
     'native'    => {'flags'       => ['-m64', ],
                     'params'      => ['', ],
-                    'environment' => {'USE_THREAD' => '1', 'BINARY' => '64', 'NUM_THREADS' => '2', 'AUDIO' => 'PORTAUDIO', 'LDFLAGS' => '-m64', },
+                    'environment' => {'TARGET' => 'GENERIC', 'USE_THREAD' => '1', 'BINARY' => '64', 'NUM_THREADS' => '2', 'AUDIO' => 'PORTAUDIO', 'LDFLAGS' => '-m64', },
                    },
     'fitpc2i'   => {'flags'       => ['-m32', '-march=bonnell', '-mtune=bonnell', '-mno-movbe', '-mfxsr', '-mmmx', '-msahf', '-msse', '-msse2', '-msse3', '-mssse3', ],
                     'params'      => ['--param l1-cache-size=24', '--param l1-cache-line-size=64', '--param l2-cache-size=512', ],

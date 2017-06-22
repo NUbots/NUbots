@@ -9,12 +9,10 @@ dist: trusty
 # Most modern travis image
 group: edge
 
-# Cache our toolchain directory to speed up the build
-# This dir will get symlinked into place later
+
 cache:
+  # ccache makes things waaaaay faster
   ccache: true
-  directories:
-    - toolchain
 
 # Only do branch builds on master
 branches:
@@ -23,9 +21,6 @@ branches:
 
 # Setup using puppet
 before_install:
-  # Make a symlink from our toolchain cache to /nubots
-  - sudo ln -s $TRAVIS_BUILD_DIR/toolchain /nubots
-
   # Setup ruby and get the latest version of puppet
   - rvm install ruby --latest
   - sudo wget -N http://apt.puppetlabs.com/puppetlabs-release-trusty.deb -O $TRAVIS_BUILD_DIR/toolchain/puppetlabs-release-trusty.deb
