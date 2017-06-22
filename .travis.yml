@@ -9,9 +9,8 @@ dist: trusty
 # Most modern travis image
 group: edge
 
-
+# ccache makes things waaaaay faster
 cache:
-  # ccache makes things waaaaay faster
   ccache: true
 
 # Only do branch builds on master
