@@ -41,8 +41,7 @@ namespace module
             {
                 try 
                 {
-                    std::__cxx11::string s(deviceID.begin(), deviceID.end());
-                    Spinnaker::CameraPtr newCamera = SpinnakerCamList.GetBySerial(s);
+                    Spinnaker::CameraPtr newCamera = SpinnakerCamList.GetBySerial(deviceID);
 
                     // Ensure we found the camera.
                     if (newCamera)
