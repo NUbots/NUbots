@@ -1,2 +1,57 @@
 # Build our NUClear module
 NUCLEAR_MODULE()
+
+INCLUDE(ExternalProject)
+
+###############################################################################
+# CM730 Firmware builds for both Darwin and Igus models
+###############################################################################
+
+SET(FIRMWARE_SOURCE "${CMAKE_CURRENT_BINARY_DIR}/CM730Firmware")
+SET(FIRMWARE_DIR    "${CMAKE_BINARY_DIR}/firmware")
+
+EXTERNALPROJECT_ADD(
+  CM730Firmware
+
+  DOWNLOAD_DIR "${FIRMWARE_SOURCE}"
+  GIT_REPOSITORY "https://github.com/NUbots/CM730"
+  GIT_TAG "master"
+
+  UPDATE_COMMAND ""
+  PATCH_COMMAND ""
+
+  SOURCE_DIR "${FIRMWARE_SOURCE}"
+
+  CONFIGURE_COMMAND ""
+  BUILD_COMMAND ""
+
+  BINARY_DIR "${FIRMWARE_SOURCE}"
+  INSTALL_DIR "${FIRMWARE_SOURCE}"
+  INSTALL_COMMAND ""
+
+  TEST_COMMAND ""
+)
+
+EXTERNALPROJECT_ADD_STEP(
+  CM730Firmware Build3Cell
+  COMMAND ${CMAKE_COMMAND} -E make_directory ${FIRMWARE_SOURCE}/build_3Cell
+  COMMAND ${CMAKE_COMMAND} -E chdir ${FIRMWARE_SOURCE}/build_3Cell ${CMAKE_COMMAND} -DCMAKE_TOOLCHAIN_FILE=${FIRMWARE_SOURCE}/CM730.cmake -DBATTERY_TYPE=BATTERY_3CELL -DDEVICE=CM730 ${FIRMWARE_SOURCE} -G Ninja
+  COMMAND ${CMAKE_COMMAND} -E chdir ${FIRMWARE_SOURCE}/build_3Cell ninja
+  DEPENDEES download
+)
+
+EXTERNALPROJECT_ADD_STEP(
+  CM730Firmware Build4Cell
+  COMMAND ${CMAKE_COMMAND} -E make_directory ${FIRMWARE_SOURCE}/build_4Cell
+  COMMAND ${CMAKE_COMMAND} -E chdir ${FIRMWARE_SOURCE}/build_4Cell ${CMAKE_COMMAND} -DCMAKE_TOOLCHAIN_FILE=${FIRMWARE_SOURCE}/CM730.cmake -DBATTERY_TYPE=BATTERY_4CELL -DDEVICE=CM730 ${FIRMWARE_SOURCE} -G Ninja
+  COMMAND ${CMAKE_COMMAND} -E chdir ${FIRMWARE_SOURCE}/build_4Cell ninja
+  DEPENDEES download
+)
+
+EXTERNALPROJECT_ADD_STEP(
+  CM730Firmware CopyToBin
+  COMMAND ${CMAKE_COMMAND} -E make_directory "${FIRMWARE_DIR}"
+  COMMAND ${CMAKE_COMMAND} -E copy "${FIRMWARE_SOURCE}/build_3Cell/CM730.bin" "${FIRMWARE_DIR}/CM730_3Cell.bin"
+  COMMAND ${CMAKE_COMMAND} -E copy "${FIRMWARE_SOURCE}/build_4Cell/CM730.bin" "${FIRMWARE_DIR}/CM730_4Cell.bin"
+  DEPENDEES Build3Cell Build4Cell
+)
