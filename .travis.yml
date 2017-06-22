@@ -12,6 +12,9 @@ group: edge
 # ccache makes things waaaaay faster
 cache:
   ccache: true
+  directories:
+    # This cache is used for deb files so we don't smash nubots.net
+    - toolchain
 
 # Only do branch builds on master
 branches:
@@ -20,12 +23,24 @@ branches:
 
 # Setup using puppet
 before_install:
-  # Setup ruby and get the latest version of puppet
+  # Setup ruby so puppet works
   - rvm install ruby --latest
+
+  # Download and install our current toolchain version
+  - sudo wget -N http://nubots.net/debs/nubots-toolchain-2.1.1-travis.deb -O $TRAVIS_BUILD_DIR/toolchain/nubots-toolchain.deb
+  - sudo dpkg -i $TRAVIS_BUILD_DIR/toolchain/nubots-toolchain.deb
+
+  # Download and install the proper version of puppet
   - sudo wget -N http://apt.puppetlabs.com/puppetlabs-release-trusty.deb -O $TRAVIS_BUILD_DIR/toolchain/puppetlabs-release-trusty.deb
   - sudo dpkg -i $TRAVIS_BUILD_DIR/toolchain/puppetlabs-release-trusty.deb
   - sudo apt-get update
   - sudo apt-get install puppet
+
+    wget::fetch { 'nubots_deb':
+    destination => "/nubots/nubots-toolchain-${toolchain_version}-travis.deb",
+    source      => "",
+    timeout     => 0,
+  } ->
 
   # Install the puppet modules that are required for this install
   - sudo mkdir -p /etc/puppet/modules;
