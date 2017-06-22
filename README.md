@@ -40,8 +40,9 @@ Vagrant
     In the commands that follow, `{target}` is one of the supported build targets.
 
         $ vagrant ssh
+        $ cd NUbots
         $ ./b platform select {target}
-        $ cd NUbots/build
+        $ cd build
         $ ninja
 
 4. If quex permission error occurs run

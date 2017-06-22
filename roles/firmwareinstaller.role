@@ -4,9 +4,6 @@ NUCLEAR_ROLE(
     support::SignalCatcher
     support::logging::ConsoleLogHandler
 
-    #Sensors
-    platform::darwin::HardwareIO
-
     #Tools
     tools::FirmwareInstaller
 )
