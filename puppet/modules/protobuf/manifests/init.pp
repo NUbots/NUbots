@@ -2,7 +2,7 @@
 class protobuf {
     # Build ELLCC
     archive { 'protobuf-native':
-      url              => 'https://github.com/google/protobuf/releases/download/v3.0.2/protobuf-python-3.0.2.tar.gz',
+      url              => 'https://github.com/google/protobuf/releases/download/v3.3.0/protobuf-cpp-3.3.0.tar.gz',
       target           => '/nubots/toolchain/src/protobuf',
       src_target       => '/nubots/toolchain/src',
       purge_target     => true,
@@ -12,12 +12,12 @@ class protobuf {
       extension        => 'tar.gz',
       strip_components => 1,
       root_dir         => '.',
-      require          => [ Class['installer::prerequisites'], Class['dev_tools'], ],
+      require          => [ Class['installer::prerequisites'], Class['build_tools'], ],
     }
 
     exec { 'autotools_protobuf':
       creates     => '/nubots/toolchain/bin/protoc',
-      command     => "cp protobuf-native.tar.gz protobuf.tar.gz && 
+      command     => "cp protobuf-native.tar.gz protobuf.tar.gz &&
                       cd protobuf &&
                       ./configure --prefix=\"/nubots/toolchain\" --with-zlib &&
                       make -j\$(nproc) &&
@@ -29,4 +29,3 @@ class protobuf {
       require     => [ Archive['protobuf-native'], ],
     }
 }
-
