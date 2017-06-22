@@ -84,6 +84,17 @@ TroubleShooting Vagrant
         $ cd build/
         $ nano config/NetworkConfiguration.yaml
 
+3. If dpkg is locked during vagrant provision:
+      
+      $ vagrant ssh
+      $ sudo rm /var/lib/dpkg/lock
+      $ sudo apt-get install -f
+      $ sudo apt-get update
+      $ sudo apt-get upgrade
+      $ exit
+      $ vagrant provision
+    
+
 
 [NUbots]:                 http://nubots.net/                                      "NUbots"
 [NUClear]:                https://github.com/Fastcode/NUClear                     "NUClear"
