@@ -21,9 +21,17 @@ namespace tools {
             uint8_t checksum;
         };
 
-        std::map<std::string, Firmware> firmwares;
+        std::map<std::pair<std::string, std::string>, Firmware> firmwares;
 
-        bool ignore_inputs;
+        enum MenuState { NO_MENU, DEVICE_MENU, BATTERY_MENU };
+        enum Device { NO_DEVICE, CM730, DYNAMIXEL };
+        enum Battery { NO_BATTERY, BATTERY3, BATTERY4 };
+        MenuState menu_state;
+        Device selected_device;
+        Battery selected_battery;
+
+        void showDeviceMenu() const;
+        void showBatteryMenu() const;
     };
 
 }  // namespace tools
