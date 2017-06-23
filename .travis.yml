@@ -6,6 +6,12 @@ language: cpp
 os: linux
 dist: trusty
 
+# Build for each of our platforms
+env:
+  - PLATFORM=native
+  - PLATFORM=nuc7i7bnh
+  - PLATFORM=fitpc2i
+
 # Most modern travis image
 group: edge
 
@@ -27,7 +33,7 @@ before_install:
   - rvm install ruby --latest
 
   # Download and install our current toolchain version
-  - sudo wget -N http://nubots.net/debs/nubots-toolchain-2.1.1-travis.deb -O $TRAVIS_BUILD_DIR/toolchain/nubots-toolchain.deb
+  - sudo wget -N http://nubots.net/debs/nubots-toolchain-2.1.2-travis.deb -O $TRAVIS_BUILD_DIR/toolchain/nubots-toolchain.deb
   - sudo dpkg -i $TRAVIS_BUILD_DIR/toolchain/nubots-toolchain.deb
 
   # Download and install the proper version of puppet
@@ -55,6 +61,6 @@ install:
 
 script:
   - export PATH=/usr/lib/ccache:$PATH
-  - /usr/bin/python3 ./b platform select native
+  - /usr/bin/python3 ./b platform select $PLATFORM
   - cd build
   - ninja
