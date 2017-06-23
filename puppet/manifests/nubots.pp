@@ -3,13 +3,18 @@ include apt
 # http://www.puppetcookbook.com/posts/set-global-exec-path.html
 Exec { path => [ "/bin/", "/sbin/" , "/usr/bin/", "/usr/sbin/" ] }
 
-node nubotsvm {
+node default {
 
-  # We need dev tools
-  class {'dev_tools': }
+  # We need build tools to compile
+  class {'build_tools': }
+
+  # These user tools make the shell much easier
+  class {'user_tools':
+    user => 'vagrant',
+  }
 
   # Get and install our toolchain
-  $toolchain_version = '2.1.0'
+  $toolchain_version = '2.1.1'
   wget::fetch { 'nubots_deb':
     destination => "/root/nubots-toolchain-${toolchain_version}.deb",
     source      => "http://nubots.net/debs/nubots-toolchain-${toolchain_version}.deb",
@@ -24,16 +29,16 @@ node nubotsvm {
 
 node nubotsvmbuild {
   $archs = {
-    'native'    => {'flags'       => ['', ],
-                    'params'      => ['-m64', ],
-                    'environment' => {'USE_THREAD' => '1', 'BINARY' => '64', 'NUM_THREADS' => '2', 'AUDIO' => 'PORTAUDIO', 'LDFLAGS' => '-m64', },
+    'native'    => {'flags'       => ['-m64', ],
+                    'params'      => ['', ],
+                    'environment' => {'TARGET' => 'GENERIC', 'USE_THREAD' => '1', 'BINARY' => '64', 'NUM_THREADS' => '2', 'AUDIO' => 'PORTAUDIO', 'LDFLAGS' => '-m64', },
                    },
-    'fitpc2i'   => {'flags'       => ['-march=bonnell', '-mtune=bonnell', '-mno-movbe', '-mfxsr', '-mmmx', '-msahf', '-msse', '-msse2', '-msse3', '-mssse3', ],
-                    'params'      => ['-m32', '--param l1-cache-size=24', '--param l1-cache-line-size=64', '--param l2-cache-size=512', ],
+    'fitpc2i'   => {'flags'       => ['-m32', '-march=bonnell', '-mtune=bonnell', '-mno-movbe', '-mfxsr', '-mmmx', '-msahf', '-msse', '-msse2', '-msse3', '-mssse3', ],
+                    'params'      => ['--param l1-cache-size=24', '--param l1-cache-line-size=64', '--param l2-cache-size=512', ],
                     'environment' => {'TARGET' => 'YONAH', 'USE_THREAD' => '1', 'BINARY' => '32', 'NUM_THREADS' => '2', 'AUDIO' => 'PORTAUDIO', 'LDFLAGS' => '-m32', },
                    },
-    'nuc7i7bnh' => {'flags'       => ['-march=broadwell', '-mtune=broadwell', '-mmmx', '-mno-3dnow', '-msse', '-msse2', '-msse3', '-mssse3', '-mno-sse4a', '-mcx16', '-msahf', '-mmovbe', '-maes', '-mno-sha', '-mpclmul', '-mpopcnt', '-mabm', '-mno-lwp', '-mfma', '-mno-fma4', '-mno-xop', '-mbmi', '-mbmi2', '-mno-tbm', '-mavx', '-mavx2', '-msse4.2', '-msse4.1', '-mlzcnt', '-mno-rtm', '-mno-hle', '-mrdrnd', '-mf16c', '-mfsgsbase', '-mrdseed', '-mprfchw', '-madx', '-mfxsr', '-mxsave', '-mxsaveopt', '-mno-avx512f', '-mno-avx512er', '-mno-avx512cd', '-mno-avx512pf', '-mno-prefetchwt1', '-mclflushopt', '-mxsavec', '-mxsaves', '-mno-avx512dq', '-mno-avx512bw', '-mno-avx512vl', '-mno-avx512ifma', '-mno-avx512vbmi', '-mno-clwb', '-mno-mwaitx', ],
-                    'params'      => ['-m64', '--param l1-cache-size=32', '--param l1-cache-line-size=64', '--param l2-cache-size=4096', ],
+    'nuc7i7bnh' => {'flags'       => ['-m64', '-march=broadwell', '-mtune=broadwell', '-mmmx', '-mno-3dnow', '-msse', '-msse2', '-msse3', '-mssse3', '-mno-sse4a', '-mcx16', '-msahf', '-mmovbe', '-maes', '-mno-sha', '-mpclmul', '-mpopcnt', '-mabm', '-mno-lwp', '-mfma', '-mno-fma4', '-mno-xop', '-mbmi', '-mbmi2', '-mno-tbm', '-mavx', '-mavx2', '-msse4.2', '-msse4.1', '-mlzcnt', '-mno-rtm', '-mno-hle', '-mrdrnd', '-mf16c', '-mfsgsbase', '-mrdseed', '-mprfchw', '-madx', '-mfxsr', '-mxsave', '-mxsaveopt', '-mno-avx512f', '-mno-avx512er', '-mno-avx512cd', '-mno-avx512pf', '-mno-prefetchwt1', '-mclflushopt', '-mxsavec', '-mxsaves', '-mno-avx512dq', '-mno-avx512bw', '-mno-avx512vl', '-mno-avx512ifma', '-mno-avx512vbmi', '-mno-clwb', '-mno-mwaitx', ],
+                    'params'      => ['--param l1-cache-size=32', '--param l1-cache-line-size=64', '--param l2-cache-size=4096', ],
                     'environment' => {'TARGET' => 'HASWELL', 'USE_THREAD' => '1', 'BINARY' => '64', 'NUM_THREADS' => '2', 'AUDIO' => 'PORTAUDIO', 'LDFLAGS' => '-m64', },
                    },
   }
@@ -43,8 +48,13 @@ node nubotsvmbuild {
     archs => $archs,
   }
 
-  # We need dev tools to use the installer
-  class {'dev_tools': } -> Installer <| |>
+  # We need build tools to compile and we need it done before the installer
+  class {'build_tools': } -> Installer <| |>
+
+  # These user tools make the shell much easier and these also should be done before installing
+  class {'user_tools':
+    user => 'vagrant',
+  } -> Installer <| |>
 
   # List all of the archives that need to be downloaded along with any other associated parameters (creates, requires, etc).
   $archives = {
@@ -77,11 +87,12 @@ node nubotsvmbuild {
                        'method'      => 'cmake',},
     # NOTE: OpenBLAS CMake support is experimental and only supports x86 at the moment.
     'openblas'     => {'url'         => 'https://github.com/xianyi/OpenBLAS/archive/v0.2.19.tar.gz',
-                       'method'      => 'make',},
+                       'method'      => 'make',
+                       'creates'     => 'lib/libopenblas.a' },
     'libsvm'       => {'url'         => 'https://github.com/Bidski/libsvm/archive/v322.tar.gz',
-                       'creates'     =>'lib/svm.o',
+                       'creates'     => 'lib/svm.o',
                        'method'      => 'make', },
-    'armadillo'    => {'url'         => 'https://downloads.sourceforge.net/project/arma/armadillo-7.900.1.tar.xz',
+    'armadillo'    => {'url'         => 'https://downloads.sourceforge.net/project/arma/armadillo-7.950.1.tar.xz',
                        'method'      => 'cmake',
                        'creates'     => 'lib/libarmadillo.so',
                        'require'     => [ Installer['openblas'], ],},
@@ -107,7 +118,8 @@ node nubotsvmbuild {
                                           'nuc7i7bnh' => [ 'CCASFLAGS="-f elf64"', ], },
                        'method'      => 'autotools',},
     'cppformat'    => {'url'         => 'https://github.com/fmtlib/fmt/archive/3.0.1.tar.gz',
-                       'method'      => 'cmake',},
+                       'method'      => 'cmake',
+                       'creates'     => 'lib/libfmt.a' },
     'portaudio'    => {'url'         => 'http://www.portaudio.com/archives/pa_stable_v19_20140130.tgz',
                        'args'        => { 'native'   => [ '', ],
                                           'fitpc2i' => [ '--host=i686-linux-gnu', '--build=x86_64-unknown-linux-gnu', ],
@@ -115,7 +127,7 @@ node nubotsvmbuild {
                        'method'      => 'autotools',},
     'muparserx'    => {'url'         => 'https://github.com/beltoforion/muparserx/archive/v4.0.7.tar.gz',
                        'method'      => 'cmake',},
-    'eigen3'       => {'url'         => 'http://bitbucket.org/eigen/eigen/get/3.3.3.tar.gz',
+    'eigen3'       => {'url'         => 'http://bitbucket.org/eigen/eigen/get/3.3.4.tar.bz2',
                        'creates'     => 'include/eigen3/Eigen/Eigen',
                        'method'      => 'cmake',},
     'boost'        => {'url'         => 'https://dl.bintray.com/boostorg/release/1.64.0/source/boost_1_64_0.tar.gz',
@@ -126,19 +138,12 @@ node nubotsvmbuild {
                        'creates'     => 'src/boost/build_complete',
                        'postbuild'   => 'touch build_complete',
                        'require'     => [ Installer['zlib'], Installer['bzip2'], ],},
-    'mlpack'       => {'url'         => 'http://www.mlpack.org/files/mlpack-2.2.2.tar.gz',
-                       'args'        => { 'native'   => [ '-DBUILD_TESTS=OFF', '-DLAPACK_LIBRARY=PREFIX/lib/libopenblas.so', '-DBLAS_LIBRARY=PREFIX/lib/libopenblas.so', ],
-                                          'fitpc2i' => [ '-DBUILD_TESTS=OFF', '-DLAPACK_LIBRARY=PREFIX/lib/libopenblas.so', '-DBLAS_LIBRARY=PREFIX/lib/libopenblas.so', ],
-                                          'nuc7i7bnh' => [ '-DBUILD_TESTS=OFF', '-DLAPACK_LIBRARY=PREFIX/lib/libopenblas.so', '-DBLAS_LIBRARY=PREFIX/lib/libopenblas.so', ], },
-                       'require'     => [ Installer['armadillo'], Installer['boost'], Installer['xml2'], ],
-                       'creates'     => 'lib/libmlpack.so',
-                       'method'      => 'cmake',},
     'espeak'       => {'url'         => 'https://github.com/Bidski/espeak/archive/v1.48.04.tar.gz',
                        'src_dir'     => 'src',
                        'prebuild'    => 'cp portaudio19.h portaudio.h',
                        'method'      => 'make',
                        'require'     => [ Installer['portaudio'], ],},
-    'fswatch'      => {'url'         => 'https://github.com/emcrisostomo/fswatch/archive/1.9.3.tar.gz',
+    'fswatch'      => {'url'         => 'https://github.com/emcrisostomo/fswatch/releases/download/1.9.3/fswatch-1.9.3.tar.gz',
                        'args'        => { 'native'   => [ '', ],
                                           'fitpc2i' => [ '--host=i686-linux-gnu', '--build=x86_64-unknown-linux-gnu', ],
                                           'nuc7i7bnh' => [ '', ], },
@@ -181,12 +186,12 @@ node nubotsvmbuild {
           extension        => $extension,
           strip_components => 1,
           root_dir         => '.',
-          require          => [ Class['installer::prerequisites'], Class['dev_tools'], ],
+          require          => [ Class['installer::prerequisites'], Class['build_tools'], ],
         }
         installer { "${archive}":
           archs       => $archs,
           creates     => $params['creates'],
-          require     => delete_undef_values(flatten([ Archive["${archive}"], $params['require'], Class['installer::prerequisites'], Class['dev_tools'], ])),
+          require     => delete_undef_values(flatten([ Archive["${archive}"], $params['require'], Class['installer::prerequisites'], Class['build_tools'], ])),
           args        => $params['args'],
           src_dir     => $params['src_dir'],
           prebuild    => $params['prebuild'],
@@ -221,14 +226,6 @@ node nubotsvmbuild {
     }
   }
 
-  # INSTALL ROBOT HOST PARSER
-  file { '/nubots/toolchain/find_robot_hosts.sh':
-    ensure  => present,
-    mode    => '755',
-    source  => 'puppet:///modules/dev_tools/find_robot_hosts.sh',
-    replace => true,
-  }
-
   archive { "Spinnaker_nuc7i7bnh":
     url              => "http://nubots.net/tarballs/spinnaker_1_0_0_295_amd64.tar.gz",
     target           => "/nubots/toolchain/nuc7i7bnh/src/Spinnaker",
@@ -240,7 +237,7 @@ node nubotsvmbuild {
     extension        => "tar.gz",
     strip_components => 1,
     root_dir         => '.',
-    require          => [ Class['installer::prerequisites'], Class['dev_tools'], ],
+    require          => [ Class['installer::prerequisites'], Class['build_tools'], ],
   }
   archive { "Spinnaker_native":
     url              => "http://nubots.net/tarballs/spinnaker_1_0_0_295_amd64.tar.gz",
@@ -253,7 +250,7 @@ node nubotsvmbuild {
     extension        => "tar.gz",
     strip_components => 1,
     root_dir         => '.',
-    require          => [ Class['installer::prerequisites'], Class['dev_tools'], ],
+    require          => [ Class['installer::prerequisites'], Class['build_tools'], ],
   }
   archive { "Spinnaker_fitpc2i":
     url              => "http://nubots.net/tarballs/spinnaker_1_0_0_295_i386.tar.gz",
@@ -266,7 +263,7 @@ node nubotsvmbuild {
     extension        => "tar.gz",
     strip_components => 1,
     root_dir         => '.',
-    require          => [ Class['installer::prerequisites'], Class['dev_tools'], ],
+    require          => [ Class['installer::prerequisites'], Class['build_tools'], ],
   }
   exec { "Spinnaker_nuc7i7bnh":
     creates  => "/nubots/toolchain/nuc7i7bnh/include/Spinnaker.h",
@@ -345,8 +342,8 @@ node nubotsvmbuild {
       content =>
 "set(CMAKE_SYSTEM_NAME Linux)
 
-set(CMAKE_C_COMPILER /usr/bin/gcc)
-set(CMAKE_CXX_COMPILER /usr/bin/g++)
+set(CMAKE_C_COMPILER gcc)
+set(CMAKE_CXX_COMPILER g++)
 
 set(CMAKE_FIND_ROOT_PATH \"${prefix}/${arch}\"
        \"${prefix}\"
@@ -362,8 +359,8 @@ ${compile_options}
 include_directories(SYSTEM \"${prefix}/${arch}/include\")
 include_directories(SYSTEM \"${prefix}/include\")
 
-set(CMAKE_C_FLAGS \"\${CMAKE_C_FLAGS} ${compile_params}\" CACHE STRING \"\" FORCE)
-set(CMAKE_CXX_FLAGS \"\${CMAKE_CXX_FLAGS} ${compile_params}\" CACHE STRING \"\" FORCE)
+set(CMAKE_C_FLAGS \"\${CMAKE_C_FLAGS} ${compile_params}\")
+set(CMAKE_CXX_FLAGS \"\${CMAKE_CXX_FLAGS} ${compile_params}\")
 
 set(PLATFORM \"${arch}\" CACHE STRING \"The platform to build for.\" FORCE)
 ",
