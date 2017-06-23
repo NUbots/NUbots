@@ -359,8 +359,8 @@ ${compile_options}
 include_directories(SYSTEM \"${prefix}/${arch}/include\")
 include_directories(SYSTEM \"${prefix}/include\")
 
-set(CMAKE_C_FLAGS \"\${CMAKE_C_FLAGS} ${compile_params}\")
-set(CMAKE_CXX_FLAGS \"\${CMAKE_CXX_FLAGS} ${compile_params}\")
+set(CMAKE_C_FLAGS \"\${CMAKE_C_FLAGS} ${compile_params}\" CACHE STRING \"\")
+set(CMAKE_CXX_FLAGS \"\${CMAKE_CXX_FLAGS} ${compile_params}\" CACHE STRING \"\")
 
 set(PLATFORM \"${arch}\" CACHE STRING \"The platform to build for.\" FORCE)
 ",
