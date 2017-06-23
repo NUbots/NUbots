@@ -2,7 +2,6 @@
 
 import pickle
 import gzip
-import mmh3
 import struct
 import sys
 import os
@@ -47,7 +46,8 @@ def run(file, **kwargs):
         pb_type = message.__module__.split('.')[:-1]
         pb_type.append(message.__name__)
         pb_type = '.'.join(pb_type).encode('utf-8')
-        pb_hash = mmh3.hash_bytes(pb_type, 0x4e55436c, True)
+        pb_hash = '' # TODO swap to using XXHASH
+        # pb_hash = mmh3.hash_bytes(pb_type, 0x4e55436c, True)
 
         parsers[pb_hash] = (pb_type, message)
 
