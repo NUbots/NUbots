@@ -90,20 +90,19 @@ TroubleShooting Vagrant
    This procedure should resolve most issues that may cause the dpkg to be locked (the lock file is like a mutex).
    Pay attention to the output of the apt-get commands and look for any further errors.
 
-      $ vagrant ssh
-      $ sudo rm /var/lib/dpkg/lock
-      $ sudo apt-get install -f
-      $ sudo apt-get update
-      $ sudo apt-get upgrade
-      $ exit
-      $ vagrant provision
+        $ vagrant ssh
+        $ sudo rm /var/lib/dpkg/lock
+        $ sudo apt-get install -f
+        $ sudo apt-get update
+        $ sudo apt-get upgrade
+        $ exit
+        $ vagrant provision
 
    Optional step:
    Run this after the "apt-get upgrade" command.
    This isn't necessary to resolve any problems, it will just free up some hard drive space.
-      $ sudo apt-get autoremove --purge
-
-
+        
+        $ sudo apt-get autoremove --purge
 
 [NUbots]:                 http://nubots.net/                                      "NUbots"
 [NUClear]:                https://github.com/Fastcode/NUClear                     "NUClear"
