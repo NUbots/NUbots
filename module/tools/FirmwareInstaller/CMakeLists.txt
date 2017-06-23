@@ -1,57 +1,44 @@
-# Build our NUClear module
-NUCLEAR_MODULE()
-
 INCLUDE(ExternalProject)
 
 ###############################################################################
 # CM730 Firmware builds for both Darwin and Igus models
 ###############################################################################
 
-SET(FIRMWARE_SOURCE "${CMAKE_CURRENT_BINARY_DIR}/CM730Firmware")
-SET(FIRMWARE_DIR    "${CMAKE_BINARY_DIR}/firmware")
+SET(firmware_source "${CMAKE_CURRENT_BINARY_DIR}/CM730Firmware")
+SET(firmware_dir    "${CMAKE_BINARY_DIR}/firmware")
+SET(bin_files "${firmware_source}/build/cm730_3cell.bin" "${firmware_source}/build/cm730_4cell.bin"
+              "${firmware_source}/build/cm740_3cell.bin" "${firmware_source}/build/cm740_4cell.bin")
 
 EXTERNALPROJECT_ADD(
   CM730Firmware
 
-  DOWNLOAD_DIR "${FIRMWARE_SOURCE}"
+  DOWNLOAD_DIR "${firmware_source}"
   GIT_REPOSITORY "https://github.com/NUbots/CM730"
   GIT_TAG "master"
 
+  PREFIX "${firmware_source}"
+
   UPDATE_COMMAND ""
-  PATCH_COMMAND ""
 
-  SOURCE_DIR "${FIRMWARE_SOURCE}"
+  CMAKE_GENERATOR Ninja
+  #CMAKE_ARGS -D -DCMAKE_TOOLCHAIN_FILE:STRING="${firmware_source}/CM730.cmake"
 
-  CONFIGURE_COMMAND ""
-  BUILD_COMMAND ""
+  BINARY_DIR "${firmware_source}/build"
+  BUILD_COMMAND ninja
+  BUILD_BYPRODUCTS ${bin_files}
 
-  BINARY_DIR "${FIRMWARE_SOURCE}"
-  INSTALL_DIR "${FIRMWARE_SOURCE}"
+  # We have a custom installation step below.
+  INSTALL_DIR "${firmware_source}/build"
   INSTALL_COMMAND ""
 
+  # We dont need to do any testing.
   TEST_COMMAND ""
 )
 
-EXTERNALPROJECT_ADD_STEP(
-  CM730Firmware Build3Cell
-  COMMAND ${CMAKE_COMMAND} -E make_directory ${FIRMWARE_SOURCE}/build_3Cell
-  COMMAND ${CMAKE_COMMAND} -E chdir ${FIRMWARE_SOURCE}/build_3Cell ${CMAKE_COMMAND} -DCMAKE_TOOLCHAIN_FILE=${FIRMWARE_SOURCE}/CM730.cmake -DBATTERY_TYPE=BATTERY_3CELL -DDEVICE=CM730 ${FIRMWARE_SOURCE} -G Ninja
-  COMMAND ${CMAKE_COMMAND} -E chdir ${FIRMWARE_SOURCE}/build_3Cell ninja
-  DEPENDEES download
-)
+# Build our NUClear module
+FOREACH(bin_file ${bin_files})
+    LIST(APPEND data_files "${bin_file}:firmware")
+ENDFOREACH(bin_file)
 
-EXTERNALPROJECT_ADD_STEP(
-  CM730Firmware Build4Cell
-  COMMAND ${CMAKE_COMMAND} -E make_directory ${FIRMWARE_SOURCE}/build_4Cell
-  COMMAND ${CMAKE_COMMAND} -E chdir ${FIRMWARE_SOURCE}/build_4Cell ${CMAKE_COMMAND} -DCMAKE_TOOLCHAIN_FILE=${FIRMWARE_SOURCE}/CM730.cmake -DBATTERY_TYPE=BATTERY_4CELL -DDEVICE=CM730 ${FIRMWARE_SOURCE} -G Ninja
-  COMMAND ${CMAKE_COMMAND} -E chdir ${FIRMWARE_SOURCE}/build_4Cell ninja
-  DEPENDEES download
-)
+NUCLEAR_MODULE(DATA_FILES ${data_files})
 
-EXTERNALPROJECT_ADD_STEP(
-  CM730Firmware CopyToBin
-  COMMAND ${CMAKE_COMMAND} -E make_directory "${FIRMWARE_DIR}"
-  COMMAND ${CMAKE_COMMAND} -E copy "${FIRMWARE_SOURCE}/build_3Cell/CM730.bin" "${FIRMWARE_DIR}/CM730_3Cell.bin"
-  COMMAND ${CMAKE_COMMAND} -E copy "${FIRMWARE_SOURCE}/build_4Cell/CM730.bin" "${FIRMWARE_DIR}/CM730_4Cell.bin"
-  DEPENDEES Build3Cell Build4Cell
-)

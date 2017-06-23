@@ -9,6 +9,7 @@
 
 #include "utility/file/fileutil.h"
 #include "utility/io/uart.h"
+#include "utility/strutil/strutil.h"
 
 namespace module {
 namespace tools {
@@ -16,15 +17,23 @@ namespace tools {
     using extension::Configuration;
 
     struct FlashCM730 {};
+    struct FlashComplete {};
 
     FirmwareInstaller::FirmwareInstaller(std::unique_ptr<NUClear::Environment> environment)
-        : Reactor(std::move(environment)), device("UNKNOWN"), ignore_inputs(false) {
+        : Reactor(std::move(environment))
+        , device("UNKNOWN")
+        , menu_state(DEVICE_MENU)
+        , selected_device(NO_DEVICE)
+        , selected_battery(NO_BATTERY) {
+
         on<Configuration>("FirmwareInstaller.yaml").then([this](const Configuration& config) {
             device = config["device"].as<std::string>();
 
             for (auto& f : config["firmwares"].config) {
-                std::string name = f.first.as<std::string>();
-                std::string path = f.second.as<std::string>();
+                std::pair<std::string, std::string> name;
+                name.first       = utility::strutil::toUpper(f["device"].as<std::string>());
+                name.second      = utility::strutil::toUpper(f["battery"].as<std::string>());
+                std::string path = f["path"].as<std::string>();
 
                 Firmware fw;
 
@@ -36,66 +45,118 @@ namespace tools {
                     fw.checksum = std::accumulate(fw.firmware.begin(), fw.firmware.end(), uint8_t(0));
 
                     // Because Robotis really dont get the point of a checksum.
+                    // Need to account for extra 0xFFs in checksum (up to byte limit of 128 * 1024).
+                    // This is equivalent to -1 per 0xFF.
                     fw.checksum -= ((128 * 1024) - fw.firmware.size());
 
                     firmwares.insert(std::make_pair(name, fw));
                 }
                 else {
-                    log<NUClear::WARN>("The firmware file", path, "for", name, "does not exist");
+                    log<NUClear::WARN>("The firmware file", path, "for", name.first, "does not exist");
                 }
             }
         });
 
-        auto showMenu = [this]() -> void {
-            std::cout << "\n\n" << std::endl;
-            std::cout << "***********************************" << std::endl;
-            std::cout << "* Welcome to NUfirmware Installer *" << std::endl;
-            std::cout << "***********************************" << std::endl;
-            std::cout << "\tType \"CM730\" to flash CM730 firmware." << std::endl;
-            std::cout << "\tType \"DYNXL\" to flash Dynamixel firmware." << std::endl;
-            std::cout << "\tType \"QUIT\" to quit." << std::endl;
-            std::cout << "Choice: " << std::flush;
-        };
+        showDeviceMenu();
 
-        showMenu();
+        on<IO>(STDIN_FILENO, IO::READ).then([this] {
 
-        on<IO>(STDIN_FILENO, IO::READ).then([this, &showMenu] {
+            // Get input.
+            std::string input;
+            std::cin >> input;
 
-            if (!ignore_inputs) {
-                std::string input;
-                std::cin >> input;
+            // Convert input to uppercase.
+            utility::strutil::toUpper(input);
 
-                // Convert input to uppercase.
-                std::transform(
-                    input.begin(), input.end(), input.begin(), [](const char& c) -> char { return std::toupper(c); });
+            switch (menu_state) {
+                // Ignore inputs.
+                case NO_MENU: break;
 
-                if (input.compare("CM730") == 0) {
-                    emit(std::make_unique<FlashCM730>());
-                }
+                case DEVICE_MENU:
+                    if (input.compare("CM730") == 0) {
+                        selected_device  = CM730;
+                        selected_battery = NO_BATTERY;
+                        menu_state       = BATTERY_MENU;
+                        showBatteryMenu();
+                    }
 
-                else if (input.compare("DYNXL") == 0) {
-                    std::cout << "Too bad. We haven't implemented this yet." << std::endl;
-                    showMenu();
-                }
+                    else if (input.compare("DYNXL") == 0) {
+                        selected_device  = DYNAMIXEL;
+                        selected_battery = NO_BATTERY;
+                        menu_state       = DEVICE_MENU;  // This will change when we implement this feature.
+                        std::cout << "Too bad. We haven't implemented this yet." << std::endl;
+                        showDeviceMenu();
+                    }
 
-                else if (input.compare("QUIT") == 0) {
-                    std::cout << "Bye." << std::endl;
-                    powerplant.shutdown();
-                }
+                    else if (input.compare("QUIT") == 0) {
+                        selected_device  = NO_DEVICE;
+                        selected_battery = NO_BATTERY;
+                        std::cout << "Bye." << std::endl;
+                        powerplant.shutdown();
+                    }
 
-                else {
-                    std::cout << "Unknown input. Try again." << std::endl;
-                    showMenu();
-                }
+                    else {
+                        selected_device  = NO_DEVICE;
+                        selected_battery = NO_BATTERY;
+                        std::cout << "Unknown input. Try again." << std::endl;
+                        showDeviceMenu();
+                    }
+
+                    break;
+
+                case BATTERY_MENU:
+                    if (input.compare("1") == 0) {
+                        selected_battery = BATTERY3;
+                        menu_state       = NO_MENU;
+                        emit(std::make_unique<FlashCM730>());
+                    }
+
+                    else if (input.compare("2") == 0) {
+                        selected_battery = BATTERY4;
+                        menu_state       = NO_MENU;
+                        emit(std::make_unique<FlashCM730>());
+                    }
+
+                    else if (input.compare("0") == 0) {
+                        selected_device  = NO_DEVICE;
+                        selected_battery = NO_BATTERY;
+                        menu_state       = DEVICE_MENU;
+                        showDeviceMenu();
+                    }
+
+                    else {
+                        selected_battery = NO_BATTERY;
+                        std::cout << "Unknown input. Try again." << std::endl;
+                        showBatteryMenu();
+                    }
+
+                    break;
             }
         });
 
-        on<Trigger<FlashCM730>, Sync<FirmwareInstaller>>().then([this, &showMenu] {
+        on<Trigger<FlashComplete>, Sync<FirmwareInstaller>>().then([this] {
+            menu_state       = DEVICE_MENU;
+            selected_device  = NO_DEVICE;
+            selected_battery = NO_BATTERY;
+            showDeviceMenu();
+        });
 
-            // Make sure the user can't quit part way through the process.
-            ignore_inputs = true;
+        on<Trigger<FlashCM730>, Sync<FirmwareInstaller>>().then([this] {
 
-            const auto& it = firmwares.find("CM730");
+            std::pair<std::string, std::string> name;
+
+            switch (selected_device) {
+                case CM730: name.first = "CM730"; break;
+                default: log<NUClear::WARN>("Invalid device selected."); return;
+            }
+
+            switch (selected_battery) {
+                case BATTERY3: name.second = "3CELL"; break;
+                case BATTERY4: name.second = "4CELL"; break;
+                default: log<NUClear::WARN>("Invalid battery selected."); return;
+            }
+
+            const auto& it = firmwares.find(name);
 
             // Open the UART
             utility::io::uart uart(device, 57600);
@@ -211,13 +272,31 @@ namespace tools {
                 else {
                     log<NUClear::WARN>("CM730 reset failed.");
                     uart.close();
-                    powerplant.shutdown();
                 }
             }
 
-            ignore_inputs = false;
-            showMenu();
+            emit(std::make_unique<FlashComplete>());
         });
+    }
+
+    void FirmwareInstaller::showDeviceMenu() const {
+        std::cout << "\n\n" << std::endl;
+        std::cout << "***********************************" << std::endl;
+        std::cout << "* Welcome to NUfirmware Installer *" << std::endl;
+        std::cout << "***********************************" << std::endl;
+        std::cout << "\tType \"CM730\" to flash CM730 firmware." << std::endl;
+        std::cout << "\tType \"DYNXL\" to flash Dynamixel firmware." << std::endl;
+        std::cout << "\tType \"QUIT\" to quit." << std::endl;
+        std::cout << "Choice: " << std::flush;
+    }
+
+    void FirmwareInstaller::showBatteryMenu() const {
+        std::cout << "\n" << std::endl;
+        std::cout << "Select battery type: " << std::endl;
+        std::cout << "\t1) 11.1V 3 Cell Battery" << std::endl;
+        std::cout << "\t2) 14.8V 4 Cell Battery" << std::endl;
+        std::cout << "\t0) Cancel" << std::endl;
+        std::cout << "Choice: " << std::flush;
     }
 
 }  // namespace tools
