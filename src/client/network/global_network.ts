@@ -1,19 +1,22 @@
-import { inject } from 'inversify'
-import { injectable } from 'inversify'
 import { message } from '../../shared/proto/messages'
 import { MessageTypePath } from './message_type_names'
 import { RawSocket } from './raw_socket'
 import Sensors = message.input.Sensors
 
-@injectable()
 export class GlobalNetwork {
   private listeners: Map<MessageType<Message>, Set<MessageCallback<Message>>>
   private packetListeners: Map<string, (messageType: MessageType<Message>, buffer: ArrayBuffer) => void>
 
-  public constructor(@inject(RawSocket) private socket: RawSocket,
-                     @inject(MessageTypePath) private messageTypePath: MessageTypePath) {
+  public constructor(private socket: RawSocket,
+                     private messageTypePath: MessageTypePath) {
     this.listeners = new Map()
     this.packetListeners = new Map()
+  }
+
+  public static of() {
+    const messageTypePath = MessageTypePath.of()
+    const socket = RawSocket.of()
+    return new GlobalNetwork(socket, messageTypePath)
   }
 
   public on<T extends Message>(messageType: MessageType<T>, cb: MessageCallback<T>) {

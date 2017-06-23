@@ -1,9 +1,7 @@
 import * as EventEmitter from 'events'
-import { injectable } from 'inversify'
 import { NUClearNetPeer } from 'nuclearnet.js'
 import { NUClearNetSend } from 'nuclearnet.js'
 
-@injectable()
 export class FakeNUClearNetServer extends EventEmitter {
   private peers: NUClearNetPeer[]
 
@@ -12,6 +10,16 @@ export class FakeNUClearNetServer extends EventEmitter {
 
     this.peers = []
   }
+
+  public static of = (() => {
+    let instance: FakeNUClearNetServer
+    return (): FakeNUClearNetServer => {
+      if (!instance) {
+        instance = new FakeNUClearNetServer()
+      }
+      return instance
+    }
+  })()
 
   public connect(peer: NUClearNetPeer): void {
     this.emit('nuclear_join', peer)

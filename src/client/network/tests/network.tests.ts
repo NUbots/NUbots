@@ -1,4 +1,3 @@
-import 'reflect-metadata'
 import { message } from '../../../shared/proto/messages'
 import { Network } from '../network'
 import Sensors = message.input.Sensors

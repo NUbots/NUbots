@@ -1,9 +1,4 @@
 import * as minimist from 'minimist'
-import { NUClearNet } from 'nuclearnet.js'
-import 'reflect-metadata'
-import { getContainer } from '../server/inversify.config'
-import { Clock } from '../server/time/clock'
-import { ClockType } from '../server/time/clock'
 import { SimulatorStatus } from './robot_simulator'
 import { RobotSimulator } from './robot_simulator'
 import { SensorDataSimulator } from './sensor_data_simulator'
@@ -13,17 +8,12 @@ function main() {
   const args = minimist(process.argv.slice(2))
 
   const simulators = getSimulators(args)
-  const container = getContainer({ fakeNetworking: false })
-  const clock = container.get<Clock>(ClockType)
-  const robotSimulator = new RobotSimulator(
-    container.get<NUClearNet>(NUClearNet),
-    clock,
-    {
-      name: 'Robot Simulator',
-      simulators,
-    },
-  )
-  new SimulatorStatus(clock, robotSimulator).statusEvery(2)
+  const robotSimulator = RobotSimulator.of({
+    fakeNetworking: false,
+    name: 'Robot Simulator',
+    simulators,
+  })
+  SimulatorStatus.of(robotSimulator).statusEvery(2)
   robotSimulator.simulateWithFrequency(60)
 }
 

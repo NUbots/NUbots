@@ -1,22 +1,29 @@
-import { inject } from 'inversify'
 import { NUClearNet } from 'nuclearnet.js'
 import { Clock } from '../../src/server/time/clock'
 import { CancelTimer } from '../../src/server/time/node_clock'
-import { ClockType } from '../server/time/clock'
 import { flatMap } from './flat_map'
 import { Simulator } from './simulator'
+import { NodeSystemClock } from '../server/time/node_clock'
+import { FakeNUClearNet } from './nuclearnet/fake_nuclearnet'
 
 export class RobotSimulator {
   private name: string
   private simulators: Simulator[]
   public messagesSent: number
 
-  public constructor(@inject(NUClearNet) private network: NUClearNet,
-                     @inject(ClockType) private clock: Clock,
+  public constructor(private network: NUClearNet,
+                     private clock: Clock,
                      opts: { name: string, simulators: Simulator[] }) {
-    Object.assign(this, opts)
+    this.name = opts.name
+    this.simulators = opts.simulators
 
     this.messagesSent = 0
+  }
+
+  public static of(opts: { fakeNetworking: boolean, name: string; simulators: Simulator[] }): RobotSimulator {
+    const network = opts.fakeNetworking ? FakeNUClearNet.of() : new NUClearNet()
+    const clock = NodeSystemClock
+    return new RobotSimulator(network, clock, opts)
   }
 
   public simulateWithFrequency(frequency: number) {
@@ -61,9 +68,13 @@ export class RobotSimulator {
 export class SimulatorStatus {
   private lastMessagesSent: number
 
-  public constructor(@inject(ClockType) private clock: Clock,
+  public constructor(private clock: Clock,
                      private simulator: RobotSimulator) {
     this.lastMessagesSent = 0
+  }
+
+  public static of(simulator: RobotSimulator): SimulatorStatus {
+    return new SimulatorStatus(NodeSystemClock, simulator)
   }
 
   public statusEvery(seconds: number): CancelTimer {

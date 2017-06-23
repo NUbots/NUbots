@@ -13,22 +13,18 @@ export default {
   devtool: isProduction ? 'source-map' : 'inline-source-map',
   entry: {
     main: [
-      'reflect-metadata',
       './client/index.tsx',
     ].concat(isProduction ? [] : [
       'webpack-hot-middleware/client',
     ]),
     vendor: [
       'classnames',
-      'inversify',
-      'inversify-inject-decorators',
       'mobx',
       'mobx-react',
       'mobx-react-router',
       'react',
       'react-dom',
       'react-router',
-      'reflect-metadata',
       'socket.io-client',
       'three',
     ],

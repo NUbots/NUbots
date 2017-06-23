@@ -1,16 +1,17 @@
-import { inject } from 'inversify'
-import { injectable } from 'inversify'
 import { GlobalNetwork } from './global_network'
 import { MessageType } from './global_network'
 import { Message } from './global_network'
 import { MessageCallback } from './global_network'
 
-@injectable()
 export class Network {
   private listeners: Map<MessageType<Message>, Set<MessageCallback<Message>>>
 
-  public constructor(@inject(GlobalNetwork) private globalNetwork: GlobalNetwork) {
+  public constructor(private globalNetwork: GlobalNetwork) {
     this.listeners = new Map()
+  }
+
+  public static of(globalNetwork: GlobalNetwork): Network {
+    return new Network(globalNetwork)
   }
 
   public on<T extends Message>(messageType: MessageType<T>, cb: MessageCallback<T>) {

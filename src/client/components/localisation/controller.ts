@@ -1,4 +1,3 @@
-import { injectable } from 'inversify'
 import { action } from 'mobx'
 import * as THREE from 'three'
 import { HIP_TO_FOOT } from './darwin_robot/view_model'
@@ -12,8 +11,11 @@ interface KeyModifiers {
   ctrlKey: boolean
 }
 
-@injectable()
 export class LocalisationController {
+  public static of(): LocalisationController {
+    return new LocalisationController()
+  }
+
   @action
   public onAnimationFrame(model: LocalisationModel, time: number) {
     model.time.time = time / 1000

@@ -17,13 +17,15 @@ import { NUClear } from './components/nuclear/view'
 import { Scatter } from './components/scatter_plot/view'
 import { Subsumption } from './components/subsumption/view'
 import { Vision } from './components/vision/view'
-import { container } from './inversify.config'
+import { GlobalNetwork } from './network/global_network'
 
 // enable MobX strict mode
 useStrict(true)
 
+const globalNetwork = GlobalNetwork.of()
+
 // TODO (Annable): Replace all this code with real networking + simulator
-const localisationModel = container.get(LocalisationModel)
+const localisationModel = LocalisationModel.of()
 
 runInAction(() => {
   localisationModel.camera.position.set(0, 0.2, 0.5)
@@ -58,9 +60,9 @@ ReactDOM.render(
     <Route path='/' component={AppView}>
       <IndexRoute component={Dashboard}/>
       <Route path='/localisation' component={() => {
-        const controller = container.get(LocalisationController)
-        const model = container.get(LocalisationModel)
-        const network = container.get(LocalisationNetwork)
+        const model = localisationModel
+        const controller = LocalisationController.of()
+        const network = LocalisationNetwork.of(globalNetwork, model)
         return <LocalisationView controller={controller} model={model} network={network}/>
       }}/>
       <Route path='/vision' component={Vision}/>

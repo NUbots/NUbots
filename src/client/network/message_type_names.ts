@@ -1,9 +1,7 @@
-import { injectable } from 'inversify'
 import { message } from '../../shared/proto/messages'
 import { MessageType } from './global_network'
 import { Message } from './global_network'
 
-@injectable()
 export class MessageTypePath {
   private cache: Map<any, string>
   private searchObject: any
@@ -12,6 +10,16 @@ export class MessageTypePath {
     this.searchObject = { message }
     this.cache = new Map()
   }
+
+  public static of = (() => {
+    let instance: MessageTypePath
+    return (): MessageTypePath => {
+      if (!instance) {
+        instance = new MessageTypePath()
+      }
+      return instance
+    }
+  })()
 
   public getPath(messageType: MessageType<Message>): string {
     if (!this.cache.has(messageType)) {

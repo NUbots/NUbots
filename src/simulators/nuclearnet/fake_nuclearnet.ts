@@ -1,5 +1,3 @@
-import { injectable } from 'inversify'
-import { inject } from 'inversify'
 import { NUClearNet } from 'nuclearnet.js'
 import { NUClearNetPacket } from 'nuclearnet.js'
 import { NUClearNetOptions } from 'nuclearnet.js'
@@ -12,15 +10,18 @@ type EventListener = (peer: NUClearNetPeer) => void
 type Listener = EventListener | PacketListener
 type EventMessage = 'nuclear_join' | 'nuclear_leave'
 
-@injectable()
 export class FakeNUClearNet implements NUClearNet {
   private peer: NUClearNetPeer
   private listeners: Map<Listener, Listener>
   private connected: boolean
 
-  public constructor(@inject(FakeNUClearNetServer) private server: FakeNUClearNetServer) {
+  public constructor(private server: FakeNUClearNetServer) {
     this.listeners = new Map()
     this.connected = false
+  }
+
+  public static of(): FakeNUClearNet {
+    return new FakeNUClearNet(FakeNUClearNetServer.of())
   }
 
   public on(event: EventMessage, callback: EventListener): this
