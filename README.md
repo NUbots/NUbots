@@ -1,5 +1,6 @@
-NUbots Codebase
+NUbots Codebase [![Build Status](https://travis-ci.org/NUbots/NUbots.png)](https://travis-ci.org/NUbots/NUbots)
 ==========================
+
 Vagrant
 --------
 
