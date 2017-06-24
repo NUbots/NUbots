@@ -13,7 +13,6 @@ import { RobotSimulator } from '../simulators/robot_simulator'
 import { SimulatorStatus } from '../simulators/robot_simulator'
 import { SensorDataSimulator } from '../simulators/sensor_data_simulator'
 import { NUSightServer } from './app/server'
-import CloseTo = Chai.CloseTo
 
 const compiler = webpack(webpackConfig)
 
