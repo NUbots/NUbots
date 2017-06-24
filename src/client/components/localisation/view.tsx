@@ -20,7 +20,7 @@ interface LocalisationViewProps extends HTMLProps<JSX.Element> {
 }
 
 @observer
-export class LocalisationView extends React.Component<LocalisationViewProps, void> {
+export class LocalisationView extends React.Component<LocalisationViewProps> {
   private canvas: HTMLCanvasElement
   private renderer: WebGLRenderer
   private stopAutorun: IReactionDisposer
@@ -59,7 +59,9 @@ export class LocalisationView extends React.Component<LocalisationViewProps, voi
         <LocalisationMenuBar onHawkEyeClick={this.onHawkEyeClick}/>
         <div className={style.localisation__canvasContainer}>
           <canvas className={style.localisation__canvas} ref={canvas => {
-            this.canvas = canvas
+            if (canvas) {
+              this.canvas = canvas
+            }
           }}/>
         </div>
         <StatusBar model={this.props.model}/>

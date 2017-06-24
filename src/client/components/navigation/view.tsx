@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { IndexLink, Link as NormalLink } from 'react-router'
+import { NavLink } from 'react-router-dom'
 import ChartIcon from './icons/chart.svg'
 import ControllerIcon from './icons/controller.svg'
 import CubeIcon from './icons/cube.svg'
@@ -12,18 +12,18 @@ import SpeedometerIcon from './icons/speedometer.svg'
 import * as style from './style.css'
 
 interface NavigationItemViewProps {
+  exact?: boolean
   url: string
   Icon: any
   children?: any
-  Link?: NormalLink | IndexLink
 }
 
-const NavigationItemView = ({ url, Icon, children = undefined, Link = NormalLink }: NavigationItemViewProps) => (
+const NavigationItemView = ({ exact = false, url, Icon, children = undefined }: NavigationItemViewProps) => (
   <li className={style.header__item}>
-    <Link className={style.header__link} to={url} activeClassName={style['header__link--active']}>
+    <NavLink exact={exact} className={style.header__link} to={url} activeClassName={style['header__link--active']}>
       <Icon className={style.header__icon}/>
       <span>{children}</span>
-    </Link>
+    </NavLink>
   </li>
 )
 
@@ -31,7 +31,7 @@ export const NavigationView = () => (
   <header className={style.header}>
     <h1 className={style.header__title}>NUsight</h1>
     <ul className={style.header__list}>
-      <NavigationItemView url='/' Icon={SpeedometerIcon} Link={IndexLink}>Dashboard</NavigationItemView>
+      <NavigationItemView exact url='/' Icon={SpeedometerIcon}>Dashboard</NavigationItemView>
       <NavigationItemView url='/localisation' Icon={MapIcon}>Localisation</NavigationItemView>
       <NavigationItemView url='/vision' Icon={EyeIcon}>Vision</NavigationItemView>
       <NavigationItemView url='/chart' Icon={ChartIcon}>Chart</NavigationItemView>
