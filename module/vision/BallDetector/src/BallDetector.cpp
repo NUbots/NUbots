@@ -299,9 +299,9 @@ namespace vision {
                 // Average our two centroids
                 arma::vec3 rBWw = (width_rBWw);
 
-                // Attach the position to the object
-                b.measurements.push_back();
-                b.measurements.back().rBCc = rBWw;  // TODO: This needs updating to actually provide rBCc
+                // Attach the measurement to the object
+                b.measurements.push_back(Ball::Measurement());
+                b.measurements.back().rBCc = convert<double, 3, 1>(rBWw);  // TODO: This needs updating to actually provide rBCc
 
                 Transform3D Hgc       = camToGround;
                 arma::vec3 width_rBGg = Hgc.transformPoint(ballCentreRay * widthDistance);
