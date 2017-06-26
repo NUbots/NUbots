@@ -34,10 +34,19 @@ namespace localisation {
 
         /* To run at something like 100Hz that will call Time Update */
         on<Every<100, Per<std::chrono::seconds>>, Sync<BallLocalisation>>().then("BallLocalisation Time", [this] {
+            /* Perform time update */
             auto curr_time = NUClear::clock::now();
             double seconds = TimeDifferenceSeconds(curr_time,last_time_update_time);
             last_time_update_time = curr_time;
             filter.timeUpdate(seconds);
+
+            /* Creating ball state vector and covariance matrix for emission */
+            //std::unique_ptr ball;
+            auto ball = std::make_unique<Ball>();
+            ball->locObject.position = convert<double,2>(filter.get());
+            ball->locObject.position_cov = convert<double,2,2>(filter.getCovariance());
+            ball->locObject.last_measurement_time = curr_time;
+            emit(ball);
         });
 
         /* To run whenever a ball has been detected */
@@ -60,6 +69,14 @@ namespace localisation {
                     for (auto& measurement : balls[0].measurements) {
                         quality *= filter.measurementUpdate(convert<double, 3, 1>(measurement.rBCc),convert<double, 3, 3>(measurement.covariance), field, sensors);
                     }
+                    
+                    /* Creating ball state vector and covariance matrix for emission */
+                    //std::unique_ptr ball;
+                    auto ball = std::make_unique<Ball>();
+                    ball->locObject.position = convert<double,2>(filter.get());
+                    ball->locObject.position_cov = convert<double,2,2>(filter.getCovariance());
+                    ball->locObject.last_measurement_time = curr_time;
+                    emit(ball);
                 }
         });
     }
