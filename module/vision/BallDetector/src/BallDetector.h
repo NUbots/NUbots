@@ -29,6 +29,7 @@
 #include "utility/learning/KMeans.h"
 #include "utility/math/geometry/Circle.h"
 #include "utility/vision/LookUpTable.h"
+#include "utility/support/eigen_armadillo.h"
 
 namespace module {
 namespace vision {
@@ -38,6 +39,8 @@ namespace vision {
         uint MINIMUM_POINTS_FOR_CONSENSUS;
         uint MAXIMUM_ITERATIONS_PER_FITTING;
         uint MAXIMUM_FITTED_MODELS;
+
+        const double LAMBDA = 8.3116883;
 
         double CONSENSUS_ERROR_THRESHOLD;
         double MAXIMUM_DISAGREEMENT_RATIO;
@@ -68,6 +71,7 @@ namespace vision {
 
         bool print_throwout_logs;
 
+        arma::fvec3 pixelToSpherical(arma::vec2 point);
         float approximateCircleGreenRatio(const utility::math::geometry::Circle& circle, const message::input::Image& image, const message::vision::LookUpTable& lut);
     public:
 

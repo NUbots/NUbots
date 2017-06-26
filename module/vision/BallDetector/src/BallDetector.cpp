@@ -77,11 +77,11 @@ namespace vision {
     using FOURCC = utility::vision::FOURCC;
     using Colour = utility::vision::Colour;
 
-    arma::fvec3 BallDetector::pixelToSpherical(float lambda, arma::vec2 point){
+    arma::fvec3 BallDetector::pixelToSpherical(arma::vec2 point){
         float r  = std::sqrt(std::pow(point[0],2) + std::pow(point[1],2));
-        float sx = std::sin(lambda * r) * (point[0]/r);
-        float sy = std::sin(lambda * r) * (point[1]/r);
-        float sz = -(std::cos(lambda*r));
+        float sx = std::sin(LAMBDA * r) * (float(point[0])/r);
+        float sy = std::sin(LAMBDA * r) * (float(point[1])/r);
+        float sz = -(std::cos(LAMBDA * r));
 
         return arma::fvec3({sx, sy, sz});
     }
@@ -190,7 +190,7 @@ namespace vision {
             const auto& image   = *rawImage;
             const auto& sensors = *image.sensors;
             const auto        f = cam.focalLengthPixels;
-            //const auto   lambda = pixels/FOV;
+
             Line horizon(convert<double, 2>(image.horizon.normal), image.horizon.distance);
 
             // This holds our points that may be a part of the ball
@@ -198,7 +198,7 @@ namespace vision {
             ballPoints.reserve(image.ballPoints.size());
 
             for (const auto& point : image.ballPoints) {
-                auto sphVec = pixelToSpherical(lambda, point);
+                auto sphVec = pixelToSpherical(convert<float, 2, 1>(point));
                 ballPoints.push_back(arma::vec2({(f*sphVec[0])/sphVec[2], (f*sphVec[1])/sphVec[2]}));
             }
 
