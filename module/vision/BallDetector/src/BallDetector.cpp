@@ -77,6 +77,15 @@ namespace vision {
     using FOURCC = utility::vision::FOURCC;
     using Colour = utility::vision::Colour;
 
+    arma::fvec3 BallDetector::pixelToSpherical(float lambda, arma::vec2 point){
+        float r  = std::sqrt(std::pow(point[0],2) + std::pow(point[1],2));
+        float sx = std::sin(lambda * r) * (point[0]/r);
+        float sy = std::sin(lambda * r) * (point[1]/r);
+        float sz = -(std::cos(lambda*r));
+
+        return arma::fvec3({sx, sy, sz});
+    }
+
     float BallDetector::approximateCircleGreenRatio(const Circle& circle, const Image& image, const LookUpTable& lut) {
         // TODO:
         // std::vector<std::tuple<arma::ivec2, arma::ivec2, arma::vec4>> debug;
@@ -89,7 +98,7 @@ namespace vision {
                 arma::ivec2 ipos = arma::ivec({int(std::round(circle.centre[0])), int(std::round(circle.centre[1]))});
                 if(ipos[0] >= 0 && ipos[0] < int(image.dimensions[0]) && ipos[1] >= 0 && ipos[1] < int(image.dimensions[1])){
                     // debug.push_back(std::make_tuple(ipos, ipos + arma::ivec2{1,1}, arma::vec4{1,1,1,1}));
-                    char c = static_cast<char>(utility::vision::getPixelColour(lut, 
+                    char c = static_cast<char>(utility::vision::getPixelColour(lut,
                             getPixel(ipos[0], ipos[1], image.dimensions[0], image.dimensions[1], image.data, static_cast<FOURCC>(image.format))));
                     if (c == Colour::GREEN) {
                         numGreen++;
@@ -105,7 +114,7 @@ namespace vision {
                 arma::ivec2 ipos = arma::ivec2({int(std::round(pos[0])),int(std::round(pos[1]))});
                 if(ipos[0] >= 0 && ipos[0] < int(image.dimensions[0]) && ipos[1] >= 0 && ipos[1] < int(image.dimensions[1])){
                     // debug.push_back(std::make_tuple(ipos, ipos + arma::ivec2{1,1}, arma::vec4{1,1,1,1}));
-                    char c = static_cast<char>(utility::vision::getPixelColour(lut, 
+                    char c = static_cast<char>(utility::vision::getPixelColour(lut,
                             getPixel(ipos[0], ipos[1], image.dimensions[0], image.dimensions[1], image.data, static_cast<FOURCC>(image.format))));
                     if (c == Colour::GREEN) {
                         numGreen++;
@@ -178,8 +187,10 @@ namespace vision {
             , const FieldDescription& field
             , const LookUpTable& lut) {
 
-            const auto& image = *rawImage;
+            const auto& image   = *rawImage;
             const auto& sensors = *image.sensors;
+            const auto        f = cam.focalLengthPixels;
+            //const auto   lambda = pixels/FOV;
             Line horizon(convert<double, 2>(image.horizon.normal), image.horizon.distance);
 
             // This holds our points that may be a part of the ball
@@ -187,7 +198,8 @@ namespace vision {
             ballPoints.reserve(image.ballPoints.size());
 
             for (const auto& point : image.ballPoints) {
-                ballPoints.push_back(arma::vec2({double(point[0]), double(point[1])}));
+                auto sphVec = pixelToSpherical(lambda, point);
+                ballPoints.push_back(arma::vec2({(f*sphVec[0])/sphVec[2], (f*sphVec[1])/sphVec[2]}));
             }
 
             // Use ransac to find the ball
@@ -286,7 +298,7 @@ namespace vision {
 
                 // Get our transform to world coordinates
                 const Transform3D& Htw = convert<double, 4, 4>(sensors.world);
-                const Transform3D& Htc = convert<double, 4, 4>(sensors.forwardKinematics.at(ServoID::HEAD_PITCH)); 
+                const Transform3D& Htc = convert<double, 4, 4>(sensors.forwardKinematics.at(ServoID::HEAD_PITCH));
                 Transform3D Hcw = Htc.i() * Htw;
                 Transform3D Hwc = Hcw.i();
 
