@@ -6,6 +6,7 @@ import glob
 import hashlib
 import tempfile
 import b
+import subprocess
 
 from termcolor import cprint
 from subprocess import call, STDOUT
@@ -76,7 +77,7 @@ def run(ip_addr, hostname, config, scripts, user, toolchain, **kwargs):
 
     # Get list of config files.
     config_files = [os.path.relpath(c, build_dir) for c in b.cmake_cache['NUCLEAR_MODULE_DATA_FILES']]
-
+    
     # Get list of config files.
     if config in ['overwrite', 'o']:
         cprint('Overwriting configuration files on target', 'blue', attrs=['bold'])
@@ -92,3 +93,9 @@ def run(ip_addr, hostname, config, scripts, user, toolchain, **kwargs):
 
     if config in ['ignore', 'i']:
         cprint('Ignoring configuration changes', 'blue', attrs=['bold'])
+        
+    # Pipe the git commit to file
+    versionFile = open("version.txt", "w")
+    subprocess.Popen("git log -1", stdout=versionFile, shell=True)
+    versionFile.close()
+    call(['rsync', '-avzPLR', '--checksum', '-e ssh'] + [versionFile.name] + [target_dir])
