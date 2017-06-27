@@ -13,6 +13,7 @@ namespace localisation {
     private:
         utility::math::filter::UKF<BallModel> filter;
         NUClear::clock::time_point last_time_update_time;
+        NUClear::clock::time_point last_measurement_update_time;
     public:
         /// @brief Called by the powerplant to build and setup the BallLocalisation reactor.
         explicit BallLocalisation(std::unique_ptr<NUClear::Environment> environment);

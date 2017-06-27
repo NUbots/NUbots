@@ -45,7 +45,7 @@ namespace localisation {
             auto ball = std::make_unique<Ball>();
             ball->locObject.position = convert<double,2>(filter.get());
             ball->locObject.position_cov = convert<double,2,2>(filter.getCovariance());
-            ball->locObject.last_measurement_time = curr_time;
+            ball->locObject.last_measurement_time = last_measurement_update_time;
             emit(ball);
         });
 
@@ -76,6 +76,7 @@ namespace localisation {
                     ball->locObject.position = convert<double,2>(filter.get());
                     ball->locObject.position_cov = convert<double,2,2>(filter.getCovariance());
                     ball->locObject.last_measurement_time = curr_time;
+                    last_measurement_update_time = curr_time;
                     emit(ball);
                 }
         });
