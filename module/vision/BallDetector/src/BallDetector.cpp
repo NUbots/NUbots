@@ -198,8 +198,8 @@ namespace vision {
             ballPoints.reserve(image.ballPoints.size());
 
             for (const auto& point : image.ballPoints) {
-                auto sphVec = pixelToSpherical(convert<float, 2, 1>(point));
-                ballPoints.push_back(arma::vec2({(f*sphVec[0])/sphVec[2], (f*sphVec[1])/sphVec[2]}));
+                // auto sphVec = pixelToSpherical(convert<float, 2, 1>(point));
+                ballPoints.push_back(arma::vec2({point[0], point[1]}));
             }
 
             // Use ransac to find the ball
