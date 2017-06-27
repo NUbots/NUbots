@@ -15,6 +15,9 @@ Vagrant.configure("2") do |config|
     v.update_guest_tools = true
   end
 
+  config.vm.provider :virtualbox do |vb|
+  	vb.gui = true
+  end
   # Settings if using a virtualbox provider
   config.vm.provider "virtualbox" do |v, override|
     # Use the official ubuntu box
