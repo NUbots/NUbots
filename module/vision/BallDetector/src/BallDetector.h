@@ -71,7 +71,6 @@ namespace vision {
 
         bool print_throwout_logs;
 
-        arma::fvec3 pixelToSpherical(arma::vec2 point);
         float approximateCircleGreenRatio(const utility::math::geometry::Circle& circle, const message::input::Image& image, const message::vision::LookUpTable& lut);
     public:
 

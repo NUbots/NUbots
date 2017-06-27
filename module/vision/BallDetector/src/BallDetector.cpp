@@ -77,14 +77,6 @@ namespace vision {
     using FOURCC = utility::vision::FOURCC;
     using Colour = utility::vision::Colour;
 
-    arma::fvec3 BallDetector::pixelToSpherical(arma::vec2 point){
-        float r  = std::sqrt(std::pow(point[0],2) + std::pow(point[1],2));
-        float sx = std::sin(LAMBDA * r) * (float(point[0])/r);
-        float sy = std::sin(LAMBDA * r) * (float(point[1])/r);
-        float sz = -(std::cos(LAMBDA * r));
-
-        return arma::fvec3({sx, sy, sz});
-    }
 
     float BallDetector::approximateCircleGreenRatio(const Circle& circle, const Image& image, const LookUpTable& lut) {
         // TODO:
@@ -198,7 +190,7 @@ namespace vision {
             ballPoints.reserve(image.ballPoints.size());
 
             for (const auto& point : image.ballPoints) {
-                // auto sphVec = pixelToSpherical(convert<float, 2, 1>(point));
+                // auto sphVec = utility::math::vision::RadialCamera::pixelToPoint(convert<float, 2, 1>(point));
                 ballPoints.push_back(arma::vec2({point[0], point[1]}));
             }
 

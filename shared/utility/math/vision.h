@@ -282,7 +282,23 @@ namespace vision {
 
     }
 
+    namespace RadialCamera{
 
+
+        inline arma::fvec3 pixelToPoint(arma::vec2 point){
+            float r  = std::sqrt(std::pow(point[0],2) + std::pow(point[1],2));
+            float sx = std::sin(LAMBDA * r) * (float(point[0])/r);
+            float sy = std::sin(LAMBDA * r) * (float(point[1])/r);
+            float sz = -(std::cos(LAMBDA * r));
+
+            return arma::fvec3({sx, sy, sz});
+        }
+
+        inline arma::fvec3 pointToPixel(arma::vec2 point){
+            //TODO
+            return arma::fvec3();
+        }
+    }
 }
 }
 }
