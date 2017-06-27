@@ -1,3 +1,7 @@
-ballCentre: 2,0,0
+ballCentre: [2,0,0]
 radius: 0.1
 theta_count: 100
+
+lambda: 0.1
+offset: [0,0]
+image_size: [1000,1000]

@@ -18,6 +18,10 @@ namespace vision {
 
             theta_count = config["theta_count"].as<float>();
 
+            params.lambda = config["lambda"].as<float>();
+            params.offset = config["offset"].as<arma::fvec>();
+
+            image_size = config["image_size"].as<arma::uvec>();
             emitClassifiedImage();
         });
     }
@@ -34,20 +38,25 @@ namespace vision {
         float theta_step = theta_count != 0 ? 2 * M_PI / theta_count : 10;
 
         //Points on screen
-        std::vector<Eigen::Vector2i> screenPoints;
+        std::vector<Eigen::Vector2i> imagePoints;
         //Generate visible points
         while(theta < 2 * M_PI){
+            //Generate (approximate) circle of visible points
             Eigen::Vector3f P = p + q * cos(theta) + r * sin(theta);
-
-
-
-
+            //Project to screen
+            arma::fvec2 pixel = math::utility::vision::RadialCamera::pointToPixel(P,params);
+            //Screen point referenced from screen centre
+            arma::ivec2 screenPoint = int(pixel[0]),int(pixel[1]));
+            //Convert to point referenced from top left
+            arma::ivec2 imagePoint = math::utility::vision::screenToImage(screen,image_size);
+            imagePoints.push_back(imagePoint);
+            //Increment theta
             theta += theta_step;
         }
 
-
-
-        log(P);
+        for(auto& p : imagePoints){
+            log(p.t());
+        }
     }
 }
 }
