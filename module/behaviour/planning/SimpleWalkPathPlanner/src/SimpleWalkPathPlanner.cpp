@@ -49,6 +49,7 @@
 #include "utility/behaviour/Action.h"
 #include "utility/input/LimbID.h"
 #include "utility/input/ServoID.h"
+#include "message/support/FieldDescription.h"
 
 
 namespace module {
@@ -82,7 +83,8 @@ namespace module {
             using message::motion::DisableWalkEngineCommand;
 
             using message::localisation::Self;
-            using message::vision::Ball;
+            using message::localisation::Ball;
+            using message::support::FieldDescription;
 
 
             SimpleWalkPathPlanner::SimpleWalkPathPlanner(std::unique_ptr<NUClear::Environment> environment)
@@ -159,17 +161,19 @@ namespace module {
                 // });
 
                 on<Every<20, Per<std::chrono::seconds>>
-                 , With<std::vector<Ball>>
+                 , With<Ball>
                  , With<std::vector<Self>>
                  , With<Sensors>
                  , With<WantsToKick>
                  , With<KickPlan>
+                 , With<FieldDescription>
                  , Sync<SimpleWalkPathPlanner>>().then([this] (
-                    const std::vector<Ball>& ball,
+                    const Ball& ball,
                     const std::vector<Self>& selfs,
                     const Sensors& sensors,
                     const WantsToKick& wantsTo,
-                    const KickPlan& kickPlan
+                    const KickPlan& kickPlan,
+                    const FieldDescription& field
                     ) {
                     if(wantsTo.kick){
                         emit(std::make_unique<StopCommand>(subsumptionId));
@@ -196,9 +200,23 @@ namespace module {
 
                     Transform3D Htw = convert<double, 4, 4>(sensors.world);
                     auto now = NUClear::clock::now();
-                    float timeSinceBallSeen = std::chrono::duration_cast<std::chrono::nanoseconds>(now - timeBallLastSeen).count() * (1 / std::nano::den);
+                    float timeSinceBallSeen = std::chrono::duration_cast<std::chrono::nanoseconds>(now - ball.locObject.last_measurement_time).count() * (1 / std::nano::den);
+
+                    if(!robot_ground_space){
+                        rBWw = timeSinceBallSeen < search_timeout ?
+                                    convert<double, 2>(ball.locObject.position.head<2>()) : // Place last seen
+                                    Htw.x() + Htw.translation(); //In front of the robot
+                        position = Htw.transformPoint(rBWw);
+                    } else {
+                        arma::vec3 rBWw_temp = { ball.locObject.position[0], ball.locObject.position[1], field.ball_radius };
+                        rBWw = timeSinceBallSeen < search_timeout ?
+                                    rBWw_temp : // Place last seen
+                                    Htw.x() + Htw.translation(); //In front of the robot
+                        position = Htw.transformPoint(rBWw);
+                    }
 
                     // TODO: support non-ball targets
+                    /*
                     if(!robot_ground_space){
                         if(ball.size() > 0){
                             rBWw = convert<double, 2>(ball[0].position.head<2>());
@@ -220,7 +238,7 @@ namespace module {
                                    arma::vec2({1,0}); //In front of the robot
                         }
                     }
-
+                    */
                     //Hack Planner:
                     float headingChange = 0;
                     float sideStep = 0;
