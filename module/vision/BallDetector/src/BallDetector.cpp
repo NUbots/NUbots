@@ -291,17 +291,20 @@ namespace vision {
                 Transform3D Hwc = Hcw.i();
 
                 // Work out how far away the ball must be to be at the distance it is from the camera
-                arma::vec3 width_rBWw = Hwc.transformPoint(ballCentreRay * widthDistance);
+                arma::vec3 width_rBCc = ballCentreRay * widthDistance;
+                arma::vec3 width_rBWw = Hwc.transformPoint(width_rBCc);
 
                 // Put our ball centre projection into the same space
-                arma::vec3 proj_rBWw = Hwc.transformPoint(ballCentreGroundProj);
+                arma::vec3 proj_rBCc = ballCentreGroundProj;
+                arma::vec3 proj_rBWw = Hwc.transformPoint(proj_rBCc);
 
                 // Average our two centroids
+                arma::vec3 rBCc = (width_rBCc);
                 arma::vec3 rBWw = (width_rBWw);
 
                 // Attach the measurement to the object
                 b.measurements.push_back(Ball::Measurement());
-                b.measurements.back().rBCc = convert<double, 3, 1>(rBWw);  // TODO: This needs updating to actually provide rBCc
+                b.measurements.back().rBCc = convert<double, 3, 1>(rBCc);
 
                 Transform3D Hgc       = camToGround;
                 arma::vec3 width_rBGg = Hgc.transformPoint(ballCentreRay * widthDistance);
@@ -326,6 +329,7 @@ namespace vision {
                 for (auto& point : result) {
                     b.edgePoints.push_back(convert<double, 3>(getCamFromScreen(imageToScreen(point, convert<uint, 2>(image.dimensions)), cam.focalLengthPixels)));
                 }
+                b.visObject.timestamp = NUClear::clock::now();
 
                 balls->push_back(std::move(b));
             }
