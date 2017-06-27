@@ -39,6 +39,16 @@ Vagrant.configure("2") do |config|
     shell.inline = "sudo sed -i '/tty/!s/mesg n/tty -s \\&\\& mesg n/' /root/.profile"
   end
 
+  # Before anything else runs make sure dpkg isnt locked.
+  # Might as well do a quick update while we are here
+  config.vm.provision "unlock-dpkg", type: "shell", run: "always" do |shell|
+    shell.inline = "rm /var/lib/dpkg/lock;
+                    apt-get update;
+                    apt-get upgrade;
+                    apt-get dist-upgrade;
+                    apt-get autoremove --purge;"
+  end
+
   # Before the puppet provisioner runs
   # install puppet modules that are used
   config.vm.provision "install-puppet-modules", type: "shell" do |shell|
