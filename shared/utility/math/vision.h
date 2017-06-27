@@ -284,19 +284,36 @@ namespace vision {
 
     namespace RadialCamera{
 
+        struct Parameters{
+            float lamda = 0.01; //Radians per pixel
+            arma::vec2 offset = {0,0};
+        };
 
-        inline arma::fvec3 pixelToPoint(arma::vec2 point){
-            float r  = std::sqrt(std::pow(point[0],2) + std::pow(point[1],2));
-            float sx = std::sin(LAMBDA * r) * (float(point[0])/r);
-            float sy = std::sin(LAMBDA * r) * (float(point[1])/r);
-            float sz = -(std::cos(LAMBDA * r));
+        inline arma::fvec3 pixelToUnitVector(const arma::fvec2& p, const RadialCameraParams& params = RadialCameraParams()){
+            arma::fvec2 px = p - params.offset;
+            float r  = std::sqrt(std::pow(px[0],2) + std::pow(px[1],2));
+            float sx = std::sin(params.lambda * r) * (float(px[0])/r);
+            float sy = std::sin(params.lambda * r) * (float(px[1])/r);
+            float sz = -(std::cos(params.lambda * r));
 
-            return arma::fvec3({sx, sy, sz});
+            //Swizzle components so x is out of camera, y is to the left, z is up
+            //Matches input of pointToPixel
+            return arma::fvec3({-sz, -sx, sy});
         }
 
-        inline arma::fvec3 pointToPixel(arma::vec2 point){
+        inline arma::fvec2 pointToPixel(const arma::fvec3& point, const RadialCameraParams& params = RadialCameraParams()){
             //TODO
-            return arma::fvec3();
+            arma::fvec3 p = arma::normalise(point);
+            float theta = std::acos(p[0]);
+            if(theta == 0){
+                return arma::fvec2({0,0});
+            }
+            float r = theta / params.lambda;
+            float sin_theta = std::sin(theta);
+            float px = - r * p[1] / (sin_theta);
+            float py =  r * p[2] / (sin_theta);
+
+            return arma::fvec2({px,py}) + params.offset;
         }
     }
 }

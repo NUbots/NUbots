@@ -189,8 +189,9 @@ namespace vision {
             std::vector<arma::vec2> ballPoints;
             ballPoints.reserve(image.ballPoints.size());
 
+            // utility::math::vision::RadialCamera::CameraParameters params = {LAMBDA,arma::fvec2({x_off,y_off})};
             for (const auto& point : image.ballPoints) {
-                // auto sphVec = utility::math::vision::RadialCamera::pixelToPoint(convert<float, 2, 1>(point));
+                // auto sphVec = utility::math::vision::RadialCamera::pixelToUnitVector(convert<float, 2, 1>(point),params);
                 ballPoints.push_back(arma::vec2({point[0], point[1]}));
             }
 
