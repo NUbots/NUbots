@@ -6,6 +6,12 @@ language: cpp
 os: linux
 dist: trusty
 
+# Don't spam people with emails but do spam slack!
+notifications:
+  email: false
+  slack:
+    secure: BNNFwBsGwKxamyxH6OTtZLfOH9541zr3keNQ0U1rdE2eJpOL11h5gFCd2DHc4OhK596cHFmZrg6mryLXapqHEFCcrfx4CpLyJVxwXc/16rjE838sa4AoBV14ZzMoRiFsNdBOQOVBRu+0SR3kiJMRtJxOTPELnrHWOKmSuVGHjVg=
+
 # Build for each of our platforms
 env:
   - PLATFORM=native
