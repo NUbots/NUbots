@@ -91,6 +91,9 @@ namespace localisation {
 
                 double quality = 1.0;   // I don't know what quality should be used for
                 if(balls.size() > 0){
+                    log("Ball rBCc: ", balls[0].measurements[0].rBCc);
+                    log("Ball cov: ", balls[0].measurements[0].covariance);
+
                     /* Call Time Update first */
                     auto curr_time = NUClear::clock::now();
                     double seconds = TimeDifferenceSeconds(curr_time,last_time_update_time);
@@ -101,11 +104,13 @@ namespace localisation {
                     for (auto& measurement : balls[0].measurements) {
                         /* For graphing purposes */
                         arma::vec3 rBCc = convert<double, 3, 1>(measurement.rBCc);
+                        //TODO: make this be in ro coords to start with
+                        rBCc[0] = 1 / rBCc[0];
                         emit(graph("measured_roe", rBCc[0]));
                         emit(graph("measured_theta", rBCc[1]));
                         emit(graph("measured_phi", rBCc[2]));
 
-                        quality *= filter.measurementUpdate(convert<double, 3, 1>(measurement.rBCc),convert<double, 3, 3>(measurement.covariance), field, sensors);
+                        quality *= filter.measurementUpdate(rBCc,convert<double, 3, 3>(measurement.covariance), field, sensors);
                     }
 
                     last_measurement_update_time = curr_time;

@@ -89,7 +89,7 @@ namespace vision {
                 arma::ivec2 ipos = arma::ivec({int(std::round(circle.centre[0])), int(std::round(circle.centre[1]))});
                 if(ipos[0] >= 0 && ipos[0] < int(image.dimensions[0]) && ipos[1] >= 0 && ipos[1] < int(image.dimensions[1])){
                     // debug.push_back(std::make_tuple(ipos, ipos + arma::ivec2{1,1}, arma::vec4{1,1,1,1}));
-                    char c = static_cast<char>(utility::vision::getPixelColour(lut, 
+                    char c = static_cast<char>(utility::vision::getPixelColour(lut,
                             getPixel(ipos[0], ipos[1], image.dimensions[0], image.dimensions[1], image.data, static_cast<FOURCC>(image.format))));
                     if (c == Colour::GREEN) {
                         numGreen++;
@@ -105,7 +105,7 @@ namespace vision {
                 arma::ivec2 ipos = arma::ivec2({int(std::round(pos[0])),int(std::round(pos[1]))});
                 if(ipos[0] >= 0 && ipos[0] < int(image.dimensions[0]) && ipos[1] >= 0 && ipos[1] < int(image.dimensions[1])){
                     // debug.push_back(std::make_tuple(ipos, ipos + arma::ivec2{1,1}, arma::vec4{1,1,1,1}));
-                    char c = static_cast<char>(utility::vision::getPixelColour(lut, 
+                    char c = static_cast<char>(utility::vision::getPixelColour(lut,
                             getPixel(ipos[0], ipos[1], image.dimensions[0], image.dimensions[1], image.data, static_cast<FOURCC>(image.format))));
                     if (c == Colour::GREEN) {
                         numGreen++;
@@ -286,7 +286,7 @@ namespace vision {
 
                 // Get our transform to world coordinates
                 const Transform3D& Htw = convert<double, 4, 4>(sensors.world);
-                const Transform3D& Htc = convert<double, 4, 4>(sensors.forwardKinematics.at(ServoID::HEAD_PITCH)); 
+                const Transform3D& Htc = convert<double, 4, 4>(sensors.forwardKinematics.at(ServoID::HEAD_PITCH));
                 Transform3D Hcw = Htc.i() * Htw;
                 Transform3D Hwc = Hcw.i();
 
@@ -305,6 +305,8 @@ namespace vision {
                 // Attach the measurement to the object
                 b.measurements.push_back(Ball::Measurement());
                 b.measurements.back().rBCc = convert<double, 3, 1>(rBCc);
+                Eigen::Vector3d cov_diag(0.1,0.01,0.01);
+                b.measurements.back().covariance = cov_diag.asDiagonal();
 
                 Transform3D Hgc       = camToGround;
                 arma::vec3 width_rBGg = Hgc.transformPoint(ballCentreRay * widthDistance);
