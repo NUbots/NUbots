@@ -12,6 +12,11 @@
 #include "utility/support/eigen_armadillo.h"
 #include "utility/support/yaml_armadillo.h"
 
+#include "utility/math/matrix/Transform3D.h"
+#include "utility/math/coordinates.h"
+#include "utility/input/ServoID.h"
+#include "utility/nubugger/NUhelpers.h"
+
 namespace module {
 namespace localisation {
 
@@ -20,6 +25,11 @@ namespace localisation {
     using message::localisation::Ball;
     using message::support::FieldDescription;
     using message::input::Sensors;
+
+    using utility::math::matrix::Transform3D;
+    using utility::math::coordinates::cartesianToSpherical;
+    using ServoID = utility::input::ServoID;
+    using utility::nubugger::graph;
 
     BallLocalisation::BallLocalisation(std::unique_ptr<NUClear::Environment> environment)
     : Reactor(std::move(environment))

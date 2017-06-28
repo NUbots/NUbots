@@ -206,16 +206,16 @@ namespace utility {
                     // }
                     // Now calculate the mean of these measurement sigmas.
                     arma::vec predictedMean = meanFromSigmas(predictedObservations);
-                    
+
                     auto centredObservations = predictedObservations - arma::repmat(predictedMean, 1, NUM_SIGMA_POINTS);
 
-                    
+
                     // Update our state
                     covarianceUpdate -= covarianceUpdate.t() * centredObservations.t() *
                                         (measurement_variance + centredObservations * covarianceUpdate * centredObservations.t()).i() *
                                         centredObservations * covarianceUpdate;
 
-                    
+
 
                     const arma::mat innovation = model.observationDifference(measurement, predictedMean);
 
@@ -235,7 +235,7 @@ namespace utility {
                     mean = model.limitState(mean);
                     covariance = centredSigmaPoints * covarianceUpdate * centredSigmaPoints.t();
 
-                    
+
                     // Calculate and return the likelihood of the prior mean
                     // and covariance given the new measurement (i.e. the
                     // prior probability density of the measurement):
@@ -264,7 +264,7 @@ namespace utility {
                     return (1.0 - outlierProbability) * fract * exp(expTerm) + outlierProbability;
                 }
 
-                StateVec get() const {           
+                StateVec get() const {
                     return mean;
                 }
 
