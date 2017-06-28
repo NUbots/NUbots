@@ -92,10 +92,9 @@ namespace strutil {
     }
 
     inline std::string toUpper(const std::string& input) {
-        std::string output;
+        std::string output = input;
 
-        std::transform(
-            input.begin(), input.end(), output.begin(), [](const char& c) -> char { return std::toupper(c); });
+        std::transform(output.begin() output.end() output.begin(), std::toupper);
 
         return output;
     }
