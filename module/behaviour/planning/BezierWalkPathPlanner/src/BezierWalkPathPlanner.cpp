@@ -128,7 +128,7 @@ namespace module {
                     }
                 }));
 
-                on<Trigger<KickFinished>>().then([this] (const KickFinished&) 
+                on<Trigger<KickFinished>>().then([this] (const KickFinished&)
                 {
                     // May need to tweek this to resume walking after kick completed....
                     std::unique_ptr<WalkCommand> command = std::make_unique<WalkCommand>(subsumptionId,latestCommand.walkCommand);
@@ -342,7 +342,7 @@ namespace module {
                         // emit(graph("forwardSpeed2", finalForwardSpeed));
 
 
-                        emit(std::make_unique<KickPlan>(KickPlan{kick_target, KickType::SCRIPTED}));
+                        // emit(std::make_unique<KickPlan>(KickPlan{kick_target, KickType::SCRIPTED}));
 
                         std::unique_ptr<WalkCommand> command = std::make_unique<WalkCommand>(subsumptionId, Transform2D({finalForwardSpeed, 0, angle}));
                         //command->command = Transform2D({bezXdash[1], bezYdash[1], angle});

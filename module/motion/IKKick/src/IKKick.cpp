@@ -101,7 +101,7 @@ namespace motion {
 
             //Emit useful info to KickPlanner
             emit(std::make_unique<IKKickParams>(IKKickParams(config["balancer"]["stand_height"].as<float>())));
-            emit(std::make_unique<KickPlan>(KickPlan(Eigen::Vector2d(4.5, 0), KickPlan::KickType::IK_KICK)));
+            // emit(std::make_unique<KickPlan>(KickPlan(Eigen::Vector2d(4.5, 0), KickPlan::KickType::IK_KICK)));
 
         });
 
@@ -126,8 +126,8 @@ namespace motion {
 
 
             // 4x4 homogeneous transform matrices for left foot and right foot relative to torso
-            Transform3D leftFoot  = convert<double, 4, 4>(sensors.forwardKinematics.at(ServoID::L_ANKLE_ROLL)); 
-            Transform3D rightFoot = convert<double, 4, 4>(sensors.forwardKinematics.at(ServoID::R_ANKLE_ROLL)); 
+            Transform3D leftFoot  = convert<double, 4, 4>(sensors.forwardKinematics.at(ServoID::L_ANKLE_ROLL));
+            Transform3D rightFoot = convert<double, 4, 4>(sensors.forwardKinematics.at(ServoID::R_ANKLE_ROLL));
 
             // Work out which of our feet are going to be the support foot
             // Store the support foot and kick foot

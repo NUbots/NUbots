@@ -80,14 +80,22 @@ namespace planning {
             emit(std::make_unique<WantsToKick>(false));
         });
 
-        on<Trigger<std::vector<Ball>>,
+        on<Trigger<Ball>>().then([this](const Ball&){  log("Ball>>");   });
+        on<Trigger<std::vector<Self>>>().then([this](const std::vector<Self>&){ log("std::");   });
+        on<Trigger<FieldDescription>>().then([this](const FieldDescription&){  log("FieldDescription>>");   });
+        on<Trigger<KickPlan>>().then([this](const KickPlan&){  log("KickPlan>>");   });
+        on<Trigger<Sensors>>().then([this](const Sensors&){   log("Sensors>>");     });
+
+        on<Trigger<Ball>,
             With<std::vector<Self>>,
             With<FieldDescription>,
-            With<KickPlan>>().then([this] (
-            const std::vector<Ball>& ball,
+            With<KickPlan>,
+            With<Sensors>>().then([this] (
+            const Ball& ball,
             const std::vector<Self>& selfs,
             const FieldDescription& fd,
-            const KickPlan& kickPlan) {
+            const KickPlan& kickPlan,
+            const Sensors& sensors) {
 
             //Get time since last seen ball
             auto now = NUClear::clock::now();
@@ -97,11 +105,12 @@ namespace planning {
             auto self = selfs[0];
             // arma::vec2 kickTarget = {1,0,0}; //Kick forwards
             arma::vec2 kickTarget = WorldToRobotTransform(convert<double,2>(self.locObject.position), convert<double,2>(self.heading), convert<double,2>(kickPlan.target));
-            arma::vec3 ballPosition = {100,0,0};//too far to kick
-            if(ball.size()>0){
-                ballPosition = {ball[0].locObject.position[0], ball[0].locObject.position[1], fd.ball_radius};
-                ball_last_measurement_time = now;
-            }
+
+            Transform3D Htw = convert<double, 4, 4>(sensors.world);
+            arma::vec3 ballPosition = Htw.transformPoint({ball.locObject.position[0], ball.locObject.position[1], fd.ball_radius});
+            ball_last_measurement_time = ball.locObject.last_measurement_time;
+
+            log("ballPos Torso", ballPosition);
 
             float KickAngle = std::fabs(std::atan2(kickTarget[1], kickTarget[0]));
 

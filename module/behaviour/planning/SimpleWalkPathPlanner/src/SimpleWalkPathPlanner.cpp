@@ -213,6 +213,7 @@ namespace module {
                     float headingChange = 0;
                     float sideStep = 0;
                     float speedFactor = 1;
+                    log("kickPlan.target = ",kickPlan.target);
                     if(useLocalisation){
                         arma::vec2 kick_target = WorldToRobotTransform(convert<double,2>(selfs.front().locObject.position), convert<double,2>(selfs.front().heading), convert<double,2>(kickPlan.target));
                         // //approach point:
@@ -255,19 +256,9 @@ namespace module {
 
                     std::unique_ptr<WalkCommand> command = std::make_unique<WalkCommand>(subsumptionId, convert<double, 3>(Transform2D({0, 0, 0})));
                     command->command = convert<double, 3>(Transform2D({finalForwardSpeed, finalSideSpeed, angle}));
-
-                    //TODO: delete this?!?!?
-                    arma::vec2 ball_world_position = RobotToWorldTransform(convert<double, 2>(selfs.front().locObject.position),
-                                                                           convert<double, 2>(selfs.front().heading),
-                                                                           position.rows(0,1));
-                    arma::vec2 kick_target = 2 * ball_world_position - convert<double, 2>(selfs.front().locObject.position);
-                    emit(drawSphere("kick_target", arma::vec3({kick_target[0], kick_target[1], 0.0}), 0.1, arma::vec3({1, 0, 0}), 0));
-                    log("kick_target", kick_target[0], kick_target[1]);
-
-                    emit(std::make_unique<KickPlan>(KickPlan(convert<double, 2>(kick_target), KickPlan::KickType::SCRIPTED)));
-
                     emit(std::move(command));
                     emit(std::make_unique<ActionPriorites>(ActionPriorites { subsumptionId, { 40, 11 }}));
+
                 });
 
                 on<Trigger<MotionCommand>, Sync<SimpleWalkPathPlanner>>().then([this] (const MotionCommand& cmd) {
