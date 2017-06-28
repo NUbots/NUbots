@@ -10,6 +10,7 @@
 
 
 #include "utility/support/eigen_armadillo.h"
+#include "utility/support/yaml_armadillo.h"
 
 namespace module {
 namespace localisation {
@@ -24,10 +25,14 @@ namespace localisation {
     : Reactor(std::move(environment))
     , filter() {
 
-        on<Configuration>("BallLocalisation.yaml").then([this] (const Configuration&) {
+        last_measurement_update_time = NUClear::clock::now();
+
+        on<Configuration>("BallLocalisation.yaml").then([this] (const Configuration& config) {
             auto message = std::make_unique<std::vector<Ball>>();
         	emit(message);
             emit(std::make_unique<Ball>());
+
+            filter.model.processNoiseDiagonal = config["process_noise_diagonal"].as<arma::vec>();
 
             // Use configuration here from file BallLocalisation.yaml
         });
@@ -69,15 +74,8 @@ namespace localisation {
                     for (auto& measurement : balls[0].measurements) {
                         quality *= filter.measurementUpdate(convert<double, 3, 1>(measurement.rBCc),convert<double, 3, 3>(measurement.covariance), field, sensors);
                     }
-                    
-                    /* Creating ball state vector and covariance matrix for emission */
-                    //std::unique_ptr ball;
-                    auto ball = std::make_unique<Ball>();
-                    ball->locObject.position = convert<double,2>(filter.get());
-                    ball->locObject.position_cov = convert<double,2,2>(filter.getCovariance());
-                    ball->locObject.last_measurement_time = curr_time;
+
                     last_measurement_update_time = curr_time;
-                    emit(ball);
                 }
         });
     }

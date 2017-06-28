@@ -57,6 +57,7 @@ message Ball {
 
     message Measurement {
         MeasurementType type        = 1;
+        //Vector from camera to ball in camera coordinates
         vec3            rBCc        = 2;
         mat33           covariance  = 3;
     }
