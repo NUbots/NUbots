@@ -80,12 +80,6 @@ namespace planning {
             emit(std::make_unique<WantsToKick>(false));
         });
 
-        on<Trigger<Ball>>().then([this](const Ball&){  log("Ball>>");   });
-        on<Trigger<std::vector<Self>>>().then([this](const std::vector<Self>&){ log("std::");   });
-        on<Trigger<FieldDescription>>().then([this](const FieldDescription&){  log("FieldDescription>>");   });
-        on<Trigger<KickPlan>>().then([this](const KickPlan&){  log("KickPlan>>");   });
-        on<Trigger<Sensors>>().then([this](const Sensors&){   log("Sensors>>");     });
-
         on<Trigger<Ball>,
             With<std::vector<Self>>,
             With<FieldDescription>,
@@ -110,7 +104,6 @@ namespace planning {
             arma::vec3 ballPosition = Htw.transformPoint({ball.locObject.position[0], ball.locObject.position[1], fd.ball_radius});
             ball_last_measurement_time = ball.locObject.last_measurement_time;
 
-            log("ballPos Torso", ballPosition);
 
             float KickAngle = std::fabs(std::atan2(kickTarget[1], kickTarget[0]));
 
