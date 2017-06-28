@@ -40,10 +40,16 @@ namespace localisation {
 
 
         on<Trigger<Sensors>, Sync<OdometryLocalisation>, Single>().then("Odometry Loc", [this](const Sensors& sensors){
-        	
+
         	Transform2D Trw = Transform3D(convert<double, 4, 4>(sensors.world)).projectTo2D();
         	Transform2D Twr = Trw.i();
-        	
+
+
+
+            //TODO: The heading seems to judder in here!!
+
+
+
             if(arma::norm(Twr.localToWorld(Trw)) > 0.00001){
                 log("arma::norm(Twr.localToWorld(Trw))",Trw.t(),Twr.t(),Twr.localToWorld(Trw).t());
             }
@@ -55,7 +61,7 @@ namespace localisation {
 
             auto selfs = std::make_unique<std::vector<Self>>();
             selfs->push_back(Self());
-            selfs->back().locObject.position = convert<double, 2, 1>(state.xy());
+            selfs->back().locObject.position = Eigen::Vector2d(0,0);//HACK convert<double, 2, 1>(state.xy());
             selfs->back().heading = Eigen::Vector2d(std::cos(state.angle()),std::sin(state.angle()));
             // log("sensors world", state.t());
             // log("offset", localisationOffset.t());

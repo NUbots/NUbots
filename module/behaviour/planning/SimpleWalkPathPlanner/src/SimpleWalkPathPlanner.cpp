@@ -213,7 +213,6 @@ namespace module {
                     float headingChange = 0;
                     float sideStep = 0;
                     float speedFactor = 1;
-                    log("kickPlan.target = ",kickPlan.target);
                     if(useLocalisation){
                         arma::vec2 kick_target = WorldToRobotTransform(convert<double,2>(selfs.front().locObject.position), convert<double,2>(selfs.front().heading), convert<double,2>(kickPlan.target));
                         // //approach point:
