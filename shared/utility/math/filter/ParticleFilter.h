@@ -97,7 +97,7 @@ namespace utility {
 
                     for (unsigned int i = 0; i < particles.n_rows; i++){
                         arma::vec predictedObservation = model.predictedObservation(particles.row(i).t(), measurementArgs...);
-                        assert(predictedObservation.size() == measurement.size());
+                        // assert(predictedObservation.size() == measurement.size());
                         arma::vec difference = predictedObservation-measurement;
                         weights[i] = std::exp(- arma::dot(difference, (measurement_variance.i() * difference)));
                     }

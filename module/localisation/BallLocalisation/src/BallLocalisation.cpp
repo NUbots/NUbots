@@ -74,10 +74,10 @@ namespace localisation {
             Transform3D Hcw = Htc.i() * Htw;
             arma::vec3 rBCc_cart = Hcw.transformPoint(rBWw);
             arma::vec3 rBCc_sph1 = cartesianToSpherical(rBCc_cart); // in r,theta,phi
-            arma::vec3 rBCc_sph2 = { 1/rBCc_sph1[0], rBCc_sph1[1], rBCc_sph1[2] };  // in roe, theta, phi, where roe is 1/r
-            emit(graph("state_roe", rBCc_sph2[0]));
-            emit(graph("state_theta", rBCc_sph2[1]));
-            emit(graph("state_phi", rBCc_sph2[2]));
+            arma::vec3 rBCc_sph2 = { rBCc_sph1[0], rBCc_sph1[1], rBCc_sph1[2] };  // in roe, theta, phi, where roe is 1/r
+            emit(graph("ball loc state", rBCc_sph2[0], rBCc_sph2[1],rBCc_sph2[2]));
+
+            emit(graph("ball state xy",ball->locObject.position[0],ball->locObject.position[1]));
             emit(ball);
         });
 
@@ -91,8 +91,6 @@ namespace localisation {
 
                 double quality = 1.0;   // I don't know what quality should be used for
                 if(balls.size() > 0){
-                    log("Ball rBCc: ", balls[0].measurements[0].rBCc);
-                    log("Ball cov: ", balls[0].measurements[0].covariance);
 
                     /* Call Time Update first */
                     auto curr_time = NUClear::clock::now();
@@ -105,10 +103,8 @@ namespace localisation {
                         /* For graphing purposes */
                         arma::vec3 rBCc = convert<double, 3, 1>(measurement.rBCc);
                         //TODO: make this be in ro coords to start with
-                        rBCc[0] = 1 / rBCc[0];
-                        emit(graph("measured_roe", rBCc[0]));
-                        emit(graph("measured_theta", rBCc[1]));
-                        emit(graph("measured_phi", rBCc[2]));
+                        rBCc[0] = rBCc[0];
+                        emit(graph("ball meas", rBCc[0],rBCc[1], rBCc[2]));
 
                         quality *= filter.measurementUpdate(rBCc,convert<double, 3, 3>(measurement.covariance), field, sensors);
                     }

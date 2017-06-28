@@ -49,13 +49,13 @@ namespace module {
 
             // Get our transform to world coordinates
             const Transform3D& Htw = convert<double, 4, 4>(sensors.world);
-            const Transform3D& Htc = convert<double, 4, 4>(sensors.forwardKinematics.at(ServoID::HEAD_PITCH)); 
+            const Transform3D& Htc = convert<double, 4, 4>(sensors.forwardKinematics.at(ServoID::HEAD_PITCH));
             Transform3D Hcw = Htc.i() * Htw;
 
             arma::vec3 rBWw = { state[PX], state[PY], field.ball_radius };
             arma::vec3 rBCc_cart = Hcw.transformPoint(rBWw);
             arma::vec3 rBCc_sph1 = cartesianToSpherical(rBCc_cart); // in r,theta,phi
-            arma::vec3 rBCc_sph2 = { 1/rBCc_sph1[0], rBCc_sph1[1], rBCc_sph1[2] };  // in roe, theta, phi, where roe is 1/r
+            arma::vec3 rBCc_sph2 = { rBCc_sph1[0], rBCc_sph1[1], rBCc_sph1[2] };  // in roe, theta, phi, where roe is 1/r
 
             return rBCc_sph2;
         }

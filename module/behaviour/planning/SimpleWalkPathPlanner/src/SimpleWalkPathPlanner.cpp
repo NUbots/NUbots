@@ -202,43 +202,13 @@ namespace module {
                     auto now = NUClear::clock::now();
                     float timeSinceBallSeen = std::chrono::duration_cast<std::chrono::nanoseconds>(now - ball.locObject.last_measurement_time).count() * (1 / std::nano::den);
 
-                    if(!robot_ground_space){
-                        rBWw = timeSinceBallSeen < search_timeout ?
-                                    convert<double, 2>(ball.locObject.position.head<2>()) : // Place last seen
-                                    Htw.x() + Htw.translation(); //In front of the robot
-                        position = Htw.transformPoint(rBWw);
-                    } else {
-                        arma::vec3 rBWw_temp = { ball.locObject.position[0], ball.locObject.position[1], field.ball_radius };
-                        rBWw = timeSinceBallSeen < search_timeout ?
-                                    rBWw_temp : // Place last seen
-                                    Htw.x() + Htw.translation(); //In front of the robot
-                        position = Htw.transformPoint(rBWw);
-                    }
 
-                    // TODO: support non-ball targets
-                    /*
-                    if(!robot_ground_space){
-                        if(ball.size() > 0){
-                            rBWw = convert<double, 2>(ball[0].position.head<2>());
-                            timeBallLastSeen = now;
-                            // log("ball seen");
-                        } else {
-                            rBWw = timeSinceBallSeen < search_timeout ?
-                                   rBWw : // Place last seen
-                                   Htw.x() + Htw.translation(); //In front of the robot
-                        }
-                        position = Htw.transformPoint(rBWw);
-                    } else {
-                        if(ball.size() > 0){
-                            position =  convert<double, 3>(ball[0].torsoSpacePosition);
-                            timeBallLastSeen = now;
-                        } else {
-                            position = timeSinceBallSeen < search_timeout ?
-                                   position : // Place last seen
-                                   arma::vec2({1,0}); //In front of the robot
-                        }
-                    }
-                    */
+                    arma::vec3 rBWw_temp = { ball.locObject.position[0], ball.locObject.position[1], field.ball_radius };
+                    rBWw = timeSinceBallSeen < search_timeout ?
+                                rBWw_temp : // Place last seen
+                                Htw.x() + Htw.translation(); //In front of the robot
+                    position = Htw.transformPoint(rBWw);
+
                     //Hack Planner:
                     float headingChange = 0;
                     float sideStep = 0;

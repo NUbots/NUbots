@@ -4,6 +4,7 @@
 #include <nuclear>
 
 #include "utility/math/filter/UKF.h"
+#include "utility/math/filter/ParticleFilter.h"
 #include "BallModel.h"
 
 namespace module {
@@ -11,7 +12,8 @@ namespace localisation {
 
     class BallLocalisation : public NUClear::Reactor {
     private:
-        utility::math::filter::UKF<BallModel> filter;
+        // utility::math::filter::UKF<BallModel> filter;
+        utility::math::filter::ParticleFilter<BallModel> filter;
         NUClear::clock::time_point last_time_update_time;
         NUClear::clock::time_point last_measurement_update_time;
     public:
