@@ -94,8 +94,7 @@ namespace utility {
                                          const TMeasurementType&... measurementArgs)
                 {
                     arma::vec weights = arma::zeros(particles.n_rows + model.getRogueCount());
-                    ParticleList candidateParticles = arma::join_rows(particles,arma::zeros(model.getRogueCount(),Model::size));
-                    
+                    ParticleList candidateParticles = arma::join_cols(particles,arma::zeros(model.getRogueCount(),Model::size));
                     //Resample some rogues
                     for(int i = 0; i < model.getRogueCount(); i++){
                         candidateParticles.row(i + particles.n_rows) = model.getRogueRange() % (0.5 - arma::randu(Model::size));
@@ -108,7 +107,6 @@ namespace utility {
                         weights[i] = std::exp(- arma::dot(difference, (measurement_variance.i() * difference)));
                     }
 
-                    // std::cout << "weights = \n" << weights << std::endl;
                     //Resample
                     std::random_device rd;
                     std::mt19937 gen(rd());

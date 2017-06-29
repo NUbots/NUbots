@@ -36,6 +36,7 @@ namespace localisation {
     , filter() {
 
         last_measurement_update_time = NUClear::clock::now();
+        last_time_update_time = NUClear::clock::now();
 
         on<Configuration>("BallLocalisation.yaml").then([this] (const Configuration& config) {
             auto message = std::make_unique<std::vector<Ball>>();
@@ -56,7 +57,6 @@ namespace localisation {
             /* Perform time update */
             auto curr_time = NUClear::clock::now();
             double seconds = TimeDifferenceSeconds(curr_time,last_time_update_time);
-            log("Seconds: ",seconds);
             last_time_update_time = curr_time;
             filter.timeUpdate(seconds);
 
@@ -95,6 +95,7 @@ namespace localisation {
 
                     /* Call Time Update first */
                     auto curr_time = NUClear::clock::now();
+                    //TODO: take min of time and measurement update delta
                     double seconds = TimeDifferenceSeconds(curr_time,last_time_update_time);
                     last_time_update_time = curr_time;
                     filter.timeUpdate(seconds);
