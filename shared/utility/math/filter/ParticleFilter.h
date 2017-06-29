@@ -132,7 +132,7 @@ namespace utility {
                         candidateParticles.row(i) = model.getRogueRange() % (0.5 - arma::randu(Model::size));
                     }
                     //Repeat each particle for each possibility
-                    ParticleList repCandidateParticles = arma::repMat(particles, possibilities.size(),1);
+                    ParticleList repCandidateParticles = arma::repmat(particles, possibilities.size(),1);
                     arma::vec weights = arma::zeros(possibilities.size() * (particles.n_rows + model.getRogueCount()));
 
                     //Compute weights
