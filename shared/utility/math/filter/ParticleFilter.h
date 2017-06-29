@@ -117,6 +117,43 @@ namespace utility {
                     return arma::mean(weights);
                 }
 
+
+                template <typename TMeasurement, typename... TMeasurementType>
+                double ambiguousMeasurementUpdate(const TMeasurement& measurement,
+                                         const arma::mat& measurement_variance,
+                                         const std::vector<arma::vec>& possibilities,
+                                         const TMeasurementType&... measurementArgs)
+                {
+                    //Expand candidate particles with
+                    ParticleList candidateParticles = arma::join_cols(particles,
+                                                                      arma::zeros(model.getRogueCount(),Model::size));
+                    //Resample rogues
+                    for(int i = 0; i < model.getRogueCount(); i++){
+                        candidateParticles.row(i) = model.getRogueRange() % (0.5 - arma::randu(Model::size));
+                    }
+                    //Repeat each particle for each possibility
+                    ParticleList repCandidateParticles = arma::repMat(particles, possibilities.size(),1);
+                    arma::vec weights = arma::zeros(possibilities.size() * (particles.n_rows + model.getRogueCount()));
+
+                    //Compute weights
+                    for (unsigned int i = 0; i < repCandidateParticles.n_rows; i++){
+                        arma::vec predictedObservation = model.predictedObservation(repCandidateParticles.row(i).t(), possibilities[ i / candidateParticles.size()], measurementArgs...);
+                        arma::vec difference = predictedObservation - measurement;
+                        weights[i] = std::exp(- arma::dot(difference, (measurement_variance.i() * difference)));
+                    }
+
+                    //Resample
+                    std::random_device rd;
+                    std::mt19937 gen(rd());
+                    std::discrete_distribution<> multinomial(weights.begin(),weights.end());//class incorrectly named by cpp devs
+                    //Only sample N particles
+                    for (unsigned int i = 0; i < particles.n_rows; i++){
+                        particles.row(i) = repCandidateParticles.row(multinomial(gen));
+                    }
+                    //Return mean weight
+                    return arma::mean(weights);
+                }
+
                 StateVec get() const
                 {
                     return arma::mean(particles, 0).t();
