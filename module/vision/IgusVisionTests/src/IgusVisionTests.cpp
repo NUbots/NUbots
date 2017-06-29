@@ -46,7 +46,7 @@ namespace vision {
             //Project to screen
             arma::fvec2 pixel = math::utility::vision::RadialCamera::pointToPixel(P,params);
             //Screen point referenced from screen centre
-            arma::ivec2 screenPoint = int(pixel[0]),int(pixel[1]));
+            arma::ivec2 screenPoint = arma::ivec2({int(pixel[0]),int(pixel[1])});
             //Convert to point referenced from top left
             arma::ivec2 imagePoint = math::utility::vision::screenToImage(screen,image_size);
             imagePoints.push_back(imagePoint);

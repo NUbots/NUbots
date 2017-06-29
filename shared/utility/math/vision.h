@@ -311,7 +311,7 @@ namespace vision {
             float r = theta / params.lambda;
             float sin_theta = std::sin(theta);
             float px = - r * p[1] / (sin_theta);
-            float py =  r * p[2] / (sin_theta);
+            float py =   r * p[2] / (sin_theta);
 
             return arma::fvec2({px,py}) + params.offset;
         }
