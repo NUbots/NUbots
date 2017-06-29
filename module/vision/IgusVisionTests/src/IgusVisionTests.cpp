@@ -1,7 +1,6 @@
 #include "IgusVisionTests.h"
 
 #include "extension/Configuration.h"
-#include "utility/support/eigen_armadillo.h"
 
 namespace module {
 namespace vision {
@@ -13,7 +12,8 @@ namespace vision {
 
         on<Configuration>("IgusVisionTests.yaml").then([this] (const Configuration& config) {
             // Use configuration here from file IgusVisionTests.yaml
-            ballCentre = config["ballCentre"].as<Eigen::Vector3f>();
+            arma::fvec3 ballCentreTemp = config["ballCentre"].as<arma::fvec>();
+            ballCentre = convert<float,3>(ballCentreTemp);
             radius = config["radius"].as<float>();
 
             theta_count = config["theta_count"].as<float>();
@@ -25,16 +25,18 @@ namespace vision {
             emitClassifiedImage();
         });
 
-        on<Trigger<std::vector<VisionBall>>>().then([this] (const std::vector<VisionBall>& balls) {
+        on<Trigger<std::vector<message::vision::Ball>>>().then([this] (const std::vector<message::vision::Ball>& balls) {
             for(auto& ball : balls){
                 log("Ball pos:", ball.position);
-                log("Edge pts:", ball.edgePoints);
+                for(auto& edgePts : ball.edgePoints){
+                    log("Edge pts:", edgePts);
+                }
             }
         });
 
-        on<Trigger<ClassifiedImage>>().then([this](const ClassifiedImage& classifiedImage) {
+        // on<Trigger<ClassifiedImage>>().then([this](const ClassifiedImage& classifiedImage) {
 
-        });
+        // });
     }
 
     void IgusVisionTests::emitClassifiedImage(){
@@ -55,18 +57,19 @@ namespace vision {
             //Generate (approximate) circle of visible points
             Eigen::Vector3f P = p + q * cos(theta) + r * sin(theta);
             //Project to screen
-            arma::fvec2 pixel = math::utility::vision::RadialCamera::pointToPixel(P,params);
+            //const arma::fvec3& point, const Parameters& params = Parameters()
+            arma::fvec2 pixel = utility::math::vision::RadialCamera::pointToPixel(convert<float, 3>(P),params);
             //Screen point referenced from screen centre
-            arma::ivec2 screenPoint = arma::ivec2({int(pixel[0]),int(pixel[1])});
+            arma::vec2 screenPoint = arma::vec2({int(pixel[0]),int(pixel[1])});
             //Convert to point referenced from top left
-            arma::ivec2 imagePoint = math::utility::vision::screenToImage(screen,image_size);
-            imagePoints.push_back(imagePoint);
+            arma::ivec2 imagePoint = utility::math::vision::screenToImage(screenPoint,image_size);
+            imagePoints.push_back(convert<int,2>(imagePoint));
             //Increment theta
             theta += theta_step;
         }
 
         for(auto& p : imagePoints){
-            log(p.t());
+            log(p);
         }
     }
 }
