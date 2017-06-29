@@ -108,9 +108,9 @@ namespace planning {
 
             float KickAngle = std::fabs(std::atan2(kickTarget[1], kickTarget[0]));
 
-            log("KickPlan target global",convert<double,2,1>(kickPlan.target).t());
-            log("Target of Kick",kickTarget.t());
-            log("KickAngle",KickAngle);
+            //log("KickPlan target global",convert<double,2,1>(kickPlan.target).t());
+            //log("Target of Kick",kickTarget.t());
+            //log("KickAngle",KickAngle);
 
             //Check whether to kick
             // log("kickTarget",kickTarget.t());
