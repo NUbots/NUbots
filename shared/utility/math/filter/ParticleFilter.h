@@ -80,7 +80,7 @@ namespace utility {
                 {
                     //Sample single zero mean gaussian with process noise (represented by a gaussian mixture model of size 1)
                     arma::gmm_diag gaussian;
-                    gaussian.set_params(arma::mat(arma::zeros(Model::size)), arma::mat(model.processNoise().diag()),arma::ones(1));
+                    gaussian.set_params(arma::mat(arma::zeros(Model::size)), arma::mat(model.processNoise().diag() * deltaT),arma::ones(1));
                     for(unsigned int i = 0; i < particles.n_rows; ++i) {
                         //TODO: add noise?
                         StateVec newpcle = model.timeUpdate(particles.row(i).t(), deltaT, additionalParameters...) + gaussian.generate();

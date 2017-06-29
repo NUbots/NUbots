@@ -50,12 +50,12 @@ namespace localisation {
 
 
 
-            if(arma::norm(Twr.localToWorld(Trw)) > 0.00001){
-                log("arma::norm(Twr.localToWorld(Trw))",Trw.t(),Twr.t(),Twr.localToWorld(Trw).t());
-            }
-            if(arma::norm(Trw.localToWorld(Twr)) > 0.00001){
-                log("arma::norm(Trw.localToWorld(Twr))",Trw.t(),Twr.t(),Trw.localToWorld(Twr).t());
-            }
+            // if(arma::norm(Twr.localToWorld(Trw)) > 0.00001){
+            //     log("arma::norm(Twr.localToWorld(Trw))",Trw.t(),Twr.t(),Twr.localToWorld(Trw).t());
+            // }
+            // if(arma::norm(Trw.localToWorld(Twr)) > 0.00001){
+            //     log("arma::norm(Trw.localToWorld(Twr))",Trw.t(),Twr.t(),Trw.localToWorld(Twr).t());
+            // }
 
             Transform2D state = localisationOffset.localToWorld(Twr);
 
