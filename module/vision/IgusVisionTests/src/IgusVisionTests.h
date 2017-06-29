@@ -14,7 +14,7 @@ namespace vision {
         arma::uvec2 image_size;
 
         Eigen::Vector3f ballCentre = Eigen::Vector3f({2,0,0});
-        double radius = 0.1;
+        float radius = 0.1;
     public:
         /// @brief Called by the powerplant to build and setup the IgusVisionTests reactor.
         explicit IgusVisionTests(std::unique_ptr<NUClear::Environment> environment);

@@ -24,6 +24,17 @@ namespace vision {
             image_size = config["image_size"].as<arma::uvec>();
             emitClassifiedImage();
         });
+
+        on<Trigger<std::vector<VisionBall>>>().then([this] (const std::vector<VisionBall>& balls) {
+            for(auto& ball : balls){
+                log("Ball pos:", ball.position);
+                log("Edge pts:", ball.edgePoints);
+            }
+        });
+
+        on<Trigger<ClassifiedImage>>().then([this](const ClassifiedImage& classifiedImage) {
+
+        });
     }
 
     void IgusVisionTests::emitClassifiedImage(){
