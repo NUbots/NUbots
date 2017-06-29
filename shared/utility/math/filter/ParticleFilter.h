@@ -93,20 +93,26 @@ namespace utility {
                                          const arma::mat& measurement_variance,
                                          const TMeasurementType&... measurementArgs)
                 {
-                    arma::vec weights = arma::zeros(particles.n_rows);
+                    arma::vec weights = arma::zeros(particles.n_rows + model.getRogueCount());
+                    ParticleList candidateParticles = arma::join_rows(particles,arma::zeros(model.getRogueCount(),Model::size));
+                    
+                    //Resample some rogues
+                    for(int i = 0; i < model.getRogueCount(); i++){
+                        candidateParticles.row(i + particles.n_rows) = model.getRogueRange() % (0.5 - arma::randu(Model::size));
+                    }
 
-                    for (unsigned int i = 0; i < particles.n_rows; i++){
-                        arma::vec predictedObservation = model.predictedObservation(particles.row(i).t(), measurementArgs...);
+                    for (unsigned int i = 0; i < candidateParticles.n_rows; i++){
+                        arma::vec predictedObservation = model.predictedObservation(candidateParticles.row(i).t(), measurementArgs...);
                         // assert(predictedObservation.size() == measurement.size());
                         arma::vec difference = predictedObservation-measurement;
                         weights[i] = std::exp(- arma::dot(difference, (measurement_variance.i() * difference)));
                     }
+
                     // std::cout << "weights = \n" << weights << std::endl;
                     //Resample
                     std::random_device rd;
                     std::mt19937 gen(rd());
                     std::discrete_distribution<> multinomial(weights.begin(),weights.end());//class incorrectly named by cpp devs
-                    ParticleList candidateParticles = particles;
                     for (unsigned int i = 0; i < particles.n_rows; i++){
                         particles.row(i) = candidateParticles.row(multinomial(gen));
                     }
