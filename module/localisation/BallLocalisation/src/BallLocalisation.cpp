@@ -48,7 +48,7 @@ namespace localisation {
         });
 
         /* To run at something like 100Hz that will call Time Update */
-        on<Every<100, Per<std::chrono::seconds>>, Sync<BallLocalisation>
+        on<Every<15, Per<std::chrono::seconds>>, Sync<BallLocalisation>
          , With<FieldDescription>
          , With<Sensors>>().then("BallLocalisation Time", [this](
             const FieldDescription& field
@@ -56,6 +56,7 @@ namespace localisation {
             /* Perform time update */
             auto curr_time = NUClear::clock::now();
             double seconds = TimeDifferenceSeconds(curr_time,last_time_update_time);
+            log("Seconds: ",seconds);
             last_time_update_time = curr_time;
             filter.timeUpdate(seconds);
 

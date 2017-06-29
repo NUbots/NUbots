@@ -58,6 +58,16 @@ namespace module {
             arma::vec::fixed<size> limitState(const arma::vec::fixed<size>& state) const;
 
             arma::mat::fixed<size, size> processNoise() const;
+
+
+            // number and range of reset particles
+            int n_rogues = 10;
+            arma::vec2 resetRange = {10,10};
+
+            //Getters
+            int getRogueCount() const {return n_rogues;}
+            arma::vec getRogueRange() const {return resetRange;}
+
         };
 
     }
