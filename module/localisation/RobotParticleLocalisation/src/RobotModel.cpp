@@ -28,14 +28,13 @@
 #include "message/localisation/FieldObject.h"
 #include "utility/localisation/transform.h"
 #include "message/input/Sensors.h"
-#include "message/input/ServoID.h"
+#include "utility/input/ServoID.h"
 
 namespace module {
 namespace localisation {
-namespace robot {
 
     using message::input::Sensors;
-    using message::input::ServoID;
+    using utility::input::ServoID;
     using utility::localisation::transform::SphericalRobotObservation;
     using utility::localisation::transform::WorldToRobotTransform;
     using utility::localisation::transform::RobotToWorldTransform;
@@ -44,7 +43,7 @@ namespace robot {
     using utility::math::coordinates::cartesianToSpherical;
 
     arma::vec::fixed<RobotModel::size> RobotModel::timeUpdate(
-        const arma::vec::fixed<RobotModel::size>& state, double /*deltaT*/, const Sensors& /*sensors*/) {
+        const arma::vec::fixed<RobotModel::size>& state, double /*deltaT*/) {
         arma::vec::fixed<RobotModel::size> new_state = state;
 
         return new_state;
@@ -67,36 +66,10 @@ namespace robot {
         return obs;
     }
 
-    // Angle between goals - NOTE: CURRENTLY UNUSED
-    arma::vec RobotModel::predictedObservation(
-        const arma::vec::fixed<RobotModel::size>& state,
-        const std::vector<arma::vec>& actual_positions,
-        const Sensors& /*sensors*/) {
-
-        //TODO: needs to incorporate new motion model position data
-        arma::vec diff_1 = actual_positions[0].rows(0, 1) - state.rows(kX, kY);
-        arma::vec diff_2 = actual_positions[1].rows(0, 1) - state.rows(kX, kY);
-        arma::vec radial_1 = cartesianToRadial(diff_1);
-        arma::vec radial_2 = cartesianToRadial(diff_2);
-
-        auto angle_diff = utility::math::angle::difference(radial_1[1], radial_2[1]);
-
-        return { std::abs(angle_diff) };
-    }
 
     arma::vec RobotModel::observationDifference(const arma::vec& a,
                                                 const arma::vec& b) {
-        if (a.n_elem == 1) {
-            return a - b;
-        } if (a.n_elem == 2) {
-            return a - b;
-        } else {
-            // Spherical coordinates
-            arma::vec3 result = a - b;
-            result(1) = /*utility::math::angle::normalizeAngle*/(result(1)) * cfg_.observationDifferenceBearingFactor;
-            result(2) = /*utility::math::angle::normalizeAngle*/(result(2)) * cfg_.observationDifferenceElevationFactor;
-            return result;
-        }
+        return a-b;
     }
 
     arma::vec::fixed<RobotModel::size> RobotModel::limitState(
@@ -107,15 +80,14 @@ namespace robot {
     }
 
     arma::mat::fixed<RobotModel::size, RobotModel::size> RobotModel::processNoise(){
-        arma::mat noise = arma::eye(RobotModel::size, RobotModel::size);
-        noise(kX, kX) *= cfg_.processNoisePositionFactor;
-        noise(kY, kY) *= cfg_.processNoisePositionFactor;
-        noise(kImuOffset, kImuOffset) *= cfg_.processNoiseHeadingFactor;
+        arma::mat noise = arma::eye(size, size);
+        // noise(kX, kX) *= cfg_.processNoisePositionFactor;
+        // noise(kY, kY) *= cfg_.processNoisePositionFactor;
+        // noise(kImuOffset, kImuOffset) *= cfg_.processNoiseHeadingFactor;
         // std::cout << "process noise = \n" << noise << std::endl;
         return noise;
     }
 
 
-}
 }
 }

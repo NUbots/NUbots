@@ -45,18 +45,11 @@ namespace robot {
         // kHeadingY = 3,
     };
 
-    enum class MeasurementType {
-        kBRGoalMeasurement,
-        kBLGoalMeasurement,
-        kLandmarkMeasurement,
-        kAngleBetweenLandmarksMeasurement,
-    };
-
     class RobotModel {
     public:
         static constexpr size_t size = 3;
 
-        RobotModel() : cfg_(), currentImuOrientation() {
+        RobotModel() {
         }
 
         arma::vec::fixed<RobotModel::size> timeUpdate(
@@ -68,33 +61,21 @@ namespace robot {
             const arma::vec3& actual_position,
             const message::input::Sensors& sensors);
 
-        //arma::vec predictedObservation(
-        //    const arma::vec::fixed<RobotModel::size>& state,
-        //    const message::input::Sensors& sensors);
-
-        arma::vec predictedObservation(
-            const arma::vec::fixed<RobotModel::size>& state,
-            const std::vector<arma::vec>& actual_positions,
-            const message::input::Sensors& sensors);
-
         arma::vec observationDifference(const arma::vec& a, const arma::vec& b);
 
         arma::vec::fixed<size> limitState(const arma::vec::fixed<size>& state);
 
         arma::mat::fixed<size, size> processNoise();
 
-        struct Config {
-            double processNoisePositionFactor = 1e-3;
-            double processNoiseHeadingFactor = 1e-3;
-            double processNoiseVelocityFactor = 1e-3;
-            double observationDifferenceBearingFactor = 0.2;
-            double observationDifferenceElevationFactor = 0.2;
-        } cfg_;
+        //TODO: use these again?
+        // struct Config {
+        //     double processNoisePositionFactor = 1e-3;
+        //     double processNoiseHeadingFactor = 1e-3;
+        //     double processNoiseVelocityFactor = 1e-3;
+        //     double observationDifferenceBearingFactor = 0.2;
+        //     double observationDifferenceElevationFactor = 0.2;
+        // } cfg_;
 
-        utility::math::matrix::Rotation3D currentImuOrientation;
-
-        // arma::mat33 getRobotToWorldTransform(const arma::vec::fixed<RobotModel::size>& state);
-        // arma::mat33 getWorldToRobotTransform(const arma::vec::fixed<RobotModel::size>& state);
     };
 }
 }
