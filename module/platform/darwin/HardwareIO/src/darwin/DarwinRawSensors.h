@@ -34,11 +34,11 @@ namespace Types {
      * @brief This represents the raw gyro values from the CM730 (they are read from the board in ZYX)
      */
     struct Gyro {
-        Gyro() : x(0), y(0), z(0) {}
-        uint16_t x;
-        uint16_t y;
-        uint16_t z;
-    };
+            Gyro() : z(0), y(0), x(0) {}
+            uint16_t z;
+            uint16_t y;
+            uint16_t x;
+        };
 
     /**
      * @brief This represents the raw accelerometer values from the CM730
