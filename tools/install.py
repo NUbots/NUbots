@@ -8,7 +8,7 @@ import tempfile
 import b
 
 from termcolor import cprint
-from subprocess import call, STDOUT, Popen
+from subprocess import call, STDOUT
 
 def register(command):
 
