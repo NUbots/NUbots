@@ -234,6 +234,10 @@ namespace vision {
                 /************************************************
                  *                  THROWOUTS                   *
                  ************************************************/
+
+                if(print_throwout_logs){
+                    log("Ball model:", result.model.centre.t(), result.model.radius);
+                }
                 // CENTRE OF BALL IS ABOVE THE HORIZON
                 if(horizon.y(result.model.centre[0]) > result.model.centre[1]) {
                     if(print_throwout_logs) log("Ball discarded: image.horizon.y(result.model.centre[0]) > result.model.centre[1]");
@@ -248,22 +252,22 @@ namespace vision {
                 // }
 
                 // DOES NOT TOUCH 3 SEED POINTS
-                arma::vec3 sDist({ std::numeric_limits<double>::max(), std::numeric_limits<double>::max(), std::numeric_limits<double>::max() });
+                // arma::vec3 sDist({ std::numeric_limits<double>::max(), std::numeric_limits<double>::max(), std::numeric_limits<double>::max() });
 
-                // Loop through our seed points and find the minimum distance one
-                for(uint i = 0; i < 3; ++i) {
-                    for(auto& s : image.ballSeedPoints[i].points) {
-                        double dist = std::fabs(result.model.radius - arma::norm(result.model.centre - arma::vec2({double(s[0]), double(s[1])})));
-                        if(sDist[i] > dist) {
-                            sDist[i] = dist;
-                        }
-                    }
-                }
-                // Check if our largest one is too far away
-                if(arma::max(sDist) / result.model.radius > maximum_relative_seed_point_distance) {
-                    if(print_throwout_logs) log("Ball discarded: arma::max(sDist) / result.model.radius > maximum_relative_seed_point_distance");
-                    continue;
-                }
+                // // Loop through our seed points and find the minimum distance one
+                // for(uint i = 0; i < 3; ++i) {
+                //     for(auto& s : image.ballSeedPoints[i].points) {
+                //         double dist = std::fabs(result.model.radius - arma::norm(result.model.centre - arma::vec2({double(s[0]), double(s[1])})));
+                //         if(sDist[i] > dist) {
+                //             sDist[i] = dist;
+                //         }
+                //     }
+                // }
+                // // Check if our largest one is too far away
+                // if(arma::max(sDist) / result.model.radius > maximum_relative_seed_point_distance) {
+                //     if(print_throwout_logs) log("Ball discarded: arma::max(sDist) / result.model.radius > maximum_relative_seed_point_distance");
+                //     continue;
+                // }
 
                 // BALL IS CLOSER THAN 1/2 THE HEIGHT OF THE ROBOT BY WIDTH
                 double widthDistance = widthBasedDistanceToCircle(field.ball_radius, top, base, cam.focalLengthPixels);

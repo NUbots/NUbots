@@ -16,7 +16,6 @@ NUCLEAR_ROLE(
 
     #Simulation
     platform::darwin::HardwareSimulator
-    support::SoccerSimulator
     vision::IgusVisionTests
     vision::BallDetector
 
@@ -24,31 +23,5 @@ NUCLEAR_ROLE(
 
     #Sensors
     platform::darwin::SensorFilter
-
-    #Localisation
-    localisation::RobotFieldLocalisation
-    localisation::BallLocalisation
-
-    #Behaviour
-    behaviour::Controller
-    behaviour::skills::Stand
-    behaviour::skills::FallingRelax
-    behaviour::skills::HeadBehaviourSoccer
-    behaviour::skills::Getup
-    behaviour::skills::KickScript
-    behaviour::planning::KickPlanner
-    behaviour::planning::SimpleWalkPathPlanner
-    #behaviour::planning::BezierWalkPathPlanner
-    behaviour::strategy::SoccerStrategy
-
-    #Motion
-    motion::ScriptEngine
-    motion::FootMotionPlanner
-    motion::FootPlacementPlanner
-    motion::TorsoMotionPlanner
-    motion::BalanceKinematicResponse
-    motion::OldWalkEngine
-    motion::HeadController
-    ##motion::IKKick
 )
 
