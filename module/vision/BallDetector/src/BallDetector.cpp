@@ -171,13 +171,14 @@ namespace vision {
         on<Trigger<ClassifiedImage>
          , With<CameraParameters>
          , With<FieldDescription>
-         , With<LookUpTable>
+         // , With<LookUpTable>
          , Single
          , Priority::LOW>().then("Ball Detector", [this](
             std::shared_ptr<const ClassifiedImage> rawImage
             , const CameraParameters& cam
             , const FieldDescription& field
-            , const LookUpTable& lut) {
+            // , const LookUpTable& lut
+            ) {
 
             const auto& image   = *rawImage;
             const auto& sensors = *image.sensors;
@@ -240,11 +241,11 @@ namespace vision {
                 }
 
                 // DOES HAVE INTERNAL GREEN
-                float greenRatio = approximateCircleGreenRatio(result.model, *(image.image), lut);
-                if (greenRatio > green_ratio_threshold) {
-                    if(print_throwout_logs) log("Ball discarded: greenRatio > green_ratio_threshold");
-                    continue;
-                }
+                // float greenRatio = approximateCircleGreenRatio(result.model, *(image.image), lut);
+                // if (greenRatio > green_ratio_threshold) {
+                //     if(print_throwout_logs) log("Ball discarded: greenRatio > green_ratio_threshold");
+                //     continue;
+                // }
 
                 // DOES NOT TOUCH 3 SEED POINTS
                 arma::vec3 sDist({ std::numeric_limits<double>::max(), std::numeric_limits<double>::max(), std::numeric_limits<double>::max() });
@@ -359,7 +360,7 @@ namespace vision {
                     }
                 }
             }
-            if(print_throwout_logs) log("Final result: ", balls->size(), "balls");
+            log("Final result: ", balls->size(), "balls");
             emit(std::move(balls));
             lastFrame.time = sensors.timestamp;
         });

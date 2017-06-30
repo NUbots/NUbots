@@ -286,11 +286,11 @@ namespace vision {
 
         struct Parameters{
             float lambda = 0.01; //Radians per pixel
-            arma::fvec2 offset = {0,0};
+            arma::vec2 offset = {0,0};
         };
 
         inline arma::fvec3 pixelToUnitVector(const arma::fvec2& p, const Parameters& params = Parameters()){
-            arma::fvec2 px = p - params.offset; //Reduce warnings setting types properly
+            arma::vec2 px = p - params.offset; //Reduce warnings setting types properly
             float r  = std::sqrt(std::pow(px[0],2) + std::pow(px[1],2));
             float sx = std::sin(params.lambda * r) * (float(px[0])/r);
             float sy = std::sin(params.lambda * r) * (float(px[1])/r);
@@ -301,19 +301,19 @@ namespace vision {
             return arma::fvec3({-sz, -sx, sy});
         }
 
-        inline arma::fvec2 pointToPixel(const arma::fvec3& point, const Parameters& params = Parameters()){
+        inline arma::vec2 pointToPixel(const arma::vec3& point, const Parameters& params = Parameters()){
             //TODO
-            arma::fvec3 p = arma::normalise(point);
+            arma::vec3 p = arma::normalise(point);
             float theta = std::acos(p[0]);
             if(theta == 0){
-                return arma::fvec2({0,0});
+                return arma::vec2({0,0});
             }
             float r = theta / params.lambda;
             float sin_theta = std::sin(theta);
             float px = - r * p[1] / (sin_theta);
             float py =   r * p[2] / (sin_theta);
 
-            return arma::fvec2({px,py}) + params.offset;    //Reduce warnings by setting types properly
+            return arma::vec2({px,py}) + params.offset;    //Reduce warnings by setting types properly
         }
     }
 }
