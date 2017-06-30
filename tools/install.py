@@ -95,6 +95,6 @@ def run(ip_addr, hostname, config, scripts, user, toolchain, **kwargs):
 
     # Pipe the git commit to file
     version_file = open(os.path.join(build_dir, "version.txt"), "w")
-    Popen(["git", "log", "-1"], stdout=version_file)
+    call(["git", "log", "-1"], stdout=version_file)
     version_file.close()
     call(['rsync', '-avzPLR', '--checksum', '-e ssh'] + [version_file.name] + [target_dir])
