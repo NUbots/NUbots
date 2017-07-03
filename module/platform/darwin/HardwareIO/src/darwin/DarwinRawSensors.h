@@ -79,14 +79,12 @@ namespace Types {
      * @brief This represents data that comes from the CM730
      */
     struct CM730Data {
-        CM730Data() : buttons(0), voltage(0), gyroscope(), accelerometer(), temperature(0), battery(0) {}
+        CM730Data() : buttons(0), gyroscope(), accelerometer(), voltage(0) {}
         uint8_t buttons;
-        uint8_t voltage;
+        uint8_t reserved[7] = { 0 };
         Gyro gyroscope;
         Accelerometer accelerometer;
-        uint8_t reserved[6] = {0};
-        uint8_t temperature;
-        uint16_t battery;
+        uint8_t voltage;
     };
 
     /**
