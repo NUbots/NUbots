@@ -83,7 +83,7 @@ namespace motion {
         , uRightFoot(), uRightFootSource(), uRightFootDestination()
         , uSupport(), velocityCurrent(), velocityCommand()
         , velocityDifference(), zmpCoefficients(arma::fill::zeros), zmpParams(arma::fill::zeros)
-        , swingLeg(), lastFootGoalRotation(), footGoalErrorSum(), emitLocalisation(false), stanceLimitY2(0.0)
+        , swingLeg(), lastFootGoalRotation(), footGoalErrorSum(), stanceLimitY2(0.0)
         , stepLimits(arma::fill::zeros), velocityLimits(arma::fill::zeros), accelerationLimits(arma::fill::zeros)
         , accelerationLimitsHigh(arma::fill::zeros), velocityHigh(0.0), accelerationTurningFactor(0.0), bodyHeight(0.0)
         , bodyTilt(0.0), gainArms(0.0f), gainLegs(0.0f), stepTime(0.0), zmpTime(0.0), stepHeight(0.0)
@@ -214,7 +214,6 @@ namespace motion {
     }
 
     void OldWalkEngine::configure(const YAML::Node& config){
-        emitLocalisation = config["emit_localisation"].as<bool>();
 
         auto& stance = config["stance"];
         bodyHeight = stance["body_height"].as<Expression>();
@@ -414,6 +413,7 @@ namespace motion {
         emit(std::make_unique<std::vector<ServoCommand>>());
     }
 
+    /*
     void OldWalkEngine::localise(Transform2D position) {
         // emit position as a fake localisation
         auto localisation = std::make_unique<std::vector<message::localisation::Self>>();
@@ -426,6 +426,7 @@ namespace motion {
         localisation->push_back(self);
         emit(std::move(localisation));
     }
+    */
 
     void OldWalkEngine::update(const Sensors& sensors) {
         double now = getTime();
@@ -511,11 +512,6 @@ namespace motion {
             leftFootTorso = leftFootTorso.rotateZLocal(hipRollCompensation * phaseComp, convert<double, 4, 4>(sensors.forwardKinematics.find(ServoID::L_HIP_ROLL)->second));
         }
 
-        //TODO:is this a Debug?
-        if (emitLocalisation) {
-            localise(uTorsoActual);
-        }
-
         if (balanceEnabled) {
             // Apply balance to our support foot
             balancer.balance(kinematicsModel
@@ -545,10 +541,6 @@ namespace motion {
         // Transform feet targets to be relative to the torso
         Transform3D leftFootTorso = Transform3D(uLeftFoot).worldToLocal(torso);
         Transform3D rightFootTorso = Transform3D(uRightFoot).worldToLocal(torso);
-
-        if (emitLocalisation) {
-            localise(uTorsoActual);
-        }
 
         if (balanceEnabled) {
             // Apply balance to both legs when standing still

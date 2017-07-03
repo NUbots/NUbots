@@ -9,6 +9,7 @@
 #include "utility/support/eigen_armadillo.h"
 #include "utility/math/matrix/Transform3D.h"
 #include "utility/support/yaml_armadillo.h"
+#include "utility/nubugger/NUhelpers.h"
 
 namespace module {
 namespace localisation {
@@ -20,6 +21,7 @@ namespace localisation {
     using utility::math::matrix::Transform3D;
     using message::platform::darwin::ButtonLeftDown;
     using message::behaviour::Nod;
+    using utility::nubugger::graph;
 
     OdometryLocalisation::OdometryLocalisation(std::unique_ptr<NUClear::Environment> environment)
     : Reactor(std::move(environment)) {
@@ -45,7 +47,6 @@ namespace localisation {
         	Transform2D Twr = Trw.i();
 
 
-
             //TODO: The heading seems to judder in here!!
 
 
@@ -61,7 +62,7 @@ namespace localisation {
 
             auto selfs = std::make_unique<std::vector<Self>>();
             selfs->push_back(Self());
-            selfs->back().locObject.position = Eigen::Vector2d(0,0);//HACK convert<double, 2, 1>(state.xy());
+            selfs->back().locObject.position = convert<double, 2, 1>(state.xy());
             selfs->back().heading = Eigen::Vector2d(std::cos(state.angle()),std::sin(state.angle()));
             // log("sensors world", state.t());
             // log("offset", localisationOffset.t());
