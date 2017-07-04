@@ -182,7 +182,6 @@ namespace vision {
 
             const auto& image   = *rawImage;
             const auto& sensors = *image.sensors;
-            const auto        f = cam.focalLengthPixels;
 
             Line horizon(convert<double, 2>(image.horizon.normal), image.horizon.distance);
 
