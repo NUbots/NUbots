@@ -207,7 +207,8 @@ namespace module {
                     rBWw = timeSinceBallSeen < search_timeout ?
                                 rBWw_temp : // Place last seen
                                 Htw.x() + Htw.translation(); //In front of the robot
-                    position = Htw.transformPoint(rBWw);
+                    arma::vec3 pos = Htw.transformPoint(rBWw);
+                    position = arma::vec2{pos[0],pos[1]};
 
                     //Hack Planner:
                     float headingChange = 0;
