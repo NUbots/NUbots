@@ -129,7 +129,7 @@ namespace utility {
                                                                       arma::zeros(model.getRogueCount(),Model::size));
                     //Resample rogues
                     for(int i = 0; i < model.getRogueCount(); i++){
-                        candidateParticles.row(i) = model.getRogueRange() % (0.5 - arma::randu(Model::size));
+                        candidateParticles.row(i + particles.n_rows) = (model.getRogueRange() % (0.5 - arma::randu(Model::size))).t();
                     }
                     //Repeat each particle for each possibility
                     ParticleList repCandidateParticles = arma::repmat(particles, possibilities.size(),1);
@@ -147,16 +147,30 @@ namespace utility {
                     std::mt19937 gen(rd());
                     std::discrete_distribution<> multinomial(weights.begin(),weights.end());//class incorrectly named by cpp devs
                     //Only sample N particles
+                    arma::vec new_weights = arma::zeros(particles.n_rows);
                     for (unsigned int i = 0; i < particles.n_rows; i++){
-                        particles.row(i) = repCandidateParticles.row(multinomial(gen));
+                        int index = multinomial(gen);
+                        particles.row(i) = repCandidateParticles.row(index);
+                        new_weights(i) = weights(index);
                     }
+                    //Sort particles by descending weight
+                    arma::uvec sorted_index = sort_index(new_weights,"decend");
+                    arma::mat particles_temp = particles;
+                    for(int i = 0; i < sorted_index.n_rows; i++){
+                        particles.row(i) = particles_temp.row(sorted_index[i]);
+                    }
+
                     //Return mean weight
-                    return arma::mean(weights);
+                    return new_weights[sorted_index[0]];
                 }
 
                 StateVec get() const
                 {
                     return arma::mean(particles, 0).t();
+                }
+
+                StateVec getBest() const{
+                    return particles.row(0).t();
                 }
 
                 StateMat getCovariance() const

@@ -46,27 +46,13 @@ namespace localisation {
         	Transform2D Trw = Transform3D(convert<double, 4, 4>(sensors.world)).projectTo2D();
         	Transform2D Twr = Trw.i();
 
-
-            //TODO: The heading seems to judder in here!!
-
-
-
-            // if(arma::norm(Twr.localToWorld(Trw)) > 0.00001){
-            //     log("arma::norm(Twr.localToWorld(Trw))",Trw.t(),Twr.t(),Twr.localToWorld(Trw).t());
-            // }
-            // if(arma::norm(Trw.localToWorld(Twr)) > 0.00001){
-            //     log("arma::norm(Trw.localToWorld(Twr))",Trw.t(),Twr.t(),Trw.localToWorld(Twr).t());
-            // }
-
             Transform2D state = localisationOffset.localToWorld(Twr);
 
             auto selfs = std::make_unique<std::vector<Self>>();
             selfs->push_back(Self());
             selfs->back().locObject.position = convert<double, 2, 1>(state.xy());
             selfs->back().heading = Eigen::Vector2d(std::cos(state.angle()),std::sin(state.angle()));
-            // log("sensors world", state.t());
-            // log("offset", localisationOffset.t());
-            // log("world", Twr.t());
+
         	emit(selfs);
         });
     }

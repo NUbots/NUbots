@@ -28,33 +28,26 @@
 
 namespace module {
 namespace localisation {
-namespace robot {
-    // Number of dimensions
-    // The state consists of 3 components:
-    //    1. The x position on the field
-    //    2. The y position on the field
-    //    3. The robot's heading (in radians)
-    enum RobotModelStateComponents : int {
-        kX = 0, // world space
-        kY = 1, // world space
-        kImuOffset = 2
-        // kVX = 3, // robot space
-        // kVY = 4  // robot space
-        // kHeading = 2,
-        // kHeadingX = 2,
-        // kHeadingY = 3,
-    };
 
     class RobotModel {
     public:
         static constexpr size_t size = 3;
 
+        enum Components : int {
+            // Field center in world space
+            kX = 0,
+            kY = 1,
+            //Angle is the angle from the robot world forward direction to the field forward direction
+            kAngle = 2
+        };
+
+
+
         RobotModel() {
         }
 
         arma::vec::fixed<RobotModel::size> timeUpdate(
-            const arma::vec::fixed<RobotModel::size>& state, double deltaT,
-            const message::input::Sensors& sensors);
+            const arma::vec::fixed<RobotModel::size>& state, double deltaT);
 
         arma::vec predictedObservation(
             const arma::vec::fixed<RobotModel::size>& state,
@@ -67,6 +60,17 @@ namespace robot {
 
         arma::mat::fixed<size, size> processNoise();
 
+        arma::vec3 processNoiseDiagonal;
+
+        // number and range of reset particles
+        int n_rogues = 10;
+        arma::vec3 resetRange = {10,6,6};
+
+        //Getters
+        int getRogueCount() const {return n_rogues;}
+        arma::vec getRogueRange() const {return resetRange;}
+
+
         //TODO: use these again?
         // struct Config {
         //     double processNoisePositionFactor = 1e-3;
@@ -77,7 +81,7 @@ namespace robot {
         // } cfg_;
 
     };
-}
+
 }
 }
 #endif

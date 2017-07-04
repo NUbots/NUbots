@@ -29,6 +29,9 @@
 #include "utility/localisation/transform.h"
 #include "message/input/Sensors.h"
 #include "utility/input/ServoID.h"
+#include "utility/math/matrix/Transform3D.h"
+#include "utility/support/eigen_armadillo.h"
+
 
 namespace module {
 namespace localisation {
@@ -41,7 +44,10 @@ namespace localisation {
     using utility::localisation::transform::ImuToWorldHeadingTransform;
     using utility::math::coordinates::cartesianToRadial;
     using utility::math::coordinates::cartesianToSpherical;
+    using utility::math::angle::normalizeAngle;
 
+
+    using utility::math::matrix::Transform3D;
     arma::vec::fixed<RobotModel::size> RobotModel::timeUpdate(
         const arma::vec::fixed<RobotModel::size>& state, double /*deltaT*/) {
         arma::vec::fixed<RobotModel::size> new_state = state;
@@ -56,14 +62,23 @@ namespace localisation {
         const arma::vec3& actual_position,
         const Sensors& sensors) {
 
-        //Rewrite:
-        double rmHeading = sensors.world.rotation().yaw() - state(robot::kImuOffset);
-        arma::vec2 robotModelHeading = {std::cos(-rmHeading),std::sin(-rmHeading)};
+        // Get our transform to world coordinates
+        const Transform3D& Htw = convert<double, 4, 4>(sensors.world);
+        const Transform3D& Htc = convert<double, 4, 4>(sensors.forwardKinematics.at(ServoID::HEAD_PITCH));
+        Transform3D Hcw = Htc.i() * Htw;
 
-        auto obs = SphericalRobotObservation(sensors.world.translation().rows(0,1) - state.rows(kX, kY),
-                                             robotModelHeading,
-                                             actual_position);
-        return obs;
+        Transform3D Hwf;
+        Hwf.translation() = arma::vec3{state[kX], state[kY],0};
+        Hwf.rotateZ(state[kAngle]);
+
+        Transform3D Hcf = Hcw * Hwf;
+
+        //rFCc = vector from camera to field object expected position
+        arma::vec3 rFCc = Hcf.transformPoint(actual_position);
+        arma::vec3 rFCc_sph = cartesianToSpherical(rFCc); // in r,theta,phi
+        //arma::vec3 rFCc_sph2 = { rFCc_sph1[0], rFCc_sph1[1], rFCc_sph1[2] };  // in roe, theta, phi, where roe is 1/r
+
+        return rFCc_sph;
     }
 
 
@@ -74,18 +89,20 @@ namespace localisation {
 
     arma::vec::fixed<RobotModel::size> RobotModel::limitState(
         const arma::vec::fixed<RobotModel::size>& state) {
-
-        // TODO: Clip robot's state to the field.
-        return state;
+        auto state2 = state;
+        state2[kAngle] = normalizeAngle(state2[kAngle]);
+        // TODO: Clip robot's state to the field?
+        return state2;
     }
 
     arma::mat::fixed<RobotModel::size, RobotModel::size> RobotModel::processNoise(){
         arma::mat noise = arma::eye(size, size);
+        //TODO: this
         // noise(kX, kX) *= cfg_.processNoisePositionFactor;
         // noise(kY, kY) *= cfg_.processNoisePositionFactor;
         // noise(kImuOffset, kImuOffset) *= cfg_.processNoiseHeadingFactor;
         // std::cout << "process noise = \n" << noise << std::endl;
-        return noise;
+        return arma::diagmat(processNoiseDiagonal);
     }
 
 

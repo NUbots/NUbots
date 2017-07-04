@@ -3,6 +3,8 @@
 
 #include <nuclear>
 #include "RobotModel.h"
+#include "utility/math/filter/ParticleFilter.h"
+#include "RobotModel.h"
 
 namespace module {
 namespace localisation {
