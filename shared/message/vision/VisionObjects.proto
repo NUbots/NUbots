@@ -87,6 +87,7 @@ message Goal {
         RIGHT_NORMAL        = 2;
         TOP_NORMAL          = 3;
         BASE_NORMAL         = 4;
+        CENTRE              = 5;
     }
 
     message Measurement {

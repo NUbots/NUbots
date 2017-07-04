@@ -360,11 +360,12 @@ namespace vision {
                 arma::vec2 br = imageToScreen(quad.getBottomRight(), convert<uint, 2>(image.dimensions));
                 arma::vec2 screenGoalCentre = (tl + tr + bl + br) * 0.25;
 
-                // Get vectors for TL TR BL BR;
-                arma::vec3 ctl = getCamFromScreen(tl, cam.focalLengthPixels);
-                arma::vec3 ctr = getCamFromScreen(tr, cam.focalLengthPixels);
-                arma::vec3 cbl = getCamFromScreen(bl, cam.focalLengthPixels);
-                arma::vec3 cbr = getCamFromScreen(br, cam.focalLengthPixels);
+                // Get vectors for TL TR BL BR goal;
+                arma::vec3 ctl  = getCamFromScreen(tl, cam.focalLengthPixels);
+                arma::vec3 ctr  = getCamFromScreen(tr, cam.focalLengthPixels);
+                arma::vec3 cbl  = getCamFromScreen(bl, cam.focalLengthPixels);
+                arma::vec3 cbr  = getCamFromScreen(br, cam.focalLengthPixels);
+                arma::vec3 rGCc_norm = arma::normalise((cbl+cbr)*0.5); // vector to bottom centre of goal post
 
                 // Get our four normals for each edge
                 // BL TL cross product gives left side
@@ -396,6 +397,13 @@ namespace vision {
                     auto top    = convert<double, 3>(arma::normalise(arma::cross(ctl, ctr)));
                     it->measurement.push_back(Goal::Measurement(Goal::MeasurementType::TOP_NORMAL, top));
                 }
+
+                // Add the vector to the bottom centre of the goal post as long as post is near vertical (less than 30 degrees)
+                if (std::abs(arma::atan(left[2]/left[1])) < 0.5){
+                    auto rGCc_sphr = convert<double, 3>(cartesianToSpherical(rGCc_norm));  // Just converted into eigen. Still the unit vector
+                    it->measurement.push_back(Goal::Measurement(Goal::MeasurementType::CENTRE, rGCc_sphr));
+                }
+
 
                 // Angular positions from the camera
                 arma::vec2 pixelsToTanThetaFactor = convert<double, 2>(cam.pixelsToTanThetaFactor);
