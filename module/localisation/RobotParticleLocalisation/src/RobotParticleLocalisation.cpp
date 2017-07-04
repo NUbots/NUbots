@@ -40,7 +40,7 @@ namespace localisation {
         });
 
         on<Trigger<Sensors>, Single>().then("Time Update", [this](const Sensors& sensors){
-            log("TimeUpdate Start");
+            std::cout << "TimeUpdate Start" << std::endl;
             /* Perform time update */
             auto curr_time = NUClear::clock::now();
             double seconds = TimeDifferenceSeconds(curr_time,last_time_update_time);
@@ -48,8 +48,8 @@ namespace localisation {
             filter.timeUpdate(seconds);
 
             std::vector<arma::vec> test_positions;
-            test_positions.push_back(arma::vec{10,10,0});
-            test_positions.push_back(arma::vec{2,2,0});
+            test_positions.push_back(arma::vec{4.5,1.5,0});
+            // test_positions.push_back(arma::vec{4.5,-1.5,0});
 
             //Debug filter
             arma::vec measurement = filter.model.predictedObservation(test_state, test_positions[0], sensors);//r,theta,phi
@@ -60,7 +60,7 @@ namespace localisation {
             auto selfs = std::make_unique<std::vector<Self>>();
             selfs->push_back(Self());
             //Todo: get filter state and transform
-            arma::vec3 state = filter.get();//filter.getBest();
+            arma::vec3 state = filter.getBest();
             selfs->back().locObject.position = Eigen::Vector2d(state[RobotModel::kX],state[RobotModel::kY]);
             selfs->back().heading = Eigen::Vector2d(std::cos(state[RobotModel::kAngle]),std::sin(state[RobotModel::kAngle]));
             // log("measurement", measurement.t());
@@ -68,7 +68,7 @@ namespace localisation {
             log("deltaT", seconds);
 
             emit(selfs);
-            log("TimeUpdate End");
+            std::cout << "TimeUpdate End" << std::endl;
         });
     }
 }
