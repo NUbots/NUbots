@@ -224,17 +224,25 @@ namespace module
             // Check if we managed to open our file descriptor
             int resetCount = 0;
 
-            while (fd < 0 && resetCount < 100)
+            while (fd < 0 && resetCount < 10)
             {
                     std::cout << "Toggling GPIO" << std::endl;
                     std::ofstream gpio;
                     gpio.open ("/sys/class/gpio/gpio8/value");
                     gpio << "0";
-                    std::this_thread::sleep_for(std::chrono::milliseconds(150));
+                    std::this_thread::sleep_for(std::chrono::milliseconds(500));
                     gpio << "1";
-                    std::this_thread::sleep_for(std::chrono::milliseconds(100));
+                    for(int i = 0; i < 20; i++)
+                    {
+                        fd = open(deviceID.c_str(), O_RDWR);
+                        std::this_thread::sleep_for(std::chrono::milliseconds(200));
+                        if (fd >= 0)
+                        {
+                            break;
+                        }
+                    }
+
                     gpio.close();
-                    fd = open(deviceID.c_str(), O_RDWR);
                     resetCount++;
             }
             if (fd < 0)
