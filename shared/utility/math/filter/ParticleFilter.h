@@ -62,17 +62,31 @@ namespace utility {
 
                 void reset(StateVec initialMean, StateMat initialCovariance, int number_of_particles_ = 100)
                 {
-                    particles = arma::zeros(number_of_particles_,Model::size);
-                    setState(initialMean, initialCovariance);
+                    particles = getParticles(initialMean, initialCovariance, number_of_particles_);
                 }
 
-                void setState(StateVec initialMean, StateMat initialCovariance) {
+                void resetAmbiguous(std::vector<StateVec> initialMean, std::vector<StateMat> initialCovariance, int number_of_particles_ = 100)
+                {
+                    if(initialMean.size() != initialCovariance.size()){
+                        throw std::runtime_error(std::string(__FILE__) + " : " + std::to_string(__LINE__) + " different number of means vs covariances provided.");
+                    }
+                    //Sample the same number of particles for each possibility
+                    particles = getParticles(initialMean[0], initialCovariance[0], number_of_particles_ / initialMean.size());
+                    for(int i = 1; i < initialMean.size(); i++){
+                        particles = arma::join_cols(particles,getParticles(initialMean[i], initialCovariance[i], number_of_particles_ / initialMean.size()));
+                    }
+                }
+
+                ParticleList getParticles(StateVec initialMean, StateMat initialCovariance, int n_particles) {
                     //Sample single gaussian (represented by a gaussian mixture model of size 1)
+                    ParticleList new_particles = arma::zeros(n_particles, Model::size);
+
                     arma::gmm_diag gaussian;
                     gaussian.set_params(arma::mat(initialMean), arma::mat(initialCovariance.diag()),arma::ones(1));
-                    for(unsigned int i = 0; i < particles.n_rows; ++i) {
-                        particles.row(i) = gaussian.generate().t();
+                    for(unsigned int i = 0; i < n_particles; ++i) {
+                        new_particles.row(i) = gaussian.generate().t();
                     }
+                    return new_particles;
                 }
 
                 template <typename... TAdditionalParameters>
@@ -82,7 +96,6 @@ namespace utility {
                     arma::gmm_diag gaussian;
                     gaussian.set_params(arma::mat(arma::zeros(Model::size)), arma::mat(model.processNoise().diag() * deltaT),arma::ones(1));
                     for(unsigned int i = 0; i < particles.n_rows; ++i) {
-                        //TODO: add noise?
                         StateVec newpcle = model.timeUpdate(particles.row(i).t(), deltaT, additionalParameters...) + gaussian.generate();
                         particles.row(i) = newpcle.t();
                     }
@@ -132,15 +145,33 @@ namespace utility {
                         candidateParticles.row(i + particles.n_rows) = (model.getRogueRange() % (0.5 - arma::randu(Model::size))).t();
                     }
                     //Repeat each particle for each possibility
-                    ParticleList repCandidateParticles = arma::repmat(particles, possibilities.size(),1);
+                    ParticleList repCandidateParticles = arma::repmat(candidateParticles, possibilities.size(),1);
                     arma::vec weights = arma::zeros(possibilities.size() * (particles.n_rows + model.getRogueCount()));
 
+                    // std::cout << "measurement = " << measurement.t() << "candidateParticles.n_rows = " << candidateParticles.n_rows << std::endl;
                     //Compute weights
+                    float good_weight = 0;
+                    float bad_weight = 0;
+                    int bad_count = 0;
                     for (unsigned int i = 0; i < repCandidateParticles.n_rows; i++){
-                        arma::vec predictedObservation = model.predictedObservation(repCandidateParticles.row(i).t(), possibilities[ i / candidateParticles.size()], measurementArgs...);
+                        arma::vec predictedObservation = model.predictedObservation(repCandidateParticles.row(i).t(), possibilities[ i / candidateParticles.n_rows], measurementArgs...);
                         arma::vec difference = predictedObservation - measurement;
                         weights[i] = std::exp(- arma::dot(difference, (measurement_variance.i() * difference)));
+                        if(repCandidateParticles.row(i)[2] < 0){
+                            // std::cout << "Left side : i = " << i << " / " << repCandidateParticles.n_rows << ", weight = " << weights[i] << std::endl
+                            //           << " predictedObservation = "  << predictedObservation.t()
+                            //           << " measurement            " << measurement.t()
+                            //           << " possibility:           " << i / candidateParticles.n_rows << std::endl
+                            //           << " position =             " << possibilities[ i / candidateParticles.n_rows].t()
+                            //           << "state =                 " << repCandidateParticles.row(i)
+                            //           << std::endl;
+                            bad_weight+=weights[i];
+                            bad_count ++;
+                        } else {
+                            good_weight+=weights[i];
+                        }
                     }
+                    std::cout << " good vs bad = " << good_weight << " , " << bad_weight << std::endl;
 
                     //Resample
                     std::random_device rd;
@@ -152,7 +183,10 @@ namespace utility {
                         int index = multinomial(gen);
                         particles.row(i) = repCandidateParticles.row(index);
                         new_weights(i) = weights(index);
+                        // std::cout << "index = " << index << " / " << repCandidateParticles.n_rows << ", weight = " << new_weights(i) << std::endl;
                     }
+                    std::cout << " Resampled " << particles.n_rows << std::endl;
+                    std::cout << " Bad count = " << bad_count  << std::endl;
                     //Sort particles by descending weight
                     arma::uvec sorted_index = sort_index(new_weights,"decend");
                     arma::mat particles_temp = particles;
@@ -166,6 +200,14 @@ namespace utility {
 
                 StateVec get() const
                 {
+                    StateMat variance = arma::cov(particles, 0);
+                    //If uncertainty high, then we likely have multiple hypotheses remaining
+                    std::cout << arma::norm(variance) << std::endl;
+                    if(arma::norm(variance) / Model::size > 1){
+                        std::cout << "PCLE FILTER BEST" << std::endl;
+                        return getBest();
+                    }
+                    std::cout << "PCLE FILTER MEAN" << std::endl;
                     return arma::mean(particles, 0).t();
                 }
 
@@ -176,6 +218,10 @@ namespace utility {
                 StateMat getCovariance() const
                 {
                     return arma::cov(particles, 0);
+                }
+
+                ParticleList getParticles() const{
+                    return particles;
                 }
             };
         }

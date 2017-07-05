@@ -1,6 +1,16 @@
 process_noise_diagonal: [0.01,0.01,0.0001]
-test_state: [1,2,3.14]
+test_state: [0,-3,1.5]
 
+draw_particles: 20
 n_particles: 500
 n_rogues: 50
 reset_range: [10,10,6]
+
+
+
+
+
+
+
+
+
