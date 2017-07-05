@@ -60,7 +60,7 @@ namespace utility {
                     reset(initialMean, initialCovariance, number_of_particles_);
                 }
 
-                void reset(StateVec initialMean, StateMat initialCovariance, int number_of_particles_)
+                void reset(StateVec initialMean, StateMat initialCovariance, int number_of_particles_ = 100)
                 {
                     particles = arma::zeros(number_of_particles_,Model::size);
                     setState(initialMean, initialCovariance);

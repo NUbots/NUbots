@@ -67,9 +67,10 @@ namespace localisation {
         const Transform3D& Htc = convert<double, 4, 4>(sensors.forwardKinematics.at(ServoID::HEAD_PITCH));
         Transform3D Hcw = Htc.i() * Htw;
 
+
         Transform3D Hwf;
         Hwf.translation() = arma::vec3{state[kX], state[kY],0};
-        Hwf.rotateZ(state[kAngle]);
+        Hwf = Hwf.rotateZ(state[kAngle]);
 
         Transform3D Hcf = Hcw * Hwf;
 
@@ -78,6 +79,13 @@ namespace localisation {
         arma::vec3 rFCc_sph = cartesianToSpherical(rFCc); // in r,theta,phi
         //arma::vec3 rFCc_sph2 = { rFCc_sph1[0], rFCc_sph1[1], rFCc_sph1[2] };  // in roe, theta, phi, where roe is 1/r
 
+        // std::cout << "state \n" << state << std::endl;
+        // std::cout << "Htw \n" << Htw << std::endl;
+        // std::cout << "Htc \n" << Htc << std::endl;
+        // std::cout << "Hwf \n" << Hwf << std::endl;
+        // std::cout << "Hcf \n" << Hcf << std::endl;
+        // std::cout << "rFCc \n" << rFCc << std::endl;
+        // std::cout << "rFCc_sph \n" << rFCc_sph << std::endl;
         return rFCc_sph;
     }
 
