@@ -22,6 +22,9 @@
 
 #include <cmath>
 
+#include <Eigen/Core>
+
+
 namespace utility {
 namespace math {
     /**
