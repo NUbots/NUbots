@@ -20,8 +20,8 @@
 #ifndef UTILITY_MOTION_BALANCE_H
 #define UTILITY_MOTION_BALANCE_H
 
-#include <nuclear>
 #include <yaml-cpp/yaml.h>
+#include <nuclear>
 
 #include "extension/Configuration.h"
 
@@ -30,16 +30,16 @@
 
 #include "utility/input/LimbID.h"
 //#include "utility/input/ServoID.h"
-#include "utility/math/matrix/Transform3D.h"
-#include "utility/math/matrix/Rotation3D.h"
 #include "utility/math/geometry/UnitQuaternion.h"
+#include "utility/math/matrix/Rotation3D.h"
+#include "utility/math/matrix/Transform3D.h"
 
 namespace utility {
 namespace motion {
 
     class Balancer {
     private:
-        //Config
+        // Config
         float rotationPGain = 0;
         float rotationIGain = 0;
         float rotationDGain = 0;
@@ -53,23 +53,25 @@ namespace motion {
         float translationDGainZ = 0;
 
         float ankleRotationScale = 0;
-        float hipRotationScale = 0;
+        float hipRotationScale   = 0;
 
-        //State
-        float dPitch = 0;
-        float dRoll = 0;
+        // State
+        float dPitch    = 0;
+        float dRoll     = 0;
         float lastPitch = 0;
-        float lastRoll = 0;
+        float lastRoll  = 0;
 
         utility::math::geometry::UnitQuaternion lastErrorQuaternion;
         NUClear::clock::time_point lastBalanceTime;
+
     public:
         Balancer() : lastErrorQuaternion(), lastBalanceTime() {}
         void configure(const YAML::Node& config);
-        void balance(const message::motion::KinematicsModel& hip, utility::math::matrix::Transform3D& footToTorso, const utility::input::LimbID& leg, const message::input::Sensors& sensors);
+        void balance(const message::motion::KinematicsModel& hip,
+                     utility::math::matrix::Transform3D& footToTorso,
+                     const utility::input::LimbID& leg,
+                     const message::input::Sensors& sensors);
     };
-
-
 }
 }
 
