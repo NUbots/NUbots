@@ -20,29 +20,43 @@
 #ifndef UTILITY_MATH_GEOMETRY_UNITQUATERNION_H
 #define UTILITY_MATH_GEOMETRY_UNITQUATERNION_H
 
+#include <random>
+
+#include <Eigen/Core>
 
 #include "utility/math/matrix/Rotation3D.h"
 
 namespace utility {
 namespace math {
-namespace matrix {
-    template <int Dimensions>
-    class Rotation;
-    using Rotation3D = Rotation<3>;
-}
-namespace geometry {
+    namespace matrix {
+        template <int Dimensions>
+        class Rotation;
+        using Rotation3D = Rotation<3>;
+    }
+    namespace geometry {
 
-    class UnitQuaternion : public Eigen::Vector4d {
-        using Eigen::Vector4d::vec4; // inherit constructors
-
+        class UnitQuaternion : public Eigen::Vector4d {
         private:
-
             /* @brief Constructor for non-unit quaternion for purpose of point representation
             */
             UnitQuaternion(const Eigen::Vector3d& v);
 
         public:
-            UnitQuaternion();
+            UnitQuaternion() : Eigen::Vector4d() {
+                real() = 1;
+                imaginary().setZero();
+            }
+
+            // This constructor allows you to construct UnitQuaternion from Eigen expressions
+            template <typename OtherDerived>
+            UnitQuaternion(const Eigen::MatrixBase<OtherDerived>& other) : Eigen::Vector4d(other) {}
+
+            // This method allows you to assign Eigen expressions to UnitQuaternion
+            template <typename OtherDerived>
+            UnitQuaternion& operator=(const Eigen::MatrixBase<OtherDerived>& other) {
+                this->Eigen::Vector4d::operator=(other);
+                return *this;
+            }
 
             UnitQuaternion(const matrix::Rotation3D& rotation);
 
@@ -50,9 +64,11 @@ namespace geometry {
 
             UnitQuaternion(const Eigen::Vector3d& vec1, const Eigen::Vector3d& vec2);
 
-            UnitQuaternion operator - (const UnitQuaternion& p) const;
+            UnitQuaternion operator-(const UnitQuaternion& p) const;
+            UnitQuaternion operator-() const;
 
-            UnitQuaternion operator * (const UnitQuaternion& p) const;
+            UnitQuaternion operator*(const UnitQuaternion& p) const;
+            UnitQuaternion operator*(double n) const;
 
             UnitQuaternion(double realPart, const Eigen::Vector3d& imaginaryPart);
 
@@ -97,29 +113,54 @@ namespace geometry {
             double norm();
 
             // real part
-            inline double kW() const { return at(0); };
-            inline double& kW() { return at(0); };
+            inline double kW() const {
+                return operator[](0);
+            };
+            inline double& kW() {
+                return operator[](0);
+            };
 
-            inline double kX() const { return at(1); };
-            inline double& kX() { return at(1); };
+            inline double kX() const {
+                return operator[](1);
+            };
+            inline double& kX() {
+                return operator[](1);
+            };
 
-            inline double kY() const { return at(2); };
-            inline double& kY() { return at(2); };
+            inline double kY() const {
+                return operator[](2);
+            };
+            inline double& kY() {
+                return operator[](2);
+            };
 
-            inline double kZ() const { return at(3); };
-            inline double& kZ() { return at(3); };
+            inline double kZ() const {
+                return operator[](3);
+            };
+            inline double& kZ() {
+                return operator[](3);
+            };
 
-            inline double real() const { return at(0); };
-            inline double& real() { return at(0); };
+            inline double real() const {
+                return operator[](0);
+            };
+            inline double& real() {
+                return operator[](0);
+            };
 
-            inline const arma::subview_col<double> imaginary() const { return rows(1,3); }
-            inline arma::subview_col<double> imaginary() { return rows(1,3); }
+            inline const Eigen::Vector3d imaginary() const {
+                return tail<3>();
+            }
+            inline Eigen::Vector3d imaginary() {
+                return tail<3>();
+            }
 
             UnitQuaternion slerp(const UnitQuaternion& p, const double& t);
-            static inline UnitQuaternion Identity() { return(Eigen::Vector4d(1.0, 0.0, 0.0, 0.0)); }
-    };
-
-}
+            static inline UnitQuaternion Identity() {
+                return (Eigen::Vector4d(1.0, 0.0, 0.0, 0.0));
+            }
+        };
+    }
 }
 }
 

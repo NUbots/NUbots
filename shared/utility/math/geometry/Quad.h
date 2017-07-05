@@ -23,106 +23,117 @@
 #include <ostream>
 #include <vector>
 
+#include <Eigen/Core>
+
 #include "Line.h"
 
 namespace utility {
 namespace math {
-namespace geometry {
+    namespace geometry {
 
-    class Quad {
-    public:
-        Quad();
-        Quad(const Quad& other);
-        Quad(Eigen::Vector2d bottomLeft, Eigen::Vector2d topLeft, Eigen::Vector2d topRight, Eigen::Vector2d bottomRight);
-        Quad(Eigen::Vector2i bottomLeft, Eigen::Vector2i topLeft, Eigen::Vector2i topRight, Eigen::Vector2i bottomRight);
-        Quad(double left, double top, double right, double bottom);
+        class Quad {
+        public:
+            Quad();
+            Quad(const Quad& other);
+            Quad(Eigen::Vector2d bottomLeft,
+                 Eigen::Vector2d topLeft,
+                 Eigen::Vector2d topRight,
+                 Eigen::Vector2d bottomRight);
+            Quad(Eigen::Vector2i bottomLeft,
+                 Eigen::Vector2i topLeft,
+                 Eigen::Vector2i topRight,
+                 Eigen::Vector2i bottomRight);
+            Quad(double left, double top, double right, double bottom);
 
-        /**
-         * Sets the Quad as a screen aligned rectangle given the specified positions.
-         * @param left     The left x pixel value.
-         * @param top      The top y pixel value.
-         * @param right    The right x pixel value.
-         * @param bottom   The bottom y pixel value.
-         */
-        void set(double left, double top, double right, double bottom);
+            /**
+             * Sets the Quad as a screen aligned rectangle given the specified positions.
+             * @param left     The left x pixel value.
+             * @param top      The top y pixel value.
+             * @param right    The right x pixel value.
+             * @param bottom   The bottom y pixel value.
+             */
+            void set(double left, double top, double right, double bottom);
 
-        /**
-         * Sets the Quad given the specified corners.
-         * @param bottomLeft  The bottom left corner.
-         * @param topLeft     The top left corner.
-         * @param topRight    The top right corner.
-         * @param bottomRight The bottom right corner.
-         */
-        void set(Eigen::Vector2d bottomLeft, Eigen::Vector2d topLeft, Eigen::Vector2d topRight, Eigen::Vector2d bottomRight);
+            /**
+             * Sets the Quad given the specified corners.
+             * @param bottomLeft  The bottom left corner.
+             * @param topLeft     The top left corner.
+             * @param topRight    The top right corner.
+             * @param bottomRight The bottom right corner.
+             */
+            void set(Eigen::Vector2d bottomLeft,
+                     Eigen::Vector2d topLeft,
+                     Eigen::Vector2d topRight,
+                     Eigen::Vector2d bottomRight);
 
-        Eigen::Vector2d getTopCentre() const;                                //! Returns the bottom centre pixel location of the Quad.
-        Eigen::Vector2d getBottomCentre() const;                             //! Returns the bottom centre pixel location of the Quad.
-        Eigen::Vector2d getRightCentre() const;
-        Eigen::Vector2d getLeftCentre() const;
+            Eigen::Vector2d getTopCentre() const;     //! Returns the bottom centre pixel location of the Quad.
+            Eigen::Vector2d getBottomCentre() const;  //! Returns the bottom centre pixel location of the Quad.
+            Eigen::Vector2d getRightCentre() const;
+            Eigen::Vector2d getLeftCentre() const;
 
-        Eigen::Vector2d getCentre() const;                                   //! Returns the centre pixel location  of the Quad.
+            Eigen::Vector2d getCentre() const;  //! Returns the centre pixel location  of the Quad.
 
-        Eigen::Vector2d getBottomLeft() const;                               //! Returns the bottom left pixel location  of the Quad.
-        Eigen::Vector2d getBottomRight() const;                              //! Returns the bottom right pixel location  of the Quad.
-        Eigen::Vector2d getTopLeft() const;                                  //! Returns the top left pixel location  of the Quad.
-        Eigen::Vector2d getTopRight() const;                                 //! Returns the top right pixel location  of the Quad.
+            Eigen::Vector2d getBottomLeft() const;   //! Returns the bottom left pixel location  of the Quad.
+            Eigen::Vector2d getBottomRight() const;  //! Returns the bottom right pixel location  of the Quad.
+            Eigen::Vector2d getTopLeft() const;      //! Returns the top left pixel location  of the Quad.
+            Eigen::Vector2d getTopRight() const;     //! Returns the top right pixel location  of the Quad.
 
-        Eigen::Vector2d getSize() const;                                     //Returns the bounding box width and height
+            Eigen::Vector2d getSize() const;  // Returns the bounding box width and height
 
-        double getLeft() const;
-        double getRight() const;
-        double getTop() const;
-        double getBottom() const;
+            double getLeft() const;
+            double getRight() const;
+            double getTop() const;
+            double getBottom() const;
 
-        int getBaseWidth() const;                                       //! Returns the base width of the Quad in pixels.
-        int getTopWidth() const;                                        //! Returns the top width of the Quad in pixels.
+            int getBaseWidth() const;  //! Returns the base width of the Quad in pixels.
+            int getTopWidth() const;   //! Returns the top width of the Quad in pixels.
 
-        int getLeftHeight() const;                                      //! Returns the left height of the Quad in pixels.
-        int getRightHeight() const;                                     //! Returns the right height of the Quad in pixels.
+            int getLeftHeight() const;   //! Returns the left height of the Quad in pixels.
+            int getRightHeight() const;  //! Returns the right height of the Quad in pixels.
 
-        double getAverageWidth() const;                                 //! Returns the average width of the Quad in pixels.
-        double getAverageHeight() const;                                //! Returns the average height of the Quad in pixels.
+            double getAverageWidth() const;   //! Returns the average width of the Quad in pixels.
+            double getAverageHeight() const;  //! Returns the average height of the Quad in pixels.
 
-        double area() const;
-        double aspectRatio() const;
+            double area() const;
+            double aspectRatio() const;
 
-        std::vector<Eigen::Vector2d> getVertices() const;
+            std::vector<Eigen::Vector2d> getVertices() const;
 
-        bool overlapsHorizontally(const Quad& other) const;
+            bool overlapsHorizontally(const Quad& other) const;
 
-        bool checkCornersValid() const;
+            bool checkCornersValid() const;
 
-        /**
-         * Finds and returns the two rounded intersections points on x given a y
-         * @param y The horizonal line to solve the 2 x-axis intersections with
-         * @return The minX and maxX rounded that intersect given y
-         */
-        Eigen::Vector2d getEdgePoints(uint y) const;
+            /**
+             * Finds and returns the two rounded intersections points on x given a y
+             * @param y The horizonal line to solve the 2 x-axis intersections with
+             * @return The minX and maxX rounded that intersect given y
+             */
+            Eigen::Vector2d getEdgePoints(uint y) const;
 
-        std::pair<Eigen::Vector2d, Eigen::Vector2d> getIntersectionPoints(Line line) const;
+            std::pair<Eigen::Vector2d, Eigen::Vector2d> getIntersectionPoints(Line line) const;
 
-        /**
-         * Finds and returns the two intersections points on x given a y
-         * @param y The horizonal line to solve the 2 x-axis intersections with
-         * @return The minX and maxX that intersect given y
-         */
-        Eigen::Vector2d getEdgePoints(double y) const;
+            /**
+             * Finds and returns the two intersections points on x given a y
+             * @param y The horizonal line to solve the 2 x-axis intersections with
+             * @return The minX and maxX that intersect given y
+             */
+            Eigen::Vector2d getEdgePoints(double y) const;
 
-        static Quad getBoundingBox(const std::vector<Eigen::Vector2d>& points);
+            static Quad getBoundingBox(const std::vector<Eigen::Vector2d>& points);
 
-    private:
-        Eigen::Vector2d bl;                                                  //! @variable The bottom-left of the Quad.
-        Eigen::Vector2d br;                                                  //! @variable The bottom-right of the Quad.
-        Eigen::Vector2d tr;                                                  //! @variable The top-right of the Quad.
-        Eigen::Vector2d tl;                                                  //! @variable The top-left of the Quad.
+        private:
+            Eigen::Vector2d bl;  //! @variable The bottom-left of the Quad.
+            Eigen::Vector2d br;  //! @variable The bottom-right of the Quad.
+            Eigen::Vector2d tr;  //! @variable The top-right of the Quad.
+            Eigen::Vector2d tl;  //! @variable The top-left of the Quad.
 
-        //! @brief output stream operator.
-    friend std::ostream& operator<< (std::ostream& output, const Quad& quad);
+            //! @brief output stream operator.
+            friend std::ostream& operator<<(std::ostream& output, const Quad& quad);
 
-    //! @brief output stream operator for a vector of goals.
-    friend std::ostream& operator<< (std::ostream& output, const std::vector<Quad>& quads);
-    };
-}
+            //! @brief output stream operator for a vector of goals.
+            friend std::ostream& operator<<(std::ostream& output, const std::vector<Quad>& quads);
+        };
+    }
 }
 }
 

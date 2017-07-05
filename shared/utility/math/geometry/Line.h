@@ -21,87 +21,89 @@
 #ifndef UTILITY_MATH_GEOMETRY_LINE_H
 #define UTILITY_MATH_GEOMETRY_LINE_H
 
+#include <Eigen/Core>
 #include <iostream>
-#include <vector>
 #include <limits>
+#include <vector>
 
 namespace utility {
 namespace math {
-namespace geometry {
+    namespace geometry {
 
-    class Line {
-    public:
-        Eigen::Vector2d normal;
-        double distance;
+        class Line {
+        public:
+            Eigen::Vector2d normal;
+            double distance;
 
-        Line();
+            Line();
 
-        Line(const Eigen::Vector2d& n, const double& d);
+            Line(const Eigen::Vector2d& n, const double& d);
 
-        Line(const Eigen::Vector2d& a, const Eigen::Vector2d& b);
+            Line(const Eigen::Vector2d& a, const Eigen::Vector2d& b);
 
-        void setFromPoints(const Eigen::Vector2d& a, const Eigen::Vector2d& b);
+            void setFromPoints(const Eigen::Vector2d& a, const Eigen::Vector2d& b);
 
-        double x(const double& y) const;
-        double y(const double& x) const;
+            double x(const double& y) const;
+            double y(const double& x) const;
 
-        double distanceToPoint(const Eigen::Vector2d& point) const;
-        double tangentialDistanceToPoint(const Eigen::Vector2d& x) const;
-        Eigen::Vector2d pointFromTangentialDistance(const double& x) const;
+            double distanceToPoint(const Eigen::Vector2d& point) const;
+            double tangentialDistanceToPoint(const Eigen::Vector2d& x) const;
+            Eigen::Vector2d pointFromTangentialDistance(const double& x) const;
 
-        bool isHorizontal() const;
-        bool isVertical() const;
+            bool isHorizontal() const;
+            bool isVertical() const;
 
-        Eigen::Vector2d orthogonalProjection(const Eigen::Vector2d& x) const;
+            Eigen::Vector2d orthogonalProjection(const Eigen::Vector2d& x) const;
 
-        Line getParallelLineThrough(const Eigen::Vector2d& x) const;
+            Line getParallelLineThrough(const Eigen::Vector2d& x) const;
 
-        Eigen::Vector2d tangent() const;
-        Eigen::Vector2d intersect(const Line& line) const;
+            Eigen::Vector2d tangent() const;
+            Eigen::Vector2d intersect(const Line& line) const;
 
-        //Perform a least squares fit on a line, optionally using a distance
-        //squared threshold away from the current model to filter candidates
-        template <typename Iterator>
-        void leastSquaresUpdate(const Iterator& first,
-                                const Iterator& last,
-                                const double& candidateThreshold = std::numeric_limits<double>::max()) {
+            // Perform a least squares fit on a line, optionally using a distance
+            // squared threshold away from the current model to filter candidates
+            template <typename Iterator>
+            void leastSquaresUpdate(const Iterator& first,
+                                    const Iterator& last,
+                                    const double& candidateThreshold = std::numeric_limits<double>::max()) {
 
-            Eigen::Vector2d average({ 0.0, 0.0 });
-            Eigen::Matrix2d covmat({ 0.0, 0.0, 0.0, 0.0 });
-            size_t ctr = 0;
-            //step 1: calculate means and grab candidates
-            for (auto it = first; it != last; ++it) {
-                const double diff = distanceToPoint(*it);
-                if ( diff*diff < candidateThreshold ) {
-                    average += *it;
-                    covmat += *it * (*it).transpose();
-                    ++ctr;
-                }
-            }
+                Eigen::Vector2d average{0.0, 0.0};
+                Eigen::Matrix2d covmat;
+                covmat << 0.0, 0.0, 0.0, 0.0;
 
-            if (ctr > 1) {
-                //normalise the average to save some divides later and make code clearer
-                average /= (ctr);
-                covmat /= (ctr);
-
-                //step 2: calculate the slope and intercept
-                double m = (covmat[1] - average[0] * average[1]);
-                if (std::abs(normal[0]) > std::abs(normal[1])) { //check whether to use y=mx+b or x=my+b
-                    //make a unit vector at right angles to the direction of slope
-                    normal = Eigen::Vector2d(-1.0,  m / (covmat[0] - average[0] * average[0])).normalize();
-                } else {
-                    //make a unit vector at right angles to the direction of slope
-                    normal = Eigen::Vector2d( 1.0, -m / (covmat[3] - average[1] * average[1])).normalize();
-
+                size_t ctr = 0;
+                // step 1: calculate means and grab candidates
+                for (auto it = first; it != last; ++it) {
+                    const double diff = distanceToPoint(*it);
+                    if (diff * diff < candidateThreshold) {
+                        average += *it;
+                        covmat += *it * (*it).transpose();
+                        ++ctr;
+                    }
                 }
 
-                //find distance the usual way
-                distance = average.dot(normal);
-            }
-        }
-    };
+                if (ctr > 1) {
+                    // normalise the average to save some divides later and make code clearer
+                    average /= (ctr);
+                    covmat /= (ctr);
 
-}
+                    // step 2: calculate the slope and intercept
+                    double m = (covmat[1] - average[0] * average[1]);
+                    if (std::abs(normal[0]) > std::abs(normal[1])) {  // check whether to use y=mx+b or x=my+b
+                        // make a unit vector at right angles to the direction of slope
+                        normal = Eigen::Vector2d(-1.0, m / (covmat[0] - average[0] * average[0])).normalize();
+                    }
+                    else {
+                        // make a unit vector at right angles to the direction of slope
+                        normal = Eigen::Vector2d(1.0, -m / (covmat[3] - average[1] * average[1])).normalize();
+                    }
+
+                    // find distance the usual way
+                    distance = average.dot(normal);
+                }
+            }
+        };
+    }
 }
 }
 #endif

@@ -20,67 +20,82 @@
 #ifndef UTILITY_MATH_GEOMETRY_CIRCLE_H
 #define UTILITY_MATH_GEOMETRY_CIRCLE_H
 
+#include <Eigen/Core>
+#include <Eigen/QR>
+
+#include "utility/math/comparison.h"
 
 namespace utility {
 namespace math {
-namespace geometry {
+    namespace geometry {
 
-    class Circle {
-    public:
-        double radius;
-        double radiusSq;
-        Eigen::Vector2d centre;
+        class Circle {
+        public:
+            double radius;
+            double radiusSq;
+            Eigen::Vector2d centre;
 
-        Circle();
+            Circle();
 
-        Circle(const double& radius, const Eigen::Vector2d& centre);
+            Circle(const double& radius, const Eigen::Vector2d& centre);
 
-        Circle(const Eigen::Vector2d& a, const Eigen::Vector2d& b, const Eigen::Vector2d& c, const double tolerance = std::numeric_limits<double>::min());
+            Circle(const Eigen::Vector2d& a,
+                   const Eigen::Vector2d& b,
+                   const Eigen::Vector2d& c,
+                   const double tolerance = std::numeric_limits<double>::min());
 
-        bool setFromPoints(const Eigen::Vector2d& a, const Eigen::Vector2d& b, const Eigen::Vector2d& c, const double tolerance = std::numeric_limits<double>::min());
+            bool setFromPoints(const Eigen::Vector2d& a,
+                               const Eigen::Vector2d& b,
+                               const Eigen::Vector2d& c,
+                               const double tolerance = std::numeric_limits<double>::min());
 
-        double distanceToPoint(const Eigen::Vector2d& point) const;
+            double distanceToPoint(const Eigen::Vector2d& point) const;
 
-        double squaresDifference(const Eigen::Vector2d& point) const;
+            double squaresDifference(const Eigen::Vector2d& point) const;
 
-        Eigen::Vector2d orthogonalProjection(const Eigen::Vector2d& x) const;
+            Eigen::Vector2d orthogonalProjection(const Eigen::Vector2d& x) const;
 
-        //Perform a least squares fit on a line, optionally using a distance
-        //squared threshold away from the current model to filter candidates
-        template <typename Iterator>
-        void leastSquaresUpdate(Iterator& first, Iterator& last, const double& candidateThreshold = std::numeric_limits<double>::max()) {
+            // Perform a least squares fit on a line, optionally using a distance
+            // squared threshold away from the current model to filter candidates
+            template <typename Iterator>
+            void leastSquaresUpdate(Iterator& first,
+                                    Iterator& last,
+                                    const double& candidateThreshold = std::numeric_limits<double>::max()) {
 
-            //Perform a least squares fit on a circle, optionally using a distance
-            //squared threshold away from the current model to filter candidates
+                // Perform a least squares fit on a circle, optionally using a distance
+                // squared threshold away from the current model to filter candidates
 
-            //Method posted on a mailing list at:
-            //http://www.math.niu.edu/~rusin/known-math/96/circle.fit
-            //Reference: [Pawel Gora, Zdislav V. Kovarik, Daniel Pfenniger, Condensed by Amara Graps]
-            arma::mat linearEq1(std::distance(first, last), 3);
-            Eigen::VectorXd linearEq2(std::distance(first, last));
-            uint i = 0;
-            for (auto it = first; it != last; ++it) {
-                const double diff = distanceToPoint(*it);
-                if (diff * diff < candidateThreshold) {
-                    linearEq1.row(i).cols(0,1) = (*it).transpose();
-                    linearEq1(i, 2) = 1.0;
-                    linearEq2(i) = -(*it).dot((*it));
-                    ++i;
+                // Method posted on a mailing list at:
+                // http://www.math.niu.edu/~rusin/known-math/96/circle.fit
+                // Reference: [Pawel Gora, Zdislav V. Kovarik, Daniel Pfenniger, Condensed by Amara Graps]
+                Eigen::Matrix<double, Eigen::Dynamic, 3> linearEq1(std::distance(first, last), 3);
+                Eigen::VectorXd linearEq2(std::distance(first, last));
+                uint i = 0;
+
+                for (auto it = first; it != last; ++it) {
+                    const double diff = distanceToPoint(*it);
+                    if (diff * diff < candidateThreshold) {
+                        linearEq1.row(i).head<2>() = (*it).transpose();
+                        linearEq1(i, 2) = 1.0;
+                        linearEq2(i) = -(*it).dot((*it));
+                        ++i;
+                    }
+                }
+
+                if (i != 0) {
+                    Eigen::ColPivHouseholderQR<Eigen::Matrix<double, Eigen::Dynamic, 3>> solver(linearEq1.topRows(i));
+                    Eigen::Vector3d results = solver.solve(linearEq2.head(i));
+                    centre << std::abs(results[0] * 0.5) * utility::math::sgn(centre[0]),
+                        std::abs(results[1] * 0.5) * utility::math::sgn(centre[1]);
+                    radiusSq = centre.dot(centre) - results[2];
+                    radius   = std::sqrt(radiusSq);
                 }
             }
-            if (i != 0) {
-                Eigen::Vector3d results = arma::solve(linearEq1.rows(0, i - 1), linearEq2.rows(0, i - 1));
-                centre = arma::abs(Eigen::Vector2d( results[0] * 0.5, results[1] * 0.5 )) % arma::sign(centre);
-                radiusSq = centre.dot(centre) - results[2];
-                radius = std::sqrt(radiusSq);
-            }
-        }
 
-        Eigen::Vector2d getEdgePoints(uint y) const;
-        Eigen::Vector2d getEdgePoints(double y) const;
-    };
-
-}
+            Eigen::Vector2d getEdgePoints(uint y) const;
+            Eigen::Vector2d getEdgePoints(double y) const;
+        };
+    }
 }
 }
 

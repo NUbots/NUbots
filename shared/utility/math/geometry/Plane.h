@@ -19,58 +19,59 @@
 #ifndef UTILITY_MATH_GEOMETRY_PLANE_H
 #define UTILITY_MATH_GEOMETRY_PLANE_H
 
+#include <Eigen/Core>
+
 #include "utility/math/geometry/ParametricLine.h"
 
 namespace utility {
 namespace math {
-namespace geometry {
+    namespace geometry {
 
-	template<int n>
-	class Plane {
-	private:
-		using Vector = Eigen::Matrix<double, n, 1>;
+        template <int n>
+        class Plane {
+        private:
+            using Vector = Eigen::Matrix<double, n, 1>;
 
-	public:
-		Vector normal;
-		Vector point;
+        public:
+            Vector normal;
+            Vector point;
 
-		Plane() : normal(arma::fill::zeros), point(arma::fill::zeros) {}
-		Plane(Vector normal_, Vector point_) : normal(arma::fill::zeros), point(arma::fill::zeros) {
-			setFromNormal(normal_, point_);
-		}
+            Plane() : normal(Vector::Zero()), point(Vector::Zero()) {}
+            Plane(Vector normal_, Vector point_) : normal(Vector::Zero()), point(Vector::Zero()) {
+                setFromNormal(normal_, point_);
+            }
 
-		void setFromNormal(Vector normal_, Vector point_){
-			if(normal_.lpNorm<1>() <= 0){
-				throw std::domain_error("Plane::setFromNormal - Normal is zero vector. Normal to plane must be non-zero!");
-			}
-			normal = normal_.normalize();
-			point = point_;
-		}
+            void setFromNormal(Vector normal_, Vector point_) {
+                if (normal_.template lpNorm<1>() <= 0) {
+                    throw std::domain_error(
+                        "Plane::setFromNormal - Normal is zero vector. Normal to plane must be non-zero!");
+                }
+                normal = normal_.normalize();
+                point  = point_;
+            }
 
-		void setFrom3Points(Vector p1, Vector p2, Vector p3){
-			point = p1;
-			normal = (p2 - p1).cross(p3 - p1).normalize();// Positive if p3 palmside (RHR) relative to p2
-			if(normal.lpNorm<1>() <= 0){
-				throw std::domain_error("Plane::setFrom3Points - 3 Points are colinear!");
-			}
-		}
+            void setFrom3Points(Vector p1, Vector p2, Vector p3) {
+                point  = p1;
+                normal = (p2 - p1).cross(p3 - p1).normalize();  // Positive if p3 palmside (RHR) relative to p2
+                if (normal.template lpNorm<1>() <= 0) {
+                    throw std::domain_error("Plane::setFrom3Points - 3 Points are colinear!");
+                }
+            }
 
-		Vector intersect(ParametricLine<n> l) const {
-			double lDotN = l.direction.dot(normal);
-			if(lDotN == 0){
-				throw std::domain_error("Plane::intersect - Plane does not meet line!");
-			}
-			double tIntersection = (point - l.point).dot(normal) / lDotN;
-			if(tIntersection < l.tLimits[0] || tIntersection > l.tLimits[1]){
-				throw std::domain_error("Plane::intersect - Plane does not meet line segment (intersection falls off segment)!");
-			}
-			return tIntersection * l.direction + l.point;
-		}
-
-
-	};
-
-}
+            Vector intersect(ParametricLine<n> l) const {
+                double lDotN = l.direction.dot(normal);
+                if (lDotN == 0) {
+                    throw std::domain_error("Plane::intersect - Plane does not meet line!");
+                }
+                double tIntersection = (point - l.point).dot(normal) / lDotN;
+                if (tIntersection < l.tLimits[0] || tIntersection > l.tLimits[1]) {
+                    throw std::domain_error(
+                        "Plane::intersect - Plane does not meet line segment (intersection falls off segment)!");
+                }
+                return tIntersection * l.direction + l.point;
+            }
+        };
+    }
 }
 }
 #endif

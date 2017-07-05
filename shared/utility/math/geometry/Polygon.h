@@ -20,29 +20,33 @@
 #ifndef UTILITY_MATH_GEOMETRY_POLYGON_H
 #define UTILITY_MATH_GEOMETRY_POLYGON_H
 
+#include <Eigen/Core>
+#include <vector>
+
 #include "ParametricLine.h"
 
 namespace utility {
 namespace math {
-namespace geometry {
+    namespace geometry {
 
-    class Polygon {
-    private:
-    	std::vector<ParametricLine<2>> edges;
-    public:
-    	Polygon() : edges() {}
-    	Polygon(const std::vector<Eigen::Vector2d>& vertices);
+        class Polygon {
+        private:
+            std::vector<ParametricLine<2>> edges;
 
-    	void set(const std::vector<Eigen::Vector2d>& vertices);
+        public:
+            Polygon() : edges() {}
+            Polygon(const std::vector<Eigen::Vector2d>& vertices);
 
-    	/*! @brief Checks if the point lies within the boundary of the polygon
-    	*/
-    	bool pointContained(const Eigen::Vector2d& p) const;
-    	/*! @brief Gets the closest point in the polygon to the specified point
-    	*/
-    	Eigen::Vector2d projectPointToPolygon(const Eigen::Vector2d& p) const;
-    };
-}
+            void set(const std::vector<Eigen::Vector2d>& vertices);
+
+            /*! @brief Checks if the point lies within the boundary of the polygon
+            */
+            bool pointContained(const Eigen::Vector2d& p) const;
+            /*! @brief Gets the closest point in the polygon to the specified point
+            */
+            Eigen::Vector2d projectPointToPolygon(const Eigen::Vector2d& p) const;
+        };
+    }
 }
 }
 
