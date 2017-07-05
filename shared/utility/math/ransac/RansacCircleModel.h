@@ -21,30 +21,31 @@
 #define UTILITY_MATH_RANSAC_RANSACCIRCLEMODEL_H
 
 #include <array>
+
+#include <Eigen/Core>
+
 #include "utility/math/geometry/Circle.h"
 
 namespace utility {
 namespace math {
-namespace ransac {
+    namespace ransac {
 
-    class RansacCircleModel : public utility::math::geometry::Circle {
-    public:
+        class RansacCircleModel : public utility::math::geometry::Circle {
+        public:
+            static constexpr size_t REQUIRED_POINTS = 3;
+            using DataPoint                         = Eigen::Vector2d;
 
-        static constexpr size_t REQUIRED_POINTS = 3;
-        using DataPoint = Eigen::Vector2d;
+            bool regenerate(const std::array<DataPoint, REQUIRED_POINTS>& points);
 
-        bool regenerate(const std::array<DataPoint, REQUIRED_POINTS>& points);
+            double calculateError(const DataPoint& p) const;
 
-        double calculateError(const DataPoint& p) const;
-
-        template <typename Iterator>
-        void refineModel(Iterator&, Iterator&, const double&) {
-            //commented out due to performance concerns - works well though
-            //leastSquaresUpdate(first,last,candidateThreshold);
-        }
-    };
-
-}
+            template <typename Iterator>
+            void refineModel(Iterator&, Iterator&, const double&) {
+                // commented out due to performance concerns - works well though
+                // leastSquaresUpdate(first,last,candidateThreshold);
+            }
+        };
+    }
 }
 }
 
