@@ -46,7 +46,7 @@ namespace math {
                     throw std::domain_error(
                         "Plane::setFromNormal - Normal is zero vector. Normal to plane must be non-zero!");
                 }
-                normal = normal_.normalize();
+                normal = normal_.normalized();
                 point  = point_;
             }
 
