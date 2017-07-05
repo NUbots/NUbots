@@ -21,31 +21,33 @@
 #define UTILITY_MATH_RANSAC_RANSACLINEMODEL_H
 
 #include <array>
+
+#include <Eigen/Core>
+
 #include "utility/math/geometry/Line.h"
 
 namespace utility {
 namespace math {
-namespace ransac {
+    namespace ransac {
 
-    class RansacLineModel : public utility::math::geometry::Line {
-    public:
-        static constexpr size_t REQUIRED_POINTS = 2;
-        using DataPoint = arma::vec2;
+        class RansacLineModel : public utility::math::geometry::Line {
+        public:
+            static constexpr size_t REQUIRED_POINTS = 2;
+            using DataPoint                         = Eigen::Vector2d;
 
-        RansacLineModel() {}
+            RansacLineModel() {}
 
-        bool regenerate(const std::array<DataPoint, REQUIRED_POINTS>& pts);
+            bool regenerate(const std::array<DataPoint, REQUIRED_POINTS>& pts);
 
-        double calculateError(const DataPoint& p) const;
+            double calculateError(const DataPoint& p) const;
 
-        template <typename Iterator>
-        void refineModel(Iterator& first, Iterator& last, const double& candidateThreshold) {
-            //refine model using least squares
-            leastSquaresUpdate(first,last,candidateThreshold);
-        }
-    };
-
-}
+            template <typename Iterator>
+            void refineModel(Iterator& first, Iterator& last, const double& candidateThreshold) {
+                // refine model using least squares
+                leastSquaresUpdate(first, last, candidateThreshold);
+            }
+        };
+    }
 }
 }
 

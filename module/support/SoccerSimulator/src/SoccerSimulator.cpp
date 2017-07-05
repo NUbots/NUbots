@@ -117,9 +117,9 @@ namespace support {
         cfg_.ball.path.y_amp = config["ball"]["path"]["y_amp"].as<Expression>();
         cfg_.ball.path.type = pathTypeFromString(config["ball"]["path"]["type"].as<std::string>());
 
-        world.robotPose = config["initial"]["robot_pose"].as<arma::vec3>();
+        world.robotPose = config["initial"]["robot_pose"].as<Expression>();
         world.ball = VirtualBall(
-            config["initial"]["ball"]["position"].as<arma::vec2>(),
+            config["initial"]["ball"]["position"].as<Expression>(),
             config["initial"]["ball"]["diameter"].as<Expression>()
         );
 
@@ -210,17 +210,17 @@ namespace support {
                     //Face along direction of movement
                     world.robotPose.angle() = vectorToBearing(diff.xy());
 
-                    world.robotVelocity = Transform2D({arma::norm(diff) / deltaT, 0, 0}); //Robot coordinates
+                    world.robotVelocity = Transform2D({diff.norm() / deltaT, 0, 0}); //Robot coordinates
                     break;
 
                 case MotionType::MOTION:
 
                 //Update based on walk engine
                     if(walking && walkCommand && !kicking) {
-                        world.robotVelocity.xy() = Transform2D(convert<double, 3>(walkCommand->command)).xy() * 0.15;
+                        world.robotVelocity.xy() = Transform2D(walkCommand->command).xy() * 0.15;
                         // world.robotVelocity.xy() = sensors.odometry;
                         //angle from command:
-                        world.robotVelocity.angle() = Transform2D(convert<double, 3>(walkCommand->command)).angle() * 1.0;
+                        world.robotVelocity.angle() = Transform2D(walkCommand->command).angle() * 1.0;
                     } else {
                         world.robotVelocity = utility::math::matrix::Transform2D({0,0,0});
                     }
@@ -251,7 +251,7 @@ namespace support {
                         //Check if kick worked:
                         Transform2D relativeBallPose = world.robotPose.worldToLocal(world.ball.position);
 
-                        world.ball.position.rows(0, 1) += world.robotPose.rotation() * convert<double, 2>(lastKickCommand.direction.head<2>().normalized());
+                        world.ball.position.rows(0, 1) += world.robotPose.rotation() * lastKickCommand.direction.head<2>().normalized();
 
                     }
                     break;
@@ -315,10 +315,10 @@ namespace support {
                 // Emit current self exactly
                 auto r = std::make_unique<std::vector<message::localisation::Self>>();
                 r->push_back(message::localisation::Self());
-                r->back().locObject.position = convert<double, 2>(world.robotPose.xy());
-                r->back().heading = convert<double, 2>(bearingToUnitVector(world.robotPose.angle()));
-                r->back().velocity = convert<double, 2>(world.robotVelocity.rows(0,1));
-                r->back().locObject.position_cov = convert<double, 2, 2>(0.00001 * arma::eye(2,2));
+                r->back().locObject.position = world.robotPose.xy();
+                r->back().heading = bearingToUnitVector(world.robotPose.angle());
+                r->back().velocity = world.robotVelocity.rows(0,1);
+                r->back().locObject.position_cov = 0.00001 * Eigen::Matrix2d::Identity();
                 r->back().locObject.last_measurement_time = NUClear::clock::now();
                 emit(std::move(r));
             }
@@ -343,9 +343,9 @@ namespace support {
             } else {
                 // Emit current ball exactly
                 auto b = std::make_unique<message::localisation::Ball>();
-                b->locObject.position = convert<double, 2>(world.robotPose.worldToLocal(world.ball.position).xy());
-                b->velocity = convert<double, 2>(world.robotPose.rotation().t() * world.ball.velocity.rows(0,1));
-                b->locObject.position_cov = convert<double, 2, 2>(0.00001 * arma::eye(2,2));
+                b->locObject.position = world.robotPose.worldToLocal(world.ball.position).xy();
+                b->velocity = world.robotPose.rotation().transpose() * world.ball.velocity.rows(0,1);
+                b->locObject.position_cov = 0.00001 * Eigen::Matrix2d::Identity();
                 b->locObject.last_measurement_time = NUClear::clock::now();
                 emit(std::make_unique<std::vector<message::localisation::Ball>>(
                         std::vector<message::localisation::Ball>(1, *b)
@@ -358,8 +358,8 @@ namespace support {
 
         // Emit exact position to NUbugger
         on<Every<100, std::chrono::milliseconds>>().then("Emit True Robot Position", [this] {
-            arma::vec2 bearingVector = world.robotPose.rotation() * arma::vec2({1,0});
-            arma::vec3 robotHeadingVector = {bearingVector[0], bearingVector[1], 0};
+            Eigen::Vector2d bearingVector = world.robotPose.rotation() * Eigen::Vector2d(1,0);
+            Eigen::Vector3d robotHeadingVector = {bearingVector[0], bearingVector[1], 0};
             emit(drawArrow("robot", {world.robotPose.x(), world.robotPose.y(), 0}, 1, robotHeadingVector, 0));
 
             emit(drawSphere("ball", {world.ball.position(0), world.ball.position(1), 0}, 0.1, 0));
@@ -387,7 +387,7 @@ namespace support {
         return std::move(g);
     }
 
-    arma::vec2 SoccerSimulator::getPath(SoccerSimulator::Config::Motion::Path p){
+    Eigen::Vector2d SoccerSimulator::getPath(SoccerSimulator::Config::Motion::Path p){
         auto t = absolute_time();
         float wave1,wave2;
         switch(p.type){
@@ -404,7 +404,7 @@ namespace support {
                 str << __FILE__ << ", " << __LINE__ << ": " << __func__ << ": unknown p.type.";
                 throw std::runtime_error(str.str());
         }
-        return arma::vec2({wave1,wave2});
+        return Eigen::Vector2d(wave1,wave2);
     }
 
     void SoccerSimulator::setGoalLeftRightKnowledge(std::vector<message::vision::Goal>& goals){
@@ -438,16 +438,16 @@ namespace support {
             //Load goal posts
             goalPosts.clear();
 
-            arma::vec3 goal_opp_r = {fd->goalpost_opp_r[0],fd->goalpost_opp_r[1],0};
+            Eigen::Vector3d goal_opp_r = {fd->goalpost_opp_r[0],fd->goalpost_opp_r[1],0};
             goalPosts.push_back(VirtualGoalPost(goal_opp_r, 1.1, Goal::Side::RIGHT, Goal::Team::OPPONENT));
 
-            arma::vec3 goal_opp_l = {fd->goalpost_opp_l[0],fd->goalpost_opp_l[1],0};
+            Eigen::Vector3d goal_opp_l = {fd->goalpost_opp_l[0],fd->goalpost_opp_l[1],0};
             goalPosts.push_back(VirtualGoalPost(goal_opp_l, 1.1, Goal::Side::LEFT, Goal::Team::OPPONENT));
 
-            arma::vec3 goal_own_r = {fd->goalpost_own_r[0],fd->goalpost_own_r[1],0};
+            Eigen::Vector3d goal_own_r = {fd->goalpost_own_r[0],fd->goalpost_own_r[1],0};
             goalPosts.push_back(VirtualGoalPost(goal_own_r, 1.1, Goal::Side::RIGHT, Goal::Team::OWN));
 
-            arma::vec3 goal_own_l = {fd->goalpost_own_l[0],fd->goalpost_own_l[1],0};
+            Eigen::Vector3d goal_own_l = {fd->goalpost_own_l[0],fd->goalpost_own_l[1],0};
             goalPosts.push_back(VirtualGoalPost(goal_own_l, 1.1, Goal::Side::LEFT, Goal::Team::OWN));
     }
 

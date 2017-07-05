@@ -49,24 +49,24 @@ namespace localisation {
         RobotHypothesis()
             : filter_(
                 {-4.5, 0, 0}, // mean
-                arma::eye(robot::RobotModel::size, robot::RobotModel::size) * 0.1, // cov
+                Eigen::Matrix<double, robot::RobotModel::size, robot::RobotModel::size>::Identity() * 0.1, // cov
                 0.1) // alpha
             , weight_(1)
             , obs_count_(0) {
-                arma::mat cov = arma::eye(robot::RobotModel::size, robot::RobotModel::size) * 0.1;
+                arma::mat cov = Eigen::Matrix<double, robot::RobotModel::size, robot::RobotModel::size>::Identity() * 0.1;
                 cov(2,2) = 1;
-                filter_.setState(arma::vec::fixed<robot::RobotModel::size>({-4.5, 0, 0}), cov);
+                filter_.setState(Eigen::Matrix<double, robot::RobotModel::size, 1>({-4.5, 0, 0}), cov);
             }
 
         RobotHypothesis(const message::localisation::ResetRobotHypotheses::Self& reset_self, const message::input::Sensors& sensors)
             : RobotHypothesis() {
-            arma::vec2 imuDirection = arma::normalise(sensors.world.col(0).rows(0,1));
+            Eigen::Vector2d imuDirection = sensors.world.col(0).rows(0, 1).normalize();
             double imuHeading = std::atan2(imuDirection(1), imuDirection(0));
             double imuOffset = reset_self.heading + imuHeading;
 
-            // arma::vec3 mean = arma::join_rows(reset_self.position, arma::vec(imuOffset));
-            arma::vec::fixed<robot::RobotModel::size> mean = arma::vec::fixed<robot::RobotModel::size>({reset_self.position(0), reset_self.position(1), imuOffset});
-            arma::mat::fixed<robot::RobotModel::size, robot::RobotModel::size> cov = arma::eye(robot::RobotModel::size,robot::RobotModel::size) * 0.1;
+            // Eigen::Vector3d mean = arma::join_rows(reset_self.position, arma::vec(imuOffset));
+            Eigen::Matrix<double, robot::RobotModel::size, 1> mean = Eigen::Matrix<double, robot::RobotModel::size, 1>({reset_self.position(0), reset_self.position(1), imuOffset});
+            Eigen::Matrix<double, robot::RobotModel::size, robot::RobotModel::size> cov = Eigen::Matrix<double, robot::RobotModel::size, robot::RobotModel::size>::Identity() * 0.1;
             cov.submat(0,0,1,1) = reset_self.position_cov;
             cov(2,2) = reset_self.heading_var;
             filter_.setState(mean, cov);
@@ -79,11 +79,11 @@ namespace localisation {
         float GetFilterWeight() const { return weight_; }
         void SetFilterWeight(float weight) { weight_ = weight; }
 
-        arma::vec::fixed<robot::RobotModel::size> GetEstimate() const {
+        Eigen::Matrix<double, robot::RobotModel::size, 1> GetEstimate() const {
             return filter_.get();
         }
 
-        arma::mat::fixed<robot::RobotModel::size, robot::RobotModel::size> GetCovariance() const {
+        Eigen::Matrix<double, robot::RobotModel::size, robot::RobotModel::size> GetCovariance() const {
             return filter_.getCovariance();
         }
 
@@ -162,11 +162,11 @@ namespace localisation {
             const std::vector<message::vision::Goal>& ambiguous_objects,
             const std::vector<std::vector<utility::localisation::LocalisationFieldObject>>& possible_object_sets);
 
-        arma::vec::fixed<robot::RobotModel::size> GetEstimate() {
+        Eigen::Matrix<double, robot::RobotModel::size, 1> GetEstimate() {
             return robot_models_[0]->GetEstimate();
         }
 
-        arma::mat::fixed<robot::RobotModel::size, robot::RobotModel::size> GetCovariance() {
+        Eigen::Matrix<double, robot::RobotModel::size, robot::RobotModel::size> GetCovariance() {
             return robot_models_[0]->GetCovariance();
         }
 

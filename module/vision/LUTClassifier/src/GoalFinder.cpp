@@ -38,15 +38,15 @@ namespace module {
                classify the mostly empty green below.
              */
 
-            const auto& maxVisualHorizon = classifiedImage.visualHorizon.front()[1] > classifiedImage.visualHorizon.back()[1] 
-                                            ? classifiedImage.visualHorizon.begin() 
+            const auto& maxVisualHorizon = classifiedImage.visualHorizon.front()[1] > classifiedImage.visualHorizon.back()[1]
+                                            ? classifiedImage.visualHorizon.begin()
                                             : classifiedImage.visualHorizon.end() - 1;
 
             // Cast lines upward to find the goals starting at the lowest point of the visual horizon
             for(int y = 0; y < maxVisualHorizon->y(); y += GOAL_LINE_SPACING) {
 
-                arma::ivec2 start = { 0, y };
-                arma::ivec2 end = { int(image.dimensions[0] - 1), y };
+                Eigen::Vector2i start = { 0, y };
+                Eigen::Vector2i end = { int(image.dimensions[0] - 1), y };
 
                 // Insert our segments
                 auto segments = quex->classify(image, lut, start, end, GOAL_SUBSAMPLING);

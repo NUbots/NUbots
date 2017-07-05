@@ -45,12 +45,12 @@ namespace motion{
 
     void KickBalancer::computeStartMotion(const KinematicsModel& kinematicsModel, const Sensors& sensors) {
         Transform3D torsoToFoot = getTorsoPose(sensors);
-        Transform3D startPose = torsoToFoot.i();
+        Transform3D startPose = torsoToFoot.inverse();
 
         int negativeIfRight = (supportFoot == LimbID::RIGHT_LEG) ? -1 : 1;
         Transform3D finishPose = torsoToFoot;
-        finishPose.translation() = arma::vec3({forward_lean, negativeIfRight * (adjustment + kinematicsModel.leg.FOOT_CENTRE_TO_ANKLE_CENTRE), stand_height});
-        finishPose = finishPose.i();
+        finishPose.translation() = Eigen::Vector3d(forward_lean, negativeIfRight * (adjustment + kinematicsModel.leg.FOOT_CENTRE_TO_ANKLE_CENTRE), stand_height);
+        finishPose = finishPose.inverse();
 
         std::vector<SixDOFFrame> frames;
         frames.push_back(SixDOFFrame{startPose,0});
@@ -83,35 +83,35 @@ namespace motion{
 	}
 
     void Kicker::computeStartMotion(const KinematicsModel& kinematicsModel, const Sensors& sensors) {
-        Transform3D startPose = arma::eye(4,4);
+        Transform3D startPose = Eigen::Matrix4d::Identity();
 
         // Convert torso to support foot
         Transform3D currentTorso = getTorsoPose(sensors);
         // Convert kick foot to torso
-        Transform3D currentKickFoot = (supportFoot == LimbID::LEFT_LEG) 
-                                    ? convert<double, 4, 4>(sensors.forwardKinematics.at(ServoID::L_ANKLE_ROLL))
-                                    : convert<double, 4, 4>(sensors.forwardKinematics.at(ServoID::R_ANKLE_ROLL)); 
-                                    
+        Transform3D currentKickFoot = (supportFoot == LimbID::LEFT_LEG)
+                                    ? sensors.forwardKinematics.at(ServoID::L_ANKLE_ROLL)
+                                    : sensors.forwardKinematics.at(ServoID::R_ANKLE_ROLL);
+
         // Convert support foot to kick foot coordinates = convert torso to kick foot * convert support foot to torso
-        Transform3D supportToKickFoot = currentKickFoot.i() * currentTorso.i();
+        Transform3D supportToKickFoot = currentKickFoot.inverse() * currentTorso.inverse();
         // Convert ball position from support foot coordinates to kick foot coordinates
-        arma::vec3 ballFromKickFoot = supportToKickFoot.transformPoint(ballPosition);
-        arma::vec3 goalFromKickFoot = supportToKickFoot.transformPoint(goalPosition);
+        Eigen::Vector3d ballFromKickFoot = supportToKickFoot.transformPoint(ballPosition);
+        Eigen::Vector3d goalFromKickFoot = supportToKickFoot.transformPoint(goalPosition);
 
         //Compute follow through:
-        arma::vec3 ballToGoalUnit = arma::normalise(goalFromKickFoot - ballFromKickFoot);
-        arma::vec3 followThrough = follow_through * ballToGoalUnit;
-        arma::vec3 windUp = - wind_up * ballToGoalUnit;
+        Eigen::Vector3d ballToGoalUnit = (goalFromKickFoot - ballFromKickFoot).normalize();
+        Eigen::Vector3d followThrough = follow_through * ballToGoalUnit;
+        Eigen::Vector3d windUp = - wind_up * ballToGoalUnit;
 
         //Get kick and lift goals
-        arma::vec3 kickGoal = followThrough;
-        arma::vec3 liftGoal = windUp;
+        Eigen::Vector3d kickGoal = followThrough;
+        Eigen::Vector3d liftGoal = windUp;
 
         kickGoal[2] = kick_height;
         liftGoal[2] = kick_height;
 
         //constrain to prevent leg collision
-        arma::vec3 supportFootPos = supportToKickFoot.translation();
+        Eigen::Vector3d supportFootPos = supportToKickFoot.translation();
         int signSupportFootPosY = supportFootPos[1] < 0 ? -1 : 1;
         float clippingPlaneY = supportFootPos[1] - signSupportFootPosY * (foot_separation_margin + (kinematicsModel.leg.FOOT_WIDTH / 2.0 - kinematicsModel.leg.FOOT_CENTRE_TO_ANKLE_CENTRE));
 
@@ -130,12 +130,12 @@ namespace motion{
         kick.pose.translation() = kickGoal;
         lift_foot.pose.translation() = liftGoal;
 
-        kick.duration = arma::norm(kickGoal - liftGoal) / kick_velocity;
+        kick.duration = (kickGoal - liftGoal).norm() / kick_velocity;
 
         //Robocup code / hacks
         auto startFrame = SixDOFFrame{startPose,0};
         auto liftBeforeWindUp = startFrame;
-        liftBeforeWindUp.pose.translation() = arma::vec3{0,0,lift_foot.pose.translation()[2]};
+        liftBeforeWindUp.pose.translation() = Eigen::Vector3d{0,0,lift_foot.pose.translation()[2]};
         liftBeforeWindUp.duration = lift_before_windup_duration;
         auto returnBeforePlace = liftBeforeWindUp;
         returnBeforePlace.duration = return_before_place_duration;

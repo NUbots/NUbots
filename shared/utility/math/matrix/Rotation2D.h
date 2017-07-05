@@ -20,25 +20,29 @@
 #ifndef UTILITY_MATH_MATRIX_ROTATION2D_H
 #define UTILITY_MATH_MATRIX_ROTATION2D_H
 
+#include <Eigen/Core>
+#include <cmath>
 
 namespace utility {
 namespace math {
-namespace matrix {
+    namespace matrix {
 
-    template <int Dimensions>
-    class Rotation;
+        template <int Dimensions>
+        class Rotation;
 
-    using Rotation2D = Rotation<2>;
+        using Rotation2D = Rotation<2>;
 
-    template <>
-    class Rotation<2> : public arma::mat22 {
-        using arma::mat22::mat22; // inherit constructors
-
+        template <>
+        class Rotation<2> : public Eigen::Matrix2d {
         public:
+            using Eigen::Matrix2d::Matrix;
+
             /**
              * @brief Default constructor creates an identity matrix
              */
-            Rotation();
+            Rotation() {
+                setIdentity();  // identity matrix by default
+            }
 
             /**
              * @brief Rotates matrix around the local Z axis
@@ -50,7 +54,8 @@ namespace matrix {
 
             /**
              * @brief Performs an inverse and returns a new copy
-             * Note: Assumes current transform is orthonormal and invertible (which it should be given normal use)
+             * Note: Assumes current transform is orthonormal and invertible (which it
+             * should be given normal use)
              *
              * @return The inverse transform
              */
@@ -63,9 +68,9 @@ namespace matrix {
              * @return The rotation matrix
              */
             static Rotation2D createRotation(double radians);
-    };
+        };
 
-}  // matrix
+    }  // matrix
 }  // math
 }  // utility
 

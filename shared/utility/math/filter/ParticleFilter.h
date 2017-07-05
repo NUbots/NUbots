@@ -38,9 +38,9 @@ namespace utility {
 
             private:
                 // Dimension types for vectors and square matricies
-                using StateVec = arma::vec::fixed<Model::size>;
-                using ParticleList = arma::mat;
-                using StateMat = arma::mat::fixed<Model::size, Model::size>;
+                using StateVec     = Eigen::Matrix<double, Model::size, 1>;
+                using ParticleList = Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>;
+                using StateMat     = Eigen::Matrix<double, Model::size, Model::size>;
 
                 /* particles.n_rows = number of particles
                    particle.row(i) = particle i
@@ -50,8 +50,8 @@ namespace utility {
                 StateVec sigma_sq;
 
             public:
-                ParticleFilter(StateVec initialMean = arma::zeros(Model::size),
-                               StateMat initialCovariance = arma::eye(Model::size, Model::size) * 0.1,
+                ParticleFilter(StateVec initialMean = Eigen::Matrix<double, Model::size, 1>::Zero(),
+                               StateMat initialCovariance = Eigen::Matrix<double, Model::size, Model::size>::Identity() * 0.1,
                                int number_of_particles_ = 100,
                                StateVec sigma_sq_ = 0.1 * arma::ones(Model::size))
                 {
@@ -61,7 +61,7 @@ namespace utility {
 
                 void reset(StateVec initialMean, StateMat initialCovariance, int number_of_particles_)
                 {
-                    particles = arma::zeros(number_of_particles_,Model::size);
+                    particles = Eigen::Matrix<double, number_of_particles_, Model::size>::Zero();
                     setState(initialMean, initialCovariance);
                 }
 
@@ -70,7 +70,7 @@ namespace utility {
                     arma::gmm_diag gaussian;
                     gaussian.set_params(arma::mat(initialMean), arma::mat(initialCovariance.diag()),arma::ones(1));
                     for(unsigned int i = 0; i < particles.n_rows; ++i) {
-                        particles.row(i) = gaussian.generate().t();
+                        particles.row(i) = gaussian.generate().transpose();
                     }
                 }
 
@@ -79,11 +79,11 @@ namespace utility {
                 {
                     //Sample single zero mean gaussian with process noise (represented by a gaussian mixture model of size 1)
                     arma::gmm_diag gaussian;
-                    gaussian.set_params(arma::mat(arma::zeros(Model::size)), arma::mat(model.processNoise().diag()),arma::ones(1));
+                    gaussian.set_params(arma::mat(Eigen::Matrix<double, Model::size, 1>::Zero()), arma::mat(model.processNoise().diag()),arma::ones(1));
                     for(unsigned int i = 0; i < particles.n_rows; ++i) {
                         //TODO: add noise?
-                        StateVec newpcle = model.timeUpdate(particles.row(i).t(), deltaT, additionalParameters...) + gaussian.generate();
-                        particles.row(i) = newpcle.t();
+                        StateVec newpcle = model.timeUpdate(particles.row(i).transpose(), deltaT, additionalParameters...) + gaussian.generate();
+                        particles.row(i) = newpcle.transpose();
                     }
                 }
 
@@ -92,13 +92,13 @@ namespace utility {
                                          const arma::mat& measurement_variance,
                                          const TMeasurementType&... measurementArgs)
                 {
-                    arma::vec weights = arma::zeros(particles.n_rows);
+                    Eigen::VectorXd weights = Eigen::Matrix<double, particles.n_rows, 1>::Zero();
 
                     for (unsigned int i = 0; i < particles.n_rows; i++){
-                        arma::vec predictedObservation = model.predictedObservation(particles.row(i).t(), measurementArgs...);
+                        Eigen::VectorXd predictedObservation = model.predictedObservation(particles.row(i).transpose(), measurementArgs...);
                         assert(predictedObservation.size() == measurement.size());
-                        arma::vec difference = predictedObservation-measurement;
-                        weights[i] = std::exp(- arma::dot(difference, (measurement_variance.i() * difference)));
+                        Eigen::VectorXd difference = predictedObservation-measurement;
+                        weights[i] = std::exp(-difference.dot((measurement_variance.inverse() * difference)));
                     }
                     // std::cout << "weights = \n" << weights << std::endl;
                     //Resample
@@ -109,12 +109,12 @@ namespace utility {
                     for (unsigned int i = 0; i < particles.n_rows; i++){
                         particles.row(i) = candidateParticles.row(multinomial(gen));
                     }
-                    return arma::mean(weights);
+                    return weights.mean();
                 }
 
                 StateVec get() const
                 {
-                    return arma::mean(particles, 0).t();
+                    return particles.colwise().mean().transpose();
                 }
 
                 StateMat getCovariance() const

@@ -137,20 +137,20 @@ namespace motion
         {
             // Torso Position is a queued evaluation...
             if(DEBUG) { log<NUClear::TRACE>("Messaging: Balance Kinematic Response - Received Update (Active Torso Position) Info(0)"); }
-                setTorsoPositionLegs(convert<double, 3>(tmu.frameArms));
-                setTorsoPositionArms(convert<double, 3>(tmu.frameLegs));
-                setTorsoPosition3D(convert<double, 4, 4>(tmu.frame3D));
+                setTorsoPositionLegs(tmu.frameArms);
+                setTorsoPositionArms(tmu.frameLegs);
+                setTorsoPosition3D(tmu.frame3D);
             if(DEBUG) { log<NUClear::TRACE>("Messaging: Balance Kinematic Response - Received Update (Active Torso Position) Info(1)"); }
 
             // Foot Position is a queued, continuous evaluation...
             if(DEBUG) { log<NUClear::TRACE>("Messaging: Balance Kinematic Response - Received Update (Active Foot Position) Info(0)"); }
                 setMotionPhase(fmu.phase);
                 setActiveForwardLimb(fmu.activeForwardLimb);
-                setLeftFootPosition2D(convert<double, 3>(fmu.leftFoot2D));
-                setRightFootPosition2D(convert<double, 3>(fmu.rightFoot2D));
+                setLeftFootPosition2D(fmu.leftFoot2D);
+                setRightFootPosition2D(fmu.rightFoot2D);
                 // Transform feet positions to be relative to the robot torso...
-                setLeftFootPosition(Transform3D(convert<double, 4, 4>(fmu.leftFoot3D)).worldToLocal(getTorsoPosition3D()));
-                setRightFootPosition(Transform3D(convert<double, 4, 4>(fmu.rightFoot3D)).worldToLocal(getTorsoPosition3D()));
+                setLeftFootPosition(Transform3D(fmu.leftFoot3D).worldToLocal(getTorsoPosition3D()));
+                setRightFootPosition(Transform3D(fmu.rightFoot3D).worldToLocal(getTorsoPosition3D()));
             if(DEBUG) { log<NUClear::TRACE>("Messaging: Balance Kinematic Response - Received Update (Active Foot Position) Info(1)"); }
 
             // With a set of valid anthopomorphic data, balance posture and update WalkEngine...
@@ -206,8 +206,8 @@ namespace motion
         if (armRollCompensationEnabled)
         {
             double shiftShoulder = ((getRollParameter() * getArmCompensationScale()) * armRollParameter);
-            setLArmPosition(arma::vec3({getLArmPosition()[0], getLArmPosition()[1] + (shiftShoulder > 0 ?  shiftShoulder : 0), getLArmPosition()[2]}));
-            setRArmPosition(arma::vec3({getRArmPosition()[0], getRArmPosition()[1] - (shiftShoulder < 0 ? -shiftShoulder : 0), getRArmPosition()[2]}));
+            setLArmPosition(Eigen::Vector3d(getLArmPosition()[0], getLArmPosition()[1] + (shiftShoulder > 0 ?  shiftShoulder : 0), getLArmPosition()[2]));
+            setRArmPosition(Eigen::Vector3d(getRArmPosition()[0], getRArmPosition()[1] - (shiftShoulder < 0 ? -shiftShoulder : 0), getRArmPosition()[2]));
         }
         //std::min(/*Maxium Roll*/0.0, std::max(/*Minimum Roll*/1.0,/*Calculated Roll Offset * 45° Base roll? */0.5));
     }
@@ -256,7 +256,7 @@ namespace motion
         if (hipRollCompensationEnabled)
         {
             //Instantiate unitless phases for x(=0), y(=1) and z(=2) foot motion...
-            arma::vec3 getFootPhases = getFootPhase(getMotionPhase(), phase1Single, phase2Single);
+            Eigen::Vector3d getFootPhases = getFootPhase(getMotionPhase(), phase1Single, phase2Single);
 
             //Evaluate scaled minimum distance of y(=1) phase position to the range [0,1] for hip roll parameter compensation...
             double yBoundedMinimumPhase = std::min({1.0, getFootPhases[1] / 0.1, (1 - getFootPhases[1]) / 0.1});
@@ -264,12 +264,12 @@ namespace motion
             //Rotate foot around hip by the given hip roll compensation...
             if (getActiveForwardLimb() == LimbID::LEFT_LEG)
             {
-                arma::mat44 rHipRoll = convert<double, 4, 4>(sensors.forwardKinematics.at(ServoID::R_HIP_ROLL));
+                Eigen::Matrix4d rHipRoll = sensors.forwardKinematics.at(ServoID::R_HIP_ROLL);
                 setRightFootPosition(getRightFootPosition().rotateZLocal(-hipRollParameter * yBoundedMinimumPhase, rHipRoll));
             }
             else
             {
-                arma::mat44 lHipRoll = convert<double, 4, 4>(sensors.forwardKinematics.at(ServoID::L_HIP_ROLL));
+                Eigen::Matrix4d lHipRoll = sensors.forwardKinematics.at(ServoID::L_HIP_ROLL);
                 setLeftFootPosition(getLeftFootPosition().rotateZLocal( hipRollParameter  * yBoundedMinimumPhase, lHipRoll));
             }
         }
@@ -337,10 +337,10 @@ namespace motion
 
         // Emit new robot posture once there has been valid data set in all relevant variables...
         emit(std::make_unique<BalanceBodyUpdate>(getMotionPhase(),
-                                                 convert<double, 4, 4>(getLeftFootPosition()),
-                                                 convert<double, 4, 4>(getRightFootPosition()),
-                                                 convert<double, 3>(getLArmPosition()),
-                                                 convert<double, 3>(getRArmPosition())));
+                                                 getLeftFootPosition(),
+                                                 getRightFootPosition(),
+                                                 getLArmPosition(),
+                                                 getRArmPosition()));
     }
 /*=======================================================================================================*/
 //      METHOD: updateLowerBody
@@ -392,8 +392,8 @@ namespace motion
 
         // Update shoulder pitch to move arm away from body
         // TODO min of max of values... for arm compensation...
-        setLArmPosition(arma::vec3({getLArmPosition()[0], std::max(leftMinValue,  getLArmPosition()[1]), getLArmPosition()[2]}));
-        setRArmPosition(arma::vec3({getRArmPosition()[0], std::min(rightMinValue, getRArmPosition()[1]), getRArmPosition()[2]}));
+        setLArmPosition(Eigen::Vector3d(getLArmPosition()[0], std::max(leftMinValue,  getLArmPosition()[1]), getLArmPosition()[2]));
+        setRArmPosition(Eigen::Vector3d(getRArmPosition()[0], std::min(rightMinValue, getRArmPosition()[1]), getRArmPosition()[2]));
     }
 /*=======================================================================================================*/
 //      NAME: localise
@@ -414,7 +414,7 @@ namespace motion
 /*=======================================================================================================*/
 //      METHOD: getFootPhase
 /*=======================================================================================================*/
-    arma::vec3 BalanceKinematicResponse::getFootPhase(double phase, double phase1Single, double phase2Single)
+    Eigen::Vector3d BalanceKinematicResponse::getFootPhase(double phase, double phase1Single, double phase2Single)
     {
         // Computes relative x,z motion of foot during single support phase
         // phSingle = 0: x=0, z=0, phSingle = 1: x=1,z=0
@@ -457,7 +457,7 @@ namespace motion
     {
         return (footOffsetCoefficient[index]);
     }
-    void BalanceKinematicResponse::setFootOffsetCoefficient(const arma::vec2& inFootOffsetCoefficient)
+    void BalanceKinematicResponse::setFootOffsetCoefficient(const Eigen::Vector2d& inFootOffsetCoefficient)
     {
         footOffsetCoefficient = inFootOffsetCoefficient;
     }
@@ -520,66 +520,66 @@ namespace motion
 /*=======================================================================================================*/
 //      ENCAPSULATION METHOD: Left Arm Position
 /*=======================================================================================================*/
-    arma::vec3 BalanceKinematicResponse::getLArmPosition()
+    Eigen::Vector3d BalanceKinematicResponse::getLArmPosition()
     {
         return (armLPostureTransform);
     }
-    void BalanceKinematicResponse::setLArmPosition(arma::vec3 inLArm)
+    void BalanceKinematicResponse::setLArmPosition(Eigen::Vector3d inLArm)
     {
         armLPostureTransform = inLArm;
     }
 /*=======================================================================================================*/
 //      ENCAPSULATION METHOD: Left Arm Source
 /*=======================================================================================================*/
-    arma::vec3 BalanceKinematicResponse::getLArmSource()
+    Eigen::Vector3d BalanceKinematicResponse::getLArmSource()
     {
         return (armLPostureSource);
     }
-    void BalanceKinematicResponse::setLArmSource(arma::vec3 inLArm)
+    void BalanceKinematicResponse::setLArmSource(Eigen::Vector3d inLArm)
     {
         armLPostureSource = inLArm;
     }
 /*=======================================================================================================*/
 //      ENCAPSULATION METHOD: Left Arm Destination
 /*=======================================================================================================*/
-    arma::vec3 BalanceKinematicResponse::getLArmDestination()
+    Eigen::Vector3d BalanceKinematicResponse::getLArmDestination()
     {
         return (armLPostureDestination);
     }
-    void BalanceKinematicResponse::setLArmDestination(arma::vec3 inLArm)
+    void BalanceKinematicResponse::setLArmDestination(Eigen::Vector3d inLArm)
     {
         armLPostureDestination = inLArm;
     }
 /*=======================================================================================================*/
 //      ENCAPSULATION METHOD: Right Arm Position
 /*=======================================================================================================*/
-    arma::vec3 BalanceKinematicResponse::getRArmPosition()
+    Eigen::Vector3d BalanceKinematicResponse::getRArmPosition()
     {
         return (armRPostureTransform);
     }
-    void BalanceKinematicResponse::setRArmPosition(arma::vec3 inRArm)
+    void BalanceKinematicResponse::setRArmPosition(Eigen::Vector3d inRArm)
     {
         armRPostureTransform = inRArm;
     }
 /*=======================================================================================================*/
 //      ENCAPSULATION METHOD: Right Arm Source
 /*=======================================================================================================*/
-    arma::vec3 BalanceKinematicResponse::getRArmSource()
+    Eigen::Vector3d BalanceKinematicResponse::getRArmSource()
     {
         return (armRPostureSource);
     }
-    void BalanceKinematicResponse::setRArmSource(arma::vec3 inRArm)
+    void BalanceKinematicResponse::setRArmSource(Eigen::Vector3d inRArm)
     {
         armRPostureSource = inRArm;
     }
 /*=======================================================================================================*/
 //      ENCAPSULATION METHOD: Right Arm Destination
 /*=======================================================================================================*/
-    arma::vec3 BalanceKinematicResponse::getRArmDestination()
+    Eigen::Vector3d BalanceKinematicResponse::getRArmDestination()
     {
         return (armRPostureDestination);
     }
-    void BalanceKinematicResponse::setRArmDestination(arma::vec3 inRArm)
+    void BalanceKinematicResponse::setRArmDestination(Eigen::Vector3d inRArm)
     {
         armRPostureDestination = inRArm;
     }
@@ -731,19 +731,19 @@ namespace motion
         auto& sensors_gyro = sensors["gyro"];
 
         auto& sensors_imu  = sensors["imu"];
-        ankleImuParamX  = sensors_imu["ankleImuParamX"].as<arma::vec>();
-        ankleImuParamY  = sensors_imu["ankleImuParamY"].as<arma::vec>();
-        kneeImuParamX   = sensors_imu["kneeImuParamX"].as<arma::vec>();
-        hipImuParamY    = sensors_imu["hipImuParamY"].as<arma::vec>();
-        armImuParamX    = sensors_imu["armImuParamX"].as<arma::vec>();
-        armImuParamY    = sensors_imu["armImuParamY"].as<arma::vec>();
+        ankleImuParamX  = sensors_imu["ankleImuParamX"].as<Expression>();
+        ankleImuParamY  = sensors_imu["ankleImuParamY"].as<Expression>();
+        kneeImuParamX   = sensors_imu["kneeImuParamX"].as<Expression>();
+        hipImuParamY    = sensors_imu["hipImuParamY"].as<Expression>();
+        armImuParamX    = sensors_imu["armImuParamX"].as<Expression>();
+        armImuParamY    = sensors_imu["armImuParamY"].as<Expression>();
 
         auto& bkr_stance = bkr["stance"];
         auto& arms   = bkr_stance["arms"];
-        setLArmSource(arms["left"]["start"].as<arma::vec>());
-        setLArmDestination(arms["left"]["end"].as<arma::vec>());
-        setRArmSource(arms["right"]["start"].as<arma::vec>());
-        setRArmDestination(arms["right"]["end"].as<arma::vec>());
+        setLArmSource(arms["left"]["start"].as<Expression>());
+        setLArmDestination(arms["left"]["end"].as<Expression>());
+        setRArmSource(arms["right"]["start"].as<Expression>());
+        setRArmDestination(arms["right"]["end"].as<Expression>());
         armMotionEnabled = bkr_stance["moving_enabled"].as<bool>();
 
 
@@ -751,25 +751,25 @@ namespace motion
         auto& body   = wlk_stance["body"];
         bodyHeight   = body["height"].as<Expression>();
         bodyTilt     = body["tilt"].as<Expression>();
-        setFootOffsetCoefficient(wlk_stance["foot_offset"].as<arma::vec>());
+        setFootOffsetCoefficient(wlk_stance["foot_offset"].as<Expression>());
         stanceLimitY2 = kinematicsModel.leg.LENGTH_BETWEEN_LEGS - wlk_stance["limit_margin_y"].as<Expression>();
         STAND_SCRIPT_DURATION = wlk_stance["STAND_SCRIPT_DURATION"].as<Expression>();
 
         auto& walkCycle = wlk["walk_cycle"];
         stepTime    = walkCycle["step_time"].as<Expression>();
         stepHeight  = walkCycle["step"]["height"].as<Expression>();
-        stepLimits  = walkCycle["step"]["limits"].as<arma::mat::fixed<3,2>>();
+        stepLimits  = walkCycle["step"]["limits"].as<Expression>();
 
         step_height_slow_fraction = walkCycle["step"]["height_slow_fraction"].as<float>();
         step_height_fast_fraction = walkCycle["step"]["height_fast_fraction"].as<float>();
 
         auto& velocity = walkCycle["velocity"];
-        velocityLimits = velocity["limits"].as<arma::mat::fixed<3,2>>();
+        velocityLimits = velocity["limits"].as<Expression>();
         velocityHigh   = velocity["high_speed"].as<Expression>();
 
         auto& acceleration = walkCycle["acceleration"];
-        accelerationLimits          = acceleration["limits"].as<arma::vec>();
-        accelerationLimitsHigh      = acceleration["limits_high"].as<arma::vec>();
+        accelerationLimits          = acceleration["limits"].as<Expression>();
+        accelerationLimitsHigh      = acceleration["limits_high"].as<Expression>();
         accelerationTurningFactor   = acceleration["turning_factor"].as<Expression>();
 
         phase1Single = walkCycle["single_support_phase"]["start"].as<Expression>();

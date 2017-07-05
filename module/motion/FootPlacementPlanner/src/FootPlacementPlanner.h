@@ -141,8 +141,8 @@ namespace motion
         double stepHeight;                              //
         float  step_height_slow_fraction;               //
         float  step_height_fast_fraction;               //
-        arma::mat::fixed<3,2> stepLimits;               //
-        arma::vec2 footOffsetCoefficient;               //
+        Eigen::Matrix<double, 3, 2> stepLimits;               //
+        Eigen::Vector2d footOffsetCoefficient;               //
         Transform2D uLRFootOffset;                      // standard offset
 
         /**
@@ -157,17 +157,17 @@ namespace motion
          */
         double velocityHigh;                            //
         double accelerationTurningFactor;               //
-        arma::mat::fixed<3,2> velocityLimits;           //
-        arma::vec3 accelerationLimits;                  //
-        arma::vec3 accelerationLimitsHigh;              //
+        Eigen::Matrix<double, 3, 2> velocityLimits;           //
+        Eigen::Vector3d accelerationLimits;                  //
+        Eigen::Vector3d accelerationLimitsHigh;              //
         Transform2D velocityCurrent;                    // Current robot velocity
         Transform2D velocityCommand;                    // Current velocity command
 
         /**
          * Dynamic analysis parameters for relevant motion planning...
          */
-        arma::vec4 zmpCoefficients;                     // zmp expoential coefficients aXP aXN aYP aYN
-        arma::vec4 zmpParameters;                       // zmp params m1X, m2X, m1Y, m2Y
+        Eigen::Vector4d zmpCoefficients;                     // zmp expoential coefficients aXP aXN aYP aYN
+        Eigen::Vector4d zmpParameters;                       // zmp params m1X, m2X, m1Y, m2Y
 
         /**
          * Dynamic analysis parameters initialized from configuration script, see config file for documentation...
@@ -354,7 +354,7 @@ namespace motion
          *
          * @param inFootOffsetCoefficient [description]
          */
-        void setFootOffsetCoefficient(const arma::vec2& inFootOffsetCoefficient);
+        void setFootOffsetCoefficient(const Eigen::Vector2d& inFootOffsetCoefficient);
         /**
          * @brief [brief description]
          * @details [long description]

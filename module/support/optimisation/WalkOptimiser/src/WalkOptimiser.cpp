@@ -67,7 +67,7 @@ namespace module {
                     for(auto& segment : config["segments"]){
 
                         walk_command.segments.push_back(FixedWalkCommand::WalkSegment());
-                        walk_command.segments.back().direction = segment["direction"].as<arma::vec>();
+                        walk_command.segments.back().direction = segment["direction"].as<Expression>();
                         walk_command.segments.back().curvePeriod = segment["curvePeriod"].as<double>();
 
                         walk_command.segments.back().normalisedVelocity = segment["normalisedVelocity"].as<double>();
@@ -99,7 +99,7 @@ namespace module {
 
                     std::cerr << "Sample: " << currentSample <<std::endl;
                     //Apply the parameters to the walk engine
-                    setWalkParameters(getWalkConfig(samples.row(currentSample).t()));
+                    setWalkParameters(getWalkConfig(samples.row(currentSample).transpose()));
                     //Now wait for WalkConfigSaved
 
                 });
@@ -141,14 +141,14 @@ namespace module {
                     } else {
                         //Setup new parameters
                         std::cerr << "Sample:" << ++currentSample <<std::endl;
-                        setWalkParameters(getWalkConfig(samples.row(currentSample).t()));
+                        setWalkParameters(getWalkConfig(samples.row(currentSample).transpose()));
                         //Now wait for WalkConfigSaved
                     }
                 });
 
                 on<Trigger<OptimisationComplete>, Sync<WalkOptimiser>>().then("Record Results", [this] {
                     //Combine samples
-                    arma::vec result = utility::math::optimisation::PGA::updateEstimate(samples, fitnesses);
+                    Eigen::VectorXd result = utility::math::optimisation::PGA::updateEstimate(samples, fitnesses);
 
                     std::cerr << "Final Result:" <<std::endl;
                     auto cfg = getWalkConfig(result);
@@ -156,8 +156,8 @@ namespace module {
                 });
             }
 
-            arma::vec WalkOptimiser::getState(const Configuration& walkConfig){
-                arma::vec state(parameter_names.size());
+            Eigen::VectorXd WalkOptimiser::getState(const Configuration& walkConfig){
+                Eigen::VectorXd state(parameter_names.size());
                 std::cerr << "walkConfig.size() = " << walkConfig.config.size() << "\nLoading state:"<< std::endl;
                 int i = 0;
                 for(const std::string& name : parameter_names){
@@ -212,9 +212,9 @@ namespace module {
             }
             void FitnessData::update(const message::input::Sensors& sensors){
                 if(recording){
-                    arma::vec3 verticalKinematics = sensors.camToGround.submat(0,2,2,2);
-                    arma::vec3 verticalOrientation = sensors.kinematicsCamToGround.submat(0,2,2,2);
-                    double tiltMag = utility::math::angle::acos_clamped(arma::dot(verticalOrientation, verticalKinematics));
+                    Eigen::Vector3d verticalKinematics = sensors.camToGround.submat(0,2,2,2);
+                    Eigen::Vector3d verticalOrientation = sensors.kinematicsCamToGround.submat(0,2,2,2);
+                    double tiltMag = utility::math::angle::acos_clamped(verticalOrientation.dot(verticalKinematics));
                     if(std::fabs(tiltMag) < M_PI_4){
                         tilt(tiltMag);
                     }

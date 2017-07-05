@@ -20,38 +20,46 @@
 #ifndef UTILITY_MATH_MATRIX_ROTATION3D_H
 #define UTILITY_MATH_MATRIX_ROTATION3D_H
 
+#include <iostream>
+
+#include <Eigen/Core>
+#include <Eigen/Eigenvalues>
 
 #include "utility/math/geometry/UnitQuaternion.h"
 
 namespace utility {
 namespace math {
-namespace geometry {
-    class UnitQuaternion;
-}
-namespace matrix {
+    namespace geometry {
+        class UnitQuaternion;
+    }
+    namespace matrix {
 
-    template <int Dimensions>
-    class Transform;
+        template <int Dimensions>
+        class Transform;
 
-    using Transform3D = Transform<3>;
+        using Transform3D = Transform<3>;
 
-    template <int Dimensions>
-    class Rotation;
+        template <int Dimensions>
+        class Rotation;
 
-    using Rotation3D = Rotation<3>;
-    using Axis = arma::vec3;
-    using AxisAngle = std::pair<Axis, double>;
+        using Rotation3D = Rotation<3>;
+        using Axis       = Eigen::Vector3d;
+        using AxisAngle  = std::pair<Axis, double>;
 
-    template <>
-    class Rotation<3> : public arma::mat33 {
-        using arma::mat33::mat33; // inherit constructors
+        template <>
+        class Rotation<3> : public Eigen::Matrix3d {
         public:
+            using Eigen::Matrix3d::Matrix;
+
             /**
              * @brief Default constructor creates an identity matrix
              */
-            Rotation();
+            Rotation() {
+                setIdentity();  // identity matrix by default
+            }
 
-            Rotation(const arma::mat& m);
+            template <int N = 3>
+            Rotation(const Eigen::Matrix<double, N, N>& m);
             /**
              * @brief Convert from a quaternions vec4
              */
@@ -60,14 +68,14 @@ namespace matrix {
             /**
              * @brief Construct an ONB using a vec3 as the X axis
              */
-            Rotation(const arma::vec3& axis);
+            Rotation(const Eigen::Vector3d& axis);
 
             Rotation(const Transform3D&) = delete;
 
             /**
              * @brief Create a rotation matrix based on a vec3 as the X axis and an angle
              */
-            Rotation(const arma::vec3& axis, double angle);
+            Rotation(const Eigen::Vector3d& axis, double angle);
 
             /**
              * @brief Rotates matrix around the local X axis
@@ -94,7 +102,8 @@ namespace matrix {
             Rotation3D rotateZ(double radians) const;
 
             /**
-             * @brief Transforms current rotation from world coordinates (i.e. standard basis) to be local to 'reference'
+             * @brief Transforms current rotation from world coordinates (i.e. standard basis) to be local to
+             * 'reference'
              *
              * @param reference A rotation matrix to become relatively local to
              * @return The transformed rotation matrix
@@ -102,7 +111,8 @@ namespace matrix {
             Rotation3D worldToLocal(const Rotation3D& reference) const;
 
             /**
-             * @brief Rotations current rotation from local coordinates relative to 'reference', to world coordinates (i.e. standard rotation)
+             * @brief Rotations current rotation from local coordinates relative to 'reference', to world coordinates
+             * (i.e. standard rotation)
              *
              * @param reference The rotation matrix that the current rotation is relative to
              * @return The transformed rotation matrix
@@ -125,19 +135,30 @@ namespace matrix {
             /**
              * @return Retrieve the euler angles (xyz) from the matrix
              */
-            arma::vec3 eulerAngles() const;
+            Eigen::Vector3d eulerAngles() const;
 
             Rotation3D orthogonalise() const;
 
-            inline const arma::vec3 x() const { return submat(0,0,2,0); }
-            inline arma::subview<double> x() { return submat(0,0,2,0); }
+            inline const Eigen::Vector3d x() const {
+                return leftCols<1>();
+            }
+            inline Eigen::Vector3d x() {
+                return leftCols<1>();
+            }
 
-            inline const arma::vec3 y() const { return submat(0,1,2,1); }
-            inline arma::subview<double> y() { return submat(0,1,2,1); }
+            inline const Eigen::Vector3d y() const {
+                return middleCols<1>(1);
+            }
+            inline Eigen::Vector3d y() {
+                return middleCols<1>(1);
+            }
 
-            inline const arma::vec3 z() const { return submat(0,2,2,2); }
-            inline arma::subview<double> z() { return submat(0,2,2,2); }
-
+            inline const Eigen::Vector3d z() const {
+                return rightCols<1>();
+            }
+            inline Eigen::Vector3d z() {
+                return rightCols<1>();
+            }
 
             /**
              * @brief Computes 'size' of the transform T
@@ -148,17 +169,23 @@ namespace matrix {
             /**
              * @return The roll (x-axis) of the rotation matrix
              */
-            inline double roll() const { return eulerAngles()[0]; }
+            inline double roll() const {
+                return eulerAngles()[0];
+            }
 
             /**
              * @return The pitch (y-axis) of the rotation matrix
              */
-            inline double pitch() const { return eulerAngles()[1]; }
+            inline double pitch() const {
+                return eulerAngles()[1];
+            }
 
             /**
              * @return The yaw (z-axis) of the rotation matrix
              */
-            inline double yaw() const { return eulerAngles()[2]; }
+            inline double yaw() const {
+                return eulerAngles()[2];
+            }
 
             /**
              * @brief Creates a rotation matrix around the X axis by the given radians
@@ -194,11 +221,10 @@ namespace matrix {
                 Gregory G. Slabaugh
                 double roll, pitch, yaw; // psi, theta, phi
              */
-            static Rotation3D createFromEulerAngles(const arma::vec3& a);
+            static Rotation3D createFromEulerAngles(const Eigen::Vector3d& a);
+        };
 
-    };
-
-}  // matrix
+    }  // matrix
 }  // math
 }  // utility
 

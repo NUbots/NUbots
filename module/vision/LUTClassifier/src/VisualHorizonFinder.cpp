@@ -40,7 +40,7 @@ namespace module {
         void LUTClassifier::findVisualHorizon(const Image& image, const LookUpTable& lut, ClassifiedImage& classifiedImage) {
 
             // Get some local references to class variables to make text shorter
-            Line horizon(convert<double, 2>(classifiedImage.horizon.normal), classifiedImage.horizon.distance);
+            Line horizon(classifiedImage.horizon.normal, classifiedImage.horizon.distance);
             auto& visualHorizon = classifiedImage.visualHorizon;
 
             // Cast lines to find our visual horizon
@@ -54,7 +54,7 @@ namespace module {
                 auto segments = quex->classify(image, lut, { int(x), top }, { int(x), int(image.dimensions[1] - 1) }, VISUAL_HORIZON_SUBSAMPLING);
 
                 // Our default green point is the bottom of the screen
-                arma::ivec2 greenPoint = { int(x), int(image.dimensions[1]) };
+                Eigen::Vector2i greenPoint = { int(x), int(image.dimensions[1]) };
 
                 // Loop through our segments to find our first green segment
                 for (auto it = segments.begin(); it != segments.end(); ++it) {
@@ -62,7 +62,7 @@ namespace module {
                     // If this a valid green point update our information
                     if(it->segmentClass == ClassifiedImage::SegmentClass::FIELD && it->length >= VISUAL_HORIZON_MINIMUM_SEGMENT_SIZE) {
 
-                        greenPoint = convert<int, 2>(it->start);
+                        greenPoint = it->start;
 
                         // We move our green point up by the scanning size if possible (assume more green horizon rather then less)
                         greenPoint[1] = std::max(int(greenPoint[1] - (VISUAL_HORIZON_SUBSAMPLING / 2)), 0);
@@ -73,7 +73,7 @@ namespace module {
                 }
                 // Only put the green point in if it's on the screen
                 if(greenPoint[1] < int(image.dimensions[1])) {
-                    visualHorizon.push_back(std::move(convert<int, 2>(greenPoint)));
+                    visualHorizon.push_back(std::move(greenPoint));
                 }
 
                 insertSegments(classifiedImage, segments, true);
@@ -86,21 +86,21 @@ namespace module {
                 int top = std::max(int(lround(horizon.y(image.dimensions[0] - 1)) - VISUAL_HORIZON_BUFFER), int(0));
                 top = std::min(top, int(image.dimensions[1] - 1));
 
-                arma::ivec2 start = { int(image.dimensions[0] - 1), top };
-                arma::ivec2 end = { int(image.dimensions[0] - 1), int(image.dimensions[1] - 1) };
+                Eigen::Vector2i start = { int(image.dimensions[0] - 1), top };
+                Eigen::Vector2i end = { int(image.dimensions[0] - 1), int(image.dimensions[1] - 1) };
 
                 // Classify our segments
                 auto segments = quex->classify(image, lut, start, end, VISUAL_HORIZON_SUBSAMPLING);
 
                 // Our default green point is the bottom of the screen
-                arma::ivec2 greenPoint = { int(image.dimensions[0] - 1), int(image.dimensions[1]) };
+                Eigen::Vector2i greenPoint = { int(image.dimensions[0] - 1), int(image.dimensions[1]) };
 
                 // Loop through our segments to find our first green segment
                 for (auto it = segments.begin(); it != segments.end(); ++it) {
 
                     // If this a valid green point update our information
                     if(it->segmentClass == ClassifiedImage::SegmentClass::FIELD && it->length >= VISUAL_HORIZON_MINIMUM_SEGMENT_SIZE) {
-                        greenPoint = convert<int, 2>(it->start);
+                        greenPoint = it->start;
                         // We found our green
                         break;
                     }
@@ -108,7 +108,7 @@ namespace module {
 
                 // Only put the green point in if it's on the screen
                 if(greenPoint[1] < int(image.dimensions[1])) {
-                    visualHorizon.push_back(std::move(convert<int, 2>(greenPoint)));
+                    visualHorizon.push_back(std::move(greenPoint));
                 }
 
                 insertSegments(classifiedImage, segments, true);

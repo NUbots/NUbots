@@ -81,10 +81,10 @@ namespace research {
             // Loop through our balls
             for (auto& ball : balls) {
                 auto& image = *ball.visObject.classifiedImage->image;
-                Circle circle(ball.circle.radius, convert<double, 2>(ball.circle.centre));
+                Circle circle(ball.circle.radius, ball.circle.centre);
 
                 double radius = circle.radius;
-                arma::vec2 centre = circle.centre;
+                Eigen::Vector2d centre = circle.centre;
 
                 // find the min and max y points on the circle
                 // capped at the bounds of the image
@@ -118,10 +118,10 @@ namespace research {
 
             for (auto& goal : goals) {
                 auto& image = *goal.visObject.classifiedImage->image;
-                Quad quad(convert<double, 2>(goal.quad.bl),
-                          convert<double, 2>(goal.quad.tl),
-                          convert<double, 2>(goal.quad.tr),
-                          convert<double, 2>(goal.quad.br));
+                Quad quad(goal.quad.bl,
+                          goal.quad.tl,
+                          goal.quad.tr,
+                          goal.quad.br);
 
                 // find the min and max y points on the quad
                 // capped at the bounds of the image
@@ -129,7 +129,7 @@ namespace research {
                 uint maxY = std::min(std::max(quad.getBottomLeft()[1], quad.getBottomRight()[1]), double(image.dimensions[1] - 1));
 
                 for (uint y = minY + goalEdgeBuffer; y <= maxY - goalEdgeBuffer; ++y) {
-                    arma::vec2 edgePoints;
+                    Eigen::Vector2d edgePoints;
                     try {
                         edgePoints = quad.getEdgePoints(y);
                     } catch (std::domain_error&) {

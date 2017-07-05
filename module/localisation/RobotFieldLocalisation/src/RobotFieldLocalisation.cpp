@@ -64,21 +64,21 @@ namespace localisation {
 
         on<Configuration>("RobotFieldLocalisation.yaml").then([this] (const Configuration& config) {
             // Use configuration here from file RobotFieldLocalisation.yaml
-            defaultMeasurementCovariance = config["measurement_noise"].as<arma::vec3>();
+            defaultMeasurementCovariance = config["measurement_noise"].as<Expression>();
             if (filter.filters.empty()) {
                 filter.filters.push_back(
                         MMUKF<FieldModel>::Filter{
                             1.0,
                             UKF<FieldModel>(
-                                config["initial_mean"].as<arma::vec3>()
-                                , arma::diagmat(config["initial_covariance"].as<arma::vec3>())
+                                config["initial_mean"].as<Expression>()
+                                , arma::diagmat(config["initial_covariance"].as<Expression>())
                                 )
                             }
                         );
             }
 
             for (auto& f : filter.filters) {
-                f.filter.model.processNoiseDiagonal = config["process_noise"].as<arma::vec3>();
+                f.filter.model.processNoiseDiagonal = config["process_noise"].as<Expression>();
             }
 
             lastUpdateTime = NUClear::clock::now();
@@ -98,14 +98,14 @@ namespace localisation {
             filter.filters.resize(0);
 
             for (const auto& h : reset.hypotheses) {
-                arma::vec3 Tgr = arma::vec3{h.position[0], h.position[1], h.heading};
+                Eigen::Vector3d Tgr = Eigen::Vector3d{h.position[0], h.position[1], h.heading};
 
                 if (!h.absoluteYaw) {
-                    Tgr[2] -= Rotation3D(Transform3D(convert<double, 4, 4>(sensors.world)).rotation()).yaw();
+                    Tgr[2] -= Rotation3D(Transform3D(sensors.world).rotation()).yaw();
                 }
 
-                arma::mat33 stateCov(arma::fill::eye);
-                stateCov.submat(0, 0, 1, 1) = convert<double, 2, 2>(h.position_cov);
+                Eigen::Matrix3d stateCov(arma::fill::eye);
+                stateCov.submat(0, 0, 1, 1) = h.position_cov;
                 stateCov(2, 2) = h.heading_var;
                 filter.filters.emplace_back(0.0, UKF<FieldModel>(Tgr, stateCov));
             }
@@ -116,7 +116,7 @@ namespace localisation {
         on<Trigger<Sensors>, Sync<RobotFieldLocalisation>, Single>().then("Localisation Field Space", [this] (const Sensors& sensors) {
 
             // Use the current world to field state we are holding to modify sensors.world and emit that
-            utility::math::matrix::Transform3D Htg = convert<double, 4, 4>(sensors.world);
+            utility::math::matrix::Transform3D Htg = sensors.world;
 
             //this actually gets Field to Torso???
             //g = odometry space
@@ -125,21 +125,21 @@ namespace localisation {
             Transform2D Tgr = filter.get();
             utility::math::matrix::Transform3D Hcf = utility::math::vision::getFieldToCam(
                     Tgr,
-                    Htg.i()
+                    Htg.inverse()
                 );
 
             //make a localisation object
             message::localisation::Self robot;
-            Transform2D currentLocalisation = Hcf.i().projectTo2D(arma::vec3({0,0,1}),arma::vec3({1,0,0}));
-            Transform2D currentOdometry = Htg.i().projectTo2D(arma::vec3({0,0,1}),arma::vec3({1,0,0}));
+            Transform2D currentLocalisation = Hcf.inverse().projectTo2D(Eigen::Vector3d(0,0,1),Eigen::Vector3d(1,0,0));
+            Transform2D currentOdometry = Htg.inverse().projectTo2D(Eigen::Vector3d(0,0,1),Eigen::Vector3d(1,0,0));
             // std::cerr << "Hcf : " << std::endl << Hcf << std::endl;
             // std::cerr << "currentOdometry : " << std::endl << currentOdometry << std::endl;
             //std::cerr << "internal Localisation state: " << std::endl << Tgr << std::endl;
             //std::cerr << "currentLocalisation: " << std::endl << currentLocalisation << std::endl;
             //set position, covariance, and rotation
-            robot.locObject.position      = convert<double, 2>(currentLocalisation.rows(0, 1));
-            robot.robot_to_world_rotation = convert<double, 2, 2>(Rotation2D::createRotation(currentLocalisation[2]));
-            robot.locObject.position_cov  = robot.robot_to_world_rotation * convert<double, 2, 2>(filter.getCovariance().submat(0, 0, 1, 1));
+            robot.locObject.position      = currentLocalisation.rows(0, 1);
+            robot.robot_to_world_rotation = Rotation2D::createRotation(currentLocalisation[2]);
+            robot.locObject.position_cov  = robot.robot_to_world_rotation * filter.getCovariance().submat(0, 0, 1, 1);
             robot.heading                 = robot.robot_to_world_rotation.row(0).transpose();
             emit(std::make_unique<std::vector<message::localisation::Self>>(std::vector<message::localisation::Self>(1, robot)));
         });
@@ -172,7 +172,7 @@ namespace localisation {
                     }
                 }
 
-                arma::vec armaMeas = measurement;
+                Eigen::VectorXd armaMeas = measurement;
 
                 // Apply our multiple measurement updates
                 arma::mat covmat = arma::diagmat(
@@ -212,7 +212,7 @@ namespace localisation {
                     }
                 }
 
-                arma::vec armaMeas = measurement;
+                Eigen::VectorXd armaMeas = measurement;
 
                 // Apply our multiple measurement updates
                 arma::mat covmat = arma::diagmat(

@@ -10,12 +10,12 @@ namespace autocal {
 	using utility::math::matrix::Rotation3D;
 	using utility::math::geometry::UnitQuaternion;
 
-	void MocapRecording::addMeasurement(const std::string& name, 
-									 const TimeStamp& timeStamp, 
-									 const MocapStream::RigidBodyID& rigidBodyId, 
+	void MocapRecording::addMeasurement(const std::string& name,
+									 const TimeStamp& timeStamp,
+									 const MocapStream::RigidBodyID& rigidBodyId,
 									 const Transform3D& pose,
 									 bool correctCoordinateSystem)
-	{	
+	{
 		//Create a new stream if one with this name doesnt exist
 		if(streams.count(name) == 0){
 			std::cout << "Initialising mocap stream: " << name << std::endl;
@@ -40,19 +40,19 @@ namespace autocal {
 		if(stats[name].count(rigidBodyId) == 0){
 			stats[name][rigidBodyId] = arma::running_stat_vec<arma::vec>(true);
 			}
-		
+
 		//Rotation measurement
 		//TODO: try axis angle
 		Rotation3D rot = pose.rotation();
 		UnitQuaternion q(rot);
 		float rotNorm = Rotation3D::norm(rot);
 		float quatAngle = q.getAngle();
-		arma::vec rotMeas = {rotNorm, quatAngle};
+		Eigen::VectorXd rotMeas = {rotNorm, quatAngle};
 
 		//Position measurement
-		arma::vec3 pos = pose.translation();
+		Eigen::Vector3d pos = pose.translation();
 
-		arma::vec measurement = arma::join_cols(rotMeas,pos);
+		Eigen::VectorXd measurement = arma::join_cols(rotMeas,pos);
 		stats[name][rigidBodyId](measurement);
 
 	}

@@ -126,8 +126,8 @@ namespace motion
         /**
          * Arm Position vectors initialized from configuration script, see config file for documentation...
          */
-        arma::vec3 armLPostureTransform;                //
-        arma::vec3 armRPostureTransform;                //
+        Eigen::Vector3d armLPostureTransform;                //
+        Eigen::Vector3d armRPostureTransform;                //
 
         /**
          * Internal timing reference variables...
@@ -139,9 +139,9 @@ namespace motion
          */
         double velocityHigh;                            //
         double accelerationTurningFactor;               //
-        arma::mat::fixed<3,2> velocityLimits;           //
-        arma::vec3 accelerationLimits;                  //
-        arma::vec3 accelerationLimitsHigh;              //
+        Eigen::Matrix<double, 3, 2> velocityLimits;           //
+        Eigen::Vector3d accelerationLimits;                  //
+        Eigen::Vector3d accelerationLimitsHigh;              //
         Transform2D velocityCurrent;                    // Current robot velocity
         Transform2D velocityCommand;                    // Current velocity command
 
@@ -259,28 +259,28 @@ namespace motion
          *
          * @param inTorsoPosition [description]
          */
-        arma::vec3 getLArmPosition();
+        Eigen::Vector3d getLArmPosition();
         /**
          * @brief [brief description]
          * @details [long description]
          *
          * @param inTorsoPosition [description]
          */
-        void setLArmPosition(arma::vec3 inLArm);
+        void setLArmPosition(Eigen::Vector3d inLArm);
         /**
          * @brief [brief description]
          * @details [long description]
          *
          * @param inTorsoPosition [description]
          */
-        arma::vec3 getRArmPosition();
+        Eigen::Vector3d getRArmPosition();
         /**
          * @brief [brief description]
          * @details [long description]
          *
          * @param inTorsoPosition [description]
          */
-        void setRArmPosition(arma::vec3 inRArm);
+        void setRArmPosition(Eigen::Vector3d inRArm);
         /**
          * @brief [brief description]
          * @details [long description]

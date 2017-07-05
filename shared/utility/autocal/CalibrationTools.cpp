@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////////
 //	  Author: Jake Fountain 2015
-//    
+//
 /// \file CalibrationTools.cpp
 /// \brief CPP file for CalibrationTools.h
 ///
@@ -30,8 +30,8 @@ namespace autocal{
 	/*
 	Returns matrix M(v) such that for any vector x, cross(v,x) = dot(M(v),x)
 	*/
-	arma::mat33 CalibrationTools::crossMatrix(const arma::vec3& v){
-		arma::mat33 omega;
+	Eigen::Matrix3d CalibrationTools::crossMatrix(const Eigen::Vector3d& v){
+		Eigen::Matrix3d omega;
 		omega <<  0 <<    -v[2] <<  v[1] << arma::endr
 			  << v[2] <<     0  << -v[0] << arma::endr
 			  << -v[1]<<   v[0] <<    0  << arma::endr;
@@ -82,44 +82,44 @@ namespace autocal{
 		if(success) x = pinvA * b;
 
 		auto error = A*x-b;
-		// std::cout << "SVD error: A*x - b = \n" << error.t() << " size = " << arma::norm(error) << std::endl;
+		// std::cout << "SVD error: A*x - b = \n" << error.transpose() << " size = " << error.norm() << std::endl;
 
 		//Return whether or not the SVD was performed correctly
 		return success;
 	}
 
-	std::pair<arma::vec3,arma::vec3> CalibrationTools::getTranslationComponent(const std::vector<Transform3D>& samplesA, const std::vector<Transform3D>& samplesB,const Rotation3D& Ry, bool& success){
-		arma::mat combinedF; 
-		arma::vec combinedD; 
+	std::pair<Eigen::Vector3d,Eigen::Vector3d> CalibrationTools::getTranslationComponent(const std::vector<Transform3D>& samplesA, const std::vector<Transform3D>& samplesB,const Rotation3D& Ry, bool& success){
+		arma::mat combinedF;
+		Eigen::VectorXd combinedD;
 
 		for (int i = 0; i < samplesA.size(); i++){
-			Rotation3D RA = samplesA[i].rotation(); 
-			arma::vec3 pA = samplesA[i].translation(); 
-			arma::vec3 pB = samplesB[i].translation(); 
+			Rotation3D RA = samplesA[i].rotation();
+			Eigen::Vector3d pA = samplesA[i].translation();
+			Eigen::Vector3d pB = samplesB[i].translation();
 
-			arma::mat F = arma::join_rows(RA,-arma::eye(3,3)); 
+			arma::mat F = arma::join_rows(RA,-Eigen::Matrix3d::Identity());
 
-			arma::vec D = Ry * pB - pA; 
+			Eigen::VectorXd D = Ry * pB - pA;
 
-			if (i == 0){	
-				combinedF = F; 
-				combinedD = D; 
-			}else{	
-				combinedF = arma::join_cols(combinedF,F); 
-				combinedD = arma::join_cols(combinedD,D); 
+			if (i == 0){
+				combinedF = F;
+				combinedD = D;
+			}else{
+				combinedF = arma::join_cols(combinedF,F);
+				combinedD = arma::join_cols(combinedD,D);
 			}
 		}
-		arma::vec pxpy;
-		bool pxpySuccess = solveWithSVD(combinedF,combinedD,pxpy); 
+		Eigen::VectorXd pxpy;
+		bool pxpySuccess = solveWithSVD(combinedF,combinedD,pxpy);
 
 		if(!pxpySuccess){
 			//If SVD fails, return identity
 			std::cout << __FILE__ << " : " << __LINE__ << " - WARNING: SVD FAILED" << std::endl;
 			success = false;
-			return std::pair<arma::vec3, arma::vec3>();
+			return std::pair<Eigen::Vector3d, Eigen::Vector3d>();
 		}
-		
-		std::pair<arma::vec3,arma::vec3> txty(pxpy.rows(0,2),pxpy.rows(3,5));
+
+		std::pair<Eigen::Vector3d,Eigen::Vector3d> txty(pxpy.rows(0,2),pxpy.rows(3,5));
 		return txty;
 	}
 
@@ -128,16 +128,16 @@ namespace autocal{
 		solves AX=YB for X,Y and A in sampleA, B in sampleB
 
 		Source:
-		@ARTICLE{Zhuang1994, 
-		author={Hanqi Zhuang and Roth, Zvi S. and Sudhakar, R.}, 
-		journal={Robotics and Automation, IEEE Transactions on}, 
-		title={Simultaneous robot/world and tool/flange calibration by solving homogeneous transformation equations of the form AX=YB}, 
-		year={1994}, 
-		month={Aug}, 
-		volume={10}, 
-		number={4}, 
+		@ARTICLE{Zhuang1994,
+		author={Hanqi Zhuang and Roth, Zvi S. and Sudhakar, R.},
+		journal={Robotics and Automation, IEEE Transactions on},
+		title={Simultaneous robot/world and tool/flange calibration by solving homogeneous transformation equations of the form AX=YB},
+		year={1994},
+		month={Aug},
+		volume={10},
+		number={4},
 		pages={549-554}
-		}	
+		}
 		*/
 	std::pair<Transform3D, Transform3D> CalibrationTools::solveZhuang1994(const std::vector<Transform3D>& samplesA,const std::vector<Transform3D>& samplesB, bool& success){
 		if(samplesA.size() < 3 || samplesB.size() < 3){
@@ -147,55 +147,55 @@ namespace autocal{
 		Transform3D X,Y;
 
 		arma::mat combinedG;
-		arma::vec combinedC;
+		Eigen::VectorXd combinedC;
 
 		float a0 = 0;
 		float b0 = 0;
 
-		arma::vec3 a;
-		arma::vec3 b;
+		Eigen::Vector3d a;
+		Eigen::Vector3d b;
 
 		for (int i = 0; i < samplesA.size(); i++){
-			const Transform3D& A = samplesA[i]; 
-			const Transform3D& B = samplesB[i]; 
+			const Transform3D& A = samplesA[i];
+			const Transform3D& B = samplesB[i];
 
 			//Get Quaternions for rotations
-			const UnitQuaternion quat_a(A.rotation()); 
-			a0 = quat_a.real(); 
-			a = quat_a.imaginary(); 
-			
-			const UnitQuaternion quat_b(B.rotation()); 
-			b0 = quat_b.real(); 
-			b = quat_b.imaginary(); 
+			const UnitQuaternion quat_a(A.rotation());
+			a0 = quat_a.real();
+			a = quat_a.imaginary();
+
+			const UnitQuaternion quat_b(B.rotation());
+			b0 = quat_b.real();
+			b = quat_b.imaginary();
 
 			//Compute G in Gw = C
 			if(std::fabs(a0) < 1e-10){
 				std::cout << __FILE__ << " : " << __LINE__ << " - WARNING: BAD SAMPLED ROTATION - RETURNING IDENTITY" << std::endl;
 				// std::cout << " A = \n" << A <<  std::endl;
-				// std::cout << " A * A.i() = \n" << A * A.i() <<  std::endl;
+				// std::cout << " A * A.inverse() = \n" << A * A.inverse() <<  std::endl;
 				// std::cout << " quat_a = \n" << quat_a <<  std::endl;
 				success = false;
-				return std::pair<Transform3D, Transform3D>(); 
+				return std::pair<Transform3D, Transform3D>();
 			}
 
-			arma::mat G1 = a0 * arma::eye(3,3) + crossMatrix(a) + a*a.t() / a0; 
-			arma::mat G2 = -b0 * arma::eye(3,3) + crossMatrix(b) - a*b.t() / a0; 
-			
-			arma::mat G = arma::join_rows(G1,G2); 
+			arma::mat G1 = a0 * Eigen::Matrix3d::Identity() + crossMatrix(a) + a*a.transpose() / a0;
+			arma::mat G2 = -b0 * Eigen::Matrix3d::Identity() + crossMatrix(b) - a*b.transpose() / a0;
+
+			arma::mat G = arma::join_rows(G1,G2);
 
 			//Compute C in Gw = C
-			arma::vec C = b - (b0/a0) * a; 
+			Eigen::VectorXd C = b - (b0/a0) * a;
 
-			if (i == 0){	
-				combinedG = G; 
-				combinedC = C; 
-			}else{	
-				combinedG = arma::join_cols(combinedG,G); 
-				combinedC = arma::join_cols(combinedC,C); 
+			if (i == 0){
+				combinedG = G;
+				combinedC = C;
+			}else{
+				combinedG = arma::join_cols(combinedG,G);
+				combinedC = arma::join_cols(combinedC,C);
 			}
 		}
 
-		arma::vec w;
+		Eigen::VectorXd w;
 		bool wSuccess = solveWithSVD(combinedG,combinedC, w);
 		if(!wSuccess){
 			//If SVD fails, return identity
@@ -213,35 +213,35 @@ namespace autocal{
 			success = false;
 			return std::pair<Transform3D, Transform3D>(X,Y);
 		}
-		
+
 		//Compute x and y Quaternions
-		UnitQuaternion x, y; 
-		y.real() = 1 / std::sqrt(1 + w[3]*w[3] + w[4]*w[4] + w[5]*w[5]); 
+		UnitQuaternion x, y;
+		y.real() = 1 / std::sqrt(1 + w[3]*w[3] + w[4]*w[4] + w[5]*w[5]);
 		if (std::fabs(y.real())< 1e-3){
-			std::cout << "\n\n\n\n\n\n\ny.real() == 0 so you need to rotate the ref base with respect to the base\n\n\n\n\n\n\n" << std::endl; 
+			std::cout << "\n\n\n\n\n\n\ny.real() == 0 so you need to rotate the ref base with respect to the base\n\n\n\n\n\n\n" << std::endl;
 			success = false;
-			return std::pair<Transform3D, Transform3D>(); 
+			return std::pair<Transform3D, Transform3D>();
 		}
-		y.imaginary() = y.real() * w.rows(3,5); 
-		x.imaginary() = y.real() * w.rows(0,2); 
-		
-		float x0 = arma::dot((a/a0), x.rows(1,3)) + (b0/a0) * y.real() - arma::dot((b/a0) , y.rows(1,3)); 
-		int x_sign = x0 > 0 ? 1 : -1; 
+		y.imaginary() = y.real() * w.rows(3,5);
+		x.imaginary() = y.real() * w.rows(0,2);
+
+		float x0 = (a/a0).dot(x.rows(1,3)) + (b0/a0) * y.real() - (b/a0).dot(y.rows(1,3));
+		int x_sign = x0 > 0 ? 1 : -1;
 		//TODO: figure out how to handle when x is nan
-		x.real() = x_sign * std::sqrt(1 - std::fmin(1, x[1]*x[1] + x[2]*x[2] + x[3]*x[3]) ); 
+		x.real() = x_sign * std::sqrt(1 - std::fmin(1, x[1]*x[1] + x[2]*x[2] + x[3]*x[3]) );
 		// check:
 		// check = tr.quaternion_multiply(tr.quaternion_inverse(tr.quaternion_multiply(quat_a,x)), tr.quaternion_multiply(y,quat_b))
 
-		Rotation3D Rx(x); 
-		Rotation3D Ry(y); 
+		Rotation3D Rx(x);
+		Rotation3D Ry(y);
 
-		X.rotation() = Rx; 
-		Y.rotation() = Ry; 
+		X.rotation() = Rx;
+		Y.rotation() = Ry;
 
 		auto translation = getTranslationComponent(samplesA, samplesB, Ry, success);
 
-		X.translation() = translation.first; 
-		Y.translation() = translation.second; 
+		X.translation() = translation.first;
+		Y.translation() = translation.second;
 
 		return std::pair<Transform3D, Transform3D>(X,Y);
 	}
@@ -276,7 +276,7 @@ namespace autocal{
 
 		//Create kronecker matrix K
 		int n = samplesA.size();
-		arma::mat K = arma::zeros(9,9);
+		arma::mat K = Eigen::Matrix<double, 9, 9>::Zero();
 		for(int i = 0; i < n; i++){
 			const Transform3D& A = samplesA[i];
 			const Transform3D& B = samplesB[i];
@@ -287,7 +287,7 @@ namespace autocal{
 
 		//Take singular value decomposition of K
 		arma::mat U,V;
-		arma::vec s;
+		Eigen::VectorXd s;
 		arma::svd(U,s,V,K);
 
 		// std::cout << "U = \n" << U << std::endl;
@@ -295,15 +295,15 @@ namespace autocal{
 		// std::cout << "V = \n" << V << std::endl;
 
 		//Get index of singular values closest to n
-		// arma::vec sMinusN = arma::abs(s-double(n));
+		// Eigen::VectorXd sMinusN = arma::abs(s-double(n));
 		// sMinusN.min(index);
-		
+
 		//Use largest singular value
 		arma::uword index = 0;
 
-		arma::vec u = U.col(index);
-		arma::vec v = V.col(index);
-		
+		Eigen::VectorXd u = U.col(index);
+		Eigen::VectorXd v = V.col(index);
+
 		// std::cout << "u = \n" << u << std::endl;
 		// std::cout << "s(index)  = \n" << s(index) << std::endl;
 		// std::cout << "v = \n" << v << std::endl;
@@ -342,14 +342,14 @@ namespace autocal{
 		return result;
 
 	}
-	
+
 	std::pair<utility::math::matrix::Transform3D, utility::math::matrix::Transform3D> CalibrationTools::solveClosedForm_Dornaika1998(const std::vector<utility::math::matrix::Transform3D>& samplesA,const std::vector<utility::math::matrix::Transform3D>& samplesB, bool& success){
-		
+
 		std::pair<utility::math::matrix::Transform3D, utility::math::matrix::Transform3D> result;
 
 		//Create kronecker matrix K
 		int n = samplesA.size();
-		arma::mat44 C = arma::zeros(4,4);
+		Eigen::Matrix4d C = Eigen::Matrix4d::Zero();
 		for(int i = 0; i < n; i++){
 			const Transform3D& A = samplesA[i];
 			const Transform3D& B = samplesB[i];
@@ -357,23 +357,23 @@ namespace autocal{
 			const UnitQuaternion qA(Rotation3D(A.rotation()));
 			const UnitQuaternion qB(Rotation3D(B.rotation()));
 
-			arma::mat44 C_i = -qA.getLeftQuatMultMatrix().t() * qB.getRightQuatMultMatrix();
+			Eigen::Matrix4d C_i = -qA.getLeftQuatMultMatrix().transpose() * qB.getRightQuatMultMatrix();
 
 			C += C_i;
 
 		}
 
-		arma::mat44 CTC = C.t() * C;
-		
-		arma::vec eigval;
+		Eigen::Matrix4d CTC = C.transpose() * C;
+
+		Eigen::VectorXd eigval;
 		arma::mat eigvec;
 		arma::eig_sym( eigval, eigvec, CTC );
 		std::cout << "eigval = " << eigval << std::endl;
 		std::cout << "eigvec = " << eigvec << std::endl;
 
-		arma::vec lamda1 = n + arma::sqrt(eigval);
-		arma::vec lamda2 = n - arma::sqrt(eigval);
-		arma::vec lamda = arma::join_cols(lamda1,lamda2);
+		Eigen::VectorXd lamda1 = n + Eigen::sqrt(eigval.array()).matrix();
+		Eigen::VectorXd lamda2 = n - Eigen::sqrt(eigval.array()).matrix();
+		Eigen::VectorXd lamda = arma::join_cols(lamda1,lamda2);
 		std::cout << "lamda1 = " << lamda1 << std::endl;
 		std::cout << "lamda2 = " << lamda2 << std::endl;
 		std::cout << "lamda = " << lamda << std::endl;

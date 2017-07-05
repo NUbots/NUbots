@@ -84,7 +84,7 @@ namespace support {
         handles["overview"].push_back(on<Trigger<KickPlan>, Single, Priority::LOW>().then([this] (const KickPlan& /*kickPlan*/) {
 
             // TODO fix runtime error:
-            // *overview.kick_target = convert<double, 2>(kickPlan.target);
+            // *overview.kick_target = kickPlan.target;
 
         }));
 
@@ -121,9 +121,9 @@ namespace support {
             overview.ball_position = ball.locObject.position;
 
             // Set world ball position.
-            overview.ball_world_position = convert<double, 2>(RobotToWorldTransform(convert<double, 2>(self.locObject.position),
-                                                                                    convert<double, 2>(self.heading),
-                                                                                    convert<double, 2>(ball.locObject.position)));
+            overview.ball_world_position = RobotToWorldTransform(self.locObject.position,
+                                                                 self.heading,
+                                                                 ball.locObject.position);
         }));
 
         handles["overview"].push_back(on<Trigger<Image>, Single, Priority::LOW>().then([this] {

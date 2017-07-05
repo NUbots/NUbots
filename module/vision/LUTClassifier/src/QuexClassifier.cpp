@@ -39,7 +39,7 @@ namespace module {
             , tknNumber(lexer.token_p()->number) {
         }
 
-        std::vector<ClassifiedImage::Segment> QuexClassifier::classify(const Image& image, const LookUpTable& lut, const arma::ivec2& start, const arma::ivec2& end, const uint& subsample) {
+        std::vector<ClassifiedImage::Segment> QuexClassifier::classify(const Image& image, const LookUpTable& lut, const Eigen::Vector2i& start, const Eigen::Vector2i& end, const uint& subsample) {
 
             // Start reading data
             lexer.buffer_fill_region_prepare();
@@ -80,7 +80,7 @@ namespace module {
             output.reserve(64);
 
             // Our vector of position
-            arma::ivec2 position = start;
+            Eigen::Vector2i position = start;
 
             // A reference to the relevant movement direction
             int& movement = start[1] == end[1] ? position[0] : position[1];
@@ -88,38 +88,38 @@ namespace module {
             for(uint32_t typeID = lexer.receive(); typeID != QUEX_TKN_TERMINATION; typeID = lexer.receive()) {
 
                 // Update our position
-                arma::ivec2 s = position;
+                Eigen::Vector2i s = position;
                 uint len = tknNumber * subsample;
                 movement += len;
-                arma::ivec2 m = (s + position) / 2;
+                Eigen::Vector2i m = (s + position) / 2;
 
                 switch(typeID) {
                     case QUEX_TKN_FIELD:
-                        output.push_back(ClassifiedImage::Segment(SegmentClass::FIELD, len, subsample, convert<int, 2>(s), convert<int, 2>(position), convert<int, 2>(m), -1, -1));
+                        output.push_back(ClassifiedImage::Segment(SegmentClass::FIELD, len, subsample, s, position, m, -1, -1));
                         break;
 
                     case QUEX_TKN_BALL:
-                        output.push_back(ClassifiedImage::Segment(SegmentClass::BALL, len, subsample, convert<int, 2>(s), convert<int, 2>(position), convert<int, 2>(m), -1, -1));
+                        output.push_back(ClassifiedImage::Segment(SegmentClass::BALL, len, subsample, s, position, m, -1, -1));
                         break;
 
                     case QUEX_TKN_GOAL:
-                        output.push_back(ClassifiedImage::Segment(SegmentClass::GOAL, len, subsample, convert<int, 2>(s), convert<int, 2>(position), convert<int, 2>(m), -1, -1));
+                        output.push_back(ClassifiedImage::Segment(SegmentClass::GOAL, len, subsample, s, position, m, -1, -1));
                         break;
 
                     case QUEX_TKN_LINE:
-                        output.push_back(ClassifiedImage::Segment(SegmentClass::LINE, len, subsample, convert<int, 2>(s), convert<int, 2>(position), convert<int, 2>(m), -1, -1));
+                        output.push_back(ClassifiedImage::Segment(SegmentClass::LINE, len, subsample, s, position, m, -1, -1));
                         break;
 
                     case QUEX_TKN_CYAN_TEAM:
-                        output.push_back(ClassifiedImage::Segment(SegmentClass::CYAN_TEAM, len, subsample, convert<int, 2>(s), convert<int, 2>(position), convert<int, 2>(m), -1, -1));
+                        output.push_back(ClassifiedImage::Segment(SegmentClass::CYAN_TEAM, len, subsample, s, position, m, -1, -1));
                         break;
 
                     case QUEX_TKN_MAGENTA_TEAM:
-                        output.push_back(ClassifiedImage::Segment(SegmentClass::MAGENTA_TEAM, len, subsample, convert<int, 2>(s), convert<int, 2>(position), convert<int, 2>(m), -1, -1));
+                        output.push_back(ClassifiedImage::Segment(SegmentClass::MAGENTA_TEAM, len, subsample, s, position, m, -1, -1));
                         break;
 
                     case QUEX_TKN_UNCLASSIFIED:
-                        output.push_back(ClassifiedImage::Segment(SegmentClass::UNKNOWN_CLASS, len, subsample, convert<int, 2>(s), convert<int, 2>(position), convert<int, 2>(m), -1, -1));
+                        output.push_back(ClassifiedImage::Segment(SegmentClass::UNKNOWN_CLASS, len, subsample, s, position, m, -1, -1));
                         break;
                 }
             }

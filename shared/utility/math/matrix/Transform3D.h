@@ -20,40 +20,45 @@
 #ifndef UTILITY_MATH_MATRIX_TRANSFORM3D_H
 #define UTILITY_MATH_MATRIX_TRANSFORM3D_H
 
+#include <random>
 
+#include <Eigen/Core>
+
+#include "utility/math/geometry/UnitQuaternion.h"
 #include "utility/math/matrix/Rotation3D.h"
 #include "utility/math/matrix/Transform2D.h"
-#include "utility/math/geometry/UnitQuaternion.h"
 
 namespace utility {
 namespace math {
-namespace matrix {
+    namespace matrix {
 
-    template <int Dimensions>
-    class Transform;
+        template <int Dimensions>
+        class Transform;
 
-    using Transform3D = Transform<3>;
+        using Transform3D = Transform<3>;
 
-    /**
-     * @brief A 4x4 homogeneous orthonormal basis matrix class for representing 3D transformations
-     *
-     * See:
-     * http://en.wikipedia.org/wiki/Transformation_matrix
-     * http://en.wikipedia.org/wiki/Rotation_group_SO(3)
-     * http://en.wikipedia.org/wiki/Orthogonal_matrix
-     * http://en.wikipedia.org/wiki/Orthonormal_basis
-     *
-     * @author Brendan Annable
-     */
-    template <>
-    class Transform<3> : public arma::mat44 {
-        using arma::mat44::mat44; // inherit constructors
-
+        /**
+         * @brief A 4x4 homogeneous orthonormal basis matrix class for representing 3D transformations
+         *
+         * See:
+         * http://en.wikipedia.org/wiki/Transformation_matrix
+         * http://en.wikipedia.org/wiki/Rotation_group_SO(3)
+         * http://en.wikipedia.org/wiki/Orthogonal_matrix
+         * http://en.wikipedia.org/wiki/Orthonormal_basis
+         *
+         * @author Brendan Annable
+         */
+        template <>
+        class Transform<3> : public Eigen::Matrix4d {
         public:
+            using Eigen::Matrix4d::Matrix;
+
             /**
              * @brief Default constructor creates an identity matrix
              */
-            Transform();
+            Transform() {
+                setIdentity();  // identity matrix by default
+            }
 
             /**
              * @brief Convert from a quaternions vec4
@@ -74,16 +79,17 @@ namespace matrix {
             /**
              * @brief Convert from a Rotation3D matrix
              */
-            Transform(const Rotation3D& rotation, const arma::vec3& translation);
+            Transform(const Rotation3D& rotation, const Eigen::Vector3d& translation);
 
             /**
-             * @brief Convert from a vec6 representing [position_x, position_y, position_z, rotation_x, rotation_y, rotation_z]
+             * @brief Convert from a vec6 representing [position_x, position_y, position_z, rotation_x, rotation_y,
+             * rotation_z]
              */
-            Transform(const arma::vec6& in);
+            Transform(const Eigen::Matrix<double, 6, 1>& in);
             /**
              * @brief Convert from a vec3 representing [..., ..., ...]
              */
-            Transform(const arma::vec3& in);
+            Transform(const Eigen::Vector3d& in);
 
             /**
              * @brief Translate the current basis by the given 3D vector in local space
@@ -91,7 +97,7 @@ namespace matrix {
              * @param translation The 3D translation vector to translate by
              * @return The transformed basis matrix
              */
-            Transform3D translate(const arma::vec3& translation) const;
+            Transform3D translate(const Eigen::Vector3d& translation) const;
 
             /*
              * @brief Translate the current basis along the local X axis
@@ -147,7 +153,7 @@ namespace matrix {
              */
             Transform3D rotateZ(double radians) const;
 
-            Transform3D scale(const arma::vec3& v) const;
+            Transform3D scale(const Eigen::Vector3d& v) const;
 
             Transform3D rotateLocal(const Rotation3D& rotation, const Transform3D& local) const;
             Transform3D rotateXLocal(double radians, const Transform3D& local) const;
@@ -163,15 +169,16 @@ namespace matrix {
             Transform3D worldToLocal(const Transform3D& reference) const;
 
             /**
-             * @brief Transforms current basis from local coordinates relative to 'reference', to world coordinates (i.e. standard basis)
+             * @brief Transforms current basis from local coordinates relative to 'reference', to world coordinates
+             * (i.e. standard basis)
              *
              * @param reference The basis matrix that the current basis is relative to
              * @return The transformed basis matrix
              */
             Transform3D localToWorld(const Transform3D& reference) const;
 
-            arma::vec3 transformPoint(const arma::vec3& p);
-            arma::vec3 transformVector(const arma::vec3& p);
+            Eigen::Vector3d transformPoint(const Eigen::Vector3d& p);
+            Eigen::Vector3d transformVector(const Eigen::Vector3d& p);
 
             /**
              * @brief Performs an orthonormal inverse and returns a new copy
@@ -185,27 +192,52 @@ namespace matrix {
             /**
              * @return The 3x3 rotation matrix
              */
-            inline const Rotation3D rotation() const { return submat(0,0,2,2); }
-            inline arma::subview<double> rotation() { return submat(0,0,2,2); }
+            inline const Rotation3D rotation() const {
+                return topLeftCorner<3, 3>();
+            }
+            inline Rotation3D rotation() {
+                return topLeftCorner<3, 3>();
+            }
 
-            inline const arma::vec3 translation() const { return submat(0,3,2,3); }
-            inline arma::subview<double> translation() { return submat(0,3,2,3); }
+            inline const Eigen::Vector3d translation() const {
+                return topRightCorner<3, 1>();
+            }
+            inline Eigen::Vector3d translation() {
+                return topRightCorner<3, 1>();
+            }
 
-            inline const arma::vec3 x() const { return submat(0,0,2,0); }
-            inline arma::subview<double> x() { return submat(0,0,2,0); }
+            inline const Eigen::Vector3d x() const {
+                return block<3, 1>(0, 0);
+            }
+            inline Eigen::Vector3d x() {
+                return block<3, 1>(0, 0);
+            }
 
-            inline const arma::vec3 y() const { return submat(0,1,2,1); }
-            inline arma::subview<double> y() { return submat(0,1,2,1); }
+            inline const Eigen::Vector3d y() const {
+                return block<3, 1>(0, 1);
+            }
+            inline Eigen::Vector3d y() {
+                return block<3, 1>(0, 1);
+            }
 
-            inline const arma::vec3 z() const { return submat(0,2,2,2); }
-            inline arma::subview<double> z() { return submat(0,2,2,2); }
+            inline const Eigen::Vector3d z() const {
+                return block<3, 1>(0, 2);
+            }
+            inline Eigen::Vector3d z() {
+                return block<3, 1>(0, 2);
+            }
 
-            arma::vec3 eulerAngles() const {
+            Eigen::Vector3d eulerAngles() const {
                 return rotation().eulerAngles();
             }
 
-            inline const arma::mat44 raw() const { return *this; }
-            inline arma::mat44 raw() { return *this; }
+            inline const Eigen::Matrix4d raw() const {
+                return *this;
+            }
+
+            inline Eigen::Matrix4d raw() {
+                return *this;
+            }
 
             /**
              * @brief Computes 'size' of the transform T
@@ -230,7 +262,7 @@ namespace matrix {
              * @param translation The 3D translation vector to translate by
              * @return The translation transform
              */
-            static Transform3D createTranslation(const arma::vec3& translation);
+            static Transform3D createTranslation(const Eigen::Vector3d& translation);
 
             /**
              * @brief Creates a rotation transform around the X axis by the given radians
@@ -256,7 +288,7 @@ namespace matrix {
              */
             static Transform3D createRotationZ(double radians);
 
-            static Transform3D createScale(const arma::vec3& v);
+            static Transform3D createScale(const Eigen::Vector3d& v);
 
             /**
              * @brief Interpolates between two transforms
@@ -270,11 +302,10 @@ namespace matrix {
              * @brief Construct transform from a transform 3D assuming the angle is around the yawAxis
              * and the translation is projected onto the plane normal to yawAxis
              */
-            Transform2D projectTo2D(const arma::vec3& yawAxis, const arma::vec3& forwardAxis) const;
+            Transform2D projectTo2D(const Eigen::Vector3d& yawAxis, const Eigen::Vector3d& forwardAxis) const;
+        };
 
-    };
-
-}  // matrix
+    }  // matrix
 }  // math
 }  // utility
 

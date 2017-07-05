@@ -44,23 +44,23 @@ namespace ball {
 
         BallModel() : cfg_() {}
 
-        // arma::vec::fixed<size> timeUpdate(
-        //     const arma::vec::fixed<size>& state, double deltaT,
+        // Eigen::Matrix<double, size, 1> timeUpdate(
+        //     const Eigen::Matrix<double, size, 1>& state, double deltaT,
         //     const message::localisation::FakeOdometry& odom);
 
-        arma::vec::fixed<size> timeUpdate(
-            const arma::vec::fixed<size>& state, double deltaT);
+        Eigen::Matrix<double, size, 1> timeUpdate(
+            const Eigen::Matrix<double, size, 1>& state, double deltaT);
 
-        arma::vec predictedObservation(const arma::vec::fixed<size>& state, double ballAngle);
+        Eigen::VectorXd predictedObservation(const Eigen::Matrix<double, size, 1>& state, double ballAngle);
 
-        arma::vec observationDifference(const arma::vec& a, const arma::vec& b);
+        Eigen::VectorXd observationDifference(const arma::vec& a, const arma::vec& b);
 
-        arma::vec::fixed<size> limitState(const arma::vec::fixed<size>& state);
+        Eigen::Matrix<double, size, 1> limitState(const Eigen::Matrix<double, size, 1>& state);
 
-        arma::mat::fixed<size, size> processNoise();
+        Eigen::Matrix<double, size, size> processNoise();
 
-        arma::vec::fixed<BallModel::size> ApplyVelocity(
-            const arma::vec::fixed<BallModel::size>& state,
+        Eigen::Matrix<double, BallModel::size, 1> ApplyVelocity(
+            const Eigen::Matrix<double, BallModel::size, 1>& state,
             double deltaT);
 
         struct Config {

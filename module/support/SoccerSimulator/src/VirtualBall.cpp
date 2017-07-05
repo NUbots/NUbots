@@ -48,7 +48,7 @@ namespace support {
     , rd(rand()) {
     }
 
-    VirtualBall::VirtualBall(arma::vec2 position, float diameter)
+    VirtualBall::VirtualBall(Eigen::Vector2d position, float diameter)
     : position({position[0], position[1], diameter * 0.5})
     , velocity(arma::fill::zeros)
     , diameter(diameter)
@@ -56,40 +56,40 @@ namespace support {
     }
 
     // utility::math::matrix::Transform2D ballPose;
-    arma::vec3 position;
-    arma::vec3 velocity;
+    Eigen::Vector3d position;
+    Eigen::Vector3d velocity;
 
-    // arma::vec2 position;
+    // Eigen::Vector2d position;
     float diameter;
 
-    Ball VirtualBall::detect(const CameraParameters& cam, Transform2D robotPose, const Sensors& sensors, arma::vec4 /*error*/){
+    Ball VirtualBall::detect(const CameraParameters& cam, Transform2D robotPose, const Sensors& sensors, Eigen::Vector4d /*error*/){
 
         Ball result;
 
-        Transform3D Hcf = getFieldToCam(robotPose, convert<double, 4, 4>(sensors.camToGround));
-        Transform3D Hfc = Hcf.i();
+        Transform3D Hcf = getFieldToCam(robotPose, sensors.camToGround);
+        Transform3D Hfc = Hcf.inverse();
 
         // Ball position in field
-        arma::vec3 rBFf = position;
+        Eigen::Vector3d rBFf = position;
 
         // Camera position in field
-        arma::vec3 rCFf = Hfc.translation();
+        Eigen::Vector3d rCFf = Hfc.translation();
 
         // Get our ball position in camera
-        arma::vec3 rBCc = Hcf.rotation() * arma::vec3(rBFf - rCFf);
+        Eigen::Vector3d rBCc = Hcf.rotation() * Eigen::Vector3d(rBFf - rCFf);
         if (rBCc[0] < 0.0) {
             result.edgePoints.clear();
             return result;
         }
 
 
-        double rBCcLength = arma::norm(rBCc);
+        double rBCcLength = rBCc.norm();
 
         // The angular width of the cone we are drawing
-        double angle = 2.0 * std::asin((diameter * 0.5) / arma::norm(rBCc));
+        double angle = 2.0 * std::asin((diameter * 0.5) / rBCc.norm());
 
         // Project the centre to the screen and work out the radius as if it was in the centre
-        arma::ivec2 centre = screenToImage(projectCamSpaceToScreen(rBCc, cam.focalLengthPixels), convert<uint, 2>(cam.imageSizePixels));
+        Eigen::Vector2i centre = screenToImage(projectCamSpaceToScreen(rBCc, cam.focalLengthPixels), cam.imageSizePixels);
         double radius = cam.focalLengthPixels * std::tan(angle * 0.5);
 
         // Check our ball is on the screen at all and if so set the values
@@ -99,19 +99,19 @@ namespace support {
            && centre[1] < int(cam.imageSizePixels[1])) {
 
             // Set our circle parameters for simulating the ball
-            result.circle.centre = convert<double, 2>(arma::conv_to<arma::vec>::from(centre));
+            result.circle.centre = arma::conv_to<arma::vec>::from(centre);
             result.circle.radius = radius;
 
             // Get our transform to world coordinates
-            const Transform3D& Htw = convert<double, 4, 4>(sensors.world);
-            const Transform3D& Htc = convert<double, 4, 4>(sensors.forwardKinematics.at(ServoID::HEAD_PITCH));
-            Transform3D Hcw = Htc.i() * Htw;
-            Transform3D Hwc = Hcw.i();
+            const Transform3D& Htw = sensors.world;
+            const Transform3D& Htc = sensors.forwardKinematics.at(ServoID::HEAD_PITCH);
+            Transform3D Hcw = Htc.inverse() * Htw;
+            Transform3D Hwc = Hcw.inverse();
 
-            result.position = convert<double, 3>(Hwc.transformPoint(rBCc));
+            result.position = Hwc.transformPoint(rBCc);
 
             // Measure points around the ball as a normal distribution
-            arma::vec3 rEBc;
+            Eigen::Vector3d rEBc;
             if (rBCc[0] == 0.0 && rBCc[1] == 0.0 ) {
                 if (rBCc[2] > 0.0) {
                     rEBc = { 1, 0, 0};
@@ -124,7 +124,7 @@ namespace support {
                 rEBc = { M_SQRT1_2, 0, M_SQRT1_2 };
             }
             //set rEBC to be a properly sized radius vector facing from the ball centre towards the (top or inner int he case of extreme values) ball edge
-            rEBc = rBCcLength * arma::normalise(rEBc - rEBc * arma::dot(rEBc, rBCc) / rBCcLength);
+            rEBc = rBCcLength * (rEBc - rEBc * rEBc.dot(rBCc) / rBCcLength).normalize();
 
 
             for (int i = 0; i < 50; ++i) {
@@ -133,10 +133,13 @@ namespace support {
                 double angleOffset = angularDistribution(rd);
 
                 // Get a random number for which direciton the measurement is
-                arma::vec3 rEBc = rEBc * std::tan(angle + radialJitter / 2.0);
+                Eigen::Vector3d rEBc = rEBc * std::tan(angle + radialJitter / 2.0);
 
                 // Make a rotation matrix to rotate our vector to our target
-                result.edgePoints.push_back(convert<double, 3>(arma::normalise(Rotation3D(arma::normalise(rBCc), angle + angleOffset) * rEBc)));
+                // Eigen lpNorm<p> is templated on p ... so p must be known at compile time.
+                // Introducing the fucked-up hack!!
+                //result.edgePoints.push_back(Rotation3D(arma::normalise(rBCc, angle + angleOffset) * rEBc).normalize());
+                result.edgePoints.push_back(Rotation3D(std::pow(rBCc.pow(angle + angleOffset).sum(), 1 / (angle + angleOffset)) * rEBc).normalize());
             }
         }
 

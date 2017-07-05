@@ -23,28 +23,30 @@
 #include <ostream>
 #include <vector>
 
+#include <Eigen/Core>
+
 #include "utility/math/matrix/Transform2D.h"
 
 namespace utility {
 namespace math {
-namespace geometry {
+    namespace geometry {
 
-    using utility::math::matrix::Transform2D;
+        using utility::math::matrix::Transform2D;
 
-    class RotatedRectangle {
-    private:
-        Transform2D transform;
-        arma::vec2 size;
+        class RotatedRectangle {
+        private:
+            Transform2D transform;
+            Eigen::Vector2d size;
 
-    public:
-        RotatedRectangle(const Transform2D& trans, const arma::vec2& size);
+        public:
+            RotatedRectangle(const Transform2D& trans, const Eigen::Vector2d& size);
 
-        Transform2D getTransform() const;
-        arma::vec2 getSize()       const;
-        arma::vec2 getPosition()   const;
-        double getRotation()       const;
-    };
-}
+            Transform2D getTransform() const;
+            Eigen::Vector2d getSize() const;
+            Eigen::Vector2d getPosition() const;
+            double getRotation() const;
+        };
+    }
 }
 }
 

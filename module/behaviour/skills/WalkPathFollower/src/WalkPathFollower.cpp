@@ -184,7 +184,7 @@ namespace skills {
             //     // target from the ball.
 
             //     // Find current ball space.
-            //     arma::vec2 worldBall = currentState.localToWorld({ball.position, 0}).xy();
+            //     Eigen::Vector2d worldBall = currentState.localToWorld({ball.position, 0}).xy();
             //     Transform2D currentBallSpace = Transform2D::lookAt(worldBall, currentPath.command.kickTarget);
 
             //     // Transform robot from world space into (current) ball space:
@@ -201,7 +201,7 @@ namespace skills {
             // RoboCup HACK - Just aim for the goal state:
             Transform2D targetState;
             if (currentPath.command.type == MotionCommand::Type::BallApproach) {
-                arma::vec2 worldBall = currentState.localToWorld({ball.position, 0}).xy();
+                Eigen::Vector2d worldBall = currentState.localToWorld({ball.position, 0}).xy();
                 Transform2D currentBallSpace = Transform2D::lookAt(worldBall, currentPath.command.kickTarget);
                 targetState = currentBallSpace;
             } else {
@@ -218,8 +218,8 @@ namespace skills {
             }
 
             // emit(utility::nubugger::drawArrow("WPF_Closest_Arrow", currentState.localToWorld(walkCommand->command), {1,1,1}, 1));
-            arma::vec2 arrowTip = currentState.localToWorld(walkCommand->command).xy();
-            arma::vec2 dirPoint = currentState.localToWorld({walkCommand->command.rotation()*walkCommand->command.xy(), 0}).xy();
+            Eigen::Vector2d arrowTip = currentState.localToWorld(walkCommand->command).xy();
+            Eigen::Vector2d dirPoint = currentState.localToWorld({walkCommand->command.rotation()*walkCommand->command.xy(), 0}).xy();
 
             emit(utility::nubugger::drawArrow("WPF_Closest_Arrow", currentState.xy(), arrowTip, 1));
             emit(utility::nubugger::drawArrow("WPF_Closest_Arrow_Rotation", arrowTip, dirPoint, 1));
@@ -267,13 +267,13 @@ namespace skills {
 
     bool WalkPathFollower::isVisited(const Transform2D& currentState, const Transform2D& visitState) {
         // TODO: Abstract away the distance metric used between states.
-        double dist = arma::norm(visitState.xy() - currentState.xy());
+        double dist = (visitState.xy() - currentState.xy()).norm();
         return dist < cfg_.waypoint_visit_distance;
     }
 
     bool WalkPathFollower::isGoalClose(const Transform2D& currentState, const Transform2D& visitState) {
         // TODO: Abstract away the distance metric used between states.
-        double dist = arma::norm(visitState.xy() - currentState.xy());
+        double dist = (visitState.xy() - currentState.xy()).norm();
         return dist < cfg_.goal_close_distance;
     }
 
@@ -283,7 +283,7 @@ namespace skills {
         double closestDist = std::numeric_limits<double>::infinity();
         for (int i = 0; i < numStates; i++) {
             // TODO: Abstract away the distance metric used between states.
-            double dist = arma::norm(walkPath.states[i].xy() - currentState.xy());
+            double dist = (walkPath.states[i].xy() - currentState.xy()).norm();
             if (dist < closestDist) {
                 closestDist = dist;
                 closestIndex = i;
@@ -313,7 +313,7 @@ namespace skills {
     }
 
     WalkCommand WalkPathFollower::walkBetweenFar(const Transform2D& currentState, const Transform2D& targetState) {
-        auto diff = arma::vec2(targetState.xy() - currentState.xy());
+        auto diff = Eigen::Vector2d(targetState.xy() - currentState.xy());
         auto dir = vectorToBearing(diff);
         double wcAngle = utility::math::angle::signedDifference(dir, currentState.angle());
         // TODO: Consider the heading of targetState in planning.
@@ -327,13 +327,13 @@ namespace skills {
         int angleSign = (localTarget.angle() < 0) ? -1 : 1; // angle must be normalised.
 
         double rotationSpeed = angleSign * cfg_.walk_about_rotational_speed;
-        arma::vec2 translationVec = arma::normalise(localTarget.xy());
+        Eigen::Vector2d translationVec = localTarget.xy().normalize();
 
         double translationAngle = utility::math::angle::vectorToBearing(translationVec);
 
-        double translationSpeed = (1 - std::abs(translationAngle)*(0.25/M_PI)); 
-        
-        arma::vec2 translationVelocity = translationVec * translationSpeed;
+        double translationSpeed = (1 - std::abs(translationAngle)*(0.25/M_PI));
+
+        Eigen::Vector2d translationVelocity = translationVec * translationSpeed;
 
         Transform2D velocity = {translationVelocity, rotationSpeed};
 
@@ -349,13 +349,13 @@ namespace skills {
         /// double rotationSpeed = angleSign * cfg_.walk_about_rotational_speed;
 
         // if (std::abs(walkAboutAngle) < M_PI*0.125) {
-        ///     Transform2D velocity = {cfg_.walk_to_near_speed * arma::normalise(targetState.xy() - currentState.xy()), rotationSpeed}; //TODO make 20 seconds the variable update_frequency
+        ///     Transform2D velocity = {cfg_.walk_to_near_speed * (targetState.xy() - currentState.xy()).normalize(), rotationSpeed}; //TODO make 20 seconds the variable update_frequency
         ///     WalkCommand command(subsumptionId, velocity);
         ///     return command;
         // } else {
-        //     arma::vec2 strafe = { std::max(cfg_.walk_about_x_strafe, 0.0), -angleSign * cfg_.walk_about_y_strafe };
+        //     Eigen::Vector2d strafe = { std::max(cfg_.walk_about_x_strafe, 0.0), -angleSign * cfg_.walk_about_y_strafe };
 
-        //     arma::vec2 strafeClipped = arma::normalise(strafe) * std::min(1.0, arma::norm(strafe));
+        //     Eigen::Vector2d strafeClipped = strafe.normalize() * std::min(1.0, strafe.norm());
 
         //     Transform2D velocity = {strafeClipped, rotationSpeed}; //TODO make 20 seconds the variable update_frequency
         //     WalkCommand command(subsumptionId, velocity);

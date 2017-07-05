@@ -153,9 +153,9 @@ namespace strategy {
 
             if (moving) {
                 // TODO: hacked to not allow backwards movement for stability
-                // arma::vec s = { std::max(strafe[0], 0.0), strafe[1] };
-                arma::vec s = strafe;
-                arma::vec strafeNorm = s / std::numeric_limits<short>::max();
+                // Eigen::VectorXd s = { std::max(strafe[0], 0.0), strafe[1] };
+                Eigen::VectorXd s = strafe;
+                Eigen::VectorXd strafeNorm = s / std::numeric_limits<short>::max();
 
                 auto rotationalSpeedNorm = rotationalSpeed / std::numeric_limits<short>::max();
                 auto transform = Transform2D(strafeNorm, rotationalSpeedNorm);

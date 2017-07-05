@@ -128,7 +128,7 @@ namespace module {
                     }
                 }));
 
-                on<Trigger<KickFinished>>().then([this] (const KickFinished&) 
+                on<Trigger<KickFinished>>().then([this] (const KickFinished&)
                 {
                     // May need to tweek this to resume walking after kick completed....
                     std::unique_ptr<WalkCommand> command = std::make_unique<WalkCommand>(subsumptionId,latestCommand.walkCommand);
@@ -174,9 +174,9 @@ namespace module {
 
                         //TODO:use vision ball
 
-                        arma::vec2 ball_world_position = RobotToWorldTransform(selfs.front().position, selfs.front().heading, ball.position);
-                        arma::vec2 kick_target = latestCommand.kickTarget;//2 * ball_world_position - selfs.front().position;
-                        emit(drawSphere("kick_target", arma::vec3({kick_target[0], kick_target[1], 0.0}), 0.1, arma::vec3({1, 0, 0}), 0));
+                        Eigen::Vector2d ball_world_position = RobotToWorldTransform(selfs.front().position, selfs.front().heading, ball.position);
+                        Eigen::Vector2d kick_target = latestCommand.kickTarget;//2 * ball_world_position - selfs.front().position;
+                        emit(drawSphere("kick_target", Eigen::Vector3d(kick_target[0], kick_target[1], 0.0), 0.1, Eigen::Vector3d(1, 0, 0), 0));
 
                         // log("Kick Target = ",kick_target);
 
@@ -261,8 +261,8 @@ namespace module {
                         float A2 = A3 +d2 * std::cos(M_PI +theta2);
                         float B2 = B3 +d2 *std::sin(M_PI + theta2);
 
-                        emit(drawSphere("Tangent 1", arma::vec3({B1, A1, 0.0}), 0.1, arma::vec3({0, 1, 0}), 0 ));
-                        emit(drawSphere("Tangent 2", arma::vec3({B2, A2, 0.0}), 0.1, arma::vec3({0, 0, 1}), 0 ));
+                        emit(drawSphere("Tangent 1", Eigen::Vector3d(B1, A1, 0.0), 0.1, Eigen::Vector3d(0, 1, 0), 0 ));
+                        emit(drawSphere("Tangent 2", Eigen::Vector3d(B2, A2, 0.0), 0.1, Eigen::Vector3d(0, 0, 1), 0 ));
 
                         // log("A1 = ", A1, "\n B1 = ", B1, "\n A2 = ", A2 , "\n B2 = ", B2);
 
@@ -283,13 +283,12 @@ namespace module {
                         //bezXdashdash[i] = 6*(A0*(-u)+A0+3*A1*u-2*A1-3*A2 u+A2+A3*u);
                         //bezYdashdash[i] = 6*(B0*(-u)+B0+3*B1*u-2*A1-3*B2 u+B2+B3*u);
 
-                        arma::fmat bez_matrix;
-                        bez_matrix << bezier_X_point << bezier_Y_point << arma::endr
-                                   << A0 << B0;
+                        Eigen::Matrix2f bez_matrix;
+                        bez_matrix << bezier_X_point, bezier_Y_point,
+                                      A0,             B0;
 
 
-
-                        arma::fvec2 next_robot_position = arma::mean(bez_matrix).t();
+                        Eigen::Vector2f next_robot_position = bez_matrix.colwise().mean().transpose();
 
 
                         // log("Robot next position = ", next_robot_position);
@@ -330,7 +329,7 @@ namespace module {
 
                         //Euclidean distance to ball
 
-                        float distanceToPoint = arma::norm(next_robot_position);
+                        float distanceToPoint = next_robot_position.norm();
                         float scale = 2.0 / (1.0 + std::exp(-a * distanceToPoint + b)) - 1.0;
                         float scale2 = angle / M_PI;
                         float finalForwardSpeed = forwardSpeed * scale * (1.0 - scale2);

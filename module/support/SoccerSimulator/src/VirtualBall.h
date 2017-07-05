@@ -35,17 +35,17 @@ namespace support {
     public:
         VirtualBall();
 
-        VirtualBall(arma::vec2 position, float diameter);
+        VirtualBall(Eigen::Vector2d position, float diameter);
 
-        arma::vec3 position;
-        arma::vec3 velocity;
+        Eigen::Vector3d position;
+        Eigen::Vector3d velocity;
         float diameter;
 
         std::mt19937 rd;
         std::normal_distribution<> angularDistribution = std::normal_distribution<>(0, M_PI_2);
         std::normal_distribution<> radialDistribution = std::normal_distribution<>(0, 0.01);
 
-        message::vision::Ball detect(const message::input::CameraParameters& camParams, utility::math::matrix::Transform2D robotPose, const message::input::Sensors& sensors, arma::vec4 error);
+        message::vision::Ball detect(const message::input::CameraParameters& camParams, utility::math::matrix::Transform2D robotPose, const message::input::Sensors& sensors, Eigen::Vector4d error);
     };
 
 }

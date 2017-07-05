@@ -58,7 +58,7 @@ namespace debug {
 
         on<Trigger<Sensors>, Single, Priority::LOW>().then([this](const Sensors& sensors) {
 
-            emit(graph("Servo " + static_cast<std::string>(static_cast<ServoID>(sensors.servo.at(ServoID::L_HIP_ROLL).id)), 
+            emit(graph("Servo " + static_cast<std::string>(static_cast<ServoID>(sensors.servo.at(ServoID::L_HIP_ROLL).id)),
                                     sensors.servo.at(ServoID::L_HIP_ROLL).presentPosition));
         });
 
@@ -76,8 +76,8 @@ namespace debug {
             float sine = sin(2 * M_PI * freq * t);
             float cosine = cos(2 * M_PI * freq * t);
 
-            emit(drawArrow("arrow", arma::vec3({x, y, std::abs(z)}), arma::vec3({sine, cosine, 0}), sine));
-            emit(drawSphere("sphere", arma::vec3({x, z, std::abs(z)}), std::abs(sine)));
+            emit(drawArrow("arrow", Eigen::Vector3d(x, y, std::abs(z)), Eigen::Vector3d(sine, cosine, 0), sine));
+            emit(drawSphere("sphere", Eigen::Vector3d(x, z, std::abs(z)), std::abs(sine)));
 
         });
     }

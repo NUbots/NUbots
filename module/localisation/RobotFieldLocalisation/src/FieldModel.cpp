@@ -42,11 +42,11 @@ namespace module {
         using GoalTeam            = message::vision::Goal::Team::Value;
         using GoalMeasurementType = message::vision::Goal::MeasurementType;
 
-        arma::vec::fixed<FieldModel::size> FieldModel::timeUpdate(const arma::vec::fixed<size>& state, double /*deltaT*/) {
+        Eigen::Matrix<double, FieldModel::size, 1> FieldModel::timeUpdate(const Eigen::Matrix<double, size, 1>& state, double /*deltaT*/) {
             return state;
         }
 
-        arma::vec FieldModel::predictedObservation(const arma::vec::fixed<size>& state
+        Eigen::VectorXd FieldModel::predictedObservation(const Eigen::Matrix<double, size, 1>& state
             , const std::vector<std::tuple<GoalTeam, GoalSide, GoalMeasurementType>>& measurements
             , const FieldDescription& field
             , const Sensors& sensors
@@ -54,21 +54,21 @@ namespace module {
         {
 
             //make a storage for our goal locations
-            arma::vec3 goalLocation;
+            Eigen::Vector3d goalLocation;
             goalLocation.fill(0.0);
-            arma::mat::fixed<3,4> goalNormals;
-            // Transform2D world = sensors.world.projectTo2D(arma::vec3({0,0,1}),arma::vec3({1,0,0}));
+            Eigen::Matrix<double, 3, 4> goalNormals;
+            // Transform2D world = sensors.world.projectTo2D(Eigen::Vector3d(0,0,1),Eigen::Vector3d(1,0,0));
 
-            //Transform2D world = sensors.world.projectTo2D(arma::vec3({0,0,1}),arma::vec3({1,0,0}));
-            const Transform3D& Htw = convert<double, 4, 4>(sensors.world);
-            const Transform3D& Htc = convert<double, 4, 4>(sensors.forwardKinematics.at(ServoID::HEAD_PITCH));
-            Transform3D Hwc = Htw.i() * Htc;
+            //Transform2D world = sensors.world.projectTo2D(Eigen::Vector3d(0,0,1),Eigen::Vector3d(1,0,0));
+            const Transform3D& Htw = sensors.world;
+            const Transform3D& Htc = sensors.forwardKinematics.at(ServoID::HEAD_PITCH);
+            Transform3D Hwc = Htw.inverse() * Htc;
             //Get the x/y position for goals
-            arma::vec prediction(3*measurements.size());
+            Eigen::VectorXd prediction(3*measurements.size());
             int counter = 0;
             //std::string ans = "";
             for(auto& type : measurements) {
-                arma::vec3 lastGoalLocation = goalLocation;
+                Eigen::Vector3d lastGoalLocation = goalLocation;
                 //choose which goalpost we are looking at
                 // Switch on Team
                 switch(std::get<0>(type)) {
@@ -77,11 +77,11 @@ namespace module {
                         //ans += " own";
                         switch(std::get<1>(type)) {
                             case GoalSide::LEFT:
-                                goalLocation.rows(0,1) = convert<double, 2>(field.goalpost_own_l);
+                                goalLocation.rows(0,1) = field.goalpost_own_l;
                                 //ans += " left";
                                 break;
                             case GoalSide::RIGHT:
-                                goalLocation.rows(0,1) = convert<double, 2>(field.goalpost_own_r);
+                                goalLocation.rows(0,1) = field.goalpost_own_r;
                                 //ans += " right";
                                 break;
                             case GoalSide::UNKNOWN_SIDE:
@@ -93,11 +93,11 @@ namespace module {
                         switch(std::get<1>(type)) {
                             case GoalSide::LEFT:
                                 //ans += " left";
-                                goalLocation.rows(0,1) = convert<double, 2>(field.goalpost_opp_l);
+                                goalLocation.rows(0,1) = field.goalpost_opp_l;
                                 break;
                             case GoalSide::RIGHT:
                                 //ans += " right";
-                                goalLocation.rows(0,1) = convert<double, 2>(field.goalpost_opp_r);
+                                goalLocation.rows(0,1) = field.goalpost_opp_r;
                                 break;
                             case GoalSide::UNKNOWN_SIDE:
                                 break;
@@ -136,16 +136,16 @@ namespace module {
             return prediction;
         }
 
-        arma::vec FieldModel::observationDifference(const arma::vec& a, const arma::vec& b) const {
+        Eigen::VectorXd FieldModel::observationDifference(const arma::vec& a, const arma::vec& b) const {
             //std::cerr << (a-b) << std::endl << a << std::endl << b << std::endl << std::endl;
             return (a - b);
         }
 
-        arma::vec::fixed<FieldModel::size> FieldModel::limitState(const arma::vec::fixed<size>& state) const {
+        Eigen::Matrix<double, FieldModel::size, 1> FieldModel::limitState(const Eigen::Matrix<double, size, 1>& state) const {
             return state;
         }
 
-        arma::mat::fixed<FieldModel::size, FieldModel::size> FieldModel::processNoise() const {
+        Eigen::Matrix<double, FieldModel::size, FieldModel::size> FieldModel::processNoise() const {
             return arma::diagmat(processNoiseDiagonal);
         }
 

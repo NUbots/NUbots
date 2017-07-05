@@ -61,9 +61,9 @@ TEST_CASE("RobotToWorldTransform should be inverse of WorldToRobotTransform") {
 
     // INFO("Testing the FSR centre conversions");
 
-    arma::vec2 robot_pos = { 3, 2 };
-    arma::vec2 robot_heading = arma::normalise(arma::vec({ 1, 5 }));
-    arma::vec2 field_ball = { -3, -1 };
+    Eigen::Vector2d robot_pos = { 3, 2 };
+    Eigen::Vector2d robot_heading = Eigen::Vector2d(1, 5).normalize();
+    Eigen::Vector2d field_ball = { -3, -1 };
 
     auto robot_ball = WorldToRobotTransform(robot_pos, robot_heading, field_ball);
     auto result_ball = RobotToWorldTransform(robot_pos, robot_heading, robot_ball);
@@ -106,7 +106,7 @@ TEST_CASE("MultiModalRobotModel::MergeSimilarModels tests") {
         INFO("Test merge with two identical and one different input models");
         MultiModalRobotModel mmrm;
         auto hyp = std::make_unique<RobotHypothesis>();
-        hyp->filter_ = UKF<RobotModel>(arma::vec({10, 20, 30}));
+        hyp->filter_ = UKF<RobotModel>(Eigen::Vector2d(10, 20, 30));
         mmrm.robot_models_.push_back(std::move(hyp));
         mmrm.robot_models_.push_back(std::make_unique<RobotHypothesis>());
         REQUIRE(mmrm.robot_models_.size() == 3);

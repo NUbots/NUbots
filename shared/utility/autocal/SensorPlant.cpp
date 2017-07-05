@@ -19,7 +19,7 @@ namespace autocal {
 
 		MocapStream& stream1 = mocapRecording.getStream(stream_name_1);
 		MocapStream& stream2 = mocapRecording.getStream(stream_name_2);
-		
+
 		NamePair hypothesisKey({stream_name_1,stream_name_2});
 
 		//Initialise eliminated hypotheses if necessary
@@ -35,7 +35,7 @@ namespace autocal {
 
 		std::map<MocapStream::RigidBodyID, Transform3D> currentState1 = stream1.getCompleteStates(now + latencyOfStream1);
 		std::map<MocapStream::RigidBodyID, Transform3D> currentState2 = stream2.getCompleteStates(now);
-		
+
 
 		//Update statistics
 		for(auto& state1 : currentState1){
@@ -45,7 +45,7 @@ namespace autocal {
 				//For each rigid body to match to
 				MocapStream::RigidBodyID id2 = state2.first;
 
-				correlator.addData(id1, state1.second, id2, state2.second);	
+				correlator.addData(id1, state1.second, id2, state2.second);
 			}
 		}
 
@@ -58,7 +58,7 @@ namespace autocal {
 
 		auto finish = std::chrono::high_resolution_clock::now();
 		computeTimes(double(std::chrono::duration_cast<std::chrono::nanoseconds>(finish-start).count() * 1e-6));
-		
+
 		//Compute correct guesses:
 		auto answers = correctMatchings[hypothesisKey];
 		for (auto& cor : correlations){
@@ -69,7 +69,7 @@ namespace autocal {
 			}
 			totalGuesses[cor.first] ++;
 		}
-		
+
 		return correlations;
 
 	}
@@ -100,7 +100,7 @@ namespace autocal {
 	void SensorPlant::setGroundTruthTransform(std::string streamA, std::string streamB, Transform3D mapAtoB, bool useTruth){
 		groundTruthTransforms[std::make_pair(streamA, streamB)] = mapAtoB;
 		//HACK CORRECTION (for kinect, no longer necessary)
-		// groundTruthTransforms[std::make_pair(streamA, streamB)].translation() += arma::vec3{-0.38,0,0};
+		// groundTruthTransforms[std::make_pair(streamA, streamB)].translation() += Eigen::Vector3d{-0.38,0,0};
 		// std::cout << "groundTruthTransforms \n" << groundTruthTransforms[std::make_pair(streamA, streamB)]<<  std::endl;
 
 		if(useTruth){
@@ -112,7 +112,7 @@ namespace autocal {
 
 	void SensorPlant::convertToGroundTruth(std::string streamA, std::string streamB){
 		auto key = std::make_pair(streamA, streamB);
-		
+
 		if(groundTruthTransforms.count(key) != 0 && mocapRecording.streamPresent(streamA)){
 			//Get the transform between coordinate systems
 			Transform3D streamToDesiredBasis = groundTruthTransforms[key];
@@ -124,7 +124,7 @@ namespace autocal {
 		}
 
 	}
-	
+
 	autocal::MocapStream::Frame SensorPlant::getGroundTruth(std::string stream, std::string desiredBasis, TimeStamp now){
 		//If we are transforming to the same reference basis, just return the current frame unaltered
 		if(stream.compare(desiredBasis) == 0){
@@ -139,7 +139,7 @@ namespace autocal {
 			//Get the transform between coordinate systems
 			Transform3D streamToDesiredBasis = groundTruthTransforms[key];
 
-			//Get the latest data 
+			//Get the latest data
 			MocapStream::Frame latestFrame = mocapRecording.getStream(stream).getFrame(now);
 
 			//Loop through and record transformed rigid body poses
@@ -167,11 +167,11 @@ namespace autocal {
 		if(simParams.size()!=0){
 			SimulationParameters s = simParams.front();
 			simParams.pop();
-			std::cerr << "Finished simulating: " << s.latency_ms << " " << s.noise.angle_stddev << " " << s.noise.disp_stddev << " " 
+			std::cerr << "Finished simulating: " << s.latency_ms << " " << s.noise.angle_stddev << " " << s.noise.disp_stddev << " "
 					  << s.slip.disp.f << " " << s.slip.disp.A << " "
 					  << s.slip.angle.f << " " << s.slip.angle.A << " ";
-		} 
-		std::cerr << " Fraction correct: " << std::endl; 
+		}
+		std::cerr << " Fraction correct: " << std::endl;
 		for(auto guess : correctGuesses){
 			std::cerr << "id: " << guess.first << " = " <<  float(guess.second) / float(totalGuesses[guess.first]) << std::endl;
 		}
@@ -188,12 +188,12 @@ namespace autocal {
 	void SensorPlant::setSimParameters(
 		SimulationParameters a1, SimulationParameters a2, int aN,
 		SimulationParameters d1, SimulationParameters d2, int dN){
-		
+
 		simParams = std::queue<SimulationParameters>();//clear queue
-		
-		SimulationParameters aStep;	
+
+		SimulationParameters aStep;
 		if(aN != 1){
-			aStep = (a2 - a1) * (1 / float(aN-1));	
+			aStep = (a2 - a1) * (1 / float(aN-1));
 		}
 
 		SimulationParameters dStep;
@@ -221,8 +221,8 @@ namespace autocal {
 	void SensorPlant::setCurrentSimParameters(const SimulationParameters& sim){
 		for(auto& stream : mocapRecording.streams){
 			stream.second.setSimulationParameters(sim);
-		}	
-	}	
+		}
+	}
 
 
 

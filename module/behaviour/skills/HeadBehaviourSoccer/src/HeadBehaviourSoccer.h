@@ -68,12 +68,12 @@ namespace module {
 
                 /*! @brief Converts from camera space direction to IMU space direction
                 */
-                arma::vec2 getIMUSpaceDirection(const message::motion::KinematicsModel& kinematicsModel, const arma::vec2& screenAngles, utility::math::matrix::Rotation3D headToIMUSpace);
+                Eigen::Vector2d getIMUSpaceDirection(const message::motion::KinematicsModel& kinematicsModel, const Eigen::Vector2d& screenAngles, utility::math::matrix::Rotation3D headToIMUSpace);
 
                 /*! @brief Gets points which allow for simultaneous search and viewing of key objects
                 */
-                std::vector<arma::vec2> getSearchPoints(const message::motion::KinematicsModel& kinematicsModel, std::vector<message::vision::Ball> fixationObjects, message::behaviour::SoccerObjectPriority::SearchType sType, const message::input::Sensors& sensors);
-                std::vector<arma::vec2> getSearchPoints(const message::motion::KinematicsModel& kinematicsModel, std::vector<message::vision::Goal> fixationObjects, message::behaviour::SoccerObjectPriority::SearchType sType, const message::input::Sensors& sensors);
+                std::vector<Eigen::Vector2d> getSearchPoints(const message::motion::KinematicsModel& kinematicsModel, std::vector<message::vision::Ball> fixationObjects, message::behaviour::SoccerObjectPriority::SearchType sType, const message::input::Sensors& sensors);
+                std::vector<Eigen::Vector2d> getSearchPoints(const message::motion::KinematicsModel& kinematicsModel, std::vector<message::vision::Goal> fixationObjects, message::behaviour::SoccerObjectPriority::SearchType sType, const message::input::Sensors& sensors);
 
                 /*! @brief Combines a collection of vision objects. The screen resulting screen angular region is the bounding box of the objects
                 */
@@ -112,10 +112,10 @@ namespace module {
                 bool locBallReceived = false;
                 message::localisation::Ball lastLocBall;
 
-                std::map<message::behaviour::SoccerObjectPriority::SearchType, std::vector<arma::vec2>> searches;
+                std::map<message::behaviour::SoccerObjectPriority::SearchType, std::vector<Eigen::Vector2d>> searches;
 
                 //State variables
-                Searcher<arma::vec2> headSearcher;
+                Searcher<Eigen::Vector2d> headSearcher;
 
                 int ballPriority = 0;
                 int goalPriority = 0;
@@ -124,7 +124,7 @@ namespace module {
                 NUClear::clock::time_point lastPlanUpdate;
                 NUClear::clock::time_point timeLastObjectSeen;
 
-                arma::vec2 lastCentroid;
+                Eigen::Vector2d lastCentroid;
 
                 bool lostAndSearching = false;
                 bool lostLastTime = false;

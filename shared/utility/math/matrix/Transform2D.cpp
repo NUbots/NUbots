@@ -23,62 +23,53 @@
 
 namespace utility {
 namespace math {
-namespace matrix {
+    namespace matrix {
 
-    using utility::math::angle::normalizeAngle;
-    using utility::math::angle::vectorToBearing;
+        using utility::math::angle::normalizeAngle;
+        using utility::math::angle::vectorToBearing;
 
-    Transform2D::Transform() {
-        zeros();
+        Transform2D::Transform(const Eigen::Vector2d xy_, double angle_) {
+            xy()    = xy_;
+            angle() = angle_;
+        }
+
+        Transform2D Transform2D::lookAt(const Eigen::Vector2d from, Eigen::Vector2d to) {
+            Eigen::Vector2d vecHeading = to - from;
+            double angle               = vectorToBearing(vecHeading);
+            return {from, angle};
+        }
+
+        Transform2D Transform2D::localToWorld(const Transform2D& reference) const {
+            double cosAngle = std::cos(angle());
+            double sinAngle = std::sin(angle());
+            // translates to this + rotZ(this.angle) * reference
+            return {
+                {x() + cosAngle * reference.x() - sinAngle * reference.y(),
+                 y() + sinAngle * reference.x() + cosAngle * reference.y()},
+                angle() + reference.angle()  // do not use normalizeAngle here, causes bad things when turning! TODO:
+                                             // unsure on cause
+            };
+        }
+
+        Transform2D Transform2D::worldToLocal(const Transform2D& reference) const {
+            double cosAngle  = std::cos(angle());
+            double sinAngle  = std::sin(angle());
+            Transform2D diff = reference - *this;
+            // translates to rotZ(this.angle) * (reference - this)
+            return {{cosAngle * diff.x() + sinAngle * diff.y(), -sinAngle * diff.x() + cosAngle * diff.y()},
+                    normalizeAngle(diff.angle())};
+        }
+
+        Transform2D Transform2D::interpolate(double t, const Transform2D& target) const {
+            Transform2D result = *this + t * (target - *this);
+            result.angle()     = normalizeAngle(result.angle());
+            return result;
+        }
+
+        Transform2D Transform2D::i() const {
+            Eigen::Vector2d newDisplacement = -worldToLocal(*this).xy();
+            return Transform2D(newDisplacement, -this->angle());
+        }
     }
-
-    Transform2D::Transform(const arma::vec2 xy_, double angle_) {
-        xy() = xy_;
-        angle() = angle_;
-    }
-
-    Transform2D Transform2D::lookAt(const arma::vec2 from, arma::vec2 to) {
-        arma::vec2 vecHeading = to - from;
-        double angle = vectorToBearing(vecHeading);
-        return {from, angle};
-    }
-
-
-    Transform2D Transform2D::localToWorld(const Transform2D& reference) const {
-        double cosAngle = std::cos(angle());
-        double sinAngle = std::sin(angle());
-        // translates to this + rotZ(this.angle) * reference
-        return {
-            x() + cosAngle * reference.x() - sinAngle * reference.y(),
-            y() + sinAngle * reference.x() + cosAngle * reference.y(),
-            angle() + reference.angle() // do not use normalizeAngle here, causes bad things when turning! TODO: unsure on cause
-        };
-    }
-
-    Transform2D Transform2D::worldToLocal(const Transform2D& reference) const {
-        double cosAngle = std::cos(angle());
-        double sinAngle = std::sin(angle());
-        Transform2D diff = reference - *this;
-        // translates to rotZ(this.angle) * (reference - this)
-        return {
-            cosAngle * diff.x() + sinAngle * diff.y(),
-            -sinAngle * diff.x() + cosAngle * diff.y(),
-            normalizeAngle(diff.angle())
-        };
-    }
-
-    Transform2D Transform2D::interpolate(double t, const Transform2D& target) const {
-        Transform2D result = *this + t * (target - *this);
-        result.angle() = normalizeAngle(result.angle());
-        return result;
-    }
-
-    Transform2D Transform2D::i() const {
-        arma::vec2 newDisplacement = -worldToLocal(*this).xy();
-        return Transform2D(newDisplacement,-this->angle());
-    } 
-
-
-}
 }
 }

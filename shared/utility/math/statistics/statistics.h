@@ -12,9 +12,9 @@ namespace utility
         {
             // Calculate the mean of the data points.
             template<int n=2>
-            arma::vec::fixed<n> calculateMean(const std::vector<arma::vec::fixed<n> >& points)
+            Eigen::Matrix<double, n, 1> calculateMean(const std::vector<Eigen::Matrix<double, n, 1> >& points)
             {
-                arma::vec::fixed<n> mean;
+                Eigen::Matrix<double, n, 1> mean;
                 mean.zeros();
 
                 for (const auto& point : points)
@@ -28,15 +28,15 @@ namespace utility
             // Create a covariance matrix for all points in the window.
             // https://en.wikipedia.org/wiki/Covariance_matrix#Generalization_of_the_variance
             template<int n=2>
-            arma::mat::fixed<n, n> calculateCovarianceMatrix(const std::vector<arma::vec::fixed<n> >& points, const arma::vec::fixed<n>& mean)
+            Eigen::Matrix<double, n, n> calculateCovarianceMatrix(const std::vector<Eigen::Matrix<double, n, 1> >& points, const Eigen::Matrix<double, n, 1>& mean)
             {
-                arma::mat::fixed<n, n> covariance;
+                Eigen::Matrix<double, n, n> covariance;
                 covariance.zeros();
 
                 for (const auto& point : points)
                 {
-                    arma::vec::fixed<n> offset = point - mean;
-                    covariance += offset * offset.t();
+                    Eigen::Matrix<double, n, 1> offset = point - mean;
+                    covariance += offset * offset.transpose();
                 }
 
                 return(covariance / (points.size() - 1));
@@ -45,9 +45,9 @@ namespace utility
             // Create a correlation matrix for all points in the window.
             // https://en.wikipedia.org/wiki/Covariance_matrix#Correlation_matrix
             template<int n=2>
-            arma::mat::fixed<n, n> calculateCorrelationMatrix(const arma::mat::fixed<n, n>& covariance)
+            Eigen::Matrix<double, n, n> calculateCorrelationMatrix(const Eigen::Matrix<double, n, n>& covariance)
             {
-                arma::mat::fixed<n, n> diag = arma::diagmat(covariance);
+                Eigen::Matrix<double, n, n> diag = arma::diagmat(covariance);
                 diag.for_each(
                     [] (arma::mat::elem_type& val) -> void
                     {

@@ -39,9 +39,9 @@ namespace module {
 
         struct GoalPOI {
             GoalPOI() :  midpoint(), length() {}
-            GoalPOI(const arma::vec2 midpoint, uint length) :  midpoint(midpoint), length(length) {}
+            GoalPOI(const Eigen::Vector2d midpoint, uint length) :  midpoint(midpoint), length(length) {}
 
-            arma::vec2 midpoint;
+            Eigen::Vector2d midpoint;
             uint length;
         };
 
@@ -56,12 +56,12 @@ namespace module {
             GoalPOIModel() : line(), lengths() {}
             GoalPOIModel(const Line& line, const std::array<uint, 2>& lengths) : line(line), lengths(lengths) {}
 
-            bool regenerate(const std::array<DataPoint, REQUIRED_POINTS>& pts, const arma::vec2& horizonTangent, const double& maxAngle) {
+            bool regenerate(const std::array<DataPoint, REQUIRED_POINTS>& pts, const Eigen::Vector2d& horizonTangent, const double& maxAngle) {
                 line.setFromPoints(pts[0].midpoint, pts[1].midpoint);
                 lengths[0] = pts[0].length;
                 lengths[1] = pts[1].length;
 
-                return arma::dot(line.normal, horizonTangent) > maxAngle;
+                return line.normal.dot(horizonTangent) > maxAngle;
             };
 
             double calculateError(const DataPoint& p) const {
@@ -86,7 +86,7 @@ namespace module {
                 We first generate segments above and below that are 2x the width of the segment
              */
 
-            Line horizon(convert<double, 2>(classifiedImage.horizon.normal), classifiedImage.horizon.distance);
+            Line horizon(classifiedImage.horizon.normal, classifiedImage.horizon.distance);
 
             // Get our goal segments
             std::vector<GoalPOI> points;
@@ -125,7 +125,7 @@ namespace module {
 
             std::vector<ClassifiedImage::Segment> newSegments;
 
-            std::vector<std::pair<arma::ivec2, arma::ivec2>> goalLines;
+            std::vector<std::pair<Eigen::Vector2i, Eigen::Vector2i>> goalLines;
             for(auto& model : models) {
 
                 double lineMid = 0;
@@ -156,15 +156,15 @@ namespace module {
                 for(auto d = minTangent; d <= maxTangent; d += jump) {
 
                     // Get our centre point
-                    arma::vec2 p = model.model.line.pointFromTangentialDistance(d);
+                    Eigen::Vector2d p = model.model.line.pointFromTangentialDistance(d);
 
                     if((p[1] > int(image.dimensions[1]) - 1) || (p[1] < 0)) {
                         continue;
                     }
 
                     // Start and end
-                    arma::ivec2 s({ std::max(0, int(std::round(p[0] - lineHalfWidth))), int(std::round(p[1]))});
-                    arma::ivec2 e({ std::min(int(image.dimensions[0]) - 1, int(std::round(p[0] + lineHalfWidth))), int(std::round(p[1]))});
+                    Eigen::Vector2i s({ std::max(0, int(std::round(p[0] - lineHalfWidth))), int(std::round(p[1]))});
+                    Eigen::Vector2i e({ std::min(int(image.dimensions[0]) - 1, int(std::round(p[0] + lineHalfWidth))), int(std::round(p[1]))});
 
                     if(e[0] > 0) {
                         auto segments = quex->classify(image, lut, s, e);

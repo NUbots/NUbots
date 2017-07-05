@@ -35,27 +35,27 @@ namespace autocal {
 		// std::cout << "Loading " << m.n_cols << " rigid bodies" << std::endl;
 		// std::cout << m << std::endl;
 		for(int n = 0; n < m.n_cols; n++){
-			arma::vec data = m.col(n);
+			Eigen::VectorXd data = m.col(n);
 
 			RigidBody r;
-			
-			arma::vec3 pos = data.rows(1,3);
+
+			Eigen::Vector3d pos = data.rows(1,3);
 			Rotation3D rot;
 			int start = 4;
 			for(int i = 0; i < 3; i++){
-				rot.row(i) = data.rows(start + 3 * i, start + 3 * i + 2).t();
+				rot.row(i) = data.rows(start + 3 * i, start + 3 * i + 2).transpose();
 			}
 			//Change back to mocap coords from nubots coords (sigh...)
 			if(correctForAutocalibrationCoordinateSystem){
-				r.pose.translation() = arma::vec3{-pos[1],pos[2],-pos[0]};
+				r.pose.translation() = Eigen::Vector3d{-pos[1],pos[2],-pos[0]};
 			} else {
 				r.pose.translation() = pos;
 			}
-			
+
 			if(correctForAutocalibrationCoordinateSystem){
 				UnitQuaternion q(rot);
 				//Change back to mocap coords from nubots coords (sigh...)
-				UnitQuaternion q_(arma::vec4{
+				UnitQuaternion q_(Eigen::Vector4d{
 					 q.kX(),
 					-q.kZ(),
 					 q.kW(),
@@ -79,7 +79,7 @@ namespace autocal {
 				std::cout << __FILE__ << " - " << __LINE__ << "Warning: nan data not loaded for RB " << int(data[0]) << std::endl;
 				continue;
 			}
-			
+
 			if(allowedIDs.empty() //empty allowed IDs means allow any
 			|| allowedIDs.count(int(data[0])) > 0){
 				f.rigidBodies[int(data[0])] = r;
@@ -92,7 +92,7 @@ namespace autocal {
 		//Get last frame at current time point
 		return getFrame(getTimeStamp(t));
 	}
-	
+
 	MocapStream::Frame MocapStream::getInterpolatedFrame(const TimeStamp& t){
 		//Get last frame at current time point
 		if(simulated) return getSimulatedFrame(t);
@@ -110,7 +110,7 @@ namespace autocal {
 			return Frame::interpolate(lb->second, ub->second, alpha);
 		}
 	}
-	
+
 	MocapStream::Frame MocapStream::getFrame(const TimeStamp& t){
 		//Get last frame at current time point
 		if(simulated) return getSimulatedFrame(t);
@@ -149,12 +149,12 @@ namespace autocal {
 		//Get last frame at current time point
 		return stream->upper_bound(t);
 	}
-	
+
 	std::map<TimeStamp,MocapStream::Frame>::iterator MocapStream::getLowerBoundIter(const TimeStamp& t){
 		//Get last frame at current time point
 		return stream->lower_bound(t);
 	}
-	
+
 	bool MocapStream::loadMocapData(std::string folder_path, const TimeStamp& start_time, const std::chrono::system_clock::time_point& end_time, const std::set<int>& allowedIDs){
 		std::cout << "Loading data ..." << std::endl;
 
@@ -170,7 +170,7 @@ namespace autocal {
 		TimeStamp min_loaded = max;
 
 		while ((file = readdir(dir)) != NULL){
-			
+
 			std::string filename = file->d_name;
 			// std::cout << "Filename = " << filename << std::endl;
 			TimeStamp timestamp;
@@ -187,7 +187,7 @@ namespace autocal {
 				path << folder_path << "/" << filename;
 				success = success && frame.load(path.str(), arma::arma_binary);
 
-				if(success){ 
+				if(success){
 					//Do not store frame if it has no info
 					if(frame.n_cols!=0){
 						(*stream)[timestamp] = createFrame(frame, allowedIDs);
@@ -203,8 +203,8 @@ namespace autocal {
 		}
 		if(max != min_loaded && min != max_loaded){
 			float period_sec = float(max_loaded - min_loaded) * 1e-6;
-			std::cout << "Loaded data from " << min_loaded << " to " << max_loaded << ". i.e. " 
-					  << int(period_sec) << " seconds at " << stream->size() / period_sec << "Hz measurement frequency" << std::endl; 
+			std::cout << "Loaded data from " << min_loaded << " to " << max_loaded << ". i.e. "
+					  << int(period_sec) << " seconds at " << stream->size() / period_sec << "Hz measurement frequency" << std::endl;
 		}
 
 	   	(void)closedir(dir);
@@ -228,14 +228,14 @@ namespace autocal {
 		}
 		(*stream)[t].rigidBodies[id] = RigidBody({pose});
 		RigidBody& r = (*stream)[t].rigidBodies[id];
-		
-		arma::vec3 pos = r.pose.translation();
+
+		Eigen::Vector3d pos = r.pose.translation();
 		Rotation3D rot = r.pose.rotation();
 		//Change back to mocap coords from nubots coords (sigh...)
 		if(correctCoordinateSystem){
 			UnitQuaternion q(rot);
 			//Change back to mocap coords from nubots coords (sigh...)
-			UnitQuaternion q_(arma::vec4{
+			UnitQuaternion q_(Eigen::Vector4d{
 				 q.kX(),
 				-q.kZ(),
 				 q.kW(),
@@ -243,7 +243,7 @@ namespace autocal {
 				});
 			//Turn back into rotation
 			r.pose.rotation() = Rotation3D(q_);
-			r.pose.translation() = arma::vec3{-pos[1],pos[2],-pos[0]};
+			r.pose.translation() = Eigen::Vector3d{-pos[1],pos[2],-pos[0]};
 		}
 
 		if(LHInput){
@@ -254,9 +254,9 @@ namespace autocal {
 
 	std::map<MocapStream::RigidBodyID, Transform3D> MocapStream::getCompleteStates(TimeStamp now){
 		std::map<MocapStream::RigidBodyID, Transform3D> states;
-		
+
 		if(stream->size() != 0){
-			
+
 			Frame latestFrame = getFrame(now);
 
 			for (auto& rb : latestFrame.rigidBodies){
@@ -295,21 +295,21 @@ namespace autocal {
 
 		int lag_milliseconds = simulationParameters.latency_ms;
 		now -= lag_milliseconds * 1000;
-		
+
 		if(parentStream->size() != 0){
-			
+
 			MocapStream::Frame latestFrame = getParentFrame(now);
 			for (auto& key : simulationIDs){
 				int artificialID = key.first;
 				int derivedID = key.second;
-				
+
 				if(simWorldTransform.count(key) == 0){
 					simWorldTransform[key] = Transform3D::getRandomU(1,0.1);
-					// simWorldTransform[key] = arma::eye(4,4);
+					// simWorldTransform[key] = Eigen::Matrix4d::Identity();
 					//  Transform3D({ 0.1040,  -0.0023,  -0.9946,  -0.3540,
 					// 								      -0.1147,   0.9933,  -0.0143,  -0.9437,
 					// 								       0.9879,   0.1156,   0.1030,   1.2106,
-					// 								            0,        0,        0,   1.0000}).t();//transpose because column major reading
+					// 								            0,        0,        0,   1.0000}).transpose();//transpose because column major reading
 					std::cout << "simWorldTransform = \n" << simWorldTransform[key] << std::endl;
 				}
 				if(simLocalTransform.count(key) == 0){
@@ -320,16 +320,16 @@ namespace autocal {
 
 				//Noise:
 				Transform3D localNoise = Transform3D::getRandomN(simulationParameters.noise.angle_stddev ,simulationParameters.noise.disp_stddev);
-				// std::cout << "noise = " << arma::vec4(localNoise * arma::vec4({0,0,0,1})).t() << std::endl;
+				// std::cout << "noise = " << Eigen::Vector4d(localNoise * Eigen::Vector4d(0,0,0,1)).transpose() << std::endl;
 				Transform3D globalNoise = Transform3D::getRandomN(simulationParameters.noise.angle_stddev ,simulationParameters.noise.disp_stddev);
 				// Transform3D globalNoise = Transform3D::getRandomN(0.310524198 ,0.052928682);
-				
+
 				Transform3D transform = simWorldTransform[key] * latestFrame.rigidBodies[derivedID].pose * globalNoise * simLocalTransform[key] * localNoise;
-				
+
 				//Debugging
-				// std::cout << "transform = " << transform.translation().t() << std::endl;
+				// std::cout << "transform = " << transform.translation().transpose() << std::endl;
 				// transform.translation() = arma::vec{0,0,-1};
-				
+
 				frame.rigidBodies[artificialID] = RigidBody();
 				frame.rigidBodies[artificialID].pose = transform;
 			}
@@ -343,8 +343,8 @@ namespace autocal {
 
 	void MocapStream::transformLHtoRH(Transform3D& T){
 		if(LHInput){
-			Transform3D L = Transform3D::createScale(arma::vec3({-1,1,1}));
-			T = L * T * L;//last L is actually L.i() = L;
+			Transform3D L = Transform3D::createScale(Eigen::Vector3d(-1,1,1));
+			T = L * T * L;//last L is actually L.inverse() = L;
 		}
 	}
 

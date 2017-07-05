@@ -37,7 +37,7 @@ namespace module {
 namespace localisation {
 
 std::ostream & operator<<(std::ostream &os, const RobotHypothesis& h) {
-    arma::vec::fixed<robot::RobotModel::size> est = h.filter_.get();
+    Eigen::Matrix<double, robot::RobotModel::size, 1> est = h.filter_.get();
 
     return os
         << "{ "
@@ -88,11 +88,11 @@ double RobotHypothesis::MeasurementUpdate(
 
     for (auto& measurement : observed_object.measurements) {
         // Spherical from ground:
-        arma::vec3 measured_pos = measurement.position;
-        arma::mat33 cov = measurement.error;
+        Eigen::Vector3d measured_pos = measurement.position;
+        Eigen::Matrix3d cov = measurement.error;
 
-        arma::vec2 actual_2d = actual_object.location();
-        arma::vec3 actual_pos = arma::vec3({actual_2d(0), actual_2d(1), 0});
+        Eigen::Vector2d actual_2d = actual_object.location();
+        Eigen::Vector3d actual_pos = Eigen::Vector3d(actual_2d(0), actual_2d(1), 0);
 
 
         quality *= filter_.measurementUpdate(measured_pos, cov, actual_pos, *(observed_object.sensors));
@@ -118,12 +118,12 @@ double RobotHypothesis::MeasurementUpdate(
     // };
 
     // // Use a dot product to calculate heading distance:
-    // arma::vec unit_a = arma::normalise(obv_a.measurements[0].position.rows(0, 1));
-    // arma::vec unit_b = arma::normalise(obv_b.measurements[0].position.rows(0, 1));
-    // double heading_diff = utility::math::angle::acos_clamped(arma::dot(arma::vec(unit_a), arma::vec(unit_b)));
+    // Eigen::VectorXd unit_a = obv_a.measurements[0].position.rows(0, 1).normalize();
+    // Eigen::VectorXd unit_b = obv_b.measurements[0].position.rows(0, 1).normalize();
+    // double heading_diff = utility::math::angle::acos_clamped(unit_a.dot(unit_b));
 
-    // arma::vec measurement = { std::abs(heading_diff) };
-    // arma::mat cov = arma::eye(1, 1) * 0.1; // TODO: Calculate correct covariance
+    // Eigen::VectorXd measurement = { std::abs(heading_diff) };
+    // arma::mat cov = Eigen::Matrix<double, 1, 1>::Identity() * 0.1; // TODO: Calculate correct covariance
 
     // double quality = filter_.measurementUpdate(measurement, cov, actual_positions, *(obv_a.sensors));
 
@@ -290,9 +290,9 @@ void MultiModalRobotModel::PruneModels() {
 bool MultiModalRobotModel::ModelsAreSimilar(
     const std::unique_ptr<RobotHypothesis> &model_a,
     const std::unique_ptr<RobotHypothesis> &model_b) {
-    arma::vec::fixed<robot::RobotModel::size> diff = model_a->GetEstimate() - model_b->GetEstimate();
+    Eigen::Matrix<double, robot::RobotModel::size, 1> diff = model_a->GetEstimate() - model_b->GetEstimate();
 
-    double translation_dist = arma::norm(diff.rows(0, 1), 2);
+    double translation_dist = diff.rows(0, 1).norm();
 
     // // Radial coords
     // auto heading_dist = std::abs(utility::math::angle::normalizeAngle(diff[kHeading]));

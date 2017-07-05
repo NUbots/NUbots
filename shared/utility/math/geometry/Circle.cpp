@@ -21,77 +21,78 @@
 
 namespace utility {
 namespace math {
-namespace geometry {
+    namespace geometry {
 
-    Circle::Circle() : radius(0.0), radiusSq(0.0), centre(arma::fill::zeros) {
-    }
+        Circle::Circle() : radius(0.0), radiusSq(0.0), centre(Eigen::Vector2d::Zero()) {}
 
 
-    Circle::Circle(const double& radius, const arma::vec2& centre)
-            : radius(radius), radiusSq(radius * radius), centre(centre) {
-    }
+        Circle::Circle(const double& radius, const Eigen::Vector2d& centre)
+            : radius(radius), radiusSq(radius * radius), centre(centre) {}
 
-    Circle::Circle(const arma::vec2& a, const arma::vec2& b, const arma::vec2& c, const double tolerance)
-            : radius(0.0), radiusSq(0.0), centre(arma::fill::zeros) {
-        setFromPoints(std::forward<const arma::vec2&>(a), std::forward<const arma::vec2&>(b), std::forward<const arma::vec2&>(c),tolerance);
-    }
-
-    bool Circle::setFromPoints(const arma::vec2& a, const arma::vec2& b, const arma::vec2& c, const double tolerance) {
-
-        const arma::vec2 ab = a - b;
-        const arma::vec2 bc = b - c;
-        double det = ((ab[0] * bc[1]) - (bc[0] * ab[1]));
-
-        if (std::abs(det) < tolerance) {
-            return false;
+        Circle::Circle(const Eigen::Vector2d& a,
+                       const Eigen::Vector2d& b,
+                       const Eigen::Vector2d& c,
+                       const double tolerance)
+            : radius(0.0), radiusSq(0.0), centre(Eigen::Vector2d::Zero()) {
+            setFromPoints(std::forward<const Eigen::Vector2d&>(a),
+                          std::forward<const Eigen::Vector2d&>(b),
+                          std::forward<const Eigen::Vector2d&>(c),
+                          tolerance);
         }
-        det = 1.0 / det;
 
-        double b_len_sqr = arma::dot(b, b);
+        bool Circle::setFromPoints(const Eigen::Vector2d& a,
+                                   const Eigen::Vector2d& b,
+                                   const Eigen::Vector2d& c,
+                                   const double tolerance) {
 
-        double ab_norm = (arma::dot(a, a) - b_len_sqr) * 0.5;
-        double bc_norm = (b_len_sqr - arma::dot(c, c)) * 0.5;
+            const Eigen::Vector2d ab = a - b;
+            const Eigen::Vector2d bc = b - c;
+            double det               = ((ab[0] * bc[1]) - (bc[0] * ab[1]));
+
+            if (std::abs(det) < tolerance) {
+                return false;
+            }
+            det = 1.0 / det;
+
+            double b_len_sqr = b.dot(b);
+
+            double ab_norm = (a.dot(a) - b_len_sqr) * 0.5;
+            double bc_norm = (b_len_sqr - c.dot(c)) * 0.5;
 
 
-        centre[0] = ((ab_norm * bc[1]) - (bc_norm * ab[1])) * det;
-        centre[1] = ((ab[0] * bc_norm) - (bc[0] * ab_norm)) * det;
+            centre[0] = ((ab_norm * bc[1]) - (bc_norm * ab[1])) * det;
+            centre[1] = ((ab[0] * bc_norm) - (bc[0] * ab_norm)) * det;
 
-        radiusSq = arma::accu(arma::square(a - centre));
-        radius = std::sqrt(radiusSq);
+            radiusSq = (a - centre).squaredNorm();
+            radius   = std::sqrt(radiusSq);
 
-        return true;
+            return true;
+        }
+
+        double Circle::distanceToPoint(const Eigen::Vector2d& point) const {
+            return (point - centre).norm() - radius;
+        }
+
+        double Circle::squaresDifference(const Eigen::Vector2d& point) const {
+            return (point - centre).squaredNorm() - radiusSq;
+        }
+
+        Eigen::Vector2d Circle::orthogonalProjection(const Eigen::Vector2d& point) const {
+            return (point - centre).normalized() * radius + centre;
+        }
+
+        Eigen::Vector2d Circle::getEdgePoints(uint y) const {
+            auto edgePoints = getEdgePoints(double(y));
+            return {std::round(edgePoints[0]), std::round(edgePoints[1])};
+        }
+
+        Eigen::Vector2d Circle::getEdgePoints(double y) const {
+            // find the min and max x points on the circle for each given y
+            // uses the general equation of a circle and solves for x
+            double a = y - centre[1];
+            double b = std::sqrt(radius * radius - a * a);
+            return {centre[0] - b, centre[0] + b};
+        }
     }
-
-    double Circle::distanceToPoint(const arma::vec2& point) const {
-        return arma::norm(point - centre) - radius;
-    }
-
-    double Circle::squaresDifference(const arma::vec2& point) const {
-        return arma::accu(arma::square(point - centre)) - radiusSq;
-    }
-
-    arma::vec2 Circle::orthogonalProjection(const arma::vec2& point) const {
-        return arma::normalise(point - centre) * radius + centre;
-    }
-
-    arma::vec2 Circle::getEdgePoints(uint y) const {
-        auto edgePoints = getEdgePoints(double(y));
-        return {
-            std::round(edgePoints[0]),
-            std::round(edgePoints[1])
-        };
-    }
-
-    arma::vec2 Circle::getEdgePoints(double y) const {
-        // find the min and max x points on the circle for each given y
-        // uses the general equation of a circle and solves for x
-        double a = y - centre[1];
-        double b = std::sqrt(radius * radius - a * a);
-        return {
-            centre[0] - b,
-            centre[0] + b
-        };
-    }
-}
 }
 }

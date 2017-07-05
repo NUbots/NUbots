@@ -33,8 +33,8 @@ namespace module {
 namespace localisation {
 namespace ball {
 
-arma::vec::fixed<BallModel::size> BallModel::ApplyVelocity(
-    const arma::vec::fixed<BallModel::size>& state, double deltaT) {
+Eigen::Matrix<double, BallModel::size, 1> BallModel::ApplyVelocity(
+    const Eigen::Matrix<double, BallModel::size, 1>& state, double deltaT) {
     auto result = state;
 
     // Apply ball velocity
@@ -46,14 +46,14 @@ arma::vec::fixed<BallModel::size> BallModel::ApplyVelocity(
     return result;
 }
 
-arma::vec::fixed<BallModel::size> BallModel::timeUpdate(
-    const arma::vec::fixed<BallModel::size>& state, double deltaT) {
+Eigen::Matrix<double, BallModel::size, 1> BallModel::timeUpdate(
+    const Eigen::Matrix<double, BallModel::size, 1>& state, double deltaT) {
 
     return ApplyVelocity(state, deltaT);
 }
 
-// arma::vec::fixed<BallModel::size> BallModel::timeUpdate(
-//     const arma::vec::fixed<BallModel::size>& state, double deltaT,
+// Eigen::Matrix<double, BallModel::size, 1> BallModel::timeUpdate(
+//     const Eigen::Matrix<double, BallModel::size, 1>& state, double deltaT,
 //     const FakeOdometry& odom) {
 
 //     auto result = ApplyVelocity(state, deltaT);
@@ -62,7 +62,7 @@ arma::vec::fixed<BallModel::size> BallModel::timeUpdate(
 //     result.rows(kX, kY) -= odom.torso_displacement;
 
 //     // Rotate ball_pos by -torso_rotation.
-//     arma::mat22 rot = rotationMatrix(-odom.torso_rotation);
+//     Eigen::Matrix2d rot = rotationMatrix(-odom.torso_rotation);
 //     result.rows(kX, kY) = rot * result.rows(kX, kY);
 //     result.rows(kVx, kVy) = rot * result.rows(kVx, kVy);
 
@@ -70,34 +70,34 @@ arma::vec::fixed<BallModel::size> BallModel::timeUpdate(
 // }
 
 /// Return the predicted observation of an object at the given position
-arma::vec BallModel::predictedObservation(
-    const arma::vec::fixed<BallModel::size>& state, double ballAngle) {
+Eigen::VectorXd BallModel::predictedObservation(
+    const Eigen::Matrix<double, BallModel::size, 1>& state, double ballAngle) {
 
-    arma::vec3 ball_pos = arma::vec3({state(kX), state(kY), cfg_.ballHeight});
+    Eigen::Vector3d ball_pos = Eigen::Vector3d(state(kX), state(kY), cfg_.ballHeight);
     auto obs = SphericalRobotObservation({0, 0}, 0, ball_pos);
     obs(1) -= ballAngle;
 
-    arma::vec obsVel = arma::join_cols(obs,state.rows(kVx,kVy));
+    Eigen::VectorXd obsVel = arma::join_cols(obs,state.rows(kVx,kVy));
     return obsVel;
 }
 
-arma::vec BallModel::observationDifference(const arma::vec& a,
+Eigen::VectorXd BallModel::observationDifference(const arma::vec& a,
                                            const arma::vec& b){
-    arma::vec result = a - b;
+    Eigen::VectorXd result = a - b;
     // result(1) = utility::math::angle::normalizeAngle(result(1));
     // result(2) = utility::math::angle::normalizeAngle(result(2));
     return result;
 }
 
-arma::vec::fixed<BallModel::size> BallModel::limitState(
-    const arma::vec::fixed<BallModel::size>& state) {
+Eigen::Matrix<double, BallModel::size, 1> BallModel::limitState(
+    const Eigen::Matrix<double, BallModel::size, 1>& state) {
     auto new_state = state;
-    new_state.rows(kVx,kVy) = arma::vec({0,0});
+    new_state.rows(kVx,kVy) = Eigen::Vector2d(0,0);
     return new_state;
 }
 
-arma::mat::fixed<BallModel::size, BallModel::size> BallModel::processNoise() {
-    arma::mat noise = arma::eye(BallModel::size, BallModel::size);
+Eigen::Matrix<double, BallModel::size, BallModel::size> BallModel::processNoise() {
+    Eigen::Matrix<double, BallModel::size, BallModel::size> noise = Eigen::Matrix<double, BallModel::size, BallModel::size>::Identity();
 
     noise(kX, kX) *= cfg_.processNoisePositionFactor;
     noise(kY, kY) *= cfg_.processNoisePositionFactor;

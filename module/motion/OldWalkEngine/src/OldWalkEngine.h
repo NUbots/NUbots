@@ -132,9 +132,9 @@ namespace motion {
         // Difference between current velocity and commanded velocity
         Transform2D velocityDifference;
         // zmp expoential coefficients aXP aXN aYP aYN
-        arma::vec4 zmpCoefficients;
+        Eigen::Vector4d zmpCoefficients;
         // zmp params m1X, m2X, m1Y, m2Y
-        arma::vec4 zmpParams;
+        Eigen::Vector4d zmpParams;
         // The leg that is 'swinging' in the step, opposite of the support foot
         LimbID swingLeg;
         // The last foot goal rotation
@@ -148,10 +148,10 @@ namespace motion {
         bool emitLocalisation;
 
         double stanceLimitY2;
-        arma::mat::fixed<3,2> stepLimits;
-        arma::mat::fixed<3,2> velocityLimits;
-        arma::vec3 accelerationLimits;
-        arma::vec3 accelerationLimitsHigh;
+        Eigen::Matrix<double, 3, 2> stepLimits;
+        Eigen::Matrix<double, 3, 2> velocityLimits;
+        Eigen::Vector3d accelerationLimits;
+        Eigen::Vector3d accelerationLimitsHigh;
         double velocityHigh;
         double accelerationTurningFactor;
         double bodyHeight;
@@ -165,14 +165,14 @@ namespace motion {
         float step_height_fast_fraction;
         double phase1Single;
         double phase2Single;
-        arma::vec2 footOffset;
+        Eigen::Vector2d footOffset;
         // standard offset
         Transform2D uLRFootOffset;
         // arm poses
-        arma::vec3 qLArmStart;
-        arma::vec3 qLArmEnd;
-        arma::vec3 qRArmStart;
-        arma::vec3 qRArmEnd;
+        Eigen::Vector3d qLArmStart;
+        Eigen::Vector3d qLArmEnd;
+        Eigen::Vector3d qRArmStart;
+        Eigen::Vector3d qRArmEnd;
         LimbID swingLegInitial = LimbID::LEFT_LEG;
 
         double balanceEnabled;
@@ -198,12 +198,12 @@ namespace motion {
         message::motion::KinematicsModel kinematicsModel;
 
 
-        /*arma::vec4 ankleImuParamX;
-        arma::vec4 ankleImuParamY;
-        arma::vec4 kneeImuParamX;
-        arma::vec4 hipImuParamY;
-        arma::vec4 armImuParamX;
-        arma::vec4 armImuParamY;
+        /*Eigen::Vector4d ankleImuParamX;
+        Eigen::Vector4d ankleImuParamY;
+        Eigen::Vector4d kneeImuParamX;
+        Eigen::Vector4d hipImuParamY;
+        Eigen::Vector4d armImuParamX;
+        Eigen::Vector4d armImuParamY;
 
         double velFastForward;
         double velFastTurn;
@@ -261,14 +261,14 @@ namespace motion {
         /**
          * Solve the ZMP equation
          */
-        arma::vec2 zmpSolve(double zs, double z1, double z2, double x1, double x2, double phase1Single, double phase2Single, double stepTime, double zmpTime);
+        Eigen::Vector2d zmpSolve(double zs, double z1, double z2, double x1, double x2, double phase1Single, double phase2Single, double stepTime, double zmpTime);
 
         /**
          * Uses ZMP to determine the torso position
          *
          * @return The torso position in Transform2D
          */
-        Transform2D zmpCom(double phase, arma::vec4 zmpCoefficients, arma::vec4 zmpParams, double stepTime, double zmpTime, double phase1Zmp, double phase2Zmp, Transform2D uSupport, Transform2D uLeftFootDestination, Transform2D uLeftFootSource, Transform2D uRightFootDestination, Transform2D uRightFootSource);
+        Transform2D zmpCom(double phase, Eigen::Vector4d zmpCoefficients, Eigen::Vector4d zmpParams, double stepTime, double zmpTime, double phase1Zmp, double phase2Zmp, Transform2D uSupport, Transform2D uLeftFootDestination, Transform2D uLeftFootSource, Transform2D uRightFootDestination, Transform2D uRightFootSource);
 
         /**
          * This is an easing function that returns 3 values {x,y,z} with the range [0,1]
@@ -281,7 +281,7 @@ namespace motion {
          * @param phase1Single The phase time between [0,1] to start the step. A value of 0.1 means the step will not start until phase is >= 0.1
          * @param phase2Single The phase time between [0,1] to end the step. A value of 0.9 means the step will end when phase >= 0.9
          */
-        arma::vec3 footPhase(double phase, double phase1Single, double phase2Single);
+        Eigen::Vector3d footPhase(double phase, double phase1Single, double phase2Single);
 
         /**
          * @return get a unix timestamp (in decimal seconds that are accurate to the microsecond)

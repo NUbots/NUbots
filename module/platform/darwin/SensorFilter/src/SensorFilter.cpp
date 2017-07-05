@@ -120,20 +120,20 @@ namespace module {
 
                     // Foot load sensor config
                     leftFootDown = DarwinVirtualLoadSensor(
-                        config["foot_load_sensor"]["hidden_layer"]["weights"].as<arma::mat>()
-                      , config["foot_load_sensor"]["hidden_layer"]["bias"].as<arma::vec>()
-                      , config["foot_load_sensor"]["output_layer"]["weights"].as<arma::mat>()
-                      , config["foot_load_sensor"]["output_layer"]["bias"].as<arma::vec>()
+                        config["foot_load_sensor"]["hidden_layer"]["weights"].as<Expression>()
+                      , config["foot_load_sensor"]["hidden_layer"]["bias"].as<Expression>()
+                      , config["foot_load_sensor"]["output_layer"]["weights"].as<Expression>()
+                      , config["foot_load_sensor"]["output_layer"]["bias"].as<Expression>()
                       , config["foot_load_sensor"]["noise_factor"].as<double>()
                       , config["foot_load_sensor"]["certainty_threshold"].as<double>()
                       , config["foot_load_sensor"]["uncertainty_threshold"].as<double>()
                     );
 
                     rightFootDown = DarwinVirtualLoadSensor(
-                        config["foot_load_sensor"]["hidden_layer"]["weights"].as<arma::mat>()
-                      , config["foot_load_sensor"]["hidden_layer"]["bias"].as<arma::vec>()
-                      , config["foot_load_sensor"]["output_layer"]["weights"].as<arma::mat>()
-                      , config["foot_load_sensor"]["output_layer"]["bias"].as<arma::vec>()
+                        config["foot_load_sensor"]["hidden_layer"]["weights"].as<Expression>()
+                      , config["foot_load_sensor"]["hidden_layer"]["bias"].as<Expression>()
+                      , config["foot_load_sensor"]["output_layer"]["weights"].as<Expression>()
+                      , config["foot_load_sensor"]["output_layer"]["bias"].as<Expression>()
                       , config["foot_load_sensor"]["noise_factor"].as<double>()
                       , config["foot_load_sensor"]["certainty_threshold"].as<double>()
                       , config["foot_load_sensor"]["uncertainty_threshold"].as<double>()
@@ -141,25 +141,25 @@ namespace module {
 
                     // Motion filter config
                     // Update our velocity timestep dekay
-                    this->config.motionFilter.velocityDecay    = config["motion_filter"]["update"]["velocity_decay"].as<arma::vec3>();
+                    this->config.motionFilter.velocityDecay    = config["motion_filter"]["update"]["velocity_decay"].as<Expression>();
                     motionFilter.model.timeUpdateVelocityDecay = this->config.motionFilter.velocityDecay;
 
                     // Update our measurement noises
-                    this->config.motionFilter.noise.measurement.accelerometer    = arma::diagmat(config["motion_filter"]["noise"]["measurement"]["accelerometer"].as<arma::vec3>());
-                    this->config.motionFilter.noise.measurement.accelerometerMagnitude    = arma::diagmat(config["motion_filter"]["noise"]["measurement"]["accelerometer_magnitude"].as<arma::vec3>());
-                    this->config.motionFilter.noise.measurement.gyroscope        = arma::diagmat(config["motion_filter"]["noise"]["measurement"]["gyroscope"].as<arma::vec3>());
-                    this->config.motionFilter.noise.measurement.footUpWithZ      = arma::diagmat(config["motion_filter"]["noise"]["measurement"]["foot_up_with_z"].as<arma::vec4>());
-                    this->config.motionFilter.noise.measurement.flatFootOdometry = arma::diagmat(config["motion_filter"]["noise"]["measurement"]["flat_foot_odometry"].as<arma::vec3>());
-                    this->config.motionFilter.noise.measurement.flatFootOrientation = arma::diagmat(config["motion_filter"]["noise"]["measurement"]["flat_foot_orientation"].as<arma::vec4>());
+                    this->config.motionFilter.noise.measurement.accelerometer    = arma::diagmat(config["motion_filter"]["noise"]["measurement"]["accelerometer"].as<Expression>());
+                    this->config.motionFilter.noise.measurement.accelerometerMagnitude    = arma::diagmat(config["motion_filter"]["noise"]["measurement"]["accelerometer_magnitude"].as<Expression>());
+                    this->config.motionFilter.noise.measurement.gyroscope        = arma::diagmat(config["motion_filter"]["noise"]["measurement"]["gyroscope"].as<Expression>());
+                    this->config.motionFilter.noise.measurement.footUpWithZ      = arma::diagmat(config["motion_filter"]["noise"]["measurement"]["foot_up_with_z"].as<Expression>());
+                    this->config.motionFilter.noise.measurement.flatFootOdometry = arma::diagmat(config["motion_filter"]["noise"]["measurement"]["flat_foot_odometry"].as<Expression>());
+                    this->config.motionFilter.noise.measurement.flatFootOrientation = arma::diagmat(config["motion_filter"]["noise"]["measurement"]["flat_foot_orientation"].as<Expression>());
 
                     // Update our process noises
-                    this->config.motionFilter.noise.process.position           = config["motion_filter"]["noise"]["process"]["position"].as<arma::vec3>();
-                    this->config.motionFilter.noise.process.velocity           = config["motion_filter"]["noise"]["process"]["velocity"].as<arma::vec3>();
-                    this->config.motionFilter.noise.process.rotation           = config["motion_filter"]["noise"]["process"]["rotation"].as<arma::vec4>();
-                    this->config.motionFilter.noise.process.rotationalVelocity = config["motion_filter"]["noise"]["process"]["rotational_velocity"].as<arma::vec3>();
+                    this->config.motionFilter.noise.process.position           = config["motion_filter"]["noise"]["process"]["position"].as<Expression>();
+                    this->config.motionFilter.noise.process.velocity           = config["motion_filter"]["noise"]["process"]["velocity"].as<Expression>();
+                    this->config.motionFilter.noise.process.rotation           = config["motion_filter"]["noise"]["process"]["rotation"].as<Expression>();
+                    this->config.motionFilter.noise.process.rotationalVelocity = config["motion_filter"]["noise"]["process"]["rotational_velocity"].as<Expression>();
 
                     // Set our process noise in our filter
-                    arma::vec::fixed<MotionModel::size> processNoise;
+                    Eigen::Matrix<double, MotionModel::size, 1> processNoise;
                     processNoise.rows(MotionModel::PX, MotionModel::PZ) = this->config.motionFilter.noise.process.position;
                     processNoise.rows(MotionModel::VX, MotionModel::VZ) = this->config.motionFilter.noise.process.velocity;
                     processNoise.rows(MotionModel::QW, MotionModel::QZ) = this->config.motionFilter.noise.process.rotation;
@@ -167,24 +167,24 @@ namespace module {
                     motionFilter.model.processNoiseMatrix = arma::diagmat(processNoise);
 
                     // Update our mean configs and if it changed, reset the filter
-                    this->config.motionFilter.initial.mean.position                 = config["motion_filter"]["initial"]["mean"]["position"].as<arma::vec3>();
-                    this->config.motionFilter.initial.mean.velocity                 = config["motion_filter"]["initial"]["mean"]["velocity"].as<arma::vec3>();
-                    this->config.motionFilter.initial.mean.rotation                 = config["motion_filter"]["initial"]["mean"]["rotation"].as<arma::vec4>();
-                    this->config.motionFilter.initial.mean.rotationalVelocity       = config["motion_filter"]["initial"]["mean"]["rotational_velocity"].as<arma::vec3>();
+                    this->config.motionFilter.initial.mean.position                 = config["motion_filter"]["initial"]["mean"]["position"].as<Expression>();
+                    this->config.motionFilter.initial.mean.velocity                 = config["motion_filter"]["initial"]["mean"]["velocity"].as<Expression>();
+                    this->config.motionFilter.initial.mean.rotation                 = config["motion_filter"]["initial"]["mean"]["rotation"].as<Expression>();
+                    this->config.motionFilter.initial.mean.rotationalVelocity       = config["motion_filter"]["initial"]["mean"]["rotational_velocity"].as<Expression>();
 
-                    this->config.motionFilter.initial.covariance.position           = config["motion_filter"]["initial"]["covariance"]["position"].as<arma::vec3>();
-                    this->config.motionFilter.initial.covariance.velocity           = config["motion_filter"]["initial"]["covariance"]["velocity"].as<arma::vec3>();
-                    this->config.motionFilter.initial.covariance.rotation           = config["motion_filter"]["initial"]["covariance"]["rotation"].as<arma::vec4>();
-                    this->config.motionFilter.initial.covariance.rotationalVelocity = config["motion_filter"]["initial"]["covariance"]["rotational_velocity"].as<arma::vec3>();
+                    this->config.motionFilter.initial.covariance.position           = config["motion_filter"]["initial"]["covariance"]["position"].as<Expression>();
+                    this->config.motionFilter.initial.covariance.velocity           = config["motion_filter"]["initial"]["covariance"]["velocity"].as<Expression>();
+                    this->config.motionFilter.initial.covariance.rotation           = config["motion_filter"]["initial"]["covariance"]["rotation"].as<Expression>();
+                    this->config.motionFilter.initial.covariance.rotationalVelocity = config["motion_filter"]["initial"]["covariance"]["rotational_velocity"].as<Expression>();
 
                     // Calculate our mean and covariance
-                    arma::vec::fixed<MotionModel::size> mean;
+                    Eigen::Matrix<double, MotionModel::size, 1> mean;
                     mean.rows(MotionModel::PX, MotionModel::PZ) = this->config.motionFilter.initial.mean.position;
                     mean.rows(MotionModel::VX, MotionModel::VZ) = this->config.motionFilter.initial.mean.velocity;
                     mean.rows(MotionModel::QW, MotionModel::QZ) = this->config.motionFilter.initial.mean.rotation;
                     mean.rows(MotionModel::WX, MotionModel::WZ) = this->config.motionFilter.initial.mean.rotationalVelocity;
 
-                    arma::vec::fixed<MotionModel::size> covariance;
+                    Eigen::Matrix<double, MotionModel::size, 1> covariance;
                     covariance.rows(MotionModel::PX, MotionModel::PZ) = this->config.motionFilter.initial.covariance.position;
                     covariance.rows(MotionModel::VX, MotionModel::VZ) = this->config.motionFilter.initial.covariance.velocity;
                     covariance.rows(MotionModel::QW, MotionModel::QZ) = this->config.motionFilter.initial.covariance.rotation;
@@ -197,13 +197,13 @@ namespace module {
                 // on<Trigger<ResetRobotHypotheses>>()
                 //  .then("Localisation ResetRobotHypotheses", [this] {
                 //     //this reset's the odometry position when localisation does a reset so that we don't have an odometry offset form our new position
-                //     arma::vec::fixed<MotionModel::size> covariance;
+                //     Eigen::Matrix<double, MotionModel::size, 1> covariance;
                 //     covariance.rows(MotionModel::PX, MotionModel::PZ) = this->config.motionFilter.initial.covariance.position;
                 //     covariance.rows(MotionModel::VX, MotionModel::VZ) = this->config.motionFilter.initial.covariance.velocity;
                 //     covariance.rows(MotionModel::QW, MotionModel::QZ) = this->config.motionFilter.initial.covariance.rotation;
                 //     covariance.rows(MotionModel::WX, MotionModel::WZ) = this->config.motionFilter.initial.covariance.rotationalVelocity;
 
-                //     arma::vec::fixed<MotionModel::size>  newFilter = motionFilter.get();
+                //     Eigen::Matrix<double, MotionModel::size, 1>  newFilter = motionFilter.get();
                 //     newFilter.rows(MotionModel::PX, MotionModel::PY) *= 0.;
                 //     motionFilter.setState(newFilter, arma::diagmat(covariance));
                 // });
@@ -389,9 +389,9 @@ namespace module {
                     }
 
                     // If we have a previous sensors and our cm730 has errors then reuse our last sensor value
-                    if(previousSensors && (input.cm730ErrorFlags || arma::norm(arma::vec({input.gyroscope.x, input.gyroscope.y, input.gyroscope.z}), 2) > 4 * M_PI))
+                    if(previousSensors && (input.cm730ErrorFlags || Eigen::Vector3d(input.gyroscope.x, input.gyroscope.y, input.gyroscope.z).norm() > 4 * M_PI))
                     {
-                        NUClear::log<NUClear::WARN>("Bad gyroscope value", arma::norm(arma::vec({input.gyroscope.x, input.gyroscope.y, input.gyroscope.z}), 2));
+                        NUClear::log<NUClear::WARN>("Bad gyroscope value", Eigen::Vector3d(input.gyroscope.x, input.gyroscope.y, input.gyroscope.z).norm());
                         sensors->gyroscope = previousSensors->gyroscope;
                     }
                     else
@@ -437,7 +437,7 @@ namespace module {
                     auto forwardKinematics = calculateAllPositions(kinematicsModel, *sensors);
                     for (const auto& entry : forwardKinematics)
                     {
-                        sensors->forwardKinematics[entry.first] = convert<double, 4, 4>(entry.second);
+                        sensors->forwardKinematics[entry.first] = entry.second;
                     }
 
                     /************************************************
@@ -446,7 +446,7 @@ namespace module {
                     if(previousSensors)
                     {
                         // Use our virtual load sensor class to work out if our foot is down
-                        arma::vec leftFootFeatureVec = {
+                        Eigen::VectorXd leftFootFeatureVec = {
                               sensors->servo[ServoID::L_HIP_PITCH].presentVelocity
                             , sensors->servo[ServoID::L_HIP_PITCH].presentVelocity - previousSensors->servo[ServoID::L_HIP_PITCH].presentVelocity
                             , sensors->servo[ServoID::L_HIP_PITCH].load
@@ -459,7 +459,7 @@ namespace module {
                         };
                         sensors->leftFootDown = leftFootDown.updateFoot(leftFootFeatureVec);
 
-                        arma::vec rightFootFeatureVec = {
+                        Eigen::VectorXd rightFootFeatureVec = {
                               sensors->servo[ServoID::R_HIP_PITCH].presentVelocity
                             , sensors->servo[ServoID::R_HIP_PITCH].presentVelocity - previousSensors->servo[ServoID::R_HIP_PITCH].presentVelocity
                             , sensors->servo[ServoID::R_HIP_PITCH].load
@@ -489,18 +489,18 @@ namespace module {
                     motionFilter.timeUpdate(deltaT);
 
                     // Accelerometer measurment update
-                    motionFilter.measurementUpdate(convert<double, 3>(sensors->accelerometer),
+                    motionFilter.measurementUpdate(sensors->accelerometer,
                                                     config.motionFilter.noise.measurement.accelerometer +
-                                                    arma::norm(convert<double, 3>(sensors->accelerometer)) * config.motionFilter.noise.measurement.accelerometerMagnitude,
+                                                    sensors->accelerometer.norm() * config.motionFilter.noise.measurement.accelerometerMagnitude,
                                                     MotionModel::MeasurementType::ACCELEROMETER());
 
                     // Gyroscope measurement update
-                    motionFilter.measurementUpdate(convert<double, 3>(sensors->gyroscope), config.motionFilter.noise.measurement.gyroscope, MotionModel::MeasurementType::GYROSCOPE());
+                    motionFilter.measurementUpdate(sensors->gyroscope, config.motionFilter.noise.measurement.gyroscope, MotionModel::MeasurementType::GYROSCOPE());
 
                     if (sensors->leftFootDown or sensors->rightFootDown)
                     {
                         //pre-calculate common foot-down variables - these are the torso to world transforms.
-                        arma::vec3 rTWw = motionFilter.get().rows(MotionModel::PX, MotionModel::PZ);
+                        Eigen::Vector3d rTWw = motionFilter.get().rows(MotionModel::PX, MotionModel::PZ);
                         Rotation3D Rtw(UnitQuaternion(motionFilter.get().rows(MotionModel::QW, MotionModel::QZ)));
 
                         // 3 points on the ground mean that we can assume this foot is flat
@@ -523,24 +523,24 @@ namespace module {
 
                             if (footDown)
                             {
-                                Transform3D Htf = convert<double, 4, 4>(sensors->forwardKinematics.at(servoid));
-                                Transform3D Hft = Htf.i();
+                                Transform3D Htf = sensors->forwardKinematics.at(servoid);
+                                Transform3D Hft = Htf.inverse();
 
                                 Rotation3D Rtf = Htf.rotation();
-                                arma::vec3 rFTt = Htf.translation();
+                                Eigen::Vector3d rFTt = Htf.translation();
 
                                 Rotation3D Rft = Hft.rotation();
-                                arma::vec3 rTFf = Hft.translation();
+                                Eigen::Vector3d rTFf = Hft.translation();
 
 
                                 if (!prevFootDown)
                                 {
                                     //NOTE: footflat measurements assume the foot is flat on the ground. These decorrelate the accelerometer and gyro from translation.
-                                    Rotation3D footflat_Rwt = Rotation3D::createRotationZ(Rtw.i().yaw());
+                                    Rotation3D footflat_Rwt = Rotation3D::createRotationZ(Rtw.inverse().yaw());
                                     Rotation3D footflat_Rtf = Rotation3D::createRotationZ(Rtf.yaw());
 
                                     //Store the robot foot to world transform
-                                    footlanding_Rfw[side] = footflat_Rtf.i() * footflat_Rwt.i();
+                                    footlanding_Rfw[side] = footflat_Rtf.inverse() * footflat_Rwt.inverse();
                                     //Store robot foot in world-delta coordinates
                                     footlanding_Rwf[side] = footflat_Rwt * footflat_Rtf;
                                     footlanding_rFWw[side] = footlanding_Rwf[side] * rTFf - rTWw;
@@ -559,7 +559,7 @@ namespace module {
                                     UnitQuaternion Rtw_new( Rotation3D(Rtf * footlanding_Rfw[side]) );
 
                                     //check if we need to reverse our quaternion
-                                    if (arma::norm(Rtw_new + motionFilter.get().rows(MotionModel::QW, MotionModel::QZ)) < 1.) {
+                                    if ((Rtw_new + motionFilter.get().rows(MotionModel::QW, MotionModel::QZ)).norm() < 1.0) {
                                         Rtw_new *= -1;
                                     }
 
@@ -570,7 +570,7 @@ namespace module {
                                             MotionModel::MeasurementType::FLAT_FOOT_ORIENTATION());
 
                                     //calculate the old -> new world foot position updates
-                                    arma::vec3 rFWw = footlanding_Rwf[side] * rTFf  - footlanding_rFWw[side];
+                                    Eigen::Vector3d rFWw = footlanding_Rwf[side] * rTFf  - footlanding_rFWw[side];
 
 
                                     //do a foot based position update
@@ -597,41 +597,41 @@ namespace module {
                     world.rotation() = Rotation3D(UnitQuaternion(o.rows(MotionModel::QW, MotionModel::QZ)));
                     world.translation() = -(world.rotation() * o.rows(MotionModel::PX, MotionModel::PZ));
                     // world.translation() = (o.rows(MotionModel::PX, MotionModel::PZ));
-                    sensors->world = convert<double, 4, 4>(world);
+                    sensors->world = world;
 
-                    sensors->robotToIMU = convert<double, 2, 2>(calculateRobotToIMU(world.rotation()));
+                    sensors->robotToIMU = calculateRobotToIMU(world.rotation());
 
                     /************************************************
                      *                  Mass Model                  *
                      ************************************************/
-                    sensors->centreOfMass = convert<double, 4>(calculateCentreOfMass(kinematicsModel, sensors->forwardKinematics, true));
+                    sensors->centreOfMass = calculateCentreOfMass(kinematicsModel, sensors->forwardKinematics, true);
 
                     /************************************************
                      *                  Kinematics Horizon          *
                      ************************************************/
                     sensors->bodyCentreHeight = motionFilter.get()[MotionModel::PZ];
 
-                    Rotation3D Rwt = world.rotation().t();     //remove translation components from the transform
+                    Rotation3D Rwt = world.rotation().transpose();     //remove translation components from the transform
                     Rotation3D oBodyToGround = Rotation3D::createRotationZ(-Rwt.yaw()) * Rwt;
                     // sensors->bodyToGround : Mat size [4x4] (default identity)
                     // createRotationZ : Mat size [3x3]
                     // Rwt : Mat size [3x3]
-                    sensors->bodyToGround = convert<double, 4, 4>(Transform3D(oBodyToGround));
+                    sensors->bodyToGround = Transform3D(oBodyToGround);
                     auto headPitchKinematics = sensors->forwardKinematics.at(ServoID::HEAD_PITCH);
 
                     //Get torso to world transform
-                    Transform3D worldInv = world.i();
+                    Transform3D worldInv = world.inverse();
 
                     Rotation3D yawlessWorldInvR = Rotation3D::createRotationZ(-Rotation3D(worldInv.rotation()).yaw()) * worldInv.rotation();
                     Transform3D torsoToGround = worldInv;
-                    torsoToGround.translation() = arma::vec3({0,0,torsoToGround.translation()[2]});
+                    torsoToGround.translation() = Eigen::Vector3d(0,0,torsoToGround.translation()[2]);
                     torsoToGround.rotation() = yawlessWorldInvR;
-                    sensors->camToGround  = convert<double, 4, 4>(Transform3D(torsoToGround * convert<double, 4, 4>(headPitchKinematics))); // Rwt * Rth
+                    sensors->camToGround  = Transform3D(torsoToGround * headPitchKinematics); // Rwt * Rth
 
                     /************************************************
                      *                  CENTRE OF PRESSURE          *
                      ************************************************/
-                    sensors->centreOfPressure = convert<double, 3>(utility::motion::kinematics::calculateCentreOfPressure(kinematicsModel, *sensors));
+                    sensors->centreOfPressure = utility::motion::kinematics::calculateCentreOfPressure(kinematicsModel, *sensors);
 
                     emit(std::move(sensors));
                 });

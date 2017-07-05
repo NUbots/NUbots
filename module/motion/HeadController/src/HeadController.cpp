@@ -108,9 +108,9 @@ namespace motion
                 //Get goal vector from angles
                 //Pitch is positive when the robot is looking down by Right hand rule, so negate the pitch
                 //The goal angles are for the neck directly, so we have to offset the camera declination again
-                arma::vec3 goalHeadUnitVector_world = sphericalToCartesian({1, currentAngles[0], currentAngles[1]});
+                Eigen::Vector3d goalHeadUnitVector_world = sphericalToCartesian({1, currentAngles[0], currentAngles[1]});
                 //Convert to robot space
-                arma::vec3 headUnitVector = goalRobotSpace ? goalHeadUnitVector_world : Transform3D(convert<double, 4, 4>(sensors.world)).rotation() * goalHeadUnitVector_world;
+                Eigen::Vector3d headUnitVector = goalRobotSpace ? goalHeadUnitVector_world : Transform3D(sensors.world).rotation() * goalHeadUnitVector_world;
                 //Compute inverse kinematics for head
                 //!!!!!!!!!!!!!!
                 //!!!!!!!!!!!!!!
@@ -123,7 +123,7 @@ namespace motion
                 //!!!!!!!!!!!!!!
                 //!!!!!!!!!!!!!!
                 std::vector< std::pair<ServoID, float> > goalAnglesList = calculateHeadJoints(headUnitVector);
-                // arma::vec2 goalAngles = cartesianToSpherical(headUnitVector).rows(1,2);
+                // Eigen::Vector2d goalAngles = cartesianToSpherical(headUnitVector).rows(1,2);
 
                 //head limits
                 max_yaw = kinematicsModel.head.MAX_YAW;

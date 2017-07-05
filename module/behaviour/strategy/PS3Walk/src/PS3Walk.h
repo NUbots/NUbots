@@ -63,7 +63,7 @@ namespace strategy {
         explicit PS3Walk(std::unique_ptr<NUClear::Environment> environment);
     private:
         Joystick joystick; // TODO: make configurable
-        arma::vec strafe{0, 0};
+        Eigen::VectorXd strafe{0, 0};
         float rotationalSpeed = 0;
         bool moving = false;
         bool headLocked = false;

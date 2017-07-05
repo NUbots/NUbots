@@ -28,7 +28,7 @@ namespace localisation {
     class MMKFRobotLocalisation : public NUClear::Reactor {
     private:
         /// For testing
-        arma::vec2 marker_ = { 0, 0 };
+        Eigen::Vector2d marker_ = { 0, 0 };
         /// The engine that does all of the work
         std::unique_ptr<localisation::MMKFRobotLocalisationEngine> engine_;
 

@@ -35,7 +35,7 @@ namespace planning {
         explicit KickPlanner(std::unique_ptr<NUClear::Environment> environment);
 
     private:
-        bool kickValid(const arma::vec3& ballPos);
+        bool kickValid(const Eigen::Vector3d& ballPos);
        	message::motion::KickPlannerConfig cfg;
        	NUClear::clock::time_point ball_last_measurement_time;
        	NUClear::clock::time_point lastTimeValid;

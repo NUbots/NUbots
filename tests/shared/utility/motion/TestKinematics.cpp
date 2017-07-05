@@ -40,10 +40,10 @@ TEST_CASE("Test the Head kinematics", "[utility][motion][kinematics][head]") {
     for(int i = 0; i < ITERATIONS; ++i) {
 
         // Make a random camera vector
-        arma::vec3 camVec = { double(rand()), double(rand()), double(rand()) };
-        camVec = arma::normalise(camVec);
+        Eigen::Vector3d camVec = { double(rand()), double(rand()), double(rand()) };
+        camVec = camVec.normalize();
 
-        INFO("Testing with the random vector, " << camVec.t());
+        INFO("Testing with the random vector, " << camVec.transpose());
 
         std::vector<std::pair<message::input::ServoID, float>> angles = utility::motion::kinematics::calculateCameraLookJoints(kinematicsModel,camVec);
 
@@ -62,7 +62,7 @@ TEST_CASE("Test the Head kinematics", "[utility][motion][kinematics][head]") {
         }
 
         // Do our forward kinematics
-        arma::mat44 fKin = utility::motion::kinematics::calculatePosition(KinematicsModel(),sensors, ServoID::HEAD_PITCH)[ServoID::HEAD_PITCH];
+        Eigen::Matrix4d fKin = utility::motion::kinematics::calculatePosition(KinematicsModel(),sensors, ServoID::HEAD_PITCH)[ServoID::HEAD_PITCH];
 
         // Check that our vector that forward kinematics finds is close to what is expected
         REQUIRE(double(fKin(0, 0) - camVec[0]) == Approx(0));

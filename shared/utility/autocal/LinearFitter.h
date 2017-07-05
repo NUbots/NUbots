@@ -9,7 +9,7 @@ namespace autocal {
 	template <int N>
 	class LinearFitter {
 	private:
-        using Vec = arma::vec::fixed<N>;
+        using Vec = Eigen::Matrix<double, N, 1>;
 
 		arma::mat data;
 		arma::mat times;
@@ -25,7 +25,7 @@ namespace autocal {
 
 		void addData(Vec new_data, double t_sec){
 			data.insert_cols(0,new_data);
-			times.insert_cols(0,arma::vec2({t_sec,1}));
+			times.insert_cols(0,Eigen::Vector2d(t_sec,1));
 			enough_samples = data.n_cols > number_of_samples;
 			if(enough_samples){
 				data.shed_col(data.n_cols-1);

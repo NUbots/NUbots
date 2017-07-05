@@ -59,18 +59,18 @@ namespace module {
 
             const auto& maxVisualHorizon = visualHorizon.front()[1] > visualHorizon.back()[1] ? visualHorizon.begin() : visualHorizon.end() - 1;
 
-            arma::vec2 topY = imageToScreen(arma::ivec2({ maxVisualHorizon->x(), int(maxVisualHorizon->y()) }), convert<uint, 2>(classifiedImage.dimensions));
+            Eigen::Vector2d topY = imageToScreen(Eigen::Vector2i({ maxVisualHorizon->x(), int(maxVisualHorizon->y()) }), classifiedImage.dimensions);
             topY[0] = 0;    //Choose centre of screen
 
             // Get the positions of the top of our green horizion, and the bottom of the screen
-            arma::mat44 camToGround = convert<double, 4, 4>(classifiedImage.sensors->camToGround);
+            Eigen::Matrix4d camToGround = classifiedImage.sensors->camToGround;
             auto xb = getGroundPointFromScreen({ 0, -double(image.dimensions[1] - 1) / 2}, camToGround, FOCAL_LENGTH_PIXELS);
             auto xt = getGroundPointFromScreen(topY, camToGround, FOCAL_LENGTH_PIXELS);
             double dx = 2 * BALL_RADIUS / BALL_MINIMUM_INTERSECTIONS_COARSE;
             double cameraHeight = camToGround(2, 3);
 
             // This describes the direction of travel
-            arma::vec3 direction = arma::normalise(xb);
+            Eigen::Vector3d direction = xb.normalize();
 
             // Don't bother drawing lines if we know it's going to fail
             if(direction[0] < 0) {
@@ -78,32 +78,32 @@ namespace module {
             }
 
             // Our start and end points
-            double xStart = arma::norm(xb);
+            double xStart = xb.norm();
             xStart += dx - fmod(xStart, dx);
-            double xEnd = arma::norm(xt);
+            double xEnd = xt.norm();
 
-            auto movement = arma::normalise(xb) * dx;
+            auto movement = xb.normalize() * dx;
 
             auto hLeft  = visualHorizon.begin();
             auto hRight = visualHorizon.end() - 1;
 
 
             // Do our inital calculation to get our first Y
-            arma::vec4 worldPosition = arma::ones(4);
+            Eigen::Vector4d worldPosition = arma::ones(4);
             worldPosition.rows(0, 2) = xStart * direction;
             auto camPoint = projectWorldPointToScreen(worldPosition, camToGround, FOCAL_LENGTH_PIXELS);
-            int y = screenToImage(camPoint, convert<uint, 2>(classifiedImage.dimensions))[1];
+            int y = screenToImage(camPoint, classifiedImage.dimensions)[1];
 
             for(double x = xStart; x < xEnd && y >= 0; x += std::max(dx, (dx * x) / (cameraHeight - dx))) {
 
                 // Calculate our next Y
                 worldPosition.rows(0, 2) = (x + std::max(dx, (dx * x) / (cameraHeight - dx))) * direction;
                 camPoint = projectWorldPointToScreen(worldPosition, camToGround, FOCAL_LENGTH_PIXELS);
-                int nextY = screenToImage(camPoint, convert<uint, 2>(classifiedImage.dimensions))[1];
+                int nextY = screenToImage(camPoint, classifiedImage.dimensions)[1];
 
                 // Work out our details
-                arma::ivec2 start = { 0, y };
-                arma::ivec2 end = { int(image.dimensions[0] - 1), y };
+                Eigen::Vector2i start = { 0, y };
+                Eigen::Vector2i end = { int(image.dimensions[0] - 1), y };
                 int subsample = std::max(1, int(lround((y - nextY) * BALL_HORIZONTAL_SUBSAMPLE_FACTOR)));
 
                 // If our left hand side is in range, or we are over the top

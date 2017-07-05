@@ -62,7 +62,7 @@ namespace optimisation {
         e->values = current.estimate;
         e->covariance = current.covariance;
 
-        log<NUClear::FATAL>("Current Estimate", convert<double>(current.estimate).t());
+        log<NUClear::FATAL>("Current Estimate", current.estimate.transpose());
 
         // Add our episodes
         for (auto& episode : opt.episodes) {
@@ -81,7 +81,7 @@ namespace optimisation {
         // We are updating our batch
         log<NUClear::INFO>(fmt::format("Processing {}/{} episode batch for {}", opt.episodes.size(), opt.batchSize, opt.group));
 
-        arma::vec fitnesses(opt.episodes.size());
+        Eigen::VectorXd fitnesses(opt.episodes.size());
         arma::mat samples(opt.episodes.size(), opt.optimiser->estimate().estimate.rows());
 
         for (uint i = 0; i < opt.episodes.size(); ++i) {
@@ -310,7 +310,7 @@ namespace optimisation {
 
                 p->group = request.group;
                 p->generation = opt.optimiser->estimate().generation;
-                p->samples = convert<double>(opt.optimiser->getSamples(request.nSamples));
+                p->samples = opt.optimiser->getSamples(request.nSamples);
                 p->covariance = opt.optimiser->estimate().covariance;
 
                 log<NUClear::DEBUG>(fmt::format("Generating {} parameters for {}({})", request.nSamples, p->group, p->generation));

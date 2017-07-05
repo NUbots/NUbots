@@ -57,10 +57,10 @@ namespace module {
                 static constexpr size_t size = 13;
 
                 // Our static process noise matrix
-                arma::mat::fixed<size, size> processNoiseMatrix;
+                Eigen::Matrix<double, size, size> processNoiseMatrix;
 
                 // The velocity decay for x/y/z velocities (1.0 = no decay)
-                arma::vec3 timeUpdateVelocityDecay = {1,1,1};
+                Eigen::Vector3d timeUpdateVelocityDecay = {1,1,1};
 
                 struct MeasurementType {
                     struct GYROSCOPE {};
@@ -72,19 +72,19 @@ namespace module {
 
                 MotionModel() : processNoiseMatrix(arma::fill::eye) {} // empty constructor
 
-                arma::vec::fixed<size> timeUpdate(const arma::vec::fixed<size>& state, double deltaT);
+                Eigen::Matrix<double, size, 1> timeUpdate(const Eigen::Matrix<double, size, 1>& state, double deltaT);
 
-                arma::vec3 predictedObservation(const arma::vec::fixed<size>& state, const MeasurementType::ACCELEROMETER&);
-                arma::vec3 predictedObservation(const arma::vec::fixed<size>& state, const MeasurementType::GYROSCOPE&);
-                arma::vec4 predictedObservation(const arma::vec::fixed<size>& state, const MeasurementType::FOOT_UP_WITH_Z&);
-                arma::vec3 predictedObservation(const arma::vec::fixed<size>& state, const MeasurementType::FLAT_FOOT_ODOMETRY&);
-                arma::vec4 predictedObservation(const arma::vec::fixed<size>& state, const MeasurementType::FLAT_FOOT_ORIENTATION&);
+                Eigen::Vector3d predictedObservation(const Eigen::Matrix<double, size, 1>& state, const MeasurementType::ACCELEROMETER&);
+                Eigen::Vector3d predictedObservation(const Eigen::Matrix<double, size, 1>& state, const MeasurementType::GYROSCOPE&);
+                Eigen::Vector4d predictedObservation(const Eigen::Matrix<double, size, 1>& state, const MeasurementType::FOOT_UP_WITH_Z&);
+                Eigen::Vector3d predictedObservation(const Eigen::Matrix<double, size, 1>& state, const MeasurementType::FLAT_FOOT_ODOMETRY&);
+                Eigen::Vector4d predictedObservation(const Eigen::Matrix<double, size, 1>& state, const MeasurementType::FLAT_FOOT_ORIENTATION&);
 
-                arma::vec observationDifference(const arma::vec& a, const arma::vec& b);
+                Eigen::VectorXd observationDifference(const arma::vec& a, const arma::vec& b);
 
-                arma::vec::fixed<size> limitState(const arma::vec::fixed<size>& state);
+                Eigen::Matrix<double, size, 1> limitState(const Eigen::Matrix<double, size, 1>& state);
 
-                const arma::mat::fixed<size, size>& processNoise();
+                const Eigen::Matrix<double, size, size>& processNoise();
             };
 
         }

@@ -20,46 +20,50 @@
 #ifndef UTILITY_MATH_MATRIX_TRANSFORM2D_H
 #define UTILITY_MATH_MATRIX_TRANSFORM2D_H
 
+#include <Eigen/Core>
+
 #include "Rotation2D.h"
 
 namespace utility {
 namespace math {
-namespace matrix {
+    namespace matrix {
 
-    template <int Dimensions>
-    class Transform;
+        template <int Dimensions>
+        class Transform;
 
-    using Transform2D = Transform<2>;
+        using Transform2D = Transform<2>;
 
-    /**
-     * Represents a 2D point including its rotation. Uses a vec3 of the form {x, y, angle}.
-     *
-     * See: Special Euclidean group SE(2).
-     * http://en.wikipedia.org/wiki/Euclidean_group
-     *
-     * @author Brendan Annable
-     */
-    template <>
-    class Transform<2> : public arma::vec3 {
-        using arma::vec3::vec3; // inherit constructors
-
+        /**
+         * Represents a 2D point including its rotation. Uses a vec3 of the form {x, y, angle}.
+         *
+         * See: Special Euclidean group SE(2).
+         * http://en.wikipedia.org/wiki/Euclidean_group
+         *
+         * @author Brendan Annable
+         */
+        template <>
+        class Transform<2> : public Eigen::Vector3d {
         public:
+            using Eigen::Vector3d::Matrix;
+
             /**
              * @brief Default constructor initialises values to zero
              */
-            Transform();
+            Transform() {
+                setZero();
+            }
 
             /**
              * @brief Construct transform from a position and an angle.
              */
-            Transform(const arma::vec2 xy_, double angle_);
+            Transform(const Eigen::Vector2d xy_, double angle_);
 
             /**
              * Construct a transform that represents the position and
              * orientation of a camera positioned at 'from' and facing toward
              * 'to'.
              */
-            static Transform2D lookAt(const arma::vec2 from, arma::vec2 to);
+            static Transform2D lookAt(const Eigen::Vector2d from, Eigen::Vector2d to);
 
             /**
              * @brief Transforms position from local coordinates relative to 'reference', to world coordinates
@@ -90,22 +94,40 @@ namespace matrix {
 
             Transform2D i() const;
 
-            inline double x() const { return at(0); }
-            inline double& x() { return at(0); }
+            inline double x() const {
+                return operator[](0);
+            }
+            inline double& x() {
+                return operator[](0);
+            }
 
-            inline double y() const { return at(1); }
-            inline double& y() { return at(1); }
+            inline double y() const {
+                return operator[](1);
+            }
+            inline double& y() {
+                return operator[](1);
+            }
 
-            inline double angle() const { return at(2); }
-            inline double& angle() { return at(2); }
+            inline double angle() const {
+                return operator[](2);
+            }
+            inline double& angle() {
+                return operator[](2);
+            }
 
-            inline Rotation2D rotation() {return Rotation2D::createRotation(angle());}
+            inline Rotation2D rotation() {
+                return Rotation2D::createRotation(angle());
+            }
 
-            inline const arma::subview_col<double> xy() const { return rows(0,1); }
-            inline arma::subview_col<double> xy() { return rows(0,1); }
-    };
+            inline const Eigen::Vector2d xy() const {
+                return head<2>();
+            }
+            inline Eigen::Vector2d xy() {
+                return head<2>();
+            }
+        };
 
-}  // matrix
+    }  // matrix
 }  // math
 }  // utility
 

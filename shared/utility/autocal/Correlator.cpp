@@ -29,18 +29,18 @@ namespace autocal {
 				//Initialise if key missing. (true => calculate cov)
 				recordedStates[key] = StreamPair();
 			} else {
-				
+
 				// std::cout << "number of samples = " << recordedStates[key].first.size() << std::endl;
-				// std::cout << "diff1 = " << diff1 << std::endl; 
-				// if( id1 == 1 && id2 == 18) std::cout << "T2 = " << T2 << std::endl; 
-				// std::cout << "diff2 = " << diff2 << std::endl; 
-				// std::cout << "T2 = " << T2 << std::endl; 
+				// std::cout << "diff1 = " << diff1 << std::endl;
+				// if( id1 == 1 && id2 == 18) std::cout << "T2 = " << T2 << std::endl;
+				// std::cout << "diff2 = " << diff2 << std::endl;
+				// std::cout << "T2 = " << T2 << std::endl;
 
 				//If we have no recorded states yet, or the new states differ significantly from the previous, add the new states
-				if( stateIsNew(T1, recordedStates[key].first) 
+				if( stateIsNew(T1, recordedStates[key].first)
 					|| stateIsNew(T2, recordedStates[key].second) )
 				{
-					//Check if bad sample (for the particular solver we are using):	
+					//Check if bad sample (for the particular solver we are using):
 					Rotation3D R1 = T1.rotation();
 					UnitQuaternion q1(R1);
 					Rotation3D R2 = T2.rotation();
@@ -56,7 +56,7 @@ namespace autocal {
 
 					}
 
-					std::cout << "Recording Sample..." << std::endl; 
+					std::cout << "Recording Sample..." << std::endl;
 
 					if(recordedStates[key].first.size() >= number_of_samples){
 						recordedStates[key].first.erase(recordedStates[key].first.begin());
@@ -81,7 +81,7 @@ namespace autocal {
 				const auto& id1 = pairID.first;
 				float& score = s.second;
 				if(eliminatedHypotheses.count(pairID) != 0) continue;
-				
+
 				if(totalScores[id1] != 0){
 					//Normalise
 					// score = score / totalScores[id1];
@@ -89,10 +89,10 @@ namespace autocal {
 					if(score < elimination_score_threshold && eliminatedHypotheses.count(pairID) == 0){
 						eliminatedHypotheses.insert(pairID);
 						std::cout << "Eliminated: [" << pairID.first << "," << pairID.second << "]" << std::endl;
-					}						
+					}
 				}
 			}
-			//If all eliminated			
+			//If all eliminated
 			if(eliminatedHypotheses.size() == scores.size()){
 				reset();
 			}
@@ -119,7 +119,7 @@ namespace autocal {
 				const auto& id2 = key.second;
 				const Correlator::Stream& states1 = hypothesis.second.first;
 				const Correlator::Stream& states2 = hypothesis.second.second;
-				
+
 				//Check whether or not we need to check this hypothesis anymore
 				if(eliminatedHypotheses.count(key) != 0) continue;
 
@@ -127,7 +127,7 @@ namespace autocal {
 				if(totalScores.count(id1) == 0){
 					totalScores[id1] = 0;
 				}
-				//CONFIG HERE: 
+				//CONFIG HERE:
 				//CE METHOD
 				float score = getSylvesterScore(states1, states2, key);
 				//IF METHOD
@@ -175,8 +175,8 @@ namespace autocal {
 			if(states.empty()) return true;
 
 			//OLD METHOD
-			//Add current stats to the vector			
-			const Transform3D& lastTransform = states.back().i();
+			//Add current stats to the vector
+			const Transform3D& lastTransform = states.back().inverse();
 			float diff = Transform3D::norm(lastTransform * T);
 			return diff > difference_threshold;
 
@@ -184,8 +184,8 @@ namespace autocal {
 			// float minDiffAngle = std::numeric_limits<float>::max();
 			// float minDiffPos = std::numeric_limits<float>::max();
 			// for(auto& S : states){
-			// 	float diffAngle = Rotation3D::norm(S.rotation().t() * T.rotation());
-			// 	float diffPos = arma::norm(T.translation() - S.translation());
+			// 	float diffAngle = Rotation3D::norm(S.rotation().transpose() * T.rotation());
+			// 	float diffPos = (T.translation() - S.translation().norm());
 			// 	if(diffAngle < minDiffAngle && diffPos < minDiffPos ){
 			// 		minDiffAngle = diffAngle;
 			// 		minDiffPos = diffPos;
@@ -196,7 +196,7 @@ namespace autocal {
 		}
 
 
-		float Correlator::getSylvesterScore(const Correlator::Stream& states1, const Correlator::Stream& states2, 
+		float Correlator::getSylvesterScore(const Correlator::Stream& states1, const Correlator::Stream& states2,
 											Correlator::Hypothesis key){
 			//Fit data
 			bool success = true;
@@ -214,11 +214,11 @@ namespace autocal {
 			// note that the equation for the system is
 			// M Ai = Bi N
 			// and so by putting the samples in order A,B we are actually solving
-			// Ai N.i() = M.i() Bi
-			// so 
-			// X = N.i()
+			// Ai N.inverse() = M.inverse() Bi
+			// so
+			// X = N.inverse()
 			// and
-			// Y = M.i()
+			// Y = M.inverse()
 			/////////////////////
 			/////////////////////
 			/////////////////////
@@ -232,14 +232,14 @@ namespace autocal {
 			for(int i = 0; i < states1.size(); i++){
 				const Transform3D& A = states1[i];
 				const Transform3D& B = states2[i];
-				Transform3D errorMat = (A * X).i() * (Y * B);
+				Transform3D errorMat = (A * X).inverse() * (Y * B);
 				float error = Transform3D::norm(errorMat);
 				totalError += error;
 				UnitQuaternion rotA(Rotation3D(A.rotation()));
 				UnitQuaternion rotB(Rotation3D(B.rotation()));
-				// std::cout << "Error = " << error << std::endl  
-				// 		  << " A = " << rotA.getAngle() << " rads about axis " << rotA.getAxis().t()
-				// 		  << " B = " << rotB.getAngle() << " rads about axis " << rotB.getAxis().t()
+				// std::cout << "Error = " << error << std::endl
+				// 		  << " A = " << rotA.getAngle() << " rads about axis " << rotA.getAxis().transpose()
+				// 		  << " B = " << rotB.getAngle() << " rads about axis " << rotB.getAxis().transpose()
 				// 		  << std::endl;
 				// std::cout << "det(A.rotation()) = " << arma::det(A.rotation()) << std::endl;
 				// std::cout << "det(B.rotation()) = " << arma::det(B.rotation()) << std::endl;
@@ -252,7 +252,7 @@ namespace autocal {
 
 		float Correlator::getRotationScore(const Correlator::Stream& states1, const Correlator::Stream& states2,
 										   Correlator::Hypothesis key){
-			
+
 			if(firstRotationReadings.count(key) == 0){
 				std::pair<utility::math::matrix::Rotation3D,utility::math::matrix::Rotation3D> val = {states1.front().rotation(), states2.front().rotation()};
 				firstRotationReadings[key] = val;
@@ -260,8 +260,8 @@ namespace autocal {
 			}
 
 			//Fit data
-			Rotation3D R1 = states1.back().rotation().t() * states1.front().rotation();
-			Rotation3D R2 = states2.back().rotation().t() * states2.front().rotation();
+			Rotation3D R1 = states1.back().rotation().transpose() * states1.front().rotation();
+			Rotation3D R2 = states2.back().rotation().transpose() * states2.front().rotation();
 
 			float angle1 = Rotation3D::norm(R1);
 			float angle2 = Rotation3D::norm(R2);
@@ -283,15 +283,15 @@ namespace autocal {
 				const auto& key = s.first;
 				const float& score = s.second;
 				if(eliminatedHypotheses.count(key) != 0) continue;
-				
+
 				const auto& id1 = key.first;
 				const auto& id2 = key.second;
-				
+
 				if(bestScores.count(id1) == 0){
 					bestScores[id1] = score;
 					bestMatches[id1] = id2;
 				}
-				
+
 				if(score > bestScores[id1]){
 					bestScores[id1] = score;
 					bestMatches[id1] = id2;

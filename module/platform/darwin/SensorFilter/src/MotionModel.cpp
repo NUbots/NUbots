@@ -30,9 +30,9 @@ namespace module {
             using utility::math::geometry::UnitQuaternion;
             using utility::math::matrix::Rotation3D;
 
-            arma::vec::fixed<MotionModel::size> MotionModel::limitState(const arma::vec::fixed<size>& state) {
-                arma::vec::fixed<size> newState = state;
-                newState.rows(QW, QZ) = arma::normalise(newState.rows(QW, QZ));
+            Eigen::Matrix<double, MotionModel::size, 1> MotionModel::limitState(const Eigen::Matrix<double, size, 1>& state) {
+                Eigen::Matrix<double, size, 1> newState = state;
+                newState.rows(QW, QZ) = newState.rows(QW, QZ).normalize();
                 return newState;
             }
 
@@ -41,10 +41,10 @@ namespace module {
             // @param deltaT The amount of time that has passed since the previous update, in seconds.
             // @param measurement The reading from the rate gyroscope in rad/s used to update the orientation.
             // @return The new estimated system state.
-            arma::vec::fixed<MotionModel::size> MotionModel::timeUpdate(const arma::vec::fixed<size>& state, double deltaT) {
+            Eigen::Matrix<double, MotionModel::size, 1> MotionModel::timeUpdate(const Eigen::Matrix<double, size, 1>& state, double deltaT) {
 
                 // Prepare our new state
-                arma::vec::fixed<MotionModel::size> newState = state;
+                Eigen::Matrix<double, MotionModel::size, 1> newState = state;
 
                 // Extract our unit quaternion rotation
                 UnitQuaternion rotation(state.rows(QW, QZ));
@@ -56,7 +56,7 @@ namespace module {
                 double t_2 = deltaT * 0.5;
                 UnitQuaternion qGyro;
                 qGyro.imaginary() = state.rows(WX, WZ) * t_2;
-                qGyro.real() = 1.0 - 0.5 * arma::sum(arma::square(qGyro.imaginary()));
+                qGyro.real() = 1.0 - 0.5 * qGyro.imaginary().squaredNorm();
 
                 newState.rows(QW, QZ) = qGyro * rotation;
 
@@ -67,30 +67,30 @@ namespace module {
             }
 
             // Accelerometer
-            arma::vec3 MotionModel::predictedObservation(const arma::vec::fixed<size>& state, const MeasurementType::ACCELEROMETER&) {
+            Eigen::Vector3d MotionModel::predictedObservation(const Eigen::Matrix<double, size, 1>& state, const MeasurementType::ACCELEROMETER&) {
 
                 // Extract our rotation quaternion
                 UnitQuaternion rotation(state.rows(QW, QZ));
 
                 // Make a gravity vector and return it
-                return rotation.rotateVector(arma::vec3({0, 0, G}));
+                return rotation.rotateVector(Eigen::Vector3d(0, 0, G));
             }
 
             // Gyroscope
-            arma::vec3 MotionModel::predictedObservation(const arma::vec::fixed<size>& state, const MeasurementType::GYROSCOPE&) {
+            Eigen::Vector3d MotionModel::predictedObservation(const Eigen::Matrix<double, size, 1>& state, const MeasurementType::GYROSCOPE&) {
                 return state.rows(WX, WZ);
             }
 
             // Foot up with z
-            arma::vec4 MotionModel::predictedObservation(const arma::vec::fixed<size>& state, const MeasurementType::FOOT_UP_WITH_Z&) {
+            Eigen::Vector4d MotionModel::predictedObservation(const Eigen::Matrix<double, size, 1>& state, const MeasurementType::FOOT_UP_WITH_Z&) {
 
-                arma::vec4 prediction;
+                Eigen::Vector4d prediction;
 
                 // Extract our rotation quaternion
                 UnitQuaternion rotation(state.rows(QW, QZ));
 
                 // First 3 is the up vector in torso space
-                prediction.rows(0,2) = rotation.rotateVector(arma::vec3({0,0,1}));
+                prediction.rows(0,2) = rotation.rotateVector(Eigen::Vector3d(0,0,1));
 
                 // 4th component is our z height
                 prediction[3] = state[PZ];
@@ -98,21 +98,21 @@ namespace module {
                 return prediction;
             }
 
-            arma::vec3 MotionModel::predictedObservation(const arma::vec::fixed<size>& state, const MeasurementType::FLAT_FOOT_ODOMETRY&) {
-            
+            Eigen::Vector3d MotionModel::predictedObservation(const Eigen::Matrix<double, size, 1>& state, const MeasurementType::FLAT_FOOT_ODOMETRY&) {
+
                 return state.rows(PX, PZ);
             }
-            
-            arma::vec4 MotionModel::predictedObservation(const arma::vec::fixed<size>& state, const MeasurementType::FLAT_FOOT_ORIENTATION&) {
+
+            Eigen::Vector4d MotionModel::predictedObservation(const Eigen::Matrix<double, size, 1>& state, const MeasurementType::FLAT_FOOT_ORIENTATION&) {
 
                 return state.rows(QW, QZ);
             }
 
-            arma::vec MotionModel::observationDifference(const arma::vec& a, const arma::vec& b) {
+            Eigen::VectorXd MotionModel::observationDifference(const arma::vec& a, const arma::vec& b) {
                 return a - b;
             }
 
-            const arma::mat::fixed<MotionModel::size, MotionModel::size>& MotionModel::processNoise() {
+            const Eigen::Matrix<double, MotionModel::size, MotionModel::size>& MotionModel::processNoise() {
                 // Return our process noise matrix
                 return processNoiseMatrix;
             }

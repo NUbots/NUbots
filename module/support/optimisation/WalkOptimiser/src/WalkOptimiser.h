@@ -51,8 +51,8 @@ namespace module {
             private:
                 message::behaviour::FixedWalkCommand walk_command;
                 std::vector<std::string> parameter_names;
-                arma::vec parameter_sigmas;
-                arma::vec fitnesses;
+                Eigen::VectorXd parameter_sigmas;
+                Eigen::VectorXd fitnesses;
 
                 unsigned int currentSample;
                 arma::mat samples;
@@ -67,7 +67,7 @@ namespace module {
                 static constexpr const char* backupLocation = "WalkEngine_Optimised.yaml";
 
                 void printState(const arma::vec& state);
-                arma::vec getState(const extension::Configuration& walkConfig);
+                Eigen::VectorXd getState(const extension::Configuration& walkConfig);
                 YAML::Node getWalkConfig(const arma::vec& state);
                 void saveConfig(const YAML::Node& config);
                 void setWalkParameters(const YAML::Node& config);

@@ -40,7 +40,7 @@ namespace localisation {
             : ball_filter_(
                 {3, 2, 0, 0}, // mean
                 // {0, 0, 3.141},
-                arma::eye(ball::BallModel::size, ball::BallModel::size) * 1, // cov
+                Eigen::Matrix<double, ball::BallModel::size, ball::BallModel::size>::Identity() * 1, // cov
                 0.1) // alpha
             , cfg_()
             , last_time_update_time_(NUClear::clock::now()) { }

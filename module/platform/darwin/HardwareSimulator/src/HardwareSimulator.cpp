@@ -176,10 +176,10 @@ namespace darwin {
         on<Every<UPDATE_FREQUENCY, Per<std::chrono::seconds>>, Optional<With<Sensors>>, Single>()
         .then([this] (std::shared_ptr<const Sensors> previousSensors) {
             if (previousSensors) {
-                Transform3D rightFootPose = convert<double, 4, 4>(previousSensors->forwardKinematics.at(ServoID::R_ANKLE_ROLL));
-                Transform3D leftFootPose  = convert<double, 4, 4>(previousSensors->forwardKinematics.at(ServoID::L_ANKLE_ROLL));
-                arma::vec3 torsoFromRightFoot = -rightFootPose.rotation().i() * rightFootPose.translation();
-                arma::vec3 torsoFromLeftFoot = -leftFootPose.rotation().i() * leftFootPose.translation();
+                Transform3D rightFootPose = previousSensors->forwardKinematics.at(ServoID::R_ANKLE_ROLL);
+                Transform3D leftFootPose  = previousSensors->forwardKinematics.at(ServoID::L_ANKLE_ROLL);
+                Eigen::Vector3d torsoFromRightFoot = -rightFootPose.rotation().inverse() * rightFootPose.translation();
+                Eigen::Vector3d torsoFromLeftFoot = -leftFootPose.rotation().inverse() * leftFootPose.translation();
                 // emit(graph("torsoFromRightFoot", torsoFromRightFoot));
                 // emit(graph("torsoFromLeftFoot", torsoFromLeftFoot));
                 if(torsoFromRightFoot(2) > torsoFromLeftFoot(2)){
@@ -208,10 +208,10 @@ namespace darwin {
                 else {
                     // std::cout << "Second: movingSpeed = " << movingSpeed << " servo.goalPosition = "<< servo.goalPosition << " servo.presentPosition = "<< servo.presentPosition << std::endl;
 
-                    arma::vec3 present = { cos(servo.presentPosition), sin(servo.presentPosition), 0 };
-                    arma::vec3 goal = { cos(servo.goalPosition), sin(servo.goalPosition), 0 };
+                    Eigen::Vector3d present = { cos(servo.presentPosition), sin(servo.presentPosition), 0 };
+                    Eigen::Vector3d goal = { cos(servo.goalPosition), sin(servo.goalPosition), 0 };
 
-                    arma::vec3 cross = arma::cross(present, goal);
+                    Eigen::Vector3d cross = present.cross(goal);
                     if(cross[2] > 0) {
                         servo.presentPosition = utility::math::angle::normalizeAngle(servo.presentPosition + movingSpeed);
                     }
@@ -225,18 +225,18 @@ namespace darwin {
             // Note: This reaction is not (and should not be) synced with the
             // 'Receive Simulated Gyroscope' reaction above, so we can't
             // reliably query the size of the gyroQueue.
-            arma::vec3 sumGyro = {0,0,0};
+            Eigen::Vector3d sumGyro = {0,0,0};
             {
                 // std::lock_guard<std::mutex> lock(gyroQueueMutex);
                 while (!gyroQueue.empty()){
                     DarwinSensors::Gyroscope g = gyroQueue.front();
-                    sumGyro += arma::vec3({g.x,g.y,g.z});
+                    sumGyro += Eigen::Vector3d(g.x,g.y,g.z);
 
                     std::lock_guard<std::mutex> lock(gyroQueueMutex);
                     gyroQueue.pop();
                 }
             }
-            sumGyro = (sumGyro * UPDATE_FREQUENCY + arma::vec3({0,0,imu_drift_rate}));
+            sumGyro = (sumGyro * UPDATE_FREQUENCY + Eigen::Vector3d(0,0,imu_drift_rate));
             sensors.gyroscope.x = sumGyro[0];
             sensors.gyroscope.y = sumGyro[1];
             sensors.gyroscope.z = sumGyro[2];
@@ -248,9 +248,9 @@ namespace darwin {
             sensors.timestamp = NUClear::clock::now();
 
             // //Debug:
-            // integrated_gyroscope += sumGyro + arma::vec3({0,0,imu_drift_rate});
+            // integrated_gyroscope += sumGyro + Eigen::Vector3d(0,0,imu_drift_rate);
             // std::cout << "HardwareSimulator gyroscope = " << sensors.gyroscope.x << ", " << sensors.gyroscope.y << ", " << sensors.gyroscope.z << std::endl;
-            // std::cout << "HardwareSimulator integrated_gyroscope = " << integrated_gyroscope.t() << std::endl;
+            // std::cout << "HardwareSimulator integrated_gyroscope = " << integrated_gyroscope.transpose() << std::endl;
 
             //Add some noise so that sensor fusion doesnt converge to a singularity
             auto sensors_message = std::make_unique<DarwinSensors>(sensors);

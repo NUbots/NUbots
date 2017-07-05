@@ -77,8 +77,8 @@ namespace logging {
         {
             // RightFootDisplacement FK -> RightAnkleRoll -> inverse -> translation -> negate
             // LeftFootDisplacement  FK -> LeftAnkleRoll  -> inverse -> translation -> negate
-            arma::vec3 RightFootDisplacement          = -Transform3D(convert<double, 4, 4>(sensors.forwardKinematics.at(ServoID::R_ANKLE_ROLL).inverse())).translation();
-            arma::vec3 LeftFootDisplacement           = -Transform3D(convert<double, 4, 4>(sensors.forwardKinematics.at(ServoID::L_ANKLE_ROLL).inverse())).translation();
+            Eigen::Vector3d RightFootDisplacement          = -Transform3D(sensors.forwardKinematics.at(ServoID::R_ANKLE_ROLL).inverse()).translation();
+            Eigen::Vector3d LeftFootDisplacement           = -Transform3D(sensors.forwardKinematics.at(ServoID::L_ANKLE_ROLL).inverse()).translation();
             float      RightHipPitchPresentVelocity   =  sensors.servo[ServoID::R_HIP_PITCH].presentVelocity;
             float      RightHipPitchLoad              =  sensors.servo[ServoID::R_HIP_PITCH].load;
             float      LeftHipPitchPresentVelocity    =  sensors.servo[ServoID::L_HIP_PITCH].presentVelocity;

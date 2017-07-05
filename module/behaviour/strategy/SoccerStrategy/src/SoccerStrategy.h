@@ -54,8 +54,8 @@ namespace strategy {
             float ball_search_walk_stop_speed;
             float ball_search_walk_slow_time;
 
-            arma::vec2 start_position_offensive;
-            arma::vec2 start_position_defensive;
+            Eigen::Vector2d start_position_offensive;
+            Eigen::Vector2d start_position_defensive;
             bool is_goalie;
 
             float goalie_command_timeout;
@@ -96,14 +96,14 @@ namespace strategy {
         void standStill();
         void searchWalk();
         void walkTo(const message::support::FieldDescription& fieldDescription, const message::behaviour::FieldTarget::Target& object);
-        void walkTo(const message::support::FieldDescription& fieldDescription, arma::vec position);
+        void walkTo(const message::support::FieldDescription& fieldDescription, Eigen::VectorXd position);
         void find(const std::vector<message::behaviour::FieldTarget>& objects);
         void spinWalk();
         bool pickedUp(const message::input::Sensors& sensors);
         bool penalised();
         bool ballDistance(const message::localisation::Ball& ball);
         void goalieWalk(const std::vector<message::localisation::Self>& selfs, const std::vector<message::localisation::Ball>& balls);
-        arma::vec2 getKickPlan(const std::vector<message::localisation::Self>& selfs, const message::support::FieldDescription& fieldDescription);
+        Eigen::Vector2d getKickPlan(const std::vector<message::localisation::Self>& selfs, const message::support::FieldDescription& fieldDescription);
         void play(const std::vector<message::localisation::Self>& selfs, const std::vector<message::localisation::Ball>& balls, const message::support::FieldDescription& fieldDescription, const message::input::GameState::Data::Mode& mode);
 
     public:

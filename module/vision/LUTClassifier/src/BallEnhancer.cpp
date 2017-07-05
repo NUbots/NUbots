@@ -134,7 +134,7 @@ namespace module {
                 if((it->segmentClass == ClassifiedImage::SegmentClass::GOAL) &&
                    (utility::vision::visualHorizonAtPoint(classifiedImage, it->start[0]) <= it->start[1] ||
                     utility::vision::visualHorizonAtPoint(classifiedImage, it->end[0])   <= it->end[1])
-                    && it->length > 1) 
+                    && it->length > 1)
                 {
                     points.push_back(it->midpoint);
                 }
@@ -145,7 +145,7 @@ namespace module {
 
             // For each of these points move upward until we find a strong transition to green
             for(auto& point : points) {
-                Line horizon(convert<double, 2>(classifiedImage.horizon.normal), classifiedImage.horizon.distance);
+                Line horizon(classifiedImage.horizon.normal, classifiedImage.horizon.distance);
                 int minY = int(std::max(3.0, horizon.y(point[0])));
 
                 for(int y = point[1]; y > minY; --y) {

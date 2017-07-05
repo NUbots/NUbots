@@ -41,10 +41,10 @@ namespace utility
         {
             int          splitDim;
             double       splitVal;
-            arma::Col<T> LowerBounds;
-            arma::Col<T> UpperBounds;
-            arma::uvec   dataIndices;
-            arma::uvec   spillDataIndices;
+            Eigen::Matrix<T, Eigen::Dynamic, 1> LowerBounds;
+            Eigen::Matrix<T, Eigen::Dynamic, 1> UpperBounds;
+            Eigen::Matrix<unsigned int, Eigen::Dynamic, 1>   dataIndices;
+            Eigen::Matrix<unsigned int, Eigen::Dynamic, 1>   spillDataIndices;
             uint32_t     leftChild; //std::reference_wrapper<KDTreeNode> leftChild;
             uint32_t     rightChild; //std::reference_wrapper<KDTreeNode> rightChild;
         };
@@ -55,11 +55,11 @@ namespace utility
         private:
             uint32_t root;
             std::vector<KDTreeNode<T> > nodes;
-            arma::Mat<T> data;
+            Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic> data;
 
-            double getDistSq(const uint32_t& i, const arma::Col<T>& v)
+            double getDistSq(const uint32_t& i, const Eigen::Matrix<T, Eigen::Dynamic, 1>& v)
             {
-                return arma::accu(arma::square(data.col(i) - v));
+                return (data.col(i) - v).squaredNorm();
             }
 
             void addNeighbour(std::vector<std::pair<double, uint64_t> >& nHeap, double dist, uint64_t ind)
@@ -76,12 +76,12 @@ namespace utility
                 }
             }
 
-            uint32_t mkNodeRecursive(const arma::uvec dataIndices, const arma::uvec spillDataIndices, const arma::Col<T>& LowerBounds,
-                                       const arma::Col<T>& UpperBounds, const uint& minLeafSize, const double& epsilon)
+            uint32_t mkNodeRecursive(const Eigen::Matrix<unsigned int, Eigen::Dynamic, 1> dataIndices, const Eigen::Matrix<unsigned int, Eigen::Dynamic, 1> spillDataIndices, const Eigen::Matrix<T, Eigen::Dynamic, 1>& LowerBounds,
+                                       const Eigen::Matrix<T, Eigen::Dynamic, 1>& UpperBounds, const uint& minLeafSize, const double& epsilon)
             {
                 //we need to determine the split point first, because if the data is unsplittable we should put it in a leaf
                 int splitDim = 0;
-                const arma::Col<T> boundGap = UpperBounds - LowerBounds;
+                const Eigen::Matrix<T, Eigen::Dynamic, 1> boundGap = UpperBounds - LowerBounds;
 
                 for (uint i = 0; i < boundGap.n_elem; ++i)
                 {
@@ -94,7 +94,7 @@ namespace utility
                 double splitVal = (UpperBounds[splitDim] + LowerBounds[splitDim]) / 2.0f;
 
                 //slide the split point if one child is empty
-                arma::Row<T> vals = arma::Mat<T>(data.cols(dataIndices)).row(splitDim);
+                Eigen::Matrix<T, 1, Eigen::Dynamic> vals = Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic>(data.cols(dataIndices)).row(splitDim);
                 double maxv = arma::max(vals);
                 double minv = arma::min(vals);
 
@@ -108,8 +108,8 @@ namespace utility
                     splitVal = minv;
                 }
 
-                arma::uvec leftInds  = arma::find(vals <= splitVal + epsilon);
-                arma::uvec rightInds = arma::find(vals >  splitVal + epsilon);
+                Eigen::Matrix<unsigned int, Eigen::Dynamic, 1> leftInds  = arma::find(vals <= splitVal + epsilon);
+                Eigen::Matrix<unsigned int, Eigen::Dynamic, 1> rightInds = arma::find(vals >  splitVal + epsilon);
 
                 if ((dataIndices.n_elem <= minLeafSize) || (leftInds.n_elem == 0) || (rightInds.n_elem == 0))
                 {
@@ -118,7 +118,7 @@ namespace utility
 
                     KDTreeNode<T> node =
                     {
-                        -1, 0.0f, arma::Col<T>(), arma::Col<T>(), dataIndices, spillDataIndices, empty, empty
+                        -1, 0.0f, Eigen::Matrix<T, Eigen::Dynamic, 1>(), Eigen::Matrix<T, Eigen::Dynamic, 1>(), dataIndices, spillDataIndices, empty, empty
                     };
                     nodes.push_back(node);
                 }
@@ -126,15 +126,15 @@ namespace utility
                 else
                 {
                     //separate the child data
-                    arma::uvec leftDataIndices  = dataIndices(leftInds);
-                    arma::uvec rightDataIndices = dataIndices(rightInds);
+                    Eigen::Matrix<unsigned int, Eigen::Dynamic, 1> leftDataIndices  = dataIndices(leftInds);
+                    Eigen::Matrix<unsigned int, Eigen::Dynamic, 1> rightDataIndices = dataIndices(rightInds);
 
                     //separate the spill data
-                    arma::uvec leftSpillData, rightSpillData;
+                    Eigen::Matrix<unsigned int, Eigen::Dynamic, 1> leftSpillData, rightSpillData;
 
                     if (epsilon > 0.0f)
                     {
-                        arma::Col<T> spillDists = arma::Mat<T>(data.cols(spillDataIndices)).row(splitDim).t();
+                        Eigen::Matrix<T, Eigen::Dynamic, 1> spillDists = Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic>(data.cols(spillDataIndices)).row(splitDim).transpose();
 
                         leftSpillData = arma::join_cols(
                                             spillDataIndices(arma::find(spillDists <= splitVal+epsilon)),
@@ -147,15 +147,15 @@ namespace utility
                     }
 
                     //create the child bounds
-                    arma::Col<T> leftBounds  = UpperBounds;
+                    Eigen::Matrix<T, Eigen::Dynamic, 1> leftBounds  = UpperBounds;
                     leftBounds[splitDim]     = splitVal;
-                    arma::Col<T> rightBounds = LowerBounds;
+                    Eigen::Matrix<T, Eigen::Dynamic, 1> rightBounds = LowerBounds;
                     rightBounds[splitDim]    = splitVal;
 
                     //make a new node with children
                     KDTreeNode<T> node =
                     {
-                        splitDim, splitVal, LowerBounds, UpperBounds, arma::uvec(), arma::uvec(),
+                        splitDim, splitVal, LowerBounds, UpperBounds, Eigen::Matrix<unsigned int, Eigen::Dynamic, 1>(), Eigen::Matrix<unsigned int, Eigen::Dynamic, 1>(),
                         mkNodeRecursive(leftDataIndices, leftSpillData, LowerBounds, leftBounds, minLeafSize, epsilon),
                         mkNodeRecursive(rightDataIndices, rightSpillData, rightBounds, UpperBounds, minLeafSize, epsilon)
                     };
@@ -167,15 +167,15 @@ namespace utility
             }
 
         public:
-            KDTree(const arma::Mat<T>& d, const uint& minLeafSize, const double epsilon = 0.0f)
+            KDTree(const Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic>& d, const uint& minLeafSize, const double epsilon = 0.0f)
             {
                 nodes.push_back(KDTreeNode<T>());
                 data = d;
-                arma::uvec inds = arma::linspace<arma::uvec>(0, data.n_cols - 1, data.n_cols);
-                root = mkNodeRecursive(inds, arma::uvec(), arma::min(data, 1), arma::max(data, 1), minLeafSize, epsilon);
+                Eigen::Matrix<unsigned int, Eigen::Dynamic, 1> inds = arma::linspace<Eigen::Matrix<unsigned int, Eigen::Dynamic, 1>>(0, data.n_cols - 1, data.n_cols);
+                root = mkNodeRecursive(inds, Eigen::Matrix<unsigned int, Eigen::Dynamic, 1>(), arma::min(data, 1), arma::max(data, 1), minLeafSize, epsilon);
             }
 
-            std::vector<std::pair<double, uint64_t> > query(const arma::Col<T>& val, const int& kneighbours,
+            std::vector<std::pair<double, uint64_t> > query(const Eigen::Matrix<T, Eigen::Dynamic, 1>& val, const int& kneighbours,
                                                           const uint64_t& maxLeaves = 10000000,
                                                           const double lowDimProjError = 0.0f)
             {
@@ -256,7 +256,7 @@ namespace utility
                 return(total);
             }
 
-            void replaceData(const arma::Mat<T>& d)
+            void replaceData(const Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic>& d)
             {
                 /*
                 Replaces the internal data store with d.

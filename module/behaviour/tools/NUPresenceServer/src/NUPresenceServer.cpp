@@ -61,14 +61,14 @@ namespace tools {
             //Todo: make this a global config struct message
             float yaw = config["robot_to_head"]["yaw"].as<Expression>();
             float pitch = config["robot_to_head"]["pitch"].as<Expression>();
-            arma::vec3 pos = config["robot_to_head"]["pos"].as<arma::vec>();
+            Eigen::Vector3d pos = config["robot_to_head"]["pos"].as<Expression>();
 
             robot_to_head_scale = config["robot_to_head"]["scale"].as<Expression>();
             robot_to_head = Transform3D::createTranslation(pos) * Transform3D::createRotationZ(yaw) * Transform3D::createRotationY(pitch);
 
-            arma::vec oculus_x_axis = config["oculus"]["x_axis"].as<arma::vec>();
-            arma::vec oculus_y_axis = config["oculus"]["y_axis"].as<arma::vec>();
-            arma::vec oculus_z_axis = config["oculus"]["z_axis"].as<arma::vec>();
+            Eigen::VectorXd oculus_x_axis = config["oculus"]["x_axis"].as<Expression>();
+            Eigen::VectorXd oculus_y_axis = config["oculus"]["y_axis"].as<Expression>();
+            Eigen::VectorXd oculus_z_axis = config["oculus"]["z_axis"].as<Expression>();
 
             camera_to_robot.rotation() = arma::join_rows(oculus_x_axis,arma::join_rows(oculus_y_axis,oculus_z_axis));
         });
@@ -82,22 +82,22 @@ namespace tools {
             imageFragment->start = 0;
             imageFragment->end   = image.data.size();
 
-            Transform3D cam_to_right_foot = convert<double, 4, 4>(sensors.forwardKinematics.at(ServoID::R_ANKLE_ROLL).inverse() * sensors.forwardKinematics.at(ServoID::HEAD_PITCH));
-            Transform3D cam_to_left_foot  = convert<double, 4, 4>(sensors.forwardKinematics.at(ServoID::L_ANKLE_ROLL).inverse() * sensors.forwardKinematics.at(ServoID::HEAD_PITCH));
+            Transform3D cam_to_right_foot = sensors.forwardKinematics.at(ServoID::R_ANKLE_ROLL).inverse() * sensors.forwardKinematics.at(ServoID::HEAD_PITCH);
+            Transform3D cam_to_left_foot  = sensors.forwardKinematics.at(ServoID::L_ANKLE_ROLL).inverse() * sensors.forwardKinematics.at(ServoID::HEAD_PITCH);
 
             Transform3D cam_to_feet = cam_to_left_foot;
             cam_to_feet.translation() = 0.5 * (cam_to_left_foot.translation() + cam_to_right_foot.translation()) ;
-            cam_to_feet = robot_to_head.i() * cam_to_feet;
+            cam_to_feet = robot_to_head.inverse() * cam_to_feet;
             cam_to_feet.translation() /= robot_to_head_scale;
 
-            cam_to_feet = camera_to_robot.t() * cam_to_feet * camera_to_robot;
+            cam_to_feet = camera_to_robot.transpose() * cam_to_feet * camera_to_robot;
 
             //hack out translation
             //TODO: fix translation
             cam_to_feet.translation() *= 0;
-            // std::cout << "robot_to_head.i() \n" << robot_to_head.i();
+            // std::cout << "robot_to_head.inverse() \n" << robot_to_head.inverse();
             // std::cout << "cam_to_feet \n" << cam_to_feet;
-            imageFragment->cam_to_feet = convert<float, 4, 4>(arma::conv_to<arma::fmat>::from(cam_to_feet));
+            imageFragment->cam_to_feet = arma::conv_to<arma::fmat>::from(cam_to_feet);
 
             emit<Scope::NETWORK>(imageFragment, "nupresenceclient", reliable);
 

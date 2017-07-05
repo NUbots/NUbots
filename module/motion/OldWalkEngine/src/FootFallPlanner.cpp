@@ -41,13 +41,13 @@ namespace motion {
         uRightFootSource = uRightFootDestination;
         uTorsoSource = uTorsoDestination;
 
-        arma::vec2 supportMod = arma::zeros(2); // support point modulation for wallkick
+        Eigen::Vector2d supportMod = Eigen::Vector2d::Zero(); // support point modulation for wallkick
 
         if (state == State::STOP_REQUEST) {
             log<NUClear::TRACE>("Walk Engine:: Stop requested");
             state = State::LAST_STEP;
-            velocityCurrent = arma::zeros(3);
-            velocityCommand = arma::zeros(3);
+            velocityCurrent = Eigen::Vector3d::Zero();
+            velocityCommand = Eigen::Vector3d::Zero();
 
             // Stop with feet together by targetting swing leg next to support leg
             if (swingLeg == LimbID::RIGHT_LEG) {
@@ -132,7 +132,7 @@ namespace motion {
         velocityCurrent.angle() += velocityDifference.angle();
 
         if (initialStep > 0) {
-            velocityCurrent = arma::zeros(3);
+            velocityCurrent = Eigen::Vector3d::Zero();
             initialStep--;
         }
     }
@@ -170,7 +170,7 @@ namespace motion {
         return footTarget;
     }
 
-    arma::vec3 OldWalkEngine::footPhase(double phase, double phase1Single, double phase2Single) {
+    Eigen::Vector3d OldWalkEngine::footPhase(double phase, double phase1Single, double phase2Single) {
         // Computes relative x,z motion of foot during single support phase
         // phSingle = 0: x=0, z=0, phSingle = 1: x=1,z=0
         double phaseSingle = std::min(std::max(phase - phase1Single, 0.0) / (phase2Single - phase1Single), 1.0);

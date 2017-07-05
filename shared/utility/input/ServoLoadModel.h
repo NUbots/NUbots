@@ -35,24 +35,24 @@ namespace input
 
         ServoLoadModel() {} // empty constructor
 
-        arma::vec::fixed<size> timeUpdate(const arma::vec::fixed<size>& state, double /*deltaT*/) {
+        Eigen::Matrix<double, size, 1> timeUpdate(const Eigen::Matrix<double, size, 1>& state, double /*deltaT*/) {
             return state;
         }
 
-        arma::vec::fixed<size> predictedObservation(const arma::vec::fixed<size>& state) {
+        Eigen::Matrix<double, size, 1> predictedObservation(const Eigen::Matrix<double, size, 1>& state) {
             return state;
         }
 
-        arma::vec observationDifference(const arma::vec& a, const arma::vec& b) {
+        Eigen::VectorXd observationDifference(const arma::vec& a, const arma::vec& b) {
             return a - b;
         }
 
-        arma::vec::fixed<size> limitState(const arma::vec::fixed<size>& state) {
+        Eigen::Matrix<double, size, 1> limitState(const Eigen::Matrix<double, size, 1>& state) {
             return state;
         }
 
-        arma::mat::fixed<size, size> processNoise() {
-            return arma::eye(ServoLoadModel::size, ServoLoadModel::size) * 0.001;
+        Eigen::Matrix<double, size, size> processNoise() {
+            return Eigen::Matrix<double, ServoLoadModel::size, ServoLoadModel::size>::Identity() * 0.001;
         }
     };
 }

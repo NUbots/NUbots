@@ -91,7 +91,7 @@ namespace strategy {
         approach->targetPositionType = WalkTarget::Ball;
         approach->targetHeadingType = WalkTarget::WayPoint;
         approach->walkMovementType = WalkApproach::WalkToPoint;
-        approach->heading = arma::vec2({3, 0}); // TODO: unhack
+        approach->heading = Eigen::Vector2d(3, 0); // TODO: unhack
         emit(std::move(approach));
         currentState = Behaviour::WALK_TO_BALL;
     }

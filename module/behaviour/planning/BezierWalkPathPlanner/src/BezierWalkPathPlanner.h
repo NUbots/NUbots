@@ -63,11 +63,11 @@ namespace module {
 
                     //info for the current walk
                     message::behaviour::MotionCommand latestCommand;
-                    // arma::vec2 currentTargetPosition;
-                    // arma::vec2 currentTargetHeading;
+                    // Eigen::Vector2d currentTargetPosition;
+                    // Eigen::Vector2d currentTargetHeading;
                     // message::behaviour::MotionCommand::Type planType;
                     // message::behaviour::KickPlan targetHeading;
-                    // arma::vec2 targetPosition = {0, 0};
+                    // Eigen::Vector2d targetPosition = {0, 0};
 
                 public:
                     explicit BezierWalkPathPlanner(std::unique_ptr<NUClear::Environment> environment);

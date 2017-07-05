@@ -127,8 +127,8 @@ namespace motion {
 
 
             // 4x4 homogeneous transform matrices for left foot and right foot relative to torso
-            Transform3D leftFoot  = convert<double, 4, 4>(sensors.forwardKinematics.at(ServoID::L_ANKLE_ROLL));
-            Transform3D rightFoot = convert<double, 4, 4>(sensors.forwardKinematics.at(ServoID::R_ANKLE_ROLL));
+            Transform3D leftFoot  = sensors.forwardKinematics.at(ServoID::L_ANKLE_ROLL);
+            Transform3D rightFoot = sensors.forwardKinematics.at(ServoID::R_ANKLE_ROLL);
 
             // Work out which of our feet are going to be the support foot
             // Store the support foot and kick foot
@@ -138,21 +138,21 @@ namespace motion {
                 supportFoot = LimbID::RIGHT_LEG;
             }
 
-            Transform3D torsoPose = (supportFoot == LimbID::LEFT_LEG) ? leftFoot.i() : rightFoot.i();
+            Transform3D torsoPose = (supportFoot == LimbID::LEFT_LEG) ? leftFoot.inverse() : rightFoot.inverse();
 
             // Put the ball position from vision into torso coordinates
-            arma::vec3 targetTorso;// = Transform3D(convert<double, 4, 4>(sensors.kinematicsBodyToGround)).i().transformPoint(convert<double, 3>(command.target)); //TODO fix
+            Eigen::Vector3d targetTorso;// = Transform3D(sensors.kinematicsBodyToGround).inverse().transformPoint(command.target); //TODO fix
             // Put the ball position into support foot coordinates
-            arma::vec3 targetSupportFoot = torsoPose.transformPoint(targetTorso);
+            Eigen::Vector3d targetSupportFoot = torsoPose.transformPoint(targetTorso);
 
             // Put the goal from vision into torso coordinates
-            arma::vec3 directionTorso;// = Transform3D(convert<double, 4, 4>(sensors.kinematicsBodyToGround)).i().transformVector(convert<double, 3>(command.direction)); //TODO fix
+            Eigen::Vector3d directionTorso;// = Transform3D(sensors.kinematicsBodyToGround).inverse().transformVector(command.direction); //TODO fix
             // Put the goal into support foot coordinates
-            arma::vec3 directionSupportFoot = torsoPose.transformVector(directionTorso);
+            Eigen::Vector3d directionSupportFoot = torsoPose.transformVector(directionTorso);
 
-            arma::vec3 ballPosition = targetSupportFoot;
+            Eigen::Vector3d ballPosition = targetSupportFoot;
             ballPosition[2] = 0.05; //TODO: figure out why ball height is unreliable
-            arma::vec3 goalPosition = directionSupportFoot;
+            Eigen::Vector3d goalPosition = directionSupportFoot;
             goalPosition[2] = 0.0; //TODO: figure out why ball height is unreliable
 
             balancer.setKickParameters(supportFoot, ballPosition, goalPosition);
@@ -196,7 +196,7 @@ namespace motion {
             if(balancer.isRunning()){
                 Transform3D supportFootPose = balancer.getFootPose(sensors);
                 supportFootGoal = supportFootPose;
-                kickFootGoal = supportFootPose.translate(arma::vec3({0, negativeIfKickRight * foot_separation, 0}));
+                kickFootGoal = supportFootPose.translate(Eigen::Vector3d(0, negativeIfKickRight * foot_separation, 0));
             }
 
             //Move foot to ball to kick

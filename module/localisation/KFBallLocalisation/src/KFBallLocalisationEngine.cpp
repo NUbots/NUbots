@@ -63,22 +63,22 @@ double KFBallLocalisationEngine::MeasurementUpdate(const VisionObject& observed_
             ballAngle = std::atan2(currentState(1), currentState(0));
         }
 
-        arma::vec3 measuredPosCartesian = sphericalToCartesian(measurement.position);
-        arma::vec2 cartesianImuObservation2d = observed_object.sensors->robotToIMU * measuredPosCartesian.rows(0,1);
-        arma::vec3 cartesianImuObservation = arma::vec3({cartesianImuObservation2d(0),
+        Eigen::Vector3d measuredPosCartesian = sphericalToCartesian(measurement.position);
+        Eigen::Vector2d cartesianImuObservation2d = observed_object.sensors->robotToIMU * measuredPosCartesian.rows(0,1);
+        Eigen::Vector3d cartesianImuObservation = Eigen::Vector3d(cartesianImuObservation2d(0),
                                                          cartesianImuObservation2d(1),
-                                                         measuredPosCartesian(2)});
-        arma::vec3 sphericalImuObservation = cartesianToSpherical(cartesianImuObservation);
+                                                         measuredPosCartesian(2));
+        Eigen::Vector3d sphericalImuObservation = cartesianToSpherical(cartesianImuObservation);
         sphericalImuObservation(1) -= ballAngle;
-        arma::mat33 cov = measurement.error;
+        Eigen::Matrix3d cov = measurement.error;
 
         //Old measurement
         // quality *= ball_filter_.measurementUpdate(sphericalImuObservation, cov, ballAngle);
 
         //new measurement
         //add velocity before measurement:
-        arma::vec posVel = arma::join_cols(sphericalImuObservation, measurement.velocity.rows(0,1));
-        arma::mat posVelCov = arma::eye(5,5);
+        Eigen::VectorXd posVel = arma::join_cols(sphericalImuObservation, measurement.velocity.rows(0,1));
+        arma::mat posVelCov = Eigen::Matrix<double, 5, 5>::Identity();
         posVelCov.submat(0,0,2,2) = cov;
         posVelCov.submat(3,3,4,4) = measurement.velCov.submat(0,0,1,1);
         quality *= ball_filter_.measurementUpdate(posVel, posVelCov, ballAngle);

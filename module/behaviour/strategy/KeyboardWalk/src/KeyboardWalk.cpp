@@ -224,7 +224,7 @@ namespace strategy {
 
     void KeyboardWalk::updateCommand() {
         if (moving) {
-            std::cout << "New command " << velocity.t() <<  " " << rotation << std::endl;
+            std::cout << "New command " << velocity.transpose() <<  " " << rotation << std::endl;
             emit(std::make_unique<MotionCommand>(utility::behaviour::DirectCommand(Transform2D(velocity, rotation))));
         }
 

@@ -45,8 +45,8 @@ namespace tools {
                 doThings = true;
             } else {
                 emit(std::make_unique<KickCommand>(KickCommand(
-                   convert<double, 3>(config["target"].as<arma::vec3>()),
-                   convert<double, 3>(config["direction"].as<arma::vec3>()),
+                   config["target"].as<Expression>(),
+                   config["direction"].as<Expression>(),
                    KickCommandType::NORMAL
                 )));
             }

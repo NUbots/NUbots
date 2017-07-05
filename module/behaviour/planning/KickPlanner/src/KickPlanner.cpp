@@ -96,9 +96,9 @@ namespace planning {
 
             //Compute target in robot coords
             auto self = selfs[0];
-            arma::vec2 kickTarget = {1,0,0}; //Kick forwards
-            // arma::vec2 kickTarget = WorldToRobotTransform(self.position, self.heading, kickPlan.target);
-            arma::vec3 ballPosition = {100,0,0};//too far to kick
+            Eigen::Vector2d kickTarget = {1,0,0}; //Kick forwards
+            // Eigen::Vector2d kickTarget = WorldToRobotTransform(self.position, self.heading, kickPlan.target);
+            Eigen::Vector3d ballPosition = {100,0,0};//too far to kick
             if(ball.size()>0){
                 ballPosition = {ball[0].locObject.position[0], ball[0].locObject.position[1], fd.ball_radius};
                 ball_last_measurement_time = now;
@@ -107,7 +107,7 @@ namespace planning {
             float KickAngle = std::fabs(std::atan2(kickTarget[1], kickTarget[0]));
 
             //Check whether to kick
-            log("kickTarget",kickTarget.t());
+            log("kickTarget",kickTarget.transpose());
             log("KickAngle",KickAngle);
             log("ballPosition",ballPosition);
             log("secondsSinceLastSeen",secondsSinceLastSeen);
@@ -152,7 +152,7 @@ namespace planning {
     }
 
 
-    bool KickPlanner::kickValid(const arma::vec3& ballPos){
+    bool KickPlanner::kickValid(const Eigen::Vector3d& ballPos){
         return (ballPos[0] > 0) && (ballPos[0] < cfg.max_ball_distance) && (std::fabs(ballPos[1]) < cfg.kick_corridor_width / 2.0);
     }
 

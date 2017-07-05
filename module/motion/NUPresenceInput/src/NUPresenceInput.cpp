@@ -82,7 +82,7 @@ namespace motion {
 
 			float yaw = config["robot_to_head"]["yaw"].as<Expression>();
 			float pitch = config["robot_to_head"]["pitch"].as<Expression>();
-			arma::vec3 pos = config["robot_to_head"]["pos"].as<arma::vec>();
+			Eigen::Vector3d pos = config["robot_to_head"]["pos"].as<Expression>();
 
             oculus_to_robot_scale = config["robot_to_head"]["scale"].as<Expression>();
 			robot_to_head = Transform3D::createTranslation(pos) * Transform3D::createRotationZ(yaw) * Transform3D::createRotationY(pitch);
@@ -92,14 +92,14 @@ namespace motion {
 
             smoothing_alpha = config["smoothing_alpha"].as<Expression>();
 
-			l_arm = config["l_arm"].as<arma::vec>();
-			r_arm = config["r_arm"].as<arma::vec>();
+			l_arm = config["l_arm"].as<Expression>();
+			r_arm = config["r_arm"].as<Expression>();
 
-            arma::vec oculus_x_axis = config["oculus"]["x_axis"].as<arma::vec>();
-            arma::vec oculus_y_axis = config["oculus"]["y_axis"].as<arma::vec>();
-            arma::vec oculus_z_axis = config["oculus"]["z_axis"].as<arma::vec>();
+            Eigen::VectorXd oculus_x_axis = config["oculus"]["x_axis"].as<Expression>();
+            Eigen::VectorXd oculus_y_axis = config["oculus"]["y_axis"].as<Expression>();
+            Eigen::VectorXd oculus_z_axis = config["oculus"]["z_axis"].as<Expression>();
 
-            arma::mat33 camera_to_robot_rot = arma::join_rows(oculus_x_axis,arma::join_rows(oculus_y_axis,oculus_z_axis));
+            Eigen::Matrix3d camera_to_robot_rot = arma::join_rows(oculus_x_axis,arma::join_rows(oculus_y_axis,oculus_z_axis));
             camera_to_robot.rotation() = camera_to_robot_rot;
 
             //Kinematic limits:
@@ -131,9 +131,9 @@ namespace motion {
             l_arm_id = config["mocap_rigidbody_ids"]["l_arm"].as<int>();
             r_arm_id = config["mocap_rigidbody_ids"]["r_arm"].as<int>();
 
-            arma::vec mocap_x_axis = config["mocap"]["x_axis"].as<arma::vec>();
-            arma::vec mocap_y_axis = config["mocap"]["y_axis"].as<arma::vec>();
-            arma::vec mocap_z_axis = config["mocap"]["z_axis"].as<arma::vec>();
+            Eigen::VectorXd mocap_x_axis = config["mocap"]["x_axis"].as<Expression>();
+            Eigen::VectorXd mocap_y_axis = config["mocap"]["y_axis"].as<Expression>();
+            Eigen::VectorXd mocap_z_axis = config["mocap"]["z_axis"].as<Expression>();
             mocap_to_robot = arma::join_rows(mocap_x_axis,arma::join_rows(mocap_y_axis,mocap_z_axis));
 
             gyro_compensation = config["gyro_compensation"].as<bool>();
@@ -143,8 +143,8 @@ namespace motion {
         on<Network<PresenceUserState>, Sync<NUPresenceInput>>().then("NUPresenceInput Network Input",[this](const PresenceUserState& user){
 
             //Rotate to robot coordinate system
-            goalCamPose = arma::conv_to<arma::mat>::from(convert<float, 4, 4>(user.head_pose));
-            goalCamPose = camera_to_robot * goalCamPose.i() * camera_to_robot.t();
+            goalCamPose = arma::conv_to<arma::mat>::from(user.head_pose);
+            goalCamPose = camera_to_robot * goalCamPose.inverse() * camera_to_robot.transpose();
             goalCamPose.translation() *= oculus_to_robot_scale;
 
             limitPose(goalCamPose);
@@ -152,12 +152,12 @@ namespace motion {
             // pose << user.head_pose();
             // goalCamPose = Transform3D(arma::conv_to<arma::mat>::from(pose));
             // std::cout << "goalCamPose = \n" << goalCamPose << std::endl;
-            // std::cout << "robotCamPos = " << user.head_pose().t().x() << " "<<  user.head_pose().t().y() << " "<<  user.head_pose().t().z() << std::endl;
+            // std::cout << "robotCamPos = " << user.head_pose().transpose().x() << " "<<  user.head_pose().transpose().y() << " "<<  user.head_pose().transpose().z() << std::endl;
 
         });
 
         on<Trigger<MotionCapture>, Sync<NUPresenceInput>>().then([this](const MotionCapture& mocap){
-            arma::vec3 l_arm_raw, r_arm_raw;
+            Eigen::Vector3d l_arm_raw, r_arm_raw;
             int marker_count = 0;
             for (auto& rigidBody : mocap.rigidBodies) {
 
@@ -165,15 +165,15 @@ namespace motion {
                 float x = rigidBody.position[0];
                 float y = rigidBody.position[1];
                 float z = rigidBody.position[2];
-                // std::cout << "Rigid body " << id << " " << arma::vec({x,y,z}).t();
+                // std::cout << "Rigid body " << id << " " << Eigen::Vector3d(x,y,z).transpose();
                 if(id == head_id){
-                        mocap_head_pos = oculus_to_robot_scale * mocap_to_robot * arma::vec3({x,y,z});
+                        mocap_head_pos = oculus_to_robot_scale * mocap_to_robot * Eigen::Vector3d(x,y,z);
                         marker_count++;
                 } else if(id == l_arm_id){
-                        l_arm_raw = oculus_to_robot_scale * mocap_to_robot * arma::vec3({x,y,z});
+                        l_arm_raw = oculus_to_robot_scale * mocap_to_robot * Eigen::Vector3d(x,y,z);
                         marker_count++;
                 } else if(id == r_arm_id){
-                        r_arm_raw = oculus_to_robot_scale * mocap_to_robot * arma::vec3({x,y,z});
+                        r_arm_raw = oculus_to_robot_scale * mocap_to_robot * Eigen::Vector3d(x,y,z);
                         marker_count++;
                 }
 
@@ -189,12 +189,12 @@ namespace motion {
         >().then([this](const Sensors& sensors, const KinematicsModel& kinematicsModel){
 
         	//Record current arm position:
-        	// arma::vec3 prevArmJointsL = {
+        	// Eigen::Vector3d prevArmJointsL = {
         	// 							sensors.servos[int(ServoID::L_SHOULDER_PITCH)].presentPosition,
         	// 							sensors.servos[int(ServoID::L_SHOULDER_ROLL)].presentPosition,
         	// 							sensors.servos[int(ServoID::L_ELBOW)].presentPosition,
         	// 							};
-        	// arma::vec3 prevArmJointsR = {
+        	// Eigen::Vector3d prevArmJointsR = {
         	// 							sensors.servos[int(ServoID::R_SHOULDER_PITCH)].presentPosition,
         	// 							sensors.servos[int(ServoID::R_SHOULDER_ROLL)].presentPosition,
         	// 							sensors.servos[int(ServoID::R_ELBOW)].presentPosition,
@@ -205,9 +205,9 @@ namespace motion {
             // currentCamPose.rotation() = Rotation3D();
 
             //3DoF
-            arma::vec3 gaze = currentCamPose.rotation().col(0);
-            Rotation3D yawlessOrientation = Rotation3D::createRotationZ(Rotation3D(Transform3D(convert<double, 4, 4>(-sensors.world)).rotation()).yaw()) *
-                                                                        Transform3D(convert<double, 4, 4>( sensors.world)).rotation();
+            Eigen::Vector3d gaze = currentCamPose.rotation().col(0);
+            Rotation3D yawlessOrientation = Rotation3D::createRotationZ(Rotation3D(Transform3D(-sensors.world).rotation()).yaw()) *
+                                                                        Transform3D(sensors.world).rotation();
 
             if(gyro_compensation){
                 gaze = yawlessOrientation * gaze;
@@ -219,8 +219,8 @@ namespace motion {
 
 			//Adjust arm position
         	// int max_number_of_iterations = 20;
-            Transform3D camToBody = convert<double, 4, 4>(sensors.forwardKinematics.at(ServoID::HEAD_PITCH));
-            arma::vec3 kneckPos = { kinematicsModel.head.NECK_BASE_POS_FROM_ORIGIN_X,
+            Transform3D camToBody = sensors.forwardKinematics.at(ServoID::HEAD_PITCH);
+            Eigen::Vector3d kneckPos = { kinematicsModel.head.NECK_BASE_POS_FROM_ORIGIN_X,
                                     kinematicsModel.head.NECK_BASE_POS_FROM_ORIGIN_Y,
                                     kinematicsModel.head.NECK_BASE_POS_FROM_ORIGIN_Z};
         	auto arm_jointsL = utility::motion::kinematics::setArmApprox(kinematicsModel, kneckPos + l_arm, true);
@@ -245,8 +245,8 @@ namespace motion {
         	// Transform3D L_shoulder_roll = sensors.forwardKinematics.at(ServoID::L_SHOULDER_ROLL);
         	// Transform3D L_arm = sensors.forwardKinematics.at(ServoID::L_ELBOW);
 
-        	// arma::vec3 zeros = arma::zeros(3);
-        	// arma::vec3 zero_pos = utility::motion::kinematics::calculateArmPosition(kinematicsModel, zeros, true);
+        	// Eigen::Vector3d zeros = Eigen::Vector3d::Zero();
+        	// Eigen::Vector3d zero_pos = utility::motion::kinematics::calculateArmPosition(kinematicsModel, zeros, true);
 
         	// std::cout << "New zero pos = \n" << zero_pos << std::endl;
         	// std::cout << "Traditional FK R_shoulder_pitch = \n" << R_shoulder_pitch << std::endl;
@@ -284,18 +284,18 @@ namespace motion {
     }
 
     void NUPresenceInput::limitPose(Transform3D& pose){
-        float norm = arma::norm(pose.translation());
+        float norm = pose.translation().norm();
         if( norm > distance_limit){
             pose.translation() = distance_limit * pose.translation() / norm;
         }
 
-        arma::vec3 eulerAngles = pose.eulerAngles();
-        // std::cout << "eulerAngles = " << eulerAngles.t();
+        Eigen::Vector3d eulerAngles = pose.eulerAngles();
+        // std::cout << "eulerAngles = " << eulerAngles.transpose();
         // std::cout << "eulerLimits = " << ", " << eulerLimits.roll.max << ", " << eulerLimits.roll.min << "; " << eulerLimits.pitch.max << ", " << eulerLimits.pitch.min << "; " << eulerLimits.yaw.max << ", " << eulerLimits.yaw.min << std::endl;
         eulerAngles[0] = std::fmax(std::fmin(eulerAngles[0],eulerLimits.roll.max),eulerLimits.roll.min);
         eulerAngles[1] = std::fmax(std::fmin(eulerAngles[1],eulerLimits.pitch.max),eulerLimits.pitch.min);
         eulerAngles[2] = std::fmax(std::fmin(eulerAngles[2],eulerLimits.yaw.max),eulerLimits.yaw.min);
-        // std::cout << "eulerAngles = " << eulerAngles.t();
+        // std::cout << "eulerAngles = " << eulerAngles.transpose();
         pose.rotation() = Rotation3D::createFromEulerAngles(eulerAngles);
         // std::cout << "check = " << pose.rotation() - R << std::endl;
 

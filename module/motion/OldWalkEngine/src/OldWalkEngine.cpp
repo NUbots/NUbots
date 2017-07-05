@@ -147,7 +147,7 @@ namespace motion {
 
         on<Trigger<WalkCommand>>().then([this] (const WalkCommand& walkCommand) {
 
-            Transform2D velocity = convert<double, 3>(walkCommand.command);
+            Transform2D velocity = walkCommand.command;
             if (velocity.x() == 0 && velocity.y() == 0 && velocity.angle() == 0) {
                 requestStop();
             }
@@ -217,11 +217,11 @@ namespace motion {
         auto& stance = config["stance"];
         bodyHeight = stance["body_height"].as<Expression>();
         bodyTilt = stance["body_tilt"].as<Expression>();
-        qLArmStart = stance["arms"]["left"]["start"].as<arma::vec>();
-        qLArmEnd = stance["arms"]["left"]["end"].as<arma::vec>();
-        qRArmStart = stance["arms"]["right"]["start"].as<arma::vec>();
-        qRArmEnd = stance["arms"]["right"]["end"].as<arma::vec>();
-        footOffset = stance["foot_offset"].as<arma::vec>();
+        qLArmStart = stance["arms"]["left"]["start"].as<Expression>();
+        qLArmEnd = stance["arms"]["left"]["end"].as<Expression>();
+        qRArmStart = stance["arms"]["right"]["start"].as<Expression>();
+        qRArmEnd = stance["arms"]["right"]["end"].as<Expression>();
+        footOffset = stance["foot_offset"].as<Expression>();
         // gToe/heel overlap checking values
         stanceLimitY2 = kinematicsModel.leg.LENGTH_BETWEEN_LEGS - stance["limit_margin_y"].as<Expression>();
 
@@ -242,18 +242,18 @@ namespace motion {
         zmpTime = walkCycle["zmp_time"].as<Expression>();
         hipRollCompensation = walkCycle["hip_roll_compensation"].as<Expression>();
         stepHeight = walkCycle["step"]["height"].as<Expression>();
-        stepLimits = walkCycle["step"]["limits"].as<arma::mat::fixed<3,2>>();
+        stepLimits = walkCycle["step"]["limits"].as<Expression>();
 
         step_height_slow_fraction = walkCycle["step"]["height_slow_fraction"].as<float>();
         step_height_fast_fraction = walkCycle["step"]["height_fast_fraction"].as<float>();
 
         auto& velocity = walkCycle["velocity"];
-        velocityLimits = velocity["limits"].as<arma::mat::fixed<3,2>>();
+        velocityLimits = velocity["limits"].as<Expression>();
         velocityHigh = velocity["high_speed"].as<Expression>();
 
         auto& acceleration = walkCycle["acceleration"];
-        accelerationLimits = acceleration["limits"].as<arma::vec>();
-        accelerationLimitsHigh = acceleration["limits_high"].as<arma::vec>();
+        accelerationLimits = acceleration["limits"].as<Expression>();
+        accelerationLimitsHigh = acceleration["limits_high"].as<Expression>();
         accelerationTurningFactor = acceleration["turning_factor"].as<Expression>();
 
         phase1Single = walkCycle["single_support_phase"]["start"].as<Expression>();
@@ -280,12 +280,12 @@ namespace motion {
         ankleMod = {-toeTipCompensation, 0};
 
         // gGyro stabilization parameters
-        ankleImuParamX = config["ankleImuParamX"].as<arma::vec>();
-        ankleImuParamY = config["ankleImuParamY"].as<arma::vec>();
-        kneeImuParamX = config["kneeImuParamX"].as<arma::vec>();
-        hipImuParamY = config["hipImuParamY"].as<arma::vec>();
-        armImuParamX = config["armImuParamX"].as<arma::vec>();
-        armImuParamY = config["armImuParamY"].as<arma::vec>();
+        ankleImuParamX = config["ankleImuParamX"].as<Expression>();
+        ankleImuParamY = config["ankleImuParamY"].as<Expression>();
+        kneeImuParamX = config["kneeImuParamX"].as<Expression>();
+        hipImuParamY = config["hipImuParamY"].as<Expression>();
+        armImuParamX = config["armImuParamX"].as<Expression>();
+        armImuParamY = config["armImuParamY"].as<Expression>();
 
         // gSupport bias parameters to reduce backlash-based instability
         velFastForward = config["velFastForward"].as<Expression>();
@@ -323,9 +323,9 @@ namespace motion {
     void OldWalkEngine::stanceReset() {
         // standup/sitdown/falldown handling
         if (startFromStep) {
-            uLeftFoot = arma::zeros(3);
-            uRightFoot = arma::zeros(3);
-            uTorso = arma::zeros(3);
+            uLeftFoot = Eigen::Vector3d::Zero();
+            uRightFoot = Eigen::Vector3d::Zero();
+            uTorso = Eigen::Vector3d::Zero();
 
             // start walking asap
             initialStep = 1;
@@ -357,20 +357,20 @@ namespace motion {
         uLeftFoot = {0, kinematicsModel.leg.HIP_OFFSET_Y, 0};
         uRightFoot = {0, -kinematicsModel.leg.HIP_OFFSET_Y, 0};
 
-        uTorsoSource = arma::zeros(3);
-        uTorsoDestination = arma::zeros(3);
-        uLeftFootSource = arma::zeros(3);
-        uLeftFootDestination = arma::zeros(3);
-        uRightFootSource = arma::zeros(3);
-        uRightFootDestination = arma::zeros(3);
+        uTorsoSource = Eigen::Vector3d::Zero();
+        uTorsoDestination = Eigen::Vector3d::Zero();
+        uLeftFootSource = Eigen::Vector3d::Zero();
+        uLeftFootDestination = Eigen::Vector3d::Zero();
+        uRightFootSource = Eigen::Vector3d::Zero();
+        uRightFootDestination = Eigen::Vector3d::Zero();
 
-        velocityCurrent = arma::zeros(3);
-        velocityCommand = arma::zeros(3);
-        velocityDifference = arma::zeros(3);
+        velocityCurrent = Eigen::Vector3d::Zero();
+        velocityCommand = Eigen::Vector3d::Zero();
+        velocityDifference = Eigen::Vector3d::Zero();
 
         // gZMP exponential coefficients:
-        zmpCoefficients = arma::zeros(4);
-        zmpParams = arma::zeros(4);
+        zmpCoefficients = Eigen::Vector4d::Zero();
+        zmpParams = Eigen::Vector4d::Zero();
 
         // gGyro stabilization variables
         swingLeg = swingLegInitial;
@@ -459,7 +459,7 @@ namespace motion {
 
     void OldWalkEngine::updateStep(double phase, const Sensors& sensors) {
         //Get unitless phases for x and z motion
-        arma::vec3 foot = footPhase(phase, phase1Single, phase2Single);
+        Eigen::Vector3d foot = footPhase(phase, phase1Single, phase2Single);
 
         //Lift foot by amount depending on walk speed
         auto& limit = (velocityCurrent.x() > velocityHigh ? accelerationLimitsHigh : accelerationLimits); // TODO: use a function instead
@@ -503,10 +503,10 @@ namespace motion {
 
         // Rotate foot around hip by the given hip roll compensation
         if (swingLeg == LimbID::LEFT_LEG) {
-            rightFootTorso = rightFootTorso.rotateZLocal(-hipRollCompensation * phaseComp, convert<double, 4, 4>(sensors.forwardKinematics.find(ServoID::R_HIP_ROLL)->second));
+            rightFootTorso = rightFootTorso.rotateZLocal(-hipRollCompensation * phaseComp, sensors.forwardKinematics.find(ServoID::R_HIP_ROLL->second));
         }
         else {
-            leftFootTorso = leftFootTorso.rotateZLocal(hipRollCompensation * phaseComp, convert<double, 4, 4>(sensors.forwardKinematics.find(ServoID::L_HIP_ROLL)->second));
+            leftFootTorso = leftFootTorso.rotateZLocal(hipRollCompensation * phaseComp, sensors.forwardKinematics.find(ServoID::L_HIP_ROLL->second));
         }
 
         //TODO:is this a Debug?
@@ -589,8 +589,8 @@ namespace motion {
         }
 
         // Linearly interpolate between the start and end positions using the easing parameter
-        arma::vec3 qLArmActual = easing * qLArmStart + (1.0 - easing) * qLArmEnd;
-        arma::vec3 qRArmActual = (1.0 - easing) * qRArmStart + easing * qRArmEnd;
+        Eigen::Vector3d qLArmActual = easing * qLArmStart + (1.0 - easing) * qLArmEnd;
+        Eigen::Vector3d qRArmActual = (1.0 - easing) * qRArmStart + easing * qRArmEnd;
 
         // Start arm/leg collision/prevention
         double rotLeftA = normalizeAngle(uLeftFoot.angle() - uTorso.angle());
@@ -649,7 +649,7 @@ namespace motion {
         return velocityCurrent;
     }
 
-    arma::vec2 OldWalkEngine::zmpSolve(double zs, double z1, double z2, double x1, double x2, double phase1Single, double phase2Single, double stepTime, double zmpTime) {
+    Eigen::Vector2d OldWalkEngine::zmpSolve(double zs, double z1, double z2, double x1, double x2, double phase1Single, double phase2Single, double stepTime, double zmpTime) {
         /*
         Solves ZMP equations.
         The resulting form of x is
@@ -670,7 +670,7 @@ namespace motion {
         return {aP, aN};
     }
 
-    Transform2D OldWalkEngine::zmpCom(double phase, arma::vec4 zmpCoefficients, arma::vec4 zmpParams, double stepTime, double zmpTime, double phase1Single, double phase2Single, Transform2D uSupport, Transform2D uLeftFootDestination, Transform2D uLeftFootSource, Transform2D uRightFootDestination, Transform2D uRightFootSource) {
+    Transform2D OldWalkEngine::zmpCom(double phase, Eigen::Vector4d zmpCoefficients, Eigen::Vector4d zmpParams, double stepTime, double zmpTime, double phase1Single, double phase2Single, Transform2D uSupport, Transform2D uLeftFootDestination, Transform2D uLeftFootSource, Transform2D uRightFootDestination, Transform2D uRightFootSource) {
         Transform2D com = {0, 0, 0};
         double expT = std::exp(stepTime * phase / zmpTime);
         com.x() = uSupport.x() + zmpCoefficients[0] * expT + zmpCoefficients[1] / expT;

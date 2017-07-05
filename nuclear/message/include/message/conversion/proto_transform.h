@@ -12,19 +12,19 @@ protobuf::message::Transform2D& operator<< (protobuf::message::Transform2D& prot
 }
 
 utility::math::matrix::Transform2D& operator<< (utility::math::matrix::Transform2D& transform, const protobuf::message::Transform2D& proto) {
-    arma::vec3 t;
+    Eigen::Vector3d t;
     t << proto.transform();
     transform = t;
     return transform;
 }
 
 protobuf::message::Transform3D& operator<< (protobuf::message::Transform3D& proto, const utility::math::matrix::Transform3D& transform) {
-    *proto.mutable_transform() << static_cast<arma::mat44>(transform);
+    *proto.mutable_transform() << static_cast<Eigen::Matrix4d>(transform);
     return proto;
 }
 
 utility::math::matrix::Transform3D& operator<< (utility::math::matrix::Transform3D& transform, const protobuf::message::Transform3D& proto) {
-    arma::mat44 t;
+    Eigen::Matrix4d t;
     t << proto.transform();
     transform = t;
     return transform;
@@ -34,24 +34,24 @@ utility::math::matrix::Transform3D& operator<< (utility::math::matrix::Transform
  * @brief Functions to convert the rotation classes
  */
 protobuf::message::Rotation2D& operator<< (protobuf::message::Rotation2D& proto, const utility::math::matrix::Rotation2D& transform) {
-    *proto.mutable_rotation() << static_cast<arma::mat22>(transform);
+    *proto.mutable_rotation() << static_cast<Eigen::Matrix2d>(transform);
     return proto;
 }
 
 utility::math::matrix::Rotation2D& operator<< (utility::math::matrix::Rotation2D& transform, const protobuf::message::Rotation2D& proto) {
-    arma::mat22 t;
+    Eigen::Matrix2d t;
     t << proto.rotation();
     transform = t;
     return transform;
 }
 
 protobuf::message::Rotation3D& operator<< (protobuf::message::Rotation3D& proto, const utility::math::matrix::Rotation3D& transform) {
-    *proto.mutable_rotation() << static_cast<arma::mat33>(transform);
+    *proto.mutable_rotation() << static_cast<Eigen::Matrix3d>(transform);
     return proto;
 }
 
 utility::math::matrix::Rotation3D& operator<< (utility::math::matrix::Rotation3D& transform, const protobuf::message::Rotation3D& proto) {
-    arma::mat33 t;
+    Eigen::Matrix3d t;
     t << proto.rotation();
     transform = t;
     return transform;
