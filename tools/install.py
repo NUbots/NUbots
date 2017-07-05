@@ -94,7 +94,8 @@ def run(ip_addr, hostname, config, scripts, user, toolchain, **kwargs):
         cprint('Ignoring configuration changes', 'blue', attrs=['bold'])
 
     # Pipe the git commit to file
-    version_file = open(os.path.join(build_dir, "version.txt"), "w")
-    call(["git", "log", "-1"], stdout=version_file)
-    version_file.close()
-    call(['rsync', '-avzPLR', '--checksum', '-e ssh'] + [version_file.name] + [target_dir])
+    with open(os.path.join(build_dir, 'version.txt'), 'w') as f:
+        call(["git", "log", "-1"], stdout=f)
+
+    call(['rsync', '-avzPLR', '--checksum', '-e ssh'] + ['version.txt'] + [target_dir])
+
