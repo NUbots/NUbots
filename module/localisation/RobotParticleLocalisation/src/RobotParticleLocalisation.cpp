@@ -100,15 +100,17 @@ namespace localisation {
             filter.timeUpdate(seconds);
 
             for(auto goal : goals){
+
                 //Check side and team
                 std::vector<arma::vec> poss = getPossibleFieldPositions(goal, fd);
 
                 for(auto& m: goal.measurement){
+                    //TODO: support other measurement types
+                    if(m.type != Goal::MeasurementType::CENTRE) continue;
                     //Measure objects
                     float quality = filter.ambiguousMeasurementUpdate(convert<double,3>(m.position),convert<double,3,3>(m.covariance),poss,sensors);
                 }
             }
-
 
             //Emit state
             auto selfs = std::make_unique<std::vector<Self>>();
@@ -128,8 +130,18 @@ namespace localisation {
     }
 
     std::vector<arma::vec> RobotParticleLocalisation::getPossibleFieldPositions(const message::vision::Goal& goal,
-                                                      const message::support::FieldDescription& fd) const{
+                                                                                const message::support::FieldDescription& fd) const{
         std::vector<arma::vec> possibilities;
+
+        bool left  =      (goal.side   !=  Goal::Side::RIGHT);
+        bool right =      (goal.side   !=  Goal::Side::LEFT);
+        bool own   =      (goal.team   !=  Goal::Team::OPPONENT);
+        bool opp   =      (goal.team   !=  Goal::Team::OWN);
+
+        if(own && left) possibilities.push_back(convert<double,2>(fd.goalpost_own_l));
+        if(own && right) possibilities.push_back(convert<double,2>(fd.goalpost_own_r));
+        if(opp && left) possibilities.push_back(convert<double,2>(fd.goalpost_opp_l));
+        if(opp && right) possibilities.push_back(convert<double,2>(fd.goalpost_opp_r));
 
         return possibilities;
     }

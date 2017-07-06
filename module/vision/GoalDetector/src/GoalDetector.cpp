@@ -206,8 +206,8 @@ namespace vision {
                     (point[0] < image.dimensions[0]) && (point[0] > 0) && (point[1] < image.dimensions[1]);
                     point += direction) {
 
-                    char c = static_cast<char>(utility::vision::getPixelColour(lut, 
-                        utility::vision::getPixel(int(point[0]), int(point[1]), image.image->dimensions[0], image.image->dimensions[1], image.image->data, 
+                    char c = static_cast<char>(utility::vision::getPixelColour(lut,
+                        utility::vision::getPixel(int(point[0]), int(point[1]), image.image->dimensions[0], image.image->dimensions[1], image.image->data,
                                                     static_cast<utility::vision::FOURCC>(image.image->format))));
 
                     if(c != 'y') {
@@ -399,10 +399,11 @@ namespace vision {
                 }
 
                 // Add the vector to the bottom centre of the goal post as long as post is near vertical (less than 30 degrees)
-                if (std::abs(arma::atan(left[2]/left[1])) < 0.5){
-                    auto rGCc_sphr = convert<double, 3>(cartesianToSpherical(rGCc_norm));  // Just converted into eigen. Still the unit vector
-                    it->measurement.push_back(Goal::Measurement(Goal::MeasurementType::CENTRE, rGCc_sphr));
-                }
+                // if (std::abs(arma::atan(left[2]/left[1])) < 0.5){
+                    //HACK 3m distance for debug
+                    auto rGCc_sphr = convert<double, 3>(cartesianToSpherical(3 * rGCc_norm));  // Just converted into eigen. Still the unit vector
+                    it->measurement.push_back(Goal::Measurement(Goal::MeasurementType::CENTRE, rGCc_sphr, Eigen::Matrix3d::Identity()));
+                // }
 
 
                 // Angular positions from the camera

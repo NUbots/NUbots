@@ -45,7 +45,7 @@ namespace kinematics {
     using message::input::Sensors;
     using message::motion::KinematicsModel;
     using BodySide = message::motion::BodySide::Value;
- 
+
 
     inline std::map<ServoID, utility::math::matrix::Transform3D> calculateHeadJointPosition(const KinematicsModel& model, const float& HEAD_PITCH, const float& HEAD_YAW, ServoID servoID){
         std::map<ServoID, utility::math::matrix::Transform3D> positions;
@@ -89,7 +89,7 @@ namespace kinematics {
     }
 
     inline std::map<ServoID, utility::math::matrix::Transform3D> calculateHeadJointPosition(const KinematicsModel& model, const Sensors& sensors, ServoID servoID){
-        return calculateHeadJointPosition(model, 
+        return calculateHeadJointPosition(model,
                                           sensors.servo[static_cast<int>(ServoID::HEAD_PITCH)].presentPosition,
                                           sensors.servo[static_cast<int>(ServoID::HEAD_YAW)  ].presentPosition,
                                           servoID);
@@ -420,7 +420,8 @@ namespace kinematics {
     inline arma::vec3 calculateCentreOfPressure(const KinematicsModel& model, const Sensors& sensors) {
         arma::vec4 CoP = {0,0,0,1};
         float number_of_feet_down = 0;
-        if (sensors.leftFootDown) {
+        try
+{       if (sensors.leftFootDown) {
             CoP += fsrCentreInBodyCoords(model, sensors, convert<double, 2>(sensors.fsr[LimbID::LEFT_LEG].centre), true);
             number_of_feet_down += 1.0f;
         }
@@ -428,6 +429,9 @@ namespace kinematics {
             CoP += fsrCentreInBodyCoords(model, sensors, convert<double, 2>(sensors.fsr[LimbID::RIGHT_LEG].centre), false);
             number_of_feet_down  += 1.0f;
         }
+} catch (...){
+    std::cout << __FILE__ <<  " : " << __LINE__ << " error in calculateCentreOfPressure" << std::endl;
+}
         if(number_of_feet_down == 2){
             CoP = CoP / number_of_feet_down;
         }
