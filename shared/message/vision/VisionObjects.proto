@@ -93,6 +93,7 @@ message Goal {
     message Measurement {
         MeasurementType type       = 1;
         vec3            position   = 2;
+        mat33           covariance   = 3;
     }
 
     VisionObject         visObject   = 1;

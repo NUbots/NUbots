@@ -31,6 +31,9 @@ namespace localisation {
     using utility::math::geometry::Circle;
     using utility::time::TimeDifferenceSeconds;
 
+    using message::support::FieldDescription;
+    using message::vision::Goal;
+
     RobotParticleLocalisation::RobotParticleLocalisation(std::unique_ptr<NUClear::Environment> environment)
     : Reactor(std::move(environment)) {
 
@@ -42,10 +45,10 @@ namespace localisation {
             filter.model.processNoiseDiagonal = config["process_noise_diagonal"].as<arma::vec>();
             filter.model.n_rogues = config["n_rogues"].as<int>();
             filter.model.resetRange = config["reset_range"].as<arma::vec>();
-            test_state = config["test_state"].as<arma::vec>();
             int n_particles = config["n_particles"].as<int>();
             draw_particles = config["draw_particles"].as<int>();
 
+            arma::vec3 test_state = config["test_state"].as<arma::vec>();
 
             std::vector<arma::vec3> possible_states;
             std::vector<arma::mat33> possible_var;
@@ -61,59 +64,51 @@ namespace localisation {
 
         });
 
-        constexpr int PARTICLE_UPDATE_RATE = 1;
-        on<Every<PARTICLE_UPDATE_RATE,std::chrono::seconds>,Sync<RobotParticleLocalisation>>().then([this](){
+        on<Every<PARTICLE_UPDATE_FREQUENCY,Per<std::chrono::seconds>>,Sync<RobotParticleLocalisation>>().then("Particle Debug",[this](){
             arma::mat particles = filter.getParticles();
             for(int i =0; i < std::min(draw_particles,int(particles.n_rows)); i++){
-                emit(drawCircle("particle"+std::to_string(i),Circle(0.01, particles.submat(i,0,i,1).t()), 0.05, {0, 0, 0},PARTICLE_UPDATE_RATE));
+                emit(drawCircle("particle"+std::to_string(i),Circle(0.01, particles.submat(i,0,i,1).t()), 0.05, {0, 0, 0},PARTICLE_UPDATE_FREQUENCY));
             }
         });
 
-        on<Trigger<Sensors>, Single>().then("Time Update", [this](const Sensors& sensors){
-            //First debug particles
+        on<Every<TIME_UPDATE_FREQUENCY,Per<std::chrono::seconds>>, Sync<RobotParticleLocalisation>>().then("Time Update",[this](){
+            /* Perform time update */
+            auto curr_time = NUClear::clock::now();
+            double seconds = TimeDifferenceSeconds(curr_time,last_time_update_time);
+            last_time_update_time = curr_time;
 
+            filter.timeUpdate(seconds);
+
+        });
+
+        on< Trigger<std::vector<Goal>>,
+            With<FieldDescription>,
+            With<Sensors>,
+            Sync<RobotParticleLocalisation>
+        >().then("Measurement Update",
+                [this](const std::vector<Goal>& goals,
+                       const FieldDescription& fd,
+                       const Sensors& sensors
+                       ){
+            //First debug particles
 
             /* Perform time update */
             auto curr_time = NUClear::clock::now();
             double seconds = TimeDifferenceSeconds(curr_time,last_time_update_time);
             last_time_update_time = curr_time;
+
             filter.timeUpdate(seconds);
 
-            //GOAL TEST
-            // std::vector<arma::vec> test_positions_left;
-            // //Forward goal
-            // test_positions_left.push_back(arma::vec{4.5,1.5,0});
-            // //Rear goal
-            // test_positions_left.push_back(arma::vec{-4.5,-1.5,0});
+            for(auto goal : goals){
+                //Check side and team
+                std::vector<arma::vec> poss = getPossibleFieldPositions(goal, fd);
 
-            // std::vector<arma::vec> test_positions_right;
-            // //Forward goal
-            // test_positions_right.push_back(arma::vec{4.5,-1.5,0});
-            // //Rear goal
-            // test_positions_right.push_back(arma::vec{-4.5,1.5,0});
+                for(auto& m: goal.measurement){
+                    //Measure objects
+                    float quality = filter.ambiguousMeasurementUpdate(convert<double,3>(m.position),convert<double,3,3>(m.covariance),poss,sensors);
+                }
+            }
 
-
-            // //Debug filter
-            // arma::vec measurement_l = filter.model.predictedObservation(test_state, test_positions_left[0], sensors);//r,theta,phi
-            // arma::vec measurement_r = filter.model.predictedObservation(test_state, test_positions_right[0], sensors);//r,theta,phi
-            // arma::mat var = arma::diagmat(arma::vec({0.1,0.1,0.1}));
-            // //Measure both left and right goals
-            // float quality = filter.ambiguousMeasurementUpdate(measurement_l,var,test_positions_left,sensors);
-            // filter.ambiguousMeasurementUpdate(measurement_r,var,test_positions_right,sensors);
-            //GOAL TEST END
-
-            std::vector<arma::vec> test_positions;
-            //Forward goal
-            test_positions.push_back(arma::vec{4.5,0,0});
-            //Rear goal
-            test_positions.push_back(arma::vec{-4.5,0,0});
-
-            //Debug filter
-            arma::vec3 complement_position({test_state[0],-test_state[1],-test_state[2]});
-            arma::vec measurement = filter.model.predictedObservation(test_state, test_positions[1], sensors);//r,theta,phi
-            arma::mat var = arma::diagmat(arma::vec({0.1,0.1,0.1}));
-            //Measure both left and right goals
-            float quality = filter.ambiguousMeasurementUpdate(measurement,var,test_positions,sensors);
 
             //Emit state
             auto selfs = std::make_unique<std::vector<Self>>();
@@ -123,6 +118,7 @@ namespace localisation {
             arma::vec3 state = filter.get();
             selfs->back().locObject.position = Eigen::Vector2d(state[RobotModel::kX],state[RobotModel::kY]);
             selfs->back().heading = Eigen::Vector2d(std::cos(state[RobotModel::kAngle]),std::sin(state[RobotModel::kAngle]));
+            selfs->back().covariance = convert<double,3,3>(filter.getCovariance());
             // emit(graph("filter state = ", state[0],state[1],state[2]));
             // emit(graph("actual state = ", test_state[0],test_state[1],test_state[2]));
 
@@ -130,5 +126,13 @@ namespace localisation {
             emit(selfs);
         });
     }
+
+    std::vector<arma::vec> RobotParticleLocalisation::getPossibleFieldPositions(const message::vision::Goal& goal,
+                                                      const message::support::FieldDescription& fd) const{
+        std::vector<arma::vec> possibilities;
+
+        return possibilities;
+    }
+
 }
 }
