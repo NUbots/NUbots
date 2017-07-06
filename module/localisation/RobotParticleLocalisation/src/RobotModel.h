@@ -63,8 +63,8 @@ namespace localisation {
         arma::vec3 processNoiseDiagonal;
 
         // number and range of reset particles
-        int n_rogues = 10;
-        arma::vec3 resetRange = {10,6,6};
+        int n_rogues = 0;
+        arma::vec3 resetRange = {10,10,6};
 
         //Getters
         int getRogueCount() const {return n_rogues;}
