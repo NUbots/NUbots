@@ -14,11 +14,12 @@ unusedButCommentedModules = []
 
 # a list of folders that could be within a module
 skip_list = ['src', 'data', 'config', 'tests', 'report']
+skip_list = [s + os.sep for s in skip_list]
 
 # find all the modules that are available
 for root, dirs, files in os.walk(modulesPath):
 	if len(files) != 0:
-		if not any(substring in root for substring in skip_list):
+		if not any(substring in (root + os.sep) for substring in skip_list):
 			existingModules[root.replace(basePath, '')] = 0 # make sure we remove the base path from the module
 
 
@@ -55,14 +56,7 @@ for root, dirs, files in os.walk(rolesPath):
 					else:
 						missingModules[line] = 1
 
-
-
-print('The following modules were commented out:\n')
-for key in sorted(commentedModules.keys()):
-	if key not in usedModules:
-		print('\t', key)
-
-print('\nUnused modules:\n')
+print('Unused modules:\n')
 for key in sorted(existingModules.keys()):
 	if existingModules[key] == 0:
 		if key not in commentedModules.keys():
@@ -70,6 +64,11 @@ for key in sorted(existingModules.keys()):
 		else:
 			unusedButCommentedModules.append(key)
 
-print('\nUnused but commented modules:\n')
-for key in sorted(unusedButCommentedModules):
-	print('\t', key)
+print('\nUnused but commented out modules:\n')
+for key in sorted(commentedModules):
+	if key not in usedModules:
+		if key in existingModules:
+			if existingModules[key] > 0:
+				continue
+
+		print('\t', key)
