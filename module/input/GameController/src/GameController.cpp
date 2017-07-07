@@ -52,7 +52,8 @@ namespace input {
 
     GameController::GameController(std::unique_ptr<NUClear::Environment> environment)
         : Reactor(std::move(environment))
-        , port(0)
+        , recieve_port(0)
+        , send_port(0)
         , TEAM_ID(0)
         , PLAYER_ID(0)
         , listenHandle()
@@ -64,31 +65,37 @@ namespace input {
 
             PLAYER_ID = globalConfig.playerId;
             TEAM_ID   = globalConfig.teamId;
+            send_port = config["send_port"].as<uint>();
 
             // If we are changing ports (the port starts at 0 so this should start it the first time)
-            if(config["port"].as<uint>() != port) {
+            if(config["recieve_port"].as<uint>() != recieve_port) {
 
                 // If we have an old binding, then unbind it
                 // The port starts at 0 so this should work
-                if(port != 0) {
+                if(recieve_port != 0) {
                     listenHandle.unbind();
                 }
 
                 // Update our port
-                port = config["port"].as<uint>();
+                recieve_port = config["recieve_port"].as<uint>();
 
                 // Bind our new handle
-                std::tie(listenHandle, std::ignore, std::ignore) = on<UDP::Broadcast, With<GameState>>(port).then([this] (const UDP::Packet& p, const GameState& gameState) {
+                std::tie(listenHandle, std::ignore, std::ignore) = on<UDP::Broadcast, With<GameState>>(recieve_port).then([this] (const UDP::Packet& p, const GameState& gameState) {
                     // Get our packet contents
                     const GameControllerPacket& newPacket = *reinterpret_cast<const GameControllerPacket*>(p.payload.data());
 
                     // Get the IP we are getting this packet from
                     // Store it and use it to send back to the game controller using emit UDP
                     BROADCAST_IP = p.local.address;
+                    std::cout << std::hex <<  int(p.local.address) << std::endl;
 
                     if (newPacket.version == SUPPORTED_VERSION) {
                         try {
                             process(gameState, packet, newPacket);
+                            log ("Game Controller Packet Recieved");
+                            log ("Num Players ", int(newPacket.playersPerTeam));
+                            log("State: ",int(newPacket.state));
+
                         } catch (std::runtime_error err) {
                             log(err.what());
                         }
@@ -120,7 +127,7 @@ namespace input {
         packet->player = PLAYER_ID;
         packet->message = message;
 
-        emit<Scope::UDP>(packet, BROADCAST_IP, port);
+        emit<Scope::UDP>(packet, BROADCAST_IP, send_port);
     }
 
     void GameController::resetState() {
@@ -257,6 +264,7 @@ namespace input {
             if (newOwnPlayer.penaltyState != oldOwnPlayer.penaltyState
                 && newOwnPlayer.penaltyState != gamecontroller::PenaltyState::UNPENALISED) {
 
+                log("Penalised");
                 auto unpenalisedTime = NUClear::clock::now() + std::chrono::seconds(newOwnPlayer.penalisedTimeLeft);
                 auto reason = getPenaltyReason(newOwnPlayer.penaltyState);
                 stateChanges.push_back([this, playerId, unpenalisedTime, reason] {
@@ -580,7 +588,6 @@ namespace input {
     const Team& GameController::getOwnTeam(const GameControllerPacket& state) const {
 
         for (auto& team : state.teams) {
-            // std::cout << uint(team.teamId) << ", " << uint(TEAM_ID) << std::endl;
             if (team.teamId == TEAM_ID) {
                 return team;
             }
