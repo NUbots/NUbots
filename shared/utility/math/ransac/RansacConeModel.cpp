@@ -48,27 +48,27 @@ namespace ransac {
         return error * error;
     }
 
-    RansacConeModel::Vector RansacConeModel::getTopVector(){
+    RansacConeModel::Vector RansacConeModel::getTopVector() const {
         Vector cone_up = arma::normalise(arma::cross(unit_axis,Vector({0,1,0})));
         return unit_axis + gradient * cone_up;
     }
 
-    RansacConeModel::Vector RansacConeModel::getBottomVector(){
+    RansacConeModel::Vector RansacConeModel::getBottomVector() const {
         Vector cone_up = arma::normalise(arma::cross(unit_axis,Vector({0,1,0})));
         return unit_axis + gradient * (-cone_up);
     }
 
-    RansacConeModel::Vector RansacConeModel::getLeftVector(){
+    RansacConeModel::Vector RansacConeModel::getLeftVector() const {
         Vector cone_left = arma::normalise(arma::cross(Vector({0,0,1}),unit_axis));
         return unit_axis + gradient * cone_left;
     }
 
-    RansacConeModel::Vector RansacConeModel::getRightVector(){
+    RansacConeModel::Vector RansacConeModel::getRightVector() const {
         Vector cone_left = arma::normalise(arma::cross(unit_axis,Vector({0,1,0})));
         return unit_axis + gradient * (-cone_left);
     }
 
-    RansacConeModel::Vector RansacConeModel::getPoint(float g, float theta){
+    RansacConeModel::Vector RansacConeModel::getPoint(float g, float theta) const {
         Vector perp = arma::vec3({0,std::sin(theta + M_PI_2),std::cos(theta + M_PI_2)});
         Vector direction = arma::normalise(arma::cross(unit_axis,perp));
         return unit_axis + g * direction;

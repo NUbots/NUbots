@@ -30,6 +30,7 @@
 #include "utility/math/coordinates.h"
 #include "utility/math/geometry/Plane.h"
 #include "utility/math/geometry/Line.h"
+#include "utility/math/geometry/Circle.h"
 #include "utility/math/matrix/Transform3D.h"
 #include "utility/math/ransac/Ransac.h"
 #include "utility/math/ransac/RansacConeModel.h"
@@ -66,6 +67,7 @@ namespace vision {
     using utility::math::vision::projectCamSpaceToScreen;
     using utility::math::matrix::Transform3D;
     using utility::math::geometry::Cone;
+    using utility::math::geometry::Circle;
     using utility::math::geometry::Line;
 
     using utility::math::coordinates::cartesianToSpherical;
@@ -75,8 +77,6 @@ namespace vision {
     using utility::math::ransac::RansacConeModel;
     using utility::nubugger::drawVisionLines;
     using utility::support::Expression;
-
-    using utility::math::vision::RadialCamera::CameraParameters = RadialParameters;
 
     using FOURCC = utility::vision::FOURCC;
     using Colour = utility::vision::Colour;
@@ -174,13 +174,13 @@ namespace vision {
         on<Trigger<ClassifiedImage>
          , With<CameraParameters>
          , With<FieldDescription>
-         // , With<LookUpTable>
+         , With<LookUpTable>
          , Single
          , Priority::LOW>().then("Ball Detector", [this](
             std::shared_ptr<const ClassifiedImage> rawImage
             , const CameraParameters& cam
             , const FieldDescription& field
-            // , const LookUpTable& lut
+            , const LookUpTable& lut
             ) {
 
             const auto& image   = *rawImage;
@@ -189,12 +189,13 @@ namespace vision {
             Line horizon(convert<double, 2>(image.horizon.normal), image.horizon.distance);
 
             // This holds our points that may be a part of the ball
-            std::vector<arma::vec2> ballPoints;
+            std::vector<arma::vec3> ballPoints;
             ballPoints.reserve(image.ballPoints.size());
 
             for (const auto& point : image.ballPoints) {
                 //TODO: generalise to configured camera
-                ballPoints.push_back(getCamFromScreen(convert<float, 2, 1>(point),cam));
+                arma::ivec2 pt = convert<int, 2>(point);
+                ballPoints.push_back(getCamFromScreen(arma::vec2({pt[0],pt[1]}),cam));
             }
 
             // Use ransac to find the ball
@@ -215,7 +216,7 @@ namespace vision {
             for (auto& result : ransacResults) {
 
                 // Transform our centre into kinematics coordinates
-                arma::vec3 axis = imageToScreen(result.model.centre, convert<uint, 2>(image.dimensions));
+                arma::vec3 axis = result.model.unit_axis;
 
                 // Get the 4 points around our circle
                 arma::vec2 top   = projectCamSpaceToScreen(result.model.getTopVector(),cam);
@@ -236,7 +237,7 @@ namespace vision {
                  ************************************************/
 
                 if(print_throwout_logs){
-                    log("Ball model:", result.model.axis.t(), result.model.gradient);
+                    log("Ball model:", result.model.unit_axis.t(), result.model.gradient);
                 }
                 // CENTRE OF BALL IS ABOVE THE HORIZON
                 if(horizon.y(ballCentreScreen[0]) > ballCentreScreen[1]) {
@@ -245,7 +246,7 @@ namespace vision {
                 }
 
                 //DOES HAVE INTERNAL GREEN
-                float greenRatio = approximateCircleGreenRatio(result.model, *(image.image), lut);
+                float greenRatio = approximateCircleGreenRatio(result.model, *(image.image), lut, cam);
                 if (greenRatio > green_ratio_threshold) {
                     if(print_throwout_logs) log("Ball discarded: greenRatio > green_ratio_threshold");
                     continue;
@@ -257,7 +258,8 @@ namespace vision {
                 // Loop through our seed points and find the minimum distance one
                 for(uint i = 0; i < 3; ++i) {
                     for(auto& s : image.ballSeedPoints[i].points) {
-                        arma::vec3& s_cam = getCamFromScreen(s,cam);
+                        arma::ivec2 s_ = convert<int,2>(s);
+                        arma::vec3 s_cam = getCamFromScreen(arma::vec2({s_[0],s_[1]}),cam);
                         //TODO: change to angle error?
                         //Points will be normalised so it should be ok
                         double dist = result.model.distanceToPoint(s_cam);

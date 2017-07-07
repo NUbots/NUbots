@@ -35,6 +35,8 @@
 #include "utility/vision/fourcc.h"
 #include "utility/vision/LookUpTable.h"
 #include "utility/vision/Vision.h"
+#include "message/input/CameraParameters.h"
+
 
 namespace module {
     namespace vision {
@@ -93,7 +95,7 @@ namespace module {
 
             void findVisualHorizon(const message::input::Image& image, const message::vision::LookUpTable& lut, message::vision::ClassifiedImage& classifiedImage);
 
-            void findBall(const message::input::Image& image, const message::vision::LookUpTable& lut, message::vision::ClassifiedImage& classifiedImage);
+            void findBall(const message::input::Image& image, const message::vision::LookUpTable& lut, message::vision::ClassifiedImage& classifiedImage, const message::input::CameraParameters& cam);
 
             void findGoals(const message::input::Image& image, const message::vision::LookUpTable& lut, message::vision::ClassifiedImage& classifiedImage);
 

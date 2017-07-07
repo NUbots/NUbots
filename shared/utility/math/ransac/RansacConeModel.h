@@ -45,11 +45,11 @@ namespace ransac {
             //leastSquaresUpdate(first,last,candidateThreshold);
         }
 
-        Vector getTopVector();
-        Vector getBottomVector();
-        Vector getLeftVector();
-        Vector getRightVector();
-        Vector getPoint(float g, float theta);
+        Vector getTopVector()const ;
+        Vector getBottomVector()const ;
+        Vector getLeftVector()const ;
+        Vector getRightVector()const ;
+        Vector getPoint(float g, float theta)const ;
     };
 
 }

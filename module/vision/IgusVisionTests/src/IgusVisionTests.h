@@ -18,7 +18,6 @@ namespace vision {
     class IgusVisionTests : public NUClear::Reactor {
 
     private:
-        utility::math::vision::RadialCamera::Parameters params;
 
         float radius = 0.1;
         arma::vec3 ballCentre = arma::vec3({2,0,0});
@@ -32,7 +31,7 @@ namespace vision {
     public:
         /// @brief Called by the powerplant to build and setup the IgusVisionTests reactor.
         explicit IgusVisionTests(std::unique_ptr<NUClear::Environment> environment);
-        void emitClassifiedImage();
+        void emitClassifiedImage(const message::input::CameraParameters& cam);
     };
 
 }

@@ -12,6 +12,7 @@ namespace vision {
     using message::vision::ClassifiedImage;
     using utility::nubugger::drawVisionLines;
     using extension::Configuration;
+    using message::input::CameraParameters;
 
     IgusVisionTests::IgusVisionTests(std::unique_ptr<NUClear::Environment> environment)
     : Reactor(std::move(environment)) {
@@ -26,8 +27,6 @@ namespace vision {
 
             theta_count = config["theta_count"].as<float>();
 
-            params.lambda = config["lambda"].as<float>();
-            params.offset = config["offset"].as<arma::vec>();
         });
 
         on<Trigger<std::vector<message::vision::Ball>>>().then([this] (const std::vector<message::vision::Ball>& balls) {
@@ -40,19 +39,22 @@ namespace vision {
         });
 
         on<Every<30, Per<std::chrono::seconds>>,
+            With<CameraParameters>,
             Optional<With <Image>>,
             Optional<With <Sensors>>
-            >().then([this](std::shared_ptr<const Image> inputImage,
+            >().then([this](
+                const CameraParameters& cam,
+                std::shared_ptr<const Image> inputImage,
                 std::shared_ptr<const Sensors> inputSensors) {
             image = inputImage;
             sensors = inputSensors;
             if(image && sensors){
-                emitClassifiedImage();
+                emitClassifiedImage(cam);
             }
         });
     }
 
-    void IgusVisionTests::emitClassifiedImage(){
+    void IgusVisionTests::emitClassifiedImage(const CameraParameters& cam){
         //Basis of circle
         arma::vec3 p = ballCentre;
         arma::vec3 q = arma::normalise(arma::vec3({p[1], -p[0], 0}));
@@ -72,7 +74,7 @@ namespace vision {
             arma::vec3 P = p + radius * (q * cos(theta) + r * sin(theta));
             //Project to screen
             //const arma::fvec3& point, const Parameters& params = Parameters()
-            arma::vec2 pixel = utility::math::vision::RadialCamera::pointToPixel(P,params);
+            arma::vec2 pixel = utility::math::vision::projectCamSpaceToScreen(P,cam);
             //Screen point referenced from screen centre
             arma::vec2 screenPoint = arma::vec2({pixel[0],pixel[1]});
             //Convert to point referenced from top left

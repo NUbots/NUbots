@@ -19,7 +19,6 @@
 
 #include "LUTClassifier.h"
 
-#include "utility/math/vision.h"
 #include "utility/math/geometry/Line.h"
 #include "utility/nubugger/NUhelpers.h"
 
@@ -31,9 +30,6 @@ namespace module {
         using message::vision::ClassifiedImage;
 
         using utility::math::geometry::Line;
-        using utility::math::vision::getGroundPointFromScreen;
-        using utility::math::vision::projectWorldPointToScreen;
-        using utility::math::vision::imageToScreen;
         using utility::nubugger::drawVisionLines;
         using Colour = utility::vision::Colour;
         using FOURCC = utility::vision::FOURCC;
@@ -134,7 +130,7 @@ namespace module {
                 if((it->segmentClass == ClassifiedImage::SegmentClass::GOAL) &&
                    (utility::vision::visualHorizonAtPoint(classifiedImage, it->start[0]) <= it->start[1] ||
                     utility::vision::visualHorizonAtPoint(classifiedImage, it->end[0])   <= it->end[1])
-                    && it->length > 1) 
+                    && it->length > 1)
                 {
                     points.push_back(it->midpoint);
                 }

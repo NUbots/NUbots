@@ -25,6 +25,7 @@
 
 #include "message/vision/LookUpTable.h"
 #include "message/input/Image.h"
+#include "message/input/CameraParameters.h"
 
 #include "utility/learning/KMeans.h"
 #include "utility/math/geometry/Circle.h"

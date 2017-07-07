@@ -122,6 +122,7 @@ namespace vision {
             case(message::input::CameraParameters::LensType::RADIAL):
                 return radial::projectCamSpaceToScreen(point,cam);
         }
+        return arma::vec2();
     }
 
     inline arma::vec3 getCamFromScreen(const arma::vec2& screen, const message::input::CameraParameters& cam){
@@ -131,6 +132,7 @@ namespace vision {
             case(message::input::CameraParameters::LensType::RADIAL):
                 return radial::getCamFromScreen(screen,cam);
         }
+        return arma::vec2();
     }
     /////////////////////
     //END SWITCH METHODS

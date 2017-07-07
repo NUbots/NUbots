@@ -34,7 +34,7 @@ namespace support {
 
     class VirtualGoalPost {
     private:
-        arma::vec2 getCamRay(const arma::vec3& norm1, const arma::vec3& norm2, double focalLength, arma::uvec2 imSize);
+        arma::vec2 getCamRay(const arma::vec3& norm1, const arma::vec3& norm2, const message::input::CameraParameters& params, arma::uvec2 imSize);
 
     public:
         VirtualGoalPost(arma::vec3 position_, float height_, message::vision::Goal::Side side_, message::vision::Goal::Team team_);

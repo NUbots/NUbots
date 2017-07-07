@@ -48,7 +48,7 @@ namespace support {
     using utility::math::matrix::Rotation3D;
     using utility::math::geometry::Quad;
 
-    arma::vec2 VirtualGoalPost::getCamRay(const arma::vec3& norm1, const arma::vec3& norm2, double focalLength, arma::uvec2 imSize) {
+    arma::vec2 VirtualGoalPost::getCamRay(const arma::vec3& norm1, const arma::vec3& norm2, const CameraParameters& params, arma::uvec2 imSize) {
         //Solve the vector intersection between two planes to get the camera ray of the quad corner
         arma::vec3 result;
         const double zdiff = norm2[2]*norm1[1] - norm1[2] * norm2[1];
@@ -75,7 +75,7 @@ namespace support {
 
         return arma::conv_to<arma::vec>::from(
                     utility::math::vision::screenToImage(
-                        utility::math::vision::projectCamSpaceToScreen(result, focalLength),
+                        utility::math::vision::projectCamSpaceToScreen(result, params),
                         imSize
                     )
                 );
@@ -121,10 +121,10 @@ namespace support {
 
             //build the predicted quad
             utility::math::geometry::Quad quad(
-                    getCamRay(goalNormals.col(0), goalNormals.col(3), camParams.pinhole.focalLengthPixels, convert<uint, 2>(camParams.imageSizePixels)),
-                    getCamRay(goalNormals.col(0), goalNormals.col(2), camParams.pinhole.focalLengthPixels, convert<uint, 2>(camParams.imageSizePixels)),
-                    getCamRay(goalNormals.col(1), goalNormals.col(2), camParams.pinhole.focalLengthPixels, convert<uint, 2>(camParams.imageSizePixels)),
-                    getCamRay(goalNormals.col(1), goalNormals.col(3), camParams.pinhole.focalLengthPixels, convert<uint, 2>(camParams.imageSizePixels))
+                    getCamRay(goalNormals.col(0), goalNormals.col(3), camParams, convert<uint, 2>(camParams.imageSizePixels)),
+                    getCamRay(goalNormals.col(0), goalNormals.col(2), camParams, convert<uint, 2>(camParams.imageSizePixels)),
+                    getCamRay(goalNormals.col(1), goalNormals.col(2), camParams, convert<uint, 2>(camParams.imageSizePixels)),
+                    getCamRay(goalNormals.col(1), goalNormals.col(3), camParams, convert<uint, 2>(camParams.imageSizePixels))
                 );
 
             //goal base visibility check
