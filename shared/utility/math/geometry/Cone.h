@@ -37,11 +37,8 @@ namespace geometry {
         //Axis direction
         arma::vec::fixed<DIM> unit_axis;
 
-        bool setFromPoints(const Vector& a, const Vector& b, const Vector& c){
-            Matrix X = Matrix::eye();
-            X.col(0) = arma::normalise(a);
-            X.col(1) = arma::normalise(b);
-            X.col(2) = arma::normalise(c);
+        //X is the vectors in columns
+        bool setFromPoints(const Matrix& X){
             try{
                 unit_axis = arma::normalise(arma::solve(X.t(),arma::ones(DIM)));
             } catch (std::runtime_error e){
@@ -49,15 +46,15 @@ namespace geometry {
                 std::cout << __FILE__ << " : " << __LINE__ << " standard exception : cannot construct cone from points - they are redundant or coplanar." << std::endl;
             }
             //Rise
-            Vector proj_length = arma::dot(X.col(0),unit_axis);
+            double proj_length = arma::dot(X.col(0),unit_axis);
             //Run
-            Vector norm_length = std::sqrt(1 - proj_length * proj_length);
+            double norm_length = std::sqrt(1 - proj_length * proj_length);
             //Gradient
             gradient = norm_length / proj_length;
             return true;
         }
 
-        float distanceToPoint(const Vector& p){
+        float distanceToPoint(const Vector& p) const{
             //Get normalised p
             double norm_p = arma::norm(p);
             if(norm_p == 0) return 0;

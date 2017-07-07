@@ -26,8 +26,8 @@ import "Vector.proto";
 
 message CameraParameters {
     enum LensType{
-        PINHOLE = 1;
-        RADIAL = 2;
+        PINHOLE = 0;
+        RADIAL = 1;
     }
 
     message Pinhole{

@@ -28,7 +28,8 @@ namespace utility {
 namespace math {
 namespace ransac {
 
-    class Ransac3DConeModel : public utility::math::geometry::Cone<3> {
+    //3D only!
+    class RansacConeModel : public utility::math::geometry::Cone<3> {
     public:
 
         static constexpr size_t REQUIRED_POINTS = 3;
@@ -44,31 +45,11 @@ namespace ransac {
             //leastSquaresUpdate(first,last,candidateThreshold);
         }
 
-        Vector getTopVector(){
-            Vector cone_up = arma::normalise(arma::cross(axis,Vector({0,1,0})));
-            return axis + result.model.gradient * cone_up;
-        }
-
-        Vector getBottomVector(){
-            Vector cone_up = arma::normalise(arma::cross(axis,Vector({0,1,0})));
-            return axis + result.model.gradient * (-cone_up);
-        }
-
-        Vector getLeftVector(){
-            Vector cone_left = arma::normalise(arma::cross(Vector({0,0,1}),axis));
-            return axis + result.model.gradient * cone_left;
-        }
-
-        Vector getRightVector(){
-            Vector cone_left = arma::normalise(arma::cross(axis,Vector({0,1,0})));
-            return axis + result.model.gradient * (-cone_left);
-        }
-
-        Vector getPoint(float g, float theta){
-            Vector perp = arma::vec3({0,std::sin(theta + M_PI_2),std::cos(theta + M_PI_2)});
-            Vector direction = arma::normalise(arma::cross(axis,perp));
-            return axis + g * direction;
-        }
+        Vector getTopVector();
+        Vector getBottomVector();
+        Vector getLeftVector();
+        Vector getRightVector();
+        Vector getPoint(float g, float theta);
     };
 
 }

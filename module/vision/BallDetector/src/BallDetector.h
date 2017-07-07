@@ -77,7 +77,7 @@ namespace vision {
                     const utility::math::ransac::RansacConeModel& circle,
                     const message::input::Image& image,
                     const message::vision::LookUpTable& lut,
-                    const utility::math::vision::RadialCamera::CameraParameters& params);
+                    const message::input::CameraParameters& params);
     public:
 
         /// @brief Called by the powerplant to build and setup the BallDetector reactor.
