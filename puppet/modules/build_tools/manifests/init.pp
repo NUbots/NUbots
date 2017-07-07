@@ -46,6 +46,7 @@ class build_tools {
   package { 'gettext': ensure => latest, }
   package { 'python3-pip': ensure => latest, }
   package { 'python-pip': ensure => latest, }
+  package { 'zlib1g-dev': ensure => latest, }
 
   # CM730 firmware compilation.
   package { 'gcc-arm-none-eabi': ensure => latest, }
