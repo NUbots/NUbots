@@ -134,19 +134,19 @@ namespace module {
             on<Configuration, Trigger<CameraParameters>>("LUTClassifier.yaml").then([this] (const Configuration& config, const CameraParameters& cam) {
 
                 // Visual horizon detector
-                VISUAL_HORIZON_SPACING = cam.focalLengthPixels * tan(config["visual_horizon"]["spacing"].as<double>());
-                VISUAL_HORIZON_BUFFER = cam.focalLengthPixels * tan(config["visual_horizon"]["horizon_buffer"].as<double>());
-                VISUAL_HORIZON_SUBSAMPLING = std::max(1, int(cam.focalLengthPixels * tan(config["visual_horizon"]["subsampling"].as<double>())));
-                VISUAL_HORIZON_MINIMUM_SEGMENT_SIZE = cam.focalLengthPixels * tan(config["visual_horizon"]["minimum_segment_size"].as<double>());
+                VISUAL_HORIZON_SPACING = cam.pinhole.focalLengthPixels * tan(config["visual_horizon"]["spacing"].as<double>());
+                VISUAL_HORIZON_BUFFER = cam.pinhole.focalLengthPixels * tan(config["visual_horizon"]["horizon_buffer"].as<double>());
+                VISUAL_HORIZON_SUBSAMPLING = std::max(1, int(cam.pinhole.focalLengthPixels * tan(config["visual_horizon"]["subsampling"].as<double>())));
+                VISUAL_HORIZON_MINIMUM_SEGMENT_SIZE = cam.pinhole.focalLengthPixels * tan(config["visual_horizon"]["minimum_segment_size"].as<double>());
 
                 // Goal detector
-                GOAL_LINE_SPACING = cam.focalLengthPixels * tan(config["goals"]["spacing"].as<double>());
-                GOAL_SUBSAMPLING = std::max(1, int(cam.focalLengthPixels * tan(config["goals"]["subsampling"].as<double>())));
+                GOAL_LINE_SPACING = cam.pinhole.focalLengthPixels * tan(config["goals"]["spacing"].as<double>());
+                GOAL_SUBSAMPLING = std::max(1, int(cam.pinhole.focalLengthPixels * tan(config["goals"]["subsampling"].as<double>())));
                 GOAL_RANSAC_MINIMUM_POINTS_FOR_CONSENSUS = config["goals"]["ransac"]["minimum_points_for_consensus"].as<uint>();
                 GOAL_RANSAC_MAXIMUM_ITERATIONS_PER_FITTING = config["goals"]["ransac"]["maximum_iterations_per_fitting"].as<uint>();
                 GOAL_RANSAC_MAXIMUM_FITTED_MODELS = config["goals"]["ransac"]["maximum_fitted_models"].as<uint>();
                 GOAL_RANSAC_CONSENSUS_ERROR_THRESHOLD = config["goals"]["ransac"]["consensus_error_threshold"].as<double>();
-                GOAL_MINIMUM_RANSAC_SEGMENT_SIZE = std::max(1, int(cam.focalLengthPixels * tan(config["goals"]["minimum_ransac_segment_size"].as<double>())));
+                GOAL_MINIMUM_RANSAC_SEGMENT_SIZE = std::max(1, int(cam.pinhole.focalLengthPixels * tan(config["goals"]["minimum_ransac_segment_size"].as<double>())));
                 GOAL_MAX_HORIZON_ANGLE = std::cos(config["goals"]["max_horizon_angle"].as<Expression>());
                 GOAL_RANSAC_CONSENSUS_ERROR_THRESHOLD = config["goals"]["ransac"]["consensus_error_threshold"].as<double>();
                 GOAL_LINE_DENSITY = config["goals"]["line_density"].as<int>();
@@ -159,15 +159,15 @@ namespace module {
                 BALL_MINIMUM_INTERSECTIONS_COARSE = config["ball"]["intersections_coarse"].as<double>();
                 BALL_MINIMUM_INTERSECTIONS_FINE = config["ball"]["intersections_fine"].as<double>();
                 BALL_SEARCH_CIRCLE_SCALE = config["ball"]["search_circle_scale"].as<double>();
-                BALL_MAXIMUM_VERTICAL_CLUSTER_SPACING = std::max(1, int(cam.focalLengthPixels * tan(config["ball"]["maximum_vertical_cluster_spacing"].as<double>())));
+                BALL_MAXIMUM_VERTICAL_CLUSTER_SPACING = std::max(1, int(cam.pinhole.focalLengthPixels * tan(config["ball"]["maximum_vertical_cluster_spacing"].as<double>())));
                 BALL_HORIZONTAL_SUBSAMPLE_FACTOR = config["ball"]["horizontal_subsample_factor"].as<double>();
 
                 MAXIMUM_LIGHTNING_BOLT_LENGTH = config["ball"]["maximum_lighting_bolt_length"].as<int>();
                 MINIMUM_LIGHTNING_BOLT_STRENGTH = config["ball"]["minimum_lighting_bolt_strength"].as<double>();
 
                 // Camera settings
-                ALPHA = cam.pixelsToTanThetaFactor[1];
-                FOCAL_LENGTH_PIXELS = cam.focalLengthPixels;
+                ALPHA = cam.pinhole.pixelsToTanThetaFactor[1];
+                FOCAL_LENGTH_PIXELS = cam.pinhole.focalLengthPixels;
             });
 
             on<Trigger<Image>

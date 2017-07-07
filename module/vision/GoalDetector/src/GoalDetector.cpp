@@ -102,7 +102,7 @@ namespace vision {
 
             MINIMUM_ASPECT_RATIO = config["aspect_ratio_range"][0].as<double>();
             MAXIMUM_ASPECT_RATIO = config["aspect_ratio_range"][1].as<double>();
-            VISUAL_HORIZON_BUFFER = std::max(1, int(cam.focalLengthPixels * tan(config["visual_horizon_buffer"].as<double>())));
+            VISUAL_HORIZON_BUFFER = std::max(1, int(cam.pinhole.focalLengthPixels * tan(config["visual_horizon_buffer"].as<double>())));
             MAXIMUM_GOAL_HORIZON_NORMAL_ANGLE = std::cos(config["minimum_goal_horizon_angle"].as<double>() - M_PI_2);
             MAXIMUM_ANGLE_BETWEEN_GOALS = std::cos(config["maximum_angle_between_goals"].as<double>());
             MAXIMUM_VERTICAL_GOAL_PERSPECTIVE_ANGLE = std::sin(-config["maximum_vertical_goal_perspective_angle"].as<double>());
@@ -206,8 +206,8 @@ namespace vision {
                     (point[0] < image.dimensions[0]) && (point[0] > 0) && (point[1] < image.dimensions[1]);
                     point += direction) {
 
-                    char c = static_cast<char>(utility::vision::getPixelColour(lut, 
-                        utility::vision::getPixel(int(point[0]), int(point[1]), image.image->dimensions[0], image.image->dimensions[1], image.image->data, 
+                    char c = static_cast<char>(utility::vision::getPixelColour(lut,
+                        utility::vision::getPixel(int(point[0]), int(point[1]), image.image->dimensions[0], image.image->dimensions[1], image.image->data,
                                                     static_cast<utility::vision::FOURCC>(image.image->format))));
 
                     if(c != 'y') {
@@ -361,10 +361,10 @@ namespace vision {
                 arma::vec2 screenGoalCentre = (tl + tr + bl + br) * 0.25;
 
                 // Get vectors for TL TR BL BR;
-                arma::vec3 ctl = getCamFromScreen(tl, cam.focalLengthPixels);
-                arma::vec3 ctr = getCamFromScreen(tr, cam.focalLengthPixels);
-                arma::vec3 cbl = getCamFromScreen(bl, cam.focalLengthPixels);
-                arma::vec3 cbr = getCamFromScreen(br, cam.focalLengthPixels);
+                arma::vec3 ctl = getCamFromScreen(tl, cam.pinhole.focalLengthPixels);
+                arma::vec3 ctr = getCamFromScreen(tr, cam.pinhole.focalLengthPixels);
+                arma::vec3 cbl = getCamFromScreen(bl, cam.pinhole.focalLengthPixels);
+                arma::vec3 cbr = getCamFromScreen(br, cam.pinhole.focalLengthPixels);
 
                 // Get our four normals for each edge
                 // BL TL cross product gives left side
@@ -398,7 +398,7 @@ namespace vision {
                 }
 
                 // Angular positions from the camera
-                arma::vec2 pixelsToTanThetaFactor = convert<double, 2>(cam.pixelsToTanThetaFactor);
+                arma::vec2 pixelsToTanThetaFactor = convert<double, 2>(cam.pinhole.pixelsToTanThetaFactor);
                 it->visObject.screenAngular = convert<double, 2>(arma::atan(pixelsToTanThetaFactor % screenGoalCentre));
                 arma::vec2 brAngular = arma::atan(pixelsToTanThetaFactor % br);
                 arma::vec2 trAngular = arma::atan(pixelsToTanThetaFactor % tr);

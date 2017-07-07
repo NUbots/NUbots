@@ -90,8 +90,8 @@ namespace support {
         double angle = 2.0 * std::asin((diameter * 0.5) / arma::norm(rBCc));
 
         // Project the centre to the screen and work out the radius as if it was in the centre
-        arma::ivec2 centre = screenToImage(projectCamSpaceToScreen(rBCc, cam.focalLengthPixels), convert<uint, 2>(cam.imageSizePixels));
-        double radius = cam.focalLengthPixels * std::tan(angle * 0.5);
+        arma::ivec2 centre = screenToImage(projectCamSpaceToScreen(rBCc, cam.pinhole.focalLengthPixels), convert<uint, 2>(cam.imageSizePixels));
+        double radius = cam.pinhole.focalLengthPixels * std::tan(angle * 0.5);
 
         // Check our ball is on the screen at all and if so set the values
         if (  centre[0] > 0
@@ -105,7 +105,7 @@ namespace support {
 
             // Get our transform to world coordinates
             const Transform3D& Htw = convert<double, 4, 4>(sensors.world);
-            const Transform3D& Htc = convert<double, 4, 4>(sensors.forwardKinematics.at(ServoID::HEAD_PITCH)); 
+            const Transform3D& Htc = convert<double, 4, 4>(sensors.forwardKinematics.at(ServoID::HEAD_PITCH));
             Transform3D Hcw = Htc.i() * Htw;
             Transform3D Hwc = Hcw.i();
 

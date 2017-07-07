@@ -96,10 +96,10 @@ namespace support {
         Goal result;
 
         // t = torso; c = camera; g = ground; f = foot;
-        Transform3D Htc  = convert<double, 4, 4>(sensors.forwardKinematics.at(ServoID::HEAD_PITCH)); 
+        Transform3D Htc  = convert<double, 4, 4>(sensors.forwardKinematics.at(ServoID::HEAD_PITCH));
         //get the torso to foot transform
-        Transform3D Hgt  = convert<double, 4, 4>(sensors.forwardKinematics.at(ServoID::R_ANKLE_ROLL)); 
-        Transform3D Hgt2 = convert<double, 4, 4>(sensors.forwardKinematics.at(ServoID::L_ANKLE_ROLL)); 
+        Transform3D Hgt  = convert<double, 4, 4>(sensors.forwardKinematics.at(ServoID::R_ANKLE_ROLL));
+        Transform3D Hgt2 = convert<double, 4, 4>(sensors.forwardKinematics.at(ServoID::L_ANKLE_ROLL));
 
         if (Hgt2(3,2) < Hgt(3,2)) {
             Hgt = Hgt2;
@@ -121,10 +121,10 @@ namespace support {
 
             //build the predicted quad
             utility::math::geometry::Quad quad(
-                    getCamRay(goalNormals.col(0), goalNormals.col(3), camParams.focalLengthPixels, convert<uint, 2>(camParams.imageSizePixels)),
-                    getCamRay(goalNormals.col(0), goalNormals.col(2), camParams.focalLengthPixels, convert<uint, 2>(camParams.imageSizePixels)),
-                    getCamRay(goalNormals.col(1), goalNormals.col(2), camParams.focalLengthPixels, convert<uint, 2>(camParams.imageSizePixels)),
-                    getCamRay(goalNormals.col(1), goalNormals.col(3), camParams.focalLengthPixels, convert<uint, 2>(camParams.imageSizePixels))
+                    getCamRay(goalNormals.col(0), goalNormals.col(3), camParams.pinhole.focalLengthPixels, convert<uint, 2>(camParams.imageSizePixels)),
+                    getCamRay(goalNormals.col(0), goalNormals.col(2), camParams.pinhole.focalLengthPixels, convert<uint, 2>(camParams.imageSizePixels)),
+                    getCamRay(goalNormals.col(1), goalNormals.col(2), camParams.pinhole.focalLengthPixels, convert<uint, 2>(camParams.imageSizePixels)),
+                    getCamRay(goalNormals.col(1), goalNormals.col(3), camParams.pinhole.focalLengthPixels, convert<uint, 2>(camParams.imageSizePixels))
                 );
 
             //goal base visibility check

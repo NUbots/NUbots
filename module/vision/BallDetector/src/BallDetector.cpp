@@ -272,7 +272,7 @@ namespace vision {
                 }
 
                 // BALL IS CLOSER THAN 1/2 THE HEIGHT OF THE ROBOT BY WIDTH
-                double widthDistance = widthBasedDistanceToCircle(field.ball_radius, top, base, cam.focalLengthPixels);
+                double widthDistance = widthBasedDistanceToCircle(field.ball_radius, top, base, cam.pinhole.focalLengthPixels);
                 if(widthDistance < cameraHeight * 0.5) {
                     if(print_throwout_logs) log("Ball discarded: widthDistance < cameraHeight * 0.5");
                     continue;
@@ -330,12 +330,12 @@ namespace vision {
                 b.circle.centre = convert<double, 2>(result.model.centre);
 
                 // Angular positions from the camera
-                b.visObject.screenAngular = convert<double, 2>(arma::atan(convert<double, 2>(cam.pixelsToTanThetaFactor) % ballCentreScreen));
-                b.visObject.angularSize   << getParallaxAngle(left, right, cam.focalLengthPixels), getParallaxAngle(top, base, cam.focalLengthPixels);
+                b.visObject.screenAngular = convert<double, 2>(arma::atan(convert<double, 2>(cam.pinhole.pixelsToTanThetaFactor) % ballCentreScreen));
+                b.visObject.angularSize   << getParallaxAngle(left, right, cam.pinhole.focalLengthPixels), getParallaxAngle(top, base, cam.pinhole.focalLengthPixels);
 
                 // Add our points
                 for (auto& point : result) {
-                    b.edgePoints.push_back(convert<double, 3>(getCamFromScreen(imageToScreen(point, convert<uint, 2>(image.dimensions)), cam.focalLengthPixels)));
+                    b.edgePoints.push_back(convert<double, 3>(getCamFromScreen(imageToScreen(point, convert<uint, 2>(image.dimensions)), cam.pinhole.focalLengthPixels)));
                 }
 
                 balls->push_back(std::move(b));

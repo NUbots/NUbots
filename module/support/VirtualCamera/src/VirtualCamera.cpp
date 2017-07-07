@@ -57,14 +57,16 @@ namespace support {
 
             cameraParameters->imageSizePixels << config["imageWidth"].as<uint>(), config["imageHeight"].as<uint>();
             cameraParameters->FOV << config["FOV_X"].as<double>(), config["FOV_Y"].as<double>();
-            cameraParameters->distortionFactor = config["DISTORTION_FACTOR"].as<double>();
+            cameraParameters->distortionD.focalLengthPixels
+->distortionD.focalLengthPixels
+->distortionFactor.focalLengthPixels = config["DISTORTION_FACTOR"].as<double>();
             double tanHalfFOV[2], imageCentre[2];
             tanHalfFOV[0] = std::tan(cameraParameters->FOV[0] * 0.5);
             tanHalfFOV[1] = std::tan(cameraParameters->FOV[1] * 0.5);
             imageCentre[0] = cameraParameters->imageSizePixels[0] * 0.5;
             imageCentre[1] = cameraParameters->imageSizePixels[1] * 0.5;
-            cameraParameters->pixelsToTanThetaFactor << (tanHalfFOV[0] / imageCentre[0]), (tanHalfFOV[1] / imageCentre[1]);
-            cameraParameters->focalLengthPixels = imageCentre[0] / tanHalfFOV[0];
+            cameraParameters->pinhole.pixelsToTanThetaFactor << (tanHalfFOV[0] / imageCentre[0]), (tanHalfFOV[1] / imageCentre[1]);
+            cameraParameters->pinhole.pinhole.focalLengthPixels = imageCentre[0] / tanHalfFOV[0];
 
             bool emit_images = config["emit_images"].as<bool>();
             if(emit_images){
