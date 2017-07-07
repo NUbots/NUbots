@@ -31,6 +31,8 @@
 #include "utility/vision/LookUpTable.h"
 #include "utility/support/eigen_armadillo.h"
 
+#include "utility/math/ransac/RansacConeModel.h"
+
 namespace module {
 namespace vision {
 
@@ -71,7 +73,11 @@ namespace vision {
 
         bool print_throwout_logs;
 
-        float approximateCircleGreenRatio(const utility::math::geometry::Circle& circle, const message::input::Image& image, const message::vision::LookUpTable& lut);
+        float approximateCircleGreenRatio(
+                    const utility::math::ransac::RansacConeModel& circle,
+                    const message::input::Image& image,
+                    const message::vision::LookUpTable& lut,
+                    const utility::math::vision::RadialCamera::CameraParameters& params);
     public:
 
         /// @brief Called by the powerplant to build and setup the BallDetector reactor.
