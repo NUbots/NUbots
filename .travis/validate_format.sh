@@ -4,7 +4,7 @@ find . -type f \( -name *.h -o -name *.c -o -name *.cc -o -name *.cxx -o -name *
 
     # Get the original and formatted code
     src=$( cat $line )
-    fmt=$( clang-format-4 $line )
+    fmt=$( clang-format -style=file $line )
 
     # Check if our text is formatted
     if [ "$src" != "$fmt" ]; then
