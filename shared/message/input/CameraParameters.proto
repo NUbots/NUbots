@@ -37,7 +37,7 @@ message CameraParameters {
     }
 
     message Radial{
-        double radiansPerPixel = 1;
+        double radiansPerPixel = 1; //AKA lambda to some
     }
 
     //Common
