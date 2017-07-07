@@ -7,3 +7,4 @@ sudo apt-add-repository -y 'deb http://apt.llvm.org/trusty/ llvm-toolchain-trust
 # Update and install clang-format
 sudo apt-get update
 sudo apt-get install clang-format-4.0
+sudo apt-get install colordiff
