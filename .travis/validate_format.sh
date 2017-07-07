@@ -14,10 +14,16 @@ while IFS= read -r -d $'\0' line; do
         # Flag that it is wrong and print the difference
         ret=1
         echo "$line is incorrectly formatted"
-        colordiff $line <(echo "$fmt")
+        colordiff -u $line <(echo "$fmt")
     fi
 # This must be at the bottom since otherwise piping into the while will make a subshell
-done < <(find . -type f \( -name *.h -o -name *.c -o -name *.cc -o -name *.cxx -o -name *.cpp -o -name *.hpp -o -name *.ipp \) -print0)
+done < <(find . -type f \( -name *.h \
+                        -o -name *.c \
+                        -o -name *.cc \
+                        -o -name *.cxx \
+                        -o -name *.cpp \
+                        -o -name *.hpp \
+                        -o -name *.ipp \) -print0)
 
 # If we failed somewhere this will exit 1 and fail travis
 exit $ret
