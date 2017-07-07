@@ -15,22 +15,23 @@ notifications:
 # Build for each of our platforms
 env:
   # Build for native
-  - INSTALL_COMMAND=".travis/install_toolchain.sh"
+  - PLATFORM=native
+    INSTALL_COMMAND=".travis/install_toolchain.sh"
     SCRIPT_COMMAND=".travis/build_code.sh"
-    PLATFORM=native
 
   # Build for nuc7i7bnh
-  - INSTALL_COMMAND=".travis/install_toolchain.sh"
+  - PLATFORM=nuc7i7bnh
+    INSTALL_COMMAND=".travis/install_toolchain.sh"
     SCRIPT_COMMAND=".travis/build_code.sh"
-    PLATFORM=nuc7i7bnh
 
   # Build for fitpc2i
-  - INSTALL_COMMAND=".travis/install_toolchain.sh"
+  - PLATFORM=fitpc2i
+    INSTALL_COMMAND=".travis/install_toolchain.sh"
     SCRIPT_COMMAND=".travis/build_code.sh"
-    PLATFORM=fitpc2i
 
   # Test with clang-format
-  - INSTALL_COMMAND=".travis/install_clang-format.sh"
+  - PLATFORM=clang-format
+    INSTALL_COMMAND=".travis/install_clang-format.sh"
     SCRIPT_COMMAND=".travis/validate_format.sh"
 
 # Most modern travis image
@@ -50,7 +51,7 @@ branches:
 
 install:
   # Run the install command
-  - (eval "$SCRIPT_COMMAND")
+  - (eval "$INSTALL_COMMAND")
 
 script:
   # Run our script command
