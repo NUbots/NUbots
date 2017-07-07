@@ -14,10 +14,24 @@ notifications:
 
 # Build for each of our platforms
 env:
-  - PLATFORM=native TYPE=build
-  - PLATFORM=nuc7i7bnh TYPE=build
-  - PLATFORM=fitpc2i TYPE=build
-  - TYPE=format
+  # Build for native
+  - INSTALL_COMMAND=".travis/install_toolchain.sh"
+    SCRIPT_COMMAND=".travis/build_code.sh"
+    PLATFORM=native
+
+  # Build for nuc7i7bnh
+  - INSTALL_COMMAND=".travis/install_toolchain.sh"
+    SCRIPT_COMMAND=".travis/build_code.sh"
+    PLATFORM=nuc7i7bnh
+
+  # Build for fitpc2i
+  - INSTALL_COMMAND=".travis/install_toolchain.sh"
+    SCRIPT_COMMAND=".travis/build_code.sh"
+    PLATFORM=fitpc2i
+
+  # Test with clang-format
+  - INSTALL_COMMAND=".travis/install_clang-format.sh"
+    SCRIPT_COMMAND=".travis/validate_format.sh"
 
 # Most modern travis image
 group: edge
@@ -34,18 +48,10 @@ branches:
   only:
     - 'master'
 
-before_install:
-  # If we are building get puppet
-  - if [[ "$TYPE" == "build" ]]; then .travis/get_puppet.sh; fi
-
 install:
-  # If we are building install the toolchain and apply puppet
-  - if [[ "$TYPE" == "build" ]]; then .travis/get_toolchain.sh; fi
-  - if [[ "$TYPE" == "build" ]]; then .travis/apply_puppet.sh; fi
-
-  # If we are formatting, install clang-format
-  - if [[ "$TYPE" == "format" ]]; then .travis/get_clang-format.sh; fi
+  # Run the install command
+  - (eval "$SCRIPT_COMMAND")
 
 script:
-  # If we are building, run the build script and the test script
-  - if [[ "$TYPE" == "build" ]]; then .travis/build_code.sh; fi
+  # Run our script command
+  - (eval "$SCRIPT_COMMAND")
