@@ -36,7 +36,7 @@ branches:
 
 before_install:
   # If we are building get puppet
-  - if [[ "$TYPE" == "build" ]]; then ./travis/get_puppet.sh; fi
+  - if [[ "$TYPE" == "build" ]]; then .travis/get_puppet.sh; fi
 
 install:
   # If we are building install the toolchain and apply puppet
