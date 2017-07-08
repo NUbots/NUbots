@@ -27,48 +27,50 @@
 #include "message/input/GameState.h"
 
 namespace module {
-    namespace input {
+namespace input {
 
-        /**
-         * Monitors the match Game Controller
-         *
-         * @author Brendan Annable
-         * @author Jordan Johnson
-         * @author Trent Houliston
-         */
-        class GameController : public NUClear::Reactor {
-            private:
-                static constexpr const uint SUPPORTED_VERSION       = 12;
-                static constexpr const uint PLAYERS_PER_TEAM        = 6;
-                static constexpr const uint ACTIVE_PLAYERS_PER_TEAM = 4;
-                static constexpr const uint NUM_TEAMS               = 2;
+    /**
+     * Monitors the match Game Controller
+     *
+     * @author Brendan Annable
+     * @author Jordan Johnson
+     * @author Trent Houliston
+     */
+    class GameController : public NUClear::Reactor {
+    private:
+        static constexpr const uint SUPPORTED_VERSION       = 12;
+        static constexpr const uint PLAYERS_PER_TEAM        = 6;
+        static constexpr const uint ACTIVE_PLAYERS_PER_TEAM = 4;
+        static constexpr const uint NUM_TEAMS               = 2;
 
-                uint recieve_port;
-                uint send_port;
-                uint TEAM_ID;
-                uint PLAYER_ID;
-                uint BROADCAST_IP = 0xFFFFFFFF;
+        uint recieve_port;
+        uint send_port;
+        uint TEAM_ID;
+        uint PLAYER_ID;
+        uint BROADCAST_IP = 0xFFFFFFFF;
 
-                bool penaltyOverride = false;
-                bool selfPenalised = true;
-                ReactionHandle listenHandle;
+        bool penaltyOverride = false;
+        bool selfPenalised   = true;
+        ReactionHandle listenHandle;
 
-                gamecontroller::GameControllerPacket packet;
-                gamecontroller::Mode mode;
+        gamecontroller::GameControllerPacket packet;
+        gamecontroller::Mode mode;
 
-                void resetState();
-                void process(const message::input::GameState& oldGameState, const gamecontroller::GameControllerPacket& oldPacket, const gamecontroller::GameControllerPacket& newPacket);
-                void sendReplyMessage(const gamecontroller::ReplyMessage& message);
-                const gamecontroller::Team& getOwnTeam(const gamecontroller::GameControllerPacket& packet) const;
-                const gamecontroller::Team& getOpponentTeam(const gamecontroller::GameControllerPacket& packet) const;
-                message::input::GameState::Data::PenaltyReason getPenaltyReason(const gamecontroller::PenaltyState& penaltyState) const;
+        void resetState();
+        void process(const message::input::GameState& oldGameState,
+                     const gamecontroller::GameControllerPacket& oldPacket,
+                     const gamecontroller::GameControllerPacket& newPacket);
+        void sendReplyMessage(const gamecontroller::ReplyMessage& message);
+        const gamecontroller::Team& getOwnTeam(const gamecontroller::GameControllerPacket& packet) const;
+        const gamecontroller::Team& getOpponentTeam(const gamecontroller::GameControllerPacket& packet) const;
+        message::input::GameState::Data::PenaltyReason getPenaltyReason(
+            const gamecontroller::PenaltyState& penaltyState) const;
 
-            public:
-                explicit GameController(std::unique_ptr<NUClear::Environment> environment);
+    public:
+        explicit GameController(std::unique_ptr<NUClear::Environment> environment);
+    };
 
-        };
-
-    }  // input
+}  // input
 }  // modules
 
 #endif  // MODULES_INPUT_GAMECONTROLLER_H
