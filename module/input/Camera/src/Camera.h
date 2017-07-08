@@ -23,6 +23,8 @@
 #include "message/input/Image.h"
 #include "message/input/CameraParameters.h"
 
+#include "utility/support/eigen_armadillo.h"
+
 #include "utility/vision/fourcc.h"
 
 #include "V4L2Camera.h"
@@ -44,8 +46,8 @@ namespace module
 	    	V4L2Camera initiateV4L2Camera(const ::extension::Configuration& config);
 			void ShutdownV4L2Camera();
 
-	        ReactionHandle V4L2FrameRateHandle; 
-	        ReactionHandle V4L2SettingsHandle; 
+	        ReactionHandle V4L2FrameRateHandle;
+	        ReactionHandle V4L2SettingsHandle;
 
 	        std::map<std::string, V4L2Camera> V4L2Cameras;
 

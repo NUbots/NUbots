@@ -9,14 +9,15 @@
 
 namespace module
 {
-    namespace input 
+    namespace input
     {
+        using message::input::CameraParameters;
         using extension::Configuration;
         using utility::support::Expression;
         using FOURCC = utility::vision::FOURCC;
 
         void Camera::initiateSpinnakerCamera(const Configuration& config)
-        { 
+        {
             if (!SpinnakerSystem)
             {
                 SpinnakerSystem  = Spinnaker::System::GetInstance();
@@ -39,7 +40,7 @@ namespace module
 
             if (camera == SpinnakerCameras.end())
             {
-                try 
+                try
                 {
                     Spinnaker::CameraPtr newCamera = SpinnakerCamList.GetBySerial(deviceID);
 
@@ -52,7 +53,7 @@ namespace module
                         // Add camera to list.
                         FOURCC fourcc = utility::vision::getFourCCFromDescription(config["format"]["pixel"].as<std::string>());
                         camera = SpinnakerCameras.insert(std::make_pair(
-                                deviceID, 
+                                deviceID,
                                 std::make_unique<SpinnakerImageEvent>(config.fileName, deviceID, std::move(newCamera), *this, fourcc, cameraCount))).first;
                     }
 
@@ -63,7 +64,7 @@ namespace module
                     }
                 }
 
-                catch(const Spinnaker::Exception& ex) 
+                catch(const Spinnaker::Exception& ex)
                 {
                     log<NUClear::WARN>("Failed to find camera", config.fileName, " with serial number:", deviceID);
                     return;
@@ -79,6 +80,22 @@ namespace module
             }
 
             resetSpinnakerCamera(camera, config);
+
+            auto cameraParameters = std::make_unique<CameraParameters>();
+
+            //Generic camera parameters
+            cameraParameters->imageSizePixels << config["imageWidth"].as<uint>(), config["imageHeight"].as<uint>();
+            cameraParameters->FOV << config["FOV_X"].as<double>(), config["FOV_Y"].as<double>();
+
+            //Radial specific
+            cameraParameters->lens = CameraParameters::LensType::RADIAL;
+            cameraParameters->radial.radiansPerPixel = config["lens"]["radiansPerPixel"].as<float>();
+            cameraParameters->centreOffset = convert<int,2>(config["lens"]["centreOffset"].as<arma::ivec>());
+
+            emit<Scope::DIRECT>(std::move(cameraParameters));
+
+            log("Emitted radial camera parameters for camera", config["deviceID"].as<std::string>());
+
         }
 
         void Camera::resetSpinnakerCamera(std::map<std::string, std::unique_ptr<SpinnakerImageEvent>>::iterator& camera, const Configuration& config)
@@ -283,7 +300,7 @@ namespace module
                 for (const auto& entry : entries)
                 {
                     log("Auto white balance: entry '", entry->GetName(), "'.");
-                } 
+                }
             }
 
             // If both elements of the vector are non-zero then we are setting a manual value.

@@ -11,6 +11,10 @@ format:
   #pixel: YCbCr422_8_CbYCrY
   #pixel: RGB8
 
+lens:
+  radiansPerPixel: 0.001
+  centreOffset: [0,0]
+
 settings:
   exposure: 33333             # The shutter time in microseconds (1/fps).
   gain: auto                  # The gain of the camera in dB.
