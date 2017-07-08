@@ -28,6 +28,28 @@
 namespace YAML {
 
     template<>
+    struct convert<arma::Col<int>> {
+        static Node encode(const arma::Col<int>& rhs) {
+            Node node;
+
+            for (const double& d : rhs) {
+                node.push_back(d);
+            }
+
+            return node;
+        }
+
+        static bool decode(const Node& node, arma::Col<int>& rhs) {
+            rhs.resize(node.size());
+            for (uint i = 0; i < node.size(); ++i) {
+                rhs[i] = node[i].as<utility::support::Expression>();
+            }
+
+            return true;
+        }
+    };
+
+    template<>
     struct convert<arma::Col<int64_t>> {
         static Node encode(const arma::Col<int64_t>& rhs) {
             Node node;
