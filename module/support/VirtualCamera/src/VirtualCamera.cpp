@@ -22,10 +22,13 @@
 #include "extension/Configuration.h"
 
 #include "message/input/CameraParameters.h"
+#include "message/vision/LookUpTable.h"
 #include "message/input/Image.h"
 
 #include "utility/support/eigen_armadillo.h"
 #include "utility/support/yaml_armadillo.h"
+#include "utility/support/yaml_expression.h"
+#include "utility/vision/LookUpTable.h"
 #include "utility/vision/fourcc.h"
 
 namespace module {
@@ -35,6 +38,7 @@ namespace support {
 
     using message::input::CameraParameters;
     using message::input::Image;
+    using message::vision::LookUpTable;
 
     using FOURCC = utility::vision::FOURCC;
 
@@ -50,6 +54,12 @@ namespace support {
             emit(std::make_unique<Image>(FOURCC::YUYV, cam.imageSizePixels, std::move(data), 0, "VirtualCamera", NUClear::clock::now()));
 
         });
+
+        on<Configuration>("VirtualLookUpTable.yaml").then([this] (const Configuration& config) {
+            auto lut = std::make_unique<LookUpTable>(config.config.as<LookUpTable>());
+            emit(lut);
+        });
+
 
 
         on<Configuration>("VirtualCamera.yaml").then("VirtualCamera: Emit VirCam params",[this] (const Configuration& config) {
@@ -79,7 +89,7 @@ namespace support {
             } else if(config["lens_type"].as<std::string>().compare("radial") == 0){
                 //Radial specific
                 cameraParameters->lens = CameraParameters::LensType::RADIAL;
-                cameraParameters->radial.radiansPerPixel = config["lens"]["radiansPerPixel"].as<float>();
+                cameraParameters->radial.radiansPerPixel = cameraParameters->FOV[0] / cameraParameters->imageSizePixels[0];//config["lens"]["radiansPerPixel"].as<float>();
                 cameraParameters->centreOffset = convert<int,2>(config["lens"]["centreOffset"].as<arma::ivec>());
 
             } else {

@@ -12,14 +12,13 @@ NUCLEAR_ROLE(
     support::configuration::SoccerConfig
 
     #input
+    support::VirtualCamera
     input::GameController
 
     #Simulation
     platform::darwin::HardwareSimulator
     vision::IgusVisionTests
     vision::BallDetector
-
-    support::VirtualCamera
 
     #Sensors
     platform::darwin::SensorFilter
