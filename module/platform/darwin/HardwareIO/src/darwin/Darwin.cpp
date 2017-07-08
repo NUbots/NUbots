@@ -99,7 +99,7 @@ std::vector<std::pair<uint8_t, bool>> Darwin::selfTest() {
 void Darwin::buildBulkReadPacket() {
 
     // Double check that our type is big enough to hold the result
-    static_assert(sizeof(Types::CM730Data) == CM730::Address::BATTERY_H - CM730::Address::BUTTON + 1,
+    static_assert(sizeof(Types::CM730Data) == CM730::Address::VOLTAGE - CM730::Address::BUTTON + 1,
                   "The CM730 type is the wrong size");
 
     // Double check that our type is big enough to hold the result
