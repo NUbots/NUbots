@@ -1,3 +1,0 @@
-protobuf
-
-This module downloads, builds and installs the current version of protobuf from source.

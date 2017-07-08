@@ -1,16 +1,72 @@
-language: cpp
+# Need sudo to use the puppet installs
+sudo: required
 
-install:
-  - wget http://apt.puppetlabs.com/puppetlabs-release-precise.deb
-  - sudo dpkg -i puppetlabs-release-precise.deb
+# C++ code on trusty
+language: cpp
+os: linux
+dist: trusty
+
+# Don't spam people with emails but do spam slack!
+notifications:
+  email: false
+  slack:
+    secure: BNNFwBsGwKxamyxH6OTtZLfOH9541zr3keNQ0U1rdE2eJpOL11h5gFCd2DHc4OhK596cHFmZrg6mryLXapqHEFCcrfx4CpLyJVxwXc/16rjE838sa4AoBV14ZzMoRiFsNdBOQOVBRu+0SR3kiJMRtJxOTPELnrHWOKmSuVGHjVg=
+
+# Build for each of our platforms
+env:
+  - PLATFORM=native
+  - PLATFORM=nuc7i7bnh
+  - PLATFORM=fitpc2i
+
+# Most modern travis image
+group: edge
+
+# ccache makes things waaaaay faster
+cache:
+  ccache: true
+  directories:
+    # This cache is used for deb files so we don't smash nubots.net
+    - toolchain
+
+# Only do branch builds on master
+branches:
+  only:
+    - 'master'
+
+# Setup using puppet
+before_install:
+  # Setup ruby so puppet works
+  - rvm install ruby --latest
+
+  # Download and install our current toolchain version
+  - sudo wget -N http://nubots.net/debs/nubots-toolchain-2.1.2-travis.deb -O $TRAVIS_BUILD_DIR/toolchain/nubots-toolchain.deb
+  - sudo dpkg -i $TRAVIS_BUILD_DIR/toolchain/nubots-toolchain.deb
+
+  # Download and install the proper version of puppet
+  - sudo wget -N http://apt.puppetlabs.com/puppetlabs-release-trusty.deb -O $TRAVIS_BUILD_DIR/toolchain/puppetlabs-release-trusty.deb
+  - sudo dpkg -i $TRAVIS_BUILD_DIR/toolchain/puppetlabs-release-trusty.deb
   - sudo apt-get update
   - sudo apt-get install puppet
-  - sudo apt-get install git
+
+  # Install the puppet modules that are required for this install
+  - sudo mkdir -p /etc/puppet/modules;
+  - sudo puppet module install puppetlabs-apt --module_repository https://forge.puppet.com --version 2.4.0
+  - sudo puppet module install puppetlabs-vcsrepo --module_repository https://forge.puppet.com
+  - sudo puppet module install camptocamp-archive --module_repository https://forge.puppet.com
+  - sudo puppet module install maestrodev-wget --module_repository https://forge.puppet.com
+
+install:
+  # Apply the puppet file to the vm
+  - sudo puppet apply --parser=future --verbose --debug --modulepath=puppet/modules:/etc/puppet/modules puppet/manifests/travis.pp
+
+  # For some reason it looks like we have to run update-alternative again on travis
+  - sudo update-alternatives --remove-all gcc || true
+  - sudo update-alternatives --remove-all g++ || true
+  - sudo update-alternatives --remove-all gfortan || true
+  - sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-7 100 --slave /usr/bin/g++ g++ /usr/bin/g++-7 --slave /usr/bin/gfortran gfortran /usr/bin/gfortran-7
 
 script:
-  - sudo puppet apply --modulepath=puppet/modules puppet/manifests/travis.pp
-  - mkdir build
+  - export PATH=/usr/lib/ccache:$PATH
+  - /usr/bin/python3 ./b platform select $PLATFORM
   - cd build
-  - cmake ..
-  - make
-  - make test
+  - ninja
