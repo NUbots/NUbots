@@ -81,7 +81,7 @@ namespace vision {
     namespace radial{
 
         inline arma::vec3 getCamFromScreen(const arma::vec2& p, const message::input::CameraParameters& cam){
-            arma::vec2 px = p - arma::vec2({cam.centreOffset[0],cam.centreOffset[1]}); //Reduce warnings setting types properly
+            arma::vec2 px = p - arma::vec2({double(cam.centreOffset[0]),double(cam.centreOffset[1])});
             float r  = std::sqrt(std::pow(px[0],2) + std::pow(px[1],2));
             float sx = std::sin(cam.radial.radiansPerPixel * r) * (float(px[0])/r);
             float sy = std::sin(cam.radial.radiansPerPixel * r) * (float(px[1])/r);
@@ -103,7 +103,7 @@ namespace vision {
             float px = - r * p[1] / (sin_theta);
             float py =   r * p[2] / (sin_theta);
 
-            return arma::vec2({px,py}) + arma::vec2({cam.centreOffset[0],cam.centreOffset[1]});    //Reduce warnings by setting types properly
+            return arma::vec2({px,py}) + arma::vec2({double(cam.centreOffset[0]),double(cam.centreOffset[1])});
         }
 
     }
