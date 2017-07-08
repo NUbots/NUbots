@@ -43,12 +43,6 @@ namespace tools {
                     fw.firmware =
                         std::vector<uint8_t>((std::istreambuf_iterator<char>(ifs)), std::istreambuf_iterator<char>());
                     fw.checksum = std::accumulate(fw.firmware.begin(), fw.firmware.end(), uint8_t(0));
-
-                    // Because Robotis really dont get the point of a checksum.
-                    // Need to account for extra 0xFFs in checksum (up to byte limit of 128 * 1024).
-                    // This is equivalent to -1 per 0xFF.
-                    fw.checksum -= ((128 * 1024) - fw.firmware.size());
-
                     firmwares.insert(std::make_pair(name, fw));
                 }
                 else {

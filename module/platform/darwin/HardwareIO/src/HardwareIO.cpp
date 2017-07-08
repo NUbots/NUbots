@@ -165,13 +165,15 @@ namespace platform {
         HardwareIO::HardwareIO(std::unique_ptr<NUClear::Environment> environment)
             : Reactor(std::move(environment)), darwin("/dev/CM730"), cm730State(), servoState() {
 
-            uint16_t CM730Model  = darwin.cm730.read<uint16_t>(Darwin::CM730::Address::MODEL_NUMBER_L);
-            uint8_t CM730Version = darwin.cm730.read<uint8_t>(Darwin::CM730::Address::VERSION);
-            std::stringstream version, model;
-            model << "0x" << std::setw(4) << std::setfill('0') << std::hex << int(CM730Model);
-            version << "0x" << std::setw(2) << std::setfill('0') << std::hex << int(CM730Version);
-            log<NUClear::INFO>("CM730 Model:", model.str());
-            log<NUClear::INFO>("CM730 Firmware Version:", version.str());
+            on<Startup>().then("HardwareIO Startup", [this] {
+                uint16_t CM730Model  = darwin.cm730.read<uint16_t>(Darwin::CM730::Address::MODEL_NUMBER_L);
+                uint8_t CM730Version = darwin.cm730.read<uint8_t>(Darwin::CM730::Address::VERSION);
+                std::stringstream version, model;
+                model << "0x" << std::setw(4) << std::setfill('0') << std::hex << int(CM730Model);
+                version << "0x" << std::setw(2) << std::setfill('0') << std::hex << int(CM730Version);
+                log<NUClear::INFO>("CM730 Model:", model.str());
+                log<NUClear::INFO>("CM730 Firmware Version:", version.str());
+            });
 
             on<Configuration>("DarwinPlatform.yaml").then([this](const Configuration& config) {
                 darwin.setConfig(config);
