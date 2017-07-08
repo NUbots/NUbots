@@ -231,13 +231,15 @@ namespace vision {
 
                 // Get the centre of our ball in screen space
                 arma::vec2 ballCentreScreen = projectCamSpaceToScreen(ballCentreRay,cam);
+                float ballRadiusScreen = arma::norm(top-base) / 4 + arma::norm(left - right) / 4;
 
                 /************************************************
                  *                  THROWOUTS                   *
                  ************************************************/
 
                 if(print_throwout_logs){
-                    log("Ball model:", result.model.unit_axis.t(), result.model.gradient);
+                    log("Ball model: g =  ", result.model.gradient, " axis =   ", result.model.unit_axis.t());
+                    log("Ball screen: r = ", ballRadiusScreen,      " centre = ",  ballCentreScreen.t());
                 }
                 // CENTRE OF BALL IS ABOVE THE HORIZON
                 if(horizon.y(ballCentreScreen[0]) > ballCentreScreen[1]) {
@@ -330,7 +332,7 @@ namespace vision {
 
                 // On screen visual shape
                 // Estimate for now
-                b.circle.radius = arma::norm(top-base) / 4 + arma::norm(left - right) / 4;
+                b.circle.radius = ballRadiusScreen;
                 b.circle.centre = convert<double, 2>(ballCentreScreen);
 
                 // Angular positions from the camera

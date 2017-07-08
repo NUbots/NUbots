@@ -31,7 +31,7 @@ namespace vision {
 
         on<Trigger<std::vector<message::vision::Ball>>>().then([this] (const std::vector<message::vision::Ball>& balls) {
             for(auto& ball : balls){
-                log("Ball pos:", ball.position);
+                log("Ball detected by vision, pos:", ball.position.transpose());
                 for(auto& edgePts : ball.edgePoints){
                     log("Edge pts:", edgePts);
                 }
@@ -93,6 +93,9 @@ namespace vision {
 
         auto classifiedImage = std::make_unique<ClassifiedImage>();
         classifiedImage->ballPoints = imagePoints;
+        classifiedImage->ballSeedPoints[0] = imagePoints;
+        classifiedImage->ballSeedPoints[1] = imagePoints;
+        classifiedImage->ballSeedPoints[2] = imagePoints;
         classifiedImage->image = const_cast<Image*>(image.get())->shared_from_this();
         classifiedImage->sensors = const_cast<Sensors*>(sensors.get())->shared_from_this();
         classifiedImage->horizon.normal = Eigen::Vector2d(0,-1);

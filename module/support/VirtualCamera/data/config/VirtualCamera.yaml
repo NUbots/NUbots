@@ -6,8 +6,22 @@ lens:
 
 imageWidth: 320
 imageHeight: 240
-FOV_X: 1.0472
-FOV_Y: 0.785398
+FOV_X: 3.14
+FOV_Y: 3.14
 DISTORTION_FACTOR: -0.0000
 
 emit_images: true
+
+# lens_type: pinhole
+
+# lens:
+#   radiansPerPixel: 0.01
+#   centreOffset: [0,0]
+
+# imageWidth: 320
+# imageHeight: 240
+# FOV_X: 1.0472
+# FOV_Y: 0.785398
+# DISTORTION_FACTOR: -0.0000
+
+# emit_images: true
