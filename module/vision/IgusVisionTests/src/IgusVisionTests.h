@@ -26,6 +26,8 @@ namespace vision {
         float lambda = 0.1;
         arma::vec2 offset = arma::vec2({0,0});
 
+        arma::vec2 test_point_screen;
+
         std::shared_ptr<const message::input::Image> image;
         std::shared_ptr<const message::input::Sensors> sensors;
     public:

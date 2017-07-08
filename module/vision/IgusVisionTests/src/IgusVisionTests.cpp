@@ -27,6 +27,7 @@ namespace vision {
 
             theta_count = config["theta_count"].as<float>();
 
+            test_point_screen = config["test_point_screen"].as<arma::vec>();
         });
 
         on<Trigger<std::vector<message::vision::Ball>>>().then([this] (const std::vector<message::vision::Ball>& balls) {
@@ -51,6 +52,13 @@ namespace vision {
             if(image && sensors){
                 emitClassifiedImage(cam);
             }
+            arma::vec3 test_point_cam = utility::math::vision::getCamFromScreen(test_point_screen,cam);
+            arma::vec2 test_point_screen2 = utility::math::vision::projectCamSpaceToScreen(test_point_cam,cam);
+            arma::vec3 test_point_cam2 = utility::math::vision::getCamFromScreen(test_point_screen2,cam);
+            std::cout << "test_point_screen" << test_point_screen.t() << std::endl;
+            std::cout << "test_point_cam" << test_point_cam.t() << std::endl;
+            std::cout << "test_point_screen2" << test_point_screen2.t() << std::endl;
+            std::cout << "test_point_cam2" << test_point_cam2.t() << std::endl;
         });
     }
 

@@ -83,6 +83,7 @@ namespace vision {
         inline arma::vec3 getCamFromScreen(const arma::vec2& p, const message::input::CameraParameters& cam){
             arma::vec2 px = p - arma::vec2({double(cam.centreOffset[0]),double(cam.centreOffset[1])});
             float r  = std::sqrt(std::pow(px[0],2) + std::pow(px[1],2));
+            if(r==0){return {1,0,0};}
             float sx = std::sin(cam.radial.radiansPerPixel * r) * (float(px[0])/r);
             float sy = std::sin(cam.radial.radiansPerPixel * r) * (float(px[1])/r);
             float sz = -(std::cos(cam.radial.radiansPerPixel * r));

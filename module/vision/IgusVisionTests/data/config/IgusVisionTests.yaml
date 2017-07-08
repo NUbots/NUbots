@@ -9,3 +9,5 @@ image_size:   [1000, 1000]
 horizon:
   normal:   [0, -1]
   distance: 200
+
+test_point_screen: [0,0]

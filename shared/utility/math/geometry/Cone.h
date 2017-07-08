@@ -54,6 +54,7 @@ namespace geometry {
             if(arma::dot(X.col(0),unit_axis) - arma::dot(X.col(1),unit_axis) > 0.00001 ||
                arma::dot(X.col(1),unit_axis) - arma::dot(X.col(2),unit_axis) > 0.00001)
             {
+                std::cout << __FILE__ << " : " << __LINE__ << " CONE NOT FORMED." << std::endl;
                 return false;
             }
             return true;
@@ -77,7 +78,6 @@ namespace geometry {
             //Compute size of orth component
             return std::sqrt(norm_p * norm_p - proj_cone_p * proj_cone_p);
         }
-
 
 
     };
