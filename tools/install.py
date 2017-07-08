@@ -13,7 +13,7 @@ from subprocess import call, STDOUT
 def register(command):
 
     # Install help
-    command.help = 'Install the system onto the target drone'
+    command.help = 'Install the system onto the target system'
 
     # Drone arguments
     command.add_argument('ip_addr'

@@ -10,12 +10,27 @@ class build_tools {
     command => "/usr/bin/apt-get install -y software-properties-common",
     unless => '/usr/bin/dpkg -s software-properties-common',
   } ->
+  # Add the llvm 4.0 source
+  apt::source { 'llvm-apt-repo':
+    comment  => 'The LLVM 4.0 apt repository',
+    location => 'http://apt.llvm.org/xenial/',
+    release  => 'llvm-toolchain-xenial-4.0',
+    repos    => 'main',
+    key      => {
+      'id'     => '6084F3CF814B57C1CF12EFD515CF4D18AF4F7421',
+      'server' => 'pgp.mit.edu',
+    },
+    include  => {
+      'src' => true,
+      'deb' => true,
+    },
+  } ->
   # Add the ubuntu test toolchain ppa (for modern g++ etc)
   apt::ppa {'ppa:ubuntu-toolchain-r/test': } ~>
   exec { "apt-update-ppa":
     command => "/usr/bin/apt-get update",
     refreshonly => true
-  } -> Package <| |>
+  } -> Package <| provider == 'apt' |>
 
   # Tools
   package { 'cmake': ensure => latest, }
