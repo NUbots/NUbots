@@ -84,13 +84,13 @@ namespace vision {
             arma::vec2 px = p - arma::vec2({double(cam.centreOffset[0]),double(cam.centreOffset[1])});
             float r  = std::sqrt(std::pow(px[0],2) + std::pow(px[1],2));
             if(r==0){return {1,0,0};}
-            float sx = std::sin(cam.radial.radiansPerPixel * r) * (float(px[0])/r);
-            float sy = std::sin(cam.radial.radiansPerPixel * r) * (float(px[1])/r);
-            float sz = -(std::cos(cam.radial.radiansPerPixel * r));
+            float sx = (std::cos(cam.radial.radiansPerPixel * r));
+            float sy = std::sin(cam.radial.radiansPerPixel * r) * (float(px[0])/r);
+            float sz = std::sin(cam.radial.radiansPerPixel * r) * (float(px[1])/r);
 
             //Swizzle components so x is out of camera, y is to the left, z is up
             //Matches input of pointToPixel
-            return arma::vec3({-sz, -sx, sy});
+            return arma::vec3({sx, sy, sz});
         }
 
         inline arma::vec2 projectCamSpaceToScreen(const arma::vec3& point, const message::input::CameraParameters& cam){
@@ -101,7 +101,7 @@ namespace vision {
             }
             float r = theta / cam.radial.radiansPerPixel;
             float sin_theta = std::sin(theta);
-            float px = - r * p[1] / (sin_theta);
+            float px =   r * p[1] / (sin_theta);
             float py =   r * p[2] / (sin_theta);
 
             return arma::vec2({px,py}) + arma::vec2({double(cam.centreOffset[0]),double(cam.centreOffset[1])});
