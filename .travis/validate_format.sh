@@ -8,6 +8,9 @@ while IFS= read -r -d $'\0' line; do
     # Get what our formatted code should be
     fmt=$( clang-format-4.0 -style=file $line )
 
+    # Print a status message so we know what it's doing
+    echo "Validating formatting for $line"
+
     # Check if our text is formatted incorrectly
     if ! cmp -s $line <(echo "$fmt"); then
 
