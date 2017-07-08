@@ -104,7 +104,7 @@ namespace vision {
             MAXIMUM_ASPECT_RATIO = config["aspect_ratio_range"][1].as<double>();
             //TODO: use
             arma::vec3 horizon_buffer_height = {1,0,tan(config["visual_horizon_buffer"].as<double>())};
-            VISUAL_HORIZON_BUFFER = std::max(1, int(projectCamSpaceToScreen(horizon_buffer_height,cam)));
+            VISUAL_HORIZON_BUFFER = std::max(1, int(projectCamSpaceToScreen(horizon_buffer_height,cam)[1]));
             MAXIMUM_GOAL_HORIZON_NORMAL_ANGLE = std::cos(config["minimum_goal_horizon_angle"].as<double>() - M_PI_2);
             MAXIMUM_ANGLE_BETWEEN_GOALS = std::cos(config["maximum_angle_between_goals"].as<double>());
             MAXIMUM_VERTICAL_GOAL_PERSPECTIVE_ANGLE = std::sin(-config["maximum_vertical_goal_perspective_angle"].as<double>());
