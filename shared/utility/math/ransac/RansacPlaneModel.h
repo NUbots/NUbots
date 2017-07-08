@@ -17,8 +17,8 @@
  * Copyright 2013 NUBots <nubots@nubots.net>
  */
 
-#ifndef UTILITY_MATH_RANSAC_RANSACCONEMODEL_H
-#define UTILITY_MATH_RANSAC_RANSACCONEMODEL_H
+#ifndef UTILITY_MATH_RANSAC_RANSACPLANEMODEL_H
+#define UTILITY_MATH_RANSAC_RANSACPLANEMODEL_H
 
 #include <array>
 #include <armadillo>
@@ -28,7 +28,6 @@ namespace utility {
 namespace math {
 namespace ransac {
 
-    //3D only!
     class RansacPlaneModel : public utility::math::geometry::Plane<3> {
     public:
 
@@ -40,7 +39,7 @@ namespace ransac {
         double calculateError(const DataPoint& p) const;
 
         template <typename Iterator>
-        void refineModel(Iterator&, Iterator&, const double&) {
+        void refineModel(Iterator& begin, Iterator& end, const double& threshold) {
             //commented out due to performance concerns - works well though
             //leastSquaresUpdate(first,last,candidateThreshold);
         }
