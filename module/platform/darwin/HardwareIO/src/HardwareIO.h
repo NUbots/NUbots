@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with the NUbots Codebase.  If not, see <http://www.gnu.org/licenses/>.
  *
- * Copyright 2013 NUBots <nubots@nubots.net>
+ * Copyright 2013 NUbots <nubots@nubots.net>
  */
 
 #ifndef MODULES_PLATFORM_DARWIN_HARDWAREIO_H
@@ -78,7 +78,7 @@ namespace platform {
             /// @brief called by a Powerplant to construct this reactor
             explicit HardwareIO(std::unique_ptr<NUClear::Environment> environment);
         };
-    }
-}
-}
+    }  // namespace darwin
+}  // namespace platform
+}  // namespace module
 #endif

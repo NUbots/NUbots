@@ -14,33 +14,31 @@
  * You should have received a copy of the GNU General Public License
  * along with the NUbots Codebase.  If not, see <http://www.gnu.org/licenses/>.
  *
- * Copyright 2013 NUBots <nubots@nubots.net>
+ * Copyright 2013 NUbots <nubots@nubots.net>
  */
 
 #include "RansacCircleModel.h"
 
 namespace utility {
 namespace math {
-namespace ransac {
+    namespace ransac {
 
-  bool RansacCircleModel::regenerate(const std::array<DataPoint, REQUIRED_POINTS>& points) {
-        if (points.size() == REQUIRED_POINTS
-            && !arma::all(points[0] == points[1])
-            && !arma::all(points[0] == points[2])
-            && !arma::all(points[1] == points[2])) {
-            return setFromPoints(points[0], points[1], points[2], 1.0e-2);
+        bool RansacCircleModel::regenerate(const std::array<DataPoint, REQUIRED_POINTS>& points) {
+            if (points.size() == REQUIRED_POINTS && !arma::all(points[0] == points[1])
+                && !arma::all(points[0] == points[2])
+                && !arma::all(points[1] == points[2])) {
+                return setFromPoints(points[0], points[1], points[2], 1.0e-2);
+            }
+
+            else {
+                return false;
+            }
         }
 
-        else {
-            return false;
+        double RansacCircleModel::calculateError(const DataPoint& p) const {
+            double error = distanceToPoint(p);
+            return error * error;
         }
-    }
-
-    double RansacCircleModel::calculateError(const DataPoint& p) const {
-        double error = distanceToPoint(p);
-        return error * error;
-    }
-
-}
-}
-}
+    }  // namespace ransac
+}  // namespace math
+}  // namespace utility

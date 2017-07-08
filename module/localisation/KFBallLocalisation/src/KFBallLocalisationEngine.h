@@ -14,37 +14,35 @@
  * You should have received a copy of the GNU General Public License
  * along with the NUbots Codebase.  If not, see <http://www.gnu.org/licenses/>.
  *
- * Copyright 2013 NUBots <nubots@nubots.net>
+ * Copyright 2013 NUbots <nubots@nubots.net>
  */
 
 #ifndef MODULES_KFBALLLOCALISATIONENGINE_H
 #define MODULES_KFBALLLOCALISATIONENGINE_H
 
-#include <nuclear>
 #include <armadillo>
 #include <chrono>
+#include <nuclear>
 
-#include "utility/math/filter/UKF.h"
-#include "utility/math/filter/ParticleFilter.h"
-#include "extension/Configuration.h"
-#include "message/vision/VisionObjects.h"
-#include "message/localisation/FieldObject.h"
 #include "BallModel.h"
+#include "extension/Configuration.h"
+#include "message/localisation/FieldObject.h"
+#include "message/vision/VisionObjects.h"
+#include "utility/math/filter/ParticleFilter.h"
+#include "utility/math/filter/UKF.h"
 
 namespace module {
 namespace localisation {
 
     class KFBallLocalisationEngine {
-        public:
-
+    public:
         KFBallLocalisationEngine()
-            : ball_filter_(
-                {3, 2, 0, 0}, // mean
-                // {0, 0, 3.141},
-                arma::eye(ball::BallModel::size, ball::BallModel::size) * 1, // cov
-                0.1) // alpha
+            : ball_filter_({3, 2, 0, 0},                                                 // mean
+                                                                                         // {0, 0, 3.141},
+                           arma::eye(ball::BallModel::size, ball::BallModel::size) * 1,  // cov
+                           0.1)                                                          // alpha
             , cfg_()
-            , last_time_update_time_(NUClear::clock::now()) { }
+            , last_time_update_time_(NUClear::clock::now()) {}
 
         void TimeUpdate(NUClear::clock::time_point current_time);
 
@@ -72,6 +70,6 @@ namespace localisation {
 
         NUClear::clock::time_point last_time_update_time_;
     };
-}
-}
+}  // namespace localisation
+}  // namespace module
 #endif

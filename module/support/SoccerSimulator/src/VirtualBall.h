@@ -14,14 +14,14 @@
  * You should have received a copy of the GNU General Public License
  * along with the NUbots Codebase.  If not, see <http://www.gnu.org/licenses/>.
  *
- * Copyright 2013 NUBots <nubots@nubots.net>
+ * Copyright 2013 NUbots <nubots@nubots.net>
  */
 
 #ifndef MODULE_SUPPORT_VIRTUALBALL
 #define MODULE_SUPPORT_VIRTUALBALL
 
-#include <random>
 #include <armadillo>
+#include <random>
 
 #include "message/input/CameraParameters.h"
 #include "message/input/Sensors.h"
@@ -44,12 +44,14 @@ namespace support {
 
         std::mt19937 rd;
         std::normal_distribution<> angularDistribution = std::normal_distribution<>(0, M_PI_2);
-        std::normal_distribution<> radialDistribution = std::normal_distribution<>(0, 0.01);
+        std::normal_distribution<> radialDistribution  = std::normal_distribution<>(0, 0.01);
 
-        message::vision::Ball detect(const message::input::CameraParameters& camParams, utility::math::matrix::Transform2D robotPose, const message::input::Sensors& sensors, arma::vec4 error);
+        message::vision::Ball detect(const message::input::CameraParameters& camParams,
+                                     utility::math::matrix::Transform2D robotPose,
+                                     const message::input::Sensors& sensors,
+                                     arma::vec4 error);
     };
-
-}
-}
+}  // namespace support
+}  // namespace module
 
 #endif  // MODULE_SUPPORT_VIRTUALBALL

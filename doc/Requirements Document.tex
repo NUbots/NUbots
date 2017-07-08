@@ -112,7 +112,7 @@
 
 \newglossaryentry{nubots}
 {
-	name=NUBots,
+	name=NUbots,
 	description={
 		is the team responsible for programming and maintaining the robots.
 	}
@@ -306,7 +306,7 @@
 			There are also a number of special types provided by the system.
 			These types can be used in an \emph{On} statement in order to get different behaviour.
 			The best example of this is the Every type. This type will make the system trigger the On method at regular intervals.
-			This functionality will be used by the NUBots as the primal events that trigger all of the sensor reads each round.
+			This functionality will be used by the NUbots as the primal events that trigger all of the sensor reads each round.
 
 			\emph{Emit} allows \glspl{reactor} to push data into the \gls{powerplant} that will then be distributed to all components that are interested in this datatype. This is done by calling their appropriate \emph{On} methods while providing the Emitted data as a parameter.
 			This will be used by the robot to push the results of any operations it has performed to allow other components to use them.
@@ -606,7 +606,7 @@
 				There are fewer systems that are affected by this change in the new architecture, and the consistent method of communication between them means that there is no longer a need to understand both blackboard and the job system.
 				The method by which messages are passed also means that no global state needs to be set up to hold the new information provided by the compass.
 
-			\paragraph{Scenario} The marketing department for Engineering wishes to use the NUBots robots for advertising purposes. They request that the robots be made to dance in time to music they plan to play through speakers. Therefore a new component will need to be added to take audio input and analyse it to determine how the robot should dance. Dance move scripts will need to be added to the system and a way to execute the scripts according to timing of the beats.
+			\paragraph{Scenario} The marketing department for Engineering wishes to use the NUbots robots for advertising purposes. They request that the robots be made to dance in time to music they plan to play through speakers. Therefore a new component will need to be added to take audio input and analyse it to determine how the robot should dance. Dance move scripts will need to be added to the system and a way to execute the scripts according to timing of the beats.
 
 			\subsubsection{Current System}
 				In order to implement this in the current system, the following changes would be required

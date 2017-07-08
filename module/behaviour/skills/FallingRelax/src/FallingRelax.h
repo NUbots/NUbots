@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with the NUbots Codebase.  If not, see <http://www.gnu.org/licenses/>.
  *
- * Copyright 2013 NUBots <nubots@nubots.net>
+ * Copyright 2013 NUbots <nubots@nubots.net>
  */
 
 #ifndef MODULES_BEHAVIOUR_REFLEX_FALLINGRELAX_H
@@ -23,34 +23,33 @@
 #include <nuclear>
 
 namespace module {
-    namespace behaviour {
-        namespace skills {
+namespace behaviour {
+    namespace skills {
 
-            /**
-             * Executes a falling script if the robot falls over.
-             *
-             * @author Trent Houliston
-             */
-            class FallingRelax : public NUClear::Reactor {
-            private:
-                const size_t id;
+        /**
+         * Executes a falling script if the robot falls over.
+         *
+         * @author Trent Houliston
+         */
+        class FallingRelax : public NUClear::Reactor {
+        private:
+            const size_t id;
 
-                bool falling;
+            bool falling;
 
-                /// config settings
-                float FALLING_ANGLE;
-                float FALLING_ACCELERATION;
-                std::vector<float> RECOVERY_ACCELERATION;
-                float PRIORITY;
+            /// config settings
+            float FALLING_ANGLE;
+            float FALLING_ACCELERATION;
+            std::vector<float> RECOVERY_ACCELERATION;
+            float PRIORITY;
 
-                void updatePriority(const float& priority);
+            void updatePriority(const float& priority);
 
-            public:
-                explicit FallingRelax(std::unique_ptr<NUClear::Environment> environment);
-            };
-        }  // skills
-    }  // behaviours
-}  // modules
+        public:
+            explicit FallingRelax(std::unique_ptr<NUClear::Environment> environment);
+        };
+    }  // namespace skills
+}  // namespace behaviour
+}  // namespace module
 
 #endif  // MODULES_BEHAVIOUR_REFLEX_FALLINGRELAX_H
-

@@ -14,30 +14,29 @@
  * You should have received a copy of the GNU General Public License
  * along with the NUbots Codebase.  If not, see <http://www.gnu.org/licenses/>.
  *
- * Copyright 2013 NUBots <nubots@nubots.net>
+ * Copyright 2013 NUbots <nubots@nubots.net>
  */
 
 #include "RansacLineModel.h"
 
 namespace utility {
 namespace math {
-namespace ransac {
+    namespace ransac {
 
-    bool RansacLineModel::regenerate(const std::array<DataPoint, REQUIRED_POINTS>& pts) {
-        if(pts.size() == REQUIRED_POINTS && !arma::all(pts[0] == pts[1])) {
-            setFromPoints(pts[0], pts[1]);
-            return true;
+        bool RansacLineModel::regenerate(const std::array<DataPoint, REQUIRED_POINTS>& pts) {
+            if (pts.size() == REQUIRED_POINTS && !arma::all(pts[0] == pts[1])) {
+                setFromPoints(pts[0], pts[1]);
+                return true;
+            }
+            else {
+                return false;
+            }
         }
-        else {
-            return false;
+
+        double RansacLineModel::calculateError(const DataPoint& p) const {
+            double val = distanceToPoint(std::forward<const DataPoint&>(p));
+            return val * val;
         }
-    }
-
-    double RansacLineModel::calculateError(const DataPoint& p) const {
-        double val = distanceToPoint(std::forward<const DataPoint&>(p));
-        return val * val;
-    }
-
-}
-}
-}
+    }  // namespace ransac
+}  // namespace math
+}  // namespace utility

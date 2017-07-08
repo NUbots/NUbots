@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with the Autocalibration Codebase.  If not, see <http://www.gnu.org/licenses/>.
  *
- * Copyright 2013 NUBots <nubots@nubots.net>
+ * Copyright 2013 NUbots <nubots@nubots.net>
  */
 
 #ifndef UTILITY_MATH_KALMAN_IMUMODEL_H
@@ -24,51 +24,49 @@
 #include <armadillo>
 
 namespace utility {
-    namespace math {
-        namespace kalman {
+namespace math {
+    namespace kalman {
 
-            class IMUModel {
-            public:
+        class IMUModel {
+        public:
+            static constexpr double G = -9.80665;
 
-                static constexpr double G = -9.80665;
+            // The indicies for our vector
+            static constexpr uint VX = 0;
+            static constexpr uint VY = 1;
+            static constexpr uint VZ = 2;
+            static constexpr uint QW = 3;
+            static constexpr uint QX = 4;
+            static constexpr uint QY = 5;
+            static constexpr uint QZ = 6;
 
-                // The indicies for our vector
-                static constexpr uint VX = 0;
-                static constexpr uint VY = 1;
-                static constexpr uint VZ = 2;
-                static constexpr uint QW = 3;
-                static constexpr uint QX = 4;
-                static constexpr uint QY = 5;
-                static constexpr uint QZ = 6;
-
-                struct MeasurementType {
-                    struct GYROSCOPE {};
-                    struct ACCELEROMETER {};
-                    struct FORWARD {};
-                    struct UP {};
-                };
-
-                arma::vec processNoiseDiagonal;
-
-                static constexpr size_t size = 7;
-
-                IMUModel() : processNoiseDiagonal() {} // empty constructor
-
-                arma::vec::fixed<size> timeUpdate(const arma::vec::fixed<size>& state, double deltaT);
-
-                arma::vec3 predictedObservation(const arma::vec::fixed<size>& state);
-                arma::vec3 predictedObservation(const arma::vec::fixed<size>& state, const MeasurementType::UP&);
-                arma::vec3 predictedObservation(const arma::vec::fixed<size>& state, const MeasurementType::ACCELEROMETER&);
-                arma::vec3 predictedObservation(const arma::vec::fixed<size>& state, const MeasurementType::GYROSCOPE&);
-
-                arma::vec observationDifference(const arma::vec& a, const arma::vec& b);
-
-                arma::vec::fixed<size> limitState(const arma::vec::fixed<size>& state);
-
-                arma::mat::fixed<size, size> processNoise();
+            struct MeasurementType {
+                struct GYROSCOPE {};
+                struct ACCELEROMETER {};
+                struct FORWARD {};
+                struct UP {};
             };
 
-        }
-    }
-}
+            arma::vec processNoiseDiagonal;
+
+            static constexpr size_t size = 7;
+
+            IMUModel() : processNoiseDiagonal() {}  // empty constructor
+
+            arma::vec::fixed<size> timeUpdate(const arma::vec::fixed<size>& state, double deltaT);
+
+            arma::vec3 predictedObservation(const arma::vec::fixed<size>& state);
+            arma::vec3 predictedObservation(const arma::vec::fixed<size>& state, const MeasurementType::UP&);
+            arma::vec3 predictedObservation(const arma::vec::fixed<size>& state, const MeasurementType::ACCELEROMETER&);
+            arma::vec3 predictedObservation(const arma::vec::fixed<size>& state, const MeasurementType::GYROSCOPE&);
+
+            arma::vec observationDifference(const arma::vec& a, const arma::vec& b);
+
+            arma::vec::fixed<size> limitState(const arma::vec::fixed<size>& state);
+
+            arma::mat::fixed<size, size> processNoise();
+        };
+    }  // namespace kalman
+}  // namespace math
+}  // namespace utility
 #endif

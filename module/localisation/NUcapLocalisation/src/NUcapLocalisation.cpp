@@ -14,19 +14,19 @@
  * You should have received a copy of the GNU General Public License
  * along with the NUbots Codebase.  If not, see <http://www.gnu.org/licenses/>.
  *
- * Copyright 2013 NUBots <nubots@nubots.net>
+ * Copyright 2013 NUbots <nubots@nubots.net>
  */
 
 #include "NUcapLocalisation.h"
-#include "utility/nubugger/NUhelpers.h"
-#include "utility/math/matrix/Rotation3D.h"
+#include <armadillo>
+#include "extension/Configuration.h"
 #include "message/input/MotionCapture.h"
 #include "message/input/Sensors.h"
-#include "utility/math/geometry/UnitQuaternion.h"
-#include "extension/Configuration.h"
 #include "message/localisation/FieldObject.h"
 #include "utility/math/angle.h"
-#include <armadillo>
+#include "utility/math/geometry/UnitQuaternion.h"
+#include "utility/math/matrix/Rotation3D.h"
+#include "utility/nubugger/NUhelpers.h"
 
 namespace module {
 namespace localisation {
@@ -39,11 +39,13 @@ namespace localisation {
     using utility::math::matrix::Rotation3D;
     using utility::nubugger::graph;
 
-    NUcapLocalisation::NUcapLocalisation(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
+    NUcapLocalisation::NUcapLocalisation(std::unique_ptr<NUClear::Environment> environment)
+        : Reactor(std::move(environment)) {
 
         on<Configuration>("NUcapLocalisation.yaml").then([this](const Configuration& config) {
             robot_id = config["robot_id"].as<int>();
-            NUClear::log("NUcapLocalisation::robot_id = ", robot_id, ". If incorrect change config/NUcapLocalisation.yaml");
+            NUClear::log(
+                "NUcapLocalisation::robot_id = ", robot_id, ". If incorrect change config/NUcapLocalisation.yaml");
         });
 
         on<Network<MotionCapture>>([this](const MotionCapture& mocap) {
@@ -52,7 +54,7 @@ namespace localisation {
 
                 int id = rigidBody.identifier();
                 if (id == robot_id) {
-                    //TODO: switch to correct xyz coordinate system!!!!!!!!!!
+                    // TODO: switch to correct xyz coordinate system!!!!!!!!!!
                     float x = rigidBody.position().x();
                     float y = rigidBody.position().y();
                     float z = rigidBody.position().z();
@@ -61,15 +63,15 @@ namespace localisation {
                                                 rigidBody.rotation().z(),
                                                 rigidBody.rotation().t()});
 
-                    Rotation3D groundToWorldRotation = q;// * sensors.camToGround.submat(0,0,2,2).t();
+                    Rotation3D groundToWorldRotation = q;  // * sensors.camToGround.submat(0,0,2,2).t();
 
-                    double heading = utility::math::angle::acos_clamped(groundToWorldRotation(0,0));
+                    double heading = utility::math::angle::acos_clamped(groundToWorldRotation(0, 0));
 
                     // TODO: transform from head to field
                     auto selfs = std::make_unique<std::vector<Self>>();
                     selfs->push_back(Self());
-                    selfs->back().heading = arma::normalise(groundToWorldRotation.submat(0,0,1,0));
-                    selfs->back().position = arma::vec2{x,y};
+                    selfs->back().heading  = arma::normalise(groundToWorldRotation.submat(0, 0, 1, 0));
+                    selfs->back().position = arma::vec2{x, y};
                     emit(std::move(selfs));
 
                     emit(graph("NUcap pos", x, y, z));
@@ -79,5 +81,5 @@ namespace localisation {
 
         });
     }
-}
-}
+}  // namespace localisation
+}  // namespace module

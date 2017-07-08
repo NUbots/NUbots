@@ -7,42 +7,40 @@ This code is part of mocap-kinect experiments*/
 #define AUTOCAL_VELOCITY_FITTER
 
 namespace autocal {
-	template <int N>
-	class LinearFitter {
-	private:
-        using Vec = arma::vec::fixed<N>;
+template <int N>
+class LinearFitter {
+private:
+    using Vec = arma::vec::fixed<N>;
 
-		arma::mat data;
-		arma::mat times;
-		
-		int number_of_samples;
+    arma::mat data;
+    arma::mat times;
 
-		bool enough_samples;
+    int number_of_samples;
 
-	public:
-		LinearFitter(int n){
-			number_of_samples = n;
-		}
-		
-		void addData(Vec new_data, double t_sec){
-			data.insert_cols(0,new_data);
-			times.insert_cols(0,arma::vec2({t_sec,1}));
-			enough_samples = data.n_cols > number_of_samples;
-			if(enough_samples){
-				data.shed_col(data.n_cols-1);
-				times.shed_col(times.n_cols-1);	
-			}
-		}
+    bool enough_samples;
 
-		bool canFit() {
-			return enough_samples;
-		}
+public:
+    LinearFitter(int n) {
+        number_of_samples = n;
+    }
 
-		arma::mat fit(){
-			return data * arma::pinv(times);
-		}
-	};
+    void addData(Vec new_data, double t_sec) {
+        data.insert_cols(0, new_data);
+        times.insert_cols(0, arma::vec2({t_sec, 1}));
+        enough_samples = data.n_cols > number_of_samples;
+        if (enough_samples) {
+            data.shed_col(data.n_cols - 1);
+            times.shed_col(times.n_cols - 1);
+        }
+    }
 
+    bool canFit() {
+        return enough_samples;
+    }
 
-}
+    arma::mat fit() {
+        return data * arma::pinv(times);
+    }
+};
+}  // namespace autocal
 #endif

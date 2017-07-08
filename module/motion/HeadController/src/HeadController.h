@@ -14,45 +14,45 @@
  * You should have received a copy of the GNU General Public License
  * along with the NUbots Codebase.  If not, see <http://www.gnu.org/licenses/>.
  *
- * Copyright 2013 NUBots <nubots@nubots.net>
+ * Copyright 2013 NUbots <nubots@nubots.net>
  */
 
 #ifndef MODULES_BEHAVIOUR_REFLEX_HEADCONTROLLER_H
 #define MODULES_BEHAVIOUR_REFLEX_HEADCONTROLLER_H
 
-#include <nuclear>
 #include <armadillo>
+#include <nuclear>
 
 namespace module {
-    namespace motion {
+namespace motion {
 
-            /**
-             * Executes a HeadController action.
-             *
-             * @author Jake Fountain
-             */
-            class HeadController : public NUClear::Reactor {
-            private:
-                const size_t id;
-                double min_yaw,max_yaw,min_pitch,max_pitch,head_motor_gain,head_motor_torque, p_gain;
-                ReactionHandle updateHandle;
-                //Debug var:
-                NUClear::clock::time_point lastTime;
-            public:
-                static constexpr const char* CONFIGURATION_PATH = "HeadController.yaml";
-                static constexpr const char* CONFIGURATION_MSSG = "Head Controller - Configure";
-                static constexpr const char* ONTRIGGER_HEAD_CMD = "Head Controller - Register Head Command";
-                static constexpr const char* ONTRIGGER_HEAD_POS = "Head Controller - Update Head Position";
+    /**
+     * Executes a HeadController action.
+     *
+     * @author Jake Fountain
+     */
+    class HeadController : public NUClear::Reactor {
+    private:
+        const size_t id;
+        double min_yaw, max_yaw, min_pitch, max_pitch, head_motor_gain, head_motor_torque, p_gain;
+        ReactionHandle updateHandle;
+        // Debug var:
+        NUClear::clock::time_point lastTime;
 
-                explicit HeadController(std::unique_ptr<NUClear::Environment> environment);
-                
-                arma::vec2 currentAngles;
-                arma::vec2 goalAngles;
-                bool goalRobotSpace = true;
-            };
+    public:
+        static constexpr const char* CONFIGURATION_PATH = "HeadController.yaml";
+        static constexpr const char* CONFIGURATION_MSSG = "Head Controller - Configure";
+        static constexpr const char* ONTRIGGER_HEAD_CMD = "Head Controller - Register Head Command";
+        static constexpr const char* ONTRIGGER_HEAD_POS = "Head Controller - Update Head Position";
 
-    }  // motion
-}  // modules
+        explicit HeadController(std::unique_ptr<NUClear::Environment> environment);
+
+        arma::vec2 currentAngles;
+        arma::vec2 goalAngles;
+        bool goalRobotSpace = true;
+    };
+
+}  // namespace motion
+}  // namespace module
 
 #endif  // MODULES_BEHAVIOURS_REFLEX_HEADCONTROLLER_H
-
