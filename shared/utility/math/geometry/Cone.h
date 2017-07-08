@@ -51,6 +51,11 @@ namespace geometry {
             double norm_length = std::sqrt(1 - proj_length * proj_length);
             //Gradient
             gradient = norm_length / proj_length;
+            if(arma::dot(X.col(0),unit_axis) - arma::dot(X.col(1),unit_axis) > 0.00001 ||
+               arma::dot(X.col(1),unit_axis) - arma::dot(X.col(2),unit_axis) > 0.00001)
+            {
+                return false;
+            }
             return true;
         }
 
@@ -61,10 +66,10 @@ namespace geometry {
             Vector p_unit = p / norm_p;
 
             //Get orth projection to cone axis to construct plane
-            Vector orth_u_p = arma::normalise(p - p_unit * arma::dot(p,unit_axis));
+            Vector orth_u_p = arma::normalise(p - unit_axis * arma::dot(p,unit_axis));
 
             //Construct a unit vector on the cone and in the plane of p
-            Vector cone_vec = arma::normalise(p_unit + gradient * orth_u_p);
+            Vector cone_vec = arma::normalise(unit_axis + gradient * orth_u_p);
 
             //Project point to cone vector
             double proj_cone_p = arma::dot(p,cone_vec);
