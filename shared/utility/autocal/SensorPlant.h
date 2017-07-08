@@ -82,4 +82,5 @@ public:
     void setCurrentSimParameters(const SimulationParameters& sim);
 };
 }  // namespace autocal
+
 #endif

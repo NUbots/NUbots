@@ -153,4 +153,5 @@ public:
     Frame getSimulatedFrame(TimeStamp now);
 };
 }  // namespace autocal
+
 #endif

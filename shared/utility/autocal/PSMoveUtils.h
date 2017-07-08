@@ -96,5 +96,4 @@ private:
     MocapRecorder mocapRecorder;
 };
 
-
 #endif
