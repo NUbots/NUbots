@@ -99,9 +99,10 @@ namespace ransac {
                 }
 
                 for(auto it = first; it != last; ++it) {
-                    if(model.calculateError(*it) < consensusErrorThreshold) {
+                    float this_error = model.calculateError(*it);
+                    if(this_error < consensusErrorThreshold) {
                         ++consensusSize;
-                        error += consensusErrorThreshold;
+                        error += this_error;
                     }
                 }
 
