@@ -10,6 +10,13 @@ class build_tools {
     command => "/usr/bin/apt-get install -y software-properties-common",
     unless => '/usr/bin/dpkg -s software-properties-common',
   } ->
+  # Add the ubuntu test toolchain ppa (for modern g++ etc)
+  apt::ppa {'ppa:ubuntu-toolchain-r/test': } ~>
+  exec { "apt-update-ppa":
+    command => "/usr/bin/apt-get update",
+    refreshonly => true
+  } -> Package <| provider == 'apt' |>
+
   # Add the llvm 4.0 source
   apt::source { 'llvm-apt-repo':
     comment  => 'The LLVM 4.0 apt repository',
@@ -24,12 +31,6 @@ class build_tools {
       'src' => true,
       'deb' => true,
     },
-  } ->
-  # Add the ubuntu test toolchain ppa (for modern g++ etc)
-  apt::ppa {'ppa:ubuntu-toolchain-r/test': } ~>
-  exec { "apt-update-ppa":
-    command => "/usr/bin/apt-get update",
-    refreshonly => true
   } -> Package <| provider == 'apt' |>
 
   # Tools
