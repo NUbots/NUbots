@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with the NUbots Codebase.  If not, see <http://www.gnu.org/licenses/>.
  *
- * Copyright 2013 NUBots <nubots@nubots.net>
+ * Copyright 2013 NUbots <nubots@nubots.net>
  */
 
 #ifndef UTILITY_MATH_MATRIX_ROTATION2D_H
@@ -24,16 +24,16 @@
 
 namespace utility {
 namespace math {
-namespace matrix {
+    namespace matrix {
 
-    template <int Dimensions>
-    class Rotation;
+        template <int Dimensions>
+        class Rotation;
 
-    using Rotation2D = Rotation<2>;
+        using Rotation2D = Rotation<2>;
 
-    template <>
-    class Rotation<2> : public arma::mat22 {
-        using arma::mat22::mat22; // inherit constructors
+        template <>
+        class Rotation<2> : public arma::mat22 {
+            using arma::mat22::mat22;  // inherit constructors
 
         public:
             /**
@@ -64,10 +64,10 @@ namespace matrix {
              * @return The rotation matrix
              */
             static Rotation2D createRotation(double radians);
-    };
+        };
 
-}  // matrix
-}  // math
-}  // utility
+    }  // namespace matrix
+}  // namespace math
+}  // namespace utility
 
 #endif  // UTILITY_MATH_MATRIX_ROTATION2D_H

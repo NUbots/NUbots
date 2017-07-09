@@ -14,45 +14,42 @@
  * You should have received a copy of the GNU General Public License
  * along with the NUbots Codebase.  If not, see <http://www.gnu.org/licenses/>.
  *
- * Copyright 2013 NUBots <nubots@nubots.net>
+ * Copyright 2013 NUbots <nubots@nubots.net>
  */
 
 #ifndef MODULES_LOCALISATION_MMKFROBOTLOCALISATIONENGINE_H
 #define MODULES_LOCALISATION_MMKFROBOTLOCALISATIONENGINE_H
 
-#include <nuclear>
 #include <chrono>
-#include "utility/localisation/LocalisationFieldObject.h"
+#include <nuclear>
+#include "MultiModalRobotModel.h"
 #include "extension/Configuration.h"
-#include "message/support/FieldDescription.h"
-#include "message/vision/VisionObjects.h"
 #include "message/input/Sensors.h"
 #include "message/localisation/ResetRobotHypotheses.h"
-#include "MultiModalRobotModel.h"
-#include "message/input/Sensors.h"
+#include "message/support/FieldDescription.h"
+#include "message/vision/VisionObjects.h"
+#include "utility/localisation/LocalisationFieldObject.h"
 
 namespace module {
 namespace localisation {
 
     class MMKFRobotLocalisationEngine {
-        public:
-
+    public:
         MMKFRobotLocalisationEngine()
-            : robot_models_(), field_description_(), cfg_({true, true, false, true}), goalpost_lfos_(), last_time_update_time_(NUClear::clock::now()) {
-        }
+            : robot_models_()
+            , field_description_()
+            , cfg_({true, true, false, true})
+            , goalpost_lfos_()
+            , last_time_update_time_(NUClear::clock::now()) {}
 
-        void TimeUpdate(NUClear::clock::time_point current_time,
-                        const message::input::Sensors& sensors);
+        void TimeUpdate(NUClear::clock::time_point current_time, const message::input::Sensors& sensors);
 
         std::vector<utility::localisation::LocalisationFieldObject> GetPossibleObjects(
             const message::vision::Goal& ambiguous_object);
 
-        void ProcessAmbiguousObjects(
-            const std::vector<message::vision::Goal>& ambiguous_objects);
+        void ProcessAmbiguousObjects(const std::vector<message::vision::Goal>& ambiguous_objects);
 
-        void IndividualStationaryObjectUpdate(
-            const std::vector<message::vision::Goal>& goals,
-            float time_increment);
+        void IndividualStationaryObjectUpdate(const std::vector<message::vision::Goal>& goals, float time_increment);
 
         void ProcessObjects(const std::vector<message::vision::Goal>& goals);
 
@@ -71,18 +68,23 @@ namespace localisation {
         void Reset(const message::localisation::ResetRobotHypotheses& reset, const message::input::Sensors& sensors);
 
         void OdometryMeasurementUpdate(const message::input::Sensors& sensors);
-    // private:
+        // private:
         MultiModalRobotModel robot_models_;
 
         std::shared_ptr<message::support::FieldDescription> field_description_;
 
     private:
         struct Config {
-            Config() : angle_between_goals_observation_enabled(false), goal_pair_observation_enabled(false),
-                       all_goals_are_own(false), emit_robot_fieldobjects(false) {}
+            Config()
+                : angle_between_goals_observation_enabled(false)
+                , goal_pair_observation_enabled(false)
+                , all_goals_are_own(false)
+                , emit_robot_fieldobjects(false) {}
             Config(bool angle, bool goal, bool own, bool emit)
-                : angle_between_goals_observation_enabled(angle), goal_pair_observation_enabled(goal),
-                  all_goals_are_own(own), emit_robot_fieldobjects(emit) {}
+                : angle_between_goals_observation_enabled(angle)
+                , goal_pair_observation_enabled(goal)
+                , all_goals_are_own(own)
+                , emit_robot_fieldobjects(emit) {}
 
             bool angle_between_goals_observation_enabled;
             bool goal_pair_observation_enabled;
@@ -106,6 +108,6 @@ namespace localisation {
 
         NUClear::clock::time_point last_time_update_time_;
     };
-}
-}
+}  // namespace localisation
+}  // namespace module
 #endif

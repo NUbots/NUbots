@@ -14,29 +14,25 @@
  * You should have received a copy of the GNU General Public License
  * along with the NUbots Codebase.  If not, see <http://www.gnu.org/licenses/>.
  *
- * Copyright 2013 NUBots <nubots@nubots.net>
+ * Copyright 2013 NUbots <nubots@nubots.net>
  */
 
 #include "WalkTest.h"
 #include "message/motion/WalkCommand.h"
 
 namespace module {
-    namespace behaviour {
-        namespace strategy {
+namespace behaviour {
+    namespace strategy {
 
-            using message::motion::WalkCommand;
+        using message::motion::WalkCommand;
 
-            WalkTest::WalkTest(std::unique_ptr<NUClear::Environment> environment)
-                : Reactor(std::move(environment)) 
-            {
-                // Begin walking forward...
-                auto walk = std::make_unique<WalkCommand>();
-                walk->command.xy() = arma::vec({1, 0});
-                walk->command.angle() = 0;
-                emit(std::move(walk));
-            }
-
+        WalkTest::WalkTest(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
+            // Begin walking forward...
+            auto walk             = std::make_unique<WalkCommand>();
+            walk->command.xy()    = arma::vec({1, 0});
+            walk->command.angle() = 0;
+            emit(std::move(walk));
         }
-    }
-}
-
+    }  // namespace strategy
+}  // namespace behaviour
+}  // namespace module

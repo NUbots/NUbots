@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with the NUbots Codebase.  If not, see <http://www.gnu.org/licenses/>.
  *
- * Copyright 2013 NUBots <nubots@nubots.net>
+ * Copyright 2013 NUbots <nubots@nubots.net>
  */
 
 #ifndef MODULES_RESEARCH_AUTOCLASSIFIERPROVIDER_H
@@ -33,18 +33,18 @@ namespace research {
         explicit AutoClassifierProvider(std::unique_ptr<NUClear::Environment> environment);
 
     private:
-        int ballEdgeBuffer  = 0;
-        uint8_t ballLightnessMin = 0;
-        uint8_t ballLightnessMax = 255;
-        int goalEdgeBuffer  = 0;
-        uint8_t goalLightnessMin = 0;
-        uint8_t goalLightnessMax = 255;
-        int fieldEdgeBuffer = 0;
+        int ballEdgeBuffer        = 0;
+        uint8_t ballLightnessMin  = 0;
+        uint8_t ballLightnessMax  = 255;
+        int goalEdgeBuffer        = 0;
+        uint8_t goalLightnessMin  = 0;
+        uint8_t goalLightnessMax  = 255;
+        int fieldEdgeBuffer       = 0;
         uint8_t fieldLightnessMin = 0;
         uint8_t fieldLightnessMax = 255;
-        int lineEdgeBuffer  = 0;
-        int lineLightnessMin = 0;
-        int lineLightnessMax = 255;
+        int lineEdgeBuffer        = 0;
+        int lineLightnessMin      = 0;
+        int lineLightnessMax      = 255;
 
         void handleVisionGoals(const message::vision::VisionObject& goals);
         void handleVisionBalls(const message::vision::VisionObject& balls);
@@ -54,9 +54,8 @@ namespace research {
         ReactionHandle fieldProvider;
         ReactionHandle lineProvider;
     };
-
-}
-}
+}  // namespace research
+}  // namespace module
 
 
 #endif

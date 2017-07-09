@@ -22,62 +22,62 @@
 
 #include "utility/input/ServoID.h"
 #include "utility/math/matrix/Rotation3D.h"
-#include "utility/math/matrix/Transform3D.h"
 #include "utility/math/matrix/Transform2D.h"
+#include "utility/math/matrix/Transform3D.h"
 #include "utility/math/vision.h"
 #include "utility/support/eigen_armadillo.h"
 
 namespace module {
-    namespace localisation {
+namespace localisation {
 
-        using utility::math::matrix::Rotation3D;
-        using utility::math::matrix::Transform3D;
-        using utility::math::matrix::Transform2D;
-        using message::support::FieldDescription;
-        using message::input::Sensors;
-        using ServoID = utility::input::ServoID;
+    using utility::math::matrix::Rotation3D;
+    using utility::math::matrix::Transform3D;
+    using utility::math::matrix::Transform2D;
+    using message::support::FieldDescription;
+    using message::input::Sensors;
+    using ServoID = utility::input::ServoID;
 
-        arma::vec::fixed<BallModel::size> BallModel::timeUpdate(const arma::vec::fixed<size>& state, double /*deltaT*/) {
-            return state;
-        }
-
-        arma::vec3 BallModel::predictedObservation(const arma::vec::fixed<size>& state
-            , const FieldDescription& field
-            , const Sensors& sensors
-            , const MeasurementType::BALL&) const {
-
-            // Get our transform to world coordinates
-            const Transform3D& Htw = convert<double, 4, 4>(sensors.world);
-            const Transform3D& Htc = convert<double, 4, 4>(sensors.forwardKinematics.at(ServoID::HEAD_PITCH)); 
-            Transform3D Hcw = Htc.i() * Htw;
-
-            arma::vec3 rBWw = { state[PX], state[PY], field.ball_radius };
-
-            return Hcw.transformPoint(rBWw);
-        }
-
-        arma::vec BallModel::observationDifference(const arma::vec& measurement
-            , const arma::vec3& rBCc
-            , const FieldDescription& field
-            , const Sensors& /*sensors*/
-            , const MeasurementType::BALL&) const {
-
-            double len = arma::norm(rBCc);
-
-            double expectedAngle = 2.0 * std::asin((field.ball_radius) / len);
-
-            double actualAngle = std::acos(arma::dot(measurement, rBCc / len));
-
-            return arma::vec({actualAngle - expectedAngle});
-        }
-
-        arma::vec::fixed<BallModel::size> BallModel::limitState(const arma::vec::fixed<size>& state) const {
-            return state;
-        }
-
-        arma::mat::fixed<BallModel::size, BallModel::size> BallModel::processNoise() const {
-            return arma::diagmat(processNoiseDiagonal);
-        }
-
+    arma::vec::fixed<BallModel::size> BallModel::timeUpdate(const arma::vec::fixed<size>& state, double /*deltaT*/) {
+        return state;
     }
-}
+
+    arma::vec3 BallModel::predictedObservation(const arma::vec::fixed<size>& state,
+                                               const FieldDescription& field,
+                                               const Sensors& sensors,
+                                               const MeasurementType::BALL&) const {
+
+        // Get our transform to world coordinates
+        const Transform3D& Htw = convert<double, 4, 4>(sensors.world);
+        const Transform3D& Htc = convert<double, 4, 4>(sensors.forwardKinematics.at(ServoID::HEAD_PITCH));
+        Transform3D Hcw        = Htc.i() * Htw;
+
+        arma::vec3 rBWw = {state[PX], state[PY], field.ball_radius};
+
+        return Hcw.transformPoint(rBWw);
+    }
+
+    arma::vec BallModel::observationDifference(const arma::vec& measurement,
+                                               const arma::vec3& rBCc,
+                                               const FieldDescription& field,
+                                               const Sensors& /*sensors*/
+                                               ,
+                                               const MeasurementType::BALL&) const {
+
+        double len = arma::norm(rBCc);
+
+        double expectedAngle = 2.0 * std::asin((field.ball_radius) / len);
+
+        double actualAngle = std::acos(arma::dot(measurement, rBCc / len));
+
+        return arma::vec({actualAngle - expectedAngle});
+    }
+
+    arma::vec::fixed<BallModel::size> BallModel::limitState(const arma::vec::fixed<size>& state) const {
+        return state;
+    }
+
+    arma::mat::fixed<BallModel::size, BallModel::size> BallModel::processNoise() const {
+        return arma::diagmat(processNoiseDiagonal);
+    }
+}  // namespace localisation
+}  // namespace module

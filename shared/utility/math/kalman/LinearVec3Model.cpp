@@ -14,41 +14,42 @@
  * You should have received a copy of the GNU General Public License
  * along with the Autocalibration Codebase.  If not, see <http://www.gnu.org/licenses/>.
  *
- * Copyright 2013 NUBots <nubots@nubots.net>
+ * Copyright 2013 NUbots <nubots@nubots.net>
  */
 
-#include <math.h> //needed for normalisation function
+#include "LinearVec3Model.h"  //includes armadillo
 #include <assert.h>
-#include "LinearVec3Model.h" //includes armadillo
+#include <math.h>  //needed for normalisation function
 
 #include <iostream>
 
 namespace utility {
-    namespace math {
-        namespace kalman {
-            arma::vec::fixed<LinearVec3Model::size> LinearVec3Model::limitState(const arma::vec::fixed<size>& state) {
-                return state;
-            }
-
-
-            arma::vec::fixed<LinearVec3Model::size> LinearVec3Model::timeUpdate(const arma::vec::fixed<size>& state, double deltaT, const arma::vec3& dState) {
-                return state + deltaT * dState;
-            }
-
-
-            arma::vec LinearVec3Model::predictedObservation(const arma::vec::fixed<size>& state, std::nullptr_t) {
-                return state;
-            }
-
-
-            arma::vec LinearVec3Model::observationDifference(const arma::vec& a, const arma::vec& b) {
-                return a - b;
-            }
-
-            arma::mat::fixed<LinearVec3Model::size, LinearVec3Model::size> LinearVec3Model::processNoise() {
-                return arma::eye(size, size) * processNoiseFactor; //std::numeric_limits<double>::epsilon();
-            }
-
+namespace math {
+    namespace kalman {
+        arma::vec::fixed<LinearVec3Model::size> LinearVec3Model::limitState(const arma::vec::fixed<size>& state) {
+            return state;
         }
-    }
-}
+
+
+        arma::vec::fixed<LinearVec3Model::size> LinearVec3Model::timeUpdate(const arma::vec::fixed<size>& state,
+                                                                            double deltaT,
+                                                                            const arma::vec3& dState) {
+            return state + deltaT * dState;
+        }
+
+
+        arma::vec LinearVec3Model::predictedObservation(const arma::vec::fixed<size>& state, std::nullptr_t) {
+            return state;
+        }
+
+
+        arma::vec LinearVec3Model::observationDifference(const arma::vec& a, const arma::vec& b) {
+            return a - b;
+        }
+
+        arma::mat::fixed<LinearVec3Model::size, LinearVec3Model::size> LinearVec3Model::processNoise() {
+            return arma::eye(size, size) * processNoiseFactor;  // std::numeric_limits<double>::epsilon();
+        }
+    }  // namespace kalman
+}  // namespace math
+}  // namespace utility

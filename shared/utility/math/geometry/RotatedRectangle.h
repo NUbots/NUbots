@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with the NUbots Codebase.  If not, see <http://www.gnu.org/licenses/>.
  *
- * Copyright 2013 NUBots <nubots@nubots.net>
+ * Copyright 2013 NUbots <nubots@nubots.net>
  */
 
 #ifndef UTILITY_MATH_GEOMETRY_ROTATEDRECTANGLE_H
@@ -28,25 +28,25 @@
 
 namespace utility {
 namespace math {
-namespace geometry {
+    namespace geometry {
 
-    using utility::math::matrix::Transform2D;
+        using utility::math::matrix::Transform2D;
 
-    class RotatedRectangle {
-    private:
-        Transform2D transform;
-        arma::vec2 size;
+        class RotatedRectangle {
+        private:
+            Transform2D transform;
+            arma::vec2 size;
 
-    public:
-        RotatedRectangle(const Transform2D& trans, const arma::vec2& size);
+        public:
+            RotatedRectangle(const Transform2D& trans, const arma::vec2& size);
 
-        Transform2D getTransform() const;
-        arma::vec2 getSize()       const;
-        arma::vec2 getPosition()   const;
-        double getRotation()       const;
-    };
-}
-}
-}
+            Transform2D getTransform() const;
+            arma::vec2 getSize() const;
+            arma::vec2 getPosition() const;
+            double getRotation() const;
+        };
+    }  // namespace geometry
+}  // namespace math
+}  // namespace utility
 
 #endif

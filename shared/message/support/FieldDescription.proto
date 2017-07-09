@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with the NUbots Codebase.  If not, see <http://www.gnu.org/licenses/>.
  *
- * Copyright 2013 NUBots <nubots@nubots.net>
+ * Copyright 2013 NUbots <nubots@nubots.net>
  */
 syntax = "proto3";
 
@@ -44,7 +44,7 @@ message FieldDescription {
     double          ball_radius         = 1;
     double          goalpost_top_height = 2;
     double          penalty_robot_start = 3;
-         
+
     // Coordinates of goalpost centers calculated from the FieldDimensions:
     vec2            goalpost_own_l      = 4;
     vec2            goalpost_own_r      = 5;

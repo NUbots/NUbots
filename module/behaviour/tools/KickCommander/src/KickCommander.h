@@ -24,18 +24,17 @@
 
 namespace module {
 namespace behaviour {
-namespace tools {
+    namespace tools {
 
-    class KickCommander : public NUClear::Reactor {
+        class KickCommander : public NUClear::Reactor {
 
-    public:
-        /// @brief Called by the powerplant to build and setup the KickCommander reactor.
-        explicit KickCommander(std::unique_ptr<NUClear::Environment> environment);
-        bool doThings = false;
-    };
-
-}
-}
-}
+        public:
+            /// @brief Called by the powerplant to build and setup the KickCommander reactor.
+            explicit KickCommander(std::unique_ptr<NUClear::Environment> environment);
+            bool doThings = false;
+        };
+    }  // namespace tools
+}  // namespace behaviour
+}  // namespace module
 
 #endif  // MODULES_SUPPORT_KICKCOMMANDER_H

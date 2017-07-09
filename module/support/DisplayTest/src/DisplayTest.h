@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with the NUbots Codebase.  If not, see <http://www.gnu.org/licenses/>.
  *
- * Copyright 2013 NUBots <nubots@nubots.net>
+ * Copyright 2013 NUbots <nubots@nubots.net>
  */
 
 #ifndef MODULES_DISPLAY_TEST_H
@@ -23,14 +23,12 @@
 #include <nuclear>
 
 namespace module {
-    namespace support {
+namespace support {
 
-        class DisplayTest : public NUClear::Reactor {
-        public:
-            explicit DisplayTest(std::unique_ptr<NUClear::Environment> environment);
-        };
-
-    }
-}
+    class DisplayTest : public NUClear::Reactor {
+    public:
+        explicit DisplayTest(std::unique_ptr<NUClear::Environment> environment);
+    };
+}  // namespace support
+}  // namespace module
 #endif
-
