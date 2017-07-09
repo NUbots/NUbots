@@ -31,9 +31,9 @@
 #include "message/behaviour/Subsumption.h"
 #include "message/input/Sensors.h"
 #include "message/localisation/FieldObject.h"
-#include "message/vision/VisionObjects.h"
-#include "message/motion/WalkCommand.h"
 #include "message/motion/KickCommand.h"
+#include "message/motion/WalkCommand.h"
+#include "message/vision/VisionObjects.h"
 
 #include "utility/behaviour/Action.h"
 #include "utility/behaviour/MotionCommand.h"
@@ -184,18 +184,17 @@ namespace module {
 
 
                         emit(std::make_unique<StopCommand>(subsumptionId));
-                        //emit(std::make_unique<ActionPriorites>(ActionPriorites { subsumptionId, { 40, 11 }}));
+                        // emit(std::make_unique<ActionPriorites>(ActionPriorites { subsumptionId, { 40, 11 }}));
 
                         return;
-
                     }
                     else if (latestCommand.type == message::behaviour::MotionCommand::Type::DirectCommand) {
-                        //TO DO, change to Bezier stuff
-                        std::unique_ptr<WalkCommand> command = std::make_unique<WalkCommand>(subsumptionId,latestCommand.walkCommand);
+                        // TO DO, change to Bezier stuff
+                        std::unique_ptr<WalkCommand> command =
+                            std::make_unique<WalkCommand>(subsumptionId, latestCommand.walkCommand);
                         emit(std::move(command));
-                        emit(std::make_unique<ActionPriorites>(ActionPriorites { subsumptionId, { 40, 11 }}));
+                        emit(std::make_unique<ActionPriorites>(ActionPriorites{subsumptionId, {40, 11}}));
                         return;
-
                     }
 
                     Transform3D Htw = convert<double, 4, 4>(sensors.world);
@@ -209,25 +208,31 @@ namespace module {
                                 Htw.x() + Htw.translation(); //In front of the robot
                     position = Htw.transformPoint(rBWw);
 
-                    //Hack Planner:
+
+                    // Hack Planner:
                     float headingChange = 0;
-                    float sideStep = 0;
-                    float speedFactor = 1;
-                    if(useLocalisation){
-                        arma::vec2 kick_target = WorldToRobotTransform(convert<double,2>(selfs.front().locObject.position), convert<double,2>(selfs.front().heading), convert<double,2>(kickPlan.target));
+                    float sideStep      = 0;
+                    float speedFactor   = 1;
+                    if (useLocalisation) {
+                        arma::vec2 kick_target =
+                            WorldToRobotTransform(convert<double, 2>(selfs.front().locObject.position),
+                                                  convert<double, 2>(selfs.front().heading),
+                                                  convert<double, 2>(kickPlan.target));
                         // //approach point:
                         arma::vec2 ballToTarget = arma::normalise(kick_target - position);
-                        arma::vec2 kick_point = position - ballToTarget * ball_approach_dist;
+                        arma::vec2 kick_point   = position - ballToTarget * ball_approach_dist;
 
-                        if(arma::norm(position) > slowdown_distance){
+                        if (arma::norm(position) > slowdown_distance) {
                             position = kick_point;
-                        }else{
-                            speedFactor = slow_approach_factor;
+                        }
+                        else {
+                            speedFactor   = slow_approach_factor;
                             headingChange = std::atan2(ballToTarget[1], ballToTarget[0]);
-                            sideStep = 1;
+                            sideStep      = 1;
                         }
                     }
-                    // arma::vec2 ball_world_position = WorldToRobotTransform(selfs.front().position, selfs.front().heading, position);
+                    // arma::vec2 ball_world_position = WorldToRobotTransform(selfs.front().position,
+                    // selfs.front().heading, position);
 
 
                     float angle = std::atan2(position[1], position[0]) + headingChange;
@@ -239,35 +244,37 @@ namespace module {
                     // log("loc position", selfs.front().position.t());
                     // log("loc heading", selfs.front().heading);
 
-                    //Euclidean distance to ball
-                    float scaleF = 2.0 / (1.0 + std::exp(-a * std::fabs(position[0]) + b)) - 1.0;
-                    float scaleF2 = angle / M_PI;
+                    // Euclidean distance to ball
+                    float scaleF            = 2.0 / (1.0 + std::exp(-a * std::fabs(position[0]) + b)) - 1.0;
+                    float scaleF2           = angle / M_PI;
                     float finalForwardSpeed = speedFactor * forwardSpeed * scaleF * (1.0 - scaleF2);
 
-                    float scaleS = 2.0 / (1.0 + std::exp(-a * std::fabs(position[1]) + b)) - 1.0;
-                    float scaleS2 = angle / M_PI;
-                    float finalSideSpeed = - speedFactor * ((0 < position[1]) - (position[1] < 0)) * sideStep * sideSpeed * scaleS * (1.0 - scaleS2);
+                    float scaleS         = 2.0 / (1.0 + std::exp(-a * std::fabs(position[1]) + b)) - 1.0;
+                    float scaleS2        = angle / M_PI;
+                    float finalSideSpeed = -speedFactor * ((0 < position[1]) - (position[1] < 0)) * sideStep * sideSpeed
+                                           * scaleS * (1.0 - scaleS2);
                     // log("forwardSpeed1", forwardSpeed);
                     // log("scale", scale);
                     // log("distanceToBall", distanceToBall);
                     // log("forwardSpeed2", finalForwardSpeed);
 
 
-                    std::unique_ptr<WalkCommand> command = std::make_unique<WalkCommand>(subsumptionId, convert<double, 3>(Transform2D({0, 0, 0})));
+                    std::unique_ptr<WalkCommand> command =
+                        std::make_unique<WalkCommand>(subsumptionId, convert<double, 3>(Transform2D({0, 0, 0})));
                     command->command = convert<double, 3>(Transform2D({finalForwardSpeed, finalSideSpeed, angle}));
+
                     emit(std::move(command));
                     emit(std::make_unique<ActionPriorites>(ActionPriorites { subsumptionId, { 40, 11 }}));
 
                 });
 
-                on<Trigger<MotionCommand>, Sync<SimpleWalkPathPlanner>>().then([this] (const MotionCommand& cmd) {
-                    //save the plan
-                    latestCommand = cmd;
+            on<Trigger<MotionCommand>, Sync<SimpleWalkPathPlanner>>().then([this](const MotionCommand& cmd) {
+                // save the plan
+                latestCommand = cmd;
 
-                });
+            });
+        }
 
-            }
-
-        }  // planning
-    }  // behaviours
+    }  // planning
+}  // behaviours
 }  // modules
