@@ -32,10 +32,14 @@ namespace vision {
 
         on<Trigger<std::vector<message::vision::Ball>>>().then([this] (const std::vector<message::vision::Ball>& balls) {
             for(auto& ball : balls){
-                log("Ball detected by vision, pos:", ball.position.transpose());
-                for(auto& edgePts : ball.edgePoints){
-                    log("Edge pts:", edgePts);
-                }
+                arma::vec3 measuredPos = convert<double,3>(ball.position);
+                log("Ball actual pos (x,y,z):  ", ballCentre.t());
+                log("Ball measured pos (x,y,z):", measuredPos.t());
+                log("Ball detector error =     ", (measuredPos - ballCentre).t());
+                log("Ball norm error =         ", arma::norm(measuredPos - ballCentre));
+                // for(auto& edgePts : ball.edgePoints){
+                //     log("Edge pts:", edgePts);
+                // }
             }
         });
 
