@@ -199,7 +199,10 @@ namespace behaviour {
                     // TODO: support non-ball targets
                     if (!robot_ground_space) {
                         if (ball.size() > 0) {
-                            rBWw             = convert<double, 2>(ball[0].position.head<2>());
+                            arma::vec2 rBWw_vec2 = convert<double, 2>(ball[0].position.head<2>());
+                            rBWw[0]              = rBWw_vec2[0];
+                            rBWw[1]              = rBWw_vec2[1];
+
                             timeBallLastSeen = now;
                             // log("ball seen");
                         }
@@ -207,7 +210,9 @@ namespace behaviour {
                             rBWw = timeSinceBallSeen < search_timeout ? rBWw :  // Place last seen
                                        Htw.x() + Htw.translation();             // In front of the robot
                         }
-                        position = Htw.transformPoint(rBWw);
+                        arma::vec3 position3d = Htw.transformPoint(rBWw);
+                        position[0]           = position3d[0];
+                        position[1]           = position3d[1];
                     }
                     else {
                         if (ball.size() > 0) {
@@ -286,7 +291,7 @@ namespace behaviour {
                                     0.1,
                                     arma::vec3({1, 0, 0}),
                                     0));
-                    log("kick_target", kick_target[0], kick_target[1]);
+                    // log("kick_target", kick_target[0], kick_target[1]);
 
                     emit(std::make_unique<KickPlan>(
                         KickPlan(convert<double, 2>(kick_target), KickPlan::KickType::SCRIPTED)));
