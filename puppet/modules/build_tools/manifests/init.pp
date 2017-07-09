@@ -15,7 +15,7 @@ class build_tools {
   exec { "apt-update-ppa":
     command => "/usr/bin/apt-get update",
     refreshonly => true
-  } -> Package <| provider == 'apt' |>
+  } -> Package <| |>
 
   # Add the llvm 4.0 source
   apt::source { 'llvm-apt-repo':
@@ -31,7 +31,7 @@ class build_tools {
       'src' => true,
       'deb' => true,
     },
-  } -> Package <| provider == 'apt' |>
+  } -> Package <| |>
 
   # Tools
   package { 'cmake': ensure => latest, }
