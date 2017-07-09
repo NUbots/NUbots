@@ -52,6 +52,9 @@ namespace vision {
         arma::vec2 v = arma::vec2({ double(imageSize[0] - 1) * 0.5, double(imageSize[1] - 1) * 0.5 }) - screen;
         return arma::ivec2({ int(lround(v[0])), int(lround(v[1])) });
     }
+    inline arma::vec2 screenToImageCts(const arma::vec2& screen, const arma::uvec2& imageSize){
+        return arma::vec2({ double(imageSize[0] - 1) * 0.5, double(imageSize[1] - 1) * 0.5 }) - screen;
+    }
     inline arma::vec2 imageToScreen(const arma::ivec2& im, const arma::uvec2& imageSize){
         return arma::vec2({ double(imageSize[0] - 1) * 0.5, double(imageSize[1] - 1) * 0.5 }) - im;
     }

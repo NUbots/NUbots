@@ -62,6 +62,8 @@ namespace vision {
     using utility::math::vision::widthBasedDistanceToCircle;
     using utility::math::vision::projectCamToPlane;
     using utility::math::vision::imageToScreen;
+    using utility::math::vision::screenToImage;
+    using utility::math::vision::screenToImageCts;
     using utility::math::vision::getCamFromScreen;
     using utility::math::vision::getParallaxAngle;
     using utility::math::vision::projectCamSpaceToScreen;
@@ -194,8 +196,8 @@ namespace vision {
 
             for (const auto& point : image.ballPoints) {
                 //TODO: generalise to configured camera
-                arma::ivec2 pt = convert<int, 2>(point);
-                ballPoints.push_back(getCamFromScreen(arma::vec2({pt[0],pt[1]}),cam));
+                arma::vec2 pt = imageToScreen(convert<int, 2>(point),convert<uint, 2>(cam.imageSizePixels));
+                ballPoints.push_back(getCamFromScreen(pt,cam));
             }
 
             // Use ransac to find the ball
@@ -209,7 +211,7 @@ namespace vision {
             auto balls = std::make_unique<std::vector<Ball>>();
             balls->reserve(ransacResults.size());
 
-            if(print_throwout_logs) log("Ransac : ", ransacResults.size(), "results");
+            if(print_throwout_logs) log("Ransac : ", ransacResults.size(), "results (MAX = ", MAXIMUM_FITTED_MODELS, ")");
 
             arma::mat44 camToGround = convert<double, 4, 4>(sensors.camToGround);
 
@@ -333,7 +335,7 @@ namespace vision {
                 // On screen visual shape
                 // Estimate for now
                 b.circle.radius = ballRadiusScreen;
-                b.circle.centre = convert<double, 2>(ballCentreScreen);
+                b.circle.centre = convert<double, 2>(screenToImageCts(ballCentreScreen,convert<uint,2>(cam.imageSizePixels)));
 
                 // Angular positions from the camera
                 b.visObject.screenAngular = convert<double, 2>(arma::atan(convert<double, 2>(cam.pinhole.pixelsToTanThetaFactor) % ballCentreScreen));
