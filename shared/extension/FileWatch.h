@@ -22,93 +22,97 @@
 
 namespace extension {
 
-    struct FileWatch {
-        using FileWatchStore = NUClear::dsl::store::ThreadStore<FileWatch>;
+struct FileWatch {
+    using FileWatchStore = NUClear::dsl::store::ThreadStore<FileWatch>;
 
-        enum Event {
-            NO_OP = 0,                     /**< No event has occurred. */
-            PLATFORM_SPECIFIC = (1 << 0),  /**< Platform-specific placeholder for event type that cannot currently be mapped. */
-            CREATED = (1 << 1),            /**< An object was created. */
-            UPDATED = (1 << 2),            /**< An object was updated. */
-            REMOVED = (1 << 3),            /**< An object was removed. */
-            RENAMED = (1 << 4),            /**< An object was renamed. */
-            OWNER_MODIFIED = (1 << 5),     /**< The owner of an object was modified. */
-            ATTRIBUTE_MODIFIED = (1 << 6), /**< The attributes of an object were modified. */
-            MOVED_FROM = (1 << 7),         /**< An object was moved from this location. */
-            MOVED_TO = (1 << 8),           /**< An object was moved to this location. */
-            IS_FILE = (1 << 9),            /**< The object is a file. */
-            IS_DIR = (1 << 10),            /**< The object is a directory. */
-            IS_SYM_LINK = (1 << 11),       /**< The object is a symbolic link. */
-            LINK = (1 << 12),              /**< The link count of an object has changed. */
-            QUEUE_OVERFLOW = (1 << 13)     /**< The event queue has overflowed. */
-        };
-
-        std::string path;
-        int events;
-
-        inline operator bool() const {
-            // Empty path is invalid
-            return !path.empty();
-        }
+    enum Event {
+        NO_OP = 0, /**< No event has occurred. */
+        PLATFORM_SPECIFIC =
+            (1 << 0), /**< Platform-specific placeholder for event type that cannot currently be mapped. */
+        CREATED            = (1 << 1),  /**< An object was created. */
+        UPDATED            = (1 << 2),  /**< An object was updated. */
+        REMOVED            = (1 << 3),  /**< An object was removed. */
+        RENAMED            = (1 << 4),  /**< An object was renamed. */
+        OWNER_MODIFIED     = (1 << 5),  /**< The owner of an object was modified. */
+        ATTRIBUTE_MODIFIED = (1 << 6),  /**< The attributes of an object were modified. */
+        MOVED_FROM         = (1 << 7),  /**< An object was moved from this location. */
+        MOVED_TO           = (1 << 8),  /**< An object was moved to this location. */
+        IS_FILE            = (1 << 9),  /**< The object is a file. */
+        IS_DIR             = (1 << 10), /**< The object is a directory. */
+        IS_SYM_LINK        = (1 << 11), /**< The object is a symbolic link. */
+        LINK               = (1 << 12), /**< The link count of an object has changed. */
+        QUEUE_OVERFLOW     = (1 << 13)  /**< The event queue has overflowed. */
     };
 
-    struct FileWatchRequest {
-        std::string path;
-        int events;
-        std::shared_ptr<NUClear::threading::Reaction> reaction;
-    };
+    std::string path;
+    int events;
 
-}  // extension
+    inline operator bool() const {
+        // Empty path is invalid
+        return !path.empty();
+    }
+};
+
+struct FileWatchRequest {
+    std::string path;
+    int events;
+    std::shared_ptr<NUClear::threading::Reaction> reaction;
+};
+
+}  // namespace extension
 
 // NUClear configuration extension
 namespace NUClear {
-    namespace dsl {
-        namespace operation {
-            template <>
-            struct DSLProxy<::extension::FileWatch> {
+namespace dsl {
+    namespace operation {
+        template <>
+        struct DSLProxy<::extension::FileWatch> {
 
-                template <typename DSL>
-                static inline void bind(const std::shared_ptr<threading::Reaction>& reaction, const std::string& path, int events) {
+            template <typename DSL>
+            static inline void bind(const std::shared_ptr<threading::Reaction>& reaction,
+                                    const std::string& path,
+                                    int events) {
 
-                    // Add our unbinder
-                    reaction->unbinders.emplace_back([](const threading::Reaction& r) {
-                        r.reactor.emit<word::emit::Direct>(std::make_unique<operation::Unbind<::extension::FileWatch>>(r.id));
-                    });
+                // Add our unbinder
+                reaction->unbinders.emplace_back([](const threading::Reaction& r) {
+                    r.reactor.emit<word::emit::Direct>(
+                        std::make_unique<operation::Unbind<::extension::FileWatch>>(r.id));
+                });
 
-                    // Make a request to watch our file
-                    auto fw = std::make_unique<::extension::FileWatchRequest>();
-                    fw->path = path;
-                    fw->events = events;
-                    fw->reaction = reaction;
+                // Make a request to watch our file
+                auto fw      = std::make_unique<::extension::FileWatchRequest>();
+                fw->path     = path;
+                fw->events   = events;
+                fw->reaction = reaction;
 
-                    // Send our file watcher to the extension
-                    reaction->reactor.powerplant.emit<word::emit::Direct>(fw);
+                // Send our file watcher to the extension
+                reaction->reactor.powerplant.emit<word::emit::Direct>(fw);
+            }
+
+            template <typename DSL>
+            static inline ::extension::FileWatch get(threading::Reaction&) {
+
+                // Get our File Watch store value
+                auto ptr = ::extension::FileWatch::FileWatchStore::value;
+
+                // If there was something in the store
+                if (ptr) {
+                    return *ptr;
                 }
-
-                template <typename DSL>
-                static inline ::extension::FileWatch get(threading::Reaction&) {
-
-                    // Get our File Watch store value
-                    auto ptr = ::extension::FileWatch::FileWatchStore::value;
-
-                    // If there was something in the store
-                    if(ptr) {
-                        return *ptr;
-                    }
-                    // Return an invalid file watch element
-                    else {
-                        return ::extension::FileWatch { "", 0 };
-                    }
+                // Return an invalid file watch element
+                else {
+                    return ::extension::FileWatch{"", 0};
                 }
-            };
-        }
+            }
+        };
+    }  // namespace operation
 
-        // FileWatch is transient
-        namespace trait {
-            template <>
-            struct is_transient<::extension::FileWatch> : public std::true_type {};
-        }
-    }
-}
+    // FileWatch is transient
+    namespace trait {
+        template <>
+        struct is_transient<::extension::FileWatch> : public std::true_type {};
+    }  // namespace trait
+}  // namespace dsl
+}  // namespace NUClear
 
-#endif //EXTENSION_FILEWATCH_H
+#endif  // EXTENSION_FILEWATCH_H

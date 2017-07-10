@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with the NUbots Codebase.  If not, see <http://www.gnu.org/licenses/>.
  *
- * Copyright 2013 NUBots <nubots@nubots.net>
+ * Copyright 2013 NUbots <nubots@nubots.net>
  */
 
 #ifndef MODULES_SUPPORT_CONFIGURATION_GLOBALCONFIG_H
@@ -24,17 +24,16 @@
 
 namespace module {
 namespace support {
-namespace configuration {
+    namespace configuration {
 
-    class GlobalConfig : public NUClear::Reactor {
-    public:
-        /// @brief Called by the powerplant to build and setup the GlobalConfig reactor.
-        explicit GlobalConfig(std::unique_ptr<NUClear::Environment> environment);
-    };
-
-}
-}
-}
+        class GlobalConfig : public NUClear::Reactor {
+        public:
+            /// @brief Called by the powerplant to build and setup the GlobalConfig reactor.
+            explicit GlobalConfig(std::unique_ptr<NUClear::Environment> environment);
+        };
+    }  // namespace configuration
+}  // namespace support
+}  // namespace module
 
 
 #endif

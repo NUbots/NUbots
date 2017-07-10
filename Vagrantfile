@@ -44,8 +44,7 @@ Vagrant.configure("2") do |config|
   config.vm.provision "unlock-dpkg", type: "shell", run: "always" do |shell|
     shell.inline = "rm /var/lib/dpkg/lock;
                     apt-get update;
-                    apt-get upgrade;
-                    apt-get dist-upgrade;
+                    apt-get dist-upgrade -y;
                     apt-get autoremove --purge;"
   end
 

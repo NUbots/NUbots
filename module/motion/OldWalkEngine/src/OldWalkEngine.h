@@ -14,14 +14,14 @@
  * You should have received a copy of the GNU General Public License
  * along with the NUbots Codebase.  If not, see <http://www.gnu.org/licenses/>.
  *
- * Copyright 2013 NUBots <nubots@nubots.net>
+ * Copyright 2013 NUbots <nubots@nubots.net>
  */
 
 #ifndef MODULES_MOTION_OLDWALKENGINE_H
 #define MODULES_MOTION_OLDWALKENGINE_H
 
-#include <nuclear>
 #include <armadillo>
+#include <nuclear>
 
 #include <yaml-cpp/yaml.h>
 
@@ -30,8 +30,8 @@
 #include "message/motion/KinematicsModels.h"
 
 #include "utility/behaviour/Action.h"
-#include "utility/input/ServoID.h"
 #include "utility/input/LimbID.h"
+#include "utility/input/ServoID.h"
 #include "utility/math/geometry/UnitQuaternion.h"
 #include "utility/math/matrix/Transform2D.h"
 #include "utility/math/matrix/Transform3D.h"
@@ -57,6 +57,7 @@ namespace motion {
 
         static constexpr const char* CONFIGURATION_PATH = "OldWalkEngine.yaml";
         explicit OldWalkEngine(std::unique_ptr<NUClear::Environment> environment);
+
     private:
         using ServoCommand   = message::behaviour::ServoCommand;
         using Sensors        = message::input::Sensors;
@@ -147,8 +148,8 @@ namespace motion {
         // start config, see config file for documentation
 
         double stanceLimitY2;
-        arma::mat::fixed<3,2> stepLimits;
-        arma::mat::fixed<3,2> velocityLimits;
+        arma::mat::fixed<3, 2> stepLimits;
+        arma::mat::fixed<3, 2> velocityLimits;
         arma::vec3 accelerationLimits;
         arma::vec3 accelerationLimitsHigh;
         double velocityHigh;
@@ -243,7 +244,10 @@ namespace motion {
         std::unique_ptr<std::vector<ServoCommand>> motionLegs(std::vector<std::pair<ServoID, float>> joints);
         std::unique_ptr<std::vector<ServoCommand>> motionArms(double phase);
 
-        Transform2D getNewFootTarget(const Transform2D& velocity, const Transform2D& leftFoot, const Transform2D& rightFoot, const LimbID& swingLeg);
+        Transform2D getNewFootTarget(const Transform2D& velocity,
+                                     const Transform2D& leftFoot,
+                                     const Transform2D& rightFoot,
+                                     const LimbID& swingLeg);
 
         /**
          * Get the next torso position
@@ -258,14 +262,33 @@ namespace motion {
         /**
          * Solve the ZMP equation
          */
-        arma::vec2 zmpSolve(double zs, double z1, double z2, double x1, double x2, double phase1Single, double phase2Single, double stepTime, double zmpTime);
+        arma::vec2 zmpSolve(double zs,
+                            double z1,
+                            double z2,
+                            double x1,
+                            double x2,
+                            double phase1Single,
+                            double phase2Single,
+                            double stepTime,
+                            double zmpTime);
 
         /**
          * Uses ZMP to determine the torso position
          *
          * @return The torso position in Transform2D
          */
-        Transform2D zmpCom(double phase, arma::vec4 zmpCoefficients, arma::vec4 zmpParams, double stepTime, double zmpTime, double phase1Zmp, double phase2Zmp, Transform2D uSupport, Transform2D uLeftFootDestination, Transform2D uLeftFootSource, Transform2D uRightFootDestination, Transform2D uRightFootSource);
+        Transform2D zmpCom(double phase,
+                           arma::vec4 zmpCoefficients,
+                           arma::vec4 zmpParams,
+                           double stepTime,
+                           double zmpTime,
+                           double phase1Zmp,
+                           double phase2Zmp,
+                           Transform2D uSupport,
+                           Transform2D uLeftFootDestination,
+                           Transform2D uLeftFootSource,
+                           Transform2D uRightFootDestination,
+                           Transform2D uRightFootSource);
 
         /**
          * This is an easing function that returns 3 values {x,y,z} with the range [0,1]
@@ -275,8 +298,10 @@ namespace motion {
          * See: http://easings.net/ to reference common easing functions
          *
          * @param phase The input to the easing function, with a range of [0,1].
-         * @param phase1Single The phase time between [0,1] to start the step. A value of 0.1 means the step will not start until phase is >= 0.1
-         * @param phase2Single The phase time between [0,1] to end the step. A value of 0.9 means the step will end when phase >= 0.9
+         * @param phase1Single The phase time between [0,1] to start the step. A value of 0.1 means the step will not
+         * start until phase is >= 0.1
+         * @param phase2Single The phase time between [0,1] to end the step. A value of 0.9 means the step will end when
+         * phase >= 0.9
          */
         arma::vec3 footPhase(double phase, double phase1Single, double phase2Single);
 
@@ -291,8 +316,7 @@ namespace motion {
         double procFunc(double a, double deadband, double maxvalue);
     };
 
-}  // motion
-}  // modules
+}  // namespace motion
+}  // namespace module
 
 #endif  // MODULES_MOTION_OLDWALKENGINE_H
-

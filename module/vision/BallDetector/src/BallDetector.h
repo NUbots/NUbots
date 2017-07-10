@@ -14,17 +14,17 @@
  * You should have received a copy of the GNU General Public License
  * along with the NUbots Codebase.  If not, see <http://www.gnu.org/licenses/>.
  *
- * Copyright 2013 NUBots <nubots@nubots.net>
+ * Copyright 2013 NUbots <nubots@nubots.net>
  */
 
 #ifndef MODULES_VISION_BALLDETECTOR_H
 #define MODULES_VISION_BALLDETECTOR_H
 
-#include <nuclear>
 #include <armadillo>
+#include <nuclear>
 
-#include "message/vision/LookUpTable.h"
 #include "message/input/Image.h"
+#include "message/vision/LookUpTable.h"
 
 #include "utility/learning/KMeans.h"
 #include "utility/math/geometry/Circle.h"
@@ -54,7 +54,7 @@ namespace vision {
 
         utility::learning::KMeans kmeansClusterer;
 
-        struct Frame{
+        struct Frame {
             Frame() : time(), widthBall(arma::fill::zeros), projBall(arma::fill::zeros) {}
             Frame(const NUClear::clock::time_point& time, const arma::vec3& width, const arma::vec3& proj)
                 : time(time), widthBall(width), projBall(proj) {}
@@ -68,15 +68,16 @@ namespace vision {
 
         bool print_throwout_logs;
 
-        float approximateCircleGreenRatio(const utility::math::geometry::Circle& circle, const message::input::Image& image, const message::vision::LookUpTable& lut);
-    public:
+        float approximateCircleGreenRatio(const utility::math::geometry::Circle& circle,
+                                          const message::input::Image& image,
+                                          const message::vision::LookUpTable& lut);
 
+    public:
         /// @brief Called by the powerplant to build and setup the BallDetector reactor.
         explicit BallDetector(std::unique_ptr<NUClear::Environment> environment);
     };
-
-}
-}
+}  // namespace vision
+}  // namespace module
 
 
 #endif

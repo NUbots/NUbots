@@ -14,11 +14,11 @@
  * You should have received a copy of the GNU General Public License
  * along with the NUbots Codebase.  If not, see <http://www.gnu.org/licenses/>.
  *
- * Copyright 2013 NUBots <nubots@nubots.net>
+ * Copyright 2013 NUbots <nubots@nubots.net>
  */
 
 #include "FSR.h"
 
 namespace Darwin {
-    FSR::FSR(UART& coms, int id) : DarwinDevice(coms, id) {}
-}
+FSR::FSR(UART& coms, int id) : DarwinDevice(coms, id) {}
+}  // namespace Darwin

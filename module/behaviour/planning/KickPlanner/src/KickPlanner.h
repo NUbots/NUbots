@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with the NUbots Codebase.  If not, see <http://www.gnu.org/licenses/>.
  *
- * Copyright 2013 NUBots <nubots@nubots.net>
+ * Copyright 2013 NUbots <nubots@nubots.net>
  */
 
 #ifndef MODULES_BEHAVIOUR_PLANNING_KICKPLANNER_H
@@ -28,23 +28,22 @@
 #include <nuclear>
 namespace module {
 namespace behaviour {
-namespace planning {
+    namespace planning {
 
-    class KickPlanner : public NUClear::Reactor {
-    public:
-        /// @brief Called by the powerplant to build and setup the KickPlanner reactor.
-        explicit KickPlanner(std::unique_ptr<NUClear::Environment> environment);
+        class KickPlanner : public NUClear::Reactor {
+        public:
+            /// @brief Called by the powerplant to build and setup the KickPlanner reactor.
+            explicit KickPlanner(std::unique_ptr<NUClear::Environment> environment);
 
-    private:
-        bool kickValid(const arma::vec3& ballPos);
-       	message::motion::KickPlannerConfig cfg;
-       	NUClear::clock::time_point ball_last_measurement_time;
-       	NUClear::clock::time_point lastTimeValid;
-    };
-
-}
-}
-}
+        private:
+            bool kickValid(const arma::vec3& ballPos);
+            message::motion::KickPlannerConfig cfg;
+            NUClear::clock::time_point ball_last_measurement_time;
+            NUClear::clock::time_point lastTimeValid;
+        };
+    }  // namespace planning
+}  // namespace behaviour
+}  // namespace module
 
 
 #endif

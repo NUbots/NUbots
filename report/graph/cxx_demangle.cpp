@@ -1,9 +1,9 @@
 #include <cxxabi.h>
-#include <memory>
 #include <iostream>
+#include <memory>
 
 extern "C" {
-    const char* demangle(const char* symbol);
+const char* demangle(const char* symbol);
 }
 
 const char* demangle(const char* symbol) {

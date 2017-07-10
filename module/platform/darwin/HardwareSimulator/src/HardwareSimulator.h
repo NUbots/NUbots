@@ -14,57 +14,59 @@
  * You should have received a copy of the GNU General Public License
  * along with the NUbots Codebase.  If not, see <http://www.gnu.org/licenses/>.
  *
- * Copyright 2013 NUBots <nubots@nubots.net>
+ * Copyright 2013 NUbots <nubots@nubots.net>
  */
 
 #ifndef MODULES_PLATFORM_DARWIN_HARDWARESIMULATOR_H
 #define MODULES_PLATFORM_DARWIN_HARDWARESIMULATOR_H
 
-#include <nuclear>
 #include <armadillo>
 #include <mutex>
+#include <nuclear>
 
 #include "message/platform/darwin/DarwinSensors.h"
 
 namespace module {
 namespace platform {
-namespace darwin {
+    namespace darwin {
 
-    /**
-     * This NUClear Reactor is responsible for reading in the data for the Darwin Platform and emitting it to the rest
-     * of the system
-     *
-     * @author Jake Fountain
-     */
-    class HardwareSimulator : public NUClear::Reactor {
-    private:
-        message::platform::darwin::DarwinSensors sensors;
+        /**
+         * This NUClear Reactor is responsible for reading in the data for the Darwin Platform and emitting it to the
+         * rest
+         * of the system
+         *
+         * @author Jake Fountain
+         */
+        class HardwareSimulator : public NUClear::Reactor {
+        private:
+            message::platform::darwin::DarwinSensors sensors;
 
-        std::queue<message::platform::darwin::DarwinSensors::Gyroscope> gyroQueue;
-        std::mutex gyroQueueMutex;
+            std::queue<message::platform::darwin::DarwinSensors::Gyroscope> gyroQueue;
+            std::mutex gyroQueueMutex;
 
-        float imu_drift_rate = 0;
-        static constexpr size_t UPDATE_FREQUENCY = 90;
-        void addNoise(std::unique_ptr<message::platform::darwin::DarwinSensors>& sensors);
-        struct NoiseConfig{
-            NoiseConfig() : accelerometer(), gyroscope() {}
-            struct Vec3Noise {
-                float x = 0.001;
-                float y = 0.001;
-                float z = 0.001;
-            };
-            Vec3Noise accelerometer;
-            Vec3Noise gyroscope;
-        } noise;
-        double bodyTilt = 0;
-        arma::vec3 integrated_gyroscope = {0, 0, 0};
-        void setRightFootDown(bool down);
-        void setLeftFootDown(bool down);
-    public:
-        /// @brief called by a Powerplant to construct this reactor
-        explicit HardwareSimulator(std::unique_ptr<NUClear::Environment> environment);
-    };
-}
-}
-}
+            float imu_drift_rate                     = 0;
+            static constexpr size_t UPDATE_FREQUENCY = 90;
+            void addNoise(std::unique_ptr<message::platform::darwin::DarwinSensors>& sensors);
+            struct NoiseConfig {
+                NoiseConfig() : accelerometer(), gyroscope() {}
+                struct Vec3Noise {
+                    float x = 0.001;
+                    float y = 0.001;
+                    float z = 0.001;
+                };
+                Vec3Noise accelerometer;
+                Vec3Noise gyroscope;
+            } noise;
+            double bodyTilt                 = 0;
+            arma::vec3 integrated_gyroscope = {0, 0, 0};
+            void setRightFootDown(bool down);
+            void setLeftFootDown(bool down);
+
+        public:
+            /// @brief called by a Powerplant to construct this reactor
+            explicit HardwareSimulator(std::unique_ptr<NUClear::Environment> environment);
+        };
+    }  // namespace darwin
+}  // namespace platform
+}  // namespace module
 #endif

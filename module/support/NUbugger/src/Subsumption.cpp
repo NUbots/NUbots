@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with the NUbots Codebase.  If not, see <http://www.gnu.org/licenses/>.
  *
- * Copyright 2013 NUBots <nubots@nubots.net>
+ * Copyright 2013 NUbots <nubots@nubots.net>
  */
 
 #include "NUbugger.h"
@@ -69,7 +69,7 @@ namespace support {
             send(subsumption);
         }));
 
-        handles["subsumption"].push_back(on<Trigger<RegisterAction>>().then([this] (const RegisterAction& action) {
+        handles["subsumption"].push_back(on<Trigger<RegisterAction>>().then([this](const RegisterAction& action) {
 
             Subsumption subsumption;
 
@@ -94,7 +94,7 @@ namespace support {
             send(subsumption);
         }));
 
-        handles["subsumption"].push_back(on<Trigger<ActionPriorites>>().then([this] (const ActionPriorites& action) {
+        handles["subsumption"].push_back(on<Trigger<ActionPriorites>>().then([this](const ActionPriorites& action) {
 
             Subsumption subsumption;
 
@@ -126,6 +126,5 @@ namespace support {
 
         send(subsumption);
     }
-
-}
-}
+}  // namespace support
+}  // namespace module

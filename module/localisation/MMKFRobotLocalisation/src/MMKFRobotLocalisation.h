@@ -14,14 +14,14 @@
  * You should have received a copy of the GNU General Public License
  * along with the NUbots Codebase.  If not, see <http://www.gnu.org/licenses/>.
  *
- * Copyright 2013 NUBots <nubots@nubots.net>
+ * Copyright 2013 NUbots <nubots@nubots.net>
  */
 
 #ifndef MODULES_LOCALISATION_MMKFROBOTLOCALISATION_H
 #define MODULES_LOCALISATION_MMKFROBOTLOCALISATION_H
 
-#include <nuclear>
 #include <armadillo>
+#include <nuclear>
 #include "MMKFRobotLocalisationEngine.h"
 
 namespace module {
@@ -29,11 +29,11 @@ namespace localisation {
     class MMKFRobotLocalisation : public NUClear::Reactor {
     private:
         /// For testing
-        arma::vec2 marker_ = { 0, 0 };
+        arma::vec2 marker_ = {0, 0};
         /// The engine that does all of the work
         std::unique_ptr<localisation::MMKFRobotLocalisationEngine> engine_;
 
-        //Disable until first data
+        // Disable until first data
         ReactionHandle emit_data_handle;
 
         NUClear::clock::time_point last_measurement_time;
@@ -44,8 +44,6 @@ namespace localisation {
         /// @brief Called by the powerplant to build and setup the MMKFRobotLocalisation reactor.
         explicit MMKFRobotLocalisation(std::unique_ptr<NUClear::Environment> environment);
     };
-
-}
-}
+}  // namespace localisation
+}  // namespace module
 #endif
-

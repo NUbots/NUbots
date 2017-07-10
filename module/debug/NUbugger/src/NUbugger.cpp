@@ -14,18 +14,18 @@
  * You should have received a copy of the GNU General Public License
  * along with the NUbots Codebase.  If not, see <http://www.gnu.org/licenses/>.
  *
- * Copyright 2013 NUBots <nubots@nubots.net>
+ * Copyright 2013 NUbots <nubots@nubots.net>
  */
 
 #include "NUbugger.h"
 
 #include <random>
 
-#include "message/platform/darwin/DarwinSensors.h"
 #include "message/input/Sensors.h"
+#include "message/platform/darwin/DarwinSensors.h"
 
-#include "utility/nubugger/NUhelpers.h"
 #include "utility/input/ServoID.h"
+#include "utility/nubugger/NUhelpers.h"
 
 namespace module {
 namespace debug {
@@ -45,11 +45,11 @@ namespace debug {
         on<Every<50, milliseconds>>().then([this] {
 
             double period = 10;
-            double freq = 1 / period;
-            double t = NUClear::clock::now().time_since_epoch().count() / double(NUClear::clock::period::den);
-            float sine = sin(2 * M_PI * freq * t);
-            float cosine = cos(2 * M_PI * freq * t);
-            float dsine = 2 * sine;
+            double freq   = 1 / period;
+            double t      = NUClear::clock::now().time_since_epoch().count() / double(NUClear::clock::period::den);
+            float sine    = sin(2 * M_PI * freq * t);
+            float cosine  = cos(2 * M_PI * freq * t);
+            float dsine   = 2 * sine;
             float dcosine = 4 * cosine;
 
             emit(graph("Debug Waves", sine, cosine, dsine, dcosine));
@@ -58,8 +58,9 @@ namespace debug {
 
         on<Trigger<Sensors>, Single, Priority::LOW>().then([this](const Sensors& sensors) {
 
-            emit(graph("Servo " + static_cast<std::string>(static_cast<ServoID>(sensors.servo.at(ServoID::L_HIP_ROLL).id)), 
-                                    sensors.servo.at(ServoID::L_HIP_ROLL).presentPosition));
+            emit(graph(
+                "Servo " + static_cast<std::string>(static_cast<ServoID>(sensors.servo.at(ServoID::L_HIP_ROLL).id)),
+                sensors.servo.at(ServoID::L_HIP_ROLL).presentPosition));
         });
 
         on<Every<1, std::chrono::seconds>>().then([this] {
@@ -71,10 +72,10 @@ namespace debug {
             double z = dis(gen);
 
             double period = 10;
-            double freq = 1 / period;
-            double t = NUClear::clock::now().time_since_epoch().count() / double(NUClear::clock::period::den);
-            float sine = sin(2 * M_PI * freq * t);
-            float cosine = cos(2 * M_PI * freq * t);
+            double freq   = 1 / period;
+            double t      = NUClear::clock::now().time_since_epoch().count() / double(NUClear::clock::period::den);
+            float sine    = sin(2 * M_PI * freq * t);
+            float cosine  = cos(2 * M_PI * freq * t);
 
             emit(drawArrow("arrow", arma::vec3({x, y, std::abs(z)}), arma::vec3({sine, cosine, 0}), sine));
             emit(drawSphere("sphere", arma::vec3({x, z, std::abs(z)}), std::abs(sine)));
@@ -82,5 +83,5 @@ namespace debug {
         });
     }
 
-} // debug
-} // modules
+}  // namespace debug
+}  // namespace module
