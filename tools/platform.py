@@ -2,6 +2,7 @@
 
 import os
 import b
+from termcolor import cprint
 from subprocess import call, STDOUT
 
 def register(command):
@@ -42,15 +43,21 @@ def run(workspace_command, **kwargs):
             pass
 
         # Try to make the symlink, this will fail if you use windows
+        symlink_success = True
         try:
             os.symlink(path, 'build')
         except OSError:
-            print("Windows does not support symlinks, you will need to cd to build_{}".format(platform))
+            symlink_success = False
 
         # Change to that directory
         os.chdir(path)
 
         # Run cmake
         call(['cmake', b.project_dir, '-GNinja', '-DCMAKE_TOOLCHAIN_FILE=/nubots/toolchain/{}.cmake'.format(platform)])
+
+        # Yell at windows users for having a crappy OS
+        if not symlink_success:
+            cprint('Windows does not support symlinks so we can\'t link to the build directory', 'red', attrs=['bold'])
+            cprint('Instead you will need to change to the build_{} directory to build'.format(platform), 'red', attrs=['bold'])
 
 
