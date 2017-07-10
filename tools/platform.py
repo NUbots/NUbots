@@ -40,7 +40,12 @@ def run(workspace_command, **kwargs):
             os.remove('build')
         except FileNotFoundError:
             pass
-        os.symlink(path, 'build')
+
+        # Try to make the symlink, this will fail if you use windows
+        try:
+            os.symlink(path, 'build')
+        except OSError:
+            print("Windows does not support symlinks, you will need to cd to build_{}".format(platform))
 
         # Change to that directory
         os.chdir(path)
