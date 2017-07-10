@@ -92,7 +92,7 @@ namespace module {
 
             void findHorizon(const message::input::Image& image, const message::vision::LookUpTable& lut, message::vision::ClassifiedImage& classifiedImage);
 
-            void findVisualHorizon(const message::input::Image& image, const message::vision::LookUpTable& lut, message::vision::ClassifiedImage& classifiedImage);
+            void findVisualHorizon(const message::input::Image& image, const message::vision::LookUpTable& lut, message::vision::ClassifiedImage& classifiedImage, const message::input::CameraParameters& cam);
 
             void findBall(const message::input::Image& image, const message::vision::LookUpTable& lut, message::vision::ClassifiedImage& classifiedImage, const message::input::CameraParameters& cam);
 

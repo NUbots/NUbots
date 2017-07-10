@@ -192,57 +192,45 @@ namespace module {
                       , const Sensors& sensors
                       , const CameraParameters& cam) {
 
-                log("Should be printing (top)");
                 //TODO
                 // if(std::fabs(sensors.servo[ServoID::HEAD_PITCH].currentVelocity) + std::fabs(sensors.servo[ServoID::HEAD_YAW].currentVelocity) > threshold)
 
                 // Our classified image
                 auto classifiedImage = std::make_unique<ClassifiedImage>();
 
-                log(__LINE__);
 
                 // Set our width and height
                 classifiedImage->dimensions = rawImage.dimensions;
 
-                log(__LINE__);
 
                 // Attach our sensors
                 // std::cout << "sensor-vision latency = " << std::chrono::duration_cast<std::chrono::microseconds>(NUClear::clock::now() - sensors->timestamp).count() << std::endl;
                 classifiedImage->sensors = const_cast<Sensors*>(&sensors)->shared_from_this();
 
-                log(__LINE__);
 
                 // Attach the image
                 classifiedImage->image = const_cast<Image*>(&rawImage)->shared_from_this();
-                log(__LINE__);
 
                 // Find our horizon
                 findHorizon(rawImage, lut, *classifiedImage);
-                log(__LINE__);
 
                 // Find our visual horizon
-                findVisualHorizon(rawImage, lut, *classifiedImage);
-                log(__LINE__);
+                findVisualHorizon(rawImage, lut, *classifiedImage, cam);
 
                 // Find our goals
                 findGoals(rawImage, lut, *classifiedImage);
-                log(__LINE__);
 
                 // Enhance our goals
                 enhanceGoals(rawImage, lut, *classifiedImage);
-                log(__LINE__);
 
                 // Find our ball (also helps with the bottom of goals)
                 findBall(rawImage, lut, *classifiedImage,cam);
-                log(__LINE__);
 
                 // Enhance our ball
                 enhanceBall(rawImage, lut, *classifiedImage);
-                log(__LINE__);
 
                 // Emit our classified image
                 emit(std::move(classifiedImage));
-                log("Should be printing (bottom)");
             });
 
         }

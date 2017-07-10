@@ -31,12 +31,13 @@ namespace module {
 
         using message::input::Image;
         using message::vision::LookUpTable;
+        using message::input::CameraParameters;
         using message::vision::ClassifiedImage;
         using utility::math::geometry::Line;
         using utility::math::geometry::Quad;
         using utility::nubugger::drawVisionLines;
 
-        void LUTClassifier::findVisualHorizon(const Image& image, const LookUpTable& lut, ClassifiedImage& classifiedImage) {
+        void LUTClassifier::findVisualHorizon(const Image& image, const LookUpTable& lut, ClassifiedImage& classifiedImage, const CameraParameters& cam) {
 
             // Get some local references to class variables to make text shorter
             Line horizon(convert<double, 2>(classifiedImage.horizon.normal), classifiedImage.horizon.distance);
@@ -55,6 +56,7 @@ namespace module {
                 // Our default green point is the bottom of the screen
                 arma::ivec2 greenPoint = { int(x), int(image.dimensions[1]) };
 
+                bool segmentsStarted = false;
                 // Loop through our segments to find our first green segment
                 for (auto it = segments.begin(); it != segments.end(); ++it) {
 
@@ -70,6 +72,7 @@ namespace module {
                         break;
                     }
                 }
+
                 // Only put the green point in if it's on the screen
                 if(greenPoint[1] < int(image.dimensions[1])) {
                     visualHorizon.push_back(std::move(convert<int, 2>(greenPoint)));
