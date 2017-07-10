@@ -44,47 +44,49 @@ namespace input {
         std::string deviceID = config["deviceID"];
         V4L2Camera camera    = V4L2Camera(config, deviceID);
 
-        V4L2SettingsHandle = on<Every<1, std::chrono::seconds>>().then("V4L2 Camera Setting Applicator", [this] {
+        V4L2SettingsHandle =
+            on<Every<1, std::chrono::seconds>>().then("V4L2 Camera Setting Applicator", [this, config] {
 
-            for (auto& camera : V4L2Cameras) {
+                for (auto& camera : V4L2Cameras) {
 
 
-                try {
-                    static int errorCount = 0;
+                    try {
+                        static int errorCount = 0;
 
-                    if (camera.second.isStreaming()) {
-                        // Set all other camera settings
-                        for (auto& setting : camera.second.getConfig().config) {
+                        if (camera.second.isStreaming()) {
+                            // Set all other camera settings
+                            for (auto& setting : camera.second.getConfig().config) {
 
-                            auto& settings = camera.second.getSettings();
-                            auto it        = settings.find(setting.first.as<std::string>());
+                                auto& settings = camera.second.getSettings();
+                                auto it        = settings.find(setting.first.as<std::string>());
 
-                            if (it != settings.end()) {
-                                if (camera.second.setSetting(it->second, setting.second.as<int>()) == false) {
-                                    log<NUClear::DEBUG>("Failed to set", it->first, "on camera", camera.first);
-                                    errorCount++;
+                                if (it != settings.end()) {
+                                    if (camera.second.setSetting(it->second, setting.second.as<int>()) == false) {
+                                        log<NUClear::DEBUG>("Failed to set", it->first, "on camera", camera.first);
+                                        errorCount++;
+                                    }
                                 }
                             }
-                        }
-                        if (errorCount > 40) {
-                            errorCount = 0;
-                            throw std::system_error(errno, std::system_category(), ("Camerea Settings Unresponsive"));
+                            if (errorCount > config["max_error_count"].as<uint>()) {
+                                errorCount = 0;
+                                throw std::system_error(
+                                    errno, std::system_category(), ("Camerea Settings Unresponsive"));
+                            }
                         }
                     }
+                    catch (std::system_error& e) {
+                        log<NUClear::ERROR>(e.what());
+                        log("Resetting Camera");
+                        V4L2FrameRateHandle.disable();
+                        V4L2SettingsHandle.disable();
+                        camera.second.resetCamera();
+                        camera.second.startStreaming();
+                        V4L2SettingsHandle.enable();
+                        V4L2FrameRateHandle.enable();
+                        log("Camera Reset");
+                    }
                 }
-                catch (std::system_error& e) {
-                    log<NUClear::ERROR>(e.what());
-                    log("Resetting Camera");
-                    V4L2FrameRateHandle.disable();
-                    V4L2SettingsHandle.disable();
-                    camera.second.resetCamera();
-                    camera.second.startStreaming();
-                    V4L2SettingsHandle.enable();
-                    V4L2FrameRateHandle.enable();
-                    log("Camera Reset");
-                }
-            }
-        });
+            });
 
         camera.setSettingsHandle(V4L2SettingsHandle);
         auto cameraParameters = std::make_unique<CameraParameters>();
