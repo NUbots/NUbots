@@ -341,9 +341,6 @@ namespace module {
                         // emit(graph("distanceToBall", distanceToBall));
                         // emit(graph("forwardSpeed2", finalForwardSpeed));
 
-
-                        // emit(std::make_unique<KickPlan>(KickPlan{kick_target, KickType::SCRIPTED}));
-
                         std::unique_ptr<WalkCommand> command = std::make_unique<WalkCommand>(subsumptionId, Transform2D({finalForwardSpeed, 0, angle}));
                         //command->command = Transform2D({bezXdash[1], bezYdash[1], angle});
                         emit(std::move(command));
