@@ -26,44 +26,42 @@
 #include "message/support/FieldDescription.h"
 
 namespace module {
-    namespace localisation {
+namespace localisation {
 
-        class BallModel {
-        public:
+    class BallModel {
+    public:
+        // The indicies for our vector
+        static constexpr uint PX = 0;
+        static constexpr uint PY = 1;
 
-            // The indicies for our vector
-            static constexpr uint PX = 0;
-            static constexpr uint PY = 1;
+        static constexpr size_t size = 2;
 
-            static constexpr size_t size = 2;
-
-            struct MeasurementType {
-                struct BALL {};
-            };
-
-            arma::vec2 processNoiseDiagonal;
-
-
-            BallModel() : processNoiseDiagonal(arma::fill::eye) {} // empty constructor
-
-            arma::vec::fixed<size> timeUpdate(const arma::vec::fixed<size>& state, double deltaT);
-
-            arma::vec3 predictedObservation(const arma::vec::fixed<size>& state
-                , const message::support::FieldDescription& field
-                , const message::input::Sensors& sensors
-                , const MeasurementType::BALL&) const;
-
-            arma::vec observationDifference(const arma::vec& measurement
-                , const arma::vec3& rBCc
-                , const message::support::FieldDescription& field
-                , const message::input::Sensors& sensors
-                , const MeasurementType::BALL&) const;
-
-            arma::vec::fixed<size> limitState(const arma::vec::fixed<size>& state) const;
-
-            arma::mat::fixed<size, size> processNoise() const;
+        struct MeasurementType {
+            struct BALL {};
         };
 
-    }
-}
+        arma::vec2 processNoiseDiagonal;
+
+
+        BallModel() : processNoiseDiagonal(arma::fill::eye) {}  // empty constructor
+
+        arma::vec::fixed<size> timeUpdate(const arma::vec::fixed<size>& state, double deltaT);
+
+        arma::vec3 predictedObservation(const arma::vec::fixed<size>& state,
+                                        const message::support::FieldDescription& field,
+                                        const message::input::Sensors& sensors,
+                                        const MeasurementType::BALL&) const;
+
+        arma::vec observationDifference(const arma::vec& measurement,
+                                        const arma::vec3& rBCc,
+                                        const message::support::FieldDescription& field,
+                                        const message::input::Sensors& sensors,
+                                        const MeasurementType::BALL&) const;
+
+        arma::vec::fixed<size> limitState(const arma::vec::fixed<size>& state) const;
+
+        arma::mat::fixed<size, size> processNoise() const;
+    };
+}  // namespace localisation
+}  // namespace module
 #endif  // MODULE_LOCALISATION_BALLMODEL_H

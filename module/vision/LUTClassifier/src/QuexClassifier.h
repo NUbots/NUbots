@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with the NUbots Codebase.  If not, see <http://www.gnu.org/licenses/>.
  *
- * Copyright 2013 NUBots <nubots@nubots.net>
+ * Copyright 2013 NUbots <nubots@nubots.net>
  */
 
 #ifndef MODULES_VISION_QUEXCLASSIFIER_H
@@ -32,24 +32,28 @@
 #include "Lexer.hpp"
 
 #include "message/input/Image.h"
-#include "message/vision/LookUpTable.h"
 #include "message/vision/ClassifiedImage.h"
+#include "message/vision/LookUpTable.h"
 
 namespace module {
-    namespace vision {
-        class QuexClassifier {
-        private:
-            static constexpr size_t BUFFER_SIZE = 2000;
-            uint8_t buffer[BUFFER_SIZE] = { 0 }; // This should be big enough for now
-            quex::Lexer lexer;
-            size_t& tknNumber;
+namespace vision {
+    class QuexClassifier {
+    private:
+        static constexpr size_t BUFFER_SIZE = 2000;
+        uint8_t buffer[BUFFER_SIZE]         = {0};  // This should be big enough for now
+        quex::Lexer lexer;
+        size_t& tknNumber;
 
-        public:
-            QuexClassifier();
+    public:
+        QuexClassifier();
 
-            std::vector<message::vision::ClassifiedImage::Segment> classify(const message::input::Image& image, const message::vision::LookUpTable& lut, const arma::ivec2& start, const arma::ivec2& end, const uint& stratification = 1);
-        };
-    }
-}
+        std::vector<message::vision::ClassifiedImage::Segment> classify(const message::input::Image& image,
+                                                                        const message::vision::LookUpTable& lut,
+                                                                        const arma::ivec2& start,
+                                                                        const arma::ivec2& end,
+                                                                        const uint& stratification = 1);
+    };
+}  // namespace vision
+}  // namespace module
 
 #endif

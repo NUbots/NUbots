@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with the NUbots Codebase.  If not, see <http://www.gnu.org/licenses/>.
  *
- * Copyright 2013 NUBots <nubots@nubots.net>
+ * Copyright 2013 NUbots <nubots@nubots.net>
  */
 
 #ifndef MODULES_BEHAVIOUR_REFLEX_STAND_H
@@ -23,25 +23,24 @@
 #include <nuclear>
 
 namespace module {
-    namespace behaviour {
-        namespace skills {
+namespace behaviour {
+    namespace skills {
 
-            /**
-             * Executes a getup script if the robot falls over.
-             *
-             * @author Josiah Walker
-             */
-            class Stand : public NUClear::Reactor {
-            private:
-                const size_t id;
+        /**
+         * Executes a getup script if the robot falls over.
+         *
+         * @author Josiah Walker
+         */
+        class Stand : public NUClear::Reactor {
+        private:
+            const size_t id;
 
-            public:
-                explicit Stand(std::unique_ptr<NUClear::Environment> environment);
-            };
+        public:
+            explicit Stand(std::unique_ptr<NUClear::Environment> environment);
+        };
 
-        }  // reflexes
-    }  // behaviours
-}  // modules
+    }  // namespace skills
+}  // namespace behaviour
+}  // namespace module
 
 #endif  // MODULES_BEHAVIOURS_UTILITY_SCRIPTRUNNER_H
-

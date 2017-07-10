@@ -16,15 +16,14 @@
 
 #include <string>
 
-#define JS_EVENT_BUTTON 0x01 // button pressed/released
-#define JS_EVENT_AXIS   0x02 // joystick moved
-#define JS_EVENT_INIT   0x80 // initial state of device
+#define JS_EVENT_BUTTON 0x01  // button pressed/released
+#define JS_EVENT_AXIS 0x02    // joystick moved
+#define JS_EVENT_INIT 0x80    // initial state of device
 
 /**
  * Encapsulates all data relevant to a sampled joystick event.
  */
-class JoystickEvent
-{
+class JoystickEvent {
 public:
     JoystickEvent() : time(0), value(0), type(0), number(0) {}
 
@@ -53,16 +52,14 @@ public:
     /**
      * Returns true if this event is the result of a button press.
      */
-    bool isButton()
-    {
+    bool isButton() {
         return (type & JS_EVENT_BUTTON) != 0;
     }
 
     /**
      * Returns true if this event is the result of an axis movement.
      */
-    bool isAxis()
-    {
+    bool isAxis() {
         return (type & JS_EVENT_AXIS) != 0;
     }
 
@@ -70,8 +67,7 @@ public:
      * Returns true if this event is part of the initial state obtained when
      * the joystick is first connected to.
      */
-    bool isInitialState()
-    {
+    bool isInitialState() {
         return (type & JS_EVENT_INIT) != 0;
     }
 };
@@ -79,8 +75,7 @@ public:
 /**
  * Represents a joystick device. Allows data to be sampled from it.
  */
-class Joystick
-{
+class Joystick {
 private:
     void openPath(std::string devicePath);
 

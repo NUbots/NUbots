@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with the NUbots Codebase.  If not, see <http://www.gnu.org/licenses/>.
  *
- * Copyright 2013 NUBots <nubots@nubots.net>
+ * Copyright 2013 NUbots <nubots@nubots.net>
  */
 
 #ifndef MODULES_BEHAVIOUR_STRATEGY_WALKTEST_H
@@ -23,18 +23,17 @@
 #include <nuclear>
 
 namespace module {
-	namespace behaviour {
-		namespace strategy {
+namespace behaviour {
+    namespace strategy {
 
-		    class WalkTest : public NUClear::Reactor {
-		    public:
-		        /// @brief Called by the powerplant to build and setup the WalkTest reactor.
-		        explicit WalkTest(std::unique_ptr<NUClear::Environment> environment);
-		    };
-
-		}
-	}
-}
+        class WalkTest : public NUClear::Reactor {
+        public:
+            /// @brief Called by the powerplant to build and setup the WalkTest reactor.
+            explicit WalkTest(std::unique_ptr<NUClear::Environment> environment);
+        };
+    }  // namespace strategy
+}  // namespace behaviour
+}  // namespace module
 
 
 #endif

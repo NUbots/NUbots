@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with the NUbots Codebase.  If not, see <http://www.gnu.org/licenses/>.
  *
- * Copyright 2013 NUBots <nubots@nubots.net>
+ * Copyright 2013 NUbots <nubots@nubots.net>
  */
 
 #ifndef MODULES_LOCALISATION_BALLMODEL_H
@@ -25,53 +25,51 @@
 
 namespace module {
 namespace localisation {
-namespace ball {
-    // Number of dimensions
-    // The state consists of 3 components:
-    //    1. The x position in robot space
-    //    2. The y position in robot space
-    //    3. The x component of velocity
-    //    4. The y component of velocity
-    enum BallModelStateComponents {
-        kX = 0,
-        kY = 1,
-        kVx = 2,
-        kVy = 3,
-    };
+    namespace ball {
+        // Number of dimensions
+        // The state consists of 3 components:
+        //    1. The x position in robot space
+        //    2. The y position in robot space
+        //    3. The x component of velocity
+        //    4. The y component of velocity
+        enum BallModelStateComponents {
+            kX  = 0,
+            kY  = 1,
+            kVx = 2,
+            kVy = 3,
+        };
 
-    class BallModel {
-    public:
-        static constexpr size_t size = 4;
+        class BallModel {
+        public:
+            static constexpr size_t size = 4;
 
-        BallModel() : cfg_() {}
+            BallModel() : cfg_() {}
 
-        // arma::vec::fixed<size> timeUpdate(
-        //     const arma::vec::fixed<size>& state, double deltaT,
-        //     const message::localisation::FakeOdometry& odom);
+            // arma::vec::fixed<size> timeUpdate(
+            //     const arma::vec::fixed<size>& state, double deltaT,
+            //     const message::localisation::FakeOdometry& odom);
 
-        arma::vec::fixed<size> timeUpdate(
-            const arma::vec::fixed<size>& state, double deltaT);
+            arma::vec::fixed<size> timeUpdate(const arma::vec::fixed<size>& state, double deltaT);
 
-        arma::vec predictedObservation(const arma::vec::fixed<size>& state, double ballAngle);
+            arma::vec predictedObservation(const arma::vec::fixed<size>& state, double ballAngle);
 
-        arma::vec observationDifference(const arma::vec& a, const arma::vec& b);
+            arma::vec observationDifference(const arma::vec& a, const arma::vec& b);
 
-        arma::vec::fixed<size> limitState(const arma::vec::fixed<size>& state);
+            arma::vec::fixed<size> limitState(const arma::vec::fixed<size>& state);
 
-        arma::mat::fixed<size, size> processNoise();
+            arma::mat::fixed<size, size> processNoise();
 
-        arma::vec::fixed<BallModel::size> ApplyVelocity(
-            const arma::vec::fixed<BallModel::size>& state,
-            double deltaT);
+            arma::vec::fixed<BallModel::size> ApplyVelocity(const arma::vec::fixed<BallModel::size>& state,
+                                                            double deltaT);
 
-        struct Config {
-            double ballDragCoefficient = 0.1;
-            double processNoisePositionFactor = 1e-3;
-            double processNoiseVelocityFactor = 1e-3;
-            double ballHeight = 0.05;
-        } cfg_;
-    };
-}
-}
-}
+            struct Config {
+                double ballDragCoefficient        = 0.1;
+                double processNoisePositionFactor = 1e-3;
+                double processNoiseVelocityFactor = 1e-3;
+                double ballHeight                 = 0.05;
+            } cfg_;
+        };
+    }  // namespace ball
+}  // namespace localisation
+}  // namespace module
 #endif

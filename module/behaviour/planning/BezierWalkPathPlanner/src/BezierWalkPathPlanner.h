@@ -14,15 +14,15 @@
  * You should have received a copy of the GNU General Public License
  * along with the NUbots Codebase.  If not, see <http://www.gnu.org/licenses/>.
  *
- * Copyright 2013 NUBots <nubots@nubots.net>
+ * Copyright 2013 NUbots <nubots@nubots.net>
  */
 
 #ifndef MODULES_BEHAVIOUR_PLANNERS_BEZIERWALKPATHPLANNER_H
 #define MODULES_BEHAVIOUR_PLANNERS_BEZIERWALKPATHPLANNER_H
 
-#include <nuclear>
 #include <armadillo>
 #include <cmath>
+#include <nuclear>
 
 #include "extension/Configuration.h"
 
@@ -34,49 +34,47 @@
 
 
 namespace module {
-    namespace behaviour {
-        namespace planning {
+namespace behaviour {
+    namespace planning {
 
-                //using namespace message;
-                /**
-                 * Executes a getup script if the robot falls over.
-                 *
-                 * @author Josiah Walker
-                 */
-                class BezierWalkPathPlanner : public NUClear::Reactor {
-                private:
+        // using namespace message;
+        /**
+         * Executes a getup script if the robot falls over.
+         *
+         * @author Josiah Walker
+         */
+        class BezierWalkPathPlanner : public NUClear::Reactor {
+        private:
+            /// @brief Subsumption ID key to access motors
+            const size_t subsumptionId;
 
-                    /// @brief Subsumption ID key to access motors
-                    const size_t subsumptionId;
+            // Thresholds
+            float turnSpeed;
+            float forwardSpeed;
+            float a;
+            float b;
+            float VP;
+            float VS;
+            float d1;
+            float d2;
+            float ErMax;
 
-                    //Thresholds
-                    float turnSpeed;
-                    float forwardSpeed;
-                    float a;
-                    float b;
-                    float VP;
-                    float VS;
-                    float d1;
-                    float d2;
-                    float ErMax;
+            //-----------non-config variables (not defined in WalkPathPlanner.yaml)-----------
 
-                    //-----------non-config variables (not defined in WalkPathPlanner.yaml)-----------
+            // info for the current walk
+            message::behaviour::MotionCommand latestCommand;
+            // arma::vec2 currentTargetPosition;
+            // arma::vec2 currentTargetHeading;
+            // message::behaviour::MotionCommand::Type planType;
+            // message::behaviour::KickPlan targetHeading;
+            // arma::vec2 targetPosition = {0, 0};
 
-                    //info for the current walk
-                    message::behaviour::MotionCommand latestCommand;
-                    // arma::vec2 currentTargetPosition;
-                    // arma::vec2 currentTargetHeading;
-                    // message::behaviour::MotionCommand::Type planType;
-                    // message::behaviour::KickPlan targetHeading;
-                    // arma::vec2 targetPosition = {0, 0}; 
+        public:
+            explicit BezierWalkPathPlanner(std::unique_ptr<NUClear::Environment> environment);
+        };
 
-                public:
-                    explicit BezierWalkPathPlanner(std::unique_ptr<NUClear::Environment> environment);
-            };
-
-        }  // planning
-    }  // behaviours
-}  // modules
+    }  // namespace planning
+}  // namespace behaviour
+}  // namespace module
 
 #endif  // MODULES_BEHAVIOUR_PLANNERS_BEZIERWALKPATHPLANNER_H
-

@@ -24,18 +24,18 @@
 
 namespace module {
 namespace behaviour {
-namespace skills {
+    namespace skills {
 
-    class WalkEngineStand : public NUClear::Reactor {
-	private:
-        const size_t subsumptionId;
-    public:
-        /// @brief Called by the powerplant to build and setup the WalkEngineStand reactor.
-        explicit WalkEngineStand(std::unique_ptr<NUClear::Environment> environment);
-    };
+        class WalkEngineStand : public NUClear::Reactor {
+        private:
+            const size_t subsumptionId;
 
-}
-}
-}
+        public:
+            /// @brief Called by the powerplant to build and setup the WalkEngineStand reactor.
+            explicit WalkEngineStand(std::unique_ptr<NUClear::Environment> environment);
+        };
+    }  // namespace skills
+}  // namespace behaviour
+}  // namespace module
 
 #endif  // MODULES_BEHAVIOUR_SKILLS_WALKENGINESTAND_H

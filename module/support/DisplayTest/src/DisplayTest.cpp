@@ -14,13 +14,13 @@
  * You should have received a copy of the GNU General Public License
  * along with the NUbots Codebase.  If not, see <http://www.gnu.org/licenses/>.
  *
- * Copyright 2013 NUBots <nubots@nubots.net>
+ * Copyright 2013 NUbots <nubots@nubots.net>
  */
 
 #include "DisplayTest.h"
-#include "utility/nubugger/NUhelpers.h"
 #include "message/input/MotionCapture.h"
 #include "message/input/Sensors.h"
+#include "utility/nubugger/NUhelpers.h"
 #include "utility/support/eigen_armadillo.h"
 
 using utility::nubugger::graph;
@@ -41,14 +41,14 @@ namespace support {
 
         });*/
 
-//         on<Network<MotionCapture>>().then([this](const Network<MotionCapture>::Source, const Network<MotionCapture>& net) {
-// //            auto mocap = net.data;
-//             // NUClear::log("I got things from", net.sender);
-//         });
+        //         on<Network<MotionCapture>>().then([this](const Network<MotionCapture>::Source, const
+        //         Network<MotionCapture>& net) {
+        // //            auto mocap = net.data;
+        //             // NUClear::log("I got things from", net.sender);
+        //         });
 
-        on<Trigger<Sensors>, Single, Priority::HIGH>().then([this](const Sensors& sensors) {
-            emit(graph("world", convert<double, 4, 4>(sensors.world)));
-        });
+        on<Trigger<Sensors>, Single, Priority::HIGH>().then(
+            [this](const Sensors& sensors) { emit(graph("world", convert<double, 4, 4>(sensors.world))); });
     }
-}
-}
+}  // namespace support
+}  // namespace module

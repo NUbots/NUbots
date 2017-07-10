@@ -51,7 +51,7 @@ namespace input {
 
 
                     try {
-                        static int errorCount = 0;
+                        static uint errorCount = 0;
 
                         if (camera.second.isStreaming()) {
                             // Set all other camera settings
@@ -467,5 +467,5 @@ namespace input {
         // We succeeded
         return true;
     }
-}
-}
+}  // namespace input
+}  // namespace module

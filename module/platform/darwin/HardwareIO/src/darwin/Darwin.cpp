@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with the NUbots Codebase.  If not, see <http://www.gnu.org/licenses/>.
  *
- * Copyright 2013 NUBots <nubots@nubots.net>
+ * Copyright 2013 NUbots <nubots@nubots.net>
  */
 
 #include "Darwin.h"
@@ -99,7 +99,7 @@ std::vector<std::pair<uint8_t, bool>> Darwin::selfTest() {
 void Darwin::buildBulkReadPacket() {
 
     // Double check that our type is big enough to hold the result
-    static_assert(sizeof(Types::CM730Data) == CM730::Address::BATTERY_H - CM730::Address::BUTTON + 1,
+    static_assert(sizeof(Types::CM730Data) == CM730::Address::VOLTAGE - CM730::Address::BUTTON + 1,
                   "The CM730 type is the wrong size");
 
     // Double check that our type is big enough to hold the result
@@ -272,4 +272,4 @@ void Darwin::sendRawCommand(std::vector<uint8_t>& packet) {
 
     uart.executeBroadcast(packet);
 }
-}
+}  // namespace Darwin

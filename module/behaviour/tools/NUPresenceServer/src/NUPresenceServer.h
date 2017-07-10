@@ -25,22 +25,22 @@
 
 namespace module {
 namespace behaviour {
-namespace tools {
+    namespace tools {
 
-    class NUPresenceServer : public NUClear::Reactor {
-    private:
-        utility::math::matrix::Transform3D robot_to_head;
-        float robot_to_head_scale;
+        class NUPresenceServer : public NUClear::Reactor {
+        private:
+            utility::math::matrix::Transform3D robot_to_head;
+            float robot_to_head_scale;
 
-        bool reliable;
-        utility::math::matrix::Transform3D camera_to_robot;
-    public:
-        /// @brief Called by the powerplant to build and setup the NUPresenceServer reactor.
-        explicit NUPresenceServer(std::unique_ptr<NUClear::Environment> environment);
-    };
+            bool reliable;
+            utility::math::matrix::Transform3D camera_to_robot;
 
-}
-}
-}
+        public:
+            /// @brief Called by the powerplant to build and setup the NUPresenceServer reactor.
+            explicit NUPresenceServer(std::unique_ptr<NUClear::Environment> environment);
+        };
+    }  // namespace tools
+}  // namespace behaviour
+}  // namespace module
 
 #endif  // MODULE_BEHAVIOUR_NUPRESENCESERVER_H

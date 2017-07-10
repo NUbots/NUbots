@@ -14,34 +14,33 @@
  * You should have received a copy of the GNU General Public License
  * along with the NUbots Codebase.  If not, see <http://www.gnu.org/licenses/>.
  *
- * Copyright 2013 NUBots <nubots@nubots.net>
+ * Copyright 2013 NUbots <nubots@nubots.net>
  */
 
 #include "RotatedRectangle.h"
 
 namespace utility {
 namespace math {
-namespace geometry {
+    namespace geometry {
 
-    RotatedRectangle::RotatedRectangle(const Transform2D& transform_, const arma::vec2& size_)
-        : transform(transform_), size(size_) { }
+        RotatedRectangle::RotatedRectangle(const Transform2D& transform_, const arma::vec2& size_)
+            : transform(transform_), size(size_) {}
 
-    Transform2D RotatedRectangle::getTransform() const {
-        return transform;
-    }
+        Transform2D RotatedRectangle::getTransform() const {
+            return transform;
+        }
 
-    arma::vec2 RotatedRectangle::getPosition()   const {
-        return arma::vec(transform.xy());
-    }
+        arma::vec2 RotatedRectangle::getPosition() const {
+            return arma::vec(transform.xy());
+        }
 
-    double RotatedRectangle::getRotation()       const {
-        return transform.angle();
-    }
+        double RotatedRectangle::getRotation() const {
+            return transform.angle();
+        }
 
-    arma::vec2 RotatedRectangle::getSize()       const {
-        return size;
-    }
-
-}
-}
-}
+        arma::vec2 RotatedRectangle::getSize() const {
+            return size;
+        }
+    }  // namespace geometry
+}  // namespace math
+}  // namespace utility

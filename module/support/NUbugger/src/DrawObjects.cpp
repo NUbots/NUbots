@@ -14,13 +14,13 @@
  * You should have received a copy of the GNU General Public License
  * along with the NUbots Codebase.  If not, see <http://www.gnu.org/licenses/>.
  *
- * Copyright 2013 NUBots <nubots@nubots.net>
+ * Copyright 2013 NUbots <nubots@nubots.net>
  */
 
 #include "NUbugger.h"
 
-#include "utility/time/time.h"
 #include "message/support/nubugger/DrawObjects.h"
+#include "utility/time/time.h"
 
 namespace module {
 namespace support {
@@ -31,15 +31,11 @@ namespace support {
 
     void NUbugger::provideDrawObjects() {
 
-        handles["draw_objects"].push_back(on<Trigger<DrawObjects>>().then([this](const DrawObjects& drawObjects) {
+        handles["draw_objects"].push_back(
+            on<Trigger<DrawObjects>>().then([this](const DrawObjects& drawObjects) { send(drawObjects); }));
 
-            send(drawObjects);
-        }));
-
-        handles["draw_objects"].push_back(on<Trigger<DrawObject>>().then([this](const DrawObject& drawObject) {
-
-            send(drawObject);
-        }));
+        handles["draw_objects"].push_back(
+            on<Trigger<DrawObject>>().then([this](const DrawObject& drawObject) { send(drawObject); }));
     }
-}
-}
+}  // namespace support
+}  // namespace module
