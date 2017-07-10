@@ -385,6 +385,11 @@ namespace vision {
                     // BR BL cross product gives the bottom side
                     auto bottom = convert<double, 3>(arma::normalise(arma::cross(cbr, cbl)));
                     it->measurement.push_back(Goal::Measurement(Goal::MeasurementType::BASE_NORMAL, bottom));
+
+                    // Vector to the bottom centre...HACK 3m distance for debug
+                    auto rGCc_sphr = convert<double, 3>(cartesianToSpherical(3 * rGCc_norm));  // Just converted into eigen. Still the unit vector
+                    Eigen::Matrix3d rGCc_cov = Eigen::Matrix3d::Identity();  //arma::diagmat(arma::vec3{0.01,0.01,0.001})
+                    it->measurement.push_back(Goal::Measurement(Goal::MeasurementType::CENTRE, rGCc_sphr, rGCc_cov));
                 }
 
                 // Check that the points are not too close to the edges of the screen
@@ -397,13 +402,6 @@ namespace vision {
                     auto top    = convert<double, 3>(arma::normalise(arma::cross(ctl, ctr)));
                     it->measurement.push_back(Goal::Measurement(Goal::MeasurementType::TOP_NORMAL, top));
                 }
-
-                // Add the vector to the bottom centre of the goal post as long as post is near vertical (less than 30 degrees)
-                // if (std::abs(arma::atan(left[2]/left[1])) < 0.5){
-                    //HACK 3m distance for debug
-                    auto rGCc_sphr = convert<double, 3>(cartesianToSpherical(3 * rGCc_norm));  // Just converted into eigen. Still the unit vector
-                    it->measurement.push_back(Goal::Measurement(Goal::MeasurementType::CENTRE, rGCc_sphr, Eigen::Matrix3d::Identity()));
-                // }
 
 
                 // Angular positions from the camera

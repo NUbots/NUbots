@@ -108,7 +108,7 @@ namespace localisation {
                     //TODO: support other measurement types
                     if(m.type != Goal::MeasurementType::CENTRE) continue;
                     //Measure objects
-                    float quality = filter.ambiguousMeasurementUpdate(convert<double,3>(m.position),convert<double,3,3>(m.covariance),poss,sensors);
+                    float quality = filter.ambiguousMeasurementUpdate(convert<double,3>(m.position),convert<double,3,3>(m.covariance),poss,sensors,m.type);
                 }
             }
 

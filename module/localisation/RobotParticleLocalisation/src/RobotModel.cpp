@@ -37,6 +37,7 @@ namespace module {
 namespace localisation {
 
     using message::input::Sensors;
+    using message::vision::Goal;
     using utility::input::ServoID;
     using utility::localisation::transform::SphericalRobotObservation;
     using utility::localisation::transform::WorldToRobotTransform;
@@ -60,7 +61,8 @@ namespace localisation {
     arma::vec RobotModel::predictedObservation(
         const arma::vec::fixed<RobotModel::size>& state,
         const arma::vec3& actual_position,
-        const Sensors& sensors) {
+        const Sensors& sensors,
+        const Goal::MeasurementType& type) {
 
         // Get our transform to world coordinates
         const Transform3D& Htw = convert<double, 4, 4>(sensors.world);
@@ -73,11 +75,13 @@ namespace localisation {
         Hfw = Hfw.rotateZ(state[kAngle]);
 
         Transform3D Hcf = Hcw * Hfw.i();
-
-        //rFCc = vector from camera to field object expected position
-        arma::vec3 rFCc = Hcf.transformPoint(actual_position);
-        arma::vec3 rFCc_sph = cartesianToSpherical(rFCc); // in r,theta,phi
-        //arma::vec3 rFCc_sph2 = { rFCc_sph1[0], rFCc_sph1[1], rFCc_sph1[2] };  // in roe, theta, phi, where roe is 1/r
+        arma::vec3 rFCc_sph = {0,0,0};
+        if (type == Goal::MeasurementType::CENTRE){
+            //rFCc = vector from camera to field object expected position
+            arma::vec3 rFCc = Hcf.transformPoint(actual_position);
+            /*arma::vec3*/ rFCc_sph = cartesianToSpherical(rFCc); // in r,theta,phi
+            //arma::vec3 rFCc_sph2 = { rFCc_sph1[0], rFCc_sph1[1], rFCc_sph1[2] };  // in roe, theta, phi, where roe is 1/r
+        }
 
         // std::cout << "actual_position \n" << actual_position << std::endl;
         // std::cout << "state \n" << state << std::endl;

@@ -24,6 +24,7 @@
 #include "message/localisation/FieldObject.h"
 #include "message/input/Sensors.h"
 #include "utility/math/matrix/Rotation3D.h"
+#include "message/vision/VisionObjects.h"
 
 
 namespace module {
@@ -52,7 +53,8 @@ namespace localisation {
         arma::vec predictedObservation(
             const arma::vec::fixed<RobotModel::size>& state,
             const arma::vec3& actual_position,
-            const message::input::Sensors& sensors);
+            const message::input::Sensors& sensors,
+            const message::vision::Goal::MeasurementType& type);
 
         arma::vec observationDifference(const arma::vec& a, const arma::vec& b);
 
