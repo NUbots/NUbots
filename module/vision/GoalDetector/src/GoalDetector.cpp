@@ -370,11 +370,17 @@ namespace vision {
                 // Get our four normals for each edge
                 // BL TL cross product gives left side
                 auto left   = convert<double, 3>(arma::normalise(arma::cross(cbl, ctl)));
-                it->measurement.push_back(Goal::Measurement(Goal::MeasurementType::LEFT_NORMAL, left));
+                Eigen::Matrix3d left_vecCov = Eigen::Matrix3d::Identity();  //arma::diagmat(arma::vec3{0.01,0.01,0.001})
+                Eigen::Vector2d left_Angles(std::atan2(left[1],left[0]), std::atan2(left[2],std::sqrt(left[0]*left[0] + left[1]*left[1])));
+                Eigen::Matrix2d left_AngCov = Eigen::Matrix2d::Identity();
+                it->measurement.push_back(Goal::Measurement(Goal::MeasurementType::LEFT_NORMAL, left, left_vecCov, left_Angles, left_AngCov));
 
                 // TR BR cross product gives right side
                 auto right  = convert<double, 3>(arma::normalise(arma::cross(ctr, cbr)));
-                it->measurement.push_back(Goal::Measurement(Goal::MeasurementType::RIGHT_NORMAL, right));
+                Eigen::Matrix3d right_vecCov = Eigen::Matrix3d::Identity();
+                Eigen::Vector2d right_Angles(std::atan2(right[1],right[0]), std::atan2(right[2],std::sqrt(right[0]*right[0] + right[1]*right[1])));
+                Eigen::Matrix2d right_AngCov = Eigen::Matrix2d::Identity();
+                it->measurement.push_back(Goal::Measurement(Goal::MeasurementType::RIGHT_NORMAL, right, right_vecCov, right_Angles, right_AngCov));
 
                 // Check that the points are not too close to the edges of the screen
                 if(                         std::min(cbr[0], cbl[0]) > MEASUREMENT_LIMITS_LEFT

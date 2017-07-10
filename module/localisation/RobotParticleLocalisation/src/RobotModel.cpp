@@ -95,7 +95,8 @@ namespace localisation {
             //creating the normal vector (following convention stipulated in VisionObjects)
             arma::vec3 rNFf = arma::normalise(arma::cross(rG_blFf, rG_tlFf));
             arma::vec3 rNCc = Hcf.transformPoint(rNFf);
-            return rNCc;
+            arma::vec2 angles = { std::atan2(rNCc[1],rNCc[0]) , std::atan2(rNCc[2],std::sqrt(rNCc[0]*rNCc[0] + rNCc[1]*rNCc[1]))};
+            return angles;
         }
         else if (type == Goal::MeasurementType::RIGHT_NORMAL){
             //rGFf = vector from field origin to goal post expected position. bl = bottom left, tl = top left.
@@ -109,14 +110,14 @@ namespace localisation {
             //creating the normal vector (following convention stipulated in VisionObjects)
             arma::vec3 rNFf = arma::normalise(arma::cross(rG_trFf, rG_brFf));
             arma::vec3 rNCc = Hcf.transformPoint(rNFf);
+            arma::vec2 angles = { std::atan2(rNCc[1],rNCc[0]) , std::atan2(rNCc[2],std::sqrt(rNCc[0]*rNCc[0] + rNCc[1]*rNCc[1]))};
             return rNCc;
         }
     }
 
 
     arma::vec RobotModel::observationDifference(const arma::vec& a,
-                                                const arma::vec& b,
-                                                const Goal::MeasurementType& type) {
+                                                const arma::vec& b) {
         return a-b;
     }
 

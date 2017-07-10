@@ -58,7 +58,7 @@ namespace localisation {
             const message::vision::Goal::MeasurementType& type,
             const message::support::FieldDescription& fd);
 
-        arma::vec observationDifference(const arma::vec& a, const arma::vec& b, const message::vision::Goal::MeasurementType& type);
+        arma::vec observationDifference(const arma::vec& a, const arma::vec& b);
 
         arma::vec::fixed<size> limitState(const arma::vec::fixed<size>& state);
 

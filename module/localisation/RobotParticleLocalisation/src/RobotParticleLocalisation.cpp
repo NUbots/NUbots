@@ -105,7 +105,12 @@ namespace localisation {
                     if(m.type == Goal::MeasurementType::BASE_NORMAL) continue;
                     if(m.type == Goal::MeasurementType::UNKNOWN_MEASUREMENT) continue;
                     //Measure objects
-                    float quality = filter.ambiguousMeasurementUpdate(convert<double,3>(m.position),convert<double,3,3>(m.covariance),poss,sensors,m.type,fd);
+                    if(m.type == Goal::MeasurementType::CENTRE) {
+                        filter.ambiguousMeasurementUpdate(convert<double,3>(m.position),convert<double,3,3>(m.covariance),poss,sensors,m.type,fd);
+                    }
+                    else {
+                        filter.ambiguousMeasurementUpdate(convert<double,2>(m.normalAngles),convert<double,2,2>(m.normAngCov),poss,sensors,m.type,fd);
+                    }
                 }
             }
 
