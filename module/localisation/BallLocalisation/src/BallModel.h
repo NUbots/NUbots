@@ -26,48 +26,50 @@
 #include "message/support/FieldDescription.h"
 
 namespace module {
-namespace localisation {
+    namespace localisation {
 
-class BallModel {
- public:
-  // The indicies for our vector
-  static constexpr uint PX = 0;
-  static constexpr uint PY = 1;
+        class BallModel {
+        public:
 
-  static constexpr size_t size = 2;
+            // The indicies for our vector
+            static constexpr uint PX = 0;
+            static constexpr uint PY = 1;
 
-  struct MeasurementType {
-    struct BALL {};
-  };
+            static constexpr size_t size = 2;
 
-  arma::vec2 processNoiseDiagonal;
+            struct MeasurementType {
+                struct BALL {};
+            };
 
-  BallModel() : processNoiseDiagonal(arma::fill::eye) {}  // empty constructor
+            arma::vec2 processNoiseDiagonal;
 
-  arma::vec::fixed<size> timeUpdate(const arma::vec::fixed<size>& state,
-                                    double deltaT);
 
-  arma::vec3 predictedObservation(
-      const arma::vec::fixed<size>& state,
-      const message::support::FieldDescription& field,
-      const message::input::Sensors& sensors) const;
+            BallModel() : processNoiseDiagonal(arma::fill::eye) {} // empty constructor
 
-  arma::vec observationDifference(const arma::vec& measurement,
-                                  const arma::vec3& rBCc) const;
+            arma::vec::fixed<size> timeUpdate(const arma::vec::fixed<size>& state, double deltaT);
 
-  arma::vec::fixed<size> limitState(const arma::vec::fixed<size>& state) const;
+            arma::vec3 predictedObservation(const arma::vec::fixed<size>& state
+                , const message::support::FieldDescription& field
+                , const message::input::Sensors& sensors) const;
 
-  arma::mat::fixed<size, size> processNoise() const;
+            arma::vec observationDifference(const arma::vec& measurement
+                , const arma::vec3& rBCc) const;
 
-  // number and range of reset particles
-  int n_rogues = 10;
-  arma::vec2 resetRange = {10, 10};
+            arma::vec::fixed<size> limitState(const arma::vec::fixed<size>& state) const;
 
-  // Getters
-  int getRogueCount() const { return n_rogues; }
-  arma::vec getRogueRange() const { return resetRange; }
-};
+            arma::mat::fixed<size, size> processNoise() const;
 
-}  // namespace localisation
-}  // namespace module
+
+            // number and range of reset particles
+            int n_rogues = 10;
+            arma::vec2 resetRange = {10,10};
+
+            //Getters
+            int getRogueCount() const {return n_rogues;}
+            arma::vec getRogueRange() const {return resetRange;}
+
+        };
+
+    }
+}
 #endif  // MODULE_LOCALISATION_BALLMODEL_H
