@@ -13,6 +13,7 @@ format:
 lens:
   radiansPerPixel: 0.001
   centreOffset: [0,0]
+  FOV: 2.0
 
 settings:
   exposure: 33333             # The shutter time in microseconds (1/fps).

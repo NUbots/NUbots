@@ -84,8 +84,8 @@ namespace module
             auto cameraParameters = std::make_unique<CameraParameters>();
 
             //Generic camera parameters
-            cameraParameters->imageSizePixels << config["imageWidth"].as<uint>(), config["imageHeight"].as<uint>();
-            cameraParameters->FOV << config["FOV_X"].as<double>(), config["FOV_Y"].as<double>();
+            cameraParameters->imageSizePixels << config["format"]["width"].as<uint>(), config["format"]["height"].as<uint>();
+            cameraParameters->FOV << config["lens"]["FOV"].as<double>(), config["lens"]["FOV"].as<double>();
 
             //Radial specific
             cameraParameters->lens = CameraParameters::LensType::RADIAL;
