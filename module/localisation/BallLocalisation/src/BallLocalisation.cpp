@@ -81,11 +81,11 @@ namespace localisation {
 
         /* To run whenever a ball has been detected */
         on<Trigger<std::vector<message::vision::Ball>>
-         , With<FieldDescription>
-         , With<Sensors>>().then([this](
+         , With<FieldDescription>>().then([this](
             const std::vector<message::vision::Ball>& balls
-            , const FieldDescription& field
-            , const Sensors& sensors){
+            , const FieldDescription& field){
+
+                auto sensors = *balls[0].visObject.sensors;
 
                 if(balls.size() > 0){
                     /* Call Time Update first */
