@@ -52,11 +52,11 @@ namespace localisation {
 
         arma::vec predictedObservation(
             const arma::vec::fixed<RobotModel::size>& state,
-            const arma::vec3& actual_position,
+            const arma::vec& actual_position,
             const message::input::Sensors& sensors,
             const message::vision::Goal::MeasurementType& type);
 
-        arma::vec observationDifference(const arma::vec& a, const arma::vec& b);
+        arma::vec observationDifference(const arma::vec& a, const arma::vec& b, const message::vision::Goal::MeasurementType& type);
 
         arma::vec::fixed<size> limitState(const arma::vec::fixed<size>& state);
 

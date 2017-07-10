@@ -31,6 +31,7 @@
 #include "utility/input/ServoID.h"
 #include "utility/math/matrix/Transform3D.h"
 #include "utility/support/eigen_armadillo.h"
+#include "message/support/FieldDescription.h"
 
 
 namespace module {
@@ -46,6 +47,7 @@ namespace localisation {
     using utility::math::coordinates::cartesianToRadial;
     using utility::math::coordinates::cartesianToSpherical;
     using utility::math::angle::normalizeAngle;
+    using message::support::FieldDescription;
 
 
     using utility::math::matrix::Transform3D;
@@ -60,9 +62,10 @@ namespace localisation {
     /// Return the predicted observation of an object at the given position
     arma::vec RobotModel::predictedObservation(
         const arma::vec::fixed<RobotModel::size>& state,
-        const arma::vec3& actual_position,
+        const arma::vec& actual_position,
         const Sensors& sensors,
-        const Goal::MeasurementType& type) {
+        const Goal::MeasurementType& type
+        const FieldDescription& fd) {
 
         // Get our transform to world coordinates
         const Transform3D& Htw = convert<double, 4, 4>(sensors.world);
@@ -75,28 +78,48 @@ namespace localisation {
         Hfw = Hfw.rotateZ(state[kAngle]);
 
         Transform3D Hcf = Hcw * Hfw.i();
-        arma::vec3 rFCc_sph = {0,0,0};
         if (type == Goal::MeasurementType::CENTRE){
-            //rFCc = vector from camera to field object expected position
-            arma::vec3 rFCc = Hcf.transformPoint(actual_position);
-            /*arma::vec3*/ rFCc_sph = cartesianToSpherical(rFCc); // in r,theta,phi
-            //arma::vec3 rFCc_sph2 = { rFCc_sph1[0], rFCc_sph1[1], rFCc_sph1[2] };  // in roe, theta, phi, where roe is 1/r
+            //rGCc = vector from camera to goal post expected position
+            arma::vec3 rGCc = Hcf.transformPoint(arma::vec3{actual_position[0],actual_position[1],0});
+            arma::vec3 rGCc_sph = cartesianToSpherical(rGCc); // in r,theta,phi
+            return rGCc_sph;
+        }
+        else if (type == Goal::MeasurementType::LEFT_NORMAL){
+            //rGFf = vector from field origin to goal post expected position. bl = bottom left, tl = top left.
+            arma::vec3 rGFf = {actual_position[0], actual_position[1], 0};
+
+            // Find the vector to the top and bottom left edge points
+            //TODO: support non-cylindrical goal posts
+            arma::vec3 rGFf_bl = rGFf + {0, fd.goalpost_diameter*0.5, 0};
+            arma::vec3 rGFf_tl = {rGFf_bl[0], rGFf_bl[1], fd.goal_crossbar_height};
+
+            //creating the normal vector (following convention stipulated in VisionObjects)
+            arma::vec3 rNFf = arma::normalise(arma::cross(rGFf_bl, rGFf_tl));
+            arma::vec3 rNCc = Hcf.transformPoint(rNFf);
+            return rNCc;
+        }
+        else if (type == Goal::MeasurementType::RIGHT_NORMAL){
+            //rGFf = vector from field origin to goal post expected position. bl = bottom left, tl = top left.
+            arma::vec3 rGFf = {actual_position[0], actual_position[1], 0};
+
+            // Find the vector to the top and bottom right edge points
+            //TODO: support non-cylindrical goal posts
+            arma::vec3 rGFf_br = rGFf + {0, fd.goalpost_diameter*0.5, 0};
+            arma::vec3 rGFf_tr = {rGFf_bl[0], rGFf_bl[1], fd.goal_crossbar_height};
+            
+            //creating the normal vector (following convention stipulated in VisionObjects)
+            arma::vec3 rNFf = arma::normalise(arma::cross(rGFf_tr, rGFf_br));
+            arma::vec3 rNCc = Hcf.transformPoint(rNFf);
+            return rNCc;
         }
 
-        // std::cout << "actual_position \n" << actual_position << std::endl;
-        // std::cout << "state \n" << state << std::endl;
-        // std::cout << "Htw \n" << Htw << std::endl;
-        // std::cout << "Htc \n" << Htc << std::endl;
-        // std::cout << "Hfw \n" << Hfw << std::endl;
-        // std::cout << "Hcf \n" << Hcf << std::endl;
-        // std::cout << "rFCc \n" << rFCc << std::endl;
-        // std::cout << "rFCc_sph \n" << rFCc_sph << std::endl;
-        return rFCc_sph;
+        
     }
 
 
     arma::vec RobotModel::observationDifference(const arma::vec& a,
-                                                const arma::vec& b) {
+                                                const arma::vec& b,
+                                                const Goal::MeasurementType& type) {
         return a-b;
     }
 

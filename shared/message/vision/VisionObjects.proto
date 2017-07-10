@@ -92,6 +92,7 @@ message Goal {
 
     message Measurement {
         MeasurementType type       = 1;
+        // Normal vectors point to the centre of the object
         vec3            position   = 2;
         mat33           covariance   = 3;
     }

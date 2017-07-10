@@ -372,8 +372,8 @@ namespace vision {
                 auto left   = convert<double, 3>(arma::normalise(arma::cross(cbl, ctl)));
                 it->measurement.push_back(Goal::Measurement(Goal::MeasurementType::LEFT_NORMAL, left));
 
-                // TR BL cross product gives right side
-                auto right  = convert<double, 3>(arma::normalise(arma::cross(ctr, cbl)));
+                // TR BR cross product gives right side
+                auto right  = convert<double, 3>(arma::normalise(arma::cross(ctr, cbr)));
                 it->measurement.push_back(Goal::Measurement(Goal::MeasurementType::RIGHT_NORMAL, right));
 
                 // Check that the points are not too close to the edges of the screen

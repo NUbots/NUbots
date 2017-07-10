@@ -105,10 +105,11 @@ namespace localisation {
                 std::vector<arma::vec> poss = getPossibleFieldPositions(goal, fd);
 
                 for(auto& m: goal.measurement){
-                    //TODO: support other measurement types
-                    if(m.type != Goal::MeasurementType::CENTRE) continue;
+                    if(m.type == Goal::MeasurementType::TOP_NORMAL) continue;
+                    if(m.type == Goal::MeasurementType::BOTTOM_NORMAL) continue;
+                    if(m.type == Goal::MeasurementType::UNKNOWN) continue;
                     //Measure objects
-                    float quality = filter.ambiguousMeasurementUpdate(convert<double,3>(m.position),convert<double,3,3>(m.covariance),poss,sensors,m.type);
+                    float quality = filter.ambiguousMeasurementUpdate(convert<double,3>(m.position),convert<double,3,3>(m.covariance),poss,sensors,m.type,fd);
                 }
             }
 
