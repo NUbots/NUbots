@@ -184,31 +184,29 @@ def generate_test(parts):
 
 
 def module_unused(**kwargs):
-    rolesPath = os.path.abspath(os.path.join(os.path.dirname( __file__ ), '..', '..', 'roles'))
-    modulesPath = os.path.abspath(os.path.join(os.path.dirname( __file__ ), '..', '..', 'module'))
-    basePath = os.path.abspath(os.path.join(os.path.dirname( __file__ ), '..', '..', 'module')) + os.sep
-
-    existingModules = {}
-    missingModules = {}
-    commentedModules = {}
-    usedModules = []
-    unusedButCommentedModules = []
+    roles_path = 'roles'
+    modules_path = b.cmake_cache["NUCLEAR_MODULE_DIR"]
+    existing_modules = {}
+    missing_modules = {}
+    commented_modules = {}
+    used_modules = []
+    unused_commented_modules = []
 
     # a list of folders that could be within a module
     skip_list = ['src', 'data', 'config', 'tests', 'report']
     skip_list = [s + os.sep for s in skip_list]
 
     # find all the modules that are available
-    for root, dirs, files in os.walk(modulesPath):
+    for root, dirs, files in os.walk(modules_path):
         if len(files) != 0:
             if not any(substring in (root + os.sep) for substring in skip_list):
-                existingModules[root.replace(basePath, '')] = 0 # make sure we remove the base path from the module
+                existing_modules[root.replace(modules_path + os.sep, '')] = 0 # make sure we remove the base path from the module
 
 
     # compare our roles to our existing modules
-    for root, dirs, files in os.walk(rolesPath):
+    for root, dirs, files in os.walk(roles_path):
         for file in files:
-            with open(os.path.join(rolesPath, file), 'r') as role:
+            with open(os.path.join(roles_path, file), 'r') as role:
                 for line in role:
                     line = line.strip()
 
@@ -224,7 +222,7 @@ def module_unused(**kwargs):
                                     line = line[:additionalCommentLoc]
 
                                 line = line.replace('::', os.sep)
-                                commentedModules[line.strip()] = 1
+                                commented_modules[line.strip()] = 1
                             continue
                         else:
                             # the comment was just a description, remove the comment and continue
@@ -232,25 +230,25 @@ def module_unused(**kwargs):
 
                     if '::' in line: # the line is a module
                         line = line.replace('::', os.sep)
-                        if line in existingModules:
-                            existingModules[line] += 1
-                            usedModules.append(line)
+                        if line in existing_modules:
+                            existing_modules[line] += 1
+                            used_modules.append(line)
                         else:
-                            missingModules[line] = 1
+                            missing_modules[line] = 1
 
     print('Unused modules:\n')
-    for key in sorted(existingModules.keys()):
-        if existingModules[key] == 0:
-            if key not in commentedModules.keys():
+    for key in sorted(existing_modules.keys()):
+        if existing_modules[key] == 0:
+            if key not in commented_modules.keys():
                 print('\t', key)
             else:
-                unusedButCommentedModules.append(key)
+                unused_commented_modules.append(key)
 
     print('\nUnused but commented out modules:\n')
-    for key in sorted(commentedModules):
-        if key not in usedModules:
-            if key in existingModules:
-                if existingModules[key] > 0:
+    for key in sorted(commented_modules):
+        if key not in used_modules:
+            if key in existing_modules:
+                if existing_modules[key] > 0:
                     continue
 
             print('\t', key)
