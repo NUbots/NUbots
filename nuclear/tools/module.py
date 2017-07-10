@@ -184,7 +184,8 @@ def generate_test(parts):
 
 
 def module_unused(**kwargs):
-    roles_path = 'roles'
+    roles_path = b.cmake_cache["NUCLEAR_ROLES_DIR"]
+    print(roles_path)
     modules_path = b.cmake_cache["NUCLEAR_MODULE_DIR"]
     existing_modules = {}
     missing_modules = {}
