@@ -59,12 +59,20 @@ namespace input {
             }
         });
 
-        // When we shutdown, we must tell our camera class to close (stop streaming)
         on<Shutdown>().then([this] {
             ShutdownV4L2Camera();
-
             ShutdownSpinnakerCamera();
         });
+    }
+
+    // When we shutdown, we must tell our camera class to close (stop streaming)
+    void Camera::ShutdownV4L2Camera() {
+        for (auto& camera : V4L2Cameras) {
+            camera.second.closeCamera();
+            camera.second.disableHandles();
+        }
+
+        V4L2Cameras.clear();
     }
 }  // namespace input
 }  // namespace module
