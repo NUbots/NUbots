@@ -31,7 +31,6 @@
 #include "utility/input/ServoID.h"
 #include "utility/math/matrix/Transform3D.h"
 #include "utility/support/eigen_armadillo.h"
-#include "message/support/FieldDescription.h"
 
 
 namespace module {
@@ -64,7 +63,7 @@ namespace localisation {
         const arma::vec::fixed<RobotModel::size>& state,
         const arma::vec& actual_position,
         const Sensors& sensors,
-        const Goal::MeasurementType& type
+        const Goal::MeasurementType& type,
         const FieldDescription& fd) {
 
         // Get our transform to world coordinates
@@ -90,11 +89,11 @@ namespace localisation {
 
             // Find the vector to the top and bottom left edge points
             //TODO: support non-cylindrical goal posts
-            arma::vec3 rGFf_bl = rGFf + {0, fd.goalpost_diameter*0.5, 0};
-            arma::vec3 rGFf_tl = {rGFf_bl[0], rGFf_bl[1], fd.goal_crossbar_height};
+            arma::vec3 rG_blFf = rGFf + arma::vec3{0, fd.dimensions.goalpost_diameter*0.5, 0};
+            arma::vec3 rG_tlFf = {rG_blFf[0], rG_blFf[1], fd.dimensions.goal_crossbar_height};
 
             //creating the normal vector (following convention stipulated in VisionObjects)
-            arma::vec3 rNFf = arma::normalise(arma::cross(rGFf_bl, rGFf_tl));
+            arma::vec3 rNFf = arma::normalise(arma::cross(rG_blFf, rG_tlFf));
             arma::vec3 rNCc = Hcf.transformPoint(rNFf);
             return rNCc;
         }
@@ -104,16 +103,14 @@ namespace localisation {
 
             // Find the vector to the top and bottom right edge points
             //TODO: support non-cylindrical goal posts
-            arma::vec3 rGFf_br = rGFf + {0, fd.goalpost_diameter*0.5, 0};
-            arma::vec3 rGFf_tr = {rGFf_bl[0], rGFf_bl[1], fd.goal_crossbar_height};
+            arma::vec3 rG_brFf = rGFf + arma::vec3{0, fd.dimensions.goalpost_diameter*0.5, 0};
+            arma::vec3 rG_trFf = {rG_brFf[0], rG_brFf[1], fd.dimensions.goal_crossbar_height};
             
             //creating the normal vector (following convention stipulated in VisionObjects)
-            arma::vec3 rNFf = arma::normalise(arma::cross(rGFf_tr, rGFf_br));
+            arma::vec3 rNFf = arma::normalise(arma::cross(rG_trFf, rG_brFf));
             arma::vec3 rNCc = Hcf.transformPoint(rNFf);
             return rNCc;
         }
-
-        
     }
 
 

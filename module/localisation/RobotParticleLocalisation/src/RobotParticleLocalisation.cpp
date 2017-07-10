@@ -82,14 +82,12 @@ namespace localisation {
         });
 
         on< Trigger<std::vector<Goal>>,
-            With<FieldDescription>,,
-            Sync<RobotParticleLocalisation>
-        >().then("Measurement Update",
-                [this](const std::vector<Goal>& goals,
-                       const FieldDescription& fd
-                       ){
+            With<FieldDescription>,
+            Sync<RobotParticleLocalisation>>().then("Measurement Update",
+                [this](const std::vector<Goal>& goals, const FieldDescription& fd){
+
             //First debug particles
-            auto sensors = *goals[0].visObject.sensors;        
+            const auto& sensors = *goals[0].visObject.sensors;        
             /* Perform time update */
             auto curr_time = NUClear::clock::now();
             double seconds = TimeDifferenceSeconds(curr_time,last_time_update_time);
@@ -104,8 +102,8 @@ namespace localisation {
 
                 for(auto& m: goal.measurement){
                     if(m.type == Goal::MeasurementType::TOP_NORMAL) continue;
-                    if(m.type == Goal::MeasurementType::BOTTOM_NORMAL) continue;
-                    if(m.type == Goal::MeasurementType::UNKNOWN) continue;
+                    if(m.type == Goal::MeasurementType::BASE_NORMAL) continue;
+                    if(m.type == Goal::MeasurementType::UNKNOWN_MEASUREMENT) continue;
                     //Measure objects
                     float quality = filter.ambiguousMeasurementUpdate(convert<double,3>(m.position),convert<double,3,3>(m.covariance),poss,sensors,m.type,fd);
                 }

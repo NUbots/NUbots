@@ -22,6 +22,7 @@
 
 #include <armadillo>
 #include "message/localisation/FieldObject.h"
+#include "message/support/FieldDescription.h"
 #include "message/input/Sensors.h"
 #include "utility/math/matrix/Rotation3D.h"
 #include "message/vision/VisionObjects.h"
@@ -54,7 +55,8 @@ namespace localisation {
             const arma::vec::fixed<RobotModel::size>& state,
             const arma::vec& actual_position,
             const message::input::Sensors& sensors,
-            const message::vision::Goal::MeasurementType& type);
+            const message::vision::Goal::MeasurementType& type,
+            const message::support::FieldDescription& fd);
 
         arma::vec observationDifference(const arma::vec& a, const arma::vec& b, const message::vision::Goal::MeasurementType& type);
 
