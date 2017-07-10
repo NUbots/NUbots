@@ -82,16 +82,14 @@ namespace localisation {
         });
 
         on< Trigger<std::vector<Goal>>,
-            With<FieldDescription>,
-            With<Sensors>,
+            With<FieldDescription>,,
             Sync<RobotParticleLocalisation>
         >().then("Measurement Update",
                 [this](const std::vector<Goal>& goals,
-                       const FieldDescription& fd,
-                       const Sensors& sensors
+                       const FieldDescription& fd
                        ){
             //First debug particles
-
+            auto sensors = *goals[0].visObject.sensors;        
             /* Perform time update */
             auto curr_time = NUClear::clock::now();
             double seconds = TimeDifferenceSeconds(curr_time,last_time_update_time);
