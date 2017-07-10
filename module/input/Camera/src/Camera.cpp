@@ -37,7 +37,7 @@ namespace input {
                 }
 
                 else {
-                     cam->second.setConfig(config);
+                    cam->second.setConfig(config);
                 }
             }
 
@@ -64,7 +64,7 @@ namespace input {
             ShutdownSpinnakerCamera();
         });
     }
- 
+
     // When we shutdown, we must tell our camera class to close (stop streaming)
     void Camera::ShutdownV4L2Camera() {
         for (auto& camera : V4L2Cameras) {
@@ -76,4 +76,3 @@ namespace input {
     }
 }  // namespace input
 }  // namespace module
-

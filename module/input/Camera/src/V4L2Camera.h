@@ -81,7 +81,7 @@ namespace input {
 
         NUClear::threading::ReactionHandle cameraHandle;
         NUClear::threading::ReactionHandle settingsHandle;
-      
+
         /// @brief Configuration information for this camera.
         ::extension::Configuration config;
 
