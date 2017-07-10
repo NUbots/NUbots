@@ -15,11 +15,12 @@ OPTION(NUCLEAR_SHARED_BUILD "Build each module as a separate shared library." ON
 SET(NUCLEAR_ROLE_BANNER_FILE "${CMAKE_CURRENT_SOURCE_DIR}/roles/banner.txt" CACHE PATH "The path the banner to print at the start of each role execution")
 
 # Our location of our nuclear roles directory
-SET(NUCLEAR_ROLES_DIR "${CMAKE_CURRENT_SOURCE_DIR}" CACHE PATH "The path to the nuclear roles system directory")
+SET(NUCLEAR_ROLES_SYSTEM_DIR "${CMAKE_CURRENT_SOURCE_DIR}" CACHE PATH "The path to the nuclear roles system directory")
 
 # Our variables that are used to locate the shared, module, and message folders
 # They are given relative to the current project directory
 SET(NUCLEAR_MODULE_DIR    "module"           CACHE PATH "The path to the module directory for NUClear")
+SET(NUCLEAR_ROLES_DIR     "roles"            CACHE PATH "The path to the roles directory for NUClear")
 SET(NUCLEAR_MESSAGE_DIR   "shared/message"   CACHE PATH "The path to the message directory for NUClear")
 SET(NUCLEAR_UTILITY_DIR   "shared/utility"   CACHE PATH "The path to the utility dir for NUClear")
 SET(NUCLEAR_EXTENSION_DIR "shared/extension" CACHE PATH "The path to the extension dir for NUClear")
