@@ -350,6 +350,7 @@ namespace module
         void Camera::ShutdownSpinnakerCamera()
         {
             SpinnakerCameras.clear();
+            SpinnakerCamList.Clear();
 
             if (SpinnakerSystem)
             {
