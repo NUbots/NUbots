@@ -22,114 +22,120 @@
 #ifndef UTILITY_MATH_FILTER_PARTICLEFILTER_H
 #define UTILITY_MATH_FILTER_PARTICLEFILTER_H
 
-#include <nuclear>
 #include <armadillo>
+#include <nuclear>
 #include <random>
 #include <vector>
 
 namespace utility {
-    namespace math {
-        namespace filter {
+namespace math {
+namespace filter {
 
-            template <typename Model> //model is is a template parameter that Kalman also inherits
-            class ParticleFilter {
-            public:
-                // The model
-                Model model;
+template <typename Model>  // model is is a template parameter that Kalman also
+                           // inherits
+                           class ParticleFilter {
+ public:
+  // The model
+  Model model;
 
-            private:
-                // Dimension types for vectors and square matricies
-                using StateVec = arma::vec::fixed<Model::size>;
-                using ParticleList = arma::mat;
-                using StateMat = arma::mat::fixed<Model::size, Model::size>;
+ private:
+  // Dimension types for vectors and square matricies
+  using StateVec = arma::vec::fixed<Model::size>;
+  using ParticleList = arma::mat;
+  using StateMat = arma::mat::fixed<Model::size, Model::size>;
 
-                /* particles.n_rows = number of particles
-                   particle.row(i) = particle i
-                */
-                ParticleList particles;
+  /* particles.n_rows = number of particles
+     particle.row(i) = particle i
+  */
+  ParticleList particles;
 
-                StateVec sigma_sq;
+  StateVec sigma_sq;
 
-            public:
-                ParticleFilter(StateVec initialMean = arma::zeros(Model::size),
-                               StateMat initialCovariance = arma::eye(Model::size, Model::size) * 0.1,
-                               int number_of_particles_ = 100,
-                               StateVec sigma_sq_ = 0.1 * arma::ones(Model::size))
-                {
-                    sigma_sq = arma::abs(sigma_sq_);
-                    reset(initialMean, initialCovariance, number_of_particles_);
-                }
+ public:
+  ParticleFilter(StateVec initialMean = arma::zeros(Model::size),
+                 StateMat initialCovariance = arma::eye(Model::size,
+                                                        Model::size) *
+                                              0.1,
+                 int number_of_particles_ = 100,
+                 StateVec sigma_sq_ = 0.1 * arma::ones(Model::size)) {
+    sigma_sq = arma::abs(sigma_sq_);
+    reset(initialMean, initialCovariance, number_of_particles_);
+  }
 
-                void reset(StateVec initialMean, StateMat initialCovariance, int number_of_particles_)
-                {
-                    particles = arma::zeros(number_of_particles_,Model::size);
-                    setState(initialMean, initialCovariance);
-                }
+  void reset(StateVec initialMean, StateMat initialCovariance,
+             int number_of_particles_) {
+    particles = arma::zeros(number_of_particles_, Model::size);
+    setState(initialMean, initialCovariance);
+  }
 
-                void setState(StateVec initialMean, StateMat initialCovariance) {
-                    //Sample single gaussian (represented by a gaussian mixture model of size 1)
-                    arma::gmm_diag gaussian;
-                    gaussian.set_params(arma::mat(initialMean), arma::mat(initialCovariance.diag()),arma::ones(1));
-                    for(unsigned int i = 0; i < particles.n_rows; ++i) {
-                        particles.row(i) = gaussian.generate().t();
-                    }
-                }
-
-                template <typename... TAdditionalParameters>
-                void timeUpdate(double deltaT, const TAdditionalParameters&... additionalParameters)
-                {
-                    //Sample single zero mean gaussian with process noise (represented by a gaussian mixture model of size 1)
-                    arma::gmm_diag gaussian;
-                    gaussian.set_params(arma::mat(arma::zeros(Model::size)), arma::mat(model.processNoise().diag() * deltaT),arma::ones(1));
-                    for(unsigned int i = 0; i < particles.n_rows; ++i) {
-                        //TODO: add noise?
-                        StateVec newpcle = model.timeUpdate(particles.row(i).t(), deltaT, additionalParameters...) + gaussian.generate();
-                        particles.row(i) = newpcle.t();
-                    }
-                }
-
-                template <typename TMeasurement, typename... TMeasurementType>
-                double measurementUpdate(const TMeasurement& measurement,
-                                         const arma::mat& measurement_variance,
-                                         const TMeasurementType&... measurementArgs)
-                {
-                    arma::vec weights = arma::zeros(particles.n_rows + model.getRogueCount());
-                    ParticleList candidateParticles = arma::join_cols(particles,arma::zeros(model.getRogueCount(),Model::size));
-                    //Resample some rogues
-                    for(int i = 0; i < model.getRogueCount(); i++){
-                        candidateParticles.row(i + particles.n_rows) = model.getRogueRange() % (0.5 - arma::randu(Model::size));
-                    }
-
-                    for (unsigned int i = 0; i < candidateParticles.n_rows; i++){
-                        arma::vec predictedObservation = model.predictedObservation(candidateParticles.row(i).t(), measurementArgs...);
-                        // assert(predictedObservation.size() == measurement.size());
-                        arma::vec difference = predictedObservation-measurement;
-                        weights[i] = std::exp(- arma::dot(difference, (measurement_variance.i() * difference)));
-                    }
-
-                    //Resample
-                    std::random_device rd;
-                    std::mt19937 gen(rd());
-                    std::discrete_distribution<> multinomial(weights.begin(),weights.end());//class incorrectly named by cpp devs
-                    for (unsigned int i = 0; i < particles.n_rows; i++){
-                        particles.row(i) = candidateParticles.row(multinomial(gen));
-                    }
-                    return arma::mean(weights);
-                }
-
-                StateVec get() const
-                {
-                    return arma::mean(particles, 0).t();
-                }
-
-                StateMat getCovariance() const
-                {
-                    return arma::cov(particles, 0);
-                }
-            };
-        }
+  void setState(StateVec initialMean, StateMat initialCovariance) {
+    // Sample single gaussian (represented by a gaussian mixture model of size
+    // 1)
+    arma::gmm_diag gaussian;
+    gaussian.set_params(arma::mat(initialMean),
+                        arma::mat(initialCovariance.diag()), arma::ones(1));
+    for (unsigned int i = 0; i < particles.n_rows; ++i) {
+      particles.row(i) = gaussian.generate().t();
     }
-}
+  }
 
+  template <typename... TAdditionalParameters>
+  void timeUpdate(double deltaT,
+                  const TAdditionalParameters&... additionalParameters) {
+    // Sample single zero mean gaussian with process noise (represented by a
+    // gaussian mixture model of size 1)
+    arma::gmm_diag gaussian;
+    gaussian.set_params(arma::mat(arma::zeros(Model::size)),
+                        arma::mat(model.processNoise().diag() * deltaT),
+                        arma::ones(1));
+    for (unsigned int i = 0; i < particles.n_rows; ++i) {
+      // TODO: add noise?
+      StateVec newpcle = model.timeUpdate(particles.row(i).t(), deltaT,
+                                          additionalParameters...) +
+                         gaussian.generate();
+      particles.row(i) = newpcle.t();
+    }
+  }
+
+  template <typename TMeasurement, typename... TMeasurementType>
+  double measurementUpdate(const TMeasurement& measurement,
+                           const arma::mat& measurement_variance,
+                           const TMeasurementType&... measurementArgs) {
+    arma::vec weights = arma::zeros(particles.n_rows + model.getRogueCount());
+    ParticleList candidateParticles = arma::join_cols(
+        particles, arma::zeros(model.getRogueCount(), Model::size));
+    // Resample some rogues
+    for (int i = 0; i < model.getRogueCount(); i++) {
+      candidateParticles.row(i + particles.n_rows) =
+          model.getRogueRange() % (0.5 - arma::randu(Model::size));
+    }
+
+    for (unsigned int i = 0; i < candidateParticles.n_rows; i++) {
+      arma::vec predictedObservation = model.predictedObservation(
+          candidateParticles.row(i).t(), measurementArgs...);
+      // assert(predictedObservation.size() == measurement.size());
+      arma::vec difference = predictedObservation - measurement;
+      weights[i] = std::exp(
+          -arma::dot(difference, (measurement_variance.i() * difference)));
+    }
+
+    // Resample
+    std::random_device rd;
+    std::mt19937 gen(rd());
+    std::discrete_distribution<> multinomial(
+        weights.begin(), weights.end());  // class incorrectly named by cpp devs
+    for (unsigned int i = 0; i < particles.n_rows; i++) {
+      particles.row(i) = candidateParticles.row(multinomial(gen));
+    }
+    return arma::mean(weights);
+  }
+
+  StateVec get() const { return arma::mean(particles, 0).t(); }
+
+  StateMat getCovariance() const { return arma::cov(particles, 0); }
+};
+}  // namespace filter
+}  // namespace math
+}  // namespace utility
 
 #endif
