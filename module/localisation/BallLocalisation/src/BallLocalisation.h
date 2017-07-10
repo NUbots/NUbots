@@ -12,7 +12,6 @@ namespace localisation {
 
     class BallLocalisation : public NUClear::Reactor {
     private:
-        // utility::math::filter::UKF<BallModel> filter;
         utility::math::filter::ParticleFilter<BallModel> filter;
         NUClear::clock::time_point last_time_update_time;
         NUClear::clock::time_point last_measurement_update_time;

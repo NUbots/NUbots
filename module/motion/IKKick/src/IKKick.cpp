@@ -101,8 +101,6 @@ namespace motion {
 
             //Emit useful info to KickPlanner
             emit(std::make_unique<IKKickParams>(IKKickParams(config["balancer"]["stand_height"].as<float>())));
-            // emit(std::make_unique<KickPlan>(KickPlan(Eigen::Vector2d(4.5, 0), KickPlan::KickType::IK_KICK)));
-
         });
 
         on<Startup>().then("IKKick Startup", [this] {

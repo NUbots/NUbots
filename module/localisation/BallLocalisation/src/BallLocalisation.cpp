@@ -48,7 +48,7 @@ namespace localisation {
             // Use configuration here from file BallLocalisation.yaml
         });
 
-        /* To run at something like 100Hz that will call Time Update */
+        /* Run Time Update */
         on<Every<15, Per<std::chrono::seconds>>, Sync<BallLocalisation>
          , With<FieldDescription>
          , With<Sensors>>().then("BallLocalisation Time", [this](
@@ -76,9 +76,6 @@ namespace localisation {
             arma::vec3 rBCc_cart = Hcw.transformPoint(rBWw);
             arma::vec3 rBCc_sph1 = cartesianToSpherical(rBCc_cart); // in r,theta,phi
             arma::vec3 rBCc_sph2 = { rBCc_sph1[0], rBCc_sph1[1], rBCc_sph1[2] };  // in roe, theta, phi, where roe is 1/r
-            emit(graph("ball loc state", rBCc_sph2[0], rBCc_sph2[1],rBCc_sph2[2]));
-
-            emit(graph("ball state xy",ball->locObject.position[0],ball->locObject.position[1]));
             emit(ball);
         });
 
@@ -90,30 +87,18 @@ namespace localisation {
             , const FieldDescription& field
             , const Sensors& sensors){
 
-                double quality = 1.0;   // I don't know what quality should be used for
                 if(balls.size() > 0){
-
                     /* Call Time Update first */
                     auto curr_time = NUClear::clock::now();
-                    //TODO: take min of time and measurement update delta
                     double seconds = TimeDifferenceSeconds(curr_time,last_time_update_time);
                     last_time_update_time = curr_time;
                     filter.timeUpdate(seconds);
 
                     /* Now call Measurement Update. Supports multiple measurement methods and will treat them as separate measurements */
                     for (auto& measurement : balls[0].measurements) {
-                        /* For graphing purposes */
-                        arma::vec3 rBCc = convert<double, 3, 1>(measurement.rBCc);
-                        //TODO: make this be in ro coords to start with
-                        rBCc[0] = rBCc[0];
-                        emit(graph("ball meas", rBCc[0],rBCc[1], rBCc[2]));
-
-                        quality *= filter.measurementUpdate(rBCc,convert<double, 3, 3>(measurement.covariance), field, sensors);
+                        filter.measurementUpdate(convert<double, 3, 1>(measurement.rBCc),convert<double, 3, 3>(measurement.covariance), field, sensors);
                     }
-
                     last_measurement_update_time = curr_time;
-
-
                 }
         });
     }

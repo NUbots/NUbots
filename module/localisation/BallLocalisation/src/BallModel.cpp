@@ -40,7 +40,7 @@ namespace module {
         using utility::math::coordinates::cartesianToSpherical;
 
         arma::vec::fixed<BallModel::size> BallModel::timeUpdate(const arma::vec::fixed<size>& state, double /*deltaT*/) {
-            return state;   // This needs changing
+            return state;
         }
 
         arma::vec3 BallModel::predictedObservation(const arma::vec::fixed<size>& state

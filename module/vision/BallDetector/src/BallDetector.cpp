@@ -311,7 +311,6 @@ namespace vision {
                 Transform3D Hgc       = camToGround;
                 arma::vec3 width_rBGg = Hgc.transformPoint(ballCentreRay * widthDistance);
                 arma::vec3 proj_rBGg  = Hgc.transformPoint(ballCentreGroundProj);
-                //b.torsoSpacePosition  = convert<double, 3>(width_rBGg);
                 // log("ball pos1 =", b.position);
                 // log("ball pos2 =", b.torsoSpacePosition);
                 // log("width_rBGg =", width_rBGg.t());
