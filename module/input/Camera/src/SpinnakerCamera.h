@@ -45,8 +45,6 @@ namespace input {
         void OnImageEvent(Spinnaker::ImagePtr image) {
             // We have a complete image, emit it.
             if (!image->IsIncomplete()) {
-                reactor.log<NUClear::INFO>("Image Dimensions:", image->GetWidth(), image->GetHeight());
-
                 auto msg       = std::make_unique<message::input::Image>();
                 msg->timestamp = NUClear::clock::time_point(std::chrono::nanoseconds(image->GetTimeStamp()));
                 msg->format    = static_cast<uint32_t>(fourcc);
