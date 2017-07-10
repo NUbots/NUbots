@@ -69,7 +69,7 @@ message ClassifiedImage {
     repeated ivec2            ballPoints         = 5;
 
     // Our horizon
-    Line                      horizon            = 6;
+    vec3                      horizon_normal     = 6;
 
     // The points of the visual horizon
     repeated ivec2            visualHorizon      = 7;

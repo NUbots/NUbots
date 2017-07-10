@@ -134,7 +134,7 @@ namespace vision {
                 // Less the full quality (subsampled)
                 // Do not have a transition on the other side
                 if ((segment.segmentClass == SegmentClass::GOAL) && (segment.subsample == 1) && (segment.previous > -1) && (segment.next > -1)) {
-                    segments.push_back({ { double(segment.start[0]), double(segment.start[1]) }, { double(segment.end[0]), double(segment.end[1]) } });
+                    segments.push_back({ getCamFromScreen(segment.start, cam), getCamFromScreen(segment.end, cam) });
                 }
             }
 
@@ -142,7 +142,7 @@ namespace vision {
             auto split = std::partition(std::begin(segments), std::end(segments), [image] (const RansacGoalModel::GoalSegment& segment) {
                 // Is the midpoint above or below the horizon?
                 utility::math::geometry::Line horizon(convert<double, 2>(image.horizon.normal), image.horizon.distance);
-                return horizon.distanceToPoint(segment.left + segment.right / 2) > 0;
+                return arma::dot(horizon.normal, segment.left) > 0;
             });
 
             // Make an array of our partitions

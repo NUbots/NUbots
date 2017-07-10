@@ -37,9 +37,9 @@ namespace vision {
 
         struct GoalSegment {
             GoalSegment() : left(arma::fill::zeros), right(arma::fill::zeros) {}
-            GoalSegment(const arma::vec2& l, const arma::vec2& r) : left(l), right(r) {}
-            arma::vec2 left;
-            arma::vec2 right;
+            GoalSegment(const arma::vec3& l, const arma::vec3& r) : left(l), right(r) {}
+            arma::vec3 left;
+            arma::vec3 right;
         };
 
         using DataPoint = GoalSegment;

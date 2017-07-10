@@ -26,8 +26,8 @@ namespace vision {
 
         if(pts.size() == REQUIRED_POINTS && !arma::all(pts[0].left == pts[1].left) && !arma::all(pts[0].right == pts[1].right)) {
 
-            left.setFromPoints(pts[0].left, pts[1].left);
-            right.setFromPoints(pts[0].right, pts[1].right);
+            left.setFromPoints(pts[0].left, pts[1].left, arma::vec3f({0,0,0}));     //Line - setFromPoints takes 2 vec2's
+            right.setFromPoints(pts[0].right, pts[1].right, arma::vec3f({0,0,0}));  //Line - setFromPoints takes 2 vec2's
 
             return true;
         }
