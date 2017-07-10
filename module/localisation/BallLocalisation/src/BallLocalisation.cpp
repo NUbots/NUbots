@@ -85,7 +85,7 @@ namespace localisation {
             const std::vector<message::vision::Ball>& balls
             , const FieldDescription& field){
 
-                auto sensors = *balls[0].visObject.sensors;
+                const auto& sensors = *balls[0].visObject.sensors;
 
                 if(balls.size() > 0){
                     /* Call Time Update first */
