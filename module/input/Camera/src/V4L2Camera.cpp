@@ -231,25 +231,6 @@ namespace input {
             system("/home/nubots/gpio_toggle.sh");
             fd = open(deviceID.c_str(), O_RDWR);
             resetCount++;
-
-            /*std::ofstream gpio;
-            gpio.open ("/sys/class/gpio/gpio8/value");
-            gpio << "0";
-            std::this_thread::sleep_for(std::chrono::milliseconds(3000));
-            gpio << "1";
-            std::this_thread::sleep_for(std::chrono::milliseconds(3000));
-            for(int i = 0; i < 20; i++)
-            {
-                fd = open(deviceID.c_str(), O_RDWR);
-                if (fd >= 0)
-                {
-                    break;
-                }
-                std::this_thread::sleep_for(std::chrono::milliseconds(200));
-
-            }
-
-            gpio.close();*/
         }
         if (fd < 0) {
             throw std::runtime_error(std::string("We were unable to access the camera device on ") + deviceID);
