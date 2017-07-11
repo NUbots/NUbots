@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with the NUbots Codebase.  If not, see <http://www.gnu.org/licenses/>.
  *
- * Copyright 2013 NUBots <nubots@nubots.net>
+ * Copyright 2013 NUbots <nubots@nubots.net>
  */
 
 #include "RansacGoalModel.h"
@@ -24,7 +24,8 @@ namespace vision {
 
     bool RansacGoalModel::regenerate(const std::array<DataPoint, REQUIRED_POINTS>& pts) {
 
-        if(pts.size() == REQUIRED_POINTS && !arma::all(pts[0].left == pts[1].left) && !arma::all(pts[0].right == pts[1].right)) {
+        if (pts.size() == REQUIRED_POINTS && !arma::all(pts[0].left == pts[1].left)
+            && !arma::all(pts[0].right == pts[1].right)) {
 
             left.setFromPoints(pts[0].left, pts[1].left);
             right.setFromPoints(pts[0].right, pts[1].right);
@@ -43,5 +44,5 @@ namespace vision {
 
         return l * l + r * r;
     }
-}
-}
+}  // namespace vision
+}  // namespace module

@@ -14,14 +14,14 @@
  * You should have received a copy of the GNU General Public License
  * along with the NUbots Codebase.  If not, see <http://www.gnu.org/licenses/>.
  *
- * Copyright 2013 NUBots <nubots@nubots.net>
+ * Copyright 2013 NUbots <nubots@nubots.net>
  */
 
 #ifndef UTILITY_MATH_ANGLE_H
 #define UTILITY_MATH_ANGLE_H
 
-#include <cmath>
 #include <armadillo>
+#include <cmath>
 
 namespace utility {
 namespace math {
@@ -42,27 +42,26 @@ namespace math {
         inline double normalizeAngle(const double value) {
 
             double angle = std::fmod(value, 2 * M_PI);
-            
-            if (angle <= -M_PI)
-                angle += M_PI * 2;
 
-            if (angle > M_PI)
-                angle -= 2 * M_PI;
+            if (angle <= -M_PI) angle += M_PI * 2;
+
+            if (angle > M_PI) angle -= 2 * M_PI;
 
             return angle;
         }
 
-        inline double acos_clamped(const double& a){
-            return std::acos(std::fmax(std::fmin(a,1),-1));
+        inline double acos_clamped(const double& a) {
+            return std::acos(std::fmax(std::fmin(a, 1), -1));
         }
 
-        inline double asin_clamped(const double& a){
-            return std::asin(std::fmax(std::fmin(a,1),-1));
+        inline double asin_clamped(const double& a) {
+            return std::asin(std::fmax(std::fmin(a, 1), -1));
         }
 
         /**
          * Calculates the difference between two angles between -pi and pi
-         * Method: http://math.stackexchange.com/questions/1158223/solve-for-x-where-a-sin-x-b-cos-x-c-where-a-b-and-c-are-kno
+         * Method:
+         * http://math.stackexchange.com/questions/1158223/solve-for-x-where-a-sin-x-b-cos-x-c-where-a-b-and-c-are-kno
          * @param
          */
         inline double difference(const double a, const double b) {
@@ -79,9 +78,9 @@ namespace math {
 
             auto x = a - b;
 
-            auto m = x - std::floor(x/(2*M_PI)) * (2*M_PI);
+            auto m = x - std::floor(x / (2 * M_PI)) * (2 * M_PI);
 
-            auto d = std::fmod(m + M_PI, 2*M_PI) - M_PI;
+            auto d = std::fmod(m + M_PI, 2 * M_PI) - M_PI;
 
             return d;
         }
@@ -95,29 +94,32 @@ namespace math {
         }
 
         /*! @brief Solves for x in $a \sin(x) + b \cos(x) = c ; x \in [0,\pi]$
-        */
-        inline float solveLinearTrigEquation(float a, float b, float c){
-            float norm = std::sqrt(a*a+b*b);
-            if (norm == 0){
-                throw std::domain_error("utility::math::angle::solveLinearTrigEquation - std::sqrt(a*a+b*b) == 0 => Any value for x is a solution");
+         */
+        inline float solveLinearTrigEquation(float a, float b, float c) {
+            float norm = std::sqrt(a * a + b * b);
+            if (norm == 0) {
+                throw std::domain_error(
+                    "utility::math::angle::solveLinearTrigEquation - std::sqrt(a*a+b*b) == 0 => Any value for x is a "
+                    "solution");
             }
 
-            //Normalise equation
+            // Normalise equation
             float a_ = a / norm;
             float b_ = b / norm;
             float c_ = c / norm;
 
-            if(std::fabs(c_) > 1){
+            if (std::fabs(c_) > 1) {
                 throw std::domain_error("utility::math::angle::solveLinearTrigEquation - no solution |c_|>1");
             }
 
-            //Find alpha such that $\sin(\alpha) = a\_$ and $\cos(\alpha) = b\_$, which is possible because $a\_^2 + b\_^2 = 1$
-            float alpha = atan2(a_,b_);
+            // Find alpha such that $\sin(\alpha) = a\_$ and $\cos(\alpha) = b\_$, which is possible because $a\_^2 +
+            // b\_^2 = 1$
+            float alpha = atan2(a_, b_);
 
-            //Hence the equation becomes $\cos(\alpha)\cos(x)+\sin(\alpha)\sin(x) = cos(x-\alpha) = c\_$
+            // Hence the equation becomes $\cos(\alpha)\cos(x)+\sin(\alpha)\sin(x) = cos(x-\alpha) = c\_$
             return alpha + acos_clamped(c_);
         }
-    }
-}
-}
+    }  // namespace angle
+}  // namespace math
+}  // namespace utility
 #endif

@@ -14,15 +14,15 @@
  * You should have received a copy of the GNU General Public License
  * along with the NUbots Codebase.  If not, see <http://www.gnu.org/licenses/>.
  *
- * Copyright 2013 NUBots <nubots@nubots.net>
+ * Copyright 2013 NUbots <nubots@nubots.net>
  */
 
 #include <catch.hpp>
 
 #include <nuclear>
-#include "utility/math/angle.h"
-#include "utility/localisation/transform.h"
 #include "MultiModalRobotModel.h"
+#include "utility/localisation/transform.h"
+#include "utility/math/angle.h"
 
 using utility::localisation::transform::WorldToRobotTransform;
 using utility::localisation::transform::RobotToWorldTransform;
@@ -36,24 +36,22 @@ TEST_CASE("Angle convinience functions should handle corner cases", "[math][angl
 
     // INFO("Testing the FSR centre conversions");
 
-    for(int i = 0; i < 10000; ++i) {
+    for (int i = 0; i < 10000; ++i) {
         float a = i * M_PI / 10000.0;
 
-        REQUIRE(normalizeAngle(a + 2 * M_PI) ==
-            normalizeAngle(a));
+        REQUIRE(normalizeAngle(a + 2 * M_PI) == normalizeAngle(a));
 
-        REQUIRE(normalizeAngle(a - 2 * M_PI) ==
-            normalizeAngle(a));
+        REQUIRE(normalizeAngle(a - 2 * M_PI) == normalizeAngle(a));
     }
 
     REQUIRE(normalizeAngle(0.0) == Approx(0.0));
-    REQUIRE(normalizeAngle( M_PI) == Approx(M_PI));
+    REQUIRE(normalizeAngle(M_PI) == Approx(M_PI));
     REQUIRE(normalizeAngle(-M_PI) == Approx(M_PI));
-    REQUIRE(normalizeAngle( M_PI * 2) == Approx(0.0));
+    REQUIRE(normalizeAngle(M_PI * 2) == Approx(0.0));
     REQUIRE(normalizeAngle(-M_PI * 2) == Approx(0.0));
-    REQUIRE(normalizeAngle( M_PI * 2 - 0.1) == Approx(-0.1));
-    REQUIRE(normalizeAngle(-M_PI * 2 + 0.1) == Approx( 0.1));
-    REQUIRE(normalizeAngle( M_PI * 77 - 0.1) == Approx(M_PI - 0.1));
+    REQUIRE(normalizeAngle(M_PI * 2 - 0.1) == Approx(-0.1));
+    REQUIRE(normalizeAngle(-M_PI * 2 + 0.1) == Approx(0.1));
+    REQUIRE(normalizeAngle(M_PI * 77 - 0.1) == Approx(M_PI - 0.1));
     REQUIRE(normalizeAngle(-M_PI * 77 + 0.1) == Approx(-M_PI + 0.1));
 }
 
@@ -61,11 +59,11 @@ TEST_CASE("RobotToWorldTransform should be inverse of WorldToRobotTransform") {
 
     // INFO("Testing the FSR centre conversions");
 
-    arma::vec2 robot_pos = { 3, 2 };
-    arma::vec2 robot_heading = arma::normalise(arma::vec({ 1, 5 }));
-    arma::vec2 field_ball = { -3, -1 };
+    arma::vec2 robot_pos     = {3, 2};
+    arma::vec2 robot_heading = arma::normalise(arma::vec({1, 5}));
+    arma::vec2 field_ball    = {-3, -1};
 
-    auto robot_ball = WorldToRobotTransform(robot_pos, robot_heading, field_ball);
+    auto robot_ball  = WorldToRobotTransform(robot_pos, robot_heading, field_ball);
     auto result_ball = RobotToWorldTransform(robot_pos, robot_heading, robot_ball);
 
     REQUIRE(field_ball(0) == Approx(result_ball(0)));
@@ -105,7 +103,7 @@ TEST_CASE("MultiModalRobotModel::MergeSimilarModels tests") {
     {
         INFO("Test merge with two identical and one different input models");
         MultiModalRobotModel mmrm;
-        auto hyp = std::make_unique<RobotHypothesis>();
+        auto hyp     = std::make_unique<RobotHypothesis>();
         hyp->filter_ = UKF<RobotModel>(arma::vec({10, 20, 30}));
         mmrm.robot_models_.push_back(std::move(hyp));
         mmrm.robot_models_.push_back(std::make_unique<RobotHypothesis>());

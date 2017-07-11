@@ -1,4 +1,3 @@
-
 ransac:
   minimum_points_for_consensus: 10
   maximum_iterations_per_fitting: 50
@@ -28,13 +27,13 @@ clustering:
 
   dist_mode: eucl_dist # specifies the distance used during the seeding of initial means and k-means clustering:
     # Parameters for dist_mode:
-    # eucl_dist	   	Euclidean distance
-    # maha_dist	   	Mahalanobis distance, which uses a global diagonal covariance matrix estimated from the training samples
+    # eucl_dist     Euclidean distance
+    # maha_dist     Mahalanobis distance, which uses a global diagonal covariance matrix estimated from the training samples
 
   seed_mode: random_spread # specifies how the initial means are seeded prior to running k-means and/or EM algorithms
     # Parameters for seed_mode:
-    # keep_existing	   	keep the existing model (do not modify the means, covariances and hefts)
-    # static_subset	   	a subset of the training samples (repeatable)
-    # random_subset	   	a subset of the training samples (random)
-    # static_spread	   	a maximally spread subset of training samples (repeatable)
-    # random_spread	   	a maximally spread subset of training samples (random start)
+    # keep_existing     keep the existing model (do not modify the means, covariances and hefts)
+    # static_subset     a subset of the training samples (repeatable)
+    # random_subset     a subset of the training samples (random)
+    # static_spread     a maximally spread subset of training samples (repeatable)
+    # random_spread     a maximally spread subset of training samples (random start)

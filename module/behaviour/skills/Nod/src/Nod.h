@@ -24,24 +24,24 @@
 
 namespace module {
 namespace behaviour {
-namespace skills {
+    namespace skills {
 
-    class Nod : public NUClear::Reactor {
-    public:
-        /// @brief Called by the powerplant to build and setup the KickScript reactor.
-        explicit Nod(std::unique_ptr<NUClear::Environment> environment);
-    private:
-        const size_t id;
+        class Nod : public NUClear::Reactor {
+        public:
+            /// @brief Called by the powerplant to build and setup the KickScript reactor.
+            explicit Nod(std::unique_ptr<NUClear::Environment> environment);
 
-        bool value;
-        float EXECUTION_PRIORITY;
+        private:
+            const size_t id;
 
-        void updatePriority(const float& priority);
-    };
+            bool value;
+            float EXECUTION_PRIORITY;
 
-}
-}
-}
+            void updatePriority(const float& priority);
+        };
+    }  // namespace skills
+}  // namespace behaviour
+}  // namespace module
 
 
 #endif  // MODULE_BEHAVIOUR_SKILLS_NOD_H

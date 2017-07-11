@@ -29,46 +29,43 @@
 
 namespace module {
 namespace behaviour {
-namespace skills {
+    namespace skills {
 
-    using extension::Configuration;
+        using extension::Configuration;
 
-    using LimbID  = utility::input::LimbID;
-    using ServoID = utility::input::ServoID;
+        using LimbID  = utility::input::LimbID;
+        using ServoID = utility::input::ServoID;
 
-    using message::motion::WalkCommand;
-    using message::motion::StopCommand;
-    using message::motion::WalkStopped;
-    using message::motion::EnableWalkEngineCommand;
-    using message::motion::DisableWalkEngineCommand;
+        using message::motion::WalkCommand;
+        using message::motion::StopCommand;
+        using message::motion::WalkStopped;
+        using message::motion::EnableWalkEngineCommand;
+        using message::motion::DisableWalkEngineCommand;
 
-    using utility::behaviour::RegisterAction;
-    using utility::behaviour::ActionPriorites;
+        using utility::behaviour::RegisterAction;
+        using utility::behaviour::ActionPriorites;
 
-	//internal only callback messages to start and stop our action
-    // struct ExecuteStand {};
+        // internal only callback messages to start and stop our action
+        // struct ExecuteStand {};
 
-    WalkEngineStand::WalkEngineStand(std::unique_ptr<NUClear::Environment> environment)
-    : Reactor(std::move(environment))
-    , subsumptionId(size_t(this) * size_t(this) - size_t(this)) 
-    {
+        WalkEngineStand::WalkEngineStand(std::unique_ptr<NUClear::Environment> environment)
+            : Reactor(std::move(environment)), subsumptionId(size_t(this) * size_t(this) - size_t(this)) {
 
-		emit<Scope::INITIALIZE>(std::make_unique<RegisterAction>(RegisterAction 
-        {
-            subsumptionId, "WalkEngineStand",
-            { 
-                std::pair<float, std::set<LimbID>>(std::numeric_limits<float>::epsilon(), { LimbID::LEFT_LEG, LimbID::RIGHT_LEG, LimbID::LEFT_ARM, LimbID::RIGHT_ARM}) 
-            },
-            [this] (const std::set<LimbID>&) {
-                emit<Scope::DIRECT>(std::move(std::make_unique<EnableWalkEngineCommand>(subsumptionId)));
-                emit(std::move(std::make_unique<StopCommand>(subsumptionId)));
-            },
-            [this] (const std::set<LimbID>&) {
-                emit<Scope::DIRECT>(std::move(std::make_unique<DisableWalkEngineCommand>(subsumptionId)));
-            },
-            [this] (const std::set<ServoID>&) { }
-        }));
-    }
-}
-}
-}
+            emit<Scope::INITIALIZE>(std::make_unique<RegisterAction>(RegisterAction{
+                subsumptionId,
+                "WalkEngineStand",
+                {std::pair<float, std::set<LimbID>>(
+                    std::numeric_limits<float>::epsilon(),
+                    {LimbID::LEFT_LEG, LimbID::RIGHT_LEG, LimbID::LEFT_ARM, LimbID::RIGHT_ARM})},
+                [this](const std::set<LimbID>&) {
+                    emit<Scope::DIRECT>(std::move(std::make_unique<EnableWalkEngineCommand>(subsumptionId)));
+                    emit(std::move(std::make_unique<StopCommand>(subsumptionId)));
+                },
+                [this](const std::set<LimbID>&) {
+                    emit<Scope::DIRECT>(std::move(std::make_unique<DisableWalkEngineCommand>(subsumptionId)));
+                },
+                [this](const std::set<ServoID>&) {}}));
+        }
+    }  // namespace skills
+}  // namespace behaviour
+}  // namespace module

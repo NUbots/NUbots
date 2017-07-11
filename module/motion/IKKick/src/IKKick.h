@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with the NUbots Codebase.  If not, see <http://www.gnu.org/licenses/>.
  *
- * Copyright 2013 NUBots <nubots@nubots.net>
+ * Copyright 2013 NUbots <nubots@nubots.net>
  */
 
 #ifndef MODULES_MOTION_IKKICK_H
@@ -26,8 +26,8 @@
 
 #include "message/motion/KickCommand.h"
 
-#include "utility/motion/Balance.h"
 #include "utility/input/LimbID.h"
+#include "utility/motion/Balance.h"
 
 namespace module {
 namespace motion {
@@ -35,10 +35,10 @@ namespace motion {
     class IKKick : public NUClear::Reactor {
 
     private:
-
         // ID of support foot
         utility::input::LimbID supportFoot;
-        // NEED the vector from the point on the surface of the ball where we want to kick to the front of the kick foot which is rightFootFront
+        // NEED the vector from the point on the surface of the ball where we want to kick to the front of the kick foot
+        // which is rightFootFront
         // KickPlanner has to add the radius of the all to get the location of the centre of the ball
         // point position of ball
         arma::vec3 ballPosition;
@@ -52,11 +52,11 @@ namespace motion {
 
         float foot_separation;
 
-    	float KICK_PRIORITY;
-    	float EXECUTION_PRIORITY;
+        float KICK_PRIORITY;
+        float EXECUTION_PRIORITY;
 
         float gain_legs = 50;
-        float torque = 100;
+        float torque    = 100;
 
         bool feedback_active;
         utility::motion::Balancer feedbackBalancer;
@@ -64,9 +64,9 @@ namespace motion {
         KickBalancer balancer;
         Kicker kicker;
 
-    	void updatePriority(const float& priority);
+        void updatePriority(const float& priority);
 
-    	static constexpr size_t UPDATE_FREQUENCY = 90;
+        static constexpr size_t UPDATE_FREQUENCY = 90;
 
         ReactionHandle updater;
 
@@ -74,9 +74,8 @@ namespace motion {
         /// @brief Called by the powerplant to build and setup the IKKick reactor.
         explicit IKKick(std::unique_ptr<NUClear::Environment> environment);
     };
-
-}
-}
+}  // namespace motion
+}  // namespace module
 
 
 #endif
