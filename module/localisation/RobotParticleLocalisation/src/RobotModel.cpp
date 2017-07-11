@@ -77,6 +77,7 @@ namespace localisation {
         Hfw = Hfw.rotateZ(state[kAngle]);
 
         Transform3D Hcf = Hcw * Hfw.i();
+        Transform3D Htf = Htw * Hfw.i();
 
         switch(FieldDescription::GoalpostType::Value(fd.dimensions.goalpost_type)) {
             case FieldDescription::GoalpostType::CIRCLE: {
@@ -87,24 +88,23 @@ namespace localisation {
                     return rGCc_sph;
                 }
                 else if (type == Goal::MeasurementType::LEFT_NORMAL){
-                    //rGFf = vector from field origin to goal post expected position. bl = bottom left, tl = top left.
+                    //rGFf = vector from field origin to goal post expected position.
                     arma::vec3 rGFf = {actual_position[0], actual_position[1], 0};
                     arma::vec3 rGCc = Hcf.transformPoint(rGFf);
 
                     //rZFf = vector from field origin to zenith high in the sky
                     arma::vec3 rZFf = {0,0,1000000};
                     arma::vec3 rZCc = Hcf.transformPoint(rZFf);
-                    //rYFf = vector from field origin to a point a large distance away on the positive Y axis 
-                    arma::vec3 rYFf = {0,1000000,0};
-                    arma::vec3 rYCc = Hcf.transformPoint(rYFf);
+                    
+                    // Finding the vector from robot to the goal
+                    arma::vec3 rRFf = Htf.translation();
+                    arma::vec3 rGRf = rGFf - rRFf;
+                    // The vector pointing from the robot off to the left from a cross product
+                    arma::vec3 rLRf = 1000000*arma::normalise(arma::cross(rZFf,rGFf));
 
-                    // Find the vector to the top and bottom left edge points
+                    // Find the vector to the top and bottom left edge points. bl = bottom left, tl = top left.
                     // TODO: Circular Tangental effect
-                    if (actual_position[0] > 0) { // left and right are flipped at the opposite end of field
-                        arma::vec3 rG_blCc = rGCc + 0.5*fd.dimensions.goalpost_width*arma::normalise(rYCc);
-                    } else {
-                        arma::vec3 rG_blCc = rGCc - 0.5*fd.dimensions.goalpost_width*arma::normalise(rYCc);
-                    }
+                    arma::vec3 rG_blCc = rGCc + 0.5*fd.dimensions.goalpost_width*arma::normalise(rLRf);
                     arma::vec3 rG_tlCc = rG_blCc + fd.dimensions.goal_crossbar_height*arma::normalise(rZCc);
 
                     //creating the normal vector (following convention stipulated in VisionObjects)
@@ -113,24 +113,23 @@ namespace localisation {
                     return angles;
                 }
                 else if (type == Goal::MeasurementType::RIGHT_NORMAL){
-                    //rGFf = vector from field origin to goal post expected position. bl = bottom left, tl = top left.
+                    //rGFf = vector from field origin to goal post expected position.
                     arma::vec3 rGFf = {actual_position[0], actual_position[1], 0};
                     arma::vec3 rGCc = Hcf.transformPoint(rGFf);
 
                     //rZFf = vector from field origin to zenith high in the sky
                     arma::vec3 rZFf = {0,0,1000000};
                     arma::vec3 rZCc = Hcf.transformPoint(rZFf);
-                    //rYFf = vector from field origin to a point a large distance away on the positive Y axis 
-                    arma::vec3 rYFf = {0,1000000,0};
-                    arma::vec3 rYCc = Hcf.transformPoint(rYFf);
 
-                    // Find the vector to the top and bottom left edge points
+                    // Finding the vector from robot to the goal
+                    arma::vec3 rRFf = Htf.translation();
+                    arma::vec3 rGRf = rGFf - rRFf;
+                    // The vector pointing from the robot off to the left from a cross product
+                    arma::vec3 rLRf = 1000000*arma::normalise(arma::cross(rZFf,rGFf));
+
+                    // Find the vector to the top and bottom right edge points  bl = bottom left, tl = top left.
                     // TODO: Circular Tangental effect
-                    if (actual_position[0] > 0) { // left and right are flipped at the opposite end of field
-                        arma::vec3 rG_brCc = rGCc - 0.5*fd.dimensions.goalpost_width*arma::normalise(rYCc);
-                    } else {
-                        arma::vec3 rG_brCc = rGCc + 0.5*fd.dimensions.goalpost_width*arma::normalise(rYCc);
-                    }
+                    arma::vec3 rG_brCc = rGCc - 0.5*fd.dimensions.goalpost_width*arma::normalise(rLRf);
                     arma::vec3 rG_trCc = rG_brCc + fd.dimensions.goal_crossbar_height*arma::normalise(rZCc);
                     
                     //creating the normal vector (following convention stipulated in VisionObjects)
@@ -139,10 +138,31 @@ namespace localisation {
                     return angles;
                 }
             } break;
-            /*case FieldDescription::GoalpostType::RECTANGLE: {
+            case FieldDescription::GoalpostType::RECTANGLE: {
+                // Finding 4 corners of goalpost (4 corners x XY)
+                arma::mat goalBaseCorners(4,2);
+                goalBaseCorners.each_row() = actual_position;
+                goalBaseCorners.submat(0,0,1,0) -= 0.5*fd.dimensions.goalpost_depth; // x for front goal corners
+                goalBaseCorners.submat(2,0,3,0) += 0.5*fd.dimensions.goalpost_depth; // x for back  goal corners
+                goalBaseCorners.submat(1,1,2,1) -= 0.5*fd.dimensions.goalpost_width; // y for right goal corners
+                goalBaseCorners.submat(0,1,0,1) += 0.5*fd.dimensions.goalpost_width; // y for front left goal corners
+                goalBaseCorners.submat(3,1,3,1) += 0.5*fd.dimensions.goalpost_width; // y for back  left goal corners
 
-                // Calculate given a rectangular goalpost crosssection
-            } break;*/
+                if (type == Goal::MeasurementType::CENTRE){
+                    //rGCc = vector from camera to goal post expected position
+                    arma::vec3 rGCc = Hcf.transformPoint(arma::vec3{actual_position[0],actual_position[1],0});
+                    arma::vec3 rGCc_sph = cartesianToSpherical(rGCc); // in r,theta,phi
+                    return rGCc_sph;
+                }
+                else if (type == Goal::MeasurementType::LEFT_NORMAL){
+                    
+                    return angles;
+                }
+                else if (type == Goal::MeasurementType::RIGHT_NORMAL){
+                    
+                    return angles;
+                }
+            } break;
         }
     }
 
