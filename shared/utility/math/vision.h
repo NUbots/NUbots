@@ -148,7 +148,7 @@ namespace vision {
     }
 
     inline arma::ivec2 getImageFromCam(const arma::vec3& unit_vector, const message::input::CameraParameters& cam){
-        return screenToImage(projectCamSpaceToScreen(unit_vector,cam),convert<uint,2>(cam.imageSizePixels);
+        return screenToImage(projectCamSpaceToScreen(unit_vector,cam),convert<uint,2>(cam.imageSizePixels));
     }
 
 

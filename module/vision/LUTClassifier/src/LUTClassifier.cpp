@@ -224,10 +224,10 @@ namespace module {
                 enhanceGoals(rawImage, lut, *classifiedImage);
 
                 // Find our ball (also helps with the bottom of goals)
-                findBall(rawImage, lut, *classifiedImage,cam);
+                findBall(rawImage, lut, *classifiedImage, cam);
 
                 // Enhance our ball
-                enhanceBall(rawImage, lut, *classifiedImage);
+                enhanceBall(rawImage, lut, *classifiedImage, cam);
 
                 // Emit our classified image
                 emit(std::move(classifiedImage));

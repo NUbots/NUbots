@@ -23,6 +23,7 @@
 #include "utility/math/geometry/Line.h"
 #include "utility/nubugger/NUhelpers.h"
 #include "utility/support/eigen_armadillo.h"
+#include "utility/math/vision.h"
 
 namespace module {
     namespace vision {
@@ -33,6 +34,7 @@ namespace module {
         using SegmentClass = message::vision::ClassifiedImage::SegmentClass::Value;
         using utility::math::ransac::NPartiteRansac;
         using utility::math::geometry::Line;
+        using utility::math::geometry::Plane;
 
         using utility::nubugger::drawVisionLines;
 
@@ -85,7 +87,8 @@ namespace module {
                 We first generate segments above and below that are 2x the width of the segment
              */
 
-            Line horizon(convert<double, 2>(classifiedImage.horizon.normal), classifiedImage.horizon.distance);
+            // Line horizon(convert<double, 2>(classifiedImage.horizon.normal), classifiedImage.horizon.distance);
+            Plane<3> horizon;
 
             // Get our goal segments
             std::vector<GoalPOI> points;

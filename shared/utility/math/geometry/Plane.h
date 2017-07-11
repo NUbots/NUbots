@@ -73,7 +73,7 @@ namespace geometry {
         }
 
         Vector orthogonalProjection(const arma::vec3& p){
-            return p - distanceToPoint * normal;
+            return p - distanceToPoint(p) * normal;
 
         }
 

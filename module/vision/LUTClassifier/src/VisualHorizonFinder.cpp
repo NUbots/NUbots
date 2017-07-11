@@ -23,8 +23,10 @@
 
 #include "utility/math/geometry/ParametricLine.h"
 #include "utility/math/geometry/Quad.h"
+#include "utility/math/geometry/Plane.h"
 #include "utility/nubugger/NUhelpers.h"
 #include "utility/support/eigen_armadillo.h"
+#include "utility/math/vision.h"
 
 namespace module {
     namespace vision {
@@ -33,21 +35,25 @@ namespace module {
         using message::vision::LookUpTable;
         using message::input::CameraParameters;
         using message::vision::ClassifiedImage;
+        using utility::math::geometry::Plane;
         using utility::math::geometry::Line;
         using utility::math::geometry::Quad;
+        using utility::math::vision::getCamFromImage;
+        using utility::math::vision::getImageFromCam;
         using utility::nubugger::drawVisionLines;
 
         void LUTClassifier::findVisualHorizon(const Image& image, const LookUpTable& lut, ClassifiedImage& classifiedImage, const CameraParameters& cam) {
 
             // Get some local references to class variables to make text shorter
-            Line horizon(convert<double, 2>(classifiedImage.horizon.normal), classifiedImage.horizon.distance);
+            // Line horizon(convert<double, 2>(classifiedImage.horizon.normal), classifiedImage.horizon.distance);
+            Plane<3> horizon;
             auto& visualHorizon = classifiedImage.visualHorizon;
 
             // Cast lines to find our visual horizon
             for(uint x = 0; x < image.dimensions[0]; x += VISUAL_HORIZON_SPACING) {
-
+                int horizon_Y = getImageFromCam(horizon.orthogonalProjection(getCamFromImage(arma::ivec2({x,0}),cam)), cam)[1]; //TODO: Jake check this gross code
                 // Find our point to classify from (slightly above the horizon)
-                int top = std::max(int(lround(horizon.y(x)) - VISUAL_HORIZON_BUFFER), int(0));
+                int top = std::max(int(horizon_Y - VISUAL_HORIZON_BUFFER), int(0));
                 top = std::min(top, int(image.dimensions[1] - 1));
 
                 // Classify our segments
@@ -56,7 +62,6 @@ namespace module {
                 // Our default green point is the bottom of the screen
                 arma::ivec2 greenPoint = { int(x), int(image.dimensions[1]) };
 
-                bool segmentsStarted = false;
                 // Loop through our segments to find our first green segment
                 for (auto it = segments.begin(); it != segments.end(); ++it) {
 
@@ -85,7 +90,8 @@ namespace module {
             if(image.dimensions[0] - 1 % VISUAL_HORIZON_SPACING != 0) {
 
                 // Find our point to classify from (slightly above the horizon)
-                int top = std::max(int(lround(horizon.y(image.dimensions[0] - 1)) - VISUAL_HORIZON_BUFFER), int(0));
+                int horizon_Y = getImageFromCam(horizon.orthogonalProjection(getCamFromImage(arma::ivec2({image.dimensions[0] - 1,0}),cam)), cam)[1]; //TODO: Jake check this gross code
+                int top = std::max(int(horizon_Y - VISUAL_HORIZON_BUFFER), int(0));
                 top = std::min(top, int(image.dimensions[1] - 1));
 
                 arma::ivec2 start = { int(image.dimensions[0] - 1), top };

@@ -245,10 +245,10 @@ namespace vision {
                 }
 
                 // CENTRE OF BALL IS ABOVE THE HORIZON
-                if(arma::dot(image.horizon_normal,ballCentreRay) > 0){
+                if(arma::dot(convert<double,3>(image.horizon_normal),ballCentreRay) > 0){
                     if(print_throwout_logs) {
                         log("Ball discarded: arma::dot(image.horizon_normal,ballCentreRay) > 0 ");
-                        log("Horizon normal = ", image.horizon_normal.t());
+                        log("Horizon normal = ", image.horizon_normal.transpose());
                         log("Ball centre ray = ", ballCentreRay.t());
                     }
                     continue;

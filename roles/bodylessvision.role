@@ -8,7 +8,7 @@ NUCLEAR_ROLE(
     support::configuration::GlobalConfig
     input::Camera
     vision::LUTClassifier
-    vision::GoalDetector
+    #vision::GoalDetector
     vision::BallDetector
     support::configuration::NetworkConfiguration
     support::NUbugger

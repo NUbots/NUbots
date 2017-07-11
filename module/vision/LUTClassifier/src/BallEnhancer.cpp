@@ -21,15 +21,20 @@
 
 #include "utility/math/geometry/Line.h"
 #include "utility/nubugger/NUhelpers.h"
+#include "utility/math/vision.h"
 
 namespace module {
     namespace vision {
 
         using message::input::Image;
+        using message::input::CameraParameters;
         using message::vision::LookUpTable;
         using message::vision::ClassifiedImage;
 
         using utility::math::geometry::Line;
+        using utility::math::geometry::Plane;
+        using utility::math::vision::getCamFromImage;
+        using utility::math::vision::getImageFromCam;
         using utility::nubugger::drawVisionLines;
         using Colour = utility::vision::Colour;
         using FOURCC = utility::vision::FOURCC;
@@ -117,7 +122,7 @@ namespace module {
             return std::make_pair(strength, greenNormal);
         }
 
-        void LUTClassifier::enhanceBall(const Image& image, const LookUpTable& lut, ClassifiedImage& classifiedImage) {
+        void LUTClassifier::enhanceBall(const Image& image, const LookUpTable& lut, ClassifiedImage& classifiedImage, const CameraParameters& cam) {
 
             // Loop through all of our possible ball segments
             std::vector<Eigen::Vector2i> points;
@@ -141,8 +146,11 @@ namespace module {
 
             // For each of these points move upward until we find a strong transition to green
             for(auto& point : points) {
-                Line horizon(convert<double, 2>(classifiedImage.horizon.normal), classifiedImage.horizon.distance);
-                int minY = int(std::max(3.0, horizon.y(point[0])));
+                // Line horizon(convert<double, 2>(classifiedImage.horizon.normal), classifiedImage.horizon.distance);
+                Plane<3> horizon(classifiedImage.horizon_normal, getCamFromImage(convert<int, 2>(point), cam)); //TODO: Jake check this gross code
+                int horizon_Y = getImageFromCam(horizon.orthogonalProjection(getCamFromImage(convert<int, 2>(point),cam)), cam);
+
+                int minY = int(std::max(3.0, double(horizon_Y)));
 
                 for(int y = point[1]; y > minY; --y) {
 
