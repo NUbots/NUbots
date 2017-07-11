@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with the NUbots Codebase.  If not, see <http://www.gnu.org/licenses/>.
  *
- * Copyright 2013 NUbots <nubots@nubots.net>
+ * Copyright 2013 NUBots <nubots@nubots.net>
  */
 
 #include "KickPlanner.h"
@@ -83,11 +83,12 @@ namespace behaviour {
                 emit(std::make_unique<WantsToKick>(false));
             });
 
-            on<Trigger<std::vector<Ball>>, With<std::vector<Self>>, With<FieldDescription>, With<KickPlan>>().then(
-                [this](const std::vector<Ball>& ball,
+            on<Trigger<Ball>, With<std::vector<Self>>, With<FieldDescription>, With<KickPlan>, With<Sensors>>().then(
+                [this](const Ball& ball,
                        const std::vector<Self>& selfs,
                        const FieldDescription& fd,
-                       const KickPlan& kickPlan) {
+                       const KickPlan& kickPlan,
+                       const Sensors& sensors) {
 
                     // Get time since last seen ball
                     auto now = NUClear::clock::now();
@@ -98,16 +99,22 @@ namespace behaviour {
                     // Compute target in robot coords
                     auto self = selfs[0];
                     // arma::vec2 kickTarget = {1,0,0}; //Kick forwards
+                    // TODO: The heading seems to judder here!!
+                    // TODO: use sensors.world instead
                     arma::vec2 kickTarget = WorldToRobotTransform(convert<double, 2>(self.locObject.position),
                                                                   convert<double, 2>(self.heading),
                                                                   convert<double, 2>(kickPlan.target));
-                    arma::vec3 ballPosition = {100, 0, 0};  // too far to kick
-                    if (ball.size() > 0) {
-                        ballPosition = {ball[0].locObject.position[0], ball[0].locObject.position[1], fd.ball_radius};
-                        ball_last_measurement_time = now;
-                    }
+
+                    Transform3D Htw = convert<double, 4, 4>(sensors.world);
+                    arma::vec3 ballPosition =
+                        Htw.transformPoint({ball.locObject.position[0], ball.locObject.position[1], fd.ball_radius});
+                    ball_last_measurement_time = ball.locObject.last_measurement_time;
 
                     float KickAngle = std::fabs(std::atan2(kickTarget[1], kickTarget[0]));
+
+                    // log("KickPlan target global",convert<double,2,1>(kickPlan.target).t());
+                    // log("Target of Kick",kickTarget.t());
+                    // log("KickAngle",KickAngle);
 
                     // Check whether to kick
                     // log("kickTarget",kickTarget.t());
@@ -173,6 +180,6 @@ namespace behaviour {
             return (ballPos[0] > 0) && (ballPos[0] < cfg.max_ball_distance)
                    && (std::fabs(ballPos[1]) < cfg.kick_corridor_width / 2.0);
         }
-    }  // namespace planning
-}  // namespace behaviour
-}  // namespace module
+    }
+}
+}
