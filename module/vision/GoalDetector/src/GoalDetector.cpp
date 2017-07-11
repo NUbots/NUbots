@@ -51,7 +51,7 @@ namespace vision {
 
     using utility::math::coordinates::cartesianToSpherical;
 
-    using utility::math::geometry::Line;
+    using utility::math::geometry::Plane;
     using Plane = utility::math::geometry::Plane<3>;
     using utility::math::geometry::Quad;
 
@@ -64,6 +64,8 @@ namespace vision {
     using utility::math::vision::getParallaxAngle;
     using utility::math::vision::projectCamSpaceToScreen;
     using utility::math::vision::distanceToVerticalObject;
+    using utility::math::vision::getCamFromImage;
+    using utility::math::vision::getImageFromCam;
 
     using message::vision::LookUpTable;
     using message::vision::ClassifiedImage;
@@ -134,15 +136,17 @@ namespace vision {
                 // Less the full quality (subsampled)
                 // Do not have a transition on the other side
                 if ((segment.segmentClass == SegmentClass::GOAL) && (segment.subsample == 1) && (segment.previous > -1) && (segment.next > -1)) {
-                    segments.push_back({ getCamFromScreen(segment.start, cam), getCamFromScreen(segment.end, cam) });
+                    segments.push_back({
+                        getCamFromScreen(imageToScreen(segment.start,convert<uint,2>(cam.imageSizePixels)), cam),
+                        getCamFromScreen(imageToScreen(segment.end,convert<uint,2>(cam.imageSizePixels)), cam)
+                    });
                 }
             }
 
             // Partition our segments so that they are split between above and below the horizon
+
             auto split = std::partition(std::begin(segments), std::end(segments), [image] (const RansacGoalModel::GoalSegment& segment) {
-                // Is the midpoint above or below the horizon?
-                utility::math::geometry::Line horizon(convert<double, 2>(image.horizon.normal), image.horizon.distance);
-                return arma::dot(horizon.normal, segment.left) > 0;
+                return arma::dot(image.horizon_normal,segment.left + segment.right / 2) > 0;
             });
 
             // Make an array of our partitions
@@ -163,53 +167,45 @@ namespace vision {
             for (auto& result : models) {
 
                 // Get our left, right and midlines
-                Line& left = result.model.left;
-                Line& right = result.model.right;
-                Line mid;
+                Plane& left = result.model.left;
+                Plane& right = result.model.right;
+                Plane mid;
 
                 // Normals in same direction
                 if(arma::dot(left.normal, right.normal) > 0) {
                     mid.normal = arma::normalise(right.normal + left.normal);
-                    mid.distance = ((right.distance / arma::dot(right.normal, mid.normal)) + (left.distance / arma::dot(left.normal, mid.normal))) * 0.5;
                 }
                 // Normals opposed
                 else {
                     mid.normal = arma::normalise(right.normal - left.normal);
-                    mid.distance = ((right.distance / arma::dot(right.normal, mid.normal)) - (left.distance / arma::dot(left.normal, mid.normal))) * 0.5;
                 }
 
                 // Find a point that should work to start searching down
-                arma::vec2 midpoint({0, 0});
+                arma::vec3 midpoint({0, 0, 0});
                 int i = 0;
                 for(auto& m : result) {
-                    midpoint += m.left;
-                    midpoint += m.right;
+                    midpoint += m.left.normal;
+                    midpoint += m.right.normal;
                     i += 2;
                 }
                 midpoint /= i;
 
                 // Work out which direction to go
-                arma::vec2 direction = mid.tangent();
-                direction *= direction[1] > 0 ? 1 : -1;
-                double theta = std::acos(direction[0]);
-                if (std::abs(theta) < M_PI_4) {
-                    direction[0] = 1;
-                    direction[1] = -std::tan(theta);
-                }
-                else {
-                    direction[0] = std::tan(M_PI_2 - std::abs(theta));
-                    direction[1] = 1;
-                }
+                arma::vec3 direction = arma::normalise(arma::cross(mid.normal,arma::vec3({1,0,0})));
+                //Rectify if pointing up
+                direction *= direction[2] < 0 ? 1 : -1;
+                //TODO: does this work?
+                direction *= cam.imageSizePixels[1] / cam.FOV[1];
 
                 // Classify until we reach green
-                arma::vec2 basePoint({0, 0});
+                arma::vec3 basePoint({0, 0, 0});
                 int notWhiteLen = 0;
-                for(arma::vec2 point = mid.orthogonalProjection(midpoint);
-                    (point[0] < image.dimensions[0]) && (point[0] > 0) && (point[1] < image.dimensions[1]);
-                    point += direction) {
+                arma::vec3 point = arma::normalise(mid.orthogonalProjection(midpoint));
+                arma::ivec2 imagePoint = getImageFromCam(point);
+                while((imagePoint[0] < image.dimensions[0]) && (imagePoint[0] > 0) && (imagePoint[1] < image.dimensions[1])){
 
                     char c = static_cast<char>(utility::vision::getPixelColour(lut,
-                        utility::vision::getPixel(int(point[0]), int(point[1]), image.image->dimensions[0], image.image->dimensions[1], image.image->data,
+                        utility::vision::getPixel(imagePoint[0], imagePoint[1], image.image->dimensions[0], image.image->dimensions[1], image.image->data,
                                                     static_cast<utility::vision::FOURCC>(image.image->format))));
 
                     if(c != 'y') {
@@ -226,6 +222,10 @@ namespace vision {
                     else if(c == 'y') {
                         notWhiteLen = 0;
                     }
+
+                    point += direction;
+                    arma::vec2 imagePoint = getImageFromCam(point);
+
                 }
 
                 arma::running_stat<double> stat;
@@ -266,7 +266,6 @@ namespace vision {
                 goals->push_back(std::move(goal));
             }
 
-            utility::math::geometry::Line horizon(convert<double, 2>(image.horizon.normal), image.horizon.distance);
 
             // Throwout invalid quads
             for(auto it = goals->begin(); it != goals->end();) {
