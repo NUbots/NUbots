@@ -108,7 +108,8 @@ namespace support {
             arma::vec3 rBWw = Hwc.transformPoint(rBCc);
             // Attach the measurement to the object
             result.measurements.push_back(Ball::Measurement());
-            result.measurements.back().rBCc = convert<double, 3, 1>(rBWw);  // TODO: This needs updating to actually provide rBCc
+            result.measurements.back().rBCc =
+                convert<double, 3, 1>(rBWw);  // TODO: This needs updating to actually provide rBCc
 
             // Measure points around the ball as a normal distribution
             arma::vec3 rEBc;

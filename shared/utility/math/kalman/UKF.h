@@ -23,257 +23,261 @@
 #include <armadillo>
 
 namespace utility {
-    namespace math {
-        namespace kalman {
+namespace math {
+    namespace kalman {
 
-            template <typename Model> //model is is a template parameter that Kalman also inherits
-            class UKF {
-            public:
-                // The model
-                Model model;
+        template <typename Model>  // model is is a template parameter that Kalman also inherits
+        class UKF {
+        public:
+            // The model
+            Model model;
 
-            private:
-                // The number of sigma points
-                static constexpr uint NUM_SIGMA_POINTS = (Model::size * 2) + 1;
+        private:
+            // The number of sigma points
+            static constexpr uint NUM_SIGMA_POINTS = (Model::size * 2) + 1;
 
-                // Dimension types for vectors and square matricies
-                using StateVec = arma::vec::fixed<Model::size>;
-                using StateMat = arma::mat::fixed<Model::size, Model::size>;
+            // Dimension types for vectors and square matricies
+            using StateVec = arma::vec::fixed<Model::size>;
+            using StateMat = arma::mat::fixed<Model::size, Model::size>;
 
-                using SigmaVec = arma::vec::fixed<NUM_SIGMA_POINTS>;
-                using SigmaRowVec = arma::rowvec::fixed<NUM_SIGMA_POINTS>;
-                using SigmaMat = arma::mat::fixed<Model::size, NUM_SIGMA_POINTS>;
-                using SigmaSquareMat = arma::mat::fixed<NUM_SIGMA_POINTS, NUM_SIGMA_POINTS>;
+            using SigmaVec       = arma::vec::fixed<NUM_SIGMA_POINTS>;
+            using SigmaRowVec    = arma::rowvec::fixed<NUM_SIGMA_POINTS>;
+            using SigmaMat       = arma::mat::fixed<Model::size, NUM_SIGMA_POINTS>;
+            using SigmaSquareMat = arma::mat::fixed<NUM_SIGMA_POINTS, NUM_SIGMA_POINTS>;
 
-                // Our estimate and covariance
-                StateVec mean;
-                StateMat covariance;
+            // Our estimate and covariance
+            StateVec mean;
+            StateMat covariance;
 
-                // Our sigma points for UKF
-                StateVec sigmaMean;
-                SigmaMat sigmaPoints;
+            // Our sigma points for UKF
+            StateVec sigmaMean;
+            SigmaMat sigmaPoints;
 
-                SigmaMat centredSigmaPoints; // X in Steves kalman theory
-                SigmaVec d;
-                SigmaSquareMat covarianceUpdate; // C in Steves kalman theory
+            SigmaMat centredSigmaPoints;  // X in Steves kalman theory
+            SigmaVec d;
+            SigmaSquareMat covarianceUpdate;  // C in Steves kalman theory
 
-                SigmaSquareMat defaultCovarianceUpdate;
+            SigmaSquareMat defaultCovarianceUpdate;
 
-                // The mean and covariance weights
-                SigmaVec meanWeights;
-                SigmaRowVec covarianceWeights;
+            // The mean and covariance weights
+            SigmaVec meanWeights;
+            SigmaRowVec covarianceWeights;
 
-                // UKF variables
-                double covarianceSigmaWeights;
+            // UKF variables
+            double covarianceSigmaWeights;
 
-                SigmaMat generateSigmaPoints(const StateVec& mean, const StateMat& covariance) {
+            SigmaMat generateSigmaPoints(const StateVec& mean, const StateMat& covariance) {
 
-                    // Allocate memory for our points
-                    SigmaMat points;
+                // Allocate memory for our points
+                SigmaMat points;
 
-                    // Our first row is always the mean
-                    points.col(0) = mean;
+                // Our first row is always the mean
+                points.col(0) = mean;
 
-                    // Get our cholskey decomposition
-                    arma::mat chol;
-                    try {
-                        chol = arma::chol(covarianceSigmaWeights * covariance);
-                    } catch (...) {
-                        std::cerr << __FILE__ << " " << __LINE__ << " : covarianceSigmaWeights * covariance was NOT positive-definite and the cholskey "
-                                  << "decomposition failed.\ncovarianceSigmaWeights * covariance = \n" << std::endl
-                                  << covarianceSigmaWeights * covariance << std::endl;
-                        throw std::exception();
-                    }
-
-                    // Put our values in either end of the matrix
-                    for (uint i = 1; i < Model::size + 1; ++i) {
-
-                        auto deviation = chol.col(i - 1);
-                        points.col(i)               = (mean + deviation);
-                        points.col(i + Model::size) = (mean - deviation);
-
-                    }
-
-                    return points;
+                // Get our cholskey decomposition
+                arma::mat chol;
+                try {
+                    chol = arma::chol(covarianceSigmaWeights * covariance);
+                }
+                catch (...) {
+                    std::cerr << __FILE__ << " " << __LINE__
+                              << " : covarianceSigmaWeights * covariance was NOT positive-definite and the cholskey "
+                              << "decomposition failed.\ncovarianceSigmaWeights * covariance = \n"
+                              << std::endl
+                              << covarianceSigmaWeights * covariance << std::endl;
+                    throw std::exception();
                 }
 
-                StateVec meanFromSigmas(const SigmaMat& sigmaPoints) const {
-                    return sigmaPoints * meanWeights;
+                // Put our values in either end of the matrix
+                for (uint i = 1; i < Model::size + 1; ++i) {
+
+                    auto deviation              = chol.col(i - 1);
+                    points.col(i)               = (mean + deviation);
+                    points.col(i + Model::size) = (mean - deviation);
                 }
 
-                StateMat covarianceFromSigmas(const SigmaMat& sigmaPoints, const StateVec& mean) const {
+                return points;
+            }
 
-                    auto meanCentered = sigmaPoints - arma::repmat(mean, 1, NUM_SIGMA_POINTS);
-                    return (arma::repmat(covarianceWeights, Model::size, 1) % meanCentered) * meanCentered.t();
+            StateVec meanFromSigmas(const SigmaMat& sigmaPoints) const {
+                return sigmaPoints * meanWeights;
+            }
+
+            StateMat covarianceFromSigmas(const SigmaMat& sigmaPoints, const StateVec& mean) const {
+
+                auto meanCentered = sigmaPoints - arma::repmat(mean, 1, NUM_SIGMA_POINTS);
+                return (arma::repmat(covarianceWeights, Model::size, 1) % meanCentered) * meanCentered.t();
+            }
+
+            arma::vec meanFromSigmas(const arma::mat& sigmaPoints) const {
+                return sigmaPoints * meanWeights;
+            }
+
+            arma::mat covarianceFromSigmas(const arma::mat& sigmaPoints, const arma::vec& mean) const {
+
+                auto meanCentered = sigmaPoints - arma::repmat(mean, 1, NUM_SIGMA_POINTS);
+                return (arma::repmat(covarianceWeights, mean.size(), 1) % meanCentered) * meanCentered.t();
+            }
+
+        public:
+            UKF(StateVec initialMean       = arma::zeros(Model::size),
+                StateMat initialCovariance = arma::eye(Model::size, Model::size) * 0.1,
+                double alpha               = 1e-1,
+                double kappa               = 0.f,
+                double beta                = 2.f) {
+
+                reset(initialMean, initialCovariance, alpha, kappa, beta);
+            }
+
+            void reset(StateVec initialMean, StateMat initialCovariance, double alpha, double kappa, double beta) {
+                double lambda = pow(alpha, 2) * (Model::size + kappa) - Model::size;
+
+                covarianceSigmaWeights = Model::size + lambda;
+
+                meanWeights.fill(1.0 / (2.0 * (Model::size + lambda)));
+                meanWeights[0] = lambda / (Model::size + lambda);
+
+                covarianceWeights.fill(1.0 / (2.0 * (Model::size + lambda)));
+                covarianceWeights[0] = lambda / (Model::size + lambda) + (1.0 - pow(alpha, 2) + beta);
+
+                defaultCovarianceUpdate = arma::diagmat(covarianceWeights);
+
+                setState(initialMean, initialCovariance);
+            }
+
+            void setState(StateVec initialMean, StateMat initialCovariance) {
+                mean       = initialMean;
+                covariance = initialCovariance;
+
+                // Calculate our sigma points
+                sigmaMean   = mean;
+                sigmaPoints = generateSigmaPoints(mean, covariance);
+
+                // Reset our state for more measurements
+                covarianceUpdate = defaultCovarianceUpdate;
+                d.zeros();
+                centredSigmaPoints = sigmaPoints - arma::repmat(sigmaMean, 1, NUM_SIGMA_POINTS);
+            }
+
+            template <typename... TAdditionalParameters>
+            void timeUpdate(double deltaT, const TAdditionalParameters&... additionalParameters) {
+                // Generate our sigma points
+                sigmaPoints = generateSigmaPoints(mean, covariance);
+
+                // Write the propagated version of the sigma point
+                for (uint i = 0; i < NUM_SIGMA_POINTS; ++i) {
+                    sigmaPoints.col(i) = model.timeUpdate(sigmaPoints.col(i), deltaT, additionalParameters...);
                 }
 
-                arma::vec meanFromSigmas(const arma::mat& sigmaPoints) const {
-                    return sigmaPoints * meanWeights;
+                // Calculate the new mean and covariance values.
+                mean       = meanFromSigmas(sigmaPoints);
+                mean       = model.limitState(mean);
+                covariance = covarianceFromSigmas(sigmaPoints, mean);
+                covariance += model.processNoise();
+
+                // Re calculate our sigma points
+                sigmaMean   = mean;
+                sigmaPoints = generateSigmaPoints(mean, covariance);
+
+                // Reset our state for more measurements
+                covarianceUpdate = defaultCovarianceUpdate;
+                d.zeros();
+                centredSigmaPoints = sigmaPoints - arma::repmat(sigmaMean, 1, NUM_SIGMA_POINTS);
+            }
+
+            template <typename TMeasurement, typename... TMeasurementType>
+            double measurementUpdate(const TMeasurement& measurement,
+                                     const arma::mat& measurement_variance,
+                                     const TMeasurementType&... measurementArgs) {
+
+                // Allocate room for our predictions
+                arma::mat predictedObservations(measurement.n_elem, NUM_SIGMA_POINTS);
+
+                // First step is to calculate the expected measurement for each sigma point.
+                for (uint i = 0; i < NUM_SIGMA_POINTS; ++i) {
+                    predictedObservations.col(i) = model.predictedObservation(sigmaPoints.col(i), measurementArgs...);
                 }
 
-                arma::mat covarianceFromSigmas(const arma::mat& sigmaPoints, const arma::vec& mean) const {
+                // DEBUG
+                // if(model.size == 5){
+                //     std::cout << "model size = \n" << model.size << std::endl;
+                //     std::cout << "sigmaPoints = \n" << sigmaPoints << std::endl;
+                //     std::cout << "predicted = \n" << predictedObservations << std::endl;
+                //     std::cout << "measured = \n" << measurement << std::endl;
+                // }
+                // Now calculate the mean of these measurement sigmas.
+                arma::vec predictedMean = meanFromSigmas(predictedObservations);
 
-                    auto meanCentered = sigmaPoints - arma::repmat(mean, 1, NUM_SIGMA_POINTS);
-                    return (arma::repmat(covarianceWeights, mean.size() , 1) % meanCentered) * meanCentered.t();
-                }
-
-            public:
-                UKF(StateVec initialMean = arma::zeros(Model::size),
-                    StateMat initialCovariance = arma::eye(Model::size, Model::size) * 0.1,
-                    double alpha = 1e-1,
-                    double kappa = 0.f,
-                    double beta = 2.f) {
-
-                    reset(initialMean, initialCovariance, alpha, kappa, beta);
-                }
-
-                void reset(StateVec initialMean, StateMat initialCovariance,
-                           double alpha, double kappa, double beta) {
-                    double lambda = pow(alpha, 2) * (Model::size + kappa) - Model::size;
-
-                    covarianceSigmaWeights = Model::size + lambda;
-
-                    meanWeights.fill(1.0 / (2.0 * (Model::size + lambda)));
-                    meanWeights[0] = lambda / (Model::size + lambda);
-
-                    covarianceWeights.fill(1.0 / (2.0 * (Model::size + lambda)));
-                    covarianceWeights[0] = lambda / (Model::size + lambda) + (1.0 - pow(alpha,2) + beta);
-
-                    defaultCovarianceUpdate = arma::diagmat(covarianceWeights);
-
-                    setState(initialMean, initialCovariance);
-                }
-
-                void setState(StateVec initialMean, StateMat initialCovariance) {
-                    mean = initialMean;
-                    covariance = initialCovariance;
-
-                    // Calculate our sigma points
-                    sigmaMean = mean;
-                    sigmaPoints = generateSigmaPoints(mean, covariance);
-
-                    // Reset our state for more measurements
-                    covarianceUpdate = defaultCovarianceUpdate;
-                    d.zeros();
-                    centredSigmaPoints = sigmaPoints - arma::repmat(sigmaMean, 1, NUM_SIGMA_POINTS);
-                }
-
-                template <typename... TAdditionalParameters>
-                void timeUpdate(double deltaT, const TAdditionalParameters&... additionalParameters) {
-                    // Generate our sigma points
-                    sigmaPoints = generateSigmaPoints(mean, covariance);
-
-                    // Write the propagated version of the sigma point
-                    for(uint i = 0; i < NUM_SIGMA_POINTS; ++i) {
-                        sigmaPoints.col(i) = model.timeUpdate(sigmaPoints.col(i), deltaT, additionalParameters...);
-                    }
-
-                    // Calculate the new mean and covariance values.
-                    mean = meanFromSigmas(sigmaPoints);
-                    mean = model.limitState(mean);
-                    covariance = covarianceFromSigmas(sigmaPoints, mean);
-                    covariance += model.processNoise();
-
-                    // Re calculate our sigma points
-                    sigmaMean = mean;
-                    sigmaPoints = generateSigmaPoints(mean, covariance);
-
-                    // Reset our state for more measurements
-                    covarianceUpdate = defaultCovarianceUpdate;
-                    d.zeros();
-                    centredSigmaPoints = sigmaPoints - arma::repmat(sigmaMean, 1, NUM_SIGMA_POINTS);
-                }
-
-                template <typename TMeasurement, typename... TMeasurementType>
-                double measurementUpdate(const TMeasurement& measurement,
-                                         const arma::mat& measurement_variance,
-                                         const TMeasurementType&... measurementArgs) {
-
-                    // Allocate room for our predictions
-                    arma::mat predictedObservations(measurement.n_elem, NUM_SIGMA_POINTS);
-
-                    // First step is to calculate the expected measurement for each sigma point.
-                    for(uint i = 0; i < NUM_SIGMA_POINTS; ++i) {
-                        predictedObservations.col(i) = model.predictedObservation(sigmaPoints.col(i), measurementArgs...);
-                    }
-
-                    //DEBUG
-                    // if(model.size == 5){
-                    //     std::cout << "model size = \n" << model.size << std::endl;
-                    //     std::cout << "sigmaPoints = \n" << sigmaPoints << std::endl;
-                    //     std::cout << "predicted = \n" << predictedObservations << std::endl;
-                    //     std::cout << "measured = \n" << measurement << std::endl;
-                    // }
-                    // Now calculate the mean of these measurement sigmas.
-                    arma::vec predictedMean = meanFromSigmas(predictedObservations);
-
-                    auto centredObservations = predictedObservations - arma::repmat(predictedMean, 1, NUM_SIGMA_POINTS);
+                auto centredObservations = predictedObservations - arma::repmat(predictedMean, 1, NUM_SIGMA_POINTS);
 
 
-                    // Update our state
-                    covarianceUpdate -= covarianceUpdate.t() * centredObservations.t() *
-                                        (measurement_variance + centredObservations * covarianceUpdate * centredObservations.t()).i() *
-                                        centredObservations * covarianceUpdate;
+                // Update our state
+                covarianceUpdate -=
+                    covarianceUpdate.t() * centredObservations.t()
+                    * (measurement_variance + centredObservations * covarianceUpdate * centredObservations.t()).i()
+                    * centredObservations * covarianceUpdate;
 
 
-
-                    const arma::mat innovation = model.observationDifference(measurement, predictedMean);
-
-
-                    d += (centredObservations.t()) * measurement_variance.i() * innovation;
-
-                    //DEBUG
-                    // if(model.size == 5){
-                    //     std::cout << "innovation = \n" << innovation << std::endl;
-                    //     std::cout << "predictedMean = \n" << predictedMean << std::endl;
-                    //     std::cout << "centredSigmaPoints * covarianceUpdate * d = \n" << centredSigmaPoints * covarianceUpdate * d << std::endl;
-                    //     std::cout << "mean = \n" << mean << std::endl;
-                    // }
-
-                    // Update our mean and covariance
-                    mean = sigmaMean + centredSigmaPoints * covarianceUpdate * d;
-                    mean = model.limitState(mean);
-                    covariance = centredSigmaPoints * covarianceUpdate * centredSigmaPoints.t();
+                const arma::mat innovation = model.observationDifference(measurement, predictedMean);
 
 
-                    // Calculate and return the likelihood of the prior mean
-                    // and covariance given the new measurement (i.e. the
-                    // prior probability density of the measurement):
+                d += (centredObservations.t()) * measurement_variance.i() * innovation;
 
-                    //DEBUG: why do we occasionally get negative eigenvalues
-                    // arma::vec eValues = arma::eig_sym(predictedCovariance);
-                    // std::cout << "UKF - eValues = " << eValues.t() << std::endl;
-                    // if(arma::any(eValues < 0*eValues)){
-                    //     std::cout << "UKF - sigma covariance has negative eigenvalues!!!!!!!!!!!!!!!!!!!!!!!" << std::endl;
-                    //     std::cout << "UKF - centredObservations = \n" << centredObservations << std::endl;
-                    //     std::cout << "UKF - predictedMean = " << predictedMean.t() << std::endl;
-                    // }
-                    arma::mat predictedCovariance = covarianceFromSigmas(predictedObservations, predictedMean);
-                    arma::mat innovationVariance = predictedCovariance + measurement_variance;
-                    arma::mat scalarlikelihoodExponent = ((innovation.t() * innovationVariance.i()) * innovation);
+                // DEBUG
+                // if(model.size == 5){
+                //     std::cout << "innovation = \n" << innovation << std::endl;
+                //     std::cout << "predictedMean = \n" << predictedMean << std::endl;
+                //     std::cout << "centredSigmaPoints * covarianceUpdate * d = \n" << centredSigmaPoints *
+                //     covarianceUpdate * d << std::endl;
+                //     std::cout << "mean = \n" << mean << std::endl;
+                // }
 
-                    double expTerm = -0.5 * scalarlikelihoodExponent(0, 0);
-                    double normalisationFactor = pow(2 * M_PI, measurement_variance.n_rows) * arma::det(innovationVariance);
-                    // DEBUG
-                    // if(normalisationFactor <= 0){
-                    //     std::cout << "arma::det(innovationVariance) == 0. innovationVariance = \n" << innovationVariance << std::endl;
-                    // }
-                    double fract = 1 / sqrt(normalisationFactor);
-                    const float outlierProbability = 0.05;
+                // Update our mean and covariance
+                mean       = sigmaMean + centredSigmaPoints * covarianceUpdate * d;
+                mean       = model.limitState(mean);
+                covariance = centredSigmaPoints * covarianceUpdate * centredSigmaPoints.t();
 
-                    return (1.0 - outlierProbability) * fract * exp(expTerm) + outlierProbability;
-                }
 
-                StateVec get() const {
-                    return mean;
-                }
+                // Calculate and return the likelihood of the prior mean
+                // and covariance given the new measurement (i.e. the
+                // prior probability density of the measurement):
 
-                StateMat getCovariance() const {
-                    return covariance;
-                }
-            };
-        }
+                // DEBUG: why do we occasionally get negative eigenvalues
+                // arma::vec eValues = arma::eig_sym(predictedCovariance);
+                // std::cout << "UKF - eValues = " << eValues.t() << std::endl;
+                // if(arma::any(eValues < 0*eValues)){
+                //     std::cout << "UKF - sigma covariance has negative eigenvalues!!!!!!!!!!!!!!!!!!!!!!!" <<
+                //     std::endl;
+                //     std::cout << "UKF - centredObservations = \n" << centredObservations << std::endl;
+                //     std::cout << "UKF - predictedMean = " << predictedMean.t() << std::endl;
+                // }
+                arma::mat predictedCovariance      = covarianceFromSigmas(predictedObservations, predictedMean);
+                arma::mat innovationVariance       = predictedCovariance + measurement_variance;
+                arma::mat scalarlikelihoodExponent = ((innovation.t() * innovationVariance.i()) * innovation);
+
+                double expTerm             = -0.5 * scalarlikelihoodExponent(0, 0);
+                double normalisationFactor = pow(2 * M_PI, measurement_variance.n_rows) * arma::det(innovationVariance);
+                // DEBUG
+                // if(normalisationFactor <= 0){
+                //     std::cout << "arma::det(innovationVariance) == 0. innovationVariance = \n" << innovationVariance
+                //     << std::endl;
+                // }
+                double fract                   = 1 / sqrt(normalisationFactor);
+                const float outlierProbability = 0.05;
+
+                return (1.0 - outlierProbability) * fract * exp(expTerm) + outlierProbability;
+            }
+
+            StateVec get() const {
+                return mean;
+            }
+
+            StateMat getCovariance() const {
+                return covariance;
+            }
+        };
     }
+}
 }
 
 
