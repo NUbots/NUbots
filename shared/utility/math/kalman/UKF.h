@@ -280,5 +280,4 @@ namespace math {
 }  // namespace math
 }  // namespace utility
 
-
 #endif
