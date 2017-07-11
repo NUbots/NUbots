@@ -1,7 +1,12 @@
+import { createSingletonFactory } from '../../shared/base/create_singleton_factory'
 import { message } from '../../shared/proto/messages'
-import { MessageType } from './global_network'
-import { Message } from './global_network'
+import { MessageType } from './nusight_network'
 
+/**
+ * This class is used for converting NUClearNet message types into their path identifier strings.
+ *
+ * e.g. getPath(message.input.Sensors) should return the string 'message.input.Sensors'
+ */
 export class MessageTypePath {
   private cache: Map<any, string>
   private searchObject: any
@@ -11,17 +16,11 @@ export class MessageTypePath {
     this.cache = new Map()
   }
 
-  public static of = (() => {
-    let instance: MessageTypePath
-    return (): MessageTypePath => {
-      if (!instance) {
-        instance = new MessageTypePath()
-      }
-      return instance
-    }
-  })()
+  public static of = createSingletonFactory(() => {
+    return new MessageTypePath()
+  })
 
-  public getPath(messageType: MessageType<Message>): string {
+  public getPath<T>(messageType: MessageType<T>): string {
     if (!this.cache.has(messageType)) {
       const path = findPath(this.searchObject, value => value === messageType)
       if (!path) {
@@ -38,7 +37,7 @@ export class MessageTypePath {
  *
  * e.g. findPath({ a: { b: { c: 'd' } } }, v => v === 'd') // 'a.b.c'
  */
-function findPath(obj: any, isSubject: (value: any) => boolean, path: string[] = []): string|undefined {
+function findPath(obj: any, isSubject: (value: any) => boolean, path: string[] = []): string | undefined {
   if (isSubject(obj)) {
     return path.join('.')
   }

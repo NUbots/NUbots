@@ -9,7 +9,7 @@ function stubMethods<T>(obj: Mocked<T>, mock: Mocked<T> = obj, stubbed: Set<stri
     if (!stubbed.has(prop)) {
       const descriptor = Object.getOwnPropertyDescriptor(obj, prop)
       if (obj !== Object.prototype && prop !== 'constructor' && typeof descriptor.value === 'function') {
-        Object.defineProperty(mock, prop, { ... descriptor, value: jest.fn() })
+        Object.defineProperty(mock, prop, { ...descriptor, value: jest.fn() })
       }
       stubbed.add(prop)
     }

@@ -1,37 +1,47 @@
-import { GlobalNetwork } from './global_network'
-import { MessageType } from './global_network'
-import { Message } from './global_network'
-import { MessageCallback } from './global_network'
+import { NUsightNetwork } from './nusight_network'
+import { MessageType } from './nusight_network'
+import { MessageCallback } from './nusight_network'
 
+/**
+ * A convenience helper class to be used at the component-level.
+ *
+ * Easily subscribe to multiple NUClearNet messages with on(MessageType) and then unsubscribe from them all with off().
+ */
 export class Network {
-  private listeners: Map<MessageType<Message>, Set<MessageCallback<Message>>>
+  // Store all event listener removers, so we can call them all in off().
+  private offNUClearMessages: Set<() => void>
 
-  public constructor(private globalNetwork: GlobalNetwork) {
-    this.listeners = new Map()
+  public constructor(private nusightNetwork: NUsightNetwork) {
+    this.offNUClearMessages = new Set()
   }
 
-  public static of(globalNetwork: GlobalNetwork): Network {
-    return new Network(globalNetwork)
+  public static of(nusightNetwork: NUsightNetwork): Network {
+    return new Network(nusightNetwork)
   }
 
-  public on<T extends Message>(messageType: MessageType<T>, cb: MessageCallback<T>) {
-    this.globalNetwork.on(messageType, cb)
-
-    if (!this.listeners.has(messageType)) {
-      this.listeners.set(messageType, new Set())
+  /**
+   * Subscribe to a NUClearNet message.
+   *
+   * @param messageType The protobuf message type that a robot would send. e.g. message.input.Sensors
+   * @param cb The callback to call every time a message is received
+   * @returns A unsubscriber function.
+   */
+  public on<T>(messageType: MessageType<T>, cb: MessageCallback<T>): () => void {
+    const offNUClearMessage = this.nusightNetwork.onNUClearMessage(messageType, cb)
+    this.offNUClearMessages.add(offNUClearMessage)
+    return () => {
+      offNUClearMessage()
+      this.offNUClearMessages.delete(offNUClearMessage)
     }
-    const listeners = this.listeners.get(messageType)
-    if (listeners) {
-      listeners.add(cb)
-    }
   }
 
+  /**
+   * Unsubscribe from all events that is currently being listened to.
+   */
   public off() {
-    for (const [messageType, callbacks] of this.listeners.entries()) {
-      for (const cb of callbacks) {
-        this.globalNetwork.off(messageType, cb)
-      }
+    for (const offNUClearMessage of this.offNUClearMessages.values()) {
+      offNUClearMessage()
     }
-    this.listeners.clear()
+    this.offNUClearMessages.clear()
   }
 }

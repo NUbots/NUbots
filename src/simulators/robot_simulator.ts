@@ -1,17 +1,18 @@
-import { NUClearNet } from 'nuclearnet.js'
 import { Clock } from '../../src/server/time/clock'
 import { CancelTimer } from '../../src/server/time/node_clock'
+import { DirectNUClearNetClient } from '../server/nuclearnet/direct_nuclearnet_client'
+import { FakeNUClearNetClient } from '../server/nuclearnet/fake_nuclearnet_client'
+import { NodeSystemClock } from '../server/time/node_clock'
+import { NUClearNetClient } from '../shared/nuclearnet/nuclearnet_client'
 import { flatMap } from './flat_map'
 import { Simulator } from './simulator'
-import { NodeSystemClock } from '../server/time/node_clock'
-import { FakeNUClearNet } from './nuclearnet/fake_nuclearnet'
 
 export class RobotSimulator {
   private name: string
   private simulators: Simulator[]
   public messagesSent: number
 
-  public constructor(private network: NUClearNet,
+  public constructor(private network: NUClearNetClient,
                      private clock: Clock,
                      opts: { name: string, simulators: Simulator[] }) {
     this.name = opts.name
@@ -21,20 +22,20 @@ export class RobotSimulator {
   }
 
   public static of(opts: { fakeNetworking: boolean, name: string; simulators: Simulator[] }): RobotSimulator {
-    const network = opts.fakeNetworking ? FakeNUClearNet.of() : new NUClearNet()
+    const network = opts.fakeNetworking ? FakeNUClearNetClient.of() : DirectNUClearNetClient.of()
     const clock = NodeSystemClock
     return new RobotSimulator(network, clock, opts)
   }
 
   public simulateWithFrequency(frequency: number) {
-    this.connect()
+    const disconnect = this.connect()
 
     const period = 1000 / frequency
     const cancelLoop = this.clock.setInterval(() => this.simulate(), period)
 
     return () => {
       cancelLoop()
-      this.disconnect()
+      disconnect()
     }
   }
 
@@ -51,17 +52,13 @@ export class RobotSimulator {
     this.messagesSent++
   }
 
-  private simulate() {
+  public simulate() {
     const messages = flatMap(simulator => simulator.simulate(this.clock.now()), this.simulators)
     messages.forEach(message => this.send(message.messageType, message.buffer))
   }
 
-  private connect() {
-    this.network.connect({ name: this.name })
-  }
-
-  private disconnect() {
-    this.network.disconnect()
+  private connect(): () => void {
+    return this.network.connect({ name: this.name })
   }
 }
 

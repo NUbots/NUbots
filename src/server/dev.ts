@@ -12,7 +12,8 @@ import webpackConfig from '../../webpack.config'
 import { RobotSimulator } from '../simulators/robot_simulator'
 import { SimulatorStatus } from '../simulators/robot_simulator'
 import { SensorDataSimulator } from '../simulators/sensor_data_simulator'
-import { NUSightServer } from './app/server'
+import { WebSocketProxyNUClearNetServer } from './nuclearnet/web_socket_proxy_nuclearnet_server'
+import { WebSocketServer } from './nuclearnet/web_socket_server'
 
 const compiler = webpack(webpackConfig)
 
@@ -59,4 +60,6 @@ if (withSimulators) {
   SimulatorStatus.of(robotSimulator).statusEvery(60)
 }
 
-NUSightServer.of(withSimulators, sioNetwork).connect()
+WebSocketProxyNUClearNetServer.of(WebSocketServer.of(sioNetwork.of('/nuclearnet')), {
+  fakeNetworking: withSimulators,
+})

@@ -19,12 +19,13 @@ import { NUClear } from './components/nuclear/view'
 import { Scatter } from './components/scatter_plot/view'
 import { Subsumption } from './components/subsumption/view'
 import { Vision } from './components/vision/view'
-import { GlobalNetwork } from './network/global_network'
+import { NUsightNetwork } from './network/nusight_network'
 
 // enable MobX strict mode
 useStrict(true)
 
-const globalNetwork = GlobalNetwork.of()
+const nusightNetwork = NUsightNetwork.of()
+nusightNetwork.connect({ name: 'nusight' })
 
 // TODO (Annable): Replace all this code with real networking + simulator
 const localisationModel = LocalisationModel.of()
@@ -62,12 +63,12 @@ ReactDOM.render(
     <AppView>
       <Switch>
         <Route exact path='/' component={Dashboard}/>
-          <Route path='/localisation' render={() => {
-            const model = localisationModel
-            const controller = LocalisationController.of()
-            const network = LocalisationNetwork.of(globalNetwork, model)
-            return <LocalisationView controller={controller} model={model} network={network}/>
-          }}/>
+        <Route path='/localisation' render={() => {
+          const model = localisationModel
+          const controller = LocalisationController.of()
+          const network = LocalisationNetwork.of(nusightNetwork, model)
+          return <LocalisationView controller={controller} model={model} network={network}/>
+        }}/>
         <Route path='/vision' component={Vision}/>
         <Route path='/chart' component={Chart}/>
         <Route path='/scatter' component={Scatter}/>
