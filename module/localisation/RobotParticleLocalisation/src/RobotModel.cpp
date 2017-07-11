@@ -79,6 +79,10 @@ namespace localisation {
         Transform3D Hcf = Hcw * Hfw.i();
         Transform3D Htf = Htw * Hfw.i();
 
+        //rZFf = vector from field origin to zenith high in the sky
+        arma::vec3 rZFf = {0,0,1000000};
+        arma::vec3 rZCc = Hcf.transformPoint(rZFf);
+
         switch(FieldDescription::GoalpostType::Value(fd.dimensions.goalpost_type)) {
             case FieldDescription::GoalpostType::CIRCLE: {
                 if (type == Goal::MeasurementType::CENTRE){
@@ -91,10 +95,6 @@ namespace localisation {
                     //rGFf = vector from field origin to goal post expected position.
                     arma::vec3 rGFf = {actual_position[0], actual_position[1], 0};
                     arma::vec3 rGCc = Hcf.transformPoint(rGFf);
-
-                    //rZFf = vector from field origin to zenith high in the sky
-                    arma::vec3 rZFf = {0,0,1000000};
-                    arma::vec3 rZCc = Hcf.transformPoint(rZFf);
                     
                     // Finding the vector from robot to the goal
                     arma::vec3 rRFf = Htf.translation();
@@ -117,10 +117,6 @@ namespace localisation {
                     arma::vec3 rGFf = {actual_position[0], actual_position[1], 0};
                     arma::vec3 rGCc = Hcf.transformPoint(rGFf);
 
-                    //rZFf = vector from field origin to zenith high in the sky
-                    arma::vec3 rZFf = {0,0,1000000};
-                    arma::vec3 rZCc = Hcf.transformPoint(rZFf);
-
                     // Finding the vector from robot to the goal
                     arma::vec3 rRFf = Htf.translation();
                     arma::vec3 rGRf = rGFf - rRFf;
@@ -140,8 +136,9 @@ namespace localisation {
             } break;
             case FieldDescription::GoalpostType::RECTANGLE: {
                 // Finding 4 corners of goalpost (4 corners x XY)
-                arma::mat goalBaseCorners(4,2);
-                goalBaseCorners.each_row() = actual_position;
+                arma::mat goalBaseCorners(4,3);
+                goalBaseCorners.submat(0,0,3,1).each_row() = actual_position;
+                goalBaseCorners.col(2).fill(0.0);
                 goalBaseCorners.submat(0,0,1,0) -= 0.5*fd.dimensions.goalpost_depth; // x for front goal corners
                 goalBaseCorners.submat(2,0,3,0) += 0.5*fd.dimensions.goalpost_depth; // x for back  goal corners
                 goalBaseCorners.submat(1,1,2,1) -= 0.5*fd.dimensions.goalpost_width; // y for right goal corners
@@ -154,12 +151,56 @@ namespace localisation {
                     arma::vec3 rGCc_sph = cartesianToSpherical(rGCc); // in r,theta,phi
                     return rGCc_sph;
                 }
-                else if (type == Goal::MeasurementType::LEFT_NORMAL){
+                else if ((type == Goal::MeasurementType::LEFT_NORMAL) || (type == Goal::MeasurementType::RIGHT_NORMAL)){
+                    //rGFf = vector from field origin to goal post expected position.
+                    arma::vec3 rGFf = {actual_position[0], actual_position[1], 0};
+
+                    // Finding the vector from robot to the goal corners
+                    arma::vec3 rTFf = Htf.translation();
+                    arma::mat  vecs2GoalCorners(4,3); // 4 rGTfs
+                    vecs2GoalCorners = goalBaseCorners;
+                    vecs2GoalCorners.each_row() -= rTFf;
                     
-                    return angles;
-                }
-                else if (type == Goal::MeasurementType::RIGHT_NORMAL){
-                    
+                    // This section calculates the 6 possible angles to the goal edges to find the widest 2 edges
+                    int j_store = 1;
+                    double theta;
+                    arma::vec3 a;
+                    arma::vec3 b;
+                    arma::vec3 rG_blCc;
+                    arma::vec3 rG_brCc;
+                    double max_theta = 0.0;
+                    for (int i=0;i<3;++i){
+                        for (int j=j_store;j<4;++j){
+                            a = vecs2GoalCorners.submat(i,0,i,2);
+                            b = vecs2GoalCorners.submat(j,0,j,2);
+                            theta = std::acos(arma::norm_dot(a,b));
+                            if (std::abs(theta) > max_theta){
+                                max_theta = theta;
+                                if (theta > 0) {
+                                    rG_blCc = Hcf.transformPoint(goalBaseCorners.submat(j,0,j,2));
+                                    rG_brCc = Hcf.transformPoint(goalBaseCorners.submat(i,0,i,2));
+                                }
+                                else {
+                                    rG_blCc = Hcf.transformPoint(goalBaseCorners.submat(i,0,i,2));
+                                    rG_brCc = Hcf.transformPoint(goalBaseCorners.submat(j,0,j,2));
+                                }
+                            }
+                        }
+                        j_store += 1;
+                    }
+                    arma::vec2 angles;
+                    if (type == Goal::MeasurementType::LEFT_NORMAL) {
+                        arma::vec3 rG_tlCc = rG_blCc + fd.dimensions.goal_crossbar_height*arma::normalise(rZCc);
+                        //creating the normal vector (following convention stipulated in VisionObjects)
+                        arma::vec3 rNCc = arma::normalise(arma::cross(rG_blCc, rG_tlCc));
+                        angles = { std::atan2(rNCc[1],rNCc[0]) , std::atan2(rNCc[2],std::sqrt(rNCc[0]*rNCc[0] + rNCc[1]*rNCc[1]))};
+                    }
+                    else {
+                        arma::vec3 rG_trCc = rG_brCc + fd.dimensions.goal_crossbar_height*arma::normalise(rZCc);
+                        //creating the normal vector (following convention stipulated in VisionObjects)
+                        arma::vec3 rNCc = arma::normalise(arma::cross(rG_trCc, rG_brCc));
+                        angles = { std::atan2(rNCc[1],rNCc[0]) , std::atan2(rNCc[2],std::sqrt(rNCc[0]*rNCc[0] + rNCc[1]*rNCc[1]))};
+                    }
                     return angles;
                 }
             } break;
