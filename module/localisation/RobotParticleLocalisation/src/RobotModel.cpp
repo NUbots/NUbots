@@ -65,7 +65,17 @@ namespace localisation {
         const Sensors& sensors,
         const Goal::MeasurementType& type,
         const FieldDescription& fd) {
+        /*
+        switch(fd.dimensions.goalpost_type) {
+            case FieldDescription::GoalpostType::CIRCLE: {
+                // Calculate given a circular goalpost crosssection
+            } break;
+            case FieldDescription::GoalpostType::RECTANGLE: {
 
+                // Calculate given a rectangular goalpost crosssection
+            } break;
+        }
+        */
         // Get our transform to world coordinates
         const Transform3D& Htw = convert<double, 4, 4>(sensors.world);
         const Transform3D& Htc = convert<double, 4, 4>(sensors.forwardKinematics.at(ServoID::HEAD_PITCH));
@@ -89,7 +99,7 @@ namespace localisation {
 
             // Find the vector to the top and bottom left edge points
             //TODO: support non-cylindrical goal posts
-            arma::vec3 rG_blFf = rGFf + arma::vec3{0, fd.dimensions.goalpost_diameter*0.5, 0};
+            arma::vec3 rG_blFf = rGFf + arma::vec3{0, fd.dimensions.goalpost_width*0.5, 0};
             arma::vec3 rG_tlFf = {rG_blFf[0], rG_blFf[1], fd.dimensions.goal_crossbar_height};
 
             //creating the normal vector (following convention stipulated in VisionObjects)
@@ -104,7 +114,7 @@ namespace localisation {
 
             // Find the vector to the top and bottom right edge points
             //TODO: support non-cylindrical goal posts
-            arma::vec3 rG_brFf = rGFf + arma::vec3{0, fd.dimensions.goalpost_diameter*0.5, 0};
+            arma::vec3 rG_brFf = rGFf + arma::vec3{0, fd.dimensions.goalpost_width*0.5, 0};
             arma::vec3 rG_trFf = {rG_brFf[0], rG_brFf[1], fd.dimensions.goal_crossbar_height};
             
             //creating the normal vector (following convention stipulated in VisionObjects)

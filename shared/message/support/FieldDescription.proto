@@ -23,22 +23,30 @@ package message.support;
 import "Vector.proto";
 
 message FieldDescription {
+    enum GoalpostType {
+        RECTANGLE = 0;
+        CIRCLE = 1;
+    }
+
     message FieldDimensions {
         double line_width             = 1;
         double mark_width             = 2;
         double field_length           = 3;
         double field_width            = 4;
-        double goal_depth             = 5;
-        double goal_width             = 6;
-        double goal_area_length       = 7;
-        double goal_area_width        = 8;
-        double goal_crossbar_height   = 9;
-        double goalpost_diameter      = 10;
-        double goal_crossbar_diameter = 11;
-        double goal_net_height        = 12;
-        double penalty_mark_distance  = 13;
-        double center_circle_diameter = 14;
-        double border_strip_min_width = 15;
+        GoalpostType goalpost_type    = 5;
+        double goal_depth             = 6;
+        double goal_width             = 7;
+        double goal_area_length       = 8;
+        double goal_area_width        = 9;
+        double goal_crossbar_height   = 10;
+        double goalpost_width         = 11;
+        double goalpost_depth         = 12;
+        double goal_crossbar_width    = 13;
+        double goal_crossbar_depth    = 14;
+        double goal_net_height        = 15;
+        double penalty_mark_distance  = 16;
+        double center_circle_diameter = 17;
+        double border_strip_min_width = 18;
     }
 
     double          ball_radius         = 1;

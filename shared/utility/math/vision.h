@@ -190,14 +190,14 @@ namespace vision {
             const bool& failIfNegative = true) //camtoground is either camera to ground or camera to world, depending on application
     {
         utility::math::matrix::Transform3D Hcf = getFieldToCam(robotPose,camToGround);
-        //NOTE: this code assumes that goalposts are boxes with width and high of goalpost_diameter
+        //NOTE: this code assumes that goalposts are boxes with width and high of goalpost_width
         //make the base goal corners
         arma::mat goalBaseCorners(4,4);
         goalBaseCorners.row(3).fill(1.0);
         goalBaseCorners.submat(0,0,2,3).each_col() = goalLocation;
-        goalBaseCorners.submat(0,0,1,3) -= 0.5*field.dimensions.goalpost_diameter;
-        goalBaseCorners.submat(0,0,1,0) += field.dimensions.goalpost_diameter;
-        goalBaseCorners.submat(1,1,2,1) += field.dimensions.goalpost_diameter;
+        goalBaseCorners.submat(0,0,1,3) -= 0.5*field.dimensions.goalpost_width;
+        goalBaseCorners.submat(0,0,1,0) += field.dimensions.goalpost_width;
+        goalBaseCorners.submat(1,1,2,1) += field.dimensions.goalpost_width;
         //make the top corner points
         arma::mat goalTopCorners = goalBaseCorners;
 

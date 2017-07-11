@@ -37,9 +37,9 @@ namespace module {
                 FieldDescription::FieldDimensions& d = desc.dimensions;
                 auto half_length = d.field_length * 0.5;
                 // auto goal_line_width = d.line_width * 0.5;
-                auto goal_post_radius = d.goalpost_diameter * 0.5;
+                auto goal_post_radius = d.goalpost_width * 0.5;
                 // auto goal_x = (half_length - d.line_width * 0.5 + d.goal_depth + goal_line_width * 0.5);
-                auto goal_y = (d.goal_width + d.goalpost_diameter) * 0.5;
+                auto goal_y = (d.goal_width + d.goalpost_width) * 0.5;
                 // auto goal_w = (d.goal_depth - d.line_width + goal_line_width * 0.5);
                 // auto goal_h = (d.goal_width + d.goalpost_diameter);
                 auto goal_post_x = half_length + goal_post_radius * 0.5;
@@ -66,15 +66,18 @@ namespace module {
                 d.goal_area_length = config["GoalAreaLength"].as<double>();
                 d.goal_area_width = config["GoalAreaWidth"].as<double>();
                 d.goal_crossbar_height = config["GoalCrossbarHeight"].as<double>();
-                d.goalpost_diameter = config["GoalpostDiameter"].as<double>();
-                d.goal_crossbar_diameter = config["GoalCrossbarDiameter"].as<double>();
+                d.goalpost_type = config["GoalpostType"].as<std::string>();
+                d.goalpost_width = config["GoalpostWidth"].as<double>();
+                d.goalpost_depth = config["GoalpostDepth"].as<double>();
+                d.goal_crossbar_width = config["GoalCrossbarWidth"].as<double>();
+                d.goal_crossbar_depth = config["GoalCrossbarDepth"].as<double>();
                 d.goal_net_height = config["GoalNetHeight"].as<double>();
                 d.penalty_mark_distance = config["PenaltyMarkDistance"].as<double>();
                 d.center_circle_diameter = config["CenterCircleDiameter"].as<double>();
                 d.border_strip_min_width = config["BorderStripMinWidth"].as<double>();
 
                 desc.penalty_robot_start = config["PenaltyRobotStart"].as<double>();
-                desc.goalpost_top_height = d.goal_crossbar_height + d.goal_crossbar_diameter;
+                desc.goalpost_top_height = d.goal_crossbar_height + d.goal_crossbar_width;
 
                 SetGoalpostPositions(desc);
 
