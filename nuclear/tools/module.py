@@ -217,9 +217,9 @@ def module_unused(**kwargs):
                         if location == 0:
                             line = line[1:] # remove the comment and continue to process
                             if '::' in line: # the commented line is a commented out module
-                                additionalCommentLoc = line.find('#')
-                                if additionalCommentLoc > 0:
-                                    line = line[:additionalCommentLoc]
+                                additional_comment_loc = line.find('#')
+                                if additional_comment_loc > 0:
+                                    line = line[:additional_comment_loc]
 
                                 line = line.replace('::', os.sep)
                                 commented_modules[line.strip()] = 1
