@@ -650,8 +650,8 @@ namespace platform {
                     /************************************************
                      *                  CENTRE OF PRESSURE          *
                      ************************************************/
-                    sensors->centreOfPressure = convert<double, 3>(
-                        utility::motion::kinematics::calculateCentreOfPressure(kinematicsModel, *sensors));
+                    // sensors->centreOfPressure = convert<double, 3>(
+                    //    utility::motion::kinematics::calculateCentreOfPressure(kinematicsModel, *sensors));
 
                     emit(std::move(sensors));
                 });
