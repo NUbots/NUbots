@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with the NUbots Codebase.  If not, see <http://www.gnu.org/licenses/>.
  *
- * Copyright 2013 NUbots <nubots@nubots.net>
+ * Copyright 2013 NUBots <nubots@nubots.net>
  */
 
 #include "BallDetector.h"
@@ -324,21 +324,26 @@ namespace vision {
                         Transform3D Hwc = Hcw.i();
 
                         // Work out how far away the ball must be to be at the distance it is from the camera
-                        arma::vec3 width_rBWw = Hwc.transformPoint(ballCentreRay * widthDistance);
+                        arma::vec3 width_rBCc = ballCentreRay * widthDistance;
+                        arma::vec3 width_rBWw = Hwc.transformPoint(width_rBCc);
 
                         // Put our ball centre projection into the same space
-                        arma::vec3 proj_rBWw = Hwc.transformPoint(ballCentreGroundProj);
+                        arma::vec3 proj_rBCc = ballCentreGroundProj;
+                        arma::vec3 proj_rBWw = Hwc.transformPoint(proj_rBCc);
 
                         // Average our two centroids
+                        arma::vec3 rBCc = (width_rBCc);
                         arma::vec3 rBWw = (width_rBWw);
 
-                        // Attach the position to the object
-                        b.position = convert<double, 3>(rBWw);
+                        // Attach the measurement to the object
+                        b.measurements.push_back(Ball::Measurement());
+                        b.measurements.back().rBCc = convert<double, 3, 1>(rBCc);
+                        Eigen::Vector3d cov_diag(0.1, 0.01, 0.01);
+                        b.measurements.back().covariance = cov_diag.asDiagonal();
 
                         Transform3D Hgc       = camToGround;
                         arma::vec3 width_rBGg = Hgc.transformPoint(ballCentreRay * widthDistance);
                         arma::vec3 proj_rBGg  = Hgc.transformPoint(ballCentreGroundProj);
-                        b.torsoSpacePosition  = convert<double, 3>(width_rBGg);
                         // log("ball pos1 =", b.position);
                         // log("ball pos2 =", b.torsoSpacePosition);
                         // log("width_rBGg =", width_rBGg.t());
@@ -361,6 +366,7 @@ namespace vision {
                             b.edgePoints.push_back(convert<double, 3>(getCamFromScreen(
                                 imageToScreen(point, convert<uint, 2>(image.dimensions)), cam.focalLengthPixels)));
                         }
+                        b.visObject.timestamp = NUClear::clock::now();
 
                         balls->push_back(std::move(b));
                     }
@@ -395,5 +401,5 @@ namespace vision {
                     lastFrame.time = sensors.timestamp;
                 });
     }
-}  // namespace vision
-}  // namespace module
+}
+}

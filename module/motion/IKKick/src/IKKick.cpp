@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with the NUbots Codebase.  If not, see <http://www.gnu.org/licenses/>.
  *
- * Copyright 2013 NUbots <nubots@nubots.net>
+ * Copyright 2013 NUBots <nubots@nubots.net>
  */
 
 #include "IKKick.h"
@@ -101,8 +101,6 @@ namespace motion {
 
             // Emit useful info to KickPlanner
             emit(std::make_unique<IKKickParams>(IKKickParams(config["balancer"]["stand_height"].as<float>())));
-            emit(std::make_unique<KickPlan>(KickPlan(Eigen::Vector2d(4.5, 0), KickPlan::KickType::IK_KICK)));
-
         });
 
         on<Startup>().then("IKKick Startup", [this] {
@@ -269,5 +267,5 @@ namespace motion {
     }
 
 
-}  // namespace motion
-}  // namespace module
+}  // motion
+}  // modules

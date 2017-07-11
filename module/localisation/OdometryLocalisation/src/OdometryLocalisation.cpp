@@ -7,6 +7,7 @@
 #include "message/behaviour/Nod.h"
 #include "message/platform/darwin/DarwinSensors.h"
 #include "utility/math/matrix/Transform3D.h"
+#include "utility/nubugger/NUhelpers.h"
 #include "utility/support/eigen_armadillo.h"
 #include "utility/support/yaml_armadillo.h"
 
@@ -20,6 +21,7 @@ namespace localisation {
     using utility::math::matrix::Transform3D;
     using message::platform::darwin::ButtonLeftDown;
     using message::behaviour::Nod;
+    using utility::nubugger::graph;
 
     OdometryLocalisation::OdometryLocalisation(std::unique_ptr<NUClear::Environment> environment)
         : Reactor(std::move(environment)) {
@@ -43,24 +45,14 @@ namespace localisation {
             Transform2D Trw = Transform3D(convert<double, 4, 4>(sensors.world)).projectTo2D();
             Transform2D Twr = Trw.i();
 
-            if (arma::norm(Twr.localToWorld(Trw)) > 0.00001) {
-                log("arma::norm(Twr.localToWorld(Trw))", Trw.t(), Twr.t(), Twr.localToWorld(Trw).t());
-            }
-            if (arma::norm(Trw.localToWorld(Twr)) > 0.00001) {
-                log("arma::norm(Trw.localToWorld(Twr))", Trw.t(), Twr.t(), Trw.localToWorld(Twr).t());
-            }
-
             Transform2D state = localisationOffset.localToWorld(Twr);
 
             auto selfs = std::make_unique<std::vector<Self>>();
             selfs->push_back(Self());
             selfs->back().locObject.position = convert<double, 2, 1>(state.xy());
             selfs->back().heading            = Eigen::Vector2d(std::cos(state.angle()), std::sin(state.angle()));
-            // log("sensors world", state.t());
-            // log("offset", localisationOffset.t());
-            // log("world", Twr.t());
             emit(selfs);
         });
     }
-}  // namespace localisation
-}  // namespace module
+}
+}
