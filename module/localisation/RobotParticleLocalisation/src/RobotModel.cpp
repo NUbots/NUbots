@@ -100,7 +100,11 @@ namespace localisation {
 
                     // Find the vector to the top and bottom left edge points
                     // TODO: Circular Tangental effect
-                    arma::vec3 rG_blCc = rGCc + 0.5*fd.dimensions.goalpost_width*arma::normalise(rYCc);
+                    if (actual_position[0] > 0) { // left and right are flipped at the opposite end of field
+                        arma::vec3 rG_blCc = rGCc + 0.5*fd.dimensions.goalpost_width*arma::normalise(rYCc);
+                    } else {
+                        arma::vec3 rG_blCc = rGCc - 0.5*fd.dimensions.goalpost_width*arma::normalise(rYCc);
+                    }
                     arma::vec3 rG_tlCc = rG_blCc + fd.dimensions.goal_crossbar_height*arma::normalise(rZCc);
 
                     //creating the normal vector (following convention stipulated in VisionObjects)
@@ -122,7 +126,11 @@ namespace localisation {
 
                     // Find the vector to the top and bottom left edge points
                     // TODO: Circular Tangental effect
-                    arma::vec3 rG_brCc = rGCc - 0.5*fd.dimensions.goalpost_width*arma::normalise(rYCc);
+                    if (actual_position[0] > 0) { // left and right are flipped at the opposite end of field
+                        arma::vec3 rG_brCc = rGCc - 0.5*fd.dimensions.goalpost_width*arma::normalise(rYCc);
+                    } else {
+                        arma::vec3 rG_brCc = rGCc + 0.5*fd.dimensions.goalpost_width*arma::normalise(rYCc);
+                    }
                     arma::vec3 rG_trCc = rG_brCc + fd.dimensions.goal_crossbar_height*arma::normalise(rZCc);
                     
                     //creating the normal vector (following convention stipulated in VisionObjects)
