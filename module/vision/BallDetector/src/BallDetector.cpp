@@ -85,8 +85,8 @@ namespace vision {
 
 
     float BallDetector::approximateCircleGreenRatio(const RansacConeModel& cone, const Image& image, const LookUpTable& lut, const CameraParameters& params) {
-        // TODO:
-        // std::vector<std::tuple<arma::ivec2, arma::ivec2, arma::vec4>> debug;
+
+        std::vector<std::pair<Eigen::Vector2i, Eigen::Vector2i>> debug;
         float r = 0;
         int numGreen = 0;
         int actualSamples = 0;
@@ -94,9 +94,9 @@ namespace vision {
             float theta = 0;
             if(r == 0){
                 arma::vec2 pos = projectCamSpaceToScreen(cone.unit_axis, params);
-                arma::ivec2 ipos = arma::ivec({int(std::round(pos[0])), int(std::round(pos[1]))});
+                arma::ivec2 ipos = screenToImage(pos, convert<uint,2>(params.imageSizePixels));
                 if(ipos[0] >= 0 && ipos[0] < int(image.dimensions[0]) && ipos[1] >= 0 && ipos[1] < int(image.dimensions[1])){
-                    // debug.push_back(std::make_tuple(ipos, ipos + arma::ivec2{1,1}, arma::vec4{1,1,1,1}));
+                    debug.push_back(std::make_pair(convert<int,2>(ipos), convert<int,2>(ipos + arma::ivec2{1,1})));
                     char c = static_cast<char>(utility::vision::getPixelColour(lut,
                             getPixel(ipos[0], ipos[1], image.dimensions[0], image.dimensions[1], image.data, static_cast<FOURCC>(image.format))));
                     if (c == Colour::GREEN) {
@@ -108,9 +108,9 @@ namespace vision {
             }
             for(int j = 0; j < green_angular_samples; theta = (++j) * 2 * M_PI / float(green_angular_samples)) {
                 arma::vec2 pos = projectCamSpaceToScreen(cone.getPoint(r,theta), params);
-                arma::ivec2 ipos = arma::ivec2({int(std::round(pos[0])),int(std::round(pos[1]))});
+                arma::ivec2 ipos = screenToImage(pos, convert<uint,2>(params.imageSizePixels));
                 if(ipos[0] >= 0 && ipos[0] < int(image.dimensions[0]) && ipos[1] >= 0 && ipos[1] < int(image.dimensions[1])){
-                    // debug.push_back(std::make_tuple(ipos, ipos + arma::ivec2{1,1}, arma::vec4{1,1,1,1}));
+                    debug.push_back(std::make_pair(convert<int,2>(ipos), convert<int,2>(ipos + arma::ivec2{1,1})));
                     char c = static_cast<char>(utility::vision::getPixelColour(lut,
                             getPixel(ipos[0], ipos[1], image.dimensions[0], image.dimensions[1], image.data, static_cast<FOURCC>(image.format))));
                     if (c == Colour::GREEN) {
@@ -122,7 +122,7 @@ namespace vision {
             // sample point in lut and check if == Colour::GREEN
         }
 
-        // emit(drawVisionLines(debug));
+        emit(drawVisionLines(debug));
 
         float greenRatio = actualSamples == 0 ? 1 : (numGreen / float(actualSamples));
         return greenRatio;
@@ -188,7 +188,6 @@ namespace vision {
             const auto& image   = *rawImage;
             const auto& sensors = *image.sensors;
 
-            Line horizon(convert<double, 2>(image.horizon.normal), image.horizon.distance);
 
             // This holds our points that may be a part of the ball
             std::vector<arma::vec3> ballPoints;
@@ -233,6 +232,7 @@ namespace vision {
 
                 // Get the centre of our ball in screen space
                 arma::vec2 ballCentreScreen = projectCamSpaceToScreen(ballCentreRay,cam);
+                arma::ivec2 ballCentreImage = screenToImage(ballCentreRay,convert<uint,2>(cam.imageSizePixels));
                 float ballRadiusScreen = arma::norm(top-base) / 4 + arma::norm(left - right) / 4;
 
                 /************************************************
@@ -243,20 +243,25 @@ namespace vision {
                     log("Ball model: g =  ", result.model.gradient, " axis =   ", result.model.unit_axis.t());
                     log("Ball screen: r = ", ballRadiusScreen,      " centre = ",  ballCentreScreen.t());
                 }
+
                 // CENTRE OF BALL IS ABOVE THE HORIZON
-                if(horizon.y(ballCentreScreen[0]) > ballCentreScreen[1]) {
-                    if(print_throwout_logs) log("Ball discarded: image.horizon.y(result.model.centre[0]) > result.model.centre[1]");
+                if(arma::dot(image.horizon_normal,ballCentreRay) > 0){
+                    if(print_throwout_logs) {
+                        log("Ball discarded: arma::dot(image.horizon_normal,ballCentreRay) > 0 ");
+                        log("Horizon normal = ", image.horizon_normal.t());
+                        log("Ball centre ray = ", ballCentreRay.t());
+                    }
                     continue;
                 }
 
-                //DOES HAVE INTERNAL GREEN
+                // //DOES HAVE INTERNAL GREEN
                 float greenRatio = approximateCircleGreenRatio(result.model, *(image.image), lut, cam);
                 if (greenRatio > green_ratio_threshold) {
                     if(print_throwout_logs) log("Ball discarded: greenRatio > green_ratio_threshold");
                     continue;
                 }
 
-                // DOES NOT TOUCH 3 SEED POINTS
+                // // DOES NOT TOUCH 3 SEED POINTS
                 arma::vec3 sDist({ std::numeric_limits<double>::max(), std::numeric_limits<double>::max(), std::numeric_limits<double>::max() });
 
                 // Loop through our seed points and find the minimum distance one
@@ -278,15 +283,15 @@ namespace vision {
                     continue;
                 }
 
-                // BALL IS CLOSER THAN 1/2 THE HEIGHT OF THE ROBOT BY WIDTH
+                // // BALL IS CLOSER THAN 1/2 THE HEIGHT OF THE ROBOT BY WIDTH
                 double widthDistance = widthBasedDistanceToCircle(field.ball_radius, top, base, cam);
                 if(widthDistance < cameraHeight * 0.5) {
                     if(print_throwout_logs) log("Ball discarded: widthDistance < cameraHeight * 0.5");
                     continue;
                 }
 
-                // IF THE DISAGREEMENT BETWEEN THE WIDTH AND PROJECTION BASED DISTANCES ARE TOO LARGE
-                // Project this vector to a plane midway through the ball
+                // // IF THE DISAGREEMENT BETWEEN THE WIDTH AND PROJECTION BASED DISTANCES ARE TOO LARGE
+                // // Project this vector to a plane midway through the ball
                 Plane ballBisectorPlane({ 0, 0, 1 }, { 0, 0, field.ball_radius });
                 arma::vec3 ballCentreGroundProj = projectCamToPlane(ballCentreRay, camToGround, ballBisectorPlane);
                 double ballCentreGroundProjDistance = arma::norm(ballCentreGroundProj);
@@ -329,7 +334,7 @@ namespace vision {
                 // log("ball pos2 =", b.torsoSpacePosition);
                 // log("width_rBGg =", width_rBGg.t());
                 // log("proj_rBGg =", proj_rBGg.t());
-                // log("ballCentreRay =",ballCentreRay.t());
+                log("Ball Camera Space =",(ballCentreRay * widthDistance).t());
                 // log("camToGround =\n",camToGround);
 
                 // On screen visual shape

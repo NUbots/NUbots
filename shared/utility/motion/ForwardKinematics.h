@@ -45,7 +45,7 @@ namespace kinematics {
     using message::input::Sensors;
     using message::motion::KinematicsModel;
     using BodySide = message::motion::BodySide::Value;
- 
+
 
     inline std::map<ServoID, utility::math::matrix::Transform3D> calculateHeadJointPosition(const KinematicsModel& model, const float& HEAD_PITCH, const float& HEAD_YAW, ServoID servoID){
         std::map<ServoID, utility::math::matrix::Transform3D> positions;
@@ -89,7 +89,7 @@ namespace kinematics {
     }
 
     inline std::map<ServoID, utility::math::matrix::Transform3D> calculateHeadJointPosition(const KinematicsModel& model, const Sensors& sensors, ServoID servoID){
-        return calculateHeadJointPosition(model, 
+        return calculateHeadJointPosition(model,
                                           sensors.servo[static_cast<int>(ServoID::HEAD_PITCH)].presentPosition,
                                           sensors.servo[static_cast<int>(ServoID::HEAD_YAW)  ].presentPosition,
                                           servoID);
@@ -355,15 +355,6 @@ namespace kinematics {
             NUClear::log<NUClear::ERROR>("ForwardKinematics::calculateCentreOfMass - Empty centre of mass request or no mass in mass model.");
             return arma::vec4();
         }
-    }
-
-    inline utility::math::geometry::Line calculateHorizon(const math::matrix::Rotation3D Rcw, double cameraDistancePixels) {
-
-        // Normal of the line is the y and z of the z axis, however in the image the y axis is negated
-        arma::vec2 normal = -arma::normalise(Rcw.submat(1,2,2,2));
-        double distance = cameraDistancePixels * std::tan(utility::math::angle::acos_clamped(Rcw(0,2)) - M_PI_2);
-
-        return utility::math::geometry::Line(normal, distance);
     }
 
     inline utility::math::matrix::Transform3D calculateBodyToGround(arma::vec3 groundNormal_body, double bodyHeight){

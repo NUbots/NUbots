@@ -143,6 +143,15 @@ namespace vision {
     /////////////////////
 
 
+    inline arma::vec3 getCamFromImage(const arma::ivec2& image, const message::input::CameraParameters& cam){
+        return getCamFromScreen(imageToScreen(image,convert<uint,2>(cam.imageSizePixels)),cam);
+    }
+
+    inline arma::ivec2 getImageFromCam(const arma::vec3& unit_vector, const message::input::CameraParameters& cam){
+        return screenToImage(projectCamSpaceToScreen(unit_vector,cam),convert<uint,2>(cam.imageSizePixels);
+    }
+
+
     inline double getParallaxAngle(const arma::vec2& screen1, const arma::vec2& screen2, const message::input::CameraParameters& cam){
         arma::vec3 camSpaceP1 = getCamFromScreen(screen1,cam);
         arma::vec3 camSpaceP2 = getCamFromScreen(screen2,cam);

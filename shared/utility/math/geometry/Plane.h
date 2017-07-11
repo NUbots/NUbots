@@ -68,6 +68,15 @@ namespace geometry {
 			return tIntersection * l.direction + l.point;
 		}
 
+        double distanceToPoint(const arma::vec3& p){
+            return std::fabs(arma::dot(p - point,normal));
+        }
+
+        Vector orthogonalProjection(const arma::vec3& p){
+            return p - distanceToPoint * normal;
+
+        }
+
 
 	};
 
