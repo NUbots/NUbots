@@ -45,7 +45,7 @@ Vagrant.configure("2") do |config|
     shell.inline = "rm /var/lib/dpkg/lock;
                     apt-get update;
                     apt-get dist-upgrade -y;
-                    apt-get autoremove --purge;"
+                    apt-get autoremove --purge -y;"
   end
 
   # Before the puppet provisioner runs
