@@ -30,12 +30,12 @@ branches:
 jobs:
   include:
     # As a first stage try to format the code since this is fast
-    - stage: clang-format
+    - stage: Clang Format
       install: .travis/install_clang-format.sh
       script: .travis/validate_format.sh
 
     # If that passes, then we can try building the three build targets
-    - stage: build
+    - stage: Build
       env: PLATFORM=native
       install: .travis/install_toolchain.sh
       script: .travis/build_code.sh
