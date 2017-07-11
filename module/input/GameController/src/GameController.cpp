@@ -576,6 +576,7 @@ namespace input {
             case gamecontroller::PenaltyState::REQUEST_FOR_SERVICE: return PenaltyReason::REQUEST_FOR_SERVICE;
             case gamecontroller::PenaltyState::SUBSTITUTE: return PenaltyReason::SUBSTITUTE;
             case gamecontroller::PenaltyState::MANUAL: return PenaltyReason::MANUAL;
+            case gamecontroller::PenaltyState::PLAYER_PUSHING: return PenaltyReason::PLAYER_PUSHING;
             default: throw std::runtime_error("Invalid Penalty State");
         }
     }
