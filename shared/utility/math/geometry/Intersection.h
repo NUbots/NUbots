@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with the NUbots Codebase.  If not, see <http://www.gnu.org/licenses/>.
  *
- * Copyright 2015 NUBots <nubots@nubots.net>
+ * Copyright 2015 NUbots <nubots@nubots.net>
  */
 
 #ifndef UTILITY_MATH_GEOMETRY_INTERSECTION_H
@@ -25,14 +25,13 @@
 
 namespace utility {
 namespace math {
-namespace geometry {
-namespace intersection {
+    namespace geometry {
+        namespace intersection {
 
-bool test(const Circle& circle, const RotatedRectangle& rect);
-
-}
-}
-}
-}
+            bool test(const Circle& circle, const RotatedRectangle& rect);
+        }
+    }  // namespace geometry
+}  // namespace math
+}  // namespace utility
 
 #endif

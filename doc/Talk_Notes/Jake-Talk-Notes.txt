@@ -1,10 +1,10 @@
 === Introduction ===
 - Introduce Members: Team NUClear (Jake, Trent, Michael, Josh)
-    - Our final year project was to modernize the NUBots software architecture.
+    - Our final year project was to modernize the NUbots software architecture.
 - Brief Introduction to Darwin, Robocup and Nubots
     - Robot: Darwin
     - Robocup: International Robot Soccer Competition goal is 2050
-    - NUbots: We've been working closely with the NUBots team who build the software for the robots.
+    - NUbots: We've been working closely with the NUbots team who build the software for the robots.
     - The uni has been been doing it since 2002
 
 - Goal
@@ -17,7 +17,7 @@
     - Working with hardware can add a degree of complexity.
 
 - Successes
-    - Close collaboration with the NUBots team to produce a product that solves real problems and fits with what they need.
+    - Close collaboration with the NUbots team to produce a product that solves real problems and fits with what they need.
     - Josiah is using the architecture to research better scripting (energy efficient, faster)
 
 === Existing System ===

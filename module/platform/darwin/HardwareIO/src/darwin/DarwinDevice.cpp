@@ -14,20 +14,20 @@
  * You should have received a copy of the GNU General Public License
  * along with the NUbots Codebase.  If not, see <http://www.gnu.org/licenses/>.
  *
- * Copyright 2013 NUBots <nubots@nubots.net>
+ * Copyright 2013 NUbots <nubots@nubots.net>
  */
 
 #include "DarwinDevice.h"
 
 namespace Darwin {
-    DarwinDevice::DarwinDevice(UART& coms, int id) : coms(coms), id(id) {}
+DarwinDevice::DarwinDevice(UART& coms, int id) : coms(coms), id(id) {}
 
-    bool DarwinDevice::ping() {
+bool DarwinDevice::ping() {
 
-        // Ping and get the result
-        CommandResult result = coms.executeRead(PingCommand(id));
+    // Ping and get the result
+    CommandResult result = coms.executeRead(PingCommand(id));
 
-        // Check if there was an error code
-        return result.header.errorcode == ErrorCode::NONE;
-    }
+    // Check if there was an error code
+    return result.header.errorcode == ErrorCode::NONE;
 }
+}  // namespace Darwin

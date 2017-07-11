@@ -14,13 +14,13 @@
  * You should have received a copy of the GNU General Public License
  * along with the NUbots Codebase.  If not, see <http://www.gnu.org/licenses/>.
  *
- * Copyright 2013 NUBots <nubots@nubots.net>
+ * Copyright 2013 NUbots <nubots@nubots.net>
  */
 
 #include "NUbugger.h"
 
-#include "utility/time/time.h"
 #include "message/support/nuclear/ReactionStatistics.h"
+#include "utility/time/time.h"
 
 namespace module {
 namespace support {
@@ -31,7 +31,8 @@ namespace support {
     using std::chrono::microseconds;
 
     void NUbugger::provideReactionStatistics() {
-        // handles["reaction_statistics"].push_back(on<Trigger<ReactionStatistics>>().then([this](const ReactionStatistics& stats) {
+        // handles["reaction_statistics"].push_back(on<Trigger<ReactionStatistics>>().then([this](const
+        // ReactionStatistics& stats) {
 
         //     ReactionStatisticsProto reactionStatistics;
         //     reactionStatistics.set_reactionid(stats.reactionId);
@@ -48,5 +49,5 @@ namespace support {
         //     send(reactionStatistics);
         // }));
     }
-}
-}
+}  // namespace support
+}  // namespace module

@@ -24,17 +24,16 @@
 
 namespace module {
 namespace behaviour {
-namespace tools {
+    namespace tools {
 
-    class Jump : public NUClear::Reactor {
+        class Jump : public NUClear::Reactor {
 
-    public:
-        /// @brief Called by the powerplant to build and setup the Jump reactor.
-        explicit Jump(std::unique_ptr<NUClear::Environment> environment);
-    };
-
-}
-}
-}
+        public:
+            /// @brief Called by the powerplant to build and setup the Jump reactor.
+            explicit Jump(std::unique_ptr<NUClear::Environment> environment);
+        };
+    }  // namespace tools
+}  // namespace behaviour
+}  // namespace module
 
 #endif  // MODULES_BEHAVIOUR_TOOLS_JUMP_H

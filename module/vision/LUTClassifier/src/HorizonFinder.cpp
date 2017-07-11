@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with the NUbots Codebase.  If not, see <http://www.gnu.org/licenses/>.
  *
- * Copyright 2013 NUBots <nubots@nubots.net>
+ * Copyright 2013 NUbots <nubots@nubots.net>
  */
 
 #include "LUTClassifier.h"
@@ -24,35 +24,37 @@
 #include "utility/support/eigen_armadillo.h"
 
 namespace module {
-    namespace vision {
+namespace vision {
 
-        using message::input::Image;
-        using message::vision::LookUpTable;
-        using message::vision::ClassifiedImage;
+    using message::input::Image;
+    using message::vision::LookUpTable;
+    using message::vision::ClassifiedImage;
 
-        using ServoID = utility::input::ServoID;
-        using utility::math::matrix::Rotation3D;
-        using utility::math::matrix::Transform3D;
+    using ServoID = utility::input::ServoID;
+    using utility::math::matrix::Rotation3D;
+    using utility::math::matrix::Transform3D;
 
-        void LUTClassifier::findHorizon(const Image& image, const LookUpTable&, ClassifiedImage& classifiedImage) {
+    void LUTClassifier::findHorizon(const Image& image, const LookUpTable&, ClassifiedImage& classifiedImage) {
 
-                auto& sensors = *classifiedImage.sensors;
+        auto& sensors = *classifiedImage.sensors;
 
-                // Get our transform to world coordinates
-                const Rotation3D& Rtw = Transform3D(convert<double, 4, 4>(sensors.world)).rotation();
-                const Rotation3D& Rtc = Transform3D(convert<double, 4, 4>(sensors.forwardKinematics.at(ServoID::HEAD_PITCH))).rotation();
-                Rotation3D Rcw =  Rtc.i() * Rtw;
+        // Get our transform to world coordinates
+        const Rotation3D& Rtw = Transform3D(convert<double, 4, 4>(sensors.world)).rotation();
+        const Rotation3D& Rtc =
+            Transform3D(convert<double, 4, 4>(sensors.forwardKinematics.at(ServoID::HEAD_PITCH))).rotation();
+        Rotation3D Rcw = Rtc.i() * Rtw;
 
-                // Rcw = Rotation3D::createRotationZ(-Rcw.yaw()) * Rcw;
+        // Rcw = Rotation3D::createRotationZ(-Rcw.yaw()) * Rcw;
 
-                // Coordinate system: 0,0 is the centre of the screen. pos[0] is along the y axis of the
-                // camera transform, pos[1] is along the z axis (x points out of the camera)
-                auto horizon = utility::motion::kinematics::calculateHorizon(Rcw, FOCAL_LENGTH_PIXELS);
-                classifiedImage.horizon.normal = convert<double, 2>(horizon.normal);
+        // Coordinate system: 0,0 is the centre of the screen. pos[0] is along the y axis of the
+        // camera transform, pos[1] is along the z axis (x points out of the camera)
+        auto horizon                   = utility::motion::kinematics::calculateHorizon(Rcw, FOCAL_LENGTH_PIXELS);
+        classifiedImage.horizon.normal = convert<double, 2>(horizon.normal);
 
-                // Move our axis to be at the top left of the screen
-                classifiedImage.horizon.distance = -horizon.distanceToPoint({ -double(image.dimensions[0]) * 0.5, -double(image.dimensions[1]) * 0.5 });
-        }
+        // Move our axis to be at the top left of the screen
+        classifiedImage.horizon.distance =
+            -horizon.distanceToPoint({-double(image.dimensions[0]) * 0.5, -double(image.dimensions[1]) * 0.5});
+    }
 
-    }  // vision
-}  // modules
+}  // namespace vision
+}  // namespace module

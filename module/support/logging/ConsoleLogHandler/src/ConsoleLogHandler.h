@@ -14,33 +14,34 @@
  * You should have received a copy of the GNU General Public License
  * along with the NUbots Codebase.  If not, see <http://www.gnu.org/licenses/>.
  *
- * Copyright 2013 NUBots <nubots@nubots.net>
+ * Copyright 2013 NUbots <nubots@nubots.net>
  */
 
 #ifndef MODULES_SUPPORT_LOGGING_CONSOLELOGHANDLER_H
 #define MODULES_SUPPORT_LOGGING_CONSOLELOGHANDLER_H
 
-#include <nuclear>
 #include <mutex>
+#include <nuclear>
 
 namespace module {
-    namespace support {
-        namespace logging {
+namespace support {
+    namespace logging {
 
-            /**
-             * Handles the logging of log messages to the console in a thread safe manner.
-             *
-             * @author Jake Woods
-             */
-            class ConsoleLogHandler : public NUClear::Reactor {
-            private:
-                std::mutex mutex;
-            public:
-                explicit ConsoleLogHandler(std::unique_ptr<NUClear::Environment> environment);
-            };
+        /**
+         * Handles the logging of log messages to the console in a thread safe manner.
+         *
+         * @author Jake Woods
+         */
+        class ConsoleLogHandler : public NUClear::Reactor {
+        private:
+            std::mutex mutex;
 
-        }  // logging
-    }  // support
-}  // modules
+        public:
+            explicit ConsoleLogHandler(std::unique_ptr<NUClear::Environment> environment);
+        };
+
+    }  // namespace logging
+}  // namespace support
+}  // namespace module
 
 #endif  // MODULES_SUPPORT_LOGGING_CONSOLELOGHANDLER_H

@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with the NUbots Codebase.  If not, see <http://www.gnu.org/licenses/>.
  *
- * Copyright 2013 NUBots <nubots@nubots.net>
+ * Copyright 2013 NUbots <nubots@nubots.net>
  */
 
 #ifndef MODULES_BEHAVIOUR_PLANNING_GOALSAVER_H
@@ -25,32 +25,31 @@
 
 namespace module {
 namespace behaviour {
-namespace skills {
+    namespace skills {
 
-    class GoalSaver : public NUClear::Reactor {
-    public:
-        /// @brief Called by the powerplant to build and setup the GoalSaver reactor.
-        explicit GoalSaver(std::unique_ptr<NUClear::Environment> environment);
+        class GoalSaver : public NUClear::Reactor {
+        public:
+            /// @brief Called by the powerplant to build and setup the GoalSaver reactor.
+            explicit GoalSaver(std::unique_ptr<NUClear::Environment> environment);
 
-    private:
-        const size_t id;
-        float DIVE_PRIORITY;
-        float EXECUTION_PRIORITY;
+        private:
+            const size_t id;
+            float DIVE_PRIORITY;
+            float EXECUTION_PRIORITY;
 
-        /**
-         * TODO DiveCommand seems incompleted?
-         * @Mingze
-         * DiveCommand returns vec2 direction to dive
-         */
-        message::motion::DiveCommand diveCommand;
+            /**
+             * TODO DiveCommand seems incompleted?
+             * @Mingze
+             * DiveCommand returns vec2 direction to dive
+             */
+            message::motion::DiveCommand diveCommand;
 
-        void updatePriority(const float& priority);
-        int getDirectionalQuadrant(float x, float y);
-    };
-
-}
-}
-}
+            void updatePriority(const float& priority);
+            int getDirectionalQuadrant(float x, float y);
+        };
+    }  // namespace skills
+}  // namespace behaviour
+}  // namespace module
 
 
 #endif

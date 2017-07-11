@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with the NUbots Codebase.  If not, see <http://www.gnu.org/licenses/>.
  *
- * Copyright 2013 NUBots <nubots@nubots.net>
+ * Copyright 2013 NUbots <nubots@nubots.net>
  */
 
 #ifndef MODULES_BEHAVIOUR_PLANNING_DIVEPLANNER_H
@@ -24,21 +24,20 @@
 #include <nuclear>
 namespace module {
 namespace behaviour {
-namespace planning {
+    namespace planning {
 
-    class DivePlanner : public NUClear::Reactor {
-    public:
-        /// @brief Called by the powerplant to build and setup the DivePlanner reactor.
-        explicit DivePlanner(std::unique_ptr<NUClear::Environment> environment);
+        class DivePlanner : public NUClear::Reactor {
+        public:
+            /// @brief Called by the powerplant to build and setup the DivePlanner reactor.
+            explicit DivePlanner(std::unique_ptr<NUClear::Environment> environment);
 
-    private:
-    	float SPEED_THRESHOLD;
-    	float DISTANCE_THRESHOLD;
-    };
-
-}
-}
-}
+        private:
+            float SPEED_THRESHOLD;
+            float DISTANCE_THRESHOLD;
+        };
+    }  // namespace planning
+}  // namespace behaviour
+}  // namespace module
 
 
 #endif

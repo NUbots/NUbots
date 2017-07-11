@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with the NUbots Codebase.  If not, see <http://www.gnu.org/licenses/>.
  *
- * Copyright 2013 NUBots <nubots@nubots.net>
+ * Copyright 2013 NUbots <nubots@nubots.net>
  */
 
 #ifndef DARWIN_DARWINRAWSENSORS_H
@@ -34,10 +34,10 @@ namespace Types {
      * @brief This represents the raw gyro values from the CM730 (they are read from the board in ZYX)
      */
     struct Gyro {
-        Gyro() : x(0), y(0), z(0) {}
-        uint16_t x;
-        uint16_t y;
+        Gyro() : z(0), y(0), x(0) {}
         uint16_t z;
+        uint16_t y;
+        uint16_t x;
     };
 
     /**
@@ -79,14 +79,12 @@ namespace Types {
      * @brief This represents data that comes from the CM730
      */
     struct CM730Data {
-        CM730Data() : buttons(0), voltage(0), gyroscope(), accelerometer(), temperature(0), battery(0) {}
+        CM730Data() : buttons(0), gyroscope(), accelerometer(), voltage(0) {}
         uint8_t buttons;
-        uint8_t voltage;
+        uint8_t reserved[7] = {0};
         Gyro gyroscope;
         Accelerometer accelerometer;
-        uint8_t reserved[6] = {0};
-        uint8_t temperature;
-        uint16_t battery;
+        uint8_t voltage;
     };
 
     /**
