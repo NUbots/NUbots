@@ -146,7 +146,7 @@ namespace vision {
             // Partition our segments so that they are split between above and below the horizon
 
             auto split = std::partition(std::begin(segments), std::end(segments), [image] (const RansacGoalModel::GoalSegment& segment) {
-                return arma::dot(image.horizon_normal,segment.left + segment.right / 2) > 0;
+                return arma::dot(convert<double,3>(image.horizon_normal),segment.left + segment.right / 2) > 0;
             });
 
             // Make an array of our partitions

@@ -145,7 +145,7 @@ namespace module {
             std::vector<Eigen::Vector2i> edges;
 
             // For each of these points move upward until we find a strong transition to green
-            Plane<3> horizon(classifiedImage.horizon_normal);
+            Plane<3> horizon(convert<double,3>(classifiedImage.horizon_normal));
             for(auto& point : points) {
                 //Project up to horizon
                 int horizon_Y = getImageFromCam(horizon.directionalProjection(getCamFromImage(convert<int, 2>(point),cam),arma::vec3({0,0,1})), cam);
