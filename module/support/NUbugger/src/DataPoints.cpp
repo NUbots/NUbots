@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with the NUbots Codebase.  If not, see <http://www.gnu.org/licenses/>.
  *
- * Copyright 2013 NUBots <nubots@nubots.net>
+ * Copyright 2013 NUbots <nubots@nubots.net>
  */
 
 #include "NUbugger.h"
@@ -33,12 +33,13 @@ namespace support {
 
         handles["data_point"].push_back(on<Trigger<DataPoint>>().then([this](const DataPoint& dataPoint) {
 
-            uint filterId = dataPointFilterIds.find(dataPoint.label) == dataPointFilterIds.end()
-                ? dataPointFilterIds.insert(std::make_pair(dataPoint.label, dataPointFilterId++)).first->second
-                : dataPointFilterIds[dataPoint.label];
+            uint filterId =
+                dataPointFilterIds.find(dataPoint.label) == dataPointFilterIds.end()
+                    ? dataPointFilterIds.insert(std::make_pair(dataPoint.label, dataPointFilterId++)).first->second
+                    : dataPointFilterIds[dataPoint.label];
 
             send(dataPoint, filterId);
         }));
     }
-}
-}
+}  // namespace support
+}  // namespace module

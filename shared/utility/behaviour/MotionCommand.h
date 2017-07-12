@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with the NUbots Codebase.  If not, see <http://www.gnu.org/licenses/>.
  *
- * Copyright 2013 NUBots <nubots@nubots.net>
+ * Copyright 2013 NUbots <nubots@nubots.net>
  */
 #ifndef UTILITY_BEHAVIOUR_MOTIONCOMMAND_H
 #define UTILITY_BEHAVIOUR_MOTIONCOMMAND_H
@@ -38,21 +38,21 @@ namespace behaviour {
 
     inline MotionCommand WalkToState(Transform2D goalState_) {
         MotionCommand cmd;
-        cmd.type = MotionCommand::Type::Value::WalkToState;
+        cmd.type      = MotionCommand::Type::Value::WalkToState;
         cmd.goalState = convert<double, 3>(goalState_);
         return cmd;
     }
 
     inline MotionCommand BallApproach(arma::vec2 kickTarget_) {
         MotionCommand cmd;
-        cmd.type = MotionCommand::Type::Value::BallApproach;
+        cmd.type       = MotionCommand::Type::Value::BallApproach;
         cmd.kickTarget = convert<double, 2>(kickTarget_);
         return cmd;
     }
 
     inline MotionCommand DirectCommand(Transform2D walkCommand_) {
         MotionCommand cmd;
-        cmd.type = MotionCommand::Type::Value::DirectCommand;
+        cmd.type        = MotionCommand::Type::Value::DirectCommand;
         cmd.walkCommand = convert<double, 3>(walkCommand_);
         return cmd;
     }
@@ -68,7 +68,7 @@ namespace behaviour {
     // //     Ball
     // // };
     // // TargetType targetLookAt = WayPoint;
-}
-}
+}  // namespace behaviour
+}  // namespace utility
 
 #endif

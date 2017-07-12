@@ -4,7 +4,7 @@
         {
             "folder_exclude_patterns":
             [
-                "build*",
+                "NUbots/build*",
                 ".vagrant"
             ],
             "path": "."
@@ -18,8 +18,8 @@
         "detect_indentation": false,
         "default_line_ending": "unix",
         "ClangFormat": {
-            "format" : "file",
-            "format_on_save": false
+            "style": "file",
+            "format_on_save": true
         }
     }
 }

@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with the NUbots Codebase.  If not, see <http://www.gnu.org/licenses/>.
  *
- * Copyright 2013 NUBots <nubots@nubots.net>
+ * Copyright 2013 NUbots <nubots@nubots.net>
  */
 
 #ifndef MODULES_BEHAVIOUR_STRATEGY_KICKATGOAL_H
@@ -26,27 +26,27 @@
 
 namespace module {
 namespace behaviour {
-namespace strategy {
+    namespace strategy {
 
-    class KickAtGoal : public NUClear::Reactor {
-    private:
-        NUClear::clock::duration ballActiveTimeout;
-        NUClear::clock::time_point ballLastSeen;
-        NUClear::clock::time_point goalLastSeen;
+        class KickAtGoal : public NUClear::Reactor {
+        private:
+            NUClear::clock::duration ballActiveTimeout;
+            NUClear::clock::time_point ballLastSeen;
+            NUClear::clock::time_point goalLastSeen;
 
-        void doBehaviour();
-        void walkToBall();
-        void spinToWin();
+            void doBehaviour();
+            void walkToBall();
+            void spinToWin();
 
-        message::behaviour::Behaviour::State currentState = message::behaviour::Behaviour::INIT;
-    public:
-        /// @brief Called by the powerplant to build and setup the KickAtGoal reactor.
-        explicit KickAtGoal(std::unique_ptr<NUClear::Environment> environment);
-    };
+            message::behaviour::Behaviour::State currentState = message::behaviour::Behaviour::INIT;
 
-}
-}
-}
+        public:
+            /// @brief Called by the powerplant to build and setup the KickAtGoal reactor.
+            explicit KickAtGoal(std::unique_ptr<NUClear::Environment> environment);
+        };
+    }  // namespace strategy
+}  // namespace behaviour
+}  // namespace module
 
 
 #endif

@@ -20,39 +20,37 @@
 #ifndef UTILITY_MATH_RANSAC_RANSACCONEMODEL_H
 #define UTILITY_MATH_RANSAC_RANSACCONEMODEL_H
 
-#include <array>
 #include <armadillo>
+#include <array>
 #include "utility/math/geometry/Cone.h"
 
 namespace utility {
 namespace math {
-namespace ransac {
+    namespace ransac {
 
-    //3D only!
-    class RansacConeModel : public utility::math::geometry::Cone<3> {
-    public:
+        // 3D only!
+        class RansacConeModel : public utility::math::geometry::Cone<3> {
+        public:
+            static constexpr size_t REQUIRED_POINTS = 3;
+            using DataPoint                         = arma::vec3;
 
-        static constexpr size_t REQUIRED_POINTS = 3;
-        using DataPoint = arma::vec3;
+            bool regenerate(const std::array<DataPoint, REQUIRED_POINTS>& points);
 
-        bool regenerate(const std::array<DataPoint, REQUIRED_POINTS>& points);
+            double calculateError(const DataPoint& p) const;
 
-        double calculateError(const DataPoint& p) const;
+            template <typename Iterator>
+            void refineModel(Iterator&, Iterator&, const double&) {
+                // commented out due to performance concerns - works well though
+                // leastSquaresUpdate(first,last,candidateThreshold);
+            }
 
-        template <typename Iterator>
-        void refineModel(Iterator&, Iterator&, const double&) {
-            //commented out due to performance concerns - works well though
-            //leastSquaresUpdate(first,last,candidateThreshold);
-        }
-
-        Vector getTopVector()const ;
-        Vector getBottomVector()const ;
-        Vector getLeftVector()const ;
-        Vector getRightVector()const ;
-        Vector getPoint(float g, float theta)const ;
-    };
-
-}
+            Vector getTopVector() const;
+            Vector getBottomVector() const;
+            Vector getLeftVector() const;
+            Vector getRightVector() const;
+            Vector getPoint(float g, float theta) const;
+        };
+    }
 }
 }
 

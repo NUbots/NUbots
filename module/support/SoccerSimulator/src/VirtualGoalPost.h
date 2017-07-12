@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with the NUbots Codebase.  If not, see <http://www.gnu.org/licenses/>.
  *
- * Copyright 2013 NUBots <nubots@nubots.net>
+ * Copyright 2013 NUbots <nubots@nubots.net>
  */
 
 #ifndef MODULE_SUPPORT_VIRTUALGOALPOST
@@ -22,10 +22,10 @@
 
 #include <armadillo>
 
-#include "message/vision/VisionObjects.h"
 #include "message/input/CameraParameters.h"
 #include "message/input/Sensors.h"
 #include "message/support/FieldDescription.h"
+#include "message/vision/VisionObjects.h"
 
 #include "utility/math/matrix/Transform2D.h"
 
@@ -34,23 +34,29 @@ namespace support {
 
     class VirtualGoalPost {
     private:
-        arma::vec2 getCamRay(const arma::vec3& norm1, const arma::vec3& norm2, const message::input::CameraParameters& params, arma::uvec2 imSize);
+        arma::vec2 getCamRay(const arma::vec3& norm1,
+                             const arma::vec3& norm2,
+                             const message::input::CameraParameters& params,
+                             arma::uvec2 imSize);
 
     public:
-        VirtualGoalPost(arma::vec3 position_, float height_, message::vision::Goal::Side side_, message::vision::Goal::Team team_);
+        VirtualGoalPost(arma::vec3 position_,
+                        float height_,
+                        message::vision::Goal::Side side_,
+                        message::vision::Goal::Team team_);
 
-        arma::vec3 position = {0, 0, 0};
-        float height = 1.1;
-        message::vision::Goal::Side side = message::vision::Goal::Side::UNKNOWN_SIDE; // LEFT, RIGHT, or UNKNOWN
-        message::vision::Goal::Team team = message::vision::Goal::Team::UNKNOWN_TEAM; // OWN, OPPONENT, or UNKNOWN
+        arma::vec3 position              = {0, 0, 0};
+        float height                     = 1.1;
+        message::vision::Goal::Side side = message::vision::Goal::Side::UNKNOWN_SIDE;  // LEFT, RIGHT, or UNKNOWN
+        message::vision::Goal::Team team = message::vision::Goal::Team::UNKNOWN_TEAM;  // OWN, OPPONENT, or UNKNOWN
 
         message::vision::Goal detect(const message::input::CameraParameters& camParams,
-                    utility::math::matrix::Transform2D& robotPose,
-                    const message::input::Sensors& sensors,
-                    arma::vec4& /*error*/,
-                    const message::support::FieldDescription& field);
+                                     utility::math::matrix::Transform2D& robotPose,
+                                     const message::input::Sensors& sensors,
+                                     arma::vec4& /*error*/,
+                                     const message::support::FieldDescription& field);
     };
-}
-}
+}  // namespace support
+}  // namespace module
 
 #endif  // MODULE_SUPPORT_VIRTUALGOALPOST

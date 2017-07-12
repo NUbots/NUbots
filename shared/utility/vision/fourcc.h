@@ -57,6 +57,7 @@ namespace vision {
                                              0,  0, 16,  0,  0,
                                              0,  0, -8,  0,  0};
     // clang-format on
+
     const Eigen::Matrix<int8_t, 5, 5> GREEN_AXIAL =
         Eigen::Map<const Eigen::Matrix<int8_t, 5, 5>>(GREEN_AXIAL_ARR, 5, 5);
 
@@ -68,11 +69,13 @@ namespace vision {
                                               0, 16,   0, 16,   0,
                                               0,  0, -12,  0,   0};
     // clang-format on
+
     const Eigen::Matrix<int8_t, 5, 5> RED_AT_BLUE =
         Eigen::Map<const Eigen::Matrix<int8_t, 5, 5>>(RED_AT_BLUE_ARR, 5, 5);
 
     // Red at green locations and blue at green locations, on red rows
     // Red at green locations and blue at green locations, on blue rows are the transpose of this mask.
+
     // clang-format off
     constexpr int8_t RED_AT_GREEN_ARR[25] = { 0,  0,  4,  0,  0,
                                               0, -8,  0, -8,  0,
@@ -84,7 +87,6 @@ namespace vision {
         Eigen::Map<const Eigen::Matrix<int8_t, 5, 5>>(RED_AT_GREEN_ARR, 5, 5);
 
     inline const auto getSubImage(uint x, uint y, uint width, uint height, const std::vector<uint8_t>& data) {
-
         // Extract the 5x5 matrix centered at (x, y).
         // Clamped to borders.
         x = x < 2 ? 2 : x > (width - 2) ? width - 2 : x;
@@ -477,7 +479,7 @@ namespace vision {
             return (FOURCC::UNKNOWN);
         }
     }
-}
-}
+}  // namespace vision
+}  // namespace utility
 
 #endif  // UTILITY_VISION_FOURCC_H

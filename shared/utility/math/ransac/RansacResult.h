@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with the NUbots Codebase.  If not, see <http://www.gnu.org/licenses/>.
  *
- * Copyright 2013 NUBots <nubots@nubots.net>
+ * Copyright 2013 NUbots <nubots@nubots.net>
  */
 
 #ifndef UTILITY_MATH_RANSAC_RANSACRESULT_H
@@ -26,38 +26,32 @@
 
 namespace utility {
 namespace math {
-namespace ransac {
+    namespace ransac {
 
-    template <typename Iterator, typename Model>
-    struct RansacResult {
-    public:
+        template <typename Iterator, typename Model>
+        struct RansacResult {
+        public:
+            RansacResult() : model(), first(), last() {}
 
-        RansacResult() : model(), first(), last() {
-        }
+            RansacResult(const Model& model, const Iterator& first, const Iterator& last)
+                : model(model), first(first), last(last) {}
 
-        RansacResult(const Model& model, const Iterator& first, const Iterator& last)
-        : model(model)
-        , first(first)
-        , last(last) {
-        }
+            Model model;
 
-        Model model;
+            Iterator begin() const {
+                return first;
+            }
 
-        Iterator begin() const {
-            return first;
-        }
+            Iterator end() const {
+                return last;
+            }
 
-        Iterator end() const {
-            return last;
-        }
-
-    private:
-        Iterator first;
-        Iterator last;
-    };
-
-}
-}
-}
+        private:
+            Iterator first;
+            Iterator last;
+        };
+    }  // namespace ransac
+}  // namespace math
+}  // namespace utility
 
 #endif

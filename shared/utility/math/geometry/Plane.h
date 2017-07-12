@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with the NUbots Codebase.  If not, see <http://www.gnu.org/licenses/>.
  *
- * Copyright 2013 NUBots <nubots@nubots.net>
+ * Copyright 2013 NUbots <nubots@nubots.net>
  */
 #ifndef UTILITY_MATH_GEOMETRY_PLANE_H
 #define UTILITY_MATH_GEOMETRY_PLANE_H
@@ -24,69 +24,70 @@
 
 namespace utility {
 namespace math {
-namespace geometry {
+    namespace geometry {
 
-	template<int n>
-	class Plane {
-	private:
-		using Vector = arma::vec::fixed<n>;
+        template <int n>
+        class Plane {
+        private:
+            using Vector = arma::vec::fixed<n>;
 
-	public:
-		Vector normal;
-		Vector point;
+        public:
+            Vector normal;
+            Vector point;
 
-		Plane() : normal(arma::fill::zeros), point(arma::fill::zeros) {}
-		Plane(Vector normal_, Vector point_ = arma::zeros(n)) : normal(arma::fill::zeros), point(arma::fill::zeros) {
-			setFromNormal(normal_, point_);
+            Plane() : normal(arma::fill::zeros), point(arma::fill::zeros) {}
+            Plane(Vector normal_, Vector point_ = arma::zeros(n))
+                : normal(arma::fill::zeros), point(arma::fill::zeros) {
+                setFromNormal(normal_, point_);
+            }
 
-		}
+            void setFromNormal(Vector normal_, Vector point_ = arma::zeros(n)) {
+                if (arma::norm(normal_, 1) <= 0) {
+                    throw std::domain_error(
+                        "Plane::setFromNormal - Normal is zero vector. Normal to plane must be non-zero!");
+                }
+                normal = arma::normalise(normal_);
+                point  = point_;
+            }
 
-		void setFromNormal(Vector normal_, Vector point_ = arma::zeros(n)){
-			if(arma::norm(normal_, 1) <= 0){
-				throw std::domain_error("Plane::setFromNormal - Normal is zero vector. Normal to plane must be non-zero!");
-			}
-			normal = arma::normalise(normal_);
-			point = point_;
-		}
+            void setFrom3Points(Vector p1, Vector p2, Vector p3) {
+                point = p1;
+                normal =
+                    arma::normalise(arma::cross(p2 - p1, p3 - p1));  // Positive if p3 palmside (RHR) relative to p2
+                if (arma::norm(normal, 1) <= 0) {
+                    throw std::domain_error("Plane::setFrom3Points - 3 Points are colinear!");
+                }
+            }
 
-		void setFrom3Points(Vector p1, Vector p2, Vector p3){
-			point = p1;
-			normal = arma::normalise(arma::cross(p2-p1,p3-p1));// Positive if p3 palmside (RHR) relative to p2
-			if(arma::norm(normal, 1) <= 0){
-				throw std::domain_error("Plane::setFrom3Points - 3 Points are colinear!");
-			}
-		}
+            Vector intersect(ParametricLine<n> l) const {
+                double lDotN = arma::dot(l.direction, normal);
+                if (lDotN == 0) {
+                    throw std::domain_error("Plane::intersect - Plane does not meet line!");
+                }
+                double tIntersection = arma::dot(point - l.point, normal) / lDotN;
+                if (!l.tValid(tIntersection)) {
+                    throw std::domain_error(
+                        "Plane::intersect - Plane does not meet line segment (intersection falls off segment)!");
+                }
+                return tIntersection * l.direction + l.point;
+            }
 
-		Vector intersect(ParametricLine<n> l) const {
-			double lDotN = arma::dot(l.direction, normal);
-			if(lDotN == 0){
-				throw std::domain_error("Plane::intersect - Plane does not meet line!");
-			}
-			double tIntersection = arma::dot(point - l.point, normal) / lDotN;
-			if(!l.tValid(tIntersection)){
-				throw std::domain_error("Plane::intersect - Plane does not meet line segment (intersection falls off segment)!");
-			}
-			return tIntersection * l.direction + l.point;
-		}
+            double distanceToPoint(const Vector& p) {
+                return std::fabs(arma::dot(p - point, normal));
+            }
 
-        double distanceToPoint(const Vector& p){
-            return std::fabs(arma::dot(p - point,normal));
-        }
+            Vector orthogonalProjection(const Vector& p) {
+                return p - distanceToPoint(p) * normal;
+            }
 
-        Vector orthogonalProjection(const Vector& p){
-            return p - distanceToPoint(p) * normal;
-        }
-        Vector directionalProjection(const Vector& p, const Vector& dir){
-            //Create line
-            ParametricLine<n> line(p,p+dir);
-            //Return intersection of this plane with line
-            return intersect(line);
-        }
-
-
-	};
-
-}
-}
-}
+            Vector directionalProjection(const Vector& p, const Vector& dir) {
+                // Create line
+                ParametricLine<n> line(p, p + dir);
+                // Return intersection of this plane with line
+                return intersect(line);
+            }
+        };
+    }  // namespace geometry
+}  // namespace math
+}  // namespace utility
 #endif

@@ -13,7 +13,7 @@ from subprocess import call, STDOUT
 def register(command):
 
     # Install help
-    command.help = 'Install the system onto the target drone'
+    command.help = 'Install the system onto the target system'
 
     # Drone arguments
     command.add_argument('ip_addr'
@@ -92,3 +92,10 @@ def run(ip_addr, hostname, config, scripts, user, toolchain, **kwargs):
 
     if config in ['ignore', 'i']:
         cprint('Ignoring configuration changes', 'blue', attrs=['bold'])
+
+    # Pipe the git commit to file
+    with open(os.path.join(build_dir, 'version.txt'), 'w') as f:
+        call(["git", "log", "-1"], stdout=f)
+
+    call(['rsync', '-avzPLR', '--checksum', '-e ssh'] + ['version.txt'] + [target_dir])
+

@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with the NUbots Codebase.  If not, see <http://www.gnu.org/licenses/>.
  *
- * Copyright 2013 NUBots <nubots@nubots.net>
+ * Copyright 2013 NUbots <nubots@nubots.net>
  */
 
 #ifndef MODULES_VISION_RANSACGOALMODEL_H
@@ -52,8 +52,9 @@ namespace vision {
 
         template <typename Iterator>
         void refineModel(Iterator& begin, Iterator& end, const double& threshold) {
-            //TODO: new least squares model for plane
+            // TODO: new least squares model for plane
             // Allows us to iterate through only the left states without copying
+
             // struct LIt {
             //     Iterator state;
             //     LIt(Iterator state) : state(state) {}
@@ -74,11 +75,9 @@ namespace vision {
             // left.leastSquaresUpdate(LIt(begin), LIt(end), threshold);
             // right.leastSquaresUpdate(RIt(begin), RIt(end), threshold);
         }
-
-};
-
-}
-}
+    };
+}  // namespace vision
+}  // namespace module
 
 
 #endif

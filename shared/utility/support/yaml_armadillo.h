@@ -14,176 +14,176 @@
  * You should have received a copy of the GNU General Public License
  * along with the NUbots Codebase.  If not, see <http://www.gnu.org/licenses/>.
  *
- * Copyright 2013 NUBots <nubots@nubots.net>
+ * Copyright 2013 NUbots <nubots@nubots.net>
  */
 
 #ifndef UTILITY_SUPPORT_YAML_ARMADILLO_H
 #define UTILITY_SUPPORT_YAML_ARMADILLO_H
 
+#include <yaml-cpp/yaml.h>
 #include <armadillo>
 #include <iostream>
-#include <yaml-cpp/yaml.h>
 #include "utility/support/yaml_expression.h"
 
 namespace YAML {
 
-    template<>
-    struct convert<arma::Col<int>> {
-        static Node encode(const arma::Col<int>& rhs) {
-            Node node;
+template <>
+struct convert<arma::Col<int>> {
+    static Node encode(const arma::Col<int>& rhs) {
+        Node node;
 
-            for (const double& d : rhs) {
-                node.push_back(d);
-            }
-
-            return node;
+        for (const double& d : rhs) {
+            node.push_back(d);
         }
 
-        static bool decode(const Node& node, arma::Col<int>& rhs) {
-            rhs.resize(node.size());
-            for (uint i = 0; i < node.size(); ++i) {
+        return node;
+    }
+
+    static bool decode(const Node& node, arma::Col<int>& rhs) {
+        rhs.resize(node.size());
+        for (uint i = 0; i < node.size(); ++i) {
+            rhs[i] = node[i].as<utility::support::Expression>();
+        }
+
+        return true;
+    }
+};
+
+template <>
+struct convert<arma::Col<int64_t>> {
+    static Node encode(const arma::Col<int64_t>& rhs) {
+        Node node;
+
+        for (const double& d : rhs) {
+            node.push_back(d);
+        }
+
+        return node;
+    }
+
+    static bool decode(const Node& node, arma::Col<int64_t>& rhs) {
+        rhs.resize(node.size());
+        for (uint i = 0; i < node.size(); ++i) {
+            rhs[i] = node[i].as<utility::support::Expression>();
+        }
+
+        return true;
+    }
+};
+
+template <>
+struct convert<arma::vec> {
+    static Node encode(const arma::vec& rhs) {
+        Node node;
+
+        for (const double& d : rhs) {
+            node.push_back(d);
+        }
+
+        return node;
+    }
+
+    static bool decode(const Node& node, arma::vec& rhs) {
+        rhs.resize(node.size());
+        for (uint i = 0; i < node.size(); ++i) {
+            rhs[i] = node[i].as<utility::support::Expression>();
+        }
+
+        return true;
+    }
+};
+
+template <uint size>
+struct convert<arma::vec::fixed<size>> {
+    static Node encode(const arma::vec::fixed<size>& rhs) {
+        Node node;
+
+        for (uint i = 0; i < size; ++i) {
+            node.push_back(rhs[i]);
+        }
+
+        return node;
+    }
+
+    static bool decode(const Node& node, arma::vec::fixed<size>& rhs) {
+        if (node.size() == size) {
+
+            for (uint i = 0; i < size; ++i) {
                 rhs[i] = node[i].as<utility::support::Expression>();
             }
 
             return true;
         }
-    };
+        else {
+            return false;
+        }
+    }
+};
 
-    template<>
-    struct convert<arma::Col<int64_t>> {
-        static Node encode(const arma::Col<int64_t>& rhs) {
-            Node node;
+template <>
+struct convert<arma::mat> {
+    // TODO: use arma::vec decoding for each row?
+    static Node encode(const arma::mat& rhs) {
+        Node node;
 
-            for (const double& d : rhs) {
-                node.push_back(d);
+        for (uint i = 0; i < rhs.n_rows; ++i) {
+            Node row;
+            for (uint j = 0; j < rhs.n_cols; ++j) {
+                row.push_back(rhs(i, j));
             }
-
-            return node;
+            node.push_back(row);
         }
 
-        static bool decode(const Node& node, arma::Col<int64_t>& rhs) {
-            rhs.resize(node.size());
-            for (uint i = 0; i < node.size(); ++i) {
-                rhs[i] = node[i].as<utility::support::Expression>();
-            }
+        return node;
+    }
 
-            return true;
-        }
-    };
+    static bool decode(const Node& node, arma::mat& rhs) {
 
-    template<>
-    struct convert<arma::vec> {
-        static Node encode(const arma::vec& rhs) {
-            Node node;
+        rhs.resize(node.size(), node[0].size());
 
-            for (const double& d : rhs) {
-                node.push_back(d);
-            }
-
-            return node;
-        }
-
-        static bool decode(const Node& node, arma::vec& rhs) {
-            rhs.resize(node.size());
-            for (uint i = 0; i < node.size(); ++i) {
-                rhs[i] = node[i].as<utility::support::Expression>();
-            }
-
-            return true;
-        }
-    };
-
-    template<uint size>
-    struct convert<arma::vec::fixed<size>> {
-        static Node encode(const arma::vec::fixed<size>& rhs) {
-            Node node;
-
-            for(uint i = 0; i < size; ++i) {
-                node.push_back(rhs[i]);
-            }
-
-            return node;
-        }
-
-        static bool decode(const Node& node, arma::vec::fixed<size>& rhs) {
-            if (node.size() == size) {
-
-                for (uint i = 0; i < size; ++i) {
-                    rhs[i] = node[i].as<utility::support::Expression>();
-                }
-
-                return true;
-            }
-            else {
-                return false;
+        for (uint i = 0; i < node.size(); ++i) {
+            for (uint j = 0; j < node[i].size(); ++j) {
+                rhs(i, j) = node[i][j].as<utility::support::Expression>();
             }
         }
-    };
 
-    template<>
-    struct convert<arma::mat> {
-        // TODO: use arma::vec decoding for each row?
-        static Node encode(const arma::mat& rhs) {
-            Node node;
+        return true;
+    }
+};
 
-            for (uint i = 0; i < rhs.n_rows; ++i) {
-                Node row;
-                for (uint j = 0; j < rhs.n_cols; ++j) {
-                    row.push_back(rhs(i,j));
-                }
-                node.push_back(row);
+template <uint rows, uint cols>
+struct convert<arma::mat::fixed<rows, cols>> {
+    // TODO: use arma::vec decoding for each row?
+    static Node encode(const arma::mat::fixed<rows, cols>& rhs) {
+        Node node;
+
+        for (uint i = 0; i < rows; ++i) {
+            Node row;
+            for (uint j = 0; j < cols; ++j) {
+                row.push_back(rhs(i, j));
             }
-
-            return node;
+            node.push_back(row);
         }
 
-        static bool decode(const Node& node, arma::mat& rhs) {
+        return node;
+    }
 
-            rhs.resize(node.size(), node[0].size());
-
-            for (uint i = 0; i < node.size(); ++i) {
-                for (uint j = 0; j < node[i].size(); ++j) {
-                    rhs(i,j) = node[i][j].as<utility::support::Expression>();
-                }
-            }
-
-            return true;
-        }
-    };
-
-    template<uint rows, uint cols>
-    struct convert<arma::mat::fixed<rows, cols>> {
-        // TODO: use arma::vec decoding for each row?
-        static Node encode(const arma::mat::fixed<rows, cols>& rhs) {
-            Node node;
+    static bool decode(const Node& node, arma::mat::fixed<rows, cols>& rhs) {
+        if (node.size() == rows) {  // TODO: check cols
 
             for (uint i = 0; i < rows; ++i) {
-                Node row;
                 for (uint j = 0; j < cols; ++j) {
-                    row.push_back(rhs(i,j));
+                    rhs(i, j) = node[i][j].as<utility::support::Expression>();
                 }
-                node.push_back(row);
             }
 
-            return node;
+            return true;
         }
-
-        static bool decode(const Node& node, arma::mat::fixed<rows, cols>& rhs) {
-            if (node.size() == rows) { // TODO: check cols
-
-                for (uint i = 0; i < rows; ++i) {
-                    for (uint j = 0; j < cols; ++j) {
-                        rhs(i,j) = node[i][j].as<utility::support::Expression>();
-                    }
-                }
-
-                return true;
-            }
-            else {
-                return false;
-            }
+        else {
+            return false;
         }
-    };
-}
+    }
+};
+}  // namespace YAML
 
-#endif // UTILITY_SUPPORT_yaml_armadillo_H
+#endif  // UTILITY_SUPPORT_yaml_armadillo_H

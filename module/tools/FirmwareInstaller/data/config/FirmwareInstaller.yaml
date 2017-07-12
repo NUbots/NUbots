@@ -1,7 +1,8 @@
-device: "/dev/ttyUSB0"
-cm730:
-  flash: true
-  firmware: "/path/to/cm730_firmware.hex"
-dynamixel:
-  flash: false
-  firmware: "/path/to/,x28_firmware.hex"
+device: "/dev/CM730"
+firmwares:
+  - device: CM730
+    battery: 3Cell
+    path: "firmware/cm730_3cell.bin"
+  - device: CM730
+    battery: 4Cell
+    path: "firmware/cm730_4cell.bin"

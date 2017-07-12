@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with the NUbots Codebase.  If not, see <http://www.gnu.org/licenses/>.
  *
- * Copyright 2013 NUBots <nubots@nubots.net>
+ * Copyright 2013 NUbots <nubots@nubots.net>
  */
 
 #ifndef MODULES_RESEARCH_SCRIPTOPTIMIZER_H
@@ -24,23 +24,23 @@
 #include "message/platform/darwin/DarwinSensors.h"
 
 namespace module {
-    namespace research {
+namespace research {
 
-        /**
-         * TODO document
-         *
-         * @author Trent Houliston
-         */
-        class ScriptOptimizer : public NUClear::Reactor {
-        private:
-            volatile bool recording;
-            volatile int iteration;
-            std::string metadata;
-            std::vector<std::shared_ptr<const message::platform::darwin::DarwinSensors>> sensors;
-        public:
-            explicit ScriptOptimizer(std::unique_ptr<NUClear::Environment> environment);
-        };
-    }
-}
+    /**
+     * TODO document
+     *
+     * @author Trent Houliston
+     */
+    class ScriptOptimizer : public NUClear::Reactor {
+    private:
+        volatile bool recording;
+        volatile int iteration;
+        std::string metadata;
+        std::vector<std::shared_ptr<const message::platform::darwin::DarwinSensors>> sensors;
+
+    public:
+        explicit ScriptOptimizer(std::unique_ptr<NUClear::Environment> environment);
+    };
+}  // namespace research
+}  // namespace module
 #endif
-

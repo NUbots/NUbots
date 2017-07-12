@@ -61,7 +61,7 @@ namespace input {
             image->Release();
         }
     };
-}
-}
+}  // namespace input
+}  // namespace module
 
 #endif  // MODULE_INPUT_CMAERA_SPINNAKERCAMERA_H

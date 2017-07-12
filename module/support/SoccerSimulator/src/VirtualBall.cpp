@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with the NUbots Codebase.  If not, see <http://www.gnu.org/licenses/>.
  *
- * Copyright 2013 NUBots <nubots@nubots.net>
+ * Copyright 2013 NUbots <nubots@nubots.net>
  */
 
 #include "VirtualBall.h"
@@ -22,8 +22,8 @@
 #include <armadillo>
 
 #include "utility/input/ServoID.h"
-#include "utility/math/matrix/Rotation3D.h"
 #include "utility/math/coordinates.h"
+#include "utility/math/matrix/Rotation3D.h"
 #include "utility/math/vision.h"
 #include "utility/support/eigen_armadillo.h"
 
@@ -42,19 +42,13 @@ namespace support {
     using utility::math::vision::screenToImage;
     using utility::math::vision::getFieldToCam;
 
-    VirtualBall::VirtualBall()
-    : position(arma::fill::zeros)
-    , velocity(arma::fill::zeros)
-    , diameter(0.1)
-    , rd(rand()) {
-    }
+    VirtualBall::VirtualBall() : position(arma::fill::zeros), velocity(arma::fill::zeros), diameter(0.1), rd(rand()) {}
 
     VirtualBall::VirtualBall(arma::vec2 position, float diameter)
-    : position({position[0], position[1], diameter * 0.5})
-    , velocity(arma::fill::zeros)
-    , diameter(diameter)
-    , rd(rand()) {
-    }
+        : position({position[0], position[1], diameter * 0.5})
+        , velocity(arma::fill::zeros)
+        , diameter(diameter)
+        , rd(rand()) {}
 
     // utility::math::matrix::Transform2D ballPose;
     arma::vec3 position;
@@ -63,7 +57,10 @@ namespace support {
     // arma::vec2 position;
     float diameter;
 
-    Ball VirtualBall::detect(const CameraParameters& cam, Transform2D robotPose, const Sensors& sensors, arma::vec4 /*error*/){
+    Ball VirtualBall::detect(const CameraParameters& cam,
+                             Transform2D robotPose,
+                             const Sensors& sensors,
+                             arma::vec4 /*error*/) {
 
         Ball result;
 
@@ -91,14 +88,12 @@ namespace support {
 
         // Project the centre to the screen and work out the radius as if it was in the centre
         arma::ivec2 centre = screenToImage(projectCamSpaceToScreen(rBCc, cam), convert<uint, 2>(cam.imageSizePixels));
-        //TODO actually project this
+        // TODO actually project this
         double radius = 100 * std::tan(angle * 0.5);
 
         // Check our ball is on the screen at all and if so set the values
-        if (  centre[0] > 0
-           && centre[0] < int(cam.imageSizePixels[0])
-           && centre[1] > 0
-           && centre[1] < int(cam.imageSizePixels[1])) {
+        if (centre[0] > 0 && centre[0] < int(cam.imageSizePixels[0]) && centre[1] > 0
+            && centre[1] < int(cam.imageSizePixels[1])) {
 
             // Set our circle parameters for simulating the ball
             result.circle.centre = convert<double, 2>(arma::conv_to<arma::vec>::from(centre));
@@ -107,48 +102,54 @@ namespace support {
             // Get our transform to world coordinates
             const Transform3D& Htw = convert<double, 4, 4>(sensors.world);
             const Transform3D& Htc = convert<double, 4, 4>(sensors.forwardKinematics.at(ServoID::HEAD_PITCH));
-            Transform3D Hcw = Htc.i() * Htw;
-            Transform3D Hwc = Hcw.i();
+            Transform3D Hcw        = Htc.i() * Htw;
+            Transform3D Hwc        = Hcw.i();
 
-            result.position = convert<double, 3>(Hwc.transformPoint(rBCc));
+            arma::vec3 rBWw = Hwc.transformPoint(rBCc);
+            // Attach the measurement to the object
+            result.measurements.push_back(Ball::Measurement());
+            result.measurements.back().rBCc =
+                convert<double, 3, 1>(rBWw);  // TODO: This needs updating to actually provide rBCc
 
             // Measure points around the ball as a normal distribution
             arma::vec3 rEBc;
-            if (rBCc[0] == 0.0 && rBCc[1] == 0.0 ) {
+            if (rBCc[0] == 0.0 && rBCc[1] == 0.0) {
                 if (rBCc[2] > 0.0) {
-                    rEBc = { 1, 0, 0};
-                } else {
-                    rEBc = { -1, 0, 0};
+                    rEBc = {1, 0, 0};
+                }
+                else {
+                    rEBc = {-1, 0, 0};
                 }
             }
             else {
-                //NOTE: this may not work correctly for view fields > 180 degrees
-                rEBc = { M_SQRT1_2, 0, M_SQRT1_2 };
+                // NOTE: this may not work correctly for view fields > 180 degrees
+                rEBc = {M_SQRT1_2, 0, M_SQRT1_2};
             }
-            //set rEBC to be a properly sized radius vector facing from the ball centre towards the (top or inner int he case of extreme values) ball edge
+            // set rEBC to be a properly sized radius vector facing from the ball centre towards the (top or inner int
+            // he case of extreme values) ball edge
             rEBc = rBCcLength * arma::normalise(rEBc - rEBc * arma::dot(rEBc, rBCc) / rBCcLength);
 
 
             for (int i = 0; i < 50; ++i) {
                 //
                 double radialJitter = radialDistribution(rd);
-                double angleOffset = angularDistribution(rd);
+                double angleOffset  = angularDistribution(rd);
 
                 // Get a random number for which direciton the measurement is
                 arma::vec3 rEBc = rEBc * std::tan(angle + radialJitter / 2.0);
 
                 // Make a rotation matrix to rotate our vector to our target
-                result.edgePoints.push_back(convert<double, 3>(arma::normalise(Rotation3D(arma::normalise(rBCc), angle + angleOffset) * rEBc)));
+                result.edgePoints.push_back(
+                    convert<double, 3>(arma::normalise(Rotation3D(arma::normalise(rBCc), angle + angleOffset) * rEBc)));
             }
         }
 
-        result.visObject.sensors = const_cast<Sensors*>(&sensors)->shared_from_this();
-        result.visObject.timestamp = sensors.timestamp; // TODO: Eventually allow this to be different to sensors.
+        result.visObject.sensors   = const_cast<Sensors*>(&sensors)->shared_from_this();
+        result.visObject.timestamp = sensors.timestamp;  // TODO: Eventually allow this to be different to sensors.
 
 
-        //If no measurements are in the Ball, then there it was not observed
+        // If no measurements are in the Ball, then there it was not observed
         return result;
     }
-
-}
-}
+}  // namespace support
+}  // namespace module

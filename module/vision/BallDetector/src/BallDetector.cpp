@@ -24,13 +24,12 @@
 #include "message/input/CameraParameters.h"
 #include "message/support/FieldDescription.h"
 #include "message/vision/ClassifiedImage.h"
-#include "message/vision/VisionObjects.h"
 #include "message/vision/LookUpTable.h"
+#include "message/vision/VisionObjects.h"
 
 #include "utility/math/coordinates.h"
-#include "utility/math/geometry/Plane.h"
 #include "utility/math/geometry/Line.h"
-#include "utility/math/geometry/Circle.h"
+#include "utility/math/geometry/Plane.h"
 #include "utility/math/matrix/Transform3D.h"
 #include "utility/math/ransac/Ransac.h"
 #include "utility/math/ransac/RansacConeModel.h"
@@ -38,8 +37,8 @@
 #include "utility/nubugger/NUhelpers.h"
 #include "utility/support/eigen_armadillo.h"
 #include "utility/support/yaml_expression.h"
-#include "utility/vision/fourcc.h"
 #include "utility/vision/Vision.h"
+#include "utility/vision/fourcc.h"
 
 #include "utility/math/geometry/Cone.h"
 
@@ -86,21 +85,32 @@ namespace vision {
     using Colour = utility::vision::Colour;
 
 
-    float BallDetector::approximateCircleGreenRatio(const RansacConeModel& cone, const Image& image, const LookUpTable& lut, const CameraParameters& params) {
+    float BallDetector::approximateCircleGreenRatio(const RansacConeModel& cone,
+                                                    const Image& image,
+                                                    const LookUpTable& lut,
+                                                    const CameraParameters& params) {
 
         std::vector<std::pair<Eigen::Vector2i, Eigen::Vector2i>> debug;
-        float r = 0;
-        int numGreen = 0;
+        float r           = 0;
+        int numGreen      = 0;
         int actualSamples = 0;
-        for(int i = 0; i < green_radial_samples; r = (++i) * cone.gradient / float(green_radial_samples)) {
+        for (int i = 0; i < green_radial_samples; r = (++i) * cone.gradient / float(green_radial_samples)) {
             float theta = 0;
-            if(r == 0){
-                arma::vec2 pos = projectCamSpaceToScreen(cone.unit_axis, params);
-                arma::ivec2 ipos = screenToImage(pos, convert<uint,2>(params.imageSizePixels));
-                if(ipos[0] >= 0 && ipos[0] < int(image.dimensions[0]) && ipos[1] >= 0 && ipos[1] < int(image.dimensions[1])){
-                    debug.push_back(std::make_pair(convert<int,2>(ipos), convert<int,2>(ipos + arma::ivec2{1,1})));
-                    char c = static_cast<char>(utility::vision::getPixelColour(lut,
-                            getPixel(ipos[0], ipos[1], image.dimensions[0], image.dimensions[1], image.data, static_cast<FOURCC>(image.format))));
+            if (r == 0) {
+                arma::vec2 pos   = projectCamSpaceToScreen(cone.unit_axis, params);
+                arma::ivec2 ipos = screenToImage(pos, convert<uint, 2>(params.imageSizePixels));
+                if (ipos[0] >= 0 && ipos[0] < int(image.dimensions[0]) && ipos[1] >= 0
+                    && ipos[1] < int(image.dimensions[1])) {
+                    debug.push_back(std::make_pair(convert<int, 2>(ipos), convert<int, 2>(ipos + arma::ivec2{1, 1})));
+                    char c =
+                        static_cast<char>(utility::vision::getPixelColour(lut,
+                                                                          getPixel(ipos[0],
+                                                                                   ipos[1],
+                                                                                   image.dimensions[0],
+                                                                                   image.dimensions[1],
+                                                                                   image.data,
+                                                                                   static_cast<FOURCC>(image.format))));
+
                     if (c == Colour::GREEN) {
                         numGreen++;
                     }
@@ -108,13 +118,21 @@ namespace vision {
                 }
                 continue;
             }
-            for(int j = 0; j < green_angular_samples; theta = (++j) * 2 * M_PI / float(green_angular_samples)) {
-                arma::vec2 pos = projectCamSpaceToScreen(cone.getPoint(r,theta), params);
-                arma::ivec2 ipos = screenToImage(pos, convert<uint,2>(params.imageSizePixels));
-                if(ipos[0] >= 0 && ipos[0] < int(image.dimensions[0]) && ipos[1] >= 0 && ipos[1] < int(image.dimensions[1])){
-                    debug.push_back(std::make_pair(convert<int,2>(ipos), convert<int,2>(ipos + arma::ivec2{1,1})));
-                    char c = static_cast<char>(utility::vision::getPixelColour(lut,
-                            getPixel(ipos[0], ipos[1], image.dimensions[0], image.dimensions[1], image.data, static_cast<FOURCC>(image.format))));
+            for (int j = 0; j < green_angular_samples; theta = (++j) * 2 * M_PI / float(green_angular_samples)) {
+                arma::vec2 pos   = projectCamSpaceToScreen(cone.getPoint(r, theta), params);
+                arma::ivec2 ipos = screenToImage(pos, convert<uint, 2>(params.imageSizePixels));
+                if (ipos[0] >= 0 && ipos[0] < int(image.dimensions[0]) && ipos[1] >= 0
+                    && ipos[1] < int(image.dimensions[1])) {
+                    debug.push_back(std::make_pair(convert<int, 2>(ipos), convert<int, 2>(ipos + arma::ivec2{1, 1})));
+                    char c =
+                        static_cast<char>(utility::vision::getPixelColour(lut,
+                                                                          getPixel(ipos[0],
+                                                                                   ipos[1],
+                                                                                   image.dimensions[0],
+                                                                                   image.dimensions[1],
+                                                                                   image.data,
+                                                                                   static_cast<FOURCC>(image.format))));
+
                     if (c == Colour::GREEN) {
                         numGreen++;
                     }
@@ -145,27 +163,27 @@ namespace vision {
         , green_radial_samples(0.0)
         , green_angular_samples(0.0)
         , kmeansClusterer()
-        , lastFrame(),
-        print_throwout_logs(false) {
+        , lastFrame()
+        , print_throwout_logs(false) {
 
 
-        on<Configuration>("BallDetector.yaml").then([this] (const Configuration& config) {
+        on<Configuration>("BallDetector.yaml").then([this](const Configuration& config) {
 
             MINIMUM_POINTS_FOR_CONSENSUS = config["ransac"]["minimum_points_for_consensus"].as<uint>();
-            CONSENSUS_ERROR_THRESHOLD = config["ransac"]["consensus_error_threshold"].as<Expression>();
+            CONSENSUS_ERROR_THRESHOLD    = config["ransac"]["consensus_error_threshold"].as<Expression>();
 
             MAXIMUM_ITERATIONS_PER_FITTING = config["ransac"]["maximum_iterations_per_fitting"].as<uint>();
-            MAXIMUM_FITTED_MODELS = config["ransac"]["maximum_fitted_models"].as<uint>();
-            MAXIMUM_DISAGREEMENT_RATIO = config["maximum_disagreement_ratio"].as<Expression>();
+            MAXIMUM_FITTED_MODELS          = config["ransac"]["maximum_fitted_models"].as<uint>();
+            MAXIMUM_DISAGREEMENT_RATIO     = config["maximum_disagreement_ratio"].as<Expression>();
 
             maximum_relative_seed_point_distance = config["maximum_relative_seed_point_distance"].as<double>();
 
             measurement_distance_variance_factor = config["measurement_distance_variance_factor"].as<Expression>();
-            measurement_bearing_variance = config["measurement_bearing_variance"].as<Expression>();
-            measurement_elevation_variance = config["measurement_elevation_variance"].as<Expression>();
+            measurement_bearing_variance         = config["measurement_bearing_variance"].as<Expression>();
+            measurement_elevation_variance       = config["measurement_elevation_variance"].as<Expression>();
 
             green_ratio_threshold = config["green_ratio_threshold"].as<Expression>();
-            green_radial_samples = config["green_radial_samples"].as<Expression>();
+            green_radial_samples  = config["green_radial_samples"].as<Expression>();
             green_angular_samples = config["green_angular_samples"].as<Expression>();
 
             kmeansClusterer.configure(config["clustering"]);
@@ -175,217 +193,244 @@ namespace vision {
             lastFrame.time = NUClear::clock::now();
         });
 
-        on<Trigger<ClassifiedImage>
-         , With<CameraParameters>
-         , With<FieldDescription>
-         , With<LookUpTable>
-         , Single
-         , Priority::LOW>().then("Ball Detector", [this](
-            std::shared_ptr<const ClassifiedImage> rawImage
-            , const CameraParameters& cam
-            , const FieldDescription& field
-            , const LookUpTable& lut
-            ) {
+        on<Trigger<ClassifiedImage>,
+           With<CameraParameters>,
+           With<FieldDescription>,
+           With<LookUpTable>,
+           Single,
+           Priority::LOW>()
+            .then("Ball Detector",
+                  [this](std::shared_ptr<const ClassifiedImage> rawImage,
+                         const CameraParameters& cam,
+                         const FieldDescription& field,
+                         const LookUpTable& lut) {
 
-            const auto& image   = *rawImage;
-            const auto& sensors = *image.sensors;
+                      const auto& image   = *rawImage;
+                      const auto& sensors = *image.sensors;
 
 
-            // This holds our points that may be a part of the ball
-            std::vector<arma::vec3> ballPoints;
-            ballPoints.reserve(image.ballPoints.size());
+                      // This holds our points that may be a part of the ball
+                      std::vector<arma::vec3> ballPoints;
+                      ballPoints.reserve(image.ballPoints.size());
 
-            for (const auto& point : image.ballPoints) {
-                //TODO: generalise to configured camera
-                arma::vec2 pt = imageToScreen(convert<int, 2>(point),convert<uint, 2>(cam.imageSizePixels));
-                ballPoints.push_back(getCamFromScreen(pt,cam));
-            }
+                      for (const auto& point : image.ballPoints) {
+                          // TODO: generalise to configured camera
+                          arma::vec2 pt = imageToScreen(convert<int, 2>(point), convert<uint, 2>(cam.imageSizePixels));
+                          ballPoints.push_back(getCamFromScreen(pt, cam));
+                      }
 
-            // Use ransac to find the ball
-            auto ransacResults = Ransac<RansacConeModel>::fitModels(ballPoints.begin()
-                                                                    , ballPoints.end()
-                                                                    , MINIMUM_POINTS_FOR_CONSENSUS
-                                                                    , MAXIMUM_ITERATIONS_PER_FITTING
-                                                                    , MAXIMUM_FITTED_MODELS
-                                                                    , CONSENSUS_ERROR_THRESHOLD);
+                      // Use ransac to find the ball
+                      auto ransacResults = Ransac<RansacConeModel>::fitModels(ballPoints.begin(),
+                                                                              ballPoints.end(),
+                                                                              MINIMUM_POINTS_FOR_CONSENSUS,
+                                                                              MAXIMUM_ITERATIONS_PER_FITTING,
+                                                                              MAXIMUM_FITTED_MODELS,
+                                                                              CONSENSUS_ERROR_THRESHOLD);
 
-            auto balls = std::make_unique<std::vector<Ball>>();
-            balls->reserve(ransacResults.size());
+                      auto balls = std::make_unique<std::vector<Ball>>();
+                      balls->reserve(ransacResults.size());
 
-            // if(print_throwout_logs) log("Ransac : ", ransacResults.size(), "results (MAX = ", MAXIMUM_FITTED_MODELS, ")");
+                      // if(print_throwout_logs) log("Ransac : ", ransacResults.size(), "results (MAX = ",
+                      // MAXIMUM_FITTED_MODELS, ")");
 
-            arma::mat44 camToGround = convert<double, 4, 4>(sensors.camToGround);
+                      arma::mat44 camToGround = convert<double, 4, 4>(sensors.camToGround);
 
-            for (auto& result : ransacResults) {
+                      for (auto& result : ransacResults) {
 
-                // Transform our centre into kinematics coordinates
-                arma::vec3 axis = result.model.unit_axis;
+                          // Transform our centre into kinematics coordinates
+                          arma::vec3 axis = result.model.unit_axis;
 
-                // Get the 4 points around our circle
-                arma::vec2 top   = projectCamSpaceToScreen(result.model.getTopVector(),cam);
-                arma::vec2 base  = projectCamSpaceToScreen(result.model.getBottomVector(),cam);
-                arma::vec2 left  = projectCamSpaceToScreen(result.model.getLeftVector(),cam);
-                arma::vec2 right = projectCamSpaceToScreen(result.model.getRightVector(),cam);
+                          // Get the 4 points around our circle
+                          arma::vec2 top   = projectCamSpaceToScreen(result.model.getTopVector(), cam);
+                          arma::vec2 base  = projectCamSpaceToScreen(result.model.getBottomVector(), cam);
+                          arma::vec2 left  = projectCamSpaceToScreen(result.model.getLeftVector(), cam);
+                          arma::vec2 right = projectCamSpaceToScreen(result.model.getRightVector(), cam);
 
-                double cameraHeight = camToGround(2, 3);
+                          double cameraHeight = camToGround(2, 3);
 
-                // Get a unit vector pointing to the centre of the ball
-                arma::vec3 ballCentreRay = axis;
+                          // Get a unit vector pointing to the centre of the ball
+                          arma::vec3 ballCentreRay = axis;
 
-                // Get the centre of our ball in screen space
-                arma::vec2 ballCentreScreen = projectCamSpaceToScreen(ballCentreRay,cam);
-                arma::ivec2 ballCentreImage = screenToImage(ballCentreRay,convert<uint,2>(cam.imageSizePixels));
-                float ballRadiusScreen = arma::norm(top-base) / 4 + arma::norm(left - right) / 4;
+                          // Get the centre of our ball in screen space
+                          arma::vec2 ballCentreScreen = projectCamSpaceToScreen(ballCentreRay, cam);
+                          arma::ivec2 ballCentreImage =
+                              screenToImage(ballCentreRay, convert<uint, 2>(cam.imageSizePixels));
+                          float ballRadiusScreen = arma::norm(top - base) / 4 + arma::norm(left - right) / 4;
 
-                /************************************************
-                 *                  THROWOUTS                   *
-                 ************************************************/
+                          /************************************************
+                           *                  THROWOUTS                   *
+                           ************************************************/
 
-                if(print_throwout_logs){
-                    // log("Ball model: g =  ", result.model.gradient, " axis =   ", result.model.unit_axis.t());
-                    // log("Ball screen: r = ", ballRadiusScreen,      " centre = ",  ballCentreScreen.t());
-                }
+                          if (print_throwout_logs) {
+                              // log("Ball model: g =  ", result.model.gradient, " axis =   ",
+                              // result.model.unit_axis.t()); log("Ball screen: r = ", ballRadiusScreen,      " centre =
+                              // ",  ballCentreScreen.t());
+                          }
 
-                // CENTRE OF BALL IS ABOVE THE HORIZON
-                if(arma::dot(convert<double,3>(image.horizon_normal),ballCentreRay) > 0){
-                    if(print_throwout_logs) {
-                        log("Ball discarded: arma::dot(image.horizon_normal,ballCentreRay) > 0 ");
-                        // log("Horizon normal = ", image.horizon_normal.transpose());
-                        // log("Ball centre ray = ", ballCentreRay.t());
-                    }
-                    continue;
-                }
+                          // CENTRE OF BALL IS ABOVE THE HORIZON
+                          if (arma::dot(convert<double, 3>(image.horizon_normal), ballCentreRay) > 0) {
+                              if (print_throwout_logs) {
+                                  log("Ball discarded: arma::dot(image.horizon_normal,ballCentreRay) > 0 ");
+                                  // log("Horizon normal = ", image.horizon_normal.transpose());
+                                  // log("Ball centre ray = ", ballCentreRay.t());
+                              }
+                              continue;
+                          }
 
-                // //DOES HAVE INTERNAL GREEN
-                float greenRatio = approximateCircleGreenRatio(result.model, *(image.image), lut, cam);
-                if (greenRatio > green_ratio_threshold) {
-                    if(print_throwout_logs) log("Ball discarded: greenRatio > green_ratio_threshold");
-                    continue;
-                }
+                          // //DOES HAVE INTERNAL GREEN
+                          float greenRatio = approximateCircleGreenRatio(result.model, *(image.image), lut, cam);
+                          if (greenRatio > green_ratio_threshold) {
+                              if (print_throwout_logs) log("Ball discarded: greenRatio > green_ratio_threshold");
+                              continue;
+                          }
 
-                // // DOES NOT TOUCH 3 SEED POINTS
-                arma::vec3 sDist({ std::numeric_limits<double>::max(), std::numeric_limits<double>::max(), std::numeric_limits<double>::max() });
+                          // // DOES NOT TOUCH 3 SEED POINTS
+                          arma::vec3 sDist({std::numeric_limits<double>::max(),
+                                            std::numeric_limits<double>::max(),
+                                            std::numeric_limits<double>::max()});
 
-                // Loop through our seed points and find the minimum distance one
-                for(uint i = 0; i < 3; ++i) {
-                    for(auto& s : image.ballSeedPoints[i].points) {
-                        arma::ivec2 s_ = convert<int,2>(s);
-                        arma::vec3 s_cam = getCamFromImage(s_,cam);
-                        //Angle error
-                        double dist = std::acos(result.model.dotDistanceToPoint(s_cam));
-                        if(sDist[i] > dist) {
-                            sDist[i] = dist;
-                        }
-                    }
-                }
-                // Check if our largest one is too far away
-                if(arma::max(sDist) > maximum_relative_seed_point_distance) {
-                    if(print_throwout_logs) log("Ball discarded: arma::max(sDist) / result.model.radius > maximum_relative_seed_point_distance");
-                    // if(print_throwout_logs) log("arma::max(sDist) = ", arma::max(sDist), " > ", maximum_relative_seed_point_distance);
-                    continue;
-                }
+                          // Loop through our seed points and find the minimum distance one
+                          for (uint i = 0; i < 3; ++i) {
+                              for (auto& s : image.ballSeedPoints[i].points) {
+                                  arma::ivec2 s_   = convert<int, 2>(s);
+                                  arma::vec3 s_cam = getCamFromImage(s_, cam);
+                                  // Angle error
+                                  double dist = std::acos(result.model.dotDistanceToPoint(s_cam));
 
-                // // BALL IS CLOSER THAN 1/2 THE HEIGHT OF THE ROBOT BY WIDTH
-                double widthDistance = widthBasedDistanceToCircle(field.ball_radius, top, base, cam);
-                if(widthDistance < cameraHeight * 0.5) {
-                    if(print_throwout_logs) log("Ball discarded: widthDistance < cameraHeight * 0.5");
-                    continue;
-                }
+                                  if (sDist[i] > dist) {
+                                      sDist[i] = dist;
+                                  }
+                              }
+                          }
+                          // Check if our largest one is too far away
+                          if (arma::max(sDist) > maximum_relative_seed_point_distance) {
+                              if (print_throwout_logs)
+                                  log("Ball discarded: arma::max(sDist) / result.model.radius > "
+                                      "maximum_relative_seed_point_distance");
+                              // if(print_throwout_logs) log("arma::max(sDist) = ", arma::max(sDist), " > ",
+                              // maximum_relative_seed_point_distance);
+                              continue;
+                          }
 
-                // // IF THE DISAGREEMENT BETWEEN THE WIDTH AND PROJECTION BASED DISTANCES ARE TOO LARGE
-                // // Project this vector to a plane midway through the ball
-                Plane ballBisectorPlane({ 0, 0, 1 }, { 0, 0, field.ball_radius });
-                arma::vec3 ballCentreGroundProj = projectCamToPlane(ballCentreRay, camToGround, ballBisectorPlane);
-                double ballCentreGroundProjDistance = arma::norm(ballCentreGroundProj);
+                          // // BALL IS CLOSER THAN 1/2 THE HEIGHT OF THE ROBOT BY WIDTH
+                          double widthDistance = widthBasedDistanceToCircle(field.ball_radius, top, base, cam);
 
-                if(std::abs((widthDistance - ballCentreGroundProjDistance) / std::max(ballCentreGroundProjDistance, widthDistance)) > MAXIMUM_DISAGREEMENT_RATIO) {
-                    if(print_throwout_logs) log("Ball discarded: Width and proj distance disagree too much: width =", widthDistance, "proj =", ballCentreGroundProjDistance);
-                    continue;
-                }
+                          if (widthDistance < cameraHeight * 0.5) {
+                              if (print_throwout_logs) log("Ball discarded: widthDistance < cameraHeight * 0.5");
+                              continue;
+                          }
 
-                /************************************************
-                 *                 MEASUREMENTS                 *
-                 ************************************************/
+                          // // IF THE DISAGREEMENT BETWEEN THE WIDTH AND PROJECTION BASED DISTANCES ARE TOO LARGE
+                          // // Project this vector to a plane midway through the ball
+                          Plane ballBisectorPlane({0, 0, 1}, {0, 0, field.ball_radius});
+                          arma::vec3 ballCentreGroundProj =
+                              projectCamToPlane(ballCentreRay, camToGround, ballBisectorPlane);
+                          double ballCentreGroundProjDistance = arma::norm(ballCentreGroundProj);
 
-                Ball b;
-                b.visObject.sensors = image.sensors;
+                          if (std::abs((widthDistance - ballCentreGroundProjDistance)
+                                       / std::max(ballCentreGroundProjDistance, widthDistance))
+                              > MAXIMUM_DISAGREEMENT_RATIO) {
+                              if (print_throwout_logs)
+                                  log("Ball discarded: Width and proj distance disagree too much: width =",
+                                      widthDistance,
+                                      "proj =",
+                                      ballCentreGroundProjDistance);
+                              continue;
+                          }
 
-                // Get our transform to world coordinates
-                const Transform3D& Htw = convert<double, 4, 4>(sensors.world);
-                const Transform3D& Htc = convert<double, 4, 4>(sensors.forwardKinematics.at(ServoID::HEAD_PITCH));
-                Transform3D Hcw = Htc.i() * Htw;
-                Transform3D Hwc = Hcw.i();
+                          /************************************************
+                           *                 MEASUREMENTS                 *
+                           ************************************************/
 
-                // Work out how far away the ball must be to be at the distance it is from the camera
-                arma::vec3 width_rBWw = Hwc.transformPoint(ballCentreRay * widthDistance);
+                          Ball b;
+                          b.visObject.sensors = image.sensors;
 
-                // Put our ball centre projection into the same space
-                arma::vec3 proj_rBWw = Hwc.transformPoint(ballCentreGroundProj);
+                          // Get our transform to world coordinates
+                          const Transform3D& Htw = convert<double, 4, 4>(sensors.world);
+                          const Transform3D& Htc =
+                              convert<double, 4, 4>(sensors.forwardKinematics.at(ServoID::HEAD_PITCH));
+                          Transform3D Hcw = Htc.i() * Htw;
+                          Transform3D Hwc = Hcw.i();
 
-                // Average our two centroids
-                arma::vec3 rBWw = (width_rBWw);
+                          // Work out how far away the ball must be to be at the distance it is from the camera
+                          arma::vec3 width_rBCc = ballCentreRay * widthDistance;
+                          arma::vec3 width_rBWw = Hwc.transformPoint(width_rBCc);
 
-                // Attach the position to the object
-                b.position = convert<double, 3>(rBWw);
+                          // Put our ball centre projection into the same space
+                          arma::vec3 proj_rBCc = ballCentreGroundProj;
+                          arma::vec3 proj_rBWw = Hwc.transformPoint(proj_rBCc);
 
-                Transform3D Hgc       = camToGround;
-                arma::vec3 width_rBGg = Hgc.transformPoint(ballCentreRay * widthDistance);
-                arma::vec3 proj_rBGg  = Hgc.transformPoint(ballCentreGroundProj);
-                b.torsoSpacePosition  = convert<double, 3>(width_rBGg);
-                // log("ball pos1 =", b.position);
-                // log("ball pos2 =", b.torsoSpacePosition);
-                // log("width_rBGg =", width_rBGg.t());
-                // log("proj_rBGg =", proj_rBGg.t());
-                // log("Ball Camera Space =",(ballCentreRay * widthDistance).t());
-                // log("camToGround =\n",camToGround);
+                          // Average our two centroids
+                          arma::vec3 rBCc = (width_rBCc);
+                          arma::vec3 rBWw = (width_rBWw);
 
-                // On screen visual shape
-                // Estimate for now
-                b.circle.radius = ballRadiusScreen;
-                b.circle.centre = convert<double, 2>(screenToImageCts(ballCentreScreen,convert<uint,2>(cam.imageSizePixels)));
+                          // Attach the measurement to the object
+                          b.measurements.push_back(Ball::Measurement());
+                          b.measurements.back().rBCc = convert<double, 3, 1>(rBCc);
+                          Eigen::Vector3d cov_diag(0.1, 0.01, 0.01);
+                          b.measurements.back().covariance = cov_diag.asDiagonal();
 
-                // Angular positions from the camera
-                b.visObject.screenAngular = convert<double, 2>(arma::atan(convert<double, 2>(cam.pinhole.pixelsToTanThetaFactor) % ballCentreScreen));
-                b.visObject.angularSize   << getParallaxAngle(left, right, cam), getParallaxAngle(top, base, cam);
+                          Transform3D Hgc       = camToGround;
+                          arma::vec3 width_rBGg = Hgc.transformPoint(ballCentreRay * widthDistance);
+                          arma::vec3 proj_rBGg  = Hgc.transformPoint(ballCentreGroundProj);
+                          // log("ball pos1 =", b.position);
+                          // log("ball pos2 =", b.torsoSpacePosition);
+                          // log("width_rBGg =", width_rBGg.t());
+                          // log("proj_rBGg =", proj_rBGg.t());
+                          // log("Ball Camera Space =",(ballCentreRay * widthDistance).t());
+                          // log("camToGround =\n",camToGround);
 
-                // Add our points
-                for (auto& point : result) {
-                    b.edgePoints.push_back(convert<double, 3>(getCamFromScreen(imageToScreen(point, convert<uint, 2>(image.dimensions)), cam)));
-                }
+                          // On screen visual shape
+                          // Estimate for now
+                          b.circle.radius = ballRadiusScreen;
+                          b.circle.centre = convert<double, 2>(
+                              screenToImageCts(ballCentreScreen, convert<uint, 2>(cam.imageSizePixels)));
 
-                balls->push_back(std::move(b));
-            }
+                          // Angular positions from the camera
+                          b.visObject.screenAngular = convert<double, 2>(
+                              arma::atan(convert<double, 2>(cam.pinhole.pixelsToTanThetaFactor) % ballCentreScreen));
+                          b.visObject.angularSize << getParallaxAngle(left, right, cam),
+                              getParallaxAngle(top, base, cam);
 
-            for(auto a = balls->begin(); a != balls->end(); ++a) {
-                Circle acircle(a->circle.radius, convert<double, 2>(a->circle.centre));
+                          // Add our points
+                          for (auto& point : result) {
+                              b.edgePoints.push_back(convert<double, 3>(
+                                  getCamFromScreen(imageToScreen(point, convert<uint, 2>(image.dimensions)), cam)));
+                          }
+                          b.visObject.timestamp = NUClear::clock::now();
 
-                for(auto b = a + 1; b != balls->end();) {
+                          balls->push_back(std::move(b));
+                      }
 
-                    // If our balls overlap
-                    if(acircle.distanceToPoint(convert<double, 2>(b->circle.centre)) < b->circle.radius) {
-                        // Pick the better ball
-                        if(acircle.radius < b->circle.radius) {
-                            // Throw-out b
-                            b = balls->erase(b);
-                        }
-                        else {
-                            a = balls->erase(a);
+                      for (auto a = balls->begin(); a != balls->end(); ++a) {
+                          Circle acircle(a->circle.radius, convert<double, 2>(a->circle.centre));
 
-                            if(a == b) {
-                                ++b;
-                            }
-                        }
-                    }
-                    else {
-                        ++b;
-                    }
-                }
-            }
-            // log("Final result: ", balls->size(), "balls");
-            emit(std::move(balls));
-            lastFrame.time = sensors.timestamp;
-        });
+                          for (auto b = a + 1; b != balls->end();) {
+
+                              // If our balls overlap
+                              if (acircle.distanceToPoint(convert<double, 2>(b->circle.centre)) < b->circle.radius) {
+                                  // Pick the better ball
+                                  if (acircle.radius < b->circle.radius) {
+                                      // Throw-out b
+                                      b = balls->erase(b);
+                                  }
+                                  else {
+                                      a = balls->erase(a);
+
+                                      if (a == b) {
+                                          ++b;
+                                      }
+                                  }
+                              }
+                              else {
+                                  ++b;
+                              }
+                          }
+                      }
+                      // log("Final result: ", balls->size(), "balls");
+                      emit(std::move(balls));
+                      lastFrame.time = sensors.timestamp;
+                  });
     }
-
-}
-}
+}  // namespace vision
+}  // namespace module

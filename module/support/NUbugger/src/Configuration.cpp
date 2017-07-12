@@ -14,16 +14,16 @@
  * You should have received a copy of the GNU General Public License
  * along with the NUbots Codebase.  If not, see <http://www.gnu.org/licenses/>.
  *
- * Copyright 2013 NUBots <nubots@nubots.net>
+ * Copyright 2013 NUbots <nubots@nubots.net>
  */
 
 #include "NUbugger.h"
 
 #include <yaml-cpp/yaml.h>
 
-#include "utility/time/time.h"
 #include "utility/file/fileutil.h"
 #include "utility/strutil/strutil.h"
+#include "utility/time/time.h"
 
 /**
  * @author Monica Olejniczak
@@ -37,7 +37,8 @@ namespace support {
 
     /**
      * @brief Saves the configuration file using the root YAML node.
-     * @details Writes to the YAML file specified at the path by using a YAML emitter. This emitter takes the output stream of the
+     * @details Writes to the YAML file specified at the path by using a YAML emitter. This emitter takes the output
+     * stream of the
      * root YAML node and saves it to the file.
      *
      * @param path The path to the configuration file.
@@ -48,10 +49,10 @@ namespace support {
         utility::file::writeToFile(tempName, root);
         rename(tempName.c_str(), path.c_str());
 
-        //YAML::Emitter emitter;          // create a YAML emitter
-        //emitter << root;                // send the root node to the emitter's output stream
-        //std::ofstream fout(path);       // create an output stream to the specified path
-        //fout << emitter.c_str();        // write to the file
+        // YAML::Emitter emitter;          // create a YAML emitter
+        // emitter << root;                // send the root node to the emitter's output stream
+        // std::ofstream fout(path);       // create an output stream to the specified path
+        // fout << emitter.c_str();        // write to the file
     }
-}
-}
+}  // namespace support
+}  // namespace module
