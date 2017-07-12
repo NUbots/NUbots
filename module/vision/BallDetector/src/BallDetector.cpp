@@ -66,6 +66,8 @@ namespace vision {
     using utility::math::vision::screenToImageCts;
     using utility::math::vision::getCamFromScreen;
     using utility::math::vision::getParallaxAngle;
+    using utility::math::vision::getCamFromImage;
+    using utility::math::vision::getImageFromCam;
     using utility::math::vision::projectCamSpaceToScreen;
     using utility::math::matrix::Transform3D;
     using utility::math::geometry::Cone;
@@ -268,10 +270,9 @@ namespace vision {
                 for(uint i = 0; i < 3; ++i) {
                     for(auto& s : image.ballSeedPoints[i].points) {
                         arma::ivec2 s_ = convert<int,2>(s);
-                        arma::vec3 s_cam = getCamFromScreen(arma::vec2({s_[0],s_[1]}),cam);
-                        //TODO: change to angle error?
-                        //Points will be normalised so it should be ok
-                        double dist = result.model.distanceToPoint(s_cam);
+                        arma::vec3 s_cam = getCamFromImage(s_,cam);
+                        //Angle error
+                        double dist = std::acos(result.model.dotDistanceToPoint(s_cam));
                         if(sDist[i] > dist) {
                             sDist[i] = dist;
                         }
