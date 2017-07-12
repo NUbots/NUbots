@@ -148,7 +148,11 @@ namespace module {
             Plane<3> horizon(convert<double,3>(classifiedImage.horizon_normal));
             for(auto& point : points) {
                 //Project up to horizon
-                int horizon_Y = getImageFromCam(horizon.directionalProjection(getCamFromImage(convert<int, 2>(point),cam),arma::vec3({0,0,1})), cam);
+                int horizon_Y = getImageFromCam(
+                                                horizon.directionalProjection(
+                                                getCamFromImage(convert<int, 2>(point),cam),
+                                                arma::vec3({0,0,1})),
+                                                cam)[1];
 
                 int minY = int(std::max(3.0, double(horizon_Y)));
 

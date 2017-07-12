@@ -278,8 +278,9 @@ namespace vision {
                     }
                 }
                 // Check if our largest one is too far away
-                if(arma::max(sDist) / result.model.gradient > maximum_relative_seed_point_distance) {
+                if(arma::max(sDist) > maximum_relative_seed_point_distance) {
                     if(print_throwout_logs) log("Ball discarded: arma::max(sDist) / result.model.radius > maximum_relative_seed_point_distance");
+                    if(print_throwout_logs) log("arma::max(sDist) = ", arma::max(sDist), " > ", maximum_relative_seed_point_distance);
                     continue;
                 }
 

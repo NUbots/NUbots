@@ -63,7 +63,7 @@ namespace geometry {
         Vector projectPoint(const Vector& p) const{
             //Get normalised p
             double norm_p = arma::norm(p);
-            if(norm_p == 0) return 0;
+            if(norm_p == 0) return arma::zeros(DIM);
             Vector p_unit = p / norm_p;
 
             //Get orth projection to cone axis to construct plane

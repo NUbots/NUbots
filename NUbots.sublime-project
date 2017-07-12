@@ -18,7 +18,8 @@
         "detect_indentation": false,
         "default_line_ending": "unix",
         "ClangFormat": {
-            "format_on_save": true
+            "format" : "file",
+            "format_on_save": false
         }
     }
 }

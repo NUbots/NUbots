@@ -36,11 +36,12 @@ namespace geometry {
 		Vector point;
 
 		Plane() : normal(arma::fill::zeros), point(arma::fill::zeros) {}
-		Plane(Vector normal_, Vector point_) : normal(arma::fill::zeros), point(arma::fill::zeros) {
+		Plane(Vector normal_, Vector point_ = arma::zeros(n)) : normal(arma::fill::zeros), point(arma::fill::zeros) {
 			setFromNormal(normal_, point_);
+
 		}
 
-		void setFromNormal(Vector normal_, Vector point_ = Vector({0,0,0})){
+		void setFromNormal(Vector normal_, Vector point_ = arma::zeros(n)){
 			if(arma::norm(normal_, 1) <= 0){
 				throw std::domain_error("Plane::setFromNormal - Normal is zero vector. Normal to plane must be non-zero!");
 			}

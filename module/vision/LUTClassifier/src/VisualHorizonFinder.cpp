@@ -54,10 +54,10 @@ namespace module {
                 // Find our point to classify from (slightly above the horizon)
                 int horizon_Y = getImageFromCam(
                                                     //Project down to horizon
-                                                    horizon.directionalProjection(
-                                                            getCamFromImage(arma::ivec2({x,0}),cam),
-                                                            arma::vec({0,0,1}))
-                                                ,cam)[1];
+                                                horizon.directionalProjection(
+                                                getCamFromImage(arma::ivec2({x,0}),cam),
+                                                arma::vec({0,0,1})),
+                                                cam)[1];
                 // Find our point to classify from (slightly above the horizon)
                 int top = std::max(int(horizon_Y - VISUAL_HORIZON_BUFFER), int(0));
                 top = std::min(top, int(image.dimensions[1] - 1));
@@ -99,14 +99,14 @@ namespace module {
                 int horizon_Y = getImageFromCam(
                                                     //Project down to horizon
                                                     horizon.directionalProjection(
-                                                            getCamFromImage(arma::ivec2({x,0}),cam),
-                                                            arma::vec({0,0,1}))
-                                                ,cam)[1];
+                                                    getCamFromImage(arma::ivec2({image.dimensions[0] - 1,0}),cam),
+                                                    arma::vec({0,0,1})),
+                                                    cam)[1];
                 int top = std::max(int(horizon_Y - VISUAL_HORIZON_BUFFER), int(0));
-                top = std::min(top, int(image.dimensions[1] - 1));
+                    top = std::min(top, int(image.dimensions[1] - 1));
 
                 arma::ivec2 start = { int(image.dimensions[0] - 1), top };
-                arma::ivec2 end = { int(image.dimensions[0] - 1), int(image.dimensions[1] - 1) };
+                arma::ivec2 end   = { int(image.dimensions[0] - 1), int(image.dimensions[1] - 1) };
 
                 // Classify our segments
                 auto segments = quex->classify(image, lut, start, end, VISUAL_HORIZON_SUBSAMPLING);
