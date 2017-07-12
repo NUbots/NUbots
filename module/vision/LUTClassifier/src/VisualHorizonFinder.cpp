@@ -46,12 +46,18 @@ namespace module {
 
             // Get some local references to class variables to make text shorter
             // Line horizon(convert<double, 2>(classifiedImage.horizon.normal), classifiedImage.horizon.distance);
-            Plane<3> horizon;
+            Plane<3> horizon(classifiedImage.horizon_normal);
             auto& visualHorizon = classifiedImage.visualHorizon;
 
             // Cast lines to find our visual horizon
             for(uint x = 0; x < image.dimensions[0]; x += VISUAL_HORIZON_SPACING) {
-                int horizon_Y = getImageFromCam(horizon.orthogonalProjection(getCamFromImage(arma::ivec2({x,0}),cam)), cam)[1]; //TODO: Jake check this gross code
+                // Find our point to classify from (slightly above the horizon)
+                int horizon_Y = getImageFromCam(
+                                                    //Project down to horizon
+                                                    horizon.directionalProjection(
+                                                            getCamFromImage(arma::ivec2({x,0}),cam),
+                                                            arma::vec({0,0,1}))
+                                                ,cam)[1];
                 // Find our point to classify from (slightly above the horizon)
                 int top = std::max(int(horizon_Y - VISUAL_HORIZON_BUFFER), int(0));
                 top = std::min(top, int(image.dimensions[1] - 1));
@@ -90,7 +96,12 @@ namespace module {
             if(image.dimensions[0] - 1 % VISUAL_HORIZON_SPACING != 0) {
 
                 // Find our point to classify from (slightly above the horizon)
-                int horizon_Y = getImageFromCam(horizon.orthogonalProjection(getCamFromImage(arma::ivec2({image.dimensions[0] - 1,0}),cam)), cam)[1]; //TODO: Jake check this gross code
+                int horizon_Y = getImageFromCam(
+                                                    //Project down to horizon
+                                                    horizon.directionalProjection(
+                                                            getCamFromImage(arma::ivec2({x,0}),cam),
+                                                            arma::vec({0,0,1}))
+                                                ,cam)[1];
                 int top = std::max(int(horizon_Y - VISUAL_HORIZON_BUFFER), int(0));
                 top = std::min(top, int(image.dimensions[1] - 1));
 
