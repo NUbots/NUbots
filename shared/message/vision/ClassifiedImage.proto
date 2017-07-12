@@ -79,5 +79,8 @@ message ClassifiedImage {
     repeated Segment          verticalSegments   = 9;
     //map<uint32, Segment>      horizontalSegments = 8;
     //map<uint32, Segment>      verticalSegments   = 9;
+
+    //Old horizon TODO: phase out
+    Line                      horizon            = 10;
 }
 

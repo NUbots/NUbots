@@ -110,7 +110,7 @@ namespace vision {
         classifiedImage->ballSeedPoints[2] = imagePoints;
         classifiedImage->image = const_cast<Image*>(image.get())->shared_from_this();
         classifiedImage->sensors = const_cast<Sensors*>(sensors.get())->shared_from_this();
-        classifiedImage->horizon_normal = Eigen::Vector3d(0,0,-1);
+        classifiedImage->horizon_normal = Eigen::Vector3d(0,0,1);
         // classifiedImage->horizon.distance = 200;
         classifiedImage->dimensions = image->dimensions;
 

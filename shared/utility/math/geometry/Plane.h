@@ -40,7 +40,7 @@ namespace geometry {
 			setFromNormal(normal_, point_);
 		}
 
-		void setFromNormal(Vector normal_, Vector point_){
+		void setFromNormal(Vector normal_, Vector point_ = Vector({0,0,0})){
 			if(arma::norm(normal_, 1) <= 0){
 				throw std::domain_error("Plane::setFromNormal - Normal is zero vector. Normal to plane must be non-zero!");
 			}
@@ -62,19 +62,24 @@ namespace geometry {
 				throw std::domain_error("Plane::intersect - Plane does not meet line!");
 			}
 			double tIntersection = arma::dot(point - l.point, normal) / lDotN;
-			if(tIntersection < l.tLimits[0] || tIntersection > l.tLimits[1]){
+			if(!l.tValid(tIntersection)){
 				throw std::domain_error("Plane::intersect - Plane does not meet line segment (intersection falls off segment)!");
 			}
 			return tIntersection * l.direction + l.point;
 		}
 
-        double distanceToPoint(const arma::vec3& p){
+        double distanceToPoint(const Vector& p){
             return std::fabs(arma::dot(p - point,normal));
         }
 
-        Vector orthogonalProjection(const arma::vec3& p){
+        Vector orthogonalProjection(const Vector& p){
             return p - distanceToPoint(p) * normal;
-
+        }
+        Vector directionalProjection(const Vector& p, const Vector& dir){
+            //Create line
+            ParametricLine<n> line(p,p+dir);
+            //Return intersection of this plane with line
+            return intersect(line);
         }
 
 

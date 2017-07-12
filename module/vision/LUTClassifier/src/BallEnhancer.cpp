@@ -145,10 +145,10 @@ namespace module {
             std::vector<Eigen::Vector2i> edges;
 
             // For each of these points move upward until we find a strong transition to green
+            Plane<3> horizon(classifiedImage.horizon_normal);
             for(auto& point : points) {
-                // Line horizon(convert<double, 2>(classifiedImage.horizon.normal), classifiedImage.horizon.distance);
-                Plane<3> horizon(classifiedImage.horizon_normal, getCamFromImage(convert<int, 2>(point), cam)); //TODO: Jake check this gross code
-                int horizon_Y = getImageFromCam(horizon.orthogonalProjection(getCamFromImage(convert<int, 2>(point),cam)), cam);
+                //Project up to horizon
+                int horizon_Y = getImageFromCam(horizon.directionalProjection(getCamFromImage(convert<int, 2>(point),cam),arma::vec3({0,0,1})), cam);
 
                 int minY = int(std::max(3.0, double(horizon_Y)));
 

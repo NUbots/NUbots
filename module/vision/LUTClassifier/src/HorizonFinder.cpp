@@ -44,7 +44,17 @@ namespace module {
                 const Rotation3D& Rtc = Transform3D(convert<double, 4, 4>(sensors.forwardKinematics.at(ServoID::HEAD_PITCH))).rotation();
                 Rotation3D Rcw =  Rtc.i() * Rtw;
 
+                // Rcw = Rotation3D::createRotationZ(-Rcw.yaw()) * Rcw;
+
+                // Coordinate system: 0,0 is the centre of the screen. pos[0] is along the y axis of the
+                // camera transform, pos[1] is along the z axis (x points out of the camera)
+                auto horizon = utility::motion::kinematics::calculateHorizon(Rcw, FOCAL_LENGTH_PIXELS);
+                classifiedImage.horizon.normal = convert<double, 2>(horizon.normal);
+
+                // Move our axis to be at the top left of the screen
+                classifiedImage.horizon.distance = -horizon.distanceToPoint({ -double(image.dimensions[0]) * 0.5, -double(image.dimensions[1]) * 0.5 });
                 classifiedImage.horizon_normal = convert<double, 3>(Rcw.z());
+
         }
 
     }  // vision
