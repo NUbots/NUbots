@@ -1,7 +1,6 @@
 {
   "compilerOptions": {
     "inlineSourceMap": true,
-    "//": "Transpile ES6 imports to CommonJS imports for Node (required for ts-jest)",
     "module": "commonjs"
   },
   "extends": "./tsconfig.json"

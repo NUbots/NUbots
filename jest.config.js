@@ -8,34 +8,36 @@ module.exports = {
     '!**/tests/**',
   ],
   globals: {
-    __TS_CONFIG__: './tsconfig.test.json'
+    'ts-jest': {
+      'tsConfigFile': './tsconfig.test.json',
+    },
   },
   mapCoverage: true,
   moduleDirectories: [
     'node_modules',
-    '<rootDir>/src'
+    '<rootDir>/src',
   ],
   moduleFileExtensions: [
     'js',
     'ts',
-    'tsx'
+    'tsx',
   ],
   moduleNameMapper: {
     '\\.(css)$': 'identity-obj-proxy',
     '\\.(vert)$': '<rootDir>/__mocks__/mock.vert',
-    '\\.(frag)$': '<rootDir>/__mocks__/mock.frag'
+    '\\.(frag)$': '<rootDir>/__mocks__/mock.frag',
   },
   roots: [
-    '<rootDir>/src'
+    '<rootDir>/src',
   ],
   modulePaths: [
-    '<rootDir>/src'
+    '<rootDir>/src',
   ],
   testMatch: [
-    '**/tests/**/*.tests.{ts,tsx}'
+    '**/tests/**/*.tests.{ts,tsx}',
   ],
   transform: {
-    '.(ts|tsx)': '<rootDir>/node_modules/ts-jest/preprocessor.js'
-  }
+    '.(ts|tsx)': '<rootDir>/node_modules/ts-jest/preprocessor.js',
+  },
 }
 
