@@ -86,49 +86,50 @@ namespace localisation {
             Sync<RobotParticleLocalisation>>().then("Measurement Update",
                 [this](const std::vector<Goal>& goals, const FieldDescription& fd){
 
-            //First debug particles
-            std::cout << goals[0].visObject.sensors << std::endl;        
-            const auto& sensors = *goals[0].visObject.sensors;        
-            /* Perform time update */
-            auto curr_time = NUClear::clock::now();
-            double seconds = TimeDifferenceSeconds(curr_time,last_time_update_time);
-            last_time_update_time = curr_time;
+            if (!goals.empty()){
+                //First debug particles      
+                const auto& sensors = *goals[0].visObject.sensors;        
+                /* Perform time update */
+                auto curr_time = NUClear::clock::now();
+                double seconds = TimeDifferenceSeconds(curr_time,last_time_update_time);
+                last_time_update_time = curr_time;
 
-            filter.timeUpdate(seconds);
+                filter.timeUpdate(seconds);
 
-            for(auto goal : goals){
+                for(auto goal : goals){
 
-                //Check side and team
-                std::vector<arma::vec> poss = getPossibleFieldPositions(goal, fd);
+                    //Check side and team
+                    std::vector<arma::vec> poss = getPossibleFieldPositions(goal, fd);
 
-                for(auto& m: goal.measurement){
-                    if(m.type == Goal::MeasurementType::TOP_NORMAL) continue;
-                    if(m.type == Goal::MeasurementType::BASE_NORMAL) continue;
-                    if(m.type == Goal::MeasurementType::UNKNOWN_MEASUREMENT) continue;
-                    //Measure objects
-                    if(m.type == Goal::MeasurementType::CENTRE) {
-                        filter.ambiguousMeasurementUpdate(convert<double,3>(m.position),convert<double,3,3>(m.covariance),poss,sensors,m.type,fd);
-                    }
-                    else {
-                        filter.ambiguousMeasurementUpdate(convert<double,2>(m.normalAngles),convert<double,2,2>(m.normAngCov),poss,sensors,m.type,fd);
+                    for(auto& m: goal.measurement){
+                        if(m.type == Goal::MeasurementType::TOP_NORMAL) continue;
+                        if(m.type == Goal::MeasurementType::BASE_NORMAL) continue;
+                        if(m.type == Goal::MeasurementType::UNKNOWN_MEASUREMENT) continue;
+                        //Measure objects
+                        if(m.type == Goal::MeasurementType::CENTRE) {
+                            filter.ambiguousMeasurementUpdate(convert<double,3>(m.position),convert<double,3,3>(m.covariance),poss,sensors,m.type,fd);
+                        }
+                        else {
+                            filter.ambiguousMeasurementUpdate(convert<double,2>(m.normalAngles),convert<double,2,2>(m.normAngCov),poss,sensors,m.type,fd);
+                        }
                     }
                 }
+
+                //Emit state
+                auto selfs = std::make_unique<std::vector<Self>>();
+                selfs->push_back(Self());
+
+                //Get filter state and transform
+                arma::vec3 state = filter.get();
+                selfs->back().locObject.position = Eigen::Vector2d(state[RobotModel::kX],state[RobotModel::kY]);
+                selfs->back().heading = Eigen::Vector2d(std::cos(state[RobotModel::kAngle]),std::sin(state[RobotModel::kAngle]));
+                selfs->back().covariance = convert<double,3,3>(filter.getCovariance());
+                // emit(graph("filter state = ", state[0],state[1],state[2]));
+                // emit(graph("actual state = ", test_state[0],test_state[1],test_state[2]));
+
+
+                emit(selfs);
             }
-
-            //Emit state
-            auto selfs = std::make_unique<std::vector<Self>>();
-            selfs->push_back(Self());
-
-            //Get filter state and transform
-            arma::vec3 state = filter.get();
-            selfs->back().locObject.position = Eigen::Vector2d(state[RobotModel::kX],state[RobotModel::kY]);
-            selfs->back().heading = Eigen::Vector2d(std::cos(state[RobotModel::kAngle]),std::sin(state[RobotModel::kAngle]));
-            selfs->back().covariance = convert<double,3,3>(filter.getCovariance());
-            // emit(graph("filter state = ", state[0],state[1],state[2]));
-            // emit(graph("actual state = ", test_state[0],test_state[1],test_state[2]));
-
-
-            emit(selfs);
         });
     }
 

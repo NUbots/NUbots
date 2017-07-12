@@ -90,6 +90,7 @@ namespace localisation {
             , const FieldDescription& field
             , const Sensors& sensors){
 
+            if (!balls.empty()){
                 double quality = 1.0;   // I don't know what quality should be used for
                 if(balls.size() > 0){
 
@@ -115,6 +116,7 @@ namespace localisation {
 
 
                 }
+            }
         });
     }
 }
