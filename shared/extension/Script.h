@@ -21,6 +21,9 @@
 #include <yaml-cpp/yaml.h>
 #include <cstdlib>
 #include <nuclear>
+#include <regex>
+#include <string>
+#include <system_error>
 
 #include "FileWatch.h"
 
@@ -60,96 +63,104 @@ struct Script {
         std::vector<Target> targets;
     };
 
-    std::string fileName, hostname, binary;
+    std::string fileName, hostname, platform;
     YAML::Node config;
     std::vector<Frame> frames;
 
-    Script() : fileName(), hostname(), binary(), config(), frames() {
-        // Get hostname so we can find the correct per-robot script directory.
-        char host[255];
-        gethostname(host, 255);
-        hostname = host;
+    Script()
+        : fileName(), hostname(Script::getHostname()), platform(Script::getPlatform(hostname)), config(), frames() {}
 
-        // Get the command line arguments so we can find the current binary's name.
-        std::shared_ptr<const NUClear::message::CommandLineArguments> args =
-            NUClear::dsl::store::DataStore<NUClear::message::CommandLineArguments>::get();
-
-        std::vector<char> data(args->at(0).cbegin(), args->at(0).cend());
-        data.push_back('\0');
-        binary = basename(data.data());
-    }
-
-
-    Script(const std::vector<Frame>& frames) : fileName(), hostname(), binary(), config(), frames(frames) {
-        // Get hostname so we can find the correct per-robot script directory.
-        char host[255];
-        gethostname(host, 255);
-        hostname = host;
-
-        // Get the command line arguments so we can find the current binary's name.
-        std::shared_ptr<const NUClear::message::CommandLineArguments> args =
-            NUClear::dsl::store::DataStore<NUClear::message::CommandLineArguments>::get();
-
-        std::vector<char> data(args->at(0).cbegin(), args->at(0).cend());
-        data.push_back('\0');
-        binary = basename(data.data());
-    }
+    Script(const std::vector<Frame>& frames)
+        : fileName()
+        , hostname(Script::getHostname())
+        , platform(Script::getPlatform(hostname))
+        , config()
+        , frames(frames) {}
 
     Script(const std::string& fileName,
            const std::string& hostname,
-           const std::string& binary,
+           const std::string& platform,
            const YAML::Node& config,
            const std::vector<Frame>& frames)
-        : fileName(fileName), hostname(hostname), binary(binary), config(config), frames(frames) {}
+        : fileName(fileName), hostname(hostname), platform(platform), config(config), frames(frames) {}
 
-    Script(const std::string& fileName, const std::string& hostname, const std::string& binary)
-        : fileName(fileName), hostname(hostname), binary(binary), config(), frames() {
-        if (utility::file::exists("scripts/" + binary + "/" + fileName)) {
-            config = YAML::LoadFile("scripts/" + binary + "/" + fileName);
-        }
+    Script(const std::string& fileName, const std::string& hostname, const std::string& platform)
+        : fileName(fileName), hostname(hostname), platform(platform), config(), frames() {
 
-        else if (utility::file::exists("scripts/" + hostname + "/" + fileName)) {
+        // Per robot scripts:    Scripts that are specific to a certain robot (e.g. darwin1).
+        //                       These are to account for minor hardware variations in a robot and, as such, take
+        //                       precedence over per platform scripts.
+        // Per platform scripts: Scripts that are specific to a certain platform (e.g. darwin, igus, etc).
+        //                       These are the default scripts, it is an error for this version of the script to not
+        //                       exist.
+
+        if (utility::file::exists("scripts/" + hostname + "/" + fileName)) {
             config = YAML::LoadFile("scripts/" + hostname + "/" + fileName);
         }
 
-        else if (utility::file::exists("scripts/" + fileName)) {
-            config = YAML::LoadFile("scripts/" + fileName);
+        else if (utility::file::exists("scripts/" + platform + "/" + fileName)) {
+            NUClear::log("scripts/" + platform + "/" + fileName);
         }
 
         NUClear::log("Parsing script:", fileName);
         frames = config.as<std::vector<Frame>>();
     }
 
+    static inline std::string getHostname() {
+        // Get hostname so we can find the correct per-robot script directory.
+        char host[255];
+        gethostname(host, 255);
+        return host;
+    }
+
+    static inline std::string getPlatform(const std::string& hostname) {
+        // It is assumed that all hostnames are in the format <platform name><robot number>,
+        // such that the regular expression
+        // [a-z]+[0-9]+
+        // will match all hostnames
+        std::regex re("([a-z]+)([0-9]+)");
+        std::smatch match;
+
+        if (std::regex_match(hostname, match, re)) {
+            return match[1].str();
+        }
+
+        else {
+            throw std::system_error(
+                -1, std::system_category(), ("Failed to extract platform name from '" + hostname + "'."));
+        }
+    }
+
     Script operator[](const std::string& key) {
-        return Script(fileName, hostname, binary, config[key], frames);
+        return Script(fileName, hostname, platform, config[key], frames);
     }
 
     const Script operator[](const std::string& key) const {
-        return Script(fileName, hostname, binary, config[key], frames);
+        return Script(fileName, hostname, platform, config[key], frames);
     }
 
     Script operator[](const char* key) {
-        return Script(fileName, hostname, binary, config[key], frames);
+        return Script(fileName, hostname, platform, config[key], frames);
     }
 
     const Script operator[](const char* key) const {
-        return Script(fileName, hostname, binary, config[key], frames);
+        return Script(fileName, hostname, platform, config[key], frames);
     }
 
     Script operator[](size_t index) {
-        return Script(fileName, hostname, binary, config[index], frames);
+        return Script(fileName, hostname, platform, config[index], frames);
     }
 
     const Script operator[](size_t index) const {
-        return Script(fileName, hostname, binary, config[index], frames);
+        return Script(fileName, hostname, platform, config[index], frames);
     }
 
     Script operator[](int index) {
-        return Script(fileName, hostname, binary, config[index], frames);
+        return Script(fileName, hostname, platform, config[index], frames);
     }
 
     const Script operator[](int index) const {
-        return Script(fileName, hostname, binary, config[index], frames);
+        return Script(fileName, hostname, platform, config[index], frames);
     }
 
     template <typename T>
@@ -273,38 +284,24 @@ namespace dsl {
                 auto flags = ::extension::FileWatch::ATTRIBUTE_MODIFIED | ::extension::FileWatch::CREATED
                              | ::extension::FileWatch::UPDATED | ::extension::FileWatch::MOVED_TO;
 
-                // Get hostname so we can find the correct per-robot script directory.
-                char hostname[255];
-                gethostname(hostname, 255);
-
-                // Get the command line arguments so we can find the current binary's name.
-                std::shared_ptr<const message::CommandLineArguments> args =
-                    store::DataStore<message::CommandLineArguments>::get();
-
-                std::vector<char> data(args->at(0).cbegin(), args->at(0).cend());
-                data.push_back('\0');
-                const auto* binary = basename(data.data());
+                std::string hostname(extension::Script::getHostname()),
+                    platform(extension::Script::getPlatform(hostname));
 
                 // Set paths to the script files.
-                auto defaultConfig = "scripts/" + path;
-                auto robotConfig   = "scripts/" + std::string(hostname) + "/" + path;
-                auto binaryConfig  = "scripts/" + std::string(binary) + "/" + path;
+                auto robotScript    = "scripts/" + hostname + "/" + path;
+                auto platformScript = "scripts/" + platform + "/" + path;
 
-                if (!utility::file::exists(defaultConfig)) {
-                    throw std::runtime_error("Script file '" + defaultConfig + "' does not exist.");
+                // The platform script is the default script. This must exist!
+                if (!utility::file::exists(platformScript)) {
+                    throw std::runtime_error("Script file '" + platformScript + "' does not exist.");
                 }
 
                 // Bind our default path
-                DSLProxy<::extension::FileWatch>::bind<DSL>(reaction, defaultConfig, flags);
+                DSLProxy<::extension::FileWatch>::bind<DSL>(reaction, platformScript, flags);
 
                 // Bind our robot specific path if it exists
-                if (utility::file::exists(robotConfig)) {
-                    DSLProxy<::extension::FileWatch>::bind<DSL>(reaction, robotConfig, flags);
-                }
-
-                // Bind our binary specific path if it exists
-                if (utility::file::exists(binaryConfig)) {
-                    DSLProxy<::extension::FileWatch>::bind<DSL>(reaction, binaryConfig, flags);
+                if (utility::file::exists(robotScript)) {
+                    DSLProxy<::extension::FileWatch>::bind<DSL>(reaction, robotScript, flags);
                 }
             }
 
@@ -318,25 +315,17 @@ namespace dsl {
                 if (watch && utility::strutil::endsWith(watch.path, ".yaml")) {
                     // Return our yaml file
                     try {
-                        // Get hostname so we can find the correct per-robot script directory.
-                        char hostname[255];
-                        gethostname(hostname, 255);
-
-                        // Get the command line arguments so we can find the current binary's name.
-                        std::shared_ptr<const message::CommandLineArguments> args =
-                            store::DataStore<message::CommandLineArguments>::get();
-
-                        std::vector<char> data(args->at(0).cbegin(), args->at(0).cend());
-                        data.push_back('\0');
-                        const auto* binary = basename(data.data());
+                        std::string hostname(extension::Script::getHostname()),
+                            platform(extension::Script::getPlatform(hostname));
 
                         // Get relative path to script file.
                         auto components = utility::strutil::split(watch.path, '/');
                         std::string relativePath("");
                         bool flag = false;
+
                         for (const auto& component : components) {
-                            // Ignore the hostname/binary name if they are present.
-                            if (flag && (component.compare(hostname) != 0) && (component.compare(binary) != 0)) {
+                            // Ignore the hostname/platform name if they are present.
+                            if (flag && (component.compare(hostname) != 0) && (component.compare(platform) != 0)) {
                                 relativePath.append(component + "/");
                             }
 
@@ -349,7 +338,7 @@ namespace dsl {
                         // There will be a trailing / character.
                         relativePath.pop_back();
 
-                        return std::make_shared<::extension::Script>(relativePath, hostname, binary);
+                        return std::make_shared<::extension::Script>(relativePath, hostname, platform);
                     }
                     catch (const YAML::ParserException& e) {
                         throw std::runtime_error(watch.path + " " + std::string(e.what()));

@@ -147,8 +147,6 @@ namespace motion {
 
         // start config, see config file for documentation
 
-        bool emitLocalisation;
-
         double stanceLimitY2;
         arma::mat::fixed<3, 2> stepLimits;
         arma::mat::fixed<3, 2> velocityLimits;
@@ -242,8 +240,6 @@ namespace motion {
         void setVelocity(Transform2D velocity);
         void updateVelocity();
         void stanceReset();
-
-        void localise(Transform2D position);
 
         std::unique_ptr<std::vector<ServoCommand>> motionLegs(std::vector<std::pair<ServoID, float>> joints);
         std::unique_ptr<std::vector<ServoCommand>> motionArms(double phase);
