@@ -23,7 +23,6 @@ NUCLEAR_ROLE(
     platform::darwin::SensorFilter
 
     #Localisation
-    #localisation::RobotParticleLocalisation
     localisation::RobotParticleLocalisation
     localisation::BallLocalisation
 

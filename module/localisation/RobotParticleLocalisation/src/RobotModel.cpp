@@ -137,7 +137,7 @@ namespace localisation {
             case FieldDescription::GoalpostType::RECTANGLE: {
                 // Finding 4 corners of goalpost (4 corners x XY)
                 arma::mat goalBaseCorners(4,3);
-                goalBaseCorners.submat(0,0,3,1).each_row() = actual_position;
+                goalBaseCorners.submat(0,0,3,1).each_row() = actual_position.t();
                 goalBaseCorners.col(2).fill(0.0);
                 goalBaseCorners.submat(0,0,1,0) -= 0.5*fd.dimensions.goalpost_depth; // x for front goal corners
                 goalBaseCorners.submat(2,0,3,0) += 0.5*fd.dimensions.goalpost_depth; // x for back  goal corners
@@ -159,7 +159,7 @@ namespace localisation {
                     arma::vec3 rTFf = Htf.translation();
                     arma::mat  vecs2GoalCorners(4,3); // 4 rGTfs
                     vecs2GoalCorners = goalBaseCorners;
-                    vecs2GoalCorners.each_row() -= rTFf;
+                    vecs2GoalCorners.each_row() -= rTFf.t();
                     
                     // This section calculates the 6 possible angles to the goal edges to find the widest 2 edges
                     int j_store = 1;
@@ -171,18 +171,18 @@ namespace localisation {
                     double max_theta = 0.0;
                     for (int i=0;i<3;++i){
                         for (int j=j_store;j<4;++j){
-                            a = vecs2GoalCorners.submat(i,0,i,2);
-                            b = vecs2GoalCorners.submat(j,0,j,2);
+                            a = vecs2GoalCorners.submat(i,0,i,2).t();
+                            b = vecs2GoalCorners.submat(j,0,j,2).t();
                             theta = std::acos(arma::norm_dot(a,b));
                             if (std::abs(theta) > max_theta){
                                 max_theta = theta;
                                 if (theta > 0) {
-                                    rG_blCc = Hcf.transformPoint(goalBaseCorners.submat(j,0,j,2));
-                                    rG_brCc = Hcf.transformPoint(goalBaseCorners.submat(i,0,i,2));
+                                    rG_blCc = Hcf.transformPoint(goalBaseCorners.submat(j,0,j,2).t());
+                                    rG_brCc = Hcf.transformPoint(goalBaseCorners.submat(i,0,i,2).t());
                                 }
                                 else {
-                                    rG_blCc = Hcf.transformPoint(goalBaseCorners.submat(i,0,i,2));
-                                    rG_brCc = Hcf.transformPoint(goalBaseCorners.submat(j,0,j,2));
+                                    rG_blCc = Hcf.transformPoint(goalBaseCorners.submat(i,0,i,2).t());
+                                    rG_brCc = Hcf.transformPoint(goalBaseCorners.submat(j,0,j,2).t());
                                 }
                             }
                         }

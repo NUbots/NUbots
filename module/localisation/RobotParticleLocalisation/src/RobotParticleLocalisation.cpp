@@ -1,5 +1,5 @@
 #include "RobotParticleLocalisation.h"
-
+#include "stdio.h"
 #include "message/input/Sensors.h"
 #include "extension/Configuration.h"
 #include "message/localisation/FieldObject.h"
@@ -87,6 +87,7 @@ namespace localisation {
                 [this](const std::vector<Goal>& goals, const FieldDescription& fd){
 
             //First debug particles
+            std::cout << goals[0].visObject.sensors << std::endl;        
             const auto& sensors = *goals[0].visObject.sensors;        
             /* Perform time update */
             auto curr_time = NUClear::clock::now();
