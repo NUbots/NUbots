@@ -60,7 +60,7 @@ namespace geometry {
             return true;
         }
 
-        float distanceToPoint(const Vector& p) const{
+        Vector projectPoint(const Vector& p) const{
             //Get normalised p
             double norm_p = arma::norm(p);
             if(norm_p == 0) return 0;
@@ -73,10 +73,26 @@ namespace geometry {
             Vector cone_vec = arma::normalise(unit_axis + gradient * orth_u_p);
 
             //Project point to cone vector
-            double proj_cone_p = arma::dot(p,cone_vec);
+            return cone_vec * arma::dot(p,cone_vec);
 
+        }
+
+        float distanceToPoint(const Vector& p) const{
+            Vector p_cone = projectPoint(p);
+            Vector p_orth = p - p_cone;
             //Compute size of orth component
-            return std::sqrt(norm_p * norm_p - proj_cone_p * proj_cone_p);
+            return arma::norm(p_orth);
+        }
+
+        float dotDistanceToPoint(const Vector& p) const {
+            Vector p_cone = projectPoint(p);
+            //Compute size of orth component
+            float norm_prod = arma::norm(p) * arma::norm(p_cone);
+            if(norm_prod!=0){
+                return std::fabs(arma::dot(p_cone,p) / norm_prod);
+            }
+            //Max distance from the cone
+            else return 1;
         }
 
 
