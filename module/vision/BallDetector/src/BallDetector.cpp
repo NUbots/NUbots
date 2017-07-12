@@ -212,7 +212,7 @@ namespace vision {
             auto balls = std::make_unique<std::vector<Ball>>();
             balls->reserve(ransacResults.size());
 
-            if(print_throwout_logs) log("Ransac : ", ransacResults.size(), "results (MAX = ", MAXIMUM_FITTED_MODELS, ")");
+            // if(print_throwout_logs) log("Ransac : ", ransacResults.size(), "results (MAX = ", MAXIMUM_FITTED_MODELS, ")");
 
             arma::mat44 camToGround = convert<double, 4, 4>(sensors.camToGround);
 
@@ -242,16 +242,16 @@ namespace vision {
                  ************************************************/
 
                 if(print_throwout_logs){
-                    log("Ball model: g =  ", result.model.gradient, " axis =   ", result.model.unit_axis.t());
-                    log("Ball screen: r = ", ballRadiusScreen,      " centre = ",  ballCentreScreen.t());
+                    // log("Ball model: g =  ", result.model.gradient, " axis =   ", result.model.unit_axis.t());
+                    // log("Ball screen: r = ", ballRadiusScreen,      " centre = ",  ballCentreScreen.t());
                 }
 
                 // CENTRE OF BALL IS ABOVE THE HORIZON
                 if(arma::dot(convert<double,3>(image.horizon_normal),ballCentreRay) > 0){
                     if(print_throwout_logs) {
                         log("Ball discarded: arma::dot(image.horizon_normal,ballCentreRay) > 0 ");
-                        log("Horizon normal = ", image.horizon_normal.transpose());
-                        log("Ball centre ray = ", ballCentreRay.t());
+                        // log("Horizon normal = ", image.horizon_normal.transpose());
+                        // log("Ball centre ray = ", ballCentreRay.t());
                     }
                     continue;
                 }
@@ -281,7 +281,7 @@ namespace vision {
                 // Check if our largest one is too far away
                 if(arma::max(sDist) > maximum_relative_seed_point_distance) {
                     if(print_throwout_logs) log("Ball discarded: arma::max(sDist) / result.model.radius > maximum_relative_seed_point_distance");
-                    if(print_throwout_logs) log("arma::max(sDist) = ", arma::max(sDist), " > ", maximum_relative_seed_point_distance);
+                    // if(print_throwout_logs) log("arma::max(sDist) = ", arma::max(sDist), " > ", maximum_relative_seed_point_distance);
                     continue;
                 }
 
@@ -336,7 +336,7 @@ namespace vision {
                 // log("ball pos2 =", b.torsoSpacePosition);
                 // log("width_rBGg =", width_rBGg.t());
                 // log("proj_rBGg =", proj_rBGg.t());
-                log("Ball Camera Space =",(ballCentreRay * widthDistance).t());
+                // log("Ball Camera Space =",(ballCentreRay * widthDistance).t());
                 // log("camToGround =\n",camToGround);
 
                 // On screen visual shape
@@ -381,7 +381,7 @@ namespace vision {
                     }
                 }
             }
-            log("Final result: ", balls->size(), "balls");
+            // log("Final result: ", balls->size(), "balls");
             emit(std::move(balls));
             lastFrame.time = sensors.timestamp;
         });

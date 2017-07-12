@@ -44,7 +44,7 @@ namespace ransac {
     double RansacConeModel::calculateError(const DataPoint& p) const {
         //TODO: change to angle error?
         //Points will be normalised so it should be ok
-        double error = distanceToPoint(p);
+        double error = std::fabs(std::acos(dotDistanceToPoint(p)));
         return error * error;
     }
 
