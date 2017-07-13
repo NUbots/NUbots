@@ -43,6 +43,7 @@ namespace localisation {
             emit(std::make_unique<Ball>());
 
             filter.model.processNoiseDiagonal = config["process_noise_diagonal"].as<arma::vec>();
+            ball_pos_log                      = config["ball_pos_log"].as<bool>();
 
             // Use configuration here from file BallLocalisation.yaml
         });
@@ -73,6 +74,10 @@ namespace localisation {
                 arma::vec3 rBCc_sph1   = cartesianToSpherical(rBCc_cart);  // in r,theta,phi
                 arma::vec3 rBCc_sph2   = {
                     rBCc_sph1[0], rBCc_sph1[1], rBCc_sph1[2]};  // in roe, theta, phi, where roe is 1/r
+                if (ball_pos_log) {
+                    emit(graph("localisation ball pos", filter.get()[0], filter.get()[1]));
+                    log("localisation ball pos = ", filter.get()[0], filter.get()[1]);
+                }
                 emit(ball);
             });
 
@@ -80,9 +85,9 @@ namespace localisation {
         on<Trigger<std::vector<message::vision::Ball>>, With<FieldDescription>>().then(
             [this](const std::vector<message::vision::Ball>& balls, const FieldDescription& field) {
 
-                const auto& sensors = *balls[0].visObject.sensors;
-
                 if (balls.size() > 0) {
+                    const auto& sensors = *balls[0].visObject.sensors;
+
                     /* Call Time Update first */
                     auto curr_time        = NUClear::clock::now();
                     double seconds        = TimeDifferenceSeconds(curr_time, last_time_update_time);
