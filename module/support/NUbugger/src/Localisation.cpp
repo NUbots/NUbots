@@ -47,7 +47,6 @@ namespace support {
         // }));
 
         handles["localisation"].push_back(on<Trigger<Self>, Single, Priority::LOW>().then([this](const Self& fo) {
-            log("Sending self to NUbugger");
             send(fo, 0, false, NUClear::clock::now());
 
         }));

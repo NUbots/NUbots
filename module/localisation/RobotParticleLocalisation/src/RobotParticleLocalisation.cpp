@@ -107,7 +107,7 @@ namespace localisation {
                         if(m.type == Goal::MeasurementType::UNKNOWN_MEASUREMENT) continue;
                         //Measure objects
                         if(m.type == Goal::MeasurementType::CENTRE) {
-                            filter.ambiguousMeasurementUpdate(convert<double,3>(m.position),convert<double,3,3>(m.covariance),poss,sensors,m.type,fd);
+                            //filter.ambiguousMeasurementUpdate(convert<double,3>(m.position),convert<double,3,3>(m.covariance),poss,sensors,m.type,fd);
                         }
                         else {
                             filter.ambiguousMeasurementUpdate(convert<double,2>(m.normalAngles),convert<double,2,2>(m.normAngCov),poss,sensors,m.type,fd);
@@ -128,7 +128,7 @@ namespace localisation {
                  emit(graph("robot filter state = ", state[0],state[1],state[2]));
                 // emit(graph("actual state = ", test_state[0],test_state[1],test_state[2]));
 
-                auto self = std::make_unique<Self>(*selfs[0]);
+                auto self = std::make_unique<Self>((*selfs)[0]);
                 emit(self);
                 emit(selfs);
             }

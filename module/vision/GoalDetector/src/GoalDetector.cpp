@@ -22,7 +22,7 @@
 #include "extension/Configuration.h"
 
 #include "RansacGoalModel.h"
-
+#include "stdio.h"
 #include "message/input/CameraParameters.h"
 #include "message/vision/ClassifiedImage.h"
 #include "message/vision/VisionObjects.h"
@@ -381,6 +381,15 @@ namespace vision {
                 Eigen::Vector2d right_Angles(std::atan2(right[1],right[0]), std::atan2(right[2],std::sqrt(right[0]*right[0] + right[1]*right[1])));
                 Eigen::Matrix2d right_AngCov = Eigen::Matrix2d::Identity();
                 it->measurement.push_back(Goal::Measurement(Goal::MeasurementType::RIGHT_NORMAL, right, right_vecCov, right_Angles, right_AngCov));
+
+                // Debug check
+                double theta_goal = 180 - std::acos(arma::norm_dot(convert<double, 3>(right),convert<double, 3>(left)))*180/M_PI;
+                stats(theta_goal);
+                if (stats.count() == 50){
+                    std::cout << "theta goal avg: " << stats.mean() << std::endl;
+                    std::cout << "distance from goal avg: " << 0.055/std::tan(stats.mean()/2*M_PI/180) << std::endl;
+                    stats.reset();
+                }
 
                 // Check that the points are not too close to the edges of the screen
                 if(                         std::min(cbr[0], cbl[0]) > MEASUREMENT_LIMITS_LEFT
