@@ -40,8 +40,14 @@ namespace support {
 
     void NUbugger::provideLocalisation() {
         // This trigger gets the output from the sensors (unfiltered)
-        handles["localisation"].push_back(on<Trigger<FieldObject>, Single, Priority::LOW>().then([this](const FieldObject& fo) {
+        // handles["localisation"].push_back(on<Trigger<FieldObject>, Single, Priority::LOW>().then([this](const FieldObject& fo) {
 
+        //     send(fo, 0, false, NUClear::clock::now());
+
+        // }));
+
+        handles["localisation"].push_back(on<Trigger<Self>, Single, Priority::LOW>().then([this](const Self& fo) {
+            log("Sending self to NUbugger");
             send(fo, 0, false, NUClear::clock::now());
 
         }));

@@ -118,16 +118,18 @@ namespace localisation {
                 //Emit state
                 auto selfs = std::make_unique<std::vector<Self>>();
                 selfs->push_back(Self());
+                //emit(graph("Self",Self.locObject.position[0], Self.locObject.position[1],))
 
                 //Get filter state and transform
                 arma::vec3 state = filter.get();
                 selfs->back().locObject.position = Eigen::Vector2d(state[RobotModel::kX],state[RobotModel::kY]);
                 selfs->back().heading = Eigen::Vector2d(std::cos(state[RobotModel::kAngle]),std::sin(state[RobotModel::kAngle]));
                 selfs->back().covariance = convert<double,3,3>(filter.getCovariance());
-                // emit(graph("filter state = ", state[0],state[1],state[2]));
+                 emit(graph("robot filter state = ", state[0],state[1],state[2]));
                 // emit(graph("actual state = ", test_state[0],test_state[1],test_state[2]));
 
-
+                auto self = std::make_unique<Self>(*selfs[0]);
+                emit(self);
                 emit(selfs);
             }
         });
