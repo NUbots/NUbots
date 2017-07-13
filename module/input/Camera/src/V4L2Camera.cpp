@@ -25,7 +25,6 @@ namespace input {
                         if (camera.second.isStreaming()) {
                             emit(std::make_unique<Image>(camera.second.getImage()));
                         }
-                        log(camera.second.isStreaming());
                     }
                     catch (std::system_error& e) {
                         log<NUClear::ERROR>(e.what());
@@ -76,14 +75,14 @@ namespace input {
                     }
                     catch (std::system_error& e) {
                         log<NUClear::ERROR>(e.what());
-                        log("Resetting Camera");
+                        log<NUClear::ERROR>("Resetting Camera");
                         V4L2FrameRateHandle.disable();
                         V4L2SettingsHandle.disable();
                         camera.second.resetCamera();
                         camera.second.startStreaming();
                         V4L2SettingsHandle.enable();
                         V4L2FrameRateHandle.enable();
-                        log("Camera Reset");
+                        log<NUClear::INFO>("Camera Reset");
                     }
                 }
             });
@@ -130,7 +129,7 @@ namespace input {
                 if (it != settings.end()) {
                     if (camera.setSetting(it->second, setting.second.as<int>()) == false) {
                         throw std::system_error(
-                            errno, std::system_category(), ("Failed to set", it->first, "on camera", deviceID));
+                            errno, std::system_category(), ("Failed to set" + it->first + "on camera" + deviceID));
                     }
                 }
             }
@@ -207,109 +206,126 @@ namespace input {
                                  const FOURCC& cc,
                                  size_t w,
                                  size_t h) {
-        // if the camera device is already open, close it
-        closeCamera();
+        uint8_t resetCount = 0;
+        uint8_t resetLimit = config["max_error_count"].as<uint>();
+        bool succeeded     = false;
 
-        // Store our new state
-        deviceID = device;
-        format   = fmt;
-        fourcc   = cc;
-        width    = w;
-        height   = h;
-
-        // Open the camera device
-        fd = open(deviceID.c_str(), O_RDWR);
-        if (fd >= 0) {
-            std::cout << "Reopened Camera" << std::endl;
-        }
-
-        // Check if we managed to open our file descriptor
-        int resetCount = 0;
-
-        while (fd < 0 && resetCount < 10) {
-            std::cout << "Toggling GPIO" << std::endl;
-            system("/home/nubots/gpio_toggle.sh");
-            fd = open(deviceID.c_str(), O_RDWR);
+        while (resetCount < resetLimit && !succeeded) {
             resetCount++;
+
+            // if the camera device is already open, close it
+            closeCamera();
+
+            // Store our new state
+            deviceID = device;
+            format   = fmt;
+            fourcc   = cc;
+            width    = w;
+            height   = h;
+
+            // Open the camera device
+            fd = open(deviceID.c_str(), O_RDWR);
+            if (fd >= 0) {
+                NUClear::log<NUClear::INFO>("Reopened Camera");
+            }
+
+            // Check if we managed to open our file descriptor
+            int toggleCount = 0;
+
+            while (fd < 0 && toggleCount < 10) {
+                NUClear::log<NUClear::ERROR>("Toggling GPIO");
+                if (!system("/home/nubots/gpio_toggle.sh")) {
+                    NUClear::log<NUClear::ERROR>("Error running GPIO script");
+                }
+
+                fd = open(deviceID.c_str(), O_RDWR);
+                resetCount++;
+            }
+
+            if (fd < 0) {
+                NUClear::log<NUClear::ERROR>("We were unable to access the camera device on " + deviceID
+                                             + ". Retrying...");
+                std::this_thread::sleep_for(std::chrono::milliseconds(2000));
+                continue;
+            }
+
+            // Here we set the "Format" of the device (the type of data we are getting)
+            v4l2_format format;
+            memset(&format, 0, sizeof(format));
+            format.type           = V4L2_BUF_TYPE_VIDEO_CAPTURE;
+            format.fmt.pix.width  = width;
+            format.fmt.pix.height = height;
+
+            // We have to choose YUYV or MJPG here
+            if (fmt == "YUYV") {
+                format.fmt.pix.pixelformat = V4L2_PIX_FMT_YUYV;
+            }
+
+            else if (fmt == "MJPG") {
+                format.fmt.pix.pixelformat = V4L2_PIX_FMT_MJPEG;
+            }
+
+            else {
+                throw std::runtime_error("The format must be either YUYV or MJPG");
+            }
+
+            format.fmt.pix.field = V4L2_FIELD_NONE;
+            if (ioctl(fd, VIDIOC_S_FMT, &format) == -1) {
+                NUClear::log<NUClear::ERROR>("There was an error while setting the cameras format. Resetting...");
+                continue;
+            }
+
+            // Set the frame rate
+            v4l2_streamparm param;
+            memset(&param, 0, sizeof(param));
+            param.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
+
+            // Get the current parameters (populate our fields)
+            if (ioctl(fd, VIDIOC_G_PARM, &param) == -1) {
+                NUClear::log<NUClear::ERROR>("We were unable to get the current camera FPS parameters. Resetting...");
+                continue;
+            }
+
+            param.parm.capture.timeperframe.numerator   = 1;
+            param.parm.capture.timeperframe.denominator = FRAMERATE;
+
+            if (ioctl(fd, VIDIOC_S_PARM, &param) == -1) {
+                NUClear::log<NUClear::ERROR>("We were unable to get the current camera FPS parameters. Resetting...");
+                continue;
+            }
+
+            // Tell V4L2 that we are using 2 userspace buffers
+            v4l2_requestbuffers rb;
+            memset(&rb, 0, sizeof(rb));
+            rb.count  = NUM_BUFFERS;
+            rb.type   = V4L2_BUF_TYPE_VIDEO_CAPTURE;
+            rb.memory = V4L2_MEMORY_USERPTR;
+
+            if (ioctl(fd, VIDIOC_REQBUFS, &rb) == -1) {
+                NUClear::log<NUClear::ERROR>("There was an error configuring user buffers. Resetting...");
+                continue;
+            }
+
+            settings.insert(std::make_pair("brightness", V4L2_CID_BRIGHTNESS));
+            settings.insert(std::make_pair("gain", V4L2_CID_GAIN));
+            settings.insert(std::make_pair("gamma", V4L2_CID_GAMMA));
+            settings.insert(std::make_pair("contrast", V4L2_CID_CONTRAST));
+            settings.insert(std::make_pair("saturation", V4L2_CID_SATURATION));
+            settings.insert(std::make_pair("power_line_frequency", V4L2_CID_POWER_LINE_FREQUENCY));
+            settings.insert(std::make_pair("auto_white_balance", V4L2_CID_AUTO_WHITE_BALANCE));
+            settings.insert(std::make_pair("white_balance_temperature", V4L2_CID_WHITE_BALANCE_TEMPERATURE));
+            settings.insert(std::make_pair("auto_exposure", V4L2_CID_EXPOSURE_AUTO));
+            settings.insert(std::make_pair("auto_exposure_priority", V4L2_CID_EXPOSURE_AUTO_PRIORITY));
+            settings.insert(std::make_pair("absolute_exposure", V4L2_CID_EXPOSURE_ABSOLUTE));
+            settings.insert(std::make_pair("backlight_compensation", V4L2_CID_BACKLIGHT_COMPENSATION));
+            settings.insert(std::make_pair("auto_focus", V4L2_CID_FOCUS_AUTO));
+            // settings.insert(std::make_pair("absolute_focus",             V4L2_CID_FOCUS_ABSOLUTE));
+            settings.insert(std::make_pair("absolute_zoom", V4L2_CID_ZOOM_ABSOLUTE));
+            settings.insert(std::make_pair("absolute_pan", V4L2_CID_PAN_ABSOLUTE));
+            settings.insert(std::make_pair("absolute_tilt", V4L2_CID_TILT_ABSOLUTE));
+            settings.insert(std::make_pair("sharpness", V4L2_CID_SHARPNESS));
+            succeeded = true;
         }
-        if (fd < 0) {
-            throw std::runtime_error(std::string("We were unable to access the camera device on ") + deviceID);
-        }
-
-        // Here we set the "Format" of the device (the type of data we are getting)
-        v4l2_format format;
-        memset(&format, 0, sizeof(format));
-        format.type           = V4L2_BUF_TYPE_VIDEO_CAPTURE;
-        format.fmt.pix.width  = width;
-        format.fmt.pix.height = height;
-
-        // We have to choose YUYV or MJPG here
-        if (fmt == "YUYV") {
-            format.fmt.pix.pixelformat = V4L2_PIX_FMT_YUYV;
-        }
-
-        else if (fmt == "MJPG") {
-            format.fmt.pix.pixelformat = V4L2_PIX_FMT_MJPEG;
-        }
-
-        else {
-            throw std::runtime_error("The format must be either YUYV or MJPG");
-        }
-
-        format.fmt.pix.field = V4L2_FIELD_NONE;
-        if (ioctl(fd, VIDIOC_S_FMT, &format) == -1) {
-            throw std::system_error(
-                errno, std::system_category(), "There was an error while setting the cameras format");
-        }
-
-        // Set the frame rate
-        v4l2_streamparm param;
-        memset(&param, 0, sizeof(param));
-        param.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
-
-        // Get the current parameters (populate our fields)
-        if (ioctl(fd, VIDIOC_G_PARM, &param) == -1) {
-            throw std::system_error(
-                errno, std::system_category(), "We were unable to get the current camera FPS parameters");
-        }
-
-        param.parm.capture.timeperframe.numerator   = 1;
-        param.parm.capture.timeperframe.denominator = FRAMERATE;
-
-        if (ioctl(fd, VIDIOC_S_PARM, &param) == -1) {
-            throw std::system_error(
-                errno, std::system_category(), "We were unable to get the current camera FPS parameters");
-        }
-
-        // Tell V4L2 that we are using 2 userspace buffers
-        v4l2_requestbuffers rb;
-        memset(&rb, 0, sizeof(rb));
-        rb.count  = NUM_BUFFERS;
-        rb.type   = V4L2_BUF_TYPE_VIDEO_CAPTURE;
-        rb.memory = V4L2_MEMORY_USERPTR;
-
-        if (ioctl(fd, VIDIOC_REQBUFS, &rb) == -1) {
-            throw std::system_error(errno, std::system_category(), "There was an error configuring user buffers");
-        }
-
-        settings.insert(std::make_pair("brightness", V4L2_CID_BRIGHTNESS));
-        settings.insert(std::make_pair("gain", V4L2_CID_GAIN));
-        settings.insert(std::make_pair("gamma", V4L2_CID_GAMMA));
-        settings.insert(std::make_pair("contrast", V4L2_CID_CONTRAST));
-        settings.insert(std::make_pair("saturation", V4L2_CID_SATURATION));
-        settings.insert(std::make_pair("power_line_frequency", V4L2_CID_POWER_LINE_FREQUENCY));
-        settings.insert(std::make_pair("auto_white_balance", V4L2_CID_AUTO_WHITE_BALANCE));
-        settings.insert(std::make_pair("white_balance_temperature", V4L2_CID_WHITE_BALANCE_TEMPERATURE));
-        settings.insert(std::make_pair("auto_exposure", V4L2_CID_EXPOSURE_AUTO));
-        settings.insert(std::make_pair("auto_exposure_priority", V4L2_CID_EXPOSURE_AUTO_PRIORITY));
-        settings.insert(std::make_pair("absolute_exposure", V4L2_CID_EXPOSURE_ABSOLUTE));
-        settings.insert(std::make_pair("backlight_compensation", V4L2_CID_BACKLIGHT_COMPENSATION));
-        settings.insert(std::make_pair("auto_focus", V4L2_CID_FOCUS_AUTO));
-        // settings.insert(std::make_pair("absolute_focus",             V4L2_CID_FOCUS_ABSOLUTE));
-        settings.insert(std::make_pair("absolute_zoom", V4L2_CID_ZOOM_ABSOLUTE));
-        settings.insert(std::make_pair("absolute_pan", V4L2_CID_PAN_ABSOLUTE));
-        settings.insert(std::make_pair("absolute_tilt", V4L2_CID_TILT_ABSOLUTE));
-        settings.insert(std::make_pair("sharpness", V4L2_CID_SHARPNESS));
     }
 
     void V4L2Camera::resetCamera() {
