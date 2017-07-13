@@ -23,6 +23,7 @@
 #define UTILITY_MATH_FILTER_PARTICLEFILTER_H
 
 #include <armadillo>
+#include <iostream>
 #include <nuclear>
 #include <random>
 #include <vector>
@@ -99,7 +100,7 @@ namespace math {
                 // Resample some rogues
                 for (int i = 0; i < model.getRogueCount(); i++) {
                     candidateParticles.row(i + particles.n_rows) =
-                        model.getRogueRange() % (0.5 - arma::randu(Model::size));
+                        (model.getRogueRange() % (0.5 - arma::randu(Model::size))).t();
                 }
 
                 for (unsigned int i = 0; i < candidateParticles.n_rows; i++) {
@@ -116,7 +117,8 @@ namespace math {
                 std::discrete_distribution<> multinomial(weights.begin(),
                                                          weights.end());  // class incorrectly named by cpp devs
                 for (unsigned int i = 0; i < particles.n_rows; i++) {
-                    particles.row(i) = candidateParticles.row(multinomial(gen));
+                    auto num         = multinomial(gen);
+                    particles.row(i) = candidateParticles.row(num);
                 }
                 return arma::mean(weights);
             }
