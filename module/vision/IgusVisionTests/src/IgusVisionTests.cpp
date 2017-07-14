@@ -30,9 +30,10 @@ namespace vision {
             test_point_screen = config["test_point_screen"].as<arma::vec>();
         });
 
-        on<Trigger<std::vector<message::vision::Ball>>>().then([this](const std::vector<message::vision::Ball>& balls) {
+        /*on<Trigger<std::vector<message::vision::Ball>>>().then([this](const std::vector<message::vision::Ball>& balls)
+        {
             for (auto& ball : balls) {
-                arma::vec3 measuredPos = convert<double, 3>(ball.position);
+                arma::vec3 measuredPos = arma::vec3({ball.locObject.position[0], ball.locObject.position[1], 0});
                 log("Ball actual pos (x,y,z):  ", ballCentre.t());
                 log("Ball measured pos (x,y,z):", measuredPos.t());
                 log("Ball detector error =     ", (measuredPos - ballCentre).t());
@@ -41,7 +42,7 @@ namespace vision {
                 //     log("Edge pts:", edgePts);
                 // }
             }
-        });
+        });*/
 
         on<Every<30, Per<std::chrono::seconds>>,
            With<CameraParameters>,
