@@ -74,4 +74,3 @@ namespace localisation {
     }
 }  // namespace localisation
 }  // namespace module
-
