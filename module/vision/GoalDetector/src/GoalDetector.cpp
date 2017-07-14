@@ -41,6 +41,9 @@
 #include "utility/vision/LookUpTable.h"
 #include "utility/vision/Vision.h"
 
+#include "utility/support/eigen_armadillo.h"
+#include "utility/support/yaml_armadillo.h"
+
 
 namespace module {
 namespace vision {
@@ -111,6 +114,9 @@ namespace vision {
             MEASUREMENT_LIMITS_RIGHT = config["measurement_limits"]["right"].as<uint>();
             MEASUREMENT_LIMITS_TOP   = config["measurement_limits"]["top"].as<uint>();
             MEASUREMENT_LIMITS_BASE  = config["measurement_limits"]["base"].as<uint>();
+
+            vector3_covariance = config["vector3_covariance"].as<arma::vec>();
+            angle_covariance = config["angle_covariance"].as<arma::vec>();
         });
 
         on<Trigger<ClassifiedImage>
@@ -370,16 +376,16 @@ namespace vision {
                 // Get our four normals for each edge
                 // BL TL cross product gives left side
                 auto left   = convert<double, 3>(arma::normalise(arma::cross(cbl, ctl)));
-                Eigen::Matrix3d left_vecCov = Eigen::Matrix3d::Identity();  //arma::diagmat(arma::vec3{0.01,0.01,0.001})
+                Eigen::Matrix3d left_vecCov = convert<double,3,3>(arma::diagmat(vector3_covariance));
                 Eigen::Vector2d left_Angles(std::atan2(left[1],left[0]), std::atan2(left[2],std::sqrt(left[0]*left[0] + left[1]*left[1])));
-                Eigen::Matrix2d left_AngCov = Eigen::Matrix2d::Identity();
+                Eigen::Matrix2d left_AngCov = convert<double,2,2>(arma::diagmat(angle_covariance));
                 it->measurement.push_back(Goal::Measurement(Goal::MeasurementType::LEFT_NORMAL, left, left_vecCov, left_Angles, left_AngCov));
 
                 // TR BR cross product gives right side
                 auto right  = convert<double, 3>(arma::normalise(arma::cross(ctr, cbr)));
-                Eigen::Matrix3d right_vecCov = Eigen::Matrix3d::Identity();
+                Eigen::Matrix3d right_vecCov = convert<double,3,3>(arma::diagmat(vector3_covariance));
                 Eigen::Vector2d right_Angles(std::atan2(right[1],right[0]), std::atan2(right[2],std::sqrt(right[0]*right[0] + right[1]*right[1])));
-                Eigen::Matrix2d right_AngCov = Eigen::Matrix2d::Identity();
+                Eigen::Matrix2d right_AngCov = convert<double,2,2>(arma::diagmat(angle_covariance));
                 it->measurement.push_back(Goal::Measurement(Goal::MeasurementType::RIGHT_NORMAL, right, right_vecCov, right_Angles, right_AngCov));
 
                 // Debug check
@@ -403,7 +409,7 @@ namespace vision {
 
                     // Vector to the bottom centre...HACK 3m distance for debug
                     auto rGCc_sphr = convert<double, 3>(cartesianToSpherical(3 * rGCc_norm));  // Just converted into eigen. Still the unit vector
-                    Eigen::Matrix3d rGCc_cov = Eigen::Matrix3d::Identity();  //arma::diagmat(arma::vec3{0.01,0.01,0.001})
+                    Eigen::Matrix3d rGCc_cov = convert<double,3,3>(arma::diagmat(vector3_covariance)); //arma::diagmat(arma::vec3{0.01,0.01,0.001})
                     it->measurement.push_back(Goal::Measurement(Goal::MeasurementType::CENTRE, rGCc_sphr, rGCc_cov));
                 }
 
