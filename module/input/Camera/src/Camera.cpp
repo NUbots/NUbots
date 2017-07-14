@@ -4,89 +4,77 @@ namespace module {
 namespace input {
 
     uint Camera::cameraCount = 0;
-    
+
     using extension::Configuration;
 
     Camera::Camera(std::unique_ptr<NUClear::Environment> environment)
-    : Reactor(std::move(environment))
-    , V4L2FrameRateHandle()
-    , V4L2SettingsHandle()
-    , V4L2Cameras()
-    , SpinnakerSystem()
-    , SpinnakerCamList()
-    , SpinnakerCameras() {
+        : Reactor(std::move(environment))
+        , V4L2FrameRateHandle()
+        , V4L2SettingsHandle()
+        , V4L2Cameras()
+        , SpinnakerSystem()
+        , SpinnakerCamList()
+        , SpinnakerCameras() {
 
-        on<Configuration>("Camera.yaml").then("Camera system configuration", [this] (const Configuration& /*config*/) {
+        on<Configuration>("Camera.yaml").then("Camera system configuration", [this](const Configuration& /*config*/) {
             // Use configuration here from file Camera.yaml
         });
 
-        on<Configuration>("Cameras").then("Camera driver loader", [this] (const Configuration& config) {
-        	// Monitor camera config directory for files.
-        	// Each file MUST define a "driver", we use this driver to load the appropriate handler for the camera.
-        	auto driver   = config["driver"].as<std::string>();
+        on<Configuration>("Cameras").then("Camera driver loader", [this](const Configuration& config) {
+            // Monitor camera config directory for files.
+            // Each file MUST define a "driver", we use this driver to load the appropriate handler for the camera.
+            auto driver   = config["driver"].as<std::string>();
             auto deviceID = config["deviceID"].as<std::string>();
 
             log("Searching for", driver, "camera with deviceID", deviceID);
 
-        	if (driver == "V4L2")
-        	{
+            if (driver == "V4L2") {
                 auto cam = V4L2Cameras.find(deviceID);
 
-                if (cam == V4L2Cameras.end())
-                {
+                if (cam == V4L2Cameras.end()) {
                     V4L2Cameras.insert(std::make_pair(deviceID, std::move(initiateV4L2Camera(config))));
                     cameraCount++;
                 }
 
-                else
-                {
+                else {
                     cam->second.setConfig(config);
                 }
-        	}
+            }
 
-        	else if (driver == "Spinnaker")
-        	{
+            else if (driver == "Spinnaker") {
                 auto cam = SpinnakerCameras.find(deviceID);
 
-                if (cam == SpinnakerCameras.end())
-                {
+                if (cam == SpinnakerCameras.end()) {
                     initiateSpinnakerCamera(config);
                     cameraCount++;
                 }
 
-                else
-                {
+                else {
                     resetSpinnakerCamera(cam, config);
                 }
-        	}
+            }
 
-        	else
-        	{
-        		log<NUClear::FATAL>("Unsupported camera driver:", driver);
-        	}
+            else {
+                log<NUClear::FATAL>("Unsupported camera driver:", driver);
+            }
         });
 
-            on<Shutdown>().then([this] {
+        on<Shutdown>().then([this] {
             ShutdownV4L2Camera();
-            
+
             ShutdownSpinnakerCamera();
         });
-
-        }
-
-        void Camera::ShutdownV4L2Camera()
-        {
-            for (auto& camera : V4L2Cameras)
-            {
-                camera.second.closeCamera();
-                camera.second.disableHandles();
-            }
-            
-            V4L2Cameras.clear();
-        }
-
-        // When we shutdown, we must tell our camera class to close (stop streaming)
-    
     }
-}
 
+    void Camera::ShutdownV4L2Camera() {
+        for (auto& camera : V4L2Cameras) {
+            camera.second.closeCamera();
+            camera.second.disableHandles();
+        }
+
+        V4L2Cameras.clear();
+    }
+
+    // When we shutdown, we must tell our camera class to close (stop streaming)
+}
+}

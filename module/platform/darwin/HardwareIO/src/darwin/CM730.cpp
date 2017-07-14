@@ -20,10 +20,10 @@
 #include "CM730.h"
 
 namespace Darwin {
-    CM730::CM730(UART& coms, int id) : DarwinDevice(coms, id) {}
+CM730::CM730(UART& coms, int id) : DarwinDevice(coms, id) {}
 
-    void CM730::turnOnDynamixel() {
-        // Write true to the DXL_POWER byte
-        write(Address::DXL_POWER, true);
-        }
+void CM730::turnOnDynamixel() {
+    // Write true to the DXL_POWER byte
+    write(Address::DXL_POWER, true);
+}
 }  // Darwin

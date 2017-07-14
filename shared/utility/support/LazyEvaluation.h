@@ -30,14 +30,12 @@ namespace support {
 
         std::function<T()> lazy;
 
-        LazyEvaluation(std::function<T()> lazy)
-        : lazy(lazy) {}
+        LazyEvaluation(std::function<T()> lazy) : lazy(lazy) {}
 
         operator T() {
             return lazy();
         }
     };
-
 }
 }
 

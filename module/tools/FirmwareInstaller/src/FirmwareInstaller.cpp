@@ -25,7 +25,7 @@ namespace tools {
         , cm730Firmware("INVALID")
         , dynamixelFirmware("INVALID") {
 
-        on<Configuration>("FirmwareInstaller.yaml").then([this] (const Configuration& config) {
+        on<Configuration>("FirmwareInstaller.yaml").then([this](const Configuration& config) {
             device            = config["device"].as<std::string>();
             flashCM730        = config["CM730"]["flash"].as<bool>();
             cm730Firmware     = config["CM730"]["firmware"].as<std::string>();
@@ -54,34 +54,34 @@ namespace tools {
         });
     }
 
-    bool FirmwareInstaller::hex2bin(const std::string& hexFile, uint8_t* pBinBuffer, uint32_t& startAddress, uint32_t& bufSize) {
+    bool FirmwareInstaller::hex2bin(const std::string& hexFile,
+                                    uint8_t* pBinBuffer,
+                                    uint32_t& startAddress,
+                                    uint32_t& bufSize) {
         std::string line, data;
-        uint32_t    numBytes, type;
-        uint32_t    firstWord, address, segment;
-        uint32_t    lowestAddress, highestAddress, physicalAddress;
-        uint16_t    temp;
-        int         i, iIndex;
-        bool        bRead = true;
+        uint32_t numBytes, type;
+        uint32_t firstWord, address, segment;
+        uint32_t lowestAddress, highestAddress, physicalAddress;
+        uint16_t temp;
+        int i, iIndex;
+        bool bRead = true;
 
         std::ifstream ifs(hexFile);
 
-        if (!ifs.is_open())
-        {
+        if (!ifs.is_open()) {
             log<NUClear::FATAL>("Unable to open firmware file:", hexFile);
             return false;
         }
 
-        segment         = 0x00;
-        lowestAddress   = MEMORY_MAXSIZE - 1;
-        highestAddress  = 0x00;
+        segment        = 0x00;
+        lowestAddress  = MEMORY_MAXSIZE - 1;
+        highestAddress = 0x00;
 
-        do
-        {
+        do {
             // Read a line from input file.
             std::getline(ifs, line);
 
-            if ((!ifs) || (line.length() == 0))
-            {
+            if ((!ifs) || (line.length() == 0)) {
                 log<NUClear::FATAL>(hexFile, "has invalid format.");
                 ifs.close();
                 return false;
@@ -91,18 +91,14 @@ namespace tools {
             The two bytes are read in firstWord since it's use depend on the
             record type: if it's an extended address record or a data record.
             */
-            if (line.front() != ':')
-            {
+            if (line.front() != ':') {
                 log<NUClear::FATAL>(hexFile, "has invalid format.");
                 ifs.close();
                 return false;
             }
 
-            line.erase(std::remove_if(line.begin(), line.end(),
-                                        [] (char c) -> bool
-                                        {
-                                            return std::isspace(c);
-                                        }), line.end());
+            line.erase(std::remove_if(line.begin(), line.end(), [](char c) -> bool { return std::isspace(c); }),
+                       line.end());
 
             std::stringstream ss(line);
             ss.ignore(1, ':');
@@ -112,37 +108,31 @@ namespace tools {
             ss >> data;
 
             /* If we're reading the last record, ignore it. */
-            switch (type)
-            {
+            switch (type) {
                 /* Data record */
-                case 0:
-                {
+                case 0: {
                     address         = firstWord;
                     physicalAddress = ((segment << 4) & ADDRESS_MASK) + address;
 
                     /* Check that the physical address stays in the buffer's range. */
-                    if ((physicalAddress + numBytes) <= (MEMORY_MAXSIZE - 1))
-                    {
+                    if ((physicalAddress + numBytes) <= (MEMORY_MAXSIZE - 1)) {
                         /* Set the lowest address as base pointer. */
-                        if (lowestAddress > physicalAddress)
-                        {
+                        if (lowestAddress > physicalAddress) {
                             lowestAddress = physicalAddress;
                         }
 
                         /* Same for the top address. */
-                        if (highestAddress < (physicalAddress + numBytes - 1))
-                        {
+                        if (highestAddress < (physicalAddress + numBytes - 1)) {
                             highestAddress = (physicalAddress + numBytes - 1);
                         }
 
                         /* Read the Data bytes. */
                         /* Bytes are written in the Memory block even if checksum is wrong. */
-                        for (i = numBytes, iIndex = 0; i > 0; i--, iIndex += 2)
-                        {
+                        for (i = numBytes, iIndex = 0; i > 0; i--, iIndex += 2) {
                             std::stringstream ss(data.substr(iIndex));
                             ss >> std::hex >> std::setw(2) >> temp;
 
-                            pBinBuffer[physicalAddress] = (unsigned char)temp;
+                            pBinBuffer[physicalAddress] = (unsigned char) temp;
                             physicalAddress++;
                         }
 
@@ -151,8 +141,7 @@ namespace tools {
                         ss >> std::hex >> std::setw(2) >> temp;
                     }
 
-                    else
-                    {
+                    else {
                         log<NUClear::FATAL>("Exceed maximum memory size!");
                         ifs.close();
                         return false;
@@ -162,16 +151,14 @@ namespace tools {
                 }
 
                 /* End of file record */
-                case 1:
-                {
+                case 1: {
                     /* Simply ignore checksum errors in this line. */
                     bRead = false;
                     break;
                 }
 
                 /* Extended segment address record */
-                case 2:
-                {
+                case 2: {
                     /* firstWord contains the offset. It's supposed to be 0000 so
                     we ignore it. */
                     std::stringstream ss(data);
@@ -184,38 +171,34 @@ namespace tools {
                 }
 
                 /* Start segment address record */
-                case 3:
-                {
+                case 3: {
                     /* Nothing to be done since it's for specifying the starting address for
                     execution of the binary code */
                     break;
                 }
 
                 /* Extended linear address record */
-                case 4:
-                {
+                case 4: {
                     break;
                 }
 
                 /* Start linear address record */
-                case 5:
-                {
+                case 5: {
                     /* Nothing to be done since it's for specifying the starting address for
                     execution of the binary code */
                     break;
                 }
 
-                default:
-                {
+                default: {
                     log<NUClear::FATAL>("Can not support type:", type);
                     ifs.close();
                     return false;
                 }
             }
 
-        } while(bRead == true);
+        } while (bRead == true);
 
-        bufSize = highestAddress - lowestAddress + 1;
+        bufSize      = highestAddress - lowestAddress + 1;
         startAddress = lowestAddress;
 
         ifs.close();

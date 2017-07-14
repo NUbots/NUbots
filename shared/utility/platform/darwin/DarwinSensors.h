@@ -23,69 +23,69 @@
 #include "utility/input/ServoID.h"
 
 namespace utility {
-    namespace platform {
-        namespace darwin {
+namespace platform {
+    namespace darwin {
 
-            using ServoID = utility::input::ServoID;
-            using message::platform::darwin::DarwinSensors;
+        using ServoID = utility::input::ServoID;
+        using message::platform::darwin::DarwinSensors;
 
-            const DarwinSensors::Servo& getDarwinServo(ServoID servoId, const DarwinSensors& sensors) {
+        const DarwinSensors::Servo& getDarwinServo(ServoID servoId, const DarwinSensors& sensors) {
 
-                switch (servoId.value) {
-                    case ServoID::R_SHOULDER_PITCH:   return sensors.servo.rShoulderPitch;
-                    case ServoID::L_SHOULDER_PITCH:   return sensors.servo.lShoulderPitch;
-                    case ServoID::R_SHOULDER_ROLL:    return sensors.servo.rShoulderRoll;
-                    case ServoID::L_SHOULDER_ROLL:    return sensors.servo.lShoulderRoll;
-                    case ServoID::R_ELBOW:            return sensors.servo.rElbow;
-                    case ServoID::L_ELBOW:            return sensors.servo.lElbow;
-                    case ServoID::R_HIP_YAW:          return sensors.servo.rHipYaw;
-                    case ServoID::L_HIP_YAW:          return sensors.servo.lHipYaw;
-                    case ServoID::R_HIP_ROLL:         return sensors.servo.rHipRoll;
-                    case ServoID::L_HIP_ROLL:         return sensors.servo.lHipRoll;
-                    case ServoID::R_HIP_PITCH:        return sensors.servo.rHipPitch;
-                    case ServoID::L_HIP_PITCH:        return sensors.servo.lHipPitch;
-                    case ServoID::R_KNEE:             return sensors.servo.rKnee;
-                    case ServoID::L_KNEE:             return sensors.servo.lKnee;
-                    case ServoID::R_ANKLE_PITCH:      return sensors.servo.rAnklePitch;
-                    case ServoID::L_ANKLE_PITCH:      return sensors.servo.lAnklePitch;
-                    case ServoID::R_ANKLE_ROLL:       return sensors.servo.rAnkleRoll;
-                    case ServoID::L_ANKLE_ROLL:       return sensors.servo.lAnkleRoll;
-                    case ServoID::HEAD_YAW:           return sensors.servo.headPan;
-                    case ServoID::HEAD_PITCH:         return sensors.servo.headTilt;
+            switch (servoId.value) {
+                case ServoID::R_SHOULDER_PITCH: return sensors.servo.rShoulderPitch;
+                case ServoID::L_SHOULDER_PITCH: return sensors.servo.lShoulderPitch;
+                case ServoID::R_SHOULDER_ROLL: return sensors.servo.rShoulderRoll;
+                case ServoID::L_SHOULDER_ROLL: return sensors.servo.lShoulderRoll;
+                case ServoID::R_ELBOW: return sensors.servo.rElbow;
+                case ServoID::L_ELBOW: return sensors.servo.lElbow;
+                case ServoID::R_HIP_YAW: return sensors.servo.rHipYaw;
+                case ServoID::L_HIP_YAW: return sensors.servo.lHipYaw;
+                case ServoID::R_HIP_ROLL: return sensors.servo.rHipRoll;
+                case ServoID::L_HIP_ROLL: return sensors.servo.lHipRoll;
+                case ServoID::R_HIP_PITCH: return sensors.servo.rHipPitch;
+                case ServoID::L_HIP_PITCH: return sensors.servo.lHipPitch;
+                case ServoID::R_KNEE: return sensors.servo.rKnee;
+                case ServoID::L_KNEE: return sensors.servo.lKnee;
+                case ServoID::R_ANKLE_PITCH: return sensors.servo.rAnklePitch;
+                case ServoID::L_ANKLE_PITCH: return sensors.servo.lAnklePitch;
+                case ServoID::R_ANKLE_ROLL: return sensors.servo.rAnkleRoll;
+                case ServoID::L_ANKLE_ROLL: return sensors.servo.lAnkleRoll;
+                case ServoID::HEAD_YAW: return sensors.servo.headPan;
+                case ServoID::HEAD_PITCH: return sensors.servo.headTilt;
 
-                    default:                          throw std::runtime_error("Out of bounds");
-                }
+                default: throw std::runtime_error("Out of bounds");
             }
+        }
 
-            DarwinSensors::Servo& getDarwinServo(ServoID servoId, DarwinSensors& sensors) {
+        DarwinSensors::Servo& getDarwinServo(ServoID servoId, DarwinSensors& sensors) {
 
-                switch (servoId.value) {
-                    case ServoID::R_SHOULDER_PITCH:   return sensors.servo.rShoulderPitch;
-                    case ServoID::L_SHOULDER_PITCH:   return sensors.servo.lShoulderPitch;
-                    case ServoID::R_SHOULDER_ROLL:    return sensors.servo.rShoulderRoll;
-                    case ServoID::L_SHOULDER_ROLL:    return sensors.servo.lShoulderRoll;
-                    case ServoID::R_ELBOW:            return sensors.servo.rElbow;
-                    case ServoID::L_ELBOW:            return sensors.servo.lElbow;
-                    case ServoID::R_HIP_YAW:          return sensors.servo.rHipYaw;
-                    case ServoID::L_HIP_YAW:          return sensors.servo.lHipYaw;
-                    case ServoID::R_HIP_ROLL:         return sensors.servo.rHipRoll;
-                    case ServoID::L_HIP_ROLL:         return sensors.servo.lHipRoll;
-                    case ServoID::R_HIP_PITCH:        return sensors.servo.rHipPitch;
-                    case ServoID::L_HIP_PITCH:        return sensors.servo.lHipPitch;
-                    case ServoID::R_KNEE:             return sensors.servo.rKnee;
-                    case ServoID::L_KNEE:             return sensors.servo.lKnee;
-                    case ServoID::R_ANKLE_PITCH:      return sensors.servo.rAnklePitch;
-                    case ServoID::L_ANKLE_PITCH:      return sensors.servo.lAnklePitch;
-                    case ServoID::R_ANKLE_ROLL:       return sensors.servo.rAnkleRoll;
-                    case ServoID::L_ANKLE_ROLL:       return sensors.servo.lAnkleRoll;
-                    case ServoID::HEAD_YAW:           return sensors.servo.headPan;
-                    case ServoID::HEAD_PITCH:         return sensors.servo.headTilt;
+            switch (servoId.value) {
+                case ServoID::R_SHOULDER_PITCH: return sensors.servo.rShoulderPitch;
+                case ServoID::L_SHOULDER_PITCH: return sensors.servo.lShoulderPitch;
+                case ServoID::R_SHOULDER_ROLL: return sensors.servo.rShoulderRoll;
+                case ServoID::L_SHOULDER_ROLL: return sensors.servo.lShoulderRoll;
+                case ServoID::R_ELBOW: return sensors.servo.rElbow;
+                case ServoID::L_ELBOW: return sensors.servo.lElbow;
+                case ServoID::R_HIP_YAW: return sensors.servo.rHipYaw;
+                case ServoID::L_HIP_YAW: return sensors.servo.lHipYaw;
+                case ServoID::R_HIP_ROLL: return sensors.servo.rHipRoll;
+                case ServoID::L_HIP_ROLL: return sensors.servo.lHipRoll;
+                case ServoID::R_HIP_PITCH: return sensors.servo.rHipPitch;
+                case ServoID::L_HIP_PITCH: return sensors.servo.lHipPitch;
+                case ServoID::R_KNEE: return sensors.servo.rKnee;
+                case ServoID::L_KNEE: return sensors.servo.lKnee;
+                case ServoID::R_ANKLE_PITCH: return sensors.servo.rAnklePitch;
+                case ServoID::L_ANKLE_PITCH: return sensors.servo.lAnklePitch;
+                case ServoID::R_ANKLE_ROLL: return sensors.servo.rAnkleRoll;
+                case ServoID::L_ANKLE_ROLL: return sensors.servo.lAnkleRoll;
+                case ServoID::HEAD_YAW: return sensors.servo.headPan;
+                case ServoID::HEAD_PITCH: return sensors.servo.headTilt;
 
-                    default:                          throw std::runtime_error("Out of bounds");
-                }
+                default: throw std::runtime_error("Out of bounds");
             }
-        }  // darwin
-    }  // platform
+        }
+    }  // darwin
+}  // platform
 }  // utility
 
 #endif

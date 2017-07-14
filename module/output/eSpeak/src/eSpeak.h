@@ -23,20 +23,19 @@
 #include <nuclear>
 
 namespace module {
-    namespace output {
+namespace output {
 
-        /**
-         * Takes strings given to it and plays them using text to speech
-         *
-         * @author Trent Houliston
-         */
-        class eSpeak : public NUClear::Reactor {
-        public:
-            explicit eSpeak(std::unique_ptr<NUClear::Environment> environment);
-        };
+    /**
+     * Takes strings given to it and plays them using text to speech
+     *
+     * @author Trent Houliston
+     */
+    class eSpeak : public NUClear::Reactor {
+    public:
+        explicit eSpeak(std::unique_ptr<NUClear::Environment> environment);
+    };
 
-    }  // output
+}  // output
 }  // modules
 
 #endif  // MODULES_OUTPUT_ESPEAK_H
-

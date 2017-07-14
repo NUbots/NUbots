@@ -39,7 +39,9 @@ namespace input {
     // Read plain old datatypes
     template <typename T>
     struct ReadData {
-        static inline const typename std::enable_if<std::is_trivial<T>::value, T>::type& read(const char*& ptr, const uint32_t /*version*/) {
+        static inline const typename std::enable_if<std::is_trivial<T>::value, T>::type& read(
+            const char*& ptr,
+            const uint32_t /*version*/) {
 
             const T& val = *reinterpret_cast<const T*>(ptr);
             ptr += sizeof(T);
@@ -61,9 +63,11 @@ namespace input {
     // Read Eigen vectors
     template <typename Scalar, int rows, int cols>
     struct ReadData<Eigen::Matrix<Scalar, rows, cols, Eigen::DontAlign>> {
-        static inline Eigen::Matrix<Scalar, rows, cols, Eigen::DontAlign> read(const char*& ptr, const uint32_t /*version*/) {
+        static inline Eigen::Matrix<Scalar, rows, cols, Eigen::DontAlign> read(const char*& ptr,
+                                                                               const uint32_t /*version*/) {
 
-            auto data = Eigen::Map<const Eigen::Matrix<Scalar, rows, cols, Eigen::DontAlign>>(reinterpret_cast<const Scalar*>(ptr), rows, cols);
+            auto data = Eigen::Map<const Eigen::Matrix<Scalar, rows, cols, Eigen::DontAlign>>(
+                reinterpret_cast<const Scalar*>(ptr), rows, cols);
             ptr += sizeof(Scalar) * rows * cols;
             return data;
         }
@@ -78,7 +82,7 @@ namespace input {
             std::vector<T> data(ReadData<uint32_t>::read(ptr, version));
 
             // Read the data elements
-            for(T& d : data) {
+            for (T& d : data) {
                 d = ReadData<T>::read(ptr, version);
             }
             return data;
@@ -95,7 +99,7 @@ namespace input {
 
             // Read all the positions
             for (auto& marker : markers) {
-            marker.position = ReadData<Eigen::Matrix<float, 3, 1, Eigen::DontAlign>>::read(ptr, version);
+                marker.position = ReadData<Eigen::Matrix<float, 3, 1, Eigen::DontAlign>>::read(ptr, version);
             }
 
             // If we are version 2 or greater we have additional information
@@ -109,7 +113,7 @@ namespace input {
             }
             else {
                 for (auto& marker : markers) {
-                    marker.id = -1;
+                    marker.id   = -1;
                     marker.size = -1;
                 }
             }
@@ -126,15 +130,16 @@ namespace input {
             MarkerSet set;
 
             set.name = ReadData<std::string>::read(ptr, version);
-            auto markersPositions = ReadData<std::vector<Eigen::Matrix<float, 3, 1, Eigen::DontAlign>>>::read(ptr, version);
+            auto markersPositions =
+                ReadData<std::vector<Eigen::Matrix<float, 3, 1, Eigen::DontAlign>>>::read(ptr, version);
             set.markers.reserve(markersPositions.size());
 
             // Build markers
             for (auto position : markersPositions) {
                 Marker marker;
                 marker.position = position;
-                marker.id = -1;
-                marker.size = -1;
+                marker.id       = -1;
+                marker.size     = -1;
                 set.markers.push_back(marker);
             }
 
@@ -149,14 +154,15 @@ namespace input {
 
             RigidBody rigidBody;
 
-            rigidBody.id            = ReadData<uint32_t>::read(ptr, version);
-            rigidBody.position      = ReadData<Eigen::Matrix<float, 3, 1, Eigen::DontAlign>>::read(ptr, version);
-            rigidBody.rotation      = ReadData<Eigen::Matrix<float, 4, 1, Eigen::DontAlign>>::read(ptr, version);
-            rigidBody.markers       = ReadData<std::vector<Marker>>::read(ptr, version);
+            rigidBody.id       = ReadData<uint32_t>::read(ptr, version);
+            rigidBody.position = ReadData<Eigen::Matrix<float, 3, 1, Eigen::DontAlign>>::read(ptr, version);
+            rigidBody.rotation = ReadData<Eigen::Matrix<float, 4, 1, Eigen::DontAlign>>::read(ptr, version);
+            rigidBody.markers  = ReadData<std::vector<Marker>>::read(ptr, version);
 
             // Version specific information
-            rigidBody.error         = version >= 0x02000000 ? ReadData<float>::read(ptr, version) : -1;
-            rigidBody.trackingValid = version >= 0x02060000 ? (ReadData<short>::read(ptr, version) & 0x01) == 0x01 : true;
+            rigidBody.error = version >= 0x02000000 ? ReadData<float>::read(ptr, version) : -1;
+            rigidBody.trackingValid =
+                version >= 0x02060000 ? (ReadData<short>::read(ptr, version) & 0x01) == 0x01 : true;
 
             return rigidBody;
         }
@@ -188,7 +194,7 @@ namespace input {
             marker.marker.size     = ReadData<float>::read(ptr, version);
 
             if (version >= 0x02060000) {
-                short params = ReadData<short>::read(ptr, version);
+                short params            = ReadData<short>::read(ptr, version);
                 marker.occluded         = (params & 0x01) == 0x01;
                 marker.pointCloudSolved = (params & 0x02) == 0x02;
                 marker.modelSolved      = (params & 0x04) == 0x04;
@@ -210,11 +216,10 @@ namespace input {
 
             ForcePlate forcePlate;
 
-            forcePlate.id       = ReadData<uint32_t>::read(ptr, version);
-            auto channels       = ReadData<std::vector<std::vector<float>>>::read(ptr, version);
+            forcePlate.id = ReadData<uint32_t>::read(ptr, version);
+            auto channels = ReadData<std::vector<std::vector<float>>>::read(ptr, version);
             forcePlate.channels.reserve(channels.size());
-            for (uint channel = 0; channel < channels.size(); channel++)
-            {
+            for (uint channel = 0; channel < channels.size(); channel++) {
                 forcePlate.channels[channel].channel = std::move(channels[channel]);
             }
 
@@ -259,7 +264,7 @@ namespace input {
 
             // Convert our bone models into a map
             auto boneModels = ReadData<std::vector<NatNet::RigidBodyModel>>::read(ptr, version);
-            for(auto& model : boneModels) {
+            for (auto& model : boneModels) {
                 m.boneModels[model.id] = model;
             }
 

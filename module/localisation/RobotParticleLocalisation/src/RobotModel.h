@@ -21,11 +21,11 @@
 #define MODULES_LOCALISATION_ROBOTMODEL_H
 
 #include <armadillo>
+#include "message/input/Sensors.h"
 #include "message/localisation/FieldObject.h"
 #include "message/support/FieldDescription.h"
-#include "message/input/Sensors.h"
-#include "utility/math/matrix/Rotation3D.h"
 #include "message/vision/VisionObjects.h"
+#include "utility/math/matrix/Rotation3D.h"
 #include "utility/math/matrix/Transform3D.h"
 
 
@@ -40,24 +40,20 @@ namespace localisation {
             // Field center in world space
             kX = 0,
             kY = 1,
-            //Angle is the angle from the robot world forward direction to the field forward direction
+            // Angle is the angle from the robot world forward direction to the field forward direction
             kAngle = 2
         };
 
 
+        RobotModel() {}
 
-        RobotModel() {
-        }
+        arma::vec::fixed<RobotModel::size> timeUpdate(const arma::vec::fixed<RobotModel::size>& state, double deltaT);
 
-        arma::vec::fixed<RobotModel::size> timeUpdate(
-            const arma::vec::fixed<RobotModel::size>& state, double deltaT);
-
-        arma::vec predictedObservation(
-            const arma::vec::fixed<RobotModel::size>& state,
-            const arma::vec& actual_position,
-            const message::input::Sensors& sensors,
-            const message::vision::Goal::MeasurementType& type,
-            const message::support::FieldDescription& fd);
+        arma::vec predictedObservation(const arma::vec::fixed<RobotModel::size>& state,
+                                       const arma::vec& actual_position,
+                                       const message::input::Sensors& sensors,
+                                       const message::vision::Goal::MeasurementType& type,
+                                       const message::support::FieldDescription& fd);
 
         arma::vec observationDifference(const arma::vec& a, const arma::vec& b);
 
@@ -68,26 +64,26 @@ namespace localisation {
         arma::vec3 processNoiseDiagonal;
 
         // number and range of reset particles
-        int n_rogues = 0;
-        arma::vec3 resetRange = {10,10,6};
+        int n_rogues          = 0;
+        arma::vec3 resetRange = {10, 10, 6};
 
-        //Getters
-        int getRogueCount() const {return n_rogues;}
-        arma::vec getRogueRange() const {return resetRange;}
+        // Getters
+        int getRogueCount() const {
+            return n_rogues;
+        }
+        arma::vec getRogueRange() const {
+            return resetRange;
+        }
 
-        arma::vec3 getCylindricalPostCamSpaceNormal(
-                                    const message::vision::Goal::MeasurementType& type,
-                                    const arma::vec3& post_centre,
-                                    const utility::math::matrix::Transform3D& Hcf,
-                                    const message::support::FieldDescription& fd
-                                    );
-        arma::vec3 getSquarePostCamSpaceNormal(
-                                    const message::vision::Goal::MeasurementType& type,
-                                    const arma::vec3& post_centre,
-                                    const utility::math::matrix::Transform3D& Hcf,
-                                    const message::support::FieldDescription& fd
-                                    );
-        //TODO: use these again?
+        arma::vec3 getCylindricalPostCamSpaceNormal(const message::vision::Goal::MeasurementType& type,
+                                                    const arma::vec3& post_centre,
+                                                    const utility::math::matrix::Transform3D& Hcf,
+                                                    const message::support::FieldDescription& fd);
+        arma::vec3 getSquarePostCamSpaceNormal(const message::vision::Goal::MeasurementType& type,
+                                               const arma::vec3& post_centre,
+                                               const utility::math::matrix::Transform3D& Hcf,
+                                               const message::support::FieldDescription& fd);
+        // TODO: use these again?
         // struct Config {
         //     double processNoisePositionFactor = 1e-3;
         //     double processNoiseHeadingFactor = 1e-3;
@@ -95,9 +91,7 @@ namespace localisation {
         //     double observationDifferenceBearingFactor = 0.2;
         //     double observationDifferenceElevationFactor = 0.2;
         // } cfg_;
-
     };
-
 }
 }
 #endif

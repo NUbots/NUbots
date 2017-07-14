@@ -20,21 +20,18 @@
 #ifndef MODULES_INPUT_SERVOLOADMODEL_H
 #define MODULES_INPUT_SERVOLOADMODEL_H
 
-#include <nuclear>
+#include <yaml-cpp/yaml.h>
 #include <armadillo>
 #include <chrono>
-#include <yaml-cpp/yaml.h>
+#include <nuclear>
 
-namespace utility 
-{
-namespace input 
-{
-    class ServoLoadModel 
-    {
-       public:
+namespace utility {
+namespace input {
+    class ServoLoadModel {
+    public:
         static constexpr size_t size = 1;
 
-        ServoLoadModel() {} // empty constructor
+        ServoLoadModel() {}  // empty constructor
 
         arma::vec::fixed<size> timeUpdate(const arma::vec::fixed<size>& state, double /*deltaT*/) {
             return state;

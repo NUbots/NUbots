@@ -20,224 +20,217 @@
 #ifndef DARWIN_UART_H
 #define DARWIN_UART_H
 
-#include <cassert>
-#include <unistd.h>
 #include <errno.h>
-#include <termios.h>
-#include <stdint.h>
 #include <linux/serial.h>
+#include <stdint.h>
+#include <termios.h>
+#include <unistd.h>
+#include <cassert>
 
 #include "extension/Configuration.h"
 
-#include <mutex>
 #include <cstring>
+#include <mutex>
 #include <vector>
 
 
 namespace Darwin {
-    namespace Packet {
-        enum {
-            MAGIC       = 0,
-            ID          = 2,
-            LENGTH      = 3,
-            INSTRUCTION = 4,
-            ERRBIT      = 4,
-            PARAMETER   = 5
-        };
-    }  // namespace Packet
+namespace Packet {
+    enum { MAGIC = 0, ID = 2, LENGTH = 3, INSTRUCTION = 4, ERRBIT = 4, PARAMETER = 5 };
+}  // namespace Packet
 
-    namespace ErrorCode {
-        enum {
-            NO_RESPONSE     = 0x00FF,
-            NONE            = 0x0000,
-            INPUT_VOLTAGE   = 0x0001,
-            ANGLE_LIMIT     = 0x0002,
-            OVERHEATING     = 0x0004,
-            RANGE           = 0x0008,
-            CHECKSUM        = 0x0010,
-            OVERLOAD        = 0x0020,
-            INSTRUCTION     = 0x0040,
-            CORRUPT_DATA    = 0x0080
-        };
-    }  // namespace ErrorCode
-
-    // This is the header that is contained in the CommandResult
-    #pragma pack(push, 1)  // Make sure that this struct is not cache alligned
-    struct Header {
-        Header() {}
-        uint8_t id = -1;
-        uint8_t length = 0;
-        uint8_t errorcode = -1;
+namespace ErrorCode {
+    enum {
+        NO_RESPONSE   = 0x00FF,
+        NONE          = 0x0000,
+        INPUT_VOLTAGE = 0x0001,
+        ANGLE_LIMIT   = 0x0002,
+        OVERHEATING   = 0x0004,
+        RANGE         = 0x0008,
+        CHECKSUM      = 0x0010,
+        OVERLOAD      = 0x0020,
+        INSTRUCTION   = 0x0040,
+        CORRUPT_DATA  = 0x0080
     };
-    // Check that this struct is not cache alligned
-    static_assert(sizeof(Header) == 3, "The compiler is adding padding to this struct, Bad compiler!");
-    #pragma pack(pop)
+}  // namespace ErrorCode
 
-    // This is the object that is returned when a command is run
-    struct CommandResult {
-        CommandResult() : header(), data(), checksum(0) {}
-        Header header;
-        std::vector<uint8_t> data;
-        uint8_t checksum;
-    };
+// This is the header that is contained in the CommandResult
+#pragma pack(push, 1)  // Make sure that this struct is not cache alligned
+struct Header {
+    Header() {}
+    uint8_t id        = -1;
+    uint8_t length    = 0;
+    uint8_t errorcode = -1;
+};
+// Check that this struct is not cache alligned
+static_assert(sizeof(Header) == 3, "The compiler is adding padding to this struct, Bad compiler!");
+#pragma pack(pop)
 
-    // This value calculates the checksum for a packet (the command argument is assumed to be in the CM730 format)
-    uint8_t calculateChecksum(void* command);
-    uint8_t calculateChecksum(const CommandResult& result);
+// This is the object that is returned when a command is run
+struct CommandResult {
+    CommandResult() : header(), data(), checksum(0) {}
+    Header header;
+    std::vector<uint8_t> data;
+    uint8_t checksum;
+};
+
+// This value calculates the checksum for a packet (the command argument is assumed to be in the CM730 format)
+uint8_t calculateChecksum(void* command);
+uint8_t calculateChecksum(const CommandResult& result);
+
+/**
+ * @brief Communicates with the components via the UART (through a USB TTY device)
+ *
+ * @details
+ *  This class handles the communication with the hardware, It has methods that implement the ZigBee protocol used
+ *    in the darwin in order to communicate with the various devices.
+ *
+ * @author Trent Houliston
+ */
+class UART {
+private:
+    const char* devName;
+
+    // We will wait this long for an initial packet header
+    int PACKET_WAIT = 10000;
+    // We will only wait a maximum of BYTE_WAIT microseconds between bytes in a packet (assumes baud of 1000000bps)
+    int BYTE_WAIT              = 1000;
+    int BUS_RESET_WAIT_TIME_uS = 100000;
+
+    /// @brief The file descriptor for the USB TTY device we use to communicate with the devices
+    int fd;
+    /// @brief A mutex which is used for flow control on the USB TTY device
+    std::mutex mutex;
 
     /**
-     * @brief Communicates with the components via the UART (through a USB TTY device)
+     * @brief Configures our serial port to use the passed Baud rate
      *
-     * @details
-     *  This class handles the communication with the hardware, It has methods that implement the ZigBee protocol used
-     *    in the darwin in order to communicate with the various devices.
+     * @param baud the baud rate to use
      *
-     * @author Trent Houliston
+     * @return if the configuration was successful
      */
-    class UART {
-    private:
-        const char* devName;
+    bool configure(double baud);
 
-        // We will wait this long for an initial packet header
-        int PACKET_WAIT= 10000;
-        // We will only wait a maximum of BYTE_WAIT microseconds between bytes in a packet (assumes baud of 1000000bps)
-        int BYTE_WAIT = 1000;
-        int BUS_RESET_WAIT_TIME_uS = 100000;
+    /**
+     * @brief Connects to the serial port
+     */
+    void connect();
 
-        /// @brief The file descriptor for the USB TTY device we use to communicate with the devices
-        int fd;
-        /// @brief A mutex which is used for flow control on the USB TTY device
-        std::mutex mutex;
+    /**
+     * @brief Reconnects to the serial port
+     */
+    void reconnect();
 
-        /**
-         * @brief Configures our serial port to use the passed Baud rate
-         *
-         * @param baud the baud rate to use
-         *
-         * @return if the configuration was successful
-         */
-        bool configure(double baud);
+public:
+    void setConfig(const extension::Configuration& config);
+    /**
+     * @brief Constructs a new UART instance using the passed device path as the TTY device
+     *
+     * @param name the path to the USB TTY device
+     */
+    explicit UART(const char* name);
 
-        /**
-         * @brief Connects to the serial port
-         */
-        void connect();
+    /**
+     * @brief reads a single packet back from the uart, and returns error codes if they timeout
+     *
+     * @return The command result, or a command result with an error flag if there was an error
+     */
+    CommandResult readPacket();
 
-        /**
-         * @brief Reconnects to the serial port
-         */
-        void reconnect();
+    /**
+     * @brief Executes a passed packet and then waits for a response, Used for single commands (read write ping)
+     *
+     * @tparam TPacket the type of packet we are executing
+     *
+     * @param command the command we are executing
+     *
+     * @return the return value from executing this command
+     */
+    template <typename TPacket>
+    CommandResult executeRead(const TPacket& command) {
 
-    public:
-        void setConfig(const extension::Configuration& config);
-        /**
-         * @brief Constructs a new UART instance using the passed device path as the TTY device
-         *
-         * @param name the path to the USB TTY device
-         */
-        explicit UART(const char* name);
+        // Lock the mutex
+        std::lock_guard<std::mutex> lock(mutex);
 
-        /**
-         * @brief reads a single packet back from the uart, and returns error codes if they timeout
-         *
-         * @return The command result, or a command result with an error flag if there was an error
-         */
-        CommandResult readPacket();
+        // Write our command to the UART
+        int written = write(fd, &command, sizeof(TPacket));
 
-        /**
-         * @brief Executes a passed packet and then waits for a response, Used for single commands (read write ping)
-         *
-         * @tparam TPacket the type of packet we are executing
-         *
-         * @param command the command we are executing
-         *
-         * @return the return value from executing this command
-         */
-        template <typename TPacket>
-        CommandResult executeRead(const TPacket& command) {
+        // Wait until we finish writing before continuing (no buffering)
+        tcdrain(fd);
 
-            // Lock the mutex
-            std::lock_guard<std::mutex> lock(mutex);
+        // We flush our buffer, just in case there was anything random in it
+        tcflush(fd, TCIFLUSH);
 
-            // Write our command to the UART
-            int written = write(fd, &command, sizeof(TPacket));
+        assert(written == sizeof(TPacket));
+        // If compiled with NDEBUG then technically written is unused, suppress that warning
+        (void) written;
 
-            // Wait until we finish writing before continuing (no buffering)
-            tcdrain(fd);
+        // Read the packet that we get in response
+        return readPacket();
+    }
 
-            // We flush our buffer, just in case there was anything random in it
-            tcflush(fd, TCIFLUSH);
+    /**
+     * @brief Executes a passed packet and does not wait for a response (for writes)
+     *
+     * @tparam TPacket the type of packet we are executing
+     *
+     * @param command the command we are executing
+     */
+    template <typename TPacket>
+    void executeWrite(const TPacket& command) {
 
-            assert(written == sizeof(TPacket));
-            // If compiled with NDEBUG then technically written is unused, suppress that warning
-            (void) written;
+        // Lock the mutex
+        std::lock_guard<std::mutex> lock(mutex);
 
-            // Read the packet that we get in response
-            return readPacket();
-        }
+        // Write our command to the UART
+        int written = write(fd, &command, sizeof(TPacket));
 
-        /**
-         * @brief Executes a passed packet and does not wait for a response (for writes)
-         *
-         * @tparam TPacket the type of packet we are executing
-         *
-         * @param command the command we are executing
-         */
-        template <typename TPacket>
-        void executeWrite(const TPacket& command) {
+        // Wait until we finish writing before continuing (no buffering)
+        tcdrain(fd);
 
-            // Lock the mutex
-            std::lock_guard<std::mutex> lock(mutex);
+        assert(written == sizeof(TPacket));
+        // If compiled with NDEBUG then technically written is unused, suppress that warning
+        (void) written;
+    }
 
-            // Write our command to the UART
-            int written = write(fd, &command, sizeof(TPacket));
+    /**
+     * @brief This is used to execute a bulk read request.
+     *
+     * @param command the packet that we are going to send to get the response
+     *
+     * @return a vector of command results, one for each of the responding devices
+     */
+    std::vector<CommandResult> executeBulk(const std::vector<uint8_t>& command);
 
-            // Wait until we finish writing before continuing (no buffering)
-            tcdrain(fd);
+    /**
+     * @brief This is used to execute a broadcast command (to the broadcast address), these expect no response
+     *
+     * @param command the command to execute
+     */
+    void executeBroadcast(const std::vector<uint8_t>& command);
 
-            assert(written == sizeof(TPacket));
-            // If compiled with NDEBUG then technically written is unused, suppress that warning
-            (void) written;
-        }
+    /**
+     * @brief Reads a specified number of bytes from the serial port.
+     *
+     * @param buf Pointer to a location to store the read data.
+     *
+     * @param count Number of bytes to read from the serial port.
+     *
+     * @return the number of bytes.
+     */
+    size_t readBytes(void* buf, size_t count);
 
-        /**
-         * @brief This is used to execute a bulk read request.
-         *
-         * @param command the packet that we are going to send to get the response
-         *
-         * @return a vector of command results, one for each of the responding devices
-         */
-        std::vector<CommandResult> executeBulk(const std::vector<uint8_t>& command);
-
-        /**
-         * @brief This is used to execute a broadcast command (to the broadcast address), these expect no response
-         *
-         * @param command the command to execute
-         */
-        void executeBroadcast(const std::vector<uint8_t>& command);
-
-        /**
-         * @brief Reads a specified number of bytes from the serial port.
-         *
-         * @param buf Pointer to a location to store the read data.
-         *
-         * @param count Number of bytes to read from the serial port.
-         *
-         * @return the number of bytes.
-         */
-        size_t readBytes(void* buf, size_t count);
-
-        /**
-         * @brief Writes a specified number of bytes to the serial port.
-         *
-         * @param buf Pointer to the data to write.
-         *
-         * @param count Number of bytes to write to the serial port.
-         *
-         * @return the number of bytes.
-         */
-        size_t writeBytes(const void* buf, size_t count);
-    };
+    /**
+     * @brief Writes a specified number of bytes to the serial port.
+     *
+     * @param buf Pointer to the data to write.
+     *
+     * @param count Number of bytes to write to the serial port.
+     *
+     * @return the number of bytes.
+     */
+    size_t writeBytes(const void* buf, size_t count);
+};
 }  // namespace Darwin
 
 #endif

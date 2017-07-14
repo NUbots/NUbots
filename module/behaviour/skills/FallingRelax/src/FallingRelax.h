@@ -23,34 +23,33 @@
 #include <nuclear>
 
 namespace module {
-    namespace behaviour {
-        namespace skills {
+namespace behaviour {
+    namespace skills {
 
-            /**
-             * Executes a falling script if the robot falls over.
-             *
-             * @author Trent Houliston
-             */
-            class FallingRelax : public NUClear::Reactor {
-            private:
-                const size_t id;
+        /**
+         * Executes a falling script if the robot falls over.
+         *
+         * @author Trent Houliston
+         */
+        class FallingRelax : public NUClear::Reactor {
+        private:
+            const size_t id;
 
-                bool falling;
+            bool falling;
 
-                /// config settings
-                float FALLING_ANGLE;
-                float FALLING_ACCELERATION;
-                std::vector<float> RECOVERY_ACCELERATION;
-                float PRIORITY;
+            /// config settings
+            float FALLING_ANGLE;
+            float FALLING_ACCELERATION;
+            std::vector<float> RECOVERY_ACCELERATION;
+            float PRIORITY;
 
-                void updatePriority(const float& priority);
+            void updatePriority(const float& priority);
 
-            public:
-                explicit FallingRelax(std::unique_ptr<NUClear::Environment> environment);
-            };
-        }  // skills
-    }  // behaviours
+        public:
+            explicit FallingRelax(std::unique_ptr<NUClear::Environment> environment);
+        };
+    }  // skills
+}  // behaviours
 }  // modules
 
 #endif  // MODULES_BEHAVIOUR_REFLEX_FALLINGRELAX_H
-

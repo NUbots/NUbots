@@ -24,94 +24,125 @@
 #include <string>
 
 namespace utility {
-    namespace input {
+namespace input {
 
-        enum ServoSide {
-            RIGHT = 0,
-            LEFT  = 1
+    enum ServoSide { RIGHT = 0, LEFT = 1 };
+
+    struct ServoID {
+        enum Value {
+            R_SHOULDER_PITCH = 0,
+            L_SHOULDER_PITCH = 1,
+            R_SHOULDER_ROLL  = 2,
+            L_SHOULDER_ROLL  = 3,
+            R_ELBOW          = 4,
+            L_ELBOW          = 5,
+            R_HIP_YAW        = 6,
+            L_HIP_YAW        = 7,
+            R_HIP_ROLL       = 8,
+            L_HIP_ROLL       = 9,
+            R_HIP_PITCH      = 10,
+            L_HIP_PITCH      = 11,
+            R_KNEE           = 12,
+            L_KNEE           = 13,
+            R_ANKLE_PITCH    = 14,
+            L_ANKLE_PITCH    = 15,
+            R_ANKLE_ROLL     = 16,
+            L_ANKLE_ROLL     = 17,
+            HEAD_YAW         = 18,
+            HEAD_PITCH       = 19,
+            NUMBER_OF_SERVOS = 20
         };
+        Value value;
 
-        struct ServoID {
-            enum Value {
-                R_SHOULDER_PITCH = 0,
-                L_SHOULDER_PITCH = 1,
-                R_SHOULDER_ROLL  = 2,
-                L_SHOULDER_ROLL  = 3,
-                R_ELBOW          = 4,
-                L_ELBOW          = 5,
-                R_HIP_YAW        = 6,
-                L_HIP_YAW        = 7,
-                R_HIP_ROLL       = 8,
-                L_HIP_ROLL       = 9,
-                R_HIP_PITCH      = 10,
-                L_HIP_PITCH      = 11,
-                R_KNEE           = 12,
-                L_KNEE           = 13,
-                R_ANKLE_PITCH    = 14,
-                L_ANKLE_PITCH    = 15,
-                R_ANKLE_ROLL     = 16,
-                L_ANKLE_ROLL     = 17,
-                HEAD_YAW         = 18,
-                HEAD_PITCH       = 19,
-                NUMBER_OF_SERVOS = 20
-            };
-            Value value;
-        
-            // Constructors
-	        ServoID()                   : value(Value::R_SHOULDER_PITCH) {}
-	        ServoID(uint8_t const& v)   : value(static_cast<Value>(v)) {}
-	        ServoID(uint32_t const& v)  : value(static_cast<Value>(v)) {}
-            ServoID(uint64_t const& v)  : value(static_cast<Value>(v)) {}
-	        ServoID(int const& v)       : value(static_cast<Value>(v)) {}
-	        ServoID(Value const& value) : value(value) {}
-            ServoID(std::string const& str);
-            ServoID(std::string const& str, ServoSide const& side);
-        
-            // Operators
-            bool operator <(ServoID const& other)         const { return value <  other.value; }
-            bool operator >(ServoID const& other)         const { return value >  other.value; }
-            bool operator <=(ServoID const& other)        const { return value <= other.value; }
-            bool operator >=(ServoID const& other)        const { return value >= other.value; }
-            bool operator ==(ServoID const& other)        const { return value == other.value; }
-            bool operator !=(ServoID const& other)        const { return value != other.value; }
-            bool operator <(ServoID::Value const& other)  const { return value <  other;       }
-            bool operator >(ServoID::Value const& other)  const { return value >  other;       }
-            bool operator <=(ServoID::Value const& other) const { return value <= other;       }
-            bool operator >=(ServoID::Value const& other) const { return value >= other;       }
-            bool operator ==(ServoID::Value const& other) const { return value == other;       }
-            bool operator !=(ServoID::Value const& other) const { return value != other;       }
+        // Constructors
+        ServoID() : value(Value::R_SHOULDER_PITCH) {}
+        ServoID(uint8_t const& v) : value(static_cast<Value>(v)) {}
+        ServoID(uint32_t const& v) : value(static_cast<Value>(v)) {}
+        ServoID(uint64_t const& v) : value(static_cast<Value>(v)) {}
+        ServoID(int const& v) : value(static_cast<Value>(v)) {}
+        ServoID(Value const& value) : value(value) {}
+        ServoID(std::string const& str);
+        ServoID(std::string const& str, ServoSide const& side);
 
-            // Conversions
-            operator Value()    const { return value; }
-            operator uint8_t()  const { return value; }
-            operator uint32_t() const { return value; }
-            operator uint64_t() const { return value; }
-            operator int()      const { return value; }
-            operator std::string() const;
+        // Operators
+        bool operator<(ServoID const& other) const {
+            return value < other.value;
+        }
+        bool operator>(ServoID const& other) const {
+            return value > other.value;
+        }
+        bool operator<=(ServoID const& other) const {
+            return value <= other.value;
+        }
+        bool operator>=(ServoID const& other) const {
+            return value >= other.value;
+        }
+        bool operator==(ServoID const& other) const {
+            return value == other.value;
+        }
+        bool operator!=(ServoID const& other) const {
+            return value != other.value;
+        }
+        bool operator<(ServoID::Value const& other) const {
+            return value < other;
+        }
+        bool operator>(ServoID::Value const& other) const {
+            return value > other;
+        }
+        bool operator<=(ServoID::Value const& other) const {
+            return value <= other;
+        }
+        bool operator>=(ServoID::Value const& other) const {
+            return value >= other;
+        }
+        bool operator==(ServoID::Value const& other) const {
+            return value == other;
+        }
+        bool operator!=(ServoID::Value const& other) const {
+            return value != other;
+        }
 
-            // Iterators
-            static std::set<ServoID>::const_iterator begin() {
-                return values.begin();
-            }
-        
-            static std::set<ServoID>::const_iterator end() {
-                return values.end();
-            }
-        
-            static std::set<ServoID>::const_iterator cbegin() {
-                return values.cbegin();
-            }
-        
-            static std::set<ServoID>::const_iterator cend() {
-                return values.cend();
-            } 
+        // Conversions
+        operator Value() const {
+            return value;
+        }
+        operator uint8_t() const {
+            return value;
+        }
+        operator uint32_t() const {
+            return value;
+        }
+        operator uint64_t() const {
+            return value;
+        }
+        operator int() const {
+            return value;
+        }
+        operator std::string() const;
 
-            friend std::ostream& operator<< (std::ostream& out, const ServoID& val);
+        // Iterators
+        static std::set<ServoID>::const_iterator begin() {
+            return values.begin();
+        }
 
-        private:
-            static const std::set<ServoID> values;
-        };	
-    }
+        static std::set<ServoID>::const_iterator end() {
+            return values.end();
+        }
+
+        static std::set<ServoID>::const_iterator cbegin() {
+            return values.cbegin();
+        }
+
+        static std::set<ServoID>::const_iterator cend() {
+            return values.cend();
+        }
+
+        friend std::ostream& operator<<(std::ostream& out, const ServoID& val);
+
+    private:
+        static const std::set<ServoID> values;
+    };
+}
 }
 
 #endif

@@ -23,38 +23,38 @@
 #include "message/output/Say.h"
 
 namespace module {
-    namespace output {
+namespace output {
 
-        using message::output::Say;
+    using message::output::Say;
 
-        eSpeak::eSpeak(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
+    eSpeak::eSpeak(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
 
-            // Initialize espeak, and set it to play out the speakers, and not exit if it can't find it's directory
-            espeak_Initialize(AUDIO_OUTPUT_PLAYBACK, 500, nullptr, 1 << 15);
-            espeak_SetVoiceByName("default");
-            espeak_SetParameter(espeakVOLUME, 100, 0);
-            espeak_SetParameter(espeakCAPITALS, 6, 0);
+        // Initialize espeak, and set it to play out the speakers, and not exit if it can't find it's directory
+        espeak_Initialize(AUDIO_OUTPUT_PLAYBACK, 500, nullptr, 1 << 15);
+        espeak_SetVoiceByName("default");
+        espeak_SetParameter(espeakVOLUME, 100, 0);
+        espeak_SetParameter(espeakCAPITALS, 6, 0);
 
-            on<Trigger<Say>, Sync<eSpeak>>().then([](const Say& say) {
-                // Wait to finish the current message (if any)
-                // By waiting here this reaction can finish and return to the pool
-                // if it does not have to wait for another say message
-                espeak_Synchronize();
+        on<Trigger<Say>, Sync<eSpeak>>().then([](const Say& say) {
+            // Wait to finish the current message (if any)
+            // By waiting here this reaction can finish and return to the pool
+            // if it does not have to wait for another say message
+            espeak_Synchronize();
 
-                // Say the new message
-                espeak_Synth(say.message.c_str(),    // Text
-                             say.message.size() + 1, // Size (including null at end)
-                             0,                      // Start position
-                             POS_CHARACTER,          // Position Type (irrelevant since we start at the beginning)
-                             0,                      // End position (0 means no end position)
-                             espeakCHARS_AUTO,       // Flags (auto encoding)
-                             nullptr,                // User identifier for callback
-                             nullptr                 // Callback
-                        );
-            });
+            // Say the new message
+            espeak_Synth(say.message.c_str(),     // Text
+                         say.message.size() + 1,  // Size (including null at end)
+                         0,                       // Start position
+                         POS_CHARACTER,           // Position Type (irrelevant since we start at the beginning)
+                         0,                       // End position (0 means no end position)
+                         espeakCHARS_AUTO,        // Flags (auto encoding)
+                         nullptr,                 // User identifier for callback
+                         nullptr                  // Callback
+                         );
+        });
 
-            on<Shutdown>().then(espeak_Terminate);
-        }
+        on<Shutdown>().then(espeak_Terminate);
+    }
 
-    }  // output
+}  // output
 }  // modules

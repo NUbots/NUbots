@@ -26,26 +26,26 @@
 
 namespace utility {
 namespace math {
-namespace geometry {
-    class UnitQuaternion;
-}
-namespace matrix {
+    namespace geometry {
+        class UnitQuaternion;
+    }
+    namespace matrix {
 
-    template <int Dimensions>
-    class Transform;
+        template <int Dimensions>
+        class Transform;
 
-    using Transform3D = Transform<3>;
+        using Transform3D = Transform<3>;
 
-    template <int Dimensions>
-    class Rotation;
+        template <int Dimensions>
+        class Rotation;
 
-    using Rotation3D = Rotation<3>;
-    using Axis = arma::vec3;
-    using AxisAngle = std::pair<Axis, double>;
+        using Rotation3D = Rotation<3>;
+        using Axis       = arma::vec3;
+        using AxisAngle  = std::pair<Axis, double>;
 
-    template <>
-    class Rotation<3> : public arma::mat33 {
-        using arma::mat33::mat33; // inherit constructors
+        template <>
+        class Rotation<3> : public arma::mat33 {
+            using arma::mat33::mat33;  // inherit constructors
         public:
             /**
              * @brief Default constructor creates an identity matrix
@@ -95,7 +95,8 @@ namespace matrix {
             Rotation3D rotateZ(double radians) const;
 
             /**
-             * @brief Transforms current rotation from world coordinates (i.e. standard basis) to be local to 'reference'
+             * @brief Transforms current rotation from world coordinates (i.e. standard basis) to be local to
+             * 'reference'
              *
              * @param reference A rotation matrix to become relatively local to
              * @return The transformed rotation matrix
@@ -103,7 +104,8 @@ namespace matrix {
             Rotation3D worldToLocal(const Rotation3D& reference) const;
 
             /**
-             * @brief Rotations current rotation from local coordinates relative to 'reference', to world coordinates (i.e. standard rotation)
+             * @brief Rotations current rotation from local coordinates relative to 'reference', to world coordinates
+             * (i.e. standard rotation)
              *
              * @param reference The rotation matrix that the current rotation is relative to
              * @return The transformed rotation matrix
@@ -130,14 +132,26 @@ namespace matrix {
 
             Rotation3D orthogonalise() const;
 
-            inline const arma::vec3 x() const { return submat(0,0,2,0); }
-            inline arma::subview<double> x() { return submat(0,0,2,0); }
+            inline const arma::vec3 x() const {
+                return submat(0, 0, 2, 0);
+            }
+            inline arma::subview<double> x() {
+                return submat(0, 0, 2, 0);
+            }
 
-            inline const arma::vec3 y() const { return submat(0,1,2,1); }
-            inline arma::subview<double> y() { return submat(0,1,2,1); }
+            inline const arma::vec3 y() const {
+                return submat(0, 1, 2, 1);
+            }
+            inline arma::subview<double> y() {
+                return submat(0, 1, 2, 1);
+            }
 
-            inline const arma::vec3 z() const { return submat(0,2,2,2); }
-            inline arma::subview<double> z() { return submat(0,2,2,2); }
+            inline const arma::vec3 z() const {
+                return submat(0, 2, 2, 2);
+            }
+            inline arma::subview<double> z() {
+                return submat(0, 2, 2, 2);
+            }
 
 
             /**
@@ -149,17 +163,23 @@ namespace matrix {
             /**
              * @return The roll (x-axis) of the rotation matrix
              */
-            inline double roll() const { return eulerAngles()[0]; }
+            inline double roll() const {
+                return eulerAngles()[0];
+            }
 
             /**
              * @return The pitch (y-axis) of the rotation matrix
              */
-            inline double pitch() const { return eulerAngles()[1]; }
+            inline double pitch() const {
+                return eulerAngles()[1];
+            }
 
             /**
              * @return The yaw (z-axis) of the rotation matrix
              */
-            inline double yaw() const { return eulerAngles()[2]; }
+            inline double yaw() const {
+                return eulerAngles()[2];
+            }
 
             /**
              * @brief Creates a rotation matrix around the X axis by the given radians
@@ -196,10 +216,9 @@ namespace matrix {
                 double roll, pitch, yaw; // psi, theta, phi
              */
             static Rotation3D createFromEulerAngles(const arma::vec3& a);
+        };
 
-    };
-
-}  // matrix
+    }  // matrix
 }  // math
 }  // utility
 

@@ -26,12 +26,12 @@ namespace module {
 namespace support {
 
     class VirtualCamera : public NUClear::Reactor {
-    	ReactionHandle emitImageHandle;
+        ReactionHandle emitImageHandle;
+
     public:
         /// @brief Called by the powerplant to build and setup the VirtualCamera reactor.
         explicit VirtualCamera(std::unique_ptr<NUClear::Environment> environment);
     };
-
 }
 }
 

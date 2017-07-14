@@ -24,20 +24,19 @@
 
 namespace module {
 namespace behaviour {
-namespace skills {
+    namespace skills {
 
-    class DirectWalkController : public NUClear::Reactor {
+        class DirectWalkController : public NUClear::Reactor {
 
-    public:
-        /// @brief Called by the powerplant to build and setup the DirectWalkController reactor.
-        explicit DirectWalkController(std::unique_ptr<NUClear::Environment> environment);
+        public:
+            /// @brief Called by the powerplant to build and setup the DirectWalkController reactor.
+            explicit DirectWalkController(std::unique_ptr<NUClear::Environment> environment);
 
-	private:
-       	/// @brief Subsumption ID key to access motors
-        const size_t subsumptionId;
-    };
-
-}
+        private:
+            /// @brief Subsumption ID key to access motors
+            const size_t subsumptionId;
+        };
+    }
 }
 }
 

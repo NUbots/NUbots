@@ -40,7 +40,7 @@ namespace input {
         , commandHandle()
         , dataHandle() {
 
-        on<Configuration>("NatNet.yaml").then([this] (const Configuration& config) {
+        on<Configuration>("NatNet.yaml").then([this](const Configuration& config) {
 
             // We are updating to a new multicast address
             if (multicastAddress != config["multicast_address"].as<std::string>()
@@ -56,40 +56,40 @@ namespace input {
 
                 // Set our new variables
                 multicastAddress = config["multicast_address"].as<std::string>();
-                dataPort = config["data_port"].as<uint16_t>();
-                commandPort = config["command_port"].as<uint16_t>();
+                dataPort         = config["data_port"].as<uint16_t>();
+                commandPort      = config["command_port"].as<uint16_t>();
 
                 log<NUClear::INFO>("Connecting to NatNet network", multicastAddress);
 
                 // Create a listening UDP port for commands
-                std::tie(commandHandle, std::ignore, commandFd) = on<UDP>().then("NatNet Command", [this] (UDP::Packet packet) {
-                    process(packet.payload);
-                });
+                std::tie(commandHandle, std::ignore, commandFd) =
+                    on<UDP>().then("NatNet Command", [this](UDP::Packet packet) { process(packet.payload); });
 
                 // Create a listening UDP port for data
-                std::tie(dataHandle, std::ignore, std::ignore) = on<UDP::Multicast>(multicastAddress, dataPort).then("NatNet Data", [this] (UDP::Packet packet) {
+                std::tie(dataHandle, std::ignore, std::ignore) =
+                    on<UDP::Multicast>(multicastAddress, dataPort).then("NatNet Data", [this](UDP::Packet packet) {
 
-                    // Test if we are "connected" to this remote
-                    // And if we are we can use the data
-                    if (remote == packet.remote.address && version != 0) {
-                        process(packet.payload);
-                    }
-                    // We have started connecting but haven't received a return ping
-                    else if (remote == packet.remote.address && version == 0) {
-                        // TODO maybe set a timeout here to try again
-                    }
-                    // We haven't connected to anything yet
-                    else if (remote == 0) {
-                        // This is now our remote
-                        remote = packet.remote.address;
+                        // Test if we are "connected" to this remote
+                        // And if we are we can use the data
+                        if (remote == packet.remote.address && version != 0) {
+                            process(packet.payload);
+                        }
+                        // We have started connecting but haven't received a return ping
+                        else if (remote == packet.remote.address && version == 0) {
+                            // TODO maybe set a timeout here to try again
+                        }
+                        // We haven't connected to anything yet
+                        else if (remote == 0) {
+                            // This is now our remote
+                            remote = packet.remote.address;
 
-                        // Send a ping command
-                        sendCommand(Packet::Type::PING);
-                    }
-                    else if (remote != packet.remote.address) {
-                        log<NUClear::WARN>("There is more than one NatNet server running on this network");
-                    }
-                });
+                            // Send a ping command
+                            sendCommand(Packet::Type::PING);
+                        }
+                        else if (remote != packet.remote.address) {
+                            log<NUClear::WARN>("There is more than one NatNet server running on this network");
+                        }
+                    });
             }
         });
     }
@@ -101,7 +101,7 @@ namespace input {
 
             // Fill in the header
             Packet* header = reinterpret_cast<Packet*>(packet.data());
-            header->type = type;
+            header->type   = type;
             header->length = data.size();
 
             // Fill in the data
@@ -110,12 +110,13 @@ namespace input {
             // Work out our remotes address
             sockaddr_in address;
             memset(&address, 0, sizeof(sockaddr_in));
-            address.sin_family = AF_INET;
-            address.sin_port = htons(commandPort);
+            address.sin_family      = AF_INET;
+            address.sin_port        = htons(commandPort);
             address.sin_addr.s_addr = htonl(remote);
 
             // Send to our remote server
-            ::sendto(commandFd, packet.data(), packet.size(), 0, reinterpret_cast<sockaddr*>(&address), sizeof(sockaddr));
+            ::sendto(
+                commandFd, packet.data(), packet.size(), 0, reinterpret_cast<sockaddr*>(&address), sizeof(sockaddr));
         }
         else {
             log<NUClear::WARN>("NatNet is not yet connected to a remote server");
@@ -143,8 +144,8 @@ namespace input {
         for (auto position : freeMarkers) {
             MotionCapture::Marker marker;
             marker.position = position;
-            marker.id = -1;
-            marker.size = -1;
+            marker.id       = -1;
+            marker.size     = -1;
             mocap->markers.push_back(marker);
         }
 
@@ -152,17 +153,17 @@ namespace input {
         mocap->rigidBodies = ReadData<std::vector<MotionCapture::RigidBody>>::read(ptr, version);
 
         // Read the skeletons
-        if(version >= 0x02010000) {
+        if (version >= 0x02010000) {
             mocap->skeletons = ReadData<std::vector<MotionCapture::Skeleton>>::read(ptr, version);
         }
 
         // Read the labeled markers
-        if(version >= 0x02030000) {
+        if (version >= 0x02030000) {
             mocap->labeledMarkers = ReadData<std::vector<MotionCapture::LabeledMarker>>::read(ptr, version);
         }
 
         // Read the force plates
-        if(version >= 0x02090000) {
+        if (version >= 0x02090000) {
             mocap->forcePlates = ReadData<std::vector<MotionCapture::ForcePlate>>::read(ptr, version);
         }
 
@@ -179,7 +180,7 @@ namespace input {
             mocap->timestamp = ReadData<float>::read(ptr, version);
         }
 
-        short params = ReadData<short>::read(ptr, version);
+        short params                = ReadData<short>::read(ptr, version);
         mocap->recording            = (params & 0x01) == 0x01;
         mocap->trackedModelsChanged = (params & 0x01) == 0x02;
 
@@ -191,7 +192,7 @@ namespace input {
             auto model = markerSetModels.find(markerSet.name);
 
             // We have a model
-            if(model != markerSetModels.end()) {
+            if (model != markerSetModels.end()) {
             }
             // We need to update our models
             else {
@@ -211,19 +212,21 @@ namespace input {
             auto model = rigidBodyModels.find(rigidBody.id);
 
             // We have a model
-            if(model != rigidBodyModels.end()) {
+            if (model != rigidBodyModels.end()) {
 
-                rigidBody.name = model->second.name;
+                rigidBody.name   = model->second.name;
                 rigidBody.offset = model->second.offset;
 
-                auto parent = std::find_if(mocap->rigidBodies.begin(), mocap->rigidBodies.end(), [model] (const MotionCapture::RigidBody& rb) {
-                    return rb.id == model->second.id;
-                });
+                auto parent = std::find_if(
+                    mocap->rigidBodies.begin(), mocap->rigidBodies.end(), [model](const MotionCapture::RigidBody& rb) {
+                        return rb.id == model->second.id;
+                    });
 
                 // Get a pointer to our parent if it exists and is not us
-                rigidBody.parent = parent->id == rigidBody.id             ?  0
-                                 : parent     == mocap->rigidBodies.end() ? -1
-                                 : std::distance(mocap->rigidBodies.begin(), parent);
+                rigidBody.parent =
+                    parent->id == rigidBody.id
+                        ? 0
+                        : parent == mocap->rigidBodies.end() ? -1 : std::distance(mocap->rigidBodies.begin(), parent);
             }
             // We need to update our models
             else {
@@ -241,7 +244,8 @@ namespace input {
         // Now we reverse link all our rigid bodies
         for (auto rigidBody = mocap->rigidBodies.begin(); rigidBody != mocap->rigidBodies.end(); rigidBody++) {
             if (rigidBody->parent > 0) {
-                mocap->rigidBodies.at(rigidBody->parent).children.push_back(std::distance(mocap->rigidBodies.begin(), rigidBody));
+                mocap->rigidBodies.at(rigidBody->parent)
+                    .children.push_back(std::distance(mocap->rigidBodies.begin(), rigidBody));
             }
         }
 
@@ -250,23 +254,25 @@ namespace input {
             auto model = skeletonModels.find(skeleton.id);
 
             // We have a model
-            if(model != skeletonModels.end()) {
+            if (model != skeletonModels.end()) {
 
                 for (auto& bone : skeleton.bones) {
                     auto boneModel = model->second.boneModels.find(bone.id);
                     // We have a model for this bone
                     if (boneModel != model->second.boneModels.end()) {
 
-                        bone.name = boneModel->second.name;
+                        bone.name   = boneModel->second.name;
                         bone.offset = boneModel->second.offset;
 
-                        auto parent = std::find_if(skeleton.bones.begin(), skeleton.bones.end(), [boneModel] (const MotionCapture::RigidBody& rb) {
-                            return rb.id == boneModel->second.id;
-                        });
+                        auto parent = std::find_if(
+                            skeleton.bones.begin(),
+                            skeleton.bones.end(),
+                            [boneModel](const MotionCapture::RigidBody& rb) { return rb.id == boneModel->second.id; });
 
-                        bone.parent = parent->id == bone.id              ?  0
-                                    : parent     == skeleton.bones.end() ? -1
-                                    : std::distance(skeleton.bones.begin(), parent);
+                        bone.parent =
+                            parent->id == bone.id
+                                ? 0
+                                : parent == skeleton.bones.end() ? -1 : std::distance(skeleton.bones.begin(), parent);
                     }
                     // We need to update our models
                     else {
@@ -296,7 +302,8 @@ namespace input {
             // Now we reverse link all our bones
             for (auto rigidBody = skeleton.bones.begin(); rigidBody != skeleton.bones.end(); rigidBody++) {
                 if (rigidBody->parent > 0) {
-                    skeleton.bones.at(rigidBody->parent).children.push_back(std::distance(skeleton.bones.begin(), rigidBody));
+                    skeleton.bones.at(rigidBody->parent)
+                        .children.push_back(std::distance(skeleton.bones.begin(), rigidBody));
                 }
             }
         }
@@ -322,26 +329,24 @@ namespace input {
             switch (type) {
                 // Marker Set
                 case 0: {
-                    MarkerSetModel m = ReadData<MarkerSetModel>::read(ptr, version);
+                    MarkerSetModel m        = ReadData<MarkerSetModel>::read(ptr, version);
                     markerSetModels[m.name] = m;
                 } break;
 
                 // Rigid Body
                 case 1: {
-                    RigidBodyModel m = ReadData<RigidBodyModel>::read(ptr, version);
+                    RigidBodyModel m      = ReadData<RigidBodyModel>::read(ptr, version);
                     rigidBodyModels[m.id] = m;
                 } break;
 
                 // Skeleton
                 case 2: {
-                    SkeletonModel m = ReadData<SkeletonModel>::read(ptr, version);
+                    SkeletonModel m      = ReadData<SkeletonModel>::read(ptr, version);
                     skeletonModels[m.id] = m;
                 } break;
 
                 // Bad packet
-                default: {
-                    log<NUClear::WARN>("NatNet received an unexpected model type", type);
-                } break;
+                default: { log<NUClear::WARN>("NatNet received an unexpected model type", type); } break;
             }
         }
     }
@@ -350,34 +355,32 @@ namespace input {
 
         // Extract the information from the packet
         std::string name(&packet.data);
-        const char* appVersion = &packet.data + 256;
+        const char* appVersion    = &packet.data + 256;
         const char* natNetVersion = appVersion + 4;
 
         // Update our version number
-        version = (natNetVersion[0] << 24)
-                | (natNetVersion[1] << 16)
-                | (natNetVersion[2] << 8)
-                | (natNetVersion[3] << 0);
+        version =
+            (natNetVersion[0] << 24) | (natNetVersion[1] << 16) | (natNetVersion[2] << 8) | (natNetVersion[3] << 0);
 
         // Make our app version a string (removing trailing 0 version numbers)
         std::string strAppVersion = std::to_string(int(appVersion[0]))
-                            + (appVersion[1] == 0 ? "" : "." + std::to_string(appVersion[1]))
-                            + (appVersion[2] == 0 ? "" : "." + std::to_string(appVersion[2]))
-                            + (appVersion[3] == 0 ? "" : "." + std::to_string(appVersion[3]));
+                                    + (appVersion[1] == 0 ? "" : "." + std::to_string(appVersion[1]))
+                                    + (appVersion[2] == 0 ? "" : "." + std::to_string(appVersion[2]))
+                                    + (appVersion[3] == 0 ? "" : "." + std::to_string(appVersion[3]));
 
         // Make our natNetVersion a string
         std::string strNatVersion = std::to_string(natNetVersion[0])
-                            + (natNetVersion[1] == 0 ? "" : "." + std::to_string(natNetVersion[1]))
-                            + (natNetVersion[2] == 0 ? "" : "." + std::to_string(natNetVersion[2]))
-                            + (natNetVersion[3] == 0 ? "" : "." + std::to_string(natNetVersion[3]));
+                                    + (natNetVersion[1] == 0 ? "" : "." + std::to_string(natNetVersion[1]))
+                                    + (natNetVersion[2] == 0 ? "" : "." + std::to_string(natNetVersion[2]))
+                                    + (natNetVersion[3] == 0 ? "" : "." + std::to_string(natNetVersion[3]));
 
         // Make our remote into an IP
-        std::string strRemote = std::to_string((remote >> 24) & 0xFF) + "."
-                              + std::to_string((remote >> 16) & 0xFF) + "."
-                              + std::to_string((remote >>  8) & 0xFF) + "."
-                              + std::to_string((remote >>  0) & 0xFF);
+        std::string strRemote = std::to_string((remote >> 24) & 0xFF) + "." + std::to_string((remote >> 16) & 0xFF)
+                                + "." + std::to_string((remote >> 8) & 0xFF) + "."
+                                + std::to_string((remote >> 0) & 0xFF);
 
-        log<NUClear::INFO>(fmt::format("Connected to {} ({} {}) over NatNet {}", strRemote, name, strAppVersion, strNatVersion));
+        log<NUClear::INFO>(
+            fmt::format("Connected to {} ({} {}) over NatNet {}", strRemote, name, strAppVersion, strNatVersion));
 
         // Request model definitions on startup
         sendCommand(Packet::Type::REQUEST_MODEL_DEFINITIONS);
@@ -407,33 +410,22 @@ namespace input {
         const Packet& packet = *reinterpret_cast<const Packet*>(input.data());
 
         // Work out it's type
-        switch(packet.type) {
-            case Packet::Type::PING_RESPONSE:
-                processPing(packet);
-            break;
+        switch (packet.type) {
+            case Packet::Type::PING_RESPONSE: processPing(packet); break;
 
-            case Packet::Type::RESPONSE:
-                processResponse(packet);
-            break;
+            case Packet::Type::RESPONSE: processResponse(packet); break;
 
-            case Packet::Type::MODEL_DEF:
-                processModel(packet);
-            break;
+            case Packet::Type::MODEL_DEF: processModel(packet); break;
 
-            case Packet::Type::FRAME_OF_DATA:
-                processFrame(packet);
-            break;
+            case Packet::Type::FRAME_OF_DATA: processFrame(packet); break;
 
             case Packet::Type::UNRECOGNIZED_REQUEST:
                 log<NUClear::ERROR>("An unrecognized request was made to the NatNet server");
-            break;
+                break;
 
-            case Packet::Type::MESSAGE_STRING:
-                processString(packet);
+            case Packet::Type::MESSAGE_STRING: processString(packet);
 
-            default:
-                log<NUClear::ERROR>("The NatNet server sent an unexpected packet type");
-            break;
+            default: log<NUClear::ERROR>("The NatNet server sent an unexpected packet type"); break;
         }
     }
 }

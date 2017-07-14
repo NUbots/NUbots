@@ -43,7 +43,6 @@ namespace research {
         /// @brief Called by the powerplant to build and setup the PressureAutoClassifier reactor.
         explicit PressureAutoClassifier(std::unique_ptr<NUClear::Environment> environment);
     };
-
 }
 }
 

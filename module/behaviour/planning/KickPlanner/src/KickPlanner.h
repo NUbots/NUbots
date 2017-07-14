@@ -28,21 +28,20 @@
 #include <nuclear>
 namespace module {
 namespace behaviour {
-namespace planning {
+    namespace planning {
 
-    class KickPlanner : public NUClear::Reactor {
-    public:
-        /// @brief Called by the powerplant to build and setup the KickPlanner reactor.
-        explicit KickPlanner(std::unique_ptr<NUClear::Environment> environment);
+        class KickPlanner : public NUClear::Reactor {
+        public:
+            /// @brief Called by the powerplant to build and setup the KickPlanner reactor.
+            explicit KickPlanner(std::unique_ptr<NUClear::Environment> environment);
 
-    private:
-        bool kickValid(const arma::vec3& ballPos);
-       	message::motion::KickPlannerConfig cfg;
-       	NUClear::clock::time_point ball_last_measurement_time;
-       	NUClear::clock::time_point lastTimeValid;
-    };
-
-}
+        private:
+            bool kickValid(const arma::vec3& ballPos);
+            message::motion::KickPlannerConfig cfg;
+            NUClear::clock::time_point ball_last_measurement_time;
+            NUClear::clock::time_point lastTimeValid;
+        };
+    }
 }
 }
 

@@ -20,67 +20,66 @@
 #ifndef MODULES_SUPPORT_OPTIMISATION_WALK_OPTIMISER_H
 #define MODULES_SUPPORT_OPTIMISATION_WALK_OPTIMISER_H
 
-#include <nuclear>
 #include <armadillo>
+#include <nuclear>
 
-#include "message/input/Sensors.h"
-#include "message/motion/GetupCommand.h"
 #include "extension/Configuration.h"
 #include "message/behaviour/FixedWalkCommand.h"
+#include "message/input/Sensors.h"
+#include "message/motion/GetupCommand.h"
 
 namespace module {
-    namespace support {
-        namespace optimisation {
+namespace support {
+    namespace optimisation {
 
-            struct OptimiseWalkCommand{};
-            struct OptimisationComplete{};
+        struct OptimiseWalkCommand {};
+        struct OptimisationComplete {};
 
 
+        class FitnessData {
+        public:
+            uint numberOfGetups = 0;
+            arma::running_stat<double> tilt;
+            bool recording;
+            double popFitness();
+            void update(const message::input::Sensors& sensors);
+            void recordGetup();
+            void getupFinished();
+        };
 
-            class FitnessData {
-            public:
-                uint numberOfGetups = 0;
-                arma::running_stat<double> tilt;
-                bool recording;
-                double popFitness();
-                void update(const message::input::Sensors& sensors);
-                void recordGetup();
-                void getupFinished();
-            };
+        class WalkOptimiser : public NUClear::Reactor {
+        private:
+            message::behaviour::FixedWalkCommand walk_command;
+            std::vector<std::string> parameter_names;
+            arma::vec parameter_sigmas;
+            arma::vec fitnesses;
 
-            class WalkOptimiser : public NUClear::Reactor {
-            private:
-                message::behaviour::FixedWalkCommand walk_command;
-                std::vector<std::string> parameter_names;
-                arma::vec parameter_sigmas;
-                arma::vec fitnesses;
+            unsigned int currentSample;
+            arma::mat samples;
+            int number_of_samples;
 
-                unsigned int currentSample;
-                arma::mat samples;
-                int number_of_samples;
+            unsigned int getup_cancel_trial_threshold;
 
-                unsigned int getup_cancel_trial_threshold;
+            int configuration_wait_milliseconds = 2000;
 
-                int configuration_wait_milliseconds = 2000;
+            extension::Configuration initialConfig;
 
-                extension::Configuration initialConfig;
+            static constexpr const char* backupLocation = "WalkEngine_Optimised.yaml";
 
-                static constexpr const char* backupLocation = "WalkEngine_Optimised.yaml";
+            void printState(const arma::vec& state);
+            arma::vec getState(const extension::Configuration& walkConfig);
+            YAML::Node getWalkConfig(const arma::vec& state);
+            void saveConfig(const YAML::Node& config);
+            void setWalkParameters(const YAML::Node& config);
 
-                void printState(const arma::vec& state);
-                arma::vec getState(const extension::Configuration& walkConfig);
-                YAML::Node getWalkConfig(const arma::vec& state);
-                void saveConfig(const YAML::Node& config);
-                void setWalkParameters(const YAML::Node& config);
+            FitnessData data;
 
-                FitnessData data;
-            public:
-                explicit WalkOptimiser(std::unique_ptr<NUClear::Environment> environment);
-            };
+        public:
+            explicit WalkOptimiser(std::unique_ptr<NUClear::Environment> environment);
+        };
 
-        } //optimisation
-    }  // support
+    }  // optimisation
+}  // support
 }  // modules
 
 #endif  // MODULES_SUPPORT_NUBUGGER_H
-

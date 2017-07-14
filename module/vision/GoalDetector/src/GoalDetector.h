@@ -20,8 +20,8 @@
 #ifndef MODULES_VISION_GOALDETECTOR_H
 #define MODULES_VISION_GOALDETECTOR_H
 
-#include <nuclear>
 #include <armadillo>
+#include <nuclear>
 
 namespace module {
 namespace vision {
@@ -53,7 +53,6 @@ namespace vision {
         /// @brief Called by the powerplant to build and setup the GoalDetector reactor.
         explicit GoalDetector(std::unique_ptr<NUClear::Environment> environment);
     };
-
 }
 }
 

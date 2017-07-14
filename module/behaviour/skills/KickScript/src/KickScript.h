@@ -26,26 +26,25 @@
 
 namespace module {
 namespace behaviour {
-namespace skills {
+    namespace skills {
 
-    class KickScript : public NUClear::Reactor {
-    public:
-        /// @brief Called by the powerplant to build and setup the KickScript reactor.
-        explicit KickScript(std::unique_ptr<NUClear::Environment> environment);
-    private:
-        const size_t id;
+        class KickScript : public NUClear::Reactor {
+        public:
+            /// @brief Called by the powerplant to build and setup the KickScript reactor.
+            explicit KickScript(std::unique_ptr<NUClear::Environment> environment);
 
-        float KICK_PRIORITY;
-        float EXECUTION_PRIORITY;
+        private:
+            const size_t id;
 
-        message::motion::KickScriptCommand kickCommand;
+            float KICK_PRIORITY;
+            float EXECUTION_PRIORITY;
 
-        void updatePriority(const float& priority);
-        int getDirectionalQuadrant(float x, float y);
+            message::motion::KickScriptCommand kickCommand;
 
-    };
-
-}
+            void updatePriority(const float& priority);
+            int getDirectionalQuadrant(float x, float y);
+        };
+    }
 }
 }
 

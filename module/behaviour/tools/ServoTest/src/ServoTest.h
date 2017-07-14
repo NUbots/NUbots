@@ -5,16 +5,15 @@
 
 namespace module {
 namespace behaviour {
-namespace tools {
+    namespace tools {
 
-    class ServoTest : public NUClear::Reactor {
+        class ServoTest : public NUClear::Reactor {
 
-    public:
-        /// @brief Called by the powerplant to build and setup the ServoTest reactor.
-        explicit ServoTest(std::unique_ptr<NUClear::Environment> environment);
-    };
-
-}
+        public:
+            /// @brief Called by the powerplant to build and setup the ServoTest reactor.
+            explicit ServoTest(std::unique_ptr<NUClear::Environment> environment);
+        };
+    }
 }
 }
 

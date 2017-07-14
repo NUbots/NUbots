@@ -27,31 +27,32 @@
 #include "utility/math/geometry/Line.h"
 
 namespace utility {
-    namespace vision {
+namespace vision {
 
-        static inline int visualHorizonAtPoint(const message::vision::ClassifiedImage& classifiedImage, int x) {
+    static inline int visualHorizonAtPoint(const message::vision::ClassifiedImage& classifiedImage, int x) {
 
-            struct {
-                bool operator()(const int& k, const Eigen::Vector2i& v) {
-                    return k < v[0];
-                }
+        struct {
+            bool operator()(const int& k, const Eigen::Vector2i& v) {
+                return k < v[0];
+            }
 
-                bool operator()(const Eigen::Vector2i& v, const int& k) {
-                    return v[0] < k;
-                }
-            } comparator;
+            bool operator()(const Eigen::Vector2i& v, const int& k) {
+                return v[0] < k;
+            }
+        } comparator;
 
-            // Find the point such that pt1 < x < pt2
-            auto p2 = std::upper_bound(classifiedImage.visualHorizon.begin(), classifiedImage.visualHorizon.end(), x, comparator);
-            p2 -= p2 == classifiedImage.visualHorizon.end() ? 1 : 0;
-            auto p1 = p2 - 1;
+        // Find the point such that pt1 < x < pt2
+        auto p2 =
+            std::upper_bound(classifiedImage.visualHorizon.begin(), classifiedImage.visualHorizon.end(), x, comparator);
+        p2 -= p2 == classifiedImage.visualHorizon.end() ? 1 : 0;
+        auto p1 = p2 - 1;
 
-            utility::math::geometry::Line l({ double(p1->x()), double(p1->y())}, {double(p2->x()), double(p2->y())});
+        utility::math::geometry::Line l({double(p1->x()), double(p1->y())}, {double(p2->x()), double(p2->y())});
 
-            return int(lround(l.y(x)));
-        }
+        return int(lround(l.y(x)));
+    }
 
-    }  // vision
+}  // vision
 }  // utility
 
 #endif  // UTILITY_VISION_CLASSIFIEDIMAGE_H

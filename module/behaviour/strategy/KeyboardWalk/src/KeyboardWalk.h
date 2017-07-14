@@ -20,51 +20,51 @@
 #ifndef MODULES_BEHAVIOUR_STRATEGY_CONTROLLABLEDARWIN_H
 #define MODULES_BEHAVIOUR_STRATEGY_CONTROLLABLEDARWIN_H
 
-#include <nuclear>
 #include <armadillo>
+#include <nuclear>
 
 namespace module {
 namespace behaviour {
-namespace strategy {
+    namespace strategy {
 
-    class KeyboardWalk : public NUClear::Reactor {
-    private:
-        static constexpr const double DIFF = 0.10;
-        static constexpr const double ROT_DIFF = 0.10;
+        class KeyboardWalk : public NUClear::Reactor {
+        private:
+            static constexpr const double DIFF     = 0.10;
+            static constexpr const double ROT_DIFF = 0.10;
 
-        static constexpr const double HEAD_DIFF = 1 * M_PI / 180;
+            static constexpr const double HEAD_DIFF = 1 * M_PI / 180;
 
-        bool moving = false;
-        arma::vec2 velocity;
-        float rotation = 0;
+            bool moving = false;
+            arma::vec2 velocity;
+            float rotation = 0;
 
-        float headYaw = 0;
-        float headPitch = 0;
+            float headYaw   = 0;
+            float headPitch = 0;
 
-        void forward();
-        void left();
-        void back();
-        void right();
-        void turnLeft();
-        void turnRight();
-        void getUp();
-        void reset();
-        void kickRightForward();
-        void lookLeft();
-        void lookRight();
-        void lookUp();
-        void lookDown();
-        void walkToggle();
-        void quit();
+            void forward();
+            void left();
+            void back();
+            void right();
+            void turnLeft();
+            void turnRight();
+            void getUp();
+            void reset();
+            void kickRightForward();
+            void lookLeft();
+            void lookRight();
+            void lookUp();
+            void lookDown();
+            void walkToggle();
+            void quit();
 
-        void updateCommand();
-        void printStatus();
-    public:
-        /// @brief Called by the powerplant to build and setup the KeyboardWalk reactor.
-        explicit KeyboardWalk(std::unique_ptr<NUClear::Environment> environment);
-    };
+            void updateCommand();
+            void printStatus();
 
-}
+        public:
+            /// @brief Called by the powerplant to build and setup the KeyboardWalk reactor.
+            explicit KeyboardWalk(std::unique_ptr<NUClear::Environment> environment);
+        };
+    }
 }
 }
 

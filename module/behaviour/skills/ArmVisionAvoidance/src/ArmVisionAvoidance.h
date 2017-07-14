@@ -28,31 +28,30 @@
 
 namespace module {
 namespace behaviour {
-namespace skills {
+    namespace skills {
 
-    class ArmVisionAvoidance : public NUClear::Reactor {
+        class ArmVisionAvoidance : public NUClear::Reactor {
 
-    public:
-        /// @brief Called by the powerplant to build and setup the ArmController reactor.
-        explicit ArmVisionAvoidance(std::unique_ptr<NUClear::Environment> environment);
+        public:
+            /// @brief Called by the powerplant to build and setup the ArmController reactor.
+            explicit ArmVisionAvoidance(std::unique_ptr<NUClear::Environment> environment);
 
-    private:
-        static constexpr size_t UPDATE_FREQUENCY = 90;
+        private:
+            static constexpr size_t UPDATE_FREQUENCY = 90;
 
-        ReactionHandle updateHandle;
+            ReactionHandle updateHandle;
 
-        const size_t subsumptionId;
+            const size_t subsumptionId;
 
-        // The limits on how far the head can be turned before the corresponding arm starts to obscure vision.
-        float headYawLimit[2];
-        float headPitchLimit;
+            // The limits on how far the head can be turned before the corresponding arm starts to obscure vision.
+            float headYawLimit[2];
+            float headPitchLimit;
 
-        // Gain and torque config parameters.
-        float gain;
-        float torque;
-    };
-
-}
+            // Gain and torque config parameters.
+            float gain;
+            float torque;
+        };
+    }
 }
 }
 

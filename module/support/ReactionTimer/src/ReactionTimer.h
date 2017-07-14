@@ -12,7 +12,6 @@ namespace support {
         /// @brief Called by the powerplant to build and setup the ReactionTimer reactor.
         explicit ReactionTimer(std::unique_ptr<NUClear::Environment> environment);
     };
-
 }
 }
 

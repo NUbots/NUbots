@@ -28,24 +28,24 @@
 
 namespace utility {
 namespace math {
-namespace geometry {
+    namespace geometry {
 
-    using utility::math::matrix::Transform2D;
+        using utility::math::matrix::Transform2D;
 
-    class RotatedRectangle {
-    private:
-        Transform2D transform;
-        arma::vec2 size;
+        class RotatedRectangle {
+        private:
+            Transform2D transform;
+            arma::vec2 size;
 
-    public:
-        RotatedRectangle(const Transform2D& trans, const arma::vec2& size);
+        public:
+            RotatedRectangle(const Transform2D& trans, const arma::vec2& size);
 
-        Transform2D getTransform() const;
-        arma::vec2 getSize()       const;
-        arma::vec2 getPosition()   const;
-        double getRotation()       const;
-    };
-}
+            Transform2D getTransform() const;
+            arma::vec2 getSize() const;
+            arma::vec2 getPosition() const;
+            double getRotation() const;
+        };
+    }
 }
 }
 

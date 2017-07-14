@@ -28,31 +28,30 @@
 
 namespace module {
 namespace behaviour {
-namespace tools {
+    namespace tools {
 
-    using extension::Configuration;
+        using extension::Configuration;
 
-    using message::motion::KickCommand;
-    using KickCommandType = message::motion::KickCommandType;
+        using message::motion::KickCommand;
+        using KickCommandType = message::motion::KickCommandType;
 
-    KickCommander::KickCommander(std::unique_ptr<NUClear::Environment> environment)
-    : Reactor(std::move(environment)) {
+        KickCommander::KickCommander(std::unique_ptr<NUClear::Environment> environment)
+            : Reactor(std::move(environment)) {
 
-        on<Configuration>("KickCommander.yaml").then([this] (const Configuration& config) {
-            log("I'm running");
-            if(!doThings){
-                doThings = true;
-            } else {
-                emit(std::make_unique<KickCommand>(KickCommand(
-                   convert<double, 3>(config["target"].as<arma::vec3>()),
-                   convert<double, 3>(config["direction"].as<arma::vec3>()),
-                   KickCommandType::NORMAL
-                )));
-            }
+            on<Configuration>("KickCommander.yaml").then([this](const Configuration& config) {
+                log("I'm running");
+                if (!doThings) {
+                    doThings = true;
+                }
+                else {
+                    emit(std::make_unique<KickCommand>(
+                        KickCommand(convert<double, 3>(config["target"].as<arma::vec3>()),
+                                    convert<double, 3>(config["direction"].as<arma::vec3>()),
+                                    KickCommandType::NORMAL)));
+                }
 
-        });
+            });
+        }
     }
-
-}
 }
 }

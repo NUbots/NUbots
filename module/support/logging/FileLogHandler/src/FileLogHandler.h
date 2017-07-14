@@ -3,28 +3,27 @@
 
 #include <nuclear>
 
-#include <mutex>
 #include <fstream>
+#include <mutex>
 #include <string>
 
 namespace module {
 namespace support {
-namespace logging {
+    namespace logging {
 
-    class FileLogHandler : public NUClear::Reactor {
+        class FileLogHandler : public NUClear::Reactor {
 
-    public:
-        /// @brief Called by the powerplant to build and setup the FileLogHandler reactor.
-        explicit FileLogHandler(std::unique_ptr<NUClear::Environment> environment);
+        public:
+            /// @brief Called by the powerplant to build and setup the FileLogHandler reactor.
+            explicit FileLogHandler(std::unique_ptr<NUClear::Environment> environment);
 
-    private:
-        std::mutex mutex;
-        
-        std::string logFileName;
-        std::ofstream logFile;
-    };
+        private:
+            std::mutex mutex;
 
-}
+            std::string logFileName;
+            std::ofstream logFile;
+        };
+    }
 }
 }
 

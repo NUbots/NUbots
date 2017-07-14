@@ -26,12 +26,12 @@ namespace module {
 namespace localisation {
 
     class NUcapLocalisation : public NUClear::Reactor {
-	private:
-		int robot_id;
+    private:
+        int robot_id;
+
     public:
         explicit NUcapLocalisation(std::unique_ptr<NUClear::Environment> environment);
     };
-
 }
 }
 

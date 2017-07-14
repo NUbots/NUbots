@@ -25,25 +25,26 @@
 
 namespace utility {
 namespace math {
-namespace geometry {
+    namespace geometry {
 
-    class Polygon {
-    private:
-    	std::vector<ParametricLine<2>> edges;
-    public:
-    	Polygon() : edges() {}
-    	Polygon(const std::vector<arma::vec2>& vertices);
+        class Polygon {
+        private:
+            std::vector<ParametricLine<2>> edges;
 
-    	void set(const std::vector<arma::vec2>& vertices);
+        public:
+            Polygon() : edges() {}
+            Polygon(const std::vector<arma::vec2>& vertices);
 
-    	/*! @brief Checks if the point lies within the boundary of the polygon
-    	*/
-    	bool pointContained(const arma::vec2& p) const;
-    	/*! @brief Gets the closest point in the polygon to the specified point
-    	*/
-    	arma::vec2 projectPointToPolygon(const arma::vec2& p) const;
-    };
-}
+            void set(const std::vector<arma::vec2>& vertices);
+
+            /*! @brief Checks if the point lies within the boundary of the polygon
+            */
+            bool pointContained(const arma::vec2& p) const;
+            /*! @brief Gets the closest point in the polygon to the specified point
+            */
+            arma::vec2 projectPointToPolygon(const arma::vec2& p) const;
+        };
+    }
 }
 }
 

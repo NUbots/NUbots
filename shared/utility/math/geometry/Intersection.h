@@ -25,13 +25,12 @@
 
 namespace utility {
 namespace math {
-namespace geometry {
-namespace intersection {
+    namespace geometry {
+        namespace intersection {
 
-bool test(const Circle& circle, const RotatedRectangle& rect);
-
-}
-}
+            bool test(const Circle& circle, const RotatedRectangle& rect);
+        }
+    }
 }
 }
 

@@ -20,16 +20,16 @@
 #include "fileutil.h"
 
 extern "C" {
-    #include <sys/stat.h>
-    #include <dirent.h>
+#include <dirent.h>
+#include <sys/stat.h>
 }
 
 #include <sstream>
-#include <system_error>
 #include <stack>
+#include <system_error>
 
-#include "utility/strutil/strutil.h"
 #include <iostream>
+#include "utility/strutil/strutil.h"
 
 namespace utility {
 namespace file {
@@ -47,7 +47,7 @@ namespace file {
     bool exists(const std::string& path) {
         // Shamelessly stolen from: http://stackoverflow.com/a/12774387/1387006
         struct stat buffer;
-        return (stat (path.c_str(), &buffer) == 0);
+        return (stat(path.c_str(), &buffer) == 0);
     }
 
     std::chrono::system_clock::time_point getModificationTime(const std::string& path) {
@@ -60,7 +60,7 @@ namespace file {
             throw std::system_error(errno, std::system_category(), "Error checking if path is file or directory");
         }
 
-        return(std::chrono::system_clock::from_time_t(st_buf.st_mtime));
+        return (std::chrono::system_clock::from_time_t(st_buf.st_mtime));
     }
 
     // Test if a passed path is a directory
@@ -79,8 +79,7 @@ namespace file {
         return S_ISDIR(st_buf.st_mode);
     }
 
-    void makeDir(const std::string& path)
-    {
+    void makeDir(const std::string& path) {
         int status;
         status = mkdir(path.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
 
@@ -95,16 +94,16 @@ namespace file {
         auto dir = opendir(path.c_str());
         std::vector<std::string> result;
 
-        if(dir != nullptr) {
-            for(dirent* ent = readdir(dir); ent != nullptr; ent = readdir(dir)) {
+        if (dir != nullptr) {
+            for (dirent* ent = readdir(dir); ent != nullptr; ent = readdir(dir)) {
 
                 auto file = std::string(ent->d_name);
 
-                if(file == "." || file == "..") {
+                if (file == "." || file == "..") {
                     continue;
                 }
 
-                if(ent->d_type & DT_DIR) {
+                if (ent->d_type & DT_DIR) {
                     result.push_back(file + "/");
                 }
                 else {
@@ -126,14 +125,14 @@ namespace file {
         size_t lastSlash = input.rfind('/');
 
         // There was no slash
-        if(lastSlash == std::string::npos) {
-            return { ".", input };
+        if (lastSlash == std::string::npos) {
+            return {".", input};
         }
         // The slash was the last character
-        if(lastSlash + 1 == input.size()) {
+        if (lastSlash + 1 == input.size()) {
             // If all we had was a slash
-            if(input.size() == 1) {
-                return { "/", "/" };
+            if (input.size() == 1) {
+                return {"/", "/"};
             }
             // Otherwise remove the slash and call recursivly
             else {
@@ -141,7 +140,7 @@ namespace file {
             }
         }
         else {
-            return { input.substr(0, lastSlash), input.substr(lastSlash + 1, input.size()) };
+            return {input.substr(0, lastSlash), input.substr(lastSlash + 1, input.size())};
         }
     }
 
@@ -169,7 +168,8 @@ namespace file {
                         // append the path to the directories vector
                         directories.push(path);
                     }
-                } else {
+                }
+                else {
                     // append the path to the paths vector
                     files.push_back(path);
                 }
@@ -184,7 +184,7 @@ namespace file {
 
         // Get elements of the path to create.
         if (parent == true) {
-            elements = utility::strutil::split(directory, '/');
+            elements         = utility::strutil::split(directory, '/');
             elements.front() = elements.front() == "" ? "/" : elements.front();
         }
         else {

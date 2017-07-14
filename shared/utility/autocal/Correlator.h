@@ -1,86 +1,82 @@
 /*
 author Jake Fountain
 This code is part of mocap-kinect experiments*/
+#include <dirent.h>
 #include <armadillo>
 #include <chrono>
-#include <dirent.h>
 #include <map>
 #include <set>
-#include "MocapStream.h"
 #include "CalibrationTools.h"
-#include "utility/math/matrix/Transform3D.h"
-#include "utility/math/matrix/Rotation3D.h"
+#include "MocapStream.h"
 #include "utility/math/geometry/UnitQuaternion.h"
+#include "utility/math/matrix/Rotation3D.h"
+#include "utility/math/matrix/Transform3D.h"
 
 #ifndef AUTOCAL_CORRELATOR
 #define AUTOCAL_CORRELATOR
 
 namespace autocal {
 
-	class Correlator
-	{
-	public:
-		Correlator();
-		~Correlator(){};
-		
-	private:
-		//CONFIG
-		int number_of_samples;
+class Correlator {
+public:
+    Correlator();
+    ~Correlator(){};
 
-		float difference_threshold;
+private:
+    // CONFIG
+    int number_of_samples;
 
-		float elimination_score_threshold; 
+    float difference_threshold;
 
-		float score_inclusion_threshold;
-		//STATE
+    float elimination_score_threshold;
 
-		using Hypothesis = std::pair<MocapStream::RigidBodyID, MocapStream::RigidBodyID>;
-		using Stream = std::vector<utility::math::matrix::Transform3D>;
-		using StreamPair = std::pair<Stream, Stream>;
+    float score_inclusion_threshold;
+    // STATE
 
-		//States for matchStreams
-		std::map<Hypothesis, StreamPair> recordedStates;
-		//Stores scores for the matchings
-		std::map<Hypothesis, float> scores;
-		//Stores the matches which have been deduced incorrect
-		std::set<Hypothesis> eliminatedHypotheses;
-		
-		std::set<Hypothesis> computableStreams;
+    using Hypothesis = std::pair<MocapStream::RigidBodyID, MocapStream::RigidBodyID>;
+    using Stream     = std::vector<utility::math::matrix::Transform3D>;
+    using StreamPair = std::pair<Stream, Stream>;
 
-		//For rotation scoring:
-		std::map<Hypothesis, std::pair<utility::math::matrix::Rotation3D,utility::math::matrix::Rotation3D> >
-				 firstRotationReadings;
-		
-		float getSylvesterScore(const Stream& states1, const Stream& states2, 
-								Hypothesis key);
+    // States for matchStreams
+    std::map<Hypothesis, StreamPair> recordedStates;
+    // Stores scores for the matchings
+    std::map<Hypothesis, float> scores;
+    // Stores the matches which have been deduced incorrect
+    std::set<Hypothesis> eliminatedHypotheses;
 
-		float getRotationScore(const Stream& states1, const Stream& states2, 
-								Hypothesis key);
-		
-		void resetRecordedStates();
+    std::set<Hypothesis> computableStreams;
 
-		bool stateIsNew(const utility::math::matrix::Transform3D& T, const Stream& states);
-		
-	public:
+    // For rotation scoring:
+    std::map<Hypothesis, std::pair<utility::math::matrix::Rotation3D, utility::math::matrix::Rotation3D>>
+        firstRotationReadings;
 
-		void addData(MocapStream::RigidBodyID id1, utility::math::matrix::Transform3D T1, MocapStream::RigidBodyID id2, utility::math::matrix::Transform3D T2);
+    float getSylvesterScore(const Stream& states1, const Stream& states2, Hypothesis key);
 
-		void eliminateAndNormalise(std::map<MocapStream::RigidBodyID,float> totalScores);
+    float getRotationScore(const Stream& states1, const Stream& states2, Hypothesis key);
 
-		bool sufficientData();
+    void resetRecordedStates();
 
-		void compute();
+    bool stateIsNew(const utility::math::matrix::Transform3D& T, const Stream& states);
 
-		void reset();
+public:
+    void addData(MocapStream::RigidBodyID id1,
+                 utility::math::matrix::Transform3D T1,
+                 MocapStream::RigidBodyID id2,
+                 utility::math::matrix::Transform3D T2);
 
-		std::vector<std::pair<int,int>> getBestCorrelations();
+    void eliminateAndNormalise(std::map<MocapStream::RigidBodyID, float> totalScores);
 
-		float likelihood(float error){
-			return std::exp(-error * error);
-		}
+    bool sufficientData();
 
-	};
+    void compute();
 
+    void reset();
 
+    std::vector<std::pair<int, int>> getBestCorrelations();
+
+    float likelihood(float error) {
+        return std::exp(-error * error);
+    }
+};
 }
 #endif

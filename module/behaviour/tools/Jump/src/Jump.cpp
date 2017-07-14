@@ -31,40 +31,36 @@
 
 namespace module {
 namespace behaviour {
-namespace tools {
+    namespace tools {
 
-    using extension::Configuration;
-    using extension::ExecuteScriptByName;
+        using extension::Configuration;
+        using extension::ExecuteScriptByName;
 
-    using message::platform::darwin::ButtonMiddleDown;
-    using message::platform::darwin::ButtonLeftDown;
+        using message::platform::darwin::ButtonMiddleDown;
+        using message::platform::darwin::ButtonLeftDown;
 
-    using utility::behaviour::RegisterAction;
-    using utility::behaviour::ActionPriorites;
-    using LimbID  = utility::input::LimbID;
-    using ServoID = utility::input::ServoID;
+        using utility::behaviour::RegisterAction;
+        using utility::behaviour::ActionPriorites;
+        using LimbID  = utility::input::LimbID;
+        using ServoID = utility::input::ServoID;
 
-    Jump::Jump(std::unique_ptr<NUClear::Environment> environment)
-    : Reactor(std::move(environment)) {
+        Jump::Jump(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
 
-        emit<Scope::INITIALIZE>(std::make_unique<RegisterAction>(RegisterAction {
-            2,
-            "Jump",
-            { std::pair<float, std::set<LimbID>>(100, { LimbID::LEFT_LEG, LimbID::RIGHT_LEG, LimbID::LEFT_ARM, LimbID::RIGHT_ARM }) },
-            [this] (const std::set<LimbID>&) {
-            },
-            [this] (const std::set<LimbID>&) {
-            },
-            [this] (const std::set<ServoID>&) {
-            }
-        }));
+            emit<Scope::INITIALIZE>(std::make_unique<RegisterAction>(
+                RegisterAction{2,
+                               "Jump",
+                               {std::pair<float, std::set<LimbID>>(
+                                   100, {LimbID::LEFT_LEG, LimbID::RIGHT_LEG, LimbID::LEFT_ARM, LimbID::RIGHT_ARM})},
+                               [this](const std::set<LimbID>&) {},
+                               [this](const std::set<LimbID>&) {},
+                               [this](const std::set<ServoID>&) {}}));
 
-        on<Trigger<ButtonMiddleDown>>().then([this] {
-            std::this_thread::sleep_for(std::chrono::seconds(2));
+            on<Trigger<ButtonMiddleDown>>().then([this] {
+                std::this_thread::sleep_for(std::chrono::seconds(2));
 
-            emit(std::make_unique<ExecuteScriptByName>(2,  std::vector<std::string>({"Jump.yaml"})));
-        });
+                emit(std::make_unique<ExecuteScriptByName>(2, std::vector<std::string>({"Jump.yaml"})));
+            });
+        }
     }
-}
 }
 }

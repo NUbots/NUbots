@@ -19,8 +19,8 @@
 
 #include <catch.hpp>
 
-#include "message/input/ServoID.h"
 #include "message/input/Sensors.h"
+#include "message/input/ServoID.h"
 #include "utility/motion/ForwardKinematics.h"
 #include "utility/motion/InverseKinematics.h"
 
@@ -37,15 +37,16 @@ TEST_CASE("Test the Head kinematics", "[utility][motion][kinematics][head]") {
 
     KinematicsModel kinematicsModel;
 
-    for(int i = 0; i < ITERATIONS; ++i) {
+    for (int i = 0; i < ITERATIONS; ++i) {
 
         // Make a random camera vector
-        arma::vec3 camVec = { double(rand()), double(rand()), double(rand()) };
-        camVec = arma::normalise(camVec);
+        arma::vec3 camVec = {double(rand()), double(rand()), double(rand())};
+        camVec            = arma::normalise(camVec);
 
         INFO("Testing with the random vector, " << camVec.t());
 
-        std::vector<std::pair<message::input::ServoID, float>> angles = utility::motion::kinematics::calculateCameraLookJoints(kinematicsModel,camVec);
+        std::vector<std::pair<message::input::ServoID, float>> angles =
+            utility::motion::kinematics::calculateCameraLookJoints(kinematicsModel, camVec);
 
         // Make our sensors object
         Sensors sensors;
@@ -53,16 +54,17 @@ TEST_CASE("Test the Head kinematics", "[utility][motion][kinematics][head]") {
 
         // Insert our known sensors (from the calculated angles) into our sensors
         for (auto& angle : angles) {
-                ServoID servoID;
-                float position;
+            ServoID servoID;
+            float position;
 
-                std::tie(servoID, position) = angle;
+            std::tie(servoID, position) = angle;
 
-                sensors.servos[static_cast<int>(servoID)].presentPosition = position;
+            sensors.servos[static_cast<int>(servoID)].presentPosition = position;
         }
 
         // Do our forward kinematics
-        arma::mat44 fKin = utility::motion::kinematics::calculatePosition(KinematicsModel(),sensors, ServoID::HEAD_PITCH)[ServoID::HEAD_PITCH];
+        arma::mat44 fKin = utility::motion::kinematics::calculatePosition(
+            KinematicsModel(), sensors, ServoID::HEAD_PITCH)[ServoID::HEAD_PITCH];
 
         // Check that our vector that forward kinematics finds is close to what is expected
         REQUIRE(double(fKin(0, 0) - camVec[0]) == Approx(0));

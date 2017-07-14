@@ -24,99 +24,104 @@
 #include "utility/math/matrix/Rotation3D.h"
 
 namespace module {
-    namespace platform {
-        namespace darwin {
+namespace platform {
+    namespace darwin {
 
-            using utility::math::geometry::UnitQuaternion;
-            using utility::math::matrix::Rotation3D;
+        using utility::math::geometry::UnitQuaternion;
+        using utility::math::matrix::Rotation3D;
 
-            arma::vec::fixed<MotionModel::size> MotionModel::limitState(const arma::vec::fixed<size>& state) {
-                arma::vec::fixed<size> newState = state;
-                newState.rows(QW, QZ) = arma::normalise(newState.rows(QW, QZ));
-                return newState;
-            }
+        arma::vec::fixed<MotionModel::size> MotionModel::limitState(const arma::vec::fixed<size>& state) {
+            arma::vec::fixed<size> newState = state;
+            newState.rows(QW, QZ) = arma::normalise(newState.rows(QW, QZ));
+            return newState;
+        }
 
-            // @brief The process equation is used to update the systems state using the process euquations of the system.
-            // @param sigma_point The sigma point representing a system state.
-            // @param deltaT The amount of time that has passed since the previous update, in seconds.
-            // @param measurement The reading from the rate gyroscope in rad/s used to update the orientation.
-            // @return The new estimated system state.
-            arma::vec::fixed<MotionModel::size> MotionModel::timeUpdate(const arma::vec::fixed<size>& state, double deltaT) {
+        // @brief The process equation is used to update the systems state using the process euquations of the system.
+        // @param sigma_point The sigma point representing a system state.
+        // @param deltaT The amount of time that has passed since the previous update, in seconds.
+        // @param measurement The reading from the rate gyroscope in rad/s used to update the orientation.
+        // @return The new estimated system state.
+        arma::vec::fixed<MotionModel::size> MotionModel::timeUpdate(const arma::vec::fixed<size>& state,
+                                                                    double deltaT) {
 
-                // Prepare our new state
-                arma::vec::fixed<MotionModel::size> newState = state;
+            // Prepare our new state
+            arma::vec::fixed<MotionModel::size> newState = state;
 
-                // Extract our unit quaternion rotation
-                UnitQuaternion rotation(state.rows(QW, QZ));
+            // Extract our unit quaternion rotation
+            UnitQuaternion rotation(state.rows(QW, QZ));
 
-                // Add our velocity to our position
-                newState.rows(PX, PZ) += state.rows(VX, VZ) * deltaT;
+            // Add our velocity to our position
+            newState.rows(PX, PZ) += state.rows(VX, VZ) * deltaT;
 
-                // Apply our rotational velocity to our orientation
-                double t_2 = deltaT * 0.5;
-                UnitQuaternion qGyro;
-                qGyro.imaginary() = state.rows(WX, WZ) * t_2;
-                qGyro.real() = 1.0 - 0.5 * arma::sum(arma::square(qGyro.imaginary()));
+            // Apply our rotational velocity to our orientation
+            double t_2 = deltaT * 0.5;
+            UnitQuaternion qGyro;
+            qGyro.imaginary() = state.rows(WX, WZ) * t_2;
+            qGyro.real()      = 1.0 - 0.5 * arma::sum(arma::square(qGyro.imaginary()));
 
-                newState.rows(QW, QZ) = qGyro * rotation;
+            newState.rows(QW, QZ) = qGyro * rotation;
 
-                //add velocity decay
-                newState.rows(VX, VZ) = newState.rows(VX, VZ) % timeUpdateVelocityDecay;
+            // add velocity decay
+            newState.rows(VX, VZ) = newState.rows(VX, VZ) % timeUpdateVelocityDecay;
 
-                return newState;
-            }
+            return newState;
+        }
 
-            // Accelerometer
-            arma::vec3 MotionModel::predictedObservation(const arma::vec::fixed<size>& state, const MeasurementType::ACCELEROMETER&) {
+        // Accelerometer
+        arma::vec3 MotionModel::predictedObservation(const arma::vec::fixed<size>& state,
+                                                     const MeasurementType::ACCELEROMETER&) {
 
-                // Extract our rotation quaternion
-                UnitQuaternion rotation(state.rows(QW, QZ));
+            // Extract our rotation quaternion
+            UnitQuaternion rotation(state.rows(QW, QZ));
 
-                // Make a gravity vector and return it
-                return rotation.rotateVector(arma::vec3({0, 0, G}));
-            }
+            // Make a gravity vector and return it
+            return rotation.rotateVector(arma::vec3({0, 0, G}));
+        }
 
-            // Gyroscope
-            arma::vec3 MotionModel::predictedObservation(const arma::vec::fixed<size>& state, const MeasurementType::GYROSCOPE&) {
-                return state.rows(WX, WZ);
-            }
+        // Gyroscope
+        arma::vec3 MotionModel::predictedObservation(const arma::vec::fixed<size>& state,
+                                                     const MeasurementType::GYROSCOPE&) {
+            return state.rows(WX, WZ);
+        }
 
-            // Foot up with z
-            arma::vec4 MotionModel::predictedObservation(const arma::vec::fixed<size>& state, const MeasurementType::FOOT_UP_WITH_Z&) {
+        // Foot up with z
+        arma::vec4 MotionModel::predictedObservation(const arma::vec::fixed<size>& state,
+                                                     const MeasurementType::FOOT_UP_WITH_Z&) {
 
-                arma::vec4 prediction;
+            arma::vec4 prediction;
 
-                // Extract our rotation quaternion
-                UnitQuaternion rotation(state.rows(QW, QZ));
+            // Extract our rotation quaternion
+            UnitQuaternion rotation(state.rows(QW, QZ));
 
-                // First 3 is the up vector in torso space
-                prediction.rows(0,2) = rotation.rotateVector(arma::vec3({0,0,1}));
+            // First 3 is the up vector in torso space
+            prediction.rows(0, 2) = rotation.rotateVector(arma::vec3({0, 0, 1}));
 
-                // 4th component is our z height
-                prediction[3] = state[PZ];
+            // 4th component is our z height
+            prediction[3] = state[PZ];
 
-                return prediction;
-            }
+            return prediction;
+        }
 
-            arma::vec3 MotionModel::predictedObservation(const arma::vec::fixed<size>& state, const MeasurementType::FLAT_FOOT_ODOMETRY&) {
-            
-                return state.rows(PX, PZ);
-            }
-            
-            arma::vec4 MotionModel::predictedObservation(const arma::vec::fixed<size>& state, const MeasurementType::FLAT_FOOT_ORIENTATION&) {
+        arma::vec3 MotionModel::predictedObservation(const arma::vec::fixed<size>& state,
+                                                     const MeasurementType::FLAT_FOOT_ODOMETRY&) {
 
-                return state.rows(QW, QZ);
-            }
+            return state.rows(PX, PZ);
+        }
 
-            arma::vec MotionModel::observationDifference(const arma::vec& a, const arma::vec& b) {
-                return a - b;
-            }
+        arma::vec4 MotionModel::predictedObservation(const arma::vec::fixed<size>& state,
+                                                     const MeasurementType::FLAT_FOOT_ORIENTATION&) {
 
-            const arma::mat::fixed<MotionModel::size, MotionModel::size>& MotionModel::processNoise() {
-                // Return our process noise matrix
-                return processNoiseMatrix;
-            }
+            return state.rows(QW, QZ);
+        }
 
+        arma::vec MotionModel::observationDifference(const arma::vec& a, const arma::vec& b) {
+            return a - b;
+        }
+
+        const arma::mat::fixed<MotionModel::size, MotionModel::size>& MotionModel::processNoise() {
+            // Return our process noise matrix
+            return processNoiseMatrix;
         }
     }
+}
 }

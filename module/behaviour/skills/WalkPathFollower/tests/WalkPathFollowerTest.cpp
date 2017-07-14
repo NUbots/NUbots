@@ -22,4 +22,6 @@
 //#include <catch.hpp>
 
 // Remove this line when test files are added
-int main() { return 0; }
+int main() {
+    return 0;
+}

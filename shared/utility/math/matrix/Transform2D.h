@@ -25,24 +25,24 @@
 
 namespace utility {
 namespace math {
-namespace matrix {
+    namespace matrix {
 
-    template <int Dimensions>
-    class Transform;
+        template <int Dimensions>
+        class Transform;
 
-    using Transform2D = Transform<2>;
+        using Transform2D = Transform<2>;
 
-    /**
-     * Represents a 2D point including its rotation. Uses a vec3 of the form {x, y, angle}.
-     *
-     * See: Special Euclidean group SE(2).
-     * http://en.wikipedia.org/wiki/Euclidean_group
-     *
-     * @author Brendan Annable
-     */
-    template <>
-    class Transform<2> : public arma::vec3 {
-        using arma::vec3::vec3; // inherit constructors
+        /**
+         * Represents a 2D point including its rotation. Uses a vec3 of the form {x, y, angle}.
+         *
+         * See: Special Euclidean group SE(2).
+         * http://en.wikipedia.org/wiki/Euclidean_group
+         *
+         * @author Brendan Annable
+         */
+        template <>
+        class Transform<2> : public arma::vec3 {
+            using arma::vec3::vec3;  // inherit constructors
 
         public:
             /**
@@ -91,22 +91,40 @@ namespace matrix {
 
             Transform2D i() const;
 
-            inline double x() const { return at(0); }
-            inline double& x() { return at(0); }
+            inline double x() const {
+                return at(0);
+            }
+            inline double& x() {
+                return at(0);
+            }
 
-            inline double y() const { return at(1); }
-            inline double& y() { return at(1); }
+            inline double y() const {
+                return at(1);
+            }
+            inline double& y() {
+                return at(1);
+            }
 
-            inline double angle() const { return at(2); }
-            inline double& angle() { return at(2); }
+            inline double angle() const {
+                return at(2);
+            }
+            inline double& angle() {
+                return at(2);
+            }
 
-            inline Rotation2D rotation() {return Rotation2D::createRotation(angle());}
+            inline Rotation2D rotation() {
+                return Rotation2D::createRotation(angle());
+            }
 
-            inline const arma::subview_col<double> xy() const { return rows(0,1); }
-            inline arma::subview_col<double> xy() { return rows(0,1); }
-    };
+            inline const arma::subview_col<double> xy() const {
+                return rows(0, 1);
+            }
+            inline arma::subview_col<double> xy() {
+                return rows(0, 1);
+            }
+        };
 
-}  // matrix
+    }  // matrix
 }  // math
 }  // utility
 

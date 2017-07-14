@@ -3,8 +3,8 @@
 
 #include <nuclear>
 
-#include "utility/input/ServoID.h"
 #include "message/support/ServoHealthTestData.h"
+#include "utility/input/ServoID.h"
 
 namespace module {
 namespace debug {
@@ -16,14 +16,13 @@ namespace debug {
         const size_t id;
         message::support::ServoHealthTestData::State state;
         double fallen_angle;
-        int counter = 0;
+        int counter    = 0;
         int test_loops = 5;
 
-    public: 
+    public:
         /// @brief Called by the powerplant to build and setup the ServoHealth reactor.
         explicit ServoHealth(std::unique_ptr<NUClear::Environment> environment);
     };
-
 }
 }
 

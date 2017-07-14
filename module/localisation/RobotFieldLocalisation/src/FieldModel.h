@@ -23,48 +23,47 @@
 #include <armadillo>
 
 #include "message/input/Sensors.h"
-#include "message/vision/VisionObjects.h"
 #include "message/support/FieldDescription.h"
+#include "message/vision/VisionObjects.h"
 
 namespace module {
-    namespace localisation {
+namespace localisation {
 
-        class FieldModel {
-        public:
+    class FieldModel {
+    public:
+        // The indicies for our vector
+        static constexpr uint DPX    = 0;
+        static constexpr uint DPY    = 1;
+        static constexpr uint DTHETA = 2;
 
-            // The indicies for our vector
-            static constexpr uint DPX = 0;
-            static constexpr uint DPY = 1;
-            static constexpr uint DTHETA = 2;
+        static constexpr size_t size = 3;
 
-            static constexpr size_t size = 3;
-
-            struct MeasurementType {
-                struct GOAL {};
-            };
-
-            arma::vec3 processNoiseDiagonal;
-
-
-            FieldModel() : processNoiseDiagonal(arma::fill::eye) {} // empty constructor
-
-            arma::vec::fixed<size> timeUpdate(const arma::vec::fixed<size>& state, double deltaT);
-
-            arma::vec predictedObservation(const arma::vec::fixed<size>& state
-                , const std::vector<std::tuple<message::vision::Goal::Team::Value, 
-                                               message::vision::Goal::Side::Value, 
-                                               message::vision::Goal::MeasurementType>>& measurements
-                , const message::support::FieldDescription& field
-                , const message::input::Sensors& sensors
-                , const MeasurementType::GOAL&);
-
-            arma::vec observationDifference(const arma::vec& a, const arma::vec& b) const;
-
-            arma::vec::fixed<size> limitState(const arma::vec::fixed<size>& state) const;
-
-            arma::mat::fixed<size, size> processNoise() const;
+        struct MeasurementType {
+            struct GOAL {};
         };
 
-    }
+        arma::vec3 processNoiseDiagonal;
+
+
+        FieldModel() : processNoiseDiagonal(arma::fill::eye) {}  // empty constructor
+
+        arma::vec::fixed<size> timeUpdate(const arma::vec::fixed<size>& state, double deltaT);
+
+        arma::vec predictedObservation(
+            const arma::vec::fixed<size>& state,
+            const std::vector<std::tuple<message::vision::Goal::Team::Value,
+                                         message::vision::Goal::Side::Value,
+                                         message::vision::Goal::MeasurementType>>& measurements,
+            const message::support::FieldDescription& field,
+            const message::input::Sensors& sensors,
+            const MeasurementType::GOAL&);
+
+        arma::vec observationDifference(const arma::vec& a, const arma::vec& b) const;
+
+        arma::vec::fixed<size> limitState(const arma::vec::fixed<size>& state) const;
+
+        arma::mat::fixed<size, size> processNoise() const;
+    };
+}
 }
 #endif  // MODULE_LOCALISATION_FIELDMODEL_H

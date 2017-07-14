@@ -26,18 +26,17 @@
 
 namespace utility {
 namespace math {
-namespace matrix {
-    template <int Dimensions>
-    class Rotation;
-    using Rotation3D = Rotation<3>;
-}
-namespace geometry {
+    namespace matrix {
+        template <int Dimensions>
+        class Rotation;
+        using Rotation3D = Rotation<3>;
+    }
+    namespace geometry {
 
-    class UnitQuaternion : public arma::vec4 {
-        using arma::vec4::vec4; // inherit constructors
+        class UnitQuaternion : public arma::vec4 {
+            using arma::vec4::vec4;  // inherit constructors
 
         private:
-
             /* @brief Constructor for non-unit quaternion for purpose of point representation
             */
             UnitQuaternion(const arma::vec3& v);
@@ -51,16 +50,16 @@ namespace geometry {
 
             UnitQuaternion(const arma::vec3& vec1, const arma::vec3& vec2);
 
-            UnitQuaternion operator - (const UnitQuaternion& p) const;
+            UnitQuaternion operator-(const UnitQuaternion& p) const;
 
-            UnitQuaternion operator * (const UnitQuaternion& p) const;
+            UnitQuaternion operator*(const UnitQuaternion& p) const;
 
             UnitQuaternion(double realPart, const arma::vec3& imaginaryPart);
 
             /*! @brief Creates quaternion which rotates about 3D axis by angle radians
             */
             UnitQuaternion(const arma::vec3& axis, double angle);
-            
+
             /*! @brief Swaps quat to -quat if kW < 0
             */
             void rectify();
@@ -98,29 +97,54 @@ namespace geometry {
             double norm();
 
             // real part
-            inline double kW() const { return at(0); };
-            inline double& kW() { return at(0); };
+            inline double kW() const {
+                return at(0);
+            };
+            inline double& kW() {
+                return at(0);
+            };
 
-            inline double kX() const { return at(1); };
-            inline double& kX() { return at(1); };
+            inline double kX() const {
+                return at(1);
+            };
+            inline double& kX() {
+                return at(1);
+            };
 
-            inline double kY() const { return at(2); };
-            inline double& kY() { return at(2); };
+            inline double kY() const {
+                return at(2);
+            };
+            inline double& kY() {
+                return at(2);
+            };
 
-            inline double kZ() const { return at(3); };
-            inline double& kZ() { return at(3); };
+            inline double kZ() const {
+                return at(3);
+            };
+            inline double& kZ() {
+                return at(3);
+            };
 
-            inline double real() const { return at(0); };
-            inline double& real() { return at(0); };
+            inline double real() const {
+                return at(0);
+            };
+            inline double& real() {
+                return at(0);
+            };
 
-            inline const arma::subview_col<double> imaginary() const { return rows(1,3); }
-            inline arma::subview_col<double> imaginary() { return rows(1,3); }
+            inline const arma::subview_col<double> imaginary() const {
+                return rows(1, 3);
+            }
+            inline arma::subview_col<double> imaginary() {
+                return rows(1, 3);
+            }
 
             UnitQuaternion slerp(const UnitQuaternion& p, const double& t);
-            static inline UnitQuaternion Identity() { return(arma::vec4({1.0, 0.0, 0.0, 0.0})); }
-    };
-
-}
+            static inline UnitQuaternion Identity() {
+                return (arma::vec4({1.0, 0.0, 0.0, 0.0}));
+            }
+        };
+    }
 }
 }
 

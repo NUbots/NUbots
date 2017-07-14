@@ -24,16 +24,16 @@
 
 namespace utility {
 namespace math {
-namespace matrix {
+    namespace matrix {
 
-    template <int Dimensions>
-    class Rotation;
+        template <int Dimensions>
+        class Rotation;
 
-    using Rotation2D = Rotation<2>;
+        using Rotation2D = Rotation<2>;
 
-    template <>
-    class Rotation<2> : public arma::mat22 {
-        using arma::mat22::mat22; // inherit constructors
+        template <>
+        class Rotation<2> : public arma::mat22 {
+            using arma::mat22::mat22;  // inherit constructors
 
         public:
             /**
@@ -64,9 +64,9 @@ namespace matrix {
              * @return The rotation matrix
              */
             static Rotation2D createRotation(double radians);
-    };
+        };
 
-}  // matrix
+    }  // matrix
 }  // math
 }  // utility
 

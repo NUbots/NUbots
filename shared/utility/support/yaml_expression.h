@@ -20,10 +20,10 @@
 #ifndef UTILITY_SUPPORT_yaml_expression_H
 #define UTILITY_SUPPORT_yaml_expression_H
 
+#include <muparserx/mpParser.h>
+#include <yaml-cpp/yaml.h>
 #include <iostream>
 #include <limits>
-#include <yaml-cpp/yaml.h>
-#include <muparserx/mpParser.h>
 
 namespace utility {
 namespace support {
@@ -35,41 +35,42 @@ namespace support {
         double value;
         Expression() : value(0.0) {}
         Expression(double x) : value(x) {}
-        operator double() const { return value; }
+        operator double() const {
+            return value;
+        }
     };
 }
 }
 
 namespace YAML {
 
-    template<>
-    struct convert<utility::support::Expression> {
-        static Node encode(const utility::support::Expression& rhs) {
-            Node node;
+template <>
+struct convert<utility::support::Expression> {
+    static Node encode(const utility::support::Expression& rhs) {
+        Node node;
 
-            // Treat as a double
-            node = rhs;
+        // Treat as a double
+        node = rhs;
 
-            return node;
+        return node;
+    }
+
+    static bool decode(const Node& node, utility::support::Expression& rhs) {
+
+        try {
+            // Parse the expression using muParser
+            mup::ParserX parser(mup::pckALL_NON_COMPLEX);
+            parser.DefineConst("auto", std::numeric_limits<double>::infinity());
+            parser.SetExpr(node.as<std::string>());
+            rhs = parser.Eval().GetFloat();
+
+            return true;
         }
-
-        static bool decode(const Node& node, utility::support::Expression& rhs) {
-
-            try {
-                // Parse the expression using muParser
-                mup::ParserX parser(mup::pckALL_NON_COMPLEX);
-                parser.DefineConst("auto", std::numeric_limits<double>::infinity());
-                parser.SetExpr(node.as<std::string>());
-                rhs = parser.Eval().GetFloat();
-
-                return true;
-            }
-            catch(mup::ParserError& e) {
-                return false;
-            }
+        catch (mup::ParserError& e) {
+            return false;
         }
-    };
-
+    }
+};
 }
 
 #endif

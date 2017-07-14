@@ -20,9 +20,9 @@
 #ifndef MODULE_MOTION_KINEMATICSCONFIGURATION_H
 #define MODULE_MOTION_KINEMATICSCONFIGURATION_H
 
-#include <nuclear>
-#include <armadillo>
 #include <yaml-cpp/yaml.h>
+#include <armadillo>
+#include <nuclear>
 
 #include "extension/Configuration.h"
 #include "message/motion/KinematicsModels.h"
@@ -37,13 +37,12 @@ namespace motion {
         explicit KinematicsConfiguration(std::unique_ptr<NUClear::Environment> environment);
 
     private:
-    	void configure (message::motion::KinematicsModel& model, const ::extension::Configuration& objDarwinModel);
-        void configureLeg (message::motion::KinematicsModel& model, const YAML::Node& objLeg);
-        void configureHead (message::motion::KinematicsModel& model, const YAML::Node& objHead);
-        void configureArm (message::motion::KinematicsModel& model, const YAML::Node& objArm);
-    	void configureMassModel (message::motion::KinematicsModel& model, const YAML::Node& objMassModel);
+        void configure(message::motion::KinematicsModel& model, const ::extension::Configuration& objDarwinModel);
+        void configureLeg(message::motion::KinematicsModel& model, const YAML::Node& objLeg);
+        void configureHead(message::motion::KinematicsModel& model, const YAML::Node& objHead);
+        void configureArm(message::motion::KinematicsModel& model, const YAML::Node& objArm);
+        void configureMassModel(message::motion::KinematicsModel& model, const YAML::Node& objMassModel);
     };
-
 }
 }
 

@@ -11,7 +11,7 @@ namespace tools {
     class FirmwareInstaller : public NUClear::Reactor {
 
     public:
-        static constexpr uint32_t MEMORY_MAXSIZE           = (256 * 1024);       /* size in bytes */
+        static constexpr uint32_t MEMORY_MAXSIZE           = (256 * 1024); /* size in bytes */
         static constexpr uint32_t MAX_LINE_SIZE            = 1024;
         static constexpr uint32_t ADDRESS_MASK             = 0x000FFFF0;
         static constexpr uint32_t NO_ADDRESS_TYPE_SELECTED = 0;
@@ -26,11 +26,10 @@ namespace tools {
         bool hex2bin(const std::string& hexFile, uint8_t* pBinBuffer, uint32_t& startAddress, uint32_t& bufSize);
 
         std::string device;
-        bool        flashCM730, flashDynamixel;
-    	std::string cm730Firmware;
+        bool flashCM730, flashDynamixel;
+        std::string cm730Firmware;
         std::string dynamixelFirmware;
     };
-
 }
 }
 

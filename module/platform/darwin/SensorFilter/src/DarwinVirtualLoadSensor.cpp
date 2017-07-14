@@ -21,64 +21,59 @@
 #include <nuclear>
 
 namespace module {
-    namespace platform {
-        namespace darwin {
-            DarwinVirtualLoadSensor::DarwinVirtualLoadSensor()
-                    : noiseFactor(0.0)
-                    , currentNoise(2.0 * noiseFactor)
-                    , certaintyThreshold(0.0)
-                    , uncertaintyThreshold(0.0)
-                    , hiddenWeights()
-                    , hiddenBias()
-                    , outputWeights()
-                    , outputBias() {
+namespace platform {
+    namespace darwin {
+        DarwinVirtualLoadSensor::DarwinVirtualLoadSensor()
+            : noiseFactor(0.0)
+            , currentNoise(2.0 * noiseFactor)
+            , certaintyThreshold(0.0)
+            , uncertaintyThreshold(0.0)
+            , hiddenWeights()
+            , hiddenBias()
+            , outputWeights()
+            , outputBias() {}
+
+        DarwinVirtualLoadSensor::DarwinVirtualLoadSensor(arma::mat hiddenWeights,
+                                                         arma::vec hiddenBias,
+                                                         arma::mat outputWeights,
+                                                         arma::vec outputBias,
+                                                         double noiseFactor,
+                                                         double certaintyThreshold,
+                                                         double uncertaintyThreshold)
+            : noiseFactor(noiseFactor)
+            , currentNoise(2.0 * noiseFactor)
+            , certaintyThreshold(certaintyThreshold)
+            , uncertaintyThreshold(uncertaintyThreshold)
+            , hiddenWeights(hiddenWeights)
+            , hiddenBias(hiddenBias)
+            , outputWeights(outputWeights)
+            , outputBias(outputBias) {}
+
+        bool DarwinVirtualLoadSensor::updateFoot(const arma::vec& features) {
+
+            double linResult =
+                (arma::vec(arma::clamp(hiddenWeights * features + hiddenBias, 0.0, std::numeric_limits<double>::max()))
+                         .t()
+                     * outputWeights
+                 + outputBias)[0];
+
+            linResult = std::tanh(linResult * 0.5) * 0.5 + 0.5;
+
+            // do the bayes update (1D kalman filter thing)
+            double k = currentNoise / (currentNoise + noiseFactor);
+            state += k * (linResult - state);
+            currentNoise *= 1.0 - k;
+            currentNoise += 1.0;
+
+            if (state >= certaintyThreshold) {
+                outputState = true;
+            }
+            else if (state < uncertaintyThreshold) {
+                outputState = false;
             }
 
-            DarwinVirtualLoadSensor::DarwinVirtualLoadSensor(arma::mat hiddenWeights,
-                                    arma::vec hiddenBias,
-                                    arma::mat outputWeights,
-                                    arma::vec outputBias,
-                                    double noiseFactor,
-                                    double certaintyThreshold,
-                                    double uncertaintyThreshold)
-                    : noiseFactor(noiseFactor)
-                    , currentNoise(2.0 * noiseFactor)
-                    , certaintyThreshold(certaintyThreshold)
-                    , uncertaintyThreshold(uncertaintyThreshold)
-                    , hiddenWeights(hiddenWeights)
-                    , hiddenBias(hiddenBias)
-                    , outputWeights(outputWeights)
-                    , outputBias(outputBias) {
-            }
-
-            bool DarwinVirtualLoadSensor::updateFoot(const arma::vec& features) {
-
-                double linResult =
-                    (
-                        arma::vec(
-                            arma::clamp(
-                                hiddenWeights * features + hiddenBias, 0.0, std::numeric_limits<double>::max()
-                            )
-                        ).t() * outputWeights + outputBias
-                    )[0];
-
-                linResult = std::tanh(linResult * 0.5) * 0.5 + 0.5;
-
-                //do the bayes update (1D kalman filter thing)
-                double k = currentNoise / (currentNoise + noiseFactor);
-                state += k * (linResult - state);
-                currentNoise *= 1.0 - k;
-                currentNoise += 1.0;
-
-                if (state >= certaintyThreshold) {
-                   outputState = true;
-                }
-                else if (state < uncertaintyThreshold) {
-                    outputState = false;
-                }
-
-                return outputState;
-            }
+            return outputState;
         }
     }
+}
 }

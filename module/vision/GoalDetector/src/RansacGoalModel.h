@@ -57,26 +57,38 @@ namespace vision {
             struct LIt {
                 Iterator state;
                 LIt(Iterator state) : state(state) {}
-                LIt& operator++() { ++state; return *this; }
-                const arma::vec2& operator*() { return state->left; }
-                bool operator!=(const LIt& other) { return state != other.state; }
+                LIt& operator++() {
+                    ++state;
+                    return *this;
+                }
+                const arma::vec2& operator*() {
+                    return state->left;
+                }
+                bool operator!=(const LIt& other) {
+                    return state != other.state;
+                }
             };
 
             // Allows us to iterate through only the right states without copying
             struct RIt {
                 Iterator state;
                 RIt(Iterator state) : state(state) {}
-                RIt& operator++() { ++state; return *this; }
-                const arma::vec2& operator*() { return state->right; }
-                bool operator!=(const RIt& other) { return state != other.state; }
+                RIt& operator++() {
+                    ++state;
+                    return *this;
+                }
+                const arma::vec2& operator*() {
+                    return state->right;
+                }
+                bool operator!=(const RIt& other) {
+                    return state != other.state;
+                }
             };
 
             left.leastSquaresUpdate(LIt(begin), LIt(end), threshold);
             right.leastSquaresUpdate(RIt(begin), RIt(end), threshold);
         }
-
-};
-
+    };
 }
 }
 

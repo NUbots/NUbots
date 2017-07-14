@@ -23,15 +23,14 @@
 #include <nuclear>
 
 namespace module {
-    namespace debug {
+namespace debug {
 
-            class KinematicsDebug : public NUClear::Reactor {
-            public:
-                explicit KinematicsDebug(std::unique_ptr<NUClear::Environment> environment);
-            };
+    class KinematicsDebug : public NUClear::Reactor {
+    public:
+        explicit KinematicsDebug(std::unique_ptr<NUClear::Environment> environment);
+    };
 
-    }  // debug
+}  // debug
 }  // modules
 
 #endif  // MODULES_DEBUG_KINEMATICSDEBUG_H
-

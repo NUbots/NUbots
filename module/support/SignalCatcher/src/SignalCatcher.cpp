@@ -21,67 +21,67 @@
 #include <csignal>
 
 namespace module {
-    namespace support {
+namespace support {
 
-        // Set our initial shutdown request state
-        volatile bool userRequestedShutdown = false;
+    // Set our initial shutdown request state
+    volatile bool userRequestedShutdown = false;
 
-        // Initialize our powerplant variable
-        NUClear::PowerPlant* POWER_PLANT = nullptr;
+    // Initialize our powerplant variable
+    NUClear::PowerPlant* POWER_PLANT = nullptr;
 
-        void sigint(int) {
+    void sigint(int) {
 
-            // Output that a shutdown command was sent (so the user knows the ctrl-c worked)
-            std::cout << std::endl << "Shutdown Command Sent" << std::endl;
+        // Output that a shutdown command was sent (so the user knows the ctrl-c worked)
+        std::cout << std::endl << "Shutdown Command Sent" << std::endl;
 
-            // If this is the first time they asked
-            if(!userRequestedShutdown) {
+        // If this is the first time they asked
+        if (!userRequestedShutdown) {
 
-                // Ask the system to shutdown, and flag that the user has asked once
-                POWER_PLANT->shutdown();
-                userRequestedShutdown = true;
-            }
-            // If this is the second time, kill everything
-            else {
-                exit(1);
-            }
+            // Ask the system to shutdown, and flag that the user has asked once
+            POWER_PLANT->shutdown();
+            userRequestedShutdown = true;
         }
-
-        // Our segmentation fault converter function
-        void sigsegv(int) {
-
-            throw std::runtime_error("Segmentation Fault");
+        // If this is the second time, kill everything
+        else {
+            exit(1);
         }
+    }
 
-        void sigabrt(int) {
+    // Our segmentation fault converter function
+    void sigsegv(int) {
 
-            throw std::runtime_error("Abort signal");
-        }
+        throw std::runtime_error("Segmentation Fault");
+    }
 
-        SignalCatcher::SignalCatcher(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
+    void sigabrt(int) {
 
-            // Store our powerplant in the static variable
-            POWER_PLANT = &powerplant;
-            struct sigaction action;
+        throw std::runtime_error("Abort signal");
+    }
 
-            // Setup our segmentation fault signal handler/converter
-            std::memset(&action, 0, sizeof(action));
-            action.sa_handler = sigsegv;
-            action.sa_flags = SA_NODEFER;
-            sigaction(SIGSEGV, &action, nullptr);
+    SignalCatcher::SignalCatcher(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
 
-            // Setup our abort signal handler/converter
-            std::memset(&action, 0, sizeof(action));
-            action.sa_handler = sigabrt;
-            action.sa_flags = SA_NODEFER;
-            sigaction(SIGABRT, &action, nullptr);
+        // Store our powerplant in the static variable
+        POWER_PLANT = &powerplant;
+        struct sigaction action;
 
-            // On sigint run the sigint handler
-            std::memset(&action, 0, sizeof(action));
-            action.sa_handler = sigint;
-            action.sa_flags = SA_NODEFER;
-            sigaction(SIGINT, &action, nullptr);
-        }
+        // Setup our segmentation fault signal handler/converter
+        std::memset(&action, 0, sizeof(action));
+        action.sa_handler = sigsegv;
+        action.sa_flags   = SA_NODEFER;
+        sigaction(SIGSEGV, &action, nullptr);
 
-    }  // support
+        // Setup our abort signal handler/converter
+        std::memset(&action, 0, sizeof(action));
+        action.sa_handler = sigabrt;
+        action.sa_flags   = SA_NODEFER;
+        sigaction(SIGABRT, &action, nullptr);
+
+        // On sigint run the sigint handler
+        std::memset(&action, 0, sizeof(action));
+        action.sa_handler = sigint;
+        action.sa_flags   = SA_NODEFER;
+        sigaction(SIGINT, &action, nullptr);
+    }
+
+}  // support
 }  // modules

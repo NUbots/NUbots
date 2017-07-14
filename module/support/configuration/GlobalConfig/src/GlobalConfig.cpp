@@ -23,22 +23,21 @@
 #include "message/support/GlobalConfig.h"
 
 namespace module {
-    namespace support {
-        namespace configuration {
-            using extension::Configuration;
+namespace support {
+    namespace configuration {
+        using extension::Configuration;
 
-            GlobalConfig::GlobalConfig(std::unique_ptr<NUClear::Environment> environment)
-                : Reactor(std::move(environment)) {
+        GlobalConfig::GlobalConfig(std::unique_ptr<NUClear::Environment> environment)
+            : Reactor(std::move(environment)) {
 
-                on<Configuration>("GlobalConfig.yaml").then([this] (const Configuration& config) {
+            on<Configuration>("GlobalConfig.yaml").then([this](const Configuration& config) {
 
-                    auto msg = std::make_unique<message::support::GlobalConfig>();
-                    msg->playerId = config["playerId"].as<uint32_t>();
-                    msg->teamId   = config["teamId"].as<uint32_t>();
-                    emit(msg);
-                });
-            }
+                auto msg      = std::make_unique<message::support::GlobalConfig>();
+                msg->playerId = config["playerId"].as<uint32_t>();
+                msg->teamId   = config["teamId"].as<uint32_t>();
+                emit(msg);
+            });
         }
     }
 }
-
+}

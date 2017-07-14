@@ -23,43 +23,48 @@
 #include <nuclear>
 
 #include "message/support/optimisation/DOpE.h"
-#include "utility/math/optimisation/Optimiser.h"
 #include "message/support/optimisation/Episode.h"
+#include "utility/math/optimisation/Optimiser.h"
 
 namespace module {
 namespace support {
-namespace optimisation {
+    namespace optimisation {
 
-    class DOpE : public NUClear::Reactor {
-    private:
-        struct Optimisation {
-            Optimisation() : group(""), network(false), batchSize(0), optimiser(), estimateEpisodes(), episodes() {}
-            Optimisation(const std::string& group, bool network, uint size,
-                        std::unique_ptr<utility::math::optimisation::Optimiser>&& opt,
-                        const std::vector<message::support::optimisation::Episode>& estimateEpisodes,
-                        const std::vector<message::support::optimisation::Episode>& episodes)
-                : group(group), network(network), batchSize(size), optimiser(std::move(opt)),
-                  estimateEpisodes(estimateEpisodes), episodes(episodes) {}
-            std::string group;
-            bool network;
-            uint batchSize;
-            std::unique_ptr<utility::math::optimisation::Optimiser> optimiser;
-            std::vector<message::support::optimisation::Episode> estimateEpisodes;
-            std::vector<message::support::optimisation::Episode> episodes;
+        class DOpE : public NUClear::Reactor {
+        private:
+            struct Optimisation {
+                Optimisation() : group(""), network(false), batchSize(0), optimiser(), estimateEpisodes(), episodes() {}
+                Optimisation(const std::string& group,
+                             bool network,
+                             uint size,
+                             std::unique_ptr<utility::math::optimisation::Optimiser>&& opt,
+                             const std::vector<message::support::optimisation::Episode>& estimateEpisodes,
+                             const std::vector<message::support::optimisation::Episode>& episodes)
+                    : group(group)
+                    , network(network)
+                    , batchSize(size)
+                    , optimiser(std::move(opt))
+                    , estimateEpisodes(estimateEpisodes)
+                    , episodes(episodes) {}
+                std::string group;
+                bool network;
+                uint batchSize;
+                std::unique_ptr<utility::math::optimisation::Optimiser> optimiser;
+                std::vector<message::support::optimisation::Episode> estimateEpisodes;
+                std::vector<message::support::optimisation::Episode> episodes;
+            };
+
+            void sendEstimateUpdate(const Optimisation& opt, const std::string& target = "");
+            void processBatch(Optimisation& opt);
+            void saveOptimisationState(const Optimisation& opt);
+
+            std::map<std::string, Optimisation> optimisations;
+
+        public:
+            /// @brief Called by the powerplant to build and setup the DOpE reactor.
+            explicit DOpE(std::unique_ptr<NUClear::Environment> environment);
         };
-
-        void sendEstimateUpdate(const Optimisation& opt, const std::string& target = "");
-        void processBatch(Optimisation& opt);
-        void saveOptimisationState(const Optimisation& opt);
-
-        std::map<std::string, Optimisation> optimisations;
-
-    public:
-        /// @brief Called by the powerplant to build and setup the DOpE reactor.
-        explicit DOpE(std::unique_ptr<NUClear::Environment> environment);
-    };
-
-}
+    }
 }
 }
 

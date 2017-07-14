@@ -38,7 +38,6 @@ namespace localisation {
         /// @brief Called by the powerplant to build and setup the RobotFieldLocalisation reactor.
         explicit RobotFieldLocalisation(std::unique_ptr<NUClear::Environment> environment);
     };
-
 }
 }
 

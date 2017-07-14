@@ -20,59 +20,54 @@
 #ifndef MODULES_LOCALISATION_SOCCERSIMULATOR_H
 #define MODULES_LOCALISATION_SOCCERSIMULATOR_H
 
-#include <nuclear>
 #include <armadillo>
+#include <nuclear>
 
 #include "extension/Configuration.h"
 
-#include "message/support/GlobalConfig.h"
-#include "message/support/FieldDescription.h"
-#include "message/platform/darwin/DarwinSensors.h"
 #include "message/input/CameraParameters.h"
 #include "message/motion/KickCommand.h"
+#include "message/platform/darwin/DarwinSensors.h"
+#include "message/support/FieldDescription.h"
+#include "message/support/GlobalConfig.h"
 
-#include "utility/math/matrix/Transform2D.h"
 #include "utility/math/angle.h"
+#include "utility/math/matrix/Transform2D.h"
 
-#include "VirtualGoalPost.h"
 #include "VirtualBall.h"
+#include "VirtualGoalPost.h"
 
 namespace module {
 namespace support {
 
     class SoccerSimulator : public NUClear::Reactor {
     public:
-        enum MotionType{
-            NONE = 0,
-            PATH = 1,
-            MOTION = 2
-        };
-        MotionType motionTypeFromString(std::string s){
-            if(s.compare("NONE")==0){
+        enum MotionType { NONE = 0, PATH = 1, MOTION = 2 };
+        MotionType motionTypeFromString(std::string s) {
+            if (s.compare("NONE") == 0) {
                 return MotionType::NONE;
-            } else
-            if(s.compare("PATH")==0){
+            }
+            else if (s.compare("PATH") == 0) {
                 return MotionType::PATH;
-            } else
-            if(s.compare("MOTION")==0){
+            }
+            else if (s.compare("MOTION") == 0) {
                 return MotionType::MOTION;
-            } else {
+            }
+            else {
                 return MotionType::PATH;
             }
         }
 
-        enum PathType{
-            SIN = 0,
-            TRIANGLE = 1
-        };
+        enum PathType { SIN = 0, TRIANGLE = 1 };
 
-        PathType pathTypeFromString(std::string s){
-            if(s.compare("SIN")==0){
+        PathType pathTypeFromString(std::string s) {
+            if (s.compare("SIN") == 0) {
                 return PathType::SIN;
-            } else
-            if(s.compare("TRIANGLE")==0){
+            }
+            else if (s.compare("TRIANGLE") == 0) {
                 return PathType::TRIANGLE;
-            } else {
+            }
+            else {
                 return PathType::SIN;
             }
         }
@@ -81,28 +76,28 @@ namespace support {
         NUClear::clock::time_point moduleStartupTime;
         double absolute_time();
 
-        //Member variables
+        // Member variables
         message::motion::KickPlannerConfig kick_cfg;
 
         static constexpr size_t SIMULATION_UPDATE_FREQUENCY = 180;
 
-        struct Config{
+        struct Config {
             Config() : robot(), ball() {}
 
-            bool simulate_goal_observations = true;
-            bool simulate_ball_observations = true;
+            bool simulate_goal_observations         = true;
+            bool simulate_ball_observations         = true;
             bool distinguish_own_and_opponent_goals = false;
-            bool distinguish_left_and_right_goals = true;
+            bool distinguish_left_and_right_goals   = true;
 
             struct Motion {
                 Motion() : path() {}
 
                 MotionType motion_type = MotionType::PATH;
-                struct Path{
-                    float period = 10;
+                struct Path {
+                    float period  = 10;
                     PathType type = PathType::SIN;
-                    float x_amp = 3;
-                    float y_amp = 2;
+                    float x_amp   = 3;
+                    float y_amp   = 2;
                 } path;
             };
 
@@ -110,22 +105,22 @@ namespace support {
             Motion ball;
 
             bool emit_robot_fieldobjects = true;
-            bool emit_ball_fieldobjects = true;
+            bool emit_ball_fieldobjects  = true;
 
-            bool blind_robot = false;
+            bool blind_robot          = false;
             bool auto_start_behaviour = true;
 
-            arma::vec4 vision_error = {0.01,0.017,0.017};
+            arma::vec4 vision_error = {0.01, 0.017, 0.017};
 
         } cfg_;
 
-        //Goal models
+        // Goal models
         std::vector<VirtualGoalPost> goalPosts;
 
-        //World State
+        // World State
         struct WorldState {
             WorldState() : robotPose(), robotVelocity(), ball() {}
-            //Transform2D == (x,y,heading)
+            // Transform2D == (x,y,heading)
             utility::math::matrix::Transform2D robotPose;
             utility::math::matrix::Transform2D robotVelocity;
             // utility::math::matrix::Transform2D ballPose;
@@ -141,30 +136,31 @@ namespace support {
         utility::math::matrix::Transform2D oldBallPose;
 
 
-        bool kicking = false;
-        bool walking = false;
+        bool kicking     = false;
+        bool walking     = false;
         bool lastKicking = false;
         uint PLAYER_ID;
 
         NUClear::clock::time_point lastNow;
 
-        //Methods
-        void updateConfiguration(const ::extension::Configuration& config, const message::support::GlobalConfig& globalConfig);
+        // Methods
+        void updateConfiguration(const ::extension::Configuration& config,
+                                 const message::support::GlobalConfig& globalConfig);
 
-        std::unique_ptr<message::platform::darwin::DarwinSensors::Gyroscope> computeGyro(float heading, float oldHeading);
+        std::unique_ptr<message::platform::darwin::DarwinSensors::Gyroscope> computeGyro(float heading,
+                                                                                         float oldHeading);
 
         arma::vec2 getPath(Config::Motion::Path p);
 
         void setGoalLeftRightKnowledge(std::vector<message::vision::Goal>& goals);
 
-        void loadFieldDescription( const std::shared_ptr<const message::support::FieldDescription> fd);
+        void loadFieldDescription(const std::shared_ptr<const message::support::FieldDescription> fd);
 
 
     public:
         /// @brief Called by the powerplant to build and setup the SoccerSimulator reactor.
         explicit SoccerSimulator(std::unique_ptr<NUClear::Environment> environment);
     };
-
 }
 }
 

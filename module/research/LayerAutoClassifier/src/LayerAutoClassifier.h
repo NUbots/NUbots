@@ -38,7 +38,6 @@ namespace research {
         /// @brief Called by the powerplant to build and setup the LayerAutoClassifier reactor.
         explicit LayerAutoClassifier(std::unique_ptr<NUClear::Environment> environment);
     };
-
 }
 }
 

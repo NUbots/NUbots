@@ -23,10 +23,10 @@
 #include <nuclear>
 
 #include <array>
-#include <vector>
+#include <list>
 #include <map>
 #include <set>
-#include <list>
+#include <vector>
 
 #include "message/behaviour/ServoCommand.h"
 #include "message/input/Sensors.h"
@@ -35,14 +35,14 @@
 #include "utility/input/ServoID.h"
 
 namespace module {
-    namespace behaviour {
+namespace behaviour {
 
-        struct RequestItem;
+    struct RequestItem;
 
-        struct Request {
-            using callback = std::function<void (std::set<utility::input::LimbID>)>;
+    struct Request {
+        using callback = std::function<void(std::set<utility::input::LimbID>)>;
 
-            Request()
+        Request()
             : id(0)
             , name("")
             , active(false)
@@ -53,7 +53,11 @@ namespace module {
             , kill()
             , completed() {}
 
-            Request(size_t id, std::string name, callback start, callback kill, std::function<void (std::set<utility::input::ServoID>)> completed)
+        Request(size_t id,
+                std::string name,
+                callback start,
+                callback kill,
+                std::function<void(std::set<utility::input::ServoID>)> completed)
             : id(id)
             , name(name)
             , active(false)
@@ -64,72 +68,69 @@ namespace module {
             , kill(kill)
             , completed(completed) {}
 
-            /// The ID of this request that will be sent with any motion commands
-            size_t id;
+        /// The ID of this request that will be sent with any motion commands
+        size_t id;
 
-            /// The name of the requester
-            std::string name;
+        /// The name of the requester
+        std::string name;
 
-            /// If the main element of this request is active
-            bool active;
+        /// If the main element of this request is active
+        bool active;
 
-            /// The maximum priority for any of the items
-            float maxPriority;
+        /// The maximum priority for any of the items
+        float maxPriority;
 
-            /// The index of the main item
-            size_t mainElement;
+        /// The index of the main item
+        size_t mainElement;
 
-            /// The items in this list
-            std::vector<RequestItem> items;
+        /// The items in this list
+        std::vector<RequestItem> items;
 
-            /// The callback to execute when a new limb is started
-            callback start;
-            callback kill;
-            std::function<void (std::set<utility::input::ServoID>)> completed;
-        };
+        /// The callback to execute when a new limb is started
+        callback start;
+        callback kill;
+        std::function<void(std::set<utility::input::ServoID>)> completed;
+    };
 
-        struct RequestItem {
+    struct RequestItem {
 
-            //RequestItem() : group(Request()), index(0), active(false), priority(std::numeric_limits<float>::min()), limbSet() {}
-            RequestItem(Request& group, size_t index, float priority, const std::set<utility::input::LimbID>& limbSet)
-            : group(group)
-            , index(index)
-            , active(false)
-            , priority(priority)
-            , limbSet(limbSet) {}
+        // RequestItem() : group(Request()), index(0), active(false), priority(std::numeric_limits<float>::min()),
+        // limbSet() {}
+        RequestItem(Request& group, size_t index, float priority, const std::set<utility::input::LimbID>& limbSet)
+            : group(group), index(index), active(false), priority(priority), limbSet(limbSet) {}
 
-            Request& group;
+        Request& group;
 
-            size_t index;
+        size_t index;
 
-            bool active;
+        bool active;
 
-            float priority;
-            std::set<utility::input::LimbID> limbSet;
-        };
+        float priority;
+        std::set<utility::input::LimbID> limbSet;
+    };
 
-        /**
-         * Controls which of the behaviours are able to access motors.
-         *
-         * @author Trent Houliston
-         */
-        class Controller : public NUClear::Reactor {
-        private:
-            std::array<std::vector<std::reference_wrapper<RequestItem>>, 5> actions;
-            std::array<size_t, 5> limbAccess;
-            std::map<size_t, std::unique_ptr<Request>> requests;
-            std::vector<std::reference_wrapper<RequestItem>> currentActions;
+    /**
+     * Controls which of the behaviours are able to access motors.
+     *
+     * @author Trent Houliston
+     */
+    class Controller : public NUClear::Reactor {
+    private:
+        std::array<std::vector<std::reference_wrapper<RequestItem>>, 5> actions;
+        std::array<size_t, 5> limbAccess;
+        std::map<size_t, std::unique_ptr<Request>> requests;
+        std::vector<std::reference_wrapper<RequestItem>> currentActions;
 
 
-            std::array<std::list<message::behaviour::ServoCommand>, 20> commandQueues;
+        std::array<std::list<message::behaviour::ServoCommand>, 20> commandQueues;
 
-            void selectAction();
-        public:
-            explicit Controller(std::unique_ptr<NUClear::Environment> environment);
-        };
+        void selectAction();
 
-    }  // behaviours
+    public:
+        explicit Controller(std::unique_ptr<NUClear::Environment> environment);
+    };
+
+}  // behaviours
 }  // modules
 
 #endif  // MODULES_BEHAVIOUR_CONTROLLER_H
-

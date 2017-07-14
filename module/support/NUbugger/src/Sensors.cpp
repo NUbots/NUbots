@@ -31,11 +31,12 @@ namespace support {
     void NUbugger::provideSensors() {
 
         // This trigger gets the output from the sensors (unfiltered)
-        handles["sensor_data"].push_back(on<Trigger<Sensors>, Single, Priority::LOW>().then([this](const Sensors& sensors) {
+        handles["sensor_data"].push_back(
+            on<Trigger<Sensors>, Single, Priority::LOW>().then([this](const Sensors& sensors) {
 
-            send(sensors, 1, false, sensors.timestamp);
+                send(sensors, 1, false, sensors.timestamp);
 
-        }));
+            }));
     }
 }
 }

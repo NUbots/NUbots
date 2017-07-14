@@ -20,8 +20,8 @@
 #ifndef MODULE_MOTION_FOOTMOTIONPLANNER_H
 #define MODULE_MOTION_FOOTMOTIONPLANNER_H
 
-#include <nuclear>
 #include <armadillo>
+#include <nuclear>
 
 #include <yaml-cpp/yaml.h>
 
@@ -29,9 +29,9 @@
 
 #include "message/input/Sensors.h"
 
-#include "message/motion/KinematicsModels.h"
-#include "message/motion/FootMotionCommand.h" 
+#include "message/motion/FootMotionCommand.h"
 #include "message/motion/FootPlacementCommand.h"
+#include "message/motion/KinematicsModels.h"
 
 #include "utility/input/LimbID.h"
 
@@ -43,69 +43,62 @@
 #include "utility/math/matrix/Transform2D.h"
 #include "utility/math/matrix/Transform3D.h"
 
-#include "utility/motion/InverseKinematics.h"
 #include "utility/motion/ForwardKinematics.h"
+#include "utility/motion/InverseKinematics.h"
 
 #include "utility/nubugger/NUhelpers.h"
 #include "utility/support/eigen_armadillo.h"
 
-namespace module 
-{
-namespace motion 
-{
-    class FootMotionPlanner : public NUClear::Reactor 
-    {
+namespace module {
+namespace motion {
+    class FootMotionPlanner : public NUClear::Reactor {
     public:
-       /**
-         * The number of servo updates performnced per second
-         * TODO: Probably be a global config somewhere, waiting on NUClear to support runtime on<Every> arguments
-         */
+        /**
+          * The number of servo updates performnced per second
+          * TODO: Probably be a global config somewhere, waiting on NUClear to support runtime on<Every> arguments
+          */
         static constexpr size_t UPDATE_FREQUENCY = 90;
-        static constexpr size_t MIN_QUEUE_SIZE   =  1;
+        static constexpr size_t MIN_QUEUE_SIZE   = 1;
 
         static constexpr const char* CONFIGURATION_PATH = "FootMotionPlanner.yaml";
         static constexpr const char* CONFIGURATION_MSSG = "Foot Motion Planner - Configure";
         static constexpr const char* ONTRIGGER_FOOT_CMD = "Foot Motion Planner - Update Foot Position";
         static constexpr const char* ONTRIGGER_FOOT_TGT = "Foot Motion Planner - Received Target Foot Position";
-        
+
         explicit FootMotionPlanner(std::unique_ptr<NUClear::Environment> environment);
+
     private:
-        using Sensors        = message::input::Sensors;
-        using LimbID         = utility::input::LimbID;
-        using Transform2D    = utility::math::matrix::Transform2D;
-        using Transform3D    = utility::math::matrix::Transform3D;
+        using Sensors     = message::input::Sensors;
+        using LimbID      = utility::input::LimbID;
+        using Transform2D = utility::math::matrix::Transform2D;
+        using Transform3D = utility::math::matrix::Transform3D;
 
         /**
          * Temporary debugging variables for local output logging...
-         */ 
-        bool DEBUG;                 //
-        int  DEBUG_ITER;            //
+         */
+        bool DEBUG;      //
+        int DEBUG_ITER;  //
 
         /**
          * NUsight feedback initialized from configuration script, see config file for documentation...
          */
-        bool emitFootPosition;      //
+        bool emitFootPosition;  //
 
         /**
          * Resource abstractions for id and handler instances...
          */
-        ReactionHandle updateHandle;                    // handle(updateWaypoints), disabling when not moving will save unnecessary CPU resources
-        
+        ReactionHandle
+            updateHandle;  // handle(updateWaypoints), disabling when not moving will save unnecessary CPU resources
+
         /**
          * Anthropomorphic metrics for relevant humanoid joints & actuators...
          */
-        struct NewStepInfo                              // Capture Next Step Data
+        struct NewStepInfo  // Capture Next Step Data
         {
-            NewStepInfo() 
-            : lFootSource()
-            , rFootSource()
-            , sMass()
-            , lFootDestination()
-            , rFootDestination()
-            {
-                lFootSource = Transform2D();
-                rFootSource = Transform2D();
-                sMass = Transform2D();
+            NewStepInfo() : lFootSource(), rFootSource(), sMass(), lFootDestination(), rFootDestination() {
+                lFootSource      = Transform2D();
+                rFootSource      = Transform2D();
+                sMass            = Transform2D();
                 lFootDestination = Transform2D();
                 rFootDestination = Transform2D();
             }
@@ -117,59 +110,59 @@ namespace motion
             Transform2D lFootDestination;
             Transform2D rFootDestination;
         };
-        Transform2D leftFootPositionTransform;          // Active left foot position
-        Transform2D rightFootPositionTransform;         // Active right foot position
-        Transform2D activeLimbSource;       // Pre-step active limb position
-        Transform2D activeLimbDestination;  // Destination placement Transform2D active foot positions
-        LimbID activeForwardLimb;           // The leg that is 'swinging' in the step, opposite of the support foot
-        LimbID activeLimbInitial;                       // TODO: Former initial non-support leg for deterministic walking approach
+        Transform2D leftFootPositionTransform;   // Active left foot position
+        Transform2D rightFootPositionTransform;  // Active right foot position
+        Transform2D activeLimbSource;            // Pre-step active limb position
+        Transform2D activeLimbDestination;       // Destination placement Transform2D active foot positions
+        LimbID activeForwardLimb;                // The leg that is 'swinging' in the step, opposite of the support foot
+        LimbID activeLimbInitial;  // TODO: Former initial non-support leg for deterministic walking approach
 
-         /**
-         * Anthropomorphic metrics initialized from configuration script, see config file for documentation...
-         */
-        double stepTime;                                //
-        double stepHeight;                              //
-        float  step_height_slow_fraction;               //
-        float  step_height_fast_fraction;               //
-        float  ankle_pitch_lift; 
-        float  ankle_pitch_fall; 
-        arma::mat::fixed<3,2> stepLimits;               //              
-        arma::vec2 footOffsetCoefficient;               //
+        /**
+        * Anthropomorphic metrics initialized from configuration script, see config file for documentation...
+        */
+        double stepTime;                  //
+        double stepHeight;                //
+        float step_height_slow_fraction;  //
+        float step_height_fast_fraction;  //
+        float ankle_pitch_lift;
+        float ankle_pitch_fall;
+        arma::mat::fixed<3, 2> stepLimits;  //
+        arma::vec2 footOffsetCoefficient;   //
 
         /**
          * Internal timing reference variables...
          */
-        bool  INITIAL_STEP;                                     // Indicates if the first step has been consumed
-        double newStepStartTime;                                // The time when the current step is scheduled
-        double destinationTime;                     // The relative time when the current is to be completed
-        NUClear::clock::time_point lastVeloctiyUpdateTime;      //
+        bool INITIAL_STEP;                                  // Indicates if the first step has been consumed
+        double newStepStartTime;                            // The time when the current step is scheduled
+        double destinationTime;                             // The relative time when the current is to be completed
+        NUClear::clock::time_point lastVeloctiyUpdateTime;  //
 
         /**
          * Motion data for relevant humanoid actuators...
          */
-        double velocityHigh;                            // 
-        double accelerationTurningFactor;               //
-        arma::mat::fixed<3,2> velocityLimits;           //
-        arma::vec3 accelerationLimits;                  //
-        arma::vec3 accelerationLimitsHigh;              //
-        Transform2D velocityCurrent;        // Current robot velocity
+        double velocityHigh;                    //
+        double accelerationTurningFactor;       //
+        arma::mat::fixed<3, 2> velocityLimits;  //
+        arma::vec3 accelerationLimits;          //
+        arma::vec3 accelerationLimitsHigh;      //
+        Transform2D velocityCurrent;            // Current robot velocity
 
         /**
          * Dynamic analysis parameters for relevant motion planning...
          */
-            //...
-            //...
+        //...
+        //...
 
         /**
          * Dynamic analysis parameters initialized from configuration script, see config file for documentation...
          */
-        double phase1Single;                            //
-        double phase2Single;                            //
+        double phase1Single;  //
+        double phase2Single;  //
 
         /**
          * Balance & Kinematics module initialization...
          */
-        message::motion::KinematicsModel kinematicsModel;   //
+        message::motion::KinematicsModel kinematicsModel;  //
 
         /**
          * @brief [brief description]
@@ -185,8 +178,10 @@ namespace motion
          * See: http://easings.net/ to reference common easing functions
          *
          * @param phase The input to the easing function, with a range of [0,1].
-         * @param phase1Single The phase time between [0,1] to start the step. A value of 0.1 means the step will not start until phase is >= 0.1
-         * @param phase2Single The phase time between [0,1] to end the step. A value of 0.9 means the step will end when phase >= 0.9
+         * @param phase1Single The phase time between [0,1] to start the step. A value of 0.1 means the step will not
+         * start until phase is >= 0.1
+         * @param phase2Single The phase time between [0,1] to end the step. A value of 0.9 means the step will end when
+         * phase >= 0.9
          */
         arma::vec3 getFootPhase(double phase, double phase1Single, double phase2Single);
         /**
@@ -194,11 +189,14 @@ namespace motion
          * @details [long description]
          * @return [description]
          */
-        void updateFootPosition(double inPhase, const Transform2D& inActiveLimbSource, const LimbID& inActiveForwardLimb, const Transform2D& inActiveLimbDestination);
+        void updateFootPosition(double inPhase,
+                                const Transform2D& inActiveLimbSource,
+                                const LimbID& inActiveForwardLimb,
+                                const Transform2D& inActiveLimbDestination);
         /**
          * @brief [brief description]
          * @details [long description]
-         * 
+         *
          * @param inTorsoPosition [description]
          */
         void configure(const YAML::Node& config);
@@ -206,7 +204,7 @@ namespace motion
          * @brief [brief description]
          * @details [long description]
          */
-        void postureInitialize();  
+        void postureInitialize();
         /**
          * @brief [brief description]
          * @details [long description]
@@ -220,7 +218,7 @@ namespace motion
         /**
          * @brief [brief description]
          * @details [long description]
-         * 
+         *
          * @param index [description]
          * @return [description]
          */
@@ -228,14 +226,14 @@ namespace motion
         /**
          * @brief [brief description]
          * @details [long description]
-         * 
+         *
          * @param inFootOffsetCoefficient [description]
          */
         void setFootOffsetCoefficient(const arma::vec2& inFootOffsetCoefficient);
         /**
          * @brief [brief description]
          * @details [long description]
-         * 
+         *
          * @param index [description]
          * @param inValue [description]
          */
@@ -309,20 +307,20 @@ namespace motion
         /**
          * @brief [brief description]
          * @details [long description]
-         * 
+         *
          * @param velocity [description]
          */
         void setVelocityCurrent(Transform2D inVelocityCommand);
-         /**
-         * @brief [brief description]
-         * @details [long description]
-         * @return [description]
-         */
+        /**
+        * @brief [brief description]
+        * @details [long description]
+        * @return [description]
+        */
         Transform2D getLeftFootPosition();
         /**
          * @brief [brief description]
          * @details [long description]
-         * 
+         *
          * @param inLeftFootPosition [description]
          */
         void setLeftFootPosition(const Transform2D& inLeftFootPosition);
@@ -335,7 +333,7 @@ namespace motion
         /**
          * @brief [brief description]
          * @details [long description]
-         * 
+         *
          * @param inRightFootPosition [description]
          */
         void setRightFootPosition(const Transform2D& inRightFootPosition);
@@ -348,7 +346,7 @@ namespace motion
         /**
          * @brief [brief description]
          * @details [long description]
-         * 
+         *
          * @param inRightFootSource [description]
          */
         void setActiveLimbSource(const Transform2D& inActiveLimbSource);
@@ -361,7 +359,7 @@ namespace motion
         /**
          * @brief [brief description]
          * @details [long description]
-         * 
+         *
          * @param inLeftFootDestination [description]
          */
         void setActiveLimbDestination(const Transform2D& inActiveLimbDestination);

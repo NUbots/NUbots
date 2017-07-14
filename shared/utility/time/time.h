@@ -27,11 +27,9 @@
 namespace utility {
 namespace time {
 
-    inline double TimeDifferenceSeconds(
-        NUClear::clock::time_point end_time,
-        NUClear::clock::time_point start_time) {
+    inline double TimeDifferenceSeconds(NUClear::clock::time_point end_time, NUClear::clock::time_point start_time) {
         auto time_diff = end_time - start_time;
-        double nano = std::chrono::duration_cast<std::chrono::nanoseconds>(time_diff).count();
+        double nano    = std::chrono::duration_cast<std::chrono::nanoseconds>(time_diff).count();
         return nano * 1.0e-9;
     }
 
@@ -47,7 +45,6 @@ namespace time {
     inline NUClear::clock::duration durationFromSeconds(double seconds) {
         return NUClear::clock::duration(uint64_t(NUClear::clock::period::den * seconds));
     }
-
 }
 }
 #endif

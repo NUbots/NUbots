@@ -21,32 +21,30 @@
 
 namespace utility {
 namespace math {
-namespace matrix {
+    namespace matrix {
 
-    Rotation2D::Rotation() {
-        eye(); // identity matrix by default
+        Rotation2D::Rotation() {
+            eye();  // identity matrix by default
+        }
+
+        Rotation2D Rotation2D::rotate(double radians) const {
+            return *this * createRotation(radians);
+        }
+
+        Rotation2D Rotation2D::i() const {
+            // http://en.wikipedia.org/wiki/Rotation_matrix#Multiplication
+            // The inverse of a rotation matrix is its transpose, which is also a rotation matrix.
+            return t();
+        }
+
+        Rotation2D Rotation2D::createRotation(double radians) {
+            double c = cos(radians);
+            double s = sin(radians);
+            Rotation2D rotation;
+            // http://en.wikipedia.org/wiki/Rotation_matrix#Basic_rotations
+            rotation << c << -s << arma::endr << s << c;
+            return rotation;
+        }
     }
-
-    Rotation2D Rotation2D::rotate(double radians) const {
-        return *this * createRotation(radians);
-    }
-
-    Rotation2D Rotation2D::i() const {
-        // http://en.wikipedia.org/wiki/Rotation_matrix#Multiplication
-        // The inverse of a rotation matrix is its transpose, which is also a rotation matrix.
-        return t();
-    }
-
-    Rotation2D Rotation2D::createRotation(double radians) {
-        double c = cos(radians);
-        double s = sin(radians);
-        Rotation2D rotation;
-        // http://en.wikipedia.org/wiki/Rotation_matrix#Basic_rotations
-        rotation << c << -s << arma::endr
-                 << s <<  c;
-        return rotation;
-    }
-
-}
 }
 }

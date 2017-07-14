@@ -26,79 +26,79 @@
 
 namespace module {
 namespace debug {
-namespace optimisation {
+    namespace optimisation {
 
-    using extension::Configuration;
-    using message::support::optimisation::Episode;
-    using message::support::optimisation::Parameters;
-    using message::support::optimisation::RequestParameters;
-    using message::support::optimisation::RegisterOptimisation;
+        using extension::Configuration;
+        using message::support::optimisation::Episode;
+        using message::support::optimisation::Parameters;
+        using message::support::optimisation::RequestParameters;
+        using message::support::optimisation::RegisterOptimisation;
 
-    TestDOpE::TestDOpE(std::unique_ptr<NUClear::Environment> environment)
-    : Reactor(std::move(environment)), currentParameters() {
+        TestDOpE::TestDOpE(std::unique_ptr<NUClear::Environment> environment)
+            : Reactor(std::move(environment)), currentParameters() {
 
-        on<Configuration>("TestDOpE.yaml").then([this] (const Configuration& /*config*/) {
-            // Use configuration here from file TestDOpE.yaml
-        });
+            on<Configuration>("TestDOpE.yaml").then([this](const Configuration& /*config*/) {
+                // Use configuration here from file TestDOpE.yaml
+            });
 
-        on<Trigger<Parameters>>().then([this] (const Parameters& params) {
+            on<Trigger<Parameters>>().then([this](const Parameters& params) {
 
-            // If these parameters are for us
-            if(params.group == "test_dope") {
-                currentParameters = params;
-            }
-        });
+                // If these parameters are for us
+                if (params.group == "test_dope") {
+                    currentParameters = params;
+                }
+            });
 
-        // TODO request optimisation parameters from the system
-        // Emit an optimisation param request
+            // TODO request optimisation parameters from the system
+            // Emit an optimisation param request
 
-        on<Every<1, Per<std::chrono::seconds>>>().then([this] {
+            on<Every<1, Per<std::chrono::seconds>>>().then([this] {
 
-            auto e = std::make_unique<Episode>();
+                auto e = std::make_unique<Episode>();
 
-            e->group = "test_dope";
-            e->generation = currentParameters.generation;
-            e->values = currentParameters.samples.col(0);
-            e->covariance = currentParameters.covariance;
+                e->group      = "test_dope";
+                e->generation = currentParameters.generation;
+                e->values     = currentParameters.samples.col(0);
+                e->covariance = currentParameters.covariance;
 
-            Episode::Fitness fitness;
-            fitness.weight = 1.0;
+                Episode::Fitness fitness;
+                fitness.weight = 1.0;
 
-            double f = 0;
-            for(int i = 0; i < currentParameters.samples.col(0).size(); ++i) {
-                double v = currentParameters.samples(i, 0) + i;
-                v *= v;
-                f += -v;
-            }
-            fitness.fitness = f;
-            e->fitness.push_back(fitness);
+                double f = 0;
+                for (int i = 0; i < currentParameters.samples.col(0).size(); ++i) {
+                    double v = currentParameters.samples(i, 0) + i;
+                    v *= v;
+                    f += -v;
+                }
+                fitness.fitness = f;
+                e->fitness.push_back(fitness);
 
-            emit(e);
+                emit(e);
 
-            // Request a new sample
-            auto req = std::make_unique<RequestParameters>();
-            req->group = "test_dope";
+                // Request a new sample
+                auto req      = std::make_unique<RequestParameters>();
+                req->group    = "test_dope";
+                req->nSamples = 1;
+                emit<Scope::DIRECT>(req);
+            });
+
+            auto op                           = std::make_unique<RegisterOptimisation>();
+            op->group                         = "test_dope";
+            op->network                       = true;
+            op->parameters.initial.generation = 0;
+            op->parameters.initial.estimate   = Eigen::VectorXd::Random(5);
+            op->parameters.initial.covariance = Eigen::VectorXd::Constant(5, 0.1).asDiagonal();
+            op->parameters.upperBound         = Eigen::VectorXd::Constant(5, std::numeric_limits<double>::max());
+            op->parameters.lowerBound         = Eigen::VectorXd::Constant(5, std::numeric_limits<double>::min());
+            op->parameters.batchSize          = 10;
+
+            emit<Scope::INITIALIZE>(op);
+
+            auto req      = std::make_unique<RequestParameters>();
+            req->group    = "test_dope";
             req->nSamples = 1;
-            emit<Scope::DIRECT>(req);
-        });
-
-        auto op = std::make_unique<RegisterOptimisation>();
-        op->group = "test_dope";
-        op->network = true;
-        op->parameters.initial.generation = 0;
-        op->parameters.initial.estimate   = Eigen::VectorXd::Random(5);
-        op->parameters.initial.covariance = Eigen::VectorXd::Constant(5, 0.1).asDiagonal();
-        op->parameters.upperBound         = Eigen::VectorXd::Constant(5, std::numeric_limits<double>::max());
-        op->parameters.lowerBound         = Eigen::VectorXd::Constant(5, std::numeric_limits<double>::min());
-        op->parameters.batchSize          = 10;
-
-        emit<Scope::INITIALIZE>(op);
-
-        auto req = std::make_unique<RequestParameters>();
-        req->group = "test_dope";
-        req->nSamples =  1;
-        emit<Scope::INITIALIZE>(req);
+            emit<Scope::INITIALIZE>(req);
+        }
     }
-}
 }
 }

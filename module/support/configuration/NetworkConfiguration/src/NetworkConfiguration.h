@@ -24,16 +24,15 @@
 
 namespace module {
 namespace support {
-namespace configuration {
+    namespace configuration {
 
-    class NetworkConfiguration : public NUClear::Reactor {
+        class NetworkConfiguration : public NUClear::Reactor {
 
-    public:
-        /// @brief Called by the powerplant to build and setup the NetworkConfiguration reactor.
-        explicit NetworkConfiguration(std::unique_ptr<NUClear::Environment> environment);
-    };
-
-}
+        public:
+            /// @brief Called by the powerplant to build and setup the NetworkConfiguration reactor.
+            explicit NetworkConfiguration(std::unique_ptr<NUClear::Environment> environment);
+        };
+    }
 }
 }
 

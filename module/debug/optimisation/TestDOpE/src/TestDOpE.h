@@ -25,18 +25,17 @@
 
 namespace module {
 namespace debug {
-namespace optimisation {
+    namespace optimisation {
 
-    class TestDOpE : public NUClear::Reactor {
-    private:
-        message::support::optimisation::Parameters currentParameters;
+        class TestDOpE : public NUClear::Reactor {
+        private:
+            message::support::optimisation::Parameters currentParameters;
 
-    public:
-        /// @brief Called by the powerplant to build and setup the TestDOpE reactor.
-        explicit TestDOpE(std::unique_ptr<NUClear::Environment> environment);
-    };
-
-}
+        public:
+            /// @brief Called by the powerplant to build and setup the TestDOpE reactor.
+            explicit TestDOpE(std::unique_ptr<NUClear::Environment> environment);
+        };
+    }
 }
 }
 

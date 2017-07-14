@@ -25,15 +25,13 @@
 
 namespace module {
 namespace behaviour {
-namespace tools {
+    namespace tools {
 
         SpeakTest::SpeakTest(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
 
-            on<Every<30, std::chrono::seconds>>().then([this] {
-                emit(std::make_unique<message::output::Say>("Bite Me"));
-            });
+            on<Every<30, std::chrono::seconds>>().then(
+                [this] { emit(std::make_unique<message::output::Say>("Bite Me")); });
         }
-
-}
+    }
 }
 }

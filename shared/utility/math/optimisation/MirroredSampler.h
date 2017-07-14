@@ -26,50 +26,50 @@
 #include "message/support/optimisation/OptimiserTypes.h"
 
 namespace utility {
-    namespace math {
-        namespace optimisation {
-            using message::support::optimisation::OptimiserParameters;
-            using message::support::optimisation::OptimiserEstimate;
+namespace math {
+    namespace optimisation {
+        using message::support::optimisation::OptimiserParameters;
+        using message::support::optimisation::OptimiserEstimate;
 
 
-            template<typename OriginalSampler>
-            class MirroredSampler {
-            private:
-                uint64_t batchSize;
-                uint64_t sampleCount = 0;
-                int64_t generation = -1;
-                arma::mat samples;
-                OriginalSampler sampler;
-            public:
-                MirroredSampler(const OptimiserParameters& params):
-                                batchSize(params.batchSize),
-                                generation(params.initial.generation) {
-                    auto params2 = params;
-                    params2.batchSize = (params.batchSize+1)/2;
-                    sampler(params2);
+        template <typename OriginalSampler>
+        class MirroredSampler {
+        private:
+            uint64_t batchSize;
+            uint64_t sampleCount = 0;
+            int64_t generation   = -1;
+            arma::mat samples;
+            OriginalSampler sampler;
+
+        public:
+            MirroredSampler(const OptimiserParameters& params)
+                : batchSize(params.batchSize), generation(params.initial.generation) {
+                auto params2      = params;
+                params2.batchSize = (params.batchSize + 1) / 2;
+                sampler(params2);
+            }
+
+            void clear() {
+                generation = -1;
+            }
+
+            arma::mat getSamples(OptimiserEstimate& bestParams, uint64_t numSamples) {
+                // note: bestParams.covariance is possibly mutable in this step, do not const or copy it!
+                if (bestParams.generation != generation || sampleCount + numSamples > batchSize) {
+                    samples = sampler.getSamples(bestParams, (batchSize + 1) / 2);
+                    samples = join_rows(samples, -samples);
+
+                    // XXX: rearrange samples to be better for robot rollouts!
+
+                    // reset required variables
+                    sampleCount = 0;
                 }
-
-                void clear() {
-                    generation = -1;
-                }
-
-                arma::mat getSamples(OptimiserEstimate& bestParams, uint64_t numSamples) {
-                    //note: bestParams.covariance is possibly mutable in this step, do not const or copy it!
-                    if (bestParams.generation != generation || sampleCount+numSamples > batchSize) {
-                        samples = sampler.getSamples(bestParams,(batchSize+1)/2);
-                        samples = join_rows(samples,-samples);
-
-                        //XXX: rearrange samples to be better for robot rollouts!
-
-                        //reset required variables
-                        sampleCount = 0;
-                    }
-                    sampleCount += numSamples;
-                    return samples.cols(sampleCount-numSamples,sampleCount-1);
-                }
-            };
-        }
+                sampleCount += numSamples;
+                return samples.cols(sampleCount - numSamples, sampleCount - 1);
+            }
+        };
     }
 }
+}
 
-#endif // UTILITY_MATH_OPTIMISATION_MIRROREDSAMPLER_H
+#endif  // UTILITY_MATH_OPTIMISATION_MIRROREDSAMPLER_H

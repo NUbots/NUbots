@@ -69,7 +69,7 @@ namespace support {
             send(subsumption);
         }));
 
-        handles["subsumption"].push_back(on<Trigger<RegisterAction>>().then([this] (const RegisterAction& action) {
+        handles["subsumption"].push_back(on<Trigger<RegisterAction>>().then([this](const RegisterAction& action) {
 
             Subsumption subsumption;
 
@@ -94,7 +94,7 @@ namespace support {
             send(subsumption);
         }));
 
-        handles["subsumption"].push_back(on<Trigger<ActionPriorites>>().then([this] (const ActionPriorites& action) {
+        handles["subsumption"].push_back(on<Trigger<ActionPriorites>>().then([this](const ActionPriorites& action) {
 
             Subsumption subsumption;
 
@@ -126,6 +126,5 @@ namespace support {
 
         send(subsumption);
     }
-
 }
 }

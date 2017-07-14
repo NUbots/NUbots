@@ -22,10 +22,10 @@
 #include "message/localisation/FieldObject.h"
 #include "message/localisation/Localisation.h"
 
-#include "utility/time/time.h"
 #include "utility/localisation/transform.h"
 #include "utility/nubugger/NUhelpers.h"
 #include "utility/support/eigen_armadillo.h"
+#include "utility/time/time.h"
 
 namespace module {
 namespace support {
@@ -40,25 +40,25 @@ namespace support {
 
     void NUbugger::provideLocalisation() {
         // This trigger gets the output from the sensors (unfiltered)
-        // handles["localisation"].push_back(on<Trigger<FieldObject>, Single, Priority::LOW>().then([this](const FieldObject& fo) {
+        // handles["localisation"].push_back(on<Trigger<FieldObject>, Single, Priority::LOW>().then([this](const
+        // FieldObject& fo) {
 
         //     send(fo, 0, false, NUClear::clock::now());
 
         // }));
 
-        handles["localisation"].push_back(on<Every<10,Per<std::chrono::seconds>>,
-                                          Optional<With<Self>>,
-                                          Optional<With<Ball>>,
-                                          Single,
-                                          Priority::LOW>().then(
-            [this](std::shared_ptr<const Self> self, std::shared_ptr<const Ball> ball) {
+        handles["localisation"].push_back(
+            on<Every<10, Per<std::chrono::seconds>>,
+               Optional<With<Self>>,
+               Optional<With<Ball>>,
+               Single,
+               Priority::LOW>()
+                .then([this](std::shared_ptr<const Self> self, std::shared_ptr<const Ball> ball) {
 
-            if(self) send(*self, 0, false, NUClear::clock::now());
-            if(ball) send(*ball, 0, false, NUClear::clock::now());
+                    if (self) send(*self, 0, false, NUClear::clock::now());
+                    if (ball) send(*ball, 0, false, NUClear::clock::now());
 
-        }));
-
+                }));
     }
-
 }
 }

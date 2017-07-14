@@ -31,155 +31,166 @@
 #include "utility/vision/LookUpTable.h"
 
 namespace module {
-    namespace vision {
+namespace vision {
 
-        using extension::Configuration;
+    using extension::Configuration;
 
-        using message::input::Image;
-        using message::input::Sensors;
-        using message::input::CameraParameters;
-        using message::vision::LookUpTable;
-        using message::vision::SaveLookUpTable;
-        using message::vision::ClassifiedImage;
-        using message::support::SaveConfiguration;
-        using utility::support::Expression;
+    using message::input::Image;
+    using message::input::Sensors;
+    using message::input::CameraParameters;
+    using message::vision::LookUpTable;
+    using message::vision::SaveLookUpTable;
+    using message::vision::ClassifiedImage;
+    using message::support::SaveConfiguration;
+    using utility::support::Expression;
 
-        //using ServoID = utility::input::ServoID;
-        using Colour  = utility::vision::Colour;
-        using Pixel   = utility::vision::Pixel;
+    // using ServoID = utility::input::ServoID;
+    using Colour = utility::vision::Colour;
+    using Pixel  = utility::vision::Pixel;
 
-        void LUTClassifier::insertSegments(ClassifiedImage& image, std::vector<ClassifiedImage::Segment>& segments, bool vertical) {
+    void LUTClassifier::insertSegments(ClassifiedImage& image,
+                                       std::vector<ClassifiedImage::Segment>& segments,
+                                       bool vertical) {
 
-            int32_t previous = -1;
+        int32_t previous = -1;
 
-            auto& target = vertical ? image.verticalSegments : image.horizontalSegments;
+        auto& target = vertical ? image.verticalSegments : image.horizontalSegments;
 
-            for (auto& segment : segments) {
+        for (auto& segment : segments) {
 
-                // Move in the data
-                auto current = target.insert(target.end(), std::move(segment));
+            // Move in the data
+            auto current = target.insert(target.end(), std::move(segment));
 
-                // Link up the results
-                current->previous = previous;
+            // Link up the results
+            current->previous = previous;
 
-                if (previous > -1)
-                {
-                    target[previous].next = std::distance(target.begin(), current);
-                }
-
-                // Get ready for our next one
-                previous = std::distance(target.begin(), current);
+            if (previous > -1) {
+                target[previous].next = std::distance(target.begin(), current);
             }
+
+            // Get ready for our next one
+            previous = std::distance(target.begin(), current);
         }
+    }
 
-        LUTClassifier::LUTClassifier(std::unique_ptr<NUClear::Environment> environment)
-            : Reactor(std::move(environment))
-            , quex(new QuexClassifier)
-            , greenCentroid(Eigen::Vector3f::Zero())
-            , LUT_PATH("")
-            , LUT_HOST("") {
+    LUTClassifier::LUTClassifier(std::unique_ptr<NUClear::Environment> environment)
+        : Reactor(std::move(environment))
+        , quex(new QuexClassifier)
+        , greenCentroid(Eigen::Vector3f::Zero())
+        , LUT_PATH("")
+        , LUT_HOST("") {
 
-            on<Configuration>("LookUpTable.yaml").then([this] (const Configuration& config) {
+        on<Configuration>("LookUpTable.yaml").then([this](const Configuration& config) {
 
-                LUT_PATH = config.fileName;
-                LUT_HOST = config.hostname;
+            LUT_PATH = config.fileName;
+            LUT_HOST = config.hostname;
 
-                // Load our LUT
-                auto lut = std::make_unique<LookUpTable>(config.config.as<LookUpTable>());
+            // Load our LUT
+            auto lut = std::make_unique<LookUpTable>(config.config.as<LookUpTable>());
 
-                // Calculate our green centroid for ball detection
-                Eigen::Vector3f greenCentroid(0, 0, 0);
-                uint nPoints = 0;
+            // Calculate our green centroid for ball detection
+            Eigen::Vector3f greenCentroid(0, 0, 0);
+            uint nPoints = 0;
 
-                // Loop through every voxel in the lut
-                for(uint x = 0; x < uint(1 << lut->bits_y); ++x) {
-                    for (uint y = 0; y < uint(1 << lut->bits_cb); ++y) {
-                        for (uint z = 0; z < uint(1 << lut->bits_cr); ++z) {
+            // Loop through every voxel in the lut
+            for (uint x = 0; x < uint(1 << lut->bits_y); ++x) {
+                for (uint y = 0; y < uint(1 << lut->bits_cb); ++y) {
+                    for (uint z = 0; z < uint(1 << lut->bits_cr); ++z) {
 
-                            // Get our voxel
-                            uint index = (((x << lut->bits_cr) | y) << lut->bits_cb) | z;
-                            char c = lut->table[index];
+                        // Get our voxel
+                        uint index = (((x << lut->bits_cr) | y) << lut->bits_cb) | z;
+                        char c     = lut->table[index];
 
-                            // If this is a field voxel
-                            if (c == static_cast<char>(Colour::GREEN)) {
-                                // Get our LUT pixel for this index
-                                Pixel p = utility::vision::getPixelFromIndex(*lut, index);
+                        // If this is a field voxel
+                        if (c == static_cast<char>(Colour::GREEN)) {
+                            // Get our LUT pixel for this index
+                            Pixel p = utility::vision::getPixelFromIndex(*lut, index);
 
-                                ++nPoints;
-                                greenCentroid += Eigen::Vector3f({ float(p.components.y), float(p.components.cb), float(p.components.cr) });
-                            }
+                            ++nPoints;
+                            greenCentroid += Eigen::Vector3f(
+                                {float(p.components.y), float(p.components.cb), float(p.components.cr)});
                         }
                     }
                 }
-                greenCentroid /= float(nPoints);
-                greenCentroid[0] *= 2.0;
-                this->greenCentroid = greenCentroid;
+            }
+            greenCentroid /= float(nPoints);
+            greenCentroid[0] *= 2.0;
+            this->greenCentroid = greenCentroid;
 
-                emit(std::move(lut));
-            });
+            emit(std::move(lut));
+        });
 
-            on<Trigger<SaveLookUpTable>, With<LookUpTable>>().then([this] (const LookUpTable& lut) {
-                YAML::Node node = YAML::convert<LookUpTable>::encode(lut);
+        on<Trigger<SaveLookUpTable>, With<LookUpTable>>().then([this](const LookUpTable& lut) {
+            YAML::Node node = YAML::convert<LookUpTable>::encode(lut);
 
-                log(fmt::format("config/{}/{}", LUT_HOST, LUT_PATH));
-                std::ofstream yaml(fmt::format("config/{}/{}.tmp", LUT_HOST, LUT_PATH), std::ios::trunc | std::ios::out);
-                yaml << node;
-                yaml.flush();
-                yaml.close();
-                log("done saving");
-                std::rename(fmt::format("config/{}/{}.tmp", LUT_HOST, LUT_PATH).c_str(), fmt::format("config/{}/{}", LUT_HOST, LUT_PATH).c_str());
-            });
+            log(fmt::format("config/{}/{}", LUT_HOST, LUT_PATH));
+            std::ofstream yaml(fmt::format("config/{}/{}.tmp", LUT_HOST, LUT_PATH), std::ios::trunc | std::ios::out);
+            yaml << node;
+            yaml.flush();
+            yaml.close();
+            log("done saving");
+            std::rename(fmt::format("config/{}/{}.tmp", LUT_HOST, LUT_PATH).c_str(),
+                        fmt::format("config/{}/{}", LUT_HOST, LUT_PATH).c_str());
+        });
 
-            // Trigger the same function when either update
-            on<Configuration, Trigger<CameraParameters>>("LUTClassifier.yaml").then([this] (const Configuration& config, const CameraParameters& cam) {
+        // Trigger the same function when either update
+        on<Configuration, Trigger<CameraParameters>>("LUTClassifier.yaml")
+            .then([this](const Configuration& config, const CameraParameters& cam) {
 
                 // Visual horizon detector
                 VISUAL_HORIZON_SPACING = cam.focalLengthPixels * tan(config["visual_horizon"]["spacing"].as<double>());
-                VISUAL_HORIZON_BUFFER = cam.focalLengthPixels * tan(config["visual_horizon"]["horizon_buffer"].as<double>());
-                VISUAL_HORIZON_SUBSAMPLING = std::max(1, int(cam.focalLengthPixels * tan(config["visual_horizon"]["subsampling"].as<double>())));
-                VISUAL_HORIZON_MINIMUM_SEGMENT_SIZE = cam.focalLengthPixels * tan(config["visual_horizon"]["minimum_segment_size"].as<double>());
+                VISUAL_HORIZON_BUFFER =
+                    cam.focalLengthPixels * tan(config["visual_horizon"]["horizon_buffer"].as<double>());
+                VISUAL_HORIZON_SUBSAMPLING =
+                    std::max(1, int(cam.focalLengthPixels * tan(config["visual_horizon"]["subsampling"].as<double>())));
+                VISUAL_HORIZON_MINIMUM_SEGMENT_SIZE =
+                    cam.focalLengthPixels * tan(config["visual_horizon"]["minimum_segment_size"].as<double>());
 
                 // Goal detector
                 GOAL_LINE_SPACING = cam.focalLengthPixels * tan(config["goals"]["spacing"].as<double>());
-                GOAL_SUBSAMPLING = std::max(1, int(cam.focalLengthPixels * tan(config["goals"]["subsampling"].as<double>())));
-                GOAL_RANSAC_MINIMUM_POINTS_FOR_CONSENSUS = config["goals"]["ransac"]["minimum_points_for_consensus"].as<uint>();
-                GOAL_RANSAC_MAXIMUM_ITERATIONS_PER_FITTING = config["goals"]["ransac"]["maximum_iterations_per_fitting"].as<uint>();
+                GOAL_SUBSAMPLING =
+                    std::max(1, int(cam.focalLengthPixels * tan(config["goals"]["subsampling"].as<double>())));
+                GOAL_RANSAC_MINIMUM_POINTS_FOR_CONSENSUS =
+                    config["goals"]["ransac"]["minimum_points_for_consensus"].as<uint>();
+                GOAL_RANSAC_MAXIMUM_ITERATIONS_PER_FITTING =
+                    config["goals"]["ransac"]["maximum_iterations_per_fitting"].as<uint>();
                 GOAL_RANSAC_MAXIMUM_FITTED_MODELS = config["goals"]["ransac"]["maximum_fitted_models"].as<uint>();
-                GOAL_RANSAC_CONSENSUS_ERROR_THRESHOLD = config["goals"]["ransac"]["consensus_error_threshold"].as<double>();
-                GOAL_MINIMUM_RANSAC_SEGMENT_SIZE = std::max(1, int(cam.focalLengthPixels * tan(config["goals"]["minimum_ransac_segment_size"].as<double>())));
+                GOAL_RANSAC_CONSENSUS_ERROR_THRESHOLD =
+                    config["goals"]["ransac"]["consensus_error_threshold"].as<double>();
+                GOAL_MINIMUM_RANSAC_SEGMENT_SIZE = std::max(
+                    1, int(cam.focalLengthPixels * tan(config["goals"]["minimum_ransac_segment_size"].as<double>())));
                 GOAL_MAX_HORIZON_ANGLE = std::cos(config["goals"]["max_horizon_angle"].as<Expression>());
-                GOAL_RANSAC_CONSENSUS_ERROR_THRESHOLD = config["goals"]["ransac"]["consensus_error_threshold"].as<double>();
-                GOAL_LINE_DENSITY = config["goals"]["line_density"].as<int>();
+                GOAL_RANSAC_CONSENSUS_ERROR_THRESHOLD =
+                    config["goals"]["ransac"]["consensus_error_threshold"].as<double>();
+                GOAL_LINE_DENSITY               = config["goals"]["line_density"].as<int>();
                 GOAL_HORIZONTAL_EXTENSION_SCALE = config["goals"]["horizontal_extension_scale"].as<double>();
-                GOAL_VERTICAL_EXTENSION_SCALE = config["goals"]["vertical_extension_scale"].as<double>();
-                GOAL_WIDTH_HEIGHT_RATIO = config["goals"]["width_height_ratio"].as<double>();
-                GOAL_LINE_INTERSECTIONS = config["goals"]["line_intersections"].as<uint>();
+                GOAL_VERTICAL_EXTENSION_SCALE   = config["goals"]["vertical_extension_scale"].as<double>();
+                GOAL_WIDTH_HEIGHT_RATIO         = config["goals"]["width_height_ratio"].as<double>();
+                GOAL_LINE_INTERSECTIONS         = config["goals"]["line_intersections"].as<uint>();
 
                 // Ball Detector
-                BALL_MINIMUM_INTERSECTIONS_COARSE = config["ball"]["intersections_coarse"].as<double>();
-                BALL_MINIMUM_INTERSECTIONS_FINE = config["ball"]["intersections_fine"].as<double>();
-                BALL_SEARCH_CIRCLE_SCALE = config["ball"]["search_circle_scale"].as<double>();
-                BALL_MAXIMUM_VERTICAL_CLUSTER_SPACING = std::max(1, int(cam.focalLengthPixels * tan(config["ball"]["maximum_vertical_cluster_spacing"].as<double>())));
+                BALL_MINIMUM_INTERSECTIONS_COARSE     = config["ball"]["intersections_coarse"].as<double>();
+                BALL_MINIMUM_INTERSECTIONS_FINE       = config["ball"]["intersections_fine"].as<double>();
+                BALL_SEARCH_CIRCLE_SCALE              = config["ball"]["search_circle_scale"].as<double>();
+                BALL_MAXIMUM_VERTICAL_CLUSTER_SPACING = std::max(
+                    1,
+                    int(cam.focalLengthPixels * tan(config["ball"]["maximum_vertical_cluster_spacing"].as<double>())));
                 BALL_HORIZONTAL_SUBSAMPLE_FACTOR = config["ball"]["horizontal_subsample_factor"].as<double>();
 
-                MAXIMUM_LIGHTNING_BOLT_LENGTH = config["ball"]["maximum_lighting_bolt_length"].as<int>();
+                MAXIMUM_LIGHTNING_BOLT_LENGTH   = config["ball"]["maximum_lighting_bolt_length"].as<int>();
                 MINIMUM_LIGHTNING_BOLT_STRENGTH = config["ball"]["minimum_lighting_bolt_strength"].as<double>();
 
                 // Camera settings
-                ALPHA = cam.pixelsToTanThetaFactor[1];
+                ALPHA               = cam.pixelsToTanThetaFactor[1];
                 FOCAL_LENGTH_PIXELS = cam.focalLengthPixels;
             });
 
-            on<Trigger<Image>
-            , With<LookUpTable>
-            , With<Sensors>
-            , Single
-            , Priority::LOW>().then("Classify Image", [this] (const Image& rawImage
-                      , const LookUpTable& lut
-                      , const Sensors& sensors) {
+        on<Trigger<Image>, With<LookUpTable>, With<Sensors>, Single, Priority::LOW>().then(
+            "Classify Image", [this](const Image& rawImage, const LookUpTable& lut, const Sensors& sensors) {
 
-                //TODO
-                // if(std::fabs(sensors.servo[ServoID::HEAD_PITCH].currentVelocity) + std::fabs(sensors.servo[ServoID::HEAD_YAW].currentVelocity) > threshold)
+                // TODO
+                // if(std::fabs(sensors.servo[ServoID::HEAD_PITCH].currentVelocity) +
+                // std::fabs(sensors.servo[ServoID::HEAD_YAW].currentVelocity) > threshold)
 
                 // Our classified image
                 auto classifiedImage = std::make_unique<ClassifiedImage>();
@@ -188,7 +199,9 @@ namespace module {
                 classifiedImage->dimensions = rawImage.dimensions;
 
                 // Attach our sensors
-                // std::cout << "sensor-vision latency = " << std::chrono::duration_cast<std::chrono::microseconds>(NUClear::clock::now() - sensors->timestamp).count() << std::endl;
+                // std::cout << "sensor-vision latency = " <<
+                // std::chrono::duration_cast<std::chrono::microseconds>(NUClear::clock::now() -
+                // sensors->timestamp).count() << std::endl;
                 classifiedImage->sensors = const_cast<Sensors*>(&sensors)->shared_from_this();
 
                 // Attach the image
@@ -215,7 +228,6 @@ namespace module {
                 // Emit our classified image
                 emit(std::move(classifiedImage));
             });
-
-        }
-    }  // vision
+    }
+}  // vision
 }  // modules

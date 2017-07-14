@@ -28,103 +28,103 @@
 #ifndef UTILITY_VISION_LOOKUPTABLE_H
 #define UTILITY_VISION_LOOKUPTABLE_H
 
+#include <yaml-cpp/yaml.h>
 #include <cmath>
 #include <cstring>
-#include <yaml-cpp/yaml.h>
 
 #include "message/vision/LookUpTable.h"
 
 #include "Vision.h"
 
 namespace utility {
-    namespace vision {
+namespace vision {
 
-        /*!
-         *   @brief Gets the index of the pixel in the LUT
-         *   @param p The pixel to be classified.
-         *   @return Returns the colour index for the given pixel.
-         */
-        static inline uint32_t getLUTIndex(const message::vision::LookUpTable& lut, const Pixel& p) {
-            const uint8_t BITS_Y_REMOVED  = sizeof(uint8_t) * 8 - lut.bits_y;
-            const uint8_t BITS_CB_REMOVED = sizeof(uint8_t) * 8 - lut.bits_cb;
-            const uint8_t BITS_CR_REMOVED = sizeof(uint8_t) * 8 - lut.bits_cr;
-            const uint8_t BITS_CB_CR      = lut.bits_cb + lut.bits_cr;
+    /*!
+     *   @brief Gets the index of the pixel in the LUT
+     *   @param p The pixel to be classified.
+     *   @return Returns the colour index for the given pixel.
+     */
+    static inline uint32_t getLUTIndex(const message::vision::LookUpTable& lut, const Pixel& p) {
+        const uint8_t BITS_Y_REMOVED  = sizeof(uint8_t) * 8 - lut.bits_y;
+        const uint8_t BITS_CB_REMOVED = sizeof(uint8_t) * 8 - lut.bits_cb;
+        const uint8_t BITS_CR_REMOVED = sizeof(uint8_t) * 8 - lut.bits_cr;
+        const uint8_t BITS_CB_CR      = lut.bits_cb + lut.bits_cr;
 
-            uint32_t index = 0;
+        uint32_t index = 0;
 
-            index += ((p.components.y  >> BITS_Y_REMOVED)  << BITS_CB_CR);
-            index += ((p.components.cb >> BITS_CB_REMOVED) << lut.bits_cr);
-            index += ( p.components.cr >> BITS_CR_REMOVED);
+        index += ((p.components.y >> BITS_Y_REMOVED) << BITS_CB_CR);
+        index += ((p.components.cb >> BITS_CB_REMOVED) << lut.bits_cr);
+        index += (p.components.cr >> BITS_CR_REMOVED);
 
-            return index;
-        }
+        return index;
+    }
 
-        /*!
-            @brief Classifies a pixel
-            @param p the pixel
-            @return Returns the colour classification of this pixel
-         */
-        static inline Colour getPixelColour(const message::vision::LookUpTable& lut, const Pixel& p) {
-            return lut.table[getLUTIndex(lut, p)];
-        }
+    /*!
+        @brief Classifies a pixel
+        @param p the pixel
+        @return Returns the colour classification of this pixel
+     */
+    static inline Colour getPixelColour(const message::vision::LookUpTable& lut, const Pixel& p) {
+        return lut.table[getLUTIndex(lut, p)];
+    }
 
-        /*!
-         *   @brief The inverse of getLUTIndex
-         *   NOTE: This inverse is NOT injective (e.g. not 1-to-1)
-         */
-        static inline Pixel getPixelFromIndex(const message::vision::LookUpTable& lut, const uint& index) {
-            const uint8_t BITS_Y_REMOVED  = sizeof(uint8_t) * 8 - lut.bits_y;
-            const uint8_t BITS_CB_REMOVED = sizeof(uint8_t) * 8 - lut.bits_cb;
-            const uint8_t BITS_CR_REMOVED = sizeof(uint8_t) * 8 - lut.bits_cr;
-            const uint8_t BITS_CB_CR      = lut.bits_cb + lut.bits_cr;
-            const uint8_t BITS_CB_MASK    = (1 << lut.bits_cb) - 1; //std::pow(2, lut.bits_cb) - 1;
-            const uint8_t BITS_CR_MASK    = (1 << lut.bits_cr) - 1; //std::pow(2, lut.bits_cr) - 1;
+    /*!
+     *   @brief The inverse of getLUTIndex
+     *   NOTE: This inverse is NOT injective (e.g. not 1-to-1)
+     */
+    static inline Pixel getPixelFromIndex(const message::vision::LookUpTable& lut, const uint& index) {
+        const uint8_t BITS_Y_REMOVED  = sizeof(uint8_t) * 8 - lut.bits_y;
+        const uint8_t BITS_CB_REMOVED = sizeof(uint8_t) * 8 - lut.bits_cb;
+        const uint8_t BITS_CR_REMOVED = sizeof(uint8_t) * 8 - lut.bits_cr;
+        const uint8_t BITS_CB_CR      = lut.bits_cb + lut.bits_cr;
+        const uint8_t BITS_CB_MASK = (1 << lut.bits_cb) - 1;  // std::pow(2, lut.bits_cb) - 1;
+        const uint8_t BITS_CR_MASK = (1 << lut.bits_cr) - 1;  // std::pow(2, lut.bits_cr) - 1;
 
-            uint8_t y  = ( index >> BITS_CB_CR)   << BITS_Y_REMOVED;
-            uint8_t cb = ((index >> lut.bits_cr)  &  BITS_CB_MASK) << BITS_CB_REMOVED;
-            uint8_t cr = ( index &  BITS_CR_MASK) << BITS_CR_REMOVED;
+        uint8_t y  = (index >> BITS_CB_CR) << BITS_Y_REMOVED;
+        uint8_t cb = ((index >> lut.bits_cr) & BITS_CB_MASK) << BITS_CB_REMOVED;
+        uint8_t cr = (index & BITS_CR_MASK) << BITS_CR_REMOVED;
 
-            return Pixel(static_cast<uint32_t>((y << 16) | (cb << 8) | cr));
-        }
+        return Pixel(static_cast<uint32_t>((y << 16) | (cb << 8) | cr));
+    }
 
-    } //vision
-} // utility
+}  // vision
+}  // utility
 
 // YAML conversions
 namespace YAML {
 
-    template<>
-    struct convert<message::vision::LookUpTable> {
-        static Node encode(const message::vision::LookUpTable& rhs) {
-            Node node;
+template <>
+struct convert<message::vision::LookUpTable> {
+    static Node encode(const message::vision::LookUpTable& rhs) {
+        Node node;
 
-            node["bits"]["y"] = uint(rhs.bits_y);
-            node["bits"]["cb"] = uint(rhs.bits_cb);
-            node["bits"]["cr"] = uint(rhs.bits_cr);
+        node["bits"]["y"]  = uint(rhs.bits_y);
+        node["bits"]["cb"] = uint(rhs.bits_cb);
+        node["bits"]["cr"] = uint(rhs.bits_cr);
 
-            node["lut"] = std::string(rhs.table.begin(), rhs.table.end());
+        node["lut"] = std::string(rhs.table.begin(), rhs.table.end());
 
-            return node;
+        return node;
+    }
+
+    static bool decode(const Node& node, message::vision::LookUpTable& rhs) {
+        uint8_t bitsY  = node["bits"]["y"].as<uint>();
+        uint8_t bitsCb = node["bits"]["cb"].as<uint>();
+        uint8_t bitsCr = node["bits"]["cr"].as<uint>();
+
+        std::string dataString = node["lut"].as<std::string>();
+        std::vector<uint8_t> data;
+        data.reserve(dataString.size());
+
+        for (auto& s : dataString) {
+            data.push_back(static_cast<uint8_t>(s));
         }
 
-        static bool decode(const Node& node, message::vision::LookUpTable& rhs) {
-            uint8_t bitsY  = node["bits"]["y"].as<uint>();
-            uint8_t bitsCb = node["bits"]["cb"].as<uint>();
-            uint8_t bitsCr = node["bits"]["cr"].as<uint>();
+        rhs = message::vision::LookUpTable(std::move(data), bitsY, bitsCb, bitsCr);
 
-            std::string dataString = node["lut"].as<std::string>();
-            std::vector<uint8_t> data;
-            data.reserve(dataString.size());
-
-            for (auto& s : dataString) {
-                data.push_back(static_cast<uint8_t>(s));
-            }
-
-            rhs = message::vision::LookUpTable(std::move(data), bitsY, bitsCb, bitsCr);
-
-            return true;
-        }
-    };
+        return true;
+    }
+};
 }
 
-#endif // UTILITY_VISION_LOOKUPTABLE_H
+#endif  // UTILITY_VISION_LOOKUPTABLE_H

@@ -24,23 +24,23 @@
 #include "message/platform/darwin/DarwinSensors.h"
 
 namespace module {
-    namespace research {
+namespace research {
 
-        /**
-         * TODO document
-         *
-         * @author Trent Houliston
-         */
-        class ScriptOptimizer : public NUClear::Reactor {
-        private:
-            volatile bool recording;
-            volatile int iteration;
-            std::string metadata;
-            std::vector<std::shared_ptr<const message::platform::darwin::DarwinSensors>> sensors;
-        public:
-            explicit ScriptOptimizer(std::unique_ptr<NUClear::Environment> environment);
-        };
-    }
+    /**
+     * TODO document
+     *
+     * @author Trent Houliston
+     */
+    class ScriptOptimizer : public NUClear::Reactor {
+    private:
+        volatile bool recording;
+        volatile int iteration;
+        std::string metadata;
+        std::vector<std::shared_ptr<const message::platform::darwin::DarwinSensors>> sensors;
+
+    public:
+        explicit ScriptOptimizer(std::unique_ptr<NUClear::Environment> environment);
+    };
+}
 }
 #endif
-

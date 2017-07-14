@@ -20,8 +20,8 @@
 #ifndef MODULE_MOTION_BALANCEKINEMATICRESPONSE_H
 #define MODULE_MOTION_BALANCEKINEMATICRESPONSE_H
 
-#include <nuclear>
 #include <armadillo>
+#include <nuclear>
 
 #include <yaml-cpp/yaml.h>
 
@@ -31,16 +31,16 @@
 #include "message/behaviour/FixedWalkCommand.h"
 #include "message/behaviour/ServoCommand.h"
 
-#include "message/input/Sensors.h"
 #include "message/input/PostureRecognition.h"
+#include "message/input/Sensors.h"
 
-#include "message/motion/KinematicsModels.h"
-#include "message/motion/WalkCommand.h"
-#include "message/motion/FootMotionCommand.h"
-#include "message/motion/TorsoMotionCommand.h"
 #include "message/motion/BalanceCommand.h"
+#include "message/motion/FootMotionCommand.h"
 #include "message/motion/HeadCommand.h"
+#include "message/motion/KinematicsModels.h"
 #include "message/motion/ServoTarget.h"
+#include "message/motion/TorsoMotionCommand.h"
+#include "message/motion/WalkCommand.h"
 
 #include "message/localisation/FieldObject.h"
 
@@ -50,28 +50,25 @@
 #include "utility/input/ServoID.h"
 
 #include "utility/math/angle.h"
-#include "utility/math/matrix/Rotation3D.h"
 #include "utility/math/geometry/UnitQuaternion.h"
+#include "utility/math/matrix/Rotation3D.h"
 #include "utility/math/matrix/Transform2D.h"
 #include "utility/math/matrix/Transform3D.h"
 
 #include "utility/motion/Balance.h"
-#include "utility/motion/InverseKinematics.h"
 #include "utility/motion/ForwardKinematics.h"
+#include "utility/motion/InverseKinematics.h"
 
 #include "utility/nubugger/NUhelpers.h"
 
 #include "utility/support/yaml_armadillo.h"
 #include "utility/support/yaml_expression.h"
 
-namespace module
-{
-namespace motion
-{
-    class BalanceKinematicResponse : public NUClear::Reactor
-    {
+namespace module {
+namespace motion {
+    class BalanceKinematicResponse : public NUClear::Reactor {
     public:
-    	/**
+        /**
          * The number of servo updates performnced per second
          * TODO: Probably be a global config somewhere, waiting on NUClear to support runtime on<Every> arguments
          */
@@ -79,12 +76,16 @@ namespace motion
 
         static constexpr const char* CONFIGURATION_PATH = "BalanceKinematicResponse.yaml";
         static constexpr const char* CONFIGURATION_MSSG = "Balance Response Planner - Configure";
-        static constexpr const char* ONTRIGGER_FTMN_INF = "Balance Response Planner - Received Update (Active Foot Position) Info";
-        static constexpr const char* ONTRIGGER_TRSM_INF = "Balance Response Planner - Received Update (Active Torso Position) Info";
-        static constexpr const char* ONTRIGGER_HEAD_INF = "Balance Response Planner - Received Update (Active Head Position) Info";
+        static constexpr const char* ONTRIGGER_FTMN_INF =
+            "Balance Response Planner - Received Update (Active Foot Position) Info";
+        static constexpr const char* ONTRIGGER_TRSM_INF =
+            "Balance Response Planner - Received Update (Active Torso Position) Info";
+        static constexpr const char* ONTRIGGER_HEAD_INF =
+            "Balance Response Planner - Received Update (Active Head Position) Info";
         static constexpr const char* ONTRIGGER_BLNC_CMD = "Balance Response Planner - Update Robot Posture";
 
         explicit BalanceKinematicResponse(std::unique_ptr<NUClear::Environment> environment);
+
     private:
         using ServoCommand   = message::behaviour::ServoCommand;
         using Sensors        = message::input::Sensors;
@@ -97,45 +98,44 @@ namespace motion
         /**
          * Temporary debugging variables for local output logging...
          */
-        bool DEBUG;                         //
-        int  DEBUG_ITER;                    //
-        int  initialStep;                   // TODO: How to many 'steps' to take before lifting a foot when starting to walk
+        bool DEBUG;       //
+        int DEBUG_ITER;   //
+        int initialStep;  // TODO: How to many 'steps' to take before lifting a foot when starting to walk
 
         /**
          * NUsight feedback initialized from configuration script, see config file for documentation...
          */
-        bool balanceEnabled;                    //
-        bool hipRollCompensationEnabled;        //
-        bool ankleTorqueCompensationEnabled;    //
-        bool armRollCompensationEnabled;        //
-        bool toeTipCompensationEnabled;         //
-        bool supportCompensationEnabled;        //
-        bool balanceOptimiserEnabled;           //
-        bool pushRecoveryEnabled;               //
-        bool emitLocalisation;                  //
-        bool emitFootPosition;                  //
-        bool armMotionEnabled;                  // Determines if the upper body can move the arms throughout motion.
+        bool balanceEnabled;                  //
+        bool hipRollCompensationEnabled;      //
+        bool ankleTorqueCompensationEnabled;  //
+        bool armRollCompensationEnabled;      //
+        bool toeTipCompensationEnabled;       //
+        bool supportCompensationEnabled;      //
+        bool balanceOptimiserEnabled;         //
+        bool pushRecoveryEnabled;             //
+        bool emitLocalisation;                //
+        bool emitFootPosition;                //
+        bool armMotionEnabled;                // Determines if the upper body can move the arms throughout motion.
 
         /**
          * Resource abstractions for id and handler instances...
          */
-        ReactionHandle updateHandle;                    // handle(updateWaypoints), disabling when not moving will save unnecessary CPU resources
-        ReactionHandle updateOptimiser;                 // handle(updateOptimiser), disabling when not required will save unnecessary CPU resources
-        ReactionHandle generateStandScriptReaction;     // handle(generateStandAndSaveScript), disabling when not required for capturing standing phase
+        ReactionHandle
+            updateHandle;  // handle(updateWaypoints), disabling when not moving will save unnecessary CPU resources
+        ReactionHandle updateOptimiser;  // handle(updateOptimiser), disabling when not required will save unnecessary
+                                         // CPU resources
+        ReactionHandle generateStandScriptReaction;  // handle(generateStandAndSaveScript), disabling when not required
+                                                     // for capturing standing phase
 
         /**
          * Anthropomorphic metrics for relevant humanoid joints & actuators...
          */
-        struct TorsoPositions                           // Active torso relative positions struct
+        struct TorsoPositions  // Active torso relative positions struct
         {
-            TorsoPositions()
-            : FrameArms()
-            , FrameLegs()
-            , Frame3D()
-            {
+            TorsoPositions() : FrameArms(), FrameLegs(), Frame3D() {
                 FrameArms = Transform2D();
                 FrameLegs = Transform2D();
-                Frame3D = Transform3D();
+                Frame3D   = Transform3D();
             }
             ~TorsoPositions() {}
 
@@ -143,79 +143,79 @@ namespace motion
             Transform2D FrameLegs;
             Transform3D Frame3D;
         };
-        TorsoPositions torsoPositionsTransform;         // Active torso position
-        Transform2D leftFootPosition2D;                 // Transform2D state of left foot position
-        Transform2D rightFootPosition2D;                // Transform2D state of right foot position
-        Transform3D leftFootPositionTransform;          // Active left foot position
-        Transform3D rightFootPositionTransform;         // Active right foot position
-        Transform2D uSupportMass;                       // Appears to be support foot pre-step position
-        LimbID activeForwardLimb;                       // The leg that is 'swinging' in the step, opposite of the support foot
-        LimbID activeLimbInitial;                       // TODO: Former initial non-support leg for deterministic walking approach
+        TorsoPositions torsoPositionsTransform;  // Active torso position
+        Transform2D leftFootPosition2D;          // Transform2D state of left foot position
+        Transform2D rightFootPosition2D;         // Transform2D state of right foot position
+        Transform3D leftFootPositionTransform;   // Active left foot position
+        Transform3D rightFootPositionTransform;  // Active right foot position
+        Transform2D uSupportMass;                // Appears to be support foot pre-step position
+        LimbID activeForwardLimb;                // The leg that is 'swinging' in the step, opposite of the support foot
+        LimbID activeLimbInitial;  // TODO: Former initial non-support leg for deterministic walking approach
 
         /**
          * Anthropomorphic metrics initialized from configuration script, see config file for documentation...
          */
-        double bodyTilt;                                //
-        double bodyHeight;                              //
-        double supportFront;                            //
-        double supportFront2;                           //
-        double supportBack;                             //
-        double supportSideX;                            //
-        double supportSideY;                            //
-        double supportTurn;                             //
-        double stanceLimitY2;                           //
-        double stepTime;                                //
-        double stepHeight;                              //
-        float  step_height_slow_fraction;               //
-        float  step_height_fast_fraction;               //
-        arma::mat::fixed<3,2> stepLimits;               //
-        arma::vec2 footOffsetCoefficient;               //
-        Transform2D uLRFootOffset;                      // standard offset
+        double bodyTilt;                    //
+        double bodyHeight;                  //
+        double supportFront;                //
+        double supportFront2;               //
+        double supportBack;                 //
+        double supportSideX;                //
+        double supportSideY;                //
+        double supportTurn;                 //
+        double stanceLimitY2;               //
+        double stepTime;                    //
+        double stepHeight;                  //
+        float step_height_slow_fraction;    //
+        float step_height_fast_fraction;    //
+        arma::mat::fixed<3, 2> stepLimits;  //
+        arma::vec2 footOffsetCoefficient;   //
+        Transform2D uLRFootOffset;          // standard offset
 
         /**
          * Arm Position vectors initialized from configuration script, see config file for documentation...
          */
-        arma::vec3 armLPostureTransform;                //
-        arma::vec3 armLPostureSource;                   //
-        arma::vec3 armLPostureDestination;              //
-        arma::vec3 armRPostureTransform;                //
-        arma::vec3 armRPostureSource;                   //
-        arma::vec3 armRPostureDestination;              //
+        arma::vec3 armLPostureTransform;    //
+        arma::vec3 armLPostureSource;       //
+        arma::vec3 armLPostureDestination;  //
+        arma::vec3 armRPostureTransform;    //
+        arma::vec3 armRPostureSource;       //
+        arma::vec3 armRPostureDestination;  //
 
         /**
          * Ankle Position vectors initialized from configuration script, see config file for documentation...
          */
-        arma::vec4 ankleImuParamX;                      //
-        arma::vec4 ankleImuParamY;                      //
-        arma::vec4 kneeImuParamX;                       //
-        arma::vec4 hipImuParamY;                        //
-        arma::vec4 armImuParamX;                        //
-        arma::vec4 armImuParamY;                        //
+        arma::vec4 ankleImuParamX;  //
+        arma::vec4 ankleImuParamY;  //
+        arma::vec4 kneeImuParamX;   //
+        arma::vec4 hipImuParamY;    //
+        arma::vec4 armImuParamX;    //
+        arma::vec4 armImuParamY;    //
 
         /**
          * Internal timing reference variables...
          */
-        double beginStepTime;                                   // The time when the current step begun
-        double footMotionPhase;                                 // Phase representation of foot motion state
-        double STAND_SCRIPT_DURATION;                           //
-        NUClear::clock::time_point lastVeloctiyUpdateTime;      //
+        double beginStepTime;                               // The time when the current step begun
+        double footMotionPhase;                             // Phase representation of foot motion state
+        double STAND_SCRIPT_DURATION;                       //
+        NUClear::clock::time_point lastVeloctiyUpdateTime;  //
 
         /**
          * Motion data for relevant humanoid actuators...
          */
-        double velocityHigh;                            //
-        double accelerationTurningFactor;               //
-        arma::mat::fixed<3,2> velocityLimits;           //
-        arma::vec3 accelerationLimits;                  //
-        arma::vec3 accelerationLimitsHigh;              //
-        Transform2D velocityCurrent;                    // Current robot velocity
-        Transform2D velocityCommand;                    // Current velocity command
+        double velocityHigh;                    //
+        double accelerationTurningFactor;       //
+        arma::mat::fixed<3, 2> velocityLimits;  //
+        arma::vec3 accelerationLimits;          //
+        arma::vec3 accelerationLimitsHigh;      //
+        Transform2D velocityCurrent;            // Current robot velocity
+        Transform2D velocityCommand;            // Current velocity command
 
         /**
          * Motion data initialized from configuration script, see config file for documentation...
          */
-        double velFastForward;                          //
-        double velFastTurn;                             //
+        double velFastForward;  //
+        double velFastTurn;     //
 
         /**
          * Dynamic analysis parameters for relevant motion planning...
@@ -224,52 +224,52 @@ namespace motion
         /**
          * Dynamic analysis parameters initialized from configuration script, see config file for documentation...
          */
-        double phase1Single;                            //
-        double phase2Single;                            //
+        double phase1Single;  //
+        double phase2Single;  //
 
         /**
          * Balance & Post-alignment parameters used for humanoid stability techniques...
          */
 
-        double rollParameter;                //
-        double pitchParameter;               //
-        double yawParameter;                 //
-        double toeTipParameter;              //
-        double hipRollParameter;             //
-        double armRollParameter;             //
-        double hipCompensationScale;         //
-        double toeCompensationScale;         //
-        double ankleCompensationScale;       //
-        double armCompensationScale;         //
-        double supportCompensationScale;     //
-        double hipCompensationMax;         //
-        double toeCompensationMax;         //
-        double ankleCompensationMax;       //
-        double armCompensationMax;         //
-        double supportCompensationMax;     //
+        double rollParameter;             //
+        double pitchParameter;            //
+        double yawParameter;              //
+        double toeTipParameter;           //
+        double hipRollParameter;          //
+        double armRollParameter;          //
+        double hipCompensationScale;      //
+        double toeCompensationScale;      //
+        double ankleCompensationScale;    //
+        double armCompensationScale;      //
+        double supportCompensationScale;  //
+        double hipCompensationMax;        //
+        double toeCompensationMax;        //
+        double ankleCompensationMax;      //
+        double armCompensationMax;        //
+        double supportCompensationMax;    //
 
 
         /**
          * Balance & Kinematics module initialization...
          */
-        utility::motion::Balancer balancer;                             //
-        message::motion::KinematicsModel kinematicsModel;   //
+        utility::motion::Balancer balancer;                //
+        message::motion::KinematicsModel kinematicsModel;  //
 
         /**
          * Balance parameters initialized from configuration script, see config file for documentation...
          */
-        double balanceAmplitude;                //
-        double balanceWeight;                   //
-        double balanceOffset;                   //
-        double balancePGain;                    //
-        double balanceIGain;                    //
-        double balanceDGain;                    //
+        double balanceAmplitude;  //
+        double balanceWeight;     //
+        double balanceOffset;     //
+        double balancePGain;      //
+        double balanceIGain;      //
+        double balanceDGain;      //
 
         /**
          * The last foot goal rotation...
          */
-        UnitQuaternion lastFootGoalRotation;            //
-        UnitQuaternion footGoalErrorSum;                //
+        UnitQuaternion lastFootGoalRotation;  //
+        UnitQuaternion footGoalErrorSum;      //
 
         /**
          * @brief [brief description]
@@ -278,12 +278,12 @@ namespace motion
          * @param config [description]
          */
         void configure(const YAML::Node& config);
-                /**
-         * @brief [brief description]
-         * @details [long description]
-         *
-         * @param inTorsoPosition [description]
-         */
+        /**
+ * @brief [brief description]
+ * @details [long description]
+ *
+ * @param inTorsoPosition [description]
+ */
         void localise(Transform2D position);
         /**
          * @brief [brief description]
@@ -382,10 +382,10 @@ namespace motion
          * @param inValue [description]
          */
         void setFootOffsetCoefficient(int index, double inValue);
-         /**
-         * @brief [brief description]
-         * @details [long description]
-         */
+        /**
+        * @brief [brief description]
+        * @details [long description]
+        */
         double getTime();
         /**
          * This is an easing function that returns 3 values {x,y,z} with the range [0,1]
@@ -395,8 +395,10 @@ namespace motion
          * See: http://easings.net/ to reference common easing functions
          *
          * @param phase The input to the easing function, with a range of [0,1].
-         * @param phase1Single The phase time between [0,1] to start the step. A value of 0.1 means the step will not start until phase is >= 0.1
-         * @param phase2Single The phase time between [0,1] to end the step. A value of 0.9 means the step will end when phase >= 0.9
+         * @param phase1Single The phase time between [0,1] to start the step. A value of 0.1 means the step will not
+         * start until phase is >= 0.1
+         * @param phase2Single The phase time between [0,1] to end the step. A value of 0.9 means the step will end when
+         * phase >= 0.9
          */
         arma::vec3 getFootPhase(double phase, double phase1Single, double phase2Single);
         /**

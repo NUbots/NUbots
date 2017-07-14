@@ -23,19 +23,19 @@
 
 #include "extension/Configuration.h"
 
-#include "message/vision/VisionObjects.h"
-#include "message/localisation/FieldObject.h"
-#include "message/input/Sensors.h"
 #include "message/input/CameraParameters.h"
-#include "message/motion/WalkCommand.h"
 #include "message/input/GameEvents.h"
 #include "message/input/GameState.h"
+#include "message/input/Sensors.h"
+#include "message/localisation/FieldObject.h"
+#include "message/motion/WalkCommand.h"
+#include "message/vision/VisionObjects.h"
 
+#include "utility/localisation/transform.h"
 #include "utility/math/angle.h"
 #include "utility/math/coordinates.h"
-#include "utility/nubugger/NUhelpers.h"
-#include "utility/localisation/transform.h"
 #include "utility/motion/ForwardKinematics.h"
+#include "utility/nubugger/NUhelpers.h"
 #include "utility/support/yaml_armadillo.h"
 
 
@@ -76,7 +76,7 @@ namespace support {
     using utility::support::Expression;
 
     double triangle_wave(double t, double period) {
-        auto a = period; // / 2.0;
+        auto a = period;  // / 2.0;
         auto k = t / a;
         return 2.0 * std::abs(2.0 * (k - std::floor(k + 0.5))) - 1.0;
     }
@@ -90,10 +90,10 @@ namespace support {
         return std::sin((2.0 * M_PI * t) / period);
     }
     double SoccerSimulator::absolute_time() {
-        auto now = NUClear::clock::now();
+        auto now          = NUClear::clock::now();
         auto msSinceStart = std::chrono::duration_cast<std::chrono::microseconds>(now - moduleStartupTime).count();
-        double ms = static_cast<double>(msSinceStart);
-        double t = ms * 1e-6;
+        double ms         = static_cast<double>(msSinceStart);
+        double t          = ms * 1e-6;
         return t;
     }
 
@@ -101,28 +101,26 @@ namespace support {
 
         moduleStartupTime = NUClear::clock::now();
 
-        cfg_.simulate_goal_observations = config["vision"]["goal_observations"].as<bool>();
-        cfg_.simulate_ball_observations = config["vision"]["ball_observations"].as<bool>();
+        cfg_.simulate_goal_observations         = config["vision"]["goal_observations"].as<bool>();
+        cfg_.simulate_ball_observations         = config["vision"]["ball_observations"].as<bool>();
         cfg_.distinguish_own_and_opponent_goals = config["vision"]["distinguish_own_and_opponent_goals"].as<bool>();
-        cfg_.distinguish_left_and_right_goals = config["vision"]["distinguish_own_and_opponent_goals"].as<bool>();
+        cfg_.distinguish_left_and_right_goals   = config["vision"]["distinguish_own_and_opponent_goals"].as<bool>();
 
         cfg_.robot.motion_type = motionTypeFromString(config["robot"]["motion_type"].as<std::string>());
         cfg_.robot.path.period = config["robot"]["path"]["period"].as<Expression>();
-        cfg_.robot.path.x_amp = config["robot"]["path"]["x_amp"].as<Expression>();
-        cfg_.robot.path.y_amp = config["robot"]["path"]["y_amp"].as<Expression>();
-        cfg_.robot.path.type = pathTypeFromString(config["robot"]["path"]["type"].as<std::string>());
+        cfg_.robot.path.x_amp  = config["robot"]["path"]["x_amp"].as<Expression>();
+        cfg_.robot.path.y_amp  = config["robot"]["path"]["y_amp"].as<Expression>();
+        cfg_.robot.path.type   = pathTypeFromString(config["robot"]["path"]["type"].as<std::string>());
 
         cfg_.ball.motion_type = motionTypeFromString(config["ball"]["motion_type"].as<std::string>());
         cfg_.ball.path.period = config["ball"]["path"]["period"].as<Expression>();
-        cfg_.ball.path.x_amp = config["ball"]["path"]["x_amp"].as<Expression>();
-        cfg_.ball.path.y_amp = config["ball"]["path"]["y_amp"].as<Expression>();
-        cfg_.ball.path.type = pathTypeFromString(config["ball"]["path"]["type"].as<std::string>());
+        cfg_.ball.path.x_amp  = config["ball"]["path"]["x_amp"].as<Expression>();
+        cfg_.ball.path.y_amp  = config["ball"]["path"]["y_amp"].as<Expression>();
+        cfg_.ball.path.type   = pathTypeFromString(config["ball"]["path"]["type"].as<std::string>());
 
         world.robotPose = config["initial"]["robot_pose"].as<arma::vec3>();
-        world.ball = VirtualBall(
-            config["initial"]["ball"]["position"].as<arma::vec2>(),
-            config["initial"]["ball"]["diameter"].as<Expression>()
-        );
+        world.ball      = VirtualBall(config["initial"]["ball"]["position"].as<arma::vec2>(),
+                                 config["initial"]["ball"]["diameter"].as<Expression>());
 
         cfg_.blind_robot = config["blind_robot"].as<bool>();
 
@@ -133,7 +131,7 @@ namespace support {
 
         lastNow = NUClear::clock::now();
 
-        kicking = false;
+        kicking   = false;
         PLAYER_ID = globalConfig.playerId;
 
         cfg_.auto_start_behaviour = config["auto_start_behaviour"].as<bool>();
@@ -153,213 +151,215 @@ namespace support {
         , lastNow() {
 
 
-        on<Trigger<FieldDescription>>().then("FieldDescription Update", [this] (const FieldDescription& desc) {
+        on<Trigger<FieldDescription>>().then("FieldDescription Update", [this](const FieldDescription& desc) {
             auto fdptr = std::make_shared<const FieldDescription>(desc);
             loadFieldDescription(fdptr);
         });
 
         on<Configuration, Trigger<GlobalConfig>>("SoccerSimulator.yaml")
-        .then("Soccer Simulator Configuration", [this] (const Configuration& config, const GlobalConfig& globalConfig) {
-            updateConfiguration(config, globalConfig);
-        });
+            .then("Soccer Simulator Configuration",
+                  [this](const Configuration& config, const GlobalConfig& globalConfig) {
+                      updateConfiguration(config, globalConfig);
+                  });
 
-        on<Trigger<KickPlannerConfig>>().then("Get Kick Planner Config", [this](const KickPlannerConfig& cfg){
-            kick_cfg = cfg;
-        });
+        on<Trigger<KickPlannerConfig>>().then("Get Kick Planner Config",
+                                              [this](const KickPlannerConfig& cfg) { kick_cfg = cfg; });
 
-        on<Trigger<KickCommand>>().then("Simulator Queue KickCommand",[this](const KickCommand& k){
+        on<Trigger<KickCommand>>().then("Simulator Queue KickCommand", [this](const KickCommand& k) {
             kickQueue.push(k);
             kicking = true;
         });
 
-        on<Trigger<KickScriptCommand>>().then("Simulator Queue KickCommand",[this](const KickScriptCommand& k){
-            kickQueue.push(KickCommand({1,0,0},k.direction));
+        on<Trigger<KickScriptCommand>>().then("Simulator Queue KickCommand", [this](const KickScriptCommand& k) {
+            kickQueue.push(KickCommand({1, 0, 0}, k.direction));
             kicking = true;
         });
 
-        on<Trigger<KickFinished>>().then("Simulator Kick Finished",[this] {
-            kicking = false;
-        });
+        on<Trigger<KickFinished>>().then("Simulator Kick Finished", [this] { kicking = false; });
 
-        on<Trigger<WalkCommand>>().then("Sim walk start",[this]{
-            walking = true;
-        });
+        on<Trigger<WalkCommand>>().then("Sim walk start", [this] { walking = true; });
 
-        on<Trigger<StopCommand>>().then("Sim walk start",[this]{
-            walking = false;
-        });
+        on<Trigger<StopCommand>>().then("Sim walk start", [this] { walking = false; });
 
-        on<Every<SIMULATION_UPDATE_FREQUENCY, Per<std::chrono::seconds>>,
-            With<Sensors>,
-            Optional<With<WalkCommand>>
-        >().then("Robot motion simulation", [this](const Sensors& /*sensors*/,
-                                 std::shared_ptr<const WalkCommand> walkCommand) {
-            NUClear::clock::time_point now = NUClear::clock::now();
-            double deltaT = 1e-6 * std::chrono::duration_cast<std::chrono::microseconds>(now - lastNow).count();
-            Transform2D diff;
+        on<Every<SIMULATION_UPDATE_FREQUENCY, Per<std::chrono::seconds>>, With<Sensors>, Optional<With<WalkCommand>>>()
+            .then("Robot motion simulation",
+                  [this](const Sensors& /*sensors*/, std::shared_ptr<const WalkCommand> walkCommand) {
+                      NUClear::clock::time_point now = NUClear::clock::now();
+                      double deltaT =
+                          1e-6 * std::chrono::duration_cast<std::chrono::microseconds>(now - lastNow).count();
+                      Transform2D diff;
 
-            switch (cfg_.robot.motion_type){
-                case MotionType::NONE:
-                    world.robotVelocity = Transform2D({ 0, 0 ,0 });
-                    break;
+                      switch (cfg_.robot.motion_type) {
+                          case MotionType::NONE: world.robotVelocity = Transform2D({0, 0, 0}); break;
 
-                case MotionType::PATH:
+                          case MotionType::PATH:
 
-                    world.robotPose.xy() = getPath(cfg_.robot.path);
+                              world.robotPose.xy() = getPath(cfg_.robot.path);
 
-                    diff = world.robotPose - oldRobotPose;
-                    //Face along direction of movement
-                    world.robotPose.angle() = vectorToBearing(diff.xy());
+                              diff = world.robotPose - oldRobotPose;
+                              // Face along direction of movement
+                              world.robotPose.angle() = vectorToBearing(diff.xy());
 
-                    world.robotVelocity = Transform2D({arma::norm(diff) / deltaT, 0, 0}); //Robot coordinates
-                    break;
+                              world.robotVelocity = Transform2D({arma::norm(diff) / deltaT, 0, 0});  // Robot
+                                                                                                     // coordinates
+                              break;
 
-                case MotionType::MOTION:
+                          case MotionType::MOTION:
 
-                //Update based on walk engine
-                    if(walking && walkCommand && !kicking) {
-                        world.robotVelocity.xy() = Transform2D(convert<double, 3>(walkCommand->command)).xy() * 0.15;
-                        // world.robotVelocity.xy() = sensors.odometry;
-                        //angle from command:
-                        world.robotVelocity.angle() = Transform2D(convert<double, 3>(walkCommand->command)).angle() * 1.0;
-                    } else {
-                        world.robotVelocity = utility::math::matrix::Transform2D({0,0,0});
-                    }
-                    world.robotVelocity.xy() = world.robotPose.rotation() * world.robotVelocity.xy();
-                    world.robotPose += world.robotVelocity * deltaT;
-                    break;
-            }
-            // Update ball position
-            switch (cfg_.ball.motion_type) {
-                case MotionType::NONE:
-                    world.ball.velocity = { 0, 0 , 0};
-                    break;
+                              // Update based on walk engine
+                              if (walking && walkCommand && !kicking) {
+                                  world.robotVelocity.xy() =
+                                      Transform2D(convert<double, 3>(walkCommand->command)).xy() * 0.15;
+                                  // world.robotVelocity.xy() = sensors.odometry;
+                                  // angle from command:
+                                  world.robotVelocity.angle() =
+                                      Transform2D(convert<double, 3>(walkCommand->command)).angle() * 1.0;
+                              }
+                              else {
+                                  world.robotVelocity = utility::math::matrix::Transform2D({0, 0, 0});
+                              }
+                              world.robotVelocity.xy() = world.robotPose.rotation() * world.robotVelocity.xy();
+                              world.robotPose += world.robotVelocity * deltaT;
+                              break;
+                      }
+                      // Update ball position
+                      switch (cfg_.ball.motion_type) {
+                          case MotionType::NONE: world.ball.velocity = {0, 0, 0}; break;
 
-                case MotionType::PATH:
+                          case MotionType::PATH:
 
-                    world.ball.position.rows(0,1) = getPath(cfg_.ball.path);
+                              world.ball.position.rows(0, 1) = getPath(cfg_.ball.path);
 
-                    world.ball.velocity = (world.ball.position - oldBallPose) / deltaT; //world coordinates
-                    break;
+                              world.ball.velocity = (world.ball.position - oldBallPose) / deltaT;  // world coordinates
+                              break;
 
-                case MotionType::MOTION:
-                    // log("check kick:", !kickQueue.empty(), !kicking, lastKicking);
-                    if(!kickQueue.empty() && !kicking && lastKicking){
-                        //Get last queue
-                        KickCommand lastKickCommand = kickQueue.back();
-                        //Empty queue
-                        std::queue<KickCommand>().swap(kickQueue);
-                        //Check if kick worked:
-                        Transform2D relativeBallPose = world.robotPose.worldToLocal(world.ball.position);
+                          case MotionType::MOTION:
+                              // log("check kick:", !kickQueue.empty(), !kicking, lastKicking);
+                              if (!kickQueue.empty() && !kicking && lastKicking) {
+                                  // Get last queue
+                                  KickCommand lastKickCommand = kickQueue.back();
+                                  // Empty queue
+                                  std::queue<KickCommand>().swap(kickQueue);
+                                  // Check if kick worked:
+                                  Transform2D relativeBallPose = world.robotPose.worldToLocal(world.ball.position);
 
-                        world.ball.position.rows(0, 1) += world.robotPose.rotation() * convert<double, 2>(lastKickCommand.direction.head<2>().normalized());
-
-                    }
-                    break;
-            }
+                                  world.ball.position.rows(0, 1) +=
+                                      world.robotPose.rotation()
+                                      * convert<double, 2>(lastKickCommand.direction.head<2>().normalized());
+                              }
+                              break;
+                      }
 
 
-            // Emit the change in orientation as a DarwinSensors::Gyroscope,
-            // to be handled by HardwareSimulator.
-            emit(computeGyro(world.robotPose.angle(), oldRobotPose.angle()));
+                      // Emit the change in orientation as a DarwinSensors::Gyroscope,
+                      // to be handled by HardwareSimulator.
+                      emit(computeGyro(world.robotPose.angle(), oldRobotPose.angle()));
 
-            oldRobotPose = world.robotPose;
-            oldBallPose = world.ball.position;
-            lastNow = now;
-            lastKicking = kicking;
+                      oldRobotPose = world.robotPose;
+                      oldBallPose  = world.ball.position;
+                      lastNow      = now;
+                      lastKicking  = kicking;
 
-        });
+                  });
 
         // Simulate Vision
-        on<Every<30, Per<std::chrono::seconds>>, With<Sensors>, With<CameraParameters>, Optional<With<FieldDescription>>, Single>()
-        .then("Vision Simulation",
-        [this](const Sensors& sensors, const CameraParameters& camParams, const std::shared_ptr<const FieldDescription> fd) {
+        on<Every<30, Per<std::chrono::seconds>>,
+           With<Sensors>,
+           With<CameraParameters>,
+           Optional<With<FieldDescription>>,
+           Single>()
+            .then("Vision Simulation",
+                  [this](const Sensors& sensors,
+                         const CameraParameters& camParams,
+                         const std::shared_ptr<const FieldDescription> fd) {
 
-            if(!fd){
-                NUClear::log<NUClear::ERROR>(__FILE__, __LINE__, "Field Description must be available for vision simulation!");
-                powerplant.shutdown();
-                return;
-            }
+                      if (!fd) {
+                          NUClear::log<NUClear::ERROR>(
+                              __FILE__, __LINE__, "Field Description must be available for vision simulation!");
+                          powerplant.shutdown();
+                          return;
+                      }
 
-            if (goalPosts.size() == 0) {
-                loadFieldDescription(fd);
-            }
+                      if (goalPosts.size() == 0) {
+                          loadFieldDescription(fd);
+                      }
 
-            if (cfg_.simulate_goal_observations) {
-                auto goals = std::make_unique<std::vector<message::vision::Goal>>();
-                if (cfg_.blind_robot) {
-                    emit(std::move(goals));
-                    return;
-                }
-
-
-                for (auto& g : goalPosts) {
-
-                    // Detect the goal:
-                    auto m = g.detect(camParams, world.robotPose, sensors, cfg_.vision_error, *fd);
-
-                    if (!m.measurement.empty()) {
-                        if (!cfg_.distinguish_own_and_opponent_goals) {
-                            m.team = message::vision::Goal::Team::UNKNOWN_TEAM;
-                        }
-                        goals->push_back(m);
-                    }
-                }
-
-                if(!cfg_.distinguish_left_and_right_goals){
-                    setGoalLeftRightKnowledge(*goals);
-                }
-
-                emit(std::move(goals));
-
-            } else {
-                // Emit current self exactly
-                auto r = std::make_unique<std::vector<message::localisation::Self>>();
-                r->push_back(message::localisation::Self());
-                r->back().locObject.position = convert<double, 2>(world.robotPose.xy());
-                r->back().heading = convert<double, 2>(bearingToUnitVector(world.robotPose.angle()));
-                r->back().velocity = convert<double, 2>(world.robotVelocity.rows(0,1));
-                r->back().locObject.position_cov = convert<double, 2, 2>(0.00001 * arma::eye(2,2));
-                r->back().locObject.last_measurement_time = NUClear::clock::now();
-                emit(std::move(r));
-            }
+                      if (cfg_.simulate_goal_observations) {
+                          auto goals = std::make_unique<std::vector<message::vision::Goal>>();
+                          if (cfg_.blind_robot) {
+                              emit(std::move(goals));
+                              return;
+                          }
 
 
-            if (cfg_.simulate_ball_observations) {
-                auto ball_vec = std::make_unique<std::vector<message::vision::Ball>>();
-                if (cfg_.blind_robot) {
-                    emit(std::move(ball_vec));
-                    return;
-                }
+                          for (auto& g : goalPosts) {
 
-                auto ball = world.ball.detect(camParams, world.robotPose, sensors, cfg_.vision_error);
+                              // Detect the goal:
+                              auto m = g.detect(camParams, world.robotPose, sensors, cfg_.vision_error, *fd);
 
-                // If we have measurements
-                if (!ball.edgePoints.empty()) {
-                    ball_vec->push_back(ball);
-                }
+                              if (!m.measurement.empty()) {
+                                  if (!cfg_.distinguish_own_and_opponent_goals) {
+                                      m.team = message::vision::Goal::Team::UNKNOWN_TEAM;
+                                  }
+                                  goals->push_back(m);
+                              }
+                          }
 
-                emit(std::move(ball_vec));
+                          if (!cfg_.distinguish_left_and_right_goals) {
+                              setGoalLeftRightKnowledge(*goals);
+                          }
 
-            } else {
-                // Emit current ball exactly
-                auto b = std::make_unique<message::localisation::Ball>();
-                b->locObject.position = convert<double, 2>(world.robotPose.worldToLocal(world.ball.position).xy());
-                b->velocity = convert<double, 2>(world.robotPose.rotation().t() * world.ball.velocity.rows(0,1));
-                b->locObject.position_cov = convert<double, 2, 2>(0.00001 * arma::eye(2,2));
-                b->locObject.last_measurement_time = NUClear::clock::now();
-                emit(std::make_unique<std::vector<message::localisation::Ball>>(
-                        std::vector<message::localisation::Ball>(1, *b)
-                    ));
-                emit(std::move(b));
-            }
+                          emit(std::move(goals));
+                      }
+                      else {
+                          // Emit current self exactly
+                          auto r = std::make_unique<std::vector<message::localisation::Self>>();
+                          r->push_back(message::localisation::Self());
+                          r->back().locObject.position = convert<double, 2>(world.robotPose.xy());
+                          r->back().heading  = convert<double, 2>(bearingToUnitVector(world.robotPose.angle()));
+                          r->back().velocity = convert<double, 2>(world.robotVelocity.rows(0, 1));
+                          r->back().locObject.position_cov          = convert<double, 2, 2>(0.00001 * arma::eye(2, 2));
+                          r->back().locObject.last_measurement_time = NUClear::clock::now();
+                          emit(std::move(r));
+                      }
 
-        });
+
+                      if (cfg_.simulate_ball_observations) {
+                          auto ball_vec = std::make_unique<std::vector<message::vision::Ball>>();
+                          if (cfg_.blind_robot) {
+                              emit(std::move(ball_vec));
+                              return;
+                          }
+
+                          auto ball = world.ball.detect(camParams, world.robotPose, sensors, cfg_.vision_error);
+
+                          // If we have measurements
+                          if (!ball.edgePoints.empty()) {
+                              ball_vec->push_back(ball);
+                          }
+
+                          emit(std::move(ball_vec));
+                      }
+                      else {
+                          // Emit current ball exactly
+                          auto b = std::make_unique<message::localisation::Ball>();
+                          b->locObject.position =
+                              convert<double, 2>(world.robotPose.worldToLocal(world.ball.position).xy());
+                          b->velocity =
+                              convert<double, 2>(world.robotPose.rotation().t() * world.ball.velocity.rows(0, 1));
+                          b->locObject.position_cov          = convert<double, 2, 2>(0.00001 * arma::eye(2, 2));
+                          b->locObject.last_measurement_time = NUClear::clock::now();
+                          emit(std::make_unique<std::vector<message::localisation::Ball>>(
+                              std::vector<message::localisation::Ball>(1, *b)));
+                          emit(std::move(b));
+                      }
+
+                  });
 
 
         // Emit exact position to NUbugger
         on<Every<100, std::chrono::milliseconds>>().then("Emit True Robot Position", [this] {
-            arma::vec2 bearingVector = world.robotPose.rotation() * arma::vec2({1,0});
+            arma::vec2 bearingVector      = world.robotPose.rotation() * arma::vec2({1, 0});
             arma::vec3 robotHeadingVector = {bearingVector[0], bearingVector[1], 0};
             emit(drawArrow("robot", {world.robotPose.x(), world.robotPose.y(), 0}, 1, robotHeadingVector, 0));
 
@@ -369,29 +369,31 @@ namespace support {
         on<Startup>().then("SoccerSimulator Startup", [this] {
             if (cfg_.auto_start_behaviour) {
                 auto time = NUClear::clock::now();
-                emit(std::make_unique<GameEvents::Unpenalisation>(GameEvents::Unpenalisation(GameEvents::Context::SELF, PLAYER_ID)));
-                emit(std::make_unique<GameEvents::GamePhase>(GameEvents::GamePhase(GameState::Data::Phase::PLAYING, time, time)));
+                emit(std::make_unique<GameEvents::Unpenalisation>(
+                    GameEvents::Unpenalisation(GameEvents::Context::SELF, PLAYER_ID)));
+                emit(std::make_unique<GameEvents::GamePhase>(
+                    GameEvents::GamePhase(GameState::Data::Phase::PLAYING, time, time)));
                 emit(std::make_unique<GameState::Data::Phase>(GameState::Data::Phase::PLAYING));
             }
 
         });
     }
 
-    std::unique_ptr<DarwinSensors::Gyroscope> SoccerSimulator::computeGyro(float heading, float oldHeading){
+    std::unique_ptr<DarwinSensors::Gyroscope> SoccerSimulator::computeGyro(float heading, float oldHeading) {
         // float dHeading = utility::math::angle::difference(heading, oldHeading);
         float dHeading = heading - oldHeading;
 
         auto g = std::make_unique<DarwinSensors::Gyroscope>();
-        g->x = 0;
-        g->y = 0;
-        g->z = dHeading;
+        g->x   = 0;
+        g->y   = 0;
+        g->z   = dHeading;
         return std::move(g);
     }
 
-    arma::vec2 SoccerSimulator::getPath(SoccerSimulator::Config::Motion::Path p){
+    arma::vec2 SoccerSimulator::getPath(SoccerSimulator::Config::Motion::Path p) {
         auto t = absolute_time();
-        float wave1,wave2;
-        switch(p.type){
+        float wave1, wave2;
+        switch (p.type) {
             case PathType::SIN:
                 wave1 = p.x_amp * sine_wave(t, p.period);
                 wave2 = p.y_amp * sine_wave(t + (p.period / 4.0), p.period);
@@ -405,53 +407,54 @@ namespace support {
                 str << __FILE__ << ", " << __LINE__ << ": " << __func__ << ": unknown p.type.";
                 throw std::runtime_error(str.str());
         }
-        return arma::vec2({wave1,wave2});
+        return arma::vec2({wave1, wave2});
     }
 
-    void SoccerSimulator::setGoalLeftRightKnowledge(std::vector<message::vision::Goal>& goals){
+    void SoccerSimulator::setGoalLeftRightKnowledge(std::vector<message::vision::Goal>& goals) {
         // for (auto& g : goalPosts) {
-        int leftGoals = 0;
-        int rightGoals = 0;
+        int leftGoals    = 0;
+        int rightGoals   = 0;
         int unknownGoals = 0;
         for (auto& g : goals) {
-            //Count sides
-            if(g.side == Goal::Side::LEFT){
+            // Count sides
+            if (g.side == Goal::Side::LEFT) {
                 leftGoals++;
-            } else if(g.side == Goal::Side::RIGHT){
+            }
+            else if (g.side == Goal::Side::RIGHT) {
                 rightGoals++;
-            } else {
+            }
+            else {
                 unknownGoals++;
             }
         }
 
         int totalGoals = leftGoals + rightGoals + unknownGoals;
 
-        //we need to check if more or less than two goals are visible, or if the two visible goals are not a left-right pair,
+        // we need to check if more or less than two goals are visible, or if the two visible goals are not a left-right
+        // pair,
         // and remove left-right labels if so
-        if(totalGoals != 2 || leftGoals != 1 || rightGoals != 1){
-            for (auto& g : goals){
+        if (totalGoals != 2 || leftGoals != 1 || rightGoals != 1) {
+            for (auto& g : goals) {
                 g.side = Goal::Side::UNKNOWN_SIDE;
             }
         }
     }
 
-    void SoccerSimulator::loadFieldDescription( const std::shared_ptr<const FieldDescription> fd){
-            //Load goal posts
-            goalPosts.clear();
+    void SoccerSimulator::loadFieldDescription(const std::shared_ptr<const FieldDescription> fd) {
+        // Load goal posts
+        goalPosts.clear();
 
-            arma::vec3 goal_opp_r = {fd->goalpost_opp_r[0],fd->goalpost_opp_r[1],0};
-            goalPosts.push_back(VirtualGoalPost(goal_opp_r, 1.1, Goal::Side::RIGHT, Goal::Team::OPPONENT));
+        arma::vec3 goal_opp_r = {fd->goalpost_opp_r[0], fd->goalpost_opp_r[1], 0};
+        goalPosts.push_back(VirtualGoalPost(goal_opp_r, 1.1, Goal::Side::RIGHT, Goal::Team::OPPONENT));
 
-            arma::vec3 goal_opp_l = {fd->goalpost_opp_l[0],fd->goalpost_opp_l[1],0};
-            goalPosts.push_back(VirtualGoalPost(goal_opp_l, 1.1, Goal::Side::LEFT, Goal::Team::OPPONENT));
+        arma::vec3 goal_opp_l = {fd->goalpost_opp_l[0], fd->goalpost_opp_l[1], 0};
+        goalPosts.push_back(VirtualGoalPost(goal_opp_l, 1.1, Goal::Side::LEFT, Goal::Team::OPPONENT));
 
-            arma::vec3 goal_own_r = {fd->goalpost_own_r[0],fd->goalpost_own_r[1],0};
-            goalPosts.push_back(VirtualGoalPost(goal_own_r, 1.1, Goal::Side::RIGHT, Goal::Team::OWN));
+        arma::vec3 goal_own_r = {fd->goalpost_own_r[0], fd->goalpost_own_r[1], 0};
+        goalPosts.push_back(VirtualGoalPost(goal_own_r, 1.1, Goal::Side::RIGHT, Goal::Team::OWN));
 
-            arma::vec3 goal_own_l = {fd->goalpost_own_l[0],fd->goalpost_own_l[1],0};
-            goalPosts.push_back(VirtualGoalPost(goal_own_l, 1.1, Goal::Side::LEFT, Goal::Team::OWN));
+        arma::vec3 goal_own_l = {fd->goalpost_own_l[0], fd->goalpost_own_l[1], 0};
+        goalPosts.push_back(VirtualGoalPost(goal_own_l, 1.1, Goal::Side::LEFT, Goal::Team::OWN));
     }
-
 }
 }
-

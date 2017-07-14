@@ -24,19 +24,18 @@
 #include <nuclear>
 namespace module {
 namespace behaviour {
-namespace planning {
+    namespace planning {
 
-    class DivePlanner : public NUClear::Reactor {
-    public:
-        /// @brief Called by the powerplant to build and setup the DivePlanner reactor.
-        explicit DivePlanner(std::unique_ptr<NUClear::Environment> environment);
+        class DivePlanner : public NUClear::Reactor {
+        public:
+            /// @brief Called by the powerplant to build and setup the DivePlanner reactor.
+            explicit DivePlanner(std::unique_ptr<NUClear::Environment> environment);
 
-    private:
-    	float SPEED_THRESHOLD;
-    	float DISTANCE_THRESHOLD;
-    };
-
-}
+        private:
+            float SPEED_THRESHOLD;
+            float DISTANCE_THRESHOLD;
+        };
+    }
 }
 }
 
