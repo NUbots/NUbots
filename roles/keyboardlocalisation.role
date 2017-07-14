@@ -16,10 +16,7 @@ NUCLEAR_ROLE(
     platform::darwin::SensorFilter
 
     # Motion
-    motion::FootMotionPlanner
-    motion::FootPlacementPlanner
-    motion::TorsoMotionPlanner
-    motion::BalanceKinematicResponse
+
     motion::OldWalkEngine
     motion::ScriptEngine
     motion::HeadController
@@ -29,7 +26,7 @@ NUCLEAR_ROLE(
     vision::LUTClassifier
     vision::GoalDetector
     vision::BallDetector
-    
+
     #Localisation
     localisation::RobotParticleLocalisation
     #localisation::BallLocalisation
