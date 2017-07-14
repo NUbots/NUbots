@@ -49,7 +49,7 @@
 
 // #define ARMA_BLAS_CAPITALS
 //// Uncomment the above line if your BLAS and LAPACK libraries have capitalised function names (eg. ACML on 64-bit
-///Windows)
+/// Windows)
 
 #define ARMA_BLAS_UNDERSCORE
 //// Uncomment the above line if your BLAS and LAPACK libraries have function names with a trailing underscore.
@@ -63,11 +63,11 @@
 
 // #define ARMA_USE_TBB_ALLOC
 //// Uncomment the above line if you want to use Intel TBB scalable_malloc() and scalable_free() instead of standard
-///malloc() and free()
+/// malloc() and free()
 
 // #define ARMA_USE_MKL_ALLOC
 //// Uncomment the above line if you want to use Intel MKL mkl_malloc() and mkl_free() instead of standard malloc() and
-///free()
+/// free()
 
 /* #undef ARMA_USE_ATLAS */
 #define ARMA_ATLAS_INCLUDE_DIR /
