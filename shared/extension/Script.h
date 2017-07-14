@@ -95,14 +95,15 @@ struct Script {
         //                       exist.
 
         if (utility::file::exists("scripts/" + hostname + "/" + fileName)) {
+            NUClear::log<NUClear::INFO>("Parsing robot specific script:", fileName);
             config = YAML::LoadFile("scripts/" + hostname + "/" + fileName);
         }
 
         else if (utility::file::exists("scripts/" + platform + "/" + fileName)) {
-            NUClear::log("scripts/" + platform + "/" + fileName);
+            NUClear::log<NUClear::INFO>("Parsing default platform script:", fileName);
+            config = YAML::LoadFile("scripts/" + platform + "/" + fileName);
         }
 
-        NUClear::log("Parsing script:", fileName);
         frames = config.as<std::vector<Frame>>();
     }
 
@@ -122,6 +123,9 @@ struct Script {
         std::smatch match;
 
         if (std::regex_match(hostname, match, re)) {
+            // match[0] will be the full string
+            // match[1] the first match (platform name)
+            // match[2] the second match (robot number)
             return match[1].str();
         }
 
@@ -375,7 +379,6 @@ struct convert<::extension::Script::Frame::Target> {
     }
 
     static inline bool decode(const Node& node, ::extension::Script::Frame::Target& rhs) {
-
         try {
             rhs = {node["id"].as<std::string>(),
                    node["position"].as<float>(),
@@ -392,7 +395,9 @@ struct convert<::extension::Script::Frame::Target> {
                                          e.mark.pos,
                                          "Message:",
                                          e.msg);
+            return false;
         }
+
         return true;
     }
 };
@@ -409,14 +414,27 @@ struct convert<::extension::Script::Frame> {
     }
 
     static inline bool decode(const Node& node, ::extension::Script::Frame& rhs) {
+        try {
+            int millis = node["duration"].as<int>();
+            std::chrono::milliseconds duration(millis);
 
-        int millis = node["duration"].as<int>();
-        std::chrono::milliseconds duration(millis);
+            std::vector<::extension::Script::Frame::Target> targets =
+                node["targets"].as<std::vector<::extension::Script::Frame::Target>>();
+            rhs = {duration, std::move(targets)};
+        }
+        catch (const YAML::Exception& e) {
+            NUClear::log<NUClear::ERROR>("Error parsing script -",
+                                         "Line:",
+                                         e.mark.line,
+                                         "Column:",
+                                         e.mark.column,
+                                         "Pos:",
+                                         e.mark.pos,
+                                         "Message:",
+                                         e.msg);
+            return false;
+        }
 
-        std::vector<::extension::Script::Frame::Target> targets =
-            node["targets"].as<std::vector<::extension::Script::Frame::Target>>();
-
-        rhs = {duration, std::move(targets)};
         return true;
     }
 };
@@ -432,8 +450,23 @@ struct convert<::extension::Script> {
     }
 
     static inline bool decode(const Node& node, ::extension::Script& rhs) {
-        std::vector<::extension::Script::Frame> frames = node.as<std::vector<::extension::Script::Frame>>();
-        rhs                                            = {std::move(frames)};
+        try {
+            std::vector<::extension::Script::Frame> frames = node.as<std::vector<::extension::Script::Frame>>();
+            rhs                                            = {std::move(frames)};
+        }
+        catch (const YAML::Exception& e) {
+            NUClear::log<NUClear::ERROR>("Error parsing script -",
+                                         "Line:",
+                                         e.mark.line,
+                                         "Column:",
+                                         e.mark.column,
+                                         "Pos:",
+                                         e.mark.pos,
+                                         "Message:",
+                                         e.msg);
+            return false;
+        }
+
         return true;
     }
 };
