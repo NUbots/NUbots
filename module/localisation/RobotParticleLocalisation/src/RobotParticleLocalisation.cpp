@@ -155,10 +155,10 @@ namespace localisation {
         bool own   = (goal.team != Goal::Team::OPPONENT);
         bool opp   = (goal.team != Goal::Team::OWN);
 
-        if (own && left) possibilities.push_back(convert<double, 2>(fd.goalpost_own_l));
-        if (own && right) possibilities.push_back(convert<double, 2>(fd.goalpost_own_r));
-        if (opp && left) possibilities.push_back(convert<double, 2>(fd.goalpost_opp_l));
-        if (opp && right) possibilities.push_back(convert<double, 2>(fd.goalpost_opp_r));
+        if (own && left) possibilities.push_back(arma::vec3({fd.goalpost_own_l[0], fd.goalpost_own_l[1], 0}));
+        if (own && right) possibilities.push_back(arma::vec3({fd.goalpost_own_r[0], fd.goalpost_own_r[1], 0}));
+        if (opp && left) possibilities.push_back(arma::vec3({fd.goalpost_opp_l[0], fd.goalpost_opp_l[1], 0}));
+        if (opp && right) possibilities.push_back(arma::vec3({fd.goalpost_opp_r[0], fd.goalpost_opp_r[1], 0}));
 
         return possibilities;
     }

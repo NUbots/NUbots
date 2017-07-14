@@ -476,9 +476,9 @@ namespace motion {
         self.locObject.position_cov = Eigen::Matrix<double, 2, 2, Eigen::DontAlign>::Identity() * 0.1;  // made up
         self.heading << std::cos(position.angle()), std::sin(position.angle());  // convert to cartesian coordinates
         self.velocity.setZero();                                                 // not used
-        self.robot_to_world_rotation.setZero();                                  // not used
+        // self.robot_to_world_rotation.setZero();                                  // not used
         localisation->push_back(self);
-        emit(std::move(localisation));
+        // emit(std::move(localisation));
     }
     /*=======================================================================================================*/
     //      METHOD: getFootPhase

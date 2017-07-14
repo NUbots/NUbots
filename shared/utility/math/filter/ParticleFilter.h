@@ -120,7 +120,7 @@ namespace math {
                 // Resample some rogues
                 for (int i = 0; i < model.getRogueCount(); i++) {
                     candidateParticles.row(i + particles.n_rows) =
-                        model.getRogueRange() % (0.5 - arma::randu(Model::size));
+                        (model.getRogueRange() % (0.5 - arma::randu(Model::size))).t();
                 }
 
                 for (unsigned int i = 0; i < candidateParticles.n_rows; i++) {
