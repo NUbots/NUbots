@@ -129,6 +129,10 @@ struct Script {
             return match[1].str();
         }
 
+        else if (hostname == "nubotsvm") {
+            return hostname;
+        }
+
         else {
             throw std::system_error(
                 -1, std::system_category(), ("Failed to extract platform name from '" + hostname + "'."));
