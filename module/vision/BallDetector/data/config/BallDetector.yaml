@@ -11,6 +11,7 @@ measurement_elevation_variance: 0.2
 green_ratio_threshold: 0.2
 green_radial_samples: 12
 green_angular_samples: 12
+ball_screen_covariance: [0.1, 0.01, 0.01]
 
 print_throwout_logs: false
 

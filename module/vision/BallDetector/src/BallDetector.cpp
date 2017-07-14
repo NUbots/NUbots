@@ -36,6 +36,7 @@
 #include "utility/math/vision.h"
 #include "utility/nubugger/NUhelpers.h"
 #include "utility/support/eigen_armadillo.h"
+#include "utility/support/yaml_armadillo.h"
 #include "utility/support/yaml_expression.h"
 #include "utility/vision/Vision.h"
 #include "utility/vision/fourcc.h"
@@ -186,6 +187,8 @@ namespace vision {
             green_radial_samples  = config["green_radial_samples"].as<Expression>();
             green_angular_samples = config["green_angular_samples"].as<Expression>();
 
+            ball_screen_covariance = config["ball_screen_covariance"].as<arma::vec>();
+
             kmeansClusterer.configure(config["clustering"]);
 
             print_throwout_logs = config["print_throwout_logs"].as<bool>();
@@ -214,7 +217,6 @@ namespace vision {
                       ballPoints.reserve(image.ballPoints.size());
 
                       for (const auto& point : image.ballPoints) {
-                          // TODO: generalise to configured camera
                           arma::vec2 pt = imageToScreen(convert<int, 2>(point), convert<uint, 2>(cam.imageSizePixels));
                           ballPoints.push_back(getCamFromScreen(pt, cam));
                       }
@@ -367,7 +369,8 @@ namespace vision {
                           // Attach the measurement to the object
                           b.measurements.push_back(Ball::Measurement());
                           b.measurements.back().rBCc = convert<double, 3, 1>(rBCc);
-                          Eigen::Vector3d cov_diag(0.1, 0.01, 0.01);
+
+                          Eigen::Vector3d cov_diag         = convert<double, 3>(ball_screen_covariance);
                           b.measurements.back().covariance = cov_diag.asDiagonal();
 
                           Transform3D Hgc       = camToGround;
