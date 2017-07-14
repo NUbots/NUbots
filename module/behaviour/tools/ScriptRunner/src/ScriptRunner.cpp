@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with the NUbots Codebase.  If not, see <http://www.gnu.org/licenses/>.
  *
- * Copyright 2013 NUBots <nubots@nubots.net>
+ * Copyright 2013 NUbots <nubots@nubots.net>
  */
 
 #include "ScriptRunner.h"
@@ -94,6 +94,6 @@ namespace behaviour {
                 [this](const std::set<ServoID>&) { emit(std::make_unique<ExecuteNextScript>()); }}));
         }
 
-    }  // tools
-}  // behaviours
-}  // modules
+    }  // namespace tools
+}  // namespace behaviour
+}  // namespace module

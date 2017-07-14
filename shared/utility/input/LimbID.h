@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with the NUbots Codebase.  If not, see <http://www.gnu.org/licenses/>.
  *
- * Copyright 2013 NUBots <nubots@nubots.net>
+ * Copyright 2013 NUbots <nubots@nubots.net>
  */
 
 #ifndef UTILITY_INPUT_LIMBID_H
@@ -25,60 +25,86 @@
 #include "utility/input/ServoID.h"
 
 namespace utility {
-    namespace input {
-        //LimbID is a higher level of ServoID (see ServoID.h),
-        //which contains all the constituent servos (e.g. An arm contains shoulder (pitch + roll)) and elbow.
-        using ServoID = utility::input::ServoID;
+namespace input {
+    // LimbID is a higher level of ServoID (see ServoID.h),
+    // which contains all the constituent servos (e.g. An arm contains shoulder (pitch + roll)) and elbow.
+    using ServoID = utility::input::ServoID;
 
-        struct LimbID {
-            enum Value {
-                UNKNOWN   = 0,
-                LEFT_LEG  = 1,
-                RIGHT_LEG = 2,
-                LEFT_ARM  = 3,
-                RIGHT_ARM = 4,
-                HEAD      = 5
-            };
-            Value value;
-        
-            // Constructors
-            LimbID()                   : value(Value::UNKNOWN) {}
-            LimbID(uint8_t const& v)   : value(static_cast<Value>(v)) {}
-            LimbID(uint32_t const& v)  : value(static_cast<Value>(v)) {}
-            LimbID(uint64_t const& v)  : value(static_cast<Value>(v)) {}
-            LimbID(int const& v)       : value(static_cast<Value>(v)) {}
-            LimbID(Value const& value) : value(value) {}
-            LimbID(std::string const& str);
-        
-            // Operators
-            bool operator <(LimbID const& other)         const { return value <  other.value; }
-            bool operator >(LimbID const& other)         const { return value >  other.value; }
-            bool operator <=(LimbID const& other)        const { return value <= other.value; }
-            bool operator >=(LimbID const& other)        const { return value >= other.value; }
-            bool operator ==(LimbID const& other)        const { return value == other.value; }
-            bool operator !=(LimbID const& other)        const { return value != other.value; }
-            bool operator <(LimbID::Value const& other)  const { return value <  other;       }
-            bool operator >(LimbID::Value const& other)  const { return value >  other;       }
-            bool operator <=(LimbID::Value const& other) const { return value <= other;       }
-            bool operator >=(LimbID::Value const& other) const { return value >= other;       }
-            bool operator ==(LimbID::Value const& other) const { return value == other;       }
-            bool operator !=(LimbID::Value const& other) const { return value != other;       }
+    struct LimbID {
+        enum Value { UNKNOWN = 0, LEFT_LEG = 1, RIGHT_LEG = 2, LEFT_ARM = 3, RIGHT_ARM = 4, HEAD = 5 };
+        Value value;
 
-            // Conversions
-            operator Value()    const { return value; }
-            operator uint8_t()  const { return value; }
-            operator uint32_t() const { return value; }
-            operator uint64_t() const { return value; }
-            operator int()      const { return value; }
-            operator std::string() const;
+        // Constructors
+        LimbID() : value(Value::UNKNOWN) {}
+        LimbID(uint8_t const& v) : value(static_cast<Value>(v)) {}
+        LimbID(uint32_t const& v) : value(static_cast<Value>(v)) {}
+        LimbID(uint64_t const& v) : value(static_cast<Value>(v)) {}
+        LimbID(int const& v) : value(static_cast<Value>(v)) {}
+        LimbID(Value const& value) : value(value) {}
+        LimbID(std::string const& str);
 
-            static std::set<ServoID> servosForLimb(const LimbID& limb);
-            static LimbID limbForServo(const ServoID& servo);
+        // Operators
+        bool operator<(LimbID const& other) const {
+            return value < other.value;
+        }
+        bool operator>(LimbID const& other) const {
+            return value > other.value;
+        }
+        bool operator<=(LimbID const& other) const {
+            return value <= other.value;
+        }
+        bool operator>=(LimbID const& other) const {
+            return value >= other.value;
+        }
+        bool operator==(LimbID const& other) const {
+            return value == other.value;
+        }
+        bool operator!=(LimbID const& other) const {
+            return value != other.value;
+        }
+        bool operator<(LimbID::Value const& other) const {
+            return value < other;
+        }
+        bool operator>(LimbID::Value const& other) const {
+            return value > other;
+        }
+        bool operator<=(LimbID::Value const& other) const {
+            return value <= other;
+        }
+        bool operator>=(LimbID::Value const& other) const {
+            return value >= other;
+        }
+        bool operator==(LimbID::Value const& other) const {
+            return value == other;
+        }
+        bool operator!=(LimbID::Value const& other) const {
+            return value != other;
+        }
 
-            friend std::ostream& operator<< (std::ostream& out, const LimbID& val);
-        };
-    }
-}
+        // Conversions
+        operator Value() const {
+            return value;
+        }
+        operator uint8_t() const {
+            return value;
+        }
+        operator uint32_t() const {
+            return value;
+        }
+        operator uint64_t() const {
+            return value;
+        }
+        operator int() const {
+            return value;
+        }
+        operator std::string() const;
+
+        static std::set<ServoID> servosForLimb(const LimbID& limb);
+        static LimbID limbForServo(const ServoID& servo);
+
+        friend std::ostream& operator<<(std::ostream& out, const LimbID& val);
+    };
+}  // namespace input
+}  // namespace utility
 
 #endif
-

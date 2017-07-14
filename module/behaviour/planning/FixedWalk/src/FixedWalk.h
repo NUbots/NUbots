@@ -15,51 +15,51 @@
  * You should have received a copy of the GNU General Public License
  * along with the NUbots Codebase.  If not, see <http://www.gnu.org/licenses/>.
  *
- * Copyright 2013 NUBots <nubots@nubots.net>
+ * Copyright 2013 NUbots <nubots@nubots.net>
  */
 
 #ifndef MODULES_BEHAVIOUR_PLANNERS_FIXEDWALK_H
 #define MODULES_BEHAVIOUR_PLANNERS_FIXEDWALK_H
 
-#include <nuclear>
 #include <armadillo>
 #include <list>
+#include <nuclear>
 
+#include "message/behaviour/FixedWalkCommand.h"
 #include "message/input/Sensors.h"
 #include "message/motion/WalkCommand.h"
-#include "message/behaviour/FixedWalkCommand.h"
-
 
 
 namespace module {
-    namespace behaviour {
-        namespace planning {
+namespace behaviour {
+    namespace planning {
 
-                //using namespace message;
-                /**
-                 * Executes a getup script if the robot falls over.
-                 *
-                 * @author Jake Fountain
-                 */
-                class FixedWalk : public NUClear::Reactor {
-                private:
-                    std::unique_ptr<message::motion::WalkCommand> getWalkCommand(const message::behaviour::FixedWalkCommand::WalkSegment& segment,
-                                                                NUClear::clock::duration t,
-                                                                const message::input::Sensors& sensors);
-                    std::list<message::behaviour::FixedWalkCommand::WalkSegment> walkSegments;
-                    NUClear::clock::time_point segmentStart;
-                    NUClear::clock::duration segmentElapsedTimeBeforeFall;
+        // using namespace message;
+        /**
+         * Executes a getup script if the robot falls over.
+         *
+         * @author Jake Fountain
+         */
+        class FixedWalk : public NUClear::Reactor {
+        private:
+            std::unique_ptr<message::motion::WalkCommand> getWalkCommand(
+                const message::behaviour::FixedWalkCommand::WalkSegment& segment,
+                NUClear::clock::duration t,
+                const message::input::Sensors& sensors);
+            std::list<message::behaviour::FixedWalkCommand::WalkSegment> walkSegments;
+            NUClear::clock::time_point segmentStart;
+            NUClear::clock::duration segmentElapsedTimeBeforeFall;
 
-                    arma::mat beginningOrientation;
-                    bool active = false;
-                    bool fallen = false;
-                public:
-                    explicit FixedWalk(std::unique_ptr<NUClear::Environment> environment);
-                };
+            arma::mat beginningOrientation;
+            bool active = false;
+            bool fallen = false;
 
-        }  // planning
-    }  // behaviours
-}  // modules
+        public:
+            explicit FixedWalk(std::unique_ptr<NUClear::Environment> environment);
+        };
+
+    }  // namespace planning
+}  // namespace behaviour
+}  // namespace module
 
 #endif  // MODULES_BEHAVIOURS_UTILITY_SCRIPTRUNNER_H
-

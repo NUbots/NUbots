@@ -14,52 +14,52 @@
  * You should have received a copy of the GNU General Public License
  * along with the NUbots Codebase.  If not, see <http://www.gnu.org/licenses/>.
  *
- * Copyright 2013 NUBots <nubots@nubots.net>
+ * Copyright 2013 NUbots <nubots@nubots.net>
  */
 
 #ifndef MODULES_PLATFORM_DARWIN_DARWINVIRTUALLOADSENSOR_H
 #define MODULES_PLATFORM_DARWIN_DARWINVIRTUALLOADSENSOR_H
 
-#include "utility/math/matrix/Transform3D.h"
 #include "utility/math/matrix/Rotation3D.h"
+#include "utility/math/matrix/Transform3D.h"
 
 
 namespace module {
-    namespace platform {
-        namespace darwin {
+namespace platform {
+    namespace darwin {
 
-            class DarwinVirtualLoadSensor {
-                //this implements a linear model (trained by logistic regression) with a bayes filter on the output
-                private:
-                    double noiseFactor;
-                    double currentNoise;
-                    double certaintyThreshold;
-                    double uncertaintyThreshold;
+        class DarwinVirtualLoadSensor {
+            // this implements a linear model (trained by logistic regression) with a bayes filter on the output
+        private:
+            double noiseFactor;
+            double currentNoise;
+            double certaintyThreshold;
+            double uncertaintyThreshold;
 
-                    arma::mat hiddenWeights;
-                    arma::vec hiddenBias;
-                    arma::mat outputWeights;
-                    arma::vec outputBias;
+            arma::mat hiddenWeights;
+            arma::vec hiddenBias;
+            arma::mat outputWeights;
+            arma::vec outputBias;
 
-                public:
-                    double state = 0.5;
-                    bool outputState = true;
+        public:
+            double state     = 0.5;
+            bool outputState = true;
 
 
-                    DarwinVirtualLoadSensor();
+            DarwinVirtualLoadSensor();
 
-                    DarwinVirtualLoadSensor(arma::mat hiddenWeights,
-                                            arma::vec hiddenBias,
-                                            arma::mat outputWeights,
-                                            arma::vec outputBias,
-                                            double noiseFactor,
-                                            double certaintyThreshold,
-                                            double uncertaintyThreshold);
+            DarwinVirtualLoadSensor(arma::mat hiddenWeights,
+                                    arma::vec hiddenBias,
+                                    arma::mat outputWeights,
+                                    arma::vec outputBias,
+                                    double noiseFactor,
+                                    double certaintyThreshold,
+                                    double uncertaintyThreshold);
 
-                    bool updateFoot(const arma::vec& legMotors);
-            };
-        }
-    }
-}
+            bool updateFoot(const arma::vec& legMotors);
+        };
+    }  // namespace darwin
+}  // namespace platform
+}  // namespace module
 
 #endif

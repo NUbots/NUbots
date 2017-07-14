@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with the NUbots Codebase.  If not, see <http://www.gnu.org/licenses/>.
  *
- * Copyright 2013 NUBots <nubots@nubots.net>
+ * Copyright 2013 NUbots <nubots@nubots.net>
  */
 
 #ifndef MODULES_DEBUG_NUBUGGER_H
@@ -30,8 +30,7 @@ namespace debug {
         explicit NUbugger(std::unique_ptr<NUClear::Environment> environment);
     };
 
-}  // debug
-}  // modules
+}  // namespace debug
+}  // namespace module
 
 #endif  // MODULES_SUPPORT_NUBUGGER_H
-

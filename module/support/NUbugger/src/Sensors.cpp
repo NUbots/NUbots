@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with the NUbots Codebase.  If not, see <http://www.gnu.org/licenses/>.
  *
- * Copyright 2013 NUBots <nubots@nubots.net>
+ * Copyright 2013 NUbots <nubots@nubots.net>
  */
 
 #include "NUbugger.h"
@@ -31,11 +31,12 @@ namespace support {
     void NUbugger::provideSensors() {
 
         // This trigger gets the output from the sensors (unfiltered)
-        handles["sensor_data"].push_back(on<Trigger<Sensors>, Single, Priority::LOW>().then([this](const Sensors& sensors) {
+        handles["sensor_data"].push_back(
+            on<Trigger<Sensors>, Single, Priority::LOW>().then([this](const Sensors& sensors) {
 
-            send(sensors, 1, false, sensors.timestamp);
+                send(sensors, 1, false, sensors.timestamp);
 
-        }));
+            }));
     }
-}
-}
+}  // namespace support
+}  // namespace module

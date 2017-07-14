@@ -14,98 +14,85 @@
  * You should have received a copy of the GNU General Public License
  * along with the NUbots Codebase.  If not, see <http://www.gnu.org/licenses/>.
  *
- * Copyright 2013 NUBots <nubots@nubots.net>
+ * Copyright 2013 NUbots <nubots@nubots.net>
  */
 
 #ifndef UTILITY_LOCALISATION_TRANSFORM_H
 #define UTILITY_LOCALISATION_TRANSFORM_H
 
 #include <armadillo>
+#include "utility/math/coordinates.h"
 #include "utility/math/matrix/Rotation2D.h"
 #include "utility/math/matrix/Rotation3D.h"
-#include "utility/math/coordinates.h"
 
 namespace utility {
 namespace localisation {
-namespace transform {
+    namespace transform {
 
-    inline arma::vec RobotToWorldTransform(const arma::vec& robot_pos,
-                                           const arma::vec& robot_heading,
-                                           const arma::vec& relative_ball_pos) {
-        arma::vec u = arma::normalise(robot_heading);
-        arma::mat rot;
-        rot <<  u[0] << -u[1] << arma::endr
-            <<  u[1] <<  u[0];
-        // Rotate relative_ball_pos by robot_heading, then add robot_pos.
-        return rot * relative_ball_pos + robot_pos;
-    }
+        inline arma::vec RobotToWorldTransform(const arma::vec& robot_pos,
+                                               const arma::vec& robot_heading,
+                                               const arma::vec& relative_ball_pos) {
+            arma::vec u = arma::normalise(robot_heading);
+            arma::mat rot;
+            rot << u[0] << -u[1] << arma::endr << u[1] << u[0];
+            // Rotate relative_ball_pos by robot_heading, then add robot_pos.
+            return rot * relative_ball_pos + robot_pos;
+        }
 
-    inline arma::vec WorldToRobotTransform(const arma::vec& robot_pos,
-                                           const arma::vec& robot_heading,
-                                           const arma::vec& field_ball_pos) {
-        arma::vec u = arma::normalise(robot_heading);
-        arma::mat rot;
-        rot <<  u[0] <<  u[1] << arma::endr
-            << -u[1] <<  u[0];
-        // Subtract robot_pos, then rotate relative_ball_pos by -robot_heading.
-        return rot * (field_ball_pos - robot_pos);
-    }
+        inline arma::vec WorldToRobotTransform(const arma::vec& robot_pos,
+                                               const arma::vec& robot_heading,
+                                               const arma::vec& field_ball_pos) {
+            arma::vec u = arma::normalise(robot_heading);
+            arma::mat rot;
+            rot << u[0] << u[1] << arma::endr << -u[1] << u[0];
+            // Subtract robot_pos, then rotate relative_ball_pos by -robot_heading.
+            return rot * (field_ball_pos - robot_pos);
+        }
 
-    inline arma::vec RobotToWorldTransform(const arma::vec& robot_pos,
-                                           const double& robot_heading,
-                                           const arma::vec& relative_ball_pos) {
-        arma::mat rot = math::matrix::Rotation2D::createRotation(robot_heading);
-        // Rotate relative_ball_pos by robot_heading, then add robot_pos.
-        return rot * relative_ball_pos + robot_pos;
-    }
+        inline arma::vec RobotToWorldTransform(const arma::vec& robot_pos,
+                                               const double& robot_heading,
+                                               const arma::vec& relative_ball_pos) {
+            arma::mat rot = math::matrix::Rotation2D::createRotation(robot_heading);
+            // Rotate relative_ball_pos by robot_heading, then add robot_pos.
+            return rot * relative_ball_pos + robot_pos;
+        }
 
-    inline arma::vec WorldToRobotTransform(const arma::vec& robot_pos,
-                                           const double& robot_heading,
-                                           const arma::vec& field_ball_pos) {
-        arma::mat rot = math::matrix::Rotation2D::createRotation(-robot_heading);
-        // Subtract robot_pos, then rotate relative_ball_pos by -robot_heading.
-        return rot * (field_ball_pos - robot_pos);
-    }
+        inline arma::vec WorldToRobotTransform(const arma::vec& robot_pos,
+                                               const double& robot_heading,
+                                               const arma::vec& field_ball_pos) {
+            arma::mat rot = math::matrix::Rotation2D::createRotation(-robot_heading);
+            // Subtract robot_pos, then rotate relative_ball_pos by -robot_heading.
+            return rot * (field_ball_pos - robot_pos);
+        }
 
-    inline arma::vec SphericalRobotObservation(
-            const arma::vec& robot_pos,
-            const double& robot_heading,
-            const arma::vec3& actual_position) {
-        auto actual_pos_robot_2d = WorldToRobotTransform(robot_pos,
-                                                     robot_heading,
-                                                     actual_position.rows(0, 1));
-        auto actual_pos_robot_3d = arma::vec3({actual_pos_robot_2d(0),
-                                           actual_pos_robot_2d(1),
-                                           actual_position(2)});
+        inline arma::vec SphericalRobotObservation(const arma::vec& robot_pos,
+                                                   const double& robot_heading,
+                                                   const arma::vec3& actual_position) {
+            auto actual_pos_robot_2d = WorldToRobotTransform(robot_pos, robot_heading, actual_position.rows(0, 1));
+            auto actual_pos_robot_3d = arma::vec3({actual_pos_robot_2d(0), actual_pos_robot_2d(1), actual_position(2)});
 
-        auto obs = utility::math::coordinates::cartesianToSpherical(actual_pos_robot_3d);
+            auto obs = utility::math::coordinates::cartesianToSpherical(actual_pos_robot_3d);
 
-        return obs;
-    }
+            return obs;
+        }
 
-    inline arma::vec2 ImuToWorldHeadingTransform(double imuOffset, math::matrix::Rotation3D orientation) {
-        math::matrix::Rotation3D imuRotation = math::matrix::Rotation3D::createRotationZ(imuOffset);
-        arma::vec3 worldRobotHeading = imuRotation * arma::mat(orientation.i()).col(0);
-        return arma::normalise(worldRobotHeading.rows(0,1));
-    }
+        inline arma::vec2 ImuToWorldHeadingTransform(double imuOffset, math::matrix::Rotation3D orientation) {
+            math::matrix::Rotation3D imuRotation = math::matrix::Rotation3D::createRotationZ(imuOffset);
+            arma::vec3 worldRobotHeading         = imuRotation * arma::mat(orientation.i()).col(0);
+            return arma::normalise(worldRobotHeading.rows(0, 1));
+        }
 
-    inline arma::vec SphericalRobotObservation(
-            const arma::vec& robot_pos,
-            const arma::vec2& robot_heading,
-            const arma::vec3& actual_position) {
-        auto actual_pos_robot_2d = WorldToRobotTransform(robot_pos,
-                                                     robot_heading,
-                                                     actual_position.rows(0, 1));
-        auto actual_pos_robot_3d = arma::vec3({actual_pos_robot_2d(0),
-                                           actual_pos_robot_2d(1),
-                                           actual_position(2)});
+        inline arma::vec SphericalRobotObservation(const arma::vec& robot_pos,
+                                                   const arma::vec2& robot_heading,
+                                                   const arma::vec3& actual_position) {
+            auto actual_pos_robot_2d = WorldToRobotTransform(robot_pos, robot_heading, actual_position.rows(0, 1));
+            auto actual_pos_robot_3d = arma::vec3({actual_pos_robot_2d(0), actual_pos_robot_2d(1), actual_position(2)});
 
-        auto obs = utility::math::coordinates::cartesianToSpherical(actual_pos_robot_3d);
+            auto obs = utility::math::coordinates::cartesianToSpherical(actual_pos_robot_3d);
 
-        return obs;
-    }
-
-}
-}
-}
+            return obs;
+        }
+    }  // namespace transform
+}  // namespace localisation
+}  // namespace utility
 #endif

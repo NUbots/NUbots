@@ -1,0 +1,2 @@
+process_noise_diagonal: [0.1,0.1]
+ball_pos_log: false

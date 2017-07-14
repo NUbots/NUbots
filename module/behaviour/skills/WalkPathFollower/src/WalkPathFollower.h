@@ -27,70 +27,74 @@
 
 namespace module {
 namespace behaviour {
-namespace skills {
+    namespace skills {
 
-    using message::behaviour::WalkPath;
-    using message::motion::WalkCommand;
-    using utility::math::matrix::Transform2D;
+        using message::behaviour::WalkPath;
+        using message::motion::WalkCommand;
+        using utility::math::matrix::Transform2D;
 
-    class WalkPathFollower : public NUClear::Reactor {
+        class WalkPathFollower : public NUClear::Reactor {
 
-    public:
-        /// @brief Called by the powerplant to build and setup the WalkPathFollower reactor.
-        explicit WalkPathFollower(std::unique_ptr<NUClear::Environment> environment);
+        public:
+            /// @brief Called by the powerplant to build and setup the WalkPathFollower reactor.
+            explicit WalkPathFollower(std::unique_ptr<NUClear::Environment> environment);
 
-        /// @brief The instantaneous walk command required to start moving to the next unvisited node on the path.
-        std::unique_ptr<WalkCommand> walkToNextNode(const Transform2D& currentState, bool noLogging = false);
+            /// @brief The instantaneous walk command required to start moving to the next unvisited node on the path.
+            std::unique_ptr<WalkCommand> walkToNextNode(const Transform2D& currentState, bool noLogging = false);
 
-        WalkCommand walkBetweenFar(const Transform2D& currentState, const Transform2D& targetState);
+            WalkCommand walkBetweenFar(const Transform2D& currentState, const Transform2D& targetState);
 
-        WalkCommand walkBetweenNear(const Transform2D& currentState, const Transform2D& targetState);
+            WalkCommand walkBetweenNear(const Transform2D& currentState, const Transform2D& targetState);
 
-        /// @brief Remove already visited states from the given path.
-        /// Returns the number of states removed.
-        int trimPath(const Transform2D& currentState, WalkPath& walkPath);
+            /// @brief Remove already visited states from the given path.
+            /// Returns the number of states removed.
+            int trimPath(const Transform2D& currentState, WalkPath& walkPath);
 
-        /// @brief The index of the closest state in walkPath to currentState.
-        int closestPathIndex(const Transform2D& currentState, const WalkPath& walkPath);
+            /// @brief The index of the closest state in walkPath to currentState.
+            int closestPathIndex(const Transform2D& currentState, const WalkPath& walkPath);
 
-        /// @brief The path the robot is expected to follow while following the given path.
-        WalkPath estimatedPath(const Transform2D& currentState, const WalkPath& walkPath, double timeStep, int simSteps, int sample);
+            /// @brief The path the robot is expected to follow while following the given path.
+            WalkPath estimatedPath(const Transform2D& currentState,
+                                   const WalkPath& walkPath,
+                                   double timeStep,
+                                   int simSteps,
+                                   int sample);
 
-        /// @brief Return whether currentState is close enough to visitState for us to say that the robot has 'visited' that state.
-        bool isVisited(const Transform2D& currentState, const Transform2D& visitState);
-        bool isGoalClose(const Transform2D& currentState, const Transform2D& visitState);
+            /// @brief Return whether currentState is close enough to visitState for us to say that the robot has
+            /// 'visited' that state.
+            bool isVisited(const Transform2D& currentState, const Transform2D& visitState);
+            bool isGoalClose(const Transform2D& currentState, const Transform2D& visitState);
 
-        WalkPath currentPath;
+            WalkPath currentPath;
 
-    private:
-        /// @brief Subsumption ID key to access motors
-        const size_t subsumptionId;
+        private:
+            /// @brief Subsumption ID key to access motors
+            const size_t subsumptionId;
 
-        /// @brief Reaction handle for the path following reaction
-        ReactionHandle followPathReaction;
+            /// @brief Reaction handle for the path following reaction
+            ReactionHandle followPathReaction;
 
-        /// @brief Reaction handle for the path update reaction
-        ReactionHandle updatePathReaction;
+            /// @brief Reaction handle for the path update reaction
+            ReactionHandle updatePathReaction;
 
 
-        struct Config {
+            struct Config {
 
-            double waypoint_visit_distance = 0.1;
-            double goal_close_distance = 0.5;
-            bool draw_estimated_path = false;
-            double walk_about_x_strafe = 0;
-            double walk_about_y_strafe = 0;
-            double walk_about_rotational_speed = 0;
-            double walk_to_far_forward_speed = 1;
-            double walk_to_near_speed = 1;
+                double waypoint_visit_distance     = 0.1;
+                double goal_close_distance         = 0.5;
+                bool draw_estimated_path           = false;
+                double walk_about_x_strafe         = 0;
+                double walk_about_y_strafe         = 0;
+                double walk_about_rotational_speed = 0;
+                double walk_to_far_forward_speed   = 1;
+                double walk_to_near_speed          = 1;
 
-            bool follow_path_in_ball_space = true;
+                bool follow_path_in_ball_space = true;
 
-        } cfg_;
-    };
-
-}
-}
-}
+            } cfg_;
+        };
+    }  // namespace skills
+}  // namespace behaviour
+}  // namespace module
 
 #endif  // MODULES_BEHAVIOUR_SKILLS_WALKPATHFOLLOWER_H
