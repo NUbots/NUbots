@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with the NUbots Codebase.  If not, see <http://www.gnu.org/licenses/>.
  *
- * Copyright 2013 NUBots <nubots@nubots.net>
+ * Copyright 2013 NUbots <nubots@nubots.net>
  */
 
 #ifndef MODULES_SUPPORT_NUBUGGER_H
@@ -119,7 +119,6 @@ namespace support {
                 emit<Scope::NETWORK>(msg, "nusight", reliable);
             }
         }
-
         // message::support::nubugger::Message::Type getMessageTypeFromString(std::string type_name);
         // std::string getStringFromMessageType(message::support::nubugger::Message::Type type);
     public:

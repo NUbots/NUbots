@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with the NUbots Codebase.  If not, see <http://www.gnu.org/licenses/>.
  *
- * Copyright 2013 NUBots <nubots@nubots.net>
+ * Copyright 2013 NUbots <nubots@nubots.net>
  */
 
 #ifndef UTILITY_MOTION_FORWARDKINEMATICS_H
@@ -446,20 +446,15 @@ namespace motion {
         inline arma::vec3 calculateCentreOfPressure(const KinematicsModel& model, const Sensors& sensors) {
             arma::vec4 CoP            = {0, 0, 0, 1};
             float number_of_feet_down = 0;
-            try {
-                if (sensors.leftFootDown) {
-                    CoP += fsrCentreInBodyCoords(
-                        model, sensors, convert<double, 2>(sensors.fsr[LimbID::LEFT_LEG].centre), true);
-                    number_of_feet_down += 1.0f;
-                }
-                if (sensors.rightFootDown) {
-                    CoP += fsrCentreInBodyCoords(
-                        model, sensors, convert<double, 2>(sensors.fsr[LimbID::RIGHT_LEG].centre), false);
-                    number_of_feet_down += 1.0f;
-                }
+            if (sensors.leftFootDown) {
+                CoP += fsrCentreInBodyCoords(
+                    model, sensors, convert<double, 2>(sensors.fsr[LimbID::LEFT_LEG - 1].centre), true);
+                number_of_feet_down += 1.0f;
             }
-            catch (...) {
-                std::cout << __FILE__ << " : " << __LINE__ << " error in calculateCentreOfPressure" << std::endl;
+            if (sensors.rightFootDown) {
+                CoP += fsrCentreInBodyCoords(
+                    model, sensors, convert<double, 2>(sensors.fsr[LimbID::RIGHT_LEG - 1].centre), false);
+                number_of_feet_down += 1.0f;
             }
             if (number_of_feet_down == 2) {
                 CoP = CoP / number_of_feet_down;

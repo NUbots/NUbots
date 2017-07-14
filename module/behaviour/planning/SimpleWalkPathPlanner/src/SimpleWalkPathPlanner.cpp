@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with the NUbots Codebase.  If not, see <http://www.gnu.org/licenses/>.
  *
- * Copyright 2013 NUBots <nubots@nubots.net>
+ * Copyright 2013 NUbots <nubots@nubots.net>
  */
 
 #include <cmath>
@@ -261,6 +261,7 @@ namespace behaviour {
                     std::unique_ptr<WalkCommand> command =
                         std::make_unique<WalkCommand>(subsumptionId, convert<double, 3>(Transform2D({0, 0, 0})));
                     command->command = convert<double, 3>(Transform2D({finalForwardSpeed, finalSideSpeed, angle}));
+
                     emit(std::move(command));
                     emit(std::make_unique<ActionPriorites>(ActionPriorites{subsumptionId, {40, 11}}));
 

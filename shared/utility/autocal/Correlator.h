@@ -79,4 +79,5 @@ public:
     }
 };
 }  // namespace autocal
+
 #endif

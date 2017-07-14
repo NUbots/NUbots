@@ -12,10 +12,12 @@ namespace localisation {
 
     class BallLocalisation : public NUClear::Reactor {
     private:
-        // utility::math::filter::UKF<BallModel> filter;
+
         utility::math::filter::ParticleFilter<BallModel> filter;
         NUClear::clock::time_point last_time_update_time;
         NUClear::clock::time_point last_measurement_update_time;
+        bool ball_pos_log;
+
 
     public:
         /// @brief Called by the powerplant to build and setup the BallLocalisation reactor.

@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with the NUbots Codebase.  If not, see <http://www.gnu.org/licenses/>.
  *
- * Copyright 2013 NUBots <nubots@nubots.net>
+ * Copyright 2013 NUbots <nubots@nubots.net>
  */
 
 #ifndef MODULES_MOTION_IKKICKCONTROLLERS_H
@@ -41,8 +41,8 @@ namespace motion {
 
     class SixDOFFrame {
         // enum InterpolationType {
-        // 	LINEAR = 0,
-        // 	SERVO = 1
+        //  LINEAR = 0,
+        //  SERVO = 1
         // TODO:
         // };
         // InterpolationType interpolation = LINEAR;

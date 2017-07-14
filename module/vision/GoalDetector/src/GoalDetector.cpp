@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with the NUbots Codebase.  If not, see <http://www.gnu.org/licenses/>.
  *
- * Copyright 2013 NUBots <nubots@nubots.net>
+ * Copyright 2013 NUbots <nubots@nubots.net>
  */
 
 #include "GoalDetector.h"
@@ -26,7 +26,7 @@
 #include "message/vision/ClassifiedImage.h"
 #include "message/vision/LookUpTable.h"
 #include "message/vision/VisionObjects.h"
-#include "stdio.h"
+
 
 #include "utility/math/geometry/Line.h"
 #include "utility/math/geometry/Plane.h"
@@ -121,6 +121,7 @@ namespace vision {
 
                 vector3_covariance = config["vector3_covariance"].as<arma::vec>();
                 angle_covariance   = config["angle_covariance"].as<arma::vec>();
+
             });
 
         on<Trigger<ClassifiedImage>, With<CameraParameters>, With<LookUpTable>, Single>().then(
@@ -245,6 +246,7 @@ namespace vision {
                         }
                     }
 
+
                     arma::running_stat<double> stat;
 
                     // Look through our segments to find endpoints
@@ -302,7 +304,8 @@ namespace vision {
 
                     // Check if we are within the aspect ratio range
                     bool valid =
-                        quad.aspectRatio() > MINIMUM_ASPECT_RATIO && quad.aspectRatio() < MAXIMUM_ASPECT_RATIO
+                        quad.aspectRatio() > MINIMUM_ASPECT_RATIO
+                        && quad.aspectRatio() < MAXIMUM_ASPECT_RATIO
 
                         // Check if we are close enough to the visual horizon
                         && (utility::vision::visualHorizonAtPoint(image, quad.getBottomLeft()[0])

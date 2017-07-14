@@ -25,6 +25,7 @@ namespace input {
                         if (camera.second.isStreaming()) {
                             emit(std::make_unique<Image>(camera.second.getImage()));
                         }
+                        log(camera.second.isStreaming());
                     }
                     catch (std::system_error& e) {
                         log<NUClear::ERROR>(e.what());
@@ -43,37 +44,49 @@ namespace input {
         std::string deviceID = config["deviceID"];
         V4L2Camera camera    = V4L2Camera(config, deviceID);
 
-        V4L2SettingsHandle = on<Every<1, std::chrono::seconds>>().then("V4L2 Camera Setting Applicator", [this] {
+        V4L2SettingsHandle =
+            on<Every<1, std::chrono::seconds>>().then("V4L2 Camera Setting Applicator", [this, config] {
 
-            for (auto& camera : V4L2Cameras) {
-                try {
-                    if (camera.second.isStreaming()) {
-                        // Set all other camera settings
-                        for (auto& setting : camera.second.getConfig().config) {
-                            auto& settings = camera.second.getSettings();
-                            auto it        = settings.find(setting.first.as<std::string>());
+                for (auto& camera : V4L2Cameras) {
 
-                            if (it != settings.end()) {
-                                if (camera.second.setSetting(it->second, setting.second.as<int>()) == false) {
-                                    log<NUClear::DEBUG>("Failed to set", it->first, "on camera", camera.first);
+
+                    try {
+                        static uint errorCount = 0;
+
+                        if (camera.second.isStreaming()) {
+                            // Set all other camera settings
+                            for (auto& setting : camera.second.getConfig().config) {
+
+                                auto& settings = camera.second.getSettings();
+                                auto it        = settings.find(setting.first.as<std::string>());
+
+                                if (it != settings.end()) {
+                                    if (camera.second.setSetting(it->second, setting.second.as<int>()) == false) {
+                                        log<NUClear::DEBUG>("Failed to set", it->first, "on camera", camera.first);
+                                        errorCount++;
+                                    }
                                 }
+                            }
+                            if (errorCount > config["max_error_count"].as<uint>()) {
+                                errorCount = 0;
+                                throw std::system_error(
+                                    errno, std::system_category(), ("Camerea Settings Unresponsive"));
                             }
                         }
                     }
+                    catch (std::system_error& e) {
+                        log<NUClear::ERROR>(e.what());
+                        log("Resetting Camera");
+                        V4L2FrameRateHandle.disable();
+                        V4L2SettingsHandle.disable();
+                        camera.second.resetCamera();
+                        camera.second.startStreaming();
+                        V4L2SettingsHandle.enable();
+                        V4L2FrameRateHandle.enable();
+                        log("Camera Reset");
+                    }
                 }
-                catch (std::system_error& e) {
-                    log<NUClear::ERROR>(e.what());
-                    log("Resetting Camera");
-                    V4L2FrameRateHandle.disable();
-                    V4L2SettingsHandle.disable();
-                    camera.second.resetCamera();
-                    camera.second.startStreaming();
-                    V4L2SettingsHandle.enable();
-                    V4L2FrameRateHandle.enable();
-                    log("Camera Reset");
-                }
-            }
-        });
+            });
 
         camera.setSettingsHandle(V4L2SettingsHandle);
         auto cameraParameters = std::make_unique<CameraParameters>();
@@ -116,7 +129,8 @@ namespace input {
 
                 if (it != settings.end()) {
                     if (camera.setSetting(it->second, setting.second.as<int>()) == false) {
-                        log<NUClear::DEBUG>("Failed to set", it->first, "on camera", deviceID);
+                        throw std::system_error(
+                            errno, std::system_category(), ("Failed to set", it->first, "on camera", deviceID));
                     }
                 }
             }
@@ -205,19 +219,16 @@ namespace input {
 
         // Open the camera device
         fd = open(deviceID.c_str(), O_RDWR);
+        if (fd >= 0) {
+            std::cout << "Reopened Camera" << std::endl;
+        }
 
         // Check if we managed to open our file descriptor
         int resetCount = 0;
 
-        while (fd < 0 && resetCount < 100) {
+        while (fd < 0 && resetCount < 10) {
             std::cout << "Toggling GPIO" << std::endl;
-            std::ofstream gpio;
-            gpio.open("/sys/class/gpio/gpio8/value");
-            gpio << "0";
-            std::this_thread::sleep_for(std::chrono::milliseconds(150));
-            gpio << "1";
-            std::this_thread::sleep_for(std::chrono::milliseconds(100));
-            gpio.close();
+            system("/home/nubots/gpio_toggle.sh");
             fd = open(deviceID.c_str(), O_RDWR);
             resetCount++;
         }

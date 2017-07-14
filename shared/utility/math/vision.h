@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with the NUbots Codebase.  If not, see <http://www.gnu.org/licenses/>.
  *
- * Copyright 2013 NUBots <nubots@nubots.net>
+ * Copyright 2013 NUbots <nubots@nubots.net>
  */
 #ifndef UTILITY_MATH_VISION_H
 #define UTILITY_MATH_VISION_H
@@ -217,7 +217,7 @@ namespace math {
                 true)  // camtoground is either camera to ground or camera to world, depending on application
         {
             utility::math::matrix::Transform3D Hcf = getFieldToCam(robotPose, camToGround);
-            // NOTE: this code assumes that goalposts are boxes with width and high of goalpost_width
+            // NOTE: this code assumes that goalposts are boxes with width and high of goalpost_diameter
             // make the base goal corners
             arma::mat goalBaseCorners(4, 4);
             goalBaseCorners.row(3).fill(1.0);
@@ -225,6 +225,7 @@ namespace math {
             goalBaseCorners.submat(0, 0, 1, 3) -= 0.5 * field.dimensions.goalpost_width;
             goalBaseCorners.submat(0, 0, 1, 0) += field.dimensions.goalpost_width;
             goalBaseCorners.submat(1, 1, 2, 1) += field.dimensions.goalpost_width;
+
             // make the top corner points
             arma::mat goalTopCorners = goalBaseCorners;
 

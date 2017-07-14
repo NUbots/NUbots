@@ -14,17 +14,18 @@
  * You should have received a copy of the GNU General Public License
  * along with the NUbots Codebase.  If not, see <http://www.gnu.org/licenses/>.
  *
- * Copyright 2013 NUBots <nubots@nubots.net>
+ * Copyright 2013 NUbots <nubots@nubots.net>
  */
 
 #include "HardwareIO.h"
 #include "Convert.h"
 
+#include <iomanip>
+
 #include "extension/Configuration.h"
 
 #include "message/motion/ServoTarget.h"
 #include "message/platform/darwin/DarwinSensors.h"
-#include "message/platform/darwin/Firmware.h"
 
 #include "utility/math/angle.h"
 #include "utility/platform/darwin/DarwinSensors.h"
@@ -36,7 +37,6 @@ namespace platform {
     namespace darwin {
 
         using message::platform::darwin::DarwinSensors;
-        using message::platform::darwin::FlashCM730Firmware;
         using message::motion::ServoTarget;
         using extension::Configuration;
         using utility::support::Expression;
@@ -163,7 +163,17 @@ namespace platform {
         }
 
         HardwareIO::HardwareIO(std::unique_ptr<NUClear::Environment> environment)
-            : Reactor(std::move(environment)), darwin("/dev/CM730"), cm730State(), servoState(), hardwareLoop() {
+            : Reactor(std::move(environment)), darwin("/dev/CM730"), cm730State(), servoState() {
+
+            on<Startup>().then("HardwareIO Startup", [this] {
+                uint16_t CM730Model  = darwin.cm730.read<uint16_t>(Darwin::CM730::Address::MODEL_NUMBER_L);
+                uint8_t CM730Version = darwin.cm730.read<uint8_t>(Darwin::CM730::Address::VERSION);
+                std::stringstream version, model;
+                model << "0x" << std::setw(4) << std::setfill('0') << std::hex << int(CM730Model);
+                version << "0x" << std::setw(2) << std::setfill('0') << std::hex << int(CM730Version);
+                log<NUClear::INFO>("CM730 Model:", model.str());
+                log<NUClear::INFO>("CM730 Firmware Version:", version.str());
+            });
 
             on<Configuration>("DarwinPlatform.yaml").then([this](const Configuration& config) {
                 darwin.setConfig(config);
@@ -178,86 +188,85 @@ namespace platform {
             });
 
             // This trigger gets the sensor data from the CM730
-            hardwareLoop =
-                on<Every<90, Per<std::chrono::seconds>>, Single, Priority::HIGH>().then("Hardware Loop", [this] {
+            on<Every<90, Per<std::chrono::seconds>>, Single, Priority::HIGH>().then("Hardware Loop", [this] {
 
-                    // Our final sensor output
-                    auto sensors = std::make_unique<DarwinSensors>();
+                // Our final sensor output
+                auto sensors = std::make_unique<DarwinSensors>();
 
-                    std::vector<uint8_t> command = {0xFF,
-                                                    0xFF,
-                                                    Darwin::ID::BROADCAST,
-                                                    0x00,  // The size, fill this in later
-                                                    Darwin::DarwinDevice::Instruction::SYNC_WRITE,
-                                                    Darwin::MX28::Address::D_GAIN,
-                                                    0x0A};
+                std::vector<uint8_t> command = {0xFF,
+                                                0xFF,
+                                                Darwin::ID::BROADCAST,
+                                                0x00,  // The size, fill this in later
+                                                Darwin::DarwinDevice::Instruction::SYNC_WRITE,
+                                                Darwin::MX28::Address::D_GAIN,
+                                                0x0A};
 
-                    for (uint i = 0; i < servoState.size(); ++i) {
+                for (uint i = 0; i < servoState.size(); ++i) {
 
-                        if (servoState[i].dirty) {
+                    if (servoState[i].dirty) {
 
-                            // Clear our dirty flag
-                            servoState[i].dirty = false;
+                        // Clear our dirty flag
+                        servoState[i].dirty = false;
 
-                            // If our torque should be disabled then we disable our torque
-                            if (servoState[i].torqueEnabled
-                                && (std::isnan(servoState[i].goalPosition) || servoState[i].torque == 0)) {
-                                servoState[i].torqueEnabled = false;
-                                darwin[i + 1].write(Darwin::MX28::Address::TORQUE_ENABLE, false);
+                        // If our torque should be disabled then we disable our torque
+                        if (servoState[i].torqueEnabled
+                            && (std::isnan(servoState[i].goalPosition) || servoState[i].torque == 0)) {
+                            servoState[i].torqueEnabled = false;
+                            darwin[i + 1].write(Darwin::MX28::Address::TORQUE_ENABLE, false);
+                        }
+                        else {
+                            // If our torque was disabled but is now enabled
+                            if (!servoState[i].torqueEnabled && !std::isnan(servoState[i].goalPosition)
+                                && servoState[i].torque != 0) {
+                                servoState[i].torqueEnabled = true;
+                                darwin[i + 1].write(Darwin::MX28::Address::TORQUE_ENABLE, true);
                             }
-                            else {
-                                // If our torque was disabled but is now enabled
-                                if (!servoState[i].torqueEnabled && !std::isnan(servoState[i].goalPosition)
-                                    && servoState[i].torque != 0) {
-                                    servoState[i].torqueEnabled = true;
-                                    darwin[i + 1].write(Darwin::MX28::Address::TORQUE_ENABLE, true);
-                                }
 
-                                // Get our goal position and speed
-                                uint16_t goalPosition = Convert::servoPositionInverse(i, servoState[i].goalPosition);
-                                uint16_t movingSpeed  = Convert::servoSpeedInverse(servoState[i].movingSpeed);
-                                uint16_t torque       = Convert::torqueLimitInverse(servoState[i].torque);
+                            // Get our goal position and speed
+                            uint16_t goalPosition = Convert::servoPositionInverse(i, servoState[i].goalPosition);
+                            uint16_t movingSpeed  = Convert::servoSpeedInverse(servoState[i].movingSpeed);
+                            uint16_t torque       = Convert::torqueLimitInverse(servoState[i].torque);
 
-                                // Add to our sync write command
-                                command.insert(command.end(),
-                                               {
-                                                   uint8_t(i + 1),
-                                                   Convert::gainInverse(servoState[i].dGain),  // D Gain
-                                                   Convert::gainInverse(servoState[i].iGain),  // I Gain
-                                                   Convert::gainInverse(servoState[i].pGain),  // P Gain
-                                                   0,                                          // Reserved
-                                                   uint8_t(0xFF & goalPosition),               // Goal Position L
-                                                   uint8_t(0xFF & (goalPosition >> 8)),        // Goal Position H
-                                                   uint8_t(0xFF & movingSpeed),                // Goal Speed L
-                                                   uint8_t(0xFF & (movingSpeed >> 8)),         // Goal Speed H
-                                                   uint8_t(0xFF & torque),                     // Torque Limit L
-                                                   uint8_t(0xFF & (torque >> 8))               // Torque Limit H
-                                               });
-                            }
+                            // Add to our sync write command
+                            command.insert(command.end(),
+                                           {
+                                               uint8_t(i + 1),
+                                               Convert::gainInverse(servoState[i].dGain),  // D Gain
+                                               Convert::gainInverse(servoState[i].iGain),  // I Gain
+                                               Convert::gainInverse(servoState[i].pGain),  // P Gain
+                                               0,                                          // Reserved
+                                               uint8_t(0xFF & goalPosition),               // Goal Position L
+                                               uint8_t(0xFF & (goalPosition >> 8)),        // Goal Position H
+                                               uint8_t(0xFF & movingSpeed),                // Goal Speed L
+                                               uint8_t(0xFF & (movingSpeed >> 8)),         // Goal Speed H
+                                               uint8_t(0xFF & torque),                     // Torque Limit L
+                                               uint8_t(0xFF & (torque >> 8))               // Torque Limit H
+                                           });
                         }
                     }
+                }
 
-                    // Write our data (if we need to)
-                    if (command.size() > 7) {
-                        // Calculate our length
-                        command[Darwin::Packet::LENGTH] = command.size() - 3;
+                // Write our data (if we need to)
+                if (command.size() > 7) {
+                    // Calculate our length
+                    command[Darwin::Packet::LENGTH] = command.size() - 3;
 
-                        // Do a checksum
-                        command.push_back(0);
-                        command.back() = Darwin::calculateChecksum(command.data());
+                    // Do a checksum
+                    command.push_back(0);
+                    command.back() = Darwin::calculateChecksum(command.data());
 
-                        darwin.sendRawCommand(command);
-                    }
+                    darwin.sendRawCommand(command);
+                }
 
-                    // Read our data
-                    Darwin::BulkReadResults data = darwin.bulkRead();
+                // Read our data
+                Darwin::BulkReadResults data = darwin.bulkRead();
 
-                    // Parse our data
-                    *sensors = parseSensors(data);
+                // Parse our data
+                *sensors = parseSensors(data);
 
-                    // Send our nicely computed sensor data out to the world
-                    emit(std::move(sensors));
-                });
+                // Send our nicely computed sensor data out to the world
+                emit(std::move(sensors));
+            });
 
             // This trigger writes the servo positions to the hardware
             on<Trigger<std::vector<ServoTarget>>, With<DarwinSensors>>().then([this](
@@ -329,136 +338,6 @@ namespace platform {
                                    Convert::colourLEDInverse(static_cast<uint8_t>((led.RGB & 0x00FF0000) >> 24),
                                                              static_cast<uint8_t>((led.RGB & 0x0000FF00) >> 8),
                                                              static_cast<uint8_t>(led.RGB & 0x000000FF)));
-            });
-
-            on<Trigger<FlashCM730Firmware>>().then([this](const FlashCM730Firmware& fw) {
-                // Disable the hardware loop reaction. We don't want to be interrupted.
-                hardwareLoop.disable();
-
-                log<NUClear::INFO>("Press DARwIn-OP's Reset button to start...");
-
-                std::vector<uint8_t> buf;
-
-                for (size_t retries = 0; retries < 100; retries++) {
-                    darwin.cm730.writeBytes(std::vector<uint8_t>{'#'});
-
-                    std::this_thread::sleep_for(std::chrono::milliseconds(20));
-
-                    if (darwin.cm730.readBytes(buf, 1) > 0) {
-                        if (buf.front() == '#') {
-                            darwin.cm730.writeBytes(std::vector<uint8_t>{'\r'});
-                            break;
-                        }
-                    }
-                }
-
-                /*+++ start download +++*/
-                darwin.cm730.writeBytes(std::vector<uint8_t>{'l', '\r'});
-
-                for (size_t retries = 0; retries < 100; retries++) {
-                    std::this_thread::sleep_for(std::chrono::milliseconds(135));
-
-                    size_t count = 0;
-
-                    if ((count = darwin.cm730.readBytes(buf, 256)) > 0) {
-                        if (count == 256) {
-                            buf.push_back(0);
-                        }
-
-                        else {
-                            buf[count] = 0;
-                        }
-
-                        std::stringstream data;
-                        std::copy(buf.begin(), buf.end(), std::ostream_iterator<uint8_t>(data, ""));
-                        log<NUClear::INFO>(data.str());
-                    }
-
-                    else {
-                        log<NUClear::INFO>("Erase block complete...");
-                        break;
-                    }
-                }
-
-                std::this_thread::sleep_for(std::chrono::milliseconds(100));
-
-                // Calculate checksum.
-                uint8_t byteSum = 0x00;
-
-                std::for_each(fw.firmware.begin() + fw.startAddress,
-                              fw.firmware.begin() + (fw.startAddress + (128 * 1024)),
-                              [&](const uint8_t& byte) { byteSum += byte; });
-
-                const size_t MAX_UNIT = 64;
-                size_t size           = 0;
-
-                while (size < fw.binSize) {
-                    size_t unit = fw.binSize - size;
-
-                    if (unit > MAX_UNIT) {
-                        unit = MAX_UNIT;
-                    }
-
-                    size_t offset = fw.startAddress + size;
-
-                    size_t count = darwin.cm730.writeBytes(
-                        std::vector<uint8_t>{fw.firmware.begin() + offset, fw.firmware.begin() + offset + unit});
-
-                    if (count > 0) {
-                        size += count;
-                        log<NUClear::INFO>("Downloading Firmware:", size, "bytes out of", fw.binSize, "bytes written.");
-                    }
-                }
-
-                darwin.cm730.writeBytes(std::vector<uint8_t>{byteSum});
-                log<NUClear::INFO>("Downloading Bytesum:", byteSum);
-
-                for (int x = 0; x < 100; x++) {
-                    std::this_thread::sleep_for(std::chrono::milliseconds(10));
-
-                    size_t count = 0;
-
-                    if ((count = darwin.cm730.readBytes(buf, 256)) > 0) {
-                        if (count == 256) {
-                            buf.push_back(0);
-                        }
-
-                        else {
-                            buf[count] = 0;
-                        }
-
-                        std::stringstream data;
-                        std::copy(buf.begin(), buf.end(), std::ostream_iterator<uint8_t>(data, ""));
-                        log<NUClear::INFO>(data.str());
-                    }
-                }
-                /*--- end download ---*/
-
-                std::this_thread::sleep_for(std::chrono::milliseconds(10));
-
-                // Exit bootloader
-                darwin.cm730.writeBytes(std::vector<uint8_t>{'\r', 'g', 'o', '\r'});
-
-                std::this_thread::sleep_for(std::chrono::milliseconds(50));
-
-                size_t count = 0;
-
-                if ((count = darwin.cm730.readBytes(buf, 256)) > 0) {
-                    if (count == 256) {
-                        buf.push_back(0);
-                    }
-
-                    else {
-                        buf[count] = 0;
-                    }
-
-                    std::stringstream data;
-                    std::copy(buf.begin(), buf.end(), std::ostream_iterator<uint8_t>(data, ""));
-                    log<NUClear::INFO>(data.str());
-                }
-
-                // Reenable hardware loop.
-                hardwareLoop.enable();
             });
         }
     }  // namespace darwin

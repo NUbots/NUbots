@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with OldWalkEngine.  If not, see <http://www.gnu.org/licenses/>.
  *
- * Copyright 2013 NUBots <nubots@nubots.net>
+ * Copyright 2013 NUbots <nubots@nubots.net>
  */
 
 #include "OldWalkEngine.h"
@@ -77,6 +77,7 @@ namespace motion {
 
     OldWalkEngine::OldWalkEngine(std::unique_ptr<NUClear::Environment> environment)
         : Reactor(std::move(environment))
+
         , updateHandle()
         , state()
         , startFromStep(false)
@@ -140,29 +141,27 @@ namespace motion {
         , hipRollCompensation(0.0)
         , STAND_SCRIPT_DURATION(0.0)
         , generateStandScriptReaction() {
-
         // , subsumptionId(size_t(this) * size_t(this) - size_t(this)) {
 
         // emit<Scope::INITIALIZE>(std::make_unique<RegisterAction>(RegisterAction {
         //     subsumptionId,
         //     "Walk Engine",
         //     {
-        //         std::pair<double, std::set<LimbID>>(0, {LimbID::LEFT_LEG, LimbID::RIGHT_LEG}),
-        //         std::pair<double, std::set<LimbID>>(0, {LimbID::LEFT_ARM, LimbID::RIGHT_ARM}),
+        //         std::pair<double, std::set<LimbID>>(0, {LimbID::LEFT_LEG,
+        //         LimbID::RIGHT_LEG}), std::pair<double, std::set<LimbID>>(0,
+        //         {LimbID::LEFT_ARM, LimbID::RIGHT_ARM}),
         //     },
         //     [this] (const std::set<LimbID>& givenLimbs) {
         //         if (givenLimbs.find(LimbID::LEFT_LEG) != givenLimbs.end()) {
         //             // legs are available, start
-        //             stanceReset(); // reset stance as we don't know where our limbs are
-        //             interrupted = false;
-        //             updateHandle.enable();
+        //             stanceReset(); // reset stance as we don't know where our limbs
+        //             are interrupted = false; updateHandle.enable();
         //         }
         //     },
         //     [this] (const std::set<LimbID>& takenLimbs) {
         //         if (takenLimbs.find(LimbID::LEFT_LEG) != takenLimbs.end()) {
-        //             // legs are no longer available, reset walking (too late to stop walking)
-        //             updateHandle.disable();
-        //             interrupted = true;
+        //             // legs are no longer available, reset walking (too late to
+        //             stop walking) updateHandle.disable(); interrupted = true;
         //         }
         //     },
         //     [this] (const std::set<ServoID>&) {
@@ -172,7 +171,6 @@ namespace motion {
 
         on<Startup, Trigger<KinematicsModel>>().then("Update Kin Model",
                                                      [this](const KinematicsModel& model) { kinematicsModel = model; });
-
 
         on<Trigger<EnableWalkEngineCommand>>().then([this](const EnableWalkEngineCommand& command) {
             subsumptionId = command.subsumptionId;
@@ -218,8 +216,8 @@ namespace motion {
 
         // TODO: finish push detection and compensation
         // pushTime = NUClear::clock::now();
-        // on<Trigger<PushDetection>, With<Configuration>>().then([this](const PushDetection& pd, const Configuration&
-        // config) {
+        // on<Trigger<PushDetection>, With<Configuration>>().then([this](const
+        // PushDetection& pd, const Configuration& config) {
         //     balanceEnabled = true;
         //     // balanceAmplitude = balance["amplitude"].as<Expression>();
         //     // balanceWeight = balance["weight"].as<Expression>();
@@ -237,11 +235,11 @@ namespace motion {
         // >().then([this](const Configuration& config) {
         //     [this](const WalkOptimiserCommand& command) {
         //     if ((NUClear::clock::now() - pushTime) >
-        //     std::chrono::milliseconds(config["walk_cycle"]["balance"]["balance_time"].as<int>)) {
+        //     std::chrono::milliseconds(config["walk_cycle"]["balance"]["balance_time"].as<int>))
+        //     {
         //         balancer.configure(config["walk_cycle"]["balance"]);
         //     }
         // });
-
 
         on<Trigger<WalkOptimiserCommand>>().then([this](const WalkOptimiserCommand& command) {
             configure(YAML::Load(command.walkConfig));
@@ -259,7 +257,6 @@ namespace motion {
     }
 
     void OldWalkEngine::configure(const YAML::Node& config) {
-
         auto& stance = config["stance"];
         bodyHeight   = stance["body_height"].as<Expression>();
         bodyTilt     = stance["body_tilt"].as<Expression>();
@@ -455,27 +452,12 @@ namespace motion {
 
     void OldWalkEngine::stop() {
         state = State::STOPPED;
-        // emit(std::make_unique<ActionPriorites>(ActionPriorites { subsumptionId, { 0, 0 }})); // TODO: config
+        // emit(std::make_unique<ActionPriorites>(ActionPriorites { subsumptionId, {
+        // 0, 0 }})); // TODO: config
         log<NUClear::TRACE>("Walk Engine:: Stop request complete");
         emit(std::make_unique<WalkStopped>());
         emit(std::make_unique<std::vector<ServoCommand>>());
     }
-
-    /*
-    void OldWalkEngine::localise(Transform2D position) {
-        // emit position as a fake localisation
-        auto localisation = std::make_unique<std::vector<message::localisation::Self>>();
-        message::localisation::Self self;
-        self.locObject.position << position.x(), position.y();
-        self.locObject.position_cov = Eigen::Matrix2d::Identity() * 0.1; // made up
-        self.heading << std::cos(position.angle()), std::sin(position.angle()); // convert to cartesian coordinates
-        self.velocity.setZero(); // not used
-        self.robot_to_world_rotation.setZero(); // not used
-        localisation->push_back(self);
-        emit(std::move(localisation));
-    }
-    */
-
     void OldWalkEngine::update(const Sensors& sensors) {
         double now = getTime();
 
@@ -652,14 +634,15 @@ namespace motion {
     }
 
     std::unique_ptr<std::vector<ServoCommand>> OldWalkEngine::motionArms(double phase) {
-
-        // Converts the phase into a sine wave that oscillates between 0 and 1 with a period of 2 phases
+        // Converts the phase into a sine wave that oscillates between 0 and 1 with a
+        // period of 2 phases
         double easing = std::sin(M_PI * phase - M_PI / 2.0) / 2.0 + 0.5;
         if (swingLeg == LimbID::LEFT_LEG) {
             easing = -easing + 1.0;  // Gets the 2nd half of the sine wave
         }
 
-        // Linearly interpolate between the start and end positions using the easing parameter
+        // Linearly interpolate between the start and end positions using the easing
+        // parameter
         arma::vec3 qLArmActual = easing * qLArmStart + (1.0 - easing) * qLArmEnd;
         arma::vec3 qRArmActual = (1.0 - easing) * qRArmStart + easing * qRArmEnd;
 
@@ -758,9 +741,9 @@ namespace motion {
         /*
         Solves ZMP equations.
         The resulting form of x is
-        x(t) = z(t) + aP*exp(t/zmpTime) + aN*exp(-t/zmpTime) - zmpTime*mi*sinh((t-Ti)/zmpTime)
-        where the ZMP point is piecewise linear:
-        z(0) = z1, z(T1 < t < T2) = zs, z(stepTime) = z2
+        x(t) = z(t) + aP*exp(t/zmpTime) + aN*exp(-t/zmpTime) -
+        zmpTime*mi*sinh((t-Ti)/zmpTime) where the ZMP point is piecewise linear: z(0)
+        = z1, z(T1 < t < T2) = zs, z(stepTime) = z2
         */
         double T1 = stepTime * phase1Single;
         double T2 = stepTime * phase2Single;

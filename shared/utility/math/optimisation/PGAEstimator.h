@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with the NUbots Codebase.  If not, see <http://www.gnu.org/licenses/>.
  *
- * Copyright 2014 NUBots <nubots@nubots.net>
+ * Copyright 2014 NUbots <nubots@nubots.net>
  */
 
 #ifndef UTILITY_MATH_OPTIMISATION_PGA_H

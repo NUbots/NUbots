@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with the NUbots Codebase.  If not, see <http://www.gnu.org/licenses/>.
  *
- * Copyright 2013 NUBots <nubots@nubots.net>
+ * Copyright 2013 NUbots <nubots@nubots.net>
  */
 
 #ifndef MODULES_BEHAVIOUR_SKILLS_SEARCHER_H
@@ -81,7 +81,7 @@ namespace behaviour {
                 // std::sort(relativePoints.begin(),relativePoints.end(),pair_comparator);
                 // std::vector<T> newPoints(relativePoints.size());
                 // for(uint i = 0; i < relativePoints.size(); i++){
-                // 	newPoints[i] = points[relativePoints[i].first];
+                //  newPoints[i] = points[relativePoints[i].first];
                 // }
                 // points = newPoints;
             }

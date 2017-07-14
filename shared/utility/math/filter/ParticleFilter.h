@@ -23,6 +23,7 @@
 #define UTILITY_MATH_FILTER_PARTICLEFILTER_H
 
 #include <armadillo>
+#include <iostream>
 #include <nuclear>
 #include <random>
 #include <vector>
@@ -92,6 +93,7 @@ namespace math {
                 return new_particles;
             }
 
+
             template <typename... TAdditionalParameters>
             void timeUpdate(double deltaT, const TAdditionalParameters&... additionalParameters) {
                 // Sample single zero mean gaussian with process noise (represented by a gaussian mixture model of size
@@ -101,6 +103,7 @@ namespace math {
                                     arma::mat(model.processNoise().diag() * deltaT),
                                     arma::ones(1));
                 for (unsigned int i = 0; i < particles.n_rows; ++i) {
+
                     StateVec newpcle =
                         model.timeUpdate(particles.row(i).t(), deltaT, additionalParameters...) + gaussian.generate();
                     particles.row(i) = newpcle.t();
@@ -166,8 +169,7 @@ namespace math {
                         model.predictedObservation(repCandidateParticles.row(i).t(),
                                                    possibilities[i / candidateParticles.n_rows],
                                                    measurementArgs...);
-                    arma::vec difference = predictedObservation - measurement;
-                    weights[i]           = std::exp(-arma::dot(difference, (measurement_variance.i() * difference)));
+                    weights[i] = std::exp(-arma::dot(difference, (measurement_variance.i() * difference)));
                 }
 
                 // Resample

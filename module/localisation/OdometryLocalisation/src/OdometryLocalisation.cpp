@@ -51,9 +51,8 @@ namespace localisation {
             selfs->push_back(Self());
             selfs->back().locObject.position = convert<double, 2, 1>(state.xy());
             selfs->back().heading            = Eigen::Vector2d(std::cos(state.angle()), std::sin(state.angle()));
-
             emit(selfs);
         });
     }
-}  // namespace localisation
-}  // namespace module
+}
+}

@@ -53,7 +53,6 @@ namespace util {
                 return XXH64(typeName.c_str(), typeName.size(), 0x4e55436c);
             }
         };
-
     }  // namespace serialise
 }  // namespace util
 }  // namespace NUClear

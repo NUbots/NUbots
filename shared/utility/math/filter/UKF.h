@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with the NUbots Codebase.  If not, see <http://www.gnu.org/licenses/>.
  *
- * Copyright 2013 NUBots <nubots@nubots.net>
+ * Copyright 2013 NUbots <nubots@nubots.net>
  */
 
 #ifndef UTILITY_MATH_FILTER_UKF_H
@@ -230,8 +230,9 @@ namespace math {
                         arma::mat innovationVariance       = predictedCovariance + measurementVariance;
                         arma::mat scalarlikelihoodExponent = ((innovation.t() * innovationVariance.i()) * innovation);
                         double loglikelihood =
-                            0.5 * (std::log(arma::det(innovationVariance)) + std::abs(scalarlikelihoodExponent[0])
-                                   + innovation.n_elem * std::log(2 * M_PI));
+                            0.5
+                            * (std::log(arma::det(innovationVariance)) + std::abs(scalarlikelihoodExponent[0])
+                               + innovation.n_elem * std::log(2 * M_PI));
                         return -loglikelihood;
                     });
             }

@@ -63,4 +63,5 @@ namespace input {
 }  // namespace input
 }  // namespace module
 
+
 #endif  // MODULE_INPUT_CAMERA_H

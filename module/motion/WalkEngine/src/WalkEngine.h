@@ -14,13 +14,13 @@
  * You should have received a copy of the GNU General Public License
  * along with the NUbots Codebase.  If not, see <http://www.gnu.org/licenses/>.
  *
- * Copyright 2013 NUBots <nubots@nubots.net>
+ * Copyright 2013 NUbots <nubots@nubots.net>
  */
 
 #ifndef MODULES_MOTION_WALKENGINE_H
 #define MODULES_MOTION_WALKENGINE_H
 
-#error "DONT USE ME I AM NOT FINISHED"
+#warning "DONT USE ME I AM NOT FINISHED"
 
 #include <algorithm>
 #include <armadillo>

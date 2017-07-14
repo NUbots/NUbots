@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with the NUbots Codebase.  If not, see <http://www.gnu.org/licenses/>.
  *
- * Copyright 2013 NUBots <nubots@nubots.net>
+ * Copyright 2013 NUbots <nubots@nubots.net>
  */
 
 #ifndef MODULES_INPUT_V4L2CAMERA_H
@@ -80,7 +80,6 @@ namespace input {
         bool streaming;
 
         NUClear::threading::ReactionHandle cameraHandle;
-
         NUClear::threading::ReactionHandle settingsHandle;
 
         /// @brief Configuration information for this camera.
@@ -252,8 +251,8 @@ namespace input {
 
         bool setSetting(unsigned int id, int32_t value);
     };
-
 }  // namespace input
 }  // namespace module
+
 
 #endif  // MODULES_INPUT_V4L2CAMERA_H

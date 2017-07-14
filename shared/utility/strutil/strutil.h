@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with the NUbots Codebase.  If not, see <http://www.gnu.org/licenses/>.
  *
- * Copyright 2013 NUBots <nubots@nubots.net>
+ * Copyright 2013 NUbots <nubots@nubots.net>
  */
 
 #ifndef UTILITY_STRUTIL_H
@@ -89,6 +89,14 @@ namespace strutil {
         str.erase(std::remove_if(
                       str.begin(), str.end(), [&tokens](const char& c) { return tokens.find(c) != std::string::npos; }),
                   str.end());  // remove all tokens from the string.
+    }
+
+    inline std::string toUpper(const std::string& input) {
+        std::string output = input;
+
+        std::transform(output.begin(), output.end(), output.begin(), ::toupper);
+
+        return output;
     }
 }  // namespace strutil
 }  // namespace utility
