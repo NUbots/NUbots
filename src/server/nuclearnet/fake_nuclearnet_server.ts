@@ -60,6 +60,7 @@ export class FakeNUClearNetServer {
       const packet = {
         peer: client.peer,
         payload: opts.payload,
+        reliable: !!opts.reliable,
       }
 
       /*
