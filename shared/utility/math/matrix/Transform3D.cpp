@@ -113,13 +113,13 @@ namespace matrix {
     }
 
 
-    arma::vec3 Transform3D::transformPoint(const arma::vec3& p){
+    arma::vec3 Transform3D::transformPoint(const arma::vec3& p) const{
         arma::vec4 p4 = arma::join_cols(p,arma::vec({1}));
         arma::vec4 result4 = *this * p4;
         return result4.rows(0,2);
     }
 
-    arma::vec3 Transform3D::transformVector(const arma::vec3& p){
+    arma::vec3 Transform3D::transformVector(const arma::vec3& p) const{
         arma::vec4 p4 = arma::join_cols(p,arma::vec({0}));
         arma::vec4 result4 = *this * p4;
         return result4.rows(0,2);
@@ -244,13 +244,13 @@ namespace matrix {
         Rotation3D worldToNewSpace = newSpaceToWorld.i();
         arma::vec3 rNewSpace =  worldToNewSpace * r;
         result.xy() = rNewSpace.rows(0,1);
-        
+
         //Rotation
         Rotation3D rot = rotation();
         arma::vec3 x = rot.x();
-        arma::vec3 xNew = worldToNewSpace * x; 
+        arma::vec3 xNew = worldToNewSpace * x;
         float theta_x_from_f = std::atan2(xNew[1],xNew[0]);//sin/cos
-        result.angle() = theta_x_from_f; 
+        result.angle() = theta_x_from_f;
 
         // std::cerr << "in = \n" << *this << std::endl;
         // std::cerr << "out = \n" << result << std::endl;

@@ -26,6 +26,7 @@
 #include "message/input/Sensors.h"
 #include "utility/math/matrix/Rotation3D.h"
 #include "message/vision/VisionObjects.h"
+#include "utility/math/matrix/Transform3D.h"
 
 
 namespace module {

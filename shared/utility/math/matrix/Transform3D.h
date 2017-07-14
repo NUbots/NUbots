@@ -70,7 +70,7 @@ namespace matrix {
              * @brief Convert from a Rotation3D matrix
              */
 
-            Transform(const Rotation3D& rotation); 
+            Transform(const Rotation3D& rotation);
 
             /**
              * @brief Convert from a Rotation3D matrix
@@ -171,8 +171,8 @@ namespace matrix {
              */
             Transform3D localToWorld(const Transform3D& reference) const;
 
-            arma::vec3 transformPoint(const arma::vec3& p);
-            arma::vec3 transformVector(const arma::vec3& p);
+            arma::vec3 transformPoint(const arma::vec3& p) const;
+            arma::vec3 transformVector(const arma::vec3& p) const;
 
             /**
              * @brief Performs an orthonormal inverse and returns a new copy
@@ -256,9 +256,9 @@ namespace matrix {
              * @return The rotation transform
              */
             static Transform3D createRotationZ(double radians);
-            
+
             static Transform3D createScale(const arma::vec3& v);
-            
+
             /**
              * @brief Interpolates between two transforms
              *
@@ -268,7 +268,7 @@ namespace matrix {
             static Transform3D interpolate(Transform3D T1, Transform3D T2, float alpha);
 
             /**
-             * @brief Construct transform from a transform 3D assuming the angle is around the yawAxis 
+             * @brief Construct transform from a transform 3D assuming the angle is around the yawAxis
              * and the translation is projected onto the plane normal to yawAxis
              */
             Transform2D projectTo2D(const arma::vec3& yawAxis = arma::vec3({0,0,1}), const arma::vec3& forwardAxis = arma::vec3({1,0,0})) const;
