@@ -264,7 +264,6 @@ namespace input {
             if (newOwnPlayer.penaltyState != oldOwnPlayer.penaltyState
                 && newOwnPlayer.penaltyState != gamecontroller::PenaltyState::UNPENALISED) {
 
-                log("Penalised");
                 auto unpenalisedTime = NUClear::clock::now() + std::chrono::seconds(newOwnPlayer.penalisedTimeLeft);
                 auto reason          = getPenaltyReason(newOwnPlayer.penaltyState);
                 stateChanges.push_back([this, playerId, unpenalisedTime, reason] {
