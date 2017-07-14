@@ -1,5 +1,5 @@
 export interface Simulator {
-  simulate(time: number): Message[]
+  simulate(time: number, index: number, numRobots: number): Message[]
 }
 
 export interface Message {
