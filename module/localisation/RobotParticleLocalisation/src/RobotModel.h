@@ -74,7 +74,18 @@ namespace localisation {
         int getRogueCount() const {return n_rogues;}
         arma::vec getRogueRange() const {return resetRange;}
 
-
+        arma::vec3 getCylindricalPostCamSpaceNormal(
+                                    const message::vision::Goal::MeasurementType& type,
+                                    const arma::vec3& post_centre,
+                                    const utility::math::matrix::Transform3D& Hcf,
+                                    const message::support::FieldDescription& fd
+                                    );
+        arma::vec3 getSquarePostCamSpaceNormal(
+                                    const message::vision::Goal::MeasurementType& type,
+                                    const arma::vec3& post_centre,
+                                    const utility::math::matrix::Transform3D& Hcf,
+                                    const message::support::FieldDescription& fd
+                                    );
         //TODO: use these again?
         // struct Config {
         //     double processNoisePositionFactor = 1e-3;

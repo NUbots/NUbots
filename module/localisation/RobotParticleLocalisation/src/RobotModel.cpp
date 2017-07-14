@@ -65,7 +65,7 @@ namespace localisation {
         const Sensors& sensors,
         const Goal::MeasurementType& type,
         const FieldDescription& fd) {
-        
+
         // Get our transform to world coordinates
         const Transform3D& Htw = convert<double, 4, 4>(sensors.world);
         const Transform3D& Htc = convert<double, 4, 4>(sensors.forwardKinematics.at(ServoID::HEAD_PITCH));
@@ -80,61 +80,31 @@ namespace localisation {
         Transform3D Htf = Htw * Hfw.i();
 
         //rZFf = vector from field origin to zenith high in the sky
-        arma::vec3 rZFf = {0,0,1000000};
-        arma::vec3 rZCc = Hcf.transformPoint(rZFf);
+        arma::vec3 rZFf = {0,0,1};
+        arma::vec3 rZCc = Hcf.transformVector(rZFf);
+
+        if (type == Goal::MeasurementType::CENTRE){
+            //rGCc = vector from camera to goal post expected position
+            arma::vec3 rGCc = Hcf.transformPoint(arma::vec3{actual_position[0],actual_position[1],0});
+            arma::vec3 rGCc_sph = cartesianToSpherical(rGCc); // in r,theta,phi
+            return rGCc_sph;
+        }
 
         switch(FieldDescription::GoalpostType::Value(fd.dimensions.goalpost_type)) {
             case FieldDescription::GoalpostType::CIRCLE: {
-                if (type == Goal::MeasurementType::CENTRE){
-                    //rGCc = vector from camera to goal post expected position
-                    arma::vec3 rGCc = Hcf.transformPoint(arma::vec3{actual_position[0],actual_position[1],0});
-                    arma::vec3 rGCc_sph = cartesianToSpherical(rGCc); // in r,theta,phi
-                    return rGCc_sph;
-                }
-                else if (type == Goal::MeasurementType::LEFT_NORMAL){
-                    //rGFf = vector from field origin to goal post expected position.
-                    arma::vec3 rGFf = {actual_position[0], actual_position[1], 0};
-                    arma::vec3 rGCc = Hcf.transformPoint(rGFf);
-                    
-                    // Finding the vector from robot to the goal
-                    arma::vec3 rRFf = Htf.translation();
-                    arma::vec3 rGRf = rGFf - rRFf;
-                    // The vector pointing from the robot off to the left from a cross product
-                    arma::vec3 rLRf = 1000000*arma::normalise(arma::cross(rZFf,rGFf));
-
-                    // Find the vector to the top and bottom left edge points. bl = bottom left, tl = top left.
-                    // TODO: Circular Tangental effect
-                    arma::vec3 rG_blCc = rGCc + 0.5*fd.dimensions.goalpost_width*arma::normalise(rLRf);
-                    arma::vec3 rG_tlCc = rG_blCc + fd.dimensions.goal_crossbar_height*arma::normalise(rZCc);
-
-                    //creating the normal vector (following convention stipulated in VisionObjects)
-                    arma::vec3 rNCc = arma::normalise(arma::cross(rG_blCc, rG_tlCc));
+                if (type == Goal::MeasurementType::LEFT_NORMAL || type == Goal::MeasurementType::RIGHT_NORMAL){
+                    arma::vec3 rNCc = getCylindricalPostCamSpaceNormal(type, post_centre, Hcf, fd);
                     arma::vec2 angles = { std::atan2(rNCc[1],rNCc[0]) , std::atan2(rNCc[2],std::sqrt(rNCc[0]*rNCc[0] + rNCc[1]*rNCc[1]))};
                     return angles;
                 }
-                else if (type == Goal::MeasurementType::RIGHT_NORMAL){
-                    //rGFf = vector from field origin to goal post expected position.
-                    arma::vec3 rGFf = {actual_position[0], actual_position[1], 0};
-                    arma::vec3 rGCc = Hcf.transformPoint(rGFf);
-
-                    // Finding the vector from robot to the goal
-                    arma::vec3 rRFf = Htf.translation();
-                    arma::vec3 rGRf = rGFf - rRFf;
-                    // The vector pointing from the robot off to the left from a cross product
-                    arma::vec3 rLRf = 1000000*arma::normalise(arma::cross(rZFf,rGFf));
-
-                    // Find the vector to the top and bottom right edge points  bl = bottom left, tl = top left.
-                    // TODO: Circular Tangental effect
-                    arma::vec3 rG_brCc = rGCc - 0.5*fd.dimensions.goalpost_width*arma::normalise(rLRf);
-                    arma::vec3 rG_trCc = rG_brCc + fd.dimensions.goal_crossbar_height*arma::normalise(rZCc);
-                    
-                    //creating the normal vector (following convention stipulated in VisionObjects)
-                    arma::vec3 rNCc = arma::normalise(arma::cross(rG_trCc, rG_brCc));
-                    arma::vec2 angles = { std::atan2(rNCc[1],rNCc[0]) , std::atan2(rNCc[2],std::sqrt(rNCc[0]*rNCc[0] + rNCc[1]*rNCc[1]))};
-                    return angles;
-                }
-            } break;
+                break;
             case FieldDescription::GoalpostType::RECTANGLE: {
+                if (type == Goal::MeasurementType::LEFT_NORMAL || type == Goal::MeasurementType::RIGHT_NORMAL){
+                    arma::vec3 rNCc = getSquarePostCamSpaceNormal(type, post_centre, Hcf, fd);
+                    arma::vec2 angles = { std::atan2(rNCc[1],rNCc[0]) , std::atan2(rNCc[2],std::sqrt(rNCc[0]*rNCc[0] + rNCc[1]*rNCc[1]))};
+                    return angles;
+                }
+                break;
                 // Finding 4 corners of goalpost (4 corners x XY)
                 arma::mat goalBaseCorners(4,3);
                 goalBaseCorners.submat(0,0,3,1).each_row() = actual_position.t();
@@ -145,13 +115,7 @@ namespace localisation {
                 goalBaseCorners.submat(0,1,0,1) += 0.5*fd.dimensions.goalpost_width; // y for front left goal corners
                 goalBaseCorners.submat(3,1,3,1) += 0.5*fd.dimensions.goalpost_width; // y for back  left goal corners
 
-                if (type == Goal::MeasurementType::CENTRE){
-                    //rGCc = vector from camera to goal post expected position
-                    arma::vec3 rGCc = Hcf.transformPoint(arma::vec3{actual_position[0],actual_position[1],0});
-                    arma::vec3 rGCc_sph = cartesianToSpherical(rGCc); // in r,theta,phi
-                    return rGCc_sph;
-                }
-                else if ((type == Goal::MeasurementType::LEFT_NORMAL) || (type == Goal::MeasurementType::RIGHT_NORMAL)){
+                if ((type == Goal::MeasurementType::LEFT_NORMAL) || (type == Goal::MeasurementType::RIGHT_NORMAL)){
                     //rGFf = vector from field origin to goal post expected position.
                     arma::vec3 rGFf = {actual_position[0], actual_position[1], 0};
 
@@ -160,7 +124,7 @@ namespace localisation {
                     arma::mat  vecs2GoalCorners(4,3); // 4 rGTfs
                     vecs2GoalCorners = goalBaseCorners;
                     vecs2GoalCorners.each_row() -= rTFf.t();
-                    
+
                     // This section calculates the 6 possible angles to the goal edges to find the widest 2 edges
                     int j_store = 1;
                     double theta;
@@ -229,6 +193,59 @@ namespace localisation {
         // noise(kImuOffset, kImuOffset) *= cfg_.processNoiseHeadingFactor;
         // std::cout << "process noise = \n" << noise << std::endl;
         return arma::diagmat(processNoiseDiagonal);
+    }
+
+    arma::vec3 getCylindricalPostCamSpaceNormal(Goal::MeasurementType type, const arma::vec3& post_centre, const Transform3D& Hcf, const FieldDescription& fd){
+        if(!(type == Goal::MeasurementType::LEFT_NORMAL || type == Goal::MeasurementType::RIGHT_NORMAL)) return arma::vec(0,0,0);
+        //rZFf = field vertical
+        arma::vec3 rZFf = {0,0,1};
+        arma::vec3 rZCc = Hcf.transformVector(rZFf);
+        // The vector direction across the field perpendicular to the camera view vector
+        arma::vec3 rLRf = arma::normalise(arma::cross(rZCc,arma::vec3({1,0,0})));
+
+        float dir = (type == Goal::MeasurementType::LEFT_NORMAL) ? 1 : -1;
+        arma::vec3 rG_blCc = post_centre + 0.5*dir*fd.dimensions.goalpost_width * rLRf;
+        arma::vec3 rG_tlCc = rG_blCc + fd.dimensions.goal_crossbar_height * rZCc;
+
+        //creating the normal vector (following convention stipulated in VisionObjects)
+        return (type == Goal::MeasurementType::LEFT_NORMAL) ?
+            arma::normalise(arma::cross(rG_blCc, rG_tlCc)) :
+            arma::normalise(arma::cross(rG_tlCc, rG_blCc)) ;
+    }
+
+    arma::vec3 getSquarePostCamSpaceNormal(Goal::MeasurementType type, const arma::vec3& post_centre, const Transform3D& Hcf, const FieldDescription& fd){
+        // Finding 4 corners of goalpost and centre (4 corners and centre)
+
+        arma::mat goalBaseCorners(4,5);
+        goalBaseCorners.each_col() = arma::vec4({post_centre[0],post_centre[1],post_centre[2],1});
+        //
+        goalBaseCorners.col(1) += arma::vec4({ 0.5  * fd.dimensions.goalpost_depth,  0.5 * fd.dimensions.goalpost_width,0,0});
+        goalBaseCorners.col(2) += arma::vec4({ 0.5  * fd.dimensions.goalpost_depth, -0.5 * fd.dimensions.goalpost_width,0,0});
+        goalBaseCorners.col(3) += arma::vec4({ -0.5 * fd.dimensions.goalpost_depth,  0.5 * fd.dimensions.goalpost_width,0,0});
+        goalBaseCorners.col(4) += arma::vec4({ -0.5 * fd.dimensions.goalpost_depth, -0.5 * fd.dimensions.goalpost_width,0,0});
+
+        arma::mat goalTopCorners = goalBaseCorners;
+        goalTopCorners.each_col() += arma::vec4({0,0,fd.dimensions.goal_crossbar_height,0});
+        if ((type == Goal::MeasurementType::LEFT_NORMAL) || (type == Goal::MeasurementType::RIGHT_NORMAL)){
+            //Transform to robot camera space
+            arma::mat goalBaseCornersCam = Hcf * goalBaseCorners;
+            arma::mat goalTopCornersCam = Hcf * goalTopCorners;
+
+            //Get widest line
+            int widest = 0;
+            float largest_dot = 0;
+            for(int i = 1; i < goalBaseCornersCam.n_cols; i++){
+                float dot = arma::dot(goalBaseCornersCam.col(i),goalBaseCornersCam.col(0));
+                float left_side = arma::dot(arma::cross(goalBaseCornersCam.col(i),goalBaseCornersCam.col(0)),goalTopCornersCam - goalBaseCornersCam) < 0;
+                if(left_side && (type == Goal::MeasurementType::LEFT_NORMAL)){
+
+                }
+            }
+
+        //creating the normal vector (following convention stipulated in VisionObjects)
+        return (type == Goal::MeasurementType::LEFT_NORMAL) ?
+            arma::normalise(arma::cross(rG_blCc, rG_tlCc)) :
+            arma::normalise(arma::cross(rG_tlCc, rG_blCc)) ;
     }
 
 
