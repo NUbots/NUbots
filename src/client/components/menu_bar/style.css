@@ -2,3 +2,7 @@
   display: flex;
   height: 60px;
 }
+
+.menu {
+  flex: 1
+}

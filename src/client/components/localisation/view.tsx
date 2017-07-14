@@ -3,9 +3,8 @@ import { runInAction } from 'mobx'
 import { IReactionDisposer } from 'mobx'
 import { observer } from 'mobx-react'
 import * as React from 'react'
-import { HTMLProps } from 'react'
+import { ComponentType } from 'react'
 import { WebGLRenderer } from 'three'
-import { MenuBar } from '../menu_bar/view'
 import { LocalisationController } from './controller'
 import { LocalisationModel } from './model'
 import { ViewMode } from './model'
@@ -13,8 +12,9 @@ import { LocalisationNetwork } from './network'
 import * as style from './style.css'
 import { LocalisationViewModel } from './view_model'
 
-interface LocalisationViewProps extends HTMLProps<JSX.Element> {
+type LocalisationViewProps = {
   controller: LocalisationController
+  menu: ComponentType<{}>
   model: LocalisationModel
   network: LocalisationNetwork
 }
@@ -56,7 +56,7 @@ export class LocalisationView extends React.Component<LocalisationViewProps> {
   public render(): JSX.Element {
     return (
       <div className={style.localisation}>
-        <LocalisationMenuBar onHawkEyeClick={this.onHawkEyeClick}/>
+        <LocalisationMenuBar menu={this.props.menu} onHawkEyeClick={this.onHawkEyeClick}/>
         <div className={style.localisation__canvasContainer}>
           <canvas className={style.localisation__canvas} ref={canvas => {
             if (canvas) {
@@ -131,18 +131,20 @@ export class LocalisationView extends React.Component<LocalisationViewProps> {
 }
 
 interface LocalisationMenuBarProps {
+  menu: ComponentType<{}>
   onHawkEyeClick(): void
 }
 
 const LocalisationMenuBar = observer((props: LocalisationMenuBarProps) => {
+  const { menu: Menu } = props
   return (
-    <MenuBar>
+    <Menu>
       <ul className={style.localisation__menu}>
         <li className={style.localisation__menuItem}>
           <button className={style.localisation__menuButton} onClick={props.onHawkEyeClick}>Hawk Eye</button>
         </li>
       </ul>
-    </MenuBar>
+    </Menu>
   )
 })
 
