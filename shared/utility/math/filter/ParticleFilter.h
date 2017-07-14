@@ -137,7 +137,7 @@ namespace math {
                 std::discrete_distribution<> multinomial(weights.begin(),
                                                          weights.end());  // class incorrectly named by cpp devs
                 for (unsigned int i = 0; i < particles.n_rows; i++) {
-                    particles.row(i) = model.limitState(candidateParticles.row(multinomial(gen)));
+                    particles.row(i) = model.limitState(candidateParticles.row(multinomial(gen)).t()).t();
                 }
                 return arma::mean(weights);
             }
@@ -189,7 +189,7 @@ namespace math {
                 arma::uvec sorted_index  = sort_index(new_weights, "decend");
                 arma::mat particles_temp = particles;
                 for (int i = 0; i < sorted_index.n_rows; i++) {
-                    particles.row(i) = model.limitState(particles_temp.row(sorted_index[i]));
+                    particles.row(i) = model.limitState(particles_temp.row(sorted_index[i]).t()).t();
                 }
 
                 // Return mean weight
