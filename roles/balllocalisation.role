@@ -17,11 +17,11 @@ NUCLEAR_ROLE(
 
     #Vision
     vision::LUTClassifier
-    vision::GoalDetector
+    #vision::GoalDetector
     vision::BallDetector
 
     #Localisation
-    localisation::RobotFieldLocalisation
+    #localisation::RobotFieldLocalisation
     localisation::BallLocalisation
 
     support::configuration::SoccerConfig

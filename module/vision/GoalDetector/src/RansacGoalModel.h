@@ -30,16 +30,16 @@ namespace vision {
 
     class RansacGoalModel {
     public:
-        utility::math::geometry::Line left;
-        utility::math::geometry::Line right;
+        utility::math::geometry::Plane<3> left;
+        utility::math::geometry::Plane<3> right;
 
         static constexpr size_t REQUIRED_POINTS = 2;
 
         struct GoalSegment {
             GoalSegment() : left(arma::fill::zeros), right(arma::fill::zeros) {}
-            GoalSegment(const arma::vec2& l, const arma::vec2& r) : left(l), right(r) {}
-            arma::vec2 left;
-            arma::vec2 right;
+            GoalSegment(const arma::vec3& l, const arma::vec3& r) : left(l), right(r) {}
+            arma::vec3 left;
+            arma::vec3 right;
         };
 
         using DataPoint = GoalSegment;
@@ -52,41 +52,28 @@ namespace vision {
 
         template <typename Iterator>
         void refineModel(Iterator& begin, Iterator& end, const double& threshold) {
-
+            // TODO: new least squares model for plane
             // Allows us to iterate through only the left states without copying
-            struct LIt {
-                Iterator state;
-                LIt(Iterator state) : state(state) {}
-                LIt& operator++() {
-                    ++state;
-                    return *this;
-                }
-                const arma::vec2& operator*() {
-                    return state->left;
-                }
-                bool operator!=(const LIt& other) {
-                    return state != other.state;
-                }
-            };
 
-            // Allows us to iterate through only the right states without copying
-            struct RIt {
-                Iterator state;
-                RIt(Iterator state) : state(state) {}
-                RIt& operator++() {
-                    ++state;
-                    return *this;
-                }
-                const arma::vec2& operator*() {
-                    return state->right;
-                }
-                bool operator!=(const RIt& other) {
-                    return state != other.state;
-                }
-            };
+            // struct LIt {
+            //     Iterator state;
+            //     LIt(Iterator state) : state(state) {}
+            //     LIt& operator++() { ++state; return *this; }
+            //     const arma::vec2& operator*() { return state->left; }
+            //     bool operator!=(const LIt& other) { return state != other.state; }
+            // };
 
-            left.leastSquaresUpdate(LIt(begin), LIt(end), threshold);
-            right.leastSquaresUpdate(RIt(begin), RIt(end), threshold);
+            // // Allows us to iterate through only the right states without copying
+            // struct RIt {
+            //     Iterator state;
+            //     RIt(Iterator state) : state(state) {}
+            //     RIt& operator++() { ++state; return *this; }
+            //     const arma::vec2& operator*() { return state->right; }
+            //     bool operator!=(const RIt& other) { return state != other.state; }
+            // };
+
+            // left.leastSquaresUpdate(LIt(begin), LIt(end), threshold);
+            // right.leastSquaresUpdate(RIt(begin), RIt(end), threshold);
         }
     };
 }  // namespace vision

@@ -5,6 +5,7 @@
 #include <vector>
 
 #include <Eigen/Core>
+#include <iostream>
 
 #include "Vision.h"
 
@@ -36,70 +37,117 @@ namespace vision {
         UNKNOWN = 0
     };
 
+    enum class BayerPixelType {
+        R,   // Its red
+        GR,  // Green on red row
+        GB,  // Green on blue row
+        B    // Its blue
+    };
+
     // Implemented from http://www.ipol.im/pub/art/2011/g_mhcd/
     // Malvar-He-Cutler Linear Image Demosaicking
     // Bayer interpolators
     // These are masks, not matrices.
     // Green pixels at both blue and red locations.
-    constexpr int8_t BAYER_SCALE      = 3;  // 8 = 2^3 .... use bit shift
-    constexpr int8_t IDENTITY_ARR[25] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 8, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
-    const Eigen::Matrix<int8_t, 5, 5> IDENTITY = Eigen::Map<const Eigen::Matrix<int8_t, 5, 5>>(IDENTITY_ARR, 5, 5);
+    constexpr int8_t BAYER_SCALE = 6;  // 8 = 2^3 .... use bit shift
+    // clang-format off
+    constexpr int8_t GREEN_AXIAL_ARR[25] = { 0,  0, -8,  0,  0,
+                                             0,  0, 16,  0,  0,
+                                            -8, 16, 32, 16, -8,
+                                             0,  0, 16,  0,  0,
+                                             0,  0, -8,  0,  0};
+    // clang-format on
 
-    constexpr int8_t GREEN_AXIAL_ARR[25] = {0,  0,  8, 0, 0,  0, 0, 16, 0, 0,  -8, 16, 32,
-                                            16, -8, 0, 0, 16, 0, 0, 0,  0, -8, 0,  0};
     const Eigen::Matrix<int8_t, 5, 5> GREEN_AXIAL =
         Eigen::Map<const Eigen::Matrix<int8_t, 5, 5>>(GREEN_AXIAL_ARR, 5, 5);
 
     // Red at blue locations and blue at red locations
-    constexpr int8_t RED_AT_BLUE_ARR[25] = {0, 0,   -12, 0,  0, 0,  16, 0, 16, 0,   -12, 0, 48,
-                                            0, -12, 0,   16, 0, 16, 0,  0, 0,  -12, 0,   0};
+    // clang-format off
+    constexpr int8_t RED_AT_BLUE_ARR[25] = {  0,  0, -12,  0,   0,
+                                              0, 16,   0, 16,   0,
+                                            -12,  0,  48,  0, -12,
+                                              0, 16,   0, 16,   0,
+                                              0,  0, -12,  0,   0};
+    // clang-format on
+
     const Eigen::Matrix<int8_t, 5, 5> RED_AT_BLUE =
         Eigen::Map<const Eigen::Matrix<int8_t, 5, 5>>(RED_AT_BLUE_ARR, 5, 5);
 
     // Red at green locations and blue at green locations, on red rows
     // Red at green locations and blue at green locations, on blue rows are the transpose of this mask.
-    constexpr int8_t RED_AT_GREEN_ARR[25] = {0,  0,  -4, 0,  0, 0,  -8, 0, -8, 0,  -8, 32, 40,
-                                             32, -8, 0,  -8, 0, -8, 0,  0, 0,  -4, 0,  0};
+
+    // clang-format off
+    constexpr int8_t RED_AT_GREEN_ARR[25] = { 0,  0,  4,  0,  0,
+                                              0, -8,  0, -8,  0,
+                                             -8, 32, 40, 32, -8,
+                                              0, -8,  0, -8,  0,
+                                              0,  0,  4,  0,  0};
+    // clang-format on
     const Eigen::Matrix<int8_t, 5, 5> RED_AT_GREEN =
         Eigen::Map<const Eigen::Matrix<int8_t, 5, 5>>(RED_AT_GREEN_ARR, 5, 5);
 
-    inline Eigen::Matrix<uint8_t, 5, 5> getSubImage(uint x,
-                                                    uint y,
-                                                    uint width,
-                                                    uint height,
-                                                    const std::vector<uint8_t>& data) {
+    inline const auto getSubImage(uint x, uint y, uint width, uint height, const std::vector<uint8_t>& data) {
         // Extract the 5x5 matrix centered at (x, y).
-        // Zero pad the borders.
-        Eigen::Matrix<uint8_t, 5, 5> I = Eigen::Matrix<uint8_t, 5, 5>::Zero();
+        // Clamped to borders.
+        x = x < 2 ? 2 : x > (width - 2) ? width - 2 : x;
+        y = y < 2 ? 2 : y > (height - 2) ? height - 2 : y;
 
-        for (int8_t row = -2; row <= 2; row++) {
-            if (((y + row) > 0) && ((y + row) < height)) {
-                for (int8_t col = -2; col <= 2; col++) {
-                    if (((x + col) > 0) && ((x + col) < width)) {
-                        I(x + 2, y + 2) = data[(y + row) * width + (x + col)];
-                    }
-                }
-            }
-        }
-
-        return (I);
+        return Eigen::Map<const Eigen::Matrix<uint8_t, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>>(
+                   data.data(), height, width)
+            .block<5, 5>(y - 2, x - 2);
     }
 
-    inline uint8_t conv2d(const Eigen::Matrix<uint8_t, 5, 5>& I,
+    inline uint8_t conv2d(const Eigen::Matrix<uint8_t, 5, 5>& patch,
                           const Eigen::Matrix<int8_t, 5, 5>& kernel,
                           uint8_t normalisation = BAYER_SCALE) {
-        int16_t value = I.cast<int16_t>().cwiseProduct(kernel.cast<int16_t>()).sum();
+        int16_t value = patch.cast<int16_t>().cwiseProduct(kernel.cast<int16_t>()).sum();
 
         if (normalisation == 0) {
             normalisation = 1;
         }
 
-        return (static_cast<uint8_t>(std::min(255, std::max(0, value >> normalisation))));
+        return static_cast<uint8_t>(std::min(255, std::max(0, value >> normalisation)));
+    }
+
+    inline Pixel getBayerPixel(const Eigen::Matrix<uint8_t, 5, 5>& patch, const BayerPixelType& type) {
+        Pixel p;
+
+        switch (type) {
+            // Centered on a red pixel
+            case BayerPixelType::R: {
+                p.components.r = patch(2, 2);
+                p.components.g = conv2d(patch, GREEN_AXIAL);
+                p.components.b = conv2d(patch, RED_AT_BLUE);
+                return p;
+            }
+            // Centered on a green pixel in a red row
+            case BayerPixelType::GR: {
+                p.components.r = conv2d(patch, RED_AT_GREEN.transpose());
+                p.components.g = patch(2, 2);
+                p.components.b = conv2d(patch, RED_AT_GREEN);
+                return p;
+            }
+            // Centered on a green pixel in a blue row
+            case BayerPixelType::GB: {
+                p.components.r = conv2d(patch, RED_AT_GREEN);
+                p.components.g = patch(2, 2);
+                p.components.b = conv2d(patch, RED_AT_GREEN.transpose());
+                return p;
+            }
+            // Centered on a blue pixel
+            case BayerPixelType::B: {
+                p.components.r = conv2d(patch, RED_AT_BLUE);
+                p.components.g = conv2d(patch, GREEN_AXIAL);
+                p.components.b = patch(2, 2);
+                return p;
+            }
+            default: return p;
+        }
     }
 
     inline Pixel getGrey8Pixel(uint x, uint y, int width, int /*height*/, const std::vector<uint8_t>& data) {
         // Asumming pixels are stored as
-        // R0 G0 B0 R1 G1 B1 R2 G2 B2 ...
+        // R0 G0 B0 R1 GR B1 R2 GB B2 ...
         int origin = (y * width + x);
 
         return {0, 0, data[origin]};
@@ -114,24 +162,15 @@ namespace vision {
         // Green pixels are in every row, but in the even columns on even rows and the odd columns on odd rows.
         // Blue  pixels are in odd rows,  but even columns
 
-        Eigen::Matrix<uint8_t, 5, 5> I = getSubImage(x, y, width, height, data);
+        Eigen::Matrix<uint8_t, 5, 5> patch = getSubImage(x, y, width, height, data);
 
+        // Work out what pixel type we are
         const int row = y % 2;
         const int col = x % 2;
+        BayerPixelType type =
+            row ? col ? BayerPixelType::GB : BayerPixelType::B : col ? BayerPixelType::R : BayerPixelType::GR;
 
-        const bool redPixel   = ((row == 0) && (col == 1));
-        const bool greenPixel = (row == col);
-        const bool bluePixel  = ((row == 1) && (col == 0));
-        const bool redRow     = (row == 0);
-
-        // Determine which kernels we need.
-        const auto& redKernel = (greenPixel) ? ((redRow) ? RED_AT_GREEN : RED_AT_GREEN.transpose())
-                                             : ((bluePixel) ? RED_AT_BLUE : IDENTITY);
-        const auto& greenKernel = (greenPixel) ? IDENTITY : GREEN_AXIAL;
-        const auto& blueKernel =
-            (greenPixel) ? ((redRow) ? RED_AT_GREEN : RED_AT_GREEN.transpose()) : ((redPixel) ? RED_AT_BLUE : IDENTITY);
-
-        return {conv2d(I, redKernel), conv2d(I, greenKernel), conv2d(I, blueKernel)};
+        return getBayerPixel(patch, type);
     }
 
     inline Pixel getRGGBPixel(uint x, uint y, int width, int height, const std::vector<uint8_t>& data) {
@@ -143,24 +182,15 @@ namespace vision {
         // Green pixels are in every row, but in the odd columns on even rows and the even columns on odd rows.
         // Blue  pixels are in odd rows,  but odd  columns
 
-        Eigen::Matrix<uint8_t, 5, 5> I = getSubImage(x, y, width, height, data);
+        Eigen::Matrix<uint8_t, 5, 5> patch = getSubImage(x, y, width, height, data);
 
+        // Work out what pixel type we are
         const int row = y % 2;
         const int col = x % 2;
+        BayerPixelType type =
+            row ? col ? BayerPixelType::B : BayerPixelType::GB : col ? BayerPixelType::GR : BayerPixelType::R;
 
-        const bool redPixel   = ((row == 0) && (col == 0));
-        const bool greenPixel = (row != col);
-        const bool bluePixel  = ((row == 1) && (col == 1));
-        const bool redRow     = (row == 0);
-
-        // Determine which kernels we need.
-        const auto& redKernel = (greenPixel) ? ((redRow) ? RED_AT_GREEN : RED_AT_GREEN.transpose())
-                                             : ((bluePixel) ? RED_AT_BLUE : IDENTITY);
-        const auto& greenKernel = (greenPixel) ? IDENTITY : GREEN_AXIAL;
-        const auto& blueKernel =
-            (greenPixel) ? ((redRow) ? RED_AT_GREEN : RED_AT_GREEN.transpose()) : ((redPixel) ? RED_AT_BLUE : IDENTITY);
-
-        return {conv2d(I, redKernel), conv2d(I, greenKernel), conv2d(I, blueKernel)};
+        return getBayerPixel(patch, type);
     }
 
     inline Pixel getGBRGPixel(uint x, uint y, int width, int height, const std::vector<uint8_t>& data) {
@@ -172,24 +202,15 @@ namespace vision {
         // Green pixels are in every row, but in the even columns on even rows and the odd columns on odd rows.
         // Blue  pixels are in even rows, but odd columns
 
-        Eigen::Matrix<uint8_t, 5, 5> I = getSubImage(x, y, width, height, data);
+        Eigen::Matrix<uint8_t, 5, 5> patch = getSubImage(x, y, width, height, data);
 
+        // Work out what pixel type we are
         const int row = y % 2;
         const int col = x % 2;
+        BayerPixelType type =
+            row ? col ? BayerPixelType::GR : BayerPixelType::R : col ? BayerPixelType::B : BayerPixelType::GB;
 
-        const bool redPixel   = ((row == 1) && (col == 0));
-        const bool greenPixel = (row == col);
-        const bool bluePixel  = ((row == 0) && (col == 1));
-        const bool redRow     = (row == 1);
-
-        // Determine which kernels we need.
-        const auto& redKernel = (greenPixel) ? ((redRow) ? RED_AT_GREEN : RED_AT_GREEN.transpose())
-                                             : ((bluePixel) ? RED_AT_BLUE : IDENTITY);
-        const auto& greenKernel = (greenPixel) ? IDENTITY : GREEN_AXIAL;
-        const auto& blueKernel =
-            (greenPixel) ? ((redRow) ? RED_AT_GREEN : RED_AT_GREEN.transpose()) : ((redPixel) ? RED_AT_BLUE : IDENTITY);
-
-        return {conv2d(I, redKernel), conv2d(I, greenKernel), conv2d(I, blueKernel)};
+        return getBayerPixel(patch, type);
     }
 
     inline Pixel getBGGRPixel(uint x, uint y, int width, int height, const std::vector<uint8_t>& data) {
@@ -201,24 +222,15 @@ namespace vision {
         // Green pixels are in every row, but in the even columns on odd rows and the odd columns on even rows.
         // Blue  pixels are in even rows, but even columns
 
-        Eigen::Matrix<uint8_t, 5, 5> I = getSubImage(x, y, width, height, data);
+        Eigen::Matrix<uint8_t, 5, 5> patch = getSubImage(x, y, width, height, data);
 
+        // Work out what pixel type we are
         const int row = y % 2;
         const int col = x % 2;
+        BayerPixelType type =
+            row ? col ? BayerPixelType::R : BayerPixelType::GR : col ? BayerPixelType::GB : BayerPixelType::B;
 
-        const bool redPixel   = ((row == 1) && (col == 1));
-        const bool greenPixel = (row != col);
-        const bool bluePixel  = ((row == 0) && (col == 0));
-        const bool redRow     = (row == 1);
-
-        // Determine which kernels we need.
-        const auto& redKernel = (greenPixel) ? ((redRow) ? RED_AT_GREEN : RED_AT_GREEN.transpose())
-                                             : ((bluePixel) ? RED_AT_BLUE : IDENTITY);
-        const auto& greenKernel = (greenPixel) ? IDENTITY : GREEN_AXIAL;
-        const auto& blueKernel =
-            (greenPixel) ? ((redRow) ? RED_AT_GREEN : RED_AT_GREEN.transpose()) : ((redPixel) ? RED_AT_BLUE : IDENTITY);
-
-        return {conv2d(I, redKernel), conv2d(I, greenKernel), conv2d(I, blueKernel)};
+        return getBayerPixel(patch, type);
     }
 
     inline Pixel getGrey16Pixel(uint x, uint y, int width, int /*height*/, const std::vector<uint8_t>& data) {
@@ -229,7 +241,7 @@ namespace vision {
 
     inline Pixel getRGB3Pixel(uint x, uint y, int width, int /*height*/, const std::vector<uint8_t>& data) {
         // Asumming pixels are stored as
-        // R0 G0 B0 R1 G1 B1 R2 G2 B2 ...
+        // R0 G0 B0 R1 GR B1 R2 GB B2 ...
         int origin = (y * width + x) * 3;
 
         return {data[origin + 0], data[origin + 1], data[origin + 2]};

@@ -34,18 +34,12 @@ NUCLEAR_ROLE(
     behaviour::skills::Getup
     behaviour::skills::KickScript
     behaviour::planning::KickPlanner
-    behaviour::planning::SimpleWalkPathPlanner 
-    #behaviour::planning::BezierWalkPathPlanner 
+    behaviour::planning::SimpleWalkPathPlanner
     behaviour::strategy::SoccerStrategy
 
     #Motion
     motion::ScriptEngine
-    motion::FootMotionPlanner
-    motion::FootPlacementPlanner
-    motion::TorsoMotionPlanner
-    motion::BalanceKinematicResponse
     motion::OldWalkEngine
     motion::HeadController
-    ##motion::IKKick
 )
 

@@ -50,7 +50,7 @@ namespace support {
 
     arma::vec2 VirtualGoalPost::getCamRay(const arma::vec3& norm1,
                                           const arma::vec3& norm2,
-                                          double focalLength,
+                                          const CameraParameters& params,
                                           arma::uvec2 imSize) {
         // Solve the vector intersection between two planes to get the camera ray of the quad corner
         arma::vec3 result;
@@ -77,7 +77,7 @@ namespace support {
         }
 
         return arma::conv_to<arma::vec>::from(utility::math::vision::screenToImage(
-            utility::math::vision::projectCamSpaceToScreen(result, focalLength), imSize));
+            utility::math::vision::projectCamSpaceToScreen(result, params), imSize));
     }
 
     VirtualGoalPost::VirtualGoalPost(arma::vec3 position_, float height_, Goal::Side side_, Goal::Team team_) {
@@ -123,22 +123,16 @@ namespace support {
                 Goal::Measurement(Goal::MeasurementType::BASE_NORMAL, convert<double, 3>(goalNormals.col(3))));
 
             // build the predicted quad
-            utility::math::geometry::Quad quad(getCamRay(goalNormals.col(0),
-                                                         goalNormals.col(3),
-                                                         camParams.focalLengthPixels,
-                                                         convert<uint, 2>(camParams.imageSizePixels)),
-                                               getCamRay(goalNormals.col(0),
-                                                         goalNormals.col(2),
-                                                         camParams.focalLengthPixels,
-                                                         convert<uint, 2>(camParams.imageSizePixels)),
-                                               getCamRay(goalNormals.col(1),
-                                                         goalNormals.col(2),
-                                                         camParams.focalLengthPixels,
-                                                         convert<uint, 2>(camParams.imageSizePixels)),
-                                               getCamRay(goalNormals.col(1),
-                                                         goalNormals.col(3),
-                                                         camParams.focalLengthPixels,
-                                                         convert<uint, 2>(camParams.imageSizePixels)));
+            utility::math::geometry::Quad quad(
+                getCamRay(
+                    goalNormals.col(0), goalNormals.col(3), camParams, convert<uint, 2>(camParams.imageSizePixels)),
+                getCamRay(
+                    goalNormals.col(0), goalNormals.col(2), camParams, convert<uint, 2>(camParams.imageSizePixels)),
+                getCamRay(
+                    goalNormals.col(1), goalNormals.col(2), camParams, convert<uint, 2>(camParams.imageSizePixels)),
+                getCamRay(
+                    goalNormals.col(1), goalNormals.col(3), camParams, convert<uint, 2>(camParams.imageSizePixels)));
+
 
             // goal base visibility check
             if (not(quad.getBottomRight()[1] > 0 && quad.getBottomRight()[1] < camParams.imageSizePixels[1]

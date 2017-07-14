@@ -23,6 +23,8 @@
 #include "message/input/CameraParameters.h"
 #include "message/input/Image.h"
 
+#include "utility/support/eigen_armadillo.h"
+
 #include "utility/vision/fourcc.h"
 
 #include "SpinnakerCamera.h"

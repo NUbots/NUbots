@@ -57,6 +57,8 @@ namespace input {
 
                 reactor.emit(msg);
             }
+
+            image->Release();
         }
     };
 }  // namespace input

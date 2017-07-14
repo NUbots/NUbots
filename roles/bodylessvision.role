@@ -8,11 +8,11 @@ NUCLEAR_ROLE(
     support::configuration::GlobalConfig
     input::Camera
     vision::LUTClassifier
-    vision::GoalDetector
+    #vision::GoalDetector
     vision::BallDetector
     support::configuration::NetworkConfiguration
     support::NUbugger
-    platform::darwin::HardwareIO
+    platform::darwin::HardwareSimulator
     platform::darwin::SensorFilter
 
     support::configuration::SoccerConfig

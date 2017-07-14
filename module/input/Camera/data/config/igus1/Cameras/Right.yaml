@@ -2,14 +2,18 @@ driver: Spinnaker
 deviceID: "15211412" # "E81B94"
 
 buffer_count: 4             # The number of software buffers to use.
-device: 
 
 format:
   width: 1280
   height: 1024
-  pixel: BayerRG8
+  pixel: BayerBG8
   #pixel: YCbCr422_8_CbYCrY
   #pixel: RGB8
+
+lens:
+  radiansPerPixel: 0.001
+  centreOffset: [0,0]
+  FOV: 2.0
 
 settings:
   exposure: 33333             # The shutter time in microseconds (1/fps).
@@ -21,7 +25,7 @@ settings:
   saturation: auto            # Saturation of the image in percent.
   white_balance: [   0,    0] # Adjust the relative gain of R/V w.r.t G/Y and B/U w.r.t G/Y. End goal is to achieve a 1:1:1 ratio for the RGB channels.
                               # [R_Value/V_value, B_Value/U_Value] .... A 0 in either position will turn on automatic control.
-                              # For example, if the average pixel on the target was 222 (R), 232 (G), 236 (B) 
+                              # For example, if the average pixel on the target was 222 (R), 232 (G), 236 (B)
                               # then all the reds should be scaled up by 232/222 and the blues down by 232/236.
                               # According to technical reference, defaults are 1023 for both R and B. (These are 12 bit values).
 

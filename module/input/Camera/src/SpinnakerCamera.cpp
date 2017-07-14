@@ -9,6 +9,7 @@
 
 namespace module {
 namespace input {
+    using message::input::CameraParameters;
     using extension::Configuration;
     using utility::support::Expression;
     using FOURCC = utility::vision::FOURCC;
@@ -71,6 +72,22 @@ namespace input {
         }
 
         resetSpinnakerCamera(camera, config);
+
+        auto cameraParameters = std::make_unique<CameraParameters>();
+
+        // Generic camera parameters
+        cameraParameters->imageSizePixels << config["format"]["width"].as<uint>(),
+            config["format"]["height"].as<uint>();
+        cameraParameters->FOV << config["lens"]["FOV"].as<double>(), config["lens"]["FOV"].as<double>();
+
+        // Radial specific
+        cameraParameters->lens                   = CameraParameters::LensType::RADIAL;
+        cameraParameters->radial.radiansPerPixel = config["lens"]["radiansPerPixel"].as<float>();
+        cameraParameters->centreOffset           = convert<int, 2>(config["lens"]["centreOffset"].as<arma::ivec>());
+
+        emit<Scope::DIRECT>(std::move(cameraParameters));
+
+        log("Emitted radial camera parameters for camera", config["deviceID"].as<std::string>());
     }
 
     void Camera::resetSpinnakerCamera(std::map<std::string, std::unique_ptr<SpinnakerImageEvent>>::iterator& camera,
@@ -187,11 +204,11 @@ namespace input {
         // Set sharpness.
         auto sharpness = config["settings"]["sharpness"].as<Expression>();
 
-        if (!utility::vision::setEnumParam(nodeMap, "SharpnessAuto", (std::isfinite(sharpness.value) ? "Off" :
-        "Continuous")))
+    if (!utility::vision::setEnumParam(nodeMap, "SharpnessAuto", (std::isfinite(sharpness.value) ? "Off" :
+    "Continuous")))
         {
-            log("Failed to set auto sharpness for camera", camera->first, "to", (std::isfinite(sharpness.value) ?
-        "'Off'" : "'Continuous'"));
+        log("Failed to set auto sharpness for camera", camera->first, "to", (std::isfinite(sharpness.value) ?
+    "'Off'" : "'Continuous'"));
         }
 
         if (std::isfinite(sharpness.value))
@@ -207,8 +224,8 @@ namespace input {
 
         if (!utility::vision::setEnumParam(nodeMap, "SharpnessAuto", (std::isfinite(hue.value) ? "Off" : "Continuous")))
         {
-            log("Failed to set auto hue for camera", camera->first, "to", (std::isfinite(hue.value) ? "'Off'" :
-        "'Continuous'"));
+        log("Failed to set auto hue for camera", camera->first, "to", (std::isfinite(hue.value) ? "'Off'" :
+    "'Continuous'"));
         }
 
         if (std::isfinite(hue.value))
@@ -224,11 +241,11 @@ namespace input {
         // Set saturation.
         auto saturation = config["settings"]["saturation"].as<Expression>();
 
-        if (!utility::vision::setEnumParam(nodeMap, "SaturationAuto", (std::isfinite(saturation.value) ? "Off" :
-        "Continuous")))
+    if (!utility::vision::setEnumParam(nodeMap, "SaturationAuto", (std::isfinite(saturation.value) ? "Off" :
+    "Continuous")))
         {
-            log("Failed to set auto saturation for camera", camera->first, "to", (std::isfinite(saturation.value) ?
-        "'Off'" : "'Continuous'"));
+        log("Failed to set auto saturation for camera", camera->first, "to", (std::isfinite(saturation.value) ?
+    "'Off'" : "'Continuous'"));
 
             Spinnaker::GenApi::CEnumerationPtr enumName = nodeMap.GetNode("SaturationAuto");
 
@@ -263,11 +280,11 @@ namespace input {
         // int64_t to be (trivially) type compatible with Spinnaker libray.
         arma::Col<int64_t> whiteBalance = config["settings"]["white_balance"].as<arma::Col<int64_t>>();
 
-        if (!utility::vision::setEnumParam(nodeMap, "BalanceWhiteAuto", (arma::all(whiteBalance) ? "Off" :
-        "Continuous")))
+    if (!utility::vision::setEnumParam(nodeMap, "BalanceWhiteAuto", (arma::all(whiteBalance) ? "Off" :
+    "Continuous")))
         {
-            log("Failed to set auto white balance for camera", camera->first, "to", (arma::all(whiteBalance) ? "'Off'" :
-        "'Continuous'"));
+        log("Failed to set auto white balance for camera", camera->first, "to", (arma::all(whiteBalance) ? "'Off'" :
+    "'Continuous'"));
 
             Spinnaker::GenApi::CEnumerationPtr enumName = nodeMap.GetNode("BalanceWhiteAuto");
 
@@ -335,6 +352,7 @@ namespace input {
 
     void Camera::ShutdownSpinnakerCamera() {
         SpinnakerCameras.clear();
+        SpinnakerCamList.Clear();
 
         if (SpinnakerSystem) {
             SpinnakerSystem->ReleaseInstance();

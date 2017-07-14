@@ -22,7 +22,9 @@
 #include "QuexClassifier.h"
 
 #include "utility/math/geometry/ParametricLine.h"
+#include "utility/math/geometry/Plane.h"
 #include "utility/math/geometry/Quad.h"
+#include "utility/math/vision.h"
 #include "utility/nubugger/NUhelpers.h"
 #include "utility/support/eigen_armadillo.h"
 
@@ -31,24 +33,34 @@ namespace vision {
 
     using message::input::Image;
     using message::vision::LookUpTable;
+    using message::input::CameraParameters;
     using message::vision::ClassifiedImage;
+    using utility::math::geometry::Plane;
     using utility::math::geometry::Line;
     using utility::math::geometry::Quad;
+    using utility::math::vision::getCamFromImage;
+    using utility::math::vision::getImageFromCam;
     using utility::nubugger::drawVisionLines;
 
     void LUTClassifier::findVisualHorizon(const Image& image,
                                           const LookUpTable& lut,
-                                          ClassifiedImage& classifiedImage) {
+                                          ClassifiedImage& classifiedImage,
+                                          const CameraParameters& cam) {
 
         // Get some local references to class variables to make text shorter
-        Line horizon(convert<double, 2>(classifiedImage.horizon.normal), classifiedImage.horizon.distance);
+        // Line horizon(convert<double, 2>(classifiedImage.horizon.normal), classifiedImage.horizon.distance);
+        Plane<3> horizon(convert<double, 3>(classifiedImage.horizon_normal));
         auto& visualHorizon = classifiedImage.visualHorizon;
 
         // Cast lines to find our visual horizon
         for (uint x = 0; x < image.dimensions[0]; x += VISUAL_HORIZON_SPACING) {
-
             // Find our point to classify from (slightly above the horizon)
-            int top = std::max(int(lround(horizon.y(x)) - VISUAL_HORIZON_BUFFER), int(0));
+            int horizon_Y = getImageFromCam(
+                // Project down to horizon
+                horizon.directionalProjection(getCamFromImage(arma::ivec2({x, 0}), cam), arma::vec({0, 0, 1})),
+                cam)[1];
+            // Find our point to classify from (slightly above the horizon)
+            int top = std::max(int(horizon_Y - VISUAL_HORIZON_BUFFER), int(0));
             top     = std::min(top, int(image.dimensions[1] - 1));
 
             // Classify our segments
@@ -75,6 +87,7 @@ namespace vision {
                     break;
                 }
             }
+
             // Only put the green point in if it's on the screen
             if (greenPoint[1] < int(image.dimensions[1])) {
                 visualHorizon.push_back(std::move(convert<int, 2>(greenPoint)));
@@ -87,7 +100,12 @@ namespace vision {
         if (image.dimensions[0] - 1 % VISUAL_HORIZON_SPACING != 0) {
 
             // Find our point to classify from (slightly above the horizon)
-            int top = std::max(int(lround(horizon.y(image.dimensions[0] - 1)) - VISUAL_HORIZON_BUFFER), int(0));
+            int horizon_Y = getImageFromCam(
+                // Project down to horizon
+                horizon.directionalProjection(getCamFromImage(arma::ivec2({image.dimensions[0] - 1, 0}), cam),
+                                              arma::vec({0, 0, 1})),
+                cam)[1];
+            int top = std::max(int(horizon_Y - VISUAL_HORIZON_BUFFER), int(0));
             top     = std::min(top, int(image.dimensions[1] - 1));
 
             arma::ivec2 start = {int(image.dimensions[0] - 1), top};

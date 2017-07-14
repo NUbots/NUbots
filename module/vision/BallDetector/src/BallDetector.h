@@ -23,12 +23,16 @@
 #include <armadillo>
 #include <nuclear>
 
+#include "message/input/CameraParameters.h"
 #include "message/input/Image.h"
 #include "message/vision/LookUpTable.h"
 
 #include "utility/learning/KMeans.h"
 #include "utility/math/geometry/Circle.h"
+#include "utility/support/eigen_armadillo.h"
 #include "utility/vision/LookUpTable.h"
+
+#include "utility/math/ransac/RansacConeModel.h"
 
 namespace module {
 namespace vision {
@@ -38,6 +42,8 @@ namespace vision {
         uint MINIMUM_POINTS_FOR_CONSENSUS;
         uint MAXIMUM_ITERATIONS_PER_FITTING;
         uint MAXIMUM_FITTED_MODELS;
+
+        const double LAMBDA = 8.3116883;
 
         double CONSENSUS_ERROR_THRESHOLD;
         double MAXIMUM_DISAGREEMENT_RATIO;
@@ -65,12 +71,12 @@ namespace vision {
         };
         Frame lastFrame;
 
-
         bool print_throwout_logs;
 
-        float approximateCircleGreenRatio(const utility::math::geometry::Circle& circle,
+        float approximateCircleGreenRatio(const utility::math::ransac::RansacConeModel& circle,
                                           const message::input::Image& image,
-                                          const message::vision::LookUpTable& lut);
+                                          const message::vision::LookUpTable& lut,
+                                          const message::input::CameraParameters& params);
 
     public:
         /// @brief Called by the powerplant to build and setup the BallDetector reactor.
