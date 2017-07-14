@@ -118,8 +118,8 @@ namespace localisation {
     }
 
     arma::vec::fixed<RobotModel::size> RobotModel::limitState(const arma::vec::fixed<RobotModel::size>& state) {
-        auto state2    = state;
-        state2[kAngle] = normalizeAngle(state2[kAngle]);
+        auto state2 = state;
+        // state2[kAngle] = normalizeAngle(state2[kAngle]);
         // TODO: Clip robot's state to the field?
         return state2;
     }

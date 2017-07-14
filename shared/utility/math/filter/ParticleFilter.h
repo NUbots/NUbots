@@ -127,7 +127,7 @@ namespace math {
                     arma::vec predictedObservation =
                         model.predictedObservation(candidateParticles.row(i).t(), measurementArgs...);
                     // assert(predictedObservation.size() == measurement.size());
-                    arma::vec difference = predictedObservation - measurement;
+                    arma::vec difference = model.observationDifference(predictedObservation, measurement);
                     weights[i]           = std::exp(-arma::dot(difference, (measurement_variance.i() * difference)));
                 }
 
@@ -137,7 +137,7 @@ namespace math {
                 std::discrete_distribution<> multinomial(weights.begin(),
                                                          weights.end());  // class incorrectly named by cpp devs
                 for (unsigned int i = 0; i < particles.n_rows; i++) {
-                    particles.row(i) = candidateParticles.row(multinomial(gen));
+                    particles.row(i) = model.limitState(candidateParticles.row(multinomial(gen)));
                 }
                 return arma::mean(weights);
             }
@@ -169,7 +169,8 @@ namespace math {
                         model.predictedObservation(repCandidateParticles.row(i).t(),
                                                    possibilities[i / candidateParticles.n_rows],
                                                    measurementArgs...);
-                    weights[i] = std::exp(-arma::dot(difference, (measurement_variance.i() * difference)));
+                    arma::vec difference = model.observationDifference(predictedObservation, measurement);
+                    weights[i]           = std::exp(-arma::dot(difference, (measurement_variance.i() * difference)));
                 }
 
                 // Resample
@@ -188,7 +189,7 @@ namespace math {
                 arma::uvec sorted_index  = sort_index(new_weights, "decend");
                 arma::mat particles_temp = particles;
                 for (int i = 0; i < sorted_index.n_rows; i++) {
-                    particles.row(i) = particles_temp.row(sorted_index[i]);
+                    particles.row(i) = model.limitState(particles_temp.row(sorted_index[i]));
                 }
 
                 // Return mean weight
