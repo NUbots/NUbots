@@ -88,8 +88,8 @@ namespace math {
             arma::vec2 getEdgePoints(uint y) const;
             arma::vec2 getEdgePoints(double y) const;
         };
-    }
-}
-}
+    }  // namespace geometry
+}  // namespace math
+}  // namespace utility
 
 #endif

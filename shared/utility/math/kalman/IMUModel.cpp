@@ -106,6 +106,6 @@ namespace math {
         arma::mat::fixed<IMUModel::size, IMUModel::size> IMUModel::processNoise() {
             return arma::diagmat(processNoiseDiagonal);
         }
-    }
-}
-}
+    }  // namespace kalman
+}  // namespace math
+}  // namespace utility

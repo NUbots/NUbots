@@ -228,5 +228,5 @@ namespace support {
         send(reactionHandles, 0, true, NUClear::clock::now());
     }
 
-}  // support
-}  // modules
+}  // namespace support
+}  // namespace module

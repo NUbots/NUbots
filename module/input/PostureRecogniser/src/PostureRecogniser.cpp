@@ -168,5 +168,5 @@ namespace input {
         emitGyroscope          = debug["emit_gyroscope"].as<bool>();
         emitFallingScaleFactor = debug["emit_falling_scale_factor"].as<bool>();
     }
-}
-}
+}  // namespace input
+}  // namespace module

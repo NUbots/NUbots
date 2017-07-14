@@ -82,10 +82,10 @@ namespace math {
                            % arma::repmat(sigmaWeights, 1, numSamples).t()
                        + arma::repmat(bestEstimate, 1, numSamples).t();
             }
-        }
-    }
-}
-}
+        }  // namespace PGA
+    }      // namespace optimisation
+}  // namespace math
+}  // namespace utility
 
 
 #endif  // UTILITY_MATH_COORDINATES_H

@@ -58,8 +58,8 @@ namespace platform {
 
             bool updateFoot(const arma::vec& legMotors);
         };
-    }
-}
-}
+    }  // namespace darwin
+}  // namespace platform
+}  // namespace module
 
 #endif

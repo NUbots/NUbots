@@ -119,7 +119,7 @@ namespace vision {
         explicit LUTClassifier(std::unique_ptr<NUClear::Environment> environment);
     };
 
-}  // vision
-}  // modules
+}  // namespace vision
+}  // namespace module
 
 #endif  // MODULES_VISION_QUEXLUTCLASSIFIER_H

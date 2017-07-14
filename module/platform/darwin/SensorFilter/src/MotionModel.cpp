@@ -122,6 +122,6 @@ namespace platform {
             // Return our process noise matrix
             return processNoiseMatrix;
         }
-    }
-}
-}
+    }  // namespace darwin
+}  // namespace platform
+}  // namespace module

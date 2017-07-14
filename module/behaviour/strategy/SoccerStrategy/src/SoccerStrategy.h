@@ -129,8 +129,8 @@ namespace behaviour {
             explicit SoccerStrategy(std::unique_ptr<NUClear::Environment> environment);
         };
 
-    }  // strategy
-}  // behaviours
-}  // modules
+    }  // namespace strategy
+}  // namespace behaviour
+}  // namespace module
 
 #endif  // MODULES_BEHAVIOUR_STRATEGY_SOCCERSTRATEGGY_H

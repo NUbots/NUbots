@@ -99,9 +99,9 @@ namespace math {
                                          convert<double>(arma::mat(diagmat(covEstimate))));
             }
         };
-    }
-}
-}
+    }  // namespace optimisation
+}  // namespace math
+}  // namespace utility
 
 
 #endif  // UTILITY_MATH_COORDINATES_H

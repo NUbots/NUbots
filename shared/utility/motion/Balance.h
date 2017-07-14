@@ -72,7 +72,7 @@ namespace motion {
                      const utility::input::LimbID& leg,
                      const message::input::Sensors& sensors);
     };
-}
-}
+}  // namespace motion
+}  // namespace utility
 
 #endif

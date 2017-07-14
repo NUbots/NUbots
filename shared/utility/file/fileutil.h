@@ -74,6 +74,6 @@ namespace file {
     std::vector<std::string> listFiles(const std::string& directory, bool recursive = false);
 
     bool makeDirectory(const std::string& directory, bool parent = false);
-}
-}
+}  // namespace file
+}  // namespace utility
 #endif

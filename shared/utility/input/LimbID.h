@@ -104,7 +104,7 @@ namespace input {
 
         friend std::ostream& operator<<(std::ostream& out, const LimbID& val);
     };
-}
-}
+}  // namespace input
+}  // namespace utility
 
 #endif

@@ -51,8 +51,8 @@ namespace behaviour {
             float gain;
             float torque;
         };
-    }
-}
-}
+    }  // namespace skills
+}  // namespace behaviour
+}  // namespace module
 
 #endif  // MODULES_BEHAVIOUR_SKILLS_ARMVISIONAVOIDANCE_H

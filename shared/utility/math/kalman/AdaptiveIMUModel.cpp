@@ -104,6 +104,6 @@ namespace math {
         arma::mat::fixed<AdaptiveIMUModel::size, AdaptiveIMUModel::size> AdaptiveIMUModel::processNoise() {
             return arma::eye(size, size) * processNoiseFactor;  // std::numeric_limits<double>::epsilon();
         }
-    }
-}
-}
+    }  // namespace kalman
+}  // namespace math
+}  // namespace utility

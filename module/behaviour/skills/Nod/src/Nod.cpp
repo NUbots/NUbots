@@ -79,6 +79,6 @@ namespace behaviour {
         void Nod::updatePriority(const float& priority) {
             emit(std::make_unique<ActionPriorites>(ActionPriorites{id, {priority}}));
         }
-    }
-}
-}
+    }  // namespace skills
+}  // namespace behaviour
+}  // namespace module

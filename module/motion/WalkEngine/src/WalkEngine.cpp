@@ -457,5 +457,5 @@ namespace motion {
             log<NUClear::TRACE>("Configure WalkEngine - Finish");
         }
     }
-}  // motion
-}  // modules
+}  // namespace motion
+}  // namespace module

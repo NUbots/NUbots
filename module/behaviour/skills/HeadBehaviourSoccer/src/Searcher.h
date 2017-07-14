@@ -171,8 +171,8 @@ namespace behaviour {
             }
         };
 
-    }  // motion
-}  // behaviour
-}  // modules
+    }  // namespace skills
+}  // namespace behaviour
+}  // namespace module
 
 #endif  // MODULES_BEHAVIOURS_SKILLS_SEARCHER_H

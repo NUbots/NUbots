@@ -32,8 +32,8 @@ namespace support {
             /// @brief Called by the powerplant to build and setup the NetworkConfiguration reactor.
             explicit NetworkConfiguration(std::unique_ptr<NUClear::Environment> environment);
         };
-    }
-}
-}
+    }  // namespace configuration
+}  // namespace support
+}  // namespace module
 
 #endif  // MODULES_SUPPORT_CONFIGURATION_NETWORKCONFIGURATION_H

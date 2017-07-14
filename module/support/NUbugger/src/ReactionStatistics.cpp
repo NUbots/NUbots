@@ -49,5 +49,5 @@ namespace support {
         //     send(reactionStatistics);
         // }));
     }
-}
-}
+}  // namespace support
+}  // namespace module

@@ -206,5 +206,5 @@ namespace motion {
 
         return {xf, phaseSingle, zf};
     }
-}
-}
+}  // namespace motion
+}  // namespace module

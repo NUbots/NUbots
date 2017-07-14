@@ -223,5 +223,5 @@ namespace file {
 
         return true;
     }
-}
-}
+}  // namespace file
+}  // namespace utility

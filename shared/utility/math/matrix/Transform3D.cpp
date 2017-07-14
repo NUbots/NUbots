@@ -251,6 +251,6 @@ namespace math {
             // std::cerr << "out = \n" << result << std::endl;
             return result;
         }
-    }
-}
-}
+    }  // namespace matrix
+}  // namespace math
+}  // namespace utility

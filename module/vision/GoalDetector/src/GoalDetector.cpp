@@ -501,5 +501,5 @@ namespace vision {
 
             });
     }
-}
-}
+}  // namespace vision
+}  // namespace module

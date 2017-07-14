@@ -39,8 +39,8 @@ namespace behaviour {
             explicit Stand(std::unique_ptr<NUClear::Environment> environment);
         };
 
-    }  // reflexes
-}  // behaviours
-}  // modules
+    }  // namespace skills
+}  // namespace behaviour
+}  // namespace module
 
 #endif  // MODULES_BEHAVIOURS_UTILITY_SCRIPTRUNNER_H

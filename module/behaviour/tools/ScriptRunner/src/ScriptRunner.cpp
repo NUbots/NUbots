@@ -82,6 +82,6 @@ namespace behaviour {
                 [this](const std::set<ServoID>&) { emit(std::make_unique<ExecuteNextScript>()); }}));
         }
 
-    }  // tools
-}  // behaviours
-}  // modules
+    }  // namespace tools
+}  // namespace behaviour
+}  // namespace module

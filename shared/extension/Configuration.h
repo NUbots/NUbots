@@ -197,7 +197,7 @@ struct Configuration {
     }
 };
 
-}  // extension
+}  // namespace extension
 
 // NUClear configuration extension
 namespace NUClear {
@@ -313,14 +313,14 @@ namespace dsl {
                 }
             }
         };
-    }
+    }  // namespace operation
 
     // Configuration is transient
     namespace trait {
         template <>
         struct is_transient<std::shared_ptr<::extension::Configuration>> : public std::true_type {};
-    }
-}
-}
+    }  // namespace trait
+}  // namespace dsl
+}  // namespace NUClear
 
 #endif  // EXTENSION_CONFIGURATION_H

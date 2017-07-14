@@ -90,6 +90,6 @@ namespace math {
             double b = std::sqrt(radius * radius - a * a);
             return {centre[0] - b, centre[0] + b};
         }
-    }
-}
-}
+    }  // namespace geometry
+}  // namespace math
+}  // namespace utility

@@ -127,8 +127,8 @@ namespace support {
         explicit NUbugger(std::unique_ptr<NUClear::Environment> environment);
     };
 
-}  // support
-}  // modules
+}  // namespace support
+}  // namespace module
 
 // Serialisation for NUsight messages
 namespace NUClear {
@@ -196,8 +196,8 @@ namespace util {
                 return XXH64(name.c_str(), name.size(), 0x4e55436c);
             }
         };
-    }
-}
-}
+    }  // namespace serialise
+}  // namespace util
+}  // namespace NUClear
 
 #endif  // MODULES_SUPPORT_NUBUGGER_H

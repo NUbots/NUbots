@@ -287,5 +287,5 @@ namespace debug {
 
             });
     }
-}  // debug
-}  // modules
+}  // namespace debug
+}  // namespace module

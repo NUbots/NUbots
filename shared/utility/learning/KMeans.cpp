@@ -200,5 +200,5 @@ namespace learning {
             }
         }
     }
-}
-}
+}  // namespace learning
+}  // namespace utility

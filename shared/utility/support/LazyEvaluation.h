@@ -36,7 +36,7 @@ namespace support {
             return lazy();
         }
     };
-}
-}
+}  // namespace support
+}  // namespace utility
 
 #endif  // UTILITY_SUPPORT_LAZYEVALUATION_H

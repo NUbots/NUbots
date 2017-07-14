@@ -235,4 +235,4 @@ void SensorPlant::setCurrentSimParameters(const SimulationParameters& sim) {
         stream.second.setSimulationParameters(sim);
     }
 }
-}
+}  // namespace autocal

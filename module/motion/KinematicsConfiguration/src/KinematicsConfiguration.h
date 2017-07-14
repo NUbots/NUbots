@@ -43,7 +43,7 @@ namespace motion {
         void configureArm(message::motion::KinematicsModel& model, const YAML::Node& objArm);
         void configureMassModel(message::motion::KinematicsModel& model, const YAML::Node& objMassModel);
     };
-}
-}
+}  // namespace motion
+}  // namespace module
 
 #endif  // MODULE_MOTION_KINEMATICSCONFIGURATION_H

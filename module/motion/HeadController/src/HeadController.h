@@ -52,7 +52,7 @@ namespace motion {
         bool goalRobotSpace = true;
     };
 
-}  // motion
-}  // modules
+}  // namespace motion
+}  // namespace module
 
 #endif  // MODULES_BEHAVIOURS_REFLEX_HEADCONTROLLER_H

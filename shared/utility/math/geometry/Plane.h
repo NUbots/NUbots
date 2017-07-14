@@ -71,7 +71,7 @@ namespace math {
                 return tIntersection * l.direction + l.point;
             }
         };
-    }
-}
-}
+    }  // namespace geometry
+}  // namespace math
+}  // namespace utility
 #endif

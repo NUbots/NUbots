@@ -156,9 +156,9 @@ namespace motion {
                 arma::vec3 directionSupportFoot = torsoPose.transformVector(directionTorso);
 
                 arma::vec3 ballPosition = targetSupportFoot;
-                ballPosition[2] = 0.05;  // TODO: figure out why ball height is unreliable
+                ballPosition[2]         = 0.05;  // TODO: figure out why ball height is unreliable
                 arma::vec3 goalPosition = directionSupportFoot;
-                goalPosition[2] = 0.0;  // TODO: figure out why ball height is unreliable
+                goalPosition[2]         = 0.0;  // TODO: figure out why ball height is unreliable
 
                 balancer.setKickParameters(supportFoot, ballPosition, goalPosition);
                 kicker.setKickParameters(supportFoot, ballPosition, goalPosition);
@@ -269,5 +269,5 @@ namespace motion {
     }
 
 
-}  // motion
-}  // modules
+}  // namespace motion
+}  // namespace module

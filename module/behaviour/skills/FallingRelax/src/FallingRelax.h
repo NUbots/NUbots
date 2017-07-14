@@ -48,8 +48,8 @@ namespace behaviour {
         public:
             explicit FallingRelax(std::unique_ptr<NUClear::Environment> environment);
         };
-    }  // skills
-}  // behaviours
-}  // modules
+    }  // namespace skills
+}  // namespace behaviour
+}  // namespace module
 
 #endif  // MODULES_BEHAVIOUR_REFLEX_FALLINGRELAX_H

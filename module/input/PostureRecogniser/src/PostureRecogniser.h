@@ -71,7 +71,7 @@ namespace input {
          */
         void configure(const YAML::Node& config);
     };
-}
-}
+}  // namespace input
+}  // namespace module
 
 #endif  // MODULES_INPUT_POSTURERECOGNISER_H

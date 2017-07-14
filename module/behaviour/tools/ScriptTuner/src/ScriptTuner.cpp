@@ -1088,6 +1088,6 @@ namespace behaviour {
 
             return std::numeric_limits<float>::quiet_NaN();
         }
-    }  // tools
-}  // behaviours
-}  // modules
+    }  // namespace tools
+}  // namespace behaviour
+}  // namespace module

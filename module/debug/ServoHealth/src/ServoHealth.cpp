@@ -343,5 +343,5 @@ namespace debug {
             }
         });
     }
-}
-}
+}  // namespace debug
+}  // namespace module

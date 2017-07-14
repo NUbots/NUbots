@@ -467,7 +467,7 @@ namespace vision {
             return (FOURCC::UNKNOWN);
         }
     }
-}
-}
+}  // namespace vision
+}  // namespace utility
 
 #endif  // UTILITY_VISION_FOURCC_H

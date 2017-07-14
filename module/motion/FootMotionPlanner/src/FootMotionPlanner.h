@@ -54,9 +54,9 @@ namespace motion {
     class FootMotionPlanner : public NUClear::Reactor {
     public:
         /**
-          * The number of servo updates performnced per second
-          * TODO: Probably be a global config somewhere, waiting on NUClear to support runtime on<Every> arguments
-          */
+         * The number of servo updates performnced per second
+         * TODO: Probably be a global config somewhere, waiting on NUClear to support runtime on<Every> arguments
+         */
         static constexpr size_t UPDATE_FREQUENCY = 90;
         static constexpr size_t MIN_QUEUE_SIZE   = 1;
 
@@ -118,8 +118,8 @@ namespace motion {
         LimbID activeLimbInitial;  // TODO: Former initial non-support leg for deterministic walking approach
 
         /**
-        * Anthropomorphic metrics initialized from configuration script, see config file for documentation...
-        */
+         * Anthropomorphic metrics initialized from configuration script, see config file for documentation...
+         */
         double stepTime;                  //
         double stepHeight;                //
         float step_height_slow_fraction;  //
@@ -312,10 +312,10 @@ namespace motion {
          */
         void setVelocityCurrent(Transform2D inVelocityCommand);
         /**
-        * @brief [brief description]
-        * @details [long description]
-        * @return [description]
-        */
+         * @brief [brief description]
+         * @details [long description]
+         * @return [description]
+         */
         Transform2D getLeftFootPosition();
         /**
          * @brief [brief description]
@@ -365,7 +365,7 @@ namespace motion {
         void setActiveLimbDestination(const Transform2D& inActiveLimbDestination);
     };
 
-}  // motion
-}  // modules
+}  // namespace motion
+}  // namespace module
 
 #endif  // MODULE_MOTION_FOOTMOTIONPLANNER_H

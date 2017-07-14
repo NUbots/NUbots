@@ -114,9 +114,9 @@ namespace math {
                 return processNoisePartial * processNoise;
             }
         };
-    }
-}
-}
+    }  // namespace filter
+}  // namespace math
+}  // namespace utility
 
 
 #endif

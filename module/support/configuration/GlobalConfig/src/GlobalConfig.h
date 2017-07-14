@@ -31,9 +31,9 @@ namespace support {
             /// @brief Called by the powerplant to build and setup the GlobalConfig reactor.
             explicit GlobalConfig(std::unique_ptr<NUClear::Environment> environment);
         };
-    }
-}
-}
+    }  // namespace configuration
+}  // namespace support
+}  // namespace module
 
 
 #endif

@@ -456,5 +456,5 @@ namespace input {
         // We succeeded
         return true;
     }
-}
-}
+}  // namespace input
+}  // namespace module

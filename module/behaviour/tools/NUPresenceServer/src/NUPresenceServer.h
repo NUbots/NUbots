@@ -39,8 +39,8 @@ namespace behaviour {
             /// @brief Called by the powerplant to build and setup the NUPresenceServer reactor.
             explicit NUPresenceServer(std::unique_ptr<NUClear::Environment> environment);
         };
-    }
-}
-}
+    }  // namespace tools
+}  // namespace behaviour
+}  // namespace module
 
 #endif  // MODULE_BEHAVIOUR_NUPRESENCESERVER_H

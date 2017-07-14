@@ -121,5 +121,5 @@ namespace support {
         handles["lookup_table_diff"].push_back(on<Trigger<LookUpTableDiff>, Single, Priority::LOW>().then(
             [this](const LookUpTableDiff& tableDiff) { send(tableDiff, 0, true, NUClear::clock::now()); }));
     }
-}
-}
+}  // namespace support
+}  // namespace module

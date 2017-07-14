@@ -126,5 +126,5 @@ namespace support {
 
         send(subsumption);
     }
-}
-}
+}  // namespace support
+}  // namespace module

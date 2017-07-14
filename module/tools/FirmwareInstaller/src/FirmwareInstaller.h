@@ -30,7 +30,7 @@ namespace tools {
         std::string cm730Firmware;
         std::string dynamixelFirmware;
     };
-}
-}
+}  // namespace tools
+}  // namespace module
 
 #endif  // MODULE_TOOLS_FIRMWAREINSTALLER_H

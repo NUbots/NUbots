@@ -189,5 +189,5 @@ namespace vision {
 
         return output;
     }
-}
-}
+}  // namespace vision
+}  // namespace module

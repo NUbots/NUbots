@@ -340,5 +340,5 @@ namespace input {
             SpinnakerSystem->ReleaseInstance();
         }
     }
-}
-}
+}  // namespace input
+}  // namespace module

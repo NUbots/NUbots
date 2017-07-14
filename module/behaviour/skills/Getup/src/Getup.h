@@ -49,8 +49,8 @@ namespace behaviour {
         public:
             explicit Getup(std::unique_ptr<NUClear::Environment> environment);
         };
-    }  // skills
-}  // behaviours
-}  // modules
+    }  // namespace skills
+}  // namespace behaviour
+}  // namespace module
 
 #endif  // MODULES_BEHAVIOURS_UTILITY_SCRIPTRUNNER_H

@@ -284,6 +284,6 @@ namespace math {
                         arma::vec2({max_x, max_y}),
                         arma::vec2({max_x, min_y}));
         }
-    }
-}
-}
+    }  // namespace geometry
+}  // namespace math
+}  // namespace utility

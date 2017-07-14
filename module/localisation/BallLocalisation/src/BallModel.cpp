@@ -72,5 +72,5 @@ namespace localisation {
     arma::mat::fixed<BallModel::size, BallModel::size> BallModel::processNoise() const {
         return arma::diagmat(processNoiseDiagonal);
     }
-}
-}
+}  // namespace localisation
+}  // namespace module

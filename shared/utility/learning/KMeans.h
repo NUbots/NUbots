@@ -72,7 +72,7 @@ namespace learning {
         arma::gmm_diag clusterModel;
         KMeansConfig config;
     };
-}
-}
+}  // namespace learning
+}  // namespace utility
 
 #endif

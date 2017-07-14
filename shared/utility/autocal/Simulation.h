@@ -72,6 +72,6 @@ struct SimulationParameters {
         return s_;
     }
 };
-}
+}  // namespace autocal
 
 #endif

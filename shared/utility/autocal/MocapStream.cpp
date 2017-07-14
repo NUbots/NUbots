@@ -319,8 +319,9 @@ MocapStream::Frame MocapStream::getSimulatedFrame(TimeStamp now) {
                 //  Transform3D({ 0.1040,  -0.0023,  -0.9946,  -0.3540,
                 // 								      -0.1147,   0.9933,  -0.0143,  -0.9437,
                 // 								       0.9879,   0.1156,   0.1030,   1.2106,
-                // 								            0,        0,        0,   1.0000}).t();//transpose because column major
-                // reading
+                // 								            0,        0,        0,   1.0000}).t();//transpose because
+                // column
+                // major reading
                 std::cout << "simWorldTransform = \n" << simWorldTransform[key] << std::endl;
             }
             if (simLocalTransform.count(key) == 0) {
@@ -361,4 +362,4 @@ void MocapStream::transformLHtoRH(Transform3D& T) {
         T             = L * T * L;  // last L is actually L.i() = L;
     }
 }
-}
+}  // namespace autocal

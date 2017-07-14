@@ -41,6 +41,6 @@ namespace research {
     public:
         explicit ScriptOptimizer(std::unique_ptr<NUClear::Environment> environment);
     };
-}
-}
+}  // namespace research
+}  // namespace module
 #endif

@@ -92,6 +92,6 @@ namespace support {
                     emit(std::move(fd));
                 });
         }
-    }
-}
-}
+    }  // namespace configuration
+}  // namespace support
+}  // namespace module

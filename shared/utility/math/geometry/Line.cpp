@@ -105,6 +105,6 @@ namespace math {
 
             return point1 + tValues[0] * direction1;
         }
-    }
-}
-}
+    }  // namespace geometry
+}  // namespace math
+}  // namespace utility

@@ -66,8 +66,8 @@ namespace math {
             static Rotation2D createRotation(double radians);
         };
 
-    }  // matrix
-}  // math
-}  // utility
+    }  // namespace matrix
+}  // namespace math
+}  // namespace utility
 
 #endif  // UTILITY_MATH_MATRIX_ROTATION2D_H

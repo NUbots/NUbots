@@ -253,7 +253,7 @@ namespace input {
         bool setSetting(unsigned int id, int32_t value);
     };
 
-}  // input
-}  // modules
+}  // namespace input
+}  // namespace module
 
 #endif  // MODULES_INPUT_V4L2CAMERA_H

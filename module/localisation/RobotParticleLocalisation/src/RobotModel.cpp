@@ -211,5 +211,5 @@ namespace localisation {
                    ? arma::normalise(arma::cross(goalBaseCornersCam.col(widest), goalTopCornersCam.col(widest)))
                    : arma::normalise(arma::cross(goalTopCornersCam.col(widest), goalBaseCornersCam.col(widest)));
     }
-}
-}
+}  // namespace localisation
+}  // namespace module

@@ -28,7 +28,7 @@ namespace localisation {
         /// @brief Called by the powerplant to build and setup the RobotParticleLocalisation reactor.
         explicit RobotParticleLocalisation(std::unique_ptr<NUClear::Environment> environment);
     };
-}
-}
+}  // namespace localisation
+}  // namespace module
 
 #endif  // MODULE_LOCALISATION_ROBOTPARTICLELOCALISATION_H

@@ -167,8 +167,8 @@ namespace input {
                << packet.teams[1] << std::endl;
             return os;
         }
-    }
-}
-}
+    }  // namespace gamecontroller
+}  // namespace input
+}  // namespace module
 
 #endif  // MODULES_INPUT_GAMECONTROLLERDATA_H

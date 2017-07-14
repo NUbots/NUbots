@@ -461,6 +461,6 @@ namespace platform {
                 hardwareLoop.enable();
             });
         }
-    }
-}
-}
+    }  // namespace darwin
+}  // namespace platform
+}  // namespace module

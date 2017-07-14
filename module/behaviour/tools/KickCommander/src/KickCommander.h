@@ -33,8 +33,8 @@ namespace behaviour {
             explicit KickCommander(std::unique_ptr<NUClear::Environment> environment);
             bool doThings = false;
         };
-    }
-}
-}
+    }  // namespace tools
+}  // namespace behaviour
+}  // namespace module
 
 #endif  // MODULES_SUPPORT_KICKCOMMANDER_H

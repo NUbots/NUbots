@@ -81,7 +81,7 @@ namespace motion {
         /// @brief Called by the powerplant to build and setup the NUPresenceInput reactor.
         explicit NUPresenceInput(std::unique_ptr<NUClear::Environment> environment);
     };
-}
-}
+}  // namespace motion
+}  // namespace module
 
 #endif  // MODULES_MOTION_HEAD6DOFCONTROLLER_H

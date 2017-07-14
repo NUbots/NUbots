@@ -45,8 +45,8 @@ namespace math {
             arma::vec2 getPosition() const;
             double getRotation() const;
         };
-    }
-}
-}
+    }  // namespace geometry
+}  // namespace math
+}  // namespace utility
 
 #endif

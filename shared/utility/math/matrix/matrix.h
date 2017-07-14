@@ -64,7 +64,7 @@ namespace math {
             auto u = orthogonal(v);
             return arma::normalise(u);
         }
-    }
-}
-}
+    }  // namespace matrix
+}  // namespace math
+}  // namespace utility
 #endif  // UTILITY_MATH_MATRIX_H

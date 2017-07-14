@@ -843,5 +843,5 @@ namespace motion {
             log<NUClear::TRACE>("Configure BalanceKinematicResponse - Finish");
         }
     }
-}  // motion
-}  // modules
+}  // namespace motion
+}  // namespace module

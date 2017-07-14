@@ -87,6 +87,6 @@ namespace math {
 
 
         // Points should be stored in clockwise order.
-    }
-}
-}
+    }  // namespace geometry
+}  // namespace math
+}  // namespace utility

@@ -30,7 +30,7 @@ namespace math {
         template <int Dimensions>
         class Rotation;
         using Rotation3D = Rotation<3>;
-    }
+    }  // namespace matrix
     namespace geometry {
 
         class UnitQuaternion : public arma::vec4 {
@@ -38,7 +38,7 @@ namespace math {
 
         private:
             /* @brief Constructor for non-unit quaternion for purpose of point representation
-            */
+             */
             UnitQuaternion(const arma::vec3& v);
 
         public:
@@ -57,15 +57,15 @@ namespace math {
             UnitQuaternion(double realPart, const arma::vec3& imaginaryPart);
 
             /*! @brief Creates quaternion which rotates about 3D axis by angle radians
-            */
+             */
             UnitQuaternion(const arma::vec3& axis, double angle);
 
             /*! @brief Swaps quat to -quat if kW < 0
-            */
+             */
             void rectify();
 
             /*! @brief Gets the inverse of the quaternion
-            */
+             */
             UnitQuaternion i() const;
 
             arma::vec3 rotateVector(const arma::vec3& v) const;
@@ -82,12 +82,12 @@ namespace math {
 
             /* @return Matrix Q(q) such that given another quaternion q', then
              * Q(q) * q' = q * q'
-            */
+             */
             arma::mat44 getLeftQuatMultMatrix() const;
 
             /* @return Matrix W(q) such that given another quaternion q', then
              * W(q) * q' = q' * q
-            */
+             */
             arma::mat44 getRightQuatMultMatrix() const;
 
             static float random(float a, float b);
@@ -144,8 +144,8 @@ namespace math {
                 return (arma::vec4({1.0, 0.0, 0.0, 0.0}));
             }
         };
-    }
-}
-}
+    }  // namespace geometry
+}  // namespace math
+}  // namespace utility
 
 #endif

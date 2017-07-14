@@ -14,9 +14,9 @@ namespace support {
         thread_local std::vector<utility::support::evil::StackFrame> stack =
             std::vector<utility::support::evil::StackFrame>();
         thread_local std::string exception_name = std::string();
-    }
-}
-}
+    }  // namespace evil
+}  // namespace support
+}  // namespace utility
 
 extern "C" {
 

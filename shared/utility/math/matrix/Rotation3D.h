@@ -218,8 +218,8 @@ namespace math {
             static Rotation3D createFromEulerAngles(const arma::vec3& a);
         };
 
-    }  // matrix
-}  // math
-}  // utility
+    }  // namespace matrix
+}  // namespace math
+}  // namespace utility
 
 #endif  // UTILITY_MATH_MATRIX_ROTATION3D_H

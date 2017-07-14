@@ -30,7 +30,7 @@ namespace debug {
         explicit KinematicsDebug(std::unique_ptr<NUClear::Environment> environment);
     };
 
-}  // debug
-}  // modules
+}  // namespace debug
+}  // namespace module
 
 #endif  // MODULES_DEBUG_KINEMATICSDEBUG_H

@@ -92,7 +92,7 @@ namespace localisation {
 
             return obs;
         }
-    }
-}
-}
+    }  // namespace transform
+}  // namespace localisation
+}  // namespace utility
 #endif

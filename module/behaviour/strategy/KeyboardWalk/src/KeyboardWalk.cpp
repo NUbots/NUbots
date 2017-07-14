@@ -218,6 +218,6 @@ namespace behaviour {
             endwin();
             std::raise(SIGTERM);  // Change back to SIGINT if required by NUbots messaging system//
         }
-    }
-}
-}
+    }  // namespace strategy
+}  // namespace behaviour
+}  // namespace module

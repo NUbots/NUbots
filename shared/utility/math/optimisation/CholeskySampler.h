@@ -89,8 +89,8 @@ namespace math {
                 return samples.cols(sampleCount - numSamples, sampleCount - 1);
             }
         };
-    }
-}
-}
+    }  // namespace optimisation
+}  // namespace math
+}  // namespace utility
 
 #endif  // UTILITY_MATH_OPTIMISATION_CHOLESKYSAMPLER_H

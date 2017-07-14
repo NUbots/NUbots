@@ -121,9 +121,9 @@ namespace math {
                 return arma::cov(particles, 0);
             }
         };
-    }
-}
-}
+    }  // namespace kalman
+}  // namespace math
+}  // namespace utility
 
 
 #endif

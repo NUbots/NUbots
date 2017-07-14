@@ -31,9 +31,9 @@ namespace behaviour {
             /// @brief Called by the powerplant to build and setup the SpeakTest reactor.
             explicit SpeakTest(std::unique_ptr<NUClear::Environment> environment);
         };
-    }
-}
-}
+    }  // namespace tools
+}  // namespace behaviour
+}  // namespace module
 
 
 #endif

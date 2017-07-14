@@ -142,7 +142,7 @@ namespace input {
     private:
         static const std::set<ServoID> values;
     };
-}
-}
+}  // namespace input
+}  // namespace utility
 
 #endif

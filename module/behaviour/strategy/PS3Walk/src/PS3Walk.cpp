@@ -161,6 +161,6 @@ namespace behaviour {
                 }
             });
         }
-    }
-}
-}
+    }  // namespace strategy
+}  // namespace behaviour
+}  // namespace module

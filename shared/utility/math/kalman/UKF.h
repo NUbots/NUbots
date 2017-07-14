@@ -276,9 +276,9 @@ namespace math {
                 return covariance;
             }
         };
-    }
-}
-}
+    }  // namespace kalman
+}  // namespace math
+}  // namespace utility
 
 
 #endif

@@ -44,5 +44,5 @@ namespace vision {
 
         return l * l + r * r;
     }
-}
-}
+}  // namespace vision
+}  // namespace module

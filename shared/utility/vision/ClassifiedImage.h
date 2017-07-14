@@ -52,7 +52,7 @@ namespace vision {
         return int(lround(l.y(x)));
     }
 
-}  // vision
-}  // utility
+}  // namespace vision
+}  // namespace utility
 
 #endif  // UTILITY_VISION_CLASSIFIEDIMAGE_H

@@ -84,8 +84,8 @@ namespace platform {
                 default: throw std::runtime_error("Out of bounds");
             }
         }
-    }  // darwin
-}  // platform
-}  // utility
+    }  // namespace darwin
+}  // namespace platform
+}  // namespace utility
 
 #endif

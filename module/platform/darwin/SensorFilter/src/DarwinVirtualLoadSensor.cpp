@@ -74,6 +74,6 @@ namespace platform {
 
             return outputState;
         }
-    }
-}
-}
+    }  // namespace darwin
+}  // namespace platform
+}  // namespace module

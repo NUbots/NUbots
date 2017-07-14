@@ -171,7 +171,7 @@ namespace vision {
         };
     };
 
-}  // vision
-}  // utility
+}  // namespace vision
+}  // namespace utility
 
 #endif  // MESSAGE_VISION_VISION_H

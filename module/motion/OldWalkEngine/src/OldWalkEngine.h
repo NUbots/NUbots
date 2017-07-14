@@ -320,7 +320,7 @@ namespace motion {
         double procFunc(double a, double deadband, double maxvalue);
     };
 
-}  // motion
-}  // modules
+}  // namespace motion
+}  // namespace module
 
 #endif  // MODULES_MOTION_OLDWALKENGINE_H

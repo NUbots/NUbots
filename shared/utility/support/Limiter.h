@@ -83,7 +83,7 @@ namespace support {
             return result;
         }
     };
-}
-}
+}  // namespace support
+}  // namespace utility
 
 #endif

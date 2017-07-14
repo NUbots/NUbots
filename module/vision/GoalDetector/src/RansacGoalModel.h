@@ -89,8 +89,8 @@ namespace vision {
             right.leastSquaresUpdate(RIt(begin), RIt(end), threshold);
         }
     };
-}
-}
+}  // namespace vision
+}  // namespace module
 
 
 #endif

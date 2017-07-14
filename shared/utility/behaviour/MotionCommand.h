@@ -68,7 +68,7 @@ namespace behaviour {
     // //     Ball
     // // };
     // // TargetType targetLookAt = WayPoint;
-}
-}
+}  // namespace behaviour
+}  // namespace utility
 
 #endif

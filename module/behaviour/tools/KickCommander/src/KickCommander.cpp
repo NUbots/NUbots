@@ -52,6 +52,6 @@ namespace behaviour {
 
             });
         }
-    }
-}
-}
+    }  // namespace tools
+}  // namespace behaviour
+}  // namespace module

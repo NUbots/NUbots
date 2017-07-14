@@ -39,9 +39,9 @@ namespace behaviour {
 
             void updatePriority(const float& priority);
         };
-    }
-}
-}
+    }  // namespace skills
+}  // namespace behaviour
+}  // namespace module
 
 
 #endif  // MODULE_BEHAVIOUR_SKILLS_NOD_H

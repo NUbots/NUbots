@@ -53,7 +53,7 @@ namespace input {
             return arma::eye(ServoLoadModel::size, ServoLoadModel::size) * 0.001;
         }
     };
-}
-}
+}  // namespace input
+}  // namespace utility
 
 #endif  // MODULES_INPUT_SERVOLOADMODEL_H

@@ -122,6 +122,6 @@ namespace support {
                 logFile << message.message << std::endl;
             });
         }
-    }
-}
-}
+    }  // namespace logging
+}  // namespace support
+}  // namespace module

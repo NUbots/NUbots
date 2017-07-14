@@ -575,6 +575,6 @@ namespace behaviour {
             }
         }
 
-    }  // strategy
-}  // behaviours
-}  // modules
+    }  // namespace strategy
+}  // namespace behaviour
+}  // namespace module

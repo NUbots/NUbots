@@ -233,6 +233,6 @@ namespace support {
         void FitnessData::getupFinished() {
             recording = true;
         }
-    }  // optimisation
-}  // support
-}  // modules
+    }  // namespace optimisation
+}  // namespace support
+}  // namespace module

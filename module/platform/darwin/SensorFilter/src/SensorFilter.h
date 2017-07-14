@@ -143,7 +143,7 @@ namespace platform {
             // World to foot in foot-flat rotation when the foot landed
             std::array<utility::math::matrix::Rotation3D, 2> footlanding_Rwf;
         };
-    }
-}
-}
+    }  // namespace darwin
+}  // namespace platform
+}  // namespace module
 #endif  // MODULES_PLATFORM_DARWIN_SENSORFILTER_H

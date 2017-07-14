@@ -428,5 +428,5 @@ namespace input {
             default: log<NUClear::ERROR>("The NatNet server sent an unexpected packet type"); break;
         }
     }
-}
-}
+}  // namespace input
+}  // namespace module

@@ -58,8 +58,8 @@ namespace behaviour {
             explicit FixedWalk(std::unique_ptr<NUClear::Environment> environment);
         };
 
-    }  // planning
-}  // behaviours
-}  // modules
+    }  // namespace planning
+}  // namespace behaviour
+}  // namespace module
 
 #endif  // MODULES_BEHAVIOURS_UTILITY_SCRIPTRUNNER_H

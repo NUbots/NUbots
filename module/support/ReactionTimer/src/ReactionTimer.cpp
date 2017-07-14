@@ -22,5 +22,5 @@ namespace support {
                 "ms");
         });
     }
-}
-}
+}  // namespace support
+}  // namespace module

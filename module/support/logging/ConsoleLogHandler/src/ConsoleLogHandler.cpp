@@ -129,6 +129,6 @@ namespace support {
             });
         }
 
-    }  // logging
-}  // support
-}  // modules
+    }  // namespace logging
+}  // namespace support
+}  // namespace module

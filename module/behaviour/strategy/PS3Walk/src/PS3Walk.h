@@ -72,9 +72,9 @@ namespace behaviour {
             float headPitch       = 0;
             float headYaw         = 0;
         };
-    }
-}
-}
+    }  // namespace strategy
+}  // namespace behaviour
+}  // namespace module
 
 
 #endif

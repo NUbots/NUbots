@@ -369,7 +369,7 @@ namespace motion {
         void setRightFootPosition(const Transform3D& inRightFootPosition);
     };
 
-}  // motion
-}  // modules
+}  // namespace motion
+}  // namespace module
 
 #endif  // MODULES_MOTION_WALKENGINE_H

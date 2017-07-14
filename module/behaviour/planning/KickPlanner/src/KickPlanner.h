@@ -41,9 +41,9 @@ namespace behaviour {
             NUClear::clock::time_point ball_last_measurement_time;
             NUClear::clock::time_point lastTimeValid;
         };
-    }
-}
-}
+    }  // namespace planning
+}  // namespace behaviour
+}  // namespace module
 
 
 #endif

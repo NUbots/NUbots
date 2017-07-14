@@ -117,7 +117,7 @@ namespace math {
                 return point + tValues[0] * direction;
             }
         };
-    }
-}
-}
+    }  // namespace geometry
+}  // namespace math
+}  // namespace utility
 #endif

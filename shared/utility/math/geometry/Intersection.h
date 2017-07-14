@@ -30,8 +30,8 @@ namespace math {
 
             bool test(const Circle& circle, const RotatedRectangle& rect);
         }
-    }
-}
-}
+    }  // namespace geometry
+}  // namespace math
+}  // namespace utility
 
 #endif

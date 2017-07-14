@@ -144,5 +144,5 @@ namespace localisation {
     arma::mat::fixed<FieldModel::size, FieldModel::size> FieldModel::processNoise() const {
         return arma::diagmat(processNoiseDiagonal);
     }
-}
-}
+}  // namespace localisation
+}  // namespace module

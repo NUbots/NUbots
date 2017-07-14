@@ -76,5 +76,5 @@ namespace input {
     }
 
     // When we shutdown, we must tell our camera class to close (stop streaming)
-}
-}
+}  // namespace input
+}  // namespace module

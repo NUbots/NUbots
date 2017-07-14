@@ -49,7 +49,7 @@ namespace math {
 
             const double processNoiseFactor = 1e-6;
         };
-    }
-}
-}
+    }  // namespace kalman
+}  // namespace math
+}  // namespace utility
 #endif

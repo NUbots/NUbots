@@ -35,8 +35,8 @@ namespace debug {
             /// @brief Called by the powerplant to build and setup the TestDOpE reactor.
             explicit TestDOpE(std::unique_ptr<NUClear::Environment> environment);
         };
-    }
-}
-}
+    }  // namespace optimisation
+}  // namespace debug
+}  // namespace module
 
 #endif  // MODULES_DEBUG_OPTIMISATION_TESTDOPE_H

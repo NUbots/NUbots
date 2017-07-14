@@ -191,8 +191,8 @@ namespace math {
                 return results;
             }
         };
-    }
-}
-}
+    }  // namespace ransac
+}  // namespace math
+}  // namespace utility
 
 #endif

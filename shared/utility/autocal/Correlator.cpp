@@ -309,4 +309,4 @@ std::vector<std::pair<int, int>> Correlator::getBestCorrelations() {
     }
     return result;
 }
-}
+}  // namespace autocal

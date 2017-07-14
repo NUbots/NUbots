@@ -29,6 +29,6 @@ namespace support {
     public:
         explicit DisplayTest(std::unique_ptr<NUClear::Environment> environment);
     };
-}
-}
+}  // namespace support
+}  // namespace module
 #endif

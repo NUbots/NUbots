@@ -141,6 +141,6 @@ namespace platform {
         float Convert::temperature(const uint8_t value) {
             return value * TEMPERATURE_CONVERSION_FACTOR;
         }
-    }
-}
-}
+    }  // namespace darwin
+}  // namespace platform
+}  // namespace module

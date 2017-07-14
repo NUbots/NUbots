@@ -78,5 +78,5 @@ public:
         return std::exp(-error * error);
     }
 };
-}
+}  // namespace autocal
 #endif

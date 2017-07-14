@@ -76,8 +76,8 @@ namespace vision {
         /// @brief Called by the powerplant to build and setup the BallDetector reactor.
         explicit BallDetector(std::unique_ptr<NUClear::Environment> environment);
     };
-}
-}
+}  // namespace vision
+}  // namespace module
 
 
 #endif

@@ -214,6 +214,6 @@ namespace math {
 
             return *this * ratioA + p * ratioB;
         }
-    }
-}
-}
+    }  // namespace geometry
+}  // namespace math
+}  // namespace utility

@@ -67,7 +67,8 @@ namespace behaviour {
                     /*
                      * Dive direction is determined by the RT position of ball.
                      * TODO 1: This is problematic as there will be latence which has to be considered
-                     * if the velocity of ball is beyond a threshold. Might be good if there is any sort of prediction.
+                     * if the velocity of ball is beyond a threshold. Might be good if there is any sort of
+                     * prediction.
                      *
                      * TODO 2: Posture before dive. Banana dive?
                      *
@@ -104,6 +105,6 @@ namespace behaviour {
                 }
             });
         }
-    }
-}
-}
+    }  // namespace planning
+}  // namespace behaviour
+}  // namespace module

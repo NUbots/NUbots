@@ -78,8 +78,8 @@ namespace support {
             explicit WalkOptimiser(std::unique_ptr<NUClear::Environment> environment);
         };
 
-    }  // optimisation
-}  // support
-}  // modules
+    }  // namespace optimisation
+}  // namespace support
+}  // namespace module
 
 #endif  // MODULES_SUPPORT_NUBUGGER_H

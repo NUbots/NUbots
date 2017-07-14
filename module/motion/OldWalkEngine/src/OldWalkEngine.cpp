@@ -819,5 +819,5 @@ namespace motion {
         return std::abs(std::min(std::max(0.0, std::abs(value) - deadband), maxvalue));
     }
 
-}  // motion
-}  // modules
+}  // namespace motion
+}  // namespace module

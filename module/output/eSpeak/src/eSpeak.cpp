@@ -56,5 +56,5 @@ namespace output {
         on<Shutdown>().then(espeak_Terminate);
     }
 
-}  // output
-}  // modules
+}  // namespace output
+}  // namespace module

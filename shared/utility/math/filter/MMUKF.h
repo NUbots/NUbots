@@ -169,8 +169,8 @@ namespace math {
                 return filters[0].filter.getCovariance();
             }
         };
-    }
-}
-}
+    }  // namespace filter
+}  // namespace math
+}  // namespace utility
 
 #endif  // UTILITY_MATH_FILTER_MMUKF_H

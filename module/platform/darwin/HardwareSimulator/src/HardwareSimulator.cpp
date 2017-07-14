@@ -349,6 +349,6 @@ namespace platform {
             sensors.fsr.left.centreX = down ? 1 : std::numeric_limits<double>::quiet_NaN();
             sensors.fsr.left.centreY = down ? 1 : std::numeric_limits<double>::quiet_NaN();
         }
-    }
-}
-}
+    }  // namespace darwin
+}  // namespace platform
+}  // namespace module

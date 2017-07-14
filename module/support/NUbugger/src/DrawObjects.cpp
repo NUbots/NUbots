@@ -37,5 +37,5 @@ namespace support {
         handles["draw_objects"].push_back(
             on<Trigger<DrawObject>>().then([this](const DrawObject& drawObject) { send(drawObject); }));
     }
-}
-}
+}  // namespace support
+}  // namespace module

@@ -45,9 +45,9 @@ namespace support {
 
         extern thread_local std::vector<StackFrame> stack;
         extern thread_local std::string exception_name;
-    }
-}
-}
+    }  // namespace evil
+}  // namespace support
+}  // namespace utility
 
 #endif  // NDEBUG
 

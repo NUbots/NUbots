@@ -162,5 +162,5 @@ namespace localisation {
 
         return possibilities;
     }
-}
-}
+}  // namespace localisation
+}  // namespace module

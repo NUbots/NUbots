@@ -55,6 +55,6 @@ namespace behaviour {
                                [this](const std::set<LimbID>&) {},
                                [this](const std::set<ServoID>&) {}}));
         }
-    }  // tools
-}  // behaviours
-}  // modules
+    }  // namespace skills
+}  // namespace behaviour
+}  // namespace module

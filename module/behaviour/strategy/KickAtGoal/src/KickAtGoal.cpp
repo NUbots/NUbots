@@ -104,6 +104,6 @@ namespace behaviour {
             emit(std::move(command));
             currentState = Behaviour::SEARCH_FOR_BALL;
         }
-    }
-}
-}
+    }  // namespace strategy
+}  // namespace behaviour
+}  // namespace module

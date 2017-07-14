@@ -61,7 +61,7 @@ namespace behaviour {
 
 
             /*! @brief Updates the search plan when something has changed
-            */
+             */
             void updateHeadPlan(const message::motion::KinematicsModel& kinematicsModel,
                                 const std::vector<message::vision::Ball>& fixationObjects,
                                 const bool& search,
@@ -74,13 +74,13 @@ namespace behaviour {
                                 const utility::math::matrix::Rotation3D& headToIMUSpace);
 
             /*! @brief Converts from camera space direction to IMU space direction
-            */
+             */
             arma::vec2 getIMUSpaceDirection(const message::motion::KinematicsModel& kinematicsModel,
                                             const arma::vec2& screenAngles,
                                             utility::math::matrix::Rotation3D headToIMUSpace);
 
             /*! @brief Gets points which allow for simultaneous search and viewing of key objects
-            */
+             */
             std::vector<arma::vec2> getSearchPoints(const message::motion::KinematicsModel& kinematicsModel,
                                                     std::vector<message::vision::Ball> fixationObjects,
                                                     message::behaviour::SoccerObjectPriority::SearchType sType,
@@ -92,12 +92,12 @@ namespace behaviour {
 
             /*! @brief Combines a collection of vision objects. The screen resulting screen angular region is the
              * bounding box of the objects
-            */
+             */
             message::vision::Ball combineVisionObjects(const std::vector<message::vision::Ball>& obs);
             message::vision::Goal combineVisionObjects(const std::vector<message::vision::Goal>& obs);
 
             /*! @brief Gets a bounding box in screen angular space of a set of vision objects
-            */
+             */
             utility::math::geometry::Quad getScreenAngularBoundingBox(const std::vector<message::vision::Ball>& obs);
             utility::math::geometry::Quad getScreenAngularBoundingBox(const std::vector<message::vision::Goal>& obs);
 
@@ -155,8 +155,8 @@ namespace behaviour {
             explicit HeadBehaviourSoccer(std::unique_ptr<NUClear::Environment> environment);
         };
 
-    }  // skills
-}  // behaviour
-}  // modules
+    }  // namespace skills
+}  // namespace behaviour
+}  // namespace module
 
 #endif  // MODULES_BEHAVIOURS_REFLEX_HEADBEHAVIOURSOCCER_H

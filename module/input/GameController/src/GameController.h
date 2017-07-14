@@ -69,7 +69,7 @@ namespace input {
         explicit GameController(std::unique_ptr<NUClear::Environment> environment);
     };
 
-}  // input
-}  // modules
+}  // namespace input
+}  // namespace module
 
 #endif  // MODULES_INPUT_GAMECONTROLLER_H

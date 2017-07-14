@@ -459,6 +459,6 @@ namespace motion {
         }
 
 
-    }  // kinematics
-}  // motion
-}  // utility
+    }  // namespace kinematics
+}  // namespace motion
+}  // namespace utility

@@ -74,7 +74,7 @@ namespace math {
                 return arma::norm(cornerDiff) < r;
                 // }
             }
-        }
-    }
-}
-}
+        }  // namespace intersection
+    }      // namespace geometry
+}  // namespace math
+}  // namespace utility

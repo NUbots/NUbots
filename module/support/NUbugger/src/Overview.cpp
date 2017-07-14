@@ -180,5 +180,5 @@ namespace support {
         handles["overview"].push_back(on<Trigger<WalkCommand>, Single, Priority::LOW>().then(
             [this](const WalkCommand& walkCommand) { overview.walk_command = walkCommand.command; }));
     }
-}
-}
+}  // namespace support
+}  // namespace module

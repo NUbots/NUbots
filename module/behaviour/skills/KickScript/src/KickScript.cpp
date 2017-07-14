@@ -167,6 +167,6 @@ namespace behaviour {
                                                        : x <= -std::abs(y) ? 2   // backward
                                                                            : 3;  // right
         }
-    }
-}
-}
+    }  // namespace skills
+}  // namespace behaviour
+}  // namespace module

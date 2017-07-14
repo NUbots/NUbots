@@ -54,8 +54,8 @@ namespace research {
         ReactionHandle fieldProvider;
         ReactionHandle lineProvider;
     };
-}
-}
+}  // namespace research
+}  // namespace module
 
 
 #endif

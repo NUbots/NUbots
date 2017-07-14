@@ -39,7 +39,7 @@ arma::mat33 CalibrationTools::crossMatrix(const arma::vec3& v) {
 
 /*
  * Returns matrix of vectorised matrix v
-*/
+ */
 arma::mat CalibrationTools::unvectorize(arma::mat v, int n_rows) {
     int n_cols = 0;
     if (v.size() % n_rows != 0) {
@@ -64,7 +64,8 @@ arma::mat CalibrationTools::unvectorize(arma::mat v, int n_rows) {
 // 	for i in range(3):
 // 		for j in range(3):
 // 			if not (numpy.allclose(dot(M[:3,i],M[:3,j]), kroneckerDelta(i,j))):
-// 				print "\n\n\n\n\n\n\nColumn ", i, " and Column ", j, " are not orthonormal: dotprod = ", dot(M[:3,i],M[:3,j]),
+// 				print "\n\n\n\n\n\n\nColumn ", i, " and Column ", j, " are not orthonormal: dotprod = ",
+// dot(M[:3,i],M[:3,j]),
 // "\n\n\n\n\n\n\n"
 // 				return False
 // 	return True
@@ -433,4 +434,4 @@ CalibrationTools::solveClosedForm_Dornaika1998(const std::vector<utility::math::
 
     return result;
 }
-}
+}  // namespace autocal

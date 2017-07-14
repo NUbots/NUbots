@@ -301,8 +301,8 @@ namespace math {
                                     const arma::vec3& forwardAxis = arma::vec3({1, 0, 0})) const;
         };
 
-    }  // matrix
-}  // math
-}  // utility
+    }  // namespace matrix
+}  // namespace math
+}  // namespace utility
 
 #endif  // UTILITY_MATH_MATRIX_TRANSFORM3D_H

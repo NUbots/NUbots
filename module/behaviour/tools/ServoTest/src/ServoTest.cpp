@@ -19,6 +19,6 @@ namespace behaviour {
                 // Use configuration here from file ServoTest.yaml
             });
         }
-    }
-}
-}
+    }  // namespace tools
+}  // namespace behaviour
+}  // namespace module

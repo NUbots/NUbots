@@ -42,7 +42,7 @@ namespace motion {
         static constexpr const char* CONFIGURATION_PATH = "";
     };
 
-}  // motion
-}  // modules
+}  // namespace motion
+}  // namespace module
 
 #endif  // MODULES_MOTION_SCRIPTENGINE_H

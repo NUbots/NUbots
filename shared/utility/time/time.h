@@ -45,6 +45,6 @@ namespace time {
     inline NUClear::clock::duration durationFromSeconds(double seconds) {
         return NUClear::clock::duration(uint64_t(NUClear::clock::period::den * seconds));
     }
-}
-}
+}  // namespace time
+}  // namespace utility
 #endif

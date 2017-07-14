@@ -178,8 +178,8 @@ namespace math {
                 return (t > epsilon);
             }
         };
-    }
-}
-}
+    }  // namespace geometry
+}  // namespace math
+}  // namespace utility
 
 #endif  // UTILITY_MATH_GEOMETRY_TRIANGLE_H

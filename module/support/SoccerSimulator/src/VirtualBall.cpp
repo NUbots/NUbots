@@ -151,5 +151,5 @@ namespace support {
         // If no measurements are in the Ball, then there it was not observed
         return result;
     }
-}
-}
+}  // namespace support
+}  // namespace module

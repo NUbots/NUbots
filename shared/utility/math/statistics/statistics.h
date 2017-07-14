@@ -50,8 +50,8 @@ namespace math {
 
             return (diag * covariance * diag);
         }
-    }
-}
-}
+    }  // namespace statistics
+}  // namespace math
+}  // namespace utility
 
 #endif  // UTILITY_MATH_STATISTICS_STATISTICS_H

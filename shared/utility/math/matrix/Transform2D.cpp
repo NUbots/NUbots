@@ -78,6 +78,6 @@ namespace math {
             arma::vec2 newDisplacement = -Rotation2D::createRotation(angle()).i() * xy();
             return Transform2D(newDisplacement, -this->angle());
         }
-    }
-}
-}
+    }  // namespace matrix
+}  // namespace math
+}  // namespace utility

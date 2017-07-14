@@ -155,6 +155,6 @@ namespace behaviour {
                 [this](const std::set<ServoID>&) {}  // Servos reached target
             }));
         }
-    }
-}
-}
+    }  // namespace skills
+}  // namespace behaviour
+}  // namespace module

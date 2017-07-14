@@ -74,8 +74,8 @@ namespace motion {
         /// @brief Called by the powerplant to build and setup the IKKick reactor.
         explicit IKKick(std::unique_ptr<NUClear::Environment> environment);
     };
-}
-}
+}  // namespace motion
+}  // namespace module
 
 
 #endif

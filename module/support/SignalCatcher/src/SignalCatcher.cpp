@@ -83,5 +83,5 @@ namespace support {
         sigaction(SIGINT, &action, nullptr);
     }
 
-}  // support
-}  // modules
+}  // namespace support
+}  // namespace module

@@ -76,8 +76,8 @@ namespace behaviour {
             explicit ScriptTuner(std::unique_ptr<NUClear::Environment> environment);
         };
 
-    }  // tools
-}  // behaviours
-}  // modules
+    }  // namespace tools
+}  // namespace behaviour
+}  // namespace module
 
 #endif  // MODULES_BEHAVIOURS_UTILITY_SCRIPTTUNER_H

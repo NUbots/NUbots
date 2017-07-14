@@ -32,7 +32,7 @@ namespace localisation {
     public:
         explicit NUcapLocalisation(std::unique_ptr<NUClear::Environment> environment);
     };
-}
-}
+}  // namespace localisation
+}  // namespace module
 
 #endif

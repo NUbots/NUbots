@@ -33,6 +33,6 @@ namespace behaviour {
             walk->command.angle() = 0;
             emit(std::move(walk));
         }
-    }
-}
-}
+    }  // namespace strategy
+}  // namespace behaviour
+}  // namespace module

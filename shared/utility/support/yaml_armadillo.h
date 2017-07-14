@@ -162,6 +162,6 @@ struct convert<arma::mat::fixed<rows, cols>> {
         }
     }
 };
-}
+}  // namespace YAML
 
 #endif  // UTILITY_SUPPORT_yaml_armadillo_H

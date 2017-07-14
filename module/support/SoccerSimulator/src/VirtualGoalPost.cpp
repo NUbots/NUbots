@@ -194,5 +194,5 @@ namespace support {
         // If no measurements are in the goal, then it was not observed
         return result;
     }
-}
-}
+}  // namespace support
+}  // namespace module

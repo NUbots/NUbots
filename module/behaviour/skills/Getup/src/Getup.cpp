@@ -123,6 +123,6 @@ namespace behaviour {
             emit(std::make_unique<ActionPriorites>(ActionPriorites{id, {priority}}));
         }
 
-    }  // skills
-}  // behaviours
-}  // modules
+    }  // namespace skills
+}  // namespace behaviour
+}  // namespace module

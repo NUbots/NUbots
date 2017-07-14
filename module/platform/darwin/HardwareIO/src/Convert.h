@@ -104,7 +104,7 @@ namespace platform {
 
             static float temperature(const uint8_t value);
         };
-    }
-}
-}
+    }  // namespace darwin
+}  // namespace platform
+}  // namespace module
 #endif

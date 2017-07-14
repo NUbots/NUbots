@@ -44,5 +44,5 @@ public:
                                  const std::vector<utility::math::matrix::Transform3D>& samplesB,
                                  bool& success);
 };
-}
+}  // namespace autocal
 #endif

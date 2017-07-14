@@ -92,6 +92,6 @@ namespace localisation {
         //     double observationDifferenceElevationFactor = 0.2;
         // } cfg_;
     };
-}
-}
+}  // namespace localisation
+}  // namespace module
 #endif

@@ -30,4 +30,4 @@ bool DarwinDevice::ping() {
     // Check if there was an error code
     return result.header.errorcode == ErrorCode::NONE;
 }
-}
+}  // namespace Darwin

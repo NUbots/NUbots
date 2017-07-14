@@ -64,6 +64,6 @@ namespace localisation {
 
         arma::mat::fixed<size, size> processNoise() const;
     };
-}
-}
+}  // namespace localisation
+}  // namespace module
 #endif  // MODULE_LOCALISATION_FIELDMODEL_H

@@ -78,6 +78,6 @@ namespace support {
                 log<NUClear::INFO>("Disconnected from", event.name, "on", addr + ":" + std::to_string(port));
             });
         }
-    }
-}
-}
+    }  // namespace configuration
+}  // namespace support
+}  // namespace module

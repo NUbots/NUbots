@@ -218,7 +218,7 @@ namespace vision {
             return (false);
         }
     }
-}
-}
+}  // namespace vision
+}  // namespace utility
 
 #endif  // UTILITY_VISION_SPINNAKER_H

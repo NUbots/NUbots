@@ -103,7 +103,7 @@ namespace math {
     inline constexpr typename std::enable_if<std::is_arithmetic<T>::value, T>::type clamp(T min, T val, T max) {
         return (std::min(std::max(val, min), max));
     }
-}
-}
+}  // namespace math
+}  // namespace utility
 
 #endif  // UTILITY_MATH_COMPARISON_H

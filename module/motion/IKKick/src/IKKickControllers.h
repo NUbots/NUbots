@@ -271,7 +271,7 @@ namespace motion {
                                         const message::input::Sensors& sensors);
         virtual void computeStopMotion(const message::input::Sensors& sensors);
     };
-}
-}
+}  // namespace motion
+}  // namespace module
 
 #endif

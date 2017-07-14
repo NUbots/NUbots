@@ -368,6 +368,6 @@ namespace behaviour {
                     });
         }
 
-    }  // planning
-}  // behaviours
-}  // modules
+    }  // namespace planning
+}  // namespace behaviour
+}  // namespace module

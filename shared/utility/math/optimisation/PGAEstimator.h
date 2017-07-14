@@ -81,9 +81,9 @@ namespace math {
                     previousEstimate.generation + 1, convert<double>(bestEstimate), previousEstimate.covariance);
             }
         };
-    }
-}
-}
+    }  // namespace optimisation
+}  // namespace math
+}  // namespace utility
 
 
 #endif  // UTILITY_MATH_COORDINATES_H

@@ -38,6 +38,6 @@ namespace support {
                 emit(msg);
             });
         }
-    }
-}
-}
+    }  // namespace configuration
+}  // namespace support
+}  // namespace module

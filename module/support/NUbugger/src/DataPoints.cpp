@@ -41,5 +41,5 @@ namespace support {
             send(dataPoint, filterId);
         }));
     }
-}
-}
+}  // namespace support
+}  // namespace module

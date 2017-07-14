@@ -73,8 +73,8 @@ namespace behaviour {
             explicit BezierWalkPathPlanner(std::unique_ptr<NUClear::Environment> environment);
         };
 
-    }  // planning
-}  // behaviours
-}  // modules
+    }  // namespace planning
+}  // namespace behaviour
+}  // namespace module
 
 #endif  // MODULES_BEHAVIOUR_PLANNERS_BEZIERWALKPATHPLANNER_H

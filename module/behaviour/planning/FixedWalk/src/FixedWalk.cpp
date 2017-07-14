@@ -121,6 +121,6 @@ namespace behaviour {
         }
 
 
-    }  // skills
-}  // behaviours
-}  // modules
+    }  // namespace planning
+}  // namespace behaviour
+}  // namespace module

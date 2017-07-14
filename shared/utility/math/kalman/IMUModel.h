@@ -66,7 +66,7 @@ namespace math {
 
             arma::mat::fixed<size, size> processNoise();
         };
-    }
-}
-}
+    }  // namespace kalman
+}  // namespace math
+}  // namespace utility
 #endif

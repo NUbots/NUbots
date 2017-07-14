@@ -94,7 +94,7 @@ namespace math {
         }
 
         /*! @brief Solves for x in $a \sin(x) + b \cos(x) = c ; x \in [0,\pi]$
-        */
+         */
         inline float solveLinearTrigEquation(float a, float b, float c) {
             float norm = std::sqrt(a * a + b * b);
             if (norm == 0) {
@@ -119,7 +119,7 @@ namespace math {
             // Hence the equation becomes $\cos(\alpha)\cos(x)+\sin(\alpha)\sin(x) = cos(x-\alpha) = c\_$
             return alpha + acos_clamped(c_);
         }
-    }
-}
-}
+    }  // namespace angle
+}  // namespace math
+}  // namespace utility
 #endif

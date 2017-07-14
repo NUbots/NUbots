@@ -39,8 +39,8 @@ namespace support {
             return value;
         }
     };
-}
-}
+}  // namespace support
+}  // namespace utility
 
 namespace YAML {
 
@@ -71,6 +71,6 @@ struct convert<utility::support::Expression> {
         }
     }
 };
-}
+}  // namespace YAML
 
 #endif

@@ -50,8 +50,8 @@ namespace math {
             Iterator first;
             Iterator last;
         };
-    }
-}
-}
+    }  // namespace ransac
+}  // namespace math
+}  // namespace utility
 
 #endif

@@ -55,5 +55,5 @@ namespace vision {
         }
     }
 
-}  // vision
-}  // modules
+}  // namespace vision
+}  // namespace module

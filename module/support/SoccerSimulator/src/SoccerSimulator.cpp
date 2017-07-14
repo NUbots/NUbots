@@ -456,5 +456,5 @@ namespace support {
         arma::vec3 goal_own_l = {fd->goalpost_own_l[0], fd->goalpost_own_l[1], 0};
         goalPosts.push_back(VirtualGoalPost(goal_own_l, 1.1, Goal::Side::LEFT, Goal::Team::OWN));
     }
-}
-}
+}  // namespace support
+}  // namespace module

@@ -54,5 +54,5 @@ namespace support {
         // std::ofstream fout(path);       // create an output stream to the specified path
         // fout << emitter.c_str();        // write to the file
     }
-}
-}
+}  // namespace support
+}  // namespace module

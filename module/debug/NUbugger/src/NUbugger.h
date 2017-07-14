@@ -30,7 +30,7 @@ namespace debug {
         explicit NUbugger(std::unique_ptr<NUClear::Environment> environment);
     };
 
-}  // debug
-}  // modules
+}  // namespace debug
+}  // namespace module
 
 #endif  // MODULES_SUPPORT_NUBUGGER_H

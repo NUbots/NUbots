@@ -124,8 +124,8 @@ namespace math {
             }
         };
 
-    }  // matrix
-}  // math
-}  // utility
+    }  // namespace matrix
+}  // namespace math
+}  // namespace utility
 
 #endif  // UTILITY_MATH_MATRIX_TRANSFORM2D_H

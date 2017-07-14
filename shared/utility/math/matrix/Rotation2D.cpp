@@ -45,6 +45,6 @@ namespace math {
             rotation << c << -s << arma::endr << s << c;
             return rotation;
         }
-    }
-}
-}
+    }  // namespace matrix
+}  // namespace math
+}  // namespace utility

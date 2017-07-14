@@ -93,8 +93,8 @@ namespace behaviour {
 
             } cfg_;
         };
-    }
-}
-}
+    }  // namespace skills
+}  // namespace behaviour
+}  // namespace module
 
 #endif  // MODULES_BEHAVIOUR_SKILLS_WALKPATHFOLLOWER_H

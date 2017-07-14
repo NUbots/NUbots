@@ -144,9 +144,9 @@ namespace math {
                        + arma::repmat(bestEstimate, 1, numSamples).t();
             }
         };
-    }
-}
-}
+    }  // namespace optimisation
+}  // namespace math
+}  // namespace utility
 
 
 #endif  // UTILITY_MATH_COORDINATES_H

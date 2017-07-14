@@ -110,8 +110,8 @@ namespace motion {
                                                             bool left);
 
 
-    }  // kinematics
-}  // motion
-}  // utility
+    }  // namespace kinematics
+}  // namespace motion
+}  // namespace utility
 
 #endif  // UTILITY_MOTION_INVERSEKINEMATICS_H

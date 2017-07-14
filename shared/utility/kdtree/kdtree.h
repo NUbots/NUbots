@@ -247,7 +247,7 @@ namespace kdtree {
             data = d;
         }
     };
-}
-}
+}  // namespace kdtree
+}  // namespace utility
 
 #endif

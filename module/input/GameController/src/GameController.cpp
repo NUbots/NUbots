@@ -593,5 +593,5 @@ namespace input {
         throw std::runtime_error("No opponent teams not found");  // should never happen!
     }
 
-}  // input
-}  // modules
+}  // namespace input
+}  // namespace module

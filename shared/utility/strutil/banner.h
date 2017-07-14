@@ -556,7 +556,7 @@ namespace strutil {
 
         return output.str();
     }
-}
-}
+}  // namespace strutil
+}  // namespace utility
 
 #endif

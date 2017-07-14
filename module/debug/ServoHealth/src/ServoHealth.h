@@ -23,7 +23,7 @@ namespace debug {
         /// @brief Called by the powerplant to build and setup the ServoHealth reactor.
         explicit ServoHealth(std::unique_ptr<NUClear::Environment> environment);
     };
-}
-}
+}  // namespace debug
+}  // namespace module
 
 #endif  // MODULE_DEBUG_SERVOHEALTH_H

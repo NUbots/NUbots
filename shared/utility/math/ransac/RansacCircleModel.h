@@ -43,8 +43,8 @@ namespace math {
                 // leastSquaresUpdate(first,last,candidateThreshold);
             }
         };
-    }
-}
-}
+    }  // namespace ransac
+}  // namespace math
+}  // namespace utility
 
 #endif

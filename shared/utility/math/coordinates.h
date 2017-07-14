@@ -96,9 +96,9 @@ namespace math {
 
             return result;
         }
-    }
-}
-}
+    }  // namespace coordinates
+}  // namespace math
+}  // namespace utility
 
 
 #endif  // UTILITY_MATH_COORDINATES_H

@@ -50,6 +50,6 @@ namespace math {
         arma::mat::fixed<LinearVec3Model::size, LinearVec3Model::size> LinearVec3Model::processNoise() {
             return arma::eye(size, size) * processNoiseFactor;  // std::numeric_limits<double>::epsilon();
         }
-    }
-}
-}
+    }  // namespace kalman
+}  // namespace math
+}  // namespace utility

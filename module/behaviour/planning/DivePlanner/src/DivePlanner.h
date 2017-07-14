@@ -35,9 +35,9 @@ namespace behaviour {
             float SPEED_THRESHOLD;
             float DISTANCE_THRESHOLD;
         };
-    }
-}
-}
+    }  // namespace planning
+}  // namespace behaviour
+}  // namespace module
 
 
 #endif

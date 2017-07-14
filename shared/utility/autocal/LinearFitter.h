@@ -42,5 +42,5 @@ public:
         return data * arma::pinv(times);
     }
 };
-}
+}  // namespace autocal
 #endif

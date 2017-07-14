@@ -184,5 +184,5 @@ namespace motion {
         }));
     }
 
-}  // motion
-}  // modules
+}  // namespace motion
+}  // namespace module

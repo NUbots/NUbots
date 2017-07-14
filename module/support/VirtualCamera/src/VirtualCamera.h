@@ -32,7 +32,7 @@ namespace support {
         /// @brief Called by the powerplant to build and setup the VirtualCamera reactor.
         explicit VirtualCamera(std::unique_ptr<NUClear::Environment> environment);
     };
-}
-}
+}  // namespace support
+}  // namespace module
 
 #endif

@@ -64,9 +64,9 @@ namespace behaviour {
             /// @brief Called by the powerplant to build and setup the KeyboardWalk reactor.
             explicit KeyboardWalk(std::unique_ptr<NUClear::Environment> environment);
         };
-    }
-}
-}
+    }  // namespace strategy
+}  // namespace behaviour
+}  // namespace module
 
 
 #endif

@@ -462,5 +462,5 @@ namespace motion {
             log<NUClear::TRACE>("Configure FootMotionPlanner - Finish");
         }
     }
-}  // motion
-}  // modules
+}  // namespace motion
+}  // namespace module

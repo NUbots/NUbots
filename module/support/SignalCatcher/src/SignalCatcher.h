@@ -42,7 +42,7 @@ namespace support {
         explicit SignalCatcher(std::unique_ptr<NUClear::Environment> environment);
     };
 
-}  // support
-}  // modules
+}  // namespace support
+}  // namespace module
 
 #endif  // MODULES_SUPPORT_SIGNALCATCHER_H

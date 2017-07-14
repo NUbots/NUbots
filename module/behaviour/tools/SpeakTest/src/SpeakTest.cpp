@@ -32,6 +32,6 @@ namespace behaviour {
             on<Every<30, std::chrono::seconds>>().then(
                 [this] { emit(std::make_unique<message::output::Say>("Bite Me")); });
         }
-    }
-}
-}
+    }  // namespace tools
+}  // namespace behaviour
+}  // namespace module

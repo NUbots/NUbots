@@ -131,5 +131,5 @@ namespace input {
     std::ostream& operator<<(std::ostream& out, const ServoID& val) {
         return out << static_cast<std::string>(val);
     }
-}
-}
+}  // namespace input
+}  // namespace utility

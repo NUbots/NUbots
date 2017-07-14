@@ -279,11 +279,11 @@ namespace motion {
          */
         void configure(const YAML::Node& config);
         /**
- * @brief [brief description]
- * @details [long description]
- *
- * @param inTorsoPosition [description]
- */
+         * @brief [brief description]
+         * @details [long description]
+         *
+         * @param inTorsoPosition [description]
+         */
         void localise(Transform2D position);
         /**
          * @brief [brief description]
@@ -383,9 +383,9 @@ namespace motion {
          */
         void setFootOffsetCoefficient(int index, double inValue);
         /**
-        * @brief [brief description]
-        * @details [long description]
-        */
+         * @brief [brief description]
+         * @details [long description]
+         */
         double getTime();
         /**
          * This is an easing function that returns 3 values {x,y,z} with the range [0,1]
@@ -678,7 +678,7 @@ namespace motion {
          */
         void setRightFootPosition(const Transform3D& inRightFootPosition);
     };
-}  // motion
-}  // modules
+}  // namespace motion
+}  // namespace module
 
 #endif  // MODULE_MOTION_BALANCEKINEMATICRESPONSE_H

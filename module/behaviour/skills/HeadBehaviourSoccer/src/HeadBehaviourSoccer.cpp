@@ -768,6 +768,6 @@ namespace behaviour {
             return std::fabs(angle) > replan_angle_threshold;
         }
 
-    }  // motion
-}  // behaviour
-}  // modules
+    }  // namespace skills
+}  // namespace behaviour
+}  // namespace module

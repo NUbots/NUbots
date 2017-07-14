@@ -169,5 +169,5 @@ namespace motion {
         // Apply opposite translation to the foot position
         footToTorso = footToTorso.translate(-torsoAdjustment_torso);
     }
-}
-}
+}  // namespace motion
+}  // namespace utility

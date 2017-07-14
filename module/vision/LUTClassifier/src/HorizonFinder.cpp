@@ -56,5 +56,5 @@ namespace vision {
             -horizon.distanceToPoint({-double(image.dimensions[0]) * 0.5, -double(image.dimensions[1]) * 0.5});
     }
 
-}  // vision
-}  // modules
+}  // namespace vision
+}  // namespace module

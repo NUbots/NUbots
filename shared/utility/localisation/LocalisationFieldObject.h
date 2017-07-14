@@ -65,7 +65,7 @@ namespace localisation {
                       << " }";
         }
     };
-}
-}
+}  // namespace localisation
+}  // namespace utility
 
 #endif

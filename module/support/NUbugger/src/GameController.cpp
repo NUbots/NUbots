@@ -281,5 +281,5 @@ namespace support {
         send(gameController, 0, true);
         */
     }
-}
-}
+}  // namespace support
+}  // namespace module

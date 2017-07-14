@@ -51,7 +51,7 @@ namespace support {
                                      const message::input::Sensors& sensors,
                                      arma::vec4 error);
     };
-}
-}
+}  // namespace support
+}  // namespace module
 
 #endif  // MODULE_SUPPORT_VIRTUALBALL

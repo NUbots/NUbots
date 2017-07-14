@@ -59,7 +59,7 @@ struct FileWatchRequest {
     std::shared_ptr<NUClear::threading::Reaction> reaction;
 };
 
-}  // extension
+}  // namespace extension
 
 // NUClear configuration extension
 namespace NUClear {
@@ -105,14 +105,14 @@ namespace dsl {
                 }
             }
         };
-    }
+    }  // namespace operation
 
     // FileWatch is transient
     namespace trait {
         template <>
         struct is_transient<::extension::FileWatch> : public std::true_type {};
-    }
-}
-}
+    }  // namespace trait
+}  // namespace dsl
+}  // namespace NUClear
 
 #endif  // EXTENSION_FILEWATCH_H

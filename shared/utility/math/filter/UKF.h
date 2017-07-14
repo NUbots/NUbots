@@ -244,9 +244,9 @@ namespace math {
                 return covariance;
             }
         };
-    }
-}
-}
+    }  // namespace filter
+}  // namespace math
+}  // namespace utility
 
 
 #endif

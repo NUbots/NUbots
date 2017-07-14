@@ -137,9 +137,9 @@ namespace math {
         using PGAOptimiser = OptimiserSet<PGAEstimator, GaussianSampler>;
         // using WMDOptimiser  =  OptimiserSet<WMDEstimator, GaussianSampler>;
         using PGPEOptimiser = OptimiserSet<PGPEEstimator, GaussianSampler>;
-    }
-}
-}
+    }  // namespace optimisation
+}  // namespace math
+}  // namespace utility
 
 
 #endif  // UTILITY_MATH_OPTIMISER_H

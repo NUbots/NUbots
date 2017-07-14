@@ -90,8 +90,8 @@ namespace platform {
 
             const arma::mat::fixed<size, size>& processNoise();
         };
-    }
-}
-}
+    }  // namespace darwin
+}  // namespace platform
+}  // namespace module
 
 #endif  // MODULE_PLATFORM_DARWIN_MOTIONMODEL_H

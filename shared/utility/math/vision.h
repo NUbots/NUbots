@@ -291,8 +291,8 @@ namespace math {
 
             return prediction;
         }
-    }
-}
-}
+    }  // namespace vision
+}  // namespace math
+}  // namespace utility
 
 #endif

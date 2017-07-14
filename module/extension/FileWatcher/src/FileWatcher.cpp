@@ -327,5 +327,5 @@ namespace extension {
         //            }
         //        });
     }
-}
-}
+}  // namespace extension
+}  // namespace module

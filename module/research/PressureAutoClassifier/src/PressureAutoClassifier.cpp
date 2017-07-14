@@ -573,5 +573,5 @@ namespace research {
                 }
             });
     }
-}
-}
+}  // namespace research
+}  // namespace module

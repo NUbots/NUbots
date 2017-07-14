@@ -82,8 +82,8 @@ namespace motion {
         using UnitQuaternion = utility::math::geometry::UnitQuaternion;
 
         /**
-        * Temporary debugging variables for local output logging...
-        */
+         * Temporary debugging variables for local output logging...
+         */
         bool DEBUG;      //
         int DEBUG_ITER;  //
 
@@ -285,12 +285,12 @@ namespace motion {
          */
         void setZmpParams(arma::vec4 inZmpParams);
         /**
-        * @brief [brief description]
-        * @details [long description]
-        * @return Current velocity
-        *
-        * @param inTorsoPosition [description]
-        */
+         * @brief [brief description]
+         * @details [long description]
+         * @return Current velocity
+         *
+         * @param inTorsoPosition [description]
+         */
         Transform2D getVelocity();
         /**
          * @brief [brief description]
@@ -354,10 +354,10 @@ namespace motion {
          */
         void setTorsoPosition3D(const Transform3D& inTorsoPosition);
         /**
-       * @brief [brief description]
-       * @details [long description]
-       * @return [description]
-       */
+         * @brief [brief description]
+         * @details [long description]
+         * @return [description]
+         */
         Transform2D getTorsoSource();
         /**
          * @brief [brief description]
@@ -495,7 +495,7 @@ namespace motion {
         void setRightFootDestination(const Transform2D& inRightFootDestination);
     };
 
-}  // motion
-}  // modules
+}  // namespace motion
+}  // namespace module
 
 #endif  // MODULE_MOTION_TORSOMOTIONPLANNER_H

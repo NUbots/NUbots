@@ -160,5 +160,5 @@ namespace motion {
         frames.push_back(place_foot);
         anim = Animator(frames);
     }
-}
-}
+}  // namespace motion
+}  // namespace module

@@ -446,7 +446,7 @@ namespace motion {
          */
         void setRightFootDestination(const Transform2D& inRightFootDestination);
     };
-}  // motion
-}  // modules
+}  // namespace motion
+}  // namespace module
 
 #endif  // MODULE_MOTION_FOOTPLACEMENTPLANNER_H

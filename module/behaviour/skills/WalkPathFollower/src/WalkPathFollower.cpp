@@ -414,6 +414,6 @@ namespace behaviour {
 
             return robotPath;
         }
-    }
-}
-}
+    }  // namespace skills
+}  // namespace behaviour
+}  // namespace module

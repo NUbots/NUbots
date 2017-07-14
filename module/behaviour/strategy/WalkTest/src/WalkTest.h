@@ -31,9 +31,9 @@ namespace behaviour {
             /// @brief Called by the powerplant to build and setup the WalkTest reactor.
             explicit WalkTest(std::unique_ptr<NUClear::Environment> environment);
         };
-    }
-}
-}
+    }  // namespace strategy
+}  // namespace behaviour
+}  // namespace module
 
 
 #endif

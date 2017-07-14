@@ -444,5 +444,5 @@ namespace behaviour {
         currentActions = std::move(newActions);
     }
 
-}  // behaviours
-}  // modules
+}  // namespace behaviour
+}  // namespace module

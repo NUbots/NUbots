@@ -61,6 +61,6 @@ namespace behaviour {
                 emit(std::make_unique<ExecuteScriptByName>(2, std::vector<std::string>({"Jump.yaml"})));
             });
         }
-    }
-}
-}
+    }  // namespace tools
+}  // namespace behaviour
+}  // namespace module

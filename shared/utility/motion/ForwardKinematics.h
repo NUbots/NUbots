@@ -278,7 +278,7 @@ namespace motion {
         }
 
         /*! @brief
-        */
+         */
         inline std::map<ServoID, utility::math::matrix::Transform3D> calculatePosition(const KinematicsModel& model,
                                                                                        const Sensors& sensors,
                                                                                        ServoID servoID) {
@@ -471,7 +471,7 @@ namespace motion {
         }
 
         /*! @return matrix J such that \overdot{X} = J * \overdot{theta}
-        */
+         */
         inline arma::mat33 calculateArmJacobian(const KinematicsModel& model, const arma::vec3& a, bool isLeft) {
             int negativeIfRight = isLeft ? 1 : -1;
 
@@ -503,7 +503,7 @@ namespace motion {
             return arma::join_rows(col1, arma::join_rows(col2, col3));
         }
         /*! @return matrix J such that \overdot{X} = J * \overdot{theta}
-        */
+         */
         inline arma::vec3 calculateArmPosition(const KinematicsModel& model, const arma::vec3& a, bool isLeft) {
             int negativeIfRight = isLeft ? 1 : -1;
 
@@ -532,8 +532,8 @@ namespace motion {
         }
 
 
-    }  // kinematics
-}  // motion
-}  // utility
+    }  // namespace kinematics
+}  // namespace motion
+}  // namespace utility
 
 #endif  // UTILITY_MOTION_FORWARDKINEMATICS_H

@@ -53,7 +53,7 @@ namespace vision {
                                                                         const arma::ivec2& end,
                                                                         const uint& stratification = 1);
     };
-}
-}
+}  // namespace vision
+}  // namespace module
 
 #endif

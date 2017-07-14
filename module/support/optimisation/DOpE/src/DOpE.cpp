@@ -233,8 +233,8 @@ namespace support {
 
                             // If we don't already have this episode and it is valid for our optimiser
                             if (  // std::find(opt.episodes.begin(), opt.episodes.end(), episode) == opt.episodes.end()
-                                // std::find(opt.previousEpisodes.begin(), opt.previousEpisodes.end(), episode) ==
-                                // opt.episodes.end()
+                                  // std::find(opt.previousEpisodes.begin(), opt.previousEpisodes.end(), episode) ==
+                                  // opt.episodes.end()
                                 opt.optimiser->validSample(episode)) {
 
                                 // TODO fix the checking if we already have this sample
@@ -338,6 +338,6 @@ namespace support {
                     }
                 });
         }
-    }
-}
-}
+    }  // namespace optimisation
+}  // namespace support
+}  // namespace module

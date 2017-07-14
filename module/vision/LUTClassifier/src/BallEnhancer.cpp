@@ -427,5 +427,5 @@ namespace vision {
         // emit(drawVisionLines(debug)); // DEBUG LINE
     }
 
-}  // vision
-}  // modules
+}  // namespace vision
+}  // namespace module

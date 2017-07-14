@@ -334,4 +334,4 @@ void UART::executeBroadcast(const std::vector<uint8_t>& command) {
 
     // There are no responses for broadcast commands
 }
-}
+}  // namespace Darwin

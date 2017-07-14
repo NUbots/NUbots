@@ -38,14 +38,14 @@ namespace math {
             void set(const std::vector<arma::vec2>& vertices);
 
             /*! @brief Checks if the point lies within the boundary of the polygon
-            */
+             */
             bool pointContained(const arma::vec2& p) const;
             /*! @brief Gets the closest point in the polygon to the specified point
-            */
+             */
             arma::vec2 projectPointToPolygon(const arma::vec2& p) const;
         };
-    }
-}
-}
+    }  // namespace geometry
+}  // namespace math
+}  // namespace utility
 
 #endif

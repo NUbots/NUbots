@@ -40,8 +40,8 @@ namespace support {
             explicit ConsoleLogHandler(std::unique_ptr<NUClear::Environment> environment);
         };
 
-    }  // logging
-}  // support
-}  // modules
+    }  // namespace logging
+}  // namespace support
+}  // namespace module
 
 #endif  // MODULES_SUPPORT_LOGGING_CONSOLELOGHANDLER_H

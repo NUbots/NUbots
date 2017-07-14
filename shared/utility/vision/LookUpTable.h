@@ -77,8 +77,8 @@ namespace vision {
         const uint8_t BITS_CB_REMOVED = sizeof(uint8_t) * 8 - lut.bits_cb;
         const uint8_t BITS_CR_REMOVED = sizeof(uint8_t) * 8 - lut.bits_cr;
         const uint8_t BITS_CB_CR      = lut.bits_cb + lut.bits_cr;
-        const uint8_t BITS_CB_MASK = (1 << lut.bits_cb) - 1;  // std::pow(2, lut.bits_cb) - 1;
-        const uint8_t BITS_CR_MASK = (1 << lut.bits_cr) - 1;  // std::pow(2, lut.bits_cr) - 1;
+        const uint8_t BITS_CB_MASK    = (1 << lut.bits_cb) - 1;  // std::pow(2, lut.bits_cb) - 1;
+        const uint8_t BITS_CR_MASK    = (1 << lut.bits_cr) - 1;  // std::pow(2, lut.bits_cr) - 1;
 
         uint8_t y  = (index >> BITS_CB_CR) << BITS_Y_REMOVED;
         uint8_t cb = ((index >> lut.bits_cr) & BITS_CB_MASK) << BITS_CB_REMOVED;
@@ -87,8 +87,8 @@ namespace vision {
         return Pixel(static_cast<uint32_t>((y << 16) | (cb << 8) | cr));
     }
 
-}  // vision
-}  // utility
+}  // namespace vision
+}  // namespace utility
 
 // YAML conversions
 namespace YAML {
@@ -125,6 +125,6 @@ struct convert<message::vision::LookUpTable> {
         return true;
     }
 };
-}
+}  // namespace YAML
 
 #endif  // UTILITY_VISION_LOOKUPTABLE_H

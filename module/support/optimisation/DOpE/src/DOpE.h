@@ -64,8 +64,8 @@ namespace support {
             /// @brief Called by the powerplant to build and setup the DOpE reactor.
             explicit DOpE(std::unique_ptr<NUClear::Environment> environment);
         };
-    }
-}
-}
+    }  // namespace optimisation
+}  // namespace support
+}  // namespace module
 
 #endif  // MODULES_SUPPORT_OPTIMISATION_DOPE_H

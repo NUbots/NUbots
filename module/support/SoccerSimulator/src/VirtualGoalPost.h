@@ -53,7 +53,7 @@ namespace support {
                                      arma::vec4& /*error*/,
                                      const message::support::FieldDescription& field);
     };
-}
-}
+}  // namespace support
+}  // namespace module
 
 #endif  // MODULE_SUPPORT_VIRTUALGOALPOST

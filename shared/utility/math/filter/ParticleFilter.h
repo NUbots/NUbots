@@ -209,9 +209,9 @@ namespace math {
                 return particles;
             }
         };
-    }
-}
-}
+    }  // namespace filter
+}  // namespace math
+}  // namespace utility
 
 
 #endif

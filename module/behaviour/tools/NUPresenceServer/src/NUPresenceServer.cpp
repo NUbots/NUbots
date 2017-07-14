@@ -112,6 +112,6 @@ namespace behaviour {
             on<Trigger<NUClear::message::NetworkJoin>>().then(
                 [this](const NUClear::message::NetworkJoin& join) { log(join.name); });
         }
-    }
-}
-}
+    }  // namespace tools
+}  // namespace behaviour
+}  // namespace module

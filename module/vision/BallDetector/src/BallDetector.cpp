@@ -402,5 +402,5 @@ namespace vision {
                     lastFrame.time = sensors.timestamp;
                 });
     }
-}
-}
+}  // namespace vision
+}  // namespace module

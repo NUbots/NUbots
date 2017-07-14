@@ -229,5 +229,5 @@ namespace vision {
                 emit(std::move(classifiedImage));
             });
     }
-}  // vision
-}  // modules
+}  // namespace vision
+}  // namespace module

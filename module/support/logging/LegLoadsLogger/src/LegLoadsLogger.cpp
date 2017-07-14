@@ -85,6 +85,6 @@ namespace support {
                 }
             });
         }
-    }
-}
-}
+    }  // namespace logging
+}  // namespace support
+}  // namespace module

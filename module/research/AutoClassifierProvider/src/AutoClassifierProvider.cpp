@@ -188,5 +188,5 @@ namespace research {
                 emit(std::move(pixels));
             });
     }
-}
-}
+}  // namespace research
+}  // namespace module

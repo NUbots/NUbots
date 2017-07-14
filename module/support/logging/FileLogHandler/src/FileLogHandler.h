@@ -23,8 +23,8 @@ namespace support {
             std::string logFileName;
             std::ofstream logFile;
         };
-    }
-}
-}
+    }  // namespace logging
+}  // namespace support
+}  // namespace module
 
 #endif  // MODULE_SUPPORT_LOGGING_FILELOGHANDLER_H

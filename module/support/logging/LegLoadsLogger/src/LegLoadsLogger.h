@@ -19,8 +19,8 @@ namespace support {
             std::ofstream logFile;
             std::string logFilePath;
         };
-    }
-}
-}
+    }  // namespace logging
+}  // namespace support
+}  // namespace module
 
 #endif  // MODULE_SUPPORT_LEGLOADSLOGGER_H

@@ -157,5 +157,5 @@ namespace motion {
             model.massModel.masses.push_back(convert<double, 4>(mass));
         }
     }
-}
-}
+}  // namespace motion
+}  // namespace module

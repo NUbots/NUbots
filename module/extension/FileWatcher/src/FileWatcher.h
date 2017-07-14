@@ -43,7 +43,7 @@ namespace extension {
     };
 
 
-}  // extension
-}  // module
+}  // namespace extension
+}  // namespace module
 
 #endif  // MODULES_EXTENSION_FILEWATCHER_H

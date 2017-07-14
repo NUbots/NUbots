@@ -39,6 +39,6 @@ namespace math {
             double error = distanceToPoint(p);
             return error * error;
         }
-    }
-}
-}
+    }  // namespace ransac
+}  // namespace math
+}  // namespace utility

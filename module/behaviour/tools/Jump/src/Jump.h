@@ -32,8 +32,8 @@ namespace behaviour {
             /// @brief Called by the powerplant to build and setup the Jump reactor.
             explicit Jump(std::unique_ptr<NUClear::Environment> environment);
         };
-    }
-}
-}
+    }  // namespace tools
+}  // namespace behaviour
+}  // namespace module
 
 #endif  // MODULES_BEHAVIOUR_TOOLS_JUMP_H

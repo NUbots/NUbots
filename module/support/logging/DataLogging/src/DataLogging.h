@@ -44,8 +44,8 @@ namespace support {
             /// @brief Called by the powerplant to build and setup the DataLogging reactor.
             explicit DataLogging(std::unique_ptr<NUClear::Environment> environment);
         };
-    }
-}
-}
+    }  // namespace logging
+}  // namespace support
+}  // namespace module
 
 #endif  // MODULE_SUPPORT_LOGGING_DATALOGGING_H

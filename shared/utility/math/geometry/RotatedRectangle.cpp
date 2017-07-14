@@ -41,6 +41,6 @@ namespace math {
         arma::vec2 RotatedRectangle::getSize() const {
             return size;
         }
-    }
-}
-}
+    }  // namespace geometry
+}  // namespace math
+}  // namespace utility

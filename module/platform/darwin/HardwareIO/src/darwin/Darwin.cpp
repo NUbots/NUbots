@@ -272,4 +272,4 @@ void Darwin::sendRawCommand(std::vector<uint8_t>& packet) {
 
     uart.executeBroadcast(packet);
 }
-}
+}  // namespace Darwin

@@ -260,7 +260,7 @@ inline Script operator+(const Script& s1, const Script& s2) {
     return s;
 }
 
-}  // extension
+}  // namespace extension
 
 // NUClear configuration extension
 namespace NUClear {
@@ -361,15 +361,15 @@ namespace dsl {
                 }
             }
         };
-    }
+    }  // namespace operation
 
     // Script is transient
     namespace trait {
         template <>
         struct is_transient<std::shared_ptr<::extension::Script>> : public std::true_type {};
-    }
-}
-}
+    }  // namespace trait
+}  // namespace dsl
+}  // namespace NUClear
 
 namespace YAML {
 template <>
@@ -448,6 +448,6 @@ struct convert<::extension::Script> {
         return true;
     }
 };
-}
+}  // namespace YAML
 
 #endif  // EXTENSION_SCRIPT_H

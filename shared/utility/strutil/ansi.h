@@ -126,6 +126,6 @@ namespace strutil {
         static constexpr ANSISGR<ANSICode::BRIGHT, ANSICode::GRAY> brightgray =
             ANSISGR<ANSICode::BRIGHT, ANSICode::GRAY>();
     };
-}
-}
+}  // namespace strutil
+}  // namespace utility
 #endif

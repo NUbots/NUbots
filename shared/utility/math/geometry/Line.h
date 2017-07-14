@@ -101,7 +101,7 @@ namespace math {
                 }
             }
         };
-    }
-}
-}
+    }  // namespace geometry
+}  // namespace math
+}  // namespace utility
 #endif

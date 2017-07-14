@@ -37,6 +37,6 @@ namespace math {
             double val = distanceToPoint(std::forward<const DataPoint&>(p));
             return val * val;
         }
-    }
-}
-}
+    }  // namespace ransac
+}  // namespace math
+}  // namespace utility

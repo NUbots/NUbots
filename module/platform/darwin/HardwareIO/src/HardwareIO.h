@@ -80,7 +80,7 @@ namespace platform {
             /// @brief called by a Powerplant to construct this reactor
             explicit HardwareIO(std::unique_ptr<NUClear::Environment> environment);
         };
-    }
-}
-}
+    }  // namespace darwin
+}  // namespace platform
+}  // namespace module
 #endif

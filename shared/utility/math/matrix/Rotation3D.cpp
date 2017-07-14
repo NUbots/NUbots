@@ -236,6 +236,6 @@ namespace math {
             return Rotation3D::createRotationZ(a[2]) * Rotation3D::createRotationY(a[1])
                    * Rotation3D::createRotationX(a[0]);
         }
-    }
-}
-}
+    }  // namespace matrix
+}  // namespace math
+}  // namespace utility

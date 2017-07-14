@@ -36,8 +36,8 @@ namespace behaviour {
             /// @brief Subsumption ID key to access motors
             const size_t subsumptionId;
         };
-    }
-}
-}
+    }  // namespace skills
+}  // namespace behaviour
+}  // namespace module
 
 #endif  // MODULES_BEHAVIOUR_SKILLS_DIRECTWALKCONTROLLER_H

@@ -62,7 +62,7 @@ namespace behaviour {
 
         std::set<LimbID> limbs;
     };
-}
-}
+}  // namespace behaviour
+}  // namespace utility
 
 #endif

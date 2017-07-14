@@ -55,5 +55,5 @@ namespace localisation {
             emit(selfs);
         });
     }
-}
-}
+}  // namespace localisation
+}  // namespace module

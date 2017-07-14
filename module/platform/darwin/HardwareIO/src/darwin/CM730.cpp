@@ -26,4 +26,4 @@ void CM730::turnOnDynamixel() {
     // Write true to the DXL_POWER byte
     write(Address::DXL_POWER, true);
 }
-}  // Darwin
+}  // namespace Darwin

@@ -7,7 +7,6 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 
-
 #if !defined(ARMA_USE_LAPACK)
 #define ARMA_USE_LAPACK
 //// Comment out the above line if you don't have LAPACK or a high-speed replacement for LAPACK,
@@ -49,7 +48,8 @@
 //// You will then need to link your programs directly with -llapack -lblas instead of -larmadillo
 
 // #define ARMA_BLAS_CAPITALS
-//// Uncomment the above line if your BLAS and LAPACK libraries have capitalised function names (eg. ACML on 64-bit Windows)
+//// Uncomment the above line if your BLAS and LAPACK libraries have capitalised function names (eg. ACML on 64-bit
+///Windows)
 
 #define ARMA_BLAS_UNDERSCORE
 //// Uncomment the above line if your BLAS and LAPACK libraries have function names with a trailing underscore.
@@ -62,10 +62,12 @@
 //// Uncomment the above line if your BLAS and LAPACK libraries use "long long" instead of "int"
 
 // #define ARMA_USE_TBB_ALLOC
-//// Uncomment the above line if you want to use Intel TBB scalable_malloc() and scalable_free() instead of standard malloc() and free()
+//// Uncomment the above line if you want to use Intel TBB scalable_malloc() and scalable_free() instead of standard
+///malloc() and free()
 
 // #define ARMA_USE_MKL_ALLOC
-//// Uncomment the above line if you want to use Intel MKL mkl_malloc() and mkl_free() instead of standard malloc() and free()
+//// Uncomment the above line if you want to use Intel MKL mkl_malloc() and mkl_free() instead of standard malloc() and
+///free()
 
 /* #undef ARMA_USE_ATLAS */
 #define ARMA_ATLAS_INCLUDE_DIR /
@@ -95,7 +97,7 @@
 
 /* #undef ARMA_USE_HDF5_ALT */
 #if defined(ARMA_USE_HDF5_ALT) && defined(ARMA_USE_WRAPPER)
-#undef  ARMA_USE_HDF5
+#undef ARMA_USE_HDF5
 #define ARMA_USE_HDF5
 
 #define ARMA_HDF5_INCLUDE_DIR /

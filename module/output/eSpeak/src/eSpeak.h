@@ -35,7 +35,7 @@ namespace output {
         explicit eSpeak(std::unique_ptr<NUClear::Environment> environment);
     };
 
-}  // output
-}  // modules
+}  // namespace output
+}  // namespace module
 
 #endif  // MODULES_OUTPUT_ESPEAK_H

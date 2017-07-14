@@ -123,8 +123,8 @@ namespace math {
             //! @brief output stream operator for a vector of goals.
             friend std::ostream& operator<<(std::ostream& output, const std::vector<Quad>& quads);
         };
-    }
-}
-}
+    }  // namespace geometry
+}  // namespace math
+}  // namespace utility
 
 #endif
