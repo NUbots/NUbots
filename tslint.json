@@ -4,62 +4,23 @@
     "tslint-eslint-rules"
   ],
   "rules": {
-    "semicolon": {
-      "options": [
-        "never"
-      ]
-    },
-    "curly": true,
-    "eofline": true,
-    "block-spacing": [
-      true,
-      "never"
-    ],
     "array-bracket-spacing": [
       true,
       "never"
     ],
-    "new-parens": true,
-    "ter-max-len": [
-      true,
-      120
-    ],
-    "ter-arrow-spacing": [
-      true,
-      {
-        "before": true,
-        "after": true
-      }
-    ],
-    "space-in-parens": [
+    "arrow-parens": false,
+    "block-spacing": [
       true,
       "never"
     ],
-    "ter-indent": [
-      true,
-      2,
-      {
-        "SwitchCase": 1
-      }
-    ],
-    "object-literal-shorthand": true,
-    "ter-prefer-arrow-callback": true,
-    "linebreak-style": "unix",
-    "object-curly-spacing": true,
-    "arrow-parens": false,
-    "object-literal-sort-keys": false,
-    "max-classes-per-file": false,
+    "curly": true,
+    "eofline": true,
     "interface-name": [
       true,
       "never-prefix"
     ],
-    "no-empty-interface": false,
-    "quotemark": {
-      "options": [
-        "single",
-        "avoid-escape"
-      ]
-    },
+    "linebreak-style": "unix",
+    "max-classes-per-file": false,
     "member-access": true,
     "member-ordering": [
       true,
@@ -73,7 +34,47 @@
           "private-instance-method"
         ]
       }
-    ]
+    ],
+    "new-parens": true,
+    "no-empty-interface": false,
+    "object-curly-spacing": true,
+    "object-literal-shorthand": true,
+    "object-literal-sort-keys": false,
+    "prefer-method-signature": true,
+    "quotemark": {
+      "options": [
+        "avoid-escape",
+        "single"
+      ]
+    },
+    "semicolon": {
+      "options": [
+        "never"
+      ]
+    },
+    "space-in-parens": [
+      true,
+      "never"
+    ],
+    "ter-arrow-spacing": [
+      true,
+      {
+        "after": true,
+        "before": true
+      }
+    ],
+    "ter-indent": [
+      true,
+      2,
+      {
+        "SwitchCase": 1
+      }
+    ],
+    "ter-max-len": [
+      true,
+      120
+    ],
+    "ter-prefer-arrow-callback": true
   },
   "rulesDirectory": []
 }
