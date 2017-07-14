@@ -24,31 +24,33 @@
 #include <queue>
 
 namespace module {
-    namespace behaviour {
-        namespace tools {
+namespace behaviour {
+    namespace tools {
 
-            /**
-             * Executes a series of scripts provided by the command line in order.
-             *
-             * @author Trent Houliston
-             */
-            class ScriptRunner : public NUClear::Reactor {
-            private:
-                /// The scripts to be executed
-                std::queue<std::string> scripts;
+        /**
+         * Executes a series of scripts provided by the command line in order.
+         *
+         * @author Trent Houliston
+         */
+        class ScriptRunner : public NUClear::Reactor {
+        private:
+            ReactionHandle sensorHandle;
 
-                /// Our ID for subsumption
-                const size_t id;
+            /// The scripts to be executed
+            std::queue<std::string> scripts;
 
-                /// Execute the next script in the list
-                void executeNextScript();
-            public:
-                explicit ScriptRunner(std::unique_ptr<NUClear::Environment> environment);
-            };
+            /// Our ID for subsumption
+            const size_t id;
 
-        }  // tools
-    }  // behaviours
+            /// Execute the next script in the list
+            void executeNextScript();
+
+        public:
+            explicit ScriptRunner(std::unique_ptr<NUClear::Environment> environment);
+        };
+
+    }  // tools
+}  // behaviours
 }  // modules
 
 #endif  // MODULES_BEHAVIOURS_UTILITY_SCRIPTRUNNER_H
-
