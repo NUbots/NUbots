@@ -440,10 +440,12 @@ namespace vision {
                     // }
 
                     // Check that the bottom of the goal is not too close to the edges of the screen
-                    if (std::min(br[0], bl[0]) > MEASUREMENT_LIMITS_LEFT
-                        && std::min(br[1], bl[1]) > MEASUREMENT_LIMITS_TOP
-                        && cam.imageSizePixels[0] - std::max(br[0], bl[0]) > MEASUREMENT_LIMITS_TOP
-                        && cam.imageSizePixels[1] - std::max(br[1], bl[1]) > MEASUREMENT_LIMITS_BASE) {
+                    if (std::min(quad.getBottomRight()[0], quad.getBottomLeft()[0]) > MEASUREMENT_LIMITS_LEFT
+                        && std::min(quad.getBottomRight()[1], quad.getBottomLeft()[1]) > MEASUREMENT_LIMITS_TOP
+                        && cam.imageSizePixels[0] - std::max(quad.getBottomRight()[0], quad.getBottomLeft()[0])
+                               > MEASUREMENT_LIMITS_TOP
+                        && cam.imageSizePixels[1] - std::max(quad.getBottomRight()[1], quad.getBottomLeft()[1])
+                               > MEASUREMENT_LIMITS_BASE) {
 
                         // BR BL cross product gives the bottom side
                         auto bottom = convert<double, 3>(arma::normalise(arma::cross(cbr, cbl)));
