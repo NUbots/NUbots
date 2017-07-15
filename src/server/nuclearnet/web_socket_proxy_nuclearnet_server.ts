@@ -6,6 +6,8 @@ import { DirectNUClearNetClient } from './direct_nuclearnet_client'
 import { FakeNUClearNetClient } from './fake_nuclearnet_client'
 import { WebSocketServer } from './web_socket_server'
 import { WebSocket } from './web_socket_server'
+import { NodeSystemClock } from '../time/node_clock'
+import { Clock } from '../time/clock'
 
 type Opts = {
   fakeNetworking: boolean
@@ -36,12 +38,14 @@ class WebSocketServerClient {
   private offJoin: () => void
   private offLeave: () => void
   private offListenMap: Map<string, () => void>
+  private processors: Map<NUClearNetPeer, RobotMessageProcessor>
 
   public constructor(private nuclearnetClient: NUClearNetClient, private socket: WebSocket) {
     this.connected = false
     this.offJoin = this.nuclearnetClient.onJoin(this.onJoin)
     this.offLeave = this.nuclearnetClient.onLeave(this.onLeave)
     this.offListenMap = new Map()
+    this.processors = new Map()
 
     this.socket.on('listen', this.onListen)
     this.socket.on('unlisten', this.onUnlisten)
@@ -55,10 +59,15 @@ class WebSocketServerClient {
 
   private onJoin = (peer: NUClearNetPeer) => {
     this.socket.send('nuclear_join', peer)
+    this.processors.set(peer, RobotMessageProcessor.of(this.socket))
   }
 
   private onLeave = (peer: NUClearNetPeer) => {
     this.socket.send('nuclear_leave', peer)
+    const peerKey = this.getPeer(this.processors.keys(), peer)
+    if (peerKey) {
+      this.processors.delete(peerKey)
+    }
   }
 
   private onConnect = (options: NUClearNetOptions) => {
@@ -93,6 +102,83 @@ class WebSocketServerClient {
   }
 
   private onPacket = (event: string, packet: NUClearNetPacket) => {
+    const peerKey = this.getPeer(this.processors.keys(), packet.peer)
+    if (peerKey) {
+      const processor = this.processors.get(peerKey)
+      if (processor) {
+        processor.onPacket(event, packet)
+      }
+    }
+  }
+
+  /**
+   * Look for the needle 'peer' inside the haystack 'peers'. They might not be the same object reference.
+   */
+  private getPeer(peers: Iterable<NUClearNetPeer>, peer: NUClearNetPeer): NUClearNetPeer | undefined {
+    return Array.from(peers).find(otherPeer => {
+      return otherPeer.name === peer.name && otherPeer.address === peer.address && otherPeer.port === peer.port
+    })
+  }
+}
+
+class RobotMessageProcessor {
+  private eventQueueSize: Map<string, number>
+
+  // The maximum number of packets of a unique type to send before receiving acknowledgements.
+  private limit: number
+
+  // The number of milliseconds before giving up on an acknowledge
+  private timeout: number
+
+  constructor(private socket: WebSocket,
+              private clock: Clock,
+              opts: { limit: number, timeout: number }) {
+    this.limit = opts.limit
+    this.timeout = opts.timeout
+    this.eventQueueSize = new Map()
+  }
+
+  public static of(socket: WebSocket) {
+    return new RobotMessageProcessor(socket, NodeSystemClock, { limit: 1, timeout: 5000 })
+  }
+
+  public onPacket(event: string, packet: NUClearNetPacket) {
+    if (packet.reliable) {
+      this.sendReliablePacket(event, packet)
+    } else if (this.isEventBelowLimit(event)) {
+      this.sendUnreliablePacket(event, packet)
+    }/* else {
+      // This event is unreliable and already at the limit, simply drop the packet.
+    }*/
+  }
+
+  private isEventBelowLimit(event: string) {
+    return (this.eventQueueSize.get(event) || 0) < this.limit
+  }
+
+  private sendReliablePacket(event: string, packet: NUClearNetPacket) {
+    // Always send reliable packets
     this.socket.send(event, packet)
+  }
+
+  private sendUnreliablePacket(event: string, packet: NUClearNetPacket) {
+    // Throttle unreliable packets so that we do not overwhelm the client with traffic.
+    const done = this.enqueue(event)
+    this.socket.send(event, packet, done)
+    this.clock.setTimeout(done, this.timeout)
+  }
+
+  private enqueue(event: string): () => void {
+    let isDone = false
+    const eventQueueSize = this.eventQueueSize.get(event) || 0
+    this.eventQueueSize.set(event, eventQueueSize + 1)
+
+    return () => {
+      if (!isDone) {
+        const eventQueueSize = this.eventQueueSize.get(event) || 0
+        this.eventQueueSize.set(event, eventQueueSize - 1)
+        isDone = true
+      }
+    }
   }
 }

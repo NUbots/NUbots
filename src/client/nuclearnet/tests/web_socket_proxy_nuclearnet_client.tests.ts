@@ -60,7 +60,7 @@ describe('WebSocketProxyNUClearNetClient', () => {
     it('forwards generic event add listener requests to socket', () => {
       const cb = jest.fn()
       client.on('foo', cb)
-      expect(mockWebSocket.on).toHaveBeenCalledWith('foo', cb)
+      expect(mockWebSocket.on).toHaveBeenCalledWith('foo', expect.any(Function))
       expect(mockWebSocket.send).toHaveBeenCalledWith('listen', 'foo', '0')
     })
 
@@ -78,7 +78,7 @@ describe('WebSocketProxyNUClearNetClient', () => {
       const cb = jest.fn()
       const off = client.on('foo', cb)
       off()
-      expect(mockWebSocket.off).toHaveBeenCalledWith('foo', cb)
+      expect(mockWebSocket.off).toHaveBeenCalledWith('foo', expect.any(Function))
       expect(mockWebSocket.send).toHaveBeenCalledWith('unlisten', '0')
     })
 

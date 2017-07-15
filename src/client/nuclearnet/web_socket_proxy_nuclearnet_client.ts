@@ -5,6 +5,9 @@ import { NUClearEventListener } from '../../shared/nuclearnet/nuclearnet_client'
 import { NUClearNetClient } from '../../shared/nuclearnet/nuclearnet_client'
 import { WebSocketClient } from './web_socket_client'
 import SocketIOSocket = SocketIOClient.Socket
+import { NUClearNetPacket } from 'nuclearnet.js'
+
+type PacketListener = (packet: NUClearNetPacket, ack?: () => void) => void
 
 /**
  * A client-side interface for interacting with NUClearNet. Allows a browser to connect transparently connect to
@@ -17,7 +20,7 @@ export class WebSocketProxyNUClearNetClient implements NUClearNetClient {
   // Store all listeners so that we can restore them after a socket disconnection/reconnection.
   private joinListeners: Set<NUClearEventListener>
   private leaveListeners: Set<NUClearEventListener>
-  private packetListeners: Map<string, Set<{ requestToken: string, listener: NUClearPacketListener }>>
+  private packetListeners: Map<string, Set<{ requestToken: string, listener: PacketListener }>>
 
   public constructor(private socket: WebSocketClient) {
     this.nextRequestToken = 0
@@ -64,7 +67,7 @@ export class WebSocketProxyNUClearNetClient implements NUClearNetClient {
     }
   }
 
-  public on(event: string, listener: NUClearPacketListener): () => void {
+  public on(event: string, cb: NUClearPacketListener): () => void {
     /*
      * This one is a bit more complicated than the others, mostly for performance purposes.
      *
@@ -81,6 +84,12 @@ export class WebSocketProxyNUClearNetClient implements NUClearNetClient {
      */
     const requestToken = String(this.nextRequestToken++)
     this.socket.send('listen', event, requestToken)
+    const listener = (packet: NUClearNetPacket, ack?: () => void) => {
+      cb(packet)
+      if (ack) {
+        ack()
+      }
+    }
     this.socket.on(event, listener)
 
     let packetListeners = this.packetListeners.get(event)
