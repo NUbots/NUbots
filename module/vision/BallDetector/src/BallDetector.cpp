@@ -36,6 +36,7 @@
 #include "utility/math/vision.h"
 #include "utility/nubugger/NUhelpers.h"
 #include "utility/support/eigen_armadillo.h"
+#include "utility/support/yaml_armadillo.h"
 #include "utility/support/yaml_expression.h"
 #include "utility/vision/Vision.h"
 #include "utility/vision/fourcc.h"
@@ -173,6 +174,8 @@ namespace vision {
             green_ratio_threshold = config["green_ratio_threshold"].as<Expression>();
             green_radial_samples  = config["green_radial_samples"].as<Expression>();
             green_angular_samples = config["green_angular_samples"].as<Expression>();
+
+            ball_angular_cov = config["ball_angular_cov"].as<arma::vec>();
 
             kmeansClusterer.configure(config["clustering"]);
 
@@ -337,9 +340,8 @@ namespace vision {
 
                         // Attach the measurement to the object
                         b.measurements.push_back(Ball::Measurement());
-                        b.measurements.back().rBCc = convert<double, 3, 1>(rBCc);
-                        Eigen::Vector3d cov_diag(0.1, 0.01, 0.01);
-                        b.measurements.back().covariance = cov_diag.asDiagonal();
+                        b.measurements.back().rBCc       = convert<double, 3, 1>(rBCc);
+                        b.measurements.back().covariance = convert<double, 3>(ball_angular_cov).asDiagonal();
 
                         Transform3D Hgc       = camToGround;
                         arma::vec3 width_rBGg = Hgc.transformPoint(ballCentreRay * widthDistance);

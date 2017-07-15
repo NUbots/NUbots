@@ -17,6 +17,6 @@ maximum_angle_between_goals: 0.3
 maximum_vertical_goal_perspective_angle: 0.1
 
 # Localisation covariances
-vector3_covariance: [0.1,0.001,0.01]
+vector3_covariance: [0.1,0.001,0.001]
 angle_covariance: [0.001,0.01]
 

@@ -84,8 +84,10 @@ namespace localisation {
 
         if (type == Goal::MeasurementType::CENTRE) {
             // rGCc = vector from camera to goal post expected position
-            arma::vec3 rGCc     = Hcf.transformPoint(arma::vec3{actual_position[0], actual_position[1], 0});
+            arma::vec3 rGCc     = Hcf.transformPoint(actual_position);
             arma::vec3 rGCc_sph = cartesianToSpherical(rGCc);  // in r,theta,phi
+            // std::cout << "actual_position = " << actual_position.t() << std::endl;
+            // std::cout << "rGCc_sph = " << rGCc_sph.t() << std::endl;
             return rGCc_sph;
         }
 
@@ -114,6 +116,7 @@ namespace localisation {
 
 
     arma::vec RobotModel::observationDifference(const arma::vec& a, const arma::vec& b) {
+
         return a - b;
     }
 

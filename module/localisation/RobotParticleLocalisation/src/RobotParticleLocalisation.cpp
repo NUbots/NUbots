@@ -48,17 +48,18 @@ namespace localisation {
             int n_particles                   = config["n_particles"].as<int>();
             draw_particles                    = config["draw_particles"].as<int>();
 
-            arma::vec3 test_state = config["test_state"].as<arma::vec>();
+            arma::vec3 start_state    = config["start_state"].as<arma::vec>();
+            arma::vec3 start_variance = config["start_variance"].as<arma::vec>();
 
             std::vector<arma::vec3> possible_states;
             std::vector<arma::mat33> possible_var;
 
-            possible_states.push_back(test_state);
+            possible_states.push_back(start_state);
             // Reflected position
-            possible_states.push_back(arma::vec3{test_state[0], -test_state[1], -test_state[2]});
+            possible_states.push_back(arma::vec3{start_state[0], -start_state[1], -start_state[2]});
 
-            possible_var.push_back(arma::diagmat(arma::vec3{0.01, 0.01, 0.001}));
-            possible_var.push_back(arma::diagmat(arma::vec3{0.01, 0.01, 0.001}));
+            possible_var.push_back(arma::diagmat(start_variance));
+            possible_var.push_back(arma::diagmat(start_variance));
 
             filter.resetAmbiguous(possible_states, possible_var, n_particles);
 
@@ -84,6 +85,23 @@ namespace localisation {
                 last_time_update_time = curr_time;
 
                 filter.timeUpdate(seconds);
+
+                // Emit state
+                auto selfs = std::make_unique<std::vector<Self>>();
+                selfs->push_back(Self());
+                // emit(graph("Self",Self.locObject.position[0], Self.locObject.position[1],))
+
+                // Get filter state and transform
+                arma::vec3 state                 = filter.get();
+                selfs->back().locObject.position = Eigen::Vector2d(state[RobotModel::kX], state[RobotModel::kY]);
+                selfs->back().heading =
+                    Eigen::Vector2d(std::cos(state[RobotModel::kAngle]), std::sin(state[RobotModel::kAngle]));
+                selfs->back().covariance = convert<double, 3, 3>(filter.getCovariance());
+                emit(graph("robot filter state = ", state[0], state[1], state[2]));
+
+                auto self = std::make_unique<Self>((*selfs)[0]);
+                emit(self);
+                emit(selfs);
 
             });
 
@@ -111,6 +129,10 @@ namespace localisation {
                             if (m.type == Goal::MeasurementType::UNKNOWN_MEASUREMENT) continue;
                             // Measure objects
                             if (m.type == Goal::MeasurementType::CENTRE) {
+                                // log(goal.side == Goal::Side::LEFT
+                                //         ? (" LEFT GOAL ")
+                                //         : (goal.side == Goal::Side::RIGHT ? " RIGHT GOAL " : " UNKNOWN GOAL "),
+                                //     convert<double, 3>(m.position).t());
                                 filter.ambiguousMeasurementUpdate(convert<double, 3>(m.position),
                                                                   convert<double, 3, 3>(m.covariance),
                                                                   poss,
@@ -128,24 +150,6 @@ namespace localisation {
                             }
                         }
                     }
-
-                    // Emit state
-                    auto selfs = std::make_unique<std::vector<Self>>();
-                    selfs->push_back(Self());
-                    // emit(graph("Self",Self.locObject.position[0], Self.locObject.position[1],))
-
-                    // Get filter state and transform
-                    arma::vec3 state                 = filter.get();
-                    selfs->back().locObject.position = Eigen::Vector2d(state[RobotModel::kX], state[RobotModel::kY]);
-                    selfs->back().heading =
-                        Eigen::Vector2d(std::cos(state[RobotModel::kAngle]), std::sin(state[RobotModel::kAngle]));
-                    selfs->back().covariance = convert<double, 3, 3>(filter.getCovariance());
-                    emit(graph("robot filter state = ", state[0], state[1], state[2]));
-                    // emit(graph("actual state = ", test_state[0],test_state[1],test_state[2]));
-
-                    auto self = std::make_unique<Self>((*selfs)[0]);
-                    emit(self);
-                    emit(selfs);
                 }
             });
     }
@@ -160,10 +164,22 @@ namespace localisation {
         bool own   = (goal.team != Goal::Team::OPPONENT);
         bool opp   = (goal.team != Goal::Team::OWN);
 
-        if (own && left) possibilities.push_back(arma::vec3({fd.goalpost_own_l[0], fd.goalpost_own_l[1], 0}));
-        if (own && right) possibilities.push_back(arma::vec3({fd.goalpost_own_r[0], fd.goalpost_own_r[1], 0}));
-        if (opp && left) possibilities.push_back(arma::vec3({fd.goalpost_opp_l[0], fd.goalpost_opp_l[1], 0}));
-        if (opp && right) possibilities.push_back(arma::vec3({fd.goalpost_opp_r[0], fd.goalpost_opp_r[1], 0}));
+        if (own && left) {
+            possibilities.push_back(arma::vec3({fd.goalpost_own_l[0], fd.goalpost_own_l[1], 0}));
+            // std::cout << __FILE__ << ", " << __LINE__ << (" Goal possibility own  left") << std::endl;
+        }
+        if (own && right) {
+            possibilities.push_back(arma::vec3({fd.goalpost_own_r[0], fd.goalpost_own_r[1], 0}));
+            // std::cout << __FILE__ << ", " << __LINE__ << (" Goal possibility own  right") << std::endl;
+        }
+        if (opp && left) {
+            possibilities.push_back(arma::vec3({fd.goalpost_opp_l[0], fd.goalpost_opp_l[1], 0}));
+            // std::cout << __FILE__ << ", " << __LINE__ << (" Goal possibility opp  left") << std::endl;
+        }
+        if (opp && right) {
+            possibilities.push_back(arma::vec3({fd.goalpost_opp_r[0], fd.goalpost_opp_r[1], 0}));
+            // std::cout << __FILE__ << ", " << __LINE__ << (" Goal possibility opp  right") << std::endl;
+        }
 
         return possibilities;
     }

@@ -457,15 +457,15 @@ namespace vision {
                         float distance_bottom = utility::math::vision::distanceToEquidistantCamPoints(
                             fd.dimensions.goalpost_width, cbl, cbr);
                         float distance = (distance_top + distance_bottom) / 2;
-                        log("goal distance = ",
-                            distance_bottom,
-                            ", ",
-                            distance_top,
-                            ", ",
-                            distance,
-                            it->side == Goal::Side::LEFT
-                                ? (" LEFT GOAL ")
-                                : (it->side == Goal::Side::RIGHT ? " RIGHT GOAL " : " UNKNOWN GOAL"));
+                        // log("goal distance = ",
+                        //     distance_bottom,
+                        //     ", ",
+                        //     distance_top,
+                        //     ", ",
+                        //     distance,
+                        //     it->side == Goal::Side::LEFT
+                        //         ? (" LEFT GOAL ")
+                        //         : (it->side == Goal::Side::RIGHT ? " RIGHT GOAL " : " UNKNOWN GOAL"));
                         auto rGCc_sphr = convert<double, 3>(cartesianToSpherical(
                             distance * rGCc_norm));  // Just converted into eigen. Still the unit vector
                         arma::vec3 covariance_amplifier({distance, 1, 1});
