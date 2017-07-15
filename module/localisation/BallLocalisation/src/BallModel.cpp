@@ -66,7 +66,8 @@ namespace localisation {
     }
 
     arma::vec::fixed<BallModel::size> BallModel::limitState(const arma::vec::fixed<size>& state) const {
-        return state;
+        // TODO: configure
+        return arma::clamp(state, -10, 10);
     }
 
     arma::mat::fixed<BallModel::size, BallModel::size> BallModel::processNoise() const {

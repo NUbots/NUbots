@@ -34,17 +34,27 @@ namespace localisation {
     BallLocalisation::BallLocalisation(std::unique_ptr<NUClear::Environment> environment)
         : Reactor(std::move(environment)), filter() {
 
-        last_measurement_update_time = NUClear::clock::now();
-        last_time_update_time        = NUClear::clock::now();
+        on<Startup>().then([this] {
+            last_measurement_update_time = NUClear::clock::now();
+            last_time_update_time        = NUClear::clock::now();
+        });
 
-        on<Configuration>("BallLocalisation.yaml").then([this](const Configuration& config) {
+        on<Configuration, Sync<BallLocalisation>>("BallLocalisation.yaml").then([this](const Configuration& config) {
             auto message = std::make_unique<std::vector<Ball>>();
             emit(message);
             emit(std::make_unique<Ball>());
 
+            ball_pos_log = config["ball_pos_log"].as<bool>();
+            // Use configuration here from file RobotParticleLocalisation.yaml
             filter.model.processNoiseDiagonal = config["process_noise_diagonal"].as<arma::vec>();
-            ball_pos_log                      = config["ball_pos_log"].as<bool>();
+            filter.model.n_rogues             = config["n_rogues"].as<int>();
+            filter.model.resetRange           = config["reset_range"].as<arma::vec>();
+            int n_particles                   = config["n_particles"].as<int>();
 
+            arma::vec2 start_state    = config["start_state"].as<arma::vec>();
+            arma::vec2 start_variance = config["start_variance"].as<arma::vec>();
+
+            filter.reset(start_state, arma::diagmat(start_variance), n_particles);
 
             // Use configuration here from file BallLocalisation.yaml
         });
@@ -78,6 +88,7 @@ namespace localisation {
                 if (ball_pos_log) {
                     emit(graph("localisation ball pos", filter.get()[0], filter.get()[1]));
                     log("localisation ball pos = ", filter.get()[0], filter.get()[1]);
+                    log("localisation seconds elapsed = ", seconds);
                 }
                 emit(ball);
             });
@@ -98,6 +109,7 @@ namespace localisation {
                     /* Now call Measurement Update. Supports multiple measurement methods and will treat them as
                      * separate measurements */
                     for (auto& measurement : balls[0].measurements) {
+                        log("ball meas = ", convert<double, 3, 1>(measurement.rBCc).t());
                         filter.measurementUpdate(convert<double, 3, 1>(measurement.rBCc),
                                                  convert<double, 3, 3>(measurement.covariance),
                                                  field,
