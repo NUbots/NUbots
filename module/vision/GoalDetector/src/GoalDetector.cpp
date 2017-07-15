@@ -329,10 +329,10 @@ namespace vision {
 
                         // Check we finish above the kinematics horizon or or kinematics horizon is off the screen
                         && (arma::dot(convert<double, 3>(image.horizon_normal),
-                                      getCamFromImage(arma::ivec2({tl[0], tl[1]}), cam))
+                                      getCamFromImage(arma::ivec2({int(tl[0]), int(tl[1])}), cam))
                             > MAXIMUM_GOAL_HORIZON_NORMAL_ANGLE)
                         && (arma::dot(convert<double, 3>(image.horizon_normal),
-                                      getCamFromImage(arma::ivec2({tr[0], tr[1]}), cam))
+                                      getCamFromImage(arma::ivec2({int(tr[0]), int(tr[1])}), cam))
                             > MAXIMUM_GOAL_HORIZON_NORMAL_ANGLE)
 
                         // TODO: Check that this can be removed

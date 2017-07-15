@@ -57,7 +57,7 @@ namespace vision {
             // Find our point to classify from (slightly above the horizon)
             int horizon_Y = getImageFromCam(
                 // Project down to horizon
-                horizon.directionalProjection(getCamFromImage(arma::ivec2({x, 0}), cam), arma::vec({0, 0, 1})),
+                horizon.directionalProjection(getCamFromImage(arma::ivec2({int(x), 0}), cam), arma::vec({0, 0, 1})),
                 cam)[1];
             // Find our point to classify from (slightly above the horizon)
             int top = std::max(int(horizon_Y - VISUAL_HORIZON_BUFFER), int(0));
@@ -102,7 +102,7 @@ namespace vision {
             // Find our point to classify from (slightly above the horizon)
             int horizon_Y = getImageFromCam(
                 // Project down to horizon
-                horizon.directionalProjection(getCamFromImage(arma::ivec2({image.dimensions[0] - 1, 0}), cam),
+                horizon.directionalProjection(getCamFromImage(arma::ivec2({int(image.dimensions[0] - 1), 0}), cam),
                                               arma::vec({0, 0, 1})),
                 cam)[1];
             int top = std::max(int(horizon_Y - VISUAL_HORIZON_BUFFER), int(0));
