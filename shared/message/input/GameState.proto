@@ -53,6 +53,7 @@ message GameState {
             REQUEST_FOR_PICKUP_TO_SERVICE = 8;
             SUBSTITUTE                    = 9;
             MANUAL                        = 10;
+            PLAYER_PUSHING                = 11;
         }
 
         message Robot {
