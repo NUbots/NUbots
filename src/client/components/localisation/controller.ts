@@ -263,11 +263,13 @@ export class LocalisationController {
   }
 
   private getNextTarget(model: LocalisationModel) {
+    // TODO (Annable): ignore robots with visible === false
     const targetIndex = model.robots.findIndex(robot => robot === model.target)
     return model.robots[targetIndex + 1] || model.robots[0]
   }
 
   private getPreviousTarget(model: LocalisationModel) {
+    // TODO (Annable): ignore robots with visible === false
     const targetIndex = model.robots.findIndex(robot => robot === model.target)
     return model.robots[targetIndex - 1] || model.robots[model.robots.length - 1]
   }

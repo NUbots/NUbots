@@ -45,7 +45,9 @@ export class LocalisationViewModel {
 
   @computed
   private get robots(): Object3D[] {
-    return this.model.robots.map(robotModel => RobotViewModel.of(robotModel).robot)
+    return this.model.robots
+      .filter(robotModel => robotModel.visible)
+      .map(robotModel => RobotViewModel.of(robotModel).robot)
   }
 
   @computed

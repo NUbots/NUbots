@@ -1,9 +1,11 @@
 import { observable } from 'mobx'
 
 export class RobotModel {
+  @observable public connected: boolean
   @observable public enabled: boolean
   @observable public name: string
-  @observable public host: string
+  @observable public address: string
+  @observable public port: number
 
   public constructor(opts: RobotModel) {
     Object.assign(this, opts)

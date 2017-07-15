@@ -4,7 +4,7 @@ import { Mesh } from 'three'
 import { MultiMaterial } from 'three'
 import { Object3D } from 'three'
 import { geometryAndMaterial } from '../../utils'
-import { RobotModel } from '../model'
+import { LocalisationRobotModel } from '../model'
 import * as RightAnkleConfig from './config/right_ankle.json'
 import * as RightFootConfig from './config/right_foot.json'
 import * as RightLowerLegConfig from './config/right_lower_leg.json'
@@ -13,10 +13,10 @@ import * as RightPelvisYConfig from './config/right_pelvis_y.json'
 import * as RightUpperLegConfig from './config/right_upper_leg.json'
 
 export class RightLegViewModel {
-  constructor(private model: RobotModel) {
+  constructor(private model: LocalisationRobotModel) {
   }
 
-  public static of = createTransformer((model: RobotModel): RightLegViewModel => {
+  public static of = createTransformer((model: LocalisationRobotModel): RightLegViewModel => {
     return new RightLegViewModel(model)
   })
 

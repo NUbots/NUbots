@@ -7,17 +7,16 @@ import * as SocketIO from 'socket.io-client'
  * There should never be enough logic in here that it needs any testing.
  */
 export class WebSocketClient {
-  private socket: SocketIOClient.Socket
-
-  public constructor() {
+  public constructor(private socket: SocketIOClient.Socket) {
   }
 
-  public static of() {
-    return new WebSocketClient()
+  public static of(uri: string, opts: SocketIOClient.ConnectOpts) {
+    const socket = SocketIO(uri, opts)
+    return new WebSocketClient(socket)
   }
 
-  public connect(uri: string, opts?: SocketIOClient.ConnectOpts) {
-    this.socket = SocketIO.connect(uri, opts)
+  public connect() {
+    this.socket = this.socket.connect()
   }
 
   public disconnect() {

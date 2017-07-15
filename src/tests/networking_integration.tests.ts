@@ -1,3 +1,4 @@
+import { AppModel } from '../client/components/app/model'
 import { MessageTypePath } from '../client/network/message_type_names'
 import { Network } from '../client/network/network'
 import { NUsightNetwork } from '../client/network/nusight_network'
@@ -11,6 +12,7 @@ import { SensorDataSimulator } from '../simulators/sensor_data_simulator'
 import Sensors = message.input.Sensors
 import VisionObject = message.vision.VisionObject
 import Overview = message.support.nubugger.Overview
+import { AppNetwork } from '../client/components/app/network'
 
 describe('Networking Integration', () => {
   let nuclearnetServer: FakeNUClearNetServer
@@ -42,9 +44,12 @@ describe('Networking Integration', () => {
   })
 
   function createNUsightNetwork() {
+    const appModel = AppModel.of()
     const nuclearnetClient = new FakeNUClearNetClient(nuclearnetServer)
     const messageTypePath = new MessageTypePath()
-    return new NUsightNetwork(nuclearnetClient, messageTypePath)
+    const nusightNetwork =  new NUsightNetwork(nuclearnetClient, appModel, messageTypePath)
+    AppNetwork.of(nusightNetwork, appModel)
+    return nusightNetwork
   }
 
   describe('a single networked component', () => {
@@ -60,7 +65,7 @@ describe('Networking Integration', () => {
 
       virtualRobots.simulate()
 
-      expect(onSensors).toHaveBeenCalledWith(expect.any(Sensors))
+      expect(onSensors).toHaveBeenCalledWith(expect.objectContaining({ name: 'Robot #1' }), expect.any(Sensors))
       expect(onSensors).toHaveBeenCalledTimes(1)
     })
 
@@ -89,7 +94,7 @@ describe('Networking Integration', () => {
       virtualRobots.simulate()
 
       expect(onSensors1).not.toHaveBeenCalled()
-      expect(onSensors2).toHaveBeenCalledWith(expect.any(Sensors))
+      expect(onSensors2).toHaveBeenCalledWith(expect.objectContaining({ name: 'Robot #1' }), expect.any(Sensors))
     })
   })
 
@@ -110,7 +115,7 @@ describe('Networking Integration', () => {
 
       virtualRobots.simulate()
 
-      expect(onSensors).toHaveBeenCalledWith(expect.any(Sensors))
+      expect(onSensors).toHaveBeenCalledWith(expect.objectContaining({ name: 'Robot #1' }), expect.any(Sensors))
     })
 
     it('handles multiple sessions simutaneously', () => {
@@ -126,8 +131,8 @@ describe('Networking Integration', () => {
 
       virtualRobots.simulate()
 
-      expect(onSensors1).toHaveBeenCalledWith(expect.any(Sensors))
-      expect(onSensors2).toHaveBeenCalledWith(expect.any(Sensors))
+      expect(onSensors1).toHaveBeenCalledWith(expect.objectContaining({ name: 'Robot #1' }), expect.any(Sensors))
+      expect(onSensors2).toHaveBeenCalledWith(expect.objectContaining({ name: 'Robot #1' }), expect.any(Sensors))
     })
   })
 

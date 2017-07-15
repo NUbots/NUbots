@@ -6,16 +6,16 @@ import { geometryAndMaterial } from '../../utils'
 import { HeadViewModel } from '../head/view_model'
 import { LeftArmViewModel } from '../left_arm/view_model'
 import { LeftLegViewModel } from '../left_leg/view_model'
-import { RobotModel } from '../model'
+import { LocalisationRobotModel } from '../model'
 import { RightArmViewModel } from '../right_arm/view_model'
 import { RightLegViewModel } from '../right_leg/view_model'
 import * as BodyConfig from './config/body.json'
 
 export class BodyViewModel {
-  public constructor(private model: RobotModel) {
+  public constructor(private model: LocalisationRobotModel) {
   }
 
-  public static of = createTransformer((model: RobotModel): BodyViewModel => {
+  public static of = createTransformer((model: LocalisationRobotModel): BodyViewModel => {
     return new BodyViewModel(model)
   })
 

@@ -2,8 +2,10 @@ import { action } from 'mobx'
 import { message } from '../../../shared/proto/messages'
 import { Network } from '../../network/network'
 import { NUsightNetwork } from '../../network/nusight_network'
+import { RobotModel } from '../robot/model'
 import { LocalisationModel } from './model'
 import Sensors = message.input.Sensors
+import { LocalisationRobotModel } from './darwin_robot/model'
 
 export class LocalisationNetwork {
   public constructor(private network: Network,
@@ -21,9 +23,8 @@ export class LocalisationNetwork {
   }
 
   @action
-  private onSensors = (sensors: Sensors) => {
-    // TODO (Annable): Remove hardcoded values.
-    const robot = this.model.robots[0]
+  private onSensors = (robotModel: RobotModel, sensors: Sensors) => {
+    const robot = LocalisationRobotModel.of(robotModel)
     robot.motors.rightShoulderPitch.angle = Number(sensors.servo[0].presentPosition)
     robot.motors.leftShoulderPitch.angle = Number(sensors.servo[1].presentPosition)
     robot.motors.rightShoulderRoll.angle = Number(sensors.servo[2].presentPosition)

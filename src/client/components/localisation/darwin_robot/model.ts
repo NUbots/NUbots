@@ -1,28 +1,37 @@
 import { observable } from 'mobx'
+import { createTransformer } from 'mobx'
+import { RobotModel } from '../../robot/model'
 import { Vector3 } from '../model'
+import { computed } from 'mobx'
 
-export class RobotModel {
-  @observable public id: number
+export class LocalisationRobotModel {
+  @observable private model: RobotModel
   @observable public name: string
   @observable public color?: string
   @observable public heading: number
   @observable public position: Vector3
   @observable public motors: DarwinMotorSet
 
-  public constructor(opts: RobotModel) {
+  public constructor(model: RobotModel, opts: Partial<LocalisationRobotModel>) {
+    this.model = model
     Object.assign(this, opts)
   }
 
-  public static of(opts: { id: number, name: string, color?: string, heading: number }) {
-    return new RobotModel({
-      ...opts,
+  public static of = createTransformer((model: RobotModel): LocalisationRobotModel => {
+    return new LocalisationRobotModel(model, {
+      name: model.name,
+      heading: 0,
       position: Vector3.of(),
       motors: DarwinMotorSet.of(),
     })
+  })
+
+  @computed get visible() {
+    return this.model.enabled
   }
 }
 
-class DarwinMotorSet {
+export class DarwinMotorSet {
   @observable public rightShoulderPitch: DarwinMotor
   @observable public leftShoulderPitch: DarwinMotor
   @observable public rightShoulderRoll: DarwinMotor

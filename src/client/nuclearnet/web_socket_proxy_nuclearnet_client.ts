@@ -27,17 +27,18 @@ export class WebSocketProxyNUClearNetClient implements NUClearNetClient {
   }
 
   public static of() {
-    return new WebSocketProxyNUClearNetClient(WebSocketClient.of())
+    const uri = `${document.location.origin}/nuclearnet`
+    return new WebSocketProxyNUClearNetClient(WebSocketClient.of(uri, {
+      upgrade: false,
+      transports: ['websocket'],
+    }))
   }
 
   public connect(options: NUClearNetOptions): () => void {
-    this.socket.connect(`${document.location.origin}/nuclearnet`, {
-      upgrade: false,
-      transports: ['websocket'],
-    })
-
+    this.socket.connect()
     this.socket.on('reconnect', this.onReconnect.bind(this, options))
     this.socket.send('nuclear_connect', options)
+
 
     return () => {
       this.socket.send('nuclear_disconnect')

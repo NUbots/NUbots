@@ -1,8 +1,9 @@
 import { action, observable } from 'mobx'
 import { computed } from 'mobx'
-import { RobotModel } from './darwin_robot/model'
+import { LocalisationRobotModel } from './darwin_robot/model'
 import { FieldModel } from './field/model'
 import { SkyboxModel } from './skybox/model'
+import { AppModel } from '../app/model'
 
 export class TimeModel {
   @observable public time: number // seconds
@@ -31,25 +32,25 @@ export enum ViewMode {
 }
 
 export class LocalisationModel {
+  @observable private appModel: AppModel
   @observable public aspect: number
-  @observable public robots: RobotModel[]
   @observable public field: FieldModel
   @observable public skybox: SkyboxModel
   @observable public camera: CameraModel
   @observable public locked: boolean
   @observable public controls: ControlsModel
   @observable public viewMode: ViewMode
-  @observable public target?: RobotModel
+  @observable public target?: LocalisationRobotModel
   @observable public time: TimeModel
 
-  constructor(opts: LocalisationModel) {
+  constructor(appModel: AppModel, opts: Partial<LocalisationModel>) {
+    this.appModel = appModel
     Object.assign(this, opts)
   }
 
-  public static of(): LocalisationModel {
-    return new LocalisationModel({
+  public static of(appModel: AppModel): LocalisationModel {
+    return new LocalisationModel(appModel, {
       aspect: 300 / 150,
-      robots: [],
       field: FieldModel.of(),
       skybox: SkyboxModel.of(),
       camera: CameraModel.of(),
@@ -58,6 +59,10 @@ export class LocalisationModel {
       viewMode: ViewMode.FreeCamera,
       time: TimeModel.of(),
     })
+  }
+
+  @computed get robots(): LocalisationRobotModel[] {
+    return this.appModel.robots.map(robot => LocalisationRobotModel.of(robot))
   }
 }
 
@@ -73,9 +78,9 @@ class CameraModel {
 
   public static of() {
     return new CameraModel({
-      position: Vector3.of(),
+      position: new Vector3(0, 1, 1),
       yaw: 0,
-      pitch: 0,
+      pitch: 0.5,
       distance: 0.5,
     })
   }

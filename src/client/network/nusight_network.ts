@@ -1,8 +1,11 @@
 import { NUClearNetPacket } from 'nuclearnet.js'
 import { NUClearNetOptions } from 'nuclearnet.js'
+import { NUClearNetPeer } from 'nuclearnet.js'
 import { NUClearNetClient } from '../../shared/nuclearnet/nuclearnet_client'
 import { WebSocketProxyNUClearNetClient } from '../nuclearnet/web_socket_proxy_nuclearnet_client'
 import { MessageTypePath } from './message_type_names'
+import { RobotModel } from '../components/robot/model'
+import { AppModel } from '../components/app/model'
 
 const HEADER_SIZE = 9
 
@@ -13,13 +16,14 @@ const HEADER_SIZE = 9
  */
 export class NUsightNetwork {
   public constructor(private nuclearnetClient: NUClearNetClient,
+                     private appModel: AppModel,
                      private messageTypePath: MessageTypePath) {
   }
 
-  public static of() {
+  public static of(appModel: AppModel) {
     const messageTypePath = MessageTypePath.of()
     const nuclearnetClient: NUClearNetClient = WebSocketProxyNUClearNetClient.of()
-    return new NUsightNetwork(nuclearnetClient, messageTypePath)
+    return new NUsightNetwork(nuclearnetClient, appModel, messageTypePath)
   }
 
   public connect(opts: NUClearNetOptions): () => void {
@@ -32,8 +36,22 @@ export class NUsightNetwork {
       // Remove NUsight header for decoding by protobufjs
       const buffer = new Uint8Array(packet.payload).slice(HEADER_SIZE)
       const message = messageType.decode(buffer)
-      cb(message)
+      const peer = packet.peer
+      const robotModel = this.appModel.robots.find(robot => {
+        return robot.name === peer.name && robot.address === peer.address && robot.port === peer.port
+      })
+      if (robotModel) {
+        cb(robotModel, message)
+      }
     })
+  }
+
+  public onNUClearJoin(cb: (peer: NUClearNetPeer) => void) {
+    this.nuclearnetClient.onJoin(cb)
+  }
+
+  public onNUClearLeave(cb: (peer: NUClearNetPeer) => void) {
+    this.nuclearnetClient.onLeave(cb)
   }
 }
 
@@ -42,4 +60,4 @@ export interface MessageType<T> {
   decode(...args: any[]): T
 }
 
-export type MessageCallback<T> = (message: T) => void
+export type MessageCallback<T> = (robotModel: RobotModel, message: T) => void

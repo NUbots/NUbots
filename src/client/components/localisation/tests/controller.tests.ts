@@ -1,3 +1,5 @@
+import { createMockInstance } from '../../../../shared/base/testing/create_mock_instance'
+import { AppModel } from '../../app/model'
 import { LocalisationController } from '../controller'
 import { LocalisationModel } from '../model'
 import { ViewMode } from '../model'
@@ -7,7 +9,7 @@ describe('LocalisationController', () => {
   let model: LocalisationModel
 
   beforeEach(() => {
-    model = LocalisationModel.of()
+    model = LocalisationModel.of(createMockInstance(AppModel))
     controller = new LocalisationController()
   })
 

@@ -4,16 +4,16 @@ import { Mesh } from 'three'
 import { MultiMaterial } from 'three'
 import { Object3D } from 'three'
 import { geometryAndMaterial } from '../../utils'
-import { RobotModel } from '../model'
+import { LocalisationRobotModel } from '../model'
 import * as RightLowerArmConfig from './config/right_lower_arm.json'
 import * as RightShoulderConfig from './config/right_shoulder.json'
 import * as RightUpperArmConfig from './config/right_upper_arm.json'
 
 export class RightArmViewModel {
-  constructor(private model: RobotModel) {
+  constructor(private model: LocalisationRobotModel) {
   }
 
-  public static of = createTransformer((model: RobotModel): RightArmViewModel => {
+  public static of = createTransformer((model: LocalisationRobotModel): RightArmViewModel => {
     return new RightArmViewModel(model)
   })
 

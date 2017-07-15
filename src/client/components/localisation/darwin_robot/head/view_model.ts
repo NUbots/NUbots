@@ -4,7 +4,7 @@ import { Mesh } from 'three'
 import { MultiMaterial } from 'three'
 import { Object3D } from 'three'
 import { geometryAndMaterial } from '../../utils'
-import { RobotModel } from '../model'
+import { LocalisationRobotModel } from '../model'
 import * as CameraConfig from './config/camera.json'
 import * as EyeLEDConfig from './config/eye_led.json'
 import * as HeadConfig from './config/head.json'
@@ -12,10 +12,10 @@ import * as HeadLEDConfig from './config/head_led.json'
 import * as NeckConfig from './config/neck.json'
 
 export class HeadViewModel {
-  constructor(private model: RobotModel) {
+  constructor(private model: LocalisationRobotModel) {
   }
 
-  public static of = createTransformer((model: RobotModel): HeadViewModel => {
+  public static of = createTransformer((model: LocalisationRobotModel): HeadViewModel => {
     return new HeadViewModel(model)
   })
 
