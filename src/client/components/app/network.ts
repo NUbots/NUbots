@@ -25,6 +25,8 @@ export class AppNetwork {
 
     if (robot) {
       robot.connected = true
+      // Keep this in sync, since the port will likely change per connection.
+      robot.port = peer.port
     } else {
       this.model.robots.push(RobotModel.of({
         name: peer.name,
