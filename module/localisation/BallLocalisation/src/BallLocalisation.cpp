@@ -109,7 +109,6 @@ namespace localisation {
                     /* Now call Measurement Update. Supports multiple measurement methods and will treat them as
                      * separate measurements */
                     for (auto& measurement : balls[0].measurements) {
-                        log("ball meas = ", convert<double, 3, 1>(measurement.rBCc).t());
                         filter.measurementUpdate(convert<double, 3, 1>(measurement.rBCc),
                                                  convert<double, 3, 3>(measurement.covariance),
                                                  field,
