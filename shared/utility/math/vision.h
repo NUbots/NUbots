@@ -72,9 +72,16 @@ namespace math {
             return (separation / 2) / std::tan(parallaxAngle / 2);
         }
 
+        inline double distanceToEquidistantCamPoints(const double& separation,
+                                                     const arma::vec3& cam1,
+                                                     const arma::vec3& cam2) {
+            double parallaxAngle = utility::math::angle::acos_clamped(arma::norm_dot(cam1, cam2));
+            return (separation / 2) / std::tan(parallaxAngle / 2);
+        }
+
         /*! @brief
-            @param cam - coordinates in camera space of the pixel (cam[0] = y coordinate pixels, cam[1] = z coordinate
-           pixels)
+            @param cam - coordinates in camera space of the pixel (cam[0] = y coordinate pixels, cam[1] = z
+           coordinate pixels)
             @return im - coordinates on the screen in image space measured x across, y down, zero at top left
         */
         inline arma::ivec2 screenToImage(const arma::vec2& screen, const arma::uvec2& imageSize) {
