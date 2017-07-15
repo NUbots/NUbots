@@ -38,7 +38,7 @@ class WebSocketServerClient {
   private offJoin: () => void
   private offLeave: () => void
   private offListenMap: Map<string, () => void>
-  private processors: Map<NUClearNetPeer, RobotMessageProcessor>
+  private processors: Map<NUClearNetPeer, PacketProcessor>
 
   public constructor(private nuclearnetClient: NUClearNetClient, private socket: WebSocket) {
     this.connected = false
@@ -59,7 +59,7 @@ class WebSocketServerClient {
 
   private onJoin = (peer: NUClearNetPeer) => {
     this.socket.send('nuclear_join', peer)
-    this.processors.set(peer, RobotMessageProcessor.of(this.socket))
+    this.processors.set(peer, PacketProcessor.of(this.socket))
   }
 
   private onLeave = (peer: NUClearNetPeer) => {
@@ -121,7 +121,7 @@ class WebSocketServerClient {
   }
 }
 
-class RobotMessageProcessor {
+class PacketProcessor {
   private eventQueueSize: Map<string, number>
 
   // The maximum number of packets of a unique type to send before receiving acknowledgements.
@@ -139,7 +139,7 @@ class RobotMessageProcessor {
   }
 
   public static of(socket: WebSocket) {
-    return new RobotMessageProcessor(socket, NodeSystemClock, { limit: 1, timeout: 5000 })
+    return new PacketProcessor(socket, NodeSystemClock, { limit: 1, timeout: 5000 })
   }
 
   public onPacket(event: string, packet: NUClearNetPacket) {
