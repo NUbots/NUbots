@@ -190,3 +190,30 @@ export class Vector3 {
     return this
   }
 }
+
+export class Quaternion {
+  @observable public x: number
+  @observable public y: number
+  @observable public z: number
+  @observable public w: number
+
+  public constructor(x: number, y: number, z: number, w: number) {
+    this.x = x
+    this.y = y
+    this.z = z
+    this.w = w
+  }
+
+  public static of() {
+    return new Quaternion(0, 0, 0, 1)
+  }
+
+  @action
+  public set(x: number, y: number, z: number, w: number): Quaternion {
+    this.x = x
+    this.y = y
+    this.z = z
+    this.w = w
+    return this
+  }
+}

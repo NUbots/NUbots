@@ -1,15 +1,16 @@
 import { observable } from 'mobx'
 import { createTransformer } from 'mobx'
+import { computed } from 'mobx'
 import { RobotModel } from '../../robot/model'
 import { Vector3 } from '../model'
-import { computed } from 'mobx'
+import { Quaternion } from '../model'
 
 export class LocalisationRobotModel {
   @observable private model: RobotModel
   @observable public name: string
   @observable public color?: string
-  @observable public heading: number
-  @observable public position: Vector3
+  @observable public rWTt: Vector3 // Torso to world translation in torso space.
+  @observable public Rwt: Quaternion // Torso to world rotation.
   @observable public motors: DarwinMotorSet
 
   public constructor(model: RobotModel, opts: Partial<LocalisationRobotModel>) {
@@ -20,8 +21,8 @@ export class LocalisationRobotModel {
   public static of = createTransformer((model: RobotModel): LocalisationRobotModel => {
     return new LocalisationRobotModel(model, {
       name: model.name,
-      heading: 0,
-      position: Vector3.of(),
+      rWTt: Vector3.of(),
+      Rwt: Quaternion.of(),
       motors: DarwinMotorSet.of(),
     })
   })

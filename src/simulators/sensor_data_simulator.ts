@@ -1,4 +1,8 @@
+import { Matrix4 } from 'three'
+import { Vector3 } from 'three'
+import { Quaternion } from 'three'
 import { message } from '../../src/shared/proto/messages'
+import { mat44$Properties } from '../shared/proto/messages'
 import { Simulator } from './simulator'
 import { Message } from './simulator'
 import Sensors = message.input.Sensors
@@ -8,13 +12,21 @@ export class SensorDataSimulator implements Simulator {
     return new SensorDataSimulator()
   }
 
-  public simulate(time: number): Message[] {
+  public simulate(time: number, index: number, numRobots: number): Message[] {
     const messageType = 'message.input.Sensors'
 
     // Simulate a walk
-    const t = time * 5E-3
+    const t = time * 5E-3 + index
+
+    const angle = index * (2 * Math.PI) / numRobots + time / 4E4
+    const distance = Math.cos(time / 1E3 + 4 * index) * 0.3 + 1
+    const x = distance * Math.cos(angle)
+    const y = distance * Math.sin(angle)
+    const heading = -angle - Math.PI / 2
+    const Htw = toHtw(x, y, heading)
 
     const buffer = Sensors.encode({
+      world: toProtoMat44(Htw),
       servo: [
         { presentPosition: 3 * Math.PI / 4 + 0.5 * Math.cos(t - Math.PI) },
         { presentPosition: 3 * Math.PI / 4 + 0.5 * Math.cos(t) },
@@ -42,5 +54,21 @@ export class SensorDataSimulator implements Simulator {
     const message = { messageType, buffer }
 
     return [message]
+  }
+}
+
+function toHtw(x: number, y: number, heading: number): Matrix4 {
+  const translation = new Vector3(x, y, 0)
+  const rotation = new Quaternion().setFromAxisAngle(new Vector3(0, 0, 1), heading)
+  const scale = new Vector3(1, 1, 1)
+  return new Matrix4().getInverse(new Matrix4().compose(translation, rotation, scale))
+}
+
+function toProtoMat44(m: Matrix4): mat44$Properties {
+  return {
+    x: { x: m.elements[0], y: m.elements[1], z: m.elements[2], t: m.elements[3] },
+    y: { x: m.elements[4], y: m.elements[5], z: m.elements[6], t: m.elements[7] },
+    z: { x: m.elements[8], y: m.elements[9], z: m.elements[10], t: m.elements[11] },
+    t: { x: m.elements[12], y: m.elements[13], z: m.elements[14], t: m.elements[15] },
   }
 }
