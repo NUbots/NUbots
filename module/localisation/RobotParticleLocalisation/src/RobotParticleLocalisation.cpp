@@ -89,7 +89,6 @@ namespace localisation {
                 // Emit state
                 auto selfs = std::make_unique<std::vector<Self>>();
                 selfs->push_back(Self());
-                // emit(graph("Self",Self.locObject.position[0], Self.locObject.position[1],))
 
                 // Get filter state and transform
                 arma::vec3 state                 = filter.get();
@@ -124,29 +123,13 @@ namespace localisation {
                         std::vector<arma::vec> poss = getPossibleFieldPositions(goal, fd);
 
                         for (auto& m : goal.measurement) {
-                            if (m.type == Goal::MeasurementType::TOP_NORMAL) continue;
-                            if (m.type == Goal::MeasurementType::BASE_NORMAL) continue;
-                            if (m.type == Goal::MeasurementType::UNKNOWN_MEASUREMENT) continue;
-                            // Measure objects
                             if (m.type == Goal::MeasurementType::CENTRE) {
-                                // log(goal.side == Goal::Side::LEFT
-                                //         ? (" LEFT GOAL ")
-                                //         : (goal.side == Goal::Side::RIGHT ? " RIGHT GOAL " : " UNKNOWN GOAL "),
-                                //     convert<double, 3>(m.position).t());
                                 filter.ambiguousMeasurementUpdate(convert<double, 3>(m.position),
                                                                   convert<double, 3, 3>(m.covariance),
                                                                   poss,
                                                                   sensors,
                                                                   m.type,
                                                                   fd);
-                            }
-                            else {
-                                // filter.ambiguousMeasurementUpdate(convert<double, 2>(m.normalAngles),
-                                //                                   convert<double, 2, 2>(m.normAngCov),
-                                //                                   poss,
-                                //                                   sensors,
-                                //                                   m.type,
-                                //                                   fd);
                             }
                         }
                     }
@@ -166,19 +149,15 @@ namespace localisation {
 
         if (own && left) {
             possibilities.push_back(arma::vec3({fd.goalpost_own_l[0], fd.goalpost_own_l[1], 0}));
-            // std::cout << __FILE__ << ", " << __LINE__ << (" Goal possibility own  left") << std::endl;
         }
         if (own && right) {
             possibilities.push_back(arma::vec3({fd.goalpost_own_r[0], fd.goalpost_own_r[1], 0}));
-            // std::cout << __FILE__ << ", " << __LINE__ << (" Goal possibility own  right") << std::endl;
         }
         if (opp && left) {
             possibilities.push_back(arma::vec3({fd.goalpost_opp_l[0], fd.goalpost_opp_l[1], 0}));
-            // std::cout << __FILE__ << ", " << __LINE__ << (" Goal possibility opp  left") << std::endl;
         }
         if (opp && right) {
             possibilities.push_back(arma::vec3({fd.goalpost_opp_r[0], fd.goalpost_opp_r[1], 0}));
-            // std::cout << __FILE__ << ", " << __LINE__ << (" Goal possibility opp  right") << std::endl;
         }
 
         return possibilities;

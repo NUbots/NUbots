@@ -328,32 +328,14 @@ namespace vision {
 
                         // Work out how far away the ball must be to be at the distance it is from the camera
                         arma::vec3 width_rBCc = ballCentreRay * widthDistance;
-                        arma::vec3 width_rBWw = Hwc.transformPoint(width_rBCc);
-
-                        // Put our ball centre projection into the same space
-                        arma::vec3 proj_rBCc = ballCentreGroundProj;
-                        arma::vec3 proj_rBWw = Hwc.transformPoint(proj_rBCc);
 
                         // Average our two centroids
                         arma::vec3 rBCc = (width_rBCc);
-                        arma::vec3 rBWw = (width_rBWw);
 
                         // Attach the measurement to the object
                         b.measurements.push_back(Ball::Measurement());
                         b.measurements.back().rBCc       = convert<double, 3, 1>(rBCc);
                         b.measurements.back().covariance = convert<double, 3>(ball_angular_cov).asDiagonal();
-
-                        Transform3D Hgc       = camToGround;
-                        arma::vec3 width_rBGg = Hgc.transformPoint(ballCentreRay * widthDistance);
-                        arma::vec3 proj_rBGg  = Hgc.transformPoint(ballCentreGroundProj);
-                        // b.torsoSpacePosition  = convert<double, 3>(width_rBGg);
-
-                        // log("ball pos1 =", b.position);
-                        // log("ball pos2 =", b.torsoSpacePosition);
-                        // log("width_rBGg =", width_rBGg.t());
-                        // log("proj_rBGg =", proj_rBGg.t());
-                        // log("ballCentreRay =",ballCentreRay.t());
-                        // log("camToGround =\n",camToGround);
 
                         // On screen visual shape
                         b.circle.radius = result.model.radius;

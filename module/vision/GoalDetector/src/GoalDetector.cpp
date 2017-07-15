@@ -406,6 +406,7 @@ namespace vision {
                     arma::vec3 cbr       = getCamFromScreen(br, cam.focalLengthPixels);
                     arma::vec3 rGCc_norm = arma::normalise((cbl + cbr) * 0.5);  // vector to bottom centre of goal post
 
+                    // TODO: NORMALS not used currently - delete?
                     // Get our four normals for each edge
                     // BL TL cross product gives left side
                     auto left                   = convert<double, 3>(arma::normalise(arma::cross(cbl, ctl)));
@@ -426,19 +427,6 @@ namespace vision {
                     it->measurement.push_back(Goal::Measurement(
                         Goal::MeasurementType::RIGHT_NORMAL, right, right_vecCov, right_Angles, right_AngCov));
 
-                    // Debug check
-                    // double theta_goal =
-                    //     180
-                    //     - std::acos(arma::norm_dot(convert<double, 3>(right), convert<double, 3>(left))) * 180 /
-                    //     M_PI;
-                    // stats(theta_goal);
-                    // if (stats.count() == 50) {
-                    //     std::cout << "theta goal avg: " << stats.mean() << std::endl;
-                    //     std::cout << "distance from goal avg: " << 0.055 / std::tan(stats.mean() / 2 * M_PI / 180)
-                    //               << std::endl;
-                    //     stats.reset();
-                    // }
-
                     // Check that the bottom of the goal is not too close to the edges of the screen
                     if (std::min(quad.getBottomRight()[0], quad.getBottomLeft()[0]) > MEASUREMENT_LIMITS_LEFT
                         && std::min(quad.getBottomRight()[1], quad.getBottomLeft()[1]) > MEASUREMENT_LIMITS_TOP
@@ -451,21 +439,13 @@ namespace vision {
                         auto bottom = convert<double, 3>(arma::normalise(arma::cross(cbr, cbl)));
                         it->measurement.push_back(Goal::Measurement(Goal::MeasurementType::BASE_NORMAL, bottom));
 
-                        // Vector to the bottom centre...HACK 3m distance for debug
+                        // Vector to the bottom centre average top and bottom distances
                         float distance_top = utility::math::vision::distanceToEquidistantCamPoints(
                             fd.dimensions.goalpost_width, ctl, ctr);
                         float distance_bottom = utility::math::vision::distanceToEquidistantCamPoints(
                             fd.dimensions.goalpost_width, cbl, cbr);
                         float distance = (distance_top + distance_bottom) / 2;
-                        // log("goal distance = ",
-                        //     distance_bottom,
-                        //     ", ",
-                        //     distance_top,
-                        //     ", ",
-                        //     distance,
-                        //     it->side == Goal::Side::LEFT
-                        //         ? (" LEFT GOAL ")
-                        //         : (it->side == Goal::Side::RIGHT ? " RIGHT GOAL " : " UNKNOWN GOAL"));
+
                         auto rGCc_sphr = convert<double, 3>(cartesianToSpherical(
                             distance * rGCc_norm));  // Just converted into eigen. Still the unit vector
                         arma::vec3 covariance_amplifier({distance, 1, 1});
