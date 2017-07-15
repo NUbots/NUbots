@@ -234,7 +234,7 @@ namespace input {
 
             while (fd < 0 && toggleCount < 10) {
                 NUClear::log<NUClear::ERROR>("Toggling GPIO");
-                if (!system("/home/nubots/gpio_toggle.sh")) {
+                if (!system("/bin/bash /home/nubots/gpio_toggle.sh")) {
                     NUClear::log<NUClear::ERROR>("Error running GPIO script");
                 }
 
