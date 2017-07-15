@@ -65,7 +65,7 @@ namespace localisation {
 
         // number and range of reset particles
         int n_rogues          = 0;
-        arma::vec3 resetRange = {10, 10, 6};
+        arma::vec3 resetRange = {0, 0, 0};
 
         // Getters
         int getRogueCount() const {
