@@ -14,6 +14,7 @@
     "coverage:ci": "yarn test:ci -- --coverage",
     "tslint": "tslint -c tslint.json 'src/**/*.ts{,x}' --exclude 'src/shared/proto/**'",
     "tslint:fix": "tslint -c tslint.json 'src/**/*.ts{,x}' --exclude 'src/shared/proto/**' --fix",
+    "dev": "yarn start:sim",
     "start": "nodemon ./src/server/dev.ts",
     "start:sim": "nodemon ./src/server/dev.ts --with-simulators",
     "simulate": "nodemon ./src/simulators/simulate.ts",

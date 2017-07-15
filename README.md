@@ -9,11 +9,14 @@
 - [Node](https://nodejs.org/en/download/)
 - [Yarn](https://yarnpkg.com/en/docs/install)
 
-## Install
+## Installing
 `yarn`
 
-## Run
+## Running
 `yarn start`
 
-## Test
+## Developing (Virtual Robots)
+`yarn dev`
+
+## Testing
 `yarn test`
