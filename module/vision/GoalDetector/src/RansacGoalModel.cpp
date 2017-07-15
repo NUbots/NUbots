@@ -26,8 +26,8 @@ namespace vision {
 
         if (pts.size() == REQUIRED_POINTS && !arma::all(pts[0].left == pts[1].left)
             && !arma::all(pts[0].right == pts[1].right)) {
-            left.setFrom3Points(pts[0].left, pts[1].left, arma::vec3({0, 0, 0}));
-            right.setFrom3Points(pts[0].right, pts[1].right, arma::vec3({0, 0, 0}));
+            leftPlane.setFrom3Points(pts[0].left, pts[1].left, arma::vec3({0, 0, 0}));
+            rightPlane.setFrom3Points(pts[0].right, pts[1].right, arma::vec3({0, 0, 0}));
 
             return true;
         }
@@ -38,8 +38,8 @@ namespace vision {
 
     double RansacGoalModel::calculateError(const DataPoint& p) const {
 
-        double l = left.distanceToPoint(p.left);
-        double r = right.distanceToPoint(p.right);
+        double l = leftPlane.distanceToPoint(p.left);
+        double r = rightPlane.distanceToPoint(p.right);
 
         return l * l + r * r;
     }

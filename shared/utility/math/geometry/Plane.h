@@ -72,15 +72,15 @@ namespace math {
                 return tIntersection * l.direction + l.point;
             }
 
-            double distanceToPoint(const Vector& p) {
+            double distanceToPoint(const Vector& p) const {
                 return std::fabs(arma::dot(p - point, normal));
             }
 
-            Vector orthogonalProjection(const Vector& p) {
+            Vector orthogonalProjection(const Vector& p) const {
                 return p - distanceToPoint(p) * normal;
             }
 
-            Vector directionalProjection(const Vector& p, const Vector& dir) {
+            Vector directionalProjection(const Vector& p, const Vector& dir) const {
                 // Create line
                 ParametricLine<n> line(p, p + dir);
                 // Return intersection of this plane with line

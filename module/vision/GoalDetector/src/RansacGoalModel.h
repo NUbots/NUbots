@@ -24,14 +24,17 @@
 
 #include <array>
 #include "utility/math/geometry/Line.h"
+#include "utility/math/geometry/Plane.h"
 
 namespace module {
 namespace vision {
 
+    using Plane = utility::math::geometry::Plane<3>;
+
     class RansacGoalModel {
     public:
-        utility::math::geometry::Plane<3> left;
-        utility::math::geometry::Plane<3> right;
+        Plane leftPlane;
+        Plane rightPlane;
 
         static constexpr size_t REQUIRED_POINTS = 2;
 
@@ -44,7 +47,7 @@ namespace vision {
 
         using DataPoint = GoalSegment;
 
-        RansacGoalModel() : left(), right() {}
+        RansacGoalModel() : leftPlane(), rightPlane() {}
 
         bool regenerate(const std::array<DataPoint, REQUIRED_POINTS>& pts);
 

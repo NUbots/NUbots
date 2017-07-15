@@ -51,7 +51,6 @@ namespace vision {
 
     using utility::math::coordinates::cartesianToSpherical;
 
-    using utility::math::geometry::Plane;
     using Plane = utility::math::geometry::Plane<3>;
     using utility::math::geometry::Quad;
 
@@ -144,9 +143,12 @@ namespace vision {
                     if ((segment.segmentClass == SegmentClass::GOAL) && (segment.subsample == 1)
                         && (segment.previous > -1)
                         && (segment.next > -1)) {
-                        segments.push_back(
-                            {getCamFromScreen(imageToScreen(segment.start, convert<uint, 2>(cam.imageSizePixels)), cam),
-                             getCamFromScreen(imageToScreen(segment.end, convert<uint, 2>(cam.imageSizePixels)), cam)});
+                        segments.push_back({getCamFromScreen(imageToScreen(convert<int, 2>(segment.start),
+                                                                           convert<uint, 2>(cam.imageSizePixels)),
+                                                             cam),
+                                            getCamFromScreen(imageToScreen(convert<int, 2>(segment.end),
+                                                                           convert<uint, 2>(cam.imageSizePixels)),
+                                                             cam)});
                     }
                 }
 
@@ -174,8 +176,8 @@ namespace vision {
                 for (auto& result : models) {
 
                     // Get our left, right and midlines
-                    Plane& left  = result.model.left;
-                    Plane& right = result.model.right;
+                    Plane& left  = result.model.leftPlane;
+                    Plane& right = result.model.rightPlane;
                     Plane mid;
 
                     // Normals in same direction
@@ -191,8 +193,8 @@ namespace vision {
                     arma::vec3 midpoint({0, 0, 0});
                     int i = 0;
                     for (auto& m : result) {
-                        midpoint += m.left.normal;
-                        midpoint += m.right.normal;
+                        midpoint += m.left;
+                        midpoint += m.right;
                         i += 2;
                     }
                     midpoint /= i;
@@ -208,7 +210,7 @@ namespace vision {
                     arma::vec3 basePoint({0, 0, 0});
                     int notWhiteLen        = 0;
                     arma::vec3 point       = arma::normalise(mid.orthogonalProjection(midpoint));
-                    arma::ivec2 imagePoint = getImageFromCam(point);
+                    arma::ivec2 imagePoint = getImageFromCam(point, cam);
                     while ((imagePoint[0] < image.dimensions[0]) && (imagePoint[0] > 0)
                            && (imagePoint[1] < image.dimensions[1])) {
 
@@ -237,20 +239,40 @@ namespace vision {
                         }
 
                         point += direction;
-                        arma::vec2 imagePoint = getImageFromCam(point);
+                        imagePoint = getImageFromCam(point, cam);
                     }
 
                     arma::running_stat<double> stat;
 
+                    float min = 1, max = -1;
+                    arma::vec3 minPt, maxPt;
                     // Look through our segments to find endpoints
+
                     for (auto& point : result) {
                         // Project left and right onto midpoint keep top and bottom
-                        stat(mid.tangentialDistanceToPoint(point.left));
-                        stat(mid.tangentialDistanceToPoint(point.right));
+                        auto leftDot  = arma::dot(convert<double, 3>(image.horizon_normal), point.left);
+                        auto rightDot = arma::dot(convert<double, 3>(image.horizon_normal), point.right);
+
+                        if (leftDot < min) {
+                            min   = leftDot;
+                            minPt = point.left;
+                        }
+                        if (rightDot < min) {
+                            min   = rightDot;
+                            minPt = point.right;
+                        }
+                        if (leftDot > max) {
+                            max   = leftDot;
+                            maxPt = point.left;
+                        }
+                        if (rightDot > max) {
+                            max   = rightDot;
+                            maxPt = point.right;
+                        }
                     }
 
                     // Get our endpoints from the min and max points on the line
-                    arma::vec2 midP1 = mid.pointFromTangentialDistance(stat.min());
+                    arma::vec2 midP1 = maxPt - minPt;  // TODO: Check calculation
                     arma::vec2 midP2 = mid.orthogonalProjection(basePoint);
 
                     // Project those points outward onto the quad
@@ -293,7 +315,8 @@ namespace vision {
 
                     arma::vec2 lhs = arma::normalise(quad.getTopLeft() - quad.getBottomLeft());
                     arma::vec2 rhs = arma::normalise(quad.getTopRight() - quad.getBottomRight());
-
+                    arma::vec2 tl  = convert<double, 2>(it->quad.tl);
+                    arma::vec2 tr  = convert<double, 2>(it->quad.tr);
                     // Check if we are within the aspect ratio range
                     bool valid =
                         quad.aspectRatio() > MINIMUM_ASPECT_RATIO && quad.aspectRatio() < MAXIMUM_ASPECT_RATIO
@@ -305,15 +328,20 @@ namespace vision {
                                    < quad.getBottomRight()[1] + VISUAL_HORIZON_BUFFER)
 
                         // Check we finish above the kinematics horizon or or kinematics horizon is off the screen
-                        && (horizon.y(quad.getTopLeft()[0]) > quad.getTopLeft()[1]
-                            || horizon.y(quad.getTopLeft()[0]) < 0)
-                        && (horizon.y(quad.getTopRight()[0]) > quad.getTopRight()[1]
-                            || horizon.y(quad.getTopRight()[0]) < 0)
+                        && (arma::dot(convert<double, 3>(image.horizon_normal),
+                                      getCamFromImage(arma::ivec2({tl[0], tl[1]}), cam))
+                            > MAXIMUM_GOAL_HORIZON_NORMAL_ANGLE)
+                        && (arma::dot(convert<double, 3>(image.horizon_normal),
+                                      getCamFromImage(arma::ivec2({tr[0], tr[1]}), cam))
+                            > MAXIMUM_GOAL_HORIZON_NORMAL_ANGLE)
 
+                        // TODO: Check that this can be removed
                         // Check that our two goal lines are perpendicular with the horizon must use greater than rather
                         // then less than because of the cos
-                        && std::abs(arma::dot(rhs, horizon.normal)) > MAXIMUM_GOAL_HORIZON_NORMAL_ANGLE
-                        && std::abs(arma::dot(lhs, horizon.normal)) > MAXIMUM_GOAL_HORIZON_NORMAL_ANGLE
+                        // && std::abs(arma::dot(getCamFromImage(, cam), image.horizon_normal))
+                        //        > MAXIMUM_GOAL_HORIZON_NORMAL_ANGLE
+                        // && std::abs(arma::dot(getCamFromImage(, cam), image.horizon_normal))
+                        //        > MAXIMUM_GOAL_HORIZON_NORMAL_ANGLE
 
                         // Check that our two goal lines are approximatly parallel
                         && std::abs(arma::dot(lhs, rhs)) > MAXIMUM_ANGLE_BETWEEN_GOALS;
