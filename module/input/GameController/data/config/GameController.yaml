@@ -1,2 +1,3 @@
 playerId: 1
-port: 3838
+recieve_port: 3838
+send_port: 3939
