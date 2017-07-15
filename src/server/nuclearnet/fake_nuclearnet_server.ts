@@ -2,6 +2,7 @@ import * as EventEmitter from 'events'
 import { NUClearNetSend } from 'nuclearnet.js'
 import { createSingletonFactory } from '../../shared/base/create_singleton_factory'
 import { FakeNUClearNetClient } from './fake_nuclearnet_client'
+import * as XXH from 'xxhashjs'
 
 /**
  * A fake in-memory NUClearNet 'server' which routes messages between each FakeNUClearNetClient.
@@ -59,6 +60,8 @@ export class FakeNUClearNetServer {
     if (typeof opts.type === 'string') {
       const packet = {
         peer: client.peer,
+        type: opts.type,
+        hash: this.hash(opts.type),
         payload: opts.payload,
         reliable: !!opts.reliable,
       }
@@ -75,5 +78,12 @@ export class FakeNUClearNetServer {
         client.fakePacket(opts.type, packet)
       }
     }
+  }
+
+  private hash(input: string): Buffer {
+    // Matches hashing implementation from NUClearNet
+    // See https://goo.gl/6NDPo2
+    const hashString: string = XXH.h64(input, 0x4e55436c).toString(16)
+    return Buffer.from((hashString.match(/../g) as string[]).reverse().join(''), 'hex')
   }
 }
