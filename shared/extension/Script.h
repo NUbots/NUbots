@@ -117,9 +117,9 @@ struct Script {
     static inline std::string getPlatform(const std::string& hostname) {
         // It is assumed that all hostnames are in the format <platform name><robot number>,
         // such that the regular expression
-        // [a-z]+[0-9]+
+        // [a-z]+[0-9]+?
         // will match all hostnames
-        std::regex re("([a-z]+)([0-9]+)");
+        std::regex re("([a-z]+)([0-9]+)?");
         std::smatch match;
 
         if (std::regex_match(hostname, match, re)) {
@@ -127,10 +127,6 @@ struct Script {
             // match[1] the first match (platform name)
             // match[2] the second match (robot number)
             return match[1].str();
-        }
-
-        else if (hostname == "nubotsvm") {
-            return hostname;
         }
 
         else {
