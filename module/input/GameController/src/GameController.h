@@ -43,7 +43,8 @@ namespace input {
         static constexpr const uint ACTIVE_PLAYERS_PER_TEAM = 4;
         static constexpr const uint NUM_TEAMS               = 2;
 
-        uint port;
+        uint recieve_port;
+        uint send_port;
         uint TEAM_ID;
         uint PLAYER_ID;
         uint BROADCAST_IP = 0xFFFFFFFF;
