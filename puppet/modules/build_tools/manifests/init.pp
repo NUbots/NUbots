@@ -79,7 +79,7 @@ class build_tools {
                 /usr/bin/pip3 install pygments &&
                 /usr/bin/pip3 install termcolor &&
                 /usr/bin/pip3 install protobuf &&
-                /usr/bin/pip3 install mmh3 &&
+                /usr/bin/pip3 install xxhash &&
                 /usr/bin/pip3 install numpy',
     require => [ Package['python3-pip'], ]
   }
