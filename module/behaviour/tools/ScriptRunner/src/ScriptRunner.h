@@ -34,6 +34,8 @@ namespace behaviour {
          */
         class ScriptRunner : public NUClear::Reactor {
         private:
+            ReactionHandle sensorHandle;
+
             /// The scripts to be executed
             std::queue<std::string> scripts;
 
