@@ -4,6 +4,7 @@ import { LocalisationRobotModel } from './darwin_robot/model'
 import { FieldModel } from './field/model'
 import { SkyboxModel } from './skybox/model'
 import { AppModel } from '../app/model'
+import { memoize } from '../../base/memoize'
 
 export class TimeModel {
   @observable public time: number // seconds
@@ -48,7 +49,7 @@ export class LocalisationModel {
     Object.assign(this, opts)
   }
 
-  public static of(appModel: AppModel): LocalisationModel {
+  public static of = memoize((appModel: AppModel): LocalisationModel => {
     return new LocalisationModel(appModel, {
       aspect: 300 / 150,
       field: FieldModel.of(),
@@ -59,7 +60,7 @@ export class LocalisationModel {
       viewMode: ViewMode.FreeCamera,
       time: TimeModel.of(),
     })
-  }
+  })
 
   @computed get robots(): LocalisationRobotModel[] {
     return this.appModel.robots.map(robot => LocalisationRobotModel.of(robot))
