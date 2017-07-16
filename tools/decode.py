@@ -11,6 +11,14 @@ import pkgutil
 import google.protobuf.message
 from google.protobuf.json_format import MessageToJson
 
+class NUsightDecoder:
+    def __init__(self, pb_type):
+        self.pb_type = pb_type
+
+    def FromString(self, payload):
+        # Strip off the filterid and timestamp (first 9 bytes)
+        return self.pb_type.FromString(payload[9:])
+
 def register(command):
 
     # Install help
@@ -45,12 +53,17 @@ def run(file, **kwargs):
         # Work out our original protobuf type
         pb_type = message.__module__.split('.')[:-1]
         pb_type.append(message.__name__)
-        pb_type = '.'.join(pb_type).encode('utf-8')
-        pb_hash = xxhash.xxh64(pb_type, seed=0x4e55436c).digest()
-
-        pb_hash2 = xxhash.xxh64('NUsight<{}>'.format(pb_type), seed=0x4e55436c).digest()
-
+        pb_type = '.'.join(pb_type)
+        # Reverse to little endian
+        pb_hash = bytes(reversed(xxhash.xxh64(pb_type, seed=0x4e55436c).digest()))
         parsers[pb_hash] = (pb_type, message)
+
+        # We can also decode NUsight<> wrapped packets
+        nusight_type = 'NUsight<{}>'.format(pb_type)
+        # Reverse to little endian
+        nusight_hash = bytes(reversed(xxhash.xxh64(nusight_type, seed=0x4e55436c).digest()))
+        parsers[nusight_hash] = (nusight_type, NUsightDecoder(message))
+
 
     # Now open the passed file
     with gzip.open(file, 'rb') if file.endswith('nbz') or file.endswith('.gz') else open(file, 'rb') as f:
@@ -84,7 +97,7 @@ def run(file, **kwargs):
 
                 else:
                     out = re.sub(r'\s+', ' ', MessageToJson(msg, True))
-                    out = '{{ "type": "{}", "timestamp": {}, "data": {} }}'.format(parsers[type_hash][0].decode('utf-8'), timestamp, out)
+                    out = '{{ "type": "{}", "timestamp": {}, "data": {} }}'.format(parsers[type_hash][0], timestamp, out)
                     # Print as a json object
                     print(out)
 
