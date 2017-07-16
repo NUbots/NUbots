@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-import pickle
+import xxhash
 import gzip
 import struct
 import sys
@@ -46,12 +46,11 @@ def run(file, **kwargs):
         pb_type = message.__module__.split('.')[:-1]
         pb_type.append(message.__name__)
         pb_type = '.'.join(pb_type).encode('utf-8')
-        pb_hash = '' # TODO swap to using XXHASH
-        # pb_hash = mmh3.hash_bytes(pb_type, 0x4e55436c, True)
+        pb_hash = xxhash.xxh64(pb_type, seed=0x4e55436c).digest()
+
+        pb_hash2 = xxhash.xxh64('NUsight<{}>'.format(pb_type), seed=0x4e55436c).digest()
 
         parsers[pb_hash] = (pb_type, message)
-
-    servo_health = {}
 
     # Now open the passed file
     with gzip.open(file, 'rb') if file.endswith('nbz') or file.endswith('.gz') else open(file, 'rb') as f:
@@ -61,7 +60,7 @@ def run(file, **kwargs):
 
             # Read our size
             size = struct.unpack('<I', f.read(4))[0]
-            print(size)
+
             # Read our payload
             payload = f.read(size)
 
@@ -69,11 +68,11 @@ def run(file, **kwargs):
             timestamp = struct.unpack('<Q', payload[:8])[0]
 
             # Read our hash
-            type_hash = payload[8:24]
+            type_hash = payload[8:16]
 
             # If we know how to parse this type, parse it
             if type_hash in parsers:
-                msg = parsers[type_hash][1].FromString(payload[24:])
+                msg = parsers[type_hash][1].FromString(payload[16:])
 
                 # So the else can always exist
                 if False:
