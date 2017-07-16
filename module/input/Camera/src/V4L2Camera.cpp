@@ -25,7 +25,6 @@ namespace input {
                         if (camera.second.isStreaming()) {
                             emit(std::make_unique<Image>(camera.second.getImage()));
                         }
-                        log(camera.second.isStreaming());
                     }
                     catch (std::system_error& e) {
                         log<NUClear::ERROR>(e.what());
