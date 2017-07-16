@@ -55,82 +55,37 @@ def run(file, **kwargs):
 
     # Now open the passed file
     with gzip.open(file, 'rb') if file.endswith('nbz') or file.endswith('.gz') else open(file, 'rb') as f:
-        with gzip.open('output.pickle', 'wb') as of:
 
-            prev_goal_position = None
-            state = None
-            c_pass = []
+        # While we can read a header
+        while len(f.read(3)) == 3:
 
-            # While we can read a header
-            while len(f.read(3)) == 3:
+            # Read our size
+            size = struct.unpack('<I', f.read(4))[0]
+            print(size)
+            # Read our payload
+            payload = f.read(size)
 
-                # Read our size
-                size = struct.unpack('<I', f.read(4))[0]
+            # Read our timestamp
+            timestamp = struct.unpack('<Q', payload[:8])[0]
 
-                # Read our payload
-                payload = f.read(size)
+            # Read our hash
+            type_hash = payload[8:24]
 
-                # Read our timestamp
-                timestamp = struct.unpack('<Q', payload[:8])[0]
+            # If we know how to parse this type, parse it
+            if type_hash in parsers:
+                msg = parsers[type_hash][1].FromString(payload[24:])
 
-                # Read our hash
-                type_hash = payload[8:24]
+                # So the else can always exist
+                if False:
+                    pass
 
-                # If we know how to parse this type, parse it
-                if type_hash in parsers:
-                    msg = parsers[type_hash][1].FromString(payload[24:])
+                # If there is a special way to decode a particular message do it here
+                # if parsers[type_hash][0] == b'message.input.Sensors':
+                    # Read our servo
 
-                    if parsers[type_hash][0] == b'message.support.ServoHealthTestData':
-                        # Read our servo
-                        servo = msg.sensors.servo.rAnkleRoll
-
-                        if prev_goal_position == None:
-                            prev_goal_position = round(servo.goalPosition)
-                        elif prev_goal_position != round(servo.goalPosition):
-                            # Changing motion
-                            if state != None:
-                                pickle.dump((state, c_pass), of, protocol=pickle.HIGHEST_PROTOCOL)
-                                c_pass = []
-
-                            if prev_goal_position == 0:
-                                # Second half
-                                if round(servo.goalPosition) > prev_goal_position:
-                                    # increasing
-                                    state = 'inc2stop'
-                                else:
-                                    # decreasing
-                                    state = 'dec2stop'
-                            elif round(servo.goalPosition) == 0:
-                                # First half
-                                if round(servo.goalPosition) > prev_goal_position:
-                                    # increasing
-                                    state = 'inc1stop'
-                                else:
-                                    # decreasing
-                                    state = 'dec1stop'
-                            elif round(servo.goalPosition) > prev_goal_position:
-                                # increasing
-                                state = 'inc'
-                            else:
-                                # decreasing
-                                state = 'dec'
-
-                            prev_goal_position = round(servo.goalPosition)
-
-                        c_pass.append({
-                            'error_flags': servo.errorFlags,
-                            'present_position': servo.presentPosition,
-                            'goal_position': servo.goalPosition,
-                            'present_speed': servo.presentSpeed,
-                            'goal_speed': servo.movingSpeed,
-                            'load': servo.load,
-                            'voltage': servo.voltage,
-                            'temperature': servo.temperature
-                        })
-
-                    else:
-                        out = re.sub(r'\s+', ' ', MessageToJson(msg, True))
-                        out = '{{ "type": "{}", "timestamp": {}, "data": {} }}'.format(parsers[type_hash][0].decode('utf-8'), timestamp, out)
-                        # Print as a json object
-                        print(out)
+                else:
+                    out = re.sub(r'\s+', ' ', MessageToJson(msg, True))
+                    out = '{{ "type": "{}", "timestamp": {}, "data": {} }}'.format(parsers[type_hash][0].decode('utf-8'), timestamp, out)
+                    # Print as a json object
+                    print(out)
 
