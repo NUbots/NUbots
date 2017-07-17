@@ -27,7 +27,7 @@ def register(command):
     # Drone arguments
     command.add_argument('file'
         , metavar='file'
-        , help='The file to decode into a strint')
+        , help='The file to decode into a series of json objects')
 
 def run(file, **kwargs):
 
