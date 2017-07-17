@@ -165,8 +165,10 @@ namespace math {
                         repCandidateParticles.col(i), possibilities[i / candidateParticles.n_cols], measurementArgs...);
                     observationDifferences.col(i) = model.observationDifference(predictedObservation, measurement);
                 }
-                arma::vec weights = arma::exp(
-                    -arma::sum(observationDifferences % (measurement_variance.i() * observationDifferences.t()), 0));
+                arma::vec weights =
+                    arma::exp(
+                        -arma::sum(observationDifferences % (measurement_variance.i() * observationDifferences), 0))
+                        .t();
 
                 // Resample
                 std::random_device rd;
