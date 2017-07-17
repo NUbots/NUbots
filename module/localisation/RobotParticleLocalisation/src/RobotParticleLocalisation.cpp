@@ -68,9 +68,9 @@ namespace localisation {
         on<Every<PARTICLE_UPDATE_FREQUENCY, Per<std::chrono::seconds>>, Sync<RobotParticleLocalisation>>().then(
             "Particle Debug", [this]() {
                 arma::mat particles = filter.getParticles();
-                for (int i = 0; i < std::min(draw_particles, int(particles.n_rows)); i++) {
+                for (int i = 0; i < std::min(draw_particles, int(particles.n_cols)); i++) {
                     emit(drawCircle("particle" + std::to_string(i),
-                                    Circle(0.01, particles.submat(i, 0, i, 1).t()),
+                                    Circle(0.01, particles.submat(0, i, 1, i)),
                                     0.05,
                                     {0, 0, 0},
                                     PARTICLE_UPDATE_FREQUENCY));
