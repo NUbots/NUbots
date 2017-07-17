@@ -28,7 +28,6 @@
 #include "message/motion/WalkCommand.h"
 #include "message/vision/VisionObjects.h"
 
-#include "utility/localisation/transform.h"
 #include "utility/support/eigen_armadillo.h"
 #include "utility/time/time.h"
 
@@ -51,8 +50,6 @@ namespace support {
     using VisionGoal       = message::vision::Goal;
     using VisionObstacle   = message::vision::Obstacle;
     using message::motion::WalkCommand;
-
-    using utility::localisation::transform::RobotToWorldTransform;
 
     /**
      * @brief Provides triggers to send overview information over the network using the overview

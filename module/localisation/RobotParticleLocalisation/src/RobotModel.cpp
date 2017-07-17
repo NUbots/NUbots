@@ -25,7 +25,6 @@
 
 #include "message/input/Sensors.h"
 #include "utility/input/ServoID.h"
-#include "utility/localisation/transform.h"
 #include "utility/math/angle.h"
 #include "utility/math/coordinates.h"
 #include "utility/support/eigen_armadillo.h"
@@ -37,11 +36,6 @@ namespace localisation {
     using message::input::Sensors;
     using message::vision::Goal;
     using utility::input::ServoID;
-    using utility::localisation::transform::SphericalRobotObservation;
-    using utility::localisation::transform::WorldToRobotTransform;
-    using utility::localisation::transform::RobotToWorldTransform;
-    using utility::localisation::transform::ImuToWorldHeadingTransform;
-    using utility::math::coordinates::cartesianToRadial;
     using utility::math::coordinates::cartesianToSpherical;
     using utility::math::angle::normalizeAngle;
     using utility::math::matrix::Transform3D;

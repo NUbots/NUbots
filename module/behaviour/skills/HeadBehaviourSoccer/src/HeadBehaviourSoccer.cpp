@@ -395,11 +395,11 @@ namespace behaviour {
                         goals.push_back(goal);
                     }
                     fixationObjects.push_back(combineVisionObjects(goals));
-                    search =
-                        (visiblePosts.find(Goal::Side::LEFT) == visiblePosts.end() ||  // If left post not visible or
-                         visiblePosts.find(Goal::Side::RIGHT)
-                             == visiblePosts
-                                    .end());  // right post not visible, then we need to search for the other goal post
+                    search = (visiblePosts.find(Goal::Side::LEFT) == visiblePosts.end() ||  // If left post not visible
+                              visiblePosts.find(Goal::Side::RIGHT) == visiblePosts.end());  // or right post not
+                                                                                            // visible, then we need to
+                                                                                            // search for the other goal
+                                                                                            // post
                 }
                 else {
                     search = true;

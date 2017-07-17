@@ -33,7 +33,6 @@
 #include "message/motion/WalkCommand.h"
 #include "message/vision/VisionObjects.h"
 
-#include "utility/localisation/transform.h"
 #include "utility/math/angle.h"
 #include "utility/math/coordinates.h"
 #include "utility/motion/ForwardKinematics.h"
@@ -70,9 +69,6 @@ namespace support {
     using utility::math::angle::bearingToUnitVector;
     using utility::math::coordinates::cartesianToSpherical;
     using utility::motion::kinematics::calculateRobotToIMU;
-    using utility::localisation::transform::SphericalRobotObservation;
-    using utility::localisation::transform::WorldToRobotTransform;
-    using utility::localisation::transform::RobotToWorldTransform;
     using utility::nubugger::graph;
     using utility::math::matrix::Transform2D;
     using utility::support::Expression;

@@ -34,7 +34,6 @@
 #include "message/vision/VisionObjects.h"
 
 #include "utility/behaviour/MotionCommand.h"
-#include "utility/localisation/transform.h"
 #include "utility/math/geometry/Circle.h"
 #include "utility/math/matrix/Rotation3D.h"
 #include "utility/math/matrix/Transform2D.h"
@@ -79,7 +78,6 @@ namespace behaviour {
         using message::platform::darwin::ButtonLeftDown;
         using message::support::FieldDescription;
 
-        using utility::localisation::transform::RobotToWorldTransform;
         using utility::time::durationFromSeconds;
         using utility::math::geometry::Circle;
         using utility::math::matrix::Rotation3D;
@@ -535,16 +533,16 @@ namespace behaviour {
                 * 1e-6;
             if (timeSinceBallSeen < cfg_.goalie_command_timeout) {
 
-                float fieldBearing  = field.position[2];
-                int signBearing     = fieldBearing > 0 ? 1 : -1;
-                float rotationSpeed = -signBearing
-                                      * std::fmin(std::fabs(cfg_.goalie_rotation_speed_factor * fieldBearing),
-                                                  cfg_.goalie_max_rotation_speed);
+                float fieldBearing = field.position[2];
+                int signBearing    = fieldBearing > 0 ? 1 : -1;
+                float rotationSpeed =
+                    -signBearing * std::fmin(std::fabs(cfg_.goalie_rotation_speed_factor * fieldBearing),
+                                             cfg_.goalie_max_rotation_speed);
 
-                int signTranslation    = ball.position[1] > 0 ? 1 : -1;
-                float translationSpeed = signTranslation
-                                         * std::fmin(std::fabs(cfg_.goalie_translation_speed_factor * ball.position[1]),
-                                                     cfg_.goalie_max_translation_speed);
+                int signTranslation = ball.position[1] > 0 ? 1 : -1;
+                float translationSpeed =
+                    signTranslation * std::fmin(std::fabs(cfg_.goalie_translation_speed_factor * ball.position[1]),
+                                                cfg_.goalie_max_translation_speed);
 
                 motionCommand =
                     std::make_unique<MotionCommand>(utility::behaviour::DirectCommand({0, 0, rotationSpeed}));

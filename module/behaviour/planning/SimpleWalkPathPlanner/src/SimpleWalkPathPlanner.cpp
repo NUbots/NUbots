@@ -38,7 +38,6 @@
 #include "utility/behaviour/MotionCommand.h"
 #include "utility/input/LimbID.h"
 #include "utility/input/ServoID.h"
-#include "utility/localisation/transform.h"
 #include "utility/math/matrix/Transform2D.h"
 #include "utility/math/matrix/Transform3D.h"
 #include "utility/nubugger/NUhelpers.h"
@@ -62,10 +61,9 @@ namespace behaviour {
         using message::motion::StopCommand;
         using message::behaviour::WantsToKick;
         using VisionBall = message::vision::Ball;
-        using utility::localisation::transform::RobotToWorldTransform;
-        using utility::localisation::transform::WorldToRobotTransform;
         using utility::math::matrix::Transform2D;
         using utility::math::matrix::Transform3D;
+        using utility::math::matrix::Rotation2D;
         using utility::nubugger::graph;
         using utility::nubugger::drawSphere;
 
@@ -212,11 +210,11 @@ namespace behaviour {
                     float sideStep      = 0;
                     float speedFactor   = 1;
                     if (useLocalisation) {
-                        arma::vec2 kick_target = WorldToRobotTransform(
-                            convert<double, 2>(Eigen::Vector2d(field.position[0], field.position[1])),
-                            convert<double, 2>(
-                                Eigen::Vector2d(std::cos(field.position[2]), std::sin(field.position[2]))),
-                            convert<double, 2>(kickPlan.target));
+                        arma::vec2 kick_target =
+                            Rotation2D::createRotation(-field.position[2])
+                            * convert<double, 2>(kickPlan.target
+                                                 - Eigen::Vector2d(field.position[0], field.position[1]));
+
                         // //approach point:
                         arma::vec2 ballToTarget = arma::normalise(kick_target - position);
                         arma::vec2 kick_point   = position - ballToTarget * ball_approach_dist;

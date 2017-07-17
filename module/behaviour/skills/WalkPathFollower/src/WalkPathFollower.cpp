@@ -161,9 +161,7 @@ namespace behaviour {
                    Single>()
                     .then(
                         "Follow current path plan",
-                        [this](const std::vector<Self>& selfs, const Ball& ball
-                               // const WalkPath& walkPath
-                        ) {
+                        [this](const std::vector<Self>& selfs, const Ball& ball) {
                             if (selfs.empty() || currentPath.states.empty()) {
                                 return;
                             }
