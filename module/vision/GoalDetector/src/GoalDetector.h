@@ -39,7 +39,6 @@ namespace vision {
         double MAXIMUM_GOAL_HORIZON_NORMAL_ANGLE;
         double MAXIMUM_ANGLE_BETWEEN_GOALS;
         double MAXIMUM_VERTICAL_GOAL_PERSPECTIVE_ANGLE;
-        arma::running_stat<double> stats;
 
         uint MEASUREMENT_LIMITS_LEFT;
         uint MEASUREMENT_LIMITS_RIGHT;
