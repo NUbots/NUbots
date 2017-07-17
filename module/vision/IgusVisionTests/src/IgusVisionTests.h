@@ -22,6 +22,8 @@ namespace vision {
         arma::vec3 ballCentre = arma::vec3({2, 0, 0});
         float theta_count     = 100;
 
+        arma::vec3 goalPosition = arma::vec3({2, 1, -0.9});
+
         float lambda      = 0.1;
         arma::vec2 offset = arma::vec2({0, 0});
 
@@ -30,12 +32,16 @@ namespace vision {
         std::shared_ptr<const message::input::Image> image;
         std::shared_ptr<const message::input::Sensors> sensors;
 
+
     public:
         /// @brief Called by the powerplant to build and setup the IgusVisionTests reactor.
         explicit IgusVisionTests(std::unique_ptr<NUClear::Environment> environment);
-        void emitClassifiedImage(const message::input::CameraParameters& cam);
-    };
-}
-}
+        void emitClassifiedImage(const message::input::CameraParameters& cam,
+                                 const message::support::FieldDescription& fd);
+        std::vector<message::vision::ClassifiedImage::Segment> getGoalSegments(
+            const message::input::CameraParameters& cam,
+            const message::support::FieldDescription& fd);
+    }  // namespace vision
+}  // namespace vision
 
 #endif  // MODULE_VISION_IGUSVISIONTESTS_H

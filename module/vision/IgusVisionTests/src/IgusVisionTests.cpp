@@ -2,6 +2,7 @@
 
 #include "extension/Configuration.h"
 #include "utility/nubugger/NUhelpers.h"
+#include "utility/support/FieldDescription.h"
 #include "utility/support/yaml_armadillo.h"
 
 namespace module {
@@ -13,6 +14,7 @@ namespace vision {
     using utility::nubugger::drawVisionLines;
     using extension::Configuration;
     using message::input::CameraParameters;
+    using message::support::FieldDescription;
 
     IgusVisionTests::IgusVisionTests(std::unique_ptr<NUClear::Environment> environment)
         : Reactor(std::move(environment)) {
@@ -28,6 +30,8 @@ namespace vision {
             theta_count = config["theta_count"].as<float>();
 
             test_point_screen = config["test_point_screen"].as<arma::vec>();
+
+            goalPosition = config["goalPosition"].as<arma::vec>();
         });
 
         /*on<Trigger<std::vector<message::vision::Ball>>>().then([this](const std::vector<message::vision::Ball>& balls)
@@ -56,17 +60,17 @@ namespace vision {
                 if (image && sensors) {
                     emitClassifiedImage(cam);
                 }
-                arma::vec3 test_point_cam     = utility::math::vision::getCamFromScreen(test_point_screen, cam);
-                arma::vec2 test_point_screen2 = utility::math::vision::projectCamSpaceToScreen(test_point_cam, cam);
-                arma::vec3 test_point_cam2    = utility::math::vision::getCamFromScreen(test_point_screen2, cam);
-                std::cout << "test_point_screen" << test_point_screen.t() << std::endl;
-                std::cout << "test_point_cam" << test_point_cam.t() << std::endl;
-                std::cout << "test_point_screen2" << test_point_screen2.t() << std::endl;
-                std::cout << "test_point_cam2" << test_point_cam2.t() << std::endl;
+                // arma::vec3 test_point_cam     = utility::math::vision::getCamFromScreen(test_point_screen, cam);
+                // arma::vec2 test_point_screen2 = utility::math::vision::projectCamSpaceToScreen(test_point_cam, cam);
+                // arma::vec3 test_point_cam2    = utility::math::vision::getCamFromScreen(test_point_screen2, cam);
+                // std::cout << "test_point_screen" << test_point_screen.t() << std::endl;
+                // std::cout << "test_point_cam" << test_point_cam.t() << std::endl;
+                // std::cout << "test_point_screen2" << test_point_screen2.t() << std::endl;
+                // std::cout << "test_point_cam2" << test_point_cam2.t() << std::endl;
             });
     }
 
-    void IgusVisionTests::emitClassifiedImage(const CameraParameters& cam) {
+    void IgusVisionTests::emitClassifiedImage(const CameraParameters& cam, const FieldDescription& fd) {
         // Basis of circle
         arma::vec3 p = ballCentre;
         arma::vec3 q = arma::normalise(arma::vec3({p[1], -p[0], 0}));
@@ -104,19 +108,28 @@ namespace vision {
         }
 
 
-        auto classifiedImage               = std::make_unique<ClassifiedImage>();
-        classifiedImage->ballPoints        = imagePoints;
-        classifiedImage->ballSeedPoints[0] = imagePoints;
-        classifiedImage->ballSeedPoints[1] = imagePoints;
-        classifiedImage->ballSeedPoints[2] = imagePoints;
-        classifiedImage->image             = const_cast<Image*>(image.get())->shared_from_this();
-        classifiedImage->sensors           = const_cast<Sensors*>(sensors.get())->shared_from_this();
-        classifiedImage->horizon_normal    = Eigen::Vector3d(0, 0, 1);
+        auto classifiedImage                 = std::make_unique<ClassifiedImage>();
+        classifiedImage->ballPoints          = imagePoints;
+        classifiedImage->ballSeedPoints[0]   = imagePoints;
+        classifiedImage->ballSeedPoints[1]   = imagePoints;
+        classifiedImage->ballSeedPoints[2]   = imagePoints;
+        classifiedImage->image               = const_cast<Image*>(image.get())->shared_from_this();
+        classifiedImage->sensors             = const_cast<Sensors*>(sensors.get())->shared_from_this();
+        classifiedImage->horizon_normal      = Eigen::Vector3d(0, 0, 1);
+        classifiedImage->horizontal_segments = getGoalSegments(cam, fd);
         // classifiedImage->horizon.distance = 200;
         classifiedImage->dimensions = image->dimensions;
 
         emit(drawVisionLines(lines, Eigen::Vector4d({1, 1, 1, 1})));
         emit(classifiedImage);
     }
-}
-}
+
+
+    std::vector<message::vision::ClassifiedImage::Segment> getGoalSegments(
+        const message::input::CameraParameters& cam,
+        const message::support::FieldDescription& fd) {
+        std::vector<message::vision::ClassifiedImage::Segment> segments;
+        return segments;
+    }
+}  // namespace vision
+}  // namespace module
