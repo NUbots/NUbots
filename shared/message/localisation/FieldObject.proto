@@ -50,3 +50,7 @@ message Self {
     vec2               velocity                = 3; //robot velocity (vector 2)
     mat33              covariance              = 4;
 }
+
+message LocalisationReset {
+    repeated Self   self   = 1;
+}

@@ -33,6 +33,7 @@ namespace localisation {
 
     using message::support::FieldDescription;
     using message::vision::Goal;
+    using message::localisation::LocalisationReset;
 
     RobotParticleLocalisation::RobotParticleLocalisation(std::unique_ptr<NUClear::Environment> environment)
         : Reactor(std::move(environment)) {
@@ -45,7 +46,7 @@ namespace localisation {
             filter.model.processNoiseDiagonal = config["process_noise_diagonal"].as<arma::vec>();
             filter.model.n_rogues             = config["n_rogues"].as<int>();
             filter.model.resetRange           = config["reset_range"].as<arma::vec>();
-            int n_particles                   = config["n_particles"].as<int>();
+            n_particles                       = config["n_particles"].as<int>();
             draw_particles                    = config["draw_particles"].as<int>();
 
             arma::vec3 start_state    = config["start_state"].as<arma::vec>();
@@ -135,6 +136,25 @@ namespace localisation {
                     }
                 }
             });
+
+        // Do I need to use sync??
+        on<Trigger<LocalisationReset>>,
+            With<Sensors>> ().then("Localisation Reset",
+                                   [this](const LocalisationReset& locReset, const Sensors& sensors) {
+                                       const Transform3D& Htw = convert<double, 4, 4>(sensors.world);
+                                       std::vector<arma::vec3> states;
+                                       std::vector<arma::mat33> cov;
+                                       for (auto& s : locReset.self) {
+                                           arma::vec3 rTFf = {s.locObject.position[0],
+                                                              s.locObject.position[1],
+                                                              std::atan2(s.heading[1], s.heading[0])};
+                                           const Transform3D& Hft = LocalisationStateToMatrix(rTFf);
+                                           const Transform3D& Hfw = Hft * Htw;
+                                           states.push_back(MatrixToLocalisationState(Hfw));
+                                           cov.push_back(s.covariance);
+                                       }
+                                       filter.ambiguousReset(states, cov, n_particles);
+                                   });
     }
 
     std::vector<arma::vec> RobotParticleLocalisation::getPossibleFieldPositions(

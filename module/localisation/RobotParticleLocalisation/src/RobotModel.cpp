@@ -71,9 +71,7 @@ namespace localisation {
         Transform3D Hcw        = Htc.i() * Htw;
 
 
-        Transform3D Hfw;
-        Hfw.translation() = arma::vec3{state[kX], state[kY], 0};
-        Hfw               = Hfw.rotateZ(state[kAngle]);
+        Transform3D Hfw = LocalisationStateToMatrix(state);
 
         Transform3D Hcf = Hcw * Hfw.i();
         Transform3D Htf = Htw * Hfw.i();
