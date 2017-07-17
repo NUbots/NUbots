@@ -44,8 +44,8 @@ namespace math {
             using ParticleList = arma::mat;
             using StateMat     = arma::mat::fixed<Model::size, Model::size>;
 
-            /* particles.n_rows = number of particles
-               particle.row(i) = particle i
+            /* particles.n_cols = number of particles
+               particle.col(i) = particle i
             */
             ParticleList particles;
 
@@ -79,7 +79,7 @@ namespace math {
                 // Cols are accessed cols(first,last_inclusive)
                 particles.cols(0, remainder - 1) = getParticles(initialMeans[0], initialCovariances[0], remainder);
                 // Generate the rest equally
-                for (unsigned int i = 0, currentStart = remainder; currentStart < particles.n_rows;
+                for (unsigned int i = 0, currentStart = remainder; currentStart < particles.n_cols;
                      ++i, currentStart += particlesPerInit) {
                     particles.cols(currentStart, currentStart + particlesPerInit - 1) =
                         getParticles(initialMeans[i], initialCovariances[i], particlesPerInit);
@@ -103,10 +103,10 @@ namespace math {
                 gaussian.set_params(arma::mat(arma::zeros(Model::size)),
                                     arma::mat(model.processNoise().diag() * deltaT),
                                     arma::ones(1));
-                for (unsigned int i = 0; i < particles.n_rows; ++i) {
+                for (unsigned int i = 0; i < particles.n_cols; ++i) {
                     particles.col(i) = model.timeUpdate(particles.col(i), deltaT, additionalParameters...);
                 }
-                particles += gaussian.generate(particles.n_rows);
+                particles += gaussian.generate(particles.n_cols);
             }
 
             template <typename TMeasurement, typename... TMeasurementType>
