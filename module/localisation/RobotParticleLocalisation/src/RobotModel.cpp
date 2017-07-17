@@ -24,7 +24,6 @@
 #include <nuclear>
 
 #include "message/input/Sensors.h"
-#include "message/localisation/FieldObject.h"
 #include "utility/input/ServoID.h"
 #include "utility/localisation/transform.h"
 #include "utility/math/angle.h"

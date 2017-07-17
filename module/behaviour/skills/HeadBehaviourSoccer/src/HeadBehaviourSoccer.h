@@ -29,7 +29,7 @@
 #include "message/behaviour/SoccerObjectPriority.h"
 #include "message/input/CameraParameters.h"
 #include "message/input/Sensors.h"
-#include "message/localisation/FieldObject.h"
+#include "message/localisation/Ball.h"
 #include "message/motion/HeadCommand.h"
 #include "message/motion/KinematicsModels.h"
 #include "message/vision/VisionObjects.h"

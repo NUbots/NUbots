@@ -14,37 +14,19 @@
  * You should have received a copy of the GNU General Public License
  * along with the NUbots Codebase.  If not, see <http://www.gnu.org/licenses/>.
  *
- * Copyright 2013 NUbots <nubots@nubots.net>
+ * Copyright 2017 NUbots <nubots@nubots.net>
  */
 syntax = "proto3";
 
 package message.localisation;
 
-message Model {
-    uint32 model_id   = 1;
+import "Vector.proto";
+import "Matrix.proto";
 
-    float  wm_x       = 2;  //world model x
-    float  wm_y       = 3;  //world model y
-
-    float  sd_x       = 4;
-    float  sd_y       = 5;
-
-    float  sr_xx      = 6;  //covariance
-    float  sr_xy      = 7;
-    float  sr_yy      = 8;
-
-    float  heading    = 9;  //direction
-    float  sd_heading = 10;  //stdev
-
-    bool   lost       = 11;
-}
-
-message LocalisationFieldObject {
-    string name = 1;
-
-    repeated Model models = 2;
-}
-
-message Localisation {
-    repeated LocalisationFieldObject field_object = 1;
+message Field {
+    // Measures the position of the field centre in world space position[0,1] = (rFWw)
+    // and measures the orientation of the field from the world position[2] = (thetafw)
+    vec3  position = 1;
+    // Covariance of the measurement
+    mat33 covariance = 2;
 }

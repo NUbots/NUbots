@@ -26,7 +26,6 @@
 #include "message/behaviour/KickPlan.h"
 #include "message/behaviour/MotionCommand.h"
 #include "message/behaviour/WalkPath.h"
-#include "message/localisation/FieldObject.h"
 #include "message/motion/KickCommand.h"
 #include "message/motion/WalkCommand.h"
 
@@ -164,7 +163,7 @@ namespace behaviour {
                         "Follow current path plan",
                         [this](const std::vector<Self>& selfs, const Ball& ball
                                // const WalkPath& walkPath
-                               ) {
+                        ) {
                             if (selfs.empty() || currentPath.states.empty()) {
                                 return;
                             }
