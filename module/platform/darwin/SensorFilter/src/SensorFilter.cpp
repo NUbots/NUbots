@@ -343,7 +343,6 @@ namespace platform {
                             }
                             if (error & DarwinSensors::Error::CORRUPT_DATA) {
                                 s << " Corrupt Data ";
-                                break;
                             }
                             if (error & DarwinSensors::Error::TIMEOUT) {
                                 s << " Timeout ";
