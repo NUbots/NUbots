@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-import pickle
+import xxhash
 import gzip
 import struct
 import sys
@@ -11,6 +11,14 @@ import pkgutil
 import google.protobuf.message
 from google.protobuf.json_format import MessageToJson
 
+class NUsightDecoder:
+    def __init__(self, pb_type):
+        self.pb_type = pb_type
+
+    def FromString(self, payload):
+        # Strip off the filterid and timestamp (first 9 bytes)
+        return self.pb_type.FromString(payload[9:])
+
 def register(command):
 
     # Install help
@@ -19,7 +27,7 @@ def register(command):
     # Drone arguments
     command.add_argument('file'
         , metavar='file'
-        , help='The file to decode into a strint')
+        , help='The file to decode into a series of json objects')
 
 def run(file, **kwargs):
 
@@ -37,7 +45,7 @@ def run(file, **kwargs):
                 # Load our protobuf module
                 module = loader.find_module(module_name).load_module(module_name)
 
-    parsers = {}
+    decoders = {}
 
     # Now that we've imported them all get all the subclasses of protobuf message
     for message in google.protobuf.message.Message.__subclasses__():
@@ -45,92 +53,55 @@ def run(file, **kwargs):
         # Work out our original protobuf type
         pb_type = message.__module__.split('.')[:-1]
         pb_type.append(message.__name__)
-        pb_type = '.'.join(pb_type).encode('utf-8')
-        pb_hash = '' # TODO swap to using XXHASH
-        # pb_hash = mmh3.hash_bytes(pb_type, 0x4e55436c, True)
+        pb_type = '.'.join(pb_type)
+        # Reverse to little endian
+        pb_hash = bytes(reversed(xxhash.xxh64(pb_type, seed=0x4e55436c).digest()))
+        decoders[pb_hash] = (pb_type, message)
 
-        parsers[pb_hash] = (pb_type, message)
+        # We can also decode NUsight<> wrapped packets
+        nusight_type = 'NUsight<{}>'.format(pb_type)
+        # Reverse to little endian
+        nusight_hash = bytes(reversed(xxhash.xxh64(nusight_type, seed=0x4e55436c).digest()))
+        decoders[nusight_hash] = (nusight_type, NUsightDecoder(message))
 
-    servo_health = {}
 
     # Now open the passed file
     with gzip.open(file, 'rb') if file.endswith('nbz') or file.endswith('.gz') else open(file, 'rb') as f:
-        with gzip.open('output.pickle', 'wb') as of:
 
-            prev_goal_position = None
-            state = None
-            c_pass = []
+        # NBS File Format:
+        # 3 Bytes - NUClear radiation symbol header, useful for synchronisation when attaching to an existing stream
+        # 4 Bytes - The remaining packet length i.e. 16 bytes + N payload bytes
+        # 8 Bytes - 64bit timestamp in microseconds. Note: this is not necessarily a unix timestamp
+        # 8 Bytes - 64bit bit hash of the message type
+        # N bytes - The binary packet payload
 
-            # While we can read a header
-            while len(f.read(3)) == 3:
+        # While we can read a header
+        while len(f.read(3)) == 3:
 
-                # Read our size
-                size = struct.unpack('<I', f.read(4))[0]
+            # Read our size
+            size = struct.unpack('<I', f.read(4))[0]
 
-                # Read our payload
-                payload = f.read(size)
+            # Read our payload
+            payload = f.read(size)
 
-                # Read our timestamp
-                timestamp = struct.unpack('<Q', payload[:8])[0]
+            # Read our timestamp
+            timestamp = struct.unpack('<Q', payload[:8])[0]
 
-                # Read our hash
-                type_hash = payload[8:24]
+            # Read our hash
+            type_hash = payload[8:16]
 
-                # If we know how to parse this type, parse it
-                if type_hash in parsers:
-                    msg = parsers[type_hash][1].FromString(payload[24:])
+            # If we know how to parse this type, parse it
+            if type_hash in decoders:
+                msg = decoders[type_hash][1].FromString(payload[16:])
 
-                    if parsers[type_hash][0] == b'message.support.ServoHealthTestData':
-                        # Read our servo
-                        servo = msg.sensors.servo.rAnkleRoll
+                # Put anything you don't want to output here, it will still output a message to show it is in the file
+                if decoders[type_hash][0] in ['message.input.Image', 'NUsight<message.input.Image>']:
+                    out = '{{ "type": "{}", "timestamp": {}, "data": null }}'.format(decoders[type_hash][0], timestamp)
+                    print(out)
 
-                        if prev_goal_position == None:
-                            prev_goal_position = round(servo.goalPosition)
-                        elif prev_goal_position != round(servo.goalPosition):
-                            # Changing motion
-                            if state != None:
-                                pickle.dump((state, c_pass), of, protocol=pickle.HIGHEST_PROTOCOL)
-                                c_pass = []
-
-                            if prev_goal_position == 0:
-                                # Second half
-                                if round(servo.goalPosition) > prev_goal_position:
-                                    # increasing
-                                    state = 'inc2stop'
-                                else:
-                                    # decreasing
-                                    state = 'dec2stop'
-                            elif round(servo.goalPosition) == 0:
-                                # First half
-                                if round(servo.goalPosition) > prev_goal_position:
-                                    # increasing
-                                    state = 'inc1stop'
-                                else:
-                                    # decreasing
-                                    state = 'dec1stop'
-                            elif round(servo.goalPosition) > prev_goal_position:
-                                # increasing
-                                state = 'inc'
-                            else:
-                                # decreasing
-                                state = 'dec'
-
-                            prev_goal_position = round(servo.goalPosition)
-
-                        c_pass.append({
-                            'error_flags': servo.errorFlags,
-                            'present_position': servo.presentPosition,
-                            'goal_position': servo.goalPosition,
-                            'present_speed': servo.presentSpeed,
-                            'goal_speed': servo.movingSpeed,
-                            'load': servo.load,
-                            'voltage': servo.voltage,
-                            'temperature': servo.temperature
-                        })
-
-                    else:
-                        out = re.sub(r'\s+', ' ', MessageToJson(msg, True))
-                        out = '{{ "type": "{}", "timestamp": {}, "data": {} }}'.format(parsers[type_hash][0].decode('utf-8'), timestamp, out)
-                        # Print as a json object
-                        print(out)
-
+                # By default output as json
+                else:
+                    out = re.sub(r'\s+', ' ', MessageToJson(msg, True))
+                    out = '{{ "type": "{}", "timestamp": {}, "data": {} }}'.format(decoders[type_hash][0], timestamp, out)
+                    # Print as a json object
+                    print(out)
