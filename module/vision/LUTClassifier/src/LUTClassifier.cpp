@@ -157,10 +157,6 @@ namespace vision {
                         std::max(1,
                                  int(cam.pinhole.focalLengthPixels
                                      * tan(config["goals"]["minimum_ransac_segment_size"].as<double>())));
-                    BALL_MAXIMUM_VERTICAL_CLUSTER_SPACING =
-                        std::max(1,
-                                 int(cam.pinhole.focalLengthPixels
-                                     * tan(config["ball"]["maximum_vertical_cluster_spacing"].as<double>())));
                 }
                 else if (cam.lens == CameraParameters::LensType::RADIAL) {
                     VISUAL_HORIZON_SPACING =
@@ -177,10 +173,6 @@ namespace vision {
                     GOAL_MINIMUM_RANSAC_SEGMENT_SIZE = std::max(
                         1,
                         int(config["goals"]["minimum_ransac_segment_size"].as<double>() / cam.radial.radiansPerPixel));
-                    BALL_MAXIMUM_VERTICAL_CLUSTER_SPACING =
-                        std::max(1,
-                                 int(config["ball"]["maximum_vertical_cluster_spacing"].as<double>()
-                                     / cam.radial.radiansPerPixel));
                 }
 
                 // Goal detector
