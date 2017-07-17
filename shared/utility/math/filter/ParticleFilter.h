@@ -64,23 +64,31 @@ namespace math {
                 particles = getParticles(initialMean, initialCovariance, number_of_particles_);
             }
 
-            void resetAmbiguous(const std::vector<StateVec>& initialMean,
-                                const std::vector<StateMat>& initialCovariance,
+            void resetAmbiguous(const std::vector<StateVec>& initialMeans,
+                                const std::vector<StateMat>& initialCovariances,
                                 const int& number_of_particles_ = 100) {
-                if (initialMean.size() != initialCovariance.size()) {
+                if (initialMeans.size() != initialCovariances.size()) {
                     throw std::runtime_error(std::string(__FILE__) + " : " + std::to_string(__LINE__)
                                              + " different number of means vs covariances provided.");
                 }
+                particles = arma::zeros(Model::size, number_of_particles_);
                 // Sample the same number of particles for each possibility
-                const int particlesPerInit = number_of_particles_ / initialMean.size();
-                for (unsigned int i = 0, currentStart = 0;
-                     currentStart < particles.n_rows;
+                const int particlesPerInit = number_of_particles_ / initialMeans.size();
+                const int remainder        = number_of_particles_ % initialMeans.size();
+                // Generate remainder using first hypotheses
+                // Cols are accessed cols(first,last_inclusive)
+                particles.cols(0, remainder - 1) = getParticles(initialMeans[0], initialCovariances[0], remainder);
+                // Generate the rest equally
+                for (unsigned int i = 0, currentStart = remainder; currentStart < particles.n_rows;
                      ++i, currentStart += particlesPerInit) {
-                    particles.cols(currentStart, currentStart + particlesPerInit) = getParticles(initialMean[i], initialCovariance[i], particlesPerInit);
+                    particles.cols(currentStart, currentStart + particlesPerInit - 1) =
+                        getParticles(initialMeans[i], initialCovariances[i], particlesPerInit);
                 }
             }
 
-            ParticleList getParticles(const StateVec& initialMean, const StateMat& initialCovariance, const int& n_particles) const {
+            ParticleList getParticles(const StateVec& initialMean,
+                                      const StateMat& initialCovariance,
+                                      const int& n_particles) const {
                 // Sample single gaussian (represented by a gaussian mixture model of size 1)
                 arma::gmm_diag gaussian;
                 gaussian.set_params(arma::mat(initialMean), arma::mat(initialCovariance.diag()), arma::ones(1));
@@ -119,7 +127,8 @@ namespace math {
                         model.predictedObservation(candidateParticles.col(i), measurementArgs...);
                     observationDifferences.col(i) = model.observationDifference(predictedObservation, measurement);
                 }
-                arma::vec weights = arma::exp(-arma::sum(observationDifferences % (measurement_variance.i() * observationDifferences.t()), 0));
+                arma::vec weights = arma::exp(
+                    -arma::sum(observationDifferences % (measurement_variance.i() * observationDifferences.t()), 0));
 
                 // Resample
                 std::random_device rd;
@@ -152,13 +161,12 @@ namespace math {
                 // Compute weights
                 arma::mat observationDifferences = arma::mat(measurement.n_elem, repCandidateParticles.n_cols);
                 for (unsigned int i = 0; i < repCandidateParticles.n_cols; ++i) {
-                    arma::vec predictedObservation =
-                        model.predictedObservation(repCandidateParticles.col(i),
-                                                   possibilities[i / candidateParticles.n_cols],
-                                                   measurementArgs...);
+                    arma::vec predictedObservation = model.predictedObservation(
+                        repCandidateParticles.col(i), possibilities[i / candidateParticles.n_cols], measurementArgs...);
                     observationDifferences.col(i) = model.observationDifference(predictedObservation, measurement);
                 }
-                arma::vec weights = arma::exp(-arma::sum(observationDifferences % (measurement_variance.i() * observationDifferences.t()), 0));
+                arma::vec weights = arma::exp(
+                    -arma::sum(observationDifferences % (measurement_variance.i() * observationDifferences.t()), 0));
 
                 // Resample
                 std::random_device rd;
