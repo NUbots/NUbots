@@ -8,7 +8,6 @@
 #include "message/support/FieldDescription.h"
 #include "message/vision/VisionObjects.h"
 
-
 #include "utility/support/eigen_armadillo.h"
 #include "utility/support/yaml_armadillo.h"
 
@@ -33,7 +32,6 @@ namespace localisation {
 
     BallLocalisation::BallLocalisation(std::unique_ptr<NUClear::Environment> environment)
         : Reactor(std::move(environment)), filter() {
-
         last_measurement_update_time = NUClear::clock::now();
         last_time_update_time        = NUClear::clock::now();
 
@@ -94,10 +92,11 @@ namespace localisation {
                     last_time_update_time = curr_time;
                     filter.timeUpdate(seconds);
 
-                    /* Now call Measurement Update. Supports multiple measurement methods and will treat them as
+                    /* Now call Measurement Update. Supports multiple measurement methods
+                     * and will treat them as
                      * separate measurements */
                     for (auto& measurement : balls[0].measurements) {
-                        filter.measurementUpdate(convert<double, 3, 1>(measurement.rBCc),
+                        filter.measurementUpdate(cartesianToSpherical(convert<double, 3, 1>(measurement.rBCc)),
                                                  convert<double, 3, 3>(measurement.covariance),
                                                  field,
                                                  sensors);
