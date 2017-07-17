@@ -45,7 +45,7 @@ def run(file, **kwargs):
                 # Load our protobuf module
                 module = loader.find_module(module_name).load_module(module_name)
 
-    parsers = {}
+    decoders = {}
 
     # Now that we've imported them all get all the subclasses of protobuf message
     for message in google.protobuf.message.Message.__subclasses__():
@@ -56,17 +56,24 @@ def run(file, **kwargs):
         pb_type = '.'.join(pb_type)
         # Reverse to little endian
         pb_hash = bytes(reversed(xxhash.xxh64(pb_type, seed=0x4e55436c).digest()))
-        parsers[pb_hash] = (pb_type, message)
+        decoders[pb_hash] = (pb_type, message)
 
         # We can also decode NUsight<> wrapped packets
         nusight_type = 'NUsight<{}>'.format(pb_type)
         # Reverse to little endian
         nusight_hash = bytes(reversed(xxhash.xxh64(nusight_type, seed=0x4e55436c).digest()))
-        parsers[nusight_hash] = (nusight_type, NUsightDecoder(message))
+        decoders[nusight_hash] = (nusight_type, NUsightDecoder(message))
 
 
     # Now open the passed file
     with gzip.open(file, 'rb') if file.endswith('nbz') or file.endswith('.gz') else open(file, 'rb') as f:
+
+        # NBS File Format:
+        # 3 Bytes - NUClear radiation symbol header, useful for synchronisation when attaching to a existing stream.
+        # 4 Bytes - The remaining packet length i.e. 16 bytes + N payload bytes
+        # 8 Bytes - 64bit timestamp in microseconds. Note: this is not necessarily a unix timestamp.
+        # 8 Bytes - 64bit bit hash of the message type.
+        # N bytes - The binary packet payload.
 
         # While we can read a header
         while len(f.read(3)) == 3:
@@ -84,20 +91,16 @@ def run(file, **kwargs):
             type_hash = payload[8:16]
 
             # If we know how to parse this type, parse it
-            if type_hash in parsers:
-                msg = parsers[type_hash][1].FromString(payload[16:])
+            if type_hash in decoders:
+                msg = decoders[type_hash][1].FromString(payload[16:])
 
-                # So the else can always exist
-                if False:
+                # Outputting an image as json would be bad
+                if decoders[type_hash][0] == b'message.input.Image':
                     pass
 
-                # If there is a special way to decode a particular message do it here
-                # if parsers[type_hash][0] == b'message.input.Sensors':
-                    # Read our servo
-
+                # By default output as json
                 else:
                     out = re.sub(r'\s+', ' ', MessageToJson(msg, True))
-                    out = '{{ "type": "{}", "timestamp": {}, "data": {} }}'.format(parsers[type_hash][0], timestamp, out)
+                    out = '{{ "type": "{}", "timestamp": {}, "data": {} }}'.format(decoders[type_hash][0], timestamp, out)
                     # Print as a json object
                     print(out)
-
