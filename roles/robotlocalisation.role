@@ -25,7 +25,7 @@ NUCLEAR_ROLE(
     vision::GoalDetector
 
     # Localisation
-    localisation::RobotFieldLocalisation
+    localisation::RobotParticleLocalisation
     localisation::BallLocalisation
 
     # Behaviour
@@ -38,13 +38,8 @@ NUCLEAR_ROLE(
     # behaviour::skills::HeadBehaviourSoccer
 
     # Motion
-    # motion::FootMotionPlanner
-    # motion::FootPlacementPlanner
-    # motion::TorsoMotionPlanner
-    # motion::BalanceKinematicResponse
-    # motion::OldWalkEngine
     motion::ScriptEngine
-    motion::HeadController
+    #motion::HeadController
     #motion::IKKick
 
 )

@@ -259,7 +259,6 @@ namespace behaviour {
                                 }
                             }
 
-
                             d1 = std::min(float(2.0), std::max(d1, float(0.1)));
 
                             d2 = std::min(float(2.0), std::max(d2, float(0.1)));
@@ -302,7 +301,6 @@ namespace behaviour {
 
 
                             arma::fvec2 next_robot_position = arma::mean(bez_matrix).t();
-
 
                             // log("Robot next position = ", next_robot_position);
 
@@ -365,6 +363,6 @@ namespace behaviour {
                     });
         }
 
-    }  // planning
-}  // behaviours
-}  // modules
+    }  // namespace planning
+}  // namespace behaviour
+}  // namespace module

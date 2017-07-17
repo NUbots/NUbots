@@ -23,6 +23,7 @@ Vagrant.configure("2") do |config|
     # Use custom box because official Ubuntu one is shit.
     override.vm.box = "bidski/xenial64"
 
+
     # See http://www.virtualbox.org/manual/ch08.html#vboxmanage-modifyvm
     v.customize ["modifyvm", :id, "--cpus", `if [ "x$(uname)" = "xDarwin" ]; then sysctl -n hw.physicalcpu_max; else lscpu -p | egrep -v '^#' | sort -u -t, -k 2,4 | wc -l; fi`.chomp ]
     v.customize ["modifyvm", :id, "--memory", `if [ "x$(uname)" = "xDarwin" ]; then echo "scale=0; $(sysctl -n hw.memsize)/2097152" | bc; else echo "scale=0; $(awk '/MemTotal/{print $2}' /proc/meminfo)/2048" | bc; fi`.chomp ]

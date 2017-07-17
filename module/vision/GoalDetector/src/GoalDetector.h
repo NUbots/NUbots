@@ -20,6 +20,7 @@
 #ifndef MODULES_VISION_GOALDETECTOR_H
 #define MODULES_VISION_GOALDETECTOR_H
 
+#include <armadillo>
 #include <nuclear>
 
 namespace module {
@@ -43,6 +44,9 @@ namespace vision {
         uint MEASUREMENT_LIMITS_RIGHT;
         uint MEASUREMENT_LIMITS_TOP;
         uint MEASUREMENT_LIMITS_BASE;
+
+        arma::vec3 VECTOR3_COVARIANCE;
+        arma::vec2 ANGLE_COVARIANCE;
 
     public:
         /// @brief Called by the powerplant to build and setup the GoalDetector reactor.
