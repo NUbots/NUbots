@@ -547,11 +547,11 @@ namespace behaviour {
                     auto& ball = balls[0];
                     auto& self = selfs[0];
 
-                    float selfBearing   = std::atan2(self.heading[1], self.heading[0]);
-                    int signBearing     = selfBearing > 0 ? 1 : -1;
-                    float rotationSpeed = -signBearing
-                                          * std::fmin(std::fabs(cfg_.goalie_rotation_speed_factor * selfBearing),
-                                                      cfg_.goalie_max_rotation_speed);
+                    float selfBearing = std::atan2(self.heading[1], self.heading[0]);
+                    int signBearing   = selfBearing > 0 ? 1 : -1;
+                    float rotationSpeed =
+                        -signBearing * std::fmin(std::fabs(cfg_.goalie_rotation_speed_factor * selfBearing),
+                                                 cfg_.goalie_max_rotation_speed);
 
                     int signTranslation = ball.locObject.position[1] > 0 ? 1 : -1;
                     float translationSpeed =
