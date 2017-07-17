@@ -95,7 +95,7 @@ def run(file, **kwargs):
                 msg = decoders[type_hash][1].FromString(payload[16:])
 
                 # Put anything you don't want to output here, it will still output a message to show it is in the file
-                if decoders[type_hash][0] in [ b'message.input.Image', b'NUsight<message.input.Image>']:
+                if decoders[type_hash][0] in [ 'message.input.Image', 'NUsight<message.input.Image>']:
                     out = '{{ "type": "{}", "timestamp": {}, "data": null }}'.format(decoders[type_hash][0], timestamp)
                     print(out)
 
