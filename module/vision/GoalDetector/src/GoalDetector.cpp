@@ -250,7 +250,6 @@ namespace vision {
                         }
                     }
 
-
                     arma::running_stat<double> stat;
 
                     // Look through our segments to find endpoints
@@ -465,7 +464,6 @@ namespace vision {
                         auto top = convert<double, 3>(arma::normalise(arma::cross(ctl, ctr)));
                         it->measurement.push_back(Goal::Measurement(Goal::MeasurementType::TOP_NORMAL, top));
                     }
-
 
                     // Angular positions from the camera
                     arma::vec2 pixelsToTanThetaFactor = convert<double, 2>(cam.pixelsToTanThetaFactor);

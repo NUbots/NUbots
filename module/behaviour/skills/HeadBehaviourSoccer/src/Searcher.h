@@ -76,7 +76,7 @@ namespace behaviour {
                 // Full sort
                 // std::vector<std::pair<int, T>> relativePoints;
                 // for (uint i = 0; i < points.size(); i++){
-                // 	relativePoints.push_back(std::pair<int, T>(i,points[i] - refPoint));
+                //  relativePoints.push_back(std::pair<int, T>(i,points[i] - refPoint));
                 // }
                 // std::sort(relativePoints.begin(),relativePoints.end(),pair_comparator);
                 // std::vector<T> newPoints(relativePoints.size());
