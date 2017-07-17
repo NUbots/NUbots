@@ -83,14 +83,6 @@ namespace localisation {
                                                const arma::vec3& post_centre,
                                                const utility::math::matrix::Transform3D& Hcf,
                                                const message::support::FieldDescription& fd);
-        // TODO: use these again?
-        // struct Config {
-        //     double processNoisePositionFactor = 1e-3;
-        //     double processNoiseHeadingFactor = 1e-3;
-        //     double processNoiseVelocityFactor = 1e-3;
-        //     double observationDifferenceBearingFactor = 0.2;
-        //     double observationDifferenceElevationFactor = 0.2;
-        // } cfg_;
     };
 }  // namespace localisation
 }  // namespace module
