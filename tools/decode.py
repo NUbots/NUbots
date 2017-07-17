@@ -69,11 +69,11 @@ def run(file, **kwargs):
     with gzip.open(file, 'rb') if file.endswith('nbz') or file.endswith('.gz') else open(file, 'rb') as f:
 
         # NBS File Format:
-        # 3 Bytes - NUClear radiation symbol header, useful for synchronisation when attaching to a existing stream.
+        # 3 Bytes - NUClear radiation symbol header, useful for synchronisation when attaching to an existing stream
         # 4 Bytes - The remaining packet length i.e. 16 bytes + N payload bytes
-        # 8 Bytes - 64bit timestamp in microseconds. Note: this is not necessarily a unix timestamp.
-        # 8 Bytes - 64bit bit hash of the message type.
-        # N bytes - The binary packet payload.
+        # 8 Bytes - 64bit timestamp in microseconds. Note: this is not necessarily a unix timestamp
+        # 8 Bytes - 64bit bit hash of the message type
+        # N bytes - The binary packet payload
 
         # While we can read a header
         while len(f.read(3)) == 3:
@@ -94,9 +94,10 @@ def run(file, **kwargs):
             if type_hash in decoders:
                 msg = decoders[type_hash][1].FromString(payload[16:])
 
-                # Outputting an image as json would be bad
-                if decoders[type_hash][0] == b'message.input.Image':
-                    pass
+                # Put anything you don't want to output here, it will still output a message to show it is in the file
+                if decoders[type_hash][0] in [ b'message.input.Image', b'NUsight<message.input.Image>']:
+                    out = '{{ "type": "{}", "timestamp": {}, "data": null }}'.format(decoders[type_hash][0], timestamp)
+                    print(out)
 
                 # By default output as json
                 else:
