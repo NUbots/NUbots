@@ -15,6 +15,9 @@ ball_screen_covariance: [0.1, 0.01, 0.01]
 
 print_throwout_logs: false
 
+ball_angular_cov: [0.1,0.01,0.01]
+
+
 clustering:
   number_of_clusters: 4 # set the number of Gaussians
 

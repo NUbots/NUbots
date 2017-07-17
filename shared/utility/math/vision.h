@@ -188,6 +188,17 @@ namespace math {
             return (separation / 2) / std::tan(parallaxAngle / 2);
         }
 
+        /*! @brief returns an estimate of the distance to two points which have a known separation.
+            @param separation - Known distance between points in camera space
+            @param cam1,cam2 - Measured camera space unit vectors point toward the points
+        */
+        inline double distanceToEquidistantCamPoints(const double& separation,
+                                                     const arma::vec3& cam1,
+                                                     const arma::vec3& cam2) {
+            double parallaxAngle = utility::math::angle::acos_clamped(arma::norm_dot(cam1, cam2));
+            return (separation / 2) / std::tan(parallaxAngle / 2);
+        }
+
 
         inline arma::vec2 projectWorldPointToScreen(const arma::vec4& point,
                                                     const utility::math::matrix::Transform3D& camToGround,
@@ -310,9 +321,10 @@ namespace math {
             arma::mat goalBaseCorners(4, 4);
             goalBaseCorners.row(3).fill(1.0);
             goalBaseCorners.submat(0, 0, 2, 3).each_col() = goalLocation;
-            goalBaseCorners.submat(0, 0, 1, 3) -= 0.5 * field.dimensions.goalpost_diameter;
-            goalBaseCorners.submat(0, 0, 1, 0) += field.dimensions.goalpost_diameter;
-            goalBaseCorners.submat(1, 1, 2, 1) += field.dimensions.goalpost_diameter;
+            goalBaseCorners.submat(0, 0, 1, 3) -= 0.5 * field.dimensions.goalpost_width;
+            goalBaseCorners.submat(0, 0, 1, 0) += field.dimensions.goalpost_width;
+            goalBaseCorners.submat(1, 1, 2, 1) += field.dimensions.goalpost_width;
+
             // make the top corner points
             arma::mat goalTopCorners = goalBaseCorners;
 

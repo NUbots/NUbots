@@ -58,7 +58,7 @@ namespace vision {
         double green_radial_samples;
         double green_angular_samples;
 
-        arma::vec3 ball_screen_covariance;
+        arma::vec3 ball_angular_cov;
 
         utility::learning::KMeans kmeansClusterer;
 

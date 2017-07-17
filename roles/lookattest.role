@@ -22,7 +22,7 @@ NUCLEAR_ROLE(
     vision::GoalDetector
 
     #Localisation
-    localisation::RobotFieldLocalisation
+    localisation::RobotParticleLocalisation
     #localisation::BallLocalisation
 
     #Behaviour

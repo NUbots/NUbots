@@ -22,11 +22,12 @@
 #include "extension/Configuration.h"
 
 #include "RansacGoalModel.h"
-
 #include "message/input/CameraParameters.h"
+#include "message/support/FieldDescription.h"
 #include "message/vision/ClassifiedImage.h"
 #include "message/vision/LookUpTable.h"
 #include "message/vision/VisionObjects.h"
+
 
 #include "utility/math/geometry/Line.h"
 #include "utility/math/geometry/Plane.h"
@@ -40,6 +41,9 @@
 #include "utility/vision/LookUpTable.h"
 #include "utility/vision/Vision.h"
 #include "utility/vision/fourcc.h"
+
+#include "utility/support/eigen_armadillo.h"
+#include "utility/support/yaml_armadillo.h"
 
 
 namespace module {
@@ -70,6 +74,7 @@ namespace vision {
     using message::vision::ClassifiedImage;
     using SegmentClass = message::vision::ClassifiedImage::SegmentClass::Value;
     using message::vision::Goal;
+    using message::support::FieldDescription;
 
     // TODO the system is too generous with adding segments above and below the goals and makes them too tall, stop it
     // TODO the system needs to throw out the kinematics and height based measurements when it cannot be sure it saw the
@@ -122,12 +127,18 @@ namespace vision {
                 MEASUREMENT_LIMITS_RIGHT = config["measurement_limits"]["right"].as<uint>();
                 MEASUREMENT_LIMITS_TOP   = config["measurement_limits"]["top"].as<uint>();
                 MEASUREMENT_LIMITS_BASE  = config["measurement_limits"]["base"].as<uint>();
+
+                VECTOR3_COVARIANCE = config["VECTOR3_COVARIANCE"].as<arma::vec>();
+                ANGLE_COVARIANCE   = config["ANGLE_COVARIANCE"].as<arma::vec>();
+
             });
 
-        on<Trigger<ClassifiedImage>, With<CameraParameters>, With<LookUpTable>, Single>().then(
+        on<Trigger<ClassifiedImage>, With<CameraParameters>, With<LookUpTable>, With<FieldDescription>, Single>().then(
             "Goal Detector",
-            [this](
-                std::shared_ptr<const ClassifiedImage> rawImage, const CameraParameters& cam, const LookUpTable& lut) {
+            [this](std::shared_ptr<const ClassifiedImage> rawImage,
+                   const CameraParameters& cam,
+                   const LookUpTable& lut,
+                   const FieldDescription& fd) {
 
                 const auto& image = *rawImage;
                 // Our segments that may be a part of a goal
@@ -319,7 +330,8 @@ namespace vision {
                     arma::vec2 tr  = convert<double, 2>(it->quad.tr);
                     // Check if we are within the aspect ratio range
                     bool valid =
-                        quad.aspectRatio() > MINIMUM_ASPECT_RATIO && quad.aspectRatio() < MAXIMUM_ASPECT_RATIO
+                        quad.aspectRatio() > MINIMUM_ASPECT_RATIO
+                        && quad.aspectRatio() < MAXIMUM_ASPECT_RATIO
 
                         // Check if we are close enough to the visual horizon
                         && (utility::vision::visualHorizonAtPoint(image, quad.getBottomLeft()[0])
@@ -415,29 +427,60 @@ namespace vision {
                     arma::vec2 screenGoalCentre = (tl + tr + bl + br) * 0.25;
 
                     // Get vectors for TL TR BL BR;
-                    arma::vec3 ctl = getCamFromScreen(tl, cam);
-                    arma::vec3 ctr = getCamFromScreen(tr, cam);
-                    arma::vec3 cbl = getCamFromScreen(bl, cam);
-                    arma::vec3 cbr = getCamFromScreen(br, cam);
+                    arma::vec3 ctl       = getCamFromScreen(tl, cam);
+                    arma::vec3 ctr       = getCamFromScreen(tr, cam);
+                    arma::vec3 cbl       = getCamFromScreen(bl, cam);
+                    arma::vec3 cbr       = getCamFromScreen(br, cam);
+                    arma::vec3 rGCc_norm = arma::normalise((cbl + cbr) * 0.5);  // vector to bottom centre of goal post
 
+
+                    // TODO: NORMALS not used currently - delete?
                     // Get our four normals for each edge
                     // BL TL cross product gives left side
-                    auto left = convert<double, 3>(arma::normalise(arma::cross(cbl, ctl)));
-                    it->measurement.push_back(Goal::Measurement(Goal::MeasurementType::LEFT_NORMAL, left));
+                    auto left                   = convert<double, 3>(arma::normalise(arma::cross(cbl, ctl)));
+                    Eigen::Matrix3d left_vecCov = convert<double, 3, 3>(arma::diagmat(VECTOR3_COVARIANCE));
+                    Eigen::Vector2d left_Angles(std::atan2(left[1], left[0]),
+                                                std::atan2(left[2], std::sqrt(left[0] * left[0] + left[1] * left[1])));
+                    Eigen::Matrix2d left_AngCov = convert<double, 2, 2>(arma::diagmat(ANGLE_COVARIANCE));
+                    it->measurement.push_back(Goal::Measurement(
+                        Goal::MeasurementType::LEFT_NORMAL, left, left_vecCov, left_Angles, left_AngCov));
 
-                    // TR BL cross product gives right side
-                    auto right = convert<double, 3>(arma::normalise(arma::cross(ctr, cbl)));
-                    it->measurement.push_back(Goal::Measurement(Goal::MeasurementType::RIGHT_NORMAL, right));
+                    // TR BR cross product gives right side
+                    auto right                   = convert<double, 3>(arma::normalise(arma::cross(ctr, cbr)));
+                    Eigen::Matrix3d right_vecCov = convert<double, 3, 3>(arma::diagmat(VECTOR3_COVARIANCE));
+                    Eigen::Vector2d right_Angles(
+                        std::atan2(right[1], right[0]),
+                        std::atan2(right[2], std::sqrt(right[0] * right[0] + right[1] * right[1])));
+                    Eigen::Matrix2d right_AngCov = convert<double, 2, 2>(arma::diagmat(ANGLE_COVARIANCE));
+                    it->measurement.push_back(Goal::Measurement(
+                        Goal::MeasurementType::RIGHT_NORMAL, right, right_vecCov, right_Angles, right_AngCov));
 
-                    // Check that the points are not too close to the edges of the screen
-                    if (std::min(cbr[0], cbl[0]) > MEASUREMENT_LIMITS_LEFT
-                        && std::min(cbr[1], cbl[1]) > MEASUREMENT_LIMITS_TOP
-                        && cam.imageSizePixels[0] - std::max(cbr[0], cbl[0]) < MEASUREMENT_LIMITS_TOP
-                        && cam.imageSizePixels[1] - std::max(cbr[1], cbl[1]) < MEASUREMENT_LIMITS_BASE) {
+                    // Check that the bottom of the goal is not too close to the edges of the screen
+                    if (std::min(quad.getBottomRight()[0], quad.getBottomLeft()[0]) > MEASUREMENT_LIMITS_LEFT
+                        && std::min(quad.getBottomRight()[1], quad.getBottomLeft()[1]) > MEASUREMENT_LIMITS_TOP
+                        && cam.imageSizePixels[0] - std::max(quad.getBottomRight()[0], quad.getBottomLeft()[0])
+                               > MEASUREMENT_LIMITS_TOP
+                        && cam.imageSizePixels[1] - std::max(quad.getBottomRight()[1], quad.getBottomLeft()[1])
+                               > MEASUREMENT_LIMITS_BASE) {
 
                         // BR BL cross product gives the bottom side
                         auto bottom = convert<double, 3>(arma::normalise(arma::cross(cbr, cbl)));
                         it->measurement.push_back(Goal::Measurement(Goal::MeasurementType::BASE_NORMAL, bottom));
+
+                        // Vector to the bottom centre average top and bottom distances
+                        float distance_top = utility::math::vision::distanceToEquidistantCamPoints(
+                            fd.dimensions.goalpost_width, ctl, ctr);
+                        float distance_bottom = utility::math::vision::distanceToEquidistantCamPoints(
+                            fd.dimensions.goalpost_width, cbl, cbr);
+                        float distance = (distance_top + distance_bottom) / 2;
+
+                        auto rGCc_sphr = convert<double, 3>(cartesianToSpherical(
+                            distance * rGCc_norm));  // Just converted into eigen. Still the unit vector
+                        arma::vec3 covariance_amplifier({distance, 1, 1});
+                        Eigen::Matrix3d rGCc_cov = convert<double, 3, 3>(arma::diagmat(
+                            VECTOR3_COVARIANCE % covariance_amplifier));  // arma::diagmat(arma::vec3{0.01,0.01,0.001})
+                        it->measurement.push_back(
+                            Goal::Measurement(Goal::MeasurementType::CENTRE, rGCc_sphr, rGCc_cov));
                     }
 
                     // Check that the points are not too close to the edges of the screen
