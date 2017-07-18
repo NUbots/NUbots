@@ -7,7 +7,7 @@
 #define UTILITY_MATH_FILTER_GOLAYFILTER_H
 
 // Includes
-#include "Golay.h"
+#include "GolayDerivative.h"
 
 namespace utility {
 namespace math {

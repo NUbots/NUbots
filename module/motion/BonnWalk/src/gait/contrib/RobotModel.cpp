@@ -47,15 +47,15 @@ namespace contrib {
         supportExchangeLock = false;
 
         // Initialise the base frame
-        base.setReferenceFrame(NULL);
+        base.setReferenceFrame(nullptr);
         base.setTranslation(0, 0, 0);  // Updated further down in this function
         base.setRotation(0, 0, 0, 1);
 
         // Initialise the left and right footstep frames
-        leftFootstep.setReferenceFrame(NULL);
+        leftFootstep.setReferenceFrame(nullptr);
         leftFootstep.setTranslation(0, 0, 0);  // Updated further down in this function
         leftFootstep.setRotation(0, 0, 0, 1);  // Updated further down in this function
-        rightFootstep.setReferenceFrame(NULL);
+        rightFootstep.setReferenceFrame(nullptr);
         rightFootstep.setTranslation(0, 0, 0);  // Updated further down in this function
         rightFootstep.setRotation(0, 0, 0, 1);  // Updated further down in this function
 

@@ -11,6 +11,9 @@
 #include <array>
 #include "cap_com_filter.h"
 #include "gait_interface.h"
+#include "utility/math/filter/GolayDerivative.h"
+#include "utility/math/filter/MeanFilter.h"
+#include "utility/math/filter/WLBFFilter.h"
 
 // Gait namespace
 namespace gait {
@@ -248,10 +251,10 @@ private:
     // Gait command velocity vector input (raw velocities commanded by the gait motion module)
     Eigen::Vector3d m_gcvInput;
     // Derivative filter for the GCV to calculate the gait acceleration
-    rc_utils::GolayDerivative<Eigen::Vector3d, 1, 5, Eigen::aligned_allocator<Eigen::Vector3d>> m_gcvDeriv;
-    rc_utils::MeanFilter m_gcvAccSmoothX;
-    rc_utils::MeanFilter m_gcvAccSmoothY;
-    rc_utils::MeanFilter m_gcvAccSmoothZ;
+    utility::math::filter::GolayDerivative<Eigen::Vector3d, 1, 5, Eigen::aligned_allocator<Eigen::Vector3d>> m_gcvDeriv;
+    utility::math::filter::MeanFilter m_gcvAccSmoothX;
+    utility::math::filter::MeanFilter m_gcvAccSmoothY;
+    utility::math::filter::MeanFilter m_gcvAccSmoothZ;
     Eigen::Vector3d m_gcvAcc;
 
     // Gait flags
@@ -279,14 +282,14 @@ private:
     //
 
     // Basic feedback filters
-    rc_utils::MeanFilter fusedXFeedFilter;
-    rc_utils::MeanFilter fusedYFeedFilter;
-    rc_utils::WLBFFilter dFusedXFeedFilter;
-    rc_utils::WLBFFilter dFusedYFeedFilter;
-    rc_utils::MeanFilter iFusedXFeedFilter;
-    rc_utils::MeanFilter iFusedYFeedFilter;
-    rc_utils::WLBFFilter gyroXFeedFilter;
-    rc_utils::WLBFFilter gyroYFeedFilter;
+    utility::math::filter::MeanFilter fusedXFeedFilter;
+    utility::math::filter::MeanFilter fusedYFeedFilter;
+    utility::math::filter::WLBFFilter dFusedXFeedFilter;
+    utility::math::filter::WLBFFilter dFusedYFeedFilter;
+    utility::math::filter::MeanFilter iFusedXFeedFilter;
+    utility::math::filter::MeanFilter iFusedYFeedFilter;
+    utility::math::filter::WLBFFilter gyroXFeedFilter;
+    utility::math::filter::WLBFFilter gyroYFeedFilter;
 
     // Integrators
     rc_utils::EWIntegrator iFusedXFeedIntegrator;

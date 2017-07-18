@@ -52,9 +52,6 @@ GaitEngine::GaitEngine()
     updateHaltPose();
     m_lastJointPose = m_jointHaltPose;
 
-    // Configure the plot manager
-    configurePlotManager();
-
     // Set up callbacks for the basic feedback config parameters
     config.basicFusedFilterN.setCallback(std::bind(&GaitEngine::resizeFusedFilters, this, std::placeholders::_1));
     config.basicDFusedFilterN.setCallback(std::bind(&GaitEngine::resizeDFusedFilters, this, std::placeholders::_1));
@@ -610,8 +607,8 @@ void GaitEngine::updateRobot(const Eigen::Vector3d& gcvBias) {
     LimpState mx  = mxModel.getMotionState();
     LimpState rx  = rxModel.getMotionState();
     LimpState ls  = mx;
-    double adaptx = coerce(adaptation.x, 0.0, 1.0);
-    double adapty = coerce(adaptation.y, 0.0, 1.0);
+    double adaptx = utility::math::clamp(0.0, adaptation.x, 1.0);
+    double adapty = utility::math::clamp(0.0, adaptation.y, 1.0);
     if (rxModel.supportLegSign * mxModel.supportLegSign > 0) {
         ls.x  = (1.0 - adaptx) * mx.x + adaptx * rx.x;
         ls.vx = (1.0 - adaptx) * mx.vx + adaptx * rx.vx;
@@ -683,8 +680,8 @@ void GaitEngine::updateRobot(const Eigen::Vector3d& gcvBias) {
     //  fusedAngleAdaptation.y = (absFusedX > config.nsMinDeviation() ? config.nsGain() * absFusedX : 0.0);
 
     // Calculate the required adaptation (0.0 => Completely trust Mx, 1.0 => Completely trust Rx)
-    adaptation.x = coerce<double>(adaptationX, 0.0, config.nsMaxAdaptation());
-    adaptation.y = coerce<double>(adaptationY, 0.0, config.nsMaxAdaptation());
+    adaptation.x = utility::math::clamp(0.0, adaptationX, config.nsMaxAdaptation());
+    adaptation.y = utility::math::clamp(0.0, adaptationY, config.nsMaxAdaptation());
 
     // Adaptation resetting (force complete trust in Rx)
     if (resetCounter > 0) {
@@ -781,8 +778,8 @@ void GaitEngine::updateRobot(const Eigen::Vector3d& gcvBias) {
     if (!config.basicGyroEnabledSag()) gyroYFeed = 0.0;
 
     // Calculate a modification to the gait phase frequency based on basic feedback terms
-    double timingFeedWeight =
-        coerce(-config.basicTimingWeightFactor() * sin(m_gaitPhase - 0.5 * config.doubleSupportPhaseLen()), -1.0, 1.0);
+    double timingFeedWeight = utility::math::clamp(
+        -1.0, -config.basicTimingWeightFactor() * sin(m_gaitPhase - 0.5 * config.doubleSupportPhaseLen()), 1.0);
     double timingFeed =
         SmoothDeadband::eval(fusedXFeedFilter.value() * timingFeedWeight, config.basicTimingFeedDeadRad());
     double timingFreqDelta = (timingFeed >= 0.0 ? config.basicTimingGainSpeedUp() * timingFeed
@@ -839,7 +836,7 @@ void GaitEngine::updateRobot(const Eigen::Vector3d& gcvBias) {
     }
 
     // Coerce the gait frequency to the allowed range
-    gaitFrequency = coerce<double>(gaitFrequency, 1e-8, config.gaitFrequencyMax());
+    gaitFrequency = utility::math::clamp(1e-8, gaitFrequency, config.gaitFrequencyMax());
 
     // Calculate the time to step based on how much gait phase we have to cover and how fast we intend to cover it
     double timeToStep = remainingGaitPhase / (M_PI * gaitFrequency);  // Note: Always in the range (0,Inf)
@@ -907,13 +904,13 @@ void GaitEngine::updateRobot(const Eigen::Vector3d& gcvBias) {
             else {
                 double D = config.gcvDecToAccRatio();
                 if (gcvUnbiased.x() >= 0.0)
-                    m_gcv.x() += coerce(m_gcvInput.x() - m_gcv.x(),
-                                        -truedT * config.gcvAccForwards() * D,
-                                        truedT * config.gcvAccForwards());
+                    m_gcv.x() += utility::math::clamp(-truedT * config.gcvAccForwards() * D,
+                                                      m_gcvInput.x() - m_gcv.x(),
+                                                      truedT * config.gcvAccForwards());
                 else
-                    m_gcv.x() += coerce(m_gcvInput.x() - m_gcv.x(),
-                                        -truedT * config.gcvAccBackwards(),
-                                        truedT * config.gcvAccBackwards() * D);
+                    m_gcv.x() += utility::math::clamp(-truedT * config.gcvAccBackwards(),
+                                                      m_gcvInput.x() - m_gcv.x(),
+                                                      truedT * config.gcvAccBackwards() * D);
             }
             m_gcv.y() = CLGcv.y();
             m_gcv.z() = CLGcv.z();
@@ -926,26 +923,32 @@ void GaitEngine::updateRobot(const Eigen::Vector3d& gcvBias) {
 
         // Update the internal gcv based on the gcv input using a slope-limiting approach
         double D = config.gcvDecToAccRatio();
-        if (gcvUnbiased.x() >= 0.0)
-            m_gcv.x() += coerce(
-                m_gcvInput.x() - m_gcv.x(), -truedT * config.gcvAccForwards() * D, truedT * config.gcvAccForwards());
-        else
-            m_gcv.x() += coerce(
-                m_gcvInput.x() - m_gcv.x(), -truedT * config.gcvAccBackwards(), truedT * config.gcvAccBackwards() * D);
-        if (gcvUnbiased.y() >= 0.0)
-            m_gcv.y() += coerce(
-                m_gcvInput.y() - m_gcv.y(), -truedT * config.gcvAccSidewards() * D, truedT * config.gcvAccSidewards());
-        else
-            m_gcv.y() += coerce(
-                m_gcvInput.y() - m_gcv.y(), -truedT * config.gcvAccSidewards(), truedT * config.gcvAccSidewards() * D);
-        if (gcvUnbiased.z() >= 0.0)
-            m_gcv.z() += coerce(m_gcvInput.z() - m_gcv.z(),
-                                -truedT * config.gcvAccRotational() * D,
-                                truedT * config.gcvAccRotational());
-        else
-            m_gcv.z() += coerce(m_gcvInput.z() - m_gcv.z(),
-                                -truedT * config.gcvAccRotational(),
-                                truedT * config.gcvAccRotational() * D);
+        if (gcvUnbiased.x() >= 0.0) {
+            m_gcv.x() += utility::math::clamp(
+                -truedT * config.gcvAccForwards() * D, m_gcvInput.x() - m_gcv.x(), truedT * config.gcvAccForwards());
+        }
+        else {
+            m_gcv.x() += utility::math::clamp(
+                -truedT * config.gcvAccBackwards(), m_gcvInput.x() - m_gcv.x(), truedT * config.gcvAccBackwards() * D);
+        }
+        if (gcvUnbiased.y() >= 0.0) {
+            m_gcv.y() += utility::math::clamp(
+                -truedT * config.gcvAccSidewards() * D, m_gcvInput.y() - m_gcv.y(), truedT * config.gcvAccSidewards());
+        }
+        else {
+            m_gcv.y() += utility::math::clamp(
+                -truedT * config.gcvAccSidewards(), m_gcvInput.y() - m_gcv.y(), truedT * config.gcvAccSidewards() * D);
+        }
+        if (gcvUnbiased.z() >= 0.0) {
+            m_gcv.z() += utility::math::clamp(-truedT * config.gcvAccRotational() * D,
+                                              m_gcvInput.z() - m_gcv.z(),
+                                              truedT * config.gcvAccRotational());
+        }
+        else {
+            m_gcv.z() += utility::math::clamp(-truedT * config.gcvAccRotational(),
+                                              m_gcvInput.z() - m_gcv.z(),
+                                              truedT * config.gcvAccRotational() * D);
+        }
     }
 
     // Calculate and filter the gait command acceleration
@@ -1397,14 +1400,18 @@ void GaitEngine::abstractLegMotion(AbstractLegPose& leg)  // 'leg' is assumed to
     double footAngleCtsYFeedback = 0.0;
     if (!config.tuningNoLegFeedback()) {
         // Compute the phase waveform over which to apply the foot feedback
-        double footPhaseLen = coerce<double>(config.basicFootAnglePhaseLen(), 0.05, M_PI_2);
+        double footPhaseLen = utility::math::clamp(0.05, config.basicFootAnglePhaseLen(), M_PI_2);
         double footFeedbackSlope =
             1.0 / footPhaseLen;  // This can't go uncontrolled because the footPhaseLen is coerced to a reasonable range
         double footFeedbackScaler = 0.0;
-        if (CMD.limbPhase <= -M_PI_2)  // This works because of the coerce above
-            footFeedbackScaler = coerce(footFeedbackSlope * (CMD.limbPhase + M_PI), 0.0, 1.0);
-        else
-            footFeedbackScaler = coerce(footFeedbackSlope * (CMD.doubleSupportPhase - CMD.limbPhase), 0.0, 1.0);
+        // This works because of the coerce above
+        if (CMD.limbPhase <= -M_PI_2) {
+            footFeedbackScaler = utility::math::clamp(0.0, footFeedbackSlope * (CMD.limbPhase + M_PI), 1.0);
+        }
+        else {
+            footFeedbackScaler =
+                utility::math::clamp(0.0, footFeedbackSlope * (CMD.doubleSupportPhase - CMD.limbPhase), 1.0);
+        }
 
         // Compute the integrated foot and hip angle feedback
         double hipAngleXIFeed     = config.basicIFusedHipAngleX() * iFusedXFeed;
@@ -1431,14 +1438,24 @@ void GaitEngine::abstractLegMotion(AbstractLegPose& leg)  // 'leg' is assumed to
         footAngleCtsYFeedback = config.basicFeedBiasFootAngCY() + footAngleCtsYIFeed;
 
         // Disable the foot and hip angle feedback if required
-        if (!(config.basicEnableHipAngleX() && config.basicGlobalEnable())) hipAngleXFeedback = hipAngleXIFeed = 0.0;
-        if (!(config.basicEnableHipAngleY() && config.basicGlobalEnable())) hipAngleYFeedback = hipAngleYIFeed = 0.0;
-        if (!(config.basicEnableFootAngleX() && config.basicGlobalEnable())) footAngleXFeedback = 0.0;
-        if (!(config.basicEnableFootAngleY() && config.basicGlobalEnable())) footAngleYFeedback = 0.0;
-        if (!(config.basicEnableFootAngleCX() && config.basicGlobalEnable()))
+        if (!(config.basicEnableHipAngleX() && config.basicGlobalEnable())) {
+            hipAngleXFeedback = hipAngleXIFeed = 0.0;
+        }
+        if (!(config.basicEnableHipAngleY() && config.basicGlobalEnable())) {
+            hipAngleYFeedback = hipAngleYIFeed = 0.0;
+        }
+        if (!(config.basicEnableFootAngleX() && config.basicGlobalEnable())) {
+            footAngleXFeedback = 0.0;
+        }
+        if (!(config.basicEnableFootAngleY() && config.basicGlobalEnable())) {
+            footAngleYFeedback = 0.0;
+        }
+        if (!(config.basicEnableFootAngleCX() && config.basicGlobalEnable())) {
             footAngleCtsXFeedback = footAngleCtsXIFeed = 0.0;
-        if (!(config.basicEnableFootAngleCY() && config.basicGlobalEnable()))
+        }
+        if (!(config.basicEnableFootAngleCY() && config.basicGlobalEnable())) {
             footAngleCtsYFeedback = footAngleCtsYIFeed = 0.0;
+        }
 
         // Apply the foot and hip angle feedback
         hipAngleX += hipAngleXFeedback;
@@ -1509,18 +1526,24 @@ void GaitEngine::abstractLegMotion(AbstractLegPose& leg)  // 'leg' is assumed to
     if (supportTransitionPhaseLen > 1e-10) supportTransitionSlope= 1.0 / supportTransitionPhaseLen;
 
     // Calculate the required support coefficient of this leg
-    if (CMD.limbPhase <= CMD.suppTransStopPhase - M_PI)
-        leg.cld.supportCoeff =
-            coerce(1.0 - supportTransitionSlope * (CMD.suppTransStopPhase - M_PI - CMD.limbPhase), 0.0, 1.0);
-    else if (CMD.limbPhase <= CMD.suppTransStartPhase)
+    if (CMD.limbPhase <= CMD.suppTransStopPhase - M_PI) {
+        leg.cld.supportCoeff = utility::math::clamp(
+            0.0, 1.0 - supportTransitionSlope * (CMD.suppTransStopPhase - M_PI - CMD.limbPhase), 1.0);
+    }
+    else if (CMD.limbPhase <= CMD.suppTransStartPhase) {
         leg.cld.supportCoeff = 1.0;
-    else if (CMD.limbPhase <= CMD.suppTransStopPhase)
-        leg.cld.supportCoeff = coerce(supportTransitionSlope * (CMD.suppTransStopPhase - CMD.limbPhase), 0.0, 1.0);
-    else if (CMD.limbPhase >= CMD.suppTransStartPhase + M_PI)
+    }
+    else if (CMD.limbPhase <= CMD.suppTransStopPhase) {
         leg.cld.supportCoeff =
-            coerce(supportTransitionSlope * (CMD.limbPhase - CMD.suppTransStartPhase - M_PI), 0.0, 1.0);
-    else
+            utility::math::clamp(0.0, supportTransitionSlope * (CMD.suppTransStopPhase - CMD.limbPhase), 1.0);
+    }
+    else if (CMD.limbPhase >= CMD.suppTransStartPhase + M_PI) {
+        leg.cld.supportCoeff =
+            utility::math::clamp(0.0, supportTransitionSlope * (CMD.limbPhase - CMD.suppTransStartPhase - M_PI), 1.0);
+    }
+    else {
         leg.cld.supportCoeff = 0.0;
+    }
 
     // Rescale the support coefficients to the required range
     leg.cld.supportCoeff = config.supportCoeffRange() * (leg.cld.supportCoeff - 0.5) + 0.5;
@@ -1811,153 +1834,6 @@ void GaitEngine::updateOutputs() {
     updateOdometry();
 }
 
-// Configure the plot manager
-void GaitEngine::configurePlotManager() {
-    // Configure gait command vector variables
-    m_PM.setName(PM_GCV_X, "gcv/linVelX");
-    m_PM.setName(PM_GCV_Y, "gcv/linVelY");
-    m_PM.setName(PM_GCV_Z, "gcv/angVelZ");
-    m_PM.setName(PM_GCV_ACC_X, "gcv/linAccX");
-    m_PM.setName(PM_GCV_ACC_Y, "gcv/linAccY");
-    m_PM.setName(PM_GCV_ACC_Z, "gcv/angAccZ");
-
-    // Configure step motion variables
-    m_PM.setName(PM_GAIT_PHASE, "cmd/gaitPhase");
-    m_PM.setName(PM_USED_IFUSEDX, "basicFeedback/usedIFusedX");
-    m_PM.setName(PM_USED_IFUSEDY, "basicFeedback/usedIFusedY");
-    m_PM.setName(PM_HALT_BLEND_FACTOR, "blending/haltBlendFactor");
-    m_PM.setName(PM_LEG_EXTENSION_R, "rightLeg/extensionOffset");
-    m_PM.setName(PM_LEG_EXTENSION_L, "leftLeg/extensionOffset");
-    m_PM.setName(PM_LEG_SWING_ANGLE_R, "rightLeg/swingAngle");
-    m_PM.setName(PM_LEG_SWING_ANGLE_L, "leftLeg/swingAngle");
-    m_PM.setName(PM_LEG_SAG_SWING_R, "rightLeg/sagittalSwing");
-    m_PM.setName(PM_LEG_SAG_SWING_L, "leftLeg/sagittalSwing");
-    m_PM.setName(PM_LEG_LAT_SWING_R, "rightLeg/lateralSwing");
-    m_PM.setName(PM_LEG_LAT_SWING_L, "leftLeg/lateralSwing");
-    m_PM.setName(PM_LEG_ROT_SWING_R, "rightLeg/rotationalSwing");
-    m_PM.setName(PM_LEG_ROT_SWING_L, "leftLeg/rotationalSwing");
-    m_PM.setName(PM_LEG_LAT_HIP_SWING_R, "rightLeg/lateralHipSwing");
-    m_PM.setName(PM_LEG_LAT_HIP_SWING_L, "leftLeg/lateralHipSwing");
-    m_PM.setName(PM_LEG_SAG_LEAN_R, "rightLeg/sagittalLean");
-    m_PM.setName(PM_LEG_SAG_LEAN_L, "leftLeg/sagittalLean");
-    m_PM.setName(PM_LEG_LAT_LEAN_R, "rightLeg/lateralLean");
-    m_PM.setName(PM_LEG_LAT_LEAN_L, "leftLeg/lateralLean");
-    m_PM.setName(PM_LEG_FEED_HIPANGLEX_R, "rightLeg/basicFeedback/hipAngleX");
-    m_PM.setName(PM_LEG_FEED_HIPANGLEX_L, "leftLeg/basicFeedback/hipAngleX");
-    m_PM.setName(PM_LEG_FEED_HIPANGLEY_R, "rightLeg/basicFeedback/hipAngleY");
-    m_PM.setName(PM_LEG_FEED_HIPANGLEY_L, "leftLeg/basicFeedback/hipAngleY");
-    m_PM.setName(PM_LEG_FEED_FOOTANGLEX_R, "rightLeg/basicFeedback/footAngleX");
-    m_PM.setName(PM_LEG_FEED_FOOTANGLEX_L, "leftLeg/basicFeedback/footAngleX");
-    m_PM.setName(PM_LEG_FEED_FOOTANGLEY_R, "rightLeg/basicFeedback/footAngleY");
-    m_PM.setName(PM_LEG_FEED_FOOTANGLEY_L, "leftLeg/basicFeedback/footAngleY");
-    m_PM.setName(PM_LEG_FEED_FOOTANGLECX_R, "rightLeg/basicFeedback/footAngleCtsX");
-    m_PM.setName(PM_LEG_FEED_FOOTANGLECX_L, "leftLeg/basicFeedback/footAngleCtsX");
-    m_PM.setName(PM_LEG_FEED_FOOTANGLECY_R, "rightLeg/basicFeedback/footAngleCtsY");
-    m_PM.setName(PM_LEG_FEED_FOOTANGLECY_L, "leftLeg/basicFeedback/footAngleCtsY");
-    m_PM.setName(PM_LEG_ABS_LEGEXT_R, "rightLeg/abstractCmd/legExtension");
-    m_PM.setName(PM_LEG_ABS_LEGEXT_L, "leftLeg/abstractCmd/legExtension");
-    m_PM.setName(PM_LEG_ABS_LEGANGLEX_R, "rightLeg/abstractCmd/legAngleX");
-    m_PM.setName(PM_LEG_ABS_LEGANGLEX_L, "leftLeg/abstractCmd/legAngleX");
-    m_PM.setName(PM_LEG_ABS_LEGANGLEY_R, "rightLeg/abstractCmd/legAngleY");
-    m_PM.setName(PM_LEG_ABS_LEGANGLEY_L, "leftLeg/abstractCmd/legAngleY");
-    m_PM.setName(PM_LEG_ABS_LEGANGLEZ_R, "rightLeg/abstractCmd/legAngleZ");
-    m_PM.setName(PM_LEG_ABS_LEGANGLEZ_L, "leftLeg/abstractCmd/legAngleZ");
-    m_PM.setName(PM_LEG_ABS_FOOTANGLEX_R, "rightLeg/abstractCmd/footAngleX");
-    m_PM.setName(PM_LEG_ABS_FOOTANGLEX_L, "leftLeg/abstractCmd/footAngleX");
-    m_PM.setName(PM_LEG_ABS_FOOTANGLEY_R, "rightLeg/abstractCmd/footAngleY");
-    m_PM.setName(PM_LEG_ABS_FOOTANGLEY_L, "leftLeg/abstractCmd/footAngleY");
-    m_PM.setName(PM_LEG_FEED_COMSHIFTX_R, "rightLeg/basicFeedback/comShiftX");
-    m_PM.setName(PM_LEG_FEED_COMSHIFTX_L, "leftLeg/basicFeedback/comShiftX");
-    m_PM.setName(PM_LEG_FEED_COMSHIFTY_R, "rightLeg/basicFeedback/comShiftY");
-    m_PM.setName(PM_LEG_FEED_COMSHIFTY_L, "leftLeg/basicFeedback/comShiftY");
-    m_PM.setName(PM_LEG_VIRTUAL_SLOPE_R, "rightLeg/virtualSlope");
-    m_PM.setName(PM_LEG_VIRTUAL_SLOPE_L, "leftLeg/virtualSlope");
-    m_PM.setName(PM_LEG_VIRTUAL_COMP_R, "rightLeg/virtualComponent");
-    m_PM.setName(PM_LEG_VIRTUAL_COMP_L, "leftLeg/virtualComponent");
-    m_PM.setName(PM_ARM_SWING_ANGLE_R, "rightArm/unitSwingAngle");
-    m_PM.setName(PM_ARM_SWING_ANGLE_L, "leftArm/unitSwingAngle");
-    m_PM.setName(PM_ARM_SAG_SWING_R, "rightArm/sagittalSwing");
-    m_PM.setName(PM_ARM_SAG_SWING_L, "leftArm/sagittalSwing");
-    m_PM.setName(PM_ARM_FEED_ARMANGLEX_R, "rightArm/basicFeedback/armAngleX");
-    m_PM.setName(PM_ARM_FEED_ARMANGLEX_L, "leftArm/basicFeedback/armAngleX");
-    m_PM.setName(PM_ARM_FEED_ARMANGLEY_R, "rightArm/basicFeedback/armAngleY");
-    m_PM.setName(PM_ARM_FEED_ARMANGLEY_L, "leftArm/basicFeedback/armAngleY");
-    m_PM.setName(PM_ARM_ABS_ARMEXT_R, "rightArm/abstractCmd/armExtension");
-    m_PM.setName(PM_ARM_ABS_ARMEXT_L, "leftArm/abstractCmd/armExtension");
-    m_PM.setName(PM_ARM_ABS_ARMANGLEX_R, "rightArm/abstractCmd/armAngleX");
-    m_PM.setName(PM_ARM_ABS_ARMANGLEX_L, "leftArm/abstractCmd/armAngleX");
-    m_PM.setName(PM_ARM_ABS_ARMANGLEY_R, "rightArm/abstractCmd/armAngleY");
-    m_PM.setName(PM_ARM_ABS_ARMANGLEY_L, "leftArm/abstractCmd/armAngleY");
-
-    // Configure capture stepping variables
-    m_PM.setName(PM_RXRMODEL_SUPPVEC_X, "rxRobotModel/supportVector/x");
-    m_PM.setName(PM_RXRMODEL_SUPPVEC_Y, "rxRobotModel/supportVector/y");
-    m_PM.setName(PM_RXRMODEL_SUPPVEC_Z, "rxRobotModel/supportVector/z");
-    m_PM.setName(PM_RXRMODEL_STEPVEC_X, "rxRobotModel/stepVector/x");
-    m_PM.setName(PM_RXRMODEL_STEPVEC_Y, "rxRobotModel/stepVector/y");
-    m_PM.setName(PM_RXRMODEL_STEPVEC_Z, "rxRobotModel/stepVector/z");
-    m_PM.setName(PM_RXRMODEL_STEPVEC_FYAW, "rxRobotModel/stepVector/fyaw");
-    m_PM.setName(PM_FUSED_X, "fusedAngle/fusedX");
-    m_PM.setName(PM_FUSED_Y, "fusedAngle/fusedY");
-    m_PM.setName(PM_COMFILTER_X, "comFilter/x");
-    m_PM.setName(PM_COMFILTER_Y, "comFilter/y");
-    m_PM.setName(PM_COMFILTER_VX, "comFilter/vx");
-    m_PM.setName(PM_COMFILTER_VY, "comFilter/vy");
-    m_PM.setName(PM_RXMODEL_X, "rxModel/x");
-    m_PM.setName(PM_RXMODEL_Y, "rxModel/y");
-    m_PM.setName(PM_RXMODEL_VX, "rxModel/vx");
-    m_PM.setName(PM_RXMODEL_VY, "rxModel/vy");
-    m_PM.setName(PM_RXMODEL_SUPPLEG, "rxModel/supportLegSign");
-    m_PM.setName(PM_RXMODEL_TIMETOSTEP, "rxModel/timeToStep");
-    m_PM.setName(PM_MXMODEL_X, "mxModel/x");
-    m_PM.setName(PM_MXMODEL_Y, "mxModel/y");
-    m_PM.setName(PM_MXMODEL_VX, "mxModel/vx");
-    m_PM.setName(PM_MXMODEL_VY, "mxModel/vy");
-    m_PM.setName(PM_MXMODEL_SUPPLEG, "mxModel/supportLegSign");
-    m_PM.setName(PM_MXMODEL_TIMETOSTEP, "mxModel/timeToStep");
-    m_PM.setName(PM_MXMODEL_ZMP_X, "mxModel/zmpX");
-    m_PM.setName(PM_MXMODEL_ZMP_Y, "mxModel/zmpY");
-    m_PM.setName(PM_TXMODEL_X, "txModel/x");
-    m_PM.setName(PM_TXMODEL_Y, "txModel/y");
-    m_PM.setName(PM_TXMODEL_VX, "txModel/vx");
-    m_PM.setName(PM_TXMODEL_VY, "txModel/vy");
-    m_PM.setName(PM_TXMODEL_SUPPLEG, "txModel/supportLegSign");
-    m_PM.setName(PM_TXMODEL_TIMETOSTEP, "txModel/timeToStep");
-    m_PM.setName(PM_TXMODEL_STEPSIZEX, "txModel/stepSizeX");
-    m_PM.setName(PM_TXMODEL_STEPSIZEY, "txModel/stepSizeY");
-    m_PM.setName(PM_TXMODEL_STEPSIZEZ, "txModel/stepSizeZ");
-    m_PM.setName(PM_ADAPTATION_X, "adaptation/x");
-    m_PM.setName(PM_ADAPTATION_Y, "adaptation/y");
-    m_PM.setName(PM_EXP_FUSED_X, "fusedAngle/expectedFusedX");
-    m_PM.setName(PM_EXP_FUSED_Y, "fusedAngle/expectedFusedY");
-    m_PM.setName(PM_DEV_FUSED_X, "fusedAngle/deviationFusedX");
-    m_PM.setName(PM_DEV_FUSED_Y, "fusedAngle/deviationFusedY");
-    m_PM.setName(PM_FEEDBACK_FUSED_X, "basicFeedback/fusedXFeed");
-    m_PM.setName(PM_FEEDBACK_FUSED_Y, "basicFeedback/fusedYFeed");
-    m_PM.setName(PM_FEEDBACK_DFUSED_X, "basicFeedback/dFusedXFeed");
-    m_PM.setName(PM_FEEDBACK_DFUSED_Y, "basicFeedback/dFusedYFeed");
-    m_PM.setName(PM_FEEDBACK_IFUSED_X, "basicFeedback/iFusedXFeed");
-    m_PM.setName(PM_FEEDBACK_IFUSED_Y, "basicFeedback/iFusedYFeed");
-    m_PM.setName(PM_FEEDBACK_GYRO_X, "basicFeedback/gyroXFeed");
-    m_PM.setName(PM_FEEDBACK_GYRO_Y, "basicFeedback/gyroYFeed");
-    m_PM.setName(PM_TIMING_FEED_WEIGHT, "basicFeedback/timingWeight");
-    m_PM.setName(PM_TIMING_FREQ_DELTA, "basicFeedback/timingFreqDelta");
-    m_PM.setName(PM_GAIT_FREQUENCY, "cmd/gaitFrequency");
-    m_PM.setName(PM_REM_GAIT_PHASE, "cmd/remainingGaitPhase");
-    m_PM.setName(PM_TIMETOSTEP, "cmd/timeToStep");
-    m_PM.setName(PM_STEPSIZE_X, "cmd/stepSize/x");
-    m_PM.setName(PM_STEPSIZE_Y, "cmd/stepSize/y");
-    m_PM.setName(PM_STEPSIZE_Z, "cmd/stepSize/z");
-    m_PM.setName(PM_GCVTARGET_X, "cmd/gcvTarget/x");
-    m_PM.setName(PM_GCVTARGET_Y, "cmd/gcvTarget/y");
-    m_PM.setName(PM_GCVTARGET_Z, "cmd/gcvTarget/z");
-    m_PM.setName(PM_LAST_STEP_DURATION, "lastStepDuration");
-
-    // Check that we have been thorough
-    if (!m_PM.checkNames())
-        ROS_ERROR("Please review any warnings above that are related to the naming of plotter variables!");
-}
-
 // Callback for when the plotData parameter is updated
 void GaitEngine::callbackPlotData() {
     // Enable or disable plotting as required
@@ -1983,7 +1859,7 @@ void GaitEngine::setBlendTarget(double target,
                                 double phaseTime)  // phaseTime is the gait phase in which to complete the blend
 {
     // Blend target range checking
-    target = coerce(target, 0.0, 1.0);
+    target = utility::math::clamp(0.0, target, 1.0);
 
     // Immediately change the current blending factor if the required phase time is non-positive, or the current blend
     // factor is already equal to the target blend factor
@@ -2004,17 +1880,17 @@ void GaitEngine::setBlendTarget(double target,
 double GaitEngine::blendFactor() {
     // Update the current blend factor if we are in the process of blending
     if (m_blending) {
-        if (m_blendPhase < 0.0)  // Should never happen...
-        {
+        // Should never happen...
+        if (m_blendPhase < 0.0) {
             m_blendPhase = 0.0;
             m_b_current  = m_b_initial;
         }
-        else if (m_blendPhase >= m_blendEndPhase)  // Done with our blend...
-        {
+        // Done with our blend...
+        else if (m_blendPhase >= m_blendEndPhase) {
             resetBlending(m_b_target);  // Note: This internally sets m_blending to false
         }
-        else  // In the process of blending...
-        {
+        // In the process of blending...
+        else {
             double u    = sin(M_PI_2 * m_blendPhase / m_blendEndPhase);
             m_b_current = m_b_initial + (u * u) * (m_b_target - m_b_initial);
         }
