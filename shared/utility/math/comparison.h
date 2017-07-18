@@ -20,6 +20,8 @@
 #ifndef UTILITY_MATH_COMPARISON_H
 #define UTILITY_MATH_COMPARISON_H
 
+#include <algorithm>
+#include <cmath>
 #include <limits>
 #include <type_traits>
 
@@ -32,7 +34,9 @@ namespace math {
      * Source: http://en.cppreference.com/w/cpp/types/numeric_limits/epsilon
      */
     template <class T>
-    typename std::enable_if<!std::numeric_limits<T>::is_integer, bool>::type almost_equal(T x, T y, int ulp) {
+    typename std::enable_if<!std::numeric_limits<T>::is_integer, bool>::type almost_equal(const T& x,
+                                                                                          const T& y,
+                                                                                          int ulp) {
         // the machine epsilon has to be scaled to the magnitude of the values used
         // and multiplied by the desired precision in ULPs (units in the last place)
         return std::abs(x - y) < std::numeric_limits<T>::epsilon() * std::abs(x + y) * ulp
@@ -42,12 +46,22 @@ namespace math {
 
     /**
      * signum function.
+     * Returns either -1, or 1 based on the sign of the number.
+     * If -Wtype-limits is triggered, then need to specialise for unsigned types.
+     */
+    template <typename T>
+    inline constexpr typename std::enable_if<std::is_arithmetic<T>::value, T>::type sign(const T& val) {
+        return val >= T(0) ? 1 : -1;
+    }
+
+    /**
+     * signum function.
      * Returns either -1, 0, or 1 based on the sign of the number.
      * If -Wtype-limits is triggered, then need to specialise for unsigned types.
      * http://stackoverflow.com/questions/1903954/is-there-a-standard-sign-function-signum-sgn-in-c-c
      */
     template <typename T>
-    inline constexpr typename std::enable_if<std::is_arithmetic<T>::value, T>::type sgn(T val) {
+    inline constexpr typename std::enable_if<std::is_arithmetic<T>::value, T>::type sign0(const T& val) {
         return (T(0) < val) - (val < T(0));
     }
 
@@ -63,19 +77,20 @@ namespace math {
      *  then ret2 < numToRound <= ret < ret3 (that is, there is no other multiple that is closer to the starting point).
      */
     template <typename T>
-    inline constexpr typename std::enable_if<std::is_integral<T>::value, T>::type roundUp(T numToRound, T multiple) {
+    inline constexpr typename std::enable_if<std::is_integral<T>::value, T>::type roundUp(const T& numToRound,
+                                                                                          const T& multiple) {
         if (multiple == 0) {
             return numToRound;
         }
 
-        int remainder = abs(numToRound) % multiple;
+        int remainder = std::abs(numToRound) % multiple;
 
         if (remainder == 0) {
             return numToRound;
         }
 
         if (numToRound < 0) {
-            return -(abs(numToRound) - remainder);
+            return -(std::abs(numToRound) - remainder);
         }
 
         else {
@@ -85,7 +100,8 @@ namespace math {
 
     // http://stackoverflow.com/a/3409892/4795763
     template <typename T>
-    inline constexpr typename std::enable_if<std::is_floating_point<T>::value, T>::type roundUp(T number, T fixedBase) {
+    inline constexpr typename std::enable_if<std::is_floating_point<T>::value, T>::type roundUp(const T& number,
+                                                                                                const T& fixedBase) {
         if ((fixedBase != 0.0) && (number != 0.0)) {
             T sign = sgn(number);
             number *= sign;
@@ -100,7 +116,9 @@ namespace math {
     }
 
     template <typename T>
-    inline constexpr typename std::enable_if<std::is_arithmetic<T>::value, T>::type clamp(T min, T val, T max) {
+    inline constexpr typename std::enable_if<std::is_arithmetic<T>::value, T>::type clamp(const T& min,
+                                                                                          const T& val,
+                                                                                          const T& max) {
         return (std::min(std::max(val, min), max));
     }
 }  // namespace math

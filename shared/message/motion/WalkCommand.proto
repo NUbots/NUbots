@@ -34,10 +34,6 @@ message StopCommand {
     uint64 subsumptionId = 1;           // reservation identifier for servo control
 }
 
-message NewWalkCommand {
-    vec3 velocityTarget = 1;
-}
-
 message EnableWalkEngineCommand {
     uint64 subsumptionId = 1;           // reservation identifier for servo control
 }

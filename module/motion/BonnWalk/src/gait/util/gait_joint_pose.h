@@ -7,10 +7,13 @@
 #define GAIT_JOINT_POSE_H
 
 // Includes
+#include <array>
 #include "gait_common_pose.h"
+#include "utility/input/ServoID.h"
 
 // Gait namespace
 namespace gait {
+
 // Class forward declarations
 class JointPose;
 class JointLegPose;
@@ -322,16 +325,16 @@ struct JointPose {
     //
 
     //! Set the joint pose to the values specified by a given joint position array
-    void readJointPosArray(const double (&pos)[NUM_JOINTS]);
+    void readJointPosArray(const std::array<double, utility::input::ServoID::NUMBER_OF_SERVOS>& pos);
 
     //! Set the joint efforts to the values specified by a given joint effort array
-    void readJointEffortArray(const double (&effort)[NUM_JOINTS]);
+    void readJointEffortArray(const std::array<double, utility::input::ServoID::NUMBER_OF_SERVOS>& effort);
 
     //! Transcribe the stored joint pose to a joint position array
-    void writeJointPosArray(double (&pos)[NUM_JOINTS]) const;
+    std::array<double, utility::input::ServoID::NUMBER_OF_SERVOS> writeJointPosArray() const;
 
     //! Transcribe the stored joint efforts to a joint effort array
-    void writeJointEffortArray(double (&effort)[NUM_JOINTS]) const;
+    std::array<double, utility::input::ServoID::NUMBER_OF_SERVOS> writeJointEffortArray() const;
 
     //
     // Other functions

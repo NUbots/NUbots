@@ -3,9 +3,15 @@
 // Author: Philipp Allgeuer <pallgeuer@ais.uni-bonn.de>
 
 // Includes
-#include <gait/util/gait_abstract_pose.h>
-#include <gait/util/gait_inverse_pose.h>
-#include <gait/util/gait_joint_pose.h>
+#include "gait_joint_pose.h"
+
+#include "gait_abstract_pose.h"
+#include "gait_inverse_pose.h"
+#include "utility/input/ServoID.h"
+
+namespace gait {
+
+using utilty::input::ServoID;
 
 //
 // JointLegPose
@@ -91,101 +97,108 @@ void JointPose::setFromAbstractPose(const AbstractPose& pose) {
 }
 
 // Set the joint pose to the values specified by a given joint position array
-void JointPose::readJointPosArray(const double (&pos)[NUM_JOINTS]) {
+void JointPose::readJointPosArray(const std::array<double, utility::input::ServoID::NUMBER_OF_SERVOS>& pos) {
     // Transcribe values for the left leg
-    leftLeg.hipYaw     = pos[L_HIP_YAW];
-    leftLeg.hipRoll    = pos[L_HIP_ROLL];
-    leftLeg.hipPitch   = pos[L_HIP_PITCH];
-    leftLeg.kneePitch  = pos[L_KNEE_PITCH];
-    leftLeg.anklePitch = pos[L_ANKLE_PITCH];
-    leftLeg.ankleRoll  = pos[L_ANKLE_ROLL];
+    leftLeg.hipYaw     = pos[ServoID::L_HIP_YAW];
+    leftLeg.hipRoll    = pos[ServoID::L_HIP_ROLL];
+    leftLeg.hipPitch   = pos[ServoID::L_HIP_PITCH];
+    leftLeg.kneePitch  = pos[ServoID::L_KNEE_PITCH];
+    leftLeg.anklePitch = pos[ServoID::L_ANKLE_PITCH];
+    leftLeg.ankleRoll  = pos[ServoID::L_ANKLE_ROLL];
 
     // Transcribe values for the right leg
-    rightLeg.hipYaw     = pos[R_HIP_YAW];
-    rightLeg.hipRoll    = pos[R_HIP_ROLL];
-    rightLeg.hipPitch   = pos[R_HIP_PITCH];
-    rightLeg.kneePitch  = pos[R_KNEE_PITCH];
-    rightLeg.anklePitch = pos[R_ANKLE_PITCH];
-    rightLeg.ankleRoll  = pos[R_ANKLE_ROLL];
+    rightLeg.hipYaw     = pos[ServoID::R_HIP_YAW];
+    rightLeg.hipRoll    = pos[ServoID::R_HIP_ROLL];
+    rightLeg.hipPitch   = pos[ServoID::R_HIP_PITCH];
+    rightLeg.kneePitch  = pos[ServoID::R_KNEE_PITCH];
+    rightLeg.anklePitch = pos[ServoID::R_ANKLE_PITCH];
+    rightLeg.ankleRoll  = pos[ServoID::R_ANKLE_ROLL];
 
     // Transcribe values for the left arm
-    leftArm.shoulderPitch = pos[L_SHOULDER_PITCH];
-    leftArm.shoulderRoll  = pos[L_SHOULDER_ROLL];
-    leftArm.elbowPitch    = pos[L_ELBOW_PITCH];
+    leftArm.shoulderPitch = pos[ServoID::L_SHOULDER_PITCH];
+    leftArm.shoulderRoll  = pos[ServoID::L_SHOULDER_ROLL];
+    leftArm.elbowPitch    = pos[ServoID::L_ELBOW_PITCH];
 
     // Transcribe values for the right arm
-    rightArm.shoulderPitch = pos[R_SHOULDER_PITCH];
-    rightArm.shoulderRoll  = pos[R_SHOULDER_ROLL];
-    rightArm.elbowPitch    = pos[R_ELBOW_PITCH];
+    rightArm.shoulderPitch = pos[ServoID::R_SHOULDER_PITCH];
+    rightArm.shoulderRoll  = pos[ServoID::R_SHOULDER_ROLL];
+    rightArm.elbowPitch    = pos[ServoID::R_ELBOW_PITCH];
 }
 
 // Set the joint efforts to the values specified by a given joint effort array
-void JointPose::readJointEffortArray(const double (&effort)[NUM_JOINTS]) {
+void JointPose::readJointEffortArray(const std::array<double, utility::input::ServoID::NUMBER_OF_SERVOS>& pos) {
     // Transcribe values for the left leg
-    leftLeg.cld.effortHipYaw     = effort[L_HIP_YAW];
-    leftLeg.cld.effortHipRoll    = effort[L_HIP_ROLL];
-    leftLeg.cld.effortHipPitch   = effort[L_HIP_PITCH];
-    leftLeg.cld.effortKneePitch  = effort[L_KNEE_PITCH];
-    leftLeg.cld.effortAnklePitch = effort[L_ANKLE_PITCH];
-    leftLeg.cld.effortAnkleRoll  = effort[L_ANKLE_ROLL];
+    leftLeg.cld.effortHipYaw     = effort[ServoID::L_HIP_YAW];
+    leftLeg.cld.effortHipRoll    = effort[ServoID::L_HIP_ROLL];
+    leftLeg.cld.effortHipPitch   = effort[ServoID::L_HIP_PITCH];
+    leftLeg.cld.effortKneePitch  = effort[ServoID::L_KNEE_PITCH];
+    leftLeg.cld.effortAnklePitch = effort[ServoID::L_ANKLE_PITCH];
+    leftLeg.cld.effortAnkleRoll  = effort[ServoID::L_ANKLE_ROLL];
 
     // Transcribe values for the right leg
-    rightLeg.cld.effortHipYaw     = effort[R_HIP_YAW];
-    rightLeg.cld.effortHipRoll    = effort[R_HIP_ROLL];
-    rightLeg.cld.effortHipPitch   = effort[R_HIP_PITCH];
-    rightLeg.cld.effortKneePitch  = effort[R_KNEE_PITCH];
-    rightLeg.cld.effortAnklePitch = effort[R_ANKLE_PITCH];
-    rightLeg.cld.effortAnkleRoll  = effort[R_ANKLE_ROLL];
+    rightLeg.cld.effortHipYaw     = effort[ServoID::R_HIP_YAW];
+    rightLeg.cld.effortHipRoll    = effort[ServoID::R_HIP_ROLL];
+    rightLeg.cld.effortHipPitch   = effort[ServoID::R_HIP_PITCH];
+    rightLeg.cld.effortKneePitch  = effort[ServoID::R_KNEE_PITCH];
+    rightLeg.cld.effortAnklePitch = effort[ServoID::R_ANKLE_PITCH];
+    rightLeg.cld.effortAnkleRoll  = effort[ServoID::R_ANKLE_ROLL];
 
     // Transcribe values for the left arm
-    leftArm.cad.effortShoulderPitch = effort[L_SHOULDER_PITCH];
-    leftArm.cad.effortShoulderRoll  = effort[L_SHOULDER_ROLL];
-    leftArm.cad.effortElbowPitch    = effort[L_ELBOW_PITCH];
+    leftArm.cad.effortShoulderPitch = effort[ServoID::L_SHOULDER_PITCH];
+    leftArm.cad.effortShoulderRoll  = effort[ServoID::L_SHOULDER_ROLL];
+    leftArm.cad.effortElbowPitch    = effort[ServoID::L_ELBOW_PITCH];
 
     // Transcribe values for the right arm
-    rightArm.cad.effortShoulderPitch = effort[R_SHOULDER_PITCH];
-    rightArm.cad.effortShoulderRoll  = effort[R_SHOULDER_ROLL];
-    rightArm.cad.effortElbowPitch    = effort[R_ELBOW_PITCH];
+    rightArm.cad.effortShoulderPitch = effort[ServoID::R_SHOULDER_PITCH];
+    rightArm.cad.effortShoulderRoll  = effort[ServoID::R_SHOULDER_ROLL];
+    rightArm.cad.effortElbowPitch    = effort[ServoID::R_ELBOW_PITCH];
 }
 
 // Transcribe the stored joint pose to a joint position array
-void JointPose::writeJointPosArray(double (&pos)[NUM_JOINTS]) const {
+std::array<double, utility::input::ServoID::NUMBER_OF_SERVOS> JointPose::writeJointPosArray() const {
+    std::array<double, utility::input::ServoID::NUMBER_OF_SERVOS> pos;
+
     // Transcribe values for the left leg
-    pos[L_HIP_YAW]     = leftLeg.hipYaw;
-    pos[L_HIP_ROLL]    = leftLeg.hipRoll;
-    pos[L_HIP_PITCH]   = leftLeg.hipPitch;
-    pos[L_KNEE_PITCH]  = leftLeg.kneePitch;
-    pos[L_ANKLE_PITCH] = leftLeg.anklePitch;
-    pos[L_ANKLE_ROLL]  = leftLeg.ankleRoll;
+    pos[ServoID::L_HIP_YAW]     = leftLeg.hipYaw;
+    pos[ServoID::L_HIP_ROLL]    = leftLeg.hipRoll;
+    pos[ServoID::L_HIP_PITCH]   = leftLeg.hipPitch;
+    pos[ServoID::L_KNEE_PITCH]  = leftLeg.kneePitch;
+    pos[ServoID::L_ANKLE_PITCH] = leftLeg.anklePitch;
+    pos[ServoID::L_ANKLE_ROLL]  = leftLeg.ankleRoll;
 
     // Transcribe values for the right leg
-    pos[R_HIP_YAW]     = rightLeg.hipYaw;
-    pos[R_HIP_ROLL]    = rightLeg.hipRoll;
-    pos[R_HIP_PITCH]   = rightLeg.hipPitch;
-    pos[R_KNEE_PITCH]  = rightLeg.kneePitch;
-    pos[R_ANKLE_PITCH] = rightLeg.anklePitch;
-    pos[R_ANKLE_ROLL]  = rightLeg.ankleRoll;
+    pos[ServoID::R_HIP_YAW]     = rightLeg.hipYaw;
+    pos[ServoID::R_HIP_ROLL]    = rightLeg.hipRoll;
+    pos[ServoID::R_HIP_PITCH]   = rightLeg.hipPitch;
+    pos[ServoID::R_KNEE_PITCH]  = rightLeg.kneePitch;
+    pos[ServoID::R_ANKLE_PITCH] = rightLeg.anklePitch;
+    pos[ServoID::R_ANKLE_ROLL]  = rightLeg.ankleRoll;
 
     // Transcribe values for the left arm
-    pos[L_SHOULDER_PITCH] = leftArm.shoulderPitch;
-    pos[L_SHOULDER_ROLL]  = leftArm.shoulderRoll;
-    pos[L_ELBOW_PITCH]    = leftArm.elbowPitch;
+    pos[ServoID::L_SHOULDER_PITCH] = leftArm.shoulderPitch;
+    pos[ServoID::L_SHOULDER_ROLL]  = leftArm.shoulderRoll;
+    pos[ServoID::L_ELBOW_PITCH]    = leftArm.elbowPitch;
 
     // Transcribe values for the right arm
-    pos[R_SHOULDER_PITCH] = rightArm.shoulderPitch;
-    pos[R_SHOULDER_ROLL]  = rightArm.shoulderRoll;
-    pos[R_ELBOW_PITCH]    = rightArm.elbowPitch;
+    pos[ServoID::R_SHOULDER_PITCH] = rightArm.shoulderPitch;
+    pos[ServoID::R_SHOULDER_ROLL]  = rightArm.shoulderRoll;
+    pos[ServoID::R_ELBOW_PITCH]    = rightArm.elbowPitch;
+
+    return pos;
 }
 
 // Transcribe the stored joint efforts to a joint effort array
-void JointPose::writeJointEffortArray(double (&effort)[NUM_JOINTS]) const {
+std::array<double, utility::input::ServoID::NUMBER_OF_SERVOS> JointPose::writeJointEffortArray() const {
+
+    std::array<double, utility::input::ServoID::NUMBER_OF_SERVOS> effort;
+
     // Transcribe values for the left leg
-    effort[L_HIP_YAW]     = leftLeg.cld.effortHipYaw;
-    effort[L_HIP_ROLL]    = leftLeg.cld.effortHipRoll;
-    effort[L_HIP_PITCH]   = leftLeg.cld.effortHipPitch;
-    effort[L_KNEE_PITCH]  = leftLeg.cld.effortKneePitch;
-    effort[L_ANKLE_PITCH] = leftLeg.cld.effortAnklePitch;
-    effort[L_ANKLE_ROLL]  = leftLeg.cld.effortAnkleRoll;
+    effort[ServoID::L_HIP_YAW]     = leftLeg.cld.effortHipYaw;
+    effort[ServoID::L_HIP_ROLL]    = leftLeg.cld.effortHipRoll;
+    effort[ServoID::L_HIP_PITCH]   = leftLeg.cld.effortHipPitch;
+    effort[ServoID::L_KNEE_PITCH]  = leftLeg.cld.effortKneePitch;
+    effort[ServoID::L_ANKLE_PITCH] = leftLeg.cld.effortAnklePitch;
+    effort[ServoID::L_ANKLE_ROLL]  = leftLeg.cld.effortAnkleRoll;
 
     // Transcribe values for the right leg
     effort[R_HIP_YAW]     = rightLeg.cld.effortHipYaw;
@@ -196,14 +209,16 @@ void JointPose::writeJointEffortArray(double (&effort)[NUM_JOINTS]) const {
     effort[R_ANKLE_ROLL]  = rightLeg.cld.effortAnkleRoll;
 
     // Transcribe values for the left arm
-    effort[L_SHOULDER_PITCH] = leftArm.cad.effortShoulderPitch;
-    effort[L_SHOULDER_ROLL]  = leftArm.cad.effortShoulderRoll;
-    effort[L_ELBOW_PITCH]    = leftArm.cad.effortElbowPitch;
+    effort[ServoID::L_SHOULDER_PITCH] = leftArm.cad.effortShoulderPitch;
+    effort[ServoID::L_SHOULDER_ROLL]  = leftArm.cad.effortShoulderRoll;
+    effort[ServoID::L_ELBOW_PITCH]    = leftArm.cad.effortElbowPitch;
 
     // Transcribe values for the right arm
     effort[R_SHOULDER_PITCH] = rightArm.cad.effortShoulderPitch;
     effort[R_SHOULDER_ROLL]  = rightArm.cad.effortShoulderRoll;
     effort[R_ELBOW_PITCH]    = rightArm.cad.effortElbowPitch;
+
+    return effort;
 }
 
 // Blend this joint pose towards another one by a given blending factor
@@ -214,4 +229,5 @@ void JointPose::blendTowards(const JointPose& other, double b)  // b: 0 => No ch
     leftArm.blendTowards(other.leftArm, b);
     rightArm.blendTowards(other.rightArm, b);
 }
-// EOF
+
+}  // namespace gait
