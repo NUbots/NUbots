@@ -7,6 +7,7 @@
 
 #include <functional>
 #include "utility/math/comparison.h"
+#include "utility/math/filter/LinSinFillet.h"
 #include "utility/math/filter/SlopeLimiter.h"
 #include "utility/math/filter/SmoothDeadband.h"
 
@@ -1272,13 +1273,13 @@ void GaitEngine::abstractLegMotion(util::AbstractLegPose& leg) {
             legExtensionOffset = 0.0;  // Double support phase
 
         // Add fillets to the waveforms to avoid overly large acceleration/torque jumps
-        legExtensionOffset += LinSinFillet::eval(
+        legExtensionOffset += utility::filter::LinSinFillet::eval(
             stepStartPhase, stepHeight, sinAngFreq, 0.5 * config.filletStepPhaseLen(), config.doubleSupportPhaseLen());
-        legExtensionOffset += LinSinFillet::eval(
+        legExtensionOffset += utility::filter::LinSinFillet::eval(
             stepStopPhase, stepHeight, sinAngFreq, 0.5 * config.filletStepPhaseLen(), config.doubleSupportPhaseLen());
-        legExtensionOffset += LinSinFillet::eval(
+        legExtensionOffset += utility::filter::LinSinFillet::eval(
             pushStartPhase, -pushHeight, sinAngFreq, 0.5 * config.filletPushPhaseLen(), config.doubleSupportPhaseLen());
-        legExtensionOffset += LinSinFillet::eval(
+        legExtensionOffset += utility::filter::LinSinFillet::eval(
             pushStopPhase, -pushHeight, sinAngFreq, 0.5 * config.filletPushPhaseLen(), config.doubleSupportPhaseLen());
 
         // Update the leg extension
