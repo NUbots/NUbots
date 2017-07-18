@@ -28,6 +28,8 @@ namespace vision {
             ballCentre = config["ballCentre"].as<arma::vec>();
             radius     = config["radius"].as<float>();
 
+            horizon_normal = config["horizon_normal"].as<arma::vec>();
+
             theta_count = config["theta_count"].as<float>();
 
             test_point_screen = config["test_point_screen"].as<arma::vec>();
@@ -36,19 +38,36 @@ namespace vision {
             goal_direction = arma::normalise(config["goal_direction"].as<arma::vec>());
         });
 
-        /*on<Trigger<std::vector<message::vision::Ball>>>().then([this](const std::vector<message::vision::Ball>& balls)
-        {
+        on<Trigger<std::vector<message::vision::Ball>>>().then([this](const std::vector<message::vision::Ball>& balls) {
             for (auto& ball : balls) {
-                arma::vec3 measuredPos = arma::vec3({ball.locObject.position[0], ball.locObject.position[1], 0});
-                log("Ball actual pos (x,y,z):  ", ballCentre.t());
-                log("Ball measured pos (x,y,z):", measuredPos.t());
-                log("Ball detector error =     ", (measuredPos - ballCentre).t());
-                log("Ball norm error =         ", arma::norm(measuredPos - ballCentre));
-                // for(auto& edgePts : ball.edgePoints){
-                //     log("Edge pts:", edgePts);
-                // }
+                for (auto& m : ball.measurements) {
+                    arma::vec3 measuredPos = convert<double, 3>(m.rBCc);
+                    log("Ball actual pos (x,y,z):  ", ballCentre.t());
+                    log("Ball measured pos (x,y,z):", measuredPos.t());
+                    log("Ball detector error =     ", (measuredPos - ballCentre).t());
+                    log("Ball norm error =         ", arma::norm(measuredPos - ballCentre));
+                    // for(auto& edgePts : ball.edgePoints){
+                    //     log("Edge pts:", edgePts);
+                    // }
+                }
             }
-        });*/
+        });
+        on<Trigger<std::vector<message::vision::Goal>>>().then([this](const std::vector<message::vision::Goal>& goals) {
+            for (auto& goal : goals) {
+                for (auto& m : goal.measurement) {
+                    if (m.type != message::vision::Goal::MeasurementType::CENTRE) continue;
+                    arma::vec3 measuredPos = convert<double, 3>(m.position);
+                    log("Goal actual pos (x,y,z):  ", goal_position.t());
+                    log("Goal measured pos (x,y,z):", measuredPos.t());
+                    log("Goal detector error =     ", (measuredPos - goal_position).t());
+                    log("Goal norm error =         ", arma::norm(measuredPos - goal_position));
+                    // for(auto& edgePts : ball.edgePoints){
+                    //     log("Edge pts:", edgePts);
+                    // }
+                }
+            }
+        });
+
 
         on<Every<30, Per<std::chrono::seconds>>,
            With<CameraParameters>,
@@ -119,7 +138,7 @@ namespace vision {
         classifiedImage->ballSeedPoints[2]  = imagePoints;
         classifiedImage->image              = const_cast<Image*>(image.get())->shared_from_this();
         classifiedImage->sensors            = const_cast<Sensors*>(sensors.get())->shared_from_this();
-        classifiedImage->horizon_normal     = Eigen::Vector3d(0, 0, 1);
+        classifiedImage->horizon_normal     = convert<double, 3>(horizon_normal);
         classifiedImage->horizontalSegments = getGoalSegments(cam, fd);
         // classifiedImage->horizon.distance = 200;
         classifiedImage->dimensions = image->dimensions;
