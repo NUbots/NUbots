@@ -155,6 +155,11 @@ namespace math {
             return screenToImage(projectCamSpaceToScreen(unit_vector, cam), convert<uint, 2>(cam.imageSizePixels));
         }
 
+        inline arma::vec2 getImageFromCamCts(const arma::vec3& unit_vector,
+                                             const message::input::CameraParameters& cam) {
+            return screenToImageCts(projectCamSpaceToScreen(unit_vector, cam), convert<uint, 2>(cam.imageSizePixels));
+        }
+
 
         inline double getParallaxAngle(const arma::vec2& screen1,
                                        const arma::vec2& screen2,

@@ -103,8 +103,9 @@ message Goal {
     VisionObject         visObject   = 1;
     Side                 side        = 2;
     Team                 team        = 3;
-    Quad                 quad        = 4;
-    repeated Measurement measurement = 5;
+    Frustum              frustum     = 4;
+    Quad                 quad        = 5;
+    repeated Measurement measurement = 6;
 }
 
 message Obstacle {

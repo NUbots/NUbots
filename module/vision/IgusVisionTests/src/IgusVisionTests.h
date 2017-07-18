@@ -22,6 +22,8 @@ namespace vision {
         arma::vec3 ballCentre = arma::vec3({2, 0, 0});
         float theta_count     = 100;
 
+        arma::vec3 horizon_normal = {0,0,1};
+
         arma::vec3 goal_position  = arma::vec3({2, 1, -0.9});
         arma::vec3 goal_direction = arma::vec3({2, 1, -0.9});
 

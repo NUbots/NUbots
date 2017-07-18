@@ -50,9 +50,11 @@ message Polygon {
     vec2 point = 1;
 }
 
-message LineSegment {
-    vec3 start = 1;
-    vec3 end = 2;
+message Frustum {
+    vec3 tl = 1;
+    vec3 tr = 2;
+    vec3 bl = 3;
+    vec3 br = 4;
 }
 
 message Cone {
