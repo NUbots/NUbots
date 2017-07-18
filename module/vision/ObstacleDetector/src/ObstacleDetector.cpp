@@ -89,17 +89,8 @@ namespace vision {
 
                 // Kmeans
                 kmeansClusterer.learn(points);
-                std::vector<std::tuple<arma::ivec2, arma::ivec2, arma::vec4>> edges =
-                    kmeansClusterer.getDebugRectangles();
 
-
-                std::vector<std::pair<Eigen::Vector2i, Eigen::Vector2i>> debug;
-                for (auto& p : edges) {
-                    arma::vec2 p0 = std::get<0>(p);
-                    arma::vec2 p1 = std::get<1>(p);
-                    debug.push_back(convert<double, 2>(p0), convert<double, 2>(p1));
-                }
-                emit(drawVisionLines(debug));
+                emit(drawVisionLines(kmeansClusterer.getDebugRectangles()));
 
                 // TODO: something with this info
 

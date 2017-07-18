@@ -21,6 +21,7 @@
 #define UTILITY_LEARNING_KMEANS_H
 
 #include <yaml-cpp/yaml.h>
+#include <Eigen/Core>
 #include <armadillo>
 
 namespace utility {
@@ -64,7 +65,7 @@ namespace learning {
              * random_spread        a maximally spread subset of training samples (random start)
              */
         };
-        std::vector<std::tuple<arma::ivec2, arma::ivec2, arma::vec4>> getDebugRectangles();
+        std::vector<std::pair<Eigen::Vector2i, Eigen::Vector2i>> getDebugRectangles();
         void configure(const YAML::Node& conf);
         bool learn(arma::mat data);
 

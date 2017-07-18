@@ -20,6 +20,8 @@
 
 #include "utility/support/yaml_expression.h"
 
+#include "utility/support/eigen_armadillo.h"
+
 namespace utility {
 namespace learning {
 
@@ -34,28 +36,26 @@ namespace learning {
         config.seed_mode = conf["seed_mode"].as<std::string>();
     }
 
-    std::vector<std::tuple<arma::ivec2, arma::ivec2, arma::vec4>> KMeans::getDebugRectangles() {
+    std::vector<std::pair<Eigen::Vector2i, Eigen::Vector2i>> KMeans::getDebugRectangles() {
 
-        if (clusterModel.n_dims() != 2) return std::vector<std::tuple<arma::ivec2, arma::ivec2, arma::vec4>>();
+        if (clusterModel.n_dims() != 2) return std::vector<std::pair<Eigen::Vector2i, Eigen::Vector2i>>();
 
-        std::vector<std::tuple<arma::ivec2, arma::ivec2, arma::vec4>> debug;
+        std::vector<std::pair<Eigen::Vector2i, Eigen::Vector2i>> debug;
         for (size_t i = 0; i < clusterModel.n_gaus(); i++) {
             arma::vec2 mean = clusterModel.means.col(i);
             arma::vec2 dcov = clusterModel.dcovs.col(i);
             // float weight = clusterModel.hefts(i);
 
-            arma::ivec2 imean         = arma::ivec({int(std::round(mean[0])), int(std::round(mean[1]))});
-            arma::ivec2 idcov         = arma::ivec({int(std::round(dcov[0] * 0.1)), int(std::round(dcov[1] * 0.1))});
-            arma::ivec2 idcov_rotated = arma::ivec({int(std::round(dcov[0] * 0.1)), -int(std::round(dcov[1] * 0.1))});
+            Eigen::Vector2i imean({int(std::round(mean[0])), int(std::round(mean[1]))});
+            Eigen::Vector2i idcov({int(std::round(dcov[0] * 0.1)), int(std::round(dcov[1] * 0.1))});
+            Eigen::Vector2i idcov_rotated({int(std::round(dcov[0] * 0.1)), -int(std::round(dcov[1] * 0.1))});
 
-            debug.push_back(std::make_tuple(imean + idcov, imean + idcov_rotated, arma::vec4{1, 1, 1, 1}));
-            debug.push_back(std::make_tuple(imean - idcov, imean + idcov_rotated, arma::vec4{1, 1, 1, 1}));
-            debug.push_back(std::make_tuple(imean + idcov, imean - idcov_rotated, arma::vec4{1, 1, 1, 1}));
-            debug.push_back(std::make_tuple(imean - idcov, imean - idcov_rotated, arma::vec4{1, 1, 1, 1}));
-            debug.push_back(
-                std::make_tuple(imean + arma::ivec{0, 5}, imean - arma::ivec{0, 5}, arma::vec4{1, 1, 1, 1}));
-            debug.push_back(
-                std::make_tuple(imean + arma::ivec{5, 0}, imean - arma::ivec{5, 0}, arma::vec4{1, 1, 1, 1}));
+            debug.push_back(std::make_pair(imean + idcov, imean + idcov_rotated));
+            debug.push_back(std::make_pair(imean - idcov, imean + idcov_rotated));
+            debug.push_back(std::make_pair(imean + idcov, imean - idcov_rotated));
+            debug.push_back(std::make_pair(imean - idcov, imean - idcov_rotated));
+            debug.push_back(std::make_pair(imean + Eigen::Vector2i({0, 5}), imean - Eigen::Vector2i({0, 5})));
+            debug.push_back(std::make_pair(imean + Eigen::Vector2i({5, 0}), imean - Eigen::Vector2i({5, 0})));
         }
         return debug;
     }
