@@ -7,4 +7,4 @@ n_particles: 30
 start_state: [5,0]
 start_variance: [1,1]
 
-ball_pos_log: false
+ball_pos_log: true

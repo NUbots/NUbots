@@ -127,8 +127,10 @@ namespace math {
                         model.predictedObservation(candidateParticles.col(i), measurementArgs...);
                     observationDifferences.col(i) = model.observationDifference(predictedObservation, measurement);
                 }
-                arma::vec weights = arma::exp(
-                    -arma::sum(observationDifferences % (measurement_variance.i() * observationDifferences.t()), 0));
+                arma::vec weights =
+                    arma::exp(
+                        -arma::sum(observationDifferences % (measurement_variance.i() * observationDifferences), 0))
+                        .t();
 
                 // Resample
                 std::random_device rd;
@@ -195,15 +197,15 @@ namespace math {
             }
 
             StateVec get() const {
-                return arma::mean(particles, 1).t();
+                return arma::mean(particles, 1);
             }
 
             StateVec getBest() const {
-                return particles.col(0).t();
+                return particles.col(0);
             }
 
             StateMat getCovariance() const {
-                return arma::cov(particles, 1);
+                return arma::cov(particles.t());
             }
 
             ParticleList getParticles() const {
