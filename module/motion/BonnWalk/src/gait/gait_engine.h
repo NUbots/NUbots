@@ -10,7 +10,10 @@
 #include <Eigen/Core>
 #include <array>
 #include "cap_com_filter.h"
+#include "contrib/Action.h"
+#include "contrib/Limp.h"
 #include "gait_interface.h"
+#include "util/gait_joint_pose.h"
 #include "utility/math/filter/GolayDerivative.h"
 #include "utility/math/filter/MeanFilter.h"
 #include "utility/math/filter/WLBFFilter.h"
@@ -205,14 +208,14 @@ private:
     CommonMotionData calcCommonMotionData(bool isFirst) const;
 
     // Motion functions
-    void abstractLegMotion(gait::AbstractLegPose& leg);
-    void abstractArmMotion(gait::AbstractArmPose& arm);
-    void inverseLegMotion(gait::InverseLegPose& leg);
+    void abstractLegMotion(contrib::AbstractLegPose& leg);
+    void abstractArmMotion(contrib::AbstractArmPose& arm);
+    void inverseLegMotion(contrib::InverseLegPose& leg);
 
     // Coercion functions
-    void coerceAbstractPose(gait::AbstractPose& pose);
-    void coerceAbstractArmPose(gait::AbstractArmPose& arm);
-    void coerceAbstractLegPose(gait::AbstractLegPose& leg);
+    void coerceAbstractPose(contrib::AbstractPose& pose);
+    void coerceAbstractArmPose(contrib::AbstractArmPose& arm);
+    void coerceAbstractLegPose(contrib::AbstractLegPose& leg);
 
     // Output processing
     void updateOutputs();
@@ -238,12 +241,12 @@ private:
     CapConfig config;
 
     // Pose variables
-    gait::JointPose m_jointPose;            // Joint representation of the pose to command in a step
-    gait::JointPose m_jointHaltPose;        // Joint representation of the gait halt pose
-    gait::JointPose m_lastJointPose;        // The last joint pose to have been commanded during walking
-    gait::InversePose m_inversePose;        // Inverse representation of the pose to command in a step
-    gait::AbstractPose m_abstractPose;      // Abstract representation of the pose to command in a step
-    gait::AbstractPose m_abstractHaltPose;  // Abstract representation of the gait halt pose
+    JointPose m_jointPose;            // Joint representation of the pose to command in a step
+    JointPose m_jointHaltPose;        // Joint representation of the gait halt pose
+    JointPose m_lastJointPose;        // The last joint pose to have been commanded during walking
+    InversePose m_inversePose;        // Inverse representation of the pose to command in a step
+    AbstractPose m_abstractPose;      // Abstract representation of the pose to command in a step
+    AbstractPose m_abstractHaltPose;  // Abstract representation of the gait halt pose
 
     // Gait command vector variables
     // Gait command velocity vector (slope-limited command velocities actually followed by the gait engine)
@@ -292,8 +295,8 @@ private:
     utility::math::filter::WLBFFilter gyroYFeedFilter;
 
     // Integrators
-    rc_utils::EWIntegrator iFusedXFeedIntegrator;
-    rc_utils::EWIntegrator iFusedYFeedIntegrator;
+    utility::math::filter::EWIntegrator iFusedXFeedIntegrator;
+    utility::math::filter::EWIntegrator iFusedYFeedIntegrator;
     config_server::Parameter<bool> m_resetIntegrators;  // Rising edge triggered flag to reset any integrated or learned
                                                         // values in the gait that are not necessarily reset during
                                                         // start/stop of walking

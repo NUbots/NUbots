@@ -6,6 +6,7 @@
 #include "gait_inverse_pose.h"
 #include "gait_abstract_pose.h"
 #include "gait_joint_pose.h"
+#include "utility/math/comparison.h"
 
 //
 // InverseLegPose

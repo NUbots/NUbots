@@ -4,7 +4,9 @@
 
 // Includes
 #include "gait_engine.h"
+
 #include <functional>
+#include "utility/math/filter/SmoothDeadband.h"
 
 // Defines
 #define DEFAULT_HALT_EFFORT_ARMS 0.25  // Default joint effort to use in the halt pose for all the arm joints
@@ -712,9 +714,11 @@ void GaitEngine::updateRobot(const Eigen::Vector3d& gcvBias) {
     fusedXFeedFilter.put(deviationFusedX);
     fusedYFeedFilter.put(deviationFusedY);
     fusedXFeed =
-        config.basicFusedGainAllLat() * SmoothDeadband::eval(fusedXFeedFilter.value(), config.basicFusedDeadRadiusX());
+        config.basicFusedGainAllLat()
+        * utility::math::filter::SmoothDeadband::eval(fusedXFeedFilter.value(), config.basicFusedDeadRadiusX());
     fusedYFeed =
-        config.basicFusedGainAllSag() * SmoothDeadband::eval(fusedYFeedFilter.value(), config.basicFusedDeadRadiusY());
+        config.basicFusedGainAllSag()
+        * utility::math::filter::SmoothDeadband::eval(fusedYFeedFilter.value(), config.basicFusedDeadRadiusY());
     if (!config.basicFusedEnabledLat()) fusedXFeed = 0.0;
     if (!config.basicFusedEnabledSag()) fusedYFeed = 0.0;
 
@@ -725,10 +729,12 @@ void GaitEngine::updateRobot(const Eigen::Vector3d& gcvBias) {
     dFusedYFeedFilter.addXYW(in.timestamp,
                              deviationFusedY,
                              1.0);  // TODO: Modify the weighting based on gait phase to reject known fused angle bumps
-    dFusedXFeed = config.basicDFusedGainAllLat()
-                  * SmoothDeadband::eval(dFusedXFeedFilter.deriv(), config.basicDFusedDeadRadiusX());
-    dFusedYFeed = config.basicDFusedGainAllSag()
-                  * SmoothDeadband::eval(dFusedYFeedFilter.deriv(), config.basicDFusedDeadRadiusY());
+    dFusedXFeed =
+        config.basicDFusedGainAllLat()
+        * utility::math::filter::SmoothDeadband::eval(dFusedXFeedFilter.deriv(), config.basicDFusedDeadRadiusX());
+    dFusedYFeed =
+        config.basicDFusedGainAllSag()
+        * utility::math::filter::SmoothDeadband::eval(dFusedYFeedFilter.deriv(), config.basicDFusedDeadRadiusY());
     if (!config.basicDFusedEnabledLat()) dFusedXFeed = 0.0;
     if (!config.basicDFusedEnabledSag()) dFusedYFeed = 0.0;
 
@@ -770,18 +776,18 @@ void GaitEngine::updateRobot(const Eigen::Vector3d& gcvBias) {
     gyroYFeedFilter.addXYW(in.timestamp,
                            deviationGyroY,
                            1.0);  // TODO: Modify the weighting based on gait phase to reject known gyro bumps
-    gyroXFeed =
-        config.basicGyroGainAllLat() * SmoothDeadband::eval(gyroXFeedFilter.value(), config.basicGyroDeadRadiusX());
-    gyroYFeed =
-        config.basicGyroGainAllSag() * SmoothDeadband::eval(gyroYFeedFilter.value(), config.basicGyroDeadRadiusY());
+    gyroXFeed = config.basicGyroGainAllLat()
+                * utility::math::filter::SmoothDeadband::eval(gyroXFeedFilter.value(), config.basicGyroDeadRadiusX());
+    gyroYFeed = config.basicGyroGainAllSag()
+                * utility::math::filter::SmoothDeadband::eval(gyroYFeedFilter.value(), config.basicGyroDeadRadiusY());
     if (!config.basicGyroEnabledLat()) gyroXFeed = 0.0;
     if (!config.basicGyroEnabledSag()) gyroYFeed = 0.0;
 
     // Calculate a modification to the gait phase frequency based on basic feedback terms
     double timingFeedWeight = utility::math::clamp(
         -1.0, -config.basicTimingWeightFactor() * sin(m_gaitPhase - 0.5 * config.doubleSupportPhaseLen()), 1.0);
-    double timingFeed =
-        SmoothDeadband::eval(fusedXFeedFilter.value() * timingFeedWeight, config.basicTimingFeedDeadRad());
+    double timingFeed      = utility::math::filter::SmoothDeadband::eval(fusedXFeedFilter.value() * timingFeedWeight,
+                                                                    config.basicTimingFeedDeadRad());
     double timingFreqDelta = (timingFeed >= 0.0 ? config.basicTimingGainSpeedUp() * timingFeed
                                                 : config.basicTimingGainSlowDown() * timingFeed);
     if (!(config.basicEnableTiming() && config.basicGlobalEnable())) timingFreqDelta= 0.0;
@@ -1819,8 +1825,8 @@ void GaitEngine::coerceAbstractLegPose(AbstractLegPose& leg) {
 // Update outputs function
 void GaitEngine::updateOutputs() {
     // Transcribe the joint commands
-    m_jointPose.writeJointPosArray(out.jointCmd);
-    m_jointPose.writeJointEffortArray(out.jointEffort);
+    out.jointCmd        = writeJointPosArray();
+    out.jointEffort     = writeJointEffortArray();
     out.useRawJointCmds = haltUseRawJointCmds;
 
     // Transcribe the walking flag
