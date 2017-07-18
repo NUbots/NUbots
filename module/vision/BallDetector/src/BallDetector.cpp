@@ -143,7 +143,7 @@ namespace vision {
             // sample point in lut and check if == Colour::GREEN
         }
 
-        emit(drawVisionLines(debug));
+        // emit(drawVisionLines(debug));
 
         float greenRatio = actualSamples == 0 ? 1 : (numGreen / float(actualSamples));
         return greenRatio;

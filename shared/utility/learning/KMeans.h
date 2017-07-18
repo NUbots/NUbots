@@ -69,6 +69,13 @@ namespace learning {
         void configure(const YAML::Node& conf);
         bool learn(arma::mat data);
 
+        arma::mat getMeans() {
+            return clusterModel.means;
+        }
+        arma::mat getDCovs() {
+            return clusterModel.dcovs;
+        }
+
     private:
         arma::gmm_diag clusterModel;
         KMeansConfig config;

@@ -54,13 +54,13 @@ namespace vision {
                     bool belowVisualHorizon =
                         start[1] > utility::vision::visualHorizonAtPoint(classifiedImage, start[0])
                         || end[1] > utility::vision::visualHorizonAtPoint(classifiedImage, end[0]);
-                    if (belowVisualHorizon && colourMatches && (segment.subsample == 1) && (segment.previous > -1)
-                        && (segment.next > -1)) {
+
+                    if (belowVisualHorizon && colourMatches && (segment.previous > -1) && (segment.next > -1)) {
                         points.col(i++) = start;
                         points.col(i++) = end;
                     }
                     if (i >= points.n_cols) {
-                        points = arma::join_cols(points, arma::zeros(2, chunk_size));
+                        points = arma::join_rows(points, arma::zeros(2, chunk_size));
                     }
                 }
 
@@ -77,13 +77,12 @@ namespace vision {
                     bool belowVisualHorizon =
                         start[1] > utility::vision::visualHorizonAtPoint(classifiedImage, start[0])
                         || end[1] > utility::vision::visualHorizonAtPoint(classifiedImage, end[0]);
-                    if (belowVisualHorizon && colourMatches && (segment.subsample == 1) && (segment.previous > -1)
-                        && (segment.next > -1)) {
+                    if (belowVisualHorizon && colourMatches && (segment.previous > -1) && (segment.next > -1)) {
                         points.col(i++) = start;
                         points.col(i++) = end;
                     }
                     if (i >= points.n_cols) {
-                        points = arma::join_cols(points, arma::zeros(2, chunk_size));
+                        points = arma::join_rows(points, arma::zeros(2, chunk_size));
                     }
                 }
 

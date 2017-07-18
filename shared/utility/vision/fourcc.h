@@ -91,7 +91,6 @@ namespace vision {
         // Clamped to borders.
         x = x < 2 ? 2 : x > (width - 3) ? width - 3 : x;
         y = y < 2 ? 2 : y > (height - 3) ? height - 3 : y;
-        NUClear::log("x,y =", x, y);
 
         return Eigen::Map<const Eigen::Matrix<uint8_t, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>>(
                    data.data(), height, width)

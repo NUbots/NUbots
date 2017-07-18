@@ -115,9 +115,15 @@ message Obstacle {
         CYAN         = 2;
     }
 
-    VisionObject visObject = 1;
-    Polygon      shape     = 2;
-    Team         team      = 3;
+    message Cylinder {
+        vec3 position = 1;
+        double radius = 2;
+    }
+
+    VisionObject visObject       = 1;
+    Polygon      shape           = 2;
+    Team         team            = 3;
+    Cylinder     world_bounds    = 4;
 }
 
 message Line {
