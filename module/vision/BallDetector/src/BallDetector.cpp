@@ -36,6 +36,7 @@
 #include "utility/math/vision.h"
 #include "utility/nubugger/NUhelpers.h"
 #include "utility/support/eigen_armadillo.h"
+#include "utility/support/yaml_armadillo.h"
 #include "utility/support/yaml_expression.h"
 #include "utility/vision/Vision.h"
 #include "utility/vision/fourcc.h"
@@ -173,6 +174,8 @@ namespace vision {
             green_ratio_threshold = config["green_ratio_threshold"].as<Expression>();
             green_radial_samples  = config["green_radial_samples"].as<Expression>();
             green_angular_samples = config["green_angular_samples"].as<Expression>();
+
+            ball_angular_cov = config["ball_angular_cov"].as<arma::vec>();
 
             kmeansClusterer.configure(config["clustering"]);
 
@@ -325,31 +328,14 @@ namespace vision {
 
                         // Work out how far away the ball must be to be at the distance it is from the camera
                         arma::vec3 width_rBCc = ballCentreRay * widthDistance;
-                        arma::vec3 width_rBWw = Hwc.transformPoint(width_rBCc);
-
-                        // Put our ball centre projection into the same space
-                        arma::vec3 proj_rBCc = ballCentreGroundProj;
-                        arma::vec3 proj_rBWw = Hwc.transformPoint(proj_rBCc);
 
                         // Average our two centroids
                         arma::vec3 rBCc = (width_rBCc);
-                        arma::vec3 rBWw = (width_rBWw);
 
                         // Attach the measurement to the object
                         b.measurements.push_back(Ball::Measurement());
-                        b.measurements.back().rBCc = convert<double, 3, 1>(rBCc);
-                        Eigen::Vector3d cov_diag(0.1, 0.01, 0.01);
-                        b.measurements.back().covariance = cov_diag.asDiagonal();
-
-                        Transform3D Hgc       = camToGround;
-                        arma::vec3 width_rBGg = Hgc.transformPoint(ballCentreRay * widthDistance);
-                        arma::vec3 proj_rBGg  = Hgc.transformPoint(ballCentreGroundProj);
-                        // log("ball pos1 =", b.position);
-                        // log("ball pos2 =", b.torsoSpacePosition);
-                        // log("width_rBGg =", width_rBGg.t());
-                        // log("proj_rBGg =", proj_rBGg.t());
-                        // log("ballCentreRay =",ballCentreRay.t());
-                        // log("camToGround =\n",camToGround);
+                        b.measurements.back().rBCc       = convert<double, 3, 1>(rBCc);
+                        b.measurements.back().covariance = convert<double, 3>(ball_angular_cov).asDiagonal();
 
                         // On screen visual shape
                         b.circle.radius = result.model.radius;
@@ -401,5 +387,6 @@ namespace vision {
                     lastFrame.time = sensors.timestamp;
                 });
     }
-}
-}
+
+}  // namespace vision
+}  // namespace module

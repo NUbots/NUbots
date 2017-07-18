@@ -180,6 +180,6 @@ namespace behaviour {
             return (ballPos[0] > 0) && (ballPos[0] < cfg.max_ball_distance)
                    && (std::fabs(ballPos[1]) < cfg.kick_corridor_width / 2.0);
         }
-    }
-}
-}
+    }  // namespace planning
+}  // namespace behaviour
+}  // namespace module

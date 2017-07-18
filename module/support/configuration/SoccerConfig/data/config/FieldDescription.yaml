@@ -8,14 +8,18 @@ FieldLength: 9
 FieldWidth: 6
 GoalDepth: 0.6
 # Distance between inner edges of goal posts.
-GoalWidth: 1.89
+GoalWidth: 1.9
 GoalAreaLength: 0.61
 GoalAreaWidth: 3.50
 # Height to the bottom of the crossbar.
 GoalCrossbarHeight: 1.20
+# What shape the goal is (RECTANGLE,CIRCLE)
+GoalpostType: CIRCLE
 # The crossbar diameter and the goalpost diameter are (supposed to be) equal.
-GoalpostDiameter: 0.11
-GoalCrossbarDiameter: 0.11
+GoalpostWidth: 0.11
+GoalpostDepth: 0.11
+GoalCrossbarWidth: 0.11
+GoalCrossbarDepth: 0.11
 GoalNetHeight: 1.0
 # Measured from the goal line.
 PenaltyMarkDistance: 1.80

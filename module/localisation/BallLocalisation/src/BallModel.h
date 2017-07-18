@@ -70,6 +70,6 @@ namespace localisation {
             return resetRange;
         }
     };
-}
-}
+}  // namespace localisation
+}  // namespace module
 #endif  // MODULE_LOCALISATION_BALLMODEL_H

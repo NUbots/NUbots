@@ -31,5 +31,8 @@ ENDFOREACH()
 #Compile the nutilities library
 ADD_LIBRARY(nutilities ${NUTILITIES_LIBRARIES_FILES})
 
+# Link in our messaging library to ensure they are built first
+TARGET_LINK_LIBRARIES(nutilities ${NUCLEAR_MESSAGE_LIBRARIES})
+
 # SET(NUCLEAR_UTILITY_LIBRARIES ${NUCLEAR_UTILITY_LIBRARIES} ${NUTILITIES_LIBRARIES} CACHE INTERNAL "Library for NUClear utilities" FORCE)
 SET(NUCLEAR_UTILITY_LIBRARIES nutilities CACHE INTERNAL "Library for NUClear utilities" FORCE)

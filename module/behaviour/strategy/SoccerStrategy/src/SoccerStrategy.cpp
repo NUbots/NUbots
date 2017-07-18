@@ -287,7 +287,7 @@ namespace behaviour {
                     auto kickTarget = convert<double, 2>(getKickPlan(selfs, fieldDescription));
                     emit(std::make_unique<KickPlan>(KickPlan(kickTarget, kickType)));
                     emit(utility::nubugger::drawCircle(
-                        "SocStrat_kickTarget", Circle(0.05, convert<double, 2>(kickTarget)), 0.123, {0.8, 0.8, 0}));
+                        "SocStrat_kickTarget", Circle(0.05, convert<double, 2>(kickTarget)), 0.3, {0, 0, 0}));
                 });
         }
 

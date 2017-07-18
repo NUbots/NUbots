@@ -205,10 +205,8 @@ namespace behaviour {
                     arma::vec3 rBWw_temp = {ball.locObject.position[0], ball.locObject.position[1], field.ball_radius};
                     rBWw                 = timeSinceBallSeen < search_timeout ? rBWw_temp :  // Place last seen
                                Htw.x() + Htw.translation();                                  // In front of the robot
-                    arma::vec3 position3d = Htw.transformPoint(rBWw);
-                    position[0]           = position3d[0];
-                    position[1]           = position3d[1];
-
+                    arma::vec3 pos = Htw.transformPoint(rBWw);
+                    position       = arma::vec2{pos[0], pos[1]};
 
                     // Hack Planner:
                     float headingChange = 0;
