@@ -4,6 +4,7 @@
 
 // Includes
 #include "gait_engine.h"
+#include <functional>
 
 // Defines
 #define DEFAULT_HALT_EFFORT_ARMS 0.25  // Default joint effort to use in the halt pose for all the arm joints
@@ -12,6 +13,7 @@
 //
 // GaitEngine class
 //
+namespace gait {
 
 GaitEngine::GaitEngine()
     : model(nullptr)
@@ -44,7 +46,7 @@ GaitEngine::GaitEngine()
     GaitEngine::updateOdometry();
 
     // Reset the gait engine
-    CapGait::reset();
+    GaitEngine::reset();
 
     // Initialise the halt pose
     updateHaltPose();
@@ -54,19 +56,19 @@ GaitEngine::GaitEngine()
     configurePlotManager();
 
     // Set up callbacks for the basic feedback config parameters
-    config.basicFusedFilterN.setCallback(boost::bind(&CapGait::resizeFusedFilters, this, _1));
-    config.basicDFusedFilterN.setCallback(boost::bind(&CapGait::resizeDFusedFilters, this, _1));
-    config.basicIFusedFilterN.setCallback(boost::bind(&CapGait::resizeIFusedFilters, this, _1));
-    config.basicGyroFilterN.setCallback(boost::bind(&CapGait::resizeGyroFilters, this, _1));
+    config.basicFusedFilterN.setCallback(std::bind(&GaitEngine::resizeFusedFilters, this, std::placeholders::_1));
+    config.basicDFusedFilterN.setCallback(std::bind(&GaitEngine::resizeDFusedFilters, this, std::placeholders::_1));
+    config.basicIFusedFilterN.setCallback(std::bind(&GaitEngine::resizeIFusedFilters, this, std::placeholders::_1));
+    config.basicGyroFilterN.setCallback(std::bind(&GaitEngine::resizeGyroFilters, this, std::placeholders::_1));
     resizeFusedFilters(config.basicFusedFilterN());
     resizeDFusedFilters(config.basicDFusedFilterN());
     resizeIFusedFilters(config.basicIFusedFilterN());
     resizeGyroFilters(config.basicGyroFilterN());
 
     // Set up callbacks for the local config parameters
-    m_resetIntegrators.setCallback(boost::bind(&CapGait::resetIntegrators, this));
-    m_showRxVis.setCallback(boost::bind(&CapGait::callbackShowRxVis, this));
-    m_plotData.setCallback(boost::bind(&CapGait::callbackPlotData, this));
+    m_resetIntegrators.setCallback(std::bind(&GaitEngine::resetIntegrators, this));
+    m_showRxVis.setCallback(std::bind(&GaitEngine::callbackShowRxVis, this));
+    m_plotData.setCallback(std::bind(&GaitEngine::callbackPlotData, this));
     resetIntegrators();
     callbackShowRxVis();
     callbackPlotData();
@@ -76,7 +78,7 @@ GaitEngine::GaitEngine()
 }
 
 // Reset function
-void CapGait::reset() {
+void GaitEngine::reset() {
     // Reset the pose variables
     m_jointPose.reset();
     m_jointHaltPose.reset();
@@ -344,7 +346,7 @@ void GaitEngine::updateOdometry() {
 
 
 // Reset function for the integrators
-void CapGait::resetIntegrators() {
+void GaitEngine::resetIntegrators() {
     // Reset the integrators
     iFusedXFeedIntegrator.reset();
     iFusedYFeedIntegrator.reset();
@@ -364,13 +366,13 @@ void CapGait::resetIntegrators() {
 }
 
 // Reset function for the config parameter(s) that save the integrated feedback values
-void CapGait::resetSaveIntegrals() {
+void GaitEngine::resetSaveIntegrals() {
     // Reset the required config parameter(s) to false
     m_saveIFeedToHaltPose.set(false);
 }
 
 // Reset function for capture steps functionality
-void CapGait::resetCaptureSteps(bool resetRobotModel) {
+void GaitEngine::resetCaptureSteps(bool resetRobotModel) {
     // Reset basic feedback filters
     fusedXFeedFilter.reset();
     fusedYFeedFilter.reset();
@@ -437,7 +439,7 @@ void CapGait::resetCaptureSteps(bool resetRobotModel) {
 }
 
 // Reset walking function (this should be the only function that modifies the m_walking flag)
-void CapGait::resetWalking(bool walking, const Eigen::Vector3d& gcvBias) {
+void GaitEngine::resetWalking(bool walking, const Eigen::Vector3d& gcvBias) {
     // Reset variables
     m_walking      = walking;
     m_gcv          = gcvBias;
@@ -457,7 +459,7 @@ void CapGait::resetWalking(bool walking, const Eigen::Vector3d& gcvBias) {
 }
 
 // Process inputs function
-void CapGait::processInputs() {
+void GaitEngine::processInputs() {
     // Transcribe whether it is desired of us to walk right now
     m_walk = in.gaitCmd.walk;
 
@@ -488,7 +490,7 @@ void CapGait::processInputs() {
 }
 
 // Update robot function
-void CapGait::updateRobot(const Eigen::Vector3d& gcvBias) {
+void GaitEngine::updateRobot(const Eigen::Vector3d& gcvBias) {
     // Note: Coming into this function we assume that we have in, m_walk and m_gcvInput available and up to date.
     //       Other class member variables such as m_gcv etc should naturally also be available and have their
     //       values from the last update (or other, if for example this is being called fresh from a reset).
@@ -1084,7 +1086,7 @@ void CapGait::updateRobot(const Eigen::Vector3d& gcvBias) {
 
 
 // Calculate common motion data
-CapGait::CommonMotionData CapGait::calcCommonMotionData(bool isFirst) const {
+GaitEngine::CommonMotionData GaitEngine::calcCommonMotionData(bool isFirst) const {
     // Declare variables
     CommonMotionData CMD;
 
@@ -1192,7 +1194,7 @@ CapGait::CommonMotionData CapGait::calcCommonMotionData(bool isFirst) const {
 }
 
 // Generate the abstract leg motion
-void CapGait::abstractLegMotion(AbstractLegPose& leg)  // 'leg' is assumed to contain the desired leg halt pose
+void GaitEngine::abstractLegMotion(AbstractLegPose& leg)  // 'leg' is assumed to contain the desired leg halt pose
 {
     //
     // Common motion data
@@ -1556,7 +1558,7 @@ void CapGait::abstractLegMotion(AbstractLegPose& leg)  // 'leg' is assumed to co
 }
 
 // Generate the abstract arm motion
-void CapGait::abstractArmMotion(AbstractArmPose& arm)  // 'arm' is assumed to contain the desired arm halt pose
+void GaitEngine::abstractArmMotion(AbstractArmPose& arm)  // 'arm' is assumed to contain the desired arm halt pose
 {
     //
     // Common motion data
@@ -1648,7 +1650,7 @@ void CapGait::abstractArmMotion(AbstractArmPose& arm)  // 'arm' is assumed to co
 }
 
 // Generate the inverse leg motion
-void CapGait::inverseLegMotion(InverseLegPose& leg)  // 'leg' is assumed to contain the desired abstract motion
+void GaitEngine::inverseLegMotion(InverseLegPose& leg)  // 'leg' is assumed to contain the desired abstract motion
 {
     //
     // Common motion data
@@ -1737,7 +1739,7 @@ void CapGait::inverseLegMotion(InverseLegPose& leg)  // 'leg' is assumed to cont
 }
 
 // Abstract pose coercion function
-void CapGait::coerceAbstractPose(AbstractPose& pose) {
+void GaitEngine::coerceAbstractPose(AbstractPose& pose) {
     // Coerce each of the limbs in the abstract pose
     coerceAbstractArmPose(pose.leftArm);
     coerceAbstractArmPose(pose.rightArm);
@@ -1746,7 +1748,7 @@ void CapGait::coerceAbstractPose(AbstractPose& pose) {
 }
 
 // Abstract arm pose coercion function
-void CapGait::coerceAbstractArmPose(AbstractArmPose& arm) {
+void GaitEngine::coerceAbstractArmPose(AbstractArmPose& arm) {
     // Apply the required limits if enabled
     if (config.limArmAngleXUseLimits())
         arm.angleX =
@@ -1762,7 +1764,7 @@ void CapGait::coerceAbstractArmPose(AbstractArmPose& arm) {
 }
 
 // Abstract leg pose coercion function
-void CapGait::coerceAbstractLegPose(AbstractLegPose& leg) {
+void GaitEngine::coerceAbstractLegPose(AbstractLegPose& leg) {
     // Apply the required limits if enabled
     if (config.limLegAngleXUseLimits())
         leg.angleX =
@@ -1792,7 +1794,7 @@ void CapGait::coerceAbstractLegPose(AbstractLegPose& leg) {
 }
 
 // Update outputs function
-void CapGait::updateOutputs() {
+void GaitEngine::updateOutputs() {
     // Transcribe the joint commands
     m_jointPose.writeJointPosArray(out.jointCmd);
     m_jointPose.writeJointEffortArray(out.jointEffort);
@@ -1810,7 +1812,7 @@ void CapGait::updateOutputs() {
 }
 
 // Configure the plot manager
-void CapGait::configurePlotManager() {
+void GaitEngine::configurePlotManager() {
     // Configure gait command vector variables
     m_PM.setName(PM_GCV_X, "gcv/linVelX");
     m_PM.setName(PM_GCV_Y, "gcv/linVelY");
@@ -1957,7 +1959,7 @@ void CapGait::configurePlotManager() {
 }
 
 // Callback for when the plotData parameter is updated
-void CapGait::callbackPlotData() {
+void GaitEngine::callbackPlotData() {
     // Enable or disable plotting as required
     if (m_plotData())
         m_PM.enable();
@@ -1965,17 +1967,8 @@ void CapGait::callbackPlotData() {
         m_PM.disable();
 }
 
-// Callback for when the showRxVis parameter is updated
-void CapGait::callbackShowRxVis() {
-    // Enable or disable the rxVis as required
-    if (m_showRxVis())
-        m_rxVis.enable();
-    else
-        m_rxVis.disable();
-}
-
 // Reset the blending variables
-void CapGait::resetBlending(double b) {
+void GaitEngine::resetBlending(double b) {
     // Disable the blending variables
     m_blending      = false;
     m_b_current     = b;
@@ -1986,8 +1979,8 @@ void CapGait::resetBlending(double b) {
 }
 
 // Set a new blend target (USE_CALC_POSE = 0, USE_HALT_POSE = 1, and everything inbetween is interpolation)
-void CapGait::setBlendTarget(double target,
-                             double phaseTime)  // phaseTime is the gait phase in which to complete the blend
+void GaitEngine::setBlendTarget(double target,
+                                double phaseTime)  // phaseTime is the gait phase in which to complete the blend
 {
     // Blend target range checking
     target = coerce(target, 0.0, 1.0);
@@ -2008,7 +2001,7 @@ void CapGait::setBlendTarget(double target,
 }
 
 // Evaluate the current blend factor
-double CapGait::blendFactor() {
+double GaitEngine::blendFactor() {
     // Update the current blend factor if we are in the process of blending
     if (m_blending) {
         if (m_blendPhase < 0.0)  // Should never happen...
@@ -2032,7 +2025,9 @@ double CapGait::blendFactor() {
 }
 
 // Reset the motion stance adjustment variables
-void CapGait::resetMotionStance() {
+void GaitEngine::resetMotionStance() {
     // Reset variables
     m_motionLegAngleXFact = 1.0;  // Feet normal
 }
+
+}  // namespace gait

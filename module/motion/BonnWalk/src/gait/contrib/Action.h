@@ -286,7 +286,7 @@ namespace contrib {
     struct AbstractLegPose {
         Eigen::Vector3f legAngle;
         double legExtension;
-        Vec2f footAngle;
+        Eigen::Vector2f footAngle;
         double compliance;
 
         AbstractLegPose() {
@@ -296,7 +296,7 @@ namespace contrib {
 
         AbstractLegPose(const Eigen::Vector3f& legAngle,
                         double legExtension,
-                        const Vec2f& footAngle,
+                        const Eigen::Vector2f& footAngle,
                         double compliance = 1.0) {
             this->legAngle     = legAngle;
             this->legExtension = legExtension;

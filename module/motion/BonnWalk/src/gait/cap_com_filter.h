@@ -9,7 +9,7 @@
 #include "utility/math/filter/GolayFilter.h"
 
 // Capture step gait namespace
-namespace cap_gait {
+namespace gait {
 /**
  * @class ComFilter
  *
@@ -83,7 +83,6 @@ private:
     utility::math::filter::GolayFilter<WindowSize> m_filter_x;
     utility::math::filter::GolayFilter<WindowSize> m_filter_y;
 };
-}  // namespace cap_gait
+}  // namespace gait
 
 #endif /* CAP_COM_FILTER_H */
-// EOF

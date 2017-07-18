@@ -2,12 +2,15 @@
 
 #include "extension/Configuration.h"
 #include "message/behaviour/ServoCommand.h"
+#include "message/input/Sensors.h"
 #include "message/motion/WalkCommand.h"
 
 namespace module {
 namespace motion {
 
     using extension::Configuration;
+    using message::behaviour::ServoCommand;
+    using message::input::Sensors;
     using message::motion::DisableWalkEngineCommand;
     using message::motion::EnableWalkEngineCommand;
     using message::motion::StopCommand;
@@ -34,47 +37,51 @@ namespace motion {
             handle.disable();
         });
 
-        handle = on<Every<>, With<Sensors>, Single, Priority::HIGH>(updateRate).then([this](const Sensors& sensors) {
+        handle =
+            on<Every<90, Per<seconds>>, With<Sensors>, Single, Priority::HIGH>().then([this](const Sensors& sensors) {
 
-            // Update our angles
-            for (size_t i = 0; i < sensors.servo.size(); ++i) {
-                engine.in.jointPos[i] = sensors.servo[i].presentPosition;
-            }
+                // Update our angles
+                for (size_t i = 0; i < sensors.servo.size(); ++i) {
+                    engine.in.jointPos[i] = sensors.servo[i].presentPosition;
+                }
 
-            // Update our timestamps
-            double timestamp    = duration_cast<duration<double>>(steady_clock::now().time_since_epoch());
-            engine.in.truedT    = timestamp - engine.in.timestamp;
-            engine.in.timestamp = timestamp;
-            engine.in.nominaldT = duration_cast<duration<double>>(updateRate);
+                // Update our timestamps
+                double timestamp    = duration_cast<duration<double>>(steady_clock::now().time_since_epoch()).count();
+                engine.in.truedT    = timestamp - engine.in.timestamp;
+                engine.in.timestamp = timestamp;
+                engine.in.nominaldT = duration_cast<duration<double>>(updateRate).count();
 
-            // See if we finished walking
-            bool walking = engine.out.walking;
+                // See if we finished walking
+                bool walking = engine.out.walking;
 
-            // Execute our walk engine
-            engine.step();
+                // Execute our walk engine
+                engine.step();
 
-            // If we just stopped, let everyone know we are not walking
-            if (walking && !engine.out.walking) {
-                emit(std::make_unique<WalkStopped>());
-            }
+                // If we just stopped, let everyone know we are not walking
+                if (walking && !engine.out.walking) {
+                    emit(std::make_unique<WalkStopped>());
+                }
+                else if (!walking && engine.out.walking) {
+                    emit(std::make_unique<WalkStarted>());
+                }
 
-            auto waypoints = std::make_unique<std::vector<ServoCommand>>();
+                auto waypoints = std::make_unique<std::vector<ServoCommand>>();
 
-            // Get the outputs
-            for (int i = 0; i < engine.out.jointCmd.size(); ++i) {
-                ServoCommand waypoint;
-                waypoint.source   = subsumptionId;
-                waypoint.time     = NUClear::clock::now() + updateRate;
-                waypoint.id       = i;
-                waypoint.position = engine.out.jointCmd[i];
-                waypoint.gain     = 100 * engine.out.jointEffort[i];
-                waypoint.torque   = 100;
+                // Get the outputs
+                for (size_t i = 0; i < engine.out.jointCmd.size(); ++i) {
+                    ServoCommand waypoint;
+                    waypoint.source   = subsumptionId;
+                    waypoint.time     = NUClear::clock::now() + updateRate;
+                    waypoint.id       = i;
+                    waypoint.position = engine.out.jointCmd[i];
+                    waypoint.gain     = 100 * engine.out.jointEffort[i];
+                    waypoint.torque   = 100;
 
-                waypoints->push_back(std::move(waypoint));
-            }
+                    waypoints->push_back(std::move(waypoint));
+                }
 
-            emit(waypoints);
-        });
+                emit(waypoints);
+            });
 
         on<Trigger<WalkCommand>>().then([this](const WalkCommand& cmd) {
 

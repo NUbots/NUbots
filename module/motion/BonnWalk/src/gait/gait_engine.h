@@ -9,6 +9,7 @@
 // Includes
 #include <Eigen/Core>
 #include <array>
+#include "cap_com_filter.h"
 #include "gait_interface.h"
 
 // Gait namespace
@@ -227,8 +228,8 @@ private:
 
     // Constants
     const std::string CONFIG_PARAM_PATH;
-    static const double USE_HALT_POSE = 1.0;
-    static const double USE_CALC_POSE = 0.0;
+    static constexpr double USE_HALT_POSE = 1.0;
+    static constexpr double USE_CALC_POSE = 0.0;
 
     // Gait configuration struct
     CapConfig config;
@@ -385,4 +386,4 @@ private:
 
 }  // namespace gait
 
-#endif /* GAIT_ENGINE_H */
+#endif  // GAIT_ENGINE_H
