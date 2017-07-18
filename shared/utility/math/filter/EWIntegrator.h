@@ -6,8 +6,7 @@
 #ifndef EW_INTEGRATOR_H
 #define EW_INTEGRATOR_H
 
-// Includes
-#include <rc_utils/math_funcs.h>
+#include "utility/math/comparison.h"
 
 namespace utility {
 namespace math {
@@ -52,7 +51,7 @@ namespace math {
                 m_integral = 0.0;
             }
             void setAlpha(double alpha) {
-                m_alpha = coerce(alpha, 0.0, 1.0);
+                m_alpha = clamp(0.0, alpha, 1.0);
             }
             void setHalfLife(double cycles) {
                 m_alpha = (cycles <= 1e-6 ? 0.0 : std::pow(0.5, 1.0 / cycles));

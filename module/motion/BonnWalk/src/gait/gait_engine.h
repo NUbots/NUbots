@@ -12,8 +12,12 @@
 #include "cap_com_filter.h"
 #include "contrib/Action.h"
 #include "contrib/Limp.h"
+#include "contrib/LimpModel.h"
 #include "gait_interface.h"
+#include "util/gait_abstract_pose.h"
+#include "util/gait_inverse_pose.h"
 #include "util/gait_joint_pose.h"
+#include "utility/math/filter/EWIntegrator.h"
 #include "utility/math/filter/GolayDerivative.h"
 #include "utility/math/filter/MeanFilter.h"
 #include "utility/math/filter/WLBFFilter.h"
@@ -155,7 +159,7 @@ private:
             , suppTransStopPhase(doubleSupportPhase)
             , liftingPhaseLen(M_PI - doubleSupportPhase)
             , suppPhaseLen(M_PI + doubleSupportPhase)
-            , nonSuppPhaseLen(M_2PI - suppPhaseLen)
+            , nonSuppPhaseLen(M_PI * 2.0 - suppPhaseLen)
             , sinusoidPhaseLen(M_PI)
             , linearPhaseLen(M_PI)
             , swingAngle(0.0) {}
@@ -208,14 +212,14 @@ private:
     CommonMotionData calcCommonMotionData(bool isFirst) const;
 
     // Motion functions
-    void abstractLegMotion(contrib::AbstractLegPose& leg);
-    void abstractArmMotion(contrib::AbstractArmPose& arm);
-    void inverseLegMotion(contrib::InverseLegPose& leg);
+    void abstractLegMotion(util::AbstractLegPose& leg);
+    void abstractArmMotion(util::AbstractArmPose& arm);
+    void inverseLegMotion(util::InverseLegPose& leg);
 
     // Coercion functions
-    void coerceAbstractPose(contrib::AbstractPose& pose);
-    void coerceAbstractArmPose(contrib::AbstractArmPose& arm);
-    void coerceAbstractLegPose(contrib::AbstractLegPose& leg);
+    void coerceAbstractPose(util::AbstractPose& pose);
+    void coerceAbstractArmPose(util::AbstractArmPose& arm);
+    void coerceAbstractLegPose(util::AbstractLegPose& leg);
 
     // Output processing
     void updateOutputs();
@@ -241,12 +245,12 @@ private:
     CapConfig config;
 
     // Pose variables
-    JointPose m_jointPose;            // Joint representation of the pose to command in a step
-    JointPose m_jointHaltPose;        // Joint representation of the gait halt pose
-    JointPose m_lastJointPose;        // The last joint pose to have been commanded during walking
-    InversePose m_inversePose;        // Inverse representation of the pose to command in a step
-    AbstractPose m_abstractPose;      // Abstract representation of the pose to command in a step
-    AbstractPose m_abstractHaltPose;  // Abstract representation of the gait halt pose
+    util::JointPose m_jointPose;               // Joint representation of the pose to command in a step
+    util::JointPose m_jointHaltPose;           // Joint representation of the gait halt pose
+    util::JointPose m_lastJointPose;           // The last joint pose to have been commanded during walking
+    contrib::InversePose m_inversePose;        // Inverse representation of the pose to command in a step
+    contrib::AbstractPose m_abstractPose;      // Abstract representation of the pose to command in a step
+    contrib::AbstractPose m_abstractHaltPose;  // Abstract representation of the gait halt pose
 
     // Gait command vector variables
     // Gait command velocity vector (slope-limited command velocities actually followed by the gait engine)
@@ -361,7 +365,6 @@ private:
 
     // Capture step robot model
     contrib::RobotModel rxRobotModel;
-    contrib::RobotModelVis m_rxVis;
     config_server::Parameter<bool> m_showRxVis;
     void callbackShowRxVis();
 
@@ -378,7 +381,7 @@ private:
 
     // Miscellaneous
     config_server::Parameter<float> m_gcvZeroTime;
-    contrib::Vec2f adaptation;
+    Eigen::Vector2f adaptation;
     double lastSupportOrientation;
     double oldGcvTargetY;
     double virtualSlope;

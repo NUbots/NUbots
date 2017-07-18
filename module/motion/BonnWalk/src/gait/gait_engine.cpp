@@ -6,6 +6,8 @@
 #include "gait_engine.h"
 
 #include <functional>
+#include "utility/math/comparison.h"
+#include "utility/math/filter/SlopeLimiter.h"
 #include "utility/math/filter/SmoothDeadband.h"
 
 // Defines
@@ -502,7 +504,7 @@ void GaitEngine::updateRobot(const Eigen::Vector3d& gcvBias) {
     cycleNumber++;
 
     // Transcribe the gcv input
-    Vec3f gcvInput(m_gcvInput.x(), m_gcvInput.y(), m_gcvInput.z());
+    Eigen::Vector3f gcvInput(m_gcvInput.x(), m_gcvInput.y(), m_gcvInput.z());
 
     // Calculate the current unbiased gait command vector
     Eigen::Vector3d gcvUnbiased = m_gcv - gcvBias;  // Should only be used for checking the proximity of gcv to a
@@ -573,7 +575,7 @@ void GaitEngine::updateRobot(const Eigen::Vector3d& gcvBias) {
         double supportOrientation        = rxRobotModel.fusedYaw(rxRobotModel.suppFootstep.orientation());
         double angleFromLastToNewSupport = picut(supportOrientation - lastSupportOrientation);
         lastSupportOrientation           = supportOrientation;
-        Vec2f v(rxModel.vx, rxModel.vy);
+        Eigen::Vector2f v(rxModel.vx, rxModel.vy);
         v.rotate(-angleFromLastToNewSupport);  // To maintain continuous velocity in the world frame, rotate the CoM
                                                // velocity vector into the new support frame.
         m_comFilter.reset(systemIterationTime, suppComVector.x, suppComVector.y, v.x, v.y);
@@ -650,34 +652,36 @@ void GaitEngine::updateRobot(const Eigen::Vector3d& gcvBias) {
     double adaptationY = (loopClosed ? config.nsAdaptationGain() : 0.0);
 
     // Calculate step noise suppression factor
-    double phase = qMax(qMin(txModel.timeToStep, qMin(mxModel.timeToStep, mxModel.timeSinceStep)), 0.0);
+    double phase = std::max(std::min(txModel.timeToStep, std::min(mxModel.timeToStep, mxModel.timeSinceStep)), 0.0);
     double stepNoiseSuppression =
         1.0 - exp(-(phase * phase) / (2.0 * config.nsStepNoiseTime() * config.nsStepNoiseTime()));
     adaptationX *= stepNoiseSuppression;
     adaptationY *= stepNoiseSuppression;
 
     // If we are near the expected state, there is no need for adaptation.
-    Vec2f expectationDeviation;
-    expectationDeviation.x = config.nsGain() * (Vec2f(rxModel.x, rxModel.vx) - Vec2f(mxModel.x, mxModel.vx)).norm();
-    expectationDeviation.y = config.nsGain() * (Vec2f(rxModel.y, rxModel.vy) - Vec2f(mxModel.y, mxModel.vy)).norm();
+    Eigen::Vector2f expectationDeviation;
+    expectationDeviation.x =
+        config.nsGain() * (Eigen::Vector2f(rxModel.x, rxModel.vx) - Eigen::Vector2f(mxModel.x, mxModel.vx)).norm();
+    expectationDeviation.y =
+        config.nsGain() * (Eigen::Vector2f(rxModel.y, rxModel.vy) - Eigen::Vector2f(mxModel.y, mxModel.vy)).norm();
     adaptationX *= expectationDeviation.x;
     adaptationY *= expectationDeviation.y;
 
     //  // If our fused angle is within a certain nominal range then don't adapt
-    //  Vec2f fusedAngleAdaptation;
+    //  Eigen::Vector2f fusedAngleAdaptation;
     //  fusedAngleAdaptation.x = ((fusedY <= config.nsFusedYRangeLBnd() || fusedY >= config.nsFusedYRangeUBnd()) ? 1.0 :
     //  0.0); fusedAngleAdaptation.y = ((fusedX <= config.nsFusedXRangeLBnd() || fusedX >= config.nsFusedXRangeUBnd())
     //  ? 1.0 : 0.0); adaptationX *= fusedAngleAdaptation.x; adaptationY *= fusedAngleAdaptation.y;
 
     //  // If we are near the nominal state, there is no need for adaptation.
-    //  Vec2f nominalAdaptation;
+    //  Eigen::Vector2f nominalAdaptation;
     //  nominalAdaptation.x = (qAbs(rxModel.energyX - rxModel.nominalState.energyX) > config.nsMinDeviation() ?
     //  config.nsGain() * qAbs(rxModel.energyX - rxModel.nominalState.energyX) : 0.0); nominalAdaptation.y =
     //  (qAbs(rxModel.energyY - rxModel.nominalState.energyY) > config.nsMinDeviation() ? config.nsGain() *
     //  qAbs(rxModel.energyY - rxModel.nominalState.energyY) : 0.0);
 
     //  // If the fused angle is near zero, there is no need for adaptation.
-    //  Vec2f fusedAngleAdaptation;
+    //  Eigen::Vector2f fusedAngleAdaptation;
     //  fusedAngleAdaptation.x = (absFusedY > config.nsMinDeviation() ? config.nsGain() * absFusedY : 0.0);
     //  fusedAngleAdaptation.y = (absFusedX > config.nsMinDeviation() ? config.nsGain() * absFusedX : 0.0);
 
@@ -860,7 +864,7 @@ void GaitEngine::updateRobot(const Eigen::Vector3d& gcvBias) {
     //
 
     // By default use a nominal CL step size (this should approximately emulate walking OL with zero GCV)
-    Vec3f stepSize(0.0, 2.0 * supportLegSign * config.hipWidth(), 0.0);
+    Eigen::Vector3f stepSize(0.0, 2.0 * supportLegSign * config.hipWidth(), 0.0);
 
     // If desired, use the TX model step size instead
     if (config.cmdUseTXStepSize()) stepSize = txModel.stepSize;
@@ -874,7 +878,7 @@ void GaitEngine::updateRobot(const Eigen::Vector3d& gcvBias) {
     // asymmetrical steps, we use the center point between the feet as the sex and map the sex position between alpha,
     // delta and omega to the gcv.
     Eigen::Vector3d gcvTarget;
-    Vec3f sex = 0.5 * stepSize;
+    Eigen::Vector3f sex = 0.5 * stepSize;
     limp.set(0.0, sigma, C);
     limp.update(Limp(alpha, 0, C).tLoc(delta));
     gcvTarget.x() = sex.x / limp.x0;
@@ -960,12 +964,12 @@ void GaitEngine::updateRobot(const Eigen::Vector3d& gcvBias) {
     // Calculate and filter the gait command acceleration
     m_gcvDeriv.put(m_gcv);
     Eigen::Vector3d gcvAccRaw = m_gcvDeriv.value() / systemIterationTime;
-    m_gcvAccSmoothX.put(
-        SlopeLimiter::eval(gcvAccRaw.x(), m_gcvAcc.x(), config.gcvAccJerkLimitX() * systemIterationTime));
-    m_gcvAccSmoothY.put(
-        SlopeLimiter::eval(gcvAccRaw.y(), m_gcvAcc.y(), config.gcvAccJerkLimitY() * systemIterationTime));
-    m_gcvAccSmoothZ.put(
-        SlopeLimiter::eval(gcvAccRaw.z(), m_gcvAcc.z(), config.gcvAccJerkLimitZ() * systemIterationTime));
+    m_gcvAccSmoothX.put(utility::math::filter::SlopeLimiter::eval(
+        gcvAccRaw.x(), m_gcvAcc.x(), config.gcvAccJerkLimitX() * systemIterationTime));
+    m_gcvAccSmoothY.put(utility::math::filter::SlopeLimiter::eval(
+        gcvAccRaw.y(), m_gcvAcc.y(), config.gcvAccJerkLimitY() * systemIterationTime));
+    m_gcvAccSmoothZ.put(utility::math::filter::SlopeLimiter::eval(
+        gcvAccRaw.z(), m_gcvAcc.z(), config.gcvAccJerkLimitZ() * systemIterationTime));
     m_gcvAcc.x() = m_gcvAccSmoothX.value();
     m_gcvAcc.y() = m_gcvAccSmoothY.value();
     m_gcvAcc.z() = m_gcvAccSmoothZ.value();
@@ -991,7 +995,7 @@ void GaitEngine::updateRobot(const Eigen::Vector3d& gcvBias) {
             && ((in.motionAdjustLeftFoot && rxRobotModel.supportLegSign == RobotModel::RIGHT_LEG)
                 || (in.motionAdjustRightFoot && rxRobotModel.supportLegSign == RobotModel::LEFT_LEG)
                 || (!in.motionAdjustLeftFoot && !in.motionAdjustRightFoot)))) {
-        m_motionLegAngleXFact = SlopeLimiter::eval(
+        m_motionLegAngleXFact = utility::math::filter::SlopeLimiter::eval(
             targetLegAngleXFact, m_motionLegAngleXFact, config.stanceAdjustRate() * systemIterationTime);
     }
 
@@ -1203,8 +1207,8 @@ GaitEngine::CommonMotionData GaitEngine::calcCommonMotionData(bool isFirst) cons
 }
 
 // Generate the abstract leg motion
-void GaitEngine::abstractLegMotion(AbstractLegPose& leg)  // 'leg' is assumed to contain the desired leg halt pose
-{
+// 'leg' is assumed to contain the desired leg halt pose
+void GaitEngine::abstractLegMotion(util::AbstractLegPose& leg) {
     //
     // Common motion data
     //
@@ -1587,8 +1591,8 @@ void GaitEngine::abstractLegMotion(AbstractLegPose& leg)  // 'leg' is assumed to
 }
 
 // Generate the abstract arm motion
-void GaitEngine::abstractArmMotion(AbstractArmPose& arm)  // 'arm' is assumed to contain the desired arm halt pose
-{
+// 'arm' is assumed to contain the desired arm halt pose
+void GaitEngine::abstractArmMotion(util::AbstractArmPose& arm) {
     //
     // Common motion data
     //
@@ -1768,7 +1772,7 @@ void GaitEngine::inverseLegMotion(InverseLegPose& leg)  // 'leg' is assumed to c
 }
 
 // Abstract pose coercion function
-void GaitEngine::coerceAbstractPose(AbstractPose& pose) {
+void GaitEngine::coerceAbstractPose(util::AbstractPose& pose) {
     // Coerce each of the limbs in the abstract pose
     coerceAbstractArmPose(pose.leftArm);
     coerceAbstractArmPose(pose.rightArm);
@@ -1777,7 +1781,7 @@ void GaitEngine::coerceAbstractPose(AbstractPose& pose) {
 }
 
 // Abstract arm pose coercion function
-void GaitEngine::coerceAbstractArmPose(AbstractArmPose& arm) {
+void GaitEngine::coerceAbstractArmPose(util::AbstractArmPose& arm) {
     // Apply the required limits if enabled
     if (config.limArmAngleXUseLimits())
         arm.angleX =
@@ -1793,7 +1797,7 @@ void GaitEngine::coerceAbstractArmPose(AbstractArmPose& arm) {
 }
 
 // Abstract leg pose coercion function
-void GaitEngine::coerceAbstractLegPose(AbstractLegPose& leg) {
+void GaitEngine::coerceAbstractLegPose(util::AbstractLegPose& leg) {
     // Apply the required limits if enabled
     if (config.limLegAngleXUseLimits())
         leg.angleX =

@@ -7,297 +7,300 @@
 #define GAIT_ABSTRACT_POSE_H
 
 // Includes
-#include <gait/util/gait_common_pose.h>
+#include "gait_common_pose.h"
+#include "gait_joint_pose.h"
 
-// Gait namespace
 namespace gait {
-// Class forward declarations
-class JointPose;
-class JointLegPose;
-class JointArmPose;
-class InversePose;
-class InverseLegPose;
-class InverseArmPose;
-class AbstractPose;
-class AbstractLegPose;
-class AbstractArmPose;
+namespace util {
 
-/**
- * @struct AbstractLegPose
- *
- * @brief Data struct that encompasses the abstract representation of a leg pose.
- *
- * The assumed joint order is `hip yaw` &rarr; `hip roll` &rarr; `hip pitch` &rarr; `knee pitch` &rarr; `ankle pitch`
- *&rarr; `ankle roll`. The upper and lower leg links are assumed to be of the same length. The correct value of the link
- *length must be set only if `setFromInversePose()` is used.
- **/
-struct AbstractLegPose {
-    //
-    // Constructor
-    //
+    class JointPose;
+    class JointLegPose;
+    class JointArmPose;
+    class InversePose;
+    class InverseLegPose;
+    class InverseArmPose;
+    class AbstractPose;
+    class AbstractLegPose;
+    class AbstractArmPose;
 
-    //! Default constructor
-    explicit AbstractLegPose(bool left = true) {
-        reset(left);
-    }
+    /**
+     * @struct AbstractLegPose
+     *
+     * @brief Data struct that encompasses the abstract representation of a leg pose.
+     *
+     * The assumed joint order is `hip yaw` &rarr; `hip roll` &rarr; `hip pitch` &rarr; `knee pitch` &rarr; `ankle
+     *pitch` &rarr; `ankle roll`. The upper and lower leg links are assumed to be of the same length. The correct value
+     *of the link length must be set only if `setFromInversePose()` is used.
+     **/
+    struct AbstractLegPose {
+        //
+        // Constructor
+        //
 
-    //! Reset function
-    inline void reset(bool left = true) {
-        cld.reset(left);
-        setPose(0.0, 0.0, 0.0, 0.0);
-        setFootPose(0.0, 0.0);
-    }
+        //! Default constructor
+        explicit AbstractLegPose(bool left = true) {
+            reset(left);
+        }
 
-    //
-    // Set functions
-    //
+        //! Reset function
+        inline void reset(bool left = true) {
+            cld.reset(left);
+            setPose(0.0, 0.0, 0.0, 0.0);
+            setFootPose(0.0, 0.0);
+        }
 
-    //! Set the abstract pose (directly set the abstract pose parameters)
-    inline void setPose(double ext, double angX, double angY, double angZ) {
-        extension = ext;
-        angleX    = angX;
-        angleY    = angY;
-        angleZ    = angZ;
-    }
+        //
+        // Set functions
+        //
 
-    //! Set the abstract pose in mirror mode (directly set the abstract pose parameters if this is the left leg, or
-    //! mirror the pose if this is the right leg)
-    inline void setPoseMirrored(double ext, double angX, double angY, double angZ) {
-        extension = ext;
-        angleX    = (cld.isLeft ? angX : -angX);
-        angleY    = angY;
-        angleZ    = (cld.isLeft ? angZ : -angZ);
-    }
+        //! Set the abstract pose (directly set the abstract pose parameters)
+        inline void setPose(double ext, double angX, double angY, double angZ) {
+            extension = ext;
+            angleX    = angX;
+            angleY    = angY;
+            angleZ    = angZ;
+        }
 
-    //! Set the abstract foot pose (directly set the abstract foot pose parameters)
-    inline void setFootPose(double footAngX, double footAngY) {
-        footAngleX = footAngX;
-        footAngleY = footAngY;
-    }
+        //! Set the abstract pose in mirror mode (directly set the abstract pose parameters if this is the left leg, or
+        //! mirror the pose if this is the right leg)
+        inline void setPoseMirrored(double ext, double angX, double angY, double angZ) {
+            extension = ext;
+            angleX    = (cld.isLeft ? angX : -angX);
+            angleY    = angY;
+            angleZ    = (cld.isLeft ? angZ : -angZ);
+        }
 
-    //! Set the abstract foot pose in mirror mode (directly set the abstract foot pose parameters if this is the left
-    //! leg, or mirror the pose if this is the right leg)
-    inline void setFootPoseMirrored(double footAngX, double footAngY) {
-        footAngleX = (cld.isLeft ? footAngX : -footAngX);
-        footAngleY = footAngY;
-    }
+        //! Set the abstract foot pose (directly set the abstract foot pose parameters)
+        inline void setFootPose(double footAngX, double footAngY) {
+            footAngleX = footAngX;
+            footAngleY = footAngY;
+        }
 
-    //! Set the link length used for pose conversions
-    inline void setLinkLength(double length) {
-        cld.linkLength = length;
-    }
+        //! Set the abstract foot pose in mirror mode (directly set the abstract foot pose parameters if this is the
+        //! left leg, or mirror the pose if this is the right leg)
+        inline void setFootPoseMirrored(double footAngX, double footAngY) {
+            footAngleX = (cld.isLeft ? footAngX : -footAngX);
+            footAngleY = footAngY;
+        }
 
-    //
-    // Pose conversion functions
-    //
+        //! Set the link length used for pose conversions
+        inline void setLinkLength(double length) {
+            cld.linkLength = length;
+        }
 
-    //! Set the abstract leg pose to a given joint leg pose
-    void setFromJointPose(const JointLegPose& pose);
+        //
+        // Pose conversion functions
+        //
 
-    //! Set the abstract leg pose to a given inverse leg pose
-    void setFromInversePose(const InverseLegPose& pose);
+        //! Set the abstract leg pose to a given joint leg pose
+        void setFromJointPose(const JointLegPose& pose);
 
-    //! Set the pose of the leg to the pose defined by the given joint angles
-    void fromJointAngles(double hipYaw,
-                         double hipRoll,
-                         double hipPitch,
-                         double kneePitch,
-                         double anklePitch,
-                         double ankleRoll);
+        //! Set the abstract leg pose to a given inverse leg pose
+        void setFromInversePose(const InverseLegPose& pose);
 
-    //! Calculate the joint angles corresponding to the current abstract leg pose
-    void getJointAngles(double& hipYaw,
-                        double& hipRoll,
-                        double& hipPitch,
-                        double& kneePitch,
-                        double& anklePitch,
-                        double& ankleRoll) const;
+        //! Set the pose of the leg to the pose defined by the given joint angles
+        void fromJointAngles(double hipYaw,
+                             double hipRoll,
+                             double hipPitch,
+                             double kneePitch,
+                             double anklePitch,
+                             double ankleRoll);
 
-    //
-    // Data members
-    //
+        //! Calculate the joint angles corresponding to the current abstract leg pose
+        void getJointAngles(double& hipYaw,
+                            double& hipRoll,
+                            double& hipPitch,
+                            double& kneePitch,
+                            double& anklePitch,
+                            double& ankleRoll) const;
 
-    // Common leg data
-    CommonLegData cld;  //!< Data that is shared by all leg pose representations
+        //
+        // Data members
+        //
 
-    // Leg pose
-    double extension;  //!< Extension of the leg (in the range `[0,1]`, 0 = Fully extended, 1 = Fully contracted)
-    double angleX;     //!< Orientation angle of the leg axis about the positive x axis (2nd ZXY Euler angle)
-    double angleY;     //!< Orientation angle of the leg axis about the positive y axis (3rd ZXY Euler angle)
-    double angleZ;     //!< Orientation angle of the leg axis about the positive z axis (1st ZXY Euler angle)
+        // Common leg data
+        CommonLegData cld;  //!< Data that is shared by all leg pose representations
 
-    // Foot pose
-    double footAngleX;  //!< Global orientation angle of the foot about the positive x axis (more precisely, if all
-                        //!< non-roll servo positions are zeroed then footAngleX is the pure roll rotation from the
-                        //!< global frame to the foot frame)
-    double footAngleY;  //!< Global orientation angle of the foot about the positive y axis (more precisely, if all
-                        //!< non-pitch servo positions are zeroed then footAngleY is the pure pitch rotation from the
-                        //!< global frame to the foot frame)
-};
+        // Leg pose
+        double extension;  //!< Extension of the leg (in the range `[0,1]`, 0 = Fully extended, 1 = Fully contracted)
+        double angleX;     //!< Orientation angle of the leg axis about the positive x axis (2nd ZXY Euler angle)
+        double angleY;     //!< Orientation angle of the leg axis about the positive y axis (3rd ZXY Euler angle)
+        double angleZ;     //!< Orientation angle of the leg axis about the positive z axis (1st ZXY Euler angle)
 
-/**
- * @struct AbstractArmPose
- *
- * @brief Data struct that encompasses the abstract representation of an arm pose.
- *
- * The assumed joint order is `shoulder pitch` &rarr; `shoulder roll` &rarr; `elbow pitch`. The upper and lower arm
- *links are assumed to be of the same length (i.e. `cad.linkLength`). The correct value of the link length must be set
- *only if `setFromInversePose()` is used.
- **/
-struct AbstractArmPose {
-    //
-    // Constructor
-    //
+        // Foot pose
+        double footAngleX;  //!< Global orientation angle of the foot about the positive x axis (more precisely, if all
+                            //!< non-roll servo positions are zeroed then footAngleX is the pure roll rotation from the
+                            //!< global frame to the foot frame)
+        double
+            footAngleY;  //!< Global orientation angle of the foot about the positive y axis (more precisely, if all
+                         //!< non-pitch servo positions are zeroed then footAngleY is the pure pitch rotation from the
+                         //!< global frame to the foot frame)
+    };
 
-    //! Default constructor
-    explicit AbstractArmPose(bool left = true) {
-        reset(left);
-    }
+    /**
+     * @struct AbstractArmPose
+     *
+     * @brief Data struct that encompasses the abstract representation of an arm pose.
+     *
+     * The assumed joint order is `shoulder pitch` &rarr; `shoulder roll` &rarr; `elbow pitch`. The upper and lower arm
+     *links are assumed to be of the same length (i.e. `cad.linkLength`). The correct value of the link length must be
+     *set only if `setFromInversePose()` is used.
+     **/
+    struct AbstractArmPose {
+        //
+        // Constructor
+        //
 
-    //! Reset function
-    inline void reset(bool left = true) {
-        cad.reset(left);
-        setPose(0.0, 0.0, 0.0);
-    }
+        //! Default constructor
+        explicit AbstractArmPose(bool left = true) {
+            reset(left);
+        }
 
-    //
-    // Set functions
-    //
+        //! Reset function
+        inline void reset(bool left = true) {
+            cad.reset(left);
+            setPose(0.0, 0.0, 0.0);
+        }
 
-    //! Set the abstract pose (directly set the abstract pose parameters)
-    inline void setPose(double ext, double angX, double angY) {
-        extension = ext;
-        angleX    = angX;
-        angleY    = angY;
-    }
+        //
+        // Set functions
+        //
 
-    //! Set the abstract pose in mirror mode (directly set the abstract pose parameters if this is the left arm, or
-    //! mirror the pose if this is the right arm)
-    inline void setPoseMirrored(double ext, double angX, double angY) {
-        extension = ext;
-        angleX    = (cad.isLeft ? angX : -angX);
-        angleY    = angY;
-    }
+        //! Set the abstract pose (directly set the abstract pose parameters)
+        inline void setPose(double ext, double angX, double angY) {
+            extension = ext;
+            angleX    = angX;
+            angleY    = angY;
+        }
 
-    //! Set the link length used for pose conversions
-    inline void setLinkLength(double length) {
-        cad.linkLength = length;
-    }
+        //! Set the abstract pose in mirror mode (directly set the abstract pose parameters if this is the left arm, or
+        //! mirror the pose if this is the right arm)
+        inline void setPoseMirrored(double ext, double angX, double angY) {
+            extension = ext;
+            angleX    = (cad.isLeft ? angX : -angX);
+            angleY    = angY;
+        }
 
-    //
-    // Pose conversion functions
-    //
+        //! Set the link length used for pose conversions
+        inline void setLinkLength(double length) {
+            cad.linkLength = length;
+        }
 
-    //! Set the abstract arm pose to a given joint arm pose
-    void setFromJointPose(const JointArmPose& pose);
+        //
+        // Pose conversion functions
+        //
 
-    //! Set the abstract arm pose to a given inverse arm pose
-    void setFromInversePose(const InverseArmPose& pose);
+        //! Set the abstract arm pose to a given joint arm pose
+        void setFromJointPose(const JointArmPose& pose);
 
-    //! Set the pose of the arm to the pose defined by the given joint angles
-    void fromJointAngles(double shoulderPitch, double shoulderRoll, double elbowPitch);
+        //! Set the abstract arm pose to a given inverse arm pose
+        void setFromInversePose(const InverseArmPose& pose);
 
-    //! Calculate the joint angles corresponding to the current abstract arm pose
-    void getJointAngles(double& shoulderPitch, double& shoulderRoll, double& elbowPitch) const;
+        //! Set the pose of the arm to the pose defined by the given joint angles
+        void fromJointAngles(double shoulderPitch, double shoulderRoll, double elbowPitch);
 
-    //
-    // Data members
-    //
+        //! Calculate the joint angles corresponding to the current abstract arm pose
+        void getJointAngles(double& shoulderPitch, double& shoulderRoll, double& elbowPitch) const;
 
-    // Common arm data
-    CommonArmData cad;  //!< Data that is shared by all arm pose representations
+        //
+        // Data members
+        //
 
-    // Arm pose
-    double extension;  //!< Extension of the arm (in the range `[0,1]`, 0 = Fully extended, 1 = Fully contracted)
-    double
-        angleX;  //!< Orientation angle of the arm axis about the positive x axis (3rd ZYX Euler angle, angleZ is zero)
-    double
-        angleY;  //!< Orientation angle of the arm axis about the positive y axis (2nd ZYX Euler angle, angleZ is zero)
-};
+        // Common arm data
+        CommonArmData cad;  //!< Data that is shared by all arm pose representations
 
-/**
- * @struct AbstractPose
- *
- * @brief Data struct that encompasses the abstract representation of a robot pose.
- *
- * The correct value of the link lengths must be set only if a pose conversion function involving the inverse pose
- *representation is used.
- **/
-struct AbstractPose {
-    //
-    // Constructor
-    //
+        // Arm pose
+        double extension;  //!< Extension of the arm (in the range `[0,1]`, 0 = Fully extended, 1 = Fully contracted)
+        double angleX;  //!< Orientation angle of the arm axis about the positive x axis (3rd ZYX Euler angle, angleZ is
+                        //!< zero)
+        double angleY;  //!< Orientation angle of the arm axis about the positive y axis (2nd ZYX Euler angle, angleZ is
+                        //!< zero)
+    };
 
-    //! Default constructor
-    AbstractPose() {
-        reset();
-    }
+    /**
+     * @struct AbstractPose
+     *
+     * @brief Data struct that encompasses the abstract representation of a robot pose.
+     *
+     * The correct value of the link lengths must be set only if a pose conversion function involving the inverse pose
+     *representation is used.
+     **/
+    struct AbstractPose {
+        //
+        // Constructor
+        //
 
-    //! Reset function
-    inline void reset() {
-        leftLeg.reset(true);
-        rightLeg.reset(false);
-        leftArm.reset(true);
-        rightArm.reset(false);
-    }
+        //! Default constructor
+        AbstractPose() {
+            reset();
+        }
 
-    //
-    // Set functions
-    //
+        //! Reset function
+        inline void reset() {
+            leftLeg.reset(true);
+            rightLeg.reset(false);
+            leftArm.reset(true);
+            rightArm.reset(false);
+        }
 
-    //! Set the arm and leg link lengths used for pose conversions
-    inline void setLinkLengths(double legLinkLength, double armLinkLength) {
-        leftLeg.cld.setLinkLength(legLinkLength);
-        rightLeg.cld.setLinkLength(legLinkLength);
-        leftArm.cad.setLinkLength(armLinkLength);
-        rightArm.cad.setLinkLength(armLinkLength);
-    }
+        //
+        // Set functions
+        //
 
-    //
-    // Pose conversion functions
-    //
+        //! Set the arm and leg link lengths used for pose conversions
+        inline void setLinkLengths(double legLinkLength, double armLinkLength) {
+            leftLeg.cld.setLinkLength(legLinkLength);
+            rightLeg.cld.setLinkLength(legLinkLength);
+            leftArm.cad.setLinkLength(armLinkLength);
+            rightArm.cad.setLinkLength(armLinkLength);
+        }
 
-    //! Set the abstract pose to a given joint pose
-    void setFromJointPose(const JointPose& pose);
+        //
+        // Pose conversion functions
+        //
 
-    //! Set the abstract pose to a given inverse pose
-    void setFromInversePose(const InversePose& pose);
+        //! Set the abstract pose to a given joint pose
+        void setFromJointPose(const JointPose& pose);
 
-    //! Set the abstract leg poses to given joint poses
-    inline void setLegsFromJointPose(const JointLegPose& left, const JointLegPose& right) {
-        leftLeg.setFromJointPose(left);
-        rightLeg.setFromJointPose(right);
-    }
+        //! Set the abstract pose to a given inverse pose
+        void setFromInversePose(const InversePose& pose);
 
-    //! Set the abstract leg poses to given inverse poses
-    inline void setLegsFromInversePose(const InverseLegPose& left, const InverseLegPose& right) {
-        leftLeg.setFromInversePose(left);
-        rightLeg.setFromInversePose(right);
-    }
+        //! Set the abstract leg poses to given joint poses
+        inline void setLegsFromJointPose(const JointLegPose& left, const JointLegPose& right) {
+            leftLeg.setFromJointPose(left);
+            rightLeg.setFromJointPose(right);
+        }
 
-    //! Set the abstract arm poses to given joint poses
-    inline void setArmsFromJointPose(const JointArmPose& left, const JointArmPose& right) {
-        leftArm.setFromJointPose(left);
-        rightArm.setFromJointPose(right);
-    }
+        //! Set the abstract leg poses to given inverse poses
+        inline void setLegsFromInversePose(const InverseLegPose& left, const InverseLegPose& right) {
+            leftLeg.setFromInversePose(left);
+            rightLeg.setFromInversePose(right);
+        }
 
-    //! Set the abstract arm poses to given inverse poses
-    inline void setArmsFromInversePose(const InverseArmPose& left, const InverseArmPose& right) {
-        leftArm.setFromInversePose(left);
-        rightArm.setFromInversePose(right);
-    }
+        //! Set the abstract arm poses to given joint poses
+        inline void setArmsFromJointPose(const JointArmPose& left, const JointArmPose& right) {
+            leftArm.setFromJointPose(left);
+            rightArm.setFromJointPose(right);
+        }
 
-    //
-    // Data members
-    //
+        //! Set the abstract arm poses to given inverse poses
+        inline void setArmsFromInversePose(const InverseArmPose& left, const InverseArmPose& right) {
+            leftArm.setFromInversePose(left);
+            rightArm.setFromInversePose(right);
+        }
 
-    // Abstract limb pose structs
-    AbstractLegPose leftLeg;   //!< Abstract pose of the left leg
-    AbstractLegPose rightLeg;  //!< Abstract pose of the right leg
-    AbstractArmPose leftArm;   //!< Abstract pose of the left arm
-    AbstractArmPose rightArm;  //!< Abstract pose of the right arm
-};
+        //
+        // Data members
+        //
+
+        // Abstract limb pose structs
+        AbstractLegPose leftLeg;   //!< Abstract pose of the left leg
+        AbstractLegPose rightLeg;  //!< Abstract pose of the right leg
+        AbstractArmPose leftArm;   //!< Abstract pose of the left arm
+        AbstractArmPose rightArm;  //!< Abstract pose of the right arm
+    };
+
+}  // namespace util
 }  // namespace gait
 
 #endif /* GAIT_ABSTRACT_POSE_H */
-// EOF
