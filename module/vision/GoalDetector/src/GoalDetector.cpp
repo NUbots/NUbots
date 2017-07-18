@@ -299,8 +299,9 @@ namespace vision {
 
                     // Make a quad
                     Goal goal;
-                    goal.visObject.sensors = image.sensors;
-                    goal.side              = Goal::Side::UNKNOWN_SIDE;
+                    goal.visObject.sensors   = image.sensors;
+                    goal.visObject.timestamp = NUClear::clock::now();
+                    goal.side                = Goal::Side::UNKNOWN_SIDE;
 
                     // Seperate tl and bl
                     arma::vec3 tl = p1[1] > p2[1] ? p2 : p1;
