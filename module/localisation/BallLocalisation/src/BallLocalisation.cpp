@@ -70,6 +70,7 @@ namespace localisation {
                 /* Creating ball state vector and covariance matrix for emission */
                 // std::unique_ptr ball;
                 auto ball                             = std::make_unique<Ball>();
+                auto balls                            = std::make_unique<std::vector<Ball>>();
                 ball->locObject.position              = convert<double, 2>(filter.get());
                 ball->locObject.position_cov          = convert<double, 2, 2>(filter.getCovariance());
                 ball->locObject.last_measurement_time = last_measurement_update_time;
@@ -89,6 +90,8 @@ namespace localisation {
                     log("localisation ball pos = ", filter.get()[0], filter.get()[1]);
                     log("localisation seconds elapsed = ", seconds);
                 }
+                balls->push_back(*ball);
+                emit(balls);
                 emit(ball);
             });
 
