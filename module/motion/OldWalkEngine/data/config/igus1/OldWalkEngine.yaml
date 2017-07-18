@@ -7,49 +7,49 @@ stance:
   arms:
       left:
         start:
-          -  135 * pi / 180 # Shoulder Pitch
+          -  120 * pi / 180 # Shoulder Pitch
           -   0 * pi / 180 # Shoulder Roll
-          - -140 * pi / 180 # Elbow
+          - -90 * pi / 180 # Elbow
         end:
-          -  135 * pi / 180 # Shoulder Pitch
+          -  120 * pi / 180 # Shoulder Pitch
           -   0 * pi / 180 # Shoulder Roll
-          - -140 * pi / 180 # Elbow
+          - -90 * pi / 180 # Elbow
       right:
         start:
-          -   135 * pi / 180 # Shoulder Pitch
+          -   120 * pi / 180 # Shoulder Pitch
           -   0 * pi / 180 # Shoulder Roll
-          - -140 * pi / 180 # Elbow
+          - -90 * pi / 180 # Elbow
         end:
-          -  135 * pi / 180 # Shoulder Pitch
+          -  120 * pi / 180 # Shoulder Pitch
           -   0 * pi / 180 # Shoulder Roll
-          - -140 * pi / 180 # Elbow
+          - -90 * pi / 180 # Elbow
 
   foot_offset:
-    - -0.100 # The distance the ankles are offset from the torso, in meters.
+    - -0.1 # The distance the ankles are offset from the torso, in meters.
     - -0.05 # How far from the center of the foot the center of mass is placed during each step.
   # The gains to use for the servos during the walk
   gains:
-    arms: 20
+    arms: 15
     legs: 20
   # ???
   limit_margin_y: -0.15
 
 walk_cycle:
   # Defines how long it will take for the robot to take its next step, in seconds.
-  step_time: 0.50
+  step_time: 0.6
   # ???
-  zmp_time: 0.450
+  zmp_time: 0.4
   hip_roll_compensation: 4 * pi / 180
   step:
     # The height to which the robot raises its foot at each step. This parameter is very sensitive in terms of balance.
-    height: 0.060
+    height: 0.08
     # height of foot as a fraction of height
     height_slow_fraction: 0.5
     height_fast_fraction: 1.5
     # These limit the distance a footstep will take
     limits:
-      - [-0.1, 0.30] # [min_x, max_x]
-      - [0.15, 0.3] # [min_y, max_y]
+      - [-0.1, 0.3] # [min_x, max_x]
+      - [0.0 , 0.3] # [min_y, max_y]
       - [0, 15 * pi / 180] # [min_angle, max_angle]
   velocity:
     # Velocity limits for the walk
@@ -68,8 +68,8 @@ walk_cycle:
     turning_factor: 0.6
   # When to begin and end the single support phase. Range: [0,1]
   single_support_phase:
-    start: 0.1
-    end: 0.9
+    start: 0.25
+    end: 0.75
   # TODO: balance params disabled until they are futher understood
   balance:
     enabled: false
