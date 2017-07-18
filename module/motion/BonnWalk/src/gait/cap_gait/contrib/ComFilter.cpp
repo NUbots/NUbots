@@ -1,8 +1,6 @@
 // clang-format off
 #include "ComFilter.h"
 
-using namespace margait_contrib;
-
 ComFilter::ComFilter()
 {
     smoothingX = 0.1;

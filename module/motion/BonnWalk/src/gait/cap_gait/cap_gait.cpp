@@ -4,27 +4,6 @@
 // Author: Philipp Allgeuer <pallgeuer@ais.uni-bonn.de>
 #include "cap_gait.h"
 
-// Includes
-#include <robotcontrol/model/robotmodel.h> // This include is broken by Qt includes...
-#include <pluginlib/class_list_macros.h>
-#include <rc_utils/math_funcs.h>
-#include <rc_utils/slope_limiter.h>
-#include <rc_utils/lin_sin_fillet.h>
-#include <rc_utils/smooth_deadband.h>
-
-// Namespaces
-using namespace gait;
-using namespace cap_gait;
-using namespace rc_utils;
-using namespace qglviewer;
-
-// Using declarations (we don't include the whole margait_contrib namespace as the contributed pose classes would conflict with the existing gait_*_pose.h ones)
-using margait_contrib::Vec2f;
-using margait_contrib::Vec3f;
-using margait_contrib::Limp;
-using margait_contrib::LimpState;
-using margait_contrib::RobotModel;
-
 //
 // CapGait class
 //

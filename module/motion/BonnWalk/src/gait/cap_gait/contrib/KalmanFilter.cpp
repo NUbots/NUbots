@@ -2,8 +2,6 @@
 #include "KalmanFilter.h"
 #include <Eigen/LU>
 
-using namespace margait_contrib;
-
 KalmanFilter::KalmanFilter()
 {
     lastX = 0;

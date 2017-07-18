@@ -5,7 +5,6 @@
 #include "KalmanFilter.h"
 #include "LimpState.h"
 #include "Limp.h"
-#include "../cap_gait_config.h"
 
 namespace margait_contrib
 {

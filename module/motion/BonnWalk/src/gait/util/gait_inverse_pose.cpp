@@ -4,15 +4,9 @@
 // Author: Philipp Allgeuer <pallgeuer@ais.uni-bonn.de>
 
 // Includes
-#include <gait/util/gait_joint_pose.h>
-#include <gait/util/gait_inverse_pose.h>
-#include <gait/util/gait_abstract_pose.h>
-#include <rc_utils/math_funcs.h>
-#include <stdio.h> // TODO: TEMP => For the "not implemented yet" messages...
-
-// Namespaces
-using namespace gait;
-using namespace rc_utils;
+#include "gait_joint_pose.h"
+#include "gait_inverse_pose.h"
+#include "gait_abstract_pose.h"
 
 //
 // InverseLegPose

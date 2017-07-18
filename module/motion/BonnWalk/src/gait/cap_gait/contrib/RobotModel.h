@@ -9,14 +9,10 @@
 
 // Includes
 #include "Action.h"
-#include "../cap_gait_config.h"
 
 // Margait contrib namespace
 namespace margait_contrib
 {
-
-// Namespaces
-using namespace qglviewer;
 
 // RobotModel class
 class RobotModel

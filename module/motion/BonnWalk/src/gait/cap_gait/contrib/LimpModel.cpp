@@ -1,8 +1,6 @@
 // clang-format off
 #include "LimpModel.h"
 
-using namespace margait_contrib;
-
 LimpModel::LimpModel(const cap_gait::CapConfig* capConfig) : config(capConfig)
 {
     systemIterationTime = 0;

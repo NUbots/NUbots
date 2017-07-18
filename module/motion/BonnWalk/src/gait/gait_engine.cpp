@@ -11,9 +11,6 @@
 #define DEFAULT_HALT_EFFORT_ARMS  0.25 // Default joint effort to use in the halt pose for all the arm joints
 #define DEFAULT_HALT_EFFORT_LEGS  0.50 // Default joint effort to use in the halt pose for all the leg joints
 
-// Namespaces
-using namespace gait;
-
 //
 // GaitEngine class
 //
@@ -86,6 +83,3 @@ void GaitEngine::updateOdometry()
     out.odomOrientation[2] = 0.0;
     out.odomOrientation[3] = sin(0.5*m_rotZ);
 }
-
-PLUGINLIB_EXPORT_CLASS(gait::GaitEngine, gait::GaitEngine)
-// EOF

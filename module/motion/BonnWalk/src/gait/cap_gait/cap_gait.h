@@ -8,11 +8,9 @@
 #define CAP_GAIT_H
 
 // Includes - Local
-#include "cap_gait_config.h"
 #include "cap_com_filter.h"
 
 // Includes - Gait
-#include "../gait_common.h"
 #include "../gait_engine.h"
 #include "../util/gait_joint_pose.h"
 #include "../util/gait_inverse_pose.h"
@@ -23,7 +21,6 @@
 
 // Includes - Contrib [These are included last because they potentially contain Qt includes that break the Boost signals library... (e.g. used by TF)]
 #include "contrib/RobotModel.h"
-#include "contrib/RobotModelVis.h"
 #include "contrib/LimpModel.h"
 #include "contrib/Limp.h"
 #include "contrib/ComFilter.h"

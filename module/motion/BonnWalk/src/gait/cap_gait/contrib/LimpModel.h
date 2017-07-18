@@ -4,7 +4,6 @@
 
 #include "Limp.h"
 #include "LimpState.h"
-#include "../cap_gait_config.h"
 
 namespace margait_contrib
 {

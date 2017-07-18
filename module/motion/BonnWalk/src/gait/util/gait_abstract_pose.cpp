@@ -10,10 +10,6 @@
 #include <rc_utils/math_funcs.h>
 #include <cmath>
 
-// Namespaces
-using namespace gait;
-using namespace rc_utils;
-
 //
 // AbstractLegPose
 //

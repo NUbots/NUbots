@@ -26,10 +26,6 @@
 #define ROBOT_WALKING_STATE_NAME   "walking_"   // State during walking (active gait)
 #define PLAY_MOTION_TOKEN          "|play_"     // State prefix to make the motion player play a motion
 
-// Namespaces
-using namespace gait;
-using namespace rc_utils;
-
 //
 // Gait class
 //
