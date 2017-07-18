@@ -257,7 +257,7 @@ namespace vision {
                         // Get the centre of our ball in screen space
                         arma::vec2 ballCentreScreen = projectCamSpaceToScreen(ballCentreRay, cam);
                         arma::ivec2 ballCentreImage =
-                            screenToImage(ballCentreRay, convert<uint, 2>(cam.imageSizePixels));
+                            screenToImage(ballCentreScreen, convert<uint, 2>(cam.imageSizePixels));
                         float ballRadiusScreen = arma::norm(top - base) / 4 + arma::norm(left - right) / 4;
 
                         /************************************************
@@ -370,7 +370,7 @@ namespace vision {
                         b.cone.gradient = result.model.gradient;
 
                         // Angular positions from the camera
-                        b.visObject.screenAngular = convert<double, 2>(cartesianToSpherical(ballCentreRay).cols(0, 1));
+                        b.visObject.screenAngular = convert<double, 2>(cartesianToSpherical(ballCentreRay).rows(1, 2));
                         b.visObject.angularSize << getParallaxAngle(left, right, cam), getParallaxAngle(top, base, cam);
 
                         // Add our points

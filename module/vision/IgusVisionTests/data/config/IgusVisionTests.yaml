@@ -7,3 +7,6 @@ horizon:
   distance: 200
 
 test_point_screen: [0,0]
+
+goal_position: [2,1,-1]
+goal_direction: [0,0,1]
