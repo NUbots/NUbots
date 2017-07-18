@@ -3,8 +3,8 @@
 // Author: Philipp Allgeuer <pallgeuer@ais.uni-bonn.de>
 
 // Includes
-#include "gait_inverse_pose.h"
 #include "gait_abstract_pose.h"
+#include "gait_inverse_pose.h"
 #include "gait_joint_pose.h"
 #include "utility/math/comparison.h"
 
@@ -12,7 +12,7 @@
 // InverseLegPose
 //
 namespace gait {
-namespace util {
+namespace pose {
 
     // Set the inverse leg pose to a given joint leg pose
     void InverseLegPose::setFromJointPose(const JointLegPose& pose) {
@@ -195,5 +195,5 @@ namespace util {
         rightArm.setFromAbstractPose(pose.rightArm);
     }
 
-}  // namespace util
+}  // namespace pose
 }  // namespace gait

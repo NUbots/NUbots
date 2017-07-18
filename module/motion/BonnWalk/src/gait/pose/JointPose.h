@@ -13,7 +13,7 @@
 #include "utility/input/ServoID.h"
 
 namespace gait {
-namespace util {
+namespace pose {
 
     class JointPose;
     class JointLegPose;
@@ -355,7 +355,7 @@ namespace util {
         JointArmPose rightArm;  //!< Joint pose of the right arm
     };
 
-}  // namespace util
+}  // namespace pose
 }  // namespace gait
 
 #endif /* GAIT_JOINT_POSE_H */

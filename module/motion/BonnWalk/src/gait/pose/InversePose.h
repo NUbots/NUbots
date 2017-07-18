@@ -13,7 +13,7 @@
 
 
 namespace gait {
-namespace util {
+namespace pose {
 
     class JointPose;
     class JointLegPose;
@@ -268,7 +268,7 @@ namespace util {
         InverseArmPose rightArm;  //!< Inverse pose of the right arm
     };
 
-}  // namespace util
+}  // namespace pose
 }  // namespace gait
 
 #endif /* GAIT_INVERSE_POSE_H */

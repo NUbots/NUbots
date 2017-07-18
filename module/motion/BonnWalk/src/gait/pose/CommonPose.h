@@ -8,7 +8,7 @@
 
 // Gait namespace
 namespace gait {
-namespace util {
+namespace pose {
 
     /**
      * @struct CommonLegData
@@ -220,7 +220,7 @@ namespace util {
         double linkLength;
     };
 
-}  // namespace util
+}  // namespace pose
 }  // namespace gait
 
 #endif /* GAIT_COMMON_POSE_H */

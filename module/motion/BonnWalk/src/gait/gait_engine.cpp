@@ -42,8 +42,7 @@ GaitEngine::GaitEngine()
     , mxModel(&config)
     , txModel(&config)
     , m_gcvZeroTime("/gait/gcv/gcvZeroTime", 0.0, 0.05, 2.0, 0.0)
-    , m_plotData(CONFIG_PARAM_PATH + "plotData", false)
-    , m_PM(PM_COUNT, "/cap_gait") {
+    , m_plotData(CONFIG_PARAM_PATH + "plotData", false) {
 
     in.reset();
     out.reset();
@@ -1209,7 +1208,7 @@ GaitEngine::CommonMotionData GaitEngine::calcCommonMotionData(bool isFirst) cons
 
 // Generate the abstract leg motion
 // 'leg' is assumed to contain the desired leg halt pose
-void GaitEngine::abstractLegMotion(util::AbstractLegPose& leg) {
+void GaitEngine::abstractLegMotion(pose::AbstractLegPose& leg) {
     //
     // Common motion data
     //
@@ -1593,7 +1592,7 @@ void GaitEngine::abstractLegMotion(util::AbstractLegPose& leg) {
 
 // Generate the abstract arm motion
 // 'arm' is assumed to contain the desired arm halt pose
-void GaitEngine::abstractArmMotion(util::AbstractArmPose& arm) {
+void GaitEngine::abstractArmMotion(pose::AbstractArmPose& arm) {
     //
     // Common motion data
     //
@@ -1773,7 +1772,7 @@ void GaitEngine::inverseLegMotion(InverseLegPose& leg)  // 'leg' is assumed to c
 }
 
 // Abstract pose coercion function
-void GaitEngine::coerceAbstractPose(util::AbstractPose& pose) {
+void GaitEngine::coerceAbstractPose(pose::AbstractPose& pose) {
     // Coerce each of the limbs in the abstract pose
     coerceAbstractArmPose(pose.leftArm);
     coerceAbstractArmPose(pose.rightArm);
@@ -1782,7 +1781,7 @@ void GaitEngine::coerceAbstractPose(util::AbstractPose& pose) {
 }
 
 // Abstract arm pose coercion function
-void GaitEngine::coerceAbstractArmPose(util::AbstractArmPose& arm) {
+void GaitEngine::coerceAbstractArmPose(pose::AbstractArmPose& arm) {
     // Apply the required limits if enabled
     if (config.limArmAngleXUseLimits())
         arm.angleX =
@@ -1798,7 +1797,7 @@ void GaitEngine::coerceAbstractArmPose(util::AbstractArmPose& arm) {
 }
 
 // Abstract leg pose coercion function
-void GaitEngine::coerceAbstractLegPose(util::AbstractLegPose& leg) {
+void GaitEngine::coerceAbstractLegPose(pose::AbstractLegPose& leg) {
     // Apply the required limits if enabled
     if (config.limLegAngleXUseLimits())
         leg.angleX =
@@ -1848,10 +1847,12 @@ void GaitEngine::updateOutputs() {
 // Callback for when the plotData parameter is updated
 void GaitEngine::callbackPlotData() {
     // Enable or disable plotting as required
-    if (m_plotData())
+    if (m_plotData()) {
         m_PM.enable();
-    else
+    }
+    else {
         m_PM.disable();
+    }
 }
 
 // Reset the blending variables

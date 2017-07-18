@@ -12,7 +12,7 @@
 
 // Gait namespace
 namespace gait {
-namespace util {
+namespace pose {
 
     //
     // AbstractLegPose
@@ -120,5 +120,5 @@ namespace util {
         rightArm.setFromInversePose(pose.rightArm);
     }
 
-}  // namespace util
+}  // namespace pose
 }  // namespace gait

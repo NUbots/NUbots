@@ -212,14 +212,14 @@ private:
     CommonMotionData calcCommonMotionData(bool isFirst) const;
 
     // Motion functions
-    void abstractLegMotion(util::AbstractLegPose& leg);
-    void abstractArmMotion(util::AbstractArmPose& arm);
-    void inverseLegMotion(util::InverseLegPose& leg);
+    void abstractLegMotion(pose::AbstractLegPose& leg);
+    void abstractArmMotion(pose::AbstractArmPose& arm);
+    void inverseLegMotion(pose::InverseLegPose& leg);
 
     // Coercion functions
-    void coerceAbstractPose(util::AbstractPose& pose);
-    void coerceAbstractArmPose(util::AbstractArmPose& arm);
-    void coerceAbstractLegPose(util::AbstractLegPose& leg);
+    void coerceAbstractPose(pose::AbstractPose& pose);
+    void coerceAbstractArmPose(pose::AbstractArmPose& arm);
+    void coerceAbstractLegPose(pose::AbstractLegPose& leg);
 
     // Output processing
     void updateOutputs();
@@ -245,9 +245,9 @@ private:
     CapConfig config;
 
     // Pose variables
-    util::JointPose m_jointPose;               // Joint representation of the pose to command in a step
-    util::JointPose m_jointHaltPose;           // Joint representation of the gait halt pose
-    util::JointPose m_lastJointPose;           // The last joint pose to have been commanded during walking
+    pose::JointPose m_jointPose;               // Joint representation of the pose to command in a step
+    pose::JointPose m_jointHaltPose;           // Joint representation of the gait halt pose
+    pose::JointPose m_lastJointPose;           // The last joint pose to have been commanded during walking
     contrib::InversePose m_inversePose;        // Inverse representation of the pose to command in a step
     contrib::AbstractPose m_abstractPose;      // Abstract representation of the pose to command in a step
     contrib::AbstractPose m_abstractHaltPose;  // Abstract representation of the gait halt pose

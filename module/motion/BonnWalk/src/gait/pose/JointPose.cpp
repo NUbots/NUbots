@@ -10,7 +10,7 @@
 #include "utility/input/ServoID.h"
 
 namespace gait {
-namespace util {
+namespace pose {
 
     using utility::input::ServoID;
 
@@ -231,5 +231,5 @@ namespace util {
         rightArm.blendTowards(other.rightArm, b);
     }
 
-}  // namespace util
+}  // namespace pose
 }  // namespace gait
