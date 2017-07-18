@@ -8,8 +8,8 @@
 
 // Includes
 #include <Eigen/Geometry>
-#include "gait_common_pose.h"
-#include "gait_joint_pose.h"
+#include "CommonPose.h"
+#include "JointPose.h"
 
 
 namespace gait {

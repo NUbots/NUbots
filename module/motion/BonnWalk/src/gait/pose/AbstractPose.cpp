@@ -7,8 +7,8 @@
 
 #include "utility/math/comparison.h"
 
-#include "gait_abstract_pose.h"
-#include "gait_inverse_pose.h"
+#include "AbstractPose.h"
+#include "InversePose.h"
 
 // Gait namespace
 namespace gait {

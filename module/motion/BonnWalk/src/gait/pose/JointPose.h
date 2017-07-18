@@ -8,8 +8,8 @@
 
 // Includes
 #include <array>
-#include "gait_common_pose.h"
-#include "gait_inverse_pose.h"
+#include "CommonPose.h"
+#include "InversePose.h"
 #include "utility/input/ServoID.h"
 
 namespace gait {

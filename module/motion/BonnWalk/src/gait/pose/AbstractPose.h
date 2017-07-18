@@ -7,8 +7,8 @@
 #define GAIT_ABSTRACT_POSE_H
 
 // Includes
-#include "gait_common_pose.h"
-#include "gait_joint_pose.h"
+#include "CommonPose.h"
+#include "JointPose.h"
 
 namespace gait {
 namespace pose {

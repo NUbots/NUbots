@@ -3,10 +3,9 @@
 // Author: Philipp Allgeuer <pallgeuer@ais.uni-bonn.de>
 
 // Includes
-#include "gait_joint_pose.h"
-
-#include "gait_abstract_pose.h"
-#include "gait_inverse_pose.h"
+#include "JointPose.h"
+#include "AbstractPose.h"
+#include "InversePose.h"
 #include "utility/input/ServoID.h"
 
 namespace gait {
