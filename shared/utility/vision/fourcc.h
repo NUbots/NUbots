@@ -89,8 +89,9 @@ namespace vision {
     inline const auto getSubImage(uint x, uint y, uint width, uint height, const std::vector<uint8_t>& data) {
         // Extract the 5x5 matrix centered at (x, y).
         // Clamped to borders.
-        x = x < 2 ? 2 : x > (width - 2) ? width - 2 : x;
-        y = y < 2 ? 2 : y > (height - 2) ? height - 2 : y;
+        x = x < 2 ? 2 : x > (width - 3) ? width - 3 : x;
+        y = y < 2 ? 2 : y > (height - 3) ? height - 3 : y;
+        NUClear::log("x,y =", x, y);
 
         return Eigen::Map<const Eigen::Matrix<uint8_t, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>>(
                    data.data(), height, width)
