@@ -22,7 +22,8 @@ namespace vision {
         arma::vec3 ballCentre = arma::vec3({2, 0, 0});
         float theta_count     = 100;
 
-        arma::vec3 goalPosition = arma::vec3({2, 1, -0.9});
+        arma::vec3 goal_position  = arma::vec3({2, 1, -0.9});
+        arma::vec3 goal_direction = arma::vec3({2, 1, -0.9});
 
         float lambda      = 0.1;
         arma::vec2 offset = arma::vec2({0, 0});
@@ -41,7 +42,8 @@ namespace vision {
         std::vector<message::vision::ClassifiedImage::Segment> getGoalSegments(
             const message::input::CameraParameters& cam,
             const message::support::FieldDescription& fd);
-    }  // namespace vision
+    };
 }  // namespace vision
+}  // namespace module
 
 #endif  // MODULE_VISION_IGUSVISIONTESTS_H

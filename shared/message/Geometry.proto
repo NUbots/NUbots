@@ -49,3 +49,13 @@ message Quad {
 message Polygon {
     vec2 point = 1;
 }
+
+message LineSegment {
+    vec3 start = 1;
+    vec3 end = 2;
+}
+
+message Cone {
+    vec3 axis = 1;
+    float gradient = 2;
+}

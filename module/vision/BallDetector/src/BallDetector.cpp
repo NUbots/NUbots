@@ -230,7 +230,6 @@ namespace vision {
                                                                             MAXIMUM_FITTED_MODELS,
                                                                             CONSENSUS_ERROR_THRESHOLD);
 
-<<<<<<< HEAD
                     auto balls = std::make_unique<std::vector<Ball>>();
                     balls->reserve(ransacResults.size());
 
@@ -366,13 +365,9 @@ namespace vision {
                         b.measurements.back().rBCc       = convert<double, 3, 1>(rBCc);
                         b.measurements.back().covariance = convert<double, 3>(ball_angular_cov).asDiagonal();
 
-                        // TODO:Send ball cone
-
-                        // On screen visual shape
-                        // Estimate for now
-                        b.circle.radius = ballRadiusScreen;
-                        b.circle.centre = convert<double, 2>(
-                            screenToImageCts(ballCentreScreen, convert<uint, 2>(cam.imageSizePixels)));
+                        // Ball cam space info
+                        b.cone.axis     = convert<double, 3>(ballCentreRay);
+                        b.cone.gradient = result.model.gradient;
 
                         // Angular positions from the camera
                         b.visObject.screenAngular = convert<double, 2>(cartesianToSpherical(ballCentreRay).cols(0, 1));
@@ -389,14 +384,15 @@ namespace vision {
                     }
 
                     for (auto a = balls->begin(); a != balls->end(); ++a) {
-                        Circle acircle(a->circle.radius, convert<double, 2>(a->circle.centre));
+                        Cone<3> acone(convert<double, 3>(a->cone.axis), a->cone.gradient);
 
                         for (auto b = a + 1; b != balls->end();) {
+                            Cone<3> bcone(convert<double, 3>(b->cone.axis), b->cone.gradient);
 
                             // If our balls overlap
-                            if (acircle.distanceToPoint(convert<double, 2>(b->circle.centre)) < b->circle.radius) {
+                            if (acone.overlaps(bcone)) {
                                 // Pick the better ball
-                                if (acircle.radius < b->circle.radius) {
+                                if (acone.gradient < bcone.gradient) {
                                     // Throw-out b
                                     b = balls->erase(b);
                                 }

@@ -96,8 +96,8 @@ namespace support {
             && centre[1] < int(cam.imageSizePixels[1])) {
 
             // Set our circle parameters for simulating the ball
-            result.circle.centre = convert<double, 2>(arma::conv_to<arma::vec>::from(centre));
-            result.circle.radius = radius;
+            result.cone.axis     = convert<double, 3>(arma::normalise(rBCc));
+            result.cone.gradient = std::tan(angle * 0.5);
 
             // Get our transform to world coordinates
             const Transform3D& Htw = convert<double, 4, 4>(sensors.world);

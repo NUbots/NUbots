@@ -37,7 +37,17 @@ namespace math {
             // Axis direction
             arma::vec::fixed<DIM> unit_axis;
 
+            Cone() {
+                gradient  = 0;
+                unit_axis = arma::zeros(DIM);
+            }
+            Cone(Vector axis, double gradient_) {
+                unit_axis = arma::normalise(axis);
+                gradient  = gradient_;
+            }
+
             // X is the vectors in columns
+
             bool setFromPoints(const Matrix& X) {
                 try {
                     unit_axis = arma::normalise(arma::solve(X.t(), arma::ones(DIM)));
@@ -79,6 +89,19 @@ namespace math {
                 return cone_vec * arma::dot(p, cone_vec);
             }
 
+            bool insideCone(const Vector& p) const {
+                float p_theta    = std::acos(arma::norm_dot(p, unit_axis));
+                float cone_alpha = std::atan(gradient);
+                return p_theta < cone_alpha;
+            }
+
+            bool overlaps(const Cone<DIM>& b) const {
+                Vector b_proj = projectPoint(b.unit_axis);
+                Vector a_proj = b.projectPoint(unit_axis);
+                // If the projected points are still in the cone return true
+                return b.insideCone(b_proj) || insideCone(a_proj);
+            }
+
             float distanceToPoint(const Vector& p) const {
                 Vector p_cone = projectPoint(p);
                 Vector p_orth = p - p_cone;
@@ -98,8 +121,8 @@ namespace math {
                     return 1;
             }
         };
-    }
-}
-}
+    }  // namespace geometry
+}  // namespace math
+}  // namespace utility
 
 #endif
