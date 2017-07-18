@@ -2,6 +2,7 @@
 
 #include "extension/Configuration.h"
 
+#include "message/input/CameraParameters.h"
 #include "message/support/FieldDescription.h"
 #include "message/vision/ClassifiedImage.h"
 #include "message/vision/VisionObjects.h"
@@ -18,6 +19,7 @@ namespace vision {
     using message::support::FieldDescription;
     using message::input::CameraParameters;
     using message::vision::ClassifiedImage;
+    using SegmentClass = message::vision::ClassifiedImage::SegmentClass::Value;
 
     using utility::nubugger::drawVisionLines;
 
@@ -33,27 +35,29 @@ namespace vision {
 
         on<Trigger<ClassifiedImage>, With<CameraParameters>, With<FieldDescription>, Single>().then(
             "Obstacle Detector",
-            [this](const ClassifiedImage classImage, const CameraParameters& cam, const FieldDescription& fd) {
+            [this](const ClassifiedImage classifiedImage, const CameraParameters& cam, const FieldDescription& fd) {
 
                 // Get points
-                int chunk_size   = 50;
+                int chunk_size   = 50;  // Chunk size must be divisible by two
                 arma::mat points = arma::zeros(2, chunk_size);
                 int i            = 0;
                 // Get our obstacle segments
-                for (const auto& segment : classImage.horizontalSegments) {
-                    arma::vec2 start = arma::conv_to<double>::from(convert<int, 2>(segment.start));
-                    arma::vec2 end   = arma::conv_to<double>::from(convert<int, 2>(segment.end));
+                for (const auto& segment : classifiedImage.horizontalSegments) {
+                    arma::vec2 start = arma::conv_to<arma::vec>::from(convert<int, 2>(segment.start));
+                    arma::vec2 end   = arma::conv_to<arma::vec>::from(convert<int, 2>(segment.end));
                     // We throw out points if they are:
                     // Less the full quality (subsampled)
                     // Do not have a transition on the other side
-                    bool colourMatches = segment.segmentClass == SegmentClass::UNKNOWN
+                    bool colourMatches = segment.segmentClass == SegmentClass::UNKNOWN_CLASS
                                          || segment.segmentClass == SegmentClass::CYAN_TEAM
                                          || segment.segmentClass == SegmentClass::MAGENTA_TEAM;
-                    bool belowVisualHorizon = start > utility::vision::visualHorizonAtPoint(classifiedImage, start[0])
-                                              || end > utility::vision::visualHorizonAtPoint(classifiedImage, end[0]);
+                    bool belowVisualHorizon =
+                        start[1] > utility::vision::visualHorizonAtPoint(classifiedImage, start[0])
+                        || end[1] > utility::vision::visualHorizonAtPoint(classifiedImage, end[0]);
                     if (belowVisualHorizon && colourMatches && (segment.subsample == 1) && (segment.previous > -1)
                         && (segment.next > -1)) {
-                        points.col(i++) = points.col(i++) =
+                        points.col(i++) = start;
+                        points.col(i++) = end;
                     }
                     if (i >= points.n_cols) {
                         points = arma::join_cols(points, arma::zeros(2, chunk_size));
@@ -61,20 +65,22 @@ namespace vision {
                 }
 
                 // Get our obstacle segments
-                for (const auto& segment : classImage.verticalSegments) {
-                    arma::vec2 start = arma::conv_to<double>::from(convert<int, 2>(segment.start));
-                    arma::vec2 end   = arma::conv_to<double>::from(convert<int, 2>(segment.end));
+                for (const auto& segment : classifiedImage.verticalSegments) {
+                    arma::vec2 start = arma::conv_to<arma::vec>::from(convert<int, 2>(segment.start));
+                    arma::vec2 end   = arma::conv_to<arma::vec>::from(convert<int, 2>(segment.end));
                     // We throw out points if they are:
                     // Less the full quality (subsampled)
                     // Do not have a transition on the other side
-                    bool colourMatches = segment.segmentClass == SegmentClass::UNKNOWN
+                    bool colourMatches = segment.segmentClass == SegmentClass::UNKNOWN_CLASS
                                          || segment.segmentClass == SegmentClass::CYAN_TEAM
                                          || segment.segmentClass == SegmentClass::MAGENTA_TEAM;
-                    bool belowVisualHorizon = start > utility::vision::visualHorizonAtPoint(classifiedImage, start[0])
-                                              || end > utility::vision::visualHorizonAtPoint(classifiedImage, end[0]);
+                    bool belowVisualHorizon =
+                        start[1] > utility::vision::visualHorizonAtPoint(classifiedImage, start[0])
+                        || end[1] > utility::vision::visualHorizonAtPoint(classifiedImage, end[0]);
                     if (belowVisualHorizon && colourMatches && (segment.subsample == 1) && (segment.previous > -1)
                         && (segment.next > -1)) {
-                        points.col(i++) = points.col(i++) =
+                        points.col(i++) = start;
+                        points.col(i++) = end;
                     }
                     if (i >= points.n_cols) {
                         points = arma::join_cols(points, arma::zeros(2, chunk_size));
@@ -89,13 +95,15 @@ namespace vision {
 
                 std::vector<std::pair<Eigen::Vector2i, Eigen::Vector2i>> debug;
                 for (auto& p : edges) {
-                    debug.push_back(convert<double, 2>(p.first), convert<double, 2>(p.second));
+                    arma::vec2 p0 = std::get<0>(p);
+                    arma::vec2 p1 = std::get<1>(p);
+                    debug.push_back(convert<double, 2>(p0), convert<double, 2>(p1));
                 }
                 emit(drawVisionLines(debug));
 
                 // TODO: something with this info
 
             });
-    }  // namespace vision
+    }
 }  // namespace vision
 }  // namespace module
