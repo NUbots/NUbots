@@ -10,7 +10,8 @@ namespace support {
 
         class DataLogging : public NUClear::Reactor {
         private:
-            int fd = -1;
+            int fd              = -1;
+            std::string log_dir = "";
             std::ofstream output_file;
             std::map<std::string, ReactionHandle> handles;
 
