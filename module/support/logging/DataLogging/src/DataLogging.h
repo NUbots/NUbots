@@ -10,6 +10,13 @@ namespace support {
 
         class DataLogging : public NUClear::Reactor {
         private:
+            // FILE FORMAT
+            // TYPE       DATA
+            // char[3]    RADIATION SYMBOL {{ 0xE2, 0x98, 0xA2 }}
+            // uint32_t   SIZE OF NEXT PACKET
+            // uint64_t   TIMESTAMP DATA WAS EMITTED IN MICROSECONDS
+            // uint64_t   DATA TYPE HASH
+
             int fd              = -1;
             std::string log_dir = "";
             std::ofstream output_file;

@@ -69,8 +69,8 @@ if __name__ == "__main__":
                         // TYPE       DATA
                         // char[3]    RADIATION SYMBOL {{ 0xE2, 0x98, 0xA2 }}
                         // uint32_t   SIZE OF NEXT PACKET
-                        // uint64_t   TIMESTAMP DATA WAS EMITTED
-                        // uint128_t  DATA TYPE HASH
+                        // uint64_t   TIMESTAMP DATA WAS EMITTED IN MICROSECONDS
+                        // uint64_t   DATA TYPE HASH
 
                         // If the file isn't open skip
                         if (!output_file.is_open()) {{
@@ -113,7 +113,7 @@ if __name__ == "__main__":
                             // Enable the streams we are after and if none are enabled, we don't have to log
                             bool logging = false;
                             for (auto& setting : config["messages"].config) {{
-                                // Lowercase the name
+                                // Get the name of the type
                                 std::string name = setting.first.as<std::string>();
                                 bool enabled     = setting.second.as<bool>();
 
@@ -125,11 +125,11 @@ if __name__ == "__main__":
 
                                     if (enabled && !handle.enabled()) {{
                                         handle.enable();
-                                        log<NUClear::INFO>("Logging for", name, "enabled:");
+                                        log<NUClear::INFO>("Data logging for type", name, "enabled");
                                     }}
                                     else if (!enabled && handle.enabled()) {{
                                         handle.disable();
-                                        log<NUClear::INFO>("Logging for", name, "disabled:");
+                                        log<NUClear::INFO>("Data logging for type", name, "disabled");
                                     }}
                                 }}
                                 else {{
@@ -155,7 +155,7 @@ if __name__ == "__main__":
 
                                 // Get the name of the currently running binary
                                 std::vector<char> data(argv[0].cbegin(), argv[0].cend());
-                                data.push_back('\0');
+                                data.push_back('\\0');
                                 const auto* base = basename(data.data());
                                 std::string base_str(base);
 
