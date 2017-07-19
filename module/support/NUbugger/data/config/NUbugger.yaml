@@ -49,4 +49,4 @@ reaction_handles:
   # Lookup table delta packets (autoclassifier)
   lookup_table_diff: false
   # Camera parameters
-  camera_parameters: false
+  camera_parameters: true
