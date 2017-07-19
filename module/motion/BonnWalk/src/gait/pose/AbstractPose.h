@@ -122,19 +122,23 @@ namespace pose {
         CommonLegData cld;  //!< Data that is shared by all leg pose representations
 
         // Leg pose
-        double extension;  //!< Extension of the leg (in the range `[0,1]`, 0 = Fully extended, 1 = Fully contracted)
-        double angleX;     //!< Orientation angle of the leg axis about the positive x axis (2nd ZXY Euler angle)
-        double angleY;     //!< Orientation angle of the leg axis about the positive y axis (3rd ZXY Euler angle)
-        double angleZ;     //!< Orientation angle of the leg axis about the positive z axis (1st ZXY Euler angle)
+        //! Extension of the leg (in the range `[0,1]`, 0 = Fully extended, 1 = Fully contracted)
+        double extension;
+        //! Orientation angle of the leg axis about the positive x axis (2nd ZXY Euler angle)
+        double angleX;
+        //! Orientation angle of the leg axis about the positive y axis (3rd ZXY Euler angle)
+        double angleY;
+        //! Orientation angle of the leg axis about the positive z axis (1st ZXY Euler angle)
+        double angleZ;
 
         // Foot pose
-        double footAngleX;  //!< Global orientation angle of the foot about the positive x axis (more precisely, if all
-                            //!< non-roll servo positions are zeroed then footAngleX is the pure roll rotation from the
-                            //!< global frame to the foot frame)
-        double
-            footAngleY;  //!< Global orientation angle of the foot about the positive y axis (more precisely, if all
-                         //!< non-pitch servo positions are zeroed then footAngleY is the pure pitch rotation from the
-                         //!< global frame to the foot frame)
+        //! Global orientation angle of the foot about the positive x axis (more precisely, if all non-roll servo
+        //! positions are zeroed then footAngleX is the pure roll rotation from the global frame to the foot frame)
+        double footAngleX;
+        //! Global orientation angle of the foot about the positive y axis (more precisely, if all
+        //! non-pitch servo positions are zeroed then footAngleY is the pure pitch rotation from the
+        //! global frame to the foot frame)
+        double footAngleY;
     };
 
     /**

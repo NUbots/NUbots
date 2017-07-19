@@ -34,9 +34,7 @@ namespace math {
      * Source: http://en.cppreference.com/w/cpp/types/numeric_limits/epsilon
      */
     template <class T>
-    typename std::enable_if<!std::numeric_limits<T>::is_integer, bool>::type almost_equal(const T& x,
-                                                                                          const T& y,
-                                                                                          int ulp) {
+    inline std::enable_if_t<!std::numeric_limits<T>::is_integer, bool> almost_equal(const T& x, const T& y, int ulp) {
         // the machine epsilon has to be scaled to the magnitude of the values used
         // and multiplied by the desired precision in ULPs (units in the last place)
         return std::abs(x - y) < std::numeric_limits<T>::epsilon() * std::abs(x + y) * ulp
@@ -50,7 +48,7 @@ namespace math {
      * If -Wtype-limits is triggered, then need to specialise for unsigned types.
      */
     template <typename T>
-    inline constexpr typename std::enable_if<std::is_arithmetic<T>::value, T>::type sign(const T& val) {
+    inline constexpr std::enable_if_t<std::is_arithmetic<T>::value, T> sign(const T& val) {
         return val >= T(0) ? 1 : -1;
     }
 
@@ -61,7 +59,7 @@ namespace math {
      * http://stackoverflow.com/questions/1903954/is-there-a-standard-sign-function-signum-sgn-in-c-c
      */
     template <typename T>
-    inline constexpr typename std::enable_if<std::is_arithmetic<T>::value, T>::type sign0(const T& val) {
+    inline constexpr std::enable_if_t<std::is_arithmetic<T>::value, T> sign0(const T& val) {
         return (T(0) < val) - (val < T(0));
     }
 
@@ -77,8 +75,7 @@ namespace math {
      *  then ret2 < numToRound <= ret < ret3 (that is, there is no other multiple that is closer to the starting point).
      */
     template <typename T>
-    inline constexpr typename std::enable_if<std::is_integral<T>::value, T>::type roundUp(const T& numToRound,
-                                                                                          const T& multiple) {
+    inline constexpr std::enable_if_t<std::is_integral<T>::value, T> roundUp(const T& numToRound, const T& multiple) {
         if (multiple == 0) {
             return numToRound;
         }
@@ -100,8 +97,8 @@ namespace math {
 
     // http://stackoverflow.com/a/3409892/4795763
     template <typename T>
-    inline constexpr typename std::enable_if<std::is_floating_point<T>::value, T>::type roundUp(const T& number,
-                                                                                                const T& fixedBase) {
+    inline constexpr std::enable_if_t<std::is_floating_point<T>::value, T> roundUp(const T& number,
+                                                                                   const T& fixedBase) {
         if ((fixedBase != 0.0) && (number != 0.0)) {
             T sign = sgn(number);
             number *= sign;
@@ -115,11 +112,60 @@ namespace math {
         return (number);
     }
 
-    template <typename T>
-    inline constexpr typename std::enable_if<std::is_arithmetic<T>::value, T>::type clamp(const T& min,
-                                                                                          const T& val,
-                                                                                          const T& max) {
+    template <typename T, typename U, typename V>
+    inline constexpr std::
+        enable_if_t<(std::is_arithmetic<T>::value && std::is_arithmetic<U>::value && std::is_arithmetic<V>::value), U>
+        clamp(const T& min, const U& val, const V& max) {
         return (std::min(std::max(val, min), max));
+    }
+
+    //! @brief Coerce the value @p x to be in the range `[min,max]` in a soft manner, rounding off exponentially within
+    //! the soft range given by within @p buffer of the limits
+    template <typename T, typename U, typename V, typename W>
+    inline constexpr std::enable_if_t<std::is_arithmetic<T>::value && std::is_arithmetic<U>::value
+                                          && std::is_arithmetic<V>::value && std::is_arithmetic<W>::value,
+                                      U>
+    clampSoft(const T& min, const U& x, const V& max, const W& buffer) {
+
+        // Error checking on the buffer range
+        W maxBuf = 0.5 * (max - min);
+
+        if (buffer > maxBuf) {
+            buffer = maxBuf;
+        }
+
+        if (buffer <= 0.0) {
+            return clamp(min, x, max);
+        }
+        else if (x > max - buffer) {
+            return max - buffer * std::exp(-(x - (max - buffer)) / buffer);
+        }
+        else if (x < min + buffer) {
+            return min + buffer * std::exp((x - (min + buffer)) / buffer);
+        }
+        else {
+            return x;
+        }
+    }
+
+    //! @brief Coerce the value @p x to be in the range `[min,&infin;)` in a soft manner, rounding off exponentially
+    //! within the soft range given by within @p buffer of the limits
+    template <typename T, typename U, typename V>
+    typename std::
+        enable_if_t<(std::is_arithmetic<T>::value && std::is_arithmetic<U>::value && std::is_arithmetic<V>::value), U>
+        clampSoftMin(const T& min, const U& x, const V& buffer) {
+        // Error checking on the buffer range
+        if (buffer <= 0.0) {
+            return std::max(x, min);
+        }
+
+        // Soft-coerce the value x as required
+        U softLim = min + buffer;
+        if (x < softLim) {
+            return min + buffer * std::exp((x - softLim) / buffer);
+        }
+
+        return x;
     }
 }  // namespace math
 }  // namespace utility

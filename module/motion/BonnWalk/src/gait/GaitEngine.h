@@ -9,12 +9,12 @@
 // Includes
 #include <Eigen/Core>
 #include <array>
-#include "cap_com_filter.h"
+#include "ComFilter.h"
+#include "GaitInterface.h"
 #include "contrib/Action.h"
 #include "contrib/Limp.h"
 #include "contrib/LimpModel.h"
 #include "contrib/RobotModel.h"
-#include "gait_interface.h"
 #include "pose/AbstractPose.h"
 #include "pose/InversePose.h"
 #include "pose/JointPose.h"
@@ -217,10 +217,10 @@ private:
     void abstractArmMotion(pose::AbstractArmPose& arm);
     void inverseLegMotion(pose::InverseLegPose& leg);
 
-    // Coercion functions
-    void coerceAbstractPose(pose::AbstractPose& pose);
-    void coerceAbstractArmPose(pose::AbstractArmPose& arm);
-    void coerceAbstractLegPose(pose::AbstractLegPose& leg);
+    // Clamping functions
+    void clampAbstractPose(pose::AbstractPose& pose);
+    void clampAbstractArmPose(pose::AbstractArmPose& arm);
+    void clampAbstractLegPose(pose::AbstractLegPose& leg);
 
     // Output processing
     void updateOutputs();

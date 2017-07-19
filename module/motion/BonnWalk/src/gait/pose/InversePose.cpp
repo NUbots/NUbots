@@ -144,32 +144,32 @@ namespace pose {
     //
 
     // Set the inverse arm pose to a given joint arm pose
-    void InverseArmPose::setFromJointPose(const JointArmPose& pose)  // TODO: Write this!
+    void InverseArmPose::setFromJointPose(const JointArmPose& /*pose*/)  // TODO: Write this!
     {
         printf("WARNING: The function '%s' hasn't been implemented yet (NO INVERSE ARM POSE YET)!\n",
                __PRETTY_FUNCTION__);
     }
 
     // Set the inverse arm pose to a given abstract arm pose
-    void InverseArmPose::setFromAbstractPose(const AbstractArmPose& pose)  // TODO: Write this!
+    void InverseArmPose::setFromAbstractPose(const AbstractArmPose& /*pose*/)  // TODO: Write this!
     {
         printf("WARNING: The function '%s' hasn't been implemented yet (NO INVERSE ARM POSE YET)!\n",
                __PRETTY_FUNCTION__);
     }
 
     // Set the pose of the arm to the pose defined by the given joint angles
-    void InverseArmPose::fromJointAngles(double shoulderPitch,
-                                         double shoulderRoll,
-                                         double elbowPitch)  // TODO: Write this!
+    void InverseArmPose::fromJointAngles(double /*shoulderPitch*/,
+                                         double /*shoulderRoll*/,
+                                         double /*elbowPitch*/)  // TODO: Write this!
     {
         printf("WARNING: The function '%s' hasn't been implemented yet (NO INVERSE ARM POSE YET)!\n",
                __PRETTY_FUNCTION__);
     }
 
     // Calculate the joint angles corresponding to the current inverse arm pose
-    void InverseArmPose::getJointAngles(double& shoulderPitch,
-                                        double& shoulderRoll,
-                                        double& elbowPitch) const  // TODO: Write this!
+    void InverseArmPose::getJointAngles(double& /*shoulderPitch*/,
+                                        double& /*shoulderRoll*/,
+                                        double& /*elbowPitch*/) const  // TODO: Write this!
     {
         printf("WARNING: The function '%s' hasn't been implemented yet (NO INVERSE ARM POSE YET)!\n",
                __PRETTY_FUNCTION__);

@@ -3,7 +3,7 @@
 // Author: Philipp Allgeuer <pallgeuer@ais.uni-bonn.de>
 
 // Includes
-#include "gait_engine.h"
+#include "GaitEngine.h"
 
 #include <functional>
 #include "utility/math/comparison.h"
@@ -36,8 +36,6 @@ GaitEngine::GaitEngine()
     , m_resetIntegrators(CONFIG_PARAM_PATH + "resetIntegrators", false)
     , m_saveIFeedToHaltPose(CONFIG_PARAM_PATH + "saveIFeedToHaltPose", false)
     , rxRobotModel(&config)
-    , m_rxVis(&rxRobotModel, gaitOdomFrame)
-    , m_showRxVis(CONFIG_PARAM_PATH + "showRxVis", false)
     , rxModel(&config)
     , mxModel(&config)
     , txModel(&config)
@@ -159,8 +157,8 @@ void GaitEngine::step() {
         // Leg motions
         if (config.tuningNoLegs()) {
             // Coerce the abstract leg poses
-            coerceAbstractLegPose(m_abstractPose.leftLeg);
-            coerceAbstractLegPose(m_abstractPose.rightLeg);
+            clampAbstractLegPose(m_abstractPose.leftLeg);
+            clampAbstractLegPose(m_abstractPose.rightLeg);
 
             // Convert legs: Abstract --> Joint
             m_jointPose.setLegsFromAbstractPose(m_abstractPose.leftLeg, m_abstractPose.rightLeg);
@@ -171,8 +169,8 @@ void GaitEngine::step() {
             abstractLegMotion(m_abstractPose.rightLeg);
 
             // Coerce the abstract leg poses
-            coerceAbstractLegPose(m_abstractPose.leftLeg);
-            coerceAbstractLegPose(m_abstractPose.rightLeg);
+            clampAbstractLegPose(m_abstractPose.leftLeg);
+            clampAbstractLegPose(m_abstractPose.rightLeg);
 
             // Convert legs: Abstract --> Inverse
             m_inversePose.setLegsFromAbstractPose(m_abstractPose.leftLeg, m_abstractPose.rightLeg);
@@ -188,8 +186,8 @@ void GaitEngine::step() {
         // Arm motions
         if (config.tuningNoArms()) {
             // Coerce the abstract arm poses
-            coerceAbstractArmPose(m_abstractPose.leftArm);
-            coerceAbstractArmPose(m_abstractPose.rightArm);
+            clampAbstractArmPose(m_abstractPose.leftArm);
+            clampAbstractArmPose(m_abstractPose.rightArm);
 
             // Convert arms: Abstract --> Joint
             m_jointPose.setArmsFromAbstractPose(m_abstractPose.leftArm, m_abstractPose.rightArm);
@@ -200,8 +198,8 @@ void GaitEngine::step() {
             abstractArmMotion(m_abstractPose.rightArm);
 
             // Coerce the abstract arm poses
-            coerceAbstractArmPose(m_abstractPose.leftArm);
-            coerceAbstractArmPose(m_abstractPose.rightArm);
+            clampAbstractArmPose(m_abstractPose.leftArm);
+            clampAbstractArmPose(m_abstractPose.rightArm);
 
             // Convert arms: Abstract --> Joint
             m_jointPose.setArmsFromAbstractPose(m_abstractPose.leftArm, m_abstractPose.rightArm);
@@ -311,11 +309,11 @@ void GaitEngine::updateHaltPose() {
     // Set the link lengths
     m_abstractHaltPose.setLinkLengths(config.legLinkLength(), config.armLinkLength());
 
-    // Convert the coerced halt pose into the joint representation (abstract poses derived from m_abstractHaltPose are
-    // coerced later, always right before they are converted into another space, i.e. joint/inverse)
-    AbstractPose coercedAbstractHaltPose = m_abstractHaltPose;
-    coerceAbstractPose(coercedAbstractHaltPose);
-    m_jointHaltPose.setFromAbstractPose(coercedAbstractHaltPose);
+    // Convert the clamped halt pose into the joint representation (abstract poses derived from m_abstractHaltPose are
+    // clamped later, always right before they are converted into another space, i.e. joint/inverse)
+    AbstractPose clampedAbstractHaltPose = m_abstractHaltPose;
+    clampAbstractPose(clampedAbstractHaltPose);
+    m_jointHaltPose.setFromAbstractPose(clampedAbstractHaltPose);
 
     // Transcribe the joint halt pose to the required halt pose arrays
     m_jointHaltPose.writeJointPosArray(haltJointCmd);
@@ -428,7 +426,7 @@ void GaitEngine::resetCaptureSteps(bool resetRobotModel) {
     stepTimeCount          = 0.0;
     lastStepDuration       = 0.0;
     stepCounter            = 0;
-    noCLStepsCounter       = coerceMin((int) (m_gcvZeroTime() / in.nominaldT + 0.5), 1);
+    noCLStepsCounter       = std::max((int) (m_gcvZeroTime() / in.nominaldT + 0.5), 1);
     resetCounter           = 100;  // Force Mx to match Rx completely for the next/first few cycles
     cycleNumber            = 0;
 
@@ -870,8 +868,8 @@ void GaitEngine::updateRobot(const Eigen::Vector3d& gcvBias) {
     if (config.cmdUseTXStepSize()) stepSize = txModel.stepSize;
 
     // Clamp the step size to a maximal radius
-    stepSize.x = coerceAbs<double>(stepSize.x, config.mgMaxStepRadiusX());
-    stepSize.y = coerceAbs<double>(stepSize.y, config.mgMaxStepRadiusY());
+    stepSize.x = utility::math::clamp(-config.mgMaxStepRadiusX(), stepSize.x, config.mgMaxStepRadiusX());
+    stepSize.y = utility::math::clamp(-config.mgMaxStepRadiusY(), stepSize.y, config.mgMaxStepRadiusY());
 
     // Step size to GCV conversion.
     // To dodge the fact that the gait engine can only take symmetrical steps, while the limp model may produce
@@ -883,7 +881,7 @@ void GaitEngine::updateRobot(const Eigen::Vector3d& gcvBias) {
     limp.update(Limp(alpha, 0, C).tLoc(delta));
     gcvTarget.x() = sex.x / limp.x0;
     if (supportLegSign * gcvInput.y >= 0)
-        gcvTarget.y() = supportLegSign * coerceAbs((fabs(sex.y) - delta) / (omega - delta), 1.0);
+        gcvTarget.y() = supportLegSign * utility::math::clamp(-1.0, (std::abs(sex.y) - delta) / (omega - delta), 1.0);
     else
         gcvTarget.y() = oldGcvTargetY;  // TODO: This looks relatively unsafe
     gcvTarget.z() = sex.z;
@@ -892,17 +890,16 @@ void GaitEngine::updateRobot(const Eigen::Vector3d& gcvBias) {
 
     // Move the current gcv smoothly to the target gcv in timeToStep amount of time
     Eigen::Vector3d CLGcv = gcvTarget;
-    if (timeToStep > systemIterationTime)
-        CLGcv = m_gcv + (systemIterationTime / timeToStep) * (gcvTarget - m_gcv);  // TODO: Build some kind of
-                                                                                   // protection into this update
-                                                                                   // strategy to avoid increasingly
-                                                                                   // explosive GCV updates super-close
-                                                                                   // to the end of the step, causing
-                                                                                   // sharp joint curves.
+
+    // TODO: Build some kind of protection into this update strategy to avoid increasingly explosive GCV updates
+    // super-close to the end of the step, causing sharp joint curves.
+    if (timeToStep > systemIterationTime) {
+        CLGcv = m_gcv + (systemIterationTime / timeToStep) * (gcvTarget - m_gcv);
+    }
 
     // Handle the situation differently depending on whether we are using CL step sizes or not
-    if (config.cmdUseCLStepSize())  // Closed loop step sizes...
-    {
+    // Closed loop step sizes...
+    if (config.cmdUseCLStepSize()) {
         // Set the calculated closed loop GCV
         if (noCLStepsCounter > 0) {
             m_gcv.setZero();
@@ -926,8 +923,8 @@ void GaitEngine::updateRobot(const Eigen::Vector3d& gcvBias) {
             m_gcv.z() = CLGcv.z();
         }
     }
-    else  // Open loop step sizes...
-    {
+    // Open loop step sizes...
+    else {
         // Zero out the step size to show that we are OL
         stepSize.x = stepSize.y = stepSize.z = 0.0;
 
@@ -1344,10 +1341,10 @@ void GaitEngine::abstractLegMotion(pose::AbstractLegPose& leg) {
                             - hipSwingStartR;  // The current phase relative to the start of the transition to the right
                                                // leg as the support leg, in the range [0,2*pi]
 
-    // Calculate the dimensionless hip swing angle (range -1 to 1) by summing up the two zero-coerced sinusoid
+    // Calculate the dimensionless hip swing angle (range -1 to 1) by summing up the two zero-clamped sinusoid
     // sub-waveforms
-    double hipSwingAngleL = -coerceMin(sin(M_PI * hipSwingPhaseL / CMD.suppPhaseLen), 0.0);
-    double hipSwingAngleR = coerceMin(sin(M_PI * hipSwingPhaseR / CMD.suppPhaseLen), 0.0);
+    double hipSwingAngleL = -std::max(sin(M_PI * hipSwingPhaseL / CMD.suppPhaseLen), 0.0);
+    double hipSwingAngleR = std::max(sin(M_PI * hipSwingPhaseR / CMD.suppPhaseLen), 0.0);
     double hipSwingAngle  = hipSwingAngleL + hipSwingAngleR;  // The hip swing angle is in the range -1 to 1
 
     // Apply the lateral hip swing to the abstract leg pose
@@ -1412,9 +1409,9 @@ void GaitEngine::abstractLegMotion(pose::AbstractLegPose& leg) {
         // Compute the phase waveform over which to apply the foot feedback
         double footPhaseLen = utility::math::clamp(0.05, config.basicFootAnglePhaseLen(), M_PI_2);
         double footFeedbackSlope =
-            1.0 / footPhaseLen;  // This can't go uncontrolled because the footPhaseLen is coerced to a reasonable range
+            1.0 / footPhaseLen;  // This can't go uncontrolled because the footPhaseLen is clamped to a reasonable range
         double footFeedbackScaler = 0.0;
-        // This works because of the coerce above
+        // This works because of the clamp above
         if (CMD.limbPhase <= -M_PI_2) {
             footFeedbackScaler = utility::math::clamp(0.0, footFeedbackSlope * (CMD.limbPhase + M_PI), 1.0);
         }
@@ -1683,8 +1680,8 @@ void GaitEngine::abstractArmMotion(pose::AbstractArmPose& arm) {
 }
 
 // Generate the inverse leg motion
-void GaitEngine::inverseLegMotion(InverseLegPose& leg)  // 'leg' is assumed to contain the desired abstract motion
-{
+// 'leg' is assumed to contain the desired abstract motion
+void GaitEngine::inverseLegMotion(gait::contrib::InverseLegPose& leg) {
     //
     // Common motion data
     //
@@ -1711,16 +1708,22 @@ void GaitEngine::inverseLegMotion(InverseLegPose& leg)  // 'leg' is assumed to c
                               + config.basicIFusedComShiftY() * iFusedXFeed + config.basicGyroComShiftY() * gyroXFeed);
 
         // Apply the required limits if enabled
-        if (config.basicComShiftXUseLimits())
-            comShiftXFeedback = coerceSoft<double>(
-                comShiftXFeedback, config.basicComShiftXMin(), config.basicComShiftXMax(), config.basicComShiftXBuf());
-        if (config.basicComShiftYUseLimits())
-            comShiftYFeedback = coerceSoft<double>(
-                comShiftYFeedback, config.basicComShiftYMin(), config.basicComShiftYMax(), config.basicComShiftYBuf());
+        if (config.basicComShiftXUseLimits()) {
+            comShiftXFeedback = utility::math::clampSoft(
+                config.basicComShiftXMin(), comShiftXFeedback, config.basicComShiftXMax(), config.basicComShiftXBuf());
+        }
+        if (config.basicComShiftYUseLimits()) {
+            comShiftYFeedback = utility::math::clampSoft(
+                config.basicComShiftYMin(), comShiftYFeedback, config.basicComShiftYMax(), config.basicComShiftYBuf());
+        }
 
         // Disable the CoM shifting feedback if required
-        if (!(config.basicEnableComShiftX() && config.basicGlobalEnable())) comShiftXFeedback = 0.0;
-        if (!(config.basicEnableComShiftY() && config.basicGlobalEnable())) comShiftYFeedback = 0.0;
+        if (!(config.basicEnableComShiftX() && config.basicGlobalEnable())) {
+            comShiftXFeedback = 0.0;
+        }
+        if (!(config.basicEnableComShiftY() && config.basicGlobalEnable())) {
+            comShiftYFeedback = 0.0;
+        }
 
         // Apply the CoM shifting feedback
         leg.footPos.x() += comShiftXFeedback;
@@ -1772,58 +1775,59 @@ void GaitEngine::inverseLegMotion(InverseLegPose& leg)  // 'leg' is assumed to c
 }
 
 // Abstract pose coercion function
-void GaitEngine::coerceAbstractPose(pose::AbstractPose& pose) {
+void GaitEngine::clampAbstractPose(pose::AbstractPose& pose) {
     // Coerce each of the limbs in the abstract pose
-    coerceAbstractArmPose(pose.leftArm);
-    coerceAbstractArmPose(pose.rightArm);
-    coerceAbstractLegPose(pose.leftLeg);
-    coerceAbstractLegPose(pose.rightLeg);
+    clampAbstractArmPose(pose.leftArm);
+    clampAbstractArmPose(pose.rightArm);
+    clampAbstractLegPose(pose.leftLeg);
+    clampAbstractLegPose(pose.rightLeg);
 }
 
 // Abstract arm pose coercion function
-void GaitEngine::coerceAbstractArmPose(pose::AbstractArmPose& arm) {
+void GaitEngine::clampAbstractArmPose(pose::AbstractArmPose& arm) {
     // Apply the required limits if enabled
-    if (config.limArmAngleXUseLimits())
-        arm.angleX =
-            arm.cad.limbSign
-            * coerceSoft<double>(
-                  arm.angleX / arm.cad.limbSign,
-                  config.limArmAngleXMin(),
-                  config.limArmAngleXMax(),
-                  config.limArmAngleXBuf());  // Minimum is negative towards inside, maximum is positive towards outside
-    if (config.limArmAngleYUseLimits())
-        arm.angleY = coerceSoft<double>(
-            arm.angleY, config.limArmAngleYMin(), config.limArmAngleYMax(), config.limArmAngleYBuf());
+    if (config.limArmAngleXUseLimits()) {
+        arm.angleX = arm.cad.limbSign
+                     // Minimum is negative towards inside, maximum is positive towards outside
+                     * utility::math::clampSoft(config.limArmAngleXMin(),
+                                                arm.angleX / arm.cad.limbSign,
+                                                config.limArmAngleXMax(),
+                                                config.limArmAngleXBuf());
+    }
+    if (config.limArmAngleYUseLimits()) {
+        arm.angleY = utility::math::clampSoft(
+            config.limArmAngleYMin(), arm.angleY, config.limArmAngleYMax(), config.limArmAngleYBuf());
+    }
 }
 
 // Abstract leg pose coercion function
-void GaitEngine::coerceAbstractLegPose(pose::AbstractLegPose& leg) {
+void GaitEngine::clampAbstractLegPose(pose::AbstractLegPose& leg) {
     // Apply the required limits if enabled
     if (config.limLegAngleXUseLimits())
         leg.angleX =
             leg.cld.limbSign
-            * coerceSoft<double>(
-                  leg.angleX / leg.cld.limbSign,
-                  config.limLegAngleXMin(),
-                  config.limLegAngleXMax(),
-                  config.limLegAngleXBuf());  // Minimum is negative towards inside, maximum is positive towards outside
-    if (config.limLegAngleYUseLimits())
-        leg.angleY = coerceSoft<double>(
-            leg.angleY, config.limLegAngleYMin(), config.limLegAngleYMax(), config.limLegAngleYBuf());
-    if (config.limFootAngleXUseLimits())
-        leg.footAngleX =
-            leg.cld.limbSign
-            * coerceSoft<double>(
-                  leg.footAngleX / leg.cld.limbSign,
-                  config.limFootAngleXMin(),
-                  config.limFootAngleXMax(),
-                  config
-                      .limFootAngleXBuf());  // Minimum is negative towards inside, maximum is positive towards outside
-    if (config.limFootAngleYUseLimits())
-        leg.footAngleY = coerceSoft<double>(
-            leg.footAngleY, config.limFootAngleYMin(), config.limFootAngleYMax(), config.limFootAngleYBuf());
-    if (config.limLegExtUseLimits())
-        leg.extension = coerceSoftMin<double>(leg.extension, config.limLegExtMin(), config.limLegExtBuf());
+            * utility::math::clampSoft(config.limLegAngleXMin(),
+                                       leg.angleX / leg.cld.limbSign,
+                                       config.limLegAngleXMax(),
+                                       4);  // Minimum is negative towards inside, maximum is positive towards outside
+    if (config.limLegAngleYUseLimits()) {
+        leg.angleY = utility::math::clampSoft(config.limLegAngleYMin(), leg.angleY, config.limLegAngleYMax(), 4);
+    }
+    if (config.limFootAngleXUseLimits()) {
+        leg.footAngleX = leg.cld.limbSign
+                         // Minimum is negative towards inside, maximum is positive towards outside
+                         * utility::math::clampSoft(config.limFootAngleXMin(),
+                                                    leg.footAngleX / leg.cld.limbSign,
+                                                    config.limFootAngleXMax(),
+                                                    config.limFootAngleXBuf());
+    }
+    if (config.limFootAngleYUseLimits()) {
+        leg.footAngleY = utility::math::clampSoft(
+            config.limFootAngleYMin(), leg.footAngleY, config.limFootAngleYMax(), config.limFootAngleYBuf());
+    }
+    if (config.limLegExtUseLimits()) {
+        leg.extension = utility::math::clampSoftMin(config.limLegExtMin(), leg.extension, config.limLegExtBuf());
+    }
 }
 
 // Update outputs function

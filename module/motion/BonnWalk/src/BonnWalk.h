@@ -3,7 +3,7 @@
 
 #include <nuclear>
 
-#include "gait/gait_engine.h"
+#include "gait/GaitEngine.h"
 
 namespace module {
 namespace motion {

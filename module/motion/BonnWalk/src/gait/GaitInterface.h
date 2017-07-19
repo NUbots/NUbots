@@ -6,7 +6,7 @@
 #ifndef GAIT_INTERFACE_H
 #define GAIT_INTERFACE_H
 
-#include "gait_command.h"
+#include "GaitCommand.h"
 #include "utility/input/ServoID.h"
 
 namespace gait {
@@ -32,28 +32,29 @@ struct GaitEngineInput {
         gaitCmd.reset();
     }
 
-    //!< @brief Current measured position of each joint (indexed by the `JointID` enum, in `rad`).
+    //! @brief Current measured position of each joint (indexed by the `JointID` enum, in `rad`).
     std::array<double, utility::input::ServoID::NUMBER_OF_SERVOS> jointPos;
 
     // System parameters
-    //!< @brief The current time in seconds (guaranteed to be monotonic increasing)
+    //! @brief The current time in seconds (guaranteed to be monotonic increasing)
     double timestamp;
-    //!< @brief The nominal time between calls to the gait engine's `step()` function.
+    //! @brief The nominal time between calls to the gait engine's `step()` function.
     double nominaldT;
-    //!< @brief The true time since the last call to the gait engine's `step()` function.
-    //!< This value is coerced to avoid spikes
+    //! @brief The true time since the last call to the gait engine's `step()` function.
+    //! This value is clamp to avoid spikes
     double truedT;
 
 
     // Gait command
-    GaitCommand gaitCmd;  //!< @brief Gait command (e.g. desired walking velocity and so on).
+    //! @brief Gait command (e.g. desired walking velocity and so on).
+    GaitCommand gaitCmd;
 
     // Motion parameters
-    //!< @brief Boolean flag whether a motion is pending.
+    //! @brief Boolean flag whether a motion is pending.
     bool motionPending;
-    //!< @brief Boolean flag whether the left foot should be used to adjust the stopping stance.
+    //! @brief Boolean flag whether the left foot should be used to adjust the stopping stance.
     bool motionAdjustLeftFoot;
-    //!< @brief Boolean flag whether the right foot should be used to adjust the stopping stance.
+    //! @brief Boolean flag whether the right foot should be used to adjust the stopping stance.
     bool motionAdjustRightFoot;
 };
 
@@ -80,30 +81,30 @@ struct GaitEngineOutput {
     }
 
     // Joint commands
-    //!< @brief Commanded position for each joint (indexed by the `JointID` enum, in `rad`).
+    //! @brief Commanded position for each joint (indexed by the `JointID` enum, in `rad`).
     std::array<double, utility::input::ServoID::NUMBER_OF_SERVOS> jointCmd;
-    //!< @brief Commanded joint effort (indexed by the `JointID` enum, in the range `[0,1]`).
+    //! @brief Commanded joint effort (indexed by the `JointID` enum, in the range `[0,1]`).
     std::array<double, utility::input::ServoID::NUMBER_OF_SERVOS> jointEffort;
-    //!< @brief Apply the joint commands directly to the hardware, without using compensation or actuator controller(s)
-    //!< in-between.
+    //! @brief Apply the joint commands directly to the hardware, without using compensation or actuator controller(s)
+    //! in-between.
     bool useRawJointCmds;
 
     // Status flags
-    //!< @brief Flag specifying whether the gait is currently active and walking (`true`) or halted (`false`).
+    //! @brief Flag specifying whether the gait is currently active and walking (`true`) or halted (`false`).
     bool walking;
 
     // Support coefficients
-    //!< @brief Current support coefficient of the left leg.
+    //! @brief Current support coefficient of the left leg.
     double supportCoeffLeftLeg;
-    //!< @brief Current support coefficient of the right leg.
+    //! @brief Current support coefficient of the right leg.
     double supportCoeffRightLeg;
 
     // Robot odometry transform
-    //!< @brief Position `(x,y,z)` of the robot's body-fixed base transform (centred at the robot's centre of mass) in
-    //!< global odometry coordinates.
+    //! @brief Position `(x,y,z)` of the robot's body-fixed base transform (centred at the robot's centre of mass) in
+    //! global odometry coordinates.
     std::array<double, 3> odomPosition;
-    //!< @brief Orientation `(w,x,y,z)` of the robot's body-fixed base transform (centred at the robot's centre of mass)
-    //!< relative to the global odometry frame.
+    //! @brief Orientation `(w,x,y,z)` of the robot's body-fixed base transform (centred at the robot's centre of mass)
+    //! relative to the global odometry frame.
     std::array<double, 4> odomOrientation;
 };
 }  // namespace gait
